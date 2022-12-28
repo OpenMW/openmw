@@ -3,7 +3,7 @@
 
 #include "referenceinterface.hpp"
 #include "windowbase.hpp"
-
+#include <components/esm/refid.hpp>
 namespace ESM
 {
     struct Spell;
@@ -36,7 +36,7 @@ namespace MWGui
 
         MyGUI::ScrollView* mSpellsView;
 
-        std::map<MyGUI::Widget*, std::string> mSpellsWidgetMap;
+        std::map<MyGUI::Widget*, ESM::RefId> mSpellsWidgetMap;
 
         void onCancelButtonClicked(MyGUI::Widget* _sender);
         void onSpellButtonClick(MyGUI::Widget* _sender);
@@ -49,7 +49,7 @@ namespace MWGui
 
         void onReferenceUnavailable() override;
 
-        bool playerHasSpell(const std::string& id);
+        bool playerHasSpell(const ESM::RefId& id);
 
     private:
         static bool sortSpells(const ESM::Spell* left, const ESM::Spell* right);

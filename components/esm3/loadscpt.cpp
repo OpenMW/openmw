@@ -98,7 +98,7 @@ namespace ESM
                 case fourCC("SCHD"):
                 {
                     esm.getSubHeader();
-                    mId = esm.getString(32);
+                    mId = ESM::RefId::stringRefId(esm.getString(32));
                     esm.getT(mData);
 
                     hasHeader = true;
@@ -152,7 +152,7 @@ namespace ESM
                 varNameString.append(*it);
 
         esm.startSubRecord("SCHD");
-        esm.writeFixedSizeString(mId, 32);
+        esm.writeFixedSizeString(mId.getRefIdString(), 32);
         esm.writeT(mData, 20);
         esm.endRecord("SCHD");
 
@@ -188,11 +188,11 @@ namespace ESM
 
         mVarNames.clear();
         mScriptData.clear();
-
-        if (mId.find("::") != std::string::npos)
-            mScriptText = "Begin \"" + mId + "\"\n\nEnd " + mId + "\n";
+        const std::string& stringId = mId.getRefIdString();
+        if (stringId.find("::") != std::string::npos)
+            mScriptText = "Begin \"" + stringId + "\"\n\nEnd " + stringId + "\n";
         else
-            mScriptText = "Begin " + mId + "\n\nEnd " + mId + "\n";
+            mScriptText = "Begin " + stringId + "\n\nEnd " + stringId + "\n";
     }
 
 }

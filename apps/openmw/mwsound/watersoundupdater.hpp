@@ -1,6 +1,7 @@
 #ifndef GAME_SOUND_WATERSOUNDUPDATER_H
 #define GAME_SOUND_WATERSOUNDUPDATER_H
 
+#include "components/esm/refid.hpp"
 #include <string>
 
 namespace MWBase
@@ -21,13 +22,13 @@ namespace MWSound
         int mNearWaterPoints;
         float mNearWaterIndoorTolerance;
         float mNearWaterOutdoorTolerance;
-        std::string mNearWaterIndoorID;
-        std::string mNearWaterOutdoorID;
+        ESM::RefId mNearWaterIndoorID;
+        ESM::RefId mNearWaterOutdoorID;
     };
 
     struct WaterSoundUpdate
     {
-        std::string mId;
+        ESM::RefId mId;
         float mVolume;
     };
 

@@ -194,7 +194,7 @@ QModelIndex CSMWorld::IdTree::index(int row, int column, const QModelIndex& pare
 
 QModelIndex CSMWorld::IdTree::getNestedModelIndex(const std::string& id, int column) const
 {
-    return CSMWorld::IdTable::index(idCollection()->getIndex(id), column);
+    return CSMWorld::IdTable::index(idCollection()->getIndex(ESM::RefId::stringRefId(id)), column);
 }
 
 QModelIndex CSMWorld::IdTree::parent(const QModelIndex& index) const

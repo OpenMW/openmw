@@ -247,7 +247,7 @@ namespace
 
         if (!spellsInitialised)
         {
-            std::vector<std::string> spells = MWMechanics::autoCalcNpcSpells(skills, attributes, race);
+            std::vector<ESM::RefId> spells = MWMechanics::autoCalcNpcSpells(skills, attributes, race);
             npcStats.getSpells().addAllToInstance(spells);
         }
     }
@@ -506,9 +506,9 @@ namespace MWClass
 
                 for (std::vector<ESM::PartReference>::const_iterator it = parts.begin(); it != parts.end(); ++it)
                 {
-                    std::string_view partname = female ? it->mFemale : it->mMale;
-                    if (partname.empty())
-                        partname = female ? it->mMale : it->mFemale;
+                    const ESM::RefId& partname
+                        = (female && !it->mFemale.empty()) || (!female && it->mMale.empty()) ? it->mFemale : it->mMale;
+
                     const ESM::BodyPart* part
                         = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>().search(partname);
                     if (part && !part->mModel.empty())
@@ -521,7 +521,7 @@ namespace MWClass
         if (race)
         {
             const std::vector<const ESM::BodyPart*>& parts
-                = MWRender::NpcAnimation::getBodyParts(Misc::StringUtils::lowerCase(race->mId), female, false, false);
+                = MWRender::NpcAnimation::getBodyParts(race->mId, female, false, false);
             for (std::vector<const ESM::BodyPart*>::const_iterator it = parts.begin(); it != parts.end(); ++it)
             {
                 const ESM::BodyPart* part = *it;
@@ -545,7 +545,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
         const std::string& name = ref->mBase->mName;
 
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
     MWMechanics::CreatureStats& Npc::getCreatureStats(const MWWorld::Ptr& ptr) const
@@ -687,7 +687,8 @@ namespace MWClass
             {
                 damage *= store.find("fCombatCriticalStrikeMult")->mValue.getFloat();
                 MWBase::Environment::get().getWindowManager()->messageBox("#{sTargetCriticalStrike}");
-                MWBase::Environment::get().getSoundManager()->playSound3D(victim, "critical damage", 1.0f, 1.0f);
+                MWBase::Environment::get().getSoundManager()->playSound3D(
+                    victim, ESM::RefId::stringRefId("critical damage"), 1.0f, 1.0f);
             }
         }
 
@@ -750,7 +751,7 @@ namespace MWClass
 
         if (setOnPcHitMe && !attacker.isEmpty() && attacker == MWMechanics::getPlayer())
         {
-            std::string_view script = getScript(ptr);
+            const ESM::RefId& script = getScript(ptr);
             /* Set the OnPCHitMe script variable. The script is responsible for clearing it. */
             if (!script.empty())
                 ptr.getRefData().getLocals().setVarByInt(script, "onpchitme", 1);
@@ -760,7 +761,7 @@ namespace MWClass
         {
             // Missed
             if (!attacker.isEmpty() && attacker == MWMechanics::getPlayer())
-                sndMgr->playSound3D(ptr, "miss", 1.0f, 1.0f);
+                sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("miss"), 1.0f, 1.0f);
             return;
         }
 
@@ -789,7 +790,7 @@ namespace MWClass
             int chance = store.get<ESM::GameSetting>().find("iVoiceHitOdds")->mValue.getInteger();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             if (Misc::Rng::roll0to99(prng) < chance)
-                MWBase::Environment::get().getDialogueManager()->say(ptr, "hit");
+                MWBase::Environment::get().getDialogueManager()->say(ptr, ESM::RefId::stringRefId("hit"));
 
             // Check for knockdown
             float agilityTerm
@@ -870,13 +871,13 @@ namespace MWClass
                     switch (armor.getClass().getEquipmentSkill(armor))
                     {
                         case ESM::Skill::LightArmor:
-                            sndMgr->playSound3D(ptr, "Light Armor Hit", 1.0f, 1.0f);
+                            sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Light Armor Hit"), 1.0f, 1.0f);
                             break;
                         case ESM::Skill::MediumArmor:
-                            sndMgr->playSound3D(ptr, "Medium Armor Hit", 1.0f, 1.0f);
+                            sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Medium Armor Hit"), 1.0f, 1.0f);
                             break;
                         case ESM::Skill::HeavyArmor:
-                            sndMgr->playSound3D(ptr, "Heavy Armor Hit", 1.0f, 1.0f);
+                            sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Heavy Armor Hit"), 1.0f, 1.0f);
                             break;
                     }
                 }
@@ -892,7 +893,7 @@ namespace MWClass
 
             if (damage > 0.0f)
             {
-                sndMgr->playSound3D(ptr, "Health Damage", 1.0f, 1.0f);
+                sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Health Damage"), 1.0f, 1.0f);
                 if (ptr == MWMechanics::getPlayer())
                     MWBase::Environment::get().getWindowManager()->activateHitOverlay();
                 if (!attacker.isEmpty())
@@ -994,7 +995,7 @@ namespace MWClass
         return ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
     }
 
-    std::string_view Npc::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Npc::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
 
@@ -1141,7 +1142,7 @@ namespace MWClass
         }
 
         if (fullHelp)
-            info.text = MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            info.text = MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
 
         return info;
     }
@@ -1169,7 +1170,7 @@ namespace MWClass
     {
         MWBase::Environment::get().getWorld()->breakInvisibility(actor);
         MWMechanics::CastSpell cast(actor, actor);
-        const std::string& recordId = consumable.getCellRef().getRefId();
+        const ESM::RefId& recordId = consumable.getCellRef().getRefId();
         MWBase::Environment::get().getLuaManager()->itemConsumed(consumable, actor);
         actor.getClass().getContainerStore(actor).remove(consumable, 1, actor);
         return cast.cast(recordId);
@@ -1287,18 +1288,31 @@ namespace MWClass
         return npc->mAiData.mServices;
     }
 
-    std::string_view Npc::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
+    const ESM::RefId& Npc::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
+        static const ESM::RefId swimLeft = ESM::RefId::stringRefId("Swim Left");
+        static const ESM::RefId swimRight = ESM::RefId::stringRefId("Swim Right");
+        static const ESM::RefId footWaterLeft = ESM::RefId::stringRefId("FootWaterLeft");
+        static const ESM::RefId footWaterRight = ESM::RefId::stringRefId("FootWaterRight");
+        static const ESM::RefId footBareLeft = ESM::RefId::stringRefId("FootBareLeft");
+        static const ESM::RefId footBareRight = ESM::RefId::stringRefId("FootBareRight");
+        static const ESM::RefId footLightLeft = ESM::RefId::stringRefId("footLightLeft");
+        static const ESM::RefId footLightRight = ESM::RefId::stringRefId("footLightRight");
+        static const ESM::RefId footMediumRight = ESM::RefId::stringRefId("FootMedRight");
+        static const ESM::RefId footMediumLeft = ESM::RefId::stringRefId("FootMedLeft");
+        static const ESM::RefId footHeavyLeft = ESM::RefId::stringRefId("footHeavyLeft");
+        static const ESM::RefId footHeavyRight = ESM::RefId::stringRefId("footHeavyRight");
+
         if (name == "left" || name == "right")
         {
             MWBase::World* world = MWBase::Environment::get().getWorld();
             if (world->isFlying(ptr))
-                return {};
+                return ESM::RefId::sEmpty;
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if (world->isSwimming(ptr))
-                return (name == "left") ? "Swim Left" : "Swim Right";
+                return (name == "left") ? swimLeft : swimRight;
             if (world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
-                return (name == "left") ? "FootWaterLeft" : "FootWaterRight";
+                return (name == "left") ? footWaterLeft : footWaterRight;
             if (world->isOnGround(ptr))
             {
                 if (getNpcStats(ptr).isWerewolf()
@@ -1307,44 +1321,47 @@ namespace MWClass
                     int weaponType = ESM::Weapon::None;
                     MWMechanics::getActiveWeapon(ptr, &weaponType);
                     if (weaponType == ESM::Weapon::None)
-                        return {};
+                        return ESM::RefId::sEmpty;
                 }
 
                 const MWWorld::InventoryStore& inv = Npc::getInventoryStore(ptr);
                 MWWorld::ConstContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
                 if (boots == inv.end() || boots->getType() != ESM::Armor::sRecordId)
-                    return (name == "left") ? "FootBareLeft" : "FootBareRight";
+                    return (name == "left") ? footBareLeft : footBareRight;
 
                 switch (boots->getClass().getEquipmentSkill(*boots))
                 {
                     case ESM::Skill::LightArmor:
-                        return (name == "left") ? "FootLightLeft" : "FootLightRight";
+                        return (name == "left") ? footLightLeft : footLightRight;
+                        break;
                     case ESM::Skill::MediumArmor:
-                        return (name == "left") ? "FootMedLeft" : "FootMedRight";
+                        return (name == "left") ? footMediumLeft : footMediumRight;
+                        break;
                     case ESM::Skill::HeavyArmor:
-                        return (name == "left") ? "FootHeavyLeft" : "FootHeavyRight";
+                        return (name == "left") ? footHeavyLeft : footHeavyRight;
+                        break;
                 }
             }
-            return {};
+            return ESM::RefId::sEmpty;
         }
 
         // Morrowind ignores land soundgen for NPCs
         if (name == "land")
-            return {};
+            return ESM::RefId::sEmpty;
         if (name == "swimleft")
-            return "Swim Left";
+            return swimLeft;
         if (name == "swimright")
-            return "Swim Right";
+            return swimRight;
         // TODO: I have no idea what these are supposed to do for NPCs since they use
         // voiced dialog for various conditions like health loss and combat taunts. Maybe
         // only for biped creatures?
 
         if (name == "moan")
-            return {};
+            return ESM::RefId::sEmpty;
         if (name == "roar")
-            return {};
+            return ESM::RefId::sEmpty;
         if (name == "scream")
-            return {};
+            return ESM::RefId::sEmpty;
 
         throw std::runtime_error("Unexpected soundgen type: " + std::string(name));
     }
@@ -1428,7 +1445,7 @@ namespace MWClass
 
     bool Npc::isClass(const MWWorld::ConstPtr& ptr, std::string_view className) const
     {
-        return Misc::StringUtils::ciEqual(ptr.get<ESM::NPC>()->mBase->mClass, className);
+        return Misc::StringUtils::ciEqual(ptr.get<ESM::NPC>()->mBase->mClass.getRefIdString(), className);
     }
 
     bool Npc::canSwim(const MWWorld::ConstPtr& ptr) const
@@ -1466,7 +1483,7 @@ namespace MWClass
                 if (ptr.getRefData().getCount() == 0)
                 {
                     ptr.getRefData().setCount(1);
-                    std::string_view script = getScript(ptr);
+                    const ESM::RefId& script = getScript(ptr);
                     if (!script.empty())
                         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, ptr);
                 }
@@ -1494,7 +1511,7 @@ namespace MWClass
         return true;
     }
 
-    std::string_view Npc::getPrimaryFaction(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Npc::getPrimaryFaction(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
         return ref->mBase->mFaction;
@@ -1502,7 +1519,7 @@ namespace MWClass
 
     int Npc::getPrimaryFactionRank(const MWWorld::ConstPtr& ptr) const
     {
-        std::string_view factionID = ptr.getClass().getPrimaryFaction(ptr);
+        const ESM::RefId& factionID = ptr.getClass().getPrimaryFaction(ptr);
         if (factionID.empty())
             return -1;
 
@@ -1519,12 +1536,12 @@ namespace MWClass
         return ref->mBase->getFactionRank();
     }
 
-    void Npc::setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const
+    void Npc::setBaseAISetting(const ESM::RefId& id, MWMechanics::AiSetting setting, int value) const
     {
         MWMechanics::setBaseAISetting<ESM::NPC>(id, setting, value);
     }
 
-    void Npc::modifyBaseInventory(std::string_view actorId, std::string_view itemId, int amount) const
+    void Npc::modifyBaseInventory(const ESM::RefId& actorId, const ESM::RefId& itemId, int amount) const
     {
         MWMechanics::modifyBaseInventory<ESM::NPC>(actorId, itemId, amount);
     }

@@ -47,11 +47,11 @@
 namespace
 {
 
-    std::string getVampireHead(const std::string& race, bool female, const VFS::Manager& vfs)
+    std::string getVampireHead(const ESM::RefId& race, bool female, const VFS::Manager& vfs)
     {
-        static std::map<std::pair<std::string, int>, const ESM::BodyPart*> sVampireMapping;
+        static std::map<std::pair<ESM::RefId, int>, const ESM::BodyPart*> sVampireMapping;
 
-        std::pair<std::string, int> thisCombination = std::make_pair(race, int(female));
+        std::pair<ESM::RefId, int> thisCombination = std::make_pair(race, int(female));
 
         if (sVampireMapping.find(thisCombination) == sVampireMapping.end())
         {
@@ -66,7 +66,7 @@ namespace
                     continue;
                 if (female != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
                     continue;
-                if (!Misc::StringUtils::ciEqual(bodypart.mRace, race))
+                if (!(bodypart.mRace == race))
                     continue;
                 sVampireMapping[thisCombination] = &bodypart;
             }
@@ -467,8 +467,8 @@ namespace MWRender
         mHeadModel.clear();
         mHairModel.clear();
 
-        std::string_view headName = isWerewolf ? std::string_view{ "WerewolfHead" } : mNpc->mHead;
-        std::string_view hairName = isWerewolf ? std::string_view{ "WerewolfHair" } : mNpc->mHair;
+        const ESM::RefId& headName = isWerewolf ? ESM::RefId::stringRefId("WerewolfHead") : mNpc->mHead;
+        const ESM::RefId& hairName = isWerewolf ? ESM::RefId::stringRefId("WerewolfHair") : mNpc->mHair;
 
         if (!headName.empty())
         {
@@ -519,7 +519,8 @@ namespace MWRender
 
             addAnimSource(smodel, smodel);
 
-            if (!isWerewolf && Misc::StringUtils::lowerCase(mNpc->mRace).find("argonian") != std::string::npos)
+            if (!isWerewolf
+                && Misc::StringUtils::lowerCase(mNpc->mRace.getRefIdString()).find("argonian") != std::string::npos)
                 addAnimSource("meshes\\xargonian_swimkna.nif", smodel);
         }
         else
@@ -665,7 +666,7 @@ namespace MWRender
         showCarriedLeft(mShowCarriedLeft);
 
         bool isWerewolf = (getNpcType() == Type_Werewolf);
-        std::string race = (isWerewolf ? "werewolf" : Misc::StringUtils::lowerCase(mNpc->mRace));
+        ESM::RefId race = (isWerewolf ? ESM::RefId::stringRefId("werewolf") : mNpc->mRace);
 
         const std::vector<const ESM::BodyPart*>& parts
             = getBodyParts(race, !mNpc->isMale(), mViewMode == VM_FirstPerson, isWerewolf);
@@ -756,7 +757,8 @@ namespace MWRender
 
     bool NpcAnimation::isFirstPersonPart(const ESM::BodyPart* bodypart)
     {
-        return bodypart->mId.size() >= 3 && bodypart->mId.substr(bodypart->mId.size() - 3, 3) == "1st";
+        std::string_view partName = bodypart->mId.getRefIdString();
+        return partName.size() >= 3 && partName.substr(partName.size() - 3, 3) == "1st";
     }
 
     bool NpcAnimation::isFemalePart(const ESM::BodyPart* bodypart)
@@ -881,7 +883,7 @@ namespace MWRender
             const ESM::BodyPart* bodypart = nullptr;
             if (!mNpc->isMale() && !part.mFemale.empty())
             {
-                bodypart = partStore.search(part.mFemale + ext);
+                bodypart = partStore.search(ESM::RefId::stringRefId(part.mFemale.getRefIdString() + ext));
                 if (!bodypart && mViewMode == VM_FirstPerson)
                 {
                     bodypart = partStore.search(part.mFemale);
@@ -897,7 +899,7 @@ namespace MWRender
             }
             if (!bodypart && !part.mMale.empty())
             {
-                bodypart = partStore.search(part.mMale + ext);
+                bodypart = partStore.search(ESM::RefId::stringRefId(part.mMale.getRefIdString() + ext));
                 if (!bodypart && mViewMode == VM_FirstPerson)
                 {
                     bodypart = partStore.search(part.mMale);
@@ -1159,11 +1161,11 @@ namespace MWRender
     }
 
     // Remember body parts so we only have to search through the store once for each race/gender/viewmode combination
-    typedef std::map<std::pair<std::string, int>, std::vector<const ESM::BodyPart*>> RaceMapping;
+    typedef std::map<std::pair<ESM::RefId, int>, std::vector<const ESM::BodyPart*>> RaceMapping;
     static RaceMapping sRaceMapping;
 
     const std::vector<const ESM::BodyPart*>& NpcAnimation::getBodyParts(
-        const std::string& race, bool female, bool firstPerson, bool werewolf)
+        const ESM::RefId& race, bool female, bool firstPerson, bool werewolf)
     {
         static const int Flag_FirstPerson = 1 << 1;
         static const int Flag_Female = 1 << 0;
@@ -1208,7 +1210,7 @@ namespace MWRender
                 if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
                     continue;
 
-                if (!Misc::StringUtils::ciEqual(bodypart.mRace, race))
+                if (!(bodypart.mRace == race))
                     continue;
 
                 bool partFirstPerson = isFirstPersonPart(&bodypart);

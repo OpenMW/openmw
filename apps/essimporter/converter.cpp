@@ -71,7 +71,7 @@ namespace
             std::string refId;
             splitIndexedRefId(indexedRefId, refIndex, refId);
 
-            auto it = context.mActorIdMap.find(std::make_pair(refIndex, refId));
+            auto it = context.mActorIdMap.find(std::make_pair(refIndex, ESM::RefId::stringRefId(refId)));
             if (it == context.mActorIdMap.end())
                 return -1;
             return it->second;
@@ -202,7 +202,7 @@ namespace ESSImport
         }
 
         // note if the player is in a nameless exterior cell, we will assign the cellId later based on player position
-        if (cell.mName == mContext->mPlayerCellName)
+        if (cell.mName == ESM::RefId::stringRefId(mContext->mPlayerCellName))
         {
             mContext->mPlayer.mCellId = cell.getCellId();
         }
@@ -338,13 +338,12 @@ namespace ESSImport
             {
                 // non-indexed RefNum, i.e. no CREC/NPCC/CNTC record associated with it
                 // this could be any type of object really (even creatures/npcs too)
-                out.mRefID = cellref.mIndexedRefId;
-                std::string idLower = Misc::StringUtils::lowerCase(out.mRefID);
+                out.mRefID = ESM::RefId::stringRefId(cellref.mIndexedRefId);
 
                 ESM::ObjectState objstate;
                 objstate.blank();
                 objstate.mRef = out;
-                objstate.mRef.mRefID = idLower;
+                objstate.mRef.mRefID = out.mRefID;
                 objstate.mHasCustomState = false;
                 convertCellRef(cellref, objstate);
                 esm.writeHNT("OBJE", 0);
@@ -354,9 +353,9 @@ namespace ESSImport
             else
             {
                 int refIndex = 0;
-                splitIndexedRefId(cellref.mIndexedRefId, refIndex, out.mRefID);
-
-                std::string idLower = Misc::StringUtils::lowerCase(out.mRefID);
+                std::string outStringId;
+                splitIndexedRefId(cellref.mIndexedRefId, refIndex, outStringId);
+                out.mRefID = ESM::RefId::stringRefId(outStringId);
 
                 auto npccIt = mContext->mNpcChanges.find(std::make_pair(refIndex, out.mRefID));
                 if (npccIt != mContext->mNpcChanges.end())
@@ -364,7 +363,7 @@ namespace ESSImport
                     ESM::NpcState objstate;
                     objstate.blank();
                     objstate.mRef = out;
-                    objstate.mRef.mRefID = idLower;
+                    objstate.mRef.mRefID = out.mRefID;
                     // TODO: need more micromanagement here so we don't overwrite values
                     // from the ESM with default values
                     if (cellref.mActorData.mHasACDT)
@@ -392,7 +391,7 @@ namespace ESSImport
                     ESM::ContainerState objstate;
                     objstate.blank();
                     objstate.mRef = out;
-                    objstate.mRef.mRefID = idLower;
+                    objstate.mRef.mRefID = out.mRefID;
                     convertCNTC(cntcIt->second, objstate);
                     convertCellRef(cellref, objstate);
                     esm.writeHNT("OBJE", ESM::REC_CONT);
@@ -406,7 +405,7 @@ namespace ESSImport
                     ESM::CreatureState objstate;
                     objstate.blank();
                     objstate.mRef = out;
-                    objstate.mRef.mRefID = idLower;
+                    objstate.mRef.mRefID = out.mRefID;
                     // TODO: need more micromanagement here so we don't overwrite values
                     // from the ESM with default values
                     if (cellref.mActorData.mHasACDT)
@@ -466,7 +465,7 @@ namespace ESSImport
                 ESM::ProjectileState out;
                 convertBaseState(out, pnam);
 
-                out.mBowId = pnam.mBowId.toString();
+                out.mBowId = ESM::RefId::stringRefId(pnam.mBowId.toString());
                 out.mVelocity = pnam.mVelocity;
                 out.mAttackStrength = pnam.mAttackStrength;
 
@@ -489,7 +488,7 @@ namespace ESSImport
                     continue;
                 }
 
-                out.mSpellId = it->mSPDT.mId.toString();
+                out.mSpellId = ESM::RefId::stringRefId(it->mSPDT.mId.toString());
                 out.mSpeed = pnam.mSpeed * 0.001f; // not sure where this factor comes from
                 out.mSlot = 0;
 
@@ -502,7 +501,7 @@ namespace ESSImport
 
     void ConvertPROJ::convertBaseState(ESM::BaseProjectileState& base, const PROJ::PNAM& pnam)
     {
-        base.mId = pnam.mArrowId.toString();
+        base.mId = ESM::RefId::stringRefId(pnam.mArrowId.toString());
         base.mPosition = pnam.mPosition;
 
         osg::Quat orient;

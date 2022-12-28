@@ -36,7 +36,8 @@ namespace
     {
         EsmData data;
         GetParam().mPushBack(data);
-        EXPECT_EQ(EsmLoader::getModel(data, GetParam().mRefId, GetParam().mType), GetParam().mResult);
+        EXPECT_EQ(EsmLoader::getModel(data, ESM::RefId::stringRefId(GetParam().mRefId), GetParam().mType),
+            GetParam().mResult);
     }
 
     void pushBack(ESM::Activator&& value, EsmData& esmData)
@@ -68,7 +69,7 @@ namespace
         void operator()(EsmData& esmData) const
         {
             T value;
-            value.mId = mId;
+            value.mId = ESM::RefId::stringRefId(mId);
             value.mModel = mModel;
             pushBack(std::move(value), esmData);
         }
@@ -98,15 +99,15 @@ namespace
     {
         std::vector<ESM::GameSetting> settings;
         ESM::GameSetting setting;
-        setting.mId = "setting";
+        setting.mId = ESM::RefId::stringRefId("setting");
         setting.mValue = ESM::Variant(42);
         settings.push_back(setting);
-        EXPECT_EQ(EsmLoader::getGameSetting(settings, "setting"), ESM::Variant(42));
+        EXPECT_EQ(EsmLoader::getGameSetting(settings, ESM::RefId::stringRefId("setting")), ESM::Variant(42));
     }
 
     TEST(EsmLoaderGetGameSettingTest, shouldThrowExceptionWhenNotFound)
     {
         const std::vector<ESM::GameSetting> settings;
-        EXPECT_THROW(EsmLoader::getGameSetting(settings, "setting"), std::runtime_error);
+        EXPECT_THROW(EsmLoader::getGameSetting(settings, ESM::RefId::stringRefId("setting")), std::runtime_error);
     }
 }

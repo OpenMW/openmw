@@ -4,6 +4,7 @@
 #include "widgets.hpp"
 #include "windowbase.hpp"
 #include <components/esm/attr.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadclas.hpp>
 
 namespace ESM
@@ -30,9 +31,9 @@ namespace MWGui
         bool exit() override { return false; }
 
         void setPlayerName(const std::string& name);
-        void setRace(const std::string& raceId);
+        void setRace(const ESM::RefId& raceId);
         void setClass(const ESM::Class& class_);
-        void setBirthSign(const std::string& signId);
+        void setBirthSign(const ESM::RefId& signId);
 
         void setHealth(const MWMechanics::DynamicStat<float>& value);
         void setMagicka(const MWMechanics::DynamicStat<float>& value);
@@ -95,7 +96,8 @@ namespace MWGui
         SkillList mMajorSkills, mMinorSkills, mMiscSkills;
         std::map<int, MWMechanics::SkillValue> mSkillValues;
         std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
-        std::string mName, mRaceId, mBirthSignId;
+        ESM::RefId mRaceId, mBirthSignId;
+        std::string mName;
         ESM::Class mKlass;
         std::vector<MyGUI::Widget*> mSkillWidgets; //< Skills and other information
 

@@ -20,13 +20,13 @@ namespace CSMWorld
 
     QVariant LandTextureNicknameColumn::get(const Record<LandTexture>& record) const
     {
-        return QString::fromUtf8(record.get().mId.c_str());
+        return QString::fromUtf8(record.get().mId.getRefIdString().c_str());
     }
 
     void LandTextureNicknameColumn::set(Record<LandTexture>& record, const QVariant& data)
     {
         LandTexture copy = record.get();
-        copy.mId = data.toString().toUtf8().constData();
+        copy.mId = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
         record.setModified(copy);
     }
 
@@ -281,7 +281,7 @@ namespace CSMWorld
     {
         if (mMeshType != nullptr && mMeshType->get(record) == ESM::BodyPart::MT_Skin)
         {
-            return QString::fromUtf8(record.get().mRace.c_str());
+            return QString::fromUtf8(record.get().mRace.getRefIdString().c_str());
         }
         return QVariant(QVariant::UserType);
     }
@@ -290,7 +290,7 @@ namespace CSMWorld
     {
         ESM::BodyPart record2 = record.get();
 
-        record2.mRace = data.toString().toUtf8().constData();
+        record2.mRace = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
 
         record.setModified(record2);
     }

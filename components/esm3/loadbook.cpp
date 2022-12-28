@@ -18,7 +18,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("MODL"):
@@ -32,13 +32,13 @@ namespace ESM
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
-                    mScript = esm.getHString();
+                    mScript = esm.getRefId();
                     break;
                 case fourCC("ITEX"):
                     mIcon = esm.getHString();
                     break;
                 case fourCC("ENAM"):
-                    mEnchant = esm.getHString();
+                    mEnchant = esm.getRefId();
                     break;
                 case fourCC("TEXT"):
                     mText = esm.getHString();
@@ -60,7 +60,7 @@ namespace ESM
     }
     void Book::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {
@@ -71,10 +71,10 @@ namespace ESM
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("BKDT", mData, 20);
-        esm.writeHNOCString("SCRI", mScript);
+        esm.writeHNOCString("SCRI", mScript.getRefIdString());
         esm.writeHNOCString("ITEX", mIcon);
         esm.writeHNOString("TEXT", mText);
-        esm.writeHNOCString("ENAM", mEnchant);
+        esm.writeHNOCString("ENAM", mEnchant.getRefIdString());
     }
 
     void Book::blank()
@@ -88,8 +88,8 @@ namespace ESM
         mName.clear();
         mModel.clear();
         mIcon.clear();
-        mScript.clear();
-        mEnchant.clear();
+        mScript = ESM::RefId::sEmpty;
+        mEnchant = ESM::RefId::sEmpty;
         mText.clear();
     }
 }

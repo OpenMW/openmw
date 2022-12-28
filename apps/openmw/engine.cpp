@@ -163,7 +163,7 @@ void OMW::Engine::executeLocalScripts()
     MWWorld::LocalScripts& localScripts = mWorld->getLocalScripts();
 
     localScripts.startIteration();
-    std::pair<std::string, MWWorld::Ptr> script;
+    std::pair<ESM::RefId, MWWorld::Ptr> script;
     while (localScripts.getNext(script))
     {
         MWScript::InterpreterContext interpreterContext(&script.second.getRefData().getLocals(), script.second);
@@ -444,7 +444,7 @@ void OMW::Engine::setResourceDir(const std::filesystem::path& parResDir)
 // Set start cell name
 void OMW::Engine::setCell(const std::string& cellName)
 {
-    mCellName = cellName;
+    mCellName = ESM::RefId::stringRefId(cellName);
 }
 
 void OMW::Engine::addContentFile(const std::string& file)
@@ -790,7 +790,7 @@ void OMW::Engine::prepareEngine()
     mScriptContext->setExtensions(&mExtensions);
 
     mScriptManager = std::make_unique<MWScript::ScriptManager>(mWorld->getStore(), *mScriptContext, mWarningsMode,
-        mScriptBlacklistUse ? mScriptBlacklist : std::vector<std::string>());
+        mScriptBlacklistUse ? mScriptBlacklist : std::vector<ESM::RefId>());
     mEnvironment.setScriptManager(*mScriptManager);
 
     // Create game mechanics system
@@ -1003,7 +1003,7 @@ void OMW::Engine::setWarningsMode(int mode)
     mWarningsMode = mode;
 }
 
-void OMW::Engine::setScriptBlacklist(const std::vector<std::string>& list)
+void OMW::Engine::setScriptBlacklist(const std::vector<ESM::RefId>& list)
 {
     mScriptBlacklist = list;
 }

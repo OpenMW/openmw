@@ -1,6 +1,7 @@
 #include "summoning.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -28,9 +29,14 @@ namespace MWMechanics
             || (effectId >= ESM::MagicEffect::SummonFabricant && effectId <= ESM::MagicEffect::SummonCreature05));
     }
 
-    std::string_view getSummonedCreature(int effectId)
+    static const std::map<int, ESM::RefId>& getSummonMap()
     {
-        static const std::map<int, std::string_view> summonMap{
+        static std::map<int, ESM::RefId> summonMap;
+
+        if (summonMap.size() > 0)
+            return summonMap;
+
+        const std::map<int, std::string_view> summonMapToGameSetting{
             { ESM::MagicEffect::SummonAncestralGhost, "sMagicAncestralGhostID" },
             { ESM::MagicEffect::SummonBonelord, "sMagicBonelordID" },
             { ESM::MagicEffect::SummonBonewalker, "sMagicLeastBonewalkerID" },
@@ -55,20 +61,32 @@ namespace MWMechanics
             { ESM::MagicEffect::SummonCreature05, "sMagicCreature05ID" },
         };
 
+        for (const auto& it : summonMapToGameSetting)
+        {
+            summonMap[it.first] = ESM::RefId::stringRefId(MWBase::Environment::get()
+                                                              .getWorld()
+                                                              ->getStore()
+                                                              .get<ESM::GameSetting>()
+                                                              .find(it.second)
+                                                              ->mValue.getString());
+        }
+        return summonMap;
+    }
+
+    const ESM::RefId& getSummonedCreature(int effectId)
+    {
+        const auto& summonMap = getSummonMap();
         auto it = summonMap.find(effectId);
         if (it != summonMap.end())
-            return MWBase::Environment::get()
-                .getWorld()
-                ->getStore()
-                .get<ESM::GameSetting>()
-                .find(it->second)
-                ->mValue.getString();
-        return {};
+        {
+            return it->second;
+        }
+        return ESM::RefId::sEmpty;
     }
 
     int summonCreature(int effectId, const MWWorld::Ptr& summoner)
     {
-        std::string_view creatureID = getSummonedCreature(effectId);
+        const ESM::RefId& creatureID = getSummonedCreature(effectId);
         int creatureActorId = -1;
         if (!creatureID.empty())
         {
@@ -90,7 +108,8 @@ namespace MWMechanics
                 MWRender::Animation* anim = world->getAnimation(placed);
                 if (anim)
                 {
-                    const ESM::Static* fx = world->getStore().get<ESM::Static>().search("VFX_Summon_Start");
+                    const ESM::Static* fx
+                        = world->getStore().get<ESM::Static>().search(ESM::RefId::stringRefId("VFX_Summon_Start"));
                     if (fx)
                     {
                         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();

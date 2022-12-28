@@ -46,7 +46,7 @@ void CSMDoc::Document::addGmsts()
     for (size_t i = 0; i < CSMWorld::DefaultGmsts::FloatCount; ++i)
     {
         ESM::GameSetting gmst;
-        gmst.mId = CSMWorld::DefaultGmsts::Floats[i];
+        gmst.mId = ESM::RefId::stringRefId(CSMWorld::DefaultGmsts::Floats[i]);
         gmst.mValue.setType(ESM::VT_Float);
         gmst.mRecordFlags = 0;
         gmst.mValue.setFloat(CSMWorld::DefaultGmsts::FloatsDefaultValues[i]);
@@ -56,7 +56,7 @@ void CSMDoc::Document::addGmsts()
     for (size_t i = 0; i < CSMWorld::DefaultGmsts::IntCount; ++i)
     {
         ESM::GameSetting gmst;
-        gmst.mId = CSMWorld::DefaultGmsts::Ints[i];
+        gmst.mId = ESM::RefId::stringRefId(CSMWorld::DefaultGmsts::Ints[i]);
         gmst.mValue.setType(ESM::VT_Int);
         gmst.mRecordFlags = 0;
         gmst.mValue.setInteger(CSMWorld::DefaultGmsts::IntsDefaultValues[i]);
@@ -66,7 +66,7 @@ void CSMDoc::Document::addGmsts()
     for (size_t i = 0; i < CSMWorld::DefaultGmsts::StringCount; ++i)
     {
         ESM::GameSetting gmst;
-        gmst.mId = CSMWorld::DefaultGmsts::Strings[i];
+        gmst.mId = ESM::RefId::stringRefId(CSMWorld::DefaultGmsts::Strings[i]);
         gmst.mValue.setType(ESM::VT_String);
         gmst.mRecordFlags = 0;
         gmst.mValue.setString("");
@@ -79,7 +79,7 @@ void CSMDoc::Document::addOptionalGmsts()
     for (size_t i = 0; i < CSMWorld::DefaultGmsts::OptionalFloatCount; ++i)
     {
         ESM::GameSetting gmst;
-        gmst.mId = CSMWorld::DefaultGmsts::OptionalFloats[i];
+        gmst.mId = ESM::RefId::stringRefId(CSMWorld::DefaultGmsts::OptionalFloats[i]);
         gmst.blank();
         gmst.mValue.setType(ESM::VT_Float);
         addOptionalGmst(gmst);
@@ -88,7 +88,7 @@ void CSMDoc::Document::addOptionalGmsts()
     for (size_t i = 0; i < CSMWorld::DefaultGmsts::OptionalIntCount; ++i)
     {
         ESM::GameSetting gmst;
-        gmst.mId = CSMWorld::DefaultGmsts::OptionalInts[i];
+        gmst.mId = ESM::RefId::stringRefId(CSMWorld::DefaultGmsts::OptionalInts[i]);
         gmst.blank();
         gmst.mValue.setType(ESM::VT_Int);
         addOptionalGmst(gmst);
@@ -97,7 +97,7 @@ void CSMDoc::Document::addOptionalGmsts()
     for (size_t i = 0; i < CSMWorld::DefaultGmsts::OptionalStringCount; ++i)
     {
         ESM::GameSetting gmst;
-        gmst.mId = CSMWorld::DefaultGmsts::OptionalStrings[i];
+        gmst.mId = ESM::RefId::stringRefId(CSMWorld::DefaultGmsts::OptionalStrings[i]);
         gmst.blank();
         gmst.mValue.setType(ESM::VT_String);
         gmst.mValue.setString("<no text>");
@@ -117,7 +117,7 @@ void CSMDoc::Document::addOptionalGlobals()
     for (int i = 0; sGlobals[i]; ++i)
     {
         ESM::Global global;
-        global.mId = sGlobals[i];
+        global.mId = ESM::RefId::stringRefId(sGlobals[i]);
         global.blank();
         global.mValue.setType(ESM::VT_Long);
 
@@ -134,7 +134,7 @@ void CSMDoc::Document::addOptionalMagicEffects()
     {
         ESM::MagicEffect effect;
         effect.mIndex = i;
-        effect.mId = ESM::MagicEffect::indexToId(i);
+        effect.mId = ESM::RefId::stringRefId(ESM::MagicEffect::indexToId(i));
         effect.blank();
 
         addOptionalMagicEffect(effect);
@@ -191,7 +191,7 @@ void CSMDoc::Document::createBase()
     for (int i = 0; sGlobals[i]; ++i)
     {
         ESM::Global record;
-        record.mId = sGlobals[i];
+        record.mId = ESM::RefId::stringRefId(sGlobals[i]);
         record.mRecordFlags = 0;
         record.mValue.setType(i == 2 ? ESM::VT_Float : ESM::VT_Long);
 
@@ -207,7 +207,7 @@ void CSMDoc::Document::createBase()
     {
         ESM::Skill record;
         record.mIndex = i;
-        record.mId = ESM::Skill::indexToId(record.mIndex);
+        record.mId = ESM::RefId::stringRefId(ESM::Skill::indexToId(record.mIndex));
         record.blank();
 
         getData().getSkills().add(record);
@@ -228,7 +228,7 @@ void CSMDoc::Document::createBase()
     for (int i = 0; sVoice[i]; ++i)
     {
         ESM::Dialogue record;
-        record.mId = sVoice[i];
+        record.mId = ESM::RefId::stringRefId(sVoice[i]);
         record.mType = ESM::Dialogue::Voice;
         record.blank();
 
@@ -252,7 +252,7 @@ void CSMDoc::Document::createBase()
     for (int i = 0; sGreetings[i]; ++i)
     {
         ESM::Dialogue record;
-        record.mId = sGreetings[i];
+        record.mId = ESM::RefId::stringRefId(sGreetings[i]);
         record.mType = ESM::Dialogue::Greeting;
         record.blank();
 
@@ -276,7 +276,7 @@ void CSMDoc::Document::createBase()
     for (int i = 0; sPersuasion[i]; ++i)
     {
         ESM::Dialogue record;
-        record.mId = sPersuasion[i];
+        record.mId = ESM::RefId::stringRefId(sPersuasion[i]);
         record.mType = ESM::Dialogue::Persuasion;
         record.blank();
 
@@ -288,7 +288,7 @@ void CSMDoc::Document::createBase()
         ESM::MagicEffect record;
 
         record.mIndex = i;
-        record.mId = ESM::MagicEffect::indexToId(i);
+        record.mId = ESM::RefId::stringRefId(ESM::MagicEffect::indexToId(i));
 
         record.blank();
 
@@ -504,7 +504,8 @@ void CSMDoc::Document::startRunning(const std::string& profile, const std::strin
         contentFiles.emplace_back(mContentFile.filename());
     }
 
-    mRunner.configure(getData().getDebugProfiles().getRecord(profile).get(), contentFiles, startupInstruction);
+    mRunner.configure(getData().getDebugProfiles().getRecord(ESM::RefId::stringRefId(profile)).get(), contentFiles,
+        startupInstruction);
 
     int state = getState();
 

@@ -37,7 +37,7 @@ namespace MWWorld
         bool hasContentFile() const { return mCellRef.mRefNum.hasContentFile(); }
 
         // Id of object being referenced
-        const std::string& getRefId() const { return mCellRef.mRefID; }
+        const ESM::RefId& getRefId() const { return mCellRef.mRefID; }
 
         // For doors - true if this door teleports to somewhere else, false
         // if it should open through animation.
@@ -47,7 +47,7 @@ namespace MWWorld
         const ESM::Position& getDoorDest() const { return mCellRef.mDoorDest; }
 
         // Destination cell for doors (optional)
-        const std::string& getDestCell() const { return mCellRef.mDestCell; }
+        const ESM::RefId& getDestCell() const { return mCellRef.mDestCell; }
 
         // Scale applied to mesh
         float getScale() const { return mCellRef.mScale; }
@@ -76,8 +76,8 @@ namespace MWWorld
         void applyChargeRemainderToBeSubtracted(float chargeRemainder); // Stores remainders and applies if > 1
 
         // The NPC that owns this object (and will get angry if you steal it)
-        const std::string& getOwner() const { return mCellRef.mOwner; }
-        void setOwner(const std::string& owner);
+        const ESM::RefId& getOwner() const { return mCellRef.mOwner; }
+        void setOwner(const ESM::RefId& owner);
 
         // Name of a global variable. If the global variable is set to '1', using the object is temporarily allowed
         // even if it has an Owner field.
@@ -87,13 +87,13 @@ namespace MWWorld
         void resetGlobalVariable();
 
         // ID of creature trapped in this soul gem
-        const std::string& getSoul() const { return mCellRef.mSoul; }
-        void setSoul(std::string_view soul);
+        const ESM::RefId& getSoul() const { return mCellRef.mSoul; }
+        void setSoul(const ESM::RefId& soul);
 
         // The faction that owns this object (and will get angry if
         // you take it and are not a faction member)
-        const std::string& getFaction() const { return mCellRef.mFaction; }
-        void setFaction(const std::string& faction);
+        const ESM::RefId& getFaction() const { return mCellRef.mFaction; }
+        void setFaction(const ESM::RefId& faction);
 
         // PC faction rank required to use the item. Sometimes is -1, which means "any rank".
         void setFactionRank(int factionRank);
@@ -107,9 +107,9 @@ namespace MWWorld
         void lock(int lockLevel);
         void unlock();
         // Key and trap ID names, if any
-        const std::string& getKey() const { return mCellRef.mKey; }
-        const std::string& getTrap() const { return mCellRef.mTrap; }
-        void setTrap(const std::string& trap);
+        const ESM::RefId& getKey() const { return mCellRef.mKey; }
+        const ESM::RefId& getTrap() const { return mCellRef.mTrap; }
+        void setTrap(const ESM::RefId& trap);
 
         // This is 5 for Gold_005 references, 100 for Gold_100 and so on.
         int getGoldValue() const { return mCellRef.mGoldValue; }

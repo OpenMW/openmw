@@ -24,7 +24,7 @@ namespace MWClass
         std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
         ///< Generate action for activation
 
-        std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
+        const ESM::RefId& getScript(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of the script attached to ptr
 
         MWGui::ToolTipInfo getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const override;
@@ -33,19 +33,19 @@ namespace MWClass
         int getValue(const MWWorld::ConstPtr& ptr) const override;
         ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
-        std::string_view getUpSoundId(const MWWorld::ConstPtr& ptr) const override;
+        const ESM::RefId& getUpSoundId(const MWWorld::ConstPtr& ptr) const override;
         ///< Return the pick up sound Id
 
-        std::string_view getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
+        const ESM::RefId& getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
         ///< Return the put down sound Id
 
         const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of inventory icon.
 
-        std::string_view getEnchantment(const MWWorld::ConstPtr& ptr) const override;
+        const ESM::RefId& getEnchantment(const MWWorld::ConstPtr& ptr) const override;
         ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
 
-        const std::string& applyEnchantment(const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge,
+        const ESM::RefId& applyEnchantment(const MWWorld::ConstPtr& ptr, const ESM::RefId& enchId, int enchCharge,
             const std::string& newName) const override;
         ///< Creates a new record using \a ptr as template, with the given name and the given enchantment applied to it.
 

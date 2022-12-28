@@ -216,13 +216,13 @@ void MWState::StateManager::saveGame(const std::string& description, const Slot*
         profile.mPlayerName = player.get<ESM::NPC>()->mBase->mName;
         profile.mPlayerLevel = player.getClass().getNpcStats(player).getLevel();
 
-        const std::string& classId = player.get<ESM::NPC>()->mBase->mClass;
+        const ESM::RefId& classId = player.get<ESM::NPC>()->mBase->mClass;
         if (world.getStore().get<ESM::Class>().isDynamic(classId))
             profile.mPlayerClassName = world.getStore().get<ESM::Class>().find(classId)->mName;
         else
             profile.mPlayerClassId = classId;
 
-        profile.mPlayerCell = world.getCellName();
+        profile.mPlayerCell = ESM::RefId::stringRefId(world.getCellName());
         profile.mInGameTime = world.getEpochTimeStamp();
         profile.mTimePlayed = mTimePlayed;
         profile.mDescription = description;

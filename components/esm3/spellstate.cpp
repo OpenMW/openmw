@@ -12,7 +12,7 @@ namespace ESM
         {
             while (esm.isNextSub("SPEL"))
             {
-                std::string id = esm.getHString();
+                ESM::RefId id = esm.getRefId();
 
                 SpellParams state;
                 while (esm.isNextSub("INDX"))
@@ -40,13 +40,13 @@ namespace ESM
         else
         {
             while (esm.isNextSub("SPEL"))
-                mSpells.emplace_back(esm.getHString());
+                mSpells.emplace_back(esm.getRefId());
         }
 
         // Obsolete
         while (esm.isNextSub("PERM"))
         {
-            std::string spellId = esm.getHString();
+            ESM::RefId spellId = esm.getRefId();
             std::vector<PermanentSpellEffectInfo> permEffectList;
 
             while (true)
@@ -75,7 +75,7 @@ namespace ESM
         // Obsolete
         while (esm.isNextSub("CORP"))
         {
-            std::string id = esm.getHString();
+            ESM::RefId id = esm.getRefId();
 
             CorprusStats stats;
             esm.getHNT(stats.mWorsenings, "WORS");
@@ -86,29 +86,29 @@ namespace ESM
 
         while (esm.isNextSub("USED"))
         {
-            std::string id = esm.getHString();
+            ESM::RefId id = esm.getRefId();
             TimeStamp time;
             esm.getHNT(time, "TIME");
 
             mUsedPowers[id] = time;
         }
 
-        mSelectedSpell = esm.getHNOString("SLCT");
+        mSelectedSpell = ESM::RefId::stringRefId(esm.getHNOString("SLCT"));
     }
 
     void SpellState::save(ESMWriter& esm) const
     {
-        for (const std::string& spell : mSpells)
-            esm.writeHNString("SPEL", spell);
+        for (const ESM::RefId& spell : mSpells)
+            esm.writeHNString("SPEL", spell.getRefIdString());
 
-        for (std::map<std::string, TimeStamp>::const_iterator it = mUsedPowers.begin(); it != mUsedPowers.end(); ++it)
+        for (auto it = mUsedPowers.begin(); it != mUsedPowers.end(); ++it)
         {
-            esm.writeHNString("USED", it->first);
+            esm.writeHNString("USED", it->first.getRefIdString());
             esm.writeHNT("TIME", it->second);
         }
 
         if (!mSelectedSpell.empty())
-            esm.writeHNString("SLCT", mSelectedSpell);
+            esm.writeHNString("SLCT", mSelectedSpell.getRefIdString());
     }
 
 }

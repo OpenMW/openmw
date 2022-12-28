@@ -9,8 +9,8 @@
 
 #include <components/esm3/esmwriter.hpp>
 
+#include <components/misc/algorithm.hpp>
 #include <components/to_utf8/to_utf8.hpp>
-
 namespace CSMDoc
 {
     class Operation;
@@ -26,7 +26,7 @@ namespace CSMDoc
         ESM::ESMWriter mWriter;
         std::filesystem::path mProjectPath;
         bool mProjectFile;
-        std::map<std::string, std::deque<int>> mSubRecords; // record ID, list of subrecords
+        std::map<std::string, std::deque<int>, Misc::StringUtils::CiComp> mSubRecords; // record ID, list of subrecords
 
     public:
         SavingState(Operation& operation, std::filesystem::path projectPath, ToUTF8::FromType encoding);
@@ -47,7 +47,7 @@ namespace CSMDoc
         bool isProjectFile() const;
         ///< Currently saving project file? (instead of content file)
 
-        std::map<std::string, std::deque<int>>& getSubRecords();
+        std::map<std::string, std::deque<int>, Misc::StringUtils::CiComp>& getSubRecords();
     };
 
 }

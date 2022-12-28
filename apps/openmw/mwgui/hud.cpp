@@ -54,7 +54,7 @@ namespace MWGui
                 dropped = world->placeObject(item.mBase, mLeft, mTop, count);
             else
                 dropped = world->dropObjectOnGround(world->getPlayerPtr(), item.mBase, count);
-            dropped.getCellRef().setOwner("");
+            dropped.getCellRef().setOwner(ESM::RefId::sEmpty);
 
             return dropped;
         }
@@ -181,11 +181,10 @@ namespace MWGui
         mMainWidget->eventMouseButtonClick.clear();
     }
 
-    void HUD::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
+    void HUD::setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value)
     {
         int current = static_cast<int>(value.getCurrent());
         int modified = static_cast<int>(value.getModified());
-
         // Fatigue can be negative
         if (id != "FBar")
             current = std::max(0, current);
@@ -393,7 +392,7 @@ namespace MWGui
         }
     }
 
-    void HUD::setSelectedSpell(const std::string& spellId, int successChancePercent)
+    void HUD::setSelectedSpell(const ESM::RefId& spellId, int successChancePercent)
     {
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
 
@@ -410,7 +409,7 @@ namespace MWGui
         mSpellStatus->setProgressPosition(successChancePercent);
 
         mSpellBox->setUserString("ToolTipType", "Spell");
-        mSpellBox->setUserString("Spell", spellId);
+        mSpellBox->setUserString("Spell", spellId.getRefIdString());
 
         // use the icon of the first effect
         const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(

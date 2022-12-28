@@ -48,7 +48,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Ingredient>* ref = ptr.get<ESM::Ingredient>();
         const std::string& name = ref->mBase->mName;
 
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
     std::unique_ptr<MWWorld::Action> Ingredient::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -56,7 +56,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string_view Ingredient::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Ingredient::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Ingredient>* ref = ptr.get<ESM::Ingredient>();
 
@@ -74,19 +74,21 @@ namespace MWClass
     {
         std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionEat>(ptr);
 
-        action->setSound("Swallow");
+        action->setSound(ESM::RefId::stringRefId("Swallow"));
 
         return action;
     }
 
-    std::string_view Ingredient::getUpSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Ingredient::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return "Item Ingredient Up";
+        static auto sound = ESM::RefId::stringRefId("Item Ingredient Up");
+        return sound;
     }
 
-    std::string_view Ingredient::getDownSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Ingredient::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return "Item Ingredient Down";
+        static auto sound = ESM::RefId::stringRefId("Item Ingredient Down");
+        return sound;
     }
 
     const std::string& Ingredient::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
@@ -114,7 +116,7 @@ namespace MWClass
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();

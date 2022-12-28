@@ -6,17 +6,17 @@
 namespace ESM
 {
 
-    int SavedGame::sCurrentFormat = 21;
+    int SavedGame::sCurrentFormat = 22;
 
     void SavedGame::load(ESMReader& esm)
     {
         mPlayerName = esm.getHNString("PLNA");
         esm.getHNOT(mPlayerLevel, "PLLE");
 
-        mPlayerClassId = esm.getHNOString("PLCL");
+        mPlayerClassId = ESM::RefId::stringRefId(esm.getHNOString("PLCL"));
         mPlayerClassName = esm.getHNOString("PLCN");
 
-        mPlayerCell = esm.getHNString("PLCE");
+        mPlayerCell = ESM::RefId::stringRefId(esm.getHNString("PLCE"));
         esm.getHNTSized<16>(mInGameTime, "TSTM");
         esm.getHNT(mTimePlayed, "TIME");
         mDescription = esm.getHNString("DESC");
@@ -36,11 +36,11 @@ namespace ESM
         esm.writeHNT("PLLE", mPlayerLevel);
 
         if (!mPlayerClassId.empty())
-            esm.writeHNString("PLCL", mPlayerClassId);
+            esm.writeHNString("PLCL", mPlayerClassId.getRefIdString());
         else
             esm.writeHNString("PLCN", mPlayerClassName);
 
-        esm.writeHNString("PLCE", mPlayerCell);
+        esm.writeHNString("PLCE", mPlayerCell.getRefIdString());
         esm.writeHNT("TSTM", mInGameTime, 16);
         esm.writeHNT("TIME", mTimePlayed);
         esm.writeHNString("DESC", mDescription);

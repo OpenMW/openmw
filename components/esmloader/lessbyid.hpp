@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_CONTENT_LESSBYID_H
 #define OPENMW_COMPONENTS_CONTENT_LESSBYID_H
 
+#include <components/esm/refid.hpp>
 #include <string_view>
 
 namespace EsmLoader
@@ -14,7 +15,7 @@ namespace EsmLoader
         }
 
         template <class T>
-        bool operator()(const T& lhs, std::string_view rhs) const
+        bool operator()(const T& lhs, const ESM::RefId& rhs) const
         {
             return lhs.mId < rhs;
         }

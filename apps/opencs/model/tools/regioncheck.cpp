@@ -56,7 +56,7 @@ void CSMTools::RegionCheckStage::perform(int stage, CSMDoc::Messages& messages)
     for (const ESM::Region::SoundRef& sound : region.mSoundList)
     {
         if (sound.mChance > 100)
-            messages.add(id, "Chance of '" + sound.mSound + "' sound to play is over 100 percent", "",
+            messages.add(id, "Chance of '" + sound.mSound.getRefIdString() + "' sound to play is over 100 percent", "",
                 CSMDoc::Message::Severity_Warning);
     }
 

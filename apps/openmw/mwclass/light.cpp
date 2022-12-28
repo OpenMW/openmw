@@ -83,7 +83,7 @@ namespace MWClass
             return {};
 
         const std::string& name = ref->mBase->mName;
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
     std::unique_ptr<MWWorld::Action> Light::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -98,7 +98,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string_view Light::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Light::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Light>* ref = ptr.get<ESM::Light>();
 
@@ -124,14 +124,16 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string_view Light::getUpSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Light::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return "Item Misc Up";
+        static const auto sound = ESM::RefId::stringRefId("Item Misc Up");
+        return sound;
     }
 
-    std::string_view Light::getDownSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Light::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return "Item Misc Down";
+        static const auto sound = ESM::RefId::stringRefId("Item Misc Down");
+        return sound;
     }
 
     const std::string& Light::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
@@ -169,7 +171,7 @@ namespace MWClass
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
         info.text = text;
@@ -237,7 +239,7 @@ namespace MWClass
         return { 1, {} };
     }
 
-    std::string_view Light::getSound(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Light::getSound(const MWWorld::ConstPtr& ptr) const
     {
         return ptr.get<ESM::Light>()->mBase->mSound;
     }

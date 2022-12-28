@@ -3,6 +3,7 @@
 #include "stats.hpp"
 
 #include <components/esm3/loadpgrd.hpp>
+#include <components/misc/algorithm.hpp>
 #include <components/misc/convert.hpp>
 #include <components/misc/coordinateconverter.hpp>
 
@@ -35,6 +36,11 @@ namespace DetourNavigator
     void NavigatorImpl::setWorldspace(std::string_view worldspace, const UpdateGuard* guard)
     {
         mNavMeshManager.setWorldspace(worldspace, getImpl(guard));
+    }
+
+    void NavigatorImpl::setWorldspace(const ESM::RefId& worldspace, const UpdateGuard* guard)
+    {
+        setWorldspace(Misc::StringUtils::lowerCase(worldspace.getRefIdString()), guard);
     }
 
     void NavigatorImpl::updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard)

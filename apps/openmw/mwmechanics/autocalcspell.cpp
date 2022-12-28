@@ -3,6 +3,7 @@
 #include <limits>
 
 #include <components/esm/attr.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadspel.hpp>
@@ -23,11 +24,10 @@ namespace MWMechanics
         int mLimit;
         bool mReachedLimit;
         int mMinCost;
-        std::string mWeakestSpell;
+        ESM::RefId mWeakestSpell;
     };
 
-    std::vector<std::string> autoCalcNpcSpells(
-        const int* actorSkills, const int* actorAttributes, const ESM::Race* race)
+    std::vector<ESM::RefId> autoCalcNpcSpells(const int* actorSkills, const int* actorAttributes, const ESM::Race* race)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
             = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -56,11 +56,11 @@ namespace MWMechanics
             caps.mLimit = iAutoSpellSchoolMax[i];
             caps.mReachedLimit = iAutoSpellSchoolMax[i] <= 0;
             caps.mMinCost = std::numeric_limits<int>::max();
-            caps.mWeakestSpell.clear();
+            caps.mWeakestSpell = ESM::RefId::sEmpty;
             schoolCaps[i] = caps;
         }
 
-        std::vector<std::string> selectedSpells;
+        std::vector<ESM::RefId> selectedSpells;
 
         const MWWorld::Store<ESM::Spell>& spells = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>();
 
@@ -100,13 +100,12 @@ namespace MWMechanics
 
             if (cap.mReachedLimit)
             {
-                std::vector<std::string>::iterator found
-                    = std::find(selectedSpells.begin(), selectedSpells.end(), cap.mWeakestSpell);
+                auto found = std::find(selectedSpells.begin(), selectedSpells.end(), cap.mWeakestSpell);
                 if (found != selectedSpells.end())
                     selectedSpells.erase(found);
 
                 cap.mMinCost = std::numeric_limits<int>::max();
-                for (const std::string& testSpellName : selectedSpells)
+                for (const ESM::RefId& testSpellName : selectedSpells)
                 {
                     const ESM::Spell* testSpell = spells.find(testSpellName);
                     int testSpellCost = MWMechanics::calcSpellCost(*testSpell);
@@ -148,7 +147,7 @@ namespace MWMechanics
         return selectedSpells;
     }
 
-    std::vector<std::string> autoCalcPlayerSpells(
+    std::vector<ESM::RefId> autoCalcPlayerSpells(
         const int* actorSkills, const int* actorAttributes, const ESM::Race* race)
     {
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
@@ -161,7 +160,7 @@ namespace MWMechanics
         const ESM::Spell* weakestSpell = nullptr;
         int minCost = std::numeric_limits<int>::max();
 
-        std::vector<std::string> selectedSpells;
+        std::vector<ESM::RefId> selectedSpells;
 
         const MWWorld::Store<ESM::Spell>& spells = esmStore.get<ESM::Spell>();
         for (const ESM::Spell& spell : spells)
@@ -193,13 +192,13 @@ namespace MWMechanics
 
             if (reachedLimit)
             {
-                std::vector<std::string>::iterator it
+                std::vector<ESM::RefId>::iterator it
                     = std::find(selectedSpells.begin(), selectedSpells.end(), weakestSpell->mId);
                 if (it != selectedSpells.end())
                     selectedSpells.erase(it);
 
                 minCost = std::numeric_limits<int>::max();
-                for (const std::string& testSpellName : selectedSpells)
+                for (const ESM::RefId& testSpellName : selectedSpells)
                 {
                     const ESM::Spell* testSpell = esmStore.get<ESM::Spell>().find(testSpellName);
                     int testSpellCost = MWMechanics::calcSpellCost(*testSpell);

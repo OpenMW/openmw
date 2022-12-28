@@ -43,7 +43,7 @@ namespace MWGui
         mSelect->setCoord(8, mSelect->getTop(), mSelect->getTextSize().width, mSelect->getHeight());
     }
 
-    void TravelWindow::addDestination(const std::string& name, const ESM::Position& pos, bool interior)
+    void TravelWindow::addDestination(const ESM::RefId& name, const ESM::Position& pos, bool interior)
     {
         int price;
 
@@ -90,11 +90,13 @@ namespace MWGui
         else
             toAdd->setUserString("interior", "n");
 
+        const std::string& nameString = name.getRefIdString();
         toAdd->setUserString("price", std::to_string(price));
-        toAdd->setCaptionWithReplacing("#{sCell=" + name + "}   -   " + MyGUI::utility::toString(price) + "#{sgp}");
+        toAdd->setCaptionWithReplacing(
+            "#{sCell=" + nameString + "}   -   " + MyGUI::utility::toString(price) + "#{sgp}");
         toAdd->setSize(mDestinationsView->getWidth(), lineHeight);
         toAdd->eventMouseWheel += MyGUI::newDelegate(this, &TravelWindow::onMouseWheel);
-        toAdd->setUserString("Destination", name);
+        toAdd->setUserString("Destination", nameString);
         toAdd->setUserData(pos);
         toAdd->eventMouseButtonClick += MyGUI::newDelegate(this, &TravelWindow::onTravelButtonClick);
     }
@@ -121,7 +123,7 @@ namespace MWGui
 
         for (unsigned int i = 0; i < transport.size(); i++)
         {
-            std::string cellname = transport[i].mCellName;
+            std::string_view cellname = transport[i].mCellName.getRefIdString();
             bool interior = true;
             const osg::Vec2i cellIndex
                 = MWWorld::positionToCellIndex(transport[i].mPos.pos[0], transport[i].mPos.pos[1]);
@@ -132,7 +134,7 @@ namespace MWGui
                 cellname = MWBase::Environment::get().getWorld()->getCellName(cell);
                 interior = false;
             }
-            addDestination(cellname, transport[i].mPos, interior);
+            addDestination(ESM::RefId::stringRefId(cellname), transport[i].mPos, interior);
         }
 
         updateLabels();
@@ -162,7 +164,7 @@ namespace MWGui
 
         if (!mPtr.getCell()->isExterior())
             // Interior cell -> mages guild transport
-            MWBase::Environment::get().getWindowManager()->playSound("mysticism cast");
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("mysticism cast"));
 
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
 
@@ -172,7 +174,7 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
         ESM::Position pos = *_sender->getUserData<ESM::Position>();
-        const std::string& cellname = _sender->getUserString("Destination");
+        const ESM::RefId& cellname = ESM::RefId::stringRefId(_sender->getUserString("Destination"));
         bool interior = _sender->getUserString("interior") == "y";
         if (mPtr.getCell()->isExterior())
         {
@@ -196,7 +198,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
 
         // Teleports any followers, too.
-        MWWorld::ActionTeleport action(interior ? cellname : std::string_view{}, pos, true);
+        MWWorld::ActionTeleport action(interior ? cellname : ESM::RefId::sEmpty, pos, true);
         action.execute(player);
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);

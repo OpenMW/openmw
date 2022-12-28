@@ -10,8 +10,8 @@ namespace ESM
     {
         PartReference pr;
         esm.getHT(pr.mPart); // The INDX byte
-        pr.mMale = esm.getHNOString("BNAM");
-        pr.mFemale = esm.getHNOString("CNAM");
+        pr.mMale = ESM::RefId::stringRefId(esm.getHNOString("BNAM"));
+        pr.mFemale = ESM::RefId::stringRefId(esm.getHNOString("CNAM"));
         mParts.push_back(pr);
     }
 
@@ -29,8 +29,8 @@ namespace ESM
         for (std::vector<PartReference>::const_iterator it = mParts.begin(); it != mParts.end(); ++it)
         {
             esm.writeHNT("INDX", it->mPart);
-            esm.writeHNOString("BNAM", it->mMale);
-            esm.writeHNOString("CNAM", it->mFemale);
+            esm.writeHNOString("BNAM", it->mMale.getRefIdString());
+            esm.writeHNOString("CNAM", it->mFemale.getRefIdString());
         }
     }
 
@@ -49,7 +49,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("MODL"):
@@ -63,13 +63,13 @@ namespace ESM
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
-                    mScript = esm.getHString();
+                    mScript = esm.getRefId();
                     break;
                 case fourCC("ITEX"):
                     mIcon = esm.getHString();
                     break;
                 case fourCC("ENAM"):
-                    mEnchant = esm.getHString();
+                    mEnchant = esm.getRefId();
                     break;
                 case fourCC("INDX"):
                     mParts.add(esm);
@@ -92,7 +92,7 @@ namespace ESM
 
     void Armor::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {
@@ -102,11 +102,11 @@ namespace ESM
 
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
-        esm.writeHNOCString("SCRI", mScript);
+        esm.writeHNOCString("SCRI", mScript.getRefIdString());
         esm.writeHNT("AODT", mData, 24);
         esm.writeHNOCString("ITEX", mIcon);
         mParts.save(esm);
-        esm.writeHNOCString("ENAM", mEnchant);
+        esm.writeHNOCString("ENAM", mEnchant.getRefIdString());
     }
 
     void Armor::blank()
@@ -122,7 +122,7 @@ namespace ESM
         mName.clear();
         mModel.clear();
         mIcon.clear();
-        mScript.clear();
-        mEnchant.clear();
+        mScript = ESM::RefId::sEmpty;
+        mEnchant = ESM::RefId::sEmpty;
     }
 }

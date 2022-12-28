@@ -4,6 +4,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -31,7 +32,8 @@ namespace ESM
         static std::string_view getRecordType() { return "Static"; }
 
         unsigned int mRecordFlags;
-        std::string mId, mModel;
+        RefId mId;
+        std::string mModel;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

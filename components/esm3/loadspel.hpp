@@ -4,6 +4,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 #include "effectlist.hpp"
 
 namespace ESM
@@ -45,7 +46,8 @@ namespace ESM
 
         SPDTstruct mData;
         unsigned int mRecordFlags;
-        std::string mId, mName;
+        std::string mName;
+        RefId mId;
         EffectList mEffects;
 
         void load(ESMReader& esm, bool& isDeleted);

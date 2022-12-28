@@ -229,7 +229,8 @@ namespace NavMeshTool
             DetourNavigator::RecastGlobalAllocator::init();
             DetourNavigator::Settings navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
             navigatorSettings.mRecast.mSwimHeightScale
-                = EsmLoader::getGameSetting(esmData.mGameSettings, "fSwimHeightScale").getFloat();
+                = EsmLoader::getGameSetting(esmData.mGameSettings, ESM::RefId::stringRefId("fSwimHeightScale"))
+                      .getFloat();
 
             WorldspaceData cellsData = gatherWorldspaceData(
                 navigatorSettings, readers, vfs, bulletShapeManager, esmData, processInteriorCells, writeBinaryLog);

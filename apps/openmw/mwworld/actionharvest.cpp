@@ -19,7 +19,7 @@ namespace MWWorld
     ActionHarvest::ActionHarvest(const MWWorld::Ptr& container)
         : Action(true, container)
     {
-        setSound("Item Ingredient Up");
+        setSound(ESM::RefId::stringRefId("Item Ingredient Up"));
     }
 
     void ActionHarvest::executeImp(const MWWorld::Ptr& actor)

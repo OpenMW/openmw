@@ -18,7 +18,7 @@ namespace CSMWorld
     /// Exterior cell coordinates are encoded in the cell ID.
     struct Cell : public ESM::Cell
     {
-        std::string mId;
+        ESM::RefId mId;
 
         void load(ESM::ESMReader& esm, bool& isDeleted);
     };

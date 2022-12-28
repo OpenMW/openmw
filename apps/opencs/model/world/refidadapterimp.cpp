@@ -503,7 +503,7 @@ QVariant CSMWorld::CreatureRefIdAdapter::getData(const RefIdColumn* column, cons
         return record.get().mScale;
 
     if (column == mColumns.mOriginal)
-        return QString::fromUtf8(record.get().mOriginal.c_str());
+        return QString::fromUtf8(record.get().mOriginal.getRefIdString().c_str());
 
     if (column == mColumns.mAttributes)
         return QVariant::fromValue(ColumnBase::TableEdit_FixedRows);
@@ -538,7 +538,7 @@ void CSMWorld::CreatureRefIdAdapter::setData(
     else if (column == mColumns.mScale)
         creature.mScale = value.toFloat();
     else if (column == mColumns.mOriginal)
-        creature.mOriginal = value.toString().toUtf8().constData();
+        creature.mOriginal = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
     else if (column == mColumns.mBloodType)
         creature.mBloodType = value.toInt();
     else
@@ -577,10 +577,10 @@ QVariant CSMWorld::DoorRefIdAdapter::getData(const RefIdColumn* column, const Re
         = static_cast<const Record<ESM::Door>&>(data.getRecord(RefIdData::LocalIndex(index, UniversalId::Type_Door)));
 
     if (column == mOpenSound)
-        return QString::fromUtf8(record.get().mOpenSound.c_str());
+        return QString::fromUtf8(record.get().mOpenSound.getRefIdString().c_str());
 
     if (column == mCloseSound)
-        return QString::fromUtf8(record.get().mCloseSound.c_str());
+        return QString::fromUtf8(record.get().mCloseSound.getRefIdString().c_str());
 
     return NameRefIdAdapter<ESM::Door>::getData(column, data, index);
 }
@@ -594,9 +594,9 @@ void CSMWorld::DoorRefIdAdapter::setData(
     ESM::Door door = record.get();
 
     if (column == mOpenSound)
-        door.mOpenSound = value.toString().toUtf8().constData();
+        door.mOpenSound = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
     else if (column == mCloseSound)
-        door.mCloseSound = value.toString().toUtf8().constData();
+        door.mCloseSound = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
     else
     {
         NameRefIdAdapter<ESM::Door>::setData(column, data, index, value);
@@ -638,7 +638,7 @@ QVariant CSMWorld::LightRefIdAdapter::getData(const RefIdColumn* column, const R
         return record.get().mData.mColor;
 
     if (column == mColumns.mSound)
-        return QString::fromUtf8(record.get().mSound.c_str());
+        return QString::fromUtf8(record.get().mSound.getRefIdString().c_str());
 
     if (column == mColumns.mEmitterType)
     {
@@ -682,7 +682,7 @@ void CSMWorld::LightRefIdAdapter::setData(
     else if (column == mColumns.mColor)
         light.mData.mColor = value.toInt();
     else if (column == mColumns.mSound)
-        light.mSound = value.toString().toUtf8().constData();
+        light.mSound = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
     else if (column == mColumns.mEmitterType)
     {
         int mask = ~(ESM::Light::Flicker | ESM::Light::FlickerSlow | ESM::Light::Pulse | ESM::Light::PulseSlow);
@@ -784,19 +784,19 @@ QVariant CSMWorld::NpcRefIdAdapter::getData(const RefIdColumn* column, const Ref
         = static_cast<const Record<ESM::NPC>&>(data.getRecord(RefIdData::LocalIndex(index, UniversalId::Type_Npc)));
 
     if (column == mColumns.mRace)
-        return QString::fromUtf8(record.get().mRace.c_str());
+        return QString::fromUtf8(record.get().mRace.getRefIdString().c_str());
 
     if (column == mColumns.mClass)
-        return QString::fromUtf8(record.get().mClass.c_str());
+        return QString::fromUtf8(record.get().mClass.getRefIdString().c_str());
 
     if (column == mColumns.mFaction)
-        return QString::fromUtf8(record.get().mFaction.c_str());
+        return QString::fromUtf8(record.get().mFaction.getRefIdString().c_str());
 
     if (column == mColumns.mHair)
-        return QString::fromUtf8(record.get().mHair.c_str());
+        return QString::fromUtf8(record.get().mHair.getRefIdString().c_str());
 
     if (column == mColumns.mHead)
-        return QString::fromUtf8(record.get().mHead.c_str());
+        return QString::fromUtf8(record.get().mHead.getRefIdString().c_str());
 
     if (column == mColumns.mAttributes || column == mColumns.mSkills)
     {
@@ -838,15 +838,15 @@ void CSMWorld::NpcRefIdAdapter::setData(
     ESM::NPC npc = record.get();
 
     if (column == mColumns.mRace)
-        npc.mRace = value.toString().toUtf8().constData();
+        npc.mRace = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
     else if (column == mColumns.mClass)
-        npc.mClass = value.toString().toUtf8().constData();
+        npc.mClass = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
     else if (column == mColumns.mFaction)
-        npc.mFaction = value.toString().toUtf8().constData();
+        npc.mFaction = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
     else if (column == mColumns.mHair)
-        npc.mHair = value.toString().toUtf8().constData();
+        npc.mHair = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
     else if (column == mColumns.mHead)
-        npc.mHead = value.toString().toUtf8().constData();
+        npc.mHead = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
     else if (column == mColumns.mBloodType)
         npc.mBloodType = value.toInt();
     else if (column == mColumns.mGender)

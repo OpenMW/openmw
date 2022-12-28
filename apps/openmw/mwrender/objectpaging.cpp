@@ -61,7 +61,7 @@ namespace MWRender
         }
     }
 
-    std::string getModel(int type, const std::string& id, const MWWorld::ESMStore& store)
+    std::string getModel(int type, const ESM::RefId& id, const MWWorld::ESMStore& store)
     {
         switch (type)
         {
@@ -508,7 +508,6 @@ namespace MWRender
                                 != cell->mMovedRefs.end())
                                 continue;
 
-                            Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
                             int type = store.findStatic(ref.mRefID);
                             if (!typeFilter(type, size >= 2))
                                 continue;
@@ -532,7 +531,6 @@ namespace MWRender
                         refs.erase(ref.mRefNum);
                         continue;
                     }
-                    Misc::StringUtils::lowerCaseInPlace(ref.mRefID);
                     int type = store.findStatic(ref.mRefID);
                     if (!typeFilter(type, size >= 2))
                         continue;

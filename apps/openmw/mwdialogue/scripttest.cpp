@@ -42,7 +42,7 @@ namespace
 
             Compiler::Locals locals;
 
-            std::string_view actorScript = actor.getClass().getScript(actor);
+            const ESM::RefId& actorScript = actor.getClass().getScript(actor);
             if (!actorScript.empty())
             {
                 // grab local variables from actor's script, if available.
@@ -156,7 +156,7 @@ namespace MWDialogue
                     else
                     {
                         errorHandler.reset();
-                        errorHandler.setContext(info.mId + " in " + topic.mId);
+                        errorHandler.setContext(info.mId.getRefIdString() + " in " + topic.mId.getRefIdString());
                         if (!test(ptr, info, compiled, total, extensions, compilerContext, errorHandler))
                             Log(Debug::Error) << "Test failed for " << info.mId << " in " << topic.mId << '\n'
                                               << info.mResultScript;

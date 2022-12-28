@@ -100,7 +100,7 @@ namespace MWGui
 
     void ScrollWindow::onTakeButtonClicked(MyGUI::Widget* _sender)
     {
-        MWBase::Environment::get().getWindowManager()->playSound("Item Book Up");
+        MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Book Up"));
 
         MWWorld::ActionTake take(mScroll);
         take.execute(MWMechanics::getPlayer());

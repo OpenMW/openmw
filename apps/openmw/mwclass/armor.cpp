@@ -55,7 +55,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
         const std::string& name = ref->mBase->mName;
 
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
     std::unique_ptr<MWWorld::Action> Armor::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -75,7 +75,7 @@ namespace MWClass
         return ref->mBase->mData.mHealth;
     }
 
-    std::string_view Armor::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Armor::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 
@@ -176,26 +176,33 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string_view Armor::getUpSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Armor::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
         int es = getEquipmentSkill(ptr);
+        static const ESM::RefId lightUp = ESM::RefId::stringRefId("Item Armor Light Up");
+        static const ESM::RefId mediumUp = ESM::RefId::stringRefId("Item Armor Medium Up");
+        static const ESM::RefId heavyUp = ESM::RefId::stringRefId("Item Armor Heavy Up");
+
         if (es == ESM::Skill::LightArmor)
-            return "Item Armor Light Up";
+            return lightUp;
         else if (es == ESM::Skill::MediumArmor)
-            return "Item Armor Medium Up";
+            return mediumUp;
         else
-            return "Item Armor Heavy Up";
+            return heavyUp;
     }
 
-    std::string_view Armor::getDownSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Armor::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
         int es = getEquipmentSkill(ptr);
+        static const ESM::RefId lightDown = ESM::RefId::stringRefId("Item Armor Light Down");
+        static const ESM::RefId mediumDown = ESM::RefId::stringRefId("Item Armor Medium Down");
+        static const ESM::RefId heavyDown = ESM::RefId::stringRefId("Item Armor Heavy Down");
         if (es == ESM::Skill::LightArmor)
-            return "Item Armor Light Down";
+            return lightDown;
         else if (es == ESM::Skill::MediumArmor)
-            return "Item Armor Medium Down";
+            return mediumDown;
         else
-            return "Item Armor Heavy Down";
+            return heavyDown;
     }
 
     const std::string& Armor::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
@@ -253,7 +260,7 @@ namespace MWClass
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
         info.enchant = ref->mBase->mEnchant;
@@ -265,20 +272,20 @@ namespace MWClass
         return info;
     }
 
-    std::string_view Armor::getEnchantment(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Armor::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 
         return ref->mBase->mEnchant;
     }
 
-    const std::string& Armor::applyEnchantment(
-        const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    const ESM::RefId& Armor::applyEnchantment(
+        const MWWorld::ConstPtr& ptr, const ESM::RefId& enchId, int enchCharge, const std::string& newName) const
     {
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 
         ESM::Armor newItem = *ref->mBase;
-        newItem.mId.clear();
+        newItem.mId = ESM::RefId::sEmpty;
         newItem.mName = newName;
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;
@@ -317,7 +324,7 @@ namespace MWClass
 
         if (npc.getClass().isNpc())
         {
-            const std::string& npcRace = npc.get<ESM::NPC>()->mBase->mRace;
+            const ESM::RefId& npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
             const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);

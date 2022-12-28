@@ -17,7 +17,7 @@
 
 namespace MWWorld
 {
-    ActionTeleport::ActionTeleport(std::string_view cellName, const ESM::Position& position, bool teleportFollowers)
+    ActionTeleport::ActionTeleport(const ESM::RefId& cellName, const ESM::Position& position, bool teleportFollowers)
         : Action(true)
         , mCellName(cellName)
         , mPosition(position)
@@ -77,7 +77,7 @@ namespace MWWorld
         {
             MWWorld::Ptr follower = *it;
 
-            std::string_view script = follower.getClass().getScript(follower);
+            const ESM::RefId& script = follower.getClass().getScript(follower);
 
             if (!includeHostiles && follower.getClass().getCreatureStats(follower).getAiSequence().isInCombat(actor))
                 continue;

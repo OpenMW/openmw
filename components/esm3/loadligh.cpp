@@ -18,7 +18,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("MODL"):
@@ -35,10 +35,10 @@ namespace ESM
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
-                    mScript = esm.getHString();
+                    mScript = esm.getRefId();
                     break;
                 case fourCC("SNAM"):
-                    mSound = esm.getHString();
+                    mSound = esm.getRefId();
                     break;
                 case SREC_DELE:
                     esm.skipHSub();
@@ -57,7 +57,7 @@ namespace ESM
     }
     void Light::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {
@@ -69,8 +69,8 @@ namespace ESM
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNOCString("ITEX", mIcon);
         esm.writeHNT("LHDT", mData, 24);
-        esm.writeHNOCString("SCRI", mScript);
-        esm.writeHNOCString("SNAM", mSound);
+        esm.writeHNOCString("SCRI", mScript.getRefIdString());
+        esm.writeHNOCString("SNAM", mSound.getRefIdString());
     }
 
     void Light::blank()
@@ -82,8 +82,8 @@ namespace ESM
         mData.mRadius = 0;
         mData.mColor = 0;
         mData.mFlags = 0;
-        mSound.clear();
-        mScript.clear();
+        mSound = ESM::RefId::sEmpty;
+        mScript = ESM::RefId::sEmpty;
         mModel.clear();
         mIcon.clear();
         mName.clear();

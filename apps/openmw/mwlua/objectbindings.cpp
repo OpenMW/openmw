@@ -51,7 +51,7 @@ namespace MWLua
         class TeleportAction final : public LuaManager::Action
         {
         public:
-            TeleportAction(LuaUtil::LuaState* state, ObjectId object, std::string cell, const osg::Vec3f& pos,
+            TeleportAction(LuaUtil::LuaState* state, ObjectId object, ESM::RefId cell, const osg::Vec3f& pos,
                 const osg::Vec3f& rot)
                 : Action(state)
                 , mObject(object)
@@ -65,7 +65,7 @@ namespace MWLua
             {
                 MWWorld::CellStore* cell = worldView.findCell(mCell, mPos);
                 if (!cell)
-                    throw std::runtime_error(std::string("cell not found: '") + mCell + "'");
+                    throw std::runtime_error(std::string("cell not found: '") + mCell.getRefIdString() + "'");
 
                 MWBase::World* world = MWBase::Environment::get().getWorld();
                 MWWorld::Ptr obj = worldView.getObjectRegistry()->getPtr(mObject, false);
@@ -96,7 +96,7 @@ namespace MWLua
 
         private:
             ObjectId mObject;
-            std::string mCell;
+            ESM::RefId mCell;
             osg::Vec3f mPos;
             osg::Vec3f mRot;
         };
@@ -167,7 +167,7 @@ namespace MWLua
         {
             objectT["isValid"] = [](const ObjectT& o) { return o.isValid(); };
             objectT["recordId"] = sol::readonly_property(
-                [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId(); });
+                [](const ObjectT& o) -> ESM::RefId { return o.ptr().getCellRef().getRefId(); });
             objectT["cell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>> {
                 const MWWorld::Ptr& ptr = o.ptr();
                 if (ptr.isInCell())
@@ -246,8 +246,8 @@ namespace MWLua
                                           const sol::optional<osg::Vec3f>& optRot) {
                     MWWorld::Ptr ptr = object.ptr();
                     osg::Vec3f rot = optRot ? *optRot : ptr.getRefData().getPosition().asRotationVec3();
-                    auto action
-                        = std::make_unique<TeleportAction>(context.mLua, object.id(), std::string(cell), pos, rot);
+                    auto action = std::make_unique<TeleportAction>(
+                        context.mLua, object.id(), ESM::RefId::stringRefId(cell), pos, rot);
                     if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                         context.mLuaManager->addTeleportPlayerAction(std::move(action));
                     else
@@ -335,7 +335,7 @@ namespace MWLua
                 return ObjectList<ObjectT>{ list };
             };
 
-            inventoryT["countOf"] = [](const InventoryT& inventory, const std::string& recordId) {
+            inventoryT["countOf"] = [](const InventoryT& inventory, const ESM::RefId& recordId) {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 return store.count(recordId);

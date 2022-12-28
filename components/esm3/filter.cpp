@@ -18,7 +18,7 @@ namespace ESM
             switch (name)
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     break;
                 case fourCC("FILT"):
                     mFilter = esm.getHString();
@@ -39,7 +39,7 @@ namespace ESM
 
     void Filter::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {

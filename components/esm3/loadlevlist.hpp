@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "components/esm/refid.hpp"
 #include <components/esm/defs.hpp>
 #include <components/esm/esmcommon.hpp>
 
@@ -26,11 +27,11 @@ namespace ESM
         int mFlags;
         unsigned char mChanceNone; // Chance that none are selected (0-100)
         unsigned int mRecordFlags;
-        std::string mId;
+        RefId mId;
 
         struct LevelItem
         {
-            std::string mId;
+            RefId mId;
             short mLevel;
         };
 

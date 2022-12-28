@@ -76,7 +76,7 @@ namespace CSMWorld
 
 void CSMWorld::InfoCollection::load(const Info& record, bool base)
 {
-    int index = searchId(record.mId);
+    int index = searchId(record.mId.getRefIdString());
 
     if (index == -1)
     {
@@ -135,7 +135,7 @@ int CSMWorld::InfoCollection::getInsertIndex(const std::string& id, UniversalId:
         std::pair<RecordConstIterator, RecordConstIterator> range = getTopicRange(id.substr(0, separator));
 
         if (range.first == range.second)
-            return Collection<Info, IdAccessor<Info>>::getAppendIndex(id, type);
+            return Collection<Info, IdAccessor<Info>>::getAppendIndex(ESM::RefId::stringRefId(id), type);
 
         return std::distance(getRecords().begin(), range.second);
     }
@@ -143,12 +143,12 @@ int CSMWorld::InfoCollection::getInsertIndex(const std::string& id, UniversalId:
     int index = -1;
 
     const Info& info = static_cast<Record<Info>*>(record)->get();
-    std::string topic = info.mTopicId;
+    const std::string& topic = info.mTopicId.getRefIdString();
 
     // if the record has a prev, find its index value
     if (!info.mPrev.empty())
     {
-        index = getInfoIndex(info.mPrev, topic);
+        index = getInfoIndex(info.mPrev.getRefIdString(), topic);
 
         if (index != -1)
             ++index; // if prev exists, set current index to one above prev
@@ -158,7 +158,7 @@ int CSMWorld::InfoCollection::getInsertIndex(const std::string& id, UniversalId:
     if (index == -1 && !info.mNext.empty())
     {
         // if next exists, use its index as the current index
-        index = getInfoIndex(info.mNext, topic);
+        index = getInfoIndex(info.mNext.getRefIdString(), topic);
     }
 
     // if next doesn't exist or not found (i.e. neither exist yet) then start a new one
@@ -181,7 +181,7 @@ bool CSMWorld::InfoCollection::reorderRows(int baseIndex, const std::vector<int>
         return false;
 
     // Check that topics match
-    if (!Misc::StringUtils::ciEqual(getRecord(baseIndex).get().mTopicId, getRecord(lastIndex).get().mTopicId))
+    if (!(getRecord(baseIndex).get().mTopicId == getRecord(lastIndex).get().mTopicId))
         return false;
 
     // reorder
@@ -204,7 +204,7 @@ void CSMWorld::InfoCollection::load(ESM::ESMReader& reader, bool base, const ESM
     bool isDeleted = false;
 
     info.load(reader, isDeleted);
-    std::string id = Misc::StringUtils::lowerCase(dialogue.mId) + "#" + info.mId;
+    std::string id = dialogue.mId.getRefIdString() + "#" + info.mId.getRefIdString();
 
     if (isDeleted)
     {
@@ -230,7 +230,7 @@ void CSMWorld::InfoCollection::load(ESM::ESMReader& reader, bool base, const ESM
     else
     {
         info.mTopicId = dialogue.mId;
-        info.mId = id;
+        info.mId = ESM::RefId::stringRefId(id);
         load(info, base);
     }
 }
@@ -274,7 +274,7 @@ void CSMWorld::InfoCollection::removeDialogueInfos(const std::string& dialogueId
     {
         const Record<Info>& record = **range.first;
 
-        if (Misc::StringUtils::ciEqual(dialogueId, record.get().mTopicId))
+        if ((ESM::RefId::stringRefId(dialogueId) == record.get().mTopicId))
         {
             if (record.mState == RecordBase::State_ModifiedOnly)
             {
@@ -333,7 +333,7 @@ void CSMWorld::InfoCollection::removeRows(int index, int count)
     }
 }
 
-void CSMWorld::InfoCollection::appendBlankRecord(const std::string& id, UniversalId::Type type)
+void CSMWorld::InfoCollection::appendBlankRecord(const ESM::RefId& id, UniversalId::Type type)
 {
     auto record2 = std::make_unique<Record<Info>>();
 
@@ -342,7 +342,8 @@ void CSMWorld::InfoCollection::appendBlankRecord(const std::string& id, Universa
 
     record2->get().mId = id;
 
-    insertRecord(std::move(record2), getInsertIndex(id, type, nullptr), type); // call InfoCollection::insertRecord()
+    insertRecord(std::move(record2), getInsertIndex(id.getRefIdString(), type, nullptr),
+        type); // call InfoCollection::insertRecord()
 }
 
 int CSMWorld::InfoCollection::searchId(std::string_view id) const
@@ -357,7 +358,8 @@ int CSMWorld::InfoCollection::searchId(std::string_view id) const
 
 void CSMWorld::InfoCollection::appendRecord(std::unique_ptr<RecordBase> record, UniversalId::Type type)
 {
-    int index = getInsertIndex(static_cast<Record<Info>*>(record.get())->get().mId, type, record.get());
+    int index
+        = getInsertIndex(static_cast<Record<Info>*>(record.get())->get().mId.getRefIdString(), type, record.get());
 
     insertRecord(std::move(record), index, type);
 }
@@ -366,7 +368,7 @@ void CSMWorld::InfoCollection::insertRecord(std::unique_ptr<RecordBase> record, 
 {
     int size = static_cast<int>(getRecords().size());
 
-    std::string id = static_cast<Record<Info>*>(record.get())->get().mId;
+    std::string id = static_cast<Record<Info>*>(record.get())->get().mId.getRefIdString();
     std::string::size_type separator = id.find_last_of('#');
 
     if (separator == std::string::npos)

@@ -166,7 +166,7 @@ namespace MWInput
                     = MyGUI::InputManager::getInstance().getMouseFocusWidget()->castType<MyGUI::Button>(false);
                 if (b && b->getEnabled() && id == SDL_BUTTON_LEFT)
                 {
-                    MWBase::Environment::get().getWindowManager()->playSound("Menu Click");
+                    MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Menu Click"));
                 }
             }
             MWBase::Environment::get().getWindowManager()->setCursorActive(true);

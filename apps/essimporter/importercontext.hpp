@@ -40,15 +40,15 @@ namespace ESSImport
         float mHour;
 
         // key <refIndex, refId>
-        std::map<std::pair<int, std::string>, CREC> mCreatureChanges;
-        std::map<std::pair<int, std::string>, NPCC> mNpcChanges;
-        std::map<std::pair<int, std::string>, CNTC> mContainerChanges;
+        std::map<std::pair<int, ESM::RefId>, CREC> mCreatureChanges;
+        std::map<std::pair<int, ESM::RefId>, NPCC> mNpcChanges;
+        std::map<std::pair<int, ESM::RefId>, CNTC> mContainerChanges;
 
-        std::map<std::pair<int, std::string>, int> mActorIdMap;
+        std::map<std::pair<int, ESM::RefId>, int> mActorIdMap;
         int mNextActorId;
 
-        std::map<std::string, ESM::Creature> mCreatures;
-        std::map<std::string, ESM::NPC> mNpcs;
+        std::map<ESM::RefId, ESM::Creature> mCreatures;
+        std::map<ESM::RefId, ESM::NPC> mNpcs;
 
         std::vector<SPLM::ActiveSpell> mActiveSpells;
 
@@ -70,7 +70,7 @@ namespace ESSImport
             mPlayer.mPaidCrimeId = -1;
             mPlayer.mObject.blank();
             mPlayer.mObject.mEnabled = true;
-            mPlayer.mObject.mRef.mRefID = "player"; // REFR.mRefID would be PlayerSaveGame
+            mPlayer.mObject.mRef.mRefID = ESM::RefId::stringRefId("player"); // REFR.mRefID would be PlayerSaveGame
             mPlayer.mObject.mCreatureStats.mActorId = generateActorId();
 
             mGlobalMapState.mBounds.mMinX = 0;

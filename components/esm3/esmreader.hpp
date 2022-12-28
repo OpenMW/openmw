@@ -10,6 +10,7 @@
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "components/esm/esmcommon.hpp"
+#include "components/esm/refid.hpp"
 #include "loadtes3.hpp"
 
 namespace ESM
@@ -164,6 +165,7 @@ namespace ESM
 
         // Read a string by the given name if it is the next record.
         std::string getHNOString(NAME name);
+        ESM::RefId getHNORefId(NAME name);
 
         void skipHNOString(NAME name);
 
@@ -172,6 +174,7 @@ namespace ESM
 
         // Read a string, including the sub-record header (but not the name)
         std::string getHString();
+        RefId getRefId();
 
         void skipHString();
 
@@ -269,6 +272,7 @@ namespace ESM
         // Read the next 'size' bytes and return them as a string. Converts
         // them from native encoding to UTF8 in the process.
         std::string getString(int size);
+        ESM::RefId getRefId(int size);
 
         void skip(std::size_t bytes)
         {

@@ -10,21 +10,21 @@ namespace ESM
 
     void SpellList::add(ESMReader& esm)
     {
-        mList.push_back(esm.getHString());
+        mList.push_back(esm.getRefId());
     }
 
     void SpellList::save(ESMWriter& esm) const
     {
-        for (std::vector<std::string>::const_iterator it = mList.begin(); it != mList.end(); ++it)
+        for (auto it = mList.begin(); it != mList.end(); ++it)
         {
-            esm.writeHNString("NPCS", *it, 32);
+            esm.writeHNString("NPCS", it->getRefIdString(), 32);
         }
     }
 
-    bool SpellList::exists(const std::string& spell) const
+    bool SpellList::exists(const ESM::RefId& spell) const
     {
-        for (std::vector<std::string>::const_iterator it = mList.begin(); it != mList.end(); ++it)
-            if (Misc::StringUtils::ciEqual(*it, spell))
+        for (auto it = mList.begin(); it != mList.end(); ++it)
+            if (*it == spell)
                 return true;
         return false;
     }

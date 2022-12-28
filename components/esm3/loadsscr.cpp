@@ -18,7 +18,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("DATA"):
@@ -42,7 +42,7 @@ namespace ESM
     }
     void StartScript::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
         if (isDeleted)
         {
             esm.writeHNString("DELE", "", 3);

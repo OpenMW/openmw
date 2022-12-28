@@ -26,7 +26,7 @@ namespace CSVRender
 {
     const std::string Actor::MeshPrefix = "meshes\\";
 
-    Actor::Actor(const std::string& id, CSMWorld::Data& data)
+    Actor::Actor(const ESM::RefId& id, CSMWorld::Data& data)
         : mId(id)
         , mData(data)
         , mBaseNode(new osg::Group())
@@ -73,7 +73,7 @@ namespace CSVRender
         mSkeleton->setActive(SceneUtil::Skeleton::Active);
     }
 
-    void Actor::handleActorChanged(const std::string& refId)
+    void Actor::handleActorChanged(const ESM::RefId& refId)
     {
         if (mId == refId)
         {

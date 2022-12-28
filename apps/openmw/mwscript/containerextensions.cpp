@@ -13,10 +13,9 @@
 
 #include <components/misc/strings/format.hpp>
 
+#include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadlevlist.hpp>
 #include <components/esm3/loadskil.hpp>
-
-#include <components/esm3/loadcrea.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -66,7 +65,7 @@ namespace
             else
             {
                 auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-                std::string_view itemId
+                const ESM::RefId& itemId
                     = MWMechanics::getLevelledItem(itemPtr.get<ESM::ItemLevList>()->mBase, false, prng);
                 if (itemId.empty())
                     return;
@@ -91,7 +90,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId item = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Integer count = runtime[0].mInteger;
@@ -104,9 +103,8 @@ namespace MWScript
                 if (count == 0)
                     return;
 
-                if (::Misc::StringUtils::ciEqual(item, "gold_005") || ::Misc::StringUtils::ciEqual(item, "gold_010")
-                    || ::Misc::StringUtils::ciEqual(item, "gold_025") || ::Misc::StringUtils::ciEqual(item, "gold_100"))
-                    item = "gold_001";
+                if (item == "gold_005" || item == "gold_010" || item == "gold_025" || item == "gold_100")
+                    item = ESM::RefId::stringRefId("gold_001");
 
                 // Check if "item" can be placed in a container
                 MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), item, 1);
@@ -188,12 +186,11 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId item = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                if (::Misc::StringUtils::ciEqual(item, "gold_005") || ::Misc::StringUtils::ciEqual(item, "gold_010")
-                    || ::Misc::StringUtils::ciEqual(item, "gold_025") || ::Misc::StringUtils::ciEqual(item, "gold_100"))
-                    item = "gold_001";
+                if (item == "gold_005" || item == "gold_010" || item == "gold_025" || item == "gold_100")
+                    item = ESM::RefId::stringRefId("gold_001");
 
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
 
@@ -209,7 +206,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId item = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Integer count = runtime[0].mInteger;
@@ -222,9 +219,8 @@ namespace MWScript
                 if (count == 0)
                     return;
 
-                if (::Misc::StringUtils::ciEqual(item, "gold_005") || ::Misc::StringUtils::ciEqual(item, "gold_010")
-                    || ::Misc::StringUtils::ciEqual(item, "gold_025") || ::Misc::StringUtils::ciEqual(item, "gold_100"))
-                    item = "gold_001";
+                if (item == "gold_005" || item == "gold_010" || item == "gold_025" || item == "gold_100")
+                    item = ESM::RefId::stringRefId("gold_001");
 
                 // Explicit calls to non-unique actors affect the base record
                 if (!R::implicit && ptr.getClass().isActor()
@@ -260,7 +256,7 @@ namespace MWScript
                 std::string_view itemName;
                 for (MWWorld::ConstContainerStoreIterator iter(store.cbegin()); iter != store.cend(); ++iter)
                 {
-                    if (::Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), item))
+                    if (iter->getCellRef().getRefId() == item)
                     {
                         itemName = iter->getClass().getName(*iter);
                         break;
@@ -299,7 +295,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId item = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
@@ -309,10 +305,10 @@ namespace MWScript
                 // With soul gems we prefer filled ones.
                 for (auto it = invStore.begin(); it != invStore.end(); ++it)
                 {
-                    if (Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
+                    if (it->getCellRef().getRefId() == item)
                     {
                         found = it;
-                        const std::string& soul = it->getCellRef().getSoul();
+                        const ESM::RefId& soul = it->getCellRef().getSoul();
                         if (!it->getClass().isSoulGem(*it)
                             || (!soul.empty() && store.get<ESM::Creature>().search(soul)))
                             break;
@@ -418,14 +414,14 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId item = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 const MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
                 for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
                 {
                     MWWorld::ConstContainerStoreIterator it = invStore.getSlot(slot);
-                    if (it != invStore.end() && ::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
+                    if (it != invStore.end() && it->getCellRef().getRefId() == item)
                     {
                         runtime.push(1);
                         return;
@@ -443,7 +439,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId name = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 int count = 0;
@@ -452,7 +448,7 @@ namespace MWScript
                      = invStore.cbegin(MWWorld::ContainerStore::Type_Miscellaneous);
                      it != invStore.cend(); ++it)
                 {
-                    if (::Misc::StringUtils::ciEqual(it->getCellRef().getSoul(), name))
+                    if (it->getCellRef().getSoul() == name)
                         count += it->getRefData().getCount();
                 }
                 runtime.push(count);

@@ -3,6 +3,11 @@
 
 #include <components/compiler/context.hpp>
 
+namespace ESM
+{
+    struct RefId;
+}
+
 namespace MWScript
 {
     class CompilerContext : public Compiler::Context
@@ -27,13 +32,13 @@ namespace MWScript
         /// 'l: long, 's': short, 'f': float, ' ': does not exist.
         char getGlobalType(const std::string& name) const override;
 
-        std::pair<char, bool> getMemberType(const std::string& name, const std::string& id) const override;
+        std::pair<char, bool> getMemberType(const std::string& name, const ESM::RefId& id) const override;
         ///< Return type of member variable \a name in script \a id or in script of reference of
         /// \a id
         /// \return first: 'l: long, 's': short, 'f': float, ' ': does not exist.
         /// second: true: script of reference
 
-        bool isId(const std::string& name) const override;
+        bool isId(const ESM::RefId& name) const override;
         ///< Does \a name match an ID, that can be referenced?
     };
 }

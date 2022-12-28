@@ -200,7 +200,7 @@ namespace Interpreter
         {
             Type_Integer data = runtime[0].mInteger;
             Type_Integer index = runtime[1].mInteger;
-            std::string_view id = runtime.getStringLiteral(index);
+            ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(index));
             index = runtime[2].mInteger;
             std::string_view variable = runtime.getStringLiteral(index);
 
@@ -220,7 +220,7 @@ namespace Interpreter
         {
             Type_Integer data = runtime[0].mInteger;
             Type_Integer index = runtime[1].mInteger;
-            std::string_view id = runtime.getStringLiteral(index);
+            ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(index));
             index = runtime[2].mInteger;
             std::string_view variable = runtime.getStringLiteral(index);
 
@@ -240,7 +240,7 @@ namespace Interpreter
         {
             Type_Float data = runtime[0].mFloat;
             Type_Integer index = runtime[1].mInteger;
-            std::string_view id = runtime.getStringLiteral(index);
+            ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(index));
             index = runtime[2].mInteger;
             std::string_view variable = runtime.getStringLiteral(index);
 
@@ -259,7 +259,7 @@ namespace Interpreter
         void execute(Runtime& runtime) override
         {
             Type_Integer index = runtime[0].mInteger;
-            std::string_view id = runtime.getStringLiteral(index);
+            ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(index));
             index = runtime[1].mInteger;
             std::string_view variable = runtime.getStringLiteral(index);
             runtime.pop();
@@ -276,7 +276,7 @@ namespace Interpreter
         void execute(Runtime& runtime) override
         {
             Type_Integer index = runtime[0].mInteger;
-            std::string_view id = runtime.getStringLiteral(index);
+            ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(index));
             index = runtime[1].mInteger;
             std::string_view variable = runtime.getStringLiteral(index);
             runtime.pop();
@@ -293,7 +293,7 @@ namespace Interpreter
         void execute(Runtime& runtime) override
         {
             Type_Integer index = runtime[0].mInteger;
-            std::string_view id = runtime.getStringLiteral(index);
+            ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(index));
             index = runtime[1].mInteger;
             std::string_view variable = runtime.getStringLiteral(index);
             runtime.pop();

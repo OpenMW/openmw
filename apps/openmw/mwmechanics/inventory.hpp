@@ -15,12 +15,12 @@
 namespace MWMechanics
 {
     template <class T>
-    void modifyBaseInventory(std::string_view actorId, std::string_view itemId, int amount)
+    void modifyBaseInventory(const ESM::RefId& actorId, const ESM::RefId& itemId, int amount)
     {
         T copy = *MWBase::Environment::get().getWorld()->getStore().get<T>().find(actorId);
         for (auto& it : copy.mInventory.mList)
         {
-            if (Misc::StringUtils::ciEqual(it.mItem, itemId))
+            if (it.mItem == itemId)
             {
                 const int sign = it.mCount < 1 ? -1 : 1;
                 it.mCount = sign * std::max(it.mCount * sign + amount, 0);

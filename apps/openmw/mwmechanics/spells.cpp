@@ -50,7 +50,7 @@ namespace MWMechanics
         return mSpells.end();
     }
 
-    bool Spells::hasSpell(std::string_view spell) const
+    bool Spells::hasSpell(const ESM::RefId& spell) const
     {
         return hasSpell(SpellList::getSpell(spell));
     }
@@ -65,7 +65,7 @@ namespace MWMechanics
         mSpellList->add(spell);
     }
 
-    void Spells::add(std::string_view spellId)
+    void Spells::add(const ESM::RefId& spellId)
     {
         add(SpellList::getSpell(spellId));
     }
@@ -76,14 +76,14 @@ namespace MWMechanics
             mSpells.emplace_back(spell);
     }
 
-    void Spells::remove(std::string_view spellId)
+    void Spells::remove(const ESM::RefId& spellId)
     {
         const auto spell = SpellList::getSpell(spellId);
         removeSpell(spell);
         mSpellList->remove(spell);
 
         if (spellId == mSelectedSpell)
-            mSelectedSpell.clear();
+            mSelectedSpell = ESM::RefId::sEmpty;
     }
 
     void Spells::removeSpell(const ESM::Spell* spell)
@@ -105,12 +105,12 @@ namespace MWMechanics
             mSpellList->clear();
     }
 
-    void Spells::setSelectedSpell(const std::string& spellId)
+    void Spells::setSelectedSpell(const ESM::RefId& spellId)
     {
         mSelectedSpell = spellId;
     }
 
-    const std::string& Spells::getSelectedSpell() const
+    const ESM::RefId& Spells::getSelectedSpell() const
     {
         return mSelectedSpell;
     }
@@ -134,7 +134,7 @@ namespace MWMechanics
 
     void Spells::purge(const SpellFilter& filter)
     {
-        std::vector<std::string> purged;
+        std::vector<ESM::RefId> purged;
         for (auto iter = mSpells.begin(); iter != mSpells.end();)
         {
             const ESM::Spell* spell = *iter;
@@ -205,7 +205,7 @@ namespace MWMechanics
     {
         const auto& baseSpells = mSpellList->getSpells();
 
-        for (const std::string& id : state.mSpells)
+        for (const ESM::RefId& id : state.mSpells)
         {
             // Discard spells that are no longer available due to changed content files
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(id);
@@ -218,15 +218,14 @@ namespace MWMechanics
             }
         }
         // Add spells from the base record
-        for (const std::string& id : baseSpells)
+        for (const ESM::RefId& id : baseSpells)
         {
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(id);
             if (spell)
                 addSpell(spell);
         }
 
-        for (std::map<std::string, ESM::TimeStamp>::const_iterator it = state.mUsedPowers.begin();
-             it != state.mUsedPowers.end(); ++it)
+        for (auto it = state.mUsedPowers.begin(); it != state.mUsedPowers.end(); ++it)
         {
             const ESM::Spell* spell
                 = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);
@@ -237,9 +236,7 @@ namespace MWMechanics
 
         // Permanent effects are used only to keep the custom magnitude of corprus spells effects (after cure too), and
         // only in old saves. Convert data to the new approach.
-        for (std::map<std::string, std::vector<ESM::SpellState::PermanentSpellEffectInfo>>::const_iterator it
-             = state.mPermanentSpellEffects.begin();
-             it != state.mPermanentSpellEffects.end(); ++it)
+        for (auto it = state.mPermanentSpellEffects.begin(); it != state.mPermanentSpellEffects.end(); ++it)
         {
             const ESM::Spell* spell
                 = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);
@@ -293,7 +290,7 @@ namespace MWMechanics
             state.mUsedPowers[it.first->mId] = it.second.toEsm();
     }
 
-    bool Spells::setSpells(const std::string& actorId)
+    bool Spells::setSpells(const ESM::RefId& actorId)
     {
         bool result;
         std::tie(mSpellList, result) = MWBase::Environment::get().getWorld()->getStore().getSpellList(actorId);
@@ -302,9 +299,9 @@ namespace MWMechanics
         return result;
     }
 
-    void Spells::addAllToInstance(const std::vector<std::string>& spells)
+    void Spells::addAllToInstance(const std::vector<ESM::RefId>& spells)
     {
-        for (const std::string& id : spells)
+        for (const ESM::RefId& id : spells)
         {
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(id);
             if (spell)

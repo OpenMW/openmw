@@ -42,7 +42,7 @@ namespace CSMTools
 
     private:
         std::string checkObject(
-            const std::string& id, const CSMWorld::UniversalId& type, const std::string& column) const;
+            const ESM::RefId& id, const CSMWorld::UniversalId& type, const std::string& column) const;
 
     public:
         MagicEffectCheckStage(const CSMWorld::IdCollection<ESM::MagicEffect>& effects,

@@ -20,7 +20,7 @@
 
 namespace MWMechanics
 {
-    AiEscort::AiEscort(std::string_view actorId, int duration, float x, float y, float z, bool repeat)
+    AiEscort::AiEscort(const ESM::RefId& actorId, int duration, float x, float y, float z, bool repeat)
         : TypedAiPackage<AiEscort>(repeat)
         , mX(x)
         , mY(y)
@@ -30,11 +30,11 @@ namespace MWMechanics
         , mCellX(std::numeric_limits<int>::max())
         , mCellY(std::numeric_limits<int>::max())
     {
-        mTargetActorRefId = std::string(actorId);
+        mTargetActorRefId = actorId;
     }
 
     AiEscort::AiEscort(
-        std::string_view actorId, std::string_view cellId, int duration, float x, float y, float z, bool repeat)
+        const ESM::RefId& actorId, const ESM::RefId& cellId, int duration, float x, float y, float z, bool repeat)
         : TypedAiPackage<AiEscort>(repeat)
         , mCellId(cellId)
         , mX(x)
@@ -45,7 +45,7 @@ namespace MWMechanics
         , mCellX(std::numeric_limits<int>::max())
         , mCellY(std::numeric_limits<int>::max())
     {
-        mTargetActorRefId = std::string(actorId);
+        mTargetActorRefId = actorId;
     }
 
     AiEscort::AiEscort(const ESM::AiSequence::AiEscort* escort)

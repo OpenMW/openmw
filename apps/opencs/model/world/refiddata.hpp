@@ -56,7 +56,7 @@ namespace CSMWorld
 
         virtual unsigned int getRecordFlags(int index) const = 0;
 
-        virtual void appendRecord(const std::string& id, bool base) = 0;
+        virtual void appendRecord(const ESM::RefId& id, bool base) = 0;
 
         virtual void insertRecord(std::unique_ptr<RecordBase> record) = 0;
 
@@ -65,7 +65,7 @@ namespace CSMWorld
 
         virtual void erase(int index, int count) = 0;
 
-        virtual std::string getId(int index) const = 0;
+        virtual ESM::RefId getId(int index) const = 0;
 
         virtual void save(int index, ESM::ESMWriter& writer) const = 0;
     };
@@ -83,7 +83,7 @@ namespace CSMWorld
 
         unsigned int getRecordFlags(int index) const override;
 
-        void appendRecord(const std::string& id, bool base) override;
+        void appendRecord(const ESM::RefId& id, bool base) override;
 
         void insertRecord(std::unique_ptr<RecordBase> record) override;
 
@@ -92,7 +92,7 @@ namespace CSMWorld
 
         void erase(int index, int count) override;
 
-        std::string getId(int index) const override;
+        ESM::RefId getId(int index) const override;
 
         void save(int index, ESM::ESMWriter& writer) const override;
     };
@@ -132,7 +132,7 @@ namespace CSMWorld
     }
 
     template <typename RecordT>
-    void RefIdDataContainer<RecordT>::appendRecord(const std::string& id, bool base)
+    void RefIdDataContainer<RecordT>::appendRecord(const ESM::RefId& id, bool base)
     {
         auto record = std::make_unique<Record<RecordT>>();
 
@@ -157,7 +157,7 @@ namespace CSMWorld
         int numRecords = static_cast<int>(mContainer.size());
         for (; index < numRecords; ++index)
         {
-            if (Misc::StringUtils::ciEqual(mContainer[index]->get().mId, record.mId))
+            if ((mContainer[index]->get().mId == record.mId))
             {
                 break;
             }
@@ -216,7 +216,7 @@ namespace CSMWorld
     }
 
     template <typename RecordT>
-    std::string RefIdDataContainer<RecordT>::getId(int index) const
+    ESM::RefId RefIdDataContainer<RecordT>::getId(int index) const
     {
         return mContainer.at(index)->get().mId;
     }
@@ -262,14 +262,14 @@ namespace CSMWorld
         RefIdDataContainer<ESM::Static> mStatics;
         RefIdDataContainer<ESM::Weapon> mWeapons;
 
-        std::map<std::string, LocalIndex> mIndex;
+        std::map<ESM::RefId, LocalIndex> mIndex;
 
         std::map<UniversalId::Type, RefIdDataContainerBase*> mRecordContainers;
 
         void erase(const LocalIndex& index, int count);
         ///< Must not spill over into another type.
 
-        std::string getRecordId(const LocalIndex& index) const;
+        ESM::RefId getRecordId(const LocalIndex& index) const;
 
     public:
         RefIdData();
@@ -278,19 +278,19 @@ namespace CSMWorld
 
         int localToGlobalIndex(const LocalIndex& index) const;
 
-        LocalIndex searchId(std::string_view id) const;
+        LocalIndex searchId(const ESM::RefId& id) const;
 
         void erase(int index, int count);
 
-        void insertRecord(std::unique_ptr<RecordBase> record, CSMWorld::UniversalId::Type type, const std::string& id);
+        void insertRecord(std::unique_ptr<RecordBase> record, CSMWorld::UniversalId::Type type, const ESM::RefId& id);
 
         const RecordBase& getRecord(const LocalIndex& index) const;
 
         RecordBase& getRecord(const LocalIndex& index);
 
-        unsigned int getRecordFlags(const std::string& id) const;
+        unsigned int getRecordFlags(const ESM::RefId& id) const;
 
-        void appendRecord(UniversalId::Type type, const std::string& id, bool base);
+        void appendRecord(UniversalId::Type type, const ESM::RefId& id, bool base);
 
         int getAppendIndex(UniversalId::Type type) const;
 
@@ -298,7 +298,7 @@ namespace CSMWorld
 
         int getSize() const;
 
-        std::vector<std::string> getIds(bool listDeleted = true) const;
+        std::vector<ESM::RefId> getIds(bool listDeleted = true) const;
         ///< Return a sorted collection of all IDs
         ///
         /// \param listDeleted include deleted record in the list

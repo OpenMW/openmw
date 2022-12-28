@@ -160,7 +160,7 @@ namespace MWMechanics
 
         AiReactionTimer mReaction;
 
-        std::string mTargetActorRefId;
+        ESM::RefId mTargetActorRefId;
         mutable int mTargetActorId;
         mutable MWWorld::Ptr mCachedTarget;
 

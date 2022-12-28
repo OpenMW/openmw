@@ -14,6 +14,7 @@
 #include "cellreflist.hpp"
 #include "livecellref.hpp"
 
+#include <components/esm/refid.hpp>
 #include <components/esm3/fogstate.hpp>
 #include <components/misc/tuplemeta.hpp>
 
@@ -87,7 +88,7 @@ namespace MWWorld
         const ESM::Cell* mCell;
         State mState;
         bool mHasState;
-        std::vector<std::string> mIds;
+        std::vector<ESM::RefId> mIds;
         float mWaterLevel;
 
         MWWorld::TimeStamp mLastRespawn;
@@ -187,24 +188,24 @@ namespace MWWorld
 
         State getState() const;
 
-        const std::vector<std::string>& getPreloadedIds() const;
+        const std::vector<ESM::RefId>& getPreloadedIds() const;
         ///< Get Ids of objects in this cell, only valid in State_Preloaded
 
         bool hasState() const;
         ///< Does this cell have state that needs to be stored in a saved game file?
 
-        bool hasId(std::string_view id) const;
+        bool hasId(const ESM::RefId& id) const;
         ///< May return true for deleted IDs when in preload state. Will return false, if cell is
         /// unloaded.
         /// @note Will not account for moved references which may exist in Loaded state. Use search() instead if the
         /// cell is loaded.
 
-        Ptr search(std::string_view id);
+        Ptr search(const ESM::RefId& id);
         ///< Will return an empty Ptr if cell is not loaded. Does not check references in
         /// containers.
         /// @note Triggers CellStore hasState flag.
 
-        ConstPtr searchConst(std::string_view id) const;
+        ConstPtr searchConst(const ESM::RefId& id) const;
         ///< Will return an empty Ptr if cell is not loaded. Does not check references in
         /// containers.
         /// @note Does not trigger CellStore hasState flag.
@@ -335,7 +336,7 @@ namespace MWWorld
 
         bool isQuasiExterior() const;
 
-        Ptr searchInContainer(std::string_view id);
+        Ptr searchInContainer(const ESM::RefId& id);
 
         void loadState(const ESM::CellState& state);
 
@@ -371,7 +372,7 @@ namespace MWWorld
 
         void loadRefs();
 
-        void loadRef(ESM::CellRef& ref, bool deleted, std::map<ESM::RefNum, std::string>& refNumToID);
+        void loadRef(ESM::CellRef& ref, bool deleted, std::map<ESM::RefNum, ESM::RefId>& refNumToID);
         ///< Make case-adjustments to \a ref and insert it into the respective container.
         ///
         /// Invalid \a ref objects are silently dropped.

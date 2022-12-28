@@ -28,53 +28,53 @@ namespace CSMWorld
     template <typename ESXRecordT>
     struct IdAccessor
     {
-        void setId(ESXRecordT& record, const std::string& id) const;
-        const std::string getId(const ESXRecordT& record) const;
+        void setId(ESXRecordT& record, const ESM::RefId& id) const;
+        const ESM::RefId getId(const ESXRecordT& record) const;
     };
 
     template <typename ESXRecordT>
-    void IdAccessor<ESXRecordT>::setId(ESXRecordT& record, const std::string& id) const
+    void IdAccessor<ESXRecordT>::setId(ESXRecordT& record, const ESM::RefId& id) const
     {
         record.mId = id;
     }
 
     template <typename ESXRecordT>
-    const std::string IdAccessor<ESXRecordT>::getId(const ESXRecordT& record) const
+    const ESM::RefId IdAccessor<ESXRecordT>::getId(const ESXRecordT& record) const
     {
         return record.mId;
     }
 
     template <>
-    inline void IdAccessor<Land>::setId(Land& record, const std::string& id) const
+    inline void IdAccessor<Land>::setId(Land& record, const ESM::RefId& id) const
     {
         int x = 0, y = 0;
 
-        Land::parseUniqueRecordId(id, x, y);
+        Land::parseUniqueRecordId(id.getRefIdString(), x, y);
         record.mX = x;
         record.mY = y;
     }
 
     template <>
-    inline void IdAccessor<LandTexture>::setId(LandTexture& record, const std::string& id) const
+    inline void IdAccessor<LandTexture>::setId(LandTexture& record, const ESM::RefId& id) const
     {
         int plugin = 0;
         int index = 0;
 
-        LandTexture::parseUniqueRecordId(id, plugin, index);
+        LandTexture::parseUniqueRecordId(id.getRefIdString(), plugin, index);
         record.mPluginIndex = plugin;
         record.mIndex = index;
     }
 
     template <>
-    inline const std::string IdAccessor<Land>::getId(const Land& record) const
+    inline const ESM::RefId IdAccessor<Land>::getId(const Land& record) const
     {
-        return Land::createUniqueRecordId(record.mX, record.mY);
+        return ESM::RefId::stringRefId(Land::createUniqueRecordId(record.mX, record.mY));
     }
 
     template <>
-    inline const std::string IdAccessor<LandTexture>::getId(const LandTexture& record) const
+    inline const ESM::RefId IdAccessor<LandTexture>::getId(const LandTexture& record) const
     {
-        return LandTexture::createUniqueRecordId(record.mPluginIndex, record.mIndex);
+        return ESM::RefId::stringRefId(LandTexture::createUniqueRecordId(record.mPluginIndex, record.mIndex));
     }
 
     /// \brief Single-type record collection
@@ -118,9 +118,9 @@ namespace CSMWorld
 
         int getSize() const override;
 
-        std::string getId(int index) const override;
+        ESM::RefId getId(int index) const override;
 
-        int getIndex(const std::string& id) const override;
+        int getIndex(const ESM::RefId& id) const override;
 
         int getColumns() const override;
 
@@ -138,17 +138,21 @@ namespace CSMWorld
 
         void removeRows(int index, int count) override;
 
-        void appendBlankRecord(const std::string& id, UniversalId::Type type = UniversalId::Type_None) override;
+        void appendBlankRecord(const ESM::RefId& id, UniversalId::Type type = UniversalId::Type_None) override;
         ///< \param type Will be ignored, unless the collection supports multiple record types
 
         void cloneRecord(
-            const std::string& origin, const std::string& destination, const UniversalId::Type type) override;
+            const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type) override;
 
-        bool touchRecord(const std::string& id) override;
+        bool touchRecord(const ESM::RefId& id) override;
         ///< Change the state of a record from base to modified, if it is not already.
         ///  \return True if the record was changed.
 
         int searchId(std::string_view id) const override;
+        ////< Search record with \a id.
+        /// \return index of record (if found) or -1 (not found)
+
+        int searchId(const ESM::RefId& id) const override;
         ////< Search record with \a id.
         /// \return index of record (if found) or -1 (not found)
 
@@ -161,14 +165,14 @@ namespace CSMWorld
         ///< If the record type does not match, an exception is thrown.
         ///< \param type Will be ignored, unless the collection supports multiple record types
 
-        const Record<ESXRecordT>& getRecord(const std::string& id) const override;
+        const Record<ESXRecordT>& getRecord(const ESM::RefId& id) const override;
 
         const Record<ESXRecordT>& getRecord(int index) const override;
 
-        int getAppendIndex(const std::string& id, UniversalId::Type type = UniversalId::Type_None) const override;
+        int getAppendIndex(const ESM::RefId& id, UniversalId::Type type = UniversalId::Type_None) const override;
         ///< \param type Will be ignored, unless the collection supports multiple record types
 
-        std::vector<std::string> getIds(bool listDeleted = true) const override;
+        std::vector<ESM::RefId> getIds(bool listDeleted = true) const override;
         ///< Return a sorted collection of all IDs
         ///
         /// \param listDeleted include deleted record in the list
@@ -241,18 +245,18 @@ namespace CSMWorld
         const std::string& origin, const std::string& destination, UniversalId::Type type)
     {
         auto copy = std::make_unique<Record<ESXRecordT>>();
-        copy->mModified = getRecord(origin).get();
+        copy->mModified = getRecord(ESM::RefId::stringRefId(origin)).get();
         copy->mState = RecordBase::State_ModifiedOnly;
-        IdAccessorT().setId(copy->get(), destination);
+        IdAccessorT().setId(copy->get(), ESM::RefId::stringRefId(destination));
 
         if (type == UniversalId::Type_Reference)
         {
             CSMWorld::CellRef* ptr = (CSMWorld::CellRef*)&copy->mModified;
             ptr->mRefNum.mIndex = 0;
         }
-
-        int index = getAppendIndex(destination, type);
-        insertRecord(std::move(copy), getAppendIndex(destination, type));
+        ESM::RefId destinationRefId = ESM::RefId::stringRefId(destination);
+        int index = getAppendIndex(destinationRefId, type);
+        insertRecord(std::move(copy), getAppendIndex(destinationRefId, type));
 
         return index;
     }
@@ -260,7 +264,7 @@ namespace CSMWorld
     template <typename ESXRecordT, typename IdAccessorT>
     int Collection<ESXRecordT, IdAccessorT>::touchRecordImp(const std::string& id)
     {
-        int index = getIndex(id);
+        int index = getIndex(ESM::RefId::stringRefId(id));
         Record<ESXRecordT>& record = *mRecords.at(index);
         if (record.isDeleted())
         {
@@ -278,29 +282,29 @@ namespace CSMWorld
 
     template <typename ESXRecordT, typename IdAccessorT>
     void Collection<ESXRecordT, IdAccessorT>::cloneRecord(
-        const std::string& origin, const std::string& destination, const UniversalId::Type type)
+        const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type)
     {
-        cloneRecordImp(origin, destination, type);
+        cloneRecordImp(origin.getRefIdString(), destination.getRefIdString(), type);
     }
 
     template <>
     inline void Collection<Land, IdAccessor<Land>>::cloneRecord(
-        const std::string& origin, const std::string& destination, const UniversalId::Type type)
+        const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type)
     {
-        int index = cloneRecordImp(origin, destination, type);
+        int index = cloneRecordImp(origin.getRefIdString(), destination.getRefIdString(), type);
         mRecords.at(index)->get().setPlugin(0);
     }
 
     template <typename ESXRecordT, typename IdAccessorT>
-    bool Collection<ESXRecordT, IdAccessorT>::touchRecord(const std::string& id)
+    bool Collection<ESXRecordT, IdAccessorT>::touchRecord(const ESM::RefId& id)
     {
-        return touchRecordImp(id) != -1;
+        return touchRecordImp(id.getRefIdString()) != -1;
     }
 
     template <>
-    inline bool Collection<Land, IdAccessor<Land>>::touchRecord(const std::string& id)
+    inline bool Collection<Land, IdAccessor<Land>>::touchRecord(const ESM::RefId& id)
     {
-        int index = touchRecordImp(id);
+        int index = touchRecordImp(id.getRefIdString());
         if (index >= 0)
         {
             mRecords.at(index)->get().setPlugin(0);
@@ -325,9 +329,9 @@ namespace CSMWorld
     template <typename ESXRecordT, typename IdAccessorT>
     void Collection<ESXRecordT, IdAccessorT>::add(const ESXRecordT& record)
     {
-        std::string id = Misc::StringUtils::lowerCase(IdAccessorT().getId(record));
+        auto id = IdAccessorT().getId(record);
 
-        std::map<std::string, int>::iterator iter = mIndex.find(id);
+        auto iter = mIndex.find(Misc::StringUtils::lowerCase(id.getRefIdString()));
 
         if (iter == mIndex.end())
         {
@@ -350,18 +354,18 @@ namespace CSMWorld
     }
 
     template <typename ESXRecordT, typename IdAccessorT>
-    std::string Collection<ESXRecordT, IdAccessorT>::getId(int index) const
+    ESM::RefId Collection<ESXRecordT, IdAccessorT>::getId(int index) const
     {
         return IdAccessorT().getId(mRecords.at(index)->get());
     }
 
     template <typename ESXRecordT, typename IdAccessorT>
-    int Collection<ESXRecordT, IdAccessorT>::getIndex(const std::string& id) const
+    int Collection<ESXRecordT, IdAccessorT>::getIndex(const ESM::RefId& id) const
     {
         int index = searchId(id);
 
         if (index == -1)
-            throw std::runtime_error("invalid ID: " + id);
+            throw std::runtime_error("invalid ID: " + id.getRefIdString());
 
         return index;
     }
@@ -456,7 +460,7 @@ namespace CSMWorld
     }
 
     template <typename ESXRecordT, typename IdAccessorT>
-    void Collection<ESXRecordT, IdAccessorT>::appendBlankRecord(const std::string& id, UniversalId::Type type)
+    void Collection<ESXRecordT, IdAccessorT>::appendBlankRecord(const ESM::RefId& id, UniversalId::Type type)
     {
         ESXRecordT record;
         IdAccessorT().setId(record, id);
@@ -483,6 +487,19 @@ namespace CSMWorld
     }
 
     template <typename ESXRecordT, typename IdAccessorT>
+    int Collection<ESXRecordT, IdAccessorT>::searchId(const ESM::RefId& id) const
+    {
+
+        std::map<std::string, int>::const_iterator iter
+            = mIndex.find(Misc::StringUtils::lowerCase(id.getRefIdString()));
+
+        if (iter == mIndex.end())
+            return -1;
+
+        return iter->second;
+    }
+
+    template <typename ESXRecordT, typename IdAccessorT>
     void Collection<ESXRecordT, IdAccessorT>::replace(int index, std::unique_ptr<RecordBase> record)
     {
         std::unique_ptr<Record<ESXRecordT>> tmp(static_cast<Record<ESXRecordT>*>(record.release()));
@@ -497,17 +514,17 @@ namespace CSMWorld
     }
 
     template <typename ESXRecordT, typename IdAccessorT>
-    int Collection<ESXRecordT, IdAccessorT>::getAppendIndex(const std::string& id, UniversalId::Type type) const
+    int Collection<ESXRecordT, IdAccessorT>::getAppendIndex(const ESM::RefId& id, UniversalId::Type type) const
     {
         return static_cast<int>(mRecords.size());
     }
 
     template <typename ESXRecordT, typename IdAccessorT>
-    std::vector<std::string> Collection<ESXRecordT, IdAccessorT>::getIds(bool listDeleted) const
+    std::vector<ESM::RefId> Collection<ESXRecordT, IdAccessorT>::getIds(bool listDeleted) const
     {
-        std::vector<std::string> ids;
+        std::vector<ESM::RefId> ids;
 
-        for (typename std::map<std::string, int>::const_iterator iter = mIndex.begin(); iter != mIndex.end(); ++iter)
+        for (auto iter = mIndex.begin(); iter != mIndex.end(); ++iter)
         {
             if (listDeleted || !mRecords[iter->second]->isDeleted())
                 ids.push_back(IdAccessorT().getId(mRecords[iter->second]->get()));
@@ -517,7 +534,7 @@ namespace CSMWorld
     }
 
     template <typename ESXRecordT, typename IdAccessorT>
-    const Record<ESXRecordT>& Collection<ESXRecordT, IdAccessorT>::getRecord(const std::string& id) const
+    const Record<ESXRecordT>& Collection<ESXRecordT, IdAccessorT>::getRecord(const ESM::RefId& id) const
     {
         int index = getIndex(id);
         return *mRecords.at(index);
@@ -538,7 +555,7 @@ namespace CSMWorld
             throw std::runtime_error("index out of range");
 
         std::unique_ptr<Record<ESXRecordT>> record2(static_cast<Record<ESXRecordT>*>(record.release()));
-        std::string lowerId = Misc::StringUtils::lowerCase(IdAccessorT().getId(record2->get()));
+        std::string id = Misc::StringUtils::lowerCase(IdAccessorT().getId(record2->get()).getRefIdString());
 
         if (index == size)
             mRecords.push_back(std::move(record2));
@@ -554,14 +571,13 @@ namespace CSMWorld
             }
         }
 
-        mIndex.insert(std::make_pair(lowerId, index));
+        mIndex.insert(std::make_pair(id, index));
     }
 
     template <typename ESXRecordT, typename IdAccessorT>
     void Collection<ESXRecordT, IdAccessorT>::setRecord(int index, std::unique_ptr<Record<ESXRecordT>> record)
     {
-        if (Misc::StringUtils::lowerCase(IdAccessorT().getId(mRecords.at(index)->get()))
-            != Misc::StringUtils::lowerCase(IdAccessorT().getId(record->get())))
+        if (IdAccessorT().getId(mRecords.at(index)->get()) != IdAccessorT().getId(record->get()))
             throw std::runtime_error("attempt to change the ID of a record");
 
         mRecords.at(index) = std::move(record);

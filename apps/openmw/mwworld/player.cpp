@@ -49,7 +49,7 @@ namespace MWWorld
     {
         ESM::CellRef cellRef;
         cellRef.blank();
-        cellRef.mRefID = "player";
+        cellRef.mRefID = ESM::RefId::stringRefId("Player");
         mPlayer = LiveCellRef<ESM::NPC>(cellRef, player);
 
         ESM::Position playerPos = mPlayer.mData.getPosition();
@@ -147,12 +147,12 @@ namespace MWWorld
         return ptr;
     }
 
-    void Player::setBirthSign(const std::string& sign)
+    void Player::setBirthSign(const ESM::RefId& sign)
     {
         mSign = sign;
     }
 
-    const std::string& Player::getBirthSign() const
+    const ESM::RefId& Player::getBirthSign() const
     {
         return mSign;
     }
@@ -313,7 +313,7 @@ namespace MWWorld
     void Player::clear()
     {
         mCellStore = nullptr;
-        mSign.clear();
+        mSign = ESM::RefId::sEmpty;
         mMarkedCell = nullptr;
         mAutoMove = false;
         mForwardBackward = 0;
@@ -501,22 +501,22 @@ namespace MWWorld
         return mPaidCrimeId;
     }
 
-    void Player::setPreviousItem(const std::string& boundItemId, const std::string& previousItemId)
+    void Player::setPreviousItem(const ESM::RefId& boundItemId, const ESM::RefId& previousItemId)
     {
         mPreviousItems[boundItemId] = previousItemId;
     }
 
-    std::string Player::getPreviousItem(const std::string& boundItemId)
+    ESM::RefId Player::getPreviousItem(const ESM::RefId& boundItemId)
     {
         return mPreviousItems[boundItemId];
     }
 
-    void Player::erasePreviousItem(const std::string& boundItemId)
+    void Player::erasePreviousItem(const ESM::RefId& boundItemId)
     {
         mPreviousItems.erase(boundItemId);
     }
 
-    void Player::setSelectedSpell(const std::string& spellId)
+    void Player::setSelectedSpell(const ESM::RefId& spellId)
     {
         Ptr player = getPlayer();
         InventoryStore& store = player.getClass().getInventoryStore(player);

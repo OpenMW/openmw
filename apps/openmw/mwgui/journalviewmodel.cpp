@@ -56,7 +56,7 @@ namespace MWGui
                 MWBase::Journal* journal = MWBase::Environment::get().getJournal();
 
                 for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)
-                    mKeywordSearch.seed(i->first, intptr_t(&i->second));
+                    mKeywordSearch.seed(i->first.getRefIdString(), intptr_t(&i->second));
 
                 mKeywordSearchLoaded = true;
             }
@@ -312,7 +312,7 @@ namespace MWGui
 
             for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)
             {
-                Utf8Stream stream(i->first.c_str());
+                Utf8Stream stream(i->first.getRefIdString().c_str());
                 Utf8Stream::UnicodeChar first = Utf8Stream::toLowerUtf8(stream.peek());
 
                 if (first != Utf8Stream::toLowerUtf8(character))

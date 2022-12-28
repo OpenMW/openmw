@@ -5,6 +5,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -38,7 +39,8 @@ namespace ESM
         static std::string_view getRecordType() { return "Faction"; }
 
         unsigned int mRecordFlags;
-        std::string mId, mName;
+        std::string mName;
+        RefId mId;
 
         struct FADTstruct
         {
@@ -62,7 +64,7 @@ namespace ESM
         FADTstruct mData;
 
         // <Faction ID, Reaction>
-        std::map<std::string, int> mReactions;
+        std::map<ESM::RefId, int> mReactions;
 
         // Name of faction ranks (may be empty for NPC factions)
         std::string mRanks[10];

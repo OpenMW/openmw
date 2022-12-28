@@ -8,7 +8,7 @@ namespace ESM
 
     void GlobalScript::load(ESMReader& esm)
     {
-        mId = esm.getHNString("NAME");
+        mId = ESM::RefId::stringRefId(esm.getHNString("NAME"));
 
         mLocals.load(esm);
 
@@ -16,14 +16,14 @@ namespace ESM
         esm.getHNOT(mRunning, "RUN_");
 
         mTargetRef.unset();
-        mTargetId = esm.getHNOString("TARG");
+        mTargetId = ESM::RefId::stringRefId(esm.getHNOString("TARG"));
         if (esm.peekNextSub("FRMR"))
             mTargetRef.load(esm, true, "FRMR");
     }
 
     void GlobalScript::save(ESMWriter& esm) const
     {
-        esm.writeHNString("NAME", mId);
+        esm.writeHNString("NAME", mId.getRefIdString());
 
         mLocals.save(esm);
 
@@ -32,7 +32,7 @@ namespace ESM
 
         if (!mTargetId.empty())
         {
-            esm.writeHNOString("TARG", mTargetId);
+            esm.writeHNOString("TARG", mTargetId.getRefIdString());
             if (mTargetRef.isSet())
                 mTargetRef.save(esm, true, "FRMR");
         }

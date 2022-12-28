@@ -49,7 +49,7 @@ MWMechanics::AiPackage::AiPackage(AiPackageTypeId typeId, const Options& options
     : mTypeId(typeId)
     , mOptions(options)
     , mReaction(MWBase::Environment::get().getWorld()->getPrng())
-    , mTargetActorRefId("")
+    , mTargetActorRefId(ESM::RefId::sEmpty)
     , mTargetActorId(-1)
     , mCachedTarget()
     , mRotateOnTheRunChecks(0)
@@ -308,7 +308,7 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
             return;
         }
 
-        const std::string& keyId = door.getCellRef().getKey();
+        const ESM::RefId& keyId = door.getCellRef().getKey();
         if (keyId.empty())
             return;
 

@@ -124,7 +124,7 @@ namespace MWGui
         mNameWidget->setCaption(name);
     }
 
-    void ReviewDialog::setRace(const std::string& raceId)
+    void ReviewDialog::setRace(const ESM::RefId& raceId)
     {
         mRaceId = raceId;
 
@@ -145,7 +145,7 @@ namespace MWGui
         ToolTips::createClassToolTip(mClassWidget, mKlass);
     }
 
-    void ReviewDialog::setBirthSign(const std::string& signId)
+    void ReviewDialog::setBirthSign(const ESM::RefId& signId)
     {
         mBirthSignId = signId;
 
@@ -315,7 +315,7 @@ namespace MWGui
             "MW_StatName", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
         widget->setSpellId(spell->mId);
         widget->setUserString("ToolTipType", "Spell");
-        widget->setUserString("Spell", spell->mId);
+        widget->setUserString("Spell", spell->mId.getRefIdString());
         widget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
         mSkillWidgets.push_back(widget);
@@ -387,7 +387,7 @@ namespace MWGui
             addSkills(mMiscSkills, "sSkillClassMisc", "Misc Skills", coord1, coord2);
 
         // starting spells
-        std::vector<std::string> spells;
+        std::vector<ESM::RefId> spells;
 
         const ESM::Race* race = nullptr;
         if (!mRaceId.empty())
@@ -401,21 +401,19 @@ namespace MWGui
         for (int i = 0; i < ESM::Attribute::Length; ++i)
             attributes[i] = mAttributeWidgets[i]->getAttributeValue().getBase();
 
-        std::vector<std::string> selectedSpells = MWMechanics::autoCalcPlayerSpells(skills, attributes, race);
-        for (std::string& spellId : selectedSpells)
+        std::vector<ESM::RefId> selectedSpells = MWMechanics::autoCalcPlayerSpells(skills, attributes, race);
+        for (ESM::RefId& spellId : selectedSpells)
         {
-            std::string lower = Misc::StringUtils::lowerCase(spellId);
-            if (std::find(spells.begin(), spells.end(), lower) == spells.end())
-                spells.push_back(lower);
+            if (std::find(spells.begin(), spells.end(), spellId) == spells.end())
+                spells.push_back(spellId);
         }
 
         if (race)
         {
-            for (const std::string& spellId : race->mPowers.mList)
+            for (const ESM::RefId& spellId : race->mPowers.mList)
             {
-                std::string lower = Misc::StringUtils::lowerCase(spellId);
-                if (std::find(spells.begin(), spells.end(), lower) == spells.end())
-                    spells.push_back(lower);
+                if (std::find(spells.begin(), spells.end(), spellId) == spells.end())
+                    spells.push_back(spellId);
             }
         }
 
@@ -423,11 +421,10 @@ namespace MWGui
         {
             const ESM::BirthSign* sign
                 = MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().find(mBirthSignId);
-            for (const std::string& spellId : sign->mPowers.mList)
+            for (const auto& spellId : sign->mPowers.mList)
             {
-                std::string lower = Misc::StringUtils::lowerCase(spellId);
-                if (std::find(spells.begin(), spells.end(), lower) == spells.end())
-                    spells.push_back(lower);
+                if (std::find(spells.begin(), spells.end(), spellId) == spells.end())
+                    spells.push_back(spellId);
             }
         }
 
@@ -435,7 +432,7 @@ namespace MWGui
             addSeparator(coord1, coord2);
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeAbility", "Abilities"),
             coord1, coord2);
-        for (std::string& spellId : spells)
+        for (auto& spellId : spells)
         {
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
             if (spell->mData.mType == ESM::Spell::ST_Ability)
@@ -445,7 +442,7 @@ namespace MWGui
         addSeparator(coord1, coord2);
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypePower", "Powers"), coord1,
             coord2);
-        for (std::string& spellId : spells)
+        for (auto& spellId : spells)
         {
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
             if (spell->mData.mType == ESM::Spell::ST_Power)
@@ -455,7 +452,7 @@ namespace MWGui
         addSeparator(coord1, coord2);
         addGroup(MWBase::Environment::get().getWindowManager()->getGameSettingString("sTypeSpell", "Spells"), coord1,
             coord2);
-        for (std::string& spellId : spells)
+        for (auto& spellId : spells)
         {
             const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
             if (spell->mData.mType == ESM::Spell::ST_Spell)

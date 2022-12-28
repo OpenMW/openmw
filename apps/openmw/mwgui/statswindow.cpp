@@ -153,7 +153,7 @@ namespace MWGui
         mMainWidget->castType<MyGUI::Window>()->setCaption(playerName);
     }
 
-    void StatsWindow::setValue(const std::string& id, const MWMechanics::AttributeValue& value)
+    void StatsWindow::setValue(std::string_view id, const MWMechanics::AttributeValue& value)
     {
         static const char* ids[] = {
             "AttribVal1",
@@ -186,7 +186,7 @@ namespace MWGui
             }
     }
 
-    void StatsWindow::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
+    void StatsWindow::setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value)
     {
         int current = static_cast<int>(value.getCurrent());
         int modified = static_cast<int>(value.getModified(false));
@@ -195,7 +195,7 @@ namespace MWGui
         if (id != "FBar")
             current = std::max(0, current);
 
-        setBar(id, id + "T", current, modified);
+        setBar(std::string(id), std::string(id) + "T", current, modified);
 
         // health, magicka, fatigue tooltip
         MyGUI::Widget* w;
@@ -217,7 +217,7 @@ namespace MWGui
         }
     }
 
-    void StatsWindow::setValue(const std::string& id, const std::string& value)
+    void StatsWindow::setValue(std::string_view id, const std::string& value)
     {
         if (id == "name")
             setPlayerName(value);
@@ -227,7 +227,7 @@ namespace MWGui
             setText("ClassText", value);
     }
 
-    void StatsWindow::setValue(const std::string& id, int value)
+    void StatsWindow::setValue(std::string_view id, int value)
     {
         if (id == "level")
         {
@@ -376,7 +376,7 @@ namespace MWGui
         setFactions(PCstats.getFactionRanks());
         setExpelled(PCstats.getExpelled());
 
-        const std::string& signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
+        const auto& signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
 
         setBirthSign(signId);
         setReputation(PCstats.getReputation());
@@ -395,7 +395,7 @@ namespace MWGui
         }
     }
 
-    void StatsWindow::setExpelled(const std::set<std::string>& expelled)
+    void StatsWindow::setExpelled(const std::set<ESM::RefId>& expelled)
     {
         if (mExpelled != expelled)
         {
@@ -404,7 +404,7 @@ namespace MWGui
         }
     }
 
-    void StatsWindow::setBirthSign(const std::string& signId)
+    void StatsWindow::setBirthSign(const ESM::RefId& signId)
     {
         if (signId != mBirthSignId)
         {
@@ -591,12 +591,12 @@ namespace MWGui
         {
             MWWorld::Ptr playerPtr = MWMechanics::getPlayer();
             const MWMechanics::NpcStats& PCstats = playerPtr.getClass().getNpcStats(playerPtr);
-            const std::set<std::string>& expelled = PCstats.getExpelled();
+            const std::set<ESM::RefId>& expelled = PCstats.getExpelled();
 
             bool firstFaction = true;
             for (auto& factionPair : mFactions)
             {
-                const std::string& factionId = factionPair.first;
+                const ESM::RefId& factionId = factionPair.first;
                 const ESM::Faction* faction = store.get<ESM::Faction>().find(factionId);
                 if (faction->mData.mIsHidden == 1)
                     continue;

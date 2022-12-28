@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadpgrd.hpp>
 
 namespace ESM
@@ -25,7 +26,7 @@ namespace CSMWorld
     /// Exterior cell coordinates are encoded in the pathgrid ID.
     struct Pathgrid : public ESM::Pathgrid
     {
-        std::string mId;
+        ESM::RefId mId;
 
         void load(ESM::ESMReader& esm, bool& isDeleted, const IdCollection<Cell, IdAccessor<Cell>>& cells);
         void load(ESM::ESMReader& esm, bool& isDeleted);

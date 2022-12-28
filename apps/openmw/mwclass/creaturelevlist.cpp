@@ -130,7 +130,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::CreatureLevList>* ref = ptr.get<ESM::CreatureLevList>();
 
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-        std::string_view id = MWMechanics::getLevelledItem(ref->mBase, true, prng);
+        const ESM::RefId& id = MWMechanics::getLevelledItem(ref->mBase, true, prng);
 
         if (!id.empty())
         {

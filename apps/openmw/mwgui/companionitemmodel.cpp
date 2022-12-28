@@ -7,7 +7,7 @@ namespace
 
     void modifyProfit(const MWWorld::Ptr& actor, int diff)
     {
-        std::string_view script = actor.getClass().getScript(actor);
+        const ESM::RefId& script = actor.getClass().getScript(actor);
         if (!script.empty())
         {
             int profit = actor.getRefData().getLocals().getIntVar(script, "minimumprofit");
@@ -43,7 +43,7 @@ namespace MWGui
 
     bool CompanionItemModel::hasProfit(const MWWorld::Ptr& actor)
     {
-        std::string_view script = actor.getClass().getScript(actor);
+        const ESM::RefId& script = actor.getClass().getScript(actor);
         if (script.empty())
             return false;
         return actor.getRefData().getLocals().hasVar(script, "minimumprofit");

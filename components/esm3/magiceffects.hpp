@@ -1,6 +1,7 @@
 #ifndef COMPONENTS_ESM_MAGICEFFECTS_H
 #define COMPONENTS_ESM_MAGICEFFECTS_H
 
+#include <components/esm/refid.hpp>
 #include <map>
 #include <string>
 
@@ -21,7 +22,7 @@ namespace ESM
 
     struct SummonKey
     {
-        SummonKey(int effectId, const std::string& sourceId, int index)
+        SummonKey(int effectId, const ESM::RefId& sourceId, int index)
             : mEffectId(effectId)
             , mSourceId(sourceId)
             , mEffectIndex(index)
@@ -49,7 +50,7 @@ namespace ESM
         }
 
         int mEffectId;
-        std::string mSourceId;
+        ESM::RefId mSourceId;
         int mEffectIndex;
     };
 }

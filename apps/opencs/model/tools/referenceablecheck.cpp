@@ -519,10 +519,11 @@ void CSMTools::ReferenceableCheckStage::creatureCheck(
     {
         CSMWorld::RefIdData::LocalIndex index = mReferencables.searchId(creature.mOriginal);
         if (index.first == -1)
-            messages.add(
-                id, "Parent creature '" + creature.mOriginal + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Parent creature '" + creature.mOriginal.getRefIdString() + "' does not exist", "",
+                CSMDoc::Message::Severity_Error);
         else if (index.second != CSMWorld::UniversalId::Type_Creature)
-            messages.add(id, "'" + creature.mOriginal + "' is not a creature", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "'" + creature.mOriginal.getRefIdString() + "' is not a creature", "",
+                CSMDoc::Message::Severity_Error);
     }
 
     // Check inventory
@@ -681,7 +682,7 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Npc, npc.mId);
 
     // Detect if player is present
-    if (Misc::StringUtils::ciEqual(npc.mId, "player")) // Happy now, scrawl?
+    if (npc.mId == "Player") // Happy now, scrawl?
         mPlayerPresent = true;
 
     // Skip "Base" records (setting!)
@@ -739,22 +740,26 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
     if (npc.mClass.empty())
         messages.add(id, "Class is missing", "", CSMDoc::Message::Severity_Error);
     else if (mClasses.searchId(npc.mClass) == -1)
-        messages.add(id, "Class '" + npc.mClass + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(
+            id, "Class '" + npc.mClass.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     if (npc.mRace.empty())
         messages.add(id, "Race is missing", "", CSMDoc::Message::Severity_Error);
     else if (mRaces.searchId(npc.mRace) == -1)
-        messages.add(id, "Race '" + npc.mRace + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(
+            id, "Race '" + npc.mRace.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     if (!npc.mFaction.empty() && mFactions.searchId(npc.mFaction) == -1)
-        messages.add(id, "Faction '" + npc.mFaction + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(
+            id, "Faction '" + npc.mFaction.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     if (npc.mHead.empty())
         messages.add(id, "Head is missing", "", CSMDoc::Message::Severity_Error);
     else
     {
         if (mBodyParts.searchId(npc.mHead) == -1)
-            messages.add(id, "Head body part '" + npc.mHead + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Head body part '" + npc.mHead.getRefIdString() + "' does not exist", "",
+                CSMDoc::Message::Severity_Error);
         /// \todo Check gender, race and other body parts stuff validity for the specific NPC
     }
 
@@ -763,7 +768,8 @@ void CSMTools::ReferenceableCheckStage::npcCheck(
     else
     {
         if (mBodyParts.searchId(npc.mHair) == -1)
-            messages.add(id, "Hair body part '" + npc.mHair + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Hair body part '" + npc.mHair.getRefIdString() + "' does not exist", "",
+                CSMDoc::Message::Severity_Error);
         /// \todo Check gender, race and other body part stuff validity for the specific NPC
     }
 
@@ -903,8 +909,9 @@ void CSMTools::ReferenceableCheckStage::inventoryListCheck(
 {
     for (size_t i = 0; i < itemList.size(); ++i)
     {
-        std::string itemName = itemList[i].mItem;
-        CSMWorld::RefIdData::LocalIndex localIndex = mReferencables.searchId(itemName);
+        const ESM::RefId& item = itemList[i].mItem;
+        const auto& itemName = item.getRefIdString();
+        CSMWorld::RefIdData::LocalIndex localIndex = mReferencables.searchId(item);
 
         if (localIndex.first == -1)
             messages.add(id, "Item '" + itemName + "' does not exist", "", CSMDoc::Message::Severity_Error);
@@ -1035,11 +1042,11 @@ void CSMTools::ReferenceableCheckStage::listCheck(
     for (unsigned i = 0; i < someList.mList.size(); ++i)
     {
         if (mReferencables.searchId(someList.mList[i].mId).first == -1)
-            messages.add(
-                someID, "Object '" + someList.mList[i].mId + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(someID, "Object '" + someList.mList[i].mId.getRefIdString() + "' does not exist", "",
+                CSMDoc::Message::Severity_Error);
 
         if (someList.mList[i].mLevel < 1)
-            messages.add(someID, "Level of item '" + someList.mList[i].mId + "' is non-positive", "",
+            messages.add(someID, "Level of item '" + someList.mList[i].mId.getRefIdString() + "' is non-positive", "",
                 CSMDoc::Message::Severity_Error);
     }
 }
@@ -1051,7 +1058,7 @@ void CSMTools::ReferenceableCheckStage::scriptCheck(
     if (!someTool.mScript.empty())
     {
         if (mScripts.searchId(someTool.mScript) == -1)
-            messages.add(
-                someID, "Script '" + someTool.mScript + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(someID, "Script '" + someTool.mScript.getRefIdString() + "' does not exist", "",
+                CSMDoc::Message::Severity_Error);
     }
 }

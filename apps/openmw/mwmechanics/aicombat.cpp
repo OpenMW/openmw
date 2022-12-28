@@ -222,7 +222,7 @@ namespace MWMechanics
             if (currentAction->isFleeing())
             {
                 storage.startFleeing();
-                MWBase::Environment::get().getDialogueManager()->say(actor, "flee");
+                MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("flee"));
                 return false;
             }
             else
@@ -316,7 +316,7 @@ namespace MWMechanics
                     currentAction = std::make_unique<ActionFlee>();
                     actionCooldown = currentAction->getActionCooldown();
                     storage.startFleeing();
-                    MWBase::Environment::get().getDialogueManager()->say(actor, "flee");
+                    MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("flee"));
                 }
             }
             else
@@ -662,7 +662,7 @@ namespace MWMechanics
                     = store.get<ESM::GameSetting>().find("iVoiceAttackOdds")->mValue.getInteger();
                 if (Misc::Rng::roll0to99(prng) < iVoiceAttackOdds)
                 {
-                    MWBase::Environment::get().getDialogueManager()->say(actor, "attack");
+                    MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("attack"));
                 }
                 mAttackCooldown = std::min(baseDelay + 0.01 * Misc::Rng::roll0to99(prng), baseDelay + 0.9);
             }

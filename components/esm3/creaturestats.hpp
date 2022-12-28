@@ -12,6 +12,7 @@
 #include "activespells.hpp"
 #include "aisequence.hpp"
 #include "components/esm/attr.hpp"
+#include "components/esm/refid.hpp"
 #include "magiceffects.hpp"
 #include "spellstate.hpp"
 
@@ -78,8 +79,8 @@ namespace ESM
         bool mBlock;
         unsigned int mMovementFlags;
         float mFallHeight;
-        std::string mLastHitObject;
-        std::string mLastHitAttemptObject;
+        ESM::RefId mLastHitObject;
+        ESM::RefId mLastHitAttemptObject;
         bool mRecalcDynamicStats;
         int mDrawState;
         signed char mDeathAnimation;
@@ -87,7 +88,7 @@ namespace ESM
         int mLevel;
         bool mMissingACDT;
 
-        std::map<std::string, CorprusStats> mCorprusSpells;
+        std::map<ESM::RefId, CorprusStats> mCorprusSpells;
         SpellState mSpells;
         ActiveSpells mActiveSpells;
 

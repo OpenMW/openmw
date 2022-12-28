@@ -31,22 +31,20 @@ namespace MWWorld
         static constexpr std::string_view prefix = "grass\\";
         for (const ESM::Static& stat : statics)
         {
-            std::string id = Misc::StringUtils::lowerCase(stat.mId);
             std::string model = Misc::StringUtils::lowerCase(stat.mModel);
             std::replace(model.begin(), model.end(), '/', '\\');
             if (model.compare(0, prefix.size(), prefix) != 0)
                 continue;
-            mMeshCache[id] = Misc::ResourceHelpers::correctMeshPath(model, vfs);
+            mMeshCache[stat.mId] = Misc::ResourceHelpers::correctMeshPath(model, vfs);
         }
 
         for (const ESM::Static& stat : content.mStatics)
         {
-            std::string id = Misc::StringUtils::lowerCase(stat.mId);
             std::string model = Misc::StringUtils::lowerCase(stat.mModel);
             std::replace(model.begin(), model.end(), '/', '\\');
             if (model.compare(0, prefix.size(), prefix) != 0)
                 continue;
-            mMeshCache[id] = Misc::ResourceHelpers::correctMeshPath(model, vfs);
+            mMeshCache[stat.mId] = Misc::ResourceHelpers::correctMeshPath(model, vfs);
         }
 
         for (const ESM::Cell& cell : content.mCells)
@@ -58,10 +56,9 @@ namespace MWWorld
         }
     }
 
-    std::string GroundcoverStore::getGroundcoverModel(const std::string& id) const
+    std::string GroundcoverStore::getGroundcoverModel(const ESM::RefId& id) const
     {
-        std::string idLower = Misc::StringUtils::lowerCase(id);
-        auto search = mMeshCache.find(idLower);
+        auto search = mMeshCache.find(id);
         if (search == mMeshCache.end())
             return std::string();
 

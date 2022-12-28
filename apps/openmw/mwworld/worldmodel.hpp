@@ -29,10 +29,10 @@ namespace MWWorld
     /// \brief Cell container
     class WorldModel
     {
-        typedef std::vector<std::pair<std::string, CellStore*>> IdCache;
+        typedef std::vector<std::pair<ESM::RefId, CellStore*>> IdCache;
         const MWWorld::ESMStore& mStore;
         ESM::ReadersCache& mReaders;
-        mutable std::map<std::string, CellStore> mInteriors;
+        mutable std::map<ESM::RefId, CellStore> mInteriors;
         mutable std::map<std::pair<int, int>, CellStore> mExteriors;
         IdCache mIdCache;
         std::size_t mIdCacheIndex;
@@ -42,9 +42,9 @@ namespace MWWorld
 
         CellStore* getCellStore(const ESM::Cell* cell);
 
-        Ptr getPtrAndCache(std::string_view name, CellStore& cellStore);
+        Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);
 
-        Ptr getPtr(CellStore& cellStore, const std::string& id, const ESM::RefNum& refNum);
+        Ptr getPtr(CellStore& cellStore, const ESM::RefId& id, const ESM::RefNum& refNum);
 
         void writeCell(ESM::ESMWriter& writer, CellStore& cell) const;
 
@@ -55,18 +55,18 @@ namespace MWWorld
 
         CellStore* getExterior(int x, int y);
 
-        CellStore* getInterior(std::string_view name);
+        CellStore* getInterior(const ESM::RefId& name);
 
         CellStore* getCell(const ESM::CellId& id);
 
-        Ptr getPtr(std::string_view name, CellStore& cellStore, bool searchInContainers = false);
+        Ptr getPtr(const ESM::RefId& name, CellStore& cellStore, bool searchInContainers = false);
         ///< \param searchInContainers Only affect loaded cells.
         /// @note name must be lower case
 
         /// @note name must be lower case
-        Ptr getPtr(const std::string& name);
+        Ptr getPtr(const ESM::RefId& name);
 
-        Ptr getPtr(const std::string& id, const ESM::RefNum& refNum);
+        Ptr getPtr(const ESM::RefId& id, const ESM::RefNum& refNum);
 
         void rest(double hours);
         void recharge(float duration);
@@ -74,14 +74,14 @@ namespace MWWorld
         /// Get all Ptrs referencing \a name in exterior cells
         /// @note Due to the current implementation of getPtr this only supports one Ptr per cell.
         /// @note name must be lower case
-        void getExteriorPtrs(std::string_view name, std::vector<MWWorld::Ptr>& out);
+        void getExteriorPtrs(const ESM::RefId& name, std::vector<MWWorld::Ptr>& out);
 
         /// Get all Ptrs referencing \a name in interior cells
         /// @note Due to the current implementation of getPtr this only supports one Ptr per cell.
         /// @note name must be lower case
-        void getInteriorPtrs(const std::string& name, std::vector<MWWorld::Ptr>& out);
+        void getInteriorPtrs(const ESM::RefId& name, std::vector<MWWorld::Ptr>& out);
 
-        std::vector<MWWorld::Ptr> getAll(const std::string& id);
+        std::vector<MWWorld::Ptr> getAll(const ESM::RefId& id);
 
         int countSavedGameRecords() const;
 

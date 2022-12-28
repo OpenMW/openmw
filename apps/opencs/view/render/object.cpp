@@ -155,7 +155,7 @@ void CSVRender::Object::update()
         }
         else
         {
-            throw std::runtime_error(mReferenceableId + " has no model");
+            throw std::runtime_error(mReferenceableId.getRefIdString() + " has no model");
         }
     }
     catch (std::exception& e)
@@ -460,14 +460,14 @@ CSVRender::Object::Object(
     parentNode->addChild(mRootNode);
 
     mRootNode->setNodeMask(Mask_Reference);
-
+    ESM::RefId refId = ESM::RefId::stringRefId(id);
     if (referenceable)
     {
-        mReferenceableId = id;
+        mReferenceableId = refId;
     }
     else
     {
-        mReferenceId = id;
+        mReferenceId = refId;
         mReferenceableId = getReference().mRefID;
     }
 
@@ -607,7 +607,8 @@ bool CSVRender::Object::referenceDataChanged(const QModelIndex& topLeft, const Q
 
         if (columnIndex >= topLeft.column() && columnIndex <= bottomRight.row())
         {
-            mReferenceableId = references.getData(index, columnIndex).toString().toUtf8().constData();
+            mReferenceableId
+                = ESM::RefId::stringRefId(references.getData(index, columnIndex).toString().toUtf8().constData());
 
             update();
             updateMarker();
@@ -627,12 +628,12 @@ void CSVRender::Object::reloadAssets()
 
 std::string CSVRender::Object::getReferenceId() const
 {
-    return mReferenceId;
+    return mReferenceId.getRefIdString();
 }
 
 std::string CSVRender::Object::getReferenceableId() const
 {
-    return mReferenceableId;
+    return mReferenceableId.getRefIdString();
 }
 
 osg::ref_ptr<CSVRender::TagBase> CSVRender::Object::getTag() const
@@ -734,7 +735,7 @@ void CSVRender::Object::apply(CSMWorld::CommandMacro& commands)
         // Do cell check first so positions can be compared
         const CSMWorld::CellRef& ref = collection.getRecord(recordIndex).get();
 
-        if (CSMWorld::CellCoordinates::isExteriorCell(ref.mCell))
+        if (CSMWorld::CellCoordinates::isExteriorCell(ref.mCell.getRefIdString()))
         {
             // Find cell index at new position
             std::pair<int, int> cellIndex

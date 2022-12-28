@@ -56,8 +56,8 @@
 
 namespace
 {
-    ESM::EffectList getMagicBoltData(std::vector<std::string>& projectileIDs, std::set<std::string>& sounds,
-        float& speed, std::string& texture, std::string& sourceName, const std::string& id)
+    ESM::EffectList getMagicBoltData(std::vector<ESM::RefId>& projectileIDs, std::set<ESM::RefId>& sounds, float& speed,
+        std::string& texture, std::string& sourceName, const ESM::RefId& id)
     {
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
         const ESM::EffectList* effects;
@@ -93,7 +93,7 @@ namespace
                 continue;
 
             if (magicEffect->mBolt.empty())
-                projectileIDs.emplace_back("VFX_DefaultBolt");
+                projectileIDs.emplace_back(ESM::RefId::stringRefId("VFX_DefaultBolt"));
             else
                 projectileIDs.push_back(magicEffect->mBolt);
 
@@ -102,7 +102,7 @@ namespace
             if (!magicEffect->mBoltSound.empty())
                 sounds.emplace(magicEffect->mBoltSound);
             else
-                sounds.emplace(schools[magicEffect->mData.mSchool] + " bolt");
+                sounds.emplace(ESM::RefId::stringRefId(schools[magicEffect->mData.mSchool] + " bolt"));
             projectileEffects.mList.push_back(*iter);
         }
 
@@ -121,8 +121,8 @@ namespace
         if (projectileEffects.mList.size()
             > 1) // insert a VFX_Multiple projectile if there are multiple projectile effects
         {
-            const std::string ID = "VFX_Multiple" + std::to_string(effects->mList.size());
-            std::vector<std::string>::iterator it;
+            const ESM::RefId ID = ESM::RefId::stringRefId("VFX_Multiple" + std::to_string(effects->mList.size()));
+            std::vector<ESM::RefId>::iterator it;
             it = projectileIDs.begin();
             it = projectileIDs.insert(it, ID);
         }
@@ -267,7 +267,7 @@ namespace MWWorld
     }
 
     void ProjectileManager::launchMagicBolt(
-        const std::string& spellId, const Ptr& caster, const osg::Vec3f& fallbackDirection, int slot)
+        const ESM::RefId& spellId, const Ptr& caster, const osg::Vec3f& fallbackDirection, int slot)
     {
         osg::Vec3f pos = caster.getRefData().getPosition().asVec3();
         if (caster.getClass().isActor())
@@ -321,7 +321,7 @@ namespace MWWorld
         createModel(state, model, pos, orient, true, true, lightDiffuseColor, texture);
 
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
-        for (const std::string& soundid : state.mSoundIds)
+        for (const auto& soundid : state.mSoundIds)
         {
             MWBase::Sound* sound
                 = sndMgr->playSound3D(pos, soundid, 1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
@@ -543,8 +543,7 @@ namespace MWWorld
             {
                 MWWorld::InventoryStore& inv = caster.getClass().getInventoryStore(caster);
                 MWWorld::ContainerStoreIterator invIt = inv.getSlot(MWWorld::InventoryStore::Slot_CarriedRight);
-                if (invIt != inv.end()
-                    && Misc::StringUtils::ciEqual(invIt->getCellRef().getRefId(), projectileState.mBowId))
+                if (invIt != inv.end() && invIt->getCellRef().getRefId() == projectileState.mBowId)
                     bow = *invIt;
             }
             if (projectile->getHitWater())
@@ -768,7 +767,7 @@ namespace MWWorld
             state.mProjectileId = mPhysics->addProjectile(state.getCaster(), osg::Vec3f(esm.mPosition), model, true);
 
             MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
-            for (const std::string& soundid : state.mSoundIds)
+            for (const auto& soundid : state.mSoundIds)
             {
                 MWBase::Sound* sound = sndMgr->playSound3D(
                     esm.mPosition, soundid, 1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Loop);

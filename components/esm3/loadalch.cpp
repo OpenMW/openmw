@@ -20,7 +20,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("MODL"):
@@ -30,7 +30,7 @@ namespace ESM
                     mIcon = esm.getHString();
                     break;
                 case fourCC("SCRI"):
-                    mScript = esm.getHString();
+                    mScript = esm.getRefId();
                     break;
                 case fourCC("FNAM"):
                     mName = esm.getHString();
@@ -59,7 +59,7 @@ namespace ESM
     }
     void Potion::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {
@@ -69,7 +69,7 @@ namespace ESM
 
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("TEXT", mIcon);
-        esm.writeHNOCString("SCRI", mScript);
+        esm.writeHNOCString("SCRI", mScript.getRefIdString());
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("ALDT", mData, 12);
         mEffects.save(esm);
@@ -84,7 +84,7 @@ namespace ESM
         mName.clear();
         mModel.clear();
         mIcon.clear();
-        mScript.clear();
+        mScript = ESM::RefId::sEmpty;
         mEffects.mList.clear();
     }
 }

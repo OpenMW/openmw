@@ -25,7 +25,7 @@ namespace CSMWorld
 
         loadRecord(record, reader, isDeleted);
 
-        std::string id = IdAccessor<Pathgrid>().getId(record);
+        auto id = IdAccessor<Pathgrid>().getId(record);
         int index = this->searchId(id);
 
         if (record.mPoints.empty() || record.mEdges.empty())

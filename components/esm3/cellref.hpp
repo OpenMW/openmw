@@ -6,6 +6,7 @@
 
 #include "components/esm/defs.hpp"
 #include "components/esm/esmcommon.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -42,12 +43,12 @@ namespace ESM
         // Note: Currently unused for items in containers
         RefNum mRefNum;
 
-        std::string mRefID; // ID of object being referenced
+        ESM::RefId mRefID; // ID of object being referenced
 
         float mScale; // Scale applied to mesh
 
         // The NPC that owns this object (and will get angry if you steal it)
-        std::string mOwner;
+        ESM::RefId mOwner;
 
         // Name of a global variable. If the global variable is set to '1', using the object is temporarily allowed
         // even if it has an Owner field.
@@ -55,11 +56,11 @@ namespace ESM
         std::string mGlobalVariable;
 
         // ID of creature trapped in this soul gem
-        std::string mSoul;
+        ESM::RefId mSoul;
 
         // The faction that owns this object (and will get angry if
         // you take it and are not a faction member)
-        std::string mFaction;
+        ESM::RefId mFaction;
 
         // PC faction rank required to use the item. Sometimes is -1, which means "any rank".
         int mFactionRank;
@@ -89,11 +90,11 @@ namespace ESM
         Position mDoorDest;
 
         // Destination cell for doors (optional)
-        std::string mDestCell;
+        ESM::RefId mDestCell;
 
         // Lock level for doors and containers
         int mLockLevel;
-        std::string mKey, mTrap; // Key and trap ID names, if any
+        ESM::RefId mKey, mTrap; // Key and trap ID names, if any
 
         // This corresponds to the "Reference Blocked" checkbox in the construction set,
         // which prevents editing that reference.

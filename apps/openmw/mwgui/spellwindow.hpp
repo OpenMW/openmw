@@ -26,15 +26,15 @@ namespace MWGui
     protected:
         MyGUI::Widget* mEffectBox;
 
-        std::string mSpellToDelete;
+        ESM::RefId mSpellToDelete;
 
         void onEnchantedItemSelected(MWWorld::Ptr item, bool alreadyEquipped);
-        void onSpellSelected(const std::string& spellId);
+        void onSpellSelected(const ESM::RefId& spellId);
         void onModelIndexSelected(SpellModel::ModelIndex index);
         void onFilterChanged(MyGUI::EditBox* sender);
         void onDeleteClicked(MyGUI::Widget* widget);
         void onDeleteSpellAccept();
-        void askDeleteSpell(const std::string& spellId);
+        void askDeleteSpell(const ESM::RefId& spellId);
 
         void onPinToggled() override;
         void onTitleDoubleClicked() override;

@@ -7,6 +7,7 @@
 #include <stack>
 #include <stdexcept>
 
+#include <components/esm/refid.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "context.hpp"
@@ -204,13 +205,13 @@ namespace Compiler
         mMemberOp = false;
 
         std::string name2 = Misc::StringUtils::lowerCase(name);
-        std::string id = Misc::StringUtils::lowerCase(mExplicit);
+        auto id = ESM::RefId::stringRefId(Misc::StringUtils::lowerCase(mExplicit));
 
         std::pair<char, bool> type = getContext().getMemberType(name2, id);
 
         if (type.first != ' ')
         {
-            Generator::fetchMember(mCode, mLiterals, type.first, name2, id, !type.second);
+            Generator::fetchMember(mCode, mLiterals, type.first, name2, id.getRefIdString(), !type.second);
 
             mNextOperand = false;
             mExplicit.clear();
@@ -324,7 +325,7 @@ namespace Compiler
                 return true;
             }
 
-            if (mExplicit.empty() && getContext().isId(name2))
+            if (mExplicit.empty() && getContext().isId(ESM::RefId::stringRefId(name2)))
             {
                 mExplicit = name2;
                 return true;

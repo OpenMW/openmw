@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -49,7 +50,7 @@ namespace ESM
     struct PartReference
     {
         unsigned char mPart; // possible values [0, 26]
-        std::string mMale, mFemale;
+        RefId mMale, mFemale;
     };
 
     // A list of references to body parts
@@ -98,7 +99,8 @@ namespace ESM
         PartReferenceList mParts;
 
         unsigned int mRecordFlags;
-        std::string mId, mName, mModel, mIcon, mScript, mEnchant;
+        RefId mId, mScript, mEnchant;
+        std::string mName, mModel, mIcon;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

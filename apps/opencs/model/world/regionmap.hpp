@@ -11,6 +11,7 @@
 #include <QVariant>
 
 #include "cellcoordinates.hpp"
+#include <components/esm/refid.hpp>
 
 class QObject;
 
@@ -40,8 +41,8 @@ namespace CSMWorld
         struct CellDescription
         {
             bool mDeleted;
-            std::string mRegion;
-            std::string mName;
+            ESM::RefId mRegion;
+            ESM::RefId mName;
 
             CellDescription();
 
@@ -52,7 +53,7 @@ namespace CSMWorld
         std::map<CellCoordinates, CellDescription> mMap;
         CellCoordinates mMin; ///< inclusive
         CellCoordinates mMax; ///< exclusive
-        std::map<std::string, unsigned int> mColours; ///< region ID, colour (RGBA)
+        std::map<ESM::RefId, unsigned int> mColours; ///< region ID, colour (RGBA)
 
         CellCoordinates getIndex(const QModelIndex& index) const;
         ///< Translates a Qt model index into a cell index (which can contain negative components)
@@ -74,18 +75,18 @@ namespace CSMWorld
         void removeCell(const CellCoordinates& index);
         ///< May be called on a cell that is not in the map (in which case the call is ignored)
 
-        void addRegion(const std::string& region, unsigned int colour);
+        void addRegion(const ESM::RefId& region, unsigned int colour);
         ///< May be called on a region that is already listed (in which case an update is
         /// performed)
         ///
         /// \note This function does not update the region map.
 
-        void removeRegion(const std::string& region);
+        void removeRegion(const ESM::RefId& region);
         ///< May be called on a region that is not listed (in which case the call is ignored)
         ///
         /// \note This function does not update the region map.
 
-        void updateRegions(const std::vector<std::string>& regions);
+        void updateRegions(const std::vector<ESM::RefId>& regions);
         ///< Update cells affected by the listed regions
 
         void updateSize();

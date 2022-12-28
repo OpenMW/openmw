@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_LUASCRIPTS_H
 #define OPENMW_ESM_LUASCRIPTS_H
 
+#include <components/esm/refid.hpp>
 #include <string>
 #include <vector>
 
@@ -32,7 +33,7 @@ namespace ESM
         struct PerRecordCfg
         {
             bool mAttach; // true - attach, false - don't attach (overrides previous attach)
-            std::string mRecordId;
+            ESM::RefId mRecordId;
             // Initialization data for this specific record. If empty than LuaScriptCfg::mInitializationData is used.
             std::string mInitializationData;
         };

@@ -124,6 +124,13 @@ namespace ESM
         return "";
     }
 
+    ESM::RefId ESMReader::getHNORefId(NAME name)
+    {
+        if (isNextSub(name))
+            return getRefId();
+        return ESM::RefId::sEmpty;
+    }
+
     void ESMReader::skipHNOString(NAME name)
     {
         if (isNextSub(name))
@@ -155,6 +162,27 @@ namespace ESM
         }
 
         return getString(mCtx.leftSub);
+    }
+
+    RefId ESMReader::getRefId()
+    {
+        getSubHeader();
+
+        // Hack to make MultiMark.esp load. Zero-length strings do not
+        // occur in any of the official mods, but MultiMark makes use of
+        // them. For some reason, they break the rules, and contain a byte
+        // (value 0) even if the header says there is no data. If
+        // Morrowind accepts it, so should we.
+        if (mCtx.leftSub == 0 && hasMoreSubs() && !mEsm->peek())
+        {
+            // Skip the following zero byte
+            mCtx.leftRec--;
+            char c;
+            getT(c);
+            return ESM::RefId::sEmpty;
+        }
+
+        return getRefId(mCtx.leftSub);
     }
 
     void ESMReader::skipHString()
@@ -353,6 +381,30 @@ namespace ESM
             return std::string(mEncoder->getUtf8(std::string_view(ptr, size)));
 
         return std::string(ptr, size);
+    }
+
+    ESM::RefId ESMReader::getRefId(int size)
+    {
+        size_t s = size;
+        if (mBuffer.size() <= s)
+            // Add some extra padding to reduce the chance of having to resize
+            // again later.
+            mBuffer.resize(3 * s);
+
+        // And make sure the string is zero terminated
+        mBuffer[s] = 0;
+
+        // read ESM data
+        char* ptr = mBuffer.data();
+        getExact(ptr, size);
+
+        size = static_cast<int>(strnlen(ptr, size));
+
+        // Convert to UTF8 and return
+        if (mEncoder)
+            return ESM::RefId::stringRefId(mEncoder->getUtf8(std::string_view(ptr, size)));
+
+        return ESM::RefId::stringRefId(std::string_view(ptr, size));
     }
 
     [[noreturn]] void ESMReader::fail(const std::string& msg)

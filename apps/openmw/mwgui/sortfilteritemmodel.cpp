@@ -100,13 +100,13 @@ namespace
             // 3. item with constant effect comes before items with non-constant effects
             int leftChargePercent = -1;
             int rightChargePercent = -1;
-            leftName = left.mBase.getClass().getEnchantment(left.mBase);
-            rightName = right.mBase.getClass().getEnchantment(right.mBase);
+            const ESM::RefId& leftNameEnch = left.mBase.getClass().getEnchantment(left.mBase);
+            const ESM::RefId& rightNameEnch = right.mBase.getClass().getEnchantment(right.mBase);
 
-            if (!leftName.empty())
+            if (!leftNameEnch.empty())
             {
                 const ESM::Enchantment* ench
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(leftName);
+                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(leftNameEnch);
                 if (ench)
                 {
                     if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
@@ -117,10 +117,10 @@ namespace
                 }
             }
 
-            if (!rightName.empty())
+            if (!rightNameEnch.empty())
             {
                 const ESM::Enchantment* ench
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(rightName);
+                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(rightNameEnch);
                 if (ench)
                 {
                     if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
@@ -161,8 +161,8 @@ namespace
                 return result > 0;
 
             // compare items by Id
-            leftName = left.mBase.getCellRef().getRefId();
-            rightName = right.mBase.getCellRef().getRefId();
+            leftName = left.mBase.getCellRef().getRefId().getRefIdString();
+            rightName = right.mBase.getCellRef().getRefId().getRefIdString();
 
             result = leftName.compare(rightName);
             return result < 0;
@@ -267,7 +267,7 @@ namespace MWGui
         if ((mFilter & Filter_OnlyEnchanted) && !(item.mFlags & ItemStack::Flag_Enchanted))
             return false;
         if ((mFilter & Filter_OnlyChargedSoulstones)
-            && (base.getType() != ESM::Miscellaneous::sRecordId || base.getCellRef().getSoul() == ""
+            && (base.getType() != ESM::Miscellaneous::sRecordId || base.getCellRef().getSoul() == ESM::RefId::sEmpty
                 || !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(
                     base.getCellRef().getSoul())))
             return false;
@@ -300,7 +300,7 @@ namespace MWGui
             if (!(item.mFlags & ItemStack::Flag_Enchanted))
                 return false;
 
-            std::string_view enchId = base.getClass().getEnchantment(base);
+            const ESM::RefId& enchId = base.getClass().getEnchantment(base);
             const ESM::Enchantment* ench
                 = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchId);
             if (!ench)

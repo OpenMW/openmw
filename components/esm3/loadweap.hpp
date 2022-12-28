@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include "components/esm/refid.hpp"
 #include "loadskil.hpp"
 
 namespace ESM
@@ -75,7 +76,8 @@ namespace ESM
         WPDTstruct mData;
 
         unsigned int mRecordFlags;
-        std::string mId, mName, mModel, mIcon, mEnchant, mScript;
+        RefId mId, mEnchant, mScript;
+        std::string mName, mModel, mIcon;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;
@@ -103,8 +105,8 @@ namespace ESM
         // std::string mDisplayName; // TODO: will be needed later for editor
         std::string mShortGroup;
         std::string mLongGroup;
-        std::string mSoundIdDown;
-        std::string mSoundIdUp;
+        ESM::RefId mSoundIdDown;
+        ESM::RefId mSoundIdUp;
         std::string mAttachBone;
         std::string mSheathingBone;
         Skill::SkillEnum mSkill;
@@ -116,8 +118,8 @@ namespace ESM
             std::string sheathingBone, Skill::SkillEnum skill, Class weaponClass, int ammoType, int flags)
             : mShortGroup(std::move(shortGroup))
             , mLongGroup(std::move(longGroup))
-            , mSoundIdDown(soundId + " Down")
-            , mSoundIdUp(soundId + " Up")
+            , mSoundIdDown(ESM::RefId::stringRefId(soundId + " Down"))
+            , mSoundIdUp(ESM::RefId::stringRefId(soundId + " Up"))
             , mAttachBone(std::move(attachBone))
             , mSheathingBone(std::move(sheathingBone))
             , mSkill(skill)

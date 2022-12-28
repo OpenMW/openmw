@@ -127,7 +127,7 @@ namespace MWWorld
         }
     }
 
-    void CellRef::setOwner(const std::string& owner)
+    void CellRef::setOwner(const ESM::RefId& owner)
     {
         if (owner != mCellRef.mOwner)
         {
@@ -136,7 +136,7 @@ namespace MWWorld
         }
     }
 
-    void CellRef::setSoul(std::string_view soul)
+    void CellRef::setSoul(const ESM::RefId& soul)
     {
         if (soul != mCellRef.mSoul)
         {
@@ -145,7 +145,7 @@ namespace MWWorld
         }
     }
 
-    void CellRef::setFaction(const std::string& faction)
+    void CellRef::setFaction(const ESM::RefId& faction)
     {
         if (faction != mCellRef.mFaction)
         {
@@ -176,7 +176,7 @@ namespace MWWorld
         setLockLevel(-abs(mCellRef.mLockLevel)); // Makes lockLevel negative
     }
 
-    void CellRef::setTrap(const std::string& trap)
+    void CellRef::setTrap(const ESM::RefId& trap)
     {
         if (trap != mCellRef.mTrap)
         {

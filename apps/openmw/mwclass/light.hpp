@@ -39,7 +39,7 @@ namespace MWClass
         std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
         ///< Generate action for activation
 
-        std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
+        const ESM::RefId& getScript(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of the script attached to ptr
 
         std::pair<std::vector<int>, bool> getEquipmentSlots(const MWWorld::ConstPtr& ptr) const override;
@@ -49,10 +49,10 @@ namespace MWClass
         int getValue(const MWWorld::ConstPtr& ptr) const override;
         ///< Return trade value of the object. Throws an exception, if the object can't be traded.
 
-        std::string_view getUpSoundId(const MWWorld::ConstPtr& ptr) const override;
+        const ESM::RefId& getUpSoundId(const MWWorld::ConstPtr& ptr) const override;
         ///< Return the pick up sound Id
 
-        std::string_view getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
+        const ESM::RefId& getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
         ///< Return the put down sound Id
 
         const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
@@ -76,7 +76,7 @@ namespace MWClass
         std::pair<int, std::string_view> canBeEquipped(
             const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const override;
 
-        std::string_view getSound(const MWWorld::ConstPtr& ptr) const override;
+        const ESM::RefId& getSound(const MWWorld::ConstPtr& ptr) const override;
     };
 }
 

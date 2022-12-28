@@ -52,17 +52,21 @@ namespace MWLua
             = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>();
         container["record"] = sol::overload(
             [](const Object& obj) -> const ESM::Container* { return obj.ptr().get<ESM::Container>()->mBase; },
-            [store](const std::string& recordId) -> const ESM::Container* { return store->find(recordId); });
+            [store](const std::string& recordId) -> const ESM::Container* {
+                return store->find(ESM::RefId::stringRefId(recordId));
+            });
         sol::usertype<ESM::Container> record = context.mLua->sol().new_usertype<ESM::Container>("ESM3_Container");
-        record[sol::meta_function::to_string]
-            = [](const ESM::Container& rec) -> std::string { return "ESM3_Container[" + rec.mId + "]"; };
-        record["id"] = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mId; });
+        record[sol::meta_function::to_string] = [](const ESM::Container& rec) -> std::string {
+            return "ESM3_Container[" + rec.mId.getRefIdString() + "]";
+        };
+        record["id"]
+            = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mId.getRefIdString(); });
         record["name"] = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Container& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
-        record["mwscript"]
-            = sol::readonly_property([](const ESM::Container& rec) -> std::string { return rec.mScript; });
+        record["mwscript"] = sol::readonly_property(
+            [](const ESM::Container& rec) -> std::string { return rec.mScript.getRefIdString(); });
         record["weight"] = sol::readonly_property([](const ESM::Container& rec) -> float { return rec.mWeight; });
     }
 }

@@ -2,6 +2,7 @@
 #define OPENMW_ESM_ACTI_H
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 #include <string>
 
 namespace ESM
@@ -18,7 +19,8 @@ namespace ESM
         static std::string_view getRecordType() { return "Activator"; }
 
         unsigned int mRecordFlags;
-        std::string mId, mName, mScript, mModel;
+        RefId mId, mScript;
+        std::string mName, mModel;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

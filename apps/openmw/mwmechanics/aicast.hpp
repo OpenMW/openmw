@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_AICAST_H
 
 #include "typedaipackage.hpp"
+#include <components/esm/refid.hpp>
 
 namespace MWWorld
 {
@@ -14,7 +15,7 @@ namespace MWMechanics
     class AiCast final : public TypedAiPackage<AiCast>
     {
     public:
-        AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell = false);
+        AiCast(const ESM::RefId& targetId, const ESM::RefId& spellId, bool manualSpell = false);
 
         bool execute(const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state,
             float duration) override;
@@ -33,8 +34,8 @@ namespace MWMechanics
         }
 
     private:
-        const std::string mTargetId;
-        const std::string mSpellId;
+        const ESM::RefId mTargetId;
+        const ESM::RefId mSpellId;
         bool mCasting;
         const bool mManual;
         const float mDistance;

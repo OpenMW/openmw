@@ -59,7 +59,7 @@ namespace EsmLoader
         struct CellRecords
         {
             Records<ESM::Cell> mValues;
-            std::map<std::string, std::size_t> mByName;
+            std::map<ESM::RefId, std::size_t> mByName;
             std::map<std::pair<int, int>, std::size_t> mByPosition;
         };
 
@@ -82,7 +82,6 @@ namespace EsmLoader
             T record;
             bool deleted = false;
             record.load(reader, deleted);
-            Misc::StringUtils::lowerCaseInPlace(record.mId);
             if (Misc::ResourceHelpers::isHiddenMarker(record.mId))
                 return;
             records.emplace_back(deleted, std::move(record));
@@ -102,7 +101,6 @@ namespace EsmLoader
             ESM::Cell record;
             bool deleted = false;
             record.loadNameAndData(reader, deleted);
-            Misc::StringUtils::lowerCaseInPlace(record.mName);
 
             if ((record.mData.mFlags & ESM::Cell::Interior) != 0)
             {

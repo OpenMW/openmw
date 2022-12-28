@@ -68,7 +68,7 @@ bool CSMDoc::SavingState::isProjectFile() const
     return mProjectFile;
 }
 
-std::map<std::string, std::deque<int>>& CSMDoc::SavingState::getSubRecords()
+std::map<std::string, std::deque<int>, Misc::StringUtils::CiComp>& CSMDoc::SavingState::getSubRecords()
 {
     return mSubRecords;
 }

@@ -3,13 +3,14 @@
 
 #include "statswatcher.hpp"
 #include "windowpinnablebase.hpp"
+#include <components/esm/refid.hpp>
 
 namespace MWGui
 {
     class StatsWindow : public WindowPinnableBase, public NoDrop, public StatsListener
     {
     public:
-        typedef std::map<std::string, int> FactionList;
+        typedef std::map<ESM::RefId, int> FactionList;
 
         typedef std::vector<int> SkillList;
 
@@ -22,10 +23,10 @@ namespace MWGui
         void setPlayerName(const std::string& playerName);
 
         /// Set value for the given ID.
-        void setValue(const std::string& id, const MWMechanics::AttributeValue& value) override;
-        void setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value) override;
-        void setValue(const std::string& id, const std::string& value) override;
-        void setValue(const std::string& id, int value) override;
+        void setValue(std::string_view id, const MWMechanics::AttributeValue& value) override;
+        void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value) override;
+        void setValue(std::string_view id, const std::string& value) override;
+        void setValue(std::string_view id, int value) override;
         void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value) override;
         void configureSkills(const SkillList& major, const SkillList& minor) override;
 
@@ -55,8 +56,8 @@ namespace MWGui
         MyGUI::Widget* addItem(const std::string& text, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
 
         void setFactions(const FactionList& factions);
-        void setExpelled(const std::set<std::string>& expelled);
-        void setBirthSign(const std::string& signId);
+        void setExpelled(const std::set<ESM::RefId>& expelled);
+        void setBirthSign(const ESM::RefId& signId);
 
         void onWindowResize(MyGUI::Window* window);
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
@@ -71,10 +72,10 @@ namespace MWGui
         std::map<int, std::pair<MyGUI::TextBox*, MyGUI::TextBox*>> mSkillWidgetMap;
         std::map<std::string, MyGUI::Widget*> mFactionWidgetMap;
         FactionList mFactions; ///< Stores a list of factions and the current rank
-        std::string mBirthSignId;
+        ESM::RefId mBirthSignId;
         int mReputation, mBounty;
         std::vector<MyGUI::Widget*> mSkillWidgets; //< Skills and other information
-        std::set<std::string> mExpelled;
+        std::set<ESM::RefId> mExpelled;
 
         bool mChanged;
         const int mMinFullWidth;

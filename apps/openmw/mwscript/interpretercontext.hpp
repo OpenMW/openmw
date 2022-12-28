@@ -4,6 +4,7 @@
 #include <memory>
 #include <stdexcept>
 
+#include <components/esm/refid.hpp>
 #include <components/interpreter/context.hpp>
 
 #include "globalscripts.hpp"
@@ -29,16 +30,16 @@ namespace MWScript
         /// If \a id is empty, a reference the script is run from is returned or in case
         /// of a non-local script the reference derived from the target ID.
         const MWWorld::Ptr getReferenceImp(
-            std::string_view id = {}, bool activeOnly = false, bool doThrow = true) const;
+            const ESM::RefId& id = ESM::RefId::sEmpty, bool activeOnly = false, bool doThrow = true) const;
 
-        const Locals& getMemberLocals(std::string_view& id, bool global) const;
+        const Locals& getMemberLocals(std::reference_wrapper<const ESM::RefId>& id, bool global) const;
         ///< \a id is changed to the respective script ID, if \a id wasn't a script ID before
 
-        Locals& getMemberLocals(std::string_view& id, bool global);
+        Locals& getMemberLocals(std::reference_wrapper<const ESM::RefId>& id, bool global);
         ///< \a id is changed to the respective script ID, if \a id wasn't a script ID before
 
         /// Throws an exception if local variable can't be found.
-        int findLocalVariableIndex(std::string_view scriptId, std::string_view name, char type) const;
+        int findLocalVariableIndex(const ESM::RefId& scriptId, std::string_view name, char type) const;
 
     public:
         InterpreterContext(std::shared_ptr<GlobalScriptDesc> globalScriptDesc);
@@ -46,7 +47,7 @@ namespace MWScript
         InterpreterContext(MWScript::Locals* locals, const MWWorld::Ptr& reference);
         ///< The ownership of \a locals is not transferred. 0-pointer allowed.
 
-        std::string_view getTarget() const override;
+        const ESM::RefId& getTarget() const override;
 
         int getLocalShort(int index) const override;
 
@@ -112,17 +113,17 @@ namespace MWScript
         void executeActivation(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor);
         ///< Execute the activation action for this ptr. If ptr is mActivated, mark activation as handled.
 
-        int getMemberShort(std::string_view id, std::string_view name, bool global) const override;
+        int getMemberShort(const ESM::RefId& id, std::string_view name, bool global) const override;
 
-        int getMemberLong(std::string_view id, std::string_view name, bool global) const override;
+        int getMemberLong(const ESM::RefId& id, std::string_view name, bool global) const override;
 
-        float getMemberFloat(std::string_view id, std::string_view name, bool global) const override;
+        float getMemberFloat(const ESM::RefId& id, std::string_view name, bool global) const override;
 
-        void setMemberShort(std::string_view id, std::string_view name, int value, bool global) override;
+        void setMemberShort(const ESM::RefId& id, std::string_view name, int value, bool global) override;
 
-        void setMemberLong(std::string_view id, std::string_view name, int value, bool global) override;
+        void setMemberLong(const ESM::RefId& id, std::string_view name, int value, bool global) override;
 
-        void setMemberFloat(std::string_view id, std::string_view name, float value, bool global) override;
+        void setMemberFloat(const ESM::RefId& id, std::string_view name, float value, bool global) override;
 
         MWWorld::Ptr getReference(bool required = true) const;
         ///< Reference, that the script is running from (can be empty)

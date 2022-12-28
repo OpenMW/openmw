@@ -71,7 +71,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mName = esm.getHString();
+                    mName = esm.getRefId();
                     break;
                 case fourCC("DATA"):
                     esm.getHTSized<12>(mData);
@@ -101,7 +101,7 @@ namespace ESM
         }
         else
         {
-            mCellId.mWorldspace = Misc::StringUtils::lowerCase(mName);
+            mCellId.mWorldspace = mName;
             mCellId.mIndex.mX = 0;
             mCellId.mIndex.mY = 0;
         }
@@ -142,7 +142,7 @@ namespace ESM
                     mHasAmbi = true;
                     break;
                 case fourCC("RGNN"):
-                    mRegion = esm.getHString();
+                    mRegion = esm.getRefId();
                     break;
                 case fourCC("NAM5"):
                     esm.getHT(mMapColor);
@@ -173,7 +173,7 @@ namespace ESM
 
     void Cell::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mName);
+        esm.writeHNCString("NAME", mName.getRefIdString());
         esm.writeHNT("DATA", mData, 12);
 
         if (isDeleted)
@@ -195,7 +195,7 @@ namespace ESM
             }
 
             if (mData.mFlags & QuasiEx)
-                esm.writeHNOCString("RGNN", mRegion);
+                esm.writeHNOCString("RGNN", mRegion.getRefIdString());
             else
             {
                 // Try to avoid saving ambient lighting information when it's unnecessary.
@@ -206,7 +206,7 @@ namespace ESM
         }
         else
         {
-            esm.writeHNOCString("RGNN", mRegion);
+            esm.writeHNOCString("RGNN", mRegion.getRefIdString());
             if (mMapColor != 0)
                 esm.writeHNT("NAM5", mMapColor);
         }
@@ -225,14 +225,15 @@ namespace ESM
 
     std::string Cell::getDescription() const
     {
+        const auto& nameString = mName.getRefIdString();
         if (mData.mFlags & Interior)
-            return mName;
+            return nameString;
 
         std::string cellGrid = "(" + std::to_string(mData.mX) + ", " + std::to_string(mData.mY) + ")";
         if (!mName.empty())
-            return mName + ' ' + cellGrid;
+            return nameString + ' ' + cellGrid;
         // FIXME: should use sDefaultCellname GMST instead, but it's not available in this scope
-        std::string region = !mRegion.empty() ? mRegion : "Wilderness";
+        std::string region = !mRegion.empty() ? mRegion.getRefIdString() : "Wilderness";
 
         return region + ' ' + cellGrid;
     }
@@ -314,8 +315,8 @@ namespace ESM
 
     void Cell::blank()
     {
-        mName.clear();
-        mRegion.clear();
+        mName = ESM::RefId::sEmpty;
+        mRegion = ESM::RefId::sEmpty;
         mWater = 0;
         mWaterInt = false;
         mMapColor = 0;

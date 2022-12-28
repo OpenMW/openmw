@@ -75,7 +75,7 @@ int CSMTools::TopicInfoCheckStage::setup()
         if (regionRecord.isDeleted())
             continue;
 
-        mCellNames.insert(regionRecord.get().mName);
+        mCellNames.insert(ESM::RefId::stringRefId(regionRecord.get().mName));
     }
     // Default cell name
     int index = mGameSettings.searchId("sDefaultCellname");
@@ -85,7 +85,7 @@ int CSMTools::TopicInfoCheckStage::setup()
 
         if (!gmstRecord.isDeleted() && gmstRecord.get().mValue.getType() == ESM::VT_String)
         {
-            mCellNames.insert(gmstRecord.get().mValue.getString());
+            mCellNames.insert(ESM::RefId::stringRefId(gmstRecord.get().mValue.getString()));
         }
     }
 
@@ -181,18 +181,20 @@ void CSMTools::TopicInfoCheckStage::perform(int stage, CSMDoc::Messages& message
 // Verification functions
 
 bool CSMTools::TopicInfoCheckStage::verifyActor(
-    const std::string& actor, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
+    const ESM::RefId& actor, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
+    const std::string& actorString = actor.getRefIdString();
     CSMWorld::RefIdData::LocalIndex index = mReferencables.searchId(actor);
 
     if (index.first == -1)
     {
-        messages.add(id, "Actor '" + actor + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Actor '" + actorString + "' does not exist", "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (mReferencables.getRecord(index).isDeleted())
     {
-        messages.add(id, "Deleted actor '" + actor + "' is being referenced", "", CSMDoc::Message::Severity_Error);
+        messages.add(
+            id, "Deleted actor '" + actorString + "' is being referenced", "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (index.second != CSMWorld::UniversalId::Type_Npc && index.second != CSMWorld::UniversalId::Type_Creature)
@@ -209,11 +211,11 @@ bool CSMTools::TopicInfoCheckStage::verifyActor(
 }
 
 bool CSMTools::TopicInfoCheckStage::verifyCell(
-    const std::string& cell, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
+    const ESM::RefId& cell, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
     if (mCellNames.find(cell) == mCellNames.end())
     {
-        messages.add(id, "Cell '" + cell + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Cell '" + cell.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
         return false;
     }
 
@@ -221,7 +223,7 @@ bool CSMTools::TopicInfoCheckStage::verifyCell(
 }
 
 bool CSMTools::TopicInfoCheckStage::verifyFactionRank(
-    const std::string& factionName, int rank, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
+    const ESM::RefId& factionName, int rank, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
     if (rank < -1)
     {
@@ -256,18 +258,19 @@ bool CSMTools::TopicInfoCheckStage::verifyFactionRank(
 }
 
 bool CSMTools::TopicInfoCheckStage::verifyItem(
-    const std::string& item, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
+    const ESM::RefId& item, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
+    const std::string& idString = item.getRefIdString();
     CSMWorld::RefIdData::LocalIndex index = mReferencables.searchId(item);
 
     if (index.first == -1)
     {
-        messages.add(id, ("Item '" + item + "' does not exist"), "", CSMDoc::Message::Severity_Error);
+        messages.add(id, ("Item '" + idString + "' does not exist"), "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (mReferencables.getRecord(index).isDeleted())
     {
-        messages.add(id, ("Deleted item '" + item + "' is being referenced"), "", CSMDoc::Message::Severity_Error);
+        messages.add(id, ("Deleted item '" + idString + "' is being referenced"), "", CSMDoc::Message::Severity_Error);
         return false;
     }
     else
@@ -363,47 +366,47 @@ bool CSMTools::TopicInfoCheckStage::verifySelectStruct(
 
     // Id checks
     if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Global
-        && !verifyId(infoCondition.getVariableName(), mGlobals, id, messages))
+        && !verifyId(ESM::RefId::stringRefId(infoCondition.getVariableName()), mGlobals, id, messages))
     {
         return false;
     }
     else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Journal
-        && !verifyId(infoCondition.getVariableName(), mJournals, id, messages))
+        && !verifyId(ESM::RefId::stringRefId(infoCondition.getVariableName()), mJournals, id, messages))
     {
         return false;
     }
     else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Item
-        && !verifyItem(infoCondition.getVariableName(), id, messages))
+        && !verifyItem(ESM::RefId::stringRefId(infoCondition.getVariableName()), id, messages))
     {
         return false;
     }
     else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_Dead
-        && !verifyActor(infoCondition.getVariableName(), id, messages))
+        && !verifyActor(ESM::RefId::stringRefId(infoCondition.getVariableName()), id, messages))
     {
         return false;
     }
     else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotId
-        && !verifyActor(infoCondition.getVariableName(), id, messages))
+        && !verifyActor(ESM::RefId::stringRefId(infoCondition.getVariableName()), id, messages))
     {
         return false;
     }
     else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotFaction
-        && !verifyId(infoCondition.getVariableName(), mFactions, id, messages))
+        && !verifyId(ESM::RefId::stringRefId(infoCondition.getVariableName()), mFactions, id, messages))
     {
         return false;
     }
     else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotClass
-        && !verifyId(infoCondition.getVariableName(), mClasses, id, messages))
+        && !verifyId(ESM::RefId::stringRefId(infoCondition.getVariableName()), mClasses, id, messages))
     {
         return false;
     }
     else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotRace
-        && !verifyId(infoCondition.getVariableName(), mRaces, id, messages))
+        && !verifyId(ESM::RefId::stringRefId(infoCondition.getVariableName()), mRaces, id, messages))
     {
         return false;
     }
     else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotCell
-        && !verifyCell(infoCondition.getVariableName(), id, messages))
+        && !verifyCell(ESM::RefId::stringRefId(infoCondition.getVariableName()), id, messages))
     {
         return false;
     }
@@ -424,20 +427,22 @@ bool CSMTools::TopicInfoCheckStage::verifySound(
 }
 
 template <typename T>
-bool CSMTools::TopicInfoCheckStage::verifyId(const std::string& name, const CSMWorld::IdCollection<T>& collection,
+bool CSMTools::TopicInfoCheckStage::verifyId(const ESM::RefId& name, const CSMWorld::IdCollection<T>& collection,
     const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
     int index = collection.searchId(name);
 
     if (index == -1)
     {
-        messages.add(id, std::string(T::getRecordType()) + " '" + name + "' does not exist", "",
+        messages.add(id, std::string(T::getRecordType()) + " '" + name.getRefIdString() + "' does not exist", "",
             CSMDoc::Message::Severity_Error);
         return false;
     }
     else if (collection.getRecord(index).isDeleted())
     {
-        messages.add(id, "Deleted " + std::string(T::getRecordType()) + " record '" + name + "' is being referenced",
+        messages.add(id,
+            "Deleted " + std::string(T::getRecordType()) + " record '" + name.getRefIdString()
+                + "' is being referenced",
             "", CSMDoc::Message::Severity_Error);
         return false;
     }

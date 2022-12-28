@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -55,7 +56,7 @@ namespace ESM
             int mV0, mV1; // index of points connected with this edge
         }; // 8 bytes
 
-        std::string mCell; // Cell name
+        ESM::RefId mCell; // Cell name
         DATAstruct mData;
 
         typedef std::vector<Point> PointList;

@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_ESM_QUICKKEYS_H
 #define OPENMW_COMPONENTS_ESM_QUICKKEYS_H
 
+#include "components/esm/refid.hpp"
 #include <string>
 #include <vector>
 
@@ -14,7 +15,7 @@ namespace ESM
         struct QuickKey
         {
             int mType;
-            std::string mId; // Spell or Item ID
+            RefId mId; // Spell or Item ID
         };
 
         std::vector<QuickKey> mKeys;

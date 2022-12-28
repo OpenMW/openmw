@@ -26,14 +26,22 @@ namespace MWLua
         const MWWorld::Store<ESM::NPC>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::NPC>();
         npc["record"]
             = sol::overload([](const Object& obj) -> const ESM::NPC* { return obj.ptr().get<ESM::NPC>()->mBase; },
-                [store](const std::string& recordId) -> const ESM::NPC* { return store->find(recordId); });
+                [store](const std::string& recordId) -> const ESM::NPC* {
+                    return store->find(ESM::RefId::stringRefId(recordId));
+                });
         sol::usertype<ESM::NPC> record = context.mLua->sol().new_usertype<ESM::NPC>("ESM3_NPC");
-        record[sol::meta_function::to_string] = [](const ESM::NPC& rec) { return "ESM3_NPC[" + rec.mId + "]"; };
+        record[sol::meta_function::to_string]
+            = [](const ESM::NPC& rec) { return "ESM3_NPC[" + rec.mId.getRefIdString() + "]"; };
         record["name"] = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mName; });
-        record["race"] = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mRace; });
-        record["class"] = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mClass; });
-        record["mwscript"] = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mScript; });
-        record["hair"] = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHair; });
-        record["head"] = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead; });
+        record["race"]
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mRace.getRefIdString(); });
+        record["class"]
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mClass.getRefIdString(); });
+        record["mwscript"]
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mScript.getRefIdString(); });
+        record["hair"]
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHair.getRefIdString(); });
+        record["head"]
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.getRefIdString(); });
     }
 }

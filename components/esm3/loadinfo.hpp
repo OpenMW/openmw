@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 #include "variant.hpp"
 
 namespace ESM
@@ -68,14 +69,14 @@ namespace ESM
         std::vector<SelectStruct> mSelects;
 
         // Id of this, previous and next INFO items
-        std::string mId, mPrev, mNext;
+        RefId mId, mPrev, mNext;
 
         // Various references used in determining when to select this item.
-        std::string mActor, mRace, mClass, mFaction, mPcFaction, mCell;
+        RefId mActor, mRace, mClass, mFaction, mPcFaction, mCell;
 
         // Sound and text associated with this item
-        std::string mSound, mResponse;
-
+        std::string mSound;
+        std::string mResponse;
         // Result script (uncompiled) to run whenever this dialog item is
         // selected
         std::string mResultScript;

@@ -48,14 +48,14 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Probe>* ref = ptr.get<ESM::Probe>();
         const std::string& name = ref->mBase->mName;
 
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
     std::unique_ptr<MWWorld::Action> Probe::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
     {
         return defaultItemActivate(ptr, actor);
     }
 
-    std::string_view Probe::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Probe::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Probe>* ref = ptr.get<ESM::Probe>();
 
@@ -78,14 +78,16 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string_view Probe::getUpSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Probe::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return "Item Probe Up";
+        static const ESM::RefId sound = ESM::RefId::stringRefId("Item Probe Up");
+        return sound;
     }
 
-    std::string_view Probe::getDownSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Probe::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        return "Item Probe Down";
+        static const ESM::RefId sound = ESM::RefId::stringRefId("Item Probe Down");
+        return sound;
     }
 
     const std::string& Probe::getInventoryIcon(const MWWorld::ConstPtr& ptr) const
@@ -117,7 +119,7 @@ namespace MWClass
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
         info.text = text;

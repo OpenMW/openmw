@@ -341,8 +341,8 @@ namespace MWGui
         bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
         auto journal = JournalWindow::create(JournalViewModel::create(), questList, mEncoding);
         mGuiModeStates[GM_Journal] = GuiModeState(journal.get());
-        mGuiModeStates[GM_Journal].mCloseSound = "book close";
-        mGuiModeStates[GM_Journal].mOpenSound = "book open";
+        mGuiModeStates[GM_Journal].mCloseSound = ESM::RefId::stringRefId("book close");
+        mGuiModeStates[GM_Journal].mOpenSound = ESM::RefId::stringRefId("book open");
         mWindows.push_back(std::move(journal));
 
         mMessageBoxManager = std::make_unique<MessageBoxManager>(
@@ -379,15 +379,15 @@ namespace MWGui
         mScrollWindow = scrollWindow.get();
         mWindows.push_back(std::move(scrollWindow));
         mGuiModeStates[GM_Scroll] = GuiModeState(mScrollWindow);
-        mGuiModeStates[GM_Scroll].mOpenSound = "scroll";
-        mGuiModeStates[GM_Scroll].mCloseSound = "scroll";
+        mGuiModeStates[GM_Scroll].mOpenSound = ESM::RefId::stringRefId("scroll");
+        mGuiModeStates[GM_Scroll].mCloseSound = ESM::RefId::stringRefId("scroll");
 
         auto bookWindow = std::make_unique<BookWindow>();
         mBookWindow = bookWindow.get();
         mWindows.push_back(std::move(bookWindow));
         mGuiModeStates[GM_Book] = GuiModeState(mBookWindow);
-        mGuiModeStates[GM_Book].mOpenSound = "book open";
-        mGuiModeStates[GM_Book].mCloseSound = "book close";
+        mGuiModeStates[GM_Book].mOpenSound = ESM::RefId::stringRefId("book open");
+        mGuiModeStates[GM_Book].mCloseSound = ESM::RefId::stringRefId("book close");
 
         auto countDialog = std::make_unique<CountDialog>();
         mCountDialog = countDialog.get();
@@ -949,8 +949,8 @@ namespace MWGui
         }
         else
         {
-            mMap->setCellPrefix(cell->getCell()->mName);
-            mHud->setCellPrefix(cell->getCell()->mName);
+            mMap->setCellPrefix(cell->getCell()->mName.getRefIdString());
+            mHud->setCellPrefix(cell->getCell()->mName.getRefIdString());
 
             osg::Vec3f worldPos;
             if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))
@@ -1330,7 +1330,7 @@ namespace MWGui
         mJailScreen->goToJail(days);
     }
 
-    void WindowManager::setSelectedSpell(const std::string& spellId, int successChancePercent)
+    void WindowManager::setSelectedSpell(const ESM::RefId& spellId, int successChancePercent)
     {
         mSelectedSpell = spellId;
         mSelectedEnchantItem = MWWorld::Ptr();
@@ -1344,7 +1344,7 @@ namespace MWGui
     void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item)
     {
         mSelectedEnchantItem = item;
-        mSelectedSpell.clear();
+        mSelectedSpell = ESM::RefId::sEmpty;
         const ESM::Enchantment* ench = mStore->get<ESM::Enchantment>().find(item.getClass().getEnchantment(item));
 
         int chargePercent
@@ -1377,7 +1377,7 @@ namespace MWGui
 
     void WindowManager::unsetSelectedSpell()
     {
-        mSelectedSpell.clear();
+        mSelectedSpell = ESM::RefId::sEmpty;
         mSelectedEnchantItem = MWWorld::Ptr();
         mHud->unsetSelectedSpell();
 
@@ -1770,7 +1770,7 @@ namespace MWGui
 
         mToolTips->clear();
 
-        mSelectedSpell.clear();
+        mSelectedSpell = ESM::RefId::sEmpty;
         mCustomMarkers.clear();
 
         mForceHidden = GW_None;
@@ -1791,7 +1791,7 @@ namespace MWGui
         if (!mSelectedSpell.empty())
         {
             writer.startRecord(ESM::REC_ASPL);
-            writer.writeHNString("ID__", mSelectedSpell);
+            writer.writeHNString("ID__", mSelectedSpell.getRefIdString());
             writer.endRecord(ESM::REC_ASPL);
         }
 
@@ -1813,7 +1813,7 @@ namespace MWGui
         else if (type == ESM::REC_ASPL)
         {
             reader.getSubNameIs("ID__");
-            std::string spell = reader.getHString();
+            ESM::RefId spell = reader.getRefId();
             if (mStore->get<ESM::Spell>().search(spell))
                 mSelectedSpell = spell;
         }
@@ -2139,7 +2139,7 @@ namespace MWGui
             mInventoryWindow->cycle(next);
     }
 
-    void WindowManager::playSound(std::string_view soundId, float volume, float pitch)
+    void WindowManager::playSound(const ESM::RefId& soundId, float volume, float pitch)
     {
         if (soundId.empty())
             return;

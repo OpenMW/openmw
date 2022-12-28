@@ -134,8 +134,8 @@ namespace MWGui
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
         setClassImage(mClassImage,
-            getLevelupClassImage(pcStats.getSkillIncreasesForSpecialization(0),
-                pcStats.getSkillIncreasesForSpecialization(1), pcStats.getSkillIncreasesForSpecialization(2)));
+            ESM::RefId::stringRefId(getLevelupClassImage(pcStats.getSkillIncreasesForSpecialization(0),
+                pcStats.getSkillIncreasesForSpecialization(1), pcStats.getSkillIncreasesForSpecialization(2))));
 
         int level = creatureStats.getLevel() + 1;
         mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + MyGUI::utility::toString(level));

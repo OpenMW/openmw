@@ -29,6 +29,7 @@
 #include <osg/ref_ptr>
 
 #include <algorithm>
+#include <components/esm/refid.hpp>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -36,7 +37,6 @@
 #include <tuple>
 #include <utility>
 #include <vector>
-
 namespace NavMeshTool
 {
     namespace
@@ -52,12 +52,12 @@ namespace NavMeshTool
         {
             ESM::RecNameInts mType;
             ESM::RefNum mRefNum;
-            std::string mRefId;
+            ESM::RefId mRefId;
             float mScale;
             ESM::Position mPos;
 
             CellRef(
-                ESM::RecNameInts type, ESM::RefNum refNum, std::string&& refId, float scale, const ESM::Position& pos)
+                ESM::RecNameInts type, ESM::RefNum refNum, ESM::RefId&& refId, float scale, const ESM::Position& pos)
                 : mType(type)
                 , mRefNum(refNum)
                 , mRefId(std::move(refId))
@@ -67,7 +67,7 @@ namespace NavMeshTool
             }
         };
 
-        ESM::RecNameInts getType(const EsmLoader::EsmData& esmData, std::string_view refId)
+        ESM::RecNameInts getType(const EsmLoader::EsmData& esmData, const ESM::RefId& refId)
         {
             const auto it = std::lower_bound(
                 esmData.mRefIdTypes.begin(), esmData.mRefIdTypes.end(), refId, EsmLoader::LessById{});
@@ -89,7 +89,6 @@ namespace NavMeshTool
                 bool deleted = false;
                 while (ESM::Cell::getNextRef(*reader, cellRef, deleted))
                 {
-                    Misc::StringUtils::lowerCaseInPlace(cellRef.mRefID);
                     const ESM::RecNameInts type = getType(esmData, cellRef.mRefID);
                     if (type == ESM::RecNameInts{})
                         continue;
@@ -264,16 +263,16 @@ namespace NavMeshTool
 
             const osg::Vec2i cellPosition(cell.mData.mX, cell.mData.mY);
             const std::size_t cellObjectsBegin = data.mObjects.size();
-
+            const auto cellNameLowerCase = Misc::StringUtils::lowerCase(cell.mCellId.mWorldspace.getRefIdString());
             WorldspaceNavMeshInput& navMeshInput = [&]() -> WorldspaceNavMeshInput& {
-                auto it = navMeshInputs.find(cell.mCellId.mWorldspace);
+                auto it = navMeshInputs.find(cellNameLowerCase);
                 if (it == navMeshInputs.end())
                 {
                     it = navMeshInputs
-                             .emplace(cell.mCellId.mWorldspace,
-                                 std::make_unique<WorldspaceNavMeshInput>(cell.mCellId.mWorldspace, settings.mRecast))
+                             .emplace(cellNameLowerCase,
+                                 std::make_unique<WorldspaceNavMeshInput>(cellNameLowerCase, settings.mRecast))
                              .first;
-                    it->second->mTileCachedRecastMeshManager.setWorldspace(cell.mCellId.mWorldspace, nullptr);
+                    it->second->mTileCachedRecastMeshManager.setWorldspace(cellNameLowerCase, nullptr);
                 }
                 return *it->second;
             }();

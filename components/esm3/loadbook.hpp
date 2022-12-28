@@ -2,6 +2,7 @@
 #define OPENMW_ESM_BOOK_H
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 #include <string>
 
 namespace ESM
@@ -27,9 +28,10 @@ namespace ESM
         };
 
         BKDTstruct mData;
-        std::string mName, mModel, mIcon, mScript, mEnchant, mText;
+        std::string mName, mModel, mIcon, mText;
         unsigned int mRecordFlags;
-        std::string mId;
+        RefId mId;
+        RefId mScript, mEnchant;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

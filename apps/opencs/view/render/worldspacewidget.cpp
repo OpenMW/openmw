@@ -300,7 +300,7 @@ CSVRender::WorldspaceWidget::DropType CSVRender::WorldspaceWidget::getDropType(
         if (iter->getType() == CSMWorld::UniversalId::Type_Cell
             || iter->getType() == CSMWorld::UniversalId::Type_Cell_Missing)
         {
-            type = iter->getId().substr(0, 1) == "#" ? Type_CellsExterior : Type_CellsInterior;
+            type = iter->getId()[0] == '#' ? Type_CellsExterior : Type_CellsInterior;
         }
         else if (iter->getType() == CSMWorld::UniversalId::Type_DebugProfile)
             type = Type_DebugProfile;

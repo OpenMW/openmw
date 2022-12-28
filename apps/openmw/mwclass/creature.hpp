@@ -80,7 +80,7 @@ namespace MWClass
 
         bool hasInventoryStore(const MWWorld::Ptr& ptr) const override;
 
-        std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
+        const ESM::RefId& getScript(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of the script attached to ptr
 
         float getCapacity(const MWWorld::Ptr& ptr) const override;
@@ -97,7 +97,7 @@ namespace MWClass
 
         bool isPersistent(const MWWorld::ConstPtr& ptr) const override;
 
-        std::string_view getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const override;
+        const ESM::RefId& getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const override;
 
         MWMechanics::Movement& getMovementSettings(const MWWorld::Ptr& ptr) const override;
         ///< Return desired movement.
@@ -135,9 +135,9 @@ namespace MWClass
         void adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const override;
         /// @param rendering Indicates if the scale to adjust is for the rendering mesh, or for the collision mesh
 
-        void setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const override;
+        void setBaseAISetting(const ESM::RefId& id, MWMechanics::AiSetting setting, int value) const override;
 
-        void modifyBaseInventory(std::string_view actorId, std::string_view itemId, int amount) const override;
+        void modifyBaseInventory(const ESM::RefId& actorId, const ESM::RefId& itemId, int amount) const override;
 
         float getWalkSpeed(const MWWorld::Ptr& ptr) const override;
 

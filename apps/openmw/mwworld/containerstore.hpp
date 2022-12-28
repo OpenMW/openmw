@@ -97,7 +97,7 @@ namespace MWWorld
 
         static constexpr int Type_All = 0xffff;
 
-        static const std::string_view sGoldId;
+        static const ESM::RefId sGoldId;
 
     protected:
         ContainerStoreListener* mListener;
@@ -133,8 +133,8 @@ namespace MWWorld
 
         ContainerStoreIterator addImp(const Ptr& ptr, int count, bool markModified = true);
         void addInitialItem(
-            std::string_view id, const std::string& owner, int count, Misc::Rng::Generator* prng, bool topLevel = true);
-        void addInitialItemImp(const MWWorld::Ptr& ptr, const std::string& owner, int count, Misc::Rng::Generator* prng,
+            const ESM::RefId& id, const ESM::RefId& owner, int count, Misc::Rng::Generator* prng, bool topLevel = true);
+        void addInitialItemImp(const MWWorld::Ptr& ptr, const ESM::RefId& owner, int count, Misc::Rng::Generator* prng,
             bool topLevel = true);
 
         template <typename T>
@@ -184,11 +184,11 @@ namespace MWWorld
         /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to
         /// the newly inserted item.
 
-        ContainerStoreIterator add(std::string_view id, int count, const Ptr& actorPtr);
+        ContainerStoreIterator add(const ESM::RefId& id, int count, const Ptr& actorPtr);
         ///< Utility to construct a ManualRef and call add(ptr, count, actorPtr, true)
 
         int remove(
-            std::string_view itemId, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
+            const ESM::RefId& itemId, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
         ///< Remove \a count item(s) designated by \a itemId from this container.
         ///
         /// @return the number of items actually removed
@@ -213,7 +213,7 @@ namespace MWWorld
         /// If a compatible stack is found, the item's count is added to that stack, then the original is deleted.
         /// @return If the item was stacked, return the stack, otherwise return the old (untouched) item.
 
-        int count(std::string_view id) const;
+        int count(const ESM::RefId& id) const;
         ///< @return How many items with refID \a id are in this container?
 
         ContainerStoreListener* getContListener() const;
@@ -234,10 +234,10 @@ namespace MWWorld
         virtual bool stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const;
         ///< @return true if the two specified objects can stack with each other
 
-        void fill(const ESM::InventoryList& items, const std::string& owner, Misc::Rng::Generator& seed);
+        void fill(const ESM::InventoryList& items, const ESM::RefId& owner, Misc::Rng::Generator& seed);
         ///< Insert items into *this.
 
-        void fillNonRandom(const ESM::InventoryList& items, const std::string& owner, unsigned int seed);
+        void fillNonRandom(const ESM::InventoryList& items, const ESM::RefId& owner, unsigned int seed);
         ///< Insert items into *this, excluding leveled items
 
         virtual void clear();
@@ -250,10 +250,10 @@ namespace MWWorld
         ///< This function throws an exception, if ptr does not point to an object, that can be
         /// put into a container.
 
-        Ptr findReplacement(const std::string& id);
+        Ptr findReplacement(const ESM::RefId& id);
         ///< Returns replacement for object with given id. Prefer used items (with low durability left).
 
-        Ptr search(std::string_view id);
+        Ptr search(const ESM::RefId& id);
 
         virtual void writeState(ESM::InventoryState& state) const;
 

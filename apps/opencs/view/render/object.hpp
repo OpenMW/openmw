@@ -8,6 +8,7 @@
 #include <osg/ref_ptr>
 
 #include <components/esm/defs.hpp>
+#include <components/esm/refid.hpp>
 
 #include "tagbase.hpp"
 
@@ -81,8 +82,8 @@ namespace CSVRender
         static const float MarkerHeadLength;
 
         CSMWorld::Data& mData;
-        std::string mReferenceId;
-        std::string mReferenceableId;
+        ESM::RefId mReferenceId;
+        ESM::RefId mReferenceableId;
         osg::ref_ptr<osg::PositionAttitudeTransform> mRootNode;
         osg::ref_ptr<osg::PositionAttitudeTransform> mBaseNode;
         osg::ref_ptr<osgFX::Scribe> mOutline;

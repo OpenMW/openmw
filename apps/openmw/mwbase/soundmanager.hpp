@@ -14,6 +14,11 @@ namespace MWWorld
     class CellStore;
 }
 
+namespace ESM
+{
+    struct RefId;
+}
+
 namespace MWSound
 {
     // Each entry excepts of MaxCount should be used only in one place
@@ -146,20 +151,20 @@ namespace MWBase
         /// returned by \ref playTrack). Only intended to be called by the track
         /// decoder's read method.
 
-        virtual Sound* playSound(std::string_view soundId, float volume, float pitch, Type type = Type::Sfx,
+        virtual Sound* playSound(const ESM::RefId& soundId, float volume, float pitch, Type type = Type::Sfx,
             PlayMode mode = PlayMode::Normal, float offset = 0)
             = 0;
         ///< Play a sound, independently of 3D-position
         ///< @param offset Number of seconds into the sound to start playback.
 
-        virtual Sound* playSound3D(const MWWorld::ConstPtr& reference, std::string_view soundId, float volume,
+        virtual Sound* playSound3D(const MWWorld::ConstPtr& reference, const ESM::RefId& soundId, float volume,
             float pitch, Type type = Type::Sfx, PlayMode mode = PlayMode::Normal, float offset = 0)
             = 0;
         ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless
         ///< Play_NoTrack is specified.
         ///< @param offset Number of seconds into the sound to start playback.
 
-        virtual Sound* playSound3D(const osg::Vec3f& initialPos, std::string_view soundId, float volume, float pitch,
+        virtual Sound* playSound3D(const osg::Vec3f& initialPos, const ESM::RefId& soundId, float volume, float pitch,
             Type type = Type::Sfx, PlayMode mode = PlayMode::Normal, float offset = 0)
             = 0;
         ///< Play a 3D sound at \a initialPos. If the sound should be moving, it must be updated using
@@ -168,7 +173,7 @@ namespace MWBase
         virtual void stopSound(Sound* sound) = 0;
         ///< Stop the given sound from playing
 
-        virtual void stopSound3D(const MWWorld::ConstPtr& reference, std::string_view soundId) = 0;
+        virtual void stopSound3D(const MWWorld::ConstPtr& reference, const ESM::RefId& soundId) = 0;
         ///< Stop the given object from playing the given sound,
 
         virtual void stopSound3D(const MWWorld::ConstPtr& reference) = 0;
@@ -177,13 +182,13 @@ namespace MWBase
         virtual void stopSound(const MWWorld::CellStore* cell) = 0;
         ///< Stop all sounds for the given cell.
 
-        virtual void fadeOutSound3D(const MWWorld::ConstPtr& reference, std::string_view soundId, float duration) = 0;
+        virtual void fadeOutSound3D(const MWWorld::ConstPtr& reference, const ESM::RefId& soundId, float duration) = 0;
         ///< Fade out given sound (that is already playing) of given object
         ///< @param reference Reference to object, whose sound is faded out
         ///< @param soundId ID of the sound to fade out.
         ///< @param duration Time until volume reaches 0.
 
-        virtual bool getSoundPlaying(const MWWorld::ConstPtr& reference, std::string_view soundId) const = 0;
+        virtual bool getSoundPlaying(const MWWorld::ConstPtr& reference, const ESM::RefId& soundId) const = 0;
         ///< Is the given sound currently playing on the given object?
         ///  If you want to check if sound played with playSound is playing, use empty Ptr
 

@@ -4,6 +4,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -28,7 +29,7 @@ namespace ESM
 
         std::string mData;
         unsigned int mRecordFlags;
-        std::string mId;
+        RefId mId;
 
         // Load a record and add it to the list
         void load(ESMReader& esm, bool& isDeleted);

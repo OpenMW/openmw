@@ -8,6 +8,7 @@
 
 #include <components/compiler/context.hpp>
 #include <components/compiler/locals.hpp>
+#include <components/misc/algorithm.hpp>
 
 namespace CSMWorld
 {
@@ -16,9 +17,9 @@ namespace CSMWorld
     class ScriptContext : public Compiler::Context
     {
         const Data& mData;
-        mutable std::vector<std::string> mIds;
+        mutable std::vector<ESM::RefId> mIds;
         mutable bool mIdsUpdated;
-        mutable std::map<std::string, Compiler::Locals> mLocals;
+        mutable std::map<std::string, Compiler::Locals, Misc::StringUtils::CiComp> mLocals;
 
     public:
         ScriptContext(const Data& data);
@@ -29,13 +30,13 @@ namespace CSMWorld
         char getGlobalType(const std::string& name) const override;
         ///< 'l: long, 's': short, 'f': float, ' ': does not exist.
 
-        std::pair<char, bool> getMemberType(const std::string& name, const std::string& id) const override;
+        std::pair<char, bool> getMemberType(const std::string& name, const ESM::RefId& id) const override;
         ///< Return type of member variable \a name in script \a id or in script of reference of
         /// \a id
         /// \return first: 'l: long, 's': short, 'f': float, ' ': does not exist.
         /// second: true: script of reference
 
-        bool isId(const std::string& name) const override;
+        bool isId(const ESM::RefId& name) const override;
         ///< Does \a name match an ID, that can be referenced?
 
         void invalidateIds();

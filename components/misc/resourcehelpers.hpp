@@ -9,6 +9,11 @@ namespace VFS
     class Manager;
 }
 
+namespace ESM
+{
+    struct RefId;
+}
+
 namespace Misc
 {
     // Workarounds for messy resource handling in vanilla morrowind
@@ -30,7 +35,7 @@ namespace Misc
         std::string correctSoundPath(std::string_view resPath, const VFS::Manager* vfs);
 
         /// marker objects that have a hardcoded function in the game logic, should be hidden from the player
-        bool isHiddenMarker(std::string_view id);
+        bool isHiddenMarker(const ESM::RefId& id);
         std::string getLODMeshName(int esmVersion, std::string resPath, const VFS::Manager* vfs, unsigned char lod = 0);
     }
 }

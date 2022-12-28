@@ -133,7 +133,7 @@ namespace ESM
 
         // create an ID from the index and the name (only used in the editor and likely to change in the
         // future)
-        mId = indexToId(mIndex);
+        mId = ESM::RefId::stringRefId(indexToId(mIndex));
     }
 
     void Skill::save(ESMWriter& esm, bool /*isDeleted*/) const

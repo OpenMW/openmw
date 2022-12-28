@@ -4,6 +4,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 #include "spelllist.hpp"
 
 namespace ESM
@@ -68,7 +69,8 @@ namespace ESM
         RADTstruct mData;
 
         unsigned int mRecordFlags;
-        std::string mId, mName, mDescription;
+        std::string mName, mDescription;
+        RefId mId;
         SpellList mPowers;
 
         void load(ESMReader& esm, bool& isDeleted);

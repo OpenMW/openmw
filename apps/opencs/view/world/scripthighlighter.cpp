@@ -3,13 +3,13 @@
 #include <sstream>
 #include <utility>
 
+#include <apps/opencs/model/prefs/category.hpp>
+#include <apps/opencs/model/prefs/setting.hpp>
 #include <apps/opencs/model/world/scriptcontext.hpp>
 #include <components/compiler/extensions0.hpp>
 #include <components/compiler/scanner.hpp>
 #include <components/compiler/tokenloc.hpp>
-
-#include "../../model/prefs/category.hpp"
-#include "../../model/prefs/setting.hpp"
+#include <components/esm/refid.hpp>
 
 class QTextDocument;
 
@@ -33,7 +33,7 @@ bool CSVWorld::ScriptHighlighter::parseFloat(float value, const Compiler::TokenL
 bool CSVWorld::ScriptHighlighter::parseName(
     const std::string& name, const Compiler::TokenLoc& loc, Compiler::Scanner& scanner)
 {
-    highlight(loc, mContext.isId(name) ? Type_Id : Type_Name);
+    highlight(loc, mContext.isId(ESM::RefId::stringRefId(name)) ? Type_Id : Type_Name);
     return true;
 }
 

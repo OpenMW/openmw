@@ -4,6 +4,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -47,7 +48,8 @@ namespace ESM
         }; // 60 bytes
 
         unsigned int mRecordFlags;
-        std::string mId, mName, mDescription;
+        std::string mName, mDescription;
+        RefId mId;
         CLDTstruct mData;
 
         void load(ESMReader& esm, bool& isDeleted);

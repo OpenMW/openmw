@@ -5,6 +5,7 @@
 #include <components/misc/rng.hpp>
 
 #include <components/esm/records.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadmgef.hpp>
@@ -82,15 +83,15 @@ namespace
     {
         const MWWorld::CellRef& cellref = target.getCellRef();
 
-        const std::string& owner = cellref.getOwner();
-        bool isOwned = !owner.empty() && owner != "player";
+        const ESM::RefId& owner = cellref.getOwner();
+        bool isOwned = !owner.empty() && owner != ESM::RefId::stringRefId("Player");
 
-        const std::string& faction = cellref.getFaction();
+        const ESM::RefId& faction = cellref.getFaction();
         bool isFactionOwned = false;
         if (!faction.empty() && ptr.getClass().isNpc())
         {
-            const std::map<std::string, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
-            auto found = factions.find(Misc::StringUtils::lowerCase(faction));
+            const std::map<ESM::RefId, int>& factions = ptr.getClass().getNpcStats(ptr).getFactionRanks();
+            auto found = factions.find(faction);
             if (found == factions.end() || found->second < cellref.getFactionRank())
                 isFactionOwned = true;
         }
@@ -168,20 +169,20 @@ namespace MWMechanics
                 npcStats.getSkill(i).setBase(5 + bonus);
             }
 
-            for (const std::string& power : race->mPowers.mList)
+            for (const ESM::RefId& power : race->mPowers.mList)
             {
                 creatureStats.getSpells().add(power);
             }
         }
 
         // birthsign
-        const std::string& signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
+        const ESM::RefId& signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
 
         if (!signId.empty())
         {
             const ESM::BirthSign* sign = esmStore.get<ESM::BirthSign>().find(signId);
 
-            for (const std::string& power : sign->mPowers.mList)
+            for (const ESM::RefId& power : sign->mPowers.mList)
             {
                 creatureStats.getSpells().add(power);
             }
@@ -247,9 +248,9 @@ namespace MWMechanics
             attributes[i] = npcStats.getAttribute(i).getBase();
         npcStats.updateHealth();
 
-        std::vector<std::string> selectedSpells = autoCalcPlayerSpells(skills, attributes, race);
+        std::vector<ESM::RefId> selectedSpells = autoCalcPlayerSpells(skills, attributes, race);
 
-        for (const std::string& spell : selectedSpells)
+        for (const ESM::RefId& spell : selectedSpells)
             creatureStats.getSpells().add(spell);
 
         // forced update and current value adjustments
@@ -287,7 +288,7 @@ namespace MWMechanics
             mObjects.addObject(ptr);
     }
 
-    void MechanicsManager::castSpell(const MWWorld::Ptr& ptr, const std::string& spellId, bool manualSpell)
+    void MechanicsManager::castSpell(const MWWorld::Ptr& ptr, const ESM::RefId& spellId, bool manualSpell)
     {
         if (ptr.getClass().isActor())
             mActors.castSpell(ptr, spellId, manualSpell);
@@ -333,7 +334,7 @@ namespace MWMechanics
             winMgr->setSelectedEnchantItem(*enchantItem);
         else
         {
-            const std::string& spell = winMgr->getSelectedSpell();
+            const ESM::RefId& spell = winMgr->getSelectedSpell();
             if (!spell.empty())
                 winMgr->setSelectedSpell(spell, int(MWMechanics::getSpellSuccessChance(spell, ptr)));
             else
@@ -444,7 +445,7 @@ namespace MWMechanics
     }
 
     void MechanicsManager::setPlayerRace(
-        const std::string& race, bool male, const std::string& head, const std::string& hair)
+        const ESM::RefId& race, bool male, const ESM::RefId& head, const ESM::RefId& hair)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
@@ -462,14 +463,14 @@ namespace MWMechanics
         mUpdatePlayer = true;
     }
 
-    void MechanicsManager::setPlayerBirthsign(const std::string& id)
+    void MechanicsManager::setPlayerBirthsign(const ESM::RefId& id)
     {
         MWBase::Environment::get().getWorld()->getPlayer().setBirthSign(id);
         buildPlayer();
         mUpdatePlayer = true;
     }
 
-    void MechanicsManager::setPlayerClass(const std::string& id)
+    void MechanicsManager::setPlayerClass(const ESM::RefId& id)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
@@ -512,7 +513,7 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting>& gmst
             = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         static const float fDispRaceMod = gmst.find("fDispRaceMod")->mValue.getFloat();
-        if (Misc::StringUtils::ciEqual(npc->mBase->mRace, player->mBase->mRace))
+        if (npc->mBase->mRace == player->mBase->mRace)
             x += fDispRaceMod;
 
         static const float fDispPersonalityMult = gmst.find("fDispPersonalityMult")->mValue.getFloat();
@@ -522,7 +523,7 @@ namespace MWMechanics
 
         float reaction = 0;
         int rank = 0;
-        std::string npcFaction = Misc::StringUtils::lowerCase(ptr.getClass().getPrimaryFaction(ptr));
+        const ESM::RefId& npcFaction = ptr.getClass().getPrimaryFaction(ptr);
 
         if (playerStats.getFactionRanks().find(npcFaction) != playerStats.getFactionRanks().end())
         {
@@ -537,10 +538,10 @@ namespace MWMechanics
         }
         else if (!npcFaction.empty())
         {
-            std::map<std::string, int>::const_iterator playerFactionIt = playerStats.getFactionRanks().begin();
+            auto playerFactionIt = playerStats.getFactionRanks().begin();
             for (; playerFactionIt != playerStats.getFactionRanks().end(); ++playerFactionIt)
             {
-                const std::string& itFaction = playerFactionIt->first;
+                const ESM::RefId& itFaction = playerFactionIt->first;
 
                 // Ignore the faction, if a player was expelled from it.
                 if (playerStats.getExpelled(itFaction))
@@ -612,7 +613,7 @@ namespace MWMechanics
         return std::max(1, offerPrice);
     }
 
-    int MechanicsManager::countDeaths(const std::string& id) const
+    int MechanicsManager::countDeaths(const ESM::RefId& id) const
     {
         return mActors.countDeaths(id);
     }
@@ -839,7 +840,7 @@ namespace MWMechanics
 
     bool MechanicsManager::isBoundItem(const MWWorld::Ptr& item)
     {
-        static std::set<std::string> boundItemIDCache;
+        static std::set<ESM::RefId> boundItemIDCache;
 
         // If this is empty then we haven't executed the GMST cache logic yet; or there isn't any sMagicBound* GMST's
         // for some reason
@@ -852,20 +853,19 @@ namespace MWMechanics
             for (const ESM::GameSetting& currentSetting : gameSettings)
             {
                 // Don't bother checking this GMST if it's not a sMagicBound* one.
-                if (!Misc::StringUtils::ciStartsWith(currentSetting.mId, "smagicbound"))
+                if (!Misc::StringUtils::ciStartsWith(currentSetting.mId.getRefIdString(), "smagicbound"))
                     continue;
 
                 // All sMagicBound* GMST's should be of type string
                 std::string currentGMSTValue = currentSetting.mValue.getString();
                 Misc::StringUtils::lowerCaseInPlace(currentGMSTValue);
 
-                boundItemIDCache.insert(currentGMSTValue);
+                boundItemIDCache.insert(ESM::RefId::stringRefId(currentGMSTValue));
             }
         }
 
         // Perform bound item check and assign the Flag_Bound bit if it passes
-        std::string tempItemID = item.getCellRef().getRefId();
-        Misc::StringUtils::lowerCaseInPlace(tempItemID);
+        const ESM::RefId& tempItemID = item.getCellRef().getRefId();
 
         if (boundItemIDCache.count(tempItemID) != 0)
             return true;
@@ -891,7 +891,8 @@ namespace MWMechanics
             return true;
 
         // TODO: implement a better check to check if target is owned bed
-        if (target.getClass().isActivator() && target.getClass().getScript(target).compare(0, 3, "Bed") != 0)
+        if (target.getClass().isActivator()
+            && target.getClass().getScript(target).getRefIdString().starts_with("Bed") != 0)
             return true;
 
         if (target.getClass().isNpc())
@@ -913,7 +914,7 @@ namespace MWMechanics
             return false;
 
         // A special case for evidence chest - we should not allow to take items even if it is technically permitted
-        return !Misc::StringUtils::ciEqual(cellref.getRefId(), "stolen_goods");
+        return !(cellref.getRefId() == "stolen_goods");
     }
 
     bool MechanicsManager::sleepInBed(const MWWorld::Ptr& ptr, const MWWorld::Ptr& bed)
@@ -957,10 +958,10 @@ namespace MWMechanics
         }
     }
 
-    std::vector<std::pair<std::string, int>> MechanicsManager::getStolenItemOwners(const std::string& itemid)
+    std::vector<std::pair<ESM::RefId, int>> MechanicsManager::getStolenItemOwners(const ESM::RefId& itemid)
     {
-        std::vector<std::pair<std::string, int>> result;
-        StolenItemsMap::const_iterator it = mStolenItems.find(Misc::StringUtils::lowerCase(itemid));
+        std::vector<std::pair<ESM::RefId, int>> result;
+        StolenItemsMap::const_iterator it = mStolenItems.find(itemid);
         if (it == mStolenItems.end())
             return result;
         else
@@ -972,23 +973,22 @@ namespace MWMechanics
         }
     }
 
-    bool MechanicsManager::isItemStolenFrom(const std::string& itemid, const MWWorld::Ptr& ptr)
+    bool MechanicsManager::isItemStolenFrom(const ESM::RefId& itemid, const MWWorld::Ptr& ptr)
     {
-        StolenItemsMap::const_iterator it = mStolenItems.find(Misc::StringUtils::lowerCase(itemid));
+        StolenItemsMap::const_iterator it = mStolenItems.find(itemid);
         if (it == mStolenItems.end())
             return false;
 
         const OwnerMap& owners = it->second;
-        const std::string& ownerid = ptr.getCellRef().getRefId();
-        OwnerMap::const_iterator ownerFound = owners.find(std::make_pair(Misc::StringUtils::lowerCase(ownerid), false));
+        const ESM::RefId& ownerid = ptr.getCellRef().getRefId();
+        OwnerMap::const_iterator ownerFound = owners.find(std::make_pair(ownerid, false));
         if (ownerFound != owners.end())
             return true;
 
-        const std::string_view factionid = ptr.getClass().getPrimaryFaction(ptr);
+        const ESM::RefId& factionid = ptr.getClass().getPrimaryFaction(ptr);
         if (!factionid.empty())
         {
-            OwnerMap::const_iterator factionOwnerFound
-                = owners.find(std::make_pair(Misc::StringUtils::lowerCase(factionid), true));
+            OwnerMap::const_iterator factionOwnerFound = owners.find(std::make_pair(factionid, true));
             return factionOwnerFound != owners.end();
         }
 
@@ -1001,7 +1001,7 @@ namespace MWMechanics
         if (player != getPlayer())
             return;
 
-        const std::string itemId = Misc::StringUtils::lowerCase(item.getCellRef().getRefId());
+        const ESM::RefId& itemId = item.getCellRef().getRefId();
 
         StolenItemsMap::iterator stolenIt = mStolenItems.find(itemId);
         if (stolenIt == mStolenItems.end())
@@ -1011,15 +1011,12 @@ namespace MWMechanics
         owner.first = victim.getCellRef().getRefId();
         owner.second = false;
 
-        const std::string_view victimFaction = victim.getClass().getPrimaryFaction(victim);
-        if (!victimFaction.empty()
-            && Misc::StringUtils::ciEqual(item.getCellRef().getFaction(), victimFaction)) // Is the item faction-owned?
+        const ESM::RefId& victimFaction = victim.getClass().getPrimaryFaction(victim);
+        if (!victimFaction.empty() && item.getCellRef().getFaction() == victimFaction) // Is the item faction-owned?
         {
             owner.first = victimFaction;
             owner.second = true;
         }
-
-        Misc::StringUtils::lowerCaseInPlace(owner.first);
 
         // decrease count of stolen items
         int toRemove = std::min(count, mStolenItems[itemId][owner]);
@@ -1048,8 +1045,7 @@ namespace MWMechanics
         MWWorld::ContainerStore& containerStore = targetContainer.getClass().getContainerStore(targetContainer);
         for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
         {
-            StolenItemsMap::iterator stolenIt
-                = mStolenItems.find(Misc::StringUtils::lowerCase(it->getCellRef().getRefId()));
+            StolenItemsMap::iterator stolenIt = mStolenItems.find(it->getCellRef().getRefId());
             if (stolenIt == mStolenItems.end())
                 continue;
             OwnerMap& owners = stolenIt->second;
@@ -1120,21 +1116,19 @@ namespace MWMechanics
             }
         }
 
-        Misc::StringUtils::lowerCaseInPlace(owner.first);
-
-        if (!Misc::StringUtils::ciEqual(item.getCellRef().getRefId(), MWWorld::ContainerStore::sGoldId))
+        if (!(item.getCellRef().getRefId() == MWWorld::ContainerStore::sGoldId))
         {
             if (victim.isEmpty()
                 || (victim.getClass().isActor() && victim.getRefData().getCount() > 0
                     && !victim.getClass().getCreatureStats(victim).isDead()))
-                mStolenItems[Misc::StringUtils::lowerCase(item.getCellRef().getRefId())][owner] += count;
+                mStolenItems[item.getCellRef().getRefId()][owner] += count;
         }
         if (alarm)
             commitCrime(ptr, victim, OT_Theft, ownerCellRef->getFaction(), item.getClass().getValue(item) * count);
     }
 
     bool MechanicsManager::commitCrime(const MWWorld::Ptr& player, const MWWorld::Ptr& victim, OffenseType type,
-        const std::string& factionId, int arg, bool victimAware)
+        const ESM::RefId& factionId, int arg, bool victimAware)
     {
         // NOTE: victim may be empty
 
@@ -1175,7 +1169,7 @@ namespace MWMechanics
             {
                 // NPC will complain about theft even if he will do nothing about it
                 if (type == OT_Theft || type == OT_Pickpocket)
-                    MWBase::Environment::get().getDialogueManager()->say(neighbor, "thief");
+                    MWBase::Environment::get().getDialogueManager()->say(neighbor, ESM::RefId::stringRefId("thief"));
 
                 crimeSeen = true;
             }
@@ -1188,7 +1182,7 @@ namespace MWMechanics
             bool reported = false;
             if (victim.getClass().isClass(victim, "guard")
                 && !victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackageTypeId::Pursue))
-                reported = reportCrime(player, victim, type, std::string(), arg);
+                reported = reportCrime(player, victim, type, ESM::RefId::sEmpty, arg);
 
             if (!reported)
                 startCombat(victim,
@@ -1221,7 +1215,7 @@ namespace MWMechanics
     }
 
     bool MechanicsManager::reportCrime(
-        const MWWorld::Ptr& player, const MWWorld::Ptr& victim, OffenseType type, const std::string& factionId, int arg)
+        const MWWorld::Ptr& player, const MWWorld::Ptr& victim, OffenseType type, const ESM::RefId& factionId, int arg)
     {
         const MWWorld::Store<ESM::GameSetting>& store
             = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -1313,7 +1307,7 @@ namespace MWMechanics
                 reported = true;
 
                 if (type == OT_Trespassing)
-                    MWBase::Environment::get().getDialogueManager()->say(actor, "intruder");
+                    MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("intruder"));
             }
         }
 
@@ -1387,18 +1381,18 @@ namespace MWMechanics
             // If committing a crime against a faction member, expell from the faction
             if (!victim.isEmpty() && victim.getClass().isNpc())
             {
-                std::string_view factionID = victim.getClass().getPrimaryFaction(victim);
+                const ESM::RefId& factionID = victim.getClass().getPrimaryFaction(victim);
 
-                const std::map<std::string, int>& playerRanks = player.getClass().getNpcStats(player).getFactionRanks();
-                if (playerRanks.find(Misc::StringUtils::lowerCase(factionID)) != playerRanks.end())
+                const std::map<ESM::RefId, int>& playerRanks = player.getClass().getNpcStats(player).getFactionRanks();
+                if (playerRanks.find(factionID) != playerRanks.end())
                 {
                     player.getClass().getNpcStats(player).expell(factionID);
                 }
             }
             else if (!factionId.empty())
             {
-                const std::map<std::string, int>& playerRanks = player.getClass().getNpcStats(player).getFactionRanks();
-                if (playerRanks.find(Misc::StringUtils::lowerCase(factionId)) != playerRanks.end())
+                const std::map<ESM::RefId, int>& playerRanks = player.getClass().getNpcStats(player).getFactionRanks();
+                if (playerRanks.find(factionId) != playerRanks.end())
                 {
                     player.getClass().getNpcStats(player).expell(factionId);
                 }
@@ -1439,7 +1433,7 @@ namespace MWMechanics
 
                 if (statsTarget.getFriendlyHits() < 4)
                 {
-                    MWBase::Environment::get().getDialogueManager()->say(target, "hit");
+                    MWBase::Environment::get().getDialogueManager()->say(target, ESM::RefId::stringRefId("hit"));
                     return false;
                 }
             }
@@ -1461,7 +1455,7 @@ namespace MWMechanics
                 // If an actor has OnPCHitMe declared in his script, his Fight = 0 and the attacker is player,
                 // he will attack the player only if we will force him (e.g. via StartCombat console command)
                 bool peaceful = false;
-                std::string_view script = target.getClass().getScript(target);
+                const ESM::RefId& script = target.getClass().getScript(target);
                 if (!script.empty() && target.getRefData().getLocals().hasVar(script, "onpchitme")
                     && attacker == player)
                 {
@@ -1613,7 +1607,7 @@ namespace MWMechanics
         {
             // We don't care about dialogue filters since the target is invalid.
             // We still want to play the combat taunt.
-            MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
+            MWBase::Environment::get().getDialogueManager()->say(ptr, ESM::RefId::stringRefId("attack"));
             return;
         }
 
@@ -1651,7 +1645,7 @@ namespace MWMechanics
         }
 
         // Must be done after the target is set up, so that CreatureTargetted dialogue filter works properly
-        MWBase::Environment::get().getDialogueManager()->say(ptr, "attack");
+        MWBase::Environment::get().getDialogueManager()->say(ptr, ESM::RefId::stringRefId("attack"));
     }
 
     void MechanicsManager::stopCombat(const MWWorld::Ptr& actor)
@@ -1843,12 +1837,13 @@ namespace MWMechanics
         if (werewolf)
         {
             inv.unequipAll(actor);
-            inv.equip(MWWorld::InventoryStore::Slot_Robe, inv.ContainerStore::add("werewolfrobe", 1, actor), actor);
+            inv.equip(MWWorld::InventoryStore::Slot_Robe,
+                inv.ContainerStore::add(ESM::RefId::stringRefId("werewolfrobe"), 1, actor), actor);
         }
         else
         {
             inv.unequipSlot(MWWorld::InventoryStore::Slot_Robe, actor);
-            inv.ContainerStore::remove("werewolfrobe", 1, actor);
+            inv.ContainerStore::remove(ESM::RefId::stringRefId("werewolfrobe"), 1, actor);
         }
 
         if (actor == player->getPlayer())

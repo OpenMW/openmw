@@ -286,7 +286,7 @@ void CSVRender::UnpagedWorldspaceWidget::pathgridDataChanged(const QModelIndex& 
     for (int row = rowStart; row <= rowEnd; ++row)
     {
         const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
-        if (mCellId == pathgrid.mId)
+        if (ESM::RefId::stringRefId(mCellId) == pathgrid.mId)
         {
             mCell->pathgridModified();
             flagAsModified();
@@ -305,7 +305,7 @@ void CSVRender::UnpagedWorldspaceWidget::pathgridAboutToBeRemoved(const QModelIn
         for (int row = start; row <= end; ++row)
         {
             const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
-            if (mCellId == pathgrid.mId)
+            if (ESM::RefId::stringRefId(mCellId) == pathgrid.mId)
             {
                 mCell->pathgridRemoved();
                 flagAsModified();
@@ -324,7 +324,7 @@ void CSVRender::UnpagedWorldspaceWidget::pathgridAdded(const QModelIndex& parent
         for (int row = start; row <= end; ++row)
         {
             const CSMWorld::Pathgrid& pathgrid = pathgrids.getRecord(row).get();
-            if (mCellId == pathgrid.mId)
+            if (ESM::RefId::stringRefId(mCellId) == pathgrid.mId)
             {
                 mCell->pathgridModified();
                 flagAsModified();

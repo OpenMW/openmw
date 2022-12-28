@@ -41,7 +41,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("FNAM"):
@@ -60,7 +60,7 @@ namespace ESM
                     break;
                 case fourCC("ANAM"):
                 {
-                    std::string faction = esm.getHString();
+                    ESM::RefId faction = esm.getRefId();
                     int reaction;
                     esm.getHNT(reaction, "INTV");
                     mReactions[faction] = reaction;
@@ -84,7 +84,7 @@ namespace ESM
 
     void Faction::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {
@@ -104,9 +104,9 @@ namespace ESM
 
         esm.writeHNT("FADT", mData, 240);
 
-        for (std::map<std::string, int>::const_iterator it = mReactions.begin(); it != mReactions.end(); ++it)
+        for (auto it = mReactions.begin(); it != mReactions.end(); ++it)
         {
-            esm.writeHNString("ANAM", it->first);
+            esm.writeHNString("ANAM", it->first.getRefIdString());
             esm.writeHNT("INTV", it->second);
         }
     }

@@ -92,7 +92,7 @@ int CSMTools::ScriptCheckStage::setup()
 
     mContext.clear();
     mMessages = nullptr;
-    mId.clear();
+    mId = ESM::RefId::sEmpty;
     Compiler::ErrorHandler::reset();
 
     mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
@@ -130,7 +130,7 @@ void CSMTools::ScriptCheckStage::perform(int stage, CSMDoc::Messages& messages)
 
     try
     {
-        mFile = record.get().mId;
+        mFile = record.get().mId.getRefIdString();
         std::istringstream input(record.get().mScriptText);
 
         Compiler::Scanner scanner(*this, input, mContext.getExtensions());

@@ -11,7 +11,7 @@ namespace MWWorld
     /// \brief Abstract base for actions
     class Action
     {
-        std::string mSoundId;
+        ESM::RefId mSoundId;
         bool mKeepSound;
         float mSoundOffset;
         Ptr mTarget;
@@ -38,7 +38,7 @@ namespace MWWorld
 
         void execute(const Ptr& actor, bool noSound = false);
 
-        void setSound(std::string_view id);
+        void setSound(const ESM::RefId& id);
         void setSoundOffset(float offset);
     };
 }

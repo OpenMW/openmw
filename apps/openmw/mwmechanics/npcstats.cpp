@@ -64,88 +64,83 @@ void MWMechanics::NpcStats::setSkill(int index, const MWMechanics::SkillValue& v
     mSkill[index] = value;
 }
 
-const std::map<std::string, int>& MWMechanics::NpcStats::getFactionRanks() const
+const std::map<ESM::RefId, int>& MWMechanics::NpcStats::getFactionRanks() const
 {
     return mFactionRank;
 }
 
-int MWMechanics::NpcStats::getFactionRank(std::string_view faction) const
+int MWMechanics::NpcStats::getFactionRank(const ESM::RefId& faction) const
 {
-    const std::string lower = Misc::StringUtils::lowerCase(faction);
-    std::map<std::string, int>::const_iterator it = mFactionRank.find(lower);
+    auto it = mFactionRank.find(faction);
     if (it != mFactionRank.end())
         return it->second;
 
     return -1;
 }
 
-void MWMechanics::NpcStats::raiseRank(std::string_view faction)
+void MWMechanics::NpcStats::raiseRank(const ESM::RefId& faction)
 {
-    const std::string lower = Misc::StringUtils::lowerCase(faction);
-    std::map<std::string, int>::iterator it = mFactionRank.find(lower);
+    auto it = mFactionRank.find(faction);
     if (it != mFactionRank.end())
     {
         // Does the next rank exist?
         const ESM::Faction* factionPtr
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(lower);
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(faction);
         if (it->second + 1 < 10 && !factionPtr->mRanks[it->second + 1].empty())
             it->second += 1;
     }
 }
 
-void MWMechanics::NpcStats::lowerRank(std::string_view faction)
+void MWMechanics::NpcStats::lowerRank(const ESM::RefId& faction)
 {
-    const std::string lower = Misc::StringUtils::lowerCase(faction);
-    std::map<std::string, int>::iterator it = mFactionRank.find(lower);
+    auto it = mFactionRank.find(faction);
     if (it != mFactionRank.end())
     {
         it->second = it->second - 1;
         if (it->second < 0)
         {
             mFactionRank.erase(it);
-            mExpelled.erase(lower);
+            mExpelled.erase(faction);
         }
     }
 }
 
-void MWMechanics::NpcStats::joinFaction(std::string_view faction)
+void MWMechanics::NpcStats::joinFaction(const ESM::RefId& faction)
 {
-    const std::string lower = Misc::StringUtils::lowerCase(faction);
-    std::map<std::string, int>::iterator it = mFactionRank.find(lower);
+    auto it = mFactionRank.find(faction);
     if (it == mFactionRank.end())
-        mFactionRank[lower] = 0;
+        mFactionRank[faction] = 0;
 }
 
-bool MWMechanics::NpcStats::getExpelled(std::string_view factionID) const
+bool MWMechanics::NpcStats::getExpelled(const ESM::RefId& factionID) const
 {
-    return mExpelled.find(Misc::StringUtils::lowerCase(factionID)) != mExpelled.end();
+    return mExpelled.find(factionID) != mExpelled.end();
 }
 
-void MWMechanics::NpcStats::expell(std::string_view factionID)
+void MWMechanics::NpcStats::expell(const ESM::RefId& factionID)
 {
-    std::string lower = Misc::StringUtils::lowerCase(factionID);
-    if (mExpelled.find(lower) == mExpelled.end())
+    if (mExpelled.find(factionID) == mExpelled.end())
     {
         std::string message = "#{sExpelledMessage}";
         message += MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID)->mName;
         MWBase::Environment::get().getWindowManager()->messageBox(message);
-        mExpelled.insert(lower);
+        mExpelled.insert(factionID);
     }
 }
 
-void MWMechanics::NpcStats::clearExpelled(std::string_view factionID)
+void MWMechanics::NpcStats::clearExpelled(const ESM::RefId& factionID)
 {
-    mExpelled.erase(Misc::StringUtils::lowerCase(factionID));
+    mExpelled.erase(factionID);
 }
 
-bool MWMechanics::NpcStats::isInFaction(std::string_view faction) const
+bool MWMechanics::NpcStats::isInFaction(const ESM::RefId& faction) const
 {
-    return (mFactionRank.find(Misc::StringUtils::lowerCase(faction)) != mFactionRank.end());
+    return (mFactionRank.find(faction) != mFactionRank.end());
 }
 
-int MWMechanics::NpcStats::getFactionReputation(std::string_view faction) const
+int MWMechanics::NpcStats::getFactionReputation(const ESM::RefId& faction) const
 {
-    std::map<std::string, int>::const_iterator iter = mFactionReputation.find(Misc::StringUtils::lowerCase(faction));
+    auto iter = mFactionReputation.find(faction);
 
     if (iter == mFactionReputation.end())
         return 0;
@@ -153,9 +148,9 @@ int MWMechanics::NpcStats::getFactionReputation(std::string_view faction) const
     return iter->second;
 }
 
-void MWMechanics::NpcStats::setFactionReputation(std::string_view faction, int value)
+void MWMechanics::NpcStats::setFactionReputation(const ESM::RefId& faction, int value)
 {
-    mFactionReputation[Misc::StringUtils::lowerCase(faction)] = value;
+    mFactionReputation[faction] = value;
 }
 
 float MWMechanics::NpcStats::getSkillProgressRequirement(int skillIndex, const ESM::Class& class_) const
@@ -264,7 +259,7 @@ void MWMechanics::NpcStats::increaseSkill(
 
     // Play sound & skill progress notification
     /// \todo check if character is the player, if levelling is ever implemented for NPCs
-    MWBase::Environment::get().getWindowManager()->playSound("skillraise");
+    MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("skillraise"));
 
     std::string message{ MWBase::Environment::get().getWindowManager()->getGameSettingString("sNotifyMessage39", {}) };
     message = Misc::StringUtils::format(
@@ -351,12 +346,12 @@ int MWMechanics::NpcStats::getSkillIncreasesForSpecialization(int spec) const
     return mSpecIncreases[spec];
 }
 
-void MWMechanics::NpcStats::flagAsUsed(const std::string& id)
+void MWMechanics::NpcStats::flagAsUsed(const ESM::RefId& id)
 {
     mUsedIds.insert(id);
 }
 
-bool MWMechanics::NpcStats::hasBeenUsed(const std::string& id) const
+bool MWMechanics::NpcStats::hasBeenUsed(const ESM::RefId& id) const
 {
     return mUsedIds.find(id) != mUsedIds.end();
 }
@@ -392,7 +387,7 @@ void MWMechanics::NpcStats::setCrimeId(int id)
     mCrimeId = id;
 }
 
-bool MWMechanics::NpcStats::hasSkillsForRank(std::string_view factionId, int rank) const
+bool MWMechanics::NpcStats::hasSkillsForRank(const ESM::RefId& factionId, int rank) const
 {
     if (rank < 0 || rank >= 10)
         throw std::runtime_error("rank index out of range");
@@ -481,7 +476,7 @@ void MWMechanics::NpcStats::writeState(ESM::CreatureStats& state) const
 
 void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
 {
-    for (std::map<std::string, int>::const_iterator iter(mFactionRank.begin()); iter != mFactionRank.end(); ++iter)
+    for (std::map<ESM::RefId, int>::const_iterator iter(mFactionRank.begin()); iter != mFactionRank.end(); ++iter)
         state.mFactions[iter->first].mRank = iter->second;
 
     state.mDisposition = mDisposition;
@@ -495,11 +490,10 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
 
     state.mBounty = mBounty;
 
-    for (std::set<std::string>::const_iterator iter(mExpelled.begin()); iter != mExpelled.end(); ++iter)
+    for (auto iter(mExpelled.begin()); iter != mExpelled.end(); ++iter)
         state.mFactions[*iter].mExpelled = true;
 
-    for (std::map<std::string, int>::const_iterator iter(mFactionReputation.begin()); iter != mFactionReputation.end();
-         ++iter)
+    for (auto iter(mFactionReputation.begin()); iter != mFactionReputation.end(); ++iter)
         state.mFactions[iter->first].mReputation = iter->second;
 
     state.mReputation = mReputation;
@@ -525,8 +519,7 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
 {
     const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
-    for (std::map<std::string, ESM::NpcStats::Faction>::const_iterator iter(state.mFactions.begin());
-         iter != state.mFactions.end(); ++iter)
+    for (auto iter(state.mFactions.begin()); iter != state.mFactions.end(); ++iter)
         if (store.get<ESM::Faction>().search(iter->first))
         {
             if (iter->second.mExpelled)
@@ -536,7 +529,7 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
                 mFactionRank[iter->first] = iter->second.mRank;
 
             if (iter->second.mReputation)
-                mFactionReputation[Misc::StringUtils::lowerCase(iter->first)] = iter->second.mReputation;
+                mFactionReputation[iter->first] = iter->second.mReputation;
         }
 
     mDisposition = state.mDisposition;
@@ -558,7 +551,7 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
     for (int i = 0; i < 3; ++i)
         mSpecIncreases[i] = state.mSpecIncreases[i];
 
-    for (std::vector<std::string>::const_iterator iter(state.mUsedIds.begin()); iter != state.mUsedIds.end(); ++iter)
+    for (auto iter(state.mUsedIds.begin()); iter != state.mUsedIds.end(); ++iter)
         if (store.find(*iter))
             mUsedIds.insert(*iter);
 

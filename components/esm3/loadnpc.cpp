@@ -26,7 +26,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("MODL"):
@@ -36,22 +36,22 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("RNAM"):
-                    mRace = esm.getHString();
+                    mRace = esm.getRefId();
                     break;
                 case fourCC("CNAM"):
-                    mClass = esm.getHString();
+                    mClass = esm.getRefId();
                     break;
                 case fourCC("ANAM"):
-                    mFaction = esm.getHString();
+                    mFaction = esm.getRefId();
                     break;
                 case fourCC("BNAM"):
-                    mHead = esm.getHString();
+                    mHead = esm.getRefId();
                     break;
                 case fourCC("KNAM"):
-                    mHair = esm.getHString();
+                    mHair = esm.getRefId();
                     break;
                 case fourCC("SCRI"):
-                    mScript = esm.getHString();
+                    mScript = esm.getRefId();
                     break;
                 case fourCC("NPDT"):
                     hasNpdt = true;
@@ -127,7 +127,7 @@ namespace ESM
     }
     void NPC::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {
@@ -137,12 +137,12 @@ namespace ESM
 
         esm.writeHNOCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
-        esm.writeHNCString("RNAM", mRace);
-        esm.writeHNCString("CNAM", mClass);
-        esm.writeHNCString("ANAM", mFaction);
-        esm.writeHNCString("BNAM", mHead);
-        esm.writeHNCString("KNAM", mHair);
-        esm.writeHNOCString("SCRI", mScript);
+        esm.writeHNCString("RNAM", mRace.getRefIdString());
+        esm.writeHNCString("CNAM", mClass.getRefIdString());
+        esm.writeHNCString("ANAM", mFaction.getRefIdString());
+        esm.writeHNCString("BNAM", mHead.getRefIdString());
+        esm.writeHNCString("KNAM", mHair.getRefIdString());
+        esm.writeHNOCString("SCRI", mScript.getRefIdString());
 
         if (mNpdtType == NPC_DEFAULT)
         {
@@ -202,12 +202,12 @@ namespace ESM
         mAiPackage.mList.clear();
         mName.clear();
         mModel.clear();
-        mRace.clear();
-        mClass.clear();
-        mFaction.clear();
-        mScript.clear();
-        mHair.clear();
-        mHead.clear();
+        mRace = ESM::RefId::sEmpty;
+        mClass = ESM::RefId::sEmpty;
+        mFaction = ESM::RefId::sEmpty;
+        mScript = ESM::RefId::sEmpty;
+        mHair = ESM::RefId::sEmpty;
+        mHead = ESM::RefId::sEmpty;
     }
 
     void NPC::blankNpdt()

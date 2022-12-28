@@ -112,7 +112,7 @@ namespace MWMechanics
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             if (Misc::Rng::roll0to99(prng) <= x)
             {
-                trap.getCellRef().setTrap("");
+                trap.getCellRef().setTrap(ESM::RefId::sEmpty);
 
                 resultSound = "Disarm Trap";
                 resultMessage = "#{sTrapSuccess}";

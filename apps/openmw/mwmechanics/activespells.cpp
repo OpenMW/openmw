@@ -247,7 +247,7 @@ namespace MWMechanics
                     auto slot = store.getSlot(slotIndex);
                     if (slot == store.end())
                         continue;
-                    const std::string_view enchantmentId = slot->getClass().getEnchantment(*slot);
+                    const ESM::RefId& enchantmentId = slot->getClass().getEnchantment(*slot);
                     if (enchantmentId.empty())
                         continue;
                     const ESM::Enchantment* enchantment = world->getStore().get<ESM::Enchantment>().find(enchantmentId);
@@ -325,7 +325,8 @@ namespace MWMechanics
             if (reflected)
             {
                 const ESM::Static* reflectStatic
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find("VFX_Reflect");
+                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find(
+                        ESM::RefId::stringRefId("VFX_Reflect"));
                 MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
                 if (animation && !reflectStatic->mModel.empty())
                 {
@@ -416,11 +417,10 @@ namespace MWMechanics
         return mSpells.end();
     }
 
-    bool ActiveSpells::isSpellActive(std::string_view id) const
+    bool ActiveSpells::isSpellActive(const ESM::RefId& id) const
     {
-        return std::find_if(mSpells.begin(), mSpells.end(), [&](const auto& spell) {
-            return Misc::StringUtils::ciEqual(spell.mId, id);
-        }) != mSpells.end();
+        return std::find_if(mSpells.begin(), mSpells.end(), [&](const auto& spell) { return spell.mId == id; })
+            != mSpells.end();
     }
 
     void ActiveSpells::addSpell(const ActiveSpellParams& params)
@@ -518,7 +518,7 @@ namespace MWMechanics
         return removedCurrentSpell;
     }
 
-    void ActiveSpells::removeEffects(const MWWorld::Ptr& ptr, std::string_view id)
+    void ActiveSpells::removeEffects(const MWWorld::Ptr& ptr, const ESM::RefId& id)
     {
         purge([=](const ActiveSpellParams& params) { return params.mId == id; }, ptr);
     }

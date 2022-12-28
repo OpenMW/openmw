@@ -11,6 +11,11 @@
 
 class QVariant;
 
+namespace ESM
+{
+    struct RefId;
+}
+
 namespace CSMWorld
 {
     struct ColumnBase;
@@ -35,9 +40,9 @@ namespace CSMWorld
 
         virtual int getSize() const = 0;
 
-        virtual std::string getId(int index) const = 0;
+        virtual ESM::RefId getId(int index) const = 0;
 
-        virtual int getIndex(const std::string& id) const = 0;
+        virtual int getIndex(const ESM::RefId& id) const = 0;
 
         virtual int getColumns() const = 0;
 
@@ -57,10 +62,14 @@ namespace CSMWorld
 
         virtual void removeRows(int index, int count) = 0;
 
-        virtual void appendBlankRecord(const std::string& id, UniversalId::Type type = UniversalId::Type_None) = 0;
+        virtual void appendBlankRecord(const ESM::RefId& id, UniversalId::Type type = UniversalId::Type_None) = 0;
         ///< \param type Will be ignored, unless the collection supports multiple record types
 
         virtual int searchId(std::string_view id) const = 0;
+        ////< Search record with \a id.
+        /// \return index of record (if found) or -1 (not found)
+
+        virtual int searchId(const ESM::RefId& id) const = 0;
         ////< Search record with \a id.
         /// \return index of record (if found) or -1 (not found)
 
@@ -74,20 +83,19 @@ namespace CSMWorld
             = 0;
         ///< If the record type does not match, an exception is thrown.
 
-        virtual void cloneRecord(
-            const std::string& origin, const std::string& destination, const UniversalId::Type type)
+        virtual void cloneRecord(const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type)
             = 0;
 
-        virtual bool touchRecord(const std::string& id) = 0;
+        virtual bool touchRecord(const ESM::RefId& id) = 0;
 
-        virtual const RecordBase& getRecord(const std::string& id) const = 0;
+        virtual const RecordBase& getRecord(const ESM::RefId& id) const = 0;
 
         virtual const RecordBase& getRecord(int index) const = 0;
 
-        virtual int getAppendIndex(const std::string& id, UniversalId::Type type = UniversalId::Type_None) const = 0;
+        virtual int getAppendIndex(const ESM::RefId& id, UniversalId::Type type = UniversalId::Type_None) const = 0;
         ///< \param type Will be ignored, unless the collection supports multiple record types
 
-        virtual std::vector<std::string> getIds(bool listDeleted = true) const = 0;
+        virtual std::vector<ESM::RefId> getIds(bool listDeleted = true) const = 0;
         ///< Return a sorted collection of all IDs
         ///
         /// \param listDeleted include deleted record in the list

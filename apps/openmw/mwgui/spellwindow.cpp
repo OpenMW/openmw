@@ -136,17 +136,17 @@ namespace MWGui
         updateSpells();
     }
 
-    void SpellWindow::askDeleteSpell(const std::string& spellId)
+    void SpellWindow::askDeleteSpell(const ESM::RefId& spellId)
     {
         // delete spell, if allowed
         const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        const std::string& raceId = player.get<ESM::NPC>()->mBase->mRace;
+        const ESM::RefId& raceId = player.get<ESM::NPC>()->mBase->mRace;
         const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(raceId);
         // can't delete racial spells, birthsign spells or powers
         bool isInherent = race->mPowers.exists(spell->mId) || spell->mData.mType == ESM::Spell::ST_Power;
-        const std::string& signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
+        const ESM::RefId& signId = MWBase::Environment::get().getWorld()->getPlayer().getBirthSign();
         if (!isInherent && !signId.empty())
         {
             const ESM::BirthSign* sign
@@ -205,7 +205,7 @@ namespace MWGui
             askDeleteSpell(spell.mId);
     }
 
-    void SpellWindow::onSpellSelected(const std::string& spellId)
+    void SpellWindow::onSpellSelected(const ESM::RefId& spellId)
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);

@@ -7,6 +7,7 @@
 
 #include <osg/Vec4f>
 
+#include <components/esm/refid.hpp>
 #include <components/fallback/fallback.hpp>
 
 #include "../mwbase/soundmanager.hpp"
@@ -157,7 +158,7 @@ namespace MWWorld
 
         // Sound effect
         // This is used for Blight, Ashstorm and Blizzard (Bloodmoon)
-        std::string mAmbientLoopSoundID;
+        ESM::RefId mAmbientLoopSoundID;
 
         // Is this an ash storm / blight storm? If so, the following will happen:
         // - The particles and clouds will be oriented so they appear to come from the Red Mountain.
@@ -210,7 +211,7 @@ namespace MWWorld
         // non-zero values.
         float mThunderFrequency;
         float mThunderThreshold;
-        std::string mThunderSoundID[4];
+        ESM::RefId mThunderSoundID[4];
         float mFlashDecrement;
 
         float mFlashBrightness;
@@ -284,9 +285,9 @@ namespace MWWorld
          * @param region that should be changed
          * @param ID of the weather setting to shift to
          */
-        void changeWeather(std::string_view regionID, const unsigned int weatherID);
-        void modRegion(std::string_view regionID, const std::vector<char>& chances);
-        void playerTeleported(const std::string& playerRegion, bool isExterior);
+        void changeWeather(const ESM::RefId& regionID, const unsigned int weatherID);
+        void modRegion(const ESM::RefId& regionID, const std::vector<char>& chances);
+        void playerTeleported(const ESM::RefId& playerRegion, bool isExterior);
 
         /**
          * Per-frame update
@@ -356,7 +357,7 @@ namespace MWWorld
         bool mPrecipitation;
         osg::Vec3f mStormDirection;
 
-        std::string mCurrentRegion;
+        ESM::RefId mCurrentRegion;
         float mTimePassed;
         bool mFastForward;
         float mWeatherUpdateTime;
@@ -365,20 +366,20 @@ namespace MWWorld
         int mCurrentWeather;
         int mNextWeather;
         int mQueuedWeather;
-        std::map<std::string, RegionWeather> mRegions;
+        std::map<ESM::RefId, RegionWeather> mRegions;
         MWRender::WeatherResult mResult;
 
         MWBase::Sound* mAmbientSound;
-        std::string mPlayingSoundID;
+        ESM::RefId mPlayingSoundID;
 
         void addWeather(
             const std::string& name, float dlFactor, float dlOffset, const std::string& particleEffect = "");
 
         void importRegions();
 
-        void regionalWeatherChanged(const std::string& regionID, RegionWeather& region);
+        void regionalWeatherChanged(const ESM::RefId& regionID, RegionWeather& region);
         bool updateWeatherTime();
-        bool updateWeatherRegion(const std::string& playerRegion);
+        bool updateWeatherRegion(const ESM::RefId& playerRegion);
         void updateWeatherTransitions(const float elapsedRealSeconds);
         void forceWeather(const int weatherID);
 

@@ -6,6 +6,7 @@
 #include "variant.hpp"
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -26,7 +27,7 @@ namespace ESM
         static std::string_view getRecordType() { return "GameSetting"; }
 
         unsigned int mRecordFlags;
-        std::string mId;
+        RefId mId;
 
         Variant mValue;
 

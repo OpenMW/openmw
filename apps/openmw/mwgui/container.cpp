@@ -223,7 +223,7 @@ namespace MWGui
             {
                 // play the sound of the first object
                 MWWorld::Ptr item = mModel->getItem(i).mBase;
-                std::string_view sound = item.getClass().getUpSoundId(item);
+                const ESM::RefId& sound = item.getClass().getUpSoundId(item);
                 MWBase::Environment::get().getWindowManager()->playSound(sound);
             }
 
@@ -261,7 +261,7 @@ namespace MWGui
                     creatureStats.setDeathAnimationFinished(true);
                     MWBase::Environment::get().getMechanicsManager()->notifyDied(ptr);
 
-                    std::string_view script = ptr.getClass().getScript(ptr);
+                    const ESM::RefId& script = ptr.getClass().getScript(ptr);
                     if (!script.empty() && MWBase::Environment::get().getWorld()->getScriptsEnabled())
                     {
                         MWScript::InterpreterContext interpreterContext(&ptr.getRefData().getLocals(), ptr);

@@ -185,10 +185,14 @@ namespace MWWorld
     {
         mDL.FogFactor = dlFactor;
         mDL.FogOffset = dlOffset;
-        mThunderSoundID[0] = Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_0");
-        mThunderSoundID[1] = Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_1");
-        mThunderSoundID[2] = Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_2");
-        mThunderSoundID[3] = Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_3");
+        mThunderSoundID[0]
+            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_0"));
+        mThunderSoundID[1]
+            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_1"));
+        mThunderSoundID[2]
+            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_2"));
+        mThunderSoundID[3]
+            = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Thunder_Sound_ID_3"));
 
         // TODO: support weathers that have both "Ambient Loop Sound ID" and "Rain Loop Sound ID", need to play both
         // sounds at the same time.
@@ -196,15 +200,17 @@ namespace MWWorld
         if (!mRainEffect.empty()) // NOTE: in vanilla, the weathers with rain seem to be hardcoded; changing
                                   // Using_Precip has no effect
         {
-            mAmbientLoopSoundID = Fallback::Map::getString("Weather_" + name + "_Rain_Loop_Sound_ID");
+            mAmbientLoopSoundID
+                = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Rain_Loop_Sound_ID"));
             if (mAmbientLoopSoundID.empty()) // default to "rain" if not set
-                mAmbientLoopSoundID = "rain";
+                mAmbientLoopSoundID = ESM::RefId::stringRefId("rain");
         }
         else
-            mAmbientLoopSoundID = Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID");
+            mAmbientLoopSoundID
+                = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID"));
 
-        if (Misc::StringUtils::ciEqual(mAmbientLoopSoundID, "None"))
-            mAmbientLoopSoundID.clear();
+        if (mAmbientLoopSoundID == "None")
+            mAmbientLoopSoundID = ESM::RefId::sEmpty;
     }
 
     float Weather::transitionDelta() const
@@ -609,8 +615,7 @@ namespace MWWorld
         Store<ESM::Region>::iterator it = store.get<ESM::Region>().begin();
         for (; it != store.get<ESM::Region>().end(); ++it)
         {
-            std::string regionID = Misc::StringUtils::lowerCase(it->mId);
-            mRegions.insert(std::make_pair(regionID, RegionWeather(*it)));
+            mRegions.insert(std::make_pair(it->mId, RegionWeather(*it)));
         }
 
         forceWeather(0);
@@ -621,7 +626,7 @@ namespace MWWorld
         stopSounds();
     }
 
-    void WeatherManager::changeWeather(std::string_view regionID, const unsigned int weatherID)
+    void WeatherManager::changeWeather(const ESM::RefId& regionID, const unsigned int weatherID)
     {
         // In Morrowind, this seems to have the following behavior, when applied to the current region:
         // - When there is no transition in progress, start transitioning to the new weather.
@@ -634,8 +639,7 @@ namespace MWWorld
 
         if (weatherID < mWeatherSettings.size())
         {
-            std::string lowerCaseRegionID = Misc::StringUtils::lowerCase(regionID);
-            std::map<std::string, RegionWeather>::iterator it = mRegions.find(lowerCaseRegionID);
+            auto it = mRegions.find(regionID);
             if (it != mRegions.end())
             {
                 it->second.setWeather(weatherID);
@@ -644,7 +648,7 @@ namespace MWWorld
         }
     }
 
-    void WeatherManager::modRegion(std::string_view regionID, const std::vector<char>& chances)
+    void WeatherManager::modRegion(const ESM::RefId& regionID, const std::vector<char>& chances)
     {
         // Sets the region's probability for various weather patterns. Note that this appears to be saved permanently.
         // In Morrowind, this seems to have the following behavior when applied to the current region:
@@ -654,8 +658,7 @@ namespace MWWorld
         // - If the region no longer supports the current weather, and there is a transition in progress, queue a
         //   transition to a new supported weather type.
 
-        std::string lowerCaseRegionID = Misc::StringUtils::lowerCase(regionID);
-        std::map<std::string, RegionWeather>::iterator it = mRegions.find(lowerCaseRegionID);
+        auto it = mRegions.find(regionID);
         if (it != mRegions.end())
         {
             it->second.setChances(chances);
@@ -663,12 +666,12 @@ namespace MWWorld
         }
     }
 
-    void WeatherManager::playerTeleported(const std::string& playerRegion, bool isExterior)
+    void WeatherManager::playerTeleported(const ESM::RefId& playerRegion, bool isExterior)
     {
         // If the player teleports to an outdoors cell in a new region (for instance, by travelling), the weather needs
         // to be changed immediately, and any transitions for the previous region discarded.
         {
-            std::map<std::string, RegionWeather>::iterator it = mRegions.find(playerRegion);
+            auto it = mRegions.find(playerRegion);
             if (it != mRegions.end() && playerRegion != mCurrentRegion)
             {
                 mCurrentRegion = playerRegion;
@@ -700,10 +703,9 @@ namespace MWWorld
         if (!paused || mFastForward)
         {
             // Add new transitions when either the player's current external region changes.
-            std::string playerRegion = Misc::StringUtils::lowerCase(player.getCell()->getCell()->mRegion);
-            if (updateWeatherTime() || updateWeatherRegion(playerRegion))
+            if (updateWeatherTime() || updateWeatherRegion(player.getCell()->getCell()->mRegion))
             {
-                std::map<std::string, RegionWeather>::iterator it = mRegions.find(mCurrentRegion);
+                auto it = mRegions.find(mCurrentRegion);
                 if (it != mRegions.end())
                 {
                     addWeatherTransition(it->second.getWeather());
@@ -831,7 +833,7 @@ namespace MWWorld
         if (mAmbientSound)
             MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
         mAmbientSound = nullptr;
-        mPlayingSoundID.clear();
+        mPlayingSoundID = ESM::RefId::sEmpty;
     }
 
     float WeatherManager::getWindSpeed() const
@@ -903,7 +905,7 @@ namespace MWWorld
         state.mNextWeather = mNextWeather;
         state.mQueuedWeather = mQueuedWeather;
 
-        std::map<std::string, RegionWeather>::iterator it = mRegions.begin();
+        auto it = mRegions.begin();
         for (; it != mRegions.end(); ++it)
         {
             state.mRegions.insert(std::make_pair(it->first, it->second));
@@ -942,10 +944,9 @@ namespace MWWorld
                 mRegions.clear();
                 importRegions();
 
-                for (std::map<std::string, ESM::RegionWeatherState>::iterator it = state.mRegions.begin();
-                     it != state.mRegions.end(); ++it)
+                for (auto it = state.mRegions.begin(); it != state.mRegions.end(); ++it)
                 {
-                    std::map<std::string, RegionWeather>::iterator found = mRegions.find(it->first);
+                    auto found = mRegions.find(it->first);
                     if (found != mRegions.end())
                     {
                         found->second = RegionWeather(it->second);
@@ -963,7 +964,7 @@ namespace MWWorld
     {
         stopSounds();
 
-        mCurrentRegion.clear();
+        mCurrentRegion = ESM::RefId::sEmpty;
         mTimePassed = 0.0f;
         mWeatherUpdateTime = 0.0f;
         forceWeather(0);
@@ -985,18 +986,17 @@ namespace MWWorld
     {
         for (const ESM::Region& region : mStore.get<ESM::Region>())
         {
-            std::string regionID = Misc::StringUtils::lowerCase(region.mId);
-            mRegions.insert(std::make_pair(regionID, RegionWeather(region)));
+            mRegions.insert(std::make_pair(region.mId, RegionWeather(region)));
         }
     }
 
-    inline void WeatherManager::regionalWeatherChanged(const std::string& regionID, RegionWeather& region)
+    inline void WeatherManager::regionalWeatherChanged(const ESM::RefId& regionID, RegionWeather& region)
     {
         // If the region is current, then add a weather transition for it.
         MWWorld::ConstPtr player = MWMechanics::getPlayer();
         if (player.isInCell())
         {
-            if (Misc::StringUtils::ciEqual(regionID, mCurrentRegion))
+            if (regionID == mCurrentRegion)
             {
                 addWeatherTransition(region.getWeather());
             }
@@ -1010,7 +1010,7 @@ namespace MWWorld
         if (mWeatherUpdateTime <= 0.0f)
         {
             // Expire all regional weather, so that any call to getWeather() will return a new weather ID.
-            std::map<std::string, RegionWeather>::iterator it = mRegions.begin();
+            auto it = mRegions.begin();
             for (; it != mRegions.end(); ++it)
             {
                 it->second.setWeather(invalidWeatherID);
@@ -1024,7 +1024,7 @@ namespace MWWorld
         return false;
     }
 
-    inline bool WeatherManager::updateWeatherRegion(const std::string& playerRegion)
+    inline bool WeatherManager::updateWeatherRegion(const ESM::RefId& playerRegion)
     {
         if (!playerRegion.empty() && playerRegion != mCurrentRegion)
         {

@@ -31,7 +31,7 @@ void MWWorld::LiveCellRefBase::loadImp(const ESM::ObjectState& state)
 
     if (state.mHasLocals)
     {
-        std::string_view scriptId = mClass->getScript(ptr);
+        const ESM::RefId& scriptId = mClass->getScript(ptr);
         // Make sure we still have a script. It could have been coming from a content file that is no longer active.
         if (!scriptId.empty())
         {
@@ -58,7 +58,7 @@ void MWWorld::LiveCellRefBase::loadImp(const ESM::ObjectState& state)
         && !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(mRef.getSoul()))
     {
         Log(Debug::Warning) << "Soul '" << mRef.getSoul() << "' not found, removing the soul from soul gem";
-        mRef.setSoul(std::string());
+        mRef.setSoul(ESM::RefId::sEmpty);
     }
 
     MWBase::Environment::get().getLuaManager()->loadLocalScripts(ptr, state.mLuaScripts);

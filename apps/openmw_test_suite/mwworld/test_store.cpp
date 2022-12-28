@@ -20,7 +20,7 @@
 
 namespace MWMechanics
 {
-    SpellList::SpellList(const std::string& id, int type)
+    SpellList::SpellList(const ESM::RefId& id, int type)
         : mId(id)
         , mType(type)
     {
@@ -255,7 +255,7 @@ std::unique_ptr<std::istream> getEsmFile(T record, bool deleted)
 /// Tests deletion of records.
 TEST_F(StoreTest, delete_test)
 {
-    const std::string recordId = "foobar";
+    const ESM::RefId recordId = ESM::RefId::stringRefId("foobar");
 
     typedef ESM::Apparatus RecordType;
 
@@ -292,8 +292,8 @@ TEST_F(StoreTest, delete_test)
 /// Tests overwriting of records.
 TEST_F(StoreTest, overwrite_test)
 {
-    const std::string recordId = "foobar";
-    const std::string recordIdUpper = "Foobar";
+    const ESM::RefId recordId = ESM::RefId::stringRefId("foobar");
+    const ESM::RefId recordIdUpper = ESM::RefId::stringRefId("Foobar");
 
     typedef ESM::Apparatus RecordType;
 

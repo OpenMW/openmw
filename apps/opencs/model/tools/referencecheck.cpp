@@ -50,8 +50,8 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages& message
     {
         // Check for non existing referenced object
         if (mObjects.searchId(cellRef.mRefID) == -1)
-            messages.add(
-                id, "Instance of a non-existent object '" + cellRef.mRefID + "'", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Instance of a non-existent object '" + cellRef.mRefID.getRefIdString() + "'", "",
+                CSMDoc::Message::Severity_Error);
         else
         {
             // Check if reference charge is valid for it's proper referenced type
@@ -64,13 +64,14 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages& message
 
     // If object have owner, check if that owner reference is valid
     if (!cellRef.mOwner.empty() && mObjects.searchId(cellRef.mOwner) == -1)
-        messages.add(id, "Owner object '" + cellRef.mOwner + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Owner object '" + cellRef.mOwner.getRefIdString() + "' does not exist", "",
+            CSMDoc::Message::Severity_Error);
 
     // If object have creature soul trapped, check if that creature reference is valid
     if (!cellRef.mSoul.empty())
         if (mObjects.searchId(cellRef.mSoul) == -1)
-            messages.add(
-                id, "Trapped soul object '" + cellRef.mSoul + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Trapped soul object '" + cellRef.mSoul.getRefIdString() + "' does not exist", "",
+                CSMDoc::Message::Severity_Error);
 
     if (cellRef.mFaction.empty())
     {
@@ -80,14 +81,15 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages& message
     else
     {
         if (mFactions.searchId(cellRef.mFaction) == -1)
-            messages.add(id, "Faction '" + cellRef.mFaction + "' does not exist", "", CSMDoc::Message::Severity_Error);
+            messages.add(id, "Faction '" + cellRef.mFaction.getRefIdString() + "' does not exist", "",
+                CSMDoc::Message::Severity_Error);
         else if (cellRef.mFactionRank < -1)
             messages.add(id, "Invalid faction rank", "", CSMDoc::Message::Severity_Error);
     }
 
     if (!cellRef.mDestCell.empty() && mCells.searchId(cellRef.mDestCell) == -1)
-        messages.add(
-            id, "Destination cell '" + cellRef.mDestCell + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Destination cell '" + cellRef.mDestCell.getRefIdString() + "' does not exist", "",
+            CSMDoc::Message::Severity_Error);
 
     if (cellRef.mScale < 0)
         messages.add(id, "Negative scale", "", CSMDoc::Message::Severity_Error);

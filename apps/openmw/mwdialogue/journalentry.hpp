@@ -1,6 +1,7 @@
 #ifndef GAME_MWDIALOGUE_JOURNALENTRY_H
 #define GAME_MWDIALOGUE_JOURNALENTRY_H
 
+#include <components/esm/refid.hpp>
 #include <string>
 #include <string_view>
 
@@ -19,14 +20,14 @@ namespace MWDialogue
     /// \brief Basic quest/dialogue/topic entry
     struct Entry
     {
-        std::string mInfoId;
+        ESM::RefId mInfoId;
         std::string mText;
         std::string mActorName; // optional
 
         Entry() = default;
 
         /// actor is optional
-        Entry(std::string_view topic, std::string_view infoId, const MWWorld::Ptr& actor);
+        Entry(const ESM::RefId& topic, const ESM::RefId& infoId, const MWWorld::Ptr& actor);
 
         Entry(const ESM::JournalEntry& record);
 
@@ -40,19 +41,19 @@ namespace MWDialogue
     /// Same as entry, but store TopicID
     struct JournalEntry : public Entry
     {
-        std::string mTopic;
+        ESM::RefId mTopic;
 
         JournalEntry() = default;
 
-        JournalEntry(std::string_view topic, std::string_view infoId, const MWWorld::Ptr& actor);
+        JournalEntry(const ESM::RefId& topic, const ESM::RefId& infoId, const MWWorld::Ptr& actor);
 
         JournalEntry(const ESM::JournalEntry& record);
 
         void write(ESM::JournalEntry& entry) const;
 
-        static JournalEntry makeFromQuest(std::string_view topic, int index);
+        static JournalEntry makeFromQuest(const ESM::RefId& topic, int index);
 
-        static std::string_view idFromIndex(std::string_view topic, int index);
+        static const ESM::RefId& idFromIndex(const ESM::RefId& topic, int index);
     };
 
     /// \brief A quest entry with a timestamp.
@@ -64,14 +65,14 @@ namespace MWDialogue
 
         StampedJournalEntry();
 
-        StampedJournalEntry(std::string_view topic, std::string_view infoId, int day, int month, int dayOfMonth,
+        StampedJournalEntry(const ESM::RefId& topic, const ESM::RefId& infoId, int day, int month, int dayOfMonth,
             const MWWorld::Ptr& actor);
 
         StampedJournalEntry(const ESM::JournalEntry& record);
 
         void write(ESM::JournalEntry& entry) const;
 
-        static StampedJournalEntry makeFromQuest(std::string_view topic, int index, const MWWorld::Ptr& actor);
+        static StampedJournalEntry makeFromQuest(const ESM::RefId& topic, int index, const MWWorld::Ptr& actor);
     };
 }
 

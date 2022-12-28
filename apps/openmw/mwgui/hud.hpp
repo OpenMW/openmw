@@ -23,7 +23,7 @@ namespace MWGui
     public:
         HUD(CustomMarkerCollection& customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender);
         virtual ~HUD();
-        void setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value) override;
+        void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value) override;
 
         /// Set time left for the player to start drowning
         /// @param time time left to start drowning
@@ -39,7 +39,7 @@ namespace MWGui
         void setEffectVisible(bool visible);
         void setMinimapVisible(bool visible);
 
-        void setSelectedSpell(const std::string& spellId, int successChancePercent);
+        void setSelectedSpell(const ESM::RefId& spellId, int successChancePercent);
         void setSelectedEnchantItem(const MWWorld::Ptr& item, int chargePercent);
         const MWWorld::Ptr& getSelectedEnchantItem();
         void setSelectedWeapon(const MWWorld::Ptr& item, int durabilityPercent);

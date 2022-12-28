@@ -186,7 +186,7 @@ namespace ESM
 
         esm.getHNT(mIndex, "INDX");
 
-        mId = indexToId(mIndex);
+        mId = ESM::RefId::stringRefId(indexToId(mIndex));
 
         esm.getHNTSized<36>(mData, "MEDT");
         if (esm.getFormat() == 0)
@@ -211,28 +211,28 @@ namespace ESM
                     mParticle = esm.getHString();
                     break;
                 case fourCC("BSND"):
-                    mBoltSound = esm.getHString();
+                    mBoltSound = esm.getRefId();
                     break;
                 case fourCC("CSND"):
-                    mCastSound = esm.getHString();
+                    mCastSound = esm.getRefId();
                     break;
                 case fourCC("HSND"):
-                    mHitSound = esm.getHString();
+                    mHitSound = esm.getRefId();
                     break;
                 case fourCC("ASND"):
-                    mAreaSound = esm.getHString();
+                    mAreaSound = esm.getRefId();
                     break;
                 case fourCC("CVFX"):
-                    mCasting = esm.getHString();
+                    mCasting = esm.getRefId();
                     break;
                 case fourCC("BVFX"):
-                    mBolt = esm.getHString();
+                    mBolt = esm.getRefId();
                     break;
                 case fourCC("HVFX"):
-                    mHit = esm.getHString();
+                    mHit = esm.getRefId();
                     break;
                 case fourCC("AVFX"):
-                    mArea = esm.getHString();
+                    mArea = esm.getRefId();
                     break;
                 case fourCC("DESC"):
                     mDescription = esm.getHString();
@@ -250,15 +250,15 @@ namespace ESM
 
         esm.writeHNOCString("ITEX", mIcon);
         esm.writeHNOCString("PTEX", mParticle);
-        esm.writeHNOCString("BSND", mBoltSound);
-        esm.writeHNOCString("CSND", mCastSound);
-        esm.writeHNOCString("HSND", mHitSound);
-        esm.writeHNOCString("ASND", mAreaSound);
+        esm.writeHNOCString("BSND", mBoltSound.getRefIdString());
+        esm.writeHNOCString("CSND", mCastSound.getRefIdString());
+        esm.writeHNOCString("HSND", mHitSound.getRefIdString());
+        esm.writeHNOCString("ASND", mAreaSound.getRefIdString());
 
-        esm.writeHNOCString("CVFX", mCasting);
-        esm.writeHNOCString("BVFX", mBolt);
-        esm.writeHNOCString("HVFX", mHit);
-        esm.writeHNOCString("AVFX", mArea);
+        esm.writeHNOCString("CVFX", mCasting.getRefIdString());
+        esm.writeHNOCString("BVFX", mBolt.getRefIdString());
+        esm.writeHNOCString("HVFX", mHit.getRefIdString());
+        esm.writeHNOCString("AVFX", mArea.getRefIdString());
 
         esm.writeHNOString("DESC", mDescription);
     }
@@ -581,14 +581,14 @@ namespace ESM
 
         mIcon.clear();
         mParticle.clear();
-        mCasting.clear();
-        mHit.clear();
-        mArea.clear();
-        mBolt.clear();
-        mCastSound.clear();
-        mBoltSound.clear();
-        mHitSound.clear();
-        mAreaSound.clear();
+        mCasting = ESM::RefId::sEmpty;
+        mHit = ESM::RefId::sEmpty;
+        mArea = ESM::RefId::sEmpty;
+        mBolt = ESM::RefId::sEmpty;
+        mCastSound = ESM::RefId::sEmpty;
+        mBoltSound = ESM::RefId::sEmpty;
+        mHitSound = ESM::RefId::sEmpty;
+        mAreaSound = ESM::RefId::sEmpty;
         mDescription.clear();
     }
 

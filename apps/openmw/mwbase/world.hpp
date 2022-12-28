@@ -56,6 +56,7 @@ namespace ESM
     struct CreatureLevList;
     struct ItemLevList;
     struct TimeStamp;
+    struct RefId;
 }
 
 namespace MWPhysics
@@ -186,18 +187,18 @@ namespace MWBase
         virtual void removeRefScript(MWWorld::RefData* ref) = 0;
         //< Remove the script attached to ref from mLocalScripts
 
-        virtual MWWorld::Ptr getPtr(std::string_view name, bool activeOnly) = 0;
+        virtual MWWorld::Ptr getPtr(const ESM::RefId& name, bool activeOnly) = 0;
         ///< Return a pointer to a liveCellRef with the given name.
         /// \param activeOnly do non search inactive cells.
 
-        virtual MWWorld::Ptr searchPtr(std::string_view name, bool activeOnly, bool searchInContainers = true) = 0;
+        virtual MWWorld::Ptr searchPtr(const ESM::RefId& name, bool activeOnly, bool searchInContainers = true) = 0;
         ///< Return a pointer to a liveCellRef with the given name.
         /// \param activeOnly do non search inactive cells.
 
         virtual MWWorld::Ptr searchPtrViaActorId(int actorId) = 0;
         ///< Search is limited to the active cells.
 
-        virtual MWWorld::Ptr searchPtrViaRefNum(const std::string& id, const ESM::RefNum& refNum) = 0;
+        virtual MWWorld::Ptr searchPtrViaRefNum(const ESM::RefId& id, const ESM::RefNum& refNum) = 0;
 
         virtual MWWorld::Ptr findContainer(const MWWorld::ConstPtr& ptr) = 0;
         ///< Return a pointer to a liveCellRef which contains \a ptr.
@@ -222,7 +223,7 @@ namespace MWBase
         virtual bool toggleSky() = 0;
         ///< \return Resulting mode
 
-        virtual void changeWeather(std::string_view region, const unsigned int id) = 0;
+        virtual void changeWeather(const ESM::RefId& region, const unsigned int id) = 0;
 
         virtual int getCurrentWeather() const = 0;
 
@@ -238,7 +239,7 @@ namespace MWBase
 
         virtual void setMoonColour(bool red) = 0;
 
-        virtual void modRegion(std::string_view regionid, const std::vector<char>& chances) = 0;
+        virtual void modRegion(const ESM::RefId& regionid, const std::vector<char>& chances) = 0;
 
         virtual float getTimeScaleFactor() const = 0;
 
@@ -247,7 +248,7 @@ namespace MWBase
         virtual void setSimulationTimeScale(float scale) = 0;
 
         virtual void changeToInteriorCell(
-            const std::string& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
+            const ESM::RefId& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
             = 0;
         ///< Move to interior cell.
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
@@ -262,7 +263,7 @@ namespace MWBase
             = 0;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        virtual const ESM::Cell* getExterior(std::string_view cellName) const = 0;
+        virtual const ESM::Cell* getExterior(const ESM::RefId& cellName) const = 0;
         ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
 
         virtual MWWorld::Ptr getFacedObject() = 0;
@@ -518,11 +519,11 @@ namespace MWBase
 
         /// Find default position inside exterior cell specified by name
         /// \return false if exterior with given name not exists, true otherwise
-        virtual bool findExteriorPosition(std::string_view name, ESM::Position& pos) = 0;
+        virtual bool findExteriorPosition(const ESM::RefId& name, ESM::Position& pos) = 0;
 
         /// Find default position inside interior cell specified by name
         /// \return false if interior with given name not exists, true otherwise
-        virtual bool findInteriorPosition(std::string_view name, ESM::Position& pos) = 0;
+        virtual bool findInteriorPosition(const ESM::RefId& name, ESM::Position& pos) = 0;
 
         /// Enables or disables use of teleport spell effects (recall, intervention, etc).
         virtual void enableTeleporting(bool enable) = 0;
@@ -553,7 +554,7 @@ namespace MWBase
         virtual void castSpell(const MWWorld::Ptr& actor, bool manualSpell = false) = 0;
 
         virtual void launchMagicBolt(
-            const std::string& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot)
+            const ESM::RefId& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot)
             = 0;
         virtual void launchProjectile(MWWorld::Ptr& actor, MWWorld::Ptr& projectile, const osg::Vec3f& worldPos,
             const osg::Quat& orient, MWWorld::Ptr& bow, float speed, float attackStrength)
@@ -576,7 +577,7 @@ namespace MWBase
 
         /// Teleports \a ptr to the closest reference of \a id (e.g. DivineMarker, PrisonMarker, TempleMarker)
         /// @note id must be lower case
-        virtual void teleportToClosestMarker(const MWWorld::Ptr& ptr, std::string_view id) = 0;
+        virtual void teleportToClosestMarker(const MWWorld::Ptr& ptr, const ESM::RefId& id) = 0;
 
         enum DetectionType
         {
@@ -600,7 +601,7 @@ namespace MWBase
         virtual void goToJail() = 0;
 
         /// Spawn a random creature from a levelled list next to the player
-        virtual void spawnRandomCreature(std::string_view creatureList) = 0;
+        virtual void spawnRandomCreature(const ESM::RefId& creatureList) = 0;
 
         /// Spawn a blood effect for \a ptr at \a worldPosition
         virtual void spawnBloodEffect(const MWWorld::Ptr& ptr, const osg::Vec3f& worldPosition) = 0;
@@ -675,7 +676,7 @@ namespace MWBase
 
         virtual void reportStats(unsigned int frameNumber, osg::Stats& stats) const = 0;
 
-        virtual std::vector<MWWorld::Ptr> getAll(const std::string& id) = 0;
+        virtual std::vector<MWWorld::Ptr> getAll(const ESM::RefId& id) = 0;
 
         virtual Misc::Rng::Generator& getPrng() = 0;
 

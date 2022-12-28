@@ -81,7 +81,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view region{ runtime.getStringLiteral(runtime[0].mInteger) };
+                ESM::RefId region = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Integer id = runtime[0].mInteger;
@@ -92,7 +92,7 @@ namespace MWScript
                 if (reg)
                     MWBase::Environment::get().getWorld()->changeWeather(region, id);
                 else
-                    runtime.getContext().report("Warning: Region \"" + std::string(region) + "\" was not found");
+                    runtime.getContext().report("Warning: Region \"" + region.getRefIdString() + "\" was not found");
             }
         };
 
@@ -113,7 +113,7 @@ namespace MWScript
                     arg0--;
                 }
 
-                MWBase::Environment::get().getWorld()->modRegion(region, chances);
+                MWBase::Environment::get().getWorld()->modRegion(ESM::RefId::stringRefId(region), chances);
             }
         };
 

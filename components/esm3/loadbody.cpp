@@ -18,14 +18,14 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("MODL"):
                     mModel = esm.getHString();
                     break;
                 case fourCC("FNAM"):
-                    mRace = esm.getHString();
+                    mRace = esm.getRefId();
                     break;
                 case fourCC("BYDT"):
                     esm.getHTSized<4>(mData);
@@ -49,7 +49,7 @@ namespace ESM
 
     void BodyPart::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {
@@ -58,7 +58,7 @@ namespace ESM
         }
 
         esm.writeHNCString("MODL", mModel);
-        esm.writeHNOCString("FNAM", mRace);
+        esm.writeHNOCString("FNAM", mRace.getRefIdString());
         esm.writeHNT("BYDT", mData, 4);
     }
 
@@ -71,6 +71,6 @@ namespace ESM
         mData.mType = 0;
 
         mModel.clear();
-        mRace.clear();
+        mRace = ESM::RefId::sEmpty;
     }
 }

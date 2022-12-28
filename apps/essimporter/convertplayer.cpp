@@ -8,13 +8,13 @@
 namespace ESSImport
 {
 
-    void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<std::string>& outDialogueTopics,
+    void convertPCDT(const PCDT& pcdt, ESM::Player& out, std::vector<ESM::RefId>& outDialogueTopics,
         bool& firstPersonCam, bool& teleportingEnabled, bool& levitationEnabled, ESM::ControlsState& controls)
     {
         out.mObject.mPosition.rot[0]
             = -atan2(pcdt.mPNAM.mVerticalRotation.mData[2][1], pcdt.mPNAM.mVerticalRotation.mData[2][2]);
 
-        out.mBirthsign = pcdt.mBirthsign;
+        out.mBirthsign = ESM::RefId::stringRefId(pcdt.mBirthsign);
         out.mObject.mNpcStats.mBounty = pcdt.mBounty;
         for (const auto& essFaction : pcdt.mFactions)
         {
@@ -22,7 +22,7 @@ namespace ESSImport
             faction.mExpelled = (essFaction.mFlags & 0x2) != 0;
             faction.mRank = essFaction.mRank;
             faction.mReputation = essFaction.mReputation;
-            out.mObject.mNpcStats.mFactions[Misc::StringUtils::lowerCase(essFaction.mFactionName.toString())] = faction;
+            out.mObject.mNpcStats.mFactions[ESM::RefId::stringRefId(essFaction.mFactionName.toString())] = faction;
         }
         for (int i = 0; i < 3; ++i)
             out.mObject.mNpcStats.mSpecIncreases[i] = pcdt.mPNAM.mSpecIncreases[i];
@@ -43,7 +43,7 @@ namespace ESSImport
 
         for (const auto& knownDialogueTopic : pcdt.mKnownDialogueTopics)
         {
-            outDialogueTopics.push_back(Misc::StringUtils::lowerCase(knownDialogueTopic));
+            outDialogueTopics.push_back(ESM::RefId::stringRefId(knownDialogueTopic));
         }
 
         controls.mViewSwitchDisabled = pcdt.mPNAM.mPlayerFlags & PCDT::PlayerFlags_ViewSwitchDisabled;
@@ -70,7 +70,7 @@ namespace ESSImport
             // TODO: Figure out a better way to detect interiors. (0, 0) is a valid exterior cell.
             if (mark.mCellX == 0 && mark.mCellY == 0)
             {
-                cell.mWorldspace = pcdt.mMNAM;
+                cell.mWorldspace = ESM::RefId::stringRefId(pcdt.mMNAM);
                 cell.mPaged = false;
             }
 

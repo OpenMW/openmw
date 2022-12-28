@@ -55,7 +55,7 @@ namespace MWLua
                     }
                     else
                     {
-                        const std::string& recordId = std::get<std::string>(item);
+                        const ESM::RefId& recordId = ESM::RefId::stringRefId(std::get<std::string>(item));
                         if (old_it != store.end() && old_it->getCellRef().getRefId() == recordId)
                             return true; // already equipped
                         itemPtr = store.search(recordId);

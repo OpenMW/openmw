@@ -27,18 +27,21 @@ namespace MWLua
             = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Miscellaneous>();
         miscellaneous["record"] = sol::overload(
             [](const Object& obj) -> const ESM::Miscellaneous* { return obj.ptr().get<ESM::Miscellaneous>()->mBase; },
-            [store](const std::string& recordId) -> const ESM::Miscellaneous* { return store->find(recordId); });
+            [store](const std::string& recordId) -> const ESM::Miscellaneous* {
+                return store->find(ESM::RefId::stringRefId(recordId));
+            });
         sol::usertype<ESM::Miscellaneous> record
             = context.mLua->sol().new_usertype<ESM::Miscellaneous>("ESM3_Miscellaneous");
         record[sol::meta_function::to_string]
-            = [](const ESM::Miscellaneous& rec) { return "ESM3_Miscellaneous[" + rec.mId + "]"; };
-        record["id"] = sol::readonly_property([](const ESM::Miscellaneous& rec) -> std::string { return rec.mId; });
+            = [](const ESM::Miscellaneous& rec) { return "ESM3_Miscellaneous[" + rec.mId.getRefIdString() + "]"; };
+        record["id"] = sol::readonly_property(
+            [](const ESM::Miscellaneous& rec) -> std::string { return rec.mId.getRefIdString(); });
         record["name"] = sol::readonly_property([](const ESM::Miscellaneous& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Miscellaneous& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
-        record["mwscript"]
-            = sol::readonly_property([](const ESM::Miscellaneous& rec) -> std::string { return rec.mScript; });
+        record["mwscript"] = sol::readonly_property(
+            [](const ESM::Miscellaneous& rec) -> std::string { return rec.mScript.getRefIdString(); });
         record["icon"] = sol::readonly_property([vfs](const ESM::Miscellaneous& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });

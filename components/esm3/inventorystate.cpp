@@ -57,7 +57,7 @@ namespace ESM
         while (esm.isNextSub("LEVM"))
         {
             // Get its name
-            std::string id = esm.getHString();
+            ESM::RefId id = esm.getRefId();
             int count;
             std::string parentGroup;
             // Then get its count
@@ -71,7 +71,7 @@ namespace ESM
 
         while (esm.isNextSub("MAGI"))
         {
-            std::string id = esm.getHString();
+            ESM::RefId id = esm.getRefId();
 
             std::vector<std::pair<float, float>> params;
             while (esm.isNextSub("RAND"))
@@ -116,11 +116,11 @@ namespace ESM
         // This turns items from that map into negative quantities
         for (const auto& entry : mLevelledItemMap)
         {
-            const std::string& id = entry.first.first;
+            const ESM::RefId& id = entry.first.first;
             const int count = entry.second;
             for (auto& item : mItems)
             {
-                if (item.mCount == count && Misc::StringUtils::ciEqual(id, item.mRef.mRefID))
+                if (item.mCount == count && id == item.mRef.mRefID)
                     item.mCount = -count;
             }
         }
@@ -138,10 +138,9 @@ namespace ESM
             }
         }
 
-        for (std::map<std::pair<std::string, std::string>, int>::const_iterator it = mLevelledItemMap.begin();
-             it != mLevelledItemMap.end(); ++it)
+        for (auto it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
         {
-            esm.writeHNString("LEVM", it->first.first);
+            esm.writeHNString("LEVM", it->first.first.getRefIdString());
             esm.writeHNT("COUN", it->second);
             esm.writeHNString("LGRP", it->first.second);
         }
@@ -149,7 +148,7 @@ namespace ESM
         for (TEffectMagnitudes::const_iterator it = mPermanentMagicEffectMagnitudes.begin();
              it != mPermanentMagicEffectMagnitudes.end(); ++it)
         {
-            esm.writeHNString("MAGI", it->first);
+            esm.writeHNString("MAGI", it->first.getRefIdString());
 
             const std::vector<std::pair<float, float>>& params = it->second;
             for (std::vector<std::pair<float, float>>::const_iterator pIt = params.begin(); pIt != params.end(); ++pIt)

@@ -209,7 +209,7 @@ namespace MWGui
     void TradeWindow::sellItem(MyGUI::Widget* sender, int count)
     {
         const ItemStack& item = mTradeModel->getItem(mItemToSell);
-        std::string_view sound = item.mBase.getClass().getUpSoundId(item.mBase);
+        const ESM::RefId& sound = item.mBase.getClass().getUpSoundId(item.mBase);
         MWBase::Environment::get().getWindowManager()->playSound(sound);
 
         TradeItemModel* playerTradeModel
@@ -358,7 +358,7 @@ namespace MWGui
 
         eventTradeDone();
 
-        MWBase::Environment::get().getWindowManager()->playSound("Item Gold Up");
+        MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Gold Up"));
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Barter);
     }
 

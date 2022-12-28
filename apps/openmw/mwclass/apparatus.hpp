@@ -26,7 +26,7 @@ namespace MWClass
         std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
         ///< Generate action for activation
 
-        std::string_view getScript(const MWWorld::ConstPtr& ptr) const override;
+        const ESM::RefId& getScript(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of the script attached to ptr
 
         int getValue(const MWWorld::ConstPtr& ptr) const override;
@@ -35,10 +35,10 @@ namespace MWClass
         MWGui::ToolTipInfo getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const override;
         ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
-        std::string_view getUpSoundId(const MWWorld::ConstPtr& ptr) const override;
+        const ESM::RefId& getUpSoundId(const MWWorld::ConstPtr& ptr) const override;
         ///< Return the pick up sound Id
 
-        std::string_view getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
+        const ESM::RefId& getDownSoundId(const MWWorld::ConstPtr& ptr) const override;
         ///< Return the put down sound Id
 
         const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;

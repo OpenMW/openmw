@@ -33,7 +33,7 @@ namespace MWGui
         int imageSize;
 
         // enchantment (for cloth, armor, weapons)
-        std::string enchant;
+        ESM::RefId enchant;
         int remainingEnchantCharge;
 
         // effects (for potions, ingredients)
@@ -96,7 +96,7 @@ namespace MWGui
         static void createSkillToolTip(MyGUI::Widget* widget, int skillId);
         static void createAttributeToolTip(MyGUI::Widget* widget, int attributeId);
         static void createSpecializationToolTip(MyGUI::Widget* widget, const std::string& name, int specId);
-        static void createBirthsignToolTip(MyGUI::Widget* widget, const std::string& birthsignId);
+        static void createBirthsignToolTip(MyGUI::Widget* widget, const ESM::RefId& birthsignId);
         static void createRaceToolTip(MyGUI::Widget* widget, const ESM::Race* playerRace);
         static void createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass);
         static void createMagicEffectToolTip(MyGUI::Widget* widget, short id);

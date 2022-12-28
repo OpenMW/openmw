@@ -8,14 +8,14 @@ namespace ESM
 
     void QuestState::load(ESMReader& esm)
     {
-        mTopic = esm.getHNString("YETO");
+        mTopic = ESM::RefId::stringRefId(esm.getHNString("YETO"));
         esm.getHNOT(mState, "QSTA");
         esm.getHNOT(mFinished, "QFIN");
     }
 
     void QuestState::save(ESMWriter& esm) const
     {
-        esm.writeHNString("YETO", mTopic);
+        esm.writeHNString("YETO", mTopic.getRefIdString());
         esm.writeHNT("QSTA", mState);
         esm.writeHNT("QFIN", mFinished);
     }

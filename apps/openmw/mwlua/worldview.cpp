@@ -125,7 +125,7 @@ namespace MWLua
 
     // TODO: If Lua scripts will use several threads at the same time, then `find*Cell` functions should have critical
     // sections.
-    MWWorld::CellStore* WorldView::findCell(const std::string& name, osg::Vec3f position)
+    MWWorld::CellStore* WorldView::findCell(const ESM::RefId& name, osg::Vec3f position)
     {
         MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
         bool exterior = name.empty() || MWBase::Environment::get().getWorld()->getExterior(name);
@@ -138,7 +138,7 @@ namespace MWLua
             return worldModel->getInterior(name);
     }
 
-    MWWorld::CellStore* WorldView::findNamedCell(const std::string& name)
+    MWWorld::CellStore* WorldView::findNamedCell(const ESM::RefId& name)
     {
         MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
         const ESM::Cell* esmCell = MWBase::Environment::get().getWorld()->getExterior(name);

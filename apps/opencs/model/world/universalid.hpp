@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <QMetaType>
+#include <components/esm/refid.hpp>
 
 namespace CSMWorld
 {
@@ -157,6 +158,8 @@ namespace CSMWorld
 
         UniversalId(Type type, const std::string& id);
         ///< Using a type for a non-ID-argument UniversalId will throw an exception.
+
+        UniversalId(Type type, const ESM::RefId& id);
 
         UniversalId(Type type, int index);
         ///< Using a type for a non-index-argument UniversalId will throw an exception.

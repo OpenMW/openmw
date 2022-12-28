@@ -58,9 +58,11 @@ namespace
 
         EXPECT_THAT(asVector(conf.getGlobalConf()), ElementsAre(Pair(0, "")));
         EXPECT_THAT(asVector(conf.getPlayerConf()), ElementsAre(Pair(1, "")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, "something", ESM::RefNum())), ElementsAre());
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, "something", ESM::RefNum())), ElementsAre(Pair(1, "")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CREA, "something", ESM::RefNum())),
+        const ESM::RefId something = ESM::RefId::stringRefId("something");
+
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, something, ESM::RefNum())), ElementsAre());
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, something, ESM::RefNum())), ElementsAre(Pair(1, "")));
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CREA, something, ESM::RefNum())),
             ElementsAre(Pair(1, ""), Pair(3, "")));
 
         // Check that initialization cleans old data
@@ -90,7 +92,7 @@ namespace
         script1.mInitializationData = "data1";
         script1.mFlags = ESM::LuaScriptCfg::sPlayer;
         script1.mTypes.push_back(ESM::REC_CREA);
-        script1.mRecords.push_back({ true, "record1", "dataRecord1" });
+        script1.mRecords.push_back({ true, ESM::RefId::stringRefId("record1"), "dataRecord1" });
         script1.mRefs.push_back({ true, 2, 3, "" });
         script1.mRefs.push_back({ true, 2, 4, "" });
 
@@ -103,8 +105,8 @@ namespace
         script1Extra.mScriptPath = "script1.LUA";
         script1Extra.mFlags = ESM::LuaScriptCfg::sCustom | ESM::LuaScriptCfg::sMerge;
         script1Extra.mTypes.push_back(ESM::REC_NPC_);
-        script1Extra.mRecords.push_back({ false, "rat", "" });
-        script1Extra.mRecords.push_back({ true, "record2", "" });
+        script1Extra.mRecords.push_back({ false, ESM::RefId::stringRefId("rat"), "" });
+        script1Extra.mRecords.push_back({ true, ESM::RefId::stringRefId("record2"), "" });
         script1Extra.mRefs.push_back({ true, 3, 5, "dataRef35" });
         script1Extra.mRefs.push_back({ false, 2, 3, "" });
 
@@ -116,17 +118,23 @@ namespace
         EXPECT_EQ(LuaUtil::scriptCfgToString(conf[1]), "CUSTOM CONTAINER : Script2.lua");
 
         EXPECT_THAT(asVector(conf.getPlayerConf()), ElementsAre(Pair(0, "data1")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, "something", ESM::RefNum())), ElementsAre(Pair(1, "")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CREA, "guar", ESM::RefNum())), ElementsAre(Pair(0, "data1")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CREA, "rat", ESM::RefNum())), ElementsAre());
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, ESM::RefId::stringRefId("something"), ESM::RefNum())),
+            ElementsAre(Pair(1, "")));
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CREA, ESM::RefId::stringRefId("guar"), ESM::RefNum())),
+            ElementsAre(Pair(0, "data1")));
         EXPECT_THAT(
-            asVector(conf.getLocalConf(ESM::REC_DOOR, "record1", ESM::RefNum())), ElementsAre(Pair(0, "dataRecord1")));
+            asVector(conf.getLocalConf(ESM::REC_CREA, ESM::RefId::stringRefId("rat"), ESM::RefNum())), ElementsAre());
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_DOOR, ESM::RefId::stringRefId("record1"), ESM::RefNum())),
+            ElementsAre(Pair(0, "dataRecord1")));
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_DOOR, ESM::RefId::stringRefId("record2"), ESM::RefNum())),
+            ElementsAre(Pair(0, "data1")));
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, ESM::RefId::stringRefId("record3"), { 1, 1 })),
+            ElementsAre(Pair(0, "data1")));
         EXPECT_THAT(
-            asVector(conf.getLocalConf(ESM::REC_DOOR, "record2", ESM::RefNum())), ElementsAre(Pair(0, "data1")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, "record3", { 1, 1 })), ElementsAre(Pair(0, "data1")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, "record3", { 2, 3 })), ElementsAre());
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, "record3", { 3, 5 })), ElementsAre(Pair(0, "dataRef35")));
-        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, "record4", { 2, 4 })),
+            asVector(conf.getLocalConf(ESM::REC_NPC_, ESM::RefId::stringRefId("record3"), { 2, 3 })), ElementsAre());
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_NPC_, ESM::RefId::stringRefId("record3"), { 3, 5 })),
+            ElementsAre(Pair(0, "dataRef35")));
+        EXPECT_THAT(asVector(conf.getLocalConf(ESM::REC_CONT, ESM::RefId::stringRefId("record4"), { 2, 4 })),
             ElementsAre(Pair(0, "data1"), Pair(1, "")));
 
         ESM::LuaScriptCfg& script3 = cfg.mScripts.emplace_back();
@@ -169,8 +177,8 @@ namespace
             script.mFlags = ESM::LuaScriptCfg::sMerge;
             script.mTypes.push_back(ESM::REC_DOOR);
             script.mTypes.push_back(ESM::REC_MISC);
-            script.mRecords.push_back({ true, "rat", luaData });
-            script.mRecords.push_back({ false, "chargendoorjournal", "" });
+            script.mRecords.push_back({ true, ESM::RefId::stringRefId("rat"), luaData });
+            script.mRecords.push_back({ false, ESM::RefId::stringRefId("chargendoorjournal"), "" });
             script.mRefs.push_back({ true, 128964, 1, "" });
             script.mRefs.push_back({ true, 128962, 1, luaData });
         }

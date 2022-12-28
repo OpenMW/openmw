@@ -34,8 +34,8 @@ namespace
 
     constexpr std::size_t deletedRefID = std::numeric_limits<std::size_t>::max();
 
-    void readRefs(const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<std::string>& refIDs,
-        std::set<std::string, Misc::StringUtils::CiComp>& keyIDs, ESM::ReadersCache& readers)
+    void readRefs(const ESM::Cell& cell, std::vector<Ref>& refs, std::vector<ESM::RefId>& refIDs,
+        std::set<ESM::RefId>& keyIDs, ESM::ReadersCache& readers)
     {
         // TODO: we have many similar copies of this code.
         for (size_t i = 0; i < cell.mContextList.size(); i++)
@@ -74,7 +74,7 @@ namespace
         }
     }
 
-    const std::string& getDefaultClass(const MWWorld::Store<ESM::Class>& classes)
+    const ESM::RefId& getDefaultClass(const MWWorld::Store<ESM::Class>& classes)
     {
         auto it = classes.begin();
         if (it != classes.end())
@@ -83,11 +83,10 @@ namespace
     }
 
     std::vector<ESM::NPC> getNPCsToReplace(const MWWorld::Store<ESM::Faction>& factions,
-        const MWWorld::Store<ESM::Class>& classes,
-        const std::unordered_map<std::string, ESM::NPC, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>& npcs)
+        const MWWorld::Store<ESM::Class>& classes, const std::unordered_map<ESM::RefId, ESM::NPC>& npcs)
     {
         // Cache first class from store - we will use it if current class is not found
-        const std::string& defaultCls = getDefaultClass(classes);
+        const ESM::RefId& defaultCls = getDefaultClass(classes);
 
         // Validate NPCs for non-existing class and faction.
         // We will replace invalid entries by fixed ones
@@ -98,7 +97,7 @@ namespace
             ESM::NPC npc = npcIter.second;
             bool changed = false;
 
-            const std::string& npcFaction = npc.mFaction;
+            const ESM::RefId& npcFaction = npc.mFaction;
             if (!npcFaction.empty())
             {
                 const ESM::Faction* fact = factions.search(npcFaction);
@@ -106,13 +105,13 @@ namespace
                 {
                     Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent faction '"
                                         << npc.mFaction << "', ignoring it.";
-                    npc.mFaction.clear();
+                    npc.mFaction = ESM::RefId::sEmpty;
                     npc.mNpdt.mRank = 0;
                     changed = true;
                 }
             }
 
-            const std::string& npcClass = npc.mClass;
+            const ESM::RefId& npcClass = npc.mClass;
             const ESM::Class* cls = classes.search(npcClass);
             if (!cls)
             {
@@ -138,7 +137,7 @@ namespace
         {
             if (!item.mScript.empty() && !scripts.search(item.mScript))
             {
-                item.mScript.clear();
+                item.mScript = ESM::RefId::sEmpty;
                 Log(Debug::Verbose) << "Item '" << id << "' (" << item.mName << ") has nonexistent script '"
                                     << item.mScript << "', ignoring it.";
             }
@@ -148,7 +147,7 @@ namespace
 
 namespace MWWorld
 {
-    using IDMap = std::unordered_map<std::string, int, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>;
+    using IDMap = std::unordered_map<ESM::RefId, int>;
 
     struct ESMStoreImp
     {
@@ -183,7 +182,7 @@ namespace MWWorld
         }
     };
 
-    int ESMStore::find(const std::string_view id) const
+    int ESMStore::find(const ESM::RefId& id) const
     {
         IDMap::const_iterator it = mStoreImp->mIds.find(id);
         if (it == mStoreImp->mIds.end())
@@ -193,7 +192,7 @@ namespace MWWorld
         return it->second;
     }
 
-    int ESMStore::findStatic(const std::string_view id) const
+    int ESMStore::findStatic(const ESM::RefId& id) const
     {
         IDMap::const_iterator it = mStoreImp->mStaticIds.find(id);
         if (it == mStoreImp->mStaticIds.end())
@@ -339,7 +338,7 @@ namespace MWWorld
         }
     }
 
-    void ESMStore::setIdType(const std::string& id, ESM::RecNameInts type)
+    void ESMStore::setIdType(const ESM::RefId& id, ESM::RecNameInts type)
     {
         mStoreImp->mIds[id] = type;
     }
@@ -384,18 +383,17 @@ namespace MWWorld
 
             if (isCacheableRecord(storeIt->first))
             {
-                std::vector<std::string> identifiers;
+                std::vector<ESM::RefId> identifiers;
                 storeIt->second->listIdentifier(identifiers);
 
-                for (std::vector<std::string>::const_iterator record = identifiers.begin(); record != identifiers.end();
-                     ++record)
-                    mStoreImp->mIds[*record] = storeIt->first;
+                for (auto& record : identifiers)
+                    mStoreImp->mIds[record] = storeIt->first;
             }
         }
 
         if (mStoreImp->mStaticIds.empty())
             for (const auto& [k, v] : mStoreImp->mIds)
-                mStoreImp->mStaticIds.emplace(Misc::StringUtils::lowerCase(k), v);
+                mStoreImp->mStaticIds.emplace(k, v);
 
         getWritable<ESM::Skill>().setUp();
         getWritable<ESM::MagicEffect>().setUp();
@@ -417,8 +415,8 @@ namespace MWWorld
         if (!mRefCount.empty())
             return;
         std::vector<Ref> refs;
-        std::vector<std::string> refIDs;
-        std::set<std::string, Misc::StringUtils::CiComp> keyIDs;
+        std::set<ESM::RefId> keyIDs;
+        std::vector<ESM::RefId> refIDs;
         Store<ESM::Cell> Cells = get<ESM::Cell>();
         for (auto it = Cells.intBegin(); it != Cells.intEnd(); ++it)
             readRefs(*it, refs, refIDs, keyIDs, readers);
@@ -430,15 +428,13 @@ namespace MWWorld
         const auto incrementRefCount = [&](const Ref& value) {
             if (value.mRefID != deletedRefID)
             {
-                std::string& refId = refIDs[value.mRefID];
-                // We manually lower case IDs here for the time being to improve performance.
-                Misc::StringUtils::lowerCaseInPlace(refId);
+                ESM::RefId& refId = refIDs[value.mRefID];
                 ++mRefCount[std::move(refId)];
             }
         };
         Misc::forEachUnique(refs.rbegin(), refs.rend(), equalByRefNum, incrementRefCount);
         auto& store = getWritable<ESM::Miscellaneous>().mStatic;
-        for (const std::string& id : keyIDs)
+        for (const auto& id : keyIDs)
         {
             auto it = store.find(id);
             if (it != store.end())
@@ -446,10 +442,9 @@ namespace MWWorld
         }
     }
 
-    int ESMStore::getRefCount(std::string_view id) const
+    int ESMStore::getRefCount(const ESM::RefId& id) const
     {
-        const std::string lowerId = Misc::StringUtils::lowerCase(id);
-        auto it = mRefCount.find(lowerId);
+        auto it = mRefCount.find(id);
         if (it == mRefCount.end())
             return 0;
         return it->second;
@@ -537,7 +532,7 @@ namespace MWWorld
     void ESMStore::movePlayerRecord()
     {
         auto& npcs = getWritable<ESM::NPC>();
-        auto player = npcs.find("player");
+        auto player = npcs.find(ESM::RefId::stringRefId("Player"));
         npcs.insert(*player);
     }
 
@@ -654,13 +649,13 @@ namespace MWWorld
     {
         setUp();
 
-        const ESM::NPC* player = get<ESM::NPC>().find("player");
+        const ESM::NPC* player = get<ESM::NPC>().find(ESM::RefId::stringRefId("Player"));
 
         if (!get<ESM::Race>().find(player->mRace) || !get<ESM::Class>().find(player->mClass))
             throw std::runtime_error("Invalid player record (race or class unavailable");
     }
 
-    std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> ESMStore::getSpellList(const std::string& id) const
+    std::pair<std::shared_ptr<MWMechanics::SpellList>, bool> ESMStore::getSpellList(const ESM::RefId& id) const
     {
         auto result = mSpellListCache.find(id);
         std::shared_ptr<MWMechanics::SpellList> ptr;
@@ -690,14 +685,14 @@ namespace MWWorld
     {
 
         auto& npcs = getWritable<ESM::NPC>();
-        if (Misc::StringUtils::ciEqual(npc.mId, "player"))
+        if (npc.mId == "Player")
         {
             return npcs.insert(npc);
         }
-        const std::string id = "$dynamic" + std::to_string(mDynamicCount++);
+        const ESM::RefId id = ESM::RefId::stringRefId("$dynamic" + std::to_string(mDynamicCount++));
         if (npcs.search(id) != nullptr)
         {
-            const std::string msg = "Try to override existing record '" + id + "'";
+            const std::string msg = "Try to override existing record '" + id.getRefIdString() + "'";
             throw std::runtime_error(msg);
         }
         ESM::NPC record = npc;

@@ -18,7 +18,7 @@
 namespace
 {
     template <class T>
-    void getEnchantedItem(const std::string& id, std::string& enchantment, std::string& itemName)
+    void getEnchantedItem(const ESM::RefId& id, ESM::RefId& enchantment, std::string& itemName)
     {
         const T* item = MWBase::Environment::get().getWorld()->getStore().get<T>().search(id);
         if (item)
@@ -105,7 +105,7 @@ namespace MWWorld
             }
             creatureStats.mActiveSpells.mSpells.emplace_back(params);
         }
-        std::multimap<std::string, int> equippedItems;
+        std::multimap<ESM::RefId, int> equippedItems;
         for (std::size_t i = 0; i < inventory.mItems.size(); ++i)
         {
             const ESM::ObjectState& item = inventory.mItems[i];
@@ -115,7 +115,7 @@ namespace MWWorld
         }
         for (const auto& [id, oldMagnitudes] : inventory.mPermanentMagicEffectMagnitudes)
         {
-            std::string eId;
+            ESM::RefId eId;
             std::string name;
             switch (store.find(id))
             {

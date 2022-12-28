@@ -11,6 +11,8 @@
 
 #include "../../model/world/cellcoordinates.hpp"
 #include "instancedragmodes.hpp"
+#include <components/esm/refid.hpp>
+#include <components/misc/algorithm.hpp>
 
 class QModelIndex;
 
@@ -44,9 +46,9 @@ namespace CSVRender
     class Cell
     {
         CSMWorld::Data& mData;
-        std::string mId;
+        ESM::RefId mId;
         osg::ref_ptr<osg::Group> mCellNode;
-        std::map<std::string, Object*> mObjects;
+        std::map<std::string, Object*, Misc::StringUtils::CiComp> mObjects;
         std::unique_ptr<Terrain::TerrainGrid> mTerrain;
         CSMWorld::CellCoordinates mCoordinates;
         std::unique_ptr<CellArrow> mCellArrows[4];

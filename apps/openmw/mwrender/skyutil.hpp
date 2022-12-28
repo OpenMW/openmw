@@ -10,6 +10,7 @@
 #include <osgParticle/ConstantRateCounter>
 #include <osgParticle/Shooter>
 
+#include <components/esm/refid.hpp>
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 
@@ -63,7 +64,7 @@ namespace MWRender
 
         bool mIsStorm;
 
-        std::string mAmbientLoopSoundID;
+        ESM::RefId mAmbientLoopSoundID;
         float mAmbientSoundVolume;
 
         std::string mParticleEffect;

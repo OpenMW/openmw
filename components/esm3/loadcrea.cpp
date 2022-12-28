@@ -32,20 +32,20 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("MODL"):
                     mModel = esm.getHString();
                     break;
                 case fourCC("CNAM"):
-                    mOriginal = esm.getHString();
+                    mOriginal = esm.getRefId();
                     break;
                 case fourCC("FNAM"):
                     mName = esm.getHString();
                     break;
                 case fourCC("SCRI"):
-                    mScript = esm.getHString();
+                    mScript = esm.getRefId();
                     break;
                 case fourCC("NPDT"):
                     esm.getHTSized<96>(mData);
@@ -108,7 +108,7 @@ namespace ESM
 
     void Creature::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {
@@ -117,9 +117,9 @@ namespace ESM
         }
 
         esm.writeHNCString("MODL", mModel);
-        esm.writeHNOCString("CNAM", mOriginal);
+        esm.writeHNOCString("CNAM", mOriginal.getRefIdString());
         esm.writeHNOCString("FNAM", mName);
-        esm.writeHNOCString("SCRI", mScript);
+        esm.writeHNOCString("SCRI", mScript.getRefIdString());
         esm.writeHNT("NPDT", mData, 96);
         esm.writeHNT("FLAG", ((mBloodType << 10) + mFlags));
         if (mScale != 1.0)
@@ -152,8 +152,8 @@ namespace ESM
         mScale = 1.f;
         mModel.clear();
         mName.clear();
-        mScript.clear();
-        mOriginal.clear();
+        mScript = ESM::RefId::sEmpty;
+        mOriginal = ESM::RefId::sEmpty;
         mInventory.mList.clear();
         mSpells.mList.clear();
         mAiData.blank();

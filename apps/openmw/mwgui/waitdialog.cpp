@@ -200,7 +200,7 @@ namespace MWGui
         MWWorld::Ptr player = world->getPlayerPtr();
         if (mSleeping && player.getCell()->isExterior())
         {
-            const std::string& regionstr = player.getCell()->getCell()->mRegion;
+            const ESM::RefId& regionstr = player.getCell()->getCell()->mRegion;
             if (!regionstr.empty())
             {
                 const ESM::Region* region = world->getStore().get<ESM::Region>().find(regionstr);

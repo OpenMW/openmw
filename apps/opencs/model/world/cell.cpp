@@ -11,6 +11,6 @@ void CSMWorld::Cell::load(ESM::ESMReader& esm, bool& isDeleted)
     {
         std::ostringstream stream;
         stream << "#" << mData.mX << " " << mData.mY;
-        mId = stream.str();
+        mId = ESM::RefId::stringRefId(stream.str());
     }
 }

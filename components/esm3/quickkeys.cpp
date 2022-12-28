@@ -20,7 +20,7 @@ namespace ESM
 
             QuickKey key;
             key.mType = keyType;
-            key.mId = id;
+            key.mId = ESM::RefId::stringRefId(id);
 
             mKeys.push_back(key);
 
@@ -34,7 +34,7 @@ namespace ESM
         for (std::vector<QuickKey>::const_iterator it = mKeys.begin(); it != mKeys.end(); ++it)
         {
             esm.writeHNT("TYPE", it->mType);
-            esm.writeHNString("ID__", it->mId);
+            esm.writeHNString("ID__", it->mId.getRefIdString());
         }
     }
 

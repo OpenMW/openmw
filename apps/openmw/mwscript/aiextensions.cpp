@@ -43,7 +43,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view objectID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId objectID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 // The value of the reset argument doesn't actually matter
@@ -100,7 +100,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view actorID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId actorID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Float duration = runtime[0].mFloat;
@@ -138,10 +138,10 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view actorID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId actorID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                std::string_view cellID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId cellID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Float duration = runtime[0].mFloat;
@@ -329,7 +329,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view actorID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId actorID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Float duration = runtime[0].mFloat;
@@ -355,7 +355,8 @@ namespace MWScript
                 MWMechanics::AiFollow followPackage(actorID, duration, x, y, z, repeat);
                 ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(followPackage, ptr);
 
-                Log(Debug::Info) << "AiFollow: " << actorID << ", " << x << ", " << y << ", " << z << ", " << duration;
+                Log(Debug::Info) << "AiFollow: " << actorID.getRefIdString() << ", " << x << ", " << y << ", " << z
+                                 << ", " << duration;
             }
         };
 
@@ -367,10 +368,10 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view actorID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId actorID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                std::string_view cellID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId cellID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Float duration = runtime[0].mFloat;
@@ -395,7 +396,8 @@ namespace MWScript
 
                 MWMechanics::AiFollow followPackage(actorID, cellID, duration, x, y, z, repeat);
                 ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(followPackage, ptr);
-                Log(Debug::Info) << "AiFollow: " << actorID << ", " << x << ", " << y << ", " << z << ", " << duration;
+                Log(Debug::Info) << "AiFollow: " << actorID.getRefIdString() << ", " << x << ", " << y << ", " << z
+                                 << ", " << duration;
             }
         };
 
@@ -429,7 +431,7 @@ namespace MWScript
             {
                 MWWorld::Ptr observer = R()(runtime, false); // required=false
 
-                std::string_view actorID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId actorID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 MWWorld::Ptr actor = MWBase::Environment::get().getWorld()->searchPtr(actorID, true, false);
@@ -451,7 +453,7 @@ namespace MWScript
 
                 MWWorld::Ptr source = R()(runtime);
 
-                std::string_view actorID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId actorID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 MWWorld::Ptr dest = MWBase::Environment::get().getWorld()->searchPtr(actorID, true, false);
@@ -471,7 +473,7 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr actor = R()(runtime);
-                std::string_view testedTargetId = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId testedTargetId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 bool targetsAreEqual = false;
@@ -484,7 +486,7 @@ namespace MWScript
                         if (!targetPtr.isEmpty() && targetPtr.getCellRef().getRefId() == testedTargetId)
                             targetsAreEqual = true;
                     }
-                    else if (testedTargetId == "player") // Currently the player ID is hardcoded
+                    else if (testedTargetId == "Player") // Currently the player ID is hardcoded
                     {
                         MWBase::MechanicsManager* mechMgr = MWBase::Environment::get().getMechanicsManager();
                         bool greeting = mechMgr->getGreetingState(actor) == MWMechanics::Greet_InProgress;
@@ -503,7 +505,7 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr actor = R()(runtime);
-                std::string_view targetID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId targetID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtr(targetID, true, false);

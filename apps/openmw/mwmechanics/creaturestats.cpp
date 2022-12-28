@@ -364,32 +364,32 @@ namespace MWMechanics
         return evasion;
     }
 
-    void CreatureStats::setLastHitObject(const std::string& objectid)
+    void CreatureStats::setLastHitObject(const ESM::RefId& objectid)
     {
         mLastHitObject = objectid;
     }
 
     void CreatureStats::clearLastHitObject()
     {
-        mLastHitObject.clear();
+        mLastHitObject = ESM::RefId::sEmpty;
     }
 
-    const std::string& CreatureStats::getLastHitObject() const
+    const ESM::RefId& CreatureStats::getLastHitObject() const
     {
         return mLastHitObject;
     }
 
-    void CreatureStats::setLastHitAttemptObject(const std::string& objectid)
+    void CreatureStats::setLastHitAttemptObject(const ESM::RefId& objectid)
     {
         mLastHitAttemptObject = objectid;
     }
 
     void CreatureStats::clearLastHitAttemptObject()
     {
-        mLastHitAttemptObject.clear();
+        mLastHitAttemptObject = ESM::RefId::sEmpty;
     }
 
-    const std::string& CreatureStats::getLastHitAttemptObject() const
+    const ESM::RefId& CreatureStats::getLastHitAttemptObject() const
     {
         return mLastHitAttemptObject;
     }

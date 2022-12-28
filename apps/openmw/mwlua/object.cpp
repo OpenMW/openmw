@@ -24,7 +24,7 @@ namespace MWLua
         res.append(" (");
         res.append(getLuaObjectTypeName(ptr));
         res.append(", ");
-        res.append(ptr.getCellRef().getRefId());
+        res.append(ptr.getCellRef().getRefId().getRefIdString());
         res.append(")");
         return res;
     }

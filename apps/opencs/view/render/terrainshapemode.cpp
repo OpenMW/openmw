@@ -1340,7 +1340,7 @@ bool CSVRender::TerrainShapeMode::noLandLoaded(const std::string& cellId)
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     const CSMWorld::IdCollection<CSMWorld::Land>& landCollection = document.getData().getLand();
-    return !landCollection.getRecord(cellId).get().isDataLoaded(ESM::Land::DATA_VNML);
+    return !landCollection.getRecord(ESM::RefId::stringRefId(cellId)).get().isDataLoaded(ESM::Land::DATA_VNML);
 }
 
 bool CSVRender::TerrainShapeMode::isLandLoaded(const std::string& cellId)

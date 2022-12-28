@@ -86,7 +86,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view cell = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId cell = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 ESM::Position pos;

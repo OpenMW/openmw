@@ -73,7 +73,7 @@ namespace MWMechanics
 
     void ActionEnchantedItem::prepare(const MWWorld::Ptr& actor)
     {
-        actor.getClass().getCreatureStats(actor).getSpells().setSelectedSpell(std::string());
+        actor.getClass().getCreatureStats(actor).getSpells().setSelectedSpell(ESM::RefId::sEmpty);
         actor.getClass().getInventoryStore(actor).setSelectedEnchantItem(mItem);
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Spell);
     }
@@ -325,7 +325,7 @@ namespace MWMechanics
         const MWWorld::Store<ESM::GameSetting>& gmst
             = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-        const std::string& selectedSpellId = stats.getSpells().getSelectedSpell();
+        const ESM::RefId& selectedSpellId = stats.getSpells().getSelectedSpell();
         MWWorld::Ptr selectedEnchItem;
 
         MWWorld::Ptr activeWeapon, activeAmmo;
@@ -373,7 +373,7 @@ namespace MWMechanics
             }
             else if (!selectedEnchItem.isEmpty())
             {
-                std::string_view enchId = selectedEnchItem.getClass().getEnchantment(selectedEnchItem);
+                const ESM::RefId& enchId = selectedEnchItem.getClass().getEnchantment(selectedEnchItem);
                 if (!enchId.empty())
                 {
                     const ESM::Enchantment* ench

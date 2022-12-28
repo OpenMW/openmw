@@ -37,7 +37,7 @@ namespace CSMTools
         const CSMDoc::Document& mDocument;
         Compiler::Extensions mExtensions;
         CSMWorld::ScriptContext mContext;
-        std::string mId;
+        ESM::RefId mId;
         std::string mFile;
         CSMDoc::Messages* mMessages;
         WarningMode mWarningMode;

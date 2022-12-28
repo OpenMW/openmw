@@ -4,6 +4,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -19,7 +20,8 @@ namespace ESM
         static std::string_view getRecordType() { return "Door"; }
 
         unsigned int mRecordFlags;
-        std::string mId, mName, mModel, mScript, mOpenSound, mCloseSound;
+        RefId mId, mScript, mOpenSound, mCloseSound;
+        std::string mName, mModel;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

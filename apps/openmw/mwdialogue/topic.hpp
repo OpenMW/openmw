@@ -22,14 +22,14 @@ namespace MWDialogue
         typedef TEntryContainer::const_iterator TEntryIter;
 
     protected:
-        std::string mTopic;
+        ESM::RefId mTopic;
         std::string mName;
         TEntryContainer mEntries;
 
     public:
         Topic();
 
-        Topic(const std::string& topic);
+        Topic(const ESM::RefId& topic);
 
         virtual ~Topic();
 
@@ -42,7 +42,7 @@ namespace MWDialogue
         ///< Add entry without checking for redundant entries or modifying the state of the
         /// topic otherwise
 
-        std::string getTopic() const;
+        const ESM::RefId& getTopic() const;
 
         virtual std::string_view getName() const;
 

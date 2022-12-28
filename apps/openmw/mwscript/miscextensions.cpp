@@ -75,7 +75,7 @@
 namespace
 {
 
-    void addToLevList(ESM::LevelledListBase* list, std::string_view itemId, int level)
+    void addToLevList(ESM::LevelledListBase* list, const ESM::RefId& itemId, int level)
     {
         for (auto& levelItem : list->mList)
         {
@@ -89,7 +89,7 @@ namespace
         list->mList.push_back(item);
     }
 
-    void removeFromLevList(ESM::LevelledListBase* list, std::string_view itemId, int level)
+    void removeFromLevList(ESM::LevelledListBase* list, const ESM::RefId& itemId, int level)
     {
         // level of -1 removes all items with that itemId
         for (std::vector<ESM::LevelledListBase::LevelItem>::iterator it = list->mList.begin(); it != list->mList.end();)
@@ -99,7 +99,7 @@ namespace
                 ++it;
                 continue;
             }
-            if (Misc::StringUtils::ciEqual(itemId, it->mId))
+            if (itemId == it->mId)
                 it = list->mList.erase(it);
             else
                 ++it;
@@ -144,7 +144,7 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr target = R()(runtime, false);
-                std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId name = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
                 MWBase::Environment::get().getScriptManager()->getGlobalScripts().addScript(name, target);
             }
@@ -155,7 +155,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId& name = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
                 runtime.push(MWBase::Environment::get().getScriptManager()->getGlobalScripts().isRunning(name));
             }
@@ -166,7 +166,7 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view name = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId& name = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
                 MWBase::Environment::get().getScriptManager()->getGlobalScripts().removeScript(name);
             }
@@ -567,10 +567,10 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view creature = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId creature = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                std::string_view gem = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId gem = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 if (!ptr.getClass().hasInventoryStore(ptr))
@@ -599,7 +599,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view soul = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId soul = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 // throw away additional arguments
@@ -612,7 +612,7 @@ namespace MWScript
                 MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
                 for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
                 {
-                    if (::Misc::StringUtils::ciEqual(it->getCellRef().getSoul(), soul))
+                    if (it->getCellRef().getSoul() == soul)
                     {
                         store.remove(*it, 1, ptr);
                         return;
@@ -630,7 +630,7 @@ namespace MWScript
 
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view item = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId item = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 Interpreter::Type_Integer amount = runtime[0].mInteger;
@@ -655,7 +655,7 @@ namespace MWScript
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots; ++slot)
                     {
                         MWWorld::ConstContainerStoreIterator it = store.getSlot(slot);
-                        if (it != store.end() && ::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
+                        if (it != store.end() && it->getCellRef().getRefId() == item)
                         {
                             numNotEquipped -= it->getRefData().getCount();
                         }
@@ -664,7 +664,7 @@ namespace MWScript
                     for (int slot = 0; slot < MWWorld::InventoryStore::Slots && amount > numNotEquipped; ++slot)
                     {
                         MWWorld::ContainerStoreIterator it = store.getSlot(slot);
-                        if (it != store.end() && ::Misc::StringUtils::ciEqual(it->getCellRef().getRefId(), item))
+                        if (it != store.end() && it->getCellRef().getRefId() == item)
                         {
                             int numToRemove = std::min(amount - numNotEquipped, it->getRefData().getCount());
                             store.unequipItemQuantity(*it, ptr, numToRemove);
@@ -674,13 +674,12 @@ namespace MWScript
 
                     for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
                     {
-                        if (::Misc::StringUtils::ciEqual(iter->getCellRef().getRefId(), item)
-                            && !store.isEquipped(*iter))
+                        if (iter->getCellRef().getRefId() == item && !store.isEquipped(*iter))
                         {
                             int removed = store.remove(*iter, amount, ptr);
                             MWWorld::Ptr dropped
                                 = MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, removed);
-                            dropped.getCellRef().setOwner("");
+                            dropped.getCellRef().setOwner(ESM::RefId::sEmpty);
 
                             amount -= removed;
 
@@ -720,7 +719,7 @@ namespace MWScript
 
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view soul = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId soul = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 if (!ptr.getClass().hasInventoryStore(ptr))
@@ -730,7 +729,7 @@ namespace MWScript
 
                 for (MWWorld::ContainerStoreIterator iter(store.begin()); iter != store.end(); ++iter)
                 {
-                    if (::Misc::StringUtils::ciEqual(iter->getCellRef().getSoul(), soul))
+                    if (iter->getCellRef().getSoul() == soul)
                     {
                         MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, 1);
                         store.remove(*iter, 1, ptr);
@@ -796,7 +795,7 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = R()(runtime);
-                std::string_view id = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 if (!ptr.getClass().isActor())
@@ -949,11 +948,11 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view objectID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId objectID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                bool hit = ::Misc::StringUtils::ciEqual(objectID, stats.getLastHitObject());
+                bool hit = objectID == stats.getLastHitObject();
                 runtime.push(hit);
                 if (hit)
                     stats.clearLastHitObject();
@@ -968,11 +967,11 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view objectID = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId objectID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-                bool hit = ::Misc::StringUtils::ciEqual(objectID, stats.getLastHitAttemptObject());
+                bool hit = objectID == stats.getLastHitAttemptObject();
                 runtime.push(hit);
                 if (hit)
                     stats.clearLastHitAttemptObject();
@@ -1015,13 +1014,13 @@ namespace MWScript
 
                 if (!ptr.isEmpty())
                 {
-                    std::string_view script = ptr.getClass().getScript(ptr);
+                    ESM::RefId script = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                     if (!script.empty())
                     {
                         const Compiler::Locals& locals
                             = MWBase::Environment::get().getScriptManager()->getLocals(script);
                         char type = locals.getType(var);
-                        std::string refId = ptr.getCellRef().getRefId();
+                        std::string refId = ptr.getCellRef().getRefId().getRefIdString();
                         if (refId.find(' ') != std::string::npos)
                             refId = '"' + refId + '"';
                         switch (type)
@@ -1069,7 +1068,7 @@ namespace MWScript
             {
                 std::stringstream str;
 
-                std::string_view script = ptr.getClass().getScript(ptr);
+                const ESM::RefId& script = ptr.getClass().getScript(ptr);
                 if (script.empty())
                     str << ptr.getCellRef().getRefId() << " does not have a script.";
                 else
@@ -1188,10 +1187,10 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view spellId = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId spellId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                std::string targetId = ::Misc::StringUtils::lowerCase(runtime.getStringLiteral(runtime[0].mInteger));
+                ESM::RefId targetId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 const ESM::Spell* spell
@@ -1199,7 +1198,7 @@ namespace MWScript
                 if (!spell)
                 {
                     runtime.getContext().report(
-                        "spellcasting failed: cannot find spell \"" + std::string(spellId) + "\"");
+                        "spellcasting failed: cannot find spell \"" + spellId.getRefIdString() + "\"");
                     return;
                 }
 
@@ -1239,7 +1238,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                std::string_view spellId = runtime.getStringLiteral(runtime[0].mInteger);
+                ESM::RefId spellId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
                 const ESM::Spell* spell
@@ -1247,7 +1246,7 @@ namespace MWScript
                 if (!spell)
                 {
                     runtime.getContext().report(
-                        "spellcasting failed: cannot find spell \"" + std::string(spellId) + "\"");
+                        "spellcasting failed: cannot find spell \"" + spellId.getRefIdString() + "\"");
                     return;
                 }
 
@@ -1410,9 +1409,9 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view levId = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId& levId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
-                std::string_view creatureId = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId& creatureId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
                 int level = runtime[0].mInteger;
                 runtime.pop();
@@ -1429,9 +1428,9 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view levId = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId& levId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
-                std::string_view creatureId = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId& creatureId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
                 int level = runtime[0].mInteger;
                 runtime.pop();
@@ -1448,9 +1447,9 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view levId = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId& levId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
-                std::string_view itemId = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId& itemId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
                 int level = runtime[0].mInteger;
                 runtime.pop();
@@ -1467,9 +1466,9 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string_view levId = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId& levId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
-                std::string_view itemId = runtime.getStringLiteral(runtime[0].mInteger);
+                const ESM::RefId& itemId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
                 int level = runtime[0].mInteger;
                 runtime.pop();

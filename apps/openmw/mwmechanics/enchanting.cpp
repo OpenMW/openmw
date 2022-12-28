@@ -73,8 +73,9 @@ namespace MWMechanics
         store.remove(mSoulGemPtr, 1, player);
 
         // Exception for Azura Star, new one will be added after enchanting
-        if (Misc::StringUtils::ciEqual(mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId, "Misc_SoulGem_Azura"))
-            store.add("Misc_SoulGem_Azura", 1, player);
+        auto azurasStarId = ESM::RefId::stringRefId("Misc_SoulGem_Azura");
+        if (mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId == azurasStarId)
+            store.add(azurasStarId, 1, player);
 
         if (mSelfEnchanting)
         {
@@ -100,7 +101,7 @@ namespace MWMechanics
             enchantmentPtr = MWBase::Environment::get().getWorld()->createRecord(enchantment);
 
         // Apply the enchantment
-        const std::string& newItemId
+        const ESM::RefId& newItemId
             = mOldItemPtr.getClass().applyEnchantment(mOldItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
 
         // Add the new item to player inventory and remove the old one
@@ -299,7 +300,7 @@ namespace MWMechanics
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
         if (soulEmpty())
             return 0;
-        if (mSoulGemPtr.getCellRef().getSoul() == "")
+        if (mSoulGemPtr.getCellRef().getSoul() == ESM::RefId::sEmpty)
             return 0;
         const ESM::Creature* soul = store.get<ESM::Creature>().search(mSoulGemPtr.getCellRef().getSoul());
         if (soul)

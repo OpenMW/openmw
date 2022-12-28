@@ -455,8 +455,8 @@ namespace MWMechanics
             else if (esmPackage.mType == ESM::AI_Escort)
             {
                 ESM::AITarget data = esmPackage.mTarget;
-                package = std::make_unique<MWMechanics::AiEscort>(
-                    data.mId.toStringView(), data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
+                package = std::make_unique<MWMechanics::AiEscort>(ESM::RefId::stringRefId(data.mId.toStringView()),
+                    data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
             }
             else if (esmPackage.mType == ESM::AI_Travel)
             {
@@ -466,13 +466,14 @@ namespace MWMechanics
             else if (esmPackage.mType == ESM::AI_Activate)
             {
                 ESM::AIActivate data = esmPackage.mActivate;
-                package = std::make_unique<MWMechanics::AiActivate>(data.mName.toStringView(), data.mShouldRepeat != 0);
+                package = std::make_unique<MWMechanics::AiActivate>(
+                    ESM::RefId::stringRefId(data.mName.toStringView()), data.mShouldRepeat != 0);
             }
             else // if (esmPackage.mType == ESM::AI_Follow)
             {
                 ESM::AITarget data = esmPackage.mTarget;
-                package = std::make_unique<MWMechanics::AiFollow>(
-                    data.mId.toStringView(), data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
+                package = std::make_unique<MWMechanics::AiFollow>(ESM::RefId::stringRefId(data.mId.toStringView()),
+                    data.mDuration, data.mX, data.mY, data.mZ, data.mShouldRepeat != 0);
             }
 
             onPackageAdded(*package);

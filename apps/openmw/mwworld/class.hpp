@@ -13,6 +13,7 @@
 #include "ptr.hpp"
 
 #include "../mwmechanics/aisetting.hpp"
+#include <components/esm/refid.hpp>
 
 namespace ESM
 {
@@ -178,7 +179,7 @@ namespace MWWorld
         ///< Returns the remaining duration of the object, such as an equippable light
         /// source. (default implementation: -1, i.e. infinite)
 
-        virtual std::string_view getScript(const ConstPtr& ptr) const;
+        virtual const ESM::RefId& getScript(const ConstPtr& ptr) const;
         ///< Return name of the script attached to ptr (default implementation: return an empty
         /// string).
 
@@ -243,15 +244,15 @@ namespace MWWorld
         ///
         /// (default implementation: return false)
 
-        virtual std::string_view getUpSoundId(const ConstPtr& ptr) const;
+        virtual const ESM::RefId& getUpSoundId(const ConstPtr& ptr) const;
         ///< Return the up sound ID of \a ptr or throw an exception, if class does not support ID retrieval
         /// (default implementation: throw an exception)
 
-        virtual std::string_view getDownSoundId(const ConstPtr& ptr) const;
+        virtual const ESM::RefId& getDownSoundId(const ConstPtr& ptr) const;
         ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
         /// (default implementation: throw an exception)
 
-        virtual std::string_view getSoundIdFromSndGen(const Ptr& ptr, std::string_view type) const;
+        virtual const ESM::RefId& getSoundIdFromSndGen(const Ptr& ptr, std::string_view type) const;
         ///< Returns the sound ID for \a ptr of the given soundgen \a type.
 
         virtual float getArmorRating(const MWWorld::Ptr& ptr) const;
@@ -260,7 +261,7 @@ namespace MWWorld
         virtual const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const;
         ///< Return name of inventory icon.
 
-        virtual std::string_view getEnchantment(const MWWorld::ConstPtr& ptr) const;
+        virtual const ESM::RefId& getEnchantment(const MWWorld::ConstPtr& ptr) const;
         ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
         /// (default implementation: return empty string)
 
@@ -284,8 +285,8 @@ namespace MWWorld
         ///< Get a list of models to preload that this object may use (directly or indirectly). default implementation:
         ///< list getModel().
 
-        virtual const std::string& applyEnchantment(
-            const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const;
+        virtual const ESM::RefId& applyEnchantment(
+            const MWWorld::ConstPtr& ptr, const ESM::RefId& enchId, int enchCharge, const std::string& newName) const;
         ///< Creates a new record using \a ptr as template, with the given name and the given enchantment applied to it.
 
         virtual std::pair<int, std::string_view> canBeEquipped(
@@ -355,11 +356,11 @@ namespace MWWorld
         virtual void respawn(const MWWorld::Ptr& ptr) const {}
 
         /// Returns sound id
-        virtual std::string_view getSound(const MWWorld::ConstPtr& ptr) const;
+        virtual const ESM::RefId& getSound(const MWWorld::ConstPtr& ptr) const;
 
         virtual int getBaseFightRating(const MWWorld::ConstPtr& ptr) const;
 
-        virtual std::string_view getPrimaryFaction(const MWWorld::ConstPtr& ptr) const;
+        virtual const ESM::RefId& getPrimaryFaction(const MWWorld::ConstPtr& ptr) const;
         virtual int getPrimaryFactionRank(const MWWorld::ConstPtr& ptr) const;
 
         /// Get the effective armor rating, factoring in the actor's skills, for the given armor.
@@ -367,9 +368,9 @@ namespace MWWorld
 
         virtual osg::Vec4f getEnchantmentColor(const MWWorld::ConstPtr& item) const;
 
-        virtual void setBaseAISetting(const std::string& id, MWMechanics::AiSetting setting, int value) const;
+        virtual void setBaseAISetting(const ESM::RefId& id, MWMechanics::AiSetting setting, int value) const;
 
-        virtual void modifyBaseInventory(std::string_view actorId, std::string_view itemId, int amount) const;
+        virtual void modifyBaseInventory(const ESM::RefId& actorId, const ESM::RefId& itemId, int amount) const;
     };
 }
 

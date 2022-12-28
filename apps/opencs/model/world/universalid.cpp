@@ -275,6 +275,11 @@ CSMWorld::UniversalId::UniversalId(Type type, const std::string& id)
     throw std::logic_error("invalid ID argument UniversalId type");
 }
 
+CSMWorld::UniversalId::UniversalId(Type type, const ESM::RefId& id)
+{
+    UniversalId(type, id.getRefIdString());
+}
+
 CSMWorld::UniversalId::UniversalId(Type type, int index)
     : mArgumentType(ArgumentType_Index)
     , mType(type)

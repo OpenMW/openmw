@@ -297,7 +297,7 @@ namespace MWMechanics
         bool isAttackingOrSpell() const;
 
         void setVisibility(float visibility) const;
-        void castSpell(const std::string& spellId, bool manualSpell = false);
+        void castSpell(const ESM::RefId& spellId, bool manualSpell = false);
         void setAIAttackType(std::string_view attackType);
         static std::string_view getRandomAttackType();
 

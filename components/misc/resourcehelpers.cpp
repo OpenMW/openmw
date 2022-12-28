@@ -5,6 +5,7 @@
 #include <string_view>
 
 #include <components/esm/common.hpp>
+#include <components/esm/refid.hpp>
 
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
@@ -157,10 +158,9 @@ std::string Misc::ResourceHelpers::correctSoundPath(std::string_view resPath, co
     return vfs->normalizeFilename(resPath);
 }
 
-bool Misc::ResourceHelpers::isHiddenMarker(std::string_view id)
+bool Misc::ResourceHelpers::isHiddenMarker(const ESM::RefId& id)
 {
-    return Misc::StringUtils::ciEqual(id, "prisonmarker") || Misc::StringUtils::ciEqual(id, "divinemarker")
-        || Misc::StringUtils::ciEqual(id, "templemarker") || Misc::StringUtils::ciEqual(id, "northmarker");
+    return id == "prisonmarker" || id == "divinemarker" || id == "templemarker" || id == "northmarker";
 }
 
 namespace

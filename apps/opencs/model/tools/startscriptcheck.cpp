@@ -35,12 +35,13 @@ void CSMTools::StartScriptCheckStage::perform(int stage, CSMDoc::Messages& messa
     if ((mIgnoreBaseRecords && record.mState == CSMWorld::RecordBase::State_BaseOnly) || record.isDeleted())
         return;
 
-    std::string scriptId = record.get().mId;
+    const auto& scriptId = record.get().mId;
 
     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_StartScript, scriptId);
 
-    if (mScripts.searchId(Misc::StringUtils::lowerCase(scriptId)) == -1)
-        messages.add(id, "Start script " + scriptId + " does not exist", "", CSMDoc::Message::Severity_Error);
+    if (mScripts.searchId(scriptId) == -1)
+        messages.add(
+            id, "Start script " + scriptId.getRefIdString() + " does not exist", "", CSMDoc::Message::Severity_Error);
 }
 
 int CSMTools::StartScriptCheckStage::setup()

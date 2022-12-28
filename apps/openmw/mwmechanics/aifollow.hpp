@@ -42,10 +42,10 @@ namespace MWMechanics
     {
     public:
         /// Follow Actor for duration or until you arrive at a world position
-        AiFollow(std::string_view actorId, float duration, float x, float y, float z, bool repeat);
+        AiFollow(const ESM::RefId& actorId, float duration, float x, float y, float z, bool repeat);
         /// Follow Actor for duration or until you arrive at a position in a cell
-        AiFollow(
-            std::string_view actorId, std::string_view cellId, float duration, float x, float y, float z, bool repeat);
+        AiFollow(const ESM::RefId& actorId, const ESM::RefId& cellId, float duration, float x, float y, float z,
+            bool repeat);
         /// Follow Actor indefinitively
         AiFollow(const MWWorld::Ptr& actor, bool commanded = false);
 
@@ -66,7 +66,7 @@ namespace MWMechanics
         }
 
         /// Returns the actor being followed
-        std::string getFollowedActor();
+        ESM::RefId getFollowedActor();
 
         void writeState(ESM::AiSequence::AiSequence& sequence) const override;
 
@@ -94,7 +94,7 @@ namespace MWMechanics
         const float mX;
         const float mY;
         const float mZ;
-        const std::string mCellId;
+        const ESM::RefId mCellId;
         bool mActive; // have we spotted the target?
         const int mFollowIndex;
 

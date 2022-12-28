@@ -72,22 +72,22 @@ namespace CSMTools
         const CSMWorld::RefIdData& mReferencables;
         const CSMWorld::Resources& mSoundFiles;
 
-        std::set<std::string> mCellNames;
+        std::set<ESM::RefId> mCellNames;
 
         bool mIgnoreBaseRecords;
 
         // These return false when not successful and write an error
-        bool verifyActor(const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
-        bool verifyCell(const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
+        bool verifyActor(const ESM::RefId& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
+        bool verifyCell(const ESM::RefId& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         bool verifyFactionRank(
-            const std::string& name, int rank, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
-        bool verifyItem(const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
+            const ESM::RefId& name, int rank, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
+        bool verifyItem(const ESM::RefId& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         bool verifySelectStruct(
             const ESM::DialInfo::SelectStruct& select, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         bool verifySound(const std::string& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
 
         template <typename T>
-        bool verifyId(const std::string& name, const CSMWorld::IdCollection<T>& collection,
+        bool verifyId(const ESM::RefId& name, const CSMWorld::IdCollection<T>& collection,
             const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
     };
 }

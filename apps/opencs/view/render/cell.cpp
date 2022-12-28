@@ -95,13 +95,13 @@ bool CSVRender::Cell::addObjects(int start, int end)
 
     for (int i = start; i <= end; ++i)
     {
-        std::string cell = Misc::StringUtils::lowerCase(collection.getRecord(i).get().mCell);
+        const auto& cellId = collection.getRecord(i).get().mCell;
 
         CSMWorld::RecordBase::State state = collection.getRecord(i).mState;
 
-        if (cell == mId && state != CSMWorld::RecordBase::State_Deleted)
+        if (cellId == mId && state != CSMWorld::RecordBase::State_Deleted)
         {
-            std::string id = Misc::StringUtils::lowerCase(collection.getRecord(i).get().mId);
+            const std::string& id = collection.getRecord(i).get().mId.getRefIdString();
 
             auto object = std::make_unique<Object>(mData, mCellNode, id, false);
 
@@ -176,7 +176,7 @@ void CSVRender::Cell::unloadLand()
 
 CSVRender::Cell::Cell(CSMWorld::Data& data, osg::Group* rootNode, const std::string& id, bool deleted)
     : mData(data)
-    , mId(Misc::StringUtils::lowerCase(id))
+    , mId(ESM::RefId::stringRefId(id))
     , mDeleted(deleted)
     , mSubMode(0)
     , mSubModeElementMask(0)
@@ -208,8 +208,8 @@ CSVRender::Cell::Cell(CSMWorld::Data& data, osg::Group* rootNode, const std::str
 
         updateLand();
 
-        mPathgrid = std::make_unique<Pathgrid>(mData, mCellNode, mId, mCoordinates);
-        mCellWater = std::make_unique<CellWater>(mData, mCellNode, mId, mCoordinates);
+        mPathgrid = std::make_unique<Pathgrid>(mData, mCellNode, mId.getRefIdString(), mCoordinates);
+        mCellWater = std::make_unique<CellWater>(mData, mCellNode, mId.getRefIdString(), mCoordinates);
     }
 }
 
@@ -268,8 +268,8 @@ bool CSVRender::Cell::referenceDataChanged(const QModelIndex& topLeft, const QMo
 
     for (int i = topLeft.row(); i <= bottomRight.row(); ++i)
     {
-        std::string cell = Misc::StringUtils::lowerCase(
-            references.data(references.index(i, cellColumn)).toString().toUtf8().constData());
+        auto cell
+            = ESM::RefId::stringRefId(references.data(references.index(i, cellColumn)).toString().toUtf8().constData());
 
         if (cell == mId)
         {

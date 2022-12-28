@@ -15,7 +15,7 @@ namespace MWMechanics
 {
     namespace
     {
-        float getInitialDistance(const std::string& spellId)
+        float getInitialDistance(const ESM::RefId& spellId)
         {
             ActionSpell action = ActionSpell(spellId);
             bool isRanged;
@@ -24,7 +24,7 @@ namespace MWMechanics
     }
 }
 
-MWMechanics::AiCast::AiCast(const std::string& targetId, const std::string& spellId, bool manualSpell)
+MWMechanics::AiCast::AiCast(const ESM::RefId& targetId, const ESM::RefId& spellId, bool manualSpell)
     : mTargetId(targetId)
     , mSpellId(spellId)
     , mCasting(false)

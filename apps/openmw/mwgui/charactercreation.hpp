@@ -46,8 +46,8 @@ namespace MWGui
         // Show a dialog
         void spawnDialog(const char id);
 
-        void setValue(const std::string& id, const MWMechanics::AttributeValue& value) override;
-        void setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value) override;
+        void setValue(std::string_view id, const MWMechanics::AttributeValue& value) override;
+        void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value) override;
         void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value) override;
         void configureSkills(const SkillList& major, const SkillList& minor) override;
 
@@ -74,8 +74,8 @@ namespace MWGui
 
         // Player data
         std::string mPlayerName;
-        std::string mPlayerRaceId;
-        std::string mPlayerBirthSignId;
+        ESM::RefId mPlayerRaceId;
+        ESM::RefId mPlayerBirthSignId;
         ESM::Class mPlayerClass;
 
         // Class generation vars
@@ -83,7 +83,7 @@ namespace MWGui
         ESM::Class::Specialization mGenerateClassResponses[3];
         unsigned mGenerateClassSpecializations[3]; // A counter for each specialization which is increased when an
                                                    // answer is chosen
-        std::string mGenerateClass; // In order: Combat, Magic, Stealth
+        ESM::RefId mGenerateClass; // In order: Combat, Magic, Stealth
 
         ////Dialog events
         // Name dialog

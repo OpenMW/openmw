@@ -7,6 +7,7 @@
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Widget.h>
 
+#include <components/esm/refid.hpp>
 #include <components/esm3/effectlist.hpp>
 #include <components/esm3/loadskil.hpp>
 
@@ -180,7 +181,7 @@ namespace MWGui
         public:
             MWSpell();
 
-            void setSpellId(const std::string& id);
+            void setSpellId(const ESM::RefId& id);
 
             /**
              * @param vector to store the created effect widgets
@@ -193,7 +194,7 @@ namespace MWGui
             void createEffectWidgets(
                 std::vector<MyGUI::Widget*>& effects, MyGUI::Widget* creator, MyGUI::IntCoord& coord, int flags);
 
-            const std::string& getSpellId() const { return mId; }
+            const ESM::RefId& getSpellId() const { return mId; }
 
         protected:
             virtual ~MWSpell();
@@ -203,7 +204,7 @@ namespace MWGui
         private:
             void updateWidgets();
 
-            std::string mId;
+            ESM::RefId mId;
             MyGUI::TextBox* mSpellNameWidget;
         };
         typedef MWSpell* MWSpellPtr;

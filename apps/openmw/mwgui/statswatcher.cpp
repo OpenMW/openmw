@@ -48,21 +48,18 @@ namespace MWGui
 
         if (stats.getHealth() != mWatchedHealth || mWatchedStatsEmpty)
         {
-            static const std::string hbar("HBar");
             mWatchedHealth = stats.getHealth();
-            setValue(hbar, stats.getHealth());
+            setValue("HBar", stats.getHealth());
         }
         if (stats.getMagicka() != mWatchedMagicka || mWatchedStatsEmpty)
         {
-            static const std::string mbar("MBar");
             mWatchedMagicka = stats.getMagicka();
-            setValue(mbar, stats.getMagicka());
+            setValue("MBar", stats.getMagicka());
         }
         if (stats.getFatigue() != mWatchedFatigue || mWatchedStatsEmpty)
         {
-            static const std::string fbar("FBar");
             mWatchedFatigue = stats.getFatigue();
-            setValue(fbar, stats.getFatigue());
+            setValue("FBar", stats.getFatigue());
         }
 
         float timeToDrown = stats.getTimeToStartDrowning();
@@ -154,7 +151,7 @@ namespace MWGui
         mListeners.erase(listener);
     }
 
-    void StatsWatcher::setValue(const std::string& id, const MWMechanics::AttributeValue& value)
+    void StatsWatcher::setValue(std::string_view id, const MWMechanics::AttributeValue& value)
     {
         for (StatsListener* listener : mListeners)
             listener->setValue(id, value);
@@ -168,19 +165,19 @@ namespace MWGui
             listener->setValue(parSkill, value);
     }
 
-    void StatsWatcher::setValue(const std::string& id, const MWMechanics::DynamicStat<float>& value)
+    void StatsWatcher::setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value)
     {
         for (StatsListener* listener : mListeners)
             listener->setValue(id, value);
     }
 
-    void StatsWatcher::setValue(const std::string& id, const std::string& value)
+    void StatsWatcher::setValue(std::string_view id, const std::string& value)
     {
         for (StatsListener* listener : mListeners)
             listener->setValue(id, value);
     }
 
-    void StatsWatcher::setValue(const std::string& id, int value)
+    void StatsWatcher::setValue(std::string_view id, int value)
     {
         for (StatsListener* listener : mListeners)
             listener->setValue(id, value);

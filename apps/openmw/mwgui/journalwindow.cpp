@@ -413,16 +413,17 @@ namespace
             mOptionsMode = false;
             mTopicsMode = false;
 
-            MWBase::Environment::get().getWindowManager()->playSound("book page");
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
         }
 
-        void notifyTopicSelected(const std::string& topic, int id)
+        void notifyTopicSelected(const std::string& topicIdString, int id)
         {
+            ESM::RefId topic = ESM::RefId::stringRefId(topicIdString);
             const MWBase::Journal* journal = MWBase::Environment::get().getJournal();
             intptr_t topicId = 0; /// \todo get rid of intptr ids
             for (MWBase::Journal::TTopicIter i = journal->topicBegin(); i != journal->topicEnd(); ++i)
             {
-                if (Misc::StringUtils::ciEqual(i->first, topic))
+                if (i->first == topic)
                     topicId = intptr_t(&i->second);
             }
 
@@ -444,7 +445,7 @@ namespace
 
             mOptionsMode = false;
 
-            MWBase::Environment::get().getWindowManager()->playSound("book page");
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
         }
 
         void notifyOptions(MyGUI::Widget* _sender)
@@ -472,7 +473,7 @@ namespace
             assert(mStates.size() > 1);
             popBook();
 
-            MWBase::Environment::get().getWindowManager()->playSound("book page");
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
         }
 
         void notifyIndexLinkClicked(MWGui::TypesetBook::InteractiveId index)
@@ -493,7 +494,7 @@ namespace
 
             list->adjustSize();
 
-            MWBase::Environment::get().getWindowManager()->playSound("book page");
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
         }
 
         void notifyTopics(MyGUI::Widget* _sender)
@@ -508,7 +509,7 @@ namespace
             setVisible(ShowAllBTN, false);
             setVisible(ShowActiveBTN, false);
 
-            MWBase::Environment::get().getWindowManager()->playSound("book page");
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
         }
 
         struct AddNamesToList
@@ -565,7 +566,7 @@ namespace
                 mModel->visitQuestNames(false, setInactive);
             }
 
-            MWBase::Environment::get().getWindowManager()->playSound("book page");
+            MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
         }
 
         void notifyShowAll(MyGUI::Widget* _sender)
@@ -589,14 +590,14 @@ namespace
             else
             {
                 setBookMode();
-                MWBase::Environment::get().getWindowManager()->playSound("book page");
+                MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
             }
         }
 
         void notifyClose(MyGUI::Widget* _sender)
         {
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-            winMgr->playSound("book close");
+            winMgr->playSound(ESM::RefId::stringRefId("book close"));
             winMgr->popGuiMode();
         }
 
@@ -619,7 +620,7 @@ namespace
 
                 if (page + 2 < book->pageCount())
                 {
-                    MWBase::Environment::get().getWindowManager()->playSound("book page");
+                    MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
 
                     page += 2;
                     updateShowingPages();
@@ -637,7 +638,7 @@ namespace
 
                 if (page >= 2)
                 {
-                    MWBase::Environment::get().getWindowManager()->playSound("book page");
+                    MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("book page"));
 
                     page -= 2;
                     updateShowingPages();

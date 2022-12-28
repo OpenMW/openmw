@@ -999,7 +999,7 @@ namespace MWMechanics
         if (evt.substr(0, 7) == "sound: ")
         {
             MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
-            sndMgr->playSound3D(mPtr, evt.substr(7), 1.0f, 1.0f);
+            sndMgr->playSound3D(mPtr, ESM::RefId::stringRefId(evt.substr(7)), 1.0f, 1.0f);
             return;
         }
 
@@ -1029,7 +1029,7 @@ namespace MWMechanics
                 }
             }
 
-            std::string_view sound = charClass.getSoundIdFromSndGen(mPtr, soundgen);
+            const auto& sound = charClass.getSoundIdFromSndGen(mPtr, soundgen);
             if (!sound.empty())
             {
                 MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
@@ -1234,7 +1234,7 @@ namespace MWMechanics
 
         const bool isWerewolf = cls.isNpc() && cls.getNpcStats(mPtr).isWerewolf();
 
-        std::string_view downSoundId;
+        const ESM::RefId* downSoundId = nullptr;
         bool weaponChanged = false;
         bool ammunition = true;
         float weapSpeed = 1.f;
@@ -1250,11 +1250,11 @@ namespace MWMechanics
             {
                 newWeapon = *weapon;
                 if (isRealWeapon(mWeaponType))
-                    downSoundId = newWeapon.getClass().getDownSoundId(newWeapon);
+                    downSoundId = &newWeapon.getClass().getDownSoundId(newWeapon);
             }
             // weapon->HtH switch: weapon is empty already, so we need to take sound from previous weapon
             else if (!mWeapon.isEmpty() && weaptype == ESM::Weapon::HandToHand && mWeaponType != ESM::Weapon::Spell)
-                downSoundId = mWeapon.getClass().getDownSoundId(mWeapon);
+                downSoundId = &mWeapon.getClass().getDownSoundId(mWeapon);
 
             if (mWeapon != newWeapon)
             {
@@ -1354,9 +1354,9 @@ namespace MWMechanics
                         mAnimation->showWeapons(false);
                 }
 
-                if (!downSoundId.empty())
+                if (downSoundId && !downSoundId->empty())
                 {
-                    sndMgr->playSound3D(mPtr, downSoundId, 1.0f, 1.0f);
+                    sndMgr->playSound3D(mPtr, *downSoundId, 1.0f, 1.0f);
                 }
             }
 
@@ -1410,7 +1410,7 @@ namespace MWMechanics
 
                             if (!mWeapon.isEmpty() && mWeaponType != ESM::Weapon::HandToHand && isRealWeapon(weaptype))
                             {
-                                std::string_view upSoundId = mWeapon.getClass().getUpSoundId(mWeapon);
+                                const ESM::RefId& upSoundId = mWeapon.getClass().getUpSoundId(mWeapon);
                                 if (!upSoundId.empty())
                                     sndMgr->playSound3D(mPtr, upSoundId, 1.0f, 1.0f);
                             }
@@ -1442,13 +1442,14 @@ namespace MWMechanics
 
         if (isWerewolf)
         {
+            const ESM::RefId wolfRun = ESM::RefId::stringRefId("WolfRun");
             if (isRunning() && !world->isSwimming(mPtr) && mWeaponType == ESM::Weapon::None)
             {
-                if (!sndMgr->getSoundPlaying(mPtr, "WolfRun"))
-                    sndMgr->playSound3D(mPtr, "WolfRun", 1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
+                if (!sndMgr->getSoundPlaying(mPtr, wolfRun))
+                    sndMgr->playSound3D(mPtr, wolfRun, 1.0f, 1.0f, MWSound::Type::Sfx, MWSound::PlayMode::Loop);
             }
             else
-                sndMgr->stopSound3D(mPtr, "WolfRun");
+                sndMgr->stopSound3D(mPtr, wolfRun);
         }
 
         // Combat for actors with persistent animations obviously will be buggy
@@ -1483,11 +1484,11 @@ namespace MWMechanics
                         // For the player, set the spell we want to cast
                         // This has to be done at the start of the casting animation,
                         // *not* when selecting a spell in the GUI (otherwise you could change the spell mid-animation)
-                        const std::string& selectedSpell
+                        const ESM::RefId& selectedSpell
                             = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
                         stats.getSpells().setSelectedSpell(selectedSpell);
                     }
-                    std::string_view spellid = stats.getSpells().getSelectedSpell();
+                    const ESM::RefId* spellid = &stats.getSpells().getSelectedSpell();
                     bool isMagicItem = false;
 
                     // Play hand VFX and allow castSpell use (assuming an animation is going to be played) if
@@ -1497,13 +1498,13 @@ namespace MWMechanics
                         spellCastResult = world->startSpellCast(mPtr);
                     mCanCast = spellCastResult == MWWorld::SpellCastState::Success;
 
-                    if (spellid.empty() && cls.hasInventoryStore(mPtr))
+                    if (spellid->empty() && cls.hasInventoryStore(mPtr))
                     {
                         MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
                         if (inv.getSelectedEnchantItem() != inv.end())
                         {
                             const MWWorld::Ptr& enchantItem = *inv.getSelectedEnchantItem();
-                            spellid = enchantItem.getClass().getEnchantment(enchantItem);
+                            spellid = &enchantItem.getClass().getEnchantment(enchantItem);
                             isMagicItem = true;
                         }
                     }
@@ -1522,7 +1523,7 @@ namespace MWMechanics
                     }
                     // Play the spellcasting animation/VFX if the spellcasting was successful or failed due to
                     // insufficient magicka. Used up powers are exempt from this from some reason.
-                    else if (!spellid.empty() && spellCastResult != MWWorld::SpellCastState::PowerAlreadyUsed)
+                    else if (!spellid->empty() && spellCastResult != MWWorld::SpellCastState::PowerAlreadyUsed)
                     {
                         world->breakInvisibility(mPtr);
                         MWMechanics::CastSpell cast(mPtr, {}, false, mCastingManualSpell);
@@ -1531,13 +1532,13 @@ namespace MWMechanics
                         const MWWorld::ESMStore& store = world->getStore();
                         if (isMagicItem)
                         {
-                            const ESM::Enchantment* enchantment = store.get<ESM::Enchantment>().find(spellid);
+                            const ESM::Enchantment* enchantment = store.get<ESM::Enchantment>().find(*spellid);
                             effects = &enchantment->mEffects.mList;
                             cast.playSpellCastingEffects(enchantment);
                         }
                         else
                         {
-                            const ESM::Spell* spell = store.get<ESM::Spell>().find(spellid);
+                            const ESM::Spell* spell = store.get<ESM::Spell>().find(*spellid);
                             effects = &spell->mEffects.mList;
                             cast.playSpellCastingEffects(spell);
                         }
@@ -1546,7 +1547,8 @@ namespace MWMechanics
                             const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(
                                 effects->back().mEffectID); // use last effect of list for color of VFX_Hands
 
-                            const ESM::Static* castStatic = world->getStore().get<ESM::Static>().find("VFX_Hands");
+                            const ESM::Static* castStatic
+                                = world->getStore().get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_Hands"));
 
                             const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
@@ -1683,7 +1685,7 @@ namespace MWMechanics
                     if (!resultMessage.empty())
                         MWBase::Environment::get().getWindowManager()->messageBox(resultMessage);
                     if (!resultSound.empty())
-                        sndMgr->playSound3D(target, resultSound, 1.0f, 1.0f);
+                        sndMgr->playSound3D(target, ESM::RefId::stringRefId(resultSound), 1.0f, 1.0f);
                 }
             }
             else
@@ -2135,7 +2137,7 @@ namespace MWMechanics
                             float realHealthLost = healthLost * (1.0f - 0.25f * fatigueTerm);
                             health.setCurrent(health.getCurrent() - realHealthLost);
                             cls.getCreatureStats(mPtr).setHealth(health);
-                            sndMgr->playSound3D(mPtr, "Health Damage", 1.0f, 1.0f);
+                            sndMgr->playSound3D(mPtr, ESM::RefId::stringRefId("Health Damage"), 1.0f, 1.0f);
                             if (isPlayer)
                                 MWBase::Environment::get().getWindowManager()->activateHitOverlay();
                         }
@@ -2164,8 +2166,8 @@ namespace MWMechanics
                             sound = "DefaultLand";
 
                         if (!sound.empty())
-                            sndMgr->playSound3D(
-                                mPtr, sound, 1.f, 1.f, MWSound::Type::Foot, MWSound::PlayMode::NoPlayerLocal);
+                            sndMgr->playSound3D(mPtr, ESM::RefId::stringRefId(sound), 1.f, 1.f, MWSound::Type::Foot,
+                                MWSound::PlayMode::NoPlayerLocal);
                     }
                 }
 
@@ -2783,7 +2785,7 @@ namespace MWMechanics
         mPtr.getClass().getCreatureStats(mPtr).setAttackingOrSpell(attackingOrSpell);
     }
 
-    void CharacterController::castSpell(const std::string& spellId, bool manualSpell)
+    void CharacterController::castSpell(const ESM::RefId& spellId, bool manualSpell)
     {
         setAttackingOrSpell(true);
         mCastingManualSpell = manualSpell;
@@ -2843,7 +2845,8 @@ namespace MWMechanics
 
     void CharacterController::playSwishSound() const
     {
-        std::string_view soundId = "Weapon Swish";
+        static ESM::RefId weaponSwish = ESM::RefId::stringRefId("Weapon Swish");
+        const ESM::RefId* soundId = &weaponSwish;
         float volume = 0.98f + mAttackStrength * 0.02f;
         float pitch = 0.75f + mAttackStrength * 0.4f;
 
@@ -2854,11 +2857,11 @@ namespace MWMechanics
             const MWWorld::ESMStore& store = world->getStore();
             const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfSwing", world->getPrng());
             if (sound)
-                soundId = sound->mId;
+                soundId = &sound->mId;
         }
 
-        if (!soundId.empty())
-            MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, soundId, volume, pitch);
+        if (!soundId->empty())
+            MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, *soundId, volume, pitch);
     }
 
     void CharacterController::updateHeadTracking(float duration)

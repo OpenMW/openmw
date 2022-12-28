@@ -18,7 +18,7 @@ namespace MWDialogue
     {
     }
 
-    Quest::Quest(const std::string& topic)
+    Quest::Quest(const ESM::RefId& topic)
         : Topic(topic)
         , mIndex(0)
         , mFinished(false)
@@ -75,7 +75,7 @@ namespace MWDialogue
             [&](const auto& info) { return info.mId == entry.mInfoId; });
 
         if (info == dialogue->mInfo.end() || info->mData.mJournalIndex == -1)
-            throw std::runtime_error("unknown journal entry for topic " + mTopic);
+            throw std::runtime_error("unknown journal entry for topic " + mTopic.getRefIdString());
 
         if (info->mQuestStatus == ESM::DialInfo::QS_Finished || info->mQuestStatus == ESM::DialInfo::QS_Restart)
             mFinished = info->mQuestStatus == ESM::DialInfo::QS_Finished;

@@ -38,7 +38,7 @@ namespace MWWorld
 
         for (const ESM::Global& esmGlobal : globals)
         {
-            mVariables.insert(std::make_pair(Misc::StringUtils::lowerCase(esmGlobal.mId), esmGlobal));
+            mVariables.insert(std::make_pair(Misc::StringUtils::lowerCase(esmGlobal.mId.getRefIdString()), esmGlobal));
         }
     }
 
@@ -98,9 +98,8 @@ namespace MWWorld
             // This readRecord() method is used when reading a saved game.
             // Deleted globals can't appear there, so isDeleted will be ignored here.
             global.load(reader, isDeleted);
-            Misc::StringUtils::lowerCaseInPlace(global.mId);
 
-            Collection::iterator iter = mVariables.find(global.mId);
+            Collection::iterator iter = mVariables.find(Misc::StringUtils::lowerCase(global.mId.getRefIdString()));
             if (iter != mVariables.end())
                 iter->second = global;
 

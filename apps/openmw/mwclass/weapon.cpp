@@ -54,7 +54,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
         const std::string& name = ref->mBase->mName;
 
-        return !name.empty() ? name : ref->mBase->mId;
+        return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
     std::unique_ptr<MWWorld::Action> Weapon::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
@@ -77,7 +77,7 @@ namespace MWClass
         return ref->mBase->mData.mHealth;
     }
 
-    std::string_view Weapon::getScript(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Weapon::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
 
@@ -123,14 +123,14 @@ namespace MWClass
         return ref->mBase->mData.mValue;
     }
 
-    std::string_view Weapon::getUpSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Weapon::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
         int type = ref->mBase->mData.mType;
         return MWMechanics::getWeaponType(type)->mSoundIdUp;
     }
 
-    std::string_view Weapon::getDownSoundId(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Weapon::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
         int type = ref->mBase->mData.mType;
@@ -243,7 +243,7 @@ namespace MWClass
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())
         {
             text += MWGui::ToolTips::getCellRefString(ptr.getCellRef());
-            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript, "Script");
+            text += MWGui::ToolTips::getMiscString(ref->mBase->mScript.getRefIdString(), "Script");
         }
 
         info.text = text;
@@ -251,20 +251,20 @@ namespace MWClass
         return info;
     }
 
-    std::string_view Weapon::getEnchantment(const MWWorld::ConstPtr& ptr) const
+    const ESM::RefId& Weapon::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
 
         return ref->mBase->mEnchant;
     }
 
-    const std::string& Weapon::applyEnchantment(
-        const MWWorld::ConstPtr& ptr, const std::string& enchId, int enchCharge, const std::string& newName) const
+    const ESM::RefId& Weapon::applyEnchantment(
+        const MWWorld::ConstPtr& ptr, const ESM::RefId& enchId, int enchCharge, const std::string& newName) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
 
         ESM::Weapon newItem = *ref->mBase;
-        newItem.mId.clear();
+        newItem.mId = ESM::RefId::sEmpty;
         newItem.mName = newName;
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;

@@ -89,7 +89,7 @@ namespace MWGui
         MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
 
         const std::string& name = *sender->getUserData<std::string>();
-        winMgr->playSound("Menu Click");
+        winMgr->playSound(ESM::RefId::stringRefId("Menu Click"));
         if (name == "return")
         {
             winMgr->removeGuiMode(GM_MainMenu);

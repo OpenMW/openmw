@@ -67,9 +67,9 @@ namespace CSMWorld
 
         int getSize() const override;
 
-        std::string getId(int index) const override;
+        ESM::RefId getId(int index) const override;
 
-        int getIndex(const std::string& id) const override;
+        int getIndex(const ESM::RefId& id) const override;
 
         int getColumns() const override;
 
@@ -82,14 +82,18 @@ namespace CSMWorld
         void removeRows(int index, int count) override;
 
         void cloneRecord(
-            const std::string& origin, const std::string& destination, const UniversalId::Type type) override;
+            const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type) override;
 
-        bool touchRecord(const std::string& id) override;
+        bool touchRecord(const ESM::RefId& id) override;
 
-        void appendBlankRecord(const std::string& id, UniversalId::Type type) override;
+        void appendBlankRecord(const ESM::RefId& id, UniversalId::Type type) override;
         ///< \param type Will be ignored, unless the collection supports multiple record types
 
         int searchId(std::string_view id) const override;
+        ////< Search record with \a id.
+        /// \return index of record (if found) or -1 (not found)
+
+        int searchId(const ESM::RefId& id) const override;
         ////< Search record with \a id.
         /// \return index of record (if found) or -1 (not found)
 
@@ -103,16 +107,16 @@ namespace CSMWorld
         ///
         ///< \param type Will be ignored, unless the collection supports multiple record types
 
-        const RecordBase& getRecord(const std::string& id) const override;
+        const RecordBase& getRecord(const ESM::RefId& id) const override;
 
         const RecordBase& getRecord(int index) const override;
 
         void load(ESM::ESMReader& reader, bool base, UniversalId::Type type);
 
-        int getAppendIndex(const std::string& id, UniversalId::Type type) const override;
+        int getAppendIndex(const ESM::RefId& id, UniversalId::Type type) const override;
         ///< \param type Will be ignored, unless the collection supports multiple record types
 
-        std::vector<std::string> getIds(bool listDeleted) const override;
+        std::vector<ESM::RefId> getIds(bool listDeleted) const override;
         ///< Return a sorted collection of all IDs
         ///
         /// \param listDeleted include deleted record in the list

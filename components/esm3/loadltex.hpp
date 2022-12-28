@@ -4,6 +4,7 @@
 #include <string>
 
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -26,7 +27,8 @@ namespace ESM
         static std::string_view getRecordType() { return "LandTexture"; }
 
         // mId is merely a user friendly name for the texture in the editor.
-        std::string mId, mTexture;
+        std::string mTexture;
+        RefId mId;
         int mIndex;
 
         void load(ESMReader& esm, bool& isDeleted);

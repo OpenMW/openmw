@@ -6,6 +6,7 @@
 #include <MyGUI_EditBox.h>
 
 #include <components/esm/attr.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadclas.hpp>
 
 #include "widgets.hpp"
@@ -13,7 +14,7 @@
 
 namespace MWGui
 {
-    void setClassImage(MyGUI::ImageBox* imageBox, const std::string& classId);
+    void setClassImage(MyGUI::ImageBox* imageBox, const ESM::RefId& classId);
 
     class InfoBoxDialog : public WindowModal
     {
@@ -70,7 +71,7 @@ namespace MWGui
     public:
         GenerateClassResultDialog();
 
-        void setClassId(const std::string& classId);
+        void setClassId(const ESM::RefId& classId);
 
         bool exit() override { return false; }
 
@@ -95,7 +96,7 @@ namespace MWGui
         MyGUI::ImageBox* mClassImage;
         MyGUI::TextBox* mClassName;
 
-        std::string mCurrentClassId;
+        ESM::RefId mCurrentClassId;
     };
 
     class PickClassDialog : public WindowModal
@@ -103,8 +104,8 @@ namespace MWGui
     public:
         PickClassDialog();
 
-        const std::string& getClassId() const { return mCurrentClassId; }
-        void setClassId(const std::string& classId);
+        const ESM::RefId& getClassId() const { return mCurrentClassId; }
+        void setClassId(const ESM::RefId& classId);
 
         void setNextButtonShow(bool shown);
         void onOpen() override;
@@ -142,7 +143,7 @@ namespace MWGui
         Widgets::MWSkillPtr mMajorSkill[5];
         Widgets::MWSkillPtr mMinorSkill[5];
 
-        std::string mCurrentClassId;
+        ESM::RefId mCurrentClassId;
     };
 
     class SelectSpecializationDialog : public WindowModal

@@ -140,7 +140,7 @@ namespace MWLua
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
             // TODO: change AiEscort implementation to accept ptr instead of a non-unique refId.
-            const std::string& refId = target.ptr().getCellRef().getRefId();
+            const ESM::RefId& refId = target.ptr().getCellRef().getRefId();
             int gameHoursDuration = static_cast<int>(std::ceil(duration / 3600.0));
             const ESM::Cell* esmCell = cell.mStore->getCell();
             if (esmCell->isExterior())

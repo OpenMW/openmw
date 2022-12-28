@@ -18,7 +18,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("MODL"):
@@ -32,7 +32,7 @@ namespace ESM
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
-                    mScript = esm.getHString();
+                    mScript = esm.getRefId();
                     break;
                 case fourCC("ITEX"):
                     mIcon = esm.getHString();
@@ -55,7 +55,7 @@ namespace ESM
 
     void Lockpick::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {
@@ -67,7 +67,7 @@ namespace ESM
         esm.writeHNOCString("FNAM", mName);
 
         esm.writeHNT("LKDT", mData, 16);
-        esm.writeHNOString("SCRI", mScript);
+        esm.writeHNOString("SCRI", mScript.getRefIdString());
         esm.writeHNOCString("ITEX", mIcon);
     }
 
@@ -81,6 +81,6 @@ namespace ESM
         mName.clear();
         mModel.clear();
         mIcon.clear();
-        mScript.clear();
+        mScript = ESM::RefId::sEmpty;
     }
 }

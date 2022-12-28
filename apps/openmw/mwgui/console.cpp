@@ -105,10 +105,15 @@ namespace MWGui
 
             // identifier
             const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
+            std::vector<ESM::RefId> ids;
             for (MWWorld::ESMStore::iterator it = store.begin(); it != store.end(); ++it)
             {
-                (*it)->listIdentifier(mNames);
+                (*it)->listIdentifier(ids);
+                for (auto id : ids)
+                {
+                    mNames.push_back(id.getRefIdString());
+                }
+                ids.clear();
             }
 
             // exterior cell names aren't technically identifiers, but since the COC function accepts them,
@@ -117,7 +122,7 @@ namespace MWGui
                  it != store.get<ESM::Cell>().extEnd(); ++it)
             {
                 if (!it->mName.empty())
-                    mNames.push_back(it->mName);
+                    mNames.push_back(it->mName.getRefIdString());
             }
 
             // sort
@@ -190,7 +195,7 @@ namespace MWGui
         Compiler::Locals locals;
         if (!mPtr.isEmpty())
         {
-            std::string_view script = mPtr.getClass().getScript(mPtr);
+            const ESM::RefId& script = mPtr.getClass().getScript(mPtr);
             if (!script.empty())
                 locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
         }
@@ -529,7 +534,7 @@ namespace MWGui
         if (!mConsoleMode.empty())
             title = mConsoleMode + " " + title;
         if (!mPtr.isEmpty())
-            title.append(" (" + mPtr.getCellRef().getRefId() + ")");
+            title.append(" (" + mPtr.getCellRef().getRefId().getRefIdString() + ")");
         setTitle(title);
     }
 

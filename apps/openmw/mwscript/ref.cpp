@@ -9,7 +9,7 @@
 
 MWWorld::Ptr MWScript::ExplicitRef::operator()(Interpreter::Runtime& runtime, bool required, bool activeOnly) const
 {
-    std::string_view id = runtime.getStringLiteral(runtime[0].mInteger);
+    ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
     runtime.pop();
 
     if (required)

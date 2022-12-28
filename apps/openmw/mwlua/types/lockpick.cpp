@@ -27,17 +27,20 @@ namespace MWLua
             = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Lockpick>();
         lockpick["record"] = sol::overload(
             [](const Object& obj) -> const ESM::Lockpick* { return obj.ptr().get<ESM::Lockpick>()->mBase; },
-            [store](const std::string& recordId) -> const ESM::Lockpick* { return store->find(recordId); });
+            [store](const std::string& recordId) -> const ESM::Lockpick* {
+                return store->find(ESM::RefId::stringRefId(recordId));
+            });
         sol::usertype<ESM::Lockpick> record = context.mLua->sol().new_usertype<ESM::Lockpick>("ESM3_Lockpick");
         record[sol::meta_function::to_string]
-            = [](const ESM::Lockpick& rec) { return "ESM3_Lockpick[" + rec.mId + "]"; };
-        record["id"] = sol::readonly_property([](const ESM::Lockpick& rec) -> std::string { return rec.mId; });
+            = [](const ESM::Lockpick& rec) { return "ESM3_Lockpick[" + rec.mId.getRefIdString() + "]"; };
+        record["id"]
+            = sol::readonly_property([](const ESM::Lockpick& rec) -> std::string { return rec.mId.getRefIdString(); });
         record["name"] = sol::readonly_property([](const ESM::Lockpick& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Lockpick& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
-        record["mwscript"]
-            = sol::readonly_property([](const ESM::Lockpick& rec) -> std::string { return rec.mScript; });
+        record["mwscript"] = sol::readonly_property(
+            [](const ESM::Lockpick& rec) -> std::string { return rec.mScript.getRefIdString(); });
         record["icon"] = sol::readonly_property([vfs](const ESM::Lockpick& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });

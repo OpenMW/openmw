@@ -15,6 +15,7 @@
 #include "stat.hpp"
 
 #include <components/esm/attr.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/magiceffects.hpp>
 
 namespace ESM
@@ -63,8 +64,8 @@ namespace MWMechanics
 
         float mFallHeight;
 
-        std::string mLastHitObject; // The last object to hit this actor
-        std::string mLastHitAttemptObject; // The last object to attempt to hit this actor
+        ESM::RefId mLastHitObject; // The last object to hit this actor
+        ESM::RefId mLastHitAttemptObject; // The last object to attempt to hit this actor
 
         // For merchants: the last time items were restocked and gold pool refilled.
         MWWorld::TimeStamp mLastRestock;
@@ -249,12 +250,12 @@ namespace MWMechanics
         /// Like getMovementFlag, but also takes into account if the flag is Forced
         bool getStance(Stance flag) const;
 
-        void setLastHitObject(const std::string& objectid);
+        void setLastHitObject(const ESM::RefId& objectid);
         void clearLastHitObject();
-        const std::string& getLastHitObject() const;
-        void setLastHitAttemptObject(const std::string& objectid);
+        const ESM::RefId& getLastHitObject() const;
+        void setLastHitAttemptObject(const ESM::RefId& objectid);
         void clearLastHitAttemptObject();
-        const std::string& getLastHitAttemptObject() const;
+        const ESM::RefId& getLastHitAttemptObject() const;
         void setHitAttemptActorId(const int actorId);
         int getHitAttemptActorId() const;
 

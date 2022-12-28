@@ -26,7 +26,7 @@
 
 namespace CSMWorld
 {
-    const std::string& ActorAdapter::RaceData::getId() const
+    const ESM::RefId& ActorAdapter::RaceData::getId() const
     {
         return mId;
     }
@@ -56,47 +56,47 @@ namespace CSMWorld
         }
     }
 
-    const std::string& ActorAdapter::RaceData::getFemalePart(ESM::PartReferenceType index) const
+    const ESM::RefId& ActorAdapter::RaceData::getFemalePart(ESM::PartReferenceType index) const
     {
         return mFemaleParts[ESM::getMeshPart(index)];
     }
 
-    const std::string& ActorAdapter::RaceData::getMalePart(ESM::PartReferenceType index) const
+    const ESM::RefId& ActorAdapter::RaceData::getMalePart(ESM::PartReferenceType index) const
     {
         return mMaleParts[ESM::getMeshPart(index)];
     }
 
-    bool ActorAdapter::RaceData::hasDependency(const std::string& id) const
+    bool ActorAdapter::RaceData::hasDependency(const ESM::RefId& id) const
     {
         return mDependencies.find(id) != mDependencies.end();
     }
 
-    void ActorAdapter::RaceData::setFemalePart(ESM::BodyPart::MeshPart index, const std::string& partId)
+    void ActorAdapter::RaceData::setFemalePart(ESM::BodyPart::MeshPart index, const ESM::RefId& partId)
     {
         mFemaleParts[index] = partId;
         addOtherDependency(partId);
     }
 
-    void ActorAdapter::RaceData::setMalePart(ESM::BodyPart::MeshPart index, const std::string& partId)
+    void ActorAdapter::RaceData::setMalePart(ESM::BodyPart::MeshPart index, const ESM::RefId& partId)
     {
         mMaleParts[index] = partId;
         addOtherDependency(partId);
     }
 
-    void ActorAdapter::RaceData::addOtherDependency(const std::string& id)
+    void ActorAdapter::RaceData::addOtherDependency(const ESM::RefId& id)
     {
         if (!id.empty())
             mDependencies.emplace(id);
     }
 
-    void ActorAdapter::RaceData::reset_data(const std::string& id, bool isBeast)
+    void ActorAdapter::RaceData::reset_data(const ESM::RefId& id, bool isBeast)
     {
         mId = id;
         mIsBeast = isBeast;
         for (auto& str : mFemaleParts)
-            str.clear();
+            str = ESM::RefId::sEmpty;
         for (auto& str : mMaleParts)
-            str.clear();
+            str = ESM::RefId::sEmpty;
         mDependencies.clear();
 
         // Mark self as a dependency
@@ -109,7 +109,7 @@ namespace CSMWorld
         mFemale = false;
     }
 
-    const std::string& ActorAdapter::ActorData::getId() const
+    const ESM::RefId& ActorAdapter::ActorData::getId() const
     {
         return mId;
     }
@@ -146,12 +146,12 @@ namespace CSMWorld
                 if (mFemale)
                 {
                     // Note: we should use male parts for females as fallback
-                    const std::string& femalePart = mRaceData->getFemalePart(index);
+                    const std::string& femalePart = mRaceData->getFemalePart(index).getRefIdString();
                     if (!femalePart.empty())
                         return femalePart;
                 }
 
-                return mRaceData->getMalePart(index);
+                return mRaceData->getMalePart(index).getRefIdString();
             }
 
             return {};
@@ -160,12 +160,12 @@ namespace CSMWorld
         return it->second.first;
     }
 
-    bool ActorAdapter::ActorData::hasDependency(const std::string& id) const
+    bool ActorAdapter::ActorData::hasDependency(const ESM::RefId& id) const
     {
         return mDependencies.find(id) != mDependencies.end();
     }
 
-    void ActorAdapter::ActorData::setPart(ESM::PartReferenceType index, const std::string& partId, int priority)
+    void ActorAdapter::ActorData::setPart(ESM::PartReferenceType index, const ESM::RefId& partId, int priority)
     {
         auto it = mParts.find(index);
         if (it != mParts.end())
@@ -174,18 +174,18 @@ namespace CSMWorld
                 return;
         }
 
-        mParts[index] = std::make_pair(partId, priority);
+        mParts[index] = std::make_pair(partId.getRefIdString(), priority);
         addOtherDependency(partId);
     }
 
-    void ActorAdapter::ActorData::addOtherDependency(const std::string& id)
+    void ActorAdapter::ActorData::addOtherDependency(const ESM::RefId& id)
     {
         if (!id.empty())
             mDependencies.emplace(id);
     }
 
     void ActorAdapter::ActorData::reset_data(
-        const std::string& id, const std::string& skeleton, bool isCreature, bool isFemale, RaceDataPtr raceData)
+        const ESM::RefId& id, const std::string& skeleton, bool isCreature, bool isFemale, RaceDataPtr raceData)
     {
         mId = id;
         mCreature = isCreature;
@@ -225,7 +225,7 @@ namespace CSMWorld
             partModel, &QAbstractItemModel::rowsAboutToBeRemoved, this, &ActorAdapter::handleBodyPartsAboutToBeRemoved);
     }
 
-    ActorAdapter::ActorDataPtr ActorAdapter::getActorData(const std::string& id)
+    ActorAdapter::ActorDataPtr ActorAdapter::getActorData(const ESM::RefId& id)
     {
         // Return cached actor data if it exists
         ActorDataPtr data = mCachedActors.get(id);
@@ -248,7 +248,7 @@ namespace CSMWorld
         {
             for (int row = start; row <= end; ++row)
             {
-                std::string refId = mReferenceables.getId(row);
+                auto refId = mReferenceables.getId(row);
                 markDirtyDependency(refId);
             }
         }
@@ -269,7 +269,7 @@ namespace CSMWorld
         // Handle each record
         for (int row = start; row <= end; ++row)
         {
-            std::string refId = mReferenceables.getId(row);
+            auto refId = mReferenceables.getId(row);
             markDirtyDependency(refId);
         }
 
@@ -284,7 +284,7 @@ namespace CSMWorld
         {
             for (int row = start; row <= end; ++row)
             {
-                std::string refId = mReferenceables.getId(row);
+                auto refId = mReferenceables.getId(row);
                 markDirtyDependency(refId);
             }
         }
@@ -303,7 +303,7 @@ namespace CSMWorld
         {
             for (int row = start; row <= end; ++row)
             {
-                std::string raceId = mReferenceables.getId(row);
+                auto raceId = mReferenceables.getId(row);
                 markDirtyDependency(raceId);
             }
         }
@@ -323,7 +323,7 @@ namespace CSMWorld
 
         for (int row = start; row <= end; ++row)
         {
-            std::string raceId = mRaces.getId(row);
+            auto raceId = mRaces.getId(row);
             markDirtyDependency(raceId);
         }
 
@@ -338,7 +338,7 @@ namespace CSMWorld
         {
             for (int row = start; row <= end; ++row)
             {
-                std::string raceId = mRaces.getId(row);
+                auto raceId = mRaces.getId(row);
                 markDirtyDependency(raceId);
             }
         }
@@ -364,7 +364,7 @@ namespace CSMWorld
                     markDirtyDependency(record.get().mRace);
                 }
 
-                std::string partId = mBodyParts.getId(row);
+                auto partId = mBodyParts.getId(row);
                 markDirtyDependency(partId);
             }
         }
@@ -392,7 +392,7 @@ namespace CSMWorld
             }
 
             // Update entries with a tracked dependency
-            std::string partId = mBodyParts.getId(row);
+            auto partId = mBodyParts.getId(row);
             markDirtyDependency(partId);
         }
 
@@ -407,7 +407,7 @@ namespace CSMWorld
         {
             for (int row = start; row <= end; ++row)
             {
-                std::string partId = mBodyParts.getId(row);
+                auto partId = mBodyParts.getId(row);
                 markDirtyDependency(partId);
             }
         }
@@ -431,7 +431,7 @@ namespace CSMWorld
         return name.size() >= 4 && name.find(".1st", name.size() - 4) != std::string::npos;
     }
 
-    ActorAdapter::RaceDataPtr ActorAdapter::getRaceData(const std::string& id)
+    ActorAdapter::RaceDataPtr ActorAdapter::getRaceData(const ESM::RefId& id)
     {
         // Return cached race data if it exists
         RaceDataPtr data = mCachedRaces.get(id);
@@ -445,7 +445,7 @@ namespace CSMWorld
         return data;
     }
 
-    void ActorAdapter::setupActor(const std::string& id, ActorDataPtr data)
+    void ActorAdapter::setupActor(const ESM::RefId& id, ActorDataPtr data)
     {
         int index = mReferenceables.searchId(id);
         if (index == -1)
@@ -487,7 +487,7 @@ namespace CSMWorld
         }
     }
 
-    void ActorAdapter::setupRace(const std::string& id, RaceDataPtr data)
+    void ActorAdapter::setupRace(const ESM::RefId& id, RaceDataPtr data)
     {
         int index = mRaces.searchId(id);
         if (index == -1)
@@ -511,7 +511,7 @@ namespace CSMWorld
         // Setup body parts
         for (int i = 0; i < mBodyParts.getSize(); ++i)
         {
-            std::string partId = mBodyParts.getId(i);
+            auto partId = mBodyParts.getId(i);
             auto& partRecord = mBodyParts.getRecord(i);
 
             if (partRecord.isDeleted())
@@ -521,7 +521,8 @@ namespace CSMWorld
             }
 
             auto& part = partRecord.get();
-            if (part.mRace == id && part.mData.mType == ESM::BodyPart::MT_Skin && !is1stPersonPart(part.mId))
+            if (part.mRace == id && part.mData.mType == ESM::BodyPart::MT_Skin
+                && !is1stPersonPart(part.mId.getRefIdString()))
             {
                 auto type = (ESM::BodyPart::MeshPart)part.mData.mPart;
                 bool female = part.mData.mFlags & ESM::BodyPart::BPF_Female;
@@ -533,7 +534,7 @@ namespace CSMWorld
         }
     }
 
-    void ActorAdapter::setupNpc(const std::string& id, ActorDataPtr data)
+    void ActorAdapter::setupNpc(const ESM::RefId& id, ActorDataPtr data)
     {
         // Common setup, record is known to exist and is not deleted
         int index = mReferenceables.searchId(id);
@@ -551,12 +552,12 @@ namespace CSMWorld
         {
             if (item.mCount <= 0)
                 continue;
-            std::string itemId = item.mItem;
+            auto itemId = item.mItem;
             addNpcItem(itemId, data);
         }
     }
 
-    void ActorAdapter::addNpcItem(const std::string& itemId, ActorDataPtr data)
+    void ActorAdapter::addNpcItem(const ESM::RefId& itemId, ActorDataPtr data)
     {
         int index = mReferenceables.searchId(itemId);
         if (index == -1)
@@ -578,7 +579,7 @@ namespace CSMWorld
         auto addParts = [&](const std::vector<ESM::PartReference>& list, int priority) {
             for (auto& part : list)
             {
-                std::string partId;
+                ESM::RefId partId;
                 auto partType = (ESM::PartReferenceType)part.mPart;
 
                 if (data->isFemale())
@@ -590,7 +591,7 @@ namespace CSMWorld
 
                 // An another vanilla quirk: hide hairs if an item replaces Head part
                 if (partType == ESM::PRT_Head)
-                    data->setPart(ESM::PRT_Hair, "", priority);
+                    data->setPart(ESM::PRT_Hair, ESM::RefId::sEmpty, priority);
             }
         };
 
@@ -637,7 +638,7 @@ namespace CSMWorld
         }
     }
 
-    void ActorAdapter::setupCreature(const std::string& id, ActorDataPtr data)
+    void ActorAdapter::setupCreature(const ESM::RefId& id, ActorDataPtr data)
     {
         // Record is known to exist and is not deleted
         int index = mReferenceables.searchId(id);
@@ -646,7 +647,7 @@ namespace CSMWorld
         data->reset_data(id, creature.mModel, true);
     }
 
-    void ActorAdapter::markDirtyDependency(const std::string& dep)
+    void ActorAdapter::markDirtyDependency(const ESM::RefId& dep)
     {
         for (auto raceIt : mCachedRaces)
         {

@@ -20,7 +20,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mId = esm.getHString();
+                    mId = esm.getRefId();
                     hasName = true;
                     break;
                 case fourCC("MODL"):
@@ -34,13 +34,13 @@ namespace ESM
                     hasData = true;
                     break;
                 case fourCC("SCRI"):
-                    mScript = esm.getHString();
+                    mScript = esm.getRefId();
                     break;
                 case fourCC("ITEX"):
                     mIcon = esm.getHString();
                     break;
                 case fourCC("ENAM"):
-                    mEnchant = esm.getHString();
+                    mEnchant = esm.getRefId();
                     break;
                 case fourCC("INDX"):
                     mParts.add(esm);
@@ -63,7 +63,7 @@ namespace ESM
 
     void Clothing::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId);
+        esm.writeHNCString("NAME", mId.getRefIdString());
 
         if (isDeleted)
         {
@@ -75,12 +75,12 @@ namespace ESM
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("CTDT", mData, 12);
 
-        esm.writeHNOCString("SCRI", mScript);
+        esm.writeHNOCString("SCRI", mScript.getRefIdString());
         esm.writeHNOCString("ITEX", mIcon);
 
         mParts.save(esm);
 
-        esm.writeHNOCString("ENAM", mEnchant);
+        esm.writeHNOCString("ENAM", mEnchant.getRefIdString());
     }
 
     void Clothing::blank()
@@ -94,7 +94,7 @@ namespace ESM
         mName.clear();
         mModel.clear();
         mIcon.clear();
-        mEnchant.clear();
-        mScript.clear();
+        mEnchant = ESM::RefId::sEmpty;
+        mScript = ESM::RefId::sEmpty;
     }
 }
