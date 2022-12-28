@@ -4,7 +4,9 @@
 #include <list>
 #include <map>
 #include <string>
+#include <unordered_map>
 
+#include "cellstore.hpp"
 #include "ptr.hpp"
 
 namespace ESM
@@ -40,6 +42,7 @@ namespace MWWorld
         WorldModel(const WorldModel&);
         WorldModel& operator=(const WorldModel&);
 
+        const ESM::Cell* getESMCellByName(const ESM::RefId& name);
         CellStore* getCellStore(const ESM::Cell* cell);
 
         Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);
@@ -48,16 +51,33 @@ namespace MWWorld
 
         void writeCell(ESM::ESMWriter& writer, CellStore& cell) const;
 
+        std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
+        size_t mPtrIndexUpdateCounter;
+        ESM::RefNum mLastGeneratedRefnum;
+
     public:
         void clear();
 
         explicit WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& reader);
 
         CellStore* getExterior(int x, int y);
-
         CellStore* getInterior(const ESM::RefId& name);
-
+        CellStore* getCell(const ESM::RefId& name); // interior or named exterior
         CellStore* getCell(const ESM::CellId& id);
+
+        // If cellNameInSameWorldSpace is an interior - returns this interior.
+        // Otherwise returns exterior cell for given position in the same world space.
+        // At the moment multiple world spaces are not supported, so all exteriors are in one world space.
+        CellStore* getCellByPosition(const osg::Vec3f& pos, const ESM::RefId& cellNameInSameWorldSpace);
+
+        void registerPtr(const MWWorld::Ptr& ptr);
+        void deregisterPtr(const MWWorld::Ptr& ptr);
+        ESM::RefNum getLastGeneratedRefNum() const { return mLastGeneratedRefnum; }
+        void setLastGeneratedRefNum(ESM::RefNum v) { mLastGeneratedRefnum = v; }
+        size_t getPtrIndexUpdateCounter() const { return mPtrIndexUpdateCounter; }
+        const std::unordered_map<ESM::RefNum, Ptr>& getAllPtrs() const { return mPtrIndex; }
+
+        Ptr getPtr(const ESM::RefNum& refNum) const;
 
         Ptr getPtr(const ESM::RefId& name, CellStore& cellStore, bool searchInContainers = false);
         ///< \param searchInContainers Only affect loaded cells.
@@ -68,8 +88,14 @@ namespace MWWorld
 
         Ptr getPtr(const ESM::RefId& id, const ESM::RefNum& refNum);
 
-        void rest(double hours);
-        void recharge(float duration);
+        template <typename Fn>
+        void forEachLoadedCellStore(Fn&& fn)
+        {
+            for (auto& [_, store] : mInteriors)
+                fn(store);
+            for (auto& [_, store] : mExteriors)
+                fn(store);
+        }
 
         /// Get all Ptrs referencing \a name in exterior cells
         /// @note Due to the current implementation of getPtr this only supports one Ptr per cell.

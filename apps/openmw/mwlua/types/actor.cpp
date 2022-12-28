@@ -29,20 +29,20 @@ namespace MWLua
             {
             }
 
-            void apply(WorldView& worldView) const override
+            void apply() const override
             {
-                MWWorld::Ptr actor = worldView.getObjectRegistry()->getPtr(mActor, false);
+                MWWorld::Ptr actor = MWBase::Environment::get().getWorldModel()->getPtr(mActor);
                 MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
                 std::array<bool, MWWorld::InventoryStore::Slots> usedSlots;
                 std::fill(usedSlots.begin(), usedSlots.end(), false);
 
                 static constexpr int anySlot = -1;
-                auto tryEquipToSlot = [&actor, &store, &usedSlots, &worldView](int slot, const Item& item) -> bool {
+                auto tryEquipToSlot = [&actor, &store, &usedSlots](int slot, const Item& item) -> bool {
                     auto old_it = slot != anySlot ? store.getSlot(slot) : store.end();
                     MWWorld::Ptr itemPtr;
                     if (std::holds_alternative<ObjectId>(item))
                     {
-                        itemPtr = worldView.getObjectRegistry()->getPtr(std::get<ObjectId>(item), false);
+                        itemPtr = MWBase::Environment::get().getWorldModel()->getPtr(std::get<ObjectId>(item));
                         if (old_it != store.end() && *old_it == itemPtr)
                             return true; // already equipped
                         if (itemPtr.isEmpty() || itemPtr.getRefData().getCount() == 0
@@ -187,7 +187,7 @@ namespace MWLua
                 auto it = store.getSlot(slot);
                 if (it == store.end())
                     continue;
-                context.mWorldView->getObjectRegistry()->registerPtr(*it);
+                MWBase::Environment::get().getWorldModel()->registerPtr(*it);
                 equipment[slot] = o.getObject(context.mLua->sol(), getId(*it));
             }
             return equipment;
@@ -201,7 +201,7 @@ namespace MWLua
             auto it = store.getSlot(slot);
             if (it == store.end())
                 return sol::nil;
-            context.mWorldView->getObjectRegistry()->registerPtr(*it);
+            MWBase::Environment::get().getWorldModel()->registerPtr(*it);
             return o.getObject(context.mLua->sol(), getId(*it));
         };
         actor["equipment"] = sol::overload(getAllEquipment, getEquipmentFromSlot);

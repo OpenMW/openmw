@@ -47,8 +47,6 @@ namespace MWLua
         void gameLoaded() override;
         void objectAddedToScene(const MWWorld::Ptr& ptr) override;
         void objectRemovedFromScene(const MWWorld::Ptr& ptr) override;
-        void registerObject(const MWWorld::Ptr& ptr) override;
-        void deregisterObject(const MWWorld::Ptr& ptr) override;
         void inputEvent(const InputEvent& event) override { mInputEvents.push_back(event); }
         void itemConsumed(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) override;
         void objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) override;
@@ -75,8 +73,8 @@ namespace MWLua
             Action(LuaUtil::LuaState* state);
             virtual ~Action() {}
 
-            void safeApply(WorldView&) const;
-            virtual void apply(WorldView&) const = 0;
+            void safeApply() const;
+            virtual void apply() const = 0;
             virtual std::string toString() const = 0;
 
         private:

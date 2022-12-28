@@ -317,6 +317,7 @@ namespace MWWorld
         mLocalScripts.clear();
 
         mWorldScene->clear();
+        mWorldModel.clear();
 
         mStore.clearDynamic();
 
@@ -327,8 +328,6 @@ namespace MWWorld
             mPlayer->getPlayer().getRefData() = RefData();
             mPlayer->set(mStore.get<ESM::NPC>().find(ESM::RefId::stringRefId("Player")));
         }
-
-        mWorldModel.clear();
 
         mDoorStates.clear();
 
@@ -565,34 +564,6 @@ namespace MWWorld
         mRandomSeed = seed;
     }
 
-    const ESM::Cell* World::getExterior(const ESM::RefId& cellName) const
-    {
-        // first try named cells
-        const ESM::Cell* cell = mStore.get<ESM::Cell>().searchExtByName(cellName);
-        if (cell)
-            return cell;
-        // treat "Wilderness" like an empty string
-        static const ESM::RefId defaultName
-            = ESM::RefId::stringRefId(mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString());
-        if (cellName == defaultName)
-        {
-            cell = mStore.get<ESM::Cell>().searchExtByName(ESM::RefId::sEmpty);
-            if (cell)
-                return cell;
-        }
-
-        // didn't work -> now check for regions
-        for (const ESM::Region& region : mStore.get<ESM::Region>())
-        {
-            if (cellName == ESM::RefId::stringRefId(region.mName))
-            {
-                return mStore.get<ESM::Cell>().searchExtByRegion(region.mId);
-            }
-        }
-
-        return nullptr;
-    }
-
     void World::useDeathCamera()
     {
         mRendering->getCamera()->setMode(MWRender::Camera::Mode::ThirdPerson);
@@ -816,7 +787,7 @@ namespace MWWorld
 
     void World::enable(const Ptr& reference)
     {
-        MWBase::Environment::get().getLuaManager()->registerObject(reference);
+        MWBase::Environment::get().getWorldModel()->registerPtr(reference);
 
         if (!reference.isInCell())
             return;
@@ -868,7 +839,7 @@ namespace MWWorld
         if (reference == getPlayerPtr())
             throw std::runtime_error("can not disable player object");
 
-        MWBase::Environment::get().getLuaManager()->deregisterObject(reference);
+        MWBase::Environment::get().getWorldModel()->deregisterPtr(reference);
         reference.getRefData().disable();
 
         if (reference.getCellRef().getRefNum().hasContentFile())
@@ -2051,19 +2022,6 @@ namespace MWWorld
         mWeatherManager->modRegion(regionid, chances);
     }
 
-    osg::Vec2f World::getNorthVector(const CellStore* cell)
-    {
-        MWWorld::ConstPtr northmarker = cell->searchConst(ESM::RefId::stringRefId("northmarker"));
-
-        if (northmarker.isEmpty())
-            return osg::Vec2f(0, 1);
-
-        osg::Quat orient(-northmarker.getRefData().getPosition().rot[2], osg::Vec3f(0, 0, 1));
-        osg::Vec3f dir = orient * osg::Vec3f(0, 1, 0);
-        osg::Vec2f d(dir.x(), dir.y());
-        return d;
-    }
-
     struct GetDoorMarkerVisitor
     {
         std::vector<World::DoorMarker>& mOut;
@@ -2860,7 +2818,17 @@ namespace MWWorld
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
         const std::string& name = nameId.getRefIdString();
-        const ESM::Cell* ext = getExterior(nameId);
+
+        const ESM::Cell* ext = nullptr;
+        try
+        {
+            ext = mWorldModel.getCell(nameId)->getCell();
+            if (!ext->isExterior())
+                return false;
+        }
+        catch (std::exception&)
+        {
+        }
         if (!ext)
         {
             size_t comma = name.find(',');
@@ -3402,7 +3370,7 @@ namespace MWWorld
 
     void World::rest(double hours)
     {
-        mWorldModel.rest(hours);
+        mWorldModel.forEachLoadedCellStore([hours](CellStore& store) { store.rest(hours); });
     }
 
     void World::rechargeItems(double duration, bool activeOnly)
@@ -3418,7 +3386,7 @@ namespace MWWorld
             }
         }
         else
-            mWorldModel.recharge(duration);
+            mWorldModel.forEachLoadedCellStore([duration](CellStore& store) { store.recharge(duration); });
     }
 
     void World::teleportToClosestMarker(const MWWorld::Ptr& ptr, const ESM::RefId& id)

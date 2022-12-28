@@ -8,7 +8,9 @@
 
 #include <components/esm3/cellref.hpp>
 
+#include "../mwbase/environment.hpp"
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 namespace MWLua
 {
@@ -23,46 +25,14 @@ namespace MWLua
     std::string ptrToString(const MWWorld::Ptr& ptr);
     bool isMarker(const MWWorld::Ptr& ptr);
 
-    // Holds a mapping ObjectId -> MWWord::Ptr.
-    class ObjectRegistry
-    {
-    public:
-        ObjectRegistry() { mLastAssignedId.unset(); }
-
-        void update(); // Should be called every frame.
-        void clear(); // Should be called before starting or loading a new game.
-
-        ObjectId registerPtr(const MWWorld::Ptr& ptr);
-        ObjectId deregisterPtr(const MWWorld::Ptr& ptr);
-
-        // Returns Ptr by id. If object is not found, returns empty Ptr.
-        // If local = true, returns non-empty ptr only if it can be used in local scripts
-        // (i.e. is active or was active in the previous frame).
-        MWWorld::Ptr getPtr(ObjectId id, bool local);
-
-        // Needed only for saving/loading.
-        const ObjectId& getLastAssignedId() const { return mLastAssignedId; }
-        void setLastAssignedId(ObjectId id) { mLastAssignedId = id; }
-
-    private:
-        friend class Object;
-        friend class LuaManager;
-
-        bool mChanged = false;
-        int64_t mUpdateCounter = 0;
-        std::map<ObjectId, MWWorld::Ptr> mObjectMapping;
-        ObjectId mLastAssignedId;
-    };
-
     // Lua scripts can't use MWWorld::Ptr directly, because lifetime of a script can be longer than lifetime of Ptr.
     // `GObject` and `LObject` are intended to be passed to Lua as a userdata.
     // It automatically updates the underlying Ptr when needed.
     class Object
     {
     public:
-        Object(ObjectId id, ObjectRegistry* reg)
+        Object(ObjectId id)
             : mId(id)
-            , mObjectRegistry(reg)
         {
         }
         virtual ~Object() {}
@@ -80,13 +50,10 @@ namespace MWLua
         virtual sol::object getCell(lua_State* lua, MWWorld::CellStore* store) const = 0; // returns LCell or GCell
 
     protected:
-        virtual void updatePtr() const = 0;
-
         const ObjectId mId;
-        ObjectRegistry* mObjectRegistry;
 
         mutable MWWorld::Ptr mPtr;
-        mutable int64_t mLastUpdate = -1;
+        mutable size_t mLastUpdate = 0;
     };
 
     // Used only in local scripts
@@ -97,11 +64,7 @@ namespace MWLua
     class LObject : public Object
     {
         using Object::Object;
-        void updatePtr() const final { mPtr = mObjectRegistry->getPtr(mId, true); }
-        sol::object getObject(lua_State* lua, ObjectId id) const final
-        {
-            return sol::make_object<LObject>(lua, id, mObjectRegistry);
-        }
+        sol::object getObject(lua_State* lua, ObjectId id) const final { return sol::make_object<LObject>(lua, id); }
         sol::object getCell(lua_State* lua, MWWorld::CellStore* store) const final
         {
             return sol::make_object(lua, LCell{ store });
@@ -116,11 +79,7 @@ namespace MWLua
     class GObject : public Object
     {
         using Object::Object;
-        void updatePtr() const final { mPtr = mObjectRegistry->getPtr(mId, false); }
-        sol::object getObject(lua_State* lua, ObjectId id) const final
-        {
-            return sol::make_object<GObject>(lua, id, mObjectRegistry);
-        }
+        sol::object getObject(lua_State* lua, ObjectId id) const final { return sol::make_object<GObject>(lua, id); }
         sol::object getCell(lua_State* lua, MWWorld::CellStore* store) const final
         {
             return sol::make_object(lua, GCell{ store });

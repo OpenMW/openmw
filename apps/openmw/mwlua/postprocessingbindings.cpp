@@ -20,7 +20,7 @@ namespace
         {
         }
 
-        void apply(MWLua::WorldView&) const override
+        void apply() const override
         {
             MWBase::Environment::get().getWorld()->getPostProcessor()->setUniform(mShader, mName, mValue);
         }

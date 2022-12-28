@@ -35,7 +35,7 @@ namespace MWLua
             {
             }
 
-            void apply(WorldView&) const override
+            void apply() const override
             {
                 try
                 {

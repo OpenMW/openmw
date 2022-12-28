@@ -18,7 +18,6 @@ namespace MWLua
 
     void WorldView::update()
     {
-        mObjectRegistry.update();
         mActivatorsInScene.updateList();
         mActorsInScene.updateList();
         mContainersInScene.updateList();
@@ -29,7 +28,6 @@ namespace MWLua
 
     void WorldView::clear()
     {
-        mObjectRegistry.clear();
         mActivatorsInScene.clear();
         mActorsInScene.clear();
         mContainersInScene.clear();
@@ -59,7 +57,7 @@ namespace MWLua
 
     void WorldView::objectAddedToScene(const MWWorld::Ptr& ptr)
     {
-        mObjectRegistry.registerPtr(ptr);
+        MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
         ObjectGroup* group = chooseGroup(ptr);
         if (group)
             addToGroup(*group, ptr);
@@ -84,13 +82,13 @@ namespace MWLua
         esm.getHNT(mSimulationTime, "LUAW");
         ObjectId lastAssignedId;
         lastAssignedId.load(esm, true);
-        mObjectRegistry.setLastAssignedId(lastAssignedId);
+        MWBase::Environment::get().getWorldModel()->setLastGeneratedRefNum(lastAssignedId);
     }
 
     void WorldView::save(ESM::ESMWriter& esm) const
     {
         esm.writeHNT("LUAW", mSimulationTime);
-        mObjectRegistry.getLastAssignedId().save(esm, true);
+        MWBase::Environment::get().getWorldModel()->getLastGeneratedRefNum().save(esm, true);
     }
 
     void WorldView::ObjectGroup::updateList()
@@ -122,35 +120,4 @@ namespace MWLua
         group.mSet.erase(getId(ptr));
         group.mChanged = true;
     }
-
-    // TODO: If Lua scripts will use several threads at the same time, then `find*Cell` functions should have critical
-    // sections.
-    MWWorld::CellStore* WorldView::findCell(const ESM::RefId& name, osg::Vec3f position)
-    {
-        MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
-        bool exterior = name.empty() || MWBase::Environment::get().getWorld()->getExterior(name);
-        if (exterior)
-        {
-            const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(position.x(), position.y());
-            return worldModel->getExterior(cellIndex.x(), cellIndex.y());
-        }
-        else
-            return worldModel->getInterior(name);
-    }
-
-    MWWorld::CellStore* WorldView::findNamedCell(const ESM::RefId& name)
-    {
-        MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
-        const ESM::Cell* esmCell = MWBase::Environment::get().getWorld()->getExterior(name);
-        if (esmCell)
-            return worldModel->getExterior(esmCell->getGridX(), esmCell->getGridY());
-        else
-            return worldModel->getInterior(name);
-    }
-
-    MWWorld::CellStore* WorldView::findExteriorCell(int x, int y)
-    {
-        return MWBase::Environment::get().getWorldModel()->getExterior(x, y);
-    }
-
 }

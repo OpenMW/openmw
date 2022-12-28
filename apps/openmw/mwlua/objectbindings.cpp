@@ -61,14 +61,12 @@ namespace MWLua
             {
             }
 
-            void apply(WorldView& worldView) const override
+            void apply() const override
             {
-                MWWorld::CellStore* cell = worldView.findCell(mCell, mPos);
-                if (!cell)
-                    throw std::runtime_error(std::string("cell not found: '") + mCell.getRefIdString() + "'");
-
+                MWWorld::WorldModel& wm = *MWBase::Environment::get().getWorldModel();
+                MWWorld::CellStore* cell = wm.getCellByPosition(mPos, mCell);
                 MWBase::World* world = MWBase::Environment::get().getWorld();
-                MWWorld::Ptr obj = worldView.getObjectRegistry()->getPtr(mObject, false);
+                MWWorld::Ptr obj = wm.getPtr(mObject);
                 const MWWorld::Class& cls = obj.getClass();
                 bool isPlayer = obj == world->getPlayerPtr();
                 if (cls.isActor())
@@ -111,12 +109,12 @@ namespace MWLua
             {
             }
 
-            void apply(WorldView& worldView) const override
+            void apply() const override
             {
-                MWWorld::Ptr object = worldView.getObjectRegistry()->getPtr(mObject, true);
+                MWWorld::Ptr object = MWBase::Environment::get().getWorldModel()->getPtr(mObject);
                 if (object.isEmpty())
                     throw std::runtime_error(std::string("Object not found: " + idToString(mObject)));
-                MWWorld::Ptr actor = worldView.getObjectRegistry()->getPtr(mActor, true);
+                MWWorld::Ptr actor = MWBase::Environment::get().getWorldModel()->getPtr(mActor);
                 if (actor.isEmpty())
                     throw std::runtime_error(std::string("Actor not found: " + idToString(mActor)));
 
@@ -147,14 +145,13 @@ namespace MWLua
         {
             using ListT = ObjectList<ObjectT>;
             sol::state_view& lua = context.mLua->sol();
-            ObjectRegistry* registry = context.mWorldView->getObjectRegistry();
             sol::usertype<ListT> listT = lua.new_usertype<ListT>(prefix + "ObjectList");
             listT[sol::meta_function::to_string]
                 = [](const ListT& list) { return "{" + std::to_string(list.mIds->size()) + " objects}"; };
             listT[sol::meta_function::length] = [](const ListT& list) { return list.mIds->size(); };
-            listT[sol::meta_function::index] = [registry](const ListT& list, size_t index) {
+            listT[sol::meta_function::index] = [](const ListT& list, size_t index) {
                 if (index > 0 && index <= list.mIds->size())
-                    return ObjectT((*list.mIds)[index - 1], registry);
+                    return ObjectT((*list.mIds)[index - 1]);
                 else
                     throw std::runtime_error("Index out of range");
             };
@@ -167,7 +164,7 @@ namespace MWLua
         {
             objectT["isValid"] = [](const ObjectT& o) { return o.isValid(); };
             objectT["recordId"] = sol::readonly_property(
-                [](const ObjectT& o) -> ESM::RefId { return o.ptr().getCellRef().getRefId(); });
+                [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().getRefIdString(); });
             objectT["cell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>> {
                 const MWWorld::Ptr& ptr = o.ptr();
                 if (ptr.isInCell())
@@ -265,7 +262,7 @@ namespace MWLua
             inventoryT[sol::meta_function::to_string]
                 = [](const InventoryT& inv) { return "Inventory[" + inv.mObj.toString() + "]"; };
 
-            inventoryT["getAll"] = [worldView = context.mWorldView, ids = getPackageToTypeTable(context.mLua->sol())](
+            inventoryT["getAll"] = [ids = getPackageToTypeTable(context.mLua->sol())](
                                        const InventoryT& inventory, sol::optional<sol::table> type) {
                 int mask = -1;
                 sol::optional<uint32_t> typeId = sol::nullopt;
@@ -329,16 +326,16 @@ namespace MWLua
                 while (it.getType() != -1)
                 {
                     const MWWorld::Ptr& item = *(it++);
-                    worldView->getObjectRegistry()->registerPtr(item);
+                    MWBase::Environment::get().getWorldModel()->registerPtr(item);
                     list->push_back(getId(item));
                 }
                 return ObjectList<ObjectT>{ list };
             };
 
-            inventoryT["countOf"] = [](const InventoryT& inventory, const ESM::RefId& recordId) {
+            inventoryT["countOf"] = [](const InventoryT& inventory, const std::string& recordId) {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
-                return store.count(recordId);
+                return store.count(ESM::RefId::stringRefId(recordId));
             };
 
             if constexpr (std::is_same_v<ObjectT, GObject>)

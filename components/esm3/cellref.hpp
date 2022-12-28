@@ -135,4 +135,22 @@ namespace ESM
 
 }
 
+namespace std
+{
+
+    // Needed to use ESM::RefNum as a key in std::unordered_map
+    template <>
+    struct hash<ESM::RefNum>
+    {
+        size_t operator()(const ESM::RefNum& refNum) const
+        {
+            assert(sizeof(ESM::RefNum) == sizeof(size_t));
+            size_t s;
+            memcpy(&s, &refNum, sizeof(size_t));
+            return hash<size_t>()(s);
+        }
+    };
+
+}
+
 #endif

@@ -16,7 +16,7 @@ namespace MWLua
     // contentFileMapping is used only for deserialization. Needed to fix references if the order
     // of content files was changed.
     std::unique_ptr<LuaUtil::UserdataSerializer> createUserdataSerializer(
-        bool local, ObjectRegistry* registry, std::map<int, int>* contentFileMapping = nullptr);
+        bool local, std::map<int, int>* contentFileMapping = nullptr);
 }
 
 #endif // MWLUA_USERDATASERIALIZER_H

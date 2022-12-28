@@ -10,9 +10,8 @@ namespace MWLua
     class Serializer final : public LuaUtil::UserdataSerializer
     {
     public:
-        explicit Serializer(bool localSerializer, ObjectRegistry* registry, std::map<int, int>* contentFileMapping)
+        explicit Serializer(bool localSerializer, std::map<int, int>* contentFileMapping)
             : mLocalSerializer(localSerializer)
-            , mObjectRegistry(registry)
             , mContentFileMapping(contentFileMapping)
         {
         }
@@ -44,23 +43,22 @@ namespace MWLua
                         id.mContentFile = iter->second;
                 }
                 if (mLocalSerializer)
-                    sol::stack::push<LObject>(lua, LObject(id, mObjectRegistry));
+                    sol::stack::push<LObject>(lua, LObject(id));
                 else
-                    sol::stack::push<GObject>(lua, GObject(id, mObjectRegistry));
+                    sol::stack::push<GObject>(lua, GObject(id));
                 return true;
             }
             return false;
         }
 
         bool mLocalSerializer;
-        ObjectRegistry* mObjectRegistry;
         std::map<int, int>* mContentFileMapping;
     };
 
     std::unique_ptr<LuaUtil::UserdataSerializer> createUserdataSerializer(
-        bool local, ObjectRegistry* registry, std::map<int, int>* contentFileMapping)
+        bool local, std::map<int, int>* contentFileMapping)
     {
-        return std::make_unique<Serializer>(local, registry, contentFileMapping);
+        return std::make_unique<Serializer>(local, contentFileMapping);
     }
 
 }

@@ -45,11 +45,11 @@ namespace MWLua
                       return sol::nullopt;
               });
         rayResult["hitObject"]
-            = sol::readonly_property([worldView](const MWPhysics::RayCastingResult& r) -> sol::optional<LObject> {
+            = sol::readonly_property([](const MWPhysics::RayCastingResult& r) -> sol::optional<LObject> {
                   if (r.mHitObject.isEmpty())
                       return sol::nullopt;
                   else
-                      return LObject(getId(r.mHitObject), worldView->getObjectRegistry());
+                      return LObject(getId(r.mHitObject));
               });
 
         api["COLLISION_TYPE"]

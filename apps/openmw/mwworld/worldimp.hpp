@@ -246,9 +246,6 @@ namespace MWWorld
 
         bool isCellQuasiExterior() const override;
 
-        osg::Vec2f getNorthVector(const CellStore* cell) override;
-        ///< get north vector for given interior cell
-
         void getDoorMarkers(MWWorld::CellStore* cell, std::vector<DoorMarker>& out) override;
         ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
@@ -357,9 +354,6 @@ namespace MWWorld
         void changeToCell(const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos,
             bool changeEvent = true) override;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
-
-        const ESM::Cell* getExterior(const ESM::RefId& cellName) const override;
-        ///< Return a cell matching the given name or a 0-pointer, if there is no such cell.
 
         MWWorld::Ptr getFacedObject() override;
         ///< Return pointer to the object the player is looking at, if it is within activation range

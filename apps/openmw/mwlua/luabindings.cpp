@@ -78,20 +78,11 @@ namespace MWLua
         sol::table api(context.mLua->sol(), sol::create);
         WorldView* worldView = context.mWorldView;
         addTimeBindings(api, context, true);
-        api["getCellByName"] = [worldView = context.mWorldView](const std::string& name) -> sol::optional<GCell> {
-            MWWorld::CellStore* cell = worldView->findNamedCell(ESM::RefId::stringRefId(name));
-            if (cell)
-                return GCell{ cell };
-            else
-                return sol::nullopt;
+        api["getCellByName"] = [](std::string_view name) {
+            return GCell{ MWBase::Environment::get().getWorldModel()->getCell(ESM::RefId::stringRefId(name)) };
         };
-        api["getExteriorCell"] = [worldView = context.mWorldView](int x, int y) -> sol::optional<GCell> {
-            MWWorld::CellStore* cell = worldView->findExteriorCell(x, y);
-            if (cell)
-                return GCell{ cell };
-            else
-                return sol::nullopt;
-        };
+        api["getExteriorCell"]
+            = [](int x, int y) { return GCell{ MWBase::Environment::get().getWorldModel()->getExterior(x, y) }; };
         api["activeActors"] = GObjectList{ worldView->getActorsInScene() };
         // TODO: add world.placeNewObject(recordId, cell, pos, [rot])
         return LuaUtil::makeReadOnly(api);

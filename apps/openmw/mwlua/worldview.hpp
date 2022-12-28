@@ -17,7 +17,11 @@ namespace ESM
 namespace MWLua
 {
 
-    // Tracks all used game objects.
+    // WorldView is a kind of an extension to mwworld. It was created on initial stage of
+    // OpenMW Lua development in order to minimize the risk of merge conflicts.
+    // TODO: Move get*InScene functions to mwworld/scene
+    // TODO: Move time-related stuff to mwworld; maybe create a new class TimeManager.
+    // TODO: Remove WorldView.
     class WorldView
     {
     public:
@@ -43,20 +47,8 @@ namespace MWLua
         ObjectIdList getDoorsInScene() const { return mDoorsInScene.mList; }
         ObjectIdList getItemsInScene() const { return mItemsInScene.mList; }
 
-        ObjectRegistry* getObjectRegistry() { return &mObjectRegistry; }
-
-        void objectUnloaded(const MWWorld::Ptr& ptr) { mObjectRegistry.deregisterPtr(ptr); }
-
         void objectAddedToScene(const MWWorld::Ptr& ptr);
         void objectRemovedFromScene(const MWWorld::Ptr& ptr);
-
-        // Returns list of objects that meets the `query` criteria.
-        // If onlyActive = true, then search only among the objects that are currently in the scene.
-        // TODO: ObjectIdList selectObjects(const Queries::Query& query, bool onlyActive);
-
-        MWWorld::CellStore* findCell(const ESM::RefId& name, osg::Vec3f position);
-        MWWorld::CellStore* findNamedCell(const ESM::RefId& name);
-        MWWorld::CellStore* findExteriorCell(int x, int y);
 
         void load(ESM::ESMReader& esm);
         void save(ESM::ESMWriter& esm) const;
@@ -79,7 +71,6 @@ namespace MWLua
         void addToGroup(ObjectGroup& group, const MWWorld::Ptr& ptr);
         void removeFromGroup(ObjectGroup& group, const MWWorld::Ptr& ptr);
 
-        ObjectRegistry mObjectRegistry;
         ObjectGroup mActivatorsInScene;
         ObjectGroup mActorsInScene;
         ObjectGroup mContainersInScene;

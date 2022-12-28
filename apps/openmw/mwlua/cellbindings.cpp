@@ -38,8 +38,10 @@ namespace MWLua
             return res.str();
         };
 
-        cellT["name"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->mName; });
-        cellT["region"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->mRegion; });
+        cellT["name"]
+            = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->mName.getRefIdString(); });
+        cellT["region"]
+            = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->mRegion.getRefIdString(); });
         cellT["gridX"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getGridX(); });
         cellT["gridY"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getGridY(); });
         cellT["hasWater"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->hasWater(); });
@@ -57,11 +59,11 @@ namespace MWLua
 
         if constexpr (std::is_same_v<CellT, GCell>)
         { // only for global scripts
-            cellT["getAll"] = [worldView = context.mWorldView, ids = getPackageToTypeTable(context.mLua->sol())](
+            cellT["getAll"] = [ids = getPackageToTypeTable(context.mLua->sol())](
                                   const CellT& cell, sol::optional<sol::table> type) {
                 ObjectIdList res = std::make_shared<std::vector<ObjectId>>();
                 auto visitor = [&](const MWWorld::Ptr& ptr) {
-                    worldView->getObjectRegistry()->registerPtr(ptr);
+                    MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
                     if (getLiveCellRefType(ptr.mRef) == ptr.getType())
                         res->push_back(getId(ptr));
                     return true;
