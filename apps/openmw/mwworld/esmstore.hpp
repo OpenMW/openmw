@@ -24,6 +24,14 @@ namespace MWMechanics
     class SpellList;
 }
 
+namespace ESM4
+{
+    class Reader;
+    struct Static;
+    struct Cell;
+    struct Reference;
+}
+
 namespace ESM
 {
     class ReadersCache;
@@ -95,7 +103,9 @@ namespace MWWorld
             Store<ESM::MagicEffect>, Store<ESM::Skill>,
 
             // Special entry which is hardcoded and not loaded from an ESM
-            Store<ESM::Attribute>>;
+            Store<ESM::Attribute>,
+
+            Store<ESM4::Static>, Store<ESM4::Cell>, Store<ESM4::Reference>>;
 
         template <typename T>
         static constexpr std::size_t getTypeIndex()
@@ -162,6 +172,7 @@ namespace MWWorld
         void validateDynamic();
 
         void load(ESM::ESMReader& esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
+        void loadESM4(ESM4::Reader& esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
 
         template <class T>
         const Store<T>& get() const

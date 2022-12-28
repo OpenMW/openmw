@@ -30,6 +30,8 @@
 #include <cstdint>
 
 #include "reference.hpp" // FormId, Placement, EnableParent
+#include <components/esm/defs.hpp>
+#include <components/esm/refid.hpp>
 
 namespace ESM4
 {
@@ -71,15 +73,15 @@ namespace ESM4
 
     struct Reference
     {
-        FormId mParent; // cell FormId (currently persistent refs only), from the loading sequence
-                        // NOTE: for exterior cells it will be the dummy cell FormId
+        ESM::RefId mParent; // cell FormId (currently persistent refs only), from the loading sequence
+                            // NOTE: for exterior cells it will be the dummy cell FormId
 
-        FormId mFormId; // from the header
+        ESM::RefId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
         std::string mFullName;
-        FormId mBaseObj;
+        ESM::RefId mBaseObj;
 
         Placement mPlacement;
         float mScale = 1.0f;
@@ -110,6 +112,8 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         void blank();
+
+        static constexpr ESM::RecNameInts sRecordId = ESM::REC_REFR4;
     };
 }
 

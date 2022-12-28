@@ -13,6 +13,10 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadrefr.hpp>
+#include <components/esm4/loadstat.hpp>
+
 namespace
 {
     // TODO: Switch to C++23 to get a working version of std::unordered_map::erase
@@ -161,7 +165,10 @@ namespace MWWorld
         if (ptr == nullptr)
         {
             std::stringstream msg;
-            msg << T::getRecordType() << " '" << id << "' not found";
+            if constexpr (!ESM::isESM4Rec(T::sRecordId))
+            {
+                msg << T::getRecordType() << " '" << id << "' not found";
+            }
             throw std::runtime_error(msg.str());
         }
         return ptr;
@@ -171,8 +178,10 @@ namespace MWWorld
     {
         T record;
         bool isDeleted = false;
-
-        record.load(esm, isDeleted);
+        if constexpr (!ESM::isESM4Rec(T::sRecordId))
+        {
+            record.load(esm, isDeleted);
+        }
 
         std::pair<typename Static::iterator, bool> inserted = mStatic.insert_or_assign(record.mId, record);
         if (inserted.second)
@@ -293,7 +302,11 @@ namespace MWWorld
         for (typename Dynamic::const_iterator iter(mDynamic.begin()); iter != mDynamic.end(); ++iter)
         {
             writer.startRecord(T::sRecordId);
-            iter->second.save(writer);
+            if constexpr (!ESM::isESM4Rec(T::sRecordId))
+            {
+                iter->second.save(writer);
+            }
+
             writer.endRecord(T::sRecordId);
         }
     }
@@ -302,8 +315,10 @@ namespace MWWorld
     {
         T record;
         bool isDeleted = false;
-
-        record.load(reader, isDeleted);
+        if constexpr (!ESM::isESM4Rec(T::sRecordId))
+        {
+            record.load(reader, isDeleted);
+        }
         insert(record, overrideOnly);
 
         return RecordId(record.mId, isDeleted);
@@ -1196,3 +1211,7 @@ template class MWWorld::TypedDynamicStore<ESM::Spell>;
 template class MWWorld::TypedDynamicStore<ESM::StartScript>;
 template class MWWorld::TypedDynamicStore<ESM::Static>;
 template class MWWorld::TypedDynamicStore<ESM::Weapon>;
+
+template class MWWorld::TypedDynamicStore<ESM4::Static>;
+template class MWWorld::TypedDynamicStore<ESM4::Reference>;
+template class MWWorld::TypedDynamicStore<ESM4::Cell>;

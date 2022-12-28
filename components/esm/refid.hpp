@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_ESM_REFID_HPP
 #define OPENMW_COMPONENTS_ESM_REFID_HPP
 #include <compare>
+#include <components/esm4/formid.hpp>
 #include <functional>
 #include <iosfwd>
 #include <string>
@@ -26,6 +27,7 @@ namespace ESM
         // RefIds that are as string in the code. For serialization, and display. Using explicit conversions make it
         // very clear where in the code we need to convert from string to RefId and Vice versa.
         static RefId stringRefId(std::string_view id);
+        static RefId formIdRefId(const ESM4::FormId id);
         const std::string& getRefIdString() const { return mId; }
 
     private:

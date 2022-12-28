@@ -13,6 +13,11 @@
 #include <components/lua/configuration.hpp>
 #include <components/misc/algorithm.hpp>
 
+#include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadrefr.hpp>
+#include <components/esm4/loadstat.hpp>
+#include <components/esm4/reader.hpp>
+
 #include <components/esm4/common.hpp>
 #include <components/esmloader/load.hpp>
 
@@ -180,6 +185,84 @@ namespace MWWorld
                 }
             }
         }
+
+        template <typename T>
+        static void typedReadRecordESM4(ESM4::Reader& reader, ESMStore& stores, Store<T>& store, int& found)
+        {
+            auto recordType = static_cast<ESM4::RecordTypes>(reader.hdr().record.typeId);
+
+            ESM::RecNameInts esm4RecName = static_cast<ESM::RecNameInts>(ESM::esm4Recname(recordType));
+            if constexpr (std::is_convertible_v<Store<T>*, DynamicStore*>)
+            {
+                if constexpr (ESM::isESM4Rec(T::sRecordId))
+                {
+                    if (T::sRecordId == esm4RecName)
+                    {
+                        reader.getRecordData();
+                        T value;
+                        value.load(reader);
+                        store.insertStatic(value);
+                        found++;
+                    }
+                }
+            }
+        }
+
+        static void readRecord(ESM4::Reader& reader, ESMStore& store)
+        {
+            int found = 0;
+            std::apply([&reader, &store, &found](
+                           auto&... x) { (ESMStoreImp::typedReadRecordESM4(reader, store, x, found), ...); },
+                store.mStoreImp->mStores);
+            assert(found <= 1);
+            if (found == 0) // unhandled record
+                reader.skipRecordData();
+        }
+
+        static bool readItem(ESM4::Reader& reader, ESMStore& store)
+        {
+            if (!reader.getRecordHeader() || !reader.hasMoreRecs())
+                return false;
+
+            const ESM4::RecordHeader& header = reader.hdr();
+
+            if (header.record.typeId == ESM4::REC_GRUP)
+                return readGroup(reader, store);
+
+            readRecord(reader, store);
+            return true;
+        }
+
+        static bool readGroup(ESM4::Reader& reader, ESMStore& store)
+        {
+            const ESM4::RecordHeader& header = reader.hdr();
+
+            switch (static_cast<ESM4::GroupType>(header.group.type))
+            {
+                case ESM4::Grp_RecordType:
+                case ESM4::Grp_InteriorCell:
+                case ESM4::Grp_InteriorSubCell:
+                case ESM4::Grp_ExteriorCell:
+                case ESM4::Grp_ExteriorSubCell:
+                    reader.enterGroup();
+                    return readItem(reader, store);
+                case ESM4::Grp_WorldChild:
+                case ESM4::Grp_CellChild:
+                case ESM4::Grp_TopicChild:
+                case ESM4::Grp_CellPersistentChild:
+                case ESM4::Grp_CellTemporaryChild:
+                case ESM4::Grp_CellVisibleDistChild:
+                    reader.adjustGRUPFormId();
+                    reader.enterGroup();
+                    if (!reader.hasMoreRecs())
+                        return false;
+                    return readItem(reader, store);
+            }
+
+            reader.skipGroup();
+
+            return true;
+        }
     };
 
     int ESMStore::find(const ESM::RefId& id) const
@@ -335,6 +418,16 @@ namespace MWWorld
             }
             if (listener != nullptr)
                 listener->setProgress(::EsmLoader::fileProgress * esm.getFileOffset() / esm.getFileSize());
+        }
+    }
+
+    void ESMStore::loadESM4(ESM4::Reader& reader, Loading::Listener* listener, ESM::Dialogue*& dialogue)
+    {
+        while (reader.hasMoreRecs())
+        {
+            reader.exitGroupCheck();
+            if (!ESMStoreImp::readItem(reader, *this))
+                break;
         }
     }
 

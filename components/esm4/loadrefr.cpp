@@ -30,14 +30,15 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+// #include "writer.hpp"
 
 void ESM4::Reference::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.id;
-    reader.adjustFormId(mFormId);
+    auto formId = reader.hdr().record.id;
+    reader.adjustFormId(formId);
+    mId = ESM::RefId::formIdRefId(formId);
     mFlags = reader.hdr().record.flags;
-    mParent = reader.currCell(); // NOTE: only for persistent refs?
+    mParent = ESM::RefId::formIdRefId(reader.currCell()); // NOTE: only for persistent refs?
 
     // TODO: Let the engine apply this? Saved games?
     // mInitiallyDisabled = ((mFlags & ESM4::Rec_Disabled) != 0) ? true : false;
@@ -60,7 +61,9 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_NAME:
             {
-                reader.getFormId(mBaseObj);
+                FormId BaseId;
+                reader.getFormId(BaseId);
+                mBaseObj = ESM::RefId::formIdRefId(BaseId);
 #if 0
                 if (mFlags & ESM4::Rec_Disabled)
                     std::cout << "REFR disable at start " << formIdToString(mFormId) <<
