@@ -10,22 +10,9 @@
             <Code range="33 126"/>
             <Code range="161"/>
             <Code range="173"/>
+            <Code range="175 177"/>
             <Code range="180"/>
-            <Code range="191 253"/>
-            <Code range="255"/>
-            <Code range="260 263"/>
-            <Code range="268 271"/>
-            <Code range="280 283"/>
-            <Code range="305"/>
-            <Code range="321 324"/>
-            <Code range="327 328"/>
-            <Code range="330"/>
-            <Code range="338 339"/>
-            <Code range="344 347"/>
-            <Code range="352 353"/>
-            <Code range="356 357"/>
-            <Code range="366 367"/>
-            <Code range="376 382"/>
+            <Code range="191 382"/>
             <Code range="711"/>
             <Code range="1025"/>
             <Code range="1040 1103"/>
@@ -35,9 +22,6 @@
             <Code range="8216 8217"/>
             <Code range="8220 8221"/>
             <Code range="8228 8230"/>
-            <Code hide="208"/>
-            <Code hide="222"/>
-            <Code hide="240"/>
         </Codes>
     </Resource>
 </MyGUI>
