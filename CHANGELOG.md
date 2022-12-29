@@ -29,7 +29,6 @@
     Bug #7042: Weapon follow animations that immediately follow the hit animations cause multiple hits
     Bug #7044: Changing a class' services does not affect autocalculated NPCs
     Bug #7084: Resurrecting an actor doesn't take into account base record changes
-    Bug #7121: Crash on TimeStamp construction with invalid hour value
     Feature #6447: Add LOD support to Object Paging
     Feature #6933: Support high-resolution cursor textures
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData
@@ -197,6 +196,7 @@
     Bug #6923: Dispose of corpse prevents respawning after load
     Bug #6937: Divided by Nix Hounds quest is broken
     Bug #7008: Race condition on initializing a vector of reserved node names
+    Bug #7121: Crash on TimeStamp construction with invalid hour value
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"
