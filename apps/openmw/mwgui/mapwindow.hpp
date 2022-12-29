@@ -325,6 +325,7 @@ namespace MWGui
 
         EditNoteDialog mEditNoteDialog;
         ESM::CustomMarker mEditingMarker;
+        bool mAllowZooming;
 
         void onPinToggled() override;
         void onTitleDoubleClicked() override;
