@@ -32,7 +32,8 @@ namespace MWMechanics
     /// @note target may be empty
     float rateEffect(const ESM::ENAMstruct& effect, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
     /// @note target may be empty
-    float rateEffects(const ESM::EffectList& list, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
+    float rateEffects(
+        const ESM::EffectList& list, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool useSpellMult = true);
 
     float vanillaRateSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
 }

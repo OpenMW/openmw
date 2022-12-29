@@ -113,7 +113,7 @@ namespace MWMechanics
 
                 if (charge == -1 || charge >= castCost || weapclass == ESM::WeaponType::Thrown
                     || weapclass == ESM::WeaponType::Ammo)
-                    rating += rateEffects(enchantment->mEffects, actor, enemy);
+                    rating += rateEffects(enchantment->mEffects, actor, enemy, false);
             }
         }
 

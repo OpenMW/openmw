@@ -544,6 +544,7 @@ namespace MWMechanics
                 break;
             }
 
+            case ESM::MagicEffect::AbsorbAttribute:
             case ESM::MagicEffect::DamageAttribute:
             case ESM::MagicEffect::DrainAttribute:
                 if (!enemy.isEmpty()
@@ -567,6 +568,7 @@ namespace MWMechanics
                 }
                 break;
 
+            case ESM::MagicEffect::AbsorbSkill:
             case ESM::MagicEffect::DamageSkill:
             case ESM::MagicEffect::DrainSkill:
                 if (enemy.isEmpty() || !enemy.getClass().isNpc())
@@ -656,23 +658,29 @@ namespace MWMechanics
         return rating;
     }
 
-    float rateEffects(const ESM::EffectList& list, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy)
+    float rateEffects(
+        const ESM::EffectList& list, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool useSpellMult)
     {
         // NOTE: enemy may be empty
 
         float rating = 0.f;
-        float ratingMult = 1.f; // NB: this multiplier is applied to the effect rating, not the final rating
 
         const MWWorld::Store<ESM::GameSetting>& gmst
             = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
         static const float fAIMagicSpellMult = gmst.find("fAIMagicSpellMult")->mValue.getFloat();
         static const float fAIRangeMagicSpellMult = gmst.find("fAIRangeMagicSpellMult")->mValue.getFloat();
 
-        for (std::vector<ESM::ENAMstruct>::const_iterator it = list.mList.begin(); it != list.mList.end(); ++it)
+        for (const ESM::ENAMstruct& effect : list.mList)
         {
-            ratingMult = (it->mRange == ESM::RT_Target) ? fAIRangeMagicSpellMult : fAIMagicSpellMult;
-
-            rating += rateEffect(*it, actor, enemy) * ratingMult;
+            float effectRating = rateEffect(effect, actor, enemy);
+            if (useSpellMult)
+            {
+                if (effect.mRange == ESM::RT_Target)
+                    effectRating *= fAIRangeMagicSpellMult;
+                else
+                    effectRating *= fAIMagicSpellMult;
+            }
+            rating += effectRating;
         }
         return rating;
     }
