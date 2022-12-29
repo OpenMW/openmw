@@ -544,6 +544,7 @@ namespace MWMechanics
                 break;
             }
 
+            case ESM::MagicEffect::AbsorbAttribute:
             case ESM::MagicEffect::DamageAttribute:
             case ESM::MagicEffect::DrainAttribute:
                 if (!enemy.isEmpty()
@@ -567,6 +568,7 @@ namespace MWMechanics
                 }
                 break;
 
+            case ESM::MagicEffect::AbsorbSkill:
             case ESM::MagicEffect::DamageSkill:
             case ESM::MagicEffect::DrainSkill:
                 if (enemy.isEmpty() || !enemy.getClass().isNpc())
