@@ -22,6 +22,7 @@
 #include "esmstore.hpp"
 #include "player.hpp"
 
+#include <algorithm>
 #include <cmath>
 
 namespace MWWorld
@@ -932,7 +933,7 @@ namespace MWWorld
                 ESM::WeatherState state;
                 state.load(reader);
 
-                mCurrentRegion.swap(state.mCurrentRegion);
+                std::swap(mCurrentRegion, state.mCurrentRegion);
                 mTimePassed = state.mTimePassed;
                 mFastForward = state.mFastForward;
                 mWeatherUpdateTime = state.mWeatherUpdateTime;

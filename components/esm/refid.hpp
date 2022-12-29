@@ -1,6 +1,6 @@
 #ifndef OPENMW_COMPONENTS_ESM_REFID_HPP
 #define OPENMW_COMPONENTS_ESM_REFID_HPP
-#include <compare>
+
 #include <functional>
 #include <iosfwd>
 #include <string>
@@ -14,11 +14,12 @@ namespace ESM
     struct RefId
     {
         const static RefId sEmpty;
+
         bool empty() const { return mId.empty(); }
-        void swap(RefId& rhs) { mId.swap(rhs.mId); }
+
         bool operator==(const RefId& rhs) const;
+
         bool operator<(const RefId& rhs) const;
-        bool operator>(const RefId& rhs) const;
 
         friend std::ostream& operator<<(std::ostream& os, const RefId& dt);
 
