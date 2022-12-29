@@ -3,6 +3,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "duration.hpp"
 #include "esmstore.hpp"
 #include "globals.hpp"
 #include "timestamp.hpp"
@@ -48,11 +49,11 @@ namespace MWWorld
         if (hour < 0)
             hour = 0;
 
-        int days = static_cast<int>(hour / 24);
-        hour = std::fmod(hour, 24);
-        mGameHour = static_cast<float>(hour);
+        const Duration duration = Duration::fromHours(hour);
 
-        if (days > 0)
+        mGameHour = duration.getHours();
+
+        if (const int days = duration.getDays(); days > 0)
             setDay(days + mDay);
     }
 
