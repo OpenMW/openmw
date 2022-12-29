@@ -89,25 +89,19 @@ namespace
         }) != active.end();
     }
 
-    float getRestoreMagickaPriority(const ESM::ENAMstruct& effect, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy)
+    float getRestoreMagickaPriority(const MWWorld::Ptr& actor)
     {
         const MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
         const MWMechanics::DynamicStat<float>& current = stats.getMagicka();
-        const float magnitude = (effect.mMagnMin + effect.mMagnMax) / 2.f;
-        const float toHeal = magnitude * std::max(1, effect.mDuration);
-        float priority = 0.f;
         for (const ESM::Spell* spell : stats.getSpells())
         {
-            auto found = std::find_if(spell->mEffects.mList.begin(), spell->mEffects.mList.end(),
-                [&](const auto& e) { return &e == &effect; });
-            if (found != spell->mEffects.mList.end()) // Prevent recursion
+            if (spell->mData.mType != ESM::Spell::ST_Spell)
                 continue;
             int cost = MWMechanics::calcSpellCost(*spell);
-            if (cost < current.getCurrent() || cost > current.getCurrent() + toHeal)
-                continue;
-            priority = std::max(priority, MWMechanics::rateSpell(spell, actor, enemy, false));
+            if (cost > current.getCurrent() && cost < current.getModified())
+                return 2.f;
         }
-        return priority;
+        return 0.f;
     }
 }
 
@@ -435,10 +429,7 @@ namespace MWMechanics
                 if (!enemy.isEmpty() && enemy.getClass().getCreatureStats(enemy).getMagicka().getCurrent() <= 0.f)
                 {
                     rating = 0.5f;
-                    float priority = getRestoreMagickaPriority(effect, actor, enemy);
-                    if (priority == 0.f)
-                        priority = -1.f;
-                    rating *= priority;
+                    rating *= getRestoreMagickaPriority(actor);
                 }
                 break;
             case ESM::MagicEffect::RestoreHealth:
@@ -457,7 +448,7 @@ namespace MWMechanics
                     if (effect.mEffectID == ESM::MagicEffect::RestoreHealth)
                         priority = 4.f;
                     else if (effect.mEffectID == ESM::MagicEffect::RestoreMagicka)
-                        priority = std::max(0.1f, getRestoreMagickaPriority(effect, actor, enemy));
+                        priority = std::max(0.1f, getRestoreMagickaPriority(actor));
                     else if (effect.mEffectID == ESM::MagicEffect::RestoreFatigue)
                         priority = 2.f;
                     float overheal = 0.f;
