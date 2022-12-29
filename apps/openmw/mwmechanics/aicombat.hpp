@@ -36,6 +36,7 @@ namespace MWMechanics
         const MWWorld::CellStore* mCell;
         std::unique_ptr<Action> mCurrentAction;
         float mActionCooldown;
+        float mHealCooldown;
         float mStrength;
         bool mForceNoShortcut;
         ESM::Position mShortcutFailPos;

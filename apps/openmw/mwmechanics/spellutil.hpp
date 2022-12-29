@@ -5,6 +5,7 @@
 
 namespace ESM
 {
+    struct EffectList;
     struct ENAMstruct;
     struct Enchantment;
     struct MagicEffect;
@@ -54,6 +55,8 @@ namespace MWMechanics
     /// Get whether or not the given spell contributes to skill progress.
     bool spellIncreasesSkill(const ESM::Spell* spell);
     bool spellIncreasesSkill(const ESM::RefId& spellId);
+
+    bool isPureHealing(const ESM::EffectList& list);
 }
 
 #endif

@@ -17,6 +17,7 @@
 #include "combat.hpp"
 #include "npcstats.hpp"
 #include "spellpriority.hpp"
+#include "spellutil.hpp"
 #include "weaponpriority.hpp"
 #include "weapontype.hpp"
 
@@ -161,7 +162,7 @@ namespace MWMechanics
         return mWeapon.get<ESM::Weapon>()->mBase;
     }
 
-    std::unique_ptr<Action> prepareNextAction(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy)
+    std::unique_ptr<Action> prepareNextAction(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool allowHealing)
     {
         Spells& spells = actor.getClass().getCreatureStats(actor).getSpells();
 
@@ -181,23 +182,26 @@ namespace MWMechanics
 
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {
-                float rating = ratePotion(*it, actor);
-                if (rating > bestActionRating)
+                bool isPureHealing = false;
+                if (it->getType() == ESM::Potion::sRecordId)
                 {
-                    bestActionRating = rating;
-                    bestAction = std::make_unique<ActionPotion>(*it);
-                    antiFleeRating = std::numeric_limits<float>::max();
+                    float rating = ratePotion(*it, actor, isPureHealing);
+                    if (rating > bestActionRating && (!isPureHealing || allowHealing))
+                    {
+                        bestActionRating = rating;
+                        bestAction = std::make_unique<ActionPotion>(*it, isPureHealing);
+                        antiFleeRating = std::numeric_limits<float>::max();
+                    }
                 }
-            }
-
-            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
-            {
-                float rating = rateMagicItem(*it, actor, enemy);
-                if (rating > bestActionRating)
+                else if (!it->getClass().getEnchantment(*it).empty())
                 {
-                    bestActionRating = rating;
-                    bestAction = std::make_unique<ActionEnchantedItem>(it);
-                    antiFleeRating = std::numeric_limits<float>::max();
+                    float rating = rateMagicItem(*it, actor, enemy, isPureHealing);
+                    if (rating > bestActionRating && (!isPureHealing || allowHealing))
+                    {
+                        bestActionRating = rating;
+                        bestAction = std::make_unique<ActionEnchantedItem>(it, isPureHealing);
+                        antiFleeRating = std::numeric_limits<float>::max();
+                    }
                 }
             }
 
@@ -233,8 +237,11 @@ namespace MWMechanics
             float rating = rateSpell(spell, actor, enemy);
             if (rating > bestActionRating)
             {
+                bool isPureHealingSpell = isPureHealing(spell->mEffects);
+                if (isPureHealingSpell && !allowHealing)
+                    continue;
                 bestActionRating = rating;
-                bestAction = std::make_unique<ActionSpell>(spell->mId);
+                bestAction = std::make_unique<ActionSpell>(spell->mId, isPureHealingSpell);
                 antiFleeRating = vanillaRateSpell(spell, actor, enemy);
             }
         }
@@ -263,9 +270,10 @@ namespace MWMechanics
         {
             MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
 
+            bool pureHealing;
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {
-                float rating = rateMagicItem(*it, actor, enemy);
+                float rating = rateMagicItem(*it, actor, enemy, pureHealing);
                 if (rating > bestActionRating)
                 {
                     bestActionRating = rating;

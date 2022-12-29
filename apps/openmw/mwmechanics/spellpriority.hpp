@@ -25,9 +25,11 @@ namespace MWMechanics
 
     int getRangeTypes(const ESM::EffectList& effects);
 
-    float rateSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
-    float rateMagicItem(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
-    float ratePotion(const MWWorld::Ptr& item, const MWWorld::Ptr& actor);
+    float rateSpell(
+        const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool checkMagicka = true);
+    float rateMagicItem(
+        const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool& pureHealing);
+    float ratePotion(const MWWorld::Ptr& item, const MWWorld::Ptr& actor, bool& pureHealing);
 
     /// @note target may be empty
     float rateEffect(const ESM::ENAMstruct& effect, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);

@@ -153,6 +153,7 @@ namespace MWMechanics
             updateFleeing(actor, target, duration, characterController.getSupportedMovementDirections(), storage);
         }
         storage.mActionCooldown -= duration;
+        storage.mHealCooldown -= duration;
 
         if (storage.mReaction.update(duration) == Misc::TimerStatus::Waiting)
             return false;
@@ -176,6 +177,7 @@ namespace MWMechanics
             storage.stopAttack();
             actor.getClass().getCreatureStats(actor).setAttackingOrSpell(false);
             storage.mActionCooldown = 0.f;
+            storage.mHealCooldown = 0.f;
             // Continue combat if target is player or player follower/escorter and an attack has been attempted
             const auto& playerFollowersAndEscorters
                 = MWBase::Environment::get().getMechanicsManager()->getActorsSidingWith(MWMechanics::getPlayer());
@@ -196,6 +198,7 @@ namespace MWMechanics
         actorClass.getCreatureStats(actor).setMovementFlag(CreatureStats::Flag_Run, true);
 
         float& actionCooldown = storage.mActionCooldown;
+        float& healCooldown = storage.mHealCooldown;
         std::unique_ptr<Action>& currentAction = storage.mCurrentAction;
 
         if (!forceFlee)
@@ -205,14 +208,16 @@ namespace MWMechanics
 
             if (characterController.readyToPrepareAttack())
             {
-                currentAction = prepareNextAction(actor, target);
+                currentAction = prepareNextAction(actor, target, healCooldown <= 0.f);
                 actionCooldown = currentAction->getActionCooldown();
+                healCooldown = currentAction->getHealCooldown();
             }
         }
         else
         {
             currentAction = std::make_unique<ActionFlee>();
             actionCooldown = currentAction->getActionCooldown();
+            healCooldown = currentAction->getHealCooldown();
         }
 
         if (!currentAction)
@@ -317,6 +322,7 @@ namespace MWMechanics
                     actor.getClass().getCreatureStats(actor).setAttackingOrSpell(false);
                     currentAction = std::make_unique<ActionFlee>();
                     actionCooldown = currentAction->getActionCooldown();
+                    healCooldown = currentAction->getHealCooldown();
                     storage.startFleeing();
                     MWBase::Environment::get().getDialogueManager()->say(actor, ESM::RefId::stringRefId("flee"));
                 }
@@ -508,6 +514,7 @@ namespace MWMechanics
         , mCell(nullptr)
         , mCurrentAction()
         , mActionCooldown(0.0f)
+        , mHealCooldown(0.f)
         , mStrength()
         , mForceNoShortcut(false)
         , mShortcutFailPos()
