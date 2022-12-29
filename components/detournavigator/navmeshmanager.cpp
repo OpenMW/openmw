@@ -10,6 +10,7 @@
 
 #include <components/bullethelpers/heightfield.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/esm/refid.hpp>
 #include <components/misc/convert.hpp>
 
 #include <osg/io_utils>
@@ -59,7 +60,7 @@ namespace DetourNavigator
     {
     }
 
-    void NavMeshManager::setWorldspace(std::string_view worldspace, const UpdateGuard* guard)
+    void NavMeshManager::setWorldspace(const ESM::RefId& worldspace, const UpdateGuard* guard)
     {
         if (worldspace == mWorldspace)
             return;

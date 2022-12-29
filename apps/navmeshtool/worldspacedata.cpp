@@ -8,6 +8,7 @@
 #include <components/detournavigator/recastmesh.hpp>
 #include <components/detournavigator/settings.hpp>
 #include <components/detournavigator/tilecachedrecastmeshmanager.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadcell.hpp>
@@ -29,7 +30,6 @@
 #include <osg/ref_ptr>
 
 #include <algorithm>
-#include <components/esm/refid.hpp>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -37,6 +37,7 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+
 namespace NavMeshTool
 {
     namespace
@@ -221,7 +222,7 @@ namespace NavMeshTool
     }
 
     WorldspaceNavMeshInput::WorldspaceNavMeshInput(
-        std::string worldspace, const DetourNavigator::RecastSettings& settings)
+        ESM::RefId worldspace, const DetourNavigator::RecastSettings& settings)
         : mWorldspace(std::move(worldspace))
         , mTileCachedRecastMeshManager(settings)
     {
@@ -235,7 +236,7 @@ namespace NavMeshTool
     {
         Log(Debug::Info) << "Processing " << esmData.mCells.size() << " cells...";
 
-        std::map<std::string_view, std::unique_ptr<WorldspaceNavMeshInput>> navMeshInputs;
+        std::map<ESM::RefId, std::unique_ptr<WorldspaceNavMeshInput>> navMeshInputs;
         WorldspaceData data;
 
         std::size_t objectsCounter = 0;
@@ -263,16 +264,15 @@ namespace NavMeshTool
 
             const osg::Vec2i cellPosition(cell.mData.mX, cell.mData.mY);
             const std::size_t cellObjectsBegin = data.mObjects.size();
-            const auto cellNameLowerCase = Misc::StringUtils::lowerCase(cell.mCellId.mWorldspace.getRefIdString());
             WorldspaceNavMeshInput& navMeshInput = [&]() -> WorldspaceNavMeshInput& {
-                auto it = navMeshInputs.find(cellNameLowerCase);
+                auto it = navMeshInputs.find(cell.mCellId.mWorldspace);
                 if (it == navMeshInputs.end())
                 {
                     it = navMeshInputs
-                             .emplace(cellNameLowerCase,
-                                 std::make_unique<WorldspaceNavMeshInput>(cellNameLowerCase, settings.mRecast))
+                             .emplace(cell.mCellId.mWorldspace,
+                                 std::make_unique<WorldspaceNavMeshInput>(cell.mCellId.mWorldspace, settings.mRecast))
                              .first;
-                    it->second->mTileCachedRecastMeshManager.setWorldspace(cellNameLowerCase, nullptr);
+                    it->second->mTileCachedRecastMeshManager.setWorldspace(cell.mCellId.mWorldspace, nullptr);
                 }
                 return *it->second;
             }();

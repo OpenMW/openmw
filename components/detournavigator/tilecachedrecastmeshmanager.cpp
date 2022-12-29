@@ -5,6 +5,7 @@
 #include "settingsutils.hpp"
 
 #include <components/bullethelpers/aabb.hpp>
+#include <components/esm/refid.hpp>
 #include <components/misc/convert.hpp>
 
 #include <boost/geometry/geometry.hpp>
@@ -112,7 +113,7 @@ namespace DetourNavigator
         };
     }
 
-    void TileCachedRecastMeshManager::setWorldspace(std::string_view worldspace, const UpdateGuard* guard)
+    void TileCachedRecastMeshManager::setWorldspace(const ESM::RefId& worldspace, const UpdateGuard* guard)
     {
         const MaybeLockGuard lock(mMutex, guard);
         if (mWorldspace == worldspace)
@@ -321,7 +322,7 @@ namespace DetourNavigator
     }
 
     std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getMesh(
-        std::string_view worldspace, const TilePosition& tilePosition)
+        const ESM::RefId& worldspace, const TilePosition& tilePosition)
     {
         {
             const std::lock_guard lock(mMutex);
@@ -345,7 +346,7 @@ namespace DetourNavigator
     }
 
     std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getCachedMesh(
-        std::string_view worldspace, const TilePosition& tilePosition) const
+        const ESM::RefId& worldspace, const TilePosition& tilePosition) const
     {
         const std::lock_guard lock(mMutex);
         if (mWorldspace != worldspace)
@@ -357,7 +358,7 @@ namespace DetourNavigator
     }
 
     std::shared_ptr<RecastMesh> TileCachedRecastMeshManager::getNewMesh(
-        std::string_view worldspace, const TilePosition& tilePosition) const
+        const ESM::RefId& worldspace, const TilePosition& tilePosition) const
     {
         {
             const std::lock_guard lock(mMutex);

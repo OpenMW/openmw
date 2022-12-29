@@ -90,8 +90,6 @@ namespace DetourNavigator
          * @brief setWorldspace should be called before adding object from new worldspace
          * @param worldspace
          */
-        virtual void setWorldspace(std::string_view worldspace, const UpdateGuard* guard) = 0;
-
         virtual void setWorldspace(const ESM::RefId& worldspace, const UpdateGuard* guard) = 0;
 
         /**
