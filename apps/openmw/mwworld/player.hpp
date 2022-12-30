@@ -41,8 +41,6 @@ namespace MWWorld
         // If no position was marked, this is nullptr
         CellStore* mMarkedCell;
 
-        bool mAutoMove;
-        float mForwardBackward;
         bool mTeleported;
 
         int mCurrentCrimeId; // the id assigned witnesses
@@ -90,25 +88,12 @@ namespace MWWorld
         /// Activate the object under the crosshair, if any
         void activate();
 
-        bool getAutoMove() const;
-        void setAutoMove(bool enable);
-
-        void setLeftRight(float value);
-
-        void setForwardBackward(float value);
-        void setUpDown(int value);
-
-        void setRunState(bool run);
-        void setSneak(bool sneak);
-
         void yaw(float yaw);
         void pitch(float pitch);
         void roll(float roll);
 
         bool wasTeleported() const;
         void setTeleported(bool teleported);
-
-        void setAttackingOrSpell(bool attackingOrSpell);
 
         void setJumping(bool jumping);
         bool getJumping() const;

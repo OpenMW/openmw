@@ -1,0 +1,16 @@
+ControlsPage: "OpenMW Controls"
+ControlsPageDescription: "Additional settings related to player controls"
+
+MovementSettings: "Movement"
+
+alwaysRun: "Always run"
+alwaysRunDescription: |
+    If this setting is true, the character is running by default, otherwise the character is walking by default.
+    The shift key will temporarily invert this setting, and the caps lock key will invert this setting while it's "locked".
+
+toggleSneak: "Toggle sneak"
+toggleSneakDescription: |
+    This setting causes the behavior of the sneak key (bound to Ctrl by default)
+    to toggle sneaking on and off rather than requiring the key to be held down while sneaking.
+    Players that spend significant time sneaking may find the character easier to control with this option enabled.
+

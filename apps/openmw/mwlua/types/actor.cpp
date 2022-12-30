@@ -3,6 +3,7 @@
 #include <components/detournavigator/agentbounds.hpp>
 #include <components/lua/luastate.hpp>
 
+#include <apps/openmw/mwbase/mechanicsmanager.hpp>
 #include <apps/openmw/mwmechanics/creaturestats.hpp>
 #include <apps/openmw/mwmechanics/drawstate.hpp>
 #include <apps/openmw/mwworld/class.hpp>
@@ -149,6 +150,38 @@ namespace MWLua
                 return cls.getCreatureStats(o.ptr()).getDrawState();
             else
                 throw std::runtime_error("Actor expected");
+        };
+        actor["setStance"] = [](const SelfObject& self, int stance) {
+            const MWWorld::Class& cls = self.ptr().getClass();
+            if (!cls.isActor())
+                throw std::runtime_error("Actor expected");
+            auto& stats = cls.getCreatureStats(self.ptr());
+            if (stance != static_cast<int>(MWMechanics::DrawState::Nothing)
+                && stance != static_cast<int>(MWMechanics::DrawState::Weapon)
+                && stance != static_cast<int>(MWMechanics::DrawState::Spell))
+            {
+                throw std::runtime_error("Incorrect stance");
+            }
+            MWMechanics::DrawState newDrawState = static_cast<MWMechanics::DrawState>(stance);
+            if (stats.getDrawState() == newDrawState)
+                return;
+            if (newDrawState == MWMechanics::DrawState::Spell && stats.getSpells().getSelectedSpell().empty())
+            {
+                if (!cls.hasInventoryStore(self.ptr()))
+                    return; // No selected spell and no items; can't use magic stance.
+                MWWorld::InventoryStore& store = cls.getInventoryStore(self.ptr());
+                if (store.getSelectedEnchantItem() == store.end())
+                    return; // No selected spell and no selected enchanted item; can't use magic stance.
+            }
+            MWBase::MechanicsManager* mechanics = MWBase::Environment::get().getMechanicsManager();
+            // We want to interrupt animation only if attack is preparing, but still is not triggered.
+            // Otherwise we will get a "speedshooting" exploit, when player can skip reload animation by hitting "Toggle
+            // Weapon" key twice.
+            if (mechanics->isAttackPreparing(self.ptr()))
+                stats.setAttackingOrSpell(false); // interrupt attack
+            else if (mechanics->isAttackingOrSpell(self.ptr()))
+                return; // can't be interrupted; ignore setStance
+            stats.setDrawState(newDrawState);
         };
 
         actor["canMove"] = [](const Object& o) {

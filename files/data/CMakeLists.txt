@@ -50,6 +50,7 @@ set(BUILTIN_DATA_FILES
     l10n/OMWCamera/ru.yaml
     l10n/OMWCamera/sv.yaml
     l10n/OMWCamera/fr.yaml
+    l10n/OMWControls/en.yaml
     l10n/PostProcessing/de.yaml
     l10n/PostProcessing/en.yaml
     l10n/PostProcessing/ru.yaml
@@ -83,6 +84,7 @@ set(BUILTIN_DATA_FILES
     scripts/omw/console/player.lua
     scripts/omw/console/global.lua
     scripts/omw/console/local.lua
+    scripts/omw/playercontrols.lua
     scripts/omw/settings/player.lua
     scripts/omw/settings/global.lua
     scripts/omw/settings/common.lua

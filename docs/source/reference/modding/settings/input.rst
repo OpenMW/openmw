@@ -38,7 +38,9 @@ This setting causes the behavior of the sneak key (bound to Ctrl by default)
 to toggle sneaking on and off rather than requiring the key to be held down while sneaking.
 Players that spend significant time sneaking may find the character easier to control with this option enabled.
 
-This setting can be toggled in the launcher under "Advanced" -> "Game Mechanics" -> "Toggle sneak".
+**This setting is removed from settings.cfg.**
+
+Can be configured in game in the settings menu.
 
 always run
 ----------
@@ -52,7 +54,9 @@ The shift key will temporarily invert this setting, and the caps lock key will i
 This setting is updated every time you exit the game,
 based on whether the caps lock key was on or off at the time you exited.
 
-This settings can be toggled in game by pressing the CapsLock key and exiting.
+**This setting is removed from settings.cfg.**
+
+This setting can be toggled in game by pressing the CapsLock key or in the settings menu.
 
 camera sensitivity
 ------------------

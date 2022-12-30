@@ -25,20 +25,16 @@
 
 namespace MWInput
 {
-    ControllerManager::ControllerManager(BindingsManager* bindingsManager, ActionManager* actionManager,
-        MouseManager* mouseManager, const std::filesystem::path& userControllerBindingsFile,
-        const std::filesystem::path& controllerBindingsFile)
+    ControllerManager::ControllerManager(BindingsManager* bindingsManager, MouseManager* mouseManager,
+        const std::filesystem::path& userControllerBindingsFile, const std::filesystem::path& controllerBindingsFile)
         : mBindingsManager(bindingsManager)
-        , mActionManager(actionManager)
         , mMouseManager(mouseManager)
         , mJoystickEnabled(Settings::Manager::getBool("enable controller", "Input"))
         , mGyroAvailable(false)
         , mGamepadCursorSpeed(Settings::Manager::getFloat("gamepad cursor speed", "Input"))
-        , mSneakToggleShortcutTimer(0.f)
         , mGamepadGuiCursorEnabled(true)
         , mGuiCursorEnabled(true)
         , mJoystickLastUsed(false)
-        , mSneakGamepadShortcut(false)
     {
         if (!controllerBindingsFile.empty())
         {
@@ -82,7 +78,7 @@ namespace MWInput
         }
     }
 
-    bool ControllerManager::update(float dt)
+    void ControllerManager::update(float dt)
     {
         if (mGuiCursorEnabled && !(mJoystickLastUsed && !mGamepadGuiCursorEnabled))
         {
@@ -108,77 +104,18 @@ namespace MWInput
             }
         }
 
-        // Disable movement in Gui mode
-        if (MWBase::Environment::get().getWindowManager()->isGuiMode()
-            || MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_Running)
-        {
-            return false;
-        }
-
-        MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-        bool triedToMove = false;
-
-        // Configure player movement according to controller input. Actual movement will
-        // be done in the physics system.
-        if (MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols"))
+        if (!MWBase::Environment::get().getWindowManager()->isGuiMode()
+            && MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_Running
+            && MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols"))
         {
             float xAxis = mBindingsManager->getActionValue(A_MoveLeftRight);
             float yAxis = mBindingsManager->getActionValue(A_MoveForwardBackward);
-            if (xAxis != 0.5)
-            {
-                triedToMove = true;
-                player.setLeftRight((xAxis - 0.5f) * 2);
-            }
-
-            if (yAxis != 0.5)
-            {
-                triedToMove = true;
-                player.setAutoMove(false);
-                player.setForwardBackward((0.5f - yAxis) * 2);
-            }
-
-            if (triedToMove)
+            if (xAxis != 0.5 || yAxis != 0.5)
             {
                 mJoystickLastUsed = true;
                 MWBase::Environment::get().getInputManager()->resetIdleTime();
             }
-
-            static const bool isToggleSneak = Settings::Manager::getBool("toggle sneak", "Input");
-            if (!isToggleSneak)
-            {
-                if (mJoystickLastUsed)
-                {
-                    if (mBindingsManager->actionIsActive(A_Sneak))
-                    {
-                        if (mSneakToggleShortcutTimer) // New Sneak Button Press
-                        {
-                            if (mSneakToggleShortcutTimer <= 0.3f)
-                            {
-                                mSneakGamepadShortcut = true;
-                                mActionManager->toggleSneaking();
-                            }
-                            else
-                                mSneakGamepadShortcut = false;
-                        }
-
-                        if (!mActionManager->isSneaking())
-                            mActionManager->toggleSneaking();
-                        mSneakToggleShortcutTimer = 0.f;
-                    }
-                    else
-                    {
-                        if (!mSneakGamepadShortcut && mActionManager->isSneaking())
-                            mActionManager->toggleSneaking();
-                        if (mSneakToggleShortcutTimer <= 0.3f)
-                            mSneakToggleShortcutTimer += dt;
-                    }
-                }
-                else
-                    player.setSneak(mBindingsManager->actionIsActive(A_Sneak));
-            }
         }
-
-        return triedToMove;
     }
 
     void ControllerManager::buttonPressed(int deviceID, const SDL_ControllerButtonEvent& arg)

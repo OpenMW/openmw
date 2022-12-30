@@ -352,6 +352,7 @@ namespace MWMechanics
             const float rotationZ = mov.mRotation[2];
             const bool jump = mov.mPosition[2] == 1;
             const bool runFlag = stats.getMovementFlag(MWMechanics::CreatureStats::Flag_Run);
+            const bool sneakFlag = stats.getMovementFlag(MWMechanics::CreatureStats::Flag_Sneak);
             const bool attackingOrSpell = stats.getAttackingOrSpell();
             if (controls.mChanged)
             {
@@ -363,16 +364,24 @@ namespace MWMechanics
                 mov.mRotation[2] = controls.mYawChange;
                 mov.mSpeedFactor = osg::Vec2(controls.mMovement, controls.mSideMovement).length();
                 stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Run, controls.mRun);
+                stats.setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, controls.mSneak);
                 stats.setAttackingOrSpell((controls.mUse & 1) == 1);
                 controls.mChanged = false;
             }
-            controls.mSideMovement = movement.x();
-            controls.mMovement = movement.y();
+            // For the player we don't need to copy these values to Lua because mwinput doesn't change them.
+            // All handling of these player controls was moved from C++ to a built-in Lua script.
+            if (!isPlayer)
+            {
+                controls.mSideMovement = movement.x();
+                controls.mMovement = movement.y();
+                controls.mJump = jump;
+                controls.mRun = runFlag;
+                controls.mSneak = sneakFlag;
+                controls.mUse = attackingOrSpell ? controls.mUse | 1 : controls.mUse & ~1;
+            }
+            // For the player these controls are still handled by mwinput, so we need to update the values.
             controls.mPitchChange = rotationX;
             controls.mYawChange = rotationZ;
-            controls.mJump = jump;
-            controls.mRun = runFlag;
-            controls.mUse = attackingOrSpell ? controls.mUse | 1 : controls.mUse & ~1;
         }
     }
 

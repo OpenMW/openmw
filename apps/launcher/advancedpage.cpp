@@ -84,7 +84,6 @@ bool Launcher::AdvancedPage::loadSettings()
 {
     // Game mechanics
     {
-        loadSettingBool(toggleSneakCheckBox, "toggle sneak", "Input");
         loadSettingBool(canLootDuringDeathAnimationCheckBox, "can loot during death animation", "Game");
         loadSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
         loadSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
@@ -253,7 +252,6 @@ void Launcher::AdvancedPage::saveSettings()
 {
     // Game mechanics
     {
-        saveSettingBool(toggleSneakCheckBox, "toggle sneak", "Input");
         saveSettingBool(canLootDuringDeathAnimationCheckBox, "can loot during death animation", "Game");
         saveSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
         saveSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");

@@ -46,7 +46,6 @@ namespace MWBase
 
         virtual void setDragDrop(bool dragDrop) = 0;
         virtual void setGamepadGuiCursorEnabled(bool enabled) = 0;
-        virtual void setAttemptJump(bool jumping) = 0;
 
         virtual void toggleControlSwitch(std::string_view sw, bool value) = 0;
         virtual bool getControlSwitch(std::string_view sw) = 0;

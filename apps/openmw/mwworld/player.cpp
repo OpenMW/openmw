@@ -40,8 +40,6 @@ namespace MWWorld
         , mLastKnownExteriorPosition(0, 0, 0)
         , mMarkedPosition(ESM::Position())
         , mMarkedCell(nullptr)
-        , mAutoMove(false)
-        , mForwardBackward(0)
         , mTeleported(false)
         , mCurrentCrimeId(-1)
         , mPaidCrimeId(-1)
@@ -163,61 +161,6 @@ namespace MWWorld
         ptr.getClass().getNpcStats(ptr).setDrawState(state);
     }
 
-    bool Player::getAutoMove() const
-    {
-        return mAutoMove;
-    }
-
-    void Player::setAutoMove(bool enable)
-    {
-        MWWorld::Ptr ptr = getPlayer();
-
-        mAutoMove = enable;
-
-        int value = mForwardBackward;
-
-        if (mAutoMove)
-            value = 1;
-
-        ptr.getClass().getMovementSettings(ptr).mPosition[1] = value;
-    }
-
-    void Player::setLeftRight(float value)
-    {
-        MWWorld::Ptr ptr = getPlayer();
-        ptr.getClass().getMovementSettings(ptr).mPosition[0] = value;
-    }
-
-    void Player::setForwardBackward(float value)
-    {
-        MWWorld::Ptr ptr = getPlayer();
-
-        mForwardBackward = value;
-
-        if (mAutoMove)
-            value = 1;
-
-        ptr.getClass().getMovementSettings(ptr).mPosition[1] = value;
-    }
-
-    void Player::setUpDown(int value)
-    {
-        MWWorld::Ptr ptr = getPlayer();
-        ptr.getClass().getMovementSettings(ptr).mPosition[2] = static_cast<float>(value);
-    }
-
-    void Player::setRunState(bool run)
-    {
-        MWWorld::Ptr ptr = getPlayer();
-        ptr.getClass().getCreatureStats(ptr).setMovementFlag(MWMechanics::CreatureStats::Flag_Run, run);
-    }
-
-    void Player::setSneak(bool sneak)
-    {
-        MWWorld::Ptr ptr = getPlayer();
-        ptr.getClass().getCreatureStats(ptr).setMovementFlag(MWMechanics::CreatureStats::Flag_Sneak, sneak);
-    }
-
     void Player::yaw(float yaw)
     {
         MWWorld::Ptr ptr = getPlayer();
@@ -272,11 +215,6 @@ namespace MWWorld
         mTeleported = teleported;
     }
 
-    void Player::setAttackingOrSpell(bool attackingOrSpell)
-    {
-        getPlayer().getClass().getCreatureStats(getPlayer()).setAttackingOrSpell(attackingOrSpell);
-    }
-
     void Player::setJumping(bool jumping)
     {
         mJumping = jumping;
@@ -315,8 +253,6 @@ namespace MWWorld
         mCellStore = nullptr;
         mSign = ESM::RefId::sEmpty;
         mMarkedCell = nullptr;
-        mAutoMove = false;
-        mForwardBackward = 0;
         mTeleported = false;
         mJumping = false;
         mCurrentCrimeId = -1;
@@ -475,7 +411,6 @@ namespace MWWorld
                 mMarkedCell = nullptr;
             }
 
-            mForwardBackward = 0;
             mTeleported = false;
 
             mPreviousItems = player.mPreviousItems;

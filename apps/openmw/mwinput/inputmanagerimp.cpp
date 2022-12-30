@@ -37,8 +37,8 @@ namespace MWInput
               mBindingsManager.get(), screenCaptureOperation, viewer, screenCaptureHandler))
         , mKeyboardManager(std::make_unique<KeyboardManager>(mBindingsManager.get()))
         , mMouseManager(std::make_unique<MouseManager>(mBindingsManager.get(), mInputWrapper.get(), window))
-        , mControllerManager(std::make_unique<ControllerManager>(mBindingsManager.get(), mActionManager.get(),
-              mMouseManager.get(), userControllerBindingsFile, controllerBindingsFile))
+        , mControllerManager(std::make_unique<ControllerManager>(
+              mBindingsManager.get(), mMouseManager.get(), userControllerBindingsFile, controllerBindingsFile))
         , mSensorManager(std::make_unique<SensorManager>())
         , mGyroManager(std::make_unique<GyroManager>())
     {
@@ -57,11 +57,6 @@ namespace MWInput
 
     InputManager::~InputManager() {}
 
-    void InputManager::setAttemptJump(bool jumping)
-    {
-        mActionManager->setAttemptJump(jumping);
-    }
-
     void InputManager::update(float dt, bool disableControls, bool disableEvents)
     {
         mControlsDisabled = disableControls;
@@ -79,10 +74,10 @@ namespace MWInput
 
         mMouseManager->updateCursorMode();
 
-        bool controllerMove = mControllerManager->update(dt);
+        mControllerManager->update(dt);
         mMouseManager->update(dt);
         mSensorManager->update(dt);
-        mActionManager->update(dt, controllerMove);
+        mActionManager->update(dt);
 
         if (mGyroManager->isEnabled())
         {

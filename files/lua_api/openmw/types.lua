@@ -106,6 +106,13 @@
 -- @return #number
 
 ---
+-- Sets the current stance (whether a weapon/spell is readied), see the list of @{#STANCE} values.
+-- Can be used only in local scripts on self.
+-- @function [parent=#Actor] setStance
+-- @param openmw.core#GameObject actor
+-- @param #number stance
+
+---
 -- Returns `true` if the item is equipped on the actor.
 -- @function [parent=#Actor] isEquipped
 -- @param openmw.core#GameObject actor
@@ -475,6 +482,12 @@
 -- Whether the object is an NPC or a Player.
 -- @function [parent=#NPC] objectIsInstance
 -- @param openmw.core#GameObject object
+-- @return #boolean
+
+---
+-- Whether the actor is in the werewolf form at the moment.
+-- @function [parent=#Actor] isWerewolf
+-- @param openmw.core#GameObject actor
 -- @return #boolean
 
 ---

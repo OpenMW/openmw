@@ -39,24 +39,10 @@ namespace MWInput
 
     void ControlSwitch::set(std::string_view key, bool value)
     {
-        MWWorld::Player& player = MWBase::Environment::get().getWorld()->getPlayer();
-
-        /// \note 7 switches at all, if-else is relevant
-        if (key == "playercontrols" && !value)
+        if (key == "playerlooking" && !value)
         {
-            player.setLeftRight(0);
-            player.setForwardBackward(0);
-            player.setAutoMove(false);
-            player.setUpDown(0);
-        }
-        else if (key == "playerjumping" && !value)
-        {
-            /// \fixme maybe crouching at this time
-            player.setUpDown(0);
-        }
-        else if (key == "playerlooking" && !value)
-        {
-            MWBase::Environment::get().getWorld()->rotateObject(player.getPlayer(), osg::Vec3f());
+            auto world = MWBase::Environment::get().getWorld();
+            world->rotateObject(world->getPlayerPtr(), osg::Vec3f());
         }
         auto it = mSwitches.find(key);
         if (it == mSwitches.end())

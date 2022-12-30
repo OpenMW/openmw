@@ -5,6 +5,8 @@
 
 #include <apps/openmw/mwbase/environment.hpp>
 #include <apps/openmw/mwbase/world.hpp>
+#include <apps/openmw/mwmechanics/npcstats.hpp>
+#include <apps/openmw/mwworld/class.hpp>
 #include <apps/openmw/mwworld/esmstore.hpp>
 
 #include "../stats.hpp"
@@ -43,5 +45,14 @@ namespace MWLua
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHair.getRefIdString(); });
         record["head"]
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.getRefIdString(); });
+
+        // This function is game-specific, in future we should replace it with something more universal.
+        npc["isWerewolf"] = [](const Object& o) {
+            const MWWorld::Class& cls = o.ptr().getClass();
+            if (cls.isNpc())
+                return cls.getNpcStats(o.ptr()).isWerewolf();
+            else
+                throw std::runtime_error("NPC or Player expected");
+        };
     }
 }

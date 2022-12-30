@@ -84,11 +84,6 @@ local idleTimer = 0
 local vanityDelay = core.getGMST('fVanityDelay')
 
 local function updateVanity(dt)
-    if input.isIdle() then
-        idleTimer = idleTimer + dt
-    else
-        idleTimer = 0
-    end
     local vanityAllowed = input.getControlSwitch(input.CONTROL_SWITCH.VanityMode)
     if vanityAllowed and idleTimer > vanityDelay and camera.getMode() ~= MODE.Vanity then
         camera.setMode(MODE.Vanity)
@@ -177,8 +172,19 @@ local function onUpdate(dt)
     pov_auto_switch.onUpdate(dt)
 end
 
+local function updateIdleTimer(dt)
+    if not input.isIdle() then
+        idleTimer = 0
+    elseif self.controls.movement ~= 0 or self.controls.sideMovement ~= 0 or self.controls.jump or self.controls.use ~= 0 then
+        idleTimer = 0  -- also reset the timer in case of a scripted movement
+    else
+        idleTimer = idleTimer + dt
+    end
+end
+
 local function onFrame(dt)
     if core.isWorldPaused() then return end
+    updateIdleTimer(dt)
     local mode = camera.getMode()
     if mode == MODE.FirstPerson or mode == MODE.ThirdPerson then
         primaryMode = mode
