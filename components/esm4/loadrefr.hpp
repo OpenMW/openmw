@@ -30,6 +30,7 @@
 #include <cstdint>
 
 #include "reference.hpp" // FormId, Placement, EnableParent
+
 #include <components/esm/defs.hpp>
 #include <components/esm/refid.hpp>
 

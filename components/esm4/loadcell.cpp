@@ -32,11 +32,11 @@
 
 #include <cassert>
 #include <cfloat> // FLT_MAX for gcc
+#include <iostream> // FIXME: debug only
 #include <stdexcept>
 
-#include <iostream> // FIXME: debug only
-
 #include "reader.hpp"
+
 #include <components/esm/refid.hpp>
 // #include "writer.hpp"
 

@@ -33,6 +33,7 @@
 
 #include "formid.hpp"
 #include "lighting.hpp"
+
 #include <components/esm/defs.hpp>
 #include <components/esm/refid.hpp>
 

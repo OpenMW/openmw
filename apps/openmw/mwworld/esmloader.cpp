@@ -1,13 +1,14 @@
 #include "esmloader.hpp"
 #include "esmstore.hpp"
 
+#include <fstream>
+
 #include <components/esm/format.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/openfile.hpp>
-#include <fstream>
 
 namespace MWWorld
 {
@@ -30,7 +31,6 @@ namespace MWWorld
         if (!stream->is_open())
         {
             throw std::runtime_error(std::string("File Failed to open file: ") + std::strerror(errno) + "\n");
-            return;
         }
         const ESM::Format format = ESM::readFormat(*stream);
         stream->seekg(0);
@@ -64,9 +64,13 @@ namespace MWWorld
             }
             case ESM::Format::Tes4:
             {
-                ESM4::Reader readerESM4(std::move(stream), filepath);
-                readerESM4.setEncoder(mEncoder->getStatelessEncoder());
-                mStore.loadESM4(readerESM4, listener, mDialogue);
+                if (mEncoder)
+                {
+                    ESM4::Reader readerESM4(std::move(stream), filepath);
+                    auto statelessEncoder = mEncoder->getStatelessEncoder();
+                    readerESM4.setEncoder(&statelessEncoder);
+                    mStore.loadESM4(readerESM4, listener, mDialogue);
+                }
             }
         }
     }

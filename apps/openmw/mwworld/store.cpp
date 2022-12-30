@@ -1,21 +1,18 @@
 #include "store.hpp"
 
-#include <components/debug/debuglog.hpp>
-
-#include <components/esm/records.hpp>
-#include <components/esm3/esmreader.hpp>
-#include <components/esm3/esmwriter.hpp>
-
-#include <components/loadinglistener/loadinglistener.hpp>
-#include <components/misc/rng.hpp>
-
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
 
+#include <components/debug/debuglog.hpp>
+#include <components/esm/records.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
 #include <components/esm4/loadcell.hpp>
 #include <components/esm4/loadrefr.hpp>
 #include <components/esm4/loadstat.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
+#include <components/misc/rng.hpp>
 
 namespace
 {

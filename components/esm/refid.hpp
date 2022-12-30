@@ -1,11 +1,12 @@
 #ifndef OPENMW_COMPONENTS_ESM_REFID_HPP
 #define OPENMW_COMPONENTS_ESM_REFID_HPP
 #include <compare>
-#include <components/esm4/formid.hpp>
 #include <functional>
 #include <iosfwd>
 #include <string>
 #include <string_view>
+
+#include <components/esm4/formid.hpp>
 
 namespace ESM
 {

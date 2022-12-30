@@ -32,6 +32,7 @@
 #include <vector>
 
 #include "formid.hpp"
+
 #include <components/esm/defs.hpp>
 #include <components/esm/refid.hpp>
 
