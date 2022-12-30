@@ -43,8 +43,11 @@ namespace DetourNavigator
     void freePolyMeshDetail(rcPolyMeshDetail& value) noexcept
     {
         rcFree(value.meshes);
+        value.meshes = nullptr;
         rcFree(value.verts);
+        value.verts = nullptr;
         rcFree(value.tris);
+        value.tris = nullptr;
     }
 
     void copyPolyMesh(const rcPolyMesh& src, rcPolyMesh& dst)
