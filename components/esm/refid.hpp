@@ -1,6 +1,6 @@
 #ifndef OPENMW_COMPONENTS_ESM_REFID_HPP
 #define OPENMW_COMPONENTS_ESM_REFID_HPP
-#include <compare>
+
 #include <functional>
 #include <iosfwd>
 #include <string>
@@ -8,17 +8,18 @@
 
 namespace ESM
 {
+    // RefId is used to represent an Id that identifies an ESM record. These Ids can then be used in
+    // ESM::Stores to find the actual record. These Ids can be serialized/de-serialized, stored on disk and remain
+    // valid. They are used by ESM files, by records to reference other ESM records.
     struct RefId
     {
-        // This structure is used to represent an Id that identifies an ESM record. These Ids can then be used in
-        // ESM::Stores to find the actual record. These Ids can be serialized/de-serialized, stored on disk and remain
-        // valid. They are used by ESM files, by records to reference other ESM records.
         const static RefId sEmpty;
+
         bool empty() const { return mId.empty(); }
-        void swap(RefId& rhs) { mId.swap(rhs.mId); }
+
         bool operator==(const RefId& rhs) const;
+
         bool operator<(const RefId& rhs) const;
-        bool operator>(const RefId& rhs) const;
 
         friend std::ostream& operator<<(std::ostream& os, const RefId& dt);
 

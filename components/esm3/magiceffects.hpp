@@ -2,8 +2,10 @@
 #define COMPONENTS_ESM_MAGICEFFECTS_H
 
 #include <components/esm/refid.hpp>
+
 #include <map>
 #include <string>
+#include <tuple>
 
 namespace ESM
 {
@@ -29,30 +31,25 @@ namespace ESM
         {
         }
 
-        bool operator==(const SummonKey& other) const
-        {
-            return mEffectId == other.mEffectId && mSourceId == other.mSourceId && mEffectIndex == other.mEffectIndex;
-        }
-
-        bool operator<(const SummonKey& other) const
-        {
-            if (mEffectId < other.mEffectId)
-                return true;
-            if (mEffectId > other.mEffectId)
-                return false;
-
-            if (mSourceId < other.mSourceId)
-                return true;
-            if (mSourceId > other.mSourceId)
-                return false;
-
-            return mEffectIndex < other.mEffectIndex;
-        }
-
         int mEffectId;
         ESM::RefId mSourceId;
         int mEffectIndex;
     };
+
+    inline auto makeTupleRef(const SummonKey& value) noexcept
+    {
+        return std::tie(value.mEffectId, value.mSourceId, value.mEffectIndex);
+    }
+
+    inline bool operator==(const SummonKey& l, const SummonKey& r) noexcept
+    {
+        return makeTupleRef(l) == makeTupleRef(r);
+    }
+
+    inline bool operator<(const SummonKey& l, const SummonKey& r) noexcept
+    {
+        return makeTupleRef(l) < makeTupleRef(r);
+    }
 }
 
 #endif
