@@ -557,7 +557,8 @@ namespace MWRender
             mResetAccumRootCallback->setAccumulate(mAccumulate);
     }
 
-    size_t Animation::detectBlendMask(const osg::Node* node, const std::string& controllerName) const // controllerName is used for Collada animated deforming models
+    // controllerName is used for Collada animated deforming models
+    size_t Animation::detectBlendMask(const osg::Node* node, const std::string& controllerName) const 
     {
         static const std::string_view sBlendMaskRoots[sNumBlendMasks] = {
             "", /* Lower body / character root */

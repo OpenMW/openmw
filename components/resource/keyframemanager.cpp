@@ -34,27 +34,28 @@ namespace Resource
 
     bool RetrieveAnimationsVisitor::belongsToLeftUpperExtremity(const std::string& name)
     {
-        static const std::array boneNames
-            = { "bip01_l_clavicle", "left_clavicle", "bip01_l_upperarm", "left_upper_arm", "bip01_l_forearm",
-                  "bip01_l_hand", "left_hand", "left_wrist", "shield_bone", "bip01_l_pinky1", "bip01_l_pinky2",
-                  "bip01_l_pinky3", "bip01_l_ring1", "bip01_l_ring2", "bip01_l_ring3", "bip01_l_middle1",
-                  "bip01_l_middle2", "bip01_l_middle3", "bip01_l_pointer1", "bip01_l_pointer2", "bip01_l_pointer3",
-                  "bip01_l_thumb1", "bip01_l_thumb2", "bip01_l_thumb3", "left_forearm" };
+        static const std::array boneNames = { "bip01_l_clavicle", "left_clavicle", "bip01_l_upperarm", "left_upper_arm",
+            "bip01_l_forearm", "bip01_l_hand", "left_hand", "left_wrist", "shield_bone", "bip01_l_pinky1",
+            "bip01_l_pinky2", "bip01_l_pinky3", "bip01_l_ring1", "bip01_l_ring2", "bip01_l_ring3", "bip01_l_middle1",
+            "bip01_l_middle2", "bip01_l_middle3", "bip01_l_pointer1", "bip01_l_pointer2", "bip01_l_pointer3",
+            "bip01_l_thumb1", "bip01_l_thumb2", "bip01_l_thumb3", "left_forearm" };
 
-        if (std::find(boneNames.begin(), boneNames.end(), name) != boneNames.end()) return true;            
+        if (std::find(boneNames.begin(), boneNames.end(), name) != boneNames.end())
+            return true;
 
         return false;
     }
 
     bool RetrieveAnimationsVisitor::belongsToRightUpperExtremity(const std::string& name)
     {
-        static const std::array boneNames = { "bip01_r_clavicle", "right_clavicle",
-            "bip01_r_upperarm", "right_upper_arm", "bip01_r_forearm", "bip01_r_hand", "right_hand", "right_wrist",
-            "bip01_r_thumb1", "bip01_r_thumb2", "bip01_r_thumb3", "weapon_bone", "bip01_r_pinky1", "bip01_r_pinky2",
-            "bip01_r_pinky3", "bip01_r_ring1", "bip01_r_ring2", "bip01_r_ring3", "bip01_r_middle1", "bip01_r_middle2",
-            "bip01_r_middle3", "bip01_r_pointer1", "bip01_r_pointer2", "bip01_r_pointer3", "right_forearm" };
+        static const std::array boneNames = { "bip01_r_clavicle", "right_clavicle", "bip01_r_upperarm",
+            "right_upper_arm", "bip01_r_forearm", "bip01_r_hand", "right_hand", "right_wrist", "bip01_r_thumb1",
+            "bip01_r_thumb2", "bip01_r_thumb3", "weapon_bone", "bip01_r_pinky1", "bip01_r_pinky2", "bip01_r_pinky3",
+            "bip01_r_ring1", "bip01_r_ring2", "bip01_r_ring3", "bip01_r_middle1", "bip01_r_middle2", "bip01_r_middle3",
+            "bip01_r_pointer1", "bip01_r_pointer2", "bip01_r_pointer3", "right_forearm" };
 
-        if (std::find(boneNames.begin(), boneNames.end(), name) != boneNames.end()) return true;            
+        if (std::find(boneNames.begin(), boneNames.end(), name) != boneNames.end())
+            return true;
 
         return false;
     }
@@ -64,7 +65,8 @@ namespace Resource
         static const std::array boneNames
             = { "bip01_spine1", "bip01_spine2", "bip01_neck", "bip01_head", "head", "neck", "chest", "groin" };
 
-        if (std::find(boneNames.begin(), boneNames.end(), name) != boneNames.end()) return true;            
+        if (std::find(boneNames.begin(), boneNames.end(), name) != boneNames.end())
+            return true;
 
         return false;
     }
