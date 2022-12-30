@@ -558,7 +558,7 @@ namespace MWRender
     }
 
     // controllerName is used for Collada animated deforming models
-    size_t Animation::detectBlendMask(const osg::Node* node, const std::string& controllerName) const 
+    size_t Animation::detectBlendMask(const osg::Node* node, const std::string& controllerName) const
     {
         static const std::string_view sBlendMaskRoots[sNumBlendMasks] = {
             "", /* Lower body / character root */
