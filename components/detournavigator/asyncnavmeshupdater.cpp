@@ -8,6 +8,7 @@
 #include "version.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm/refid.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/thread.hpp>
 
@@ -135,7 +136,7 @@ namespace DetourNavigator
     }
 
     Job::Job(const AgentBounds& agentBounds, std::weak_ptr<GuardedNavMeshCacheItem> navMeshCacheItem,
-        std::string_view worldspace, const TilePosition& changedTile, ChangeType changeType, int distanceToPlayer,
+        const ESM::RefId& worldspace, const TilePosition& changedTile, ChangeType changeType, int distanceToPlayer,
         std::chrono::steady_clock::time_point processTime)
         : mId(getNextJobId())
         , mAgentBounds(agentBounds)
@@ -168,7 +169,7 @@ namespace DetourNavigator
     }
 
     void AsyncNavMeshUpdater::post(const AgentBounds& agentBounds, const SharedNavMeshCacheItem& navMeshCacheItem,
-        const TilePosition& playerTile, std::string_view worldspace,
+        const TilePosition& playerTile, const ESM::RefId& worldspace,
         const std::map<TilePosition, ChangeType>& changedTiles)
     {
         bool playerTileChanged = false;

@@ -40,7 +40,6 @@ namespace
         Settings mSettings = makeSettings();
         std::unique_ptr<Navigator> mNavigator;
         const osg::Vec3f mPlayerPosition;
-        const std::string mWorldspace;
         const AgentBounds mAgentBounds{ CollisionShapeType::Aabb, { 29, 29, 66 } };
         osg::Vec3f mStart;
         osg::Vec3f mEnd;
@@ -57,7 +56,6 @@ namespace
 
         DetourNavigatorNavigatorTest()
             : mPlayerPosition(256, 256, 0)
-            , mWorldspace("sys::default")
             , mStart(52, 460, 1)
             , mEnd(460, 52, 1)
             , mOut(mPath)

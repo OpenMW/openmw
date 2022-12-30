@@ -14,6 +14,8 @@
 #include "tileposition.hpp"
 #include "waitconditiontype.hpp"
 
+#include <components/esm/refid.hpp>
+
 #include <osg/Vec3f>
 
 #include <atomic>
@@ -49,7 +51,7 @@ namespace DetourNavigator
         const std::size_t mId;
         const AgentBounds mAgentBounds;
         const std::weak_ptr<GuardedNavMeshCacheItem> mNavMeshCacheItem;
-        const std::string mWorldspace;
+        const ESM::RefId mWorldspace;
         const TilePosition mChangedTile;
         const std::chrono::steady_clock::time_point mProcessTime;
         unsigned mTryNumber = 0;
@@ -63,7 +65,7 @@ namespace DetourNavigator
         std::unique_ptr<PreparedNavMeshData> mGeneratedNavMeshData;
 
         Job(const AgentBounds& agentBounds, std::weak_ptr<GuardedNavMeshCacheItem> navMeshCacheItem,
-            std::string_view worldspace, const TilePosition& changedTile, ChangeType changeType, int distanceToPlayer,
+            const ESM::RefId& worldspace, const TilePosition& changedTile, ChangeType changeType, int distanceToPlayer,
             std::chrono::steady_clock::time_point processTime);
     };
 
@@ -148,7 +150,7 @@ namespace DetourNavigator
         ~AsyncNavMeshUpdater();
 
         void post(const AgentBounds& agentBounds, const SharedNavMeshCacheItem& navMeshCacheItem,
-            const TilePosition& playerTile, std::string_view worldspace,
+            const TilePosition& playerTile, const ESM::RefId& worldspace,
             const std::map<TilePosition, ChangeType>& changedTiles);
 
         void wait(WaitConditionType waitConditionType, Loading::Listener* listener);

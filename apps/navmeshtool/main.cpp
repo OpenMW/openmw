@@ -8,6 +8,7 @@
 #include <components/detournavigator/navmeshdb.hpp>
 #include <components/detournavigator/recastglobalallocator.hpp>
 #include <components/detournavigator/settings.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/esm3/variant.hpp>
 #include <components/esmloader/esmdata.hpp>
