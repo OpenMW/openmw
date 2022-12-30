@@ -81,12 +81,10 @@ namespace Resource
         {
             if (animation)
             {
-                if (animation->getName()
-                    == "Default") //"Default" is osg dae plugin's default naming scheme for unnamed animations
+                //"Default" is osg dae plugin's default naming scheme for unnamed animations
+                if (animation->getName() == "Default")
                 {
-                    animation->setName(
-                        std::string("idle")); // animation naming scheme "idle: start" and "idle: stop" is the
-                                              // default idle animation that OpenMW seems to want to play
+                    animation->setName(std::string("idle"));
                 }
 
                 osg::ref_ptr<Resource::Animation> mergedAnimationTrack = new Resource::Animation;
@@ -116,7 +114,7 @@ namespace Resource
                         || belongsToTorso(channel->getTargetName()))
                         continue;
 
-                    mergedAnimationTrack->addChannel(channel.get()->clone()); // is ->clone needed?
+                    mergedAnimationTrack->addChannel(channel.get()->clone());
                 }
 
                 callback->addMergedAnimationTrack(mergedAnimationTrack);

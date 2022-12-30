@@ -11,7 +11,7 @@
 
 namespace Resource
 {
-    /// @brief extract animations to OpenMW's animation system
+    /// @brief extract animations from OSG formats to OpenMW's animation system
     class RetrieveAnimationsVisitor : public osg::NodeVisitor
     {
     public:
