@@ -4,6 +4,7 @@
 #include <components/lua/luastate.hpp>
 
 #include <apps/openmw/mwbase/mechanicsmanager.hpp>
+#include <apps/openmw/mwbase/windowmanager.hpp>
 #include <apps/openmw/mwmechanics/creaturestats.hpp>
 #include <apps/openmw/mwmechanics/drawstate.hpp>
 #include <apps/openmw/mwworld/class.hpp>
@@ -165,13 +166,24 @@ namespace MWLua
             MWMechanics::DrawState newDrawState = static_cast<MWMechanics::DrawState>(stance);
             if (stats.getDrawState() == newDrawState)
                 return;
-            if (newDrawState == MWMechanics::DrawState::Spell && stats.getSpells().getSelectedSpell().empty())
+            if (newDrawState == MWMechanics::DrawState::Spell)
             {
-                if (!cls.hasInventoryStore(self.ptr()))
-                    return; // No selected spell and no items; can't use magic stance.
-                MWWorld::InventoryStore& store = cls.getInventoryStore(self.ptr());
-                if (store.getSelectedEnchantItem() == store.end())
-                    return; // No selected spell and no selected enchanted item; can't use magic stance.
+                bool hasSelectedSpell;
+                if (self.ptr() == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    // For the player selecting spell in UI doesn't change selected spell in CreatureStats (was
+                    // implemented this way to prevent changing spell during casting, probably should be refactored), so
+                    // we have to handle the player separately.
+                    hasSelectedSpell = !MWBase::Environment::get().getWindowManager()->getSelectedSpell().empty();
+                else
+                    hasSelectedSpell = !stats.getSpells().getSelectedSpell().empty();
+                if (!hasSelectedSpell)
+                {
+                    if (!cls.hasInventoryStore(self.ptr()))
+                        return; // No selected spell and no items; can't use magic stance.
+                    MWWorld::InventoryStore& store = cls.getInventoryStore(self.ptr());
+                    if (store.getSelectedEnchantItem() == store.end())
+                        return; // No selected spell and no selected enchanted item; can't use magic stance.
+                }
             }
             MWBase::MechanicsManager* mechanics = MWBase::Environment::get().getMechanicsManager();
             // We want to interrupt animation only if attack is preparing, but still is not triggered.
