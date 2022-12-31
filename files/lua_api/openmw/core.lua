@@ -182,11 +182,19 @@
 -- @type Cell
 -- @field #string name Name of the cell (can be empty string).
 -- @field #string region Region of the cell.
--- @field #boolean isExterior Whether the cell is an exterior.
--- @field #boolean isQuasiExterior Whether the cell is a quasi exterior (like interior but with the sky and the wheather).
+-- @field #boolean isExterior Whether the cell is an exterior cell. "Exterior" means grid of cells where the player can seamless walk from one cell to another without teleports. QuasiExterior (interior with sky) is not an exterior.
+-- @field #boolean isQuasiExterior (DEPRECATED, use `hasTag("QuasiExterior")`) Whether the cell is a quasi exterior (like interior but with the sky and the wheather).
 -- @field #number gridX Index of the cell by X (only for exteriors).
 -- @field #number gridY Index of the cell by Y (only for exteriors).
 -- @field #boolean hasWater True if the cell contains water.
+-- @field #boolean hasSky True if in this cell sky should be rendered.
+
+---
+-- Returns true if the cell has given tag.
+-- @function [parent=#Cell] hasTag
+-- @param self
+-- @param #string tag One of "QuasiExterior", "NoSleep".
+-- @return #boolean
 
 ---
 -- Returns true either if the cell contains the object or if the cell is an exterior and the object is also in an exterior.
