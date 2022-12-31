@@ -401,7 +401,7 @@ namespace MWLua
         return localScripts->getActorControls();
     }
 
-    void LuaManager::addCustomLocalScript(const MWWorld::Ptr& ptr, int scriptId)
+    void LuaManager::addCustomLocalScript(const MWWorld::Ptr& ptr, int scriptId, std::string_view initData)
     {
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
         if (!localScripts)
@@ -411,7 +411,7 @@ namespace MWLua
             if (ptr.isInCell() && MWBase::Environment::get().getWorldScene()->isCellActive(*ptr.getCell()))
                 mActiveLocalScripts.insert(localScripts);
         }
-        localScripts->addCustomScript(scriptId);
+        localScripts->addCustomScript(scriptId, initData);
     }
 
     LocalScripts* LuaManager::createLocalScripts(
