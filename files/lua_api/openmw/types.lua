@@ -485,8 +485,8 @@
 -- @return #boolean
 
 ---
--- Whether the actor is in the werewolf form at the moment.
--- @function [parent=#Actor] isWerewolf
+-- Whether the NPC or player is in the werewolf form at the moment.
+-- @function [parent=#NPC] isWerewolf
 -- @param openmw.core#GameObject actor
 -- @return #boolean
 
