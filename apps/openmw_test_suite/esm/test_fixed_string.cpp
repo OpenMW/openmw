@@ -37,6 +37,7 @@ namespace
             EXPECT_TRUE(name == ss);
         }
     }
+
     TEST(EsmFixedString, operator__eq_ne_const)
     {
         {
@@ -142,5 +143,31 @@ namespace
     {
         constexpr ESM::NAME value(ESM::RecNameInts::REC_ACTI);
         EXPECT_EQ(value, static_cast<std::uint32_t>(ESM::RecNameInts::REC_ACTI)) << value.toInt();
+    }
+
+    TEST(EsmFixedString, equality_operator_for_not_convertible_to_uint32_with_string_literal)
+    {
+        const ESM::FixedString<5> value("abcd");
+        EXPECT_EQ(value, "abcd");
+    }
+
+    TEST(EsmFixedString, equality_operator_for_not_convertible_to_uint32_with_fixed_size_char_array)
+    {
+        const ESM::FixedString<5> value("abcd");
+        const char other[5] = { 'a', 'b', 'c', 'd', '\0' };
+        EXPECT_EQ(value, other);
+    }
+
+    TEST(EsmFixedString, equality_operator_for_not_convertible_to_uint32_with_const_char_pointer)
+    {
+        const ESM::FixedString<5> value("abcd");
+        const char other[5] = { 'a', 'b', 'c', 'd', '\0' };
+        EXPECT_EQ(value, static_cast<const char*>(other));
+    }
+
+    TEST(EsmFixedString, equality_operator_for_not_convertible_to_uint32_with_string)
+    {
+        const ESM::FixedString<5> value("abcd");
+        EXPECT_EQ(value, std::string("abcd"));
     }
 }
