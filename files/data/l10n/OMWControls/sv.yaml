@@ -1,0 +1,15 @@
+ControlsPage: "OpenMW Kontroller"
+ControlsPageDescription: "Ytterligare inställningar relaterade till spelarkontroller"
+
+MovementSettings: "Rörelse"
+
+alwaysRun: "Spring alltid"
+alwaysRunDescription: |
+    Om denna iställningen är aktiverad springer spelarrollfiguren som standard, annars kommer spelarrollfiguren att gå.
+    Skift-tangenten kommer temporärt invertera denna inställning, och caps lock-knappen kommer invertera inställningen när den är aktiverad.
+
+toggleSneak: "Växla till smygläge"
+toggleSneakDescription: |
+    Denna inställningen gör att smygknappen (förinställt till ctrl) slår smygning på eller av vid ett knapptryck
+    istället för att att kräva att knappen hålls nedtryckt för att smyga.
+    Spelare som spenderar mycket tid med att smyga lär ha lättare att kontrollera rollfiguren med denna funktion aktiverad.
