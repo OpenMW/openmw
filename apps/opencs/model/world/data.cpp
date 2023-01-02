@@ -1172,7 +1172,7 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
                 messages.add(id, "Logic error: cell index out of bounds", "", CSMDoc::Message::Severity_Error);
                 index = mCells.getSize() - 1;
             }
-            const std::string& cellId = mCells.getId(index).getRefIdString();
+            const std::string cellId = mCells.getId(index).getRefIdString();
 
             mRefs.load(*mReader, index, mBase, mRefLoadCache[cellId], messages);
             break;
