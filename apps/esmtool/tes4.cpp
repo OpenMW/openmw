@@ -184,7 +184,7 @@ namespace EsmTool
             if constexpr (hasFormId<T>)
                 std::cout << "\n  FormId: " << value.mFormId;
             if constexpr (hasRefId<T>)
-                std::cout << "\n  RefId: " << value.mId;
+                std::cout << "\n  FormId: " << value.mId;
             if constexpr (hasFlags<T>)
                 std::cout << "\n  Record flags: " << recordFlags(value.mFlags);
             if constexpr (hasEditorId<T>)
@@ -196,7 +196,6 @@ namespace EsmTool
             if constexpr (hasKf<T>)
                 std::cout << "\n  Kf:" << WriteArray("\n  - ", value.mKf);
             std::cout << '\n';
-            return;
         }
 
         bool readRecord(const Params& params, ESM4::Reader& reader)

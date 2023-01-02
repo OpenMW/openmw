@@ -197,7 +197,7 @@ namespace MWWorld
         };
 
         template <typename T>
-        static void typedReadRecordESM4(ESM4::Reader& reader, ESMStore& stores, Store<T>& store, int& found)
+        static bool typedReadRecordESM4(ESM4::Reader& reader, Store<T>& store)
         {
             auto recordType = static_cast<ESM4::RecordTypes>(reader.hdr().record.typeId);
 
@@ -212,20 +212,17 @@ namespace MWWorld
                         T value;
                         value.load(reader);
                         store.insertStatic(value);
-                        found++;
+                        return true;
                     }
                 }
             }
+            return false;
         }
 
         static bool readRecord(ESM4::Reader& reader, ESMStore& store)
         {
-            int found = 0;
-            std::apply([&reader, &store, &found](
-                           auto&... x) { (ESMStoreImp::typedReadRecordESM4(reader, store, x, found), ...); },
+            return std::apply([&reader](auto&... x) { return (ESMStoreImp::typedReadRecordESM4(reader, x) || ...); },
                 store.mStoreImp->mStores);
-            assert(found <= 1);
-            return found;
         }
     };
 

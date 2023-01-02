@@ -28,10 +28,6 @@ namespace MWWorld
     {
 
         auto stream = Files::openBinaryInputFileStream(filepath);
-        if (!stream->is_open())
-        {
-            throw std::runtime_error(std::string("File Failed to open file: ") + std::strerror(errno) + "\n");
-        }
         const ESM::Format format = ESM::readFormat(*stream);
         stream->seekg(0);
 
@@ -64,13 +60,14 @@ namespace MWWorld
             }
             case ESM::Format::Tes4:
             {
-                if (mEncoder)
+                if (mEncoder != nullptr)
                 {
                     ESM4::Reader readerESM4(std::move(stream), filepath);
                     auto statelessEncoder = mEncoder->getStatelessEncoder();
                     readerESM4.setEncoder(&statelessEncoder);
                     mStore.loadESM4(readerESM4, listener, mDialogue);
                 }
+                break;
             }
         }
     }

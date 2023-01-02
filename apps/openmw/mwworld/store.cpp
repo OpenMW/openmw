@@ -164,8 +164,9 @@ namespace MWWorld
             std::stringstream msg;
             if constexpr (!ESM::isESM4Rec(T::sRecordId))
             {
-                msg << T::getRecordType() << " '" << id << "' not found";
+                msg << T::getRecordType();
             }
+            msg << " '" << id << "' not found";
             throw std::runtime_error(msg.str());
         }
         return ptr;
@@ -298,13 +299,12 @@ namespace MWWorld
     {
         for (typename Dynamic::const_iterator iter(mDynamic.begin()); iter != mDynamic.end(); ++iter)
         {
-            writer.startRecord(T::sRecordId);
             if constexpr (!ESM::isESM4Rec(T::sRecordId))
             {
+                writer.startRecord(T::sRecordId);
                 iter->second.save(writer);
+                writer.endRecord(T::sRecordId);
             }
-
-            writer.endRecord(T::sRecordId);
         }
     }
     template <typename T>

@@ -36,9 +36,9 @@
 #include <stdexcept>
 
 #include "reader.hpp"
+// #include "writer.hpp"
 
 #include <components/esm/refid.hpp>
-// #include "writer.hpp"
 
 // TODO: Try loading only EDID and XCLC (along with mFormId, mFlags and mParent)
 //
