@@ -51,6 +51,7 @@ set(BUILTIN_DATA_FILES
     l10n/OMWCamera/sv.yaml
     l10n/OMWCamera/fr.yaml
     l10n/OMWControls/en.yaml
+    l10n/OMWControls/ru.yaml
     l10n/OMWControls/sv.yaml
     l10n/PostProcessing/de.yaml
     l10n/PostProcessing/en.yaml
