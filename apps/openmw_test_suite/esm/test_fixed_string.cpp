@@ -170,4 +170,19 @@ namespace
         const ESM::FixedString<5> value("abcd");
         EXPECT_EQ(value, std::string("abcd"));
     }
+
+    TEST(EsmFixedString, equality_operator_for_not_convertible_to_uint32_with_string_view)
+    {
+        const ESM::FixedString<5> value("abcd");
+        const std::string other("abcd");
+        EXPECT_EQ(value, std::string_view(other));
+    }
+
+    TEST(EsmFixedString, equality_operator_should_not_get_out_of_bounds)
+    {
+        ESM::FixedString<5> value;
+        const char other[5] = { 'a', 'b', 'c', 'd', 'e' };
+        std::memcpy(value.mData, other, sizeof(other));
+        EXPECT_EQ(value, static_cast<const char*>(other));
+    }
 }
