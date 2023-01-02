@@ -358,7 +358,8 @@ namespace MWMechanics
             {
                 mov.mPosition[0] = controls.mSideMovement;
                 mov.mPosition[1] = controls.mMovement;
-                mov.mPosition[2] = controls.mJump ? 1 : 0;
+                if (controls.mJump)
+                    mov.mPosition[2] = 1;
                 mov.mRotation[0] = controls.mPitchChange;
                 mov.mRotation[1] = 0;
                 mov.mRotation[2] = controls.mYawChange;
@@ -1731,6 +1732,10 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->applyDeferredPreviewRotationToPlayer(duration);
                 playerCharacter->update(duration);
                 playerCharacter->setVisibility(1.f);
+                MWBase::LuaManager::ActorControls* luaControls
+                    = MWBase::Environment::get().getLuaManager()->getActorControls(player);
+                if (luaControls && player.getClass().getMovementSettings(player).mPosition[2] < 1)
+                    luaControls->mJump = false;
             }
 
             for (const Actor& actor : mActors)
