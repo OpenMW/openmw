@@ -219,6 +219,35 @@ namespace MWWorld
             return false;
         }
 
+        template <typename T>
+        static unsigned int hasSameRecordId(const Store<T>& store, ESM::RecNameInts RecName)
+        {
+            if constexpr (HasRecordId<T>::value)
+            {
+                return T::sRecordId == RecName ? 1 : 0;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+
+        template <typename T>
+        static void testRecNameIntCount(const Store<T>& store, const ESMStore::StoreTuple& stores)
+        {
+            if constexpr (HasRecordId<T>::value)
+            {
+                const unsigned int recordIdCount
+                    = std::apply([](auto&&... x) { return (hasSameRecordId(x, T::sRecordId) + ...); }, stores);
+                assert(recordIdCount == 1);
+            }
+        }
+
+        static void testAllRecNameIntUnique(const ESMStore::StoreTuple& stores)
+        {
+            std::apply([&stores](auto&&... x) { (testRecNameIntCount(x, stores), ...); }, stores);
+        }
+
         static bool readRecord(ESM4::Reader& reader, ESMStore& store)
         {
             return std::apply([&reader](auto&... x) { return (ESMStoreImp::typedReadRecordESM4(reader, x) || ...); },
@@ -250,6 +279,7 @@ namespace MWWorld
     {
         mStoreImp = std::make_unique<ESMStoreImp>();
         std::apply([this](auto&... x) { (ESMStoreImp::assignStoreToIndex(*this, x), ...); }, mStoreImp->mStores);
+        ESMStoreImp::testAllRecNameIntUnique(mStoreImp->mStores);
         mDynamicCount = 0;
         getWritable<ESM::Pathgrid>().setCells(getWritable<ESM::Cell>());
     }
