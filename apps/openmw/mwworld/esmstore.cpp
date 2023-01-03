@@ -196,28 +196,6 @@ namespace MWWorld
         {
         };
 
-        struct RecNameIntChar
-        {
-            char name[6];
-            RecNameIntChar(ESM::RecNameInts recName)
-            {
-                unsigned int FourCC = recName & ~ESM::sEsm4RecnameFlag; // Removes the flag
-                name[0] = FourCC & 0xFF;
-                name[1] = (FourCC >> 8) & 0xFF;
-                name[2] = (FourCC >> 16) & 0xFF;
-                name[3] = (FourCC >> 24) & 0xFF;
-                if (ESM::isESM4Rec(recName))
-                {
-                    name[4] = '4';
-                    name[5] = '\0';
-                }
-                else
-                {
-                    name[4] = '\0';
-                }
-            }
-        };
-
         template <typename T>
         static bool typedReadRecordESM4(ESM4::Reader& reader, Store<T>& store)
         {
@@ -239,39 +217,6 @@ namespace MWWorld
                 }
             }
             return false;
-        }
-
-        template <typename T>
-        static unsigned int hasSameRecordId(const Store<T>& store, ESM::RecNameInts RecName)
-        {
-            if constexpr (HasRecordId<T>::value)
-            {
-                return T::sRecordId == RecName ? 1 : 0;
-            }
-            else
-            {
-                return 0;
-            }
-        }
-
-        template <typename T>
-        static void testRecNameIntCount(const Store<T>& store, const ESMStore::StoreTuple& stores)
-        {
-            if constexpr (HasRecordId<T>::value)
-            {
-                const unsigned int recordIdCount
-                    = std::apply([](auto&&... x) { return (hasSameRecordId(x, T::sRecordId) + ...); }, stores);
-                if (recordIdCount != 1)
-                {
-                    throw std::runtime_error(
-                        "The same RecNameInt is used twice ESM::REC_" + std::string(RecNameIntChar(T::sRecordId).name));
-                }
-            }
-        }
-
-        static void testAllRecNameIntUnique(const ESMStore::StoreTuple& stores)
-        {
-            std::apply([&stores](auto&&... x) { (testRecNameIntCount(x, stores), ...); }, stores);
         }
 
         static bool readRecord(ESM4::Reader& reader, ESMStore& store)
@@ -305,7 +250,6 @@ namespace MWWorld
     {
         mStoreImp = std::make_unique<ESMStoreImp>();
         std::apply([this](auto&... x) { (ESMStoreImp::assignStoreToIndex(*this, x), ...); }, mStoreImp->mStores);
-        ESMStoreImp::testAllRecNameIntUnique(mStoreImp->mStores);
         mDynamicCount = 0;
         getWritable<ESM::Pathgrid>().setCells(getWritable<ESM::Cell>());
     }

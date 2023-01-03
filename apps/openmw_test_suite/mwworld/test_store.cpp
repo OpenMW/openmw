@@ -8,6 +8,12 @@
 #include <components/esm/records.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm4/common.hpp>
+#include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadrefr.hpp>
+#include <components/esm4/loadstat.hpp>
+#include <components/esm4/reader.hpp>
+#include <components/esm4/readerutils.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
@@ -287,6 +293,77 @@ TEST_F(StoreTest, delete_test)
     mEsmStore.setUp();
 
     ASSERT_TRUE(mEsmStore.get<RecordType>().getSize() == 1);
+}
+
+template <class T, class = std::void_t<>>
+struct HasRecordId : std::false_type
+{
+};
+
+template <class T>
+struct HasRecordId<T, std::void_t<decltype(T::sRecordId)>> : std::true_type
+{
+};
+
+struct RecNameIntChar
+{
+    char name[6];
+    RecNameIntChar(ESM::RecNameInts recName)
+    {
+        unsigned int FourCC = recName & ~ESM::sEsm4RecnameFlag; // Removes the flag
+        name[0] = FourCC & 0xFF;
+        name[1] = (FourCC >> 8) & 0xFF;
+        name[2] = (FourCC >> 16) & 0xFF;
+        name[3] = (FourCC >> 24) & 0xFF;
+        if (ESM::isESM4Rec(recName))
+        {
+            name[4] = '4';
+            name[5] = '\0';
+        }
+        else
+        {
+            name[4] = '\0';
+        }
+    }
+};
+
+template <typename T>
+static unsigned int hasSameRecordId(const MWWorld::Store<T>& store, ESM::RecNameInts RecName)
+{
+    if constexpr (HasRecordId<T>::value)
+    {
+        return T::sRecordId == RecName ? 1 : 0;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+template <typename T>
+static void testRecNameIntCount(const MWWorld::Store<T>& store, const MWWorld::ESMStore::StoreTuple& stores)
+{
+    if constexpr (HasRecordId<T>::value)
+    {
+        const unsigned int recordIdCount
+            = std::apply([](auto&&... x) { return (hasSameRecordId(x, T::sRecordId) + ...); }, stores);
+        if (recordIdCount != 1)
+        {
+            std::cout << "The same RecNameInt is used twice ESM::REC_" + std::string(RecNameIntChar(T::sRecordId).name)
+                      << std::endl;
+        }
+        ASSERT_TRUE(recordIdCount == 1);
+    }
+}
+
+static void testAllRecNameIntUnique(const MWWorld::ESMStore::StoreTuple& stores)
+{
+    std::apply([&stores](auto&&... x) { (testRecNameIntCount(x, stores), ...); }, stores);
+}
+
+TEST_F(StoreTest, recordId_Unique) // Test that each type has a unique recordId
+{
+    testAllRecNameIntUnique(MWWorld::ESMStore::StoreTuple());
 }
 
 /// Tests overwriting of records.

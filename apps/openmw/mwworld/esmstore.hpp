@@ -86,7 +86,7 @@ namespace MWWorld
     class ESMStore
     {
         friend struct ESMStoreImp; // This allows StoreImp to extend esmstore without beeing included everywhere
-
+    public:
         using StoreTuple = std::tuple<Store<ESM::Activator>, Store<ESM::Potion>, Store<ESM::Apparatus>,
             Store<ESM::Armor>, Store<ESM::BodyPart>, Store<ESM::Book>, Store<ESM::BirthSign>, Store<ESM::Class>,
             Store<ESM::Clothing>, Store<ESM::Container>, Store<ESM::Creature>, Store<ESM::Dialogue>, Store<ESM::Door>,
@@ -107,6 +107,7 @@ namespace MWWorld
 
             Store<ESM4::Static>, Store<ESM4::Cell>, Store<ESM4::Reference>>;
 
+    private:
         template <typename T>
         static constexpr std::size_t getTypeIndex()
         {
