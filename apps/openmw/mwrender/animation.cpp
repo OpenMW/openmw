@@ -557,7 +557,8 @@ namespace MWRender
             mResetAccumRootCallback->setAccumulate(mAccumulate);
     }
 
-    size_t Animation::detectBlendMask(const osg::Node* node) const
+    // controllerName is used for Collada animated deforming models
+    size_t Animation::detectBlendMask(const osg::Node* node, const std::string& controllerName) const
     {
         static const std::string_view sBlendMaskRoots[sNumBlendMasks] = {
             "", /* Lower body / character root */
@@ -571,7 +572,7 @@ namespace MWRender
             const std::string& name = node->getName();
             for (size_t i = 1; i < sNumBlendMasks; i++)
             {
-                if (name == sBlendMaskRoots[i])
+                if (name == sBlendMaskRoots[i] || controllerName == sBlendMaskRoots[i])
                     return i;
             }
 
@@ -646,7 +647,7 @@ namespace MWRender
 
             osg::Node* node = found->second;
 
-            size_t blendMask = detectBlendMask(node);
+            size_t blendMask = detectBlendMask(node, it->second->getName());
 
             // clone the controller, because each Animation needs its own ControllerSource
             osg::ref_ptr<SceneUtil::KeyframeController> cloned

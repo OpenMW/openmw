@@ -11,7 +11,7 @@
 
 namespace Resource
 {
-    /// @brief extract animations to OpenMW's animation system
+    /// @brief extract animations from OSG formats to OpenMW's animation system
     class RetrieveAnimationsVisitor : public osg::NodeVisitor
     {
     public:
@@ -19,6 +19,11 @@ namespace Resource
             osg::ref_ptr<osgAnimation::BasicAnimationManager> animationManager, const std::string& normalized,
             const VFS::Manager* vfs);
 
+        bool belongsToLeftUpperExtremity(const std::string& name);
+        bool belongsToRightUpperExtremity(const std::string& name);
+        bool belongsToTorso(const std::string& name);
+
+        void addKeyframeController(const std::string& name, const osg::Node& node);
         virtual void apply(osg::Node& node) override;
 
     private:
