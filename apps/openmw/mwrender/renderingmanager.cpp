@@ -771,9 +771,11 @@ namespace MWRender
         setAmbientColour(ambient);
 
         osg::Vec4f diffuse = SceneUtil::colourFromRGB(cell->mAmbi.mSunlight);
-        mSunLight->setDiffuse(diffuse);
-        mSunLight->setSpecular(diffuse);
-        mSunLight->setPosition(osg::Vec4f(-0.15f, 0.15f, 1.f, 0.f));
+        setSunColour(diffuse, diffuse, 1.f);
+
+        const osg::Vec4f interiorSunPos = osg::Vec4f(-0.15f, 0.15f, 1.f, 0.f);
+        mPostProcessor->getStateUpdater()->setSunPos(interiorSunPos, false);
+        mSunLight->setPosition(interiorSunPos);
     }
 
     void RenderingManager::setSunColour(const osg::Vec4f& diffuse, const osg::Vec4f& specular, float sunVis)
