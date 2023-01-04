@@ -1,3 +1,24 @@
+# Debug window
+
+DebugWindow: "Меню отладки"
+LogViewer: "Журнал логов"
+LuaProfiler: "Профилировщик Луа"
+PhysicsProfiler: "Профилировщик физики"
+
+
+# Messages
+
+BuildingNavigationMesh: "Построение навигационной сетки"
+
+
+# Save game menu
+
+SelectCharacter: "Выберите персонажа..."
+TimePlayed: "Время в игре"
+
+
+# Settings menu
+
 ActorsProcessingRange: "Дальность обработки персонажей"
 Anisotropy: "Анизотропная фильтрация"
 CameraSensitivity: "Чувствительность камеры"

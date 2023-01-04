@@ -20,31 +20,21 @@ set(BUILTIN_DATA_FILES
     fonts/MysticCards.omwfont
     fonts/MysticCardsFontLicense.txt
 
-    l10n/BuiltInShaders/de.yaml
-    l10n/BuiltInShaders/en.yaml
-    l10n/BuiltInShaders/ru.yaml
-    l10n/BuiltInShaders/sv.yaml
-    l10n/BuiltInShaders/fr.yaml
+    # Month names and date formatting
     l10n/Calendar/de.yaml
     l10n/Calendar/en.yaml
     l10n/Calendar/ru.yaml
     l10n/Calendar/sv.yaml
     l10n/Calendar/fr.yaml
-    l10n/DebugMenu/de.yaml
-    l10n/DebugMenu/en.yaml
-    l10n/DebugMenu/ru.yaml
-    l10n/DebugMenu/sv.yaml
-    l10n/DebugMenu/fr.yaml
+
+    # Generic UI messages that can be reused by mods
     l10n/Interface/de.yaml
     l10n/Interface/en.yaml
     l10n/Interface/ru.yaml
     l10n/Interface/sv.yaml
     l10n/Interface/fr.yaml
-    l10n/Navigation/de.yaml
-    l10n/Navigation/en.yaml
-    l10n/Navigation/ru.yaml
-    l10n/Navigation/sv.yaml
-    l10n/Navigation/fr.yaml
+
+    # L10n for scripts/omw
     l10n/OMWCamera/de.yaml
     l10n/OMWCamera/en.yaml
     l10n/OMWCamera/ru.yaml
@@ -53,21 +43,20 @@ set(BUILTIN_DATA_FILES
     l10n/OMWControls/en.yaml
     l10n/OMWControls/ru.yaml
     l10n/OMWControls/sv.yaml
-    l10n/PostProcessing/de.yaml
-    l10n/PostProcessing/en.yaml
-    l10n/PostProcessing/ru.yaml
-    l10n/PostProcessing/sv.yaml
-    l10n/PostProcessing/fr.yaml
-    l10n/SavegameMenu/de.yaml
-    l10n/SavegameMenu/en.yaml
-    l10n/SavegameMenu/ru.yaml
-    l10n/SavegameMenu/sv.yaml
-    l10n/SavegameMenu/fr.yaml
-    l10n/SettingsMenu/de.yaml
-    l10n/SettingsMenu/en.yaml
-    l10n/SettingsMenu/ru.yaml
-    l10n/SettingsMenu/sv.yaml
-    l10n/SettingsMenu/fr.yaml
+
+    # L10n for OpenMW menus and non-game-specific messages
+    l10n/OMWEngine/de.yaml
+    l10n/OMWEngine/en.yaml
+    l10n/OMWEngine/ru.yaml
+    l10n/OMWEngine/sv.yaml
+    l10n/OMWEngine/fr.yaml
+    
+    # L10n for post-processing HUD and built-in shaders
+    l10n/OMWShaders/de.yaml
+    l10n/OMWShaders/en.yaml
+    l10n/OMWShaders/ru.yaml
+    l10n/OMWShaders/sv.yaml
+    l10n/OMWShaders/fr.yaml
 
     openmw_aux/util.lua
     openmw_aux/time.lua

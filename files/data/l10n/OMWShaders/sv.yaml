@@ -1,3 +1,30 @@
+# Post-processing HUD
+
+Abovewater: "Ovan vatten"
+ActiveShaders: "Aktiva shaders"
+Author: "Skapare" # Author = Författare, but författare sounds very book-author-ish. Skapare, meaning "creator", sounds better in Swedish in this case. Ok?
+Description: "Beskrivning"
+ActiveShaders: "Inaktiva shaders"
+InExteriors: "Exteriörer"
+InInteriors: "Interiörer"
+KeyboardControls: |
+    Tangentbordskontroller:
+
+    Shift+Högerpil > Aktivera shader
+    Shift+Vänsterpil > Avaktivera shader
+    Shift+Pil upp > Flytta shader upp
+    Shift+Pil ner > Flytta shader ner
+PostProcessHUD: "Postprocess HUD"
+ResetShader: "Återställ shader to ursprungligt läge"
+ShaderLocked: "Låst"
+ShaderLockedDescription: "Kan ej aktiveras/inaktiveras eller flyttas. Kontrolleras av externt Lua-skript"
+ShaderResetUniform: "r"
+Underwater: "Under vatten"
+Version: "Version"
+
+
+# Built-in post-processing shaders
+
 AdjustmentsDescription: "Färgjusteringar."
 BloomDescription: "Bloomshader som utför sina beräkningar i (ungefärligt) linjärt ljus."
 DebugDescription: "Felsökningsshader."
@@ -10,7 +37,7 @@ DisplayNormalsName: "Visualisera normalvektorer" # på engelska står det "pass 
 ContrastLevelDescription: "Kontrastnivå"
 ContrastLevelName: "Kontrast"
 GammaLevelDescription: "Gammanivå"
-# GammaLevelName: "Gamma" samma som engelska
+GammaLevelName: "Gamma" # samma som engelska
 StrengthLevelName: "Styrka"
 StrengthLevelDescription: "Effektens styrka."
 RadiusLevelName: "Radie"

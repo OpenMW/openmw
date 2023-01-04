@@ -441,13 +441,13 @@ namespace MWInput
         switch (action)
         {
             case A_Screenshot:
-                return "#{SettingsMenu:Screenshot}";
+                return "#{OMWEngine:Screenshot}";
             case A_ZoomIn:
-                return "#{SettingsMenu:CameraZoomIn}";
+                return "#{OMWEngine:CameraZoomIn}";
             case A_ZoomOut:
-                return "#{SettingsMenu:CameraZoomOut}";
+                return "#{OMWEngine:CameraZoomOut}";
             case A_ToggleHUD:
-                return "#{SettingsMenu:ToggleHUD}";
+                return "#{OMWEngine:ToggleHUD}";
             case A_Use:
                 return "#{sUse}";
             case A_Activate:
@@ -519,7 +519,7 @@ namespace MWInput
             case A_QuickLoad:
                 return "#{sQuickLoadCmd}";
             case A_TogglePostProcessorHUD:
-                return "#{SettingsMenu:TogglePostProcessorHUD}";
+                return "#{OMWEngine:TogglePostProcessorHUD}";
             default:
                 return {}; // not configurable
         }
