@@ -16,6 +16,7 @@
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadstat.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/scenemanager.hpp>
@@ -643,7 +644,8 @@ namespace MWRender
             {
                 if (cnode->getNumChildrenRequiringUpdateTraversal() > 0
                     || SceneUtil::hasUserDescription(cnode, Constants::NightDayLabel)
-                    || SceneUtil::hasUserDescription(cnode, Constants::HerbalismLabel))
+                    || SceneUtil::hasUserDescription(cnode, Constants::HerbalismLabel)
+                    || cnode->getName() == "Collada visual scene group")
                     continue;
                 else
                     refnumSet->mRefnums.push_back(pair.first);
