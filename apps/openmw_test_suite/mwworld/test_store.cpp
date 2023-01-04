@@ -315,11 +315,8 @@ static void testRecNameIntCount(const MWWorld::Store<T>& store, const MWWorld::E
     {
         const unsigned int recordIdCount
             = std::apply([](auto&&... x) { return (hasSameRecordId(x, T::sRecordId) + ...); }, stores);
-        std::string RecordIdName(ESM::NAME(T::sRecordId & ~ESM::sEsm4RecnameFlag).toStringView());
-        if (ESM::isESM4Rec(T::sRecordId))
-            RecordIdName += '4';
-
-        ASSERT_EQ(recordIdCount, 1) << "The same RecNameInt is used twice ESM::REC_" << RecordIdName;
+        ASSERT_EQ(recordIdCount, 1) << "The same RecNameInt is used twice ESM::REC_"
+                                    << MWWorld::getRecNameString(T::sRecordId).toStringView();
     }
 }
 
