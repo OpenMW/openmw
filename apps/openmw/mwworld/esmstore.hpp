@@ -173,7 +173,7 @@ namespace MWWorld
         void validateDynamic();
 
         void load(ESM::ESMReader& esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
-        void loadESM4(ESM4::Reader& esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
+        void loadESM4(ESM4::Reader& esm);
 
         template <class T>
         const Store<T>& get() const
@@ -264,6 +264,16 @@ namespace MWWorld
 
     template <>
     const ESM::NPC* ESMStore::insert<ESM::NPC>(const ESM::NPC& npc);
+
+    template <class T, class = std::void_t<>>
+    struct HasRecordId : std::false_type
+    {
+    };
+
+    template <class T>
+    struct HasRecordId<T, std::void_t<decltype(T::sRecordId)>> : std::true_type
+    {
+    };
 }
 
 #endif

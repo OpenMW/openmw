@@ -595,14 +595,14 @@ namespace EsmTool
             }
 
             auto visitorRec = [&params](ESM4::Reader& reader) { return readRecord(params, reader); };
-            auto visistorGroup = [&params](ESM4::Reader& reader) {
+            auto visitorGroup = [&params](ESM4::Reader& reader) {
                 if (params.mQuite)
                     return;
                 auto groupType = static_cast<ESM4::GroupType>(reader.hdr().group.type);
                 std::cout << "\nGroup: " << toString(groupType) << " "
                           << ESM::NAME(reader.hdr().group.typeId).toStringView() << '\n';
             };
-            ESM4::ReaderUtils::readAll(reader, visitorRec, visistorGroup);
+            ESM4::ReaderUtils::readAll(reader, visitorRec, visitorGroup);
         }
         catch (const std::exception& e)
         {

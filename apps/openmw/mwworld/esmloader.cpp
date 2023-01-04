@@ -60,13 +60,10 @@ namespace MWWorld
             }
             case ESM::Format::Tes4:
             {
-                if (mEncoder != nullptr)
-                {
-                    ESM4::Reader readerESM4(std::move(stream), filepath);
-                    auto statelessEncoder = mEncoder->getStatelessEncoder();
-                    readerESM4.setEncoder(&statelessEncoder);
-                    mStore.loadESM4(readerESM4, listener, mDialogue);
-                }
+                ESM4::Reader readerESM4(std::move(stream), filepath);
+                auto statelessEncoder = mEncoder->getStatelessEncoder();
+                readerESM4.setEncoder(&statelessEncoder);
+                mStore.loadESM4(readerESM4);
                 break;
             }
         }

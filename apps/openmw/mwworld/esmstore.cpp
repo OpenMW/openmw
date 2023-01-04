@@ -186,16 +186,6 @@ namespace MWWorld
             }
         }
 
-        template <class T, class = std::void_t<>>
-        struct HasRecordId : std::false_type
-        {
-        };
-
-        template <class T>
-        struct HasRecordId<T, std::void_t<decltype(T::sRecordId)>> : std::true_type
-        {
-        };
-
         template <typename T>
         static bool typedReadRecordESM4(ESM4::Reader& reader, Store<T>& store)
         {
@@ -382,7 +372,7 @@ namespace MWWorld
         }
     }
 
-    void ESMStore::loadESM4(ESM4::Reader& reader, Loading::Listener* listener, ESM::Dialogue*& dialogue)
+    void ESMStore::loadESM4(ESM4::Reader& reader)
     {
         auto visitorRec = [this](ESM4::Reader& reader) { return ESMStoreImp::readRecord(reader, *this); };
         ESM4::ReaderUtils::readAll(reader, visitorRec, [](ESM4::Reader&) {});
