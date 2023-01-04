@@ -57,7 +57,7 @@ namespace MWLua
         void setupPlayer(const MWWorld::Ptr& ptr) override; // Should be called once after each "clear".
 
         // Used only in Lua bindings
-        void addCustomLocalScript(const MWWorld::Ptr&, int scriptId);
+        void addCustomLocalScript(const MWWorld::Ptr&, int scriptId, std::string_view initData);
         void addUIMessage(std::string_view message) { mUIMessages.emplace_back(message); }
         void addInGameConsoleMessage(const std::string& msg, const Misc::Color& color)
         {

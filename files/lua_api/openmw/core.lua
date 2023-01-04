@@ -144,6 +144,7 @@
 -- @function [parent=#GameObject] addScript
 -- @param self
 -- @param #string scriptPath Path to the script in OpenMW virtual filesystem.
+-- @param #table initData (optional) Initialization data to be passed to onInit. If missed then Lua initialization data from content files will be used (if exists for this script).
 
 ---
 -- Whether a script with given path is attached to this object.

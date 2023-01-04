@@ -91,7 +91,7 @@ namespace LuaUtil
         // new script, adds it to the container, and calls onInit for this script. Returns `true` if the script was
         // successfully added. The script should have CUSTOM flag. If the flag is not set, or file not found, or has
         // syntax errors, returns false. If such script already exists in the container, then also returns false.
-        bool addCustomScript(int scriptId);
+        bool addCustomScript(int scriptId, std::string_view initData = "");
 
         bool hasScript(int scriptId) const { return mScripts.count(scriptId) != 0; }
         void removeScript(int scriptId);
