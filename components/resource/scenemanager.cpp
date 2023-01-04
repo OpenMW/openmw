@@ -636,7 +636,7 @@ namespace Resource
 
                             backToOriginTrans->addChild(newRiggeometryHolder);
                             group->addChild(backToOriginTrans);
-                            
+
                             node->getOrCreateUserDataContainer()->addUserObject(
                                 new TemplateRef(newRiggeometryHolder->getGeometry(0)));
                         }
