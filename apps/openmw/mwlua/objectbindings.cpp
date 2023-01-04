@@ -200,8 +200,7 @@ namespace MWLua
 
             if constexpr (std::is_same_v<ObjectT, GObject>)
             { // Only for global scripts
-                objectT["addScript"] = [context](const GObject& object, std::string_view path,
-                                           sol::optional<sol::table> initData) {
+                objectT["addScript"] = [context](const GObject& object, std::string_view path, sol::object initData) {
                     const LuaUtil::ScriptsConfiguration& cfg = context.mLua->getConfiguration();
                     std::optional<int> scriptId = cfg.findId(path);
                     if (!scriptId)
@@ -211,9 +210,9 @@ namespace MWLua
                             "Script without CUSTOM tag can not be added dynamically: " + std::string(path));
                     if (object.ptr().getType() == ESM::REC_STAT)
                         throw std::runtime_error("Attaching scripts to Static is not allowed: " + std::string(path));
-                    if (initData)
-                        context.mLuaManager->addCustomLocalScript(
-                            object.ptr(), *scriptId, LuaUtil::serialize(*initData, context.mSerializer));
+                    if (initData != sol::nil)
+                        context.mLuaManager->addCustomLocalScript(object.ptr(), *scriptId,
+                            LuaUtil::serialize(initData.as<sol::table>(), context.mSerializer));
                     else
                         context.mLuaManager->addCustomLocalScript(
                             object.ptr(), *scriptId, cfg[*scriptId].mInitializationData);
