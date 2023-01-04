@@ -49,8 +49,8 @@ pip3 install -r docs/requirements.txt
 sudo apt install luarocks
 git clone https://gitlab.com/ptmikheev/openmw-luadocumentor.git
 cd openmw-luadocumentor/luarocks
-luarocks --local pack openmwluadocumentor-0.1.1-1.rockspec
-luarocks --local install openmwluadocumentor-0.1.1-1.src.rock
+luarocks --local pack openmwluadocumentor-0.2.0-1.rockspec
+luarocks --local install openmwluadocumentor-0.2.0-1.src.rock
 ```
 
 **Windows**
@@ -61,8 +61,8 @@ luarocks --local install openmwluadocumentor-0.1.1-1.src.rock
 - `cd openmw-luadocumentor/luarocks`
 - open "Developer Command Prompt for VS <2017/2019>" in this directory and run:
 ```bash
-luarocks --local pack openmwluadocumentor-0.1.1-1.rockspec
-luarocks --local install openmwluadocumentor-0.1.1-1.src.rock
+luarocks --local pack openmwluadocumentor-0.2.0-1.rockspec
+luarocks --local install openmwluadocumentor-0.2.0-1.src.rock
 ```
 
 ### Generating HTML
