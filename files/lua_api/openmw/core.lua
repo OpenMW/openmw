@@ -112,7 +112,7 @@
 -- @field #Cell cell The cell where the object currently is. During loading a game and for objects in an inventory or a container `cell` is nil.
 -- @field #table type Type of the object (one of the tables from the package @{openmw.types#types}).
 -- @field #number count Count (makes sense if stored in a container).
--- @field #string recordId Record ID.
+-- @field #string recordId Returns record ID of the object in lowercase.
 
 ---
 -- Does the object still exist and is available.
