@@ -152,6 +152,9 @@ def setup(app):
     app.add_stylesheet('luadoc.css')
     try:
         subprocess.call(project_root + '/docs/source/generate_luadoc.sh')
+    except Exception:
+        # Running on Windows?
+        subprocess.call(['sh', project_root + '/docs/source/generate_luadoc.sh'])
     except Exception as e:
         print('Can\'t generate Lua API documentation:', e)
 
