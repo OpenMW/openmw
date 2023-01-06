@@ -47,12 +47,14 @@ namespace osgMyGUI
         MyGUI::LevelLogFilter mFilter;
         MyGUI::LogSource mSource;
 
+        MyGUI::LogLevel getCurrentLogLevel() const;
+
     public:
         LogFacility(const std::filesystem::path& output, bool console)
             : mFile(output)
         {
             mConsole.setEnabled(console);
-            mFilter.setLoggingLevel(MyGUI::LogLevel::Info);
+            mFilter.setLoggingLevel(getCurrentLogLevel());
 
             mSource.addLogListener(&mFile);
             mSource.addLogListener(&mConsole);

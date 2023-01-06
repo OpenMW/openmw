@@ -37,4 +37,17 @@ namespace osgMyGUI
                     << separator << _line << std::endl;
         }
     }
+
+    MyGUI::LogLevel LogFacility::getCurrentLogLevel() const
+    {
+        switch (Debug::CurrentDebugLevel)
+        {
+            case Debug::Error:
+                return MyGUI::LogLevel::Error;
+            case Debug::Warning:
+                return MyGUI::LogLevel::Warning;
+            default:
+                return MyGUI::LogLevel::Info;
+        }
+    }
 }
