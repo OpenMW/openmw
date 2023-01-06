@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>518</width>
+    <width>614</width>
     <height>436</height>
    </rect>
   </property>
@@ -65,6 +65,19 @@
          </item>
          <item>
           <widget class="QLineEdit" name="searchFilter"/>
+         </item>
+         <item>
+          <widget class="QComboBox" name="languageComboBox">
+           <property name="minimumSize">
+            <size>
+             <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Select language used by ESM/ESP content files to allow OpenMW to detect their encoding. </string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QToolButton" name="refreshButton">

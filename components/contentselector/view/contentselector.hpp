@@ -43,6 +43,8 @@ namespace ContentSelectorView
 
         QWidget* uiWidget() const { return ui.contentGroupBox; }
 
+        QComboBox* languageBox() const { return ui.languageComboBox; }
+
         QToolButton* refreshButton() const { return ui.refreshButton; }
 
         QLineEdit* searchFilter() const { return ui.searchFilter; }

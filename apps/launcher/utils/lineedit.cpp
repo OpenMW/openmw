@@ -9,9 +9,7 @@ LineEdit::LineEdit(QWidget* parent)
 void LineEdit::setupClearButton()
 {
     mClearButton = new QToolButton(this);
-    QPixmap pixmap(":images/clear.png");
-    mClearButton->setIcon(QIcon(pixmap));
-    mClearButton->setIconSize(pixmap.size());
+    mClearButton->setIcon(QIcon::fromTheme("edit-clear"));
     mClearButton->setCursor(Qt::ArrowCursor);
     mClearButton->setStyleSheet("QToolButton { border: none; padding: 0px; }");
     mClearButton->hide();

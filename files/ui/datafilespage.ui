@@ -48,57 +48,7 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QPushButton" name="directoryAddSubdirsButton">
-         <property name="toolTip">
-          <string>Scan directories for likely data directories and append them at the end of the list.</string>
-         </property>
-         <property name="text">
-          <string>Append</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QPushButton" name="directoryInsertButton">
-         <property name="toolTip">
-          <string>Scan directories for likely data directories and insert them above the selected position</string>
-         </property>
-         <property name="text">
-          <string>Insert Above</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QPushButton" name="directoryUpButton">
-         <property name="toolTip">
-          <string>Move selected directory one position up</string>
-         </property>
-         <property name="text">
-          <string>Move Up</string>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="1">
-        <widget class="QPushButton" name="directoryDownButton">
-         <property name="toolTip">
-          <string>Move selected directory one position down</string>
-         </property>
-         <property name="text">
-          <string>Move Down</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="1">
-        <widget class="QPushButton" name="directoryRemoveButton">
-         <property name="toolTip">
-          <string>Remove selected directory</string>
-         </property>
-         <property name="text">
-          <string>Remove</string>
-         </property>
-        </widget>
-       </item>
-       <item row="27" column="0" colspan="2">
+       <item row="32" column="0" colspan="2">
         <widget class="QLabel" name="label">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
@@ -108,6 +58,116 @@
          </property>
          <property name="text">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;note: directories that are not part of current Content List are &lt;/span&gt;&lt;span style=&quot; font-style:italic; background-color:#00ff00;&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="directoryAddSubdirsButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>33</height>
+          </size>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>33</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Scan directories for likely data directories and append them at the end of the list.</string>
+         </property>
+         <property name="text">
+          <string>Append</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QPushButton" name="directoryInsertButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>33</height>
+          </size>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>33</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Scan directories for likely data directories and insert them above the selected position</string>
+         </property>
+         <property name="text">
+          <string>Insert Above</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="1">
+        <widget class="QPushButton" name="directoryUpButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>33</height>
+          </size>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>33</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Move selected directory one position up</string>
+         </property>
+         <property name="text">
+          <string>Move Up</string>
+         </property>
+        </widget>
+       </item>
+       <item row="12" column="1">
+        <widget class="QPushButton" name="directoryDownButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>33</height>
+          </size>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>33</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Move selected directory one position down</string>
+         </property>
+         <property name="text">
+          <string>Move Down</string>
+         </property>
+        </widget>
+       </item>
+       <item row="16" column="1">
+        <widget class="QPushButton" name="directoryRemoveButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>33</height>
+          </size>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>33</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Remove selected directory</string>
+         </property>
+         <property name="text">
+          <string>Remove</string>
          </property>
         </widget>
        </item>
@@ -127,6 +187,18 @@
        </item>
        <item row="0" column="1">
         <widget class="QPushButton" name="archiveUpButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>33</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>33</height>
+          </size>
+         </property>
          <property name="toolTip">
           <string>Move selected archive one position up</string>
          </property>
@@ -135,20 +207,32 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
+       <item row="27" column="0" colspan="2">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;note: archives that are not part of current Content List are &lt;/span&gt;&lt;span style=&quot; font-style:italic; background-color:#00ff00;&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
         <widget class="QPushButton" name="archiveDownButton">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>33</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="baseSize">
+          <size>
+           <width>0</width>
+           <height>33</height>
+          </size>
+         </property>
          <property name="toolTip">
           <string>Move selected archive one position down</string>
          </property>
          <property name="text">
           <string>Move Down</string>
-         </property>
-        </widget>
-       </item>
-       <item row="27" column="0" colspan="2">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;note: archives that are not part of current Content List are &lt;/span&gt;&lt;span style=&quot; font-style:italic; background-color:#00ff00;&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
@@ -339,8 +423,7 @@
   <action name="newProfileAction">
    <property name="icon">
     <iconset theme="document-new">
-     <normaloff/>
-    </iconset>
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>New Content List</string>
@@ -355,8 +438,7 @@
   <action name="cloneProfileAction">
    <property name="icon">
     <iconset theme="edit-copy">
-     <normaloff/>
-    </iconset>
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Clone Content List</string>
@@ -374,8 +456,7 @@
    </property>
    <property name="icon">
     <iconset theme="edit-delete">
-     <normaloff/>
-    </iconset>
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Delete Content List</string>
@@ -403,8 +484,7 @@
   <action name="refreshDataFilesAction">
    <property name="icon">
     <iconset theme="view-refresh">
-     <normaloff/>
-    </iconset>
+     <normaloff>.</normaloff>.</iconset>
    </property>
    <property name="text">
     <string>Refresh Data Files</string>

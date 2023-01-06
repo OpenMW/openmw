@@ -112,6 +112,12 @@ Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager& cfg, Config:
     const QString encoding = mGameSettings.value("encoding", "win1252");
     mSelector->setEncoding(encoding);
 
+    QStringList languages;
+    languages << tr("English") << tr("French") << tr("German") << tr("Italian") << tr("Polish") << tr("Russian")
+              << tr("Spanish");
+
+    mSelector->languageBox()->addItems(languages);
+
     mNewProfileDialog = new TextInputDialog(tr("New Content List"), tr("Content List name:"), this);
     mCloneProfileDialog = new TextInputDialog(tr("Clone Content List"), tr("Content List name:"), this);
 
@@ -195,6 +201,11 @@ bool Launcher::DataFilesPage::loadSettings()
     // Hack: also add the current profile
     if (!currentProfile.isEmpty())
         addProfile(currentProfile, true);
+
+    QString language(mLauncherSettings.value(QLatin1String("Settings/language")));
+    int index = mSelector->languageBox()->findText(language);
+    if (index != -1)
+        mSelector->languageBox()->setCurrentIndex(index);
 
     return true;
 }
@@ -340,6 +351,23 @@ void Launcher::DataFilesPage::saveSettings(const QString& profile)
     }
     mLauncherSettings.setContentList(profileName, dirList, selectedArchivePaths(), fileNames);
     mGameSettings.setContentList(dirList, selectedArchivePaths(), fileNames);
+
+    QString language(mSelector->languageBox()->currentText());
+
+    mLauncherSettings.setValue(QLatin1String("Settings/language"), language);
+
+    if (language == QLatin1String("Polish"))
+    {
+        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1250"));
+    }
+    else if (language == QLatin1String("Russian"))
+    {
+        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1251"));
+    }
+    else
+    {
+        mGameSettings.setValue(QLatin1String("encoding"), QLatin1String("win1252"));
+    }
 }
 
 QStringList Launcher::DataFilesPage::selectedDirectoriesPaths() const

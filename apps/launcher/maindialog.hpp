@@ -20,12 +20,11 @@ class QString;
 
 namespace Launcher
 {
-    class PlayPage;
     class GraphicsPage;
     class DataFilesPage;
     class UnshieldThread;
+    class ImportPage;
     class SettingsPage;
-    class AdvancedPage;
 
     enum FirstRunDialogResult
     {
@@ -52,7 +51,10 @@ namespace Launcher
         bool writeSettings();
 
     public slots:
-        void changePage(QListWidgetItem* current, QListWidgetItem* previous);
+        void enableDataPage();
+        void enableGraphicsPage();
+        void enableSettingsPage();
+        void enableImportPage();
         void play();
         void help();
 
@@ -84,11 +86,10 @@ namespace Launcher
 
         void closeEvent(QCloseEvent* event) override;
 
-        PlayPage* mPlayPage;
         GraphicsPage* mGraphicsPage;
         DataFilesPage* mDataFilesPage;
+        ImportPage* mImportPage;
         SettingsPage* mSettingsPage;
-        AdvancedPage* mAdvancedPage;
 
         Process::ProcessInvoker* mGameInvoker;
         Process::ProcessInvoker* mWizardInvoker;
