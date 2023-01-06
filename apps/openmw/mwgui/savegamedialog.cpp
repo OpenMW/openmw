@@ -111,7 +111,7 @@ namespace MWGui
                 onCharacterSelected(mCharacterSelection, nextCharacter);
             }
             else
-                fillSaveList();
+                mCharacterSelection->setIndexSelected(MyGUI::ITEM_NONE);
         }
     }
 
