@@ -56,6 +56,7 @@ namespace MWScript
             mFloats.resize(locals.get('f').size(), 0);
         }
 
+        mScriptId = script.mId;
         mInitialised = true;
         return true;
     }
@@ -74,84 +75,52 @@ namespace MWScript
         return (index != -1);
     }
 
-    int Locals::getIntVar(const ESM::RefId& script, std::string_view var)
+    double Locals::getVarAsDouble(const ESM::RefId& script, std::string_view var)
     {
         ensure(script);
 
         const Compiler::Locals& locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
         int index = locals.getIndex(var);
-        char type = locals.getType(var);
-        if (index != -1)
+        if (index == -1)
+            return 0;
+        switch (locals.getType(var))
         {
-            switch (type)
-            {
-                case 's':
-                    return mShorts.at(index);
+            case 's':
+                return mShorts.at(index);
 
-                case 'l':
-                    return mLongs.at(index);
+            case 'l':
+                return mLongs.at(index);
 
-                case 'f':
-                    return static_cast<int>(mFloats.at(index));
-                default:
-                    return 0;
-            }
+            case 'f':
+                return mFloats.at(index);
+            default:
+                return 0;
         }
-        return 0;
     }
 
-    float Locals::getFloatVar(ESM::RefId& script, std::string_view var)
+    bool Locals::setVar(const ESM::RefId& script, std::string_view var, double val)
     {
         ensure(script);
 
         const Compiler::Locals& locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
         int index = locals.getIndex(var);
-        char type = locals.getType(var);
-        if (index != -1)
+        if (index == -1)
+            return false;
+        switch (locals.getType(var))
         {
-            switch (type)
-            {
-                case 's':
-                    return mShorts.at(index);
+            case 's':
+                mShorts.at(index) = static_cast<Interpreter::Type_Short>(val);
+                break;
 
-                case 'l':
-                    return mLongs.at(index);
+            case 'l':
+                mLongs.at(index) = static_cast<Interpreter::Type_Integer>(val);
+                break;
 
-                case 'f':
-                    return mFloats.at(index);
-                default:
-                    return 0;
-            }
+            case 'f':
+                mFloats.at(index) = static_cast<Interpreter::Type_Float>(val);
+                break;
         }
-        return 0;
-    }
-
-    bool Locals::setVarByInt(const ESM::RefId& script, std::string_view var, int val)
-    {
-        ensure(script);
-
-        const Compiler::Locals& locals = MWBase::Environment::get().getScriptManager()->getLocals(script);
-        int index = locals.getIndex(var);
-        char type = locals.getType(var);
-        if (index != -1)
-        {
-            switch (type)
-            {
-                case 's':
-                    mShorts.at(index) = val;
-                    break;
-
-                case 'l':
-                    mLongs.at(index) = val;
-                    break;
-
-                case 'f':
-                    mFloats.at(index) = static_cast<float>(val);
-                    break;
-            }
-            return true;
-        }
-        return false;
+        return true;
     }
 
     bool Locals::write(ESM::Locals& locals, const ESM::RefId& script) const

@@ -26,6 +26,16 @@
 -- @field [parent=#self] #ActorControls controls
 
 ---
+-- Local variables of an mwscript on this object (nil if there is no mwscript)
+-- @usage if self.mwscript then ... end  -- check if there is an mwscript on this object
+-- @usage tostring(self.mwscript)  -- name of the script
+-- @usage -- print value of local variable 'something' (0 if there is no such variable)
+-- print(self.mwscript.something)
+-- @usage -- set local variable 'something' (raises an error if there is no such variable)
+-- self.mwscript.something = 5
+-- @field [parent=#self] #MWScriptVariables mwscript
+
+---
 -- Allows to view and/or modify controls of an actor. All fields are mutable.
 -- @type ActorControls
 -- @field [parent=#ActorControls] #number movement +1 - move forward, -1 - move backward

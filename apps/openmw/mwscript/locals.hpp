@@ -5,6 +5,7 @@
 #include <string_view>
 #include <vector>
 
+#include <components/esm/refid.hpp>
 #include <components/interpreter/types.hpp>
 
 namespace ESM
@@ -19,6 +20,7 @@ namespace MWScript
     class Locals
     {
         bool mInitialised;
+        ESM::RefId mScriptId;
 
         void ensure(const ESM::RefId& scriptName);
 
@@ -28,6 +30,8 @@ namespace MWScript
         std::vector<Interpreter::Type_Float> mFloats;
 
         Locals();
+
+        const ESM::RefId& getScriptId() const { return mScriptId; }
 
         /// Are there any locals?
         ///
@@ -40,7 +44,8 @@ namespace MWScript
         /// @note var needs to be in lowercase
         ///
         /// \note Locals will be automatically configured first, if necessary
-        bool setVarByInt(const ESM::RefId& script, std::string_view var, int val);
+        bool setVarByInt(const ESM::RefId& script, std::string_view var, int val) { return setVar(script, var, val); }
+        bool setVar(const ESM::RefId& script, std::string_view var, double val);
 
         /// \note Locals will be automatically configured first, if necessary
         //
@@ -52,13 +57,15 @@ namespace MWScript
         /// @note var needs to be in lowercase
         ///
         /// \note Locals will be automatically configured first, if necessary
-        int getIntVar(const ESM::RefId& script, std::string_view var);
-
-        /// if var does not exist, returns 0
-        /// @note var needs to be in lowercase
-        ///
-        /// \note Locals will be automatically configured first, if necessary
-        float getFloatVar(ESM::RefId& script, std::string_view var);
+        double getVarAsDouble(const ESM::RefId& script, std::string_view var);
+        int getIntVar(const ESM::RefId& script, std::string_view var)
+        {
+            return static_cast<int>(getVarAsDouble(script, var));
+        }
+        float getFloatVar(const ESM::RefId& script, std::string_view var)
+        {
+            return static_cast<float>(getVarAsDouble(script, var));
+        }
 
         /// \note If locals have not been configured yet, no data is written.
         ///

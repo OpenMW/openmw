@@ -1,6 +1,7 @@
 #include "localscripts.hpp"
 
 #include <components/esm3/loadcell.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "../mwmechanics/aicombat.hpp"
 #include "../mwmechanics/aiescort.hpp"
@@ -17,6 +18,14 @@
 #include "context.hpp"
 #include "worldview.hpp"
 
+namespace MWLua
+{
+    struct LocalMWScript
+    {
+        LObject mSelf;
+    };
+}
+
 namespace sol
 {
     template <>
@@ -25,6 +34,10 @@ namespace sol
     };
     template <>
     struct is_automagical<MWLua::LocalScripts::SelfObject> : std::false_type
+    {
+    };
+    template <>
+    struct is_automagical<MWLua::LocalMWScript> : std::false_type
     {
     };
 }
@@ -61,6 +74,27 @@ namespace MWLua
         selfAPI["controls"] = sol::readonly_property([](SelfObject& self) { return &self.mControls; });
         selfAPI["isActive"] = [](SelfObject& self) { return &self.mIsActive; };
         selfAPI["enableAI"] = [](SelfObject& self, bool v) { self.mControls.mDisableAI = !v; };
+        selfAPI["mwscript"] = sol::readonly_property([](SelfObject& self) -> sol::optional<LocalMWScript> {
+            if (self.ptr().getRefData().getLocals().getScriptId().empty())
+                return sol::nullopt;
+            else
+                return LocalMWScript{ LObject(self.id()) };
+        });
+
+        sol::usertype<LocalMWScript> mwscript = context.mLua->sol().new_usertype<LocalMWScript>("LocalMWScript");
+        mwscript[sol::meta_function::to_string] = [](const LocalMWScript& s) {
+            return s.mSelf.ptr().getRefData().getLocals().getScriptId().getRefIdString();
+        };
+        mwscript[sol::meta_function::index] = [](const LocalMWScript& s, std::string_view var) {
+            MWScript::Locals& locals = s.mSelf.ptr().getRefData().getLocals();
+            return locals.getVarAsDouble(locals.getScriptId(), Misc::StringUtils::lowerCase(var));
+        };
+        mwscript[sol::meta_function::new_index] = [](const LocalMWScript& s, std::string_view var, double val) {
+            MWScript::Locals& locals = s.mSelf.ptr().getRefData().getLocals();
+            if (!locals.setVar(locals.getScriptId(), Misc::StringUtils::lowerCase(var), val))
+                throw std::runtime_error("No variable \"" + std::string(var) + "\" in mwscript \""
+                    + locals.getScriptId().getRefIdString() + "\"");
+        };
 
         using AiPackage = MWMechanics::AiPackage;
         sol::usertype<AiPackage> aiPackage = context.mLua->sol().new_usertype<AiPackage>("AiPackage");
