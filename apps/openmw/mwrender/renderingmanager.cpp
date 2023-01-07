@@ -586,8 +586,8 @@ namespace MWRender
 
         mFog = std::make_unique<FogManager>();
 
-        mSky = std::make_unique<SkyManager>(sceneRoot, resourceSystem->getSceneManager(), mSkyBlending);
-        mSky->setCamera(mViewer->getCamera());
+        mSky = std::make_unique<SkyManager>(
+            sceneRoot, mRootNode, mViewer->getCamera(), resourceSystem->getSceneManager(), mSkyBlending);
         if (mSkyBlending)
         {
             int skyTextureUnit = mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(

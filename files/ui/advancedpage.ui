@@ -485,6 +485,16 @@
                  </property>
                 </widget>
                </item>
+               <item row="4" column="0">
+                <widget class="QCheckBox" name="weatherParticleOcclusionCheckBox">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;EXPERIMENTAL: Stop rain and snow from falling through overhangs and roofs.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="text">
+                  <string>Weather Particle Occlusion</string>
+                 </property>
+                </widget>
+               </item>
              </layout>
             </widget>
            </item>

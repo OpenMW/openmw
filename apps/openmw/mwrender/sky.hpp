@@ -8,6 +8,7 @@
 #include <osg/Vec4f>
 #include <osg/ref_ptr>
 
+#include "precipitationocclusion.hpp"
 #include "skyutil.hpp"
 
 namespace osg
@@ -43,7 +44,8 @@ namespace MWRender
     class SkyManager
     {
     public:
-        SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager, bool enableSkyRTT);
+        SkyManager(osg::Group* parentNode, osg::Group* rootNode, osg::Camera* camera,
+            Resource::SceneManager* sceneManager, bool enableSkyRTT);
         ~SkyManager();
 
         void update(float duration);
@@ -98,8 +100,6 @@ namespace MWRender
 
         void listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures);
 
-        void setCamera(osg::Camera* camera);
-
         float getBaseWindSpeed() const;
 
         void setSunglare(bool enabled);
@@ -150,6 +150,8 @@ namespace MWRender
         osg::ref_ptr<osgParticle::BoxPlacer> mPlacer;
         osg::ref_ptr<RainCounter> mCounter;
         osg::ref_ptr<RainShooter> mRainShooter;
+
+        std::unique_ptr<PrecipitationOccluder> mPrecipitationOccluder;
 
         bool mCreated;
 

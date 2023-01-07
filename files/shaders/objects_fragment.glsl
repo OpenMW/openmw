@@ -92,8 +92,30 @@ varying vec3 passNormal;
 #include "softparticles.glsl"
 #endif
 
+#if @particleOcclusion
+uniform sampler2D orthoDepthMap;
+
+varying vec3 orthoDepthMapCoord;
+
+void precipitationOcclusion()
+{
+    float sceneDepth = texture2D(orthoDepthMap, orthoDepthMapCoord.xy * 0.5 + 0.5).r;
+#if @reverseZ
+    if (orthoDepthMapCoord.z < sceneDepth)
+        discard;
+#else
+    if (orthoDepthMapCoord.z * 0.5 + 0.5 > sceneDepth)
+        discard;
+#endif
+}
+#endif
+
 void main()
 {
+#if @particleOcclusion
+    precipitationOcclusion();
+#endif
+
 #if @diffuseMap
     vec2 adjustedDiffuseUV = diffuseMapUV;
 #endif

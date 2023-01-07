@@ -66,8 +66,20 @@ varying vec3 passNormal;
 #include "lighting.glsl"
 #include "depth.glsl"
 
+#if @particleOcclusion
+varying vec3 orthoDepthMapCoord;
+
+uniform mat4 depthSpaceMatrix;
+uniform mat4 osg_ViewMatrixInverse;
+#endif
+
 void main(void)
 {
+#if @particleOcclusion
+    mat4 model = osg_ViewMatrixInverse * gl_ModelViewMatrix;
+    orthoDepthMapCoord = ((depthSpaceMatrix * model) * vec4(gl_Vertex.xyz, 1.0)).xyz;
+#endif
+
     gl_Position = mw_modelToClip(gl_Vertex);
 
     vec4 viewPos = mw_modelToView(gl_Vertex);

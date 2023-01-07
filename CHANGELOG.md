@@ -220,6 +220,7 @@
     Feature #5198: Implement "Magic effect expired" event
     Feature #5454: Clear active spells from actor when he disappears from scene
     Feature #5489: MCP: Telekinesis fix for activators
+    Feature #5492: Let rain and snow collide with statics
     Feature #5701: Convert osgAnimation::RigGeometry to double-buffered custom version
     Feature #5737: OpenMW-CS: Handle instance move from one cell to another
     Feature #5928: Allow Glow in the Dahrk to be disabled
