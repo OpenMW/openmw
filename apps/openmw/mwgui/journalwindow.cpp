@@ -558,6 +558,7 @@ namespace
 
             mModel->visitQuestNames(!mAllQuests, add);
 
+            list->sort();
             list->adjustSize();
 
             if (mAllQuests)
