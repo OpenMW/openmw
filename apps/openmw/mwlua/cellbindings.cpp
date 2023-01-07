@@ -45,9 +45,22 @@ namespace MWLua
         cellT["gridX"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getGridX(); });
         cellT["gridY"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getGridY(); });
         cellT["hasWater"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->hasWater(); });
+        cellT["hasSky"] = sol::readonly_property([](const CellT& c) {
+            return c.mStore->getCell()->isExterior() || (c.mStore->getCell()->mData.mFlags & ESM::Cell::QuasiEx) != 0;
+        });
         cellT["isExterior"] = sol::readonly_property([](const CellT& c) { return c.mStore->isExterior(); });
+
+        // deprecated, use cell:hasTag("QuasiExterior") instead
         cellT["isQuasiExterior"] = sol::readonly_property(
             [](const CellT& c) { return (c.mStore->getCell()->mData.mFlags & ESM::Cell::QuasiEx) != 0; });
+
+        cellT["hasTag"] = [](const CellT& c, std::string_view tag) -> bool {
+            if (tag == "NoSleep")
+                return (c.mStore->getCell()->mData.mFlags & ESM::Cell::NoSleep) != 0;
+            else if (tag == "QuasiExterior")
+                return (c.mStore->getCell()->mData.mFlags & ESM::Cell::QuasiEx) != 0;
+            return false;
+        };
 
         cellT["isInSameSpace"] = [](const CellT& c, const ObjectT& obj) {
             const MWWorld::Ptr& ptr = obj.ptr();
