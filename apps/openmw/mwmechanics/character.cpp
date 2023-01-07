@@ -400,6 +400,9 @@ namespace MWMechanics
         {
             if (!mAnimation->isPlaying(mCurrentHit))
             {
+                if (isKnockedOut() && mCurrentHit.empty() && knockout)
+                    return;
+
                 mHitState = CharState_None;
                 mCurrentHit.clear();
                 stats.setKnockedDown(false);
@@ -450,18 +453,6 @@ namespace MWMechanics
                 mCurrentHit = chooseRandomGroup(hitStateToAnimGroup(CharState_Hit));
         }
 
-        if (!mAnimation->hasAnimation(mCurrentHit))
-        {
-            // The hit animation is missing. Reset the current hit state and immediately cancel all states as if the
-            // animation were instantaneous.
-            mHitState = CharState_None;
-            mCurrentHit.clear();
-            stats.setKnockedDown(false);
-            stats.setHitRecovery(false);
-            resetCurrentIdleState();
-            return;
-        }
-
         // Cancel upper body animations
         if (isKnockedOut() || isKnockedDown())
         {
@@ -477,6 +468,12 @@ namespace MWMechanics
             {
                 mUpperBodyState = UpperBodyState::None;
             }
+        }
+
+        if (!mAnimation->hasAnimation(mCurrentHit))
+        {
+            mCurrentHit.clear();
+            return;
         }
 
         mAnimation->play(
