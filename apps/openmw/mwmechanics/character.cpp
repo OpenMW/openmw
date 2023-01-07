@@ -752,7 +752,7 @@ namespace MWMechanics
         // FIXME: if one of the below states is close to their last animation frame (i.e. will be disabled in the coming
         // update), the idle animation should be displayed
         if (((mUpperBodyState != UpperBodyState::None && mUpperBodyState != UpperBodyState::WeaponEquipped)
-                || mMovementState != CharState_None || mHitState != CharState_None)
+                || mMovementState != CharState_None || !mCurrentHit.empty())
             && !mPtr.getClass().isBipedal(mPtr))
         {
             resetCurrentIdleState();
