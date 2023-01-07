@@ -121,23 +121,23 @@ namespace ESM
         }
     };
 
-    template <std::size_t capacity, class T, typename = std::enable_if_t<std::is_same_v<T, char>>>
-    inline bool operator==(const FixedString<capacity>& lhs, const T* const& rhs) noexcept
+    template <std::size_t capacity>
+    inline bool operator==(const FixedString<capacity>& lhs, std::string_view rhs) noexcept
     {
-        for (std::size_t i = 0; i < capacity; ++i)
+        for (std::size_t i = 0, n = std::min(rhs.size(), capacity); i < n; ++i)
         {
             if (lhs.mData[i] != rhs[i])
                 return false;
             if (lhs.mData[i] == '\0')
                 return true;
         }
-        return rhs[capacity] == '\0';
+        return rhs.size() <= capacity || rhs[capacity] == '\0';
     }
 
-    template <std::size_t capacity>
-    inline bool operator==(const FixedString<capacity>& lhs, const std::string& rhs) noexcept
+    template <std::size_t capacity, class T, typename = std::enable_if_t<std::is_same_v<T, char>>>
+    inline bool operator==(const FixedString<capacity>& lhs, const T* const& rhs) noexcept
     {
-        return lhs == rhs.c_str();
+        return lhs == std::string_view(rhs, capacity);
     }
 
     template <std::size_t capacity, std::size_t rhsSize>
@@ -154,6 +154,12 @@ namespace ESM
     inline bool operator==(const FixedString<4>& lhs, const FixedString<4>& rhs) noexcept
     {
         return lhs.toInt() == rhs.toInt();
+    }
+
+    template <class T, typename = std::enable_if_t<std::is_same_v<T, char>>>
+    inline bool operator==(const FixedString<4>& lhs, const T* const& rhs) noexcept
+    {
+        return lhs == std::string_view(rhs, 5);
     }
 
     template <std::size_t capacity, class Rhs>
