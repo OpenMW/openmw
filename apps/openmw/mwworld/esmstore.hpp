@@ -24,6 +24,14 @@ namespace MWMechanics
     class SpellList;
 }
 
+namespace ESM4
+{
+    class Reader;
+    struct Static;
+    struct Cell;
+    struct Reference;
+}
+
 namespace ESM
 {
     class ReadersCache;
@@ -78,7 +86,7 @@ namespace MWWorld
     class ESMStore
     {
         friend struct ESMStoreImp; // This allows StoreImp to extend esmstore without beeing included everywhere
-
+    public:
         using StoreTuple = std::tuple<Store<ESM::Activator>, Store<ESM::Potion>, Store<ESM::Apparatus>,
             Store<ESM::Armor>, Store<ESM::BodyPart>, Store<ESM::Book>, Store<ESM::BirthSign>, Store<ESM::Class>,
             Store<ESM::Clothing>, Store<ESM::Container>, Store<ESM::Creature>, Store<ESM::Dialogue>, Store<ESM::Door>,
@@ -95,8 +103,11 @@ namespace MWWorld
             Store<ESM::MagicEffect>, Store<ESM::Skill>,
 
             // Special entry which is hardcoded and not loaded from an ESM
-            Store<ESM::Attribute>>;
+            Store<ESM::Attribute>,
 
+            Store<ESM4::Static>, Store<ESM4::Cell>, Store<ESM4::Reference>>;
+
+    private:
         template <typename T>
         static constexpr std::size_t getTypeIndex()
         {
@@ -162,6 +173,7 @@ namespace MWWorld
         void validateDynamic();
 
         void load(ESM::ESMReader& esm, Loading::Listener* listener, ESM::Dialogue*& dialogue);
+        void loadESM4(ESM4::Reader& esm);
 
         template <class T>
         const Store<T>& get() const
@@ -252,6 +264,16 @@ namespace MWWorld
 
     template <>
     const ESM::NPC* ESMStore::insert<ESM::NPC>(const ESM::NPC& npc);
+
+    template <class T, class = std::void_t<>>
+    struct HasRecordId : std::false_type
+    {
+    };
+
+    template <class T>
+    struct HasRecordId<T, std::void_t<decltype(T::sRecordId)>> : std::true_type
+    {
+    };
 }
 
 #endif

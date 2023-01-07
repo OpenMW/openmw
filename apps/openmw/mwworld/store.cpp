@@ -1,17 +1,18 @@
 #include "store.hpp"
 
-#include <components/debug/debuglog.hpp>
-
-#include <components/esm/records.hpp>
-#include <components/esm3/esmreader.hpp>
-#include <components/esm3/esmwriter.hpp>
-
-#include <components/loadinglistener/loadinglistener.hpp>
-#include <components/misc/rng.hpp>
-
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
+
+#include <components/debug/debuglog.hpp>
+#include <components/esm/records.hpp>
+#include <components/esm3/esmreader.hpp>
+#include <components/esm3/esmwriter.hpp>
+#include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadrefr.hpp>
+#include <components/esm4/loadstat.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
+#include <components/misc/rng.hpp>
 
 namespace
 {
@@ -161,7 +162,15 @@ namespace MWWorld
         if (ptr == nullptr)
         {
             std::stringstream msg;
-            msg << T::getRecordType() << " '" << id << "' not found";
+            if constexpr (!ESM::isESM4Rec(T::sRecordId))
+            {
+                msg << T::getRecordType();
+            }
+            else
+            {
+                msg << "ESM::REC_" << getRecNameString(T::sRecordId).toStringView();
+            }
+            msg << " '" << id << "' not found";
             throw std::runtime_error(msg.str());
         }
         return ptr;
@@ -171,8 +180,10 @@ namespace MWWorld
     {
         T record;
         bool isDeleted = false;
-
-        record.load(esm, isDeleted);
+        if constexpr (!ESM::isESM4Rec(T::sRecordId))
+        {
+            record.load(esm, isDeleted);
+        }
 
         std::pair<typename Static::iterator, bool> inserted = mStatic.insert_or_assign(record.mId, record);
         if (inserted.second)
@@ -292,9 +303,12 @@ namespace MWWorld
     {
         for (typename Dynamic::const_iterator iter(mDynamic.begin()); iter != mDynamic.end(); ++iter)
         {
-            writer.startRecord(T::sRecordId);
-            iter->second.save(writer);
-            writer.endRecord(T::sRecordId);
+            if constexpr (!ESM::isESM4Rec(T::sRecordId))
+            {
+                writer.startRecord(T::sRecordId);
+                iter->second.save(writer);
+                writer.endRecord(T::sRecordId);
+            }
         }
     }
     template <typename T>
@@ -302,8 +316,10 @@ namespace MWWorld
     {
         T record;
         bool isDeleted = false;
-
-        record.load(reader, isDeleted);
+        if constexpr (!ESM::isESM4Rec(T::sRecordId))
+        {
+            record.load(reader, isDeleted);
+        }
         insert(record, overrideOnly);
 
         return RecordId(record.mId, isDeleted);
@@ -1152,6 +1168,20 @@ namespace MWWorld
 
         return mKeywordSearch;
     }
+
+    ESM::FixedString<6> getRecNameString(ESM::RecNameInts recName)
+    {
+        ESM::FixedString<6> name;
+        name.assign("");
+        ESM::NAME fourCCName(recName & ~ESM::sEsm4RecnameFlag);
+        for (int i = 0; i < 4; i++)
+            name.mData[i] = fourCCName.mData[i];
+        if (ESM::isESM4Rec(recName))
+        {
+            name.mData[4] = '4';
+        }
+        return name;
+    }
 }
 
 template class MWWorld::TypedDynamicStore<ESM::Activator>;
@@ -1196,3 +1226,7 @@ template class MWWorld::TypedDynamicStore<ESM::Spell>;
 template class MWWorld::TypedDynamicStore<ESM::StartScript>;
 template class MWWorld::TypedDynamicStore<ESM::Static>;
 template class MWWorld::TypedDynamicStore<ESM::Weapon>;
+
+template class MWWorld::TypedDynamicStore<ESM4::Static>;
+template class MWWorld::TypedDynamicStore<ESM4::Reference>;
+template class MWWorld::TypedDynamicStore<ESM4::Cell>;

@@ -333,6 +333,11 @@ namespace ESM
         REC_MSET4 = esm4Recname(ESM4::REC_MSET) // Media Set
     };
 
+    constexpr bool isESM4Rec(RecNameInts RecName)
+    {
+        return RecName & sEsm4RecnameFlag;
+    }
+
     /// Common subrecords
     enum SubRecNameInts
     {

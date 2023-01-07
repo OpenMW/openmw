@@ -6,6 +6,8 @@
 #include <string>
 #include <string_view>
 
+#include <components/esm4/formid.hpp>
+
 namespace ESM
 {
     // RefId is used to represent an Id that identifies an ESM record. These Ids can then be used in
@@ -27,6 +29,7 @@ namespace ESM
         // RefIds that are as string in the code. For serialization, and display. Using explicit conversions make it
         // very clear where in the code we need to convert from string to RefId and Vice versa.
         static RefId stringRefId(std::string_view id);
+        static RefId formIdRefId(const ESM4::FormId id);
         const std::string& getRefIdString() const { return mId; }
 
     private:

@@ -193,6 +193,7 @@ add_component_dir (esm4
     reader
     reference
     script
+    readerutils
 )
 
 add_component_dir (misc

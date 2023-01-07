@@ -14,6 +14,11 @@
 #include <components/misc/algorithm.hpp>
 
 #include <components/esm4/common.hpp>
+#include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadrefr.hpp>
+#include <components/esm4/loadstat.hpp>
+#include <components/esm4/reader.hpp>
+#include <components/esm4/readerutils.hpp>
 #include <components/esmloader/load.hpp>
 
 #include "../mwmechanics/spelllist.hpp"
@@ -180,6 +185,35 @@ namespace MWWorld
                 }
             }
         }
+
+        template <typename T>
+        static bool typedReadRecordESM4(ESM4::Reader& reader, Store<T>& store)
+        {
+            auto recordType = static_cast<ESM4::RecordTypes>(reader.hdr().record.typeId);
+
+            ESM::RecNameInts esm4RecName = static_cast<ESM::RecNameInts>(ESM::esm4Recname(recordType));
+            if constexpr (std::is_convertible_v<Store<T>*, DynamicStore*> && HasRecordId<T>::value)
+            {
+                if constexpr (ESM::isESM4Rec(T::sRecordId))
+                {
+                    if (T::sRecordId == esm4RecName)
+                    {
+                        reader.getRecordData();
+                        T value;
+                        value.load(reader);
+                        store.insertStatic(value);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        static bool readRecord(ESM4::Reader& reader, ESMStore& store)
+        {
+            return std::apply([&reader](auto&... x) { return (ESMStoreImp::typedReadRecordESM4(reader, x) || ...); },
+                store.mStoreImp->mStores);
+        }
     };
 
     int ESMStore::find(const ESM::RefId& id) const
@@ -336,6 +370,12 @@ namespace MWWorld
             if (listener != nullptr)
                 listener->setProgress(::EsmLoader::fileProgress * esm.getFileOffset() / esm.getFileSize());
         }
+    }
+
+    void ESMStore::loadESM4(ESM4::Reader& reader)
+    {
+        auto visitorRec = [this](ESM4::Reader& reader) { return ESMStoreImp::readRecord(reader, *this); };
+        ESM4::ReaderUtils::readAll(reader, visitorRec, [](ESM4::Reader&) {});
     }
 
     void ESMStore::setIdType(const ESM::RefId& id, ESM::RecNameInts type)
