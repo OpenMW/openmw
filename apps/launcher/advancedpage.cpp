@@ -126,6 +126,7 @@ bool Launcher::AdvancedPage::loadSettings()
             antialiasAlphaTestCheckBox->setCheckState(Qt::Unchecked);
         }
         loadSettingBool(adjustCoverageForAlphaTestCheckBox, "adjust coverage for alpha test", "Shaders");
+        loadSettingBool(weatherParticleOcclusionCheckBox, "weather particle occlusion", "Shaders");
         loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
         connect(animSourcesCheckBox, &QCheckBox::toggled, this, &AdvancedPage::slotAnimSourcesToggled);
         loadSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
@@ -285,6 +286,7 @@ void Launcher::AdvancedPage::saveSettings()
         saveSettingBool(softParticlesCheckBox, "soft particles", "Shaders");
         saveSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
         saveSettingBool(adjustCoverageForAlphaTestCheckBox, "adjust coverage for alpha test", "Shaders");
+        saveSettingBool(weatherParticleOcclusionCheckBox, "weather particle occlusion", "Shaders");
         saveSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
         saveSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
         saveSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");

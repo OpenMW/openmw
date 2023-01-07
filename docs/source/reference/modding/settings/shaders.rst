@@ -287,3 +287,18 @@ the look of some particle systems.
 
 Note that the rendering will act as if you have 'force shaders' option enabled.
 This means that shaders will be used to render all objects and the terrain.
+
+weather particle occlusion
+--------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+Enables particle occlusion for rain and snow particle effects.
+When enabled, rain and snow will not clip through ceilings and overhangs.
+Currently this relies on an additional render pass, which may lead to a performance hit.
+
+.. warning::
+    This is an experimental feature that may cause visual oddities, especially when using default rain settings.
+    It is recommended to at least double the rain diameter through `openmw.cfg`.`
