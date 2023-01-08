@@ -113,6 +113,8 @@ namespace MWRender
         mCamera->setViewport(0, 0, rttSize, rttSize);
         mCamera->attach(osg::Camera::DEPTH_BUFFER, mDepthTexture);
         mCamera->addChild(mSceneNode);
+        mCamera->setSmallFeatureCullingPixelSize(
+            Settings::Manager::getFloat("weather particle occlusion small feature culling pixel size", "Shaders"));
 
         SceneUtil::setCameraClearDepth(mCamera);
     }
