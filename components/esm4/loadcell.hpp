@@ -34,6 +34,9 @@
 #include "formid.hpp"
 #include "lighting.hpp"
 
+#include <components/esm/defs.hpp>
+#include <components/esm/refid.hpp>
+
 namespace ESM4
 {
     class Reader;
@@ -61,7 +64,7 @@ namespace ESM4
     {
         FormId mParent; // world formId (for grouping cells), from the loading sequence
 
-        FormId mFormId; // from the header
+        ESM::RefId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -95,6 +98,8 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         void blank();
+
+        static constexpr ESM::RecNameInts sRecordId = ESM::REC_CELL4;
     };
 }
 

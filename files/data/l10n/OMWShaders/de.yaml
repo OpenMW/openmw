@@ -1,3 +1,5 @@
+# Post-processing HUD
+
 Abovewater: "Überwasser"
 ActiveShaders: "Aktive Shader"
 Author: "Autor"
@@ -19,3 +21,14 @@ ShaderLockedDescription: "Kann nicht umgeschaltet oder verschoben werden, gesteu
 ShaderResetUniform: "r"
 Underwater: "Unterwasser"
 Version: "Version"
+
+
+# Built-in post-processing shaders
+
+DisplayDepthName: "Visualisiert den Tiefenpuffer."
+DisplayDepthFactorDescription: "Bestimmt die Korrelation zwischen dem Pixeltiefenwert und seiner Ausgabefarbe. Hohe Werte führen zu einem helleren Bild."
+DisplayDepthFactorName: "Farbfaktor"
+ContrastLevelDescription: "Kontraststufe"
+ContrastLevelName: "Kontrast"
+GammaLevelDescription: "Gamma-Level"
+GammaLevelName: "Gamma"

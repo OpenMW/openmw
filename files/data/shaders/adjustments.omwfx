@@ -3,8 +3,8 @@ uniform_float uGamma {
     step = 0.01;
     min = 0.0;
     max = 5.0;
-    display_name = "#{BuiltInShaders:GammaLevelName}";
-    description = "#{BuiltInShaders:GammaLevelDescription}";
+    display_name = "#{OMWShaders:GammaLevelName}";
+    description = "#{OMWShaders:GammaLevelDescription}";
 }
 
 uniform_float uContrast {
@@ -12,8 +12,8 @@ uniform_float uContrast {
     step = 0.01;
     min = 0.0;
     max = 5.0;
-    display_name = "#{BuiltInShaders:ContrastLevelName}";
-    description = "#{BuiltInShaders:ContrastLevelDescription}";
+    display_name = "#{OMWShaders:ContrastLevelName}";
+    description = "#{OMWShaders:ContrastLevelDescription}";
 }
 
 fragment main {
@@ -31,7 +31,7 @@ fragment main {
 }
 
 technique {
-    description = "#{BuiltInShaders:AdjustmentsDescription}";
+    description = "#{OMWShaders:AdjustmentsDescription}";
     version = "1.0";
     author = "OpenMW";
     passes = main;

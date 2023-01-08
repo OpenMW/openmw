@@ -31,10 +31,25 @@ E.g. if you include ``en_US.yaml`` and ``en_GB.yaml`` localisation files, you sh
 Note that because of the fallbacks only messages which differ between variants need to be included in the country-specific localisation files.
 
 Localisation Files
---------------------------
+------------------
 
 Localisation files (containing the message names and translations) should be stored in the
 VFS as files of the form ``l10n/<ContextName>/<Locale>.yaml``.
+
+**Naming policy**
+
+"ContextName" should be in line with :ref:`Lua scripts naming policy`:
+
+- L10n files for ``scripts/<ModName>/<ScriptName>.lua`` should be placed to ``l10n/<ModName>/<Locale>.yaml``.
+- L10n files for ``scripts/<AuthorName>/<ModName>/<ScriptName>.lua`` should be placed to ``l10n/<AuthorName><ModName>/<Locale>.yaml``.
+
+In most cases one mod should have only one l10n context. Don't create a new context for each single message. Really big mods with hundreds and thousands of messages can have several l10n contexts. In this case all context names should start with the name of the mod. I.e. ``<ContextName> = <ModName><Subcontext>`` (or ``<AuthorName><ModName><Subcontext>``).
+
+L10n contexts with prefix "OMW" are reserved for the OpenMW itself (in particular for built-in scripts ``scripts/omw/``) and shouldn't be used in mods.
+
+Built-in l10n contexts "Interface" and "Calendar" don't have the "OMW" prefix because these messages are more generic and can be reused in mods.
+
+**Format**
 
 Messages contents have the form of ICU MessageFormat strings.
 See `the Formatting Messages chapter of the ICU Guide <https://unicode-org.github.io/icu/userguide/format_parse/messages/>`_

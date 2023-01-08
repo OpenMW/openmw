@@ -228,9 +228,10 @@ namespace
 
 namespace MWRender
 {
-    SkyManager::SkyManager(osg::Group* parentNode, Resource::SceneManager* sceneManager, bool enableSkyRTT)
+    SkyManager::SkyManager(osg::Group* parentNode, osg::Group* rootNode, osg::Camera* camera,
+        Resource::SceneManager* sceneManager, bool enableSkyRTT)
         : mSceneManager(sceneManager)
-        , mCamera(nullptr)
+        , mCamera(camera)
         , mAtmosphereNightRoll(0.f)
         , mCreated(false)
         , mIsStorm(false)
@@ -289,6 +290,8 @@ namespace MWRender
         mRootNode->setNodeMask(Mask_Sky);
         mRootNode->addChild(mEarlyRenderBinRoot);
         mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
+
+        mPrecipitationOccluder = std::make_unique<PrecipitationOccluder>(skyroot, parentNode, rootNode, camera);
     }
 
     void SkyManager::create()
@@ -382,11 +385,6 @@ namespace MWRender
         mCreated = true;
     }
 
-    void SkyManager::setCamera(osg::Camera* camera)
-    {
-        mCamera = camera;
-    }
-
     void SkyManager::createRain()
     {
         if (mRainNode)
@@ -466,9 +464,11 @@ namespace MWRender
         mRainNode->setNodeMask(Mask_WeatherParticles);
 
         mRainParticleSystem->setUserValue("simpleLighting", true);
+        mRainParticleSystem->setUserValue("particleOcclusion", true);
         mSceneManager->recreateShaders(mRainNode);
 
         mRootNode->addChild(mRainNode);
+        mPrecipitationOccluder->enable();
     }
 
     void SkyManager::destroyRain()
@@ -482,6 +482,7 @@ namespace MWRender
         mCounter = nullptr;
         mRainParticleSystem = nullptr;
         mRainShooter = nullptr;
+        mPrecipitationOccluder->disable();
     }
 
     SkyManager::~SkyManager()
@@ -563,6 +564,7 @@ namespace MWRender
             * osg::DegreesToRadians(360.f) / (3600 * 96.f);
         if (mAtmosphereNightNode->getNodeMask() != 0)
             mAtmosphereNightNode->setAttitude(osg::Quat(mAtmosphereNightRoll, osg::Vec3f(0, 0, 1)));
+        mPrecipitationOccluder->update();
     }
 
     void SkyManager::setEnabled(bool enabled)
@@ -606,6 +608,7 @@ namespace MWRender
             mPlacer->setZRange(-rainRange.z() / 2, rainRange.z() / 2);
 
             mCounter->setNumberOfParticlesPerSecondToCreate(mRainMaxRaindrops / mRainEntranceSpeed * 20);
+            mPrecipitationOccluder->updateRange(rainRange);
         }
     }
 
@@ -671,6 +674,10 @@ namespace MWRender
                     mRootNode->removeChild(mParticleNode);
                     mParticleNode = nullptr;
                 }
+                if (mRainEffect.empty())
+                {
+                    mPrecipitationOccluder->disable();
+                }
             }
             else
             {
@@ -693,6 +700,8 @@ namespace MWRender
                 SceneUtil::FindByClassVisitor findPSVisitor("ParticleSystem");
                 mParticleEffect->accept(findPSVisitor);
 
+                const osg::Vec3 defaultWrapRange = osg::Vec3(1024, 1024, 800);
+
                 for (unsigned int i = 0; i < findPSVisitor.mFoundNodes.size(); ++i)
                 {
                     osgParticle::ParticleSystem* ps
@@ -700,7 +709,7 @@ namespace MWRender
 
                     osg::ref_ptr<osgParticle::ModularProgram> program = new osgParticle::ModularProgram;
                     if (!mIsStorm)
-                        program->addOperator(new WrapAroundOperator(mCamera, osg::Vec3(1024, 1024, 800)));
+                        program->addOperator(new WrapAroundOperator(mCamera, defaultWrapRange));
                     program->addOperator(new WeatherAlphaOperator(mPrecipitationAlpha, false));
                     program->setParticleSystem(ps);
                     mParticleNode->addChild(program);
@@ -713,9 +722,16 @@ namespace MWRender
                     }
 
                     ps->setUserValue("simpleLighting", true);
+                    ps->setUserValue("particleOcclusion", true);
                 }
 
                 mSceneManager->recreateShaders(mParticleNode);
+
+                if (mCurrentParticleEffect == "meshes\\snow.nif")
+                {
+                    mPrecipitationOccluder->enable();
+                    mPrecipitationOccluder->updateRange(defaultWrapRange);
+                }
             }
         }
 

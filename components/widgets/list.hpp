@@ -35,6 +35,7 @@ namespace Gui
          */
         void adjustSize();
 
+        void sort();
         void addItem(std::string_view name);
         void addSeparator(); ///< add a seperator between the current and the next item.
         void removeItem(const std::string& name);

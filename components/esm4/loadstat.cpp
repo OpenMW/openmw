@@ -30,12 +30,13 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+// #include "writer.hpp"
 
 void ESM4::Static::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.id;
-    reader.adjustFormId(mFormId);
+    FormId formId = reader.hdr().record.id;
+    reader.adjustFormId(formId);
+    mId = ESM::RefId::formIdRefId(formId);
     mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())

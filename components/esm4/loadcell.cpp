@@ -32,12 +32,13 @@
 
 #include <cassert>
 #include <cfloat> // FLT_MAX for gcc
+#include <iostream> // FIXME: debug only
 #include <stdexcept>
 
-#include <iostream> // FIXME: debug only
-
 #include "reader.hpp"
-//#include "writer.hpp"
+// #include "writer.hpp"
+
+#include <components/esm/refid.hpp>
 
 // TODO: Try loading only EDID and XCLC (along with mFormId, mFlags and mParent)
 //
@@ -48,8 +49,9 @@
 // longer/shorter/same as loading the subrecords.
 void ESM4::Cell::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.id;
-    reader.adjustFormId(mFormId);
+    auto formId = reader.hdr().record.id;
+    reader.adjustFormId(formId);
+    mId = ESM::RefId::formIdRefId(formId);
     mFlags = reader.hdr().record.flags;
     mParent = reader.currWorld();
 
@@ -71,7 +73,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
     // WARN: we need to call setCurrCell (and maybe setCurrCellGrid?) again before loading
     // cell child groups if we are loading them after restoring the context
     // (may be easier to update the context before saving?)
-    reader.setCurrCell(mFormId); // save for LAND (and other children) to access later
+    reader.setCurrCell(formId); // save for LAND (and other children) to access later
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 

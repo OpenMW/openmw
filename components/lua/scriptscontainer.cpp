@@ -35,14 +35,13 @@ namespace LuaUtil
         mAPI.emplace(std::move(packageName), makeReadOnly(std::move(package)));
     }
 
-    bool ScriptsContainer::addCustomScript(int scriptId)
+    bool ScriptsContainer::addCustomScript(int scriptId, std::string_view initData)
     {
-        const ScriptsConfiguration& conf = mLua.getConfiguration();
-        assert(conf.isCustomScript(scriptId));
+        assert(mLua.getConfiguration().isCustomScript(scriptId));
         std::optional<sol::function> onInit, onLoad;
         bool ok = addScript(scriptId, onInit, onLoad);
         if (ok && onInit)
-            callOnInit(scriptId, *onInit, conf[scriptId].mInitializationData);
+            callOnInit(scriptId, *onInit, initData);
         return ok;
     }
 

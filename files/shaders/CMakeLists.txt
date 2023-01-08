@@ -34,8 +34,8 @@ set(SHADER_FILES
     shadowcasting_vertex.glsl
     shadowcasting_fragment.glsl
     vertexcolors.glsl
-	multiview_resolve_vertex.glsl
-	multiview_resolve_fragment.glsl
+    multiview_resolve_vertex.glsl
+    multiview_resolve_fragment.glsl
     nv_default_vertex.glsl
     nv_default_fragment.glsl
     nv_nolighting_vertex.glsl
@@ -55,6 +55,8 @@ set(SHADER_FILES
     fullscreen_tri_vertex.glsl
     fullscreen_tri_fragment.glsl
     fog.glsl
+    precipitation_vertex.glsl
+    precipitation_fragment.glsl
 )
 
 copy_all_resource_files(${CMAKE_CURRENT_SOURCE_DIR} ${OPENMW_RESOURCES_ROOT} ${DDIRRELATIVE} "${SHADER_FILES}")

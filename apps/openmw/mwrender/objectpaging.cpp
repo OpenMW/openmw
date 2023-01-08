@@ -8,6 +8,7 @@
 #include <osg/MatrixTransform>
 #include <osg/Sequence>
 #include <osg/Switch>
+#include <osgAnimation/BasicAnimationManager>
 #include <osgUtil/IncrementalCompileOperation>
 
 #include <components/esm3/esmreader.hpp>
@@ -643,7 +644,9 @@ namespace MWRender
             {
                 if (cnode->getNumChildrenRequiringUpdateTraversal() > 0
                     || SceneUtil::hasUserDescription(cnode, Constants::NightDayLabel)
-                    || SceneUtil::hasUserDescription(cnode, Constants::HerbalismLabel))
+                    || SceneUtil::hasUserDescription(cnode, Constants::HerbalismLabel)
+                    || (cnode->getName() == "Collada visual scene group"
+                        && dynamic_cast<const osgAnimation::BasicAnimationManager*>(cnode->getUpdateCallback())))
                     continue;
                 else
                     refnumSet->mRefnums.push_back(pair.first);

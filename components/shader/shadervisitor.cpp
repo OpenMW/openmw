@@ -25,6 +25,7 @@
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
+#include <components/settings/settings.hpp>
 #include <components/stereo/stereomanager.hpp>
 #include <components/vfs/manager.hpp>
 
@@ -674,6 +675,11 @@ namespace Shader
 
         if (simpleLighting || dynamic_cast<osgParticle::ParticleSystem*>(&node))
             defineMap["forcePPL"] = "0";
+
+        bool particleOcclusion = false;
+        node.getUserValue("particleOcclusion", particleOcclusion);
+        defineMap["particleOcclusion"]
+            = particleOcclusion && Settings::Manager::getBool("weather particle occlusion", "Shaders") ? "1" : "0";
 
         if (reqs.mAlphaBlend && mSupportsNormalsRT)
         {

@@ -29,6 +29,11 @@ namespace ESM
         return newRefId;
     }
 
+    RefId RefId::formIdRefId(const ESM4::FormId id)
+    {
+        return ESM::RefId::stringRefId(ESM4::formIdToString(id));
+    }
+
     bool RefId::operator==(std::string_view rhs) const
     {
         return Misc::StringUtils::ciEqual(mId, rhs);

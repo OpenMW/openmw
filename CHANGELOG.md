@@ -28,7 +28,9 @@
     Bug #7034: Misc items defined in one content file are not treated as keys if another content file uses them as such
     Bug #7042: Weapon follow animations that immediately follow the hit animations cause multiple hits
     Bug #7044: Changing a class' services does not affect autocalculated NPCs
+    Bug #7054: Quests aren't sorted by name
     Bug #7084: Resurrecting an actor doesn't take into account base record changes
+    Bug #7088: Deleting last save game of last character doesn't clear character name/details
     Feature #6447: Add LOD support to Object Paging
     Feature #6933: Support high-resolution cursor textures
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData
@@ -37,6 +39,7 @@
     Feature #6995: Localize the "show effect duration" option
     Feature #7058: Implement TestModels (T3D) console command
     Feature #7087: Block resolution change in the Windowed Fullscreen mode
+    Feature #7130: Ability to set MyGUI logging verbosity
 
 0.48.0
 ------
@@ -217,6 +220,7 @@
     Feature #5198: Implement "Magic effect expired" event
     Feature #5454: Clear active spells from actor when he disappears from scene
     Feature #5489: MCP: Telekinesis fix for activators
+    Feature #5492: Let rain and snow collide with statics
     Feature #5701: Convert osgAnimation::RigGeometry to double-buffered custom version
     Feature #5737: OpenMW-CS: Handle instance move from one cell to another
     Feature #5928: Allow Glow in the Dahrk to be disabled

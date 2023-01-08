@@ -329,26 +329,22 @@ namespace MWGui
             case fx::Technique::Status::Uncompiled:
             {
                 if (technique->getDynamic())
-                    ss << "#{fontcolourhtml=header}#{PostProcessing:ShaderLocked}:      #{fontcolourhtml=normal} "
-                          "#{PostProcessing:ShaderLockedDescription}"
+                    ss << "#{fontcolourhtml=header}#{OMWShaders:ShaderLocked}:      #{fontcolourhtml=normal} "
+                          "#{OMWShaders:ShaderLockedDescription}"
                        << endl
                        << endl;
-                ss << "#{fontcolourhtml=header}#{PostProcessing:Author}:      #{fontcolourhtml=normal} " << author
+                ss << "#{fontcolourhtml=header}#{OMWShaders:Author}:      #{fontcolourhtml=normal} " << author << endl
+                   << endl
+                   << "#{fontcolourhtml=header}#{OMWShaders:Version}:     #{fontcolourhtml=normal} " << version << endl
+                   << endl
+                   << "#{fontcolourhtml=header}#{OMWShaders:Description}: #{fontcolourhtml=normal} " << description
                    << endl
                    << endl
-                   << "#{fontcolourhtml=header}#{PostProcessing:Version}:     #{fontcolourhtml=normal} " << version
-                   << endl
-                   << endl
-                   << "#{fontcolourhtml=header}#{PostProcessing:Description}: #{fontcolourhtml=normal} " << description
-                   << endl
-                   << endl
-                   << "#{fontcolourhtml=header}#{PostProcessing:InInteriors}: #{fontcolourhtml=normal} "
-                   << flag_interior
-                   << "#{fontcolourhtml=header}   #{PostProcessing:InExteriors}: #{fontcolourhtml=normal} "
-                   << flag_exterior
-                   << "#{fontcolourhtml=header}   #{PostProcessing:Underwater}: #{fontcolourhtml=normal} "
+                   << "#{fontcolourhtml=header}#{OMWShaders:InInteriors}: #{fontcolourhtml=normal} " << flag_interior
+                   << "#{fontcolourhtml=header}   #{OMWShaders:InExteriors}: #{fontcolourhtml=normal} " << flag_exterior
+                   << "#{fontcolourhtml=header}   #{OMWShaders:Underwater}: #{fontcolourhtml=normal} "
                    << flag_underwater
-                   << "#{fontcolourhtml=header}   #{PostProcessing:Abovewater}: #{fontcolourhtml=normal} "
+                   << "#{fontcolourhtml=header}   #{OMWShaders:Abovewater}: #{fontcolourhtml=normal} "
                    << flag_abovewater;
                 break;
             }
@@ -370,7 +366,7 @@ namespace MWGui
             {
                 MyGUI::Button* resetButton
                     = mConfigArea->createWidget<MyGUI::Button>("MW_Button", { 0, 0, 0, 24 }, MyGUI::Align::Default);
-                resetButton->setCaptionWithReplacing("#{PostProcessing:ResetShader}");
+                resetButton->setCaptionWithReplacing("#{OMWShaders:ResetShader}");
                 resetButton->setTextAlign(MyGUI::Align::Center);
                 resetButton->eventMouseWheel += MyGUI::newDelegate(this, &PostProcessorHud::notifyMouseWheel);
                 resetButton->eventMouseButtonClick

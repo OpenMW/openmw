@@ -1,3 +1,24 @@
+# Debug window
+
+DebugWindow: "Debug"
+LogViewer: "Log Viewer"
+LuaProfiler: "Lua Profiler"
+PhysicsProfiler: "Physics Profiler"
+
+
+# Messages
+
+BuildingNavigationMesh: "Building navigation mesh"
+
+
+# Save game menu
+
+SelectCharacter: "Select Character..."
+TimePlayed: "Time played"
+
+
+# Settings menu
+
 ActorsProcessingRange: "Actors Processing Range"
 Anisotropy: "Anisotropy"
 CameraSensitivity: "Camera Sensitivity"
@@ -62,6 +83,6 @@ WaterShaderTextureQuality: "Texture quality"
 WindowBorder: "Window Border"
 WindowMode: "Window Mode"
 WindowModeFullscreen: "Fullscreen"
-WindowModeHint: "Hint: the Windowed Fullscreen mode\nalways uses a native screen resolution."
+WindowModeHint: "Hint: Windowed Fullscreen mode\nalways uses the native display resolution."
 WindowModeWindowed: "Windowed"
 WindowModeWindowedFullscreen: "Windowed Fullscreen"

@@ -59,7 +59,8 @@ Sources can be found in ``resources/vfs/openmw_aux``. In theory mods can overrid
 
 .. include:: tables/aux_packages.rst
 
-**Interfaces of built-in scripts**
+Interfaces of built-in scripts
+------------------------------
 
 .. list-table::
   :widths: 20 20 60

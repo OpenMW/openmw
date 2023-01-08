@@ -4,6 +4,8 @@
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
 
+#include <components/misc/strings/algorithm.hpp>
+
 namespace Gui
 {
 
@@ -122,6 +124,12 @@ namespace Gui
     {
         assert(at < mItems.size() && "List item out of bounds");
         return mItems[at];
+    }
+
+    void MWList::sort()
+    {
+        // A special case for separators is not needed for now
+        std::sort(mItems.begin(), mItems.end(), Misc::StringUtils::ciLess);
     }
 
     void MWList::removeItem(const std::string& name)

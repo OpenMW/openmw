@@ -45,14 +45,14 @@ namespace
     std::string textureMipmappingToStr(const std::string& val)
     {
         if (val == "linear")
-            return "#{SettingsMenu:TextureFilteringTrilinear}";
+            return "#{OMWEngine:TextureFilteringTrilinear}";
         if (val == "nearest")
-            return "#{SettingsMenu:TextureFilteringBilinear}";
+            return "#{OMWEngine:TextureFilteringBilinear}";
         if (val == "none")
-            return "#{SettingsMenu:TextureFilteringDisabled}";
+            return "#{OMWEngine:TextureFilteringDisabled}";
 
         Log(Debug::Warning) << "Warning: Invalid texture mipmap option: " << val;
-        return "#{SettingsMenu:TextureFilteringOther}";
+        return "#{OMWEngine:TextureFilteringOther}";
     }
 
     std::string lightingMethodToStr(SceneUtil::LightingMethod method)
@@ -61,14 +61,14 @@ namespace
         switch (method)
         {
             case SceneUtil::LightingMethod::FFP:
-                result = "#{SettingsMenu:LightingMethodLegacy}";
+                result = "#{OMWEngine:LightingMethodLegacy}";
                 break;
             case SceneUtil::LightingMethod::PerObjectUniform:
-                result = "#{SettingsMenu:LightingMethodShadersCompatibility}";
+                result = "#{OMWEngine:LightingMethodShadersCompatibility}";
                 break;
             case SceneUtil::LightingMethod::SingleUBO:
             default:
-                result = "#{SettingsMenu:LightingMethodShaders}";
+                result = "#{OMWEngine:LightingMethodShaders}";
                 break;
         }
 
@@ -533,7 +533,7 @@ namespace MWGui
         _sender->setCaptionWithReplacing(_sender->getItemNameAt(_sender->getIndexSelected()));
 
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
-            "#{SettingsMenu:ChangeRequiresRestart}", { "#{sOK}" }, true);
+            "#{OMWEngine:ChangeRequiresRestart}", { "#{sOK}" }, true);
 
         Settings::Manager::setString("lighting method", "Shaders", *_sender->getItemDataAt<std::string>(pos));
         apply();
@@ -547,7 +547,7 @@ namespace MWGui
         _sender->setCaptionWithReplacing(_sender->getItemNameAt(_sender->getIndexSelected()));
 
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
-            "#{SettingsMenu:ChangeRequiresRestart}", { "#{sOK}" }, true);
+            "#{OMWEngine:ChangeRequiresRestart}", { "#{sOK}" }, true);
 
         std::vector<std::string> currentLocales = Settings::Manager::getStringArray("preferred locales", "General");
         if (currentLocales.size() <= langPriority)
@@ -601,7 +601,7 @@ namespace MWGui
     {
         std::vector<std::string> buttons = { "#{sYes}", "#{sNo}" };
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
-            "#{SettingsMenu:LightingResetToDefaults}", buttons, true);
+            "#{OMWEngine:LightingResetToDefaults}", buttons, true);
         int selectedButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
         if (selectedButton == 1 || selectedButton == -1)
             return;

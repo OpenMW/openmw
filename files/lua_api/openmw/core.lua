@@ -112,7 +112,7 @@
 -- @field #Cell cell The cell where the object currently is. During loading a game and for objects in an inventory or a container `cell` is nil.
 -- @field #table type Type of the object (one of the tables from the package @{openmw.types#types}).
 -- @field #number count Count (makes sense if stored in a container).
--- @field #string recordId Record ID.
+-- @field #string recordId Returns record ID of the object in lowercase.
 
 ---
 -- Does the object still exist and is available.
@@ -144,6 +144,7 @@
 -- @function [parent=#GameObject] addScript
 -- @param self
 -- @param #string scriptPath Path to the script in OpenMW virtual filesystem.
+-- @param #table initData (optional) Initialization data to be passed to onInit. If missed then Lua initialization data from content files will be used (if exists for this script).
 
 ---
 -- Whether a script with given path is attached to this object.
@@ -182,11 +183,19 @@
 -- @type Cell
 -- @field #string name Name of the cell (can be empty string).
 -- @field #string region Region of the cell.
--- @field #boolean isExterior Whether the cell is an exterior.
--- @field #boolean isQuasiExterior Whether the cell is a quasi exterior (like interior but with the sky and the wheather).
+-- @field #boolean isExterior Whether the cell is an exterior cell. "Exterior" means grid of cells where the player can seamless walk from one cell to another without teleports. QuasiExterior (interior with sky) is not an exterior.
+-- @field #boolean isQuasiExterior (DEPRECATED, use `hasTag("QuasiExterior")`) Whether the cell is a quasi exterior (like interior but with the sky and the wheather).
 -- @field #number gridX Index of the cell by X (only for exteriors).
 -- @field #number gridY Index of the cell by Y (only for exteriors).
 -- @field #boolean hasWater True if the cell contains water.
+-- @field #boolean hasSky True if in this cell sky should be rendered.
+
+---
+-- Returns true if the cell has given tag.
+-- @function [parent=#Cell] hasTag
+-- @param self
+-- @param #string tag One of "QuasiExterior", "NoSleep".
+-- @return #boolean
 
 ---
 -- Returns true either if the cell contains the object or if the cell is an exterior and the object is also in an exterior.
