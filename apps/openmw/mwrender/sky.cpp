@@ -291,6 +291,7 @@ namespace MWRender
         mRootNode->addChild(mEarlyRenderBinRoot);
         mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
 
+        mPrecipitationOcclusion = Settings::Manager::getBool("weather particle occlusion", "Shaders");
         mPrecipitationOccluder = std::make_unique<PrecipitationOccluder>(skyroot, parentNode, rootNode, camera);
     }
 
@@ -468,7 +469,8 @@ namespace MWRender
         mSceneManager->recreateShaders(mRainNode);
 
         mRootNode->addChild(mRainNode);
-        mPrecipitationOccluder->enable();
+        if (mPrecipitationOcclusion)
+            mPrecipitationOccluder->enable();
     }
 
     void SkyManager::destroyRain()
@@ -727,7 +729,7 @@ namespace MWRender
 
                 mSceneManager->recreateShaders(mParticleNode);
 
-                if (mCurrentParticleEffect == "meshes\\snow.nif")
+                if (mPrecipitationOcclusion && mCurrentParticleEffect == "meshes\\snow.nif")
                 {
                     mPrecipitationOccluder->enable();
                     mPrecipitationOccluder->updateRange(defaultWrapRange);

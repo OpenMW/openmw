@@ -151,6 +151,7 @@ namespace MWRender
         osg::ref_ptr<RainCounter> mCounter;
         osg::ref_ptr<RainShooter> mRainShooter;
 
+        bool mPrecipitationOcclusion = false;
         std::unique_ptr<PrecipitationOccluder> mPrecipitationOccluder;
 
         bool mCreated;
