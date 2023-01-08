@@ -132,7 +132,7 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
         }
     }
 
-    if (mLauncherSettings.value(QString("General/firstrun"), QString("true")) == QLatin1String("true"))
+    if (mLauncherSettings.isFirstRun())
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("First run"));
@@ -289,8 +289,6 @@ bool Launcher::MainDialog::setupLauncherSettings()
 {
     mLauncherSettings.clear();
 
-    mLauncherSettings.setMultiValueEnabled(true);
-
     const QString path
         = Files::pathToQString(mCfgMgr.getUserConfigPath() / Config::LauncherSettings::sLauncherConfigFileName);
 
@@ -438,31 +436,20 @@ bool Launcher::MainDialog::setupGraphicsSettings()
 
 void Launcher::MainDialog::loadSettings()
 {
-    int width = mLauncherSettings.value(QString("General/MainWindow/width")).toInt();
-    int height = mLauncherSettings.value(QString("General/MainWindow/height")).toInt();
-
-    int posX = mLauncherSettings.value(QString("General/MainWindow/posx")).toInt();
-    int posY = mLauncherSettings.value(QString("General/MainWindow/posy")).toInt();
-
-    resize(width, height);
-    move(posX, posY);
+    const auto& mainWindow = mLauncherSettings.getMainWindow();
+    resize(mainWindow.mWidth, mainWindow.mHeight);
+    move(mainWindow.mPosX, mainWindow.mPosY);
 }
 
 void Launcher::MainDialog::saveSettings()
 {
-    QString width = QString::number(this->width());
-    QString height = QString::number(this->height());
-
-    mLauncherSettings.setValue(QString("General/MainWindow/width"), width);
-    mLauncherSettings.setValue(QString("General/MainWindow/height"), height);
-
-    QString posX = QString::number(this->pos().x());
-    QString posY = QString::number(this->pos().y());
-
-    mLauncherSettings.setValue(QString("General/MainWindow/posx"), posX);
-    mLauncherSettings.setValue(QString("General/MainWindow/posy"), posY);
-
-    mLauncherSettings.setValue(QString("General/firstrun"), QString("false"));
+    mLauncherSettings.setMainWindow(Config::LauncherSettings::MainWindow{
+        .mWidth = width(),
+        .mHeight = height(),
+        .mPosX = pos().x(),
+        .mPosY = pos().y(),
+    });
+    mLauncherSettings.resetFirstRun();
 }
 
 bool Launcher::MainDialog::writeSettings()
