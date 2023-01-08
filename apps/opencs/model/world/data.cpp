@@ -1242,10 +1242,10 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
         case ESM::REC_DIAL:
         {
             ESM::Dialogue record;
-            const std::string& recordIdString = record.mId.getRefIdString();
             bool isDeleted = false;
 
             record.load(*mReader, isDeleted);
+            const std::string& recordIdString = record.mId.getRefIdString();
 
             if (isDeleted)
             {
