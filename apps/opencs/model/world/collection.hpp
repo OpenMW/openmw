@@ -490,13 +490,7 @@ namespace CSMWorld
     int Collection<ESXRecordT, IdAccessorT>::searchId(const ESM::RefId& id) const
     {
 
-        std::map<std::string, int>::const_iterator iter
-            = mIndex.find(Misc::StringUtils::lowerCase(id.getRefIdString()));
-
-        if (iter == mIndex.end())
-            return -1;
-
-        return iter->second;
+        return searchId(id.getRefIdString());
     }
 
     template <typename ESXRecordT, typename IdAccessorT>
