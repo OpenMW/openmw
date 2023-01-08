@@ -5,75 +5,68 @@ namespace MWInput
 {
     enum Actions
     {
-        // please add new actions at the bottom, in order to preserve the channel IDs in the key configuration files
+        // Action IDs are used in the configuration file input_v3.xml
 
-        A_GameMenu,
+        A_GameMenu = 0,
 
-        A_Unused,
+        A_Screenshot = 2, // Take a screenshot
 
-        A_Screenshot, // Take a screenshot
+        A_Inventory = 3, // Toggle inventory screen
+        A_Console = 4, // Toggle console screen
 
-        A_Inventory, // Toggle inventory screen
+        A_MoveLeft = 5, // Move player left / right
+        A_MoveRight = 6,
+        A_MoveForward = 7, // Forward / Backward
+        A_MoveBackward = 8,
 
-        A_Console, // Toggle console screen
+        A_Activate = 9,
 
-        A_MoveLeft, // Move player left / right
-        A_MoveRight,
-        A_MoveForward, // Forward / Backward
-        A_MoveBackward,
+        A_Use = 10, // Use weapon, spell, etc.
+        A_Jump = 11,
+        A_AutoMove = 12, // Toggle Auto-move forward
+        A_Rest = 13, // Rest
+        A_Journal = 14, // Journal
+        A_Run = 17, // Run when held
+        A_CycleSpellLeft = 18, // cycling through spells
+        A_CycleSpellRight = 19,
+        A_CycleWeaponLeft = 20, // Cycling through weapons
+        A_CycleWeaponRight = 21,
+        A_AlwaysRun = 23, // Toggle Walking/Running
+        A_Sneak = 24,
 
-        A_Activate,
+        A_QuickSave = 25,
+        A_QuickLoad = 26,
+        A_QuickMenu = 27,
+        A_ToggleWeapon = 28,
+        A_ToggleSpell = 29,
 
-        A_Use, // Use weapon, spell, etc.
-        A_Jump,
-        A_AutoMove, // Toggle Auto-move forward
-        A_Rest, // Rest
-        A_Journal, // Journal
-        A_Weapon, // Draw/Sheath weapon
-        A_Spell, // Ready/Unready Casting
-        A_Run, // Run when held
-        A_CycleSpellLeft, // cycling through spells
-        A_CycleSpellRight,
-        A_CycleWeaponLeft, // Cycling through weapons
-        A_CycleWeaponRight,
-        A_ToggleSneak, // Toggles Sneak
-        A_AlwaysRun, // Toggle Walking/Running
-        A_Sneak,
+        A_TogglePOV = 30,
 
-        A_QuickSave,
-        A_QuickLoad,
-        A_QuickMenu,
-        A_ToggleWeapon,
-        A_ToggleSpell,
+        A_QuickKey1 = 31,
+        A_QuickKey2 = 32,
+        A_QuickKey3 = 33,
+        A_QuickKey4 = 34,
+        A_QuickKey5 = 35,
+        A_QuickKey6 = 36,
+        A_QuickKey7 = 37,
+        A_QuickKey8 = 38,
+        A_QuickKey9 = 39,
+        A_QuickKey10 = 40,
 
-        A_TogglePOV,
+        A_QuickKeysMenu = 41,
 
-        A_QuickKey1,
-        A_QuickKey2,
-        A_QuickKey3,
-        A_QuickKey4,
-        A_QuickKey5,
-        A_QuickKey6,
-        A_QuickKey7,
-        A_QuickKey8,
-        A_QuickKey9,
-        A_QuickKey10,
+        A_ToggleHUD = 42,
+        A_ToggleDebug = 43,
 
-        A_QuickKeysMenu,
+        A_LookUpDown = 44, // Joystick look
+        A_LookLeftRight = 45,
+        A_MoveForwardBackward = 46,
+        A_MoveLeftRight = 47,
 
-        A_ToggleHUD,
+        A_ZoomIn = 48,
+        A_ZoomOut = 49,
 
-        A_ToggleDebug,
-
-        A_LookUpDown, // Joystick look
-        A_LookLeftRight,
-        A_MoveForwardBackward,
-        A_MoveLeftRight,
-
-        A_ZoomIn,
-        A_ZoomOut,
-
-        A_TogglePostProcessorHUD,
+        A_TogglePostProcessorHUD = 50,
 
         A_Last // Marker for the last item
     };
