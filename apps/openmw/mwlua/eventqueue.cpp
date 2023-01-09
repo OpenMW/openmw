@@ -52,8 +52,8 @@ namespace MWLua
 
     void saveEvents(ESM::ESMWriter& esm, const GlobalEventQueue& globalEvents, const LocalEventQueue& localEvents)
     {
-        ObjectId globalId;
-        globalId.unset(); // Used as a marker of a global event.
+        // Used as a marker of a global event.
+        constexpr ObjectId globalId;
 
         for (const GlobalEvent& e : globalEvents)
             saveEvent(esm, globalId, e);

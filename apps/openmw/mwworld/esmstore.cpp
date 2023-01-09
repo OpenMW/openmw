@@ -49,7 +49,6 @@ namespace
             const ESM::ReadersCache::BusyItem reader = readers.get(index);
             cell.restore(*reader, i);
             ESM::CellRef ref;
-            ref.mRefNum.unset();
             bool deleted = false;
             while (cell.getNextRef(*reader, ref, deleted))
             {

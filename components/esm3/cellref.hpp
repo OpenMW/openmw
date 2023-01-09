@@ -17,8 +17,8 @@ namespace ESM
 
     struct RefNum
     {
-        unsigned int mIndex;
-        int mContentFile;
+        unsigned int mIndex = 0;
+        int mContentFile = -1;
 
         void load(ESMReader& esm, bool wide = false, NAME tag = "FRMR");
 
@@ -27,7 +27,6 @@ namespace ESM
         inline bool hasContentFile() const { return mContentFile >= 0; }
 
         inline bool isSet() const { return mIndex != 0 || mContentFile != -1; }
-        inline void unset() { *this = { 0, -1 }; }
     };
 
     /* Cell reference. This represents ONE object (of many) inside the

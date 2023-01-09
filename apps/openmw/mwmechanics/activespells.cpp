@@ -149,7 +149,6 @@ namespace MWMechanics
         params.mEffects = mEffects;
         params.mDisplayName = mDisplayName;
         params.mCasterActorId = mCasterActorId;
-        params.mItem.unset();
         if (mSlot)
         {
             // Note that we're storing the inventory slot as a RefNum instead of an int as a matter of future proofing

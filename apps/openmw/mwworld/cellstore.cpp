@@ -693,7 +693,6 @@ namespace MWWorld
 
                 // Get each reference in turn
                 ESM::MovedCellRef cMRef;
-                cMRef.mRefNum.mIndex = 0;
                 bool deleted = false;
                 bool moved = false;
                 while (ESM::Cell::getNextRef(
@@ -750,11 +749,8 @@ namespace MWWorld
                 mCell->restore(*reader, i);
 
                 ESM::CellRef ref;
-                ref.mRefNum.unset();
-
                 // Get each reference in turn
                 ESM::MovedCellRef cMRef;
-                cMRef.mRefNum.mIndex = 0;
                 bool deleted = false;
                 bool moved = false;
                 while (ESM::Cell::getNextRef(

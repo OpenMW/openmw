@@ -22,7 +22,6 @@ namespace
         ESM::GlobalScript operator()(const MWWorld::Ptr& ptr) const
         {
             ESM::GlobalScript script;
-            script.mTargetRef.unset();
             script.mRunning = false;
             if (!ptr.isEmpty())
             {

@@ -258,7 +258,7 @@ namespace ESM
 
     void CellRef::blank()
     {
-        mRefNum.unset();
+        mRefNum = RefNum{};
         mRefID = ESM::RefId::sEmpty;
         mScale = 1;
         mOwner = ESM::RefId::sEmpty;

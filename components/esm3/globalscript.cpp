@@ -15,7 +15,7 @@ namespace ESM
         mRunning = 0;
         esm.getHNOT(mRunning, "RUN_");
 
-        mTargetRef.unset();
+        mTargetRef = RefNum{};
         mTargetId = ESM::RefId::stringRefId(esm.getHNOString("TARG"));
         if (esm.peekNextSub("FRMR"))
             mTargetRef.load(esm, true, "FRMR");

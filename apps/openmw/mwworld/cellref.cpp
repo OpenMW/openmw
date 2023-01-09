@@ -30,7 +30,7 @@ namespace MWWorld
 
     void CellRef::unsetRefNum()
     {
-        mCellRef.mRefNum.unset();
+        mCellRef.mRefNum = ESM::RefNum{};
     }
 
     void CellRef::setScale(float scale)
