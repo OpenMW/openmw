@@ -50,9 +50,6 @@ namespace MWWorld
         std::size_t mPtrIndexUpdateCounter = 0;
         ESM::RefNum mLastGeneratedRefnum;
 
-        WorldModel(const WorldModel&);
-        WorldModel& operator=(const WorldModel&);
-
         const ESM::Cell* getESMCellByName(std::string_view name);
         ESM::CellVariant getCellByName(std::string_view name);
 
@@ -62,9 +59,12 @@ namespace MWWorld
         void writeCell(ESM::ESMWriter& writer, CellStore& cell) const;
 
     public:
-        void clear();
-
         explicit WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& reader);
+
+        WorldModel(const WorldModel&) = delete;
+        WorldModel& operator=(const WorldModel&) = delete;
+
+        void clear();
 
         CellStore* getExterior(int x, int y);
         CellStore* getInterior(std::string_view name);
