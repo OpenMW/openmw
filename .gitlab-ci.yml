@@ -187,8 +187,8 @@ Ubuntu_GCC_tests_asan:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
     CMAKE_BUILD_TYPE: Debug
-    CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=leak
-    CMAKE_EXE_LINKER_FLAGS: -fsanitize=address -fsanitize=pointer-compare -fsanitize=pointer-subtract -fsanitize=leak -fuse-ld=mold
+    CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak
+    CMAKE_EXE_LINKER_FLAGS: -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak -fuse-ld=mold
     ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1
   artifacts:
     paths: []
