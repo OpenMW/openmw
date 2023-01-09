@@ -153,11 +153,11 @@ void MWWorld::WorldModel::writeCell(ESM::ESMWriter& writer, CellStore& cell) con
 MWWorld::WorldModel::WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& readers)
     : mStore(store)
     , mReaders(readers)
+    , mIdCache(std::clamp(Settings::Manager::getInt("pointers cache size", "Cells"), 40, 1000),
+          { ESM::RefId::sEmpty, nullptr })
     , mIdCacheIndex(0)
     , mPtrIndexUpdateCounter(0)
 {
-    int cacheSize = std::clamp(Settings::Manager::getInt("pointers cache size", "Cells"), 40, 1000);
-    mIdCache = IdCache(cacheSize, std::pair<ESM::RefId, CellStore*>(ESM::RefId(), (CellStore*)nullptr));
 }
 
 MWWorld::CellStore* MWWorld::WorldModel::getExterior(int x, int y)
