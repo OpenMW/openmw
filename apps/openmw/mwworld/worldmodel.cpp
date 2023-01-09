@@ -155,8 +155,6 @@ MWWorld::WorldModel::WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCach
     , mReaders(readers)
     , mIdCache(std::clamp(Settings::Manager::getInt("pointers cache size", "Cells"), 40, 1000),
           { ESM::RefId::sEmpty, nullptr })
-    , mIdCacheIndex(0)
-    , mPtrIndexUpdateCounter(0)
 {
 }
 

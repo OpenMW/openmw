@@ -45,7 +45,10 @@ namespace MWWorld
         mutable std::map<std::string, CellStore, Misc::StringUtils::CiComp> mInteriors;
         mutable std::map<std::pair<int, int>, CellStore> mExteriors;
         IdCache mIdCache;
-        std::size_t mIdCacheIndex;
+        std::size_t mIdCacheIndex = 0;
+        std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
+        std::size_t mPtrIndexUpdateCounter = 0;
+        ESM::RefNum mLastGeneratedRefnum;
 
         WorldModel(const WorldModel&);
         WorldModel& operator=(const WorldModel&);
@@ -57,10 +60,6 @@ namespace MWWorld
         Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);
 
         void writeCell(ESM::ESMWriter& writer, CellStore& cell) const;
-
-        std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
-        size_t mPtrIndexUpdateCounter;
-        ESM::RefNum mLastGeneratedRefnum;
 
     public:
         void clear();
