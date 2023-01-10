@@ -6,11 +6,6 @@
 
 namespace Interpreter
 {
-    int Runtime::getPC() const
-    {
-        return mPC;
-    }
-
     int Runtime::getIntegerLiteral(int index) const
     {
         if (index < 0 || index >= static_cast<int>(mCode[1]))
@@ -66,11 +61,6 @@ namespace Interpreter
         mCode = nullptr;
         mCodeSize = 0;
         mStack.clear();
-    }
-
-    void Runtime::setPC(int PC)
-    {
-        mPC = PC;
     }
 
     void Runtime::push(const Data& data)

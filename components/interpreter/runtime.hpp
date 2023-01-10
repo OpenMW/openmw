@@ -21,7 +21,7 @@ namespace Interpreter
         std::vector<Data> mStack;
 
     public:
-        int getPC() const;
+        int getPC() const { return mPC; }
         ///< return program counter.
 
         int getIntegerLiteral(int index) const;
@@ -36,7 +36,7 @@ namespace Interpreter
 
         void clear();
 
-        void setPC(int PC);
+        void setPC(int value) { mPC = value; }
         ///< set program counter.
 
         void push(const Data& data);
