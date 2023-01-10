@@ -703,6 +703,8 @@ namespace MWRender
                 mParticleEffect->accept(findPSVisitor);
 
                 const osg::Vec3 defaultWrapRange = osg::Vec3(1024, 1024, 800);
+                const bool occlusionEnabledForEffect
+                    = !mRainEffect.empty() || mCurrentParticleEffect == "meshes\\snow.nif";
 
                 for (unsigned int i = 0; i < findPSVisitor.mFoundNodes.size(); ++i)
                 {
@@ -724,12 +726,14 @@ namespace MWRender
                     }
 
                     ps->setUserValue("simpleLighting", true);
-                    ps->setUserValue("particleOcclusion", true);
+
+                    if (occlusionEnabledForEffect)
+                        ps->setUserValue("particleOcclusion", true);
                 }
 
                 mSceneManager->recreateShaders(mParticleNode);
 
-                if (mPrecipitationOcclusion && mCurrentParticleEffect == "meshes\\snow.nif")
+                if (mPrecipitationOcclusion && occlusionEnabledForEffect)
                 {
                     mPrecipitationOccluder->enable();
                     mPrecipitationOccluder->updateRange(defaultWrapRange);
