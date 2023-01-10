@@ -90,12 +90,12 @@ namespace Interpreter
         mStack.pop_back();
     }
 
-    Data& Runtime::operator[](int Index)
+    Data& Runtime::operator[](int index)
     {
-        if (Index < 0 || Index >= static_cast<int>(mStack.size()))
+        if (index < 0 || index >= static_cast<int>(mStack.size()))
             throw std::runtime_error("stack index out of range");
 
-        return mStack[mStack.size() - Index - 1];
+        return mStack[mStack.size() - index - 1];
     }
 
     Context& Runtime::getContext()

@@ -51,7 +51,7 @@ namespace Interpreter
         void pop();
         ///< pop stack
 
-        Data& operator[](int Index);
+        Data& operator[](int index);
         ///< Access stack member, counted from the top.
 
         Context& getContext();
