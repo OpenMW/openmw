@@ -6,14 +6,6 @@
 
 namespace Interpreter
 {
-    Runtime::Runtime()
-        : mContext(nullptr)
-        , mCode(nullptr)
-        , mCodeSize(0)
-        , mPC(0)
-    {
-    }
-
     int Runtime::getPC() const
     {
         return mPC;

@@ -14,15 +14,13 @@ namespace Interpreter
 
     class Runtime
     {
-        Context* mContext;
-        const Type_Code* mCode;
-        int mCodeSize;
-        int mPC;
+        Context* mContext = nullptr;
+        const Type_Code* mCode = nullptr;
+        int mCodeSize = 0;
+        int mPC = 0;
         std::vector<Data> mStack;
 
     public:
-        Runtime();
-
         int getPC() const;
         ///< return program counter.
 
