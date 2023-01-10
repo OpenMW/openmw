@@ -50,7 +50,6 @@ namespace ESM
                 params.mId = esm.getRefId();
                 esm.getHNT(params.mCasterActorId, "CAST");
                 params.mDisplayName = esm.getHNString("DISP");
-                params.mItem.unset();
                 if (format < 17)
                     params.mType = ActiveSpells::Type_Temporary;
                 else

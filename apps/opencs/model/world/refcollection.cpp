@@ -56,7 +56,6 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
     CellRef ref;
     ref.mNew = false;
     ESM::MovedCellRef mref;
-    mref.mRefNum.mIndex = 0;
     bool isDeleted = false;
     bool isMoved = false;
 

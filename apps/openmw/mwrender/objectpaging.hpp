@@ -94,7 +94,6 @@ namespace MWRender
         RefnumMarker()
             : mNumVertices(0)
         {
-            mRefnum.unset();
         }
         RefnumMarker(const RefnumMarker& copy, osg::CopyOp co)
             : mRefnum(copy.mRefnum)

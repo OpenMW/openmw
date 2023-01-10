@@ -494,9 +494,7 @@ namespace MWRender
                         const ESM::ReadersCache::BusyItem reader = readers.get(index);
                         cell->restore(*reader, i);
                         ESM::CellRef ref;
-                        ref.mRefNum.unset();
                         ESM::MovedCellRef cMRef;
-                        cMRef.mRefNum.mIndex = 0;
                         bool deleted = false;
                         bool moved = false;
                         while (ESM::Cell::getNextRef(

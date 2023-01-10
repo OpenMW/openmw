@@ -89,7 +89,7 @@ void MWWorld::WorldModel::clear()
 {
     mPtrIndex.clear();
     mPtrIndexUpdateCounter = 0;
-    mLastGeneratedRefnum.unset();
+    mLastGeneratedRefnum = ESM::RefNum{};
     mInteriors.clear();
     mExteriors.clear();
     std::fill(mIdCache.begin(), mIdCache.end(), std::make_pair(ESM::RefId::sEmpty, (MWWorld::CellStore*)nullptr));
@@ -155,7 +155,6 @@ MWWorld::WorldModel::WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCach
     , mIdCacheIndex(0)
     , mPtrIndexUpdateCounter(0)
 {
-    mLastGeneratedRefnum.unset();
     int cacheSize = std::clamp(Settings::Manager::getInt("pointers cache size", "Cells"), 40, 1000);
     mIdCache = IdCache(cacheSize, std::pair<ESM::RefId, CellStore*>(ESM::RefId::sEmpty, (CellStore*)nullptr));
 }

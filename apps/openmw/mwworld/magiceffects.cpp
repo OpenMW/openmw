@@ -62,7 +62,6 @@ namespace MWWorld
             ESM::ActiveSpells::ActiveSpellParams params;
             params.mId = id;
             params.mDisplayName = spell->mName;
-            params.mItem.unset();
             params.mCasterActorId = creatureStats.mActorId;
             if (spell->mData.mType == ESM::Spell::ST_Ability)
                 params.mType = ESM::ActiveSpells::Type_Ability;
