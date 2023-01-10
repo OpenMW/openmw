@@ -53,9 +53,9 @@ namespace
             Shader::ShaderManager& shaderMgr
                 = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager();
             osg::ref_ptr<osg::Shader> vertex
-                = shaderMgr.getShader("precipitationdepth_vertex.glsl", {}, osg::Shader::VERTEX);
+                = shaderMgr.getShader("precipitation_vertex.glsl", {}, osg::Shader::VERTEX);
             osg::ref_ptr<osg::Shader> fragment
-                = shaderMgr.getShader("precipitationdepth_fragment.glsl", {}, osg::Shader::FRAGMENT);
+                = shaderMgr.getShader("precipitation_fragment.glsl", {}, osg::Shader::FRAGMENT);
             mProgram = shaderMgr.getProgram(vertex, fragment);
         }
 
