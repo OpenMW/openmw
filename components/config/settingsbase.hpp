@@ -1,7 +1,7 @@
 #ifndef SETTINGSBASE_HPP
 #define SETTINGSBASE_HPP
 
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QString>
 #include <QStringList>
 #include <QTextStream>
@@ -42,8 +42,8 @@ namespace Config
 
             QString sectionPrefix;
 
-            QRegExp sectionRe("^\\[([^]]+)\\]");
-            QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
+            QRegularExpression sectionRe(QRegularExpression::anchoredPattern("^\\[([^]]+)\\]"));
+            QRegularExpression keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
             while (!stream.atEnd())
             {
@@ -52,18 +52,19 @@ namespace Config
                 if (line.isEmpty() || line.startsWith("#"))
                     continue;
 
-                if (sectionRe.exactMatch(line))
+                QRegularExpressionMatch sectionMatch = sectionRe.match(line);
+                if (sectionMatch.hasMatch())
                 {
-                    sectionPrefix = sectionRe.cap(1);
+                    sectionPrefix = sectionMatch.captured(1);
                     sectionPrefix.append("/");
                     continue;
                 }
 
-                if (keyRe.indexIn(line) != -1)
+                QRegularExpressionMatch match = keyRe.match(line);
+                if (match.hasMatch())
                 {
-
-                    QString key = keyRe.cap(1).trimmed();
-                    QString value = keyRe.cap(2).trimmed();
+                    QString key = match.captured(1).trimmed();
+                    QString value = match.captured(2).trimmed();
 
                     if (!sectionPrefix.isEmpty())
                         key.prepend(sectionPrefix);

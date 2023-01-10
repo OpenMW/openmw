@@ -4,6 +4,7 @@
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QMessageBox>
+#include <QRegularExpression>
 
 #include <boost/program_options.hpp>
 
@@ -362,7 +363,7 @@ bool CS::Editor::makeIPCServer()
             mServer->listen("dummy");
             QString fullPath = mServer->fullServerName();
             mServer->close();
-            fullPath.remove(QRegExp("dummy$"));
+            fullPath.remove(QRegularExpression("dummy$"));
             fullPath += mIpcServerName;
             const auto path = Files::pathFromQString(fullPath);
             if (exists(path))

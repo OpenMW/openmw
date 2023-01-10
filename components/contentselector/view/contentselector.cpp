@@ -59,7 +59,7 @@ void ContentSelectorView::ContentSelector::buildAddonView()
     ui.addonView->setVisible(true);
 
     mAddonProxyModel = new AddOnProxyModel(this);
-    mAddonProxyModel->setFilterRegExp(searchFilter()->text());
+    mAddonProxyModel->setFilterRegularExpression(searchFilter()->text());
     mAddonProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     mAddonProxyModel->setDynamicSortFilter(true);
     mAddonProxyModel->setSourceModel(mContentModel);

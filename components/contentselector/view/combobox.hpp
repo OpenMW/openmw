@@ -4,7 +4,7 @@
 #include <QComboBox>
 
 class QString;
-class QRegExpValidator;
+class QRegularExpressionValidator;
 
 namespace ContentSelectorView
 {
@@ -22,7 +22,7 @@ namespace ContentSelectorView
 
     protected:
         void paintEvent(QPaintEvent*) override;
-        QRegExpValidator* mValidator;
+        QRegularExpressionValidator* mValidator;
     };
 }
 

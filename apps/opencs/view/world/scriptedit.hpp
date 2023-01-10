@@ -3,7 +3,7 @@
 
 #include <QFont>
 #include <QPlainTextEdit>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QTimer>
 #include <QVector>
 #include <QWidget>
@@ -95,7 +95,7 @@ namespace CSVWorld
     private:
         QVector<CSMWorld::UniversalId::Type> mAllowedTypes;
         const CSMDoc::Document& mDocument;
-        const QRegExp mWhiteListQoutes;
+        const QRegularExpression mWhiteListQoutes;
 
         void dragEnterEvent(QDragEnterEvent* event) override;
 

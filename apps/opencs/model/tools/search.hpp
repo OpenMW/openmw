@@ -5,7 +5,7 @@
 #include <string>
 
 #include <QMetaType>
-#include <QRegExp>
+#include <QRegularExpression>
 
 class QModelIndex;
 
@@ -39,7 +39,7 @@ namespace CSMTools
     private:
         Type mType;
         std::string mText;
-        QRegExp mRegExp;
+        QRegularExpression mRegExp;
         int mValue;
         bool mCase;
         std::set<int> mColumns;
@@ -66,7 +66,7 @@ namespace CSMTools
 
         Search(Type type, bool caseSensitive, const std::string& value);
 
-        Search(Type type, bool caseSensitive, const QRegExp& value);
+        Search(Type type, bool caseSensitive, const QRegularExpression& value);
 
         Search(Type type, bool caseSensitive, int value);
 

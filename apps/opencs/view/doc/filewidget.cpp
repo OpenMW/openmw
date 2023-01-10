@@ -3,8 +3,6 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QRegExp>
-#include <QRegExpValidator>
 
 QString CSVDoc::FileWidget::getExtension() const
 {
