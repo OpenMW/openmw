@@ -7,12 +7,15 @@
 #include <stack>
 #include <utility>
 
+#include "components/interpreter/program.hpp"
 #include "opcodes.hpp"
 #include "runtime.hpp"
 #include "types.hpp"
 
 namespace Interpreter
 {
+    struct Program;
+
     class Interpreter
     {
         std::stack<Runtime> mCallstack;
@@ -66,7 +69,7 @@ namespace Interpreter
             installSegment(mSegment5, code, std::make_unique<T>(std::forward<TArgs>(args)...));
         }
 
-        void run(const Type_Code* code, int codeSize, Context& context);
+        void run(const Program& program, Context& context);
     };
 }
 

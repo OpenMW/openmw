@@ -17,9 +17,9 @@ namespace Compiler
         return mName;
     }
 
-    void FileParser::getCode(std::vector<Interpreter::Type_Code>& code) const
+    Interpreter::Program FileParser::getProgram() const
     {
-        mScriptParser.getCode(code);
+        return mScriptParser.getProgram();
     }
 
     const Locals& FileParser::getLocals() const

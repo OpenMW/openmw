@@ -9,14 +9,14 @@
 namespace Interpreter
 {
     class Context;
+    struct Program;
 
     /// Runtime data and engine interface
 
     class Runtime
     {
         Context* mContext = nullptr;
-        const Type_Code* mCode = nullptr;
-        int mCodeSize = 0;
+        const Program* mProgram = nullptr;
         int mPC = 0;
         std::vector<Data> mStack;
 
@@ -30,9 +30,9 @@ namespace Interpreter
 
         std::string_view getStringLiteral(int index) const;
 
-        void configure(const Type_Code* code, int codeSize, Context& context);
+        void configure(const Program& program, Context& context);
         ///< \a context and \a code must exist as least until either configure, clear or
-        /// the destructor is called. \a codeSize is given in 32-bit words.
+        /// the destructor is called.
 
         void clear();
 

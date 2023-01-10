@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <list>
+#include <optional>
 #include <sstream>
 
 #include <components/debug/debuglog.hpp>
@@ -187,10 +188,10 @@ namespace MWDialogue
         return false;
     }
 
-    bool DialogueManager::compile(
-        const std::string& cmd, std::vector<Interpreter::Type_Code>& code, const MWWorld::Ptr& actor)
+    std::optional<Interpreter::Program> DialogueManager::compile(const std::string& cmd, const MWWorld::Ptr& actor)
     {
         bool success = true;
+        std::optional<Interpreter::Program> program;
 
         try
         {
@@ -220,7 +221,7 @@ namespace MWDialogue
                 success = false;
 
             if (success)
-                parser.getCode(code);
+                program = parser.getProgram();
         }
         catch (const Compiler::SourceException& /* error */)
         {
@@ -238,20 +239,19 @@ namespace MWDialogue
             Log(Debug::Error) << "Error: compiling failed (dialogue script): \n" << cmd << "\n";
         }
 
-        return success;
+        return program;
     }
 
     void DialogueManager::executeScript(const std::string& script, const MWWorld::Ptr& actor)
     {
-        std::vector<Interpreter::Type_Code> code;
-        if (compile(script, code, actor))
+        if (const std::optional<Interpreter::Program> program = compile(script, actor))
         {
             try
             {
                 MWScript::InterpreterContext interpreterContext(&actor.getRefData().getLocals(), actor);
                 Interpreter::Interpreter interpreter;
                 MWScript::installOpcodes(interpreter);
-                interpreter.run(code.data(), code.size(), interpreterContext);
+                interpreter.run(*program, interpreterContext);
             }
             catch (const std::exception& error)
             {
