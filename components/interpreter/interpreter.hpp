@@ -16,16 +16,12 @@ namespace Interpreter
     class Interpreter
     {
         std::stack<Runtime> mCallstack;
-        bool mRunning;
+        bool mRunning = false;
         Runtime mRuntime;
         std::map<int, std::unique_ptr<Opcode1>> mSegment0;
         std::map<int, std::unique_ptr<Opcode1>> mSegment2;
         std::map<int, std::unique_ptr<Opcode1>> mSegment3;
         std::map<int, std::unique_ptr<Opcode0>> mSegment5;
-
-        // not implemented
-        Interpreter(const Interpreter&);
-        Interpreter& operator=(const Interpreter&);
 
         void execute(Type_Code code);
 
@@ -41,7 +37,10 @@ namespace Interpreter
         }
 
     public:
-        Interpreter();
+        Interpreter() = default;
+
+        Interpreter(const Interpreter&) = delete;
+        Interpreter& operator=(const Interpreter&) = delete;
 
         template <typename T, typename... TArgs>
         void installSegment0(int code, TArgs&&... args)

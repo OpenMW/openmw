@@ -104,11 +104,6 @@ namespace Interpreter
         }
     }
 
-    Interpreter::Interpreter()
-        : mRunning(false)
-    {
-    }
-
     void Interpreter::run(const Type_Code* code, int codeSize, Context& context)
     {
         assert(codeSize >= 4);
