@@ -2,7 +2,7 @@
 
 #include <QDebug>
 #include <QFile>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QString>
 #include <QStringList>
 #include <QTextStream>
@@ -30,12 +30,12 @@ bool Wizard::IniSettings::readFile(QTextStream& stream)
     // Look for a square bracket, "'\\["
     // that has one or more "not nothing" in it, "([^]]+)"
     // and is closed with a square bracket, "\\]"
-    QRegExp sectionRe(QLatin1String("^\\[([^]]+)\\]"));
+    QRegularExpression sectionRe(QRegularExpression::anchoredPattern("^\\[([^]]+)\\]"));
 
     // Find any character(s) that is/are not equal sign(s), "[^=]+"
     // followed by an optional whitespace, an equal sign, and another optional whitespace, "\\s*=\\s*"
     // and one or more periods, "(.+)"
-    QRegExp keyRe(QLatin1String("^([^=]+)\\s*=\\s*(.+)$"));
+    QRegularExpression keyRe(QLatin1String("^([^=]+)\\s*=\\s*(.+)$"));
 
     QString currentSection;
 
@@ -46,14 +46,18 @@ bool Wizard::IniSettings::readFile(QTextStream& stream)
         if (line.isEmpty() || line.startsWith(QLatin1Char(';')))
             continue;
 
-        if (sectionRe.exactMatch(line))
+        QRegularExpressionMatch sectionMatch = sectionRe.match(line);
+        if (sectionMatch.hasMatch())
         {
-            currentSection = sectionRe.cap(1);
+            currentSection = sectionMatch.captured(1);
+            continue;
         }
-        else if (keyRe.indexIn(line) != -1)
+
+        QRegularExpressionMatch match = keyRe.match(line);
+        if (match.hasMatch())
         {
-            QString key = keyRe.cap(1).trimmed();
-            QString value = keyRe.cap(2).trimmed();
+            QString key = match.captured(1).trimmed();
+            QString value = match.captured(2).trimmed();
 
             // Append the section, but only if there is one
             if (!currentSection.isEmpty())
@@ -71,12 +75,12 @@ bool Wizard::IniSettings::writeFile(const QString& path, QTextStream& stream)
     // Look for a square bracket, "'\\["
     // that has one or more "not nothing" in it, "([^]]+)"
     // and is closed with a square bracket, "\\]"
-    QRegExp sectionRe(QLatin1String("^\\[([^]]+)\\]"));
+    QRegularExpression sectionRe(QRegularExpression::anchoredPattern("^\\[([^]]+)\\]"));
 
     // Find any character(s) that is/are not equal sign(s), "[^=]+"
     // followed by an optional whitespace, an equal sign, and another optional whitespace, "\\s*=\\s*"
     // and one or more periods, "(.+)"
-    QRegExp keyRe(QLatin1String("^([^=]+)\\s*=\\s*(.+)$"));
+    QRegularExpression keyRe(QLatin1String("^([^=]+)\\s*=\\s*(.+)$"));
 
     const QStringList keys(mSettings.keys());
 
@@ -85,7 +89,6 @@ bool Wizard::IniSettings::writeFile(const QString& path, QTextStream& stream)
 
     while (!stream.atEnd())
     {
-
         const QString line(stream.readLine());
 
         if (line.isEmpty() || line.startsWith(QLatin1Char(';')))
@@ -94,14 +97,18 @@ bool Wizard::IniSettings::writeFile(const QString& path, QTextStream& stream)
             continue;
         }
 
-        if (sectionRe.exactMatch(line))
+        QRegularExpressionMatch sectionMatch = sectionRe.match(line);
+        if (sectionMatch.hasMatch())
         {
             buffer.append(line + QLatin1String("\n"));
-            currentSection = sectionRe.cap(1);
+            currentSection = sectionMatch.captured(1);
+            continue;
         }
-        else if (keyRe.indexIn(line) != -1)
+
+        QRegularExpressionMatch match = keyRe.match(line);
+        if (match.hasMatch())
         {
-            QString key(keyRe.cap(1).trimmed());
+            QString key(match.captured(1).trimmed());
             QString lookupKey(key);
 
             // Append the section, but only if there is one

@@ -6,6 +6,7 @@
 #include <QApplication>
 #include <QContextMenuEvent>
 #include <QMenu>
+#include <QRegularExpression>
 #include <QString>
 
 #include <apps/opencs/model/filter/parser.hpp>
@@ -136,8 +137,9 @@ void CSVFilter::EditWidget::createFilterRequest(
     }
 
     if (oldContent.isEmpty()
-        || !oldContent.contains(QRegExp("^!.*$",
-            Qt::CaseInsensitive))) // if line edit is empty or it does not contain one shot filter go into replace mode
+        || !oldContent.contains(QRegularExpression("^!.*$",
+            QRegularExpression::CaseInsensitiveOption))) // if line edit is empty or it does not contain one shot filter
+                                                         // go into replace mode
     {
         replaceMode = true;
     }

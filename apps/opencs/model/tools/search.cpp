@@ -1,7 +1,7 @@
 #include "search.hpp"
 
 #include <QModelIndex>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QString>
 
 #include <memory>
@@ -49,10 +49,12 @@ void CSMTools::Search::searchRegExCell(const CSMWorld::IdTableBase* model, const
     QString text = model->data(index).toString();
 
     int pos = 0;
+    QRegularExpressionMatch match;
 
-    while ((pos = mRegExp.indexIn(text, pos)) != -1)
+    while ((match = mRegExp.match(text, pos)).hasMatch())
     {
-        int length = mRegExp.matchedLength();
+        pos = match.capturedStart();
+        int length = match.capturedLength();
 
         std::ostringstream hint;
         hint << (writable ? 'R' : 'r') << ": " << model->getColumnId(index.column()) << " " << pos << " " << length;
@@ -138,7 +140,7 @@ CSMTools::Search::Search(Type type, bool caseSensitive, const std::string& value
         throw std::logic_error("Invalid search parameter (string)");
 }
 
-CSMTools::Search::Search(Type type, bool caseSensitive, const QRegExp& value)
+CSMTools::Search::Search(Type type, bool caseSensitive, const QRegularExpression& value)
     : mType(type)
     , mRegExp(value)
     , mValue(0)
@@ -148,7 +150,7 @@ CSMTools::Search::Search(Type type, bool caseSensitive, const QRegExp& value)
     , mPaddingBefore(10)
     , mPaddingAfter(10)
 {
-    mRegExp.setCaseSensitivity(mCase ? Qt::CaseSensitive : Qt::CaseInsensitive);
+    mRegExp.setPatternOptions(mCase ? QRegularExpression::NoPatternOption : QRegularExpression::CaseInsensitiveOption);
     if (type != Type_TextRegEx && type != Type_IdRegEx)
         throw std::logic_error("Invalid search parameter (RegExp)");
 }

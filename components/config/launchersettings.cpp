@@ -1,11 +1,10 @@
 #include "launchersettings.hpp"
 
+#include <QDebug>
 #include <QMultiMap>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QString>
 #include <QTextStream>
-
-#include <QDebug>
 
 #include <components/files/qtconversion.hpp>
 
@@ -21,16 +20,16 @@ QStringList Config::LauncherSettings::subKeys(const QString& key)
     QMultiMap<QString, QString> settings = SettingsBase::getSettings();
     QStringList keys = settings.uniqueKeys();
 
-    QRegExp keyRe("(.+)/");
+    QRegularExpression keyRe("(.+)/");
 
     QStringList result;
 
     for (const QString& currentKey : keys)
     {
-
-        if (keyRe.indexIn(currentKey) != -1)
+        QRegularExpressionMatch match = keyRe.match(currentKey);
+        if (match.hasMatch())
         {
-            QString prefixedKey = keyRe.cap(1);
+            QString prefixedKey = match.captured(1);
 
             if (prefixedKey.startsWith(key))
             {
@@ -48,7 +47,7 @@ QStringList Config::LauncherSettings::subKeys(const QString& key)
 bool Config::LauncherSettings::writeFile(QTextStream& stream)
 {
     QString sectionPrefix;
-    QRegExp sectionRe("([^/]+)/(.+)$");
+    QRegularExpression sectionRe(QRegularExpression::anchoredPattern("([^/]+)/(.+)$"));
     QMultiMap<QString, QString> settings = SettingsBase::getSettings();
 
     QMapIterator<QString, QString> i(settings);
@@ -61,10 +60,11 @@ bool Config::LauncherSettings::writeFile(QTextStream& stream)
         QString prefix;
         QString key;
 
-        if (sectionRe.exactMatch(i.key()))
+        QRegularExpressionMatch match = sectionRe.match(i.key());
+        if (match.hasMatch())
         {
-            prefix = sectionRe.cap(1);
-            key = sectionRe.cap(2);
+            prefix = match.captured(1);
+            key = match.captured(2);
         }
 
         // Get rid of legacy settings

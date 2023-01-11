@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <utility>
 
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include "../world/columns.hpp"
 #include "../world/idtablebase.hpp"
@@ -57,9 +57,11 @@ bool CSMFilter::TextNode::test(const CSMWorld::IdTableBase& table, int row, cons
         return false;
 
     /// \todo make pattern syntax configurable
-    QRegExp regExp(QString::fromUtf8(mText.c_str()), Qt::CaseInsensitive);
+    QRegularExpression regExp(QRegularExpression::anchoredPattern(QString::fromUtf8(mText.c_str())),
+        QRegularExpression::CaseInsensitiveOption);
+    QRegularExpressionMatch match = regExp.match(string);
 
-    return regExp.exactMatch(string);
+    return match.hasMatch();
 }
 
 std::vector<int> CSMFilter::TextNode::getReferencedColumns() const

@@ -205,11 +205,12 @@ void Launcher::GraphicsPage::saveSettings()
     int cHeight = 0;
     if (standardRadioButton->isChecked())
     {
-        QRegExp resolutionRe(QString("(\\d+) x (\\d+).*"));
-        if (resolutionRe.exactMatch(resolutionComboBox->currentText().simplified()))
+        QRegularExpression resolutionRe(QRegularExpression::anchoredPattern(QString("(\\d+) x (\\d+).*")));
+        QRegularExpressionMatch match = resolutionRe.match(resolutionComboBox->currentText().simplified());
+        if (match.hasMatch())
         {
-            cWidth = resolutionRe.cap(1).toInt();
-            cHeight = resolutionRe.cap(2).toInt();
+            cWidth = match.captured(1).toInt();
+            cHeight = match.captured(2).toInt();
         }
     }
     else

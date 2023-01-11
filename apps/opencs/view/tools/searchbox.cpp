@@ -112,7 +112,8 @@ CSMTools::Search CSVTools::SearchBox::getSearch() const
         case CSMTools::Search::Type_TextRegEx:
         case CSMTools::Search::Type_IdRegEx:
 
-            return CSMTools::Search(type, caseSensitive, QRegExp(mText.text().toUtf8().data(), Qt::CaseInsensitive));
+            return CSMTools::Search(type, caseSensitive,
+                QRegularExpression(mText.text().toUtf8().data(), QRegularExpression::CaseInsensitiveOption));
 
         case CSMTools::Search::Type_RecordState:
 

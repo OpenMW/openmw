@@ -2,7 +2,7 @@
 #include "launchersettings.hpp"
 
 #include <QDir>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QTextCodec>
 
 #include <components/files/configurationmanager.hpp>
@@ -90,7 +90,7 @@ bool Config::GameSettings::readUserFile(QTextStream& stream, bool ignoreContent)
 bool Config::GameSettings::readFile(QTextStream& stream, QMultiMap<QString, QString>& settings, bool ignoreContent)
 {
     QMultiMap<QString, QString> cache;
-    QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
+    QRegularExpression keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
     while (!stream.atEnd())
     {
@@ -99,11 +99,11 @@ bool Config::GameSettings::readFile(QTextStream& stream, QMultiMap<QString, QStr
         if (line.isEmpty() || line.startsWith("#"))
             continue;
 
-        if (keyRe.indexIn(line) != -1)
+        QRegularExpressionMatch match = keyRe.match(line);
+        if (match.hasMatch())
         {
-
-            QString key = keyRe.cap(1).trimmed();
-            QString value = keyRe.cap(2).trimmed();
+            QString key = match.captured(1).trimmed();
+            QString value = match.captured(2).trimmed();
 
             // Don't remove composing entries
             if (key != QLatin1String("data") && key != QLatin1String("fallback-archive")
@@ -206,10 +206,13 @@ bool Config::GameSettings::writeFile(QTextStream& stream)
 
 bool Config::GameSettings::isOrderedLine(const QString& line)
 {
-    return line.contains(QRegExp("^\\s*fallback-archive\\s*=")) || line.contains(QRegExp("^\\s*fallback\\s*="))
-        || line.contains(QRegExp("^\\s*data\\s*=")) || line.contains(QRegExp("^\\s*data-local\\s*="))
-        || line.contains(QRegExp("^\\s*resources\\s*=")) || line.contains(QRegExp("^\\s*groundcover\\s*="))
-        || line.contains(QRegExp("^\\s*content\\s*="));
+    return line.contains(QRegularExpression("^\\s*fallback-archive\\s*="))
+        || line.contains(QRegularExpression("^\\s*fallback\\s*="))
+        || line.contains(QRegularExpression("^\\s*data\\s*="))
+        || line.contains(QRegularExpression("^\\s*data-local\\s*="))
+        || line.contains(QRegularExpression("^\\s*resources\\s*="))
+        || line.contains(QRegularExpression("^\\s*groundcover\\s*="))
+        || line.contains(QRegularExpression("^\\s*content\\s*="));
 }
 
 // Policy:
@@ -268,7 +271,7 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
     //        +----------------------------------------------------------+
     //
     //
-    QRegExp settingRegex("^([^=]+)\\s*=\\s*([^,]+)(.*)$");
+    QRegularExpression settingRegex("^([^=]+)\\s*=\\s*([^,]+)(.*)$");
     std::vector<QString> comments;
     auto commentStart = fileCopy.end();
     std::map<QString, std::vector<QString>> commentsMap;
@@ -279,9 +282,10 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
             // save in a separate map of comments keyed by "ordered" line
             if (!comments.empty())
             {
-                if (settingRegex.indexIn(*iter) != -1)
+                QRegularExpressionMatch match = settingRegex.match(*iter);
+                if (match.hasMatch())
                 {
-                    commentsMap[settingRegex.cap(1) + "=" + settingRegex.cap(2)] = comments;
+                    commentsMap[match.captured(1) + "=" + match.captured(2)] = comments;
                     comments.clear();
                     commentStart = fileCopy.end();
                 }
@@ -290,14 +294,14 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
 
             *iter = QString(); // "ordered" lines to be removed later
         }
-        else if ((*iter).isEmpty() || (*iter).contains(QRegExp("^\\s*#")))
+        else if ((*iter).isEmpty() || (*iter).contains(QRegularExpression("^\\s*#")))
         {
             // comment line, save in temp buffer
             if (comments.empty())
                 commentStart = iter;
 
             // special removed content processing
-            if ((*iter).contains(QRegExp("^##content\\s*=")))
+            if ((*iter).contains(QRegularExpression("^##content\\s*=")))
             {
                 if (!comments.empty())
                 {
@@ -313,11 +317,11 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
         }
         else
         {
-            int index = settingRegex.indexIn(*iter);
+            QRegularExpressionMatch match = settingRegex.match(*iter);
 
             // blank or non-"ordered" line, write saved comments
-            if (!comments.empty() && index != -1 && settingRegex.captureCount() >= 2
-                && mUserSettings.find(settingRegex.cap(1)) != mUserSettings.end())
+            if (!comments.empty() && match.hasMatch() && settingRegex.captureCount() >= 2
+                && mUserSettings.find(match.captured(1)) != mUserSettings.end())
             {
                 if (commentStart == fileCopy.end())
                     throw std::runtime_error(
@@ -335,10 +339,10 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
             // keep blank lines and non-"ordered" lines other than comments
 
             // look for a key in the line
-            if (index == -1 || settingRegex.captureCount() < 2)
+            if (!match.hasMatch() || settingRegex.captureCount() < 2)
             {
                 // no key or first part of value found in line, replace with a null string which
-                // will be remved later
+                // will be removed later
                 *iter = QString();
                 comments.clear();
                 commentStart = fileCopy.end();
@@ -347,15 +351,16 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
 
             // look for a matching key in user settings
             *iter = QString(); // assume no match
-            QString key = settingRegex.cap(1);
-            QString keyVal = settingRegex.cap(1) + "=" + settingRegex.cap(2);
+            QString key = match.captured(1);
+            QString keyVal = match.captured(1) + "=" + match.captured(2);
             QMultiMap<QString, QString>::const_iterator i = mUserSettings.find(key);
             while (i != mUserSettings.end() && i.key() == key)
             {
                 QString settingLine = i.key() + "=" + i.value();
-                if (settingRegex.indexIn(settingLine) != -1)
+                QRegularExpressionMatch keyMatch = settingRegex.match(settingLine);
+                if (keyMatch.hasMatch())
                 {
-                    if ((settingRegex.cap(1) + "=" + settingRegex.cap(2)) == keyVal)
+                    if ((keyMatch.captured(1) + "=" + keyMatch.captured(2)) == keyVal)
                     {
                         *iter = settingLine;
                         break;
@@ -374,7 +379,7 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
 
         // Below is based on readFile() code, if that changes corresponding change may be
         // required (for example duplicates may be inserted if the rules don't match)
-        if (/*(*iter).isEmpty() ||*/ iter.contains(QRegExp("^\\s*#")))
+        if (/*(*iter).isEmpty() ||*/ iter.contains(QRegularExpression("^\\s*#")))
         {
             stream << iter << "\n";
             continue;
@@ -413,13 +418,14 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
         else
             settingLine = it.key() + "=" + it.value();
 
-        if (settingRegex.indexIn(settingLine) != -1)
+        QRegularExpressionMatch match = settingRegex.match(settingLine);
+        if (match.hasMatch())
         {
-            auto i = commentsMap.find(settingRegex.cap(1) + "=" + settingRegex.cap(2));
+            auto i = commentsMap.find(match.captured(1) + "=" + match.captured(2));
 
             // check if previous removed content item with comments
             if (i == commentsMap.end())
-                i = commentsMap.find("##" + settingRegex.cap(1) + "=" + settingRegex.cap(2));
+                i = commentsMap.find("##" + match.captured(1) + "=" + match.captured(2));
 
             if (i != commentsMap.end())
             {
@@ -440,7 +446,7 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
         auto i = commentsMap.begin();
         for (; i != commentsMap.end(); ++i)
         {
-            if (i->first.contains(QRegExp("^\\s*content\\s*=")))
+            if (i->first.contains(QRegularExpression("^\\s*content\\s*=")))
             {
                 std::vector<QString> cLines = i->second;
                 for (const auto& cLine : cLines)
