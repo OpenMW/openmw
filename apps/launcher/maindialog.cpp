@@ -1,10 +1,13 @@
 #include "maindialog.hpp"
 
+#include <components/debug/debuglog.hpp>
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
 #include <components/misc/helpviewer.hpp>
+#include <components/misc/utf8qtextstream.hpp>
 #include <components/version/version.hpp>
 
 #include <QCloseEvent>
-#include <QDebug>
 #include <QDir>
 #include <QMessageBox>
 #include <QStringList>
@@ -288,32 +291,30 @@ bool Launcher::MainDialog::setupLauncherSettings()
 
     mLauncherSettings.setMultiValueEnabled(true);
 
-    QStringList paths;
-    paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
-    paths.append(Files::pathToQString(mCfgMgr.getUserConfigPath() / Config::LauncherSettings::sLauncherConfigFileName));
+    const QString path
+        = Files::pathToQString(mCfgMgr.getUserConfigPath() / Config::LauncherSettings::sLauncherConfigFileName);
 
-    for (const QString& path : paths)
+    if (!QFile::exists(path))
+        return true;
+
+    Log(Debug::Verbose) << "Loading config file: " << path.toUtf8().constData();
+
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << "Loading config file:" << path.toUtf8().constData();
-        QFile file(path);
-        if (file.exists())
-        {
-            if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-            {
-                cfgError(tr("Error opening OpenMW configuration file"),
-                    tr("<br><b>Could not open %0 for reading</b><br><br> \
-                             Please make sure you have the right permissions \
-                             and try again.<br>")
-                        .arg(file.fileName()));
-                return false;
-            }
-            QTextStream stream(&file);
-            Misc::ensureUtf8Encoding(stream);
-
-            mLauncherSettings.readFile(stream);
-        }
-        file.close();
+        cfgError(tr("Error opening OpenMW configuration file"),
+            tr("<br><b>Could not open %0 for reading:</b><br><br>%1<br><br> \
+                     Please make sure you have the right permissions \
+                     and try again.<br>")
+                .arg(file.fileName())
+                .arg(file.errorString()));
+        return false;
     }
+
+    QTextStream stream(&file);
+    Misc::ensureUtf8Encoding(stream);
+
+    mLauncherSettings.readFile(stream);
 
     return true;
 }
@@ -326,7 +327,6 @@ bool Launcher::MainDialog::setupGameSettings()
 
     auto loadFile = [&](const QString& path, bool (Config::GameSettings::*reader)(QTextStream&, bool),
                         bool ignoreContent = false) -> std::optional<bool> {
-        qDebug() << "Loading config file:" << path.toUtf8().constData();
         file.setFileName(path);
         if (file.exists())
         {
