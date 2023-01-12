@@ -308,7 +308,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
                 return false;
             }
             QTextStream stream(&file);
-            ensureUtf8Encoding(stream);
+            Misc::ensureUtf8Encoding(stream);
 
             mLauncherSettings.readFile(stream);
         }
@@ -344,7 +344,7 @@ bool Launcher::MainDialog::setupGameSettings()
                 return {};
             }
             QTextStream stream(&file);
-            ensureUtf8Encoding(stream);
+            Misc::ensureUtf8Encoding(stream);
 
             (mGameSettings.*reader)(stream, ignoreContent);
             file.close();
@@ -544,7 +544,7 @@ bool Launcher::MainDialog::writeSettings()
 
     QTextStream stream(&file);
     stream.setDevice(&file);
-    ensureUtf8Encoding(stream);
+    Misc::ensureUtf8Encoding(stream);
 
     mLauncherSettings.writeFile(stream);
     file.close();
