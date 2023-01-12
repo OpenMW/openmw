@@ -95,7 +95,7 @@ namespace CSVWorld
     private:
         QVector<CSMWorld::UniversalId::Type> mAllowedTypes;
         const CSMDoc::Document& mDocument;
-        const QRegularExpression mWhiteListQoutes;
+        const QRegularExpression mWhiteListQuotes;
 
         void dragEnterEvent(QDragEnterEvent* event) override;
 
