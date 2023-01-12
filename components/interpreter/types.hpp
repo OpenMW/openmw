@@ -5,15 +5,13 @@
 
 namespace Interpreter
 {
-    typedef unsigned int Type_Code; // 32 bit
+    typedef std::uint32_t Type_Code;
 
-    typedef unsigned int Type_Data; // 32 bit
+    typedef std::int16_t Type_Short;
 
-    typedef short Type_Short; // 16 bit
+    typedef std::int32_t Type_Integer;
 
-    typedef int Type_Integer; // 32 bit
-
-    typedef float Type_Float; // 32 bit
+    typedef float Type_Float;
 
     union Data
     {
