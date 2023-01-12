@@ -7,13 +7,13 @@
 #include <QDebug>
 #include <QDir>
 #include <QMessageBox>
-#include <QTextCodec>
 #include <QTime>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/qtconversion.hpp>
+#include <components/misc/utf8qtextstream.hpp>
 
 #include "advancedpage.hpp"
 #include "datafilespage.hpp"
@@ -323,7 +323,7 @@ bool Launcher::MainDialog::setupLauncherSettings()
                 return false;
             }
             QTextStream stream(&file);
-            stream.setCodec(QTextCodec::codecForName("UTF-8"));
+            ensureUtf8Encoding(stream);
 
             mLauncherSettings.readFile(stream);
         }
@@ -359,7 +359,7 @@ bool Launcher::MainDialog::setupGameSettings()
                 return {};
             }
             QTextStream stream(&file);
-            stream.setCodec(QTextCodec::codecForName("UTF-8"));
+            ensureUtf8Encoding(stream);
 
             (mGameSettings.*reader)(stream, ignoreContent);
             file.close();
@@ -559,7 +559,7 @@ bool Launcher::MainDialog::writeSettings()
 
     QTextStream stream(&file);
     stream.setDevice(&file);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
+    ensureUtf8Encoding(stream);
 
     mLauncherSettings.writeFile(stream);
     file.close();

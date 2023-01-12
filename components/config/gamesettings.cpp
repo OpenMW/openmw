@@ -3,10 +3,10 @@
 
 #include <QDir>
 #include <QRegularExpression>
-#include <QTextCodec>
 
 #include <components/files/configurationmanager.hpp>
 #include <components/files/qtconversion.hpp>
+#include <components/misc/utf8qtextstream.hpp>
 
 const char Config::GameSettings::sArchiveKey[] = "fallback-archive";
 const char Config::GameSettings::sContentKey[] = "content";
@@ -232,7 +232,7 @@ bool Config::GameSettings::isOrderedLine(const QString& line)
 bool Config::GameSettings::writeFileWithComments(QFile& file)
 {
     QTextStream stream(&file);
-    stream.setCodec(QTextCodec::codecForName("UTF-8"));
+    ensureUtf8Encoding(stream);
 
     // slurp
     std::vector<QString> fileCopy;
