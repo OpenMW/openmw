@@ -47,7 +47,7 @@ QStringList Config::LauncherSettings::subKeys(const QString& key)
 bool Config::LauncherSettings::writeFile(QTextStream& stream)
 {
     QString sectionPrefix;
-    QRegularExpression sectionRe(QRegularExpression::anchoredPattern("([^/]+)/(.+)$"));
+    QRegularExpression sectionRe("^([^/]+)/(.+)$");
     QMultiMap<QString, QString> settings = SettingsBase::getSettings();
 
     QMapIterator<QString, QString> i(settings);

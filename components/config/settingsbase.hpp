@@ -42,7 +42,7 @@ namespace Config
 
             QString sectionPrefix;
 
-            QRegularExpression sectionRe(QRegularExpression::anchoredPattern("^\\[([^]]+)\\]"));
+            QRegularExpression sectionRe("^\\[([^]]+)\\]$");
             QRegularExpression keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
             while (!stream.atEnd())
