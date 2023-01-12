@@ -164,7 +164,11 @@ bool Wizard::IniSettings::writeFile(const QString& path, QTextStream& stream)
     if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
     {
         QTextStream in(&file);
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         in.setCodec(stream.codec());
+#else
+        in.setEncoding(stream.encoding());
+#endif
 
         // Write the updated buffer to an empty file
         in << buffer;
