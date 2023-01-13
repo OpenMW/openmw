@@ -197,7 +197,7 @@ add_component_dir (esm4
 )
 
 add_component_dir (misc
-    constants utf8stream utf8qtextstream resourcehelpers rng messageformatparser weakcache thread
+    constants utf8stream resourcehelpers rng messageformatparser weakcache thread
     compression osguservalues color tuplemeta tuplehelpers
     )
 
@@ -378,7 +378,7 @@ if (USE_QT)
         )
 
     add_component_qt_dir (misc
-        helpviewer
+        helpviewer utf8qtextstream
         )
 
     add_component_qt_dir (files
