@@ -20,8 +20,7 @@ Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString& 
     label->setText(text);
 
     // Line edit
-    QValidator* validator
-        = new QRegularExpressionValidator(QRegularExpression("^[a-zA-Z0-9_]*$"), this); // Alpha-numeric + underscore
+    QValidator* validator = new QRegularExpressionValidator(QRegularExpression("^[a-zA-Z0-9_]*$"), this);
     mLineEdit = new LineEdit(this);
     mLineEdit->setValidator(validator);
     mLineEdit->setCompleter(nullptr);

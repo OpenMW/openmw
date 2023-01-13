@@ -205,7 +205,7 @@ void Launcher::GraphicsPage::saveSettings()
     int cHeight = 0;
     if (standardRadioButton->isChecked())
     {
-        QRegularExpression resolutionRe(QRegularExpression::anchoredPattern(QString("(\\d+) x (\\d+).*")));
+        QRegularExpression resolutionRe("^(\\d+) x (\\d+)");
         QRegularExpressionMatch match = resolutionRe.match(resolutionComboBox->currentText().simplified());
         if (match.hasMatch())
         {

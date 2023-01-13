@@ -30,7 +30,7 @@ bool Wizard::IniSettings::readFile(QTextStream& stream)
     // Look for a square bracket, "'\\["
     // that has one or more "not nothing" in it, "([^]]+)"
     // and is closed with a square bracket, "\\]"
-    QRegularExpression sectionRe(QRegularExpression::anchoredPattern("^\\[([^]]+)\\]"));
+    QRegularExpression sectionRe("^\\[([^]]+)\\]$");
 
     // Find any character(s) that is/are not equal sign(s), "[^=]+"
     // followed by an optional whitespace, an equal sign, and another optional whitespace, "\\s*=\\s*"
@@ -75,7 +75,7 @@ bool Wizard::IniSettings::writeFile(const QString& path, QTextStream& stream)
     // Look for a square bracket, "'\\["
     // that has one or more "not nothing" in it, "([^]]+)"
     // and is closed with a square bracket, "\\]"
-    QRegularExpression sectionRe(QRegularExpression::anchoredPattern("^\\[([^]]+)\\]"));
+    QRegularExpression sectionRe("^\\[([^]]+)\\]$");
 
     // Find any character(s) that is/are not equal sign(s), "[^=]+"
     // followed by an optional whitespace, an equal sign, and another optional whitespace, "\\s*=\\s*"
