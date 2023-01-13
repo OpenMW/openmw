@@ -133,7 +133,7 @@ local function onInputAction(action)
     elseif action == input.ACTION.Use then
         startAttack = true
     elseif action == input.ACTION.AutoMove and not movementControlsOverridden then
-        autoMove = true
+        autoMove = not autoMove
     elseif action == input.ACTION.AlwaysRun and not movementControlsOverridden then
         settings:set('alwaysRun', not settings:get('alwaysRun'))
     elseif action == input.ACTION.Sneak and not movementControlsOverridden then
