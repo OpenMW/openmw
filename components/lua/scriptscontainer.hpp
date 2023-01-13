@@ -155,6 +155,7 @@ namespace LuaUtil
             int64_t mMemoryUsage = 0; // bytes
         };
         void collectStats(std::vector<ScriptStats>& stats) const;
+        static int64_t getInstanceCount() { return sInstanceCount; }
 
     protected:
         struct Handler
@@ -265,6 +266,8 @@ namespace LuaUtil
 
         std::map<int, int64_t> mRemovedScriptsMemoryUsage;
         std::shared_ptr<ScriptsContainer*> mThis; // used by LuaState to track ownership of memory allocations
+
+        static int64_t sInstanceCount; // debug information, shown in Lua profiler
     };
 
     // Wrapper for a Lua function.

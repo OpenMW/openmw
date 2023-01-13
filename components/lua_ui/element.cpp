@@ -65,7 +65,7 @@ namespace LuaUi
             }
             if (!contentObj.is<Content>())
                 throw std::logic_error("Layout content field must be a openmw.ui.content");
-            Content content = contentObj.as<Content>();
+            const Content& content = contentObj.as<Content>();
             result.resize(content.size());
             size_t minSize = std::min(children.size(), content.size());
             for (size_t i = 0; i < minSize; i++)

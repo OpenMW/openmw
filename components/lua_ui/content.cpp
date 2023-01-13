@@ -2,8 +2,11 @@
 
 namespace LuaUi
 {
+    int64_t Content::sInstanceCount = 0;
+
     Content::Content(const sol::table& table)
     {
+        sInstanceCount++;
         size_t size = table.size();
         for (size_t index = 0; index < size; ++index)
         {
@@ -94,7 +97,7 @@ namespace LuaUi
         return index;
     }
 
-    size_t Content::indexOf(const sol::table& table)
+    size_t Content::indexOf(const sol::table& table) const
     {
         auto it = std::find(mOrdered.begin(), mOrdered.end(), table);
         if (it == mOrdered.end())

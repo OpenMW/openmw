@@ -115,7 +115,7 @@ namespace MWLua
         };
         uiContent["add"]
             = [](LuaUi::Content& content, const sol::table& table) { content.insert(content.size(), table); };
-        uiContent["indexOf"] = [](LuaUi::Content& content, const sol::table& table) -> sol::optional<size_t> {
+        uiContent["indexOf"] = [](const LuaUi::Content& content, const sol::table& table) -> sol::optional<size_t> {
             size_t index = content.indexOf(table);
             if (index < content.size())
                 return toLuaIndex(index);
@@ -123,8 +123,9 @@ namespace MWLua
                 return sol::nullopt;
         };
         {
-            auto pairs = [](LuaUi::Content& content) {
-                auto next = [](LuaUi::Content& content, size_t i) -> sol::optional<std::tuple<size_t, sol::table>> {
+            auto pairs = [](const LuaUi::Content& content) {
+                auto next
+                    = [](const LuaUi::Content& content, size_t i) -> sol::optional<std::tuple<size_t, sol::table>> {
                     if (i < content.size())
                         return std::make_tuple(i + 1, content.at(i));
                     else
