@@ -48,20 +48,18 @@ void CSMTools::Search::searchRegExCell(const CSMWorld::IdTableBase* model, const
 {
     QString text = model->data(index).toString();
 
-    int pos = 0;
-    QRegularExpressionMatch match;
-
-    while ((match = mRegExp.match(text, pos)).hasMatch())
+    QRegularExpressionMatchIterator i = mRegExp.globalMatch(text);
+    while (i.hasNext())
     {
-        pos = match.capturedStart();
+        QRegularExpressionMatch match = i.next();
+
+        int pos = match.capturedStart();
         int length = match.capturedLength();
 
         std::ostringstream hint;
         hint << (writable ? 'R' : 'r') << ": " << model->getColumnId(index.column()) << " " << pos << " " << length;
 
         messages.add(id, formatDescription(text, pos, length).toUtf8().data(), hint.str());
-
-        pos += length;
     }
 }
 
