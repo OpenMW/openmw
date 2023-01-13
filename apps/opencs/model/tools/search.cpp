@@ -46,6 +46,10 @@ void CSMTools::Search::searchTextCell(const CSMWorld::IdTableBase* model, const 
 void CSMTools::Search::searchRegExCell(const CSMWorld::IdTableBase* model, const QModelIndex& index,
     const CSMWorld::UniversalId& id, bool writable, CSMDoc::Messages& messages) const
 {
+    // TODO: verify regular expression before starting a search
+    if (!mRegExp.isValid())
+        return;
+
     QString text = model->data(index).toString();
 
     QRegularExpressionMatchIterator i = mRegExp.globalMatch(text);
