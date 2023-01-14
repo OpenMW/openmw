@@ -123,7 +123,7 @@ def collect_per_frame(sources, keys, begin_frame, end_frame, frame_number_name):
     assert begin_frame < end_frame
     result = collections.defaultdict(lambda: collections.defaultdict(list))
     begin_frame = max(begin_frame, min(v[0][frame_number_name] for v in sources.values()))
-    end_frame = min(end_frame, begin_frame + max(len(v) for v in sources.values()))
+    end_frame = min(end_frame, max(v[-1][frame_number_name] for v in sources.values()) + 1)
     for name in sources.keys():
         for key in keys:
             result[name][key] = [0] * (end_frame - begin_frame)
