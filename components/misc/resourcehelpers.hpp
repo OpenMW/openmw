@@ -28,7 +28,8 @@ namespace Misc
         std::string correctIconPath(std::string_view resPath, const VFS::Manager* vfs);
         std::string correctBookartPath(std::string_view resPath, const VFS::Manager* vfs);
         std::string correctBookartPath(std::string_view resPath, int width, int height, const VFS::Manager* vfs);
-        /// Use "xfoo.nif" instead of "foo.nif" if available
+        /// Use "xfoo.nif" instead of "foo.nif" if "xfoo.kf" is available
+        /// Note that if "xfoo.nif" is actually unavailable, we can't fall back to "foo.nif". :(
         std::string correctActorModelPath(const std::string& resPath, const VFS::Manager* vfs);
         std::string correctMeshPath(const std::string& resPath, const VFS::Manager* vfs);
 
