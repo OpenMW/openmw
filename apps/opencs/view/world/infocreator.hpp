@@ -47,6 +47,8 @@ namespace CSVWorld
 
         void reset() override;
 
+        void setText(const std::string& text);
+
         std::string getErrors() const override;
         ///< Return formatted error descriptions for the current state of the creator. if an empty
         /// string is returned, there is no error.

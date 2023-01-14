@@ -115,6 +115,12 @@ void CSVWorld::InfoCreator::reset()
     GenericCreator::reset();
 }
 
+void CSVWorld::InfoCreator::setText(const std::string& text)
+{
+    QString qText = QString::fromStdString(text);
+    mTopic->setText(qText);
+}
+
 std::string CSVWorld::InfoCreator::getErrors() const
 {
     // We ignore errors from GenericCreator here, because they can never happen in an InfoCreator.

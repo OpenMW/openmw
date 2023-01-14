@@ -269,6 +269,8 @@ CSVWorld::Table::Table(const CSMWorld::UniversalId& id, bool createAndDelete, bo
     {
         mProxyModel = new CSMWorld::InfoTableProxyModel(id.getType(), this);
         connect(this, &CSVWorld::DragRecordTable::moveRecordsFromSameTable, this, &CSVWorld::Table::moveRecords);
+        connect(this, &CSVWorld::DragRecordTable::createNewInfoRecord, this,
+            &CSVWorld::Table::createRecordsDirectlyRequest);
     }
     else if (isLtexTable)
     {

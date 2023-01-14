@@ -121,6 +121,8 @@ namespace CSVWorld
 
         void createRequest();
 
+        void createRecordsDirectlyRequest(const std::string& id);
+
         void cloneRequest(const CSMWorld::UniversalId&);
 
         void touchRequest(const std::vector<CSMWorld::UniversalId>& ids);

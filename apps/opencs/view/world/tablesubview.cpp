@@ -104,6 +104,8 @@ CSVWorld::TableSubView::TableSubView(
         connect(this, qOverload<const std::string&, const CSMWorld::UniversalId::Type>(&TableSubView::cloneRequest),
             mBottom, &TableBottomBox::cloneRequest);
 
+        connect(mTable, &Table::createRecordsDirectlyRequest, mBottom, &TableBottomBox::createRecordsDirectlyRequest);
+
         connect(mTable, &Table::touchRequest, mBottom, &TableBottomBox::touchRequest);
 
         connect(mTable, &Table::extendedDeleteConfigRequest, mBottom, &TableBottomBox::extendedDeleteConfigRequest);

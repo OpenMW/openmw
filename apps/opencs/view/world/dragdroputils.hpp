@@ -20,6 +20,8 @@ namespace CSVWorld
         bool canAcceptData(const QDropEvent& event, CSMWorld::ColumnBase::Display type);
         ///< Checks whether the \a event contains a valid CSMWorld::TableMimeData that holds the \a type
 
+        bool isTopicOrJournal(const QDropEvent& event, CSMWorld::ColumnBase::Display type);
+
         bool isInfo(const QDropEvent& event, CSMWorld::ColumnBase::Display type);
         ///< Info types can be dragged to sort the info table
 

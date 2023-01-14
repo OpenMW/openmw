@@ -57,6 +57,7 @@ namespace CSVWorld
 
     signals:
         void moveRecordsFromSameTable(QDropEvent* event);
+        void createNewInfoRecord(const std::string& id);
     };
 }
 
