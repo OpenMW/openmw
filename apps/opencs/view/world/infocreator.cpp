@@ -144,6 +144,11 @@ void CSVWorld::InfoCreator::focus()
     mTopic->setFocus();
 }
 
+void CSVWorld::InfoCreator::callReturnPressed()
+{
+    emit inputReturnPressed();
+}
+
 void CSVWorld::InfoCreator::topicChanged()
 {
     update();

@@ -56,6 +56,10 @@ namespace CSVWorld
         /// Focus main input widget
         void focus() override;
 
+    public slots:
+
+        void callReturnPressed();
+
     private slots:
 
         void topicChanged();

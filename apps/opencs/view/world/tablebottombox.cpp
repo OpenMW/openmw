@@ -264,13 +264,7 @@ void CSVWorld::TableBottomBox::createRecordsDirectlyRequest(const std::string& i
     {
         creator->reset();
         creator->setText(id);
-        
-        /*Default system of createRequest - TODO: Modify so that user doesn't see the edit box*/
-        mCreator->toggleWidgets(true);
-        mLayout->setCurrentWidget(mCreator);
-        setVisible(true);
-        mEditMode = EditMode_Creation;
-        mCreator->focus();
+        creator->callReturnPressed();
     }
     else
     {
