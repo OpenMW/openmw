@@ -22,8 +22,7 @@ bool CSVWorld::DragDropUtils::isTopicOrJournal(const QDropEvent& event, CSMWorld
 {
     const CSMWorld::TableMimeData* data = getTableMimeData(event);
     return data != nullptr
-        && (data->holdsType(CSMWorld::UniversalId::Type_Topic)
-            || data->holdsType(CSMWorld::UniversalId::Type_Journal));
+        && (data->holdsType(CSMWorld::UniversalId::Type_Topic) || data->holdsType(CSMWorld::UniversalId::Type_Journal));
 }
 
 bool CSVWorld::DragDropUtils::isInfo(const QDropEvent& event, CSMWorld::ColumnBase::Display type)

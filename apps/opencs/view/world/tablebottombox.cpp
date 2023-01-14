@@ -260,7 +260,7 @@ void CSVWorld::TableBottomBox::createRequest()
 
 void CSVWorld::TableBottomBox::createRecordsDirectlyRequest(const std::string& id)
 {
-    if (InfoCreator* creator = dynamic_cast<InfoCreator*> (mCreator))
+    if (InfoCreator* creator = dynamic_cast<InfoCreator*>(mCreator))
     {
         creator->reset();
         creator->setText(id);
