@@ -150,7 +150,8 @@ void CSVWorld::TableSubView::cloneRequest(const CSMWorld::UniversalId& toClone)
     emit cloneRequest(toClone.getId(), toClone.getType());
 }
 
-void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::UniversalId>& types, Qt::DropAction action)
+void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::UniversalId>& types, Qt::DropAction action,
+    const std::string& searchString, const std::string& searchColumn)
 {
     std::vector<std::pair<std::string, std::vector<std::string>>> filterSource;
 
@@ -173,7 +174,15 @@ void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::Universal
         }
     }
 
-    mFilterBox->createFilterRequest(filterSource, action);
+    if (!filterSource.empty())
+        mFilterBox->createFilterRequest(filterSource, action);
+    else if (searchString != "")
+    {
+        std::vector<std::string> testVector;
+        testVector.emplace_back(searchColumn);
+        filterSource.emplace_back(searchString, testVector);
+        mFilterBox->createFilterRequest(filterSource, action);
+    }
 }
 
 bool CSVWorld::TableSubView::eventFilter(QObject* object, QEvent* event)

@@ -9,8 +9,11 @@
 
 #include "recordfilterbox.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include <apps/opencs/model/world/tablemimedata.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/world/dragrecordtable.hpp>
 
 CSVFilter::FilterBox::FilterBox(CSMWorld::Data& data, QWidget* parent)
     : QWidget(parent)
@@ -42,8 +45,20 @@ void CSVFilter::FilterBox::dropEvent(QDropEvent* event)
         return;
 
     std::vector<CSMWorld::UniversalId> universalIdData = mime->getData();
+    QModelIndex index = mime->getIndexAtDragStart();
+    const CSVWorld::DragRecordTable* dragTable = mime->getTableOfDragStart();
 
-    emit recordDropped(universalIdData, event->proposedAction());
+    std::string searchString = "";
+    if (index.isValid() && dragTable)
+        searchString = dragTable->model()->data(index).toString().toStdString();
+    Log(Debug::Warning) << "Data: " << searchString;
+
+    std::string searchColumn = "";
+    if (index.isValid() && dragTable)
+        searchColumn = dragTable->model()->headerData(index.column(), Qt::Horizontal).toString().toStdString();
+    Log(Debug::Warning) << "Header: " << searchColumn;
+
+    emit recordDropped(universalIdData, event->proposedAction(), searchString, searchColumn);
 }
 
 void CSVFilter::FilterBox::dragEnterEvent(QDragEnterEvent* event)

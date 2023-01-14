@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
+#include <QModelIndex>
 #include <QStringList>
 #include <QtCore/QMimeData>
-#include <QModelIndex>
 
 #include "columnbase.hpp"
 #include "universalid.hpp"
@@ -36,7 +36,7 @@ namespace CSMWorld
         std::vector<UniversalId> mUniversalId;
         QStringList mObjectsFormats;
         const CSMDoc::Document& mDocument;
-        const CSVWorld::DragRecordTable* mTableOfDragStart;
+        CSVWorld::DragRecordTable* mTableOfDragStart;
         QModelIndex mIndexAtDragStart;
 
     public:
@@ -63,10 +63,14 @@ namespace CSMWorld
         const CSMDoc::Document* getDocumentPtr() const;
 
         UniversalId returnMatching(CSMWorld::ColumnBase::Display type) const;
-        
-        void setIndexAtDragStart(QModelIndex index) {mIndexAtDragStart = index;}
-        
-        void setTableOfDragStart(const CSVWorld::DragRecordTable* table) {mTableOfDragStart = table;}
+
+        void setIndexAtDragStart(QModelIndex index) { mIndexAtDragStart = index; }
+
+        void setTableOfDragStart(CSVWorld::DragRecordTable* table) { mTableOfDragStart = table; }
+
+        const QModelIndex getIndexAtDragStart() const { return mIndexAtDragStart; }
+
+        const CSVWorld::DragRecordTable* getTableOfDragStart() const { return mTableOfDragStart; }
 
         static CSMWorld::UniversalId::Type convertEnums(CSMWorld::ColumnBase::Display type);
 
