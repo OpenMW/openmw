@@ -338,7 +338,7 @@ void CSVWorld::RegionMap::viewInTable()
 
 void CSVWorld::RegionMap::mouseMoveEvent(QMouseEvent* event)
 {
-    startDragFromTable(*this);
+    startDragFromTable(*this, indexAt(event->pos()));
 }
 
 std::vector<CSMWorld::UniversalId> CSVWorld::RegionMap::getDraggedRecords() const
