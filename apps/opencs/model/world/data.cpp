@@ -328,6 +328,7 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, bool fsStrict, const Files::Path
     mTopicInfos.addColumn(new RecordStateColumn<Info>);
     mTopicInfos.addColumn(new FixedRecordTypeColumn<Info>(UniversalId::Type_TopicInfo));
     mTopicInfos.addColumn(new TopicColumn<Info>(false));
+    mTopicInfos.addColumn(new ResponseColumn<Info>);
     mTopicInfos.addColumn(new ActorColumn<Info>);
     mTopicInfos.addColumn(new RaceColumn<Info>);
     mTopicInfos.addColumn(new ClassColumn<Info>);
@@ -339,7 +340,6 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, bool fsStrict, const Files::Path
     mTopicInfos.addColumn(new PcFactionColumn<Info>);
     mTopicInfos.addColumn(new PcRankColumn<Info>);
     mTopicInfos.addColumn(new SoundFileColumn<Info>);
-    mTopicInfos.addColumn(new ResponseColumn<Info>);
     // Result script
     mTopicInfos.addColumn(new NestedParentColumn<Info>(
         Columns::ColumnId_InfoList, ColumnBase::Flag_Dialogue | ColumnBase::Flag_Dialogue_List));
