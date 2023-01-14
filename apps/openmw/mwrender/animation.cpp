@@ -609,7 +609,7 @@ namespace MWRender
     {
         std::string kfname = Misc::StringUtils::lowerCase(model);
 
-        if (kfname.size() > 4 && kfname.compare(kfname.size() - 4, 4, ".nif") == 0)
+        if (kfname.ends_with(".nif"))
             kfname.replace(kfname.size() - 4, 4, ".kf");
 
         addSingleAnimSource(kfname, baseModel);
