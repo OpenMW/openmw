@@ -90,15 +90,11 @@ namespace
             rendering.rotateObject(ptr, rotation);
     }
 
-    std::string getModel(const MWWorld::Ptr& ptr, const VFS::Manager* vfs)
+    std::string getModel(const MWWorld::Ptr& ptr)
     {
         if (Misc::ResourceHelpers::isHiddenMarker(ptr.getCellRef().getRefId()))
             return {};
-        bool useAnim = ptr.getClass().useAnim();
-        std::string model = ptr.getClass().getModel(ptr);
-        if (useAnim)
-            model = Misc::ResourceHelpers::correctActorModelPath(model, vfs);
-        return model;
+        return ptr.getClass().getModel(ptr);
     }
 
     void addObject(const MWWorld::Ptr& ptr, const MWWorld::World& world, const std::vector<ESM::RefNum>& pagedRefs,
@@ -110,7 +106,7 @@ namespace
             return;
         }
 
-        std::string model = getModel(ptr, rendering.getResourceSystem()->getVFS());
+        std::string model = getModel(ptr);
         const auto rotation = makeDirectNodeRotation(ptr);
 
         const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
@@ -279,8 +275,7 @@ namespace MWWorld
         {
             if (!ptr.getRefData().getBaseNode())
                 return;
-            ptr.getClass().insertObjectRendering(
-                ptr, getModel(ptr, mRendering.getResourceSystem()->getVFS()), mRendering);
+            ptr.getClass().insertObjectRendering(ptr, getModel(ptr), mRendering);
             setNodeRotation(ptr, mRendering, makeNodeRotation(ptr, RotationOrder::direct));
             reloadTerrain();
         }
@@ -630,7 +625,7 @@ namespace MWWorld
                     ptr.mRef->mData.mPhysicsPostponed = false;
                     if (ptr.mRef->mData.isEnabled() && ptr.mRef->mData.getCount() > 0)
                     {
-                        std::string model = getModel(ptr, MWBase::Environment::get().getResourceSystem()->getVFS());
+                        std::string model = getModel(ptr);
                         if (!model.empty())
                         {
                             const auto rotation = makeNodeRotation(ptr, RotationOrder::direct);

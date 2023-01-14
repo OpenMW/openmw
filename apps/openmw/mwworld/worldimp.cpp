@@ -2430,10 +2430,8 @@ namespace MWWorld
         MWBase::Environment::get().getMechanicsManager()->add(getPlayerPtr());
         MWBase::Environment::get().getWindowManager()->watchActor(getPlayerPtr());
 
-        std::string model = getPlayerPtr().getClass().getModel(getPlayerPtr());
-        model = Misc::ResourceHelpers::correctActorModelPath(model, mResourceSystem->getVFS());
         mPhysics->remove(getPlayerPtr());
-        mPhysics->addActor(getPlayerPtr(), model);
+        mPhysics->addActor(getPlayerPtr(), getPlayerPtr().getClass().getModel(getPlayerPtr()));
 
         applyLoopingParticles(player);
 

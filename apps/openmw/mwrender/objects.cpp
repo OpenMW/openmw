@@ -3,6 +3,7 @@
 #include <osg/Group>
 #include <osg/UserDataContainer>
 
+#include <components/misc/resourcehelpers.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 
@@ -68,12 +69,21 @@ namespace MWRender
         ptr.getRefData().setBaseNode(insert);
     }
 
-    void Objects::insertModel(const MWWorld::Ptr& ptr, const std::string& mesh, bool animated, bool allowLight)
+    void Objects::insertModel(const MWWorld::Ptr& ptr, const std::string& mesh, bool allowLight)
     {
         insertBegin(ptr);
         ptr.getRefData().getBaseNode()->setNodeMask(Mask_Object);
+        bool animated = ptr.getClass().useAnim();
+        std::string animationMesh = mesh;
+        if (animated && !mesh.empty())
+        {
+            animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
+            if (animationMesh == mesh)
+                animated = false;
+        }
 
-        osg::ref_ptr<ObjectAnimation> anim(new ObjectAnimation(ptr, mesh, mResourceSystem, animated, allowLight));
+        osg::ref_ptr<ObjectAnimation> anim(
+            new ObjectAnimation(ptr, animationMesh, mResourceSystem, animated, allowLight));
 
         mObjects.emplace(ptr.mRef, std::move(anim));
     }
@@ -83,13 +93,16 @@ namespace MWRender
         insertBegin(ptr);
         ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
+        std::string animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
+        // FIXME: if animationMesh == mesh, the creature shouldn't be animated
+
         // CreatureAnimation
         osg::ref_ptr<Animation> anim;
 
         if (weaponsShields)
-            anim = new CreatureWeaponAnimation(ptr, mesh, mResourceSystem);
+            anim = new CreatureWeaponAnimation(ptr, animationMesh, mResourceSystem);
         else
-            anim = new CreatureAnimation(ptr, mesh, mResourceSystem);
+            anim = new CreatureAnimation(ptr, animationMesh, mResourceSystem);
 
         if (mObjects.emplace(ptr.mRef, anim).second)
             ptr.getClass().getContainerStore(ptr).setContListener(static_cast<ActorAnimation*>(anim.get()));

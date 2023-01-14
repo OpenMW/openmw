@@ -40,8 +40,7 @@ namespace MWClass
         MWWorld::LiveCellRef<ESM::Light>* ref = ptr.get<ESM::Light>();
 
         // Insert even if model is empty, so that the light is added
-        renderingInterface.getObjects().insertModel(
-            ptr, model, true, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
+        renderingInterface.getObjects().insertModel(ptr, model, !(ref->mBase->mData.mFlags & ESM::Light::OffDefault));
     }
 
     void Light::insertObject(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,

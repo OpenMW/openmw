@@ -6,6 +6,7 @@
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
     Bug #5129: Stuttering animation on Centurion Archer
+    Bug #5371: Keyframe animation tracks are used for any file that begins with an X
     Bug #5714: Touch spells cast using ExplodeSpell don't always explode
     Bug #5849: Paralysis breaks landing
     Bug #5883: Immobile creatures don't cause water ripples

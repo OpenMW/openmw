@@ -208,6 +208,7 @@ namespace NifBullet
         }
         // files with the name convention xmodel.nif usually have keyframes stored in a separate file xmodel.kf (see
         // Animation::addAnimSource). assume all nodes in the file will be animated
+        // TODO: investigate whether this should and could be optimized.
         const bool isAnimated = pathFileNameStartsWithX(filename);
 
         // If there's no bounding box, we'll have to generate a Bullet collision shape
