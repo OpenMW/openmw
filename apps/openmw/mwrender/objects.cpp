@@ -93,16 +93,18 @@ namespace MWRender
         insertBegin(ptr);
         ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
+        bool animated = true;
         std::string animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
-        // FIXME: if animationMesh == mesh, the creature shouldn't be animated
+        if (animationMesh == mesh)
+            animated = false;
 
         // CreatureAnimation
         osg::ref_ptr<Animation> anim;
 
         if (weaponsShields)
-            anim = new CreatureWeaponAnimation(ptr, animationMesh, mResourceSystem);
+            anim = new CreatureWeaponAnimation(ptr, animationMesh, mResourceSystem, animated);
         else
-            anim = new CreatureAnimation(ptr, animationMesh, mResourceSystem);
+            anim = new CreatureAnimation(ptr, animationMesh, mResourceSystem, animated);
 
         if (mObjects.emplace(ptr.mRef, anim).second)
             ptr.getClass().getContainerStore(ptr).setContListener(static_cast<ActorAnimation*>(anim.get()));
