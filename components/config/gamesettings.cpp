@@ -165,12 +165,10 @@ bool Config::GameSettings::readFile(QTextStream& stream, QMultiMap<QString, QStr
 bool Config::GameSettings::writeFile(QTextStream& stream)
 {
     // Iterate in reverse order to preserve insertion order
-    QMapIterator<QString, QString> i(mUserSettings);
-    i.toBack();
-
-    while (i.hasPrevious())
+    auto i = mUserSettings.end();
+    while (i != mUserSettings.begin())
     {
-        i.previous();
+        i--;
 
         // path lines (e.g. 'data=...') need quotes and ampersands escaping to match how boost::filesystem::path uses
         // boost::io::quoted
@@ -388,12 +386,10 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
 
     // Iterate in reverse order to preserve insertion order
     QString settingLine;
-    QMapIterator<QString, QString> it(mUserSettings);
-    it.toBack();
-
-    while (it.hasPrevious())
+    auto it = mUserSettings.end();
+    while (it != mUserSettings.begin())
     {
-        it.previous();
+        it--;
 
         if (it.key() == QLatin1String("data") || it.key() == QLatin1String("data-local")
             || it.key() == QLatin1String("resources") || it.key() == QLatin1String("load-savegame"))
