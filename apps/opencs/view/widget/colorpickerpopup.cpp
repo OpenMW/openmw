@@ -46,7 +46,7 @@ void CSVWidget::ColorPickerPopup::mousePressEvent(QMouseEvent* event)
     if (button != nullptr)
     {
         QStyleOptionButton option;
-        option.init(button);
+        option.initFrom(button);
         QRect buttonRect = option.rect;
         buttonRect.moveTo(button->mapToGlobal(buttonRect.topLeft()));
 
