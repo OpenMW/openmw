@@ -192,12 +192,12 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
             {
                 case 0:
                 case 1:
-                    return Qt::AlignLeft + Qt::AlignVCenter;
+                    return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
                 case 2:
                 case 3:
-                    return Qt::AlignRight + Qt::AlignVCenter;
+                    return QVariant(Qt::AlignRight | Qt::AlignVCenter);
                 default:
-                    return Qt::AlignLeft + Qt::AlignVCenter;
+                    return QVariant(Qt::AlignLeft | Qt::AlignVCenter);
             }
         }
 
