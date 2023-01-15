@@ -7,6 +7,7 @@
 #include <QDebug>
 #include <QDir>
 #include <QMessageBox>
+#include <QStringList>
 #include <QTime>
 
 #include <boost/program_options/options_description.hpp>

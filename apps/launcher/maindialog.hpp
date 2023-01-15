@@ -14,7 +14,6 @@
 
 class QListWidgetItem;
 class QStackedWidget;
-class QStringList;
 class QStringListModel;
 class QString;
 
