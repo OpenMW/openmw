@@ -34,6 +34,7 @@
     Bug #7088: Deleting last save game of last character doesn't clear character name/details
     Feature #5492: Let rain and snow collide with statics
     Feature #6447: Add LOD support to Object Paging
+    Feature #6922: Improve launcher appearance
     Feature #6933: Support high-resolution cursor textures
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData
     Feature #6979: Add support of loading and displaying LOD assets purely based on their filename extension

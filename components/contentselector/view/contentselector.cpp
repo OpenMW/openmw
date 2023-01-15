@@ -13,6 +13,12 @@ ContentSelectorView::ContentSelector::ContentSelector(QWidget* parent, bool show
     ui.setupUi(parent);
     ui.addonView->setDragDropMode(QAbstractItemView::InternalMove);
 
+    if (!showOMWScripts)
+    {
+        ui.languageComboBox->setHidden(true);
+        ui.refreshButton->setHidden(true);
+    }
+
     buildContentModel(showOMWScripts);
     buildGameFileView();
     buildAddonView();

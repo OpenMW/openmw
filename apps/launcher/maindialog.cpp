@@ -15,10 +15,9 @@
 #include <components/files/qtconversion.hpp>
 #include <components/misc/utf8qtextstream.hpp>
 
-#include "advancedpage.hpp"
 #include "datafilespage.hpp"
 #include "graphicspage.hpp"
-#include "playpage.hpp"
+#include "importpage.hpp"
 #include "settingspage.hpp"
 
 using namespace Process;
@@ -47,21 +46,13 @@ Launcher::MainDialog::MainDialog(QWidget* parent)
     connect(mWizardInvoker->getProcess(), qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
         &MainDialog::wizardFinished);
 
-    iconWidget->setViewMode(QListView::IconMode);
-    iconWidget->setWrapping(false);
-    iconWidget->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Just to be sure
-    iconWidget->setIconSize(QSize(48, 48));
-    iconWidget->setMovement(QListView::Static);
-
-    iconWidget->setSpacing(4);
-    iconWidget->setCurrentRow(0);
-    iconWidget->setFlow(QListView::LeftToRight);
-
-    auto* helpButton = new QPushButton(tr("Help"));
-    auto* playButton = new QPushButton(tr("Play"));
     buttonBox->button(QDialogButtonBox::Close)->setText(tr("Close"));
-    buttonBox->addButton(helpButton, QDialogButtonBox::HelpRole);
-    buttonBox->addButton(playButton, QDialogButtonBox::AcceptRole);
+    buttonBox->button(QDialogButtonBox::Ok)->setText(tr(" Launch OpenMW "));
+    buttonBox->button(QDialogButtonBox::Help)->setText(tr("Help"));
+
+    // Order of buttons can be different on different setups,
+    // so make sure that the Play button has a focus by default.
+    buttonBox->button(QDialogButtonBox::Ok)->setFocus();
 
     connect(buttonBox, &QDialogButtonBox::rejected, this, &MainDialog::close);
     connect(buttonBox, &QDialogButtonBox::accepted, this, &MainDialog::play);
@@ -84,37 +75,10 @@ void Launcher::MainDialog::createIcons()
     if (!QIcon::hasThemeIcon("document-new"))
         QIcon::setThemeName("tango");
 
-    auto* playButton = new QListWidgetItem(iconWidget);
-    playButton->setIcon(QIcon(":/images/openmw.png"));
-    playButton->setText(tr("Play"));
-    playButton->setTextAlignment(Qt::AlignCenter);
-    playButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-
-    auto* dataFilesButton = new QListWidgetItem(iconWidget);
-    dataFilesButton->setIcon(QIcon(":/images/openmw-plugin.png"));
-    dataFilesButton->setText(tr("Data Files"));
-    dataFilesButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
-    dataFilesButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-
-    auto* graphicsButton = new QListWidgetItem(iconWidget);
-    graphicsButton->setIcon(QIcon(":/images/preferences-video.png"));
-    graphicsButton->setText(tr("Graphics"));
-    graphicsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom | Qt::AlignAbsolute);
-    graphicsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-
-    auto* settingsButton = new QListWidgetItem(iconWidget);
-    settingsButton->setIcon(QIcon(":/images/preferences.png"));
-    settingsButton->setText(tr("Settings"));
-    settingsButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
-    settingsButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-
-    auto* advancedButton = new QListWidgetItem(iconWidget);
-    advancedButton->setIcon(QIcon(":/images/preferences-advanced.png"));
-    advancedButton->setText(tr("Advanced"));
-    advancedButton->setTextAlignment(Qt::AlignHCenter | Qt::AlignBottom);
-    advancedButton->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
-
-    connect(iconWidget, &QListWidget::currentItemChanged, this, &MainDialog::changePage);
+    connect(dataAction, &QAction::triggered, this, &MainDialog::enableDataPage);
+    connect(graphicsAction, &QAction::triggered, this, &MainDialog::enableGraphicsPage);
+    connect(settingsAction, &QAction::triggered, this, &MainDialog::enableSettingsPage);
+    connect(importAction, &QAction::triggered, this, &MainDialog::enableImportPage);
 }
 
 void Launcher::MainDialog::createPages()
@@ -123,33 +87,23 @@ void Launcher::MainDialog::createPages()
     if (pagesWidget->count() != 0)
         return;
 
-    mPlayPage = new PlayPage(this);
     mDataFilesPage = new DataFilesPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
     mGraphicsPage = new GraphicsPage(this);
-    mSettingsPage = new SettingsPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
-    mAdvancedPage = new AdvancedPage(mGameSettings, this);
-
-    // Set the combobox of the play page to imitate the combobox on the datafilespage
-    mPlayPage->setProfilesModel(mDataFilesPage->profilesModel());
-    mPlayPage->setProfilesIndex(mDataFilesPage->profilesIndex());
+    mImportPage = new ImportPage(mCfgMgr, mGameSettings, mLauncherSettings, this);
+    mSettingsPage = new SettingsPage(mGameSettings, this);
 
     // Add the pages to the stacked widget
-    pagesWidget->addWidget(mPlayPage);
     pagesWidget->addWidget(mDataFilesPage);
     pagesWidget->addWidget(mGraphicsPage);
     pagesWidget->addWidget(mSettingsPage);
-    pagesWidget->addWidget(mAdvancedPage);
+    pagesWidget->addWidget(mImportPage);
 
     // Select the first page
-    iconWidget->setCurrentItem(iconWidget->item(0), QItemSelectionModel::Select);
+    dataAction->setChecked(true);
 
-    connect(mPlayPage, &PlayPage::playButtonClicked, this, &MainDialog::play);
-
-    connect(mPlayPage, &PlayPage::signalProfileChanged, mDataFilesPage, &DataFilesPage::slotProfileChanged);
-    connect(mDataFilesPage, &DataFilesPage::signalProfileChanged, mPlayPage, &PlayPage::setProfilesIndex);
     // Using Qt::QueuedConnection because signal is emitted in a subthread and slot is in the main thread
-    connect(mDataFilesPage, &DataFilesPage::signalLoadedCellsChanged, mAdvancedPage,
-        &AdvancedPage::slotLoadedCellsChanged, Qt::QueuedConnection);
+    connect(mDataFilesPage, &DataFilesPage::signalLoadedCellsChanged, mSettingsPage,
+        &SettingsPage::slotLoadedCellsChanged, Qt::QueuedConnection);
 }
 
 Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
@@ -270,7 +224,7 @@ bool Launcher::MainDialog::reloadSettings()
     if (!setupGraphicsSettings())
         return false;
 
-    if (!mSettingsPage->loadSettings())
+    if (!mImportPage->loadSettings())
         return false;
 
     if (!mDataFilesPage->loadSettings())
@@ -279,20 +233,50 @@ bool Launcher::MainDialog::reloadSettings()
     if (!mGraphicsPage->loadSettings())
         return false;
 
-    if (!mAdvancedPage->loadSettings())
+    if (!mSettingsPage->loadSettings())
         return false;
 
     return true;
 }
 
-void Launcher::MainDialog::changePage(QListWidgetItem* current, QListWidgetItem* previous)
+void Launcher::MainDialog::enableDataPage()
 {
-    if (!current)
-        current = previous;
+    pagesWidget->setCurrentIndex(0);
+    mImportPage->resetProgressBar();
+    dataAction->setChecked(true);
+    graphicsAction->setChecked(false);
+    importAction->setChecked(false);
+    settingsAction->setChecked(false);
+}
 
-    int currentIndex = iconWidget->row(current);
-    pagesWidget->setCurrentIndex(currentIndex);
-    mSettingsPage->resetProgressBar();
+void Launcher::MainDialog::enableGraphicsPage()
+{
+    pagesWidget->setCurrentIndex(1);
+    mImportPage->resetProgressBar();
+    dataAction->setChecked(false);
+    graphicsAction->setChecked(true);
+    settingsAction->setChecked(false);
+    importAction->setChecked(false);
+}
+
+void Launcher::MainDialog::enableSettingsPage()
+{
+    pagesWidget->setCurrentIndex(2);
+    mImportPage->resetProgressBar();
+    dataAction->setChecked(false);
+    graphicsAction->setChecked(false);
+    settingsAction->setChecked(true);
+    importAction->setChecked(false);
+}
+
+void Launcher::MainDialog::enableImportPage()
+{
+    pagesWidget->setCurrentIndex(3);
+    mImportPage->resetProgressBar();
+    dataAction->setChecked(false);
+    graphicsAction->setChecked(false);
+    settingsAction->setChecked(false);
+    importAction->setChecked(true);
 }
 
 bool Launcher::MainDialog::setupLauncherSettings()
@@ -490,8 +474,8 @@ bool Launcher::MainDialog::writeSettings()
     saveSettings();
     mDataFilesPage->saveSettings();
     mGraphicsPage->saveSettings();
+    mImportPage->saveSettings();
     mSettingsPage->saveSettings();
-    mAdvancedPage->saveSettings();
 
     const auto& userPath = mCfgMgr.getUserConfigPath();
 

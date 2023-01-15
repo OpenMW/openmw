@@ -1,67 +1,56 @@
-#ifndef SETTINGSPAGE_HPP
-#define SETTINGSPAGE_HPP
+#ifndef SETTINGSPAGE_H
+#define SETTINGSPAGE_H
 
-#include <components/process/processinvoker.hpp>
+#include <QCompleter>
+#include <QStringListModel>
 
 #include "ui_settingspage.h"
 
-#include "maindialog.hpp"
+#include <components/settings/settings.hpp>
 
-namespace Files
-{
-    struct ConfigurationManager;
-}
 namespace Config
 {
     class GameSettings;
-    class LauncherSettings;
 }
 
 namespace Launcher
 {
-    class TextInputDialog;
-
     class SettingsPage : public QWidget, private Ui::SettingsPage
     {
         Q_OBJECT
 
     public:
-        SettingsPage(Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
-            Config::LauncherSettings& launcherSettings, MainDialog* parent = nullptr);
-        ~SettingsPage() override;
+        explicit SettingsPage(Config::GameSettings& gameSettings, QWidget* parent = nullptr);
 
-        void saveSettings();
         bool loadSettings();
+        void saveSettings();
 
-        /// set progress bar on page to 0%
-        void resetProgressBar();
+    public slots:
+        void slotLoadedCellsChanged(QStringList cellNames);
 
     private slots:
-
-        void on_wizardButton_clicked();
-        void on_importerButton_clicked();
-        void on_browseButton_clicked();
-
-        void wizardStarted();
-        void wizardFinished(int exitCode, QProcess::ExitStatus exitStatus);
-
-        void importerStarted();
-        void importerFinished(int exitCode, QProcess::ExitStatus exitStatus);
-
-        void updateOkButton(const QString& text);
+        void on_skipMenuCheckBox_stateChanged(int state);
+        void on_runScriptAfterStartupBrowseButton_clicked();
+        void slotAnimSourcesToggled(bool checked);
+        void slotPostProcessToggled(bool checked);
+        void slotSkyBlendingToggled(bool checked);
 
     private:
-        Process::ProcessInvoker* mWizardInvoker;
-        Process::ProcessInvoker* mImporterInvoker;
-
-        Files::ConfigurationManager& mCfgMgr;
-
         Config::GameSettings& mGameSettings;
-        Config::LauncherSettings& mLauncherSettings;
+        QCompleter mCellNameCompleter;
+        QStringListModel mCellNameCompleterModel;
 
-        MainDialog* mMain;
-        TextInputDialog* mProfileDialog;
+        /**
+         * Load the cells associated with the given content files for use in autocomplete
+         * @param filePaths the file paths of the content files to be examined
+         */
+        void loadCellsForAutocomplete(QStringList filePaths);
+        static void loadSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group);
+        static void saveSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group);
+        static void loadSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group);
+        static void saveSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group);
+        static void loadSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group);
+        static void saveSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group);
     };
 }
-
-#endif // SETTINGSPAGE_HPP
+#endif

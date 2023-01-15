@@ -4,10 +4,9 @@ set(LAUNCHER
     sdlinit.cpp
     main.cpp
     maindialog.cpp
-    playpage.cpp
     textslotmsgbox.cpp
+    importpage.cpp
     settingspage.cpp
-    advancedpage.cpp
 
     utils/cellnameloader.cpp
     utils/profilescombobox.cpp
@@ -23,10 +22,9 @@ set(LAUNCHER_HEADER
     graphicspage.hpp
     sdlinit.hpp
     maindialog.hpp
-    playpage.hpp
     textslotmsgbox.hpp
+    importpage.hpp
     settingspage.hpp
-    advancedpage.hpp
 
     utils/cellnameloader.hpp
     utils/profilescombobox.hpp
@@ -40,10 +38,9 @@ set(LAUNCHER_UI
     ${CMAKE_SOURCE_DIR}/files/ui/datafilespage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/graphicspage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/mainwindow.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/playpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/contentselector.ui
+    ${CMAKE_SOURCE_DIR}/files/ui/importpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/settingspage.ui
-    ${CMAKE_SOURCE_DIR}/files/ui/advancedpage.ui
     ${CMAKE_SOURCE_DIR}/files/ui/directorypicker.ui
 )
 
