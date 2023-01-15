@@ -10,18 +10,11 @@ namespace MWMechanics
 {
     class Action
     {
-        float mHealCooldown;
-
     public:
-        Action(bool healing)
-            : mHealCooldown(healing ? 5.f : 0.f)
-        {
-        }
         virtual ~Action() {}
         virtual void prepare(const MWWorld::Ptr& actor) = 0;
         virtual float getCombatRange(bool& isRanged) const = 0;
         virtual float getActionCooldown() const { return 0.f; }
-        virtual float getHealCooldown() const { return mHealCooldown; }
         virtual const ESM::Weapon* getWeapon() const { return nullptr; }
         virtual bool isAttackingOrSpell() const { return true; }
         virtual bool isFleeing() const { return false; }
@@ -30,10 +23,7 @@ namespace MWMechanics
     class ActionFlee : public Action
     {
     public:
-        ActionFlee()
-            : Action(false)
-        {
-        }
+        ActionFlee() {}
         void prepare(const MWWorld::Ptr& actor) override {}
         float getCombatRange(bool& isRanged) const override { return 0.0f; }
         float getActionCooldown() const override { return 3.0f; }
@@ -44,9 +34,8 @@ namespace MWMechanics
     class ActionSpell : public Action
     {
     public:
-        ActionSpell(const ESM::RefId& spellId, bool healing = false)
-            : Action(healing)
-            , mSpellId(spellId)
+        ActionSpell(const ESM::RefId& spellId)
+            : mSpellId(spellId)
         {
         }
         ESM::RefId mSpellId;
@@ -59,9 +48,8 @@ namespace MWMechanics
     class ActionEnchantedItem : public Action
     {
     public:
-        ActionEnchantedItem(const MWWorld::ContainerStoreIterator& item, bool healing)
-            : Action(healing)
-            , mItem(item)
+        ActionEnchantedItem(const MWWorld::ContainerStoreIterator& item)
+            : mItem(item)
         {
         }
         MWWorld::ContainerStoreIterator mItem;
@@ -76,9 +64,8 @@ namespace MWMechanics
     class ActionPotion : public Action
     {
     public:
-        ActionPotion(const MWWorld::Ptr& potion, bool healing)
-            : Action(healing)
-            , mPotion(potion)
+        ActionPotion(const MWWorld::Ptr& potion)
+            : mPotion(potion)
         {
         }
         MWWorld::Ptr mPotion;
@@ -100,8 +87,7 @@ namespace MWMechanics
     public:
         /// \a weapon may be empty for hand-to-hand combat
         ActionWeapon(const MWWorld::Ptr& weapon, const MWWorld::Ptr& ammo = MWWorld::Ptr())
-            : Action(false)
-            , mAmmunition(ammo)
+            : mAmmunition(ammo)
             , mWeapon(weapon)
         {
         }
@@ -111,7 +97,7 @@ namespace MWMechanics
         const ESM::Weapon* getWeapon() const override;
     };
 
-    std::unique_ptr<Action> prepareNextAction(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool allowHealing);
+    std::unique_ptr<Action> prepareNextAction(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
     float getBestActionRating(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
 
     float getDistanceMinusHalfExtents(const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool minusZDist = false);

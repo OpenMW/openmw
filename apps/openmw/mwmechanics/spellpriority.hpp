@@ -27,9 +27,8 @@ namespace MWMechanics
 
     float rateSpell(
         const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool checkMagicka = true);
-    float rateMagicItem(
-        const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool& pureHealing);
-    float ratePotion(const MWWorld::Ptr& item, const MWWorld::Ptr& actor, bool& pureHealing);
+    float rateMagicItem(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
+    float ratePotion(const MWWorld::Ptr& item, const MWWorld::Ptr& actor);
 
     /// @note target may be empty
     float rateEffect(const ESM::ENAMstruct& effect, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);

@@ -257,13 +257,4 @@ namespace MWMechanics
         const auto spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(spellId);
         return spell && spellIncreasesSkill(spell);
     }
-
-    bool isPureHealing(const ESM::EffectList& list)
-    {
-        auto nonHealing = std::find_if(list.mList.begin(), list.mList.end(), [](const auto& effect) {
-            return effect.mEffectID < ESM::MagicEffect::RestoreAttribute
-                || effect.mEffectID > ESM::MagicEffect::RestoreSkill;
-        });
-        return nonHealing == list.mList.end();
-    }
 }

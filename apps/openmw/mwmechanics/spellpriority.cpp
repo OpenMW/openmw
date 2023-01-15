@@ -122,13 +122,12 @@ namespace MWMechanics
         return types;
     }
 
-    float ratePotion(const MWWorld::Ptr& item, const MWWorld::Ptr& actor, bool& pureHealing)
+    float ratePotion(const MWWorld::Ptr& item, const MWWorld::Ptr& actor)
     {
         if (item.getType() != ESM::Potion::sRecordId)
             return 0.f;
 
         const ESM::Potion* potion = item.get<ESM::Potion>()->mBase;
-        pureHealing = isPureHealing(potion->mEffects);
         return rateEffects(potion->mEffects, actor, MWWorld::Ptr());
     }
 
@@ -160,15 +159,13 @@ namespace MWMechanics
         return rateEffects(spell->mEffects, actor, enemy) * (successChance / 100.f);
     }
 
-    float rateMagicItem(
-        const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool& pureHealing)
+    float rateMagicItem(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy)
     {
         if (ptr.getClass().getEnchantment(ptr).empty())
             return 0.f;
 
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().find(
             ptr.getClass().getEnchantment(ptr));
-        pureHealing = isPureHealing(enchantment->mEffects);
 
         // Spells don't stack, so early out if the spell is still active on the target
         int types = getRangeTypes(enchantment->mEffects);
