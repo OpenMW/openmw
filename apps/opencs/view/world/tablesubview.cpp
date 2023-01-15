@@ -2,12 +2,12 @@
 
 #include <QApplication>
 #include <QCheckBox>
-#include <QDesktopWidget>
 #include <QDropEvent>
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QPushButton>
+#include <QScreen>
 #include <QVBoxLayout>
 
 #include <algorithm>
@@ -76,7 +76,7 @@ CSVWorld::TableSubView::TableSubView(
 
     setWidget(widget);
     // prefer height of the screen and full width of the table
-    const QRect rect = QApplication::desktop()->screenGeometry(this);
+    const QRect rect = QApplication::screenAt(pos())->geometry();
     int frameHeight = 40; // set a reasonable default
     QWidget* topLevel = QApplication::topLevelAt(pos());
     if (topLevel)

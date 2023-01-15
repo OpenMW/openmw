@@ -50,12 +50,10 @@ bool Config::LauncherSettings::writeFile(QTextStream& stream)
     QRegularExpression sectionRe("^([^/]+)/(.+)$");
     QMultiMap<QString, QString> settings = SettingsBase::getSettings();
 
-    QMapIterator<QString, QString> i(settings);
-    i.toBack();
-
-    while (i.hasPrevious())
+    auto i = settings.end();
+    while (i != settings.begin())
     {
-        i.previous();
+        i--;
 
         QString prefix;
         QString key;
