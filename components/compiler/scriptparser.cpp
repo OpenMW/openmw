@@ -15,9 +15,9 @@ namespace Compiler
     {
     }
 
-    void ScriptParser::getCode(std::vector<Interpreter::Type_Code>& code) const
+    Interpreter::Program ScriptParser::getProgram() const
     {
-        mOutput.getCode(code);
+        return mOutput.getProgram();
     }
 
     bool ScriptParser::parseName(const std::string& name, const TokenLoc& loc, Scanner& scanner)

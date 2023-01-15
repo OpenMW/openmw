@@ -46,12 +46,12 @@ namespace MWScript
 
         struct CompiledScript
         {
-            std::vector<Interpreter::Type_Code> mByteCode;
+            Interpreter::Program mProgram;
             Compiler::Locals mLocals;
             std::set<ESM::RefId> mInactive;
 
-            CompiledScript(const std::vector<Interpreter::Type_Code>& code, const Compiler::Locals& locals)
-                : mByteCode(code)
+            explicit CompiledScript(Interpreter::Program&& program, const Compiler::Locals& locals)
+                : mProgram(std::move(program))
                 , mLocals(locals)
             {
             }

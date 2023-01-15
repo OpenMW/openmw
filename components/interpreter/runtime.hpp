@@ -9,21 +9,19 @@
 namespace Interpreter
 {
     class Context;
+    struct Program;
 
     /// Runtime data and engine interface
 
     class Runtime
     {
-        Context* mContext;
-        const Type_Code* mCode;
-        int mCodeSize;
-        int mPC;
+        Context* mContext = nullptr;
+        const Program* mProgram = nullptr;
+        int mPC = 0;
         std::vector<Data> mStack;
 
     public:
-        Runtime();
-
-        int getPC() const;
+        int getPC() const { return mPC; }
         ///< return program counter.
 
         int getIntegerLiteral(int index) const;
@@ -32,13 +30,13 @@ namespace Interpreter
 
         std::string_view getStringLiteral(int index) const;
 
-        void configure(const Type_Code* code, int codeSize, Context& context);
+        void configure(const Program& program, Context& context);
         ///< \a context and \a code must exist as least until either configure, clear or
-        /// the destructor is called. \a codeSize is given in 32-bit words.
+        /// the destructor is called.
 
         void clear();
 
-        void setPC(int PC);
+        void setPC(int value) { mPC = value; }
         ///< set program counter.
 
         void push(const Data& data);
@@ -53,7 +51,7 @@ namespace Interpreter
         void pop();
         ///< pop stack
 
-        Data& operator[](int Index);
+        Data& operator[](int index);
         ///< Access stack member, counted from the top.
 
         Context& getContext();

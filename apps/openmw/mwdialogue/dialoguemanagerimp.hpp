@@ -4,11 +4,13 @@
 #include "../mwbase/dialoguemanager.hpp"
 
 #include <map>
+#include <optional>
 #include <set>
 #include <unordered_map>
 
 #include <components/compiler/streamerrorhandler.hpp>
 #include <components/esm3/loadinfo.hpp>
+#include <components/interpreter/program.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/translation/translation.hpp>
 
@@ -63,7 +65,8 @@ namespace MWDialogue
         void updateActorKnownTopics();
         void updateGlobals();
 
-        bool compile(const std::string& cmd, std::vector<Interpreter::Type_Code>& code, const MWWorld::Ptr& actor);
+        std::optional<Interpreter::Program> compile(const std::string& cmd, const MWWorld::Ptr& actor);
+
         void executeScript(const std::string& script, const MWWorld::Ptr& actor);
 
         void executeTopic(const ESM::RefId& topic, ResponseCallback* callback);

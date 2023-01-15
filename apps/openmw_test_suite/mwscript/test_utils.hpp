@@ -249,11 +249,11 @@ namespace
 
     struct CompiledScript
     {
-        std::vector<Interpreter::Type_Code> mByteCode;
+        Interpreter::Program mProgram;
         Compiler::Locals mLocals;
 
-        CompiledScript(const std::vector<Interpreter::Type_Code>& code, const Compiler::Locals& locals)
-            : mByteCode(code)
+        CompiledScript(Interpreter::Program&& program, const Compiler::Locals& locals)
+            : mProgram(std::move(program))
             , mLocals(locals)
         {
         }

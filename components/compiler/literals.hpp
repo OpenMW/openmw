@@ -17,18 +17,11 @@ namespace Compiler
         std::vector<std::string> mStrings;
 
     public:
-        int getIntegerSize() const;
-        ///< Return size of integer block (in bytes).
+        const std::vector<Interpreter::Type_Integer>& getIntegers() const { return mIntegers; }
 
-        int getFloatSize() const;
-        ///< Return size of float block (in bytes).
+        const std::vector<Interpreter::Type_Float>& getFloats() const { return mFloats; }
 
-        int getStringSize() const;
-        ///< Return size of string block (in bytes).
-
-        void append(std::vector<Interpreter::Type_Code>& code) const;
-        ///< Apepnd literal blocks to code.
-        /// \note code blocks will be padded for 32-bit alignment.
+        const std::vector<std::string>& getStrings() const { return mStrings; }
 
         int addInteger(Interpreter::Type_Integer value);
         ///< add integer liternal and return index.

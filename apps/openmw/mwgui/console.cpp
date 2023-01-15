@@ -208,9 +208,8 @@ namespace MWGui
                 ConsoleInterpreterContext interpreterContext(*this, mPtr);
                 Interpreter::Interpreter interpreter;
                 MWScript::installOpcodes(interpreter, mConsoleOnlyScripts);
-                std::vector<Interpreter::Type_Code> code;
-                output.getCode(code);
-                interpreter.run(code.data(), code.size(), interpreterContext);
+                const Interpreter::Program program = output.getProgram();
+                interpreter.run(program, interpreterContext);
             }
             catch (const std::exception& error)
             {

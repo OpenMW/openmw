@@ -13,27 +13,14 @@ namespace Compiler
     {
     }
 
-    void Output::getCode(std::vector<Interpreter::Type_Code>& code) const
+    Interpreter::Program Output::getProgram() const
     {
-        code.clear();
-
-        // header
-        code.push_back(static_cast<Interpreter::Type_Code>(mCode.size()));
-
-        assert(mLiterals.getIntegerSize() % 4 == 0);
-        code.push_back(static_cast<Interpreter::Type_Code>(mLiterals.getIntegerSize() / 4));
-
-        assert(mLiterals.getFloatSize() % 4 == 0);
-        code.push_back(static_cast<Interpreter::Type_Code>(mLiterals.getFloatSize() / 4));
-
-        assert(mLiterals.getStringSize() % 4 == 0);
-        code.push_back(static_cast<Interpreter::Type_Code>(mLiterals.getStringSize() / 4));
-
-        // code
-        std::copy(mCode.begin(), mCode.end(), std::back_inserter(code));
-
-        // literals
-        mLiterals.append(code);
+        return Interpreter::Program{
+            .mInstructions = mCode,
+            .mIntegers = mLiterals.getIntegers(),
+            .mFloats = mLiterals.getFloats(),
+            .mStrings = mLiterals.getStrings(),
+        };
     }
 
     const Literals& Output::getLiterals() const

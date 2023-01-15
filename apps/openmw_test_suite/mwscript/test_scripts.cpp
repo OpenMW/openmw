@@ -21,11 +21,7 @@ namespace
             Compiler::Scanner scanner(mErrorHandler, input, mCompilerContext.getExtensions());
             scanner.scan(mParser);
             if (mErrorHandler.isGood())
-            {
-                std::vector<Interpreter::Type_Code> code;
-                mParser.getCode(code);
-                return CompiledScript(code, mParser.getLocals());
-            }
+                return CompiledScript(mParser.getProgram(), mParser.getLocals());
             else if (!shouldFail)
                 logErrors();
             return {};
@@ -50,7 +46,7 @@ namespace
 
         void run(const CompiledScript& script, TestInterpreterContext& context)
         {
-            mInterpreter.run(&script.mByteCode[0], static_cast<int>(script.mByteCode.size()), context);
+            mInterpreter.run(script.mProgram, context);
         }
 
         template <typename T, typename... TArgs>

@@ -79,9 +79,7 @@ namespace MWScript
 
             if (Success)
             {
-                std::vector<Interpreter::Type_Code> code;
-                mParser.getCode(code);
-                mScripts.emplace(name, CompiledScript(code, mParser.getLocals()));
+                mScripts.emplace(name, CompiledScript(mParser.getProgram(), mParser.getLocals()));
 
                 return true;
             }
@@ -100,8 +98,7 @@ namespace MWScript
             if (!compile(name))
             {
                 // failed -> ignore script from now on.
-                std::vector<Interpreter::Type_Code> empty;
-                mScripts.emplace(name, CompiledScript(empty, Compiler::Locals()));
+                mScripts.emplace(name, CompiledScript({}, Compiler::Locals()));
                 return false;
             }
 
@@ -111,7 +108,8 @@ namespace MWScript
 
         // execute script
         const auto& target = interpreterContext.getTarget();
-        if (!iter->second.mByteCode.empty() && iter->second.mInactive.find(target) == iter->second.mInactive.end())
+        if (!iter->second.mProgram.mInstructions.empty()
+            && iter->second.mInactive.find(target) == iter->second.mInactive.end())
             try
             {
                 if (!mOpcodesInstalled)
@@ -120,7 +118,7 @@ namespace MWScript
                     mOpcodesInstalled = true;
                 }
 
-                mInterpreter.run(&iter->second.mByteCode[0], iter->second.mByteCode.size(), interpreterContext);
+                mInterpreter.run(iter->second.mProgram, interpreterContext);
                 return true;
             }
             catch (const MissingImplicitRefError& e)

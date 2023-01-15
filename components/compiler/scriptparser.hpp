@@ -23,8 +23,7 @@ namespace Compiler
         /// \param end of script is marked by end keyword.
         ScriptParser(ErrorHandler& errorHandler, const Context& context, Locals& locals, bool end = false);
 
-        void getCode(std::vector<Interpreter::Type_Code>& code) const;
-        ///< store generated code in \a code.
+        Interpreter::Program getProgram() const;
 
         bool parseName(const std::string& name, const TokenLoc& loc, Scanner& scanner) override;
         ///< Handle a name token.
