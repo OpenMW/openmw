@@ -168,7 +168,7 @@
        <item>
         <widget class="QCheckBox" name="allowNPCToFollowOverWaterSurfaceCheckBox">
          <property name="toolTip">
-          <string>Give NPC an ability to swim over the water surface when they follow other actor independently from their ability to swim. Has effect only when nav mesh building is enabled.</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Give NPC an ability to swim over the water surface when they follow other actor independently from their ability to swim. Has effect only when nav mesh building is enabled.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
           <string>Always allow NPC to follow over water surface</string>
