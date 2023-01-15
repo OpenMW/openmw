@@ -57,7 +57,7 @@ namespace MWClass
     {
         if (!model.empty())
         {
-            renderingInterface.getObjects().insertModel(ptr, model, true);
+            renderingInterface.getObjects().insertModel(ptr, model);
             ptr.getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Static);
         }
     }

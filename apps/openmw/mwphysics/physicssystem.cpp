@@ -23,6 +23,7 @@
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/misc/convert.hpp>
+#include <components/misc/resourcehelpers.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/settings/settings.hpp>
@@ -642,15 +643,15 @@ namespace MWPhysics
 
     void PhysicsSystem::addActor(const MWWorld::Ptr& ptr, const std::string& mesh)
     {
-        osg::ref_ptr<const Resource::BulletShape> shape = mShapeManager->getShape(mesh);
+        std::string animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
+        osg::ref_ptr<const Resource::BulletShape> shape = mShapeManager->getShape(animationMesh);
 
         // Try to get shape from basic model as fallback for creatures
         if (!ptr.getClass().isNpc() && shape && shape->mCollisionBox.mExtents.length2() == 0)
         {
-            const std::string fallbackModel = ptr.getClass().getModel(ptr);
-            if (fallbackModel != mesh)
+            if (animationMesh != mesh)
             {
-                shape = mShapeManager->getShape(fallbackModel);
+                shape = mShapeManager->getShape(mesh);
             }
         }
 

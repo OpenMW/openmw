@@ -17,7 +17,7 @@ namespace MWRender
 {
 
     CreatureAnimation::CreatureAnimation(
-        const MWWorld::Ptr& ptr, const std::string& model, Resource::ResourceSystem* resourceSystem)
+        const MWWorld::Ptr& ptr, const std::string& model, Resource::ResourceSystem* resourceSystem, bool animated)
         : ActorAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), resourceSystem)
     {
         MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
@@ -28,12 +28,14 @@ namespace MWRender
 
             if ((ref->mBase->mFlags & ESM::Creature::Bipedal))
                 addAnimSource(Settings::Manager::getString("xbaseanim", "Models"), model);
-            addAnimSource(model, model);
+
+            if (animated)
+                addAnimSource(model, model);
         }
     }
 
     CreatureWeaponAnimation::CreatureWeaponAnimation(
-        const MWWorld::Ptr& ptr, const std::string& model, Resource::ResourceSystem* resourceSystem)
+        const MWWorld::Ptr& ptr, const std::string& model, Resource::ResourceSystem* resourceSystem, bool animated)
         : ActorAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), resourceSystem)
         , mShowWeapons(false)
         , mShowCarriedLeft(false)
@@ -45,10 +47,10 @@ namespace MWRender
             setObjectRoot(model, true, false, true);
 
             if ((ref->mBase->mFlags & ESM::Creature::Bipedal))
-            {
                 addAnimSource(Settings::Manager::getString("xbaseanim", "Models"), model);
-            }
-            addAnimSource(model, model);
+
+            if (animated)
+                addAnimSource(model, model);
 
             mPtr.getClass().getInventoryStore(mPtr).setInvListener(this, mPtr);
 

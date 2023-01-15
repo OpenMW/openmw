@@ -15,7 +15,8 @@ namespace MWRender
     class CreatureAnimation : public ActorAnimation
     {
     public:
-        CreatureAnimation(const MWWorld::Ptr& ptr, const std::string& model, Resource::ResourceSystem* resourceSystem);
+        CreatureAnimation(
+            const MWWorld::Ptr& ptr, const std::string& model, Resource::ResourceSystem* resourceSystem, bool animated);
         virtual ~CreatureAnimation() {}
     };
 
@@ -28,7 +29,7 @@ namespace MWRender
     {
     public:
         CreatureWeaponAnimation(
-            const MWWorld::Ptr& ptr, const std::string& model, Resource::ResourceSystem* resourceSystem);
+            const MWWorld::Ptr& ptr, const std::string& model, Resource::ResourceSystem* resourceSystem, bool animated);
         virtual ~CreatureWeaponAnimation() {}
 
         void equipmentChanged() override { updateParts(); }
