@@ -112,7 +112,7 @@ namespace MWMechanics
 
         MWWorld::Ptr target = MWBase::Environment::get().getWorld()->searchPtrViaActorId(mTargetActorId);
         if (target.isEmpty())
-            return false;
+            return true;
 
         if(!target.getRefData().getCount() || !target.getRefData().isEnabled()  // Really we should be checking whether the target is currently registered
                                                                                 // with the MechanicsManager
