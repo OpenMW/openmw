@@ -10,6 +10,7 @@
 #include <components/misc/rng.hpp>
 #include <components/resource/bulletshape.hpp>
 
+#include <osg/io_utils>
 #include <osg/ref_ptr>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
@@ -1232,11 +1233,16 @@ namespace
 
     TEST_F(DetourNavigatorNavigatorTest, update_for_very_big_object_should_be_limited)
     {
-        CollisionShapeInstance bigBox(std::make_unique<btBoxShape>(btVector3(1e9, 1e9, 1e9)));
+        const float size = static_cast<float>(2 * static_cast<std::int64_t>(std::numeric_limits<int>::max()) - 1);
+        CollisionShapeInstance bigBox(std::make_unique<btBoxShape>(btVector3(size, size, 1)));
+        const ObjectTransform objectTransform{
+            .mPosition = ESM::Position{ .pos = { 0, 0, 0 }, .rot{ 0, 0, 0 } },
+            .mScale = 1.0f,
+        };
 
         mNavigator->updateBounds(mPlayerPosition, nullptr);
         mNavigator->addAgent(mAgentBounds);
-        mNavigator->addObject(ObjectId(&bigBox.shape()), ObjectShapes(bigBox.instance(), mObjectTransform),
+        mNavigator->addObject(ObjectId(&bigBox.shape()), ObjectShapes(bigBox.instance(), objectTransform),
             btTransform::getIdentity(), nullptr);
 
         bool updated = false;
@@ -1257,5 +1263,16 @@ namespace
         }
 
         thread.join();
+
+        mNavigator->wait(WaitConditionType::allJobsDone, &mListener);
+
+        EXPECT_EQ(mNavigator->getRecastMeshTiles().size(), 509);
+
+        const auto navMesh = mNavigator->getNavMesh(mAgentBounds);
+        ASSERT_NE(navMesh, nullptr);
+
+        std::size_t usedNavMeshTiles = 0;
+        navMesh->lockConst()->forEachUsedTile([&](const auto&...) { ++usedNavMeshTiles; });
+        EXPECT_EQ(usedNavMeshTiles, 509);
     }
 }
