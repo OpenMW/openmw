@@ -8,9 +8,12 @@
 #include <QStackedLayout>
 #include <QStatusBar>
 
+#include <components/debug/debuglog.hpp>
+
 #include <apps/opencs/view/world/extendedcommandconfigurator.hpp>
 
 #include "creator.hpp"
+#include "infocreator.hpp"
 
 void CSVWorld::TableBottomBox::updateSize()
 {
@@ -253,6 +256,20 @@ void CSVWorld::TableBottomBox::createRequest()
     setVisible(true);
     mEditMode = EditMode_Creation;
     mCreator->focus();
+}
+
+void CSVWorld::TableBottomBox::createRecordsDirectlyRequest(const std::string& id)
+{
+    if (InfoCreator* creator = dynamic_cast<InfoCreator*>(mCreator))
+    {
+        creator->reset();
+        creator->setText(id);
+        creator->callReturnPressed();
+    }
+    else
+    {
+        Log(Debug::Warning) << "Creating a record directly failed.";
+    }
 }
 
 void CSVWorld::TableBottomBox::cloneRequest(const std::string& id, const CSMWorld::UniversalId::Type type)
