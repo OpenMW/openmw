@@ -1,4 +1,5 @@
 
+#include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/settingsutils.hpp>
 #include <components/detournavigator/tilecachedrecastmeshmanager.hpp>
 #include <components/esm/refid.hpp>
@@ -82,10 +83,11 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        TileBounds bounds;
-        bounds.mMin = osg::Vec2f(182, 182);
-        bounds.mMax = osg::Vec2f(1000, 1000);
-        manager.setBounds(bounds, nullptr);
+        const TilesPositionsRange range{
+            .mBegin = TilePosition(0, 0),
+            .mEnd = TilePosition(1, 1),
+        };
+        manager.setRange(range, nullptr);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         EXPECT_THAT(manager.takeChangedTiles(nullptr), ElementsAre(std::pair(TilePosition(0, 0), ChangeType::add)));
     }
@@ -97,10 +99,11 @@ namespace
         const btTransform transform(
             btMatrix3x3::getIdentity(), btVector3(getTileSize(mSettings) / mSettings.mRecastScaleFactor, 0, 0));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        TileBounds bounds;
-        bounds.mMin = osg::Vec2f(-1000, -1000);
-        bounds.mMax = osg::Vec2f(1000, 1000);
-        manager.setBounds(bounds, nullptr);
+        const TilesPositionsRange range{
+            .mBegin = TilePosition(-1, -1),
+            .mEnd = TilePosition(2, 2),
+        };
+        manager.setRange(range, nullptr);
         manager.addObject(ObjectId(&boxShape), shape, transform, AreaType::AreaType_ground, nullptr);
         manager.takeChangedTiles(nullptr);
         EXPECT_TRUE(
@@ -130,10 +133,11 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        TileBounds bounds;
-        bounds.mMin = osg::Vec2f(182, 182);
-        bounds.mMax = osg::Vec2f(1000, 1000);
-        manager.setBounds(bounds, nullptr);
+        const TilesPositionsRange range{
+            .mBegin = TilePosition(0, 0),
+            .mEnd = TilePosition(1, 1),
+        };
+        manager.setRange(range, nullptr);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
         manager.takeChangedTiles(nullptr);
         manager.removeObject(ObjectId(&boxShape), nullptr);
@@ -169,10 +173,11 @@ namespace
         get_mesh_for_moved_object_should_return_recast_mesh_for_each_used_tile)
     {
         TileCachedRecastMeshManager manager(mSettings);
-        TileBounds bounds;
-        bounds.mMin = osg::Vec2f(-1000, -1000);
-        bounds.mMax = osg::Vec2f(1000, 1000);
-        manager.setBounds(bounds, nullptr);
+        const TilesPositionsRange range{
+            .mBegin = TilePosition(-1, -1),
+            .mEnd = TilePosition(1, 1),
+        };
+        manager.setRange(range, nullptr);
         manager.setWorldspace(mWorldspace, nullptr);
 
         const btBoxShape boxShape(btVector3(20, 20, 100));
@@ -452,15 +457,18 @@ namespace
         TileCachedRecastMeshManager manager(mSettings);
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const CollisionShape shape(mInstance, boxShape, mObjectTransform);
-        TileBounds bounds;
-        bounds.mMin = osg::Vec2f(182, 0);
-        bounds.mMax = osg::Vec2f(1000, 1000);
-        manager.setBounds(bounds, nullptr);
+        const TilesPositionsRange range1{
+            .mBegin = TilePosition(0, 0),
+            .mEnd = TilePosition(1, 1),
+        };
+        manager.setRange(range1, nullptr);
         manager.addObject(ObjectId(&boxShape), shape, btTransform::getIdentity(), AreaType::AreaType_ground, nullptr);
-        bounds.mMin = osg::Vec2f(-1000, -1000);
-        bounds.mMax = osg::Vec2f(0, -182);
+        const TilesPositionsRange range2{
+            .mBegin = TilePosition(-1, -1),
+            .mEnd = TilePosition(0, 0),
+        };
         manager.takeChangedTiles(nullptr);
-        manager.setBounds(bounds, nullptr);
+        manager.setRange(range2, nullptr);
         EXPECT_THAT(manager.takeChangedTiles(nullptr),
             ElementsAre(
                 std::pair(TilePosition(-1, -1), ChangeType::add), std::pair(TilePosition(0, 0), ChangeType::remove)));

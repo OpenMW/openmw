@@ -20,9 +20,12 @@
 #include <gtest/gtest.h>
 
 #include <array>
+#include <condition_variable>
 #include <deque>
 #include <limits>
 #include <memory>
+#include <mutex>
+#include <thread>
 
 MATCHER_P3(Vec3fEq, x, y, z, "")
 {
@@ -1225,5 +1228,34 @@ namespace
         EXPECT_EQ(
             findPath(*mNavigator, agentBounds, mStepSize, mStart, mEnd, Flag_walk, mAreaCosts, mEndTolerance, mOut),
             Status::NavMeshNotFound);
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, update_for_very_big_object_should_be_limited)
+    {
+        CollisionShapeInstance bigBox(std::make_unique<btBoxShape>(btVector3(1e9, 1e9, 1e9)));
+
+        mNavigator->updateBounds(mPlayerPosition, nullptr);
+        mNavigator->addAgent(mAgentBounds);
+        mNavigator->addObject(ObjectId(&bigBox.shape()), ObjectShapes(bigBox.instance(), mObjectTransform),
+            btTransform::getIdentity(), nullptr);
+
+        bool updated = false;
+        std::condition_variable updateFinished;
+        std::mutex mutex;
+
+        std::thread thread([&] {
+            mNavigator->update(mPlayerPosition, nullptr);
+            std::lock_guard lock(mutex);
+            updated = true;
+            updateFinished.notify_all();
+        });
+
+        {
+            std::unique_lock lock(mutex);
+            updateFinished.wait_for(lock, std::chrono::seconds(3), [&] { return updated; });
+            ASSERT_TRUE(updated);
+        }
+
+        thread.join();
     }
 }

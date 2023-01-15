@@ -44,9 +44,9 @@ namespace DetourNavigator
 
         explicit TileCachedRecastMeshManager(const RecastSettings& settings);
 
-        void setBounds(const TileBounds& bounds, const UpdateGuard* guard);
+        void setRange(const TilesPositionsRange& range, const UpdateGuard* guard);
 
-        TilesPositionsRange getRange() const;
+        TilesPositionsRange getLimitedObjectsRange() const;
 
         void setWorldspace(const ESM::RefId& worldspace, const UpdateGuard* guard);
 
@@ -126,7 +126,6 @@ namespace DetourNavigator
         using HeightfieldIndexValue = std::pair<IndexBox, std::map<osg::Vec2i, HeightfieldData>::const_iterator>;
 
         const RecastSettings& mSettings;
-        TileBounds mBounds;
         TilesPositionsRange mRange;
         ESM::RefId mWorldspace;
         std::unordered_map<ObjectId, std::unique_ptr<ObjectData>> mObjects;
