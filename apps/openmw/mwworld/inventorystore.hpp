@@ -67,9 +67,9 @@ namespace MWWorld
 
         TSlots mSlots;
 
-        void autoEquipWeapon(const MWWorld::Ptr& actor, TSlots& slots_);
-        void autoEquipArmor(const MWWorld::Ptr& actor, TSlots& slots_);
-        void autoEquipShield(const MWWorld::Ptr& actor, TSlots& slots_);
+        void autoEquipWeapon(TSlots& slots_);
+        void autoEquipArmor(TSlots& slots_);
+        void autoEquipShield(TSlots& slots_);
 
         // selected magic item (for using enchantments of type "Cast once" or "Cast when used")
         ContainerStoreIterator mSelectedEnchantItem;
@@ -78,7 +78,7 @@ namespace MWWorld
 
         void initSlots(TSlots& slots_);
 
-        void fireEquipmentChangedEvent(const Ptr& actor);
+        void fireEquipmentChangedEvent();
 
         void storeEquipmentState(
             const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const override;
@@ -94,10 +94,13 @@ namespace MWWorld
 
         InventoryStore& operator=(const InventoryStore& store);
 
+        const MWWorld::Ptr& getActor() const { return mActor; }
+        void setActor(const MWWorld::Ptr& actor) { mActor = actor; }
+
         std::unique_ptr<ContainerStore> clone() override { return std::make_unique<InventoryStore>(*this); }
 
-        ContainerStoreIterator add(const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true,
-            bool resolve = true) override;
+        ContainerStoreIterator add(
+            const Ptr& itemPtr, int count, bool allowAutoEquip = true, bool resolve = true) override;
         ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
         /// Auto-equip items if specific conditions are fulfilled and allowAutoEquip is true (see the implementation).
         ///
@@ -109,7 +112,7 @@ namespace MWWorld
         /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to
         /// the newly inserted item.
 
-        void equip(int slot, const ContainerStoreIterator& iterator, const Ptr& actor);
+        void equip(int slot, const ContainerStoreIterator& iterator);
         ///< \warning \a iterator can not be an end()-iterator, use unequip function instead
 
         bool isEquipped(const MWWorld::ConstPtr& item);
@@ -126,30 +129,29 @@ namespace MWWorld
         ContainerStoreIterator getSlot(int slot);
         ConstContainerStoreIterator getSlot(int slot) const;
 
-        ContainerStoreIterator getPreferredShield(const MWWorld::Ptr& actor);
+        ContainerStoreIterator getPreferredShield();
 
-        void unequipAll(const MWWorld::Ptr& actor);
+        void unequipAll();
         ///< Unequip all currently equipped items.
 
-        void autoEquip(const MWWorld::Ptr& actor);
+        void autoEquip();
         ///< Auto equip items according to stats and item value.
 
         bool stacks(const ConstPtr& ptr1, const ConstPtr& ptr2) const override;
         ///< @return true if the two specified objects can stack with each other
 
         using ContainerStore::remove;
-        int remove(
-            const Ptr& item, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true) override;
+        int remove(const Ptr& item, int count, bool equipReplacement = 0, bool resolve = true) override;
         ///< Remove \a count item(s) designated by \a item from this inventory.
         ///
         /// @return the number of items actually removed
 
-        ContainerStoreIterator unequipSlot(int slot, const Ptr& actor, bool applyUpdates = true);
+        ContainerStoreIterator unequipSlot(int slot, bool applyUpdates = true);
         ///< Unequip \a slot.
         ///
         /// @return an iterator to the item that was previously in the slot
 
-        ContainerStoreIterator unequipItem(const Ptr& item, const Ptr& actor);
+        ContainerStoreIterator unequipItem(const Ptr& item);
         ///< Unequip an item identified by its Ptr. An exception is thrown
         /// if the item is not currently equipped.
         ///
@@ -157,7 +159,7 @@ namespace MWWorld
         /// (it can be re-stacked so its count may be different than when it
         /// was equipped).
 
-        ContainerStoreIterator unequipItemQuantity(const Ptr& item, const Ptr& actor, int count);
+        ContainerStoreIterator unequipItemQuantity(const Ptr& item, int count);
         ///< Unequip a specific quantity of an item identified by its Ptr.
         /// An exception is thrown if the item is not currently equipped,
         /// if count <= 0, or if count > the item stack size.
@@ -166,7 +168,7 @@ namespace MWWorld
         /// in the slot (they can be re-stacked so its count may be different
         /// than the requested count).
 
-        void setInvListener(InventoryStoreListener* listener, const Ptr& actor);
+        void setInvListener(InventoryStoreListener* listener);
         ///< Set a listener for various events, see \a InventoryStoreListener
 
         InventoryStoreListener* getInvListener() const;

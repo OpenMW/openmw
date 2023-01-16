@@ -580,10 +580,10 @@ namespace MWScript
                 store.get<ESM::Creature>().find(
                     creature); // This line throws an exception if it can't find the creature
 
-                MWWorld::Ptr item = *ptr.getClass().getContainerStore(ptr).add(gem, 1, ptr);
+                MWWorld::Ptr item = *ptr.getClass().getContainerStore(ptr).add(gem, 1);
 
                 // Set the soul on just one of the gems, not the whole stack
-                item.getContainerStore()->unstack(item, ptr);
+                item.getContainerStore()->unstack(item);
                 item.getCellRef().setSoul(creature);
 
                 // Restack the gem with other gems with the same soul
@@ -614,7 +614,7 @@ namespace MWScript
                 {
                     if (it->getCellRef().getSoul() == soul)
                     {
-                        store.remove(*it, 1, ptr);
+                        store.remove(*it, 1);
                         return;
                     }
                 }
@@ -667,7 +667,7 @@ namespace MWScript
                         if (it != store.end() && it->getCellRef().getRefId() == item)
                         {
                             int numToRemove = std::min(amount - numNotEquipped, it->getRefData().getCount());
-                            store.unequipItemQuantity(*it, ptr, numToRemove);
+                            store.unequipItemQuantity(*it, numToRemove);
                             numNotEquipped += numToRemove;
                         }
                     }
@@ -676,7 +676,7 @@ namespace MWScript
                     {
                         if (iter->getCellRef().getRefId() == item && !store.isEquipped(*iter))
                         {
-                            int removed = store.remove(*iter, amount, ptr);
+                            int removed = store.remove(*iter, amount);
                             MWWorld::Ptr dropped
                                 = MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, removed);
                             dropped.getCellRef().setOwner(ESM::RefId::sEmpty);
@@ -732,7 +732,7 @@ namespace MWScript
                     if (iter->getCellRef().getSoul() == soul)
                     {
                         MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, 1);
-                        store.remove(*iter, 1, ptr);
+                        store.remove(*iter, 1);
                         break;
                     }
                 }

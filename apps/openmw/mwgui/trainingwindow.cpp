@@ -176,7 +176,7 @@ namespace MWGui
         pcStats.increaseSkill(skillId, *class_, true);
 
         // remove gold
-        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price);
 
         // add gold to NPC trading gold pool
         MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats(mPtr);

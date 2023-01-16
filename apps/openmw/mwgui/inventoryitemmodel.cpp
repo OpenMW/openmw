@@ -50,7 +50,7 @@ namespace MWGui
     {
         if (item.mBase.getContainerStore() == &mActor.getClass().getContainerStore(mActor))
             throw std::runtime_error("Item to copy needs to be from a different container!");
-        return *mActor.getClass().getContainerStore(mActor).add(item.mBase, count, mActor, allowAutoEquip);
+        return *mActor.getClass().getContainerStore(mActor).add(item.mBase, count, allowAutoEquip);
     }
 
     void InventoryItemModel::removeItem(const ItemStack& item, size_t count)
@@ -60,12 +60,12 @@ namespace MWGui
         if (mActor.getClass().hasInventoryStore(mActor))
         {
             MWWorld::InventoryStore& store = mActor.getClass().getInventoryStore(mActor);
-            removed = store.remove(item.mBase, count, mActor, true);
+            removed = store.remove(item.mBase, count, true);
         }
         else
         {
             MWWorld::ContainerStore& store = mActor.getClass().getContainerStore(mActor);
-            removed = store.remove(item.mBase, count, mActor);
+            removed = store.remove(item.mBase, count);
         }
 
         std::stringstream error;

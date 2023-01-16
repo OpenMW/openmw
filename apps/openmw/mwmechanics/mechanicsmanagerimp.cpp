@@ -267,8 +267,8 @@ namespace MWMechanics
         // equippable
         MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
         for (int i = 0; i < MWWorld::InventoryStore::Slots; ++i)
-            invStore.unequipAll(ptr);
-        invStore.autoEquip(ptr);
+            invStore.unequipAll();
+        invStore.autoEquip();
     }
 
     MechanicsManager::MechanicsManager()
@@ -1033,8 +1033,8 @@ namespace MWMechanics
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
         // move items from player to owner and report about theft
-        victim.getClass().getContainerStore(victim).add(item, toRemove, victim);
-        store.remove(item, toRemove, player);
+        victim.getClass().getContainerStore(victim).add(item, toRemove);
+        store.remove(item, toRemove);
         commitCrime(
             player, victim, OT_Theft, item.getCellRef().getFaction(), item.getClass().getValue(item) * toRemove);
     }
@@ -1063,8 +1063,8 @@ namespace MWMechanics
 
             int toMove = it->getRefData().getCount() - itemCount;
 
-            containerStore.add(*it, toMove, targetContainer);
-            store.remove(*it, toMove, player);
+            containerStore.add(*it, toMove);
+            store.remove(*it, toMove);
         }
         // TODO: unhardcode the locklevel
         targetContainer.getCellRef().lock(50);
@@ -1836,14 +1836,14 @@ namespace MWMechanics
 
         if (werewolf)
         {
-            inv.unequipAll(actor);
+            inv.unequipAll();
             inv.equip(MWWorld::InventoryStore::Slot_Robe,
-                inv.ContainerStore::add(ESM::RefId::stringRefId("werewolfrobe"), 1, actor), actor);
+                inv.ContainerStore::add(ESM::RefId::stringRefId("werewolfrobe"), 1));
         }
         else
         {
-            inv.unequipSlot(MWWorld::InventoryStore::Slot_Robe, actor);
-            inv.ContainerStore::remove(ESM::RefId::stringRefId("werewolfrobe"), 1, actor);
+            inv.unequipSlot(MWWorld::InventoryStore::Slot_Robe);
+            inv.ContainerStore::remove(ESM::RefId::stringRefId("werewolfrobe"), 1);
         }
 
         if (actor == player->getPlayer())

@@ -199,7 +199,7 @@ namespace
                     continue;
 
                 // Set the soul on just one of the gems, not the whole stack
-                gem->getContainerStore()->unstack(*gem, caster);
+                gem->getContainerStore()->unstack(*gem);
                 gem->getCellRef().setSoul(creature.getCellRef().getRefId());
 
                 // Restack the gem with other gems with the same soul
@@ -1021,14 +1021,14 @@ namespace MWMechanics
                     {
                         // For non-hostile NPCs, unequip whatever is in the left slot in favor of a light.
                         if (heldIter != inventoryStore.end() && heldIter->getType() != ESM::Light::sRecordId)
-                            inventoryStore.unequipItem(*heldIter, ptr);
+                            inventoryStore.unequipItem(*heldIter);
                     }
                     else if (heldIter == inventoryStore.end() || heldIter->getType() == ESM::Light::sRecordId)
                     {
                         // For hostile NPCs, see if they have anything better to equip first
-                        auto shield = inventoryStore.getPreferredShield(ptr);
+                        auto shield = inventoryStore.getPreferredShield();
                         if (shield != inventoryStore.end())
-                            inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, shield, ptr);
+                            inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, shield);
                     }
 
                     heldIter = inventoryStore.getSlot(MWWorld::InventoryStore::Slot_CarriedLeft);
@@ -1036,7 +1036,7 @@ namespace MWMechanics
                     // If we have a torch and can equip it, then equip it now.
                     if (heldIter == inventoryStore.end())
                     {
-                        inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, torchIter, ptr);
+                        inventoryStore.equip(MWWorld::InventoryStore::Slot_CarriedLeft, torchIter);
                     }
                 }
             }
@@ -1046,7 +1046,7 @@ namespace MWMechanics
                 {
                     // At day, unequip lights and auto equip shields or other suitable items
                     // (Note: autoEquip will ignore lights)
-                    inventoryStore.autoEquip(ptr);
+                    inventoryStore.autoEquip();
                 }
             }
         }
@@ -1069,7 +1069,7 @@ namespace MWMechanics
                     timeRemaining -= duration;
                     if (timeRemaining <= 0.f)
                     {
-                        inventoryStore.remove(*heldIter, 1, ptr); // remove it
+                        inventoryStore.remove(*heldIter, 1); // remove it
                         return;
                     }
 
@@ -1080,7 +1080,7 @@ namespace MWMechanics
             // Both NPC and player lights extinguish in water.
             if (world->isSwimming(ptr))
             {
-                inventoryStore.remove(*heldIter, 1, ptr); // remove it
+                inventoryStore.remove(*heldIter, 1); // remove it
 
                 // ...But, only the player makes a sound.
                 if (isPlayer)

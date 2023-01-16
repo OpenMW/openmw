@@ -414,7 +414,7 @@ namespace MWClass
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             getInventoryStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId(), prng);
 
-            getInventoryStore(ptr).autoEquip(ptr);
+            getInventoryStore(ptr).autoEquip();
         }
     }
 
@@ -862,7 +862,7 @@ namespace MWClass
 
                         // Armor broken? unequip it
                         if (armorhealth == 0)
-                            armor = *inv.unequipItem(armor, ptr);
+                            armor = *inv.unequipItem(armor);
                     }
 
                     if (ptr == MWMechanics::getPlayer())
@@ -984,15 +984,17 @@ namespace MWClass
     MWWorld::ContainerStore& Npc::getContainerStore(const MWWorld::Ptr& ptr) const
     {
         ensureCustomData(ptr);
-
-        return ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
+        auto& store = ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
+        store.setActor(ptr);
+        return store;
     }
 
     MWWorld::InventoryStore& Npc::getInventoryStore(const MWWorld::Ptr& ptr) const
     {
         ensureCustomData(ptr);
-
-        return ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
+        auto& store = ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
+        store.setActor(ptr);
+        return store;
     }
 
     const ESM::RefId& Npc::getScript(const MWWorld::ConstPtr& ptr) const
@@ -1172,7 +1174,7 @@ namespace MWClass
         MWMechanics::CastSpell cast(actor, actor);
         const ESM::RefId& recordId = consumable.getCellRef().getRefId();
         MWBase::Environment::get().getLuaManager()->itemConsumed(consumable, actor);
-        actor.getClass().getContainerStore(actor).remove(consumable, 1, actor);
+        actor.getClass().getContainerStore(actor).remove(consumable, 1);
         return cast.cast(recordId);
     }
 

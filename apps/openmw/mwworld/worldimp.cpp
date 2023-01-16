@@ -2426,7 +2426,7 @@ namespace MWWorld
 
         mRendering->renderPlayer(player);
         MWRender::NpcAnimation* anim = static_cast<MWRender::NpcAnimation*>(mRendering->getAnimation(player));
-        player.getClass().getInventoryStore(player).setInvListener(anim, player);
+        player.getClass().getInventoryStore(player).setInvListener(anim);
         player.getClass().getInventoryStore(player).setContListener(anim);
 
         scaleObject(player, player.getCellRef().getScale(), true); // apply race height

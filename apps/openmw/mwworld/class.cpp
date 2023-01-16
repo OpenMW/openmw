@@ -15,6 +15,7 @@
 #include "actiontake.hpp"
 #include "containerstore.hpp"
 #include "failedaction.hpp"
+#include "inventorystore.hpp"
 #include "nullaction.hpp"
 #include "ptr.hpp"
 
@@ -372,6 +373,8 @@ namespace MWWorld
         Ptr newPtr = copyToCellImpl(ptr, cell);
         newPtr.getCellRef().unsetRefNum(); // This RefNum is only valid within the original cell of the reference
         newPtr.getRefData().setCount(count);
+        if (hasInventoryStore(newPtr))
+            getInventoryStore(newPtr).setActor(newPtr);
         return newPtr;
     }
 

@@ -322,7 +322,7 @@ namespace MWGui
         if (item.mType == ItemStack::Type_Equipped)
         {
             MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
-            MWWorld::Ptr newStack = *invStore.unequipItemQuantity(item.mBase, mPtr, count);
+            MWWorld::Ptr newStack = *invStore.unequipItemQuantity(item.mBase, count);
 
             // The unequipped item was re-stacked. We have to update the index
             // since the item pointed does not exist anymore.
@@ -743,7 +743,7 @@ namespace MWGui
         // add to player inventory
         // can't use ActionTake here because we need an MWWorld::Ptr to the newly inserted object
         MWWorld::Ptr newObject
-            = *player.getClass().getContainerStore(player).add(object, object.getRefData().getCount(), player);
+            = *player.getClass().getContainerStore(player).add(object, object.getRefData().getCount());
 
         // remove from world
         MWBase::Environment::get().getWorld()->deleteObject(object);

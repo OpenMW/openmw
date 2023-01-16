@@ -444,7 +444,7 @@ namespace MWGui
         }
         else if (key->type == Type_HandToHand)
         {
-            store.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight, player);
+            store.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState::Weapon);
         }
     }

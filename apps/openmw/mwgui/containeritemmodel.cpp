@@ -105,7 +105,7 @@ namespace MWGui
         MWWorld::ContainerStore& store = source.first.getClass().getContainerStore(source.first);
         if (item.mBase.getContainerStore() == &store)
             throw std::runtime_error("Item to copy needs to be from a different container!");
-        return *store.add(item.mBase, count, source.first, allowAutoEquip);
+        return *store.add(item.mBase, count, allowAutoEquip);
     }
 
     void ContainerItemModel::removeItem(const ItemStack& item, size_t count)
@@ -125,7 +125,7 @@ namespace MWGui
                     if (quantity < 0 && mTrading)
                         toRemove += quantity;
                     else
-                        toRemove -= store.remove(*it, toRemove, source.first);
+                        toRemove -= store.remove(*it, toRemove);
                     if (toRemove <= 0)
                         return;
                 }

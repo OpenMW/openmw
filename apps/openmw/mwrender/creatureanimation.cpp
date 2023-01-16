@@ -52,7 +52,7 @@ namespace MWRender
             if (animated)
                 addAnimSource(model, model);
 
-            mPtr.getClass().getInventoryStore(mPtr).setInvListener(this, mPtr);
+            mPtr.getClass().getInventoryStore(mPtr).setInvListener(this);
 
             updateParts();
         }
