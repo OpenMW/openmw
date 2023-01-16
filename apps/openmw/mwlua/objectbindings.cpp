@@ -7,6 +7,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/player.hpp"
+#include "../mwworld/scene.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
@@ -87,6 +88,8 @@ namespace MWLua
                 {
                     MWWorld::Ptr newObj = world->moveObject(obj, cell, mPos);
                     world->rotateObject(newObj, mRot);
+                    if (!newObj.getRefData().isEnabled())
+                        world->enable(newObj);
                 }
             }
 
@@ -198,6 +201,32 @@ namespace MWLua
                 context.mLuaManager->addAction(std::make_unique<ActivateAction>(context.mLua, o.id(), actor.id()));
             };
 
+            auto isEnabled = [](const ObjectT& o) { return o.ptr().getRefData().isEnabled(); };
+            auto setEnabled = [context](const GObject& object, bool enable) {
+                if (enable && object.ptr().getRefData().isDeleted())
+                    throw std::runtime_error("Object is removed");
+                context.mLuaManager->addAction([object, enable] {
+                    if (object.ptr().isInCell())
+                    {
+                        if (enable)
+                            MWBase::Environment::get().getWorld()->enable(object.ptr());
+                        else
+                            MWBase::Environment::get().getWorld()->disable(object.ptr());
+                    }
+                    else
+                    {
+                        if (enable)
+                            object.ptr().getRefData().enable();
+                        else
+                            throw std::runtime_error("Objects in containers can't be disabled");
+                    }
+                });
+            };
+            if constexpr (std::is_same_v<ObjectT, GObject>)
+                objectT["enabled"] = sol::property(isEnabled, setEnabled);
+            else
+                objectT["enabled"] = sol::readonly_property(isEnabled);
+
             if constexpr (std::is_same_v<ObjectT, GObject>)
             { // Only for global scripts
                 objectT["addScript"] = [context](const GObject& object, std::string_view path, sol::object initData) {
@@ -243,11 +272,74 @@ namespace MWLua
                     localScripts->removeScript(*scriptId);
                 };
 
-                objectT["teleport"] = [context](const GObject& object, std::string_view cell, const osg::Vec3f& pos,
-                                          const sol::optional<osg::Vec3f>& optRot) {
+                auto removeFn = [context](const GObject& object, int countToRemove) {
                     MWWorld::Ptr ptr = object.ptr();
+                    int currentCount = ptr.getRefData().getCount();
+                    if (countToRemove <= 0 || countToRemove > currentCount)
+                        throw std::runtime_error("Can't remove " + std::to_string(countToRemove) + " of "
+                            + std::to_string(currentCount) + " items");
+                    ptr.getRefData().setCount(currentCount - countToRemove); // Immediately change count
+                    if (ptr.getContainerStore() || currentCount == countToRemove)
+                    {
+                        // Delayed action to trigger side effects
+                        context.mLuaManager->addAction([object, countToRemove] {
+                            MWWorld::Ptr ptr = object.ptr();
+                            // Restore original count
+                            ptr.getRefData().setCount(ptr.getRefData().getCount() + countToRemove);
+                            // And now remove properly
+                            if (ptr.getContainerStore())
+                                ptr.getContainerStore()->remove(ptr, countToRemove);
+                            else
+                            {
+                                MWBase::Environment::get().getWorld()->disable(object.ptr());
+                                MWBase::Environment::get().getWorld()->deleteObject(ptr);
+                            }
+                        });
+                    }
+                };
+                objectT["remove"] = [removeFn](const GObject& object, sol::optional<int> count) {
+                    removeFn(object, count.value_or(object.ptr().getRefData().getCount()));
+                };
+                objectT["split"] = [removeFn](const GObject& object, int count) -> GObject {
+                    removeFn(object, count);
+
+                    // Doesn't matter which cell to use because the new instance will be in disabled state.
+                    MWWorld::CellStore* cell = MWBase::Environment::get().getWorldScene()->getCurrentCell();
+
+                    const MWWorld::Ptr& ptr = object.ptr();
+                    MWWorld::Ptr splitted = ptr.getClass().copyToCell(ptr, *cell, count);
+                    splitted.getRefData().disable();
+                    return GObject(getId(splitted));
+                };
+                objectT["moveInto"] = [removeFn, context](const GObject& object, const Inventory<GObject>& inventory) {
+                    // Currently moving to or from containers makes a copy and removes the original.
+                    // TODO(#6148): actually move rather than copy and preserve RefNum
+                    int count = object.ptr().getRefData().getCount();
+                    removeFn(object, count);
+                    context.mLuaManager->addAction([item = object, count, cont = inventory.mObj] {
+                        auto& refData = item.ptr().getRefData();
+                        refData.setCount(count); // temporarily undo removal to run ContainerStore::add
+                        cont.ptr().getClass().getContainerStore(cont.ptr()).add(item.ptr(), count, false);
+                        refData.setCount(0);
+                    });
+                };
+                objectT["teleport"] = [removeFn, context](const GObject& object, std::string_view cell,
+                                          const osg::Vec3f& pos, const sol::optional<osg::Vec3f>& optRot) {
+                    MWWorld::Ptr ptr = object.ptr();
+                    if (ptr.getRefData().isDeleted())
+                        throw std::runtime_error("Object is removed");
+                    if (ptr.getContainerStore())
+                    {
+                        // Currently moving to or from containers makes a copy and removes the original.
+                        // TODO(#6148): actually move rather than copy and preserve RefNum
+                        auto* cellStore = MWBase::Environment::get().getWorldModel()->getCellByPosition(pos, cell);
+                        MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *cellStore, ptr.getRefData().getCount());
+                        newPtr.getRefData().disable();
+                        removeFn(object, ptr.getRefData().getCount());
+                        ptr = newPtr;
+                    }
                     osg::Vec3f rot = optRot ? *optRot : ptr.getRefData().getPosition().asRotationVec3();
-                    auto action = std::make_unique<TeleportAction>(context.mLua, object.id(), cell, pos, rot);
+                    auto action = std::make_unique<TeleportAction>(context.mLua, getId(ptr), cell, pos, rot);
                     if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                         context.mLuaManager->addTeleportPlayerAction(std::move(action));
                     else
@@ -335,24 +427,40 @@ namespace MWLua
                 return ObjectList<ObjectT>{ list };
             };
 
-            inventoryT["countOf"] = [](const InventoryT& inventory, const std::string& recordId) {
+            inventoryT["countOf"] = [](const InventoryT& inventory, std::string_view recordId) {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 return store.count(ESM::RefId::stringRefId(recordId));
             };
-
-            if constexpr (std::is_same_v<ObjectT, GObject>)
-            { // Only for global scripts
-              // TODO
-              // obj.inventory:drop(obj2, [count])
-              // obj.inventory:drop(recordId, [count])
-              // obj.inventory:addNew(recordId, [count])
-              // obj.inventory:remove(obj/recordId, [count])
-                /*objectT["moveInto"] = [](const GObject& obj, const InventoryT& inventory) {};
-                inventoryT["drop"] = [](const InventoryT& inventory) {};
-                inventoryT["addNew"] = [](const InventoryT& inventory) {};
-                inventoryT["remove"] = [](const InventoryT& inventory) {};*/
-            }
+            inventoryT["find"] = [](const InventoryT& inventory, std::string_view recordId) -> sol::optional<ObjectT> {
+                const MWWorld::Ptr& ptr = inventory.mObj.ptr();
+                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+                auto itemId = ESM::RefId::stringRefId(recordId);
+                for (const MWWorld::Ptr& item : store)
+                {
+                    if (item.getCellRef().getRefId() == itemId)
+                    {
+                        MWBase::Environment::get().getWorldModel()->registerPtr(item);
+                        return ObjectT(getId(item));
+                    }
+                }
+                return sol::nullopt;
+            };
+            inventoryT["findAll"] = [](const InventoryT& inventory, std::string_view recordId) {
+                const MWWorld::Ptr& ptr = inventory.mObj.ptr();
+                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+                auto itemId = ESM::RefId::stringRefId(recordId);
+                ObjectIdList list = std::make_shared<std::vector<ObjectId>>();
+                for (const MWWorld::Ptr& item : store)
+                {
+                    if (item.getCellRef().getRefId() == itemId)
+                    {
+                        MWBase::Environment::get().getWorldModel()->registerPtr(item);
+                        list->push_back(getId(item));
+                    }
+                }
+                return ObjectList<ObjectT>{ list };
+            };
         }
 
         template <class ObjectT>

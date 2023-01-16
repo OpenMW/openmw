@@ -80,7 +80,6 @@
 -- @usage
 -- # DataFiles/l10n/MyMod/en.yaml
 -- good_morning: 'Good morning.'
---
 -- you_have_arrows: |-
 --   {count, plural,
 --     one {You have one arrow.}
@@ -107,11 +106,12 @@
 -- Any object that exists in the game world and has a specific location.
 -- Player, actors, items, and statics are game objects.
 -- @type GameObject
+-- @field #boolean enabled Whether the object is enabled or disabled. Global scripts can set the value. Items in containers or inventories can't be disabled.
 -- @field openmw.util#Vector3 position Object position.
 -- @field openmw.util#Vector3 rotation Object rotation (ZXY order).
 -- @field #Cell cell The cell where the object currently is. During loading a game and for objects in an inventory or a container `cell` is nil.
 -- @field #table type Type of the object (one of the tables from the package @{openmw.types#types}).
--- @field #number count Count (makes sense if stored in a container).
+-- @field #number count Count (>1 means a stack of objects).
 -- @field #string recordId Returns record ID of the object in lowercase.
 
 ---
@@ -163,13 +163,39 @@
 
 ---
 -- Moves object to given cell and position.
+-- Can be called only from a global script.
 -- The effect is not immediate: the position will be updated only in the next
--- frame. Can be called only from a global script.
+-- frame. Can be called only from a global script. Enables object if it was disabled.
+-- Can be used to move objects from an inventory or a container to the world.
 -- @function [parent=#GameObject] teleport
 -- @param self
 -- @param #string cellName Name of the cell to teleport into. For exteriors can be empty.
 -- @param openmw.util#Vector3 position New position
--- @param openmw.util#Vector3 rotation New rotation. Optional argument. If missed, then the current rotation is used.
+-- @param openmw.util#Vector3 rotation New rotation. Optional argument. If missing, then the current rotation is used.
+
+---
+-- Moves object into a container or an inventory. Enables if was disabled.
+-- Can be called only from a global script.
+-- @function [parent=#GameObject] moveInto
+-- @param self
+-- @param #Inventory dest
+-- @usage item:moveInto(types.Actor.inventory(actor))
+
+---
+-- Removes an object or reduces a stack of objects.
+-- Can be called only from a global script.
+-- @function [parent=#GameObject] remove
+-- @param self
+-- @param #number count (optional) the number of items to remove (if not specified then the whole stack)
+
+---
+-- Splits a stack of items. Original stack is reduced by `count`. Returns a new stack with `count` items.
+-- Can be called only from a global script.
+-- @function [parent=#GameObject] split
+-- @param self
+-- @param #number count The number of items to return.
+-- @usage -- take 50 coins from `money` and put to the container `cont`
+-- money:split(50):moveInto(types.Container.content(cont))
 
 
 ---
@@ -245,6 +271,22 @@
 -- local playerInventory = types.Actor.inventory(self.object)
 -- local all = playerInventory:getAll()
 -- local weapons = playerInventory:getAll(types.Weapon)
+
+---
+-- Get first item with given recordId from the inventory. Returns nil if not found.
+-- @function [parent=#Inventory] find
+-- @param self
+-- @param #string recordId
+-- @return #GameObject
+-- @usage inventory:find('gold_001')
+
+---
+-- Get all items with given recordId from the inventory.
+-- @function [parent=#Inventory] findAll
+-- @param self
+-- @param #string recordId
+-- @return #ObjectList
+-- @usage for _, item in ipairs(inventory:findAll('common_shirt_01')) do ... end
 
 
 return nil

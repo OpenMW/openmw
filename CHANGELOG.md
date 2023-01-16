@@ -16,6 +16,7 @@
     Bug #6645: Enemy block sounds align with animation instead of blocked hits
     Bug #6661: Saved games that have no preview screenshot cause issues or crashes
     Bug #6807: Ultimate Galleon is not working properly
+    Bug #6893: Lua: Inconsistent behavior with actors affected by Disable and SetDelete commands
     Bug #6939: OpenMW-CS: ID columns are too short
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
     Bug #6964: Nerasa Dralor Won't Follow
@@ -34,6 +35,7 @@
     Bug #7088: Deleting last save game of last character doesn't clear character name/details
     Feature #5492: Let rain and snow collide with statics
     Feature #6447: Add LOD support to Object Paging
+    Feature #6726: Lua API for creating new objects
     Feature #6922: Improve launcher appearance
     Feature #6933: Support high-resolution cursor textures
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData

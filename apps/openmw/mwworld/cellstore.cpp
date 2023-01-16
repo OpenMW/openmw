@@ -267,8 +267,7 @@ namespace
                         iter->mData.enable();
                         MWBase::Environment::get().getWorld()->disable(ptr);
                     }
-                    else
-                        MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
+                    MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
                     return;
                 }
 
