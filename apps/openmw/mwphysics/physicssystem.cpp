@@ -496,7 +496,11 @@ namespace MWPhysics
     {
         if (ptr.mRef->mData.mPhysicsPostponed)
             return;
-        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(mesh);
+
+        std::string animationMesh = mesh;
+        if (ptr.getClass().useAnim())
+            animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
+        osg::ref_ptr<Resource::BulletShapeInstance> shapeInstance = mShapeManager->getInstance(animationMesh);
         if (!shapeInstance || !shapeInstance->mCollisionShape)
             return;
 
