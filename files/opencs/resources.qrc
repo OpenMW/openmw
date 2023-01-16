@@ -43,8 +43,6 @@
         <file>light.png</file>
         <file>lockpick.png</file>
         <file>magic-effect.png</file>
-        <file>magicrabbit.png</file>
-        <file>map.png</file>
         <file>probe.png</file>
         <file>menu-close.png</file>
         <file>menu-exit.png</file>
@@ -70,7 +68,6 @@
         <file>potion.png</file>
         <file>qt.png</file>
         <file>race.png</file>
-        <file>random-item.png</file>
         <file>random.png</file>
         <file alias="list-removed">list-removed.png</file>
         <file>region.png</file>
