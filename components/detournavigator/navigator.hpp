@@ -77,8 +77,9 @@ namespace DetourNavigator
          * @brief addAgent should be called for each agent even if all of them has same half extents.
          * @param agentBounds allows to setup bounding cylinder for each agent, for each different half extents
          * there is different navmesh.
+         * @return true if agent is successfully added or false if agent bounds are not supported.
          */
-        virtual void addAgent(const AgentBounds& agentBounds) = 0;
+        virtual bool addAgent(const AgentBounds& agentBounds) = 0;
 
         /**
          * @brief removeAgent should be called for each agent even if all of them has same half extents

@@ -8,6 +8,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/detournavigator/agentbounds.hpp>
+#include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/heightfieldshape.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/navigatorimpl.hpp>
@@ -184,7 +185,9 @@ namespace
         }
         else if (physics.getActor(ptr))
         {
-            navigator.addAgent(world.getPathfindingAgentBounds(ptr));
+            const DetourNavigator::AgentBounds agentBounds = world.getPathfindingAgentBounds(ptr);
+            if (!navigator.addAgent(agentBounds))
+                Log(Debug::Warning) << "Agent bounds are not supported by navigator: " << agentBounds;
         }
     }
 

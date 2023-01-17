@@ -1,4 +1,5 @@
 #include "navigatorimpl.hpp"
+#include "makenavmesh.hpp"
 #include "settingsutils.hpp"
 #include "stats.hpp"
 
@@ -15,13 +16,13 @@ namespace DetourNavigator
     {
     }
 
-    void NavigatorImpl::addAgent(const AgentBounds& agentBounds)
+    bool NavigatorImpl::addAgent(const AgentBounds& agentBounds)
     {
-        if (agentBounds.mHalfExtents.x() == 0.f || agentBounds.mHalfExtents.y() == 0.f
-            || agentBounds.mHalfExtents.z() == 0.f)
-            return;
+        if (!isSupportedAgentBounds(mSettings.mRecast, agentBounds))
+            return false;
         ++mAgents[agentBounds];
         mNavMeshManager.addAgent(agentBounds);
+        return true;
     }
 
     void NavigatorImpl::removeAgent(const AgentBounds& agentBounds)

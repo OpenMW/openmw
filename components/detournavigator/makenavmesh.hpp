@@ -50,6 +50,8 @@ namespace DetourNavigator
         const TilePosition& tile, const RecastSettings& settings);
 
     NavMeshPtr makeEmptyNavMesh(const Settings& settings);
+
+    bool isSupportedAgentBounds(const RecastSettings& settings, const AgentBounds& agentBounds);
 }
 
 #endif
