@@ -36,7 +36,7 @@ namespace CSMWorld
         std::vector<UniversalId> mUniversalId;
         QStringList mObjectsFormats;
         const CSMDoc::Document& mDocument;
-        CSVWorld::DragRecordTable* mTableOfDragStart;
+        const CSVWorld::DragRecordTable* mTableOfDragStart;
         QModelIndex mIndexAtDragStart;
 
     public:
@@ -64,9 +64,9 @@ namespace CSMWorld
 
         UniversalId returnMatching(CSMWorld::ColumnBase::Display type) const;
 
-        void setIndexAtDragStart(QModelIndex index) { mIndexAtDragStart = index; }
+        void setIndexAtDragStart(const QModelIndex& index) { mIndexAtDragStart = index; }
 
-        void setTableOfDragStart(CSVWorld::DragRecordTable* table) { mTableOfDragStart = table; }
+        void setTableOfDragStart(const CSVWorld::DragRecordTable* const table) { mTableOfDragStart = table; }
 
         const QModelIndex getIndexAtDragStart() const { return mIndexAtDragStart; }
 
