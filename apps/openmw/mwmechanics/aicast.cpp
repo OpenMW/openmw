@@ -45,7 +45,7 @@ bool MWMechanics::AiCast::execute(const MWWorld::Ptr& actor, MWMechanics::Charac
     else
     {
         target = getTarget();
-        if (!target)
+        if (target.isEmpty())
             return true;
 
         if (!mManual && !pathTo(actor, target.getRefData().getPosition().asVec3(), duration, mDistance))

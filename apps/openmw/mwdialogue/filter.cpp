@@ -509,7 +509,7 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
         {
             MWWorld::Ptr target;
             mActor.getClass().getCreatureStats(mActor).getAiSequence().getCombatTarget(target);
-            if (target)
+            if (!target.isEmpty())
             {
                 if (target.getClass().isNpc() && target.getClass().getNpcStats(target).isWerewolf())
                     return 2;
