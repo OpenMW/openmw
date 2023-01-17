@@ -102,6 +102,10 @@ namespace MWWorld
     protected:
         ContainerStoreListener* mListener;
 
+        // Used in clone() to unset refnums of copies.
+        // (RefNum should be unique, copy can not have the same RefNum).
+        void clearRefNums();
+
         // (item, max charge)
         typedef std::vector<std::pair<ContainerStoreIterator, float>> TRechargingItems;
         TRechargingItems mRechargingItems;
@@ -165,7 +169,12 @@ namespace MWWorld
 
         virtual ~ContainerStore();
 
-        virtual std::unique_ptr<ContainerStore> clone() { return std::make_unique<ContainerStore>(*this); }
+        virtual std::unique_ptr<ContainerStore> clone()
+        {
+            auto res = std::make_unique<ContainerStore>(*this);
+            res->clearRefNums();
+            return res;
+        }
 
         ConstContainerStoreIterator cbegin(int mask = Type_All) const;
         ConstContainerStoreIterator cend() const;

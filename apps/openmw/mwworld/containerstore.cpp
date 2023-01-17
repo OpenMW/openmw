@@ -192,6 +192,12 @@ int MWWorld::ContainerStore::count(const ESM::RefId& id) const
     return total;
 }
 
+void MWWorld::ContainerStore::clearRefNums()
+{
+    for (const auto& iter : *this)
+        iter.getCellRef().unsetRefNum();
+}
+
 MWWorld::ContainerStoreListener* MWWorld::ContainerStore::getContListener() const
 {
     return mListener;

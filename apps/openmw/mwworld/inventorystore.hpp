@@ -97,7 +97,12 @@ namespace MWWorld
         const MWWorld::Ptr& getActor() const { return mActor; }
         void setActor(const MWWorld::Ptr& actor) { mActor = actor; }
 
-        std::unique_ptr<ContainerStore> clone() override { return std::make_unique<InventoryStore>(*this); }
+        std::unique_ptr<ContainerStore> clone() override
+        {
+            auto res = std::make_unique<InventoryStore>(*this);
+            res->clearRefNums();
+            return res;
+        }
 
         ContainerStoreIterator add(
             const Ptr& itemPtr, int count, bool allowAutoEquip = true, bool resolve = true) override;
