@@ -36,3 +36,9 @@ void CSVFilter::RecordFilterBox::createFilterRequest(
 {
     mEdit->createFilterRequest(filterSource, action);
 }
+
+void CSVFilter::RecordFilterBox::createFilterRequest(
+    std::vector<std::pair<int, std::vector<std::string>>>& filterSource, Qt::DropAction action)
+{
+    mEdit->createFilterRequest(filterSource, action);
+}

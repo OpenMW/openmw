@@ -37,6 +37,9 @@ namespace CSVFilter
 
         void createFilterRequest(
             std::vector<std::pair<std::string, std::vector<std::string>>>& filterSource, Qt::DropAction action);
+            
+        void createFilterRequest(
+            std::vector<std::pair<int, std::vector<std::string>>>& filterSource, Qt::DropAction action);
 
     signals:
 

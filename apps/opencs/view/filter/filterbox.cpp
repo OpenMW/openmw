@@ -49,16 +49,20 @@ void CSVFilter::FilterBox::dropEvent(QDropEvent* event)
     const CSVWorld::DragRecordTable* dragTable = mime->getTableOfDragStart();
 
     std::string searchString = "";
-    if (index.isValid() && dragTable)
-        searchString = dragTable->model()->data(index).toString().toStdString();
-    Log(Debug::Warning) << "Data: " << searchString;
-
     std::string searchColumn = "";
+    bool isValue(false);
     if (index.isValid() && dragTable)
+    {        
+        QVariant::Type dataType = dragTable->model()->data(index).type();
         searchColumn = dragTable->model()->headerData(index.column(), Qt::Horizontal).toString().toStdString();
-    Log(Debug::Warning) << "Header: " << searchColumn;
+        Log(Debug::Warning) << "Data: " << searchString;
+        Log(Debug::Warning) << "Header: " << searchColumn;  
+        Log(Debug::Warning) << "Type:" << dataType;
+        if (dataType == QMetaType::QString || dataType == QMetaType::Bool || dataType == QMetaType::Int) searchString = dragTable->model()->data(index).toString().toStdString();
+        if (dataType == QMetaType::Int) isValue = true;
+    }
 
-    emit recordDropped(universalIdData, event->proposedAction(), searchString, searchColumn);
+    emit recordDropped(universalIdData, event->proposedAction(), searchString, searchColumn, isValue);
 }
 
 void CSVFilter::FilterBox::dragEnterEvent(QDragEnterEvent* event)
@@ -73,6 +77,12 @@ void CSVFilter::FilterBox::dragMoveEvent(QDragMoveEvent* event)
 
 void CSVFilter::FilterBox::createFilterRequest(
     std::vector<std::pair<std::string, std::vector<std::string>>>& filterSource, Qt::DropAction action)
+{
+    mRecordFilterBox->createFilterRequest(filterSource, action);
+}
+
+void CSVFilter::FilterBox::createFilterRequest(
+    std::vector<std::pair<int, std::vector<std::string>>>& filterSource, Qt::DropAction action)
 {
     mRecordFilterBox->createFilterRequest(filterSource, action);
 }

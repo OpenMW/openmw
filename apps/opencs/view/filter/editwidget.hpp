@@ -44,14 +44,18 @@ namespace CSVFilter
         EditWidget(CSMWorld::Data& data, QWidget* parent = nullptr);
 
         void createFilterRequest(
-            std::vector<std::pair<std::string, std::vector<std::string>>>& filterSource, Qt::DropAction action);
+            std::vector<std::pair<std::string, std::vector<std::string>>>& filterSource, Qt::DropAction action, std::string stringOrValue = "string");
+        
+        void createFilterRequest(
+            std::vector<std::pair<int, std::vector<std::string>>>& filterSource, Qt::DropAction action);
 
     signals:
 
         void filterChanged(std::shared_ptr<CSMFilter::Node> filter);
 
     private:
-        std::string generateFilter(std::pair<std::string, std::vector<std::string>>& seekedString) const;
+        std::string generateFilter(std::pair<std::string, std::vector<std::string>>& seekedString, std::string stringOrValue) const;
+
         void contextMenuEvent(QContextMenuEvent* event) override;
 
     private slots:

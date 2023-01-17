@@ -15,6 +15,8 @@
 
 #include <apps/opencs/view/doc/subview.hpp>
 
+#include <components/debug/debuglog.hpp>
+
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
@@ -151,7 +153,7 @@ void CSVWorld::TableSubView::cloneRequest(const CSMWorld::UniversalId& toClone)
 }
 
 void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::UniversalId>& types, Qt::DropAction action,
-    const std::string& searchString, const std::string& searchColumn)
+    const std::string& searchString, const std::string& searchColumn, bool isValue)
 {
     std::vector<std::pair<std::string, std::vector<std::string>>> filterSource;
 
@@ -176,13 +178,31 @@ void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::Universal
 
     if (!filterSource.empty())
         mFilterBox->createFilterRequest(filterSource, action);
+    else if (isValue)
+    {
+        try 
+        {
+            std::vector<std::pair<int, std::vector<std::string>>> valueFilterSource;
+            std::vector<std::string> searchColumns;
+            searchColumns.emplace_back(searchColumn);
+            int searchValue = std::stoi(searchString);
+            Log(Debug::Warning) << "Debug: " << searchValue;
+            valueFilterSource.emplace_back(searchValue, searchColumns);
+            mFilterBox->createFilterRequest(valueFilterSource, action);
+        }
+        catch (...)
+        {
+            Log(Debug::Warning) << "Error in converting the filter request value to integer.";
+        }
+    }
     else if (searchString != "")
     {
-        std::vector<std::string> testVector;
-        testVector.emplace_back(searchColumn);
-        filterSource.emplace_back(searchString, testVector);
+        std::vector<std::string> searchColumns;
+        searchColumns.emplace_back(searchColumn);
+        filterSource.emplace_back(searchString, searchColumns);
         mFilterBox->createFilterRequest(filterSource, action);
     }
+   
 }
 
 bool CSVWorld::TableSubView::eventFilter(QObject* object, QEvent* event)

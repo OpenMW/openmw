@@ -41,6 +41,9 @@ namespace CSVFilter
         void createFilterRequest(
             std::vector<std::pair<std::string, std::vector<std::string>>>& filterSource, Qt::DropAction action);
 
+        void createFilterRequest(
+            std::vector<std::pair<int, std::vector<std::string>>>& filterSource, Qt::DropAction action);
+
     private:
         void dragEnterEvent(QDragEnterEvent* event) override;
 
@@ -51,7 +54,7 @@ namespace CSVFilter
     signals:
         void recordFilterChanged(std::shared_ptr<CSMFilter::Node> filter);
         void recordDropped(std::vector<CSMWorld::UniversalId>& types, Qt::DropAction action,
-            const std::string& searchString, const std::string& searchColumn);
+            const std::string& searchString, const std::string& searchColumn, bool isValue);
     };
 
 }
