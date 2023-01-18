@@ -1002,9 +1002,11 @@ namespace MWWorld
     Ptr Scene::searchPtrViaActorId(int actorId)
     {
         for (CellStoreCollection::const_iterator iter(mActiveCells.begin()); iter != mActiveCells.end(); ++iter)
-            if (Ptr ptr = (*iter)->searchViaActorId(actorId))
+        {
+            Ptr ptr = (*iter)->searchViaActorId(actorId);
+            if (!ptr.isEmpty())
                 return ptr;
-
+        }
         return Ptr();
     }
 

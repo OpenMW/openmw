@@ -583,10 +583,10 @@ namespace MWWorld
 
     Ptr CellStore::searchViaActorId(int id)
     {
-        if (Ptr ptr = ::searchViaActorId(get<ESM::NPC>(), id, this, mMovedToAnotherCell))
+        if (Ptr ptr = ::searchViaActorId(get<ESM::NPC>(), id, this, mMovedToAnotherCell); !ptr.isEmpty())
             return ptr;
 
-        if (Ptr ptr = ::searchViaActorId(get<ESM::Creature>(), id, this, mMovedToAnotherCell))
+        if (Ptr ptr = ::searchViaActorId(get<ESM::Creature>(), id, this, mMovedToAnotherCell); !ptr.isEmpty())
             return ptr;
 
         for (const auto& [base, _] : mMovedHere)
@@ -805,13 +805,13 @@ namespace MWWorld
 
         mHasState = true;
 
-        if (Ptr ptr = searchInContainerList(get<ESM::Container>(), id))
+        if (Ptr ptr = searchInContainerList(get<ESM::Container>(), id); !ptr.isEmpty())
             return ptr;
 
-        if (Ptr ptr = searchInContainerList(get<ESM::Creature>(), id))
+        if (Ptr ptr = searchInContainerList(get<ESM::Creature>(), id); !ptr.isEmpty())
             return ptr;
 
-        if (Ptr ptr = searchInContainerList(get<ESM::NPC>(), id))
+        if (Ptr ptr = searchInContainerList(get<ESM::NPC>(), id); !ptr.isEmpty())
             return ptr;
 
         mHasState = oldState;

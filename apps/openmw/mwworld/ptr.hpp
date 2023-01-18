@@ -98,10 +98,16 @@ namespace MWWorld
             return mContainerStore;
         }
 
-        operator const void*() const
-        ///< Return a 0-pointer, if Ptr is empty; return a non-0-pointer, if Ptr is not empty
+        template <template <class> class TypeTransform2>
+        bool operator==(const PtrBase<TypeTransform2>& other) const
         {
-            return mRef;
+            return mRef == other.mRef;
+        }
+
+        template <template <class> class TypeTransform2>
+        bool operator<(const PtrBase<TypeTransform2>& other) const
+        {
+            return mRef < other.mRef;
         }
 
     protected:
