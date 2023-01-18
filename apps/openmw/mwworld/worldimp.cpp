@@ -40,6 +40,7 @@
 #include <components/sceneutil/workqueue.hpp>
 
 #include <components/detournavigator/agentbounds.hpp>
+#include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/navigatorimpl.hpp>
 #include <components/detournavigator/settings.hpp>
@@ -1269,7 +1270,11 @@ namespace MWWorld
             mWorldScene->updateObjectScale(ptr);
 
         if (mPhysics->getActor(ptr))
-            mNavigator->addAgent(getPathfindingAgentBounds(ptr));
+        {
+            const DetourNavigator::AgentBounds agentBounds = getPathfindingAgentBounds(ptr);
+            if (!mNavigator->addAgent(agentBounds))
+                Log(Debug::Warning) << "Scaled agent bounds are not supported by navigator: " << agentBounds;
+        }
         else if (const auto object = mPhysics->getObject(ptr))
             updateNavigatorObject(*object);
     }
@@ -2435,7 +2440,9 @@ namespace MWWorld
 
         applyLoopingParticles(player);
 
-        mNavigator->addAgent(getPathfindingAgentBounds(getPlayerConstPtr()));
+        const DetourNavigator::AgentBounds agentBounds = getPathfindingAgentBounds(getPlayerConstPtr());
+        if (!mNavigator->addAgent(agentBounds))
+            Log(Debug::Warning) << "Player agent bounds are not supported by navigator: " << agentBounds;
     }
 
     World::RestPermitted World::canRest() const

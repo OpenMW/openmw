@@ -23,7 +23,7 @@ namespace DetourNavigator
             return std::make_unique<const UpdateGuard>(*this);
         }
 
-        void addAgent(const AgentBounds& agentBounds) override;
+        bool addAgent(const AgentBounds& agentBounds) override;
 
         void removeAgent(const AgentBounds& agentBounds) override;
 
