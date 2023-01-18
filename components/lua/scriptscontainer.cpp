@@ -15,11 +15,14 @@ namespace LuaUtil
     static constexpr std::string_view HANDLER_LOAD = "onLoad";
     static constexpr std::string_view HANDLER_INTERFACE_OVERRIDE = "onInterfaceOverride";
 
+    int64_t ScriptsContainer::sInstanceCount = 0;
+
     ScriptsContainer::ScriptsContainer(LuaUtil::LuaState* lua, std::string_view namePrefix)
         : mNamePrefix(namePrefix)
         , mLua(*lua)
         , mThis(std::make_shared<ScriptsContainer*>(this))
     {
+        sInstanceCount++;
         registerEngineHandlers({ &mUpdateHandlers });
         mPublicInterfaces = sol::table(lua->sol(), sol::create);
         addPackage("openmw.interfaces", mPublicInterfaces);
@@ -476,6 +479,7 @@ namespace LuaUtil
 
     ScriptsContainer::~ScriptsContainer()
     {
+        sInstanceCount--;
         for (auto& [_, script] : mScripts)
             script.mHiddenData[sScriptIdKey] = sol::nil;
         *mThis = nullptr;

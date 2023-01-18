@@ -18,6 +18,7 @@
 
 #include <components/lua/utilpackage.hpp>
 
+#include <components/lua_ui/content.hpp>
 #include <components/lua_ui/util.hpp>
 
 #include "../mwbase/windowmanager.hpp"
@@ -638,6 +639,9 @@ namespace MWLua
         static const uint64_t smallAllocSize = Settings::Manager::getUInt64("small alloc max size", "Lua");
         out << "Total memory usage:";
         outMemSize(mLua.getTotalMemoryUsage());
+        out << "\n";
+        out << "LuaUtil::ScriptsContainer count: " << LuaUtil::ScriptsContainer::getInstanceCount() << "\n";
+        out << "LuaUi::Content count: " << LuaUi::Content::getInstanceCount() << "\n";
         out << "\n";
         out << "small alloc max size = " << smallAllocSize << " (section [Lua] in settings.cfg)\n";
         out << "Smaller values give more information for the profiler, but increase performance overhead.\n";
