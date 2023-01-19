@@ -258,9 +258,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         }
 
         // deactivate data-local and global data directory: they are always included
-        const auto tmp = currentDir.toUtf8();
-        if (currentDir == mDataLocal
-            || std::filesystem::path(Misc::StringUtils::stringToU8String(tmp)) == globalDataDir)
+        if (currentDir == mDataLocal || Files::pathFromQString(currentDir) == globalDataDir)
         {
             auto flags = item->flags();
             item->setFlags(flags & ~(Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled | Qt::ItemIsEnabled));
