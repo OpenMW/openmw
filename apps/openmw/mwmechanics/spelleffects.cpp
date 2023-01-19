@@ -918,6 +918,13 @@ MagicApplicationResult applyMagicEffect(const MWWorld::Ptr& target, const MWWorl
     }
     else
     {
+        // Morrowind.exe doesn't apply magic effects while the menu is open, we do because we like to see stats
+        // updated instantly. We don't want to teleport instantly though
+        if (!dt
+            && (effect.mEffectId == ESM::MagicEffect::Recall
+                || effect.mEffectId == ESM::MagicEffect::DivineIntervention
+                || effect.mEffectId == ESM::MagicEffect::AlmsiviIntervention))
+            return MagicApplicationResult::APPLIED;
         auto& stats = target.getClass().getCreatureStats(target);
         auto& magnitudes = stats.getMagicEffects();
         if(spellParams.getType() != ESM::ActiveSpells::Type_Ability && !(effect.mFlags & ESM::ActiveEffect::Flag_Applied))
