@@ -49,7 +49,7 @@ CSVWorld::SceneSubView::SceneSubView(const CSMWorld::UniversalId& id, CSMDoc::Do
     CSVRender::WorldspaceWidget* worldspaceWidget = nullptr;
     widgetType whatWidget;
 
-    if (ESM::RefId::stringRefId(id.getId()) == ESM::CellId::sDefaultWorldspace)
+    if (Misc::StringUtils::ciEqual(id.getId(), ESM::CellId::sDefaultWorldspace))
     {
         whatWidget = widget_Paged;
 

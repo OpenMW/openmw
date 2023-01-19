@@ -541,7 +541,8 @@ namespace MWWorld
         }
 
         mNavigator.setWorldspace(
-            mWorld.getWorldModel().getExterior(playerCellX, playerCellY)->getCell()->mCellId.mWorldspace,
+            ESM::RefId::stringRefId(
+                mWorld.getWorldModel().getExterior(playerCellX, playerCellY)->getCell()->mCellId.mWorldspace),
             navigatorUpdateGuard.get());
         mNavigator.updateBounds(pos, navigatorUpdateGuard.get());
 
@@ -663,7 +664,8 @@ namespace MWWorld
                 "Testing exterior cells (" + std::to_string(i) + "/" + std::to_string(cells.getExtSize()) + ")...");
 
             CellStore* cell = mWorld.getWorldModel().getExterior(it->mData.mX, it->mData.mY);
-            mNavigator.setWorldspace(cell->getCell()->mCellId.mWorldspace, navigatorUpdateGuard.get());
+            mNavigator.setWorldspace(
+                ESM::RefId::stringRefId(cell->getCell()->mCellId.mWorldspace), navigatorUpdateGuard.get());
             const osg::Vec3f position
                 = osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits;
             mNavigator.updateBounds(position, navigatorUpdateGuard.get());
@@ -720,7 +722,8 @@ namespace MWWorld
                 "Testing interior cells (" + std::to_string(i) + "/" + std::to_string(cells.getIntSize()) + ")...");
 
             CellStore* cell = mWorld.getWorldModel().getInterior(it->mName);
-            mNavigator.setWorldspace(cell->getCell()->mCellId.mWorldspace, navigatorUpdateGuard.get());
+            mNavigator.setWorldspace(
+                ESM::RefId::stringRefId(cell->getCell()->mCellId.mWorldspace), navigatorUpdateGuard.get());
             ESM::Position position;
             mWorld.findInteriorPosition(it->mName, position);
             mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
@@ -839,7 +842,7 @@ namespace MWWorld
     }
 
     void Scene::changeToInteriorCell(
-        const ESM::RefId& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
+        std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         CellStore* cell = mWorld.getWorldModel().getInterior(cellName);
         bool useFading = (mCurrentCell != nullptr);
@@ -876,7 +879,8 @@ namespace MWWorld
 
         loadingListener->setProgressRange(cell->count());
 
-        mNavigator.setWorldspace(cell->getCell()->mCellId.mWorldspace, navigatorUpdateGuard.get());
+        mNavigator.setWorldspace(
+            ESM::RefId::stringRefId(cell->getCell()->mCellId.mWorldspace), navigatorUpdateGuard.get());
         mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
 
         // Load cell.

@@ -51,11 +51,11 @@ namespace MWLua
         class TeleportAction final : public LuaManager::Action
         {
         public:
-            TeleportAction(LuaUtil::LuaState* state, ObjectId object, ESM::RefId cell, const osg::Vec3f& pos,
+            TeleportAction(LuaUtil::LuaState* state, ObjectId object, std::string_view cell, const osg::Vec3f& pos,
                 const osg::Vec3f& rot)
                 : Action(state)
                 , mObject(object)
-                , mCell(std::move(cell))
+                , mCell(std::string(cell))
                 , mPos(pos)
                 , mRot(rot)
             {
@@ -94,7 +94,7 @@ namespace MWLua
 
         private:
             ObjectId mObject;
-            ESM::RefId mCell;
+            std::string mCell;
             osg::Vec3f mPos;
             osg::Vec3f mRot;
         };
@@ -247,8 +247,7 @@ namespace MWLua
                                           const sol::optional<osg::Vec3f>& optRot) {
                     MWWorld::Ptr ptr = object.ptr();
                     osg::Vec3f rot = optRot ? *optRot : ptr.getRefData().getPosition().asRotationVec3();
-                    auto action = std::make_unique<TeleportAction>(
-                        context.mLua, object.id(), ESM::RefId::stringRefId(cell), pos, rot);
+                    auto action = std::make_unique<TeleportAction>(context.mLua, object.id(), cell, pos, rot);
                     if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                         context.mLuaManager->addTeleportPlayerAction(std::move(action));
                     else

@@ -382,7 +382,7 @@ namespace MWScript
                 runtime.pop();
                 Interpreter::Type_Float zRot = runtime[0].mFloat;
                 runtime.pop();
-                const ESM::RefId cellID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
+                std::string_view cellID = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 if (ptr.getContainerStore())
@@ -405,8 +405,7 @@ namespace MWScript
                 {
                     // cell not found, move to exterior instead if moving the player (vanilla PositionCell
                     // compatibility)
-                    std::string error
-                        = "Warning: PositionCell: unknown interior cell (" + cellID.getRefIdString() + ")";
+                    std::string error = "Warning: PositionCell: unknown interior cell (" + std::string(cellID) + ")";
                     if (isPlayer)
                         error += ", moving to exterior instead";
                     runtime.getContext().report(error);
@@ -500,7 +499,7 @@ namespace MWScript
             {
                 const ESM::RefId itemID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
-                auto cellID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
+                std::string_view cellName = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 Interpreter::Type_Float x = runtime[0].mFloat;
@@ -515,12 +514,12 @@ namespace MWScript
                 MWWorld::CellStore* store = nullptr;
                 try
                 {
-                    store = MWBase::Environment::get().getWorldModel()->getCell(cellID);
+                    store = MWBase::Environment::get().getWorldModel()->getCell(cellName);
                 }
                 catch (std::exception&)
                 {
-                    runtime.getContext().report("unknown cell (" + cellID.getRefIdString() + ")");
-                    Log(Debug::Error) << "Error: unknown cell (" << cellID << ")";
+                    runtime.getContext().report("unknown cell (" + std::string(cellName) + ")");
+                    Log(Debug::Error) << "Error: unknown cell (" << cellName << ")";
                 }
                 if (store)
                 {

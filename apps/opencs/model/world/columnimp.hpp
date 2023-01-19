@@ -344,14 +344,14 @@ namespace CSMWorld
 
         QVariant get(const Record<CSMWorld::Cell>& record) const override
         {
-            return QString::fromUtf8(record.get().mName.getRefIdString().c_str());
+            return QString::fromUtf8(record.get().mName.c_str());
         }
 
         void set(Record<CSMWorld::Cell>& record, const QVariant& data) override
         {
             CSMWorld::Cell record2 = record.get();
 
-            record2.mName = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
+            record2.mName = data.toString().toUtf8().constData();
 
             record.setModified(record2);
         }
@@ -1147,14 +1147,14 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mDestCell.getRefIdString().c_str());
+            return QString::fromUtf8(record.get().mDestCell.c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mDestCell = ESM::RefId::stringRefId(data.toString().toUtf8().constData());
+            record2.mDestCell = data.toString().toUtf8().constData();
 
             record.setModified(record2);
         }

@@ -34,7 +34,7 @@ namespace MWMechanics
     }
 
     AiEscort::AiEscort(
-        const ESM::RefId& actorId, const ESM::RefId& cellId, int duration, float x, float y, float z, bool repeat)
+        const ESM::RefId& actorId, std::string_view cellId, int duration, float x, float y, float z, bool repeat)
         : TypedAiPackage<AiEscort>(repeat)
         , mCellId(cellId)
         , mX(x)

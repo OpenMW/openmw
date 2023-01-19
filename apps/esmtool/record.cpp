@@ -1342,7 +1342,7 @@ namespace EsmTool
     template <>
     std::string Record<ESM::Cell>::getId() const
     {
-        return mData.mName.getRefIdString();
+        return mData.mName;
     }
 
     template <>

@@ -17,11 +17,11 @@ namespace ESM
             int mY;
         };
 
-        ESM::RefId mWorldspace;
+        std::string mWorldspace;
         CellIndex mIndex;
         bool mPaged;
 
-        static const ESM::RefId sDefaultWorldspace;
+        static const std::string sDefaultWorldspace;
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;

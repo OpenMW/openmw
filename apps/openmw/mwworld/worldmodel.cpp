@@ -19,8 +19,8 @@
 
 namespace
 {
-    template <class Visitor, class Key>
-    bool forEachInStore(const ESM::RefId& id, Visitor&& visitor, std::map<Key, MWWorld::CellStore>& cellStore)
+    template <class Visitor, class Key, class Comp>
+    bool forEachInStore(const ESM::RefId& id, Visitor&& visitor, std::map<Key, MWWorld::CellStore, Comp>& cellStore)
     {
         for (auto& cell : cellStore)
         {
@@ -64,7 +64,7 @@ MWWorld::CellStore* MWWorld::WorldModel::getCellStore(const ESM::Cell* cell)
 {
     if (cell->mData.mFlags & ESM::Cell::Interior)
     {
-        auto result = mInteriors.find(cell->mName);
+        auto result = mInteriors.find(std::string(cell->mName));
 
         if (result == mInteriors.end())
             result = mInteriors.emplace(cell->mName, CellStore(cell, mStore, mReaders)).first;
@@ -196,9 +196,9 @@ MWWorld::CellStore* MWWorld::WorldModel::getExterior(int x, int y)
     return &result->second;
 }
 
-MWWorld::CellStore* MWWorld::WorldModel::getInterior(const ESM::RefId& name)
+MWWorld::CellStore* MWWorld::WorldModel::getInterior(std::string_view name)
 {
-    auto result = mInteriors.find(name);
+    auto result = mInteriors.find(std::string(name));
 
     if (result == mInteriors.end())
     {
@@ -223,7 +223,7 @@ MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::CellId& id)
     return getInterior(id.mWorldspace);
 }
 
-const ESM::Cell* MWWorld::WorldModel::getESMCellByName(const ESM::RefId& name)
+const ESM::Cell* MWWorld::WorldModel::getESMCellByName(std::string_view name)
 {
     const ESM::Cell* cell = mStore.get<ESM::Cell>().search(name); // first try interiors
     if (!cell) // try named exteriors
@@ -231,17 +231,17 @@ const ESM::Cell* MWWorld::WorldModel::getESMCellByName(const ESM::RefId& name)
     if (!cell)
     {
         // treat "Wilderness" like an empty string
-        static const ESM::RefId defaultName
-            = ESM::RefId::stringRefId(mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString());
+        static const std::string& defaultName
+            = mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
         if (name == defaultName)
-            cell = mStore.get<ESM::Cell>().searchExtByName(ESM::RefId::sEmpty);
+            cell = mStore.get<ESM::Cell>().searchExtByName("");
     }
     if (!cell)
     {
         // now check for regions
         for (const ESM::Region& region : mStore.get<ESM::Region>())
         {
-            if (name == ESM::RefId::stringRefId(region.mName))
+            if (name == region.mName)
             {
                 cell = mStore.get<ESM::Cell>().searchExtByRegion(region.mId);
                 break;
@@ -249,11 +249,11 @@ const ESM::Cell* MWWorld::WorldModel::getESMCellByName(const ESM::RefId& name)
         }
     }
     if (!cell)
-        throw std::runtime_error(std::string("Can't find cell with name ") + name.getRefIdString());
+        throw std::runtime_error(std::string("Can't find cell with name ") + std::string(name));
     return cell;
 }
 
-MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::RefId& name)
+MWWorld::CellStore* MWWorld::WorldModel::getCell(std::string_view name)
 {
     const ESM::Cell* cell = getESMCellByName(name);
     if (cell->isExterior())
@@ -263,7 +263,7 @@ MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::RefId& name)
 }
 
 MWWorld::CellStore* MWWorld::WorldModel::getCellByPosition(
-    const osg::Vec3f& pos, const ESM::RefId& cellNameInSameWorldSpace)
+    const osg::Vec3f& pos, std::string_view cellNameInSameWorldSpace)
 {
     if (cellNameInSameWorldSpace.empty() || getESMCellByName(cellNameInSameWorldSpace)->isExterior())
     {

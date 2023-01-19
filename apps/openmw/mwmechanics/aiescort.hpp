@@ -28,7 +28,7 @@ namespace MWMechanics
         /** The Actor will escort the specified actor to the cell position x, y, z until they reach their position, or
            they run out of time \implement AiEscortCell **/
         AiEscort(
-            const ESM::RefId& actorId, const ESM::RefId& cellId, int duration, float x, float y, float z, bool repeat);
+            const ESM::RefId& actorId, std::string_view cellId, int duration, float x, float y, float z, bool repeat);
 
         AiEscort(const ESM::AiSequence::AiEscort* escort);
 
@@ -52,7 +52,7 @@ namespace MWMechanics
         osg::Vec3f getDestination() const override { return osg::Vec3f(mX, mY, mZ); }
 
     private:
-        const ESM::RefId mCellId;
+        const std::string mCellId;
         const float mX;
         const float mY;
         const float mZ;

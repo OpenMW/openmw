@@ -2,6 +2,7 @@
 
 #include <components/esm3/aisequence.hpp>
 #include <components/esm3/loadcell.hpp>
+#include <components/misc/algorithm.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -35,7 +36,7 @@ namespace MWMechanics
         , mX(x)
         , mY(y)
         , mZ(z)
-        , mCellId(ESM::RefId::sEmpty)
+        , mCellId("")
         , mActive(false)
         , mFollowIndex(mFollowIndexCounter++)
     {
@@ -43,7 +44,7 @@ namespace MWMechanics
     }
 
     AiFollow::AiFollow(
-        const ESM::RefId& actorId, const ESM::RefId& cellId, float duration, float x, float y, float z, bool repeat)
+        const ESM::RefId& actorId, std::string_view cellId, float duration, float x, float y, float z, bool repeat)
         : TypedAiPackage<AiFollow>(repeat)
         , mAlwaysFollow(false)
         , mDuration(duration)
@@ -66,7 +67,7 @@ namespace MWMechanics
         , mX(0)
         , mY(0)
         , mZ(0)
-        , mCellId(ESM::RefId::sEmpty)
+        , mCellId("")
         , mActive(false)
         , mFollowIndex(mFollowIndexCounter++)
     {
@@ -169,13 +170,13 @@ namespace MWMechanics
             {
                 if (actor.getCell()->isExterior()) // Outside?
                 {
-                    if (mCellId == ESM::RefId::sEmpty) // No cell to travel to
+                    if (mCellId == "") // No cell to travel to
                     {
                         mRemainingDuration = mDuration;
                         return true;
                     }
                 }
-                else if (mCellId == actor.getCell()->getCell()->mName) // Cell to travel to
+                else if (Misc::StringUtils::ciEqual(mCellId, actor.getCell()->getCell()->mName)) // Cell to travel to
                 {
                     mRemainingDuration = mDuration;
                     return true;

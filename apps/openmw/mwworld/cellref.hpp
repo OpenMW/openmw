@@ -47,7 +47,7 @@ namespace MWWorld
         const ESM::Position& getDoorDest() const { return mCellRef.mDoorDest; }
 
         // Destination cell for doors (optional)
-        const ESM::RefId& getDestCell() const { return mCellRef.mDestCell; }
+        const std::string& getDestCell() const { return mCellRef.mDestCell; }
 
         // Scale applied to mesh
         float getScale() const { return mCellRef.mScale; }

@@ -123,7 +123,7 @@ namespace MWGui
 
         for (unsigned int i = 0; i < transport.size(); i++)
         {
-            std::string_view cellname = transport[i].mCellName.getRefIdString();
+            std::string_view cellname = transport[i].mCellName;
             bool interior = true;
             const osg::Vec2i cellIndex
                 = MWWorld::positionToCellIndex(transport[i].mPos.pos[0], transport[i].mPos.pos[1]);
@@ -174,7 +174,7 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
         ESM::Position pos = *_sender->getUserData<ESM::Position>();
-        const ESM::RefId& cellname = ESM::RefId::stringRefId(_sender->getUserString("Destination"));
+        const std::string& cellname = _sender->getUserString("Destination");
         bool interior = _sender->getUserString("interior") == "y";
         if (mPtr.getCell()->isExterior())
         {
@@ -198,7 +198,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
 
         // Teleports any followers, too.
-        MWWorld::ActionTeleport action(interior ? cellname : ESM::RefId::sEmpty, pos, true);
+        MWWorld::ActionTeleport action(interior ? cellname : "", pos, true);
         action.execute(player);
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);

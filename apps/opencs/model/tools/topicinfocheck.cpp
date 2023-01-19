@@ -75,7 +75,7 @@ int CSMTools::TopicInfoCheckStage::setup()
         if (regionRecord.isDeleted())
             continue;
 
-        mCellNames.insert(ESM::RefId::stringRefId(regionRecord.get().mName));
+        mCellNames.insert(regionRecord.get().mName);
     }
     // Default cell name
     int index = mGameSettings.searchId("sDefaultCellname");
@@ -85,7 +85,7 @@ int CSMTools::TopicInfoCheckStage::setup()
 
         if (!gmstRecord.isDeleted() && gmstRecord.get().mValue.getType() == ESM::VT_String)
         {
-            mCellNames.insert(ESM::RefId::stringRefId(gmstRecord.get().mValue.getString()));
+            mCellNames.insert(gmstRecord.get().mValue.getString());
         }
     }
 
@@ -130,7 +130,7 @@ void CSMTools::TopicInfoCheckStage::perform(int stage, CSMDoc::Messages& message
 
     if (!topicInfo.mCell.empty())
     {
-        verifyCell(topicInfo.mCell, id, messages);
+        verifyCell(topicInfo.mCell.getRefIdString(), id, messages);
     }
 
     if (!topicInfo.mFaction.empty() && !topicInfo.mFactionLess)
@@ -211,11 +211,11 @@ bool CSMTools::TopicInfoCheckStage::verifyActor(
 }
 
 bool CSMTools::TopicInfoCheckStage::verifyCell(
-    const ESM::RefId& cell, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
+    const std::string& cell, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages)
 {
     if (mCellNames.find(cell) == mCellNames.end())
     {
-        messages.add(id, "Cell '" + cell.getRefIdString() + "' does not exist", "", CSMDoc::Message::Severity_Error);
+        messages.add(id, "Cell '" + cell + "' does not exist", "", CSMDoc::Message::Severity_Error);
         return false;
     }
 
@@ -406,7 +406,7 @@ bool CSMTools::TopicInfoCheckStage::verifySelectStruct(
         return false;
     }
     else if (infoCondition.getFunctionName() == CSMWorld::ConstInfoSelectWrapper::Function_NotCell
-        && !verifyCell(ESM::RefId::stringRefId(infoCondition.getVariableName()), id, messages))
+        && !verifyCell(infoCondition.getVariableName(), id, messages))
     {
         return false;
     }

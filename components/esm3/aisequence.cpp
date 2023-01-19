@@ -54,7 +54,7 @@ namespace ESM
             mTargetActorId = -1;
             esm.getHNOT(mTargetActorId, "TAID");
             esm.getHNT(mRemainingDuration, "DURA");
-            mCellId = ESM::RefId::stringRefId(esm.getHNOString("CELL"));
+            mCellId = esm.getHNOString("CELL");
             mRepeat = false;
             esm.getHNOT(mRepeat, "REPT");
             if (esm.getFormat() < 18)
@@ -74,7 +74,7 @@ namespace ESM
             esm.writeHNT("TAID", mTargetActorId);
             esm.writeHNT("DURA", mRemainingDuration);
             if (!mCellId.empty())
-                esm.writeHNString("CELL", mCellId.getRefIdString());
+                esm.writeHNString("CELL", mCellId);
             if (mRepeat)
                 esm.writeHNT("REPT", mRepeat);
         }
@@ -86,7 +86,7 @@ namespace ESM
             mTargetActorId = -1;
             esm.getHNOT(mTargetActorId, "TAID");
             esm.getHNT(mRemainingDuration, "DURA");
-            mCellId = ESM::RefId::stringRefId(esm.getHNOString("CELL"));
+            mCellId = esm.getHNOString("CELL");
             esm.getHNT(mAlwaysFollow, "ALWY");
             mCommanded = false;
             esm.getHNOT(mCommanded, "CMND");
@@ -111,7 +111,7 @@ namespace ESM
             esm.writeHNT("TAID", mTargetActorId);
             esm.writeHNT("DURA", mRemainingDuration);
             if (!mCellId.empty())
-                esm.writeHNString("CELL", mCellId.getRefIdString());
+                esm.writeHNString("CELL", mCellId);
             esm.writeHNT("ALWY", mAlwaysFollow);
             esm.writeHNT("CMND", mCommanded);
             if (mActive)

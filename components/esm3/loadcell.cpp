@@ -71,7 +71,7 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case SREC_NAME:
-                    mName = esm.getRefId();
+                    mName = esm.getHString();
                     break;
                 case fourCC("DATA"):
                     esm.getHTSized<12>(mData);
@@ -101,7 +101,7 @@ namespace ESM
         }
         else
         {
-            mCellId.mWorldspace = mName;
+            mCellId.mWorldspace = Misc::StringUtils::lowerCase(mName);
             mCellId.mIndex.mX = 0;
             mCellId.mIndex.mY = 0;
         }
@@ -173,7 +173,7 @@ namespace ESM
 
     void Cell::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mName.getRefIdString());
+        esm.writeHNCString("NAME", mName);
         esm.writeHNT("DATA", mData, 12);
 
         if (isDeleted)
@@ -225,7 +225,7 @@ namespace ESM
 
     std::string Cell::getDescription() const
     {
-        const auto& nameString = mName.getRefIdString();
+        const auto& nameString = mName;
         if (mData.mFlags & Interior)
             return nameString;
 
@@ -315,7 +315,7 @@ namespace ESM
 
     void Cell::blank()
     {
-        mName = ESM::RefId::sEmpty;
+        mName = "";
         mRegion = ESM::RefId::sEmpty;
         mWater = 0;
         mWaterInt = false;

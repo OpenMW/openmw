@@ -6,7 +6,7 @@ void CSMWorld::Cell::load(ESM::ESMReader& esm, bool& isDeleted)
 {
     ESM::Cell::load(esm, isDeleted, false);
 
-    mId = mName;
+    mId = ESM::RefId::stringRefId(mName);
     if (isExterior())
     {
         std::ostringstream stream;

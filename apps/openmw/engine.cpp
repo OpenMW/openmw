@@ -444,7 +444,7 @@ void OMW::Engine::setResourceDir(const std::filesystem::path& parResDir)
 // Set start cell name
 void OMW::Engine::setCell(const std::string& cellName)
 {
-    mCellName = ESM::RefId::stringRefId(cellName);
+    mCellName = cellName;
 }
 
 void OMW::Engine::addContentFile(const std::string& file)

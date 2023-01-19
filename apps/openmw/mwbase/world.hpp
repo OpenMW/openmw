@@ -245,7 +245,7 @@ namespace MWBase
         virtual void setSimulationTimeScale(float scale) = 0;
 
         virtual void changeToInteriorCell(
-            const ESM::RefId& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
+            std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
             = 0;
         ///< Move to interior cell.
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
@@ -513,11 +513,11 @@ namespace MWBase
 
         /// Find default position inside exterior cell specified by name
         /// \return false if exterior with given name not exists, true otherwise
-        virtual bool findExteriorPosition(const ESM::RefId& name, ESM::Position& pos) = 0;
+        virtual bool findExteriorPosition(std::string_view name, ESM::Position& pos) = 0;
 
         /// Find default position inside interior cell specified by name
         /// \return false if interior with given name not exists, true otherwise
-        virtual bool findInteriorPosition(const ESM::RefId& name, ESM::Position& pos) = 0;
+        virtual bool findInteriorPosition(std::string_view name, ESM::Position& pos) = 0;
 
         /// Enables or disables use of teleport spell effects (recall, intervention, etc).
         virtual void enableTeleporting(bool enable) = 0;

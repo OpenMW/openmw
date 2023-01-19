@@ -1468,7 +1468,7 @@ namespace CSMWorld
 
             ESM::Transport::Dest newRow;
             newRow.mPos = newPos;
-            newRow.mCellName = ESM::RefId::sEmpty;
+            newRow.mCellName.clear();
 
             if (position >= (int)list.size())
                 list.push_back(newRow);
@@ -1533,7 +1533,7 @@ namespace CSMWorld
             switch (subColIndex)
             {
                 case 0:
-                    return QString::fromUtf8(content.mCellName.getRefIdString().c_str());
+                    return QString::fromUtf8(content.mCellName.c_str());
                 case 1:
                     return content.mPos.pos[0];
                 case 2:
@@ -1565,7 +1565,7 @@ namespace CSMWorld
             switch (subColIndex)
             {
                 case 0:
-                    list.at(subRowIndex).mCellName = ESM::RefId::stringRefId(value.toString().toUtf8().constData());
+                    list.at(subRowIndex).mCellName = value.toString().toUtf8().constData();
                     break;
                 case 1:
                     list.at(subRowIndex).mPos.pos[0] = value.toFloat();
