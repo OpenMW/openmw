@@ -41,7 +41,7 @@ namespace Wizard
         QString getPath();
         QString getIniPath();
 
-        void setIniCodec(QTextCodec* codec);
+        void setIniEncoding(ToUTF8::FromType encoding);
 
         bool setupSettings();
 
@@ -104,7 +104,7 @@ namespace Wizard
 
         IniSettings mIniSettings;
 
-        QTextCodec* mIniCodec;
+        ToUTF8::FromType mIniEncoding;
 
         QWaitCondition mWait;
 
