@@ -723,7 +723,7 @@ void Launcher::DataFilesPage::addArchivesFromDir(const QString& path)
     for (const auto& fileinfo : dir.entryInfoList())
     {
         const auto absPath = fileinfo.absoluteFilePath();
-        if (Bsa::CompressedBSAFile::detectVersion(absPath.toStdString()) == Bsa::BSAVER_UNKNOWN)
+        if (Bsa::CompressedBSAFile::detectVersion(Files::pathFromQString(absPath)) == Bsa::BSAVER_UNKNOWN)
             continue;
 
         const auto fileName = fileinfo.fileName();
