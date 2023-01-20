@@ -34,6 +34,10 @@ namespace fx
 
         void setFogColor(const osg::Vec4f& color) { mData.get<FogColor>() = color; }
 
+        void setAmbientColor(const osg::Vec4f& color) { mData.get<AmbientColor>() = color; }
+
+        void setSkyColor(const osg::Vec4f& color) { mData.get<SkyColor>() = color; }
+
         void setSunColor(const osg::Vec4f& color) { mData.get<SunColor>() = color; }
 
         void setSunPos(const osg::Vec4f& pos, bool night)
@@ -137,6 +141,16 @@ namespace fx
         struct EyeVec : std140::Vec4
         {
             static constexpr std::string_view sName = "eyeVec";
+        };
+
+        struct AmbientColor : std140::Vec4
+        {
+            static constexpr std::string_view sName = "ambientColor";
+        };
+
+        struct SkyColor : std140::Vec4
+        {
+            static constexpr std::string_view sName = "skyColor";
         };
 
         struct FogColor : std140::Vec4
@@ -249,10 +263,11 @@ namespace fx
             static constexpr std::string_view sName = "isInterior";
         };
 
-        using UniformData = std140::UBO<ProjectionMatrix, InvProjectionMatrix, ViewMatrix, PrevViewMatrix,
-            InvViewMatrix, EyePos, EyeVec, FogColor, SunColor, SunPos, Resolution, RcpResolution, FogNear, FogFar, Near,
-            Far, Fov, GameHour, SunVis, WaterHeight, IsWaterEnabled, SimulationTime, DeltaSimulationTime, WindSpeed,
-            WeatherTransition, WeatherID, NextWeatherID, IsUnderwater, IsInterior>;
+        using UniformData
+            = std140::UBO<ProjectionMatrix, InvProjectionMatrix, ViewMatrix, PrevViewMatrix, InvViewMatrix, EyePos,
+                EyeVec, FogColor, AmbientColor, SkyColor, SunColor, SunPos, Resolution, RcpResolution, FogNear, FogFar,
+                Near, Far, Fov, GameHour, SunVis, WaterHeight, IsWaterEnabled, SimulationTime, DeltaSimulationTime,
+                WindSpeed, WeatherTransition, WeatherID, NextWeatherID, IsUnderwater, IsInterior>;
 
         UniformData mData;
         bool mUseUBO;

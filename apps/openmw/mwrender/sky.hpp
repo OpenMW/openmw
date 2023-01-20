@@ -106,6 +106,8 @@ namespace MWRender
 
         SceneUtil::RTTNode* getSkyRTT() { return mSkyRTT.get(); }
 
+        osg::Vec4f getSkyColor() const { return mSkyColour; }
+
     private:
         void create();
         ///< no need to call this, automatically done on first enable()
