@@ -230,7 +230,7 @@ bool Config::GameSettings::isOrderedLine(const QString& line)
 bool Config::GameSettings::writeFileWithComments(QFile& file)
 {
     QTextStream stream(&file);
-    ensureUtf8Encoding(stream);
+    Misc::ensureUtf8Encoding(stream);
 
     // slurp
     std::vector<QString> fileCopy;

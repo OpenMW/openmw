@@ -165,7 +165,7 @@ void Wizard::MainWizard::setupGameSettings()
             return;
         }
         QTextStream stream(&file);
-        ensureUtf8Encoding(stream);
+        Misc::ensureUtf8Encoding(stream);
 
         mGameSettings.readUserFile(stream);
     }
@@ -197,7 +197,7 @@ void Wizard::MainWizard::setupGameSettings()
                 return;
             }
             QTextStream stream(&file);
-            ensureUtf8Encoding(stream);
+            Misc::ensureUtf8Encoding(stream);
 
             mGameSettings.readFile(stream);
         }
@@ -233,7 +233,7 @@ void Wizard::MainWizard::setupLauncherSettings()
             return;
         }
         QTextStream stream(&file);
-        ensureUtf8Encoding(stream);
+        Misc::ensureUtf8Encoding(stream);
 
         mLauncherSettings.readFile(stream);
     }
@@ -460,7 +460,7 @@ void Wizard::MainWizard::writeSettings()
     }
 
     QTextStream stream(&file);
-    ensureUtf8Encoding(stream);
+    Misc::ensureUtf8Encoding(stream);
 
     mGameSettings.writeFile(stream);
     file.close();
@@ -486,7 +486,7 @@ void Wizard::MainWizard::writeSettings()
     }
 
     stream.setDevice(&file);
-    ensureUtf8Encoding(stream);
+    Misc::ensureUtf8Encoding(stream);
 
     mLauncherSettings.writeFile(stream);
     file.close();
