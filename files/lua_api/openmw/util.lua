@@ -4,6 +4,29 @@
 -- @usage local util = require('openmw.util')
 
 
+---
+-- Rounds the given value to the nearest whole number.
+-- @function [parent=#util] round
+-- @param #number value
+-- @return #number The rounded value.
+-- @usage
+-- local util = require('openmw.util')
+-- local roundedValue = util.round(3.141592)
+-- print(roundedValue) -- prints 3
+
+---
+-- Remaps the value from one range to another.
+-- @function [parent=#util] remap
+-- @param #number value
+-- @param #number min
+-- @param #number max
+-- @param #number newMin
+-- @param #number newMax
+-- @return #number The remapped value.
+-- @usage
+-- local util = require('openmw.util')
+-- local newValue = util.remap(3, 0, 10, 0, 100)
+-- print(newValue) -- prints 30
 
 ---
 -- Limits given value to the interval [`from`, `to`].
