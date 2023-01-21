@@ -1,6 +1,7 @@
 #include "cellnameloader.hpp"
 
 #include <components/esm3/loadcell.hpp>
+#include <components/files/qtconversion.hpp>
 
 QSet<QString> CellNameLoader::getCellNames(QStringList& contentPaths)
 {
@@ -12,7 +13,7 @@ QSet<QString> CellNameLoader::getCellNames(QStringList& contentPaths)
     {
         if (contentPath.endsWith(".omwscripts", Qt::CaseInsensitive))
             continue;
-        esmReader.open(contentPath.toStdString());
+        esmReader.open(Files::pathFromQString(contentPath));
 
         // Loop through all records
         while (esmReader.hasMoreRecs())
