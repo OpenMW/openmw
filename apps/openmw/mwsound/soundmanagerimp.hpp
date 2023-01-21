@@ -174,9 +174,7 @@ namespace MWSound
         void playPlaylist(const std::string& playlist) override;
         ///< Start playing music from the selected folder
         /// \param name of the folder that contains the playlist
-
-        void playTitleMusic() override;
-        ///< Start playing title music
+        /// Title music playlist is predefined
 
         void say(const MWWorld::ConstPtr& reference, const std::string& filename) override;
         ///< Make an actor say some text.

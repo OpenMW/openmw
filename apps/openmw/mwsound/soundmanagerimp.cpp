@@ -129,6 +129,15 @@ namespace MWSound
 
             Log(Debug::Info) << stream.str();
         }
+
+        // TODO: dehardcode this
+        std::vector<std::string> titleMusic;
+        std::string_view titlefile = "music/special/morrowind title.mp3";
+        if (mVFS->exists(titlefile))
+            titleMusic.emplace_back(titlefile);
+        else
+            Log(Debug::Warning) << "Title music not found";
+        mMusicFiles["Title"] = titleMusic;
     }
 
     SoundManager::~SoundManager()
@@ -234,10 +243,13 @@ namespace MWSound
     {
         if (!mOutput->isInitialized())
             return;
-        Log(Debug::Info) << "Playing " << filename;
-        mLastPlayedMusic = filename;
 
         stopMusic();
+        if (filename.empty())
+            return;
+
+        Log(Debug::Info) << "Playing " << filename;
+        mLastPlayedMusic = filename;
 
         DecoderPtr decoder = getDecoder();
         try
@@ -276,6 +288,12 @@ namespace MWSound
     void SoundManager::startRandomTitle()
     {
         const std::vector<std::string>& filelist = mMusicFiles[mCurrentPlaylist];
+        if (filelist.empty())
+        {
+            advanceMusic(std::string());
+            return;
+        }
+
         auto& tracklist = mMusicToPlay[mCurrentPlaylist];
 
         // Do a Fisher-Yates shuffle
@@ -317,46 +335,20 @@ namespace MWSound
         if (mMusicFiles.find(playlist) == mMusicFiles.end())
         {
             std::vector<std::string> filelist;
-
-            for (const auto& name : mVFS->getRecursiveDirectoryIterator("Music/" + playlist))
+            for (const auto& name : mVFS->getRecursiveDirectoryIterator("Music/" + playlist + '/'))
                 filelist.push_back(name);
 
             mMusicFiles[playlist] = filelist;
         }
 
-        if (mMusicFiles[playlist].empty())
-            return;
-
-        mCurrentPlaylist = playlist;
-        startRandomTitle();
-    }
-
-    void SoundManager::playTitleMusic()
-    {
-        if (mCurrentPlaylist == "Title")
-            return;
-
-        if (mMusicFiles.find("Title") == mMusicFiles.end())
+        // No Battle music? Use Explore playlist
+        if (playlist == "Battle" && mMusicFiles[playlist].empty())
         {
-            std::vector<std::string> filelist;
-            // Is there an ini setting for this filename or something?
-            std::string_view filename = "music/special/morrowind title.mp3";
-            if (mVFS->exists(filename))
-            {
-                filelist.emplace_back(filename);
-                mMusicFiles["Title"] = filelist;
-            }
-            else
-            {
-                Log(Debug::Warning) << "Title music not found";
-                return;
-            }
+            playPlaylist("Explore");
+            return;
         }
 
-        if (mMusicFiles["Title"].empty())
-            return;
-
-        mCurrentPlaylist = "Title";
+        mCurrentPlaylist = playlist;
         startRandomTitle();
     }
 
@@ -1013,17 +1005,18 @@ namespace MWSound
 
     void SoundManager::updateMusic(float duration)
     {
-        if (!mNextMusic.empty())
+        if (!mMusic || !mMusic->updateFade(duration) || !mOutput->isStreamPlaying(mMusic.get()))
         {
-            mMusic->updateFade(duration);
-
-            mOutput->updateStream(mMusic.get());
-
-            if (mMusic->getRealVolume() <= 0.f)
+            stopMusic();
+            if (!mNextMusic.empty())
             {
                 streamMusicFull(mNextMusic);
                 mNextMusic.clear();
             }
+        }
+        else
+        {
+            mOutput->updateStream(mMusic.get());
         }
     }
 

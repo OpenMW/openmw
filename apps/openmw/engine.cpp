@@ -897,7 +897,7 @@ void OMW::Engine::go()
     {
         // start in main menu
         mWindowManager->pushGuiMode(MWGui::GM_MainMenu);
-        mSoundManager->playTitleMusic();
+        mSoundManager->playPlaylist("Title");
         std::string_view logo = Fallback::Map::getString("Movies_Morrowind_Logo");
         if (!logo.empty())
             mWindowManager->playVideo(logo, /*allowSkipping*/ true, /*overrideSounds*/ false);

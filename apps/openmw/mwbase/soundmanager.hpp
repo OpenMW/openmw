@@ -113,9 +113,7 @@ namespace MWBase
         virtual void playPlaylist(const std::string& playlist) = 0;
         ///< Start playing music from the selected folder
         /// \param name of the folder that contains the playlist
-
-        virtual void playTitleMusic() = 0;
-        ///< Start playing title music
+        /// Title music playlist is predefined
 
         virtual void say(const MWWorld::ConstPtr& reference, const std::string& filename) = 0;
         ///< Make an actor say some text.
