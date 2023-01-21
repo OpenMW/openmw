@@ -45,19 +45,19 @@ varying vec3 passNormal;
 
 void main()
 {
-    vec3 worldNormal = normalize(passNormal);
+    vec3 normal = normalize(passNormal);
 
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);
 
-    vec3 normalizedNormal = worldNormal;
+    vec3 normalizedNormal = normal;
     vec3 normalizedTangent = normalize(passTangent.xyz);
     vec3 binormal = cross(normalizedTangent, normalizedNormal) * passTangent.w;
     mat3 tbnTranspose = mat3(normalizedTangent, binormal, normalizedNormal);
 
-    worldNormal = normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
-    vec3 viewNormal = gl_NormalMatrix * worldNormal;
+    normal = normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
 #endif
+    vec3 viewNormal = normalize(gl_NormalMatrix * normal);
 
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
@@ -77,7 +77,7 @@ void main()
     lighting = passLighting + shadowDiffuseLighting * shadowing;
 #else
     vec3 diffuseLight, ambientLight;
-    doLighting(passViewPos, normalize(viewNormal), shadowing, diffuseLight, ambientLight);
+    doLighting(passViewPos, viewNormal, shadowing, diffuseLight, ambientLight);
     lighting = diffuseLight + ambientLight;
 #endif
 
@@ -87,7 +87,7 @@ void main()
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth);
 
 #if !@disableNormals
-    gl_FragData[1].xyz = worldNormal * 0.5 + 0.5;
+    gl_FragData[1].xyz = viewNormal * 0.5 + 0.5;
 #endif
 
     applyShadowDebugOverlay();

@@ -360,7 +360,7 @@ void main(void)
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], radialDepth, linearDepth);
 
 #if !@disableNormals
-    gl_FragData[1].rgb = normal * 0.5 + 0.5;
+    gl_FragData[1].rgb = normalize(gl_NormalMatrix * normal) * 0.5 + 0.5;
 #endif
 
     applyShadowDebugOverlay();

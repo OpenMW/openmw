@@ -46,7 +46,7 @@ uniform float specStrength;
 
 void main()
 {
-    vec3 worldNormal = normalize(passNormal);
+    vec3 normal = normalize(passNormal);
 
 #if @diffuseMap
     gl_FragData[0] = texture2D(diffuseMap, diffuseMapUV);
@@ -62,20 +62,18 @@ void main()
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);
 
-    vec3 normalizedNormal = worldNormal;
+    vec3 normalizedNormal = normal;
     vec3 normalizedTangent = normalize(passTangent.xyz);
     vec3 binormal = cross(normalizedTangent, normalizedNormal) * passTangent.w;
     mat3 tbnTranspose = mat3(normalizedTangent, binormal, normalizedNormal);
 
-    worldNormal = normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
-    vec3 viewNormal = gl_NormalMatrix * worldNormal;
-#else
-    vec3 viewNormal = gl_NormalMatrix * worldNormal;
+    normal = normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
 #endif
+    vec3 viewNormal = normalize(gl_NormalMatrix * normal);
 
     float shadowing = unshadowedLightRatio(linearDepth);
     vec3 diffuseLight, ambientLight;
-    doLighting(passViewPos, normalize(viewNormal), shadowing, diffuseLight, ambientLight);
+    doLighting(passViewPos, viewNormal, shadowing, diffuseLight, ambientLight);
     vec3 emission = getEmissionColor().xyz * emissiveMult;
 #if @emissiveMap
     emission *= texture2D(emissiveMap, emissiveMapUV).xyz;
@@ -93,7 +91,7 @@ void main()
 #endif
 
     if (matSpec != vec3(0.0))
-        gl_FragData[0].xyz += getSpecular(normalize(viewNormal), normalize(passViewPos.xyz), shininess, matSpec) * shadowing;
+        gl_FragData[0].xyz += getSpecular(viewNormal, normalize(passViewPos.xyz), shininess, matSpec) * shadowing;
 
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth);
 
@@ -103,7 +101,7 @@ void main()
 #endif
 
 #if !defined(FORCE_OPAQUE) && !@disableNormals
-    gl_FragData[1].xyz = worldNormal * 0.5 + 0.5;
+    gl_FragData[1].xyz = viewNormal * 0.5 + 0.5;
 #endif
 
     applyShadowDebugOverlay();

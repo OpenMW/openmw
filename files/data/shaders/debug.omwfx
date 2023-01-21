@@ -31,7 +31,7 @@ fragment main {
             omw_FragColor = vec4(vec3(omw_GetLinearDepth(omw_TexCoord) / omw.far * uDepthFactor), 1.0);
 #if OMW_NORMALS
         if (uDisplayNormals && (!uDisplayDepth || omw_TexCoord.x < 0.5))
-            omw_FragColor.rgb = omw_GetNormals(omw_TexCoord);
+            omw_FragColor.rgb = omw_GetNormals(omw_TexCoord) * 0.5 + 0.5;
 #endif
     }
 }
