@@ -202,7 +202,7 @@ namespace ESSImport
         }
 
         // note if the player is in a nameless exterior cell, we will assign the cellId later based on player position
-        if (cell.mName == ESM::RefId::stringRefId(mContext->mPlayerCellName))
+        if (Misc::StringUtils::ciEqual(cell.mName, mContext->mPlayerCellName))
         {
             mContext->mPlayer.mCellId = cell.getCellId();
         }

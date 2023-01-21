@@ -156,7 +156,7 @@ namespace MWWorld
     World::World(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
         SceneUtil::WorkQueue* workQueue, SceneUtil::UnrefQueue& unrefQueue, const Files::Collections& fileCollections,
         const std::vector<std::string>& contentFiles, const std::vector<std::string>& groundcoverFiles,
-        ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride, const ESM::RefId& startCell,
+        ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride, const std::string& startCell,
         const std::string& startupScript, const std::filesystem::path& resourcePath,
         const std::filesystem::path& userDataPath)
         : mResourceSystem(resourceSystem)
@@ -640,7 +640,7 @@ namespace MWWorld
         if (cell)
         {
             if (!cell->isExterior() || !cell->mName.empty())
-                return cell->mName.getRefIdString();
+                return cell->mName;
 
             if (const ESM::Region* region = mStore.get<ESM::Region>().search(cell->mRegion))
                 return region->mName;
@@ -928,7 +928,7 @@ namespace MWWorld
     }
 
     void World::changeToInteriorCell(
-        const ESM::RefId& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
+        const std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
         mPhysics->clearQueuedMovement();
         mDiscardMovements = true;
@@ -1399,10 +1399,10 @@ namespace MWWorld
             esmPos.pos[0] = traced.x();
             esmPos.pos[1] = traced.y();
             esmPos.pos[2] = traced.z();
-            const ESM::RefId* cell = &ESM::RefId::sEmpty;
+            std::string_view cell;
             if (!actor.getCell()->isExterior())
-                cell = &actor.getCell()->getCell()->mName;
-            MWWorld::ActionTeleport(*cell, esmPos, false).execute(actor);
+                cell = actor.getCell()->getCell()->mName;
+            MWWorld::ActionTeleport(cell, esmPos, false).execute(actor);
         }
     }
 
@@ -2747,7 +2747,7 @@ namespace MWWorld
             physicActor->enableCollisionBody(enable);
     }
 
-    bool World::findInteriorPosition(const ESM::RefId& name, ESM::Position& pos)
+    bool World::findInteriorPosition(std::string_view name, ESM::Position& pos)
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
         pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
@@ -2819,10 +2819,9 @@ namespace MWWorld
         return false;
     }
 
-    bool World::findExteriorPosition(const ESM::RefId& nameId, ESM::Position& pos)
+    bool World::findExteriorPosition(std::string_view nameId, ESM::Position& pos)
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-        const std::string& name = nameId.getRefIdString();
 
         const ESM::Cell* ext = nullptr;
         try
@@ -2836,12 +2835,13 @@ namespace MWWorld
         }
         if (!ext)
         {
-            size_t comma = name.find(',');
+            size_t comma = nameId.find(',');
             if (comma != std::string::npos)
             {
                 int x, y;
-                std::from_chars_result xResult = std::from_chars(name.data(), name.data() + comma, x);
-                std::from_chars_result yResult = std::from_chars(name.data() + comma + 1, name.data() + name.size(), y);
+                std::from_chars_result xResult = std::from_chars(nameId.data(), nameId.data() + comma, x);
+                std::from_chars_result yResult
+                    = std::from_chars(nameId.data() + comma + 1, nameId.data() + nameId.size(), y);
                 if (xResult.ec == std::errc::result_out_of_range || yResult.ec == std::errc::result_out_of_range)
                     throw std::runtime_error("Cell coordinates out of range.");
                 else if (xResult.ec == std::errc{} && yResult.ec == std::errc{})
@@ -3253,9 +3253,9 @@ namespace MWWorld
 
         // Search for a 'nearest' exterior, counting each cell between the starting
         // cell and the exterior as a distance of 1.  Will fail for isolated interiors.
-        std::set<ESM::RefId> checkedCells;
-        std::set<ESM::RefId> currentCells;
-        std::set<ESM::RefId> nextCells;
+        std::set<std::string_view> checkedCells;
+        std::set<std::string_view> currentCells;
+        std::set<std::string_view> nextCells;
         nextCells.insert(cell->getCell()->mName);
 
         while (!nextCells.empty())
@@ -3282,7 +3282,7 @@ namespace MWWorld
                     }
                     else
                     {
-                        const ESM::RefId& dest = ref.mRef.getDestCell();
+                        const std::string_view dest = ref.mRef.getDestCell();
                         if (!checkedCells.count(dest) && !currentCells.count(dest))
                             nextCells.insert(dest);
                     }
@@ -3306,9 +3306,9 @@ namespace MWWorld
         // Search for a 'nearest' marker, counting each cell between the starting
         // cell and the exterior as a distance of 1.  If an exterior is found, jump
         // to the nearest exterior marker, without further interior searching.
-        std::set<ESM::RefId> checkedCells;
-        std::set<ESM::RefId> currentCells;
-        std::set<ESM::RefId> nextCells;
+        std::set<std::string_view> checkedCells;
+        std::set<std::string_view> currentCells;
+        std::set<std::string_view> nextCells;
         MWWorld::ConstPtr closestMarker;
 
         nextCells.insert(ptr.getCell()->getCell()->mName);
@@ -3404,11 +3404,11 @@ namespace MWWorld
             return;
         }
 
-        const ESM::RefId* cellName = &ESM::RefId::sEmpty;
+        std::string_view cellName = "";
         if (!closestMarker.mCell->isExterior())
-            cellName = &closestMarker.mCell->getCell()->mName;
+            cellName = closestMarker.mCell->getCell()->mName;
 
-        MWWorld::ActionTeleport action(*cellName, closestMarker.getRefData().getPosition(), false);
+        MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition(), false);
         action.execute(ptr);
     }
 
@@ -3610,7 +3610,7 @@ namespace MWWorld
             Log(Debug::Warning) << "Failed to confiscate items: no closest prison marker found.";
             return;
         }
-        const ESM::RefId& prisonName = prisonMarker.getCellRef().getDestCell();
+        std::string_view prisonName = prisonMarker.getCellRef().getDestCell();
         if (prisonName.empty())
         {
             Log(Debug::Warning) << "Failed to confiscate items: prison marker not linked to prison interior";

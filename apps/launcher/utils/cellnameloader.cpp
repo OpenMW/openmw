@@ -49,5 +49,5 @@ QString CellNameLoader::getCellName(ESM::ESMReader& esmReader)
     bool isDeleted = false;
     cell.loadNameAndData(esmReader, isDeleted);
 
-    return QString::fromStdString(cell.mName.getRefIdString());
+    return QString::fromStdString(cell.mName);
 }

@@ -6,11 +6,11 @@
 namespace ESM
 {
 
-    const ESM::RefId CellId::sDefaultWorldspace = ESM::RefId::stringRefId("sys::default");
+    const std::string CellId::sDefaultWorldspace = "sys::default";
 
     void CellId::load(ESMReader& esm)
     {
-        mWorldspace = ESM::RefId::stringRefId(esm.getHNString("SPAC"));
+        mWorldspace = esm.getHNString("SPAC");
 
         if (esm.isNextSub("CIDX"))
         {
@@ -23,7 +23,7 @@ namespace ESM
 
     void CellId::save(ESMWriter& esm) const
     {
-        esm.writeHNString("SPAC", mWorldspace.getRefIdString());
+        esm.writeHNString("SPAC", mWorldspace);
 
         if (mPaged)
             esm.writeHNT("CIDX", mIndex, 8);

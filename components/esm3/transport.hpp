@@ -20,7 +20,7 @@ namespace ESM
         struct Dest
         {
             Position mPos;
-            ESM::RefId mCellName;
+            std::string mCellName;
         };
 
         std::vector<Dest> mList;

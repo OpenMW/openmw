@@ -141,7 +141,7 @@ namespace MWScript
                 ESM::RefId actorID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                ESM::RefId cellID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
+                std::string_view cellID = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 Interpreter::Type_Float duration = runtime[0].mFloat;
@@ -371,7 +371,7 @@ namespace MWScript
                 ESM::RefId actorID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                ESM::RefId cellID = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
+                std::string_view cellID = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
                 Interpreter::Type_Float duration = runtime[0].mFloat;

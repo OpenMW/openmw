@@ -966,8 +966,8 @@ namespace MWGui
         }
         else
         {
-            mMap->setCellPrefix(cell->getCell()->mName.getRefIdString());
-            mHud->setCellPrefix(cell->getCell()->mName.getRefIdString());
+            mMap->setCellPrefix(cell->getCell()->mName);
+            mHud->setCellPrefix(cell->getCell()->mName);
 
             osg::Vec3f worldPos;
             if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))

@@ -38,8 +38,7 @@ namespace MWLua
             return res.str();
         };
 
-        cellT["name"]
-            = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->mName.getRefIdString(); });
+        cellT["name"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->mName; });
         cellT["region"]
             = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->mRegion.getRefIdString(); });
         cellT["gridX"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getGridX(); });

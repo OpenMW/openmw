@@ -513,15 +513,15 @@ namespace MWWorld
 
         esm.restoreContext(ctx);
     }
-    const ESM::Cell* Store<ESM::Cell>::search(const ESM::RefId& id) const
+    const ESM::Cell* Store<ESM::Cell>::search(std::string_view name) const
     {
-        DynamicInt::const_iterator it = mInt.find(id);
+        DynamicInt::const_iterator it = mInt.find(name);
         if (it != mInt.end())
         {
             return &(it->second);
         }
 
-        DynamicInt::const_iterator dit = mDynamicInt.find(id);
+        DynamicInt::const_iterator dit = mDynamicInt.find(name);
         if (dit != mDynamicInt.end())
         {
             return &dit->second;
@@ -574,12 +574,12 @@ namespace MWWorld
 
         return &mExt.insert(std::make_pair(key, newCell)).first->second;
     }
-    const ESM::Cell* Store<ESM::Cell>::find(const ESM::RefId& id) const
+    const ESM::Cell* Store<ESM::Cell>::find(std::string_view id) const
     {
         const ESM::Cell* ptr = search(id);
         if (ptr == nullptr)
         {
-            const std::string msg = "Cell '" + id.getRefIdString() + "' not found";
+            const std::string msg = "Cell '" + std::string(id) + "' not found";
             throw std::runtime_error(msg);
         }
         return ptr;
@@ -709,7 +709,7 @@ namespace MWWorld
             }
         }
 
-        return RecordId(cell.mName, isDeleted);
+        return RecordId(ESM::RefId::stringRefId(cell.mName), isDeleted);
     }
     Store<ESM::Cell>::iterator Store<ESM::Cell>::intBegin() const
     {
@@ -727,12 +727,12 @@ namespace MWWorld
     {
         return iterator(mSharedExt.end());
     }
-    const ESM::Cell* Store<ESM::Cell>::searchExtByName(const ESM::RefId& id) const
+    const ESM::Cell* Store<ESM::Cell>::searchExtByName(std::string_view name) const
     {
         const ESM::Cell* cell = nullptr;
         for (const ESM::Cell* sharedCell : mSharedExt)
         {
-            if (sharedCell->mName == id)
+            if (sharedCell->mName == name)
             {
                 if (cell == nullptr || (sharedCell->mData.mX > cell->mData.mX)
                     || (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
@@ -777,7 +777,7 @@ namespace MWWorld
 
         for (const ESM::Cell* sharedCell : mSharedInt)
         {
-            list.push_back(sharedCell->mName);
+            list.push_back(ESM::RefId::stringRefId(sharedCell->mName));
         }
     }
     ESM::Cell* Store<ESM::Cell>::insert(const ESM::Cell& cell)
@@ -812,9 +812,9 @@ namespace MWWorld
         }
         return erase(cell.mName);
     }
-    bool Store<ESM::Cell>::erase(const ESM::RefId& id)
+    bool Store<ESM::Cell>::erase(std::string_view name)
     {
-        DynamicInt::iterator it = mDynamicInt.find(id);
+        auto it = mDynamicInt.find(name);
 
         if (it == mDynamicInt.end())
         {
@@ -875,7 +875,8 @@ namespace MWWorld
         // also an exterior cell with the coordinates of (0,0), so that doesn't help. Check whether mCell is an interior
         // cell. This isn't perfect, will break if a Region with the same name as an interior cell is created. A proper
         // fix should be made for future versions of the file format.
-        bool interior = pathgrid.mData.mX == 0 && pathgrid.mData.mY == 0 && mCells->search(pathgrid.mCell) != nullptr;
+        bool interior = pathgrid.mData.mX == 0 && pathgrid.mData.mY == 0
+            && mCells->search(pathgrid.mCell.getRefIdString()) != nullptr;
 
         // deal with mods that have empty pathgrid records (Issue #6209)
         // we assume that these records are empty on purpose (i.e. to remove old pathgrid on an updated cell)
@@ -928,7 +929,7 @@ namespace MWWorld
     }
     const ESM::Pathgrid* Store<ESM::Pathgrid>::search(const ESM::RefId& name) const
     {
-        Interior::const_iterator it = mInt.find(name);
+        Interior::const_iterator it = mInt.find(ESM::RefId(name));
         if (it != mInt.end())
             return &(it->second);
         return nullptr;
@@ -958,14 +959,14 @@ namespace MWWorld
         if (!(cell.mData.mFlags & ESM::Cell::Interior))
             return search(cell.mData.mX, cell.mData.mY);
         else
-            return search(cell.mName);
+            return search(ESM::RefId::stringRefId(cell.mName));
     }
     const ESM::Pathgrid* Store<ESM::Pathgrid>::find(const ESM::Cell& cell) const
     {
         if (!(cell.mData.mFlags & ESM::Cell::Interior))
             return find(cell.mData.mX, cell.mData.mY);
         else
-            return find(cell.mName);
+            return find(ESM::RefId::stringRefId(cell.mName));
     }
 
     // Skill

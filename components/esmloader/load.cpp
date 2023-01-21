@@ -59,7 +59,7 @@ namespace EsmLoader
         struct CellRecords
         {
             Records<ESM::Cell> mValues;
-            std::map<ESM::RefId, std::size_t> mByName;
+            std::map<std::string, std::size_t> mByName;
             std::map<std::pair<int, int>, std::size_t> mByPosition;
         };
 

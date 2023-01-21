@@ -332,7 +332,9 @@ namespace MWWorld
             }
         };
 
-        typedef std::unordered_map<ESM::RefId, ESM::Cell> DynamicInt;
+        typedef std::unordered_map<std::string, ESM::Cell, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
+            DynamicInt;
+
         typedef std::map<std::pair<int, int>, ESM::Cell, DynamicExtCmp> DynamicExt;
 
         DynamicInt mInt;
@@ -350,12 +352,12 @@ namespace MWWorld
     public:
         typedef SharedIterator<ESM::Cell> iterator;
 
-        const ESM::Cell* search(const ESM::RefId& id) const;
+        const ESM::Cell* search(std::string_view id) const;
         const ESM::Cell* search(int x, int y) const;
         const ESM::Cell* searchStatic(int x, int y) const;
         const ESM::Cell* searchOrCreate(int x, int y);
 
-        const ESM::Cell* find(const ESM::RefId& id) const;
+        const ESM::Cell* find(std::string_view id) const;
         const ESM::Cell* find(int x, int y) const;
 
         void clearDynamic() override;
@@ -369,7 +371,7 @@ namespace MWWorld
         iterator extEnd() const;
 
         // Return the northernmost cell in the easternmost column.
-        const ESM::Cell* searchExtByName(const ESM::RefId& id) const;
+        const ESM::Cell* searchExtByName(std::string_view id) const;
 
         // Return the northernmost cell in the easternmost column.
         const ESM::Cell* searchExtByRegion(const ESM::RefId& id) const;
@@ -383,7 +385,7 @@ namespace MWWorld
         ESM::Cell* insert(const ESM::Cell& cell);
 
         bool erase(const ESM::Cell& cell);
-        bool erase(const ESM::RefId& id);
+        bool erase(std::string_view id);
 
         bool erase(int x, int y);
     };

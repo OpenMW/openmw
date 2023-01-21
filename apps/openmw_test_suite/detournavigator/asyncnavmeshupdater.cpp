@@ -5,7 +5,6 @@
 #include <components/detournavigator/makenavmesh.hpp>
 #include <components/detournavigator/navmeshdbutils.hpp>
 #include <components/detournavigator/serialization.hpp>
-#include <components/esm/refid.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include <BulletCollision/CollisionShapes/btBoxShape.h>
@@ -53,7 +52,7 @@ namespace
         OffMeshConnectionsManager mOffMeshConnectionsManager{ mSettings.mRecast };
         const AgentBounds mAgentBounds{ CollisionShapeType::Aabb, { 29, 29, 66 } };
         const TilePosition mPlayerTile{ 0, 0 };
-        const ESM::RefId mWorldspace = ESM::RefId::stringRefId("sys::default");
+        const std::string mWorldspace = "sys::default";
         const btBoxShape mBox{ btVector3(100, 100, 20) };
         Loading::Listener mListener;
     };

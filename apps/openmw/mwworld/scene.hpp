@@ -163,7 +163,7 @@ namespace MWWorld
         void resetCellLoaded() { mCellLoaded = false; }
 
         void changeToInteriorCell(
-            const ESM::RefId& cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true);
+            std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true);
         ///< Move to interior cell.
         /// @param changeEvent Set cellChanged flag?
 

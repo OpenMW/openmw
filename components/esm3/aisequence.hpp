@@ -92,7 +92,7 @@ namespace ESM
 
             int mTargetActorId;
             ESM::RefId mTargetId;
-            ESM::RefId mCellId;
+            std::string mCellId;
             float mRemainingDuration;
             bool mRepeat;
 
@@ -106,7 +106,7 @@ namespace ESM
 
             int mTargetActorId;
             ESM::RefId mTargetId;
-            ESM::RefId mCellId;
+            std::string mCellId;
             float mRemainingDuration;
 
             bool mAlwaysFollow;

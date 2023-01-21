@@ -94,6 +94,8 @@ namespace Misc::StringUtils
 
     struct CiComp
     {
+        using is_transparent = void;
+
         bool operator()(std::string_view left, std::string_view right) const { return ciLess(left, right); }
     };
 

@@ -6,6 +6,8 @@
 #include <string>
 #include <unordered_map>
 
+#include <components/misc/algorithm.hpp>
+
 #include "cellstore.hpp"
 #include "ptr.hpp"
 
@@ -34,7 +36,7 @@ namespace MWWorld
         typedef std::vector<std::pair<ESM::RefId, CellStore*>> IdCache;
         const MWWorld::ESMStore& mStore;
         ESM::ReadersCache& mReaders;
-        mutable std::map<ESM::RefId, CellStore> mInteriors;
+        mutable std::map<std::string, CellStore, Misc::StringUtils::CiComp> mInteriors;
         mutable std::map<std::pair<int, int>, CellStore> mExteriors;
         IdCache mIdCache;
         std::size_t mIdCacheIndex;
@@ -42,7 +44,7 @@ namespace MWWorld
         WorldModel(const WorldModel&);
         WorldModel& operator=(const WorldModel&);
 
-        const ESM::Cell* getESMCellByName(const ESM::RefId& name);
+        const ESM::Cell* getESMCellByName(std::string_view name);
         CellStore* getCellStore(const ESM::Cell* cell);
 
         Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);
@@ -61,14 +63,14 @@ namespace MWWorld
         explicit WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& reader);
 
         CellStore* getExterior(int x, int y);
-        CellStore* getInterior(const ESM::RefId& name);
-        CellStore* getCell(const ESM::RefId& name); // interior or named exterior
-        CellStore* getCell(const ESM::CellId& id);
+        CellStore* getInterior(std::string_view name);
+        CellStore* getCell(std::string_view name); // interior or named exterior
+        CellStore* getCell(const ESM::CellId& Id);
 
         // If cellNameInSameWorldSpace is an interior - returns this interior.
         // Otherwise returns exterior cell for given position in the same world space.
         // At the moment multiple world spaces are not supported, so all exteriors are in one world space.
-        CellStore* getCellByPosition(const osg::Vec3f& pos, const ESM::RefId& cellNameInSameWorldSpace);
+        CellStore* getCellByPosition(const osg::Vec3f& pos, std::string_view cellNameInSameWorldSpace);
 
         void registerPtr(const MWWorld::Ptr& ptr);
         void deregisterPtr(const MWWorld::Ptr& ptr);

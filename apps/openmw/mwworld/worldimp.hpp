@@ -94,7 +94,7 @@ namespace MWWorld
         WorldModel mWorldModel;
         std::vector<int> mESMVersions; // the versions of esm files
 
-        ESM::RefId mCurrentWorldSpace;
+        std::string mCurrentWorldSpace;
 
         std::unique_ptr<MWWorld::Player> mPlayer;
         std::unique_ptr<MWPhysics::PhysicsSystem> mPhysics;
@@ -118,7 +118,7 @@ namespace MWWorld
 
         int mActivationDistanceOverride;
 
-        ESM::RefId mStartCell;
+        std::string mStartCell;
 
         float mSwimHeightScale;
 
@@ -200,7 +200,7 @@ namespace MWWorld
             SceneUtil::WorkQueue* workQueue, SceneUtil::UnrefQueue& unrefQueue,
             const Files::Collections& fileCollections, const std::vector<std::string>& contentFiles,
             const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder,
-            int activationDistanceOverride, const ESM::RefId& startCell, const std::string& startupScript,
+            int activationDistanceOverride, const std::string& startCell, const std::string& startupScript,
             const std::filesystem::path& resourcePath, const std::filesystem::path& userDataPath);
 
         virtual ~World();
@@ -341,7 +341,7 @@ namespace MWWorld
 
         void setSimulationTimeScale(float scale) override;
 
-        void changeToInteriorCell(const ESM::RefId& cellName, const ESM::Position& position, bool adjustPlayerPos,
+        void changeToInteriorCell(const std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos,
             bool changeEvent = true) override;
         ///< Move to interior cell.
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
@@ -603,11 +603,11 @@ namespace MWWorld
 
         /// Find center of exterior cell above land surface
         /// \return false if exterior with given name not exists, true otherwise
-        bool findExteriorPosition(const ESM::RefId& name, ESM::Position& pos) override;
+        bool findExteriorPosition(std::string_view nameId, ESM::Position& pos) override;
 
         /// Find position in interior cell near door entrance
         /// \return false if interior with given name not exists, true otherwise
-        bool findInteriorPosition(const ESM::RefId& name, ESM::Position& pos) override;
+        bool findInteriorPosition(std::string_view name, ESM::Position& pos) override;
 
         /// Enables or disables use of teleport spell effects (recall, intervention, etc).
         void enableTeleporting(bool enable) override;

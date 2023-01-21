@@ -12,8 +12,6 @@
 #include "tileposition.hpp"
 #include "version.hpp"
 
-#include <components/esm/refid.hpp>
-
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/index/rtree.hpp>
@@ -48,7 +46,7 @@ namespace DetourNavigator
 
         TilesPositionsRange getLimitedObjectsRange() const;
 
-        void setWorldspace(const ESM::RefId& worldspace, const UpdateGuard* guard);
+        void setWorldspace(std::string_view worldspace, const UpdateGuard* guard);
 
         bool addObject(ObjectId id, const CollisionShape& shape, const btTransform& transform, AreaType areaType,
             const UpdateGuard* guard);
@@ -66,11 +64,11 @@ namespace DetourNavigator
 
         void removeHeightfield(const osg::Vec2i& cellPosition, const UpdateGuard* guard);
 
-        std::shared_ptr<RecastMesh> getMesh(const ESM::RefId& worldspace, const TilePosition& tilePosition);
+        std::shared_ptr<RecastMesh> getMesh(std::string_view worldspace, const TilePosition& tilePosition);
 
-        std::shared_ptr<RecastMesh> getCachedMesh(const ESM::RefId& worldspace, const TilePosition& tilePosition) const;
+        std::shared_ptr<RecastMesh> getCachedMesh(std::string_view worldspace, const TilePosition& tilePosition) const;
 
-        std::shared_ptr<RecastMesh> getNewMesh(const ESM::RefId& worldspace, const TilePosition& tilePosition) const;
+        std::shared_ptr<RecastMesh> getNewMesh(std::string_view worldspace, const TilePosition& tilePosition) const;
 
         std::size_t getRevision() const { return mRevision; }
 
@@ -127,7 +125,7 @@ namespace DetourNavigator
 
         const RecastSettings& mSettings;
         TilesPositionsRange mRange;
-        ESM::RefId mWorldspace;
+        std::string mWorldspace;
         std::unordered_map<ObjectId, std::unique_ptr<ObjectData>> mObjects;
         boost::geometry::index::rtree<ObjectIndexValue, boost::geometry::index::quadratic<16>> mObjectIndex;
         std::map<osg::Vec2i, WaterData> mWater;

@@ -89,7 +89,7 @@ namespace ESM
         Position mDoorDest;
 
         // Destination cell for doors (optional)
-        ESM::RefId mDestCell;
+        std::string mDestCell;
 
         // Lock level for doors and containers
         int mLockLevel;

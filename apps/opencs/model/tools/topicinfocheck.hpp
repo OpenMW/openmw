@@ -7,6 +7,7 @@
 #include <apps/opencs/model/world/universalid.hpp>
 
 #include <components/esm3/loadinfo.hpp>
+#include <components/misc/algorithm.hpp>
 
 #include "../world/idcollection.hpp"
 
@@ -72,13 +73,13 @@ namespace CSMTools
         const CSMWorld::RefIdData& mReferencables;
         const CSMWorld::Resources& mSoundFiles;
 
-        std::set<ESM::RefId> mCellNames;
+        std::set<std::string, Misc::StringUtils::CiComp> mCellNames;
 
         bool mIgnoreBaseRecords;
 
         // These return false when not successful and write an error
         bool verifyActor(const ESM::RefId& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
-        bool verifyCell(const ESM::RefId& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
+        bool verifyCell(const std::string& cell, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         bool verifyFactionRank(
             const ESM::RefId& name, int rank, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);
         bool verifyItem(const ESM::RefId& name, const CSMWorld::UniversalId& id, CSMDoc::Messages& messages);

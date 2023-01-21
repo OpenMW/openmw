@@ -88,8 +88,8 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages& message
     }
 
     if (!cellRef.mDestCell.empty() && mCells.searchId(cellRef.mDestCell) == -1)
-        messages.add(id, "Destination cell '" + cellRef.mDestCell.getRefIdString() + "' does not exist", "",
-            CSMDoc::Message::Severity_Error);
+        messages.add(
+            id, "Destination cell '" + cellRef.mDestCell + "' does not exist", "", CSMDoc::Message::Severity_Error);
 
     if (cellRef.mScale < 0)
         messages.add(id, "Negative scale", "", CSMDoc::Message::Severity_Error);
