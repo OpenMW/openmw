@@ -220,9 +220,7 @@ namespace LuaUtil
         util["remap"] = [](double value, double min, double max, double newMin, double newMax) {
             return newMin + (value - min) * (newMax - newMin) / (max - min);
         };
-        util["round"] = [](double value) {
-            return round(value);
-        };
+        util["round"] = [](double value) { return round(value); };
 
         if (lua["bit32"] != sol::nil)
         {
