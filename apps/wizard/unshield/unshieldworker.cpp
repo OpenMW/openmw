@@ -6,8 +6,10 @@
 #include <QFileInfo>
 #include <QReadLocker>
 #include <QStringList>
-#include <QTextCodec>
-#include <QTextStream>
+
+#include <fstream>
+
+#include <components/files/qtconversion.hpp>
 
 #include <apps/wizard/inisettings.hpp>
 
@@ -23,7 +25,7 @@ Wizard::UnshieldWorker::UnshieldWorker(qint64 expectedMorrowindBsaSize, QObject*
     mDiskPath = QString();
 
     // Default to Latin encoding
-    mIniCodec = QTextCodec::codecForName("windows-1252");
+    mIniEncoding = ToUTF8::FromType::WINDOWS_1252;
 
     mInstallMorrowind = false;
     mInstallTribunal = false;
@@ -153,10 +155,10 @@ QString Wizard::UnshieldWorker::getDiskPath()
     return mDiskPath;
 }
 
-void Wizard::UnshieldWorker::setIniCodec(QTextCodec* codec)
+void Wizard::UnshieldWorker::setIniEncoding(ToUTF8::FromType encoding)
 {
     QWriteLocker writeLock(&mLock);
-    mIniCodec = codec;
+    mIniEncoding = encoding;
 }
 
 void Wizard::UnshieldWorker::wakeAll()
@@ -170,19 +172,16 @@ bool Wizard::UnshieldWorker::setupSettings()
     if (getIniPath().isEmpty())
         return false;
 
-    QFile file(getIniPath());
-
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    const auto iniPath = Files::pathFromQString(getIniPath());
+    std::ifstream file(iniPath);
+    if (file.fail())
     {
         emit error(tr("Failed to open Morrowind configuration file!"),
-            tr("Opening %1 failed: %2.").arg(getIniPath(), file.errorString()));
+            tr("Opening %1 failed: %2.").arg(getIniPath(), strerror(errno)));
         return false;
     }
 
-    QTextStream stream(&file);
-    stream.setCodec(mIniCodec);
-
-    mIniSettings.readFile(stream);
+    mIniSettings.readFile(file, mIniEncoding);
 
     return true;
 }
@@ -192,22 +191,19 @@ bool Wizard::UnshieldWorker::writeSettings()
     if (getIniPath().isEmpty())
         return false;
 
-    QFile file(getIniPath());
-
-    if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
+    const auto iniPath = Files::pathFromQString(getIniPath());
+    std::ifstream file(iniPath);
+    if (file.fail())
     {
         emit error(tr("Failed to open Morrowind configuration file!"),
-            tr("Opening %1 failed: %2.").arg(getIniPath(), file.errorString()));
+            tr("Opening %1 failed: %2.").arg(getIniPath(), strerror(errno)));
         return false;
     }
 
-    QTextStream stream(&file);
-    stream.setCodec(mIniCodec);
-
-    if (!mIniSettings.writeFile(getIniPath(), stream))
+    if (!mIniSettings.writeFile(getIniPath(), file, mIniEncoding))
     {
         emit error(tr("Failed to write Morrowind configuration file!"),
-            tr("Writing to %1 failed: %2.").arg(getIniPath(), file.errorString()));
+            tr("Writing to %1 failed: %2.").arg(getIniPath(), strerror(errno)));
         return false;
     }
 

@@ -5,7 +5,10 @@
 #include <QRegularExpression>
 #include <QString>
 #include <QStringList>
-#include <QTextStream>
+
+#include <fstream>
+
+#include <components/files/qtconversion.hpp>
 
 Wizard::IniSettings::IniSettings() {}
 
@@ -25,7 +28,7 @@ QStringList Wizard::IniSettings::findKeys(const QString& text)
     return result;
 }
 
-bool Wizard::IniSettings::readFile(QTextStream& stream)
+bool Wizard::IniSettings::readFile(std::ifstream& stream, ToUTF8::FromType encoding)
 {
     // Look for a square bracket, "'\\["
     // that has one or more "not nothing" in it, "([^]]+)"
@@ -39,10 +42,20 @@ bool Wizard::IniSettings::readFile(QTextStream& stream)
 
     QString currentSection;
 
-    while (!stream.atEnd())
-    {
-        const QString line(stream.readLine());
+    ToUTF8::Utf8Encoder encoder(encoding);
 
+    std::string legacyEncLine;
+    while (std::getline(stream, legacyEncLine))
+    {
+        std::string_view lineBuffer = encoder.getUtf8(legacyEncLine);
+
+        // unify Unix-style and Windows file ending
+        if (!(lineBuffer.empty()) && (lineBuffer[lineBuffer.length() - 1]) == '\r')
+        {
+            lineBuffer = lineBuffer.substr(0, lineBuffer.length() - 1);
+        }
+
+        const QString line = QString::fromStdString(std::string(lineBuffer));
         if (line.isEmpty() || line.startsWith(QLatin1Char(';')))
             continue;
 
@@ -70,7 +83,7 @@ bool Wizard::IniSettings::readFile(QTextStream& stream)
     return true;
 }
 
-bool Wizard::IniSettings::writeFile(const QString& path, QTextStream& stream)
+bool Wizard::IniSettings::writeFile(const QString& path, std::ifstream& stream, ToUTF8::FromType encoding)
 {
     // Look for a square bracket, "'\\["
     // that has one or more "not nothing" in it, "([^]]+)"
@@ -87,10 +100,19 @@ bool Wizard::IniSettings::writeFile(const QString& path, QTextStream& stream)
     QString currentSection;
     QString buffer;
 
-    while (!stream.atEnd())
-    {
-        const QString line(stream.readLine());
+    ToUTF8::Utf8Encoder encoder(encoding);
 
+    std::string legacyEncLine;
+    while (std::getline(stream, legacyEncLine))
+    {
+        std::string_view lineBuffer = encoder.getUtf8(legacyEncLine);
+        // unify Unix-style and Windows file ending
+        if (!(lineBuffer.empty()) && (lineBuffer[lineBuffer.length() - 1]) == '\r')
+        {
+            lineBuffer = lineBuffer.substr(0, lineBuffer.length() - 1);
+        }
+
+        const QString line = QString::fromStdString(std::string(lineBuffer));
         if (line.isEmpty() || line.startsWith(QLatin1Char(';')))
         {
             buffer.append(line + QLatin1String("\n"));
@@ -158,27 +180,13 @@ bool Wizard::IniSettings::writeFile(const QString& path, QTextStream& stream)
         }
     }
 
-    // Now we reopen the file, this time we write
-    QFile file(path);
-
-    if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text))
-    {
-        QTextStream in(&file);
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        in.setCodec(stream.codec());
-#else
-        in.setEncoding(stream.encoding());
-#endif
-
-        // Write the updated buffer to an empty file
-        in << buffer;
-        file.flush();
-        file.close();
-    }
-    else
-    {
+    const auto iniPath = Files::pathFromQString(path);
+    std::ofstream file(iniPath, std::ios::out);
+    if (file.fail())
         return false;
-    }
+
+    file << encoder.getLegacyEnc(buffer.toStdString());
+    file.close();
 
     return true;
 }
