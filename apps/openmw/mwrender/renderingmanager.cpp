@@ -961,6 +961,7 @@ namespace MWRender
         stateUpdater->setNextWeatherId(world->getNextWeather());
         stateUpdater->setWeatherTransition(world->getWeatherTransition());
         stateUpdater->setWindSpeed(world->getWindSpeed());
+        stateUpdater->setSkyColor(mSky->getSkyColor());
         mPostProcessor->setUnderwaterFlag(isUnderwater);
     }
 
@@ -1368,6 +1369,7 @@ namespace MWRender
         if (mNightEyeFactor > 0.f)
             color += osg::Vec4f(0.7, 0.7, 0.7, 0.0) * mNightEyeFactor;
 
+        mPostProcessor->getStateUpdater()->setAmbientColor(color);
         mStateUpdater->setAmbientColor(color);
     }
 
