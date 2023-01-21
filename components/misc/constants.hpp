@@ -14,7 +14,7 @@ namespace Constants
     constexpr float SoundSpeedInAir = 343.3f;
     constexpr float SoundSpeedUnderwater = 1484.0f;
 
-    // Gravity constexprant in m/sec^2
+    // Gravity constant in m/sec^2
     // Note: 8.96 m/sec^2 = 9.8 yards/sec^2
     // Probaly original engine's developers just forgot
     // that their engine uses yards instead of meters
