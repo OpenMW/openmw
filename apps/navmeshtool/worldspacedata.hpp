@@ -3,7 +3,6 @@
 
 #include <components/bullethelpers/collisionobject.hpp>
 #include <components/detournavigator/tilecachedrecastmeshmanager.hpp>
-#include <components/esm/refid.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/misc/convert.hpp>
 #include <components/resource/bulletshape.hpp>
@@ -49,12 +48,12 @@ namespace NavMeshTool
 
     struct WorldspaceNavMeshInput
     {
-        ESM::RefId mWorldspace;
+        std::string mWorldspace;
         TileCachedRecastMeshManager mTileCachedRecastMeshManager;
         btAABB mAabb;
         bool mAabbInitialized = false;
 
-        explicit WorldspaceNavMeshInput(ESM::RefId worldspace, const DetourNavigator::RecastSettings& settings);
+        explicit WorldspaceNavMeshInput(std::string worldspace, const DetourNavigator::RecastSettings& settings);
     };
 
     class BulletObject

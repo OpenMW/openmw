@@ -1,7 +1,6 @@
 #include "generate.hpp"
 
 #include <components/detournavigator/navmeshdb.hpp>
-#include <components/esm/refid.hpp>
 
 #include <DetourAlloc.h>
 
@@ -20,7 +19,7 @@ namespace
 
     struct Tile
     {
-        ESM::RefId mWorldspace;
+        std::string mWorldspace;
         TilePosition mTilePosition;
         std::vector<std::byte> mInput;
         std::vector<std::byte> mData;
@@ -40,7 +39,7 @@ namespace
 
         Tile insertTile(TileId tileId, TileVersion version)
         {
-            ESM::RefId worldspace = ESM::RefId::stringRefId("sys::default");
+            std::string worldspace = "sys::default";
             const TilePosition tilePosition{ 3, 4 };
             std::vector<std::byte> input = generateData();
             std::vector<std::byte> data = generateData();
@@ -90,7 +89,7 @@ namespace
     {
         const TileId tileId{ 53 };
         const TileVersion version{ 1 };
-        const ESM::RefId worldspace = ESM::RefId::stringRefId("sys::default");
+        const std::string worldspace = "sys::default";
         const TilePosition tilePosition{ 3, 4 };
         const std::vector<std::byte> input = generateData();
         const std::vector<std::byte> data = generateData();
@@ -102,7 +101,7 @@ namespace
     {
         const TileId tileId{ 53 };
         const TileVersion version{ 1 };
-        const ESM::RefId worldspace = ESM::RefId::stringRefId("sys::default");
+        const std::string worldspace = "sys::default";
         const TilePosition tilePosition{ 3, 4 };
         const std::vector<std::byte> input = generateData();
         const std::vector<std::byte> data = generateData();
@@ -114,7 +113,7 @@ namespace
     TEST_F(DetourNavigatorNavMeshDbTest, delete_tiles_at_should_remove_all_tiles_with_given_worldspace_and_position)
     {
         const TileVersion version{ 1 };
-        const ESM::RefId worldspace = ESM::RefId::stringRefId("sys::default");
+        const std::string worldspace = "sys::default";
         const TilePosition tilePosition{ 3, 4 };
         const std::vector<std::byte> input1 = generateData();
         const std::vector<std::byte> input2 = generateData();
@@ -131,7 +130,7 @@ namespace
         const TileId leftTileId{ 53 };
         const TileId removedTileId{ 54 };
         const TileVersion version{ 1 };
-        const ESM::RefId worldspace = ESM::RefId::stringRefId("sys::default");
+        const std::string worldspace = "sys::default";
         const TilePosition tilePosition{ 3, 4 };
         const std::vector<std::byte> leftInput = generateData();
         const std::vector<std::byte> removedInput = generateData();
@@ -149,7 +148,7 @@ namespace
     {
         TileId tileId{ 1 };
         const TileVersion version{ 1 };
-        const ESM::RefId worldspace = ESM::RefId::stringRefId("sys::default");
+        const std::string worldspace = "sys::default";
         const std::vector<std::byte> input = generateData();
         const std::vector<std::byte> data = generateData();
         for (int x = -2; x <= 2; ++x)

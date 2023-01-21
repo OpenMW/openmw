@@ -25,11 +25,6 @@
 struct sqlite3;
 struct sqlite3_stmt;
 
-namespace ESM
-{
-    struct RefId;
-}
-
 namespace DetourNavigator
 {
     using TileId = Misc::StrongTypedef<std::int64_t, struct TiledIdTag>;
@@ -153,21 +148,21 @@ namespace DetourNavigator
         TileId getMaxTileId();
 
         std::optional<Tile> findTile(
-            const ESM::RefId& worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input);
+            std::string_view worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input);
 
         std::optional<TileData> getTileData(
-            const ESM::RefId& worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input);
+            std::string_view worldspace, const TilePosition& tilePosition, const std::vector<std::byte>& input);
 
-        int insertTile(TileId tileId, const ESM::RefId& worldspace, const TilePosition& tilePosition,
+        int insertTile(TileId tileId, std::string_view worldspace, const TilePosition& tilePosition,
             TileVersion version, const std::vector<std::byte>& input, const std::vector<std::byte>& data);
 
         int updateTile(TileId tileId, TileVersion version, const std::vector<std::byte>& data);
 
-        int deleteTilesAt(const ESM::RefId& worldspace, const TilePosition& tilePosition);
+        int deleteTilesAt(std::string_view worldspace, const TilePosition& tilePosition);
 
-        int deleteTilesAtExcept(const ESM::RefId& worldspace, const TilePosition& tilePosition, TileId excludeTileId);
+        int deleteTilesAtExcept(std::string_view worldspace, const TilePosition& tilePosition, TileId excludeTileId);
 
-        int deleteTilesOutsideRange(const ESM::RefId& worldspace, const TilesPositionsRange& range);
+        int deleteTilesOutsideRange(std::string_view worldspace, const TilesPositionsRange& range);
 
         ShapeId getMaxShapeId();
 
