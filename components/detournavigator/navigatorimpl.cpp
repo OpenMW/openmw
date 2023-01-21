@@ -39,11 +39,6 @@ namespace DetourNavigator
         mNavMeshManager.setWorldspace(worldspace, getImpl(guard));
     }
 
-    void NavigatorImpl::setWorldspace(const ESM::RefId& worldspace, const UpdateGuard* guard)
-    {
-        setWorldspace(Misc::StringUtils::lowerCase(worldspace.getRefIdString()), guard);
-    }
-
     void NavigatorImpl::updateBounds(const osg::Vec3f& playerPosition, const UpdateGuard* guard)
     {
         mNavMeshManager.updateBounds(playerPosition, getImpl(guard));

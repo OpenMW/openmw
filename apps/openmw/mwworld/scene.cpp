@@ -541,7 +541,7 @@ namespace MWWorld
         }
 
         mNavigator.setWorldspace(
-            ESM::RefId::stringRefId(
+            Misc::StringUtils::lowerCase(
                 mWorld.getWorldModel().getExterior(playerCellX, playerCellY)->getCell()->mCellId.mWorldspace),
             navigatorUpdateGuard.get());
         mNavigator.updateBounds(pos, navigatorUpdateGuard.get());
@@ -665,7 +665,7 @@ namespace MWWorld
 
             CellStore* cell = mWorld.getWorldModel().getExterior(it->mData.mX, it->mData.mY);
             mNavigator.setWorldspace(
-                ESM::RefId::stringRefId(cell->getCell()->mCellId.mWorldspace), navigatorUpdateGuard.get());
+                Misc::StringUtils::lowerCase(cell->getCell()->mCellId.mWorldspace), navigatorUpdateGuard.get());
             const osg::Vec3f position
                 = osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits;
             mNavigator.updateBounds(position, navigatorUpdateGuard.get());
@@ -723,7 +723,7 @@ namespace MWWorld
 
             CellStore* cell = mWorld.getWorldModel().getInterior(it->mName);
             mNavigator.setWorldspace(
-                ESM::RefId::stringRefId(cell->getCell()->mCellId.mWorldspace), navigatorUpdateGuard.get());
+                Misc::StringUtils::lowerCase(cell->getCell()->mCellId.mWorldspace), navigatorUpdateGuard.get());
             ESM::Position position;
             mWorld.findInteriorPosition(it->mName, position);
             mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
@@ -880,7 +880,7 @@ namespace MWWorld
         loadingListener->setProgressRange(cell->count());
 
         mNavigator.setWorldspace(
-            ESM::RefId::stringRefId(cell->getCell()->mCellId.mWorldspace), navigatorUpdateGuard.get());
+            Misc::StringUtils::lowerCase(cell->getCell()->mCellId.mWorldspace), navigatorUpdateGuard.get());
         mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
 
         // Load cell.

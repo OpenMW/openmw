@@ -93,8 +93,6 @@ namespace DetourNavigator
          */
         virtual void setWorldspace(std::string_view worldspace, const UpdateGuard* guard) = 0;
 
-        virtual void setWorldspace(const ESM::RefId& worldspace, const UpdateGuard* guard) = 0;
-
         /**
          * @brief updateBounds should be called before adding object from loading cell
          * @param playerPosition corresponds to the bounds center
