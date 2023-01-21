@@ -175,7 +175,7 @@ namespace
             .mEnd = TilePosition(1, 1),
         };
         manager.setRange(range, nullptr);
-        manager.setWorldspace(mWorldspace, nullptr);
+        manager.setWorldspace("worldspace", nullptr);
 
         const btBoxShape boxShape(btVector3(20, 20, 100));
         const btTransform transform(

@@ -64,7 +64,7 @@ MWWorld::CellStore* MWWorld::WorldModel::getCellStore(const ESM::Cell* cell)
 {
     if (cell->mData.mFlags & ESM::Cell::Interior)
     {
-        auto result = mInteriors.find(std::string(cell->mName));
+        auto result = mInteriors.find(cell->mName);
 
         if (result == mInteriors.end())
             result = mInteriors.emplace(cell->mName, CellStore(cell, mStore, mReaders)).first;
@@ -198,7 +198,7 @@ MWWorld::CellStore* MWWorld::WorldModel::getExterior(int x, int y)
 
 MWWorld::CellStore* MWWorld::WorldModel::getInterior(std::string_view name)
 {
-    auto result = mInteriors.find(std::string(name));
+    auto result = mInteriors.find(name);
 
     if (result == mInteriors.end())
     {

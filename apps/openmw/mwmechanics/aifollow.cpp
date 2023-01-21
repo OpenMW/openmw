@@ -36,7 +36,6 @@ namespace MWMechanics
         , mX(x)
         , mY(y)
         , mZ(z)
-        , mCellId("")
         , mActive(false)
         , mFollowIndex(mFollowIndexCounter++)
     {
@@ -67,7 +66,6 @@ namespace MWMechanics
         , mX(0)
         , mY(0)
         , mZ(0)
-        , mCellId("")
         , mActive(false)
         , mFollowIndex(mFollowIndexCounter++)
     {
@@ -170,7 +168,7 @@ namespace MWMechanics
             {
                 if (actor.getCell()->isExterior()) // Outside?
                 {
-                    if (mCellId == "") // No cell to travel to
+                    if (mCellId.empty()) // No cell to travel to
                     {
                         mRemainingDuration = mDuration;
                         return true;

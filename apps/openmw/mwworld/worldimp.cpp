@@ -1399,7 +1399,7 @@ namespace MWWorld
             esmPos.pos[0] = traced.x();
             esmPos.pos[1] = traced.y();
             esmPos.pos[2] = traced.z();
-            std::string_view cell = "";
+            std::string_view cell;
             if (!actor.getCell()->isExterior())
                 cell = actor.getCell()->getCell()->mName;
             MWWorld::ActionTeleport(cell, esmPos, false).execute(actor);
