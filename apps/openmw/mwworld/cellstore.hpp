@@ -51,10 +51,17 @@ namespace ESM
     struct BodyPart;
 }
 
+namespace ESM4
+{
+    class Reader;
+    struct Cell;
+}
+
 namespace MWWorld
 {
     class ESMStore;
     struct CellStoreImp;
+    typedef std::variant<const ESM4::Cell*, const ESM::Cell*> CellVariant;
 
     using CellStoreTuple = std::tuple<CellRefList<ESM::Activator>, CellRefList<ESM::Potion>,
         CellRefList<ESM::Apparatus>, CellRefList<ESM::Armor>, CellRefList<ESM::Book>, CellRefList<ESM::Clothing>,
@@ -86,6 +93,7 @@ namespace MWWorld
         std::unique_ptr<ESM::FogState> mFogState;
 
         const ESM::Cell* mCell;
+        CellVariant mCellVariant;
         State mState;
         bool mHasState;
         std::vector<ESM::RefId> mIds;

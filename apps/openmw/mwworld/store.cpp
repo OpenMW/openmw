@@ -1183,6 +1183,31 @@ namespace MWWorld
         }
         return name;
     }
+
+    // ESM4 Cell
+    //=========================================================================
+
+    const ESM4::Cell* Store<ESM4::Cell>::searchCellName(std::string_view cellName) const
+    {
+        const auto foundCell = mCellNameIndex.find(cellName);
+        if (foundCell == mCellNameIndex.end())
+            return nullptr;
+        return foundCell->second;
+    }
+
+    ESM4::Cell* Store<ESM4::Cell>::insert(const ESM4::Cell& item, bool overrideOnly)
+    {
+        auto cellPtr = TypedDynamicStore<ESM4::Cell>::insert(item, overrideOnly);
+        mCellNameIndex[cellPtr->mEditorId] = cellPtr;
+        return cellPtr;
+    }
+
+    ESM4::Cell* Store<ESM4::Cell>::insertStatic(const ESM4::Cell& item)
+    {
+        auto cellPtr = TypedDynamicStore<ESM4::Cell>::insertStatic(item);
+        mCellNameIndex[cellPtr->mEditorId] = cellPtr;
+        return cellPtr;
+    }
 }
 
 template class MWWorld::TypedDynamicStore<ESM::Activator>;

@@ -253,6 +253,17 @@ const ESM::Cell* MWWorld::WorldModel::getESMCellByName(std::string_view name)
     return cell;
 }
 
+MWWorld::CellVariant MWWorld::WorldModel::getCellByName(std::string_view name)
+{
+    const ESM::Cell* cellEsm3 = getESMCellByName(name);
+    return cellEsm3;
+    if (!cellEsm3)
+    {
+        const ESM4::Cell* cellESM4 = mStore.get<ESM4::Cell>().searchCellName(name);
+        return cellESM4;
+    }
+}
+
 MWWorld::CellStore* MWWorld::WorldModel::getCell(std::string_view name)
 {
     const ESM::Cell* cell = getESMCellByName(name);
