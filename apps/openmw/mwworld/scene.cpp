@@ -380,55 +380,62 @@ namespace MWWorld
         assert(mActiveCells.find(cell) == mActiveCells.end());
         mActiveCells.insert(cell);
 
-        Log(Debug::Info) << "Loading cell " << cell->getCell()->getDescription();
+        Log(Debug::Info) << "Loading cell " << cell->getEditorName();
 
-        const int cellX = cell->getCell()->getGridX();
-        const int cellY = cell->getCell()->getGridY();
-
-        if (cell->getCell()->isExterior())
+        auto cell3 = cell->getCellVariant().getEsm3();
+        int cellX = 0;
+        int cellY = 0;
+        if (cell3 != nullptr)
         {
-            osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
-            const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
-            const int verts = ESM::Land::LAND_SIZE;
-            const int worldsize = ESM::Land::REAL_SIZE;
-            if (data)
-            {
-                mPhysics->addHeightField(
-                    data->mHeights, cellX, cellY, worldsize, verts, data->mMinHeight, data->mMaxHeight, land.get());
-            }
-            else
-            {
-                static std::vector<float> defaultHeight;
-                defaultHeight.resize(verts * verts, ESM::Land::DEFAULT_HEIGHT);
-                mPhysics->addHeightField(defaultHeight.data(), cellX, cellY, worldsize, verts,
-                    ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
-            }
-            if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-            {
-                const osg::Vec2i cellPosition(cellX, cellY);
-                const btVector3& origin = heightField->getCollisionObject()->getWorldTransform().getOrigin();
-                const osg::Vec3f shift(origin.x(), origin.y(), origin.z());
-                const HeightfieldShape shape = [&]() -> HeightfieldShape {
-                    if (data == nullptr)
-                    {
-                        return DetourNavigator::HeightfieldPlane{ static_cast<float>(ESM::Land::DEFAULT_HEIGHT) };
-                    }
-                    else
-                    {
-                        DetourNavigator::HeightfieldSurface heights;
-                        heights.mHeights = data->mHeights;
-                        heights.mSize = static_cast<std::size_t>(ESM::Land::LAND_SIZE);
-                        heights.mMinHeight = data->mMinHeight;
-                        heights.mMaxHeight = data->mMaxHeight;
-                        return heights;
-                    }
-                }();
-                mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shape, navigatorUpdateGuard);
-            }
-        }
 
-        if (const auto pathgrid = mWorld.getStore().get<ESM::Pathgrid>().search(*cell->getCell()))
-            mNavigator.addPathgrid(*cell->getCell(), *pathgrid);
+            int cellX = cell3->getGridX();
+            int cellY = cell3->getGridY();
+
+            if (cell3->isExterior())
+            {
+                osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
+                const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
+                const int verts = ESM::Land::LAND_SIZE;
+                const int worldsize = ESM::Land::REAL_SIZE;
+                if (data)
+                {
+                    mPhysics->addHeightField(
+                        data->mHeights, cellX, cellY, worldsize, verts, data->mMinHeight, data->mMaxHeight, land.get());
+                }
+                else
+                {
+                    static std::vector<float> defaultHeight;
+                    defaultHeight.resize(verts * verts, ESM::Land::DEFAULT_HEIGHT);
+                    mPhysics->addHeightField(defaultHeight.data(), cellX, cellY, worldsize, verts,
+                        ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
+                }
+                if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
+                {
+                    const osg::Vec2i cellPosition(cellX, cellY);
+                    const btVector3& origin = heightField->getCollisionObject()->getWorldTransform().getOrigin();
+                    const osg::Vec3f shift(origin.x(), origin.y(), origin.z());
+                    const HeightfieldShape shape = [&]() -> HeightfieldShape {
+                        if (data == nullptr)
+                        {
+                            return DetourNavigator::HeightfieldPlane{ static_cast<float>(ESM::Land::DEFAULT_HEIGHT) };
+                        }
+                        else
+                        {
+                            DetourNavigator::HeightfieldSurface heights;
+                            heights.mHeights = data->mHeights;
+                            heights.mSize = static_cast<std::size_t>(ESM::Land::LAND_SIZE);
+                            heights.mMinHeight = data->mMinHeight;
+                            heights.mMaxHeight = data->mMaxHeight;
+                            return heights;
+                        }
+                    }();
+                    mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shape, navigatorUpdateGuard);
+                }
+            }
+
+            if (const auto pathgrid = mWorld.getStore().get<ESM::Pathgrid>().search(*cell3))
+                mNavigator.addPathgrid(*cell3, *pathgrid);
+        }
 
         // register local scripts
         // do this before insertCell, to make sure we don't add scripts from levelled creature spawning twice
@@ -442,7 +449,7 @@ namespace MWWorld
         mRendering.addCell(cell);
 
         MWBase::Environment::get().getWindowManager()->addCell(cell);
-        bool waterEnabled = cell->getCell()->hasWater() || cell->isExterior();
+        bool waterEnabled = cell3 && (cell3->hasWater() || cell->isExterior());
         float waterLevel = cell->getWaterLevel();
         mRendering.setWaterEnabled(waterEnabled);
         if (waterEnabled)
@@ -450,7 +457,7 @@ namespace MWWorld
             mPhysics->enableWater(waterLevel);
             mRendering.setWaterHeight(waterLevel);
 
-            if (cell->getCell()->isExterior())
+            if (cell3->isExterior())
             {
                 if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
                     mNavigator.addWater(
@@ -465,8 +472,8 @@ namespace MWWorld
         else
             mPhysics->disableWater();
 
-        if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
-            mRendering.configureAmbient(cell->getCell());
+        if (cell3 && !cell->isExterior() && !(cell3->mData.mFlags & ESM::Cell::QuasiEx))
+            mRendering.configureAmbient(cell3);
 
         mPreloader->notifyLoaded(cell);
     }
@@ -879,8 +886,7 @@ namespace MWWorld
 
         loadingListener->setProgressRange(cell->count());
 
-        mNavigator.setWorldspace(
-            Misc::StringUtils::lowerCase(cell->getCell()->mCellId.mWorldspace), navigatorUpdateGuard.get());
+        mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell->getEditorName()), navigatorUpdateGuard.get());
         mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
 
         // Load cell.

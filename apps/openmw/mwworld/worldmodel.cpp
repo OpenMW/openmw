@@ -202,9 +202,17 @@ MWWorld::CellStore* MWWorld::WorldModel::getInterior(std::string_view name)
 
     if (result == mInteriors.end())
     {
-        const ESM::Cell* cell = mStore.get<ESM::Cell>().find(name);
+        const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().searchCellName(name);
 
-        result = mInteriors.emplace(name, CellStore(cell, mStore, mReaders)).first;
+        if (!cell4)
+        {
+            const ESM::Cell* cell = mStore.get<ESM::Cell>().find(name);
+            result = mInteriors.emplace(name, CellStore(cell, mStore, mReaders)).first;
+        }
+        else
+        {
+            result = mInteriors.emplace(name, CellStore(cell4, mStore, mReaders)).first;
+        }
     }
 
     if (result->second.getState() != CellStore::State_Loaded)

@@ -533,8 +533,6 @@ namespace MWWorld
         const MWDialogue::KeywordSearch<std::string, int>& getDialogIdKeywordSearch() const;
     };
 
-    ESM::FixedString<6> getRecNameString(ESM::RecNameInts recName);
-
 } // end namespace
 
 #endif

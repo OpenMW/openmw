@@ -55,20 +55,56 @@ namespace ESM4
 {
     class Reader;
     struct Cell;
+    struct Reference;
+    struct Static;
 }
 
 namespace MWWorld
 {
     class ESMStore;
     struct CellStoreImp;
-    typedef std::variant<const ESM4::Cell*, const ESM::Cell*> CellVariant;
+
+    struct CellVariant
+    {
+        std::variant<const ESM4::Cell*, const ESM::Cell*> mVariant;
+
+        CellVariant(const ESM4::Cell* cell)
+            : mVariant(cell)
+        {
+        }
+
+        CellVariant(const ESM::Cell* cell)
+            : mVariant(cell)
+        {
+        }
+
+        bool isEsm4() const { return getEsm4(); }
+
+        const ESM4::Cell* getEsm4() const
+        {
+            auto cell4 = std::get_if<const ESM4::Cell*>(&mVariant);
+            if (cell4)
+                return *cell4;
+            return nullptr;
+        }
+
+        const ESM::Cell* getEsm3() const
+        {
+            auto cell3 = std::get_if<const ESM::Cell*>(&mVariant);
+            if (cell3)
+                return *cell3;
+            return nullptr;
+        }
+    };
 
     using CellStoreTuple = std::tuple<CellRefList<ESM::Activator>, CellRefList<ESM::Potion>,
         CellRefList<ESM::Apparatus>, CellRefList<ESM::Armor>, CellRefList<ESM::Book>, CellRefList<ESM::Clothing>,
         CellRefList<ESM::Container>, CellRefList<ESM::Creature>, CellRefList<ESM::Door>, CellRefList<ESM::Ingredient>,
         CellRefList<ESM::CreatureLevList>, CellRefList<ESM::ItemLevList>, CellRefList<ESM::Light>,
         CellRefList<ESM::Lockpick>, CellRefList<ESM::Miscellaneous>, CellRefList<ESM::NPC>, CellRefList<ESM::Probe>,
-        CellRefList<ESM::Repair>, CellRefList<ESM::Static>, CellRefList<ESM::Weapon>, CellRefList<ESM::BodyPart>>;
+        CellRefList<ESM::Repair>, CellRefList<ESM::Static>, CellRefList<ESM::Weapon>, CellRefList<ESM::BodyPart>,
+
+        CellRefList<ESM4::Static>>;
 
     /// \brief Mutable state of a cell
     class CellStore
@@ -188,11 +224,14 @@ namespace MWWorld
         }
 
         /// @param readerList The readers to use for loading of the cell on-demand.
-        CellStore(const ESM::Cell* cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
+        CellStore(CellVariant cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
         CellStore(CellStore&&);
         ~CellStore();
 
         const ESM::Cell* getCell() const;
+        CellVariant getCellVariant() const;
+
+        std::string_view getEditorName() const;
 
         State getState() const;
 
@@ -339,6 +378,7 @@ namespace MWWorld
         // Should be phased out when we have const version of forEach
         inline const CellRefList<ESM::Door>& getReadOnlyDoors() const { return get<ESM::Door>(); }
         inline const CellRefList<ESM::Static>& getReadOnlyStatics() const { return get<ESM::Static>(); }
+        inline const CellRefList<ESM4::Static>& getReadOnlyEsm4Statics() const { return get<ESM4::Static>(); }
 
         bool isExterior() const;
 
@@ -374,20 +414,22 @@ namespace MWWorld
 
         Ptr getMovedActor(int actorId) const;
 
+        bool operator==(const CellStore& right) const;
+
     private:
         /// Run through references and store IDs
         void listRefs();
 
         void loadRefs();
 
+        void loadRef(const ESM4::Reference& ref, bool deleted);
         void loadRef(ESM::CellRef& ref, bool deleted, std::map<ESM::RefNum, ESM::RefId>& refNumToID);
         ///< Make case-adjustments to \a ref and insert it into the respective container.
         ///
         /// Invalid \a ref objects are silently dropped.
+        ///
     };
 
-    bool operator==(const CellStore& left, const CellStore& right);
-    bool operator!=(const CellStore& left, const CellStore& right);
 }
 
 #endif

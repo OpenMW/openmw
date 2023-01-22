@@ -24,6 +24,8 @@
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadstat.hpp>
 
+#include <components/esm4/loadstat.hpp>
+
 #include <components/misc/constants.hpp>
 #include <components/misc/convert.hpp>
 #include <components/misc/mathutil.hpp>
@@ -2804,6 +2806,24 @@ namespace MWWorld
                 }
             }
         }
+        for (const MWWorld::LiveCellRef<ESM4::Static>& stat4 : cellStore->getReadOnlyEsm4Statics().mList)
+        {
+            if (Misc::StringUtils::lowerCase(stat4.mBase->mEditorId) == "cocmarkerheading")
+            {
+                // found the COC position?
+                pos = stat4.mRef.getPosition();
+                pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+                return true;
+            }
+        }
+        // Fall back to the first static location.
+        const MWWorld::CellRefList<ESM4::Static>::List& statics4 = cellStore->getReadOnlyEsm4Statics().mList;
+        if (!statics4.empty())
+        {
+            pos = statics4.begin()->mRef.getPosition();
+            pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+            return true;
+        }
         // Fall back to the first static location.
         const MWWorld::CellRefList<ESM::Static>::List& statics = cellStore->getReadOnlyStatics().mList;
         if (!statics.empty())
@@ -3253,7 +3273,7 @@ namespace MWWorld
         std::set<std::string_view> checkedCells;
         std::set<std::string_view> currentCells;
         std::set<std::string_view> nextCells;
-        nextCells.insert(cell->getCell()->mName);
+        nextCells.insert(cell->getEditorName());
 
         while (!nextCells.empty())
         {

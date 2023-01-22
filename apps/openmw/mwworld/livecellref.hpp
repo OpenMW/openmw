@@ -87,7 +87,8 @@ namespace MWWorld
     {
         if (const LiveCellRef<T>* ref = dynamic_cast<const LiveCellRef<T>*>(value))
             return ref;
-        throw std::runtime_error(makeDynamicCastErrorMessage(value, T::getRecordType()));
+        throw std::runtime_error(
+            makeDynamicCastErrorMessage(value, ESM::getRecNameString(T::sRecordId).toStringView()));
     }
 
     template <class T>
@@ -95,7 +96,8 @@ namespace MWWorld
     {
         if (LiveCellRef<T>* ref = dynamic_cast<LiveCellRef<T>*>(value))
             return ref;
-        throw std::runtime_error(makeDynamicCastErrorMessage(value, T::getRecordType()));
+        throw std::runtime_error(
+            makeDynamicCastErrorMessage(value, ESM::getRecNameString(T::sRecordId).toStringView()));
     }
 
     /// A reference to one object (of any type) in a cell.
@@ -130,7 +132,13 @@ namespace MWWorld
         void save(ESM::ObjectState& state) const override;
         ///< Save LiveCellRef state into \a state.
 
-        std::string_view getTypeDescription() const override { return X::getRecordType(); }
+        std::string_view getTypeDescription() const override
+        {
+            if constexpr (ESM::isESM4Rec(X::sRecordId))
+                return ESM::getRecNameString(X::sRecordId).toStringView();
+            else
+                return X::getRecordType();
+        }
 
         static bool checkState(const ESM::ObjectState& state);
         ///< Check if state is valid and report errors.

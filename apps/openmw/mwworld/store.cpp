@@ -1170,20 +1170,6 @@ namespace MWWorld
         return mKeywordSearch;
     }
 
-    ESM::FixedString<6> getRecNameString(ESM::RecNameInts recName)
-    {
-        ESM::FixedString<6> name;
-        name.assign("");
-        ESM::NAME fourCCName(recName & ~ESM::sEsm4RecnameFlag);
-        for (int i = 0; i < 4; i++)
-            name.mData[i] = fourCCName.mData[i];
-        if (ESM::isESM4Rec(recName))
-        {
-            name.mData[4] = '4';
-        }
-        return name;
-    }
-
     // ESM4 Cell
     //=========================================================================
 
