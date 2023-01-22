@@ -192,6 +192,12 @@ int MWWorld::ContainerStore::count(const ESM::RefId& id) const
     return total;
 }
 
+void MWWorld::ContainerStore::clearRefNums()
+{
+    for (const auto& iter : *this)
+        iter.getCellRef().unsetRefNum();
+}
+
 MWWorld::ContainerStoreListener* MWWorld::ContainerStore::getContListener() const
 {
     return mListener;
@@ -202,7 +208,7 @@ void MWWorld::ContainerStore::setContListener(MWWorld::ContainerStoreListener* l
     mListener = listener;
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr& ptr, const Ptr& container, int count)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr& ptr, int count)
 {
     resolve();
     if (ptr.getRefData().getCount() <= count)
@@ -212,7 +218,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr& ptr,
     if (!script.empty())
         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, *it);
 
-    remove(ptr, ptr.getRefData().getCount() - count, container);
+    remove(ptr, ptr.getRefData().getCount() - count);
 
     return it;
 }
@@ -285,14 +291,14 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
                 && cls2.getItemHealth(ptr2) == cls2.getItemMaxHealth(ptr2)));
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const ESM::RefId& id, int count, const Ptr& actorPtr)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const ESM::RefId& id, int count)
 {
     MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
-    return add(ref.getPtr(), count, actorPtr);
+    return add(ref.getPtr(), count);
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
-    const Ptr& itemPtr, int count, const Ptr& actorPtr, bool /*allowAutoEquip*/, bool resolve)
+    const Ptr& itemPtr, int count, bool /*allowAutoEquip*/, bool resolve)
 {
     Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
@@ -326,7 +332,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
     const ESM::RefId& script = item.getClass().getScript(item);
     if (!script.empty())
     {
-        if (actorPtr == player)
+        if (mActor == player)
         {
             // Items in player's inventory have cell set to 0, so their scripts will never be removed
             item.mCell = nullptr;
@@ -335,7 +341,10 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
         {
             // Set mCell to the cell of the container/actor, so that the scripts are removed properly when
             // the cell of the container/actor goes inactive
-            item.mCell = actorPtr.getCell();
+            if (!mPtr.isEmpty())
+                item.mCell = mPtr.getCell();
+            else if (!mActor.isEmpty())
+                item.mCell = mActor.getCell();
         }
 
         item.mContainerStore = this;
@@ -344,12 +353,12 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
 
         // Set OnPCAdd special variable, if it is declared
         // Make sure to do this *after* we have added the script to LocalScripts
-        if (actorPtr == player)
+        if (mActor == player)
             item.getRefData().getLocals().setVarByInt(script, "onpcadd", 1);
     }
 
     // we should not fire event for InventoryStore yet - it has some custom logic
-    if (mListener && !actorPtr.getClass().hasInventoryStore(actorPtr))
+    if (mListener && !(!mActor.isEmpty() && mActor.getClass().hasInventoryStore(mActor)))
         mListener->itemAdded(item, count);
 
     return it;
@@ -504,8 +513,7 @@ void MWWorld::ContainerStore::updateRechargingItems()
     }
 }
 
-int MWWorld::ContainerStore::remove(
-    const ESM::RefId& itemId, int count, const Ptr& actor, bool equipReplacement, bool resolveFirst)
+int MWWorld::ContainerStore::remove(const ESM::RefId& itemId, int count, bool equipReplacement, bool resolveFirst)
 {
     if (resolveFirst)
         resolve();
@@ -513,7 +521,7 @@ int MWWorld::ContainerStore::remove(
 
     for (ContainerStoreIterator iter(begin()); iter != end() && toRemove > 0; ++iter)
         if (iter->getCellRef().getRefId() == itemId)
-            toRemove -= remove(*iter, toRemove, actor, equipReplacement, resolveFirst);
+            toRemove -= remove(*iter, toRemove, equipReplacement, resolveFirst);
 
     flagAsModified();
 
@@ -532,8 +540,7 @@ bool MWWorld::ContainerStore::hasVisibleItems() const
     return false;
 }
 
-int MWWorld::ContainerStore::remove(
-    const Ptr& item, int count, const Ptr& actor, bool equipReplacement, bool resolveFirst)
+int MWWorld::ContainerStore::remove(const Ptr& item, int count, bool equipReplacement, bool resolveFirst)
 {
     assert(this == item.getContainerStore());
     if (resolveFirst)
@@ -556,7 +563,7 @@ int MWWorld::ContainerStore::remove(
     flagAsModified();
 
     // we should not fire event for InventoryStore yet - it has some custom logic
-    if (mListener && !actor.getClass().hasInventoryStore(actor))
+    if (mListener && !(!mActor.isEmpty() && mActor.getClass().hasInventoryStore(mActor)))
         mListener->itemRemoved(item, count - toRemove);
 
     // number of removed items

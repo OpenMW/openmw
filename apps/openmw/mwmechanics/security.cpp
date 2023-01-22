@@ -72,7 +72,7 @@ namespace MWMechanics
 
         lockpick.getCellRef().setCharge(--uses);
         if (!uses)
-            lockpick.getContainerStore()->remove(lockpick, 1, mActor);
+            lockpick.getContainerStore()->remove(lockpick, 1);
     }
 
     void Security::probeTrap(const MWWorld::Ptr& trap, const MWWorld::Ptr& probe, std::string_view& resultMessage,
@@ -124,7 +124,7 @@ namespace MWMechanics
 
         probe.getCellRef().setCharge(--uses);
         if (!uses)
-            probe.getContainerStore()->remove(probe, 1, mActor);
+            probe.getContainerStore()->remove(probe, 1);
     }
 
 }

@@ -102,11 +102,20 @@ namespace MWWorld
     protected:
         ContainerStoreListener* mListener;
 
+        // Used in clone() to unset refnums of copies.
+        // (RefNum should be unique, copy can not have the same RefNum).
+        void clearRefNums();
+
         // (item, max charge)
         typedef std::vector<std::pair<ContainerStoreIterator, float>> TRechargingItems;
         TRechargingItems mRechargingItems;
 
         bool mRechargingItemsUpToDate;
+
+        // Non-empty only if is InventoryStore.
+        // The actor whose inventory it is.
+        // TODO: Consider merging mActor and mPtr.
+        MWWorld::Ptr mActor;
 
     private:
         MWWorld::CellRefList<ESM::Potion> potions;
@@ -128,7 +137,7 @@ namespace MWWorld
         bool mModified;
         bool mResolved;
         unsigned int mSeed;
-        MWWorld::Ptr mPtr;
+        MWWorld::Ptr mPtr; // Container that contains this store. Set in MWClass::Container::getContainerStore
         std::weak_ptr<ResolutionListener> mResolutionListener;
 
         ContainerStoreIterator addImp(const Ptr& ptr, int count, bool markModified = true);
@@ -160,7 +169,12 @@ namespace MWWorld
 
         virtual ~ContainerStore();
 
-        virtual std::unique_ptr<ContainerStore> clone() { return std::make_unique<ContainerStore>(*this); }
+        virtual std::unique_ptr<ContainerStore> clone()
+        {
+            auto res = std::make_unique<ContainerStore>(*this);
+            res->clearRefNums();
+            return res;
+        }
 
         ConstContainerStoreIterator cbegin(int mask = Type_All) const;
         ConstContainerStoreIterator cend() const;
@@ -173,7 +187,7 @@ namespace MWWorld
         bool hasVisibleItems() const;
 
         virtual ContainerStoreIterator add(
-            const Ptr& itemPtr, int count, const Ptr& actorPtr, bool allowAutoEquip = true, bool resolve = true);
+            const Ptr& itemPtr, int count, bool allowAutoEquip = true, bool resolve = true);
         ///< Add the item pointed to by \a ptr to this container. (Stacks automatically if needed)
         ///
         /// \note The item pointed to is not required to exist beyond this function call.
@@ -184,17 +198,15 @@ namespace MWWorld
         /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to
         /// the newly inserted item.
 
-        ContainerStoreIterator add(const ESM::RefId& id, int count, const Ptr& actorPtr);
+        ContainerStoreIterator add(const ESM::RefId& id, int count);
         ///< Utility to construct a ManualRef and call add(ptr, count, actorPtr, true)
 
-        int remove(
-            const ESM::RefId& itemId, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
+        int remove(const ESM::RefId& itemId, int count, bool equipReplacement = 0, bool resolve = true);
         ///< Remove \a count item(s) designated by \a itemId from this container.
         ///
         /// @return the number of items actually removed
 
-        virtual int remove(
-            const Ptr& item, int count, const Ptr& actor, bool equipReplacement = 0, bool resolve = true);
+        virtual int remove(const Ptr& item, int count, bool equipReplacement = 0, bool resolve = true);
         ///< Remove \a count item(s) designated by \a item from this inventory.
         ///
         /// @return the number of items actually removed
@@ -202,7 +214,7 @@ namespace MWWorld
         void rechargeItems(float duration);
         ///< Restore charge on enchanted items. Note this should only be done for the player.
 
-        ContainerStoreIterator unstack(const Ptr& ptr, const Ptr& container, int count = 1);
+        ContainerStoreIterator unstack(const Ptr& ptr, int count = 1);
         ///< Unstack an item in this container. The item's count will be set to count, then a new stack will be added
         ///< with (origCount-count).
         ///

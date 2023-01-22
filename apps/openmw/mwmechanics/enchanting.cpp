@@ -70,12 +70,12 @@ namespace MWMechanics
         enchantment.mData.mType = mCastStyle;
         enchantment.mData.mCost = getBaseCastCost();
 
-        store.remove(mSoulGemPtr, 1, player);
+        store.remove(mSoulGemPtr, 1);
 
         // Exception for Azura Star, new one will be added after enchanting
         auto azurasStarId = ESM::RefId::stringRefId("Misc_SoulGem_Azura");
         if (mSoulGemPtr.get<ESM::Miscellaneous>()->mBase->mId == azurasStarId)
-            store.add(azurasStarId, 1, player);
+            store.add(azurasStarId, 1);
 
         if (mSelfEnchanting)
         {
@@ -105,8 +105,8 @@ namespace MWMechanics
             = mOldItemPtr.getClass().applyEnchantment(mOldItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
 
         // Add the new item to player inventory and remove the old one
-        store.remove(mOldItemPtr, count, player);
-        store.add(newItemId, count, player);
+        store.remove(mOldItemPtr, count);
+        store.add(newItemId, count);
 
         if (!mSelfEnchanting)
             payForEnchantment();
@@ -399,7 +399,7 @@ namespace MWMechanics
         const MWWorld::Ptr& player = getPlayer();
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
-        store.remove(MWWorld::ContainerStore::sGoldId, getEnchantPrice(), player);
+        store.remove(MWWorld::ContainerStore::sGoldId, getEnchantPrice());
 
         // add gold to NPC trading gold pool
         CreatureStats& enchanterStats = mEnchanter.getClass().getCreatureStats(mEnchanter);

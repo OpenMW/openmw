@@ -259,11 +259,11 @@ namespace MWGui
 
         if (amount > 0)
         {
-            store.add(MWWorld::ContainerStore::sGoldId, amount, actor);
+            store.add(MWWorld::ContainerStore::sGoldId, amount);
         }
         else
         {
-            store.remove(MWWorld::ContainerStore::sGoldId, -amount, actor);
+            store.remove(MWWorld::ContainerStore::sGoldId, -amount);
         }
     }
 

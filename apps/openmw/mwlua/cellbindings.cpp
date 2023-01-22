@@ -75,6 +75,8 @@ namespace MWLua
                                   const CellT& cell, sol::optional<sol::table> type) {
                 ObjectIdList res = std::make_shared<std::vector<ObjectId>>();
                 auto visitor = [&](const MWWorld::Ptr& ptr) {
+                    if (ptr.getRefData().isDeleted())
+                        return true;
                     MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
                     if (getLiveCellRefType(ptr.mRef) == ptr.getType())
                         res->push_back(getId(ptr));

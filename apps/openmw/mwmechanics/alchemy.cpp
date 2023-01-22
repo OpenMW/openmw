@@ -275,7 +275,7 @@ void MWMechanics::Alchemy::removeIngredients()
     for (TIngredientsContainer::iterator iter(mIngredients.begin()); iter != mIngredients.end(); ++iter)
         if (!iter->isEmpty())
         {
-            iter->getContainerStore()->remove(*iter, 1, mAlchemist);
+            iter->getContainerStore()->remove(*iter, 1);
 
             if (iter->getRefData().getCount() < 1)
                 *iter = MWWorld::Ptr();
@@ -317,7 +317,7 @@ void MWMechanics::Alchemy::addPotion(const std::string& name)
     if (!record)
         record = MWBase::Environment::get().getWorld()->createRecord(newRecord);
 
-    mAlchemist.getClass().getContainerStore(mAlchemist).add(record->mId, 1, mAlchemist);
+    mAlchemist.getClass().getContainerStore(mAlchemist).add(record->mId, 1);
 }
 
 void MWMechanics::Alchemy::increaseSkill()

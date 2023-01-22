@@ -15,8 +15,10 @@
 #include "actiontake.hpp"
 #include "containerstore.hpp"
 #include "failedaction.hpp"
+#include "inventorystore.hpp"
 #include "nullaction.hpp"
 #include "ptr.hpp"
+#include "worldmodel.hpp"
 
 #include "../mwgui/tooltips.hpp"
 
@@ -372,6 +374,9 @@ namespace MWWorld
         Ptr newPtr = copyToCellImpl(ptr, cell);
         newPtr.getCellRef().unsetRefNum(); // This RefNum is only valid within the original cell of the reference
         newPtr.getRefData().setCount(count);
+        MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
+        if (hasInventoryStore(newPtr))
+            getInventoryStore(newPtr).setActor(newPtr);
         return newPtr;
     }
 

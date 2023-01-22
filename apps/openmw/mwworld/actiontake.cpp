@@ -33,7 +33,7 @@ namespace MWWorld
         MWBase::Environment::get().getMechanicsManager()->itemTaken(
             actor, getTarget(), MWWorld::Ptr(), getTarget().getRefData().getCount());
         MWWorld::Ptr newitem
-            = *actor.getClass().getContainerStore(actor).add(getTarget(), getTarget().getRefData().getCount(), actor);
+            = *actor.getClass().getContainerStore(actor).add(getTarget(), getTarget().getRefData().getCount());
         MWBase::Environment::get().getWorld()->deleteObject(getTarget());
         setTarget(newitem);
     }

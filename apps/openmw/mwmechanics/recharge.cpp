@@ -83,7 +83,7 @@ namespace MWMechanics
         }
 
         player.getClass().skillUsageSucceeded(player, ESM::Skill::Enchant, 0);
-        gem.getContainerStore()->remove(gem, 1, player);
+        gem.getContainerStore()->remove(gem, 1);
 
         if (gem.getRefData().getCount() == 0)
         {
@@ -100,7 +100,7 @@ namespace MWMechanics
             const ESM::RefId soulGemAzura = ESM::RefId::stringRefId("Misc_SoulGem_Azura");
             // special case: readd Azura's Star
             if (gem.get<ESM::Miscellaneous>()->mBase->mId == soulGemAzura)
-                player.getClass().getContainerStore(player).add(soulGemAzura, 1, player);
+                player.getClass().getContainerStore(player).add(soulGemAzura, 1);
         }
 
         return true;

@@ -17,6 +17,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/nullaction.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwgui/tooltips.hpp"
 #include "../mwgui/ustring.hpp"
@@ -208,6 +209,7 @@ namespace MWClass
             newPtr.getRefData().setCount(count);
         }
         newPtr.getCellRef().unsetRefNum();
+        MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
 
         return newPtr;
     }

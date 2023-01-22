@@ -23,7 +23,7 @@ namespace MWMechanics
         MWWorld::LiveCellRef<ESM::Repair>* ref = mTool.get<ESM::Repair>();
 
         // unstack tool if required
-        player.getClass().getContainerStore(player).unstack(mTool, player);
+        player.getClass().getContainerStore(player).unstack(mTool);
 
         // reduce number of uses left
         int uses = mTool.getClass().getItemHealth(mTool);
@@ -85,7 +85,7 @@ namespace MWMechanics
         {
             MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
-            store.remove(mTool, 1, player);
+            store.remove(mTool, 1);
 
             std::string message = MWBase::Environment::get()
                                       .getWorld()

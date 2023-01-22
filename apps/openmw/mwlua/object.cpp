@@ -20,6 +20,8 @@ namespace MWLua
     std::string ptrToString(const MWWorld::Ptr& ptr)
     {
         std::string res = "object";
+        if (ptr.getRefData().isDeleted())
+            res = "deleted object";
         res.append(idToString(getId(ptr)));
         res.append(" (");
         res.append(getLuaObjectTypeName(ptr));

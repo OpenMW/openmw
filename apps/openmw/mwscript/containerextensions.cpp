@@ -35,23 +35,21 @@
 
 namespace
 {
-    void addToStore(
-        const MWWorld::Ptr& itemPtr, int count, MWWorld::Ptr& ptr, MWWorld::ContainerStore& store, bool resolve = true)
+    void addToStore(const MWWorld::Ptr& itemPtr, int count, MWWorld::ContainerStore& store, bool resolve = true)
     {
         if (itemPtr.getClass().getScript(itemPtr).empty())
         {
-            store.add(itemPtr, count, ptr, true, resolve);
+            store.add(itemPtr, count, true, resolve);
         }
         else
         {
             // Adding just one item per time to make sure there isn't a stack of scripted items
             for (int i = 0; i < count; i++)
-                store.add(itemPtr, 1, ptr, true, resolve);
+                store.add(itemPtr, 1, true, resolve);
         }
     }
 
-    void addRandomToStore(const MWWorld::Ptr& itemPtr, int count, MWWorld::Ptr& owner, MWWorld::ContainerStore& store,
-        bool topLevel = true)
+    void addRandomToStore(const MWWorld::Ptr& itemPtr, int count, MWWorld::ContainerStore& store, bool topLevel = true)
     {
         if (itemPtr.getType() == ESM::ItemLevList::sRecordId)
         {
@@ -60,7 +58,7 @@ namespace
             if (topLevel && count > 1 && levItemList->mFlags & ESM::ItemLevList::Each)
             {
                 for (int i = 0; i < count; i++)
-                    addRandomToStore(itemPtr, 1, owner, store, true);
+                    addRandomToStore(itemPtr, 1, store, true);
             }
             else
             {
@@ -70,11 +68,11 @@ namespace
                 if (itemId.empty())
                     return;
                 MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), itemId, 1);
-                addRandomToStore(manualRef.getPtr(), count, owner, store, false);
+                addRandomToStore(manualRef.getPtr(), count, store, false);
             }
         }
         else
-            addToStore(itemPtr, count, owner, store);
+            addToStore(itemPtr, count, store);
     }
 }
 
@@ -141,20 +139,20 @@ namespace MWScript
                             {
                                 if (store.isResolved())
                                 {
-                                    addRandomToStore(itemPtr, count, ptr, store);
+                                    addRandomToStore(itemPtr, count, store);
                                 }
                             }
                             else
-                                addToStore(itemPtr, count, ptr, store, store.isResolved());
+                                addToStore(itemPtr, count, store, store.isResolved());
                         }
                     }
                     return;
                 }
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 if (isLevelledList)
-                    addRandomToStore(itemPtr, count, ptr, store);
+                    addRandomToStore(itemPtr, count, store);
                 else
-                    addToStore(itemPtr, count, ptr, store);
+                    addToStore(itemPtr, count, store);
 
                 // Spawn a messagebox (only for items added to player's inventory and if player is talking to someone)
                 if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
@@ -246,7 +244,7 @@ namespace MWScript
                             auto& store = container.getClass().getContainerStore(container);
                             // Note that unlike AddItem, RemoveItem only removes from unresolved containers
                             if (!store.isResolved())
-                                store.remove(item, count, ptr, false, false);
+                                store.remove(item, count, false, false);
                         }
                     }
                     return;
@@ -263,7 +261,7 @@ namespace MWScript
                     }
                 }
 
-                int numRemoved = store.remove(item, count, ptr);
+                int numRemoved = store.remove(item, count);
 
                 // Spawn a messagebox (only for items removed from player's inventory)
                 if ((numRemoved > 0) && (ptr == MWMechanics::getPlayer()))
@@ -318,7 +316,7 @@ namespace MWScript
                 if (found == invStore.end())
                 {
                     MWWorld::ManualRef ref(store, item, 1);
-                    found = ptr.getClass().getContainerStore(ptr).add(ref.getPtr(), 1, ptr, false);
+                    found = ptr.getClass().getContainerStore(ptr).add(ref.getPtr(), 1, false);
                     Log(Debug::Warning) << "Implicitly adding one " << item << " to the inventory store of "
                                         << ptr.getCellRef().getRefId()
                                         << " to fulfill the requirements of Equip instruction";

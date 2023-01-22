@@ -120,7 +120,7 @@ namespace MWRender
 
         if (mObjects.emplace(ptr.mRef, anim).second)
         {
-            ptr.getClass().getInventoryStore(ptr).setInvListener(anim.get(), ptr);
+            ptr.getClass().getInventoryStore(ptr).setInvListener(anim.get());
             ptr.getClass().getInventoryStore(ptr).setContListener(anim.get());
         }
     }
@@ -140,7 +140,7 @@ namespace MWRender
             if (ptr.getClass().isActor())
             {
                 if (ptr.getClass().hasInventoryStore(ptr))
-                    ptr.getClass().getInventoryStore(ptr).setInvListener(nullptr, ptr);
+                    ptr.getClass().getInventoryStore(ptr).setInvListener(nullptr);
 
                 ptr.getClass().getContainerStore(ptr).setContListener(nullptr);
             }
@@ -163,7 +163,7 @@ namespace MWRender
                 if (ptr.getClass().isActor() && ptr.getRefData().getCustomData())
                 {
                     if (ptr.getClass().hasInventoryStore(ptr))
-                        ptr.getClass().getInventoryStore(ptr).setInvListener(nullptr, ptr);
+                        ptr.getClass().getInventoryStore(ptr).setInvListener(nullptr);
                     ptr.getClass().getContainerStore(ptr).setContListener(nullptr);
                 }
 

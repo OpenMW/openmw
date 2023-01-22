@@ -23,6 +23,7 @@ namespace MWLua
         LocalScripts(LuaUtil::LuaState* lua, const LObject& obj);
 
         MWBase::LuaManager::ActorControls* getActorControls() { return &mData.mControls; }
+        const MWWorld::Ptr& getPtr() const { return mData.ptr(); }
 
         struct SelfObject : public LObject
         {

@@ -211,7 +211,7 @@ namespace MWGui
                 if (invStore.isEquipped(item.mBase) == false)
                     continue;
 
-                invStore.unequipItem(item.mBase, mPtr);
+                invStore.unequipItem(item.mBase);
             }
         }
 

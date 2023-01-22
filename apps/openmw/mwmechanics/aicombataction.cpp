@@ -106,8 +106,7 @@ namespace MWMechanics
         if (actor.getClass().hasInventoryStore(actor))
         {
             if (mWeapon.isEmpty())
-                actor.getClass().getInventoryStore(actor).unequipSlot(
-                    MWWorld::InventoryStore::Slot_CarriedRight, actor);
+                actor.getClass().getInventoryStore(actor).unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             else
             {
                 MWWorld::ActionEquip equip(mWeapon);

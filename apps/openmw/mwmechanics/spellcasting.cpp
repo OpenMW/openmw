@@ -360,7 +360,7 @@ namespace MWMechanics
         else if (type == ESM::Enchantment::CastOnce)
         {
             if (!godmode)
-                item.getContainerStore()->remove(item, 1, mCaster);
+                item.getContainerStore()->remove(item, 1);
         }
         else if (type == ESM::Enchantment::WhenStrikes)
         {

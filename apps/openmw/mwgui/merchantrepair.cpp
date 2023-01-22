@@ -136,7 +136,7 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Repair"));
 
-        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price, player);
+        player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price);
 
         // add gold to NPC trading gold pool
         MWMechanics::CreatureStats& actorStats = mActor.getClass().getCreatureStats(mActor);

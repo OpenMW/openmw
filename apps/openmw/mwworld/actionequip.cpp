@@ -75,7 +75,7 @@ namespace MWWorld
             if (invStore.getSlot(*slot) == invStore.end())
             {
                 // slot is not occupied
-                invStore.equip(*slot, it, actor);
+                invStore.equip(*slot, it);
                 break;
             }
         }
@@ -88,14 +88,14 @@ namespace MWWorld
             bool reEquip = false;
             for (slot = slots_.first.begin(); slot != slots_.first.end(); ++slot)
             {
-                invStore.unequipSlot(*slot, actor, false);
+                invStore.unequipSlot(*slot, false);
                 if (slot + 1 != slots_.first.end())
                 {
-                    invStore.equip(*slot, invStore.getSlot(*(slot + 1)), actor);
+                    invStore.equip(*slot, invStore.getSlot(*(slot + 1)));
                 }
                 else
                 {
-                    invStore.equip(*slot, it, actor);
+                    invStore.equip(*slot, it);
                 }
 
                 // Fix for issue of selected enchated item getting remmoved on cycle

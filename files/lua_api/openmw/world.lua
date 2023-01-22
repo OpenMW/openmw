@@ -59,5 +59,19 @@
 -- @function [parent=#world] isWorldPaused
 -- @return #boolean
 
+---
+-- Create a new instance of the given record.
+-- After creation the object is in the disabled state. Use :teleport to place to the world or :moveInto to put it into a container or an inventory.
+-- @function [parent=#world] createObject
+-- @param #string recordId Record ID in lowercase
+-- @param #number count (optional, 1 by default) The number of objects in stack
+-- @return openmw.core#GameObject
+-- @usage  -- put 100 gold on the ground at the position of `actor`
+-- money = world.createObject('gold_001', 100)
+-- money:teleport(actor.cell.name, actor.position)
+-- @usage -- put 50 gold into the actor's inventory
+-- money = world.createObject('gold_001', 50)
+-- money:moveInto(types.Actor.inventory(actor))
+
 return nil
 

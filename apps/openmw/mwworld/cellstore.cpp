@@ -52,6 +52,7 @@
 #include "class.hpp"
 #include "containerstore.hpp"
 #include "esmstore.hpp"
+#include "inventorystore.hpp"
 #include "ptr.hpp"
 #include "worldmodel.hpp"
 
@@ -264,10 +265,9 @@ namespace
                     if (!iter->mData.isEnabled())
                     {
                         iter->mData.enable();
-                        MWBase::Environment::get().getWorld()->disable(MWWorld::Ptr(&*iter, cellstore));
+                        MWBase::Environment::get().getWorld()->disable(ptr);
                     }
-                    else
-                        MWBase::Environment::get().getWorldModel()->registerPtr(MWWorld::Ptr(&*iter, cellstore));
+                    MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
                     return;
                 }
 
@@ -444,7 +444,11 @@ namespace MWWorld
         mMovedToAnotherCell.insert(std::make_pair(object.getBase(), cellToMoveTo));
 
         updateMergedRefs();
-        return MWWorld::Ptr(object.getBase(), cellToMoveTo);
+        MWWorld::Ptr ptr(object.getBase(), cellToMoveTo);
+        const Class& cls = ptr.getClass();
+        if (cls.hasInventoryStore(ptr))
+            cls.getInventoryStore(ptr).setActor(ptr);
+        return ptr;
     }
 
     struct MergeVisitor

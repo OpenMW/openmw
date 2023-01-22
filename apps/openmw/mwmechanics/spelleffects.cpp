@@ -151,9 +151,9 @@ namespace
             {
                 // Will unequip the broken item and try to find a replacement
                 if (ptr != MWMechanics::getPlayer())
-                    inv.autoEquip(ptr);
+                    inv.autoEquip();
                 else
-                    inv.unequipItem(*item, ptr);
+                    inv.unequipItem(*item);
             }
 
             return true;
@@ -173,7 +173,7 @@ namespace
     void addBoundItem(const ESM::RefId& itemId, const MWWorld::Ptr& actor)
     {
         MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
-        MWWorld::Ptr boundPtr = *store.MWWorld::ContainerStore::add(itemId, 1, actor);
+        MWWorld::Ptr boundPtr = *store.MWWorld::ContainerStore::add(itemId, 1);
 
         int slot = getBoundItemSlot(boundPtr);
         auto prevItem = slot >= 0 ? store.getSlot(slot) : store.end();
@@ -217,9 +217,9 @@ namespace
         bool wasEquipped = currentItem != store.end() && currentItem->getCellRef().getRefId() == itemId;
 
         if (wasEquipped)
-            store.remove(*currentItem, 1, actor);
+            store.remove(*currentItem, 1);
         else
-            store.remove(itemId, 1, actor);
+            store.remove(itemId, 1);
 
         if (actor != MWMechanics::getPlayer())
         {
@@ -240,7 +240,7 @@ namespace
             if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
                 return;
 
-            actor.getClass().getInventoryStore(actor).autoEquip(actor);
+            actor.getClass().getInventoryStore(actor).autoEquip();
 
             return;
         }
@@ -517,7 +517,7 @@ namespace MWMechanics
                 if (target.getClass().hasInventoryStore(target))
                 {
                     auto& store = target.getClass().getInventoryStore(target);
-                    store.unequipAll(target);
+                    store.unequipAll();
                 }
                 else
                     invalid = true;
@@ -1072,7 +1072,7 @@ namespace MWMechanics
                 break;
             case ESM::MagicEffect::ExtraSpell:
                 if (magnitudes.get(effect.mEffectId).getMagnitude() <= 0.f)
-                    target.getClass().getInventoryStore(target).autoEquip(target);
+                    target.getClass().getInventoryStore(target).autoEquip();
                 break;
             case ESM::MagicEffect::TurnUndead:
             {

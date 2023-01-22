@@ -788,8 +788,6 @@ namespace MWWorld
 
     void World::enable(const Ptr& reference)
     {
-        MWBase::Environment::get().getWorldModel()->registerPtr(reference);
-
         if (!reference.isInCell())
             return;
 
@@ -840,7 +838,6 @@ namespace MWWorld
         if (reference == getPlayerPtr())
             throw std::runtime_error("can not disable player object");
 
-        MWBase::Environment::get().getWorldModel()->deregisterPtr(reference);
         reference.getRefData().disable();
 
         if (reference.getCellRef().getRefNum().hasContentFile())
@@ -2426,7 +2423,7 @@ namespace MWWorld
 
         mRendering->renderPlayer(player);
         MWRender::NpcAnimation* anim = static_cast<MWRender::NpcAnimation*>(mRendering->getAnimation(player));
-        player.getClass().getInventoryStore(player).setInvListener(anim, player);
+        player.getClass().getInventoryStore(player).setInvListener(anim);
         player.getClass().getInventoryStore(player).setContListener(anim);
 
         scaleObject(player, player.getCellRef().getScale(), true); // apply race height

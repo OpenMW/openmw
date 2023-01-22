@@ -140,7 +140,7 @@ namespace MWMechanics
             shieldhealth -= std::min(shieldhealth, int(damage));
             shield->getCellRef().setCharge(shieldhealth);
             if (shieldhealth == 0)
-                inv.unequipItem(*shield, blocker);
+                inv.unequipItem(*shield);
             // Reduce blocker fatigue
             static const float fFatigueBlockBase = gmst.find("fFatigueBlockBase")->mValue.getFloat();
             static const float fFatigueBlockMult = gmst.find("fFatigueBlockMult")->mValue.getFloat();
@@ -285,7 +285,7 @@ namespace MWMechanics
                 static const float fProjectileThrownStoreChance
                     = gmst.find("fProjectileThrownStoreChance")->mValue.getFloat();
                 if (Misc::Rng::rollProbability(world->getPrng()) < fProjectileThrownStoreChance / 100.f)
-                    victim.getClass().getContainerStore(victim).add(projectile, 1, victim);
+                    victim.getClass().getContainerStore(victim).add(projectile, 1);
             }
 
             victim.getClass().onHit(victim, damage, true, projectile, attacker, hitPosition, true);
@@ -422,7 +422,7 @@ namespace MWMechanics
 
             // Weapon broken? unequip it
             if (weaphealth == 0)
-                weapon = *attacker.getClass().getInventoryStore(attacker).unequipItem(weapon, attacker);
+                weapon = *attacker.getClass().getInventoryStore(attacker).unequipItem(weapon);
         }
     }
 

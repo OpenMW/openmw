@@ -140,7 +140,7 @@ namespace MWRender
 
             showWeapon(false);
 
-            inv.remove(*weapon, 1, actor);
+            inv.remove(*weapon, 1);
         }
         else
         {
@@ -167,7 +167,7 @@ namespace MWRender
             MWBase::Environment::get().getWorld()->launchProjectile(
                 actor, ammoPtr, launchPos, orient, weaponPtr, speed, attackStrength);
 
-            inv.remove(ammoPtr, 1, actor);
+            inv.remove(ammoPtr, 1);
             mAmmunition.reset();
         }
     }

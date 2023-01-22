@@ -39,7 +39,7 @@ namespace MWLua
                 std::fill(usedSlots.begin(), usedSlots.end(), false);
 
                 static constexpr int anySlot = -1;
-                auto tryEquipToSlot = [&actor, &store, &usedSlots](int slot, const Item& item) -> bool {
+                auto tryEquipToSlot = [&store, &usedSlots](int slot, const Item& item) -> bool {
                     auto old_it = slot != anySlot ? store.getSlot(slot) : store.end();
                     MWWorld::Ptr itemPtr;
                     if (std::holds_alternative<ObjectId>(item))
@@ -88,7 +88,7 @@ namespace MWLua
                     if (it == store.end()) // should never happen
                         throw std::logic_error("Item not found in container");
 
-                    store.equip(slot, it, actor);
+                    store.equip(slot, it);
                     return requestedSlotIsAllowed; // return true if equipped to requested slot and false if slot was
                                                    // changed
                 };
@@ -100,7 +100,7 @@ namespace MWLua
                     if (new_it == mEquipment.end())
                     {
                         if (old_it != store.end())
-                            store.unequipSlot(slot, actor);
+                            store.unequipSlot(slot);
                         continue;
                     }
                     if (tryEquipToSlot(slot, new_it->second))

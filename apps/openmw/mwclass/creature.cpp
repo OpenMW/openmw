@@ -170,7 +170,7 @@ namespace MWClass
             getContainerStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId(), prng);
 
             if (hasInventory)
-                getInventoryStore(ptr).autoEquip(ptr);
+                getInventoryStore(ptr).autoEquip();
         }
     }
 
@@ -507,14 +507,16 @@ namespace MWClass
     MWWorld::ContainerStore& Creature::getContainerStore(const MWWorld::Ptr& ptr) const
     {
         ensureCustomData(ptr);
-
-        return *ptr.getRefData().getCustomData()->asCreatureCustomData().mContainerStore;
+        auto& store = *ptr.getRefData().getCustomData()->asCreatureCustomData().mContainerStore;
+        if (hasInventoryStore(ptr))
+            static_cast<MWWorld::InventoryStore&>(store).setActor(ptr);
+        return store;
     }
 
     MWWorld::InventoryStore& Creature::getInventoryStore(const MWWorld::Ptr& ptr) const
     {
         if (hasInventoryStore(ptr))
-            return dynamic_cast<MWWorld::InventoryStore&>(getContainerStore(ptr));
+            return static_cast<MWWorld::InventoryStore&>(getContainerStore(ptr));
         else
             throw std::runtime_error("this creature has no inventory store");
     }

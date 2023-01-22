@@ -42,8 +42,8 @@ namespace MWWorld
             // not work for a last item in the container - empty harvested containers are considered as "allowed to
             // use".
             MWBase::Environment::get().getMechanicsManager()->itemTaken(actor, *it, target, itemCount);
-            actorStore.add(*it, itemCount, actor);
-            store.remove(*it, itemCount, getTarget());
+            actorStore.add(*it, itemCount);
+            store.remove(*it, itemCount);
             std::string name{ it->getClass().getName(*it) };
             takenMap[name] += itemCount;
         }

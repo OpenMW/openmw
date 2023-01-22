@@ -7,7 +7,10 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/manualref.hpp"
+#include "../mwworld/scene.hpp"
 #include "../mwworld/store.hpp"
 
 #include "eventqueue.hpp"
@@ -48,7 +51,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 32;
+        api["API_REVISION"] = 33;
         api["quit"] = [lua]() {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
             MWBase::Environment::get().getStateManager()->requestQuit();
@@ -83,7 +86,17 @@ namespace MWLua
         api["getExteriorCell"]
             = [](int x, int y) { return GCell{ MWBase::Environment::get().getWorldModel()->getExterior(x, y) }; };
         api["activeActors"] = GObjectList{ worldView->getActorsInScene() };
-        // TODO: add world.placeNewObject(recordId, cell, pos, [rot])
+        api["createObject"] = [](std::string_view recordId, sol::optional<int> count) -> GObject {
+            // Doesn't matter which cell to use because the new object will be in disabled state.
+            MWWorld::CellStore* cell = MWBase::Environment::get().getWorldScene()->getCurrentCell();
+
+            MWWorld::ManualRef mref(
+                MWBase::Environment::get().getWorld()->getStore(), ESM::RefId::stringRefId(recordId));
+            const MWWorld::Ptr& ptr = mref.getPtr();
+            ptr.getRefData().disable();
+            MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *cell, count.value_or(1));
+            return GObject(getId(newPtr));
+        };
         return LuaUtil::makeReadOnly(api);
     }
 
