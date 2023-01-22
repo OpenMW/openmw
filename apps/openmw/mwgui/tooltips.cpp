@@ -8,6 +8,7 @@
 #include <MyGUI_RenderManager.h>
 
 #include <components/esm/records.hpp>
+#include <components/l10n/manager.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 #include <components/widgets/box.hpp>
@@ -731,12 +732,14 @@ namespace MWGui
 
     std::string ToolTips::getDurationString(float duration, const std::string& prefix)
     {
+        auto l10n = MWBase::Environment::get().getL10nManager()->getContext("Interface");
+
         std::string ret;
         ret = prefix + ": ";
 
         if (duration < 1.f)
         {
-            ret += "0 s";
+            ret += l10n->formatMessage("DurationSecond", { "seconds" }, { 0 });
             return ret;
         }
 
@@ -757,29 +760,29 @@ namespace MWGui
         if (years)
         {
             units++;
-            ret += toString(years) + " #{Interface:DurationYear} ";
+            ret += l10n->formatMessage("DurationYear", { "years" }, { years });
         }
         if (months)
         {
             units++;
-            ret += toString(months) + " #{Interface:DurationMonth} ";
+            ret += l10n->formatMessage("DurationMonth", { "months" }, { months });
         }
         if (units < 2 && days)
         {
             units++;
-            ret += toString(days) + " #{Interface:DurationDay} ";
+            ret += l10n->formatMessage("DurationDay", { "days" }, { days });
         }
         if (units < 2 && hours)
         {
             units++;
-            ret += toString(hours) + " #{Interface:DurationHour} ";
+            ret += l10n->formatMessage("DurationHour", { "hours" }, { hours });
         }
         if (units >= 2)
             return ret;
         if (minutes)
-            ret += toString(minutes) + " #{Interface:DurationMinute} ";
+            ret += l10n->formatMessage("DurationMinute", { "minutes" }, { minutes });
         if (seconds)
-            ret += toString(seconds) + " #{Interface:DurationSecond} ";
+            ret += l10n->formatMessage("DurationSecond", { "seconds" }, { seconds });
 
         return ret;
     }

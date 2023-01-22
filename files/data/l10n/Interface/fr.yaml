@@ -1,5 +1,18 @@
+DurationDay: |-
+  {days, plural,
+    one{{days} jour }
+    other{{days} jours }
+  }
+DurationHour: "{hours} h "
+DurationMinute: "{minutes} min "
+DurationMonth: "{months} mois "
+DurationSecond: "{seconds} sec "
+DurationYear: |-
+  {years, plural,
+    one{{years} an }
+    other{{years} ans }
+  }
 No: "Non"
 NotAvailableShort: "N/A"
 Reset: "Réinitialiser"
 Yes: "Oui"
-
