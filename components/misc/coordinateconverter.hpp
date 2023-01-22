@@ -17,8 +17,8 @@ namespace Misc
         {
         }
 
-        explicit CoordinateConverter(const ESM::Cell* cell)
-            : CoordinateConverter(cell->isExterior(), cell->mData.mX, cell->mData.mY)
+        explicit CoordinateConverter(const ESM::CellCommon* cell)
+            : CoordinateConverter(cell->isExterior(), cell->getGridX(), cell->getGridY())
         {
         }
 

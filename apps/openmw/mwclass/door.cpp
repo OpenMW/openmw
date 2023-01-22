@@ -307,7 +307,7 @@ namespace MWClass
             const osg::Vec2i index
                 = MWWorld::positionToCellIndex(door.mRef.getDoorDest().pos[0], door.mRef.getDoorDest().pos[1]);
             const ESM::Cell* cell = world->getStore().get<ESM::Cell>().search(index.x(), index.y());
-            dest = world->getCellName(cell);
+            dest = world->getCellName(ESM::CellVariant(cell));
         }
 
         return "#{sCell=" + std::string{ dest } + "}";

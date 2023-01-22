@@ -9,11 +9,13 @@
 #include <string_view>
 #include <tuple>
 #include <typeinfo>
+#include <variant>
 #include <vector>
 
 #include "cellreflist.hpp"
 #include "livecellref.hpp"
 
+#include <components/esm/cellcommon.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm3/fogstate.hpp>
 #include <components/misc/tuplemeta.hpp>
@@ -49,6 +51,7 @@ namespace ESM
     struct Static;
     struct Weapon;
     struct BodyPart;
+    struct CellCommon;
 }
 
 namespace ESM4
@@ -63,39 +66,6 @@ namespace MWWorld
 {
     class ESMStore;
     struct CellStoreImp;
-
-    struct CellVariant
-    {
-        std::variant<const ESM4::Cell*, const ESM::Cell*> mVariant;
-
-        CellVariant(const ESM4::Cell* cell)
-            : mVariant(cell)
-        {
-        }
-
-        CellVariant(const ESM::Cell* cell)
-            : mVariant(cell)
-        {
-        }
-
-        bool isEsm4() const { return getEsm4(); }
-
-        const ESM4::Cell* getEsm4() const
-        {
-            auto cell4 = std::get_if<const ESM4::Cell*>(&mVariant);
-            if (cell4)
-                return *cell4;
-            return nullptr;
-        }
-
-        const ESM::Cell* getEsm3() const
-        {
-            auto cell3 = std::get_if<const ESM::Cell*>(&mVariant);
-            if (cell3)
-                return *cell3;
-            return nullptr;
-        }
-    };
 
     using CellStoreTuple = std::tuple<CellRefList<ESM::Activator>, CellRefList<ESM::Potion>,
         CellRefList<ESM::Apparatus>, CellRefList<ESM::Armor>, CellRefList<ESM::Book>, CellRefList<ESM::Clothing>,
@@ -129,7 +99,7 @@ namespace MWWorld
         std::unique_ptr<ESM::FogState> mFogState;
 
         const ESM::Cell* mCell;
-        CellVariant mCellVariant;
+        ESM::CellVariant mCellVariant;
         State mState;
         bool mHasState;
         std::vector<ESM::RefId> mIds;
@@ -224,12 +194,12 @@ namespace MWWorld
         }
 
         /// @param readerList The readers to use for loading of the cell on-demand.
-        CellStore(CellVariant cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
+        CellStore(ESM::CellVariant cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
         CellStore(CellStore&&);
         ~CellStore();
 
-        const ESM::Cell* getCell() const;
-        CellVariant getCellVariant() const;
+        const ESM::CellCommon* getCell() const;
+        ESM::CellVariant getCellVariant() const;
 
         std::string_view getEditorName() const;
 

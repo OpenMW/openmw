@@ -704,7 +704,7 @@ namespace MWWorld
         if (!paused || mFastForward)
         {
             // Add new transitions when either the player's current external region changes.
-            if (updateWeatherTime() || updateWeatherRegion(player.getCell()->getCell()->mRegion))
+            if (updateWeatherTime() || updateWeatherRegion(player.getCell()->getCell()->getRegion()))
             {
                 auto it = mRegions.find(mCurrentRegion);
                 if (it != mRegions.end())

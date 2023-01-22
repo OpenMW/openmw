@@ -705,7 +705,7 @@ namespace MWGui
         ESM::Position markedPosition;
         MWBase::Environment::get().getWorld()->getPlayer().getMarkedPosition(markedCell, markedPosition);
         if (markedCell && markedCell->isExterior() == !mInterior
-            && (!mInterior || Misc::StringUtils::ciEqual(markedCell->getCell()->mName, mPrefix)))
+            && (!mInterior || Misc::StringUtils::ciEqual(markedCell->getCell()->getEditorName(), mPrefix)))
         {
             MarkerUserData markerPos(mLocalMapRender);
             MyGUI::ImageBox* markerWidget = mLocalMap->createWidget<MyGUI::ImageBox>("ImageBox",

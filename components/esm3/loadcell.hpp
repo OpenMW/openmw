@@ -7,6 +7,7 @@
 
 #include "cellid.hpp"
 #include "cellref.hpp"
+#include "components/esm/cellcommon.hpp"
 #include "components/esm/defs.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "components/esm/refid.hpp"
@@ -65,7 +66,7 @@ namespace ESM
        (using ESMReader::getContext()) and jumping back into place
        whenever we need to load a given cell.
      */
-    struct Cell
+    struct Cell : public CellCommon
     {
         constexpr static RecNameInts sRecordId = REC_CELL;
 
@@ -150,13 +151,14 @@ namespace ESM
         void save(ESMWriter& esm, bool isDeleted = false) const;
         void saveTempMarker(ESMWriter& esm, int tempCount) const;
 
-        bool isExterior() const { return !(mData.mFlags & Interior); }
+        bool isExterior() const override { return !(mData.mFlags & Interior); }
+        bool isQuasiExterior() const override { return mData.mFlags & QuasiEx; }
 
-        int getGridX() const { return mData.mX; }
+        int getGridX() const override { return mData.mX; }
 
-        int getGridY() const { return mData.mY; }
+        int getGridY() const override { return mData.mY; }
 
-        bool hasWater() const { return ((mData.mFlags & HasWater) != 0) || isExterior(); }
+        bool hasWater() const override { return ((mData.mFlags & HasWater) != 0) || isExterior(); }
 
         bool hasAmbient() const { return mHasAmbi; }
 
@@ -169,7 +171,7 @@ namespace ESM
         // exactly.
         void restore(ESMReader& esm, int iCtx) const;
 
-        std::string getDescription() const;
+        std::string getDescription() const override;
         ///< Return a short string describing the cell (mostly used for debugging/logging purpose)
 
         /* Get the next reference in this cell, if any. Returns false when
@@ -191,7 +193,10 @@ namespace ESM
         void blank();
         ///< Set record to default state (does not touch the ID/index).
 
-        const CellId& getCellId() const;
+        const CellId& getCellId() const override;
+        const ESM::RefId& getRegion() const override { return mRegion; }
+        bool noSleep() const override { return mData.mFlags & ESM::Cell::NoSleep; }
+        std::string_view getEditorName() const override { return mName; }
     };
 }
 #endif

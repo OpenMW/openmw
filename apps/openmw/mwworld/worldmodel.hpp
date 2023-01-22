@@ -51,7 +51,7 @@ namespace MWWorld
         WorldModel& operator=(const WorldModel&);
 
         const ESM::Cell* getESMCellByName(std::string_view name);
-        CellVariant getCellByName(std::string_view name);
+        ESM::CellVariant getCellByName(std::string_view name);
 
         CellStore* getCellStore(const ESM::Cell* cell);
         Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);

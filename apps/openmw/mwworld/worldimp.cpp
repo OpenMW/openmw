@@ -23,7 +23,7 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadstat.hpp>
-
+#include <components/esm4/loadcell.hpp>
 #include <components/esm4/loadstat.hpp>
 
 #include <components/misc/constants.hpp>
@@ -634,18 +634,22 @@ namespace MWWorld
     {
         if (!cell)
             cell = mWorldScene->getCurrentCell();
-        return getCellName(cell->getCell());
+        return getCellName(cell->getCellVariant());
     }
 
-    std::string_view World::getCellName(const ESM::Cell* cell) const
+    std::string_view World::getCellName(const ESM::CellVariant& cell) const
     {
-        if (cell)
+        auto cellCommon = cell.getCommon();
+        if (cellCommon)
         {
-            if (!cell->isExterior() || !cell->mName.empty())
-                return cell->mName;
+            if (!cellCommon->isExterior() || !cellCommon->getEditorName().empty())
+                return cellCommon->getEditorName();
 
-            if (const ESM::Region* region = mStore.get<ESM::Region>().search(cell->mRegion))
+            if (cell.getEsm3())
+            {
+                const ESM::Region* region = mStore.get<ESM::Region>().search(cell.getEsm3()->mRegion);
                 return region->mName;
+            }
         }
 
         return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
@@ -1139,7 +1143,7 @@ namespace MWWorld
             {
                 if (!newCell->isExterior())
                 {
-                    changeToInteriorCell(newCell->getCell()->mName, pos, false);
+                    changeToInteriorCell(newCell->getCell()->getEditorName(), pos, false);
                     removeContainerScripts(getPlayerPtr());
                 }
                 else
@@ -1400,7 +1404,7 @@ namespace MWWorld
             esmPos.pos[2] = traced.z();
             std::string_view cell;
             if (!actor.getCell()->isExterior())
-                cell = actor.getCell()->getCell()->mName;
+                cell = actor.getCell()->getCell()->getEditorName();
             MWWorld::ActionTeleport(cell, esmPos, false).execute(actor);
         }
     }
@@ -1988,10 +1992,7 @@ namespace MWWorld
         const CellStore* currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
-            if (!(currentCell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
-                return false;
-            else
-                return true;
+            return currentCell->getCell()->isQuasiExterior();
         }
         return false;
     }
@@ -2312,7 +2313,7 @@ namespace MWWorld
         if (!cell)
             return false;
 
-        if (!(cell->getCell()->hasWater()))
+        if (!(cell->getCellVariant().getCommon()->hasWater()))
         {
             return false;
         }
@@ -2468,8 +2469,7 @@ namespace MWWorld
             || isFlying(player))
             return Rest_PlayerIsInAir;
 
-        if ((currentCell->getCell()->mData.mFlags & ESM::Cell::NoSleep)
-            || player.getClass().getNpcStats(player).isWerewolf())
+        if (currentCell->getCell()->noSleep() || player.getClass().getNpcStats(player).isWerewolf())
             return Rest_OnlyWaiting;
 
         return Rest_Allowed;
@@ -2840,7 +2840,7 @@ namespace MWWorld
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-        const ESM::Cell* ext = nullptr;
+        const ESM::CellCommon* ext = nullptr;
         try
         {
             ext = mWorldModel.getCell(nameId)->getCell();
@@ -3247,9 +3247,11 @@ namespace MWWorld
         }
         else
         {
-            uint32_t ambient = cell->getCell()->mAmbi.mAmbient;
+            auto cellVariant = cell->getCellVariant();
+            uint32_t ambient = cellVariant.getEsm3() ? cellVariant.getEsm3()->mAmbi.mAmbient
+                                                     : cellVariant.getEsm4()->mLighting.ambient;
             int ambientTotal = (ambient & 0xff) + ((ambient >> 8) & 0xff) + ((ambient >> 16) & 0xff);
-            return !(cell->getCell()->mData.mFlags & ESM::Cell::NoSleep) && ambientTotal <= 201;
+            return !cell->getCell()->noSleep() && ambientTotal <= 201;
         }
     }
 
@@ -3328,7 +3330,7 @@ namespace MWWorld
         std::set<std::string_view> nextCells;
         MWWorld::ConstPtr closestMarker;
 
-        nextCells.insert(ptr.getCell()->getCell()->mName);
+        nextCells.insert(ptr.getCell()->getCell()->getEditorName());
         while (!nextCells.empty())
         {
             currentCells = nextCells;
@@ -3423,7 +3425,7 @@ namespace MWWorld
 
         std::string_view cellName = "";
         if (!closestMarker.mCell->isExterior())
-            cellName = closestMarker.mCell->getCell()->mName;
+            cellName = closestMarker.mCell->getCell()->getEditorName();
 
         MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition(), false);
         action.execute(ptr);
@@ -3436,7 +3438,7 @@ namespace MWWorld
         {
             mPlayer->setTeleported(false);
 
-            const ESM::RefId& playerRegion = getPlayerPtr().getCell()->getCell()->mRegion;
+            const ESM::RefId& playerRegion = getPlayerPtr().getCell()->getCell()->getRegion();
             mWeatherManager->playerTeleported(playerRegion, isExterior);
         }
 

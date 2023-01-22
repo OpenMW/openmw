@@ -954,20 +954,21 @@ namespace MWGui
 
         mMap->setCellName(name);
         mHud->setCellName(name);
+        auto cellCommon = cell->getCellVariant().getCommon();
 
-        if (cell->getCell()->isExterior())
+        if (cellCommon->isExterior())
         {
-            if (!cell->getCell()->mName.empty())
-                mMap->addVisitedLocation(name, cell->getCell()->getGridX(), cell->getCell()->getGridY());
+            if (!cellCommon->getEditorName().empty())
+                mMap->addVisitedLocation(name, cellCommon->getGridX(), cellCommon->getGridY());
 
-            mMap->cellExplored(cell->getCell()->getGridX(), cell->getCell()->getGridY());
+            mMap->cellExplored(cellCommon->getGridX(), cellCommon->getGridY());
 
-            setActiveMap(cell->getCell()->getGridX(), cell->getCell()->getGridY(), false);
+            setActiveMap(cellCommon->getGridX(), cellCommon->getGridY(), false);
         }
         else
         {
-            mMap->setCellPrefix(cell->getCell()->mName);
-            mHud->setCellPrefix(cell->getCell()->mName);
+            mMap->setCellPrefix(std::string(cellCommon->getEditorName()));
+            mHud->setCellPrefix(std::string(cellCommon->getEditorName()));
 
             osg::Vec3f worldPos;
             if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))

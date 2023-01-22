@@ -39,6 +39,7 @@
 // #include "writer.hpp"
 
 #include <components/esm/refid.hpp>
+#include <components/misc/algorithm.hpp>
 
 // TODO: Try loading only EDID and XCLC (along with mFormId, mFlags and mParent)
 //
@@ -76,6 +77,12 @@ void ESM4::Cell::load(ESM4::Reader& reader)
     reader.setCurrCell(formId); // save for LAND (and other children) to access later
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
+
+    mCellId.mWorldspace = Misc::StringUtils::lowerCase(mEditorId);
+    mCellId.mWorld = ESM::RefId::sEmpty;
+    mCellId.mIndex.mX = getGridX();
+    mCellId.mIndex.mX = getGridY();
+    mCellId.mPaged = isExterior();
 
     while (reader.getSubRecordHeader())
     {

@@ -271,9 +271,10 @@ namespace MWMechanics
         }
 
         // Initialization to discover & store allowed node points for this actor.
-        if (storage.mPopulateAvailableNodes)
+        auto cell3 = actor.getCell()->getCellVariant().getEsm3();
+        if (cell3 && storage.mPopulateAvailableNodes)
         {
-            getAllowedNodes(actor, actor.getCell()->getCell(), storage);
+            getAllowedNodes(actor, cell3, storage);
         }
 
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
@@ -721,8 +722,9 @@ namespace MWMechanics
             return;
 
         AiWanderStorage& storage = state.get<AiWanderStorage>();
-        if (storage.mPopulateAvailableNodes)
-            getAllowedNodes(actor, actor.getCell()->getCell(), storage);
+        auto cell3 = actor.getCell()->getCellVariant().getEsm3();
+        if (cell3 && storage.mPopulateAvailableNodes)
+            getAllowedNodes(actor, cell3, storage);
 
         if (storage.mAllowedNodes.empty())
             return;
@@ -800,8 +802,11 @@ namespace MWMechanics
     void AiWander::getNeighbouringNodes(
         ESM::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM::Pathgrid::PointList& points)
     {
+        auto cell3 = currentCell->getCellVariant().getEsm3();
+        if (!cell3)
+            return;
         const ESM::Pathgrid* pathgrid
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*currentCell->getCell());
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell3);
 
         if (pathgrid == nullptr || pathgrid->mPoints.empty())
             return;

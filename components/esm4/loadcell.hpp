@@ -34,8 +34,10 @@
 #include "formid.hpp"
 #include "lighting.hpp"
 
+#include <components/esm/cellcommon.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/refid.hpp>
+#include <components/esm3/cellid.hpp>
 
 namespace ESM4
 {
@@ -60,7 +62,7 @@ namespace ESM4
 
     // Unlike TES3, multiple cells can have the same exterior co-ordinates.
     // The cells need to be organised under world spaces.
-    struct Cell
+    struct Cell final : public ESM::CellCommon
     {
         FormId mParent; // world formId (for grouping cells), from the loading sequence
 
@@ -94,12 +96,24 @@ namespace ESM4
 
         CellGroup* mCellGroup;
 
+        ESM::CellId mCellId;
+
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
 
         void blank();
 
         static constexpr ESM::RecNameInts sRecordId = ESM::REC_CELL4;
+
+        int getGridX() const override { return mX; }
+        int getGridY() const override { return mY; }
+        bool isExterior() const override { return false; /*unimplemented for now*/ }
+        virtual bool isQuasiExterior() const override { return false; /*unimplemented for now*/ }
+        virtual bool hasWater() const override { return false; /*unimplemented for now*/ }
+        const ESM::CellId& getCellId() const override { return mCellId; }
+        const ESM::RefId& getRegion() const override { return ESM::RefId::sEmpty; }
+        std::string_view getEditorName() const override { return mEditorId; }
+        std::string getDescription() const override { return mEditorId; };
     };
 }
 

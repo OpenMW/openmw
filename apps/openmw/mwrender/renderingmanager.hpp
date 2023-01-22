@@ -43,6 +43,7 @@ namespace ESM
 {
     struct Cell;
     struct RefNum;
+    struct CellVariant;
 }
 
 namespace Terrain
@@ -140,8 +141,8 @@ namespace MWRender
         void setSunColour(const osg::Vec4f& diffuse, const osg::Vec4f& specular, float sunVis);
         void setNight(bool isNight) { mNight = isNight; }
 
-        void configureAmbient(const ESM::Cell* cell);
-        void configureFog(const ESM::Cell* cell);
+        void configureAmbient(const ESM::CellVariant& cell);
+        void configureFog(const ESM::CellVariant& cell);
         void configureFog(
             float fogDepth, float underwaterFog, float dlFactor, float dlOffset, const osg::Vec4f& colour);
 

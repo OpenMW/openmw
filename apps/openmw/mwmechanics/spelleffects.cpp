@@ -489,7 +489,7 @@ namespace MWMechanics
                     {
                         std::string_view dest;
                         if (!markedCell->isExterior())
-                            dest = markedCell->getCell()->mName;
+                            dest = markedCell->getCell()->getEditorName();
                         MWWorld::ActionTeleport action(dest, markedPosition, false);
                         action.execute(target);
                         if (!caster.isEmpty())

@@ -49,6 +49,7 @@
 #include <components/terrain/terraingrid.hpp>
 
 #include <components/esm3/loadcell.hpp>
+#include <components/esm4/loadcell.hpp>
 
 #include <components/debug/debugdraw.hpp>
 #include <components/detournavigator/navigator.hpp>
@@ -739,14 +740,24 @@ namespace MWRender
         mSky->setMoonColour(red);
     }
 
-    void RenderingManager::configureAmbient(const ESM::Cell* cell)
+    void RenderingManager::configureAmbient(const ESM::CellVariant& cell)
     {
-        bool isInterior = !cell->isExterior() && !(cell->mData.mFlags & ESM::Cell::QuasiEx);
+        bool isInterior = !cell.getCommon()->isExterior() && !cell.getCommon()->isQuasiExterior();
         bool needsAdjusting = false;
         if (mResourceSystem->getSceneManager()->getLightingMethod() != SceneUtil::LightingMethod::FFP)
             needsAdjusting = isInterior;
 
-        auto ambient = SceneUtil::colourFromRGB(cell->mAmbi.mAmbient);
+        osg::Vec4f ambient;
+        auto cell3 = cell.getEsm3();
+        auto cell4 = cell.getEsm4();
+        if (cell3)
+        {
+            ambient = SceneUtil::colourFromRGB(cell3->mAmbi.mAmbient);
+        }
+        else
+        {
+            ambient = SceneUtil::colourFromRGB(cell4->mLighting.ambient);
+        }
 
         if (needsAdjusting)
         {
@@ -770,7 +781,9 @@ namespace MWRender
 
         setAmbientColour(ambient);
 
-        osg::Vec4f diffuse = SceneUtil::colourFromRGB(cell->mAmbi.mSunlight);
+        osg::Vec4f diffuse = cell3 ? SceneUtil::colourFromRGB(cell3->mAmbi.mSunlight)
+                                   : SceneUtil::colourFromRGB(cell4->mLighting.directional);
+
         setSunColour(diffuse, diffuse, 1.f);
 
         const osg::Vec4f interiorSunPos = osg::Vec4f(-0.15f, 0.15f, 1.f, 0.f);
@@ -890,7 +903,7 @@ namespace MWRender
         return false;
     }
 
-    void RenderingManager::configureFog(const ESM::Cell* cell)
+    void RenderingManager::configureFog(const ESM::CellVariant& cell)
     {
         mFog->configure(mViewDistance, cell);
     }
@@ -1424,7 +1437,7 @@ namespace MWRender
                 mMinimumAmbientLuminance
                     = std::clamp(Settings::Manager::getFloat("minimum interior brightness", "Shaders"), 0.f, 1.f);
                 if (MWMechanics::getPlayer().isInCell())
-                    configureAmbient(MWMechanics::getPlayer().getCell()->getCell());
+                    configureAmbient(MWMechanics::getPlayer().getCell()->getCellVariant());
             }
             else if (it->first == "Shaders"
                 && (it->second == "light bounds multiplier" || it->second == "maximum light distance"

@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    struct Cell;
+    struct CellVariant;
 }
 
 namespace MWRender
@@ -15,7 +15,7 @@ namespace MWRender
     public:
         FogManager();
 
-        void configure(float viewDistance, const ESM::Cell* cell);
+        void configure(float viewDistance, const ESM::CellVariant& cell);
         void configure(float viewDistance, float fogDepth, float underwaterFog, float dlFactor, float dlOffset,
             const osg::Vec4f& color);
 

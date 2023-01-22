@@ -31,7 +31,7 @@ namespace ESM
 
     bool operator==(const CellId& left, const CellId& right)
     {
-        return left.mWorldspace == right.mWorldspace && left.mPaged == right.mPaged
+        return left.mWorld == right.mWorld && left.mWorldspace == right.mWorldspace && left.mPaged == right.mPaged
             && (!left.mPaged || (left.mIndex.mX == right.mIndex.mX && left.mIndex.mY == right.mIndex.mY));
     }
 

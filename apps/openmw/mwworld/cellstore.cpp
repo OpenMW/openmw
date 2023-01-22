@@ -505,7 +505,7 @@ namespace MWWorld
         return false;
     }
 
-    CellStore::CellStore(CellVariant cell, const MWWorld::ESMStore& esmStore, ESM::ReadersCache& readers)
+    CellStore::CellStore(ESM::CellVariant cell, const MWWorld::ESMStore& esmStore, ESM::ReadersCache& readers)
         : mStore(esmStore)
         , mReaders(readers)
         , mCellVariant(cell)
@@ -526,12 +526,12 @@ namespace MWWorld
     CellStore::~CellStore() = default;
     CellStore::CellStore(CellStore&&) = default;
 
-    const ESM::Cell* CellStore::getCell() const
+    const ESM::CellCommon* CellStore::getCell() const
     {
-        return mCell;
+        return mCellVariant.getCommon();
     }
 
-    CellVariant CellStore::getCellVariant() const
+    ESM::CellVariant CellStore::getCellVariant() const
     {
         return mCellVariant;
     }
@@ -1087,8 +1087,11 @@ namespace MWWorld
         auto cell4Left = mCellVariant.getEsm4();
         auto cell4Right = right.mCellVariant.getEsm4();
 
+        auto cell3Left = mCellVariant.getEsm3();
+        auto cell3Right = right.mCellVariant.getEsm3();
+
         if (!cell4Left && !cell4Right)
-            return getCell()->getCellId() == right.getCell()->getCellId();
+            return cell3Left->getCellId() == cell3Right->getCellId();
         else if (cell4Left && cell4Right)
             return cell4Left->mId == cell4Right->mId;
         else
@@ -1299,4 +1302,5 @@ namespace MWWorld
         }
         return {};
     }
+
 }

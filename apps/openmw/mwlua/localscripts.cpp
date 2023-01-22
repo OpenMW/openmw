@@ -176,12 +176,12 @@ namespace MWLua
             // TODO: change AiEscort implementation to accept ptr instead of a non-unique refId.
             const ESM::RefId& refId = target.ptr().getCellRef().getRefId();
             int gameHoursDuration = static_cast<int>(std::ceil(duration / 3600.0));
-            const ESM::Cell* esmCell = cell.mStore->getCell();
+            const ESM::CellCommon* esmCell = cell.mStore->getCell();
             if (esmCell->isExterior())
                 ai.stack(MWMechanics::AiEscort(refId, gameHoursDuration, dest.x(), dest.y(), dest.z(), false), ptr);
             else
                 ai.stack(MWMechanics::AiEscort(
-                             refId, esmCell->mName, gameHoursDuration, dest.x(), dest.y(), dest.z(), false),
+                             refId, esmCell->getEditorName(), gameHoursDuration, dest.x(), dest.y(), dest.z(), false),
                     ptr);
         };
         selfAPI["_startAiWander"] = [](SelfObject& self, int distance, float duration) {
