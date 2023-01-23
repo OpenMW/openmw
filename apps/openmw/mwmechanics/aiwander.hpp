@@ -18,6 +18,11 @@ namespace ESM
     }
 }
 
+namespace Misc
+{
+    class CoordinateConverter;
+}
+
 namespace MWMechanics
 {
     /// \brief This class holds the variables AiWander needs which are deleted if the package becomes inactive.
@@ -45,7 +50,6 @@ namespace MWMechanics
         bool mPopulateAvailableNodes;
 
         // allowed pathgrid nodes based on mDistance from the spawn point
-        // in local coordinates of mCell
         std::vector<ESM::Pathgrid::Point> mAllowedNodes;
 
         ESM::Pathgrid::Point mCurrentNode;
@@ -154,13 +158,10 @@ namespace MWMechanics
             GroupIndex_MaxIdle = 9
         };
 
-        /// convert point from local (i.e. cell) to world coordinates
-        void ToWorldCoordinates(ESM::Pathgrid::Point& point, const ESM::Cell* cell);
+        void setCurrentNodeToClosestAllowedNode(AiWanderStorage& storage);
 
-        void SetCurrentNodeToClosestAllowedNode(const osg::Vec3f& npcPos, AiWanderStorage& storage);
-
-        void AddNonPathGridAllowedPoints(
-            osg::Vec3f npcPos, const ESM::Pathgrid* pathGrid, int pointIndex, AiWanderStorage& storage);
+        void addNonPathGridAllowedPoints(const ESM::Pathgrid* pathGrid, int pointIndex, AiWanderStorage& storage,
+            const Misc::CoordinateConverter& converter);
 
         void AddPointBetweenPathGridPoints(
             const ESM::Pathgrid::Point& start, const ESM::Pathgrid::Point& end, AiWanderStorage& storage);

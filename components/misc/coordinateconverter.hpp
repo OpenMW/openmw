@@ -29,9 +29,22 @@ namespace Misc
             point.mY += mCellY;
         }
 
+        /// in-place conversion from world to local
+        void toLocal(ESM::Pathgrid::Point& point) const
+        {
+            point.mX -= mCellX;
+            point.mY -= mCellY;
+        }
+
         ESM::Pathgrid::Point toWorldPoint(ESM::Pathgrid::Point point) const
         {
             toWorld(point);
+            return point;
+        }
+
+        ESM::Pathgrid::Point toLocalPoint(ESM::Pathgrid::Point point) const
+        {
+            toLocal(point);
             return point;
         }
 
