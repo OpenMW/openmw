@@ -357,12 +357,13 @@ namespace MWMechanics
             case AiCombatStorage::FleeState_Idle:
             {
                 float triggerDist = getMaxAttackDistance(target);
-                auto cell3 = storage.mCell->getCellVariant().getEsm3();
-                if (cell3 && storage.mLOS
+                auto cellVariant = storage.mCell->getCellVariant();
+                if (!cellVariant.isEsm4() && storage.mLOS
                     && (triggerDist >= 1000 || getDistanceMinusHalfExtents(actor, target) <= triggerDist))
                 {
                     const ESM::Pathgrid* pathgrid
-                        = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell3);
+                        = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(
+                            cellVariant.getEsm3());
 
                     bool runFallback = true;
 

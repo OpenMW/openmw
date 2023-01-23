@@ -4,6 +4,8 @@
 #include <string_view>
 #include <variant>
 
+#include <components/misc/notnullptr.hpp>
+
 namespace ESM4
 {
     struct Cell;
@@ -31,7 +33,12 @@ namespace ESM
 
     struct CellVariant
     {
-        std::variant<const ESM4::Cell*, const ESM::Cell*> mVariant;
+        std::variant<const ESM4::Cell*, const ESM::Cell*, const void*> mVariant;
+
+        CellVariant()
+            : mVariant((void*)(nullptr))
+        {
+        }
 
         explicit CellVariant(const ESM4::Cell* cell)
             : mVariant(cell)
@@ -43,23 +50,17 @@ namespace ESM
         {
         }
 
-        bool isEsm4() const { return getEsm4(); }
-
-        const ESM4::Cell* getEsm4() const
+        bool isValid() const
         {
-            auto cell4 = std::get_if<const ESM4::Cell*>(&mVariant);
-            if (cell4)
-                return *cell4;
-            return nullptr;
+            return std::holds_alternative<const ESM4::Cell*>(mVariant)
+                || std::holds_alternative<const ESM::Cell*>(mVariant);
         }
 
-        const ESM::Cell* getEsm3() const
-        {
-            auto cell3 = std::get_if<const ESM::Cell*>(&mVariant);
-            if (cell3)
-                return *cell3;
-            return nullptr;
-        }
+        bool isEsm4() const { return std::holds_alternative<const ESM4::Cell*>(mVariant); }
+
+        const ESM4::Cell& getEsm4() const;
+
+        const ESM::Cell& getEsm3() const;
 
         const ESM::CellCommon* getCommon() const;
     };

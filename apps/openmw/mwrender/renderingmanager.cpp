@@ -747,17 +747,8 @@ namespace MWRender
         if (mResourceSystem->getSceneManager()->getLightingMethod() != SceneUtil::LightingMethod::FFP)
             needsAdjusting = isInterior;
 
-        osg::Vec4f ambient;
-        auto cell3 = cell.getEsm3();
-        auto cell4 = cell.getEsm4();
-        if (cell3)
-        {
-            ambient = SceneUtil::colourFromRGB(cell3->mAmbi.mAmbient);
-        }
-        else
-        {
-            ambient = SceneUtil::colourFromRGB(cell4->mLighting.ambient);
-        }
+        osg::Vec4f ambient = SceneUtil::colourFromRGB(
+            cell.isEsm4() ? cell.getEsm4().mLighting.ambient : cell.getEsm3().mAmbi.mAmbient);
 
         if (needsAdjusting)
         {
@@ -781,8 +772,8 @@ namespace MWRender
 
         setAmbientColour(ambient);
 
-        osg::Vec4f diffuse = cell3 ? SceneUtil::colourFromRGB(cell3->mAmbi.mSunlight)
-                                   : SceneUtil::colourFromRGB(cell4->mLighting.directional);
+        osg::Vec4f diffuse = SceneUtil::colourFromRGB(
+            !cell.isEsm4() ? cell.getEsm3().mAmbi.mSunlight : cell.getEsm4().mLighting.directional);
 
         setSunColour(diffuse, diffuse, 1.f);
 

@@ -516,7 +516,7 @@ namespace MWWorld
         , mRechargingItemsUpToDate(false)
     {
 
-        mCell = mCellVariant.getEsm3();
+        mCell = mCellVariant.isEsm4() ? nullptr : &mCellVariant.getEsm3();
 
         std::apply([this](auto&... x) { (CellStoreImp::assignStoreToIndex(*this, x), ...); }, mCellStoreImp->mRefLists);
         if (mCell)
@@ -538,14 +538,13 @@ namespace MWWorld
 
     std::string_view CellStore::getEditorName() const
     {
-        const ESM4::Cell* cell4 = mCellVariant.getEsm4();
-        if (cell4)
+        if (mCellVariant.isEsm4())
         {
-            return cell4->mEditorId;
+            return mCellVariant.getEsm4().mEditorId;
         }
         else
         {
-            return mCellVariant.getEsm3()->mName;
+            return mCellVariant.getEsm3().mName;
         }
     }
 
@@ -759,17 +758,17 @@ namespace MWWorld
 
     void CellStore::loadRefs()
     {
-        assert(mCellVariant.getEsm4() || mCellVariant.getEsm3());
-        const ESM4::Cell* cell4 = mCellVariant.getEsm4();
-        if (cell4)
-        {
+        assert(mCellVariant.isValid());
 
+        if (mCellVariant.isEsm4())
+        {
+            auto cell4 = mCellVariant.getEsm4();
             auto& refs = MWBase::Environment::get().getWorld()->getStore().get<ESM4::Reference>();
             auto it = refs.begin();
 
             while (it != refs.end())
             {
-                if (it->mParent == cell4->mId)
+                if (it->mParent == cell4.mId)
                 {
                     loadRef(*it, false);
                 }
@@ -836,15 +835,12 @@ namespace MWWorld
 
     bool CellStore::isExterior() const
     {
-        auto cell3 = mCellVariant.getEsm3();
-        return cell3 ? cell3->isExterior() : false;
+        return mCellVariant.getCommon()->isExterior();
     }
 
     bool CellStore::isQuasiExterior() const
     {
-        auto cell3 = mCellVariant.getEsm3();
-
-        return cell3 ? (mCell->mData.mFlags & ESM::Cell::QuasiEx) != 0 : false;
+        return mCellVariant.getCommon()->isExterior();
     }
 
     Ptr CellStore::searchInContainer(const ESM::RefId& id)
@@ -1084,16 +1080,14 @@ namespace MWWorld
 
     bool CellStore::operator==(const CellStore& right) const
     {
-        auto cell4Left = mCellVariant.getEsm4();
-        auto cell4Right = right.mCellVariant.getEsm4();
 
-        auto cell3Left = mCellVariant.getEsm3();
-        auto cell3Right = right.mCellVariant.getEsm3();
+        bool bothCell4 = mCellVariant.isEsm4() && right.mCellVariant.isEsm4();
+        bool bothCell3 = !mCellVariant.isEsm4() && !right.mCellVariant.isEsm4();
 
-        if (!cell4Left && !cell4Right)
-            return cell3Left->getCellId() == cell3Right->getCellId();
-        else if (cell4Left && cell4Right)
-            return cell4Left->mId == cell4Right->mId;
+        if (bothCell3)
+            return mCellVariant.getEsm3().getCellId() == right.mCellVariant.getEsm3().getCellId();
+        else if (bothCell4)
+            return mCellVariant.getEsm4().mId == right.mCellVariant.getEsm4().mId;
         else
             return false;
     }

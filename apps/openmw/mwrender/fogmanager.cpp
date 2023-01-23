@@ -45,9 +45,10 @@ namespace MWRender
         auto cell3 = cell.getEsm3();
         auto cell4 = cell.getEsm4();
 
-        osg::Vec4f color = SceneUtil::colourFromRGB(cell3 ? cell3->mAmbi.mFog : cell4->mLighting.fogColor);
+        osg::Vec4f color
+            = SceneUtil::colourFromRGB(cell.isEsm4() ? cell.getEsm4().mLighting.fogColor : cell.getEsm3().mAmbi.mFog);
 
-        const float fogDensity = cell3 ? cell3->mAmbi.mFogDensity : cell4->mLighting.fogPower;
+        const float fogDensity = !cell.isEsm4() ? cell.getEsm3().mAmbi.mFogDensity : cell.getEsm4().mLighting.fogPower;
         if (mDistantFog)
         {
             float density = std::max(0.2f, fogDensity);

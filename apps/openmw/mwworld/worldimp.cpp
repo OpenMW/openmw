@@ -645,9 +645,9 @@ namespace MWWorld
             if (!cellCommon->isExterior() || !cellCommon->getEditorName().empty())
                 return cellCommon->getEditorName();
 
-            if (cell.getEsm3())
+            if (!cell.isEsm4())
             {
-                const ESM::Region* region = mStore.get<ESM::Region>().search(cell.getEsm3()->mRegion);
+                const ESM::Region* region = mStore.get<ESM::Region>().search(cell.getEsm3().mRegion);
                 return region->mName;
             }
         }
@@ -3248,8 +3248,8 @@ namespace MWWorld
         else
         {
             auto cellVariant = cell->getCellVariant();
-            uint32_t ambient = cellVariant.getEsm3() ? cellVariant.getEsm3()->mAmbi.mAmbient
-                                                     : cellVariant.getEsm4()->mLighting.ambient;
+            uint32_t ambient = !cellVariant.isEsm4() ? cellVariant.getEsm3().mAmbi.mAmbient
+                                                     : cellVariant.getEsm4().mLighting.ambient;
             int ambientTotal = (ambient & 0xff) + ((ambient >> 8) & 0xff) + ((ambient >> 16) & 0xff);
             return !cell->getCell()->noSleep() && ambientTotal <= 201;
         }
