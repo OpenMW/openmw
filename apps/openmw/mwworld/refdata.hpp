@@ -25,6 +25,11 @@ namespace ESM
     struct ObjectState;
 }
 
+namespace ESM4
+{
+    struct Reference;
+}
+
 namespace MWLua
 {
     class LocalScripts;
@@ -76,6 +81,7 @@ namespace MWWorld
         /// be altered without affecting the original data. This makes it possible
         /// to reset the position as the original data is still held in the CellRef
         RefData(const ESM::CellRef& cellRef);
+        RefData(const ESM4::Reference& cellRef);
 
         RefData(const ESM::ObjectState& objectState, bool deletedByContentFile);
         ///< Ignores local variables and custom data (not enough context available here to

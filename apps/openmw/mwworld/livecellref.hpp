@@ -35,6 +35,7 @@ namespace MWWorld
         RefData mData;
 
         LiveCellRefBase(unsigned int type, const ESM::CellRef& cref = ESM::CellRef());
+        LiveCellRefBase(unsigned int type, const ESM4::Reference& cref);
         /* Need this for the class to be recognized as polymorphic */
         virtual ~LiveCellRefBase() {}
 
@@ -110,6 +111,12 @@ namespace MWWorld
     struct LiveCellRef : public LiveCellRefBase
     {
         LiveCellRef(const ESM::CellRef& cref, const X* b = nullptr)
+            : LiveCellRefBase(X::sRecordId, cref)
+            , mBase(b)
+        {
+        }
+
+        LiveCellRef(const ESM4::Reference& cref, const X* b = nullptr)
             : LiveCellRefBase(X::sRecordId, cref)
             , mBase(b)
         {

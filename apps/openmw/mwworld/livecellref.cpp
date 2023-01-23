@@ -22,6 +22,13 @@ MWWorld::LiveCellRefBase::LiveCellRefBase(unsigned int type, const ESM::CellRef&
 {
 }
 
+MWWorld::LiveCellRefBase::LiveCellRefBase(unsigned int type, const ESM4::Reference& cref)
+    : mClass(&Class::get(type))
+    , mRef(cref)
+    , mData(cref)
+{
+}
+
 void MWWorld::LiveCellRefBase::loadImp(const ESM::ObjectState& state)
 {
     mRef = state.mRef;

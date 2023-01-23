@@ -1,5 +1,5 @@
-#ifndef COMPONENTS_ESM_CELLCOMMON
-#define COMPONENTS_ESM_CELLCOMMON
+#ifndef COMPONENTS_ESM_ESMBRIDGE
+#define COMPONENTS_ESM_ESMBRIDGE
 #include <string>
 #include <string_view>
 #include <variant>

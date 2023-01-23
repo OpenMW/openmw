@@ -3,7 +3,9 @@
 
 #include <string_view>
 
+#include <components/esm/esm3esm4bridge.hpp>
 #include <components/esm3/cellref.hpp>
+#include <components/esm4/loadrefr.hpp>
 
 namespace ESM
 {
@@ -20,7 +22,17 @@ namespace MWWorld
         CellRef(const ESM::CellRef& ref)
             : mCellRef(ref)
         {
+            mIsEsm4 = false;
             mChanged = false;
+        }
+
+        CellRef(const ESM4::Reference& ref)
+            : mCellRef4(ref)
+        {
+            mRefrPos = { { mCellRef4.mPlacement.pos.x, mCellRef4.mPlacement.pos.y, mCellRef4.mPlacement.pos.z },
+                { mCellRef4.mPlacement.rot.x, mCellRef4.mPlacement.rot.y, mCellRef4.mPlacement.rot.z } };
+            mChanged = false;
+            mIsEsm4 = true;
         }
 
         // Note: Currently unused for items in containers
@@ -50,12 +62,24 @@ namespace MWWorld
         const std::string& getDestCell() const { return mCellRef.mDestCell; }
 
         // Scale applied to mesh
-        float getScale() const { return mCellRef.mScale; }
+        float getScale() const
+        {
+            if (mIsEsm4)
+                return mCellRef4.mScale;
+            else
+                return mCellRef.mScale;
+        }
         void setScale(float scale);
 
         // The *original* position and rotation as it was given in the Construction Set.
         // Current position and rotation of the object is stored in RefData.
-        const ESM::Position& getPosition() const { return mCellRef.mPos; }
+        const ESM::Position& getPosition() const
+        {
+            if (mIsEsm4)
+                return mRefrPos;
+            else
+                return mCellRef.mPos;
+        }
         void setPosition(const ESM::Position& position);
 
         // Remaining enchantment charge. This could be -1 if the charge was not touched yet (i.e. full).
@@ -124,6 +148,9 @@ namespace MWWorld
     private:
         bool mChanged;
         ESM::CellRef mCellRef;
+        ESM4::Reference mCellRef4;
+        ESM::Position mRefrPos;
+        bool mIsEsm4;
     };
 
 }

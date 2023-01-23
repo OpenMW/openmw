@@ -372,6 +372,37 @@ namespace MWWorld
     }
 
     template <typename X>
+    void CellRefList<X>::load(const ESM4::Reference& ref, bool deleted, const MWWorld::ESMStore& esmStore)
+    {
+
+        if constexpr (!ESM::isESM4Rec(X::sRecordId))
+            return;
+
+        const MWWorld::Store<X>& store = esmStore.get<X>();
+
+        if (const X* ptr = store.search(ref.mBaseObj))
+        {
+            // typename std::list<LiveRef>::iterator iter = std::find(mList.begin(), mList.end(), ref.);
+
+            LiveRef liveCellRef(ref, ptr);
+
+            if (deleted)
+                liveCellRef.mData.setDeletedByContentFile(true);
+
+            /*if (iter != mList.end())
+                *iter = liveCellRef;
+            else
+                */
+            mList.push_back(liveCellRef);
+        }
+        else
+        {
+            Log(Debug::Warning) << "Warning: could not resolve cell reference '" << ref.mId << "'"
+                                << " (dropping reference)";
+        }
+    }
+
+    template <typename X>
     bool operator==(const LiveCellRef<X>& ref, int pRefnum)
     {
         return (ref.mRef.mRefnum == pRefnum);
@@ -863,16 +894,6 @@ namespace MWWorld
         return Ptr();
     }
 
-    template <typename T>
-    static void loadRefESM4(
-        const MWWorld::ESMStore& store, const ESM4::Reference& ref, MWWorld::CellRefList<T>& storeIn, bool deleted)
-    {
-        if constexpr (ESM::isESM4Rec(T::sRecordId))
-        {
-            // storeIn.load(ref, deleted, store);
-        }
-    }
-
     void CellStore::loadRef(const ESM4::Reference& ref, bool deleted)
     {
         const MWWorld::ESMStore& store = mStore;
@@ -881,7 +902,7 @@ namespace MWWorld
 
         Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, &deleted, &store, foundType](auto& x) {
             recNameSwitcher(
-                x, foundType, [&ref, &deleted, &store](auto& storeIn) { loadRefESM4(store, ref, storeIn, deleted); });
+                x, foundType, [&ref, &deleted, &store](auto& storeIn) { storeIn.load(ref, deleted, store); });
         });
     }
 
