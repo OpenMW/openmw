@@ -107,13 +107,13 @@ namespace ESM4
 
         int getGridX() const override { return mX; }
         int getGridY() const override { return mY; }
-        bool isExterior() const override { return false; /*unimplemented for now*/ }
-        virtual bool isQuasiExterior() const override { return false; /*unimplemented for now*/ }
+        bool isExterior() const override { return !(mFlags & CELL_Interior); }
+        virtual bool isQuasiExterior() const override { return mFlags & CELL_QuasiExt; }
         virtual bool hasWater() const override { return false; /*unimplemented for now*/ }
         const ESM::CellId& getCellId() const override { return mCellId; }
         const ESM::RefId& getRegion() const override { return ESM::RefId::sEmpty; }
         std::string_view getEditorName() const override { return mEditorId; }
-        std::string getDescription() const override { return mEditorId; };
+        std::string getDescription() const override { return mEditorId; }
     };
 }
 
