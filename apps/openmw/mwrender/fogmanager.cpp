@@ -2,7 +2,7 @@
 
 #include <algorithm>
 
-#include <components/esm/cellcommon.hpp>
+#include <components/esm/esm3esm4bridge.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm4/loadcell.hpp>
 #include <components/fallback/fallback.hpp>
@@ -42,9 +42,6 @@ namespace MWRender
 
     void FogManager::configure(float viewDistance, const ESM::CellVariant& cell)
     {
-        auto cell3 = cell.getEsm3();
-        auto cell4 = cell.getEsm4();
-
         osg::Vec4f color
             = SceneUtil::colourFromRGB(cell.isEsm4() ? cell.getEsm4().mLighting.fogColor : cell.getEsm3().mAmbi.mFog);
 

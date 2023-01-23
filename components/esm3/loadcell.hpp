@@ -7,8 +7,8 @@
 
 #include "cellid.hpp"
 #include "cellref.hpp"
-#include "components/esm/cellcommon.hpp"
 #include "components/esm/defs.hpp"
+#include "components/esm/esm3esm4bridge.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "components/esm/refid.hpp"
 

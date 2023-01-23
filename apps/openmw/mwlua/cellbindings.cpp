@@ -1,6 +1,6 @@
 #include "luabindings.hpp"
 
-#include <components/esm/cellcommon.hpp>
+#include <components/esm/esm3esm4bridge.hpp>
 #include <components/esm/records.hpp>
 
 #include "../mwworld/cellstore.hpp"

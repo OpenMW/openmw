@@ -781,6 +781,9 @@ namespace MWSound
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::ConstPtr player = world->getPlayerPtr();
+        if (player.getCell()->getCellVariant().isEsm4())
+            return;
+
         const ESM::Cell* curcell = &player.getCell()->getCellVariant().getEsm3();
         const auto update = mWaterSoundUpdater.update(player, *world);
 

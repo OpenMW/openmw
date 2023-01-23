@@ -78,12 +78,6 @@ void ESM4::Cell::load(ESM4::Reader& reader)
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 
-    mCellId.mWorldspace = Misc::StringUtils::lowerCase(mEditorId);
-    mCellId.mWorld = ESM::RefId::sEmpty;
-    mCellId.mIndex.mX = getGridX();
-    mCellId.mIndex.mX = getGridY();
-    mCellId.mPaged = isExterior();
-
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
@@ -247,6 +241,12 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 throw std::runtime_error("ESM4::CELL::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
+
+    mCellId.mWorldspace = Misc::StringUtils::lowerCase(mEditorId);
+    mCellId.mWorld = ESM::RefId::sEmpty;
+    mCellId.mIndex.mX = getGridX();
+    mCellId.mIndex.mX = getGridY();
+    mCellId.mPaged = isExterior();
 }
 
 // void ESM4::Cell::save(ESM4::Writer& writer) const
