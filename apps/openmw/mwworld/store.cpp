@@ -732,7 +732,7 @@ namespace MWWorld
         const ESM::Cell* cell = nullptr;
         for (const ESM::Cell* sharedCell : mSharedExt)
         {
-            if (sharedCell->mName == name)
+            if (Misc::StringUtils::ciEqual(sharedCell->mName, name))
             {
                 if (cell == nullptr || (sharedCell->mData.mX > cell->mData.mX)
                     || (sharedCell->mData.mX == cell->mData.mX && sharedCell->mData.mY > cell->mData.mY))
