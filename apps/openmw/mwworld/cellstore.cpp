@@ -790,6 +790,7 @@ namespace MWWorld
     void CellStore::loadRefs()
     {
         assert(mCellVariant.isValid());
+        std::map<ESM::RefNum, ESM::RefId> refNumToID; // used to detect refID modifications
 
         if (mCellVariant.isEsm4())
         {
@@ -805,60 +806,58 @@ namespace MWWorld
                 }
                 ++it;
             }
-            return;
         }
-
-        if (mCell->mContextList.empty())
-            return; // this is a dynamically generated cell -> skipping.
-
-        std::map<ESM::RefNum, ESM::RefId> refNumToID; // used to detect refID modifications
-
-        // Load references from all plugins that do something with this cell.
-        for (size_t i = 0; i < mCell->mContextList.size(); i++)
+        else
         {
-            try
+            if (mCell->mContextList.empty())
+                return; // this is a dynamically generated cell -> skipping.
+
+            // Load references from all plugins that do something with this cell.
+            for (size_t i = 0; i < mCell->mContextList.size(); i++)
             {
-                // Reopen the ESM reader and seek to the right position.
-                const std::size_t index = static_cast<std::size_t>(mCell->mContextList[i].index);
-                const ESM::ReadersCache::BusyItem reader = mReaders.get(index);
-                mCell->restore(*reader, i);
-
-                ESM::CellRef ref;
-                // Get each reference in turn
-                ESM::MovedCellRef cMRef;
-                bool deleted = false;
-                bool moved = false;
-                while (ESM::Cell::getNextRef(
-                    *reader, ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
+                try
                 {
-                    if (moved)
-                        continue;
+                    // Reopen the ESM reader and seek to the right position.
+                    const std::size_t index = static_cast<std::size_t>(mCell->mContextList[i].index);
+                    const ESM::ReadersCache::BusyItem reader = mReaders.get(index);
+                    mCell->restore(*reader, i);
 
-                    // Don't load reference if it was moved to a different cell.
-                    ESM::MovedCellRefTracker::const_iterator iter
-                        = std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
-                    if (iter != mCell->mMovedRefs.end())
+                    ESM::CellRef ref;
+                    // Get each reference in turn
+                    ESM::MovedCellRef cMRef;
+                    bool deleted = false;
+                    bool moved = false;
+                    while (ESM::Cell::getNextRef(
+                        *reader, ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
                     {
-                        continue;
-                    }
+                        if (moved)
+                            continue;
 
-                    loadRef(ref, deleted, refNumToID);
+                        // Don't load reference if it was moved to a different cell.
+                        ESM::MovedCellRefTracker::const_iterator iter
+                            = std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
+                        if (iter != mCell->mMovedRefs.end())
+                        {
+                            continue;
+                        }
+
+                        loadRef(ref, deleted, refNumToID);
+                    }
+                }
+                catch (std::exception& e)
+                {
+                    Log(Debug::Error) << "An error occurred loading references for cell " << getCell()->getDescription()
+                                      << ": " << e.what();
                 }
             }
-            catch (std::exception& e)
+            // Load moved references, from separately tracked list.
+            for (const auto& leasedRef : mCell->mLeasedRefs)
             {
-                Log(Debug::Error) << "An error occurred loading references for cell " << getCell()->getDescription()
-                                  << ": " << e.what();
+                ESM::CellRef& ref = const_cast<ESM::CellRef&>(leasedRef.first);
+                bool deleted = leasedRef.second;
+
+                loadRef(ref, deleted, refNumToID);
             }
-        }
-
-        // Load moved references, from separately tracked list.
-        for (const auto& leasedRef : mCell->mLeasedRefs)
-        {
-            ESM::CellRef& ref = const_cast<ESM::CellRef&>(leasedRef.first);
-            bool deleted = leasedRef.second;
-
-            loadRef(ref, deleted, refNumToID);
         }
 
         updateMergedRefs();
