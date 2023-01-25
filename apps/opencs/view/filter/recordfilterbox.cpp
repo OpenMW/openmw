@@ -1,7 +1,10 @@
 #include "recordfilterbox.hpp"
 
+#include <variant>
+
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QVariant>
 
 #include "editwidget.hpp"
 
@@ -32,13 +35,8 @@ void CSVFilter::RecordFilterBox::setFilter(const std::string& filter)
 }
 
 void CSVFilter::RecordFilterBox::createFilterRequest(
-    std::vector<std::pair<std::string, std::vector<std::string>>>& filterSource, Qt::DropAction action)
-{
-    mEdit->createFilterRequest(filterSource, action);
-}
-
-void CSVFilter::RecordFilterBox::createFilterRequest(
-    std::vector<std::pair<int, std::vector<std::string>>>& filterSource, Qt::DropAction action)
+    std::vector<std::pair<std::variant<std::string, QVariant>, std::vector<std::string>>>& filterSource,
+    Qt::DropAction action)
 {
     mEdit->createFilterRequest(filterSource, action);
 }

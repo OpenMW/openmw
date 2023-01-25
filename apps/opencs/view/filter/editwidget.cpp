@@ -1,6 +1,7 @@
 #include "editwidget.hpp"
 
 #include <sstream>
+#include <variant>
 
 #include <QAction>
 #include <QApplication>
@@ -8,6 +9,7 @@
 #include <QMenu>
 #include <QRegularExpression>
 #include <QString>
+#include <QVariant>
 
 #include <apps/opencs/model/filter/parser.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
@@ -95,9 +97,21 @@ void CSVFilter::EditWidget::filterRowsInserted(const QModelIndex& parent, int st
 }
 
 void CSVFilter::EditWidget::createFilterRequest(
-    std::vector<std::pair<std::string, std::vector<std::string>>>& filterSource, Qt::DropAction action, std::string stringOrValue)
+    std::vector<std::pair<std::variant<std::string, QVariant>, std::vector<std::string>>>& filterSource,
+    Qt::DropAction action)
 {
-    const unsigned count = filterSource.size();
+    std::string stringOrValue = "string";
+    std::vector<std::pair<std::string, std::vector<std::string>>> newFilter;
+
+    for (auto pair : filterSource)
+    {
+        std::string searchString = std::visit(FilterVisitor(), pair.first).first;
+        stringOrValue = std::visit(FilterVisitor(), pair.first).second;
+        std::vector<std::string> column = pair.second;
+        newFilter.emplace_back(std::make_pair(searchString, column));
+    }
+
+    const unsigned count = newFilter.size();
     bool multipleElements = false;
 
     switch (count) // setting multipleElements;
@@ -165,7 +179,7 @@ void CSVFilter::EditWidget::createFilterRequest(
 
         for (unsigned i = 0; i < count; ++i)
         {
-            ss << generateFilter(filterSource[i], stringOrValue);
+            ss << generateFilter(newFilter[i], stringOrValue);
 
             if (i + 1 != count)
             {
@@ -186,7 +200,7 @@ void CSVFilter::EditWidget::createFilterRequest(
             ss << '!';
         }
 
-        ss << generateFilter(filterSource[0], stringOrValue);
+        ss << generateFilter(newFilter[0], stringOrValue);
 
         if (!replaceMode)
         {
@@ -201,21 +215,8 @@ void CSVFilter::EditWidget::createFilterRequest(
     }
 }
 
-void CSVFilter::EditWidget::createFilterRequest(
-    std::vector<std::pair<int, std::vector<std::string>>>& filterSource, Qt::DropAction action)
-{
-    std::vector<std::pair<std::string, std::vector<std::string>>> convertedFilter;
-    std::string stringOrValue = "value";
-    for (auto pair : filterSource)
-    {
-        std::string a = std::to_string(pair.first);
-        std::vector<std::string> b = pair.second;
-        convertedFilter.emplace_back(std::make_pair (a, b));
-    }
-    createFilterRequest(convertedFilter, action, stringOrValue);
-}
-
-std::string CSVFilter::EditWidget::generateFilter(std::pair<std::string, std::vector<std::string>>& seekedString, std::string stringOrValue) const
+std::string CSVFilter::EditWidget::generateFilter(
+    std::pair<std::string, std::vector<std::string>>& seekedString, std::string stringOrValue) const
 {
     const unsigned columns = seekedString.second.size();
 
@@ -233,9 +234,10 @@ std::string CSVFilter::EditWidget::generateFilter(std::pair<std::string, std::ve
             multipleColumns = true;
             break;
     }
-    
+
     std::string quotesResolved = seekedString.first;
-    if (stringOrValue == "string") quotesResolved = '"' + seekedString.first + '"';
+    if (stringOrValue == "string")
+        quotesResolved = '"' + seekedString.first + '"';
 
     std::stringstream ss;
     if (multipleColumns)

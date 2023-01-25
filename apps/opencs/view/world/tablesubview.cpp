@@ -9,9 +9,11 @@
 #include <QPushButton>
 #include <QScreen>
 #include <QVBoxLayout>
+#include <QVariant>
 
 #include <algorithm>
 #include <utility>
+#include <variant>
 
 #include <apps/opencs/view/doc/subview.hpp>
 
@@ -152,10 +154,10 @@ void CSVWorld::TableSubView::cloneRequest(const CSMWorld::UniversalId& toClone)
     emit cloneRequest(toClone.getId(), toClone.getType());
 }
 
-void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::UniversalId>& types, Qt::DropAction action,
-    const std::string& searchString, const std::string& searchColumn, bool isValue)
+void CSVWorld::TableSubView::createFilterRequest(
+    std::vector<CSMWorld::UniversalId>& types, std::pair<QVariant, std::string> columnSearchData, Qt::DropAction action)
 {
-    std::vector<std::pair<std::string, std::vector<std::string>>> filterSource;
+    std::vector<std::pair<std::variant<std::string, QVariant>, std::vector<std::string>>> filterSource;
 
     std::vector<std::string> refIdColumns = mTable->getColumnsWithDisplay(
         CSMWorld::TableMimeData::convertEnums(CSMWorld::UniversalId::Type_Referenceable));
@@ -178,31 +180,18 @@ void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::Universal
 
     if (!filterSource.empty())
         mFilterBox->createFilterRequest(filterSource, action);
-    else if (isValue)
+    else
     {
-        try 
-        {
-            std::vector<std::pair<int, std::vector<std::string>>> valueFilterSource;
-            std::vector<std::string> searchColumns;
-            searchColumns.emplace_back(searchColumn);
-            int searchValue = std::stoi(searchString);
-            Log(Debug::Warning) << "Debug: " << searchValue;
-            valueFilterSource.emplace_back(searchValue, searchColumns);
-            mFilterBox->createFilterRequest(valueFilterSource, action);
-        }
-        catch (...)
-        {
-            Log(Debug::Warning) << "Error in converting the filter request value to integer.";
-        }
-    }
-    else if (searchString != "")
-    {
+        QVariant qData = columnSearchData.first;
+        std::string searchColumn = columnSearchData.second;
+
+        std::vector<std::pair<std::variant<std::string, QVariant>, std::vector<std::string>>> valueFilterSource;
         std::vector<std::string> searchColumns;
         searchColumns.emplace_back(searchColumn);
-        filterSource.emplace_back(searchString, searchColumns);
-        mFilterBox->createFilterRequest(filterSource, action);
+        valueFilterSource.emplace_back(qData, searchColumns);
+
+        mFilterBox->createFilterRequest(valueFilterSource, action);
     }
-   
 }
 
 bool CSVWorld::TableSubView::eventFilter(QObject* object, QEvent* event)
