@@ -233,15 +233,15 @@ const ESM::Cell* MWWorld::WorldModel::getESMCellByName(std::string_view name)
         // treat "Wilderness" like an empty string
         static const std::string& defaultName
             = mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
-        if (name == defaultName)
-            cell = mStore.get<ESM::Cell>().searchExtByName("");
+        if (Misc::StringUtils::ciEqual(name, defaultName))
+            cell = mStore.get<ESM::Cell>().searchExtByName({});
     }
     if (!cell)
     {
         // now check for regions
         for (const ESM::Region& region : mStore.get<ESM::Region>())
         {
-            if (name == region.mName)
+            if (Misc::StringUtils::ciEqual(name, region.mName))
             {
                 cell = mStore.get<ESM::Cell>().searchExtByRegion(region.mId);
                 break;
