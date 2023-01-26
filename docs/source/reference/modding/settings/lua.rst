@@ -41,7 +41,7 @@ This setting can only be configured by editing the settings configuration file.
 small alloc max size
 --------------------
 
-:Type:		integer
+:Type:		unsigned 64-bit integer
 :Range:		>= 0
 :Default:	1024
 
@@ -55,7 +55,7 @@ This setting can only be configured by editing the settings configuration file.
 memory limit
 ------------
 
-:Type:		integer
+:Type:		unsigned 64-bit integer
 :Range:		> 0
 :Default:	2147483648 (2GB)
 
@@ -78,7 +78,7 @@ This setting can only be configured by editing the settings configuration file.
 instruction limit per call
 --------------------------
 
-:Type:		integer
+:Type:		unsigned 64-bit integer
 :Range:		> 1000
 :Default:	100000000
 
