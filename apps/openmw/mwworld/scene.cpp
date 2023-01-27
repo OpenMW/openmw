@@ -888,7 +888,7 @@ namespace MWWorld
         loadingListener->setProgressRange(cell->count());
 
         mNavigator.setWorldspace(
-            Misc::StringUtils::lowerCase(cell->getCell()->getEditorName()), navigatorUpdateGuard.get());
+            Misc::StringUtils::lowerCase(cell->getCell()->getCellId().mWorldspace), navigatorUpdateGuard.get());
         mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
 
         // Load cell.

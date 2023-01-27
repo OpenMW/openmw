@@ -772,79 +772,78 @@ namespace MWWorld
         std::sort(mIds.begin(), mIds.end());
     }
 
+    void CellStore::loadRefs(const ESM::Cell& cell, std::map<ESM::RefNum, ESM::RefId>& refNumToID)
+    {
+        if (cell.mContextList.empty())
+            return; // this is a dynamically generated cell -> skipping.
+
+        // Load references from all plugins that do something with this cell.
+        for (size_t i = 0; i < cell.mContextList.size(); i++)
+        {
+            try
+            {
+                // Reopen the ESM reader and seek to the right position.
+                const std::size_t index = static_cast<std::size_t>(cell.mContextList[i].index);
+                const ESM::ReadersCache::BusyItem reader = mReaders.get(index);
+                cell.restore(*reader, i);
+
+                ESM::CellRef ref;
+                // Get each reference in turn
+                ESM::MovedCellRef cMRef;
+                bool deleted = false;
+                bool moved = false;
+                while (ESM::Cell::getNextRef(
+                    *reader, ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
+                {
+                    if (moved)
+                        continue;
+
+                    // Don't load reference if it was moved to a different cell.
+                    ESM::MovedCellRefTracker::const_iterator iter
+                        = std::find(cell.mMovedRefs.begin(), cell.mMovedRefs.end(), ref.mRefNum);
+                    if (iter != cell.mMovedRefs.end())
+                    {
+                        continue;
+                    }
+
+                    loadRef(ref, deleted, refNumToID);
+                }
+            }
+            catch (std::exception& e)
+            {
+                Log(Debug::Error) << "An error occurred loading references for cell " << getCell()->getDescription()
+                                  << ": " << e.what();
+            }
+        }
+        // Load moved references, from separately tracked list.
+        for (const auto& leasedRef : cell.mLeasedRefs)
+        {
+            ESM::CellRef& ref = const_cast<ESM::CellRef&>(leasedRef.first);
+            bool deleted = leasedRef.second;
+
+            loadRef(ref, deleted, refNumToID);
+        }
+    }
+
+    void CellStore::loadRefs(const ESM4::Cell& cell, std::map<ESM::RefNum, ESM::RefId>& refNumToID)
+    {
+        auto& refs = MWBase::Environment::get().getWorld()->getStore().get<ESM4::Reference>();
+
+        for (const auto& ref : refs)
+        {
+            if (ref.mParent == cell.mId)
+            {
+                loadRef(ref, false);
+            }
+        }
+    }
+
     void CellStore::loadRefs()
     {
         assert(mCellVariant.isValid());
         std::map<ESM::RefNum, ESM::RefId> refNumToID; // used to detect refID modifications
 
-        if (mCellVariant.isEsm4())
-        {
-            auto cell4 = mCellVariant.getEsm4();
-            auto& refs = MWBase::Environment::get().getWorld()->getStore().get<ESM4::Reference>();
-            auto it = refs.begin();
-
-            while (it != refs.end())
-            {
-                if (it->mParent == cell4.mId)
-                {
-                    loadRef(*it, false);
-                }
-                ++it;
-            }
-        }
-        else
-        {
-            auto cell3 = mCellVariant.getEsm3();
-            if (cell3.mContextList.empty())
-                return; // this is a dynamically generated cell -> skipping.
-
-            // Load references from all plugins that do something with this cell.
-            for (size_t i = 0; i < cell3.mContextList.size(); i++)
-            {
-                try
-                {
-                    // Reopen the ESM reader and seek to the right position.
-                    const std::size_t index = static_cast<std::size_t>(cell3.mContextList[i].index);
-                    const ESM::ReadersCache::BusyItem reader = mReaders.get(index);
-                    cell3.restore(*reader, i);
-
-                    ESM::CellRef ref;
-                    // Get each reference in turn
-                    ESM::MovedCellRef cMRef;
-                    bool deleted = false;
-                    bool moved = false;
-                    while (ESM::Cell::getNextRef(
-                        *reader, ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
-                    {
-                        if (moved)
-                            continue;
-
-                        // Don't load reference if it was moved to a different cell.
-                        ESM::MovedCellRefTracker::const_iterator iter
-                            = std::find(cell3.mMovedRefs.begin(), cell3.mMovedRefs.end(), ref.mRefNum);
-                        if (iter != cell3.mMovedRefs.end())
-                        {
-                            continue;
-                        }
-
-                        loadRef(ref, deleted, refNumToID);
-                    }
-                }
-                catch (std::exception& e)
-                {
-                    Log(Debug::Error) << "An error occurred loading references for cell " << getCell()->getDescription()
-                                      << ": " << e.what();
-                }
-            }
-            // Load moved references, from separately tracked list.
-            for (const auto& leasedRef : cell3.mLeasedRefs)
-            {
-                ESM::CellRef& ref = const_cast<ESM::CellRef&>(leasedRef.first);
-                bool deleted = leasedRef.second;
-
-                loadRef(ref, deleted, refNumToID);
-            }
-        }
+        std::visit([&refNumToID, this](auto&& cell) { this->loadRefs(*cell, refNumToID); }, mCellVariant.mVariant);
 
         updateMergedRefs();
     }
@@ -1087,18 +1086,21 @@ namespace MWWorld
         }
     }
 
+    struct Visitor
+    {
+        bool operator()(const ESM::Cell* a, const ESM::Cell* b) const { return a->getCellId() == b->getCellId(); };
+        bool operator()(const ESM4::Cell* a, const ESM4::Cell* b) const { return a->mId == b->mId; };
+
+        template <class L, class R>
+        bool operator()(L, R) const
+        {
+            return false;
+        }
+    };
+
     bool CellStore::operator==(const CellStore& right) const
     {
-
-        bool bothCell4 = mCellVariant.isEsm4() && right.mCellVariant.isEsm4();
-        bool bothCell3 = !mCellVariant.isEsm4() && !right.mCellVariant.isEsm4();
-
-        if (bothCell3)
-            return mCellVariant.getEsm3().getCellId() == right.mCellVariant.getEsm3().getCellId();
-        else if (bothCell4)
-            return mCellVariant.getEsm4().mId == right.mCellVariant.getEsm4().mId;
-        else
-            return false;
+        return std::visit(Visitor{}, this->mCellVariant.mVariant, right.mCellVariant.mVariant);
     }
 
     void CellStore::setFog(std::unique_ptr<ESM::FogState>&& fog)

@@ -18,9 +18,11 @@ namespace ESM4
 
 namespace MWWorld
 {
+    class CellStore;
+
     struct Cell : public ESM::CellVariant
     {
-
+        friend MWWorld::CellStore;
         struct MoodData
         {
             uint32_t mAmbiantColor;
@@ -39,7 +41,7 @@ namespace MWWorld
         bool isQuasiExterior() const { return mFlags.isQuasiExterior; }
         bool hasWater() const { return mFlags.hasWater; }
         bool noSleep() const { return mFlags.noSleep; }
-        const ESM::CellId& getCellId() const { return mCellId; };
+        const ESM::CellId& getCellId() const { return mCellId; }
         const ESM::RefId& getRegion() const { return mRegion; }
         std::string_view getEditorName() const { return mNameID; }
         std::string getDescription() const;

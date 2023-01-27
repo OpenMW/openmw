@@ -19,7 +19,7 @@ namespace ESM
 
     struct CellVariant
     {
-    private:
+    protected:
         std::variant<const ESM4::Cell*, const ESM::Cell*> mVariant;
 
     public:

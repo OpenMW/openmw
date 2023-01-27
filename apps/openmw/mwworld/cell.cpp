@@ -37,7 +37,6 @@ namespace MWWorld
     Cell::Cell(const ESM::Cell& cell)
         : ESM::CellVariant(cell)
     {
-        assert(cell != nullptr);
         mNameID = cell.mName;
         mDisplayname = cell.mName;
         mGridPos.x() = cell.getGridX();

@@ -386,6 +386,9 @@ namespace MWWorld
         /// Run through references and store IDs
         void listRefs();
 
+        void loadRefs(const ESM::Cell& cell, std::map<ESM::RefNum, ESM::RefId>& refNumToID);
+        void loadRefs(const ESM4::Cell& cell, std::map<ESM::RefNum, ESM::RefId>& refNumToID);
+
         void loadRefs();
 
         void loadRef(const ESM4::Reference& ref, bool deleted);
