@@ -4,7 +4,8 @@
 #include <string_view>
 #include <variant>
 
-#include <components/misc/notnullptr.hpp>
+#include <components/esm3/cellref.hpp>
+#include <components/esm4/loadrefr.hpp>
 
 namespace ESM4
 {
@@ -38,6 +39,31 @@ namespace ESM
         const ESM4::Cell& getEsm4() const;
 
         const ESM::Cell& getEsm3() const;
+    };
+
+    struct ReferenceVariant
+    {
+    protected:
+        std::variant<ESM::CellRef, ESM4::Reference> mVariant;
+
+    public:
+        explicit ReferenceVariant(const ESM4::Reference& ref)
+            : mVariant(ref)
+        {
+        }
+
+        explicit ReferenceVariant(const ESM::CellRef& ref)
+            : mVariant(ref)
+        {
+        }
+
+        bool isESM4() const { return std::holds_alternative<ESM4::Reference>(mVariant); }
+
+        const ESM::CellRef& getEsm3() const { return std::get<ESM::CellRef>(mVariant); }
+        const ESM4::Reference& getEsm4() const { return std::get<ESM4::Reference>(mVariant); }
+
+        ESM::CellRef& getEsm3() { return std::get<ESM::CellRef>(mVariant); }
+        ESM4::Reference& getEsm4() { return std::get<ESM4::Reference>(mVariant); }
     };
 }
 

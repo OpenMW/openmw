@@ -7,10 +7,54 @@
 
 namespace MWWorld
 {
+    CellRef::CellRef(const ESM::CellRef& ref)
+        : mCellRef(ESM::ReferenceVariant(ref))
+    {
+        mChanged = false;
+        mSoul = ref.mSoul;
+        mTrap = ref.mTrap;
+        mKey = ref.mKey;
+        mFaction = ref.mFaction;
+        mOwner = ref.mOwner;
+        mReferenceType = ref.mRefID;
+        mPos = ref.mPos;
+        mDoorDest = ref.mDoorDest;
+        mRefNum = ref.mRefNum;
+        mGlobalVariable = ref.mGlobalVariable;
+        mDestCell = ref.mDestCell;
+
+        mLockLevel = ref.mLockLevel;
+        mGoldValue = ref.mGoldValue;
+        mFactionRank = ref.mFactionRank;
+        mEnchantmentCharge = ref.mEnchantmentCharge;
+
+        mScale = ref.mScale;
+    }
+
+    CellRef::CellRef(const ESM4::Reference& ref)
+        : mCellRef(ESM::ReferenceVariant(ref))
+    {
+
+        mChanged = false;
+
+        mReferenceType = ref.mBaseObj;
+        mPos = { { ref.mPlacement.pos.x, ref.mPlacement.pos.y, ref.mPlacement.pos.z },
+            { ref.mPlacement.rot.x, ref.mPlacement.rot.y, ref.mPlacement.rot.z } };
+
+        mRefNum = {};
+        mDoorDest = {};
+
+        mLockLevel = ref.mLockLevel;
+        mFactionRank = ref.mFactionRank;
+        mGoldValue = 0;
+        mEnchantmentCharge = 0;
+
+        mScale = ref.mScale;
+    }
 
     const ESM::RefNum& CellRef::getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum)
     {
-        if (!mCellRef.mRefNum.isSet())
+        if (!mRefNum.isSet())
         {
             // Generated RefNums have negative mContentFile
             assert(lastAssignedRefNum.mContentFile < 0);
@@ -22,30 +66,38 @@ namespace MWWorld
                 else
                     Log(Debug::Error) << "RefNum counter overflow in CellRef::getOrAssignRefNum";
             }
-            mCellRef.mRefNum = lastAssignedRefNum;
+            mRefNum = lastAssignedRefNum;
             mChanged = true;
         }
-        return mCellRef.mRefNum;
+        if (!mCellRef.isESM4())
+            mCellRef.getEsm3().mRefNum = mRefNum;
+        return mRefNum;
     }
 
     void CellRef::unsetRefNum()
     {
-        mCellRef.mRefNum = ESM::RefNum{};
+        mRefNum = ESM::RefNum{};
+        if (!mCellRef.isESM4())
+            mCellRef.getEsm3().mRefNum = mRefNum;
     }
 
     void CellRef::setScale(float scale)
     {
-        if (scale != mCellRef.mScale)
+        if (scale != mScale)
         {
             mChanged = true;
-            mCellRef.mScale = scale;
+            mScale = scale;
         }
+        if (!mCellRef.isESM4())
+            mCellRef.getEsm3().mScale = Scale;
     }
 
     void CellRef::setPosition(const ESM::Position& position)
     {
         mChanged = true;
-        mCellRef.mPos = position;
+        mPos = position;
+        if (!mCellRef.isESM4())
+            mCellRef.getEsm3().mPos = position;
     }
 
     float CellRef::getNormalizedEnchantmentCharge(int maxCharge) const
@@ -54,113 +106,140 @@ namespace MWWorld
         {
             return 0;
         }
-        else if (mCellRef.mEnchantmentCharge == -1)
+        else if (mEnchantmentCharge == -1)
         {
             return 1;
         }
         else
         {
-            return mCellRef.mEnchantmentCharge / static_cast<float>(maxCharge);
+            return mEnchantmentCharge / static_cast<float>(maxCharge);
         }
     }
 
     void CellRef::setEnchantmentCharge(float charge)
     {
-        if (charge != mCellRef.mEnchantmentCharge)
+        if (charge != mEnchantmentCharge)
         {
             mChanged = true;
-            mCellRef.mEnchantmentCharge = charge;
+            mEnchantmentCharge = charge;
         }
+        if (!mCellRef.isESM4())
+            mCellRef.getEsm3().mEnchantmentCharge = mEnchantmentCharge;
     }
 
     void CellRef::setCharge(int charge)
     {
-        if (charge != mCellRef.mChargeInt)
+        if (mCellRef.isESM4())
+            return;
+
+        auto& cellRef3 = mCellRef.getEsm3();
+        if (charge != cellRef3.mChargeInt)
         {
             mChanged = true;
-            mCellRef.mChargeInt = charge;
+            cellRef3.mChargeInt = charge;
         }
     }
 
     void CellRef::applyChargeRemainderToBeSubtracted(float chargeRemainder)
     {
-        mCellRef.mChargeIntRemainder += std::abs(chargeRemainder);
-        if (mCellRef.mChargeIntRemainder > 1.0f)
+        if (mCellRef.isESM4())
+            return;
+
+        auto& cellRef3 = mCellRef.getEsm3();
+        cellRef3.mChargeIntRemainder += std::abs(chargeRemainder);
+        if (cellRef3.mChargeIntRemainder > 1.0f)
         {
-            float newChargeRemainder = (mCellRef.mChargeIntRemainder - std::floor(mCellRef.mChargeIntRemainder));
-            if (mCellRef.mChargeInt <= static_cast<int>(mCellRef.mChargeIntRemainder))
+            float newChargeRemainder = (cellRef3.mChargeIntRemainder - std::floor(cellRef3.mChargeIntRemainder));
+            if (cellRef3.mChargeInt <= static_cast<int>(cellRef3.mChargeIntRemainder))
             {
-                mCellRef.mChargeInt = 0;
+                cellRef3.mChargeInt = 0;
             }
             else
             {
-                mCellRef.mChargeInt -= static_cast<int>(mCellRef.mChargeIntRemainder);
+                cellRef3.mChargeInt -= static_cast<int>(cellRef3.mChargeIntRemainder);
             }
-            mCellRef.mChargeIntRemainder = newChargeRemainder;
+            cellRef3.mChargeIntRemainder = newChargeRemainder;
         }
     }
 
     void CellRef::setChargeFloat(float charge)
     {
-        if (charge != mCellRef.mChargeFloat)
+        if (mCellRef.isESM4())
+            return;
+
+        auto& cellRef3 = mCellRef.getEsm3();
+        if (charge != cellRef3.mChargeFloat)
         {
             mChanged = true;
-            mCellRef.mChargeFloat = charge;
+            cellRef3.mChargeFloat = charge;
         }
     }
 
     void CellRef::resetGlobalVariable()
     {
-        if (!mCellRef.mGlobalVariable.empty())
+        if (!mGlobalVariable.empty())
         {
             mChanged = true;
-            mCellRef.mGlobalVariable.erase();
+            mGlobalVariable.erase();
         }
+
+        if (!mCellRef.isESM4())
+            mCellRef.getEsm3().mGlobalVariable = mGlobalVariable;
     }
 
     void CellRef::setFactionRank(int factionRank)
     {
-        if (factionRank != mCellRef.mFactionRank)
+        if (factionRank != mFactionRank)
         {
             mChanged = true;
-            mCellRef.mFactionRank = factionRank;
+            mFactionRank = factionRank;
         }
+        if (!mCellRef.isESM4())
+            mCellRef.getEsm3().mFactionRank = mFactionRank;
     }
 
     void CellRef::setOwner(const ESM::RefId& owner)
     {
-        if (owner != mCellRef.mOwner)
+        if (owner != mOwner)
         {
             mChanged = true;
-            mCellRef.mOwner = owner;
+            mOwner = owner;
         }
+        if (!mCellRef.isESM4())
+            mCellRef.getEsm3().mOwner = mOwner;
     }
 
     void CellRef::setSoul(const ESM::RefId& soul)
     {
-        if (soul != mCellRef.mSoul)
+        if (soul != mSoul)
         {
             mChanged = true;
-            mCellRef.mSoul = soul;
+            mSoul = soul;
         }
+        if (!mCellRef.isESM4())
+            mCellRef.getEsm3().mSoul = mSoul;
     }
 
     void CellRef::setFaction(const ESM::RefId& faction)
     {
-        if (faction != mCellRef.mFaction)
+        if (faction != mFaction)
         {
             mChanged = true;
-            mCellRef.mFaction = faction;
+            mFaction = faction;
         }
+        if (!mCellRef.isESM4())
+            mCellRef.getEsm3().mFaction = mFaction;
     }
 
     void CellRef::setLockLevel(int lockLevel)
     {
-        if (lockLevel != mCellRef.mLockLevel)
+        if (lockLevel != mLockLevel)
         {
             mChanged = true;
-            mCellRef.mLockLevel = lockLevel;
+            mLockLevel = lockLevel;
         }
+        if (!mCellRef.isESM4())
+            mCellRef.getEsm3().mLockLevel = mLockLevel;
     }
 
     void CellRef::lock(int lockLevel)
@@ -173,30 +252,38 @@ namespace MWWorld
 
     void CellRef::unlock()
     {
-        setLockLevel(-abs(mCellRef.mLockLevel)); // Makes lockLevel negative
+        setLockLevel(-abs(mLockLevel)); // Makes lockLevel negative
     }
 
     void CellRef::setTrap(const ESM::RefId& trap)
     {
-        if (trap != mCellRef.mTrap)
+        if (trap != mTrap)
         {
             mChanged = true;
-            mCellRef.mTrap = trap;
+            mTrap = trap;
         }
+        if (!mCellRef.isESM4())
+            mCellRef.getEsm3().mTrap = mTrap;
     }
 
     void CellRef::setGoldValue(int value)
     {
-        if (value != mCellRef.mGoldValue)
+        if (value != mGoldValue)
         {
             mChanged = true;
-            mCellRef.mGoldValue = value;
+            mGoldValue = value;
         }
+        if (!mCellRef.isESM4())
+            mCellRef.getEsm3().mGoldValue = mGoldValue;
     }
 
     void CellRef::writeState(ESM::ObjectState& state) const
     {
-        state.mRef = mCellRef;
+        if (!mCellRef.isESM4())
+        {
+            auto& cellRef3 = mCellRef.getEsm3();
+            state.mRef = cellRef3;
+        }
     }
 
 }
