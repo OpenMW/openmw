@@ -83,6 +83,7 @@ namespace Launcher
     private:
         struct NavMeshToolProgress
         {
+            bool mEnabled = true;
             QByteArray mLogData;
             QByteArray mMessagesData;
             std::map<std::uint64_t, std::string> mWorldspaces;
