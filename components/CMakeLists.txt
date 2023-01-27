@@ -383,6 +383,7 @@ if (USE_QT)
 
     add_component_qt_dir (files
         qtconversion
+        qtconfigpath
         )
 
     QT5_WRAP_UI(ESM_UI_HDR ${ESM_UI})

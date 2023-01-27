@@ -12,7 +12,9 @@
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
+
 #include <components/files/conversion.hpp>
+#include <components/files/qtconfigpath.hpp>
 #include <components/files/qtconversion.hpp>
 #include <components/misc/utf8qtextstream.hpp>
 
@@ -286,11 +288,9 @@ bool Launcher::MainDialog::setupLauncherSettings()
 
     mLauncherSettings.setMultiValueEnabled(true);
 
-    const auto userPath = Files::pathToQString(mCfgMgr.getUserConfigPath());
-
     QStringList paths;
     paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
-    paths.append(userPath + QString(Config::LauncherSettings::sLauncherConfigFileName));
+    paths.append(Files::pathToQString(mCfgMgr.getUserConfigPath() / Config::LauncherSettings::sLauncherConfigFileName));
 
     for (const QString& path : paths)
     {
@@ -322,10 +322,6 @@ bool Launcher::MainDialog::setupGameSettings()
 {
     mGameSettings.clear();
 
-    const auto localPath = Files::pathToQString(mCfgMgr.getLocalPath());
-    const auto userPath = Files::pathToQString(mCfgMgr.getUserConfigPath());
-    const auto globalPath = Files::pathToQString(mCfgMgr.getGlobalPath());
-
     QFile file;
 
     auto loadFile = [&](const QString& path, bool (Config::GameSettings::*reader)(QTextStream&, bool),
@@ -355,19 +351,19 @@ bool Launcher::MainDialog::setupGameSettings()
 
     // Load the user config file first, separately
     // So we can write it properly, uncontaminated
-    if (!loadFile(userPath + QLatin1String("openmw.cfg"), &Config::GameSettings::readUserFile))
+    if (!loadFile(Files::getUserConfigPathQString(mCfgMgr), &Config::GameSettings::readUserFile))
         return false;
 
     // Now the rest - priority: user > local > global
-    if (auto result = loadFile(localPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true))
+    if (auto result = loadFile(Files::getLocalConfigPathQString(mCfgMgr), &Config::GameSettings::readFile, true))
     {
         // Load global if local wasn't found
-        if (!*result && !loadFile(globalPath + QString("openmw.cfg"), &Config::GameSettings::readFile, true))
+        if (!*result && !loadFile(Files::getGlobalConfigPathQString(mCfgMgr), &Config::GameSettings::readFile, true))
             return false;
     }
     else
         return false;
-    if (!loadFile(userPath + QString("openmw.cfg"), &Config::GameSettings::readFile))
+    if (!loadFile(Files::getUserConfigPathQString(mCfgMgr), &Config::GameSettings::readFile))
         return false;
 
     return true;
@@ -495,9 +491,9 @@ bool Launcher::MainDialog::writeSettings()
 
     // Game settings
 #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-    QFile file(userPath / "openmw.cfg");
+    QFile file(userPath / Files::openmwCfgFile);
 #else
-    QFile file(Files::pathToQString(userPath / "openmw.cfg"));
+    QFile file(Files::getUserConfigPathQString(mCfgMgr));
 #endif
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text))

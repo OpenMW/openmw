@@ -4,6 +4,7 @@
 #include <map>
 #include <optional>
 #include <stack>
+#include <string_view>
 
 #include <components/files/collections.hpp>
 #include <components/files/fixedpath.hpp>
@@ -19,6 +20,7 @@ namespace boost::program_options
  */
 namespace Files
 {
+    inline constexpr std::string_view openmwCfgFile = "openmw.cfg";
 
     /**
      * \struct ConfigurationManager
