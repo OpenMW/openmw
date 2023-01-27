@@ -3,7 +3,7 @@
 
 #include <string_view>
 
-#include <components/esm/esm3esm4bridge.hpp>
+#include <components/esm/esmbridge.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm4/loadrefr.hpp>
 

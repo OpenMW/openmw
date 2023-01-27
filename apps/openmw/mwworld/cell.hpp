@@ -1,7 +1,7 @@
 #ifndef OPENW_MWORLD_CELL
 #define OPENW_MWORLD_CELL
 
-#include <components/esm/esm3esm4bridge.hpp>
+#include <components/esm/esmbridge.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm3/cellid.hpp>
 

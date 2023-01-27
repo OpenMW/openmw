@@ -1,7 +1,7 @@
 #ifndef OPENMW_COMPONENTS_MISC_COORDINATECONVERTER_H
 #define OPENMW_COMPONENTS_MISC_COORDINATECONVERTER_H
 
-#include <components/esm/esm3esm4bridge.hpp>
+#include <components/esm/esmbridge.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadpgrd.hpp>
