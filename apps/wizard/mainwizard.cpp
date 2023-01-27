@@ -6,6 +6,7 @@
 #include <QMessageBox>
 #include <QProcess>
 
+#include <components/files/qtconfigpath.hpp>
 #include <components/files/qtconversion.hpp>
 #include <components/misc/utf8qtextstream.hpp>
 #include <components/process/processinvoker.hpp>
@@ -137,8 +138,6 @@ void Wizard::MainWizard::addLogText(const QString& text)
 
 void Wizard::MainWizard::setupGameSettings()
 {
-    QString userPath(Files::pathToQString(mCfgMgr.getUserConfigPath()));
-    QString globalPath(Files::pathToQString(mCfgMgr.getGlobalPath()));
     QString message(
         tr("<html><head/><body><p><b>Could not open %1 for reading</b></p> \
                     <p>Please make sure you have the right permissions \
@@ -146,7 +145,7 @@ void Wizard::MainWizard::setupGameSettings()
 
     // Load the user config file first, separately
     // So we can write it properly, uncontaminated
-    QString path(userPath + QLatin1String("openmw.cfg"));
+    QString path(Files::getUserConfigPathQString(mCfgMgr));
     QFile file(path);
 
     qDebug() << "Loading config file:" << path.toUtf8().constData();
@@ -174,9 +173,9 @@ void Wizard::MainWizard::setupGameSettings()
 
     // Now the rest
     QStringList paths;
-    paths.append(userPath + QLatin1String("openmw.cfg"));
+    paths.append(Files::getUserConfigPathQString(mCfgMgr));
     paths.append(QLatin1String("openmw.cfg"));
-    paths.append(globalPath + QLatin1String("openmw.cfg"));
+    paths.append(Files::getGlobalConfigPathQString(mCfgMgr));
 
     for (const QString& path2 : paths)
     {
@@ -258,8 +257,7 @@ void Wizard::MainWizard::runSettingsImporter()
 
     QString path(field(QLatin1String("installation.path")).toString());
 
-    QString userPath(Files::pathToQString(mCfgMgr.getUserConfigPath()));
-    QFile file(userPath + QLatin1String("openmw.cfg"));
+    QFile file(Files::getUserConfigPathQString(mCfgMgr));
 
     // Construct the arguments to run the importer
     QStringList arguments;
@@ -304,7 +302,7 @@ void Wizard::MainWizard::runSettingsImporter()
     }
 
     arguments.append(QLatin1String("--cfg"));
-    arguments.append(userPath + QLatin1String("openmw.cfg"));
+    arguments.append(Files::getUserConfigPathQString(mCfgMgr));
 
     if (!mImporterInvoker->startProcess(QLatin1String("openmw-iniimporter"), arguments, false))
         return qApp->quit();
@@ -440,7 +438,7 @@ void Wizard::MainWizard::writeSettings()
     }
 
     // Game settings
-    QFile file(userPath + QLatin1String("openmw.cfg"));
+    QFile file(Files::getUserConfigPathQString(mCfgMgr));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
     {
@@ -466,7 +464,8 @@ void Wizard::MainWizard::writeSettings()
     file.close();
 
     // Launcher settings
-    file.setFileName(userPath + QLatin1String(Config::LauncherSettings::sLauncherConfigFileName));
+    file.setFileName(
+        Files::pathToQString(mCfgMgr.getUserConfigPath() / Config::LauncherSettings::sLauncherConfigFileName));
 
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text | QIODevice::Truncate))
     {

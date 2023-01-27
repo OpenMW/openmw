@@ -18,8 +18,6 @@ namespace Files
 
     namespace bpo = boost::program_options;
 
-    static const char* const openmwCfgFile = "openmw.cfg";
-
 #if defined(_WIN32) || defined(__WINDOWS__)
     static const char* const applicationName = "OpenMW";
 #else
