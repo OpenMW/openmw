@@ -1,7 +1,4 @@
-if [ ! -f /.dockerenv ] && [ ! -f /home/docs/omw_luadoc_docker ]; then
-    echo 'This script installs lua-5.1, luarocks, and openmwluadocumentor to $HOME. Should be used only in docker.'
-    exit 1
-fi
+pushd .
 
 echo "Install lua 5.1"
 cd ~
@@ -28,8 +25,22 @@ PATH=$PATH:~/luarocks/bin
 
 echo "Install openmwluadocumentor"
 git clone https://gitlab.com/ptmikheev/openmw-luadocumentor.git
-cd openmw-luadocumentor/luarocks
-luarocks --local pack openmwluadocumentor-0.2.0-1.rockspec
-luarocks --local install openmwluadocumentor-0.2.0-1.src.rock
+cd openmw-luadocumentor
+luarocks make luarocks/openmwluadocumentor-0.2.0-1.rockspec
 cd ~
 rm -r openmw-luadocumentor
+
+
+echo "Install Teal Cyan"
+git clone https://github.com/teal-language/cyan.git --depth 1
+cd cyan
+luarocks make cyan-dev-1.rockspec
+
+luarocks show openmwluadocumentor
+luarocks show cyan
+
+LUAROCKS=~/luarocks/bin
+export LUAROCKS
+popd
+pushd docs
+./build_teal.sh ../build_teal
