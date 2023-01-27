@@ -19,27 +19,18 @@ namespace ESM
 
     struct CellVariant
     {
-        std::variant<const ESM4::Cell*, const ESM::Cell*, const void*> mVariant;
+    private:
+        std::variant<const ESM4::Cell*, const ESM::Cell*> mVariant;
 
-        CellVariant()
-            : mVariant((void*)(nullptr))
+    public:
+        explicit CellVariant(const ESM4::Cell& cell)
+            : mVariant(&cell)
         {
         }
 
-        explicit CellVariant(const ESM4::Cell* cell)
-            : mVariant(cell)
+        explicit CellVariant(const ESM::Cell& cell)
+            : mVariant(&cell)
         {
-        }
-
-        explicit CellVariant(const ESM::Cell* cell)
-            : mVariant(cell)
-        {
-        }
-
-        bool isValid() const
-        {
-            return std::holds_alternative<const ESM4::Cell*>(mVariant)
-                || std::holds_alternative<const ESM::Cell*>(mVariant);
         }
 
         bool isEsm4() const { return std::holds_alternative<const ESM4::Cell*>(mVariant); }

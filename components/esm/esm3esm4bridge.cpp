@@ -6,17 +6,13 @@ namespace ESM
 {
     const ESM4::Cell& CellVariant::getEsm4() const
     {
-        auto cell4 = std::get<0>(mVariant);
-        if (!cell4)
-            throw std::runtime_error("invalid variant acess");
+        auto cell4 = std::get<const ESM4::Cell*>(mVariant);
         return *cell4;
     }
 
     const ESM::Cell& CellVariant::getEsm3() const
     {
-        auto cell = std::get<1>(mVariant);
-        if (!cell)
-            throw std::runtime_error("invalid variant acess");
+        auto cell = std::get<const ESM::Cell*>(mVariant);
         return *cell;
     }
 }

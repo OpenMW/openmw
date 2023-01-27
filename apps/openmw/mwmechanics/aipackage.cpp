@@ -418,7 +418,7 @@ bool MWMechanics::AiPackage::isNearInactiveCell(osg::Vec3f position)
     if (playerCell->isExterior())
     {
         // get actor's distance from origin of center cell
-        Misc::CoordinateConverter(ESM::CellVariant(playerCell)).toLocal(position);
+        Misc::CoordinateConverter(ESM::CellVariant(*playerCell)).toLocal(position);
 
         // currently assumes 3 x 3 grid for exterior cells, with player at center cell.
         // AI shuts down actors before they reach edges of 3 x 3 grid.

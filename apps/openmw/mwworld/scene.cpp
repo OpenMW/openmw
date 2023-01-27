@@ -383,57 +383,57 @@ namespace MWWorld
         assert(mActiveCells.find(cell) == mActiveCells.end());
         mActiveCells.insert(cell);
 
-        Log(Debug::Info) << "Loading cell " << cell->getCell()->getEditorName();
+        Log(Debug::Info) << "Loading cell " << cell->getCell()->getDescription();
 
         const int cellX = cell->getCell()->getGridX();
         const int cellY = cell->getCell()->getGridY();
         auto cellVariant = *cell->getCell();
+
+        if (cellVariant.isExterior())
+        {
+            osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
+            const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
+            const int verts = ESM::Land::LAND_SIZE;
+            const int worldsize = ESM::Land::REAL_SIZE;
+            if (data)
+            {
+                mPhysics->addHeightField(
+                    data->mHeights, cellX, cellY, worldsize, verts, data->mMinHeight, data->mMaxHeight, land.get());
+            }
+            else
+            {
+                static std::vector<float> defaultHeight;
+                defaultHeight.resize(verts * verts, ESM::Land::DEFAULT_HEIGHT);
+                mPhysics->addHeightField(defaultHeight.data(), cellX, cellY, worldsize, verts,
+                    ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
+            }
+            if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
+            {
+                const osg::Vec2i cellPosition(cellX, cellY);
+                const btVector3& origin = heightField->getCollisionObject()->getWorldTransform().getOrigin();
+                const osg::Vec3f shift(origin.x(), origin.y(), origin.z());
+                const HeightfieldShape shape = [&]() -> HeightfieldShape {
+                    if (data == nullptr)
+                    {
+                        return DetourNavigator::HeightfieldPlane{ static_cast<float>(ESM::Land::DEFAULT_HEIGHT) };
+                    }
+                    else
+                    {
+                        DetourNavigator::HeightfieldSurface heights;
+                        heights.mHeights = data->mHeights;
+                        heights.mSize = static_cast<std::size_t>(ESM::Land::LAND_SIZE);
+                        heights.mMinHeight = data->mMinHeight;
+                        heights.mMaxHeight = data->mMaxHeight;
+                        return heights;
+                    }
+                }();
+                mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shape, navigatorUpdateGuard);
+            }
+        }
+
         if (!cellVariant.isEsm4())
         {
             auto cell3 = cellVariant.getEsm3();
-
-            if (cell3.isExterior())
-            {
-                osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
-                const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
-                const int verts = ESM::Land::LAND_SIZE;
-                const int worldsize = ESM::Land::REAL_SIZE;
-                if (data)
-                {
-                    mPhysics->addHeightField(
-                        data->mHeights, cellX, cellY, worldsize, verts, data->mMinHeight, data->mMaxHeight, land.get());
-                }
-                else
-                {
-                    static std::vector<float> defaultHeight;
-                    defaultHeight.resize(verts * verts, ESM::Land::DEFAULT_HEIGHT);
-                    mPhysics->addHeightField(defaultHeight.data(), cellX, cellY, worldsize, verts,
-                        ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
-                }
-                if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
-                {
-                    const osg::Vec2i cellPosition(cellX, cellY);
-                    const btVector3& origin = heightField->getCollisionObject()->getWorldTransform().getOrigin();
-                    const osg::Vec3f shift(origin.x(), origin.y(), origin.z());
-                    const HeightfieldShape shape = [&]() -> HeightfieldShape {
-                        if (data == nullptr)
-                        {
-                            return DetourNavigator::HeightfieldPlane{ static_cast<float>(ESM::Land::DEFAULT_HEIGHT) };
-                        }
-                        else
-                        {
-                            DetourNavigator::HeightfieldSurface heights;
-                            heights.mHeights = data->mHeights;
-                            heights.mSize = static_cast<std::size_t>(ESM::Land::LAND_SIZE);
-                            heights.mMinHeight = data->mMinHeight;
-                            heights.mMaxHeight = data->mMaxHeight;
-                            return heights;
-                        }
-                    }();
-                    mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shape, navigatorUpdateGuard);
-                }
-            }
-
             if (const auto pathgrid = mWorld.getStore().get<ESM::Pathgrid>().search(cell3))
                 mNavigator.addPathgrid(cell3, *pathgrid);
         }
