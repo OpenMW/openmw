@@ -411,11 +411,14 @@ bool MWMechanics::AiPackage::doesPathNeedRecalc(const osg::Vec3f& newDest, const
 
 bool MWMechanics::AiPackage::isNearInactiveCell(osg::Vec3f position)
 {
-    const ESM::Cell* playerCell(&getPlayer().getCell()->getCellVariant().getEsm3());
+    if (getPlayer().getCell()->getCell()->isEsm4())
+        return false;
+
+    const ESM::Cell* playerCell(&getPlayer().getCell()->getCell()->getEsm3());
     if (playerCell->isExterior())
     {
         // get actor's distance from origin of center cell
-        Misc::CoordinateConverter(playerCell).toLocal(position);
+        Misc::CoordinateConverter(ESM::CellVariant(playerCell)).toLocal(position);
 
         // currently assumes 3 x 3 grid for exterior cells, with player at center cell.
         // AI shuts down actors before they reach edges of 3 x 3 grid.

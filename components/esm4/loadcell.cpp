@@ -241,12 +241,6 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 throw std::runtime_error("ESM4::CELL::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
-
-    mCellId.mWorldspace = Misc::StringUtils::lowerCase(mEditorId);
-    mCellId.mWorld = ESM::RefId::sEmpty;
-    mCellId.mIndex.mX = getGridX();
-    mCellId.mIndex.mX = getGridY();
-    mCellId.mPaged = isExterior();
 }
 
 // void ESM4::Cell::save(ESM4::Writer& writer) const

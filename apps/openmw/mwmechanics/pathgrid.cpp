@@ -98,13 +98,13 @@ namespace MWMechanics
      */
     bool PathgridGraph::load(const MWWorld::CellStore* cell)
     {
-        if (!cell || !cell->getCellVariant().isValid())
+        if (!cell)
             return false;
 
         if (mIsGraphConstructed)
             return true;
 
-        mCell = cell->getCellVariant().isEsm4() ? nullptr : &cell->getCellVariant().getEsm3();
+        mCell = cell->getCell()->isEsm4() ? nullptr : &cell->getCell()->getEsm3();
         if (!mCell)
             return false;
         mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*mCell);

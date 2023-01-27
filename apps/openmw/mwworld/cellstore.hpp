@@ -12,10 +12,10 @@
 #include <variant>
 #include <vector>
 
+#include "cell.hpp"
 #include "cellreflist.hpp"
 #include "livecellref.hpp"
 
-#include <components/esm/esm3esm4bridge.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm3/fogstate.hpp>
 #include <components/misc/tuplemeta.hpp>
@@ -98,8 +98,7 @@ namespace MWWorld
         // Note this is nullptr until the cell is explored to save some memory
         std::unique_ptr<ESM::FogState> mFogState;
 
-        const ESM::Cell* mCell;
-        ESM::CellVariant mCellVariant;
+        MWWorld::Cell mCellVariant;
         State mState;
         bool mHasState;
         std::vector<ESM::RefId> mIds;
@@ -194,14 +193,11 @@ namespace MWWorld
         }
 
         /// @param readerList The readers to use for loading of the cell on-demand.
-        CellStore(ESM::CellVariant cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
+        CellStore(MWWorld::Cell cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
         CellStore(CellStore&&);
         ~CellStore();
 
-        const ESM::CellCommon* getCell() const;
-        ESM::CellVariant getCellVariant() const;
-
-        std::string_view getEditorName() const;
+        const MWWorld::Cell* getCell() const;
 
         State getState() const;
 

@@ -1,9 +1,11 @@
 #ifndef OPENMW_COMPONENTS_MISC_COORDINATECONVERTER_H
 #define OPENMW_COMPONENTS_MISC_COORDINATECONVERTER_H
 
+#include <components/esm/esm3esm4bridge.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadpgrd.hpp>
+#include <components/esm4/loadcell.hpp>
 
 namespace Misc
 {
@@ -17,8 +19,10 @@ namespace Misc
         {
         }
 
-        explicit CoordinateConverter(const ESM::CellCommon* cell)
-            : CoordinateConverter(cell->isExterior(), cell->getGridX(), cell->getGridY())
+        explicit CoordinateConverter(const ESM::CellVariant& cell)
+            : CoordinateConverter(cell.isEsm4() ? cell.getEsm4().isExterior() : cell.getEsm3().isExterior(),
+                cell.isEsm4() ? cell.getEsm4().getGridX() : cell.getEsm3().getGridX(),
+                cell.isEsm4() ? cell.getEsm4().getGridY() : cell.getEsm3().getGridY())
         {
         }
 

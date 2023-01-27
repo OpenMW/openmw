@@ -9,6 +9,8 @@
 #include <components/sceneutil/util.hpp>
 #include <components/settings/settings.hpp>
 
+#include <apps/openmw/mwworld/cell.hpp>
+
 namespace
 {
     float DLLandFogStart;
@@ -40,12 +42,11 @@ namespace MWRender
         DLInteriorFogEnd = Settings::Manager::getFloat("distant interior fog end", "Fog");
     }
 
-    void FogManager::configure(float viewDistance, const ESM::CellVariant& cell)
+    void FogManager::configure(float viewDistance, const MWWorld::Cell& cell)
     {
-        osg::Vec4f color
-            = SceneUtil::colourFromRGB(cell.isEsm4() ? cell.getEsm4().mLighting.fogColor : cell.getEsm3().mAmbi.mFog);
+        osg::Vec4f color = SceneUtil::colourFromRGB(cell.getMood().mFogColor);
 
-        const float fogDensity = !cell.isEsm4() ? cell.getEsm3().mAmbi.mFogDensity : cell.getEsm4().mLighting.fogPower;
+        const float fogDensity = cell.getMood().mFogDensity;
         if (mDistantFog)
         {
             float density = std::max(0.2f, fogDensity);

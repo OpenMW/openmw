@@ -740,15 +740,14 @@ namespace MWRender
         mSky->setMoonColour(red);
     }
 
-    void RenderingManager::configureAmbient(const ESM::CellVariant& cell)
+    void RenderingManager::configureAmbient(const MWWorld::Cell& cell)
     {
-        bool isInterior = !cell.getCommon()->isExterior() && !cell.getCommon()->isQuasiExterior();
+        bool isInterior = !cell.isExterior() && !cell.isQuasiExterior();
         bool needsAdjusting = false;
         if (mResourceSystem->getSceneManager()->getLightingMethod() != SceneUtil::LightingMethod::FFP)
             needsAdjusting = isInterior;
 
-        osg::Vec4f ambient = SceneUtil::colourFromRGB(
-            cell.isEsm4() ? cell.getEsm4().mLighting.ambient : cell.getEsm3().mAmbi.mAmbient);
+        osg::Vec4f ambient = SceneUtil::colourFromRGB(cell.getMood().mAmbiantColor);
 
         if (needsAdjusting)
         {
@@ -772,8 +771,7 @@ namespace MWRender
 
         setAmbientColour(ambient);
 
-        osg::Vec4f diffuse = SceneUtil::colourFromRGB(
-            !cell.isEsm4() ? cell.getEsm3().mAmbi.mSunlight : cell.getEsm4().mLighting.directional);
+        osg::Vec4f diffuse = SceneUtil::colourFromRGB(cell.getMood().mDirectionalColor);
 
         setSunColour(diffuse, diffuse, 1.f);
 
@@ -894,7 +892,7 @@ namespace MWRender
         return false;
     }
 
-    void RenderingManager::configureFog(const ESM::CellVariant& cell)
+    void RenderingManager::configureFog(const MWWorld::Cell& cell)
     {
         mFog->configure(mViewDistance, cell);
     }
@@ -1428,7 +1426,7 @@ namespace MWRender
                 mMinimumAmbientLuminance
                     = std::clamp(Settings::Manager::getFloat("minimum interior brightness", "Shaders"), 0.f, 1.f);
                 if (MWMechanics::getPlayer().isInCell())
-                    configureAmbient(MWMechanics::getPlayer().getCell()->getCellVariant());
+                    configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
             }
             else if (it->first == "Shaders"
                 && (it->second == "light bounds multiplier" || it->second == "maximum light distance"

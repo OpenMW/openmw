@@ -536,10 +536,10 @@ namespace MWWorld
         return false;
     }
 
-    CellStore::CellStore(ESM::CellVariant cell, const MWWorld::ESMStore& esmStore, ESM::ReadersCache& readers)
+    CellStore::CellStore(MWWorld::Cell cell, const MWWorld::ESMStore& esmStore, ESM::ReadersCache& readers)
         : mStore(esmStore)
         , mReaders(readers)
-        , mCellVariant(cell)
+        , mCellVariant(std::move(cell))
         , mState(State_Unloaded)
         , mHasState(false)
         , mLastRespawn(0, 0)
@@ -547,36 +547,17 @@ namespace MWWorld
         , mRechargingItemsUpToDate(false)
     {
 
-        mCell = mCellVariant.isEsm4() ? nullptr : &mCellVariant.getEsm3();
-
         std::apply([this](auto&... x) { (CellStoreImp::assignStoreToIndex(*this, x), ...); }, mCellStoreImp->mRefLists);
-        if (mCell)
-            mWaterLevel = mCell->mWater;
+        if (!mCellVariant.isEsm4())
+            mWaterLevel = mCellVariant.getEsm3().mWater;
     }
 
     CellStore::~CellStore() = default;
     CellStore::CellStore(CellStore&&) = default;
 
-    const ESM::CellCommon* CellStore::getCell() const
+    const MWWorld::Cell* CellStore::getCell() const
     {
-        return mCellVariant.getCommon();
-    }
-
-    ESM::CellVariant CellStore::getCellVariant() const
-    {
-        return mCellVariant;
-    }
-
-    std::string_view CellStore::getEditorName() const
-    {
-        if (mCellVariant.isEsm4())
-        {
-            return mCellVariant.getEsm4().mEditorId;
-        }
-        else
-        {
-            return mCellVariant.getEsm3().mName;
-        }
+        return &mCellVariant;
     }
 
     CellStore::State CellStore::getState() const
@@ -732,20 +713,24 @@ namespace MWWorld
 
     void CellStore::listRefs()
     {
-        assert(mCell);
 
-        if (mCell->mContextList.empty())
+        if (mCellVariant.isEsm4())
+            return;
+
+        auto cell3 = mCellVariant.getEsm3();
+
+        if (cell3.mContextList.empty())
             return; // this is a dynamically generated cell -> skipping.
 
         // Load references from all plugins that do something with this cell.
-        for (size_t i = 0; i < mCell->mContextList.size(); i++)
+        for (size_t i = 0; i < cell3.mContextList.size(); i++)
         {
             try
             {
                 // Reopen the ESM reader and seek to the right position.
-                const std::size_t index = static_cast<std::size_t>(mCell->mContextList[i].index);
+                const std::size_t index = static_cast<std::size_t>(cell3.mContextList[i].index);
                 const ESM::ReadersCache::BusyItem reader = mReaders.get(index);
-                mCell->restore(*reader, i);
+                cell3.restore(*reader, i);
 
                 ESM::CellRef ref;
 
@@ -761,8 +746,8 @@ namespace MWWorld
 
                     // Don't list reference if it was moved to a different cell.
                     ESM::MovedCellRefTracker::const_iterator iter
-                        = std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
-                    if (iter != mCell->mMovedRefs.end())
+                        = std::find(cell3.mMovedRefs.begin(), cell3.mMovedRefs.end(), ref.mRefNum);
+                    if (iter != cell3.mMovedRefs.end())
                     {
                         continue;
                     }
@@ -778,7 +763,7 @@ namespace MWWorld
         }
 
         // List moved references, from separately tracked list.
-        for (const auto& [ref, deleted] : mCell->mLeasedRefs)
+        for (const auto& [ref, deleted] : cell3.mLeasedRefs)
         {
             if (!deleted)
                 mIds.push_back(ref.mRefID);
@@ -809,18 +794,19 @@ namespace MWWorld
         }
         else
         {
-            if (mCell->mContextList.empty())
+            auto cell3 = mCellVariant.getEsm3();
+            if (cell3.mContextList.empty())
                 return; // this is a dynamically generated cell -> skipping.
 
             // Load references from all plugins that do something with this cell.
-            for (size_t i = 0; i < mCell->mContextList.size(); i++)
+            for (size_t i = 0; i < cell3.mContextList.size(); i++)
             {
                 try
                 {
                     // Reopen the ESM reader and seek to the right position.
-                    const std::size_t index = static_cast<std::size_t>(mCell->mContextList[i].index);
+                    const std::size_t index = static_cast<std::size_t>(cell3.mContextList[i].index);
                     const ESM::ReadersCache::BusyItem reader = mReaders.get(index);
-                    mCell->restore(*reader, i);
+                    cell3.restore(*reader, i);
 
                     ESM::CellRef ref;
                     // Get each reference in turn
@@ -835,8 +821,8 @@ namespace MWWorld
 
                         // Don't load reference if it was moved to a different cell.
                         ESM::MovedCellRefTracker::const_iterator iter
-                            = std::find(mCell->mMovedRefs.begin(), mCell->mMovedRefs.end(), ref.mRefNum);
-                        if (iter != mCell->mMovedRefs.end())
+                            = std::find(cell3.mMovedRefs.begin(), cell3.mMovedRefs.end(), ref.mRefNum);
+                        if (iter != cell3.mMovedRefs.end())
                         {
                             continue;
                         }
@@ -851,7 +837,7 @@ namespace MWWorld
                 }
             }
             // Load moved references, from separately tracked list.
-            for (const auto& leasedRef : mCell->mLeasedRefs)
+            for (const auto& leasedRef : cell3.mLeasedRefs)
             {
                 ESM::CellRef& ref = const_cast<ESM::CellRef&>(leasedRef.first);
                 bool deleted = leasedRef.second;
@@ -865,12 +851,12 @@ namespace MWWorld
 
     bool CellStore::isExterior() const
     {
-        return mCellVariant.getCommon()->isExterior();
+        return mCellVariant.isExterior();
     }
 
     bool CellStore::isQuasiExterior() const
     {
-        return mCellVariant.getCommon()->isExterior();
+        return mCellVariant.isQuasiExterior();
     }
 
     Ptr CellStore::searchInContainer(const ESM::RefId& id)
@@ -954,9 +940,12 @@ namespace MWWorld
 
     void CellStore::loadState(const ESM::CellState& state)
     {
+        if (mCellVariant.isEsm4())
+            return;
+
         mHasState = true;
 
-        if (mCell->mData.mFlags & ESM::Cell::Interior && mCell->mData.mFlags & ESM::Cell::HasWater)
+        if (!mCellVariant.isExterior() && mCellVariant.hasWater())
             mWaterLevel = state.mWaterLevel;
 
         mLastRespawn = MWWorld::TimeStamp(state.mLastRespawn);
@@ -964,9 +953,9 @@ namespace MWWorld
 
     void CellStore::saveState(ESM::CellState& state) const
     {
-        state.mId = mCell->getCellId();
+        state.mId = mCellVariant.getCellId();
 
-        if (mCell->mData.mFlags & ESM::Cell::Interior && mCell->mData.mFlags & ESM::Cell::HasWater)
+        if (!mCellVariant.isExterior() && mCellVariant.hasWater())
             state.mWaterLevel = mWaterLevel;
 
         state.mHasFogOfWar = (mFogState.get() ? 1 : 0);
@@ -977,7 +966,7 @@ namespace MWWorld
     {
         if (mFogState.get())
         {
-            mFogState->save(writer, mCell->mData.mFlags & ESM::Cell::Interior);
+            mFogState->save(writer, !mCellVariant.isExterior());
         }
     }
 

@@ -94,6 +94,7 @@ namespace MWWorld
     class TimeStamp;
     class ESMStore;
     class RefData;
+    struct Cell;
 
     typedef std::vector<std::pair<MWWorld::Ptr, MWMechanics::Movement>> PtrMovementList;
 }
@@ -181,7 +182,7 @@ namespace MWBase
         ///
         /// \note If cell==0, the cell the player is currently in will be used instead to
         /// generate a name.
-        virtual std::string_view getCellName(const ESM::CellVariant& cell) const = 0;
+        virtual std::string_view getCellName(const MWWorld::Cell& cell) const = 0;
 
         virtual void removeRefScript(MWWorld::RefData* ref) = 0;
         //< Remove the script attached to ref from mLocalScripts

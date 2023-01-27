@@ -67,7 +67,7 @@ MWWorld::CellStore* MWWorld::WorldModel::getCellStore(const ESM::Cell* cell)
         auto result = mInteriors.find(cell->mName);
 
         if (result == mInteriors.end())
-            result = mInteriors.emplace(cell->mName, CellStore(ESM::CellVariant(cell), mStore, mReaders)).first;
+            result = mInteriors.emplace(cell->mName, CellStore(MWWorld::Cell(cell), mStore, mReaders)).first;
 
         return &result->second;
     }
@@ -79,7 +79,7 @@ MWWorld::CellStore* MWWorld::WorldModel::getCellStore(const ESM::Cell* cell)
         if (result == mExteriors.end())
             result = mExteriors
                          .emplace(std::make_pair(cell->getGridX(), cell->getGridY()),
-                             CellStore(ESM::CellVariant(cell), mStore, mReaders))
+                             CellStore(MWWorld::Cell(cell), mStore, mReaders))
                          .first;
 
         return &result->second;
@@ -186,7 +186,7 @@ MWWorld::CellStore* MWWorld::WorldModel::getExterior(int x, int y)
             cell = MWBase::Environment::get().getWorld()->createRecord(record);
         }
 
-        result = mExteriors.emplace(std::make_pair(x, y), CellStore(ESM::CellVariant(cell), mStore, mReaders)).first;
+        result = mExteriors.emplace(std::make_pair(x, y), CellStore(MWWorld::Cell(cell), mStore, mReaders)).first;
     }
 
     if (result->second.getState() != CellStore::State_Loaded)
@@ -208,11 +208,11 @@ MWWorld::CellStore* MWWorld::WorldModel::getInterior(std::string_view name)
         if (!cell4)
         {
             const ESM::Cell* cell = mStore.get<ESM::Cell>().find(name);
-            result = mInteriors.emplace(name, CellStore(ESM::CellVariant(cell), mStore, mReaders)).first;
+            result = mInteriors.emplace(name, CellStore(MWWorld::Cell(cell), mStore, mReaders)).first;
         }
         else
         {
-            result = mInteriors.emplace(name, CellStore(ESM::CellVariant(cell4), mStore, mReaders)).first;
+            result = mInteriors.emplace(name, CellStore(MWWorld::Cell(cell4), mStore, mReaders)).first;
         }
     }
 

@@ -74,6 +74,7 @@ namespace DetourNavigator
 namespace MWWorld
 {
     class GroundcoverStore;
+    struct Cell;
 }
 
 namespace Debug
@@ -141,8 +142,8 @@ namespace MWRender
         void setSunColour(const osg::Vec4f& diffuse, const osg::Vec4f& specular, float sunVis);
         void setNight(bool isNight) { mNight = isNight; }
 
-        void configureAmbient(const ESM::CellVariant& cell);
-        void configureFog(const ESM::CellVariant& cell);
+        void configureAmbient(const MWWorld::Cell& cell);
+        void configureFog(const MWWorld::Cell& cell);
         void configureFog(
             float fogDepth, float underwaterFog, float dlFactor, float dlOffset, const osg::Vec4f& colour);
 

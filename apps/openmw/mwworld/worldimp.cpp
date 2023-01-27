@@ -634,22 +634,18 @@ namespace MWWorld
     {
         if (!cell)
             cell = mWorldScene->getCurrentCell();
-        return getCellName(cell->getCellVariant());
+        return getCellName(*cell->getCell());
     }
 
-    std::string_view World::getCellName(const ESM::CellVariant& cell) const
+    std::string_view World::getCellName(const MWWorld::Cell& cell) const
     {
-        auto cellCommon = cell.getCommon();
-        if (cellCommon)
-        {
-            if (!cellCommon->isExterior() || !cellCommon->getEditorName().empty())
-                return cellCommon->getEditorName();
+        if (!cell.isExterior() || !cell.getEditorName().empty())
+            return cell.getEditorName();
 
-            if (!cell.isEsm4())
-            {
-                const ESM::Region* region = mStore.get<ESM::Region>().search(cell.getEsm3().mRegion);
-                return region->mName;
-            }
+        if (!cell.isEsm4())
+        {
+            const ESM::Region* region = mStore.get<ESM::Region>().search(cell.getEsm3().mRegion);
+            return region->mName;
         }
 
         return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
@@ -2313,7 +2309,7 @@ namespace MWWorld
         if (!cell)
             return false;
 
-        if (!(cell->getCellVariant().getCommon()->hasWater()))
+        if (!(cell->getCell()->hasWater()))
         {
             return false;
         }
@@ -2840,7 +2836,7 @@ namespace MWWorld
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-        const ESM::CellCommon* ext = nullptr;
+        const MWWorld::Cell* ext = nullptr;
         try
         {
             ext = mWorldModel.getCell(nameId)->getCell();
@@ -3247,9 +3243,8 @@ namespace MWWorld
         }
         else
         {
-            auto cellVariant = cell->getCellVariant();
-            uint32_t ambient = !cellVariant.isEsm4() ? cellVariant.getEsm3().mAmbi.mAmbient
-                                                     : cellVariant.getEsm4().mLighting.ambient;
+            auto cellVariant = *cell->getCell();
+            uint32_t ambient = cellVariant.getMood().mAmbiantColor;
             int ambientTotal = (ambient & 0xff) + ((ambient >> 8) & 0xff) + ((ambient >> 16) & 0xff);
             return !cell->getCell()->noSleep() && ambientTotal <= 201;
         }
@@ -3275,7 +3270,7 @@ namespace MWWorld
         std::set<std::string_view> checkedCells;
         std::set<std::string_view> currentCells;
         std::set<std::string_view> nextCells;
-        nextCells.insert(cell->getEditorName());
+        nextCells.insert(cell->getCell()->getEditorName());
 
         while (!nextCells.empty())
         {

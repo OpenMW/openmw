@@ -16,20 +16,6 @@ namespace ESM
     struct Cell;
     struct CellId;
     struct RefId;
-    // Common interface for esm3 and esm4 cells
-    struct CellCommon
-    {
-        virtual int getGridX() const = 0;
-        virtual int getGridY() const = 0;
-        virtual bool isExterior() const = 0;
-        virtual bool isQuasiExterior() const = 0;
-        virtual bool hasWater() const = 0;
-        virtual bool noSleep() const { return false; }
-        virtual const ESM::CellId& getCellId() const = 0;
-        virtual const ESM::RefId& getRegion() const = 0;
-        virtual std::string_view getEditorName() const = 0;
-        virtual std::string getDescription() const = 0;
-    };
 
     struct CellVariant
     {
@@ -61,8 +47,6 @@ namespace ESM
         const ESM4::Cell& getEsm4() const;
 
         const ESM::Cell& getEsm3() const;
-
-        const ESM::CellCommon* getCommon() const;
     };
 }
 

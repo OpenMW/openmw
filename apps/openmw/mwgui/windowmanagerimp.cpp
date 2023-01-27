@@ -954,7 +954,7 @@ namespace MWGui
 
         mMap->setCellName(name);
         mHud->setCellName(name);
-        auto cellCommon = cell->getCellVariant().getCommon();
+        auto cellCommon = cell->getCell();
 
         if (cellCommon->isExterior())
         {

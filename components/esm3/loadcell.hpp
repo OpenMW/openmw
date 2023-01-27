@@ -8,7 +8,6 @@
 #include "cellid.hpp"
 #include "cellref.hpp"
 #include "components/esm/defs.hpp"
-#include "components/esm/esm3esm4bridge.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "components/esm/refid.hpp"
 
@@ -66,7 +65,7 @@ namespace ESM
        (using ESMReader::getContext()) and jumping back into place
        whenever we need to load a given cell.
      */
-    struct Cell : public CellCommon
+    struct Cell
     {
         constexpr static RecNameInts sRecordId = REC_CELL;
 
@@ -151,14 +150,11 @@ namespace ESM
         void save(ESMWriter& esm, bool isDeleted = false) const;
         void saveTempMarker(ESMWriter& esm, int tempCount) const;
 
-        bool isExterior() const override { return !(mData.mFlags & Interior); }
-        bool isQuasiExterior() const override { return mData.mFlags & QuasiEx; }
+        bool isExterior() const { return !(mData.mFlags & Interior); }
 
-        int getGridX() const override { return mData.mX; }
+        int getGridX() const { return mData.mX; }
 
-        int getGridY() const override { return mData.mY; }
-
-        bool hasWater() const override { return ((mData.mFlags & HasWater) != 0) || isExterior(); }
+        int getGridY() const { return mData.mY; }
 
         bool hasAmbient() const { return mHasAmbi; }
 
@@ -171,7 +167,7 @@ namespace ESM
         // exactly.
         void restore(ESMReader& esm, int iCtx) const;
 
-        std::string getDescription() const override;
+        std::string getDescription() const;
         ///< Return a short string describing the cell (mostly used for debugging/logging purpose)
 
         /* Get the next reference in this cell, if any. Returns false when
@@ -193,10 +189,7 @@ namespace ESM
         void blank();
         ///< Set record to default state (does not touch the ID/index).
 
-        const CellId& getCellId() const override;
-        const ESM::RefId& getRegion() const override { return mRegion; }
-        bool noSleep() const override { return mData.mFlags & ESM::Cell::NoSleep; }
-        std::string_view getEditorName() const override { return mName; }
+        const CellId& getCellId() const;
     };
 }
 #endif
