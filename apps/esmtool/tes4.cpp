@@ -97,6 +97,10 @@ namespace EsmTool
                 std::cout << "\n  Id: " << value.mId;
             if constexpr (ESM4::hasFlags<T>)
                 std::cout << "\n  Record flags: " << recordFlags(value.mFlags);
+            if constexpr (ESM4::hasParentFormId<T>)
+                std::cout << "\n  ParentFormId: " << value.mParentFormId;
+            if constexpr (ESM4::hasParent<T>)
+                std::cout << "\n  Parent: " << value.mParent;
             if constexpr (ESM4::hasEditorId<T>)
                 std::cout << "\n  EditorId: " << value.mEditorId;
             if constexpr (ESM4::hasModel<T>)
@@ -105,6 +109,10 @@ namespace EsmTool
                 std::cout << "\n  Nif:" << WriteArray("\n  - ", value.mNif);
             if constexpr (ESM4::hasKf<T>)
                 std::cout << "\n  Kf:" << WriteArray("\n  - ", value.mKf);
+            if constexpr (ESM4::hasType<T>)
+                std::cout << "\n  Type: " << value.mType;
+            if constexpr (ESM4::hasValue<T>)
+                std::cout << "\n  Value: " << value.mValue;
             std::cout << '\n';
         }
 
