@@ -175,7 +175,7 @@ namespace MWMechanics
                     }
                 }
                 else if (Misc::StringUtils::ciEqual(
-                             mCellId, actor.getCell()->getCell()->getEditorName())) // Cell to travel to
+                             mCellId, actor.getCell()->getCell()->getNameId())) // Cell to travel to
                 {
                     mRemainingDuration = mDuration;
                     return true;

@@ -639,8 +639,8 @@ namespace MWWorld
 
     std::string_view World::getCellName(const MWWorld::Cell& cell) const
     {
-        if (!cell.isExterior() || !cell.getEditorName().empty())
-            return cell.getEditorName();
+        if (!cell.isExterior() || !cell.getNameId().empty())
+            return cell.getNameId();
 
         if (!cell.isEsm4())
         {
@@ -1139,7 +1139,7 @@ namespace MWWorld
             {
                 if (!newCell->isExterior())
                 {
-                    changeToInteriorCell(newCell->getCell()->getEditorName(), pos, false);
+                    changeToInteriorCell(newCell->getCell()->getNameId(), pos, false);
                     removeContainerScripts(getPlayerPtr());
                 }
                 else
@@ -1400,7 +1400,7 @@ namespace MWWorld
             esmPos.pos[2] = traced.z();
             std::string_view cell;
             if (!actor.getCell()->isExterior())
-                cell = actor.getCell()->getCell()->getEditorName();
+                cell = actor.getCell()->getCell()->getNameId();
             MWWorld::ActionTeleport(cell, esmPos, false).execute(actor);
         }
     }
@@ -3270,7 +3270,7 @@ namespace MWWorld
         std::set<std::string_view> checkedCells;
         std::set<std::string_view> currentCells;
         std::set<std::string_view> nextCells;
-        nextCells.insert(cell->getCell()->getEditorName());
+        nextCells.insert(cell->getCell()->getNameId());
 
         while (!nextCells.empty())
         {
@@ -3325,7 +3325,7 @@ namespace MWWorld
         std::set<std::string_view> nextCells;
         MWWorld::ConstPtr closestMarker;
 
-        nextCells.insert(ptr.getCell()->getCell()->getEditorName());
+        nextCells.insert(ptr.getCell()->getCell()->getNameId());
         while (!nextCells.empty())
         {
             currentCells = nextCells;
@@ -3420,7 +3420,7 @@ namespace MWWorld
 
         std::string_view cellName = "";
         if (!closestMarker.mCell->isExterior())
-            cellName = closestMarker.mCell->getCell()->getEditorName();
+            cellName = closestMarker.mCell->getCell()->getNameId();
 
         MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition(), false);
         action.execute(ptr);

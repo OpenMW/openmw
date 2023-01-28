@@ -35,11 +35,11 @@ namespace MWLua
             if (cell->isExterior())
                 res << "exterior(" << cell->getGridX() << ", " << cell->getGridY() << ")";
             else
-                res << "interior(" << cell->getEditorName() << ")";
+                res << "interior(" << cell->getNameId() << ")";
             return res.str();
         };
 
-        cellT["name"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getEditorName(); });
+        cellT["name"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getNameId(); });
         cellT["region"]
             = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getRegion().getRefIdString(); });
         cellT["gridX"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getGridX(); });

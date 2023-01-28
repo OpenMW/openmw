@@ -156,6 +156,8 @@ namespace ESM
 
         int getGridY() const { return mData.mY; }
 
+        bool hasWater() const { return ((mData.mFlags & HasWater) != 0) || isExterior(); }
+
         bool hasAmbient() const { return mHasAmbi; }
 
         void setHasAmbient(bool hasAmbi) { mHasAmbi = hasAmbi; }

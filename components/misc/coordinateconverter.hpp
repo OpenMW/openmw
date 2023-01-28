@@ -26,6 +26,11 @@ namespace Misc
         {
         }
 
+        explicit CoordinateConverter(const ESM::Cell* cell)
+            : CoordinateConverter(cell->isExterior(), cell->getGridX(), cell->getGridY())
+        {
+        }
+
         /// in-place conversion from local to world
         void toWorld(ESM::Pathgrid::Point& point) const
         {

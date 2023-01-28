@@ -747,7 +747,7 @@ namespace MWWorld
             {
                 assert(!(*iter)->getCell()->isExterior());
 
-                if (it->mName == (*iter)->getCell()->getEditorName())
+                if (it->mName == (*iter)->getCell()->getNameId())
                 {
                     unloadCell(*iter, navigatorUpdateGuard.get());
                     break;

@@ -43,10 +43,8 @@ namespace ESM
 
     struct ReferenceVariant
     {
-    protected:
         std::variant<ESM::CellRef, ESM4::Reference> mVariant;
 
-    public:
         explicit ReferenceVariant(const ESM4::Reference& ref)
             : mVariant(ref)
         {

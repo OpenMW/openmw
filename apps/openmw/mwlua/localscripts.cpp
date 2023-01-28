@@ -181,7 +181,7 @@ namespace MWLua
                 ai.stack(MWMechanics::AiEscort(refId, gameHoursDuration, dest.x(), dest.y(), dest.z(), false), ptr);
             else
                 ai.stack(MWMechanics::AiEscort(
-                             refId, esmCell->getEditorName(), gameHoursDuration, dest.x(), dest.y(), dest.z(), false),
+                             refId, esmCell->getNameId(), gameHoursDuration, dest.x(), dest.y(), dest.z(), false),
                     ptr);
         };
         selfAPI["_startAiWander"] = [](SelfObject& self, int distance, float duration) {

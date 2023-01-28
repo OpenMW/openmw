@@ -958,7 +958,7 @@ namespace MWGui
 
         if (cellCommon->isExterior())
         {
-            if (!cellCommon->getEditorName().empty())
+            if (!cellCommon->getNameId().empty())
                 mMap->addVisitedLocation(name, cellCommon->getGridX(), cellCommon->getGridY());
 
             mMap->cellExplored(cellCommon->getGridX(), cellCommon->getGridY());
@@ -967,8 +967,8 @@ namespace MWGui
         }
         else
         {
-            mMap->setCellPrefix(std::string(cellCommon->getEditorName()));
-            mHud->setCellPrefix(std::string(cellCommon->getEditorName()));
+            mMap->setCellPrefix(std::string(cellCommon->getNameId()));
+            mHud->setCellPrefix(std::string(cellCommon->getNameId()));
 
             osg::Vec3f worldPos;
             if (!MWBase::Environment::get().getWorld()->findInteriorPositionInWorldSpace(cell, worldPos))

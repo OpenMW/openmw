@@ -1,6 +1,8 @@
 #ifndef OPENW_MWORLD_CELL
 #define OPENW_MWORLD_CELL
 
+#include <osg/Vec2i>
+
 #include <components/esm/esmbridge.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm3/cellid.hpp>
@@ -43,7 +45,8 @@ namespace MWWorld
         bool noSleep() const { return mFlags.noSleep; }
         const ESM::CellId& getCellId() const { return mCellId; }
         const ESM::RefId& getRegion() const { return mRegion; }
-        std::string_view getEditorName() const { return mNameID; }
+        std::string_view getNameId() const { return mNameID; }
+        std::string_view getDisplayName() const { return mDisplayname; }
         std::string getDescription() const;
         const MoodData& getMood() const { return mMood; }
 
