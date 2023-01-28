@@ -18,7 +18,7 @@ namespace ESM
     struct CellId;
     struct RefId;
 
-    struct CellVariant
+    class CellVariant
     {
     protected:
         std::variant<const ESM4::Cell*, const ESM::Cell*> mVariant;
