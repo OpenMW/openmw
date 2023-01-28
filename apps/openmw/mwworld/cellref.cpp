@@ -260,10 +260,7 @@ namespace MWWorld
 
     void CellRef::writeState(ESM::ObjectState& state) const
     {
-        if (!mCellRef.isESM4())
-        {
-            auto& cellRef3 = mCellRef.getEsm3();
-            state.mRef = cellRef3;
-        }
+        std::visit(RefVisit{ [&](const ESM4::Reference& ref) {}, [&](const ESM::CellRef& ref) { state.mRef = ref; } },
+            mCellRef.mVariant);
     }
 }

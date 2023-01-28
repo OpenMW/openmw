@@ -40,17 +40,35 @@ namespace MWWorld
         // Id of object being referenced
         const ESM::RefId& getRefId() const
         {
-            return mCellRef.isESM4() ? mCellRef.getEsm4().mBaseObj : mCellRef.getEsm3().mRefID;
+            struct Visitor
+            {
+                const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mRefID; }
+                const ESM::RefId& operator()(const ESM4::Reference& ref) { return ref.mBaseObj; }
+            };
+            return std::visit(Visitor(), mCellRef.mVariant);
         }
 
         // For doors - true if this door teleports to somewhere else, false
         // if it should open through animation.
-        bool getTeleport() const { return mCellRef.isESM4() ? false : mCellRef.getEsm3().mTeleport; }
+        bool getTeleport() const
+        {
+            struct Visitor
+            {
+                bool operator()(const ESM::CellRef& ref) { return ref.mTeleport; }
+                bool operator()(const ESM4::Reference& ref) { return 0; }
+            };
+            return std::visit(Visitor(), mCellRef.mVariant);
+        }
 
         // Teleport location for the door, if this is a teleporting door.
         const ESM::Position& getDoorDest() const
         {
-            return mCellRef.isESM4() ? mCellRef.getEsm4().mDoor.destPos : mCellRef.getEsm3().mDoorDest;
+            struct Visitor
+            {
+                const ESM::Position& operator()(const ESM::CellRef& ref) { return ref.mDoorDest; }
+                const ESM::Position& operator()(const ESM4::Reference& ref) { return ref.mDoor.destPos; }
+            };
+            return std::visit(Visitor(), mCellRef.mVariant);
         }
 
         // Destination cell for doors (optional)
@@ -82,10 +100,23 @@ namespace MWWorld
         // For weapon or armor, this is the remaining item health.
         // For tools (lockpicks, probes, repair hammer) it is the remaining uses.
         // If this returns int(-1) it means full health.
-        int getCharge() const { return mCellRef.isESM4() ? 0 : mCellRef.getEsm3().mChargeInt; }
+        int getCharge() const
+        {
+            struct Visitor
+            {
+                int operator()(const ESM::CellRef& ref) { return ref.mChargeFloat; }
+                int operator()(const ESM4::Reference& ref) { return 0; }
+            };
+            return std::visit(Visitor(), mCellRef.mVariant);
+        }
         float getChargeFloat() const
         {
-            return mCellRef.isESM4() ? 0.f : mCellRef.getEsm3().mChargeFloat;
+            struct Visitor
+            {
+                float operator()(const ESM::CellRef& ref) { return ref.mChargeFloat; }
+                float operator()(const ESM4::Reference& ref) { return 0; }
+            };
+            return std::visit(Visitor(), mCellRef.mVariant);
         } // Implemented as union with int charge
         void setCharge(int charge);
         void setChargeFloat(float charge);
@@ -94,7 +125,12 @@ namespace MWWorld
         // The NPC that owns this object (and will get angry if you steal it)
         const ESM::RefId& getOwner() const
         {
-            return mCellRef.isESM4() ? ESM::RefId::sEmpty : mCellRef.getEsm3().mOwner;
+            struct Visitor
+            {
+                const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mOwner; }
+                const ESM::RefId& operator()(const ESM4::Reference& ref) { return ESM::RefId::sEmpty; }
+            };
+            return std::visit(Visitor(), mCellRef.mVariant);
         }
         void setOwner(const ESM::RefId& owner);
 
@@ -106,14 +142,27 @@ namespace MWWorld
         void resetGlobalVariable();
 
         // ID of creature trapped in this soul gem
-        const ESM::RefId& getSoul() const { return mCellRef.isESM4() ? ESM::RefId::sEmpty : mCellRef.getEsm3().mSoul; }
+        const ESM::RefId& getSoul() const
+        {
+            struct Visitor
+            {
+                const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mSoul; }
+                const ESM::RefId& operator()(const ESM4::Reference& ref) { return ESM::RefId::sEmpty; }
+            };
+            return std::visit(Visitor(), mCellRef.mVariant);
+        }
         void setSoul(const ESM::RefId& soul);
 
         // The faction that owns this object (and will get angry if
         // you take it and are not a faction member)
         const ESM::RefId& getFaction() const
         {
-            return mCellRef.isESM4() ? ESM::RefId::sEmpty : mCellRef.getEsm3().mFaction;
+            struct Visitor
+            {
+                const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mFaction; }
+                const ESM::RefId& operator()(const ESM4::Reference& ref) { return ESM::RefId::sEmpty; }
+            };
+            return std::visit(Visitor(), mCellRef.mVariant);
         }
         void setFaction(const ESM::RefId& faction);
 
@@ -139,11 +188,27 @@ namespace MWWorld
         {
             return std::visit([](auto&& ref) -> const ESM::RefId& { return ref.mKey; }, mCellRef.mVariant);
         }
-        const ESM::RefId& getTrap() const { return mCellRef.isESM4() ? ESM::RefId::sEmpty : mCellRef.getEsm3().mTrap; }
+        const ESM::RefId& getTrap() const
+        {
+            struct Visitor
+            {
+                const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mTrap; }
+                const ESM::RefId& operator()(const ESM4::Reference& ref) { return ESM::RefId::sEmpty; }
+            };
+            return std::visit(Visitor(), mCellRef.mVariant);
+        }
         void setTrap(const ESM::RefId& trap);
 
         // This is 5 for Gold_005 references, 100 for Gold_100 and so on.
-        int getGoldValue() const { return mCellRef.isESM4() ? 0 : mCellRef.getEsm3().mGoldValue; }
+        int getGoldValue() const
+        {
+            struct Visitor
+            {
+                int operator()(const ESM::CellRef& ref) { return ref.mGoldValue; }
+                int operator()(const ESM4::Reference& ref) { return 0; }
+            };
+            return std::visit(Visitor(), mCellRef.mVariant);
+        }
         void setGoldValue(int value);
 
         // Write the content of this CellRef into the given ObjectState
