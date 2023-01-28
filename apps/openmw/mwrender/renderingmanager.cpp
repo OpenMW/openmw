@@ -104,9 +104,7 @@ namespace MWRender
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
         {
-            auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
-            if (uProjectionMatrix)
-                uProjectionMatrix->set(mProjectionMatrix);
+            stateset->getUniform("projectionMatrix")->set(mProjectionMatrix);
             if (mSkyRTT && nv->getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
             {
                 osg::Texture* skyTexture = mSkyRTT->getColorTexture(static_cast<osgUtil::CullVisitor*>(nv));
@@ -120,18 +118,12 @@ namespace MWRender
 
         void applyLeft(osg::StateSet* stateset, osgUtil::CullVisitor* nv) override
         {
-            auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
-            if (uProjectionMatrix)
-                uProjectionMatrix->set(Stereo::Manager::instance().computeEyeViewOffset(0)
-                    * Stereo::Manager::instance().computeEyeProjection(0, SceneUtil::AutoDepth::isReversed()));
+            stateset->getUniform("projectionMatrix")->set(getEyeProjectionMatrix(0));
         }
 
         void applyRight(osg::StateSet* stateset, osgUtil::CullVisitor* nv) override
         {
-            auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
-            if (uProjectionMatrix)
-                uProjectionMatrix->set(Stereo::Manager::instance().computeEyeViewOffset(1)
-                    * Stereo::Manager::instance().computeEyeProjection(1, SceneUtil::AutoDepth::isReversed()));
+            stateset->getUniform("projectionMatrix")->set(getEyeProjectionMatrix(1));
         }
 
         void setProjectionMatrix(const osg::Matrixf& projectionMatrix) { mProjectionMatrix = projectionMatrix; }
@@ -145,6 +137,12 @@ namespace MWRender
         }
 
     private:
+        osg::Matrixf getEyeProjectionMatrix(int view)
+        {
+            return Stereo::Manager::instance().computeEyeViewOffset(view)
+                * Stereo::Manager::instance().computeEyeProjection(view, SceneUtil::AutoDepth::isReversed());
+        }
+
         osg::Matrixf mProjectionMatrix;
         int mSkyTextureUnit = -1;
         SceneUtil::RTTNode* mSkyRTT = nullptr;
@@ -160,8 +158,9 @@ namespace MWRender
             : mLinearFac(0.f)
             , mNear(0.f)
             , mFar(0.f)
-            , mUsePlayerUniforms(usePlayerUniforms)
             , mWindSpeed(0.f)
+            , mSkyBlendingStartCoef(Settings::Manager::getFloat("sky blending start", "Fog"))
+            , mUsePlayerUniforms(usePlayerUniforms)
         {
         }
 
@@ -173,6 +172,7 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("skyBlendingStart", 0.f));
             stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{}));
             stateset->addUniform(new osg::Uniform("isReflection", false));
+
             if (mUsePlayerUniforms)
             {
                 stateset->addUniform(new osg::Uniform("windSpeed", 0.0f));
@@ -182,36 +182,16 @@ namespace MWRender
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
         {
-            auto* uLinearFac = stateset->getUniform("linearFac");
-            if (uLinearFac)
-                uLinearFac->set(mLinearFac);
-
-            auto* uNear = stateset->getUniform("near");
-            if (uNear)
-                uNear->set(mNear);
-
-            auto* uFar = stateset->getUniform("far");
-            if (uFar)
-                uFar->set(mFar);
-
-            static const float mSkyBlendingStartCoef = Settings::Manager::getFloat("sky blending start", "Fog");
-            auto* uSkyBlendingStart = stateset->getUniform("skyBlendingStart");
-            if (uSkyBlendingStart)
-                uSkyBlendingStart->set(mFar * mSkyBlendingStartCoef);
-
-            auto* uScreenRes = stateset->getUniform("screenRes");
-            if (uScreenRes)
-                uScreenRes->set(mScreenRes);
+            stateset->getUniform("linearFac")->set(mLinearFac);
+            stateset->getUniform("near")->set(mNear);
+            stateset->getUniform("far")->set(mFar);
+            stateset->getUniform("skyBlendingStart")->set(mFar * mSkyBlendingStartCoef);
+            stateset->getUniform("screenRes")->set(mScreenRes);
 
             if (mUsePlayerUniforms)
             {
-                auto* windSpeed = stateset->getUniform("windSpeed");
-                if (windSpeed)
-                    windSpeed->set(mWindSpeed);
-
-                auto* playerPos = stateset->getUniform("playerPos");
-                if (playerPos)
-                    playerPos->set(mPlayerPos);
+                stateset->getUniform("windSpeed")->set(mWindSpeed);
+                stateset->getUniform("playerPos")->set(mPlayerPos);
             }
         }
 
@@ -231,8 +211,9 @@ namespace MWRender
         float mLinearFac;
         float mNear;
         float mFar;
-        bool mUsePlayerUniforms;
         float mWindSpeed;
+        float mSkyBlendingStartCoef;
+        bool mUsePlayerUniforms;
         osg::Vec3f mPlayerPos;
         osg::Vec2f mScreenRes;
     };
