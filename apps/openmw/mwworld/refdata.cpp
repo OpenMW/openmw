@@ -91,8 +91,7 @@ namespace MWWorld
         , mEnabled(true)
         , mPhysicsPostponed(false)
         , mCount(1)
-        , mPosition{ { cellRef.mPlacement.pos.x, cellRef.mPlacement.pos.y, cellRef.mPlacement.pos.z },
-            { cellRef.mPlacement.rot.x, cellRef.mPlacement.rot.y, cellRef.mPlacement.rot.z } }
+        , mPosition(cellRef.mPos)
         , mCustomData(nullptr)
         , mChanged(false)
         , mFlags(0)

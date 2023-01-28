@@ -76,7 +76,7 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_DATA:
-                reader.get(mPlacement);
+                reader.get(mPos);
                 break;
             case ESM4::SUB_XSCL:
                 reader.get(mScale);
@@ -235,7 +235,9 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 reader.get(dummy);
                 reader.get(dummy);
                 reader.get(dummy);
-                reader.getFormId(mKey);
+                FormId keyForm;
+                reader.getFormId(keyForm);
+                mKey = ESM::RefId::formIdRefId(keyForm);
                 reader.get(dummy); // flag?
                 reader.get(dummy);
                 reader.get(dummy);

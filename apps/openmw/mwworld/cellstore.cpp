@@ -840,7 +840,6 @@ namespace MWWorld
 
     void CellStore::loadRefs()
     {
-        assert(mCellVariant.isValid());
         std::map<ESM::RefNum, ESM::RefId> refNumToID; // used to detect refID modifications
 
         std::visit([&refNumToID, this](auto&& cell) { this->loadRefs(*cell, refNumToID); }, mCellVariant.mVariant);

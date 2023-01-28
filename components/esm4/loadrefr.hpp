@@ -59,7 +59,7 @@ namespace ESM4
     struct TeleportDest
     {
         FormId destDoor;
-        Placement destPos;
+        ESM::Position destPos;
         std::uint32_t flags; // 0x01 no alarm (only in TES5)
     };
 
@@ -84,7 +84,7 @@ namespace ESM4
         std::string mFullName;
         ESM::RefId mBaseObj;
 
-        Placement mPlacement;
+        ESM::Position mPos;
         float mScale = 1.0f;
         FormId mOwner;
         FormId mGlobal;
@@ -105,7 +105,7 @@ namespace ESM4
         TeleportDest mDoor;
         bool mIsLocked;
         std::int8_t mLockLevel;
-        FormId mKey;
+        ESM::RefId mKey;
 
         FormId mTargetRef;
 
