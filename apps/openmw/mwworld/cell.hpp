@@ -53,11 +53,10 @@ namespace MWWorld
     private:
         struct
         {
-            uint8_t isExterior : 1;
-            uint8_t isQuasiExterior : 1;
-            uint8_t hasWater : 1;
-            uint8_t noSleep : 1;
-            uint8_t _free : 4;
+            bool isExterior;
+            bool isQuasiExterior;
+            bool hasWater;
+            bool noSleep;
         } mFlags;
 
         osg::Vec2i mGridPos;
