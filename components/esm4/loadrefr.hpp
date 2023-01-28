@@ -74,10 +74,13 @@ namespace ESM4
 
     struct Reference
     {
-        ESM::RefId mParent; // cell FormId (currently persistent refs only), from the loading sequence
-                            // NOTE: for exterior cells it will be the dummy cell FormId
+        FormId mFormId; // from the header
+        ESM::RefId mId;
 
-        ESM::RefId mId; // from the header
+        FormId mParentFormId; // cell FormId (currently persistent refs only), from the loading sequence
+                              // NOTE: for exterior cells it will be the dummy cell FormId
+        ESM::RefId mParent;
+
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;

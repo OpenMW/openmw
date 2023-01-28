@@ -49,9 +49,9 @@
 // longer/shorter/same as loading the subrecords.
 void ESM4::Cell::load(ESM4::Reader& reader)
 {
-    auto formId = reader.hdr().record.id;
-    reader.adjustFormId(formId);
-    mId = ESM::RefId::formIdRefId(formId);
+    mFormId = reader.hdr().record.id;
+    reader.adjustFormId(mFormId);
+    mId = ESM::RefId::formIdRefId(mFormId);
     mFlags = reader.hdr().record.flags;
     mParent = reader.currWorld();
 
@@ -73,7 +73,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
     // WARN: we need to call setCurrCell (and maybe setCurrCellGrid?) again before loading
     // cell child groups if we are loading them after restoring the context
     // (may be easier to update the context before saving?)
-    reader.setCurrCell(formId); // save for LAND (and other children) to access later
+    reader.setCurrCell(mFormId); // save for LAND (and other children) to access later
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 

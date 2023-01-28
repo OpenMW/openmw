@@ -34,11 +34,12 @@
 
 void ESM4::Reference::load(ESM4::Reader& reader)
 {
-    auto formId = reader.hdr().record.id;
-    reader.adjustFormId(formId);
-    mId = ESM::RefId::formIdRefId(formId);
+    mFormId = reader.hdr().record.id;
+    reader.adjustFormId(mFormId);
+    mId = ESM::RefId::formIdRefId(mFormId);
     mFlags = reader.hdr().record.flags;
-    mParent = ESM::RefId::formIdRefId(reader.currCell()); // NOTE: only for persistent refs?
+    mParentFormId = reader.currCell(); // NOTE: only for persistent refs?
+    mParent = ESM::RefId::formIdRefId(mParentFormId);
 
     // TODO: Let the engine apply this? Saved games?
     // mInitiallyDisabled = ((mFlags & ESM4::Rec_Disabled) != 0) ? true : false;

@@ -62,10 +62,11 @@ namespace ESM4
     // The cells need to be organised under world spaces.
     struct Cell
     {
-        FormId mParent; // world formId (for grouping cells), from the loading sequence
-
-        ESM::RefId mId; // from the header
+        FormId mFormId; // from the header
+        ESM::RefId mId;
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
+
+        FormId mParent; // world formId (for grouping cells), from the loading sequence
 
         std::string mEditorId;
         std::string mFullName;
