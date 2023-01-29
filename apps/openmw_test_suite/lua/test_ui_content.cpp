@@ -119,7 +119,7 @@ namespace
         auto table = makeTable();
         LuaUi::Content::View content = makeContent(table);
         EXPECT_ANY_THROW(content.at(0));
-        EXPECT_EQ(content.size(), 0);   
+        EXPECT_EQ(content.size(), 0);
         content.assign(content.size(), makeTable());
         EXPECT_EQ(content.size(), 1);
         content.assign(content.size(), makeTable());

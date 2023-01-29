@@ -34,10 +34,6 @@ local function getIndexFromKey(self, key)
     validateIndex(self, index)
     return index
 end
-local function nameAt(self, index)
-    local v = rawget(self, index)
-    return v and type(v.name) == 'string' and v.name
-end
 local methods = {
     insert = function(self, index, value)
         validateIndex(self, index)
@@ -77,6 +73,10 @@ M.__index = function(self, key)
     if methods[key] then return methods[key] end
     local index = getIndexFromKey(self, key)
     return rawget(self, index)
+end
+local function nameAt(self, index)
+    local v = rawget(self, index)
+    return v and type(v.name) == 'string' and v.name
 end
 local function remove(self, index)
     local oldName = nameAt(self, index)

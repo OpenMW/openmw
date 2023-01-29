@@ -79,7 +79,8 @@ namespace LuaUi::Content
         {
             if (index < size())
                 // for some reason mTable[key] = value doesn't call __newindex
-                mTable[sol::metatable_key][sol::meta_function::new_index].get<sol::protected_function>()(mTable, toLua(index), sol::nil);
+                mTable[sol::metatable_key][sol::meta_function::new_index].get<sol::protected_function>()(
+                    mTable, toLua(index), sol::nil);
             else
                 throw std::domain_error("Invalid Content index");
         }
