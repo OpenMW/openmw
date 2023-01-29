@@ -1087,8 +1087,8 @@ namespace MWWorld
 
     struct Visitor
     {
-        bool operator()(const ESM::Cell* a, const ESM::Cell* b) const { return a->getCellId() == b->getCellId(); };
-        bool operator()(const ESM4::Cell* a, const ESM4::Cell* b) const { return a->mId == b->mId; };
+        bool operator()(const ESM::Cell* a, const ESM::Cell* b) const { return a->getCellId() == b->getCellId(); }
+        bool operator()(const ESM4::Cell* a, const ESM4::Cell* b) const { return a->mId == b->mId; }
 
         template <class L, class R>
         bool operator()(L, R) const

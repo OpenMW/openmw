@@ -14,6 +14,9 @@ namespace MWWorld
         using Ts::operator()...;
     };
 
+    template <class... Ts>
+    RefVisit(Ts...) -> RefVisit<Ts...>;
+
     CellRef::CellRef(const ESM::CellRef& ref)
         : mCellRef(ESM::ReferenceVariant(ref))
     {
