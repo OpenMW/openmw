@@ -33,23 +33,29 @@ namespace CSMWorld
 
 namespace CSVFilter
 {
+    enum class FilterType
+    {
+        String,
+        Value
+    };
+
     struct FilterVisitor
     {
-        std::pair<std::string, std::string> operator()(const std::string& stringData)
+        std::pair<std::string, FilterType> operator()(const std::string& stringData)
         {
-            std::string stringOrValue = "string";
-            return std::make_pair(stringData, stringOrValue);
+            FilterType filterType = FilterType::String;
+            return std::make_pair(stringData, filterType);
         }
 
-        std::pair<std::string, std::string> operator()(const QVariant& variantData)
+        std::pair<std::string, FilterType> operator()(const QVariant& variantData)
         {
-            std::string stringOrValue;
+            FilterType filterType = FilterType::String;
             QMetaType::Type dataType = static_cast<QMetaType::Type>(variantData.type());
             if (dataType == QMetaType::QString || dataType == QMetaType::Bool || dataType == QMetaType::Int)
-                stringOrValue = "string";
+                filterType = FilterType::String;
             if (dataType == QMetaType::Int || dataType == QMetaType::Float)
-                stringOrValue = "value";
-            return std::make_pair(variantData.toString().toStdString(), stringOrValue);
+                filterType = FilterType::Value;
+            return std::make_pair(variantData.toString().toStdString(), filterType);
         }
     };
 
@@ -74,9 +80,21 @@ namespace CSVFilter
         void filterChanged(std::shared_ptr<CSMFilter::Node> filter);
 
     private:
-        std::string generateFilter(const FilterData& filterData, std::string stringOrValue) const;
+        std::string generateFilter(const FilterData& filterData, const FilterType& filterType) const;
 
         void contextMenuEvent(QContextMenuEvent* event) override;
+
+        constexpr std::string_view filterTypeName(const FilterType& type) const
+        {
+            switch (type)
+            {
+                case FilterType::String:
+                    return "string";
+                case FilterType::Value:
+                    return "value";
+            }
+            return "unknown type";
+        }
 
     private slots:
 

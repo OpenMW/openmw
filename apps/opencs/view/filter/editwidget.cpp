@@ -100,15 +100,15 @@ void CSVFilter::EditWidget::filterRowsInserted(const QModelIndex& parent, int st
 
 void CSVFilter::EditWidget::createFilterRequest(const std::vector<FilterData>& sourceFilter, Qt::DropAction action)
 {
-    std::string stringOrValue = "string";
+    FilterType filterType = FilterType::String;
     std::vector<FilterData> newFilter;
 
     for (auto filterData : sourceFilter)
     {
         FilterData newFilterData;
-        std::pair<std::string, std::string> pair = std::visit(FilterVisitor(), filterData.searchData);
+        std::pair<std::string, FilterType> pair = std::visit(FilterVisitor(), filterData.searchData);
         std::string searchString = pair.first;
-        stringOrValue = pair.second;
+        filterType = pair.second;
         std::vector<std::string> columns;
         newFilterData.searchData = searchString;
         newFilterData.columns = filterData.columns;
@@ -183,7 +183,7 @@ void CSVFilter::EditWidget::createFilterRequest(const std::vector<FilterData>& s
 
         for (unsigned i = 0; i < count; ++i)
         {
-            ss << generateFilter(newFilter[i], stringOrValue);
+            ss << generateFilter(newFilter[i], filterType);
 
             if (i + 1 != count)
             {
@@ -204,7 +204,7 @@ void CSVFilter::EditWidget::createFilterRequest(const std::vector<FilterData>& s
             ss << '!';
         }
 
-        ss << generateFilter(newFilter[0], stringOrValue);
+        ss << generateFilter(newFilter[0], filterType);
 
         if (!replaceMode)
         {
@@ -219,7 +219,7 @@ void CSVFilter::EditWidget::createFilterRequest(const std::vector<FilterData>& s
     }
 }
 
-std::string CSVFilter::EditWidget::generateFilter(const FilterData& filterData, std::string stringOrValue) const
+std::string CSVFilter::EditWidget::generateFilter(const FilterData& filterData, const FilterType& filterType) const
 {
     const unsigned columns = filterData.columns.size();
 
@@ -246,16 +246,18 @@ std::string CSVFilter::EditWidget::generateFilter(const FilterData& filterData, 
         Log(Debug::Warning) << "Generating record filter failed.";
         return "";
     }
-    if (stringOrValue == "string")
+    if (filterType == FilterType::String)
         quotesResolved = '"' + quotesResolved + '"';
 
     std::stringstream ss;
+
     if (multipleColumns)
     {
         ss << "or(";
         for (unsigned i = 0; i < columns; ++i)
         {
-            ss << stringOrValue << "(" << '"' << filterData.columns[i] << '"' << ',' << quotesResolved << ')';
+            ss << filterTypeName(filterType) << "(" << '"' << filterData.columns[i] << '"' << ',' << quotesResolved
+               << ')';
             if (i + 1 != columns)
                 ss << ',';
         }
@@ -263,7 +265,7 @@ std::string CSVFilter::EditWidget::generateFilter(const FilterData& filterData, 
     }
     else
     {
-        ss << stringOrValue << '(' << '"' << filterData.columns[0] << "\"," << quotesResolved << ")";
+        ss << filterTypeName(filterType) << '(' << '"' << filterData.columns[0] << "\"," << quotesResolved << ")";
     }
 
     return ss.str();
