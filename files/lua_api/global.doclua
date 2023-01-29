@@ -24,11 +24,6 @@
 -- This is a global variable which hold the preloaded @{math} module.
 -- @field[parent = #global] math#math math preloaded module
 
-------------------------------------------------------------------------------
--- This library is an interface to the standard C math library.
--- This is a global variable which hold the preloaded @{omwutil} module.
--- @field[parent = #global] omwutil#omwutil ou preloaded module
-
 -------------------------------------------------------------------------------
 -- Issues an error when the value of its argument `v` is false (i.e.,
 -- **nil** or **false**); otherwise, returns all its arguments. `message` is an error
