@@ -439,7 +439,8 @@ namespace
         auto stream = Files::openBinaryInputFileStream(info.filename);
         if (!stream->is_open())
         {
-            std::cout << "Failed to open file: " << std::strerror(errno) << '\n';
+            std::cout << "Failed to open file " << info.filename << ": " << std::generic_category().message(errno)
+                      << '\n';
             return -1;
         }
 

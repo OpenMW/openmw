@@ -176,7 +176,8 @@ static void gdb_info(pid_t pid)
 
         /* Clean up */
         if (remove(respfile) != 0)
-            Log(Debug::Warning) << "Warning: can not remove file '" << respfile << "': " << std::strerror(errno);
+            Log(Debug::Warning) << "Warning: can not remove file '" << respfile
+                                << "': " << std::generic_category().message(errno);
     }
     else
     {
@@ -184,9 +185,11 @@ static void gdb_info(pid_t pid)
         if (fd >= 0)
         {
             if (close(fd) != 0)
-                Log(Debug::Warning) << "Warning: can not close file '" << respfile << "': " << std::strerror(errno);
+                Log(Debug::Warning) << "Warning: can not close file '" << respfile
+                                    << "': " << std::generic_category().message(errno);
             else if (remove(respfile) != 0)
-                Log(Debug::Warning) << "Warning: can not remove file '" << respfile << "': " << std::strerror(errno);
+                Log(Debug::Warning) << "Warning: can not remove file '" << respfile
+                                    << "': " << std::generic_category().message(errno);
         }
         printf("!!! Could not create gdb command file\n");
     }
