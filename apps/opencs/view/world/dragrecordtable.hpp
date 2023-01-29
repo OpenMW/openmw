@@ -42,7 +42,7 @@ namespace CSVWorld
         void setEditLock(bool locked);
 
     protected:
-        void startDragFromTable(const DragRecordTable& table, QModelIndex index);
+        void startDragFromTable(const DragRecordTable& table, const QModelIndex& index);
 
         void dragEnterEvent(QDragEnterEvent* event) override;
 

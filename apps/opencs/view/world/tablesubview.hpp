@@ -63,7 +63,7 @@ namespace CSVWorld
         void editRequest(const CSMWorld::UniversalId& id, const std::string& hint);
         void cloneRequest(const CSMWorld::UniversalId& toClone);
         void createFilterRequest(std::vector<CSMWorld::UniversalId>& types,
-            std::pair<QVariant, std::string> columnSearchData, Qt::DropAction action);
+            const std::pair<QVariant, std::string>& columnSearchData, Qt::DropAction action);
         void toggleOptions();
 
     public slots:

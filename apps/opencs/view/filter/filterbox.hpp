@@ -53,8 +53,8 @@ namespace CSVFilter
 
     signals:
         void recordFilterChanged(std::shared_ptr<CSMFilter::Node> filter);
-        void recordDropped(std::vector<CSMWorld::UniversalId>& types, std::pair<QVariant, std::string> columnSearchData,
-            Qt::DropAction action);
+        void recordDropped(std::vector<CSMWorld::UniversalId>& types,
+            const std::pair<QVariant, std::string>& columnSearchData, Qt::DropAction action);
     };
 
 }

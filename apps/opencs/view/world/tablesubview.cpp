@@ -153,8 +153,8 @@ void CSVWorld::TableSubView::cloneRequest(const CSMWorld::UniversalId& toClone)
     emit cloneRequest(toClone.getId(), toClone.getType());
 }
 
-void CSVWorld::TableSubView::createFilterRequest(
-    std::vector<CSMWorld::UniversalId>& types, std::pair<QVariant, std::string> columnSearchData, Qt::DropAction action)
+void CSVWorld::TableSubView::createFilterRequest(std::vector<CSMWorld::UniversalId>& types,
+    const std::pair<QVariant, std::string>& columnSearchData, Qt::DropAction action)
 {
     std::vector<CSVFilter::FilterData> sourceFilter;
     std::vector<std::string> refIdColumns = mTable->getColumnsWithDisplay(

@@ -16,7 +16,7 @@
 
 #include "dragdroputils.hpp"
 
-void CSVWorld::DragRecordTable::startDragFromTable(const CSVWorld::DragRecordTable& table, QModelIndex index)
+void CSVWorld::DragRecordTable::startDragFromTable(const CSVWorld::DragRecordTable& table, const QModelIndex& index)
 {
     std::vector<CSMWorld::UniversalId> records = table.getDraggedRecords();
     if (records.empty())

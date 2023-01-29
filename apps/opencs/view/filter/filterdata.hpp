@@ -1,5 +1,5 @@
-#ifndef FILTERDATA_HPP
-#define FILTERDATA_HPP
+#ifndef CSV_FILTER_FILTERDATA_H
+#define CSV_FILTER_FILTERDATA_H
 
 #include <string>
 #include <variant>
@@ -9,13 +9,11 @@
 
 namespace CSVFilter
 {
-
     struct FilterData
     {
         std::variant<std::string, QVariant> searchData;
         std::vector<std::string> columns;
     };
-
 }
 
-#endif // FILTERDATA_HPP
+#endif
