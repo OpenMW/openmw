@@ -364,6 +364,8 @@ Ubuntu_Clang_integration_tests:
     - pip3 install --user numpy matplotlib termtables click
   script:
     - CI/run_integration_tests.sh
+  after_script:
+    - if [[ -f /tmp/openmw-crash.log ]]; then cat /tmp/openmw-crash.log; fi
 
 .MacOS:
   image: macos-11-xcode-12

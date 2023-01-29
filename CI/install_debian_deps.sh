@@ -46,6 +46,7 @@ declare -rA GROUPED_DEPS=(
 
   [openmw-integration-tests]="
     ca-certificates
+    gdb
     git
     git-lfs
     libavcodec58
