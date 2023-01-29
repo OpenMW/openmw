@@ -115,6 +115,9 @@ M.__newindex = function(self, key, value)
         error('Content can only contain tables')
     end
 end
+M.__tostring = function(self)
+    return ('UiContent{%d layouts}'):format(#self)
+end
 local function next(self, index)
     local v = rawget(self, index)
     if v then
