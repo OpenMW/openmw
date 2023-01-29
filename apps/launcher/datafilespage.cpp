@@ -11,6 +11,7 @@
 #include <thread>
 
 #include <apps/launcher/utils/cellnameloader.hpp>
+
 #include <components/files/configurationmanager.hpp>
 
 #include <components/contentselector/model/esmfile.hpp>
@@ -20,10 +21,12 @@
 #include <components/config/launchersettings.hpp>
 
 #include <components/bsa/compressedbsafile.hpp>
+#include <components/debug/debuglog.hpp>
 #include <components/files/qtconversion.hpp>
 #include <components/misc/strings/conversion.hpp>
 #include <components/navmeshtool/protocol.hpp>
 #include <components/settings/settings.hpp>
+#include <components/vfs/bsaarchive.hpp>
 
 #include "utils/profilescombobox.hpp"
 #include "utils/textinputdialog.hpp"
@@ -799,6 +802,7 @@ void Launcher::DataFilesPage::startNavMeshTool()
     ui.navMeshLogPlainTextEdit->clear();
     ui.navMeshProgressBar->setValue(0);
     ui.navMeshProgressBar->setMaximum(1);
+    ui.navMeshProgressBar->resetFormat();
 
     mNavMeshToolProgress = NavMeshToolProgress{};
 
@@ -825,6 +829,8 @@ void Launcher::DataFilesPage::readNavMeshToolStderr()
 
 void Launcher::DataFilesPage::updateNavMeshProgress(int minDataSize)
 {
+    if (!mNavMeshToolProgress.mEnabled)
+        return;
     QProcess& process = *mNavMeshToolInvoker->getProcess();
     mNavMeshToolProgress.mMessagesData.append(process.readAllStandardError());
     if (mNavMeshToolProgress.mMessagesData.size() < minDataSize)
@@ -838,14 +844,23 @@ void Launcher::DataFilesPage::updateNavMeshProgress(int minDataSize)
         ui.navMeshProgressBar->maximum(),
         ui.navMeshProgressBar->value(),
     };
-    while (true)
+    try
     {
-        NavMeshTool::Message message;
-        const std::byte* const nextPosition = NavMeshTool::deserialize(position, end, message);
-        if (nextPosition == position)
-            break;
-        position = nextPosition;
-        handle = std::visit(handle, NavMeshTool::decode(message));
+        while (true)
+        {
+            NavMeshTool::Message message;
+            const std::byte* const nextPosition = NavMeshTool::deserialize(position, end, message);
+            if (nextPosition == position)
+                break;
+            position = nextPosition;
+            handle = std::visit(handle, NavMeshTool::decode(message));
+        }
+    }
+    catch (const std::exception& e)
+    {
+        Log(Debug::Error) << "Failed to deserialize navmeshtool message: " << e.what();
+        mNavMeshToolProgress.mEnabled = false;
+        ui.navMeshProgressBar->setFormat("Failed to update progress: " + QString(e.what()));
     }
     if (position != begin)
         mNavMeshToolProgress.mMessagesData = mNavMeshToolProgress.mMessagesData.mid(position - begin);
@@ -874,7 +889,10 @@ void Launcher::DataFilesPage::navMeshToolFinished(int exitCode, QProcess::ExitSt
     ui.navMeshLogPlainTextEdit->appendPlainText(
         QString::fromUtf8(mNavMeshToolInvoker->getProcess()->readAllStandardOutput()));
     if (exitCode == 0 && exitStatus == QProcess::ExitStatus::NormalExit)
+    {
         ui.navMeshProgressBar->setValue(ui.navMeshProgressBar->maximum());
+        ui.navMeshProgressBar->resetFormat();
+    }
     ui.cancelNavMeshButton->setEnabled(false);
     ui.navMeshProgressBar->setEnabled(false);
 }
