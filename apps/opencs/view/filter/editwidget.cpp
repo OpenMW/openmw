@@ -240,9 +240,14 @@ std::string CSVFilter::EditWidget::generateFilter(const FilterData& filterData, 
 
     std::string quotesResolved;
     if (std::get_if<std::string>(&filterData.searchData))
-        quotesResolved = *(std::get_if<std::string>(&filterData.searchData));
+        quotesResolved = std::get<std::string>(filterData.searchData);
+    else
+    {
+        Log(Debug::Warning) << "Generating record filter failed.";
+        return "";
+    }
     if (stringOrValue == "string")
-        quotesResolved = '"' + std::get<std::string>(filterData.searchData) + '"';
+        quotesResolved = '"' + quotesResolved + '"';
 
     std::stringstream ss;
     if (multipleColumns)

@@ -12,8 +12,6 @@
 #include "filterdata.hpp"
 #include "recordfilterbox.hpp"
 
-#include <components/debug/debuglog.hpp>
-
 #include <apps/opencs/model/world/tablemimedata.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
 #include <apps/opencs/view/world/dragrecordtable.hpp>

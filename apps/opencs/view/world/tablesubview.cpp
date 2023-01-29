@@ -17,8 +17,6 @@
 
 #include <apps/opencs/view/doc/subview.hpp>
 
-#include <components/debug/debuglog.hpp>
-
 #include "../../model/doc/document.hpp"
 #include "../../model/world/tablemimedata.hpp"
 
