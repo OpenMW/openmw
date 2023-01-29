@@ -43,7 +43,9 @@ namespace ESM4
 
     struct Static
     {
-        ESM::RefId mId; // from the header
+        FormId mFormId; // from the header
+        ESM::RefId mId;
+
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;

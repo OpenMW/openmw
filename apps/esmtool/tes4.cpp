@@ -10,6 +10,7 @@
 #include <components/esm4/reader.hpp>
 #include <components/esm4/readerutils.hpp>
 #include <components/esm4/records.hpp>
+#include <components/esm4/typetraits.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
 namespace EsmTool
@@ -57,97 +58,6 @@ namespace EsmTool
             return "Unknown (" + std::to_string(type) + ")";
         }
 
-        template <class T, class = std::void_t<>>
-        struct HasFormId : std::false_type
-        {
-        };
-
-        template <class T>
-        struct HasFormId<T, std::void_t<decltype(T::mFormId)>> : std::true_type
-        {
-        };
-
-        template <class T>
-        constexpr bool hasFormId = HasFormId<T>::value;
-
-        template <class T, class = std::void_t<>>
-        struct HasRefId : std::false_type
-        {
-        };
-
-        template <class T>
-        struct HasRefId<T, std::void_t<decltype(T::mId)>> : std::true_type
-        {
-        };
-
-        template <class T>
-        constexpr bool hasRefId = HasRefId<T>::value;
-
-        template <class T, class = std::void_t<>>
-        struct HasFlags : std::false_type
-        {
-        };
-
-        template <class T>
-        struct HasFlags<T, std::void_t<decltype(T::mFlags)>> : std::true_type
-        {
-        };
-
-        template <class T>
-        constexpr bool hasFlags = HasFlags<T>::value;
-
-        template <class T, class = std::void_t<>>
-        struct HasEditorId : std::false_type
-        {
-        };
-
-        template <class T>
-        struct HasEditorId<T, std::void_t<decltype(T::mEditorId)>> : std::true_type
-        {
-        };
-
-        template <class T>
-        constexpr bool hasEditorId = HasEditorId<T>::value;
-
-        template <class T, class = std::void_t<>>
-        struct HasModel : std::false_type
-        {
-        };
-
-        template <class T>
-        struct HasModel<T, std::void_t<decltype(T::mModel)>> : std::true_type
-        {
-        };
-
-        template <class T>
-        constexpr bool hasModel = HasModel<T>::value;
-
-        template <class T, class = std::void_t<>>
-        struct HasNif : std::false_type
-        {
-        };
-
-        template <class T>
-        struct HasNif<T, std::void_t<decltype(T::mNif)>> : std::true_type
-        {
-        };
-
-        template <class T>
-        constexpr bool hasNif = HasNif<T>::value;
-
-        template <class T, class = std::void_t<>>
-        struct HasKf : std::false_type
-        {
-        };
-
-        template <class T>
-        struct HasKf<T, std::void_t<decltype(T::mKf)>> : std::true_type
-        {
-        };
-
-        template <class T>
-        constexpr bool hasKf = HasKf<T>::value;
-
         template <class T>
         struct WriteArray
         {
@@ -181,20 +91,28 @@ namespace EsmTool
                 return;
 
             std::cout << "\n  Record: " << ESM::NAME(reader.hdr().record.typeId).toStringView();
-            if constexpr (hasFormId<T>)
+            if constexpr (ESM4::hasFormId<T>)
                 std::cout << "\n  FormId: " << value.mFormId;
-            if constexpr (hasRefId<T>)
-                std::cout << "\n  FormId: " << value.mId;
-            if constexpr (hasFlags<T>)
+            if constexpr (ESM4::hasId<T>)
+                std::cout << "\n  Id: " << value.mId;
+            if constexpr (ESM4::hasFlags<T>)
                 std::cout << "\n  Record flags: " << recordFlags(value.mFlags);
-            if constexpr (hasEditorId<T>)
+            if constexpr (ESM4::hasParentFormId<T>)
+                std::cout << "\n  ParentFormId: " << value.mParentFormId;
+            if constexpr (ESM4::hasParent<T>)
+                std::cout << "\n  Parent: " << value.mParent;
+            if constexpr (ESM4::hasEditorId<T>)
                 std::cout << "\n  EditorId: " << value.mEditorId;
-            if constexpr (hasModel<T>)
+            if constexpr (ESM4::hasModel<T>)
                 std::cout << "\n  Model: " << value.mModel;
-            if constexpr (hasNif<T>)
+            if constexpr (ESM4::hasNif<T>)
                 std::cout << "\n  Nif:" << WriteArray("\n  - ", value.mNif);
-            if constexpr (hasKf<T>)
+            if constexpr (ESM4::hasKf<T>)
                 std::cout << "\n  Kf:" << WriteArray("\n  - ", value.mKf);
+            if constexpr (ESM4::hasType<T>)
+                std::cout << "\n  Type: " << value.mType;
+            if constexpr (ESM4::hasValue<T>)
+                std::cout << "\n  Value: " << value.mValue;
             std::cout << '\n';
         }
 

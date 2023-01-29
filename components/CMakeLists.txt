@@ -194,6 +194,7 @@ add_component_dir (esm4
     reference
     script
     readerutils
+    typetraits
 )
 
 add_component_dir (misc
