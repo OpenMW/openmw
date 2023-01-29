@@ -6,52 +6,120 @@
 
 #include <sol/sol.hpp>
 
-namespace LuaUi
+namespace LuaUi::Content
 {
-    class Content
+    sol::protected_function makeFactory(sol::state_view);
+
+    class View
     {
     public:
-        using iterator = std::vector<sol::table>::iterator;
+        static int64_t sInstanceCount; // debug information, shown in Lua profiler
 
-        Content() { sInstanceCount++; }
-        ~Content() { sInstanceCount--; }
-        Content(const Content& c)
+        // accepts only Lua tables returned by ui.content
+        explicit View(sol::table table)
+            : mTable(std::move(table))
         {
-            this->mNamed = c.mNamed;
-            this->mOrdered = c.mOrdered;
+            if (!isValid(mTable))
+                throw std::domain_error("Expected a Content table");
             sInstanceCount++;
         }
-        Content(Content&& c)
+        View(const View& c)
         {
-            this->mNamed = std::move(c.mNamed);
-            this->mOrdered = std::move(c.mOrdered);
+            this->mTable = c.mTable;
             sInstanceCount++;
         }
+        View(View&& c)
+        {
+            this->mTable = std::move(c.mTable);
+            sInstanceCount++;
+        }
+        ~View() { sInstanceCount--; }
 
-        // expects a Lua array - a table with keys from 1 to n without any nil values in between
-        // any other keys are ignored
-        explicit Content(const sol::table&);
+        static bool isValid(const sol::object& object)
+        {
+            if (object.get_type() != sol::type::table)
+                return false;
+            sol::table table = object;
+            return table.traverse_get<sol::optional<bool>>(sol::metatable_key, "__Content").value_or(false);
+        }
 
-        size_t size() const { return mOrdered.size(); }
+        size_t size() const { return mTable.size(); }
 
-        void assign(std::string_view name, const sol::table& table);
-        void assign(size_t index, const sol::table& table);
-        void insert(size_t index, const sol::table& table);
+        void assign(std::string_view name, const sol::table& table)
+        {
+            if (indexOf(name).has_value())
+                mTable[name] = table;
+            else
+                throw std::domain_error("Invalid Content key");
+        }
+        void assign(size_t index, const sol::table& table)
+        {
+            if (index <= size())
+                mTable[toLua(index)] = table;
+            else
+                throw std::domain_error("Invalid Content index");
+        }
+        void insert(size_t index, const sol::table& table) { callMethod("insert", toLua(index), table); }
 
-        sol::table at(size_t index) const;
-        sol::table at(std::string_view name) const;
-        size_t remove(size_t index);
-        size_t remove(std::string_view name);
-        size_t indexOf(const sol::table& table) const;
-
-        static int64_t getInstanceCount() { return sInstanceCount; }
+        sol::table at(size_t index) const
+        {
+            if (index < size())
+                return mTable.get<sol::table>(toLua(index));
+            else
+                throw std::domain_error("Invalid Content index");
+        }
+        sol::table at(std::string_view name) const
+        {
+            if (indexOf(name).has_value())
+                return mTable.get<sol::table>(name);
+            else
+                throw std::domain_error("Invalid Content key");
+        }
+        void remove(size_t index)
+        {
+            if (index < size())
+                mTable[toLua(index)] = sol::nil;
+            else
+                throw std::domain_error("Invalid Content index");
+        }
+        void remove(std::string_view name)
+        {
+            if (indexOf(name).has_value())
+                mTable[name] = sol::nil;
+            else
+                throw std::domain_error("Invalid Content index");
+        }
+        std::optional<size_t> indexOf(std::string_view name) const
+        {
+            sol::object result = callMethod("indexOf", name);
+            if (result.is<size_t>())
+                return fromLua(result.as<size_t>());
+            else
+                return std::nullopt;
+        }
+        std::optional<size_t> indexOf(const sol::table& table) const
+        {
+            sol::object result = callMethod("indexOf", table);
+            if (result.is<size_t>())
+                return fromLua(result.as<size_t>());
+            else
+                return std::nullopt;
+        }
 
     private:
-        std::map<std::string, size_t, std::less<>> mNamed;
-        std::vector<sol::table> mOrdered;
-        static int64_t sInstanceCount; // debug information, shown in Lua profiler
+        sol::table mTable;
+
+        template <typename... Arg>
+        sol::object callMethod(std::string_view name, Arg&&... arg) const
+        {
+            return mTable.get<sol::protected_function>(name)(mTable, arg...);
+        }
+
+        static inline size_t toLua(size_t index) { return index + 1; }
+        static inline size_t fromLua(size_t index) { return index - 1; }
     };
 
+    int64_t getInstanceCount();
 }
 
 #endif // COMPONENTS_LUAUI_CONTENT
