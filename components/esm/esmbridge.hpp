@@ -35,10 +35,24 @@ namespace ESM
         }
 
         bool isEsm4() const { return std::holds_alternative<const ESM4::Cell*>(mVariant); }
-
         const ESM4::Cell& getEsm4() const;
-
         const ESM::Cell& getEsm3() const;
+
+        template <class F>
+        auto visit(F&& f) const
+        {
+            return std::visit(f, mVariant);
+        }
+        template <class F>
+        auto visit(F&& f)
+        {
+            return std::visit(f, mVariant);
+        }
+        template <class F>
+        auto visit(F&& f, const CellVariant& v2) const
+        {
+            return std::visit(f, mVariant, v2.mVariant);
+        }
     };
 
     struct ReferenceVariant
@@ -65,4 +79,22 @@ namespace ESM
     };
 }
 
+namespace std
+{
+    template <class F>
+    auto visit(F&& f, const ESM::CellVariant& v)
+    {
+        return v.visit(f);
+    }
+    template <class F>
+    auto visit(F&& f, ESM::CellVariant& v)
+    {
+        return v.visit(f);
+    }
+    template <class F>
+    auto visit(F&& f, const ESM::CellVariant& v1, const ESM::CellVariant& v2)
+    {
+        return v1.visit(f, v2);
+    }
+}
 #endif

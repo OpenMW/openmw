@@ -5,7 +5,7 @@
 
 namespace MWWorld
 {
-    struct Cell;
+    class Cell;
 }
 
 namespace MWRender

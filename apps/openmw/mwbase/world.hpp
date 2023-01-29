@@ -57,7 +57,7 @@ namespace ESM
     struct ItemLevList;
     struct TimeStamp;
     struct RefId;
-    struct CellVariant;
+    class CellVariant;
 
 }
 

@@ -43,7 +43,7 @@ namespace ESM
 {
     struct Cell;
     struct RefNum;
-    struct CellVariant;
+    class CellVariant;
 }
 
 namespace Terrain
@@ -74,7 +74,7 @@ namespace DetourNavigator
 namespace MWWorld
 {
     class GroundcoverStore;
-    struct Cell;
+    class Cell;
 }
 
 namespace Debug

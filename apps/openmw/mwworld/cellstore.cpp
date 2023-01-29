@@ -842,7 +842,7 @@ namespace MWWorld
     {
         std::map<ESM::RefNum, ESM::RefId> refNumToID; // used to detect refID modifications
 
-        std::visit([&refNumToID, this](auto&& cell) { this->loadRefs(*cell, refNumToID); }, mCellVariant.mVariant);
+        std::visit([&refNumToID, this](auto&& cell) { this->loadRefs(*cell, refNumToID); }, mCellVariant);
 
         updateMergedRefs();
     }
@@ -1099,7 +1099,7 @@ namespace MWWorld
 
     bool CellStore::operator==(const CellStore& right) const
     {
-        return std::visit(Visitor{}, this->mCellVariant.mVariant, right.mCellVariant.mVariant);
+        return std::visit(Visitor{}, this->mCellVariant, right.mCellVariant);
     }
 
     void CellStore::setFog(std::unique_ptr<ESM::FogState>&& fog)

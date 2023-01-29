@@ -24,7 +24,6 @@ namespace MWWorld
 
     class Cell : public ESM::CellVariant
     {
-        friend MWWorld::CellStore;
         struct MoodData
         {
             uint32_t mAmbiantColor;
