@@ -94,7 +94,7 @@ namespace MWWorld
     class TimeStamp;
     class ESMStore;
     class RefData;
-    struct Cell;
+    class Cell;
 
     typedef std::vector<std::pair<MWWorld::Ptr, MWMechanics::Movement>> PtrMovementList;
 }

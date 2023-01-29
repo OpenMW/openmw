@@ -104,7 +104,7 @@ namespace MWWorld
         {
             struct Visitor
             {
-                int operator()(const ESM::CellRef& ref) { return ref.mChargeFloat; }
+                int operator()(const ESM::CellRef& ref) { return ref.mChargeInt; }
                 int operator()(const ESM4::Reference& ref) { return 0; }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
