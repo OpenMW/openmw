@@ -1,13 +1,20 @@
 Overview of Lua scripting
 #########################
 
+.. toctree::
+    :hidden:
+
+    teal
+
 Language and sandboxing
 =======================
 
 OpenMW supports scripts written in Lua 5.1 with some extensions (see below) from Lua 5.2.
 There are no plans to switch to any newer version of the language, because newer versions are not supported by LuaJIT.
 
-Here are starting points for learning Lua:
+There are also experimental declarations available for Teal, a typed dialect of Lua. see :ref:`Teal` for more details.
+
+Here are some starting points for learning Lua:
 
 - `Programing in Lua <https://www.lua.org/pil/contents.html>`__ (first edition, aimed at Lua 5.0)
 - `Lua 5.1 Reference Manual <https://www.lua.org/manual/5.1/>`__
