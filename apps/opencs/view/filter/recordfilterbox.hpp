@@ -10,6 +10,8 @@
 #include <QVariant>
 #include <QWidget>
 
+#include "filterdata.hpp"
+
 namespace CSMFilter
 {
     class Node;
@@ -37,9 +39,7 @@ namespace CSVFilter
 
         void useFilterRequest(const std::string& idOfFilter);
 
-        void createFilterRequest(
-            std::vector<std::pair<std::variant<std::string, QVariant>, std::vector<std::string>>>& filterSource,
-            Qt::DropAction action);
+        void createFilterRequest(const std::vector<FilterData>& sourceFilter, Qt::DropAction action);
 
     signals:
 

@@ -10,6 +10,8 @@
 #include <QVariant>
 #include <QWidget>
 
+#include "filterdata.hpp"
+
 class QDragEnterEvent;
 class QDragMoveEvent;
 class QDropEvent;
@@ -40,9 +42,7 @@ namespace CSVFilter
 
         void setRecordFilter(const std::string& filter);
 
-        void createFilterRequest(
-            std::vector<std::pair<std::variant<std::string, QVariant>, std::vector<std::string>>>& filterSource,
-            Qt::DropAction action);
+        void createFilterRequest(const std::vector<FilterData>& sourceFilter, Qt::DropAction action);
 
     private:
         void dragEnterEvent(QDragEnterEvent* event) override;

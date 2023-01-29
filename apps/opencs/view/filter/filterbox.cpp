@@ -9,6 +9,7 @@
 #include <QHBoxLayout>
 #include <QVariant>
 
+#include "filterdata.hpp"
 #include "recordfilterbox.hpp"
 
 #include <components/debug/debuglog.hpp>
@@ -71,9 +72,7 @@ void CSVFilter::FilterBox::dragMoveEvent(QDragMoveEvent* event)
     event->accept();
 }
 
-void CSVFilter::FilterBox::createFilterRequest(
-    std::vector<std::pair<std::variant<std::string, QVariant>, std::vector<std::string>>>& filterSource,
-    Qt::DropAction action)
+void CSVFilter::FilterBox::createFilterRequest(const std::vector<FilterData>& sourceFilter, Qt::DropAction action)
 {
-    mRecordFilterBox->createFilterRequest(filterSource, action);
+    mRecordFilterBox->createFilterRequest(sourceFilter, action);
 }

@@ -11,6 +11,8 @@
 #include <variant>
 #include <vector>
 
+#include "filterdata.hpp"
+
 #include "../../model/filter/parser.hpp"
 
 class QModelIndex;
@@ -65,17 +67,14 @@ namespace CSVFilter
     public:
         EditWidget(CSMWorld::Data& data, QWidget* parent = nullptr);
 
-        void createFilterRequest(
-            std::vector<std::pair<std::variant<std::string, QVariant>, std::vector<std::string>>>& filterSource,
-            Qt::DropAction action);
+        void createFilterRequest(const std::vector<FilterData>& sourceFilter, Qt::DropAction action);
 
     signals:
 
         void filterChanged(std::shared_ptr<CSMFilter::Node> filter);
 
     private:
-        std::string generateFilter(
-            std::pair<std::string, std::vector<std::string>>& seekedString, std::string stringOrValue) const;
+        std::string generateFilter(const FilterData& filterData, std::string stringOrValue) const;
 
         void contextMenuEvent(QContextMenuEvent* event) override;
 
