@@ -167,7 +167,7 @@ namespace MWGui
         {
             const MyGUI::Colour& headerColour = windowManager->getTextColours().header;
             BookTypesetter::Style* title = typesetter->createStyle({}, headerColour, false);
-            typesetter->write(title, to_utf8_span(mTitle.c_str()));
+            typesetter->write(title, to_utf8_span(mTitle));
             typesetter->sectionBreak();
         }
 
@@ -206,7 +206,7 @@ namespace MWGui
                 break;
         }
 
-        typesetter->addContent(to_utf8_span(text.c_str()));
+        typesetter->addContent(to_utf8_span(text));
 
         if (hyperLinks.size()
             && MWBase::Environment::get().getWindowManager()->getTranslationDataStorage().hasTranslation())
@@ -271,7 +271,7 @@ namespace MWGui
         const MyGUI::Colour& textColour = MWBase::Environment::get().getWindowManager()->getTextColours().notify;
         BookTypesetter::Style* title = typesetter->createStyle("", textColour, false);
         typesetter->sectionBreak(9);
-        typesetter->write(title, to_utf8_span(mText.c_str()));
+        typesetter->write(title, to_utf8_span(mText));
     }
 
     // --------------------------------------------------------------------------------------------------
@@ -628,7 +628,7 @@ namespace MWGui
             typesetter->lineBreak();
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(
                 body, textColours.answer, textColours.answerOver, textColours.answerPressed, interactiveId);
-            typesetter->write(questionStyle, to_utf8_span(choice.first.c_str()));
+            typesetter->write(questionStyle, to_utf8_span(choice.first));
         }
 
         mGoodbye = MWBase::Environment::get().getDialogueManager()->isGoodbye();
@@ -647,7 +647,7 @@ namespace MWGui
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(
                 body, textColours.answer, textColours.answerOver, textColours.answerPressed, interactiveId);
             typesetter->lineBreak();
-            typesetter->write(questionStyle, to_utf8_span(goodbye.c_str()));
+            typesetter->write(questionStyle, to_utf8_span(goodbye));
         }
 
         TypesetBook::Ptr book = typesetter->complete();

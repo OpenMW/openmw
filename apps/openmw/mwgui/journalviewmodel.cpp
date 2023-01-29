@@ -264,7 +264,7 @@ namespace MWGui
         };
 
         void visitJournalEntries(
-            const std::string& questName, std::function<void(JournalEntry const&)> visitor) const override
+            std::string_view questName, std::function<void(JournalEntry const&)> visitor) const override
         {
             MWBase::Journal* journal = MWBase::Environment::get().getJournal();
 
