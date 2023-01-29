@@ -35,7 +35,6 @@
 
 //#include <boost/iostreams/filtering_streambuf.hpp>
 //#include <boost/iostreams/copy.hpp>
-#include <boost/scoped_array.hpp>
 
 #include "formid.hpp" // NOTE: for testing only
 #include "reader.hpp"
@@ -261,8 +260,8 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM4::SUB_DSTF:
             {
 #if 1
-                boost::scoped_array<unsigned char> dataBuf(new unsigned char[subHdr.dataSize]);
-                reader.get(dataBuf.get(), subHdr.dataSize);
+                std::vector<unsigned char> dataBuf(subHdr.dataSize);
+                reader.get(dataBuf.data(), subHdr.dataSize);
 
                 std::ostringstream ss;
                 ss << mEditorId << " " << ESM::printName(subHdr.typeId) << ":size " << subHdr.dataSize << "\n";
