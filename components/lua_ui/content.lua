@@ -79,7 +79,6 @@ M.__index = function(self, key)
     return rawget(self, index)
 end
 local function remove(self, index)
-    print('remove', #self, index)
     local oldName = nameAt(self, index)
     if oldName then
         self.__nameIndex[oldName] = nil
@@ -95,7 +94,6 @@ local function remove(self, index)
         end
     end
     rawset(self, #self, nil)
-    print('removed', #self)
 end
 local function assign(self, index, value)
     local oldName = nameAt(self, index)
@@ -108,7 +106,6 @@ local function assign(self, index, value)
     end
 end
 M.__newindex = function(self, key, value)
-    print('__newindex ', key, value)
     local index = getIndexFromKey(self, key)
     if value == nil then
         remove(self, index)
@@ -130,15 +127,6 @@ M.__pairs = function(self)
     return next, self, 1
 end
 M.__ipairs = M.__pairs
-
-local test = M.new({})
-test:insert(1, {})
-test[2] = {}
-assert(#test == 2, "Wrong size")
-test:add({ name = 'a' })
-assert(getIndexFromKey(test, 'a') == 3, getIndexFromKey(test, 'a'))
-assert(type(test.a) == 'table', type(test.a))
-assert(test.a.name == 'a', 'wrong table')
 
 return M
 )"

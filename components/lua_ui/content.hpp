@@ -78,16 +78,18 @@ namespace LuaUi::Content
         void remove(size_t index)
         {
             if (index < size())
-                mTable[toLua(index)] = sol::nil;
+                // for some reason mTable[key] = value doesn't call __newindex
+                mTable[sol::metatable_key][sol::meta_function::new_index].get<sol::protected_function>()(mTable, toLua(index), sol::nil);
             else
                 throw std::domain_error("Invalid Content index");
         }
         void remove(std::string_view name)
         {
-            if (indexOf(name).has_value())
-                mTable[name] = sol::nil;
+            auto index = indexOf(name);
+            if (index.has_value())
+                remove(index.value());
             else
-                throw std::domain_error("Invalid Content index");
+                throw std::domain_error("Invalid Content key");
         }
         std::optional<size_t> indexOf(std::string_view name) const
         {

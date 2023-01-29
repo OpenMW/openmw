@@ -119,15 +119,17 @@ namespace
         auto table = makeTable();
         LuaUi::Content::View content = makeContent(table);
         EXPECT_ANY_THROW(content.at(0));
+        EXPECT_EQ(content.size(), 0);   
         content.assign(content.size(), makeTable());
+        EXPECT_EQ(content.size(), 1);
         content.assign(content.size(), makeTable());
+        EXPECT_EQ(content.size(), 2);
         content.assign(content.size(), makeTable());
         EXPECT_EQ(content.size(), 3);
         EXPECT_ANY_THROW(content.at(3));
         EXPECT_ANY_THROW(content.remove(3));
-        EXPECT_NO_THROW(content.remove(1)); // TODO: something cursed happens here, even __newindex is not called!
+        content.remove(2);
         EXPECT_EQ(content.size(), 2);
-        EXPECT_NO_THROW(content.at(2));
-        EXPECT_EQ(content.size(), 2);
+        EXPECT_ANY_THROW(content.at(2));
     }
 }
