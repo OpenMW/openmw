@@ -17,13 +17,12 @@ namespace MWWorld
 
         mRegion = ESM::RefId::sEmpty; // Unimplemented for now
 
-        mFlags.hasWater = cell.mCellFlags & ESM4::CELL_HasWater;
-        mFlags.isExterior = !(cell.mCellFlags & ESM4::CELL_Interior);
-        mFlags.isQuasiExterior = cell.mCellFlags & ESM4::CELL_QuasiExt;
-        mFlags.noSleep = false; // No such notion in ESM4
+        mFlags.mHasWater = cell.mCellFlags & ESM4::CELL_HasWater;
+        mFlags.mIsExterior = !(cell.mCellFlags & ESM4::CELL_Interior);
+        mFlags.mIsQuasiExterior = cell.mCellFlags & ESM4::CELL_QuasiExt;
+        mFlags.mNoSleep = false; // No such notion in ESM4
 
         mCellId.mWorldspace = Misc::StringUtils::lowerCase(cell.mEditorId);
-        mCellId.mWorld = ESM::RefId::sEmpty;
         mCellId.mIndex.mX = cell.getGridX();
         mCellId.mIndex.mX = cell.getGridY();
         mCellId.mPaged = isExterior();
@@ -44,10 +43,10 @@ namespace MWWorld
 
         mRegion = ESM::RefId::sEmpty; // Unimplemented for now
 
-        mFlags.hasWater = cell.mData.mFlags & ESM::Cell::HasWater;
-        mFlags.isExterior = !(cell.mData.mFlags & ESM::Cell::Interior);
-        mFlags.isQuasiExterior = cell.mData.mFlags & ESM::Cell::QuasiEx;
-        mFlags.noSleep = cell.mData.mFlags & ESM::Cell::NoSleep;
+        mFlags.mHasWater = cell.mData.mFlags & ESM::Cell::HasWater;
+        mFlags.mIsExterior = !(cell.mData.mFlags & ESM::Cell::Interior);
+        mFlags.mIsQuasiExterior = cell.mData.mFlags & ESM::Cell::QuasiEx;
+        mFlags.mNoSleep = cell.mData.mFlags & ESM::Cell::NoSleep;
 
         mCellId = cell.getCellId();
 

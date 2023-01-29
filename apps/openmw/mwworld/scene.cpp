@@ -317,8 +317,7 @@ namespace MWWorld
     {
         if (mActiveCells.find(cell) == mActiveCells.end())
             return;
-        std::string description = cell->getCell()->getDescription();
-        Log(Debug::Info) << "Unloading cell " << description;
+        Log(Debug::Info) << "Unloading cell " << cell->getCell()->getDescription();
 
         ListAndResetObjectsVisitor visitor;
 
@@ -387,7 +386,7 @@ namespace MWWorld
 
         const int cellX = cell->getCell()->getGridX();
         const int cellY = cell->getCell()->getGridY();
-        auto cellVariant = *cell->getCell();
+        const MWWorld::Cell& cellVariant = *cell->getCell();
 
         if (cellVariant.isExterior())
         {

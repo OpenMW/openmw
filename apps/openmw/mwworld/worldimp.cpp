@@ -645,7 +645,8 @@ namespace MWWorld
         if (!cell.isEsm4())
         {
             const ESM::Region* region = mStore.get<ESM::Region>().search(cell.getEsm3().mRegion);
-            return region->mName;
+            if (region)
+                return region->mName;
         }
 
         return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();

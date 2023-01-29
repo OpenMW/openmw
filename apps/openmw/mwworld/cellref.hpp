@@ -20,9 +20,9 @@ namespace MWWorld
     {
     protected:
     public:
-        CellRef(const ESM::CellRef& ref);
+        explicit CellRef(const ESM::CellRef& ref);
 
-        CellRef(const ESM4::Reference& ref);
+        explicit CellRef(const ESM4::Reference& ref);
 
         // Note: Currently unused for items in containers
         const ESM::RefNum& getRefNum() const;
@@ -105,7 +105,7 @@ namespace MWWorld
             struct Visitor
             {
                 int operator()(const ESM::CellRef& ref) { return ref.mChargeInt; }
-                int operator()(const ESM4::Reference& ref) { return 0; }
+                int operator()(const ESM4::Reference& /*ref*/) { return 0; }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -114,7 +114,7 @@ namespace MWWorld
             struct Visitor
             {
                 float operator()(const ESM::CellRef& ref) { return ref.mChargeFloat; }
-                float operator()(const ESM4::Reference& ref) { return 0; }
+                float operator()(const ESM4::Reference& /*ref*/) { return 0; }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         } // Implemented as union with int charge
@@ -128,7 +128,7 @@ namespace MWWorld
             struct Visitor
             {
                 const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mOwner; }
-                const ESM::RefId& operator()(const ESM4::Reference& ref) { return ESM::RefId::sEmpty; }
+                const ESM::RefId& operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId::sEmpty; }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -147,7 +147,7 @@ namespace MWWorld
             struct Visitor
             {
                 const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mSoul; }
-                const ESM::RefId& operator()(const ESM4::Reference& ref) { return ESM::RefId::sEmpty; }
+                const ESM::RefId& operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId::sEmpty; }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -160,7 +160,7 @@ namespace MWWorld
             struct Visitor
             {
                 const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mFaction; }
-                const ESM::RefId& operator()(const ESM4::Reference& ref) { return ESM::RefId::sEmpty; }
+                const ESM::RefId& operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId::sEmpty; }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -193,7 +193,7 @@ namespace MWWorld
             struct Visitor
             {
                 const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mTrap; }
-                const ESM::RefId& operator()(const ESM4::Reference& ref) { return ESM::RefId::sEmpty; }
+                const ESM::RefId& operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId::sEmpty; }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -205,7 +205,7 @@ namespace MWWorld
             struct Visitor
             {
                 int operator()(const ESM::CellRef& ref) { return ref.mGoldValue; }
-                int operator()(const ESM4::Reference& ref) { return 0; }
+                int operator()(const ESM4::Reference& /*ref*/) { return 0; }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -218,7 +218,7 @@ namespace MWWorld
         bool hasChanged() const { return mChanged; }
 
     private:
-        bool mChanged;
+        bool mChanged = false;
         ESM::ReferenceVariant mCellRef;
     };
 

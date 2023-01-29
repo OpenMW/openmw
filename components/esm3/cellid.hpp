@@ -17,7 +17,6 @@ namespace ESM
             int mY;
         };
 
-        ESM::RefId mWorld;
         std::string mWorldspace;
         CellIndex mIndex;
         bool mPaged;

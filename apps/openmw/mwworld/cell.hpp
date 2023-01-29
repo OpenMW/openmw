@@ -38,10 +38,10 @@ namespace MWWorld
 
         int getGridX() const { return mGridPos.x(); }
         int getGridY() const { return mGridPos.y(); }
-        bool isExterior() const { return mFlags.isExterior; }
-        bool isQuasiExterior() const { return mFlags.isQuasiExterior; }
-        bool hasWater() const { return mFlags.hasWater; }
-        bool noSleep() const { return mFlags.noSleep; }
+        bool isExterior() const { return mFlags.mIsExterior; }
+        bool isQuasiExterior() const { return mFlags.mIsQuasiExterior; }
+        bool hasWater() const { return mFlags.mHasWater; }
+        bool noSleep() const { return mFlags.mNoSleep; }
         const ESM::CellId& getCellId() const { return mCellId; }
         const ESM::RefId& getRegion() const { return mRegion; }
         std::string_view getNameId() const { return mNameID; }
@@ -52,10 +52,10 @@ namespace MWWorld
     private:
         struct
         {
-            bool isExterior;
-            bool isQuasiExterior;
-            bool hasWater;
-            bool noSleep;
+            bool mIsExterior;
+            bool mIsQuasiExterior;
+            bool mHasWater;
+            bool mNoSleep;
         } mFlags;
 
         osg::Vec2i mGridPos;

@@ -31,7 +31,7 @@ MWWorld::LiveCellRefBase::LiveCellRefBase(unsigned int type, const ESM4::Referen
 
 void MWWorld::LiveCellRefBase::loadImp(const ESM::ObjectState& state)
 {
-    mRef = state.mRef;
+    mRef = MWWorld::CellRef(state.mRef);
     mData = RefData(state, mData.isDeletedByContentFile());
 
     Ptr ptr(this);

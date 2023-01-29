@@ -382,17 +382,9 @@ namespace MWWorld
 
         if (const X* ptr = store.search(ref.mBaseObj))
         {
-            // typename std::list<LiveRef>::iterator iter = std::find(mList.begin(), mList.end(), ref.);
-
             LiveRef liveCellRef(ref, ptr);
-
             if (deleted)
                 liveCellRef.mData.setDeletedByContentFile(true);
-
-            /*if (iter != mList.end())
-                *iter = liveCellRef;
-            else
-                */
             mList.push_back(liveCellRef);
         }
         else
