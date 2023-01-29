@@ -44,3 +44,5 @@ export LUAROCKS
 popd
 pushd docs
 ./build_teal.sh ../build_teal
+popd
+zip build_teal.zip -r build_teal
