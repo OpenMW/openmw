@@ -57,6 +57,8 @@ namespace NavMeshTool
 
         using StringsVector = std::vector<std::string>;
 
+        constexpr std::string_view applicationName = "NavMeshTool";
+
         bpo::options_description makeOptionsDescription()
         {
             using Fallback::FallbackMap;
@@ -197,8 +199,9 @@ namespace NavMeshTool
 
             VFS::registerArchives(&vfs, fileCollections, archives, true);
 
-            Settings::Manager settings;
-            settings.load(config);
+            Settings::Manager::load(config);
+
+            setupLogging(config.getLogPath(), applicationName);
 
             const auto agentCollisionShape = DetourNavigator::toCollisionShapeType(
                 Settings::Manager::getInt("actor collision shape type", "Game"));
@@ -263,5 +266,5 @@ namespace NavMeshTool
 
 int main(int argc, char* argv[])
 {
-    return wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, "NavMeshTool");
+    return wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
 }

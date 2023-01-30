@@ -13,6 +13,7 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include <components/debug/debugging.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/qtconfigpath.hpp>
 #include <components/files/qtconversion.hpp>
@@ -424,6 +425,7 @@ bool Launcher::MainDialog::setupGraphicsSettings()
         mCfgMgr.addCommonOptions(desc);
         mCfgMgr.readConfiguration(variables, desc, true);
         Settings::Manager::load(mCfgMgr);
+        setupLogging(mCfgMgr.getLogPath(), "Launcher");
         return true;
     }
     catch (std::exception& e)
