@@ -146,13 +146,13 @@ namespace
 namespace MWGui
 {
 
-    MWGui::BookTypesetter::Utf8Span to_utf8_span(char const* text)
+    MWGui::BookTypesetter::Utf8Span to_utf8_span(std::string_view text)
     {
         typedef MWGui::BookTypesetter::Utf8Point point;
 
-        point begin = reinterpret_cast<point>(text);
+        point begin = reinterpret_cast<point>(text.data());
 
-        return MWGui::BookTypesetter::Utf8Span(begin, begin + strlen(text));
+        return MWGui::BookTypesetter::Utf8Span(begin, begin + text.length());
     }
 
     typedef TypesetBook::Ptr book;
@@ -207,7 +207,7 @@ namespace MWGui
         return typesetter->complete();
     }
 
-    book JournalBooks::createQuestBook(const std::string& questName)
+    book JournalBooks::createQuestBook(std::string_view questName)
     {
         BookTypesetter::Ptr typesetter = createTypesetter();
 
@@ -215,7 +215,7 @@ namespace MWGui
         BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
 
         AddQuestName addName(typesetter, header);
-        addName(to_utf8_span(questName.c_str()));
+        addName(to_utf8_span(questName));
 
         mModel->visitJournalEntries(questName, AddJournalEntry(typesetter, body, header, false));
 
@@ -241,12 +241,14 @@ namespace MWGui
         mIndexPagesCount = 2;
 
         char ch = 'A';
+        std::string buffer;
 
         BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
         for (int i = 0; i < 26; ++i)
         {
-            char buffer[32];
-            sprintf(buffer, "( %c )", ch);
+            buffer = "( ";
+            buffer += ch;
+            buffer += " )";
 
             const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
             BookTypesetter::Style* style = typesetter->createHotStyle(body, textColours.journalTopic,
@@ -286,10 +288,14 @@ namespace MWGui
 
         unsigned char ch[3] = { 0xd0, 0x90, 0x00 }; // CYRILLIC CAPITAL A is a 0xd090 in UTF-8
 
+        std::string buffer;
+
         for (int i = 0; i < 32; ++i)
         {
-            char buffer[32];
-            sprintf(buffer, "( %c%c )", ch[0], ch[1]);
+            buffer = "( ";
+            buffer += ch[0];
+            buffer += ch[1];
+            buffer += " )";
 
             Utf8Stream stream((char*)ch);
             Utf8Stream::UnicodeChar first = stream.peek();
