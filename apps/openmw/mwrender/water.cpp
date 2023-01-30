@@ -1,5 +1,7 @@
 #include "water.hpp"
 
+#include <sstream>
+
 #include <osg/ClipNode>
 #include <osg/Depth>
 #include <osg/Fog>
