@@ -43,8 +43,8 @@ namespace Platform::File
         auto handle = ::open(filename.c_str(), openFlags, 0);
         if (handle == -1)
         {
-            throw std::runtime_error(std::string("Failed to open '") + Files::pathToUnicodeString(filename)
-                + "' for reading: " + strerror(errno));
+            throw std::system_error(errno, std::generic_category(),
+                std::string("Failed to open '") + Files::pathToUnicodeString(filename) + "' for reading");
         }
         return static_cast<Handle>(handle);
     }
@@ -63,7 +63,7 @@ namespace Platform::File
 
         if (::lseek(nativeHandle, position, nativeSeekType) == -1)
         {
-            throw std::runtime_error("An lseek() call failed: " + std::string(strerror(errno)));
+            throw std::system_error(errno, std::generic_category(), "An lseek() call failed");
         }
     }
 
@@ -85,7 +85,7 @@ namespace Platform::File
         size_t position = ::lseek(nativeHandle, 0, SEEK_CUR);
         if (position == size_t(-1))
         {
-            throw std::runtime_error("An lseek() call failed: " + std::string(strerror(errno)));
+            throw std::system_error(errno, std::generic_category(), "An lseek() call failed");
         }
         return position;
     }
@@ -97,8 +97,8 @@ namespace Platform::File
         int amount = ::read(nativeHandle, data, size);
         if (amount == -1)
         {
-            throw std::runtime_error(
-                "An attempt to read " + std::to_string(size) + " bytes failed: " + strerror(errno));
+            throw std::system_error(
+                errno, std::generic_category(), "An attempt to read " + std::to_string(size) + " bytes failed");
         }
         return amount;
     }

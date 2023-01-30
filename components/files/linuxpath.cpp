@@ -56,7 +56,8 @@ namespace Files
         const auto err = ec.value();
         if (err != 0)
         {
-            Log(Debug::Warning) << "Error " << err << " " << std::strerror(err) << " when changing current directory";
+            Log(Debug::Warning) << "Error " << err << " " << std::generic_category().message(errno)
+                                << " when changing current directory";
         }
     }
 

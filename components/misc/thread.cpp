@@ -20,7 +20,7 @@ namespace Misc
             Log(Debug::Verbose) << "Using idle priority for thread=" << std::this_thread::get_id();
         else
             Log(Debug::Warning) << "Failed to set idle priority for thread=" << std::this_thread::get_id() << ": "
-                                << std::strerror(errno);
+                                << std::generic_category().message(errno);
     }
 }
 
@@ -56,7 +56,7 @@ namespace Misc
             Log(Debug::Verbose) << "Using idle priority for thread=" << std::this_thread::get_id();
         else
             Log(Debug::Warning) << "Failed to set idle priority for thread=" << std::this_thread::get_id() << ": "
-                                << std::strerror(errno);
+                                << std::generic_category().message(errno);
     }
 }
 

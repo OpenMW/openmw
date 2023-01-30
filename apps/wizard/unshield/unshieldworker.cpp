@@ -177,7 +177,7 @@ bool Wizard::UnshieldWorker::setupSettings()
     if (file.fail())
     {
         emit error(tr("Failed to open Morrowind configuration file!"),
-            tr("Opening %1 failed: %2.").arg(getIniPath(), strerror(errno)));
+            tr("Opening %1 failed: %2.").arg(getIniPath(), std::generic_category().message(errno).c_str()));
         return false;
     }
 
@@ -196,14 +196,14 @@ bool Wizard::UnshieldWorker::writeSettings()
     if (file.fail())
     {
         emit error(tr("Failed to open Morrowind configuration file!"),
-            tr("Opening %1 failed: %2.").arg(getIniPath(), strerror(errno)));
+            tr("Opening %1 failed: %2.").arg(getIniPath(), std::generic_category().message(errno).c_str()));
         return false;
     }
 
     if (!mIniSettings.writeFile(getIniPath(), file, mIniEncoding))
     {
         emit error(tr("Failed to write Morrowind configuration file!"),
-            tr("Writing to %1 failed: %2.").arg(getIniPath(), strerror(errno)));
+            tr("Writing to %1 failed: %2.").arg(getIniPath(), std::generic_category().message(errno).c_str()));
         return false;
     }
 

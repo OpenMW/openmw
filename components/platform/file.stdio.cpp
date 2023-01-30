@@ -34,8 +34,8 @@ namespace Platform::File
         FILE* handle = fopen(filename.c_str(), "rb");
         if (handle == nullptr)
         {
-            throw std::runtime_error(std::string("Failed to open '") + Files::pathToUnicodeString(filename)
-                + "' for reading: " + strerror(errno));
+            throw std::system_error(errno, std::generic_category(),
+                std::string("Failed to open '") + Files::pathToUnicodeString(filename) + "' for reading");
         }
         return static_cast<Handle>(reinterpret_cast<intptr_t>(handle));
     }
@@ -52,7 +52,7 @@ namespace Platform::File
         const auto nativeSeekType = getNativeSeekType(type);
         if (fseek(nativeHandle, position, nativeSeekType) != 0)
         {
-            throw std::runtime_error(std::string("An fseek() call failed: ") + strerror(errno));
+            throw std::system_error(errno, std::generic_category(), std::string("An fseek() call failed"));
         }
     }
 
@@ -75,7 +75,7 @@ namespace Platform::File
         long position = ftell(nativeHandle);
         if (position == -1)
         {
-            throw std::runtime_error(std::string("An ftell() call failed: ") + strerror(errno));
+            throw std::system_error(errno, std::generic_category(), std::string("An ftell() call failed"));
         }
         return static_cast<size_t>(position);
     }
@@ -87,8 +87,8 @@ namespace Platform::File
         int amount = fread(data, 1, size, nativeHandle);
         if (amount == 0 && ferror(nativeHandle))
         {
-            throw std::runtime_error(
-                std::string("An attempt to read ") + std::to_string(size) + " bytes failed: " + strerror(errno));
+            throw std::system_error(errno, std::generic_category(),
+                std::string("An attempt to read ") + std::to_string(size) + " bytes failed");
         }
         return static_cast<size_t>(amount);
     }
