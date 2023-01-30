@@ -185,6 +185,7 @@ namespace LuaUtil
             ss << "}";
             return ss.str();
         };
+        transMType["apply"] = [](const TransformM& a, const Vec3& b) { return a.mM.preMult(b); },
         transMType["inverse"] = [](const TransformM& m) {
             TransformM res;
             if (!res.mM.invert_4x3(m.mM))
@@ -209,6 +210,7 @@ namespace LuaUtil
                << axis.z() << ")) }";
             return ss.str();
         };
+        transQType["apply"] = [](const TransformQ& a, const Vec3& b) { return a.mQ * b; },
         transQType["inverse"] = [](const TransformQ& q) { return TransformQ{ q.mQ.inverse() }; };
 
         // Utility functions

@@ -21,7 +21,7 @@ local function startPackage(args)
         if not args.destPosition then error("destPosition required") end
         self:_startAiTravel(args.destPosition)
     else
-        error('Unsupported AI Package: '..args.type)
+        error('Unsupported AI Package: ' .. args.type)
     end
 end
 
@@ -113,4 +113,3 @@ return {
         RemoveAIPackages = function(packageType) interfaces.AI.removePackages(packageType) end,
     },
 }
-

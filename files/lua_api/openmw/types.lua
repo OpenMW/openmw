@@ -120,15 +120,21 @@
 -- @return #boolean
 
 ---
+-- Map from values of @{#EQUIPMENT_SLOT} to items @{openmw.core#GameObject}s
+-- @type EquipmentTable
+-- @map <#number, openmw.core#GameObject>
+
+---
 -- Get equipment.
 -- Has two overloads:
--- 1) With single argument: returns a table `slot` -> @{openmw.core#GameObject} of currently equipped items.
+-- 1) With a single argument: returns a table `slot` -> @{openmw.core#GameObject} of currently equipped items.
 -- See @{#EQUIPMENT_SLOT}. Returns empty table if the actor doesn't have
 -- equipment slots.
 -- 2) With two arguments: returns an item equipped to the given slot.
 -- @function [parent=#Actor] equipment
 -- @param openmw.core#GameObject actor
--- @param #number slot (optional argument)
+-- @param #number slot Optional number of the equipment slot
+-- @return #EquipmentTable, openmw.core#GameObject
 
 ---
 -- Set equipment.
@@ -138,7 +144,7 @@
 -- used only in local scripts and only on self.
 -- @function [parent=#Actor] setEquipment
 -- @param openmw.core#GameObject actor
--- @param equipment
+-- @param #EquipmentTable equipment
 -- @usage local self = require('openmw.self')
 -- local Actor = require('openmw.types').Actor
 -- Actor.setEquipment(self, {}) -- unequip all
@@ -1143,4 +1149,3 @@
 -- @field #string model VFS path to the model
 
 return nil
-

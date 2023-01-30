@@ -20,7 +20,7 @@
 ---
 -- Is a keyboard button currently pressed.
 -- @function [parent=#input] isKeyPressed
--- @param #number keyCode Key code (see @{openmw.input#KEY})
+-- @param #KeyCode keyCode Key code (see @{openmw.input#KEY})
 -- @return #boolean
 
 ---
@@ -74,30 +74,34 @@
 ---
 -- Get state of a control switch. I.e. is player able to move/fight/jump/etc.
 -- @function [parent=#input] getControlSwitch
--- @param #string key Control type (see @{openmw.input#CONTROL_SWITCH})
+-- @param #ControlSwitch key Control type (see @{openmw.input#CONTROL_SWITCH})
 -- @return #boolean
 
 ---
 -- Set state of a control switch. I.e. forbid or allow player to move/fight/jump/etc.
 -- @function [parent=#input] setControlSwitch
--- @param #string key Control type (see @{openmw.input#CONTROL_SWITCH})
+-- @param #ControlSwitch key Control type (see @{openmw.input#CONTROL_SWITCH})
 -- @param #boolean value
 
 ---
 -- Returns a human readable name for the given key code
 -- @function [parent=#input] getKeyName
--- @param #number code A key code (see @{openmw.input#KEY})
+-- @param #KeyCode code A key code (see @{openmw.input#KEY})
 -- @return #string
 
 ---
+-- String id of a @{#CONTROL_SWITCH}
+-- @type ControlSwitch
+
+---
 -- @type CONTROL_SWITCH
--- @field [parent=#CONTROL_SWITCH] #string Controls Ability to move
--- @field [parent=#CONTROL_SWITCH] #string Fighting Ability to attack
--- @field [parent=#CONTROL_SWITCH] #string Jumping Ability to jump
--- @field [parent=#CONTROL_SWITCH] #string Looking Ability to change view direction
--- @field [parent=#CONTROL_SWITCH] #string Magic Ability to use magic
--- @field [parent=#CONTROL_SWITCH] #string ViewMode Ability to toggle 1st/3rd person view
--- @field [parent=#CONTROL_SWITCH] #string VanityMode Vanity view if player doesn't touch controls for a long time
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch Controls Ability to move
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch Fighting Ability to attack
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch Jumping Ability to jump
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch Looking Ability to change view direction
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch Magic Ability to use magic
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch ViewMode Ability to toggle 1st/3rd person view
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch VanityMode Vanity view if player doesn't touch controls for a long time
 
 ---
 -- Values that can be used with getControlSwitch/setControlSwitch.
@@ -193,109 +197,113 @@
 -- @field [parent=#input] #CONTROLLER_AXIS CONTROLLER_AXIS
 
 ---
+-- Numeric id of a @{#KEY}
+-- @type KeyCode
+
+---
 -- @type KEY
--- @field #number _0
--- @field #number _1
--- @field #number _2
--- @field #number _3
--- @field #number _4
--- @field #number _5
--- @field #number _6
--- @field #number _7
--- @field #number _8
--- @field #number _9
--- @field #number NP_0
--- @field #number NP_1
--- @field #number NP_2
--- @field #number NP_3
--- @field #number NP_4
--- @field #number NP_5
--- @field #number NP_6
--- @field #number NP_7
--- @field #number NP_8
--- @field #number NP_9
--- @field #number NP_Divide
--- @field #number NP_Enter
--- @field #number NP_Minus
--- @field #number NP_Multiply
--- @field #number NP_Delete
--- @field #number NP_Plus
--- @field #number F1
--- @field #number F2
--- @field #number F3
--- @field #number F4
--- @field #number F5
--- @field #number F6
--- @field #number F7
--- @field #number F8
--- @field #number F9
--- @field #number F10
--- @field #number F11
--- @field #number F12
--- @field #number A
--- @field #number B
--- @field #number C
--- @field #number D
--- @field #number E
--- @field #number F
--- @field #number G
--- @field #number H
--- @field #number I
--- @field #number J
--- @field #number K
--- @field #number L
--- @field #number M
--- @field #number N
--- @field #number O
--- @field #number P
--- @field #number Q
--- @field #number R
--- @field #number S
--- @field #number T
--- @field #number U
--- @field #number V
--- @field #number W
--- @field #number X
--- @field #number Y
--- @field #number Z
--- @field #number LeftArrow
--- @field #number RightArrow
--- @field #number UpArrow
--- @field #number DownArrow
--- @field #number LeftAlt
--- @field #number LeftCtrl
--- @field #number LeftBracket
--- @field #number LeftSuper
--- @field #number LeftShift
--- @field #number RightAlt
--- @field #number RightCtrl
--- @field #number RightBracket
--- @field #number RightSuper
--- @field #number RightShift
--- @field #number Apostrophe
--- @field #number BackSlash
--- @field #number Backspace
--- @field #number CapsLock
--- @field #number Comma
--- @field #number Delete
--- @field #number End
--- @field #number Enter
--- @field #number Equals
--- @field #number Escape
--- @field #number Home
--- @field #number Insert
--- @field #number Minus
--- @field #number NumLock
--- @field #number PageDown
--- @field #number PageUp
--- @field #number Pause
--- @field #number Period
--- @field #number PrintScreen
--- @field #number ScrollLock
--- @field #number Semicolon
--- @field #number Slash
--- @field #number Space
--- @field #number Tab
+-- @field #KeyCode _0
+-- @field #KeyCode _1
+-- @field #KeyCode _2
+-- @field #KeyCode _3
+-- @field #KeyCode _4
+-- @field #KeyCode _5
+-- @field #KeyCode _6
+-- @field #KeyCode _7
+-- @field #KeyCode _8
+-- @field #KeyCode _9
+-- @field #KeyCode NP_0
+-- @field #KeyCode NP_1
+-- @field #KeyCode NP_2
+-- @field #KeyCode NP_3
+-- @field #KeyCode NP_4
+-- @field #KeyCode NP_5
+-- @field #KeyCode NP_6
+-- @field #KeyCode NP_7
+-- @field #KeyCode NP_8
+-- @field #KeyCode NP_9
+-- @field #KeyCode NP_Divide
+-- @field #KeyCode NP_Enter
+-- @field #KeyCode NP_Minus
+-- @field #KeyCode NP_Multiply
+-- @field #KeyCode NP_Delete
+-- @field #KeyCode NP_Plus
+-- @field #KeyCode F1
+-- @field #KeyCode F2
+-- @field #KeyCode F3
+-- @field #KeyCode F4
+-- @field #KeyCode F5
+-- @field #KeyCode F6
+-- @field #KeyCode F7
+-- @field #KeyCode F8
+-- @field #KeyCode F9
+-- @field #KeyCode F10
+-- @field #KeyCode F11
+-- @field #KeyCode F12
+-- @field #KeyCode A
+-- @field #KeyCode B
+-- @field #KeyCode C
+-- @field #KeyCode D
+-- @field #KeyCode E
+-- @field #KeyCode F
+-- @field #KeyCode G
+-- @field #KeyCode H
+-- @field #KeyCode I
+-- @field #KeyCode J
+-- @field #KeyCode K
+-- @field #KeyCode L
+-- @field #KeyCode M
+-- @field #KeyCode N
+-- @field #KeyCode O
+-- @field #KeyCode P
+-- @field #KeyCode Q
+-- @field #KeyCode R
+-- @field #KeyCode S
+-- @field #KeyCode T
+-- @field #KeyCode U
+-- @field #KeyCode V
+-- @field #KeyCode W
+-- @field #KeyCode X
+-- @field #KeyCode Y
+-- @field #KeyCode Z
+-- @field #KeyCode LeftArrow
+-- @field #KeyCode RightArrow
+-- @field #KeyCode UpArrow
+-- @field #KeyCode DownArrow
+-- @field #KeyCode LeftAlt
+-- @field #KeyCode LeftCtrl
+-- @field #KeyCode LeftBracket
+-- @field #KeyCode LeftSuper
+-- @field #KeyCode LeftShift
+-- @field #KeyCode RightAlt
+-- @field #KeyCode RightCtrl
+-- @field #KeyCode RightBracket
+-- @field #KeyCode RightSuper
+-- @field #KeyCode RightShift
+-- @field #KeyCode Apostrophe
+-- @field #KeyCode BackSlash
+-- @field #KeyCode Backspace
+-- @field #KeyCode CapsLock
+-- @field #KeyCode Comma
+-- @field #KeyCode Delete
+-- @field #KeyCode End
+-- @field #KeyCode Enter
+-- @field #KeyCode Equals
+-- @field #KeyCode Escape
+-- @field #KeyCode Home
+-- @field #KeyCode Insert
+-- @field #KeyCode Minus
+-- @field #KeyCode NumLock
+-- @field #KeyCode PageDown
+-- @field #KeyCode PageUp
+-- @field #KeyCode Pause
+-- @field #KeyCode Period
+-- @field #KeyCode PrintScreen
+-- @field #KeyCode ScrollLock
+-- @field #KeyCode Semicolon
+-- @field #KeyCode Slash
+-- @field #KeyCode Space
+-- @field #KeyCode Tab
 
 ---
 -- Key codes.
@@ -305,7 +313,7 @@
 -- The argument of `onKeyPress`/`onKeyRelease` engine handlers.
 -- @type KeyboardEvent
 -- @field [parent=#KeyboardEvent] #string symbol The pressed symbol (1-symbol string if can be represented or an empty string otherwise).
--- @field [parent=#KeyboardEvent] #string code Key code.
+-- @field [parent=#KeyboardEvent] #KeyCode code Key code.
 -- @field [parent=#KeyboardEvent] #boolean withShift Is `Shift` key pressed.
 -- @field [parent=#KeyboardEvent] #boolean withCtrl Is `Control` key pressed.
 -- @field [parent=#KeyboardEvent] #boolean withAlt Is `Alt` key pressed.
@@ -320,4 +328,3 @@
 -- @field [parent=#TouchEvent] #number pressure Pressure of the finger.
 
 return nil
-

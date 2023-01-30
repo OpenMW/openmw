@@ -4,14 +4,17 @@
 -- @module camera
 -- @usage local camera = require('openmw.camera')
 
+---
+-- Camera mode; see @{openmw.camera#MODE} for possible values
+-- @type Mode
 
 ---
 -- @type MODE Camera modes.
--- @field #number Static Camera doesn't track player; player inputs doesn't affect camera; use `setStaticPosition` to move the camera.
--- @field #number FirstPerson First person mode.
--- @field #number ThirdPerson Third person mode; player character turns to the view direction.
--- @field #number Vanity Similar to Preview; camera slowly moves around the player.
--- @field #number Preview Third person mode, but player character doesn't turn to the view direction.
+-- @field #Mode Static Camera doesn't track player; player inputs doesn't affect camera; use `setStaticPosition` to move the camera.
+-- @field #Mode FirstPerson First person mode.
+-- @field #Mode ThirdPerson Third person mode; player character turns to the view direction.
+-- @field #Mode Vanity Similar to Preview; camera slowly moves around the player.
+-- @field #Mode Preview Third person mode, but player character doesn't turn to the view direction.
 
 ---
 -- Camera modes.
@@ -20,17 +23,17 @@
 ---
 -- Return the current @{openmw.camera#MODE}.
 -- @function [parent=#camera] getMode
--- @return #MODE
+-- @return #Mode
 
 ---
 -- Return the mode the camera will switch to after the end of the current animation. Can be nil.
 -- @function [parent=#camera] getQueuedMode
--- @return #MODE
+-- @return #Mode
 
 ---
 -- Change @{openmw.camera#MODE}; if the second (optional, true by default) argument is set to false, the switching can be delayed (see `getQueuedMode`).
 -- @function [parent=#camera] setMode
--- @param #MODE mode
+-- @param #Mode mode
 -- @param #boolean force
 
 ---
@@ -171,7 +174,7 @@
 -- Set the speed coefficient of focal point (the center of the screen in third person mode) smooth transition.
 -- Smooth transition happens by default every time when the preferred offset was changed. Use `instantTransition()` to skip the current transition.
 -- @function [parent=#camera] setFocalTransitionSpeed
--- Set the speed coefficient 
+-- Set the speed coefficient
 -- @param #number speed
 
 ---
@@ -223,4 +226,3 @@
 
 
 return nil
-

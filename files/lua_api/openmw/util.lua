@@ -117,6 +117,30 @@
 -- @return #Vector2.
 
 ---
+-- @function [parent=#Vector2] __add
+-- @param self
+-- @param #Vector2 v
+-- @return #Vector2 sum of the vectors
+
+---
+-- @function [parent=#Vector2] __sub
+-- @param self
+-- @param #Vector2 v
+-- @return #Vector2 difference of the vectors
+
+---
+-- @function [parent=#Vector2] __mul
+-- @param self
+-- @param #number k
+-- @return #Vector2 vector multiplied by a number
+
+---
+-- @function [parent=#Vector2] __div
+-- @param self
+-- @param #number k
+-- @return #Vector2 vector divided by a number
+
+---
 -- Length of the vector.
 -- @function [parent=#Vector2] length
 -- @param self
@@ -130,11 +154,11 @@
 
 ---
 -- Normalizes vector.
--- Returns two values: normalized vector and the length of the original vector.
--- It doesn't change the original vector. 
+-- It doesn't change the original vector.
 -- @function [parent=#Vector2] normalize
 -- @param self
--- @return #Vector2, #number
+-- @return #Vector2 normalized vector
+-- @return #number the length of the original vector
 
 ---
 -- Rotates 2D vector clockwise.
@@ -196,6 +220,35 @@
 -- @return #Vector3.
 
 ---
+-- @function [parent=#Vector3] __add
+-- @param self
+-- @param #Vector3 v
+-- @return #Vector3 sum of the vectors
+
+---
+-- @function [parent=#Vector3] __sub
+-- @param self
+-- @param #Vector3 v
+-- @return #Vector3 difference of the vectors
+
+---
+-- @function [parent=#Vector3] __mul
+-- @param self
+-- @param #number k
+-- @return #Vector3 vector multiplied by a number
+
+---
+-- @function [parent=#Vector3] __div
+-- @param self
+-- @param #number k
+-- @return #Vector3 vector divided by a number
+
+---
+-- @function [parent=#Vector3] __tostring
+-- @param self
+-- @return #string
+
+---
 -- Length of the vector
 -- @function [parent=#Vector3] length
 -- @param self
@@ -209,11 +262,11 @@
 
 ---
 -- Normalizes vector.
--- Returns two values: normalized vector and the length of the original vector.
 -- It doesn't change the original vector.
 -- @function [parent=#Vector3] normalize
 -- @param self
--- @return #Vector3, #number
+-- @return #Vector3 normalized vector
+-- @return #number the length of the original vector
 
 ---
 -- Dot product.
@@ -275,6 +328,35 @@
 -- @return #Vector4.
 
 ---
+-- @function [parent=#Vector4] __add
+-- @param self
+-- @param #Vector4 v
+-- @return #Vector4 sum of the vectors
+
+---
+-- @function [parent=#Vector4] __sub
+-- @param self
+-- @param #Vector4 v
+-- @return #Vector4 difference of the vectors
+
+---
+-- @function [parent=#Vector4] __mul
+-- @param self
+-- @param #number k
+-- @return #Vector4 vector multiplied by a number
+
+---
+-- @function [parent=#Vector4] __div
+-- @param self
+-- @param #number k
+-- @return #Vector4 vector divided by a number
+
+---
+-- @function [parent=#Vector4] __tostring
+-- @param self
+-- @return #string
+
+---
 -- Length of the vector
 -- @function [parent=#Vector4] length
 -- @param self
@@ -288,11 +370,11 @@
 
 ---
 -- Normalizes vector.
--- Returns two values: normalized vector and the length of the original vector.
 -- It doesn't change the original vector.
 -- @function [parent=#Vector4] normalize
 -- @param self
--- @return #Vector4, #number
+-- @return #Vector4 normalized vector
+-- @return #number the length of the original vector
 
 ---
 -- Dot product.
@@ -377,10 +459,24 @@
 -- @type Transform
 
 ---
+-- Combine transforms (will apply in reverse order)
+-- @function [parent=#Transform] __mul
+-- @param self
+-- @param #Transform t
+-- @return #Transform
+
+---
 -- Returns the inverse transform.
 -- @function [parent=#Transform] inverse
 -- @param self
--- @return #Transform.
+-- @return #Transform
+
+---
+-- Apply transform to a vector
+-- @function [parent=#Transform] apply
+-- @param self
+-- @param #Vector3 v
+-- @return #Vector3
 
 ---
 -- @type TRANSFORM
@@ -389,8 +485,8 @@
 ---
 -- Movement by given vector.
 -- @function [parent=#TRANSFORM] move
--- @param #Vector3 offset.
--- @return #Transform.
+-- @param #Vector3 offset
+-- @return #Transform
 -- @usage
 -- -- Accepts either 3 numbers or a 3D vector
 -- util.transform.move(x, y, z)
@@ -453,4 +549,3 @@
 -- local deltaAngle = math.atan2(relativeTargetPos.y, relativeTargetPos.x)
 
 return nil
-

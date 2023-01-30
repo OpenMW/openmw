@@ -106,11 +106,12 @@
 -- Any object that exists in the game world and has a specific location.
 -- Player, actors, items, and statics are game objects.
 -- @type GameObject
+-- @extends #userdata
 -- @field #boolean enabled Whether the object is enabled or disabled. Global scripts can set the value. Items in containers or inventories can't be disabled.
 -- @field openmw.util#Vector3 position Object position.
 -- @field openmw.util#Vector3 rotation Object rotation (ZXY order).
 -- @field #Cell cell The cell where the object currently is. During loading a game and for objects in an inventory or a container `cell` is nil.
--- @field #table type Type of the object (one of the tables from the package @{openmw.types#types}).
+-- @field #any type Type of the object (one of the tables from the package @{openmw.types#types}).
 -- @field #number count Count (>1 means a stack of objects).
 -- @field #string recordId Returns record ID of the object in lowercase.
 
@@ -290,4 +291,3 @@
 
 
 return nil
-

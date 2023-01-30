@@ -31,6 +31,9 @@
 -- @field Text Display text
 -- @field TextEdit Accepts user text input
 -- @field Window Can be moved and resized by the user
+-- @field Image Displays an image
+-- @field Flex Aligns widgets in a row or column
+-- @field Container Automatically wraps around its contents
 
 ---
 -- Shows given message at the bottom of the screen.
@@ -104,15 +107,28 @@
 ---
 -- Layout
 -- @type Layout
+-- @field type Type of the widget, one of the values in #TYPE. Must match the type in #Template if both are present
+-- @field #string layer Optional layout to display in. Only applies for the root widget.
+--   Note: if the #Element isn't attached to anything, it won't be visible!
 -- @field #string name Optional name of the layout. Allows access by name from Content
 -- @field #table props Optional table of widget properties
 -- @field #table events Optional table of event callbacks
 -- @field #Content content Optional @{openmw.ui#Content} of children layouts
+-- @field #Template template Optional #Template
+-- @field #table external Optional table of external properties
+-- @field userData Arbitrary data for you to use, e. g. when receiving the layout in an event callback
+
+---
+-- Template
+-- @type Template
+-- @field #table props
+-- @field #Content content
+-- @field type One of the values in #TYPE, serves as the default value for the #Layout
 
 ---
 -- @type Layer
 -- @field #string name Name of the layer
--- @field openmw.util#vector2 size Size of the layer in pixels
+-- @field openmw.util#Vector2 size Size of the layer in pixels
 
 ---
 -- Layers. Implements [iterables#List](iterables.html#List) of #Layer.
@@ -174,6 +190,13 @@
 -- end
 
 ---
+-- Content also acts as a map of names to Layouts
+-- @function [parent=#Content] __index
+-- @param self
+-- @param #string name
+-- @return #Layout
+
+---
 -- Puts the layout at given index by shifting all the elements after it
 -- @function [parent=#Content] insert
 -- @param self
@@ -222,8 +245,9 @@
 
 ---
 -- Register a new texture resource. Can be used to manually atlas UI textures.
--- @function [parent=#ui] texture #TextureResource
+-- @function [parent=#ui] texture
 -- @param #TextureResourceOptions options
+-- @return #TextureResource
 -- @usage
 -- local ui = require('openmw.ui')
 -- local vector2 = require('openmw.util').vector2

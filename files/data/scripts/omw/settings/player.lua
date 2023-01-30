@@ -20,9 +20,10 @@ require('scripts.omw.settings.renderers')(render.registerRenderer)
 -- @field #number order Groups within the same page are sorted by this number, or their key for equal values.
 --   Defaults to 0.
 -- @field #boolean permanentStorage Whether the group should be stored in permanent storage, or in the save file
--- @field #list<#SettingOptions> settings A [iterables#List](iterables.html#List) of #SettingOptions
+-- @field #list<#SettingOptions> settings A [iterables#List](iterables.html#List) table of #SettingOptions
 
 ---
+-- Table of setting options
 -- @type SettingOptions
 -- @field #string key A unique key
 -- @field #string name A key from the localization context

@@ -50,12 +50,14 @@
 -- @function [parent=#StorageSection] get
 -- @param self
 -- @param #string key
+-- @return #any
 
 ---
 -- Get value by a string key; if value is a table returns a copy.
 -- @function [parent=#StorageSection] getCopy
 -- @param self
 -- @param #string key
+-- @return #any
 
 ---
 -- Subscribe to changes in this section.
@@ -95,4 +97,3 @@
 -- @param #any value
 
 return nil
-
