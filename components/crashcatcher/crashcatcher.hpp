@@ -1,6 +1,7 @@
 #ifndef CRASHCATCHER_H
 #define CRASHCATCHER_H
 
+#include <filesystem>
 #include <string>
 
 #if (defined(__APPLE__) || (defined(__linux) && !defined(ANDROID)) || (defined(__unix) && !defined(ANDROID))           \
