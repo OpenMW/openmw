@@ -59,54 +59,85 @@ local templates = {}
 
 ---
 -- Container that adds padding around its content.
--- @field [parent=#MWUI] #table padding
+-- @field [parent=#Templates] openmw.ui#Template padding
 
 ---
 -- Standard spacing interval
--- @field [parent=#MWUI] #number interval
+-- @field [parent=#Templates] openmw.ui#Template interval
 require('scripts.omw.mwui.space')(templates)
 
 ---
--- Standard rectangular border
--- @field [parent=#Templates] openmw.ui#Layout border
+-- Standard rectangular borders
+-- @field [parent=#Templates] openmw.ui#Template borders
 
 ---
 -- Container wrapping the content with borders
--- @field [parent=#Templates] openmw.ui#Layout box
+-- @field [parent=#Templates] openmw.ui#Template box
 
 ---
 -- Same as box, but with a semi-transparent background
--- @field [parent=#Templates] openmw.ui#Layout boxTransparent
+-- @field [parent=#Templates] openmw.ui#Template boxTransparent
 ---
 -- Same as box, but with a solid background
--- @field [parent=#Templates] openmw.ui#Layout boxSolid
+-- @field [parent=#Templates] openmw.ui#Template boxSolid
+
+---
+-- Expanding vertical line
+-- @field [parent=#Templates] openmw.ui#Template verticalLine
+
+---
+-- Expanding horizontal line
+-- @field [parent=#Templates] openmw.ui#Template horizontalLine
+
+---
+-- Standard rectangular borders
+-- @field [parent=#Templates] openmw.ui#Template bordersThick
+
+---
+-- Container wrapping the content with borders
+-- @field [parent=#Templates] openmw.ui#Template boxThick
+
+---
+-- Same as box, but with a semi-transparent background
+-- @field [parent=#Templates] openmw.ui#Template boxTransparentThick
+---
+-- Same as box, but with a solid background
+-- @field [parent=#Templates] openmw.ui#Template boxSolidThick
+
+---
+-- Expanding vertical line
+-- @field [parent=#Templates] openmw.ui#Template verticalLineThick
+
+---
+-- Expanding horizontal line
+-- @field [parent=#Templates] openmw.ui#Template horizontalLineThick
 require('scripts.omw.mwui.borders')(templates)
 
 ---
 -- Standard "sand" colored text
--- @field [parent=#Templates] openmw.ui#Layout textNormal
+-- @field [parent=#Templates] openmw.ui#Template textNormal
 
 ---
 -- Header white colored text
--- @field [parent=#Templates] openmw.ui#Layout textHeader
+-- @field [parent=#Templates] openmw.ui#Template textHeader
 
 ---
 -- Standard "sand" colored multiline text
--- @field [parent=#Templates] openmw.ui#Layout textParagraph
+-- @field [parent=#Templates] openmw.ui#Template textParagraph
 require('scripts.omw.mwui.text')(templates)
 
 ---
 -- Single line text input
--- @field [parent=#Templates] openmw.ui#Layout textEditLine
+-- @field [parent=#Templates] openmw.ui#Template textEditLine
 
 ---
 -- Multiline text input
--- @field [parent=#Templates] openmw.ui#Layout textEditBox
+-- @field [parent=#Templates] openmw.ui#Template textEditBox
 require('scripts.omw.mwui.textEdit')(templates)
 
 ---
 -- Shades its children and makes them uninteractible
--- @field [parent=#Templates] openmw.ui#Layout disabled
+-- @field [parent=#Templates] openmw.ui#Template disabled
 require('scripts.omw.mwui.filters')(templates)
 
 ---

@@ -41,7 +41,7 @@
 
 ---
 -- Collision types that are used in `castRay`.
--- Several types can be combined with '+'.
+-- Several types can be combined with @{openmw_util#util.bitOr}.
 -- @field [parent=#nearby] #COLLISION_TYPE COLLISION_TYPE
 
 ---
@@ -53,15 +53,19 @@
 -- @field [parent=#RayCastingResult] openmw.core#GameObject hitObject The object the ray has collided with (can be nil)
 
 ---
+-- A table of parameters for @{#nearby.castRay}
+-- @type CastRayOptions
+-- @field openmw.core#GameObject ignore An object to ignore (specify here the source of the ray)
+-- @field #number collisionType Object types to work with (see @{openmw.nearby#COLLISION_TYPE})
+-- @field #number radius The radius of the ray (zero by default). If not zero then castRay actually casts a sphere with given radius.
+--  NOTE: currently `ignore` is not supported if `radius>0`.
+
+---
 -- Cast ray from one point to another and return the first collision.
 -- @function [parent=#nearby] castRay
 -- @param openmw.util#Vector3 from Start point of the ray.
 -- @param openmw.util#Vector3 to End point of the ray.
--- @param #table options An optional table with additional optional arguments. Can contain:  
--- `ignore` - an object to ignore (specify here the source of the ray);  
--- `collisionType` - object types to work with (see @{openmw.nearby#COLLISION_TYPE}), several types can be combined with '+';  
--- `radius` - the radius of the ray (zero by default). If not zero then castRay actually casts a sphere with given radius.  
--- NOTE: currently `ignore` is not supported if `radius>0`.
+-- @param #CastRayOptions options An optional table with additional optional arguments
 -- @return #RayCastingResult
 -- @usage if nearby.castRay(pointA, pointB).hit then print('obstacle between A and B') end
 -- @usage local res = nearby.castRay(self.position, enemy.position, {ignore=self})
@@ -150,7 +154,8 @@
 --       (default: 1);
 --   * `destinationTolerance` - a floating point number representing maximum allowed distance between destination and a
 --     nearest point on the navigation mesh in addition to agent size (default: 1);
--- @return @{#FIND_PATH_STATUS}, a collection of @{openmw.util#Vector3}
+-- @return #FIND_PATH_STATUS
+-- @return #list<openmw.util#Vector3>
 -- @usage local status, path = nearby.findPath(source, destination)
 -- @usage local status, path = nearby.findPath(source, destination, {
 --     includeFlags = nearby.NAVIGATOR_FLAGS.Walk + nearby.NAVIGATOR_FLAGS.OpenDoor,
@@ -177,7 +182,7 @@
 --   * `includeFlags` - allowed areas for agent to move, a sum of @{#NAVIGATOR_FLAGS} values
 --     (default: @{#NAVIGATOR_FLAGS.Walk} + @{#NAVIGATOR_FLAGS.Swim} +
 --     @{#NAVIGATOR_FLAGS.OpenDoor} + @{#NAVIGATOR_FLAGS.UsePathgrid});
--- @return @{openmw.util#Vector3} or nil
+-- @return openmw.util#Vector3, #nil
 -- @usage local position = nearby.findRandomPointAroundCircle(position, maxRadius)
 -- @usage local position = nearby.findRandomPointAroundCircle(position, maxRadius, {
 --     includeFlags = nearby.NAVIGATOR_FLAGS.Walk,
@@ -201,7 +206,7 @@
 --   * `includeFlags` - allowed areas for agent to move, a sum of @{#NAVIGATOR_FLAGS} values
 --     (default: @{#NAVIGATOR_FLAGS.Walk} + @{#NAVIGATOR_FLAGS.Swim} +
 --     @{#NAVIGATOR_FLAGS.OpenDoor} + @{#NAVIGATOR_FLAGS.UsePathgrid});
--- @return @{openmw.util#Vector3} or nil
+-- @return openmw.util#Vector3, #nil
 -- @usage local position = nearby.castNavigationRay(from, to)
 -- @usage local position = nearby.castNavigationRay(from, to, {
 --     includeFlags = nearby.NAVIGATOR_FLAGS.Swim,
