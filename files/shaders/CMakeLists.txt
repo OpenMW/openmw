@@ -11,7 +11,6 @@ set(SHADER_FILES
     groundcover_fragment.glsl
     water_vertex.glsl
     water_fragment.glsl
-    water_nm.png
     alpha.glsl
     depth.glsl
     objects_vertex.glsl

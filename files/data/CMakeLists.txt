@@ -9,6 +9,7 @@ set(BUILTIN_DATA_FILES
     textures/omw_menu_scroll_right.dds
     textures/omw_menu_scroll_center_h.dds
     textures/omw_menu_scroll_center_v.dds
+    textures/omw/water_nm.png
 
     fonts/DejaVuFontLicense.txt
     fonts/DejaVuLGCSansMono.ttf

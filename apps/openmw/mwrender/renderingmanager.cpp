@@ -318,8 +318,8 @@ namespace MWRender
 
     RenderingManager::RenderingManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
         Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
-        const std::filesystem::path& resourcePath, DetourNavigator::Navigator& navigator,
-        const MWWorld::GroundcoverStore& groundcoverStore, SceneUtil::UnrefQueue& unrefQueue)
+        DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore,
+        SceneUtil::UnrefQueue& unrefQueue)
         : mSkyBlending(Settings::Manager::getBool("sky blending", "Fog"))
         , mViewer(viewer)
         , mRootNode(rootNode)
@@ -532,8 +532,8 @@ namespace MWRender
         resourceSystem->getSceneManager()->setSupportsNormalsRT(mPostProcessor->getSupportsNormalsRT());
 
         // water goes after terrain for correct waterculling order
-        mWater = std::make_unique<Water>(sceneRoot->getParent(0), sceneRoot, mResourceSystem,
-            mViewer->getIncrementalCompileOperation(), resourcePath);
+        mWater = std::make_unique<Water>(
+            sceneRoot->getParent(0), sceneRoot, mResourceSystem, mViewer->getIncrementalCompileOperation());
 
         mCamera = std::make_unique<Camera>(mViewer->getCamera());
 

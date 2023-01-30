@@ -1,7 +1,5 @@
 #include "water.hpp"
 
-#include <iomanip>
-
 #include <osg/ClipNode>
 #include <osg/Depth>
 #include <osg/Fog>
@@ -12,14 +10,8 @@
 #include <osg/PositionAttitudeTransform>
 #include <osg/ViewportIndexed>
 
-#include <osgDB/ReadFile>
-
-#include <fstream>
-
 #include <osgUtil/CullVisitor>
 #include <osgUtil/IncrementalCompileOperation>
-
-#include <components/debug/debuglog.hpp>
 
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -235,26 +227,6 @@ namespace MWRender
         float mRainIntensity;
     };
 
-    osg::ref_ptr<osg::Image> readPngImage(const std::filesystem::path& file)
-    {
-        std::ifstream inStream;
-        inStream.open(file, std::ios_base::in | std::ios_base::binary);
-        if (inStream.fail())
-            Log(Debug::Error) << "Error: Failed to open " << file;
-        osgDB::ReaderWriter* reader = osgDB::Registry::instance()->getReaderWriterForExtension("png");
-        if (!reader)
-        {
-            Log(Debug::Error) << "Error: Failed to read " << file << ", no png readerwriter found";
-            return osg::ref_ptr<osg::Image>();
-        }
-        osgDB::ReaderWriter::ReadResult result = reader->readImage(inStream);
-        if (!result.success())
-            Log(Debug::Error) << "Error: Failed to read " << file << ": " << result.message() << " code "
-                              << result.status();
-
-        return result.getImage();
-    }
-
     class Refraction : public SceneUtil::RTTNode
     {
     public:
@@ -453,12 +425,11 @@ namespace MWRender
     };
 
     Water::Water(osg::Group* parent, osg::Group* sceneRoot, Resource::ResourceSystem* resourceSystem,
-        osgUtil::IncrementalCompileOperation* ico, const std::filesystem::path& resourcePath)
+        osgUtil::IncrementalCompileOperation* ico)
         : mRainIntensityUpdater(nullptr)
         , mParent(parent)
         , mSceneRoot(sceneRoot)
         , mResourceSystem(resourceSystem)
-        , mResourcePath(resourcePath)
         , mEnabled(true)
         , mToggled(true)
         , mTop(0)
@@ -709,8 +680,7 @@ namespace MWRender
         osg::ref_ptr<osg::Program> program = shaderMgr.getProgram(vertexShader, fragmentShader);
 
         osg::ref_ptr<osg::Texture2D> normalMap(
-            new osg::Texture2D(readPngImage(mResourcePath / "shaders" / "water_nm.png")));
-
+            new osg::Texture2D(mResourceSystem->getImageManager()->getImage("textures/omw/water_nm.png")));
         if (normalMap->getImage())
             normalMap->getImage()->flipVertical();
         normalMap->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
