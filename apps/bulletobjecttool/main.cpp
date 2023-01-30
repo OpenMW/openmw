@@ -48,6 +48,8 @@ namespace
 
     using StringsVector = std::vector<std::string>;
 
+    constexpr std::string_view applicationName = "BulletObjectTool";
+
     bpo::options_description makeOptionsDescription()
     {
         using Fallback::FallbackMap;
@@ -177,8 +179,9 @@ namespace
 
         VFS::registerArchives(&vfs, fileCollections, archives, true);
 
-        Settings::Manager settings;
-        settings.load(config);
+        Settings::Manager::load(config);
+
+        setupLogging(config.getLogPath(), applicationName);
 
         ESM::ReadersCache readers;
         EsmLoader::Query query;
@@ -221,5 +224,5 @@ namespace
 
 int main(int argc, char* argv[])
 {
-    return wrapApplication(runBulletObjectTool, argc, argv, "BulletObjectTool");
+    return wrapApplication(runBulletObjectTool, argc, argv, applicationName);
 }

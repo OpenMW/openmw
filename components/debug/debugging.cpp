@@ -2,13 +2,16 @@
 
 #include <chrono>
 #include <fstream>
+#include <iostream>
+#include <map>
 #include <memory>
 
 #include <boost/iostreams/stream.hpp>
 
 #include <components/crashcatcher/crashcatcher.hpp>
-#include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
+#include <components/misc/strings/lower.hpp>
+
 #ifdef _WIN32
 #include <components/crashcatcher/windows_crashcatcher.hpp>
 #include <components/files/conversion.hpp>
@@ -280,7 +283,7 @@ Misc::Locked<std::ostream&> getLockedRawStderr()
 }
 
 // Redirect cout and cerr to the log file
-void setupLogging(const std::filesystem::path& logDir, const std::string& appName, std::ios_base::openmode mode)
+void setupLogging(const std::filesystem::path& logDir, std::string_view appName, std::ios_base::openmode mode)
 {
 #if defined(_WIN32) && defined(_DEBUG)
     // Redirect cout and cerr to VS debug output when running in debug mode
@@ -299,8 +302,7 @@ void setupLogging(const std::filesystem::path& logDir, const std::string& appNam
 #endif
 }
 
-int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, char* argv[], const std::string& appName,
-    bool autoSetupLogging)
+int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, char* argv[], std::string_view appName)
 {
 #if defined _WIN32
     (void)Debug::attachParentConsole();
@@ -312,19 +314,6 @@ int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, c
     int ret = 0;
     try
     {
-        Files::ConfigurationManager cfgMgr;
-
-        if (autoSetupLogging)
-        {
-            std::ios_base::openmode mode = std::ios::out;
-
-            // If we are collecting a stack trace, append to existing log file
-            if (argc == 2 && strcmp(argv[1], crash_switch) == 0)
-                mode |= std::ios::app;
-
-            setupLogging(cfgMgr.getLogPath(), appName, mode);
-        }
-
         if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER"); env == nullptr || std::atol(env) == 0)
         {
 #if defined(_WIN32)
@@ -347,7 +336,7 @@ int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, c
 #if (defined(__APPLE__) || defined(__linux) || defined(__unix) || defined(__posix))
         if (!isatty(fileno(stdin)))
 #endif
-            SDL_ShowSimpleMessageBox(0, (appName + ": Fatal error").c_str(), e.what(), nullptr);
+            SDL_ShowSimpleMessageBox(0, (std::string(appName) + ": Fatal error").c_str(), e.what(), nullptr);
 
         Log(Debug::Error) << "Error: " << e.what();
 

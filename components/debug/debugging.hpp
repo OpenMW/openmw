@@ -3,6 +3,7 @@
 
 #include <filesystem>
 #include <functional>
+#include <string_view>
 
 #include <components/misc/guarded.hpp>
 
@@ -35,9 +36,8 @@ std::ostream& getRawStderr();
 Misc::Locked<std::ostream&> getLockedRawStderr();
 
 void setupLogging(
-    const std::filesystem::path& logDir, const std::string& appName, std::ios_base::openmode mode = std::ios::out);
+    const std::filesystem::path& logDir, std::string_view appName, std::ios_base::openmode mode = std::ios::out);
 
-int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, char* argv[], const std::string& appName,
-    bool autoSetupLogging = true);
+int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, char* argv[], std::string_view appName);
 
 #endif
