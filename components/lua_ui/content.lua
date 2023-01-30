@@ -6,7 +6,7 @@ M.new = function(source)
     result.__nameIndex = {}
     for i, v in ipairs(source) do
         if type(v) ~= 'table' then
-            error("Content can only contain tables")
+            error('Content can only contain tables')
         end
         result[i] = v
         if type(v.name) == 'string' then
@@ -28,7 +28,7 @@ local function getIndexFromKey(self, key)
     if type(key) == 'string' then
         index = self.__nameIndex[key]
         if not index then
-            error("Unexpected content key:" .. key)
+            error('Unexpected content key:' .. key)
         end
     end
     validateIndex(self, index)
@@ -130,6 +130,10 @@ M.__pairs = function(self)
     return next, self, 1
 end
 M.__ipairs = M.__pairs
+M.__metatable = {}
+
+assert(not pcall(function() setmetatable(M.new({}), {}) end), 'Metatable is not protected')
+assert(getmetatable(M.new) ~= M, 'Metatable is not protected')
 
 return M
 )"
