@@ -313,6 +313,8 @@ namespace MWLua
         }
         mGlobalStorage.clearTemporaryAndRemoveCallbacks();
         mPlayerStorage.clearTemporaryAndRemoveCallbacks();
+        for (int i = 0; i < 5; ++i)
+            lua_gc(mLua.sol(), LUA_GCCOLLECT, 0);
     }
 
     void LuaManager::setupPlayer(const MWWorld::Ptr& ptr)
