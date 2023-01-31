@@ -644,7 +644,6 @@ namespace MWLua
         outMemSize(mLua.getTotalMemoryUsage());
         out << "\n";
         out << "LuaUtil::ScriptsContainer count: " << LuaUtil::ScriptsContainer::getInstanceCount() << "\n";
-        out << "LuaUi::Content count: " << LuaUi::Content::getInstanceCount() << "\n";
         out << "\n";
         out << "small alloc max size = " << smallAllocSize << " (section [Lua] in settings.cfg)\n";
         out << "Smaller values give more information for the profiler, but increase performance overhead.\n";

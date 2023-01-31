@@ -15,27 +15,13 @@ namespace LuaUi::Content
     class View
     {
     public:
-        static int64_t sInstanceCount; // debug information, shown in Lua profiler
-
         // accepts only Lua tables returned by ui.content
         explicit View(sol::table table)
             : mTable(std::move(table))
         {
             if (!isValid(mTable))
                 throw std::domain_error("Expected a Content table");
-            sInstanceCount++;
         }
-        View(const View& c)
-        {
-            this->mTable = c.mTable;
-            sInstanceCount++;
-        }
-        View(View&& c)
-        {
-            this->mTable = std::move(c.mTable);
-            sInstanceCount++;
-        }
-        ~View() { sInstanceCount--; }
 
         static bool isValid(const sol::object& object)
         {
@@ -123,8 +109,6 @@ namespace LuaUi::Content
         static inline size_t toLua(size_t index) { return index + 1; }
         static inline size_t fromLua(size_t index) { return index - 1; }
     };
-
-    int64_t getInstanceCount();
 }
 
 #endif // COMPONENTS_LUAUI_CONTENT

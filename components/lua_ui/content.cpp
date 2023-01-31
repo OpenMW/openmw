@@ -11,11 +11,4 @@ namespace LuaUi::Content
             throw std::logic_error("Expected function");
         return metatable["new"].get<sol::protected_function>();
     }
-
-    int64_t View::sInstanceCount = 0;
-
-    int64_t getInstanceCount()
-    {
-        return View::sInstanceCount;
-    }
 }
