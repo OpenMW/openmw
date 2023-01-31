@@ -2,23 +2,11 @@
 
 namespace LuaUi::Content
 {
-    namespace
+    sol::protected_function loadConstructor(LuaUtil::LuaState* state)
     {
-        sol::table loadMetatable(sol::state_view sol)
-        {
-            std::string scriptBody =
-#include "content.lua"
-                ;
-            auto result = sol.safe_script(scriptBody);
-            if (result.get_type() != sol::type::table)
-                throw std::logic_error("Expected a meta table");
-            return result.get<sol::table>();
-        }
-    }
-
-    sol::protected_function makeFactory(sol::state_view sol)
-    {
-        sol::table metatable = loadMetatable(sol);
+        sol::function loader = state->loadInternalLib("content");
+        sol::set_environment(state->newInternalLibEnvironment(), loader);
+        sol::table metatable = loader().get<sol::table>();
         if (metatable["new"].get_type() != sol::type::function)
             throw std::logic_error("Expected function");
         return metatable["new"].get<sol::protected_function>();

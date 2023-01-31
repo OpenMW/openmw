@@ -1,4 +1,3 @@
-R"(
 local M = {}
 M.__Content = true
 M.new = function(source)
@@ -23,6 +22,7 @@ local function validateIndex(self, index)
         error('Invalid Content index: ' .. tostring(index))
     end
 end
+
 local function getIndexFromKey(self, key)
     local index = key
     if type(key) == 'string' then
@@ -34,6 +34,7 @@ local function getIndexFromKey(self, key)
     validateIndex(self, index)
     return index
 end
+
 local methods = {
     insert = function(self, index, value)
         validateIndex(self, index)
@@ -78,6 +79,7 @@ local function nameAt(self, index)
     local v = rawget(self, index)
     return v and type(v.name) == 'string' and v.name
 end
+
 local function remove(self, index)
     local oldName = nameAt(self, index)
     if oldName then
@@ -95,6 +97,7 @@ local function remove(self, index)
     end
     rawset(self, #self, nil)
 end
+
 local function assign(self, index, value)
     local oldName = nameAt(self, index)
     if oldName then
@@ -105,6 +108,7 @@ local function assign(self, index, value)
         self.__nameIndex[value.name] = index
     end
 end
+
 M.__newindex = function(self, key, value)
     local index = getIndexFromKey(self, key)
     if value == nil then
@@ -126,14 +130,14 @@ local function next(self, index)
         return nil, nil
     end
 end
+
 M.__pairs = function(self)
     return next, self, 1
 end
 M.__ipairs = M.__pairs
 M.__metatable = {}
 
-assert(not pcall(function() setmetatable(M.new({}), {}) end), 'Metatable is not protected')
-assert(getmetatable(M.new) ~= M, 'Metatable is not protected')
+assert(not pcall(function() setmetatable(M.new {}, {}) end), 'Metatable is not protected')
+assert(getmetatable(M.new {}) ~= M, 'Metatable is not protected')
 
 return M
-)"

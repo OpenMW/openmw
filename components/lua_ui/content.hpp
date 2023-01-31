@@ -6,9 +6,11 @@
 
 #include <sol/sol.hpp>
 
+#include <components/lua/luastate.hpp>
+
 namespace LuaUi::Content
 {
-    sol::protected_function makeFactory(sol::state_view);
+    sol::protected_function loadConstructor(LuaUtil::LuaState* state);
 
     class View
     {

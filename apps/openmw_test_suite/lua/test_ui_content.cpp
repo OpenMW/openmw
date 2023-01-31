@@ -11,13 +11,11 @@ namespace
     struct LuaUiContentTest : Test
     {
         LuaUtil::LuaState mLuaState{ nullptr, nullptr };
-        sol::state_view mSol;
         sol::protected_function mNew;
         LuaUiContentTest()
-            : mSol(mLuaState.sol())
-            , mNew(LuaUi::Content::makeFactory(mSol))
         {
-            mSol.open_libraries(sol::lib::base, sol::lib::table);
+            mLuaState.addInternalLibSearchPath("resources/lua_libs");
+            mNew = LuaUi::Content::loadConstructor(&mLuaState);
         }
 
         LuaUi::Content::View makeContent(sol::table source)
@@ -28,7 +26,7 @@ namespace
             return LuaUi::Content::View(result.get<sol::table>());
         }
 
-        sol::table makeTable() { return sol::table(mSol, sol::create); }
+        sol::table makeTable() { return sol::table(mLuaState.sol(), sol::create); }
 
         sol::table makeTable(std::string name)
         {

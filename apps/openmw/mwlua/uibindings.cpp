@@ -141,7 +141,7 @@ namespace MWLua
                 luaManager->addAction([wm, obj = obj.as<LObject>()] { wm->setConsoleSelectedObject(obj.ptr()); });
             }
         };
-        api["content"] = LuaUi::Content::makeFactory(context.mLua->sol());
+        api["content"] = LuaUi::Content::loadConstructor(context.mLua);
         api["create"] = [context](const sol::table& layout) {
             auto element = LuaUi::Element::make(layout);
             context.mLuaManager->addAction(std::make_unique<UiAction>(UiAction::CREATE, element, context.mLua));
