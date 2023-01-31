@@ -270,6 +270,7 @@ namespace MWWorld
         /// \note If cell==0, the cell the player is currently in will be used instead to
         /// generate a name.
         std::string_view getCellName(const MWWorld::Cell& cell) const override;
+        std::string_view getCellName(const ESM::Cell* cell) const override;
 
         void removeRefScript(MWWorld::RefData* ref) override;
         //< Remove the script attached to ref from mLocalScripts

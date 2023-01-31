@@ -709,7 +709,7 @@ namespace MWWorld
         if (mCellVariant.isEsm4())
             return;
 
-        auto cell3 = mCellVariant.getEsm3();
+        const ESM::Cell& cell3 = mCellVariant.getEsm3();
 
         if (cell3.mContextList.empty())
             return; // this is a dynamically generated cell -> skipping.
@@ -834,7 +834,7 @@ namespace MWWorld
     {
         std::map<ESM::RefNum, ESM::RefId> refNumToID; // used to detect refID modifications
 
-        std::visit([&refNumToID, this](auto&& cell) { this->loadRefs(*cell, refNumToID); }, mCellVariant);
+        ESM::visit([&refNumToID, this](auto&& cell) { this->loadRefs(cell, refNumToID); }, mCellVariant);
 
         updateMergedRefs();
     }
@@ -1077,13 +1077,13 @@ namespace MWWorld
         }
     }
 
-    struct Visitor
+    struct IsEqualVisitor
     {
-        bool operator()(const ESM::Cell* a, const ESM::Cell* b) const { return a->getCellId() == b->getCellId(); }
-        bool operator()(const ESM4::Cell* a, const ESM4::Cell* b) const { return a->mId == b->mId; }
+        bool operator()(const ESM::Cell& a, const ESM::Cell& b) const { return a.getCellId() == b.getCellId(); }
+        bool operator()(const ESM4::Cell& a, const ESM4::Cell& b) const { return a.mId == b.mId; }
 
         template <class L, class R>
-        bool operator()(L, R) const
+        bool operator()(const L&, const R&) const
         {
             return false;
         }
@@ -1091,7 +1091,7 @@ namespace MWWorld
 
     bool CellStore::operator==(const CellStore& right) const
     {
-        return std::visit(Visitor{}, this->mCellVariant, right.mCellVariant);
+        return ESM::visit(IsEqualVisitor(), this->mCellVariant, right.mCellVariant);
     }
 
     void CellStore::setFog(std::unique_ptr<ESM::FogState>&& fog)

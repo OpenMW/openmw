@@ -644,11 +644,21 @@ namespace MWWorld
 
         if (!cell.isEsm4())
         {
-            const ESM::Region* region = mStore.get<ESM::Region>().search(cell.getEsm3().mRegion);
-            if (region)
+            return getCellName(&cell.getEsm3());
+        }
+        return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
+    }
+
+    std::string_view World::getCellName(const ESM::Cell* cell) const
+    {
+        if (cell)
+        {
+            if (!cell->isExterior() || !cell->mName.empty())
+                return cell->mName;
+
+            if (const ESM::Region* region = mStore.get<ESM::Region>().search(cell->mRegion))
                 return region->mName;
         }
-
         return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
     }
 
@@ -3244,7 +3254,7 @@ namespace MWWorld
         }
         else
         {
-            auto cellVariant = *cell->getCell();
+            const MWWorld::Cell& cellVariant = *cell->getCell();
             uint32_t ambient = cellVariant.getMood().mAmbiantColor;
             int ambientTotal = (ambient & 0xff) + ((ambient >> 8) & 0xff) + ((ambient >> 16) & 0xff);
             return !cell->getCell()->noSleep() && ambientTotal <= 201;

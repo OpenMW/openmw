@@ -12,7 +12,6 @@
 namespace ESM
 {
     struct Cell;
-    struct CellCommon;
     namespace AiSequence
     {
         struct AiWander;
@@ -159,7 +158,6 @@ namespace MWMechanics
             GroupIndex_MaxIdle = 9
         };
 
-        /// convert point from local (i.e. cell) to world coordinates
         void setCurrentNodeToClosestAllowedNode(AiWanderStorage& storage);
 
         void addNonPathGridAllowedPoints(const ESM::Pathgrid* pathGrid, int pointIndex, AiWanderStorage& storage,

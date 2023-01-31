@@ -43,7 +43,6 @@ namespace ESM
 {
     struct Cell;
     struct RefNum;
-    class CellVariant;
 }
 
 namespace Terrain

@@ -8,52 +8,44 @@ namespace MWWorld
 {
     Cell::Cell(const ESM4::Cell& cell)
         : ESM::CellVariant(cell)
+        , mIsExterior(!(cell.mCellFlags & ESM4::CELL_Interior))
+        , mIsQuasiExterior(cell.mCellFlags & ESM4::CELL_QuasiExt)
+        , mHasWater(cell.mCellFlags & ESM4::CELL_HasWater)
+        , mNoSleep(false) // No such notion in ESM4
+        , mGridPos(cell.mX, cell.mY)
+        , mDisplayname(cell.mFullName)
+        , mNameID(cell.mEditorId)
+        , mRegion(ESM::RefId::sEmpty) // Unimplemented for now
+        , mCellId{
+            .mWorldspace{ Misc::StringUtils::lowerCase(cell.mEditorId) },
+            .mIndex{ cell.getGridX(), cell.getGridY() },
+            .mPaged = isExterior(),}
+        ,mMood{
+            .mAmbiantColor = cell.mLighting.ambient,
+            .mDirectionalColor = cell.mLighting.directional,
+            .mFogColor = cell.mLighting.fogColor,
+            .mFogDensity = cell.mLighting.fogPower,}
     {
-
-        mNameID = cell.mEditorId;
-        mDisplayname = cell.mFullName;
-        mGridPos.x() = cell.mX;
-        mGridPos.y() = cell.mY;
-
-        mRegion = ESM::RefId::sEmpty; // Unimplemented for now
-
-        mFlags.mHasWater = cell.mCellFlags & ESM4::CELL_HasWater;
-        mFlags.mIsExterior = !(cell.mCellFlags & ESM4::CELL_Interior);
-        mFlags.mIsQuasiExterior = cell.mCellFlags & ESM4::CELL_QuasiExt;
-        mFlags.mNoSleep = false; // No such notion in ESM4
-
-        mCellId.mWorldspace = Misc::StringUtils::lowerCase(cell.mEditorId);
-        mCellId.mIndex.mX = cell.getGridX();
-        mCellId.mIndex.mX = cell.getGridY();
-        mCellId.mPaged = isExterior();
-
-        mMood.mAmbiantColor = cell.mLighting.ambient;
-        mMood.mFogColor = cell.mLighting.fogColor;
-        mMood.mDirectionalColor = cell.mLighting.directional;
-        mMood.mFogDensity = cell.mLighting.fogPower;
     }
 
     Cell::Cell(const ESM::Cell& cell)
         : ESM::CellVariant(cell)
+        , mIsExterior(!(cell.mData.mFlags & ESM::Cell::Interior))
+        , mIsQuasiExterior(cell.mData.mFlags & ESM::Cell::QuasiEx)
+        , mHasWater(cell.mData.mFlags & ESM::Cell::HasWater)
+        , mNoSleep(cell.mData.mFlags & ESM::Cell::NoSleep)
+        , mGridPos(cell.getGridX(), cell.getGridY())
+        , mDisplayname(cell.mName)
+        , mNameID(cell.mName)
+        , mRegion(ESM::RefId::sEmpty) // Unimplemented for now
+        , mCellId(cell.getCellId())
+        , mMood{
+            .mAmbiantColor = cell.mAmbi.mAmbient,
+            .mDirectionalColor = cell.mAmbi.mSunlight,
+            .mFogColor = cell.mAmbi.mFog,
+            .mFogDensity = cell.mAmbi.mFogDensity,
+        }
     {
-        mNameID = cell.mName;
-        mDisplayname = cell.mName;
-        mGridPos.x() = cell.getGridX();
-        mGridPos.y() = cell.getGridY();
-
-        mRegion = ESM::RefId::sEmpty; // Unimplemented for now
-
-        mFlags.mHasWater = cell.mData.mFlags & ESM::Cell::HasWater;
-        mFlags.mIsExterior = !(cell.mData.mFlags & ESM::Cell::Interior);
-        mFlags.mIsQuasiExterior = cell.mData.mFlags & ESM::Cell::QuasiEx;
-        mFlags.mNoSleep = cell.mData.mFlags & ESM::Cell::NoSleep;
-
-        mCellId = cell.getCellId();
-
-        mMood.mAmbiantColor = cell.mAmbi.mAmbient;
-        mMood.mFogColor = cell.mAmbi.mFog;
-        mMood.mDirectionalColor = cell.mAmbi.mSunlight;
-        mMood.mFogDensity = cell.mAmbi.mFogDensity;
     }
 
     std::string Cell::getDescription() const

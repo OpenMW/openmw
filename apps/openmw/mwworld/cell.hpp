@@ -38,10 +38,10 @@ namespace MWWorld
 
         int getGridX() const { return mGridPos.x(); }
         int getGridY() const { return mGridPos.y(); }
-        bool isExterior() const { return mFlags.mIsExterior; }
-        bool isQuasiExterior() const { return mFlags.mIsQuasiExterior; }
-        bool hasWater() const { return mFlags.mHasWater; }
-        bool noSleep() const { return mFlags.mNoSleep; }
+        bool isExterior() const { return mIsExterior; }
+        bool isQuasiExterior() const { return mIsQuasiExterior; }
+        bool hasWater() const { return mHasWater; }
+        bool noSleep() const { return mNoSleep; }
         const ESM::CellId& getCellId() const { return mCellId; }
         const ESM::RefId& getRegion() const { return mRegion; }
         std::string_view getNameId() const { return mNameID; }
@@ -50,13 +50,10 @@ namespace MWWorld
         const MoodData& getMood() const { return mMood; }
 
     private:
-        struct
-        {
-            bool mIsExterior;
-            bool mIsQuasiExterior;
-            bool mHasWater;
-            bool mNoSleep;
-        } mFlags;
+        bool mIsExterior;
+        bool mIsQuasiExterior;
+        bool mHasWater;
+        bool mNoSleep;
 
         osg::Vec2i mGridPos;
         std::string mDisplayname; // How the game displays it

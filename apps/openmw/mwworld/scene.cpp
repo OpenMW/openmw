@@ -432,7 +432,7 @@ namespace MWWorld
 
         if (!cellVariant.isEsm4())
         {
-            auto cell3 = cellVariant.getEsm3();
+            const ESM::Cell& cell3 = cellVariant.getEsm3();
             if (const auto pathgrid = mWorld.getStore().get<ESM::Pathgrid>().search(cell3))
                 mNavigator.addPathgrid(cell3, *pathgrid);
         }

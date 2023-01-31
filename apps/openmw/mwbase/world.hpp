@@ -57,8 +57,6 @@ namespace ESM
     struct ItemLevList;
     struct TimeStamp;
     struct RefId;
-    class CellVariant;
-
 }
 
 namespace MWPhysics
@@ -183,6 +181,8 @@ namespace MWBase
         /// \note If cell==0, the cell the player is currently in will be used instead to
         /// generate a name.
         virtual std::string_view getCellName(const MWWorld::Cell& cell) const = 0;
+
+        virtual std::string_view getCellName(const ESM::Cell* cell) const = 0;
 
         virtual void removeRefScript(MWWorld::RefData* ref) = 0;
         //< Remove the script attached to ref from mLocalScripts

@@ -9,7 +9,6 @@
 #include <string_view>
 #include <tuple>
 #include <typeinfo>
-#include <variant>
 #include <vector>
 
 #include "cell.hpp"
