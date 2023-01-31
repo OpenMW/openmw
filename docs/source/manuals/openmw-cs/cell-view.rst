@@ -1,5 +1,5 @@
 Cell View
-########
+#########
 
 This window deals with the manipulation of instances within one or more cells.
 
