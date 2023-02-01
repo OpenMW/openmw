@@ -51,8 +51,9 @@ namespace Platform::File
         const auto nativeHandle = getNativeHandle(handle);
         const auto nativeSeekType = getNativeSeekType(type);
 
-        if (SetFilePointer(nativeHandle, static_cast<LONG>(position), nullptr, nativeSeekType)
-            == INVALID_SET_FILE_POINTER)
+        LARGE_INTEGER li;
+        li.QuadPart = static_cast<LONGLONG>(position);
+        if (!SetFilePointerEx(nativeHandle, li, nullptr, nativeSeekType))
         {
             if (auto errCode = GetLastError(); errCode != ERROR_SUCCESS)
             {
