@@ -137,7 +137,4 @@ end
 M.__ipairs = M.__pairs
 M.__metatable = {}
 
-assert(not pcall(function() setmetatable(M.new {}, {}) end), 'Metatable is not protected')
-assert(getmetatable(M.new {}) ~= M, 'Metatable is not protected')
-
 return M

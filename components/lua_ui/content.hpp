@@ -67,7 +67,7 @@ namespace LuaUi::Content
         {
             if (index < size())
                 // for some reason mTable[key] = value doesn't call __newindex
-                mTable[sol::metatable_key][sol::meta_function::new_index].get<sol::protected_function>()(
+                getMetatable()[sol::meta_function::new_index].get<sol::protected_function>()(
                     mTable, toLua(index), sol::nil);
             else
                 throw std::range_error("Invalid Content index");
@@ -96,6 +96,8 @@ namespace LuaUi::Content
             else
                 return std::nullopt;
         }
+
+        sol::table getMetatable() const { return mTable[sol::metatable_key].get<sol::table>(); }
 
     private:
         sol::table mTable;
