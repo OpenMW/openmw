@@ -8,27 +8,21 @@
 
 #include <components/lua/luastate.hpp>
 
-namespace LuaUi::Content
+namespace LuaUi
 {
-    sol::protected_function loadConstructor(LuaUtil::LuaState* state);
+    sol::protected_function loadContentConstructor(LuaUtil::LuaState* state);
 
-    class View
+    bool isValidContent(const sol::object& object);
+
+    class ContentView
     {
     public:
         // accepts only Lua tables returned by ui.content
-        explicit View(sol::table table)
+        explicit ContentView(sol::table table)
             : mTable(std::move(table))
         {
-            if (!isValid(mTable))
+            if (!isValidContent(mTable))
                 throw std::domain_error("Expected a Content table");
-        }
-
-        static bool isValid(const sol::object& object)
-        {
-            if (object.get_type() != sol::type::table)
-                return false;
-            sol::table table = object;
-            return table.traverse_get<sol::optional<bool>>(sol::metatable_key, "__Content").value_or(false);
         }
 
         size_t size() const { return mTable.size(); }

@@ -15,15 +15,15 @@ namespace
         LuaUiContentTest()
         {
             mLuaState.addInternalLibSearchPath("resources/lua_libs");
-            mNew = LuaUi::Content::loadConstructor(&mLuaState);
+            mNew = LuaUi::loadContentConstructor(&mLuaState);
         }
 
-        LuaUi::Content::View makeContent(sol::table source)
+        LuaUi::ContentView makeContent(sol::table source)
         {
             auto result = mNew.call(source);
             if (result.get_type() != sol::type::table)
                 throw std::logic_error("Expected table");
-            return LuaUi::Content::View(result.get<sol::table>());
+            return LuaUi::ContentView(result.get<sol::table>());
         }
 
         sol::table makeTable() { return sol::table(mLuaState.sol(), sol::create); }
@@ -53,7 +53,7 @@ namespace
         table.add(makeTable());
         table.add(makeTable());
         table.add(makeTable());
-        LuaUi::Content::View content = makeContent(table);
+        LuaUi::ContentView content = makeContent(table);
         EXPECT_EQ(content.size(), 3);
     }
 
@@ -63,7 +63,7 @@ namespace
         table.add(makeTable());
         table.add(makeTable());
         table.add(makeTable());
-        LuaUi::Content::View content = makeContent(table);
+        LuaUi::ContentView content = makeContent(table);
         content.insert(2, makeTable("inserted"));
         EXPECT_EQ(content.size(), 4);
         auto inserted = content.at("inserted");
@@ -77,7 +77,7 @@ namespace
         auto table = makeTable();
         table.add(makeTable());
         table.add(makeTable());
-        LuaUi::Content::View content = makeContent(table);
+        LuaUi::ContentView content = makeContent(table);
         sol::table t = makeTable();
         EXPECT_ANY_THROW(content.assign(3, t));
     }
@@ -96,7 +96,7 @@ namespace
         auto table = makeTable();
         table.add(makeTable());
         table.add(makeTable("a"));
-        LuaUi::Content::View content = makeContent(table);
+        LuaUi::ContentView content = makeContent(table);
         EXPECT_NO_THROW(content.at("a"));
         content.remove("a");
         EXPECT_EQ(content.size(), 1);
@@ -116,7 +116,7 @@ namespace
         table.add(makeTable());
         table.add(makeTable());
         table.add(makeTable());
-        LuaUi::Content::View content = makeContent(table);
+        LuaUi::ContentView content = makeContent(table);
         auto child = makeTable();
         content.assign(2, child);
         EXPECT_EQ(content.indexOf(child).value(), 2);
@@ -126,7 +126,7 @@ namespace
     TEST_F(LuaUiContentTest, BoundsChecks)
     {
         auto table = makeTable();
-        LuaUi::Content::View content = makeContent(table);
+        LuaUi::ContentView content = makeContent(table);
         EXPECT_ANY_THROW(content.at(0));
         EXPECT_EQ(content.size(), 0);
         content.assign(content.size(), makeTable());
