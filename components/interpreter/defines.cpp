@@ -5,7 +5,6 @@
 #include <string>
 #include <string_view>
 #include <tuple>
-#include <variant>
 #include <vector>
 
 #include <components/debug/debuglog.hpp>
@@ -47,29 +46,21 @@ namespace
         { "actionuse", "#{sUse}" },
         { "actionrun", "#{sRun}" },
     };
-    template <class T>
-    using ContextMethod = T (Interpreter::Context::*)() const;
-    const std::initializer_list<
-        std::tuple<std::string_view, std::variant<ContextMethod<int>, ContextMethod<std::string_view>>>>
-        sContextMethods{
-            { "pccrimelevel", &Interpreter::Context::getPCBounty },
-            { "pcclass", &Interpreter::Context::getPCClass },
-            { "pcrace", &Interpreter::Context::getPCRace },
-            { "pcname", &Interpreter::Context::getPCName },
-            { "cell", &Interpreter::Context::getCurrentCellName },
-        };
-    const std::initializer_list<
-        std::tuple<std::string_view, std::pair<ContextMethod<std::string_view>, ContextMethod<std::string_view>>>>
-        sVariableContextMethods{
-            { "faction", { &Interpreter::Context::getNPCFaction, nullptr } },
-            { "nextpcrank", { &Interpreter::Context::getPCNextRank, nullptr } },
-            { "pcnextrank", { &Interpreter::Context::getPCNextRank, nullptr } },
-            { "pcrank", { &Interpreter::Context::getPCRank, nullptr } },
-            { "rank", { &Interpreter::Context::getNPCRank, nullptr } },
-            { "class", { &Interpreter::Context::getNPCClass, &Interpreter::Context::getPCClass } },
-            { "race", { &Interpreter::Context::getNPCRace, &Interpreter::Context::getPCRace } },
-            { "name", { &Interpreter::Context::getActorName, &Interpreter::Context::getPCName } },
-        };
+    using ContextMethod = std::string_view (Interpreter::Context::*)() const;
+    const std::initializer_list<std::tuple<std::string_view, std::pair<ContextMethod, ContextMethod>>> sContextMethods{
+        { "nextpcrank", { &Interpreter::Context::getPCNextRank, nullptr } },
+        { "pcnextrank", { &Interpreter::Context::getPCNextRank, nullptr } },
+        { "faction", { &Interpreter::Context::getNPCFaction, nullptr } },
+        { "pcclass", { &Interpreter::Context::getPCClass, &Interpreter::Context::getPCClass } },
+        { "pcname", { &Interpreter::Context::getPCName, &Interpreter::Context::getPCName } },
+        { "pcrace", { &Interpreter::Context::getPCRace, &Interpreter::Context::getPCRace } },
+        { "pcrank", { &Interpreter::Context::getPCRank, nullptr } },
+        { "class", { &Interpreter::Context::getNPCClass, &Interpreter::Context::getPCClass } },
+        { "cell", { &Interpreter::Context::getCurrentCellName, &Interpreter::Context::getCurrentCellName } },
+        { "race", { &Interpreter::Context::getNPCRace, &Interpreter::Context::getPCRace } },
+        { "rank", { &Interpreter::Context::getNPCRank, nullptr } },
+        { "name", { &Interpreter::Context::getActorName, &Interpreter::Context::getPCName } },
+    };
 
     bool longerStr(std::string_view a, std::string_view b)
     {
@@ -87,15 +78,12 @@ namespace
                 return true;
             }
         }
-        for (const auto& [name, variant] : sContextMethods)
+        if (check(temp, "pccrimelevel", i, start))
         {
-            if (check(temp, name, i, start))
-            {
-                std::visit([&](auto&& method) { retval << (context.*method)(); }, variant);
-                return true;
-            }
+            retval << context.getPCBounty();
+            return true;
         }
-        for (const auto& [name, methods] : sVariableContextMethods)
+        for (const auto& [name, methods] : sContextMethods)
         {
             const auto& method = dialogue ? methods.first : methods.second;
             if (check(temp, name, i, start))
