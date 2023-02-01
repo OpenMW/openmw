@@ -188,6 +188,12 @@
 -- for i = 1, #content do
 --    print('widget',content[i].name,'at',i)
 -- end
+-- @usage
+-- -- Note: layout names can collide with method names. Because of that you can't use a layout name such as "insert":
+-- local content = ui.content {
+--     { name = 'insert '}
+-- }
+-- content.insert.content = ui.content {} -- fails here, content.insert is a function!
 
 ---
 -- Content also acts as a map of names to Layouts

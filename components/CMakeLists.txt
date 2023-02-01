@@ -273,6 +273,7 @@ add_component_dir (lua_ui
     properties widget element util layers content alignment resources
     adapter text textedit window image container flex
     )
+copy_resource_file("lua_ui/content.lua" "${OPENMW_RESOURCES_ROOT}" "resources/lua_libs/content.lua")
 
 
 if(WIN32)

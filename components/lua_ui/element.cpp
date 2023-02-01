@@ -63,9 +63,7 @@ namespace LuaUi
                     destroyWidget(w);
                 return result;
             }
-            if (!contentObj.is<Content>())
-                throw std::logic_error("Layout content field must be a openmw.ui.content");
-            const Content& content = contentObj.as<Content>();
+            ContentView content(contentObj.as<sol::table>());
             result.resize(content.size());
             size_t minSize = std::min(children.size(), content.size());
             for (size_t i = 0; i < minSize; i++)
