@@ -45,7 +45,7 @@ namespace LuaUi::Content
             if (index <= size())
                 mTable[toLua(index)] = table;
             else
-                throw std::domain_error("Invalid Content index");
+                throw std::range_error("Invalid Content index");
         }
         void insert(size_t index, const sol::table& table) { callMethod("insert", toLua(index), table); }
 
@@ -54,14 +54,14 @@ namespace LuaUi::Content
             if (index < size())
                 return mTable.get<sol::table>(toLua(index));
             else
-                throw std::domain_error("Invalid Content index");
+                throw std::range_error("Invalid Content index");
         }
         sol::table at(std::string_view name) const
         {
             if (indexOf(name).has_value())
                 return mTable.get<sol::table>(name);
             else
-                throw std::domain_error("Invalid Content key");
+                throw std::range_error("Invalid Content key");
         }
         void remove(size_t index)
         {
@@ -70,7 +70,7 @@ namespace LuaUi::Content
                 mTable[sol::metatable_key][sol::meta_function::new_index].get<sol::protected_function>()(
                     mTable, toLua(index), sol::nil);
             else
-                throw std::domain_error("Invalid Content index");
+                throw std::range_error("Invalid Content index");
         }
         void remove(std::string_view name)
         {
