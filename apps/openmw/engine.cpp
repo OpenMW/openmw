@@ -939,14 +939,16 @@ void OMW::Engine::go()
 
         if (stats)
         {
+            constexpr unsigned statsReportDelay = 3;
             const auto frameNumber = mViewer->getFrameStamp()->getFrameNumber();
-            if (frameNumber >= 2)
+            if (frameNumber >= statsReportDelay)
             {
-                mViewer->getViewerStats()->report(stats, frameNumber - 2);
+                const unsigned reportFrameNumber = frameNumber - statsReportDelay;
+                mViewer->getViewerStats()->report(stats, reportFrameNumber);
                 osgViewer::Viewer::Cameras cameras;
                 mViewer->getCameras(cameras);
                 for (auto camera : cameras)
-                    camera->getStats()->report(stats, frameNumber - 2);
+                    camera->getStats()->report(stats, reportFrameNumber);
             }
         }
 
