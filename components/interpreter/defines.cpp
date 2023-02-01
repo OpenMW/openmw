@@ -3,210 +3,115 @@
 #include <algorithm>
 #include <sstream>
 #include <string>
+#include <string_view>
+#include <tuple>
 #include <vector>
 
 #include <components/debug/debuglog.hpp>
-#include <components/misc/strings/lower.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
-namespace Interpreter
+namespace
 {
 
-    bool check(const std::string& str, const std::string& escword, unsigned int* i, unsigned int* start)
+    bool check(std::string_view str, std::string_view escword, size_t& i, size_t& start)
     {
-        bool retval = str.find(escword) == 0;
-        if (retval)
+        bool found = Misc::StringUtils::ciStartsWith(str, escword);
+        if (found)
         {
-            (*i) += escword.length();
-            (*start) = (*i) + 1;
+            i += escword.length();
+            start = i + 1;
         }
-        return retval;
+        return found;
     }
 
     std::vector<std::string> globals;
+    const std::initializer_list<std::tuple<std::string_view, std::string_view>> sActionBindings{
+        { "actionslideright", "#{sRight}" },
+        { "actionreadymagic", "#{sReady_Magic}" },
+        { "actionprevweapon", "#{sPrevWeapon}" },
+        { "actionnextweapon", "#{sNextWeapon}" },
+        { "actiontogglerun", "#{sAuto_Run}" },
+        { "actionslideleft", "#{sLeft}" },
+        { "actionreadyitem", "#{sReady_Weapon}" },
+        { "actionprevspell", "#{sPrevSpell}" },
+        { "actionnextspell", "#{sNextSpell}" },
+        { "actionrestmenu", "#{sRestKey}" },
+        { "actionmenumode", "#{sInventory}" },
+        { "actionactivate", "#{sActivate}" },
+        { "actionjournal", "#{sJournal}" },
+        { "actionforward", "#{sForward}" },
+        { "actioncrouch", "#{sCrouch_Sneak}" },
+        { "actionjump", "#{sJump}" },
+        { "actionback", "#{sBack}" },
+        { "actionuse", "#{sUse}" },
+        { "actionrun", "#{sRun}" },
+    };
+    using ContextMethod = std::string_view (Interpreter::Context::*)() const;
+    const std::initializer_list<std::tuple<std::string_view, std::pair<ContextMethod, ContextMethod>>> sContextMethods{
+        { "nextpcrank", { &Interpreter::Context::getPCNextRank, nullptr } },
+        { "pcnextrank", { &Interpreter::Context::getPCNextRank, nullptr } },
+        { "faction", { &Interpreter::Context::getNPCFaction, nullptr } },
+        { "pcclass", { &Interpreter::Context::getPCClass, &Interpreter::Context::getPCClass } },
+        { "pcname", { &Interpreter::Context::getPCName, &Interpreter::Context::getPCName } },
+        { "pcrace", { &Interpreter::Context::getPCRace, &Interpreter::Context::getPCRace } },
+        { "pcrank", { &Interpreter::Context::getPCRank, nullptr } },
+        { "class", { &Interpreter::Context::getNPCClass, &Interpreter::Context::getPCClass } },
+        { "cell", { &Interpreter::Context::getCurrentCellName, &Interpreter::Context::getCurrentCellName } },
+        { "race", { &Interpreter::Context::getNPCRace, &Interpreter::Context::getPCRace } },
+        { "rank", { &Interpreter::Context::getNPCRank, nullptr } },
+        { "name", { &Interpreter::Context::getActorName, &Interpreter::Context::getPCName } },
+    };
 
-    bool longerStr(const std::string& a, const std::string& b)
+    bool longerStr(std::string_view a, std::string_view b)
     {
         return a.length() > b.length();
     }
 
-    static std::string fixDefinesReal(const std::string& text, bool dialogue, Context& context)
+    bool findReplacement(std::string_view temp, size_t& i, size_t& start, Interpreter::Context& context,
+        std::ostringstream& retval, bool dialogue)
     {
-        unsigned int start = 0;
+        for (const auto& [name, binding] : sActionBindings)
+        {
+            if (check(temp, name, i, start))
+            {
+                retval << context.getActionBinding(binding);
+                return true;
+            }
+        }
+        if (check(temp, "pccrimelevel", i, start))
+        {
+            retval << context.getPCBounty();
+            return true;
+        }
+        for (const auto& [name, methods] : sContextMethods)
+        {
+            const auto& method = dialogue ? methods.first : methods.second;
+            if (check(temp, name, i, start))
+            {
+                if (method) // Not all variables are available outside of dialogue
+                    retval << (context.*method)();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    std::string fixDefinesReal(std::string_view text, bool dialogue, Interpreter::Context& context)
+    {
+        size_t start = 0;
         std::ostringstream retval;
-        for (unsigned int i = 0; i < text.length(); i++)
+        for (size_t i = 0; i < text.length(); ++i)
         {
             char eschar = text[i];
             if (eschar == '%' || eschar == '^')
             {
                 retval << text.substr(start, i - start);
-                std::string temp = Misc::StringUtils::lowerCase(std::string_view(text).substr(i + 1, 100));
+                std::string_view temp = text.substr(i + 1);
 
                 bool found = false;
                 try
                 {
-                    if ((found = check(temp, "actionslideright", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sRight}");
-                    }
-                    else if ((found = check(temp, "actionreadymagic", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sReady_Magic}");
-                    }
-                    else if ((found = check(temp, "actionprevweapon", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sPrevWeapon}");
-                    }
-                    else if ((found = check(temp, "actionnextweapon", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sNextWeapon}");
-                    }
-                    else if ((found = check(temp, "actiontogglerun", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sAuto_Run}");
-                    }
-                    else if ((found = check(temp, "actionslideleft", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sLeft}");
-                    }
-                    else if ((found = check(temp, "actionreadyitem", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sReady_Weapon}");
-                    }
-                    else if ((found = check(temp, "actionprevspell", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sPrevSpell}");
-                    }
-                    else if ((found = check(temp, "actionnextspell", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sNextSpell}");
-                    }
-                    else if ((found = check(temp, "actionrestmenu", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sRestKey}");
-                    }
-                    else if ((found = check(temp, "actionmenumode", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sInventory}");
-                    }
-                    else if ((found = check(temp, "actionactivate", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sActivate}");
-                    }
-                    else if ((found = check(temp, "actionjournal", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sJournal}");
-                    }
-                    else if ((found = check(temp, "actionforward", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sForward}");
-                    }
-                    else if ((found = check(temp, "pccrimelevel", &i, &start)))
-                    {
-                        retval << context.getPCBounty();
-                    }
-                    else if ((found = check(temp, "actioncrouch", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sCrouch_Sneak}");
-                    }
-                    else if ((found = check(temp, "actionjump", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sJump}");
-                    }
-                    else if ((found = check(temp, "actionback", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sBack}");
-                    }
-                    else if ((found = check(temp, "actionuse", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sUse}");
-                    }
-                    else if ((found = check(temp, "actionrun", &i, &start)))
-                    {
-                        retval << context.getActionBinding("#{sRun}");
-                    }
-                    else if ((found = check(temp, "pcclass", &i, &start)))
-                    {
-                        retval << context.getPCClass();
-                    }
-                    else if ((found = check(temp, "pcrace", &i, &start)))
-                    {
-                        retval << context.getPCRace();
-                    }
-                    else if ((found = check(temp, "pcname", &i, &start)))
-                    {
-                        retval << context.getPCName();
-                    }
-                    else if ((found = check(temp, "cell", &i, &start)))
-                    {
-                        retval << context.getCurrentCellName();
-                    }
-
-                    else if (dialogue)
-                    { // In Dialogue, not messagebox
-                        if ((found = check(temp, "faction", &i, &start)))
-                        {
-                            retval << context.getNPCFaction();
-                        }
-                        else if ((found = check(temp, "nextpcrank", &i, &start)))
-                        {
-                            retval << context.getPCNextRank();
-                        }
-                        else if ((found = check(temp, "pcnextrank", &i, &start)))
-                        {
-                            retval << context.getPCNextRank();
-                        }
-                        else if ((found = check(temp, "pcrank", &i, &start)))
-                        {
-                            retval << context.getPCRank();
-                        }
-                        else if ((found = check(temp, "rank", &i, &start)))
-                        {
-                            retval << context.getNPCRank();
-                        }
-
-                        else if ((found = check(temp, "class", &i, &start)))
-                        {
-                            retval << context.getNPCClass();
-                        }
-                        else if ((found = check(temp, "race", &i, &start)))
-                        {
-                            retval << context.getNPCRace();
-                        }
-                        else if ((found = check(temp, "name", &i, &start)))
-                        {
-                            retval << context.getActorName();
-                        }
-                    }
-                    else
-                    { // In messagebox or book, not dialogue
-
-                        /* empty outside dialogue */
-                        if ((found = check(temp, "faction", &i, &start)))
-                            ;
-                        else if ((found = check(temp, "nextpcrank", &i, &start)))
-                            ;
-                        else if ((found = check(temp, "pcnextrank", &i, &start)))
-                            ;
-                        else if ((found = check(temp, "pcrank", &i, &start)))
-                            ;
-                        else if ((found = check(temp, "rank", &i, &start)))
-                            ;
-
-                        /* uses pc in messageboxes */
-                        else if ((found = check(temp, "class", &i, &start)))
-                        {
-                            retval << context.getPCClass();
-                        }
-                        else if ((found = check(temp, "race", &i, &start)))
-                        {
-                            retval << context.getPCRace();
-                        }
-                        else if ((found = check(temp, "name", &i, &start)))
-                        {
-                            retval << context.getPCName();
-                        }
-                    }
-
+                    found = findReplacement(temp, i, start, context, retval, dialogue);
                     /* Not a builtin, try global variables */
                     if (!found)
                     {
@@ -217,27 +122,23 @@ namespace Interpreter
                             sort(globals.begin(), globals.end(), longerStr);
                         }
 
-                        for (unsigned int j = 0; j < globals.size(); j++)
+                        for (const std::string& global : globals)
                         {
-                            if (globals[j].length() > temp.length()) // Just in case there's a global with a huuuge name
-                                temp = Misc::StringUtils::lowerCase(
-                                    std::string_view(text).substr(i + 1, globals[j].length()));
-
-                            found = check(temp, globals[j], &i, &start);
+                            found = check(temp, global, i, start);
                             if (found)
                             {
-                                char type = context.getGlobalType(globals[j]);
+                                char type = context.getGlobalType(global);
 
                                 switch (type)
                                 {
                                     case 's':
-                                        retval << context.getGlobalShort(globals[j]);
+                                        retval << context.getGlobalShort(global);
                                         break;
                                     case 'l':
-                                        retval << context.getGlobalLong(globals[j]);
+                                        retval << context.getGlobalLong(global);
                                         break;
                                     case 'f':
-                                        retval << context.getGlobalFloat(globals[j]);
+                                        retval << context.getGlobalFloat(global);
                                         break;
                                 }
                                 break;
@@ -266,6 +167,10 @@ namespace Interpreter
         return retval.str();
     }
 
+}
+
+namespace Interpreter
+{
     std::string fixDefinesDialog(const std::string& text, Context& context)
     {
         return fixDefinesReal(text, true, context);
