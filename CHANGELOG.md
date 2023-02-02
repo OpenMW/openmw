@@ -447,6 +447,7 @@
     Feature #6024: OpenMW-CS: Selecting terrain in "Terrain land editing" should support "Add to selection" and "Remove from selection" modes
     Feature #6033: Include pathgrid to navigation mesh
     Feature #6034: Find path based on area cost depending on NPC stats
+    Feature #7161: OpenMW-CS: Make adding and filtering TopicInfos easier
     Task #5480: Drop Qt4 support
     Task #5520: Improve cell name autocompleter implementation
 
