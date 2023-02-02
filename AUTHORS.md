@@ -32,6 +32,7 @@ Programmers
     Andreas Stöckel
     Andrei Kortunov (akortunov)
     Andrew Appuhamy (andrew-app)
+    Andrzej Głuszak (agluszak)
     AnyOldName3
     Ardekantur
     Armin Preiml
