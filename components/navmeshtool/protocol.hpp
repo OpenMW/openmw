@@ -11,11 +11,6 @@ namespace NavMeshTool
 {
     inline constexpr char messageMagic[] = {'n', 'v', 't', 'm'};
 
-    struct BadMessageMagic : std::runtime_error
-    {
-        BadMessageMagic() : std::runtime_error("Bad Message magic") {}
-    };
-
     enum class MessageType : std::uint64_t
     {
         ExpectedCells = 1,

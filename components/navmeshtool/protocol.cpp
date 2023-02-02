@@ -5,6 +5,8 @@
 #include <components/serialization/binarywriter.hpp>
 #include <components/serialization/binaryreader.hpp>
 
+#include <iomanip>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -12,6 +14,21 @@ namespace NavMeshTool
 {
     namespace
     {
+        std::string formatMagic(const char (&value)[std::size(messageMagic)])
+        {
+            std::ostringstream stream;
+            for (const char v : value)
+            {
+                if (std::isprint(v) && !std::isspace(v))
+                    stream << '\'' << v << '\'';
+                else
+                    stream << "0x" << std::hex << std::uppercase << std::setfill('0') << std::setw(2)
+                           << static_cast<int>(v);
+                stream << ' ';
+            }
+            return stream.str();
+        }
+
         template <Serialization::Mode mode>
         struct Format : Serialization::Format<mode, Format<mode>>
         {
@@ -29,7 +46,7 @@ namespace NavMeshTool
                     char magic[std::size(messageMagic)];
                     visitor(*this, magic);
                     if (std::memcmp(magic, messageMagic, sizeof(magic)) != 0)
-                        throw BadMessageMagic();
+                        throw std::runtime_error("Bad navmeshtool message magic: " + formatMagic(magic));
                 }
                 visitor(*this, value.mType);
                 visitor(*this, value.mSize);
