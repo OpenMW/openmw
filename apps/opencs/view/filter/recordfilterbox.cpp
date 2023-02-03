@@ -1,9 +1,13 @@
 #include "recordfilterbox.hpp"
 
+#include <variant>
+
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QVariant>
 
 #include "editwidget.hpp"
+#include "filterdata.hpp"
 
 CSVFilter::RecordFilterBox::RecordFilterBox(CSMWorld::Data& data, QWidget* parent)
     : QWidget(parent)
@@ -31,8 +35,7 @@ void CSVFilter::RecordFilterBox::setFilter(const std::string& filter)
     mEdit->setText(QString::fromUtf8(filter.c_str()));
 }
 
-void CSVFilter::RecordFilterBox::createFilterRequest(
-    std::vector<std::pair<std::string, std::vector<std::string>>>& filterSource, Qt::DropAction action)
+void CSVFilter::RecordFilterBox::createFilterRequest(const std::vector<FilterData>& sourceFilter, Qt::DropAction action)
 {
-    mEdit->createFilterRequest(filterSource, action);
+    mEdit->createFilterRequest(sourceFilter, action);
 }

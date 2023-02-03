@@ -16,7 +16,7 @@
 
 #include "dragdroputils.hpp"
 
-void CSVWorld::DragRecordTable::startDragFromTable(const CSVWorld::DragRecordTable& table)
+void CSVWorld::DragRecordTable::startDragFromTable(const CSVWorld::DragRecordTable& table, const QModelIndex& index)
 {
     std::vector<CSMWorld::UniversalId> records = table.getDraggedRecords();
     if (records.empty())
@@ -25,6 +25,8 @@ void CSVWorld::DragRecordTable::startDragFromTable(const CSVWorld::DragRecordTab
     }
 
     CSMWorld::TableMimeData* mime = new CSMWorld::TableMimeData(records, mDocument);
+    mime->setTableOfDragStart(&table);
+    mime->setIndexAtDragStart(index);
     QDrag* drag = new QDrag(this);
     drag->setMimeData(mime);
     drag->setPixmap(QString::fromUtf8(mime->getIcon().c_str()));

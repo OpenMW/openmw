@@ -1,6 +1,7 @@
 #include "editwidget.hpp"
 
 #include <sstream>
+#include <variant>
 
 #include <QAction>
 #include <QApplication>
@@ -8,10 +9,14 @@
 #include <QMenu>
 #include <QRegularExpression>
 #include <QString>
+#include <QVariant>
+
+#include "filterdata.hpp"
 
 #include <apps/opencs/model/filter/parser.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/misc/helpviewer.hpp>
 
 #include "../../model/prefs/shortcut.hpp"
@@ -93,10 +98,24 @@ void CSVFilter::EditWidget::filterRowsInserted(const QModelIndex& parent, int st
     textChanged(text());
 }
 
-void CSVFilter::EditWidget::createFilterRequest(
-    std::vector<std::pair<std::string, std::vector<std::string>>>& filterSource, Qt::DropAction action)
+void CSVFilter::EditWidget::createFilterRequest(const std::vector<FilterData>& sourceFilter, Qt::DropAction action)
 {
-    const unsigned count = filterSource.size();
+    FilterType filterType = FilterType::String;
+    std::vector<FilterData> newFilter;
+
+    for (auto filterData : sourceFilter)
+    {
+        FilterData newFilterData;
+        std::pair<std::string, FilterType> pair = std::visit(FilterVisitor(), filterData.searchData);
+        std::string searchString = pair.first;
+        filterType = pair.second;
+        std::vector<std::string> columns;
+        newFilterData.searchData = searchString;
+        newFilterData.columns = filterData.columns;
+        newFilter.emplace_back(newFilterData);
+    }
+
+    const unsigned count = newFilter.size();
     bool multipleElements = false;
 
     switch (count) // setting multipleElements;
@@ -164,7 +183,7 @@ void CSVFilter::EditWidget::createFilterRequest(
 
         for (unsigned i = 0; i < count; ++i)
         {
-            ss << generateFilter(filterSource[i]);
+            ss << generateFilter(newFilter[i], filterType);
 
             if (i + 1 != count)
             {
@@ -185,7 +204,7 @@ void CSVFilter::EditWidget::createFilterRequest(
             ss << '!';
         }
 
-        ss << generateFilter(filterSource[0]);
+        ss << generateFilter(newFilter[0], filterType);
 
         if (!replaceMode)
         {
@@ -200,9 +219,9 @@ void CSVFilter::EditWidget::createFilterRequest(
     }
 }
 
-std::string CSVFilter::EditWidget::generateFilter(std::pair<std::string, std::vector<std::string>>& seekedString) const
+std::string CSVFilter::EditWidget::generateFilter(const FilterData& filterData, const FilterType& filterType) const
 {
-    const unsigned columns = seekedString.second.size();
+    const unsigned columns = filterData.columns.size();
 
     bool multipleColumns = false;
     switch (columns)
@@ -219,13 +238,26 @@ std::string CSVFilter::EditWidget::generateFilter(std::pair<std::string, std::ve
             break;
     }
 
+    std::string quotesResolved;
+    if (std::get_if<std::string>(&filterData.searchData))
+        quotesResolved = std::get<std::string>(filterData.searchData);
+    else
+    {
+        Log(Debug::Warning) << "Generating record filter failed.";
+        return "";
+    }
+    if (filterType == FilterType::String)
+        quotesResolved = '"' + quotesResolved + '"';
+
     std::stringstream ss;
+
     if (multipleColumns)
     {
         ss << "or(";
         for (unsigned i = 0; i < columns; ++i)
         {
-            ss << "string(" << '"' << seekedString.second[i] << '"' << ',' << '"' << seekedString.first << '"' << ')';
+            ss << filterTypeName(filterType) << "(" << '"' << filterData.columns[i] << '"' << ',' << quotesResolved
+               << ')';
             if (i + 1 != columns)
                 ss << ',';
         }
@@ -233,7 +265,7 @@ std::string CSVFilter::EditWidget::generateFilter(std::pair<std::string, std::ve
     }
     else
     {
-        ss << "string" << '(' << '"' << seekedString.second[0] << "\"," << '"' << seekedString.first << "\")";
+        ss << filterTypeName(filterType) << '(' << '"' << filterData.columns[0] << "\"," << quotesResolved << ")";
     }
 
     return ss.str();

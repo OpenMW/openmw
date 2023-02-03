@@ -2,15 +2,19 @@
 
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include <QDragEnterEvent>
 #include <QHBoxLayout>
+#include <QVariant>
 
+#include "filterdata.hpp"
 #include "recordfilterbox.hpp"
 
 #include <apps/opencs/model/world/tablemimedata.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
+#include <apps/opencs/view/world/dragrecordtable.hpp>
 
 CSVFilter::FilterBox::FilterBox(CSMWorld::Data& data, QWidget* parent)
     : QWidget(parent)
@@ -42,8 +46,18 @@ void CSVFilter::FilterBox::dropEvent(QDropEvent* event)
         return;
 
     std::vector<CSMWorld::UniversalId> universalIdData = mime->getData();
+    QModelIndex index = mime->getIndexAtDragStart();
+    const CSVWorld::DragRecordTable* dragTable = mime->getTableOfDragStart();
 
-    emit recordDropped(universalIdData, event->proposedAction());
+    QVariant qData;
+    std::string searchColumn;
+    if (index.isValid() && dragTable)
+    {
+        qData = dragTable->model()->data(index);
+        searchColumn = dragTable->model()->headerData(index.column(), Qt::Horizontal).toString().toStdString();
+    }
+
+    emit recordDropped(universalIdData, std::make_pair(qData, searchColumn), event->proposedAction());
 }
 
 void CSVFilter::FilterBox::dragEnterEvent(QDragEnterEvent* event)
@@ -56,8 +70,7 @@ void CSVFilter::FilterBox::dragMoveEvent(QDragMoveEvent* event)
     event->accept();
 }
 
-void CSVFilter::FilterBox::createFilterRequest(
-    std::vector<std::pair<std::string, std::vector<std::string>>>& filterSource, Qt::DropAction action)
+void CSVFilter::FilterBox::createFilterRequest(const std::vector<FilterData>& sourceFilter, Qt::DropAction action)
 {
-    mRecordFilterBox->createFilterRequest(filterSource, action);
+    mRecordFilterBox->createFilterRequest(sourceFilter, action);
 }

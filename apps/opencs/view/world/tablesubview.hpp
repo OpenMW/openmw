@@ -4,6 +4,7 @@
 #include "../doc/subview.hpp"
 
 #include <QModelIndex>
+#include <QVariant>
 #include <QWidget>
 
 #include <string>
@@ -61,7 +62,8 @@ namespace CSVWorld
 
         void editRequest(const CSMWorld::UniversalId& id, const std::string& hint);
         void cloneRequest(const CSMWorld::UniversalId& toClone);
-        void createFilterRequest(std::vector<CSMWorld::UniversalId>& types, Qt::DropAction action);
+        void createFilterRequest(std::vector<CSMWorld::UniversalId>& types,
+            const std::pair<QVariant, std::string>& columnSearchData, Qt::DropAction action);
         void toggleOptions();
 
     public slots:

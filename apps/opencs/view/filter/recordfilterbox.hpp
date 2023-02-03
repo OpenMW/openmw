@@ -4,9 +4,13 @@
 #include <memory>
 #include <string>
 #include <utility>
+#include <variant>
 #include <vector>
 
+#include <QVariant>
 #include <QWidget>
+
+#include "filterdata.hpp"
 
 namespace CSMFilter
 {
@@ -35,8 +39,7 @@ namespace CSVFilter
 
         void useFilterRequest(const std::string& idOfFilter);
 
-        void createFilterRequest(
-            std::vector<std::pair<std::string, std::vector<std::string>>>& filterSource, Qt::DropAction action);
+        void createFilterRequest(const std::vector<FilterData>& sourceFilter, Qt::DropAction action);
 
     signals:
 
