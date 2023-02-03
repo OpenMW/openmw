@@ -21,6 +21,8 @@ namespace MWPhysics
     class RayCastingInterface
     {
     public:
+        virtual ~RayCastingInterface() = default;
+
         /// Get distance from \a point to the collision shape of \a target. Uses a raycast to find where the
         /// target vector hits the collision shape and then calculates distance from the intersection point.
         /// This can be used to find out how much nearer we need to move to the target for a "getHitContact" to be

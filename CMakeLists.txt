@@ -594,7 +594,7 @@ endif()
 
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
-    set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wundef -Wextra-semi -Wno-unused-parameter -pedantic -Wno-long-long ${OPENMW_CXX_FLAGS}")
+    set(OPENMW_CXX_FLAGS "-Wall -Wextra -Wundef -Wextra-semi -Wno-unused-parameter -pedantic -Wno-long-long -Wnon-virtual-dtor ${OPENMW_CXX_FLAGS}")
     add_definitions( -DBOOST_NO_CXX11_SCOPED_ENUMS=ON )
 
     if (APPLE)

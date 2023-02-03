@@ -51,8 +51,8 @@ namespace ESM4
         std::string mEditorId;
         Dimension mDimension;
 
-        virtual void load(Reader& reader);
-        // virtual void save(Writer& writer) const;
+        void load(Reader& reader);
+        // void save(Writer& writer) const;
 
         // void blank();
     };
