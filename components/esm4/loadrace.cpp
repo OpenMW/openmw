@@ -344,11 +344,11 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                     // TES5 seems to have no body parts at all, instead keep EGT models
                 }
-                else if (curr_part == 2) // egt
-                {
-                    // std::cout << mEditorId << " egt " << currentIndex << std::endl; // FIXME
-                    reader.skipSubRecordData(); // FIXME TES5 egt
-                }
+                // else if (curr_part == 2) // egt
+                // {
+                //     // std::cout << mEditorId << " egt " << currentIndex << std::endl; // FIXME
+                //     reader.skipSubRecordData(); // FIXME TES5 egt
+                // }
                 else
                 {
                     // std::cout << mEditorId << " hkx " << currentIndex << std::endl; // FIXME
