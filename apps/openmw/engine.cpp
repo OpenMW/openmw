@@ -1,6 +1,8 @@
 #include "engine.hpp"
 
+#include <cerrno>
 #include <chrono>
+#include <system_error>
 #include <thread>
 
 #include <osgDB/WriteFile>
@@ -870,9 +872,10 @@ void OMW::Engine::go()
     {
         stats.open(path, std::ios_base::out);
         if (stats.is_open())
-            Log(Debug::Info) << "Stats will be written to: " << path;
+            Log(Debug::Info) << "OSG stats will be written to: " << path;
         else
-            Log(Debug::Warning) << "Failed to open file for stats: " << path;
+            Log(Debug::Warning) << "Failed to open file to write OSG stats \"" << path
+                                << "\": " << std::generic_category().message(errno);
     }
 
     // Setup profiler
