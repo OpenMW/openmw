@@ -40,27 +40,28 @@ namespace MWWorld
 
     const ESM::RefNum& CellRef::getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum)
     {
+        auto esm3Visit = [&](ESM::CellRef& ref) -> const ESM::RefNum& {
+            if (!ref.mRefNum.isSet())
+            {
+                // Generated RefNums have negative mContentFile
+                assert(lastAssignedRefNum.mContentFile < 0);
+                lastAssignedRefNum.mIndex++;
+                if (lastAssignedRefNum.mIndex == 0) // mIndex overflow, so mContentFile should be changed
+                {
+                    if (lastAssignedRefNum.mContentFile > std::numeric_limits<int32_t>::min())
+                        lastAssignedRefNum.mContentFile--;
+                    else
+                        Log(Debug::Error) << "RefNum counter overflow in CellRef::getOrAssignRefNum";
+                }
+                ref.mRefNum = lastAssignedRefNum;
+                mChanged = true;
+            }
+            return ref.mRefNum;
+        };
         return std::visit(
             RefVisit{
                 [&](ESM4::Reference& /*ref*/) -> const ESM::RefNum& { return emptyRefNum; },
-                [&](ESM::CellRef& ref) -> const ESM::RefNum& {
-                    if (!ref.mRefNum.isSet())
-                    {
-                        // Generated RefNums have negative mContentFile
-                        assert(lastAssignedRefNum.mContentFile < 0);
-                        lastAssignedRefNum.mIndex++;
-                        if (lastAssignedRefNum.mIndex == 0) // mIndex overflow, so mContentFile should be changed
-                        {
-                            if (lastAssignedRefNum.mContentFile > std::numeric_limits<int32_t>::min())
-                                lastAssignedRefNum.mContentFile--;
-                            else
-                                Log(Debug::Error) << "RefNum counter overflow in CellRef::getOrAssignRefNum";
-                        }
-                        ref.mRefNum = lastAssignedRefNum;
-                        mChanged = true;
-                    }
-                    return ref.mRefNum;
-                },
+                esm3Visit,
             },
             mCellRef.mVariant);
     }
@@ -146,26 +147,27 @@ namespace MWWorld
 
     void CellRef::applyChargeRemainderToBeSubtracted(float chargeRemainder)
     {
-        std::visit(RefVisit{
-                       [&](ESM4::Reference& /*ref*/) {},
-                       [&](ESM::CellRef& cellRef3) {
-                           cellRef3.mChargeIntRemainder += std::abs(chargeRemainder);
-                           if (cellRef3.mChargeIntRemainder > 1.0f)
-                           {
-                               float newChargeRemainder
-                                   = (cellRef3.mChargeIntRemainder - std::floor(cellRef3.mChargeIntRemainder));
-                               if (cellRef3.mChargeInt <= static_cast<int>(cellRef3.mChargeIntRemainder))
-                               {
-                                   cellRef3.mChargeInt = 0;
-                               }
-                               else
-                               {
-                                   cellRef3.mChargeInt -= static_cast<int>(cellRef3.mChargeIntRemainder);
-                               }
-                               cellRef3.mChargeIntRemainder = newChargeRemainder;
-                           }
-                       },
-                   },
+        auto esm3Visit = [&](ESM::CellRef& cellRef3) {
+            cellRef3.mChargeIntRemainder += std::abs(chargeRemainder);
+            if (cellRef3.mChargeIntRemainder > 1.0f)
+            {
+                float newChargeRemainder = (cellRef3.mChargeIntRemainder - std::floor(cellRef3.mChargeIntRemainder));
+                if (cellRef3.mChargeInt <= static_cast<int>(cellRef3.mChargeIntRemainder))
+                {
+                    cellRef3.mChargeInt = 0;
+                }
+                else
+                {
+                    cellRef3.mChargeInt -= static_cast<int>(cellRef3.mChargeIntRemainder);
+                }
+                cellRef3.mChargeIntRemainder = newChargeRemainder;
+            }
+        };
+        std::visit(
+            RefVisit{
+                [&](ESM4::Reference& /*ref*/) {},
+                esm3Visit,
+            },
             mCellRef.mVariant);
     }
 
@@ -180,7 +182,6 @@ namespace MWWorld
 
     const std::string& CellRef::getGlobalVariable() const
     {
-
         return std::visit(RefVisit{
                               [&](const ESM4::Reference& /*ref*/) -> const std::string& { return emptyString; },
                               [&](const ESM::CellRef& ref) -> const std::string& { return ref.mGlobalVariable; },
