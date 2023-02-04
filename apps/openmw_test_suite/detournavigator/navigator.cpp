@@ -944,4 +944,58 @@ namespace
 
     INSTANTIATE_TEST_SUITE_P(NotSupportedAgentBounds, DetourNavigatorNavigatorNotSupportedAgentBoundsTest,
         ValuesIn(notSupportedAgentBounds));
+
+    TEST_F(DetourNavigatorNavigatorTest, find_nearest_nav_mesh_position_should_return_nav_mesh_position)
+    {
+        const HeightfieldSurface surface = makeSquareHeightfieldSurface(defaultHeightfieldData);
+        const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
+
+        ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
+        auto updateGuard = mNavigator->makeUpdateGuard();
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, updateGuard.get());
+        mNavigator->update(mPlayerPosition, updateGuard.get());
+        updateGuard.reset();
+        mNavigator->wait(WaitConditionType::requiredTilesPresent, &mListener);
+
+        const osg::Vec3f position(250, 250, 0);
+        const osg::Vec3f searchAreaHalfExtents(1000, 1000, 1000);
+        EXPECT_THAT(findNearestNavMeshPosition(*mNavigator, mAgentBounds, position, searchAreaHalfExtents, Flag_walk),
+            Optional(Vec3fEq(250, 250, -62.5186)));
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, find_nearest_nav_mesh_position_should_return_nullopt_when_too_far)
+    {
+        const HeightfieldSurface surface = makeSquareHeightfieldSurface(defaultHeightfieldData);
+        const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
+
+        ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
+        auto updateGuard = mNavigator->makeUpdateGuard();
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, updateGuard.get());
+        mNavigator->update(mPlayerPosition, updateGuard.get());
+        updateGuard.reset();
+        mNavigator->wait(WaitConditionType::requiredTilesPresent, &mListener);
+
+        const osg::Vec3f position(250, 250, 250);
+        const osg::Vec3f searchAreaHalfExtents(100, 100, 100);
+        EXPECT_EQ(findNearestNavMeshPosition(*mNavigator, mAgentBounds, position, searchAreaHalfExtents, Flag_walk),
+            std::nullopt);
+    }
+
+    TEST_F(DetourNavigatorNavigatorTest, find_nearest_nav_mesh_position_should_return_nullopt_when_flags_do_not_match)
+    {
+        const HeightfieldSurface surface = makeSquareHeightfieldSurface(defaultHeightfieldData);
+        const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
+
+        ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
+        auto updateGuard = mNavigator->makeUpdateGuard();
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, updateGuard.get());
+        mNavigator->update(mPlayerPosition, updateGuard.get());
+        updateGuard.reset();
+        mNavigator->wait(WaitConditionType::requiredTilesPresent, &mListener);
+
+        const osg::Vec3f position(250, 250, 0);
+        const osg::Vec3f searchAreaHalfExtents(1000, 1000, 1000);
+        EXPECT_EQ(findNearestNavMeshPosition(*mNavigator, mAgentBounds, position, searchAreaHalfExtents, Flag_swim),
+            std::nullopt);
+    }
 }

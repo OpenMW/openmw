@@ -154,6 +154,10 @@ function M.expectThat(value, matcher, msg)
     end
 end
 
+function M.formatActualExpected(actual, expected)
+    return string.format('actual: %s, expected: %s', actual, expected)
+end
+
 local localTests = {}
 local localTestRunner = nil
 
