@@ -64,7 +64,7 @@ namespace DetourNavigator
         std::reference_wrapper<const RecastSettings> mSettings;
     };
 
-    inline std::optional<std::size_t> findPath(const dtNavMeshQuery& navMeshQuery, const dtPolyRef startRef,
+    inline std::optional<std::size_t> findPolygonPath(const dtNavMeshQuery& navMeshQuery, const dtPolyRef startRef,
         const dtPolyRef endRef, const osg::Vec3f& startPos, const osg::Vec3f& endPos, const dtQueryFilter& queryFilter,
         std::span<dtPolyRef> pathBuffer)
     {
@@ -132,7 +132,7 @@ namespace DetourNavigator
 
         std::vector<dtPolyRef> polygonPath(settings.mMaxPolygonPathSize);
         const auto polygonPathSize
-            = findPath(navMeshQuery, startRef, endRef, startNavMeshPos, endNavMeshPos, queryFilter, polygonPath);
+            = findPolygonPath(navMeshQuery, startRef, endRef, startNavMeshPos, endNavMeshPos, queryFilter, polygonPath);
 
         if (!polygonPathSize.has_value())
             return Status::FindPathOverPolygonsFailed;
