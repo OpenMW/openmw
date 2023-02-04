@@ -177,6 +177,31 @@ namespace
             << mPath;
     }
 
+    TEST_F(DetourNavigatorNavigatorTest, find_path_to_the_start_position_should_contain_single_point)
+    {
+        constexpr std::array<float, 5 * 5> heightfieldData{ {
+            0, 0, 0, 0, 0, // row 0
+            0, -25, -25, -25, -25, // row 1
+            0, -25, -100, -100, -100, // row 2
+            0, -25, -100, -100, -100, // row 3
+            0, -25, -100, -100, -100, // row 4
+        } };
+        const HeightfieldSurface surface = makeSquareHeightfieldSurface(heightfieldData);
+        const int cellSize = mHeightfieldTileSize * (surface.mSize - 1);
+
+        ASSERT_TRUE(mNavigator->addAgent(mAgentBounds));
+        auto updateGuard = mNavigator->makeUpdateGuard();
+        mNavigator->addHeightfield(mCellPosition, cellSize, surface, updateGuard.get());
+        mNavigator->update(mPlayerPosition, updateGuard.get());
+        updateGuard.reset();
+        mNavigator->wait(WaitConditionType::requiredTilesPresent, &mListener);
+
+        EXPECT_EQ(findPath(*mNavigator, mAgentBounds, mStart, mStart, Flag_walk, mAreaCosts, mEndTolerance, mOut),
+            Status::Success);
+
+        EXPECT_THAT(mPath, ElementsAre(Vec3fEq(56.66666412353515625, 460, 1.99998295307159423828125))) << mPath;
+    }
+
     TEST_F(DetourNavigatorNavigatorTest, add_object_should_change_navmesh)
     {
         mSettings.mWaitUntilMinDistanceToPlayer = 0;
