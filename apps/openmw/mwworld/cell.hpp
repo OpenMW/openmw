@@ -48,6 +48,7 @@ namespace MWWorld
         std::string_view getDisplayName() const { return mDisplayname; }
         std::string getDescription() const;
         const MoodData& getMood() const { return mMood; }
+        float getWaterHeight() const { return mWaterHeight; }
 
     private:
         bool mIsExterior;
@@ -61,6 +62,8 @@ namespace MWWorld
         ESM::RefId mRegion;
         ESM::CellId mCellId;
         MoodData mMood;
+
+        float mWaterHeight;
     };
 }
 

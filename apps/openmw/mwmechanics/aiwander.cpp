@@ -271,9 +271,9 @@ namespace MWMechanics
         }
 
         // Initialization to discover & store allowed node points for this actor.
-        if (!actor.getCell()->getCell()->isEsm4() && storage.mPopulateAvailableNodes)
+        if (storage.mPopulateAvailableNodes)
         {
-            getAllowedNodes(actor, &actor.getCell()->getCell()->getEsm3(), storage);
+            getAllowedNodes(actor, actor.getCell()->getCell(), storage);
         }
 
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
@@ -721,8 +721,8 @@ namespace MWMechanics
             return;
 
         AiWanderStorage& storage = state.get<AiWanderStorage>();
-        if (!actor.getCell()->getCell()->isEsm4() && storage.mPopulateAvailableNodes)
-            getAllowedNodes(actor, &actor.getCell()->getCell()->getEsm3(), storage);
+        if (storage.mPopulateAvailableNodes)
+            getAllowedNodes(actor, actor.getCell()->getCell(), storage);
 
         if (storage.mAllowedNodes.empty())
             return;
@@ -800,12 +800,8 @@ namespace MWMechanics
     void AiWander::getNeighbouringNodes(
         ESM::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM::Pathgrid::PointList& points)
     {
-        if (currentCell->getCell()->isEsm4())
-            return;
-        auto cell3 = currentCell->getCell()->getEsm3();
-
         const ESM::Pathgrid* pathgrid
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(cell3);
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*currentCell->getCell());
 
         if (pathgrid == nullptr || pathgrid->mPoints.empty())
             return;
@@ -815,7 +811,7 @@ namespace MWMechanics
         getPathGridGraph(currentCell).getNeighbouringPoints(index, points);
     }
 
-    void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage)
+    void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const MWWorld::Cell* cell, AiWanderStorage& storage)
     {
         // infrequently used, therefore no benefit in caching it as a member
         const ESM::Pathgrid* pathgrid
@@ -839,7 +835,7 @@ namespace MWMechanics
         if (mDistance && storage.mCanWanderAlongPathGrid && !actor.getClass().isPureWaterCreature(actor))
         {
             // get NPC's position in local (i.e. cell) coordinates
-            auto converter = Misc::CoordinateConverter(cell);
+            auto converter = Misc::CoordinateConverter(*cell);
             const osg::Vec3f npcPos = converter.toLocalVec3(mInitialActorPosition);
 
             // Find closest pathgrid point

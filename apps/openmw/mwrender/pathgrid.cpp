@@ -102,9 +102,8 @@ namespace MWRender
     void Pathgrid::enableCellPathgrid(const MWWorld::CellStore* store)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
-        if (store->getCell()->isEsm4())
-            return;
-        const ESM::Pathgrid* pathgrid = world->getStore().get<ESM::Pathgrid>().search(store->getCell()->getEsm3());
+
+        const ESM::Pathgrid* pathgrid = world->getStore().get<ESM::Pathgrid>().search(*store->getCell());
         if (!pathgrid)
             return;
 

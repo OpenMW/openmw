@@ -104,9 +104,7 @@ namespace MWMechanics
         if (mIsGraphConstructed)
             return true;
 
-        if (cell->getCell()->isEsm4())
-            return false;
-        mCell = &cell->getCell()->getEsm3();
+        mCell = cell->getCell();
 
         mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*mCell);
         if (!mPathgrid)

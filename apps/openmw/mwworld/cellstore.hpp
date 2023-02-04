@@ -383,6 +383,8 @@ namespace MWWorld
 
     private:
         /// Run through references and store IDs
+        void listRefs(const ESM::Cell& cell);
+        void listRefs(const ESM4::Cell& cell);
         void listRefs();
 
         void loadRefs(const ESM::Cell& cell, std::map<ESM::RefNum, ESM::RefId>& refNumToID);

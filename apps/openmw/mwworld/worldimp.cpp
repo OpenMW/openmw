@@ -642,11 +642,13 @@ namespace MWWorld
         if (!cell.isExterior() || !cell.getNameId().empty())
             return cell.getNameId();
 
-        if (!cell.isEsm4())
-        {
-            return getCellName(&cell.getEsm3());
-        }
-        return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
+        return ESM::visit(ESM::VisitOverload{
+                              [&](const ESM::Cell& cellIn) -> std::string_view { return getCellName(&cellIn); },
+                              [&](const ESM4::Cell& cellIn) -> std::string_view {
+                                  return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
+                              },
+                          },
+            cell);
     }
 
     std::string_view World::getCellName(const ESM::Cell* cell) const

@@ -781,10 +781,8 @@ namespace MWSound
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::ConstPtr player = world->getPlayerPtr();
-        if (player.getCell()->getCell()->isEsm4())
-            return;
 
-        const ESM::Cell* curcell = &player.getCell()->getCell()->getEsm3();
+        const MWWorld::Cell* curcell = player.getCell()->getCell();
         const auto update = mWaterSoundUpdater.update(player, *world);
 
         WaterSoundAction action;
@@ -813,7 +811,7 @@ namespace MWSound
     }
 
     std::pair<SoundManager::WaterSoundAction, Sound_Buffer*> SoundManager::getWaterSoundAction(
-        const WaterSoundUpdate& update, const ESM::Cell* cell) const
+        const WaterSoundUpdate& update, const MWWorld::Cell* cell) const
     {
         if (mNearWaterSound)
         {

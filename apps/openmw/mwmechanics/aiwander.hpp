@@ -23,6 +23,10 @@ namespace Misc
     class CoordinateConverter;
 }
 
+namespace MWWorld
+{
+    class Cell;
+}
 namespace MWMechanics
 {
     /// \brief This class holds the variables AiWander needs which are deleted if the package becomes inactive.
@@ -147,7 +151,7 @@ namespace MWMechanics
         void getNeighbouringNodes(
             ESM::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM::Pathgrid::PointList& points);
 
-        void getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage);
+        void getAllowedNodes(const MWWorld::Ptr& actor, const MWWorld::Cell* cell, AiWanderStorage& storage);
 
         void trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes, const PathFinder& pathfinder);
 

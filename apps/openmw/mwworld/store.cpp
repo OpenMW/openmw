@@ -14,6 +14,8 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
 
+#include <apps/openmw/mwworld/cell.hpp>
+
 namespace
 {
     // TODO: Switch to C++23 to get a working version of std::unordered_map::erase
@@ -960,6 +962,14 @@ namespace MWWorld
             return search(cell.mData.mX, cell.mData.mY);
         else
             return search(ESM::RefId::stringRefId(cell.mName));
+    }
+    const ESM::Pathgrid* Store<ESM::Pathgrid>::search(const MWWorld::Cell& cellVariant) const
+    {
+        return ESM::visit(ESM::VisitOverload{
+                              [&](const ESM::Cell& cell) { return search(cell); },
+                              [&](const ESM4::Cell& cell) -> const ESM::Pathgrid* { return nullptr; },
+                          },
+            cellVariant);
     }
     const ESM::Pathgrid* Store<ESM::Pathgrid>::find(const ESM::Cell& cell) const
     {

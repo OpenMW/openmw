@@ -39,6 +39,7 @@ namespace Loading
 
 namespace MWWorld
 {
+    class Cell;
     struct RecordId
     {
         ESM::RefId mId;
@@ -430,6 +431,7 @@ namespace MWWorld
         const ESM::Pathgrid* find(int x, int y) const;
         const ESM::Pathgrid* find(const ESM::RefId& name) const;
         const ESM::Pathgrid* search(const ESM::Cell& cell) const;
+        const ESM::Pathgrid* search(const MWWorld::Cell& cell) const;
         const ESM::Pathgrid* find(const ESM::Cell& cell) const;
     };
 

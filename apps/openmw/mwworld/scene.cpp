@@ -354,11 +354,14 @@ namespace MWWorld
         if (cell->getCell()->hasWater())
             mNavigator.removeWater(osg::Vec2i(cellX, cellY), navigatorUpdateGuard);
 
-        if (!cell->getCell()->isEsm4())
-        {
-            if (const auto pathgrid = mWorld.getStore().get<ESM::Pathgrid>().search(cell->getCell()->getEsm3()))
-                mNavigator.removePathgrid(*pathgrid);
-        }
+        ESM::visit(ESM::VisitOverload{
+                       [&](const ESM::Cell& cell) {
+                           if (const auto pathgrid = mWorld.getStore().get<ESM::Pathgrid>().search(cell))
+                               mNavigator.removePathgrid(*pathgrid);
+                       },
+                       [&](const ESM4::Cell& cell) {},
+                   },
+            *cell->getCell());
 
         MWBase::Environment::get().getMechanicsManager()->drop(cell);
 
@@ -430,12 +433,14 @@ namespace MWWorld
             }
         }
 
-        if (!cellVariant.isEsm4())
-        {
-            const ESM::Cell& cell3 = cellVariant.getEsm3();
-            if (const auto pathgrid = mWorld.getStore().get<ESM::Pathgrid>().search(cell3))
-                mNavigator.addPathgrid(cell3, *pathgrid);
-        }
+        ESM::visit(ESM::VisitOverload{
+                       [&](const ESM::Cell& cell) {
+                           if (const auto pathgrid = mWorld.getStore().get<ESM::Pathgrid>().search(cell))
+                               mNavigator.addPathgrid(cell, *pathgrid);
+                       },
+                       [&](const ESM4::Cell& cell) {},
+                   },
+            *cell->getCell());
 
         // register local scripts
         // do this before insertCell, to make sure we don't add scripts from levelled creature spawning twice
@@ -449,7 +454,7 @@ namespace MWWorld
         mRendering.addCell(cell);
 
         MWBase::Environment::get().getWindowManager()->addCell(cell);
-        bool waterEnabled = (!cellVariant.isEsm4()) && (cellVariant.hasWater() || cell->isExterior());
+        bool waterEnabled = cellVariant.hasWater() || cell->isExterior();
         float waterLevel = cell->getWaterLevel();
         mRendering.setWaterEnabled(waterEnabled);
         if (waterEnabled)
@@ -457,7 +462,7 @@ namespace MWWorld
             mPhysics->enableWater(waterLevel);
             mRendering.setWaterHeight(waterLevel);
 
-            if (cellVariant.getEsm3().isExterior())
+            if (cellVariant.isExterior())
             {
                 if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
                     mNavigator.addWater(

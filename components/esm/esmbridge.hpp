@@ -70,5 +70,14 @@ namespace ESM
     {
         return std::visit([&](auto*... ptr) { return std::forward<F>(f)(*ptr...); }, std::forward<T>(v).mVariant...);
     }
+
+    template <class... Ts>
+    struct VisitOverload : Ts...
+    {
+        using Ts::operator()...;
+    };
+
+    template <class... Ts>
+    VisitOverload(Ts...) -> VisitOverload<Ts...>;
 }
 #endif

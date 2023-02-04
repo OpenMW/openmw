@@ -7,16 +7,6 @@
 
 namespace MWWorld
 {
-    // makes it easier to use std visit with a variant
-    template <class... Ts>
-    struct RefVisit : Ts...
-    {
-        using Ts::operator()...;
-    };
-
-    template <class... Ts>
-    RefVisit(Ts...) -> RefVisit<Ts...>;
-
     CellRef::CellRef(const ESM::CellRef& ref)
         : mCellRef(ESM::ReferenceVariant(ref))
     {
@@ -31,7 +21,7 @@ namespace MWWorld
 
     const ESM::RefNum& CellRef::getRefNum() const
     {
-        return std::visit(RefVisit{
+        return std::visit(ESM::VisitOverload{
                               [&](const ESM4::Reference& /*ref*/) -> const ESM::RefNum& { return emptyRefNum; },
                               [&](const ESM::CellRef& ref) -> const ESM::RefNum& { return ref.mRefNum; },
                           },
@@ -59,7 +49,7 @@ namespace MWWorld
             return ref.mRefNum;
         };
         return std::visit(
-            RefVisit{
+            ESM::VisitOverload{
                 [&](ESM4::Reference& /*ref*/) -> const ESM::RefNum& { return emptyRefNum; },
                 esm3Visit,
             },
@@ -68,7 +58,7 @@ namespace MWWorld
 
     void CellRef::unsetRefNum()
     {
-        std::visit(RefVisit{
+        std::visit(ESM::VisitOverload{
                        [&](ESM4::Reference& /*ref*/) {},
                        [&](ESM::CellRef& ref) { ref.mRefNum = emptyRefNum; },
                    },
@@ -79,7 +69,11 @@ namespace MWWorld
 
     const std::string& CellRef::getDestCell() const
     {
-        return mCellRef.isESM4() ? emptyString : mCellRef.getEsm3().mDestCell;
+        return std::visit(ESM::VisitOverload{
+                              [&](const ESM4::Reference& /*ref*/) -> const std::string& { return emptyString; },
+                              [&](const ESM::CellRef& ref) -> const std::string& { return ref.mDestCell; },
+                          },
+            mCellRef.mVariant);
     }
 
     void CellRef::setScale(float scale)
@@ -99,7 +93,7 @@ namespace MWWorld
 
     float CellRef::getEnchantmentCharge() const
     {
-        return std::visit(RefVisit{
+        return std::visit(ESM::VisitOverload{
                               [&](const ESM4::Reference& /*ref*/) { return 0.f; },
                               [&](const ESM::CellRef& ref) { return ref.mEnchantmentCharge; },
                           },
@@ -128,7 +122,7 @@ namespace MWWorld
         {
             mChanged = true;
 
-            std::visit(RefVisit{
+            std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
                            [&](ESM::CellRef& ref) { ref.mEnchantmentCharge = charge; },
                        },
@@ -138,7 +132,7 @@ namespace MWWorld
 
     void CellRef::setCharge(int charge)
     {
-        std::visit(RefVisit{
+        std::visit(ESM::VisitOverload{
                        [&](ESM4::Reference& /*ref*/) {},
                        [&](ESM::CellRef& ref) { ref.mChargeInt = charge; },
                    },
@@ -164,7 +158,7 @@ namespace MWWorld
             }
         };
         std::visit(
-            RefVisit{
+            ESM::VisitOverload{
                 [&](ESM4::Reference& /*ref*/) {},
                 esm3Visit,
             },
@@ -173,7 +167,7 @@ namespace MWWorld
 
     void CellRef::setChargeFloat(float charge)
     {
-        std::visit(RefVisit{
+        std::visit(ESM::VisitOverload{
                        [&](ESM4::Reference& /*ref*/) {},
                        [&](ESM::CellRef& ref) { ref.mChargeFloat = charge; },
                    },
@@ -182,7 +176,7 @@ namespace MWWorld
 
     const std::string& CellRef::getGlobalVariable() const
     {
-        return std::visit(RefVisit{
+        return std::visit(ESM::VisitOverload{
                               [&](const ESM4::Reference& /*ref*/) -> const std::string& { return emptyString; },
                               [&](const ESM::CellRef& ref) -> const std::string& { return ref.mGlobalVariable; },
                           },
@@ -194,7 +188,7 @@ namespace MWWorld
         if (!getGlobalVariable().empty())
         {
             mChanged = true;
-            std::visit(RefVisit{
+            std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
                            [&](ESM::CellRef& ref) { ref.mGlobalVariable.erase(); },
                        },
@@ -215,7 +209,7 @@ namespace MWWorld
     {
         if (owner != getOwner())
         {
-            std::visit(RefVisit{
+            std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
                            [&](ESM::CellRef& ref) { ref.mOwner = owner; },
                        },
@@ -228,7 +222,7 @@ namespace MWWorld
         if (soul != getSoul())
         {
             mChanged = true;
-            std::visit(RefVisit{
+            std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
                            [&](ESM::CellRef& ref) { ref.mSoul = soul; },
                        },
@@ -241,7 +235,7 @@ namespace MWWorld
         if (faction != getFaction())
         {
             mChanged = true;
-            std::visit(RefVisit{
+            std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
                            [&](ESM::CellRef& ref) { ref.mFaction = faction; },
                        },
@@ -276,7 +270,7 @@ namespace MWWorld
         if (trap != getTrap())
         {
             mChanged = true;
-            std::visit(RefVisit{
+            std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
                            [&](ESM::CellRef& ref) { ref.mTrap = trap; },
                        },
@@ -289,7 +283,7 @@ namespace MWWorld
         if (value != getGoldValue())
         {
             mChanged = true;
-            std::visit(RefVisit{
+            std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
                            [&](ESM::CellRef& ref) { ref.mGoldValue = value; },
                        },
@@ -299,7 +293,7 @@ namespace MWWorld
 
     void CellRef::writeState(ESM::ObjectState& state) const
     {
-        std::visit(RefVisit{
+        std::visit(ESM::VisitOverload{
                        [&](const ESM4::Reference& /*ref*/) {},
                        [&](const ESM::CellRef& ref) { state.mRef = ref; },
                    },

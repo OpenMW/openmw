@@ -25,6 +25,7 @@ namespace MWWorld
             .mDirectionalColor = cell.mLighting.directional,
             .mFogColor = cell.mLighting.fogColor,
             .mFogDensity = cell.mLighting.fogPower,}
+            ,mWaterHeight(cell.mWaterHeight)
     {
     }
 
@@ -45,11 +46,16 @@ namespace MWWorld
             .mFogColor = cell.mAmbi.mFog,
             .mFogDensity = cell.mAmbi.mFogDensity,
         }
+        ,mWaterHeight(cell.mWater)
     {
     }
 
     std::string Cell::getDescription() const
     {
-        return isEsm4() ? mNameID : getEsm3().getDescription();
+        return ESM::visit(ESM::VisitOverload{
+                              [&](const ESM::Cell& cell) { return cell.getDescription(); },
+                              [&](const ESM4::Cell& cell) { return cell.mEditorId; },
+                          },
+            *this);
     }
 }
