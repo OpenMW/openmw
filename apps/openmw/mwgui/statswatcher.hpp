@@ -15,6 +15,8 @@ namespace MWGui
     class StatsListener
     {
     public:
+        virtual ~StatsListener() = default;
+
         /// Set value for the given ID.
         virtual void setValue(std::string_view id, const MWMechanics::AttributeValue& value) {}
         virtual void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value) {}

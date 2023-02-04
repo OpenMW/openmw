@@ -22,6 +22,9 @@ namespace LuaUi
     {
     public:
         WidgetExtension();
+
+        virtual ~WidgetExtension() = default;
+
         // must be called after creating the underlying MyGUI::Widget
         void initialize(lua_State* lua, MyGUI::Widget* self);
         // must be called after before destroying the underlying MyGUI::Widget

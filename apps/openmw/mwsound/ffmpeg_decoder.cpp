@@ -248,12 +248,11 @@ namespace MWSound
 
             mFrame = av_frame_alloc();
 
-            if (mCodecCtx->sample_fmt == AV_SAMPLE_FMT_FLT || mCodecCtx->sample_fmt == AV_SAMPLE_FMT_FLTP)
-                mOutputSampleFormat = AV_SAMPLE_FMT_S16; // FIXME: Check for AL_EXT_FLOAT32 support
-            else if (mCodecCtx->sample_fmt == AV_SAMPLE_FMT_U8P)
+            if (mCodecCtx->sample_fmt == AV_SAMPLE_FMT_U8P)
                 mOutputSampleFormat = AV_SAMPLE_FMT_U8;
-            else if (mCodecCtx->sample_fmt == AV_SAMPLE_FMT_S16P)
-                mOutputSampleFormat = AV_SAMPLE_FMT_S16;
+            // FIXME: Check for AL_EXT_FLOAT32 support
+            // else if (mCodecCtx->sample_fmt == AV_SAMPLE_FMT_FLT || mCodecCtx->sample_fmt == AV_SAMPLE_FMT_FLTP)
+            //     mOutputSampleFormat = AV_SAMPLE_FMT_S16;
             else
                 mOutputSampleFormat = AV_SAMPLE_FMT_S16;
 
