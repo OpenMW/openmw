@@ -1,11 +1,13 @@
 #include "actionteleport.hpp"
 
 #include <components/esm3/loadcell.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwworld/cellstore.hpp"
@@ -45,6 +47,7 @@ namespace MWWorld
         MWBase::World* world = MWBase::Environment::get().getWorld();
         MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
         actor.getClass().getCreatureStats(actor).land(actor == world->getPlayerPtr());
+
         if (actor == world->getPlayerPtr())
         {
             world->getPlayer().setTeleported(true);
@@ -65,6 +68,10 @@ namespace MWWorld
             else
                 world->moveObject(actor, worldModel->getInterior(mCellName), mPosition.asVec3(), true, true);
         }
+
+        if (!world->isWaterWalkingCastableOnTarget(actor) && MWMechanics::hasWaterWalking(actor))
+            actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(
+                actor, ESM::MagicEffect::WaterWalking);
     }
 
     void ActionTeleport::getFollowers(

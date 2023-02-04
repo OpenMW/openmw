@@ -102,6 +102,7 @@ Programmers
     Jacob Turnbull (Tankinfrank)
     Jake Westrip (16bitint)
     James Carty (MrTopCat)
+    James Deciutiis (JamesDeciutiis)
     James Moore (moore.work)
     James Stephens (james-h-stephens)
     Jan-Peter Nilsson (peppe)

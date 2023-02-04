@@ -33,6 +33,7 @@
     Bug #7054: Quests aren't sorted by name
     Bug #7084: Resurrecting an actor doesn't take into account base record changes
     Bug #7088: Deleting last save game of last character doesn't clear character name/details
+    Bug #7122: Teleportation to underwater should cancel active water walking effect
     Bug #7172: Current music playlist continues playing indefinitely if next playlist is empty
     Feature #5492: Let rain and snow collide with statics
     Feature #6447: Add LOD support to Object Paging
