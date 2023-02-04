@@ -372,7 +372,6 @@ if (USE_QT)
     add_component_qt_dir (config
         gamesettings
         launchersettings
-        settingsbase
         )
 
     add_component_qt_dir (process

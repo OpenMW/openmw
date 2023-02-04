@@ -1,15 +1,59 @@
 #ifndef LAUNCHERSETTINGS_HPP
 #define LAUNCHERSETTINGS_HPP
 
-#include "gamesettings.hpp"
-#include "settingsbase.hpp"
+#include <QString>
+#include <QStringList>
+
+#include <map>
+
+class QTextStream;
 
 namespace Config
 {
-    class LauncherSettings : public SettingsBase<QMultiMap<QString, QString>>
+    class GameSettings;
+
+    class LauncherSettings
     {
     public:
-        bool writeFile(QTextStream& stream);
+        static constexpr char sLauncherConfigFileName[] = "launcher.cfg";
+
+        struct Settings
+        {
+            QString mLanguage;
+        };
+
+        struct MainWindow
+        {
+            int mWidth = 0;
+            int mHeight = 0;
+            int mPosX = 0;
+            int mPosY = 0;
+        };
+
+        struct General
+        {
+            bool mFirstRun = true;
+            MainWindow mMainWindow;
+        };
+
+        struct Profile
+        {
+            QStringList mArchives;
+            QStringList mData;
+            QStringList mContent;
+        };
+
+        struct Profiles
+        {
+            QString mCurrentProfile;
+            std::map<QString, Profile> mValues;
+        };
+
+        void readFile(QTextStream& stream);
+
+        void clear();
+
+        void writeFile(QTextStream& stream) const;
 
         /// \return names of all Content Lists in the launcher's .cfg file.
         QStringList getContentLists();
@@ -21,47 +65,36 @@ namespace Config
         void setContentList(const QString& contentListName, const QStringList& dirNames,
             const QStringList& archiveNames, const QStringList& fileNames);
 
-        void removeContentList(const QString& contentListName);
+        void removeContentList(const QString& value) { mProfiles.mValues.erase(value); }
 
-        void setCurrentContentListName(const QString& contentListName);
+        void setCurrentContentListName(const QString& value) { mProfiles.mCurrentProfile = value; }
 
-        QString getCurrentContentListName() const;
+        QString getCurrentContentListName() const { return mProfiles.mCurrentProfile; }
 
         QStringList getDataDirectoryList(const QString& contentListName) const;
         QStringList getArchiveList(const QString& contentListName) const;
         QStringList getContentListFiles(const QString& contentListName) const;
 
-        /// \return new list that is reversed order of input
-        static QStringList reverse(const QStringList& toReverse);
+        bool isFirstRun() const { return mGeneral.mFirstRun; }
 
-        static const char sLauncherConfigFileName[];
+        void resetFirstRun() { mGeneral.mFirstRun = false; }
+
+        QString getLanguage() const { return mSettings.mLanguage; }
+
+        void setLanguage(const QString& value) { mSettings.mLanguage = value; }
+
+        MainWindow getMainWindow() const { return mGeneral.mMainWindow; }
+
+        void setMainWindow(const MainWindow& value) { mGeneral.mMainWindow = value; }
 
     private:
-        /// \return key to use to get/set the files in the specified data Directory List
-        static QString makeDirectoryListKey(const QString& contentListName);
+        Settings mSettings;
+        Profiles mProfiles;
+        General mGeneral;
 
-        /// \return key to use to get/set the files in the specified Archive List
-        static QString makeArchiveListKey(const QString& contentListName);
+        bool setValue(const QString& sectionPrefix, const QString& key, const QString& value);
 
-        /// \return key to use to get/set the files in the specified Content List
-        static QString makeContentListKey(const QString& contentListName);
-
-        /// \return true if both lists are same
-        static bool isEqual(const QStringList& list1, const QStringList& list2);
-
-        static QString makeNewContentListName();
-
-        QStringList subKeys(const QString& key);
-
-        /// name of entry in launcher.cfg that holds name of currently selected Content List
-        static const char sCurrentContentListKey[];
-
-        /// section of launcher.cfg holding the Content Lists
-        static const char sContentListsSectionPrefix[];
-
-        static const char sDirectoryListSuffix[];
-        static const char sArchiveListSuffix[];
-        static const char sContentListSuffix[];
+        const Profile* findProfile(const QString& name) const;
     };
 }
 #endif // LAUNCHERSETTINGS_HPP

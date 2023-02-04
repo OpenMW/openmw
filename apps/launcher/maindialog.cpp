@@ -1,10 +1,13 @@
 #include "maindialog.hpp"
 
+#include <components/debug/debuglog.hpp>
+#include <components/files/conversion.hpp>
+#include <components/files/qtconversion.hpp>
 #include <components/misc/helpviewer.hpp>
+#include <components/misc/utf8qtextstream.hpp>
 #include <components/version/version.hpp>
 
 #include <QCloseEvent>
-#include <QDebug>
 #include <QDir>
 #include <QMessageBox>
 #include <QStringList>
@@ -130,7 +133,7 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
         }
     }
 
-    if (mLauncherSettings.value(QString("General/firstrun"), QString("true")) == QLatin1String("true"))
+    if (mLauncherSettings.isFirstRun())
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("First run"));
@@ -287,34 +290,30 @@ bool Launcher::MainDialog::setupLauncherSettings()
 {
     mLauncherSettings.clear();
 
-    mLauncherSettings.setMultiValueEnabled(true);
+    const QString path
+        = Files::pathToQString(mCfgMgr.getUserConfigPath() / Config::LauncherSettings::sLauncherConfigFileName);
 
-    QStringList paths;
-    paths.append(QString(Config::LauncherSettings::sLauncherConfigFileName));
-    paths.append(Files::pathToQString(mCfgMgr.getUserConfigPath() / Config::LauncherSettings::sLauncherConfigFileName));
+    if (!QFile::exists(path))
+        return true;
 
-    for (const QString& path : paths)
+    Log(Debug::Verbose) << "Loading config file: " << path.toUtf8().constData();
+
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-        qDebug() << "Loading config file:" << path.toUtf8().constData();
-        QFile file(path);
-        if (file.exists())
-        {
-            if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-            {
-                cfgError(tr("Error opening OpenMW configuration file"),
-                    tr("<br><b>Could not open %0 for reading</b><br><br> \
-                             Please make sure you have the right permissions \
-                             and try again.<br>")
-                        .arg(file.fileName()));
-                return false;
-            }
-            QTextStream stream(&file);
-            Misc::ensureUtf8Encoding(stream);
-
-            mLauncherSettings.readFile(stream);
-        }
-        file.close();
+        cfgError(tr("Error opening OpenMW configuration file"),
+            tr("<br><b>Could not open %0 for reading:</b><br><br>%1<br><br> \
+                     Please make sure you have the right permissions \
+                     and try again.<br>")
+                .arg(file.fileName())
+                .arg(file.errorString()));
+        return false;
     }
+
+    QTextStream stream(&file);
+    Misc::ensureUtf8Encoding(stream);
+
+    mLauncherSettings.readFile(stream);
 
     return true;
 }
@@ -327,7 +326,6 @@ bool Launcher::MainDialog::setupGameSettings()
 
     auto loadFile = [&](const QString& path, bool (Config::GameSettings::*reader)(QTextStream&, bool),
                         bool ignoreContent = false) -> std::optional<bool> {
-        qDebug() << "Loading config file:" << path.toUtf8().constData();
         file.setFileName(path);
         if (file.exists())
         {
@@ -440,31 +438,20 @@ bool Launcher::MainDialog::setupGraphicsSettings()
 
 void Launcher::MainDialog::loadSettings()
 {
-    int width = mLauncherSettings.value(QString("General/MainWindow/width")).toInt();
-    int height = mLauncherSettings.value(QString("General/MainWindow/height")).toInt();
-
-    int posX = mLauncherSettings.value(QString("General/MainWindow/posx")).toInt();
-    int posY = mLauncherSettings.value(QString("General/MainWindow/posy")).toInt();
-
-    resize(width, height);
-    move(posX, posY);
+    const auto& mainWindow = mLauncherSettings.getMainWindow();
+    resize(mainWindow.mWidth, mainWindow.mHeight);
+    move(mainWindow.mPosX, mainWindow.mPosY);
 }
 
 void Launcher::MainDialog::saveSettings()
 {
-    QString width = QString::number(this->width());
-    QString height = QString::number(this->height());
-
-    mLauncherSettings.setValue(QString("General/MainWindow/width"), width);
-    mLauncherSettings.setValue(QString("General/MainWindow/height"), height);
-
-    QString posX = QString::number(this->pos().x());
-    QString posY = QString::number(this->pos().y());
-
-    mLauncherSettings.setValue(QString("General/MainWindow/posx"), posX);
-    mLauncherSettings.setValue(QString("General/MainWindow/posy"), posY);
-
-    mLauncherSettings.setValue(QString("General/firstrun"), QString("false"));
+    mLauncherSettings.setMainWindow(Config::LauncherSettings::MainWindow{
+        .mWidth = width(),
+        .mHeight = height(),
+        .mPosX = pos().x(),
+        .mPosY = pos().y(),
+    });
+    mLauncherSettings.resetFirstRun();
 }
 
 bool Launcher::MainDialog::writeSettings()

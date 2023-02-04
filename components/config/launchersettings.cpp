@@ -4,104 +4,220 @@
 #include <QMultiMap>
 #include <QRegularExpression>
 #include <QString>
+#include <QStringList>
 #include <QTextStream>
 
+#include <components/debug/debuglog.hpp>
 #include <components/files/qtconversion.hpp>
 
-const char Config::LauncherSettings::sCurrentContentListKey[] = "Profiles/currentprofile";
-const char Config::LauncherSettings::sLauncherConfigFileName[] = "launcher.cfg";
-const char Config::LauncherSettings::sContentListsSectionPrefix[] = "Profiles/";
-const char Config::LauncherSettings::sDirectoryListSuffix[] = "/data";
-const char Config::LauncherSettings::sArchiveListSuffix[] = "/fallback-archive";
-const char Config::LauncherSettings::sContentListSuffix[] = "/content";
+#include "gamesettings.hpp"
 
-QStringList Config::LauncherSettings::subKeys(const QString& key)
+namespace Config
 {
-    QMultiMap<QString, QString> settings = SettingsBase::getSettings();
-    QStringList keys = settings.uniqueKeys();
-
-    QRegularExpression keyRe("(.+)/");
-
-    QStringList result;
-
-    for (const QString& currentKey : keys)
+    namespace
     {
-        QRegularExpressionMatch match = keyRe.match(currentKey);
-        if (match.hasMatch())
-        {
-            QString prefixedKey = match.captured(1);
+        constexpr char sSettingsSection[] = "Settings";
+        constexpr char sGeneralSection[] = "General";
+        constexpr char sProfilesSection[] = "Profiles";
+        constexpr char sLanguageKey[] = "language";
+        constexpr char sCurrentProfileKey[] = "currentprofile";
+        constexpr char sDataKey[] = "data";
+        constexpr char sArchiveKey[] = "fallback-archive";
+        constexpr char sContentKey[] = "content";
+        constexpr char sFirstRunKey[] = "firstrun";
+        constexpr char sMainWindowWidthKey[] = "MainWindow/width";
+        constexpr char sMainWindowHeightKey[] = "MainWindow/height";
+        constexpr char sMainWindowPosXKey[] = "MainWindow/posx";
+        constexpr char sMainWindowPosYKey[] = "MainWindow/posy";
 
-            if (prefixedKey.startsWith(key))
+        QString makeNewContentListName()
+        {
+            // basically, use date and time as the name  e.g. YYYY-MM-DDThh:mm:ss
+            const std::time_t rawtime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+            tm timeinfo{};
+#ifdef _WIN32
+            (void)localtime_s(&timeinfo, &rawtime);
+#else
+            (void)localtime_r(&rawtime, &timeinfo);
+#endif
+            constexpr int base = 10;
+            QChar zeroPad('0');
+            return QString("%1-%2-%3T%4:%5:%6")
+                .arg(timeinfo.tm_year + 1900, 4)
+                .arg(timeinfo.tm_mon + 1, 2, base, zeroPad)
+                .arg(timeinfo.tm_mday, 2, base, zeroPad)
+                .arg(timeinfo.tm_hour, 2, base, zeroPad)
+                .arg(timeinfo.tm_min, 2, base, zeroPad)
+                .arg(timeinfo.tm_sec, 2, base, zeroPad);
+        }
+
+        bool parseBool(const QString& value, bool& out)
+        {
+            if (value == "false")
             {
-                QString subKey = prefixedKey.remove(key);
-                if (!subKey.isEmpty())
-                    result.append(subKey);
+                out = false;
+                return true;
+            }
+            if (value == "true")
+            {
+                out = true;
+                return true;
+            }
+
+            return false;
+        }
+
+        bool parseInt(const QString& value, int& out)
+        {
+            bool ok = false;
+            const int converted = value.toInt(&ok);
+            if (ok)
+                out = converted;
+            return ok;
+        }
+
+        bool parseProfilePart(
+            const QString& key, const QString& value, std::map<QString, LauncherSettings::Profile>& profiles)
+        {
+            const int separator = key.lastIndexOf('/');
+            if (separator == -1)
+                return false;
+
+            const QString profileName = key.mid(0, separator);
+
+            if (key.endsWith(sArchiveKey))
+            {
+                profiles[profileName].mArchives.append(value);
+                return true;
+            }
+            if (key.endsWith(sDataKey))
+            {
+                profiles[profileName].mData.append(value);
+                return true;
+            }
+            if (key.endsWith(sContentKey))
+            {
+                profiles[profileName].mContent.append(value);
+                return true;
+            }
+
+            return false;
+        }
+
+        bool parseSettingsSection(const QString& key, const QString& value, LauncherSettings::Settings& settings)
+        {
+            if (key == sLanguageKey)
+            {
+                settings.mLanguage = value;
+                return true;
+            }
+
+            return false;
+        }
+
+        bool parseProfilesSection(const QString& key, const QString& value, LauncherSettings::Profiles& profiles)
+        {
+            if (key == sCurrentProfileKey)
+            {
+                profiles.mCurrentProfile = value;
+                return true;
+            }
+
+            return parseProfilePart(key, value, profiles.mValues);
+        }
+
+        bool parseGeneralSection(const QString& key, const QString& value, LauncherSettings::General& general)
+        {
+            if (key == sFirstRunKey)
+                return parseBool(value, general.mFirstRun);
+            if (key == sMainWindowWidthKey)
+                return parseInt(value, general.mMainWindow.mWidth);
+            if (key == sMainWindowHeightKey)
+                return parseInt(value, general.mMainWindow.mHeight);
+            if (key == sMainWindowPosXKey)
+                return parseInt(value, general.mMainWindow.mPosX);
+            if (key == sMainWindowPosYKey)
+                return parseInt(value, general.mMainWindow.mPosY);
+
+            return false;
+        }
+
+        template <std::size_t size>
+        void writeSectionHeader(const char (&name)[size], QTextStream& stream)
+        {
+            stream << "\n[" << name << "]\n";
+        }
+
+        template <std::size_t size>
+        void writeKeyValue(const char (&key)[size], const QString& value, QTextStream& stream)
+        {
+            stream << key << '=' << value << '\n';
+        }
+
+        template <std::size_t size>
+        void writeKeyValue(const char (&key)[size], bool value, QTextStream& stream)
+        {
+            stream << key << '=' << (value ? "true" : "false") << '\n';
+        }
+
+        template <std::size_t size>
+        void writeKeyValue(const char (&key)[size], int value, QTextStream& stream)
+        {
+            stream << key << '=' << value << '\n';
+        }
+
+        template <std::size_t size>
+        void writeKeyValues(
+            const QString& prefix, const char (&suffix)[size], const QStringList& values, QTextStream& stream)
+        {
+            for (const auto& v : values)
+                stream << prefix << '/' << suffix << '=' << v << '\n';
+        }
+
+        void writeSettings(const LauncherSettings::Settings& value, QTextStream& stream)
+        {
+            writeSectionHeader(sSettingsSection, stream);
+            writeKeyValue(sLanguageKey, value.mLanguage, stream);
+        }
+
+        void writeProfiles(const LauncherSettings::Profiles& value, QTextStream& stream)
+        {
+            writeSectionHeader(sProfilesSection, stream);
+            writeKeyValue(sCurrentProfileKey, value.mCurrentProfile, stream);
+            for (auto it = value.mValues.rbegin(); it != value.mValues.rend(); ++it)
+            {
+                writeKeyValues(it->first, sArchiveKey, it->second.mArchives, stream);
+                writeKeyValues(it->first, sDataKey, it->second.mData, stream);
+                writeKeyValues(it->first, sContentKey, it->second.mContent, stream);
             }
         }
-    }
 
-    result.removeDuplicates();
-    return result;
+        void writeGeneral(const LauncherSettings::General& value, QTextStream& stream)
+        {
+            writeSectionHeader(sGeneralSection, stream);
+            writeKeyValue(sFirstRunKey, value.mFirstRun, stream);
+            writeKeyValue(sMainWindowWidthKey, value.mMainWindow.mWidth, stream);
+            writeKeyValue(sMainWindowPosYKey, value.mMainWindow.mPosY, stream);
+            writeKeyValue(sMainWindowPosXKey, value.mMainWindow.mPosX, stream);
+            writeKeyValue(sMainWindowHeightKey, value.mMainWindow.mHeight, stream);
+        }
+    }
 }
 
-bool Config::LauncherSettings::writeFile(QTextStream& stream)
+void Config::LauncherSettings::writeFile(QTextStream& stream) const
 {
-    QString sectionPrefix;
-    QRegularExpression sectionRe("^([^/]+)/(.+)$");
-    QMultiMap<QString, QString> settings = SettingsBase::getSettings();
-
-    auto i = settings.end();
-    while (i != settings.begin())
-    {
-        i--;
-
-        QString prefix;
-        QString key;
-
-        QRegularExpressionMatch match = sectionRe.match(i.key());
-        if (match.hasMatch())
-        {
-            prefix = match.captured(1);
-            key = match.captured(2);
-        }
-
-        // Get rid of legacy settings
-        if (key.contains(QChar('\\')))
-            continue;
-
-        if (key == QLatin1String("CurrentProfile"))
-            continue;
-
-        if (sectionPrefix != prefix)
-        {
-            sectionPrefix = prefix;
-            stream << "\n[" << prefix << "]\n";
-        }
-
-        stream << key << "=" << i.value() << "\n";
-    }
-
-    return true;
+    writeSettings(mSettings, stream);
+    writeProfiles(mProfiles, stream);
+    writeGeneral(mGeneral, stream);
 }
 
 QStringList Config::LauncherSettings::getContentLists()
 {
-    return subKeys(QString(sContentListsSectionPrefix));
-}
-
-QString Config::LauncherSettings::makeDirectoryListKey(const QString& contentListName)
-{
-    return QString(sContentListsSectionPrefix) + contentListName + QString(sDirectoryListSuffix);
-}
-
-QString Config::LauncherSettings::makeArchiveListKey(const QString& contentListName)
-{
-    return QString(sContentListsSectionPrefix) + contentListName + QString(sArchiveListSuffix);
-}
-
-QString Config::LauncherSettings::makeContentListKey(const QString& contentListName)
-{
-    return QString(sContentListsSectionPrefix) + contentListName + QString(sContentListSuffix);
+    QStringList result;
+    result.reserve(mProfiles.mValues.size());
+    for (const auto& [k, v] : mProfiles.mValues)
+        result.push_back(k);
+    return result;
 }
 
 void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
@@ -126,8 +242,8 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     // if any existing profile in launcher matches the content list, make that profile the default
     for (const QString& listName : getContentLists())
     {
-        if (isEqual(files, getContentListFiles(listName)) && isEqual(archives, getArchiveList(listName))
-            && isEqual(dirs, getDataDirectoryList(listName)))
+        if (files == getContentListFiles(listName) && archives == getArchiveList(listName)
+            && dirs == getDataDirectoryList(listName))
         {
             setCurrentContentListName(listName);
             return;
@@ -140,99 +256,98 @@ void Config::LauncherSettings::setContentList(const GameSettings& gameSettings)
     setContentList(newContentListName, dirs, archives, files);
 }
 
-void Config::LauncherSettings::removeContentList(const QString& contentListName)
-{
-    remove(makeDirectoryListKey(contentListName));
-    remove(makeArchiveListKey(contentListName));
-    remove(makeContentListKey(contentListName));
-}
-
-void Config::LauncherSettings::setCurrentContentListName(const QString& contentListName)
-{
-    remove(QString(sCurrentContentListKey));
-    setValue(QString(sCurrentContentListKey), contentListName);
-}
-
 void Config::LauncherSettings::setContentList(const QString& contentListName, const QStringList& dirNames,
     const QStringList& archiveNames, const QStringList& fileNames)
 {
-    auto const assign = [this](const QString key, const QStringList& list) {
-        for (auto const& item : list)
-            setMultiValue(key, item);
-    };
-
-    removeContentList(contentListName);
-    assign(makeDirectoryListKey(contentListName), dirNames);
-    assign(makeArchiveListKey(contentListName), archiveNames);
-    assign(makeContentListKey(contentListName), fileNames);
-}
-
-QString Config::LauncherSettings::getCurrentContentListName() const
-{
-    return value(QString(sCurrentContentListKey));
+    Profile& profile = mProfiles.mValues[contentListName];
+    profile.mData = dirNames;
+    profile.mArchives = archiveNames;
+    profile.mContent = fileNames;
 }
 
 QStringList Config::LauncherSettings::getDataDirectoryList(const QString& contentListName) const
 {
-    // QMap returns multiple rows in LIFO order, so need to reverse
-    return reverse(getSettings().values(makeDirectoryListKey(contentListName)));
+    const Profile* profile = findProfile(contentListName);
+    if (profile == nullptr)
+        return {};
+    return profile->mData;
 }
 
 QStringList Config::LauncherSettings::getArchiveList(const QString& contentListName) const
 {
-    // QMap returns multiple rows in LIFO order, so need to reverse
-    return reverse(getSettings().values(makeArchiveListKey(contentListName)));
+    const Profile* profile = findProfile(contentListName);
+    if (profile == nullptr)
+        return {};
+    return profile->mArchives;
 }
+
 QStringList Config::LauncherSettings::getContentListFiles(const QString& contentListName) const
 {
-    // QMap returns multiple rows in LIFO order, so need to reverse
-    return reverse(getSettings().values(makeContentListKey(contentListName)));
+    const Profile* profile = findProfile(contentListName);
+    if (profile == nullptr)
+        return {};
+    return profile->mContent;
 }
 
-QStringList Config::LauncherSettings::reverse(const QStringList& toReverse)
+bool Config::LauncherSettings::setValue(const QString& sectionPrefix, const QString& key, const QString& value)
 {
-    QStringList result;
-    result.reserve(toReverse.size());
-    std::reverse_copy(toReverse.begin(), toReverse.end(), std::back_inserter(result));
-    return result;
+    if (sectionPrefix == sSettingsSection)
+        return parseSettingsSection(key, value, mSettings);
+    if (sectionPrefix == sProfilesSection)
+        return parseProfilesSection(key, value, mProfiles);
+    if (sectionPrefix == sGeneralSection)
+        return parseGeneralSection(key, value, mGeneral);
+
+    return false;
 }
 
-bool Config::LauncherSettings::isEqual(const QStringList& list1, const QStringList& list2)
+void Config::LauncherSettings::readFile(QTextStream& stream)
 {
-    if (list1.count() != list2.count())
-    {
-        return false;
-    }
+    const QRegExp sectionRe("^\\[([^]]+)\\]");
+    const QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
-    for (int i = 0; i < list1.count(); ++i)
+    QString section;
+
+    while (!stream.atEnd())
     {
-        if (list1.at(i) != list2.at(i))
+        const QString line = stream.readLine();
+
+        if (line.isEmpty() || line.startsWith("#"))
+            continue;
+
+        if (sectionRe.exactMatch(line))
         {
-            return false;
+            section = sectionRe.cap(1);
+            continue;
         }
-    }
 
-    // if get here, lists are same
-    return true;
+        if (section.isEmpty())
+            continue;
+
+        if (keyRe.indexIn(line) == -1)
+            continue;
+
+        const QString key = keyRe.cap(1).trimmed();
+        const QString value = keyRe.cap(2).trimmed();
+
+        if (!setValue(section, key, value))
+            Log(Debug::Warning) << "Unsupported setting in the launcher config file: section: "
+                                << section.toUtf8().constData() << " key: " << key.toUtf8().constData()
+                                << " value: " << value.toUtf8().constData();
+    }
 }
 
-QString Config::LauncherSettings::makeNewContentListName()
+const Config::LauncherSettings::Profile* Config::LauncherSettings::findProfile(const QString& name) const
 {
-    // basically, use date and time as the name  e.g. YYYY-MM-DDThh:mm:ss
-    auto rawtime = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
-    tm timeinfo{};
-#ifdef _WIN32
-    (void)localtime_s(&timeinfo, &rawtime);
-#else
-    (void)localtime_r(&rawtime, &timeinfo);
-#endif
-    int base = 10;
-    QChar zeroPad('0');
-    return QString("%1-%2-%3T%4:%5:%6")
-        .arg(timeinfo.tm_year + 1900, 4)
-        .arg(timeinfo.tm_mon + 1, 2, base, zeroPad)
-        .arg(timeinfo.tm_mday, 2, base, zeroPad)
-        .arg(timeinfo.tm_hour, 2, base, zeroPad)
-        .arg(timeinfo.tm_min, 2, base, zeroPad)
-        .arg(timeinfo.tm_sec, 2, base, zeroPad);
+    const auto it = mProfiles.mValues.find(name);
+    if (it == mProfiles.mValues.end())
+        return nullptr;
+    return &it->second;
+}
+
+void Config::LauncherSettings::clear()
+{
+    mSettings = Settings{};
+    mGeneral = General{};
+    mProfiles = Profiles{};
 }

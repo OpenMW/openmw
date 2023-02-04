@@ -12,6 +12,15 @@ const char Config::GameSettings::sArchiveKey[] = "fallback-archive";
 const char Config::GameSettings::sContentKey[] = "content";
 const char Config::GameSettings::sDirectoryKey[] = "data";
 
+namespace
+{
+    QStringList reverse(QStringList values)
+    {
+        std::reverse(values.begin(), values.end());
+        return values;
+    }
+}
+
 Config::GameSettings::GameSettings(Files::ConfigurationManager& cfg)
     : mCfgMgr(cfg)
 {
@@ -501,19 +510,19 @@ void Config::GameSettings::setContentList(
 
 QStringList Config::GameSettings::getDataDirs() const
 {
-    return Config::LauncherSettings::reverse(mDataDirs);
+    return reverse(mDataDirs);
 }
 
 QStringList Config::GameSettings::getArchiveList() const
 {
     // QMap returns multiple rows in LIFO order, so need to reverse
-    return Config::LauncherSettings::reverse(values(sArchiveKey));
+    return reverse(values(sArchiveKey));
 }
 
 QStringList Config::GameSettings::getContentList() const
 {
     // QMap returns multiple rows in LIFO order, so need to reverse
-    return Config::LauncherSettings::reverse(values(sContentKey));
+    return reverse(values(sContentKey));
 }
 
 void Config::GameSettings::clear()

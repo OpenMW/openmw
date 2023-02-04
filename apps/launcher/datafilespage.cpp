@@ -205,8 +205,7 @@ bool Launcher::DataFilesPage::loadSettings()
     if (!currentProfile.isEmpty())
         addProfile(currentProfile, true);
 
-    QString language(mLauncherSettings.value(QLatin1String("Settings/language")));
-    int index = mSelector->languageBox()->findText(language);
+    const int index = mSelector->languageBox()->findText(mLauncherSettings.getLanguage());
     if (index != -1)
         mSelector->languageBox()->setCurrentIndex(index);
 
@@ -355,7 +354,7 @@ void Launcher::DataFilesPage::saveSettings(const QString& profile)
 
     QString language(mSelector->languageBox()->currentText());
 
-    mLauncherSettings.setValue(QLatin1String("Settings/language"), language);
+    mLauncherSettings.setLanguage(language);
 
     if (language == QLatin1String("Polish"))
     {

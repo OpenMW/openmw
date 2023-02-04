@@ -393,7 +393,7 @@ void Wizard::MainWizard::writeSettings()
 {
     // Write the encoding and language settings
     QString language(field(QLatin1String("installation.language")).toString());
-    mLauncherSettings.setValue(QLatin1String("Settings/language"), language);
+    mLauncherSettings.setLanguage(language);
 
     if (language == QLatin1String("Polish"))
     {
