@@ -109,7 +109,6 @@ void CSVFilter::EditWidget::createFilterRequest(const std::vector<FilterData>& s
         std::pair<std::string, FilterType> pair = std::visit(FilterVisitor(), filterData.searchData);
         std::string searchString = pair.first;
         filterType = pair.second;
-        std::vector<std::string> columns;
         newFilterData.searchData = searchString;
         newFilterData.columns = filterData.columns;
         newFilter.emplace_back(newFilterData);
@@ -219,7 +218,7 @@ void CSVFilter::EditWidget::createFilterRequest(const std::vector<FilterData>& s
     }
 }
 
-std::string CSVFilter::EditWidget::generateFilter(const FilterData& filterData, const FilterType& filterType) const
+std::string CSVFilter::EditWidget::generateFilter(const FilterData& filterData, FilterType filterType) const
 {
     const unsigned columns = filterData.columns.size();
 

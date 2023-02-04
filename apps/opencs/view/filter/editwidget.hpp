@@ -80,7 +80,7 @@ namespace CSVFilter
         void filterChanged(std::shared_ptr<CSMFilter::Node> filter);
 
     private:
-        std::string generateFilter(const FilterData& filterData, const FilterType& filterType) const;
+        std::string generateFilter(const FilterData& filterData, FilterType filterType) const;
 
         void contextMenuEvent(QContextMenuEvent* event) override;
 
