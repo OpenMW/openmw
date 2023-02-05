@@ -303,8 +303,8 @@ bool Config::LauncherSettings::setValue(const QString& sectionPrefix, const QStr
 
 void Config::LauncherSettings::readFile(QTextStream& stream)
 {
-    const QRegExp sectionRe("^\\[([^]]+)\\]");
-    const QRegExp keyRe("^([^=]+)\\s*=\\s*(.+)$");
+    const QRegularExpression sectionRe("^\\[([^]]+)\\]$");
+    const QRegularExpression keyRe("^([^=]+)\\s*=\\s*(.+)$");
 
     QString section;
 
@@ -315,20 +315,22 @@ void Config::LauncherSettings::readFile(QTextStream& stream)
         if (line.isEmpty() || line.startsWith("#"))
             continue;
 
-        if (sectionRe.exactMatch(line))
+        const QRegularExpressionMatch sectionMatch = sectionRe.match(line);
+        if (sectionMatch.hasMatch())
         {
-            section = sectionRe.cap(1);
+            section = sectionMatch.captured(1);
             continue;
         }
 
         if (section.isEmpty())
             continue;
 
-        if (keyRe.indexIn(line) == -1)
+        const QRegularExpressionMatch keyMatch = keyRe.match(line);
+        if (!keyMatch.hasMatch())
             continue;
 
-        const QString key = keyRe.cap(1).trimmed();
-        const QString value = keyRe.cap(2).trimmed();
+        const QString key = keyMatch.captured(1).trimmed();
+        const QString value = keyMatch.captured(2).trimmed();
 
         if (!setValue(section, key, value))
             Log(Debug::Warning) << "Unsupported setting in the launcher config file: section: "
