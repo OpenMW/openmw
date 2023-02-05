@@ -193,7 +193,6 @@ namespace SceneUtil {
 
             unsigned int                        _textureUnit;
             osg::ref_ptr<osg::Texture2D>        _texture;
-            osg::ref_ptr<osg::TexGen>           _texgen;
             osg::ref_ptr<osg::Camera>           _camera;
         };
 
@@ -241,8 +240,6 @@ namespace SceneUtil {
 
         void setCustomFrustumCallback(CustomFrustumCallback* cfc);
 
-        void assignTexGenSettings(osgUtil::CullVisitor& cv, ViewDependentData* vdd);
-
         virtual void createShaders();
 
         virtual bool selectActiveLights(osgUtil::CullVisitor* cv, ViewDependentData* vdd) const;
@@ -254,8 +251,6 @@ namespace SceneUtil {
         virtual bool cropShadowCameraToMainFrustum(Frustum& frustum, osg::Camera* camera, double viewNear, double viewFar, std::vector<osg::Plane>& planeList);
 
         virtual bool adjustPerspectiveShadowMapCameraSettings(osgUtil::RenderStage* renderStage, Frustum& frustum, LightData& positionedLight, osg::Camera* camera, double viewNear, double viewFar);
-
-        virtual bool assignTexGenSettings(osgUtil::CullVisitor* cv, osg::Camera* camera, unsigned int textureUnit, osg::TexGen* texgen);
 
         virtual void cullShadowReceivingScene(osgUtil::CullVisitor* cv) const;
 
