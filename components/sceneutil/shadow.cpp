@@ -32,7 +32,8 @@ namespace SceneUtil
             = std::clamp(Settings::Manager::getInt("number of shadow maps", "Shadows"), 1, 8);
 
         mShadowSettings->setNumShadowMapsPerLight(numberOfShadowMapsPerLight);
-        mShadowSettings->setBaseShadowTextureUnit(osg::GLExtensions::Get(0, false)->glMaxTextureUnits - numberOfShadowMapsPerLight);
+        mShadowSettings->setBaseShadowTextureUnit(
+            osg::GLExtensions::Get(0, false)->glMaxTextureUnits - numberOfShadowMapsPerLight);
 
         const float maximumShadowMapDistance = Settings::Manager::getFloat("maximum shadow map distance", "Shadows");
         if (maximumShadowMapDistance > 0)
