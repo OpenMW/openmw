@@ -66,11 +66,13 @@ void CSMPrefs::State::declare()
         .addValue(scrollbarOnly)
         .addValue("Grow Only", "The view window grows as subviews are added. No scrollbars.")
         .addValue("Grow then Scroll", "The view window grows. The scrollbar appears once it cannot grow any further.");
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     declareBool("grow-limit", "Grow Limit Screen", false)
         .setTooltip(
             "When \"Grow then Scroll\" option is selected, the window size grows to"
             " the width of the virtual desktop. \nIf this option is selected the the window growth"
             "is limited to the current screen.");
+#endif
 
     declareCategory("Records");
     EnumValue iconAndText("Icon and Text");

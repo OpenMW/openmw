@@ -54,8 +54,8 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-QT5_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc)
-QT5_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
+QT_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/launcher/launcher.qrc)
+QT_WRAP_UI(UI_HDRS ${LAUNCHER_UI})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 if(NOT WIN32)
@@ -82,7 +82,7 @@ target_link_libraries(openmw-launcher
     components_qt
 )
 
-target_link_libraries(openmw-launcher Qt5::Widgets Qt5::Core)
+target_link_libraries(openmw-launcher Qt::Widgets Qt::Core)
 
 if (BUILD_WITH_CODE_COVERAGE)
   add_definitions (--coverage)

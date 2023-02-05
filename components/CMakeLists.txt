@@ -387,7 +387,7 @@ if (USE_QT)
         qtconfigpath
         )
 
-    QT5_WRAP_UI(ESM_UI_HDR ${ESM_UI})
+    QT_WRAP_UI(ESM_UI_HDR ${ESM_UI})
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -455,7 +455,7 @@ endif()
 
 if (USE_QT)
     add_library(components_qt STATIC ${COMPONENT_QT_FILES} ${ESM_UI_HDR})
-    target_link_libraries(components_qt components Qt5::Widgets Qt5::Core)
+    target_link_libraries(components_qt components Qt::Widgets Qt::Core)
     target_compile_definitions(components_qt PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
 endif()
 

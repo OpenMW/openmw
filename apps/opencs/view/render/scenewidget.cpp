@@ -13,7 +13,9 @@
 #include <apps/opencs/view/render/lightingday.hpp>
 #include <apps/opencs/view/render/lightingnight.hpp>
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <extern/osgQt/GraphicsWindowQt>
+#endif
 
 #include <osg/Array>
 #include <osg/Camera>
@@ -90,6 +92,7 @@ namespace CSVRender
         mView = new osgViewer::View;
         updateCameraParameters(traits->width / static_cast<double>(traits->height));
 
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         osg::ref_ptr<osgQt::GraphicsWindowQt> window = new osgQt::GraphicsWindowQt(traits.get());
         QLayout* layout = new QHBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
@@ -97,6 +100,7 @@ namespace CSVRender
         setLayout(layout);
 
         mView->getCamera()->setGraphicsContext(window);
+#endif
         mView->getCamera()->setViewport(new osg::Viewport(0, 0, traits->width, traits->height));
 
         SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;

@@ -149,8 +149,8 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-qt5_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
-qt5_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
+qt_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+qt_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
 # for compiled .ui files
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
@@ -228,7 +228,7 @@ target_link_libraries(openmw-cs
     components_qt
 )
 
-target_link_libraries(openmw-cs Qt5::Widgets Qt5::Core Qt5::Network Qt5::OpenGL)
+target_link_libraries(openmw-cs Qt::Widgets Qt::Core Qt::Network Qt::OpenGL)
 
 if (WIN32)
     target_link_libraries(openmw-cs ${Boost_LOCALE_LIBRARY})

@@ -62,8 +62,8 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-QT5_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
-QT5_WRAP_UI(UI_HDRS ${WIZARD_UI})
+QT_ADD_RESOURCES(RCC_SRCS ${CMAKE_SOURCE_DIR}/files/wizard/wizard.qrc)
+QT_WRAP_UI(UI_HDRS ${WIZARD_UI})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -83,7 +83,7 @@ target_link_libraries(openmw-wizard
     components_qt
 )
 
-target_link_libraries(openmw-wizard Qt5::Widgets Qt5::Core)
+target_link_libraries(openmw-wizard Qt::Widgets Qt::Core)
 
 if (OPENMW_USE_UNSHIELD)
     target_link_libraries(openmw-wizard ${LIBUNSHIELD_LIBRARIES})
