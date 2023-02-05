@@ -9,6 +9,7 @@
 
 #include <components/loadinglistener/reporter.hpp>
 #include <components/misc/constants.hpp>
+#include <components/misc/mathutil.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -22,25 +23,6 @@
 
 namespace
 {
-
-    bool isPowerOfTwo(int x)
-    {
-        return ((x > 0) && ((x & (x - 1)) == 0));
-    }
-
-    int nextPowerOfTwo(int v)
-    {
-        if (isPowerOfTwo(v))
-            return v;
-        int depth = 0;
-        while (v)
-        {
-            v >>= 1;
-            depth++;
-        }
-        return 1 << depth;
-    }
-
     unsigned int Log2(unsigned int n)
     {
         unsigned int targetlevel = 0;
@@ -153,7 +135,7 @@ namespace Terrain
             int origSizeY = static_cast<int>(mMaxY - mMinY);
 
             // Dividing a quad tree only works well for powers of two, so round up to the nearest one
-            int size = nextPowerOfTwo(std::max(origSizeX, origSizeY));
+            int size = Misc::nextPowerOfTwo(std::max(origSizeX, origSizeY));
 
             float centerX = (mMinX + mMaxX) / 2.f + (size - origSizeX) / 2.f;
             float centerY = (mMinY + mMaxY) / 2.f + (size - origSizeY) / 2.f;

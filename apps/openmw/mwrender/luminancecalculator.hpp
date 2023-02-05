@@ -32,13 +32,7 @@ namespace MWRender
         void enable() { mEnabled = true; }
         void disable() { mEnabled = false; }
 
-        void dirty(int w, int h)
-        {
-            constexpr float scale = 0.5;
-            mWidth = w * scale;
-            mHeight = h * scale;
-            mCompiled = false;
-        }
+        void dirty(int w, int h);
 
         osg::ref_ptr<osg::Texture2D> getLuminanceTexture(size_t frameId) const;
 
@@ -67,6 +61,7 @@ namespace MWRender
 
         int mWidth = 1;
         int mHeight = 1;
+        osg::Vec2f mScale = osg::Vec2f(1, 1);
     };
 }
 
