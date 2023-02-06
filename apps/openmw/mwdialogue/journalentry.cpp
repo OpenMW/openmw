@@ -10,6 +10,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/globals.hpp"
 
 #include "../mwscript/interpretercontext.hpp"
 
@@ -135,9 +136,9 @@ namespace MWDialogue
     StampedJournalEntry StampedJournalEntry::makeFromQuest(
         const ESM::RefId& topic, int index, const MWWorld::Ptr& actor)
     {
-        int day = MWBase::Environment::get().getWorld()->getGlobalInt("dayspassed");
-        int month = MWBase::Environment::get().getWorld()->getGlobalInt("month");
-        int dayOfMonth = MWBase::Environment::get().getWorld()->getGlobalInt("day");
+        const int day = MWBase::Environment::get().getWorld()->getGlobalInt(MWWorld::Globals::sDaysPassed);
+        const int month = MWBase::Environment::get().getWorld()->getGlobalInt(MWWorld::Globals::sMonth);
+        const int dayOfMonth = MWBase::Environment::get().getWorld()->getGlobalInt(MWWorld::Globals::sDay);
 
         return StampedJournalEntry(topic, idFromIndex(topic, index), day, month, dayOfMonth, actor);
     }

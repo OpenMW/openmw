@@ -63,6 +63,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/globals.hpp"
 #include "../mwworld/player.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
@@ -1627,7 +1628,8 @@ namespace MWGui
     bool WindowManager::getRestEnabled()
     {
         // Enable rest dialogue if character creation finished
-        if (mRestAllowed == false && MWBase::Environment::get().getWorld()->getGlobalFloat("chargenstate") == -1)
+        if (mRestAllowed == false
+            && MWBase::Environment::get().getWorld()->getGlobalFloat(MWWorld::Globals::sCharGenState) == -1)
             mRestAllowed = true;
         return mRestAllowed;
     }

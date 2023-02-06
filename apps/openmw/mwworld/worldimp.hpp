@@ -249,19 +249,19 @@ namespace MWWorld
         void getDoorMarkers(MWWorld::CellStore* cell, std::vector<DoorMarker>& out) override;
         ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
-        void setGlobalInt(std::string_view name, int value) override;
+        void setGlobalInt(GlobalVariableName name, int value) override;
         ///< Set value independently from real type.
 
-        void setGlobalFloat(std::string_view name, float value) override;
+        void setGlobalFloat(GlobalVariableName name, float value) override;
         ///< Set value independently from real type.
 
-        int getGlobalInt(std::string_view name) const override;
+        int getGlobalInt(GlobalVariableName name) const override;
         ///< Get value independently from real type.
 
-        float getGlobalFloat(std::string_view name) const override;
+        float getGlobalFloat(GlobalVariableName name) const override;
         ///< Get value independently from real type.
 
-        char getGlobalVariableType(std::string_view name) const override;
+        char getGlobalVariableType(GlobalVariableName name) const override;
         ///< Return ' ', if there is no global variable with this name.
 
         std::string_view getCellName(const MWWorld::CellStore* cell = nullptr) const override;

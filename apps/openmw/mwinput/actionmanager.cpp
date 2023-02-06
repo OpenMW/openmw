@@ -15,6 +15,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/globals.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/player.hpp"
 
@@ -310,7 +311,7 @@ namespace MWInput
         if (!checkAllowedToUseItems())
             return;
 
-        if (MWBase::Environment::get().getWorld()->getGlobalFloat("chargenstate") != -1)
+        if (MWBase::Environment::get().getWorld()->getGlobalFloat(MWWorld::Globals::sCharGenState) != -1)
             return;
 
         if (!MWBase::Environment::get().getWindowManager()->isGuiMode())
@@ -325,7 +326,7 @@ namespace MWInput
             return;
         }
 
-        if (MWBase::Environment::get().getWorld()->getGlobalFloat("chargenstate") != -1)
+        if (MWBase::Environment::get().getWorld()->getGlobalFloat(MWWorld::Globals::sCharGenState) != -1)
             return;
 
         if (!checkAllowedToUseItems())

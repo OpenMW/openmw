@@ -15,6 +15,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/globals.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/ptr.hpp"
@@ -1779,7 +1780,8 @@ namespace MWMechanics
         if (ptr.getClass().isNpc() && target.getClass().isNpc())
         {
             if (target.getClass().getNpcStats(target).isWerewolf()
-                || (target == getPlayer() && MWBase::Environment::get().getWorld()->getGlobalInt("pcknownwerewolf")))
+                || (target == getPlayer()
+                    && MWBase::Environment::get().getWorld()->getGlobalInt(MWWorld::Globals::sPCKnownWerewolf)))
             {
                 const ESM::GameSetting* iWerewolfFightMod
                     = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
@@ -1909,7 +1911,7 @@ namespace MWMechanics
             if (detected)
             {
                 windowManager->messageBox("#{sWerewolfAlarmMessage}");
-                MWBase::Environment::get().getWorld()->setGlobalInt("pcknownwerewolf", 1);
+                MWBase::Environment::get().getWorld()->setGlobalInt(MWWorld::Globals::sPCKnownWerewolf, 1);
 
                 if (reported)
                 {

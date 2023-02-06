@@ -6,6 +6,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/globals.hpp"
+
 #include <set>
 
 namespace ESM
@@ -39,7 +41,10 @@ namespace MWLua
         // Note that game time generally goes faster than the simulation time.
         double getGameTime() const;
         double getGameTimeScale() const { return MWBase::Environment::get().getWorld()->getTimeScaleFactor(); }
-        void setGameTimeScale(double s) { MWBase::Environment::get().getWorld()->setGlobalFloat("timescale", s); }
+        void setGameTimeScale(double s)
+        {
+            MWBase::Environment::get().getWorld()->setGlobalFloat(MWWorld::Globals::sTimeScale, s);
+        }
 
         ObjectIdList getActivatorsInScene() const { return mActivatorsInScene.mList; }
         ObjectIdList getActorsInScene() const { return mActorsInScene.mList; }

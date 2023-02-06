@@ -48,12 +48,12 @@ namespace MWWorld
 {
     void DateTimeManager::setup(Globals& globalVariables)
     {
-        mGameHour = globalVariables["gamehour"].getFloat();
-        mDaysPassed = globalVariables["dayspassed"].getInteger();
-        mDay = globalVariables["day"].getInteger();
-        mMonth = globalVariables["month"].getInteger();
-        mYear = globalVariables["year"].getInteger();
-        mTimeScale = globalVariables["timescale"].getFloat();
+        mGameHour = globalVariables[Globals::sGameHour].getFloat();
+        mDaysPassed = globalVariables[Globals::sDaysPassed].getInteger();
+        mDay = globalVariables[Globals::sDay].getInteger();
+        mMonth = globalVariables[Globals::sMonth].getInteger();
+        mYear = globalVariables[Globals::sYear].getInteger();
+        mTimeScale = globalVariables[Globals::sTimeScale].getFloat();
     }
 
     void DateTimeManager::setHour(double hour)
@@ -145,11 +145,11 @@ namespace MWWorld
         if (days > 0)
             mDaysPassed += days;
 
-        globalVariables["gamehour"].setFloat(mGameHour);
-        globalVariables["dayspassed"].setInteger(mDaysPassed);
-        globalVariables["day"].setInteger(mDay);
-        globalVariables["month"].setInteger(mMonth);
-        globalVariables["year"].setInteger(mYear);
+        globalVariables[Globals::sGameHour].setFloat(mGameHour);
+        globalVariables[Globals::sDaysPassed].setInteger(mDaysPassed);
+        globalVariables[Globals::sDay].setInteger(mDay);
+        globalVariables[Globals::sMonth].setInteger(mMonth);
+        globalVariables[Globals::sYear].setInteger(mYear);
     }
 
     std::string_view DateTimeManager::getMonthName(int month) const
@@ -170,32 +170,32 @@ namespace MWWorld
         return setting->mValue.getString();
     }
 
-    bool DateTimeManager::updateGlobalFloat(std::string_view name, float value)
+    bool DateTimeManager::updateGlobalFloat(GlobalVariableName name, float value)
     {
-        if (name == "gamehour")
+        if (name == Globals::sGameHour)
         {
             setHour(value);
             return true;
         }
-        else if (name == "day")
+        else if (name == Globals::sDay)
         {
             setDay(static_cast<int>(value));
             return true;
         }
-        else if (name == "month")
+        else if (name == Globals::sMonth)
         {
             setMonth(static_cast<int>(value));
             return true;
         }
-        else if (name == "year")
+        else if (name == Globals::sYear)
         {
             mYear = static_cast<int>(value);
         }
-        else if (name == "timescale")
+        else if (name == Globals::sTimeScale)
         {
             mTimeScale = value;
         }
-        else if (name == "dayspassed")
+        else if (name == Globals::sDaysPassed)
         {
             mDaysPassed = static_cast<int>(value);
         }
@@ -203,32 +203,32 @@ namespace MWWorld
         return false;
     }
 
-    bool DateTimeManager::updateGlobalInt(std::string_view name, int value)
+    bool DateTimeManager::updateGlobalInt(GlobalVariableName name, int value)
     {
-        if (name == "gamehour")
+        if (name == Globals::sGameHour)
         {
             setHour(static_cast<float>(value));
             return true;
         }
-        else if (name == "day")
+        else if (name == Globals::sDay)
         {
             setDay(value);
             return true;
         }
-        else if (name == "month")
+        else if (name == Globals::sMonth)
         {
             setMonth(value);
             return true;
         }
-        else if (name == "year")
+        else if (name == Globals::sYear)
         {
             mYear = value;
         }
-        else if (name == "timescale")
+        else if (name == Globals::sTimeScale)
         {
             mTimeScale = static_cast<float>(value);
         }
-        else if (name == "dayspassed")
+        else if (name == Globals::sDaysPassed)
         {
             mDaysPassed = value;
         }
