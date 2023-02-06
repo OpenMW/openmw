@@ -6,6 +6,7 @@
 #include <components/contentselector/model/contentmodel.hpp>
 #include <components/contentselector/model/esmfile.hpp>
 #include <components/contentselector/view/contentselector.hpp>
+#include <components/files/qtconversion.hpp>
 
 #include <string>
 
@@ -32,7 +33,7 @@ void CSVDoc::FileDialog::addFiles(const std::vector<std::filesystem::path>& data
 {
     for (auto iter = dataDirs.rbegin(); iter != dataDirs.rend(); ++iter)
     {
-        QString path = QString::fromUtf8(iter->string().c_str());
+        QString path = Files::pathToQString(*iter);
         mSelector->addFiles(path);
     }
     mSelector->sortFiles();

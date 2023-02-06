@@ -8,6 +8,7 @@
 #include <QDir>
 
 #include <components/esm3/esmreader.hpp>
+#include <components/files/qtconversion.hpp>
 
 ContentSelectorModel::ContentModel::ContentModel(QObject* parent, QIcon warningIcon, bool showOMWScripts)
     : QAbstractTableModel(parent)
@@ -468,7 +469,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
             ESM::ESMReader fileReader;
             ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncoding.toStdString()));
             fileReader.setEncoder(&encoder);
-            fileReader.open(std::string(dir.absoluteFilePath(path2).toUtf8().constData()));
+            fileReader.open(Files::pathFromQString(dir.absoluteFilePath(path2)));
 
             EsmFile* file = new EsmFile(path2);
 
