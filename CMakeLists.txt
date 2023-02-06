@@ -131,7 +131,7 @@ configure_file ("${OpenMW_SOURCE_DIR}/docs/mainpage.hpp.cmake" "${OpenMW_BINARY_
 
 option(BOOST_STATIC "Link static build of Boost into the binaries" FALSE)
 option(SDL2_STATIC "Link static build of SDL into the binaries" FALSE)
-option(QT_STATIC "Link static build of QT into the binaries" FALSE)
+option(QT_STATIC "Link static build of Qt into the binaries" FALSE)
 
 option(OPENMW_USE_SYSTEM_BULLET "Use system provided bullet physics library" ON)
 if(OPENMW_USE_SYSTEM_BULLET)
@@ -236,10 +236,14 @@ find_package(OpenGL REQUIRED)
 find_package(LZ4 REQUIRED)
 
 if (USE_QT)
-    find_package(Qt5Core 5.12 REQUIRED)
-    find_package(Qt5Widgets REQUIRED)
-    find_package(Qt5Network REQUIRED)
-    find_package(Qt5OpenGL REQUIRED)
+	find_package(Qt5 5.15 COMPONENTS Core Widgets Network OpenGL)
+	if (Qt5_FOUND)
+		message(STATUS "Using Qt5")
+	else()
+		find_package(Qt6 6.4 COMPONENTS Core Widgets Network OpenGL REQUIRED)
+		message(STATUS "Using Qt6")
+		message(STATUS "Warning: Qt6 support is experimental and incomplete")
+	endif()
 endif()
 
 set(USED_OSG_COMPONENTS
@@ -618,7 +622,7 @@ endif (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clan
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
 add_subdirectory (extern/Base64)
-if (BUILD_OPENCS)
+if (BUILD_OPENCS AND Qt5_FOUND)
     add_subdirectory (extern/osgQt)
 endif()
 
@@ -815,13 +819,13 @@ if (OPENMW_OSX_DEPLOYMENT AND APPLE)
         message(FATAL_ERROR "macOS packaging requires CMake 3.19 or higher to sign macOS app bundles.")
     endif ()
 
-    get_property(QT_COCOA_PLUGIN_PATH TARGET Qt5::QCocoaIntegrationPlugin PROPERTY LOCATION_RELEASE)
+    get_property(QT_COCOA_PLUGIN_PATH TARGET Qt::QCocoaIntegrationPlugin PROPERTY LOCATION_RELEASE)
     get_filename_component(QT_COCOA_PLUGIN_DIR "${QT_COCOA_PLUGIN_PATH}" DIRECTORY)
     get_filename_component(QT_COCOA_PLUGIN_GROUP "${QT_COCOA_PLUGIN_DIR}" NAME)
     get_filename_component(QT_COCOA_PLUGIN_NAME "${QT_COCOA_PLUGIN_PATH}" NAME)
     configure_file("${QT_COCOA_PLUGIN_PATH}" "${APP_BUNDLE_DIR}/Contents/PlugIns/${QT_COCOA_PLUGIN_GROUP}/${QT_COCOA_PLUGIN_NAME}" COPYONLY)
 
-    get_property(QT_QMACSTYLE_PLUGIN_PATH TARGET Qt5::QMacStylePlugin PROPERTY LOCATION_RELEASE)
+    get_property(QT_QMACSTYLE_PLUGIN_PATH TARGET Qt::QMacStylePlugin PROPERTY LOCATION_RELEASE)
     get_filename_component(QT_QMACSTYLE_PLUGIN_DIR "${QT_QMACSTYLE_PLUGIN_PATH}" DIRECTORY)
     get_filename_component(QT_QMACSTYLE_PLUGIN_GROUP "${QT_QMACSTYLE_PLUGIN_DIR}" NAME)
     get_filename_component(QT_QMACSTYLE_PLUGIN_NAME "${QT_QMACSTYLE_PLUGIN_PATH}" NAME)
