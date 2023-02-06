@@ -8,7 +8,7 @@ set(OSGQT_SOURCE_FILES
 
 add_library(${OSGQT_LIBRARY} STATIC ${OSGQT_SOURCE_FILES})
 
-target_link_libraries(${OSGQT_LIBRARY} Qt5::Core Qt5::OpenGL)
+target_link_libraries(${OSGQT_LIBRARY} Qt::Core Qt::OpenGL)
 
 link_directories(${CMAKE_CURRENT_BINARY_DIR})
 
