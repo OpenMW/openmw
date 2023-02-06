@@ -174,7 +174,8 @@ namespace MWMechanics
                         return true;
                     }
                 }
-                else if (Misc::StringUtils::ciEqual(mCellId, actor.getCell()->getCell()->mName)) // Cell to travel to
+                else if (Misc::StringUtils::ciEqual(
+                             mCellId, actor.getCell()->getCell()->getNameId())) // Cell to travel to
                 {
                     mRemainingDuration = mDuration;
                     return true;

@@ -102,12 +102,13 @@ namespace MWRender
     void Pathgrid::enableCellPathgrid(const MWWorld::CellStore* store)
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
+
         const ESM::Pathgrid* pathgrid = world->getStore().get<ESM::Pathgrid>().search(*store->getCell());
         if (!pathgrid)
             return;
 
         osg::Vec3f cellPathGridPos(0, 0, 0);
-        Misc::CoordinateConverter(store->getCell()).toWorld(cellPathGridPos);
+        Misc::CoordinateConverter(*store->getCell()).toWorld(cellPathGridPos);
 
         osg::ref_ptr<osg::PositionAttitudeTransform> cellPathGrid = new osg::PositionAttitudeTransform;
         cellPathGrid->setPosition(cellPathGridPos);

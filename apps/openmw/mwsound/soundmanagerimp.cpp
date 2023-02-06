@@ -766,14 +766,14 @@ namespace MWSound
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::ConstPtr player = world->getPlayerPtr();
-        const ESM::Cell* cell = player.getCell()->getCell();
+        auto cell = player.getCell()->getCell();
 
         if (!cell->isExterior())
             return;
         if (mCurrentRegionSound && mOutput->isSoundPlaying(mCurrentRegionSound))
             return;
 
-        if (const auto next = mRegionSoundSelector.getNextRandom(duration, cell->mRegion, *world))
+        if (const auto next = mRegionSoundSelector.getNextRandom(duration, cell->getRegion(), *world))
             mCurrentRegionSound = playSound(*next, 1.0f, 1.0f);
     }
 
@@ -781,7 +781,8 @@ namespace MWSound
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
         const MWWorld::ConstPtr player = world->getPlayerPtr();
-        const ESM::Cell* curcell = player.getCell()->getCell();
+
+        const MWWorld::Cell* curcell = player.getCell()->getCell();
         const auto update = mWaterSoundUpdater.update(player, *world);
 
         WaterSoundAction action;
@@ -810,7 +811,7 @@ namespace MWSound
     }
 
     std::pair<SoundManager::WaterSoundAction, Sound_Buffer*> SoundManager::getWaterSoundAction(
-        const WaterSoundUpdate& update, const ESM::Cell* cell) const
+        const WaterSoundUpdate& update, const MWWorld::Cell* cell) const
     {
         if (mNearWaterSound)
         {

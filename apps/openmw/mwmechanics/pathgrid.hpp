@@ -13,6 +13,7 @@ namespace ESM
 namespace MWWorld
 {
     class CellStore;
+    class Cell;
 }
 
 namespace MWMechanics
@@ -41,7 +42,7 @@ namespace MWMechanics
         std::deque<ESM::Pathgrid::Point> aStarSearch(const int start, const int end) const;
 
     private:
-        const ESM::Cell* mCell;
+        const MWWorld::Cell* mCell;
         const ESM::Pathgrid* mPathgrid;
 
         struct ConnectedPoint // edge

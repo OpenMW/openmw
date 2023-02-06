@@ -11,6 +11,7 @@
 #include <typeinfo>
 #include <vector>
 
+#include "cell.hpp"
 #include "cellreflist.hpp"
 #include "livecellref.hpp"
 
@@ -49,6 +50,15 @@ namespace ESM
     struct Static;
     struct Weapon;
     struct BodyPart;
+    struct CellCommon;
+}
+
+namespace ESM4
+{
+    class Reader;
+    struct Cell;
+    struct Reference;
+    struct Static;
 }
 
 namespace MWWorld
@@ -61,7 +71,9 @@ namespace MWWorld
         CellRefList<ESM::Container>, CellRefList<ESM::Creature>, CellRefList<ESM::Door>, CellRefList<ESM::Ingredient>,
         CellRefList<ESM::CreatureLevList>, CellRefList<ESM::ItemLevList>, CellRefList<ESM::Light>,
         CellRefList<ESM::Lockpick>, CellRefList<ESM::Miscellaneous>, CellRefList<ESM::NPC>, CellRefList<ESM::Probe>,
-        CellRefList<ESM::Repair>, CellRefList<ESM::Static>, CellRefList<ESM::Weapon>, CellRefList<ESM::BodyPart>>;
+        CellRefList<ESM::Repair>, CellRefList<ESM::Static>, CellRefList<ESM::Weapon>, CellRefList<ESM::BodyPart>,
+
+        CellRefList<ESM4::Static>>;
 
     /// \brief Mutable state of a cell
     class CellStore
@@ -85,7 +97,7 @@ namespace MWWorld
         // Note this is nullptr until the cell is explored to save some memory
         std::unique_ptr<ESM::FogState> mFogState;
 
-        const ESM::Cell* mCell;
+        MWWorld::Cell mCellVariant;
         State mState;
         bool mHasState;
         std::vector<ESM::RefId> mIds;
@@ -180,11 +192,11 @@ namespace MWWorld
         }
 
         /// @param readerList The readers to use for loading of the cell on-demand.
-        CellStore(const ESM::Cell* cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
+        CellStore(MWWorld::Cell cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
         CellStore(CellStore&&);
         ~CellStore();
 
-        const ESM::Cell* getCell() const;
+        const MWWorld::Cell* getCell() const;
 
         State getState() const;
 
@@ -331,6 +343,7 @@ namespace MWWorld
         // Should be phased out when we have const version of forEach
         inline const CellRefList<ESM::Door>& getReadOnlyDoors() const { return get<ESM::Door>(); }
         inline const CellRefList<ESM::Static>& getReadOnlyStatics() const { return get<ESM::Static>(); }
+        inline const CellRefList<ESM4::Static>& getReadOnlyEsm4Statics() const { return get<ESM4::Static>(); }
 
         bool isExterior() const;
 
@@ -366,20 +379,27 @@ namespace MWWorld
 
         Ptr getMovedActor(int actorId) const;
 
+        bool operator==(const CellStore& right) const;
+
     private:
         /// Run through references and store IDs
+        void listRefs(const ESM::Cell& cell);
+        void listRefs(const ESM4::Cell& cell);
         void listRefs();
+
+        void loadRefs(const ESM::Cell& cell, std::map<ESM::RefNum, ESM::RefId>& refNumToID);
+        void loadRefs(const ESM4::Cell& cell, std::map<ESM::RefNum, ESM::RefId>& refNumToID);
 
         void loadRefs();
 
+        void loadRef(const ESM4::Reference& ref, bool deleted);
         void loadRef(ESM::CellRef& ref, bool deleted, std::map<ESM::RefNum, ESM::RefId>& refNumToID);
         ///< Make case-adjustments to \a ref and insert it into the respective container.
         ///
         /// Invalid \a ref objects are silently dropped.
+        ///
     };
 
-    bool operator==(const CellStore& left, const CellStore& right);
-    bool operator!=(const CellStore& left, const CellStore& right);
 }
 
 #endif

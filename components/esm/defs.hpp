@@ -9,6 +9,7 @@
 #include <osg/Vec3f>
 
 #include "components/esm/fourcc.hpp"
+#include <components/esm/esmcommon.hpp>
 #include <components/esm4/common.hpp>
 
 namespace ESM
@@ -336,6 +337,20 @@ namespace ESM
     constexpr bool isESM4Rec(RecNameInts RecName)
     {
         return RecName & sEsm4RecnameFlag;
+    }
+
+    inline FixedString<6> getRecNameString(ESM::RecNameInts recName)
+    {
+        ESM::FixedString<6> name;
+        name.assign("");
+        ESM::NAME fourCCName(recName & ~ESM::sEsm4RecnameFlag);
+        for (int i = 0; i < 4; i++)
+            name.mData[i] = fourCCName.mData[i];
+        if (ESM::isESM4Rec(recName))
+        {
+            name.mData[4] = '4';
+        }
+        return name;
     }
 
     /// Common subrecords

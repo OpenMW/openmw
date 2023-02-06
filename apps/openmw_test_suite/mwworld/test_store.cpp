@@ -5,6 +5,7 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include <components/esm/defs.hpp>
 #include <components/esm/records.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
@@ -316,7 +317,7 @@ static void testRecNameIntCount(const MWWorld::Store<T>& store, const MWWorld::E
         const unsigned int recordIdCount
             = std::apply([](auto&&... x) { return (hasSameRecordId(x, T::sRecordId) + ...); }, stores);
         ASSERT_EQ(recordIdCount, static_cast<unsigned int>(1))
-            << "The same RecNameInt is used twice ESM::REC_" << MWWorld::getRecNameString(T::sRecordId).toStringView();
+            << "The same RecNameInt is used twice ESM::REC_" << ESM::getRecNameString(T::sRecordId).toStringView();
     }
 }
 

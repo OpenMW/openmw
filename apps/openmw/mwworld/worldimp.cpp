@@ -23,6 +23,8 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadstat.hpp>
+#include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadstat.hpp>
 
 #include <components/misc/constants.hpp>
 #include <components/misc/convert.hpp>
@@ -631,7 +633,21 @@ namespace MWWorld
     {
         if (!cell)
             cell = mWorldScene->getCurrentCell();
-        return getCellName(cell->getCell());
+        return getCellName(*cell->getCell());
+    }
+
+    std::string_view World::getCellName(const MWWorld::Cell& cell) const
+    {
+        if (!cell.isExterior() || !cell.getNameId().empty())
+            return cell.getNameId();
+
+        return ESM::visit(ESM::VisitOverload{
+                              [&](const ESM::Cell& cellIn) -> std::string_view { return getCellName(&cellIn); },
+                              [&](const ESM4::Cell& cellIn) -> std::string_view {
+                                  return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
+                              },
+                          },
+            cell);
     }
 
     std::string_view World::getCellName(const ESM::Cell* cell) const
@@ -644,7 +660,6 @@ namespace MWWorld
             if (const ESM::Region* region = mStore.get<ESM::Region>().search(cell->mRegion))
                 return region->mName;
         }
-
         return mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
     }
 
@@ -1136,7 +1151,7 @@ namespace MWWorld
             {
                 if (!newCell->isExterior())
                 {
-                    changeToInteriorCell(newCell->getCell()->mName, pos, false);
+                    changeToInteriorCell(newCell->getCell()->getNameId(), pos, false);
                     removeContainerScripts(getPlayerPtr());
                 }
                 else
@@ -1397,7 +1412,7 @@ namespace MWWorld
             esmPos.pos[2] = traced.z();
             std::string_view cell;
             if (!actor.getCell()->isExterior())
-                cell = actor.getCell()->getCell()->mName;
+                cell = actor.getCell()->getCell()->getNameId();
             MWWorld::ActionTeleport(cell, esmPos, false).execute(actor);
         }
     }
@@ -1985,10 +2000,7 @@ namespace MWWorld
         const CellStore* currentCell = mWorldScene->getCurrentCell();
         if (currentCell)
         {
-            if (!(currentCell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
-                return false;
-            else
-                return true;
+            return currentCell->getCell()->isQuasiExterior();
         }
         return false;
     }
@@ -2465,8 +2477,7 @@ namespace MWWorld
             || isFlying(player))
             return Rest_PlayerIsInAir;
 
-        if ((currentCell->getCell()->mData.mFlags & ESM::Cell::NoSleep)
-            || player.getClass().getNpcStats(player).isWerewolf())
+        if (currentCell->getCell()->noSleep() || player.getClass().getNpcStats(player).isWerewolf())
             return Rest_OnlyWaiting;
 
         return Rest_Allowed;
@@ -2803,6 +2814,24 @@ namespace MWWorld
                 }
             }
         }
+        for (const MWWorld::LiveCellRef<ESM4::Static>& stat4 : cellStore->getReadOnlyEsm4Statics().mList)
+        {
+            if (Misc::StringUtils::lowerCase(stat4.mBase->mEditorId) == "cocmarkerheading")
+            {
+                // found the COC position?
+                pos = stat4.mRef.getPosition();
+                pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+                return true;
+            }
+        }
+        // Fall back to the first static location.
+        const MWWorld::CellRefList<ESM4::Static>::List& statics4 = cellStore->getReadOnlyEsm4Statics().mList;
+        if (!statics4.empty())
+        {
+            pos = statics4.begin()->mRef.getPosition();
+            pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+            return true;
+        }
         // Fall back to the first static location.
         const MWWorld::CellRefList<ESM::Static>::List& statics = cellStore->getReadOnlyStatics().mList;
         if (!statics.empty())
@@ -2819,7 +2848,7 @@ namespace MWWorld
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-        const ESM::Cell* ext = nullptr;
+        const MWWorld::Cell* ext = nullptr;
         try
         {
             ext = mWorldModel.getCell(nameId)->getCell();
@@ -3226,9 +3255,10 @@ namespace MWWorld
         }
         else
         {
-            uint32_t ambient = cell->getCell()->mAmbi.mAmbient;
+            const MWWorld::Cell& cellVariant = *cell->getCell();
+            uint32_t ambient = cellVariant.getMood().mAmbiantColor;
             int ambientTotal = (ambient & 0xff) + ((ambient >> 8) & 0xff) + ((ambient >> 16) & 0xff);
-            return !(cell->getCell()->mData.mFlags & ESM::Cell::NoSleep) && ambientTotal <= 201;
+            return !cell->getCell()->noSleep() && ambientTotal <= 201;
         }
     }
 
@@ -3252,7 +3282,7 @@ namespace MWWorld
         std::set<std::string_view> checkedCells;
         std::set<std::string_view> currentCells;
         std::set<std::string_view> nextCells;
-        nextCells.insert(cell->getCell()->mName);
+        nextCells.insert(cell->getCell()->getNameId());
 
         while (!nextCells.empty())
         {
@@ -3307,7 +3337,7 @@ namespace MWWorld
         std::set<std::string_view> nextCells;
         MWWorld::ConstPtr closestMarker;
 
-        nextCells.insert(ptr.getCell()->getCell()->mName);
+        nextCells.insert(ptr.getCell()->getCell()->getNameId());
         while (!nextCells.empty())
         {
             currentCells = nextCells;
@@ -3402,7 +3432,7 @@ namespace MWWorld
 
         std::string_view cellName = "";
         if (!closestMarker.mCell->isExterior())
-            cellName = closestMarker.mCell->getCell()->mName;
+            cellName = closestMarker.mCell->getCell()->getNameId();
 
         MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition(), false);
         action.execute(ptr);
@@ -3415,7 +3445,7 @@ namespace MWWorld
         {
             mPlayer->setTeleported(false);
 
-            const ESM::RefId& playerRegion = getPlayerPtr().getCell()->getCell()->mRegion;
+            const ESM::RefId& playerRegion = getPlayerPtr().getCell()->getCell()->getRegion();
             mWeatherManager->playerTeleported(playerRegion, isExterior);
         }
 

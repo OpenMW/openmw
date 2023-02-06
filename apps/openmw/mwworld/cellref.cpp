@@ -7,45 +7,97 @@
 
 namespace MWWorld
 {
+    CellRef::CellRef(const ESM::CellRef& ref)
+        : mCellRef(ESM::ReferenceVariant(ref))
+    {
+    }
+
+    CellRef::CellRef(const ESM4::Reference& ref)
+        : mCellRef(ESM::ReferenceVariant(ref))
+    {
+    }
+
+    static const ESM::RefNum emptyRefNum = {};
+
+    const ESM::RefNum& CellRef::getRefNum() const
+    {
+        return std::visit(ESM::VisitOverload{
+                              [&](const ESM4::Reference& /*ref*/) -> const ESM::RefNum& { return emptyRefNum; },
+                              [&](const ESM::CellRef& ref) -> const ESM::RefNum& { return ref.mRefNum; },
+                          },
+            mCellRef.mVariant);
+    }
 
     const ESM::RefNum& CellRef::getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum)
     {
-        if (!mCellRef.mRefNum.isSet())
-        {
-            // Generated RefNums have negative mContentFile
-            assert(lastAssignedRefNum.mContentFile < 0);
-            lastAssignedRefNum.mIndex++;
-            if (lastAssignedRefNum.mIndex == 0) // mIndex overflow, so mContentFile should be changed
+        auto esm3Visit = [&](ESM::CellRef& ref) -> const ESM::RefNum& {
+            if (!ref.mRefNum.isSet())
             {
-                if (lastAssignedRefNum.mContentFile > std::numeric_limits<int32_t>::min())
-                    lastAssignedRefNum.mContentFile--;
-                else
-                    Log(Debug::Error) << "RefNum counter overflow in CellRef::getOrAssignRefNum";
+                // Generated RefNums have negative mContentFile
+                assert(lastAssignedRefNum.mContentFile < 0);
+                lastAssignedRefNum.mIndex++;
+                if (lastAssignedRefNum.mIndex == 0) // mIndex overflow, so mContentFile should be changed
+                {
+                    if (lastAssignedRefNum.mContentFile > std::numeric_limits<int32_t>::min())
+                        lastAssignedRefNum.mContentFile--;
+                    else
+                        Log(Debug::Error) << "RefNum counter overflow in CellRef::getOrAssignRefNum";
+                }
+                ref.mRefNum = lastAssignedRefNum;
+                mChanged = true;
             }
-            mCellRef.mRefNum = lastAssignedRefNum;
-            mChanged = true;
-        }
-        return mCellRef.mRefNum;
+            return ref.mRefNum;
+        };
+        return std::visit(
+            ESM::VisitOverload{
+                [&](ESM4::Reference& /*ref*/) -> const ESM::RefNum& { return emptyRefNum; },
+                esm3Visit,
+            },
+            mCellRef.mVariant);
     }
 
     void CellRef::unsetRefNum()
     {
-        mCellRef.mRefNum = ESM::RefNum{};
+        std::visit(ESM::VisitOverload{
+                       [&](ESM4::Reference& /*ref*/) {},
+                       [&](ESM::CellRef& ref) { ref.mRefNum = emptyRefNum; },
+                   },
+            mCellRef.mVariant);
+    }
+
+    static const std::string emptyString = "";
+
+    const std::string& CellRef::getDestCell() const
+    {
+        return std::visit(ESM::VisitOverload{
+                              [&](const ESM4::Reference& /*ref*/) -> const std::string& { return emptyString; },
+                              [&](const ESM::CellRef& ref) -> const std::string& { return ref.mDestCell; },
+                          },
+            mCellRef.mVariant);
     }
 
     void CellRef::setScale(float scale)
     {
-        if (scale != mCellRef.mScale)
+        if (scale != getScale())
         {
             mChanged = true;
-            mCellRef.mScale = scale;
+            std::visit([scale](auto&& ref) { ref.mScale = scale; }, mCellRef.mVariant);
         }
     }
 
     void CellRef::setPosition(const ESM::Position& position)
     {
         mChanged = true;
-        mCellRef.mPos = position;
+        std::visit([&position](auto&& ref) { ref.mPos = position; }, mCellRef.mVariant);
+    }
+
+    float CellRef::getEnchantmentCharge() const
+    {
+        return std::visit(ESM::VisitOverload{
+                              [&](const ESM4::Reference& /*ref*/) { return 0.f; },
+                              [&](const ESM::CellRef& ref) { return ref.mEnchantmentCharge; },
+                          },
+            mCellRef.mVariant);
     }
 
     float CellRef::getNormalizedEnchantmentCharge(int maxCharge) const
@@ -54,112 +106,149 @@ namespace MWWorld
         {
             return 0;
         }
-        else if (mCellRef.mEnchantmentCharge == -1)
+        else if (getEnchantmentCharge() == -1)
         {
             return 1;
         }
         else
         {
-            return mCellRef.mEnchantmentCharge / static_cast<float>(maxCharge);
+            return getEnchantmentCharge() / static_cast<float>(maxCharge);
         }
     }
 
     void CellRef::setEnchantmentCharge(float charge)
     {
-        if (charge != mCellRef.mEnchantmentCharge)
+        if (charge != getEnchantmentCharge())
         {
             mChanged = true;
-            mCellRef.mEnchantmentCharge = charge;
+
+            std::visit(ESM::VisitOverload{
+                           [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM::CellRef& ref) { ref.mEnchantmentCharge = charge; },
+                       },
+                mCellRef.mVariant);
         }
     }
 
     void CellRef::setCharge(int charge)
     {
-        if (charge != mCellRef.mChargeInt)
-        {
-            mChanged = true;
-            mCellRef.mChargeInt = charge;
-        }
+        std::visit(ESM::VisitOverload{
+                       [&](ESM4::Reference& /*ref*/) {},
+                       [&](ESM::CellRef& ref) { ref.mChargeInt = charge; },
+                   },
+            mCellRef.mVariant);
     }
 
     void CellRef::applyChargeRemainderToBeSubtracted(float chargeRemainder)
     {
-        mCellRef.mChargeIntRemainder += std::abs(chargeRemainder);
-        if (mCellRef.mChargeIntRemainder > 1.0f)
-        {
-            float newChargeRemainder = (mCellRef.mChargeIntRemainder - std::floor(mCellRef.mChargeIntRemainder));
-            if (mCellRef.mChargeInt <= static_cast<int>(mCellRef.mChargeIntRemainder))
+        auto esm3Visit = [&](ESM::CellRef& cellRef3) {
+            cellRef3.mChargeIntRemainder += std::abs(chargeRemainder);
+            if (cellRef3.mChargeIntRemainder > 1.0f)
             {
-                mCellRef.mChargeInt = 0;
+                float newChargeRemainder = (cellRef3.mChargeIntRemainder - std::floor(cellRef3.mChargeIntRemainder));
+                if (cellRef3.mChargeInt <= static_cast<int>(cellRef3.mChargeIntRemainder))
+                {
+                    cellRef3.mChargeInt = 0;
+                }
+                else
+                {
+                    cellRef3.mChargeInt -= static_cast<int>(cellRef3.mChargeIntRemainder);
+                }
+                cellRef3.mChargeIntRemainder = newChargeRemainder;
             }
-            else
-            {
-                mCellRef.mChargeInt -= static_cast<int>(mCellRef.mChargeIntRemainder);
-            }
-            mCellRef.mChargeIntRemainder = newChargeRemainder;
-        }
+        };
+        std::visit(
+            ESM::VisitOverload{
+                [&](ESM4::Reference& /*ref*/) {},
+                esm3Visit,
+            },
+            mCellRef.mVariant);
     }
 
     void CellRef::setChargeFloat(float charge)
     {
-        if (charge != mCellRef.mChargeFloat)
-        {
-            mChanged = true;
-            mCellRef.mChargeFloat = charge;
-        }
+        std::visit(ESM::VisitOverload{
+                       [&](ESM4::Reference& /*ref*/) {},
+                       [&](ESM::CellRef& ref) { ref.mChargeFloat = charge; },
+                   },
+            mCellRef.mVariant);
+    }
+
+    const std::string& CellRef::getGlobalVariable() const
+    {
+        return std::visit(ESM::VisitOverload{
+                              [&](const ESM4::Reference& /*ref*/) -> const std::string& { return emptyString; },
+                              [&](const ESM::CellRef& ref) -> const std::string& { return ref.mGlobalVariable; },
+                          },
+            mCellRef.mVariant);
     }
 
     void CellRef::resetGlobalVariable()
     {
-        if (!mCellRef.mGlobalVariable.empty())
+        if (!getGlobalVariable().empty())
         {
             mChanged = true;
-            mCellRef.mGlobalVariable.erase();
+            std::visit(ESM::VisitOverload{
+                           [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM::CellRef& ref) { ref.mGlobalVariable.erase(); },
+                       },
+                mCellRef.mVariant);
         }
     }
 
     void CellRef::setFactionRank(int factionRank)
     {
-        if (factionRank != mCellRef.mFactionRank)
+        if (factionRank != getFactionRank())
         {
             mChanged = true;
-            mCellRef.mFactionRank = factionRank;
+            std::visit([&](auto&& ref) { ref.mFactionRank = factionRank; }, mCellRef.mVariant);
         }
     }
 
     void CellRef::setOwner(const ESM::RefId& owner)
     {
-        if (owner != mCellRef.mOwner)
+        if (owner != getOwner())
         {
-            mChanged = true;
-            mCellRef.mOwner = owner;
+            std::visit(ESM::VisitOverload{
+                           [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM::CellRef& ref) { ref.mOwner = owner; },
+                       },
+                mCellRef.mVariant);
         }
     }
 
     void CellRef::setSoul(const ESM::RefId& soul)
     {
-        if (soul != mCellRef.mSoul)
+        if (soul != getSoul())
         {
             mChanged = true;
-            mCellRef.mSoul = soul;
+            std::visit(ESM::VisitOverload{
+                           [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM::CellRef& ref) { ref.mSoul = soul; },
+                       },
+                mCellRef.mVariant);
         }
     }
 
     void CellRef::setFaction(const ESM::RefId& faction)
     {
-        if (faction != mCellRef.mFaction)
+        if (faction != getFaction())
         {
             mChanged = true;
-            mCellRef.mFaction = faction;
+            std::visit(ESM::VisitOverload{
+                           [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM::CellRef& ref) { ref.mFaction = faction; },
+                       },
+                mCellRef.mVariant);
         }
     }
 
     void CellRef::setLockLevel(int lockLevel)
     {
-        if (lockLevel != mCellRef.mLockLevel)
+        if (lockLevel != getLockLevel())
         {
             mChanged = true;
-            mCellRef.mLockLevel = lockLevel;
+            std::visit([&](auto&& ref) { ref.mLockLevel = lockLevel; }, mCellRef.mVariant);
         }
     }
 
@@ -173,30 +262,41 @@ namespace MWWorld
 
     void CellRef::unlock()
     {
-        setLockLevel(-abs(mCellRef.mLockLevel)); // Makes lockLevel negative
+        setLockLevel(-abs(getLockLevel())); // Makes lockLevel negative
     }
 
     void CellRef::setTrap(const ESM::RefId& trap)
     {
-        if (trap != mCellRef.mTrap)
+        if (trap != getTrap())
         {
             mChanged = true;
-            mCellRef.mTrap = trap;
+            std::visit(ESM::VisitOverload{
+                           [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM::CellRef& ref) { ref.mTrap = trap; },
+                       },
+                mCellRef.mVariant);
         }
     }
 
     void CellRef::setGoldValue(int value)
     {
-        if (value != mCellRef.mGoldValue)
+        if (value != getGoldValue())
         {
             mChanged = true;
-            mCellRef.mGoldValue = value;
+            std::visit(ESM::VisitOverload{
+                           [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM::CellRef& ref) { ref.mGoldValue = value; },
+                       },
+                mCellRef.mVariant);
         }
     }
 
     void CellRef::writeState(ESM::ObjectState& state) const
     {
-        state.mRef = mCellRef;
+        std::visit(ESM::VisitOverload{
+                       [&](const ESM4::Reference& /*ref*/) {},
+                       [&](const ESM::CellRef& ref) { state.mRef = ref; },
+                   },
+            mCellRef.mVariant);
     }
-
 }

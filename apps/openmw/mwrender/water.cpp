@@ -744,7 +744,8 @@ namespace MWRender
         bool wasInterior = mInterior;
         if (!isInterior)
         {
-            mWaterNode->setPosition(getSceneNodeCoordinates(store->getCell()->mData.mX, store->getCell()->mData.mY));
+            mWaterNode->setPosition(
+                getSceneNodeCoordinates(store->getCell()->getGridX(), store->getCell()->getGridY()));
             mInterior = false;
         }
         else

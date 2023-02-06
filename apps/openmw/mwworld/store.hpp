@@ -15,6 +15,7 @@
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadpgrd.hpp>
+#include <components/esm4/loadcell.hpp>
 #include <components/misc/rng.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
@@ -38,6 +39,7 @@ namespace Loading
 
 namespace MWWorld
 {
+    class Cell;
     struct RecordId
     {
         ESM::RefId mId;
@@ -268,6 +270,19 @@ namespace MWWorld
         const ESM::GameSetting* find(const std::string_view id) const;
         const ESM::GameSetting* search(const std::string_view id) const;
     };
+
+    template <>
+    class Store<ESM4::Cell> : public TypedDynamicStore<ESM4::Cell>
+    {
+        std::unordered_map<std::string, ESM4::Cell*, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
+            mCellNameIndex;
+
+    public:
+        const ESM4::Cell* searchCellName(std::string_view) const;
+        ESM4::Cell* insert(const ESM4::Cell& item, bool overrideOnly = false);
+        ESM4::Cell* insertStatic(const ESM4::Cell& item);
+    };
+
     template <>
     class Store<ESM::Land> : public DynamicStore
     {
@@ -416,6 +431,7 @@ namespace MWWorld
         const ESM::Pathgrid* find(int x, int y) const;
         const ESM::Pathgrid* find(const ESM::RefId& name) const;
         const ESM::Pathgrid* search(const ESM::Cell& cell) const;
+        const ESM::Pathgrid* search(const MWWorld::Cell& cell) const;
         const ESM::Pathgrid* find(const ESM::Cell& cell) const;
     };
 
@@ -518,8 +534,6 @@ namespace MWWorld
 
         const MWDialogue::KeywordSearch<std::string, int>& getDialogIdKeywordSearch() const;
     };
-
-    ESM::FixedString<6> getRecNameString(ESM::RecNameInts recName);
 
 } // end namespace
 

@@ -357,12 +357,11 @@ namespace MWMechanics
             case AiCombatStorage::FleeState_Idle:
             {
                 float triggerDist = getMaxAttackDistance(target);
-
+                const MWWorld::Cell* cellVariant = storage.mCell->getCell();
                 if (storage.mLOS && (triggerDist >= 1000 || getDistanceMinusHalfExtents(actor, target) <= triggerDist))
                 {
                     const ESM::Pathgrid* pathgrid
-                        = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(
-                            *storage.mCell->getCell());
+                        = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cellVariant);
 
                     bool runFallback = true;
 
@@ -370,7 +369,7 @@ namespace MWMechanics
                         && !actor.getClass().isPureWaterCreature(actor))
                     {
                         ESM::Pathgrid::PointList points;
-                        Misc::CoordinateConverter coords(storage.mCell->getCell());
+                        Misc::CoordinateConverter coords(*storage.mCell->getCell());
 
                         osg::Vec3f localPos = actor.getRefData().getPosition().asVec3();
                         coords.toLocal(localPos);

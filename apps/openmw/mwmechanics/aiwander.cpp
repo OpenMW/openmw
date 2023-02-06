@@ -730,7 +730,7 @@ namespace MWMechanics
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         int index = Misc::Rng::rollDice(storage.mAllowedNodes.size(), prng);
         ESM::Pathgrid::Point worldDest = storage.mAllowedNodes[index];
-        auto converter = Misc::CoordinateConverter(actor.getCell()->getCell());
+        auto converter = Misc::CoordinateConverter(*actor.getCell()->getCell());
         ESM::Pathgrid::Point dest = converter.toLocalPoint(worldDest);
 
         bool isPathGridOccupied = MWBase::Environment::get().getMechanicsManager()->isAnyActorInRange(
@@ -811,7 +811,7 @@ namespace MWMechanics
         getPathGridGraph(currentCell).getNeighbouringPoints(index, points);
     }
 
-    void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const ESM::Cell* cell, AiWanderStorage& storage)
+    void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const MWWorld::Cell* cell, AiWanderStorage& storage)
     {
         // infrequently used, therefore no benefit in caching it as a member
         const ESM::Pathgrid* pathgrid
@@ -835,7 +835,7 @@ namespace MWMechanics
         if (mDistance && storage.mCanWanderAlongPathGrid && !actor.getClass().isPureWaterCreature(actor))
         {
             // get NPC's position in local (i.e. cell) coordinates
-            auto converter = Misc::CoordinateConverter(cell);
+            auto converter = Misc::CoordinateConverter(*cell);
             const osg::Vec3f npcPos = converter.toLocalVec3(mInitialActorPosition);
 
             // Find closest pathgrid point

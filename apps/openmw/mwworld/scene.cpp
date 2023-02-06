@@ -317,7 +317,6 @@ namespace MWWorld
     {
         if (mActiveCells.find(cell) == mActiveCells.end())
             return;
-
         Log(Debug::Info) << "Unloading cell " << cell->getCell()->getDescription();
 
         ListAndResetObjectsVisitor visitor;
@@ -355,8 +354,14 @@ namespace MWWorld
         if (cell->getCell()->hasWater())
             mNavigator.removeWater(osg::Vec2i(cellX, cellY), navigatorUpdateGuard);
 
-        if (const auto pathgrid = mWorld.getStore().get<ESM::Pathgrid>().search(*cell->getCell()))
-            mNavigator.removePathgrid(*pathgrid);
+        ESM::visit(ESM::VisitOverload{
+                       [&](const ESM::Cell& cell) {
+                           if (const auto pathgrid = mWorld.getStore().get<ESM::Pathgrid>().search(cell))
+                               mNavigator.removePathgrid(*pathgrid);
+                       },
+                       [&](const ESM4::Cell& cell) {},
+                   },
+            *cell->getCell());
 
         MWBase::Environment::get().getMechanicsManager()->drop(cell);
 
@@ -384,8 +389,9 @@ namespace MWWorld
 
         const int cellX = cell->getCell()->getGridX();
         const int cellY = cell->getCell()->getGridY();
+        const MWWorld::Cell& cellVariant = *cell->getCell();
 
-        if (cell->getCell()->isExterior())
+        if (cellVariant.isExterior())
         {
             osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellX, cellY);
             const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
@@ -427,8 +433,14 @@ namespace MWWorld
             }
         }
 
-        if (const auto pathgrid = mWorld.getStore().get<ESM::Pathgrid>().search(*cell->getCell()))
-            mNavigator.addPathgrid(*cell->getCell(), *pathgrid);
+        ESM::visit(ESM::VisitOverload{
+                       [&](const ESM::Cell& cell) {
+                           if (const auto pathgrid = mWorld.getStore().get<ESM::Pathgrid>().search(cell))
+                               mNavigator.addPathgrid(cell, *pathgrid);
+                       },
+                       [&](const ESM4::Cell& cell) {},
+                   },
+            *cell->getCell());
 
         // register local scripts
         // do this before insertCell, to make sure we don't add scripts from levelled creature spawning twice
@@ -442,7 +454,7 @@ namespace MWWorld
         mRendering.addCell(cell);
 
         MWBase::Environment::get().getWindowManager()->addCell(cell);
-        bool waterEnabled = cell->getCell()->hasWater() || cell->isExterior();
+        bool waterEnabled = cellVariant.hasWater() || cell->isExterior();
         float waterLevel = cell->getWaterLevel();
         mRendering.setWaterEnabled(waterEnabled);
         if (waterEnabled)
@@ -450,7 +462,7 @@ namespace MWWorld
             mPhysics->enableWater(waterLevel);
             mRendering.setWaterHeight(waterLevel);
 
-            if (cell->getCell()->isExterior())
+            if (cellVariant.isExterior())
             {
                 if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
                     mNavigator.addWater(
@@ -465,8 +477,8 @@ namespace MWWorld
         else
             mPhysics->disableWater();
 
-        if (!cell->isExterior() && !(cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx))
-            mRendering.configureAmbient(cell->getCell());
+        if (!cell->isExterior() && !cellVariant.isQuasiExterior())
+            mRendering.configureAmbient(cellVariant);
 
         mPreloader->notifyLoaded(cell);
     }
@@ -542,7 +554,7 @@ namespace MWWorld
 
         mNavigator.setWorldspace(
             Misc::StringUtils::lowerCase(
-                mWorld.getWorldModel().getExterior(playerCellX, playerCellY)->getCell()->mCellId.mWorldspace),
+                mWorld.getWorldModel().getExterior(playerCellX, playerCellY)->getCell()->getCellId().mWorldspace),
             navigatorUpdateGuard.get());
         mNavigator.updateBounds(pos, navigatorUpdateGuard.get());
 
@@ -665,7 +677,7 @@ namespace MWWorld
 
             CellStore* cell = mWorld.getWorldModel().getExterior(it->mData.mX, it->mData.mY);
             mNavigator.setWorldspace(
-                Misc::StringUtils::lowerCase(cell->getCell()->mCellId.mWorldspace), navigatorUpdateGuard.get());
+                Misc::StringUtils::lowerCase(cell->getCell()->getCellId().mWorldspace), navigatorUpdateGuard.get());
             const osg::Vec3f position
                 = osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits;
             mNavigator.updateBounds(position, navigatorUpdateGuard.get());
@@ -723,7 +735,7 @@ namespace MWWorld
 
             CellStore* cell = mWorld.getWorldModel().getInterior(it->mName);
             mNavigator.setWorldspace(
-                Misc::StringUtils::lowerCase(cell->getCell()->mCellId.mWorldspace), navigatorUpdateGuard.get());
+                Misc::StringUtils::lowerCase(cell->getCell()->getCellId().mWorldspace), navigatorUpdateGuard.get());
             ESM::Position position;
             mWorld.findInteriorPosition(it->mName, position);
             mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
@@ -739,7 +751,7 @@ namespace MWWorld
             {
                 assert(!(*iter)->getCell()->isExterior());
 
-                if (it->mName == (*iter)->getCell()->mName)
+                if (it->mName == (*iter)->getCell()->getNameId())
                 {
                     unloadCell(*iter, navigatorUpdateGuard.get());
                     break;
@@ -880,7 +892,7 @@ namespace MWWorld
         loadingListener->setProgressRange(cell->count());
 
         mNavigator.setWorldspace(
-            Misc::StringUtils::lowerCase(cell->getCell()->mCellId.mWorldspace), navigatorUpdateGuard.get());
+            Misc::StringUtils::lowerCase(cell->getCell()->getCellId().mWorldspace), navigatorUpdateGuard.get());
         mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
 
         // Load cell.
@@ -892,7 +904,7 @@ namespace MWWorld
         changePlayerCell(cell, position, adjustPlayerPos);
 
         // adjust fog
-        mRendering.configureFog(mCurrentCell->getCell());
+        mRendering.configureFog(*mCurrentCell->getCell());
 
         // Sky system
         mWorld.adjustSky();
@@ -907,8 +919,7 @@ namespace MWWorld
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
 
-        MWBase::Environment::get().getWorld()->getPostProcessor()->setExteriorFlag(
-            cell->getCell()->mData.mFlags & ESM::Cell::QuasiEx);
+        MWBase::Environment::get().getWorld()->getPostProcessor()->setExteriorFlag(cell->getCell()->isQuasiExterior());
     }
 
     void Scene::changeToExteriorCell(const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)

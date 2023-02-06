@@ -30,6 +30,11 @@ namespace ESM
     struct Cell;
 }
 
+namespace MWWorld
+{
+    class Cell;
+}
+
 namespace MWSound
 {
     class Sound_Output;
@@ -107,7 +112,7 @@ namespace MWSound
 
         float mTimePassed;
 
-        const ESM::Cell* mLastCell;
+        const MWWorld::Cell* mLastCell;
 
         Sound* mCurrentRegionSound;
 
@@ -143,7 +148,7 @@ namespace MWSound
         };
 
         std::pair<WaterSoundAction, Sound_Buffer*> getWaterSoundAction(
-            const WaterSoundUpdate& update, const ESM::Cell* cell) const;
+            const WaterSoundUpdate& update, const MWWorld::Cell* cell) const;
 
         SoundManager(const SoundManager& rhs);
         SoundManager& operator=(const SoundManager& rhs);

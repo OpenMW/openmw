@@ -274,8 +274,8 @@ namespace MWMechanics
                                                             .find("fInteriorHeadTrackMult")
                                                             ->mValue.getFloat();
             float maxDistance = fMaxHeadTrackDistance;
-            const ESM::Cell* currentCell = actor.getCell()->getCell();
-            if (!currentCell->isExterior() && !(currentCell->mData.mFlags & ESM::Cell::QuasiEx))
+            auto currentCell = actor.getCell()->getCell();
+            if (!currentCell->isExterior() && !(currentCell->isQuasiExterior()))
                 maxDistance *= fInteriorHeadTrackMult;
 
             const osg::Vec3f actor1Pos(actorRefData.getPosition().asVec3());

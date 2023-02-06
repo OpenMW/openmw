@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+#include <variant>
 
 #include <components/misc/algorithm.hpp>
 
@@ -19,6 +20,11 @@ namespace ESM
     struct CellId;
     struct Cell;
     struct RefNum;
+}
+
+namespace ESM4
+{
+    struct Cell;
 }
 
 namespace Loading
@@ -45,8 +51,9 @@ namespace MWWorld
         WorldModel& operator=(const WorldModel&);
 
         const ESM::Cell* getESMCellByName(std::string_view name);
-        CellStore* getCellStore(const ESM::Cell* cell);
+        ESM::CellVariant getCellByName(std::string_view name);
 
+        CellStore* getCellStore(const ESM::Cell* cell);
         Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);
 
         Ptr getPtr(CellStore& cellStore, const ESM::RefId& id, const ESM::RefNum& refNum);

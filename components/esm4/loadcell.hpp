@@ -36,6 +36,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/refid.hpp>
+#include <components/esm3/cellid.hpp>
 
 namespace ESM4
 {
@@ -101,6 +102,10 @@ namespace ESM4
         void blank();
 
         static constexpr ESM::RecNameInts sRecordId = ESM::REC_CELL4;
+
+        int getGridX() const { return mX; }
+        int getGridY() const { return mY; }
+        bool isExterior() const { return !(mCellFlags & CELL_Interior); }
     };
 }
 

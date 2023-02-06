@@ -196,7 +196,7 @@ namespace MWMechanics
             return;
 
         // NOTE: getClosestPoint expects local coordinates
-        Misc::CoordinateConverter converter(mCell->getCell());
+        Misc::CoordinateConverter converter(*mCell->getCell());
 
         // NOTE: It is possible that getClosestPoint returns a pathgrind point index
         //       that is unreachable in some situations. e.g. actor is standing

@@ -210,8 +210,8 @@ namespace MWWorld
 
         static bool readRecord(ESM4::Reader& reader, ESMStore& store)
         {
-            return std::apply([&reader](auto&... x) { return (ESMStoreImp::typedReadRecordESM4(reader, x) || ...); },
-                store.mStoreImp->mStores);
+            return std::apply(
+                [&reader](auto&... x) { return (typedReadRecordESM4(reader, x) || ...); }, store.mStoreImp->mStores);
         }
     };
 
@@ -278,6 +278,7 @@ namespace MWWorld
             case ESM::REC_STAT:
             case ESM::REC_WEAP:
             case ESM::REC_BODY:
+            case ESM::REC_STAT4:
                 return true;
                 break;
         }
@@ -595,8 +596,8 @@ namespace MWWorld
         removeMissingObjects(getWritable<ESM::ItemLevList>());
     }
 
-    // Leveled lists can be modified by scripts. This removes items that no longer exist (presumably because the plugin
-    // was removed) from modified lists
+    // Leveled lists can be modified by scripts. This removes items that no longer exist (presumably because the
+    // plugin was removed) from modified lists
     template <class T>
     void ESMStore::removeMissingObjects(Store<T>& store)
     {

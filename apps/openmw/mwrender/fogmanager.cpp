@@ -2,10 +2,14 @@
 
 #include <algorithm>
 
+#include <components/esm/esmbridge.hpp>
 #include <components/esm3/loadcell.hpp>
+#include <components/esm4/loadcell.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/sceneutil/util.hpp>
 #include <components/settings/settings.hpp>
+
+#include <apps/openmw/mwworld/cell.hpp>
 
 namespace
 {
@@ -38,13 +42,14 @@ namespace MWRender
         DLInteriorFogEnd = Settings::Manager::getFloat("distant interior fog end", "Fog");
     }
 
-    void FogManager::configure(float viewDistance, const ESM::Cell* cell)
+    void FogManager::configure(float viewDistance, const MWWorld::Cell& cell)
     {
-        osg::Vec4f color = SceneUtil::colourFromRGB(cell->mAmbi.mFog);
+        osg::Vec4f color = SceneUtil::colourFromRGB(cell.getMood().mFogColor);
 
+        const float fogDensity = cell.getMood().mFogDensity;
         if (mDistantFog)
         {
-            float density = std::max(0.2f, cell->mAmbi.mFogDensity);
+            float density = std::max(0.2f, fogDensity);
             mLandFogStart = DLInteriorFogEnd * (1.0f - density) + DLInteriorFogStart * density;
             mLandFogEnd = DLInteriorFogEnd;
             mUnderwaterFogStart = DLUnderwaterFogStart;
@@ -52,7 +57,7 @@ namespace MWRender
             mFogColor = color;
         }
         else
-            configure(viewDistance, cell->mAmbi.mFogDensity, mUnderwaterIndoorFog, 1.0f, 0.0f, color);
+            configure(viewDistance, fogDensity, mUnderwaterIndoorFog, 1.0f, 0.0f, color);
     }
 
     void FogManager::configure(float viewDistance, float fogDepth, float underwaterFog, float dlFactor, float dlOffset,

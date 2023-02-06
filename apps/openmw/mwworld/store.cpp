@@ -14,6 +14,8 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
 
+#include <apps/openmw/mwworld/cell.hpp>
+
 namespace
 {
     // TODO: Switch to C++23 to get a working version of std::unordered_map::erase
@@ -961,6 +963,14 @@ namespace MWWorld
         else
             return search(ESM::RefId::stringRefId(cell.mName));
     }
+    const ESM::Pathgrid* Store<ESM::Pathgrid>::search(const MWWorld::Cell& cellVariant) const
+    {
+        return ESM::visit(ESM::VisitOverload{
+                              [&](const ESM::Cell& cell) { return search(cell); },
+                              [&](const ESM4::Cell& cell) -> const ESM::Pathgrid* { return nullptr; },
+                          },
+            cellVariant);
+    }
     const ESM::Pathgrid* Store<ESM::Pathgrid>::find(const ESM::Cell& cell) const
     {
         if (!(cell.mData.mFlags & ESM::Cell::Interior))
@@ -1170,18 +1180,29 @@ namespace MWWorld
         return mKeywordSearch;
     }
 
-    ESM::FixedString<6> getRecNameString(ESM::RecNameInts recName)
+    // ESM4 Cell
+    //=========================================================================
+
+    const ESM4::Cell* Store<ESM4::Cell>::searchCellName(std::string_view cellName) const
     {
-        ESM::FixedString<6> name;
-        name.assign("");
-        ESM::NAME fourCCName(recName & ~ESM::sEsm4RecnameFlag);
-        for (int i = 0; i < 4; i++)
-            name.mData[i] = fourCCName.mData[i];
-        if (ESM::isESM4Rec(recName))
-        {
-            name.mData[4] = '4';
-        }
-        return name;
+        const auto foundCell = mCellNameIndex.find(cellName);
+        if (foundCell == mCellNameIndex.end())
+            return nullptr;
+        return foundCell->second;
+    }
+
+    ESM4::Cell* Store<ESM4::Cell>::insert(const ESM4::Cell& item, bool overrideOnly)
+    {
+        auto cellPtr = TypedDynamicStore<ESM4::Cell>::insert(item, overrideOnly);
+        mCellNameIndex[cellPtr->mEditorId] = cellPtr;
+        return cellPtr;
+    }
+
+    ESM4::Cell* Store<ESM4::Cell>::insertStatic(const ESM4::Cell& item)
+    {
+        auto cellPtr = TypedDynamicStore<ESM4::Cell>::insertStatic(item);
+        mCellNameIndex[cellPtr->mEditorId] = cellPtr;
+        return cellPtr;
     }
 }
 
