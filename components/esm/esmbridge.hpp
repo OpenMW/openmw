@@ -4,12 +4,15 @@
 #include <string_view>
 #include <variant>
 
+#include <osg/Vec4>
+
 #include <components/esm3/cellref.hpp>
 #include <components/esm4/loadrefr.hpp>
 
 namespace ESM4
 {
     struct Cell;
+    struct Light;
 }
 
 namespace ESM
@@ -17,6 +20,7 @@ namespace ESM
     struct Cell;
     struct CellId;
     struct RefId;
+    struct Light;
 
     class CellVariant
     {
@@ -63,6 +67,22 @@ namespace ESM
 
         ESM::CellRef& getEsm3() { return std::get<ESM::CellRef>(mVariant); }
         ESM4::Reference& getEsm4() { return std::get<ESM4::Reference>(mVariant); }
+    };
+
+    struct LightCommon
+    {
+        explicit LightCommon(const ESM::Light& light);
+        explicit LightCommon(const ESM4::Light& light);
+
+        bool mFlicker;
+        bool mFlickerSlow;
+        bool mNegative;
+        bool mPulse;
+        bool mPulseSlow;
+        bool mOffDefault;
+
+        osg::Vec4 mColor;
+        float mRadius;
     };
 
     template <class F, class... T>

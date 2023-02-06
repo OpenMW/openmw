@@ -44,6 +44,7 @@
 #include "../../model/world/data.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm/esmbridge.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
@@ -167,7 +168,7 @@ void CSVRender::Object::update()
     if (light)
     {
         bool isExterior = false; // FIXME
-        SceneUtil::addLight(mBaseNode, light, Mask_Lighting, isExterior);
+        SceneUtil::addLight(mBaseNode, ESM::LightCommon(*light), Mask_Lighting, isExterior);
     }
 }
 

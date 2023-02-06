@@ -557,7 +557,7 @@ namespace MWRender
 
         osg::Vec4f ambient(1, 1, 1, 1);
         osg::ref_ptr<SceneUtil::LightSource> lightSource
-            = SceneUtil::createLightSource(esmLight, Mask_Lighting, exterior, ambient);
+            = SceneUtil::createLightSource(ESM::LightCommon(*esmLight), Mask_Lighting, exterior, ambient);
 
         mInsert->addChild(lightSource);
 

@@ -13,6 +13,7 @@
 
 #include <components/misc/resourcehelpers.hpp>
 
+#include <components/esm/esmbridge.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadrace.hpp>
@@ -664,7 +665,7 @@ namespace MWRender
                 addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
                     Misc::ResourceHelpers::correctMeshPath(light->mModel, vfs), false, nullptr, true);
                 if (mObjectParts[ESM::PRT_Shield])
-                    addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), light);
+                    addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), ESM::LightCommon(*light));
             }
         }
 
@@ -1041,7 +1042,8 @@ namespace MWRender
                 if (mesh.empty())
                     reserveIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1);
                 if (iter->getType() == ESM::Light::sRecordId && mObjectParts[ESM::PRT_Shield])
-                    addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), iter->get<ESM::Light>()->mBase);
+                    addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(),
+                        ESM::LightCommon(*iter->get<ESM::Light>()->mBase));
             }
         }
         else

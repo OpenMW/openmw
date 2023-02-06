@@ -39,9 +39,9 @@
 #include <components/esm3/npcstate.hpp>
 #include <components/esm3/objectstate.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/esm4/loadligh.hpp>
 #include <components/esm4/loadrefr.hpp>
 #include <components/esm4/loadstat.hpp>
-#include <components/esm4/loadligh.hpp>
 #include <components/misc/tuplehelpers.hpp>
 
 #include "../mwbase/environment.hpp"
