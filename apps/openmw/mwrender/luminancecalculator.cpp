@@ -1,5 +1,6 @@
 #include "luminancecalculator.hpp"
 
+#include <components/misc/mathutil.hpp>
 #include <components/settings/settings.hpp>
 #include <components/shader/shadermanager.hpp>
 
@@ -80,6 +81,7 @@ namespace MWRender
             buffer.sceneLumSS = new osg::StateSet;
             buffer.sceneLumSS->setAttributeAndModes(mLuminanceProgram);
             buffer.sceneLumSS->addUniform(new osg::Uniform("sceneTex", 0));
+            buffer.sceneLumSS->addUniform(new osg::Uniform("scaling", mScale));
 
             buffer.resolveSS = new osg::StateSet;
             buffer.resolveSS->setAttributeAndModes(mResolveProgram);
@@ -108,6 +110,7 @@ namespace MWRender
         auto& buffer = mBuffers[frameId];
         buffer.sceneLumFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
         buffer.sceneLumSS->setTextureAttributeAndModes(0, canvas.getSceneTexture(frameId));
+        buffer.sceneLumSS->getUniform("scaling")->set(mScale);
 
         state.apply(buffer.sceneLumSS);
         canvas.drawGeometry(renderInfo);
@@ -139,5 +142,17 @@ namespace MWRender
     osg::ref_ptr<osg::Texture2D> LuminanceCalculator::getLuminanceTexture(size_t frameId) const
     {
         return mBuffers[frameId].luminanceTex;
+    }
+
+    void LuminanceCalculator::dirty(int w, int h)
+    {
+        constexpr int minSize = 64;
+
+        mWidth = std::max(minSize, Misc::nextPowerOfTwo(w) / 2);
+        mHeight = std::max(minSize, Misc::nextPowerOfTwo(h) / 2);
+
+        mScale = osg::Vec2f(w / static_cast<float>(mWidth), h / static_cast<float>(mHeight));
+
+        mCompiled = false;
     }
 }

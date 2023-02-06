@@ -38,6 +38,7 @@ namespace MWRender
 
         mFallbackStateSet->setAttributeAndModes(mFallbackProgram);
         mFallbackStateSet->addUniform(new osg::Uniform("omw_SamplerLastShader", 0));
+        mFallbackStateSet->addUniform(new osg::Uniform("scaling", osg::Vec2f(1, 1)));
 
         auto multiviewResolveVertex = shaderManager.getShader("multiview_resolve_vertex.glsl", {}, osg::Shader::VERTEX);
         auto multiviewResolveFragment

@@ -22,6 +22,23 @@ namespace Misc
         return osg::Vec2f(vec.x() * c + vec.y() * -s, vec.x() * s + vec.y() * c);
     }
 
+    inline bool isPowerOfTwo(int x)
+    {
+        return ((x > 0) && ((x & (x - 1)) == 0));
+    }
+
+    inline int nextPowerOfTwo(int v)
+    {
+        if (isPowerOfTwo(v))
+            return v;
+        int depth = 0;
+        while (v)
+        {
+            v >>= 1;
+            depth++;
+        }
+        return 1 << depth;
+    }
 }
 
 #endif
