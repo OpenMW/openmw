@@ -1,5 +1,10 @@
 project (Components)
 
+if(APPLE)
+    set(BUNDLE_RESOURCES_DIR "${APP_BUNDLE_DIR}/Contents/Resources")
+    set(OPENMW_RESOURCES_ROOT ${BUNDLE_RESOURCES_DIR})
+endif(APPLE)
+
 # Version file
 set (VERSION_IN_FILE "${OpenMW_SOURCE_DIR}/files/version.in")
 set (VERSION_FILE_PATH_BASE "${OpenMW_BINARY_DIR}")
