@@ -400,6 +400,11 @@ namespace MWScript
                 try
                 {
                     store = worldModel->getCell(cellID);
+                    if (store->isExterior())
+                    {
+                        const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
+                        store = worldModel->getExterior(cellIndex.x(), cellIndex.y());
+                    }
                 }
                 catch (std::exception&)
                 {
