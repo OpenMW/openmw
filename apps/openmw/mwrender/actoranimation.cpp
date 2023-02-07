@@ -13,6 +13,7 @@
 #include <components/resource/scenemanager.hpp>
 
 #include <components/sceneutil/attach.hpp>
+#include <components/sceneutil/lightcommon.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/visitor.hpp>
@@ -557,7 +558,7 @@ namespace MWRender
 
         osg::Vec4f ambient(1, 1, 1, 1);
         osg::ref_ptr<SceneUtil::LightSource> lightSource
-            = SceneUtil::createLightSource(ESM::LightCommon(*esmLight), Mask_Lighting, exterior, ambient);
+            = SceneUtil::createLightSource(SceneUtil::LightCommon(*esmLight), Mask_Lighting, exterior, ambient);
 
         mInsert->addChild(lightSource);
 

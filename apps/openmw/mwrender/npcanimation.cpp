@@ -13,7 +13,6 @@
 
 #include <components/misc/resourcehelpers.hpp>
 
-#include <components/esm/esmbridge.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadrace.hpp>
@@ -22,6 +21,7 @@
 #include <components/sceneutil/actorutil.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/keyframe.hpp>
+#include <components/sceneutil/lightcommon.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/settings/settings.hpp>
 
@@ -665,7 +665,7 @@ namespace MWRender
                 addOrReplaceIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1,
                     Misc::ResourceHelpers::correctMeshPath(light->mModel, vfs), false, nullptr, true);
                 if (mObjectParts[ESM::PRT_Shield])
-                    addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), ESM::LightCommon(*light));
+                    addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(), SceneUtil::LightCommon(*light));
             }
         }
 
@@ -1043,7 +1043,7 @@ namespace MWRender
                     reserveIndividualPart(ESM::PRT_Shield, MWWorld::InventoryStore::Slot_CarriedLeft, 1);
                 if (iter->getType() == ESM::Light::sRecordId && mObjectParts[ESM::PRT_Shield])
                     addExtraLight(mObjectParts[ESM::PRT_Shield]->getNode()->asGroup(),
-                        ESM::LightCommon(*iter->get<ESM::Light>()->mBase));
+                        SceneUtil::LightCommon(*iter->get<ESM::Light>()->mBase));
             }
         }
         else

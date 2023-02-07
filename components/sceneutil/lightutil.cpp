@@ -5,9 +5,9 @@
 
 #include <osgParticle/ParticleSystem>
 
-#include <components/esm/esmbridge.hpp>
 #include <components/esm3/loadligh.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/sceneutil/lightcommon.hpp>
 
 #include "lightcontroller.hpp"
 #include "lightmanager.hpp"
@@ -87,7 +87,7 @@ namespace SceneUtil
     }
 
     osg::ref_ptr<LightSource> addLight(
-        osg::Group* node, const ESM::LightCommon& esmLight, unsigned int lightMask, bool isExterior)
+        osg::Group* node, const SceneUtil::LightCommon& esmLight, unsigned int lightMask, bool isExterior)
     {
         SceneUtil::FindByNameVisitor visitor("AttachLight");
         node->accept(visitor);
@@ -106,7 +106,7 @@ namespace SceneUtil
     }
 
     osg::ref_ptr<LightSource> createLightSource(
-        const ESM::LightCommon& esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient)
+        const SceneUtil::LightCommon& esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient)
     {
         osg::ref_ptr<SceneUtil::LightSource> lightSource(new SceneUtil::LightSource);
         osg::ref_ptr<osg::Light> light(new osg::Light);
