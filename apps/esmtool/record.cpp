@@ -828,7 +828,7 @@ namespace EsmTool
         if (mData.mData.mDisposition > 0)
             std::cout << "  Disposition/Journal index: " << mData.mData.mDisposition << std::endl;
         if (mData.mData.mGender != ESM::DialInfo::NA)
-            std::cout << "  Gender: " << mData.mData.mGender << std::endl;
+            std::cout << "  Gender: " << static_cast<int>(mData.mData.mGender) << std::endl;
         if (!mData.mSound.empty())
             std::cout << "  Sound File: " << mData.mSound << std::endl;
 
@@ -894,7 +894,7 @@ namespace EsmTool
             std::cout << "  Height Offset: " << data->mHeightOffset << std::endl;
             // Lots of missing members.
             std::cout << "  Unknown1: " << data->mUnk1 << std::endl;
-            std::cout << "  Unknown2: " << data->mUnk2 << std::endl;
+            std::cout << "  Unknown2: " << static_cast<unsigned>(data->mUnk2) << std::endl;
         }
         mData.unloadData();
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
