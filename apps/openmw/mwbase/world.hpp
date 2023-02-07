@@ -16,6 +16,7 @@
 #include <osg/Timer>
 
 #include "../mwworld/doorstate.hpp"
+#include "../mwworld/globalvariablename.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/spellcaststate.hpp"
 
@@ -160,19 +161,19 @@ namespace MWBase
         virtual void getDoorMarkers(MWWorld::CellStore* cell, std::vector<DoorMarker>& out) = 0;
         ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
-        virtual void setGlobalInt(std::string_view name, int value) = 0;
+        virtual void setGlobalInt(MWWorld::GlobalVariableName name, int value) = 0;
         ///< Set value independently from real type.
 
-        virtual void setGlobalFloat(std::string_view name, float value) = 0;
+        virtual void setGlobalFloat(MWWorld::GlobalVariableName name, float value) = 0;
         ///< Set value independently from real type.
 
-        virtual int getGlobalInt(std::string_view name) const = 0;
+        virtual int getGlobalInt(MWWorld::GlobalVariableName name) const = 0;
         ///< Get value independently from real type.
 
-        virtual float getGlobalFloat(std::string_view name) const = 0;
+        virtual float getGlobalFloat(MWWorld::GlobalVariableName name) const = 0;
         ///< Get value independently from real type.
 
-        virtual char getGlobalVariableType(std::string_view name) const = 0;
+        virtual char getGlobalVariableType(MWWorld::GlobalVariableName name) const = 0;
         ///< Return ' ', if there is no global variable with this name.
 
         virtual std::string_view getCellName(const MWWorld::CellStore* cell = nullptr) const = 0;

@@ -18,6 +18,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/globals.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "actorutil.hpp"
@@ -483,7 +484,7 @@ namespace MWMechanics
         {
             healthdmg = true;
             // GLOB instead of GMST because it gets updated during a quest
-            damage *= MWBase::Environment::get().getWorld()->getGlobalFloat("werewolfclawmult");
+            damage *= MWBase::Environment::get().getWorld()->getGlobalFloat(MWWorld::Globals::sWerewolfClawMult);
         }
         if (healthdmg)
         {

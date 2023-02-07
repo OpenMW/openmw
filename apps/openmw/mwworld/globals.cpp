@@ -41,19 +41,19 @@ namespace MWWorld
         }
     }
 
-    const ESM::Variant& Globals::operator[](std::string_view name) const
+    const ESM::Variant& Globals::operator[](GlobalVariableName name) const
     {
-        return find(name)->second.mValue;
+        return find(name.getValue())->second.mValue;
     }
 
-    ESM::Variant& Globals::operator[](std::string_view name)
+    ESM::Variant& Globals::operator[](GlobalVariableName name)
     {
-        return find(name)->second.mValue;
+        return find(name.getValue())->second.mValue;
     }
 
-    char Globals::getType(std::string_view name) const
+    char Globals::getType(GlobalVariableName name) const
     {
-        Collection::const_iterator iter = mVariables.find(name);
+        Collection::const_iterator iter = mVariables.find(name.getValue());
 
         if (iter == mVariables.end())
             return ' ';

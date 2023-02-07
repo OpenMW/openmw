@@ -13,6 +13,8 @@
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwworld/globals.hpp"
+
 #include "backgroundimage.hpp"
 #include "confirmationdialog.hpp"
 #include "savegamedialog.hpp"
@@ -232,7 +234,7 @@ namespace MWGui
         buttons.emplace_back("newgame");
 
         if (state == MWBase::StateManager::State_Running
-            && MWBase::Environment::get().getWorld()->getGlobalInt("chargenstate") == -1
+            && MWBase::Environment::get().getWorld()->getGlobalInt(MWWorld::Globals::sCharGenState) == -1
             && MWBase::Environment::get().getWindowManager()->isSavingAllowed())
             buttons.emplace_back("savegame");
 

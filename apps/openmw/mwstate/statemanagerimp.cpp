@@ -33,6 +33,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/globals.hpp"
 #include "../mwworld/scene.hpp"
 #include "../mwworld/worldmodel.hpp"
 
@@ -341,7 +342,7 @@ void MWState::StateManager::saveGame(const std::string& description, const Slot*
 void MWState::StateManager::quickSave(std::string name)
 {
     if (!(mState == State_Running
-            && MWBase::Environment::get().getWorld()->getGlobalInt("chargenstate") == -1 // char gen
+            && MWBase::Environment::get().getWorld()->getGlobalInt(MWWorld::Globals::sCharGenState) == -1 // char gen
             && MWBase::Environment::get().getWindowManager()->isSavingAllowed()))
     {
         // You can not save your game right now

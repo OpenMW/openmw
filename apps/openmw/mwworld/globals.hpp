@@ -1,14 +1,15 @@
 #ifndef GAME_MWWORLD_GLOBALS_H
 #define GAME_MWWORLD_GLOBALS_H
 
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include <cstdint>
-
 #include <components/esm3/loadglob.hpp>
 #include <components/misc/strings/algorithm.hpp>
+
+#include "globalvariablename.hpp"
 
 namespace ESM
 {
@@ -38,11 +39,27 @@ namespace MWWorld
         Collection::iterator find(std::string_view name);
 
     public:
-        const ESM::Variant& operator[](std::string_view name) const;
+        static constexpr GlobalVariableName sDaysPassed{ "dayspassed" };
+        static constexpr GlobalVariableName sGameHour{ "gamehour" };
+        static constexpr GlobalVariableName sDay{ "day" };
+        static constexpr GlobalVariableName sMonth{ "month" };
+        static constexpr GlobalVariableName sYear{ "year" };
+        static constexpr GlobalVariableName sTimeScale{ "timescale" };
+        static constexpr GlobalVariableName sCharGenState{ "chargenstate" };
+        static constexpr GlobalVariableName sPCHasCrimeGold{ "pchascrimegold" };
+        static constexpr GlobalVariableName sPCHasGoldDiscount{ "pchasgolddiscount" };
+        static constexpr GlobalVariableName sCrimeGoldDiscount{ "crimegolddiscount" };
+        static constexpr GlobalVariableName sCrimeGoldTurnIn{ "crimegoldturnin" };
+        static constexpr GlobalVariableName sPCHasTurnIn{ "pchasturnin" };
+        static constexpr GlobalVariableName sPCKnownWerewolf{ "pcknownwerewolf" };
+        static constexpr GlobalVariableName sWerewolfClawMult{ "werewolfclawmult" };
+        static constexpr GlobalVariableName sPCRace{ "pcrace" };
 
-        ESM::Variant& operator[](std::string_view name);
+        const ESM::Variant& operator[](GlobalVariableName name) const;
 
-        char getType(std::string_view name) const;
+        ESM::Variant& operator[](GlobalVariableName name);
+
+        char getType(GlobalVariableName name) const;
         ///< If there is no global variable with this name, ' ' is returned.
 
         void fill(const MWWorld::ESMStore& store);

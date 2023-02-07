@@ -3,6 +3,8 @@
 
 #include <string_view>
 
+#include "globalvariablename.hpp"
+
 namespace ESM
 {
     struct EpochTimeStamp;
@@ -35,8 +37,8 @@ namespace MWWorld
         void advanceTime(double hours, Globals& globalVariables);
 
         void setup(Globals& globalVariables);
-        bool updateGlobalInt(std::string_view name, int value);
-        bool updateGlobalFloat(std::string_view name, float value);
+        bool updateGlobalInt(GlobalVariableName name, int value);
+        bool updateGlobalFloat(GlobalVariableName name, float value);
     };
 }
 

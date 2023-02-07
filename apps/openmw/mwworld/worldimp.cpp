@@ -1,6 +1,7 @@
 #include "worldimp.hpp"
 
 #include <charconv>
+#include <vector>
 
 #include <osg/ComputeBoundsVisitor>
 #include <osg/Group>
@@ -256,10 +257,10 @@ namespace MWWorld
         if (!bypass)
         {
             // set new game mark
-            mGlobalVariables["chargenstate"].setInteger(1);
+            mGlobalVariables[Globals::sCharGenState].setInteger(1);
         }
         else
-            mGlobalVariables["chargenstate"].setInteger(-1);
+            mGlobalVariables[Globals::sCharGenState].setInteger(-1);
 
         if (bypass && !mStartCell.empty())
         {
@@ -488,31 +489,29 @@ namespace MWWorld
             }
         }
 
-        std::map<std::string, ESM::Variant> globals;
-        // vanilla Morrowind does not define dayspassed.
-        globals["dayspassed"] = ESM::Variant(1); // but the addons start counting at 1 :(
-        globals["werewolfclawmult"] = ESM::Variant(25.f);
-        globals["pcknownwerewolf"] = ESM::Variant(0);
-
-        // following should exist in all versions of MW, but not necessarily in TCs
-        globals["gamehour"] = ESM::Variant(0.f);
-        globals["timescale"] = ESM::Variant(30.f);
-        globals["day"] = ESM::Variant(1);
-        globals["month"] = ESM::Variant(1);
-        globals["year"] = ESM::Variant(1);
-        globals["pcrace"] = ESM::Variant(0);
-        globals["pchascrimegold"] = ESM::Variant(0);
-        globals["pchasgolddiscount"] = ESM::Variant(0);
-        globals["crimegolddiscount"] = ESM::Variant(0);
-        globals["crimegoldturnin"] = ESM::Variant(0);
-        globals["pchasturnin"] = ESM::Variant(0);
+        const std::vector<std::pair<GlobalVariableName, ESM::Variant>> globals{
+            // vanilla Morrowind does not define dayspassed.
+            { Globals::sDaysPassed, ESM::Variant(1) }, // but the addons start counting at 1 :(
+            { Globals::sWerewolfClawMult, ESM::Variant(25.f) },
+            { Globals::sPCKnownWerewolf, ESM::Variant(0) },
+            // following should exist in all versions of MW, but not necessarily in TCs
+            { Globals::sGameHour, ESM::Variant(0) },
+            { Globals::sTimeScale, ESM::Variant(30.f) },
+            { Globals::sDay, ESM::Variant(1) },
+            { Globals::sYear, ESM::Variant(1) },
+            { Globals::sPCRace, ESM::Variant(0) },
+            { Globals::sPCHasCrimeGold, ESM::Variant(0) },
+            { Globals::sCrimeGoldDiscount, ESM::Variant(0) },
+            { Globals::sCrimeGoldTurnIn, ESM::Variant(0) },
+            { Globals::sPCHasTurnIn, ESM::Variant(0) },
+        };
 
         for (const auto& params : globals)
         {
-            if (!mStore.get<ESM::Global>().search(ESM::RefId::stringRefId(params.first)))
+            if (!mStore.get<ESM::Global>().search(ESM::RefId::stringRefId(params.first.getValue())))
             {
                 ESM::Global record;
-                record.mId = ESM::RefId::stringRefId(params.first);
+                record.mId = ESM::RefId::stringRefId(params.first.getValue());
                 record.mValue = params.second;
                 record.mRecordFlags = 0;
                 mStore.insertStatic(record);
@@ -591,7 +590,7 @@ namespace MWWorld
         return mLocalScripts;
     }
 
-    void World::setGlobalInt(std::string_view name, int value)
+    void World::setGlobalInt(GlobalVariableName name, int value)
     {
         bool dateUpdated = mCurrentDate->updateGlobalInt(name, value);
         if (dateUpdated)
@@ -600,7 +599,7 @@ namespace MWWorld
         mGlobalVariables[name].setInteger(value);
     }
 
-    void World::setGlobalFloat(std::string_view name, float value)
+    void World::setGlobalFloat(GlobalVariableName name, float value)
     {
         bool dateUpdated = mCurrentDate->updateGlobalFloat(name, value);
         if (dateUpdated)
@@ -609,17 +608,17 @@ namespace MWWorld
         mGlobalVariables[name].setFloat(value);
     }
 
-    int World::getGlobalInt(std::string_view name) const
+    int World::getGlobalInt(GlobalVariableName name) const
     {
         return mGlobalVariables[name].getInteger();
     }
 
-    float World::getGlobalFloat(std::string_view name) const
+    float World::getGlobalFloat(GlobalVariableName name) const
     {
         return mGlobalVariables[name].getFloat();
     }
 
-    char World::getGlobalVariableType(std::string_view name) const
+    char World::getGlobalVariableType(GlobalVariableName name) const
     {
         return mGlobalVariables.getType(name);
     }
@@ -3619,13 +3618,13 @@ namespace MWWorld
             turnIn = std::max(1, turnIn);
         }
 
-        mGlobalVariables["pchascrimegold"].setInteger((bounty <= playerGold) ? 1 : 0);
+        mGlobalVariables[Globals::sPCHasCrimeGold].setInteger((bounty <= playerGold) ? 1 : 0);
 
-        mGlobalVariables["pchasgolddiscount"].setInteger((discount <= playerGold) ? 1 : 0);
-        mGlobalVariables["crimegolddiscount"].setInteger(discount);
+        mGlobalVariables[Globals::sPCHasGoldDiscount].setInteger((discount <= playerGold) ? 1 : 0);
+        mGlobalVariables[Globals::sCrimeGoldDiscount].setInteger(discount);
 
-        mGlobalVariables["crimegoldturnin"].setInteger(turnIn);
-        mGlobalVariables["pchasturnin"].setInteger((turnIn <= playerGold) ? 1 : 0);
+        mGlobalVariables[Globals::sCrimeGoldTurnIn].setInteger(turnIn);
+        mGlobalVariables[Globals::sPCHasTurnIn].setInteger((turnIn <= playerGold) ? 1 : 0);
     }
 
     void World::confiscateStolenItems(const Ptr& ptr)
