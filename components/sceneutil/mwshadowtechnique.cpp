@@ -1512,7 +1512,10 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                     for (const auto & uniform : _uniforms[cv.getTraversalNumber() % 2])
                     {
                         if (uniform->getName() == validRegionUniformName)
+                        {
                             validRegionUniform = uniform;
+                            break;
+                        }
                     }
 
                     if (!validRegionUniform)
@@ -1549,7 +1552,10 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                 for (const auto & uniform : _uniforms[cv.getTraversalNumber() % 2])
                 {
                     if (uniform->getName() == shadowSpaceUniformName)
+                    {
                         shadowSpaceUniform = uniform;
+                        break;
+                    }
                 }
 
                 if (!shadowSpaceUniform)
