@@ -140,6 +140,8 @@ namespace Nif
     struct hkPackedNiTriStripsData;
     struct NiAccumulator;
     struct NiInterpolator;
+    struct NiStringPalette;
+    struct NiControllerManager;
 
     using NodePtr = RecordPtrT<Node>;
     using ExtraPtr = RecordPtrT<Extra>;
@@ -170,6 +172,8 @@ namespace Nif
     using hkPackedNiTriStripsDataPtr = RecordPtrT<hkPackedNiTriStripsData>;
     using NiAccumulatorPtr = RecordPtrT<NiAccumulator>;
     using NiInterpolatorPtr = RecordPtrT<NiInterpolator>;
+    using NiStringPalettePtr = RecordPtrT<NiStringPalette>;
+    using NiControllerManagerPtr = RecordPtrT<NiControllerManager>;
 
     using NodeList = RecordListT<Node>;
     using PropertyList = RecordListT<Property>;

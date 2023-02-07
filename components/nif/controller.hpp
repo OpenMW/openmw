@@ -29,6 +29,58 @@
 namespace Nif
 {
 
+    struct ControlledBlock
+    {
+        std::string mTargetName;
+        NiInterpolatorPtr mInterpolator;
+        ControllerPtr mController;
+        unsigned short mBlendIndex;
+        unsigned char mPriority;
+        NiStringPalettePtr mStringPalette;
+        size_t mNodeNameOffset;
+        size_t mPropertyTypeOffset;
+        size_t mControllerTypeOffset;
+        size_t mControllerIdOffset;
+        size_t mInterpolatorIdOffset;
+        std::string mNodeName;
+        std::string mPropertyType;
+        std::string mControllerType;
+        std::string mControllerId;
+        std::string mInterpolatorId;
+
+        void read(NIFStream* nif);
+        void post(Reader& nif);
+    };
+
+    // Gamebryo KF root node record type (pre-10.0)
+    struct NiSequence : public Record
+    {
+        std::string mName;
+        std::string mAccumRootName;
+        ExtraPtr mTextKeys;
+        unsigned int mArrayGrowBy;
+        std::vector<ControlledBlock> mControlledBlocks;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    // Gamebryo KF root node record type (10.0+)
+    struct NiControllerSequence : public NiSequence
+    {
+        float mWeight{ 1.f };
+        Controller::ExtrapolationMode mExtrapolationMode{ Controller::ExtrapolationMode::Constant };
+        float mFrequency{ 1.f };
+        float mPhase{ 1.f };
+        float mStartTime, mStopTime;
+        bool mPlayBackwards{ false };
+        NiControllerManagerPtr mManager;
+        NiStringPalettePtr mStringPalette;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     // Base class for controllers that use NiInterpolators to animate objects.
     struct NiInterpController : public Controller
     {

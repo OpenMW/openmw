@@ -171,6 +171,8 @@ namespace Nif
             { "NiSortAdjustNode", &construct<NiSortAdjustNode, RC_NiSortAdjustNode> },
             { "NiClusterAccumulator", &construct<NiClusterAccumulator, RC_NiClusterAccumulator> },
             { "NiAlphaAccumulator", &construct<NiAlphaAccumulator, RC_NiAlphaAccumulator> },
+            { "NiSequence", &construct<NiSequence, RC_NiSequence> },
+            { "NiControllerSequence", &construct<NiControllerSequence, RC_NiControllerSequence> },
         };
     }
 

@@ -29,6 +29,114 @@ namespace Nif
         target.post(nif);
     }
 
+    void ControlledBlock::read(NIFStream* nif)
+    {
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 103))
+            mTargetName = nif->getSizedString();
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 106))
+            mInterpolator.read(nif);
+        if (nif->getVersion() <= NIFStream::generateVersion(20, 5, 0, 0))
+            mController.read(nif);
+
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 103))
+            return;
+
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 110))
+        {
+            nif->skip(4); // NiBlendInterpolator link
+            mBlendIndex = nif->getUShort();
+        }
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 106) && nif->getBethVersion() > 0)
+            mPriority = nif->getChar();
+
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 2, 0, 0)
+            && nif->getVersion() <= NIFStream::generateVersion(20, 1, 0, 0))
+        {
+            mStringPalette.read(nif);
+            mNodeNameOffset = nif->getUInt();
+            mPropertyTypeOffset = nif->getUInt();
+            mControllerTypeOffset = nif->getUInt();
+            mControllerIdOffset = nif->getUInt();
+            mInterpolatorIdOffset = nif->getUInt();
+        }
+        else
+        {
+            mNodeName = nif->getString();
+            mPropertyType = nif->getString();
+            mControllerType = nif->getString();
+            mControllerId = nif->getString();
+            mInterpolatorId = nif->getString();
+        }
+    }
+
+    void ControlledBlock::post(Reader& nif)
+    {
+        mInterpolator.post(nif);
+        mController.post(nif);
+        mStringPalette.post(nif);
+        // TODO: probably should fill the strings with string palette contents here
+    }
+
+    void NiSequence::read(NIFStream* nif)
+    {
+        mName = nif->getString();
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 103))
+        {
+            mAccumRootName = nif->getString();
+            mTextKeys.read(nif);
+        }
+        size_t numControlledBlocks = nif->getUInt();
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 106))
+            mArrayGrowBy = nif->getUInt();
+        mControlledBlocks.resize(numControlledBlocks);
+        for (ControlledBlock& block : mControlledBlocks)
+            block.read(nif);
+    }
+
+    void NiSequence::post(Reader& nif)
+    {
+        mTextKeys.post(nif);
+        for (ControlledBlock& block : mControlledBlocks)
+            block.post(nif);
+    }
+
+    void NiControllerSequence::read(NIFStream* nif)
+    {
+        NiSequence::read(nif);
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 103))
+            return;
+
+        mWeight = nif->getFloat();
+        mTextKeys.read(nif);
+        mExtrapolationMode = static_cast<Controller::ExtrapolationMode>(nif->getUInt());
+        mFrequency = nif->getFloat();
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 4, 0, 1))
+            mPhase = nif->getFloat();
+        mStartTime = nif->getFloat();
+        mStopTime = nif->getFloat();
+        mPlayBackwards = nif->getVersion() == NIFStream::generateVersion(10, 1, 0, 106) && nif->getBoolean();
+        mManager.read(nif);
+        mAccumRootName = nif->getString();
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 113)
+            && nif->getVersion() <= NIFStream::generateVersion(20, 1, 0, 0))
+            mStringPalette.read(nif);
+        else if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() >= 24)
+        {
+            size_t numAnimNotes = 1;
+            if (nif->getBethVersion() >= 29)
+                numAnimNotes = nif->getUShort();
+
+            nif->skip(4 * numAnimNotes); // BSAnimNotes links
+        }
+    }
+
+    void NiControllerSequence::post(Reader& nif)
+    {
+        NiSequence::post(nif);
+        mManager.post(nif);
+        mStringPalette.post(nif);
+    }
+
     void NiInterpController::read(NIFStream* nif)
     {
         Controller::read(nif);
