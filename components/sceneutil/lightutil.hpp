@@ -18,6 +18,7 @@ namespace ESM
 namespace SceneUtil
 {
     class LightSource;
+    struct LightCommon;
 
     /// @brief Set up global attenuation settings for an osg::Light.
     /// @param radius The radius of the light source.
@@ -32,15 +33,15 @@ namespace SceneUtil
     /// @param lightMask Mask to assign to the newly created LightSource.
     /// @param isExterior Is the light outside? May be used for deciding which attenuation settings to use.
     osg::ref_ptr<LightSource> addLight(
-        osg::Group* node, const ESM::Light* esmLight, unsigned int lightMask, bool isExterior);
+        osg::Group* node, const SceneUtil::LightCommon& esmLight, unsigned int lightMask, bool isExterior);
 
     /// @brief Convert an ESM::Light to a SceneUtil::LightSource, and return it.
     /// @param esmLight The light definition coming from the game files containing radius, color, flicker, etc.
     /// @param lightMask Mask to assign to the newly created LightSource.
     /// @param isExterior Is the light outside? May be used for deciding which attenuation settings to use.
     /// @param ambient Ambient component of the light.
-    osg::ref_ptr<LightSource> createLightSource(const ESM::Light* esmLight, unsigned int lightMask, bool isExterior,
-        const osg::Vec4f& ambient = osg::Vec4f(0, 0, 0, 1));
+    osg::ref_ptr<LightSource> createLightSource(const SceneUtil::LightCommon& esmLight, unsigned int lightMask,
+        bool isExterior, const osg::Vec4f& ambient = osg::Vec4f(0, 0, 0, 1));
 
 }
 

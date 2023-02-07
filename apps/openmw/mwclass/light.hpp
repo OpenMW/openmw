@@ -78,6 +78,7 @@ namespace MWClass
 
         const ESM::RefId& getSound(const MWWorld::ConstPtr& ptr) const override;
     };
+
 }
 
 #endif

@@ -5,6 +5,7 @@
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/objectstate.hpp>
+#include <components/esm4/loadligh.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -242,4 +243,5 @@ namespace MWClass
     {
         return ptr.get<ESM::Light>()->mBase->mSound;
     }
+
 }

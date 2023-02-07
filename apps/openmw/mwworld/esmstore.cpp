@@ -15,6 +15,7 @@
 
 #include <components/esm4/common.hpp>
 #include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadligh.hpp>
 #include <components/esm4/loadrefr.hpp>
 #include <components/esm4/loadstat.hpp>
 #include <components/esm4/reader.hpp>
@@ -279,6 +280,7 @@ namespace MWWorld
             case ESM::REC_WEAP:
             case ESM::REC_BODY:
             case ESM::REC_STAT4:
+            case ESM::REC_LIGH4:
                 return true;
                 break;
         }

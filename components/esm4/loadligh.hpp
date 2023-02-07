@@ -32,6 +32,9 @@
 
 #include "formid.hpp"
 
+#include <components/esm/defs.hpp>
+#include <components/esm/refid.hpp>
+
 namespace ESM4
 {
     class Reader;
@@ -39,6 +42,20 @@ namespace ESM4
 
     struct Light
     {
+        enum Flag
+        {
+            Dynamic = 0x01,
+            Carryable = 0x02,
+            Negative = 0x04,
+            Flicker = 0x08,
+            OffDefault = 0x020,
+            FlickerSlow = 0x040,
+            Pulse = 0x080,
+            PulseSlow = 0x100,
+            SpotLight = 0x200,
+            SpotShadow = 0x400,
+        };
+
         struct Data
         {
             std::uint32_t time; // FO/FONV only
@@ -67,7 +84,7 @@ namespace ESM4
             float weight;
         };
 
-        FormId mFormId; // from the header
+        ESM::RefId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -86,6 +103,8 @@ namespace ESM4
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
+
+        static constexpr ESM::RecNameInts sRecordId = ESM::REC_LIGH4;
 
         // void blank();
     };

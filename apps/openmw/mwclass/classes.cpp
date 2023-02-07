@@ -13,6 +13,7 @@
 #include "ingredient.hpp"
 #include "itemlevlist.hpp"
 #include "light.hpp"
+#include "light4.hpp"
 #include "lockpick.hpp"
 #include "misc.hpp"
 #include "npc.hpp"
@@ -49,5 +50,6 @@ namespace MWClass
         BodyPart::registerSelf();
 
         ESM4Static::registerSelf();
+        ESM4Light::registerSelf();
     }
 }

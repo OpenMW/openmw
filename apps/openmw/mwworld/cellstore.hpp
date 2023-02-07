@@ -59,6 +59,7 @@ namespace ESM4
     struct Cell;
     struct Reference;
     struct Static;
+    struct Light;
 }
 
 namespace MWWorld
@@ -73,7 +74,7 @@ namespace MWWorld
         CellRefList<ESM::Lockpick>, CellRefList<ESM::Miscellaneous>, CellRefList<ESM::NPC>, CellRefList<ESM::Probe>,
         CellRefList<ESM::Repair>, CellRefList<ESM::Static>, CellRefList<ESM::Weapon>, CellRefList<ESM::BodyPart>,
 
-        CellRefList<ESM4::Static>>;
+        CellRefList<ESM4::Static>, CellRefList<ESM4::Light>>;
 
     /// \brief Mutable state of a cell
     class CellStore

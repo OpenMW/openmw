@@ -11,6 +11,7 @@
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm4/common.hpp>
 #include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadligh.hpp>
 #include <components/esm4/loadrefr.hpp>
 #include <components/esm4/loadstat.hpp>
 #include <components/esm4/reader.hpp>

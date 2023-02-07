@@ -23,9 +23,11 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadrace.hpp>
+#include <components/esm4/loadligh.hpp>
 #include <components/misc/constants.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/sceneutil/lightcommon.hpp>
 
 #include <components/sceneutil/keyframe.hpp>
 
@@ -1510,7 +1512,7 @@ namespace MWRender
         }
     }
 
-    void Animation::addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light* esmLight)
+    void Animation::addExtraLight(osg::ref_ptr<osg::Group> parent, const SceneUtil::LightCommon& esmLight)
     {
         bool exterior = mPtr.isInCell() && mPtr.getCell()->getCell()->isExterior();
 
@@ -1854,7 +1856,9 @@ namespace MWRender
                     mObjectRoot, mResourceSystem, ptr.getClass().getEnchantmentColor(ptr));
         }
         if (ptr.getType() == ESM::Light::sRecordId && allowLight)
-            addExtraLight(getOrCreateObjectRoot(), ptr.get<ESM::Light>()->mBase);
+            addExtraLight(getOrCreateObjectRoot(), SceneUtil::LightCommon(*ptr.get<ESM::Light>()->mBase));
+        if (ptr.getType() == ESM4::Light::sRecordId && allowLight)
+            addExtraLight(getOrCreateObjectRoot(), SceneUtil::LightCommon(*ptr.get<ESM4::Light>()->mBase));
 
         if (!allowLight && mObjectRoot)
         {

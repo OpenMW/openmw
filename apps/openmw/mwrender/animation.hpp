@@ -30,6 +30,7 @@ namespace SceneUtil
     class LightSource;
     class LightListCallback;
     class Skeleton;
+    struct LightCommon;
 }
 
 namespace MWRender
@@ -333,7 +334,7 @@ namespace MWRender
         void addSingleAnimSource(const std::string& model, const std::string& baseModel);
 
         /** Adds an additional light to the given node using the specified ESM record. */
-        void addExtraLight(osg::ref_ptr<osg::Group> parent, const ESM::Light* light);
+        void addExtraLight(osg::ref_ptr<osg::Group> parent, const SceneUtil::LightCommon& light);
 
         void clearAnimSources();
 

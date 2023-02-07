@@ -7,6 +7,7 @@
 
 #include <components/esm3/loadligh.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/sceneutil/lightcommon.hpp>
 
 #include "lightcontroller.hpp"
 #include "lightmanager.hpp"
@@ -86,7 +87,7 @@ namespace SceneUtil
     }
 
     osg::ref_ptr<LightSource> addLight(
-        osg::Group* node, const ESM::Light* esmLight, unsigned int lightMask, bool isExterior)
+        osg::Group* node, const SceneUtil::LightCommon& esmLight, unsigned int lightMask, bool isExterior)
     {
         SceneUtil::FindByNameVisitor visitor("AttachLight");
         node->accept(visitor);
@@ -105,19 +106,19 @@ namespace SceneUtil
     }
 
     osg::ref_ptr<LightSource> createLightSource(
-        const ESM::Light* esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient)
+        const SceneUtil::LightCommon& esmLight, unsigned int lightMask, bool isExterior, const osg::Vec4f& ambient)
     {
         osg::ref_ptr<SceneUtil::LightSource> lightSource(new SceneUtil::LightSource);
         osg::ref_ptr<osg::Light> light(new osg::Light);
         lightSource->setNodeMask(lightMask);
 
-        float radius = esmLight->mData.mRadius;
+        float radius = esmLight.mRadius;
         lightSource->setRadius(radius);
 
         configureLight(light, radius, isExterior);
 
-        osg::Vec4f diffuse = SceneUtil::colourFromRGB(esmLight->mData.mColor);
-        if (esmLight->mData.mFlags & ESM::Light::Negative)
+        osg::Vec4f diffuse = esmLight.mColor;
+        if (esmLight.mNegative)
         {
             diffuse *= -1;
             diffuse.a() = 1;
@@ -130,13 +131,13 @@ namespace SceneUtil
 
         osg::ref_ptr<SceneUtil::LightController> ctrl(new SceneUtil::LightController);
         ctrl->setDiffuse(light->getDiffuse());
-        if (esmLight->mData.mFlags & ESM::Light::Flicker)
+        if (esmLight.mFlicker)
             ctrl->setType(SceneUtil::LightController::LT_Flicker);
-        if (esmLight->mData.mFlags & ESM::Light::FlickerSlow)
+        if (esmLight.mFlickerSlow)
             ctrl->setType(SceneUtil::LightController::LT_FlickerSlow);
-        if (esmLight->mData.mFlags & ESM::Light::Pulse)
+        if (esmLight.mPulse)
             ctrl->setType(SceneUtil::LightController::LT_Pulse);
-        if (esmLight->mData.mFlags & ESM::Light::PulseSlow)
+        if (esmLight.mPulseSlow)
             ctrl->setType(SceneUtil::LightController::LT_PulseSlow);
 
         lightSource->addUpdateCallback(ctrl);
