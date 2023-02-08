@@ -118,10 +118,16 @@ namespace Nif
         if (nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO4)
             readRecordList(nif, effects);
 
+        // FIXME: stopgap solution until we figure out what Oblivion does if it does anything
+        if (nif->getVersion() > NIFFile::NIFVersion::VER_MW)
+            return;
+
         // Discard transformations for the root node, otherwise some meshes
         // occasionally get wrong orientation. Only for NiNode-s for now, but
         // can be expanded if needed.
         // FIXME: if node 0 is *not* the only root node, this must not happen.
+        // FIXME: doing this here is awful.
+        // We want to do this on world scene graph level rather than local scene graph level.
         if (0 == recIndex && !Misc::StringUtils::ciEqual(name, "bip01"))
         {
             trafo = Nif::Transformation::getIdentity();
