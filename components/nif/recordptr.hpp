@@ -143,6 +143,8 @@ namespace Nif
     struct NiStringPalette;
     struct NiControllerManager;
     struct NiBlendInterpolator;
+    struct NiDefaultAVObjectPalette;
+    struct NiControllerSequence;
 
     using NodePtr = RecordPtrT<Node>;
     using ExtraPtr = RecordPtrT<Extra>;
@@ -176,6 +178,7 @@ namespace Nif
     using NiStringPalettePtr = RecordPtrT<NiStringPalette>;
     using NiControllerManagerPtr = RecordPtrT<NiControllerManager>;
     using NiBlendInterpolatorPtr = RecordPtrT<NiBlendInterpolator>;
+    using NiDefaultAVObjectPalettePtr = RecordPtrT<NiDefaultAVObjectPalette>;
 
     using NodeList = RecordListT<Node>;
     using PropertyList = RecordListT<Property>;
@@ -185,6 +188,7 @@ namespace Nif
     using NiTriStripsDataList = RecordListT<NiTriStripsData>;
     using bhkShapeList = RecordListT<bhkShape>;
     using bhkSerializableList = RecordListT<bhkSerializable>;
+    using NiControllerSequenceList = RecordListT<NiControllerSequence>;
 
 } // Namespace
 #endif

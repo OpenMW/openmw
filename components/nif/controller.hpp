@@ -296,7 +296,10 @@ namespace Nif
     struct NiControllerManager : public Controller
     {
         bool mCumulative;
+        NiControllerSequenceList mSequences;
+        NiDefaultAVObjectPalettePtr mObjectPalette;
         void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiInterpolator : public Record

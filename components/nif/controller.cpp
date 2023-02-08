@@ -432,9 +432,15 @@ namespace Nif
     {
         Controller::read(nif);
         mCumulative = nif->getBoolean();
-        unsigned int numSequences = nif->getUInt();
-        nif->skip(4 * numSequences); // Controller sequences
-        nif->skip(4); // Object palette
+        readRecordList(nif, mSequences);
+        mObjectPalette.read(nif);
+    }
+
+    void NiControllerManager::post(Reader& nif)
+    {
+        Controller::post(nif);
+        postRecordList(nif, mSequences);
+        mObjectPalette.post(nif);
     }
 
     void NiPoint3Interpolator::read(NIFStream* nif)
