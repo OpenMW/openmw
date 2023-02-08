@@ -345,5 +345,36 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    // Abstract
+    struct NiBlendInterpolator : public NiInterpolator
+    {
+        struct Item
+        {
+            NiInterpolatorPtr mInterpolator;
+            float mWeight, mNormalizedWeight;
+            int mPriority;
+            float mEaseSpinner;
+
+            void read(NIFStream* nif);
+            void post(Reader& nif);
+        };
+
+        bool mManagerControlled{ false };
+        bool mOnlyUseHighestWeight{ false };
+        unsigned short mArrayGrowBy{ 0 };
+        float mWeightThreshold;
+        unsigned short mInterpCount;
+        unsigned short mSingleIndex;
+        int mHighPriority, mNextHighPriority;
+        float mSingleTime;
+        float mHighWeightsSum, mNextHighWeightsSum;
+        float mHighEaseSpinner;
+        std::vector<Item> mItems;
+        NiInterpolatorPtr mSingleInterpolator;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
 } // Namespace
 #endif

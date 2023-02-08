@@ -502,4 +502,97 @@ namespace Nif
         data.post(nif);
     }
 
+    void NiBlendInterpolator::read(NIFStream* nif)
+    {
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 112))
+            mManagerControlled = nif->getChar() & 1;
+        size_t numInterps = 0;
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
+        {
+            numInterps = nif->getUShort();
+            mArrayGrowBy = nif->getUShort();
+        }
+        else
+        {
+            numInterps = nif->getChar();
+            if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 112))
+            {
+                mWeightThreshold = nif->getFloat();
+                if (!mManagerControlled)
+                {
+                    mInterpCount = nif->getChar();
+                    mSingleIndex = nif->getChar();
+                    mHighPriority = nif->getChar();
+                    mNextHighPriority = nif->getChar();
+                    mSingleTime = nif->getFloat();
+                    mHighWeightsSum = nif->getFloat();
+                    mNextHighWeightsSum = nif->getFloat();
+                    mHighEaseSpinner = nif->getFloat();
+                }
+            }
+        }
+
+        if (!mManagerControlled)
+        {
+            mItems.resize(numInterps);
+            for (Item& item : mItems)
+                item.read(nif);
+        }
+
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 111))
+        {
+            mManagerControlled = nif->getBoolean();
+            mWeightThreshold = nif->getFloat();
+            mOnlyUseHighestWeight = nif->getBoolean();
+            if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
+            {
+                mInterpCount = nif->getUShort();
+                mSingleIndex = nif->getUShort();
+            }
+            else
+            {
+                mInterpCount = nif->getChar();
+                mSingleIndex = nif->getChar();
+            }
+            if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 108))
+            {
+                mSingleInterpolator.read(nif);
+                mSingleTime = nif->getFloat();
+            }
+            if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
+            {
+                mHighPriority = nif->getInt();
+                mNextHighPriority = nif->getInt();
+            }
+            else
+            {
+                mHighPriority = nif->getChar();
+                mNextHighPriority = nif->getChar();
+            }
+        }
+    }
+
+    void NiBlendInterpolator::post(Reader& nif)
+    {
+        for (Item& item : mItems)
+            item.post(nif);
+        mSingleInterpolator.post(nif);
+    }
+
+    void NiBlendInterpolator::Item::read(NIFStream* nif)
+    {
+        mInterpolator.read(nif);
+        mWeight = nif->getFloat();
+        mNormalizedWeight = nif->getFloat();
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
+            mPriority = nif->getInt();
+        else
+            mPriority = nif->getChar();
+        mEaseSpinner = nif->getFloat();
+    }
+
+    void NiBlendInterpolator::Item::post(Reader& nif)
+    {
+        mInterpolator.post(nif);
+    }
 }
