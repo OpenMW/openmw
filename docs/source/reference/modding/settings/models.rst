@@ -263,3 +263,13 @@ weatherblizzard
 Path to the file used for the blizzard clouds weather effect in Morrowind. 
 OpenMW doesn't use this file, instead it renders a similar looking particle 
 effect. Changing this won't have any effect.
+
+write nif debug log
+-------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+If enabled, log the loading process of unsupported NIF files.
+:ref:`load unsupported nif files` setting must be enabled for this setting to have any effect.

@@ -110,6 +110,7 @@ namespace Nif
         bool& mUseSkinning;
 
         static std::atomic_bool sLoadUnsupportedFiles;
+        static std::atomic_bool sWriteNifDebugLog;
 
         /// Get the file's version in a human readable form
         ///\returns A string containing a human readable NIF version number
@@ -145,6 +146,8 @@ namespace Nif
         unsigned int getBethVersion() const { return bethVer; }
 
         static void setLoadUnsupportedFiles(bool load);
+
+        static void setWriteNifDebugLog(bool load);
     };
     using NIFFilePtr = std::shared_ptr<const Nif::NIFFile>;
 
