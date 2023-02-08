@@ -174,6 +174,7 @@ namespace Nif
             { "NiAlphaAccumulator", &construct<NiAlphaAccumulator, RC_NiAlphaAccumulator> },
             { "NiSequence", &construct<NiSequence, RC_NiSequence> },
             { "NiControllerSequence", &construct<NiControllerSequence, RC_NiControllerSequence> },
+            { "NiDefaultAVObjectPalette", &construct<NiDefaultAVObjectPalette, RC_NiDefaultAVObjectPalette> },
         };
     }
 
