@@ -61,7 +61,8 @@ namespace Resource
             {
                 // If ref count is greater than 1, the object has an external reference.
                 // If the timestamp is yet to be initialized, it needs to be updated too.
-                if (itr->second.first->referenceCount() > 1 || itr->second.second == 0.0)
+                if ((itr->second.first != nullptr && itr->second.first->referenceCount() > 1)
+                    || itr->second.second == 0.0)
                     itr->second.second = referenceTime;
             }
         }
