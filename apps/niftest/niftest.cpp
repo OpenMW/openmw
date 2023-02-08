@@ -41,10 +41,31 @@ bool isBSA(const std::filesystem::path& filename)
     return hasExtension(filename, ".bsa");
 }
 
+std::unique_ptr<VFS::Archive> makeBsaArchive(const std::filesystem::path& path)
+{
+    switch (Bsa::CompressedBSAFile::detectVersion(path))
+    {
+        case Bsa::BSAVER_UNKNOWN:
+            std::cerr << '"' << path << "\" is unknown BSA archive" << std::endl;
+            return nullptr;
+        case Bsa::BSAVER_UNCOMPRESSED:
+            return std::make_unique<VFS::BsaArchive>(path);
+        case Bsa::BSAVER_COMPRESSED:
+            return std::make_unique<VFS::CompressedBsaArchive>(path);
+    }
+
+    std::cerr << '"' << path << "\" is unsupported BSA archive" << std::endl;
+
+    return nullptr;
+}
+
 /// Check all the nif files in a given VFS::Archive
 /// \note Can not read a bsa file inside of a bsa file.
 void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::path& archivePath = {})
 {
+    if (anArchive == nullptr)
+        return;
+
     VFS::Manager myManager(true);
     myManager.addArchive(std::move(anArchive));
     myManager.buildIndex();
@@ -65,7 +86,7 @@ void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::p
                 if (!archivePath.empty() && !isBSA(archivePath))
                 {
                     //                     std::cout << "Reading BSA File: " << name << std::endl;
-                    readVFS(std::make_unique<VFS::BsaArchive>(archivePath / name), archivePath / name);
+                    readVFS(makeBsaArchive(archivePath / name), archivePath / name);
                     //                     std::cout << "Done with BSA File: " << name << std::endl;
                 }
             }
@@ -144,7 +165,7 @@ int main(int argc, char** argv)
             else if (isBSA(path))
             {
                 //                 std::cout << "Reading BSA File: " << name << std::endl;
-                readVFS(std::make_unique<VFS::BsaArchive>(path));
+                readVFS(makeBsaArchive(path));
             }
             else if (std::filesystem::is_directory(path))
             {
