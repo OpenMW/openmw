@@ -220,13 +220,14 @@ namespace Nif
             NIFFile::VER_MW,
         };
         const bool supportedVersion = std::find(supportedVers.begin(), supportedVers.end(), ver) != supportedVers.end();
+        const bool writeDebugLog = sWriteNifDebugLog;
         if (!supportedVersion)
         {
-            if (sLoadUnsupportedFiles)
+            if (!sLoadUnsupportedFiles)
+                throw Nif::Exception("Unsupported NIF version: " + printVersion(ver), filename);
+            if (writeDebugLog)
                 Log(Debug::Warning) << " NIFFile Warning: Unsupported NIF version: " << printVersion(ver)
                                     << ". Proceed with caution! File: " << filename;
-            else
-                throw Nif::Exception("Unsupported NIF version: " + printVersion(ver), filename);
         }
 
         // NIF data endianness
@@ -322,7 +323,7 @@ namespace Nif
 
             r = entry->second();
 
-            if (!supportedVersion)
+            if (!supportedVersion && writeDebugLog)
                 Log(Debug::Verbose) << "NIF Debug: Reading record of type " << rec << ", index " << i << " ("
                                     << filename << ")";
 
@@ -364,10 +365,16 @@ namespace Nif
     }
 
     std::atomic_bool Reader::sLoadUnsupportedFiles = false;
+    std::atomic_bool Reader::sWriteNifDebugLog = false;
 
     void Reader::setLoadUnsupportedFiles(bool load)
     {
         sLoadUnsupportedFiles = load;
+    }
+
+    void Reader::setWriteNifDebugLog(bool value)
+    {
+        sWriteNifDebugLog = value;
     }
 
     std::string Reader::getString(std::uint32_t index) const

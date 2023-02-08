@@ -600,6 +600,7 @@ namespace MWRender
         NifOsg::Loader::setHiddenNodeMask(Mask_UpdateVisitor);
         NifOsg::Loader::setIntersectionDisabledNodeMask(Mask_Effect);
         Nif::Reader::setLoadUnsupportedFiles(Settings::Manager::getBool("load unsupported nif files", "Models"));
+        Nif::Reader::setWriteNifDebugLog(Settings::Manager::getBool("write nif debug log", "Models"));
 
         mStateUpdater->setFogEnd(mViewDistance);
 

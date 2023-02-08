@@ -98,7 +98,7 @@ void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::p
     }
 }
 
-bool parseOptions(int argc, char** argv, std::vector<Files::MaybeQuotedPath>& files)
+bool parseOptions(int argc, char** argv, std::vector<Files::MaybeQuotedPath>& files, bool& writeDebugLog)
 {
     bpo::options_description desc(R"(Ensure that OpenMW can use the provided NIF and BSA files
 
@@ -109,6 +109,7 @@ Usages:
 Allowed options)");
     auto addOption = desc.add_options();
     addOption("help,h", "print help message.");
+    addOption("write-debug-log,v", "write debug log for unsupported nif files");
     addOption("input-file", bpo::value<Files::MaybeQuotedPathContainer>(), "input file");
 
     // Default option if none provided
@@ -126,6 +127,7 @@ Allowed options)");
             std::cout << desc << std::endl;
             return false;
         }
+        writeDebugLog = variables.count("write-debug-log") > 0;
         if (variables.count("input-file"))
         {
             files = variables["input-file"].as<Files::MaybeQuotedPathContainer>();
@@ -146,10 +148,13 @@ Allowed options)");
 int main(int argc, char** argv)
 {
     std::vector<Files::MaybeQuotedPath> files;
-    if (!parseOptions(argc, argv, files))
+    bool writeDebugLog = false;
+    if (!parseOptions(argc, argv, files, writeDebugLog))
         return 1;
 
     Nif::Reader::setLoadUnsupportedFiles(true);
+    Nif::Reader::setWriteNifDebugLog(writeDebugLog);
+
     //     std::cout << "Reading Files" << std::endl;
     for (const auto& path : files)
     {
