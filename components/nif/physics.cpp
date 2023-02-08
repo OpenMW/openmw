@@ -281,6 +281,22 @@ namespace Nif
             nif->getVector4s(mNormals, numNormals);
     }
 
+    void bhkConvexTransformShape::read(NIFStream* nif)
+    {
+        mShape.read(nif);
+        mHavokMaterial.read(nif);
+        mRadius = nif->getFloat();
+        nif->skip(8); // Unused
+        std::vector<float> mat;
+        nif->getFloats(mat, 16);
+        mTransform.set(mat.data());
+    }
+
+    void bhkConvexTransformShape::post(Reader& nif)
+    {
+        mShape.post(nif);
+    }
+
     void bhkBoxShape::read(NIFStream* nif)
     {
         bhkConvexShape::read(nif);
