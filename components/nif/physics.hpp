@@ -314,6 +314,16 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct bhkConvexTransformShape : public bhkShape
+    {
+        bhkShapePtr mShape;
+        HavokMaterial mHavokMaterial;
+        float mRadius;
+        osg::Matrixf mTransform;
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     // A box
     struct bhkBoxShape : public bhkConvexShape
     {

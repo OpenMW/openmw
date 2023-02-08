@@ -161,6 +161,7 @@ namespace Nif
             { "bhkPackedNiTriStripsShape", &construct<bhkPackedNiTriStripsShape, RC_bhkPackedNiTriStripsShape> },
             { "hkPackedNiTriStripsData", &construct<hkPackedNiTriStripsData, RC_hkPackedNiTriStripsData> },
             { "bhkConvexVerticesShape", &construct<bhkConvexVerticesShape, RC_bhkConvexVerticesShape> },
+            { "bhkConvexTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },
             { "bhkBoxShape", &construct<bhkBoxShape, RC_bhkBoxShape> },
             { "bhkCapsuleShape", &construct<bhkCapsuleShape, RC_bhkCapsuleShape> },
             { "bhkSphereShape", &construct<bhkSphereShape, RC_bhkSphereShape> },
