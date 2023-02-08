@@ -822,7 +822,8 @@ namespace MWPhysics
         // copy new ptr position in temporary vector. player is handled separately as its movement might change active
         // cell.
         mActorsPositions.clear();
-        mActorsPositions.reserve(mActors.size() - 1);
+        if (!mActors.empty())
+            mActorsPositions.reserve(mActors.size() - 1);
         for (const auto& [ptr, physicActor] : mActors)
         {
             if (physicActor.get() == player)
@@ -833,7 +834,8 @@ namespace MWPhysics
         for (const auto& [ptr, pos] : mActorsPositions)
             world->moveObject(ptr, pos, false, false);
 
-        world->moveObject(player->getPtr(), player->getSimulationPosition(), false, false);
+        if (player != nullptr)
+            world->moveObject(player->getPtr(), player->getSimulationPosition(), false, false);
     }
 
     void PhysicsSystem::updateAnimatedCollisionShape(const MWWorld::Ptr& object)
