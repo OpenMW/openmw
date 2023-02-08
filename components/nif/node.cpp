@@ -144,7 +144,7 @@ namespace Nif
 
     void NiGeometry::MaterialData::read(NIFStream* nif)
     {
-        if (nif->getVersion() <= NIFStream::generateVersion(10, 0, 1, 0))
+        if (nif->getVersion() < NIFStream::generateVersion(10, 0, 1, 0))
             return;
         unsigned int num = 0;
         if (nif->getVersion() <= NIFStream::generateVersion(20, 1, 0, 3))
