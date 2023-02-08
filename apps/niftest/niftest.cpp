@@ -59,6 +59,15 @@ std::unique_ptr<VFS::Archive> makeBsaArchive(const std::filesystem::path& path)
     return nullptr;
 }
 
+std::unique_ptr<VFS::Archive> makeArchive(const std::filesystem::path& path)
+{
+    if (isBSA(path))
+        return makeBsaArchive(path);
+    if (std::filesystem::is_directory(path))
+        return std::make_unique<VFS::FileSystemArchive>(path);
+    return nullptr;
+}
+
 /// Check all the nif files in a given VFS::Archive
 /// \note Can not read a bsa file inside of a bsa file.
 void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::path& archivePath = {})
@@ -98,7 +107,8 @@ void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::p
     }
 }
 
-bool parseOptions(int argc, char** argv, std::vector<Files::MaybeQuotedPath>& files, bool& writeDebugLog)
+bool parseOptions(int argc, char** argv, std::vector<Files::MaybeQuotedPath>& files, bool& writeDebugLog,
+    std::vector<Files::MaybeQuotedPath>& archives)
 {
     bpo::options_description desc(R"(Ensure that OpenMW can use the provided NIF and BSA files
 
@@ -110,6 +120,7 @@ Allowed options)");
     auto addOption = desc.add_options();
     addOption("help,h", "print help message.");
     addOption("write-debug-log,v", "write debug log for unsupported nif files");
+    addOption("archives", bpo::value<Files::MaybeQuotedPathContainer>(), "path to archive files to provide files");
     addOption("input-file", bpo::value<Files::MaybeQuotedPathContainer>(), "input file");
 
     // Default option if none provided
@@ -131,6 +142,8 @@ Allowed options)");
         if (variables.count("input-file"))
         {
             files = variables["input-file"].as<Files::MaybeQuotedPathContainer>();
+            if (const auto it = variables.find("archives"); it != variables.end())
+                archives = it->second.as<Files::MaybeQuotedPathContainer>();
             return true;
         }
     }
@@ -149,11 +162,24 @@ int main(int argc, char** argv)
 {
     std::vector<Files::MaybeQuotedPath> files;
     bool writeDebugLog = false;
-    if (!parseOptions(argc, argv, files, writeDebugLog))
+    std::vector<Files::MaybeQuotedPath> archives;
+    if (!parseOptions(argc, argv, files, writeDebugLog, archives))
         return 1;
 
     Nif::Reader::setLoadUnsupportedFiles(true);
     Nif::Reader::setWriteNifDebugLog(writeDebugLog);
+
+    std::unique_ptr<VFS::Manager> vfs;
+    if (!archives.empty())
+    {
+        vfs = std::make_unique<VFS::Manager>(true);
+        for (const std::filesystem::path& path : archives)
+            if (auto archive = makeArchive(path))
+                vfs->addArchive(std::move(archive));
+            else
+                std::cerr << '"' << path << "\" is unsupported archive" << std::endl;
+        vfs->buildIndex();
+    }
 
     //     std::cout << "Reading Files" << std::endl;
     for (const auto& path : files)
@@ -165,17 +191,14 @@ int main(int argc, char** argv)
                 // std::cout << "Decoding: " << name << std::endl;
                 Nif::NIFFile file(path);
                 Nif::Reader reader(file);
-                reader.parse(Files::openConstrainedFileStream(path));
+                if (vfs != nullptr)
+                    reader.parse(vfs->get(Files::pathToUnicodeString(path)));
+                else
+                    reader.parse(Files::openConstrainedFileStream(path));
             }
-            else if (isBSA(path))
+            else if (auto archive = makeArchive(path))
             {
-                //                 std::cout << "Reading BSA File: " << name << std::endl;
-                readVFS(makeBsaArchive(path));
-            }
-            else if (std::filesystem::is_directory(path))
-            {
-                //                 std::cout << "Reading All Files in: " << name << std::endl;
-                readVFS(std::make_unique<VFS::FileSystemArchive>(path), path);
+                readVFS(std::move(archive), path);
             }
             else
             {
