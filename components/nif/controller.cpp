@@ -43,7 +43,7 @@ namespace Nif
 
         if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 110))
         {
-            nif->skip(4); // NiBlendInterpolator link
+            mBlendInterpolator.read(nif);
             mBlendIndex = nif->getUShort();
         }
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 106) && nif->getBethVersion() > 0)
@@ -73,6 +73,7 @@ namespace Nif
     {
         mInterpolator.post(nif);
         mController.post(nif);
+        mBlendInterpolator.post(nif);
         mStringPalette.post(nif);
         // TODO: probably should fill the strings with string palette contents here
     }
@@ -594,5 +595,40 @@ namespace Nif
     void NiBlendInterpolator::Item::post(Reader& nif)
     {
         mInterpolator.post(nif);
+    }
+
+    void NiBlendBoolInterpolator::read(NIFStream* nif)
+    {
+        NiBlendInterpolator::read(nif);
+        mValue = nif->getChar() != 0;
+    }
+
+    void NiBlendFloatInterpolator::read(NIFStream* nif)
+    {
+        NiBlendInterpolator::read(nif);
+        mValue = nif->getFloat();
+    }
+
+    void NiBlendPoint3Interpolator::read(NIFStream* nif)
+    {
+        NiBlendInterpolator::read(nif);
+        mValue = nif->getVector3();
+    }
+
+    void NiBlendTransformInterpolator::read(NIFStream* nif)
+    {
+        NiBlendInterpolator::read(nif);
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
+        {
+            mPosValue = nif->getVector3();
+            mRotValue = nif->getQuaternion();
+            mScaleValue = nif->getFloat();
+            if (!nif->getBoolean())
+                mPosValue = osg::Vec3f();
+            if (!nif->getBoolean())
+                mRotValue = osg::Quat();
+            if (!nif->getBoolean())
+                mScaleValue = 1.f;
+        }
     }
 }

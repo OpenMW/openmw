@@ -142,6 +142,7 @@ namespace Nif
     struct NiInterpolator;
     struct NiStringPalette;
     struct NiControllerManager;
+    struct NiBlendInterpolator;
 
     using NodePtr = RecordPtrT<Node>;
     using ExtraPtr = RecordPtrT<Extra>;
@@ -174,6 +175,7 @@ namespace Nif
     using NiInterpolatorPtr = RecordPtrT<NiInterpolator>;
     using NiStringPalettePtr = RecordPtrT<NiStringPalette>;
     using NiControllerManagerPtr = RecordPtrT<NiControllerManager>;
+    using NiBlendInterpolatorPtr = RecordPtrT<NiBlendInterpolator>;
 
     using NodeList = RecordListT<Node>;
     using PropertyList = RecordListT<Property>;

@@ -34,6 +34,7 @@ namespace Nif
         std::string mTargetName;
         NiInterpolatorPtr mInterpolator;
         ControllerPtr mController;
+        NiBlendInterpolatorPtr mBlendInterpolator;
         unsigned short mBlendIndex;
         unsigned char mPriority;
         NiStringPalettePtr mStringPalette;
@@ -374,6 +375,32 @@ namespace Nif
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
+    };
+
+    struct NiBlendBoolInterpolator : public NiBlendInterpolator
+    {
+        char mValue;
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiBlendFloatInterpolator : public NiBlendInterpolator
+    {
+        float mValue;
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiBlendPoint3Interpolator : public NiBlendInterpolator
+    {
+        osg::Vec3f mValue;
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiBlendTransformInterpolator : public NiBlendInterpolator
+    {
+        osg::Vec3f mPosValue;
+        osg::Quat mRotValue;
+        float mScaleValue;
+        void read(NIFStream* nif) override;
     };
 
 } // Namespace
