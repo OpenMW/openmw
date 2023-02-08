@@ -1,6 +1,8 @@
 #ifndef OPENMW_COMPONENTS_NIF_NODE_HPP
 #define OPENMW_COMPONENTS_NIF_NODE_HPP
 
+#include <unordered_map>
+
 #include <osg/Plane>
 
 #include "base.hpp"
@@ -271,6 +273,15 @@ namespace Nif
         int mMode{ 0 };
 
         void read(NIFStream* nif) override;
+    };
+
+    struct NiDefaultAVObjectPalette : Record
+    {
+        NodePtr mScene;
+        std::unordered_map<std::string, NodePtr> mObjects;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
 } // Namespace

@@ -291,4 +291,19 @@ namespace Nif
         else
             mMode = (flags >> 5) & 0x3;
     }
+
+    void NiDefaultAVObjectPalette::read(NIFStream* nif)
+    {
+        mScene.read(nif);
+        size_t numObjects = nif->getUInt();
+        for (size_t i = 0; i < numObjects; i++)
+            mObjects[nif->getSizedString()].read(nif);
+    }
+
+    void NiDefaultAVObjectPalette::post(Reader& nif)
+    {
+        mScene.post(nif);
+        for (auto& object : mObjects)
+            object.second.post(nif);
+    }
 }

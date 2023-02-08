@@ -151,6 +151,7 @@ namespace Nif
         RC_NiMultiTargetTransformController,
         RC_NiSequence,
         RC_NiControllerSequence,
+        RC_NiDefaultAVObjectPalette,
     };
 
     /// Base class for all records
