@@ -33,12 +33,12 @@ bool hasExtension(const std::filesystem::path& filename, const std::string& exte
 /// See if the file has the "nif" extension.
 bool isNIF(const std::filesystem::path& filename)
 {
-    return hasExtension(filename, "nif");
+    return hasExtension(filename, ".nif");
 }
 /// See if the file has the "bsa" extension.
 bool isBSA(const std::filesystem::path& filename)
 {
-    return hasExtension(filename, "bsa");
+    return hasExtension(filename, ".bsa");
 }
 
 /// Check all the nif files in a given VFS::Archive
