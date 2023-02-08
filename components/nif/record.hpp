@@ -147,7 +147,9 @@ namespace Nif
         RC_NiClusterAccumulator,
         RC_NiAlphaAccumulator,
         RC_NiSortAdjustNode,
-        RC_NiMultiTargetTransformController
+        RC_NiMultiTargetTransformController,
+        RC_NiSequence,
+        RC_NiControllerSequence,
     };
 
     /// Base class for all records
