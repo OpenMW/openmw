@@ -152,6 +152,10 @@ namespace Nif
         RC_NiSequence,
         RC_NiControllerSequence,
         RC_NiDefaultAVObjectPalette,
+        RC_NiBlendBoolInterpolator,
+        RC_NiBlendFloatInterpolator,
+        RC_NiBlendPoint3Interpolator,
+        RC_NiBlendTransformInterpolator,
     };
 
     /// Base class for all records

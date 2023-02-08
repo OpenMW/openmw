@@ -175,6 +175,11 @@ namespace Nif
             { "NiSequence", &construct<NiSequence, RC_NiSequence> },
             { "NiControllerSequence", &construct<NiControllerSequence, RC_NiControllerSequence> },
             { "NiDefaultAVObjectPalette", &construct<NiDefaultAVObjectPalette, RC_NiDefaultAVObjectPalette> },
+            { "NiBlendBoolInterpolator", &construct<NiBlendBoolInterpolator, RC_NiBlendBoolInterpolator> },
+            { "NiBlendFloatInterpolator", &construct<NiBlendFloatInterpolator, RC_NiBlendFloatInterpolator> },
+            { "NiBlendPoint3Interpolator", &construct<NiBlendPoint3Interpolator, RC_NiBlendPoint3Interpolator> },
+            { "NiBlendTransformInterpolator",
+                &construct<NiBlendTransformInterpolator, RC_NiBlendTransformInterpolator> },
         };
     }
 
