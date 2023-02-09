@@ -53,6 +53,8 @@ namespace Nif
 
     struct NiTriStripsData : public NiGeometryData
     {
+        size_t mNumTriangles;
+
         // Triangle strips, series of vertex indices.
         std::vector<std::vector<unsigned short>> strips;
 
