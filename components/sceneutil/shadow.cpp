@@ -13,7 +13,7 @@ namespace SceneUtil
 {
     using namespace osgShadow;
 
-    void ShadowManager::setupShadowSettings()
+    void ShadowManager::setupShadowSettings(Shader::ShaderManager& shaderManager)
     {
         mEnableShadows = Settings::Manager::getBool("enable shadows", "Shadows");
 
@@ -32,8 +32,7 @@ namespace SceneUtil
             = std::clamp(Settings::Manager::getInt("number of shadow maps", "Shadows"), 1, 8);
 
         mShadowSettings->setNumShadowMapsPerLight(numberOfShadowMapsPerLight);
-        mShadowSettings->setBaseShadowTextureUnit(
-            osg::GLExtensions::Get(0, false)->glMaxTextureUnits - numberOfShadowMapsPerLight);
+        mShadowSettings->setBaseShadowTextureUnit(shaderManager.reserveGlobalTextureUnits(Shader::ShaderManager::Slot::ShadowMaps, numberOfShadowMapsPerLight));
 
         const float maximumShadowMapDistance = Settings::Manager::getFloat("maximum shadow map distance", "Shadows");
         if (maximumShadowMapDistance > 0)
@@ -122,7 +121,7 @@ namespace SceneUtil
         mShadowedScene->setNodeMask(sceneRoot->getNodeMask());
 
         mShadowSettings = mShadowedScene->getShadowSettings();
-        setupShadowSettings();
+        setupShadowSettings(shaderManager);
 
         mShadowTechnique->setupCastingShader(shaderManager);
         mShadowTechnique->setWorldMask(worldMask);

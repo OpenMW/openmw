@@ -76,9 +76,11 @@ namespace Shader
         {
             OpaqueDepthTexture,
             SkyTexture,
+            ShadowMaps,
+            SLOT_COUNT
         };
 
-        int reserveGlobalTextureUnits(Slot slot);
+        int reserveGlobalTextureUnits(Slot slot, int count = 1);
 
         void update(osgViewer::Viewer& viewer);
         void setHotReloadEnabled(bool value);
@@ -116,7 +118,8 @@ namespace Shader
         int mMaxTextureUnits = 0;
         int mReservedTextureUnits = 0;
         std::unique_ptr<HotReloadManager> mHotReloadManager;
-        std::array<int, 2> mReservedTextureUnitsBySlot = { -1, -1 };
+        struct ReservedTextureUnits { int index = -1; int count = 0; };
+        std::array<ReservedTextureUnits, static_cast<int>(Slot::SLOT_COUNT) > mReservedTextureUnitsBySlot = {};
     };
 
     bool parseForeachDirective(std::string& source, const std::string& templateName, size_t foundPos);
