@@ -896,6 +896,9 @@ namespace MWGui
 
         mDebugWindow->onFrame(frameDuration);
 
+        if (isConsoleMode())
+            mConsole->onFrame(frameDuration);
+
         if (!gameRunning)
             return;
 
