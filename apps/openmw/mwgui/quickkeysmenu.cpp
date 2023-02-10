@@ -302,6 +302,7 @@ namespace MWGui
         const ESM::MagicEffect* effect = esmStore.get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
 
         std::string path = effect->mIcon;
+        std::replace(path.begin(), path.end(), '/', '\\');
         int slashPos = path.rfind('\\');
         path.insert(slashPos + 1, "b_");
         path = Misc::ResourceHelpers::correctIconPath(path, MWBase::Environment::get().getResourceSystem()->getVFS());
