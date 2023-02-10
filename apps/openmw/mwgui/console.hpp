@@ -58,6 +58,7 @@ namespace MWGui
 
         void updateSelectedObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr);
 
+        void onFrame(float dt) override { checkReferenceAvailable(); }
         void clear() override;
 
         void resetReference() override;
