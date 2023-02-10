@@ -100,3 +100,16 @@ Zero disables the log viewer.
 
 This setting can only be configured by editing the settings configuration file.
 
+console history buffer size 
+---------------------------
+
+:Type:		platform dependant unsigned integer
+:Range:		>= 0
+:Default:	4096
+
+Number of console history objects to retrieve from previous session. If the number of history 
+objects in the file exceeds this value, history objects will be erased starting from the oldest. 
+This operation runs on every new session. See :doc:`../paths` for location of the history file.
+
+This setting can only be configured by editing the settings configuration file.
+
