@@ -1425,7 +1425,21 @@ namespace MWScript
                         SceneUtil::PositionAttitudeTransform* baseNode = ptr.getRefData().getBaseNode();
                         if (baseNode)
                             baseNode->accept(visitor);
-                        msg << "Bound textures: ";
+                        // The instance might not have a physical model due to paging or scripting.
+                        // If this is the case, fall back to the template
+                        if (visitor.mTextures.empty())
+                        {
+                            Resource::SceneManager* sceneManager
+                                = MWBase::Environment::get().getResourceSystem()->getSceneManager();
+                            const_cast<osg::Node*>(sceneManager->getTemplate(model).get())->accept(visitor);
+                            msg << "Bound textures: [None]" << std::endl;
+                            if (!visitor.mTextures.empty())
+                                msg << "Model textures: ";
+                        }
+                        else
+                        {
+                            msg << "Bound textures: ";
+                        }
                         if (!visitor.mTextures.empty())
                         {
                             msg << std::endl;
