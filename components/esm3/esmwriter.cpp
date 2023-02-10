@@ -167,11 +167,14 @@ namespace ESM
         endRecord(name);
     }
 
-    void ESMWriter::writeFixedSizeString(const std::string& data, int size)
+    void ESMWriter::writeFixedSizeString(const std::string& data, std::size_t size)
     {
         std::string string;
         if (!data.empty())
             string = mEncoder ? mEncoder->getLegacyEnc(data) : data;
+        if (string.size() > size)
+            throw std::runtime_error("Fixed string data is too long: \"" + string + "\" ("
+                + std::to_string(string.size()) + " > " + std::to_string(size) + ")");
         string.resize(size);
         write(string.c_str(), string.size());
     }
