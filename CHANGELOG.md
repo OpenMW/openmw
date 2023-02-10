@@ -46,6 +46,7 @@
     Feature #6995: Localize the "show effect duration" option
     Feature #7058: Implement TestModels (T3D) console command
     Feature #7087: Block resolution change in the Windowed Fullscreen mode
+    Feature #7125: Remembering console commands between sessions
     Feature #7130: Ability to set MyGUI logging verbosity
     Feature #7148: Optimize string literal lookup in mwscript
     Feature #7194: Ori to show texture paths

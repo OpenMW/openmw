@@ -126,7 +126,8 @@ namespace MWGui
         WindowManager(SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot,
             Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
             const std::filesystem::path& logpath, bool consoleOnlyScripts, Translation::Storage& translationDataStorage,
-            ToUTF8::FromType encoding, const std::string& versionDescription, bool useShaders);
+            ToUTF8::FromType encoding, const std::string& versionDescription, bool useShaders,
+            Files::ConfigurationManager& cfgMgr);
         virtual ~WindowManager();
 
         /// Set the ESMStore to use for retrieving of GUI-related strings.
@@ -585,6 +586,8 @@ namespace MWGui
 
         void setCullMask(uint32_t mask) override;
         uint32_t getCullMask() override;
+
+        Files::ConfigurationManager& mCfgMgr;
     };
 }
 

@@ -13,6 +13,7 @@
 #include <components/compiler/locals.hpp>
 #include <components/compiler/scanner.hpp>
 #include <components/interpreter/interpreter.hpp>
+#include <components/settings/settings.hpp>
 
 #include "../mwscript/extensions.hpp"
 #include "../mwscript/interpretercontext.hpp"
@@ -133,10 +134,11 @@ namespace MWGui
         }
     }
 
-    Console::Console(int w, int h, bool consoleOnlyScripts)
+    Console::Console(int w, int h, bool consoleOnlyScripts, Files::ConfigurationManager& cfgMgr)
         : WindowBase("openmw_console.layout")
         , mCompilerContext(MWScript::CompilerContext::Type_Console)
         , mConsoleOnlyScripts(consoleOnlyScripts)
+        , mCfgMgr(cfgMgr)
     {
         setCoord(10, 10, w - 10, h / 2);
 
@@ -153,6 +155,15 @@ namespace MWGui
         // compiler
         Compiler::registerExtensions(mExtensions, mConsoleOnlyScripts);
         mCompilerContext.setExtensions(&mExtensions);
+
+        // command history file
+        initConsoleHistory();
+    }
+
+    Console::~Console()
+    {
+        if (mCommandHistoryFile && mCommandHistoryFile.is_open())
+            mCommandHistoryFile.close();
     }
 
     void Console::onOpen()
@@ -341,7 +352,12 @@ namespace MWGui
         // Add the command to the history, and set the current pointer to
         // the end of the list
         if (mCommandHistory.empty() || mCommandHistory.back() != cm)
+        {
             mCommandHistory.push_back(cm);
+
+            if (mCommandHistoryFile && mCommandHistoryFile.good())
+                mCommandHistoryFile << cm << std::endl;
+        }
         mCurrent = mCommandHistory.end();
         mEditString.clear();
         mHistory->setTextCursor(mHistory->getTextLength());
@@ -552,5 +568,44 @@ namespace MWGui
     {
         ReferenceInterface::resetReference();
         setSelectedObject(MWWorld::Ptr());
+    }
+
+    void Console::initConsoleHistory()
+    {
+        const auto filePath = mCfgMgr.getUserConfigPath() / "console_history.txt";
+        const size_t retrievalLimit = Settings::Manager::getSize("console history buffer size", "General");
+
+        std::ifstream historyFile(filePath);
+        std::string line;
+
+        // Read the previous session's commands from the file
+        while (std::getline(historyFile, line))
+        {
+            // Truncate the list if it exceeds the retrieval limit
+            if (mCommandHistory.size() >= retrievalLimit)
+                mCommandHistory.pop_front();
+            mCommandHistory.push_back(line);
+        }
+
+        historyFile.close();
+
+        mCurrent = mCommandHistory.end();
+        try
+        {
+            mCommandHistoryFile.exceptions(std::fstream::failbit | std::fstream::badbit);
+            mCommandHistoryFile.open(filePath, std::ios_base::trunc);
+
+            //  Update the history file
+            for (const auto& histObj : mCommandHistory)
+                mCommandHistoryFile << histObj << std::endl;
+            mCommandHistoryFile.close();
+
+            mCommandHistoryFile.open(filePath, std::ios_base::app);
+        }
+        catch (const std::ios_base::failure& e)
+        {
+            Log(Debug::Error) << "Error: Failed to write to console history file " << filePath << " : " << e.what()
+                              << " : " << std::generic_category().message(errno);
+        }
     }
 }

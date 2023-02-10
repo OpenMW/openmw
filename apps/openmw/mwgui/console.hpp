@@ -8,6 +8,7 @@
 #include <components/compiler/errorhandler.hpp>
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/output.hpp>
+#include <components/files/configurationmanager.hpp>
 
 #include "../mwbase/windowmanager.hpp"
 
@@ -34,8 +35,10 @@ namespace MWGui
         StringList mCommandHistory;
         StringList::iterator mCurrent;
         std::string mEditString;
+        std::ofstream mCommandHistoryFile;
 
-        Console(int w, int h, bool consoleOnlyScripts);
+        Console(int w, int h, bool consoleOnlyScripts, Files::ConfigurationManager& cfgMgr);
+        ~Console();
 
         void onOpen() override;
 
@@ -82,8 +85,9 @@ namespace MWGui
         Compiler::Extensions mExtensions;
         MWScript::CompilerContext mCompilerContext;
         std::vector<std::string> mNames;
-        bool mConsoleOnlyScripts;
 
+        bool mConsoleOnlyScripts;
+        Files::ConfigurationManager& mCfgMgr;
         bool compile(const std::string& cmd, Compiler::Output& output);
 
         /// Report error to the user.
@@ -97,6 +101,8 @@ namespace MWGui
         /// \note The list may contain duplicates (if a name is a keyword and an identifier at the same
         /// time).
         void listNames();
+
+        void initConsoleHistory();
     };
 }
 #endif

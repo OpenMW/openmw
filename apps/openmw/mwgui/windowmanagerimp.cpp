@@ -123,7 +123,7 @@ namespace MWGui
     WindowManager::WindowManager(SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot,
         Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::filesystem::path& logpath,
         bool consoleOnlyScripts, Translation::Storage& translationDataStorage, ToUTF8::FromType encoding,
-        const std::string& versionDescription, bool useShaders)
+        const std::string& versionDescription, bool useShaders, Files::ConfigurationManager& cfgMgr)
         : mOldUpdateMask(0)
         , mOldCullMask(0)
         , mStore(nullptr)
@@ -178,6 +178,7 @@ namespace MWGui
         , mEncoding(encoding)
         , mVersionDescription(versionDescription)
         , mWindowVisible(true)
+        , mCfgMgr(cfgMgr)
     {
         int w, h;
         SDL_GetWindowSize(window, &w, &h);
@@ -335,7 +336,7 @@ namespace MWGui
         trackWindow(mTradeWindow, "barter");
         mGuiModeStates[GM_Barter] = GuiModeState({ mInventoryWindow, mTradeWindow });
 
-        auto console = std::make_unique<Console>(w, h, mConsoleOnlyScripts);
+        auto console = std::make_unique<Console>(w, h, mConsoleOnlyScripts, mCfgMgr);
         mConsole = console.get();
         mWindows.push_back(std::move(console));
         trackWindow(mConsole, "console");
