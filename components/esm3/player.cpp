@@ -47,10 +47,11 @@ namespace ESM
                 checkPrevItems = false;
         }
 
-        if (esm.getFormat() < 19)
+        if (esm.getFormatVersion() <= MaxOldSkillsAndAttributesFormatVersion)
         {
-            bool intFallback = esm.getFormat() < 11;
-            bool clearModified = esm.getFormat() < 17 && !mObject.mNpcStats.mIsWerewolf;
+            const bool intFallback = esm.getFormatVersion() <= MaxIntFallbackFormatVersion;
+            const bool clearModified
+                = esm.getFormatVersion() <= MaxClearModifiersFormatVersion && !mObject.mNpcStats.mIsWerewolf;
             if (esm.hasMoreSubs())
             {
                 for (int i = 0; i < Attribute::Length; ++i)

@@ -18,8 +18,6 @@ namespace ESM
     {
         constexpr static RecNameInts sRecordId = REC_SAVE;
 
-        static int sCurrentFormat;
-
         std::vector<std::string> mContentFiles;
         std::string mPlayerName;
         int mPlayerLevel;

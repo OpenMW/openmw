@@ -14,20 +14,16 @@ namespace ESM
         mData.author.clear();
         mData.desc.clear();
         mData.records = 0;
-        mFormat = CurrentFormat;
+        mFormatVersion = CurrentContentFormatVersion;
         mMaster.clear();
     }
 
     void Header::load(ESMReader& esm)
     {
         if (esm.isNextSub("FORM"))
-        {
-            esm.getHT(mFormat);
-            if (mFormat < 0)
-                esm.fail("invalid format code");
-        }
+            esm.getHT(mFormatVersion);
         else
-            mFormat = 0;
+            mFormatVersion = DefaultFormatVersion;
 
         if (esm.isNextSub("HEDR"))
         {
@@ -69,8 +65,8 @@ namespace ESM
 
     void Header::save(ESMWriter& esm)
     {
-        if (mFormat > 0)
-            esm.writeHNT("FORM", mFormat);
+        if (mFormatVersion > DefaultFormatVersion)
+            esm.writeHNT("FORM", mFormatVersion);
 
         esm.startSubRecord("HEDR");
         esm.writeT(mData.version);

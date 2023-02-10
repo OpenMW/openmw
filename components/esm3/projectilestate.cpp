@@ -40,7 +40,7 @@ namespace ESM
             esm.skipHSub();
         EffectList().load(esm); // for backwards compatibility
         esm.getHNT(mSpeed, "SPED");
-        if (esm.getFormat() < 17)
+        if (esm.getFormatVersion() <= MaxClearModifiersFormatVersion)
             mSlot = 0;
         else
             esm.getHNT(mSlot, "SLOT");

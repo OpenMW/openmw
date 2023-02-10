@@ -15,7 +15,6 @@ QString ContentSelectorModel::EsmFile::sToolTip = QString(
 ContentSelectorModel::EsmFile::EsmFile(QString fileName, ModelItem* parent)
     : ModelItem(parent)
     , mFileName(fileName)
-    , mFormat(0)
 {
 }
 
@@ -36,7 +35,7 @@ void ContentSelectorModel::EsmFile::setDate(const QDateTime& modified)
 
 void ContentSelectorModel::EsmFile::setFormat(int format)
 {
-    mFormat = format;
+    mVersion = format;
 }
 
 void ContentSelectorModel::EsmFile::setFilePath(const QString& path)
@@ -59,7 +58,7 @@ QByteArray ContentSelectorModel::EsmFile::encodedData() const
     QByteArray encodedData;
     QDataStream stream(&encodedData, QIODevice::WriteOnly);
 
-    stream << mFileName << mAuthor << QString::number(mFormat) << mModified.toString() << mPath << mDescription
+    stream << mFileName << mAuthor << QString::number(mVersion) << mModified.toString() << mPath << mDescription
            << mGameFiles;
 
     return encodedData;
@@ -85,7 +84,7 @@ QVariant ContentSelectorModel::EsmFile::fileProperty(const FileProperty prop) co
             break;
 
         case FileProperty_Format:
-            return mFormat;
+            return mVersion;
             break;
 
         case FileProperty_DateModified:
@@ -122,7 +121,7 @@ void ContentSelectorModel::EsmFile::setFileProperty(const FileProperty prop, con
             break;
 
         case FileProperty_Format:
-            mFormat = value.toInt();
+            mVersion = value.toInt();
             break;
 
         case FileProperty_DateModified:

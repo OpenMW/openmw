@@ -60,7 +60,7 @@ namespace ESM
     {
         esm.getHNOT(mBounds, "BOUN");
         esm.getHNOT(mNorthMarkerAngle, "ANGL");
-        int dataFormat = esm.getFormat();
+        const FormatVersion dataFormat = esm.getFormatVersion();
         while (esm.isNextSub("FTEX"))
         {
             esm.getSubHeader();
@@ -73,7 +73,7 @@ namespace ESM
             tex.mImageData.resize(imageSize);
             esm.getExact(&tex.mImageData[0], imageSize);
 
-            if (dataFormat < 7)
+            if (dataFormat <= MaxOldForOfWarFormatVersion)
                 convertFogOfWar(tex.mImageData);
 
             mFogTextures.push_back(tex);

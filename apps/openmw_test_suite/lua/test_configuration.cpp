@@ -5,6 +5,7 @@
 
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm3/formatversion.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/lua/configuration.hpp>
 #include <components/lua/serialization.hpp>
@@ -152,7 +153,7 @@ namespace
         writer.setAuthor("");
         writer.setDescription("");
         writer.setRecordCount(1);
-        writer.setFormat(ESM::Header::CurrentFormat);
+        writer.setFormatVersion(ESM::CurrentContentFormatVersion);
         writer.setVersion();
         writer.addMaster("morrowind.esm", 0);
 

@@ -5,9 +5,6 @@
 
 namespace ESM
 {
-
-    int SavedGame::sCurrentFormat = 22;
-
     void SavedGame::load(ESMReader& esm)
     {
         mPlayerName = esm.getHNString("PLNA");

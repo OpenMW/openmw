@@ -39,12 +39,12 @@ namespace ESM
         mDisposition = 0;
         esm.getHNOT(mDisposition, "DISP");
 
-        bool intFallback = esm.getFormat() < 11;
+        const bool intFallback = esm.getFormatVersion() <= MaxIntFallbackFormatVersion;
         for (int i = 0; i < 27; ++i)
             mSkills[i].load(esm, intFallback);
 
         mWerewolfDeprecatedData = false;
-        if (esm.getFormat() < 8 && esm.peekNextSub("STBA"))
+        if (esm.getFormatVersion() <= MaxWerewolfDeprecatedDataFormatVersion && esm.peekNextSub("STBA"))
         {
             // we have deprecated werewolf skills, stored interleaved
             // Load into one big vector, then remove every 2nd value
@@ -66,7 +66,9 @@ namespace ESM
                 else
                     ++it;
             }
-            assert(skills.size() == 27);
+            if (skills.size() != std::size(mSkills))
+                throw std::runtime_error(
+                    "Invalid number of skill for werewolf deprecated data: " + std::to_string(skills.size()));
             std::copy(skills.begin(), skills.end(), mSkills);
         }
 
