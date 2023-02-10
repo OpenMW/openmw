@@ -416,6 +416,7 @@ namespace MWGui
             spell->mEffects.mList.front().mEffectID);
 
         std::string icon = effect->mIcon;
+        std::replace(icon.begin(), icon.end(), '/', '\\');
         int slashPos = icon.rfind('\\');
         icon.insert(slashPos + 1, "b_");
         icon = Misc::ResourceHelpers::correctIconPath(icon, MWBase::Environment::get().getResourceSystem()->getVFS());
