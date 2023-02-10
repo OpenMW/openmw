@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "components/esm/esmcommon.hpp"
+#include "components/esm3/formatversion.hpp"
 
 namespace ESM
 {
@@ -42,8 +43,6 @@ namespace ESM
     /// \brief File header record
     struct Header
     {
-        static constexpr int CurrentFormat = 1; // most recent known format
-
         // Defines another files (esm or esp) that this file depends upon.
         struct MasterData
         {
@@ -56,7 +55,7 @@ namespace ESM
         std::vector<unsigned char> mSCRS; // Used in .ess savegames only, screenshot
 
         Data mData;
-        int mFormat;
+        FormatVersion mFormatVersion;
         std::vector<MasterData> mMaster;
 
         void blank();

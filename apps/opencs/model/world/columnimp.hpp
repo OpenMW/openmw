@@ -2232,7 +2232,7 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mFormat; }
+        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mFormatVersion; }
 
         bool isEditable() const override { return false; }
     };

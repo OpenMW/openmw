@@ -36,7 +36,7 @@ namespace ESM
         const std::string& getDesc() const { return mHeader.mData.desc; }
         const std::vector<Header::MasterData>& getGameFiles() const { return mHeader.mMaster; }
         const Header& getHeader() const { return mHeader; }
-        int getFormat() const { return mHeader.mFormat; }
+        FormatVersion getFormatVersion() const { return mHeader.mFormatVersion; }
         const NAME& retSubName() const { return mCtx.subName; }
         uint32_t getSubSize() const { return mCtx.leftSub; }
         const std::filesystem::path& getName() const { return mCtx.filename; }

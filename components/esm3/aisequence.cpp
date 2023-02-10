@@ -57,7 +57,7 @@ namespace ESM
             mCellId = esm.getHNOString("CELL");
             mRepeat = false;
             esm.getHNOT(mRepeat, "REPT");
-            if (esm.getFormat() < 18)
+            if (esm.getFormatVersion() <= MaxOldAiPackageFormatVersion)
             {
                 // mDuration isn't saved in the save file, so just giving it "1" for now if the package has a duration.
                 // The exact value of mDuration only matters for repeating packages.
@@ -94,7 +94,7 @@ namespace ESM
             esm.getHNOT(mActive, "ACTV");
             mRepeat = false;
             esm.getHNOT(mRepeat, "REPT");
-            if (esm.getFormat() < 18)
+            if (esm.getFormatVersion() <= MaxOldAiPackageFormatVersion)
             {
                 // mDuration isn't saved in the save file, so just giving it "1" for now if the package has a duration.
                 // The exact value of mDuration only matters for repeating packages.
@@ -265,7 +265,7 @@ namespace ESM
 
             esm.getHNOT(mLastAiPackage, "LAST");
 
-            if (count > 1 && esm.getFormat() < 18)
+            if (count > 1 && esm.getFormatVersion() <= MaxOldAiPackageFormatVersion)
             {
                 for (auto& pkg : mPackages)
                 {

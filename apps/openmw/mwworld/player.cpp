@@ -327,10 +327,10 @@ namespace MWWorld
                 // this is the one object we can not silently drop.
                 throw std::runtime_error("invalid player state record (object state)");
             }
-            if (reader.getFormat() < 17)
+            if (reader.getFormatVersion() <= ESM::MaxClearModifiersFormatVersion)
                 convertMagicEffects(
                     player.mObject.mCreatureStats, player.mObject.mInventory, &player.mObject.mNpcStats);
-            else if (reader.getFormat() < 20)
+            else if (reader.getFormatVersion() <= ESM::MaxOldCreatureStatsFormatVersion)
                 convertStats(player.mObject.mCreatureStats);
 
             if (!player.mObject.mEnabled)
@@ -353,7 +353,7 @@ namespace MWWorld
                     saveStats();
                     setWerewolfStats();
                 }
-                else if (reader.getFormat() < 19)
+                else if (reader.getFormatVersion() <= ESM::MaxOldSkillsAndAttributesFormatVersion)
                 {
                     setWerewolfStats();
                     if (player.mSetWerewolfAcrobatics)

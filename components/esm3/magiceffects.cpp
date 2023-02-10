@@ -24,7 +24,7 @@ namespace ESM
             std::pair<int, float> params;
             esm.getHT(id);
             esm.getHNT(params.first, "BASE");
-            if (esm.getFormat() < 17)
+            if (esm.getFormatVersion() <= MaxClearModifiersFormatVersion)
                 params.second = 0.f;
             else
                 esm.getHNT(params.second, "MODI");

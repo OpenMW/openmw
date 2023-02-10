@@ -4,9 +4,11 @@
 #include <string>
 #include <vector>
 
+#include "components/esm/luascripts.hpp"
+#include "components/esm3/formatversion.hpp"
+
 #include "animationstate.hpp"
 #include "cellref.hpp"
-#include "components/esm/luascripts.hpp"
 #include "locals.hpp"
 
 namespace ESM
@@ -37,7 +39,7 @@ namespace ESM
         // Is there any class-specific state following the ObjectState
         bool mHasCustomState;
 
-        unsigned int mVersion;
+        FormatVersion mVersion = DefaultFormatVersion;
 
         AnimationState mAnimationState;
 
@@ -47,7 +49,6 @@ namespace ESM
             , mCount(0)
             , mFlags(0)
             , mHasCustomState(true)
-            , mVersion(0)
         {
         }
 

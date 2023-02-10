@@ -4,6 +4,8 @@
 #include <QDateTime>
 #include <QStringList>
 
+#include <components/esm3/formatversion.hpp>
+
 #include "modelitem.hpp"
 
 class QMimeData;
@@ -49,7 +51,7 @@ namespace ContentSelectorModel
         inline QString fileName() const { return mFileName; }
         inline QString author() const { return mAuthor; }
         inline QDateTime modified() const { return mModified; }
-        inline float format() const { return mFormat; }
+        ESM::FormatVersion formatVersion() const { return mVersion; }
         inline QString filePath() const { return mPath; }
 
         /// @note Contains file names, not paths.
@@ -58,7 +60,7 @@ namespace ContentSelectorModel
         inline QString toolTip() const
         {
             return sToolTip.arg(mAuthor)
-                .arg(mFormat)
+                .arg(mVersion)
                 .arg(mModified.toString(Qt::ISODate))
                 .arg(mPath)
                 .arg(mDescription)
@@ -76,7 +78,7 @@ namespace ContentSelectorModel
         QString mFileName;
         QString mAuthor;
         QDateTime mModified;
-        int mFormat;
+        ESM::FormatVersion mVersion = ESM::DefaultFormatVersion;
         QString mPath;
         QStringList mGameFiles;
         QString mDescription;

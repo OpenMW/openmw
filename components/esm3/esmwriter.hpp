@@ -45,7 +45,7 @@ namespace ESM
         // It is a good idea to compare this with the value you wrote into the header (setRecordCount)
         // It should be the record count you set + 1 (1 additional record for the TES3 header)
         int getRecordCount() { return mRecordCount; }
-        void setFormat(int format);
+        void setFormatVersion(FormatVersion value);
 
         void clearMaster();
 

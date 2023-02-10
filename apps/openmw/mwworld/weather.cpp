@@ -921,8 +921,7 @@ namespace MWWorld
     {
         if (ESM::REC_WTHR == type)
         {
-            static const int oldestCompatibleSaveFormat = 2;
-            if (reader.getFormat() < oldestCompatibleSaveFormat)
+            if (reader.getFormatVersion() <= ESM::MaxOldWeatherFormatVersion)
             {
                 // Weather state isn't really all that important, so to preserve older save games, we'll just discard
                 // the older weather records, rather than fail to handle the record.

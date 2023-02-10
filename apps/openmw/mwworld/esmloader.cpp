@@ -55,7 +55,7 @@ namespace MWWorld
                 if (!mMasterFileFormat.has_value()
                     && (Misc::StringUtils::ciEndsWith(reader->getName().u8string(), u8".esm")
                         || Misc::StringUtils::ciEndsWith(reader->getName().u8string(), u8".omwgame")))
-                    mMasterFileFormat = reader->getFormat();
+                    mMasterFileFormat = reader->getFormatVersion();
                 break;
             }
             case ESM::Format::Tes4:

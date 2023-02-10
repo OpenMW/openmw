@@ -479,7 +479,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
 
             file->setAuthor(QString::fromUtf8(fileReader.getAuthor().c_str()));
             file->setDate(info.lastModified());
-            file->setFormat(fileReader.getFormat());
+            file->setFormat(fileReader.getFormatVersion());
             file->setFilePath(info.absoluteFilePath());
             file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
 

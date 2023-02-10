@@ -8,7 +8,7 @@ namespace ESM
 
     void SpellState::load(ESMReader& esm)
     {
-        if (esm.getFormat() < 17)
+        if (esm.getFormatVersion() <= MaxClearModifiersFormatVersion)
         {
             while (esm.isNextSub("SPEL"))
             {

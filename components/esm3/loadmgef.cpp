@@ -189,7 +189,7 @@ namespace ESM
         mId = ESM::RefId::stringRefId(indexToId(mIndex));
 
         esm.getHNTSized<36>(mData, "MEDT");
-        if (esm.getFormat() == 0)
+        if (esm.getFormatVersion() == DefaultFormatVersion)
         {
             // don't allow mods to change fixed flags in the legacy format
             mData.mFlags &= (AllowSpellmaking | AllowEnchanting | NegativeLight);

@@ -250,7 +250,7 @@ void MWState::StateManager::saveGame(const std::string& description, const Slot*
         for (const std::string& contentFile : MWBase::Environment::get().getWorld()->getContentFiles())
             writer.addMaster(contentFile, 0); // not using the size information anyway -> use value of 0
 
-        writer.setFormat(ESM::SavedGame::sCurrentFormat);
+        writer.setFormatVersion(ESM::CurrentSaveGameFormatVersion);
 
         // all unused
         writer.setVersion(0);
@@ -400,7 +400,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         ESM::ESMReader reader;
         reader.open(filepath);
 
-        if (reader.getFormat() > ESM::SavedGame::sCurrentFormat)
+        if (reader.getFormatVersion() > ESM::CurrentSaveGameFormatVersion)
             throw std::runtime_error(
                 "This save file was created using a newer version of OpenMW and is thus not supported. Please upgrade "
                 "to the newest OpenMW version to load this file.");

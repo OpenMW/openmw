@@ -2,6 +2,8 @@
 #define CSM_WOLRD_METADATA_H
 
 #include <components/esm/refid.hpp>
+#include <components/esm3/formatversion.hpp>
+
 #include <string>
 
 namespace ESM
@@ -16,7 +18,7 @@ namespace CSMWorld
     {
         ESM::RefId mId;
 
-        int mFormat;
+        ESM::FormatVersion mFormatVersion;
         std::string mAuthor;
         std::string mDescription;
 

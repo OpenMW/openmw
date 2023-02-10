@@ -49,9 +49,9 @@ namespace ESM
         mHeader.mData.records = count;
     }
 
-    void ESMWriter::setFormat(int format)
+    void ESMWriter::setFormatVersion(FormatVersion value)
     {
-        mHeader.mFormat = format;
+        mHeader.mFormatVersion = value;
     }
 
     void ESMWriter::clearMaster()

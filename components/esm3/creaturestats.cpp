@@ -9,7 +9,7 @@ namespace ESM
 
     void CreatureStats::load(ESMReader& esm)
     {
-        bool intFallback = esm.getFormat() < 11;
+        const bool intFallback = esm.getFormatVersion() <= MaxIntFallbackFormatVersion;
         for (int i = 0; i < 8; ++i)
             mAttributes[i].load(esm, intFallback);
 
@@ -37,11 +37,11 @@ namespace ESM
         mHitRecovery = false;
         mBlock = false;
         mRecalcDynamicStats = false;
-        if (esm.getFormat() < 8)
+        if (esm.getFormatVersion() <= MaxWerewolfDeprecatedDataFormatVersion)
         {
             esm.getHNOT(mDead, "DEAD");
             esm.getHNOT(mDeathAnimationFinished, "DFNT");
-            if (esm.getFormat() < 3 && mDead)
+            if (esm.getFormatVersion() <= MaxOldDeathAnimationFormatVersion && mDead)
                 mDeathAnimationFinished = true;
             esm.getHNOT(mDied, "DIED");
             esm.getHNOT(mMurdered, "MURD");
@@ -91,7 +91,7 @@ namespace ESM
 
         mLastHitAttemptObject = ESM::RefId::stringRefId(esm.getHNOString("LHAT"));
 
-        if (esm.getFormat() < 8)
+        if (esm.getFormatVersion() <= MaxWerewolfDeprecatedDataFormatVersion)
             esm.getHNOT(mRecalcDynamicStats, "CALC");
 
         mDrawState = 0;
@@ -115,7 +115,7 @@ namespace ESM
         mAiSequence.load(esm);
         mMagicEffects.load(esm);
 
-        if (esm.getFormat() < 17)
+        if (esm.getFormatVersion() <= MaxClearModifiersFormatVersion)
         {
             while (esm.isNextSub("SUMM"))
             {
@@ -168,7 +168,7 @@ namespace ESM
 
             mCorprusSpells[id] = stats;
         }
-        if (esm.getFormat() <= 18)
+        if (esm.getFormatVersion() <= MaxOldSkillsAndAttributesFormatVersion)
             mMissingACDT = mGoldPool == std::numeric_limits<int>::min();
         else
         {
