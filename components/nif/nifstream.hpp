@@ -169,6 +169,17 @@ namespace Nif
             return result;
         }
 
+        /// Read a sequence of null-terminated strings
+        std::string getStringPalette()
+        {
+            size_t size = readLittleEndianType<uint32_t>(inp);
+            std::string str(size, '\0');
+            inp->read(str.data(), size);
+            if (inp->bad())
+                throw std::runtime_error("Failed to read string palette of " + std::to_string(size) + " chars");
+            return str;
+        }
+
         void getChars(std::vector<char>& vec, size_t size)
         {
             vec.resize(size);

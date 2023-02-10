@@ -470,7 +470,7 @@ namespace Nif
 
     void NiStringPalette::read(NIFStream* nif)
     {
-        palette = nif->getString();
+        palette = nif->getStringPalette();
         if (nif->getUInt() != palette.size())
             Log(Debug::Warning) << "NIFFile Warning: Failed size check in NiStringPalette. File: "
                                 << nif->getFile().getFilename();
