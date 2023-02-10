@@ -2,7 +2,6 @@
 
 #include <QFileDialog>
 #include <QMessageBox>
-#include <QTextCodec>
 #include <QThread>
 
 #include "mainwizard.hpp"
