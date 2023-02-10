@@ -149,8 +149,8 @@ namespace Nif
     {
         NiGeometryData::read(nif);
 
-        // Every strip with n points defines n-2 triangles, so this should be unnecessary.
-        /*int tris =*/nif->getUShort();
+        mNumTriangles = nif->getUShort();
+
         // Number of triangle strips
         int numStrips = nif->getUShort();
 

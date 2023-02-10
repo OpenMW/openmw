@@ -57,22 +57,11 @@ namespace
 
     void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriStripsData& data, const osg::Matrixf& transform)
     {
-        const std::vector<osg::Vec3f>& vertices = data.vertices;
-        const std::vector<std::vector<unsigned short>>& strips = data.strips;
-        mesh.preallocateVertices(static_cast<int>(vertices.size()));
-        int numTriangles = 0;
-        for (const std::vector<unsigned short>& strip : strips)
-        {
-            // Each strip with N points contains information about N-2 triangles.
-            if (strip.size() >= 3)
-                numTriangles += static_cast<int>(strip.size() - 2);
-        }
-        mesh.preallocateIndices(static_cast<int>(numTriangles));
+        mesh.preallocateVertices(static_cast<int>(data.vertices.size()));
+        mesh.preallocateIndices(static_cast<int>(data.mNumTriangles));
 
-        // It's triangulation time. Totally not a NifSkope spell ripoff.
-        for (const std::vector<unsigned short>& strip : strips)
+        for (const std::vector<unsigned short>& strip : data.strips)
         {
-            // Can't make a triangle from less than 3 points.
             if (strip.size() < 3)
                 continue;
 
@@ -84,21 +73,15 @@ namespace
                 a = b;
                 b = c;
                 c = strip[i];
-                if (a != b && b != c && a != c)
-                {
-                    if (i % 2 == 0)
-                    {
-                        mesh.addTriangle(Misc::Convert::toBullet(vertices[a] * transform),
-                            Misc::Convert::toBullet(vertices[b] * transform),
-                            Misc::Convert::toBullet(vertices[c] * transform));
-                    }
-                    else
-                    {
-                        mesh.addTriangle(Misc::Convert::toBullet(vertices[a] * transform),
-                            Misc::Convert::toBullet(vertices[c] * transform),
-                            Misc::Convert::toBullet(vertices[b] * transform));
-                    }
-                }
+                if (a == b || b == c || a == c)
+                    continue;
+                const btVector3 vertexA = Misc::Convert::toBullet(data.vertices[a] * transform);
+                const btVector3 vertexB = Misc::Convert::toBullet(data.vertices[b] * transform);
+                const btVector3 vertexC = Misc::Convert::toBullet(data.vertices[c] * transform);
+                if (i % 2 == 0)
+                    mesh.addTriangle(vertexA, vertexB, vertexC);
+                else
+                    mesh.addTriangle(vertexA, vertexC, vertexB);
             }
         }
     }
