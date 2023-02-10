@@ -53,6 +53,13 @@ namespace ESM
                 mWriter.writeT(RefIdType::Generated);
                 mWriter.writeT(v.getValue());
             }
+
+            void operator()(IndexRefId v) const
+            {
+                mWriter.writeT(RefIdType::Generated);
+                mWriter.writeT(v.getRecordType());
+                mWriter.writeT(v.getValue());
+            }
         };
     }
 

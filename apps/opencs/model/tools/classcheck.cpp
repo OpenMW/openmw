@@ -71,7 +71,7 @@ void CSMTools::ClassCheckStage::perform(int stage, CSMDoc::Messages& messages)
     for (auto& skill : skills)
         if (skill.second > 1)
         {
-            messages.add(id, "Skill " + ESM::Skill::indexToId(skill.first) + " is listed more than once", "",
-                CSMDoc::Message::Severity_Error);
+            messages.add(id, "Skill " + ESM::Skill::indexToRefId(skill.first).toString() + " is listed more than once",
+                "", CSMDoc::Message::Severity_Error);
         }
 }

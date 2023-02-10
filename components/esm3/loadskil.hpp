@@ -87,7 +87,7 @@ namespace ESM
         void blank();
         ///< Set record to default state (does not touch the ID/index).
 
-        static std::string indexToId(int index);
+        static RefId indexToRefId(int index);
     };
 }
 #endif

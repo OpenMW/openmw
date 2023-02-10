@@ -404,7 +404,7 @@ namespace CSMWorld
         {
             int skill = record.get().mData.getSkill(mIndex, mMajor);
 
-            return QString::fromUtf8(ESM::Skill::indexToId(skill).c_str());
+            return QString::fromStdString(ESM::Skill::indexToRefId(skill).toString());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override

@@ -450,7 +450,7 @@ namespace
         const int index = 3;
         decltype(RecordType::mId) refId;
         if constexpr (hasIndex<RecordType> && !std::is_same_v<RecordType, ESM::LandTexture>)
-            refId = ESM::RefId::stringRefId(RecordType::indexToId(index));
+            refId = RecordType::indexToRefId(index);
         else
             refId = ESM::StringRefId("foobar");
 

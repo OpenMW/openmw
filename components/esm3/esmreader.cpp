@@ -463,6 +463,14 @@ namespace ESM
                 getExact(&generated, sizeof(std::uint64_t));
                 return RefId::generated(generated);
             }
+            case RefIdType::Index:
+            {
+                RecNameInts recordType{};
+                getExact(&recordType, sizeof(std::uint32_t));
+                std::uint32_t index{};
+                getExact(&index, sizeof(std::uint32_t));
+                return RefId::index(recordType, index);
+            }
         }
 
         fail("Unsupported RefIdType: " + std::to_string(static_cast<unsigned>(refIdType)));

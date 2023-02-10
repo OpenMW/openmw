@@ -134,7 +134,7 @@ void CSMDoc::Document::addOptionalMagicEffects()
     {
         ESM::MagicEffect effect;
         effect.mIndex = i;
-        effect.mId = ESM::RefId::stringRefId(ESM::MagicEffect::indexToId(i));
+        effect.mId = ESM::MagicEffect::indexToRefId(i);
         effect.blank();
 
         addOptionalMagicEffect(effect);
@@ -207,7 +207,7 @@ void CSMDoc::Document::createBase()
     {
         ESM::Skill record;
         record.mIndex = i;
-        record.mId = ESM::RefId::stringRefId(ESM::Skill::indexToId(record.mIndex));
+        record.mId = ESM::Skill::indexToRefId(record.mIndex);
         record.blank();
 
         getData().getSkills().add(record);
@@ -288,7 +288,7 @@ void CSMDoc::Document::createBase()
         ESM::MagicEffect record;
 
         record.mIndex = i;
-        record.mId = ESM::RefId::stringRefId(ESM::MagicEffect::indexToId(i));
+        record.mId = ESM::MagicEffect::indexToRefId(i);
 
         record.blank();
 

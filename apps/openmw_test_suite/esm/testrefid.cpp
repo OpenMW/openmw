@@ -213,6 +213,7 @@ namespace ESM
             { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), { 'a', 0, -1, '\n', '\t' } },
             { RefId::formIdRefId(42), "42" },
             { RefId::generated(42), "42" },
+            { RefId::index(ESM::REC_ARMO, 42), "ARMO, 42" },
         };
 
         INSTANTIATE_TEST_SUITE_P(ESMRefIdToString, ESMRefIdToStringTest, ValuesIn(toStringParams));
@@ -243,6 +244,7 @@ namespace ESM
             { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), "String{a\\x0\\xFF\\xA\\x9}" },
             { RefId::formIdRefId(42), "FormId{42}" },
             { RefId::generated(42), "Generated{42}" },
+            { RefId::index(ESM::REC_ARMO, 42), "Index{ARMO, 42}" },
         };
 
         INSTANTIATE_TEST_SUITE_P(ESMRefIdToDebugString, ESMRefIdToDebugStringTest, ValuesIn(toDebugStringParams));

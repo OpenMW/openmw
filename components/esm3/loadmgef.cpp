@@ -1,7 +1,5 @@
 #include "loadmgef.hpp"
 
-#include <sstream>
-
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -11,156 +9,6 @@ namespace ESM
 {
     namespace
     {
-        static const char* sIds[MagicEffect::Length] = {
-            "WaterBreathing",
-            "SwiftSwim",
-            "WaterWalking",
-            "Shield",
-            "FireShield",
-            "LightningShield",
-            "FrostShield",
-            "Burden",
-            "Feather",
-            "Jump",
-            "Levitate",
-            "SlowFall",
-            "Lock",
-            "Open",
-            "FireDamage",
-            "ShockDamage",
-            "FrostDamage",
-            "DrainAttribute",
-            "DrainHealth",
-            "DrainMagicka",
-            "DrainFatigue",
-            "DrainSkill",
-            "DamageAttribute",
-            "DamageHealth",
-            "DamageMagicka",
-            "DamageFatigue",
-            "DamageSkill",
-            "Poison",
-            "WeaknessToFire",
-            "WeaknessToFrost",
-            "WeaknessToShock",
-            "WeaknessToMagicka",
-            "WeaknessToCommonDisease",
-            "WeaknessToBlightDisease",
-            "WeaknessToCorprusDisease",
-            "WeaknessToPoison",
-            "WeaknessToNormalWeapons",
-            "DisintegrateWeapon",
-            "DisintegrateArmor",
-            "Invisibility",
-            "Chameleon",
-            "Light",
-            "Sanctuary",
-            "NightEye",
-            "Charm",
-            "Paralyze",
-            "Silence",
-            "Blind",
-            "Sound",
-            "CalmHumanoid",
-            "CalmCreature",
-            "FrenzyHumanoid",
-            "FrenzyCreature",
-            "DemoralizeHumanoid",
-            "DemoralizeCreature",
-            "RallyHumanoid",
-            "RallyCreature",
-            "Dispel",
-            "Soultrap",
-            "Telekinesis",
-            "Mark",
-            "Recall",
-            "DivineIntervention",
-            "AlmsiviIntervention",
-            "DetectAnimal",
-            "DetectEnchantment",
-            "DetectKey",
-            "SpellAbsorption",
-            "Reflect",
-            "CureCommonDisease",
-            "CureBlightDisease",
-            "CureCorprusDisease",
-            "CurePoison",
-            "CureParalyzation",
-            "RestoreAttribute",
-            "RestoreHealth",
-            "RestoreMagicka",
-            "RestoreFatigue",
-            "RestoreSkill",
-            "FortifyAttribute",
-            "FortifyHealth",
-            "FortifyMagicka",
-            "FortifyFatigue",
-            "FortifySkill",
-            "FortifyMaximumMagicka",
-            "AbsorbAttribute",
-            "AbsorbHealth",
-            "AbsorbMagicka",
-            "AbsorbFatigue",
-            "AbsorbSkill",
-            "ResistFire",
-            "ResistFrost",
-            "ResistShock",
-            "ResistMagicka",
-            "ResistCommonDisease",
-            "ResistBlightDisease",
-            "ResistCorprusDisease",
-            "ResistPoison",
-            "ResistNormalWeapons",
-            "ResistParalysis",
-            "RemoveCurse",
-            "TurnUndead",
-            "SummonScamp",
-            "SummonClannfear",
-            "SummonDaedroth",
-            "SummonDremora",
-            "SummonAncestralGhost",
-            "SummonSkeletalMinion",
-            "SummonBonewalker",
-            "SummonGreaterBonewalker",
-            "SummonBonelord",
-            "SummonWingedTwilight",
-            "SummonHunger",
-            "SummonGoldenSaint",
-            "SummonFlameAtronach",
-            "SummonFrostAtronach",
-            "SummonStormAtronach",
-            "FortifyAttack",
-            "CommandCreature",
-            "CommandHumanoid",
-            "BoundDagger",
-            "BoundLongsword",
-            "BoundMace",
-            "BoundBattleAxe",
-            "BoundSpear",
-            "BoundLongbow",
-            "ExtraSpell",
-            "BoundCuirass",
-            "BoundHelm",
-            "BoundBoots",
-            "BoundShield",
-            "BoundGloves",
-            "Corprus",
-            "Vampirism",
-            "SummonCenturionSphere",
-            "SunDamage",
-            "StuntedMagicka",
-
-            // Tribunal only
-            "SummonFabricant",
-
-            // Bloodmoon only
-            "SummonWolf",
-            "SummonBear",
-            "SummonBonewolf",
-            "SummonCreature04",
-            "SummonCreature05",
-        };
-
         const int NumberOfHardcodedFlags = 143;
         const int HardcodedFlags[NumberOfHardcodedFlags] = { 0x11c8, 0x11c0, 0x11c8, 0x11e0, 0x11e0, 0x11e0, 0x11e0,
             0x11d0, 0x11c0, 0x11c0, 0x11e0, 0x11c0, 0x11184, 0x11184, 0x1f0, 0x1f0, 0x1f0, 0x11d2, 0x11f0, 0x11d0,
@@ -186,7 +34,7 @@ namespace ESM
 
         esm.getHNT(mIndex, "INDX");
 
-        mId = ESM::RefId::stringRefId(indexToId(mIndex));
+        mId = indexToRefId(mIndex);
 
         esm.getHNTSized<36>(mData, "MEDT");
         if (esm.getFormatVersion() == DefaultFormatVersion)
@@ -592,28 +440,10 @@ namespace ESM
         mDescription.clear();
     }
 
-    std::string MagicEffect::indexToId(int index)
+    RefId MagicEffect::indexToRefId(int index)
     {
-        std::ostringstream stream;
-
-        if (index != -1)
-        {
-            stream << "#";
-
-            if (index < 100)
-            {
-                stream << "0";
-
-                if (index < 10)
-                    stream << "0";
-            }
-
-            stream << index;
-
-            if (index >= 0 && index < Length)
-                stream << sIds[index];
-        }
-
-        return stream.str();
+        if (index == -1)
+            return RefId();
+        return RefId::index(sRecordId, static_cast<std::uint32_t>(index));
     }
 }
