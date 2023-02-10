@@ -118,8 +118,12 @@ namespace Shader
         int mMaxTextureUnits = 0;
         int mReservedTextureUnits = 0;
         std::unique_ptr<HotReloadManager> mHotReloadManager;
-        struct ReservedTextureUnits { int index = -1; int count = 0; };
-        std::array<ReservedTextureUnits, static_cast<int>(Slot::SLOT_COUNT) > mReservedTextureUnitsBySlot = {};
+        struct ReservedTextureUnits
+        {
+            int index = -1;
+            int count = 0;
+        };
+        std::array<ReservedTextureUnits, static_cast<int>(Slot::SLOT_COUNT)> mReservedTextureUnitsBySlot = {};
     };
 
     bool parseForeachDirective(std::string& source, const std::string& templateName, size_t foundPos);
