@@ -28,8 +28,8 @@ variables:
   extends: .Ubuntu_Image
   cache:
     paths:
-      - apt-cache/
-      - ccache/
+    - apt-cache/
+    - ccache/
   stage: build
   variables:
     CMAKE_EXE_LINKER_FLAGS: -fuse-ld=mold
@@ -74,8 +74,8 @@ Coverity:
   cache:
     key: Coverity.ubuntu_20.04.v1
     paths:
-      - apt-cache/
-      - ccache/
+    - apt-cache/
+    - ccache/
   variables:
     CCACHE_SIZE: 2G
     CC: clang-11
@@ -119,7 +119,7 @@ Ubuntu_GCC:
     CCACHE_SIZE: 4G
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
-
+  
 Clang_Format:
   extends: .Ubuntu_Image
   stage: checks
@@ -389,9 +389,9 @@ Ubuntu_Clang_integration_tests:
       - $CI_PROJECT_ID == "7107382"
   cache:
     paths:
-      - ccache/
+    - ccache/
   script:
-    - rm -fr build # remove the build directory
+    - rm -fr build  # remove the build directory
     - CI/before_install.osx.sh
     - export CCACHE_BASEDIR="$(pwd)"
     - export CCACHE_DIR="$(pwd)/ccache"
@@ -420,29 +420,29 @@ macOS12_Xcode13:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
   before_script:
-    - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-    - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
-    - choco source disable -n=chocolatey
-    - choco install git --force --params "/GitAndUnixToolsOnPath" -y
-    - choco install 7zip -y
-    - choco install ccache -y
-    - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
-    - choco install vswhere -y
-    - choco install ninja -y
-    - choco install python -y
-    - refreshenv
-    - |
-      function Make-SafeFileName {
-        param(
-          [Parameter(Mandatory=$true)]
-          [String]
-          $FileName
-        )
-        [IO.Path]::GetInvalidFileNameChars() | ForEach-Object {
-          $FileName = $FileName.Replace($_, '_')
-        }
-        return $FileName
+  - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+  - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
+  - choco source disable -n=chocolatey
+  - choco install git --force --params "/GitAndUnixToolsOnPath" -y
+  - choco install 7zip -y
+  - choco install ccache -y
+  - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
+  - choco install vswhere -y
+  - choco install ninja -y
+  - choco install python -y
+  - refreshenv
+  - |
+    function Make-SafeFileName {
+      param(
+        [Parameter(Mandatory=$true)]
+        [String]
+        $FileName
+      )
+      [IO.Path]::GetInvalidFileNameChars() | ForEach-Object {
+        $FileName = $FileName.Replace($_, '_')
       }
+      return $FileName
+    }
   stage: build
   script:
     - $time = (Get-Date -Format "HH:mm:ss")
@@ -471,22 +471,22 @@ macOS12_Xcode13:
   cache:
     key: ninja-v5
     paths:
-      - ccache
-      - deps
-      - MSVC2019_64_Ninja/deps/Qt
+    - ccache
+    - deps
+    - MSVC2019_64_Ninja/deps/Qt
   artifacts:
     when: always
     paths:
-      - "*.zip"
-      - "*.log"
-      - MSVC2019_64_Ninja/*.log
-      - MSVC2019_64_Ninja/*/*.log
-      - MSVC2019_64_Ninja/*/*/*.log
-      - MSVC2019_64_Ninja/*/*/*/*.log
-      - MSVC2019_64_Ninja/*/*/*/*/*.log
-      - MSVC2019_64_Ninja/*/*/*/*/*/*.log
-      - MSVC2019_64_Ninja/*/*/*/*/*/*/*.log
-      - MSVC2019_64_Ninja/*/*/*/*/*/*/*/*.log
+    - "*.zip"
+    - "*.log"
+    - MSVC2019_64_Ninja/*.log
+    - MSVC2019_64_Ninja/*/*.log
+    - MSVC2019_64_Ninja/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*/*/*.log
+    - MSVC2019_64_Ninja/*/*/*/*/*/*/*/*.log
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
@@ -523,28 +523,28 @@ macOS12_Xcode13:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
   before_script:
-    - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-    - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
-    - choco source disable -n=chocolatey
-    - choco install git --force --params "/GitAndUnixToolsOnPath" -y
-    - choco install 7zip -y
-    - choco install ccache -y
-    - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
-    - choco install vswhere -y
-    - choco install python -y
-    - refreshenv
-    - |
-      function Make-SafeFileName {
-        param(
-          [Parameter(Mandatory=$true)]
-          [String]
-          $FileName
-        )
-        [IO.Path]::GetInvalidFileNameChars() | ForEach-Object {
-          $FileName = $FileName.Replace($_, '_')
-        }
-        return $FileName
+  - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+  - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
+  - choco source disable -n=chocolatey
+  - choco install git --force --params "/GitAndUnixToolsOnPath" -y
+  - choco install 7zip -y
+  - choco install ccache -y
+  - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
+  - choco install vswhere -y
+  - choco install python -y
+  - refreshenv
+  - |
+    function Make-SafeFileName {
+      param(
+        [Parameter(Mandatory=$true)]
+        [String]
+        $FileName
+      )
+      [IO.Path]::GetInvalidFileNameChars() | ForEach-Object {
+        $FileName = $FileName.Replace($_, '_')
       }
+      return $FileName
+    }
   stage: build
   script:
     - $time = (Get-Date -Format "HH:mm:ss")
@@ -572,22 +572,22 @@ macOS12_Xcode13:
   cache:
     key: msbuild-v5
     paths:
-      - ccache
-      - deps
-      - MSVC2019_64/deps/Qt
+    - ccache
+    - deps
+    - MSVC2019_64/deps/Qt
   artifacts:
     when: always
     paths:
-      - "*.zip"
-      - "*.log"
-      - MSVC2019_64/*.log
-      - MSVC2019_64/*/*.log
-      - MSVC2019_64/*/*/*.log
-      - MSVC2019_64/*/*/*/*.log
-      - MSVC2019_64/*/*/*/*/*.log
-      - MSVC2019_64/*/*/*/*/*/*.log
-      - MSVC2019_64/*/*/*/*/*/*/*.log
-      - MSVC2019_64/*/*/*/*/*/*/*/*.log
+    - "*.zip"
+    - "*.log"
+    - MSVC2019_64/*.log
+    - MSVC2019_64/*/*.log
+    - MSVC2019_64/*/*/*.log
+    - MSVC2019_64/*/*/*/*.log
+    - MSVC2019_64/*/*/*/*/*.log
+    - MSVC2019_64/*/*/*/*/*/*.log
+    - MSVC2019_64/*/*/*/*/*/*/*.log
+    - MSVC2019_64/*/*/*/*/*/*/*/*.log
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
@@ -620,6 +620,7 @@ Windows_MSBuild_RelWithDebInfo:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
     - if: $CI_PIPELINE_SOURCE == "push"
     - if: $CI_PIPELINE_SOURCE == "schedule"
+
 
 .Ubuntu_AndroidNDK_arm64-v8a:
   tags:
@@ -681,21 +682,21 @@ Windows_MSBuild_RelWithDebInfo:
     - scripts/find_missing_merge_requests.py --project_id=$CI_PROJECT_ID --ignored_mrs_path=$CI_PROJECT_DIR/.resubmitted_merge_requests.txt
 
 .flatpak:
-  image: "docker.io/bilelmoussaoui/flatpak-github-actions"
-  stage: build
-  script:
-    - flatpak install -y flathub org.kde.Platform/x86_64/5.15-21.08
-    - flatpak install -y flathub org.kde.Sdk/x86_64/5.15-21.08
-    - flatpak-builder --ccache --force-clean --repo=repo build CI/org.openmw.OpenMW.devel.yaml
-    - flatpak build-bundle ./repo openmw.flatpak org.openmw.OpenMW.devel
-  cache:
-    key: flatpak
-    paths:
-      - ".flatpak-builder"
-  artifacts:
-    untracked: false
-    paths:
-      - "openmw.flatpak"
-  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
-  # Flatpak Builds compile all dependencies aswell so need more time. Build results of libraries are cached
-  timeout: 4h
+    image: 'docker.io/bilelmoussaoui/flatpak-github-actions'
+    stage: build
+    script:
+      - flatpak install -y flathub org.kde.Platform/x86_64/5.15-21.08
+      - flatpak install -y flathub org.kde.Sdk/x86_64/5.15-21.08
+      - flatpak-builder --ccache --force-clean --repo=repo build CI/org.openmw.OpenMW.devel.yaml
+      - flatpak build-bundle ./repo openmw.flatpak org.openmw.OpenMW.devel
+    cache:
+      key: flatpak
+      paths: 
+        - ".flatpak-builder"
+    artifacts:
+      untracked: false
+      paths:
+        - "openmw.flatpak"
+    # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+    # Flatpak Builds compile all dependencies aswell so need more time. Build results of libraries are cached
+    timeout: 4h
