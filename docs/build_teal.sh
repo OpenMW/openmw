@@ -1,5 +1,12 @@
-# Requires the LUAROCKS variable to be set to the luarocks/bin directory, e. g. `~/.luarocks/bin`
-# takes an absolute path to the output directory as the argument
+if [ -z "$LUAROCKS" ]; then
+  echo "Requires the LUAROCKS variable to be set to the luarocks/bin directory, e. g. `~/.luarocks/bin`"
+  exit
+fi
+
+if [ -z "$1" ]; then
+  echo "Takes an absolute path to the output directory as the argument"
+  exit
+fi
 
 DOCS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 FILES_DIR=$(realpath $DOCS_DIR/../files)
