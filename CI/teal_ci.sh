@@ -9,9 +9,6 @@ git clone https://github.com/teal-language/cyan.git --depth 1
 cd cyan
 luarocks make cyan-dev-1.rockspec
 
-luarocks show openmwluadocumentor
-luarocks show cyan
-
 LUAROCKS=~/luarocks/bin
 export LUAROCKS
 popd
