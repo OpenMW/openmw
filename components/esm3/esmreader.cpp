@@ -297,16 +297,18 @@ namespace ESM
 
     void ESMReader::getSubHeader()
     {
-        if (mCtx.leftRec < sizeof(mCtx.leftSub))
-            fail("End of record while reading sub-record header");
+        if (mCtx.leftRec < static_cast<std::streamsize>(sizeof(mCtx.leftSub)))
+            fail("End of record while reading sub-record header: " + std::to_string(mCtx.leftRec) + " < "
+                + std::to_string(sizeof(mCtx.leftSub)));
 
         // Get subrecord size
-        getT(mCtx.leftSub);
+        getUint(mCtx.leftSub);
         mCtx.leftRec -= sizeof(mCtx.leftSub);
 
         // Adjust number of record bytes left
         if (mCtx.leftRec < mCtx.leftSub)
-            fail("Record size is larger than rest of file");
+            fail("Record size is larger than rest of file: " + std::to_string(mCtx.leftRec) + " < "
+                + std::to_string(mCtx.leftSub));
         mCtx.leftRec -= mCtx.leftSub;
     }
 
@@ -335,12 +337,14 @@ namespace ESM
     void ESMReader::getRecHeader(uint32_t& flags)
     {
         // General error checking
-        if (mCtx.leftFile < 3 * sizeof(uint32_t))
+        if (mCtx.leftFile < static_cast<std::streamsize>(3 * sizeof(uint32_t)))
             fail("End of file while reading record header");
         if (mCtx.leftRec)
             fail("Previous record contains unread bytes");
 
-        getUint(mCtx.leftRec);
+        std::uint32_t leftRec = 0;
+        getUint(leftRec);
+        mCtx.leftRec = static_cast<std::streamsize>(leftRec);
         getUint(flags); // This header entry is always zero
         getUint(flags);
         mCtx.leftFile -= 3 * sizeof(uint32_t);

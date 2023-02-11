@@ -1,3 +1,4 @@
+#include <components/esm/fourcc.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/variant.hpp>
@@ -11,6 +12,8 @@ namespace
 {
     using namespace testing;
     using namespace ESM;
+
+    constexpr std::uint32_t fakeRecordId = fourCC("FAKE");
 
     Variant makeVariant(VarType type)
     {
@@ -430,25 +433,28 @@ namespace
         std::ostringstream out;
         ESMWriter writer;
         writer.save(out);
+        writer.startRecord(fakeRecordId);
         variant.write(writer, format);
+        writer.endRecord(fakeRecordId);
         writer.close();
         return out.str();
     }
 
-    Variant read(const Variant::Format format, const std::string& data)
+    void read(const Variant::Format format, const std::string& data, Variant& result)
     {
-        Variant result;
         ESMReader reader;
-        reader.open(std::make_unique<std::istringstream>(data), "");
+        reader.open(std::make_unique<std::istringstream>(data), "stream");
+        ASSERT_TRUE(reader.hasMoreRecs());
+        ASSERT_EQ(reader.getRecName().toInt(), fakeRecordId);
+        reader.getRecHeader();
         result.read(reader, format);
-        return result;
     }
 
-    Variant writeAndRead(const Variant& variant, const Variant::Format format, std::size_t dataSize)
+    void writeAndRead(const Variant& variant, const Variant::Format format, std::size_t dataSize, Variant& result)
     {
         const std::string data = write(variant, format);
         EXPECT_EQ(data.size(), dataSize);
-        return read(format, data);
+        read(format, data, result);
     }
 
     struct ESMVariantToESMTest : TestWithParam<WriteToESMTestCase>
@@ -458,36 +464,27 @@ namespace
     TEST_P(ESMVariantToESMTest, deserialized_is_equal_to_serialized)
     {
         const auto param = GetParam();
-        const auto result = writeAndRead(param.mVariant, param.mFormat, param.mDataSize);
+        ESM::Variant result;
+        writeAndRead(param.mVariant, param.mFormat, param.mDataSize, result);
         ASSERT_EQ(param.mVariant, result);
     }
 
-    INSTANTIATE_TEST_SUITE_P(VariantAndData, ESMVariantToESMTest,
-        Values(WriteToESMTestCase{ Variant(), Variant::Format_Gmst, 324 },
-            WriteToESMTestCase{ Variant(int{ 42 }), Variant::Format_Global, 345 },
-            WriteToESMTestCase{ Variant(float{ 2.7f }), Variant::Format_Global, 345 },
-            WriteToESMTestCase{ Variant(float{ 2.7f }), Variant::Format_Info, 336 },
-            WriteToESMTestCase{ Variant(float{ 2.7f }), Variant::Format_Local, 336 },
-            WriteToESMTestCase{ makeVariant(VT_Short, 42), Variant::Format_Global, 345 },
-            WriteToESMTestCase{ makeVariant(VT_Short, 42), Variant::Format_Local, 334 },
-            WriteToESMTestCase{ makeVariant(VT_Int, 42), Variant::Format_Info, 336 },
-            WriteToESMTestCase{ makeVariant(VT_Int, 42), Variant::Format_Local, 336 }));
-
-    struct ESMVariantToESMNoneTest : TestWithParam<WriteToESMTestCase>
-    {
+    const std::array deserializedParams = {
+        WriteToESMTestCase{ Variant(), Variant::Format_Gmst, 340 },
+        WriteToESMTestCase{ Variant(int{ 42 }), Variant::Format_Global, 361 },
+        WriteToESMTestCase{ Variant(float{ 2.7f }), Variant::Format_Global, 361 },
+        WriteToESMTestCase{ Variant(float{ 2.7f }), Variant::Format_Info, 352 },
+        WriteToESMTestCase{ Variant(float{ 2.7f }), Variant::Format_Local, 352 },
+        WriteToESMTestCase{ makeVariant(VT_Short, 42), Variant::Format_Global, 361 },
+        WriteToESMTestCase{ makeVariant(VT_Short, 42), Variant::Format_Local, 350 },
+        WriteToESMTestCase{ makeVariant(VT_Int, 42), Variant::Format_Info, 352 },
+        WriteToESMTestCase{ makeVariant(VT_Int, 42), Variant::Format_Local, 352 },
+        WriteToESMTestCase{ Variant(float{ 2.7f }), Variant::Format_Gmst, 352 },
+        WriteToESMTestCase{ Variant(std::string("foo")), Variant::Format_Gmst, 351 },
+        WriteToESMTestCase{ makeVariant(VT_Int, 42), Variant::Format_Gmst, 352 },
     };
 
-    TEST_P(ESMVariantToESMNoneTest, deserialized_is_none)
-    {
-        const auto param = GetParam();
-        const auto result = writeAndRead(param.mVariant, param.mFormat, param.mDataSize);
-        ASSERT_EQ(Variant(), result);
-    }
-
-    INSTANTIATE_TEST_SUITE_P(VariantAndData, ESMVariantToESMNoneTest,
-        Values(WriteToESMTestCase{ Variant(float{ 2.7f }), Variant::Format_Gmst, 336 },
-            WriteToESMTestCase{ Variant(std::string("foo")), Variant::Format_Gmst, 335 },
-            WriteToESMTestCase{ makeVariant(VT_Int, 42), Variant::Format_Gmst, 336 }));
+    INSTANTIATE_TEST_SUITE_P(VariantAndData, ESMVariantToESMTest, ValuesIn(deserializedParams));
 
     struct ESMVariantWriteToESMFailTest : TestWithParam<WriteToESMTestCase>
     {

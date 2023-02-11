@@ -188,8 +188,9 @@ namespace ESM
     struct ESM_Context
     {
         std::filesystem::path filename;
-        uint32_t leftRec, leftSub;
-        size_t leftFile;
+        std::streamsize leftRec;
+        std::uint32_t leftSub;
+        std::streamsize leftFile;
         NAME recName, subName;
         // When working with multiple esX files, we will generate lists of all files that
         //  actually contribute to a specific cell. Therefore, we need to store the index
