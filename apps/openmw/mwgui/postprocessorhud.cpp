@@ -445,6 +445,9 @@ namespace MWGui
         }
 
         auto tryFocus = [this](ListWrapper* widget, const std::string& hint) {
+            MyGUI::Widget* oldFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+            if (oldFocus == mFilter)
+                return;
             size_t index = widget->findItemIndexWith(hint);
 
             if (index != MyGUI::ITEM_NONE)
