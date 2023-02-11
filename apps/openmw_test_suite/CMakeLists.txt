@@ -90,6 +90,7 @@ file(GLOB UNITTEST_SRC_FILES
     fx/technique.cpp
 
     esm3/readerscache.cpp
+    esm3/testsaveload.cpp
 
     nifosg/testnifloader.cpp
 )
