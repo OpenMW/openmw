@@ -9,6 +9,8 @@
 #include <components/fx/widgets.hpp>
 #include <components/fx/technique.hpp>
 
+#include <components/misc/utf8stream.hpp>
+
 #include <components/widgets/box.hpp>
 
 #include "../mwrender/postprocessor.hpp"
@@ -396,8 +398,14 @@ namespace MWGui
             if (!technique)
                 continue;
 
-            if (!technique->getHidden() && !processor->isTechniqueEnabled(technique) && name.find(mFilter->getCaption()) != std::string::npos)
-                mInactiveList->addItem(name, technique);
+            if (!technique->getHidden() && !processor->isTechniqueEnabled(technique))
+            {
+                std::string lowerName = Utf8Stream::lowerCaseUtf8(name);
+                std::string lowerCaption = mFilter->getCaption();
+                lowerCaption = Utf8Stream::lowerCaseUtf8(lowerCaption);
+                if (lowerName.find(lowerCaption) != std::string::npos)
+                    mInactiveList->addItem(name, technique);
+            }
         }
 
         for (auto technique : processor->getTechniques())
@@ -408,6 +416,10 @@ namespace MWGui
 
         auto tryFocus = [this](ListWrapper* widget, const std::string& hint)
         {
+            MyGUI::Widget* oldFocus = MyGUI::InputManager::getInstance().getKeyFocusWidget();
+            if (oldFocus == mFilter)
+                return;
+
             size_t index = widget->findItemIndexWith(hint);
 
             if (index != MyGUI::ITEM_NONE)
