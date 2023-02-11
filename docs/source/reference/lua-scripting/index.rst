@@ -12,4 +12,5 @@ OpenMW Lua scripting
 
     overview
     api
+    teal
 
