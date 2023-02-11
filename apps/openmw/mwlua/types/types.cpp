@@ -159,7 +159,7 @@ namespace MWLua
         addType(ObjectTypeName::Player, { ESM::REC_INTERNAL_PLAYER }, ObjectTypeName::NPC);
 
         addArmorBindings(addType(ObjectTypeName::Armor, { ESM::REC_ARMO }, ObjectTypeName::Item), context);
-        addType(ObjectTypeName::Clothing, { ESM::REC_CLOT }, ObjectTypeName::Item);
+        addClothingBindings(addType(ObjectTypeName::Clothing, { ESM::REC_CLOT }, ObjectTypeName::Item), context);
         addIngredientBindings(addType(ObjectTypeName::Ingredient, { ESM::REC_INGR }, ObjectTypeName::Item), context);
         addLightBindings(addType(ObjectTypeName::Light, { ESM::REC_LIGH }, ObjectTypeName::Item), context);
         addMiscellaneousBindings(addType(ObjectTypeName::MiscItem, { ESM::REC_MISC }, ObjectTypeName::Item), context);
