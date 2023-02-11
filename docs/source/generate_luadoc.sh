@@ -7,7 +7,7 @@ DOCUMENTOR_PATH=~/.luarocks/bin/openmwluadocumentor
 
 if [ ! -x $DOCUMENTOR_PATH ]; then
     if [ -f /.dockerenv ] || [ -f /home/docs/omw_luadoc_docker ]; then
-        . install_luadocumentor_in_docker.sh
+        ./install_luadocumentor_in_docker.sh
     else
         # running on Windows?
         DOCUMENTOR_PATH="$APPDATA/LuaRocks/bin/openmwluadocumentor.bat"

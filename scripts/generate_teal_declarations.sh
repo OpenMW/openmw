@@ -4,13 +4,15 @@ if [ -z "$LUAROCKS" ]; then
 fi
 
 if [ -z "$1" ]; then
-  echo "Takes an absolute path to the output directory as the argument"
+  echo "Takes a path to the output directory as the argument"
   exit
 fi
 
-DOCS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-FILES_DIR=$(realpath $DOCS_DIR/../files)
-OUTPUT_DIR=$1
+SCRIPTS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+OPENMW_DIR=$(realpath $SCRIPTS_DIR/..)
+DOCS_DIR=$(realpath $OPENMW_DIR/docs)
+FILES_DIR=$(realpath $OPENMW_DIR/files)
+OUTPUT_DIR=$(realpath "$1")
 DOCUMENTOR_PATH=$LUAROCKS/openmwluadocumentor
 TEAL_PATH=$LUAROCKS/cyan
 
