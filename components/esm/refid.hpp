@@ -11,6 +11,7 @@
 #include <components/misc/notnullptr.hpp>
 
 #include "formidrefid.hpp"
+#include "generatedrefid.hpp"
 #include "stringrefid.hpp"
 
 namespace ESM
@@ -34,6 +35,7 @@ namespace ESM
         SizedString = 1,
         UnsizedString = 2,
         FormId = 3,
+        Generated = 4,
     };
 
     // RefId is used to represent an Id that identifies an ESM record. These Ids can then be used in
@@ -50,6 +52,10 @@ namespace ESM
         // Constructs RefId from ESM4 FormId storing the value in-place.
         static RefId formIdRefId(ESM4::FormId value) noexcept { return RefId(FormIdRefId(value)); }
 
+        // Constructs RefId from uint64 storing the value in-place. Should be used for generated records where id is a
+        // global counter.
+        static RefId generated(std::uint64_t value) { return RefId(GeneratedRefId{ value }); }
+
         constexpr RefId() = default;
 
         constexpr RefId(EmptyRefId value) noexcept
@@ -63,6 +69,11 @@ namespace ESM
         }
 
         constexpr RefId(FormIdRefId value) noexcept
+            : mValue(value)
+        {
+        }
+
+        constexpr RefId(GeneratedRefId value) noexcept
             : mValue(value)
         {
         }
@@ -109,7 +120,7 @@ namespace ESM
         friend struct std::hash<ESM::RefId>;
 
     private:
-        std::variant<EmptyRefId, StringRefId, FormIdRefId> mValue{ EmptyRefId{} };
+        std::variant<EmptyRefId, StringRefId, FormIdRefId, GeneratedRefId> mValue{ EmptyRefId{} };
     };
 }
 

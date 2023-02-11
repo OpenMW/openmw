@@ -47,6 +47,12 @@ namespace ESM
                 mWriter.writeT(RefIdType::FormId);
                 mWriter.writeT(v.getValue());
             }
+
+            void operator()(GeneratedRefId v) const
+            {
+                mWriter.writeT(RefIdType::Generated);
+                mWriter.writeT(v.getValue());
+            }
         };
     }
 

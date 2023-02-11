@@ -185,7 +185,7 @@ namespace MWWorld
         template <class T>
         const T* insert(const T& x)
         {
-            const ESM::RefId id = ESM::RefId::stringRefId("$dynamic" + std::to_string(mDynamicCount++));
+            const ESM::RefId id = ESM::RefId::generated(mDynamicCount++);
 
             Store<T>& store = getWritable<T>();
             if (store.search(id) != nullptr)

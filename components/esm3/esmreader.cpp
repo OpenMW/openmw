@@ -457,6 +457,12 @@ namespace ESM
                 getT(formId);
                 return RefId::formIdRefId(formId);
             }
+            case RefIdType::Generated:
+            {
+                std::uint64_t generated{};
+                getExact(&generated, sizeof(std::uint64_t));
+                return RefId::generated(generated);
+            }
         }
 
         fail("Unsupported RefIdType: " + std::to_string(static_cast<unsigned>(refIdType)));
