@@ -502,12 +502,12 @@ namespace NifOsg
             return image;
         }
 
-        void handleEffect(const Nif::Node* nifNode, osg::Node* node, Resource::ImageManager* imageManager)
+        bool handleEffect(const Nif::Node* nifNode, osg::StateSet* stateset, Resource::ImageManager* imageManager)
         {
             if (nifNode->recType != Nif::RC_NiTextureEffect)
             {
                 Log(Debug::Info) << "Unhandled effect " << nifNode->recName << " in " << mFilename;
-                return;
+                return false;
             }
 
             const Nif::NiTextureEffect* textureEffect = static_cast<const Nif::NiTextureEffect*>(nifNode);
@@ -515,13 +515,13 @@ namespace NifOsg
             {
                 Log(Debug::Info) << "Unhandled NiTextureEffect type " << textureEffect->textureType << " in "
                                  << mFilename;
-                return;
+                return false;
             }
 
             if (textureEffect->texture.empty())
             {
                 Log(Debug::Info) << "NiTextureEffect missing source texture in " << mFilename;
-                return;
+                return false;
             }
 
             osg::ref_ptr<osg::TexGen> texGen(new osg::TexGen);
@@ -539,7 +539,7 @@ namespace NifOsg
                 default:
                     Log(Debug::Info) << "Unhandled NiTextureEffect coordGenType " << textureEffect->coordGenType
                                      << " in " << mFilename;
-                    return;
+                    return false;
             }
 
             osg::ref_ptr<osg::Image> image(handleSourceTexture(textureEffect->texture.getPtr(), imageManager));
@@ -554,12 +554,12 @@ namespace NifOsg
 
             int texUnit = 3; // FIXME
 
-            osg::StateSet* stateset = node->getOrCreateStateSet();
             stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
             stateset->setTextureAttributeAndModes(texUnit, texGen, osg::StateAttribute::ON);
             stateset->setTextureAttributeAndModes(texUnit, createEmissiveTexEnv(), osg::StateAttribute::ON);
 
             stateset->addUniform(new osg::Uniform("envMapColor", osg::Vec4f(1, 1, 1, 1)));
+            return true;
         }
 
         // Get a default dataVariance for this node to be used as a hint by optimization (post)routines
@@ -798,17 +798,24 @@ namespace NifOsg
             const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
             if (ninode)
             {
-                const Nif::NodeList& effects = ninode->effects;
-                for (const auto& effect : effects)
-                    if (!effect.empty())
-                        handleEffect(effect.getPtr(), currentNode, imageManager);
-
                 const Nif::NodeList& children = ninode->children;
                 const Nif::Parent currentParent{ *ninode, parent };
                 for (const auto& child : children)
                     if (!child.empty())
                         handleNode(child.getPtr(), &currentParent, currentNode, imageManager, boundTextures, animflags,
                             skipMeshes, hasMarkers, hasAnimatedParents, textKeys, rootNode);
+
+                // Propagate effects to the the direct subgraph instead of the node itself
+                // This simulates their "affected node list" which Morrowind appears to replace with the subgraph (?)
+                // Note that the serialized affected node list is actually unused
+                for (const auto& effect : ninode->effects)
+                    if (!effect.empty())
+                    {
+                        osg::ref_ptr<osg::StateSet> effectStateSet = new osg::StateSet;
+                        if (handleEffect(effect.getPtr(), effectStateSet, imageManager))
+                            for (unsigned int i = 0; i < currentNode->getNumChildren(); ++i)
+                                currentNode->getChild(i)->getOrCreateStateSet()->merge(*effectStateSet);
+                    }
             }
 
             if (nifNode->recType == Nif::RC_NiFltAnimationNode)
