@@ -43,7 +43,15 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiTriShapeData : public NiGeometryData
+    // Abstract
+    struct NiTriBasedGeomData : public NiGeometryData
+    {
+        size_t mNumTriangles;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiTriShapeData : public NiTriBasedGeomData
     {
         // Triangles, three vertex indices per triangle
         std::vector<unsigned short> triangles;
@@ -51,10 +59,8 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiTriStripsData : public NiGeometryData
+    struct NiTriStripsData : public NiTriBasedGeomData
     {
-        size_t mNumTriangles;
-
         // Triangle strips, series of vertex indices.
         std::vector<std::vector<unsigned short>> strips;
 

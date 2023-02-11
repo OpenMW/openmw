@@ -118,14 +118,18 @@ namespace Nif
             nif->skip(4); // Additional data
     }
 
-    void NiTriShapeData::read(NIFStream* nif)
+    void NiTriBasedGeomData::read(NIFStream* nif)
     {
         NiGeometryData::read(nif);
+        mNumTriangles = nif->getUShort();
+    }
 
-        /*int tris =*/nif->getUShort();
+    void NiTriShapeData::read(NIFStream* nif)
+    {
+        NiTriBasedGeomData::read(nif);
 
         // We have three times as many vertices as triangles, so this
-        // is always equal to tris*3.
+        // is always equal to mNumTriangles * 3.
         int cnt = nif->getInt();
         bool hasTriangles = true;
         if (nif->getVersion() > NIFFile::NIFVersion::VER_OB_OLD)
@@ -147,9 +151,7 @@ namespace Nif
 
     void NiTriStripsData::read(NIFStream* nif)
     {
-        NiGeometryData::read(nif);
-
-        mNumTriangles = nif->getUShort();
+        NiTriBasedGeomData::read(nif);
 
         // Number of triangle strips
         int numStrips = nif->getUShort();

@@ -2300,23 +2300,39 @@ namespace NifOsg
                     {
                         const Nif::NiVertexColorProperty* vertprop
                             = static_cast<const Nif::NiVertexColorProperty*>(property);
-                        lightmode = vertprop->data.lightmode;
 
-                        switch (vertprop->data.vertmode)
+                        switch (vertprop->mVertexMode)
                         {
-                            case 0:
+                            case Nif::NiVertexColorProperty::VertexMode::VertMode_SrcIgnore:
+                            {
                                 mat->setColorMode(osg::Material::OFF);
                                 break;
-                            case 1:
+                            }
+                            case Nif::NiVertexColorProperty::VertexMode::VertMode_SrcEmissive:
+                            {
                                 mat->setColorMode(osg::Material::EMISSION);
                                 break;
-                            case 2:
-                                if (lightmode != 0)
-                                    mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
-                                else
-                                    mat->setColorMode(osg::Material::OFF);
+                            }
+                            case Nif::NiVertexColorProperty::VertexMode::VertMode_SrcAmbDif:
+                            {
+                                switch (vertprop->mLightingMode)
+                                {
+                                    case Nif::NiVertexColorProperty::LightMode::LightMode_Emissive:
+                                    {
+                                        mat->setColorMode(osg::Material::OFF);
+                                        break;
+                                    }
+                                    case Nif::NiVertexColorProperty::LightMode::LightMode_EmiAmbDif:
+                                    default:
+                                    {
+                                        mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
+                                        break;
+                                    }
+                                }
                                 break;
+                            }
                         }
+
                         break;
                     }
                     case Nif::RC_NiAlphaProperty:

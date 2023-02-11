@@ -293,22 +293,6 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
-    struct S_VertexColorProperty
-    {
-        /* Vertex mode:
-            0 - source ignore
-            1 - source emmisive
-            2 - source amb diff
-
-            Lighting mode
-            0 - lighting emmisive
-            1 - lighting emmisive ambient/diffuse
-        */
-        int vertmode, lightmode;
-
-        void read(NIFStream* nif);
-    };
-
     struct S_AlphaProperty
     {
         /*
@@ -402,9 +386,28 @@ namespace Nif
         int alphaTestMode() const { return (flags >> 10) & 0x7; }
     };
 
-    struct NiVertexColorProperty : public StructPropT<S_VertexColorProperty>
+    struct NiVertexColorProperty : public Property
     {
+        enum class VertexMode : unsigned int
+        {
+            VertMode_SrcIgnore = 0,
+            VertMode_SrcEmissive = 1,
+            VertMode_SrcAmbDif = 2
+        };
+
+        enum class LightMode : unsigned int
+        {
+            LightMode_Emissive = 0,
+            LightMode_EmiAmbDif = 1
+        };
+
+        unsigned short mFlags;
+        VertexMode mVertexMode;
+        LightMode mLightingMode;
+
+        void read(NIFStream* nif) override;
     };
+
     struct NiStencilProperty : public Property
     {
         S_StencilProperty data;

@@ -227,10 +227,20 @@ namespace Nif
             emissiveMult = nif->getFloat();
     }
 
-    void S_VertexColorProperty::read(NIFStream* nif)
+    void NiVertexColorProperty::read(NIFStream* nif)
     {
-        vertmode = nif->getInt();
-        lightmode = nif->getInt();
+        Property::read(nif);
+        mFlags = nif->getUShort();
+        if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
+        {
+            mVertexMode = static_cast<VertexMode>(nif->getUInt());
+            mLightingMode = static_cast<LightMode>(nif->getUInt());
+        }
+        else
+        {
+            mVertexMode = static_cast<VertexMode>((mFlags >> 4) & 0x3);
+            mLightingMode = static_cast<LightMode>((mFlags >> 3) & 0x1);
+        }
     }
 
     void S_AlphaProperty::read(NIFStream* nif)
