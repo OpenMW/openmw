@@ -15,7 +15,6 @@ varying float linearDepth;
 uniform bool useFalloff;
 uniform vec4 falloffParams;
 
-varying vec3 passViewPos;
 varying float passFalloff;
 
 #include "vertexcolors.glsl"
@@ -43,7 +42,12 @@ void main(void)
         vec3 viewNormal = gl_NormalMatrix * normalize(gl_Normal.xyz);
         vec3 viewDir = normalize(viewPos.xyz);
         float viewAngle = abs(dot(viewNormal, viewDir));
-        passFalloff = smoothstep(falloffParams.y, falloffParams.x, viewAngle);
+        passFalloff = smoothstep(falloffParams.x, falloffParams.y, viewAngle);
+
+        float startOpacity = min(falloffParams.z, 1.0);
+        float stopOpacity = max(falloffParams.w, 0.0);
+
+        passFalloff = mix(startOpacity, stopOpacity, passFalloff);
     }
     else
     {
