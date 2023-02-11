@@ -1321,7 +1321,8 @@ namespace MWMechanics
         {
             std::string weapgroup;
             if ((!isWerewolf || mWeaponType != ESM::Weapon::Spell) && weaptype != mWeaponType
-                && mUpperBodyState != UpperBodyState::Unequipping && !isStillWeapon)
+                && mUpperBodyState <= UpperBodyState::AttackWindUp && mUpperBodyState != UpperBodyState::Unequipping
+                && !isStillWeapon)
             {
                 // We can not play un-equip animation if weapon changed since last update
                 if (!weaponChanged)
@@ -1363,7 +1364,7 @@ namespace MWMechanics
             {
                 // Weapon is changed, no current animation (e.g. unequipping or attack).
                 // Start equipping animation now.
-                if (weaptype != mWeaponType)
+                if (weaptype != mWeaponType && mUpperBodyState <= UpperBodyState::WeaponEquipped)
                 {
                     forcestateupdate = true;
                     bool useShieldAnims = mAnimation->useShieldAnimations();
