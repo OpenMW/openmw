@@ -144,7 +144,7 @@ Teal:
     - CI/teal_ci.sh
   artifacts:
     paths:
-      - build_teal.zip
+      - teal_declarations.zip
 
 Ubuntu_GCC_Debug:
   extends: .Ubuntu

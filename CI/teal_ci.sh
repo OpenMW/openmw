@@ -43,6 +43,6 @@ LUAROCKS=~/luarocks/bin
 export LUAROCKS
 popd
 pushd docs
-./build_teal.sh ../build_teal
+./generate_teal_declarations.sh ../teal_declarations
 popd
-zip build_teal.zip -r build_teal
+zip teal_declarations.zip -r teal_declarations

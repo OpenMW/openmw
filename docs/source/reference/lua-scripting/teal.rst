@@ -24,7 +24,7 @@ All of your scripts (i. e. the ``scripts`` directory) should be within this dire
 .. note::
   You can use ``cyan init`` to set up a directory for a Teal project automatically.
 
-In addition to setting up a build process, you will need the `declaration files for the OpenMW API <https://gitlab.com/OpenMW/openmw/-/jobs/artifacts/master/raw/build_teal.zip?job=Teal>`_.
+In addition to setting up a build process, you will need the `declaration files for the OpenMW API <https://gitlab.com/OpenMW/openmw/-/jobs/artifacts/master/raw/teal_declarations.zip?job=Teal>`_.
 Unpack them into a directory of your choice, and add that path to the ``include_dir`` option in your ``tlconfig.lua``. Alternatively, you can add ``-I <my-dcelaration-directory-path>`` as an agument to ``Cyan`` commands.
 
 After everything is ready, run ``cyan build`` in the same directory as ``tlconfig.lua``. It will find all the ``.tl`` files in the ``source_dir``, and put compiled ``.lua`` files at the same relative paths inside ``build_dir``.
