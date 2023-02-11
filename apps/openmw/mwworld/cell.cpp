@@ -38,7 +38,7 @@ namespace MWWorld
         , mGridPos(cell.getGridX(), cell.getGridY())
         , mDisplayname(cell.mName)
         , mNameID(cell.mName)
-        , mRegion(ESM::RefId::sEmpty) // Unimplemented for now
+        , mRegion(cell.mRegion)
         , mCellId(cell.getCellId())
         , mMood{
             .mAmbiantColor = cell.mAmbi.mAmbient,
