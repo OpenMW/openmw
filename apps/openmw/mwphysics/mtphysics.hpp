@@ -29,6 +29,13 @@ namespace MWRender
 
 namespace MWPhysics
 {
+    enum class LockingPolicy
+    {
+        NoLocks,
+        ExclusiveLocksOnly,
+        AllowSharedLocks,
+    };
+
     class PhysicsTaskScheduler
     {
         public:
@@ -92,6 +99,7 @@ namespace MWPhysics
             std::unique_ptr<Misc::Barrier> mPostStepBarrier;
             std::unique_ptr<Misc::Barrier> mPostSimBarrier;
 
+            LockingPolicy mLockingPolicy;
             unsigned mNumThreads;
             int mNumJobs;
             int mRemainingSteps;
