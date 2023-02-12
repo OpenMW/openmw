@@ -1137,6 +1137,9 @@ namespace MWMechanics
         if (player != getPlayer())
             return false;
 
+        if (type == OT_Assault)
+            victimAware = true;
+
         // Find all the actors within the alarm radius
         std::vector<MWWorld::Ptr> neighbors;
 
