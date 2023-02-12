@@ -82,7 +82,7 @@ namespace EsmTool
         {
         }
 
-        std::string getId() const override { return mData.mId.getRefIdString(); }
+        std::string getId() const override { return mData.mId.toDebugString(); }
 
         T& get() { return mData; }
 

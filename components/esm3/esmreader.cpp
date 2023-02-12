@@ -1,6 +1,7 @@
 #include "esmreader.hpp"
 
 #include "readerscache.hpp"
+#include "savedgame.hpp"
 
 #include <components/files/conversion.hpp>
 #include <components/files/openfile.hpp>
@@ -158,6 +159,9 @@ namespace ESM
     {
         getSubHeader();
 
+        if (mHeader.mFormatVersion > MaxStringRefIdFormatVersion)
+            return getStringView(mCtx.leftSub);
+
         // Hack to make MultiMark.esp load. Zero-length strings do not
         // occur in any of the official mods, but MultiMark makes use of
         // them. For some reason, they break the rules, and contain a byte
@@ -177,7 +181,10 @@ namespace ESM
 
     RefId ESMReader::getRefId()
     {
-        return ESM::RefId::stringRefId(getHStringView());
+        if (mHeader.mFormatVersion <= MaxStringRefIdFormatVersion)
+            return ESM::RefId::stringRefId(getHStringView());
+        getSubHeader();
+        return getRefIdImpl(mCtx.leftSub);
     }
 
     void ESMReader::skipHString()
@@ -189,7 +196,8 @@ namespace ESM
         // them. For some reason, they break the rules, and contain a byte
         // (value 0) even if the header says there is no data. If
         // Morrowind accepts it, so should we.
-        if (mCtx.leftSub == 0 && hasMoreSubs() && !mEsm->peek())
+        if (mHeader.mFormatVersion <= MaxStringRefIdFormatVersion && mCtx.leftSub == 0 && hasMoreSubs()
+            && !mEsm->peek())
         {
             // Skip the following zero byte
             mCtx.leftRec--;
@@ -378,6 +386,13 @@ namespace ESM
         return std::string(getStringView(size));
     }
 
+    RefId ESMReader::getMaybeFixedRefIdSize(std::size_t size)
+    {
+        if (mHeader.mFormatVersion <= MaxStringRefIdFormatVersion)
+            return RefId::stringRefId(getMaybeFixedStringSize(size));
+        return getRefIdImpl(mCtx.leftSub);
+    }
+
     std::string_view ESMReader::getStringView(std::size_t size)
     {
         if (mBuffer.size() <= size)
@@ -403,7 +418,48 @@ namespace ESM
 
     RefId ESMReader::getRefId(std::size_t size)
     {
-        return RefId::stringRefId(getStringView(size));
+        if (mHeader.mFormatVersion <= MaxStringRefIdFormatVersion)
+            return ESM::RefId::stringRefId(getStringView(size));
+        return getRefIdImpl(size);
+    }
+
+    RefId ESMReader::getRefIdImpl(std::size_t size)
+    {
+        RefIdType refIdType = RefIdType::Empty;
+        getT(refIdType);
+
+        switch (refIdType)
+        {
+            case RefIdType::Empty:
+                return RefId();
+            case RefIdType::SizedString:
+            {
+                const std::size_t minSize = sizeof(refIdType) + sizeof(StringSizeType);
+                if (size < minSize)
+                    fail("Requested RefId record size is too small (" + std::to_string(size) + " < "
+                        + std::to_string(minSize) + ")");
+                StringSizeType storedSize = 0;
+                getT(storedSize);
+                const std::size_t maxSize = size - minSize;
+                if (storedSize > maxSize)
+                    fail("RefId string does not fit subrecord size (" + std::to_string(storedSize) + " > "
+                        + std::to_string(maxSize) + ")");
+                return RefId::stringRefId(getStringView(storedSize));
+            }
+            case RefIdType::UnsizedString:
+                if (size < sizeof(refIdType))
+                    fail("Requested RefId record size is too small (" + std::to_string(size) + " < "
+                        + std::to_string(sizeof(refIdType)) + ")");
+                return RefId::stringRefId(getStringView(size - sizeof(refIdType)));
+            case RefIdType::FormId:
+            {
+                ESM4::FormId formId{};
+                getT(formId);
+                return RefId::formIdRefId(formId);
+            }
+        }
+
+        fail("Unsupported RefIdType: " + std::to_string(static_cast<unsigned>(refIdType)));
     }
 
     [[noreturn]] void ESMReader::fail(const std::string& msg)

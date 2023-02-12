@@ -5,6 +5,7 @@
 #include <iosfwd>
 #include <string>
 #include <string_view>
+#include <type_traits>
 #include <variant>
 
 #include <components/misc/notnullptr.hpp>
@@ -25,6 +26,14 @@ namespace ESM
         std::string toDebugString() const;
 
         friend std::ostream& operator<<(std::ostream& stream, EmptyRefId value);
+    };
+
+    enum class RefIdType : std::uint8_t
+    {
+        Empty = 0,
+        SizedString = 1,
+        UnsizedString = 2,
+        FormId = 3,
     };
 
     // RefId is used to represent an Id that identifies an ESM record. These Ids can then be used in
@@ -88,6 +97,14 @@ namespace ESM
         friend bool operator<(std::string_view lhs, RefId rhs);
 
         friend std::ostream& operator<<(std::ostream& stream, RefId value);
+
+        template <class F, class... T>
+        friend constexpr auto visit(F&& f, T&&... v)
+            -> std::enable_if_t<(std::is_same_v<std::decay_t<T>, RefId> && ...),
+                decltype(std::visit(std::forward<F>(f), std::forward<T>(v).mValue...))>
+        {
+            return std::visit(std::forward<F>(f), std::forward<T>(v).mValue...);
+        }
 
         friend struct std::hash<ESM::RefId>;
 

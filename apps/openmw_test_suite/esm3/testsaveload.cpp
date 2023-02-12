@@ -1,6 +1,9 @@
 #include <components/esm/fourcc.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loadregn.hpp>
+#include <components/esm3/loadscpt.hpp>
 #include <components/esm3/player.hpp>
 
 #include <gmock/gmock.h>
@@ -9,15 +12,51 @@
 #include <array>
 #include <memory>
 #include <random>
+#include <type_traits>
 
 namespace ESM
 {
+    namespace
+    {
+        auto tie(const ContItem& value)
+        {
+            return std::tie(value.mCount, value.mItem);
+        }
+
+        auto tie(const ESM::Region::SoundRef& value)
+        {
+            return std::tie(value.mSound, value.mChance);
+        }
+    }
+
+    inline bool operator==(const ESM::ContItem& lhs, const ESM::ContItem& rhs)
+    {
+        return tie(lhs) == tie(rhs);
+    }
+
+    inline std::ostream& operator<<(std::ostream& stream, const ESM::ContItem& value)
+    {
+        return stream << "ESM::ContItem {.mCount = " << value.mCount << ", .mItem = '" << value.mItem << "'}";
+    }
+
+    inline bool operator==(const ESM::Region::SoundRef& lhs, const ESM::Region::SoundRef& rhs)
+    {
+        return tie(lhs) == tie(rhs);
+    }
+
+    inline std::ostream& operator<<(std::ostream& stream, const ESM::Region::SoundRef& value)
+    {
+        return stream << "ESM::Region::SoundRef {.mSound = '" << value.mSound << "', .mChance = " << value.mChance
+                      << "}";
+    }
+
     namespace
     {
         using namespace ::testing;
 
         constexpr std::array formats = {
             MaxLimitedSizeStringsFormatVersion,
+            MaxStringRefIdFormatVersion,
             CurrentSaveGameFormatVersion,
         };
 
@@ -47,10 +86,39 @@ namespace ESM
             return stream;
         }
 
+        template <class T, class = std::void_t<>>
+        struct HasLoad : std::false_type
+        {
+        };
+
         template <class T>
-        void load(ESMReader& reader, T& record)
+        struct HasLoad<T, std::void_t<decltype(std::declval<T>().load(std::declval<ESMReader&>()))>> : std::true_type
+        {
+        };
+
+        template <class T>
+        auto load(ESMReader& reader, T& record) -> std::enable_if_t<HasLoad<std::decay_t<T>>::value>
         {
             record.load(reader);
+        }
+
+        template <class T, class = std::void_t<>>
+        struct HasLoadWithDelete : std::false_type
+        {
+        };
+
+        template <class T>
+        struct HasLoadWithDelete<T,
+            std::void_t<decltype(std::declval<T>().load(std::declval<ESMReader&>(), std::declval<bool&>()))>>
+            : std::true_type
+        {
+        };
+
+        template <class T>
+        auto load(ESMReader& reader, T& record) -> std::enable_if_t<HasLoadWithDelete<std::decay_t<T>>::value>
+        {
+            bool deleted = false;
+            record.load(reader, deleted);
         }
 
         void load(ESMReader& reader, CellRef& record)
@@ -106,6 +174,40 @@ namespace ESM
             EXPECT_EQ(reader.getDesc(), description);
         }
 
+        TEST_F(Esm3SaveLoadRecordTest, containerContItemShouldSupportRefIdLongerThan32)
+        {
+            Container record;
+            record.blank();
+            record.mInventory.mList.push_back(ESM::ContItem{ .mCount = 42, .mItem = generateRandomRefId(33) });
+            record.mInventory.mList.push_back(ESM::ContItem{ .mCount = 13, .mItem = generateRandomRefId(33) });
+            Container result;
+            saveAndLoadRecord(record, CurrentSaveGameFormatVersion, result);
+            EXPECT_EQ(result.mInventory.mList, record.mInventory.mList);
+        }
+
+        TEST_F(Esm3SaveLoadRecordTest, regionSoundRefShouldSupportRefIdLongerThan32)
+        {
+            Region record;
+            record.blank();
+            record.mSoundList.push_back(ESM::Region::SoundRef{ .mSound = generateRandomRefId(33), .mChance = 42 });
+            record.mSoundList.push_back(ESM::Region::SoundRef{ .mSound = generateRandomRefId(33), .mChance = 13 });
+            Region result;
+            saveAndLoadRecord(record, CurrentSaveGameFormatVersion, result);
+            EXPECT_EQ(result.mSoundList, record.mSoundList);
+        }
+
+        TEST_F(Esm3SaveLoadRecordTest, scriptSoundRefShouldSupportRefIdLongerThan32)
+        {
+            Script record;
+            record.blank();
+            record.mId = generateRandomRefId(33);
+            record.mData.mNumShorts = 42;
+            Script result;
+            saveAndLoadRecord(record, CurrentSaveGameFormatVersion, result);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mData.mNumShorts, record.mData.mNumShorts);
+        }
+
         TEST_P(Esm3SaveLoadRecordTest, playerShouldNotChange)
         {
             std::minstd_rand random;
@@ -149,6 +251,44 @@ namespace ESM
             saveAndLoadRecord(record, GetParam(), result);
             EXPECT_EQ(record.mLastHitAttemptObject, result.mLastHitAttemptObject);
             EXPECT_EQ(record.mLastHitObject, result.mLastHitObject);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, containerShouldNotChange)
+        {
+            Container record;
+            record.blank();
+            record.mId = generateRandomRefId();
+            record.mInventory.mList.push_back(ESM::ContItem{ .mCount = 42, .mItem = generateRandomRefId(32) });
+            record.mInventory.mList.push_back(ESM::ContItem{ .mCount = 13, .mItem = generateRandomRefId(32) });
+            Container result;
+            saveAndLoadRecord(record, GetParam(), result);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mInventory.mList, record.mInventory.mList);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, regionShouldNotChange)
+        {
+            Region record;
+            record.blank();
+            record.mId = generateRandomRefId();
+            record.mSoundList.push_back(ESM::Region::SoundRef{ .mSound = generateRandomRefId(32), .mChance = 42 });
+            record.mSoundList.push_back(ESM::Region::SoundRef{ .mSound = generateRandomRefId(32), .mChance = 13 });
+            Region result;
+            saveAndLoadRecord(record, GetParam(), result);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mSoundList, record.mSoundList);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, scriptShouldNotChange)
+        {
+            Script record;
+            record.blank();
+            record.mId = generateRandomRefId(32);
+            record.mData.mNumShorts = 42;
+            Script result;
+            saveAndLoadRecord(record, GetParam(), result);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mData.mNumShorts, record.mData.mNumShorts);
         }
 
         INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(formats));

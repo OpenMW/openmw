@@ -47,6 +47,8 @@ namespace ESM
         // It is a good idea to compare this with the value you wrote into the header (setRecordCount)
         // It should be the record count you set + 1 (1 additional record for the TES3 header)
         int getRecordCount() const { return mRecordCount; }
+
+        FormatVersion getFormatVersion() const { return mHeader.mFormatVersion; }
         void setFormatVersion(FormatVersion value);
 
         void clearMaster();
@@ -78,24 +80,24 @@ namespace ESM
                 writeHNCString(name, data);
         }
 
-        void writeHNRefId(NAME name, const RefId& value);
+        void writeHNRefId(NAME name, RefId value);
 
-        void writeHNRefId(NAME name, const RefId& value, std::size_t size);
+        void writeHNRefId(NAME name, RefId value, std::size_t size);
 
-        void writeHNCRefId(NAME name, const RefId& value)
+        void writeHNCRefId(NAME name, RefId value)
         {
             startSubRecord(name);
             writeHCRefId(value);
             endRecord(name);
         }
 
-        void writeHNORefId(NAME name, const RefId& value)
+        void writeHNORefId(NAME name, RefId value)
         {
             if (!value.empty())
                 writeHNRefId(name, value);
         }
 
-        void writeHNOCRefId(NAME name, const RefId& value)
+        void writeHNOCRefId(NAME name, RefId value)
         {
             if (!value.empty())
                 writeHNCRefId(name, value);
@@ -165,11 +167,11 @@ namespace ESM
         void writeHString(const std::string& data);
         void writeHCString(const std::string& data);
 
-        void writeMaybeFixedSizeRefId(const RefId& value, std::size_t size);
+        void writeMaybeFixedSizeRefId(RefId value, std::size_t size);
 
-        void writeHRefId(const RefId& value);
+        void writeHRefId(RefId refId);
 
-        void writeHCRefId(const RefId& value);
+        void writeHCRefId(RefId refId);
 
         void writeName(NAME data);
 
@@ -184,6 +186,8 @@ namespace ESM
         bool mCounting;
 
         Header mHeader;
+
+        void writeRefId(RefId value);
     };
 }
 

@@ -62,7 +62,7 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mId.getRefIdString().c_str());
+            return QString::fromStdString(record.get().mId.toString());
         }
 
         bool isEditable() const override { return false; }

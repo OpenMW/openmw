@@ -273,13 +273,17 @@ namespace ESM
             skip(sizeof(T));
         }
 
-        void getExact(void* x, int size) { mEsm->read((char*)x, size); }
+        void getExact(void* x, std::size_t size)
+        {
+            mEsm->read(static_cast<char*>(x), static_cast<std::streamsize>(size));
+        }
+
         void getName(NAME& name) { getT(name); }
         void getUint(uint32_t& u) { getT(u); }
 
         std::string getMaybeFixedStringSize(std::size_t size);
 
-        RefId getMaybeFixedRefIdSize(std::size_t size) { return RefId::stringRefId(getMaybeFixedStringSize(size)); }
+        RefId getMaybeFixedRefIdSize(std::size_t size);
 
         // Read the next 'size' bytes and return them as a string. Converts
         // them from native encoding to UTF8 in the process.
@@ -314,6 +318,8 @@ namespace ESM
         }
 
         void clearCtx();
+
+        RefId getRefIdImpl(std::size_t size);
 
         std::unique_ptr<std::istream> mEsm;
 

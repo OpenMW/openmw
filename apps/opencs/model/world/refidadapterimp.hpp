@@ -106,7 +106,7 @@ namespace CSMWorld
             = static_cast<const Record<RecordT>&>(data.getRecord(RefIdData::LocalIndex(index, mType)));
 
         if (column == mBase.mId)
-            return QString::fromUtf8(record.get().mId.getRefIdString().c_str());
+            return QString::fromStdString(record.get().mId.toString());
 
         if (column == mBase.mModified)
         {
