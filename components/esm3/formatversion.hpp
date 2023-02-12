@@ -19,7 +19,8 @@ namespace ESM
     inline constexpr FormatVersion MaxOldAiPackageFormatVersion = 17;
     inline constexpr FormatVersion MaxOldSkillsAndAttributesFormatVersion = 18;
     inline constexpr FormatVersion MaxOldCreatureStatsFormatVersion = 19;
-    inline constexpr FormatVersion CurrentSaveGameFormatVersion = 22;
+    inline constexpr FormatVersion MaxLimitedSizeStringsFormatVersion = 22;
+    inline constexpr FormatVersion CurrentSaveGameFormatVersion = 23;
 }
 
 #endif

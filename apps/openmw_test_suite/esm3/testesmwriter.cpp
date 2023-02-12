@@ -37,7 +37,7 @@ namespace ESM
             ESMWriter writer;
             writer.setAuthor(author);
             writer.setDescription(description);
-            writer.setFormatVersion(CurrentSaveGameFormatVersion);
+            writer.setFormatVersion(MaxLimitedSizeStringsFormatVersion);
             EXPECT_THROW(writer.save(stream), std::runtime_error);
         }
 
@@ -46,9 +46,9 @@ namespace ESM
             std::stringstream stream;
 
             ESMWriter writer;
-            writer.setFormatVersion(CurrentSaveGameFormatVersion);
+            writer.setFormatVersion(MaxLimitedSizeStringsFormatVersion);
             writer.save(stream);
-            EXPECT_THROW(writer.writeFixedSizeString(generateRandomString(33), 32), std::runtime_error);
+            EXPECT_THROW(writer.writeMaybeFixedSizeString(generateRandomString(33), 32), std::runtime_error);
         }
     }
 }

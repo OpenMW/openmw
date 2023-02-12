@@ -167,15 +167,26 @@ namespace ESM
         endRecord(name);
     }
 
-    void ESMWriter::writeFixedSizeString(const std::string& data, std::size_t size)
+    void ESMWriter::writeMaybeFixedSizeString(const std::string& data, std::size_t size)
     {
         std::string string;
         if (!data.empty())
             string = mEncoder ? mEncoder->getLegacyEnc(data) : data;
-        if (string.size() > size)
-            throw std::runtime_error("Fixed string data is too long: \"" + string + "\" ("
-                + std::to_string(string.size()) + " > " + std::to_string(size) + ")");
-        string.resize(size);
+        if (mHeader.mFormatVersion <= MaxLimitedSizeStringsFormatVersion)
+        {
+            if (string.size() > size)
+                throw std::runtime_error("Fixed string data is too long: \"" + string + "\" ("
+                    + std::to_string(string.size()) + " > " + std::to_string(size) + ")");
+            string.resize(size);
+        }
+        else
+        {
+            constexpr StringSizeType maxSize = std::numeric_limits<StringSizeType>::max();
+            if (string.size() > maxSize)
+                throw std::runtime_error("String size is too long: \"" + string.substr(0, 64) + "<...>\" ("
+                    + std::to_string(string.size()) + " > " + std::to_string(maxSize) + ")");
+            writeT(static_cast<StringSizeType>(string.size()));
+        }
         write(string.c_str(), string.size());
     }
 

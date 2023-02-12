@@ -17,6 +17,7 @@ namespace ESM
         using namespace ::testing;
 
         constexpr std::array formats = {
+            MaxLimitedSizeStringsFormatVersion,
             CurrentSaveGameFormatVersion,
         };
 
@@ -74,14 +75,36 @@ namespace ESM
             std::minstd_rand mRandom;
             std::uniform_int_distribution<short> mRefIdDistribution{ 'a', 'z' };
 
-            RefId generateRandomRefId(std::size_t size = 33)
+            std::string generateRandomString(std::size_t size)
             {
                 std::string value;
                 while (value.size() < size)
                     value.push_back(static_cast<char>(mRefIdDistribution(mRandom)));
-                return RefId::stringRefId(value);
+                return value;
             }
+
+            RefId generateRandomRefId(std::size_t size = 33) { return RefId::stringRefId(generateRandomString(size)); }
         };
+
+        TEST_F(Esm3SaveLoadRecordTest, headerShouldNotChange)
+        {
+            const std::string author = generateRandomString(33);
+            const std::string description = generateRandomString(257);
+
+            auto stream = std::make_unique<std::stringstream>();
+
+            ESMWriter writer;
+            writer.setAuthor(author);
+            writer.setDescription(description);
+            writer.setFormatVersion(CurrentSaveGameFormatVersion);
+            writer.save(*stream);
+            writer.close();
+
+            ESMReader reader;
+            reader.open(std::move(stream), "stream");
+            EXPECT_EQ(reader.getAuthor(), author);
+            EXPECT_EQ(reader.getDesc(), description);
+        }
 
         TEST_P(Esm3SaveLoadRecordTest, playerShouldNotChange)
         {

@@ -12,7 +12,7 @@ namespace ESM
         esm.getSubHeader();
         ContItem ci;
         esm.getT(ci.mCount);
-        ci.mItem = ESM::RefId::stringRefId(esm.getString(32));
+        ci.mItem = ESM::RefId::stringRefId(esm.getMaybeFixedStringSize(32));
         mList.push_back(ci);
     }
 
@@ -22,7 +22,7 @@ namespace ESM
         {
             esm.startSubRecord("NPCO");
             esm.writeT(it->mCount);
-            esm.writeFixedSizeString(it->mItem.getRefIdString(), 32);
+            esm.writeMaybeFixedSizeString(it->mItem.getRefIdString(), 32);
             esm.endRecord("NPCO");
         }
     }

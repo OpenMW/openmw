@@ -28,6 +28,8 @@ namespace ESM
         FLAG_Blocked = 0x00002000
     };
 
+    using StringSizeType = std::uint32_t;
+
     template <std::size_t capacity>
     struct FixedString
     {

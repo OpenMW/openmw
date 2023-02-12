@@ -174,6 +174,7 @@ namespace ESM
 
         // Read a string, including the sub-record header (but not the name)
         std::string getHString();
+        std::string_view getHStringView();
         RefId getRefId();
 
         void skipHString();
@@ -269,10 +270,11 @@ namespace ESM
         void getName(NAME& name) { getT(name); }
         void getUint(uint32_t& u) { getT(u); }
 
+        std::string getMaybeFixedStringSize(std::size_t size);
+
         // Read the next 'size' bytes and return them as a string. Converts
         // them from native encoding to UTF8 in the process.
-        std::string getString(int size);
-        ESM::RefId getRefId(int size);
+        std::string_view getStringView(std::size_t size);
 
         void skip(std::size_t bytes)
         {
