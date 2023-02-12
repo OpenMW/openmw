@@ -42,6 +42,7 @@ namespace MWLua
     void addPotionBindings(sol::table potion, const Context& context);
     void addIngredientBindings(sol::table Ingredient, const Context& context);
     void addArmorBindings(sol::table armor, const Context& context);
+    void addClothingBindings(sol::table clothing, const Context& context);
     void addStaticBindings(sol::table stat, const Context& context);
     void addLightBindings(sol::table light, const Context& context);
 }

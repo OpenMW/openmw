@@ -649,9 +649,9 @@
 -- @field #boolean isScroll
 -- @field #number enchantCapacity
 
+
+
 --- @{#Clothing} functions
-
-
 -- @field [parent=#types] #Clothing Clothing
 
 ---
@@ -664,6 +664,42 @@
 -- @function [parent=#Clothing] objectIsInstance
 -- @param openmw.core#GameObject object
 -- @return #boolean
+
+--- Clothing.TYPE
+-- @type ClothingTYPE
+-- @field #number Amulet
+-- @field #number Belt
+-- @field #number LGlove
+-- @field #number Pants
+-- @field #number RGlove
+-- @field #number Ring
+-- @field #number Robe
+-- @field #number Shirt
+-- @field #number Shoes
+-- @field #number Skirt
+
+--- @{#ClothingTYPE}
+-- @field [parent=#Clothing] #ClothingTYPE TYPE
+
+---
+-- Returns the read-only @{#ClothingRecord} of a Clothing
+-- @function [parent=#Clothing] record
+-- @param #any objectOrRecordId
+-- @return #ClothingRecord
+
+---
+-- @type ClothingRecord
+-- @field #string id Record id
+-- @field #string name Name of the clothing
+-- @field #string model VFS path to the model
+-- @field #string mwscript MWScript on this clothing (can be empty)
+-- @field #string icon VFS path to the icon
+-- @field #string enchant The enchantment ID of this clothing (can be empty)
+-- @field #number weight
+-- @field #number value
+-- @field #number type See @{#Clothing.TYPE}
+-- @field #number enchantCapacity
+
 
 
 
