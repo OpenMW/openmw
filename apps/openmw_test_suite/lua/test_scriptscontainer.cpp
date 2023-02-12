@@ -3,6 +3,7 @@
 
 #include <components/esm/luascripts.hpp>
 
+#include <components/lua/asyncpackage.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/scriptscontainer.hpp>
 

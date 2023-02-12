@@ -38,15 +38,6 @@ namespace MWLua
     void initCellBindingsForLocalScripts(const Context&);
     void initCellBindingsForGlobalScripts(const Context&);
 
-    // Implemented in asyncbindings.cpp
-    struct AsyncPackageId
-    {
-        LuaUtil::ScriptsContainer* mContainer;
-        int mScriptId;
-        sol::table mHiddenData;
-    };
-    sol::function getAsyncPackageInitializer(const Context&);
-
     // Implemented in camerabindings.cpp
     sol::table initCameraPackage(const Context&);
 
