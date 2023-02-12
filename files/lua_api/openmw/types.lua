@@ -692,9 +692,9 @@
 -- @field #string id Record id
 -- @field #string name Name of the clothing
 -- @field #string model VFS path to the model
--- @field #string mwscript MWScript on this armor (can be empty)
+-- @field #string mwscript MWScript on this clothing (can be empty)
 -- @field #string icon VFS path to the icon
--- @field #string enchant The enchantment ID of this armor (can be empty)
+-- @field #string enchant The enchantment ID of this clothing (can be empty)
 -- @field #number weight
 -- @field #number value
 -- @field #number type See @{#Clothing.TYPE}
