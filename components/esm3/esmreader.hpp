@@ -165,19 +165,26 @@ namespace ESM
 
         // Read a string by the given name if it is the next record.
         std::string getHNOString(NAME name);
+
         ESM::RefId getHNORefId(NAME name);
 
-        void skipHNOString(NAME name);
+        void skipHNORefId(NAME name);
 
         // Read a string with the given sub-record name
         std::string getHNString(NAME name);
 
+        RefId getHNRefId(NAME name);
+
         // Read a string, including the sub-record header (but not the name)
         std::string getHString();
+
         std::string_view getHStringView();
+
         RefId getRefId();
 
         void skipHString();
+
+        void skipHRefId();
 
         // Read the given number of bytes from a subrecord
         void getHExact(void* p, int size);
@@ -272,9 +279,13 @@ namespace ESM
 
         std::string getMaybeFixedStringSize(std::size_t size);
 
+        RefId getMaybeFixedRefIdSize(std::size_t size) { return RefId::stringRefId(getMaybeFixedStringSize(size)); }
+
         // Read the next 'size' bytes and return them as a string. Converts
         // them from native encoding to UTF8 in the process.
         std::string_view getStringView(std::size_t size);
+
+        RefId getRefId(std::size_t size);
 
         void skip(std::size_t bytes)
         {

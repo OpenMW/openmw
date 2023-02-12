@@ -39,7 +39,7 @@ namespace ESM
 
     void Filter::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {

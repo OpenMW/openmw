@@ -28,7 +28,7 @@ namespace ESM
         if (esm.isNextSub("AMOV"))
             esm.skipHSub();
 
-        mBirthsign = ESM::RefId::stringRefId(esm.getHNString("SIGN"));
+        mBirthsign = esm.getHNRefId("SIGN");
 
         mCurrentCrimeId = -1;
         esm.getHNOT(mCurrentCrimeId, "CURD");
@@ -38,8 +38,8 @@ namespace ESM
         bool checkPrevItems = true;
         while (checkPrevItems)
         {
-            ESM::RefId boundItemId = ESM::RefId::stringRefId(esm.getHNOString("BOUN"));
-            ESM::RefId prevItemId = ESM::RefId::stringRefId(esm.getHNOString("PREV"));
+            ESM::RefId boundItemId = esm.getHNORefId("BOUN");
+            ESM::RefId prevItemId = esm.getHNORefId("PREV");
 
             if (!boundItemId.empty())
                 mPreviousItems[boundItemId] = prevItemId;
@@ -102,15 +102,15 @@ namespace ESM
             mMarkedCell.save(esm);
         }
 
-        esm.writeHNString("SIGN", mBirthsign.getRefIdString());
+        esm.writeHNRefId("SIGN", mBirthsign);
 
         esm.writeHNT("CURD", mCurrentCrimeId);
         esm.writeHNT("PAYD", mPaidCrimeId);
 
         for (PreviousItems::const_iterator it = mPreviousItems.begin(); it != mPreviousItems.end(); ++it)
         {
-            esm.writeHNString("BOUN", it->first.getRefIdString());
-            esm.writeHNString("PREV", it->second.getRefIdString());
+            esm.writeHNRefId("BOUN", it->first);
+            esm.writeHNRefId("PREV", it->second);
         }
 
         esm.writeHNT("WWAT", mSaveAttributes);

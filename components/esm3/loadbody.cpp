@@ -49,7 +49,7 @@ namespace ESM
 
     void BodyPart::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -58,7 +58,7 @@ namespace ESM
         }
 
         esm.writeHNCString("MODL", mModel);
-        esm.writeHNOCString("FNAM", mRace.getRefIdString());
+        esm.writeHNOCRefId("FNAM", mRace);
         esm.writeHNT("BYDT", mData, 4);
     }
 

@@ -49,7 +49,7 @@ namespace ESM
     }
     void SoundGenerator::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -58,8 +58,8 @@ namespace ESM
         }
 
         esm.writeHNT("DATA", mType, 4);
-        esm.writeHNOCString("CNAM", mCreature.getRefIdString());
-        esm.writeHNOCString("SNAM", mSound.getRefIdString());
+        esm.writeHNOCRefId("CNAM", mCreature);
+        esm.writeHNOCRefId("SNAM", mSound);
     }
 
     void SoundGenerator::blank()

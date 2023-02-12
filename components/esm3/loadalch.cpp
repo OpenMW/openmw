@@ -59,7 +59,7 @@ namespace ESM
     }
     void Potion::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -69,7 +69,7 @@ namespace ESM
 
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("TEXT", mIcon);
-        esm.writeHNOCString("SCRI", mScript.getRefIdString());
+        esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("ALDT", mData, 12);
         mEffects.save(esm);

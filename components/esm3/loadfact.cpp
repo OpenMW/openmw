@@ -84,7 +84,7 @@ namespace ESM
 
     void Faction::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -106,7 +106,7 @@ namespace ESM
 
         for (auto it = mReactions.begin(); it != mReactions.end(); ++it)
         {
-            esm.writeHNString("ANAM", it->first.getRefIdString());
+            esm.writeHNRefId("ANAM", it->first);
             esm.writeHNT("INTV", it->second);
         }
     }

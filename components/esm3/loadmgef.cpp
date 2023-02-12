@@ -250,15 +250,15 @@ namespace ESM
 
         esm.writeHNOCString("ITEX", mIcon);
         esm.writeHNOCString("PTEX", mParticle);
-        esm.writeHNOCString("BSND", mBoltSound.getRefIdString());
-        esm.writeHNOCString("CSND", mCastSound.getRefIdString());
-        esm.writeHNOCString("HSND", mHitSound.getRefIdString());
-        esm.writeHNOCString("ASND", mAreaSound.getRefIdString());
+        esm.writeHNOCRefId("BSND", mBoltSound);
+        esm.writeHNOCRefId("CSND", mCastSound);
+        esm.writeHNOCRefId("HSND", mHitSound);
+        esm.writeHNOCRefId("ASND", mAreaSound);
 
-        esm.writeHNOCString("CVFX", mCasting.getRefIdString());
-        esm.writeHNOCString("BVFX", mBolt.getRefIdString());
-        esm.writeHNOCString("HVFX", mHit.getRefIdString());
-        esm.writeHNOCString("AVFX", mArea.getRefIdString());
+        esm.writeHNOCRefId("CVFX", mCasting);
+        esm.writeHNOCRefId("BVFX", mBolt);
+        esm.writeHNOCRefId("HVFX", mHit);
+        esm.writeHNOCRefId("AVFX", mArea);
 
         esm.writeHNOString("DESC", mDescription);
     }

@@ -7,15 +7,15 @@ namespace ESM
 {
     void DialInfo::load(ESMReader& esm, bool& isDeleted)
     {
-        mId = ESM::RefId::stringRefId(esm.getHNString("INAM"));
+        mId = esm.getHNRefId("INAM");
 
         isDeleted = false;
 
         mQuestStatus = QS_None;
         mFactionLess = false;
 
-        mPrev = ESM::RefId::stringRefId(esm.getHNString("PNAM"));
-        mNext = ESM::RefId::stringRefId(esm.getHNString("NNAM"));
+        mPrev = esm.getHNRefId("PNAM");
+        mNext = esm.getHNRefId("NNAM");
 
         while (esm.hasMoreSubs())
         {
@@ -37,7 +37,7 @@ namespace ESM
                 case fourCC("FNAM"):
                 {
                     mFaction = esm.getRefId();
-                    if (mFaction.getRefIdString() == "FFFF")
+                    if (mFaction == "FFFF")
                     {
                         mFactionLess = true;
                     }
@@ -91,9 +91,9 @@ namespace ESM
 
     void DialInfo::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("INAM", mId.getRefIdString());
-        esm.writeHNCString("PNAM", mPrev.getRefIdString());
-        esm.writeHNCString("NNAM", mNext.getRefIdString());
+        esm.writeHNCRefId("INAM", mId);
+        esm.writeHNCRefId("PNAM", mPrev);
+        esm.writeHNCRefId("NNAM", mNext);
 
         if (isDeleted)
         {
@@ -102,12 +102,12 @@ namespace ESM
         }
 
         esm.writeHNT("DATA", mData, 12);
-        esm.writeHNOCString("ONAM", mActor.getRefIdString());
-        esm.writeHNOCString("RNAM", mRace.getRefIdString());
-        esm.writeHNOCString("CNAM", mClass.getRefIdString());
-        esm.writeHNOCString("FNAM", mFaction.getRefIdString());
-        esm.writeHNOCString("ANAM", mCell.getRefIdString());
-        esm.writeHNOCString("DNAM", mPcFaction.getRefIdString());
+        esm.writeHNOCRefId("ONAM", mActor);
+        esm.writeHNOCRefId("RNAM", mRace);
+        esm.writeHNOCRefId("CNAM", mClass);
+        esm.writeHNOCRefId("FNAM", mFaction);
+        esm.writeHNOCRefId("ANAM", mCell);
+        esm.writeHNOCRefId("DNAM", mPcFaction);
         esm.writeHNOCString("SNAM", mSound);
         esm.writeHNOString("NAME", mResponse);
 

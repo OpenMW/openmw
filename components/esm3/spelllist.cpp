@@ -17,7 +17,7 @@ namespace ESM
     {
         for (auto it = mList.begin(); it != mList.end(); ++it)
         {
-            esm.writeHNString("NPCS", it->getRefIdString(), 32);
+            esm.writeHNRefId("NPCS", *it, 32);
         }
     }
 

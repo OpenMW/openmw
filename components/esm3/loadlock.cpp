@@ -55,7 +55,7 @@ namespace ESM
 
     void Lockpick::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -67,7 +67,7 @@ namespace ESM
         esm.writeHNOCString("FNAM", mName);
 
         esm.writeHNT("LKDT", mData, 16);
-        esm.writeHNOString("SCRI", mScript.getRefIdString());
+        esm.writeHNORefId("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon);
     }
 

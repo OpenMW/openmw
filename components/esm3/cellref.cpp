@@ -34,7 +34,7 @@ namespace ESM
             else
             {
                 RefNum{}.load(esm, wideRefNum);
-                esm.skipHNOString("NAME");
+                esm.skipHNORefId("NAME");
             }
         }
 
@@ -45,7 +45,7 @@ namespace ESM
                 if constexpr (load)
                     refId = esm.getRefId();
                 else
-                    esm.skipHString();
+                    esm.skipHRefId();
             };
 
             const auto getHStringOrSkip = [&](std::string& value) {
@@ -195,7 +195,7 @@ namespace ESM
     {
         mRefNum.save(esm, wideRefNum);
 
-        esm.writeHNCString("NAME", mRefID.getRefIdString());
+        esm.writeHNCRefId("NAME", mRefID);
 
         if (isDeleted)
         {
@@ -209,14 +209,14 @@ namespace ESM
         }
 
         if (!inInventory)
-            esm.writeHNOCString("ANAM", mOwner.getRefIdString());
+            esm.writeHNOCRefId("ANAM", mOwner);
 
         esm.writeHNOCString("BNAM", mGlobalVariable);
-        esm.writeHNOCString("XSOL", mSoul.getRefIdString());
+        esm.writeHNOCRefId("XSOL", mSoul);
 
         if (!inInventory)
         {
-            esm.writeHNOCString("CNAM", mFaction.getRefIdString());
+            esm.writeHNOCRefId("CNAM", mFaction);
             if (mFactionRank != -2)
             {
                 esm.writeHNT("INDX", mFactionRank);
@@ -245,8 +245,8 @@ namespace ESM
 
         if (!inInventory)
         {
-            esm.writeHNOCString("KNAM", mKey.getRefIdString());
-            esm.writeHNOCString("TNAM", mTrap.getRefIdString());
+            esm.writeHNOCRefId("KNAM", mKey);
+            esm.writeHNOCRefId("TNAM", mTrap);
         }
 
         if (mReferenceBlocked != -1)

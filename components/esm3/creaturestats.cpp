@@ -87,9 +87,9 @@ namespace ESM
         mFallHeight = 0;
         esm.getHNOT(mFallHeight, "FALL");
 
-        mLastHitObject = ESM::RefId::stringRefId(esm.getHNOString("LHIT"));
+        mLastHitObject = esm.getHNORefId("LHIT");
 
-        mLastHitAttemptObject = ESM::RefId::stringRefId(esm.getHNOString("LHAT"));
+        mLastHitAttemptObject = esm.getHNORefId("LHAT");
 
         if (esm.getFormatVersion() <= MaxWerewolfDeprecatedDataFormatVersion)
             esm.getHNOT(mRecalcDynamicStats, "CALC");
@@ -121,7 +121,7 @@ namespace ESM
             {
                 int magicEffect;
                 esm.getHT(magicEffect);
-                ESM::RefId source = ESM::RefId::stringRefId(esm.getHNOString("SOUR"));
+                ESM::RefId source = esm.getHNORefId("SOUR");
                 int effectIndex = -1;
                 esm.getHNOT(effectIndex, "EIND");
                 int actorId;
@@ -229,10 +229,10 @@ namespace ESM
             esm.writeHNT("FALL", mFallHeight);
 
         if (!mLastHitObject.empty())
-            esm.writeHNString("LHIT", mLastHitObject.getRefIdString());
+            esm.writeHNRefId("LHIT", mLastHitObject);
 
         if (!mLastHitAttemptObject.empty())
-            esm.writeHNString("LHAT", mLastHitAttemptObject.getRefIdString());
+            esm.writeHNRefId("LHAT", mLastHitAttemptObject);
 
         if (mDrawState)
             esm.writeHNT("DRAW", mDrawState);

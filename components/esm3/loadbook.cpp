@@ -60,7 +60,7 @@ namespace ESM
     }
     void Book::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -71,10 +71,10 @@ namespace ESM
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("BKDT", mData, 20);
-        esm.writeHNOCString("SCRI", mScript.getRefIdString());
+        esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon);
         esm.writeHNOString("TEXT", mText);
-        esm.writeHNOCString("ENAM", mEnchant.getRefIdString());
+        esm.writeHNOCRefId("ENAM", mEnchant);
     }
 
     void Book::blank()

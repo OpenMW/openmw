@@ -34,7 +34,7 @@ namespace ESM
         for (std::vector<QuickKey>::const_iterator it = mKeys.begin(); it != mKeys.end(); ++it)
         {
             esm.writeHNT("TYPE", it->mType);
-            esm.writeHNString("ID__", it->mId.getRefIdString());
+            esm.writeHNRefId("ID__", it->mId);
         }
     }
 

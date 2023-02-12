@@ -8,7 +8,7 @@ namespace ESM
 
     void BaseProjectileState::save(ESMWriter& esm) const
     {
-        esm.writeHNString("ID__", mId.getRefIdString());
+        esm.writeHNRefId("ID__", mId);
         esm.writeHNT("VEC3", mPosition);
         esm.writeHNT("QUAT", mOrientation);
         esm.writeHNT("ACTO", mActorId);
@@ -16,7 +16,7 @@ namespace ESM
 
     void BaseProjectileState::load(ESMReader& esm)
     {
-        mId = ESM::RefId::stringRefId(esm.getHNString("ID__"));
+        mId = esm.getHNRefId("ID__");
         esm.getHNT(mPosition, "VEC3");
         esm.getHNT(mOrientation, "QUAT");
         esm.getHNT(mActorId, "ACTO");
@@ -26,7 +26,7 @@ namespace ESM
     {
         BaseProjectileState::save(esm);
 
-        esm.writeHNString("SPEL", mSpellId.getRefIdString());
+        esm.writeHNRefId("SPEL", mSpellId);
         esm.writeHNT("SPED", mSpeed);
         esm.writeHNT("SLOT", mSlot);
     }
@@ -35,7 +35,7 @@ namespace ESM
     {
         BaseProjectileState::load(esm);
 
-        mSpellId = ESM::RefId::stringRefId(esm.getHNString("SPEL"));
+        mSpellId = esm.getHNRefId("SPEL");
         if (esm.isNextSub("SRCN")) // for backwards compatibility
             esm.skipHSub();
         EffectList().load(esm); // for backwards compatibility
@@ -54,7 +54,7 @@ namespace ESM
     {
         BaseProjectileState::save(esm);
 
-        esm.writeHNString("BOW_", mBowId.getRefIdString());
+        esm.writeHNRefId("BOW_", mBowId);
         esm.writeHNT("VEL_", mVelocity);
         esm.writeHNT("STR_", mAttackStrength);
     }
@@ -63,7 +63,7 @@ namespace ESM
     {
         BaseProjectileState::load(esm);
 
-        mBowId = ESM::RefId::stringRefId(esm.getHNString("BOW_"));
+        mBowId = esm.getHNRefId("BOW_");
         esm.getHNT(mVelocity, "VEL_");
 
         mAttackStrength = 1.f;

@@ -10,7 +10,7 @@ namespace ESM
         isDeleted = false;
         mRecordFlags = esm.getRecordFlags();
 
-        mId = ESM::RefId::stringRefId(esm.getHNString("NAME"));
+        mId = esm.getHNRefId("NAME");
 
         if (esm.isNextSub("DELE"))
         {
@@ -25,7 +25,7 @@ namespace ESM
 
     void Global::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {

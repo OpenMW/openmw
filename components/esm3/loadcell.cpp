@@ -195,7 +195,7 @@ namespace ESM
             }
 
             if (mData.mFlags & QuasiEx)
-                esm.writeHNOCString("RGNN", mRegion.getRefIdString());
+                esm.writeHNOCRefId("RGNN", mRegion);
             else
             {
                 // Try to avoid saving ambient lighting information when it's unnecessary.
@@ -206,7 +206,7 @@ namespace ESM
         }
         else
         {
-            esm.writeHNOCString("RGNN", mRegion.getRefIdString());
+            esm.writeHNOCRefId("RGNN", mRegion);
             if (mMapColor != 0)
                 esm.writeHNT("NAM5", mMapColor);
         }

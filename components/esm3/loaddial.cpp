@@ -14,7 +14,7 @@ namespace ESM
 
     void Dialogue::loadId(ESMReader& esm)
     {
-        mId = ESM::RefId::stringRefId(esm.getHNString("NAME"));
+        mId = esm.getHNRefId("NAME");
     }
 
     void Dialogue::loadData(ESMReader& esm, bool& isDeleted)
@@ -54,7 +54,7 @@ namespace ESM
 
     void Dialogue::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
         if (isDeleted)
         {
             esm.writeHNString("DELE", "", 3);

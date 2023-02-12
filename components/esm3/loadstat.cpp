@@ -40,7 +40,7 @@ namespace ESM
     }
     void Static::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
         if (isDeleted)
         {
             esm.writeHNString("DELE", "", 3);

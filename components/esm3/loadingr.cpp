@@ -72,7 +72,7 @@ namespace ESM
 
     void Ingredient::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -83,7 +83,7 @@ namespace ESM
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("IRDT", mData, 56);
-        esm.writeHNOCString("SCRI", mScript.getRefIdString());
+        esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon);
     }
 

@@ -127,7 +127,7 @@ namespace ESM
     }
     void NPC::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -137,12 +137,12 @@ namespace ESM
 
         esm.writeHNOCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
-        esm.writeHNCString("RNAM", mRace.getRefIdString());
-        esm.writeHNCString("CNAM", mClass.getRefIdString());
-        esm.writeHNCString("ANAM", mFaction.getRefIdString());
-        esm.writeHNCString("BNAM", mHead.getRefIdString());
-        esm.writeHNCString("KNAM", mHair.getRefIdString());
-        esm.writeHNOCString("SCRI", mScript.getRefIdString());
+        esm.writeHNCRefId("RNAM", mRace);
+        esm.writeHNCRefId("CNAM", mClass);
+        esm.writeHNCRefId("ANAM", mFaction);
+        esm.writeHNCRefId("BNAM", mHead);
+        esm.writeHNCRefId("KNAM", mHair);
+        esm.writeHNOCRefId("SCRI", mScript);
 
         if (mNpdtType == NPC_DEFAULT)
         {

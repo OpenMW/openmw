@@ -45,7 +45,7 @@ namespace ESM
     }
     void LandTexture::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
         esm.writeHNT("INTV", mIndex);
         esm.writeHNCString("DATA", mTexture);
 

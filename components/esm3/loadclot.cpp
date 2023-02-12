@@ -63,7 +63,7 @@ namespace ESM
 
     void Clothing::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -75,12 +75,12 @@ namespace ESM
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("CTDT", mData, 12);
 
-        esm.writeHNOCString("SCRI", mScript.getRefIdString());
+        esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon);
 
         mParts.save(esm);
 
-        esm.writeHNOCString("ENAM", mEnchant.getRefIdString());
+        esm.writeHNOCRefId("ENAM", mEnchant);
     }
 
     void Clothing::blank()
