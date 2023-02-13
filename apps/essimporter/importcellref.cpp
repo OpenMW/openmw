@@ -111,7 +111,7 @@ namespace ESSImport
         {
             // used power
             esm.getSubHeader();
-            std::string id = esm.getString(32);
+            std::string id = esm.getMaybeFixedStringSize(32);
             (void)id;
             // timestamp can't be used: this is the total hours passed, calculated by
             // timestamp = 24 * (365 * year + cumulativeDays[month] + day)

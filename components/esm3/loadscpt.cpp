@@ -98,7 +98,7 @@ namespace ESM
                 case fourCC("SCHD"):
                 {
                     esm.getSubHeader();
-                    mId = ESM::RefId::stringRefId(esm.getString(32));
+                    mId = ESM::RefId::stringRefId(esm.getMaybeFixedStringSize(32));
                     esm.getT(mData);
 
                     hasHeader = true;
@@ -152,7 +152,7 @@ namespace ESM
                 varNameString.append(*it);
 
         esm.startSubRecord("SCHD");
-        esm.writeFixedSizeString(mId.getRefIdString(), 32);
+        esm.writeMaybeFixedSizeString(mId.getRefIdString(), 32);
         esm.writeT(mData, 20);
         esm.endRecord("SCHD");
 

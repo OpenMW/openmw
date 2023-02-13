@@ -145,26 +145,10 @@ namespace ESM
 
     std::string ESMReader::getHString()
     {
-        getSubHeader();
-
-        // Hack to make MultiMark.esp load. Zero-length strings do not
-        // occur in any of the official mods, but MultiMark makes use of
-        // them. For some reason, they break the rules, and contain a byte
-        // (value 0) even if the header says there is no data. If
-        // Morrowind accepts it, so should we.
-        if (mCtx.leftSub == 0 && hasMoreSubs() && !mEsm->peek())
-        {
-            // Skip the following zero byte
-            mCtx.leftRec--;
-            char c;
-            getT(c);
-            return std::string();
-        }
-
-        return getString(mCtx.leftSub);
+        return std::string(getHStringView());
     }
 
-    RefId ESMReader::getRefId()
+    std::string_view ESMReader::getHStringView()
     {
         getSubHeader();
 
@@ -179,10 +163,15 @@ namespace ESM
             mCtx.leftRec--;
             char c;
             getT(c);
-            return ESM::RefId::sEmpty;
+            return std::string_view();
         }
 
-        return getRefId(mCtx.leftSub);
+        return getStringView(mCtx.leftSub);
+    }
+
+    RefId ESMReader::getRefId()
+    {
+        return ESM::RefId::stringRefId(getHStringView());
     }
 
     void ESMReader::skipHString()
@@ -363,52 +352,42 @@ namespace ESM
      *
      *************************************************************************/
 
-    std::string ESMReader::getString(int size)
+    std::string ESMReader::getMaybeFixedStringSize(std::size_t size)
     {
-        size_t s = size;
-        if (mBuffer.size() <= s)
-            // Add some extra padding to reduce the chance of having to resize
-            // again later.
-            mBuffer.resize(3 * s);
+        if (mHeader.mFormatVersion > MaxLimitedSizeStringsFormatVersion)
+        {
+            StringSizeType storedSize = 0;
+            getT(storedSize);
+            if (storedSize > mCtx.leftSub)
+                fail("String does not fit subrecord (" + std::to_string(storedSize) + " > "
+                    + std::to_string(mCtx.leftSub) + ")");
+            size = static_cast<std::size_t>(storedSize);
+        }
 
-        // And make sure the string is zero terminated
-        mBuffer[s] = 0;
-
-        // read ESM data
-        char* ptr = mBuffer.data();
-        getExact(ptr, size);
-
-        size = static_cast<int>(strnlen(ptr, size));
-
-        // Convert to UTF8 and return
-        if (mEncoder)
-            return std::string(mEncoder->getUtf8(std::string_view(ptr, size)));
-
-        return std::string(ptr, size);
+        return std::string(getStringView(size));
     }
 
-    ESM::RefId ESMReader::getRefId(int size)
+    std::string_view ESMReader::getStringView(std::size_t size)
     {
-        size_t s = size;
-        if (mBuffer.size() <= s)
+        if (mBuffer.size() <= size)
             // Add some extra padding to reduce the chance of having to resize
             // again later.
-            mBuffer.resize(3 * s);
+            mBuffer.resize(3 * size);
 
         // And make sure the string is zero terminated
-        mBuffer[s] = 0;
+        mBuffer[size] = 0;
 
         // read ESM data
         char* ptr = mBuffer.data();
         getExact(ptr, size);
 
-        size = static_cast<int>(strnlen(ptr, size));
+        size = strnlen(ptr, size);
 
         // Convert to UTF8 and return
-        if (mEncoder)
-            return ESM::RefId::stringRefId(mEncoder->getUtf8(std::string_view(ptr, size)));
+        if (mEncoder != nullptr)
+            return mEncoder->getUtf8(std::string_view(ptr, size));
 
-        return ESM::RefId::stringRefId(std::string_view(ptr, size));
+        return std::string_view(ptr, size);
     }
 
     [[noreturn]] void ESMReader::fail(const std::string& msg)

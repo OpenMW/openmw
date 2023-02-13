@@ -91,6 +91,7 @@ file(GLOB UNITTEST_SRC_FILES
 
     esm3/readerscache.cpp
     esm3/testsaveload.cpp
+    esm3/testesmwriter.cpp
 
     nifosg/testnifloader.cpp
 )

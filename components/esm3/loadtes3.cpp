@@ -30,8 +30,8 @@ namespace ESM
             esm.getSubHeader();
             esm.getT(mData.version);
             esm.getT(mData.type);
-            mData.author.assign(esm.getString(32));
-            mData.desc.assign(esm.getString(256));
+            mData.author.assign(esm.getMaybeFixedStringSize(32));
+            mData.desc.assign(esm.getMaybeFixedStringSize(256));
             esm.getT(mData.records);
         }
 
@@ -71,8 +71,8 @@ namespace ESM
         esm.startSubRecord("HEDR");
         esm.writeT(mData.version);
         esm.writeT(mData.type);
-        esm.writeFixedSizeString(mData.author, 32);
-        esm.writeFixedSizeString(mData.desc, 256);
+        esm.writeMaybeFixedSizeString(mData.author, 32);
+        esm.writeMaybeFixedSizeString(mData.desc, 256);
         esm.writeT(mData.records);
         esm.endRecord("HEDR");
 

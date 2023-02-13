@@ -53,7 +53,7 @@ namespace ESM
                 {
                     esm.getSubHeader();
                     SoundRef sr;
-                    sr.mSound = ESM::RefId::stringRefId(esm.getString(32));
+                    sr.mSound = ESM::RefId::stringRefId(esm.getMaybeFixedStringSize(32));
                     esm.getT(sr.mChance);
                     mSoundList.push_back(sr);
                     break;
@@ -95,7 +95,7 @@ namespace ESM
         for (std::vector<SoundRef>::const_iterator it = mSoundList.begin(); it != mSoundList.end(); ++it)
         {
             esm.startSubRecord("SNAM");
-            esm.writeFixedSizeString(it->mSound.getRefIdString(), 32);
+            esm.writeMaybeFixedSizeString(it->mSound.getRefIdString(), 32);
             esm.writeT(it->mChance);
             esm.endRecord("SNAM");
         }
