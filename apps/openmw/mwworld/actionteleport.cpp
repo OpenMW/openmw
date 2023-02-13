@@ -48,6 +48,7 @@ namespace MWWorld
         MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
         actor.getClass().getCreatureStats(actor).land(actor == world->getPlayerPtr());
 
+        Ptr teleported;
         if (actor == world->getPlayerPtr())
         {
             world->getPlayer().setTeleported(true);
@@ -55,23 +56,31 @@ namespace MWWorld
                 world->changeToExteriorCell(mPosition, true);
             else
                 world->changeToInteriorCell(mCellName, mPosition, true);
+            teleported = world->getPlayerPtr();
         }
         else
         {
             if (actor.getClass().getCreatureStats(actor).getAiSequence().isInCombat(world->getPlayerPtr()))
+            {
                 actor.getClass().getCreatureStats(actor).getAiSequence().stopCombat();
+                return;
+            }
             else if (mCellName.empty())
             {
                 const osg::Vec2i index = positionToCellIndex(mPosition.pos[0], mPosition.pos[1]);
-                world->moveObject(actor, worldModel->getExterior(index.x(), index.y()), mPosition.asVec3(), true, true);
+                teleported = world->moveObject(
+                    actor, worldModel->getExterior(index.x(), index.y()), mPosition.asVec3(), true, true);
             }
             else
-                world->moveObject(actor, worldModel->getInterior(mCellName), mPosition.asVec3(), true, true);
+                teleported
+                    = world->moveObject(actor, worldModel->getInterior(mCellName), mPosition.asVec3(), true, true);
         }
 
-        if (!world->isWaterWalkingCastableOnTarget(actor) && MWMechanics::hasWaterWalking(actor))
-            actor.getClass().getCreatureStats(actor).getActiveSpells().purgeEffect(
-                actor, ESM::MagicEffect::WaterWalking);
+        if (!world->isWaterWalkingCastableOnTarget(teleported) && MWMechanics::hasWaterWalking(teleported))
+            teleported.getClass()
+                .getCreatureStats(teleported)
+                .getActiveSpells()
+                .purgeEffect(actor, ESM::MagicEffect::WaterWalking);
     }
 
     void ActionTeleport::getFollowers(
