@@ -173,6 +173,27 @@ namespace
         }
     };
 
+    class DiscardAlphaCombine
+    {
+    public:
+        static const osg::ref_ptr<osg::TexEnvCombine>& value()
+        {
+            static DiscardAlphaCombine instance;
+            return instance.mValue;
+        }
+
+    private:
+        osg::ref_ptr<osg::TexEnvCombine> mValue;
+
+        DiscardAlphaCombine()
+            : mValue(new osg::TexEnvCombine)
+        {
+            mValue->setCombine_Alpha(osg::TexEnvCombine::REPLACE);
+            mValue->setSource0_Alpha(osg::TexEnvCombine::CONSTANT);
+            mValue->setConstantColor(osg::Vec4(0.0, 0.0, 0.0, 1.0));
+        }
+    };
+
     class UniformCollection
     {
     public:
@@ -286,6 +307,8 @@ namespace Terrain
                 if (layerTileSize != 1.f)
                     stateset->setTextureAttributeAndModes(
                         0, LayerTexMat::value(layerTileSize), osg::StateAttribute::ON);
+
+                stateset->setTextureAttributeAndModes(0, DiscardAlphaCombine::value(), osg::StateAttribute::ON);
 
                 // Multiply by the alpha map
                 if (!blendmaps.empty())
