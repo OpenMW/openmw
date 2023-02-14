@@ -135,6 +135,6 @@ M.__pairs = function(self)
     return next, self, 1
 end
 M.__ipairs = M.__pairs
-M.__metatable = {}
+M.__metatable = false
 
 return M
