@@ -22,6 +22,9 @@ namespace LuaUtil
         sol::main_protected_function mFunc;
         sol::table mHiddenData; // same object as Script::mHiddenData in ScriptsContainer
 
+        static bool isLuaCallback(const sol::object&);
+        static Callback fromLua(const sol::table&);
+
         bool isValid() const { return mHiddenData[ScriptsContainer::sScriptIdKey] != sol::nil; }
 
         template <typename... Args>

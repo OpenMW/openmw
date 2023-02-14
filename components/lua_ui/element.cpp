@@ -104,13 +104,12 @@ namespace LuaUi
             if (!eventsObj.is<sol::table>())
                 throw std::logic_error("The \"events\" layout field must be a table of callbacks");
             auto events = eventsObj.as<sol::table>();
-            events.for_each([ext](const sol::object& name, const sol::object& callback)
-            {
-                if (name.is<std::string>() && callback.is<LuaUtil::Callback>())
-                    ext->setCallback(name.as<std::string>(), callback.as<LuaUtil::Callback>());
+            events.for_each([ext](const sol::object& name, const sol::object& callback) {
+                if (name.is<std::string>() && LuaUtil::Callback::isLuaCallback(callback))
+                    ext->setCallback(name.as<std::string>(), LuaUtil::Callback::fromLua(callback));
                 else if (!name.is<std::string>())
                     Log(Debug::Warning) << "UI event key must be a string";
-                else if (!callback.is<LuaUtil::Callback>())
+                else
                     Log(Debug::Warning) << "UI event handler for key \"" << name.as<std::string>()
                                         << "\" must be an openmw.async.callback";
             });

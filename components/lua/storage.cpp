@@ -108,8 +108,7 @@ namespace LuaUtil
             return section.mSection->get(key).getCopy(s);
         };
         sview["asTable"] = [](const SectionView& section) { return section.mSection->asTable(); };
-        sview["subscribe"] = [](const SectionView& section, const Callback& callback)
-        {
+        sview["subscribe"] = [](const SectionView& section, const sol::table& callback) {
             std::vector<Callback>& callbacks = section.mSection->mCallbacks;
             if (!callbacks.empty() && callbacks.size() == callbacks.capacity())
             {
@@ -117,7 +116,7 @@ namespace LuaUtil
                                                [&](const Callback& c) { return !c.isValid(); }),
                                 callbacks.end());
             }
-            callbacks.push_back(callback);
+            callbacks.push_back(Callback::fromLua(callback));
         };
         sview["reset"] = [](const SectionView& section, const sol::optional<sol::table>& newValues)
         {
