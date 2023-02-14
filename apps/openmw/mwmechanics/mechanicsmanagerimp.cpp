@@ -631,7 +631,7 @@ namespace MWMechanics
         float playerRating1, playerRating2, playerRating3;
         getPersuasionRatings(playerStats, playerRating1, playerRating2, playerRating3, true);
 
-        int currentDisposition = getDerivedDisposition(npc);
+        const int currentDisposition = getDerivedDisposition(npc);
 
         float d = 1 - 0.02f * abs(currentDisposition - 50);
         float target1 = d * (playerRating1 - npcRating1 + 50);
@@ -644,10 +644,10 @@ namespace MWMechanics
 
         float target3 = d * (playerRating3 - npcRating3 + 50) + bribeMod;
 
-        float iPerMinChance = floor(gmst.find("iPerMinChance")->mValue.getFloat());
-        float iPerMinChange = floor(gmst.find("iPerMinChange")->mValue.getFloat());
-        float fPerDieRollMult = gmst.find("fPerDieRollMult")->mValue.getFloat();
-        float fPerTempMult = gmst.find("fPerTempMult")->mValue.getFloat();
+        const float iPerMinChance = gmst.find("iPerMinChance")->mValue.getFloat();
+        const float iPerMinChange = gmst.find("iPerMinChange")->mValue.getFloat();
+        const float fPerDieRollMult = gmst.find("fPerDieRollMult")->mValue.getFloat();
+        const float fPerTempMult = gmst.find("fPerTempMult")->mValue.getFloat();
 
         float x = 0;
         float y = 0;
@@ -740,22 +740,23 @@ namespace MWMechanics
             x = success ? std::max(iPerMinChange, c) : c;
         }
 
-        tempChange = type == PT_Intimidate ? int(x) : int(x * fPerTempMult);
-
-
-        int cappedDispositionChange = tempChange;
-        if (currentDisposition + tempChange > 100)
-            cappedDispositionChange = 100 - currentDisposition;
-        if (currentDisposition + tempChange < 0)
-        {
-            cappedDispositionChange = -currentDisposition;
-            tempChange = cappedDispositionChange;
-        }
-
-        permChange = floor(cappedDispositionChange / fPerTempMult);
         if (type == PT_Intimidate)
         {
-            permChange = success ? -int(cappedDispositionChange/ fPerTempMult) : int(y);
+            tempChange = int(x);
+            if (currentDisposition + tempChange > 100)
+                tempChange = 100 - currentDisposition;
+            else if (currentDisposition + tempChange < 0)
+                tempChange = -currentDisposition;
+            permChange = success ? -int(tempChange / fPerTempMult) : int(y);
+        }
+        else
+        {
+            tempChange = int(x * fPerTempMult);
+            if (currentDisposition + tempChange > 100)
+                tempChange = 100 - currentDisposition;
+            else if (currentDisposition + tempChange < 0)
+                tempChange = -currentDisposition;
+            permChange = int(tempChange / fPerTempMult);
         }
     }
 
