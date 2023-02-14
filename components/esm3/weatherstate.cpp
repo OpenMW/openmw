@@ -25,7 +25,7 @@ namespace ESM
 {
     void WeatherState::load(ESMReader& esm)
     {
-        mCurrentRegion = ESM::RefId::stringRefId(esm.getHNString(currentRegionRecord));
+        mCurrentRegion = esm.getHNRefId(currentRegionRecord);
         esm.getHNT(mTimePassed, timePassedRecord);
         esm.getHNT(mFastForward, fastForwardRecord);
         esm.getHNT(mWeatherUpdateTime, weatherUpdateTimeRecord);
@@ -52,7 +52,7 @@ namespace ESM
 
     void WeatherState::save(ESMWriter& esm) const
     {
-        esm.writeHNCString(currentRegionRecord, mCurrentRegion.getRefIdString());
+        esm.writeHNCRefId(currentRegionRecord, mCurrentRegion);
         esm.writeHNT(timePassedRecord, mTimePassed);
         esm.writeHNT(fastForwardRecord, mFastForward);
         esm.writeHNT(weatherUpdateTimeRecord, mWeatherUpdateTime);
@@ -64,7 +64,7 @@ namespace ESM
         auto it = mRegions.begin();
         for (; it != mRegions.end(); ++it)
         {
-            esm.writeHNCString(regionNameRecord, it->first.getRefIdString().c_str());
+            esm.writeHNCRefId(regionNameRecord, it->first);
             esm.writeHNT(regionWeatherRecord, it->second.mWeather);
             for (size_t i = 0; i < it->second.mChances.size(); ++i)
             {

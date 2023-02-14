@@ -6,6 +6,8 @@
 #include <type_traits>
 
 #include "components/esm/esmcommon.hpp"
+#include "components/esm/refid.hpp"
+
 #include "loadtes3.hpp"
 
 namespace ToUTF8
@@ -76,6 +78,29 @@ namespace ESM
                 writeHNCString(name, data);
         }
 
+        void writeHNRefId(NAME name, const RefId& value);
+
+        void writeHNRefId(NAME name, const RefId& value, std::size_t size);
+
+        void writeHNCRefId(NAME name, const RefId& value)
+        {
+            startSubRecord(name);
+            writeHCRefId(value);
+            endRecord(name);
+        }
+
+        void writeHNORefId(NAME name, const RefId& value)
+        {
+            if (!value.empty())
+                writeHNRefId(name, value);
+        }
+
+        void writeHNOCRefId(NAME name, const RefId& value)
+        {
+            if (!value.empty())
+                writeHNCRefId(name, value);
+        }
+
         template <typename T>
         void writeHNT(NAME name, const T& data)
         {
@@ -139,7 +164,15 @@ namespace ESM
         void writeMaybeFixedSizeString(const std::string& data, std::size_t size);
         void writeHString(const std::string& data);
         void writeHCString(const std::string& data);
+
+        void writeMaybeFixedSizeRefId(const RefId& value, std::size_t size);
+
+        void writeHRefId(const RefId& value);
+
+        void writeHCRefId(const RefId& value);
+
         void writeName(NAME data);
+
         void write(const char* data, size_t size);
 
     private:

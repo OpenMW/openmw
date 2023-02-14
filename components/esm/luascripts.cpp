@@ -74,11 +74,8 @@ void ESM::LuaScriptsCfg::load(ESMReader& esm)
             esm.getSubHeader();
             script.mRecords.emplace_back();
             ESM::LuaScriptCfg::PerRecordCfg& recordCfg = script.mRecords.back();
-            std::string recordIdString;
-            recordIdString.resize(esm.getSubSize() - 1);
             recordCfg.mAttach = readBool(esm);
-            esm.getExact(recordIdString.data(), static_cast<int>(recordIdString.size()));
-            recordCfg.mRecordId = ESM::RefId::stringRefId(recordIdString);
+            recordCfg.mRecordId = esm.getRefId(esm.getSubSize() - 1);
             recordCfg.mInitializationData = loadLuaBinaryData(esm);
         }
         while (esm.isNextSub("LUAI"))
@@ -144,7 +141,7 @@ void ESM::LuaScriptsCfg::save(ESMWriter& esm) const
         {
             esm.startSubRecord("LUAR");
             esm.writeT<char>(recordCfg.mAttach ? 1 : 0);
-            esm.write(recordCfg.mRecordId.getRefIdString().data(), recordCfg.mRecordId.getRefIdString().size());
+            esm.writeHRefId(recordCfg.mRecordId);
             esm.endRecord("LUAR");
             saveLuaBinaryData(esm, recordCfg.mInitializationData);
         }

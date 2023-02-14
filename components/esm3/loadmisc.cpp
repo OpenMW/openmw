@@ -55,7 +55,7 @@ namespace ESM
 
     void Miscellaneous::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -66,7 +66,7 @@ namespace ESM
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("MCDT", mData, 12);
-        esm.writeHNOCString("SCRI", mScript.getRefIdString());
+        esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon);
     }
 

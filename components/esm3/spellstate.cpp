@@ -93,22 +93,22 @@ namespace ESM
             mUsedPowers[id] = time;
         }
 
-        mSelectedSpell = ESM::RefId::stringRefId(esm.getHNOString("SLCT"));
+        mSelectedSpell = esm.getHNORefId("SLCT");
     }
 
     void SpellState::save(ESMWriter& esm) const
     {
         for (const ESM::RefId& spell : mSpells)
-            esm.writeHNString("SPEL", spell.getRefIdString());
+            esm.writeHNRefId("SPEL", spell);
 
         for (auto it = mUsedPowers.begin(); it != mUsedPowers.end(); ++it)
         {
-            esm.writeHNString("USED", it->first.getRefIdString());
+            esm.writeHNRefId("USED", it->first);
             esm.writeHNT("TIME", it->second);
         }
 
         if (!mSelectedSpell.empty())
-            esm.writeHNString("SLCT", mSelectedSpell.getRefIdString());
+            esm.writeHNRefId("SLCT", mSelectedSpell);
     }
 
 }

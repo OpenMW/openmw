@@ -154,7 +154,7 @@ namespace ESM
         }
 
         // Save
-        esm.writeHNCString("NAME", mCell.getRefIdString());
+        esm.writeHNCRefId("NAME", mCell);
         esm.writeHNT("DATA", mData, 12);
 
         if (isDeleted)

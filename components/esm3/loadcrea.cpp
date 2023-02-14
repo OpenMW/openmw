@@ -108,7 +108,7 @@ namespace ESM
 
     void Creature::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -117,9 +117,9 @@ namespace ESM
         }
 
         esm.writeHNCString("MODL", mModel);
-        esm.writeHNOCString("CNAM", mOriginal.getRefIdString());
+        esm.writeHNOCRefId("CNAM", mOriginal);
         esm.writeHNOCString("FNAM", mName);
-        esm.writeHNOCString("SCRI", mScript.getRefIdString());
+        esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNT("NPDT", mData, 96);
         esm.writeHNT("FLAG", ((mBloodType << 10) + mFlags));
         if (mScale != 1.0)

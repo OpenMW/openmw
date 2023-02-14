@@ -10,10 +10,10 @@ namespace ESM
         mPlayerName = esm.getHNString("PLNA");
         esm.getHNOT(mPlayerLevel, "PLLE");
 
-        mPlayerClassId = ESM::RefId::stringRefId(esm.getHNOString("PLCL"));
+        mPlayerClassId = esm.getHNORefId("PLCL");
         mPlayerClassName = esm.getHNOString("PLCN");
 
-        mPlayerCell = ESM::RefId::stringRefId(esm.getHNString("PLCE"));
+        mPlayerCell = esm.getHNRefId("PLCE");
         esm.getHNTSized<16>(mInGameTime, "TSTM");
         esm.getHNT(mTimePlayed, "TIME");
         mDescription = esm.getHNString("DESC");
@@ -33,11 +33,11 @@ namespace ESM
         esm.writeHNT("PLLE", mPlayerLevel);
 
         if (!mPlayerClassId.empty())
-            esm.writeHNString("PLCL", mPlayerClassId.getRefIdString());
+            esm.writeHNRefId("PLCL", mPlayerClassId);
         else
             esm.writeHNString("PLCN", mPlayerClassName);
 
-        esm.writeHNString("PLCE", mPlayerCell.getRefIdString());
+        esm.writeHNRefId("PLCE", mPlayerCell);
         esm.writeHNT("TSTM", mInGameTime, 16);
         esm.writeHNT("TIME", mTimePlayed);
         esm.writeHNString("DESC", mDescription);

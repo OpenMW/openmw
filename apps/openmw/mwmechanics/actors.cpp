@@ -2286,7 +2286,7 @@ namespace MWMechanics
         writer.startRecord(ESM::REC_DCOU);
         for (const auto& [id, count] : mDeathCount)
         {
-            writer.writeHNString("ID__", id.getRefIdString());
+            writer.writeHNRefId("ID__", id);
             writer.writeHNT("COUN", count);
         }
         writer.endRecord(ESM::REC_DCOU);

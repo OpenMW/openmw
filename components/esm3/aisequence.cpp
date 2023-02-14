@@ -50,7 +50,7 @@ namespace ESM
         void AiEscort::load(ESMReader& esm)
         {
             esm.getHNT(mData, "DATA");
-            mTargetId = ESM::RefId::stringRefId(esm.getHNString("TARG"));
+            mTargetId = esm.getHNRefId("TARG");
             mTargetActorId = -1;
             esm.getHNOT(mTargetActorId, "TAID");
             esm.getHNT(mRemainingDuration, "DURA");
@@ -70,7 +70,7 @@ namespace ESM
         void AiEscort::save(ESMWriter& esm) const
         {
             esm.writeHNT("DATA", mData);
-            esm.writeHNString("TARG", mTargetId.getRefIdString());
+            esm.writeHNRefId("TARG", mTargetId);
             esm.writeHNT("TAID", mTargetActorId);
             esm.writeHNT("DURA", mRemainingDuration);
             if (!mCellId.empty())
@@ -82,7 +82,7 @@ namespace ESM
         void AiFollow::load(ESMReader& esm)
         {
             esm.getHNT(mData, "DATA");
-            mTargetId = ESM::RefId::stringRefId(esm.getHNString("TARG"));
+            mTargetId = esm.getHNRefId("TARG");
             mTargetActorId = -1;
             esm.getHNOT(mTargetActorId, "TAID");
             esm.getHNT(mRemainingDuration, "DURA");
@@ -107,7 +107,7 @@ namespace ESM
         void AiFollow::save(ESMWriter& esm) const
         {
             esm.writeHNT("DATA", mData);
-            esm.writeHNString("TARG", mTargetId.getRefIdString());
+            esm.writeHNRefId("TARG", mTargetId);
             esm.writeHNT("TAID", mTargetActorId);
             esm.writeHNT("DURA", mRemainingDuration);
             if (!mCellId.empty())
@@ -122,14 +122,14 @@ namespace ESM
 
         void AiActivate::load(ESMReader& esm)
         {
-            mTargetId = ESM::RefId::stringRefId(esm.getHNString("TARG"));
+            mTargetId = esm.getHNRefId("TARG");
             mRepeat = false;
             esm.getHNOT(mRepeat, "REPT");
         }
 
         void AiActivate::save(ESMWriter& esm) const
         {
-            esm.writeHNString("TARG", mTargetId.getRefIdString());
+            esm.writeHNRefId("TARG", mTargetId);
             if (mRepeat)
                 esm.writeHNT("REPT", mRepeat);
         }

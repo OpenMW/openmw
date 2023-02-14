@@ -167,6 +167,16 @@ namespace ESM
         endRecord(name);
     }
 
+    void ESMWriter::writeHNRefId(NAME name, const RefId& value)
+    {
+        writeHNString(name, value.getRefIdString());
+    }
+
+    void ESMWriter::writeHNRefId(NAME name, const RefId& value, std::size_t size)
+    {
+        writeHNString(name, value.getRefIdString(), size);
+    }
+
     void ESMWriter::writeMaybeFixedSizeString(const std::string& data, std::size_t size)
     {
         std::string string;
@@ -208,6 +218,21 @@ namespace ESM
         writeHString(data);
         if (data.size() > 0 && data[data.size() - 1] != '\0')
             write("\0", 1);
+    }
+
+    void ESMWriter::writeMaybeFixedSizeRefId(const RefId& value, std::size_t size)
+    {
+        writeMaybeFixedSizeString(value.getRefIdString(), size);
+    }
+
+    void ESMWriter::writeHRefId(const RefId& value)
+    {
+        writeHString(value.getRefIdString());
+    }
+
+    void ESMWriter::writeHCRefId(const RefId& value)
+    {
+        writeHCString(value.getRefIdString());
     }
 
     void ESMWriter::writeName(NAME name)

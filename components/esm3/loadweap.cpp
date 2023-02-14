@@ -57,7 +57,7 @@ namespace ESM
     }
     void Weapon::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -68,9 +68,9 @@ namespace ESM
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
         esm.writeHNT("WPDT", mData, 32);
-        esm.writeHNOCString("SCRI", mScript.getRefIdString());
+        esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNOCString("ITEX", mIcon);
-        esm.writeHNOCString("ENAM", mEnchant.getRefIdString());
+        esm.writeHNOCRefId("ENAM", mEnchant);
     }
 
     void Weapon::blank()

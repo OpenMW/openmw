@@ -1815,7 +1815,7 @@ namespace MWGui
         if (!mSelectedSpell.empty())
         {
             writer.startRecord(ESM::REC_ASPL);
-            writer.writeHNString("ID__", mSelectedSpell.getRefIdString());
+            writer.writeHNRefId("ID__", mSelectedSpell);
             writer.endRecord(ESM::REC_ASPL);
         }
 

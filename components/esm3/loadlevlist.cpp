@@ -43,7 +43,7 @@ namespace ESM
                     for (size_t i = 0; i < mList.size(); i++)
                     {
                         LevelItem& li = mList[i];
-                        li.mId = ESM::RefId::stringRefId(esm.getHNString(recName));
+                        li.mId = esm.getHNRefId(recName);
                         esm.getHNT(li.mLevel, "INTV");
                     }
 
@@ -77,7 +77,7 @@ namespace ESM
 
     void LevelledListBase::save(ESMWriter& esm, NAME recName, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -91,7 +91,7 @@ namespace ESM
 
         for (std::vector<LevelItem>::const_iterator it = mList.begin(); it != mList.end(); ++it)
         {
-            esm.writeHNCString(recName, it->mId.getRefIdString());
+            esm.writeHNCRefId(recName, it->mId);
             esm.writeHNT("INTV", it->mLevel);
         }
     }

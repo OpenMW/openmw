@@ -37,16 +37,16 @@ namespace ESM
     {
         for (auto iter(mKnownTopics.begin()); iter != mKnownTopics.end(); ++iter)
         {
-            esm.writeHNString("TOPI", iter->getRefIdString());
+            esm.writeHNRefId("TOPI", *iter);
         }
 
         for (auto iter = mChangedFactionReaction.begin(); iter != mChangedFactionReaction.end(); ++iter)
         {
-            esm.writeHNString("FACT", iter->first.getRefIdString());
+            esm.writeHNRefId("FACT", iter->first);
 
             for (auto reactIter = iter->second.begin(); reactIter != iter->second.end(); ++reactIter)
             {
-                esm.writeHNString("REA2", reactIter->first.getRefIdString());
+                esm.writeHNRefId("REA2", reactIter->first);
                 esm.writeHNT("INTV", reactIter->second);
             }
         }

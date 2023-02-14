@@ -136,7 +136,7 @@ namespace ESM
     {
         for (auto iter(mFactions.begin()); iter != mFactions.end(); ++iter)
         {
-            esm.writeHNString("FACT", iter->first.getRefIdString());
+            esm.writeHNRefId("FACT", iter->first);
 
             if (iter->second.mExpelled)
             {
@@ -188,7 +188,7 @@ namespace ESM
             esm.writeHNT("SPEC", mSpecIncreases);
 
         for (auto iter(mUsedIds.begin()); iter != mUsedIds.end(); ++iter)
-            esm.writeHNString("USED", iter->getRefIdString());
+            esm.writeHNRefId("USED", *iter);
 
         if (mTimeToStartDrowning)
             esm.writeHNT("DRTI", mTimeToStartDrowning);

@@ -10,8 +10,8 @@ namespace ESM
     {
         PartReference pr;
         esm.getHT(pr.mPart); // The INDX byte
-        pr.mMale = ESM::RefId::stringRefId(esm.getHNOString("BNAM"));
-        pr.mFemale = ESM::RefId::stringRefId(esm.getHNOString("CNAM"));
+        pr.mMale = esm.getHNORefId("BNAM");
+        pr.mFemale = esm.getHNORefId("CNAM");
         mParts.push_back(pr);
     }
 
@@ -29,8 +29,8 @@ namespace ESM
         for (std::vector<PartReference>::const_iterator it = mParts.begin(); it != mParts.end(); ++it)
         {
             esm.writeHNT("INDX", it->mPart);
-            esm.writeHNOString("BNAM", it->mMale.getRefIdString());
-            esm.writeHNOString("CNAM", it->mFemale.getRefIdString());
+            esm.writeHNORefId("BNAM", it->mMale);
+            esm.writeHNORefId("CNAM", it->mFemale);
         }
     }
 
@@ -92,7 +92,7 @@ namespace ESM
 
     void Armor::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -102,11 +102,11 @@ namespace ESM
 
         esm.writeHNCString("MODL", mModel);
         esm.writeHNOCString("FNAM", mName);
-        esm.writeHNOCString("SCRI", mScript.getRefIdString());
+        esm.writeHNOCRefId("SCRI", mScript);
         esm.writeHNT("AODT", mData, 24);
         esm.writeHNOCString("ITEX", mIcon);
         mParts.save(esm);
-        esm.writeHNOCString("ENAM", mEnchant.getRefIdString());
+        esm.writeHNOCRefId("ENAM", mEnchant);
     }
 
     void Armor::blank()

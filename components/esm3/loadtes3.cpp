@@ -30,8 +30,8 @@ namespace ESM
             esm.getSubHeader();
             esm.getT(mData.version);
             esm.getT(mData.type);
-            mData.author.assign(esm.getMaybeFixedStringSize(32));
-            mData.desc.assign(esm.getMaybeFixedStringSize(256));
+            mData.author = esm.getMaybeFixedStringSize(32);
+            mData.desc = esm.getMaybeFixedStringSize(256);
             esm.getT(mData.records);
         }
 

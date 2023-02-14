@@ -53,7 +53,7 @@ namespace ESM
                 {
                     esm.getSubHeader();
                     SoundRef sr;
-                    sr.mSound = ESM::RefId::stringRefId(esm.getMaybeFixedStringSize(32));
+                    sr.mSound = esm.getMaybeFixedRefIdSize(32);
                     esm.getT(sr.mChance);
                     mSoundList.push_back(sr);
                     break;
@@ -74,7 +74,7 @@ namespace ESM
 
     void Region::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCString("NAME", mId.getRefIdString());
+        esm.writeHNCRefId("NAME", mId);
 
         if (isDeleted)
         {
@@ -89,13 +89,13 @@ namespace ESM
         else
             esm.writeHNT("WEAT", mData);
 
-        esm.writeHNOCString("BNAM", mSleepList.getRefIdString());
+        esm.writeHNOCRefId("BNAM", mSleepList);
 
         esm.writeHNT("CNAM", mMapColor);
         for (std::vector<SoundRef>::const_iterator it = mSoundList.begin(); it != mSoundList.end(); ++it)
         {
             esm.startSubRecord("SNAM");
-            esm.writeMaybeFixedSizeString(it->mSound.getRefIdString(), 32);
+            esm.writeMaybeFixedSizeRefId(it->mSound, 32);
             esm.writeT(it->mChance);
             esm.endRecord("SNAM");
         }

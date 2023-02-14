@@ -131,16 +131,22 @@ namespace ESM
         return ESM::RefId::sEmpty;
     }
 
-    void ESMReader::skipHNOString(NAME name)
+    void ESMReader::skipHNORefId(NAME name)
     {
         if (isNextSub(name))
-            skipHString();
+            skipHRefId();
     }
 
     std::string ESMReader::getHNString(NAME name)
     {
         getSubNameIs(name);
         return getHString();
+    }
+
+    RefId ESMReader::getHNRefId(NAME name)
+    {
+        getSubNameIs(name);
+        return getRefId();
     }
 
     std::string ESMReader::getHString()
@@ -192,6 +198,11 @@ namespace ESM
         }
 
         skip(mCtx.leftSub);
+    }
+
+    void ESMReader::skipHRefId()
+    {
+        skipHString();
     }
 
     void ESMReader::getHExact(void* p, int size)
@@ -388,6 +399,11 @@ namespace ESM
             return mEncoder->getUtf8(std::string_view(ptr, size));
 
         return std::string_view(ptr, size);
+    }
+
+    RefId ESMReader::getRefId(std::size_t size)
+    {
+        return RefId::stringRefId(getStringView(size));
     }
 
     [[noreturn]] void ESMReader::fail(const std::string& msg)

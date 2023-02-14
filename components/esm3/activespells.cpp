@@ -11,7 +11,7 @@ namespace ESM
         {
             for (const auto& params : spells)
             {
-                esm.writeHNString(tag, params.mId.getRefIdString());
+                esm.writeHNRefId(tag, params.mId);
 
                 esm.writeHNT("CAST", params.mCasterActorId);
                 esm.writeHNString("DISP", params.mDisplayName);

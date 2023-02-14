@@ -213,7 +213,7 @@ namespace ESSImport
     public:
         void read(ESM::ESMReader& esm) override
         {
-            auto id = ESM::RefId::stringRefId(esm.getHNString("NAME"));
+            auto id = esm.getHNRefId("NAME");
             NPCC npcc;
             npcc.load(esm);
             if (id == "PlayerSaveGame")
@@ -308,7 +308,7 @@ namespace ESSImport
     {
         void read(ESM::ESMReader& esm) override
         {
-            auto id = ESM::RefId::stringRefId(esm.getHNString("NAME"));
+            auto id = esm.getHNRefId("NAME");
             CNTC cntc;
             cntc.load(esm);
             mContext->mContainerChanges.insert(std::make_pair(std::make_pair(cntc.mIndex, id), cntc));
@@ -320,7 +320,7 @@ namespace ESSImport
     public:
         void read(ESM::ESMReader& esm) override
         {
-            auto id = ESM::RefId::stringRefId(esm.getHNString("NAME"));
+            auto id = esm.getHNRefId("NAME");
             CREC crec;
             crec.load(esm);
             mContext->mCreatureChanges.insert(std::make_pair(std::make_pair(crec.mIndex, id), crec));

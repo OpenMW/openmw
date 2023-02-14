@@ -140,7 +140,7 @@ namespace ESM
 
         for (auto it = mLevelledItemMap.begin(); it != mLevelledItemMap.end(); ++it)
         {
-            esm.writeHNString("LEVM", it->first.first.getRefIdString());
+            esm.writeHNRefId("LEVM", it->first.first);
             esm.writeHNT("COUN", it->second);
             esm.writeHNString("LGRP", it->first.second);
         }
@@ -148,7 +148,7 @@ namespace ESM
         for (TEffectMagnitudes::const_iterator it = mPermanentMagicEffectMagnitudes.begin();
              it != mPermanentMagicEffectMagnitudes.end(); ++it)
         {
-            esm.writeHNString("MAGI", it->first.getRefIdString());
+            esm.writeHNRefId("MAGI", it->first);
 
             const std::vector<std::pair<float, float>>& params = it->second;
             for (std::vector<std::pair<float, float>>::const_iterator pIt = params.begin(); pIt != params.end(); ++pIt)
