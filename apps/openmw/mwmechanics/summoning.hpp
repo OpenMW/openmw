@@ -5,7 +5,7 @@
 #include <utility>
 namespace ESM
 {
-    struct RefId;
+    class RefId;
 }
 namespace MWWorld
 {

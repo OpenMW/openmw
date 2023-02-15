@@ -45,7 +45,7 @@ namespace SceneUtil
 namespace ESM
 {
     struct Position;
-    struct RefId;
+    class RefId;
 }
 
 namespace Files

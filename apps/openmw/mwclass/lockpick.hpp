@@ -5,7 +5,7 @@
 
 namespace ESM
 {
-    struct RefId;
+    class RefId;
 }
 
 namespace MWClass
