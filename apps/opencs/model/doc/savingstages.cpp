@@ -145,11 +145,11 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
 
     // Test, if we need to save anything associated info records.
     bool infoModified = false;
-    CSMWorld::InfoCollection::Range range = mInfos.getTopicRange(topic.get().mId.getRefIdString());
+    const auto infos = mInfos.getTopicInfos(topic.get().mId);
 
-    for (CSMWorld::InfoCollection::RecordConstIterator iter(range.first); iter != range.second; ++iter)
+    for (const auto& record : infos)
     {
-        if ((*iter)->isModified() || (*iter)->mState == CSMWorld::RecordBase::State_Deleted)
+        if (record->isModified() || record->mState == CSMWorld::RecordBase::State_Deleted)
         {
             infoModified = true;
             break;
@@ -173,35 +173,30 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
         }
 
         // write modified selected info records
-        for (CSMWorld::InfoCollection::RecordConstIterator iter(range.first); iter != range.second; ++iter)
+        for (auto iter = infos.begin(); iter != infos.end(); ++iter)
         {
-            if ((*iter)->isModified() || (*iter)->mState == CSMWorld::RecordBase::State_Deleted)
+            const CSMWorld::Record<CSMWorld::Info>& record = **iter;
+
+            if (record.isModified() || record.mState == CSMWorld::RecordBase::State_Deleted)
             {
-                ESM::DialInfo info = (*iter)->get();
-                std::string_view infoIdString = info.mId.getRefIdString();
-                info.mId = ESM::RefId::stringRefId(infoIdString.substr(infoIdString.find_last_of('#') + 1));
+                ESM::DialInfo info = record.get();
+                info.mId = record.get().mOriginalId;
 
                 info.mPrev = ESM::RefId::sEmpty;
-                if (iter != range.first)
+                if (iter != infos.begin())
                 {
-                    CSMWorld::InfoCollection::RecordConstIterator prev = iter;
-                    --prev;
-                    std::string_view prevIdString = (*prev)->get().mId.getRefIdString();
-                    info.mPrev = ESM::RefId::stringRefId(prevIdString.substr(prevIdString.find_last_of('#') + 1));
+                    const auto prev = std::prev(iter);
+                    info.mPrev = (*prev)->get().mOriginalId;
                 }
 
-                CSMWorld::InfoCollection::RecordConstIterator next = iter;
-                ++next;
+                const auto next = std::next(iter);
 
                 info.mNext = ESM::RefId::sEmpty;
-                if (next != range.second)
-                {
-                    std::string_view nextIdString = (*next)->get().mId.getRefIdString();
-                    info.mNext = ESM::RefId::stringRefId(nextIdString.substr(nextIdString.find_last_of('#') + 1));
-                }
+                if (next != infos.end())
+                    info.mNext = (*next)->get().mOriginalId;
 
                 writer.startRecord(info.sRecordId);
-                info.save(writer, (*iter)->mState == CSMWorld::RecordBase::State_Deleted);
+                info.save(writer, record.mState == CSMWorld::RecordBase::State_Deleted);
                 writer.endRecord(info.sRecordId);
             }
         }
