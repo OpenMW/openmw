@@ -8,6 +8,7 @@
 #include <apps/opencs/model/world/data.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
 
 #include <QTimer>
@@ -55,6 +56,9 @@ void CSMDoc::Loader::load()
 
         return;
     }
+
+    if (!mStart.has_value())
+        mStart = std::chrono::steady_clock::now();
 
     std::vector<std::pair<Document*, Stage>>::iterator iter = mDocuments.begin();
 
@@ -133,6 +137,14 @@ void CSMDoc::Loader::load()
 
     if (done)
     {
+        if (mStart.has_value())
+        {
+            const auto duration = std::chrono::steady_clock::now() - *mStart;
+            Log(Debug::Verbose) << "Loaded content files in "
+                                << std::chrono::duration_cast<std::chrono::duration<double>>(duration).count() << 's';
+            mStart.reset();
+        }
+
         mDocuments.erase(iter);
         emit documentLoaded(document);
     }

@@ -1,6 +1,8 @@
 #ifndef CSM_DOC_LOADER_H
 #define CSM_DOC_LOADER_H
 
+#include <chrono>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -34,6 +36,8 @@ namespace CSMDoc
 
         QTimer* mTimer;
         bool mShouldStop;
+
+        std::optional<std::chrono::steady_clock::time_point> mStart;
 
     public:
         Loader();
