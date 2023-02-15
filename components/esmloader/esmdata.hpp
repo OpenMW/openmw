@@ -16,7 +16,7 @@ namespace ESM
     struct Land;
     struct Static;
     class Variant;
-    struct RefId;
+    class RefId;
 }
 
 namespace EsmLoader

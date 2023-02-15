@@ -4,7 +4,7 @@
 #include <string>
 namespace ESM
 {
-    struct RefId;
+    class RefId;
 }
 
 namespace Compiler

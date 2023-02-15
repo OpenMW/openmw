@@ -13,7 +13,7 @@ namespace ESM
 {
     class ESMReader;
     class ESMWriter;
-    struct RefId;
+    class RefId;
 
     // NOTE: spell ids must be lower case
     struct SpellState

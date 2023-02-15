@@ -57,7 +57,7 @@ namespace ESM
     struct CreatureLevList;
     struct ItemLevList;
     struct TimeStamp;
-    struct RefId;
+    class RefId;
 }
 
 namespace MWPhysics

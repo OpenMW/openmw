@@ -17,7 +17,7 @@ namespace ESM
 {
     class ESMReader;
     class ESMWriter;
-    struct RefId;
+    class RefId;
 }
 
 namespace MWWorld

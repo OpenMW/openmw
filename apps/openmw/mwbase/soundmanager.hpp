@@ -16,7 +16,7 @@ namespace MWWorld
 
 namespace ESM
 {
-    struct RefId;
+    class RefId;
 }
 
 namespace MWSound

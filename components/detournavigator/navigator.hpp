@@ -16,7 +16,7 @@ namespace ESM
 {
     struct Cell;
     struct Pathgrid;
-    struct RefId;
+    class RefId;
 }
 
 namespace Loading

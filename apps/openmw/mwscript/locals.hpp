@@ -12,7 +12,7 @@ namespace ESM
 {
     class Script;
     struct Locals;
-    struct RefId;
+    class RefId;
 }
 
 namespace MWScript

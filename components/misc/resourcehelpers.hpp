@@ -11,7 +11,7 @@ namespace VFS
 
 namespace ESM
 {
-    struct RefId;
+    class RefId;
 }
 
 namespace Misc

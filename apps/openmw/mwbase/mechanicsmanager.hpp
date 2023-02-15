@@ -21,7 +21,7 @@ namespace osg
 namespace ESM
 {
     struct Class;
-    struct RefId;
+    class RefId;
     class ESMReader;
     class ESMWriter;
 }

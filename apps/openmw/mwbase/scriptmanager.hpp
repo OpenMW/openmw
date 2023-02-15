@@ -10,7 +10,7 @@ namespace Interpreter
 
 namespace ESM
 {
-    struct RefId;
+    class RefId;
 }
 
 namespace Compiler

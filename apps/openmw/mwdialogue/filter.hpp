@@ -9,7 +9,7 @@ namespace ESM
 {
     struct DialInfo;
     struct Dialogue;
-    struct RefId;
+    class RefId;
 }
 
 namespace MWDialogue

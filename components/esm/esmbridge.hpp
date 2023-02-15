@@ -16,7 +16,7 @@ namespace ESM
 {
     struct Cell;
     struct CellId;
-    struct RefId;
+    class RefId;
 
     class CellVariant
     {

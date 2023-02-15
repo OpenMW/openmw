@@ -13,7 +13,7 @@ class QVariant;
 
 namespace ESM
 {
-    struct RefId;
+    class RefId;
 }
 
 namespace CSMWorld
