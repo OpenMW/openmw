@@ -5,6 +5,7 @@
 #endif // NO_LUAJIT
 
 #include <filesystem>
+#include <fstream>
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
@@ -385,7 +386,9 @@ namespace LuaUtil
     sol::function LuaState::loadInternalLib(std::string_view libName)
     {
         const auto path = packageNameToPath(libName, mLibSearchPaths);
-        sol::load_result res = mSol.load_file(Files::pathToUnicodeString(path), sol::load_mode::text);
+        std::ifstream stream(path);
+        std::string fileContent(std::istreambuf_iterator<char>(stream), {});
+        sol::load_result res = mSol.load(fileContent, Files::pathToUnicodeString(path), sol::load_mode::text);
         if (!res.valid())
             throw std::runtime_error("Lua error: " + res.get<std::string>());
         return res;
