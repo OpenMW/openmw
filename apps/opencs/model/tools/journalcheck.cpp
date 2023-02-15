@@ -50,16 +50,12 @@ void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
     int totalInfoCount = 0;
     std::set<int> questIndices;
 
-    CSMWorld::InfoCollection::Range range = mJournalInfos.getTopicRange(journal.mId.getRefIdString());
-
-    for (CSMWorld::InfoCollection::RecordConstIterator it = range.first; it != range.second; ++it)
+    for (const CSMWorld::Record<CSMWorld::Info>* record : mJournalInfos.getTopicInfos(journal.mId))
     {
-        const CSMWorld::Record<CSMWorld::Info> infoRecord = (*it->get());
-
-        if (infoRecord.isDeleted())
+        if (record->isDeleted())
             continue;
 
-        const CSMWorld::Info& journalInfo = infoRecord.get();
+        const CSMWorld::Info& journalInfo = record->get();
 
         totalInfoCount += 1;
 
@@ -69,7 +65,7 @@ void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
         }
 
         // Skip "Base" records (setting!)
-        if (mIgnoreBaseRecords && infoRecord.mState == CSMWorld::RecordBase::State_BaseOnly)
+        if (mIgnoreBaseRecords && record->mState == CSMWorld::RecordBase::State_BaseOnly)
             continue;
 
         if (journalInfo.mResponse.empty())

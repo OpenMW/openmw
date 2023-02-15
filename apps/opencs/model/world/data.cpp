@@ -55,6 +55,41 @@
 #include "resourcesmanager.hpp"
 #include "resourcetable.hpp"
 
+namespace
+{
+    void removeDialogueInfos(const ESM::RefId& dialogueId, const CSMWorld::InfosByTopic& infosByTopic,
+        CSMWorld::InfoCollection& infoCollection)
+    {
+        const auto topicInfos = infosByTopic.find(dialogueId);
+
+        if (topicInfos == infosByTopic.end())
+            return;
+
+        std::vector<int> erasedRecords;
+
+        for (const ESM::RefId& id : topicInfos->second)
+        {
+            const CSMWorld::Record<CSMWorld::Info>& record = infoCollection.getRecord(id);
+
+            if (record.mState == CSMWorld::RecordBase::State_ModifiedOnly)
+            {
+                erasedRecords.push_back(infoCollection.searchId(record.get().mId));
+                continue;
+            }
+
+            auto deletedRecord = std::make_unique<CSMWorld::Record<CSMWorld::Info>>(record);
+            deletedRecord->mState = CSMWorld::RecordBase::State_Deleted;
+            infoCollection.setRecord(infoCollection.searchId(record.get().mId), std::move(deletedRecord));
+        }
+
+        while (!erasedRecords.empty())
+        {
+            infoCollection.removeRows(erasedRecords.back(), 1);
+            erasedRecords.pop_back();
+        }
+    }
+}
+
 void CSMWorld::Data::addModel(QAbstractItemModel* model, UniversalId::Type type, bool update)
 {
     mModels.push_back(model);
@@ -1254,11 +1289,11 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
 
                 if (mJournals.tryDelete(recordIdString))
                 {
-                    mJournalInfos.removeDialogueInfos(recordIdString);
+                    removeDialogueInfos(record.mId, mJournalInfosByTopic, mJournalInfos);
                 }
                 else if (mTopics.tryDelete(recordIdString))
                 {
-                    mTopicInfos.removeDialogueInfos(recordIdString);
+                    removeDialogueInfos(record.mId, mTopicInfosByTopic, mTopicInfos);
                 }
                 else
                 {
@@ -1296,9 +1331,9 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
             }
 
             if (mDialogue->mType == ESM::Dialogue::Journal)
-                mJournalInfos.load(*mReader, mBase, *mDialogue);
+                mJournalInfos.load(*mReader, mBase, *mDialogue, mJournalInfosByTopic);
             else
-                mTopicInfos.load(*mReader, mBase, *mDialogue);
+                mTopicInfos.load(*mReader, mBase, *mDialogue, mTopicInfosByTopic);
 
             break;
         }

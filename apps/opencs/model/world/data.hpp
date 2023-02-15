@@ -135,6 +135,9 @@ namespace CSMWorld
 
         std::vector<std::shared_ptr<ESM::ESMReader>> mReaders;
 
+        CSMWorld::InfosByTopic mJournalInfosByTopic;
+        CSMWorld::InfosByTopic mTopicInfosByTopic;
+
         // not implemented
         Data(const Data&);
         Data& operator=(const Data&);
