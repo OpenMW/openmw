@@ -125,6 +125,7 @@ CSMDoc::WriteDialogueCollectionStage::WriteDialogueCollectionStage(Document& doc
 
 int CSMDoc::WriteDialogueCollectionStage::setup()
 {
+    mInfosByTopic = mInfos.getInfosByTopic();
     return mTopics.getSize();
 }
 
@@ -145,14 +146,17 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
 
     // Test, if we need to save anything associated info records.
     bool infoModified = false;
-    const auto infos = mInfos.getTopicInfos(topic.get().mId);
+    const auto topicInfos = mInfosByTopic.find(topic.get().mId);
 
-    for (const auto& record : infos)
+    if (topicInfos != mInfosByTopic.end())
     {
-        if (record->isModified() || record->mState == CSMWorld::RecordBase::State_Deleted)
+        for (const auto& record : topicInfos->second)
         {
-            infoModified = true;
-            break;
+            if (record->isModified() || record->mState == CSMWorld::RecordBase::State_Deleted)
+            {
+                infoModified = true;
+                break;
+            }
         }
     }
 
@@ -173,31 +177,36 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
         }
 
         // write modified selected info records
-        for (auto iter = infos.begin(); iter != infos.end(); ++iter)
+        if (topicInfos != mInfosByTopic.end())
         {
-            const CSMWorld::Record<CSMWorld::Info>& record = **iter;
+            const std::vector<const CSMWorld::Record<CSMWorld::Info>*>& infos = topicInfos->second;
 
-            if (record.isModified() || record.mState == CSMWorld::RecordBase::State_Deleted)
+            for (auto iter = infos.begin(); iter != infos.end(); ++iter)
             {
-                ESM::DialInfo info = record.get();
-                info.mId = record.get().mOriginalId;
+                const CSMWorld::Record<CSMWorld::Info>& record = **iter;
 
-                info.mPrev = ESM::RefId::sEmpty;
-                if (iter != infos.begin())
+                if (record.isModified() || record.mState == CSMWorld::RecordBase::State_Deleted)
                 {
-                    const auto prev = std::prev(iter);
-                    info.mPrev = (*prev)->get().mOriginalId;
+                    ESM::DialInfo info = record.get();
+                    info.mId = record.get().mOriginalId;
+
+                    info.mPrev = ESM::RefId::sEmpty;
+                    if (iter != infos.begin())
+                    {
+                        const auto prev = std::prev(iter);
+                        info.mPrev = (*prev)->get().mOriginalId;
+                    }
+
+                    const auto next = std::next(iter);
+
+                    info.mNext = ESM::RefId::sEmpty;
+                    if (next != infos.end())
+                        info.mNext = (*next)->get().mOriginalId;
+
+                    writer.startRecord(info.sRecordId);
+                    info.save(writer, record.mState == CSMWorld::RecordBase::State_Deleted);
+                    writer.endRecord(info.sRecordId);
                 }
-
-                const auto next = std::next(iter);
-
-                info.mNext = ESM::RefId::sEmpty;
-                if (next != infos.end())
-                    info.mNext = (*next)->get().mOriginalId;
-
-                writer.startRecord(info.sRecordId);
-                info.save(writer, record.mState == CSMWorld::RecordBase::State_Deleted);
-                writer.endRecord(info.sRecordId);
             }
         }
     }

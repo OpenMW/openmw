@@ -32,7 +32,7 @@ CSMTools::JournalCheckStage::JournalCheckStage(
 int CSMTools::JournalCheckStage::setup()
 {
     mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();
-
+    mInfosByTopic = mJournalInfos.getInfosByTopic();
     return mJournals.getSize();
 }
 
@@ -50,38 +50,39 @@ void CSMTools::JournalCheckStage::perform(int stage, CSMDoc::Messages& messages)
     int totalInfoCount = 0;
     std::set<int> questIndices;
 
-    for (const CSMWorld::Record<CSMWorld::Info>* record : mJournalInfos.getTopicInfos(journal.mId))
+    if (const auto infos = mInfosByTopic.find(journal.mId); infos != mInfosByTopic.end())
     {
-        if (record->isDeleted())
-            continue;
-
-        const CSMWorld::Info& journalInfo = record->get();
-
-        totalInfoCount += 1;
-
-        if (journalInfo.mQuestStatus == ESM::DialInfo::QS_Name)
+        for (const CSMWorld::Record<CSMWorld::Info>* record : infos->second)
         {
-            statusNamedCount += 1;
-        }
+            if (record->isDeleted())
+                continue;
 
-        // Skip "Base" records (setting!)
-        if (mIgnoreBaseRecords && record->mState == CSMWorld::RecordBase::State_BaseOnly)
-            continue;
+            const CSMWorld::Info& journalInfo = record->get();
 
-        if (journalInfo.mResponse.empty())
-        {
-            CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_JournalInfo, journalInfo.mId);
-            messages.add(id, "Missing journal entry text", "", CSMDoc::Message::Severity_Warning);
-        }
+            totalInfoCount += 1;
 
-        std::pair<std::set<int>::iterator, bool> result = questIndices.insert(journalInfo.mData.mJournalIndex);
+            if (journalInfo.mQuestStatus == ESM::DialInfo::QS_Name)
+            {
+                statusNamedCount += 1;
+            }
 
-        // Duplicate index
-        if (!result.second)
-        {
-            CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_JournalInfo, journalInfo.mId);
-            messages.add(id, "Duplicated quest index " + std::to_string(journalInfo.mData.mJournalIndex), "",
-                CSMDoc::Message::Severity_Error);
+            // Skip "Base" records (setting!)
+            if (mIgnoreBaseRecords && record->mState == CSMWorld::RecordBase::State_BaseOnly)
+                continue;
+
+            if (journalInfo.mResponse.empty())
+            {
+                CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_JournalInfo, journalInfo.mId);
+                messages.add(id, "Missing journal entry text", "", CSMDoc::Message::Severity_Warning);
+            }
+
+            // Duplicate index
+            if (!questIndices.insert(journalInfo.mData.mJournalIndex).second)
+            {
+                CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_JournalInfo, journalInfo.mId);
+                messages.add(id, "Duplicated quest index " + std::to_string(journalInfo.mData.mJournalIndex), "",
+                    CSMDoc::Message::Severity_Error);
+            }
         }
     }
 

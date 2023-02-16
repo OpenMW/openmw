@@ -4,8 +4,10 @@
 #include "stage.hpp"
 
 #include <deque>
+#include <unordered_map>
 
 #include "../world/idcollection.hpp"
+#include "../world/infocollection.hpp"
 #include "../world/record.hpp"
 #include "../world/scope.hpp"
 
@@ -118,6 +120,7 @@ namespace CSMDoc
         SavingState& mState;
         const CSMWorld::IdCollection<ESM::Dialogue>& mTopics;
         CSMWorld::InfoCollection& mInfos;
+        CSMWorld::InfosRecordPtrByTopic mInfosByTopic;
 
     public:
         WriteDialogueCollectionStage(Document& document, SavingState& state, bool journal);

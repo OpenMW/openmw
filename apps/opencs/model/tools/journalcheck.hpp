@@ -2,6 +2,7 @@
 #define CSM_TOOLS_JOURNALCHECK_H
 
 #include "../world/idcollection.hpp"
+#include "../world/infocollection.hpp"
 
 #include "../doc/stage.hpp"
 
@@ -39,6 +40,7 @@ namespace CSMTools
         const CSMWorld::IdCollection<ESM::Dialogue>& mJournals;
         const CSMWorld::InfoCollection& mJournalInfos;
         bool mIgnoreBaseRecords;
+        CSMWorld::InfosRecordPtrByTopic mInfosByTopic;
     };
 }
 

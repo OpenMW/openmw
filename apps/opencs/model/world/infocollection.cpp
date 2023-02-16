@@ -82,11 +82,10 @@ void CSMWorld::InfoCollection::load(
     }
 }
 
-std::vector<CSMWorld::Record<CSMWorld::Info>*> CSMWorld::InfoCollection::getTopicInfos(const ESM::RefId& topic) const
+CSMWorld::InfosRecordPtrByTopic CSMWorld::InfoCollection::getInfosByTopic() const
 {
-    std::vector<CSMWorld::Record<CSMWorld::Info>*> result;
+    InfosRecordPtrByTopic result;
     for (const std::unique_ptr<Record<Info>>& record : getRecords())
-        if (record->mBase.mTopicId == topic)
-            result.push_back(record.get());
+        result[record->mBase.mTopicId].push_back(record.get());
     return result;
 }
