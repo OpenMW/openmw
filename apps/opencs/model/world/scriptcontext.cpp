@@ -32,7 +32,7 @@ bool CSMWorld::ScriptContext::canDeclareLocals() const
 
 char CSMWorld::ScriptContext::getGlobalType(const std::string& name) const
 {
-    int index = mData.getGlobals().searchId(name);
+    const int index = mData.getGlobals().searchId(ESM::RefId::stringRefId(name));
 
     if (index != -1)
     {

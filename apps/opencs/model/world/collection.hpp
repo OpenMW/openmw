@@ -86,7 +86,7 @@ namespace CSMWorld
 
     private:
         std::vector<std::unique_ptr<Record<ESXRecordT>>> mRecords;
-        std::map<std::string, int> mIndex;
+        std::map<ESM::RefId, int> mIndex;
         std::vector<Column<ESXRecordT>*> mColumns;
 
         // not implemented
@@ -147,10 +147,6 @@ namespace CSMWorld
         bool touchRecord(const ESM::RefId& id) override;
         ///< Change the state of a record from base to modified, if it is not already.
         ///  \return True if the record was changed.
-
-        int searchId(std::string_view id) const override;
-        ////< Search record with \a id.
-        /// \return index of record (if found) or -1 (not found)
 
         int searchId(const ESM::RefId& id) const override;
         ////< Search record with \a id.
@@ -232,9 +228,9 @@ namespace CSMWorld
             std::move(buffer.begin(), buffer.end(), mRecords.begin() + baseIndex);
 
             // adjust index
-            for (std::map<std::string, int>::iterator iter(mIndex.begin()); iter != mIndex.end(); ++iter)
-                if (iter->second >= baseIndex && iter->second < baseIndex + size)
-                    iter->second = newOrder.at(iter->second - baseIndex) + baseIndex;
+            for (auto& [id, index] : mIndex)
+                if (index >= baseIndex && index < baseIndex + size)
+                    index = newOrder.at(index - baseIndex) + baseIndex;
         }
 
         return true;
@@ -329,9 +325,9 @@ namespace CSMWorld
     template <typename ESXRecordT, typename IdAccessorT>
     void Collection<ESXRecordT, IdAccessorT>::add(const ESXRecordT& record)
     {
-        auto id = IdAccessorT().getId(record);
+        const ESM::RefId id = IdAccessorT().getId(record);
 
-        auto iter = mIndex.find(Misc::StringUtils::lowerCase(id.getRefIdString()));
+        auto iter = mIndex.find(id);
 
         if (iter == mIndex.end())
         {
@@ -438,7 +434,7 @@ namespace CSMWorld
     {
         mRecords.erase(mRecords.begin() + index, mRecords.begin() + index + count);
 
-        typename std::map<std::string, int>::iterator iter = mIndex.begin();
+        auto iter = mIndex.begin();
 
         while (iter != mIndex.end())
         {
@@ -451,7 +447,7 @@ namespace CSMWorld
                 }
                 else
                 {
-                    mIndex.erase(iter++);
+                    iter = mIndex.erase(iter);
                 }
             }
             else
@@ -474,23 +470,14 @@ namespace CSMWorld
     }
 
     template <typename ESXRecordT, typename IdAccessorT>
-    int Collection<ESXRecordT, IdAccessorT>::searchId(std::string_view id) const
+    int Collection<ESXRecordT, IdAccessorT>::searchId(const ESM::RefId& id) const
     {
-        std::string id2 = Misc::StringUtils::lowerCase(id);
-
-        std::map<std::string, int>::const_iterator iter = mIndex.find(id2);
+        const auto iter = mIndex.find(id);
 
         if (iter == mIndex.end())
             return -1;
 
         return iter->second;
-    }
-
-    template <typename ESXRecordT, typename IdAccessorT>
-    int Collection<ESXRecordT, IdAccessorT>::searchId(const ESM::RefId& id) const
-    {
-
-        return searchId(id.getRefIdString());
     }
 
     template <typename ESXRecordT, typename IdAccessorT>
@@ -549,7 +536,7 @@ namespace CSMWorld
             throw std::runtime_error("index out of range");
 
         std::unique_ptr<Record<ESXRecordT>> record2(static_cast<Record<ESXRecordT>*>(record.release()));
-        std::string id = Misc::StringUtils::lowerCase(IdAccessorT().getId(record2->get()).getRefIdString());
+        ESM::RefId id = IdAccessorT().getId(record2->get());
 
         if (index == size)
             mRecords.push_back(std::move(record2));
@@ -558,10 +545,10 @@ namespace CSMWorld
 
         if (index < size - 1)
         {
-            for (std::map<std::string, int>::iterator iter(mIndex.begin()); iter != mIndex.end(); ++iter)
+            for (auto& [key, value] : mIndex)
             {
-                if (iter->second >= index)
-                    ++(iter->second);
+                if (value >= index)
+                    ++value;
             }
         }
 

@@ -65,7 +65,7 @@ std::string CSVWorld::ReferenceCreator::getErrors() const
     // record is internal and requires neither user input nor verification.
     std::string errors;
 
-    std::string cell = mCell->text().toUtf8().constData();
+    const ESM::RefId cell = ESM::RefId::stringRefId(mCell->text().toStdString());
 
     if (cell.empty())
         errors += "Missing Cell ID";

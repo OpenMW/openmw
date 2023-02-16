@@ -965,7 +965,7 @@ void CSVRender::InstanceMode::dropEvent(QDropEvent* event)
         CSMWorld::IdTree& cellTable
             = dynamic_cast<CSMWorld::IdTree&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Cells));
 
-        bool noCell = document.getData().getCells().searchId(cellId) == -1;
+        const bool noCell = document.getData().getCells().searchId(ESM::RefId::stringRefId(cellId)) == -1;
 
         if (noCell)
         {

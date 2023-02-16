@@ -1072,13 +1072,14 @@ void CSMWorld::Data::loadFallbackEntries()
 
     std::pair<std::string, std::string> doorMarkers[] = { std::make_pair("PrisonMarker", "marker_prison.nif") };
 
-    for (const auto& marker : staticMarkers)
+    for (const auto& [id, model] : staticMarkers)
     {
-        if (mReferenceables.searchId(marker.first) == -1)
+        const ESM::RefId refId = ESM::RefId::stringRefId(id);
+        if (mReferenceables.searchId(refId) == -1)
         {
             ESM::Static newMarker;
-            newMarker.mId = ESM::RefId::stringRefId(marker.first);
-            newMarker.mModel = marker.second;
+            newMarker.mId = refId;
+            newMarker.mModel = model;
             newMarker.mRecordFlags = 0;
             auto record = std::make_unique<CSMWorld::Record<ESM::Static>>();
             record->mBase = newMarker;
@@ -1087,13 +1088,14 @@ void CSMWorld::Data::loadFallbackEntries()
         }
     }
 
-    for (const auto& marker : doorMarkers)
+    for (const auto& [id, model] : doorMarkers)
     {
-        if (mReferenceables.searchId(marker.first) == -1)
+        const ESM::RefId refId = ESM::RefId::stringRefId(id);
+        if (mReferenceables.searchId(refId) == -1)
         {
             ESM::Door newMarker;
-            newMarker.mId = ESM::RefId::stringRefId(marker.first);
-            newMarker.mModel = marker.second;
+            newMarker.mId = refId;
+            newMarker.mModel = model;
             newMarker.mRecordFlags = 0;
             auto record = std::make_unique<CSMWorld::Record<ESM::Door>>();
             record->mBase = newMarker;
@@ -1280,25 +1282,24 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
             bool isDeleted = false;
 
             record.load(*mReader, isDeleted);
-            const std::string& recordIdString = record.mId.getRefIdString();
 
             if (isDeleted)
             {
                 // record vector can be shuffled around which would make pointer to record invalid
                 mDialogue = nullptr;
 
-                if (mJournals.tryDelete(recordIdString))
+                if (mJournals.tryDelete(record.mId))
                 {
                     removeDialogueInfos(record.mId, mJournalInfosByTopic, mJournalInfos);
                 }
-                else if (mTopics.tryDelete(recordIdString))
+                else if (mTopics.tryDelete(record.mId))
                 {
                     removeDialogueInfos(record.mId, mTopicInfosByTopic, mTopicInfos);
                 }
                 else
                 {
                     messages.add(UniversalId::Type_None,
-                        "Trying to delete dialogue record " + recordIdString + " which does not exist", "",
+                        "Trying to delete dialogue record " + record.mId.getRefIdString() + " which does not exist", "",
                         CSMDoc::Message::Severity_Warning);
                 }
             }
@@ -1378,13 +1379,15 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
 
 bool CSMWorld::Data::hasId(const std::string& id) const
 {
-    return getGlobals().searchId(id) != -1 || getGmsts().searchId(id) != -1 || getSkills().searchId(id) != -1
-        || getClasses().searchId(id) != -1 || getFactions().searchId(id) != -1 || getRaces().searchId(id) != -1
-        || getSounds().searchId(id) != -1 || getScripts().searchId(id) != -1 || getRegions().searchId(id) != -1
-        || getBirthsigns().searchId(id) != -1 || getSpells().searchId(id) != -1 || getTopics().searchId(id) != -1
-        || getJournals().searchId(id) != -1 || getCells().searchId(id) != -1 || getEnchantments().searchId(id) != -1
-        || getBodyParts().searchId(id) != -1 || getSoundGens().searchId(id) != -1
-        || getMagicEffects().searchId(id) != -1 || getReferenceables().searchId(id) != -1;
+    const ESM::RefId refId = ESM::RefId::stringRefId(id);
+    return getGlobals().searchId(refId) != -1 || getGmsts().searchId(refId) != -1 || getSkills().searchId(refId) != -1
+        || getClasses().searchId(refId) != -1 || getFactions().searchId(refId) != -1 || getRaces().searchId(refId) != -1
+        || getSounds().searchId(refId) != -1 || getScripts().searchId(refId) != -1 || getRegions().searchId(refId) != -1
+        || getBirthsigns().searchId(refId) != -1 || getSpells().searchId(refId) != -1
+        || getTopics().searchId(refId) != -1 || getJournals().searchId(refId) != -1 || getCells().searchId(refId) != -1
+        || getEnchantments().searchId(refId) != -1 || getBodyParts().searchId(refId) != -1
+        || getSoundGens().searchId(refId) != -1 || getMagicEffects().searchId(refId) != -1
+        || getReferenceables().searchId(refId) != -1;
 }
 
 int CSMWorld::Data::count(RecordBase::State state) const

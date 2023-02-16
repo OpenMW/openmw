@@ -62,7 +62,7 @@ void CSVWorld::PathgridCreator::cloneMode(const std::string& originId, const CSM
 
 std::string CSVWorld::PathgridCreator::getErrors() const
 {
-    std::string cellId = getId();
+    const ESM::RefId cellId = ESM::RefId::stringRefId(getId());
 
     // Check user input for any errors.
     std::string errors;

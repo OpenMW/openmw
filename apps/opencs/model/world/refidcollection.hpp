@@ -89,10 +89,6 @@ namespace CSMWorld
         void appendBlankRecord(const ESM::RefId& id, UniversalId::Type type) override;
         ///< \param type Will be ignored, unless the collection supports multiple record types
 
-        int searchId(std::string_view id) const override;
-        ////< Search record with \a id.
-        /// \return index of record (if found) or -1 (not found)
-
         int searchId(const ESM::RefId& id) const override;
         ////< Search record with \a id.
         /// \return index of record (if found) or -1 (not found)

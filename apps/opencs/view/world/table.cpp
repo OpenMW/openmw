@@ -152,7 +152,7 @@ void CSVWorld::Table::contextMenuEvent(QContextMenuEvent* event)
         {
             CSMWorld::UniversalId id = mModel->view(row).first;
 
-            int index = mDocument.getData().getCells().searchId(id.getId());
+            const int index = mDocument.getData().getCells().searchId(ESM::RefId::stringRefId(id.getId()));
             // index==-1: the ID references a worldspace instead of a cell (ignore for now and go
             // ahead)
 

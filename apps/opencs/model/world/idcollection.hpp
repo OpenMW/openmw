@@ -40,7 +40,7 @@ namespace CSMWorld
         /// \return index
         int load(const ESXRecordT& record, bool base, int index = -2);
 
-        bool tryDelete(const std::string& id);
+        bool tryDelete(const ESM::RefId& id);
         ///< Try deleting \a id. If the id does not exist or can't be deleted the call is ignored.
         ///
         /// \return Has the ID been deleted?
@@ -135,7 +135,7 @@ namespace CSMWorld
     }
 
     template <typename ESXRecordT, typename IdAccessorT>
-    bool IdCollection<ESXRecordT, IdAccessorT>::tryDelete(const std::string& id)
+    bool IdCollection<ESXRecordT, IdAccessorT>::tryDelete(const ESM::RefId& id)
     {
         int index = this->searchId(id);
 

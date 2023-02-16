@@ -87,7 +87,7 @@ void CSMTools::ReferenceCheckStage::perform(int stage, CSMDoc::Messages& message
             messages.add(id, "Invalid faction rank", "", CSMDoc::Message::Severity_Error);
     }
 
-    if (!cellRef.mDestCell.empty() && mCells.searchId(cellRef.mDestCell) == -1)
+    if (!cellRef.mDestCell.empty() && mCells.searchId(ESM::RefId::stringRefId(cellRef.mDestCell)) == -1)
         messages.add(
             id, "Destination cell '" + cellRef.mDestCell + "' does not exist", "", CSMDoc::Message::Severity_Error);
 

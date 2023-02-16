@@ -77,7 +77,7 @@ bool CSVRender::PagedWorldspaceWidget::adjustCells()
             else
             {
                 // update
-                int index = cells.searchId(iter->first.getId(mWorldspace));
+                const int index = cells.searchId(ESM::RefId::stringRefId(iter->first.getId(mWorldspace)));
 
                 bool deleted = index == -1 || cells.getRecord(index).mState == CSMWorld::RecordBase::State_Deleted;
 
@@ -460,7 +460,7 @@ void CSVRender::PagedWorldspaceWidget::addCellToScene(const CSMWorld::CellCoordi
 {
     const CSMWorld::IdCollection<CSMWorld::Cell>& cells = mDocument.getData().getCells();
 
-    int index = cells.searchId(coordinates.getId(mWorldspace));
+    const int index = cells.searchId(ESM::RefId::stringRefId(coordinates.getId(mWorldspace)));
 
     bool deleted = index == -1 || cells.getRecord(index).mState == CSMWorld::RecordBase::State_Deleted;
 

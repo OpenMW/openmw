@@ -32,7 +32,8 @@ namespace CSVRender
     {
         // The cell isn't guaranteed to have Land. This is because the terrain implementation
         // has to wrap the vertices of the last row and column to the next cell, which may be a nonexisting cell
-        int index = mData.getLand().searchId(CSMWorld::Land::createUniqueRecordId(cellX, cellY));
+        const int index
+            = mData.getLand().searchId(ESM::RefId::stringRefId(CSMWorld::Land::createUniqueRecordId(cellX, cellY)));
         if (index == -1)
             return nullptr;
 
@@ -43,7 +44,8 @@ namespace CSVRender
 
     const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)
     {
-        int row = mData.getLandTextures().searchId(CSMWorld::LandTexture::createUniqueRecordId(plugin, index));
+        const int row = mData.getLandTextures().searchId(
+            ESM::RefId::stringRefId(CSMWorld::LandTexture::createUniqueRecordId(plugin, index)));
         if (row == -1)
             return nullptr;
 
@@ -65,7 +67,8 @@ namespace CSVRender
     {
         float height = 0.f;
 
-        int index = mData.getLand().searchId(CSMWorld::Land::createUniqueRecordId(cellX, cellY));
+        const int index
+            = mData.getLand().searchId(ESM::RefId::stringRefId(CSMWorld::Land::createUniqueRecordId(cellX, cellY)));
         if (index == -1) // no land!
             return height;
 

@@ -137,7 +137,7 @@ void CSVRender::TerrainTextureMode::primaryEditPressed(const WorldspaceHitResult
 
     QUndoStack& undoStack = document.getUndoStack();
     CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
-    int index = landtexturesCollection.searchId(mBrushTexture);
+    int index = landtexturesCollection.searchId(ESM::RefId::stringRefId(mBrushTexture));
 
     if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit && hit.tag == nullptr)
     {
@@ -186,7 +186,7 @@ bool CSVRender::TerrainTextureMode::primaryEditStartDrag(const QPoint& pos)
     mDragMode = InteractionType_PrimaryEdit;
 
     CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
-    int index = landtexturesCollection.searchId(mBrushTexture);
+    const int index = landtexturesCollection.searchId(ESM::RefId::stringRefId(mBrushTexture));
 
     if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit && hit.tag == nullptr)
     {
@@ -242,7 +242,7 @@ void CSVRender::TerrainTextureMode::drag(const QPoint& pos, int diffX, int diffY
         CSMDoc::Document& document = getWorldspaceWidget().getDocument();
 
         CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
-        int index = landtexturesCollection.searchId(mBrushTexture);
+        const int index = landtexturesCollection.searchId(ESM::RefId::stringRefId(mBrushTexture));
 
         if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted() && hit.hit && hit.tag == nullptr)
         {
@@ -273,7 +273,7 @@ void CSVRender::TerrainTextureMode::dragCompleted(const QPoint& pos)
         QUndoStack& undoStack = document.getUndoStack();
 
         CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = document.getData().getLandTextures();
-        int index = landtexturesCollection.searchId(mBrushTexture);
+        const int index = landtexturesCollection.searchId(ESM::RefId::stringRefId(mBrushTexture));
 
         if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
         {
@@ -718,8 +718,9 @@ bool CSVRender::TerrainTextureMode::allowLandTextureEditing(std::string cellId)
     CSMWorld::IdTree& cellTable
         = dynamic_cast<CSMWorld::IdTree&>(*document.getData().getTableModel(CSMWorld::UniversalId::Type_Cells));
 
-    bool noCell = document.getData().getCells().searchId(cellId) == -1;
-    bool noLand = document.getData().getLand().searchId(cellId) == -1;
+    const ESM::RefId cellRefId = ESM::RefId::stringRefId(cellId);
+    const bool noCell = document.getData().getCells().searchId(cellRefId) == -1;
+    const bool noLand = document.getData().getLand().searchId(cellRefId) == -1;
 
     if (noCell)
     {

@@ -62,7 +62,7 @@ void CSVWorld::StartScriptCreator::cloneMode(const std::string& originId, const 
 
 std::string CSVWorld::StartScriptCreator::getErrors() const
 {
-    std::string scriptId = getId();
+    const ESM::RefId scriptId = ESM::RefId::stringRefId(getId());
 
     // Check user input for any errors.
     std::string errors;

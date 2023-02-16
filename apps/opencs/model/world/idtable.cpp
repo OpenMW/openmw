@@ -243,7 +243,8 @@ std::string CSMWorld::IdTable::getId(int row) const
 /// This method can return only indexes to the top level table cells
 QModelIndex CSMWorld::IdTable::getModelIndex(const std::string& id, int column) const
 {
-    int row = mIdCollection->searchId(id);
+    const int row = mIdCollection->searchId(ESM::RefId::stringRefId(id));
+
     if (row != -1)
         return index(row, column);
 
@@ -253,7 +254,8 @@ QModelIndex CSMWorld::IdTable::getModelIndex(const std::string& id, int column) 
 void CSMWorld::IdTable::setRecord(
     const std::string& id, std::unique_ptr<RecordBase> record, CSMWorld::UniversalId::Type type)
 {
-    int index = mIdCollection->searchId(id);
+    const ESM::RefId refId = ESM::RefId::stringRefId(id);
+    const int index = mIdCollection->searchId(refId);
 
     if (index == -1)
     {
@@ -263,7 +265,7 @@ void CSMWorld::IdTable::setRecord(
         //
         // Use an alternative method to get the correct index.  For non-Info records the
         // record pointer is ignored and internally calls getAppendIndex.
-        int index2 = mIdCollection->getInsertIndex(id, type, record.get());
+        const int index2 = mIdCollection->getInsertIndex(refId, type, record.get());
 
         beginInsertRows(QModelIndex(), index2, index2);
 
@@ -377,9 +379,10 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
     for (const std::string& id : ids)
     {
         int plugin, index;
-
         LandTexture::parseUniqueRecordId(id, plugin, index);
-        int oldRow = idCollection()->searchId(id);
+
+        const ESM::RefId refId = ESM::RefId::stringRefId(id);
+        const int oldRow = idCollection()->searchId(refId);
 
         // If it does not exist or it is in the current plugin, it can be skipped.
         if (oldRow < 0 || plugin == 0)
@@ -403,12 +406,13 @@ CSMWorld::LandTextureIdTable::ImportResults CSMWorld::LandTextureIdTable::import
         do
         {
             std::string newId = LandTexture::createUniqueRecordId(0, index);
-            int newRow = idCollection()->searchId(newId);
+            const ESM::RefId newRefId = ESM::RefId::stringRefId(newId);
+            int newRow = idCollection()->searchId(newRefId);
 
             if (newRow < 0)
             {
                 // Id not taken, clone it
-                cloneRecord(ESM::RefId::stringRefId(id), ESM::RefId::stringRefId(newId), UniversalId::Type_LandTexture);
+                cloneRecord(refId, newRefId, UniversalId::Type_LandTexture);
                 results.createdRecords.push_back(newId);
                 results.recordMapping.emplace_back(id, newId);
                 reverseLookupMap.emplace(texture, newId);
