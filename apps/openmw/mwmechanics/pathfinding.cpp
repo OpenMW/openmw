@@ -313,8 +313,7 @@ namespace MWMechanics
     }
 
     void PathFinder::update(const osg::Vec3f& position, float pointTolerance, float destinationTolerance,
-        bool shortenIfAlmostStraight, bool canMoveByZ, const DetourNavigator::AgentBounds& agentBounds,
-        const DetourNavigator::Flags flags)
+        UpdateFlags updateFlags, const DetourNavigator::AgentBounds& agentBounds, DetourNavigator::Flags pathFlags)
     {
         if (mPath.empty())
             return;
@@ -323,9 +322,9 @@ namespace MWMechanics
             mPath.pop_front();
 
         const IsValidShortcut isValidShortcut{ MWBase::Environment::get().getWorld()->getNavigator(), agentBounds,
-            flags };
+            pathFlags };
 
-        if (shortenIfAlmostStraight)
+        if ((updateFlags & UpdateFlag_ShortenIfAlmostStraight) != 0)
         {
             while (mPath.size() > 2 && isAlmostStraight(mPath[0], mPath[1], mPath[2], pointTolerance)
                 && isValidShortcut(mPath[0], mPath[2]))
@@ -335,7 +334,7 @@ namespace MWMechanics
                 mPath.pop_front();
         }
 
-        if (mPath.size() > 1)
+        if ((updateFlags & UpdateFlag_RemoveLoops) != 0 && mPath.size() > 1)
         {
             std::size_t begin = 0;
             for (std::size_t i = 1; i < mPath.size(); ++i)
@@ -351,7 +350,7 @@ namespace MWMechanics
         if (mPath.size() == 1)
         {
             float distSqr;
-            if (canMoveByZ)
+            if ((updateFlags & UpdateFlag_CanMoveByZ) != 0)
                 distSqr = (mPath.front() - position).length2();
             else
                 distSqr = sqrDistanceIgnoreZ(mPath.front(), position);

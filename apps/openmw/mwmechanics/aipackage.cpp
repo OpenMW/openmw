@@ -189,8 +189,17 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         = getPointTolerance(actor.getClass().getMaxSpeed(actor), duration, world->getHalfExtents(actor));
 
     static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
-    mPathFinder.update(position, pointTolerance, DEFAULT_TOLERANCE,
-        /*shortenIfAlmostStraight=*/smoothMovement, actorCanMoveByZ, agentBounds, getNavigatorFlags(actor));
+
+    PathFinder::UpdateFlags updateFlags{};
+
+    if (actorCanMoveByZ)
+        updateFlags |= PathFinder::UpdateFlag_CanMoveByZ;
+    if (timerStatus == Misc::TimerStatus::Elapsed && smoothMovement)
+        updateFlags |= PathFinder::UpdateFlag_ShortenIfAlmostStraight;
+    if (timerStatus == Misc::TimerStatus::Elapsed)
+        updateFlags |= PathFinder::UpdateFlag_RemoveLoops;
+
+    mPathFinder.update(position, pointTolerance, DEFAULT_TOLERANCE, updateFlags, agentBounds, getNavigatorFlags(actor));
 
     if (isDestReached || mPathFinder.checkPathCompleted()) // if path is finished
     {
