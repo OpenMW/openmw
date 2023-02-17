@@ -89,7 +89,7 @@ namespace CSVWorld
 
     std::string LandCreator::getErrors() const
     {
-        if (getData().getLand().searchId(getId()) >= 0)
+        if (getData().getLand().searchId(ESM::RefId::stringRefId(getId())) >= 0)
             return "A land with that name already exists.";
 
         return "";

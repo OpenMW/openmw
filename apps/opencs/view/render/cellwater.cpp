@@ -57,7 +57,7 @@ namespace CSVRender
         mWaterGroup = new osg::Group();
         mWaterTransform->addChild(mWaterGroup);
 
-        int cellIndex = mData.getCells().searchId(mId);
+        const int cellIndex = mData.getCells().searchId(ESM::RefId::stringRefId(mId));
         if (cellIndex > -1)
         {
             updateCellData(mData.getCells().getRecord(cellIndex));

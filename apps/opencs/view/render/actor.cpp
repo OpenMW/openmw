@@ -128,7 +128,7 @@ namespace CSVRender
     {
         const auto& bodyParts = mData.getBodyParts();
 
-        int index = bodyParts.searchId(bodyPartId);
+        const int index = bodyParts.searchId(ESM::RefId::stringRefId(bodyPartId));
         if (index != -1 && !bodyParts.getRecord(index).isDeleted())
             return MeshPrefix + bodyParts.getRecord(index).get().mModel;
         else

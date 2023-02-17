@@ -12,7 +12,7 @@
 
 bool CSMWorld::InfoCollection::load(const Info& record, bool base)
 {
-    int index = searchId(record.mId.getRefIdString());
+    const int index = searchId(record.mId);
 
     if (index == -1)
     {
@@ -48,7 +48,7 @@ void CSMWorld::InfoCollection::load(
     bool isDeleted = false;
 
     info.load(reader, isDeleted);
-    std::string id = dialogue.mId.getRefIdString() + "#" + info.mId.getRefIdString();
+    const ESM::RefId id = ESM::RefId::stringRefId(dialogue.mId.getRefIdString() + "#" + info.mId.getRefIdString());
 
     if (isDeleted)
     {
@@ -75,7 +75,7 @@ void CSMWorld::InfoCollection::load(
     {
         info.mTopicId = dialogue.mId;
         info.mOriginalId = info.mId;
-        info.mId = ESM::RefId::stringRefId(id);
+        info.mId = id;
 
         if (load(info, base))
             infosByTopic[dialogue.mId].push_back(info.mId);

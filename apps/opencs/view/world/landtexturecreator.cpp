@@ -72,7 +72,7 @@ namespace CSVWorld
 
     std::string LandTextureCreator::getErrors() const
     {
-        if (getData().getLandTextures().searchId(getId()) >= 0)
+        if (getData().getLandTextures().searchId(ESM::RefId::stringRefId(getId())) >= 0)
         {
             return "Index is already in use";
         }

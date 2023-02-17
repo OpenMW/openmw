@@ -22,7 +22,7 @@ CSVWorld::PreviewSubView::PreviewSubView(const CSMWorld::UniversalId& id, CSMDoc
 {
     QHBoxLayout* layout = new QHBoxLayout;
 
-    if (document.getData().getReferenceables().searchId(id.getId()) == -1)
+    if (document.getData().getReferenceables().searchId(ESM::RefId::stringRefId(id.getId())) == -1)
     {
         std::string referenceableId = document.getData()
                                           .getReferences()

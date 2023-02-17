@@ -65,10 +65,6 @@ namespace CSMWorld
         virtual void appendBlankRecord(const ESM::RefId& id, UniversalId::Type type = UniversalId::Type_None) = 0;
         ///< \param type Will be ignored, unless the collection supports multiple record types
 
-        virtual int searchId(std::string_view id) const = 0;
-        ////< Search record with \a id.
-        /// \return index of record (if found) or -1 (not found)
-
         virtual int searchId(const ESM::RefId& id) const = 0;
         ////< Search record with \a id.
         /// \return index of record (if found) or -1 (not found)
@@ -107,7 +103,7 @@ namespace CSMWorld
         /// \return Success?
 
         virtual int getInsertIndex(
-            const std::string& id, UniversalId::Type type = UniversalId::Type_None, RecordBase* record = nullptr) const;
+            const ESM::RefId& id, UniversalId::Type type = UniversalId::Type_None, RecordBase* record = nullptr) const;
         ///< Works like getAppendIndex unless an overloaded method uses the record pointer
         /// to get additional info about the record that results in an alternative index.
 

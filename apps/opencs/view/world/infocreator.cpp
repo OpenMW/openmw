@@ -126,7 +126,7 @@ std::string CSVWorld::InfoCreator::getErrors() const
     // We ignore errors from GenericCreator here, because they can never happen in an InfoCreator.
     std::string errors;
 
-    std::string topic = mTopic->text().toUtf8().constData();
+    const ESM::RefId topic = ESM::RefId::stringRefId(mTopic->text().toStdString());
 
     if ((getCollectionId().getType() == CSMWorld::UniversalId::Type_TopicInfos ? getData().getTopics()
                                                                                : getData().getJournals())

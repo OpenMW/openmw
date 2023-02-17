@@ -643,7 +643,7 @@ bool CSMFilter::Parser::parse(const std::string& filter, bool allowPredefined)
             return false;
         }
 
-        int index = mData.getFilters().searchId(token.mString);
+        const int index = mData.getFilters().searchId(ESM::RefId::stringRefId(token.mString));
 
         if (index == -1)
         {

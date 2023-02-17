@@ -78,7 +78,7 @@ int CSMTools::TopicInfoCheckStage::setup()
         mCellNames.insert(regionRecord.get().mName);
     }
     // Default cell name
-    int index = mGameSettings.searchId("sDefaultCellname");
+    const int index = mGameSettings.searchId(ESM::RefId::stringRefId("sDefaultCellname"));
     if (index != -1)
     {
         const CSMWorld::Record<ESM::GameSetting>& gmstRecord = mGameSettings.getRecord(index);

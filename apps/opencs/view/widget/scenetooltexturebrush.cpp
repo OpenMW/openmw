@@ -77,7 +77,7 @@ CSVWidget::TextureBrushWindow::TextureBrushWindow(CSMDoc::Document& document, QW
     CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = mDocument.getData().getLandTextures();
 
     int landTextureFilename = landtexturesCollection.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
-    int index = landtexturesCollection.searchId(mBrushTexture);
+    const int index = landtexturesCollection.searchId(ESM::RefId::stringRefId(mBrushTexture));
 
     if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
     {
@@ -164,9 +164,11 @@ void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
     int index = 0;
     int pluginInDragged = 0;
     CSMWorld::LandTexture::parseUniqueRecordId(brushTexture, pluginInDragged, index);
+    const ESM::RefId brushTextureRefId = ESM::RefId::stringRefId(brushTexture);
     std::string newBrushTextureId = CSMWorld::LandTexture::createUniqueRecordId(0, index);
-    int rowInBase = landtexturesCollection.searchId(brushTexture);
-    int rowInNew = landtexturesCollection.searchId(newBrushTextureId);
+    ESM::RefId newBrushTextureRefId = ESM::RefId::stringRefId(newBrushTextureId);
+    int rowInBase = landtexturesCollection.searchId(brushTextureRefId);
+    int rowInNew = landtexturesCollection.searchId(newBrushTextureRefId);
 
     // Check if texture exists in current plugin, and clone if id found in base, otherwise reindex the texture
     // TO-DO: Handle case when texture is not found in neither base or plugin properly (finding new index is not enough)
@@ -181,10 +183,11 @@ void CSVWidget::TextureBrushWindow::setBrushTexture(std::string brushTexture)
             do
             {
                 newBrushTextureId = CSMWorld::LandTexture::createUniqueRecordId(0, counter);
-                if (landtexturesCollection.searchId(brushTexture) != -1
-                    && landtexturesCollection.getRecord(ESM::RefId::stringRefId(brushTexture)).isDeleted() == 0
-                    && landtexturesCollection.searchId(newBrushTextureId) != -1
-                    && landtexturesCollection.getRecord(ESM::RefId::stringRefId(newBrushTextureId)).isDeleted() == 0)
+                newBrushTextureRefId = ESM::RefId::stringRefId(newBrushTextureId);
+                if (landtexturesCollection.searchId(brushTextureRefId) != -1
+                    && landtexturesCollection.getRecord(brushTextureRefId).isDeleted() == 0
+                    && landtexturesCollection.searchId(newBrushTextureRefId) != -1
+                    && landtexturesCollection.getRecord(newBrushTextureRefId).isDeleted() == 0)
                     counter = (counter + 1) % maxCounter;
                 else
                     freeIndexFound = true;
@@ -307,7 +310,7 @@ void CSVWidget::SceneToolTextureBrush::setButtonIcon(CSVWidget::BrushShape brush
     CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = mDocument.getData().getLandTextures();
 
     int landTextureFilename = landtexturesCollection.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
-    int index = landtexturesCollection.searchId(mTextureBrushWindow->mBrushTexture);
+    const int index = landtexturesCollection.searchId(ESM::RefId::stringRefId(mTextureBrushWindow->mBrushTexture));
 
     if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
     {
@@ -339,7 +342,7 @@ void CSVWidget::SceneToolTextureBrush::updatePanel()
     {
         CSMWorld::IdCollection<CSMWorld::LandTexture>& landtexturesCollection = mDocument.getData().getLandTextures();
         int landTextureFilename = landtexturesCollection.findColumnIndex(CSMWorld::Columns::ColumnId_Texture);
-        int index = landtexturesCollection.searchId(mBrushHistory[i]);
+        const int index = landtexturesCollection.searchId(ESM::RefId::stringRefId(mBrushHistory[i]));
 
         if (index != -1 && !landtexturesCollection.getRecord(index).isDeleted())
         {
