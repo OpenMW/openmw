@@ -13,7 +13,6 @@
 #include "recastparams.hpp"
 #include "settings.hpp"
 #include "settingsutils.hpp"
-#include "sharednavmesh.hpp"
 
 #include "components/debug/debuglog.hpp"
 
@@ -604,7 +603,7 @@ namespace DetourNavigator
         return NavMeshData(navMeshData, navMeshDataSize);
     }
 
-    NavMeshPtr makeEmptyNavMesh(const Settings& settings)
+    void initEmptyNavMesh(const Settings& settings, dtNavMesh& navMesh)
     {
         // Max tiles and max polys affect how the tile IDs are caculated.
         // There are 22 bits available for identifying a tile and a polygon.
@@ -623,17 +622,10 @@ namespace DetourNavigator
         params.maxTiles = 1 << tilesBits;
         params.maxPolys = 1 << polysBits;
 
-        NavMeshPtr navMesh(dtAllocNavMesh(), &dtFreeNavMesh);
-
-        if (navMesh == nullptr)
-            throw NavigatorException("Failed to allocate navmesh");
-
-        const auto status = navMesh->init(&params);
+        const auto status = navMesh.init(&params);
 
         if (!dtStatusSucceed(status))
             throw NavigatorException("Failed to init navmesh");
-
-        return navMesh;
     }
 
     bool isSupportedAgentBounds(const RecastSettings& settings, const AgentBounds& agentBounds)

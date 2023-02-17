@@ -82,11 +82,16 @@ namespace MWMechanics
     class PathFinder
     {
     public:
-        PathFinder()
-            : mConstructed(false)
-            , mCell(nullptr)
+        using UpdateFlags = unsigned;
+
+        enum UpdateFlag : UpdateFlags
         {
-        }
+            UpdateFlag_CanMoveByZ = 1 << 0,
+            UpdateFlag_ShortenIfAlmostStraight = 1 << 1,
+            UpdateFlag_RemoveLoops = 1 << 2,
+        };
+
+        PathFinder() = default;
 
         void clearPath()
         {
@@ -121,8 +126,7 @@ namespace MWMechanics
 
         /// Remove front point if exist and within tolerance
         void update(const osg::Vec3f& position, float pointTolerance, float destinationTolerance,
-            bool shortenIfAlmostStraight, bool canMoveByZ, const DetourNavigator::AgentBounds& agentBounds,
-            const DetourNavigator::Flags flags);
+            UpdateFlags updateFlags, const DetourNavigator::AgentBounds& agentBounds, DetourNavigator::Flags pathFlags);
 
         bool checkPathCompleted() const { return mConstructed && mPath.empty(); }
 
@@ -201,10 +205,9 @@ namespace MWMechanics
         }
 
     private:
-        bool mConstructed;
+        bool mConstructed = false;
         std::deque<osg::Vec3f> mPath;
-
-        const MWWorld::CellStore* mCell;
+        const MWWorld::CellStore* mCell = nullptr;
 
         void buildPathByPathgridImpl(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
             const PathgridGraph& pathgridGraph, std::back_insert_iterator<std::deque<osg::Vec3f>> out);

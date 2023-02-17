@@ -252,14 +252,10 @@ namespace DetourNavigator
     }
 
     template <class OutputIterator>
-    Status findSmoothPath(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents, const float stepSize,
-        const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags, const AreaCosts& areaCosts,
-        const Settings& settings, float endTolerance, OutputIterator out)
+    Status findSmoothPath(const dtNavMesh& navMesh, const dtNavMeshQuery& navMeshQuery, const osg::Vec3f& halfExtents,
+        const float stepSize, const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags,
+        const AreaCosts& areaCosts, const Settings& settings, float endTolerance, OutputIterator out)
     {
-        dtNavMeshQuery navMeshQuery;
-        if (!initNavMeshQuery(navMeshQuery, navMesh, settings.mDetour.mMaxNavMeshQueryNodes))
-            return Status::InitNavMeshQueryFailed;
-
         dtQueryFilter queryFilter;
         queryFilter.setIncludeFlags(includeFlags);
         queryFilter.setAreaCost(AreaType_water, areaCosts.mWater);

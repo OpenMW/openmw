@@ -69,7 +69,7 @@ namespace DetourNavigator
             return;
         mRecastMeshManager.setWorldspace(worldspace, getImpl(guard));
         for (auto& [agent, cache] : mCache)
-            cache = std::make_shared<GuardedNavMeshCacheItem>(makeEmptyNavMesh(mSettings), ++mGenerationCounter);
+            cache = std::make_shared<GuardedNavMeshCacheItem>(++mGenerationCounter, mSettings);
         mWorldspace = worldspace;
     }
 
@@ -123,8 +123,7 @@ namespace DetourNavigator
         auto cached = mCache.find(agentBounds);
         if (cached != mCache.end())
             return;
-        mCache.insert(std::make_pair(
-            agentBounds, std::make_shared<GuardedNavMeshCacheItem>(makeEmptyNavMesh(mSettings), ++mGenerationCounter)));
+        mCache.emplace(agentBounds, std::make_shared<GuardedNavMeshCacheItem>(++mGenerationCounter, mSettings));
         mPlayerTile.reset();
         Log(Debug::Debug) << "cache add for agent=" << agentBounds;
     }
