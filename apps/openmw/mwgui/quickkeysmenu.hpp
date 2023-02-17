@@ -55,19 +55,11 @@ namespace MWGui
     private:
         struct keyData
         {
-            int index;
-            ItemWidget* button;
-            QuickKeysMenu::QuickKeyType type;
+            int index = -1;
+            ItemWidget* button = nullptr;
+            QuickKeysMenu::QuickKeyType type = Type_Unassigned;
             ESM::RefId id;
             std::string name;
-            keyData()
-                : index(-1)
-                , button(nullptr)
-                , type(Type_Unassigned)
-                , id(ESM::RefId::sEmpty)
-                , name("")
-            {
-            }
         };
 
         std::vector<keyData> mKey;

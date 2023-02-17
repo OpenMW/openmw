@@ -1188,7 +1188,7 @@ namespace MWMechanics
             bool reported = false;
             if (victim.getClass().isClass(victim, "guard")
                 && !victim.getClass().getCreatureStats(victim).getAiSequence().hasPackage(AiPackageTypeId::Pursue))
-                reported = reportCrime(player, victim, type, ESM::RefId::sEmpty, arg);
+                reported = reportCrime(player, victim, type, ESM::RefId(), arg);
 
             if (!reported)
                 startCombat(victim,

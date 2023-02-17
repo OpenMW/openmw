@@ -54,7 +54,7 @@ namespace MWGui
                 dropped = world->placeObject(item.mBase, mLeft, mTop, count);
             else
                 dropped = world->dropObjectOnGround(world->getPlayerPtr(), item.mBase, count);
-            dropped.getCellRef().setOwner(ESM::RefId::sEmpty);
+            dropped.getCellRef().setOwner(ESM::RefId());
 
             return dropped;
         }

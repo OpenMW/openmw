@@ -320,9 +320,9 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
     item.getCellRef().setPosition(pos);
 
     // We do not need to store owners for items in container stores - we do not use it anyway.
-    item.getCellRef().setOwner(ESM::RefId::sEmpty);
+    item.getCellRef().setOwner(ESM::RefId());
     item.getCellRef().resetGlobalVariable();
-    item.getCellRef().setFaction(ESM::RefId::sEmpty);
+    item.getCellRef().setFaction(ESM::RefId());
     item.getCellRef().setFactionRank(-2);
 
     // must reset the RefNum on the copied item, so that the RefNum on the original item stays unique
@@ -675,7 +675,7 @@ void MWWorld::ContainerStore::resolve()
         for (const auto&& ptr : *this)
             ptr.getRefData().setCount(0);
         Misc::Rng::Generator prng{ mSeed };
-        fill(mPtr.get<ESM::Container>()->mBase->mInventory, ESM::RefId::sEmpty, prng);
+        fill(mPtr.get<ESM::Container>()->mBase->mInventory, ESM::RefId(), prng);
         addScripts(*this, mPtr.mCell);
     }
     mModified = true;
@@ -696,7 +696,7 @@ MWWorld::ResolutionHandle MWWorld::ContainerStore::resolveTemporarily()
         for (const auto&& ptr : *this)
             ptr.getRefData().setCount(0);
         Misc::Rng::Generator prng{ mSeed };
-        fill(mPtr.get<ESM::Container>()->mBase->mInventory, ESM::RefId::sEmpty, prng);
+        fill(mPtr.get<ESM::Container>()->mBase->mInventory, ESM::RefId(), prng);
         addScripts(*this, mPtr.mCell);
     }
     return { listener };
@@ -711,7 +711,7 @@ void MWWorld::ContainerStore::unresolve()
     {
         for (const auto&& ptr : *this)
             ptr.getRefData().setCount(0);
-        fillNonRandom(mPtr.get<ESM::Container>()->mBase->mInventory, ESM::RefId::sEmpty, mSeed);
+        fillNonRandom(mPtr.get<ESM::Container>()->mBase->mInventory, ESM::RefId(), mSeed);
         addScripts(*this, mPtr.mCell);
         mResolved = false;
     }

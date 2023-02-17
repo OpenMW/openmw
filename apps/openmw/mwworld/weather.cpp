@@ -211,7 +211,7 @@ namespace MWWorld
                 = ESM::RefId::stringRefId(Fallback::Map::getString("Weather_" + name + "_Ambient_Loop_Sound_ID"));
 
         if (mAmbientLoopSoundID == "None")
-            mAmbientLoopSoundID = ESM::RefId::sEmpty;
+            mAmbientLoopSoundID = ESM::RefId();
     }
 
     float Weather::transitionDelta() const
@@ -834,7 +834,7 @@ namespace MWWorld
         if (mAmbientSound)
             MWBase::Environment::get().getSoundManager()->stopSound(mAmbientSound);
         mAmbientSound = nullptr;
-        mPlayingSoundID = ESM::RefId::sEmpty;
+        mPlayingSoundID = ESM::RefId();
     }
 
     float WeatherManager::getWindSpeed() const
@@ -964,7 +964,7 @@ namespace MWWorld
     {
         stopSounds();
 
-        mCurrentRegion = ESM::RefId::sEmpty;
+        mCurrentRegion = ESM::RefId();
         mTimePassed = 0.0f;
         mWeatherUpdateTime = 0.0f;
         forceWeather(0);

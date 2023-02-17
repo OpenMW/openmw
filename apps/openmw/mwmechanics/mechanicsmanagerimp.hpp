@@ -112,7 +112,7 @@ namespace MWMechanics
          * @return was the crime seen?
          */
         bool commitCrime(const MWWorld::Ptr& ptr, const MWWorld::Ptr& victim, OffenseType type,
-            const ESM::RefId& factionId = ESM::RefId::sEmpty, int arg = 0, bool victimAware = false) override;
+            const ESM::RefId& factionId = ESM::RefId(), int arg = 0, bool victimAware = false) override;
         /// @return false if the attack was considered a "friendly hit" and forgiven
         bool actorAttacked(const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker) override;
 

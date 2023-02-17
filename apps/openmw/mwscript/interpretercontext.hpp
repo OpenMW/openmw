@@ -30,7 +30,7 @@ namespace MWScript
         /// If \a id is empty, a reference the script is run from is returned or in case
         /// of a non-local script the reference derived from the target ID.
         const MWWorld::Ptr getReferenceImp(
-            const ESM::RefId& id = ESM::RefId::sEmpty, bool activeOnly = false, bool doThrow = true) const;
+            const ESM::RefId& id = ESM::RefId(), bool activeOnly = false, bool doThrow = true) const;
 
         const Locals& getMemberLocals(std::reference_wrapper<const ESM::RefId>& id, bool global) const;
         ///< \a id is changed to the respective script ID, if \a id wasn't a script ID before

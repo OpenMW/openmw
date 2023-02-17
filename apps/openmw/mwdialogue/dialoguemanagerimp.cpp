@@ -139,7 +139,7 @@ namespace MWDialogue
         if (actor.getClass().getCreatureStats(actor).isDead())
             return false;
 
-        mLastTopic = ESM::RefId::sEmpty;
+        mLastTopic = ESM::RefId();
         // Note that we intentionally don't reset mPermanentDispositionChange
 
         mChoice = -1;

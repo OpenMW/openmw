@@ -102,6 +102,6 @@ namespace ESM
         mName.clear();
         mModel.clear();
         mIcon.clear();
-        mScript = ESM::RefId::sEmpty;
+        mScript = ESM::RefId();
     }
 }

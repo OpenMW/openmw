@@ -19,7 +19,7 @@ namespace MWDialogue
 
         Topic& getTopic(const ESM::RefId& id);
 
-        bool isThere(const ESM::RefId& topicId, const ESM::RefId& infoId = ESM::RefId::sEmpty) const;
+        bool isThere(const ESM::RefId& topicId, const ESM::RefId& infoId = ESM::RefId()) const;
 
     public:
         Journal();

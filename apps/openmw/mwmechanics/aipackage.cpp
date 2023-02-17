@@ -49,7 +49,6 @@ MWMechanics::AiPackage::AiPackage(AiPackageTypeId typeId, const Options& options
     : mTypeId(typeId)
     , mOptions(options)
     , mReaction(MWBase::Environment::get().getWorld()->getPrng())
-    , mTargetActorRefId(ESM::RefId::sEmpty)
     , mTargetActorId(-1)
     , mCachedTarget()
     , mRotateOnTheRunChecks(0)

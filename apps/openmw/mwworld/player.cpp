@@ -251,7 +251,7 @@ namespace MWWorld
     void Player::clear()
     {
         mCellStore = nullptr;
-        mSign = ESM::RefId::sEmpty;
+        mSign = ESM::RefId();
         mMarkedCell = nullptr;
         mTeleported = false;
         mJumping = false;

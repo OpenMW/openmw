@@ -73,7 +73,7 @@ namespace MWMechanics
 
     void ActionEnchantedItem::prepare(const MWWorld::Ptr& actor)
     {
-        actor.getClass().getCreatureStats(actor).getSpells().setSelectedSpell(ESM::RefId::sEmpty);
+        actor.getClass().getCreatureStats(actor).getSpells().setSelectedSpell(ESM::RefId());
         actor.getClass().getInventoryStore(actor).setSelectedEnchantItem(mItem);
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Spell);
     }

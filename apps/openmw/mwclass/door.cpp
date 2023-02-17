@@ -166,7 +166,7 @@ namespace MWClass
             // using a key disarms the trap
             if (isTrapped)
             {
-                ptr.getCellRef().setTrap(ESM::RefId::sEmpty);
+                ptr.getCellRef().setTrap(ESM::RefId());
                 MWBase::Environment::get().getSoundManager()->playSound3D(
                     ptr, ESM::RefId::stringRefId("Disarm Trap"), 1.0f, 1.0f);
                 isTrapped = false;

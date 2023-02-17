@@ -93,7 +93,7 @@ void MWWorld::WorldModel::clear()
     mLastGeneratedRefnum = ESM::RefNum{};
     mInteriors.clear();
     mExteriors.clear();
-    std::fill(mIdCache.begin(), mIdCache.end(), std::make_pair(ESM::RefId::sEmpty, (MWWorld::CellStore*)nullptr));
+    std::fill(mIdCache.begin(), mIdCache.end(), std::make_pair(ESM::RefId(), (MWWorld::CellStore*)nullptr));
     mIdCacheIndex = 0;
 }
 
@@ -157,7 +157,7 @@ MWWorld::WorldModel::WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCach
     , mPtrIndexUpdateCounter(0)
 {
     int cacheSize = std::clamp(Settings::Manager::getInt("pointers cache size", "Cells"), 40, 1000);
-    mIdCache = IdCache(cacheSize, std::pair<ESM::RefId, CellStore*>(ESM::RefId::sEmpty, (CellStore*)nullptr));
+    mIdCache = IdCache(cacheSize, std::pair<ESM::RefId, CellStore*>(ESM::RefId(), (CellStore*)nullptr));
 }
 
 MWWorld::CellStore* MWWorld::WorldModel::getExterior(int x, int y)

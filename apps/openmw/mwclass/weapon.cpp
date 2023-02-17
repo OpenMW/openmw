@@ -264,7 +264,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
 
         ESM::Weapon newItem = *ref->mBase;
-        newItem.mId = ESM::RefId::sEmpty;
+        newItem.mId = ESM::RefId();
         newItem.mName = newName;
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;

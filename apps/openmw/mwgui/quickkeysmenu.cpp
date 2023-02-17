@@ -144,7 +144,7 @@ namespace MWGui
         else
         {
             key->type = Type_Unassigned;
-            key->id = ESM::RefId::sEmpty;
+            key->id = ESM::RefId();
             key->name.clear();
 
             MyGUI::TextBox* textBox = key->button->createWidgetReal<MyGUI::TextBox>(

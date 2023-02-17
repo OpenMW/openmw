@@ -63,7 +63,7 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
     {
         // Keep mOriginalCell empty when in modified (as an indicator that the
         // original cell will always be equal the current cell).
-        ref.mOriginalCell = base ? cell2.mId : ESM::RefId::sEmpty;
+        ref.mOriginalCell = base ? cell2.mId : ESM::RefId();
 
         if (cell.get().isExterior())
         {
@@ -329,7 +329,7 @@ int CSMWorld::RefCollection::searchId(const ESM::RefId& id) const
 
 void CSMWorld::RefCollection::appendRecord(std::unique_ptr<RecordBase> record, UniversalId::Type type)
 {
-    int index = getAppendIndex(/*id*/ ESM::RefId::sEmpty, type); // for CellRef records id is ignored
+    int index = getAppendIndex(/*id*/ ESM::RefId(), type); // for CellRef records id is ignored
 
     mRefIndex.insert(std::make_pair(static_cast<Record<CellRef>*>(record.get())->get().mIdNum, index));
 
@@ -338,7 +338,7 @@ void CSMWorld::RefCollection::appendRecord(std::unique_ptr<RecordBase> record, U
 
 void CSMWorld::RefCollection::insertRecord(std::unique_ptr<RecordBase> record, int index, UniversalId::Type type)
 {
-    int size = getAppendIndex(/*id*/ ESM::RefId::sEmpty, type); // for CellRef records id is ignored
+    int size = getAppendIndex(/*id*/ ESM::RefId(), type); // for CellRef records id is ignored
     unsigned int idNum = static_cast<Record<CellRef>*>(record.get())->get().mIdNum;
 
     Collection<CellRef, IdAccessor<CellRef>>::insertRecord(std::move(record), index, type); // add records only

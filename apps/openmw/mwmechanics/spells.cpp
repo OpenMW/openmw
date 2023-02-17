@@ -83,7 +83,7 @@ namespace MWMechanics
         mSpellList->remove(spell);
 
         if (spellId == mSelectedSpell)
-            mSelectedSpell = ESM::RefId::sEmpty;
+            mSelectedSpell = ESM::RefId();
     }
 
     void Spells::removeSpell(const ESM::Spell* spell)

@@ -148,7 +148,7 @@ namespace ESM
                 if (cellRef.mLockLevel == 0 && !cellRef.mKey.empty())
                 {
                     cellRef.mLockLevel = UnbreakableLock;
-                    cellRef.mTrap = ESM::RefId::sEmpty;
+                    cellRef.mTrap = ESM::RefId();
                 }
             }
         }
@@ -259,12 +259,12 @@ namespace ESM
     void CellRef::blank()
     {
         mRefNum = RefNum{};
-        mRefID = ESM::RefId::sEmpty;
+        mRefID = ESM::RefId();
         mScale = 1;
-        mOwner = ESM::RefId::sEmpty;
+        mOwner = ESM::RefId();
         mGlobalVariable.clear();
-        mSoul = ESM::RefId::sEmpty;
-        mFaction = ESM::RefId::sEmpty;
+        mSoul = ESM::RefId();
+        mFaction = ESM::RefId();
         mFactionRank = -2;
         mChargeInt = -1;
         mChargeIntRemainder = 0.0f;
@@ -272,8 +272,8 @@ namespace ESM
         mGoldValue = 1;
         mDestCell.clear();
         mLockLevel = 0;
-        mKey = ESM::RefId::sEmpty;
-        mTrap = ESM::RefId::sEmpty;
+        mKey = ESM::RefId();
+        mTrap = ESM::RefId();
         mReferenceBlocked = -1;
         mTeleport = false;
 

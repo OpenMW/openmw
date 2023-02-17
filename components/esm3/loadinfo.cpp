@@ -140,14 +140,14 @@ namespace ESM
         mData = {};
 
         mSelects.clear();
-        mPrev = ESM::RefId::sEmpty;
-        mNext = ESM::RefId::sEmpty;
-        mActor = ESM::RefId::sEmpty;
-        mRace = ESM::RefId::sEmpty;
-        mClass = ESM::RefId::sEmpty;
-        mFaction = ESM::RefId::sEmpty;
-        mPcFaction = ESM::RefId::sEmpty;
-        mCell = ESM::RefId::sEmpty;
+        mPrev = ESM::RefId();
+        mNext = ESM::RefId();
+        mActor = ESM::RefId();
+        mRace = ESM::RefId();
+        mClass = ESM::RefId();
+        mFaction = ESM::RefId();
+        mPcFaction = ESM::RefId();
+        mCell = ESM::RefId();
         mSound.clear();
         mResponse.clear();
         mResultScript.clear();

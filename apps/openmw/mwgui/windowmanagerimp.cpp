@@ -1367,7 +1367,7 @@ namespace MWGui
     void WindowManager::setSelectedEnchantItem(const MWWorld::Ptr& item)
     {
         mSelectedEnchantItem = item;
-        mSelectedSpell = ESM::RefId::sEmpty;
+        mSelectedSpell = ESM::RefId();
         const ESM::Enchantment* ench = mStore->get<ESM::Enchantment>().find(item.getClass().getEnchantment(item));
 
         int chargePercent
@@ -1400,7 +1400,7 @@ namespace MWGui
 
     void WindowManager::unsetSelectedSpell()
     {
-        mSelectedSpell = ESM::RefId::sEmpty;
+        mSelectedSpell = ESM::RefId();
         mSelectedEnchantItem = MWWorld::Ptr();
         mHud->unsetSelectedSpell();
 
@@ -1794,7 +1794,7 @@ namespace MWGui
 
         mToolTips->clear();
 
-        mSelectedSpell = ESM::RefId::sEmpty;
+        mSelectedSpell = ESM::RefId();
         mCustomMarkers.clear();
 
         mForceHidden = GW_None;
