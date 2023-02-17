@@ -11,11 +11,12 @@ namespace DetourNavigator
         const auto navMesh = navigator.getNavMesh(agentBounds);
         if (!navMesh)
             return std::nullopt;
-        const auto& settings = navigator.getSettings();
-        const auto result = DetourNavigator::findRandomPointAroundCircle(navMesh->lockConst()->getImpl(),
+        const Settings& settings = navigator.getSettings();
+        const auto locked = navMesh->lock();
+        const auto result = DetourNavigator::findRandomPointAroundCircle(locked->getQuery(),
             toNavMeshCoordinates(settings.mRecast, agentBounds.mHalfExtents),
             toNavMeshCoordinates(settings.mRecast, start), toNavMeshCoordinates(settings.mRecast, maxRadius),
-            includeFlags, settings.mDetour, prng);
+            includeFlags, prng);
         if (!result)
             return std::nullopt;
         return std::optional<osg::Vec3f>(fromNavMeshCoordinates(settings.mRecast, *result));
@@ -27,11 +28,11 @@ namespace DetourNavigator
         const auto navMesh = navigator.getNavMesh(agentBounds);
         if (navMesh == nullptr)
             return std::nullopt;
-        const auto& settings = navigator.getSettings();
-        const auto result = DetourNavigator::raycast(navMesh->lockConst()->getImpl(),
+        const Settings& settings = navigator.getSettings();
+        const auto locked = navMesh->lock();
+        const auto result = DetourNavigator::raycast(locked->getQuery(),
             toNavMeshCoordinates(settings.mRecast, agentBounds.mHalfExtents),
-            toNavMeshCoordinates(settings.mRecast, start), toNavMeshCoordinates(settings.mRecast, end), includeFlags,
-            settings.mDetour);
+            toNavMeshCoordinates(settings.mRecast, start), toNavMeshCoordinates(settings.mRecast, end), includeFlags);
         if (!result)
             return std::nullopt;
         return fromNavMeshCoordinates(settings.mRecast, *result);

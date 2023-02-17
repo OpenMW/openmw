@@ -6,14 +6,14 @@
 #include <optional>
 #include <osg/Vec3f>
 
-class dtNavMesh;
+class dtNavMeshQuery;
 
 namespace DetourNavigator
 {
     struct DetourSettings;
 
-    std::optional<osg::Vec3f> raycast(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents, const osg::Vec3f& start,
-        const osg::Vec3f& end, const Flags includeFlags, const DetourSettings& settings);
+    std::optional<osg::Vec3f> raycast(const dtNavMeshQuery& navMeshQuery, const osg::Vec3f& halfExtents,
+        const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags);
 }
 
 #endif

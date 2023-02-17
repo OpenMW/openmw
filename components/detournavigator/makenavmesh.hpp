@@ -2,7 +2,6 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_MAKENAVMESH_H
 
 #include "recastmesh.hpp"
-#include "sharednavmesh.hpp"
 #include "tileposition.hpp"
 
 #include <memory>
@@ -49,7 +48,7 @@ namespace DetourNavigator
         const std::vector<OffMeshConnection>& offMeshConnections, const AgentBounds& agentBounds,
         const TilePosition& tile, const RecastSettings& settings);
 
-    NavMeshPtr makeEmptyNavMesh(const Settings& settings);
+    void initEmptyNavMesh(const Settings& settings, dtNavMesh& navMesh);
 
     bool isSupportedAgentBounds(const RecastSettings& settings, const AgentBounds& agentBounds);
 }

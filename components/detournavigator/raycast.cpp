@@ -1,6 +1,4 @@
 #include "raycast.hpp"
-#include "findsmoothpath.hpp"
-#include "settings.hpp"
 
 #include <DetourNavMesh.h>
 #include <DetourNavMeshQuery.h>
@@ -9,13 +7,9 @@
 
 namespace DetourNavigator
 {
-    std::optional<osg::Vec3f> raycast(const dtNavMesh& navMesh, const osg::Vec3f& halfExtents, const osg::Vec3f& start,
-        const osg::Vec3f& end, const Flags includeFlags, const DetourSettings& settings)
+    std::optional<osg::Vec3f> raycast(const dtNavMeshQuery& navMeshQuery, const osg::Vec3f& halfExtents,
+        const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags)
     {
-        dtNavMeshQuery navMeshQuery;
-        if (!initNavMeshQuery(navMeshQuery, navMesh, settings.mMaxNavMeshQueryNodes))
-            return {};
-
         dtQueryFilter queryFilter;
         queryFilter.setIncludeFlags(includeFlags);
 
