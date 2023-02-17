@@ -11,7 +11,7 @@ namespace Misc
     class NotNullPtr
     {
     public:
-        NotNullPtr(T* value)
+        constexpr NotNullPtr(T* value) noexcept
             : mValue(value)
         {
             assert(mValue != nullptr);
@@ -19,11 +19,11 @@ namespace Misc
 
         NotNullPtr(std::nullptr_t) = delete;
 
-        operator T*() const { return mValue; }
+        constexpr operator T*() const noexcept { return mValue; }
 
-        T* operator->() const { return mValue; }
+        constexpr T* operator->() const noexcept { return mValue; }
 
-        T& operator*() const { return *mValue; }
+        constexpr T& operator*() const noexcept { return *mValue; }
 
     private:
         T* mValue;
