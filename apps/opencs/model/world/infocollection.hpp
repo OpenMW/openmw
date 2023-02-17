@@ -7,7 +7,6 @@
 
 #include "collection.hpp"
 #include "info.hpp"
-#include "record.hpp"
 
 namespace ESM
 {
@@ -18,6 +17,7 @@ namespace ESM
 namespace CSMWorld
 {
     using InfosByTopic = std::unordered_map<ESM::RefId, std::vector<ESM::RefId>>;
+    using InfosRecordPtrByTopic = std::unordered_map<ESM::RefId, std::vector<const Record<Info>*>>;
 
     class InfoCollection : public Collection<Info, IdAccessor<Info>>
     {
@@ -27,7 +27,7 @@ namespace CSMWorld
     public:
         void load(ESM::ESMReader& reader, bool base, const ESM::Dialogue& dialogue, InfosByTopic& infosByTopic);
 
-        std::vector<Record<Info>*> getTopicInfos(const ESM::RefId& topic) const;
+        InfosRecordPtrByTopic getInfosByTopic() const;
     };
 }
 

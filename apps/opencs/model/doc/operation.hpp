@@ -1,12 +1,15 @@
 #ifndef CSM_DOC_OPERATION_H
 #define CSM_DOC_OPERATION_H
 
+#include <chrono>
+#include <optional>
 #include <utility>
 #include <vector>
 
 #include <QObject>
 
 #include "messages.hpp"
+#include "state.hpp"
 
 class QTimer;
 
@@ -18,7 +21,7 @@ namespace CSMDoc
     {
         Q_OBJECT
 
-        int mType;
+        State mType;
         std::vector<std::pair<Stage*, int>> mStages; // stage, number of steps
         std::vector<std::pair<Stage*, int>>::iterator mCurrentStage;
         int mCurrentStep;
@@ -31,11 +34,12 @@ namespace CSMDoc
         QTimer* mTimer;
         bool mPrepared;
         Message::Severity mDefaultSeverity;
+        std::optional<std::chrono::steady_clock::time_point> mStart;
 
         void prepareStages();
 
     public:
-        Operation(int type, bool ordered, bool finalAlways = false);
+        Operation(State type, bool ordered, bool finalAlways = false);
         ///< \param ordered Stages must be executed in the given order.
         /// \param finalAlways Execute last stage even if an error occurred during earlier stages.
 

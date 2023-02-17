@@ -6,11 +6,39 @@
 
 #include <QTimer>
 
+#include <components/debug/debuglog.hpp>
+
 #include <apps/opencs/model/doc/messages.hpp>
 
 #include "../world/universalid.hpp"
 
 #include "stage.hpp"
+
+namespace CSMDoc
+{
+    namespace
+    {
+        std::string_view operationToString(State value)
+        {
+            switch (value)
+            {
+                case State_Saving:
+                    return "Saving";
+                case State_Merging:
+                    return "Merging";
+                case State_Verifying:
+                    return "Verifying";
+                case State_Searching:
+                    return "Searching";
+                case State_Loading:
+                    return "Loading";
+                default:
+                    break;
+            }
+            return "Unknown";
+        }
+    }
+}
 
 void CSMDoc::Operation::prepareStages()
 {
@@ -27,7 +55,7 @@ void CSMDoc::Operation::prepareStages()
     }
 }
 
-CSMDoc::Operation::Operation(int type, bool ordered, bool finalAlways)
+CSMDoc::Operation::Operation(State type, bool ordered, bool finalAlways)
     : mType(type)
     , mStages(std::vector<std::pair<Stage*, int>>())
     , mCurrentStage(mStages.begin())
@@ -61,6 +89,7 @@ void CSMDoc::Operation::run()
     }
 
     mPrepared = false;
+    mStart = std::chrono::steady_clock::now();
 
     mTimer->start(0);
 }
@@ -140,7 +169,17 @@ void CSMDoc::Operation::executeStage()
         emit reportMessage(*iter, mType);
 
     if (mCurrentStage == mStages.end())
+    {
+        if (mStart.has_value())
+        {
+            const auto duration = std::chrono::steady_clock::now() - *mStart;
+            Log(Debug::Verbose) << operationToString(mType) << " operation is completed in "
+                                << std::chrono::duration_cast<std::chrono::duration<double>>(duration).count() << 's';
+            mStart.reset();
+        }
+
         operationDone();
+    }
 }
 
 void CSMDoc::Operation::operationDone()
