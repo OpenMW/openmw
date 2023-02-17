@@ -4,6 +4,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <components/esm3/cellstate.hpp>
+#include <components/esm3/esmreader.hpp>
 #include <components/misc/strings/format.hpp>
 
 namespace
@@ -213,11 +215,19 @@ namespace
                 std::cout << "  Destination Cell: " << dest.mCellName << std::endl;
         }
     }
-
 }
 
 namespace EsmTool
 {
+    void CellState::load(ESM::ESMReader& reader, bool& deleted)
+    {
+        mCellState.mId.load(reader);
+        mCellState.load(reader);
+        if (mCellState.mHasFogOfWar)
+            mFogState.load(reader);
+        deleted = false;
+        reader.skipRecord();
+    }
 
     std::unique_ptr<RecordBase> RecordBase::create(const ESM::NAME type)
     {
@@ -433,6 +443,11 @@ namespace EsmTool
             case ESM::REC_SSCR:
             {
                 record = std::make_unique<EsmTool::Record<ESM::StartScript>>();
+                break;
+            }
+            case ESM::REC_CSTA:
+            {
+                record = std::make_unique<EsmTool::Record<CellState>>();
                 break;
             }
             default:
@@ -1340,6 +1355,38 @@ namespace EsmTool
     }
 
     template <>
+    void Record<CellState>::print()
+    {
+        std::cout << "  Id:" << std::endl;
+        std::cout << "    Worldspace: " << mData.mCellState.mId.mWorldspace << std::endl;
+        std::cout << "    Index:" << std::endl;
+        std::cout << "      X: " << mData.mCellState.mId.mIndex.mX << std::endl;
+        std::cout << "      Y: " << mData.mCellState.mId.mIndex.mY << std::endl;
+        std::cout << "    Paged: " << mData.mCellState.mId.mPaged << std::endl;
+        std::cout << "  WaterLevel: " << mData.mCellState.mWaterLevel << std::endl;
+        std::cout << "  HasFogOfWar: " << mData.mCellState.mHasFogOfWar << std::endl;
+        std::cout << "  LastRespawn:" << std::endl;
+        std::cout << "    Day:" << mData.mCellState.mLastRespawn.mDay << std::endl;
+        std::cout << "    Hour:" << mData.mCellState.mLastRespawn.mHour << std::endl;
+        if (mData.mCellState.mHasFogOfWar)
+        {
+            std::cout << "  NorthMarkerAngle: " << mData.mFogState.mNorthMarkerAngle << std::endl;
+            std::cout << "  Bounds:" << std::endl;
+            std::cout << "    MinX: " << mData.mFogState.mBounds.mMinX << std::endl;
+            std::cout << "    MinY: " << mData.mFogState.mBounds.mMinY << std::endl;
+            std::cout << "    MaxX: " << mData.mFogState.mBounds.mMaxX << std::endl;
+            std::cout << "    MaxY: " << mData.mFogState.mBounds.mMaxY << std::endl;
+            for (const ESM::FogTexture& fogTexture : mData.mFogState.mFogTextures)
+            {
+                std::cout << "  FogTexture:" << std::endl;
+                std::cout << "    X: " << fogTexture.mX << std::endl;
+                std::cout << "    Y: " << fogTexture.mY << std::endl;
+                std::cout << "    ImageData: (" << fogTexture.mImageData.size() << ")" << std::endl;
+            }
+        }
+    }
+
+    template <>
     std::string Record<ESM::Cell>::getId() const
     {
         return mData.mName;
@@ -1367,6 +1414,15 @@ namespace EsmTool
     std::string Record<ESM::Skill>::getId() const
     {
         return std::string(); // No ID for Skill record
+    }
+
+    template <>
+    std::string Record<CellState>::getId() const
+    {
+        std::ostringstream stream;
+        stream << mData.mCellState.mId.mWorldspace << " " << mData.mCellState.mId.mIndex.mX << " "
+               << mData.mCellState.mId.mIndex.mY << " " << mData.mCellState.mId.mPaged;
+        return stream.str();
     }
 
 } // end namespace
