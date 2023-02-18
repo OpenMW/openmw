@@ -76,6 +76,12 @@ local function updatePOV(dt)
             end
         end
         camera.setMode(primaryMode)
+        if camera.getMode() == MODE.Preview then
+            -- If Preview -> FirstPerson change is queued (because of 3rd person animation),
+            -- then first exit Preview by switching to ThirdPerson, and then queue the switch to FirstPerson.
+            camera.setMode(MODE.ThirdPerson)
+            camera.setMode(MODE.FirstPerson)
+        end
         previewTimer = 0
     end
 end
@@ -180,17 +186,15 @@ end
 local function onFrame(dt)
     if core.isWorldPaused() then return end
     local mode = camera.getMode()
-    if mode == MODE.FirstPerson or mode == MODE.ThirdPerson then
+    if (mode == MODE.FirstPerson or mode == MODE.ThirdPerson) and not camera.getQueuedMode() then
         primaryMode = mode
     end
     if mode ~= MODE.Static then
-        if not camera.getQueuedMode() or camera.getQueuedMode() == MODE.Preview then
-            if noModeControl == 0 then
-                updatePOV(dt)
-                updateVanity(dt)
-            end
-            updateStandingPreview()
+        if noModeControl == 0 then
+            updatePOV(dt)
+            updateVanity(dt)
         end
+        updateStandingPreview()
         updateCrosshair()
     end
     applyControllerZoom(dt)

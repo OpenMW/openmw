@@ -210,7 +210,10 @@ namespace MWRender
     void Camera::setMode(Mode newMode, bool force)
     {
         if (mMode == newMode)
+        {
+            mQueuedMode = std::nullopt;
             return;
+        }
         Mode oldMode = mMode;
         if (!force && (newMode == Mode::FirstPerson || oldMode == Mode::FirstPerson) && mAnimation && !mAnimation->upperBodyReady())
         {
