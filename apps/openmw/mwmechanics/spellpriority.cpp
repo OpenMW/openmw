@@ -588,14 +588,26 @@ namespace MWMechanics
 
             if (!creatureStats.getSummonedCreatureMap().empty())
                 return 0.f;
+            // But rate summons higher than other effects
+            rating = 3.f;
         }
         if (effect.mEffectID >= ESM::MagicEffect::BoundDagger && effect.mEffectID <= ESM::MagicEffect::BoundGloves)
         {
             // While rateSpell prevents actors from recasting the same spell, it doesn't prevent them from casting
             // different spells with the same effect. Multiple instances of the same bound item don't stack so if the
-            // effect is already active, rate it as useless.
-            if (actor.getClass().getCreatureStats(actor).getMagicEffects().get(effect.mEffectID).getMagnitude() > 0.f)
+            // effect is already active, rate it as useless. Likewise, if the actor already has a bound weapon, don't
+            // summon another of a different kind.
+            if (effect.mEffectID <= ESM::MagicEffect::BoundLongbow)
+            {
+                for (int e = ESM::MagicEffect::BoundDagger; e <= ESM::MagicEffect::BoundLongbow; ++e)
+                    if (actor.getClass().getCreatureStats(actor).getMagicEffects().get(e).getMagnitude() > 0.f)
+                        return 0.f;
+            }
+            else if (actor.getClass().getCreatureStats(actor).getMagicEffects().get(effect.mEffectID).getMagnitude()
+                > 0.f)
                 return 0.f;
+            // Prefer casting bound items over other spells
+            rating = 2.f;
         }
 
         // Underwater casting not possible
