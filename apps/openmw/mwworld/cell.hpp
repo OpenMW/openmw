@@ -49,6 +49,7 @@ namespace MWWorld
         std::string getDescription() const;
         const MoodData& getMood() const { return mMood; }
         float getWaterHeight() const { return mWaterHeight; }
+        const ESM::RefId& getId() const { return mId; };
 
     private:
         bool mIsExterior;
@@ -61,6 +62,7 @@ namespace MWWorld
         std::string mNameID; // The name that will be used by the script and console commands
         ESM::RefId mRegion;
         ESM::CellId mCellId;
+        ESM::RefId mId;
         MoodData mMood;
 
         float mWaterHeight;

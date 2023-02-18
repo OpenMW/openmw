@@ -562,7 +562,7 @@ namespace
 
     REGISTER_TYPED_TEST_SUITE_P(StoreSaveLoadTest, shouldNotChangeRefId);
 
-    static_assert(std::tuple_size_v<RecordTypesWithSave> == 38);
+    static_assert(std::tuple_size_v<RecordTypesWithSave> == 39);
 
     INSTANTIATE_TYPED_TEST_SUITE_P(
         RecordTypesTest, StoreSaveLoadTest, typename AsTestingTypes<RecordTypesWithSave>::Type);

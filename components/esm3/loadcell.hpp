@@ -110,7 +110,7 @@ namespace ESM
             , mRefNumCounter(0)
         {
         }
-
+        ESM::RefId mId;
         // Interior cells are indexed by this (it's the 'id'), for exterior
         // cells it is optional.
         std::string mName;
@@ -192,6 +192,7 @@ namespace ESM
         ///< Set record to default state (does not touch the ID/index).
 
         const CellId& getCellId() const;
+        const ESM::RefId& updateId();
     };
 }
 #endif

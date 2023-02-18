@@ -347,10 +347,12 @@ namespace MWWorld
             }
         };
 
-        typedef std::unordered_map<std::string, ESM::Cell, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
+        typedef std::unordered_map<std::string, ESM::Cell*, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
             DynamicInt;
 
-        typedef std::map<std::pair<int, int>, ESM::Cell, DynamicExtCmp> DynamicExt;
+        typedef std::map<std::pair<int, int>, ESM::Cell*, DynamicExtCmp> DynamicExt;
+
+        std::unordered_map<ESM::RefId, ESM::Cell> mCells;
 
         DynamicInt mInt;
         DynamicExt mExt;
@@ -367,6 +369,7 @@ namespace MWWorld
     public:
         typedef SharedIterator<ESM::Cell> iterator;
 
+        const ESM::Cell* search(const ESM::RefId& id) const;
         const ESM::Cell* search(std::string_view id) const;
         const ESM::Cell* search(int x, int y) const;
         const ESM::Cell* searchStatic(int x, int y) const;

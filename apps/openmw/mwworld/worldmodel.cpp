@@ -180,6 +180,7 @@ MWWorld::CellStore* MWWorld::WorldModel::getExterior(int x, int y)
             record.mData.mY = y;
             record.mWater = 0;
             record.mMapColor = 0;
+            record.updateId();
 
             cell = MWBase::Environment::get().getWorld()->createRecord(record);
         }

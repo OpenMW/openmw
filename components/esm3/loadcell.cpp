@@ -57,6 +57,19 @@ namespace ESM
         loadCell(esm, saveContext);
     }
 
+    const ESM::RefId& Cell::updateId()
+    {
+        if (isExterior())
+        {
+            mId = ESM::RefId::stringRefId("#" + std::to_string(mData.mX) + "," + std::to_string(mData.mY));
+        }
+        else
+        {
+            mId = ESM::RefId::stringRefId(mName);
+        }
+        return mId;
+    }
+
     void Cell::loadNameAndData(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
@@ -105,6 +118,7 @@ namespace ESM
             mCellId.mIndex.mX = 0;
             mCellId.mIndex.mY = 0;
         }
+        updateId();
     }
 
     void Cell::loadCell(ESMReader& esm, bool saveContext)

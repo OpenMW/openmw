@@ -20,6 +20,7 @@ namespace MWWorld
             .mWorldspace{ Misc::StringUtils::lowerCase(cell.mEditorId) },
             .mIndex{ cell.getGridX(), cell.getGridY() },
             .mPaged = isExterior(),}
+        , mId(cell.mId)
         ,mMood{
             .mAmbiantColor = cell.mLighting.ambient,
             .mDirectionalColor = cell.mLighting.directional,
@@ -41,6 +42,7 @@ namespace MWWorld
         , mNameID(cell.mName)
         , mRegion(cell.mRegion)
         , mCellId(cell.getCellId())
+        , mId(cell.mId)
         , mMood{
             .mAmbiantColor = cell.mAmbi.mAmbient,
             .mDirectionalColor = cell.mAmbi.mSunlight,
