@@ -40,6 +40,7 @@
     Bug #7088: Deleting last save game of last character doesn't clear character name/details
     Bug #7092: BSA archives from higher priority directories don't take priority
     Bug #7122: Teleportation to underwater should cancel active water walking effect
+    Bug #7163: Myar Aranath: Wheat breaks the GUI
     Bug #7172: Current music playlist continues playing indefinitely if next playlist is empty
     Feature #5492: Let rain and snow collide with statics
     Feature #6447: Add LOD support to Object Paging
