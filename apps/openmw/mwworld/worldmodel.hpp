@@ -42,8 +42,9 @@ namespace MWWorld
         typedef std::vector<std::pair<ESM::RefId, CellStore*>> IdCache;
         const MWWorld::ESMStore& mStore;
         ESM::ReadersCache& mReaders;
-        mutable std::map<std::string, CellStore, Misc::StringUtils::CiComp> mInteriors;
-        mutable std::map<std::pair<int, int>, CellStore> mExteriors;
+        mutable std::unordered_map<ESM::RefId, CellStore> mCells;
+        mutable std::map<std::string, CellStore*, Misc::StringUtils::CiComp> mInteriors;
+        mutable std::map<std::pair<int, int>, CellStore*> mExteriors;
         IdCache mIdCache;
         std::size_t mIdCacheIndex = 0;
         std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
@@ -91,9 +92,7 @@ namespace MWWorld
         template <typename Fn>
         void forEachLoadedCellStore(Fn&& fn)
         {
-            for (auto& [_, store] : mInteriors)
-                fn(store);
-            for (auto& [_, store] : mExteriors)
+            for (auto& [_, store] : mCells)
                 fn(store);
         }
 

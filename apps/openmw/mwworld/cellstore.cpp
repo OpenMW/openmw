@@ -1122,21 +1122,9 @@ namespace MWWorld
         }
     }
 
-    struct IsEqualVisitor
-    {
-        bool operator()(const ESM::Cell& a, const ESM::Cell& b) const { return a.getCellId() == b.getCellId(); }
-        bool operator()(const ESM4::Cell& a, const ESM4::Cell& b) const { return a.mId == b.mId; }
-
-        template <class L, class R>
-        bool operator()(const L&, const R&) const
-        {
-            return false;
-        }
-    };
-
     bool CellStore::operator==(const CellStore& right) const
     {
-        return ESM::visit(IsEqualVisitor(), this->mCellVariant, right.mCellVariant);
+        return right.mCellVariant.getId() == mCellVariant.getId();
     }
 
     void CellStore::setFog(std::unique_ptr<ESM::FogState>&& fog)
