@@ -12,6 +12,7 @@
 #include "../mwworld/actioneat.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/nullaction.hpp"
 #include "../mwworld/ptr.hpp"
 
 #include "../mwgui/tooltips.hpp"
@@ -72,6 +73,8 @@ namespace MWClass
 
     std::unique_ptr<MWWorld::Action> Ingredient::use(const MWWorld::Ptr& ptr, bool force) const
     {
+        if (ptr.get<ESM::Ingredient>()->mBase->mData.mEffectID[0] < 0)
+            return std::make_unique<MWWorld::NullAction>();
         std::unique_ptr<MWWorld::Action> action = std::make_unique<MWWorld::ActionEat>(ptr);
 
         action->setSound(ESM::RefId::stringRefId("Swallow"));
