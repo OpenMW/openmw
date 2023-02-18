@@ -131,7 +131,7 @@ local function onInputAction(action)
     if action == input.ACTION.Jump then
         attemptJump = true
     elseif action == input.ACTION.Use then
-        startAttack = true
+        startAttack = Actor.stance(self) ~= Actor.STANCE.Nothing
     elseif action == input.ACTION.AutoMove and not movementControlsOverridden then
         autoMove = not autoMove
     elseif action == input.ACTION.AlwaysRun and not movementControlsOverridden then
