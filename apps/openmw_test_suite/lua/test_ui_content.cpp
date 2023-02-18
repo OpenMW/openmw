@@ -42,7 +42,7 @@ namespace
         mLuaState.sol()["M"] = makeContent(makeTable()).getMetatable();
         std::string testScript = R"(
             assert(not pcall(function() setmetatable(makeContent{}, {}) end), 'Metatable is not protected')
-            assert(getmetatable(makeContent{}) ~= M, 'Metatable is not protected')
+            assert(getmetatable(makeContent{}) == false, 'Metatable is not protected')
         )";
         EXPECT_NO_THROW(mLuaState.sol().safe_script(testScript));
     }

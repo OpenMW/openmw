@@ -2,7 +2,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <components/lua/scriptscontainer.hpp>
+#include <components/lua/asyncpackage.hpp>
 #include <components/lua/storage.hpp>
 
 namespace
@@ -24,15 +24,16 @@ namespace
         LuaUtil::LuaStorage storage(mLua);
 
         std::vector<std::string> callbackCalls;
-        LuaUtil::Callback callback{ sol::make_object(mLua,
-                                        [&](const std::string& section, const sol::optional<std::string>& key) {
-                                            if (key)
-                                                callbackCalls.push_back(section + "_" + *key);
-                                            else
-                                                callbackCalls.push_back(section + "_*");
-                                        }),
-            sol::table(mLua, sol::create) };
-        callback.mHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptId{};
+        sol::table callbackHiddenData(mLua, sol::create);
+        callbackHiddenData[LuaUtil::ScriptsContainer::sScriptIdKey] = LuaUtil::ScriptId{};
+        sol::table callback(mLua, sol::create);
+        callback[1] = [&](const std::string& section, const sol::optional<std::string>& key) {
+            if (key)
+                callbackCalls.push_back(section + "_" + *key);
+            else
+                callbackCalls.push_back(section + "_*");
+        };
+        callback[2] = LuaUtil::AsyncPackageId{ nullptr, 0, callbackHiddenData };
 
         mLua["mutable"] = storage.getMutableSection("test");
         mLua["ro"] = storage.getReadOnlySection("test");

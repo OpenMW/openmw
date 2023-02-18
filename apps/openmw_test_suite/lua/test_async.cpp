@@ -1,8 +1,8 @@
 #include "gmock/gmock.h"
 #include <gtest/gtest.h>
 
+#include <components/lua/asyncpackage.hpp>
 #include <components/lua/luastate.hpp>
-#include <components/lua/scriptscontainer.hpp>
 
 #include "../testing_util.hpp"
 

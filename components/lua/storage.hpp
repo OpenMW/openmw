@@ -4,7 +4,7 @@
 #include <map>
 #include <sol/sol.hpp>
 
-#include "scriptscontainer.hpp"
+#include "asyncpackage.hpp"
 #include "serialization.hpp"
 
 namespace LuaUtil
