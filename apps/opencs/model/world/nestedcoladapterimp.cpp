@@ -255,7 +255,7 @@ namespace CSMWorld
         std::map<ESM::RefId, int>& reactions = faction.mReactions;
 
         // blank row
-        reactions.insert(std::make_pair(ESM::RefId::sEmpty, 0));
+        reactions.insert(std::make_pair(ESM::RefId(), 0));
 
         record.setModified(faction);
     }
@@ -382,7 +382,7 @@ namespace CSMWorld
 
         // blank row
         ESM::Region::SoundRef soundRef;
-        soundRef.mSound = ESM::RefId::sEmpty;
+        soundRef.mSound = ESM::RefId();
         soundRef.mChance = 0;
 
         soundList.insert(soundList.begin() + position, soundRef);

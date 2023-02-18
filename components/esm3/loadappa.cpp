@@ -79,7 +79,7 @@ namespace ESM
         mData.mValue = 0;
         mModel.clear();
         mIcon.clear();
-        mScript = ESM::RefId::sEmpty;
+        mScript = ESM::RefId();
         mName.clear();
     }
 }

@@ -42,7 +42,7 @@ namespace MWClass
         unsigned int seed = Misc::Rng::rollDice(std::numeric_limits<int>::max(), prng);
         // setting ownership not needed, since taking items from a container inherits the
         // container's owner automatically
-        mStore.fillNonRandom(container.mInventory, ESM::RefId::sEmpty, seed);
+        mStore.fillNonRandom(container.mInventory, ESM::RefId(), seed);
     }
 
     ContainerCustomData::ContainerCustomData(const ESM::InventoryState& inventory)
@@ -178,7 +178,7 @@ namespace MWClass
             // using a key disarms the trap
             if (isTrapped)
             {
-                ptr.getCellRef().setTrap(ESM::RefId::sEmpty);
+                ptr.getCellRef().setTrap(ESM::RefId());
                 MWBase::Environment::get().getSoundManager()->playSound3D(
                     ptr, ESM::RefId::stringRefId("Disarm Trap"), 1.0f, 1.0f);
                 isTrapped = false;
@@ -257,7 +257,7 @@ namespace MWClass
             text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(lockLevel);
         else if (lockLevel < 0)
             text += "\n#{sUnlocked}";
-        if (ptr.getCellRef().getTrap() != ESM::RefId::sEmpty)
+        if (ptr.getCellRef().getTrap() != ESM::RefId())
             text += "\n#{sTrapped}";
 
         if (MWBase::Environment::get().getWindowManager()->getFullHelp())

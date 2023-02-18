@@ -92,7 +92,7 @@ int CSMTools::ScriptCheckStage::setup()
 
     mContext.clear();
     mMessages = nullptr;
-    mId = ESM::RefId::sEmpty;
+    mId = ESM::RefId();
     Compiler::ErrorHandler::reset();
 
     mIgnoreBaseRecords = CSMPrefs::get()["Reports"]["ignore-base-records"].isTrue();

@@ -202,12 +202,12 @@ namespace ESM
         mAiPackage.mList.clear();
         mName.clear();
         mModel.clear();
-        mRace = ESM::RefId::sEmpty;
-        mClass = ESM::RefId::sEmpty;
-        mFaction = ESM::RefId::sEmpty;
-        mScript = ESM::RefId::sEmpty;
-        mHair = ESM::RefId::sEmpty;
-        mHead = ESM::RefId::sEmpty;
+        mRace = ESM::RefId();
+        mClass = ESM::RefId();
+        mFaction = ESM::RefId();
+        mScript = ESM::RefId();
+        mHair = ESM::RefId();
+        mHead = ESM::RefId();
     }
 
     void NPC::blankNpdt()

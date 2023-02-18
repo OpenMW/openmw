@@ -82,8 +82,8 @@ namespace ESM
         mData.mRadius = 0;
         mData.mColor = 0;
         mData.mFlags = 0;
-        mSound = ESM::RefId::sEmpty;
-        mScript = ESM::RefId::sEmpty;
+        mSound = ESM::RefId();
+        mScript = ESM::RefId();
         mModel.clear();
         mIcon.clear();
         mName.clear();

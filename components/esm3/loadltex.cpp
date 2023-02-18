@@ -57,7 +57,7 @@ namespace ESM
 
     void LandTexture::blank()
     {
-        mId = ESM::RefId::sEmpty;
+        mId = ESM::RefId();
         mTexture.clear();
     }
 }

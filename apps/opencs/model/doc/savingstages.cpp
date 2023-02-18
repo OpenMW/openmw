@@ -190,7 +190,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
                     ESM::DialInfo info = record.get();
                     info.mId = record.get().mOriginalId;
 
-                    info.mPrev = ESM::RefId::sEmpty;
+                    info.mPrev = ESM::RefId();
                     if (iter != infos.begin())
                     {
                         const auto prev = std::prev(iter);
@@ -199,7 +199,7 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
 
                     const auto next = std::next(iter);
 
-                    info.mNext = ESM::RefId::sEmpty;
+                    info.mNext = ESM::RefId();
                     if (next != infos.end())
                         info.mNext = (*next)->get().mOriginalId;
 

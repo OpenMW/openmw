@@ -61,7 +61,7 @@ namespace ESM
     {
         mRecordFlags = 0;
         mName.clear();
-        mScript = ESM::RefId::sEmpty;
+        mScript = ESM::RefId();
         mModel.clear();
     }
 }

@@ -454,7 +454,7 @@ namespace MWWorld
         else
             mStatic.insert(it, std::move(land));
 
-        return RecordId(ESM::RefId::sEmpty, isDeleted);
+        return RecordId(ESM::RefId(), isDeleted);
     }
     void Store<ESM::Land>::setUp()
     {
@@ -898,7 +898,7 @@ namespace MWWorld
                     mExt.erase(it);
             }
 
-            return RecordId(ESM::RefId::sEmpty, isDeleted);
+            return RecordId(ESM::RefId(), isDeleted);
         }
 
         // Try to overwrite existing record
@@ -916,7 +916,7 @@ namespace MWWorld
                 ret.first->second = pathgrid;
         }
 
-        return RecordId(ESM::RefId::sEmpty, isDeleted);
+        return RecordId(ESM::RefId(), isDeleted);
     }
     size_t Store<ESM::Pathgrid>::getSize() const
     {

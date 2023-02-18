@@ -248,7 +248,7 @@ namespace MWGui
                     break;
                 case GM_ClassGenerate:
                     mGenerateClassStep = 0;
-                    mGenerateClass = ESM::RefId::sEmpty;
+                    mGenerateClass = ESM::RefId();
                     mGenerateClassSpecializations[0] = 0;
                     mGenerateClassSpecializations[1] = 0;
                     mGenerateClassSpecializations[2] = 0;

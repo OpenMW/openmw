@@ -15,7 +15,7 @@ namespace MWWorld
         , mGridPos(cell.mX, cell.mY)
         , mDisplayname(cell.mFullName)
         , mNameID(cell.mEditorId)
-        , mRegion(ESM::RefId::sEmpty) // Unimplemented for now
+        , mRegion(ESM::RefId()) // Unimplemented for now
         , mCellId{
             .mWorldspace{ Misc::StringUtils::lowerCase(cell.mEditorId) },
             .mIndex{ cell.getGridX(), cell.getGridY() },

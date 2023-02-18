@@ -66,7 +66,7 @@ namespace ESM
     {
         mRecordFlags = 0;
         mType = LeftFoot;
-        mCreature = ESM::RefId::sEmpty;
-        mSound = ESM::RefId::sEmpty;
+        mCreature = ESM::RefId();
+        mSound = ESM::RefId();
     }
 }

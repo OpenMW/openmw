@@ -716,7 +716,7 @@ namespace MWScript
                             int removed = store.remove(*iter, amount);
                             MWWorld::Ptr dropped
                                 = MWBase::Environment::get().getWorld()->dropObjectOnGround(ptr, *iter, removed);
-                            dropped.getCellRef().setOwner(ESM::RefId::sEmpty);
+                            dropped.getCellRef().setOwner(ESM::RefId());
 
                             amount -= removed;
 

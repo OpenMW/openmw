@@ -94,9 +94,9 @@ namespace CSMWorld
         mId = id;
         mIsBeast = isBeast;
         for (auto& str : mFemaleParts)
-            str = ESM::RefId::sEmpty;
+            str = ESM::RefId();
         for (auto& str : mMaleParts)
-            str = ESM::RefId::sEmpty;
+            str = ESM::RefId();
         mDependencies.clear();
 
         // Mark self as a dependency
@@ -591,7 +591,7 @@ namespace CSMWorld
 
                 // An another vanilla quirk: hide hairs if an item replaces Head part
                 if (partType == ESM::PRT_Head)
-                    data->setPart(ESM::PRT_Hair, ESM::RefId::sEmpty, priority);
+                    data->setPart(ESM::PRT_Hair, ESM::RefId(), priority);
             }
         };
 

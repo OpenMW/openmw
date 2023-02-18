@@ -31,6 +31,6 @@ namespace MWWorld
             cast.mHitPosition = actorPosition;
             cast.cast(mSpellId);
         }
-        mTrapSource.getCellRef().setTrap(ESM::RefId::sEmpty);
+        mTrapSource.getCellRef().setTrap(ESM::RefId());
     }
 }

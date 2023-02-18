@@ -1986,8 +1986,8 @@ namespace CSMWorld
 
             ESM::PartReference newPart;
             newPart.mPart = 0; // 0 == head
-            newPart.mMale = ESM::RefId::sEmpty;
-            newPart.mFemale = ESM::RefId::sEmpty;
+            newPart.mMale = ESM::RefId();
+            newPart.mFemale = ESM::RefId();
 
             if (position >= (int)list.size())
                 list.push_back(newPart);
@@ -2343,7 +2343,7 @@ namespace CSMWorld
             std::vector<ESM::LevelledListBase::LevelItem>& list = leveled.mList;
 
             ESM::LevelledListBase::LevelItem newItem;
-            newItem.mId = ESM::RefId::sEmpty;
+            newItem.mId = ESM::RefId();
             newItem.mLevel = 0;
 
             if (position >= (int)list.size())

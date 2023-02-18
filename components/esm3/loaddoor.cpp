@@ -71,8 +71,8 @@ namespace ESM
         mRecordFlags = 0;
         mName.clear();
         mModel.clear();
-        mScript = ESM::RefId::sEmpty;
-        mOpenSound = ESM::RefId::sEmpty;
-        mCloseSound = ESM::RefId::sEmpty;
+        mScript = ESM::RefId();
+        mOpenSound = ESM::RefId();
+        mCloseSound = ESM::RefId();
     }
 }

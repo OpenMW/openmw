@@ -267,7 +267,7 @@ namespace MWGui
         if ((mFilter & Filter_OnlyEnchanted) && !(item.mFlags & ItemStack::Flag_Enchanted))
             return false;
         if ((mFilter & Filter_OnlyChargedSoulstones)
-            && (base.getType() != ESM::Miscellaneous::sRecordId || base.getCellRef().getSoul() == ESM::RefId::sEmpty
+            && (base.getType() != ESM::Miscellaneous::sRecordId || base.getCellRef().getSoul().empty()
                 || !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(
                     base.getCellRef().getSoul())))
             return false;

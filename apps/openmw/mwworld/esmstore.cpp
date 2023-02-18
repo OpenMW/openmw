@@ -110,7 +110,7 @@ namespace
                 {
                     Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent faction '"
                                         << npc.mFaction << "', ignoring it.";
-                    npc.mFaction = ESM::RefId::sEmpty;
+                    npc.mFaction = ESM::RefId();
                     npc.mNpdt.mRank = 0;
                     changed = true;
                 }
@@ -142,7 +142,7 @@ namespace
         {
             if (!item.mScript.empty() && !scripts.search(item.mScript))
             {
-                item.mScript = ESM::RefId::sEmpty;
+                item.mScript = ESM::RefId();
                 Log(Debug::Verbose) << "Item '" << id << "' (" << item.mName << ") has nonexistent script '"
                                     << item.mScript << "', ignoring it.";
             }

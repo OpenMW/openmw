@@ -113,7 +113,7 @@ namespace ESM
         mRecordFlags = 0;
         mName.clear();
         mModel.clear();
-        mScript = ESM::RefId::sEmpty;
+        mScript = ESM::RefId();
         mWeight = 0;
         mFlags = 0x8; // set default flag value
         mInventory.mList.clear();

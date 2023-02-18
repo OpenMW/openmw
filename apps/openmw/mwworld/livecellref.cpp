@@ -65,7 +65,7 @@ void MWWorld::LiveCellRefBase::loadImp(const ESM::ObjectState& state)
         && !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(mRef.getSoul()))
     {
         Log(Debug::Warning) << "Soul '" << mRef.getSoul() << "' not found, removing the soul from soul gem";
-        mRef.setSoul(ESM::RefId::sEmpty);
+        mRef.setSoul(ESM::RefId());
     }
 
     MWBase::Environment::get().getLuaManager()->loadLocalScripts(ptr, state.mLuaScripts);
