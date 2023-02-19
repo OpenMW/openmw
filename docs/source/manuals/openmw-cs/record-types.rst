@@ -32,16 +32,16 @@ Armor
    Finally, *Armor Value* tells the game how much points to add to the player
    character’s *Armor Rating*.
 
-   Armor parts can be either Light, Medium, or Heavy and are assigned into these
-   categories primarily by their weight. In addition, the type of armor part (what slot it goes to)
-   and GMST values ``fLightMaxMod`` and ``fMedMaxMod`` further affect whether an armor is 
-   Light, Medium, or Heavy. By default these values are:
+   An armor piece can be either Light, Medium, or Heavy and is assigned to a
+   category primarily by its weight. In addition, the type of armor piece
+   (what slot it goes to) and GMST values ``fLightMaxMod`` and ``fMedMaxMod``
+   further affect this. By default these values are:
 
 .. list-table:: 
    :widths: 40 20 20 20
    :header-rows: 1
 
-   * - Armor part
+   * - Armor piece
      - Light (weight)
      - Medium (weight)
      - Heavy (weight) 
@@ -65,7 +65,6 @@ Armor
      - w ≤ 6.0
      - 6.0 < w ≤ 9.0
      - 9.0 < w
-
 
 
 Book
