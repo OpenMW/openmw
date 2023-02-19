@@ -10,6 +10,7 @@
 #include <osg/Sequence>
 #include <osg/Switch>
 #include <osg/TexGen>
+#include <osg/TexMat>
 #include <osg/ValueObject>
 
 // resource
@@ -2208,6 +2209,61 @@ namespace NifOsg
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
                     break;
                 }
+                case Nif::RC_BSEffectShaderProperty:
+                {
+                    auto texprop = static_cast<const Nif::BSEffectShaderProperty*>(property);
+                    bool shaderRequired = true;
+                    node->setUserValue("shaderPrefix", std::string("nv_nolighting"));
+                    node->setUserValue("shaderRequired", shaderRequired);
+                    osg::StateSet* stateset = node->getOrCreateStateSet();
+                    if (!texprop->mSourceTexture.empty())
+                    {
+                        if (!boundTextures.empty())
+                        {
+                            for (unsigned int i = 0; i < boundTextures.size(); ++i)
+                                stateset->setTextureMode(i, GL_TEXTURE_2D, osg::StateAttribute::OFF);
+                            boundTextures.clear();
+                        }
+                        std::string filename = Misc::ResourceHelpers::correctTexturePath(
+                            texprop->mSourceTexture, imageManager->getVFS());
+                        osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
+                        osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
+                        texture2d->setName("diffuseMap");
+                        if (image)
+                            texture2d->setTextureSize(image->s(), image->t());
+                        bool wrapT = texprop->mClamp & 0x1;
+                        bool wrapS = (texprop->mClamp >> 1) & 0x1;
+                        texture2d->setWrap(osg::Texture::WRAP_S,
+                            wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                        texture2d->setWrap(osg::Texture::WRAP_T,
+                            wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                        const unsigned int texUnit = 0;
+                        const unsigned int uvSet = 0;
+                        stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
+                        boundTextures.push_back(uvSet);
+
+                        {
+                            osg::ref_ptr<osg::TexMat> texMat(new osg::TexMat);
+                            // This handles 20.2.0.7 UV settings like 4.0.0.2 UV settings (see NifOsg::UVController)
+                            // TODO: verify
+                            osg::Vec3f uvOrigin(0.5f, 0.5f, 0.f);
+                            osg::Vec3f uvScale(texprop->mUVScale.x(), texprop->mUVScale.y(), 1.f);
+                            osg::Vec3f uvTrans(-texprop->mUVOffset.x(), -texprop->mUVOffset.y(), 0.f);
+
+                            osg::Matrixf mat = osg::Matrixf::translate(uvOrigin);
+                            mat.preMultScale(uvScale);
+                            mat.preMultTranslate(-uvOrigin);
+                            mat.setTrans(mat.getTrans() + uvTrans);
+
+                            texMat->setMatrix(mat);
+                            stateset->setTextureAttributeAndModes(texUnit, texMat, osg::StateAttribute::ON);
+                        }
+                    }
+                    stateset->addUniform(new osg::Uniform("useFalloff", true)); // Should use the shader flag
+                    stateset->addUniform(new osg::Uniform("falloffParams", texprop->mFalloffParams));
+                    handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    break;
+                }
                 // unused by mw
                 case Nif::RC_NiShadeProperty:
                 case Nif::RC_NiDitherProperty:
@@ -2393,6 +2449,11 @@ namespace NifOsg
                         }
                         break;
                     }
+                    case Nif::RC_BSShaderNoLightingProperty:
+                    {
+                        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
+                        break;
+                    }
                     case Nif::RC_BSLightingShaderProperty:
                     {
                         auto shaderprop = static_cast<const Nif::BSLightingShaderProperty*>(property);
@@ -2402,6 +2463,13 @@ namespace NifOsg
                         mat->setShininess(osg::Material::FRONT_AND_BACK, shaderprop->mGlossiness);
                         emissiveMult = shaderprop->mEmissiveMult;
                         specStrength = shaderprop->mSpecStrength;
+                        break;
+                    }
+                    case Nif::RC_BSEffectShaderProperty:
+                    {
+                        auto shaderprop = static_cast<const Nif::BSEffectShaderProperty*>(property);
+                        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mBaseColor));
+                        emissiveMult = shaderprop->mBaseColorScale;
                         break;
                     }
                     default:

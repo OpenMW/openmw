@@ -15,6 +15,7 @@ varying float linearDepth;
 
 uniform bool useFalloff;
 uniform vec2 screenRes;
+uniform float emissiveMult;
 
 varying float passFalloff;
 
@@ -35,6 +36,10 @@ void main()
 
     if (useFalloff)
         gl_FragData[0].a *= passFalloff;
+
+    vec4 emissionColor = getEmissionColor();
+    gl_FragData[0].rgb *= emissionColor.rgb * emissiveMult;
+    gl_FragData[0].a *= emissionColor.a * emissionColor.a; // sic
 
     alphaTest();
 
