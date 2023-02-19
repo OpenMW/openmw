@@ -32,6 +32,42 @@ Armor
    Finally, *Armor Value* tells the game how much points to add to the player
    character’s *Armor Rating*.
 
+   Armor parts can be either Light, Medium, or Heavy and are assigned into these
+   categories primarily by their weight. In addition, the type of armor part (what slot it goes to)
+   and GMST values ``fLightMaxMod`` and ``fMedMaxMod`` further affect whether an armor is 
+   Light, Medium, or Heavy. By default these values are:
+
+.. list-table:: 
+   :widths: 35 65
+   :header-rows: 1
+
+   * - Armor part
+     - Light (weight)
+     - Medium (weight)
+     - Heavy (weight) 
+   * - Boots
+     - w ≤ 12.0
+     - 12.0 < w ≤ 18.0
+     - 18.0 < w
+   * - Guirass
+     - w ≤ 18.0
+     - 18.0 < w ≤ 27.0
+     - 27.0 < w
+   * - Greaves, Shield
+     - w ≤ 9.0
+     - 9.0 < w ≤ 13.5
+     - 13.5 < w
+   * - Bracer, Gauntlet, Helmet
+     - w ≤ 3.0
+     - 3.0 < w ≤ 4.5
+     - 4.5 < w
+   * - Pauldron
+     - w ≤ 6.0
+     - 6.0 < w ≤ 9.0
+     - 9.0 < w
+
+
+
 Book
    This includes scrolls and notes. For the game to make the distinction
    between books and scrolls, *Book Type* property is used.
