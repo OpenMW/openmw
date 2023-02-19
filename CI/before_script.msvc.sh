@@ -612,9 +612,9 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	fi
 
 	# OpenAL
-	download "OpenAL-Soft 1.20.1" \
-	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OpenAL-Soft-1.20.1.zip" \
-		"OpenAL-Soft-1.20.1.zip"
+	download "OpenAL-Soft 1.23.0" \
+	  "https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/OpenAL-Soft-1.23.0.zip" \
+		"OpenAL-Soft-1.23.0.zip"
 
 	# OSGoS
 	download "${OSG_ARCHIVE_NAME}" \
@@ -803,19 +803,19 @@ printf "MyGUI 3.4.1... "
 cd $DEPS
 echo
 # OpenAL
-printf "OpenAL-Soft 1.20.1... "
+printf "OpenAL-Soft 1.23.0... "
 {
-	if [ -d openal-soft-1.20.1-bin ]; then
+	if [ -d openal-soft-1.23.0-bin ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
-		rm -rf openal-soft-1.20.1-bin
-		eval 7z x -y OpenAL-Soft-1.20.1.zip $STRIP
+		rm -rf openal-soft-1.23.0-bin
+		eval 7z x -y OpenAL-Soft-1.23.0.zip $STRIP
 	fi
-	OPENAL_SDK="$(real_pwd)/openal-soft-1.20.1-bin"
+	OPENAL_SDK="$(real_pwd)/openal-soft-1.23.0-bin"
 	add_cmake_opts -DOPENAL_INCLUDE_DIR="${OPENAL_SDK}/include/AL" \
 		-DOPENAL_LIBRARY="${OPENAL_SDK}/libs/Win${BITS}/OpenAL32.lib"
 	for config in ${CONFIGURATIONS[@]}; do
-		add_runtime_dlls $config "$(pwd)/openal-soft-1.20.1-bin/bin/WIN${BITS}/soft_oal.dll:OpenAL32.dll"
+		add_runtime_dlls $config "$(pwd)/openal-soft-1.23.0-bin/bin/WIN${BITS}/soft_oal.dll:OpenAL32.dll"
 	done
 	echo Done.
 }
