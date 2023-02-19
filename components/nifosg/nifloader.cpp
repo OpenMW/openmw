@@ -503,6 +503,12 @@ namespace NifOsg
             return image;
         }
 
+        void handleTextureWrapping(osg::Texture2D* texture, bool wrapS, bool wrapT)
+        {
+            texture->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+            texture->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+        }
+
         bool handleEffect(const Nif::Node* nifNode, osg::StateSet* stateset, Resource::ImageManager* imageManager)
         {
             if (nifNode->recType != Nif::RC_NiTextureEffect)
@@ -548,10 +554,7 @@ namespace NifOsg
             if (image)
                 texture2d->setTextureSize(image->s(), image->t());
             texture2d->setName("envMap");
-            texture2d->setWrap(
-                osg::Texture::WRAP_S, textureEffect->wrapS() ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
-            texture2d->setWrap(
-                osg::Texture::WRAP_T, textureEffect->wrapT() ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+            handleTextureWrapping(texture2d, textureEffect->wrapS(), textureEffect->wrapT());
 
             int texUnit = 3; // FIXME
 
@@ -1810,10 +1813,7 @@ namespace NifOsg
                         else
                             texture2d = new osg::Texture2D;
 
-                        texture2d->setWrap(
-                            osg::Texture::WRAP_S, tex.wrapS() ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
-                        texture2d->setWrap(
-                            osg::Texture::WRAP_T, tex.wrapT() ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                        handleTextureWrapping(texture2d, tex.wrapS(), tex.wrapT());
 
                         uvSet = tex.uvSet;
                     }
@@ -1821,8 +1821,7 @@ namespace NifOsg
                     {
                         // Texture only comes from NiFlipController, so tex is ignored, set defaults
                         texture2d = new osg::Texture2D;
-                        texture2d->setWrap(osg::Texture::WRAP_S, osg::Texture::REPEAT);
-                        texture2d->setWrap(osg::Texture::WRAP_T, osg::Texture::REPEAT);
+                        handleTextureWrapping(texture2d, true, true);
                         uvSet = 0;
                     }
 
@@ -1967,10 +1966,7 @@ namespace NifOsg
                 osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
                 if (image)
                     texture2d->setTextureSize(image->s(), image->t());
-                bool wrapT = clamp & 0x1;
-                bool wrapS = (clamp >> 1) & 0x1;
-                texture2d->setWrap(osg::Texture::WRAP_S, wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
-                texture2d->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                handleTextureWrapping(texture2d, (clamp >> 1) & 0x1, clamp & 0x1);
                 unsigned int texUnit = boundTextures.size();
                 stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
                 // BSShaderTextureSet presence means there's no need for FFP support for the affected node
@@ -2175,10 +2171,7 @@ namespace NifOsg
                         texture2d->setName("diffuseMap");
                         if (image)
                             texture2d->setTextureSize(image->s(), image->t());
-                        texture2d->setWrap(osg::Texture::WRAP_S,
-                            texprop->wrapS() ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
-                        texture2d->setWrap(osg::Texture::WRAP_T,
-                            texprop->wrapT() ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                        handleTextureWrapping(texture2d, texprop->wrapS(), texprop->wrapT());
                         const unsigned int texUnit = 0;
                         const unsigned int uvSet = 0;
                         stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
@@ -2231,12 +2224,7 @@ namespace NifOsg
                         texture2d->setName("diffuseMap");
                         if (image)
                             texture2d->setTextureSize(image->s(), image->t());
-                        bool wrapT = texprop->mClamp & 0x1;
-                        bool wrapS = (texprop->mClamp >> 1) & 0x1;
-                        texture2d->setWrap(osg::Texture::WRAP_S,
-                            wrapS ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
-                        texture2d->setWrap(osg::Texture::WRAP_T,
-                            wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
+                        handleTextureWrapping(texture2d, (texprop->mClamp >> 1) & 0x1, texprop->mClamp & 0x1);
                         const unsigned int texUnit = 0;
                         const unsigned int uvSet = 0;
                         stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
