@@ -291,7 +291,7 @@ namespace MWWorld
         struct GetCellStoreCallback
         {
             ///@note must return nullptr if the cell is not found
-            virtual CellStore* getCellStore(const ESM::CellId& cellId) = 0;
+            virtual CellStore* getCellStore(const ESM::RefId& cellId) = 0;
             virtual ~GetCellStoreCallback() = default;
         };
 

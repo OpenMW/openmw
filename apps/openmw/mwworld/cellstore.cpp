@@ -1081,7 +1081,7 @@ namespace MWWorld
             ESM::CellId movedTo;
             refnum.load(reader, true, "MVRF");
             movedTo.load(reader);
-
+            ESM::RefId movedToId = movedTo.getCellRefId();
             if (refnum.hasContentFile())
             {
                 auto iter = contentFileMap.find(refnum.mContentFile);
@@ -1098,7 +1098,7 @@ namespace MWWorld
                 continue;
             }
 
-            CellStore* otherCell = callback->getCellStore(movedTo);
+            CellStore* otherCell = callback->getCellStore(movedToId);
 
             if (otherCell == nullptr)
             {

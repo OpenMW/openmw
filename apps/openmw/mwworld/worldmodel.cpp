@@ -226,12 +226,58 @@ MWWorld::CellStore* MWWorld::WorldModel::getInterior(std::string_view name)
     return result->second;
 }
 
-MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::CellId& id)
+MWWorld::CellStore* MWWorld::WorldModel::getCellFromCellId(const ESM::CellId& id)
 {
     if (id.mPaged)
         return getExterior(id.mIndex.mX, id.mIndex.mY);
 
     return getInterior(id.mWorldspace);
+}
+
+MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::RefId& id)
+{
+    auto result = mCells.find(id);
+    if (result != mCells.end())
+        return &result->second;
+
+    // TODO: in the future replace that with elsid's refId variant that can be a osg::Vec2i
+    const std::string& idString = id.getRefIdString();
+    if (idString[0] == '#' && idString.find(',')) // That is an exterior cell Id
+    {
+        int x, y;
+        std::stringstream stringStream = std::stringstream(idString);
+        char sharp = '#';
+        char comma = ',';
+        stringStream >> sharp >> x >> comma >> y;
+        return getExterior(x, y);
+    }
+
+    const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().search(id);
+    CellStore* newCellStore = nullptr;
+    if (!cell4)
+    {
+        const ESM::Cell* cell = mStore.get<ESM::Cell>().search(id);
+        newCellStore = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
+    }
+    else
+    {
+        newCellStore = &mCells.emplace(cell4->mId, CellStore(MWWorld::Cell(*cell4), mStore, mReaders)).first->second;
+    }
+    if (newCellStore->getCell()->isExterior())
+    {
+        std::pair<int, int> coord
+            = std::make_pair(newCellStore->getCell()->getGridX(), newCellStore->getCell()->getGridY());
+        mExteriors.emplace(coord, newCellStore).first;
+    }
+    else
+    {
+        mInteriors.emplace(newCellStore->getCell()->getNameId(), newCellStore).first;
+    }
+    if (newCellStore->getState() != CellStore::State_Loaded)
+    {
+        newCellStore->load();
+    }
+    return newCellStore;
 }
 
 const ESM::Cell* MWWorld::WorldModel::getESMCellByName(std::string_view name)
@@ -428,7 +474,7 @@ public:
 
     MWWorld::WorldModel& mWorldModel;
 
-    MWWorld::CellStore* getCellStore(const ESM::CellId& cellId) override
+    MWWorld::CellStore* getCellStore(const ESM::RefId& cellId) override
     {
         try
         {
@@ -452,7 +498,7 @@ bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type, cons
 
         try
         {
-            cellStore = getCell(state.mId);
+            cellStore = getCell(state.mId.getCellRefId());
         }
         catch (...)
         {

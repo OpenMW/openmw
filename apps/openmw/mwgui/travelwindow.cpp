@@ -195,9 +195,15 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
+        ESM::CellId cellId;
+        osg::Vec2i posCell = MWWorld::positionToCellIndex(pos.pos[0], pos.pos[1]);
+        cellId.mPaged = !interior;
+        cellId.mWorldspace = Misc::StringUtils::lowerCase(cellname);
+        cellId.mIndex.mX = posCell.x();
+        cellId.mIndex.mY = posCell.y();
 
         // Teleports any followers, too.
-        MWWorld::ActionTeleport action(interior ? cellname : "", pos, true);
+        MWWorld::ActionTeleport action(cellId.getCellRefId(), pos, true);
         action.execute(player);
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(0);

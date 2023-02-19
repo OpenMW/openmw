@@ -471,7 +471,7 @@ namespace MWWorld
     const ESM::Cell* Store<ESM::Cell>::search(const ESM::RefId& cellId) const
     {
         auto foundCellIt = mCells.find(cellId);
-        if (foundCellIt == mCells.end())
+        if (foundCellIt != mCells.end())
             return &foundCellIt->second;
         return nullptr;
     }

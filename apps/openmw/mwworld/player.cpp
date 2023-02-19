@@ -367,7 +367,7 @@ namespace MWWorld
 
             try
             {
-                mCellStore = MWBase::Environment::get().getWorldModel()->getCell(player.mCellId);
+                mCellStore = MWBase::Environment::get().getWorldModel()->getCellFromCellId(player.mCellId);
             }
             catch (...)
             {
@@ -404,7 +404,7 @@ namespace MWWorld
             if (player.mHasMark)
             {
                 mMarkedPosition = player.mMarkedPosition;
-                mMarkedCell = MWBase::Environment::get().getWorldModel()->getCell(player.mMarkedCell);
+                mMarkedCell = MWBase::Environment::get().getWorldModel()->getCellFromCellId(player.mMarkedCell);
             }
             else
             {

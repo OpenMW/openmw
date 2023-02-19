@@ -59,14 +59,7 @@ namespace ESM
 
     const ESM::RefId& Cell::updateId()
     {
-        if (isExterior())
-        {
-            mId = ESM::RefId::stringRefId("#" + std::to_string(mData.mX) + "," + std::to_string(mData.mY));
-        }
-        else
-        {
-            mId = ESM::RefId::stringRefId(mName);
-        }
+        mId = mCellId.getCellRefId();
         return mId;
     }
 

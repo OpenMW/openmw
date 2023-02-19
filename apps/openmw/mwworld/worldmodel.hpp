@@ -70,7 +70,8 @@ namespace MWWorld
         CellStore* getExterior(int x, int y);
         CellStore* getInterior(std::string_view name);
         CellStore* getCell(std::string_view name); // interior or named exterior
-        CellStore* getCell(const ESM::CellId& Id);
+        CellStore* getCell(const ESM::RefId& Id);
+        CellStore* getCellFromCellId(const ESM::CellId& Id);
 
         // If cellNameInSameWorldSpace is an interior - returns this interior.
         // Otherwise returns exterior cell for given position in the same world space.

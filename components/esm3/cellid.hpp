@@ -25,6 +25,7 @@ namespace ESM
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;
+        ESM::RefId getCellRefId() const;
     };
 
     bool operator==(const CellId& left, const CellId& right);

@@ -1129,15 +1129,7 @@ namespace MWWorld
             {
                 try
                 {
-                    if (!door.getCellRef().getDestCell().empty())
-                        preloadCell(mWorld.getWorldModel().getInterior(door.getCellRef().getDestCell()));
-                    else
-                    {
-                        osg::Vec3f pos = door.getCellRef().getDoorDest().asVec3();
-                        const osg::Vec2i cellIndex = positionToCellIndex(pos.x(), pos.y());
-                        preloadCell(mWorld.getWorldModel().getExterior(cellIndex.x(), cellIndex.y()), true);
-                        exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
-                    }
+                    preloadCell(mWorld.getWorldModel().getCell(door.getCellRef().getDestCell()));
                 }
                 catch (std::exception&)
                 {

@@ -36,8 +36,7 @@ namespace MWLua
             const MWWorld::CellRef& cellRef = doorPtr(o).getCellRef();
             if (!cellRef.getTeleport())
                 return sol::nil;
-            MWWorld::CellStore* cell = MWBase::Environment::get().getWorldModel()->getCellByPosition(
-                cellRef.getDoorDest().asVec3(), cellRef.getDestCell());
+            MWWorld::CellStore* cell = MWBase::Environment::get().getWorldModel()->getCell(cellRef.getDestCell());
             assert(cell);
             return o.getCell(lua, cell);
         };

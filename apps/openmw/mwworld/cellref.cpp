@@ -3,7 +3,10 @@
 #include <cassert>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm3/cellid.hpp>
 #include <components/esm3/objectstate.hpp>
+
+#include <apps/openmw/mwworld/cellutils.hpp>
 
 namespace MWWorld
 {
@@ -67,12 +70,54 @@ namespace MWWorld
 
     static const std::string emptyString = "";
 
-    const std::string& CellRef::getDestCell() const
+    ESM::Position CellRef::getDoorDest() const
     {
-        return std::visit(ESM::VisitOverload{
-                              [&](const ESM4::Reference& /*ref*/) -> const std::string& { return emptyString; },
-                              [&](const ESM::CellRef& ref) -> const std::string& { return ref.mDestCell; },
-                          },
+
+        auto esm3Visit = [&](const ESM::CellRef& ref) -> ESM::Position {
+            // So the destinaion pos is always in relationship to the destination cells origin, interior or exterior
+            // alike
+            ESM::Position pos = ref.mDoorDest;
+            if (ref.mDestCell.empty()) // Exterior cell case
+            {
+                const osg::Vec2i index = positionToCellIndex(ref.mDoorDest.pos[0], ref.mDoorDest.pos[1]);
+                pos.pos[0] -= index.x() * Constants::CellSizeInUnits;
+                pos.pos[1] -= index.y() * Constants::CellSizeInUnits;
+            }
+
+            return pos;
+        };
+
+        return std::visit(
+            ESM::VisitOverload{
+                [&](const ESM4::Reference& ref) { return ref.mDoor.destPos; },
+                esm3Visit,
+            },
+            mCellRef.mVariant);
+    }
+
+    ESM::RefId CellRef::getDestCell() const
+    {
+        auto esm3Visit = [&](const ESM::CellRef& ref) -> ESM::RefId {
+            if (!ref.mDestCell.empty())
+            {
+                return ESM::RefId::stringRefId(ref.mDestCell);
+            }
+            else
+            {
+                const osg::Vec2i index = positionToCellIndex(ref.mDoorDest.pos[0], ref.mDoorDest.pos[1]);
+                ESM::CellId CellId;
+                CellId.mPaged = true;
+                CellId.mIndex.mX = index.x();
+                CellId.mIndex.mY = index.y();
+                return CellId.getCellRefId();
+            }
+        };
+
+        return std::visit(
+            ESM::VisitOverload{
+                [&](const ESM4::Reference& ref) -> ESM::RefId { return ESM::RefId::sEmpty; },
+                esm3Visit,
+            },
             mCellRef.mVariant);
     }
 

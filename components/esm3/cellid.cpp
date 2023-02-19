@@ -33,6 +33,18 @@ namespace ESM
             esm.writeHNT("CIDX", mIndex, 8);
     }
 
+    ESM::RefId CellId::getCellRefId() const
+    {
+        if (mPaged)
+        {
+            return ESM::RefId::stringRefId("#" + std::to_string(mIndex.mX) + "," + std::to_string(mIndex.mY));
+        }
+        else
+        {
+            return ESM::RefId::stringRefId(mWorldspace);
+        }
+    }
+
     bool operator==(const CellId& left, const CellId& right)
     {
         return left.mWorldspace == right.mWorldspace && left.mPaged == right.mPaged
