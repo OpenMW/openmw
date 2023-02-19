@@ -377,55 +377,10 @@ MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name)
     return Ptr();
 }
 
-MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& id, const ESM::RefNum& refNum)
-{
-    for (auto& pair : mInteriors)
-    {
-        Ptr ptr = getPtr(pair.second, id, refNum);
-        if (!ptr.isEmpty())
-            return ptr;
-    }
-    for (auto& pair : mExteriors)
-    {
-        Ptr ptr = getPtr(pair.second, id, refNum);
-        if (!ptr.isEmpty())
-            return ptr;
-    }
-    return Ptr();
-}
-
-MWWorld::Ptr MWWorld::WorldModel::getPtr(CellStore& cellStore, const ESM::RefId& id, const ESM::RefNum& refNum)
-{
-    if (cellStore.getState() == CellStore::State_Unloaded)
-        cellStore.preload();
-    if (cellStore.getState() == CellStore::State_Preloaded)
-    {
-        if (cellStore.hasId(id))
-            cellStore.load();
-        else
-            return Ptr();
-    }
-    return cellStore.searchViaRefNum(refNum);
-}
-
 void MWWorld::WorldModel::getExteriorPtrs(const ESM::RefId& name, std::vector<MWWorld::Ptr>& out)
 {
     const MWWorld::Store<ESM::Cell>& cells = mStore.get<ESM::Cell>();
     for (MWWorld::Store<ESM::Cell>::iterator iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
-    {
-        CellStore* cellStore = getCellStore(&(*iter));
-
-        Ptr ptr = getPtrAndCache(name, *cellStore);
-
-        if (!ptr.isEmpty())
-            out.push_back(ptr);
-    }
-}
-
-void MWWorld::WorldModel::getInteriorPtrs(const ESM::RefId& name, std::vector<MWWorld::Ptr>& out)
-{
-    const MWWorld::Store<ESM::Cell>& cells = mStore.get<ESM::Cell>();
-    for (MWWorld::Store<ESM::Cell>::iterator iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
     {
         CellStore* cellStore = getCellStore(&(*iter));
 

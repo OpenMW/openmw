@@ -728,11 +728,6 @@ namespace MWWorld
         return mWorldScene->searchPtrViaActorId(actorId);
     }
 
-    Ptr World::searchPtrViaRefNum(const ESM::RefId& id, const ESM::RefNum& refNum)
-    {
-        return mWorldModel.getPtr(id, refNum);
-    }
-
     struct FindContainerVisitor
     {
         ConstPtr mContainedPtr;
