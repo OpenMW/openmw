@@ -491,9 +491,6 @@ namespace
             else
                 result = esmStore.get<RecordType>().search(refId);
 
-            if (result == nullptr || result->mId != refId)
-                int debug = 0;
-
             ASSERT_NE(result, nullptr);
             EXPECT_EQ(result->mId, refId);
         }

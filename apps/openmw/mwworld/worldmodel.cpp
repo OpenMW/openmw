@@ -92,6 +92,7 @@ void MWWorld::WorldModel::clear()
     mLastGeneratedRefnum = ESM::RefNum{};
     mInteriors.clear();
     mExteriors.clear();
+    mCells.clear();
     std::fill(mIdCache.begin(), mIdCache.end(), std::make_pair(ESM::RefId(), (MWWorld::CellStore*)nullptr));
     mIdCacheIndex = 0;
 }
