@@ -204,6 +204,25 @@ namespace Nif
         mTextureSet.post(nif);
     }
 
+    void BSEffectShaderProperty::read(NIFStream* nif)
+    {
+        BSShaderProperty::read(nif);
+        flags1 = nif->getUInt();
+        flags2 = nif->getUInt();
+        mUVOffset = nif->getVector2();
+        mUVScale = nif->getVector2();
+        mSourceTexture = nif->getSizedString();
+        unsigned int miscParams = nif->getUInt();
+        mClamp = miscParams & 0xFF;
+        mLightingInfluence = (miscParams >> 8) & 0xFF;
+        mEnvMapMinLOD = (miscParams >> 16) & 0xFF;
+        mFalloffParams = nif->getVector4();
+        mBaseColor = nif->getVector4();
+        mBaseColorScale = nif->getFloat();
+        mFalloffDepth = nif->getFloat();
+        mGreyscaleTexture = nif->getSizedString();
+    }
+
     void NiFogProperty::read(NIFStream* nif)
     {
         Property::read(nif);

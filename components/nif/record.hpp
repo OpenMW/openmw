@@ -145,6 +145,7 @@ namespace Nif
         RC_bhkRigidBody,
         RC_bhkRigidBodyT,
         RC_BSLightingShaderProperty,
+        RC_BSEffectShaderProperty,
         RC_NiClusterAccumulator,
         RC_NiAlphaAccumulator,
         RC_NiSortAdjustNode,

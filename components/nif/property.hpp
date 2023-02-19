@@ -215,6 +215,22 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    struct BSEffectShaderProperty : public BSShaderProperty
+    {
+        osg::Vec2f mUVOffset, mUVScale;
+        std::string mSourceTexture;
+        unsigned char mClamp;
+        unsigned char mLightingInfluence;
+        unsigned char mEnvMapMinLOD;
+        osg::Vec4f mFalloffParams;
+        osg::Vec4f mBaseColor;
+        float mBaseColorScale;
+        float mFalloffDepth;
+        std::string mGreyscaleTexture;
+
+        void read(NIFStream* nif) override;
+    };
+
     struct NiDitherProperty : public Property
     {
         unsigned short flags;

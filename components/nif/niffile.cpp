@@ -169,6 +169,7 @@ namespace Nif
             { "bhkRigidBody", &construct<bhkRigidBody, RC_bhkRigidBody> },
             { "bhkRigidBodyT", &construct<bhkRigidBody, RC_bhkRigidBodyT> },
             { "BSLightingShaderProperty", &construct<BSLightingShaderProperty, RC_BSLightingShaderProperty> },
+            { "BSEffectShaderProperty", &construct<BSEffectShaderProperty, RC_BSEffectShaderProperty> },
             { "NiSortAdjustNode", &construct<NiSortAdjustNode, RC_NiSortAdjustNode> },
             { "NiClusterAccumulator", &construct<NiClusterAccumulator, RC_NiClusterAccumulator> },
             { "NiAlphaAccumulator", &construct<NiAlphaAccumulator, RC_NiAlphaAccumulator> },
