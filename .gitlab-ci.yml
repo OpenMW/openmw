@@ -134,6 +134,18 @@ Clang_Format:
   script:
     - CI/check_clang_format.sh
 
+Teal:
+  stage: checks
+  extends: .Ubuntu_Image
+  before_script:
+    - apt-get update
+    - apt-get -y install curl wget make build-essential libreadline-dev git-core zip unzip
+  script:
+    - CI/teal_ci.sh
+  artifacts:
+    paths:
+      - teal_declarations.zip
+
 Ubuntu_GCC_Debug:
   extends: .Ubuntu
   cache:
