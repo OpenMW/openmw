@@ -2854,10 +2854,17 @@ namespace MWWorld
 
     ESM::RefId World::findCellPosition(std::string_view cellName, ESM::Position& pos)
     {
-        ESM::RefId foundCell = findInteriorPosition(cellName, pos);
+        ESM::RefId foundCell;
+        try
+        {
+            foundCell = findInteriorPosition(cellName, pos);
+        }
+        catch (std::exception&)
+        {
+        }
         if (foundCell.empty())
         {
-            return findInteriorPosition(cellName, pos);
+            return findExteriorPosition(cellName, pos);
         }
 
         return foundCell;
