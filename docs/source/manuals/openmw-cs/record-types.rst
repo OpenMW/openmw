@@ -38,7 +38,7 @@ Armor
    Light, Medium, or Heavy. By default these values are:
 
 .. list-table:: 
-   :widths: 35 65
+   :widths: 40 20 20 20
    :header-rows: 1
 
    * - Armor part
