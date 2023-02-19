@@ -26,6 +26,9 @@ namespace ESM
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;
         ESM::RefId getCellRefId() const;
+
+        // TODO tetramir: this probably shouldn't exist, needs it because some CellIds are saved on disk
+        static CellId extractFromRefId(const ESM::RefId& id);
     };
 
     bool operator==(const CellId& left, const CellId& right);

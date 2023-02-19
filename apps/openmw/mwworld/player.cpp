@@ -283,7 +283,7 @@ namespace MWWorld
         ESM::Player player;
 
         mPlayer.save(player.mObject);
-        player.mCellId = mCellStore->getCell()->getCellId();
+        player.mCellId = ESM::CellId::extractFromRefId(mCellStore->getCell()->getId());
 
         player.mCurrentCrimeId = mCurrentCrimeId;
         player.mPaidCrimeId = mPaidCrimeId;
@@ -298,7 +298,7 @@ namespace MWWorld
         {
             player.mHasMark = true;
             player.mMarkedPosition = mMarkedPosition;
-            player.mMarkedCell = mMarkedCell->getCell()->getCellId();
+            player.mMarkedCell = ESM::CellId::extractFromRefId(mMarkedCell->getCell()->getId());
         }
         else
             player.mHasMark = false;

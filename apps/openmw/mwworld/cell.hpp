@@ -42,7 +42,6 @@ namespace MWWorld
         bool isQuasiExterior() const { return mIsQuasiExterior; }
         bool hasWater() const { return mHasWater; }
         bool noSleep() const { return mNoSleep; }
-        const ESM::CellId& getCellId() const { return mCellId; }
         const ESM::RefId& getRegion() const { return mRegion; }
         std::string_view getNameId() const { return mNameID; }
         std::string_view getDisplayName() const { return mDisplayname; }
@@ -61,7 +60,6 @@ namespace MWWorld
         std::string mDisplayname; // How the game displays it
         std::string mNameID; // The name that will be used by the script and console commands
         ESM::RefId mRegion;
-        ESM::CellId mCellId;
         ESM::RefId mId;
         MoodData mMood;
 

@@ -2,6 +2,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include <components/misc/algorithm.hpp>
 
 namespace ESM
 {
@@ -43,6 +44,30 @@ namespace ESM
         {
             return ESM::RefId::stringRefId(mWorldspace);
         }
+    }
+
+    CellId CellId::extractFromRefId(const ESM::RefId& id)
+    {
+        // This is bad and that code should not be merged.
+        const std::string& idString = id.getRefIdString();
+        CellId out;
+        if (idString[0] == '#' && idString.find(',')) // That is an exterior cell Id
+        {
+            int x, y;
+            std::stringstream stringStream = std::stringstream(idString);
+            char sharp = '#';
+            char comma = ',';
+            stringStream >> sharp >> x >> comma >> y;
+            out.mPaged = true;
+            out.mIndex = { x, y };
+        }
+        else
+        {
+            out.mPaged = false;
+            out.mWorldspace = Misc::StringUtils::lowerCase(idString);
+        }
+
+        return out;
     }
 
     bool operator==(const CellId& left, const CellId& right)

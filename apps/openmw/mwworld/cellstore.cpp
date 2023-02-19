@@ -988,7 +988,7 @@ namespace MWWorld
 
     void CellStore::saveState(ESM::CellState& state) const
     {
-        state.mId = mCellVariant.getCellId();
+        state.mId = ESM::CellId::extractFromRefId(mCellVariant.getId());
 
         if (!mCellVariant.isExterior() && mCellVariant.hasWater())
             state.mWaterLevel = mWaterLevel;
@@ -1019,7 +1019,7 @@ namespace MWWorld
         for (const auto& [base, store] : mMovedToAnotherCell)
         {
             ESM::RefNum refNum = base->mRef.getRefNum();
-            ESM::CellId movedTo = store->getCell()->getCellId();
+            ESM::CellId movedTo = ESM::CellId::extractFromRefId(store->getCell()->getId());
 
             refNum.save(writer, true, "MVRF");
             movedTo.save(writer);

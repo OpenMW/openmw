@@ -240,16 +240,12 @@ MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::RefId& id)
     if (result != mCells.end())
         return &result->second;
 
-    // TODO: in the future replace that with elsid's refId variant that can be a osg::Vec2i
-    const std::string& idString = id.getRefIdString();
-    if (idString[0] == '#' && idString.find(',')) // That is an exterior cell Id
+    // TODO tetramir: in the future replace that with elsid's refId variant that can be a osg::Vec2i
+    ESM::CellId cellId = ESM::CellId::extractFromRefId(id);
+    if (cellId.mPaged) // That is an exterior cell Id
     {
-        int x, y;
-        std::stringstream stringStream = std::stringstream(idString);
-        char sharp = '#';
-        char comma = ',';
-        stringStream >> sharp >> x >> comma >> y;
-        return getExterior(x, y);
+
+        return getExterior(cellId.mIndex.mX, cellId.mIndex.mY);
     }
 
     const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().search(id);

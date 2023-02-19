@@ -554,7 +554,7 @@ namespace MWWorld
 
         mNavigator.setWorldspace(
             Misc::StringUtils::lowerCase(
-                mWorld.getWorldModel().getExterior(playerCellX, playerCellY)->getCell()->getCellId().mWorldspace),
+                mWorld.getWorldModel().getExterior(playerCellX, playerCellY)->getCell()->getNameId()),
             navigatorUpdateGuard.get());
         mNavigator.updateBounds(pos, navigatorUpdateGuard.get());
 
@@ -676,7 +676,7 @@ namespace MWWorld
 
             CellStore* cell = mWorld.getWorldModel().getExterior(it->mData.mX, it->mData.mY);
             mNavigator.setWorldspace(
-                Misc::StringUtils::lowerCase(cell->getCell()->getCellId().mWorldspace), navigatorUpdateGuard.get());
+                Misc::StringUtils::lowerCase(cell->getCell()->getNameId()), navigatorUpdateGuard.get());
             const osg::Vec3f position
                 = osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits;
             mNavigator.updateBounds(position, navigatorUpdateGuard.get());
@@ -734,7 +734,7 @@ namespace MWWorld
 
             CellStore* cell = mWorld.getWorldModel().getInterior(it->mName);
             mNavigator.setWorldspace(
-                Misc::StringUtils::lowerCase(cell->getCell()->getCellId().mWorldspace), navigatorUpdateGuard.get());
+                Misc::StringUtils::lowerCase(cell->getCell()->getNameId()), navigatorUpdateGuard.get());
             ESM::Position position;
             mWorld.findInteriorPosition(it->mName, position);
             mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
@@ -890,7 +890,7 @@ namespace MWWorld
         loadingListener->setProgressRange(cell->count());
 
         mNavigator.setWorldspace(
-            Misc::StringUtils::lowerCase(cell->getCell()->getCellId().mWorldspace), navigatorUpdateGuard.get());
+            Misc::StringUtils::lowerCase(cell->getCell()->getNameId()), navigatorUpdateGuard.get());
         mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
 
         // Load cell.

@@ -16,10 +16,6 @@ namespace MWWorld
         , mDisplayname(cell.mFullName)
         , mNameID(cell.mEditorId)
         , mRegion(ESM::RefId()) // Unimplemented for now
-        , mCellId{
-            .mWorldspace{ Misc::StringUtils::lowerCase(cell.mEditorId) },
-            .mIndex{ cell.getGridX(), cell.getGridY() },
-            .mPaged = isExterior(),}
         , mId(cell.mId)
         ,mMood{
             .mAmbiantColor = cell.mLighting.ambient,
@@ -41,7 +37,6 @@ namespace MWWorld
         , mDisplayname(cell.mName)
         , mNameID(cell.mName)
         , mRegion(cell.mRegion)
-        , mCellId(cell.getCellId())
         , mId(cell.mId)
         , mMood{
             .mAmbiantColor = cell.mAmbi.mAmbient,

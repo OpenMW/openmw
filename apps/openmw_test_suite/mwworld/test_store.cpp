@@ -445,6 +445,13 @@ namespace
         decltype(RecordType::mId) refId;
         if constexpr (ESM::hasIndex<RecordType> && !std::is_same_v<RecordType, ESM::LandTexture>)
             refId = RecordType::indexToRefId(index);
+        else if constexpr (std::is_same_v<RecordType, ESM::Cell>)
+        {
+            ESM::CellId cellId;
+            cellId.mPaged = true;
+            cellId.mIndex = { 0, 0 };
+            refId = cellId.getCellRefId();
+        }
         else
             refId = ESM::StringRefId(stringId);
 
@@ -483,6 +490,9 @@ namespace
                 result = esmStore.get<RecordType>().search(index);
             else
                 result = esmStore.get<RecordType>().search(refId);
+
+            if (result == nullptr || result->mId != refId)
+                int debug = 0;
 
             ASSERT_NE(result, nullptr);
             EXPECT_EQ(result->mId, refId);
