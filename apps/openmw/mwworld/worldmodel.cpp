@@ -267,11 +267,11 @@ MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::RefId& id)
     {
         std::pair<int, int> coord
             = std::make_pair(newCellStore->getCell()->getGridX(), newCellStore->getCell()->getGridY());
-        mExteriors.emplace(coord, newCellStore).first;
+        mExteriors.emplace(coord, newCellStore);
     }
     else
     {
-        mInteriors.emplace(newCellStore->getCell()->getNameId(), newCellStore).first;
+        mInteriors.emplace(newCellStore->getCell()->getNameId(), newCellStore);
     }
     if (newCellStore->getState() != CellStore::State_Loaded)
     {

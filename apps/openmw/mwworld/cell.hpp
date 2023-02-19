@@ -49,7 +49,7 @@ namespace MWWorld
         std::string getDescription() const;
         const MoodData& getMood() const { return mMood; }
         float getWaterHeight() const { return mWaterHeight; }
-        const ESM::RefId& getId() const { return mId; };
+        const ESM::RefId& getId() const { return mId; }
 
     private:
         bool mIsExterior;

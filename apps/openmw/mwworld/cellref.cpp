@@ -73,25 +73,10 @@ namespace MWWorld
     ESM::Position CellRef::getDoorDest() const
     {
 
-        auto esm3Visit = [&](const ESM::CellRef& ref) -> ESM::Position {
-            // So the destinaion pos is always in relationship to the destination cells origin, interior or exterior
-            // alike
-            ESM::Position pos = ref.mDoorDest;
-            if (ref.mDestCell.empty()) // Exterior cell case
-            {
-                const osg::Vec2i index = positionToCellIndex(ref.mDoorDest.pos[0], ref.mDoorDest.pos[1]);
-                pos.pos[0] -= index.x() * Constants::CellSizeInUnits;
-                pos.pos[1] -= index.y() * Constants::CellSizeInUnits;
-            }
-
-            return pos;
-        };
-
-        return std::visit(
-            ESM::VisitOverload{
-                [&](const ESM4::Reference& ref) { return ref.mDoor.destPos; },
-                esm3Visit,
-            },
+        return std::visit(ESM::VisitOverload{
+                              [&](const ESM4::Reference& ref) { return ref.mDoor.destPos; },
+                              [&](const ESM::CellRef& ref) -> ESM::Position { return ref.mDoorDest; },
+                          },
             mCellRef.mVariant);
     }
 

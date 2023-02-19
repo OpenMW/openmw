@@ -378,7 +378,12 @@ namespace MWWorld
                 pos.rot[0] = 0;
                 pos.rot[1] = 0;
                 pos.rot[2] = 0;
-                mWorldScene->changeToExteriorCell(pos, true);
+
+                osg::Vec2i exteriorCellPos = positionToCellIndex(pos.pos[0], pos.pos[1]);
+                ESM::CellId CellId;
+                CellId.mPaged = true;
+                CellId.mIndex = { exteriorCellPos.x(), exteriorCellPos.y() };
+                mWorldScene->changeToExteriorCell(CellId.getCellRefId(), pos, true);
             }
         }
 
@@ -981,7 +986,11 @@ namespace MWWorld
             mRendering->notifyWorldSpaceChanged();
         }
         removeContainerScripts(getPlayerPtr());
-        mWorldScene->changeToExteriorCell(position, adjustPlayerPos, changeEvent);
+        osg::Vec2i exteriorCellPos = positionToCellIndex(position.pos[0], position.pos[1]);
+        ESM::CellId CellId;
+        CellId.mPaged = true;
+        CellId.mIndex = { exteriorCellPos.x(), exteriorCellPos.y() };
+        mWorldScene->changeToExteriorCell(CellId.getCellRefId(), position, adjustPlayerPos, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
         mRendering->getCamera()->instantTransition();
     }
@@ -1018,7 +1027,7 @@ namespace MWWorld
         }
         removeContainerScripts(getPlayerPtr());
         if (exteriorCell)
-            mWorldScene->changeToExteriorCell(position, adjustPlayerPos, changeEvent);
+            mWorldScene->changeToExteriorCell(cellId, position, adjustPlayerPos, changeEvent);
         else
             mWorldScene->changeToInteriorCell(destinationCell->getNameId(), position, adjustPlayerPos, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
@@ -1194,7 +1203,7 @@ namespace MWWorld
                     if (mWorldScene->isCellActive(*newCell))
                         mWorldScene->changePlayerCell(newCell, pos, false);
                     else
-                        mWorldScene->changeToExteriorCell(pos, false);
+                        mWorldScene->changeToExteriorCell(newCell->getCell()->getId(), pos, false);
                 }
                 addContainerScripts(getPlayerPtr(), newCell);
                 newPtr = getPlayerPtr();

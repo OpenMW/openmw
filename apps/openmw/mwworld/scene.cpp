@@ -920,16 +920,18 @@ namespace MWWorld
         MWBase::Environment::get().getWorld()->getPostProcessor()->setExteriorFlag(cell->getCell()->isQuasiExterior());
     }
 
-    void Scene::changeToExteriorCell(const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
+    void Scene::changeToExteriorCell(
+        const ESM::RefId& extCellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
-        const osg::Vec2i cellIndex = positionToCellIndex(position.pos[0], position.pos[1]);
 
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
+        CellStore* current = mWorld.getWorldModel().getCell(extCellId);
+
+        const osg::Vec2i cellIndex(current->getCell()->getGridX(), current->getCell()->getGridY());
 
         changeCellGrid(position.asVec3(), cellIndex.x(), cellIndex.y(), changeEvent);
 
-        CellStore* current = mWorld.getWorldModel().getExterior(cellIndex.x(), cellIndex.y());
         changePlayerCell(current, position, adjustPlayerPos);
 
         if (changeEvent)

@@ -301,7 +301,8 @@ namespace ESSImport
             marker.mWorldX = notepos[0];
             marker.mWorldY = notepos[1];
             marker.mNote = note;
-            marker.mCell = cell.getCellId();
+            marker.mCellId = cell.getCellId();
+            marker.mCell = cell.getCellId().getCellRefId();
             mMarkers.push_back(marker);
         }
 
