@@ -9,6 +9,9 @@
 #include <components/esm4/reader.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/openfile.hpp>
+#include <components/resource/resourcesystem.hpp>
+
+#include "../mwbase/environment.hpp"
 
 namespace MWWorld
 {
@@ -60,7 +63,8 @@ namespace MWWorld
             }
             case ESM::Format::Tes4:
             {
-                ESM4::Reader readerESM4(std::move(stream), filepath);
+                ESM4::Reader readerESM4(
+                    std::move(stream), filepath, MWBase::Environment::get().getResourceSystem()->getVFS());
                 auto statelessEncoder = mEncoder->getStatelessEncoder();
                 readerESM4.setEncoder(&statelessEncoder);
                 mStore.loadESM4(readerESM4);

@@ -33,6 +33,7 @@
 #include "loadtes4.hpp"
 
 #include <components/files/istreamptr.hpp>
+#include <components/vfs/manager.hpp>
 
 namespace ToUTF8
 {
@@ -83,6 +84,7 @@ namespace ESM4
 
     class Reader
     {
+        VFS::Manager const* mVFS;
         Header mHeader; // ESM4 header
 
         ReaderContext mCtx;
@@ -138,7 +140,7 @@ namespace ESM4
             const ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull = false);
 
     public:
-        Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename);
+        Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename, VFS::Manager const* vfs = nullptr);
         ~Reader();
 
         void open(const std::filesystem::path& filename);
