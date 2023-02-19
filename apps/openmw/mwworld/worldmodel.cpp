@@ -294,7 +294,7 @@ MWWorld::CellStore* MWWorld::WorldModel::getCellByPosition(
         return getInterior(cellNameInSameWorldSpace);
 }
 
-MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name, CellStore& cell, bool searchInContainers)
+MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name, CellStore& cell)
 {
     if (cell.getState() == CellStore::State_Unloaded)
         cell.preload();
@@ -313,9 +313,6 @@ MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name, CellStore& cell
 
     if (!ptr.isEmpty() && MWWorld::CellStore::isAccessible(ptr.getRefData(), ptr.getCellRef()))
         return ptr;
-
-    if (searchInContainers)
-        return cell.searchInContainer(name);
 
     return Ptr();
 }

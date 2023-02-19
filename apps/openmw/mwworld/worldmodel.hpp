@@ -86,11 +86,7 @@ namespace MWWorld
 
         Ptr getPtr(const ESM::RefNum& refNum) const;
 
-        Ptr getPtr(const ESM::RefId& name, CellStore& cellStore, bool searchInContainers = false);
-        ///< \param searchInContainers Only affect loaded cells.
-        /// @note name must be lower case
-
-        /// @note name must be lower case
+        Ptr getPtr(const ESM::RefId& name, CellStore& cellStore);
         Ptr getPtr(const ESM::RefId& name);
 
         template <typename Fn>
