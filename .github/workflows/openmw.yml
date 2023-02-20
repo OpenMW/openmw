@@ -36,7 +36,7 @@ jobs:
         export GENERATOR="Unix Makefiles"
         export CC="gcc"
         export CXX="g++"
-        sudo -E CI/build_googletest.sh
+        sudo -E bash CI/build_googletest.sh
 
     - name: Configure
       run: cmake -S . -B . -DGTEST_ROOT="$(pwd)/googletest/build" -DGMOCK_ROOT="$(pwd)/googletest/build" -DBUILD_UNITTESTS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_FLAGS='-Werror' -DCMAKE_CXX_FLAGS="-Werror -Wno-error=deprecated-declarations -Wno-error=nonnull -Wno-error=deprecated-copy"
