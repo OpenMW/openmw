@@ -33,10 +33,12 @@ jobs:
       run: |
         mkdir -p build
         cd build
-        cmake .. --config ${{env.BUILD_TYPE}}
+        cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Build
-      run: cmake build --build --parallel 3
+      run: |
+        cd build
+        make -j3
  
     - name: Test
       run: ./openmw_test_suite
