@@ -74,8 +74,9 @@ namespace ESM4
         subRecordHeader.dataSize = 0;
     }
 
-    Reader::Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename)
-        : mEncoder(nullptr)
+    Reader::Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename, VFS::Manager const* vfs)
+        : mVFS(vfs)
+        , mEncoder(nullptr)
         , mFileSize(0)
         , mStream(std::move(esmStream))
     {
@@ -224,7 +225,8 @@ namespace ESM4
         sp.type = stringType;
 
         // TODO: possibly check if the resource exists?
-        Files::IStreamPtr filestream = Files::openConstrainedFileStream(stringFile);
+        Files::IStreamPtr filestream
+            = mVFS ? mVFS->get(stringFile.string()) : Files::openConstrainedFileStream(stringFile);
 
         filestream->seekg(0, std::ios::end);
         std::size_t fileSize = filestream->tellg();
