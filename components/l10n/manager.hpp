@@ -1,6 +1,8 @@
 #ifndef COMPONENTS_L10N_MANAGER_H
 #define COMPONENTS_L10N_MANAGER_H
 
+#include <memory>
+
 #include <components/l10n/messagebundles.hpp>
 
 namespace VFS
