@@ -99,26 +99,12 @@ jobs:
         choco install ninja -y
         refreshenv
     - name: Build
-      run: |
-        function Make-SafeFileName {
-          param(
-            [Parameter(Mandatory=$true)]
-            [String]
-            $FileName
-          )
-          [IO.Path]::GetInvalidFileNameChars() | ForEach-Object {
-            $FileName = $FileName.Replace($_, '_')
-          }
-          return $FileName
-        }          
-        $time = (Get-Date -Format "HH:mm:ss")
-        echo ${time}
-        echo "started by ${GITLAB_USER_NAME}"
+      run: |  
         $env:CCACHE_BASEDIR = Get-Location
         $env:CCACHE_DIR = "$(Get-Location)\ccache"
         New-Item -Type Directory -Force -Path $env:CCACHE_DIR
-        #sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C $multiview -E
-        #cd MSVC2019_64_Ninja
-        #.\ActivateMSVC.ps1
-        #cmake --build . --config $config
-        #ccache --show-stats
+        sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C $multiview -E
+        cd MSVC2019_64_Ninja
+        .\ActivateMSVC.ps1
+        cmake --build . --config $config
+        ccache --show-stats
