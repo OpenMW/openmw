@@ -989,7 +989,7 @@ namespace MWClass
         return store;
     }
 
-    const ESM::RefId& Npc::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Npc::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
 
@@ -1278,7 +1278,7 @@ namespace MWClass
         return npc->mAiData.mServices;
     }
 
-    const ESM::RefId& Npc::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
+    ESM::RefId Npc::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
         static const ESM::RefId swimLeft = ESM::RefId::stringRefId("Swim Left");
         static const ESM::RefId swimRight = ESM::RefId::stringRefId("Swim Right");
@@ -1297,7 +1297,7 @@ namespace MWClass
         {
             MWBase::World* world = MWBase::Environment::get().getWorld();
             if (world->isFlying(ptr))
-                return ESM::RefId::sEmpty;
+                return ESM::RefId();
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if (world->isSwimming(ptr))
                 return (name == "left") ? swimLeft : swimRight;
@@ -1311,7 +1311,7 @@ namespace MWClass
                     int weaponType = ESM::Weapon::None;
                     MWMechanics::getActiveWeapon(ptr, &weaponType);
                     if (weaponType == ESM::Weapon::None)
-                        return ESM::RefId::sEmpty;
+                        return ESM::RefId();
                 }
 
                 const MWWorld::InventoryStore& inv = Npc::getInventoryStore(ptr);
@@ -1332,12 +1332,12 @@ namespace MWClass
                         break;
                 }
             }
-            return ESM::RefId::sEmpty;
+            return ESM::RefId();
         }
 
         // Morrowind ignores land soundgen for NPCs
         if (name == "land")
-            return ESM::RefId::sEmpty;
+            return ESM::RefId();
         if (name == "swimleft")
             return swimLeft;
         if (name == "swimright")
@@ -1347,11 +1347,11 @@ namespace MWClass
         // only for biped creatures?
 
         if (name == "moan")
-            return ESM::RefId::sEmpty;
+            return ESM::RefId();
         if (name == "roar")
-            return ESM::RefId::sEmpty;
+            return ESM::RefId();
         if (name == "scream")
-            return ESM::RefId::sEmpty;
+            return ESM::RefId();
 
         throw std::runtime_error("Unexpected soundgen type: " + std::string(name));
     }
@@ -1501,7 +1501,7 @@ namespace MWClass
         return true;
     }
 
-    const ESM::RefId& Npc::getPrimaryFaction(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Npc::getPrimaryFaction(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
         return ref->mBase->mFaction;

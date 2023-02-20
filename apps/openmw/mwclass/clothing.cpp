@@ -58,7 +58,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    const ESM::RefId& Clothing::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Clothing::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 
@@ -179,7 +179,7 @@ namespace MWClass
         return info;
     }
 
-    const ESM::RefId& Clothing::getEnchantment(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Clothing::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 

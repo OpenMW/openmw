@@ -149,7 +149,7 @@ namespace ESM
     {
         if (isNextSub(name))
             return getRefId();
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     void ESMReader::skipHNORefId(NAME name)

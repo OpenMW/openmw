@@ -2738,7 +2738,7 @@ namespace MWWorld
             return cellId;
         }
 
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     ESM::RefId World::findExteriorPosition(std::string_view nameId, ESM::Position& pos)
@@ -2785,7 +2785,7 @@ namespace MWWorld
             return ext->getId();
         }
 
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     void World::enableTeleporting(bool enable)

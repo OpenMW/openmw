@@ -256,7 +256,7 @@ namespace MWClass
             return true;
     }
 
-    const ESM::RefId& Door::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Door::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Door>* ref = ptr.get<ESM::Door>();
 

@@ -68,7 +68,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    const ESM::RefId& Miscellaneous::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Miscellaneous::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
 

@@ -33,9 +33,9 @@
 
 namespace
 {
-    const ESM::RefId& getDialogueActorFaction(const MWWorld::ConstPtr& actor)
+    ESM::RefId getDialogueActorFaction(const MWWorld::ConstPtr& actor)
     {
-        const ESM::RefId& factionId = actor.getClass().getPrimaryFaction(actor);
+        ESM::RefId factionId = actor.getClass().getPrimaryFaction(actor);
         if (factionId.empty())
             throw std::runtime_error("failed to determine dialogue actors faction (because actor is factionless)");
 

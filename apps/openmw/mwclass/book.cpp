@@ -72,7 +72,7 @@ namespace MWClass
         return std::make_unique<MWWorld::ActionRead>(ptr);
     }
 
-    const ESM::RefId& Book::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Book::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Book>* ref = ptr.get<ESM::Book>();
 
@@ -133,7 +133,7 @@ namespace MWClass
         return info;
     }
 
-    const ESM::RefId& Book::getEnchantment(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Book::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Book>* ref = ptr.get<ESM::Book>();
 

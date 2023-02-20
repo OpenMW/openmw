@@ -75,7 +75,7 @@ namespace MWClass
         return ref->mBase->mData.mHealth;
     }
 
-    const ESM::RefId& Armor::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Armor::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 
@@ -272,7 +272,7 @@ namespace MWClass
         return info;
     }
 
-    const ESM::RefId& Armor::getEnchantment(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Armor::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 

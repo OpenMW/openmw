@@ -38,12 +38,12 @@ namespace MWWorld
         bool hasContentFile() const { return getRefNum().hasContentFile(); }
 
         // Id of object being referenced
-        const ESM::RefId& getRefId() const
+        ESM::RefId getRefId() const
         {
             struct Visitor
             {
-                const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mRefID; }
-                const ESM::RefId& operator()(const ESM4::Reference& ref) { return ref.mBaseObj; }
+                ESM::RefId operator()(const ESM::CellRef& ref) { return ref.mRefID; }
+                ESM::RefId operator()(const ESM4::Reference& ref) { return ref.mBaseObj; }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -115,12 +115,12 @@ namespace MWWorld
         void applyChargeRemainderToBeSubtracted(float chargeRemainder); // Stores remainders and applies if > 1
 
         // The NPC that owns this object (and will get angry if you steal it)
-        const ESM::RefId& getOwner() const
+        ESM::RefId getOwner() const
         {
             struct Visitor
             {
-                const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mOwner; }
-                const ESM::RefId& operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId::sEmpty; }
+                ESM::RefId operator()(const ESM::CellRef& ref) { return ref.mOwner; }
+                ESM::RefId operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId(); }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -134,12 +134,12 @@ namespace MWWorld
         void resetGlobalVariable();
 
         // ID of creature trapped in this soul gem
-        const ESM::RefId& getSoul() const
+        ESM::RefId getSoul() const
         {
             struct Visitor
             {
-                const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mSoul; }
-                const ESM::RefId& operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId::sEmpty; }
+                ESM::RefId operator()(const ESM::CellRef& ref) { return ref.mSoul; }
+                ESM::RefId operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId(); }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -147,12 +147,12 @@ namespace MWWorld
 
         // The faction that owns this object (and will get angry if
         // you take it and are not a faction member)
-        const ESM::RefId& getFaction() const
+        ESM::RefId getFaction() const
         {
             struct Visitor
             {
-                const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mFaction; }
-                const ESM::RefId& operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId::sEmpty; }
+                ESM::RefId operator()(const ESM::CellRef& ref) { return ref.mFaction; }
+                ESM::RefId operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId(); }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -176,16 +176,17 @@ namespace MWWorld
         void lock(int lockLevel);
         void unlock();
         // Key and trap ID names, if any
-        const ESM::RefId& getKey() const
+        ESM::RefId getKey() const
         {
             return std::visit([](auto&& ref) -> const ESM::RefId& { return ref.mKey; }, mCellRef.mVariant);
         }
-        const ESM::RefId& getTrap() const
+
+        ESM::RefId getTrap() const
         {
             struct Visitor
             {
-                const ESM::RefId& operator()(const ESM::CellRef& ref) { return ref.mTrap; }
-                const ESM::RefId& operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId::sEmpty; }
+                ESM::RefId operator()(const ESM::CellRef& ref) { return ref.mTrap; }
+                ESM::RefId operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId(); }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }

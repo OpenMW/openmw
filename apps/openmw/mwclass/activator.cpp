@@ -84,7 +84,7 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    const ESM::RefId& Activator::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Activator::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Activator>* ref = ptr.get<ESM::Activator>();
 
@@ -140,7 +140,7 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    const ESM::RefId& Activator::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
+    ESM::RefId Activator::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
         const std::string model
             = getModel(ptr); // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
@@ -191,7 +191,7 @@ namespace MWClass
                 return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size(), prng)]->mSound;
         }
 
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     int Activator::getSndGenTypeFromName(std::string_view name)

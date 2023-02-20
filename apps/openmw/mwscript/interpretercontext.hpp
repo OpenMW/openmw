@@ -32,10 +32,10 @@ namespace MWScript
         const MWWorld::Ptr getReferenceImp(
             const ESM::RefId& id = ESM::RefId(), bool activeOnly = false, bool doThrow = true) const;
 
-        const Locals& getMemberLocals(std::reference_wrapper<const ESM::RefId>& id, bool global) const;
+        const Locals& getMemberLocals(bool global, ESM::RefId& id) const;
         ///< \a id is changed to the respective script ID, if \a id wasn't a script ID before
 
-        Locals& getMemberLocals(std::reference_wrapper<const ESM::RefId>& id, bool global);
+        Locals& getMemberLocals(bool global, ESM::RefId& id);
         ///< \a id is changed to the respective script ID, if \a id wasn't a script ID before
 
         /// Throws an exception if local variable can't be found.
@@ -47,7 +47,7 @@ namespace MWScript
         InterpreterContext(MWScript::Locals* locals, const MWWorld::Ptr& reference);
         ///< The ownership of \a locals is not transferred. 0-pointer allowed.
 
-        const ESM::RefId& getTarget() const override;
+        ESM::RefId getTarget() const override;
 
         int getLocalShort(int index) const override;
 
@@ -113,17 +113,17 @@ namespace MWScript
         void executeActivation(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor);
         ///< Execute the activation action for this ptr. If ptr is mActivated, mark activation as handled.
 
-        int getMemberShort(const ESM::RefId& id, std::string_view name, bool global) const override;
+        int getMemberShort(ESM::RefId id, std::string_view name, bool global) const override;
 
-        int getMemberLong(const ESM::RefId& id, std::string_view name, bool global) const override;
+        int getMemberLong(ESM::RefId id, std::string_view name, bool global) const override;
 
-        float getMemberFloat(const ESM::RefId& id, std::string_view name, bool global) const override;
+        float getMemberFloat(ESM::RefId id, std::string_view name, bool global) const override;
 
-        void setMemberShort(const ESM::RefId& id, std::string_view name, int value, bool global) override;
+        void setMemberShort(ESM::RefId id, std::string_view name, int value, bool global) override;
 
-        void setMemberLong(const ESM::RefId& id, std::string_view name, int value, bool global) override;
+        void setMemberLong(ESM::RefId id, std::string_view name, int value, bool global) override;
 
-        void setMemberFloat(const ESM::RefId& id, std::string_view name, float value, bool global) override;
+        void setMemberFloat(ESM::RefId id, std::string_view name, float value, bool global) override;
 
         MWWorld::Ptr getReference(bool required = true) const;
         ///< Reference, that the script is running from (can be empty)

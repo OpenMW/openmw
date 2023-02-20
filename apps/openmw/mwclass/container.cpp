@@ -229,7 +229,7 @@ namespace MWClass
         return data.mStore;
     }
 
-    const ESM::RefId& Container::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Container::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Container>* ref = ptr.get<ESM::Container>();
 

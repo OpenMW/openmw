@@ -179,7 +179,7 @@ namespace MWWorld
         ///< Returns the remaining duration of the object, such as an equippable light
         /// source. (default implementation: -1, i.e. infinite)
 
-        virtual const ESM::RefId& getScript(const ConstPtr& ptr) const;
+        virtual ESM::RefId getScript(const ConstPtr& ptr) const;
         ///< Return name of the script attached to ptr (default implementation: return an empty
         /// string).
 
@@ -252,7 +252,7 @@ namespace MWWorld
         ///< Return the down sound ID of \a ptr or throw an exception, if class does not support ID retrieval
         /// (default implementation: throw an exception)
 
-        virtual const ESM::RefId& getSoundIdFromSndGen(const Ptr& ptr, std::string_view type) const;
+        virtual ESM::RefId getSoundIdFromSndGen(const Ptr& ptr, std::string_view type) const;
         ///< Returns the sound ID for \a ptr of the given soundgen \a type.
 
         virtual float getArmorRating(const MWWorld::Ptr& ptr) const;
@@ -261,7 +261,7 @@ namespace MWWorld
         virtual const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const;
         ///< Return name of inventory icon.
 
-        virtual const ESM::RefId& getEnchantment(const MWWorld::ConstPtr& ptr) const;
+        virtual ESM::RefId getEnchantment(const MWWorld::ConstPtr& ptr) const;
         ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
         /// (default implementation: return empty string)
 
@@ -359,11 +359,11 @@ namespace MWWorld
         virtual void respawn(const MWWorld::Ptr& ptr) const {}
 
         /// Returns sound id
-        virtual const ESM::RefId& getSound(const MWWorld::ConstPtr& ptr) const;
+        virtual ESM::RefId getSound(const MWWorld::ConstPtr& ptr) const;
 
         virtual int getBaseFightRating(const MWWorld::ConstPtr& ptr) const;
 
-        virtual const ESM::RefId& getPrimaryFaction(const MWWorld::ConstPtr& ptr) const;
+        virtual ESM::RefId getPrimaryFaction(const MWWorld::ConstPtr& ptr) const;
         virtual int getPrimaryFactionRank(const MWWorld::ConstPtr& ptr) const;
 
         /// Get the effective armor rating, factoring in the actor's skills, for the given armor.

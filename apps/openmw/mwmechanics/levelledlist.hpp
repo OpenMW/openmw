@@ -13,7 +13,7 @@ namespace MWMechanics
 {
 
     /// @return ID of resulting item, or empty if none
-    const ESM::RefId& getLevelledItem(const ESM::LevelledListBase* levItem, bool creature, Misc::Rng::Generator& prng);
+    ESM::RefId getLevelledItem(const ESM::LevelledListBase* levItem, bool creature, Misc::Rng::Generator& prng);
 
 }
 

@@ -41,7 +41,7 @@ namespace MWClass
         std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
         ///< Generate action for activation
 
-        const ESM::RefId& getScript(const MWWorld::ConstPtr& ptr) const override;
+        ESM::RefId getScript(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of the script attached to ptr
 
         std::pair<std::vector<int>, bool> getEquipmentSlots(const MWWorld::ConstPtr& ptr) const override;
@@ -78,7 +78,7 @@ namespace MWClass
         std::pair<int, std::string_view> canBeEquipped(
             const MWWorld::ConstPtr& ptr, const MWWorld::Ptr& npc) const override;
 
-        const ESM::RefId& getSound(const MWWorld::ConstPtr& ptr) const override;
+        ESM::RefId getSound(const MWWorld::ConstPtr& ptr) const override;
     };
 
 }

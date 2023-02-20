@@ -69,7 +69,7 @@ namespace MWMechanics
         return summonMap;
     }
 
-    const ESM::RefId& getSummonedCreature(int effectId)
+    ESM::RefId getSummonedCreature(int effectId)
     {
         const auto& summonMap = getSummonMap();
         auto it = summonMap.find(effectId);
@@ -77,7 +77,7 @@ namespace MWMechanics
         {
             return it->second;
         }
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     int summonCreature(int effectId, const MWWorld::Ptr& summoner)
