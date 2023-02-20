@@ -124,7 +124,7 @@ namespace MWGui
                     ToolTipInfo info;
                     info.caption = mFocusObject.getClass().getName(mFocusObject);
                     if (info.caption.empty())
-                        info.caption = mFocusObject.getCellRef().getRefId().getRefIdString();
+                        info.caption = mFocusObject.getCellRef().getRefId().toDebugString();
                     info.icon.clear();
                     tooltipSize = createToolTip(info, checkOwned());
                 }
@@ -686,7 +686,7 @@ namespace MWGui
         if (!creature)
             return {};
         if (creature->mName.empty())
-            return " (" + creature->mId.getRefIdString() + ")";
+            return " (" + creature->mId.toDebugString() + ")";
         return " (" + creature->mName + ")";
     }
 
@@ -720,10 +720,10 @@ namespace MWGui
         for (std::pair<ESM::RefId, int>& owner : itemOwners)
         {
             if (owner.second == std::numeric_limits<int>::max())
-                ret += std::string("\nStolen from ") + owner.first.getRefIdString(); // for legacy (ESS) savegames
+                ret += std::string("\nStolen from ") + owner.first.toDebugString(); // for legacy (ESS) savegames
             else
                 ret += std::string("\nStolen ") + MyGUI::utility::toString(owner.second) + " from "
-                    + owner.first.getRefIdString();
+                    + owner.first.toDebugString();
         }
 
         ret += getMiscString(cellref.getGlobalVariable(), "Global");

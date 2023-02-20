@@ -208,7 +208,7 @@ namespace MWScript
             return iter->second;
         }
 
-        throw std::logic_error("script " + name.getRefIdString() + " does not exist");
+        throw std::logic_error("script " + name.toDebugString() + " does not exist");
     }
 
     GlobalScripts& ScriptManager::getGlobalScripts()

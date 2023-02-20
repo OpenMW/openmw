@@ -189,10 +189,7 @@ namespace MWWorld
 
             Store<T>& store = getWritable<T>();
             if (store.search(id) != nullptr)
-            {
-                const std::string msg = "Try to override existing record '" + id.getRefIdString() + "'";
-                throw std::runtime_error(msg);
-            }
+                throw std::runtime_error("Try to override existing record: " + id.toDebugString());
             T record = x;
 
             record.mId = id;

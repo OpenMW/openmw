@@ -75,7 +75,7 @@ namespace MWDialogue
             [&](const auto& info) { return info.mId == entry.mInfoId; });
 
         if (info == dialogue->mInfo.end() || info->mData.mJournalIndex == -1)
-            throw std::runtime_error("unknown journal entry for topic " + mTopic.getRefIdString());
+            throw std::runtime_error("unknown journal entry for topic " + mTopic.toDebugString());
 
         if (info->mQuestStatus == ESM::DialInfo::QS_Finished || info->mQuestStatus == ESM::DialInfo::QS_Restart)
             mFinished = info->mQuestStatus == ESM::DialInfo::QS_Finished;

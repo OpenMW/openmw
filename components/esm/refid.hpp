@@ -5,11 +5,28 @@
 #include <iosfwd>
 #include <string>
 #include <string_view>
+#include <variant>
 
-#include <components/esm4/formid.hpp>
+#include <components/misc/notnullptr.hpp>
+
+#include "formidrefid.hpp"
+#include "stringrefid.hpp"
 
 namespace ESM
 {
+    struct EmptyRefId
+    {
+        constexpr bool operator==(EmptyRefId /*rhs*/) const { return true; }
+
+        constexpr bool operator<(EmptyRefId /*rhs*/) const { return false; }
+
+        std::string toString() const;
+
+        std::string toDebugString() const;
+
+        friend std::ostream& operator<<(std::ostream& stream, EmptyRefId value);
+    };
+
     // RefId is used to represent an Id that identifies an ESM record. These Ids can then be used in
     // ESM::Stores to find the actual record. These Ids can be serialized/de-serialized, stored on disk and remain
     // valid. They are used by ESM files, by records to reference other ESM records.
@@ -18,45 +35,83 @@ namespace ESM
     public:
         const static RefId sEmpty;
 
-        // The 2 following functions are used to move back and forth between string and RefID. Used for hard coded
-        // RefIds that are as string in the code. For serialization, and display. Using explicit conversions make it
-        // very clear where in the code we need to convert from string to RefId and Vice versa.
-        static RefId stringRefId(std::string_view id);
+        // Constructs RefId from a string using a pointer to a static set of strings.
+        static RefId stringRefId(std::string_view value);
 
-        static RefId formIdRefId(const ESM4::FormId id);
+        // Constructs RefId from ESM4 FormId storing the value in-place.
+        static RefId formIdRefId(ESM4::FormId value) noexcept { return RefId(FormIdRefId(value)); }
 
-        const std::string& getRefIdString() const { return mId; }
+        constexpr RefId() = default;
 
-        bool empty() const { return mId.empty(); }
+        constexpr RefId(EmptyRefId value) noexcept
+            : mValue(value)
+        {
+        }
 
+        RefId(StringRefId value) noexcept
+            : mValue(value)
+        {
+        }
+
+        constexpr RefId(FormIdRefId value) noexcept
+            : mValue(value)
+        {
+        }
+
+        // Returns a reference to the value of StringRefId if it's the underlying value or throws an exception.
+        const std::string& getRefIdString() const;
+
+        // Returns a string with serialized underlying value.
+        std::string toString() const;
+
+        // Returns a string with serialized underlying value with information about underlying type.
+        std::string toDebugString() const;
+
+        constexpr bool empty() const noexcept { return std::holds_alternative<EmptyRefId>(mValue); }
+
+        // Returns true if underlying value is StringRefId and its underlying std::string starts with given prefix.
+        // Otherwise returns false.
         bool startsWith(std::string_view prefix) const;
 
+        // Returns true if underlying value is StringRefId and its underlying std::string contains given subString.
+        // Otherwise returns false.
         bool contains(std::string_view subString) const;
 
-        bool operator==(const RefId& rhs) const;
+        friend constexpr bool operator==(const RefId& l, const RefId& r) { return l.mValue == r.mValue; }
 
         bool operator==(std::string_view rhs) const;
 
-        bool operator<(const RefId& rhs) const;
+        friend constexpr bool operator<(const RefId& l, const RefId& r) { return l.mValue < r.mValue; }
 
-        friend bool operator<(const RefId& lhs, std::string_view rhs);
+        friend bool operator<(RefId lhs, std::string_view rhs);
 
-        friend bool operator<(std::string_view lhs, const RefId& rhs);
+        friend bool operator<(std::string_view lhs, RefId rhs);
 
-        friend std::ostream& operator<<(std::ostream& os, const RefId& dt);
+        friend std::ostream& operator<<(std::ostream& stream, RefId value);
+
+        friend struct std::hash<ESM::RefId>;
 
     private:
-        std::string mId;
+        std::variant<EmptyRefId, StringRefId, FormIdRefId> mValue{ EmptyRefId{} };
     };
 }
 
 namespace std
 {
+    template <>
+    struct hash<ESM::EmptyRefId>
+    {
+        std::size_t operator()(ESM::EmptyRefId /*value*/) const noexcept { return 0; }
+    };
 
     template <>
     struct hash<ESM::RefId>
     {
-        std::size_t operator()(const ESM::RefId& k) const;
+        std::size_t operator()(ESM::RefId value) const noexcept
+        {
+            return std::hash<decltype(value.mValue)>{}(value.mValue);
+        }
     };
 }
+
 #endif

@@ -160,12 +160,7 @@ namespace
             if (result != 0)
                 return result > 0;
 
-            // compare items by Id
-            leftName = left.mBase.getCellRef().getRefId().getRefIdString();
-            rightName = right.mBase.getCellRef().getRefId().getRefIdString();
-
-            result = leftName.compare(rightName);
-            return result < 0;
+            return left.mBase.getCellRef().getRefId() < right.mBase.getCellRef().getRefId();
         }
     };
 }

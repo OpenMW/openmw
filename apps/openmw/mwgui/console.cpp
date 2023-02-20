@@ -683,7 +683,7 @@ namespace MWGui
         if (!mConsoleMode.empty())
             title = mConsoleMode + " " + title;
         if (!mPtr.isEmpty())
-            title.append(" (" + mPtr.getCellRef().getRefId().getRefIdString() + ")");
+            title.append(" (" + mPtr.getCellRef().getRefId().toDebugString() + ")");
         setTitle(title);
     }
 

@@ -950,13 +950,13 @@ namespace MWWorld
         }
         else
         {
-            Log(Debug::Error) << "Cell reference '" + ref.mRefID.getRefIdString() + "' not found!";
+            Log(Debug::Error) << "Cell reference " << ref.mRefID << " is not found!";
             return;
         }
 
         if (!handledType)
         {
-            Log(Debug::Error) << "Error: Ignoring reference '" << ref.mRefID.getRefIdString() << "' of unhandled type";
+            Log(Debug::Error) << "Error: Ignoring reference " << ref.mRefID << " of unhandled type";
             return;
         }
 
