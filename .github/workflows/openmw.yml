@@ -29,8 +29,14 @@ jobs:
         key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
         max-size: 1000M
 
+    - name: Configure
+      run: |
+        mkdir -p build
+        cd build
+        cmake .. --config ${{env.BUILD_TYPE}}
+
     - name: Build
-      run: cmake --build . --config ${{env.BUILD_TYPE}} --parallel 3
+      run: cmake build --build --parallel 3
  
     - name: Test
       run: ./openmw_test_suite
