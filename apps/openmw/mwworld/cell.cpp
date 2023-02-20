@@ -1,5 +1,6 @@
 #include "cell.hpp"
 
+#include <components/esm3/cellid.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm4/loadcell.hpp>
 #include <components/misc/algorithm.hpp>
@@ -17,6 +18,7 @@ namespace MWWorld
         , mNameID(cell.mEditorId)
         , mRegion(ESM::RefId()) // Unimplemented for now
         , mId(cell.mId)
+        , mParent(cell.mParent)
         ,mMood{
             .mAmbiantColor = cell.mLighting.ambient,
             .mDirectionalColor = cell.mLighting.directional,
@@ -38,6 +40,7 @@ namespace MWWorld
         , mNameID(cell.mName)
         , mRegion(cell.mRegion)
         , mId(cell.mId)
+        , mParent(ESM::RefId::stringRefId(ESM::CellId::sDefaultWorldspace))
         , mMood{
             .mAmbiantColor = cell.mAmbi.mAmbient,
             .mDirectionalColor = cell.mAmbi.mSunlight,
@@ -55,5 +58,12 @@ namespace MWWorld
                               [&](const ESM4::Cell& cell) { return cell.mEditorId; },
                           },
             *this);
+    }
+    ESM::RefId Cell::getWorldSpace() const
+    {
+        if (isExterior())
+            return mParent;
+        else
+            return mId;
     }
 }

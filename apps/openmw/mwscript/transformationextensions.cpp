@@ -87,8 +87,7 @@ namespace MWScript
                 float distance;
                 // If the objects are in different worldspaces, return a large value (just like vanilla)
                 if (!to.isInCell() || !from.isInCell()
-                    || !Misc::StringUtils::ciEqual(
-                        to.getCell()->getCell()->getNameId(), from.getCell()->getCell()->getNameId()))
+                    || to.getCell()->getCell()->getWorldSpace() != from.getCell()->getCell()->getWorldSpace())
                     distance = std::numeric_limits<float>::max();
                 else
                 {

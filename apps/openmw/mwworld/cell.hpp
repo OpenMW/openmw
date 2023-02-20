@@ -49,6 +49,7 @@ namespace MWWorld
         const MoodData& getMood() const { return mMood; }
         float getWaterHeight() const { return mWaterHeight; }
         const ESM::RefId& getId() const { return mId; }
+        ESM::RefId getWorldSpace() const;
 
     private:
         bool mIsExterior;
@@ -61,6 +62,7 @@ namespace MWWorld
         std::string mNameID; // The name that will be used by the script and console commands
         ESM::RefId mRegion;
         ESM::RefId mId;
+        ESM::RefId mParent;
         MoodData mMood;
 
         float mWaterHeight;
