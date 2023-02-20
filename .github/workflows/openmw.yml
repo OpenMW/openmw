@@ -17,10 +17,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     
-    - name: Add OpenMW PPA Dependancies
+    - name: Add OpenMW PPA Dependencies
       run: sudo add-apt-repository ppa:openmw/openmw; sudo apt-get update
     
-    - name: Install Building Dependancies
+    - name: Install Building Dependencies
       run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
 
     - name: Prime ccache
@@ -28,18 +28,6 @@ jobs:
       with:
         key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
         max-size: 1000M
-
-    - name: Install gtest
-      run: |
-        export CONFIGURATION="Release"
-        export GOOGLETEST_DIR="."
-        export GENERATOR="Unix Makefiles"
-        export CC="gcc"
-        export CXX="g++"
-        sudo -E bash CI/build_googletest.sh
-
-    - name: Configure
-      run: cmake -S . -B . -DGTEST_ROOT="$(pwd)/googletest/build" -DGMOCK_ROOT="$(pwd)/googletest/build" -DBUILD_UNITTESTS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_FLAGS='-Werror' -DCMAKE_CXX_FLAGS="-Werror -Wno-error=deprecated-declarations -Wno-error=nonnull -Wno-error=deprecated-copy"
 
     - name: Build
       run: cmake --build . --config ${{env.BUILD_TYPE}} --parallel 3
