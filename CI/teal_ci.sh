@@ -6,9 +6,6 @@ echo "Install Teal Cyan"
 git clone https://github.com/teal-language/cyan.git --depth 1
 cd cyan
 luarocks make cyan-dev-1.rockspec
-
-LUAROCKS=~/luarocks/bin
-export LUAROCKS
 popd
 
 scripts/generate_teal_declarations.sh ./teal_declarations
