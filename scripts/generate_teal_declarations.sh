@@ -1,8 +1,3 @@
-if [ -z "$LUAROCKS" ]; then
-  echo "Requires the LUAROCKS variable to be set to the luarocks/bin directory, e. g. `~/.luarocks/bin`"
-  exit
-fi
-
 if [ -z "$1" ]; then
   echo "Takes a path to the output directory as the argument"
   exit
@@ -13,8 +8,9 @@ OPENMW_DIR=$(realpath $SCRIPTS_DIR/..)
 DOCS_DIR=$(realpath $OPENMW_DIR/docs)
 FILES_DIR=$(realpath $OPENMW_DIR/files)
 OUTPUT_DIR=$(realpath "$1")
-DOCUMENTOR_PATH=$LUAROCKS/openmwluadocumentor
-TEAL_PATH=$LUAROCKS/cyan
+
+PATH=$PATH:~/lua-5.1.5/src
+eval "$(luarocks path)"
 
 rm -rf $OUTPUT_DIR
 mkdir $OUTPUT_DIR
@@ -24,7 +20,7 @@ build_path() {
   for file in $1
   do
     mkdir -p $OUTPUT_DIR/$(dirname $file)
-    $DOCUMENTOR_PATH -f teal -d "$OUTPUT_DIR" $file
+    openmwluadocumentor -f teal -d "$OUTPUT_DIR" $file
   done
 }
 
@@ -45,4 +41,4 @@ rm -r lua_api
 mv data/* ./
 rm -r data
 
-"$TEAL_PATH" check **/*.d.tl
+cyan check **/*.d.tl
