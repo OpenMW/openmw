@@ -97,7 +97,6 @@ jobs:
         choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
         choco install vswhere -y
         choco install ninja -y
-        choco install python -y
         refreshenv
     - name: Build
       run: |
