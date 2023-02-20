@@ -30,15 +30,10 @@ jobs:
         max-size: 1000M
 
     - name: Configure
-      run: |
-        mkdir -p build
-        cd build
-        cmake .. -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Build
-      run: |
-        cd build
-        make -j3
+      run: make -j3
  
     - name: Test
       run: ./openmw_test_suite
