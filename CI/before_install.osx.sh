@@ -1,20 +1,23 @@
 #!/bin/sh -ex
 
 export HOMEBREW_NO_EMOJI=1
+
+brew uninstall --ignore-dependencies python@3.8 || true
+brew uninstall --ignore-dependencies python@3.9 || true
+brew uninstall --ignore-dependencies qt@6 || true
+brew uninstall --ignore-dependencies jpeg || true
+
 brew tap --repair
 brew update --quiet
 
-# workaround python issue on travis
-[ -z "${TRAVIS}" ] && brew uninstall --ignore-dependencies python@3.8 || true
-[ -z "${TRAVIS}" ] && brew uninstall --ignore-dependencies python@3.9 || true
-[ -z "${TRAVIS}" ] && brew uninstall --ignore-dependencies qt@6 || true
-
 # Some of these tools can come from places other than brew, so check before installing
-[ -z "${TRAVIS}" ] && brew reinstall xquartz
-[ -z "${TRAVIS}" ] && brew reinstall fontconfig
+brew reinstall xquartz fontconfig
+
 command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake
 command -v qmake >/dev/null 2>&1 || brew install qt@5
+
+# Install deps
 brew install icu4c yaml-cpp sqlite
 export PATH="/usr/local/opt/qt@5/bin:$PATH"  # needed to use qmake in none default path as qt now points to qt6
 
