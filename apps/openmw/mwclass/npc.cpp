@@ -61,6 +61,23 @@
 
 namespace
 {
+    struct NpcParts
+    {
+        const ESM::RefId mSwimLeft = ESM::RefId::stringRefId("Swim Left");
+        const ESM::RefId mSwimRight = ESM::RefId::stringRefId("Swim Right");
+        const ESM::RefId mFootWaterLeft = ESM::RefId::stringRefId("FootWaterLeft");
+        const ESM::RefId mFootWaterRight = ESM::RefId::stringRefId("FootWaterRight");
+        const ESM::RefId mFootBareLeft = ESM::RefId::stringRefId("FootBareLeft");
+        const ESM::RefId mFootBareRight = ESM::RefId::stringRefId("FootBareRight");
+        const ESM::RefId mFootLightLeft = ESM::RefId::stringRefId("footLightLeft");
+        const ESM::RefId mFootLightRight = ESM::RefId::stringRefId("footLightRight");
+        const ESM::RefId mFootMediumRight = ESM::RefId::stringRefId("FootMedRight");
+        const ESM::RefId mFootMediumLeft = ESM::RefId::stringRefId("FootMedLeft");
+        const ESM::RefId mFootHeavyLeft = ESM::RefId::stringRefId("footHeavyLeft");
+        const ESM::RefId mFootHeavyRight = ESM::RefId::stringRefId("footHeavyRight");
+    };
+
+    const NpcParts npcParts;
 
     int is_even(double d)
     {
@@ -1225,19 +1242,6 @@ namespace MWClass
 
     ESM::RefId Npc::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
-        static const ESM::RefId swimLeft = ESM::RefId::stringRefId("Swim Left");
-        static const ESM::RefId swimRight = ESM::RefId::stringRefId("Swim Right");
-        static const ESM::RefId footWaterLeft = ESM::RefId::stringRefId("FootWaterLeft");
-        static const ESM::RefId footWaterRight = ESM::RefId::stringRefId("FootWaterRight");
-        static const ESM::RefId footBareLeft = ESM::RefId::stringRefId("FootBareLeft");
-        static const ESM::RefId footBareRight = ESM::RefId::stringRefId("FootBareRight");
-        static const ESM::RefId footLightLeft = ESM::RefId::stringRefId("footLightLeft");
-        static const ESM::RefId footLightRight = ESM::RefId::stringRefId("footLightRight");
-        static const ESM::RefId footMediumRight = ESM::RefId::stringRefId("FootMedRight");
-        static const ESM::RefId footMediumLeft = ESM::RefId::stringRefId("FootMedLeft");
-        static const ESM::RefId footHeavyLeft = ESM::RefId::stringRefId("footHeavyLeft");
-        static const ESM::RefId footHeavyRight = ESM::RefId::stringRefId("footHeavyRight");
-
         if (name == "left" || name == "right")
         {
             MWBase::World* world = MWBase::Environment::get().getWorld();
@@ -1245,9 +1249,9 @@ namespace MWClass
                 return ESM::RefId();
             osg::Vec3f pos(ptr.getRefData().getPosition().asVec3());
             if (world->isSwimming(ptr))
-                return (name == "left") ? swimLeft : swimRight;
+                return (name == "left") ? npcParts.mSwimLeft : npcParts.mSwimRight;
             if (world->isUnderwater(ptr.getCell(), pos) || world->isWalkingOnWater(ptr))
-                return (name == "left") ? footWaterLeft : footWaterRight;
+                return (name == "left") ? npcParts.mFootWaterLeft : npcParts.mFootWaterRight;
             if (world->isOnGround(ptr))
             {
                 if (getNpcStats(ptr).isWerewolf()
@@ -1262,15 +1266,15 @@ namespace MWClass
                 const MWWorld::InventoryStore& inv = Npc::getInventoryStore(ptr);
                 MWWorld::ConstContainerStoreIterator boots = inv.getSlot(MWWorld::InventoryStore::Slot_Boots);
                 if (boots == inv.end() || boots->getType() != ESM::Armor::sRecordId)
-                    return (name == "left") ? footBareLeft : footBareRight;
+                    return (name == "left") ? npcParts.mFootBareLeft : npcParts.mFootBareRight;
 
                 ESM::RefId skill = boots->getClass().getEquipmentSkill(*boots);
                 if (skill == ESM::Skill::LightArmor)
-                    return (name == "left") ? footLightLeft : footLightRight;
+                    return (name == "left") ? npcParts.mFootLightLeft : npcParts.mFootLightRight;
                 else if (skill == ESM::Skill::MediumArmor)
-                    return (name == "left") ? footMediumLeft : footMediumRight;
+                    return (name == "left") ? npcParts.mFootMediumLeft : npcParts.mFootMediumRight;
                 else if (skill == ESM::Skill::HeavyArmor)
-                    return (name == "left") ? footHeavyLeft : footHeavyRight;
+                    return (name == "left") ? npcParts.mFootHeavyLeft : npcParts.mFootHeavyRight;
             }
             return ESM::RefId();
         }
@@ -1279,9 +1283,9 @@ namespace MWClass
         if (name == "land")
             return ESM::RefId();
         if (name == "swimleft")
-            return swimLeft;
+            return npcParts.mSwimLeft;
         if (name == "swimright")
-            return swimRight;
+            return npcParts.mSwimRight;
         // TODO: I have no idea what these are supposed to do for NPCs since they use
         // voiced dialog for various conditions like health loss and combat taunts. Maybe
         // only for biped creatures?
