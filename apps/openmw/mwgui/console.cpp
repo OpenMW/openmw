@@ -144,11 +144,15 @@ namespace MWGui
 
         getWidget(mCommandLine, "edit_Command");
         getWidget(mHistory, "list_History");
+        getWidget(mSearchTerm, "edit_SearchTerm");
 
         // Set up the command line box
         mCommandLine->eventEditSelectAccept += newDelegate(this, &Console::acceptCommand);
-        mCommandLine->eventKeyButtonPressed += newDelegate(this, &Console::keyPress);
+        mCommandLine->eventKeyButtonPressed += newDelegate(this, &Console::commandBoxKeyPress);
 
+        // Set up the search term box
+        mSearchTerm->eventKeyButtonReleased += newDelegate(this, &Console::searchTermBoxKeyRelease);
+        
         // Set up the log window
         mHistory->setOverflowToTheLeft(true);
 
@@ -254,7 +258,7 @@ namespace MWGui
         return c == ' ' || c == '\t';
     }
 
-    void Console::keyPress(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char _char)
+    void Console::commandBoxKeyPress(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char _char)
     {
         if (MyGUI::InputManager::getInstance().isControlPressed())
         {
@@ -341,6 +345,13 @@ namespace MWGui
                     mCommandLine->setCaption(mEditString);
             }
         }
+    }
+
+    void Console::searchTermBoxKeyRelease(MyGUI::Widget* _sender, MyGUI::KeyCode key)
+    {
+        const std::string& searchTerm = mSearchTerm->getOnlyText();
+        if (searchTerm.empty())
+            return;
     }
 
     void Console::acceptCommand(MyGUI::EditBox* _sender)

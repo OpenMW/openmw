@@ -23,5 +23,10 @@
         <UserString key="AcceptTab" value="true"/>
     </Widget>
 
+    <!-- Search box -->
+    <Widget type="EditBox" skin="MW_ConsoleCommand" position="264 0 120 28" align="Top Right" name="edit_SearchTerm">
+        <Property key="InvertSelected" value="false"/>
+    </Widget>
+
   </Widget>
 </MyGUI>
