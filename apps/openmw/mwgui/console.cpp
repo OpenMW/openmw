@@ -27,6 +27,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
+#include <MyGUI_Button.h>
+
 namespace MWGui
 {
     class ConsoleInterpreterContext : public MWScript::InterpreterContext
@@ -145,13 +147,17 @@ namespace MWGui
         getWidget(mCommandLine, "edit_Command");
         getWidget(mHistory, "list_History");
         getWidget(mSearchTerm, "edit_SearchTerm");
+        getWidget(mNextButton, "button_Next");
+        getWidget(mPreviousButton, "button_Previous");
 
         // Set up the command line box
         mCommandLine->eventEditSelectAccept += newDelegate(this, &Console::acceptCommand);
         mCommandLine->eventKeyButtonPressed += newDelegate(this, &Console::commandBoxKeyPress);
 
         // Set up the search term box
-        mSearchTerm->eventKeyButtonReleased += newDelegate(this, &Console::searchTermBoxKeyRelease);
+        mSearchTerm->eventEditSelectAccept += newDelegate(this, &Console::acceptSearchTerm);
+        mNextButton->eventMouseButtonClick += newDelegate(this, &Console::findNextOccurrence);
+        mPreviousButton->eventMouseButtonClick += newDelegate(this, &Console::findPreviousOccurence);
         
         // Set up the log window
         mHistory->setOverflowToTheLeft(true);
@@ -347,13 +353,6 @@ namespace MWGui
         }
     }
 
-    void Console::searchTermBoxKeyRelease(MyGUI::Widget* _sender, MyGUI::KeyCode key)
-    {
-        const std::string& searchTerm = mSearchTerm->getOnlyText();
-        if (searchTerm.empty())
-            return;
-    }
-
     void Console::acceptCommand(MyGUI::EditBox* _sender)
     {
         const std::string& cm = mCommandLine->getOnlyText();
@@ -379,6 +378,31 @@ namespace MWGui
         mCommandLine->setCaption("");
 
         execute(cm);
+    }
+
+    void Console::acceptSearchTerm(MyGUI::EditBox* _sender)
+    {
+        const std::string& searchTerm = mSearchTerm->getOnlyText();
+        if (searchTerm.length() <= 3)
+            return;
+
+        auto result = mHistory->getOnlyText().find(searchTerm);
+
+        // result ist nur der Index des Chars
+        // gescrollt wird aber mit Pixelwerten
+        // also muss man irgendwie umrechnen, welche Zeile welchem Pixelwert entspricht
+        mHistory->setTextSelection(result, result + searchTerm.length());
+        mHistory->setVScrollPosition(result);
+    }
+
+    void Console::findNextOccurrence(MyGUI::Widget* _sender)
+    {
+        print("Next");
+    }
+
+    void Console::findPreviousOccurence(MyGUI::Widget* _sender)
+    {
+        print("Prev");
     }
 
     std::string Console::complete(std::string input, std::vector<std::string>& matches)
