@@ -45,6 +45,7 @@
 #include <components/esm3/loadweap.hpp>
 
 #include <components/files/conversion.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -575,9 +576,11 @@ namespace MWScript
                     return;
                 }
 
-                char* end;
-                long key = strtol(effect.data(), &end, 10);
-                if (key < 0 || key > 32767 || *end != '\0')
+                long key = 0;
+
+                if (const auto k = ::Misc::StringUtils::toNumeric<long>(effect.data()); k.value() >= 0 && k.value() <= 32767)
+                    key = k.value();
+                else
                     key = ESM::MagicEffect::effectStringToId({ effect });
 
                 const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
