@@ -61,7 +61,6 @@ namespace ESSImport
             const PCDT::PNAM::MarkLocation& mark = pcdt.mPNAM.mMarkLocation;
 
             ESM::CellId cell;
-            cell.mWorldspace = ESM::CellId::sDefaultWorldspace;
             cell.mPaged = true;
 
             cell.mIndex.mX = mark.mCellX;
@@ -74,7 +73,7 @@ namespace ESSImport
                 cell.mPaged = false;
             }
 
-            out.mMarkedCell = cell;
+            out.mMarkedCell = cell.getCellRefId();
             out.mMarkedPosition.pos[0] = mark.mX;
             out.mMarkedPosition.pos[1] = mark.mY;
             out.mMarkedPosition.pos[2] = mark.mZ;

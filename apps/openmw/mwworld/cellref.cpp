@@ -90,11 +90,11 @@ namespace MWWorld
             else
             {
                 const osg::Vec2i index = positionToCellIndex(ref.mDoorDest.pos[0], ref.mDoorDest.pos[1]);
-                ESM::CellId CellId;
-                CellId.mPaged = true;
-                CellId.mIndex.mX = index.x();
-                CellId.mIndex.mY = index.y();
-                return CellId.getCellRefId();
+                ESM::CellId cellId;
+                cellId.mPaged = true;
+                cellId.mIndex.mX = index.x();
+                cellId.mIndex.mY = index.y();
+                return cellId.getCellRefId();
             }
         };
 

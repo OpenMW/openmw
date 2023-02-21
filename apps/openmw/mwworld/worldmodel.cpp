@@ -143,7 +143,8 @@ void MWWorld::WorldModel::writeCell(ESM::ESMWriter& writer, CellStore& cell) con
     cell.saveState(cellState);
 
     writer.startRecord(ESM::REC_CSTA);
-    cellState.mId.save(writer);
+
+    writer.writeCellId(cellState.mId);
     cellState.save(writer);
     cell.writeFog(writer);
     cell.writeReferences(writer);
@@ -170,11 +171,6 @@ MWWorld::CellStore* MWWorld::WorldModel::getExterior(int x, int y)
         {
             // Cell isn't predefined. Make one on the fly.
             ESM::Cell record;
-            record.mCellId.mWorldspace = ESM::CellId::sDefaultWorldspace;
-            record.mCellId.mPaged = true;
-            record.mCellId.mIndex.mX = x;
-            record.mCellId.mIndex.mY = y;
-
             record.mData.mFlags = ESM::Cell::HasWater;
             record.mData.mX = x;
             record.mData.mY = y;
@@ -225,14 +221,6 @@ MWWorld::CellStore* MWWorld::WorldModel::getInterior(std::string_view name)
     }
 
     return result->second;
-}
-
-MWWorld::CellStore* MWWorld::WorldModel::getCellFromCellId(const ESM::CellId& id)
-{
-    if (id.mPaged)
-        return getExterior(id.mIndex.mX, id.mIndex.mY);
-
-    return getInterior(id.mWorldspace);
 }
 
 MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::RefId& id)
@@ -489,19 +477,18 @@ bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type, cons
     if (type == ESM::REC_CSTA)
     {
         ESM::CellState state;
-        state.mId.load(reader);
+        state.mId = reader.getCellId();
 
         CellStore* cellStore = nullptr;
 
         try
         {
-            cellStore = getCell(state.mId.getCellRefId());
+            cellStore = getCell(state.mId);
         }
         catch (...)
         {
             // silently drop cells that don't exist anymore
-            Log(Debug::Warning) << "Warning: Dropping state for cell " << state.mId.mWorldspace
-                                << " (cell no longer exists)";
+            Log(Debug::Warning) << "Warning: Dropping state for cell " << state.mId << " (cell no longer exists)";
             reader.skipRecord();
             return true;
         }

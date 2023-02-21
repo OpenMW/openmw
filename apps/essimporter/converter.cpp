@@ -204,7 +204,7 @@ namespace ESSImport
         // note if the player is in a nameless exterior cell, we will assign the cellId later based on player position
         if (Misc::StringUtils::ciEqual(cell.mName, mContext->mPlayerCellName))
         {
-            mContext->mPlayer.mCellId = cell.getCellId();
+            mContext->mPlayer.mCellId = cell.mId;
         }
 
         Cell newcell;
@@ -301,8 +301,7 @@ namespace ESSImport
             marker.mWorldX = notepos[0];
             marker.mWorldY = notepos[1];
             marker.mNote = note;
-            marker.mCellId = cell.getCellId();
-            marker.mCell = cell.getCellId().getCellRefId();
+            marker.mCell = cell.mId;
             mMarkers.push_back(marker);
         }
 
@@ -322,8 +321,9 @@ namespace ESSImport
         csta.mHasFogOfWar = 0;
         csta.mLastRespawn.mDay = 0;
         csta.mLastRespawn.mHour = 0;
-        csta.mId = esmcell.getCellId();
-        csta.mId.save(esm);
+        csta.mId = esmcell.mId;
+        csta.mIsInterior = !esmcell.isExterior();
+        esm.writeCellId(csta.mId);
         // TODO csta.mLastRespawn;
         // shouldn't be needed if we respawn on global schedule like in original MW
         csta.mWaterLevel = esmcell.mWater;

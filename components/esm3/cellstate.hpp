@@ -15,8 +15,8 @@ namespace ESM
     /// \note Does not include references
     struct CellState
     {
-        CellId mId;
-
+        RefId mId;
+        bool mIsInterior;
         float mWaterLevel;
 
         int mHasFogOfWar; // Do we have fog of war state (0 or 1)? (see fogstate.hpp)

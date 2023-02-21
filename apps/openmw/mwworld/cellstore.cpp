@@ -988,11 +988,11 @@ namespace MWWorld
 
     void CellStore::saveState(ESM::CellState& state) const
     {
-        state.mId = ESM::CellId::extractFromRefId(mCellVariant.getId());
+        state.mId = mCellVariant.getId();
 
         if (!mCellVariant.isExterior() && mCellVariant.hasWater())
             state.mWaterLevel = mWaterLevel;
-
+        state.mIsInterior = !mCellVariant.isExterior();
         state.mHasFogOfWar = (mFogState.get() ? 1 : 0);
         state.mLastRespawn = mLastRespawn.toEsm();
     }
@@ -1019,10 +1019,10 @@ namespace MWWorld
         for (const auto& [base, store] : mMovedToAnotherCell)
         {
             ESM::RefNum refNum = base->mRef.getRefNum();
-            ESM::CellId movedTo = ESM::CellId::extractFromRefId(store->getCell()->getId());
+            ESM::RefId movedTo = store->getCell()->getId();
 
             refNum.save(writer, true, "MVRF");
-            movedTo.save(writer);
+            writer.writeCellId(movedTo);
         }
     }
 
@@ -1078,10 +1078,8 @@ namespace MWWorld
         {
             reader.cacheSubName();
             ESM::RefNum refnum;
-            ESM::CellId movedTo;
             refnum.load(reader, true, "MVRF");
-            movedTo.load(reader);
-            ESM::RefId movedToId = movedTo.getCellRefId();
+            ESM::RefId movedToId = reader.getCellId();
             if (refnum.hasContentFile())
             {
                 auto iter = contentFileMap.find(refnum.mContentFile);
@@ -1103,7 +1101,7 @@ namespace MWWorld
             if (otherCell == nullptr)
             {
                 Log(Debug::Warning) << "Warning: Dropping moved ref tag for " << movedRef.getCellRef().getRefId()
-                                    << " (target cell " << movedTo.mWorldspace
+                                    << " (target cell " << movedToId
                                     << " no longer exists). Reference moved back to its original location.";
                 // Note by dropping tag the object will automatically re-appear in its original cell, though
                 // potentially at inapproriate coordinates. Restore original coordinates:

@@ -409,16 +409,18 @@ namespace ESSImport
         }
 
         writer.startRecord(ESM::REC_PLAY);
-        if (context.mPlayer.mCellId.mPaged)
+        ESM::CellId cellId = ESM::CellId::extractFromRefId(context.mPlayer.mCellId);
+        if (cellId.mPaged)
         {
             // exterior cell -> determine cell coordinates based on position
             int cellX
                 = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[0] / Constants::CellSizeInUnits));
             int cellY
                 = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[1] / Constants::CellSizeInUnits));
-            context.mPlayer.mCellId.mIndex.mX = cellX;
-            context.mPlayer.mCellId.mIndex.mY = cellY;
+            cellId.mIndex.mX = cellX;
+            cellId.mIndex.mY = cellY;
         }
+        context.mPlayer.mCellId = cellId.getCellRefId();
         context.mPlayer.save(writer);
         writer.endRecord(ESM::REC_PLAY);
 

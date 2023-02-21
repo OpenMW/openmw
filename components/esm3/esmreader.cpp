@@ -3,6 +3,7 @@
 #include "readerscache.hpp"
 #include "savedgame.hpp"
 
+#include <components/esm3/cellid.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/openfile.hpp>
 #include <components/misc/strings/algorithm.hpp>
@@ -84,6 +85,13 @@ namespace ESM
             }
             mCtx.parentFileIndices.push_back(index);
         }
+    }
+
+    ESM::RefId ESMReader::getCellId()
+    {
+        ESM::CellId cellId;
+        cellId.load(*this);
+        return cellId.getCellRefId();
     }
 
     void ESMReader::openRaw(std::unique_ptr<std::istream>&& stream, const std::filesystem::path& name)

@@ -897,7 +897,6 @@ namespace MWGui
             clickedId.mIndex.mY = y;
         }
         mEditingMarker.mCell = clickedId.getCellRefId();
-        mEditingMarker.mCellId = clickedId;
 
         mEditNoteDialog.setVisible(true);
         mEditNoteDialog.showDeleteButton(false);

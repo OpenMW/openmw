@@ -62,7 +62,7 @@ namespace ESSImport
             ESM::CellId playerCellId;
             playerCellId.mPaged = true;
             playerCellId.mIndex.mX = playerCellId.mIndex.mY = 0;
-            mPlayer.mCellId = playerCellId;
+            mPlayer.mCellId = playerCellId.getCellRefId();
             mPlayer.mLastKnownExteriorPosition[0] = mPlayer.mLastKnownExteriorPosition[1]
                 = mPlayer.mLastKnownExteriorPosition[2] = 0.0f;
             mPlayer.mHasMark = 0;

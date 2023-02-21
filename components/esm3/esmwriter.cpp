@@ -4,6 +4,7 @@
 #include <fstream>
 #include <stdexcept>
 
+#include <components/esm3/cellid.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/misc/notnullptr.hpp>
 #include <components/to_utf8/to_utf8.hpp>
@@ -234,6 +235,12 @@ namespace ESM
         if (mHeader.mFormatVersion <= MaxStringRefIdFormatVersion)
             return writeHNString(name, value.getRefIdString(), size);
         writeHNRefId(name, value);
+    }
+
+    void ESMWriter::writeCellId(const ESM::RefId& cellId)
+    {
+        ESM::CellId cell = ESM::CellId::extractFromRefId(cellId);
+        cell.save(*this);
     }
 
     void ESMWriter::writeMaybeFixedSizeString(const std::string& data, std::size_t size)

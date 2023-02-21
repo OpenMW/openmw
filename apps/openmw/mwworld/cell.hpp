@@ -5,12 +5,10 @@
 
 #include <components/esm/esmbridge.hpp>
 #include <components/esm/refid.hpp>
-#include <components/esm3/cellid.hpp>
 
 namespace ESM
 {
     struct Cell;
-    struct CellId;
 }
 
 namespace ESM4

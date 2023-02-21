@@ -27,7 +27,6 @@ namespace ESM
     class ReadersCache;
     struct Cell;
     struct CellState;
-    struct CellId;
     struct RefNum;
     struct Activator;
     struct Potion;

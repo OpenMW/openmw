@@ -13,7 +13,6 @@ namespace ESM
         float mWorldY;
 
         RefId mCell;
-        CellId mCellId; // The CellId representation for saving/loading
 
         std::string mNote;
 

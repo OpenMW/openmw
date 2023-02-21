@@ -575,9 +575,6 @@ namespace MWWorld
         newCell.mAmbi.mSunlight = 0;
         newCell.mAmbi.mFog = 0;
         newCell.mAmbi.mFogDensity = 0;
-        newCell.mCellId.mPaged = true;
-        newCell.mCellId.mIndex.mX = x;
-        newCell.mCellId.mIndex.mY = y;
         newCell.updateId();
 
         ESM::Cell* newCellInserted = &mCells.insert(std::make_pair(newCell.mId, newCell)).first->second;

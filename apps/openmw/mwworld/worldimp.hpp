@@ -349,9 +349,6 @@ namespace MWWorld
         ///< Move to exterior cell.
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        void changeToCell(const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos,
-            bool changeEvent = true) override;
-
         void changeToCell(const ESM::RefId& cellId, const ESM::Position& position, bool adjustPlayerPos,
             bool changeEvent = true) override;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes

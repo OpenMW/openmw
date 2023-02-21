@@ -120,7 +120,6 @@ namespace ESM
 
         std::vector<ESM_Context> mContextList; // File position; multiple positions for multiple plugin support
         DATAstruct mData;
-        CellId mCellId;
 
         AMBIstruct mAmbi;
         bool mHasAmbi;
@@ -191,7 +190,6 @@ namespace ESM
         void blank();
         ///< Set record to default state (does not touch the ID/index).
 
-        const CellId& getCellId() const;
         const ESM::RefId& updateId();
     };
 }

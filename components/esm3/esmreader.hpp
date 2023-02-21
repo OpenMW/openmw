@@ -96,6 +96,9 @@ namespace ESM
          *
          *************************************************************************/
 
+        // Because we want to get rid of CellId, we isolate it's uses.
+        ESM::RefId getCellId();
+
         // Read data of a given type, stored in a subrecord of a given name
         template <typename X>
         void getHNT(X& x, NAME name)

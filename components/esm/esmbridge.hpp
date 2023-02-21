@@ -15,7 +15,6 @@ namespace ESM4
 namespace ESM
 {
     struct Cell;
-    struct CellId;
     class RefId;
 
     class CellVariant;

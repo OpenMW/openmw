@@ -59,7 +59,23 @@ namespace ESM
 
     const ESM::RefId& Cell::updateId()
     {
-        mId = mCellId.getCellRefId();
+        CellId cellid;
+
+        cellid.mPaged = !(mData.mFlags & Interior);
+
+        if (cellid.mPaged)
+        {
+            cellid.mWorldspace = CellId::sDefaultWorldspace;
+            cellid.mIndex.mX = mData.mX;
+            cellid.mIndex.mY = mData.mY;
+        }
+        else
+        {
+            cellid.mWorldspace = Misc::StringUtils::lowerCase(mName);
+            cellid.mIndex.mX = 0;
+            cellid.mIndex.mY = 0;
+        }
+        mId = cellid.getCellRefId();
         return mId;
     }
 
@@ -97,20 +113,6 @@ namespace ESM
         if (!hasData)
             esm.fail("Missing DATA subrecord");
 
-        mCellId.mPaged = !(mData.mFlags & Interior);
-
-        if (mCellId.mPaged)
-        {
-            mCellId.mWorldspace = CellId::sDefaultWorldspace;
-            mCellId.mIndex.mX = mData.mX;
-            mCellId.mIndex.mY = mData.mY;
-        }
-        else
-        {
-            mCellId.mWorldspace = Misc::StringUtils::lowerCase(mName);
-            mCellId.mIndex.mX = 0;
-            mCellId.mIndex.mY = 0;
-        }
         updateId();
     }
 
@@ -340,8 +342,4 @@ namespace ESM
         mAmbi.mFogDensity = 0;
     }
 
-    const CellId& Cell::getCellId() const
-    {
-        return mCellId;
-    }
 }
