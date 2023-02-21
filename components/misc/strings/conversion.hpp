@@ -45,6 +45,34 @@ namespace Misc::StringUtils
     {
         return { str.begin(), str.end() }; // Undefined behavior if the contents of "char" aren't UTF8 or ASCII.
     }
+
+    template <typename T>
+    inline std::optional<T> toNumeric(const std::string& s)
+    {
+        T result{};
+        auto [ptr, ec]{ std::from_chars(s.data(), s.data() + s.size(), result) };
+
+        if (ec == std::errc())
+        {
+            return result;
+        }
+
+        return std::nullopt;
+    }
+
+    template <typename T>
+    inline T toNumeric(const std::string& s, T defaultValue)
+    {
+        T result{};
+        auto [ptr, ec]{ std::from_chars(s.data(), s.data() + s.size(), result) };
+
+        if (ec == std::errc())
+        {
+            return result;
+        }
+
+        return defaultValue;
+    }
 }
 
 #endif // COMPONENTS_MISC_STRINGS_CONVERSION_H
