@@ -2,13 +2,13 @@
 
 #include <cassert>
 #include <sstream>
-#include <components/misc/strings/conversion.hpp>
 
 #include "errorhandler.hpp"
 #include "exception.hpp"
 #include "extensions.hpp"
 #include "parser.hpp"
 
+#include <components/misc/strings/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
 
 namespace Compiler

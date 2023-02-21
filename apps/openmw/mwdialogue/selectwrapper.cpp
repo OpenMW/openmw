@@ -3,8 +3,8 @@
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
-#include <components/misc/strings/conversion.hpp>
 
+#include <components/misc/strings/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
 
 namespace

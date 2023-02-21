@@ -11,6 +11,7 @@
 #include <components/crashcatcher/crashcatcher.hpp>
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 #ifdef _WIN32
 #include <components/crashcatcher/windows_crashcatcher.hpp>
@@ -19,7 +20,6 @@
 #endif
 
 #include <SDL_messagebox.h>
-#include <components/misc/strings/conversion.hpp>
 
 namespace Debug
 {
