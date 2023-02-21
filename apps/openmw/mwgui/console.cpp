@@ -404,27 +404,32 @@ namespace MWGui
 
         const auto historyText = mHistory->getOnlyText();
 
-        // If we are doing the first search OR are at the end of the text,
-        // we continue searching from the beginning of the text.
-        if (currentOccurrence == std::string::npos || historyText.length() - currentOccurrence <= minLengthOfSearchTerm)
+        // Search starts at the beginning
+        size_t startIndex = 0;
+
+        // If this is not the first search, we start right AFTER the last occurrence.
+        if (currentOccurrence != std::string::npos && historyText.length() - currentOccurrence > minLengthOfSearchTerm)
+        {
+            startIndex = currentOccurrence + minLengthOfSearchTerm;
+        }
+
+        currentOccurrence = historyText.find(currentSearchTerm, startIndex);
+
+        // If the last search did not find anything AND we didn't start at
+        // the beginning, we repeat the search one time for wrapping around the text.
+        if (currentOccurrence == std::string::npos && startIndex != 0)
         {
             currentOccurrence = historyText.find(currentSearchTerm);
-        }
-        else
-        {
-            currentOccurrence = historyText.find(currentSearchTerm, currentOccurrence + minLengthOfSearchTerm);
-
-            // Check if we already got the last occurrence & restart from the beginning
-            if (currentOccurrence == std::string::npos)
-            {
-                currentOccurrence = historyText.find(currentSearchTerm);
-            }
         }
 
         // Only scroll & select if we actually found something
         if (currentOccurrence != std::string::npos)
         {
             markOccurrence(currentOccurrence, currentSearchTerm.length());
+        }
+        else
+        {
+            markOccurrence(0, 0);
         }
     }
 
@@ -437,21 +442,22 @@ namespace MWGui
 
         const auto historyText = mHistory->getOnlyText();
 
-        // If we are doing the first search OR are at the beginning of the text,
-        // we continue searching from the end of the text.
-        if (currentOccurrence == std::string::npos || currentOccurrence <= minLengthOfSearchTerm)
+        // Search starts at the end
+        size_t startIndex = historyText.length();
+
+        // If this is not the first search, we start right BEFORE the last occurrence.
+        if (currentOccurrence != std::string::npos && currentOccurrence > minLengthOfSearchTerm)
+        {
+            startIndex = currentOccurrence - minLengthOfSearchTerm;
+        }
+
+        currentOccurrence = historyText.rfind(currentSearchTerm, startIndex);
+
+        // If the last search did not find anything AND we didn't start at
+        // the end, we repeat the search one time for wrapping around the text.
+        if (currentOccurrence == std::string::npos && startIndex != historyText.length())
         {
             currentOccurrence = historyText.rfind(currentSearchTerm, historyText.length());
-        }
-        else
-        {
-            currentOccurrence = historyText.rfind(currentSearchTerm, currentOccurrence - minLengthOfSearchTerm);
-
-            // Check if we already got the first occurrence & restart from the end
-            if (currentOccurrence == std::string::npos)
-            {
-                currentOccurrence = historyText.rfind(currentSearchTerm, historyText.length());
-            }
         }
 
         // Only scroll & select if we actually found something
@@ -459,10 +465,21 @@ namespace MWGui
         {
             markOccurrence(currentOccurrence, currentSearchTerm.length());
         }
+        else
+        {
+            markOccurrence(0, 0);
+        }
     }
 
     void Console::markOccurrence(const size_t textPosition, const size_t length)
     {
+        if (textPosition == 0 && length == 0)
+        {
+            mHistory->setTextSelection(0, 0);
+            mHistory->setVScrollPosition(mHistory->getVScrollRange());
+            return;
+        }
+
         const auto historyText = mHistory->getOnlyText();
         const size_t upperLimit = std::min(historyText.length(), textPosition);
 
