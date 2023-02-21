@@ -19,6 +19,7 @@
 #endif
 
 #include <SDL_messagebox.h>
+#include <components/misc/strings/conversion.hpp>
 
 namespace Debug
 {
@@ -314,7 +315,8 @@ int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, c
     int ret = 0;
     try
     {
-        if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER"); env == nullptr || std::atol(env) == 0)
+        if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER");
+            env == nullptr || Misc::StringUtils::toNumeric<int>(env, 0) == 0)
         {
 #if defined(_WIN32)
             const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";

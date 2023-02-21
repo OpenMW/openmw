@@ -24,6 +24,7 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/misc/convert.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/settings/settings.hpp>
@@ -121,14 +122,12 @@ namespace MWPhysics
         mCollisionWorld->setForceUpdateAllAabbs(false);
 
         // Check if a user decided to override a physics system FPS
-        const char* env = getenv("OPENMW_PHYSICS_FPS");
-        if (env)
+        if (const char* env = getenv("OPENMW_PHYSICS_FPS"))
         {
-            float physFramerate = std::atof(env);
-            if (physFramerate > 0)
+            if (const auto physFramerate = Misc::StringUtils::toNumeric<float>(env); physFramerate && physFramerate.value() > 0)
             {
-                mPhysicsDt = 1.f / physFramerate;
-                Log(Debug::Warning) << "Warning: using custom physics framerate (" << physFramerate << " FPS).";
+                mPhysicsDt = 1.f / physFramerate.value();
+                Log(Debug::Warning) << "Warning: using custom physics framerate (" << physFramerate.value() << " FPS).";
             }
         }
 
