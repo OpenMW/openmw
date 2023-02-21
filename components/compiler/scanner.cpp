@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <sstream>
+#include <components/misc/strings/conversion.hpp>
 
 #include "errorhandler.hpp"
 #include "exception.hpp"
@@ -194,10 +195,7 @@ namespace Compiler
         TokenLoc loc(mLoc);
         mLoc.mLiteral.clear();
 
-        std::istringstream stream(value);
-
-        int intValue = 0;
-        stream >> intValue;
+        const int intValue = Misc::StringUtils::toNumeric<int>(value, 0);
 
         cont = parser.parseInt(intValue, loc, *this);
         return true;
