@@ -383,26 +383,108 @@ namespace MWGui
     void Console::acceptSearchTerm(MyGUI::EditBox* _sender)
     {
         const std::string& searchTerm = mSearchTerm->getOnlyText();
-        if (searchTerm.length() <= 3)
+
+        if (searchTerm.length() < minLengthOfSearchTerm)
+        {
             return;
+        }
 
-        auto result = mHistory->getOnlyText().find(searchTerm);
+        currentSearchTerm = searchTerm;
+        currentOccurrence = std::string::npos;
 
-        // result ist nur der Index des Chars
-        // gescrollt wird aber mit Pixelwerten
-        // also muss man irgendwie umrechnen, welche Zeile welchem Pixelwert entspricht
-        mHistory->setTextSelection(result, result + searchTerm.length());
-        mHistory->setVScrollPosition(result);
+        findNextOccurrence(nullptr);
     }
 
     void Console::findNextOccurrence(MyGUI::Widget* _sender)
     {
-        print("Next");
+        if (currentSearchTerm.length() < minLengthOfSearchTerm)
+        {
+            return;
+        }
+
+        const auto historyText = mHistory->getOnlyText();
+
+        // If we are doing the first search OR are at the end of the text,
+        // we continue searching from the beginning of the text.
+        if (currentOccurrence == std::string::npos || historyText.length() - currentOccurrence <= minLengthOfSearchTerm)
+        {
+            currentOccurrence = historyText.find(currentSearchTerm);
+        }
+        else
+        {
+            currentOccurrence = historyText.find(currentSearchTerm, currentOccurrence + minLengthOfSearchTerm);
+
+            // Check if we already got the last occurrence & restart from the beginning
+            if (currentOccurrence == std::string::npos)
+            {
+                currentOccurrence = historyText.find(currentSearchTerm);
+            }
+        }
+
+        // Only scroll & select if we actually found something
+        if (currentOccurrence != std::string::npos)
+        {
+            markOccurrence(currentOccurrence, currentSearchTerm.length());
+        }
     }
 
     void Console::findPreviousOccurence(MyGUI::Widget* _sender)
     {
-        print("Prev");
+        if (currentSearchTerm.length() < minLengthOfSearchTerm)
+        {
+            return;
+        }
+
+        const auto historyText = mHistory->getOnlyText();
+
+        // If we are doing the first search OR are at the beginning of the text,
+        // we continue searching from the end of the text.
+        if (currentOccurrence == std::string::npos || currentOccurrence <= minLengthOfSearchTerm)
+        {
+            currentOccurrence = historyText.rfind(currentSearchTerm, historyText.length());
+        }
+        else
+        {
+            currentOccurrence = historyText.rfind(currentSearchTerm, currentOccurrence - minLengthOfSearchTerm);
+
+            // Check if we already got the first occurrence & restart from the end
+            if (currentOccurrence == std::string::npos)
+            {
+                currentOccurrence = historyText.rfind(currentSearchTerm, historyText.length());
+            }
+        }
+
+        // Only scroll & select if we actually found something
+        if (currentOccurrence != std::string::npos)
+        {
+            markOccurrence(currentOccurrence, currentSearchTerm.length());
+        }
+    }
+
+    void Console::markOccurrence(const size_t textPosition, const size_t length)
+    {
+        const auto historyText = mHistory->getOnlyText();
+        const size_t upperLimit = std::min(historyText.length(), textPosition);
+
+        // Since MyGUI::EditBox.setVScrollPosition() works on pixels instead of text positions
+        // we need to calculate the actual pixel position by counting lines.
+        size_t lineNumber = 0;
+        for (size_t i = 0; i < upperLimit; i++)
+        {
+            if (historyText[i] == '\n')
+            {
+                lineNumber++;
+            }
+        }
+
+        // Make some space before the actual result
+        if (lineNumber >= 2)
+        {
+            lineNumber -= 2;
+        }
+
+        mHistory->setTextSelection(textPosition, textPosition + length);
+        mHistory->setVScrollPosition(mHistory->getFontHeight() * lineNumber);
     }
 
     std::string Console::complete(std::string input, std::vector<std::string>& matches)
