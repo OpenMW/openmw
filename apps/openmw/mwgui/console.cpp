@@ -384,20 +384,20 @@ namespace MWGui
     {
         const std::string& searchTerm = mSearchTerm->getOnlyText();
 
-        if (searchTerm.length() < minLengthOfSearchTerm)
+        if (searchTerm.empty())
         {
             return;
         }
 
-        currentSearchTerm = Utf8Stream::lowerCaseUtf8(searchTerm);
-        currentOccurrence = std::string::npos;
+        mCurrentSearchTerm = Utf8Stream::lowerCaseUtf8(searchTerm);
+        mCurrentOccurrence = std::string::npos;
 
         findNextOccurrence(nullptr);
     }
 
     void Console::findNextOccurrence(MyGUI::Widget* _sender)
     {
-        if (currentSearchTerm.length() < minLengthOfSearchTerm)
+        if (mCurrentSearchTerm.empty())
         {
             return;
         }
@@ -408,24 +408,24 @@ namespace MWGui
         size_t startIndex = 0;
 
         // If this is not the first search, we start right AFTER the last occurrence.
-        if (currentOccurrence != std::string::npos && historyText.length() - currentOccurrence > minLengthOfSearchTerm)
+        if (mCurrentOccurrence != std::string::npos && historyText.length() - mCurrentOccurrence > 1)
         {
-            startIndex = currentOccurrence + minLengthOfSearchTerm;
+            startIndex = mCurrentOccurrence + 1;
         }
 
-        currentOccurrence = historyText.find(currentSearchTerm, startIndex);
+        mCurrentOccurrence = historyText.find(mCurrentSearchTerm, startIndex);
 
         // If the last search did not find anything AND we didn't start at
         // the beginning, we repeat the search one time for wrapping around the text.
-        if (currentOccurrence == std::string::npos && startIndex != 0)
+        if (mCurrentOccurrence == std::string::npos && startIndex != 0)
         {
-            currentOccurrence = historyText.find(currentSearchTerm);
+            mCurrentOccurrence = historyText.find(mCurrentSearchTerm);
         }
 
         // Only scroll & select if we actually found something
-        if (currentOccurrence != std::string::npos)
+        if (mCurrentOccurrence != std::string::npos)
         {
-            markOccurrence(currentOccurrence, currentSearchTerm.length());
+            markOccurrence(mCurrentOccurrence, mCurrentSearchTerm.length());
         }
         else
         {
@@ -435,7 +435,7 @@ namespace MWGui
 
     void Console::findPreviousOccurence(MyGUI::Widget* _sender)
     {
-        if (currentSearchTerm.length() < minLengthOfSearchTerm)
+        if (mCurrentSearchTerm.empty())
         {
             return;
         }
@@ -446,24 +446,24 @@ namespace MWGui
         size_t startIndex = historyText.length();
 
         // If this is not the first search, we start right BEFORE the last occurrence.
-        if (currentOccurrence != std::string::npos && currentOccurrence > minLengthOfSearchTerm)
+        if (mCurrentOccurrence != std::string::npos && mCurrentOccurrence > 1)
         {
-            startIndex = currentOccurrence - minLengthOfSearchTerm;
+            startIndex = mCurrentOccurrence - 1;
         }
 
-        currentOccurrence = historyText.rfind(currentSearchTerm, startIndex);
+        mCurrentOccurrence = historyText.rfind(mCurrentSearchTerm, startIndex);
 
         // If the last search did not find anything AND we didn't start at
         // the end, we repeat the search one time for wrapping around the text.
-        if (currentOccurrence == std::string::npos && startIndex != historyText.length())
+        if (mCurrentOccurrence == std::string::npos && startIndex != historyText.length())
         {
-            currentOccurrence = historyText.rfind(currentSearchTerm, historyText.length());
+            mCurrentOccurrence = historyText.rfind(mCurrentSearchTerm, historyText.length());
         }
 
         // Only scroll & select if we actually found something
-        if (currentOccurrence != std::string::npos)
+        if (mCurrentOccurrence != std::string::npos)
         {
-            markOccurrence(currentOccurrence, currentSearchTerm.length());
+            markOccurrence(mCurrentOccurrence, mCurrentSearchTerm.length());
         }
         else
         {

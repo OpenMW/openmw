@@ -87,9 +87,8 @@ namespace MWGui
         void findNextOccurrence(MyGUI::Widget* _sender);
         void findPreviousOccurence(MyGUI::Widget* _sender);
         void markOccurrence(size_t textPosition, size_t length);
-        size_t currentOccurrence = std::string::npos;
-        std::string currentSearchTerm = "";
-        const size_t minLengthOfSearchTerm = 1;
+        size_t mCurrentOccurrence = std::string::npos;
+        std::string mCurrentSearchTerm;
 
         std::string complete(std::string input, std::vector<std::string>& matches);
 
