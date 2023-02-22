@@ -47,7 +47,7 @@ namespace Misc::StringUtils
     }
 
     template <typename T>
-    inline std::optional<T> toNumeric(const std::string& s)
+    inline std::optional<T> toNumeric(std::string_view s)
     {
         T result{};
         auto [ptr, ec]{ std::from_chars(s.data(), s.data() + s.size(), result) };
@@ -61,7 +61,7 @@ namespace Misc::StringUtils
     }
 
     template <typename T>
-    inline T toNumeric(const std::string& s, T defaultValue)
+    inline T toNumeric(std::string_view s, T defaultValue)
     {
         T result{};
         auto [ptr, ec]{ std::from_chars(s.data(), s.data() + s.size(), result) };
