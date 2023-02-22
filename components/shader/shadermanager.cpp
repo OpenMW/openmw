@@ -5,6 +5,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
 #include <filesystem>
@@ -55,7 +56,7 @@ namespace Shader
                 size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
                 size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
                 std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
-                lineNumber = std::stoi(lineNumberString) - 1;
+                lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2) - 1;
             }
             else
             {
@@ -116,7 +117,7 @@ namespace Shader
                 size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
                 size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
                 std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
-                lineNumber = std::stoi(lineNumberString) - 1;
+                lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2) - 1;
             }
             else
             {
@@ -196,7 +197,7 @@ namespace Shader
             size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
             size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
             std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
-            lineNumber = std::stoi(lineNumberString);
+            lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2);
         }
         else
         {

@@ -2,6 +2,8 @@
 
 #include "numericeditbox.hpp"
 
+#include <components/misc/strings/conversion.hpp>
+
 namespace Gui
 {
 
@@ -28,22 +30,12 @@ namespace Gui
             return;
         }
 
-        try
+        mValue = Misc::StringUtils::toNumeric<int>(newCaption, mValue);
+
+        int capped = std::clamp(mValue, mMinValue, mMaxValue);
+        if (capped != mValue)
         {
-            mValue = std::stoi(newCaption);
-            int capped = std::clamp(mValue, mMinValue, mMaxValue);
-            if (capped != mValue)
-            {
-                mValue = capped;
-                setCaption(MyGUI::utility::toString(mValue));
-            }
-        }
-        catch (const std::invalid_argument&)
-        {
-            setCaption(MyGUI::utility::toString(mValue));
-        }
-        catch (const std::out_of_range&)
-        {
+            mValue = capped;
             setCaption(MyGUI::utility::toString(mValue));
         }
 
