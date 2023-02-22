@@ -14,6 +14,7 @@
 #include <components/esm3/player.hpp>
 #include <components/esm3/savedgame.hpp>
 
+#include <components/esm3/cellid.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadarmo.hpp>
 #include <components/esm3/loadclot.hpp>
@@ -410,22 +411,10 @@ namespace ESSImport
 
         writer.startRecord(ESM::REC_PLAY);
         ESM::CellId cellId = ESM::CellId::extractFromRefId(context.mPlayer.mCellId);
-        if (cellId.mPaged)
-        {
-            // exterior cell -> determine cell coordinates based on position
-            int cellX
-                = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[0] / Constants::CellSizeInUnits));
-            int cellY
-                = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[1] / Constants::CellSizeInUnits));
-            cellId.mIndex.mX = cellX;
-            cellId.mIndex.mY = cellY;
+        int cellX = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[0] / Constants::CellSizeInUnits));
+        int cellY = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[1] / Constants::CellSizeInUnits));
 
-            context.mPlayer.mCellId = ESM::Cell::generateIdForExteriorCell(cellX, cellY);
-        }
-        else
-        {
-            context.mPlayer.mCellId = ESM::RefId::stringRefId(cellId.mWorldspace);
-        }
+        context.mPlayer.mCellId = ESM::Cell::generateIdForCell(cellId.mPaged, cellId.mWorldspace, cellX, cellY);
         context.mPlayer.save(writer);
         writer.endRecord(ESM::REC_PLAY);
 

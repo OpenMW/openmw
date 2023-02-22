@@ -36,7 +36,6 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/refid.hpp>
-#include <components/esm3/cellid.hpp>
 #include <components/esm4/reader.hpp>
 
 namespace ESM4

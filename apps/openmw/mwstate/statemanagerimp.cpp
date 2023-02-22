@@ -4,7 +4,6 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm3/cellid.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadcell.hpp>

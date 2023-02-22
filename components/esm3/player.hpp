@@ -3,7 +3,6 @@
 
 #include <string>
 
-#include "cellid.hpp"
 #include "components/esm/defs.hpp"
 #include "npcstate.hpp"
 

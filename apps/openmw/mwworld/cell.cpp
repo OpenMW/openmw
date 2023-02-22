@@ -1,6 +1,5 @@
 #include "cell.hpp"
 
-#include <components/esm3/cellid.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm4/loadcell.hpp>
 #include <components/misc/algorithm.hpp>

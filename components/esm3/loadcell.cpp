@@ -7,7 +7,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
-#include "cellid.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -61,21 +60,25 @@ namespace ESM
 
     const ESM::RefId& Cell::updateId()
     {
-
-        if (mData.mFlags & Interior)
-        {
-            mId = ESM::RefId::stringRefId(mName);
-        }
-        else
-        {
-            mId = generateIdForExteriorCell(getGridX(), getGridY());
-        }
+        mId = generateIdForCell(isExterior(), mName, getGridX(), getGridY());
         return mId;
     }
 
     ESM::RefId Cell::generateIdForExteriorCell(int x, int y)
     {
         return ESM::RefId::stringRefId("#" + std::to_string(x) + "," + std::to_string(y));
+    }
+
+    ESM::RefId Cell::generateIdForCell(bool exterior, std::string_view cellName, int x, int y)
+    {
+        if (!exterior)
+        {
+            return ESM::RefId::stringRefId(cellName);
+        }
+        else
+        {
+            return generateIdForExteriorCell(x, y);
+        }
     }
 
     void Cell::loadNameAndData(ESMReader& esm, bool& isDeleted)

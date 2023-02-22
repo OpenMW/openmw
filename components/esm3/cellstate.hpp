@@ -1,9 +1,8 @@
 #ifndef OPENMW_ESM_CELLSTATE_H
 #define OPENMW_ESM_CELLSTATE_H
 
-#include "cellid.hpp"
-
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {

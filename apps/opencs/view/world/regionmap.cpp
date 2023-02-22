@@ -16,8 +16,6 @@
 
 #include <apps/opencs/view/world/dragrecordtable.hpp>
 
-#include <components/esm3/cellid.hpp>
-
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/columns.hpp"

@@ -14,8 +14,6 @@
 #include <apps/opencs/view/doc/subview.hpp>
 #include <apps/opencs/view/render/worldspacewidget.hpp>
 
-#include <components/esm3/cellid.hpp>
-
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/cellselection.hpp"

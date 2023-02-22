@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "cellid.hpp"
 #include "cellref.hpp"
 #include "components/esm/defs.hpp"
 #include "components/esm/esmcommon.hpp"
@@ -195,6 +194,7 @@ namespace ESM
         const ESM::RefId& updateId();
 
         static ESM::RefId generateIdForExteriorCell(int x, int y);
+        static ESM::RefId generateIdForCell(bool exterior, std::string_view cellName, int x, int y);
     };
 }
 #endif

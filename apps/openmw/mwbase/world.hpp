@@ -10,7 +10,6 @@
 #include <string_view>
 #include <vector>
 
-#include <components/esm3/cellid.hpp>
 #include <components/misc/rng.hpp>
 
 #include <osg/Timer>

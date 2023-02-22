@@ -351,16 +351,7 @@ namespace MWGui
         {
             for (int dY = -mCellDistance; dY <= mCellDistance; ++dY)
             {
-                ESM::RefId cellRefId;
-
-                if (mInterior)
-                {
-                    cellRefId = ESM::RefId::stringRefId(mPrefix);
-                }
-                else
-                {
-                    cellRefId = ESM::Cell::generateIdForExteriorCell(mCurX + dX, mCurY + dY);
-                }
+                ESM::RefId cellRefId = ESM::Cell::generateIdForCell(!mInterior, mPrefix, mCurX + dX, mCurY + dY);
 
                 CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(cellRefId);
                 for (CustomMarkerCollection::ContainerType::const_iterator it = markers.first; it != markers.second;
@@ -890,16 +881,8 @@ namespace MWGui
 
         mEditingMarker.mWorldX = worldPos.x();
         mEditingMarker.mWorldY = worldPos.y();
-        ESM::RefId clickedId;
+        ESM::RefId clickedId = ESM::Cell::generateIdForCell(!mInterior, LocalMapBase::mPrefix, x, y);
 
-        if (mInterior)
-        {
-            clickedId = ESM::RefId::stringRefId(LocalMapBase::mPrefix);
-        }
-        else
-        {
-            clickedId = ESM::Cell::generateIdForExteriorCell(x, y);
-        }
         mEditingMarker.mCell = clickedId;
 
         mEditNoteDialog.setVisible(true);

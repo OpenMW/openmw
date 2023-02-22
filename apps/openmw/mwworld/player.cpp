@@ -392,12 +392,8 @@ namespace MWWorld
             mLastKnownExteriorPosition.y() = player.mLastKnownExteriorPosition[1];
             mLastKnownExteriorPosition.z() = player.mLastKnownExteriorPosition[2];
 
-            bool exterior = ESM::CellId::extractFromRefId(player.mMarkedCell).mPaged;
-            if (player.mHasMark && !exterior)
+            if (player.mHasMark)
             {
-                // interior cell -> need to check if it exists (exterior cell will be
-                // generated on the fly)
-
                 if (!world.getStore().get<ESM::Cell>().search(player.mMarkedCell))
                     player.mHasMark = false; // drop mark silently
             }
