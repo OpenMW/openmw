@@ -380,10 +380,8 @@ namespace MWWorld
                 pos.rot[2] = 0;
 
                 osg::Vec2i exteriorCellPos = positionToCellIndex(pos.pos[0], pos.pos[1]);
-                ESM::CellId cellId;
-                cellId.mPaged = true;
-                cellId.mIndex = { exteriorCellPos.x(), exteriorCellPos.y() };
-                mWorldScene->changeToExteriorCell(cellId.getCellRefId(), pos, true);
+                ESM::RefId cellId = ESM::Cell::generateIdForExteriorCell(exteriorCellPos.x(), exteriorCellPos.y());
+                mWorldScene->changeToExteriorCell(cellId, pos, true);
             }
         }
 
@@ -979,7 +977,7 @@ namespace MWWorld
         mPhysics->clearQueuedMovement();
         mDiscardMovements = true;
 
-        if (changeEvent && mCurrentWorldSpace != ESM::CellId::sDefaultWorldspace)
+        if (changeEvent && mCurrentWorldSpace != ESM::Cell::sDefaultWorldspace)
         {
             // changed worldspace
             mProjectileManager->clear();
@@ -987,10 +985,8 @@ namespace MWWorld
         }
         removeContainerScripts(getPlayerPtr());
         osg::Vec2i exteriorCellPos = positionToCellIndex(position.pos[0], position.pos[1]);
-        ESM::CellId cellId;
-        cellId.mPaged = true;
-        cellId.mIndex = { exteriorCellPos.x(), exteriorCellPos.y() };
-        mWorldScene->changeToExteriorCell(cellId.getCellRefId(), position, adjustPlayerPos, changeEvent);
+        ESM::RefId cellId = ESM::Cell::generateIdForExteriorCell(exteriorCellPos.x(), exteriorCellPos.y());
+        mWorldScene->changeToExteriorCell(cellId, position, adjustPlayerPos, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
         mRendering->getCamera()->instantTransition();
     }

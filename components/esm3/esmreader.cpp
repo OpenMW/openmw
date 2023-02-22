@@ -4,6 +4,7 @@
 #include "savedgame.hpp"
 
 #include <components/esm3/cellid.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/openfile.hpp>
 #include <components/misc/strings/algorithm.hpp>
@@ -93,7 +94,14 @@ namespace ESM
         {
             ESM::CellId cellId;
             cellId.load(*this);
-            return cellId.getCellRefId();
+            if (cellId.mPaged)
+            {
+                return ESM::Cell::generateIdForExteriorCell(cellId.mIndex.mX, cellId.mIndex.mY);
+            }
+            else
+            {
+                return ESM::RefId::stringRefId(cellId.mWorldspace);
+            }
         }
         return getHNRefId("NAME");
     }

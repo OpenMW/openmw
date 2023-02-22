@@ -3,7 +3,7 @@
 #include <cassert>
 
 #include <components/debug/debuglog.hpp>
-#include <components/esm3/cellid.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/esm3/objectstate.hpp>
 
 #include <apps/openmw/mwworld/cellutils.hpp>
@@ -90,11 +90,7 @@ namespace MWWorld
             else
             {
                 const osg::Vec2i index = positionToCellIndex(ref.mDoorDest.pos[0], ref.mDoorDest.pos[1]);
-                ESM::CellId cellId;
-                cellId.mPaged = true;
-                cellId.mIndex.mX = index.x();
-                cellId.mIndex.mY = index.y();
-                return cellId.getCellRefId();
+                return ESM::Cell::generateIdForExteriorCell(index.x(), index.y());
             }
         };
 

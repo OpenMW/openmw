@@ -419,8 +419,13 @@ namespace ESSImport
                 = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[1] / Constants::CellSizeInUnits));
             cellId.mIndex.mX = cellX;
             cellId.mIndex.mY = cellY;
+
+            context.mPlayer.mCellId = ESM::Cell::generateIdForExteriorCell(cellX, cellY);
         }
-        context.mPlayer.mCellId = cellId.getCellRefId();
+        else
+        {
+            context.mPlayer.mCellId = ESM::RefId::stringRefId(cellId.mWorldspace);
+        }
         context.mPlayer.save(writer);
         writer.endRecord(ESM::REC_PLAY);
 

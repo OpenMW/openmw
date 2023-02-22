@@ -351,12 +351,17 @@ namespace MWGui
         {
             for (int dY = -mCellDistance; dY <= mCellDistance; ++dY)
             {
-                ESM::CellId cellId;
-                cellId.mPaged = !mInterior;
-                cellId.mWorldspace = (mInterior ? mPrefix : ESM::CellId::sDefaultWorldspace);
-                cellId.mIndex.mX = mCurX + dX;
-                cellId.mIndex.mY = mCurY + dY;
-                ESM::RefId cellRefId = cellId.getCellRefId();
+                ESM::RefId cellRefId;
+
+                if (mInterior)
+                {
+                    cellRefId = ESM::RefId::stringRefId(mPrefix);
+                }
+                else
+                {
+                    cellRefId = ESM::Cell::generateIdForExteriorCell(mCurX + dX, mCurY + dY);
+                }
+
                 CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(cellRefId);
                 for (CustomMarkerCollection::ContainerType::const_iterator it = markers.first; it != markers.second;
                      ++it)
@@ -885,18 +890,17 @@ namespace MWGui
 
         mEditingMarker.mWorldX = worldPos.x();
         mEditingMarker.mWorldY = worldPos.y();
-        ESM::CellId clickedId;
+        ESM::RefId clickedId;
 
-        clickedId.mPaged = !mInterior;
         if (mInterior)
-            clickedId.mWorldspace = LocalMapBase::mPrefix;
+        {
+            clickedId = ESM::RefId::stringRefId(LocalMapBase::mPrefix);
+        }
         else
         {
-            clickedId.mWorldspace = ESM::CellId::sDefaultWorldspace;
-            clickedId.mIndex.mX = x;
-            clickedId.mIndex.mY = y;
+            clickedId = ESM::Cell::generateIdForExteriorCell(x, y);
         }
-        mEditingMarker.mCell = clickedId.getCellRefId();
+        mEditingMarker.mCell = clickedId;
 
         mEditNoteDialog.setVisible(true);
         mEditNoteDialog.showDeleteButton(false);
@@ -1122,12 +1126,7 @@ namespace MWGui
 
     void MapWindow::setGlobalMapMarkerTooltip(MyGUI::Widget* markerWidget, int x, int y)
     {
-        ESM::CellId cellId;
-        cellId.mIndex.mX = x;
-        cellId.mIndex.mY = y;
-        cellId.mWorldspace = ESM::CellId::sDefaultWorldspace;
-        cellId.mPaged = true;
-        ESM::RefId cellRefId = cellId.getCellRefId();
+        ESM::RefId cellRefId = ESM::Cell::generateIdForExteriorCell(x, y);
         CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(cellRefId);
         std::vector<std::string> destNotes;
         for (CustomMarkerCollection::ContainerType::const_iterator it = markers.first; it != markers.second; ++it)

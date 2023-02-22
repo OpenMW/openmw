@@ -40,7 +40,7 @@ namespace MWWorld
         , mNameID(cell.mName)
         , mRegion(cell.mRegion)
         , mId(cell.mId)
-        , mParent(ESM::RefId::stringRefId(ESM::CellId::sDefaultWorldspace))
+        , mParent(ESM::RefId::stringRefId(ESM::Cell::sDefaultWorldspace))
         , mMood{
             .mAmbiantColor = cell.mAmbi.mAmbient,
             .mDirectionalColor = cell.mAmbi.mSunlight,

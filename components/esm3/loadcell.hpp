@@ -67,6 +67,8 @@ namespace ESM
      */
     struct Cell
     {
+        static const std::string sDefaultWorldspace;
+
         constexpr static RecNameInts sRecordId = REC_CELL;
 
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
@@ -191,6 +193,8 @@ namespace ESM
         ///< Set record to default state (does not touch the ID/index).
 
         const ESM::RefId& updateId();
+
+        static ESM::RefId generateIdForExteriorCell(int x, int y);
     };
 }
 #endif

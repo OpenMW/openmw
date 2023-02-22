@@ -40,6 +40,8 @@ namespace ESM
 
 namespace ESM
 {
+    const std::string Cell::sDefaultWorldspace = "sys::default";
+
     // Some overloaded compare operators.
     bool operator==(const MovedCellRef& ref, const RefNum& refNum)
     {
@@ -59,24 +61,21 @@ namespace ESM
 
     const ESM::RefId& Cell::updateId()
     {
-        CellId cellid;
 
-        cellid.mPaged = !(mData.mFlags & Interior);
-
-        if (cellid.mPaged)
+        if (mData.mFlags & Interior)
         {
-            cellid.mWorldspace = CellId::sDefaultWorldspace;
-            cellid.mIndex.mX = mData.mX;
-            cellid.mIndex.mY = mData.mY;
+            mId = ESM::RefId::stringRefId(mName);
         }
         else
         {
-            cellid.mWorldspace = Misc::StringUtils::lowerCase(mName);
-            cellid.mIndex.mX = 0;
-            cellid.mIndex.mY = 0;
+            mId = generateIdForExteriorCell(getGridX(), getGridY());
         }
-        mId = cellid.getCellRefId();
         return mId;
+    }
+
+    ESM::RefId Cell::generateIdForExteriorCell(int x, int y)
+    {
+        return ESM::RefId::stringRefId("#" + std::to_string(x) + "," + std::to_string(y));
     }
 
     void Cell::loadNameAndData(ESMReader& esm, bool& isDeleted)

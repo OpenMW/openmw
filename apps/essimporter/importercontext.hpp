@@ -6,6 +6,7 @@
 #include <components/esm3/controlsstate.hpp>
 #include <components/esm3/dialoguestate.hpp>
 #include <components/esm3/globalmap.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/player.hpp>
@@ -59,10 +60,7 @@ namespace ESSImport
             , mHour(0.f)
             , mNextActorId(0)
         {
-            ESM::CellId playerCellId;
-            playerCellId.mPaged = true;
-            playerCellId.mIndex.mX = playerCellId.mIndex.mY = 0;
-            mPlayer.mCellId = playerCellId.getCellRefId();
+            mPlayer.mCellId = ESM::Cell::generateIdForExteriorCell(0, 0);
             mPlayer.mLastKnownExteriorPosition[0] = mPlayer.mLastKnownExteriorPosition[1]
                 = mPlayer.mLastKnownExteriorPosition[2] = 0.0f;
             mPlayer.mHasMark = 0;
