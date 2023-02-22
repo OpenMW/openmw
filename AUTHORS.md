@@ -202,6 +202,7 @@ Programmers
     Sergey Shambir (sergey-shambir)
     sergoz
     ShadowRadiance
+    Shihan42
     Siimacore
     Simon Meulenbeek (simonmb)
     sir_herrbatka

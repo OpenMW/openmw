@@ -57,6 +57,7 @@
     Feature #7130: Ability to set MyGUI logging verbosity
     Feature #7148: Optimize string literal lookup in mwscript
     Feature #7194: Ori to show texture paths
+    Feature #7214: Add search capabilities to the console window
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message
 
