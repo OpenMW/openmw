@@ -1,5 +1,6 @@
 #include "console.hpp"
 
+#include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LayerManager.h>
@@ -13,6 +14,7 @@
 #include <components/compiler/locals.hpp>
 #include <components/compiler/scanner.hpp>
 #include <components/interpreter/interpreter.hpp>
+#include "components/misc/utf8stream.hpp"
 #include <components/settings/settings.hpp>
 
 #include "../mwscript/extensions.hpp"
@@ -26,8 +28,6 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-
-#include <MyGUI_Button.h>
 
 namespace MWGui
 {
@@ -389,7 +389,7 @@ namespace MWGui
             return;
         }
 
-        currentSearchTerm = searchTerm;
+        currentSearchTerm = Utf8Stream::lowerCaseUtf8(searchTerm);
         currentOccurrence = std::string::npos;
 
         findNextOccurrence(nullptr);
@@ -402,7 +402,7 @@ namespace MWGui
             return;
         }
 
-        const auto historyText = mHistory->getOnlyText();
+        const auto historyText = Utf8Stream::lowerCaseUtf8(mHistory->getOnlyText().asUTF8());
 
         // Search starts at the beginning
         size_t startIndex = 0;
@@ -440,7 +440,7 @@ namespace MWGui
             return;
         }
 
-        const auto historyText = mHistory->getOnlyText();
+        const auto historyText = Utf8Stream::lowerCaseUtf8(mHistory->getOnlyText().asUTF8());
 
         // Search starts at the end
         size_t startIndex = historyText.length();
