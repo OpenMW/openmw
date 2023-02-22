@@ -89,9 +89,13 @@ namespace ESM
 
     ESM::RefId ESMReader::getCellId()
     {
-        ESM::CellId cellId;
-        cellId.load(*this);
-        return cellId.getCellRefId();
+        if (mHeader.mFormatVersion <= ESM::MaxUseEsmCellId)
+        {
+            ESM::CellId cellId;
+            cellId.load(*this);
+            return cellId.getCellRefId();
+        }
+        return getHNRefId("NAME");
     }
 
     void ESMReader::openRaw(std::unique_ptr<std::istream>&& stream, const std::filesystem::path& name)

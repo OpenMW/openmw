@@ -239,8 +239,7 @@ namespace ESM
 
     void ESMWriter::writeCellId(const ESM::RefId& cellId)
     {
-        ESM::CellId cell = ESM::CellId::extractFromRefId(cellId);
-        cell.save(*this);
+        writeHNRefId("NAME", cellId);
     }
 
     void ESMWriter::writeMaybeFixedSizeString(const std::string& data, std::size_t size)
