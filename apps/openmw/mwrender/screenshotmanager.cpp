@@ -197,26 +197,17 @@ namespace MWRender
 
         if (settingArgs.size() > 1)
         {
-            if (const auto w = Misc::StringUtils::toNumeric<int>(settingArgs[1]))
-            {
-                screenshotW = std::min(10000, w.value());
-            }
+            screenshotW = std::min(10000, Misc::StringUtils::toNumeric<int>(settingArgs[1], 0));
         }
 
         if (settingArgs.size() > 2)
         {
-            if (const auto h = Misc::StringUtils::toNumeric<int>(settingArgs[2]))
-            {
-                screenshotH = std::min(10000, h.value());
-            }
+            screenshotH = std::min(10000, Misc::StringUtils::toNumeric<int>(settingArgs[2], 0));
         }
 
         if (settingArgs.size() > 3)
         {
-            if (const auto cs = Misc::StringUtils::toNumeric<int>(settingArgs[3]))
-            {
-                cubeSize = std::min(5000, cs.value());
-            }
+            cubeSize = std::min(5000, Misc::StringUtils::toNumeric<int>(settingArgs[3], 0));
         }
 
         bool rawCubemap = screenshotMapping == RawCubemap;
