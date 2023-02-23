@@ -23,7 +23,7 @@ namespace SceneUtil
         void apply(osg::MatrixTransform& node) override
         {
             mPath.push_back(&node);
-            mCache[Misc::StringUtils::lowerCase(node.getName())] = mPath;
+            mCache.emplace(Misc::StringUtils::lowerCase(node.getName()), mPath);
             traverse(node);
             mPath.pop_back();
         }

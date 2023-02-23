@@ -1,6 +1,7 @@
 0.49.0
 ------
 
+    Bug #3842: Body part skeletons override the main skeleton
     Bug #4127: Weapon animation looks choppy
     Bug #4204: Dead slaughterfish doesn't float to water surface after loading saved game
     Bug #4610: Casting a Bound Weapon spell cancels the casting animation by equipping the weapon prematurely
