@@ -9,6 +9,7 @@
 
 #include <components/files/configurationmanager.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 namespace Settings
 {
@@ -162,23 +163,44 @@ namespace Settings
     osg::Vec2f Manager::getVector2(std::string_view setting, std::string_view category)
     {
         const std::string& value = getString(setting, category);
-        std::stringstream stream(value);
-        float x, y;
-        stream >> x >> y;
-        if (stream.fail())
-            throw std::runtime_error(std::string("Can't parse 2d vector: " + value));
-        return { x, y };
+
+        std::vector<std::string> components;
+        Misc::StringUtils::split(value, components);
+
+        if (components.size() == 2)
+        {
+            auto x = Misc::StringUtils::toNumeric<float>(components[0]);
+            auto y = Misc::StringUtils::toNumeric<float>(components[1]);
+
+            if (x && y)
+            {
+                return { x.value(), y.value() };
+            }
+        }
+
+        throw std::runtime_error(std::string("Can't parse 2d vector: " + value));
     }
 
     osg::Vec3f Manager::getVector3(std::string_view setting, std::string_view category)
     {
         const std::string& value = getString(setting, category);
-        std::stringstream stream(value);
-        float x, y, z;
-        stream >> x >> y >> z;
-        if (stream.fail())
-            throw std::runtime_error(std::string("Can't parse 3d vector: " + value));
-        return { x, y, z };
+
+        std::vector<std::string> components;
+        Misc::StringUtils::split(value, components);
+
+        if (components.size() == 3)
+        {
+            auto x = Misc::StringUtils::toNumeric<float>(components[0]);
+            auto y = Misc::StringUtils::toNumeric<float>(components[1]);
+            auto z = Misc::StringUtils::toNumeric<float>(components[2]);
+
+            if (x && y && z)
+            {
+                return { x.value(), y.value(), z .value()};
+            }
+        }
+
+        throw std::runtime_error(std::string("Can't parse 3d vector: " + value));
     }
 
     void Manager::setString(std::string_view setting, std::string_view category, const std::string& value)
