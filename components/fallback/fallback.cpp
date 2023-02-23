@@ -29,31 +29,13 @@ namespace Fallback
     float Map::getFloat(std::string_view fall)
     {
         std::string_view fallback = getString(fall);
-        if (!fallback.empty())
-        {
-            std::stringstream stream;
-            stream << fallback;
-            float number = 0.f;
-            stream >> number;
-            return number;
-        }
-
-        return 0;
+        return Misc::StringUtils::toNumeric<float>(fallback, 0.0f);
     }
 
     int Map::getInt(std::string_view fall)
     {
         std::string_view fallback = getString(fall);
-        if (!fallback.empty())
-        {
-            std::stringstream stream;
-            stream << fallback;
-            int number = 0;
-            stream >> number;
-            return number;
-        }
-
-        return 0;
+        return Misc::StringUtils::toNumeric<int>(fallback, 0);
     }
 
     bool Map::getBool(std::string_view fall)

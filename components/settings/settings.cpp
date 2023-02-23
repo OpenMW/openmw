@@ -15,27 +15,18 @@ namespace Settings
     namespace
     {
         template <class T>
-        auto parseIntegralNumber(const std::string& value, std::string_view setting, std::string_view category)
+        T parseNumberFromSetting(const std::string& value, std::string_view setting, std::string_view category)
         {
             T number{};
+
             const auto result = std::from_chars(value.data(), value.data() + value.size(), number);
             if (result.ec != std::errc())
+            {
                 throw std::system_error(std::make_error_code(result.ec),
                     "Failed to parse number from setting [" + std::string(category) + "] " + std::string(setting)
-                        + " value \"" + value + "\"");
-            return number;
-        }
+                    + " value \"" + value + "\"");
+            }
 
-        template <class T>
-        auto parseFloatingPointNumber(const std::string& value, std::string_view setting, std::string_view category)
-        {
-            std::stringstream stream(value);
-            T number{};
-            stream >> number;
-            if (stream.bad())
-                throw std::system_error(errno, std::generic_category(),
-                    "Failed to parse number from setting [" + std::string(category) + "] " + std::string(setting)
-                        + " value \"" + value + "\"");
             return number;
         }
     }
@@ -139,27 +130,27 @@ namespace Settings
 
     float Manager::getFloat(std::string_view setting, std::string_view category)
     {
-        return parseFloatingPointNumber<float>(getString(setting, category), setting, category);
+        return parseNumberFromSetting<float>(getString(setting, category), setting, category);
     }
 
     double Manager::getDouble(std::string_view setting, std::string_view category)
     {
-        return parseFloatingPointNumber<double>(getString(setting, category), setting, category);
+        return parseNumberFromSetting<double>(getString(setting, category), setting, category);
     }
 
     int Manager::getInt(std::string_view setting, std::string_view category)
     {
-        return parseIntegralNumber<int>(getString(setting, category), setting, category);
+        return parseNumberFromSetting<int>(getString(setting, category), setting, category);
     }
 
     std::uint64_t Manager::getUInt64(std::string_view setting, std::string_view category)
     {
-        return parseIntegralNumber<std::uint64_t>(getString(setting, category), setting, category);
+        return parseNumberFromSetting<uint64_t>(getString(setting, category), setting, category);
     }
 
     std::size_t Manager::getSize(std::string_view setting, std::string_view category)
     {
-        return parseIntegralNumber<std::size_t>(getString(setting, category), setting, category);
+        return parseNumberFromSetting<size_t>(getString(setting, category), setting, category);
     }
 
     bool Manager::getBool(std::string_view setting, std::string_view category)

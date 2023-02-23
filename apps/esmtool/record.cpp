@@ -6,6 +6,7 @@
 
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/esmreader.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/misc/strings/format.hpp>
 
 namespace
@@ -68,9 +69,7 @@ namespace
 
         std::string type_str = "INVALID";
         std::string func_str = Misc::StringUtils::format("INVALID=%s", rule.substr(1, 3));
-        int func;
-        std::istringstream iss(rule.substr(2, 2));
-        iss >> func;
+        int func = Misc::StringUtils::toNumeric<int>(rule.substr(2, 2), 0);
 
         switch (type)
         {

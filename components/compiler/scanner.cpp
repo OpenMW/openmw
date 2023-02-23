@@ -195,9 +195,8 @@ namespace Compiler
         TokenLoc loc(mLoc);
         mLoc.mLiteral.clear();
 
-        const int intValue = Misc::StringUtils::toNumeric<int>(value, 0);
+        cont = parser.parseInt(Misc::StringUtils::toNumeric<int>(value, 0), loc, *this);
 
-        cont = parser.parseInt(intValue, loc, *this);
         return true;
     }
 
@@ -232,12 +231,8 @@ namespace Compiler
         TokenLoc loc(mLoc);
         mLoc.mLiteral.clear();
 
-        std::istringstream stream(value);
+        cont = parser.parseFloat(Misc::StringUtils::toNumeric<float>(value, 0.0f), loc, *this);
 
-        float floatValue = 0;
-        stream >> floatValue;
-
-        cont = parser.parseFloat(floatValue, loc, *this);
         return true;
     }
 
