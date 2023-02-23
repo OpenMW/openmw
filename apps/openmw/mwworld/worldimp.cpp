@@ -680,7 +680,7 @@ namespace MWWorld
         {
             // TODO: caching still doesn't work efficiently here (only works for the one CellStore that the reference is
             // in)
-            Ptr ptr = mWorldModel.getPtr(name, *cellstore, false);
+            Ptr ptr = mWorldModel.getPtr(name, *cellstore);
 
             if (!ptr.isEmpty())
                 return ptr;
@@ -726,11 +726,6 @@ namespace MWWorld
             return getPlayerPtr();
         // Now search cells
         return mWorldScene->searchPtrViaActorId(actorId);
-    }
-
-    Ptr World::searchPtrViaRefNum(const ESM::RefId& id, const ESM::RefNum& refNum)
-    {
-        return mWorldModel.getPtr(id, refNum);
     }
 
     struct FindContainerVisitor

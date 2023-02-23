@@ -286,8 +286,6 @@ namespace MWWorld
         Ptr searchPtrViaActorId(int actorId) override;
         ///< Search is limited to the active cells.
 
-        Ptr searchPtrViaRefNum(const ESM::RefId& id, const ESM::RefNum& refNum) override;
-
         MWWorld::Ptr findContainer(const MWWorld::ConstPtr& ptr) override;
         ///< Return a pointer to a liveCellRef which contains \a ptr.
         /// \note Search is limited to the active cells.

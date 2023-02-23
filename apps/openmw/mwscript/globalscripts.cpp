@@ -12,6 +12,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "interpretercontext.hpp"
 
@@ -62,7 +63,7 @@ namespace
             if (pair.second.empty())
                 return MWWorld::Ptr();
             else if (pair.first.hasContentFile())
-                return MWBase::Environment::get().getWorld()->searchPtrViaRefNum(pair.second, pair.first);
+                return MWBase::Environment::get().getWorldModel()->getPtr(pair.first);
             return MWBase::Environment::get().getWorld()->searchPtr(pair.second, false);
         }
     };
