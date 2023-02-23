@@ -24,18 +24,26 @@ namespace Gui
 
     void NumericEditBox::onEditTextChange(MyGUI::EditBox* sender)
     {
-        std::string newCaption = sender->getCaption();
+        const std::string newCaption = sender->getCaption();
+
         if (newCaption.empty())
         {
             return;
         }
 
-        mValue = Misc::StringUtils::toNumeric<int>(newCaption, mValue);
-
-        int capped = std::clamp(mValue, mMinValue, mMaxValue);
-        if (capped != mValue)
+        if (const auto conversion = Misc::StringUtils::toNumeric<int>(newCaption))
         {
-            mValue = capped;
+            mValue = conversion.value();
+
+            const int capped = std::clamp(mValue, mMinValue, mMaxValue);
+            if (capped != mValue)
+            {
+                mValue = capped;
+                setCaption(MyGUI::utility::toString(mValue));
+            }
+        }
+        else
+        {
             setCaption(MyGUI::utility::toString(mValue));
         }
 
