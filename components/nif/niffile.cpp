@@ -152,6 +152,7 @@ namespace Nif
             { "BSShaderPPLightingProperty", &construct<BSShaderPPLightingProperty, RC_BSShaderPPLightingProperty> },
             { "BSShaderNoLightingProperty", &construct<BSShaderNoLightingProperty, RC_BSShaderNoLightingProperty> },
             { "BSFurnitureMarker", &construct<BSFurnitureMarker, RC_BSFurnitureMarker> },
+            { "BSFurnitureMarkerNode", &construct<BSFurnitureMarker, RC_BSFurnitureMarker> },
             { "NiCollisionObject", &construct<NiCollisionObject, RC_NiCollisionObject> },
             { "bhkCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
             { "BSDismemberSkinInstance", &construct<BSDismemberSkinInstance, RC_BSDismemberSkinInstance> },
