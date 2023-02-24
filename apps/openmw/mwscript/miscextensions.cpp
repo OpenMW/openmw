@@ -576,10 +576,11 @@ namespace MWScript
                     return;
                 }
 
-                long key = 0;
+                long key;
 
-                if (const auto k = ::Misc::StringUtils::toNumeric<long>(effect.data()); k.value() >= 0 && k.value() <= 32767)
-                    key = k.value();
+                if (const auto k = ::Misc::StringUtils::toNumeric<long>(effect.data());
+                    k.has_value() && *k >= 0 && *k <= 32767)
+                    key = *k;
                 else
                     key = ESM::MagicEffect::effectStringToId({ effect });
 

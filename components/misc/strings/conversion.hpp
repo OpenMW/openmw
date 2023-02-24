@@ -63,9 +63,9 @@ namespace Misc::StringUtils
     template <typename T>
     inline T toNumeric(std::string_view s, T defaultValue)
     {
-        if (auto conversion = toNumeric<T>(s) ; conversion)
+        if (auto numeric = toNumeric<T>(s))
         {
-            return conversion.value();
+            return *numeric;
         }
 
         return defaultValue;
