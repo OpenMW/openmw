@@ -2247,7 +2247,7 @@ namespace NifOsg
                             stateset->setTextureAttributeAndModes(texUnit, texMat, osg::StateAttribute::ON);
                         }
                     }
-                    stateset->addUniform(new osg::Uniform("useFalloff", true)); // Should use the shader flag
+                    stateset->addUniform(new osg::Uniform("useFalloff", false)); // Should use the shader flag
                     stateset->addUniform(new osg::Uniform("falloffParams", texprop->mFalloffParams));
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
                     break;

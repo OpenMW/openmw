@@ -157,6 +157,8 @@ namespace Nif
         RC_NiBlendFloatInterpolator,
         RC_NiBlendPoint3Interpolator,
         RC_NiBlendTransformInterpolator,
+        RC_bhkCompressedMeshShape,
+        RC_bhkCompressedMeshShapeData,
     };
 
     /// Base class for all records

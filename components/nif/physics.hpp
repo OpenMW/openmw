@@ -96,6 +96,41 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
+    struct bhkMeshMaterial
+    {
+        HavokMaterial mHavokMaterial;
+        HavokFilter mHavokFilter;
+        void read(NIFStream* nif);
+    };
+
+    struct bhkQsTransform
+    {
+        osg::Vec4f mTranslation;
+        osg::Quat mRotation;
+        void read(NIFStream* nif);
+    };
+
+    struct bhkCMSBigTri
+    {
+        unsigned short mTriangle[3];
+        unsigned int mMaterial;
+        unsigned short mWeldingInfo;
+        void read(NIFStream* nif);
+    };
+
+    struct bhkCMSChunk
+    {
+        osg::Vec4f mTranslation;
+        unsigned int mMaterialIndex;
+        unsigned short mReference;
+        unsigned short mTransformIndex;
+        std::vector<unsigned short> mVertices;
+        std::vector<unsigned short> mIndices;
+        std::vector<unsigned short> mStrips;
+        std::vector<unsigned short> mWeldingInfos;
+        void read(NIFStream* nif);
+    };
+
     enum class hkMotionType : uint8_t
     {
         Motion_Invalid = 0,
@@ -351,6 +386,34 @@ namespace Nif
         bhkWorldObjCInfoProperty mChildShapeProperty;
         bhkWorldObjCInfoProperty mChildFilterProperty;
         std::vector<HavokFilter> mHavokFilters;
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkCompressedMeshShape : public bhkShape
+    {
+        NodePtr mTarget;
+        unsigned int mUserData;
+        float mRadius;
+        osg::Vec4f mScale;
+        bhkCompressedMeshShapeDataPtr mData;
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct bhkCompressedMeshShapeData : public bhkRefObject
+    {
+        unsigned int mBitsPerIndex, mBitsPerWIndex;
+        unsigned int mMaskWIndex, mMaskIndex;
+        float mError;
+        osg::Vec4f mAabbMin, mAabbMax;
+        char mWeldingType;
+        char mMaterialType;
+        std::vector<bhkMeshMaterial> mMaterials;
+        std::vector<bhkQsTransform> mChunkTransforms;
+        std::vector<osg::Vec4f> mBigVerts;
+        std::vector<bhkCMSBigTri> mBigTris;
+        std::vector<bhkCMSChunk> mChunks;
+
         void read(NIFStream* nif) override;
     };
 

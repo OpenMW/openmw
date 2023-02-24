@@ -71,6 +71,46 @@ namespace Nif
             mNormal = nif->getVector3();
     }
 
+    void bhkMeshMaterial::read(NIFStream* nif)
+    {
+        mHavokMaterial.read(nif);
+        mHavokFilter.read(nif);
+    }
+
+    void bhkQsTransform::read(NIFStream* nif)
+    {
+        mTranslation = nif->getVector4();
+        mRotation = nif->getQuaternion();
+    }
+
+    void bhkCMSBigTri::read(NIFStream* nif)
+    {
+        for (int i = 0; i < 3; i++)
+            mTriangle[i] = nif->getUShort();
+        mMaterial = nif->getUInt();
+        mWeldingInfo = nif->getUShort();
+    }
+
+    void bhkCMSChunk::read(NIFStream* nif)
+    {
+        mTranslation = nif->getVector4();
+        mMaterialIndex = nif->getUInt();
+        mReference = nif->getUShort();
+        mTransformIndex = nif->getUShort();
+        size_t numVertices = nif->getUInt();
+        if (numVertices)
+            nif->getUShorts(mVertices, numVertices);
+        size_t numIndices = nif->getUInt();
+        if (numIndices)
+            nif->getUShorts(mIndices, numIndices);
+        size_t numStrips = nif->getUInt();
+        if (numStrips)
+            nif->getUShorts(mStrips, numStrips);
+        size_t numInfos = nif->getUInt();
+        if (numInfos)
+            nif->getUShorts(mWeldingInfos, numInfos);
+    }
+
     void bhkRigidBodyCInfo::read(NIFStream* nif)
     {
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
@@ -325,6 +365,68 @@ namespace Nif
         mHavokFilters.resize(numFilters);
         for (HavokFilter& filter : mHavokFilters)
             filter.read(nif);
+    }
+
+    void bhkCompressedMeshShape::read(NIFStream* nif)
+    {
+        mTarget.read(nif);
+        mUserData = nif->getUInt();
+        mRadius = nif->getFloat();
+        nif->getFloat(); // Unknown
+        mScale = nif->getVector4();
+        nif->getFloat(); // Radius
+        nif->getVector4(); // Scale
+        mData.read(nif);
+    }
+
+    void bhkCompressedMeshShape::post(Reader& nif)
+    {
+        mTarget.post(nif);
+        mData.post(nif);
+    }
+
+    void bhkCompressedMeshShapeData::read(NIFStream* nif)
+    {
+        mBitsPerIndex = nif->getUInt();
+        mBitsPerWIndex = nif->getUInt();
+        mMaskWIndex = nif->getUInt();
+        mMaskIndex = nif->getUInt();
+        mError = nif->getFloat();
+        mAabbMin = nif->getVector4();
+        mAabbMax = nif->getVector4();
+        mWeldingType = nif->getChar();
+        mMaterialType = nif->getChar();
+        nif->skip(nif->getUInt() * 4); // Unused
+        nif->skip(nif->getUInt() * 4); // Unused
+        nif->skip(nif->getUInt() * 4); // Unused
+
+        size_t numMaterials = nif->getUInt();
+        mMaterials.resize(numMaterials);
+        for (bhkMeshMaterial& material : mMaterials)
+            material.read(nif);
+
+        nif->getUInt(); // Unused
+        size_t numTransforms = nif->getUInt();
+
+        mChunkTransforms.resize(numTransforms);
+        for (bhkQsTransform& transform : mChunkTransforms)
+            transform.read(nif);
+
+        size_t numBigVertices = nif->getUInt();
+        if (numBigVertices)
+            nif->getVector4s(mBigVerts, numBigVertices);
+
+        size_t numBigTriangles = nif->getUInt();
+        mBigTris.resize(numBigTriangles);
+        for (bhkCMSBigTri& tri : mBigTris)
+            tri.read(nif);
+
+        size_t numChunks = nif->getUInt();
+        mChunks.resize(numChunks);
+        for (bhkCMSChunk& chunk : mChunks)
+            chunk.read(nif);
+
+        nif->getUInt(); // Unused
     }
 
     void bhkRigidBody::read(NIFStream* nif)

@@ -137,6 +137,7 @@ namespace Nif
             { "BSBound", &construct<BSBound, RC_BSBound> },
             { "NiTransformData", &construct<NiKeyframeData, RC_NiKeyframeData> },
             { "BSFadeNode", &construct<NiNode, RC_NiNode> },
+            { "BSLeafAnimNode", &construct<NiNode, RC_NiNode> },
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
             { "NiFloatInterpolator", &construct<NiFloatInterpolator, RC_NiFloatInterpolator> },
             { "NiBoolInterpolator", &construct<NiBoolInterpolator, RC_NiBoolInterpolator> },
@@ -152,6 +153,7 @@ namespace Nif
             { "BSShaderPPLightingProperty", &construct<BSShaderPPLightingProperty, RC_BSShaderPPLightingProperty> },
             { "BSShaderNoLightingProperty", &construct<BSShaderNoLightingProperty, RC_BSShaderNoLightingProperty> },
             { "BSFurnitureMarker", &construct<BSFurnitureMarker, RC_BSFurnitureMarker> },
+            { "BSFurnitureMarkerNode", &construct<BSFurnitureMarker, RC_BSFurnitureMarker> },
             { "NiCollisionObject", &construct<NiCollisionObject, RC_NiCollisionObject> },
             { "bhkCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
             { "BSDismemberSkinInstance", &construct<BSDismemberSkinInstance, RC_BSDismemberSkinInstance> },
@@ -181,6 +183,8 @@ namespace Nif
             { "NiBlendPoint3Interpolator", &construct<NiBlendPoint3Interpolator, RC_NiBlendPoint3Interpolator> },
             { "NiBlendTransformInterpolator",
                 &construct<NiBlendTransformInterpolator, RC_NiBlendTransformInterpolator> },
+            { "bhkCompressedMeshShape", &construct<bhkCompressedMeshShape, RC_bhkCompressedMeshShape> },
+            { "bhkCompressedMeshShapeData", &construct<bhkCompressedMeshShapeData, RC_bhkCompressedMeshShapeData> },
         };
     }
 
