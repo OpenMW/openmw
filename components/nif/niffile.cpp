@@ -137,6 +137,7 @@ namespace Nif
             { "BSBound", &construct<BSBound, RC_BSBound> },
             { "NiTransformData", &construct<NiKeyframeData, RC_NiKeyframeData> },
             { "BSFadeNode", &construct<NiNode, RC_NiNode> },
+            { "BSLeafAnimNode", &construct<NiNode, RC_NiNode> },
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
             { "NiFloatInterpolator", &construct<NiFloatInterpolator, RC_NiFloatInterpolator> },
             { "NiBoolInterpolator", &construct<NiBoolInterpolator, RC_NiBoolInterpolator> },
