@@ -182,6 +182,8 @@ namespace Nif
             { "NiBlendPoint3Interpolator", &construct<NiBlendPoint3Interpolator, RC_NiBlendPoint3Interpolator> },
             { "NiBlendTransformInterpolator",
                 &construct<NiBlendTransformInterpolator, RC_NiBlendTransformInterpolator> },
+            { "bhkCompressedMeshShape", &construct<bhkCompressedMeshShape, RC_bhkCompressedMeshShape> },
+            { "bhkCompressedMeshShapeData", &construct<bhkCompressedMeshShapeData, RC_bhkCompressedMeshShapeData> },
         };
     }
 
