@@ -922,7 +922,7 @@ void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & sh
 {
     // This can't be part of the constructor as OSG mandates that there be a trivial constructor available
 
-    osg::ref_ptr<osg::Shader> castingVertexShader = shaderManager.getShader("shadowcasting_vertex.glsl", { }, osg::Shader::VERTEX);
+    osg::ref_ptr<osg::Shader> castingVertexShader = shaderManager.getShader("shadowcasting.vert");
     osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
     std::string useGPUShader4 = exts && exts->isGpuShader4Supported ? "1" : "0";
     for (int alphaFunc = GL_NEVER; alphaFunc <= GL_ALWAYS; ++alphaFunc)
@@ -930,11 +930,11 @@ void SceneUtil::MWShadowTechnique::setupCastingShader(Shader::ShaderManager & sh
         auto& program = _castingPrograms[alphaFunc - GL_NEVER];
         program = new osg::Program();
         program->addShader(castingVertexShader);
-        program->addShader(shaderManager.getShader("shadowcasting_fragment.glsl", { {"alphaFunc", std::to_string(alphaFunc)},
+        program->addShader(shaderManager.getShader("shadowcasting.frag", { {"alphaFunc", std::to_string(alphaFunc)},
                                                                                     {"alphaToCoverage", "0"},
                                                                                     {"adjustCoverage", "1"},
                                                                                     {"useGPUShader4", useGPUShader4}
-                                                                                  }, osg::Shader::FRAGMENT));
+                                                                                  }));
     }
 }
 

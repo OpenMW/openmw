@@ -16,6 +16,29 @@
 #include <sstream>
 #include <unordered_map>
 
+namespace
+{
+    osg::Shader::Type getShaderType(const std::string& templateName)
+    {
+        auto ext = std::filesystem::path(templateName).extension();
+
+        if (ext == ".vert")
+            return osg::Shader::VERTEX;
+        if (ext == ".frag")
+            return osg::Shader::FRAGMENT;
+        if (ext == ".geom")
+            return osg::Shader::GEOMETRY;
+        if (ext == ".comp")
+            return osg::Shader::COMPUTE;
+        if (ext == ".tese")
+            return osg::Shader::TESSEVALUATION;
+        if (ext == ".tesc")
+            return osg::Shader::TESSCONTROL;
+
+        throw std::runtime_error("unrecognized shader template name: " + templateName);
+    }
+}
+
 namespace Shader
 {
 
@@ -106,7 +129,11 @@ namespace Shader
                 return false;
             }
             std::string includeFilename = source.substr(start + 1, end - (start + 1));
-            std::filesystem::path includePath = shaderPath / includeFilename;
+            std::filesystem::path includePath
+                = shaderPath / std::filesystem::path(fileName).parent_path() / includeFilename;
+
+            if (!std::filesystem::exists(includePath))
+                includePath = shaderPath / includeFilename;
 
             // Determine the line number that will be used for the #line directive following the included source
             size_t lineDirectivePosition = source.rfind("#line", foundPos);
@@ -471,9 +498,15 @@ namespace Shader
     };
 
     osg::ref_ptr<osg::Shader> ShaderManager::getShader(
-        const std::string& templateName, const ShaderManager::DefineMap& defines, osg::Shader::Type shaderType)
+        std::string templateName, const ShaderManager::DefineMap& defines, std::optional<osg::Shader::Type> type)
     {
         std::unique_lock<std::mutex> lock(mMutex);
+
+        // TODO: Implement mechanism to switch to core or compatibility profile shaders.
+        // This logic is temporary until core support is supported.
+        if (!templateName.starts_with("lib") && !templateName.starts_with("compatibility")
+            && !templateName.starts_with("core"))
+            templateName = "compatibility/" + templateName;
 
         // read the template if we haven't already
         TemplateMap::iterator templateIt = mShaderTemplates.find(templateName);
@@ -514,7 +547,7 @@ namespace Shader
                 return nullptr;
             }
 
-            osg::ref_ptr<osg::Shader> shader(new osg::Shader(shaderType));
+            osg::ref_ptr<osg::Shader> shader(new osg::Shader(type ? *type : getShaderType(templateName)));
             shader->setShaderSource(shaderSource);
             // Assign a unique prefix to allow the SharedStateManager to compare shaders efficiently.
             // Append shader source filename for debugging.
@@ -530,6 +563,18 @@ namespace Shader
             shaderIt = mShaders.insert(std::make_pair(std::make_pair(templateName, defines), shader)).first;
         }
         return shaderIt->second;
+    }
+
+    osg::ref_ptr<osg::Program> ShaderManager::getProgram(
+        const std::string& templateName, const DefineMap& defines, const osg::Program* programTemplate)
+    {
+        auto vert = getShader(templateName + ".vert", defines);
+        auto frag = getShader(templateName + ".frag", defines);
+
+        if (!vert || !frag)
+            throw std::runtime_error("failed initializing shader: " + templateName);
+
+        return getProgram(vert, frag, programTemplate);
     }
 
     osg::ref_ptr<osg::Program> ShaderManager::getProgram(osg::ref_ptr<osg::Shader> vertexShader,

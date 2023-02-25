@@ -366,10 +366,7 @@ namespace MWRender
         {
             Shader::ShaderManager::DefineMap defines = {};
             Stereo::Manager::instance().shaderStereoDefines(defines);
-            auto vertex = mSceneManager->getShaderManager().getShader("sky_vertex.glsl", defines, osg::Shader::VERTEX);
-            auto fragment
-                = mSceneManager->getShaderManager().getShader("sky_fragment.glsl", defines, osg::Shader::FRAGMENT);
-            auto program = mSceneManager->getShaderManager().getProgram(vertex, fragment);
+            auto program = mSceneManager->getShaderManager().getProgram("sky", defines);
             mEarlyRenderBinRoot->getOrCreateStateSet()->addUniform(new osg::Uniform("pass", -1));
             mEarlyRenderBinRoot->getOrCreateStateSet()->setAttributeAndModes(
                 program, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);

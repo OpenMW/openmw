@@ -416,9 +416,7 @@ namespace osgMyGUI
 
     void RenderManager::enableShaders(Shader::ShaderManager& shaderManager)
     {
-        auto vertexShader = shaderManager.getShader("gui_vertex.glsl", {}, osg::Shader::VERTEX);
-        auto fragmentShader = shaderManager.getShader("gui_fragment.glsl", {}, osg::Shader::FRAGMENT);
-        auto program = shaderManager.getProgram(vertexShader, fragmentShader);
+        auto program = shaderManager.getProgram("gui");
 
         mDrawable->getDrawableStateSet()->setAttributeAndModes(program, osg::StateAttribute::ON);
         mDrawable->getDrawableStateSet()->addUniform(new osg::Uniform("diffuseMap", 0));

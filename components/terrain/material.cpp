@@ -285,17 +285,7 @@ namespace Terrain
                 defineMap["writeNormals"] = (it == layers.end() - 1) ? "1" : "0";
                 Stereo::Manager::instance().shaderStereoDefines(defineMap);
 
-                osg::ref_ptr<osg::Shader> vertexShader
-                    = shaderManager.getShader("terrain_vertex.glsl", defineMap, osg::Shader::VERTEX);
-                osg::ref_ptr<osg::Shader> fragmentShader
-                    = shaderManager.getShader("terrain_fragment.glsl", defineMap, osg::Shader::FRAGMENT);
-                if (!vertexShader || !fragmentShader)
-                {
-                    // Try again without shader. Error already logged by above
-                    return createPasses(false, sceneManager, layers, blendmaps, blendmapScale, layerTileSize);
-                }
-
-                stateset->setAttributeAndModes(shaderManager.getProgram(vertexShader, fragmentShader));
+                stateset->setAttributeAndModes(shaderManager.getProgram("terrain", defineMap));
                 stateset->addUniform(UniformCollection::value().mColorMode);
             }
             else

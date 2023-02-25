@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -36,13 +37,16 @@ namespace Shader
         typedef std::map<std::string, std::string> DefineMap;
 
         /// Create or retrieve a shader instance.
-        /// @param shaderTemplate The filename of the shader template.
+        /// @param templateName The path of the shader template.
         /// @param defines Define values that can be retrieved by the shader template.
         /// @param shaderType The type of shader (usually vertex or fragment shader).
         /// @note May return nullptr on failure.
         /// @note Thread safe.
-        osg::ref_ptr<osg::Shader> getShader(
-            const std::string& templateName, const DefineMap& defines, osg::Shader::Type shaderType);
+        osg::ref_ptr<osg::Shader> getShader(std::string templateName, const DefineMap& defines = {},
+            std::optional<osg::Shader::Type> type = std::nullopt);
+
+        osg::ref_ptr<osg::Program> getProgram(const std::string& templateName, const DefineMap& defines = {},
+            const osg::Program* programTemplate = nullptr);
 
         osg::ref_ptr<osg::Program> getProgram(osg::ref_ptr<osg::Shader> vertexShader,
             osg::ref_ptr<osg::Shader> fragmentShader, const osg::Program* programTemplate = nullptr);

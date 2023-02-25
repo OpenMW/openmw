@@ -264,18 +264,10 @@ namespace MWRender
         osg::ref_ptr<osg::Camera> screenshotCamera(new osg::Camera);
         osg::ref_ptr<osg::ShapeDrawable> quad(new osg::ShapeDrawable(new osg::Box(osg::Vec3(0, 0, 0), 2.0)));
 
-        std::map<std::string, std::string> defineMap;
-
-        Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
-        osg::ref_ptr<osg::Shader> fragmentShader(
-            shaderMgr.getShader("s360_fragment.glsl", defineMap, osg::Shader::FRAGMENT));
-        osg::ref_ptr<osg::Shader> vertexShader(shaderMgr.getShader("s360_vertex.glsl", defineMap, osg::Shader::VERTEX));
         osg::ref_ptr<osg::StateSet> stateset = quad->getOrCreateStateSet();
 
-        osg::ref_ptr<osg::Program> program(new osg::Program);
-        program->addShader(fragmentShader);
-        program->addShader(vertexShader);
-        stateset->setAttributeAndModes(program, osg::StateAttribute::ON);
+        Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
+        stateset->setAttributeAndModes(shaderMgr.getProgram("360"), osg::StateAttribute::ON);
 
         stateset->addUniform(new osg::Uniform("cubeMap", 0));
         stateset->addUniform(new osg::Uniform("mapping", screenshotMapping));
