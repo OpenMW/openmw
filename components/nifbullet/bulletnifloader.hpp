@@ -64,10 +64,7 @@ namespace NifBullet
             bool isAnimated, bool avoid);
 
         std::unique_ptr<btCompoundShape, Resource::DeleteCollisionShape> mCompoundShape;
-
-        std::unique_ptr<btTriangleMesh> mStaticMesh;
-
-        std::unique_ptr<btTriangleMesh> mAvoidStaticMesh;
+        std::unique_ptr<btCompoundShape, Resource::DeleteCollisionShape> mAvoidCompoundShape;
 
         osg::ref_ptr<Resource::BulletShape> mShape;
     };
