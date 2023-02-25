@@ -681,31 +681,24 @@ namespace Shader
                 program->addShader(linkedShader);
     }
 
-    int ShaderManager::reserveGlobalTextureUnits(Slot slot)
+    int ShaderManager::reserveGlobalTextureUnits(Slot slot, int count)
     {
-        int unit = mReservedTextureUnitsBySlot[static_cast<int>(slot)];
-        if (unit >= 0)
-            return unit;
+        // TODO: Reuse units when count increase forces reallocation
+        // TODO: Warn if trampling on the ~8 units needed by model textures
+        auto unit = mReservedTextureUnitsBySlot[static_cast<int>(slot)];
+        if (unit.index >= 0 && unit.count >= count)
+            return unit.index;
 
-        {
-            // Texture units from `8 - numberOfShadowMaps` to `8` are used for shadows, so we skip them here.
-            // TODO: Maybe instead of fixed texture units use `reserveGlobalTextureUnits` for shadows as well.
-            static const int numberOfShadowMaps = Settings::Manager::getBool("enable shadows", "Shadows")
-                ? std::clamp(Settings::Manager::getInt("number of shadow maps", "Shadows"), 1, 8)
-                : 0;
-            if (getAvailableTextureUnits() >= 8 && getAvailableTextureUnits() - 1 < 8)
-                mReservedTextureUnits = mMaxTextureUnits - (8 - numberOfShadowMaps);
-        }
-
-        if (getAvailableTextureUnits() < 2)
+        if (getAvailableTextureUnits() < count + 1)
             throw std::runtime_error("Can't reserve texture unit; no available units");
-        mReservedTextureUnits++;
+        mReservedTextureUnits += count;
 
-        unit = mMaxTextureUnits - mReservedTextureUnits;
+        unit.index = mMaxTextureUnits - mReservedTextureUnits;
+        unit.count = count;
 
         mReservedTextureUnitsBySlot[static_cast<int>(slot)] = unit;
 
-        return unit;
+        return unit.index;
     }
 
     void ShaderManager::update(osgViewer::Viewer& viewer)

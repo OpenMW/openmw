@@ -537,9 +537,6 @@ MWShadowTechnique::ShadowData::ShadowData(MWShadowTechnique::ViewDependentData* 
 
     bool debug = settings->getDebugDraw();
 
-    // set up texgen
-    _texgen = new osg::TexGen;
-
     // set up the texture
     _texture = new osg::Texture2D;
 
@@ -994,8 +991,6 @@ void SceneUtil::MWShadowTechnique::copyShadowMap(osgUtil::CullVisitor& cv, ViewD
         sdl.push_back(lhs_sd);
     }
 
-    assignTexGenSettings(cv, lhs);
-
     if (lhs->_numValidShadows > 0)
     {
         prepareStateSetForRenderingShadow(*lhs, cv.getTraversalNumber());
@@ -1007,13 +1002,6 @@ void SceneUtil::MWShadowTechnique::setCustomFrustumCallback(CustomFrustumCallbac
     _customFrustumCallback = cfc;
 }
 
-void SceneUtil::MWShadowTechnique::assignTexGenSettings(osgUtil::CullVisitor& cv, ViewDependentData* vdd)
-{
-    for (const auto& sd : vdd->getShadowDataList())
-    {
-        assignTexGenSettings(&cv, sd->_camera, sd->_textureUnit, sd->_texgen);
-    }
-}
 
 void MWShadowTechnique::update(osg::NodeVisitor& nv)
 {
@@ -1035,7 +1023,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
             int endUnit = baseUnit + settings->getNumShadowMapsPerLight();
             for (int i = baseUnit; i < endUnit; ++i)
             {
-                dummyState->setTextureAttributeAndModes(i, _fallbackShadowMapTexture, osg::StateAttribute::ON);
+                dummyState->setTextureAttribute(i, _fallbackShadowMapTexture, osg::StateAttribute::ON);
                 dummyState->addUniform(new osg::Uniform(("shadowTexture" + std::to_string(i - baseUnit)).c_str(), i));
                 dummyState->addUniform(new osg::Uniform(("shadowTextureUnit" + std::to_string(i - baseUnit)).c_str(), i));
             }
@@ -1524,7 +1512,10 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
                     for (const auto & uniform : _uniforms[cv.getTraversalNumber() % 2])
                     {
                         if (uniform->getName() == validRegionUniformName)
+                        {
                             validRegionUniform = uniform;
+                            break;
+                        }
                     }
 
                     if (!validRegionUniform)
@@ -1548,7 +1539,33 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
  
             // 4.4 compute main scene graph TexGen + uniform settings + setup state
             //
-            assignTexGenSettings(&cv, camera.get(), textureUnit, sd->_texgen.get());
+            {
+                osg::Matrix shadowSpaceMatrix = cv.getCurrentCamera()->getInverseViewMatrix() *
+                    camera->getViewMatrix() *
+                    camera->getProjectionMatrix() *
+                    osg::Matrix::translate(1.0,1.0,1.0) *
+                    osg::Matrix::scale(0.5,0.5,0.5);
+
+                std::string shadowSpaceUniformName = "shadowSpaceMatrix" + std::to_string(sm_i);
+                osg::ref_ptr<osg::Uniform> shadowSpaceUniform;
+
+                for (const auto & uniform : _uniforms[cv.getTraversalNumber() % 2])
+                {
+                    if (uniform->getName() == shadowSpaceUniformName)
+                    {
+                        shadowSpaceUniform = uniform;
+                        break;
+                    }
+                }
+
+                if (!shadowSpaceUniform)
+                {
+                    shadowSpaceUniform = new osg::Uniform(osg::Uniform::FLOAT_MAT4, shadowSpaceUniformName);
+                    _uniforms[cv.getTraversalNumber() % 2].push_back(shadowSpaceUniform);
+                }
+
+                shadowSpaceUniform->set(shadowSpaceMatrix);
+            }
 
             // mark the light as one that has active shadows and requires shaders
             pl.textureUnits.push_back(textureUnit);
@@ -1556,14 +1573,7 @@ void MWShadowTechnique::cull(osgUtil::CullVisitor& cv)
             // pass on shadow data to ShadowDataList
             sd->_textureUnit = textureUnit;
 
-            if (textureUnit >= 8)
-            {
-                OSG_NOTICE<<"Shadow texture unit is invalid for texgen, will not be used."<<std::endl;
-            }
-            else
-            {
-                sdl.push_back(sd);
-            }
+            sdl.push_back(sd);
 
             // increment counters.
             ++textureUnit;
@@ -1764,7 +1774,7 @@ void MWShadowTechnique::createShaders()
     // Always use the GL_ALWAYS shader as the shadows bin will change it if necessary
     _shadowCastingStateSet->setAttributeAndModes(_castingPrograms[GL_ALWAYS - GL_NEVER], osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
     // The casting program uses a sampler, so to avoid undefined behaviour, we must bind a dummy texture in case no other is supplied
-    _shadowCastingStateSet->setTextureAttributeAndModes(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
+    _shadowCastingStateSet->setTextureAttribute(0, _fallbackBaseTexture.get(), osg::StateAttribute::ON);
     _shadowCastingStateSet->addUniform(new osg::Uniform("useDiffuseMapForShadowAlpha", true));
     _shadowCastingStateSet->addUniform(new osg::Uniform("alphaTestShadows", false));
     osg::ref_ptr<osg::Depth> depth = new osg::Depth;
@@ -3081,28 +3091,6 @@ bool MWShadowTechnique::adjustPerspectiveShadowMapCameraSettings(osgUtil::Render
     return true;
 }
 
-bool MWShadowTechnique::assignTexGenSettings(osgUtil::CullVisitor* cv, osg::Camera* camera, unsigned int textureUnit, osg::TexGen* texgen)
-{
-    OSG_INFO<<"assignTexGenSettings() textureUnit="<<textureUnit<<" texgen="<<texgen<<std::endl;
-
-    texgen->setMode(osg::TexGen::EYE_LINEAR);
-
-    // compute the matrix which takes a vertex from local coords into tex coords
-    // We actually use two matrices one used to define texgen
-    // and second that will be used as modelview when appling to OpenGL
-    texgen->setPlanesFromMatrix( camera->getProjectionMatrix() *
-                                 osg::Matrix::translate(1.0,1.0,1.0) *
-                                 osg::Matrix::scale(0.5,0.5,0.5) );
-
-    // Place texgen with modelview which removes big offsets (making it float friendly)
-    osg::ref_ptr<osg::RefMatrix> refMatrix =
-        new osg::RefMatrix( camera->getInverseViewMatrix() * (*(cv->getModelViewMatrix())) );
-
-    osgUtil::RenderStage* currentStage = cv->getCurrentRenderBin()->getStage();
-    currentStage->getPositionalStateContainer()->addPositionedTextureAttribute( textureUnit, refMatrix.get(), texgen );
-    return true;
-}
-
 void MWShadowTechnique::cullShadowReceivingScene(osgUtil::CullVisitor* cv) const
 {
     OSG_INFO<<"cullShadowReceivingScene()"<<std::endl;
@@ -3196,12 +3184,7 @@ osg::StateSet* MWShadowTechnique::prepareStateSetForRenderingShadow(ViewDependen
 
         OSG_INFO<<"   ShadowData for "<<sd._textureUnit<<std::endl;
 
-        stateset->setTextureAttributeAndModes(sd._textureUnit, sd._texture.get(), shadowMapModeValue);
-
-        stateset->setTextureMode(sd._textureUnit,GL_TEXTURE_GEN_S,osg::StateAttribute::ON);
-        stateset->setTextureMode(sd._textureUnit,GL_TEXTURE_GEN_T,osg::StateAttribute::ON);
-        stateset->setTextureMode(sd._textureUnit,GL_TEXTURE_GEN_R,osg::StateAttribute::ON);
-        stateset->setTextureMode(sd._textureUnit,GL_TEXTURE_GEN_Q,osg::StateAttribute::ON);
+        stateset->setTextureAttribute(sd._textureUnit, sd._texture.get(), shadowMapModeValue);
     }
 
     return stateset;
@@ -3304,7 +3287,7 @@ void SceneUtil::MWShadowTechnique::DebugHUD::draw(osg::ref_ptr<osg::Texture2D> t
         addAnotherShadowMap();
     
     osg::ref_ptr<osg::StateSet> stateSet = new osg::StateSet();
-    stateSet->setTextureAttributeAndModes(sDebugTextureUnit, texture, osg::StateAttribute::ON);
+    stateSet->setTextureAttribute(sDebugTextureUnit, texture, osg::StateAttribute::ON);
 
     auto frustumUniform = mFrustumUniforms[cv.getTraversalNumber() % 2][shadowMapNumber];
     frustumUniform->set(matrix);
@@ -3317,8 +3300,6 @@ void SceneUtil::MWShadowTechnique::DebugHUD::draw(osg::ref_ptr<osg::Texture2D> t
     mDebugCameras[shadowMapNumber]->accept(cv);
     cv.popStateSet();
     cv.setTraversalMask(traversalMask);
-
-    // cv.getState()->setCheckForGLErrors(osg::State::ONCE_PER_ATTRIBUTE);
 }
 
 void SceneUtil::MWShadowTechnique::DebugHUD::releaseGLObjects(osg::State* state) const

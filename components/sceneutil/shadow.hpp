@@ -29,7 +29,7 @@ namespace SceneUtil
             Shader::ShaderManager& shaderManager);
         ~ShadowManager();
 
-        void setupShadowSettings();
+        void setupShadowSettings(Shader::ShaderManager& shaderManager);
 
         Shader::ShaderManager::DefineMap getShadowDefines();
 
