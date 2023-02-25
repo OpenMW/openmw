@@ -20,7 +20,7 @@
 namespace CSMWorld
 {
     template <>
-    void Collection<CellRef, IdAccessor<CellRef>>::removeRows(int index, int count)
+    void Collection<CellRef>::removeRows(int index, int count)
     {
         mRecords.erase(mRecords.begin() + index, mRecords.begin() + index + count);
 
@@ -28,8 +28,7 @@ namespace CSMWorld
     }
 
     template <>
-    void Collection<CellRef, IdAccessor<CellRef>>::insertRecord(
-        std::unique_ptr<RecordBase> record, int index, UniversalId::Type type)
+    void Collection<CellRef>::insertRecord(std::unique_ptr<RecordBase> record, int index, UniversalId::Type type)
     {
         int size = static_cast<int>(mRecords.size());
         if (index < 0 || index > size)
@@ -257,7 +256,7 @@ int CSMWorld::RefCollection::searchId(unsigned int id) const
 
 void CSMWorld::RefCollection::removeRows(int index, int count)
 {
-    Collection<CellRef, IdAccessor<CellRef>>::removeRows(index, count); // erase records only
+    Collection<CellRef>::removeRows(index, count); // erase records only
 
     std::map<unsigned int, int>::iterator iter = mRefIndex.begin();
     while (iter != mRefIndex.end())
@@ -287,7 +286,7 @@ void CSMWorld::RefCollection::appendBlankRecord(const std::string& id, Universal
     record->get().mId = ESM::RefId::stringRefId(id);
     record->get().mIdNum = extractIdNum(id);
 
-    Collection<CellRef, IdAccessor<CellRef>>::appendRecord(std::move(record));
+    Collection<CellRef>::appendRecord(std::move(record));
 }
 
 void CSMWorld::RefCollection::appendBlankRecord(const ESM::RefId& id, UniversalId::Type type)
@@ -300,7 +299,7 @@ void CSMWorld::RefCollection::appendBlankRecord(const ESM::RefId& id, UniversalI
     record->get().mId = id;
     record->get().mIdNum = extractIdNum(id.getRefIdString());
 
-    Collection<CellRef, IdAccessor<CellRef>>::appendRecord(std::move(record));
+    Collection<CellRef>::appendRecord(std::move(record));
 }
 
 void CSMWorld::RefCollection::cloneRecord(
@@ -333,7 +332,7 @@ void CSMWorld::RefCollection::appendRecord(std::unique_ptr<RecordBase> record, U
 
     mRefIndex.insert(std::make_pair(static_cast<Record<CellRef>*>(record.get())->get().mIdNum, index));
 
-    Collection<CellRef, IdAccessor<CellRef>>::insertRecord(std::move(record), index, type); // add records only
+    Collection<CellRef>::insertRecord(std::move(record), index, type); // add records only
 }
 
 void CSMWorld::RefCollection::insertRecord(std::unique_ptr<RecordBase> record, int index, UniversalId::Type type)
@@ -341,7 +340,7 @@ void CSMWorld::RefCollection::insertRecord(std::unique_ptr<RecordBase> record, i
     int size = getAppendIndex(/*id*/ ESM::RefId(), type); // for CellRef records id is ignored
     unsigned int idNum = static_cast<Record<CellRef>*>(record.get())->get().mIdNum;
 
-    Collection<CellRef, IdAccessor<CellRef>>::insertRecord(std::move(record), index, type); // add records only
+    Collection<CellRef>::insertRecord(std::move(record), index, type); // add records only
 
     if (index < size - 1)
     {

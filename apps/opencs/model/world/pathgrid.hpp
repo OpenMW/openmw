@@ -14,11 +14,8 @@ namespace ESM
 namespace CSMWorld
 {
     struct Cell;
-    template <typename T, typename AT>
+    template <typename T>
     class IdCollection;
-
-    template <typename ESXRecordT>
-    struct IdAccessor;
 
     /// \brief Wrapper for Pathgrid record
     ///
@@ -28,7 +25,7 @@ namespace CSMWorld
     {
         ESM::RefId mId;
 
-        void load(ESM::ESMReader& esm, bool& isDeleted, const IdCollection<Cell, IdAccessor<Cell>>& cells);
+        void load(ESM::ESMReader& esm, bool& isDeleted, const IdCollection<Cell>& cells);
         void load(ESM::ESMReader& esm, bool& isDeleted);
     };
 }

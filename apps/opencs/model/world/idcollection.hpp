@@ -24,8 +24,8 @@ namespace CSMWorld
     struct Pathgrid;
 
     /// \brief Single type collection of top level records
-    template <typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT>>
-    class IdCollection : public Collection<ESXRecordT, IdAccessorT>
+    template <typename ESXRecordT>
+    class IdCollection : public Collection<ESXRecordT>
     {
         virtual void loadRecord(ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted);
 
@@ -46,14 +46,14 @@ namespace CSMWorld
         /// \return Has the ID been deleted?
     };
 
-    template <typename ESXRecordT, typename IdAccessorT>
-    void IdCollection<ESXRecordT, IdAccessorT>::loadRecord(ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted)
+    template <typename ESXRecordT>
+    void IdCollection<ESXRecordT>::loadRecord(ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted)
     {
         record.load(reader, isDeleted);
     }
 
     template <>
-    inline void IdCollection<Land, IdAccessor<Land>>::loadRecord(Land& record, ESM::ESMReader& reader, bool& isDeleted)
+    inline void IdCollection<Land>::loadRecord(Land& record, ESM::ESMReader& reader, bool& isDeleted)
     {
         record.load(reader, isDeleted);
 
@@ -66,15 +66,15 @@ namespace CSMWorld
         record.mContext.filename.clear();
     }
 
-    template <typename ESXRecordT, typename IdAccessorT>
-    int IdCollection<ESXRecordT, IdAccessorT>::load(ESM::ESMReader& reader, bool base)
+    template <typename ESXRecordT>
+    int IdCollection<ESXRecordT>::load(ESM::ESMReader& reader, bool base)
     {
         ESXRecordT record;
         bool isDeleted = false;
 
         loadRecord(record, reader, isDeleted);
 
-        ESM::RefId id = IdAccessorT().getId(record);
+        ESM::RefId id = getRecordId(record);
         int index = this->searchId(id);
 
         if (isDeleted)
@@ -102,11 +102,11 @@ namespace CSMWorld
         return load(record, base, index);
     }
 
-    template <typename ESXRecordT, typename IdAccessorT>
-    int IdCollection<ESXRecordT, IdAccessorT>::load(const ESXRecordT& record, bool base, int index)
+    template <typename ESXRecordT>
+    int IdCollection<ESXRecordT>::load(const ESXRecordT& record, bool base, int index)
     {
         if (index == -2) // index unknown
-            index = this->searchId(IdAccessorT().getId(record));
+            index = this->searchId(getRecordId(record));
 
         if (index == -1)
         {
@@ -121,7 +121,7 @@ namespace CSMWorld
         else
         {
             // old record
-            auto record2 = std::make_unique<Record<ESXRecordT>>(Collection<ESXRecordT, IdAccessorT>::getRecord(index));
+            auto record2 = std::make_unique<Record<ESXRecordT>>(Collection<ESXRecordT>::getRecord(index));
 
             if (base)
                 record2->mBase = record;
@@ -134,26 +134,26 @@ namespace CSMWorld
         return index;
     }
 
-    template <typename ESXRecordT, typename IdAccessorT>
-    bool IdCollection<ESXRecordT, IdAccessorT>::tryDelete(const ESM::RefId& id)
+    template <typename ESXRecordT>
+    bool IdCollection<ESXRecordT>::tryDelete(const ESM::RefId& id)
     {
         int index = this->searchId(id);
 
         if (index == -1)
             return false;
 
-        const Record<ESXRecordT>& record = Collection<ESXRecordT, IdAccessorT>::getRecord(index);
+        const Record<ESXRecordT>& record = Collection<ESXRecordT>::getRecord(index);
 
         if (record.isDeleted())
             return false;
 
         if (record.mState == RecordBase::State_ModifiedOnly)
         {
-            Collection<ESXRecordT, IdAccessorT>::removeRows(index, 1);
+            Collection<ESXRecordT>::removeRows(index, 1);
         }
         else
         {
-            auto record2 = std::make_unique<Record<ESXRecordT>>(Collection<ESXRecordT, IdAccessorT>::getRecord(index));
+            auto record2 = std::make_unique<Record<ESXRecordT>>(Collection<ESXRecordT>::getRecord(index));
             record2->mState = RecordBase::State_Deleted;
             this->setRecord(index, std::move(record2));
         }
@@ -162,7 +162,7 @@ namespace CSMWorld
     }
 
     template <>
-    int IdCollection<Pathgrid, IdAccessor<Pathgrid>>::load(ESM::ESMReader& reader, bool base);
+    int IdCollection<Pathgrid>::load(ESM::ESMReader& reader, bool base);
 }
 
 #endif

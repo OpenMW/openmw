@@ -45,7 +45,7 @@ namespace CSMWorld
 
         int getNestedColumnsCount(int row, int column) const override;
 
-        // this method is inherited from NestedCollection, not from Collection<Info, IdAccessor<Info> >
+        // this method is inherited from NestedCollection, not from Collection<Info>
         NestableColumn* getNestableColumn(int column) override;
 
         void addAdapter(std::pair<const ColumnBase*, NestedColumnAdapter<Info>*> adapter);
