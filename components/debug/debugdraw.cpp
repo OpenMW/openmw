@@ -339,12 +339,8 @@ Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_p
     : mParentNode(parentNode)
 {
     mCurrentFrame = 0;
-    auto vertexShader
-        = shaderManager.getShader("debug_vertex.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::VERTEX);
-    auto fragmentShader = shaderManager.getShader(
-        "debug_fragment.glsl", Shader::ShaderManager::DefineMap(), osg::Shader::Type::FRAGMENT);
 
-    auto program = shaderManager.getProgram(vertexShader, fragmentShader);
+    auto program = shaderManager.getProgram("debug");
 
     mDebugDrawSceneObjects = new osg::Group;
     mDebugDrawSceneObjects->setCullingActive(false);

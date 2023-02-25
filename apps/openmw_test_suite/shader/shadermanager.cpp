@@ -17,7 +17,7 @@ namespace
         ShaderManager mManager;
         ShaderManager::DefineMap mDefines;
 
-        ShaderManagerTest() { mManager.setShaderPath("."); }
+        ShaderManagerTest() { mManager.setShaderPath("tests_output"); }
 
         template <class F>
         void withShaderFile(const std::string& content, F&& f)
@@ -28,16 +28,17 @@ namespace
         template <class F>
         void withShaderFile(const std::string& suffix, const std::string& content, F&& f)
         {
-            auto path = TestingOpenMW::outputFilePath(
-                std::string(UnitTest::GetInstance()->current_test_info()->name()) + suffix + ".glsl");
-
+            auto subdir = std::filesystem::path("lib")
+                / std::filesystem::path(
+                    std::string(UnitTest::GetInstance()->current_test_info()->name()) + suffix + ".vert");
+            auto path = TestingOpenMW::outputFilePathWithSubDir(subdir);
             {
                 std::ofstream stream(path);
                 stream << content;
                 stream.close();
             }
 
-            f(path);
+            f(subdir);
         }
     };
 
@@ -46,7 +47,7 @@ namespace
         const std::string content;
 
         withShaderFile(content, [this](const std::filesystem::path& templateName) {
-            EXPECT_TRUE(mManager.getShader(Files::pathToUnicodeString(templateName), {}, osg::Shader::VERTEX));
+            EXPECT_TRUE(mManager.getShader(Files::pathToUnicodeString(templateName)));
         });
     }
 
@@ -57,8 +58,7 @@ namespace
               "void main() {}\n";
 
         withShaderFile(content, [&](const std::filesystem::path& templateName) {
-            const auto shader
-                = mManager.getShader(Files::pathToUnicodeString(templateName), mDefines, osg::Shader::VERTEX);
+            const auto shader = mManager.getShader(Files::pathToUnicodeString(templateName), mDefines);
             ASSERT_TRUE(shader);
             EXPECT_EQ(shader->getShaderSource(), content);
         });
@@ -80,8 +80,7 @@ namespace
                     "void main() { bar() }\n";
 
                 withShaderFile(content2, [&](const std::filesystem::path& templateName2) {
-                    const auto shader
-                        = mManager.getShader(Files::pathToUnicodeString(templateName2), mDefines, osg::Shader::VERTEX);
+                    const auto shader = mManager.getShader(Files::pathToUnicodeString(templateName2), mDefines);
                     ASSERT_TRUE(shader);
                     const std::string expected
                         = "#version 120\n"
@@ -111,8 +110,7 @@ namespace
 
         withShaderFile(content, [&](const std::filesystem::path& templateName) {
             mDefines["flag"] = "1";
-            const auto shader
-                = mManager.getShader(Files::pathToUnicodeString(templateName), mDefines, osg::Shader::VERTEX);
+            const auto shader = mManager.getShader(Files::pathToUnicodeString(templateName), mDefines);
             ASSERT_TRUE(shader);
             const std::string expected
                 = "#version 120\n"
@@ -133,8 +131,7 @@ namespace
 
         withShaderFile(content, [&](const std::filesystem::path& templateName) {
             mDefines["list"] = "1,2,3";
-            const auto shader
-                = mManager.getShader(Files::pathToUnicodeString(templateName), mDefines, osg::Shader::VERTEX);
+            const auto shader = mManager.getShader(Files::pathToUnicodeString(templateName), mDefines);
             ASSERT_TRUE(shader);
             const std::string expected
                 = "#version 120\n"
@@ -174,8 +171,7 @@ namespace
 
         withShaderFile(content, [&](const std::filesystem::path& templateName) {
             mDefines["list"] = "1,2,3";
-            const auto shader
-                = mManager.getShader(Files::pathToUnicodeString(templateName), mDefines, osg::Shader::VERTEX);
+            const auto shader = mManager.getShader(Files::pathToUnicodeString(templateName), mDefines);
             ASSERT_TRUE(shader);
             const std::string expected
                 = "#version 120\n"
@@ -221,7 +217,7 @@ namespace
               "void main() {}\n";
 
         withShaderFile(content, [&](const std::filesystem::path& templateName) {
-            EXPECT_FALSE(mManager.getShader(Files::pathToUnicodeString(templateName), mDefines, osg::Shader::VERTEX));
+            EXPECT_FALSE(mManager.getShader(Files::pathToUnicodeString(templateName), mDefines));
         });
     }
 
@@ -233,7 +229,7 @@ namespace
               "void main() {}\n";
 
         withShaderFile(content, [&](const std::filesystem::path& templateName) {
-            EXPECT_FALSE(mManager.getShader(Files::pathToUnicodeString(templateName), mDefines, osg::Shader::VERTEX));
+            EXPECT_FALSE(mManager.getShader(Files::pathToUnicodeString(templateName), mDefines));
         });
     }
 }

@@ -715,24 +715,14 @@ namespace Shader
         if (!node.getUserValue("shaderPrefix", shaderPrefix))
             shaderPrefix = mDefaultShaderPrefix;
 
-        osg::ref_ptr<osg::Shader> vertexShader(
-            mShaderManager.getShader(shaderPrefix + "_vertex.glsl", defineMap, osg::Shader::VERTEX));
-        osg::ref_ptr<osg::Shader> fragmentShader(
-            mShaderManager.getShader(shaderPrefix + "_fragment.glsl", defineMap, osg::Shader::FRAGMENT));
+        auto program = mShaderManager.getProgram(shaderPrefix, defineMap, mProgramTemplate);
+        writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
+        addedState->setAttributeAndModes(program);
 
-        if (vertexShader && fragmentShader)
+        for (const auto& [unit, name] : reqs.mTextures)
         {
-            auto program = mShaderManager.getProgram(vertexShader, fragmentShader, mProgramTemplate);
-            writableStateSet->setAttributeAndModes(program, osg::StateAttribute::ON);
-            addedState->setAttributeAndModes(program);
-
-            for (std::map<int, std::string>::const_iterator texIt = reqs.mTextures.begin();
-                 texIt != reqs.mTextures.end(); ++texIt)
-            {
-                writableStateSet->addUniform(
-                    new osg::Uniform(texIt->second.c_str(), texIt->first), osg::StateAttribute::ON);
-                addedState->addUniform(texIt->second);
-            }
+            writableStateSet->addUniform(new osg::Uniform(name.c_str(), unit), osg::StateAttribute::ON);
+            addedState->addUniform(name);
         }
 
         if (!addedState->empty())

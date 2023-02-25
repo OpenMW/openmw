@@ -1991,9 +1991,9 @@ namespace NifOsg
             switch (static_cast<Nif::BSShaderType>(type))
             {
                 case Nif::BSShaderType::ShaderType_Default:
-                    return "nv_default";
+                    return "bs/default";
                 case Nif::BSShaderType::ShaderType_NoLighting:
-                    return "nv_nolighting";
+                    return "bs/nolighting";
                 case Nif::BSShaderType::ShaderType_TallGrass:
                 case Nif::BSShaderType::ShaderType_Sky:
                 case Nif::BSShaderType::ShaderType_Skin:
@@ -2001,10 +2001,10 @@ namespace NifOsg
                 case Nif::BSShaderType::ShaderType_Lighting30:
                 case Nif::BSShaderType::ShaderType_Tile:
                     Log(Debug::Warning) << "Unhandled BSShaderType " << type << " in " << mFilename;
-                    return "nv_default";
+                    return "bs/default";
             }
             Log(Debug::Warning) << "Unknown BSShaderType " << type << " in " << mFilename;
-            return "nv_default";
+            return "bs/default";
         }
 
         std::string_view getBSLightingShaderPrefix(unsigned int type) const
@@ -2012,7 +2012,7 @@ namespace NifOsg
             switch (static_cast<Nif::BSLightingShaderType>(type))
             {
                 case Nif::BSLightingShaderType::ShaderType_Default:
-                    return "nv_default";
+                    return "bs/default";
                 case Nif::BSLightingShaderType::ShaderType_EnvMap:
                 case Nif::BSLightingShaderType::ShaderType_Glow:
                 case Nif::BSLightingShaderType::ShaderType_Parallax:
@@ -2034,10 +2034,10 @@ namespace NifOsg
                 case Nif::BSLightingShaderType::ShaderType_MultitexLandLODBlend:
                 case Nif::BSLightingShaderType::ShaderType_Dismemberment:
                     Log(Debug::Warning) << "Unhandled BSLightingShaderType " << type << " in " << mFilename;
-                    return "nv_default";
+                    return "bs/default";
             }
             Log(Debug::Warning) << "Unknown BSLightingShaderType " << type << " in " << mFilename;
-            return "nv_default";
+            return "bs/default";
         }
 
         void handleProperty(const Nif::Property* property, osg::Node* node,

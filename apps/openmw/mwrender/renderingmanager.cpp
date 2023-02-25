@@ -156,8 +156,7 @@ namespace MWRender
     {
     public:
         SharedUniformStateUpdater(bool usePlayerUniforms)
-            : mLinearFac(0.f)
-            , mNear(0.f)
+            : mNear(0.f)
             , mFar(0.f)
             , mWindSpeed(0.f)
             , mSkyBlendingStartCoef(Settings::Manager::getFloat("sky blending start", "Fog"))
@@ -167,7 +166,6 @@ namespace MWRender
 
         void setDefaults(osg::StateSet* stateset) override
         {
-            stateset->addUniform(new osg::Uniform("linearFac", 0.f));
             stateset->addUniform(new osg::Uniform("near", 0.f));
             stateset->addUniform(new osg::Uniform("far", 0.f));
             stateset->addUniform(new osg::Uniform("skyBlendingStart", 0.f));
@@ -183,7 +181,6 @@ namespace MWRender
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
         {
-            stateset->getUniform("linearFac")->set(mLinearFac);
             stateset->getUniform("near")->set(mNear);
             stateset->getUniform("far")->set(mFar);
             stateset->getUniform("skyBlendingStart")->set(mFar * mSkyBlendingStartCoef);
@@ -196,8 +193,6 @@ namespace MWRender
             }
         }
 
-        void setLinearFac(float linearFac) { mLinearFac = linearFac; }
-
         void setNear(float near) { mNear = near; }
 
         void setFar(float far) { mFar = far; }
@@ -209,7 +204,6 @@ namespace MWRender
         void setPlayerPos(osg::Vec3f playerPos) { mPlayerPos = playerPos; }
 
     private:
-        float mLinearFac;
         float mNear;
         float mFar;
         float mWindSpeed;
@@ -1293,7 +1287,6 @@ namespace MWRender
 
         if (SceneUtil::AutoDepth::isReversed())
         {
-            mSharedUniformStateUpdater->setLinearFac(-mNearClip / (mViewDistance - mNearClip) - 1.f);
             mPerViewUniformStateUpdater->setProjectionMatrix(
                 SceneUtil::getReversedZProjectionMatrixAsPerspective(fov, aspect, mNearClip, mViewDistance));
         }

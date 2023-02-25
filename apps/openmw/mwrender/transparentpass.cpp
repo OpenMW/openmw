@@ -34,13 +34,9 @@ namespace MWRender
 
         Shader::ShaderManager::DefineMap defines;
         Stereo::Manager::instance().shaderStereoDefines(defines);
-        osg::ref_ptr<osg::Shader> vertex
-            = shaderManager.getShader("blended_depth_postpass_vertex.glsl", defines, osg::Shader::VERTEX);
-        osg::ref_ptr<osg::Shader> fragment
-            = shaderManager.getShader("blended_depth_postpass_fragment.glsl", defines, osg::Shader::FRAGMENT);
 
         mStateSet->setAttributeAndModes(new osg::BlendFunc, modeOff);
-        mStateSet->setAttributeAndModes(shaderManager.getProgram(vertex, fragment), modeOn);
+        mStateSet->setAttributeAndModes(shaderManager.getProgram("depthclipped", defines), modeOn);
         mStateSet->setAttributeAndModes(new SceneUtil::AutoDepth, modeOn);
 
         for (unsigned int unit = 1; unit < 8; ++unit)

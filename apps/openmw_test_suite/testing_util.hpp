@@ -18,6 +18,14 @@ namespace TestingOpenMW
         return dir / Misc::StringUtils::stringToU8String(name);
     }
 
+    inline std::filesystem::path outputFilePathWithSubDir(const std::filesystem::path& subpath)
+    {
+        std::filesystem::path path("tests_output");
+        path /= subpath;
+        std::filesystem::create_directories(path.parent_path());
+        return path;
+    }
+
     inline std::filesystem::path temporaryFilePath(const std::string name)
     {
         return std::filesystem::temp_directory_path() / name;

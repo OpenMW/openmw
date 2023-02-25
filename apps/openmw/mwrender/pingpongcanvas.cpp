@@ -32,20 +32,15 @@ namespace MWRender
         Shader::ShaderManager::DefineMap defines;
         Stereo::Manager::instance().shaderStereoDefines(defines);
 
-        auto fallbackVertex = shaderManager.getShader("fullscreen_tri_vertex.glsl", defines, osg::Shader::VERTEX);
-        auto fallbackFragment = shaderManager.getShader("fullscreen_tri_fragment.glsl", defines, osg::Shader::FRAGMENT);
-        mFallbackProgram = shaderManager.getProgram(fallbackVertex, fallbackFragment);
+        mFallbackProgram = shaderManager.getProgram("fullscreen_tri");
 
         mFallbackStateSet->setAttributeAndModes(mFallbackProgram);
-        mFallbackStateSet->addUniform(new osg::Uniform("omw_SamplerLastShader", 0));
+        mFallbackStateSet->addUniform(new osg::Uniform("lastShader", 0));
         mFallbackStateSet->addUniform(new osg::Uniform("scaling", osg::Vec2f(1, 1)));
 
-        auto multiviewResolveVertex = shaderManager.getShader("multiview_resolve_vertex.glsl", {}, osg::Shader::VERTEX);
-        auto multiviewResolveFragment
-            = shaderManager.getShader("multiview_resolve_fragment.glsl", {}, osg::Shader::FRAGMENT);
-        mMultiviewResolveProgram = shaderManager.getProgram(multiviewResolveVertex, multiviewResolveFragment);
+        mMultiviewResolveProgram = shaderManager.getProgram("multiview_resolve");
         mMultiviewResolveStateSet->setAttributeAndModes(mMultiviewResolveProgram);
-        mMultiviewResolveStateSet->addUniform(new osg::Uniform("omw_SamplerLastShader", 0));
+        mMultiviewResolveStateSet->addUniform(new osg::Uniform("lastShader", 0));
     }
 
     void PingPongCanvas::setCurrentFrameData(size_t frameId, fx::DispatchArray&& data)

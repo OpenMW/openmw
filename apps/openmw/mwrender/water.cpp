@@ -675,11 +675,7 @@ namespace MWRender
         Stereo::Manager::instance().shaderStereoDefines(defineMap);
 
         Shader::ShaderManager& shaderMgr = mResourceSystem->getSceneManager()->getShaderManager();
-        osg::ref_ptr<osg::Shader> vertexShader(
-            shaderMgr.getShader("water_vertex.glsl", defineMap, osg::Shader::VERTEX));
-        osg::ref_ptr<osg::Shader> fragmentShader(
-            shaderMgr.getShader("water_fragment.glsl", defineMap, osg::Shader::FRAGMENT));
-        osg::ref_ptr<osg::Program> program = shaderMgr.getProgram(vertexShader, fragmentShader);
+        osg::ref_ptr<osg::Program> program = shaderMgr.getProgram("water", defineMap);
 
         osg::ref_ptr<osg::Texture2D> normalMap(
             new osg::Texture2D(mResourceSystem->getImageManager()->getImage("textures/omw/water_nm.png")));

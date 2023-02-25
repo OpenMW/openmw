@@ -13,24 +13,13 @@ namespace MWRender
         const float hdrExposureTime
             = std::max(Settings::Manager::getFloat("auto exposure speed", "Post Processing"), 0.0001f);
 
-        constexpr float minLog = -9.0;
-        constexpr float maxLog = 4.0;
-        constexpr float logLumRange = (maxLog - minLog);
-        constexpr float invLogLumRange = 1.0 / logLumRange;
-        constexpr float epsilon = 0.004;
-
         Shader::ShaderManager::DefineMap defines = {
-            { "minLog", std::to_string(minLog) },
-            { "maxLog", std::to_string(maxLog) },
-            { "logLumRange", std::to_string(logLumRange) },
-            { "invLogLumRange", std::to_string(invLogLumRange) },
             { "hdrExposureTime", std::to_string(hdrExposureTime) },
-            { "epsilon", std::to_string(epsilon) },
         };
 
-        auto vertex = shaderManager.getShader("fullscreen_tri_vertex.glsl", {}, osg::Shader::VERTEX);
-        auto luminanceFragment = shaderManager.getShader("hdr_luminance_fragment.glsl", defines, osg::Shader::FRAGMENT);
-        auto resolveFragment = shaderManager.getShader("hdr_resolve_fragment.glsl", defines, osg::Shader::FRAGMENT);
+        auto vertex = shaderManager.getShader("fullscreen_tri.vert", {});
+        auto luminanceFragment = shaderManager.getShader("luminance/luminance.frag", defines);
+        auto resolveFragment = shaderManager.getShader("luminance/resolve.frag", defines);
 
         mResolveProgram = shaderManager.getProgram(vertex, resolveFragment);
         mLuminanceProgram = shaderManager.getProgram(vertex, luminanceFragment);
