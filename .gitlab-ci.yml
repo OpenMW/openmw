@@ -132,6 +132,7 @@ Clang_Format:
   before_script:
     - CI/install_debian_deps.sh openmw-clang-format
   script:
+    - CI/check_file_names.sh
     - CI/check_clang_format.sh
 
 Teal:
