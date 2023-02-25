@@ -28,6 +28,9 @@ namespace MWGui
 
         MyGUI::EditBox* mCommandLine;
         MyGUI::EditBox* mHistory;
+        MyGUI::EditBox* mSearchTerm;
+        MyGUI::Button* mNextButton;
+        MyGUI::Button* mPreviousButton;
 
         typedef std::list<std::string> StringList;
 
@@ -77,9 +80,15 @@ namespace MWGui
 
         void updateConsoleTitle();
 
-        void keyPress(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char _char);
-
+        void commandBoxKeyPress(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char _char);
         void acceptCommand(MyGUI::EditBox* _sender);
+
+        void acceptSearchTerm(MyGUI::EditBox* _sender);
+        void findNextOccurrence(MyGUI::Widget* _sender);
+        void findPreviousOccurence(MyGUI::Widget* _sender);
+        void markOccurrence(size_t textPosition, size_t length);
+        size_t mCurrentOccurrence = std::string::npos;
+        std::string mCurrentSearchTerm;
 
         std::string complete(std::string input, std::vector<std::string>& matches);
 

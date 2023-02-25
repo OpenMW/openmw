@@ -1,5 +1,6 @@
 #include "console.hpp"
 
+#include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_LayerManager.h>
@@ -13,6 +14,7 @@
 #include <components/compiler/locals.hpp>
 #include <components/compiler/scanner.hpp>
 #include <components/interpreter/interpreter.hpp>
+#include "components/misc/utf8stream.hpp"
 #include <components/settings/settings.hpp>
 
 #include "../mwscript/extensions.hpp"
@@ -144,11 +146,19 @@ namespace MWGui
 
         getWidget(mCommandLine, "edit_Command");
         getWidget(mHistory, "list_History");
+        getWidget(mSearchTerm, "edit_SearchTerm");
+        getWidget(mNextButton, "button_Next");
+        getWidget(mPreviousButton, "button_Previous");
 
         // Set up the command line box
         mCommandLine->eventEditSelectAccept += newDelegate(this, &Console::acceptCommand);
-        mCommandLine->eventKeyButtonPressed += newDelegate(this, &Console::keyPress);
+        mCommandLine->eventKeyButtonPressed += newDelegate(this, &Console::commandBoxKeyPress);
 
+        // Set up the search term box
+        mSearchTerm->eventEditSelectAccept += newDelegate(this, &Console::acceptSearchTerm);
+        mNextButton->eventMouseButtonClick += newDelegate(this, &Console::findNextOccurrence);
+        mPreviousButton->eventMouseButtonClick += newDelegate(this, &Console::findPreviousOccurence);
+        
         // Set up the log window
         mHistory->setOverflowToTheLeft(true);
 
@@ -254,7 +264,7 @@ namespace MWGui
         return c == ' ' || c == '\t';
     }
 
-    void Console::keyPress(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char _char)
+    void Console::commandBoxKeyPress(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char _char)
     {
         if (MyGUI::InputManager::getInstance().isControlPressed())
         {
@@ -368,6 +378,130 @@ namespace MWGui
         mCommandLine->setCaption("");
 
         execute(cm);
+    }
+
+    void Console::acceptSearchTerm(MyGUI::EditBox* _sender)
+    {
+        const std::string& searchTerm = mSearchTerm->getOnlyText();
+
+        if (searchTerm.empty())
+        {
+            return;
+        }
+
+        mCurrentSearchTerm = Utf8Stream::lowerCaseUtf8(searchTerm);
+        mCurrentOccurrence = std::string::npos;
+
+        findNextOccurrence(nullptr);
+    }
+
+    void Console::findNextOccurrence(MyGUI::Widget* _sender)
+    {
+        if (mCurrentSearchTerm.empty())
+        {
+            return;
+        }
+
+        const auto historyText = Utf8Stream::lowerCaseUtf8(mHistory->getOnlyText().asUTF8());
+
+        // Search starts at the beginning
+        size_t startIndex = 0;
+
+        // If this is not the first search, we start right AFTER the last occurrence.
+        if (mCurrentOccurrence != std::string::npos && historyText.length() - mCurrentOccurrence > 1)
+        {
+            startIndex = mCurrentOccurrence + 1;
+        }
+
+        mCurrentOccurrence = historyText.find(mCurrentSearchTerm, startIndex);
+
+        // If the last search did not find anything AND we didn't start at
+        // the beginning, we repeat the search one time for wrapping around the text.
+        if (mCurrentOccurrence == std::string::npos && startIndex != 0)
+        {
+            mCurrentOccurrence = historyText.find(mCurrentSearchTerm);
+        }
+
+        // Only scroll & select if we actually found something
+        if (mCurrentOccurrence != std::string::npos)
+        {
+            markOccurrence(mCurrentOccurrence, mCurrentSearchTerm.length());
+        }
+        else
+        {
+            markOccurrence(0, 0);
+        }
+    }
+
+    void Console::findPreviousOccurence(MyGUI::Widget* _sender)
+    {
+        if (mCurrentSearchTerm.empty())
+        {
+            return;
+        }
+
+        const auto historyText = Utf8Stream::lowerCaseUtf8(mHistory->getOnlyText().asUTF8());
+
+        // Search starts at the end
+        size_t startIndex = historyText.length();
+
+        // If this is not the first search, we start right BEFORE the last occurrence.
+        if (mCurrentOccurrence != std::string::npos && mCurrentOccurrence > 1)
+        {
+            startIndex = mCurrentOccurrence - 1;
+        }
+
+        mCurrentOccurrence = historyText.rfind(mCurrentSearchTerm, startIndex);
+
+        // If the last search did not find anything AND we didn't start at
+        // the end, we repeat the search one time for wrapping around the text.
+        if (mCurrentOccurrence == std::string::npos && startIndex != historyText.length())
+        {
+            mCurrentOccurrence = historyText.rfind(mCurrentSearchTerm, historyText.length());
+        }
+
+        // Only scroll & select if we actually found something
+        if (mCurrentOccurrence != std::string::npos)
+        {
+            markOccurrence(mCurrentOccurrence, mCurrentSearchTerm.length());
+        }
+        else
+        {
+            markOccurrence(0, 0);
+        }
+    }
+
+    void Console::markOccurrence(const size_t textPosition, const size_t length)
+    {
+        if (textPosition == 0 && length == 0)
+        {
+            mHistory->setTextSelection(0, 0);
+            mHistory->setVScrollPosition(mHistory->getVScrollRange());
+            return;
+        }
+
+        const auto historyText = mHistory->getOnlyText();
+        const size_t upperLimit = std::min(historyText.length(), textPosition);
+
+        // Since MyGUI::EditBox.setVScrollPosition() works on pixels instead of text positions
+        // we need to calculate the actual pixel position by counting lines.
+        size_t lineNumber = 0;
+        for (size_t i = 0; i < upperLimit; i++)
+        {
+            if (historyText[i] == '\n')
+            {
+                lineNumber++;
+            }
+        }
+
+        // Make some space before the actual result
+        if (lineNumber >= 2)
+        {
+            lineNumber -= 2;
+        }
+
+        mHistory->setTextSelection(textPosition, textPosition + length);
+        mHistory->setVScrollPosition(mHistory->getFontHeight() * lineNumber);
     }
 
     std::string Console::complete(std::string input, std::vector<std::string>& matches)

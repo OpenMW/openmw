@@ -23,5 +23,20 @@
         <UserString key="AcceptTab" value="true"/>
     </Widget>
 
+    <!-- Search box -->
+    <Widget type="EditBox" skin="MW_ConsoleCommand" position="250 1 115 28" align="Top Right" name="edit_SearchTerm">
+        <Property key="InvertSelected" value="false"/>
+    </Widget>
+
+    <!-- "Next" button -->
+    <Widget type="Button" skin="MW_Button" position="220 0 28 28" name="button_Next" align="Top Right">
+        <Property key="Caption" value=">"/>
+    </Widget>
+
+    <!-- "Previous" button -->
+    <Widget type="Button" skin="MW_Button" position="190 0 28 28" name="button_Previous" align="Top Right">
+        <Property key="Caption" value="<"/>
+    </Widget>
+
   </Widget>
 </MyGUI>
