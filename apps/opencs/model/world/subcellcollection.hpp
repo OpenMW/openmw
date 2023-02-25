@@ -13,26 +13,25 @@ namespace CSMWorld
     struct Cell;
 
     /// \brief Single type collection of top level records that are associated with cells
-    template <typename ESXRecordT, typename IdAccessorT = IdAccessor<ESXRecordT>>
-    class SubCellCollection : public NestedIdCollection<ESXRecordT, IdAccessorT>
+    template <typename ESXRecordT>
+    class SubCellCollection : public NestedIdCollection<ESXRecordT>
     {
-        const IdCollection<Cell, IdAccessor<Cell>>& mCells;
+        const IdCollection<Cell>& mCells;
 
         void loadRecord(ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted) override;
 
     public:
-        SubCellCollection(const IdCollection<Cell, IdAccessor<Cell>>& cells);
+        SubCellCollection(const IdCollection<Cell>& cells);
     };
 
-    template <typename ESXRecordT, typename IdAccessorT>
-    void SubCellCollection<ESXRecordT, IdAccessorT>::loadRecord(
-        ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted)
+    template <typename ESXRecordT>
+    void SubCellCollection<ESXRecordT>::loadRecord(ESXRecordT& record, ESM::ESMReader& reader, bool& isDeleted)
     {
         record.load(reader, isDeleted, mCells);
     }
 
-    template <typename ESXRecordT, typename IdAccessorT>
-    SubCellCollection<ESXRecordT, IdAccessorT>::SubCellCollection(const IdCollection<Cell, IdAccessor<Cell>>& cells)
+    template <typename ESXRecordT>
+    SubCellCollection<ESXRecordT>::SubCellCollection(const IdCollection<Cell>& cells)
         : mCells(cells)
     {
     }

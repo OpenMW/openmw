@@ -18,14 +18,14 @@ namespace ESM
 namespace CSMWorld
 {
     template <>
-    int IdCollection<Pathgrid, IdAccessor<Pathgrid>>::load(ESM::ESMReader& reader, bool base)
+    int IdCollection<Pathgrid>::load(ESM::ESMReader& reader, bool base)
     {
         Pathgrid record;
         bool isDeleted = false;
 
         loadRecord(record, reader, isDeleted);
 
-        auto id = IdAccessor<Pathgrid>().getId(record);
+        const ESM::RefId id = getRecordId(record);
         int index = this->searchId(id);
 
         if (record.mPoints.empty() || record.mEdges.empty())

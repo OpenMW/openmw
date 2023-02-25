@@ -14,10 +14,8 @@ namespace CSMDoc
 namespace CSMWorld
 {
     struct Pathgrid;
-    template <typename T, typename AT>
+    template <typename T>
     class SubCellCollection;
-    template <typename ESXRecordT>
-    struct IdAccessor;
 }
 
 namespace CSMTools
@@ -35,12 +33,11 @@ namespace CSMTools
 
     class PathgridCheckStage : public CSMDoc::Stage
     {
-        const CSMWorld::SubCellCollection<CSMWorld::Pathgrid, CSMWorld::IdAccessor<CSMWorld::Pathgrid>>& mPathgrids;
+        const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& mPathgrids;
         bool mIgnoreBaseRecords;
 
     public:
-        PathgridCheckStage(
-            const CSMWorld::SubCellCollection<CSMWorld::Pathgrid, CSMWorld::IdAccessor<CSMWorld::Pathgrid>>& pathgrids);
+        explicit PathgridCheckStage(const CSMWorld::SubCellCollection<CSMWorld::Pathgrid>& pathgrids);
 
         int setup() override;
 

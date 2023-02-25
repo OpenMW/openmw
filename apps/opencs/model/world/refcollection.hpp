@@ -28,11 +28,10 @@ namespace CSMWorld
     struct Cell;
 
     template <>
-    void Collection<CellRef, IdAccessor<CellRef>>::removeRows(int index, int count);
+    void Collection<CellRef>::removeRows(int index, int count);
 
     template <>
-    void Collection<CellRef, IdAccessor<CellRef>>::insertRecord(
-        std::unique_ptr<RecordBase> record, int index, UniversalId::Type type);
+    void Collection<CellRef>::insertRecord(std::unique_ptr<RecordBase> record, int index, UniversalId::Type type);
 
     /// \brief References in cells
     class RefCollection : public Collection<CellRef>

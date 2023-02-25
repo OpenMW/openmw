@@ -19,7 +19,7 @@ namespace CSMWorld
     using InfosByTopic = std::unordered_map<ESM::RefId, std::vector<ESM::RefId>>;
     using InfosRecordPtrByTopic = std::unordered_map<ESM::RefId, std::vector<const Record<Info>*>>;
 
-    class InfoCollection : public Collection<Info, IdAccessor<Info>>
+    class InfoCollection : public Collection<Info>
     {
     private:
         bool load(const Info& record, bool base);
