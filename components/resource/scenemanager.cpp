@@ -831,6 +831,34 @@ namespace Resource
         mSharedStateMutex.unlock();
     }
 
+    osg::ref_ptr<osg::Node> SceneManager::loadErrorMarker()
+    {
+        try
+        {
+            for (const auto meshType : { "nif", "osg", "osgt", "osgb", "osgx", "osg2", "dae" })
+            {
+                const std::string normalized = "meshes/marker_error." + std::string(meshType);
+                if (mVFS->exists(normalized))
+                    return load(normalized, mVFS, mImageManager, mNifFileManager);
+            }
+        }
+        catch (const std::exception& e)
+        {
+            Log(Debug::Warning) << "Failed to load error marker:" << e.what()
+                                << ", using embedded marker_error instead";
+        }
+        Files::IMemStream file(ErrorMarker::sValue.data(), ErrorMarker::sValue.size());
+        return loadNonNif("error_marker.osgt", file, mImageManager);
+    }
+
+    osg::ref_ptr<osg::Node> SceneManager::cloneErrorMarker()
+    {
+        if (!mErrorMarker)
+            mErrorMarker = loadErrorMarker();
+
+        return static_cast<osg::Node*>(mErrorMarker->clone(osg::CopyOp::DEEP_COPY_ALL));
+    }
+
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string& name, bool compile)
     {
         std::string normalized = mVFS->normalizeFilename(name);
@@ -850,21 +878,8 @@ namespace Resource
             }
             catch (const std::exception& e)
             {
-                static osg::ref_ptr<osg::Node> errorMarkerNode = [&] {
-                    static const char* const sMeshTypes[] = { "nif", "osg", "osgt", "osgb", "osgx", "osg2", "dae" };
-
-                    for (unsigned int i = 0; i < sizeof(sMeshTypes) / sizeof(sMeshTypes[0]); ++i)
-                    {
-                        normalized = "meshes/marker_error." + std::string(sMeshTypes[i]);
-                        if (mVFS->exists(normalized))
-                            return load(normalized, mVFS, mImageManager, mNifFileManager);
-                    }
-                    Files::IMemStream file(ErrorMarker::sValue.data(), ErrorMarker::sValue.size());
-                    return loadNonNif("error_marker.osgt", file, mImageManager);
-                }();
-
                 Log(Debug::Error) << "Failed to load '" << name << "': " << e.what() << ", using marker_error instead";
-                loaded = static_cast<osg::Node*>(errorMarkerNode->clone(osg::CopyOp::DEEP_COPY_ALL));
+                loaded = cloneErrorMarker();
             }
 
             // set filtering settings

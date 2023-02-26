@@ -228,6 +228,8 @@ namespace Resource
 
     private:
         Shader::ShaderVisitor* createShaderVisitor(const std::string& shaderPrefix = "objects");
+        osg::ref_ptr<osg::Node> loadErrorMarker();
+        osg::ref_ptr<osg::Node> cloneErrorMarker();
 
         std::unique_ptr<Shader::ShaderManager> mShaderManager;
         bool mForceShaders;
@@ -260,6 +262,7 @@ namespace Resource
         osg::ref_ptr<osgUtil::IncrementalCompileOperation> mIncrementalCompileOperation;
 
         unsigned int mParticleSystemMask;
+        mutable osg::ref_ptr<osg::Node> mErrorMarker;
 
         SceneManager(const SceneManager&);
         void operator=(const SceneManager&);
