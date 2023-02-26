@@ -126,11 +126,14 @@ namespace LuaUtil
                     id = self->mActiveScriptIdStack.back();
                 bigAllocDelta = nsize;
             }
-            if (id.mContainer)
+            if (id.mIndex >= 0)
             {
                 if (static_cast<size_t>(id.mIndex) >= self->mMemoryUsage.size())
                     self->mMemoryUsage.resize(id.mIndex + 1);
                 self->mMemoryUsage[id.mIndex] += bigAllocDelta;
+            }
+            if (id.mContainer)
+            {
                 id.mContainer->addMemoryUsage(id.mIndex, bigAllocDelta);
                 if (newPtr && nsize > smallAllocSize)
                     self->mBigAllocOwners.emplace(newPtr, AllocOwner{ id.mContainer->mThis, id.mIndex });
