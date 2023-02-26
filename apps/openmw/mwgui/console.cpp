@@ -14,7 +14,7 @@
 #include <components/compiler/locals.hpp>
 #include <components/compiler/scanner.hpp>
 #include <components/interpreter/interpreter.hpp>
-#include "components/misc/utf8stream.hpp"
+#include <components/misc/utf8stream.hpp>
 #include <components/settings/settings.hpp>
 
 #include "../mwscript/extensions.hpp"
@@ -158,7 +158,7 @@ namespace MWGui
         mSearchTerm->eventEditSelectAccept += newDelegate(this, &Console::acceptSearchTerm);
         mNextButton->eventMouseButtonClick += newDelegate(this, &Console::findNextOccurrence);
         mPreviousButton->eventMouseButtonClick += newDelegate(this, &Console::findPreviousOccurence);
-        
+
         // Set up the log window
         mHistory->setOverflowToTheLeft(true);
 
