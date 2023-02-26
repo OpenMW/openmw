@@ -190,8 +190,8 @@ namespace LuaUi
         assert(!mRoot);
         if (!mRoot)
         {
-            mRoot = createWidget(mLayout, 0);
-            mLayer = setLayer(mRoot, mLayout);
+            mRoot = createWidget(layout(), 0);
+            mLayer = setLayer(mRoot, layout());
             updateAttachment();
         }
     }
@@ -200,16 +200,16 @@ namespace LuaUi
     {
         if (mRoot && mUpdate)
         {
-            if (mRoot->widget()->getTypeName() != widgetType(mLayout))
+            if (mRoot->widget()->getTypeName() != widgetType(layout()))
             {
                 destroyWidget(mRoot);
-                mRoot = createWidget(mLayout, 0);
+                mRoot = createWidget(layout(), 0);
             }
             else
             {
-                updateWidget(mRoot, mLayout, 0);
+                updateWidget(mRoot, layout(), 0);
             }
-            mLayer = setLayer(mRoot, mLayout);
+            mLayer = setLayer(mRoot, layout());
             updateAttachment();
         }
         mUpdate = false;
@@ -217,9 +217,11 @@ namespace LuaUi
 
     void Element::destroy()
     {
-        if (mRoot)
-            destroyWidget(mRoot);
+        if (!mRoot)
+            return;
+        destroyWidget(mRoot);
         mRoot = nullptr;
+        mLayout = sol::make_object(mLayout.lua_state(), sol::nil);
         sAllElements.erase(this);
     }
 
