@@ -5,6 +5,7 @@
 #include <osg/AlphaFunc>
 #include <osg/BlendFunc>
 #include <osg/ColorMask>
+#include <osg/ColorMaski>
 #include <osg/Depth>
 #include <osg/Geometry>
 #include <osg/Material>
@@ -798,7 +799,8 @@ namespace MWRender
         // Disable writing to the color buffer. We are using this geometry for visibility tests only.
         osg::ref_ptr<osg::ColorMask> colormask = new osg::ColorMask(0, 0, 0, 0);
         stateset->setAttributeAndModes(colormask);
-
+        if (sceneManager.getSupportsNormalsRT())
+            stateset->setAttributeAndModes(new osg::ColorMaski(1, false, false, false, false));
         mTransform->addChild(queryNode);
 
         mOcclusionQueryVisiblePixels = createOcclusionQueryNode(queryNode, true);
