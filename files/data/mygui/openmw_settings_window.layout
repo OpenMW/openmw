@@ -275,28 +275,28 @@
                     <Property key="ButtonAutoWidth" value="true"/>
                     <Widget type="TabItem">
                         <Property key="Caption" value=" #{sVideo} "/>
-                        <Widget type="ListBox" skin="MW_List" position="0 4 185 225" align="Left Top" name="ResolutionList"/>
-                        <Widget type="TextBox" skin="NormalText" position="197 4 185 18" align="Left Top">
+                        <Widget type="ListBox" skin="MW_List" position="0 4 195 225" align="Left Top" name="ResolutionList"/>
+                        <Widget type="TextBox" skin="NormalText" position="207 4 250 18" align="Left Top">
                             <Property key="Caption" value="#{OMWEngine:WindowMode}"/>
                         </Widget>
-                        <Widget type="HBox" position="197 28 400 24">
+                        <Widget type="HBox" position="207 24 400 24">
                             <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 200 24" align="Left Top" name="WindowModeList">
                                 <Property key="AddItem" value="#{OMWEngine:WindowModeFullscreen}"/>
                                 <Property key="AddItem" value="#{OMWEngine:WindowModeWindowedFullscreen}"/>
                                 <Property key="AddItem" value="#{OMWEngine:WindowModeWindowed}"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" position="197 58 400 28">
-                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="VSyncButton">
-                                <UserString key="SettingCategory" value="Video"/>
-                                <UserString key="SettingName" value="vsync"/>
-                                <UserString key="SettingType" value="CheckButton"/>
-                            </Widget>
-                            <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 48 16" align="Left Top">
-                                <Property key="Caption" value="#{OMWEngine:VSync}"/>
+                        <Widget type="TextBox" skin="NormalText" position="207 54 250 18" align="Left Top">
+                            <Property key="Caption" value="#{OMWEngine:VSync}"/>
+                        </Widget>
+                        <Widget type="HBox" position="207 74 400 28">
+                            <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 200 24" align="Left Top" name="VSyncModeList">
+                                <Property key="AddItem" value="#{sOff}"/>
+                                <Property key="AddItem" value="#{sOn}"/>
+                                <Property key="AddItem" value="#{OMWEngine:VSyncAdaptive}"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" position="197 88 300 28">
+                        <Widget type="HBox" position="207 108 300 28">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="WindowBorderButton">
                                 <UserString key="SettingCategory" value="Video"/>
                                 <UserString key="SettingName" value="window border"/>
@@ -306,7 +306,7 @@
                                 <Property key="Caption" value="#{OMWEngine:WindowBorder}"/>
                             </Widget>
                         </Widget>
-                        <Widget type="HBox" position="197 118 300 28">
+                        <Widget type="HBox" position="207 142 300 28">
                             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="WindowBorderButton">
                                 <UserString key="SettingCategory" value="Post Processing"/>
                                 <UserString key="SettingName" value="enabled"/>
@@ -320,11 +320,11 @@
                             </Widget>
                         </Widget>
 
-                        <Widget type="AutoSizedTextBox" skin="SandText" position="197 154 300 32" align="Left Top">
+                        <Widget type="AutoSizedTextBox" skin="SandText" position="207 174 300 32" align="Left Top">
                             <Property key="Caption" value="#{OMWEngine:FrameRateHint}"/>
                         </Widget>
-                        <Widget type="AutoSizedTextBox" skin="SandText" position="197 196 300 32" align="Left Top" name="WindowModeHint">
-                            <Property key="Caption" value="#{SettingsMenu:WindowModeHint}"/>
+                        <Widget type="AutoSizedTextBox" skin="SandText" position="207 216 300 32" align="Left Top" name="WindowModeHint">
+                            <Property key="Caption" value="#{OMWEngine:WindowModeHint}"/>
                         </Widget>
 
                         <Widget type="TextBox" skin="NormalText" position="0 238 352 18" align="Left Top" name="FovText">

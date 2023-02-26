@@ -26,7 +26,7 @@ namespace SDLUtil
         VideoWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer);
         ~VideoWrapper();
 
-        void setSyncToVBlank(bool sync);
+        void setSyncToVBlank(int mode);
 
         void setGammaContrast(float gamma, float contrast);
 

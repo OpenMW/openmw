@@ -1148,8 +1148,8 @@ namespace MWGui
                     || setting.second == "window mode" || setting.second == "window border"))
                 changeRes = true;
 
-            else if (setting.first == "Video" && setting.second == "vsync")
-                mVideoWrapper->setSyncToVBlank(Settings::Manager::getBool("vsync", "Video"));
+            else if (setting.first == "Video" && setting.second == "vsync mode")
+                mVideoWrapper->setSyncToVBlank(Settings::Manager::getInt("vsync mode", "Video"));
             else if (setting.first == "Video" && (setting.second == "gamma" || setting.second == "contrast"))
                 mVideoWrapper->setGammaContrast(
                     Settings::Manager::getFloat("gamma", "Video"), Settings::Manager::getFloat("contrast", "Video"));

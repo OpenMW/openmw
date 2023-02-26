@@ -7,6 +7,12 @@
 
 namespace SDLUtil
 {
+    enum VSyncMode
+    {
+        Disabled = 0,
+        Enabled = 1,
+        Adaptive = 2
+    };
 
     class GraphicsWindowSDL2 : public osgViewer::GraphicsWindow
     {
@@ -16,13 +22,14 @@ namespace SDLUtil
         bool mValid;
         bool mRealized;
         bool mOwnsWindow;
+        VSyncMode mVSyncMode;
 
         void init();
 
         virtual ~GraphicsWindowSDL2();
 
     public:
-        GraphicsWindowSDL2(osg::GraphicsContext::Traits* traits);
+        GraphicsWindowSDL2(osg::GraphicsContext::Traits* traits, int vsync);
 
         bool isSameKindAs(const Object* object) const override
         {
@@ -53,6 +60,7 @@ namespace SDLUtil
 
         /** Set sync-to-vblank. */
         void setSyncToVBlank(bool on) override;
+        void setSyncToVBlank(VSyncMode mode);
 
         /** Set Window decoration.*/
         bool setWindowDecorationImplementation(bool flag) override;
@@ -87,7 +95,7 @@ namespace SDLUtil
         };
 
     private:
-        void setSwapInterval(bool enable);
+        void setSwapInterval(VSyncMode mode);
     };
 
 }

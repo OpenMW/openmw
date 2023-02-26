@@ -256,6 +256,7 @@ namespace MWGui
         getWidget(mOkButton, "OkButton");
         getWidget(mResolutionList, "ResolutionList");
         getWidget(mWindowModeList, "WindowModeList");
+        getWidget(mVSyncModeList, "VSyncModeList");
         getWidget(mWindowBorderButton, "WindowBorderButton");
         getWidget(mTextureFilteringButton, "TextureFilteringButton");
         getWidget(mControlsBox, "ControlsBox");
@@ -315,6 +316,7 @@ namespace MWGui
         mMaxLights->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onMaxLightsChanged);
 
         mWindowModeList->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onWindowModeChanged);
+        mVSyncModeList->eventComboChangePosition += MyGUI::newDelegate(this, &SettingsWindow::onVSyncModeChanged);
 
         mKeyboardSwitch->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onKeyboardSwitchClicked);
         mControllerSwitch->eventMouseButtonClick
@@ -560,6 +562,16 @@ namespace MWGui
             currentLocales.resize(1);
 
         Settings::Manager::setStringArray("preferred locales", "General", currentLocales);
+    }
+
+    void SettingsWindow::onVSyncModeChanged(MyGUI::ComboBox* _sender, size_t pos)
+    {
+        if (pos == MyGUI::ITEM_NONE)
+            return;
+
+        int index = static_cast<int>(_sender->getIndexSelected());
+        Settings::Manager::setInt("vsync mode", "Video", index);
+        apply();
     }
 
     void SettingsWindow::onWindowModeChanged(MyGUI::ComboBox* _sender, size_t pos)
@@ -870,6 +882,16 @@ namespace MWGui
             mResolutionList->setEnabled(false);
     }
 
+    void SettingsWindow::updateVSyncModeSettings()
+    {
+        int index = static_cast<size_t>(Settings::Manager::getInt("vsync mode", "Video"));
+
+        if (index < 0 || index > 2)
+            index = 0;
+
+        mVSyncModeList->setIndexSelected(index);
+    }
+
     void SettingsWindow::layoutControlsBox()
     {
         const int h = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
@@ -1033,6 +1055,7 @@ namespace MWGui
         updateControlsBox();
         updateLightSettings();
         updateWindowModeSettings();
+        updateVSyncModeSettings();
         resetScrollbars();
         renderScriptSettings();
         MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mOkButton);

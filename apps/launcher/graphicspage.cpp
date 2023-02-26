@@ -93,13 +93,18 @@ bool Launcher::GraphicsPage::loadSettings()
         return false;
 
     // Visuals
-    if (Settings::Manager::getBool("vsync", "Video"))
-        vSyncCheckBox->setCheckState(Qt::Checked);
+
+    int vsync = Settings::Manager::getInt("vsync mode", "Video");
+    if (vsync < 0 || vsync > 2)
+        vsync = 0;
+
+    vSyncComboBox->setCurrentIndex(vsync);
 
     size_t windowMode = static_cast<size_t>(Settings::Manager::getInt("window mode", "Video"));
     if (windowMode > static_cast<size_t>(Settings::WindowMode::Windowed))
         windowMode = 0;
     windowModeComboBox->setCurrentIndex(windowMode);
+    slotFullScreenChanged(windowMode);
 
     if (Settings::Manager::getBool("window border", "Video"))
         windowBorderCheckBox->setCheckState(Qt::Checked);
@@ -185,9 +190,9 @@ void Launcher::GraphicsPage::saveSettings()
 
     // Ensure we only set the new settings if they changed. This is to avoid cluttering the
     // user settings file (which by definition should only contain settings the user has touched)
-    bool cVSync = vSyncCheckBox->checkState();
-    if (cVSync != Settings::Manager::getBool("vsync", "Video"))
-        Settings::Manager::setBool("vsync", "Video", cVSync);
+    int cVSync = vSyncComboBox->currentIndex();
+    if (cVSync != Settings::Manager::getInt("vsync mode", "Video"))
+        Settings::Manager::setInt("vsync mode", "Video", cVSync);
 
     int cWindowMode = windowModeComboBox->currentIndex();
     if (cWindowMode != Settings::Manager::getInt("window mode", "Video"))
