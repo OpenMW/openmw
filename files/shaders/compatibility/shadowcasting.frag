@@ -23,7 +23,7 @@ void main()
     else
         gl_FragData[0].a = alphaPassthrough;
 
-    gl_FragData[0].a = alphaTest(gl_FragData[0].a);
+    gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
 
     // Prevent translucent things casting shadow (including the player using an invisibility effect).
     // This replaces alpha blending, which obviously doesn't work with depth buffers

@@ -37,6 +37,18 @@ namespace
 
         throw std::runtime_error("unrecognized shader template name: " + templateName);
     }
+
+    std::string getRootPrefix(const std::string& path)
+    {
+        if (path.starts_with("lib"))
+            return "lib";
+        else if (path.starts_with("compatibility"))
+            return "compatibility";
+        else if (path.starts_with("core"))
+            return "core";
+        else
+            return "";
+    }
 }
 
 namespace Shader
@@ -129,11 +141,15 @@ namespace Shader
                 return false;
             }
             std::string includeFilename = source.substr(start + 1, end - (start + 1));
-            std::filesystem::path includePath
-                = shaderPath / std::filesystem::path(fileName).parent_path() / includeFilename;
 
-            if (!std::filesystem::exists(includePath))
-                includePath = shaderPath / includeFilename;
+            // Check if this include is a relative path
+            // TODO: We shouldn't be relying on soft-coded root prefixes, just check if the path exists and fallback to
+            // searching root if it doesn't
+            if (getRootPrefix(includeFilename).empty())
+                includeFilename
+                    = Files::pathToUnicodeString(std::filesystem::path(fileName).parent_path() / includeFilename);
+
+            std::filesystem::path includePath = shaderPath / includeFilename;
 
             // Determine the line number that will be used for the #line directive following the included source
             size_t lineDirectivePosition = source.rfind("#line", foundPos);
@@ -504,8 +520,7 @@ namespace Shader
 
         // TODO: Implement mechanism to switch to core or compatibility profile shaders.
         // This logic is temporary until core support is supported.
-        if (!templateName.starts_with("lib") && !templateName.starts_with("compatibility")
-            && !templateName.starts_with("core"))
+        if (getRootPrefix(templateName).empty())
             templateName = "compatibility/" + templateName;
 
         // read the template if we haven't already

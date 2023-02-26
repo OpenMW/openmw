@@ -70,7 +70,7 @@ void main()
     if (euclideanDepth > @groundcoverFadeStart)
         gl_FragData[0].a *= 1.0-smoothstep(@groundcoverFadeStart, @groundcoverFadeEnd, euclideanDepth);
 
-    gl_FragData[0].a = alphaTest(gl_FragData[0].a);
+    gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
 
     float shadowing = unshadowedLightRatio(linearDepth);
 

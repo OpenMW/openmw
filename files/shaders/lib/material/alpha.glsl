@@ -33,10 +33,10 @@ float coveragePreservingAlphaScale(sampler2D diffuseMap, vec2 uv)
     #endif
 }
 
-float alphaTest(float alpha)
+float alphaTest(float alpha, float ref)
 {
     #if @alphaToCoverage 
-        float coverageAlpha = (alpha - clamp(alphaRef, 0.0001, 0.9999)) / max(fwidth(alpha), 0.0001) + 0.5;
+        float coverageAlpha = (alpha - clamp(ref, 0.0001, 0.9999)) / max(fwidth(alpha), 0.0001) + 0.5;
 
         // Some functions don't make sense with A2C or are a pain to think about and no meshes use them anyway
         // Use regular alpha testing in such cases until someone complains.
@@ -45,14 +45,14 @@ float alphaTest(float alpha)
         #elif @alphaFunc == FUNC_LESS
             return 1.0 - coverageAlpha;
         #elif @alphaFunc == FUNC_EQUAL
-            if (alpha != alphaRef)
+            if (alpha != ref)
                 discard;
         #elif @alphaFunc == FUNC_LEQUAL
             return 1.0 - coverageAlpha;
         #elif @alphaFunc == FUNC_GREATER
             return coverageAlpha;
         #elif @alphaFunc == FUNC_NOTEQUAL
-            if (alpha == alphaRef)
+            if (alpha == ref)
                 discard;
         #elif @alphaFunc == FUNC_GEQUAL
             return coverageAlpha;
@@ -61,22 +61,22 @@ float alphaTest(float alpha)
         #if @alphaFunc == FUNC_NEVER
             discard;
         #elif @alphaFunc == FUNC_LESS
-            if (alpha >= alphaRef)
+            if (alpha >= ref)
                 discard;
         #elif @alphaFunc == FUNC_EQUAL
-            if (alpha != alphaRef)
+            if (alpha != ref)
                 discard;
         #elif @alphaFunc == FUNC_LEQUAL
-            if (alpha > alphaRef)
+            if (alpha > ref)
                 discard;
         #elif @alphaFunc == FUNC_GREATER
-            if (alpha <= alphaRef)
+            if (alpha <= ref)
                 discard;
         #elif @alphaFunc == FUNC_NOTEQUAL
-            if (alpha == alphaRef)
+            if (alpha == ref)
                 discard;
         #elif @alphaFunc == FUNC_GEQUAL
-            if (alpha < alphaRef)
+            if (alpha < ref)
                 discard;
         #endif
     #endif
