@@ -125,22 +125,25 @@ This setting can be configured from a list of valid choices in the Graphics pane
 but cannot be changed during game play
 due to a technical limitation that may be addressed in a future version of OpenMW.
 
-vsync
------
+vsync mode
+----------
 
-:Type:		boolean
-:Range:		True/False
-:Default:	False
+:Type:		integer
+:Range:		0, 1, 2
+:Default:	0
 
 This setting determines whether frame draws are synchronized with the vertical refresh rate of your monitor.
 Enabling this setting can reduce screen tearing,
 a visual defect caused by updating the image buffer in the middle of a screen draw.
-Enabling this option typically implies limiting the framerate to the refresh rate of your monitor,
+Enabling this option (1 or 2) typically implies limiting the framerate to the refresh rate of your monitor,
 but may also introduce additional delays caused by having to wait until the appropriate time
 (the vertical blanking interval) to draw a frame, and a loss in mouse responsiveness known as 'input lag'.
+Mode 2 of this option corresponds to the use of adaptive vsync. Adaptive vsync is turned off if the framerate
+cannot reach your display's refresh rate. This prevents the input lag from becoming unbearable but may lead to tearing.
+Some hardware might not support this mode, in which case traditional vsync will be used.
 
-This setting can be adjusted in game using the VSync button in the Video tab of the Video panel in the Options menu.
-It can also be changed by toggling the Vertical Sync check box in the Graphics tab of the OpenMW Launcher.
+This setting can be adjusted in game using the VSync combo box in the Video tab of the Video panel in the Options menu.
+It can also be changed by toggling the Vertical Sync combo box in the Graphics tab of the OpenMW Launcher.
 
 framerate limit
 ---------------

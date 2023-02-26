@@ -1,6 +1,7 @@
 #include "sdlvideowrapper.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/sdlutil/sdlgraphicswindow.hpp>
 #include <components/settings/settings.hpp>
 
 #include <osgViewer/Viewer>
@@ -29,15 +30,24 @@ namespace SDLUtil
             SDL_SetWindowGammaRamp(mWindow, mOldSystemGammaRamp, &mOldSystemGammaRamp[256], &mOldSystemGammaRamp[512]);
     }
 
-    void VideoWrapper::setSyncToVBlank(bool sync)
+    void VideoWrapper::setSyncToVBlank(int mode)
     {
+        VSyncMode vsyncMode = VSyncMode::Disabled;
+        if (mode == 1)
+            vsyncMode = VSyncMode::Enabled;
+        else if (mode == 2)
+            vsyncMode = VSyncMode::Adaptive;
+
         osgViewer::Viewer::Windows windows;
         mViewer->getWindows(windows);
         mViewer->stopThreading();
         for (osgViewer::Viewer::Windows::iterator it = windows.begin(); it != windows.end(); ++it)
         {
             osgViewer::GraphicsWindow* win = *it;
-            win->setSyncToVBlank(sync);
+            if (GraphicsWindowSDL2* sdl2win = dynamic_cast<GraphicsWindowSDL2*>(win))
+                sdl2win->setSyncToVBlank(vsyncMode);
+            else
+                win->setSyncToVBlank(static_cast<bool>(mode));
         }
         mViewer->startThreading();
     }

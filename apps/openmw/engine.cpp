@@ -473,7 +473,7 @@ void OMW::Engine::createWindow()
     Settings::WindowMode windowMode
         = static_cast<Settings::WindowMode>(Settings::Manager::getInt("window mode", "Video"));
     bool windowBorder = Settings::Manager::getBool("window border", "Video");
-    bool vsync = Settings::Manager::getBool("vsync", "Video");
+    int vsync = Settings::Manager::getInt("vsync mode", "Video");
     unsigned int antialiasing = std::max(0, Settings::Manager::getInt("antialiasing", "Video"));
 
     int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(screen), pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
@@ -560,10 +560,10 @@ void OMW::Engine::createWindow()
         traits->windowName = SDL_GetWindowTitle(mWindow);
         traits->windowDecoration = !(SDL_GetWindowFlags(mWindow) & SDL_WINDOW_BORDERLESS);
         traits->screenNum = SDL_GetWindowDisplayIndex(mWindow);
-        traits->vsync = vsync;
+        traits->vsync = 0;
         traits->inheritedWindowData = new SDLUtil::GraphicsWindowSDL2::WindowData(mWindow);
 
-        graphicsWindow = new SDLUtil::GraphicsWindowSDL2(traits);
+        graphicsWindow = new SDLUtil::GraphicsWindowSDL2(traits, vsync);
         if (!graphicsWindow->valid())
             throw std::runtime_error("Failed to create GraphicsContext");
 

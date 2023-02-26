@@ -14,7 +14,7 @@ namespace SDLUtil
         close(true);
     }
 
-    GraphicsWindowSDL2::GraphicsWindowSDL2(osg::GraphicsContext::Traits* traits)
+    GraphicsWindowSDL2::GraphicsWindowSDL2(osg::GraphicsContext::Traits* traits, int vsync)
         : mWindow(nullptr)
         , mContext(nullptr)
         , mValid(false)
@@ -22,6 +22,13 @@ namespace SDLUtil
         , mOwnsWindow(false)
     {
         _traits = traits;
+
+        if (vsync == 2)
+            mVSyncMode = VSyncMode::Adaptive;
+        else if (vsync == 1)
+            mVSyncMode = VSyncMode::Enabled;
+        else
+            mVSyncMode = VSyncMode::Disabled;
 
         init();
         if (GraphicsWindowSDL2::valid())
@@ -134,7 +141,7 @@ namespace SDLUtil
         openmw_gl4es_init(mWindow);
 #endif
 
-        setSwapInterval(_traits->vsync);
+        setSwapInterval(mVSyncMode);
 
         // Update traits with what we've actually been given
         // Use intermediate to avoid signed/unsigned mismatch
@@ -234,28 +241,40 @@ namespace SDLUtil
 
     void GraphicsWindowSDL2::setSyncToVBlank(bool on)
     {
+        throw std::runtime_error(
+            "setSyncToVBlank with bool argument is not supported. Use the VSyncMode argument instead.");
+    }
+
+    void GraphicsWindowSDL2::setSyncToVBlank(VSyncMode mode)
+    {
         SDL_Window* oldWin = SDL_GL_GetCurrentWindow();
         SDL_GLContext oldCtx = SDL_GL_GetCurrentContext();
 
         SDL_GL_MakeCurrent(mWindow, mContext);
 
-        setSwapInterval(on);
+        setSwapInterval(mode);
 
         SDL_GL_MakeCurrent(oldWin, oldCtx);
     }
 
-    void GraphicsWindowSDL2::setSwapInterval(bool enable)
+    void GraphicsWindowSDL2::setSwapInterval(VSyncMode mode)
     {
-        if (enable)
+        mVSyncMode = mode;
+
+        if (mode == VSyncMode::Adaptive)
         {
             if (SDL_GL_SetSwapInterval(-1) == -1)
             {
                 OSG_NOTICE << "Adaptive vsync unsupported" << std::endl;
-                if (SDL_GL_SetSwapInterval(1) == -1)
-                {
-                    OSG_NOTICE << "Vertical synchronization unsupported, disabling" << std::endl;
-                    SDL_GL_SetSwapInterval(0);
-                }
+                setSwapInterval(VSyncMode::Enabled);
+            }
+        }
+        else if (mode == VSyncMode::Enabled)
+        {
+            if (SDL_GL_SetSwapInterval(1) == -1)
+            {
+                OSG_NOTICE << "Vertical synchronization unsupported, disabling" << std::endl;
+                setSwapInterval(VSyncMode::Disabled);
             }
         }
         else
