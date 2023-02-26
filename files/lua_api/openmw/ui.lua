@@ -239,6 +239,7 @@
 
 ---
 -- Access or replace the element's layout
+--   Note: Is reset to `nil` on `destroy`
 -- @field [parent=#Element] #Layout layout
 
 ---
