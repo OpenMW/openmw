@@ -612,6 +612,9 @@ namespace MWRender
             mRootNode->getOrCreateStateSet()->setAttributeAndModes(clipcontrol, osg::StateAttribute::ON);
         }
 
+        // Assign a default shader on root to handle empty statesets
+        mResourceSystem->getSceneManager()->recreateShaders(mRootNode, "objects");
+
         SceneUtil::setCameraClearDepth(mViewer->getCamera());
 
         updateProjectionMatrix();
