@@ -1,6 +1,7 @@
 0.49.0
 ------
 
+    Bug #2623: Snowy Granius doesn't prioritize conjuration spells
     Bug #3842: Body part skeletons override the main skeleton
     Bug #4127: Weapon animation looks choppy
     Bug #4204: Dead slaughterfish doesn't float to water surface after loading saved game

@@ -407,12 +407,6 @@ namespace MWMechanics
                     return 0.f;
                 break;
 
-            case ESM::MagicEffect::BoundLongbow:
-                // AI should not summon the bow if there is no suitable ammo.
-                if (rateAmmo(actor, enemy, getWeaponType(ESM::Weapon::MarksmanBow)->mAmmoType) <= 0.f)
-                    return 0.f;
-                break;
-
             case ESM::MagicEffect::RestoreHealth:
             case ESM::MagicEffect::RestoreMagicka:
             case ESM::MagicEffect::RestoreFatigue:
@@ -588,13 +582,47 @@ namespace MWMechanics
 
             if (!creatureStats.getSummonedCreatureMap().empty())
                 return 0.f;
+            // But rate summons higher than other effects
+            rating = 3.f;
         }
         if (effect.mEffectID >= ESM::MagicEffect::BoundDagger && effect.mEffectID <= ESM::MagicEffect::BoundGloves)
         {
+            // Prefer casting bound items over other spells
+            rating = 2.f;
             // While rateSpell prevents actors from recasting the same spell, it doesn't prevent them from casting
             // different spells with the same effect. Multiple instances of the same bound item don't stack so if the
-            // effect is already active, rate it as useless.
-            if (actor.getClass().getCreatureStats(actor).getMagicEffects().get(effect.mEffectID).getMagnitude() > 0.f)
+            // effect is already active, rate it as useless. Likewise, if the actor already has a bound weapon, don't
+            // summon another of a different kind unless what we have is a bow and the actor is out of ammo.
+            // FIXME: This code assumes the summoned item is of the usual type (i.e. a mod hasn't changed Bound Bow to
+            // summon an Axe instead)
+            if (effect.mEffectID <= ESM::MagicEffect::BoundLongbow)
+            {
+                for (int e = ESM::MagicEffect::BoundDagger; e <= ESM::MagicEffect::BoundLongbow; ++e)
+                    if (actor.getClass().getCreatureStats(actor).getMagicEffects().get(e).getMagnitude() > 0.f
+                        && (e != ESM::MagicEffect::BoundLongbow || effect.mEffectID == e
+                            || rateAmmo(actor, enemy, getWeaponType(ESM::Weapon::MarksmanBow)->mAmmoType) <= 0.f))
+                        return 0.f;
+                ESM::Skill::SkillEnum skill = ESM::Skill::ShortBlade;
+                if (effect.mEffectID == ESM::MagicEffect::BoundLongsword)
+                    skill = ESM::Skill::LongBlade;
+                else if (effect.mEffectID == ESM::MagicEffect::BoundMace)
+                    skill = ESM::Skill::BluntWeapon;
+                else if (effect.mEffectID == ESM::MagicEffect::BoundBattleAxe)
+                    skill = ESM::Skill::Axe;
+                else if (effect.mEffectID == ESM::MagicEffect::BoundSpear)
+                    skill = ESM::Skill::Spear;
+                else if (effect.mEffectID == ESM::MagicEffect::BoundLongbow)
+                {
+                    // AI should not summon the bow if there is no suitable ammo.
+                    if (rateAmmo(actor, enemy, getWeaponType(ESM::Weapon::MarksmanBow)->mAmmoType) <= 0.f)
+                        return 0.f;
+                    skill = ESM::Skill::Marksman;
+                }
+                // Prefer summoning items we know how to use
+                rating *= (50.f + actor.getClass().getSkill(actor, skill)) / 100.f;
+            }
+            else if (actor.getClass().getCreatureStats(actor).getMagicEffects().get(effect.mEffectID).getMagnitude()
+                > 0.f)
                 return 0.f;
         }
 
