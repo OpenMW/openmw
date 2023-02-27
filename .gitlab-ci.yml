@@ -23,6 +23,7 @@ variables:
   image: ubuntu:22.04
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 .Ubuntu:
   extends: .Ubuntu_Image
@@ -267,6 +268,7 @@ Ubuntu_GCC_tests_coverage:
 .Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
   rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "push"
       changes:
         - "**/CMakeLists.txt"
@@ -420,6 +422,7 @@ macOS12_Xcode13:
     - windows
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
@@ -523,6 +526,7 @@ macOS12_Xcode13:
     - windows
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
@@ -620,6 +624,7 @@ Windows_MSBuild_RelWithDebInfo:
   rules:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
     - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "schedule"
 
 
@@ -629,6 +634,7 @@ Windows_MSBuild_RelWithDebInfo:
   image: psi29a/android-ndk:focal-ndk22
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     CCACHE_SIZE: 3G
   cache:
