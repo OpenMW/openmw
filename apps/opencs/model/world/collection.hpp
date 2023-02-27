@@ -51,7 +51,7 @@ namespace CSMWorld
         return ESM::RefId::stringRefId(Land::createUniqueRecordId(record.mX, record.mY));
     }
 
-    inline void setRecordId(LandTexture& record, const ESM::RefId& id)
+    inline void setRecordId(const ESM::RefId& id, LandTexture& record)
     {
         int plugin = 0;
         int index = 0;
