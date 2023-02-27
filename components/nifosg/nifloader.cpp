@@ -2206,7 +2206,7 @@ namespace NifOsg
                 {
                     auto texprop = static_cast<const Nif::BSEffectShaderProperty*>(property);
                     bool shaderRequired = true;
-                    node->setUserValue("shaderPrefix", std::string("nv_nolighting"));
+                    node->setUserValue("shaderPrefix", std::string("bs/nolighting"));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
                     if (!texprop->mSourceTexture.empty())

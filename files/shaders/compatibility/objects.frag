@@ -84,12 +84,13 @@ varying vec3 passNormal;
 #define ADDITIVE_BLENDING
 #endif
 
-#include "vertexcolors.glsl"
-#include "shadows_fragment.glsl"
 #include "lib/light/lighting.glsl"
 #include "lib/material/parallax.glsl"
 #include "lib/material/alpha.glsl"
+
 #include "fog.glsl"
+#include "vertexcolors.glsl"
+#include "shadows_fragment.glsl"
 
 #if @softParticles
 #include "lib/particle/soft.glsl"
@@ -164,7 +165,7 @@ vec3 viewNormal = normalize(gl_NormalMatrix * normal);
     gl_FragData[0].a *= coveragePreservingAlphaScale(darkMap, darkMapUV);
 #endif
 
-    gl_FragData[0].a = alphaTest(gl_FragData[0].a);
+    gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
 
 #if @detailMap
     gl_FragData[0].xyz *= texture2D(detailMap, detailMapUV).xyz * 2.0;

@@ -1,6 +1,10 @@
 #version 120
 #pragma import_defines(FORCE_OPAQUE)
 
+#if @useUBO
+    #extension GL_ARB_uniform_buffer_object : require
+#endif
+
 #if @useGPUShader4
     #extension GL_EXT_gpu_shader4: require
 #endif
@@ -10,20 +14,22 @@ uniform sampler2D diffuseMap;
 varying vec2 diffuseMapUV;
 #endif
 
+varying vec3 passNormal;
 varying float euclideanDepth;
 varying float linearDepth;
+varying float passFalloff;
 
-uniform bool useFalloff;
 uniform vec2 screenRes;
+uniform bool useFalloff;
 uniform float emissiveMult;
 uniform float far;
 uniform float alphaRef;
 
-varying float passFalloff;
-
 #include "lib/material/alpha.glsl"
-#include "vertexcolors.glsl"
-#include "fog.glsl"
+
+#include "compatibility/vertexcolors.glsl"
+#include "compatibility/fog.glsl"
+#include "compatibility/shadows_fragment.glsl"
 
 void main()
 {
@@ -43,11 +49,18 @@ void main()
     gl_FragData[0].rgb *= emissionColor.rgb * emissiveMult;
     gl_FragData[0].a *= emissionColor.a * emissionColor.a; // sic
 
-    gl_FragData[0].a = alphaTest(gl_FragData[0].a);
+    gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
+
+    gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);
 
 #if defined(FORCE_OPAQUE) && FORCE_OPAQUE
     gl_FragData[0].a = 1.0;
 #endif
 
-    gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);
+#if !defined(FORCE_OPAQUE) && !@disableNormals
+    vec3 viewNormal = normalize(gl_NormalMatrix * passNormal);
+    gl_FragData[1].xyz = viewNormal * 0.5 + 0.5;
+#endif
+
+    applyShadowDebugOverlay();
 }

@@ -8,7 +8,10 @@
     #extension GL_EXT_gpu_shader4: require
 #endif
 
+#define PER_PIXEL_LIGHTING 1
+
 #include "lib/core/vertex.h.glsl"
+
 #if @diffuseMap
 varying vec2 diffuseMapUV;
 #endif
@@ -28,12 +31,11 @@ varying float linearDepth;
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
-#define PER_PIXEL_LIGHTING 1
-
-#include "vertexcolors.glsl"
-#include "shadows_vertex.glsl"
 #include "lib/light/lighting.glsl"
 #include "lib/view/depth.glsl"
+
+#include "compatibility/vertexcolors.glsl"
+#include "compatibility/shadows_vertex.glsl"
 
 void main(void)
 {

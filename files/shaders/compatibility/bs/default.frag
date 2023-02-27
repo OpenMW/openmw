@@ -9,6 +9,8 @@
     #extension GL_EXT_gpu_shader4: require
 #endif
 
+#define PER_PIXEL_LIGHTING 1
+
 #if @diffuseMap
 uniform sampler2D diffuseMap;
 varying vec2 diffuseMapUV;
@@ -28,23 +30,21 @@ varying vec4 passTangent;
 varying float euclideanDepth;
 varying float linearDepth;
 
-#define PER_PIXEL_LIGHTING 1
-
 varying vec3 passViewPos;
 varying vec3 passNormal;
 
 uniform vec2 screenRes;
 uniform float far;
 uniform float alphaRef;
-
-#include "vertexcolors.glsl"
-#include "shadows_fragment.glsl"
-#include "lib/light/lighting.glsl"
-#include "lib/material/alpha.glsl"
-#include "fog.glsl"
-
 uniform float emissiveMult;
 uniform float specStrength;
+
+#include "lib/light/lighting.glsl"
+#include "lib/material/alpha.glsl"
+
+#include "compatibility/vertexcolors.glsl"
+#include "compatibility/shadows_fragment.glsl"
+#include "compatibility/fog.glsl"
 
 void main()
 {
@@ -59,7 +59,7 @@ void main()
 
     vec4 diffuseColor = getDiffuseColor();
     gl_FragData[0].a *= diffuseColor.a;
-    gl_FragData[0].a = alphaTest(gl_FragData[0].a);
+    gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
 
 #if @normalMap
     vec4 normalTex = texture2D(normalMap, normalMapUV);

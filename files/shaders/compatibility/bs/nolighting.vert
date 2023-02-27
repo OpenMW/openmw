@@ -1,24 +1,31 @@
 #version 120
 
+#if @useUBO
+    #extension GL_ARB_uniform_buffer_object : require
+#endif
+
+#if @useGPUShader4
+    #extension GL_EXT_gpu_shader4: require
+#endif
+
 #include "lib/core/vertex.h.glsl"
 
 #if @diffuseMap
 varying vec2 diffuseMapUV;
 #endif
 
-#if @radialFog
+varying vec3 passNormal;
 varying float euclideanDepth;
-#else
 varying float linearDepth;
-#endif
+varying float passFalloff;
 
 uniform bool useFalloff;
 uniform vec4 falloffParams;
 
-varying float passFalloff;
-
-#include "vertexcolors.glsl"
 #include "lib/view/depth.glsl"
+
+#include "compatibility/vertexcolors.glsl"
+#include "compatibility/shadows_vertex.glsl"
 
 void main(void)
 {
@@ -26,17 +33,16 @@ void main(void)
 
     vec4 viewPos = modelToView(gl_Vertex);
     gl_ClipVertex = viewPos;
-#if @radialFog
     euclideanDepth = length(viewPos.xyz);
-#else
     linearDepth = getLinearDepth(gl_Position.z, viewPos.z);
-#endif
 
 #if @diffuseMap
     diffuseMapUV = (gl_TextureMatrix[@diffuseMapUV] * gl_MultiTexCoord@diffuseMapUV).xy;
 #endif
 
     passColor = gl_Color;
+    passNormal = gl_Normal.xyz;
+
     if (useFalloff)
     {
         vec3 viewNormal = gl_NormalMatrix * normalize(gl_Normal.xyz);
@@ -53,4 +59,9 @@ void main(void)
     {
         passFalloff = 1.0;
     }
+
+#if @shadows_enabled
+    vec3 viewNormal = normalize((gl_NormalMatrix * gl_Normal).xyz);
+    setupShadowCoords(viewPos, viewNormal);
+#endif
 }
