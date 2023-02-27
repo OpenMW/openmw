@@ -24,7 +24,8 @@ namespace MWWorld
             .mAmbiantColor = cell.mLighting.ambient,
             .mDirectionalColor = cell.mLighting.directional,
             .mFogColor = cell.mLighting.fogColor,
-            .mFogDensity = cell.mLighting.fogPower,}
+            // TODO: use ESM4::Lighting fog parameters
+            .mFogDensity = 1.f,}
             ,mWaterHeight(cell.mWaterHeight)
     {
     }
