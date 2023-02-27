@@ -100,7 +100,7 @@ namespace CSMWorld
     public:
         Collection();
 
-        virtual ~Collection();
+        ~Collection() override;
 
         void add(const ESXRecordT& record);
         ///< Add a new record (modified)
@@ -119,10 +119,10 @@ namespace CSMWorld
 
         const ColumnBase& getColumn(int column) const override;
 
-        virtual void merge();
+        void merge();
         ///< Merge modified into base.
 
-        virtual void purge();
+        void purge();
         ///< Remove records that are flagged as erased.
 
         void removeRows(int index, int count) override;
