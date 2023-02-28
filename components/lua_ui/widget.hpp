@@ -7,7 +7,7 @@
 #include <MyGUI_Widget.h>
 #include <sol/sol.hpp>
 
-#include <components/lua/scriptscontainer.hpp>
+#include <components/lua/asyncpackage.hpp>
 
 #include "properties.hpp"
 

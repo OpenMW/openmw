@@ -1,3 +1,7 @@
+if (NOT DEFINED OPENMW_RESOURCES_ROOT)
+    return()
+endif()
+
 set(LUA_API_FILES
     README.md
     coroutine.doclua
@@ -18,5 +22,5 @@ set(LUA_API_FILES
 )
 
 foreach (f ${LUA_API_FILES})
-    copy_resource_file("${CMAKE_CURRENT_SOURCE_DIR}/${f}" "${OpenMW_BINARY_DIR}" "resources/lua_api/${f}")
+    copy_resource_file("${CMAKE_CURRENT_SOURCE_DIR}/${f}" "${OPENMW_RESOURCES_ROOT}" "resources/lua_api/${f}")
 endforeach (f)

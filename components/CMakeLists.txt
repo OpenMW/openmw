@@ -1,5 +1,10 @@
 project (Components)
 
+if(APPLE)
+    set(BUNDLE_RESOURCES_DIR "${APP_BUNDLE_DIR}/Contents/Resources")
+    set(OPENMW_RESOURCES_ROOT ${BUNDLE_RESOURCES_DIR})
+endif(APPLE)
+
 # Version file
 set (VERSION_IN_FILE "${OpenMW_SOURCE_DIR}/files/version.in")
 set (VERSION_FILE_PATH_BASE "${OpenMW_BINARY_DIR}")
@@ -29,7 +34,7 @@ endif (GIT_CHECKOUT)
 # source files
 
 add_component_dir (lua
-    luastate scriptscontainer utilpackage serialization configuration l10n storage
+    luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage
     )
 
 add_component_dir (l10n
@@ -271,6 +276,7 @@ add_component_dir (lua_ui
     properties widget element util layers content alignment resources
     adapter text textedit window image container flex
     )
+copy_resource_file("lua_ui/content.lua" "${OPENMW_RESOURCES_ROOT}" "resources/lua_libs/content.lua")
 
 
 if(WIN32)

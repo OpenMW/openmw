@@ -12,6 +12,7 @@
 
 #include <components/settings/settings.hpp>
 
+#include <components/lua/asyncpackage.hpp>
 #include <components/lua/utilpackage.hpp>
 
 #include <components/lua_ui/util.hpp>
@@ -86,7 +87,10 @@ namespace MWLua
         LocalScripts::initializeSelfPackage(localContext);
         LuaUtil::LuaStorage::initLuaBindings(mLua.sol());
 
-        mLua.addCommonPackage("openmw.async", getAsyncPackageInitializer(context));
+        mLua.addCommonPackage("openmw.async",
+            LuaUtil::getAsyncPackageInitializer(
+                mLua.sol(), [this] { return mWorldView.getSimulationTime(); },
+                [this] { return mWorldView.getGameTime(); }));
         mLua.addCommonPackage("openmw.util", LuaUtil::initUtilPackage(mLua.sol()));
         mLua.addCommonPackage("openmw.core", initCorePackage(context));
         mLua.addCommonPackage("openmw.types", initTypesPackage(context));

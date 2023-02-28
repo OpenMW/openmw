@@ -89,69 +89,6 @@ namespace MWLua
 
     sol::table initUserInterfacePackage(const Context& context)
     {
-        auto uiContent = context.mLua->sol().new_usertype<LuaUi::Content>("UiContent");
-        uiContent[sol::meta_function::length] = [](const LuaUi::Content& content)
-        {
-            return content.size();
-        };
-        uiContent[sol::meta_function::index] = sol::overload(
-            [](const LuaUi::Content& content, size_t index)
-            {
-                return content.at(fromLuaIndex(index));
-            },
-            [](const LuaUi::Content& content, std::string_view name)
-            {
-                return content.at(name);
-            });
-        uiContent[sol::meta_function::new_index] = sol::overload(
-            [](LuaUi::Content& content, size_t index, const sol::table& table)
-            {
-                content.assign(fromLuaIndex(index), table);
-            },
-            [](LuaUi::Content& content, size_t index, sol::nil_t nil)
-            {
-                content.remove(fromLuaIndex(index));
-            },
-            [](LuaUi::Content& content, std::string_view name, const sol::table& table)
-            {
-                content.assign(name, table);
-            },
-            [](LuaUi::Content& content, std::string_view name, sol::nil_t nil)
-            {
-                content.remove(name);
-            });
-        uiContent["insert"] = [](LuaUi::Content& content, size_t index, const sol::table& table)
-        {
-            content.insert(fromLuaIndex(index), table);
-        };
-        uiContent["add"] = [](LuaUi::Content& content, const sol::table& table)
-        {
-            content.insert(content.size(), table);
-        };
-        uiContent["indexOf"] = [](LuaUi::Content& content, const sol::table& table) -> sol::optional<size_t>
-        {
-            size_t index = content.indexOf(table);
-            if (index < content.size())
-                return toLuaIndex(index);
-            else
-                return sol::nullopt;
-        };
-        {
-            auto pairs = [](LuaUi::Content& content)
-            {
-                auto next = [](LuaUi::Content& content, size_t i) -> sol::optional<std::tuple<size_t, sol::table>>
-                {
-                    if (i < content.size())
-                        return std::make_tuple(i + 1, content.at(i));
-                    else
-                        return sol::nullopt;
-                };
-                return std::make_tuple(next, content, 0);
-            };
-            uiContent[sol::meta_function::ipairs] = pairs;
-            uiContent[sol::meta_function::pairs] = pairs;
-        }
-
         auto element = context.mLua->sol().new_usertype<LuaUi::Element>("Element");
         element["layout"] = sol::property(
             [](LuaUi::Element& element)
@@ -210,12 +147,8 @@ namespace MWLua
                 luaManager->addAction([wm, obj=obj.as<LObject>()]{ wm->setConsoleSelectedObject(obj.ptr()); });
             }
         };
-        api["content"] = [](const sol::table& table)
-        {
-            return LuaUi::Content(table);
-        };
-        api["create"] = [context](const sol::table& layout)
-        {
+        api["content"] = LuaUi::loadContentConstructor(context.mLua);
+        api["create"] = [context](const sol::table& layout) {
             auto element = LuaUi::Element::make(layout);
             context.mLuaManager->addAction(std::make_unique<UiAction>(UiAction::CREATE, element, context.mLua));
             return element;

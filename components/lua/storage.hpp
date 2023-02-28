@@ -6,7 +6,7 @@
 
 #include <boost/filesystem/path.hpp>
 
-#include "scriptscontainer.hpp"
+#include "asyncpackage.hpp"
 #include "serialization.hpp"
 
 namespace LuaUtil
