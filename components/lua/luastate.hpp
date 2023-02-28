@@ -23,7 +23,7 @@ namespace LuaUtil
     struct ScriptId
     {
         ScriptsContainer* mContainer = nullptr;
-        int mIndex; // index in LuaUtil::ScriptsConfiguration
+        int mIndex = -1; // index in LuaUtil::ScriptsConfiguration
     };
 
     struct LuaStateSettings
