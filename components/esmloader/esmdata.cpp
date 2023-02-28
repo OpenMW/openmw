@@ -71,11 +71,11 @@ namespace EsmLoader
         return withStatic(refId, type, content, [](const auto& v) { return std::string_view(v.mModel); });
     }
 
-    ESM::Variant getGameSetting(const std::vector<ESM::GameSetting>& records, const ESM::RefId& id)
+    ESM::Variant getGameSetting(const std::vector<ESM::GameSetting>& records, std::string_view id)
     {
         auto it = std::lower_bound(records.begin(), records.end(), id, LessById{});
         if (it == records.end() || it->mId != id)
-            throw std::runtime_error("Game settings \"" + id.getRefIdString() + "\" is not found");
+            throw std::runtime_error("Game settings \"" + std::string(id) + "\" is not found");
         return it->mValue;
     }
 }

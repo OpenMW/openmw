@@ -22,7 +22,11 @@ namespace ESM
 
         bool operator==(const RefId& rhs) const;
 
+        bool operator==(std::string_view rhs) const;
+
         bool operator<(const RefId& rhs) const;
+
+        bool operator<(std::string_view rhs) const;
 
         friend std::ostream& operator<<(std::ostream& os, const RefId& dt);
 
@@ -33,16 +37,8 @@ namespace ESM
         static RefId formIdRefId(const ESM4::FormId id);
         const std::string& getRefIdString() const { return mId; }
 
-        template <std::size_t size>
-        bool operator==(const char (&rhs)[size]) const
-        {
-            return *this == std::string_view(rhs);
-        }
-
     private:
         std::string mId;
-
-        bool operator==(std::string_view rhs) const;
     };
 }
 
