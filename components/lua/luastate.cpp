@@ -5,6 +5,7 @@
 #endif // NO_LUAJIT
 
 #include <boost/filesystem.hpp>
+#include <fstream>
 
 #include <components/debug/debuglog.hpp>
 #include <components/vfs/manager.hpp>
@@ -273,7 +274,9 @@ namespace LuaUtil
     sol::function LuaState::loadInternalLib(std::string_view libName)
     {
         std::string path = packageNameToPath(libName, mLibSearchPaths);
-        sol::load_result res = mLua.load_file(path, sol::load_mode::text);
+        std::ifstream stream(path);
+        std::string fileContent(std::istreambuf_iterator<char>(stream), {});
+        sol::load_result res = mLua.load(fileContent, path, sol::load_mode::text);
         if (!res.valid())
             throw std::runtime_error("Lua error: " + res.get<std::string>());
         return res;
