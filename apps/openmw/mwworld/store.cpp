@@ -793,12 +793,12 @@ namespace MWWorld
     }
     ESM::Cell* Store<ESM::Cell>::insert(const ESM::Cell& cell)
     {
-        ESM::Cell* insertedCell = &mCells.emplace(cell.mId, cell).first->second;
         if (search(cell) != nullptr)
         {
             const std::string cellType = (cell.isExterior()) ? "exterior" : "interior";
             throw std::runtime_error("Failed to create " + cellType + " cell");
         }
+        ESM::Cell* insertedCell = &mCells.emplace(cell.mId, cell).first->second;
         if (cell.isExterior())
         {
             std::pair<int, int> key(cell.getGridX(), cell.getGridY());
