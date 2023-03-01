@@ -276,19 +276,6 @@ void CSMWorld::RefCollection::removeRows(int index, int count)
     }
 }
 
-void CSMWorld::RefCollection::appendBlankRecord(const std::string& id, UniversalId::Type type)
-{
-    auto record = std::make_unique<Record<CellRef>>();
-
-    record->mState = Record<CellRef>::State_ModifiedOnly;
-    record->mModified.blank();
-
-    record->get().mId = ESM::RefId::stringRefId(id);
-    record->get().mIdNum = extractIdNum(id);
-
-    Collection<CellRef>::appendRecord(std::move(record));
-}
-
 void CSMWorld::RefCollection::appendBlankRecord(const ESM::RefId& id, UniversalId::Type type)
 {
     auto record = std::make_unique<Record<CellRef>>();
@@ -314,11 +301,6 @@ void CSMWorld::RefCollection::cloneRecord(
     copy->get().mIdNum = extractIdNum(destination.getRefIdString());
 
     insertRecord(std::move(copy), getAppendIndex(destination, type)); // call RefCollection::insertRecord()
-}
-
-int CSMWorld::RefCollection::searchId(std::string_view id) const
-{
-    return searchId(extractIdNum(id));
 }
 
 int CSMWorld::RefCollection::searchId(const ESM::RefId& id) const

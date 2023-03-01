@@ -14,7 +14,7 @@ namespace CSMWorld
 
     /// \brief Single type collection of top level records that are associated with cells
     template <typename ESXRecordT>
-    class SubCellCollection : public NestedIdCollection<ESXRecordT>
+    class SubCellCollection final : public NestedIdCollection<ESXRecordT>
     {
         const IdCollection<Cell>& mCells;
 
