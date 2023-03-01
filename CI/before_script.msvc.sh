@@ -850,11 +850,11 @@ printf "${OSG_ARCHIVE_NAME}... "
 
 		if ! [ -z $OSG_MULTIVIEW_BUILD ]; then
 			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{ot21-OpenThreads,zlib,libpng16}${SUFFIX}.dll \
-				"$(pwd)/OSG/bin/osg162-osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow}${SUFFIX}.dll
+				"$(pwd)/OSG/bin/osg162-osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow,Sim}${SUFFIX}.dll
 		else
 			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{OpenThreads,icuuc58,libpng16,zlib}${SUFFIX}.dll \
 				"$(pwd)/OSG/bin/libxml2"${SUFFIX_UPCASE}.dll \
-				"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow}${SUFFIX}.dll
+				"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow,Sim}${SUFFIX}.dll
 			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/icudt58.dll"
 			if [ $CONFIGURATION == "Debug" ]; then
 				add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{boost_filesystem-vc141-mt-gd-1_63,boost_system-vc141-mt-gd-1_63,collada-dom2.4-dp-vc141-mt-d}.dll
