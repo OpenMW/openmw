@@ -171,6 +171,11 @@ namespace
         EXPECT_FALSE(ciStartsWith("foo", "foo bar"));
     }
 
+    TEST(MiscStringsCiStartsWith, should_be_case_insensitive)
+    {
+        EXPECT_TRUE(ciStartsWith("foo bar", "FOO"));
+    }
+
     TEST(MiscStringsFormat, string_format)
     {
         std::string f = "1%s2";
@@ -191,5 +196,40 @@ namespace
         EXPECT_EQ(Misc::StringUtils::format(f, view.substr(0, 1)), "112");
         EXPECT_EQ(Misc::StringUtils::format(f, view.substr(1, 1)), "122");
         EXPECT_EQ(Misc::StringUtils::format(f, view.substr(2)), "12");
+    }
+
+    TEST(MiscStringsCiFind, should_return_zero_for_2_empty_strings)
+    {
+        EXPECT_EQ(ciFind(std::string_view(), std::string_view()), 0);
+    }
+
+    TEST(MiscStringsCiFind, should_return_zero_when_looking_for_empty_string)
+    {
+        EXPECT_EQ(ciFind("foo", std::string_view()), 0);
+    }
+
+    TEST(MiscStringsCiFind, should_return_npos_for_longer_substring)
+    {
+        EXPECT_EQ(ciFind("a", "aa"), std::string_view::npos);
+    }
+
+    TEST(MiscStringsCiFind, should_return_zero_for_the_same_string)
+    {
+        EXPECT_EQ(ciFind("foo", "foo"), 0);
+    }
+
+    TEST(MiscStringsCiFind, should_return_first_position_of_substring)
+    {
+        EXPECT_EQ(ciFind("foobar foobar", "bar"), 3);
+    }
+
+    TEST(MiscStringsCiFind, should_be_case_insensitive)
+    {
+        EXPECT_EQ(ciFind("foobar", "BAR"), 3);
+    }
+
+    TEST(MiscStringsCiFind, should_return_npos_for_absent_substring)
+    {
+        EXPECT_EQ(ciFind("foobar", "baz"), std::string_view::npos);
     }
 }

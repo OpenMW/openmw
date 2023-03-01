@@ -44,6 +44,16 @@ namespace ESM
         return Misc::StringUtils::ciEqual(mId, rhs);
     }
 
+    bool RefId::startsWith(std::string_view prefix) const
+    {
+        return Misc::StringUtils::ciStartsWith(mId, prefix);
+    }
+
+    bool RefId::contains(std::string_view subString) const
+    {
+        return Misc::StringUtils::ciFind(mId, subString) != std::string_view::npos;
+    }
+
     const RefId RefId::sEmpty = {};
 }
 

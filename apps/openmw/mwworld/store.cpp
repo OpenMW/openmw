@@ -153,7 +153,7 @@ namespace MWWorld
     {
         std::vector<const T*> results;
         std::copy_if(mShared.begin(), mShared.end(), std::back_inserter(results),
-            [prefix](const T* item) { return Misc::StringUtils::ciStartsWith(item->mId.getRefIdString(), prefix); });
+            [prefix](const T* item) { return item->mId.startsWith(prefix); });
         if (!results.empty())
             return results[Misc::Rng::rollDice(results.size(), prng)];
         return nullptr;

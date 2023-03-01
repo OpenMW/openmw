@@ -263,7 +263,7 @@ void CSMDoc::CollectionReferencesStage::perform(int stage, Messages& messages)
             std::deque<int>& indices = mState.getSubRecords()[cellId.getRefIdString()];
 
             // collect moved references at the end of the container
-            bool interior = cellId.getRefIdString()[0] != '#';
+            const bool interior = !cellId.startsWith("#");
             std::ostringstream stream;
             if (!interior)
             {
@@ -367,7 +367,7 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
         || references != mState.getSubRecords().end())
     {
         CSMWorld::Cell cellRecord = cell.get();
-        bool interior = cellRecord.mId.getRefIdString()[0] != '#';
+        const bool interior = !cellRecord.mId.startsWith("#");
 
         // count new references and adjust RefNumCount accordingsly
         unsigned int newRefNum = cellRecord.mRefNumCounter;
@@ -451,10 +451,9 @@ void CSMDoc::WritePathgridCollectionStage::perform(int stage, Messages& messages
     if (pathgrid.isModified() || pathgrid.mState == CSMWorld::RecordBase::State_Deleted)
     {
         CSMWorld::Pathgrid record = pathgrid.get();
-        std::string recordIdString = record.mId.getRefIdString();
-        if (recordIdString[0] == '#')
+        if (record.mId.startsWith("#"))
         {
-            std::istringstream stream(recordIdString.c_str());
+            std::istringstream stream(record.mId.getRefIdString());
             char ignore;
             stream >> ignore >> record.mData.mX >> record.mData.mY;
         }

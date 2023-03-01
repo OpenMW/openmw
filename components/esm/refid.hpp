@@ -29,6 +29,10 @@ namespace ESM
 
         bool empty() const { return mId.empty(); }
 
+        bool startsWith(std::string_view prefix) const;
+
+        bool contains(std::string_view subString) const;
+
         bool operator==(const RefId& rhs) const;
 
         bool operator==(std::string_view rhs) const;

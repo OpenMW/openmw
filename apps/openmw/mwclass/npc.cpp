@@ -1447,7 +1447,7 @@ namespace MWClass
 
     bool Npc::isClass(const MWWorld::ConstPtr& ptr, std::string_view className) const
     {
-        return Misc::StringUtils::ciEqual(ptr.get<ESM::NPC>()->mBase->mClass.getRefIdString(), className);
+        return ptr.get<ESM::NPC>()->mBase->mClass == className;
     }
 
     bool Npc::canSwim(const MWWorld::ConstPtr& ptr) const
