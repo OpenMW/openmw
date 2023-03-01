@@ -4,7 +4,8 @@
 -- @module self
 -- @extends openmw.core#GameObject
 -- @usage local self = require('openmw.self')
--- if self.type == 'Player' then  -- All fields and functions of `GameObject` are available.
+-- local types = require('openmw.types')
+-- if self.type == types.Player then  -- All fields and functions of `GameObject` are available.
 --     self:sendEvent("something", self.position)
 -- end
 

@@ -130,7 +130,7 @@ return {
         --         {
         --             key = 'Flag',
         --             default = false,
-        --             renderer = 'yeNo',
+        --             renderer = 'checkbox',
         --             name = 'Flag',
         --             description = 'Flag toggle',
         --         },
