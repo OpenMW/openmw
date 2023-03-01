@@ -565,9 +565,9 @@ OSG_ARCHIVE_NAME="OSGoS 3.6.5"
 OSG_ARCHIVE="OSGoS-3.6.5-dd803bc-msvc${OSG_MSVC_YEAR}-win${BITS}"
 OSG_ARCHIVE_REPO_URL="https://gitlab.com/OpenMW/openmw-deps/-/raw/main"
 if ! [ -z $OSG_MULTIVIEW_BUILD ]; then
-    OSG_ARCHIVE_NAME="OSG-3.6-multiview"
-    OSG_ARCHIVE="OSG-3.6-multiview-ee297dce0-msvc${OSG_MSVC_YEAR}-win${BITS}"
-    OSG_ARCHIVE_REPO_URL="https://gitlab.com/madsbuvi/openmw-deps/-/raw/openmw-vr-ovr_multiview"
+	OSG_ARCHIVE_NAME="OSG-3.6-multiview"
+	OSG_ARCHIVE="OSG-3.6-multiview-ee297dce0-msvc${OSG_MSVC_YEAR}-win${BITS}"
+	OSG_ARCHIVE_REPO_URL="https://gitlab.com/madsbuvi/openmw-deps/-/raw/openmw-vr-ovr_multiview"
 fi
 
 
@@ -648,10 +648,10 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/LuaJIT-${LUAJIT_VER}-msvc${LUA_MSVC_YEAR}-win${BITS}.7z" \
 		"LuaJIT-${LUAJIT_VER}-msvc${LUA_MSVC_YEAR}-win${BITS}.7z"
 
-    # ICU
-    download "ICU ${ICU_VER/_/.}"\
-        "https://github.com/unicode-org/icu/releases/download/release-${ICU_VER/_/-}/icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip" \
-        "icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip"
+	# ICU
+	download "ICU ${ICU_VER/_/.}"\
+		"https://github.com/unicode-org/icu/releases/download/release-${ICU_VER/_/-}/icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip" \
+		"icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip"
 fi
 
 cd .. #/..
