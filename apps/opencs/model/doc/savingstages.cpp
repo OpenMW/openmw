@@ -236,7 +236,7 @@ CSMDoc::CollectionReferencesStage::CollectionReferencesStage(Document& document,
 
 int CSMDoc::CollectionReferencesStage::setup()
 {
-    mState.getSubRecords().clear();
+    mState.clearSubRecords();
 
     int size = mDocument.getData().getReferences().getSize();
 
@@ -260,7 +260,7 @@ void CSMDoc::CollectionReferencesStage::perform(int stage, Messages& messages)
             const ESM::RefId& cellId
                 = record.get().mOriginalCell.empty() ? record.get().mCell : record.get().mOriginalCell;
 
-            std::deque<int>& indices = mState.getSubRecords()[cellId.getRefIdString()];
+            std::deque<int>& indices = mState.getOrInsertSubRecord(cellId);
 
             // collect moved references at the end of the container
             const bool interior = !cellId.startsWith("#");
@@ -360,11 +360,9 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
     std::deque<int> tempRefs;
     std::deque<int> persistentRefs;
 
-    std::map<std::string, std::deque<int>>::const_iterator references
-        = mState.getSubRecords().find(cell.get().mId.getRefIdString());
+    const std::deque<int>* references = mState.findSubRecord(cell.get().mId);
 
-    if (cell.isModified() || cell.mState == CSMWorld::RecordBase::State_Deleted
-        || references != mState.getSubRecords().end())
+    if (cell.isModified() || cell.mState == CSMWorld::RecordBase::State_Deleted || references != nullptr)
     {
         CSMWorld::Cell cellRecord = cell.get();
         const bool interior = !cellRecord.mId.startsWith("#");
@@ -372,10 +370,9 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
         // count new references and adjust RefNumCount accordingsly
         unsigned int newRefNum = cellRecord.mRefNumCounter;
 
-        if (references != mState.getSubRecords().end())
+        if (references != nullptr)
         {
-            for (std::deque<int>::const_iterator iter(references->second.begin()); iter != references->second.end();
-                 ++iter)
+            for (std::deque<int>::const_iterator iter(references->begin()); iter != references->end(); ++iter)
             {
                 const CSMWorld::Record<CSMWorld::CellRef>& ref = mDocument.getData().getReferences().getRecord(*iter);
 
@@ -421,10 +418,10 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
         cellRecord.save(writer, cell.mState == CSMWorld::RecordBase::State_Deleted);
 
         // write references
-        if (references != mState.getSubRecords().end())
+        if (references != nullptr)
         {
             writeReferences(persistentRefs, interior, newRefNum);
-            cellRecord.saveTempMarker(writer, int(references->second.size()) - persistentRefs.size());
+            cellRecord.saveTempMarker(writer, static_cast<int>(references->size()) - persistentRefs.size());
             writeReferences(tempRefs, interior, newRefNum);
         }
 

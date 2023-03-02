@@ -68,7 +68,20 @@ bool CSMDoc::SavingState::isProjectFile() const
     return mProjectFile;
 }
 
-std::map<std::string, std::deque<int>, Misc::StringUtils::CiComp>& CSMDoc::SavingState::getSubRecords()
+const std::deque<int>* CSMDoc::SavingState::findSubRecord(const ESM::RefId& refId) const
 {
-    return mSubRecords;
+    const auto it = mSubRecords.find(refId);
+    if (it == mSubRecords.end())
+        return nullptr;
+    return &it->second;
+}
+
+std::deque<int>& CSMDoc::SavingState::getOrInsertSubRecord(const ESM::RefId& refId)
+{
+    return mSubRecords[refId];
+}
+
+void CSMDoc::SavingState::clearSubRecords()
+{
+    mSubRecords.clear();
 }
