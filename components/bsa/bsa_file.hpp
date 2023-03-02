@@ -35,6 +35,14 @@
 namespace Bsa
 {
 
+    enum BsaVersion
+    {
+        BSAVER_UNKNOWN = 0x0,
+        BSAVER_UNCOMPRESSED = 0x100,
+        BSAVER_COMPRESSED = 0x415342, // B, S, A,
+        BSAVER_BA2_GNRL,
+    };
+
     /**
        This class is used to read "Bethesda Archive Files", or BSAs.
      */
@@ -138,6 +146,9 @@ namespace Bsa
         {
             return Files::pathToUnicodeString(mFilepath);
         }
+
+        // checks version of BSA from file header
+        static BsaVersion detectVersion(const std::filesystem::path& filePath);
     };
 
 }

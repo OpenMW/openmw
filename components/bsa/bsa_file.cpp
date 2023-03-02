@@ -23,6 +23,7 @@
 
 #include "bsa_file.hpp"
 
+#include <components/esm/fourcc.hpp>
 #include <components/files/constrainedfilestream.hpp>
 
 #include <algorithm>
@@ -318,4 +319,54 @@ void Bsa::BSAFile::addFile(const std::string& filename, std::istream& file)
     stream.seekp(0, std::ios::end);
     file.seekg(0, std::ios::beg);
     stream << file.rdbuf();
+}
+
+BsaVersion Bsa::BSAFile::detectVersion(const std::filesystem::path& filePath)
+{
+    std::ifstream input(filePath, std::ios_base::binary);
+
+    // Total archive size
+    std::streamoff fsize = 0;
+    if (input.seekg(0, std::ios_base::end))
+    {
+        fsize = input.tellg();
+        input.seekg(0);
+    }
+
+    if (fsize < 12)
+    {
+        return BSAVER_UNKNOWN;
+    }
+
+    // Get essential header numbers
+
+    // First 12 bytes
+    uint32_t head[3];
+
+    input.read(reinterpret_cast<char*>(head), 12);
+
+    if (head[0] == static_cast<uint32_t>(BSAVER_UNCOMPRESSED))
+    {
+        return BSAVER_UNCOMPRESSED;
+    }
+
+    if (head[0] == static_cast<uint32_t>(BSAVER_COMPRESSED))
+    {
+        if (head[1] == static_cast<uint32_t>(0x01))
+        {
+            if (head[2] == ESM::fourCC("GNRL"))
+                return BSAVER_BA2_GNRL;
+            return BSAVER_UNKNOWN;
+        }
+        return BSAVER_COMPRESSED;
+    }
+
+    if (head[0] == ESM::fourCC("BTDX"))
+    {
+        if (head[2] == ESM::fourCC("GNRL"))
+            return BSAVER_BA2_GNRL;
+        return BSAVER_UNKNOWN;
+    }
+
+    return BSAVER_UNKNOWN;
 }

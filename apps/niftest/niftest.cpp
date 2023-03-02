@@ -43,7 +43,7 @@ bool isBSA(const std::filesystem::path& filename)
 
 std::unique_ptr<VFS::Archive> makeBsaArchive(const std::filesystem::path& path)
 {
-    switch (Bsa::CompressedBSAFile::detectVersion(path))
+    switch (Bsa::BSAFile::detectVersion(path))
     {
         case Bsa::BSAVER_UNKNOWN:
             std::cerr << '"' << path << "\" is unknown BSA archive" << std::endl;
@@ -51,6 +51,7 @@ std::unique_ptr<VFS::Archive> makeBsaArchive(const std::filesystem::path& path)
         case Bsa::BSAVER_UNCOMPRESSED:
             return std::make_unique<VFS::BsaArchive>(path);
         case Bsa::BSAVER_COMPRESSED:
+        case Bsa::BSAVER_BA2_GNRL:
             return std::make_unique<VFS::CompressedBsaArchive>(path);
     }
 

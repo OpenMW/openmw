@@ -33,13 +33,6 @@
 
 namespace Bsa
 {
-    enum BsaVersion
-    {
-        BSAVER_UNKNOWN = 0x0,
-        BSAVER_UNCOMPRESSED = 0x100,
-        BSAVER_COMPRESSED = 0x415342 // B, S, A
-    };
-
     class CompressedBSAFile : private BSAFile
     {
     private:
@@ -94,9 +87,6 @@ namespace Bsa
 
         CompressedBSAFile();
         virtual ~CompressedBSAFile();
-
-        // checks version of BSA from file header
-        static BsaVersion detectVersion(const std::filesystem::path& filePath);
 
         /// Read header information from the input source
         void readHeader() override;
