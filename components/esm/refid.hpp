@@ -18,6 +18,15 @@ namespace ESM
     public:
         const static RefId sEmpty;
 
+        // The 2 following functions are used to move back and forth between string and RefID. Used for hard coded
+        // RefIds that are as string in the code. For serialization, and display. Using explicit conversions make it
+        // very clear where in the code we need to convert from string to RefId and Vice versa.
+        static RefId stringRefId(std::string_view id);
+
+        static RefId formIdRefId(const ESM4::FormId id);
+
+        const std::string& getRefIdString() const { return mId; }
+
         bool empty() const { return mId.empty(); }
 
         bool operator==(const RefId& rhs) const;
@@ -29,13 +38,6 @@ namespace ESM
         bool operator<(std::string_view rhs) const;
 
         friend std::ostream& operator<<(std::ostream& os, const RefId& dt);
-
-        // The 2 following functions are used to move back and forth between string and RefID. Used for hard coded
-        // RefIds that are as string in the code. For serialization, and display. Using explicit conversions make it
-        // very clear where in the code we need to convert from string to RefId and Vice versa.
-        static RefId stringRefId(std::string_view id);
-        static RefId formIdRefId(const ESM4::FormId id);
-        const std::string& getRefIdString() const { return mId; }
 
     private:
         std::string mId;
