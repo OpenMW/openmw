@@ -69,7 +69,7 @@ def runTest(name):
         stderr=subprocess.STDOUT,
         encoding="utf-8",
         env={
-            "OPENMW_OSG_STATS_FILE": work_dir / f"{name}.{time_str}.osg_stats.log",
+            "OPENMW_OSG_STATS_FILE": str(work_dir / f"{name}.{time_str}.osg_stats.log"),
             "OPENMW_OSG_STATS_LIST": "times",
             **os.environ,
         },
