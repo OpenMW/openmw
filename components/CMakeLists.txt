@@ -46,7 +46,7 @@ add_component_dir (settings
     )
 
 add_component_dir (bsa
-    bsa_file compressedbsafile ba2gnrlfile
+    bsa_file compressedbsafile ba2gnrlfile ba2dx10file
     )
 
 add_component_dir (vfs

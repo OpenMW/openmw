@@ -52,6 +52,7 @@ std::unique_ptr<VFS::Archive> makeBsaArchive(const std::filesystem::path& path)
             return std::make_unique<VFS::BsaArchive>(path);
         case Bsa::BSAVER_COMPRESSED:
         case Bsa::BSAVER_BA2_GNRL:
+        case Bsa::BSAVER_BA2_DX10:
             return std::make_unique<VFS::CompressedBsaArchive>(path);
     }
 

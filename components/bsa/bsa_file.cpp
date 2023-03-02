@@ -356,6 +356,8 @@ BsaVersion Bsa::BSAFile::detectVersion(const std::filesystem::path& filePath)
         {
             if (head[2] == ESM::fourCC("GNRL"))
                 return BSAVER_BA2_GNRL;
+            if (head[2] == ESM::fourCC("DX10"))
+                return BSAVER_BA2_DX10;
             return BSAVER_UNKNOWN;
         }
         return BSAVER_COMPRESSED;
@@ -365,6 +367,8 @@ BsaVersion Bsa::BSAFile::detectVersion(const std::filesystem::path& filePath)
     {
         if (head[2] == ESM::fourCC("GNRL"))
             return BSAVER_BA2_GNRL;
+        if (head[2] == ESM::fourCC("DX10"))
+            return BSAVER_BA2_DX10;
         return BSAVER_UNKNOWN;
     }
 

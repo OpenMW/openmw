@@ -6,6 +6,7 @@
 
 #include <boost/program_options.hpp>
 
+#include <components/bsa/ba2dx10file.hpp>
 #include <components/bsa/ba2gnrlfile.hpp>
 #include <components/bsa/compressedbsafile.hpp>
 #include <components/files/configurationmanager.hpp>
@@ -327,6 +328,8 @@ int main(int argc, char** argv)
                 return call<Bsa::CompressedBSAFile>(info);
             case Bsa::BSAVER_BA2_GNRL:
                 return call<Bsa::BA2GNRLFile>(info);
+            case Bsa::BSAVER_BA2_DX10:
+                return call<Bsa::BA2DX10File>(info);
             case Bsa::BSAVER_UNCOMPRESSED:
                 return call<Bsa::BSAFile>(info);
             default:

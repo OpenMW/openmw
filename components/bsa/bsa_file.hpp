@@ -41,6 +41,7 @@ namespace Bsa
         BSAVER_UNCOMPRESSED = 0x100,
         BSAVER_COMPRESSED = 0x415342, // B, S, A,
         BSAVER_BA2_GNRL,
+        BSAVER_BA2_DX10
     };
 
     /**
