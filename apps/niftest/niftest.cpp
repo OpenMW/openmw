@@ -48,12 +48,14 @@ std::unique_ptr<VFS::Archive> makeBsaArchive(const std::filesystem::path& path)
         case Bsa::BSAVER_UNKNOWN:
             std::cerr << '"' << path << "\" is unknown BSA archive" << std::endl;
             return nullptr;
-        case Bsa::BSAVER_UNCOMPRESSED:
-            return std::make_unique<VFS::BsaArchive>(path);
         case Bsa::BSAVER_COMPRESSED:
+            return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_COMPRESSED>::type>(path);
         case Bsa::BSAVER_BA2_GNRL:
+            return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_BA2_GNRL>::type>(path);
         case Bsa::BSAVER_BA2_DX10:
-            return std::make_unique<VFS::CompressedBsaArchive>(path);
+            return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_BA2_DX10>::type>(path);
+        case Bsa::BSAVER_UNCOMPRESSED:
+            return std::make_unique<VFS::ArchiveSelector<Bsa::BSAVER_UNCOMPRESSED>::type>(path);
     }
 
     std::cerr << '"' << path << "\" is unsupported BSA archive" << std::endl;
