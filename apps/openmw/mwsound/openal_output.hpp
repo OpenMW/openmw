@@ -3,6 +3,7 @@
 
 #include <deque>
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -53,6 +54,10 @@ namespace MWSound
         struct StreamThread;
         std::unique_ptr<StreamThread> mStreamThread;
 
+        std::string mDeviceName;
+        std::vector<ALCint> mContextAttributes;
+        std::mutex mReopenMutex;
+
         void initCommon2D(ALuint source, const osg::Vec3f& pos, ALfloat gain, ALfloat pitch, bool loop, bool useenv);
         void initCommon3D(ALuint source, const osg::Vec3f& pos, ALfloat mindist, ALfloat maxdist, ALfloat gain,
             ALfloat pitch, bool loop, bool useenv);
@@ -64,6 +69,11 @@ namespace MWSound
 
         OpenAL_Output& operator=(const OpenAL_Output& rhs);
         OpenAL_Output(const OpenAL_Output& rhs);
+
+        static void eventCallback(
+            ALenum eventType, ALuint object, ALuint param, ALsizei length, const ALchar* message, void* userParam);
+
+        void onDisconnect();
 
     public:
         std::vector<std::string> enumerate() override;
