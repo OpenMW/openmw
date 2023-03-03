@@ -2,8 +2,8 @@
 #define GAME_MWWORLD_GLOBALS_H
 
 #include <cstdint>
+#include <map>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include <components/esm3/loadglob.hpp>
@@ -29,8 +29,7 @@ namespace MWWorld
     class Globals
     {
     private:
-        using Collection
-            = std::unordered_map<std::string, ESM::Global, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>;
+        using Collection = std::map<ESM::RefId, ESM::Global, std::less<>>;
 
         Collection mVariables; // type, value
 
