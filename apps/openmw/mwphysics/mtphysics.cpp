@@ -330,8 +330,8 @@ namespace MWPhysics
                 case LockingPolicy::ExclusiveLocksOnly:
                     return 1;
                 case LockingPolicy::AllowSharedLocks:
-                    return static_cast<unsigned>(std::max(
-                        getMaxBulletSupportedThreads(), Settings::Manager::getInt("async num threads", "Physics")));
+                    return static_cast<unsigned>(std::clamp(
+                        Settings::Manager::getInt("async num threads", "Physics"), 0, getMaxBulletSupportedThreads()));
             }
 
             throw std::runtime_error("Unsupported LockingPolicy: "
@@ -372,6 +372,7 @@ namespace MWPhysics
     {
         if (mNumThreads >= 1)
         {
+            Log(Debug::Info) << "Using " << mNumThreads << " async physics threads";
             for (unsigned i = 0; i < mNumThreads; ++i)
                 mThreads.emplace_back([&] { worker(); });
         }
