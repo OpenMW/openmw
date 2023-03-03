@@ -635,11 +635,11 @@ namespace Bsa
         // append chunks
         for (const auto& c : fileRecord.texturesChunks)
         {
+            Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, c.offset, c.packedSize);
+            std::istream* fileStream = streamPtr.get();
+
             if (c.packedSize != 0)
             {
-                Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, c.offset, c.packedSize);
-                std::istream* fileStream = streamPtr.get();
-
                 boost::iostreams::filtering_streambuf<boost::iostreams::input> inputStreamBuf;
                 inputStreamBuf.push(boost::iostreams::zlib_decompressor());
                 inputStreamBuf.push(*fileStream);
@@ -650,9 +650,7 @@ namespace Bsa
             // uncompressed chunk
             else
             {
-                Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, c.offset, c.packedSize);
-                std::istream* fileStream = streamPtr.get();
-                fileStream->read(memoryStreamPtr->getRawData(), c.size);
+                fileStream->read(memoryStreamPtr->getRawData() + offset, c.size);
             }
             offset += c.size;
         }
