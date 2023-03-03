@@ -365,6 +365,7 @@ BsaVersion Bsa::BSAFile::detectVersion(const std::filesystem::path& filePath)
 
     if (head[0] == ESM::fourCC("BTDX"))
     {
+        // head[1] should contains 0x01 it is checked if we want to open this kind of archive
         if (head[2] == ESM::fourCC("GNRL"))
             return BSAVER_BA2_GNRL;
         if (head[2] == ESM::fourCC("DX10"))

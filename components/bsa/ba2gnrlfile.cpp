@@ -29,7 +29,6 @@
 namespace Bsa
 {
     // special marker for invalid records,
-    // equal to max uint32_t value
     const uint32_t sInvalidOffset = std::numeric_limits<uint32_t>::max();
 
     BA2GNRLFile::FileRecord::FileRecord()
@@ -108,7 +107,7 @@ namespace Bsa
             if (header[0] == 0x00415342) /*"BSA\x00"*/
                 fail("Unrecognized compressed BSA format");
             mVersion = header[1];
-            if (mVersion != 0x01 /*F04*/)
+            if (mVersion != 0x01 /*FO4*/)
                 fail("Unrecognized compressed BSA version");
 
             type = header[2];

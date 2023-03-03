@@ -40,8 +40,8 @@ namespace Bsa
         BSAVER_UNKNOWN = 0x0,
         BSAVER_UNCOMPRESSED = 0x100,
         BSAVER_COMPRESSED = 0x415342, // B, S, A,
-        BSAVER_BA2_GNRL,
-        BSAVER_BA2_DX10
+        BSAVER_BA2_GNRL, // used by FO4, BSA which contains files
+        BSAVER_BA2_DX10 // used by FO4, BSA which contains textures
     };
 
     /**
