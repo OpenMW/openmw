@@ -16,9 +16,14 @@ namespace ESM
         return Misc::StringUtils::ciLess(mId, rhs.mId);
     }
 
-    bool RefId::operator<(std::string_view rhs) const
+    bool operator<(const RefId& lhs, std::string_view rhs)
     {
-        return Misc::StringUtils::ciLess(mId, rhs);
+        return Misc::StringUtils::ciLess(lhs.mId, rhs);
+    }
+
+    bool operator<(std::string_view lhs, const RefId& rhs)
+    {
+        return Misc::StringUtils::ciLess(lhs, rhs.mId);
     }
 
     std::ostream& operator<<(std::ostream& os, const RefId& refId)

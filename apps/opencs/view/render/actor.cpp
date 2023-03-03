@@ -104,9 +104,8 @@ namespace CSVRender
     {
         for (int i = 0; i < ESM::PRT_Count; ++i)
         {
-            auto type = (ESM::PartReferenceType)i;
-            const std::string_view partId = mActorData->getPart(type);
-            attachBodyPart(type, getBodyPartMesh(partId));
+            const auto type = static_cast<ESM::PartReferenceType>(i);
+            attachBodyPart(type, getBodyPartMesh(mActorData->getPart(type)));
         }
     }
 
@@ -124,11 +123,11 @@ namespace CSVRender
         }
     }
 
-    std::string Actor::getBodyPartMesh(std::string_view bodyPartId)
+    std::string Actor::getBodyPartMesh(const ESM::RefId& bodyPartId)
     {
         const auto& bodyParts = mData.getBodyParts();
 
-        const int index = bodyParts.searchId(ESM::RefId::stringRefId(bodyPartId));
+        const int index = bodyParts.searchId(bodyPartId);
         if (index != -1 && !bodyParts.getRecord(index).isDeleted())
             return MeshPrefix + bodyParts.getRecord(index).get().mModel;
         else

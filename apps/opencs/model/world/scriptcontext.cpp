@@ -85,7 +85,7 @@ std::pair<char, bool> CSMWorld::ScriptContext::getMemberType(const std::string& 
     if (index == -1)
         return std::make_pair(' ', false);
 
-    std::map<std::string, Compiler::Locals>::iterator iter = mLocals.find(id2.getRefIdString());
+    auto iter = mLocals.find(id2);
 
     if (iter == mLocals.end())
     {
@@ -97,7 +97,7 @@ std::pair<char, bool> CSMWorld::ScriptContext::getMemberType(const std::string& 
         Compiler::Scanner scanner(errorHandler, stream, getExtensions());
         scanner.scan(parser);
 
-        iter = mLocals.insert(std::make_pair(id2.getRefIdString(), locals)).first;
+        iter = mLocals.emplace(id2, std::move(locals)).first;
     }
 
     return std::make_pair(iter->second.getType(Misc::StringUtils::lowerCase(name)), reference);
@@ -131,7 +131,7 @@ void CSMWorld::ScriptContext::clear()
 
 bool CSMWorld::ScriptContext::clearLocals(const std::string& script)
 {
-    std::map<std::string, Compiler::Locals>::iterator iter = mLocals.find(script);
+    const auto iter = mLocals.find(script);
 
     if (iter != mLocals.end())
     {

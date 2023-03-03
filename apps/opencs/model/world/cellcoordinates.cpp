@@ -6,6 +6,7 @@
 
 #include <osg/Vec3d>
 
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/misc/constants.hpp>
 
@@ -57,6 +58,11 @@ std::string CSMWorld::CellCoordinates::generateId(int x, int y)
 bool CSMWorld::CellCoordinates::isExteriorCell(const std::string& id)
 {
     return (!id.empty() && id[0] == '#');
+}
+
+bool CSMWorld::CellCoordinates::isExteriorCell(const ESM::RefId& id)
+{
+    return id.startsWith("#");
 }
 
 std::pair<CSMWorld::CellCoordinates, bool> CSMWorld::CellCoordinates::fromId(const std::string& id)

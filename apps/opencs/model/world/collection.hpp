@@ -91,10 +91,10 @@ namespace CSMWorld
         ///
         /// \return Success?
 
-        int cloneRecordImp(const std::string& origin, const std::string& dest, UniversalId::Type type);
+        int cloneRecordImp(const ESM::RefId& origin, const ESM::RefId& dest, UniversalId::Type type);
         ///< Returns the index of the clone.
 
-        int touchRecordImp(const std::string& id);
+        int touchRecordImp(const ESM::RefId& id);
         ///< Returns the index of the record on success, -1 on failure.
 
     public:
@@ -227,29 +227,28 @@ namespace CSMWorld
 
     template <typename ESXRecordT>
     int Collection<ESXRecordT>::cloneRecordImp(
-        const std::string& origin, const std::string& destination, UniversalId::Type type)
+        const ESM::RefId& origin, const ESM::RefId& destination, UniversalId::Type type)
     {
         auto copy = std::make_unique<Record<ESXRecordT>>();
-        copy->mModified = getRecord(ESM::RefId::stringRefId(origin)).get();
+        copy->mModified = getRecord(origin).get();
         copy->mState = RecordBase::State_ModifiedOnly;
-        setRecordId(ESM::RefId::stringRefId(destination), copy->get());
+        setRecordId(destination, copy->get());
 
         if (type == UniversalId::Type_Reference)
         {
             CSMWorld::CellRef* ptr = (CSMWorld::CellRef*)&copy->mModified;
             ptr->mRefNum.mIndex = 0;
         }
-        ESM::RefId destinationRefId = ESM::RefId::stringRefId(destination);
-        int index = getAppendIndex(destinationRefId, type);
-        insertRecord(std::move(copy), getAppendIndex(destinationRefId, type));
+        const int index = getAppendIndex(destination, type);
+        insertRecord(std::move(copy), getAppendIndex(destination, type));
 
         return index;
     }
 
     template <typename ESXRecordT>
-    int Collection<ESXRecordT>::touchRecordImp(const std::string& id)
+    int Collection<ESXRecordT>::touchRecordImp(const ESM::RefId& id)
     {
-        int index = getIndex(ESM::RefId::stringRefId(id));
+        const int index = getIndex(id);
         Record<ESXRecordT>& record = *mRecords.at(index);
         if (record.isDeleted())
         {
@@ -269,27 +268,27 @@ namespace CSMWorld
     void Collection<ESXRecordT>::cloneRecord(
         const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type)
     {
-        cloneRecordImp(origin.getRefIdString(), destination.getRefIdString(), type);
+        cloneRecordImp(origin, destination, type);
     }
 
     template <>
     inline void Collection<Land>::cloneRecord(
         const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type)
     {
-        int index = cloneRecordImp(origin.getRefIdString(), destination.getRefIdString(), type);
+        const int index = cloneRecordImp(origin, destination, type);
         mRecords.at(index)->get().setPlugin(0);
     }
 
     template <typename ESXRecordT>
     bool Collection<ESXRecordT>::touchRecord(const ESM::RefId& id)
     {
-        return touchRecordImp(id.getRefIdString()) != -1;
+        return touchRecordImp(id) != -1;
     }
 
     template <>
     inline bool Collection<Land>::touchRecord(const ESM::RefId& id)
     {
-        int index = touchRecordImp(id.getRefIdString());
+        const int index = touchRecordImp(id);
         if (index >= 0)
         {
             mRecords.at(index)->get().setPlugin(0);

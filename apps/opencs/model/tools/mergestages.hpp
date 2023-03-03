@@ -113,7 +113,7 @@ namespace CSMTools
     class MergeReferencesStage : public CSMDoc::Stage
     {
         MergeState& mState;
-        std::map<std::string, int> mIndex;
+        std::map<ESM::RefId, int> mIndex;
 
     public:
         MergeReferencesStage(MergeState& state);

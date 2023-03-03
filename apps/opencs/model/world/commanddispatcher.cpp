@@ -113,11 +113,7 @@ void CSMWorld::CommandDispatcher::setEditLock(bool locked)
 void CSMWorld::CommandDispatcher::setSelection(const std::vector<std::string>& selection)
 {
     mSelection = selection;
-    for (auto& sel : mSelection)
-    {
-        Misc::StringUtils::lowerCaseInPlace(sel);
-    }
-    std::sort(mSelection.begin(), mSelection.end());
+    std::sort(mSelection.begin(), mSelection.end(), Misc::StringUtils::CiComp{});
 }
 
 void CSMWorld::CommandDispatcher::setExtendedTypes(const std::vector<UniversalId>& types)
@@ -290,8 +286,7 @@ void CSMWorld::CommandDispatcher::executeExtendedDelete()
                 if (record.mState == RecordBase::State_Deleted)
                     continue;
 
-                if (!std::binary_search(mSelection.begin(), mSelection.end(),
-                        Misc::StringUtils::lowerCase(record.get().mCell.getRefIdString())))
+                if (!std::binary_search(mSelection.begin(), mSelection.end(), record.get().mCell))
                     continue;
 
                 macro.push(new CSMWorld::DeleteCommand(model, record.get().mId.getRefIdString()));
@@ -321,8 +316,7 @@ void CSMWorld::CommandDispatcher::executeExtendedRevert()
             {
                 const Record<CellRef>& record = collection.getRecord(i);
 
-                if (!std::binary_search(mSelection.begin(), mSelection.end(),
-                        Misc::StringUtils::lowerCase(record.get().mCell.getRefIdString())))
+                if (!std::binary_search(mSelection.begin(), mSelection.end(), record.get().mCell))
                     continue;
 
                 macro.push(new CSMWorld::RevertCommand(model, record.get().mId.getRefIdString()));
