@@ -39,7 +39,9 @@ namespace ESM
 
         bool operator<(const RefId& rhs) const;
 
-        bool operator<(std::string_view rhs) const;
+        friend bool operator<(const RefId& lhs, std::string_view rhs);
+
+        friend bool operator<(std::string_view lhs, const RefId& rhs);
 
         friend std::ostream& operator<<(std::ostream& os, const RefId& dt);
 

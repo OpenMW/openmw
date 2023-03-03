@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include <functional>
+#include <map>
 #include <string>
 
 namespace ESM
@@ -121,6 +122,27 @@ namespace ESM
             const RefId a = RefId::stringRefId("a");
             const std::string_view b = "B";
             EXPECT_LT(a, b);
+        }
+
+        TEST(ESMRefIdTest, hasCaseInsensitiveStrongOrderWithStringView)
+        {
+            const RefId a = RefId::stringRefId("a");
+            const std::string_view b = "B";
+            const RefId c = RefId::stringRefId("c");
+            EXPECT_LT(a, b);
+            EXPECT_LT(b, c);
+        }
+
+        TEST(ESMRefIdTest, canBeUsedAsMapKeyWithLookupByStringView)
+        {
+            const std::map<ESM::RefId, int, std::less<>> map({ { ESM::RefId::stringRefId("a"), 42 } });
+            EXPECT_EQ(map.count("A"), 1);
+        }
+
+        TEST(ESMRefIdTest, canBeUsedAsLookupKeyForMapWithStringKey)
+        {
+            const std::map<std::string, int, std::less<>> map({ { "a", 42 } });
+            EXPECT_EQ(map.count(ESM::RefId::stringRefId("A")), 1);
         }
     }
 }
