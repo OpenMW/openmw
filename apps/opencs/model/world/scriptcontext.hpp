@@ -19,7 +19,7 @@ namespace CSMWorld
         const Data& mData;
         mutable std::vector<ESM::RefId> mIds;
         mutable bool mIdsUpdated;
-        mutable std::map<std::string, Compiler::Locals, Misc::StringUtils::CiComp> mLocals;
+        mutable std::map<ESM::RefId, Compiler::Locals, std::less<>> mLocals;
 
     public:
         ScriptContext(const Data& data);
