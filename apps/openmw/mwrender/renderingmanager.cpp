@@ -568,7 +568,6 @@ namespace MWRender
         {
             int skyTextureUnit = mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(
                 Shader::ShaderManager::Slot::SkyTexture);
-            Log(Debug::Info) << "Reserving texture unit for sky RTT: " << skyTextureUnit;
             mPerViewUniformStateUpdater->enableSkyRTT(skyTextureUnit, mSky->getSkyRTT());
         }
 
