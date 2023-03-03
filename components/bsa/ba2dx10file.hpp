@@ -45,7 +45,6 @@ namespace Bsa
 
         FileRecord getFileRecord(const std::string& str) const;
 
-        static uint32_t generateHash(const std::string& name);
         Files::IStreamPtr getFile(const FileRecord& fileRecord);
 
         void loadFiles(uint32_t fileCount, std::istream& in);
