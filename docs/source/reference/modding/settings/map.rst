@@ -113,7 +113,7 @@ allow zooming
 
 If this setting is true the user can zoom in/out on local and global map with the mouse wheel.
 
-This setting can be controlled in Advanced tab of the launcher.
+This setting can be controlled in the Settings tab of the launcher.
 
 max local viewing distance
 ---------------------------
