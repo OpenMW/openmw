@@ -1,8 +1,11 @@
 #include "riggeometry.hpp"
 
+#include <osg/MatrixTransform>
+
+#include <osgUtil/CullVisitor>
+
 #include <components/debug/debuglog.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <osg/MatrixTransform>
 
 #include "skeleton.hpp"
 #include "util.hpp"
@@ -387,7 +390,18 @@ void RigGeometry::accept(osg::NodeVisitor &nv)
     nv.pushOntoNodePath(this);
 
     if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+    {
+        // The cull visitor won't be applied to the node itself,
+        // but we want to use its state to render the child geometry.
+        osg::StateSet* stateset = getStateSet();
+        osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
+        if (stateset)
+            cv->pushStateSet(stateset);
+
         cull(&nv);
+        if (stateset)
+            cv->popStateSet();
+    }
     else if (nv.getVisitorType() == osg::NodeVisitor::UPDATE_VISITOR)
         updateBounds(&nv);
     else
