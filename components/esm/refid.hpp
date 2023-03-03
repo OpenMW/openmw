@@ -104,6 +104,10 @@ namespace ESM
         // Otherwise returns false.
         bool startsWith(std::string_view prefix) const;
 
+        // Returns true if underlying value is StringRefId and its underlying std::string ends with given suffix.
+        // Otherwise returns false.
+        bool endsWith(std::string_view suffix) const;
+
         // Returns true if underlying value is StringRefId and its underlying std::string contains given subString.
         // Otherwise returns false.
         bool contains(std::string_view subString) const;

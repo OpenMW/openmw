@@ -321,7 +321,6 @@ namespace MWGui
 
         for (const ESM::BodyPart& bodypart : store)
         {
-            const std::string& idString = bodypart.mId.getRefIdString();
             if (bodypart.mData.mFlags & ESM::BodyPart::BPF_NotPlayable)
                 continue;
             if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
@@ -330,8 +329,7 @@ namespace MWGui
                 continue;
             if (mGenderIndex != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
                 continue;
-            bool firstPerson = Misc::StringUtils::ciEndsWith(idString, "1st");
-            if (firstPerson)
+            if (ESM::isFirstPersonBodyPart(bodypart))
                 continue;
             if (bodypart.mRace == mCurrentRaceId)
                 out.push_back(bodypart.mId);

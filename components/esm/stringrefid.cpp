@@ -81,6 +81,11 @@ namespace ESM
         return Misc::StringUtils::ciStartsWith(*mValue, prefix);
     }
 
+    bool StringRefId::endsWith(std::string_view suffix) const
+    {
+        return Misc::StringUtils::ciEndsWith(*mValue, suffix);
+    }
+
     bool StringRefId::contains(std::string_view subString) const
     {
         return Misc::StringUtils::ciFind(*mValue, subString) != std::string_view::npos;

@@ -73,4 +73,9 @@ namespace ESM
         mModel.clear();
         mRace = ESM::RefId();
     }
+
+    bool isFirstPersonBodyPart(const BodyPart& value)
+    {
+        return value.mId.endsWith("1st");
+    }
 }

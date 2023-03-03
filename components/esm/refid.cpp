@@ -77,6 +77,19 @@ namespace ESM
             }
         };
 
+        struct EndsWith
+        {
+            const std::string_view mSuffix;
+
+            bool operator()(StringRefId v) const { return v.endsWith(mSuffix); }
+
+            template <class T>
+            bool operator()(const T& /*v*/) const
+            {
+                return false;
+            }
+        };
+
         struct Contains
         {
             const std::string_view mSubString;
@@ -153,6 +166,11 @@ namespace ESM
     bool RefId::startsWith(std::string_view prefix) const
     {
         return std::visit(StartsWith{ prefix }, mValue);
+    }
+
+    bool RefId::endsWith(std::string_view suffix) const
+    {
+        return std::visit(EndsWith{ suffix }, mValue);
     }
 
     bool RefId::contains(std::string_view subString) const

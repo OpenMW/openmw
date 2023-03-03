@@ -27,6 +27,8 @@ namespace ESM
 
         bool startsWith(std::string_view prefix) const;
 
+        bool endsWith(std::string_view suffix) const;
+
         bool contains(std::string_view subString) const;
 
         bool operator==(StringRefId rhs) const noexcept { return mValue == rhs.mValue; }
