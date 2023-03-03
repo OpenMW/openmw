@@ -14,6 +14,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/misc/thread.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "loudness.hpp"
@@ -412,6 +413,7 @@ namespace MWSound
 
         void run()
         {
+            Misc::setCurrentThreadIdlePriority();
             std::unique_lock<std::mutex> lock(mMutex);
             while (!mQuitNow)
             {
@@ -437,7 +439,7 @@ namespace MWSound
         }
 
     public:
-        DefaultDeviceThread(OpenAL_Output& output, std::basic_string_view<ALCchar> name)
+        DefaultDeviceThread(OpenAL_Output& output, std::basic_string_view<ALCchar> name = {})
             : mCurrentName(name)
             , mOutput(output)
             , mQuitNow(false)
@@ -691,7 +693,11 @@ namespace MWSound
         Log(Debug::Warning) << "Audio device disconnected, attempting to reopen...";
         ALCboolean reopened = alcReopenDeviceSOFT(mDevice, mDeviceName.c_str(), mContextAttributes.data());
         if (reopened == AL_FALSE && !mDeviceName.empty())
+        {
             reopened = alcReopenDeviceSOFT(mDevice, nullptr, mContextAttributes.data());
+            if (reopened == AL_TRUE && !mDefaultDeviceThread)
+                mDefaultDeviceThread = std::make_unique<DefaultDeviceThread>(*this);
+        }
         if (reopened == AL_FALSE)
             Log(Debug::Error) << "Failed to reopen audio device";
         else
