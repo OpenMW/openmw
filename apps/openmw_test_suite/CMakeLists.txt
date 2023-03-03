@@ -23,6 +23,7 @@ file(GLOB UNITTEST_SRC_FILES
 
     esm/test_fixed_string.cpp
     esm/variant.cpp
+    esm/testrefid.cpp
 
     lua/test_lua.cpp
     lua/test_scriptscontainer.cpp
