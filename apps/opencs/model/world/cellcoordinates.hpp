@@ -12,6 +12,11 @@ namespace osg
     class Vec3d;
 }
 
+namespace ESM
+{
+    class RefId;
+}
+
 namespace CSMWorld
 {
     class CellCoordinates
@@ -40,6 +45,8 @@ namespace CSMWorld
         ///< Return the ID for the cell at these coordinates.
 
         static bool isExteriorCell(const std::string& id);
+
+        static bool isExteriorCell(const ESM::RefId& id);
 
         /// \return first: CellCoordinates (or 0, 0 if cell does not have coordinates),
         /// second: is cell paged?
