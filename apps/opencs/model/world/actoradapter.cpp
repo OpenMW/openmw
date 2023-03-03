@@ -136,7 +136,7 @@ namespace CSMWorld
         return SceneUtil::getActorSkeleton(firstPerson, mFemale, beast, werewolf);
     }
 
-    std::string_view ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
+    ESM::RefId ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
     {
         auto it = mParts.find(index);
         if (it == mParts.end())
@@ -146,12 +146,11 @@ namespace CSMWorld
                 if (mFemale)
                 {
                     // Note: we should use male parts for females as fallback
-                    const std::string& femalePart = mRaceData->getFemalePart(index).getRefIdString();
-                    if (!femalePart.empty())
+                    if (const ESM::RefId femalePart = mRaceData->getFemalePart(index); !femalePart.empty())
                         return femalePart;
                 }
 
-                return mRaceData->getMalePart(index).getRefIdString();
+                return mRaceData->getMalePart(index);
             }
 
             return {};
@@ -174,7 +173,7 @@ namespace CSMWorld
                 return;
         }
 
-        mParts[index] = std::make_pair(partId.getRefIdString(), priority);
+        mParts[index] = std::make_pair(partId, priority);
         addOtherDependency(partId);
     }
 
