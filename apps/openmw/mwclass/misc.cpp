@@ -243,7 +243,7 @@ namespace MWClass
 
     bool Miscellaneous::isSoulGem(const MWWorld::ConstPtr& ptr) const
     {
-        return Misc::StringUtils::ciStartsWith(ptr.getCellRef().getRefId().getRefIdString(), "misc_soulgem");
+        return ptr.getCellRef().getRefId().startsWith("misc_soulgem");
     }
 
 }

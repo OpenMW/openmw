@@ -526,8 +526,7 @@ namespace MWRender
 
             addAnimSource(smodel, smodel);
 
-            if (!isWerewolf
-                && Misc::StringUtils::lowerCase(mNpc->mRace.getRefIdString()).find("argonian") != std::string::npos)
+            if (!isWerewolf && mNpc->mRace.contains("argonian"))
                 addAnimSource("meshes\\xargonian_swimkna.nif", smodel);
         }
         else

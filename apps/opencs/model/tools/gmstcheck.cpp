@@ -47,7 +47,7 @@ void CSMTools::GmstCheckStage::perform(int stage, CSMDoc::Messages& messages)
 
     // Checking type and limits
     // optimization - compare it to lists based on naming convention (f-float,i-int,s-string)
-    if (gmstIdString[0] == 'f')
+    if (gmst.mId.startsWith("f"))
     {
         for (size_t i = 0; i < CSMWorld::DefaultGmsts::FloatCount; ++i)
         {
@@ -74,7 +74,7 @@ void CSMTools::GmstCheckStage::perform(int stage, CSMDoc::Messages& messages)
             }
         }
     }
-    else if (gmstIdString[0] == 'i')
+    else if (gmst.mId.startsWith("i"))
     {
         for (size_t i = 0; i < CSMWorld::DefaultGmsts::IntCount; ++i)
         {
@@ -101,7 +101,7 @@ void CSMTools::GmstCheckStage::perform(int stage, CSMDoc::Messages& messages)
             }
         }
     }
-    else if (gmstIdString[0] == 's')
+    else if (gmst.mId.startsWith("s"))
     {
         for (size_t i = 0; i < CSMWorld::DefaultGmsts::StringCount; ++i)
         {

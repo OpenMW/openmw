@@ -856,7 +856,7 @@ namespace MWMechanics
             for (const ESM::GameSetting& currentSetting : gameSettings)
             {
                 // Don't bother checking this GMST if it's not a sMagicBound* one.
-                if (!Misc::StringUtils::ciStartsWith(currentSetting.mId.getRefIdString(), "smagicbound"))
+                if (!currentSetting.mId.startsWith("smagicbound"))
                     continue;
 
                 // All sMagicBound* GMST's should be of type string

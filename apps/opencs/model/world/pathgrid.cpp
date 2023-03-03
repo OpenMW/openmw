@@ -9,7 +9,7 @@ void CSMWorld::Pathgrid::load(ESM::ESMReader& esm, bool& isDeleted, const IdColl
     load(esm, isDeleted);
 
     // correct ID
-    if (!mId.empty() && mId.getRefIdString()[0] != '#' && cells.searchId(mId) == -1)
+    if (!mId.empty() && !mId.startsWith("#") && cells.searchId(mId) == -1)
     {
         std::ostringstream stream;
         stream << "#" << mData.mX << " " << mData.mY;
