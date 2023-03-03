@@ -123,7 +123,7 @@ namespace CSMWorld
         const ESM::Dialogue* mDialogue; // last loaded dialogue
         bool mBase;
         bool mProject;
-        std::map<std::string, std::map<unsigned int, unsigned int>, Misc::StringUtils::CiComp> mRefLoadCache;
+        std::map<ESM::RefId, std::map<unsigned int, unsigned int>> mRefLoadCache;
         int mReaderIndex;
 
         bool mFsStrict;
