@@ -205,6 +205,7 @@ namespace Crash
 
             if (mFreezeAbort)
             {
+                handleCrash();
                 TerminateProcess(mAppProcessHandle, 0xDEAD);
                 std::string message = "OpenMW appears to have frozen.\nCrash log saved to '" + std::string(mShm->mStartup.mLogFilePath) + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
                 SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
