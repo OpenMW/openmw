@@ -713,6 +713,27 @@ namespace Shader
 
         mReservedTextureUnitsBySlot[static_cast<int>(slot)] = unit;
 
+        std::string_view slotDescr;
+        switch (slot)
+        {
+            case Slot::OpaqueDepthTexture:
+                slotDescr = "opaque depth texture";
+                break;
+            case Slot::SkyTexture:
+                slotDescr = "sky RTT";
+                break;
+            case Slot::ShadowMaps:
+                slotDescr = "shadow maps";
+                break;
+            default:
+                slotDescr = "UNKNOWN";
+        }
+        if (unit.count == 1)
+            Log(Debug::Info) << "Reserving texture unit for " << slotDescr << ": " << unit.index;
+        else
+            Log(Debug::Info) << "Reserving texture units for " << slotDescr << ": " << unit.index << ".."
+                             << (unit.index + count - 1);
+
         return unit.index;
     }
 
