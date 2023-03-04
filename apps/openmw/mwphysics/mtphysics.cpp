@@ -10,6 +10,7 @@
 
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include <LinearMath/btThreads.h>
 
 #include <osg/Stats>
 
@@ -305,10 +306,11 @@ namespace MWPhysics
 {
     namespace
     {
-        int getMaxBulletSupportedThreads()
+        unsigned getMaxBulletSupportedThreads()
         {
             auto broad = std::make_unique<btDbvtBroadphase>();
-            return broad->m_rayTestStacks.size();
+            assert(BT_MAX_THREAD_COUNT > 0);
+            return std::min<unsigned>(broad->m_rayTestStacks.size(), BT_MAX_THREAD_COUNT - 1);
         }
 
         LockingPolicy detectLockingPolicy()
@@ -330,8 +332,8 @@ namespace MWPhysics
                 case LockingPolicy::ExclusiveLocksOnly:
                     return 1;
                 case LockingPolicy::AllowSharedLocks:
-                    return static_cast<unsigned>(std::clamp(
-                        Settings::Manager::getInt("async num threads", "Physics"), 0, getMaxBulletSupportedThreads()));
+                    return std::clamp<unsigned>(
+                        Settings::Manager::getInt("async num threads", "Physics"), 0, getMaxBulletSupportedThreads());
             }
 
             throw std::runtime_error("Unsupported LockingPolicy: "
