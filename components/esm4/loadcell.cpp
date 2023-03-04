@@ -240,6 +240,8 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 throw std::runtime_error("ESM4::CELL::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
+
+    mReaderContext = reader.getContext();
 }
 
 // void ESM4::Cell::save(ESM4::Writer& writer) const
