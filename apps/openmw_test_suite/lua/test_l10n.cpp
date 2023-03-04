@@ -94,7 +94,6 @@ you_have_arrows: "Arrows count: {count}"
         internal::CaptureStdout();
         l.safe_script("t1 = l10n('Test1')");
         EXPECT_THAT(internal::GetCapturedStdout(),
-            "Fallback locale: en\n"
             "Language file \"l10n/Test1/de.yaml\" is enabled\n"
             "Language file \"l10n/Test1/en.yaml\" is enabled\n");
 
