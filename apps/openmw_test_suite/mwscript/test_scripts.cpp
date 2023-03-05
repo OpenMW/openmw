@@ -180,8 +180,8 @@ End)mwscript";
 short a
 short b
 short eq
-short gte
-short lte
+short gt
+short lt
 short ne
 
 set eq to 0
@@ -192,20 +192,20 @@ if ( a = = b )
     set eq to ( eq + 1 )
 endif
 
-set gte to 0
-if ( a >= b )
-    set gte to ( gte + 1 )
+set gt to 0
+if ( a > b )
+    set gt to ( gt + 1 )
 endif
 if ( a > = b )
-    set gte to ( gte + 1 )
+    set gt to ( gt + 1 )
 endif
 
-set lte to 0
-if ( a <= b )
-    set lte to ( lte + 1 )
+set lt to 0
+if ( a < b )
+    set lt to ( lt + 1 )
 endif
 if ( a < = b )
-    set lte to ( lte + 1 )
+    set lt to ( lt + 1 )
 endif
 
 set ne to 0
@@ -627,8 +627,8 @@ End)mwscript";
                     context.setLocalShort(1, b);
                     run(*script, context);
                     EXPECT_EQ(context.getLocalShort(2), a == b ? 2 : 0);
-                    EXPECT_EQ(context.getLocalShort(3), a >= b ? 2 : 0);
-                    EXPECT_EQ(context.getLocalShort(4), a <= b ? 2 : 0);
+                    EXPECT_EQ(context.getLocalShort(3), a > b ? 2 : 0);
+                    EXPECT_EQ(context.getLocalShort(4), a < b ? 2 : 0);
                     EXPECT_EQ(context.getLocalShort(5), a != b ? 2 : 0);
                 }
             }
