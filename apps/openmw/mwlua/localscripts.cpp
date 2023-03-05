@@ -198,7 +198,7 @@ namespace MWLua
     }
 
     LocalScripts::LocalScripts(LuaUtil::LuaState* lua, const LObject& obj)
-        : LuaUtil::ScriptsContainer(lua, "L" + idToString(obj.id()))
+        : LuaUtil::ScriptsContainer(lua, "L" + obj.id().toString())
         , mData(obj)
     {
         this->addPackage("openmw.self", sol::make_object(lua->sol(), &mData));

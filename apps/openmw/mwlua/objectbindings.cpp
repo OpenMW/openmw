@@ -116,10 +116,10 @@ namespace MWLua
             {
                 MWWorld::Ptr object = MWBase::Environment::get().getWorldModel()->getPtr(mObject);
                 if (object.isEmpty())
-                    throw std::runtime_error(std::string("Object not found: " + idToString(mObject)));
+                    throw std::runtime_error(std::string("Object not found: " + mObject.toString()));
                 MWWorld::Ptr actor = MWBase::Environment::get().getWorldModel()->getPtr(mActor);
                 if (actor.isEmpty())
-                    throw std::runtime_error(std::string("Actor not found: " + idToString(mActor)));
+                    throw std::runtime_error(std::string("Actor not found: " + mActor.toString()));
 
                 if (object.getRefData().activate())
                 {
@@ -131,8 +131,8 @@ namespace MWLua
 
             std::string toString() const override
             {
-                return std::string("ActivateAction object=") + idToString(mObject) + std::string(" actor=")
-                    + idToString(mActor);
+                return std::string("ActivateAction object=") + mObject.toString() + std::string(" actor=")
+                    + mActor.toString();
             }
 
         private:
@@ -165,7 +165,7 @@ namespace MWLua
         template <class ObjectT>
         void addBasicBindings(sol::usertype<ObjectT>& objectT, const Context& context)
         {
-            objectT["isValid"] = [](const ObjectT& o) { return o.isValid(); };
+            objectT["isValid"] = [](const ObjectT& o) { return !o.ptrOrNull().isEmpty(); };
             objectT["recordId"] = sol::readonly_property(
                 [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().getRefIdString(); });
             objectT["cell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>> {
@@ -197,7 +197,7 @@ namespace MWLua
                 if (esmRecordType != ESM::REC_CREA && esmRecordType != ESM::REC_NPC_)
                     throw std::runtime_error(
                         "The argument of `activateBy` must be an actor who activates the object. Got: "
-                        + ptrToString(actor.ptr()));
+                        + actor.toString());
                 context.mLuaManager->addAction(std::make_unique<ActivateAction>(context.mLua, o.id(), actor.id()));
             };
 
@@ -266,7 +266,7 @@ namespace MWLua
                     MWWorld::Ptr ptr = object.ptr();
                     LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
                     if (!localScripts || !localScripts->hasScript(*scriptId))
-                        throw std::runtime_error("There is no script " + std::string(path) + " on " + ptrToString(ptr));
+                        throw std::runtime_error("There is no script " + std::string(path) + " on " + ptr.toString());
                     if (localScripts->getAutoStartConf().count(*scriptId) > 0)
                         throw std::runtime_error("Autostarted script can not be removed: " + std::string(path));
                     localScripts->removeScript(*scriptId);
