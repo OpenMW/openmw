@@ -471,46 +471,39 @@ namespace Compiler
             size_t end = op.size();
             while (end > 0 && (op[end - 1] == '\t' || op[end - 1] == ' '))
                 --end;
-            std::string_view trimmedOperator = std::string_view{ op }.substr(0, end);
-            switch (trimmedOperator[0])
+            switch (op[0])
             {
                 case '=':
                     special = S_cmpEQ;
-                    if (trimmedOperator.size() != 2 || trimmedOperator[1] != '=')
-                        mErrorHandler.warning(
-                            "invalid operator " + std::string(trimmedOperator) + ", treating it as ==", loc);
+                    if (end != 2 || op[1] != '=')
+                        mErrorHandler.warning("invalid operator " + op.substr(0, end) + ", treating it as ==", loc);
                     break;
                 case '<':
                     special = S_cmpLT;
-                    if (trimmedOperator[1] == '=')
+                    if (op[1] == '=')
                     {
                         special = S_cmpLE;
-                        if (trimmedOperator.size() != 2)
-                            mErrorHandler.warning(
-                                "invalid operator " + std::string(trimmedOperator) + ", treating it as <=", loc);
+                        if (end != 2)
+                            mErrorHandler.warning("invalid operator " + op.substr(0, end) + ", treating it as <=", loc);
                     }
-                    else if (trimmedOperator.size() != 1)
-                        mErrorHandler.warning(
-                            "invalid operator " + std::string(trimmedOperator) + ", treating it as <", loc);
+                    else if (end != 1)
+                        mErrorHandler.warning("invalid operator " + op.substr(0, end) + ", treating it as <", loc);
                     break;
                 case '>':
                     special = S_cmpGT;
-                    if (trimmedOperator[1] == '=')
+                    if (op[1] == '=')
                     {
                         special = S_cmpGE;
-                        if (trimmedOperator.size() != 2)
-                            mErrorHandler.warning(
-                                "invalid operator " + std::string(trimmedOperator) + ", treating it as >=", loc);
+                        if (end != 2)
+                            mErrorHandler.warning("invalid operator " + op.substr(0, end) + ", treating it as >=", loc);
                     }
-                    else if (trimmedOperator.size() != 1)
-                        mErrorHandler.warning(
-                            "invalid operator " + std::string(trimmedOperator) + ", treating it as >", loc);
+                    else if (end != 1)
+                        mErrorHandler.warning("invalid operator " + op.substr(0, end) + ", treating it as >", loc);
                     break;
                 case '!':
                     special = S_cmpNE;
-                    if (trimmedOperator.size() != 2 || trimmedOperator[1] != '=')
-                        mErrorHandler.warning(
-                            "invalid operator " + std::string(trimmedOperator) + ", treating it as !=", loc);
+                    if (end != 2 || op[1] != '=')
+                        mErrorHandler.warning("invalid operator " + op.substr(0, end) + ", treating it as !=", loc);
                     break;
                 default:
                     return false;
