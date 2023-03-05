@@ -48,25 +48,31 @@ namespace Compiler
                 return -1;
         }
 
-        bool operator==(const char ch) { return mData[0] == ch && mData[1] == 0 && mData[2] == 0 && mData[3] == 0; }
+        bool operator==(const char ch) const
+        {
+            return mData[0] == ch && mData[1] == 0 && mData[2] == 0 && mData[3] == 0;
+        }
 
-        bool operator==(const MultiChar& ch)
+        bool operator==(const MultiChar& ch) const
         {
             return mData[0] == ch.mData[0] && mData[1] == ch.mData[1] && mData[2] == ch.mData[2]
                 && mData[3] == ch.mData[3];
         }
 
-        bool operator!=(const char ch) { return mData[0] != ch || mData[1] != 0 || mData[2] != 0 || mData[3] != 0; }
+        bool operator!=(const char ch) const
+        {
+            return mData[0] != ch || mData[1] != 0 || mData[2] != 0 || mData[3] != 0;
+        }
 
-        bool isWhitespace()
+        bool isWhitespace() const
         {
             return (mData[0] == ' ' || mData[0] == '\t' || mData[0] == ',') && mData[1] == 0 && mData[2] == 0
                 && mData[3] == 0;
         }
 
-        bool isDigit() { return std::isdigit(mData[0]) && mData[1] == 0 && mData[2] == 0 && mData[3] == 0; }
+        bool isDigit() const { return std::isdigit(mData[0]) && mData[1] == 0 && mData[2] == 0 && mData[3] == 0; }
 
-        bool isMinusSign()
+        bool isMinusSign() const
         {
             if (mData[0] == '-' && mData[1] == 0 && mData[2] == 0 && mData[3] == 0)
                 return true;
@@ -74,7 +80,7 @@ namespace Compiler
             return mData[0] == '\xe2' && mData[1] == '\x80' && mData[2] == '\x93' && mData[3] == 0;
         }
 
-        bool isAlpha()
+        bool isAlpha() const
         {
             if (isMinusSign())
                 return false;
@@ -82,13 +88,13 @@ namespace Compiler
             return std::isalpha(mData[0]) || mData[1] != 0 || mData[2] != 0 || mData[3] != 0;
         }
 
-        void appendTo(std::string& str)
+        void appendTo(std::string& str) const
         {
             for (int i = 0; i <= mLength; i++)
                 str += mData[i];
         }
 
-        void putback(std::istream& in)
+        void putback(std::istream& in) const
         {
             for (int i = mLength; i >= 0; i--)
                 in.putback(mData[i]);
@@ -157,7 +163,7 @@ namespace Compiler
             mLength = -1;
         }
 
-        std::string data()
+        std::string data() const
         {
             // NB: mLength is the number of the last element in the array
             return std::string(mData, mLength + 1);
