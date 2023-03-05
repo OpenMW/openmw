@@ -151,6 +151,7 @@ target_link_libraries(openmw
     ${MyGUI_LIBRARIES}
     ${SDL2_LIBRARY}
     ${RecastNavigation_LIBRARIES}
+    "freetype"
     "osg-ffmpeg-videoplayer"
     "oics"
     components

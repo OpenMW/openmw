@@ -518,8 +518,9 @@ namespace osgMyGUI
 
     MyGUI::ITexture* RenderManager::createTexture(const std::string& name)
     {
-        const auto it = mTextures.insert_or_assign(name, OSGTexture(name, mImageManager)).first;
-        return &it->second;
+        // OSGTexture has no move or copy ctor, cannot be inserted into the map TODO FIXME or use this ptr version
+        const auto it = mTextures.insert_or_assign(name, std::make_unique<OSGTexture>(name, mImageManager)).first;
+        return it->second.get();
     }
 
     void RenderManager::destroyTexture(MyGUI::ITexture* texture)
@@ -545,7 +546,8 @@ namespace osgMyGUI
             tex->loadFromFile(name);
             return tex;
         }
-        return &item->second;
+        // OSGTexture has no move or copy ctor, cannot be inserted into the map TODO FIXME or use this ptr version
+        return item->second.get();
     }
 
     bool RenderManager::checkTexture(MyGUI::ITexture* _texture)

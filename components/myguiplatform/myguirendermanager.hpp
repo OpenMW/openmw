@@ -46,7 +46,8 @@ namespace osgMyGUI
         MyGUI::VertexColourType mVertexFormat;
         MyGUI::RenderTargetInfo mInfo;
 
-        std::map<std::string, OSGTexture> mTextures;
+        // OSGTexture has no move or copy ctor, cannot be inserted into the map TODO FIXME or use this ptr version
+        std::map<std::string, std::unique_ptr<OSGTexture>> mTextures;
 
         bool mIsInitialise;
 

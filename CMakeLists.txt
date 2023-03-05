@@ -1,5 +1,19 @@
 cmake_minimum_required(VERSION 3.1.0)
 
+# when using vcpkg with visual studio code on windows, ensure you have the file `.vscode/settings.json`
+# which contains at minimum the following three lines (including the trailing comma):
+#     "cmake.configureSettings": {
+#         "CMAKE_TOOLCHAIN_FILE": "<INSTALL LOCATION>/vcpkg/scripts/buildsystems/vcpkg.cmake"
+#     },
+# where <INSTALL LOCATION> is where you installed vcpkg; this is how cmake knows to use vcpkg
+
+# variable to easily check if vcpkg is being used
+if (CMAKE_TOOLCHAIN_FILE MATCHES ".*[vV][cC][pP][kK][gG].*")
+    set(USING_VCPKG TRUE)
+else ()
+    set(USING_VCPKG FALSE)
+endif ()
+
 # for link time optimization, remove if cmake version is >= 3.9
 if(POLICY CMP0069) # LTO
     cmake_policy(SET CMP0069 NEW)
@@ -150,7 +164,8 @@ endif()
 option(OSG_STATIC "Link static build of OpenSceneGraph into the binaries" ${_osg_static_default})
 
 option(OPENMW_USE_SYSTEM_MYGUI "Use system provided mygui library" ON)
-if(OPENMW_USE_SYSTEM_MYGUI)
+# on windows the "system provided" mygui from vcpkg is static
+if(OPENMW_USE_SYSTEM_MYGUI AND NOT USING_VCPKG)
     set(_mygui_static_default OFF)
 else()
     set(_mygui_static_default ON)
@@ -276,7 +291,7 @@ if(NOT COLLADA_DOM_VERSION_MINOR)
     set(COLLADA_DOM_VERSION_MINOR 5)
 endif()
 
-find_package(collada_dom 2.5)
+find_package(collada-dom 2.5)
 
 option(OPENMW_USE_SYSTEM_ICU "Use system ICU library instead of internal. If disabled, requires autotools" ON)
 if(OPENMW_USE_SYSTEM_ICU)
@@ -720,7 +735,7 @@ if (WIN32)
         4996 # Function was declared deprecated
         5054 # Deprecated operations between enumerations of different types caused by Qt headers
         )
-    
+
     if( "${MyGUI_VERSION}" VERSION_LESS_EQUAL "3.4.0" )
         set(WARNINGS_DISABLE ${WARNINGS_DISABLE}
         4866 # compiler may not enforce left-to-right evaluation order for call
@@ -743,7 +758,7 @@ if (WIN32)
 
     set_target_properties(components PROPERTIES COMPILE_FLAGS "${WARNINGS}")
     set_target_properties(osg-ffmpeg-videoplayer PROPERTIES COMPILE_FLAGS "${WARNINGS}")
-    
+
     if (MSVC_VERSION GREATER_EQUAL 1915 AND MSVC_VERSION LESS 1920)
         target_compile_definitions(components INTERFACE _ENABLE_EXTENDED_ALIGNED_STORAGE)
     endif()

@@ -444,6 +444,7 @@ target_link_libraries(components
     smhasher
     ${ICU_LIBRARIES}
     yaml-cpp
+    "MyGUI.DummyPlatform"
     )
 
 if(Boost_VERSION_STRING VERSION_GREATER_EQUAL 1.77.0)
