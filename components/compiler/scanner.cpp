@@ -10,6 +10,19 @@
 
 #include <components/misc/strings/lower.hpp>
 
+namespace
+{
+    bool startsComparisonOperator(const Compiler::MultiChar& c)
+    {
+        return c == '=' || c == '<' || c == '>' || c == '!';
+    }
+
+    bool validComparisonOperatorCharacter(const Compiler::MultiChar& c)
+    {
+        return startsComparisonOperator(c) || c == ' ' || c == '\t';
+    }
+}
+
 namespace Compiler
 {
     bool Scanner::get(MultiChar& c)
@@ -440,52 +453,61 @@ namespace Compiler
 
             special = S_member;
         }
-        else if (c == '=')
+        else if (startsComparisonOperator(c))
         {
-            if (get(c))
+            TokenLoc loc = mLoc;
+            std::string op;
+            c.appendTo(op);
+            while (get(c))
             {
-                /// \todo hack to allow a space in comparison operators (add option to disable)
-                if (c == ' ' && !get(c))
-                    special = S_cmpEQ;
-                else if (c == '=')
-                    special = S_cmpEQ;
-                else if (c == '>' || c == '<') // Treat => and =< as ==
-                {
-                    special = S_cmpEQ;
-                    mErrorHandler.warning(std::string("invalid operator =") + c.data() + ", treating it as ==", mLoc);
-                }
+                if (validComparisonOperatorCharacter(c))
+                    c.appendTo(op);
                 else
                 {
-                    special = S_cmpEQ;
                     putback(c);
-                    //                    return false;
-                    /// Allow = as synonym for ==. \todo optionally disable for post-1.0 scripting improvements.
+                    break;
                 }
             }
-            else
+            size_t end = op.size();
+            while (end > 0 && (op[end - 1] == '\t' || op[end - 1] == ' '))
+                --end;
+            switch (op[0])
             {
-                putback(c);
-                return false;
-            }
-        }
-        else if (c == '!')
-        {
-            if (get(c))
-            {
-                /// \todo hack to allow a space in comparison operators (add option to disable)
-                if (c == ' ' && !get(c))
-                    return false;
-
-                if (c == '=')
+                case '=':
+                    special = S_cmpEQ;
+                    if (end != 2 || op[1] != '=')
+                        mErrorHandler.warning("invalid operator " + op.substr(0, end) + ", treating it as ==", loc);
+                    break;
+                case '<':
+                    special = S_cmpLT;
+                    if (op[1] == '=')
+                    {
+                        special = S_cmpLE;
+                        if (end != 2)
+                            mErrorHandler.warning("invalid operator " + op.substr(0, end) + ", treating it as <=", loc);
+                    }
+                    else if (end != 1)
+                        mErrorHandler.warning("invalid operator " + op.substr(0, end) + ", treating it as <", loc);
+                    break;
+                case '>':
+                    special = S_cmpGT;
+                    if (op[1] == '=')
+                    {
+                        special = S_cmpGE;
+                        if (end != 2)
+                            mErrorHandler.warning("invalid operator " + op.substr(0, end) + ", treating it as >=", loc);
+                    }
+                    else if (end != 1)
+                        mErrorHandler.warning("invalid operator " + op.substr(0, end) + ", treating it as >", loc);
+                    break;
+                case '!':
                     special = S_cmpNE;
-                else
-                {
-                    putback(c);
+                    if (end != 2 || op[1] != '=')
+                        mErrorHandler.warning("invalid operator " + op.substr(0, end) + ", treating it as !=", loc);
+                    break;
+                default:
                     return false;
-                }
             }
-            else
-                return false;
         }
         else if (c.isMinusSign())
         {
@@ -502,62 +524,6 @@ namespace Compiler
             }
             else
                 special = S_minus;
-        }
-        else if (c == '<')
-        {
-            if (get(c))
-            {
-                /// \todo hack to allow a space in comparison operators (add option to disable)
-                if (c == ' ' && !get(c))
-                    special = S_cmpLT;
-                else if (c == '=')
-                {
-                    special = S_cmpLE;
-
-                    if (get(c) && c != '=') // <== is a allowed as an alternative to <=  :(
-                        putback(c);
-                }
-                else if (c == '<' || c == '>') // Treat <> and << as <
-                {
-                    special = S_cmpLT;
-                    mErrorHandler.warning("Invalid operator, treating it as <", mLoc);
-                }
-                else
-                {
-                    putback(c);
-                    special = S_cmpLT;
-                }
-            }
-            else
-                special = S_cmpLT;
-        }
-        else if (c == '>')
-        {
-            if (get(c))
-            {
-                /// \todo hack to allow a space in comparison operators (add option to disable)
-                if (c == ' ' && !get(c))
-                    special = S_cmpGT;
-                else if (c == '=')
-                {
-                    special = S_cmpGE;
-
-                    if (get(c) && c != '=') // >== is a allowed as an alternative to >=  :(
-                        putback(c);
-                }
-                else if (c == '<' || c == '>') // Treat >< and >> as >
-                {
-                    special = S_cmpGT;
-                    mErrorHandler.warning("Invalid operator, treating it as >", mLoc);
-                }
-                else
-                {
-                    putback(c);
-                    special = S_cmpGT;
-                }
-            }
-            else
-                special = S_cmpGT;
         }
         else if (c == '+')
             special = S_plus;
