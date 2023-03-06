@@ -184,6 +184,8 @@ namespace MWWorld
         , mPlayerInJail(false)
         , mSpellPreloadTimer(0.f)
     {
+        if (encoder)
+            mReaders.setStatelessEncoder(encoder->getStatelessEncoder());
         mESMVersions.resize(mContentFiles.size(), -1);
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         listener->loadingOn();

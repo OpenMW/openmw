@@ -2,6 +2,7 @@
 #include "magiceffects.hpp"
 
 #include <algorithm>
+#include <fstream>
 
 #include <components/debug/debuglog.hpp>
 
@@ -759,13 +760,14 @@ namespace MWWorld
         }
     }
 
-    template <typename ReferenceInvlocable>
-    static void visitCell4References(const ESM4::Cell& cell, ReferenceInvlocable&& invocable)
+    template <typename ReferenceInvocable>
+    static void visitCell4References(const ESM4::Cell& cell, ESM::ReadersCache& readers, ReferenceInvocable&& invocable)
     {
         auto stream = Files::openBinaryInputFileStream(cell.mReaderContext.filename);
         ESM4::Reader readerESM4(
             std::move(stream), cell.mReaderContext.filename, MWBase::Environment::get().getResourceSystem()->getVFS());
-        readerESM4.setEncoder(nullptr);
+
+        readerESM4.setEncoder(readers.getStatelessEncoder());
         readerESM4.restoreContext(cell.mReaderContext);
         bool continueRead = true;
         while (ESM::RefId::formIdRefId(readerESM4.getContext().currCell) == cell.mId && readerESM4.hasMoreRecs()
@@ -796,7 +798,7 @@ namespace MWWorld
 
     void CellStore::listRefs(const ESM4::Cell& cell)
     {
-        visitCell4References(cell, [&](ESM4::Reference& ref) { mIds.push_back(ref.mBaseObj); });
+        visitCell4References(cell, mReaders, [&](ESM4::Reference& ref) { mIds.push_back(ref.mBaseObj); });
     }
 
     void CellStore::listRefs()
@@ -860,7 +862,7 @@ namespace MWWorld
 
     void CellStore::loadRefs(const ESM4::Cell& cell, std::map<ESM::RefNum, ESM::RefId>& refNumToID)
     {
-        visitCell4References(cell, [&](ESM4::Reference& ref) { loadRef(ref, false); });
+        visitCell4References(cell, mReaders, [&](ESM4::Reference& ref) { loadRef(ref, false); });
     }
 
     void CellStore::loadRefs()
