@@ -141,7 +141,7 @@ namespace Bsa
         mIsLoaded = true;
     }
 
-    BA2DX10File::FileRecord BA2DX10File::getFileRecord(const std::string& str) const
+    std::optional<BA2DX10File::FileRecord> BA2DX10File::getFileRecord(const std::string& str) const
     {
         for (const auto c : str)
         {
@@ -169,13 +169,13 @@ namespace Bsa
         uint32_t folderHash = generateHash(folder);
         auto it = mFolders.find(folderHash);
         if (it == mFolders.end())
-            return FileRecord(); // folder not found, return default which has offset of sInvalidOffset
+            return std::nullopt; // folder not found
 
         uint32_t fileHash = generateHash(fileName);
         uint32_t extHash = *reinterpret_cast<const uint32_t*>(ext.data() + 1);
         auto iter = it->second.find({ fileHash, extHash });
         if (iter == it->second.end())
-            return FileRecord(); // file not found, return default which has offset of sInvalidOffset
+            return std::nullopt; // file not found
         return iter->second;
     }
 
@@ -221,8 +221,9 @@ namespace Bsa
 
     Files::IStreamPtr BA2DX10File::getFile(const FileStruct* file)
     {
-        FileRecord fileRec = getFileRecord(file->name());
-        return getFile(fileRec);
+        if (auto fileRec = getFileRecord(file->name()); fileRec)
+            return getFile(*fileRec);
+        fail("File not found: " + std::string(file->name()));
     }
 
     void BA2DX10File::addFile(const std::string& filename, std::istream& file)
@@ -233,8 +234,9 @@ namespace Bsa
 
     Files::IStreamPtr BA2DX10File::getFile(const char* file)
     {
-        FileRecord fileRec = getFileRecord(file);
-        return getFile(fileRec);
+        if (auto fileRec = getFileRecord(file); fileRec)
+            return getFile(*fileRec);
+        fail("File not found: " + std::string(file));
     }
 
     constexpr const uint32_t DDSD_CAPS = 0x00000001;
