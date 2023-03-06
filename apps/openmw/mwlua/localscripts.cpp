@@ -33,7 +33,7 @@ namespace sol
     {
     };
     template <>
-    struct is_automagical<MWLua::LocalScripts::SelfObject> : std::false_type
+    struct is_automagical<MWLua::SelfObject> : std::false_type
     {
     };
     template <>

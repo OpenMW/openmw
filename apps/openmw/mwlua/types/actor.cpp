@@ -119,8 +119,6 @@ namespace MWLua
         };
     }
 
-    using SelfObject = LocalScripts::SelfObject;
-
     void addActorBindings(sol::table actor, const Context& context)
     {
         actor["STANCE"]

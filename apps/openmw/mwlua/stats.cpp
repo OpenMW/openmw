@@ -18,14 +18,17 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
+#include "objectvariant.hpp"
+
 namespace
 {
+    using SelfObject = MWLua::SelfObject;
+    using ObjectVariant = MWLua::ObjectVariant;
+
     template <class T>
     auto addIndexedAccessor(int index)
     {
-        return sol::overload([index](MWLua::LocalScripts::SelfObject& o) { return T::create(&o, index); },
-            [index](const MWLua::LObject& o) { return T::create(o, index); },
-            [index](const MWLua::GObject& o) { return T::create(o, index); });
+        return [index](const sol::object& o) { return T::create(ObjectVariant(o), index); };
     }
 
     template <class T, class G>
@@ -35,50 +38,18 @@ namespace
             [=](const T& stat, const sol::object& value) { stat.cache(context, prop, value); });
     }
 
-    using SelfObject = MWLua::LocalScripts::SelfObject;
-    using StatObject = std::variant<SelfObject*, MWLua::LObject, MWLua::GObject>;
-    SelfObject* asSelfObject(const StatObject& obj)
-    {
-        if (!std::holds_alternative<SelfObject*>(obj))
-            throw std::runtime_error("Changing stats allowed only in local scripts for 'openmw.self'.");
-        return std::get<SelfObject*>(obj);
-    }
-
-    const MWLua::Object* getObject(const StatObject& obj)
-    {
-        return std::visit(
-            [](auto&& variant) -> const MWLua::Object* {
-                using T = std::decay_t<decltype(variant)>;
-                if constexpr (std::is_same_v<T, SelfObject*>)
-                    return variant;
-                else if constexpr (std::is_same_v<T, MWLua::LObject>)
-                    return &variant;
-                else if constexpr (std::is_same_v<T, MWLua::GObject>)
-                    return &variant;
-            },
-            obj);
-    }
-
     template <class G>
-    sol::object getValue(const MWLua::Context& context, const StatObject& obj, SelfObject::CachedStat::Setter setter,
+    sol::object getValue(const MWLua::Context& context, const ObjectVariant& obj, SelfObject::CachedStat::Setter setter,
         int index, std::string_view prop, G getter)
     {
-        return std::visit(
-            [&](auto&& variant) {
-                using T = std::decay_t<decltype(variant)>;
-                if constexpr (std::is_same_v<T, SelfObject*>)
-                {
-                    auto it = variant->mStatsCache.find({ setter, index, prop });
-                    if (it != variant->mStatsCache.end())
-                        return it->second;
-                    return sol::make_object(context.mLua->sol(), getter(variant));
-                }
-                else if constexpr (std::is_same_v<T, MWLua::LObject>)
-                    return sol::make_object(context.mLua->sol(), getter(&variant));
-                else if constexpr (std::is_same_v<T, MWLua::GObject>)
-                    return sol::make_object(context.mLua->sol(), getter(&variant));
-            },
-            obj);
+        if (obj.isSelfObject())
+        {
+            SelfObject* self = obj.asSelfObject();
+            auto it = self->mStatsCache.find({ setter, index, prop });
+            if (it != self->mStatsCache.end())
+                return it->second;
+        }
+        return sol::make_object(context.mLua->sol(), getter(obj.ptr()));
     }
 }
 
@@ -111,9 +82,9 @@ namespace MWLua
 
     class LevelStat
     {
-        StatObject mObject;
+        ObjectVariant mObject;
 
-        LevelStat(StatObject object)
+        LevelStat(ObjectVariant object)
             : mObject(std::move(object))
         {
         }
@@ -121,15 +92,13 @@ namespace MWLua
     public:
         sol::object getCurrent(const Context& context) const
         {
-            return getValue(context, mObject, &LevelStat::setValue, 0, "current", [](const MWLua::Object* obj) {
-                const auto& ptr = obj->ptr();
-                return ptr.getClass().getCreatureStats(ptr).getLevel();
-            });
+            return getValue(context, mObject, &LevelStat::setValue, 0, "current",
+                [](const MWWorld::Ptr& ptr) { return ptr.getClass().getCreatureStats(ptr).getLevel(); });
         }
 
         void setCurrent(const Context& context, const sol::object& value) const
         {
-            SelfObject* obj = asSelfObject(mObject);
+            SelfObject* obj = mObject.asSelfObject();
             if (obj->mStatsCache.empty())
                 context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
             obj->mStatsCache[SelfObject::CachedStat{ &LevelStat::setValue, 0, "current" }] = value;
@@ -137,15 +106,15 @@ namespace MWLua
 
         sol::object getProgress(const Context& context) const
         {
-            const auto& ptr = getObject(mObject)->ptr();
+            const auto& ptr = mObject.ptr();
             if (!ptr.getClass().isNpc())
                 return sol::nil;
             return sol::make_object(context.mLua->sol(), ptr.getClass().getNpcStats(ptr).getLevelProgress());
         }
 
-        static std::optional<LevelStat> create(StatObject object, int index)
+        static std::optional<LevelStat> create(ObjectVariant object, int index)
         {
-            if (!getObject(object)->ptr().getClass().isActor())
+            if (!object.ptr().getClass().isActor())
                 return {};
             return LevelStat{ std::move(object) };
         }
@@ -160,10 +129,10 @@ namespace MWLua
 
     class DynamicStat
     {
-        StatObject mObject;
+        ObjectVariant mObject;
         int mIndex;
 
-        DynamicStat(StatObject object, int index)
+        DynamicStat(ObjectVariant object, int index)
             : mObject(std::move(object))
             , mIndex(index)
         {
@@ -174,22 +143,21 @@ namespace MWLua
         sol::object get(const Context& context, std::string_view prop, G getter) const
         {
             return getValue(
-                context, mObject, &DynamicStat::setValue, mIndex, prop, [this, getter](const MWLua::Object* obj) {
-                    const auto& ptr = obj->ptr();
+                context, mObject, &DynamicStat::setValue, mIndex, prop, [this, getter](const MWWorld::Ptr& ptr) {
                     return (ptr.getClass().getCreatureStats(ptr).getDynamic(mIndex).*getter)();
                 });
         }
 
-        static std::optional<DynamicStat> create(StatObject object, int index)
+        static std::optional<DynamicStat> create(ObjectVariant object, int index)
         {
-            if (!getObject(object)->ptr().getClass().isActor())
+            if (!object.ptr().getClass().isActor())
                 return {};
             return DynamicStat{ std::move(object), index };
         }
 
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
-            SelfObject* obj = asSelfObject(mObject);
+            SelfObject* obj = mObject.asSelfObject();
             if (obj->mStatsCache.empty())
                 context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
             obj->mStatsCache[SelfObject::CachedStat{ &DynamicStat::setValue, mIndex, prop }] = value;
@@ -212,10 +180,10 @@ namespace MWLua
 
     class AttributeStat
     {
-        StatObject mObject;
+        ObjectVariant mObject;
         int mIndex;
 
-        AttributeStat(StatObject object, int index)
+        AttributeStat(ObjectVariant object, int index)
             : mObject(std::move(object))
             , mIndex(index)
         {
@@ -226,8 +194,7 @@ namespace MWLua
         sol::object get(const Context& context, std::string_view prop, G getter) const
         {
             return getValue(
-                context, mObject, &AttributeStat::setValue, mIndex, prop, [this, getter](const MWLua::Object* obj) {
-                    const auto& ptr = obj->ptr();
+                context, mObject, &AttributeStat::setValue, mIndex, prop, [this, getter](const MWWorld::Ptr& ptr) {
                     return (ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex).*getter)();
                 });
         }
@@ -240,16 +207,16 @@ namespace MWLua
             return std::max(0.f, base - damage + modifier); // Should match AttributeValue::getModified
         }
 
-        static std::optional<AttributeStat> create(StatObject object, int index)
+        static std::optional<AttributeStat> create(ObjectVariant object, int index)
         {
-            if (!getObject(object)->ptr().getClass().isActor())
+            if (!object.ptr().getClass().isActor())
                 return {};
             return AttributeStat{ std::move(object), index };
         }
 
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
-            SelfObject* obj = asSelfObject(mObject);
+            SelfObject* obj = mObject.asSelfObject();
             if (obj->mStatsCache.empty())
                 context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
             obj->mStatsCache[SelfObject::CachedStat{ &AttributeStat::setValue, mIndex, prop }] = value;
@@ -275,10 +242,10 @@ namespace MWLua
 
     class SkillStat
     {
-        StatObject mObject;
+        ObjectVariant mObject;
         int mIndex;
 
-        SkillStat(StatObject object, int index)
+        SkillStat(ObjectVariant object, int index)
             : mObject(std::move(object))
             , mIndex(index)
         {
@@ -304,8 +271,7 @@ namespace MWLua
         sol::object get(const Context& context, std::string_view prop, G getter) const
         {
             return getValue(
-                context, mObject, &SkillStat::setValue, mIndex, prop, [this, getter](const MWLua::Object* obj) {
-                    const auto& ptr = obj->ptr();
+                context, mObject, &SkillStat::setValue, mIndex, prop, [this, getter](const MWWorld::Ptr& ptr) {
                     return (ptr.getClass().getNpcStats(ptr).getSkill(mIndex).*getter)();
                 });
         }
@@ -321,22 +287,21 @@ namespace MWLua
         sol::object getProgress(const Context& context) const
         {
             return getValue(
-                context, mObject, &SkillStat::setValue, mIndex, "progress", [this](const MWLua::Object* obj) {
-                    const auto& ptr = obj->ptr();
+                context, mObject, &SkillStat::setValue, mIndex, "progress", [this](const MWWorld::Ptr& ptr) {
                     return getProgress(ptr, mIndex, ptr.getClass().getNpcStats(ptr).getSkill(mIndex));
                 });
         }
 
-        static std::optional<SkillStat> create(StatObject object, int index)
+        static std::optional<SkillStat> create(ObjectVariant object, int index)
         {
-            if (!getObject(object)->ptr().getClass().isNpc())
+            if (!object.ptr().getClass().isNpc())
                 return {};
             return SkillStat{ std::move(object), index };
         }
 
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
-            SelfObject* obj = asSelfObject(mObject);
+            SelfObject* obj = mObject.asSelfObject();
             if (obj->mStatsCache.empty())
                 context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
             obj->mStatsCache[SelfObject::CachedStat{ &SkillStat::setValue, mIndex, prop }] = value;
