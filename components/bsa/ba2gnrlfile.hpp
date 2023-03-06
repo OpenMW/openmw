@@ -3,9 +3,10 @@
 
 #include <list>
 #include <map>
+#include <string>
+#include <vector>
 
 #include <components/bsa/bsa_file.hpp>
-#include <filesystem>
 
 namespace Bsa
 {

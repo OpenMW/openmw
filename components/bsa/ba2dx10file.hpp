@@ -3,9 +3,11 @@
 
 #include <list>
 #include <map>
+#include <optional>
+#include <string>
+#include <vector>
 
 #include <components/bsa/bsa_file.hpp>
-#include <filesystem>
 
 namespace Bsa
 {
@@ -23,17 +25,13 @@ namespace Bsa
 
         struct FileRecord
         {
-            // DX10 archive format
             uint8_t unknownTex = 0;
-            // ChunkHeaderSize: Word;
             uint16_t height = 0;
             uint16_t width = 0;
             uint8_t numMips = 0;
             uint8_t DXGIFormat = 0;
             uint16_t cubeMaps = 0;
             std::vector<TextureChunkRecord> texturesChunks;
-            //
-            // std::string DXGIFormatName() const;
         };
 
         uint32_t mVersion{ 0u };
