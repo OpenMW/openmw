@@ -1,5 +1,7 @@
 #include "morphgeometry.hpp"
 
+#include <osgUtil/CullVisitor>
+
 #include <cassert>
 #include <components/resource/scenemanager.hpp>
 
@@ -89,7 +91,18 @@ namespace SceneUtil
         nv.pushOntoNodePath(this);
 
         if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
+        {
+            // The cull visitor won't be applied to the node itself,
+            // but we want to use its state to render the child geometry.
+            osg::StateSet* stateset = getStateSet();
+            osgUtil::CullVisitor* cv = static_cast<osgUtil::CullVisitor*>(&nv);
+            if (stateset)
+                cv->pushStateSet(stateset);
+
             cull(&nv);
+            if (stateset)
+                cv->popStateSet();
+        }
         else
             nv.apply(*this);
 
