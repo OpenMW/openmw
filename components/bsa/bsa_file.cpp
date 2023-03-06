@@ -350,7 +350,7 @@ BsaVersion Bsa::BSAFile::detectVersion(const std::filesystem::path& filePath)
         return BSAVER_UNCOMPRESSED;
     }
 
-    if (head[0] == static_cast<uint32_t>(BSAVER_COMPRESSED))
+    if (head[0] == static_cast<uint32_t>(BSAVER_COMPRESSED) || head[0] == ESM::fourCC("BTDX"))
     {
         if (head[1] == static_cast<uint32_t>(0x01))
         {
@@ -359,18 +359,6 @@ BsaVersion Bsa::BSAFile::detectVersion(const std::filesystem::path& filePath)
             if (head[2] == ESM::fourCC("DX10"))
                 return BSAVER_BA2_DX10;
             return BSAVER_UNKNOWN;
-        }
-        return BSAVER_COMPRESSED;
-    }
-
-    if (head[0] == ESM::fourCC("BTDX"))
-    {
-        if (head[1] == static_cast<uint32_t>(0x01))
-        {
-            if (head[2] == ESM::fourCC("GNRL"))
-                return BSAVER_BA2_GNRL;
-            if (head[2] == ESM::fourCC("DX10"))
-                return BSAVER_BA2_DX10;
         }
         return BSAVER_COMPRESSED;
     }
