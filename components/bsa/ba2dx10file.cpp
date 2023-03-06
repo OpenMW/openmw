@@ -45,7 +45,7 @@ namespace Bsa
             in.read(reinterpret_cast<char*>(&dirHash), sizeof(uint32_t));
 
             FileRecord file;
-            uint32_t unknown;
+            uint8_t unknown;
             in.read(reinterpret_cast<char*>(&unknown), sizeof(uint8_t));
 
             uint8_t nbChunks;
@@ -400,7 +400,7 @@ namespace Bsa
         header.mipMapCount = fileRecord.numMips;
         if (header.mipMapCount > 1)
             header.caps = header.caps | DDSCAPS_MIPMAP | DDSCAPS_COMPLEX;
-        header.depth = 1;
+        header.depth = 0;
 
         header.resourceDimension = DDS_DIMENSION_TEXTURE2D;
         header.arraySize = 1;
@@ -631,15 +631,15 @@ namespace Bsa
         buff = (char*)std::memcpy(buff, &dds, sizeof(uint32_t)) + sizeof(uint32_t);
         std::memcpy(buff, &header, headerSize);
 
-        size_t offset = headerSize;
+        size_t offset = sizeof(uint32_t) + headerSize;
         // append chunks
         for (const auto& c : fileRecord.texturesChunks)
         {
-            Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, c.offset, c.packedSize);
-            std::istream* fileStream = streamPtr.get();
-
             if (c.packedSize != 0)
             {
+                Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, c.offset, c.packedSize);
+                std::istream* fileStream = streamPtr.get();
+
                 boost::iostreams::filtering_streambuf<boost::iostreams::input> inputStreamBuf;
                 inputStreamBuf.push(boost::iostreams::zlib_decompressor());
                 inputStreamBuf.push(*fileStream);
@@ -650,6 +650,9 @@ namespace Bsa
             // uncompressed chunk
             else
             {
+                Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, c.offset, c.size);
+                std::istream* fileStream = streamPtr.get();
+
                 fileStream->read(memoryStreamPtr->getRawData() + offset, c.size);
             }
             offset += c.size;
