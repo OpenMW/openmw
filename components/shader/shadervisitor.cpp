@@ -889,28 +889,21 @@ namespace Shader
         if (auto rig = dynamic_cast<SceneUtil::RigGeometry*>(&drawable))
         {
             osg::ref_ptr<osg::Geometry> sourceGeometry = rig->getSourceGeometry();
-            if (sourceGeometry)
-            {
-                sourceGeometry->accept(*this);
+            if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
                 rig->setSourceGeometry(sourceGeometry);
-            }
         }
         else if (auto morph = dynamic_cast<SceneUtil::MorphGeometry*>(&drawable))
         {
             osg::ref_ptr<osg::Geometry> sourceGeometry = morph->getSourceGeometry();
-            if (sourceGeometry)
-            {
-                sourceGeometry->accept(*this);
+            if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
                 morph->setSourceGeometry(sourceGeometry);
-            }
         }
         else if (auto osgaRig = dynamic_cast<SceneUtil::RigGeometryHolder*>(&drawable))
         {
             osg::ref_ptr<SceneUtil::OsgaRigGeometry> sourceOsgaRigGeometry = osgaRig->getSourceRigGeometry();
             osg::ref_ptr<osg::Geometry> sourceGeometry = sourceOsgaRigGeometry->getSourceGeometry();
-            if (sourceGeometry)
+            if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
             {
-                sourceGeometry->accept(*this);
                 sourceOsgaRigGeometry->setSourceGeometry(sourceGeometry);
                 osgaRig->setSourceRigGeometry(sourceOsgaRigGeometry);
             }
