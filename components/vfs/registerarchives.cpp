@@ -25,12 +25,18 @@ namespace VFS
                 // Last BSA has the highest priority
                 const auto archivePath = collections.getPath(*archive);
                 Log(Debug::Info) << "Adding BSA archive " << archivePath;
-                Bsa::BsaVersion bsaVersion = Bsa::CompressedBSAFile::detectVersion(archivePath);
+                Bsa::BsaVersion bsaVersion = Bsa::BSAFile::detectVersion(archivePath);
 
                 if (bsaVersion == Bsa::BSAVER_COMPRESSED)
-                    vfs->addArchive(std::make_unique<CompressedBsaArchive>(archivePath));
+                    vfs->addArchive(std::make_unique<ArchiveSelector<Bsa::BSAVER_COMPRESSED>::type>(archivePath));
+                else if (bsaVersion == Bsa::BSAVER_BA2_GNRL)
+                    vfs->addArchive(std::make_unique<ArchiveSelector<Bsa::BSAVER_BA2_GNRL>::type>(archivePath));
+                else if (bsaVersion == Bsa::BSAVER_BA2_DX10)
+                    vfs->addArchive(std::make_unique<ArchiveSelector<Bsa::BSAVER_BA2_DX10>::type>(archivePath));
+                else if (bsaVersion == Bsa::BSAVER_UNCOMPRESSED)
+                    vfs->addArchive(std::make_unique<ArchiveSelector<Bsa::BSAVER_UNCOMPRESSED>::type>(archivePath));
                 else
-                    vfs->addArchive(std::make_unique<BsaArchive>(archivePath));
+                    throw std::runtime_error("Unknown archive type '" + *archive + "'");
             }
             else
             {
