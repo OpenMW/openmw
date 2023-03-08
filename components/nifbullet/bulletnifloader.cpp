@@ -25,14 +25,6 @@
 namespace
 {
 
-    osg::Matrixf getWorldTransform(const Nif::Node& node, const Nif::Parent* nodeParent)
-    {
-        osg::Matrixf result = node.trafo.toMatrix();
-        for (const Nif::Parent* parent = nodeParent; parent != nullptr; parent = parent->mParent)
-            result *= parent->mNiNode.trafo.toMatrix();
-        return result;
-    }
-
     bool pathFileNameStartsWithX(const std::string& path)
     {
         const std::size_t slashpos = path.find_last_of("/\\");
@@ -345,8 +337,7 @@ namespace NifBullet
                 && (node.recType == Nif::RC_NiTriShape || node.recType == Nif::RC_NiTriStrips
                     || node.recType == Nif::RC_BSLODTriShape))
             {
-                handleNiTriShape(static_cast<const Nif::NiGeometry&>(node), parent, getWorldTransform(node, parent),
-                    isAnimated, avoid);
+                handleNiTriShape(static_cast<const Nif::NiGeometry&>(node), parent, isAnimated, avoid);
             }
         }
 
@@ -367,8 +358,8 @@ namespace NifBullet
         }
     }
 
-    void BulletNifLoader::handleNiTriShape(const Nif::NiGeometry& niGeometry, const Nif::Parent* nodeParent,
-        const osg::Matrixf& transform, bool isAnimated, bool avoid)
+    void BulletNifLoader::handleNiTriShape(
+        const Nif::NiGeometry& niGeometry, const Nif::Parent* nodeParent, bool isAnimated, bool avoid)
     {
         if (niGeometry.data.empty() || niGeometry.data->vertices.empty())
             return;
@@ -383,14 +374,17 @@ namespace NifBullet
         auto childShape = std::make_unique<Resource::TriangleMeshShape>(childMesh.get(), true);
         std::ignore = childMesh.release();
 
-        float scale = niGeometry.trafo.scale;
+        osg::Matrixf transform = niGeometry.trafo.toMatrix();
         for (const Nif::Parent* parent = nodeParent; parent != nullptr; parent = parent->mParent)
-            scale *= parent->mNiNode.trafo.scale;
-        osg::Quat q = transform.getRotate();
-        osg::Vec3f v = transform.getTrans();
-        childShape->setLocalScaling(btVector3(scale, scale, scale));
+            transform *= parent->mNiNode.trafo.toMatrix();
+        childShape->setLocalScaling(Misc::Convert::toBullet(transform.getScale()));
+        transform.orthoNormalize(transform);
 
-        btTransform trans(btQuaternion(q.x(), q.y(), q.z(), q.w()), btVector3(v.x(), v.y(), v.z()));
+        btTransform trans;
+        trans.setOrigin(Misc::Convert::toBullet(transform.getTrans()));
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+                trans.getBasis()[i][j] = transform(j, i);
 
         if (!avoid)
         {
