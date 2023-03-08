@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
 
 #include <QVariant>
@@ -17,6 +18,7 @@
 
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
+#include "info.hpp"
 #include "land.hpp"
 #include "landtexture.hpp"
 #include "record.hpp"
@@ -24,10 +26,27 @@
 
 namespace CSMWorld
 {
+    inline std::pair<std::string_view, std::string_view> parseInfoRefId(const ESM::RefId& infoId)
+    {
+        const auto separator = infoId.getRefIdString().find('#');
+        if (separator == std::string::npos)
+            throw std::runtime_error("Invalid info id: " + infoId.getRefIdString());
+        const std::string_view view(infoId.getRefIdString());
+        return { view.substr(0, separator), view.substr(separator + 1) };
+    }
+
     template <typename T>
     void setRecordId(const decltype(T::mId)& id, T& record)
     {
         record.mId = id;
+    }
+
+    inline void setRecordId(const ESM::RefId& id, Info& record)
+    {
+        record.mId = id;
+        const auto [topicId, originalId] = parseInfoRefId(id);
+        record.mTopicId = ESM::RefId::stringRefId(topicId);
+        record.mOriginalId = ESM::RefId::stringRefId(originalId);
     }
 
     template <typename T>
@@ -84,6 +103,8 @@ namespace CSMWorld
 
     protected:
         const std::vector<std::unique_ptr<Record<ESXRecordT>>>& getRecords() const;
+
+        void reorderRowsImp(const std::vector<int>& indexOrder);
 
         bool reorderRowsImp(int baseIndex, const std::vector<int>& newOrder);
         ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
@@ -189,6 +210,20 @@ namespace CSMWorld
     const std::vector<std::unique_ptr<Record<ESXRecordT>>>& Collection<ESXRecordT>::getRecords() const
     {
         return mRecords;
+    }
+
+    template <typename ESXRecordT>
+    void Collection<ESXRecordT>::reorderRowsImp(const std::vector<int>& indexOrder)
+    {
+        assert(indexOrder.size() == mRecords.size());
+        assert(std::unordered_set(indexOrder.begin(), indexOrder.end()).size() == indexOrder.size());
+        std::vector<std::unique_ptr<Record<ESXRecordT>>> orderedRecords;
+        for (const int index : indexOrder)
+        {
+            mIndex.at(mRecords[index]->get().mId) = static_cast<int>(orderedRecords.size());
+            orderedRecords.push_back(std::move(mRecords[index]));
+        }
+        mRecords = std::move(orderedRecords);
     }
 
     template <typename ESXRecordT>

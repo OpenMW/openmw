@@ -123,6 +123,7 @@ void CSMDoc::Loader::load()
         }
         else
         {
+            document->getData().finishLoading();
             done = true;
         }
 
