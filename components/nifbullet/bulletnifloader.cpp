@@ -40,26 +40,28 @@ namespace
         return letterPos < path.size() && (path[letterPos] == 'x' || path[letterPos] == 'X');
     }
 
+    void prepareTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriBasedGeomData& data)
+    {
+        // FIXME: copying vertices/indices individually is unreasonable
+        const std::vector<osg::Vec3f>& vertices = data.vertices;
+        mesh.preallocateVertices(static_cast<int>(vertices.size()));
+        for (const osg::Vec3f& vertex : vertices)
+            mesh.findOrAddVertex(Misc::Convert::toBullet(vertex), false);
+
+        mesh.preallocateIndices(static_cast<int>(data.mNumTriangles * 3));
+    }
+
     void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriShapeData& data)
     {
-        const std::vector<osg::Vec3f>& vertices = data.vertices;
+        prepareTriangleMesh(mesh, data);
         const std::vector<unsigned short>& triangles = data.triangles;
-        mesh.preallocateVertices(static_cast<int>(vertices.size()));
-        mesh.preallocateIndices(static_cast<int>(triangles.size()));
-
         for (std::size_t i = 0; i < triangles.size(); i += 3)
-        {
-            mesh.addTriangle(Misc::Convert::toBullet(vertices[triangles[i + 0]]),
-                Misc::Convert::toBullet(vertices[triangles[i + 1]]),
-                Misc::Convert::toBullet(vertices[triangles[i + 2]]));
-        }
+            mesh.addTriangleIndices(triangles[i + 0], triangles[i + 1], triangles[i + 2]);
     }
 
     void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriStripsData& data)
     {
-        mesh.preallocateVertices(static_cast<int>(data.vertices.size()));
-        mesh.preallocateIndices(static_cast<int>(data.mNumTriangles));
-
+        prepareTriangleMesh(mesh, data);
         for (const std::vector<unsigned short>& strip : data.strips)
         {
             if (strip.size() < 3)
@@ -75,13 +77,10 @@ namespace
                 c = strip[i];
                 if (a == b || b == c || a == c)
                     continue;
-                const btVector3 vertexA = Misc::Convert::toBullet(data.vertices[a]);
-                const btVector3 vertexB = Misc::Convert::toBullet(data.vertices[b]);
-                const btVector3 vertexC = Misc::Convert::toBullet(data.vertices[c]);
                 if (i % 2 == 0)
-                    mesh.addTriangle(vertexA, vertexB, vertexC);
+                    mesh.addTriangleIndices(a, b, c);
                 else
-                    mesh.addTriangle(vertexA, vertexC, vertexB);
+                    mesh.addTriangleIndices(a, c, b);
             }
         }
     }
