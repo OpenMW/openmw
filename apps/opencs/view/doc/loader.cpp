@@ -70,6 +70,7 @@ CSVDoc::LoadingDocument::LoadingDocument(CSMDoc::Document* document)
     // error message
     mError = new QLabel(this);
     mError->setWordWrap(true);
+    mError->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     mLayout->addWidget(mError);
 
