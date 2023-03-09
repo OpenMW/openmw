@@ -93,7 +93,7 @@ shared {
 render_target RT_NoMipmap {
     width_ratio = 0.25;
     height_ratio = 0.25;
-    internal_format = rgb16f;
+    internal_format = rgba16f;
     source_type = float;
     source_format = rgb;
     mipmaps = false;
@@ -104,7 +104,7 @@ render_target RT_NoMipmap {
 render_target RT_Horizontal {
     width_ratio = 0.25;
     height_ratio = 0.25;
-    internal_format = rgb16f;
+    internal_format = rgba16f;
     source_type = float;
     source_format = rgb;
     mipmaps = false;
@@ -115,7 +115,7 @@ render_target RT_Horizontal {
 render_target RT_Vertical {
     width_ratio = 0.25;
     height_ratio = 0.25;
-    internal_format = rgb16f;
+    internal_format = rgba16f;
     source_type = float;
     source_format = rgb;
     mipmaps = false;
