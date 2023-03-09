@@ -4,7 +4,7 @@
 
 varying vec3 vertexNormal;
 
-uniform bool useAdvancedShader = false;
+uniform bool useAdvancedShader;
 
 void main()
 {

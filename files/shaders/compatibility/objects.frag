@@ -81,7 +81,7 @@ varying vec3 passViewPos;
 varying vec3 passNormal;
 
 #if @additiveBlending
-#define ADDITIVE_BLENDING
+//#define ADDITIVE_BLENDING
 #endif
 
 #include "lib/light/lighting.glsl"
