@@ -211,9 +211,9 @@ namespace ESM4
         const auto filename = mCtx.filename.stem().filename().u8string();
 
         static const std::filesystem::path s("Strings");
-        buildLStringIndex(s / (filename + u8"_English.STRINGS"), Type_Strings);
-        buildLStringIndex(s / (filename + u8"_English.ILSTRINGS"), Type_ILStrings);
-        buildLStringIndex(s / (filename + u8"_English.DLSTRINGS"), Type_DLStrings);
+        buildLStringIndex(s / (filename + "_English.STRINGS"), Type_Strings);
+        buildLStringIndex(s / (filename + "_English.ILSTRINGS"), Type_ILStrings);
+        buildLStringIndex(s / (filename + "_English.DLSTRINGS"), Type_DLStrings);
     }
 
     void Reader::buildLStringIndex(const std::filesystem::path& stringFile, LocalizedStringType stringType)

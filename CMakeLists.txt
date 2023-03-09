@@ -259,7 +259,7 @@ set(USED_OSG_COMPONENTS
     )
 set(USED_OSG_PLUGINS
     osgdb_bmp
-    osgdb_dae
+#    osgdb_dae
     osgdb_dds
     osgdb_freetype
     osgdb_jpeg
@@ -307,7 +307,7 @@ if(FFmpeg_FOUND)
     SET(FFVER_OK TRUE)
 
     # Can not detect FFmpeg version on Windows for now
-    if (NOT WIN32)
+    if (WIN32)
         if(FFmpeg_AVFORMAT_VERSION VERSION_LESS "57.56.100")
             message(STATUS "libavformat is too old! (${FFmpeg_AVFORMAT_VERSION}, wanted 57.56.100)")
             set(FFVER_OK FALSE)
@@ -483,7 +483,7 @@ else(USE_LUAJIT)
     find_package(Lua REQUIRED)
     add_compile_definitions(NO_LUAJIT)
 endif(USE_LUAJIT)
-if (NOT WIN32)
+if (WIN32)
     include(cmake/CheckLuaCustomAllocator.cmake)
 endif()
 

@@ -518,13 +518,14 @@ namespace MWWorld
     }
     const ESM::Cell* Store<ESM::Cell>::search(std::string_view name) const
     {
-        DynamicInt::const_iterator it = mInt.find(name);
+        const std::string nameString = std::string(name);
+        DynamicInt::const_iterator it = mInt.find(nameString);
         if (it != mInt.end())
         {
             return &(it->second);
         }
 
-        DynamicInt::const_iterator dit = mDynamicInt.find(name);
+        DynamicInt::const_iterator dit = mDynamicInt.find(nameString);
         if (dit != mDynamicInt.end())
         {
             return &dit->second;
@@ -817,7 +818,8 @@ namespace MWWorld
     }
     bool Store<ESM::Cell>::erase(std::string_view name)
     {
-        auto it = mDynamicInt.find(name);
+        const std::string nameString = std::string(name);
+        auto it = mDynamicInt.find(nameString);
 
         if (it == mDynamicInt.end())
         {
@@ -1186,7 +1188,8 @@ namespace MWWorld
 
     const ESM4::Cell* Store<ESM4::Cell>::searchCellName(std::string_view cellName) const
     {
-        const auto foundCell = mCellNameIndex.find(cellName);
+        const std::string cellNameString = std::string(cellName);
+        const auto foundCell = mCellNameIndex.find(cellNameString);
         if (foundCell == mCellNameIndex.end())
             return nullptr;
         return foundCell->second;

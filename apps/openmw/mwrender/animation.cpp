@@ -672,7 +672,8 @@ namespace MWRender
             NodeMap::const_iterator found = nodeMap.end();
             for (const std::string_view& name : accumRootNames)
             {
-                found = nodeMap.find(name);
+                const std::string nameString = std::string(name);
+                found = nodeMap.find(nameString);
                 if (found == nodeMap.end())
                     continue;
                 for (SceneUtil::KeyframeHolder::KeyframeControllerMap::const_iterator it = controllerMap.begin();
@@ -1546,7 +1547,8 @@ namespace MWRender
             parentNode = mInsert;
         else
         {
-            NodeMap::const_iterator found = getNodeMap().find(bonename);
+            const std::string bonenameString = std::string(bonename);
+            NodeMap::const_iterator found = getNodeMap().find(bonenameString);
             if (found == getNodeMap().end())
                 throw std::runtime_error("Can't find bone " + std::string{ bonename });
 
@@ -1664,7 +1666,8 @@ namespace MWRender
 
     const osg::Node* Animation::getNode(std::string_view name) const
     {
-        NodeMap::const_iterator found = getNodeMap().find(name);
+        const std::string nameString = std::string(name);
+        NodeMap::const_iterator found = getNodeMap().find(nameString);
         if (found == getNodeMap().end())
             return nullptr;
         else
@@ -1749,7 +1752,8 @@ namespace MWRender
 
     osg::ref_ptr<RotateController> Animation::addRotateController(std::string_view bone)
     {
-        auto iter = getNodeMap().find(bone);
+        const std::string boneString = std::string(bone);
+        auto iter = getNodeMap().find(boneString);
         if (iter == getNodeMap().end())
             return nullptr;
         osg::MatrixTransform* node = iter->second;

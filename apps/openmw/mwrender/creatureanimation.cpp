@@ -119,8 +119,9 @@ namespace MWRender
                 bonename = MWMechanics::getWeaponType(type)->mAttachBone;
                 if (bonename != "Weapon Bone")
                 {
+                    const std::string bonenameString = std::string(bonename);
                     const NodeMap& nodeMap = getNodeMap();
-                    NodeMap::const_iterator found = nodeMap.find(bonename);
+                    NodeMap::const_iterator found = nodeMap.find(bonenameString);
                     if (found == nodeMap.end())
                         bonename = "Weapon Bone";
                 }

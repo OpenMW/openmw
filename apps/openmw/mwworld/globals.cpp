@@ -11,7 +11,8 @@ namespace MWWorld
 {
     Globals::Collection::const_iterator Globals::find(std::string_view name) const
     {
-        Collection::const_iterator iter = mVariables.find(name);
+        const std::string nameString = std::string(name);
+        Collection::const_iterator iter = mVariables.find(nameString);
 
         if (iter == mVariables.end())
             throw std::runtime_error("unknown global variable: " + std::string{ name });
@@ -21,7 +22,8 @@ namespace MWWorld
 
     Globals::Collection::iterator Globals::find(std::string_view name)
     {
-        Collection::iterator iter = mVariables.find(name);
+        const std::string nameString = std::string(name);
+        Collection::iterator iter = mVariables.find(nameString);
 
         if (iter == mVariables.end())
             throw std::runtime_error("unknown global variable: " + std::string{ name });
@@ -53,7 +55,8 @@ namespace MWWorld
 
     char Globals::getType(GlobalVariableName name) const
     {
-        Collection::const_iterator iter = mVariables.find(name.getValue());
+        const std::string nameString = std::string(name.getValue());
+        Collection::const_iterator iter = mVariables.find(nameString);
 
         if (iter == mVariables.end())
             return ' ';

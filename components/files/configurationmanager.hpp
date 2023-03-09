@@ -63,7 +63,7 @@ namespace Files
         typedef Files::FixedPath<> FixedPathType;
 
         typedef const std::filesystem::path& (FixedPathType::*path_type_f)() const;
-        typedef std::map<std::u8string, path_type_f> TokensMappingContainer;
+        typedef std::map<std::string, path_type_f> TokensMappingContainer;
 
         std::optional<boost::program_options::variables_map> loadConfig(
             const std::filesystem::path& path, const boost::program_options::options_description& description) const;

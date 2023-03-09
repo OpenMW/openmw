@@ -24,10 +24,10 @@ namespace Files
     static const char* const applicationName = "openmw";
 #endif
 
-    static constexpr auto localToken = u8"?local?";
-    static constexpr auto userConfigToken = u8"?userconfig?";
-    static constexpr auto userDataToken = u8"?userdata?";
-    static constexpr auto globalToken = u8"?global?";
+    static constexpr auto localToken = "?local?";
+    static constexpr auto userConfigToken = "?userconfig?";
+    static constexpr auto userDataToken = "?userdata?";
+    static constexpr auto globalToken = "?global?";
 
     ConfigurationManager::ConfigurationManager(bool silent)
         : mFixedPath(applicationName)
@@ -298,7 +298,8 @@ namespace Files
         const auto pos = str.find('?', 1);
         if (pos != std::u8string::npos && pos != 0)
         {
-            auto tokenIt = mTokensMapping.find(str.substr(0, pos + 1));
+            const std::string tempString = str.substr(0, pos + 1);
+            auto tokenIt = mTokensMapping.find(tempString);
             if (tokenIt != mTokensMapping.end())
             {
                 auto tempPath(((mFixedPath).*(tokenIt->second))());
@@ -447,7 +448,7 @@ namespace Files
         {
             std::string intermediate;
             istream >> std::quoted(intermediate, '"', '&');
-            static_cast<std::filesystem::path&>(MaybeQuotedPath) = Misc::StringUtils::stringToU8String(intermediate);
+            static_cast<std::filesystem::path&>(MaybeQuotedPath) = intermediate;//Misc::StringUtils::stringToU8String(intermediate);
             if (istream && !istream.eof() && istream.peek() != EOF)
             {
                 std::string remainder{ std::istreambuf_iterator(istream), {} };
@@ -458,7 +459,7 @@ namespace Files
         else
         {
             std::string intermediate{ std::istreambuf_iterator(istream), {} };
-            static_cast<std::filesystem::path&>(MaybeQuotedPath) = Misc::StringUtils::stringToU8String(intermediate);
+            static_cast<std::filesystem::path&>(MaybeQuotedPath) = intermediate;//Misc::StringUtils::stringToU8String(intermediate);
         }
         return istream;
     }
