@@ -56,8 +56,8 @@ namespace MWWorld
                 mStore.load(*reader, listener, mDialogue);
 
                 if (!mMasterFileFormat.has_value()
-                    && (Misc::StringUtils::ciEndsWith(reader->getName().u8string(), u8".esm")
-                        || Misc::StringUtils::ciEndsWith(reader->getName().u8string(), u8".omwgame")))
+                    && (Misc::StringUtils::ciEndsWith(reader->getName().u8string(), ".esm")
+                        || Misc::StringUtils::ciEndsWith(reader->getName().u8string(), ".omwgame")))
                     mMasterFileFormat = reader->getFormatVersion();
                 break;
             }
