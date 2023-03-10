@@ -94,13 +94,13 @@ if(DPKG_PROGRAM)
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
-  add_definitions (--coverage)
-  target_link_libraries(openmw-wizard gcov)
+    add_definitions (--coverage)
+    target_link_libraries(openmw-wizard gcov)
 endif()
 
 # Workaround for binutil => 2.23 problem when linking, should be fixed eventually upstream
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-target_link_libraries(openmw-wizard dl Xt)
+    target_link_libraries(openmw-wizard dl Xt)
 endif()
 
 if (WIN32)

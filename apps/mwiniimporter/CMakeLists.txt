@@ -25,12 +25,12 @@ if (WIN32)
 endif(WIN32)
 
 if (MINGW)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -municode")
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
-  add_definitions (--coverage)
-  target_link_libraries(openmw-iniimporter gcov)
+    add_definitions (--coverage)
+    target_link_libraries(openmw-iniimporter gcov)
 endif()
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
