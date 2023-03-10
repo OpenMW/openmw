@@ -307,7 +307,7 @@
                             </Widget>
                         </Widget>
                         <Widget type="HBox" position="207 142 300 28">
-                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="WindowBorderButton">
+                            <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 24 24" align="Left Top" name="PostProcessButton">
                                 <UserString key="SettingCategory" value="Post Processing"/>
                                 <UserString key="SettingName" value="enabled"/>
                                 <UserString key="SettingType" value="CheckButton"/>

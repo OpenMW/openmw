@@ -278,6 +278,7 @@ namespace MWGui
         getWidget(mScriptView, "ScriptView");
         getWidget(mScriptAdapter, "ScriptAdapter");
         getWidget(mScriptDisabled, "ScriptDisabled");
+        getWidget(PostProcessButton, "PostProcessButton");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -292,6 +293,9 @@ namespace MWGui
         getWidget(textBox, "GammaTextLight");
         textBox->setVisible(false);
 #endif
+
+        PostProcessButton->eventMouseButtonClick
+            += MyGUI::newDelegate(this, &SettingsWindow::onButtonRequiringRestartClicked);
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord
             += MyGUI::newDelegate(this, &SettingsWindow::onWindowResize);
@@ -450,6 +454,12 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Settings);
     }
 
+    void SettingsWindow::onButtonRequiringRestartClicked(MyGUI::Widget* _sender)
+    {
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
+            "#{OMWEngine:ChangeRequiresRestart}", { "#{sOK}" }, true);
+    }
+
     void SettingsWindow::onResolutionSelected(MyGUI::ListBox* _sender, size_t index)
     {
         if (index == MyGUI::ITEM_NONE)
@@ -605,7 +615,13 @@ namespace MWGui
         int count = 8 * (pos + 1);
 
         Settings::Manager::setInt("max lights", "Shaders", count);
+
         apply();
+
+        // Causing crash on android
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
+            "#{OMWEngine:ChangeRequiresRestart}", { "#{sOK}" }, true);
+
         configureWidgets(mMainWidget, false);
     }
 

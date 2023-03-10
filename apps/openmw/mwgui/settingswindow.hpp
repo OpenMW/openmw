@@ -43,6 +43,8 @@ namespace MWGui
         MyGUI::ComboBox* mLightingMethodButton;
         MyGUI::Button* mLightsResetButton;
 
+        MyGUI::Button* PostProcessButton;
+
         MyGUI::ComboBox* mPrimaryLanguage;
         MyGUI::ComboBox* mSecondaryLanguage;
 
@@ -65,6 +67,7 @@ namespace MWGui
 
         void onTabChanged(MyGUI::TabControl* _sender, size_t index);
         void onOkButtonClicked(MyGUI::Widget* _sender);
+        void onButtonRequiringRestartClicked(MyGUI::Widget* _sender);
         void onTextureFilteringChanged(MyGUI::ComboBox* _sender, size_t pos);
         void onSliderChangePosition(MyGUI::ScrollBar* scroller, size_t pos);
         void onButtonToggled(MyGUI::Widget* _sender);

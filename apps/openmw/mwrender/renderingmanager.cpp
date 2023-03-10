@@ -1415,6 +1415,8 @@ namespace MWRender
 
                 if (it->second == "max lights" && !lightManager->usingFFP())
                 {
+//changing make android crash
+/*
                     mViewer->stopThreading();
 
                     lightManager->updateMaxLights();
@@ -1427,10 +1429,13 @@ namespace MWRender
                     mStateUpdater->reset();
 
                     mViewer->startThreading();
+*/
                 }
             }
             else if (it->first == "Post Processing" && it->second == "enabled")
             {
+// Disabling make android crash
+/*
                 if (Settings::Manager::getBool("enabled", "Post Processing"))
                     mPostProcessor->enable();
                 else
@@ -1439,6 +1444,7 @@ namespace MWRender
                     if (auto* hud = MWBase::Environment::get().getWindowManager()->getPostProcessorHud())
                         hud->setVisible(false);
                 }
+*/
             }
         }
 
