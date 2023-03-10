@@ -27,6 +27,9 @@ extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x
 #include <unistd.h>
 #endif
 
+// Android navmeshtool hack
+#include "../navmeshtool/navmesh.hpp"
+
 using namespace Fallback;
 
 /**
@@ -241,6 +244,17 @@ int runApplication(int argc, char* argv[])
     osg::setNotifyHandler(new OSGLogHandler());
     Files::ConfigurationManager cfgMgr;
     std::unique_ptr<OMW::Engine> engine = std::make_unique<OMW::Engine>(cfgMgr);
+
+    // Android navmeshtool hack
+    if ( getenv("OPENMW_GENERATE_NAVMESH_CACHE") )
+    {
+        if(NavMeshTool::runNavMeshTool(argc, argv))
+           Log(Debug::Error) << "runNavMeshTool failed";
+        else
+           Log(Debug::Error) << "runNavMeshTool sucess";
+
+        return 0;
+    }
 
     if (parseOptions(argc, argv, *engine, cfgMgr))
     {

@@ -304,7 +304,7 @@ void setupLogging(const std::filesystem::path& logDir, std::string_view appName,
 #endif
 }
 
-extern osg::ref_ptr<osgViewer::Viewer> g_viewer;
+osg::ref_ptr<osgViewer::Viewer> g_viewer;
 
 int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, char* argv[], std::string_view appName)
 {

@@ -466,7 +466,7 @@ void OMW::Engine::setSkipMenu(bool skipMenu, bool newGame)
 }
 
 // To share the viewer with Android interfaces
-osg::ref_ptr<osgViewer::Viewer> g_viewer;
+extern osg::ref_ptr<osgViewer::Viewer> g_viewer;
 
 void OMW::Engine::createWindow()
 {

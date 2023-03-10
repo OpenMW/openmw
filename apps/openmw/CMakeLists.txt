@@ -111,6 +111,10 @@ add_openmw_dir (mwbase
     inputmanager windowmanager statemanager
     )
 
+add_openmw_dir (.
+    ../navmeshtool/main ../navmeshtool/navmesh ../navmeshtool/worldspacedata
+    )
+
 # Main executable
 
 if (NOT ANDROID)

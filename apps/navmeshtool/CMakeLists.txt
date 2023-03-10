@@ -5,7 +5,7 @@ set(NAVMESHTOOL
 )
 source_group(apps\\navmeshtool FILES ${NAVMESHTOOL})
 
-openmw_add_executable(openmw-navmeshtool ${NAVMESHTOOL})
+add_library(openmw-navmeshtool SHARED ${NAVMESHTOOL})
 
 target_link_libraries(openmw-navmeshtool
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
