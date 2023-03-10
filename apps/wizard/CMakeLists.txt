@@ -94,7 +94,7 @@ if(DPKG_PROGRAM)
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
-    add_definitions (--coverage)
+    target_compile_options(openmw-wizard PRIVATE --coverage)
     target_link_libraries(openmw-wizard gcov)
 endif()
 

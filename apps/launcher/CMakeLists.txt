@@ -85,7 +85,7 @@ target_link_libraries(openmw-launcher
 target_link_libraries(openmw-launcher Qt::Widgets Qt::Core)
 
 if (BUILD_WITH_CODE_COVERAGE)
-    add_definitions (--coverage)
+    target_compile_options(openmw-launcher PRIVATE --coverage)
     target_link_libraries(openmw-launcher gcov)
 endif()
 

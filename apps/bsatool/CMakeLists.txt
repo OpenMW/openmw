@@ -14,7 +14,7 @@ target_link_libraries(bsatool
 )
 
 if (BUILD_WITH_CODE_COVERAGE)
-    add_definitions (--coverage)
+    target_compile_options(bsatool PRIVATE --coverage)
     target_link_libraries(bsatool gcov)
 endif()
 

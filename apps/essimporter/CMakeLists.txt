@@ -39,7 +39,7 @@ target_link_libraries(openmw-essimporter
 )
 
 if (BUILD_WITH_CODE_COVERAGE)
-    add_definitions (--coverage)
+    target_compile_options(openmw-essimporter PRIVATE --coverage)
     target_link_libraries(openmw-essimporter gcov)
 endif()
 

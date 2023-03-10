@@ -487,7 +487,7 @@ if (UNIX AND NOT APPLE)
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
-    add_definitions(--coverage)
+    target_compile_options(components PRIVATE --coverage)
     target_link_libraries(components gcov)
 endif()
 

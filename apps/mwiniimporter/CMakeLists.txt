@@ -29,7 +29,7 @@ if (MINGW)
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
-    add_definitions (--coverage)
+    target_compile_options(openmw-iniimporter PRIVATE --coverage)
     target_link_libraries(openmw-iniimporter gcov)
 endif()
 
