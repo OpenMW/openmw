@@ -1,11 +1,11 @@
 set(BSATOOL
-	bsatool.cpp
+    bsatool.cpp
 )
 source_group(apps\\bsatool FILES ${BSATOOL})
 
 # Main executable
 openmw_add_executable(bsatool
-	${BSATOOL}
+    ${BSATOOL}
 )
 
 target_link_libraries(bsatool
