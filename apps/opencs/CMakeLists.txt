@@ -176,18 +176,25 @@ add_library(openmw-cs-lib
 
 set_target_properties(openmw-cs-lib PROPERTIES OUTPUT_NAME openmw-cs)
 
-openmw_add_executable(openmw-cs
-    MACOSX_BUNDLE
-    ${OPENCS_MAC_ICON}
-    ${OPENCS_CFG}
-    ${OPENCS_DEFAULT_FILTERS_FILE}
-    ${OPENCS_OPENMW_CFG}
-    main.cpp
-)
+if(BUILD_OPENCS)
+    openmw_add_executable(openmw-cs
+        MACOSX_BUNDLE
+        ${OPENCS_MAC_ICON}
+        ${OPENCS_CFG}
+        ${OPENCS_DEFAULT_FILTERS_FILE}
+        ${OPENCS_OPENMW_CFG}
+        main.cpp
+    )
 
-target_link_libraries(openmw-cs openmw-cs-lib)
+    target_link_libraries(openmw-cs openmw-cs-lib)
 
-if(APPLE)
+    if (BUILD_WITH_CODE_COVERAGE)
+        target_compile_options(openmw-cs-lib PRIVATE --coverage)
+        target_link_libraries(openmw-cs-lib gcov)
+    endif()
+endif()
+
+if(APPLE AND BUILD_OPENCS)
     set(OPENCS_BUNDLE_NAME "OpenMW-CS")
     set(OPENCS_BUNDLE_RESOURCES_DIR "${OpenMW_BINARY_DIR}/${OPENCS_BUNDLE_NAME}.app/Contents/Resources")
 
@@ -218,7 +225,7 @@ if(APPLE)
     add_custom_command(TARGET openmw-cs
         POST_BUILD
         COMMAND cp "${OpenMW_BINARY_DIR}/resources/version" "${OPENCS_BUNDLE_RESOURCES_DIR}/resources")
-endif(APPLE)
+endif()
 
 target_link_libraries(openmw-cs-lib
     # CMake's built-in OSG finder does not use pkgconfig, so we have to
@@ -240,6 +247,9 @@ target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL)
 
 if (WIN32)
     target_link_libraries(openmw-cs-lib ${Boost_LOCALE_LIBRARY})
+endif()
+
+if (WIN32 AND BUILD_OPENCS)
     INSTALL(TARGETS openmw-cs RUNTIME DESTINATION ".")
 
     get_generator_is_multi_config(multi_config)
@@ -259,8 +269,7 @@ if (MSVC)
     endif (CMAKE_CL_64)
 endif (MSVC)
 
-
-if(APPLE)
+if(APPLE AND BUILD_OPENCS)
     INSTALL(TARGETS openmw-cs BUNDLE DESTINATION "." COMPONENT Bundle)
 endif()
 
@@ -271,8 +280,6 @@ endif(USE_QT)
 if (BUILD_WITH_CODE_COVERAGE)
     target_compile_options(openmw-cs-lib PRIVATE --coverage)
     target_link_libraries(openmw-cs-lib gcov)
-    target_compile_options(openmw-cs PRIVATE --coverage)
-    target_link_libraries(openmw-cs gcov)
 endif()
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
