@@ -645,22 +645,14 @@ namespace MWRender
             auto& sm = Stereo::Manager::instance();
             auto* projectionMatrixUniform = stateset->getUniform("projectionMatrix");
             auto projectionMatrix = sm.computeEyeProjection(0, true);
-            auto viewOffsetMatrix = sm.computeEyeViewOffset(0);
-            for (int col : {0, 1, 2})
-                viewOffsetMatrix(3, col) = 0;
-
-            projectionMatrixUniform->set(viewOffsetMatrix * projectionMatrix);
+            projectionMatrixUniform->set(projectionMatrix);
         }
         void applyRight(osg::StateSet* stateset, osgUtil::CullVisitor* /*cv*/) override
         {
             auto& sm = Stereo::Manager::instance();
             auto* projectionMatrixUniform = stateset->getUniform("projectionMatrix");
             auto projectionMatrix = sm.computeEyeProjection(1, true);
-            auto viewOffsetMatrix = sm.computeEyeViewOffset(1);
-            for (int col : {0, 1, 2})
-                viewOffsetMatrix(3, col) = 0;
-
-            projectionMatrixUniform->set(viewOffsetMatrix * projectionMatrix);
+            projectionMatrixUniform->set(projectionMatrix);
         }
 
     private:

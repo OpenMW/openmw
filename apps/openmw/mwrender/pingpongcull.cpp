@@ -47,7 +47,7 @@ namespace MWRender
             auto& sm = Stereo::Manager::instance();
             auto view = sm.getEye(cv);
             int index = view == Stereo::Eye::Right ? 1 : 0;
-            auto projectionMatrix = sm.computeEyeViewOffset(index) * sm.computeEyeProjection(index, true);
+            auto projectionMatrix = sm.computeEyeProjection(index, true);
             postProcessor->getStateUpdater()->setProjectionMatrix(projectionMatrix);
         }
 
