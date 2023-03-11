@@ -318,6 +318,7 @@ int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, c
     int ret = 0;
     try
     {
+        /* Crash catcher doesnt work on androud it seems, and std::filesystem::temp_directory_path() returning wrong dir on some devices
         if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER"); env == nullptr || std::atol(env) == 0)
         {
 #if defined(_WIN32)
@@ -333,6 +334,7 @@ int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, c
             ret = innerApplication(argc, argv);
         }
         else
+        */
             ret = innerApplication(argc, argv);
     }
     catch (const std::exception& e)
