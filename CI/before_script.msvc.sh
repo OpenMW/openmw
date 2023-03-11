@@ -377,7 +377,7 @@ case $VS_VERSION in
 		MYGUI_MSVC_YEAR="2019"
 		LUA_MSVC_YEAR="2019"
 		QT_MSVC_YEAR="2019"
-		BULLET_MSVC_YEAR="2015"
+		BULLET_MSVC_YEAR="2019"
 
 		BOOST_VER="1.80.0"
 		BOOST_VER_URL="1_80_0"
@@ -395,7 +395,7 @@ case $VS_VERSION in
 		MYGUI_MSVC_YEAR="2019"
 		LUA_MSVC_YEAR="2019"
 		QT_MSVC_YEAR="2019"
-		BULLET_MSVC_YEAR="2015"
+		BULLET_MSVC_YEAR="2019"
 
 		BOOST_VER="1.80.0"
 		BOOST_VER_URL="1_80_0"
@@ -596,8 +596,8 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
 	# Bullet
 	download "Bullet ${BULLET_VER}" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double.7z" \
-		"Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double.7z"
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double-mt.7z" \
+		"Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double-mt.7z"
 
 	# FFmpeg
 	download "FFmpeg ${FFMPEG_VER}" \
@@ -742,8 +742,8 @@ printf "Bullet ${BULLET_VER}... "
 		printf -- "Exists. (No version checking) "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf Bullet
-		eval 7z x -y "${DEPS}/Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double.7z" $STRIP
-		mv "Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double" Bullet
+		eval 7z x -y "${DEPS}/Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double-mt.7z" $STRIP
+		mv "Bullet-${BULLET_VER}-msvc${BULLET_MSVC_YEAR}-win${BITS}-double-mt" Bullet
 	fi
 	add_cmake_opts -DBULLET_ROOT="$(real_pwd)/Bullet"
 	echo Done.
