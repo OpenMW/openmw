@@ -560,7 +560,7 @@ OSG_ARCHIVE="OSGoS-3.6.5-dd803bc-msvc${OSG_MSVC_YEAR}-win${BITS}"
 OSG_ARCHIVE_REPO_URL="https://gitlab.com/OpenMW/openmw-deps/-/raw/main"
 if ! [ -z $OSG_MULTIVIEW_BUILD ]; then
     OSG_ARCHIVE_NAME="OSG-3.6-multiview"
-    OSG_ARCHIVE="OSG-3.6-multiview-ee297dce0-msvc${OSG_MSVC_YEAR}-win${BITS}"
+    OSG_ARCHIVE="OSG-3.6-multiview-d2ee5aa8-msvc${OSG_MSVC_YEAR}-win${BITS}"
     OSG_ARCHIVE_REPO_URL="https://gitlab.com/madsbuvi/openmw-deps/-/raw/openmw-vr-ovr_multiview"
 fi
 
