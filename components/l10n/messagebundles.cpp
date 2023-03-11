@@ -72,6 +72,7 @@ namespace l10n
         {
             YAML::Node data = YAML::Load(input);
             std::string localeName = lang.getName();
+            const icu::Locale& langOrEn = localeName == "gmst" ? icu::Locale::getEnglish() : lang;
             for (const auto& it : data)
             {
                 const auto key = it.first.as<std::string>();
@@ -79,7 +80,7 @@ namespace l10n
                 icu::UnicodeString pattern = icu::UnicodeString::fromUTF8(icu::StringPiece(value.data(), value.size()));
                 icu::ErrorCode status;
                 UParseError parseError;
-                icu::MessageFormat message(pattern, lang, parseError, status);
+                icu::MessageFormat message(pattern, langOrEn, parseError, status);
                 if (checkSuccess(status,
                         std::string("Failed to create message ") + key + " for locale " + lang.getName(), parseError))
                 {
@@ -120,6 +121,20 @@ namespace l10n
         return formatMessage(key, argNames, argValues);
     }
 
+    static std::string loadGmst(
+        const std::function<std::string(std::string_view)> gmstLoader, const icu::MessageFormat* message)
+    {
+        icu::UnicodeString gmstNameUnicode;
+        std::string gmstName;
+        icu::ErrorCode success;
+        message->format(nullptr, nullptr, 0, gmstNameUnicode, success);
+        gmstNameUnicode.toUTF8String(gmstName);
+        if (gmstLoader)
+            return gmstLoader(gmstName);
+        else
+            return "GMST:" + gmstName;
+    }
+
     std::string MessageBundles::formatMessage(std::string_view key, const std::vector<icu::UnicodeString>& argNames,
         const std::vector<icu::Formattable>& args) const
     {
@@ -132,7 +147,11 @@ namespace l10n
         {
             message = findMessage(key, loc);
             if (message)
+            {
+                if (loc == "gmst")
+                    return loadGmst(mGmstLoader, message);
                 break;
+            }
         }
         // If no requested locales included the message, try the fallback locale
         if (!message)

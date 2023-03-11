@@ -12,6 +12,7 @@ namespace l10n
     void Manager::setPreferredLocales(const std::vector<std::string>& langs)
     {
         mPreferredLocales.clear();
+        mPreferredLocales.push_back(icu::Locale("gmst"));
         std::set<std::string> langSet;
         for (const auto& lang : langs)
         {
@@ -90,6 +91,7 @@ namespace l10n
             throw std::runtime_error(std::string("Invalid l10n context name: ") + contextName);
         icu::Locale fallbackLocale(fallbackLocaleName.c_str());
         std::shared_ptr<MessageBundles> ctx = std::make_shared<MessageBundles>(mPreferredLocales, fallbackLocale);
+        ctx->setGmstLoader(mGmstLoader);
         updateContext(contextName, *ctx);
         mCache.emplace(key, ctx);
         return ctx;

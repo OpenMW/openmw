@@ -777,6 +777,18 @@ void OMW::Engine::prepareEngine()
     mEnvironment.setWorldModel(mWorld->getWorldModel());
     mEnvironment.setWorldScene(mWorld->getWorldScene());
 
+    const MWWorld::Store<ESM::GameSetting>* gmst = &mWorld->getStore().get<ESM::GameSetting>();
+    mL10nManager->setGmstLoader([gmst](std::string_view gmstName) {
+        const ESM::GameSetting* res = gmst->search(gmstName);
+        if (res && res->mValue.getType() == ESM::VT_String)
+            return res->mValue.getString();
+        else
+        {
+            Log(Debug::Error) << "GMST " << gmstName << " not found";
+            return std::string("GMST:") + std::string(gmstName);
+        }
+    });
+
     mWindowManager->setStore(mWorld->getStore());
     mWindowManager->initUI();
 
