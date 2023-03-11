@@ -185,15 +185,17 @@ namespace Shader
 
     void ShaderVisitor::apply(osg::Node& node)
     {
-        if (node.getStateSet())
+        bool needPop = false;
+        if (node.getStateSet() || mRequirements.empty())
         {
+            needPop = true;
             pushRequirements(node);
-            applyStateSet(node.getStateSet(), node);
-            traverse(node);
-            popRequirements();
+            if (node.getStateSet())
+                applyStateSet(node.getStateSet(), node);
         }
-        else
-            traverse(node);
+        traverse(node);
+        if (needPop)
+            popRequirements();
     }
 
     osg::StateSet* getWritableStateSet(osg::Node& node)
@@ -820,23 +822,39 @@ namespace Shader
 
     void ShaderVisitor::apply(osg::Geometry& geometry)
     {
-        pushRequirements(geometry);
+        bool needPop = geometry.getStateSet() || mRequirements.empty();
+        if (needPop)
+            pushRequirements(geometry);
+
         if (geometry.getStateSet()) // TODO: check if stateset affects shader permutation before pushing it
             applyStateSet(geometry.getStateSet(), geometry);
 
-        const ShaderRequirements& reqs = mRequirements.back();
-        adjustGeometry(geometry, reqs);
-        createProgram(reqs);
+        if (!mRequirements.empty())
+        {
+            const ShaderRequirements& reqs = mRequirements.back();
 
-        popRequirements();
+            adjustGeometry(geometry, reqs);
+
+            createProgram(reqs);
+        }
+        else
+            ensureFFP(geometry);
+
+        if (needPop)
+            popRequirements();
     }
 
     void ShaderVisitor::apply(osg::Drawable& drawable)
     {
-        pushRequirements(drawable);
+        bool needPop = drawable.getStateSet() || mRequirements.empty();
 
-        if (drawable.getStateSet())
-            applyStateSet(drawable.getStateSet(), drawable);
+        if (needPop)
+        {
+            pushRequirements(drawable);
+
+            if (drawable.getStateSet())
+                applyStateSet(drawable.getStateSet(), drawable);
+        }
 
         const ShaderRequirements& reqs = mRequirements.back();
         createProgram(reqs);
@@ -862,8 +880,11 @@ namespace Shader
                 sourceOsgaRigGeometry->setSourceGeometry(sourceGeometry);
                 osgaRig->setSourceRigGeometry(sourceOsgaRigGeometry);
             }
+
         }
-        popRequirements();
+
+        if (needPop)
+            popRequirements();
     }
 
     void ShaderVisitor::setAllowedToModifyStateSets(bool allowed)
