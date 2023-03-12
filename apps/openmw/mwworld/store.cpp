@@ -1070,7 +1070,7 @@ namespace MWWorld
         // DialInfos marked as deleted are kept during the loading phase, so that the linked list
         // structure is kept intact for inserting further INFOs. Delete them now that loading is done.
         for (auto& [_, dial] : mStatic)
-            dial.clearDeletedInfos();
+            dial.setUp();
 
         mShared.clear();
         mShared.reserve(mStatic.size());

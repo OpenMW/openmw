@@ -7,6 +7,7 @@
 
 #include "components/esm/defs.hpp"
 #include "components/esm/refid.hpp"
+#include "components/esm3/infoorder.hpp"
 
 #include "loadinfo.hpp"
 
@@ -23,6 +24,8 @@ namespace ESM
 
     struct Dialogue
     {
+        using InfoContainer = std::list<DialInfo>;
+
         constexpr static RecNameInts sRecordId = REC_DIAL;
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
         static std::string_view getRecordType() { return "Dialogue"; }
@@ -39,16 +42,11 @@ namespace ESM
 
         RefId mId;
         signed char mType;
-
-        typedef std::list<DialInfo> InfoContainer;
+        InfoContainer mInfo;
+        InfoOrder<DialInfo> mInfoOrder;
 
         // Parameters: Info ID, (Info iterator, Deleted flag)
         typedef std::map<ESM::RefId, std::pair<InfoContainer::iterator, bool>> LookupMap;
-
-        InfoContainer mInfo;
-
-        // This is only used during the loading phase to speed up DialInfo merging.
-        LookupMap mLookup;
 
         void load(ESMReader& esm, bool& isDeleted);
         ///< Loads all sub-records of Dialogue record
@@ -60,11 +58,10 @@ namespace ESM
         void save(ESMWriter& esm, bool isDeleted = false) const;
 
         /// Remove all INFOs that are deleted
-        void clearDeletedInfos();
+        void setUp();
 
         /// Read the next info record
-        /// @param merge Merge with existing list, or just push each record to the end of the list?
-        void readInfo(ESMReader& esm, bool merge);
+        void readInfo(ESMReader& esm);
 
         void blank();
         ///< Set record to default state (does not touch the ID and does not change the type).

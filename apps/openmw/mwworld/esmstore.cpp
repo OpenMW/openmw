@@ -318,7 +318,7 @@ namespace MWWorld
                 {
                     if (dialogue)
                     {
-                        dialogue->readInfo(esm, esm.getIndex() != 0);
+                        dialogue->readInfo(esm);
                     }
                     else
                     {
