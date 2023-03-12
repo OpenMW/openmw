@@ -452,6 +452,7 @@ macOS12_Xcode13:
     - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+    - New-Item -Type File -Force -Path MSVC2019_64_Ninja\.cmake\api\v1\query\codemodel-v2
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C $multiview -E
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
@@ -463,6 +464,10 @@ macOS12_Xcode13:
     - |
       if (Get-ChildItem -Recurse *.pdb) {
         7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        Push-Location ..
+        ..\CI\Store-Symbols.ps1
+        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
+        Pop-Location
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
     - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
@@ -554,6 +559,7 @@ macOS12_Xcode13:
     - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+    - New-Item -Type File -Force -Path MSVC2019_64\.cmake\api\v1\query\codemodel-v2
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t -C $multiview -E
     - cd MSVC2019_64
     - cmake --build . --config $config
@@ -564,6 +570,10 @@ macOS12_Xcode13:
     - |
       if (Get-ChildItem -Recurse *.pdb) {
         7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        Push-Location ..
+        ..\CI\Store-Symbols.ps1
+        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
+        Pop-Location
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
     - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
