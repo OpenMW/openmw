@@ -36,8 +36,6 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
     mFormId = reader.hdr().record.id;
     reader.adjustFormId(mFormId);
     mFlags = reader.hdr().record.flags;
-    std::uint32_t esmVer = reader.esmVersion();
-    bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 
     while (reader.getSubRecordHeader())
     {
@@ -52,36 +50,52 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_DATA:
             {
-                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
-                if (subHdr.dataSize == 16) // FO3 has 13 bytes even though VER_094
+                // FO3/FNV or TES4
+                if (subHdr.dataSize == 13 || subHdr.dataSize == 18)
                 {
-                    FormId projectile;
-                    reader.get(projectile); // FIXME: add to mData
-                    reader.get(mData.flags);
-                    reader.get(mData.weight);
-                    float damageInFloat;
-                    reader.get(damageInFloat); // FIXME: add to mData
+                    reader.get(mData.mSpeed);
+                    reader.get(mData.mFlags);
+                    mData.mFlags &= 0xFF;
+                    reader.get(mData.mValue);
+                    if (subHdr.dataSize == 13)
+                        reader.get(mData.mClipRounds);
+                    else
+                    {
+                        reader.get(mData.mWeight);
+                        std::uint16_t damageInt;
+                        reader.get(damageInt);
+                        mData.mDamage = static_cast<float>(damageInt);
+                    }
                 }
-                else if (isFONV || subHdr.dataSize == 13)
+                // TES5/SSE
+                else if (subHdr.dataSize == 16 || subHdr.dataSize == 20)
                 {
-                    reader.get(mData.speed);
-                    std::uint8_t flags;
-                    reader.get(flags);
-                    mData.flags = flags;
-                    static std::uint8_t dummy;
-                    reader.get(dummy);
-                    reader.get(dummy);
-                    reader.get(dummy);
-                    reader.get(mData.value);
-                    reader.get(mData.clipRounds);
+                    reader.getFormId(mData.mProjectile);
+                    reader.get(mData.mFlags);
+                    reader.get(mData.mDamage);
+                    reader.get(mData.mValue);
+                    if (subHdr.dataSize == 20)
+                        reader.get(mData.mWeight);
                 }
-                else // TES4
+                else
                 {
-                    reader.get(mData.speed);
-                    reader.get(mData.flags);
-                    reader.get(mData.value);
-                    reader.get(mData.weight);
-                    reader.get(mData.damage);
+                    reader.skipSubRecordData();
+                }
+                break;
+            }
+            case ESM4::SUB_DAT2:
+            {
+                if (subHdr.dataSize == 20)
+                {
+                    reader.get(mData.mProjPerShot);
+                    reader.getFormId(mData.mProjectile);
+                    reader.get(mData.mWeight);
+                    reader.getFormId(mData.mConsumedAmmo);
+                    reader.get(mData.mConsumedPercentage);
+                }
+                else
+                {
+                    reader.skipSubRecordData();
                 }
                 break;
             }
@@ -112,15 +126,28 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
             case ESM4::SUB_ZNAM:
                 reader.getFormId(mDropSound);
                 break;
+            case ESM4::SUB_ONAM:
+                reader.getLocalizedString(mShortName);
+                break;
+            case ESM4::SUB_QNAM: // FONV
+                reader.getLocalizedString(mAbbrev);
+                break;
+            case ESM4::SUB_RCIL:
+            {
+                FormId effect;
+                reader.getFormId(effect);
+                mAmmoEffects.push_back(effect);
+                break;
+            }
+            case ESM4::SUB_SCRI:
+            {
+                reader.getFormId(mScript);
+                break;
+            }
             case ESM4::SUB_MODT:
             case ESM4::SUB_OBND:
             case ESM4::SUB_KSIZ:
             case ESM4::SUB_KWDA:
-            case ESM4::SUB_ONAM: // FO3
-            case ESM4::SUB_DAT2: // FONV
-            case ESM4::SUB_QNAM: // FONV
-            case ESM4::SUB_RCIL: // FONV
-            case ESM4::SUB_SCRI: // FONV
             {
                 // std::cout << "AMMO " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
