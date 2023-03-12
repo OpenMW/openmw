@@ -67,16 +67,14 @@ namespace Stereo
         {
             auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
             if (uProjectionMatrix)
-                uProjectionMatrix->set(mManager->computeEyeViewOffset(0)
-                    * mManager->computeEyeProjection(0, SceneUtil::AutoDepth::isReversed()));
+                uProjectionMatrix->set(mManager->computeEyeProjection(0, SceneUtil::AutoDepth::isReversed()));
         }
 
         void applyRight(osg::StateSet* stateset, osgUtil::CullVisitor* nv) override
         {
             auto* uProjectionMatrix = stateset->getUniform("projectionMatrix");
             if (uProjectionMatrix)
-                uProjectionMatrix->set(mManager->computeEyeViewOffset(1)
-                    * mManager->computeEyeProjection(1, SceneUtil::AutoDepth::isReversed()));
+                uProjectionMatrix->set(mManager->computeEyeProjection(1, SceneUtil::AutoDepth::isReversed()));
         }
 
     private:
@@ -239,18 +237,24 @@ namespace Stereo
             osg::Matrixd computeLeftEyeProjection(const osg::Matrixd& projection) const override
             {
                 (void)projection;
-                return mManager->computeEyeViewOffset(0) * mManager->computeEyeProjection(0, false);
+                return mManager->computeEyeProjection(0, false);
             }
 
-            osg::Matrixd computeLeftEyeView(const osg::Matrixd& view) const override { return view; }
+            osg::Matrixd computeLeftEyeView(const osg::Matrixd& view) const override
+            {
+                return view * mManager->computeEyeViewOffset(0);
+            }
 
             osg::Matrixd computeRightEyeProjection(const osg::Matrixd& projection) const override
             {
                 (void)projection;
-                return mManager->computeEyeViewOffset(1) * mManager->computeEyeProjection(1, false);
+                return mManager->computeEyeProjection(1, false);
             }
 
-            osg::Matrixd computeRightEyeView(const osg::Matrixd& view) const override { return view; }
+            osg::Matrixd computeRightEyeView(const osg::Matrixd& view) const override
+            {
+                return view * mManager->computeEyeViewOffset(1);
+            }
 
             Manager* mManager;
         };
@@ -351,8 +355,7 @@ namespace Stereo
             }
         }
 
-        mFrustumManager->update(
-            { mViewOffsetMatrix[0] * mProjectionMatrix[0], mViewOffsetMatrix[1] * mProjectionMatrix[1] });
+        mFrustumManager->update({ mProjectionMatrix[0], mProjectionMatrix[1] });
     }
 
     void Manager::updateMultiviewStateset(osg::StateSet* stateset)

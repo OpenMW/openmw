@@ -140,8 +140,7 @@ namespace MWRender
     private:
         osg::Matrixf getEyeProjectionMatrix(int view)
         {
-            return Stereo::Manager::instance().computeEyeViewOffset(view)
-                * Stereo::Manager::instance().computeEyeProjection(view, SceneUtil::AutoDepth::isReversed());
+            return Stereo::Manager::instance().computeEyeProjection(view, SceneUtil::AutoDepth::isReversed());
         }
 
         osg::Matrixf mProjectionMatrix;
