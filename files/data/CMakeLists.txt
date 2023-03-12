@@ -22,11 +22,7 @@ set(BUILTIN_DATA_FILES
     fonts/MysticCardsFontLicense.txt
 
     # Month names and date formatting
-    l10n/Calendar/de.yaml
     l10n/Calendar/en.yaml
-    l10n/Calendar/ru.yaml
-    l10n/Calendar/sv.yaml
-    l10n/Calendar/fr.yaml
 
     # Generic UI messages that can be reused by mods
     l10n/Interface/de.yaml
