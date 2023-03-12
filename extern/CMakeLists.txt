@@ -183,8 +183,8 @@ if(NOT OPENMW_USE_SYSTEM_RECASTNAVIGATION)
     # master on 12 Oct 2022
     include(FetchContent)
     FetchContent_Declare(recastnavigation
-        URL https://github.com/recastnavigation/recastnavigation/archive/30edaf442c87e870e71a0e4509a96281418b1af8.zip
-        URL_HASH SHA512=c4268427afd779e9656436427cd4b2619e4f79a9068b5b51eb3ced95806e4fe9d5353feee05d52bf8f21740fa8ca3e4ac643d1921d2a803ebbca7dffdeb35ef0
+        URL https://github.com/recastnavigation/recastnavigation/archive/405cc095ab3a2df976a298421974a2af83843baf.zip
+        URL_HASH SHA512=39580ca258783ab3bda237843facc918697266e729c85065cdae1f0ed3d0ed1429a7ed08b18b926ba64402d9875a18f52904a87f43fe4fe30252f23edcfa6c70
         SOURCE_DIR fetched/recastnavigation
     )
     FetchContent_MakeAvailableExcludeFromAll(recastnavigation)
