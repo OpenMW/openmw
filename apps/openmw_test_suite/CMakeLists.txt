@@ -108,7 +108,7 @@ if (UNIX AND NOT APPLE)
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
-    add_definitions(--coverage)
+    target_compile_options(openmw_test_suite PRIVATE --coverage)
     target_link_libraries(openmw_test_suite gcov)
 endif()
 

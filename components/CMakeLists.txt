@@ -462,6 +462,11 @@ if (USE_QT)
     add_library(components_qt STATIC ${COMPONENT_QT_FILES} ${ESM_UI_HDR})
     target_link_libraries(components_qt components Qt::Widgets Qt::Core)
     target_compile_definitions(components_qt PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
+
+    if (BUILD_WITH_CODE_COVERAGE)
+        target_compile_options(components_qt PRIVATE --coverage)
+        target_link_libraries(components_qt gcov)
+    endif()
 endif()
 
 if (GIT_CHECKOUT)
@@ -483,11 +488,11 @@ endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
-target_link_libraries(components ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(components ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
-    add_definitions(--coverage)
+    target_compile_options(components PRIVATE --coverage)
     target_link_libraries(components gcov)
 endif()
 

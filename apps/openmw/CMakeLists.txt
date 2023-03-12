@@ -192,12 +192,12 @@ if (USE_SYSTEM_TINYXML)
 endif()
 
 if (NOT UNIX)
-target_link_libraries(openmw ${SDL2MAIN_LIBRARY})
+    target_link_libraries(openmw ${SDL2MAIN_LIBRARY})
 endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
-target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 if(APPLE)
@@ -230,8 +230,8 @@ if(APPLE)
 endif(APPLE)
 
 if (BUILD_WITH_CODE_COVERAGE)
-  add_definitions (--coverage)
-  target_link_libraries(openmw gcov)
+    target_compile_options(openmw PRIVATE --coverage)
+    target_link_libraries(openmw gcov)
 endif()
 
 if (WIN32)

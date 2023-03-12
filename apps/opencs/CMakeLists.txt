@@ -260,6 +260,11 @@ if(USE_QT)
     set_property(TARGET openmw-cs PROPERTY AUTOMOC ON)
 endif(USE_QT)
 
+if (BUILD_WITH_CODE_COVERAGE)
+    target_compile_options(openmw-cs PRIVATE --coverage)
+    target_link_libraries(openmw-cs gcov)
+endif()
+
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
     target_precompile_headers(openmw-cs PRIVATE
         <boost/filesystem.hpp>
