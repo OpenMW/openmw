@@ -22,7 +22,11 @@
 
 namespace MWLua
 {
-
+    // \brief LuaManager is the central interface through which the engine invokes lua scripts.
+    //
+    // This class implements the interface defined in MWBase::LuaManager.
+    // In addition to the interface, this class exposes lower level interaction between the engine
+    // and the lua world.
     class LuaManager : public MWBase::LuaManager
     {
     public:
@@ -34,11 +38,21 @@ namespace MWLua
         void loadPermanentStorage(const std::filesystem::path& userConfigPath);
         void savePermanentStorage(const std::filesystem::path& userConfigPath);
 
-        // Called by engine.cpp every frame. For performance reasons it works in a separate
-        // thread (in parallel with osg Cull). Can not use scene graph.
+        // \brief Executes lua handlers. Defaults to running in parallel with OSG Cull.
+        //
+        // The OSG Cull is expensive enough that we have "free" time to
+        // execute Lua by running it in parallel. The Cull also does
+        // not modify the game state, meaning we can safely read state from Lua
+        // despite the concurrency. Only modifying the parts of the game state
+        // that affect the scene graph is forbidden. Such modifications must
+        // be queued for execution in synchronizedUpdate().
+        // The parallelism can be turned off in the settings.
         void update();
 
-        // Called by engine.cpp from the main thread. Can use scene graph.
+        // \brief Executes latency-critical and scene graph related Lua logic.
+        //
+        // Called by engine.cpp from the main thread between InputManager and MechanicsManager updates.
+        // Can use the scene graph and applies the actions queued during update()
         void synchronizedUpdate();
 
         // Available everywhere through the MWBase::LuaManager interface.
