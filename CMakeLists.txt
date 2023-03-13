@@ -54,13 +54,14 @@ option(BUILD_UNITTESTS          "Enable Unittests with Google C++ Unittest" OFF)
 option(BUILD_BENCHMARKS         "Build benchmarks with Google Benchmark" OFF)
 option(BUILD_NAVMESHTOOL        "Build navmesh tool" ON)
 option(BUILD_BULLETOBJECTTOOL   "Build Bullet object tool" ON)
+option(BUILD_OPENCS_TESTS       "Build OpenMW Construction Set tests" OFF)
 
 set(OpenGL_GL_PREFERENCE LEGACY)  # Use LEGACY as we use GL2; GLNVD is for GL3 and up.
 
-if (NOT BUILD_LAUNCHER AND NOT BUILD_OPENCS AND NOT BUILD_WIZARD)
-    set(USE_QT FALSE)
-else()
+if (BUILD_LAUNCHER OR BUILD_OPENCS OR BUILD_WIZARD OR BUILD_OPENCS_TESTS)
     set(USE_QT TRUE)
+else()
+    set(USE_QT FALSE)
 endif()
 
 # If the user doesn't supply a CMAKE_BUILD_TYPE via command line, choose one for them.
@@ -292,6 +293,11 @@ endif()
 option(YAML_CPP_STATIC "Link static build of yaml-cpp into the binaries" ${_yaml_cpp_static_default})
 if (OPENMW_USE_SYSTEM_YAML_CPP)
     find_package(yaml-cpp REQUIRED)
+endif()
+
+if ((BUILD_UNITTESTS OR BUILD_OPENCS_TESTS) AND OPENMW_USE_SYSTEM_GOOGLETEST)
+    find_package(GTest 1.10 REQUIRED)
+    find_package(GMock 1.10 REQUIRED)
 endif()
 
 add_subdirectory(extern)
@@ -621,7 +627,7 @@ endif (CMAKE_CXX_COMPILER_ID STREQUAL GNU OR CMAKE_CXX_COMPILER_ID STREQUAL Clan
 add_subdirectory (extern/osg-ffmpeg-videoplayer)
 add_subdirectory (extern/oics)
 add_subdirectory (extern/Base64)
-if (BUILD_OPENCS AND Qt5_FOUND)
+if ((BUILD_OPENCS OR BUILD_OPENCS_TESTS) AND Qt5_FOUND)
     add_subdirectory (extern/osgQt)
 endif()
 
@@ -657,7 +663,7 @@ if (BUILD_ESSIMPORTER)
     add_subdirectory (apps/essimporter )
 endif()
 
-if (BUILD_OPENCS)
+if (BUILD_OPENCS OR BUILD_OPENCS_TESTS)
     add_subdirectory (apps/opencs)
 endif()
 
@@ -684,6 +690,10 @@ endif()
 
 if (BUILD_BULLETOBJECTTOOL)
     add_subdirectory( apps/bulletobjecttool )
+endif()
+
+if (BUILD_OPENCS_TESTS)
+    add_subdirectory(apps/opencs_tests)
 endif()
 
 if (WIN32)

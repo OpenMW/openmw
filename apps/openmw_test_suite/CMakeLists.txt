@@ -1,8 +1,3 @@
-if (OPENMW_USE_SYSTEM_GOOGLETEST)
-    find_package(GTest 1.10 REQUIRED)
-    find_package(GMock 1.10 REQUIRED)
-endif()
-
 include_directories(SYSTEM ${GTEST_INCLUDE_DIRS})
 include_directories(SYSTEM ${GMOCK_INCLUDE_DIRS})
 

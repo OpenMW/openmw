@@ -47,12 +47,13 @@ variables:
     - df -h
     - du -sh .
     - cmake --install .
-    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_test_suite --gtest_output="xml:tests.xml"; fi
+    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_test_suite --gtest_output="xml:openmw_tests.xml"; fi
+    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw-cs-tests --gtest_output="xml:openmw_cs_tests.xml"; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_detournavigator_navmeshtilescache_benchmark; fi
     - ccache -s
     - df -h
     - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then gcovr --xml-pretty --exclude-unreachable-branches --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
-    - ls | grep -v -e '^extern$' -e '^install$' -e '^tests.xml$' | xargs -I '{}' rm -rf './{}'
+    - ls | grep -v -e '^extern$' -e '^install$' -e '^openmw_tests.xml$' -e '^openmw_cs_tests.xml$' | xargs -I '{}' rm -rf './{}'
     - cd ..
     - df -h
     - du -sh build/
@@ -175,7 +176,7 @@ Ubuntu_GCC_tests:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 .Ubuntu_GCC_tests_Debug:
   extends: Ubuntu_GCC
@@ -191,7 +192,7 @@ Ubuntu_GCC_tests:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 Ubuntu_GCC_tests_asan:
   extends: Ubuntu_GCC
@@ -209,7 +210,7 @@ Ubuntu_GCC_tests_asan:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
@@ -226,7 +227,7 @@ Ubuntu_GCC_tests_ubsan:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 .Ubuntu_GCC_tests_tsan:
   extends: Ubuntu_GCC
@@ -244,7 +245,7 @@ Ubuntu_GCC_tests_ubsan:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 Ubuntu_GCC_tests_coverage:
   extends: .Ubuntu_GCC_tests_Debug
@@ -263,7 +264,7 @@ Ubuntu_GCC_tests_coverage:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 .Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
@@ -304,7 +305,7 @@ Ubuntu_GCC_tests_coverage:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 Ubuntu_Clang:
   extends: .Ubuntu
@@ -344,7 +345,7 @@ Ubuntu_Clang_Tidy:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 Ubuntu_Clang_tests_Debug:
   extends: Ubuntu_Clang
@@ -359,7 +360,7 @@ Ubuntu_Clang_tests_Debug:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 Ubuntu_Clang_integration_tests:
   extends: .Ubuntu_Image
