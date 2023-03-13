@@ -643,7 +643,7 @@ namespace
         return stream;
     }
 
-    void loadAndSetupEsmStore(int index, std::unique_ptr<std::istream>&& stream, MWWorld::ESMStore& esmStore)
+    void loadEsmStore(int index, std::unique_ptr<std::istream>&& stream, MWWorld::ESMStore& esmStore)
     {
         ESM::ESMReader reader;
         ESM::Dialogue* dialogue = nullptr;
@@ -663,7 +663,7 @@ namespace
         const DialogueData data = generateDialogueWithInfos(3);
 
         MWWorld::ESMStore esmStore;
-        loadAndSetupEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
+        loadEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
         esmStore.setUp();
 
         const ESM::Dialogue* dialogue = esmStore.get<ESM::Dialogue>().search(ESM::RefId::stringRefId("dialogue"));
@@ -678,7 +678,7 @@ namespace
         std::reverse(data.mInfos.begin(), data.mInfos.end());
 
         MWWorld::ESMStore esmStore;
-        loadAndSetupEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
+        loadEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
         esmStore.setUp();
 
         const ESM::Dialogue* dialogue = esmStore.get<ESM::Dialogue>().search(ESM::RefId::stringRefId("dialogue"));
@@ -691,7 +691,7 @@ namespace
         const DialogueData data = generateDialogueWithInfos(3);
 
         MWWorld::ESMStore esmStore;
-        loadAndSetupEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
+        loadEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
 
         ESM::DialInfo newInfo;
         newInfo.blank();
@@ -699,7 +699,7 @@ namespace
         newInfo.mPrev = data.mInfos[1].mId;
         newInfo.mNext = ESM::RefId::stringRefId("invalid");
 
-        loadAndSetupEsmStore(1, saveDialogueWithInfos(data.mDialogue, std::array{ newInfo }), esmStore);
+        loadEsmStore(1, saveDialogueWithInfos(data.mDialogue, std::array{ newInfo }), esmStore);
 
         esmStore.setUp();
 
@@ -714,14 +714,14 @@ namespace
         const DialogueData data = generateDialogueWithInfos(3);
 
         MWWorld::ESMStore esmStore;
-        loadAndSetupEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
+        loadEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
 
         ESM::DialInfo newInfo;
         newInfo.blank();
         newInfo.mId = ESM::RefId::stringRefId("newInfo");
         newInfo.mNext = ESM::RefId::stringRefId("invalid");
 
-        loadAndSetupEsmStore(1, saveDialogueWithInfos(data.mDialogue, std::array{ newInfo }), esmStore);
+        loadEsmStore(1, saveDialogueWithInfos(data.mDialogue, std::array{ newInfo }), esmStore);
 
         esmStore.setUp();
 
@@ -736,14 +736,14 @@ namespace
         const DialogueData data = generateDialogueWithInfos(3);
 
         MWWorld::ESMStore esmStore;
-        loadAndSetupEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
+        loadEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
 
         ESM::DialInfo newInfo;
         newInfo.blank();
         newInfo.mId = ESM::RefId::stringRefId("newInfo");
         newInfo.mPrev = ESM::RefId::stringRefId("invalid");
 
-        loadAndSetupEsmStore(1, saveDialogueWithInfos(data.mDialogue, std::array{ newInfo }), esmStore);
+        loadEsmStore(1, saveDialogueWithInfos(data.mDialogue, std::array{ newInfo }), esmStore);
 
         esmStore.setUp();
 
@@ -758,12 +758,12 @@ namespace
         const DialogueData data = generateDialogueWithInfos(3);
 
         MWWorld::ESMStore esmStore;
-        loadAndSetupEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
+        loadEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
 
         ESM::DialInfo updatedInfo = data.mInfos[1];
         updatedInfo.mActor = ESM::RefId::stringRefId("newActor");
 
-        loadAndSetupEsmStore(1, saveDialogueWithInfos(data.mDialogue, std::array{ updatedInfo }), esmStore);
+        loadEsmStore(1, saveDialogueWithInfos(data.mDialogue, std::array{ updatedInfo }), esmStore);
 
         esmStore.setUp();
 
@@ -778,12 +778,12 @@ namespace
         const DialogueData data = generateDialogueWithInfos(3);
 
         MWWorld::ESMStore esmStore;
-        loadAndSetupEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
+        loadEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
 
         ESM::DialInfo updatedInfo = data.mInfos[0];
         updatedInfo.mPrev = data.mInfos[2].mId;
 
-        loadAndSetupEsmStore(1, saveDialogueWithInfos(data.mDialogue, std::array{ updatedInfo }), esmStore);
+        loadEsmStore(1, saveDialogueWithInfos(data.mDialogue, std::array{ updatedInfo }), esmStore);
 
         esmStore.setUp();
 
@@ -797,12 +797,12 @@ namespace
         const DialogueData data = generateDialogueWithInfos(3);
 
         MWWorld::ESMStore esmStore;
-        loadAndSetupEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
+        loadEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos), esmStore);
 
         ESM::DialInfo updatedInfo = data.mInfos[2];
         updatedInfo.mPrev = data.mInfos[0].mId;
 
-        loadAndSetupEsmStore(1, saveDialogueWithInfos(data.mDialogue, std::array{ updatedInfo }), esmStore);
+        loadEsmStore(1, saveDialogueWithInfos(data.mDialogue, std::array{ updatedInfo }), esmStore);
 
         esmStore.setUp();
 
