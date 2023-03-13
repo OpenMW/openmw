@@ -45,10 +45,10 @@ namespace MWWorld
         mutable std::map<std::string, CellStore, Misc::StringUtils::CiComp> mInteriors;
         mutable std::map<std::pair<int, int>, CellStore> mExteriors;
         IdCache mIdCache;
-        std::size_t mIdCacheIndex;
-
-        WorldModel(const WorldModel&);
-        WorldModel& operator=(const WorldModel&);
+        std::size_t mIdCacheIndex = 0;
+        std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
+        std::size_t mPtrIndexUpdateCounter = 0;
+        ESM::RefNum mLastGeneratedRefnum;
 
         const ESM::Cell* getESMCellByName(std::string_view name);
         ESM::CellVariant getCellByName(std::string_view name);
@@ -58,14 +58,13 @@ namespace MWWorld
 
         void writeCell(ESM::ESMWriter& writer, CellStore& cell) const;
 
-        std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
-        size_t mPtrIndexUpdateCounter;
-        ESM::RefNum mLastGeneratedRefnum;
-
     public:
-        void clear();
-
         explicit WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& reader);
+
+        WorldModel(const WorldModel&) = delete;
+        WorldModel& operator=(const WorldModel&) = delete;
+
+        void clear();
 
         CellStore* getExterior(int x, int y);
         CellStore* getInterior(std::string_view name);
