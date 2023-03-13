@@ -8,7 +8,7 @@ Copyright 2020 Bret Curtis <psi29a@gmail.com>
  <metadata_license>CC0-1.0</metadata_license>
  <project_license>GPL-3.0-or-later</project_license>
  <name>OpenMW</name>
- <summary>Unofficial open source engine re-implementation of the game Morrowind</summary>
+ <summary>Reimplementation of The Elder Scrolls III: Morrowind</summary>
  <description>
   <p>
   OpenMW is a new engine for 2002's Game of the Year, The Elder Scrolls 3: Morrowind.
