@@ -193,8 +193,8 @@ endif()
 if (NOT OPENMW_USE_SYSTEM_SQLITE3)
     include(FetchContent)
     FetchContent_Declare(sqlite3
-        URL https://www.sqlite.org/2021/sqlite-amalgamation-3360000.zip
-        URL_HASH SHA512=5c18f158a599b1e91d95c91de3aa5c5de52f986845ad0cb49dfd56b650587e55e24d469571b5b864229b870d0eaf85d78893f61ef950b95389cb41692be37f58
+        URL https://www.sqlite.org/2023/sqlite-amalgamation-3410100.zip
+        URL_HASH SHA512=7de291709e88fffc693cf24ac675950cfc35c1bf7631cfea95167105720a05cf37fb943c57c5c985db2eeaa57b31894b3c0df98a7bd2939b5746fc5a24b5ae87
         SOURCE_DIR fetched/sqlite3
     )
     FetchContent_MakeAvailableExcludeFromAll(sqlite3)
