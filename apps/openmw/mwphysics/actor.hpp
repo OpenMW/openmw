@@ -95,7 +95,7 @@ namespace MWPhysics
         void adjustPosition(const osg::Vec3f& offset);
 
         // apply position offset. Can't be called during simulation
-        void applyOffsetChange();
+        osg::Vec3f applyOffsetChange();
 
         /**
          * Returns the half extents of the collision body (scaled according to rendering scale)
@@ -189,7 +189,6 @@ namespace MWPhysics
 
         osg::Vec3f mScale;
         osg::Vec3f mPositionOffset;
-        bool mWorldPositionChanged;
         bool mSkipSimulation;
         mutable std::mutex mPositionMutex;
 

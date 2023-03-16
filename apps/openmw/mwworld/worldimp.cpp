@@ -1276,14 +1276,14 @@ namespace MWWorld
         return moveObject(ptr, cell, position, movePhysics);
     }
 
-    MWWorld::Ptr World::moveObjectBy(const Ptr& ptr, const osg::Vec3f& vec)
+    MWWorld::Ptr World::moveObjectBy(const Ptr& ptr, const osg::Vec3f& vec, bool moveToActive)
     {
         auto* actor = mPhysics->getActor(ptr);
         osg::Vec3f newpos = ptr.getRefData().getPosition().asVec3() + vec;
         if (actor)
             actor->adjustPosition(vec);
         if (ptr.getClass().isActor())
-            return moveObject(ptr, newpos, false, ptr != getPlayerPtr());
+            return moveObject(ptr, newpos, false, moveToActive && ptr != getPlayerPtr());
         return moveObject(ptr, newpos);
     }
 

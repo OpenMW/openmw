@@ -33,7 +33,7 @@ namespace MWScript
             std::vector<MWWorld::Ptr> actors;
             MWBase::Environment::get().getWorld()->getActorsStandingOn (ptr, actors);
             for (auto& actor : actors)
-                MWBase::Environment::get().getWorld()->moveObjectBy(actor, diff);
+                MWBase::Environment::get().getWorld()->moveObjectBy(actor, diff, false);
         }
 
         template<class R>
@@ -328,7 +328,7 @@ namespace MWScript
                     }
 
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
-                        MWBase::Environment::get().getWorld()->moveObject(ptr, newPos, true, true));
+                        MWBase::Environment::get().getWorld()->moveObjectBy(ptr, newPos - curPos, true));
                 }
         };
 
@@ -757,7 +757,7 @@ namespace MWScript
                     // This approach can be used to create elevators.
                     moveStandingActors(ptr, diff);
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
-                        MWBase::Environment::get().getWorld()->moveObjectBy(ptr, diff));
+                        MWBase::Environment::get().getWorld()->moveObjectBy(ptr, diff, false));
                 }
         };
 
@@ -793,7 +793,7 @@ namespace MWScript
                     // This approach can be used to create elevators.
                     moveStandingActors(ptr, diff);
                     dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(ptr,
-                        MWBase::Environment::get().getWorld()->moveObjectBy(ptr, diff));
+                        MWBase::Environment::get().getWorld()->moveObjectBy(ptr, diff, false));
                 }
         };
 
