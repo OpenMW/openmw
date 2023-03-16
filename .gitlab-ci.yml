@@ -423,6 +423,7 @@ macOS12_Xcode13:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
   before_script:
+  - Get-Volume
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
   - choco source disable -n=chocolatey
@@ -447,6 +448,7 @@ macOS12_Xcode13:
     }
   stage: build
   script:
+    - Get-Volume
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
@@ -454,8 +456,8 @@ macOS12_Xcode13:
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
     - New-Item -Type File -Force -Path MSVC2019_64_Ninja\.cmake\api\v1\query\codemodel-v2
-    - $env:Path += ';C:\Program Files\CMake\bin'
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C $multiview -E
+    - Get-Volume
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
     - cmake --build . --config $config
@@ -475,6 +477,7 @@ macOS12_Xcode13:
     - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
   after_script:
+    - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
     key: ninja-v6
@@ -531,6 +534,7 @@ macOS12_Xcode13:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
   before_script:
+  - Get-Volume
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
   - choco source disable -n=chocolatey
@@ -554,6 +558,7 @@ macOS12_Xcode13:
     }
   stage: build
   script:
+    - Get-Volume
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
@@ -561,9 +566,9 @@ macOS12_Xcode13:
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
     - New-Item -Type File -Force -Path MSVC2019_64\.cmake\api\v1\query\codemodel-v2
-    - $env:Path += ';C:\Program Files\CMake\bin'
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t -C $multiview -E
     - cd MSVC2019_64
+    - Get-Volume
     - cmake --build . --config $config
     - ccache --show-stats
     - cd $config
@@ -581,6 +586,7 @@ macOS12_Xcode13:
     - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
   after_script:
+    - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
     key: msbuild-v6
