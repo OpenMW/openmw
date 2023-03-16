@@ -27,6 +27,8 @@ namespace ESM
         inline bool hasContentFile() const { return mContentFile >= 0; }
 
         inline bool isSet() const { return mIndex != 0 || mContentFile != -1; }
+
+        std::string toString() const;
     };
 
     /* Cell reference. This represents ONE object (of many) inside the

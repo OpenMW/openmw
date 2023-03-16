@@ -187,11 +187,12 @@ namespace MWLua
         for (LocalEvent& e : localEvents)
         {
             LObject obj(e.mDest);
-            LocalScripts* scripts = obj.isValid() ? obj.ptr().getRefData().getLuaScripts() : nullptr;
+            const MWWorld::Ptr& ptr = obj.ptrOrNull();
+            LocalScripts* scripts = ptr.isEmpty() ? nullptr : ptr.getRefData().getLuaScripts();
             if (scripts)
                 scripts->receiveEvent(e.mEventName, e.mEventData);
             else
-                Log(Debug::Debug) << "Ignored event " << e.mEventName << " to L" << idToString(e.mDest)
+                Log(Debug::Debug) << "Ignored event " << e.mEventName << " to L" << e.mDest.toString()
                                   << ". Object not found or has no attached scripts";
         }
 
@@ -204,14 +205,15 @@ namespace MWLua
         for (const LocalEngineEvent& e : mLocalEngineEvents)
         {
             LObject obj(e.mDest);
-            if (!obj.isValid())
+            const MWWorld::Ptr& ptr = obj.ptrOrNull();
+            if (ptr.isEmpty())
             {
                 if (luaDebug)
-                    Log(Debug::Verbose) << "Can not call engine handlers: object" << idToString(e.mDest)
+                    Log(Debug::Verbose) << "Can not call engine handlers: object" << e.mDest.toString()
                                         << " is not found";
                 continue;
             }
-            LocalScripts* scripts = obj.ptr().getRefData().getLuaScripts();
+            LocalScripts* scripts = ptr.getRefData().getLuaScripts();
             if (scripts)
                 scripts->receiveEngineEvent(e.mEvent);
         }
@@ -238,17 +240,18 @@ namespace MWLua
         for (ObjectId id : mObjectAddedEvents)
         {
             GObject obj(id);
-            if (obj.isValid())
+            const MWWorld::Ptr& ptr = obj.ptrOrNull();
+            if (!ptr.isEmpty())
             {
                 mGlobalScripts.objectActive(obj);
-                const MWWorld::Class& objClass = obj.ptr().getClass();
+                const MWWorld::Class& objClass = ptr.getClass();
                 if (objClass.isActor())
                     mGlobalScripts.actorActive(obj);
-                if (mWorldView.isItem(obj.ptr()))
+                if (mWorldView.isItem(ptr))
                     mGlobalScripts.itemActive(obj);
             }
             else if (luaDebug)
-                Log(Debug::Verbose) << "Could not resolve a Lua object added event: object" << idToString(id)
+                Log(Debug::Verbose) << "Could not resolve a Lua object added event: object" << id.toString()
                                     << " is already removed";
         }
         mObjectAddedEvents.clear();
@@ -675,7 +678,7 @@ namespace MWLua
             selectedScripts = selectedPtr.getRefData().getLuaScripts();
             if (selectedScripts)
                 selectedScripts->collectStats(selectedStats);
-            out << "Profiled object (selected in the in-game console): " << ptrToString(selectedPtr) << "\n";
+            out << "Profiled object (selected in the in-game console): " << selectedPtr.toString() << "\n";
         }
         else
             out << "No selected object. Use the in-game console to select an object for detailed profile.\n";

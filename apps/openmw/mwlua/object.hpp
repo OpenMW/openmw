@@ -21,39 +21,24 @@ namespace MWLua
     {
         return ptr.getCellRef().getRefNum();
     }
-    std::string idToString(const ObjectId& id);
-    std::string ptrToString(const MWWorld::Ptr& ptr);
-    bool isMarker(const MWWorld::Ptr& ptr);
 
     // Lua scripts can't use MWWorld::Ptr directly, because lifetime of a script can be longer than lifetime of Ptr.
     // `GObject` and `LObject` are intended to be passed to Lua as a userdata.
     // It automatically updates the underlying Ptr when needed.
-    class Object
+    class Object : public MWWorld::SafePtr
     {
     public:
-        Object(ObjectId id)
-            : mId(id)
-        {
-        }
-        virtual ~Object() {}
-        ObjectId id() const { return mId; }
-
-        std::string toString() const;
-
-        // Updates and returns the underlying Ptr. Throws an exception if object is not available.
-        const MWWorld::Ptr& ptr() const;
-
-        // Returns `true` if calling `ptr()` is safe.
-        bool isValid() const;
-
-        virtual sol::object getObject(lua_State* lua, ObjectId id) const = 0; // returns LObject or GOBject
+        using SafePtr::SafePtr;
+        virtual sol::object getObject(lua_State* lua, ObjectId id) const = 0; // returns LObject or GObject
         virtual sol::object getCell(lua_State* lua, MWWorld::CellStore* store) const = 0; // returns LCell or GCell
 
-    protected:
-        const ObjectId mId;
-
-        mutable MWWorld::Ptr mPtr;
-        mutable size_t mLastUpdate = 0;
+        const MWWorld::Ptr& ptr() const
+        {
+            const MWWorld::Ptr& res = ptrOrNull();
+            if (res.isEmpty())
+                throw std::runtime_error("Object is not available: " + id().toString());
+            return res;
+        }
     };
 
     // Used only in local scripts
@@ -100,7 +85,6 @@ namespace MWLua
     {
         Obj mObj;
     };
-
 }
 
 #endif // MWLUA_OBJECT_H

@@ -51,7 +51,7 @@ namespace MWLua
                             || itemPtr.getContainerStore() != static_cast<const MWWorld::ContainerStore*>(&store))
                         {
                             Log(Debug::Warning)
-                                << "Object" << idToString(std::get<ObjectId>(item)) << " is not in inventory";
+                                << "Object" << std::get<ObjectId>(item).toString() << " is not in inventory";
                             return false;
                         }
                     }
@@ -77,7 +77,7 @@ namespace MWLua
                             allowedSlots.begin(), allowedSlots.end(), [&](int s) { return !usedSlots[s]; });
                         if (firstAllowed == allowedSlots.end())
                         {
-                            Log(Debug::Warning) << "No suitable slot for " << ptrToString(itemPtr);
+                            Log(Debug::Warning) << "No suitable slot for " << itemPtr.toString();
                             return false;
                         }
                         slot = *firstAllowed;
@@ -118,8 +118,6 @@ namespace MWLua
             Equipment mEquipment;
         };
     }
-
-    using SelfObject = LocalScripts::SelfObject;
 
     void addActorBindings(sol::table actor, const Context& context)
     {
@@ -261,7 +259,7 @@ namespace MWLua
             if (!obj.ptr().getClass().hasInventoryStore(obj.ptr()))
             {
                 if (!equipment.empty())
-                    throw std::runtime_error(ptrToString(obj.ptr()) + " has no equipment slots");
+                    throw std::runtime_error(obj.toString() + " has no equipment slots");
                 return;
             }
             SetEquipmentAction::Equipment eqp;
