@@ -456,7 +456,6 @@ macOS12_Xcode13:
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
     - New-Item -Type File -Force -Path MSVC2019_64_Ninja\.cmake\api\v1\query\codemodel-v2
-    - $env:Path += ';C:\Program Files\CMake\bin'
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C $multiview -E
     - Get-Volume
     - cd MSVC2019_64_Ninja
@@ -567,7 +566,6 @@ macOS12_Xcode13:
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
     - New-Item -Type File -Force -Path MSVC2019_64\.cmake\api\v1\query\codemodel-v2
-    - $env:Path += ';C:\Program Files\CMake\bin'
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t -C $multiview -E
     - cd MSVC2019_64
     - Get-Volume
