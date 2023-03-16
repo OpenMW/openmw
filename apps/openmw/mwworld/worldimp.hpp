@@ -378,7 +378,7 @@ namespace MWWorld
             bool keepActive = false) override;
         ///< @return an updated Ptr
 
-        MWWorld::Ptr moveObjectBy(const Ptr& ptr, const osg::Vec3f& vec) override;
+        MWWorld::Ptr moveObjectBy(const Ptr& ptr, const osg::Vec3f& vec, bool moveToActive) override;
         ///< @return an updated Ptr
 
         void scaleObject(const Ptr& ptr, float scale, bool force = false) override;
