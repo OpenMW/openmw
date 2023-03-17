@@ -37,6 +37,7 @@
 #include <components/esm/defs.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm3/cellid.hpp>
+#include <components/esm4/reader.hpp>
 
 namespace ESM4
 {
@@ -95,6 +96,8 @@ namespace ESM4
         std::uint8_t mMusicType;
 
         CellGroup* mCellGroup;
+
+        ESM4::ReaderContext mReaderContext;
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
