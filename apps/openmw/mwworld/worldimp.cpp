@@ -101,6 +101,92 @@
 
 namespace MWWorld
 {
+    namespace
+    {
+        std::vector<std::pair<std::string_view, ESM::Variant>> generateDefaultGameSettings()
+        {
+            return {
+                // Companion (tribunal)
+                { "sCompanionShare", ESM::Variant("Companion Share") },
+                { "sCompanionWarningMessage", ESM::Variant("Warning message") },
+                { "sCompanionWarningButtonOne", ESM::Variant("Button 1") },
+                { "sCompanionWarningButtonTwo", ESM::Variant("Button 2") },
+                { "sProfitValue", ESM::Variant("Profit Value") },
+                { "sTeleportDisabled", ESM::Variant("Teleport disabled") },
+                { "sLevitateDisabled", ESM::Variant("Levitate disabled") },
+                // Missing in unpatched MW 1.0
+                { "sDifficulty", ESM::Variant("Difficulty") },
+                { "fDifficultyMult", ESM::Variant(5.f) },
+                { "sAuto_Run", ESM::Variant("Auto Run") },
+                { "sServiceRefusal", ESM::Variant("Service Refusal") },
+                { "sNeedOneSkill", ESM::Variant("Need one skill") },
+                { "sNeedTwoSkills", ESM::Variant("Need two skills") },
+                { "sEasy", ESM::Variant("Easy") },
+                { "sHard", ESM::Variant("Hard") },
+                { "sDeleteNote", ESM::Variant("Delete Note") },
+                { "sEditNote", ESM::Variant("Edit Note") },
+                { "sAdmireSuccess", ESM::Variant("Admire Success") },
+                { "sAdmireFail", ESM::Variant("Admire Fail") },
+                { "sIntimidateSuccess", ESM::Variant("Intimidate Success") },
+                { "sIntimidateFail", ESM::Variant("Intimidate Fail") },
+                { "sTauntSuccess", ESM::Variant("Taunt Success") },
+                { "sTauntFail", ESM::Variant("Taunt Fail") },
+                { "sBribeSuccess", ESM::Variant("Bribe Success") },
+                { "sBribeFail", ESM::Variant("Bribe Fail") },
+                { "fNPCHealthBarTime", ESM::Variant(5.f) },
+                { "fNPCHealthBarFade", ESM::Variant(1.f) },
+                { "fFleeDistance", ESM::Variant(3000.f) },
+                { "sMaxSale", ESM::Variant("Max Sale") },
+                { "sAnd", ESM::Variant("and") },
+                // Werewolf (BM)
+                { "fWereWolfRunMult", ESM::Variant(1.3f) },
+                { "fWereWolfSilverWeaponDamageMult", ESM::Variant(2.f) },
+                { "iWerewolfFightMod", ESM::Variant(100) },
+                { "iWereWolfFleeMod", ESM::Variant(100) },
+                { "iWereWolfLevelToAttack", ESM::Variant(20) },
+                { "iWereWolfBounty", ESM::Variant(1000) },
+                { "fCombatDistanceWerewolfMod", ESM::Variant(0.3f) },
+            };
+        }
+
+        std::vector<std::pair<GlobalVariableName, ESM::Variant>> generateDefaultGlobals()
+        {
+            return {
+                // vanilla Morrowind does not define dayspassed.
+                { Globals::sDaysPassed, ESM::Variant(1) }, // but the addons start counting at 1 :(
+                { Globals::sWerewolfClawMult, ESM::Variant(25.f) },
+                { Globals::sPCKnownWerewolf, ESM::Variant(0) },
+                // following should exist in all versions of MW, but not necessarily in TCs
+                { Globals::sGameHour, ESM::Variant(0) },
+                { Globals::sTimeScale, ESM::Variant(30.f) },
+                { Globals::sDay, ESM::Variant(1) },
+                { Globals::sYear, ESM::Variant(1) },
+                { Globals::sPCRace, ESM::Variant(0) },
+                { Globals::sPCHasCrimeGold, ESM::Variant(0) },
+                { Globals::sCrimeGoldDiscount, ESM::Variant(0) },
+                { Globals::sCrimeGoldTurnIn, ESM::Variant(0) },
+                { Globals::sPCHasTurnIn, ESM::Variant(0) },
+            };
+        }
+
+        std::vector<std::pair<std::string_view, std::string_view>> generateDefaultStatics()
+        {
+            return {
+                // Total conversions from SureAI lack marker records
+                { "divinemarker", "marker_divine.nif" },
+                { "doormarker", "marker_arrow.nif" },
+                { "northmarker", "marker_north.nif" },
+                { "templemarker", "marker_temple.nif" },
+                { "travelmarker", "marker_travel.nif" },
+            };
+        }
+
+        std::vector<std::pair<std::string_view, std::string_view>> generateDefaultDoors()
+        {
+            return { { "prisonmarker", "marker_prison.nif" } };
+        }
+    }
+
     struct GameContentLoader : public ContentLoader
     {
         void addLoader(std::string&& extension, ContentLoader& loader)
@@ -433,121 +519,49 @@ namespace MWWorld
 
     void World::ensureNeededRecords()
     {
-        std::map<std::string, ESM::Variant> gmst;
-        // Companion (tribunal)
-        gmst["sCompanionShare"] = ESM::Variant("Companion Share");
-        gmst["sCompanionWarningMessage"] = ESM::Variant("Warning message");
-        gmst["sCompanionWarningButtonOne"] = ESM::Variant("Button 1");
-        gmst["sCompanionWarningButtonTwo"] = ESM::Variant("Button 2");
-        gmst["sProfitValue"] = ESM::Variant("Profit Value");
-        gmst["sTeleportDisabled"] = ESM::Variant("Teleport disabled");
-        gmst["sLevitateDisabled"] = ESM::Variant("Levitate disabled");
-
-        // Missing in unpatched MW 1.0
-        gmst["sDifficulty"] = ESM::Variant("Difficulty");
-        gmst["fDifficultyMult"] = ESM::Variant(5.f);
-        gmst["sAuto_Run"] = ESM::Variant("Auto Run");
-        gmst["sServiceRefusal"] = ESM::Variant("Service Refusal");
-        gmst["sNeedOneSkill"] = ESM::Variant("Need one skill");
-        gmst["sNeedTwoSkills"] = ESM::Variant("Need two skills");
-        gmst["sEasy"] = ESM::Variant("Easy");
-        gmst["sHard"] = ESM::Variant("Hard");
-        gmst["sDeleteNote"] = ESM::Variant("Delete Note");
-        gmst["sEditNote"] = ESM::Variant("Edit Note");
-        gmst["sAdmireSuccess"] = ESM::Variant("Admire Success");
-        gmst["sAdmireFail"] = ESM::Variant("Admire Fail");
-        gmst["sIntimidateSuccess"] = ESM::Variant("Intimidate Success");
-        gmst["sIntimidateFail"] = ESM::Variant("Intimidate Fail");
-        gmst["sTauntSuccess"] = ESM::Variant("Taunt Success");
-        gmst["sTauntFail"] = ESM::Variant("Taunt Fail");
-        gmst["sBribeSuccess"] = ESM::Variant("Bribe Success");
-        gmst["sBribeFail"] = ESM::Variant("Bribe Fail");
-        gmst["fNPCHealthBarTime"] = ESM::Variant(5.f);
-        gmst["fNPCHealthBarFade"] = ESM::Variant(1.f);
-        gmst["fFleeDistance"] = ESM::Variant(3000.f);
-        gmst["sMaxSale"] = ESM::Variant("Max Sale");
-        gmst["sAnd"] = ESM::Variant("and");
-
-        // Werewolf (BM)
-        gmst["fWereWolfRunMult"] = ESM::Variant(1.3f);
-        gmst["fWereWolfSilverWeaponDamageMult"] = ESM::Variant(2.f);
-        gmst["iWerewolfFightMod"] = ESM::Variant(100);
-        gmst["iWereWolfFleeMod"] = ESM::Variant(100);
-        gmst["iWereWolfLevelToAttack"] = ESM::Variant(20);
-        gmst["iWereWolfBounty"] = ESM::Variant(1000);
-        gmst["fCombatDistanceWerewolfMod"] = ESM::Variant(0.3f);
-
-        for (const auto& params : gmst)
+        for (const auto& [id, value] : generateDefaultGameSettings())
         {
-            if (!mStore.get<ESM::GameSetting>().search(params.first))
+            if (mStore.get<ESM::GameSetting>().search(id) == nullptr)
             {
                 ESM::GameSetting record;
-                record.mId = ESM::RefId::stringRefId(params.first);
-                record.mValue = params.second;
+                record.mId = ESM::RefId::stringRefId(id);
+                record.mValue = value;
                 record.mRecordFlags = 0;
                 mStore.insertStatic(record);
             }
         }
 
-        const std::vector<std::pair<GlobalVariableName, ESM::Variant>> globals{
-            // vanilla Morrowind does not define dayspassed.
-            { Globals::sDaysPassed, ESM::Variant(1) }, // but the addons start counting at 1 :(
-            { Globals::sWerewolfClawMult, ESM::Variant(25.f) },
-            { Globals::sPCKnownWerewolf, ESM::Variant(0) },
-            // following should exist in all versions of MW, but not necessarily in TCs
-            { Globals::sGameHour, ESM::Variant(0) },
-            { Globals::sTimeScale, ESM::Variant(30.f) },
-            { Globals::sDay, ESM::Variant(1) },
-            { Globals::sYear, ESM::Variant(1) },
-            { Globals::sPCRace, ESM::Variant(0) },
-            { Globals::sPCHasCrimeGold, ESM::Variant(0) },
-            { Globals::sCrimeGoldDiscount, ESM::Variant(0) },
-            { Globals::sCrimeGoldTurnIn, ESM::Variant(0) },
-            { Globals::sPCHasTurnIn, ESM::Variant(0) },
-        };
-
-        for (const auto& params : globals)
+        for (const auto& [name, value] : generateDefaultGlobals())
         {
-            if (!mStore.get<ESM::Global>().search(ESM::RefId::stringRefId(params.first.getValue())))
+            if (mStore.get<ESM::Global>().search(ESM::RefId::stringRefId(name.getValue())) == nullptr)
             {
                 ESM::Global record;
-                record.mId = ESM::RefId::stringRefId(params.first.getValue());
-                record.mValue = params.second;
+                record.mId = ESM::RefId::stringRefId(name.getValue());
+                record.mValue = value;
                 record.mRecordFlags = 0;
                 mStore.insertStatic(record);
             }
         }
 
-        std::map<std::string, std::string> statics;
-        // Total conversions from SureAI lack marker records
-        statics["divinemarker"] = "marker_divine.nif";
-        statics["doormarker"] = "marker_arrow.nif";
-        statics["northmarker"] = "marker_north.nif";
-        statics["templemarker"] = "marker_temple.nif";
-        statics["travelmarker"] = "marker_travel.nif";
-
-        for (const auto& params : statics)
+        for (const auto& [id, model] : generateDefaultStatics())
         {
-            if (!mStore.get<ESM::Static>().search(ESM::RefId::stringRefId(params.first)))
+            if (mStore.get<ESM::Static>().search(ESM::RefId::stringRefId(id)) == nullptr)
             {
                 ESM::Static record;
-                record.mId = ESM::RefId::stringRefId(params.first);
-                record.mModel = params.second;
+                record.mId = ESM::RefId::stringRefId(id);
+                record.mModel = model;
                 record.mRecordFlags = 0;
                 mStore.insertStatic(record);
             }
         }
 
-        std::map<std::string, std::string> doors;
-        doors["prisonmarker"] = "marker_prison.nif";
-
-        for (const auto& params : doors)
+        for (const auto& [id, model] : generateDefaultDoors())
         {
-            if (!mStore.get<ESM::Door>().search(ESM::RefId::stringRefId(params.first)))
+            if (mStore.get<ESM::Door>().search(ESM::RefId::stringRefId(id)) == nullptr)
             {
                 ESM::Door record;
-                record.mId = ESM::RefId::stringRefId(params.first);
-                record.mModel = params.second;
+                record.mId = ESM::RefId::stringRefId(id);
+                record.mModel = model;
                 record.mRecordFlags = 0;
                 mStore.insertStatic(record);
             }
