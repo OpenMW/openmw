@@ -298,10 +298,12 @@ int CSMWorld::IdTable::findColumnIndex(Columns::ColumnId id) const
 
 void CSMWorld::IdTable::reorderRows(int baseIndex, const std::vector<int>& newOrder)
 {
-    if (!newOrder.empty())
-        if (mIdCollection->reorderRows(baseIndex, newOrder))
-            emit dataChanged(index(baseIndex, 0),
-                index(baseIndex + static_cast<int>(newOrder.size()) - 1, mIdCollection->getColumns() - 1));
+    if (newOrder.empty())
+        return;
+    if (!mIdCollection->reorderRows(baseIndex, newOrder))
+        return;
+    emit dataChanged(
+        index(baseIndex, 0), index(baseIndex + static_cast<int>(newOrder.size()) - 1, mIdCollection->getColumns() - 1));
 }
 
 std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view(int row) const

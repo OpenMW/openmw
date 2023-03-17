@@ -9,6 +9,8 @@
 #include <QVBoxLayout>
 
 #include <apps/opencs/model/world/data.hpp>
+
+#include <components/debug/debuglog.hpp>
 #include <components/files/qtconversion.hpp>
 
 #include <filesystem>
@@ -70,6 +72,7 @@ CSVDoc::LoadingDocument::LoadingDocument(CSMDoc::Document* document)
     // error message
     mError = new QLabel(this);
     mError->setWordWrap(true);
+    mError->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     mLayout->addWidget(mError);
 
@@ -120,6 +123,7 @@ void CSVDoc::LoadingDocument::abort(const std::string& error)
 {
     mAborted = true;
     mError->setText(QString::fromUtf8(("<font color=red>Loading failed: " + error + "</font>").c_str()));
+    Log(Debug::Error) << "Loading failed: " << error;
     mButtons->setStandardButtons(QDialogButtonBox::Close);
 }
 

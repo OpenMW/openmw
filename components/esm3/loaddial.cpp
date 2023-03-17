@@ -70,62 +70,17 @@ namespace ESM
         mInfo.clear();
     }
 
-    void Dialogue::readInfo(ESMReader& esm, bool merge)
+    void Dialogue::readInfo(ESMReader& esm)
     {
         DialInfo info;
         bool isDeleted = false;
         info.load(esm, isDeleted);
-
-        if (!merge || mInfo.empty())
-        {
-            mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.end(), info), isDeleted);
-            return;
-        }
-
-        LookupMap::iterator lookup = mLookup.find(info.mId);
-
-        if (lookup != mLookup.end())
-        {
-            auto it = lookup->second.first;
-            if (it->mPrev == info.mPrev)
-            {
-                *it = info;
-                lookup->second.second = isDeleted;
-                return;
-            }
-            // Since the new version of this record has a different prev linked list connection, we need to re-insert
-            // the record
-            mInfo.erase(it);
-            mLookup.erase(lookup);
-        }
-
-        if (!info.mPrev.empty())
-        {
-            lookup = mLookup.find(info.mPrev);
-            if (lookup != mLookup.end())
-            {
-                auto it = lookup->second.first;
-
-                mLookup[info.mId] = std::make_pair(mInfo.insert(++it, info), isDeleted);
-            }
-            else
-                mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.end(), info), isDeleted);
-        }
-        else
-            mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.begin(), info), isDeleted);
+        mInfoOrder.insertInfo(std::move(info), isDeleted);
     }
 
-    void Dialogue::clearDeletedInfos()
+    void Dialogue::setUp()
     {
-        LookupMap::const_iterator current = mLookup.begin();
-        LookupMap::const_iterator end = mLookup.end();
-        for (; current != end; ++current)
-        {
-            if (current->second.second)
-            {
-                mInfo.erase(current->second.first);
-            }
-        }
-        mLookup.clear();
+        mInfoOrder.removeDeleted();
+        mInfoOrder.extractOrderedInfo(mInfo);
     }
 }

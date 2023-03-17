@@ -27,7 +27,7 @@ class QUndoStack;
 
 std::string CSVWorld::InfoCreator::getId() const
 {
-    std::string id = Misc::StringUtils::lowerCase(mTopic->text().toUtf8().constData());
+    const std::string topic = mTopic->text().toStdString();
 
     std::string unique = QUuid::createUuid().toByteArray().data();
 
@@ -35,7 +35,7 @@ std::string CSVWorld::InfoCreator::getId() const
 
     unique = unique.substr(1, unique.size() - 2);
 
-    return id + '#' + unique;
+    return topic + '#' + unique;
 }
 
 void CSVWorld::InfoCreator::configureCreateCommand(CSMWorld::CreateCommand& command) const
