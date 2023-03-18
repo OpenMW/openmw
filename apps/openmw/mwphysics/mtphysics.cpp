@@ -176,16 +176,15 @@ namespace
                     return;
                 auto& [actor, frameDataRef] = *locked;
                 auto& frameData = frameDataRef.get();
-                actor->applyOffsetChange();
-                frameData.mPosition = actor->getPosition();
+                frameData.mPosition = actor->applyOffsetChange();
                 if (frameData.mWaterCollision && frameData.mPosition.z() < frameData.mWaterlevel
                     && actor->canMoveToWaterSurface(frameData.mWaterlevel, mCollisionWorld))
                 {
                     const auto offset = osg::Vec3f(0, 0, frameData.mWaterlevel - frameData.mPosition.z());
-                    MWBase::Environment::get().getWorld()->moveObjectBy(actor->getPtr(), offset);
-                    actor->applyOffsetChange();
-                    frameData.mPosition = actor->getPosition();
+                    MWBase::Environment::get().getWorld()->moveObjectBy(actor->getPtr(), offset, false);
+                    frameData.mPosition = actor->applyOffsetChange();
                 }
+                actor->updateCollisionObjectPosition();
                 frameData.mOldHeight = frameData.mPosition.z();
                 const auto rotation = actor->getPtr().getRefData().getPosition().asRotationVec3();
                 frameData.mRotation = osg::Vec2f(rotation.x(), rotation.z());

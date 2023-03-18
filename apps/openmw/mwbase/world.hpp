@@ -297,7 +297,7 @@ namespace MWBase
             = 0;
         ///< @return an updated Ptr
 
-        virtual MWWorld::Ptr moveObjectBy(const MWWorld::Ptr& ptr, const osg::Vec3f& vec) = 0;
+        virtual MWWorld::Ptr moveObjectBy(const MWWorld::Ptr& ptr, const osg::Vec3f& vec, bool moveToActive) = 0;
         ///< @return an updated Ptr
 
         virtual void scaleObject(const MWWorld::Ptr& ptr, float scale, bool force = false) = 0;
