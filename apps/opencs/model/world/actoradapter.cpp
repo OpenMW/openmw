@@ -510,7 +510,6 @@ namespace CSMWorld
         // Setup body parts
         for (int i = 0; i < mBodyParts.getSize(); ++i)
         {
-            auto partId = mBodyParts.getId(i);
             auto& partRecord = mBodyParts.getRecord(i);
 
             if (partRecord.isDeleted())
