@@ -225,8 +225,9 @@ namespace ESM4
         sp.type = stringType;
 
         // TODO: possibly check if the resource exists?
-        Files::IStreamPtr filestream
-            = mVFS ? mVFS->get(stringFile.string()) : Files::openConstrainedFileStream(stringFile);
+        Files::IStreamPtr filestream = mVFS
+            ? mVFS->get(stringFile.string())
+            : Files::openConstrainedFileStream(mCtx.filename.parent_path() / stringFile);
 
         filestream->seekg(0, std::ios::end);
         std::size_t fileSize = filestream->tellg();
