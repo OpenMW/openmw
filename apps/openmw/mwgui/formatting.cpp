@@ -1,5 +1,8 @@
 #include "formatting.hpp"
 
+#include <charconv>
+#include <system_error>
+
 #include <MyGUI_EditBox.h>
 #include <MyGUI_EditText.h>
 #include <MyGUI_Gui.h>
@@ -363,10 +366,9 @@ namespace MWGui::Formatting
     {
         if (attr.find("color") != attr.end())
         {
-            unsigned int color;
-            std::stringstream ss;
-            ss << attr.at("color");
-            ss >> std::hex >> color;
+            auto& colorString = attr.at("color");
+            unsigned int color = 0;
+            std::from_chars(colorString.data(), colorString.data() + colorString.size(), color, 16);
 
             mTextStyle.mColour
                 = MyGUI::Colour((color >> 16 & 0xFF) / 255.f, (color >> 8 & 0xFF) / 255.f, (color & 0xFF) / 255.f);

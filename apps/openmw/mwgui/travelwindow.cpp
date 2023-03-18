@@ -6,6 +6,7 @@
 
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadgmst.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -148,9 +149,7 @@ namespace MWGui
 
     void TravelWindow::onTravelButtonClick(MyGUI::Widget* _sender)
     {
-        std::istringstream iss(_sender->getUserString("price"));
-        int price;
-        iss >> price;
+        const int price = Misc::StringUtils::toNumeric<int>(_sender->getUserString("price"), 0);
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);

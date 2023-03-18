@@ -1,8 +1,11 @@
 #include "fallback.hpp"
 
-#include <sstream>
+#include <string>
+#include <vector>
 
 #include <components/debug/debuglog.hpp>
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 namespace Fallback
 {
@@ -27,31 +30,13 @@ namespace Fallback
     float Map::getFloat(std::string_view fall)
     {
         std::string_view fallback = getString(fall);
-        if (!fallback.empty())
-        {
-            std::stringstream stream;
-            stream << fallback;
-            float number = 0.f;
-            stream >> number;
-            return number;
-        }
-
-        return 0;
+        return Misc::StringUtils::toNumeric<float>(fallback, 0.0f);
     }
 
     int Map::getInt(std::string_view fall)
     {
         std::string_view fallback = getString(fall);
-        if (!fallback.empty())
-        {
-            std::stringstream stream;
-            stream << fallback;
-            int number = 0;
-            stream >> number;
-            return number;
-        }
-
-        return 0;
+        return Misc::StringUtils::toNumeric<int>(fallback, 0);
     }
 
     bool Map::getBool(std::string_view fall)
@@ -62,30 +47,29 @@ namespace Fallback
 
     osg::Vec4f Map::getColour(std::string_view fall)
     {
-        std::string_view sum = getString(fall);
+        const std::string_view sum = getString(fall);
+
         if (!sum.empty())
         {
-            try
+            std::vector<std::string> ret;
+            Misc::StringUtils::split(sum, ret, ",");
+
+            if (ret.size() == 3)
             {
-                std::string ret[3];
-                unsigned int j = 0;
-                for (unsigned int i = 0; i < sum.length(); ++i)
+                const auto r = Misc::StringUtils::toNumeric<float>(ret[0]);
+                const auto g = Misc::StringUtils::toNumeric<float>(ret[1]);
+                const auto b = Misc::StringUtils::toNumeric<float>(ret[2]);
+
+                if (r.has_value() && g.has_value() && b.has_value())
                 {
-                    if (sum[i] == ',')
-                        j++;
-                    else if (sum[i] != ' ')
-                        ret[j] += sum[i];
+                    return osg::Vec4f(*r / 255.0f, *g / 255.0f, *b / 255.0f, 1.0f);
                 }
-                return osg::Vec4f(std::stoi(ret[0]) / 255.f, std::stoi(ret[1]) / 255.f, std::stoi(ret[2]) / 255.f, 1.f);
             }
-            catch (const std::invalid_argument&)
-            {
-                Log(Debug::Error) << "Error: '" << fall << "' setting value (" << sum
-                                  << ") is not a valid color, using middle gray as a fallback";
-            }
+
+            Log(Debug::Error) << "Error: '" << fall << "' setting value (" << sum
+                              << ") is not a valid color, using middle gray as a fallback";
         }
 
         return osg::Vec4f(0.5f, 0.5f, 0.5f, 1.f);
     }
-
 }

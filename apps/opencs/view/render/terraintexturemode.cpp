@@ -27,6 +27,8 @@
 #include <apps/opencs/view/render/terrainselection.hpp>
 #include <apps/opencs/view/widget/scenetool.hpp>
 
+#include <components/misc/strings/conversion.hpp>
+
 #include "../widget/scenetoolbar.hpp"
 #include "../widget/scenetooltexturebrush.hpp"
 
@@ -360,7 +362,9 @@ void CSVRender::TerrainTextureMode::editTerrainTextureGrid(const WorldspaceHitRe
 
     std::size_t hashlocation = mBrushTexture.find('#');
     std::string mBrushTextureInt = mBrushTexture.substr(hashlocation + 1);
-    int brushInt = stoi(mBrushTexture.substr(hashlocation + 1)) + 1; // All indices are offset by +1
+
+    // All indices are offset by +1
+    int brushInt = Misc::StringUtils::toNumeric<int>(mBrushTexture.substr(hashlocation + 1), 0) + 1;
 
     int r = static_cast<float>(mBrushSize) / 2;
 

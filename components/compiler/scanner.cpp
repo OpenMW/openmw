@@ -8,6 +8,7 @@
 #include "extensions.hpp"
 #include "parser.hpp"
 
+#include <components/misc/strings/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
 
 namespace
@@ -207,12 +208,8 @@ namespace Compiler
         TokenLoc loc(mLoc);
         mLoc.mLiteral.clear();
 
-        std::istringstream stream(value);
+        cont = parser.parseInt(Misc::StringUtils::toNumeric<int>(value, 0), loc, *this);
 
-        int intValue = 0;
-        stream >> intValue;
-
-        cont = parser.parseInt(intValue, loc, *this);
         return true;
     }
 
@@ -247,12 +244,8 @@ namespace Compiler
         TokenLoc loc(mLoc);
         mLoc.mLiteral.clear();
 
-        std::istringstream stream(value);
+        cont = parser.parseFloat(Misc::StringUtils::toNumeric<float>(value, 0.0f), loc, *this);
 
-        float floatValue = 0;
-        stream >> floatValue;
-
-        cont = parser.parseFloat(floatValue, loc, *this);
         return true;
     }
 

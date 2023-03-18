@@ -10,6 +10,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/nifosg/nifloader.hpp>
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/osgacontroller.hpp>
@@ -184,7 +185,7 @@ namespace Resource
         size_t spacePos = line.find_last_of(' ');
         double time = 0.0;
         if (spacePos != std::string::npos && spacePos + 1 < line.size())
-            time = std::stod(line.substr(spacePos + 1));
+            time = Misc::StringUtils::toNumeric<double>(line.substr(spacePos + 1), time);
         return time;
     }
 
