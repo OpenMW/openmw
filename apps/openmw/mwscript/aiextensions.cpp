@@ -355,8 +355,7 @@ namespace MWScript
                 MWMechanics::AiFollow followPackage(actorID, duration, x, y, z, repeat);
                 ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(followPackage, ptr);
 
-                Log(Debug::Info) << "AiFollow: " << actorID.getRefIdString() << ", " << x << ", " << y << ", " << z
-                                 << ", " << duration;
+                Log(Debug::Info) << "AiFollow: " << actorID << ", " << x << ", " << y << ", " << z << ", " << duration;
             }
         };
 
@@ -396,8 +395,7 @@ namespace MWScript
 
                 MWMechanics::AiFollow followPackage(actorID, cellID, duration, x, y, z, repeat);
                 ptr.getClass().getCreatureStats(ptr).getAiSequence().stack(followPackage, ptr);
-                Log(Debug::Info) << "AiFollow: " << actorID.getRefIdString() << ", " << x << ", " << y << ", " << z
-                                 << ", " << duration;
+                Log(Debug::Info) << "AiFollow: " << actorID << ", " << x << ", " << y << ", " << z << ", " << duration;
             }
         };
 
