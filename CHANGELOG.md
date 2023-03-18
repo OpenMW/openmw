@@ -66,6 +66,7 @@
     Feature #7148: Optimize string literal lookup in mwscript
     Feature #7194: Ori to show texture paths
     Feature #7214: Searching in the in-game console
+    Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message
 

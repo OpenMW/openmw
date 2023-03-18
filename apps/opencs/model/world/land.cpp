@@ -1,8 +1,9 @@
 #include "land.hpp"
 
 #include <sstream>
-#include <stddef.h>
 #include <stdexcept>
+
+#include <components/misc/strings/conversion.hpp>
 
 namespace ESM
 {
@@ -30,7 +31,7 @@ namespace CSMWorld
         if (mid == std::string::npos || id[0] != '#')
             throw std::runtime_error("Invalid Land ID");
 
-        x = std::stoi(id.substr(1, mid - 1));
-        y = std::stoi(id.substr(mid + 1));
+        x = Misc::StringUtils::toNumeric<int>(id.substr(1, mid - 1), 0);
+        y = Misc::StringUtils::toNumeric<int>(id.substr(mid + 1), 0);
     }
 }

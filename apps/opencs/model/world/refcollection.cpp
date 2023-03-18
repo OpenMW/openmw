@@ -9,6 +9,7 @@
 
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/loadcell.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 #include "cell.hpp"
 #include "record.hpp"
@@ -231,7 +232,7 @@ unsigned int CSMWorld::RefCollection::extractIdNum(std::string_view id) const
     if (separator == std::string::npos)
         throw std::runtime_error("invalid ref ID: " + std::string(id));
 
-    return static_cast<unsigned int>(std::stoi(std::string(id.substr(separator + 1))));
+    return Misc::StringUtils::toNumeric<unsigned int>(id.substr(separator + 1), 0);
 }
 
 int CSMWorld::RefCollection::getIntIndex(unsigned int id) const

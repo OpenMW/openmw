@@ -1,43 +1,84 @@
 #include "settings.hpp"
 #include "parser.hpp"
 
-#include <cerrno>
 #include <charconv>
 #include <filesystem>
 #include <sstream>
 #include <system_error>
 
+#if !(defined(_MSC_VER) && (_MSC_VER >= 1924)) && !(defined(__GNUC__) && __GNUC__ >= 11) || defined(__clang__)         \
+    || defined(__apple_build_version__)
+
+#include <cerrno>
+#include <ios>
+#include <locale>
+
+#endif
+
 #include <components/files/configurationmanager.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 namespace Settings
 {
     namespace
     {
         template <class T>
-        auto parseIntegralNumber(const std::string& value, std::string_view setting, std::string_view category)
+        T parseNumberFromSetting(const std::string& value, std::string_view setting, std::string_view category)
         {
             T number{};
+
             const auto result = std::from_chars(value.data(), value.data() + value.size(), number);
             if (result.ec != std::errc())
+            {
                 throw std::system_error(std::make_error_code(result.ec),
                     "Failed to parse number from setting [" + std::string(category) + "] " + std::string(setting)
                         + " value \"" + value + "\"");
+            }
+
             return number;
         }
 
-        template <class T>
-        auto parseFloatingPointNumber(const std::string& value, std::string_view setting, std::string_view category)
+#if !(defined(_MSC_VER) && (_MSC_VER >= 1924)) && !(defined(__GNUC__) && __GNUC__ >= 11) || defined(__clang__)         \
+    || defined(__apple_build_version__)
+        template <>
+        float parseNumberFromSetting<float>(
+            const std::string& value, std::string_view setting, std::string_view category)
         {
-            std::stringstream stream(value);
-            T number{};
-            stream >> number;
-            if (stream.bad())
+            std::istringstream iss(value);
+            iss.imbue(std::locale::classic());
+
+            float floatValue = 0.0f;
+
+            if (!(iss >> floatValue))
+            {
                 throw std::system_error(errno, std::generic_category(),
                     "Failed to parse number from setting [" + std::string(category) + "] " + std::string(setting)
                         + " value \"" + value + "\"");
-            return number;
+            }
+
+            return floatValue;
         }
+
+        template <>
+        double parseNumberFromSetting<double>(
+            const std::string& value, std::string_view setting, std::string_view category)
+        {
+            std::istringstream iss(value);
+            iss.imbue(std::locale::classic());
+
+            double doubleValue = 0.0;
+
+            if (!(iss >> doubleValue))
+            {
+                throw std::system_error(errno, std::generic_category(),
+                    "Failed to parse number from setting [" + std::string(category) + "] " + std::string(setting)
+                        + " value \"" + value + "\"");
+            }
+
+            return doubleValue;
+        }
+#endif
     }
 
     CategorySettingValueMap Manager::mDefaultSettings = CategorySettingValueMap();
@@ -139,27 +180,27 @@ namespace Settings
 
     float Manager::getFloat(std::string_view setting, std::string_view category)
     {
-        return parseFloatingPointNumber<float>(getString(setting, category), setting, category);
+        return parseNumberFromSetting<float>(getString(setting, category), setting, category);
     }
 
     double Manager::getDouble(std::string_view setting, std::string_view category)
     {
-        return parseFloatingPointNumber<double>(getString(setting, category), setting, category);
+        return parseNumberFromSetting<double>(getString(setting, category), setting, category);
     }
 
     int Manager::getInt(std::string_view setting, std::string_view category)
     {
-        return parseIntegralNumber<int>(getString(setting, category), setting, category);
+        return parseNumberFromSetting<int>(getString(setting, category), setting, category);
     }
 
     std::uint64_t Manager::getUInt64(std::string_view setting, std::string_view category)
     {
-        return parseIntegralNumber<std::uint64_t>(getString(setting, category), setting, category);
+        return parseNumberFromSetting<uint64_t>(getString(setting, category), setting, category);
     }
 
     std::size_t Manager::getSize(std::string_view setting, std::string_view category)
     {
-        return parseIntegralNumber<std::size_t>(getString(setting, category), setting, category);
+        return parseNumberFromSetting<size_t>(getString(setting, category), setting, category);
     }
 
     bool Manager::getBool(std::string_view setting, std::string_view category)
@@ -171,23 +212,44 @@ namespace Settings
     osg::Vec2f Manager::getVector2(std::string_view setting, std::string_view category)
     {
         const std::string& value = getString(setting, category);
-        std::stringstream stream(value);
-        float x, y;
-        stream >> x >> y;
-        if (stream.fail())
-            throw std::runtime_error(std::string("Can't parse 2d vector: " + value));
-        return { x, y };
+
+        std::vector<std::string> components;
+        Misc::StringUtils::split(value, components);
+
+        if (components.size() == 2)
+        {
+            auto x = Misc::StringUtils::toNumeric<float>(components[0]);
+            auto y = Misc::StringUtils::toNumeric<float>(components[1]);
+
+            if (x && y)
+            {
+                return { x.value(), y.value() };
+            }
+        }
+
+        throw std::runtime_error(std::string("Can't parse 2d vector: " + value));
     }
 
     osg::Vec3f Manager::getVector3(std::string_view setting, std::string_view category)
     {
         const std::string& value = getString(setting, category);
-        std::stringstream stream(value);
-        float x, y, z;
-        stream >> x >> y >> z;
-        if (stream.fail())
-            throw std::runtime_error(std::string("Can't parse 3d vector: " + value));
-        return { x, y, z };
+
+        std::vector<std::string> components;
+        Misc::StringUtils::split(value, components);
+
+        if (components.size() == 3)
+        {
+            auto x = Misc::StringUtils::toNumeric<float>(components[0]);
+            auto y = Misc::StringUtils::toNumeric<float>(components[1]);
+            auto z = Misc::StringUtils::toNumeric<float>(components[2]);
+
+            if (x && y && z)
+            {
+                return { x.value(), y.value(), z.value() };
+            }
+        }
+
+        throw std::runtime_error(std::string("Can't parse 3d vector: " + value));
     }
 
     void Manager::setString(std::string_view setting, std::string_view category, const std::string& value)

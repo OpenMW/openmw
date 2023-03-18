@@ -22,13 +22,10 @@
 */
 #include "formid.hpp"
 
-#include <algorithm>
-#include <climits> // LONG_MIN, LONG_MAX for gcc
-#include <cstdlib> // strtol
-#include <sstream>
+#include <charconv>
 #include <stdexcept>
-
 #include <string>
+#include <system_error>
 
 namespace ESM4
 {
@@ -54,16 +51,13 @@ namespace ESM4
         if (str.size() != 8)
             return false;
 
-        char* tmp;
-        errno = 0;
-        unsigned long val = strtol(str.c_str(), &tmp, 16);
+        unsigned long value = 0;
 
-        if (tmp == str.c_str() || *tmp != '\0'
-            || ((val == (unsigned long)LONG_MIN || val == (unsigned long)LONG_MAX) && errno == ERANGE))
+        if (auto [_ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value, 16); ec != std::errc())
             return false;
 
         if (id != nullptr)
-            *id = static_cast<FormId>(val);
+            *id = static_cast<FormId>(value);
 
         return true;
     }
@@ -73,6 +67,11 @@ namespace ESM4
         if (str.size() != 8)
             throw std::out_of_range("StringToFormId: incorrect string size");
 
-        return static_cast<FormId>(std::stoul(str, nullptr, 16));
+        unsigned long value = 0;
+
+        if (auto [_ptr, ec] = std::from_chars(str.data(), str.data() + str.size(), value, 16); ec != std::errc())
+            throw std::invalid_argument("StringToFormId: string not a valid hexadecimal number");
+
+        return static_cast<FormId>(value);
     }
 }
