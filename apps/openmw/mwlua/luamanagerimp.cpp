@@ -247,7 +247,7 @@ namespace MWLua
                 const MWWorld::Class& objClass = ptr.getClass();
                 if (objClass.isActor())
                     mGlobalScripts.actorActive(obj);
-                if (mWorldView.isItem(ptr))
+                if (objClass.isItem(ptr))
                     mGlobalScripts.itemActive(obj);
             }
             else if (luaDebug)

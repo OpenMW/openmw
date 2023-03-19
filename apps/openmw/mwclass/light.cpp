@@ -86,6 +86,11 @@ namespace MWClass
         return !name.empty() ? name : ref->mBase->mId.getRefIdString();
     }
 
+    bool Light::isItem(const MWWorld::ConstPtr& ptr) const
+    {
+        return ptr.get<ESM::Light>()->mBase->mData.mFlags & ESM::Light::Carry;
+    }
+
     std::unique_ptr<MWWorld::Action> Light::activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const
     {
         if (!MWBase::Environment::get().getWindowManager()->isAllowed(MWGui::GW_Inventory))
