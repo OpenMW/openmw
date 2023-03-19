@@ -59,7 +59,7 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwlua
-    luamanagerimp object worldview userdataserializer eventqueue objectvariant
+    luamanagerimp object worldview userdataserializer luaevents objectvariant
     luabindings localscripts playerscripts objectbindings cellbindings
     camerabindings uibindings inputbindings nearbybindings postprocessingbindings stats debugbindings
     types/types types/door types/actor types/container types/weapon types/npc types/creature types/activator types/book types/lockpick types/probe types/apparatus types/potion types/ingredient types/misc types/repair types/armor types/light types/static types/clothing

@@ -81,8 +81,7 @@ namespace MWLua
         context.mLuaManager = this;
         context.mLua = &mLua;
         context.mWorldView = &mWorldView;
-        context.mLocalEventQueue = &mLocalEvents;
-        context.mGlobalEventQueue = &mGlobalEvents;
+        context.mLuaEvents = &mLuaEvents;
         context.mSerializer = mGlobalSerializer.get();
 
         Context localContext = context;
@@ -165,10 +164,7 @@ namespace MWLua
         for (LocalScripts* scripts : mActiveLocalScripts)
             scripts->statsNextFrame();
 
-        std::vector<GlobalEvent> globalEvents = std::move(mGlobalEvents);
-        std::vector<LocalEvent> localEvents = std::move(mLocalEvents);
-        mGlobalEvents = std::vector<GlobalEvent>();
-        mLocalEvents = std::vector<LocalEvent>();
+        mLuaEvents.finalizeEventBatch();
 
         if (!mWorldView.isPaused())
         { // Update time and process timers
@@ -181,20 +177,7 @@ namespace MWLua
                 scripts->processTimers(simulationTime, gameTime);
         }
 
-        // Receive events
-        for (GlobalEvent& e : globalEvents)
-            mGlobalScripts.receiveEvent(e.mEventName, e.mEventData);
-        for (LocalEvent& e : localEvents)
-        {
-            LObject obj(e.mDest);
-            const MWWorld::Ptr& ptr = obj.ptrOrNull();
-            LocalScripts* scripts = ptr.isEmpty() ? nullptr : ptr.getRefData().getLuaScripts();
-            if (scripts)
-                scripts->receiveEvent(e.mEventName, e.mEventData);
-            else
-                Log(Debug::Debug) << "Ignored event " << e.mEventName << " to L" << e.mDest.toString()
-                                  << ". Object not found or has no attached scripts";
-        }
+        mLuaEvents.callEventHandlers();
 
         // Run queued callbacks
         for (CallbackWithData& c : mQueuedCallbacks)
@@ -302,8 +285,7 @@ namespace MWLua
         MWBase::Environment::get().getWindowManager()->setConsoleMode("");
         MWBase::Environment::get().getWorld()->getPostProcessor()->disableDynamicShaders();
         mActiveLocalScripts.clear();
-        mLocalEvents.clear();
-        mGlobalEvents.clear();
+        mLuaEvents.clear();
         mInputEvents.clear();
         mObjectAddedEvents.clear();
         mLocalEngineEvents.clear();
@@ -470,7 +452,7 @@ namespace MWLua
         ESM::LuaScripts globalScripts;
         mGlobalScripts.save(globalScripts);
         globalScripts.save(writer);
-        saveEvents(writer, mGlobalEvents, mLocalEvents);
+        mLuaEvents.save(writer);
 
         writer.endRecord(ESM::REC_LUAM);
     }
@@ -483,7 +465,7 @@ namespace MWLua
         mWorldView.load(reader);
         ESM::LuaScripts globalScripts;
         globalScripts.load(reader);
-        loadEvents(mLua.sol(), reader, mGlobalEvents, mLocalEvents, mContentFileMapping, mGlobalLoader.get());
+        mLuaEvents.load(mLua.sol(), reader, mContentFileMapping, mGlobalLoader.get());
 
         mGlobalScripts.setSavedDataDeserializer(mGlobalLoader.get());
         mGlobalScripts.load(globalScripts);

@@ -6,6 +6,7 @@
 #include <components/esm/defs.hpp>
 
 #include "../context.hpp"
+#include "../object.hpp"
 
 namespace MWLua
 {

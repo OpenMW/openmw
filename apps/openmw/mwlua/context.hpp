@@ -1,8 +1,6 @@
 #ifndef MWLUA_CONTEXT_H
 #define MWLUA_CONTEXT_H
 
-#include "eventqueue.hpp"
-
 namespace LuaUtil
 {
     class LuaState;
@@ -11,6 +9,7 @@ namespace LuaUtil
 
 namespace MWLua
 {
+    class LuaEvents;
     class LuaManager;
     class WorldView;
 
@@ -21,8 +20,7 @@ namespace MWLua
         LuaUtil::LuaState* mLua;
         LuaUtil::UserdataSerializer* mSerializer;
         WorldView* mWorldView;
-        LocalEventQueue* mLocalEventQueue;
-        GlobalEventQueue* mGlobalEventQueue;
+        LuaEvents* mLuaEvents;
     };
 
 }

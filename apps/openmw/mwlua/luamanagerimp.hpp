@@ -14,9 +14,9 @@
 
 #include "../mwbase/luamanager.hpp"
 
-#include "eventqueue.hpp"
 #include "globalscripts.hpp"
 #include "localscripts.hpp"
+#include "luaevents.hpp"
 #include "object.hpp"
 #include "worldview.hpp"
 
@@ -31,6 +31,8 @@ namespace MWLua
     {
     public:
         LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir);
+        LuaManager(const LuaManager&) = delete;
+        LuaManager(LuaManager&&) = delete;
 
         // Called by engine.cpp when the environment is fully initialized.
         void init();
@@ -165,8 +167,7 @@ namespace MWLua
         bool mNewGameStarted = false;
         MWWorld::Ptr mPlayer;
 
-        GlobalEventQueue mGlobalEvents;
-        LocalEventQueue mLocalEvents;
+        LuaEvents mLuaEvents{ &mGlobalScripts };
 
         std::unique_ptr<LuaUtil::UserdataSerializer> mGlobalSerializer;
         std::unique_ptr<LuaUtil::UserdataSerializer> mLocalSerializer;

@@ -13,7 +13,7 @@
 #include "../mwworld/scene.hpp"
 #include "../mwworld/store.hpp"
 
-#include "eventqueue.hpp"
+#include "luaevents.hpp"
 #include "luamanagerimp.hpp"
 #include "worldview.hpp"
 
@@ -57,7 +57,7 @@ namespace MWLua
             MWBase::Environment::get().getStateManager()->requestQuit();
         };
         api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData) {
-            context.mGlobalEventQueue->push_back(
+            context.mLuaEvents->addGlobalEvent(
                 { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
         };
         addTimeBindings(api, context, false);
