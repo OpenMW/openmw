@@ -133,8 +133,7 @@ namespace MWClass
             if (animation)
             {
                 const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-                int index = ESM::MagicEffect::effectStringToId("sEffectTelekinesis");
-                const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(index);
+                const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(ESM::MagicEffect::Telekinesis);
 
                 animation->addSpellCastGlow(
                     effect, 1); // 1 second glow to match the time taken for a door opening or closing
