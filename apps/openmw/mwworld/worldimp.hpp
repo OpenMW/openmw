@@ -200,8 +200,7 @@ namespace MWWorld
             SceneUtil::WorkQueue* workQueue, SceneUtil::UnrefQueue& unrefQueue,
             const Files::Collections& fileCollections, const std::vector<std::string>& contentFiles,
             const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder,
-            int activationDistanceOverride, const std::string& startCell, const std::string& startupScript,
-            const std::filesystem::path& userDataPath);
+            int activationDistanceOverride, const std::string& startCell, const std::filesystem::path& userDataPath);
 
         virtual ~World();
 

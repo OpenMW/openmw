@@ -246,7 +246,7 @@ namespace MWWorld
         SceneUtil::WorkQueue* workQueue, SceneUtil::UnrefQueue& unrefQueue, const Files::Collections& fileCollections,
         const std::vector<std::string>& contentFiles, const std::vector<std::string>& groundcoverFiles,
         ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride, const std::string& startCell,
-        const std::string& startupScript, const std::filesystem::path& userDataPath)
+        const std::filesystem::path& userDataPath)
         : mResourceSystem(resourceSystem)
         , mLocalScripts(mStore)
         , mWorldModel(mStore, mReaders)
