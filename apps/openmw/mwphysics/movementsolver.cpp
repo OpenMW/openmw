@@ -452,6 +452,9 @@ namespace MWPhysics
         if(actor.mSkipCollisionDetection) // noclipping/tcl
             return;
 
+        if (actor.mMovement.length2() == 0) // no AI nor player attempted to move, current position is assumed correct
+            return;
+
         auto tempPosition = actor.mPosition;
 
         if(actor.mStuckFrames >= 10)
