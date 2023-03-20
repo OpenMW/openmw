@@ -53,7 +53,7 @@ QMenu & TableHeaderMouseEventHandler::createContextMenu()
         action->setChecked(!table.isColumnHidden(i));
         menu->addAction(action);
 
-        connect(action, &QAction::triggered, [this, &action, &i]() {
+        connect(action, &QAction::triggered, [this, action, i]() {
             table.setColumnHidden(i, !action->isChecked());
             action->setChecked(!action->isChecked());
             action->toggle();
