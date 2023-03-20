@@ -98,6 +98,27 @@ namespace Launcher
         {
             return Settings::Manager::getUInt64("max navmeshdb file size", "Navigator") / (1024 * 1024);
         }
+
+        std::optional<QString> findFirstPath(const QStringList& directories, const QString& fileName)
+        {
+            for (const QString& directoryPath : directories)
+            {
+                const QString filePath = QDir(directoryPath).absoluteFilePath(fileName);
+                if (QFile::exists(filePath))
+                    return filePath;
+            }
+            return std::nullopt;
+        }
+
+        QStringList findAllFilePaths(const QStringList& directories, const QStringList& fileNames)
+        {
+            QStringList result;
+            result.reserve(fileNames.size());
+            for (const QString& fileName : fileNames)
+                if (const auto filepath = findFirstPath(directories, fileName))
+                    result.append(*filepath);
+            return result;
+        }
     }
 }
 
@@ -305,25 +326,8 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         row++;
     }
 
-    PathIterator pathIterator(directories);
-
-    mSelector->setProfileContent(filesInProfile(contentModelName, pathIterator));
-}
-
-QStringList Launcher::DataFilesPage::filesInProfile(const QString& profileName, PathIterator& pathIterator)
-{
-    QStringList files = mLauncherSettings.getContentListFiles(profileName);
-    QStringList filepaths;
-
-    for (const QString& file : files)
-    {
-        QString filepath = pathIterator.findFirstPath(file);
-
-        if (!filepath.isEmpty())
-            filepaths << filepath;
-    }
-
-    return filepaths;
+    mSelector->setProfileContent(
+        findAllFilePaths(directories, mLauncherSettings.getContentListFiles(contentModelName)));
 }
 
 void Launcher::DataFilesPage::saveSettings(const QString& profile)
