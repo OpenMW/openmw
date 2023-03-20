@@ -384,13 +384,13 @@ QStringList Launcher::DataFilesPage::selectedDirectoriesPaths() const
     return dirList;
 }
 
-QStringList Launcher::DataFilesPage::selectedArchivePaths(bool all) const
+QStringList Launcher::DataFilesPage::selectedArchivePaths() const
 {
     QStringList archiveList;
     for (int i = 0; i < ui.archiveListWidget->count(); ++i)
     {
-        const auto* item = ui.archiveListWidget->item(i);
-        if (all || item->checkState() == Qt::Checked)
+        const QListWidgetItem* item = ui.archiveListWidget->item(i);
+        if (item->checkState() == Qt::Checked)
             archiveList.append(item->text());
     }
     return archiveList;
@@ -720,6 +720,10 @@ void Launcher::DataFilesPage::addArchivesFromDir(const QString& path)
 {
     QDir dir(path, "*.bsa");
 
+    std::unordered_set<QString> archives;
+    for (int i = 0; i < ui.archiveListWidget->count(); ++i)
+        archives.insert(ui.archiveListWidget->item(i)->text());
+
     for (const auto& fileinfo : dir.entryInfoList())
     {
         const auto absPath = fileinfo.absoluteFilePath();
@@ -727,9 +731,8 @@ void Launcher::DataFilesPage::addArchivesFromDir(const QString& path)
             continue;
 
         const auto fileName = fileinfo.fileName();
-        const auto currentList = selectedArchivePaths(true);
 
-        if (!currentList.contains(fileName, Qt::CaseInsensitive))
+        if (archives.insert(fileName).second)
             addArchive(fileName, Qt::Unchecked);
     }
 }

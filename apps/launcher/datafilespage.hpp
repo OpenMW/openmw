@@ -138,7 +138,7 @@ namespace Launcher
          * @return the file paths of all selected content files
          */
         QStringList selectedFilePaths() const;
-        QStringList selectedArchivePaths(bool all = false) const;
+        QStringList selectedArchivePaths() const;
         QStringList selectedDirectoriesPaths() const;
 
         class PathIterator
