@@ -389,8 +389,6 @@ QStringList Launcher::DataFilesPage::selectedArchivePaths(bool all) const
     for (int i = 0; i < ui.archiveListWidget->count(); ++i)
     {
         const auto* item = ui.archiveListWidget->item(i);
-        const auto archive = ui.archiveListWidget->item(i)->text();
-
         if (all || item->checkState() == Qt::Checked)
             archiveList.append(item->text());
     }
