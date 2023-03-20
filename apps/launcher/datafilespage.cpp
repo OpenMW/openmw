@@ -401,11 +401,8 @@ QStringList Launcher::DataFilesPage::selectedFilePaths() const
     ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
     QStringList filePaths;
     for (const ContentSelectorModel::EsmFile* item : items)
-    {
-        QFile file(item->filePath());
-        if (file.exists())
+        if (QFile::exists(item->filePath()))
             filePaths.append(item->filePath());
-    }
     return filePaths;
 }
 
