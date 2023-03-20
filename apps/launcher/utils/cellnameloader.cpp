@@ -1,37 +1,45 @@
 #include "cellnameloader.hpp"
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/files/qtconversion.hpp>
 
-QSet<QString> CellNameLoader::getCellNames(QStringList& contentPaths)
+QSet<QString> CellNameLoader::getCellNames(const QStringList& contentPaths)
 {
     QSet<QString> cellNames;
     ESM::ESMReader esmReader;
 
     // Loop through all content files
-    for (auto& contentPath : contentPaths)
+    for (const QString& contentPath : contentPaths)
     {
         if (contentPath.endsWith(".omwscripts", Qt::CaseInsensitive))
             continue;
-        esmReader.open(Files::pathFromQString(contentPath));
-
-        // Loop through all records
-        while (esmReader.hasMoreRecs())
+        try
         {
-            ESM::NAME recordName = esmReader.getRecName();
-            esmReader.getRecHeader();
+            esmReader.open(Files::pathFromQString(contentPath));
 
-            if (isCellRecord(recordName))
+            // Loop through all records
+            while (esmReader.hasMoreRecs())
             {
-                QString cellName = getCellName(esmReader);
-                if (!cellName.isEmpty())
-                {
-                    cellNames.insert(cellName);
-                }
-            }
+                ESM::NAME recordName = esmReader.getRecName();
+                esmReader.getRecHeader();
 
-            // Stop loading content for this record and continue to the next
-            esmReader.skipRecord();
+                if (isCellRecord(recordName))
+                {
+                    QString cellName = getCellName(esmReader);
+                    if (!cellName.isEmpty())
+                    {
+                        cellNames.insert(cellName);
+                    }
+                }
+
+                // Stop loading content for this record and continue to the next
+                esmReader.skipRecord();
+            }
+        }
+        catch (const std::exception& e)
+        {
+            Log(Debug::Error) << "Failed to get cell names from " << contentPath.toStdString() << ": " << e.what();
         }
     }
 
