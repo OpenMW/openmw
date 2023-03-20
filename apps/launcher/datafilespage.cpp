@@ -377,8 +377,9 @@ QStringList Launcher::DataFilesPage::selectedDirectoriesPaths() const
     QStringList dirList;
     for (int i = 0; i < ui.directoryListWidget->count(); ++i)
     {
-        if (ui.directoryListWidget->item(i)->flags() & Qt::ItemIsEnabled)
-            dirList.append(ui.directoryListWidget->item(i)->text());
+        const QListWidgetItem* item = ui.directoryListWidget->item(i);
+        if (item->flags() & Qt::ItemIsEnabled)
+            dirList.append(item->text());
     }
     return dirList;
 }
