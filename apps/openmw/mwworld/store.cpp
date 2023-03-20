@@ -950,11 +950,8 @@ namespace MWWorld
     const ESM::Pathgrid* Store<ESM::Pathgrid>::find(const ESM::RefId& name) const
     {
         const ESM::Pathgrid* pathgrid = search(name);
-        if (!pathgrid)
-        {
-            const std::string msg = "Pathgrid in cell '" + name.getRefIdString() + "' not found";
-            throw std::runtime_error(msg);
-        }
+        if (pathgrid == nullptr)
+            throw std::runtime_error("Pathgrid in cell " + name.toDebugString() + " is not found");
         return pathgrid;
     }
     const ESM::Pathgrid* Store<ESM::Pathgrid>::search(const ESM::Cell& cell) const

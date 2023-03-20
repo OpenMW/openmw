@@ -62,7 +62,7 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mId.getRefIdString().c_str());
+            return QString::fromStdString(record.get().mId.toString());
         }
 
         bool isEditable() const override { return false; }
@@ -404,7 +404,7 @@ namespace CSMWorld
         {
             int skill = record.get().mData.getSkill(mIndex, mMajor);
 
-            return QString::fromUtf8(ESM::Skill::indexToId(skill).c_str());
+            return QString::fromStdString(ESM::Skill::indexToRefId(skill).toString());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override

@@ -658,7 +658,7 @@ int CSMWorld::RefIdCollection::getIndex(const ESM::RefId& id) const
     int index = searchId(id);
 
     if (index == -1)
-        throw std::runtime_error("invalid ID: " + id.getRefIdString());
+        throw std::runtime_error("invalid ID: " + id.toDebugString());
 
     return index;
 }

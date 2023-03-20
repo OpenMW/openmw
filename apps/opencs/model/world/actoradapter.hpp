@@ -149,7 +149,6 @@ namespace CSMWorld
         ActorAdapter& operator=(const ActorAdapter&) = delete;
 
         QModelIndex getHighestIndex(QModelIndex) const;
-        bool is1stPersonPart(const std::string& id) const;
 
         RaceDataPtr getRaceData(const ESM::RefId& raceId);
 

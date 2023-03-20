@@ -49,7 +49,7 @@ namespace MWMechanics
             case ESM::REC_NPC_:
                 return ::withBaseRecord<ESM::NPC>(mId, function);
             default:
-                throw std::logic_error("failed to update base record for " + mId.getRefIdString());
+                throw std::logic_error("failed to update base record for " + mId.toDebugString());
         }
     }
 
@@ -62,7 +62,7 @@ namespace MWMechanics
             case ESM::REC_NPC_:
                 return getSpellList<ESM::NPC>(mId);
             default:
-                throw std::logic_error("failed to get spell list for " + mId.getRefIdString());
+                throw std::logic_error("failed to get spell list for " + mId.toDebugString());
         }
     }
 

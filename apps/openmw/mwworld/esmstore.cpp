@@ -729,12 +729,9 @@ namespace MWWorld
         {
             return npcs.insert(npc);
         }
-        const ESM::RefId id = ESM::RefId::stringRefId("$dynamic" + std::to_string(mDynamicCount++));
+        const ESM::RefId id = ESM::RefId::generated(mDynamicCount++);
         if (npcs.search(id) != nullptr)
-        {
-            const std::string msg = "Try to override existing record '" + id.getRefIdString() + "'";
-            throw std::runtime_error(msg);
-        }
+            throw std::runtime_error("Try to override existing record: " + id.toDebugString());
         ESM::NPC record = npc;
 
         record.mId = id;

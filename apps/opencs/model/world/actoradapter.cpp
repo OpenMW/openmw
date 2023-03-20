@@ -425,11 +425,6 @@ namespace CSMWorld
         return index;
     }
 
-    bool ActorAdapter::is1stPersonPart(const std::string& name) const
-    {
-        return name.size() >= 4 && name.find(".1st", name.size() - 4) != std::string::npos;
-    }
-
     ActorAdapter::RaceDataPtr ActorAdapter::getRaceData(const ESM::RefId& id)
     {
         // Return cached race data if it exists
@@ -519,8 +514,7 @@ namespace CSMWorld
             }
 
             auto& part = partRecord.get();
-            if (part.mRace == id && part.mData.mType == ESM::BodyPart::MT_Skin
-                && !is1stPersonPart(part.mId.getRefIdString()))
+            if (part.mRace == id && part.mData.mType == ESM::BodyPart::MT_Skin && !ESM::isFirstPersonBodyPart(part))
             {
                 auto type = (ESM::BodyPart::MeshPart)part.mData.mPart;
                 bool female = part.mData.mFlags & ESM::BodyPart::BPF_Female;

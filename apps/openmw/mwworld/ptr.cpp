@@ -16,7 +16,7 @@ namespace MWWorld
         res.append(" (");
         res.append(getTypeDescription());
         res.append(", ");
-        res.append(getCellRef().getRefId().getRefIdString());
+        res.append(getCellRef().getRefId().toDebugString());
         res.append(")");
         return res;
     }

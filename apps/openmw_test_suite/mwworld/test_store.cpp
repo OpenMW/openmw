@@ -281,6 +281,7 @@ namespace
         ESM::MaxOldAiPackageFormatVersion,
         ESM::MaxOldSkillsAndAttributesFormatVersion,
         ESM::MaxOldCreatureStatsFormatVersion,
+        ESM::MaxStringRefIdFormatVersion,
         ESM::CurrentSaveGameFormatVersion,
     };
 
@@ -420,8 +421,10 @@ TYPED_TEST_P(StoreTest, overwrite_test)
 
 namespace
 {
+    using namespace ::testing;
+
     template <class T>
-    struct StoreSaveLoadTest : public ::testing::Test
+    struct StoreSaveLoadTest : public Test
     {
     };
 
@@ -445,11 +448,11 @@ namespace
         using RecordType = TypeParam;
 
         const int index = 3;
-        ESM::RefId refId;
+        decltype(RecordType::mId) refId;
         if constexpr (hasIndex<RecordType> && !std::is_same_v<RecordType, ESM::LandTexture>)
-            refId = ESM::RefId::stringRefId(RecordType::indexToId(index));
+            refId = RecordType::indexToRefId(index);
         else
-            refId = ESM::RefId::stringRefId("foobar");
+            refId = ESM::StringRefId("foobar");
 
         for (const ESM::FormatVersion formatVersion : formats)
         {
@@ -473,7 +476,7 @@ namespace
             MWWorld::ESMStore esmStore;
 
             reader.open(getEsmFile(record, false, formatVersion), "filename");
-            esmStore.load(reader, &dummyListener, dialogue);
+            ASSERT_NO_THROW(esmStore.load(reader, &dummyListener, dialogue));
             esmStore.setUp();
 
             const RecordType* result = nullptr;
@@ -551,7 +554,7 @@ namespace
     template <class... T>
     struct AsTestingTypes<std::tuple<T...>>
     {
-        using Type = testing::Types<T...>;
+        using Type = Types<T...>;
     };
 
     using RecordTypes = typename ToRecordTypes<MWWorld::ESMStore::StoreTuple>::Type;

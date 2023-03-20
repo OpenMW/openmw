@@ -65,8 +65,8 @@ namespace MWScript
                         from = container;
                     else
                     {
-                        std::string error = "Failed to find the container of object '"
-                            + from.getCellRef().getRefId().getRefIdString() + "'";
+                        const std::string error
+                            = "Failed to find the container of object " + from.getCellRef().getRefId().toDebugString();
                         runtime.getContext().report(error);
                         Log(Debug::Error) << error;
                         runtime.push(0.f);
@@ -77,7 +77,7 @@ namespace MWScript
                 const MWWorld::Ptr to = MWBase::Environment::get().getWorld()->searchPtr(name, false);
                 if (to.isEmpty())
                 {
-                    std::string error = "Failed to find an instance of object '" + name.getRefIdString() + "'";
+                    const std::string error = "Failed to find an instance of object " + name.toDebugString();
                     runtime.getContext().report(error);
                     Log(Debug::Error) << error;
                     runtime.push(0.f);

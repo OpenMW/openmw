@@ -40,8 +40,7 @@ namespace MWDialogue
                 return;
             }
 
-        throw std::runtime_error(
-            "unknown info ID " + mInfoId.getRefIdString() + " for topic " + topic.getRefIdString());
+        throw std::runtime_error("unknown info ID " + mInfoId.toDebugString() + " for topic " + topic.toDebugString());
     }
 
     Entry::Entry(const ESM::JournalEntry& record)
@@ -98,7 +97,7 @@ namespace MWDialogue
                 return iter->mId;
             }
 
-        throw std::runtime_error("unknown journal index for topic " + topic.getRefIdString());
+        throw std::runtime_error("unknown journal index for topic " + topic.toDebugString());
     }
 
     StampedJournalEntry::StampedJournalEntry()

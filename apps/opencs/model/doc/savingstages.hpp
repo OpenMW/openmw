@@ -99,7 +99,7 @@ namespace CSMDoc
     template <class CollectionT>
     void WriteCollectionStage<CollectionT>::perform(int stage, Messages& messages)
     {
-        if (CSMWorld::getScopeFromId(mCollection.getRecord(stage).get().mId.getRefIdString()) != mScope)
+        if (CSMWorld::getScopeFromId(mCollection.getRecord(stage).get().mId) != mScope)
             return;
 
         ESM::ESMWriter& writer = mState.getWriter();

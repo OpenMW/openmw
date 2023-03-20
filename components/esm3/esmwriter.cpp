@@ -4,10 +4,65 @@
 #include <fstream>
 #include <stdexcept>
 
+#include <components/debug/debuglog.hpp>
+#include <components/misc/notnullptr.hpp>
 #include <components/to_utf8/to_utf8.hpp>
+
+#include "formatversion.hpp"
 
 namespace ESM
 {
+    namespace
+    {
+        template <bool sizedString>
+        struct WriteRefId
+        {
+            ESMWriter& mWriter;
+
+            explicit WriteRefId(ESMWriter& writer)
+                : mWriter(writer)
+            {
+            }
+
+            void operator()(EmptyRefId /*v*/) const { mWriter.writeT(RefIdType::Empty); }
+
+            void operator()(StringRefId v) const
+            {
+                constexpr StringSizeType maxSize = std::numeric_limits<StringSizeType>::max();
+                if (v.getValue().size() > maxSize)
+                    throw std::runtime_error("RefId string size is too long: \"" + v.getValue().substr(0, 64)
+                        + "<...>\" (" + std::to_string(v.getValue().size()) + " > " + std::to_string(maxSize) + ")");
+                if constexpr (sizedString)
+                {
+                    mWriter.writeT(RefIdType::SizedString);
+                    mWriter.writeT(static_cast<StringSizeType>(v.getValue().size()));
+                }
+                else
+                    mWriter.writeT(RefIdType::UnsizedString);
+                mWriter.write(v.getValue().data(), v.getValue().size());
+            }
+
+            void operator()(FormIdRefId v) const
+            {
+                mWriter.writeT(RefIdType::FormId);
+                mWriter.writeT(v.getValue());
+            }
+
+            void operator()(GeneratedRefId v) const
+            {
+                mWriter.writeT(RefIdType::Generated);
+                mWriter.writeT(v.getValue());
+            }
+
+            void operator()(IndexRefId v) const
+            {
+                mWriter.writeT(RefIdType::Generated);
+                mWriter.writeT(v.getRecordType());
+                mWriter.writeT(v.getValue());
+            }
+        };
+    }
+
     ESMWriter::ESMWriter()
         : mRecords()
         , mStream(nullptr)
@@ -167,14 +222,18 @@ namespace ESM
         endRecord(name);
     }
 
-    void ESMWriter::writeHNRefId(NAME name, const RefId& value)
+    void ESMWriter::writeHNRefId(NAME name, RefId value)
     {
-        writeHNString(name, value.getRefIdString());
+        startSubRecord(name);
+        writeHRefId(value);
+        endRecord(name);
     }
 
-    void ESMWriter::writeHNRefId(NAME name, const RefId& value, std::size_t size)
+    void ESMWriter::writeHNRefId(NAME name, RefId value, std::size_t size)
     {
-        writeHNString(name, value.getRefIdString(), size);
+        if (mHeader.mFormatVersion <= MaxStringRefIdFormatVersion)
+            return writeHNString(name, value.getRefIdString(), size);
+        writeHNRefId(name, value);
     }
 
     void ESMWriter::writeMaybeFixedSizeString(const std::string& data, std::size_t size)
@@ -220,19 +279,30 @@ namespace ESM
             write("\0", 1);
     }
 
-    void ESMWriter::writeMaybeFixedSizeRefId(const RefId& value, std::size_t size)
+    void ESMWriter::writeMaybeFixedSizeRefId(RefId value, std::size_t size)
     {
-        writeMaybeFixedSizeString(value.getRefIdString(), size);
+        if (mHeader.mFormatVersion <= MaxStringRefIdFormatVersion)
+            return writeMaybeFixedSizeString(value.getRefIdString(), size);
+        visit(WriteRefId<true>(*this), value);
     }
 
-    void ESMWriter::writeHRefId(const RefId& value)
+    void ESMWriter::writeHRefId(RefId value)
     {
-        writeHString(value.getRefIdString());
+        if (mHeader.mFormatVersion <= MaxStringRefIdFormatVersion)
+            return writeHString(value.getRefIdString());
+        writeRefId(value);
     }
 
-    void ESMWriter::writeHCRefId(const RefId& value)
+    void ESMWriter::writeHCRefId(RefId value)
     {
-        writeHCString(value.getRefIdString());
+        if (mHeader.mFormatVersion <= MaxStringRefIdFormatVersion)
+            return writeHCString(value.getRefIdString());
+        writeRefId(value);
+    }
+
+    void ESMWriter::writeRefId(RefId value)
+    {
+        visit(WriteRefId<false>(*this), value);
     }
 
     void ESMWriter::writeName(NAME name)

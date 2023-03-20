@@ -20,7 +20,7 @@ namespace CSMWorld
 
     QVariant LandTextureNicknameColumn::get(const Record<LandTexture>& record) const
     {
-        return QString::fromUtf8(record.get().mId.getRefIdString().c_str());
+        return QString::fromStdString(record.get().mId.toString());
     }
 
     void LandTextureNicknameColumn::set(Record<LandTexture>& record, const QVariant& data)

@@ -783,7 +783,7 @@ int MWWorld::ContainerStore::getType(const ConstPtr& ptr)
     if (ptr.getType() == ESM::Weapon::sRecordId)
         return Type_Weapon;
 
-    throw std::runtime_error("Object '" + ptr.getCellRef().getRefId().getRefIdString() + "' of type "
+    throw std::runtime_error("Object " + ptr.getCellRef().getRefId().toDebugString() + " of type "
         + std::string(ptr.getTypeDescription()) + " can not be placed into a container");
 }
 

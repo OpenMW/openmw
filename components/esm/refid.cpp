@@ -1,68 +1,180 @@
 #include "refid.hpp"
 
-#include <iostream>
-
-#include "components/misc/strings/algorithm.hpp"
+#include <ostream>
+#include <sstream>
+#include <stdexcept>
 
 namespace ESM
 {
-    bool RefId::operator==(const RefId& rhs) const
+    namespace
     {
-        return Misc::StringUtils::ciEqual(mId, rhs.mId);
+        const std::string emptyString;
+
+        struct GetRefString
+        {
+            const std::string& operator()(EmptyRefId /*v*/) const { return emptyString; }
+
+            const std::string& operator()(StringRefId v) const { return v.getValue(); }
+
+            template <class T>
+            const std::string& operator()(const T& v) const
+            {
+                std::ostringstream stream;
+                stream << "RefId is not a string: " << v;
+                throw std::runtime_error(stream.str());
+            }
+        };
+
+        struct IsEqualToString
+        {
+            const std::string_view mRhs;
+
+            bool operator()(StringRefId v) const noexcept { return v == mRhs; }
+
+            template <class T>
+            bool operator()(const T& /*v*/) const noexcept
+            {
+                return false;
+            }
+        };
+
+        struct IsLessThanString
+        {
+            const std::string_view mRhs;
+
+            bool operator()(StringRefId v) const noexcept { return v < mRhs; }
+
+            template <class T>
+            bool operator()(const T& /*v*/) const noexcept
+            {
+                return false;
+            }
+        };
+
+        struct IsGreaterThanString
+        {
+            const std::string_view mLhs;
+
+            bool operator()(StringRefId v) const noexcept { return mLhs < v; }
+
+            template <class T>
+            bool operator()(const T& /*v*/) const noexcept
+            {
+                return true;
+            }
+        };
+
+        struct StartsWith
+        {
+            const std::string_view mPrefix;
+
+            bool operator()(StringRefId v) const { return v.startsWith(mPrefix); }
+
+            template <class T>
+            bool operator()(const T& /*v*/) const
+            {
+                return false;
+            }
+        };
+
+        struct EndsWith
+        {
+            const std::string_view mSuffix;
+
+            bool operator()(StringRefId v) const { return v.endsWith(mSuffix); }
+
+            template <class T>
+            bool operator()(const T& /*v*/) const
+            {
+                return false;
+            }
+        };
+
+        struct Contains
+        {
+            const std::string_view mSubString;
+
+            bool operator()(StringRefId v) const { return v.contains(mSubString); }
+
+            template <class T>
+            bool operator()(const T& /*v*/) const
+            {
+                return false;
+            }
+        };
     }
 
-    bool RefId::operator<(const RefId& rhs) const
+    const RefId RefId::sEmpty = {};
+
+    std::string EmptyRefId::toString() const
     {
-        return Misc::StringUtils::ciLess(mId, rhs.mId);
+        return std::string();
     }
 
-    bool operator<(const RefId& lhs, std::string_view rhs)
+    std::string EmptyRefId::toDebugString() const
     {
-        return Misc::StringUtils::ciLess(lhs.mId, rhs);
+        return "Empty{}";
     }
 
-    bool operator<(std::string_view lhs, const RefId& rhs)
+    std::ostream& operator<<(std::ostream& stream, EmptyRefId value)
     {
-        return Misc::StringUtils::ciLess(lhs, rhs.mId);
-    }
-
-    std::ostream& operator<<(std::ostream& os, const RefId& refId)
-    {
-        os << refId.getRefIdString();
-        return os;
-    }
-
-    RefId RefId::stringRefId(std::string_view id)
-    {
-        RefId newRefId;
-        newRefId.mId = id;
-        return newRefId;
-    }
-
-    RefId RefId::formIdRefId(const ESM4::FormId id)
-    {
-        return ESM::RefId::stringRefId(ESM4::formIdToString(id));
+        return stream << value.toDebugString();
     }
 
     bool RefId::operator==(std::string_view rhs) const
     {
-        return Misc::StringUtils::ciEqual(mId, rhs);
+        return std::visit(IsEqualToString{ rhs }, mValue);
+    }
+
+    bool operator<(RefId lhs, std::string_view rhs)
+    {
+        return std::visit(IsLessThanString{ rhs }, lhs.mValue);
+    }
+
+    bool operator<(std::string_view lhs, RefId rhs)
+    {
+        return std::visit(IsGreaterThanString{ lhs }, rhs.mValue);
+    }
+
+    std::ostream& operator<<(std::ostream& stream, RefId value)
+    {
+        return std::visit([&](auto v) -> std::ostream& { return stream << v; }, value.mValue);
+    }
+
+    RefId RefId::stringRefId(std::string_view value)
+    {
+        if (value.empty())
+            return RefId();
+        return RefId(StringRefId(value));
+    }
+
+    const std::string& RefId::getRefIdString() const
+    {
+        return std::visit(GetRefString{}, mValue);
+    }
+
+    std::string RefId::toString() const
+    {
+        return std::visit([](auto v) { return v.toString(); }, mValue);
+    }
+
+    std::string RefId::toDebugString() const
+    {
+        return std::visit([](auto v) { return v.toDebugString(); }, mValue);
     }
 
     bool RefId::startsWith(std::string_view prefix) const
     {
-        return Misc::StringUtils::ciStartsWith(mId, prefix);
+        return std::visit(StartsWith{ prefix }, mValue);
+    }
+
+    bool RefId::endsWith(std::string_view suffix) const
+    {
+        return std::visit(EndsWith{ suffix }, mValue);
     }
 
     bool RefId::contains(std::string_view subString) const
     {
-        return Misc::StringUtils::ciFind(mId, subString) != std::string_view::npos;
+        return std::visit(Contains{ subString }, mValue);
     }
-
-    const RefId RefId::sEmpty = {};
-}
-
-std::size_t std::hash<ESM::RefId>::operator()(const ESM::RefId& k) const
-{
-    return Misc::StringUtils::CiHash()(k.getRefIdString());
 }

@@ -167,7 +167,7 @@ namespace MWLua
         {
             objectT["isValid"] = [](const ObjectT& o) { return !o.ptrOrNull().isEmpty(); };
             objectT["recordId"] = sol::readonly_property(
-                [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().getRefIdString(); });
+                [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().toDebugString(); });
             objectT["cell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>> {
                 const MWWorld::Ptr& ptr = o.ptr();
                 if (ptr.isInCell())

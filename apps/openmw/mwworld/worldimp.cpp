@@ -729,7 +729,7 @@ namespace MWWorld
         Ptr ret = searchPtr(name, activeOnly);
         if (!ret.isEmpty())
             return ret;
-        std::string error = "failed to find an instance of object '" + name.getRefIdString() + "'";
+        std::string error = "Failed to find an instance of object " + name.toDebugString();
         if (activeOnly)
             error += " in active cells";
         throw std::runtime_error(error);
@@ -1146,12 +1146,12 @@ namespace MWWorld
         MWWorld::Ptr newPtr = ptr;
 
         if (!isPlayer && !currCell)
-            throw std::runtime_error("Can not move actor \"" + ptr.getCellRef().getRefId().getRefIdString()
-                + "\" to another cell: current cell is nullptr");
+            throw std::runtime_error("Can not move actor " + ptr.getCellRef().getRefId().toDebugString()
+                + " to another cell: current cell is nullptr");
 
         if (!newCell)
-            throw std::runtime_error("Can not move actor \"" + ptr.getCellRef().getRefId().getRefIdString()
-                + "\" to another cell: new cell is nullptr");
+            throw std::runtime_error("Can not move actor " + ptr.getCellRef().getRefId().toDebugString()
+                + " to another cell: new cell is nullptr");
 
         if (currCell != newCell)
         {

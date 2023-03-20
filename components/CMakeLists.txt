@@ -85,7 +85,12 @@ add_component_dir (to_utf8
     to_utf8
     )
 
-add_component_dir(esm attr common defs esmcommon records util luascripts format refid esmbridge)
+add_component_dir(esm attr common defs esmcommon records util luascripts format refid esmbridge
+    formidrefid
+    stringrefid
+    generatedrefid
+    indexrefid
+    )
 
 add_component_dir(fx pass technique lexer widgets stateupdater)
 
