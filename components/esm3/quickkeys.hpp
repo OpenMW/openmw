@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_ESM_QUICKKEYS_H
 
 #include "components/esm/refid.hpp"
+
 #include <string>
 #include <vector>
 

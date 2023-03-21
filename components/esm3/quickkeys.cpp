@@ -15,12 +15,10 @@ namespace ESM
         {
             int keyType;
             esm.getHT(keyType);
-            std::string id;
-            id = esm.getHNString("ID__");
 
             QuickKey key;
             key.mType = keyType;
-            key.mId = ESM::RefId::stringRefId(id);
+            key.mId = esm.getHNRefId("ID__");
 
             mKeys.push_back(key);
 
