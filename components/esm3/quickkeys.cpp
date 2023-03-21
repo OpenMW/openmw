@@ -29,10 +29,10 @@ namespace ESM
 
     void QuickKeys::save(ESMWriter& esm) const
     {
-        for (std::vector<QuickKey>::const_iterator it = mKeys.begin(); it != mKeys.end(); ++it)
+        for (const QuickKey& key : mKeys)
         {
-            esm.writeHNT("TYPE", it->mType);
-            esm.writeHNRefId("ID__", it->mId);
+            esm.writeHNT("TYPE", key.mType);
+            esm.writeHNRefId("ID__", key.mId);
         }
     }
 
