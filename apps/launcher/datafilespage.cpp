@@ -9,6 +9,7 @@
 #include <thread>
 #include <mutex>
 #include <algorithm>
+#include <unordered_set>
 
 #include <apps/launcher/utils/cellnameloader.hpp>
 
@@ -235,21 +236,22 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
     if (!globalDataDir.isEmpty())
         directories.insert(0, globalDataDir);
 
-    // normalize user supplied directories: resolve symlink, convert to native separator, make absolute
-    for (auto& currentDir : directories)
-        currentDir = QDir(QDir::cleanPath(currentDir)).canonicalPath();
-
-    // add directories, archives and content files
-    directories.removeDuplicates();
-    for (const auto& currentDir : directories)
+    std::unordered_set<QString> visitedDirectories;
+    for (const QString& currentDir : directories)
     {
+        // normalize user supplied directories: resolve symlink, convert to native separator, make absolute
+        const QString canonicalDirPath = QDir(QDir::cleanPath(currentDir)).canonicalPath();
+
+        if (!visitedDirectories.insert(canonicalDirPath).second)
+            continue;
+
         // add new achives files presents in current directory
         addArchivesFromDir(currentDir);
 
         QString tooltip;
 
         // add content files presents in current directory
-        mSelector->addFiles(currentDir, mNewDataDirs.contains(currentDir));
+        mSelector->addFiles(currentDir, mNewDataDirs.contains(canonicalDirPath));
 
         // add current directory to list
         ui.directoryListWidget->addItem(currentDir);
@@ -257,7 +259,7 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         auto* item = ui.directoryListWidget->item(row);
 
         // Display new content with green background
-        if (mNewDataDirs.contains(currentDir))
+        if (mNewDataDirs.contains(canonicalDirPath))
         {
             tooltip += "Will be added to the current profile\n";
             item->setBackground(Qt::green);
