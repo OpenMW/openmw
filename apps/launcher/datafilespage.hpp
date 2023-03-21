@@ -41,7 +41,7 @@ namespace Launcher
         Ui::DataFilesPage ui;
 
     public:
-        explicit DataFilesPage(Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
+        explicit DataFilesPage(const Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
             Config::LauncherSettings& launcherSettings, MainDialog* parent = nullptr);
 
         QAbstractItemModel* profilesModel() const;
@@ -104,7 +104,7 @@ namespace Launcher
         TextInputDialog* mNewProfileDialog;
         TextInputDialog* mCloneProfileDialog;
 
-        Files::ConfigurationManager& mCfgMgr;
+        const Files::ConfigurationManager& mCfgMgr;
 
         Config::GameSettings& mGameSettings;
         Config::LauncherSettings& mLauncherSettings;

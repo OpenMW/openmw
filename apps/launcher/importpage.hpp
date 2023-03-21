@@ -26,7 +26,7 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        ImportPage(Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
+        explicit ImportPage(const Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
             Config::LauncherSettings& launcherSettings, MainDialog* parent = nullptr);
         ~ImportPage() override;
 
@@ -52,7 +52,7 @@ namespace Launcher
         Process::ProcessInvoker* mWizardInvoker;
         Process::ProcessInvoker* mImporterInvoker;
 
-        Files::ConfigurationManager& mCfgMgr;
+        const Files::ConfigurationManager& mCfgMgr;
 
         Config::GameSettings& mGameSettings;
         Config::LauncherSettings& mLauncherSettings;

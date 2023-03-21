@@ -2,8 +2,6 @@
 #define MAINDIALOG_H
 
 #ifndef Q_MOC_RUN
-#include <components/files/configurationmanager.hpp>
-
 #include <components/process/processinvoker.hpp>
 
 #include <components/config/gamesettings.hpp>
@@ -16,6 +14,11 @@ class QListWidgetItem;
 class QStackedWidget;
 class QStringListModel;
 class QString;
+
+namespace Files
+{
+    struct ConfigurationManager;
+}
 
 namespace Launcher
 {
@@ -41,7 +44,7 @@ namespace Launcher
         Q_OBJECT
 
     public:
-        explicit MainDialog(QWidget* parent = nullptr);
+        explicit MainDialog(const Files::ConfigurationManager& configurationManager, QWidget* parent = nullptr);
         ~MainDialog() override;
 
         FirstRunDialogResult showFirstRunDialog();
@@ -93,7 +96,7 @@ namespace Launcher
         Process::ProcessInvoker* mGameInvoker;
         Process::ProcessInvoker* mWizardInvoker;
 
-        Files::ConfigurationManager mCfgMgr;
+        const Files::ConfigurationManager& mCfgMgr;
 
         Config::GameSettings mGameSettings;
         Config::LauncherSettings mLauncherSettings;

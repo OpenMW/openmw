@@ -21,7 +21,7 @@ namespace
     }
 }
 
-Config::GameSettings::GameSettings(Files::ConfigurationManager& cfg)
+Config::GameSettings::GameSettings(const Files::ConfigurationManager& cfg)
     : mCfgMgr(cfg)
 {
 }
