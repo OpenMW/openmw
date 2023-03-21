@@ -580,10 +580,10 @@ void ContentSelectorModel::ContentModel::sortFiles()
 
 bool ContentSelectorModel::ContentModel::isChecked(const QString& filepath) const
 {
-    if (mCheckStates.contains(filepath))
-        return (mCheckStates[filepath] == Qt::Checked);
-
-    return false;
+    const auto it = mCheckStates.find(filepath);
+    if (it == mCheckStates.end())
+        return false;
+    return it.value() == Qt::Checked;
 }
 
 bool ContentSelectorModel::ContentModel::isEnabled(const QModelIndex& index) const
@@ -593,10 +593,10 @@ bool ContentSelectorModel::ContentModel::isEnabled(const QModelIndex& index) con
 
 bool ContentSelectorModel::ContentModel::isNew(const QString& filepath) const
 {
-    if (mNewFiles.contains(filepath))
-        return mNewFiles[filepath];
-
-    return false;
+    const auto it = mNewFiles.find(filepath);
+    if (it == mNewFiles.end())
+        return false;
+    return it.value();
 }
 
 void ContentSelectorModel::ContentModel::setNew(const QString& filepath, bool isNew)

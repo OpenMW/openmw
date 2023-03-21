@@ -98,6 +98,27 @@ namespace Launcher
         {
             return Settings::Manager::getUInt64("max navmeshdb file size", "Navigator") / (1024 * 1024);
         }
+
+        std::optional<QString> findFirstPath(const QStringList& directories, const QString& fileName)
+        {
+            for (const QString& directoryPath : directories)
+            {
+                const QString filePath = QDir(directoryPath).absoluteFilePath(fileName);
+                if (QFile::exists(filePath))
+                    return filePath;
+            }
+            return std::nullopt;
+        }
+
+        QStringList findAllFilePaths(const QStringList& directories, const QStringList& fileNames)
+        {
+            QStringList result;
+            result.reserve(fileNames.size());
+            for (const QString& fileName : fileNames)
+                if (const auto filepath = findFirstPath(directories, fileName))
+                    result.append(*filepath);
+            return result;
+        }
     }
 }
 
@@ -305,25 +326,8 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
         row++;
     }
 
-    PathIterator pathIterator(directories);
-
-    mSelector->setProfileContent(filesInProfile(contentModelName, pathIterator));
-}
-
-QStringList Launcher::DataFilesPage::filesInProfile(const QString& profileName, PathIterator& pathIterator)
-{
-    QStringList files = mLauncherSettings.getContentListFiles(profileName);
-    QStringList filepaths;
-
-    for (const QString& file : files)
-    {
-        QString filepath = pathIterator.findFirstPath(file);
-
-        if (!filepath.isEmpty())
-            filepaths << filepath;
-    }
-
-    return filepaths;
+    mSelector->setProfileContent(
+        findAllFilePaths(directories, mLauncherSettings.getContentListFiles(contentModelName)));
 }
 
 void Launcher::DataFilesPage::saveSettings(const QString& profile)
@@ -377,21 +381,20 @@ QStringList Launcher::DataFilesPage::selectedDirectoriesPaths() const
     QStringList dirList;
     for (int i = 0; i < ui.directoryListWidget->count(); ++i)
     {
-        if (ui.directoryListWidget->item(i)->flags() & Qt::ItemIsEnabled)
-            dirList.append(ui.directoryListWidget->item(i)->text());
+        const QListWidgetItem* item = ui.directoryListWidget->item(i);
+        if (item->flags() & Qt::ItemIsEnabled)
+            dirList.append(item->text());
     }
     return dirList;
 }
 
-QStringList Launcher::DataFilesPage::selectedArchivePaths(bool all) const
+QStringList Launcher::DataFilesPage::selectedArchivePaths() const
 {
     QStringList archiveList;
     for (int i = 0; i < ui.archiveListWidget->count(); ++i)
     {
-        const auto* item = ui.archiveListWidget->item(i);
-        const auto archive = ui.archiveListWidget->item(i)->text();
-
-        if (all || item->checkState() == Qt::Checked)
+        const QListWidgetItem* item = ui.archiveListWidget->item(i);
+        if (item->checkState() == Qt::Checked)
             archiveList.append(item->text());
     }
     return archiveList;
@@ -403,11 +406,8 @@ QStringList Launcher::DataFilesPage::selectedFilePaths() const
     ContentSelectorModel::ContentFileList items = mSelector->selectedFiles();
     QStringList filePaths;
     for (const ContentSelectorModel::EsmFile* item : items)
-    {
-        QFile file(item->filePath());
-        if (file.exists())
+        if (QFile::exists(item->filePath()))
             filePaths.append(item->filePath());
-    }
     return filePaths;
 }
 
@@ -724,6 +724,10 @@ void Launcher::DataFilesPage::addArchivesFromDir(const QString& path)
 {
     QDir dir(path, "*.bsa");
 
+    std::unordered_set<QString> archives;
+    for (int i = 0; i < ui.archiveListWidget->count(); ++i)
+        archives.insert(ui.archiveListWidget->item(i)->text());
+
     for (const auto& fileinfo : dir.entryInfoList())
     {
         const auto absPath = fileinfo.absoluteFilePath();
@@ -731,9 +735,8 @@ void Launcher::DataFilesPage::addArchivesFromDir(const QString& path)
             continue;
 
         const auto fileName = fileinfo.fileName();
-        const auto currentList = selectedArchivePaths(true);
 
-        if (!currentList.contains(fileName, Qt::CaseInsensitive))
+        if (archives.insert(fileName).second)
             addArchive(fileName, Qt::Unchecked);
     }
 }

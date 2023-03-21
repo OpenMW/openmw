@@ -45,19 +45,19 @@ namespace ContentSelectorModel
         void setGameFiles(const QStringList& gameFiles);
         void setDescription(const QString& description);
 
-        inline void addGameFile(const QString& name) { mGameFiles.append(name); }
+        void addGameFile(const QString& name) { mGameFiles.append(name); }
         QVariant fileProperty(const FileProperty prop) const;
 
-        inline QString fileName() const { return mFileName; }
-        inline QString author() const { return mAuthor; }
-        inline QDateTime modified() const { return mModified; }
+        QString fileName() const { return mFileName; }
+        QString author() const { return mAuthor; }
+        QDateTime modified() const { return mModified; }
         ESM::FormatVersion formatVersion() const { return mVersion; }
-        inline QString filePath() const { return mPath; }
+        QString filePath() const { return mPath; }
 
         /// @note Contains file names, not paths.
-        inline const QStringList& gameFiles() const { return mGameFiles; }
-        inline QString description() const { return mDescription; }
-        inline QString toolTip() const
+        const QStringList& gameFiles() const { return mGameFiles; }
+        QString description() const { return mDescription; }
+        QString toolTip() const
         {
             return sToolTip.arg(mAuthor)
                 .arg(mVersion)
