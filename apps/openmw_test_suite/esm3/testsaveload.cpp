@@ -63,7 +63,8 @@ namespace ESM
 
     inline std::ostream& operator<<(std::ostream& stream, const ESM::QuickKeys::QuickKey& value)
     {
-        return stream << "ESM::QuickKeys::QuickKey {.mType = '" << value.mType << "', .mId = " << value.mId << "}";
+        return stream << "ESM::QuickKeys::QuickKey {.mType = '" << static_cast<std::uint32_t>(value.mType)
+                      << "', .mId = " << value.mId << "}";
     }
 
     namespace
@@ -312,11 +313,11 @@ namespace ESM
             const QuickKeys record {
                 .mKeys = {
                     {
-                        .mType = 42,
+                        .mType = QuickKeys::Type::Magic,
                         .mId = generateRandomRefId(32),
                     },
                     {
-                        .mType = 13,
+                        .mType = QuickKeys::Type::MagicItem,
                         .mId = generateRandomRefId(32),
                     },
                 },

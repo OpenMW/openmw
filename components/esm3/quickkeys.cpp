@@ -13,11 +13,8 @@ namespace ESM
 
         while (esm.isNextSub("TYPE"))
         {
-            int keyType;
-            esm.getHT(keyType);
-
             QuickKey key;
-            key.mType = keyType;
+            esm.getHT(key.mType);
             key.mId = esm.getHNRefId("ID__");
 
             mKeys.push_back(key);

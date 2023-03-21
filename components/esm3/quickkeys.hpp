@@ -13,9 +13,18 @@ namespace ESM
 
     struct QuickKeys
     {
+        enum class Type : std::uint32_t
+        {
+            Item = 0,
+            Magic = 1,
+            MagicItem = 2,
+            Unassigned = 3,
+            HandToHand = 4,
+        };
+
         struct QuickKey
         {
-            int mType;
+            Type mType;
             RefId mId; // Spell or Item ID
         };
 
