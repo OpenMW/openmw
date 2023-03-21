@@ -9,6 +9,7 @@
 #include <thread>
 #include <mutex>
 #include <algorithm>
+#include <unordered_set>
 
 #include <apps/launcher/utils/cellnameloader.hpp>
 
@@ -239,10 +240,12 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
     for (auto& currentDir : directories)
         currentDir = QDir(QDir::cleanPath(currentDir)).canonicalPath();
 
-    // add directories, archives and content files
-    directories.removeDuplicates();
-    for (const auto& currentDir : directories)
+    std::unordered_set<QString> visitedDirectories;
+    for (const QString& currentDir : directories)
     {
+        if (!visitedDirectories.insert(currentDir).second)
+            continue;
+
         // add new achives files presents in current directory
         addArchivesFromDir(currentDir);
 
