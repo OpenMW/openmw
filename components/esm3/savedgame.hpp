@@ -27,8 +27,8 @@ namespace ESM
         // Name of the class. When using a custom class, the ID is not really meaningful prior
         // to loading the savegame, so the name is stored separately.
         std::string mPlayerClassName;
-
-        ESM::RefId mPlayerCell;
+        // Name of the cell. Note that this is not an ID.
+        std::string mPlayerCellName;
         EpochTimeStamp mInGameTime;
         double mTimePlayed;
         std::string mDescription;
