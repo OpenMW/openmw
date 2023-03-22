@@ -9,7 +9,7 @@
 
         <Widget type="AutoSizedButton" skin="MW_Button" position="340 240 24 24" name="CancelButton">
             <Property key="ExpandDirection" value="Left"/>
-            <Property key="Caption" value="#{sCancel}"/>
+            <Property key="Caption" value="#{Interface:Cancel}"/>
         </Widget>
 
 

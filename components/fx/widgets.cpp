@@ -33,7 +33,7 @@ namespace fx
             if (!uniform)
                 return;
 
-            mCheckbutton->setCaptionWithReplacing(value ? "#{sOn}" : "#{sOff}");
+            mCheckbutton->setCaptionWithReplacing(value ? "#{Interface:On}" : "#{Interface:Off}");
             mFill->setVisible(value);
 
             uniform->setValue<bool>(value);

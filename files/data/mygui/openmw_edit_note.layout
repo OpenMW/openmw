@@ -21,10 +21,10 @@
                 <Property key="Caption" value="#{sDelete}"/>
             </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton">
-                <Property key="Caption" value="#{sOk}"/>
+                <Property key="Caption" value="#{Interface:OK}"/>
             </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
-                <Property key="Caption" value="#{sCancel}"/>
+                <Property key="Caption" value="#{Interface:Cancel}"/>
             </Widget>
         </Widget>
 

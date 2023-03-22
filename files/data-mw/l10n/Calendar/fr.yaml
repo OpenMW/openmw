@@ -31,7 +31,7 @@ monthInGenitive10: "Soufflegivre"
 monthInGenitive11: "Sombreciel"
 monthInGenitive12: "Soirétoile"
 
-dateFormat: "Le {day} du {monthInGenitive} {year}"
+dateFormat: "Le {day} du {monthInGenitive} {year, number, :: group-off}"
 
 weekday1: "Sundas"
 weekday2: "Morndas"

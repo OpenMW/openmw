@@ -83,7 +83,7 @@
                 <Property key="Caption" value="#{sBack}"/>
             </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="OKButton">
-                <Property key="Caption" value="#{sOK}"/>
+                <Property key="Caption" value="#{Interface:OK}"/>
             </Widget>
         </Widget>
 

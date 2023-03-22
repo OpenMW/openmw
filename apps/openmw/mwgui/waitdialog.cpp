@@ -163,9 +163,9 @@ namespace MWGui
             hour = 12;
 
         ESM::EpochTimeStamp currentDate = MWBase::Environment::get().getWorld()->getEpochTimeStamp();
-        std::string daysPassed
-            = Misc::StringUtils::format("(#{sDay} %i)", MWBase::Environment::get().getWorld()->getTimeStamp().getDay());
-        std::string_view formattedHour(pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
+        std::string daysPassed = Misc::StringUtils::format(
+            "(#{Calendar:day} %i)", MWBase::Environment::get().getWorld()->getTimeStamp().getDay());
+        std::string_view formattedHour(pm ? "#{Calendar:pm}" : "#{Calendar:am}");
         std::string dateTimeText
             = Misc::StringUtils::format("%i %s %s %i %s", currentDate.mDay, month, daysPassed, hour, formattedHour);
         mDateTimeText->setCaptionWithReplacing(dateTimeText);

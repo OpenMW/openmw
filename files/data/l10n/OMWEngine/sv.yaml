@@ -1,3 +1,9 @@
+# Console
+
+#-- To be translated
+#ConsoleWindow: "Console"
+
+
 # Debug window
 
 DebugWindow: "Felsökning"
@@ -9,11 +15,38 @@ PhysicsProfiler: "Fysikprofilerare"
 
 BuildingNavigationMesh: "Bygger navigeringsmesh"
 
+#-- To be translated
+#AskLoadLastSave: "The most recent save is '%s'. Do you want to load it?"
+#InitializingData: "Initializing Data..."
+#LoadingExterior: "Loading Area"
+#LoadingFailed: "Failed to load saved game"
+#LoadingInterior: "Loading Area"
+#LoadingInProgress: "Loading Save Game"
+#LoadingRequiresNewVersionError: |-
+#    This save file was created using a newer version of OpenMW and is thus not supported.
+#    Please upgrade to the newest OpenMW version to load this file.
+#NewGameConfirmation: "Do you want to start a new game and lose the current one?"
+#SaveGameDenied: "The game cannot be saved right now."
+#SavingInProgress: "Saving..."
+#QuitGameConfirmation: "Quit the game?"
+
 
 # Save game menu
 
 SelectCharacter: "Välj spelfigur..."
 TimePlayed: "Speltid"
+
+
+#-- To be translated
+#DeleteGame: "Delete Game"
+#DeleteGameConfirmation: "Are you sure you want to delete this saved game?"
+#EmptySaveNameError: "Game can not be saved without a name!"
+#LoadGameConfirmation: "Do you want to load a saved game and lose the current one?"
+#MissingContentFilesConfirmation: |
+#    The currently selected content files do not match the ones used by this save game.
+#    Errors may occur during load or game play.
+#    Do you wish to continue?
+#OverwriteGameConfirmation: "Are you sure you want to overwrite this saved game?"
 
 
 # Settings menu
@@ -86,3 +119,44 @@ WindowModeHint: "Notera: Fullskärm i fönsterläge\nanvänder alltid skärmens 
 WindowModeWindowed: "Fönster"
 WindowModeWindowedFullscreen: "Fullskärm i fönsterläge"
 
+#-- To be translated
+#Audio: "Audio"
+#AudioMaster: "Master"
+#AudioVoice: "Voice"
+#AudioEffects: "Effects"
+#AudioFootsteps: "Footsteps"
+#AudioMusic: "Music"
+#ConfirmResetBindings: "Reset all controls to the default?"
+#ConfirmResolution: "New resolution will be applied immediately. Do you want to continue?"
+#Controls: "Controls"
+#DelayLow: "Fast"
+#DelayHigh: "Slow"
+#DetailLevel: "Detail Level"
+#Difficulty: "Difficulty"
+#DifficultyEasy: "Easy"
+#DifficultyHard: "Hard"
+#DistanceHigh: "Far"
+#DistanceLow: "Near"
+#EnableController: "Enable Controller"
+#FieldOfViewLow: "Low"
+#FieldOfViewHigh: "High"
+#GammaCorrection: "Gamma Correction"
+#GammaDark: "Dark"
+#GammaLight: "Light"
+#InvertYAxis: "Invert Y Axis"
+#MenuHelpDelay: "Menu Help Delay"
+#MenuTransparency: "Menu Transparency"
+#Preferences: "Prefs"
+#QualityHigh: "High"
+#QualityLow: "Low"
+#QualityMedium: "Medium"
+#RebindAction: "Press a key or button to rebind this control."
+#ResetControls: "Reset Controls"
+#SensitivityHigh: "High"
+#SensitivityLow: "Low"
+#SettingsWindow: "Options"
+#Subtitles: "Subtitles"
+#TransparencyFull: "Full"
+#TransparencyNone: "None"
+#Video: "Video"
+#ViewDistance: "View Distance"

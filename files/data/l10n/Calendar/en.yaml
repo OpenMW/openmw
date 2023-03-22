@@ -26,7 +26,7 @@ monthInGenitive10: "October"
 monthInGenitive11: "November"
 monthInGenitive12: "December"
 
-dateFormat: "day {day} of {monthInGenitive} {year}"
+dateFormat: "{day} {monthInGenitive} {year, number, :: group-off}"
 
 weekday1: "Sunday"
 weekday2: "Monday"
@@ -35,3 +35,7 @@ weekday4: "Wednesday"
 weekday5: "Thursday"
 weekday6: "Friday"
 weekday7: "Saturday"
+
+am: "am"
+pm: "pm"
+day: "day"

@@ -107,7 +107,7 @@ namespace MWGui
             else
             {
                 ConfirmationDialog* dialog = winMgr->getConfirmationDialog();
-                dialog->askForConfirmation("#{sMessage2}");
+                dialog->askForConfirmation("#{OMWEngine:QuitGameConfirmation}");
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &MainMenu::onExitConfirmed);
                 dialog->eventCancelClicked.clear();
@@ -120,7 +120,7 @@ namespace MWGui
             else
             {
                 ConfirmationDialog* dialog = winMgr->getConfirmationDialog();
-                dialog->askForConfirmation("#{sNotifyMessage54}");
+                dialog->askForConfirmation("#{OMWEngine:NewGameConfirmation}");
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &MainMenu::onNewGameConfirmed);
                 dialog->eventCancelClicked.clear();

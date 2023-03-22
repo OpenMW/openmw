@@ -1,5 +1,7 @@
 #include "datetimemanager.hpp"
 
+#include <components/l10n/manager.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
@@ -152,22 +154,28 @@ namespace MWWorld
         globalVariables[Globals::sYear].setInteger(mYear);
     }
 
+    static std::vector<std::string> getMonthNames()
+    {
+        auto calendarL10n = MWBase::Environment::get().getL10nManager()->getContext("Calendar");
+        std::string prefix = "month";
+        std::vector<std::string> months;
+        int count = 12;
+        months.reserve(count);
+        for (int i = 1; i <= count; ++i)
+            months.push_back(calendarL10n->formatMessage(prefix + std::to_string(i), {}, {}));
+        return months;
+    }
+
     std::string_view DateTimeManager::getMonthName(int month) const
     {
+        static std::vector<std::string> months = getMonthNames();
+
         if (month == -1)
             month = mMonth;
-
-        const int months = 12;
-        if (month < 0 || month >= months)
+        if (month < 0 || month >= static_cast<int>(months.size()))
             return {};
-
-        static const std::string_view monthNames[months] = { "sMonthMorningstar", "sMonthSunsdawn", "sMonthFirstseed",
-            "sMonthRainshand", "sMonthSecondseed", "sMonthMidyear", "sMonthSunsheight", "sMonthLastseed",
-            "sMonthHeartfire", "sMonthFrostfall", "sMonthSunsdusk", "sMonthEveningstar" };
-
-        const ESM::GameSetting* setting
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(monthNames[month]);
-        return setting->mValue.getString();
+        else
+            return months[month];
     }
 
     bool DateTimeManager::updateGlobalFloat(GlobalVariableName name, float value)

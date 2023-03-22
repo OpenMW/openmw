@@ -467,7 +467,7 @@ namespace MWGui
 
     void HUD::unsetSelectedSpell()
     {
-        std::string_view spellName = "#{sNone}";
+        std::string_view spellName = "#{Interface:None}";
         if (spellName != mSpellName && mSpellVisible)
         {
             mWeaponSpellTimer = 5.0f;

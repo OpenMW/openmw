@@ -29,7 +29,7 @@ monthInGenitive10: "Мороза"
 monthInGenitive11: "Заката"
 monthInGenitive12: "Вечерней Звезды"
 
-dateFormat: "день {day} {monthInGenitive} {year}"
+dateFormat: "день {day} {monthInGenitive} {year, number, :: group-off}"
 
 weekday1: "Сандас"
 weekday2: "Морндас"

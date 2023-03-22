@@ -5,10 +5,10 @@
         <Widget type="TabControl" skin="TabControl" position="8 8 368 405" align="Stretch" name="SettingsTab">
             <Property key="ButtonAutoWidth" value="true"/>
             <Widget type="TabItem">
-                <Property key="Caption" value=" #{sPrefs} "/>
+                <Property key="Caption" value=" #{OMWEngine:Preferences} "/>
                 <Widget type="Widget" position="4 4 352 54" align="Left Top HStretch">
                     <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top">
-                        <Property key="Caption" value="#{sTransparency_Menu}"/>
+                        <Property key="Caption" value="#{OMWEngine:MenuTransparency}"/>
                     </Widget>
                     <Widget type="ScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
                         <Property key="Range" value="10000"/>
@@ -19,17 +19,17 @@
                         <UserString key="SettingValueType" value="Float"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
-                        <Property key="Caption" value="#{sFull}"/>
+                        <Property key="Caption" value="#{OMWEngine:TransparencyFull}"/>
                         <Property key="TextAlign" value="Left"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Right Top">
-                        <Property key="Caption" value="#{sNone}"/>
+                        <Property key="Caption" value="#{OMWEngine:TransparencyNone}"/>
                         <Property key="TextAlign" value="Right"/>
                     </Widget>
                 </Widget>
                 <Widget type="Widget" position="4 64 352 54" align="Left Top HStretch">
                     <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top">
-                        <Property key="Caption" value="#{sMenu_Help_Delay}"/>
+                        <Property key="Caption" value="#{OMWEngine:MenuHelpDelay}"/>
                     </Widget>
                     <Widget type="ScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
                         <Property key="Range" value="10000"/>
@@ -40,17 +40,17 @@
                         <UserString key="SettingValueType" value="Float"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
-                        <Property key="Caption" value="#{sFast}"/>
+                        <Property key="Caption" value="#{OMWEngine:DelayLow}"/>
                         <Property key="TextAlign" value="Left"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Right Top">
-                        <Property key="Caption" value="#{sSlow}"/>
+                        <Property key="Caption" value="#{OMWEngine:DelayHigh}"/>
                         <Property key="TextAlign" value="Right"/>
                     </Widget>
                 </Widget>
                 <Widget type="Widget" position="4 124 352 54" align="Left Top HStretch">
                     <Widget type="TextBox" skin="NormalText" position="0 0 352 16" align="Left Top" name="DifficultyText">
-                        <Property key="Caption" value="#{sDifficulty}"/>
+                        <Property key="Caption" value="#{OMWEngine:Difficulty}"/>
                     </Widget>
                     <Widget type="ScrollBar" skin="MW_HScroll" position="0 20 352 14" align="Left Top HStretch">
                         <Property key="Range" value="201"/>
@@ -62,14 +62,14 @@
                         <UserString key="SettingMin" value="-100"/>
                         <UserString key="SettingMax" value="100"/>
                         <UserString key="SettingLabelWidget" value="DifficultyText"/>
-                        <UserString key="SettingLabelCaption" value="#{sDifficulty} (%s)"/>
+                        <UserString key="SettingLabelCaption" value="#{OMWEngine:Difficulty} (%s)"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
-                        <Property key="Caption" value="#{sEasy}"/>
+                        <Property key="Caption" value="#{OMWEngine:DifficultyEasy}"/>
                         <Property key="TextAlign" value="Left"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Right Top">
-                        <Property key="Caption" value="#{sHard}"/>
+                        <Property key="Caption" value="#{OMWEngine:DifficultyHard}"/>
                         <Property key="TextAlign" value="Right"/>
                     </Widget>
                 </Widget>
@@ -90,11 +90,11 @@
                         <UserString key="SettingLabelCaption" value="#{OMWEngine:ActorsProcessingRange} (%s)"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Left Top">
-                        <Property key="Caption" value="#{sLow}"/>
+                        <Property key="Caption" value="#{OMWEngine:DistanceLow}"/>
                         <Property key="TextAlign" value="Left"/>
                     </Widget>
                     <Widget type="TextBox" skin="SandText" position="0 38 352 16" align="Right Top">
-                        <Property key="Caption" value="#{sHigh}"/>
+                        <Property key="Caption" value="#{OMWEngine:DistanceHigh}"/>
                         <Property key="TextAlign" value="Right"/>
                     </Widget>
                 </Widget>
@@ -125,7 +125,7 @@
                         <UserString key="SettingType" value="CheckButton"/>
                     </Widget>
                     <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 71 16" align="Left Top">
-                        <Property key="Caption" value="#{sSubtitles}"/>
+                        <Property key="Caption" value="#{OMWEngine:Subtitles}"/>
                     </Widget>
                 </Widget>
                 <Widget type="HBox" position="4 340 260 28">
@@ -140,9 +140,9 @@
                 </Widget>
             </Widget>
             <Widget type="TabItem">
-                <Property key="Caption" value=" #{sAudio} "/>
+                <Property key="Caption" value=" #{OMWEngine:Audio} "/>
                 <Widget type="TextBox" skin="NormalText" position="4 4 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sMaster}"/>
+                    <Property key="Caption" value="#{OMWEngine:AudioMaster}"/>
                 </Widget>
                 <Widget type="ScrollBar" skin="MW_HScroll" position="4 28 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
@@ -153,7 +153,7 @@
                     <UserString key="SettingValueType" value="Float"/>
                 </Widget>
                 <Widget type="TextBox" skin="NormalText" position="4 54 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sVoice}"/>
+                    <Property key="Caption" value="#{OMWEngine:AudioVoice}"/>
                 </Widget>
                 <Widget type="ScrollBar" skin="MW_HScroll" position="4 78 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
@@ -164,7 +164,7 @@
                     <UserString key="SettingValueType" value="Float"/>
                 </Widget>
                 <Widget type="TextBox" skin="NormalText" position="4 104 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sEffects}"/>
+                    <Property key="Caption" value="#{OMWEngine:AudioEffects}"/>
                 </Widget>
                 <Widget type="ScrollBar" skin="MW_HScroll" position="4 128 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
@@ -175,7 +175,7 @@
                     <UserString key="SettingValueType" value="Float"/>
                 </Widget>
                 <Widget type="TextBox" skin="NormalText" position="4 154 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sFootsteps}"/>
+                    <Property key="Caption" value="#{OMWEngine:AudioFootsteps}"/>
                 </Widget>
                 <Widget type="ScrollBar" skin="MW_HScroll" position="4 178 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
@@ -186,7 +186,7 @@
                     <UserString key="SettingValueType" value="Float"/>
                 </Widget>
                 <Widget type="TextBox" skin="NormalText" position="4 204 352 18" align="Left Top">
-                    <Property key="Caption" value="#{sMusic}"/>
+                    <Property key="Caption" value="#{OMWEngine:AudioMusic}"/>
                 </Widget>
                 <Widget type="ScrollBar" skin="MW_HScroll" position="4 228 352 18" align="HStretch Top">
                     <Property key="Range" value="10000"/>
@@ -198,7 +198,7 @@
                 </Widget>
             </Widget>
             <Widget type="TabItem">
-                <Property key="Caption" value=" #{sControls} "/>
+                <Property key="Caption" value=" #{OMWEngine:Controls} "/>
 
                 <Widget type="HBox" position="4 4 360 28">
                     <Property key="Padding" value="0"/>
@@ -217,7 +217,7 @@
                     </Widget>
                 </Widget>
                 <Widget type="AutoSizedButton" skin="MW_Button" position="4 198 137 24" align="Left Bottom" name="ResetControlsButton">
-                    <Property key="Caption" value="#{sControlsMenu1}"/>
+                    <Property key="Caption" value="#{OMWEngine:ResetControls}"/>
                 </Widget>
                 <Widget type="HBox" position="4 228 600 28" align="Left Bottom">
                     <Widget type="AutoSizedButton" skin="MW_Button">
@@ -234,7 +234,7 @@
                         <UserString key="SettingType" value="CheckButton"/>
                     </Widget>
                     <Widget type="AutoSizedTextBox" skin="SandText" position="56 4 78 16" align="Left Bottom">
-                        <Property key="Caption" value="#{sMouseFlip}"/>
+                        <Property key="Caption" value="#{OMWEngine:InvertYAxis}"/>
                     </Widget>
                 </Widget>
                 <Widget type="TextBox" skin="NormalText" position="4 258 352 18" align="Left Bottom">
@@ -251,11 +251,11 @@
                     <UserString key="SettingMax" value="5.0"/>
                 </Widget>
                 <Widget type="TextBox" skin="SandText" position="4 306 352 18" align="Left Bottom">
-                    <Property key="Caption" value="#{sLow}"/>
+                    <Property key="Caption" value="#{OMWEngine:SensitivityLow}"/>
                     <Property key="TextAlign" value="Left"/>
                 </Widget>
                 <Widget type="TextBox" skin="SandText" position="4 306 352 18" align="Right Bottom">
-                    <Property key="Caption" value="#{sHigh}"/>
+                    <Property key="Caption" value="#{OMWEngine:SensitivityHigh}"/>
                     <Property key="TextAlign" value="Right"/>
                 </Widget>
                 <Widget type="HBox" position="4 328 352 28" align="Left Bottom">
@@ -265,16 +265,16 @@
                         <UserString key="SettingType" value="CheckButton"/>
                     </Widget>
                     <Widget type="AutoSizedTextBox" skin="SandText" position="28 4 78 16" align="Left Bottom">
-                        <Property key="Caption" value="#{sEnableJoystick}"/>
+                        <Property key="Caption" value="#{OMWEngine:EnableController}"/>
                     </Widget>
                 </Widget>
             </Widget>
             <Widget type="TabItem">
-                <Property key="Caption" value=" #{sVideo} "/>
+                <Property key="Caption" value=" #{OMWEngine:Video} "/>
                 <Widget type="TabControl" skin="TabControlInner" position="4 4 352 390" align="Stretch">
                     <Property key="ButtonAutoWidth" value="true"/>
                     <Widget type="TabItem">
-                        <Property key="Caption" value=" #{sVideo} "/>
+                        <Property key="Caption" value=" #{OMWEngine:Video} "/>
                         <Widget type="ListBox" skin="MW_List" position="0 4 195 225" align="Left Top" name="ResolutionList"/>
                         <Widget type="TextBox" skin="NormalText" position="207 4 250 18" align="Left Top">
                             <Property key="Caption" value="#{OMWEngine:WindowMode}"/>
@@ -291,8 +291,8 @@
                         </Widget>
                         <Widget type="HBox" position="207 74 400 28">
                             <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 200 24" align="Left Top" name="VSyncModeList">
-                                <Property key="AddItem" value="#{sOff}"/>
-                                <Property key="AddItem" value="#{sOn}"/>
+                                <Property key="AddItem" value="#{Interface:Off}"/>
+                                <Property key="AddItem" value="#{Interface:On}"/>
                                 <Property key="AddItem" value="#{OMWEngine:VSyncAdaptive}"/>
                             </Widget>
                         </Widget>
@@ -342,15 +342,15 @@
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:FieldOfView} (%s)"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 286 352 18" align="Left Top">
-                            <Property key="Caption" value="#{sLow}"/>
+                            <Property key="Caption" value="#{OMWEngine:FieldOfViewLow}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 286 352 18" align="Right Top">
-                            <Property key="Caption" value="#{sHigh}"/>
+                            <Property key="Caption" value="#{OMWEngine:FieldOfViewHigh}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
                         <Widget type="TextBox" skin="NormalText" position="0 308 352 18" align="Left Top" name="GammaText">
-                            <Property key="Caption" value="#{sGamma_Correction}"/>
+                            <Property key="Caption" value="#{OMWEngine:GammaCorrection}"/>
                         </Widget>
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 332 352 18" align="HStretch Top" name="GammaSlider">
                             <Property key="Range" value="10000"/>
@@ -363,16 +363,16 @@
                             <UserString key="SettingMax" value="3.0"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 356 352 18" align="Left Top" name="GammaTextDark">
-                            <Property key="Caption" value="#{sDark_Gamma}"/>
+                            <Property key="Caption" value="#{OMWEngine:GammaDark}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 356 352 18" align="Right Top" name="GammaTextLight">
-                            <Property key="Caption" value="#{sLight_Gamma}"/>
+                            <Property key="Caption" value="#{OMWEngine:GammaLight}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
                     </Widget>
                     <Widget type="TabItem">
-                        <Property key="Caption" value=" #{sDetail_Level} "/>
+                        <Property key="Caption" value=" #{OMWEngine:DetailLevel} "/>
 
                         <Widget type="AutoSizedTextBox" skin="NormalText" align="Left Top">
                             <Property key="Caption" value="#{OMWEngine:TextureFiltering}"/>
@@ -398,7 +398,7 @@
                         </Widget>
 
                         <Widget type="AutoSizedTextBox" skin="NormalText" position="0 104 0 18" align="Left Top" name="RenderDistanceLabel">
-                            <Property key="Caption" value="#{sRender_Distance}"/>
+                            <Property key="Caption" value="#{OMWEngine:ViewDistance}"/>
                         </Widget>
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 126 352 18" align="HStretch Top" name="RenderingDistanceSlider">
                             <Property key="Range" value="4669"/>
@@ -410,7 +410,7 @@
                             <UserString key="SettingMin" value="2500"/>
                             <UserString key="SettingMax" value="7168"/>
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
-                            <UserString key="SettingLabelCaption" value="#{sRender_Distance} (%s)"/>
+                            <UserString key="SettingLabelCaption" value="#{OMWEngine:ViewDistance} (%s)"/>
                         </Widget>
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 126 352 18" align="HStretch Top" name="LargeRenderingDistanceSlider">
                             <Property key="Range" value="79421"/>
@@ -422,14 +422,14 @@
                             <UserString key="SettingMin" value="2500"/>
                             <UserString key="SettingMax" value="81920"/>
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
-                            <UserString key="SettingLabelCaption" value="#{sRender_Distance} (x%s)"/>
+                            <UserString key="SettingLabelCaption" value="#{OMWEngine:ViewDistance} (x%s)"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 148 352 18" align="Left Top">
-                            <Property key="Caption" value="#{sNear}"/>
+                            <Property key="Caption" value="#{OMWEngine:DistanceLow}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 148 352 18" align="Right Top">
-                            <Property key="Caption" value="#{sFar}"/>
+                            <Property key="Caption" value="#{OMWEngine:DistanceHigh}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
 
@@ -479,9 +479,9 @@
                                 <UserString key="HStretch" value="true"/>
                                 <UserString key="VStretch" value="false"/>
                                 <Widget type="ComboBox" skin="MW_ComboBox" position="0 0 200 24" align="Left Top" name="WaterTextureSize">
-                                    <Property key="AddItem" value="#{sLow}"/>
-                                    <Property key="AddItem" value="#{sMedium}"/>
-                                    <Property key="AddItem" value="#{sHigh}"/>
+                                    <Property key="AddItem" value="#{OMWEngine:QualityLow}"/>
+                                    <Property key="AddItem" value="#{OMWEngine:QualityMedium}"/>
+                                    <Property key="AddItem" value="#{OMWEngine:QualityHigh}"/>
                                 </Widget>
                                 <Widget type="Spacer" />
                             </Widget>
@@ -634,7 +634,7 @@
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsMinimumInteriorBrightness} (%s)"/>
                         </Widget>
                         <Widget type="AutoSizedButton" skin="MW_Button" position="0 290 0 0" align="Top Left" name="LightsResetButton">
-                            <Property key="Caption" value="#{sControlsMenu1}"/>
+                            <Property key="Caption" value="#{Interface:Reset}"/>
                         </Widget>
                     </Widget>
                 </Widget>
@@ -705,7 +705,7 @@
         </Widget>
         <Widget type="AutoSizedButton" skin="MW_Button" position="320 420 56 24" align="Right Bottom" name="OkButton">
             <Property key="ExpandDirection" value="Left"/>
-            <Property key="Caption" value="#{sOK}"/>
+            <Property key="Caption" value="#{Interface:OK}"/>
         </Widget>
     </Widget>
     <CodeGeneratorSettings/>
