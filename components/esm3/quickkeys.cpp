@@ -13,14 +13,9 @@ namespace ESM
 
         while (esm.isNextSub("TYPE"))
         {
-            int keyType;
-            esm.getHT(keyType);
-            std::string id;
-            id = esm.getHNString("ID__");
-
             QuickKey key;
-            key.mType = keyType;
-            key.mId = ESM::RefId::stringRefId(id);
+            esm.getHT(key.mType);
+            key.mId = esm.getHNRefId("ID__");
 
             mKeys.push_back(key);
 
@@ -31,10 +26,10 @@ namespace ESM
 
     void QuickKeys::save(ESMWriter& esm) const
     {
-        for (std::vector<QuickKey>::const_iterator it = mKeys.begin(); it != mKeys.end(); ++it)
+        for (const QuickKey& key : mKeys)
         {
-            esm.writeHNT("TYPE", it->mType);
-            esm.writeHNRefId("ID__", it->mId);
+            esm.writeHNT("TYPE", key.mType);
+            esm.writeHNRefId("ID__", key.mId);
         }
     }
 

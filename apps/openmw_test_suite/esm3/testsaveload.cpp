@@ -5,6 +5,7 @@
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadscpt.hpp>
 #include <components/esm3/player.hpp>
+#include <components/esm3/quickkeys.hpp>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -27,6 +28,11 @@ namespace ESM
         {
             return std::tie(value.mSound, value.mChance);
         }
+
+        auto tie(const ESM::QuickKeys::QuickKey& value)
+        {
+            return std::tie(value.mType, value.mId);
+        }
     }
 
     inline bool operator==(const ESM::ContItem& lhs, const ESM::ContItem& rhs)
@@ -48,6 +54,17 @@ namespace ESM
     {
         return stream << "ESM::Region::SoundRef {.mSound = '" << value.mSound << "', .mChance = " << value.mChance
                       << "}";
+    }
+
+    inline bool operator==(const ESM::QuickKeys::QuickKey& lhs, const ESM::QuickKeys::QuickKey& rhs)
+    {
+        return tie(lhs) == tie(rhs);
+    }
+
+    inline std::ostream& operator<<(std::ostream& stream, const ESM::QuickKeys::QuickKey& value)
+    {
+        return stream << "ESM::QuickKeys::QuickKey {.mType = '" << static_cast<std::uint32_t>(value.mType)
+                      << "', .mId = " << value.mId << "}";
     }
 
     namespace
@@ -289,6 +306,25 @@ namespace ESM
             saveAndLoadRecord(record, GetParam(), result);
             EXPECT_EQ(result.mId, record.mId);
             EXPECT_EQ(result.mData.mNumShorts, record.mData.mNumShorts);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, quickKeysShouldNotChange)
+        {
+            const QuickKeys record {
+                .mKeys = {
+                    {
+                        .mType = QuickKeys::Type::Magic,
+                        .mId = generateRandomRefId(32),
+                    },
+                    {
+                        .mType = QuickKeys::Type::MagicItem,
+                        .mId = generateRandomRefId(32),
+                    },
+                },
+            };
+            QuickKeys result;
+            saveAndLoadRecord(record, GetParam(), result);
+            EXPECT_EQ(result.mKeys, record.mKeys);
         }
 
         INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(formats));
