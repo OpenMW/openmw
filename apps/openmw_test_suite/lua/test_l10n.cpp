@@ -87,7 +87,7 @@ you_have_arrows: "Arrows count: {count}"
         internal::CaptureStdout();
         l10n::Manager l10nManager(mVFS.get());
         l10nManager.setPreferredLocales({ "de", "en" });
-        EXPECT_THAT(internal::GetCapturedStdout(), "Preferred locales: de en\n");
+        EXPECT_THAT(internal::GetCapturedStdout(), "Preferred locales: gmst de en\n");
 
         l["l10n"] = LuaUtil::initL10nLoader(l, &l10nManager);
 
@@ -114,7 +114,7 @@ you_have_arrows: "Arrows count: {count}"
         internal::CaptureStdout();
         l10nManager.setPreferredLocales({ "en", "de" });
         EXPECT_THAT(internal::GetCapturedStdout(),
-            "Preferred locales: en de\n"
+            "Preferred locales: gmst en de\n"
             "Language file \"l10n/Test1/en.yaml\" is enabled\n"
             "Language file \"l10n/Test1/de.yaml\" is enabled\n"
             "Language file \"l10n/Test2/en.yaml\" is enabled\n");
@@ -152,7 +152,7 @@ you_have_arrows: "Arrows count: {count}"
         internal::CaptureStdout();
         l10nManager.setPreferredLocales({ "en-GB-oed", "de" });
         EXPECT_THAT(internal::GetCapturedStdout(),
-            "Preferred locales: en_GB_OED de\n"
+            "Preferred locales: gmst en_GB_OED de\n"
             "Language file \"l10n/Test1/en.yaml\" is enabled\n"
             "Language file \"l10n/Test1/de.yaml\" is enabled\n"
             "Language file \"l10n/Test2/en.yaml\" is enabled\n");
