@@ -224,18 +224,35 @@ MWWorld::CellStore* MWWorld::WorldModel::getInterior(std::string_view name)
     return result->second;
 }
 
+struct VisitorCellIdIsESM3Ext
+{
+    bool operator()(const ESM::Vec2iRefId& id)
+    {
+        coordOut = { id.getValue().first, id.getValue().second };
+        return true;
+    }
+
+    template <typename T>
+    bool operator()(const T&)
+    {
+        return false;
+    }
+
+    std::pair<int32_t, int32_t> coordOut = {};
+};
+
 MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::RefId& id)
 {
     auto result = mCells.find(id);
     if (result != mCells.end())
         return &result->second;
 
-    // TODO tetramir: in the future replace that with elsid's refId variant that can be a osg::Vec2i
-    ESM::CellId cellId = ESM::CellId::extractFromRefId(id);
-    if (cellId.mPaged) // That is an exterior cell Id
+    VisitorCellIdIsESM3Ext isESM3ExteriorVisitor;
+
+    if (visit(isESM3ExteriorVisitor, id)) // That is an exterior cell Id
     {
 
-        return getExterior(cellId.mIndex.mX, cellId.mIndex.mY);
+        return getExterior(isESM3ExteriorVisitor.coordOut.first, isESM3ExteriorVisitor.coordOut.second);
     }
 
     const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().search(id);

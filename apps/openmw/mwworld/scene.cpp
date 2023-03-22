@@ -677,8 +677,8 @@ namespace MWWorld
                 "Testing exterior cells (" + std::to_string(i) + "/" + std::to_string(cells.getExtSize()) + ")...");
 
             CellStore* cell = mWorld.getWorldModel().getExterior(it->mData.mX, it->mData.mY);
-            mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell->getCell()->getWorldSpace().getRefIdString()),
-                navigatorUpdateGuard.get());
+            mNavigator.setWorldspace(
+                Misc::StringUtils::lowerCase(cell->getCell()->getWorldSpace().toString()), navigatorUpdateGuard.get());
             const osg::Vec3f position
                 = osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits;
             mNavigator.updateBounds(position, navigatorUpdateGuard.get());
@@ -735,8 +735,8 @@ namespace MWWorld
                 "Testing interior cells (" + std::to_string(i) + "/" + std::to_string(cells.getIntSize()) + ")...");
 
             CellStore* cell = mWorld.getWorldModel().getInterior(it->mName);
-            mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell->getCell()->getWorldSpace().getRefIdString()),
-                navigatorUpdateGuard.get());
+            mNavigator.setWorldspace(
+                Misc::StringUtils::lowerCase(cell->getCell()->getWorldSpace().toString()), navigatorUpdateGuard.get());
             ESM::Position position;
             mWorld.findInteriorPosition(it->mName, position);
             mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
@@ -752,7 +752,7 @@ namespace MWWorld
             {
                 assert(!(*iter)->getCell()->isExterior());
 
-                if (it->mName == (*iter)->getCell()->getWorldSpace().getRefIdString())
+                if (it->mName == (*iter)->getCell()->getWorldSpace().toString())
                 {
                     unloadCell(*iter, navigatorUpdateGuard.get());
                     break;
@@ -891,8 +891,8 @@ namespace MWWorld
 
         loadingListener->setProgressRange(cell->count());
 
-        mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell->getCell()->getWorldSpace().getRefIdString()),
-            navigatorUpdateGuard.get());
+        mNavigator.setWorldspace(
+            Misc::StringUtils::lowerCase(cell->getCell()->getWorldSpace().toString()), navigatorUpdateGuard.get());
         mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
 
         // Load cell.

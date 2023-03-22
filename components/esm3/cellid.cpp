@@ -32,28 +32,36 @@ namespace ESM
             esm.writeHNT("CIDX", mIndex, 8);
     }
 
+    struct VisitCellRefId
+    {
+        CellId operator()(const ESM::StringRefId& id)
+        {
+            CellId out;
+            out.mPaged = false;
+            out.mWorldspace = id.getValue();
+            out.mIndex = { 0, 0 };
+            return out;
+        }
+        CellId operator()(const ESM::Vec2iRefId& id)
+        {
+            CellId out;
+            out.mPaged = true;
+            out.mIndex = { id.getValue().first, id.getValue().second };
+            return out;
+        }
+
+        template <typename T>
+        CellId operator()(const T& id)
+        {
+            throw std::runtime_error("cannot extract CellId from this Id type");
+        }
+    };
+
     CellId CellId::extractFromRefId(const ESM::RefId& id)
     {
         // This is bad and that code should not be merged.
-        const std::string& idString = id.getRefIdString();
-        CellId out;
-        if (idString[0] == '#' && idString.find(',')) // That is an exterior cell Id
-        {
-            int x, y;
-            std::stringstream stringStream = std::stringstream(idString);
-            char sharp = '#';
-            char comma = ',';
-            stringStream >> sharp >> x >> comma >> y;
-            out.mPaged = true;
-            out.mIndex = { x, y };
-        }
-        else
-        {
-            out.mPaged = false;
-            out.mWorldspace = Misc::StringUtils::lowerCase(idString);
-        }
 
-        return out;
+        return visit(VisitCellRefId(), id);
     }
 
     bool operator==(const CellId& left, const CellId& right)

@@ -14,6 +14,7 @@
 #include "generatedrefid.hpp"
 #include "indexrefid.hpp"
 #include "stringrefid.hpp"
+#include "vec2irefid.hpp"
 
 namespace ESM
 {
@@ -38,6 +39,7 @@ namespace ESM
         FormId = 3,
         Generated = 4,
         Index = 5,
+        Vec2i = 6,
     };
 
     // RefId is used to represent an Id that identifies an ESM record. These Ids can then be used in
@@ -70,6 +72,8 @@ namespace ESM
         // identified by index (i.e. ESM3 SKIL).
         static RefId index(RecNameInts recordType, std::uint32_t value) { return RefId(IndexRefId(recordType, value)); }
 
+        static RefId vec2i(std::pair<int32_t, int32_t> value) { return RefId(Vec2iRefId(value)); }
+
         constexpr RefId() = default;
 
         constexpr RefId(EmptyRefId value) noexcept
@@ -93,6 +97,11 @@ namespace ESM
         }
 
         constexpr RefId(IndexRefId value) noexcept
+            : mValue(value)
+        {
+        }
+
+        constexpr RefId(Vec2iRefId value) noexcept
             : mValue(value)
         {
         }

@@ -66,7 +66,7 @@ namespace ESM
 
     ESM::RefId Cell::generateIdForExteriorCell(int x, int y)
     {
-        return ESM::RefId::stringRefId("#" + std::to_string(x) + "," + std::to_string(y));
+        return ESM::RefId::vec2i({ x, y });
     }
 
     ESM::RefId Cell::generateIdForCell(bool exterior, std::string_view cellName, int x, int y)
