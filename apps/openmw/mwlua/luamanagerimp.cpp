@@ -136,7 +136,6 @@ namespace MWLua
 
     void LuaManager::update()
     {
-        static const bool luaDebug = Settings::Manager::getBool("lua debug", "Lua");
         static const int gcStepCount = Settings::Manager::getInt("gc steps per frame", "Lua");
         if (gcStepCount > 0)
             lua_gc(mLua.sol(), LUA_GCSTEP, gcStepCount);
@@ -177,6 +176,7 @@ namespace MWLua
                 scripts->processTimers(simulationTime, gameTime);
         }
 
+        // Run event handlers for events that were sent before `finalizeEventBatch`.
         mLuaEvents.callEventHandlers();
 
         // Run queued callbacks
@@ -184,63 +184,14 @@ namespace MWLua
             c.mCallback.tryCall(c.mArg);
         mQueuedCallbacks.clear();
 
-        // Engine handlers in local scripts
-        for (const LocalEngineEvent& e : mLocalEngineEvents)
-        {
-            LObject obj(e.mDest);
-            const MWWorld::Ptr& ptr = obj.ptrOrNull();
-            if (ptr.isEmpty())
-            {
-                if (luaDebug)
-                    Log(Debug::Verbose) << "Can not call engine handlers: object" << e.mDest.toString()
-                                        << " is not found";
-                continue;
-            }
-            LocalScripts* scripts = ptr.getRefData().getLuaScripts();
-            if (scripts)
-                scripts->receiveEngineEvent(e.mEvent);
-        }
-        mLocalEngineEvents.clear();
-
+        // Run engine handlers
+        mEngineEvents.callEngineHandlers();
         if (!mWorldView.isPaused())
         {
             for (LocalScripts* scripts : mActiveLocalScripts)
                 scripts->update(frameDuration);
-        }
-
-        // Engine handlers in global scripts
-        if (mPlayerChanged)
-        {
-            mPlayerChanged = false;
-            mGlobalScripts.playerAdded(GObject(getId(mPlayer)));
-        }
-        if (mNewGameStarted)
-        {
-            mNewGameStarted = false;
-            mGlobalScripts.newGameStarted();
-        }
-
-        for (ObjectId id : mObjectAddedEvents)
-        {
-            GObject obj(id);
-            const MWWorld::Ptr& ptr = obj.ptrOrNull();
-            if (!ptr.isEmpty())
-            {
-                mGlobalScripts.objectActive(obj);
-                const MWWorld::Class& objClass = ptr.getClass();
-                if (objClass.isActor())
-                    mGlobalScripts.actorActive(obj);
-                if (objClass.isItem(ptr))
-                    mGlobalScripts.itemActive(obj);
-            }
-            else if (luaDebug)
-                Log(Debug::Verbose) << "Could not resolve a Lua object added event: object" << id.toString()
-                                    << " is already removed";
-        }
-        mObjectAddedEvents.clear();
-
-        if (!mWorldView.isPaused())
             mGlobalScripts.update(frameDuration);
+        }
     }
 
     void LuaManager::synchronizedUpdate()
@@ -286,11 +237,8 @@ namespace MWLua
         MWBase::Environment::get().getWorld()->getPostProcessor()->disableDynamicShaders();
         mActiveLocalScripts.clear();
         mLuaEvents.clear();
+        mEngineEvents.clear();
         mInputEvents.clear();
-        mObjectAddedEvents.clear();
-        mLocalEngineEvents.clear();
-        mNewGameStarted = false;
-        mPlayerChanged = false;
         mWorldView.clear();
         mGlobalScripts.removeAllScripts();
         mGlobalScriptsStarted = false;
@@ -321,16 +269,15 @@ namespace MWLua
             localScripts->addAutoStartedScripts();
         }
         mActiveLocalScripts.insert(localScripts);
-        mLocalEngineEvents.push_back({ getId(ptr), LocalScripts::OnActive{} });
-        mPlayerChanged = true;
+        mEngineEvents.addToQueue(EngineEvents::OnActive{ getId(ptr) });
     }
 
     void LuaManager::newGameStarted()
     {
-        mNewGameStarted = true;
         mInputEvents.clear();
         mGlobalScripts.addAutoStartedScripts();
         mGlobalScriptsStarted = true;
+        mEngineEvents.addToQueue(EngineEvents::OnNewGame{});
     }
 
     void LuaManager::gameLoaded()
@@ -343,26 +290,16 @@ namespace MWLua
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)
     {
         mWorldView.objectAddedToScene(ptr); // assigns generated RefNum if it is not set yet.
+        mEngineEvents.addToQueue(EngineEvents::OnActive{ getId(ptr) });
 
-        LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
-        if (!localScripts)
+        if (!ptr.getRefData().getLuaScripts())
         {
             LuaUtil::ScriptIdsWithInitializationData autoStartConf
                 = mConfiguration.getLocalConf(getLiveCellRefType(ptr.mRef), ptr.getCellRef().getRefId(), getId(ptr));
+            // TODO: put to a queue and apply `addAutoStartedScripts` on next `update()`
             if (!autoStartConf.empty())
-            {
-                localScripts = createLocalScripts(ptr, std::move(autoStartConf));
-                localScripts->addAutoStartedScripts(); // TODO: put to a queue and apply on next `update()`
-            }
+                createLocalScripts(ptr, std::move(autoStartConf))->addAutoStartedScripts();
         }
-        if (localScripts)
-        {
-            mActiveLocalScripts.insert(localScripts);
-            mLocalEngineEvents.push_back({ getId(ptr), LocalScripts::OnActive{} });
-        }
-
-        if (ptr != mPlayer)
-            mObjectAddedEvents.push_back(getId(ptr));
     }
 
     void LuaManager::objectRemovedFromScene(const MWWorld::Ptr& ptr)
@@ -373,19 +310,8 @@ namespace MWLua
         {
             mActiveLocalScripts.erase(localScripts);
             if (!MWBase::Environment::get().getWorldModel()->getPtr(getId(ptr)).isEmpty())
-                mLocalEngineEvents.push_back({ getId(ptr), LocalScripts::OnInactive{} });
+                mEngineEvents.addToQueue(EngineEvents::OnInactive{ getId(ptr) });
         }
-    }
-
-    void LuaManager::itemConsumed(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor)
-    {
-        MWBase::Environment::get().getWorldModel()->registerPtr(consumable);
-        mLocalEngineEvents.push_back({ getId(actor), LocalScripts::OnConsume{ LObject(getId(consumable)) } });
-    }
-
-    void LuaManager::objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor)
-    {
-        mLocalEngineEvents.push_back({ getId(object), LocalScripts::OnActivated{ LObject(getId(actor)) } });
     }
 
     MWBase::LuaManager::ActorControls* LuaManager::getActorControls(const MWWorld::Ptr& ptr) const
@@ -529,7 +455,7 @@ namespace MWLua
             scripts->load(data);
         }
         for (LocalScripts* scripts : mActiveLocalScripts)
-            scripts->receiveEngineEvent(LocalScripts::OnActive());
+            scripts->setActive(true);
     }
 
     void LuaManager::handleConsoleCommand(

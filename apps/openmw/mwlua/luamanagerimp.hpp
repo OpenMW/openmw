@@ -14,6 +14,7 @@
 
 #include "../mwbase/luamanager.hpp"
 
+#include "engineevents.hpp"
 #include "globalscripts.hpp"
 #include "localscripts.hpp"
 #include "luaevents.hpp"
@@ -64,8 +65,14 @@ namespace MWLua
         void objectAddedToScene(const MWWorld::Ptr& ptr) override;
         void objectRemovedFromScene(const MWWorld::Ptr& ptr) override;
         void inputEvent(const InputEvent& event) override { mInputEvents.push_back(event); }
-        void itemConsumed(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) override;
-        void objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) override;
+        void itemConsumed(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) override
+        {
+            mEngineEvents.addToQueue(EngineEvents::OnConsume{ getId(actor), getId(consumable) });
+        }
+        void objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) override
+        {
+            mEngineEvents.addToQueue(EngineEvents::OnActivate{ getId(actor), getId(object) });
+        }
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
 
@@ -163,11 +170,11 @@ namespace MWLua
         std::set<LocalScripts*> mActiveLocalScripts;
         WorldView mWorldView;
 
-        bool mPlayerChanged = false;
-        bool mNewGameStarted = false;
         MWWorld::Ptr mPlayer;
 
         LuaEvents mLuaEvents{ &mGlobalScripts };
+        EngineEvents mEngineEvents{ &mGlobalScripts };
+        std::vector<MWBase::LuaManager::InputEvent> mInputEvents;
 
         std::unique_ptr<LuaUtil::UserdataSerializer> mGlobalSerializer;
         std::unique_ptr<LuaUtil::UserdataSerializer> mLocalSerializer;
@@ -176,22 +183,12 @@ namespace MWLua
         std::unique_ptr<LuaUtil::UserdataSerializer> mGlobalLoader;
         std::unique_ptr<LuaUtil::UserdataSerializer> mLocalLoader;
 
-        std::vector<MWBase::LuaManager::InputEvent> mInputEvents;
-        std::vector<ObjectId> mObjectAddedEvents;
-
         struct CallbackWithData
         {
             LuaUtil::Callback mCallback;
             sol::main_object mArg;
         };
         std::vector<CallbackWithData> mQueuedCallbacks;
-
-        struct LocalEngineEvent
-        {
-            ObjectId mDest;
-            LocalScripts::EngineEvent mEvent;
-        };
-        std::vector<LocalEngineEvent> mLocalEngineEvents;
 
         // Queued actions that should be done in main thread. Processed by applyQueuedChanges().
         std::vector<std::unique_ptr<Action>> mActionQueue;
