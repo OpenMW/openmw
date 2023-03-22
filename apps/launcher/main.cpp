@@ -3,7 +3,11 @@
 #include <QDir>
 #include <QTranslator>
 
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
+
 #include <components/debug/debugging.hpp>
+#include <components/files/configurationmanager.hpp>
 #include <components/platform/platform.hpp>
 
 #ifdef MAC_OS_X_VERSION_MIN_REQUIRED
@@ -17,6 +21,14 @@
 int runLauncher(int argc, char* argv[])
 {
     Platform::init();
+
+    boost::program_options::variables_map variables;
+    boost::program_options::options_description description;
+    Files::ConfigurationManager configurationManager;
+    configurationManager.addCommonOptions(description);
+    configurationManager.readConfiguration(variables, description, true);
+
+    setupLogging(configurationManager.getLogPath(), "Launcher");
 
     try
     {
@@ -34,7 +46,7 @@ int runLauncher(int argc, char* argv[])
 
         QDir::setCurrent(dir.absolutePath());
 
-        Launcher::MainDialog mainWin;
+        Launcher::MainDialog mainWin(configurationManager);
 
         Launcher::FirstRunDialogResult result = mainWin.showFirstRunDialog();
         if (result == Launcher::FirstRunDialogResultFailure)
@@ -47,9 +59,9 @@ int runLauncher(int argc, char* argv[])
 
         return exitCode;
     }
-    catch (std::exception& e)
+    catch (const std::exception& e)
     {
-        std::cerr << "ERROR: " << e.what() << std::endl;
+        Log(Debug::Error) << "Unexpected exception: " << e.what();
         return 0;
     }
 }

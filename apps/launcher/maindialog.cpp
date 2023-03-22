@@ -1,6 +1,7 @@
 #include "maindialog.hpp"
 
 #include <components/debug/debuglog.hpp>
+#include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/qtconversion.hpp>
 #include <components/misc/helpviewer.hpp>
@@ -12,9 +13,6 @@
 #include <QMessageBox>
 #include <QStringList>
 #include <QTime>
-
-#include <boost/program_options/options_description.hpp>
-#include <boost/program_options/variables_map.hpp>
 
 #include <components/debug/debugging.hpp>
 #include <components/files/conversion.hpp>
@@ -39,8 +37,9 @@ void cfgError(const QString& title, const QString& msg)
     msgBox.exec();
 }
 
-Launcher::MainDialog::MainDialog(QWidget* parent)
+Launcher::MainDialog::MainDialog(const Files::ConfigurationManager& configurationManager, QWidget* parent)
     : QMainWindow(parent)
+    , mCfgMgr(configurationManager)
     , mGameSettings(mCfgMgr)
 {
     setupUi(this);
@@ -418,12 +417,7 @@ bool Launcher::MainDialog::setupGraphicsSettings()
     Settings::Manager::clear(); // Ensure to clear previous settings in case we had already loaded settings.
     try
     {
-        boost::program_options::variables_map variables;
-        boost::program_options::options_description desc;
-        mCfgMgr.addCommonOptions(desc);
-        mCfgMgr.readConfiguration(variables, desc, true);
         Settings::Manager::load(mCfgMgr);
-        setupLogging(mCfgMgr.getLogPath(), "Launcher");
         return true;
     }
     catch (std::exception& e)

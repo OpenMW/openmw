@@ -20,7 +20,7 @@ namespace Config
     class GameSettings
     {
     public:
-        GameSettings(Files::ConfigurationManager& cfg);
+        explicit GameSettings(const Files::ConfigurationManager& cfg);
 
         inline QString value(const QString& key, const QString& defaultValue = QString())
         {
@@ -85,7 +85,7 @@ namespace Config
         void clear();
 
     private:
-        Files::ConfigurationManager& mCfgMgr;
+        const Files::ConfigurationManager& mCfgMgr;
 
         void validatePaths();
         QMultiMap<QString, QString> mSettings;

@@ -122,7 +122,7 @@ namespace Launcher
     }
 }
 
-Launcher::DataFilesPage::DataFilesPage(Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
+Launcher::DataFilesPage::DataFilesPage(const Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
     Config::LauncherSettings& launcherSettings, MainDialog* parent)
     : QWidget(parent)
     , mMainDialog(parent)
