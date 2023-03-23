@@ -101,6 +101,7 @@ namespace
         ESM::GameSetting setting;
         setting.mId = ESM::RefId::stringRefId("setting");
         setting.mValue = ESM::Variant(42);
+        setting.mRecordFlags = 0;
         settings.push_back(setting);
         EXPECT_EQ(EsmLoader::getGameSetting(settings, "setting"), ESM::Variant(42));
     }
