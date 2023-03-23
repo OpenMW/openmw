@@ -269,11 +269,15 @@ namespace CSMWorld
         copy->mState = RecordBase::State_ModifiedOnly;
         setRecordId(destination, copy->get());
 
-        if (type == UniversalId::Type_Reference)
+        if constexpr (std::is_same_v<ESXRecordT, CSMWorld::CellRef>)
         {
-            CSMWorld::CellRef* ptr = (CSMWorld::CellRef*)&copy->mModified;
-            ptr->mRefNum.mIndex = 0;
+            if (type == UniversalId::Type_Reference)
+            {
+                CSMWorld::CellRef* ptr = (CSMWorld::CellRef*)&copy->mModified;
+                ptr->mRefNum.mIndex = 0;
+            }
         }
+
         const int index = getAppendIndex(destination, type);
         insertRecord(std::move(copy), getAppendIndex(destination, type));
 
