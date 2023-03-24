@@ -177,4 +177,20 @@ namespace ESM
     {
         return std::visit(Contains{ subString }, mValue);
     }
+
+    std::string RefId::serialize() const
+    {
+        std::string result(sizeof(mValue), '\0');
+        std::memcpy(result.data(), &mValue, sizeof(mValue));
+        return result;
+    }
+
+    ESM::RefId RefId::deserialize(std::string_view value)
+    {
+        if (value.size() != sizeof(ESM::RefId::mValue))
+            throw std::runtime_error("Invalid value size to deserialize: " + std::to_string(value.size()));
+        ESM::RefId result;
+        std::memcpy(&result.mValue, value.data(), sizeof(result.mValue));
+        return result;
+    }
 }

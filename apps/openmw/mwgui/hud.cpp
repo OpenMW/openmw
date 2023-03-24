@@ -409,7 +409,7 @@ namespace MWGui
         mSpellStatus->setProgressPosition(successChancePercent);
 
         mSpellBox->setUserString("ToolTipType", "Spell");
-        mSpellBox->setUserString("Spell", spellId.getRefIdString());
+        mSpellBox->setUserString("Spell", spellId.serialize());
 
         // use the icon of the first effect
         const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(

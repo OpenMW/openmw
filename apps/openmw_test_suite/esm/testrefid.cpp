@@ -179,14 +179,14 @@ namespace ESM
 
         TEST(ESMRefIdTest, canBeUsedAsMapKeyWithLookupByStringView)
         {
-            const std::map<ESM::RefId, int, std::less<>> map({ { ESM::RefId::stringRefId("a"), 42 } });
+            const std::map<RefId, int, std::less<>> map({ { RefId::stringRefId("a"), 42 } });
             EXPECT_EQ(map.count("A"), 1);
         }
 
         TEST(ESMRefIdTest, canBeUsedAsLookupKeyForMapWithStringKey)
         {
             const std::map<std::string, int, std::less<>> map({ { "a", 42 } });
-            EXPECT_EQ(map.count(ESM::RefId::stringRefId("A")), 1);
+            EXPECT_EQ(map.count(RefId::stringRefId("A")), 1);
         }
 
         TEST(ESMRefIdTest, stringRefIdIsNotEqualToFormId)
@@ -196,7 +196,7 @@ namespace ESM
             EXPECT_NE(stringRefId, formIdRefId);
         }
 
-        struct ESMRefIdToStringTest : TestWithParam<std::pair<ESM::RefId, std::string>>
+        struct ESMRefIdToStringTest : TestWithParam<std::pair<RefId, std::string>>
         {
         };
 
@@ -213,12 +213,12 @@ namespace ESM
             { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), { 'a', 0, -1, '\n', '\t' } },
             { RefId::formIdRefId(42), "42" },
             { RefId::generated(42), "42" },
-            { RefId::index(ESM::REC_ARMO, 42), "ARMO, 42" },
+            { RefId::index(REC_ARMO, 42), "ARMO, 42" },
         };
 
         INSTANTIATE_TEST_SUITE_P(ESMRefIdToString, ESMRefIdToStringTest, ValuesIn(toStringParams));
 
-        struct ESMRefIdToDebugStringTest : TestWithParam<std::pair<ESM::RefId, std::string>>
+        struct ESMRefIdToDebugStringTest : TestWithParam<std::pair<RefId, std::string>>
         {
         };
 
@@ -244,9 +244,61 @@ namespace ESM
             { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), "String{a\\x0\\xFF\\xA\\x9}" },
             { RefId::formIdRefId(42), "FormId{42}" },
             { RefId::generated(42), "Generated{42}" },
-            { RefId::index(ESM::REC_ARMO, 42), "Index{ARMO, 42}" },
+            { RefId::index(REC_ARMO, 42), "Index{ARMO, 42}" },
         };
 
         INSTANTIATE_TEST_SUITE_P(ESMRefIdToDebugString, ESMRefIdToDebugStringTest, ValuesIn(toDebugStringParams));
+
+        template <class T>
+        RefId generateRefId();
+
+        template <>
+        RefId generateRefId<EmptyRefId>()
+        {
+            return RefId();
+        }
+
+        template <>
+        RefId generateRefId<StringRefId>()
+        {
+            return RefId::stringRefId("StringRefId");
+        }
+
+        template <>
+        RefId generateRefId<FormIdRefId>()
+        {
+            return RefId::formIdRefId(42);
+        }
+
+        template <>
+        RefId generateRefId<GeneratedRefId>()
+        {
+            return RefId::generated(13);
+        }
+
+        template <>
+        RefId generateRefId<IndexRefId>()
+        {
+            return RefId::index(REC_BOOK, 7);
+        }
+
+        template <class T>
+        struct ESMRefIdSerializeDeserializeTest : Test
+        {
+        };
+
+        TYPED_TEST_SUITE_P(ESMRefIdSerializeDeserializeTest);
+
+        TYPED_TEST_P(ESMRefIdSerializeDeserializeTest, serializeThenDeserializeShouldProduceSameValue)
+        {
+            const RefId refId = generateRefId<TypeParam>();
+            EXPECT_EQ(RefId::deserialize(refId.serialize()), refId);
+        }
+
+        REGISTER_TYPED_TEST_SUITE_P(ESMRefIdSerializeDeserializeTest, serializeThenDeserializeShouldProduceSameValue);
+
+        using RefIdTypeParams = Types<EmptyRefId, StringRefId, FormIdRefId, GeneratedRefId, IndexRefId>;
+
+        INSTANTIATE_TYPED_TEST_SUITE_P(RefIdTypes, ESMRefIdSerializeDeserializeTest, RefIdTypeParams);
     }
 }

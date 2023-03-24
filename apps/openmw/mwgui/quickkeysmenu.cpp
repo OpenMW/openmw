@@ -296,7 +296,7 @@ namespace MWGui
 
         mSelected->button->setItem(MWWorld::Ptr());
         mSelected->button->setUserString("ToolTipType", "Spell");
-        mSelected->button->setUserString("Spell", spellId.getRefIdString());
+        mSelected->button->setUserString("Spell", spellId.serialize());
 
         // use the icon of the first effect
         const ESM::MagicEffect* effect = esmStore.get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
@@ -517,7 +517,7 @@ namespace MWGui
                     break;
                 }
                 case ESM::QuickKeys::Type::Magic:
-                    key.mId = ESM::RefId::stringRefId(button->getUserString("Spell"));
+                    key.mId = ESM::RefId::deserialize(button->getUserString("Spell"));
                     break;
             }
 
