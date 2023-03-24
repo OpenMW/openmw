@@ -894,7 +894,7 @@ namespace MWMechanics
             return true;
 
         // TODO: implement a better check to check if target is owned bed
-        if (target.getClass().isActivator() && target.getClass().getScript(target).startsWith("Bed") != 0)
+        if (target.getClass().isActivator() && !target.getClass().getScript(target).startsWith("Bed"))
             return true;
 
         if (target.getClass().isNpc())
