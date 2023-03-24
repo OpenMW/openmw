@@ -37,12 +37,8 @@ namespace MWLua
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        const MWWorld::Store<ESM::Armor>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Armor>();
-        armor["record"]
-            = sol::overload([](const Object& obj) -> const ESM::Armor* { return obj.ptr().get<ESM::Armor>()->mBase; },
-                [store](const std::string& recordId) -> const ESM::Armor* {
-                    return store->find(ESM::RefId::stringRefId(recordId));
-                });
+        addRecordFunctionBinding<ESM::Armor>(armor);
+
         sol::usertype<ESM::Armor> record = context.mLua->sol().new_usertype<ESM::Armor>("ESM3_Armor");
         record[sol::meta_function::to_string]
             = [](const ESM::Armor& rec) -> std::string { return "ESM3_Armor[" + rec.mId.toDebugString() + "]"; };

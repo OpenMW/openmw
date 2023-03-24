@@ -23,12 +23,8 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        const MWWorld::Store<ESM::Probe>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Probe>();
-        probe["record"]
-            = sol::overload([](const Object& obj) -> const ESM::Probe* { return obj.ptr().get<ESM::Probe>()->mBase; },
-                [store](const std::string& recordId) -> const ESM::Probe* {
-                    return store->find(ESM::RefId::stringRefId(recordId));
-                });
+        addRecordFunctionBinding<ESM::Probe>(probe);
+
         sol::usertype<ESM::Probe> record = context.mLua->sol().new_usertype<ESM::Probe>("ESM3_Probe");
         record[sol::meta_function::to_string]
             = [](const ESM::Probe& rec) { return "ESM3_Probe[" + rec.mId.toDebugString() + "]"; };

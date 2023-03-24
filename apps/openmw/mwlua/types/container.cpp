@@ -48,13 +48,8 @@ namespace MWLua
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        const MWWorld::Store<ESM::Container>* store
-            = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>();
-        container["record"] = sol::overload(
-            [](const Object& obj) -> const ESM::Container* { return obj.ptr().get<ESM::Container>()->mBase; },
-            [store](const std::string& recordId) -> const ESM::Container* {
-                return store->find(ESM::RefId::stringRefId(recordId));
-            });
+        addRecordFunctionBinding<ESM::Container>(container);
+
         sol::usertype<ESM::Container> record = context.mLua->sol().new_usertype<ESM::Container>("ESM3_Container");
         record[sol::meta_function::to_string] = [](const ESM::Container& rec) -> std::string {
             return "ESM3_Container[" + rec.mId.toDebugString() + "]";

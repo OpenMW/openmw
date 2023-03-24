@@ -23,13 +23,8 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        const MWWorld::Store<ESM::Repair>* store
-            = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Repair>();
-        repair["record"]
-            = sol::overload([](const Object& obj) -> const ESM::Repair* { return obj.ptr().get<ESM::Repair>()->mBase; },
-                [store](const std::string& recordId) -> const ESM::Repair* {
-                    return store->find(ESM::RefId::stringRefId(recordId));
-                });
+        addRecordFunctionBinding<ESM::Repair>(repair);
+
         sol::usertype<ESM::Repair> record = context.mLua->sol().new_usertype<ESM::Repair>("ESM3_Repair");
         record[sol::meta_function::to_string]
             = [](const ESM::Repair& rec) { return "ESM3_Repair[" + rec.mId.toDebugString() + "]"; };

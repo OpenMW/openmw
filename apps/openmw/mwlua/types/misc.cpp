@@ -23,13 +23,8 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        const MWWorld::Store<ESM::Miscellaneous>* store
-            = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Miscellaneous>();
-        miscellaneous["record"] = sol::overload(
-            [](const Object& obj) -> const ESM::Miscellaneous* { return obj.ptr().get<ESM::Miscellaneous>()->mBase; },
-            [store](const std::string& recordId) -> const ESM::Miscellaneous* {
-                return store->find(ESM::RefId::stringRefId(recordId));
-            });
+        addRecordFunctionBinding<ESM::Miscellaneous>(miscellaneous);
+
         sol::usertype<ESM::Miscellaneous> record
             = context.mLua->sol().new_usertype<ESM::Miscellaneous>("ESM3_Miscellaneous");
         record[sol::meta_function::to_string]

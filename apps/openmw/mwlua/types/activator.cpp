@@ -23,13 +23,8 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        const MWWorld::Store<ESM::Activator>* store
-            = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Activator>();
-        activator["record"] = sol::overload(
-            [](const Object& obj) -> const ESM::Activator* { return obj.ptr().get<ESM::Activator>()->mBase; },
-            [store](const std::string& recordId) -> const ESM::Activator* {
-                return store->find(ESM::RefId::stringRefId(recordId));
-            });
+        addRecordFunctionBinding<ESM::Activator>(activator);
+
         sol::usertype<ESM::Activator> record = context.mLua->sol().new_usertype<ESM::Activator>("ESM3_Activator");
         record[sol::meta_function::to_string]
             = [](const ESM::Activator& rec) { return "ESM3_Activator[" + rec.mId.toDebugString() + "]"; };

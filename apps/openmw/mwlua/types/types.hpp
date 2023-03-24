@@ -5,6 +5,11 @@
 
 #include <components/esm/defs.hpp>
 
+#include "apps/openmw/mwbase/environment.hpp"
+#include "apps/openmw/mwbase/world.hpp"
+#include "apps/openmw/mwworld/esmstore.hpp"
+#include "apps/openmw/mwworld/store.hpp"
+
 #include "../context.hpp"
 
 namespace MWLua
@@ -45,6 +50,16 @@ namespace MWLua
     void addClothingBindings(sol::table clothing, const Context& context);
     void addStaticBindings(sol::table stat, const Context& context);
     void addLightBindings(sol::table light, const Context& context);
+
+    template <class T>
+    void addRecordFunctionBinding(sol::table table)
+    {
+        const MWWorld::Store<T>& store = MWBase::Environment::get().getWorld()->getStore().get<T>();
+
+        table["record"] = sol::overload([](const Object& obj) -> const T* { return obj.ptr().get<T>()->mBase; },
+            [&store](
+                const std::string& recordId) -> const T* { return store.find(ESM::RefId::stringRefId(recordId)); });
+    }
 }
 
 #endif // MWLUA_TYPES_H

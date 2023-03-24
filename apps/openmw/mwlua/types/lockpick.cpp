@@ -23,13 +23,8 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        const MWWorld::Store<ESM::Lockpick>* store
-            = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Lockpick>();
-        lockpick["record"] = sol::overload(
-            [](const Object& obj) -> const ESM::Lockpick* { return obj.ptr().get<ESM::Lockpick>()->mBase; },
-            [store](const std::string& recordId) -> const ESM::Lockpick* {
-                return store->find(ESM::RefId::stringRefId(recordId));
-            });
+        addRecordFunctionBinding<ESM::Lockpick>(lockpick);
+
         sol::usertype<ESM::Lockpick> record = context.mLua->sol().new_usertype<ESM::Lockpick>("ESM3_Lockpick");
         record[sol::meta_function::to_string]
             = [](const ESM::Lockpick& rec) { return "ESM3_Lockpick[" + rec.mId.toDebugString() + "]"; };

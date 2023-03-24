@@ -32,12 +32,8 @@ namespace MWLua
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        const MWWorld::Store<ESM::Book>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Book>();
-        book["record"]
-            = sol::overload([](const Object& obj) -> const ESM::Book* { return obj.ptr().get<ESM::Book>()->mBase; },
-                [store](const std::string& recordId) -> const ESM::Book* {
-                    return store->find(ESM::RefId::stringRefId(recordId));
-                });
+        addRecordFunctionBinding<ESM::Book>(book);
+
         sol::usertype<ESM::Book> record = context.mLua->sol().new_usertype<ESM::Book>("ESM3_Book");
         record[sol::meta_function::to_string]
             = [](const ESM::Book& rec) { return "ESM3_Book[" + rec.mId.toDebugString() + "]"; };

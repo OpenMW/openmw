@@ -25,12 +25,8 @@ namespace MWLua
     {
         addNpcStatsBindings(npc, context);
 
-        const MWWorld::Store<ESM::NPC>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::NPC>();
-        npc["record"]
-            = sol::overload([](const Object& obj) -> const ESM::NPC* { return obj.ptr().get<ESM::NPC>()->mBase; },
-                [store](const std::string& recordId) -> const ESM::NPC* {
-                    return store->find(ESM::RefId::stringRefId(recordId));
-                });
+        addRecordFunctionBinding<ESM::NPC>(npc);
+
         sol::usertype<ESM::NPC> record = context.mLua->sol().new_usertype<ESM::NPC>("ESM3_NPC");
         record[sol::meta_function::to_string]
             = [](const ESM::NPC& rec) { return "ESM3_NPC[" + rec.mId.toDebugString() + "]"; };

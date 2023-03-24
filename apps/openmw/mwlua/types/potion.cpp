@@ -21,13 +21,7 @@ namespace MWLua
 {
     void addPotionBindings(sol::table potion, const Context& context)
     {
-        const MWWorld::Store<ESM::Potion>* store
-            = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Potion>();
-        potion["record"]
-            = sol::overload([](const Object& obj) -> const ESM::Potion* { return obj.ptr().get<ESM::Potion>()->mBase; },
-                [store](const std::string& recordId) -> const ESM::Potion* {
-                    return store->find(ESM::RefId::stringRefId(recordId));
-                });
+        addRecordFunctionBinding<ESM::Potion>(potion);
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
         sol::usertype<ESM::Potion> record = context.mLua->sol().new_usertype<ESM::Potion>("ESM3_Potion");
