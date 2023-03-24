@@ -227,7 +227,7 @@ namespace MWGui
                     ToolTipInfo info;
 
                     const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(
-                        ESM::RefId::stringRefId(focus->getUserString("Spell")));
+                        ESM::RefId::deserialize(focus->getUserString("Spell")));
                     info.caption = spell->mName;
                     Widgets::SpellEffectList effects;
                     for (const ESM::ENAMstruct& spellEffect : spell->mEffects.mList)

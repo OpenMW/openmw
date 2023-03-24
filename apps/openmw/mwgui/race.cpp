@@ -452,13 +452,13 @@ namespace MWGui
         const ESM::Race* race = store.get<ESM::Race>().find(mCurrentRaceId);
 
         int i = 0;
-        for (const auto& spellpower : race->mPowers.mList)
+        for (const ESM::RefId& spellpower : race->mPowers.mList)
         {
             Widgets::MWSpellPtr spellPowerWidget = mSpellPowerList->createWidget<Widgets::MWSpell>(
                 "MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + MyGUI::utility::toString(i));
             spellPowerWidget->setSpellId(spellpower);
             spellPowerWidget->setUserString("ToolTipType", "Spell");
-            spellPowerWidget->setUserString("Spell", spellpower.getRefIdString());
+            spellPowerWidget->setUserString("Spell", spellpower.serialize());
 
             mSpellPowerItems.push_back(spellPowerWidget);
 

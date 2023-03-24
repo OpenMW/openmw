@@ -286,7 +286,7 @@ namespace MWGui
         else
         {
             widget->setUserString("ToolTipType", "Spell");
-            widget->setUserString("Spell", spell.mId.getRefIdString());
+            widget->setUserString("Spell", spell.mId.serialize());
         }
 
         widget->setUserString(sSpellModelIndex, MyGUI::utility::toString(index));
