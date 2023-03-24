@@ -31,7 +31,7 @@ namespace MWLua
                 });
         sol::usertype<ESM::Light> record = context.mLua->sol().new_usertype<ESM::Light>("ESM3_Light");
         record[sol::meta_function::to_string]
-            = [](const ESM::Light& rec) -> std::string { return "ESM3_Light[" + rec.mId.getRefIdString() + "]"; };
+            = [](const ESM::Light& rec) -> std::string { return "ESM3_Light[" + rec.mId.toDebugString() + "]"; };
         record["id"]
             = sol::readonly_property([](const ESM::Light& rec) -> std::string { return rec.mId.getRefIdString(); });
         record["name"] = sol::readonly_property([](const ESM::Light& rec) -> std::string { return rec.mName; });

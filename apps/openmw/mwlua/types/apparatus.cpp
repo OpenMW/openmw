@@ -39,7 +39,7 @@ namespace MWLua
             });
         sol::usertype<ESM::Apparatus> record = context.mLua->sol().new_usertype<ESM::Apparatus>("ESM3_Apparatus");
         record[sol::meta_function::to_string]
-            = [](const ESM::Apparatus& rec) { return "ESM3_Apparatus[" + rec.mId.getRefIdString() + "]"; };
+            = [](const ESM::Apparatus& rec) { return "ESM3_Apparatus[" + rec.mId.toDebugString() + "]"; };
         record["id"]
             = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mId.getRefIdString(); });
         record["name"] = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mName; });

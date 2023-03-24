@@ -31,7 +31,7 @@ namespace MWLua
                 });
         sol::usertype<ESM::Probe> record = context.mLua->sol().new_usertype<ESM::Probe>("ESM3_Probe");
         record[sol::meta_function::to_string]
-            = [](const ESM::Probe& rec) { return "ESM3_Probe[" + rec.mId.getRefIdString() + "]"; };
+            = [](const ESM::Probe& rec) { return "ESM3_Probe[" + rec.mId.toDebugString() + "]"; };
         record["id"]
             = sol::readonly_property([](const ESM::Probe& rec) -> std::string { return rec.mId.getRefIdString(); });
         record["name"] = sol::readonly_property([](const ESM::Probe& rec) -> std::string { return rec.mName; });

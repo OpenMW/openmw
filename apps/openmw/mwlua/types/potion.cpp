@@ -32,7 +32,7 @@ namespace MWLua
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
         sol::usertype<ESM::Potion> record = context.mLua->sol().new_usertype<ESM::Potion>("ESM3_Potion");
         record[sol::meta_function::to_string]
-            = [](const ESM::Potion& rec) { return "ESM3_Potion[" + rec.mId.getRefIdString() + "]"; };
+            = [](const ESM::Potion& rec) { return "ESM3_Potion[" + rec.mId.toDebugString() + "]"; };
         record["id"]
             = sol::readonly_property([](const ESM::Potion& rec) -> std::string { return rec.mId.getRefIdString(); });
         record["name"] = sol::readonly_property([](const ESM::Potion& rec) -> std::string { return rec.mName; });

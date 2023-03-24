@@ -33,7 +33,7 @@ namespace MWLua
             });
         sol::usertype<ESM::Ingredient> record = context.mLua->sol().new_usertype<ESM::Ingredient>(("ESM3_Ingredient"));
         record[sol::meta_function::to_string]
-            = [](const ESM::Ingredient& rec) { return "ESM3_Ingredient[" + rec.mId.getRefIdString() + "]"; };
+            = [](const ESM::Ingredient& rec) { return "ESM3_Ingredient[" + rec.mId.toDebugString() + "]"; };
         record["id"] = sol::readonly_property(
             [](const ESM::Ingredient& rec) -> std::string { return rec.mId.getRefIdString(); });
         record["name"] = sol::readonly_property([](const ESM::Ingredient& rec) -> std::string { return rec.mName; });

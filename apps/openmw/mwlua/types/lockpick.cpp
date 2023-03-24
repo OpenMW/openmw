@@ -32,7 +32,7 @@ namespace MWLua
             });
         sol::usertype<ESM::Lockpick> record = context.mLua->sol().new_usertype<ESM::Lockpick>("ESM3_Lockpick");
         record[sol::meta_function::to_string]
-            = [](const ESM::Lockpick& rec) { return "ESM3_Lockpick[" + rec.mId.getRefIdString() + "]"; };
+            = [](const ESM::Lockpick& rec) { return "ESM3_Lockpick[" + rec.mId.toDebugString() + "]"; };
         record["id"]
             = sol::readonly_property([](const ESM::Lockpick& rec) -> std::string { return rec.mId.getRefIdString(); });
         record["name"] = sol::readonly_property([](const ESM::Lockpick& rec) -> std::string { return rec.mName; });

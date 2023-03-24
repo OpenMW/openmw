@@ -33,7 +33,7 @@ namespace MWLua
                 });
         sol::usertype<ESM::NPC> record = context.mLua->sol().new_usertype<ESM::NPC>("ESM3_NPC");
         record[sol::meta_function::to_string]
-            = [](const ESM::NPC& rec) { return "ESM3_NPC[" + rec.mId.getRefIdString() + "]"; };
+            = [](const ESM::NPC& rec) { return "ESM3_NPC[" + rec.mId.toDebugString() + "]"; };
         record["name"] = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mName; });
         record["race"]
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mRace.getRefIdString(); });

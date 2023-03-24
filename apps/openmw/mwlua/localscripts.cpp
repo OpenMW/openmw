@@ -83,7 +83,7 @@ namespace MWLua
 
         sol::usertype<LocalMWScript> mwscript = context.mLua->sol().new_usertype<LocalMWScript>("LocalMWScript");
         mwscript[sol::meta_function::to_string] = [](const LocalMWScript& s) {
-            return s.mSelf.ptr().getRefData().getLocals().getScriptId().getRefIdString();
+            return s.mSelf.ptr().getRefData().getLocals().getScriptId().toDebugString();
         };
         mwscript[sol::meta_function::index] = [](const LocalMWScript& s, std::string_view var) {
             MWScript::Locals& locals = s.mSelf.ptr().getRefData().getLocals();
@@ -92,8 +92,8 @@ namespace MWLua
         mwscript[sol::meta_function::new_index] = [](const LocalMWScript& s, std::string_view var, double val) {
             MWScript::Locals& locals = s.mSelf.ptr().getRefData().getLocals();
             if (!locals.setVar(locals.getScriptId(), Misc::StringUtils::lowerCase(var), val))
-                throw std::runtime_error("No variable \"" + std::string(var) + "\" in mwscript \""
-                    + locals.getScriptId().getRefIdString() + "\"");
+                throw std::runtime_error(
+                    "No variable \"" + std::string(var) + "\" in mwscript " + locals.getScriptId().toDebugString());
         };
 
         using AiPackage = MWMechanics::AiPackage;

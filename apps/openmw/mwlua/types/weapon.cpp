@@ -49,7 +49,7 @@ namespace MWLua
                 });
         sol::usertype<ESM::Weapon> record = context.mLua->sol().new_usertype<ESM::Weapon>("ESM3_Weapon");
         record[sol::meta_function::to_string]
-            = [](const ESM::Weapon& rec) -> std::string { return "ESM3_Weapon[" + rec.mId.getRefIdString() + "]"; };
+            = [](const ESM::Weapon& rec) -> std::string { return "ESM3_Weapon[" + rec.mId.toDebugString() + "]"; };
         record["id"]
             = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mId.getRefIdString(); });
         record["name"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mName; });

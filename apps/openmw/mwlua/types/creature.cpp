@@ -32,7 +32,7 @@ namespace MWLua
             });
         sol::usertype<ESM::Creature> record = context.mLua->sol().new_usertype<ESM::Creature>("ESM3_Creature");
         record[sol::meta_function::to_string]
-            = [](const ESM::Creature& rec) { return "ESM3_Creature[" + rec.mId.getRefIdString() + "]"; };
+            = [](const ESM::Creature& rec) { return "ESM3_Creature[" + rec.mId.toDebugString() + "]"; };
         record["name"] = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Creature& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
