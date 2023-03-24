@@ -3,3 +3,4 @@ if(OPENMW_USE_SYSTEM_BENCHMARK)
 endif()
 
 add_subdirectory(detournavigator)
+add_subdirectory(esm)
