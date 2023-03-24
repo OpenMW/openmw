@@ -29,14 +29,14 @@ namespace MWLua
         sol::usertype<ESM::Ingredient> record = context.mLua->sol().new_usertype<ESM::Ingredient>(("ESM3_Ingredient"));
         record[sol::meta_function::to_string]
             = [](const ESM::Ingredient& rec) { return "ESM3_Ingredient[" + rec.mId.toDebugString() + "]"; };
-        record["id"] = sol::readonly_property(
-            [](const ESM::Ingredient& rec) -> std::string { return rec.mId.getRefIdString(); });
+        record["id"]
+            = sol::readonly_property([](const ESM::Ingredient& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Ingredient& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Ingredient& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
         record["mwscript"] = sol::readonly_property(
-            [](const ESM::Ingredient& rec) -> std::string { return rec.mScript.getRefIdString(); });
+            [](const ESM::Ingredient& rec) -> std::string { return rec.mScript.serializeText(); });
         record["icon"] = sol::readonly_property([vfs](const ESM::Ingredient& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });

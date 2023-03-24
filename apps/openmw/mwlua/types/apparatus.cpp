@@ -36,13 +36,13 @@ namespace MWLua
         record[sol::meta_function::to_string]
             = [](const ESM::Apparatus& rec) { return "ESM3_Apparatus[" + rec.mId.toDebugString() + "]"; };
         record["id"]
-            = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mId.getRefIdString(); });
+            = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Apparatus& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Apparatus& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
         record["mwscript"] = sol::readonly_property(
-            [](const ESM::Apparatus& rec) -> std::string { return rec.mScript.getRefIdString(); });
+            [](const ESM::Apparatus& rec) -> std::string { return rec.mScript.serializeText(); });
         record["icon"] = sol::readonly_property([vfs](const ESM::Apparatus& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });

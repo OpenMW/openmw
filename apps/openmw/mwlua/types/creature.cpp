@@ -33,8 +33,8 @@ namespace MWLua
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
         record["mwscript"] = sol::readonly_property(
-            [](const ESM::Creature& rec) -> std::string { return rec.mScript.getRefIdString(); });
+            [](const ESM::Creature& rec) -> std::string { return rec.mScript.serializeText(); });
         record["baseCreature"] = sol::readonly_property(
-            [](const ESM::Creature& rec) -> std::string { return rec.mOriginal.getRefIdString(); });
+            [](const ESM::Creature& rec) -> std::string { return rec.mOriginal.serializeText(); });
     }
 }

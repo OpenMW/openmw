@@ -42,7 +42,7 @@ namespace MWLua
         record[sol::meta_function::to_string]
             = [](const ESM::Clothing& rec) -> std::string { return "ESM3_Clothing[" + rec.mId.toDebugString() + "]"; };
         record["id"]
-            = sol::readonly_property([](const ESM::Clothing& rec) -> std::string { return rec.mId.getRefIdString(); });
+            = sol::readonly_property([](const ESM::Clothing& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Clothing& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Clothing& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
@@ -51,9 +51,9 @@ namespace MWLua
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
         record["enchant"] = sol::readonly_property(
-            [](const ESM::Clothing& rec) -> std::string { return rec.mEnchant.getRefIdString(); });
+            [](const ESM::Clothing& rec) -> std::string { return rec.mEnchant.serializeText(); });
         record["mwscript"] = sol::readonly_property(
-            [](const ESM::Clothing& rec) -> std::string { return rec.mScript.getRefIdString(); });
+            [](const ESM::Clothing& rec) -> std::string { return rec.mScript.serializeText(); });
         record["weight"] = sol::readonly_property([](const ESM::Clothing& rec) -> float { return rec.mData.mWeight; });
         record["value"] = sol::readonly_property([](const ESM::Clothing& rec) -> int { return rec.mData.mValue; });
         record["type"] = sol::readonly_property([](const ESM::Clothing& rec) -> int { return rec.mData.mType; });

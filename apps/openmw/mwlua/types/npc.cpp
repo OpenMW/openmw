@@ -32,15 +32,15 @@ namespace MWLua
             = [](const ESM::NPC& rec) { return "ESM3_NPC[" + rec.mId.toDebugString() + "]"; };
         record["name"] = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mName; });
         record["race"]
-            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mRace.getRefIdString(); });
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mRace.serializeText(); });
         record["class"]
-            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mClass.getRefIdString(); });
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mClass.serializeText(); });
         record["mwscript"]
-            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mScript.getRefIdString(); });
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mScript.serializeText(); });
         record["hair"]
-            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHair.getRefIdString(); });
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHair.serializeText(); });
         record["head"]
-            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.getRefIdString(); });
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.serializeText(); });
 
         // This function is game-specific, in future we should replace it with something more universal.
         npc["isWerewolf"] = [](const Object& o) {

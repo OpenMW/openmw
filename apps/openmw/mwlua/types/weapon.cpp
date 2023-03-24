@@ -46,7 +46,7 @@ namespace MWLua
         record[sol::meta_function::to_string]
             = [](const ESM::Weapon& rec) -> std::string { return "ESM3_Weapon[" + rec.mId.toDebugString() + "]"; };
         record["id"]
-            = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mId.getRefIdString(); });
+            = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Weapon& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
@@ -55,9 +55,9 @@ namespace MWLua
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
         record["enchant"] = sol::readonly_property(
-            [](const ESM::Weapon& rec) -> std::string { return rec.mEnchant.getRefIdString(); });
-        record["mwscript"] = sol::readonly_property(
-            [](const ESM::Weapon& rec) -> std::string { return rec.mScript.getRefIdString(); });
+            [](const ESM::Weapon& rec) -> std::string { return rec.mEnchant.serializeText(); });
+        record["mwscript"]
+            = sol::readonly_property([](const ESM::Weapon& rec) -> std::string { return rec.mScript.serializeText(); });
         record["isMagical"] = sol::readonly_property(
             [](const ESM::Weapon& rec) -> bool { return rec.mData.mFlags & ESM::Weapon::Magical; });
         record["isSilver"] = sol::readonly_property(

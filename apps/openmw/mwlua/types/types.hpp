@@ -57,8 +57,7 @@ namespace MWLua
         const MWWorld::Store<T>& store = MWBase::Environment::get().getWorld()->getStore().get<T>();
 
         table["record"] = sol::overload([](const Object& obj) -> const T* { return obj.ptr().get<T>()->mBase; },
-            [&store](
-                const std::string& recordId) -> const T* { return store.find(ESM::RefId::stringRefId(recordId)); });
+            [&store](std::string_view id) -> const T* { return store.find(ESM::RefId::deserializeText(id)); });
     }
 }
 
