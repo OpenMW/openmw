@@ -53,14 +53,17 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
 
     Cell& cell2 = base ? cell.mBase : cell.mModified;
 
-    CellRef ref;
-    ref.mNew = false;
     ESM::MovedCellRef mref;
     bool isDeleted = false;
     bool isMoved = false;
 
-    while (ESM::Cell::getNextRef(reader, ref, isDeleted, mref, isMoved))
+    while (true)
     {
+        CellRef ref;
+        ref.mNew = false;
+
+        if (!ESM::Cell::getNextRef(reader, ref, isDeleted, mref, isMoved))
+            break;
         // Keep mOriginalCell empty when in modified (as an indicator that the
         // original cell will always be equal the current cell).
         ref.mOriginalCell = base ? cell2.mId : ESM::RefId();
@@ -70,7 +73,7 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
             // Autocalculate the cell index from coordinates first
             std::pair<int, int> index = ref.getCellIndex();
 
-            ref.mCell = ESM::RefId::stringRefId("#" + std::to_string(index.first) + " " + std::to_string(index.second));
+            ref.mCell = ESM::RefId::vec2i(index);
 
             // Handle non-base moved references
             if (!base && isMoved)
@@ -86,12 +89,11 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
                 if (index.first != mref.mTarget[0] || index.second != mref.mTarget[1])
                 {
                     ESM::RefId indexCell = ref.mCell;
-                    ref.mCell = ESM::RefId::stringRefId(
-                        "#" + std::to_string(mref.mTarget[0]) + " " + std::to_string(mref.mTarget[1]));
+                    ref.mCell = ESM::RefId::vec2i({ mref.mTarget[0], mref.mTarget[1] });
 
                     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Cell, mCells.getId(cellIndex));
-                    messages.add(id, "The position of the moved reference " + ref.mRefID.getRefIdString() + " (cell " + indexCell.getRefIdString() + ")"
-                                     " does not match the target cell (" + ref.mCell.getRefIdString() + ")",
+                    messages.add(id, "The position of the moved reference " + ref.mRefID.toDebugString() + " (cell " + indexCell.toDebugString() + ")"
+                                     " does not match the target cell (" + ref.mCell.toDebugString() + ")",
                                      std::string(), CSMDoc::Message::Severity_Warning);
                 }
             }
@@ -118,7 +120,7 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
 
                 messages.add(id,
                     "Attempt to move a non-existent reference - RefNum index " + std::to_string(ref.mRefNum.mIndex)
-                        + ", refID " + ref.mRefID.getRefIdString() + ", content file index "
+                        + ", refID " + ref.mRefID.toDebugString() + ", content file index "
                         + std::to_string(ref.mRefNum.mContentFile),
                     /*hint*/ "", CSMDoc::Message::Severity_Warning);
                 continue;

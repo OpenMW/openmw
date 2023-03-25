@@ -34,6 +34,14 @@ namespace ESM
 
     struct VisitCellRefId
     {
+        CellId operator()(const ESM::EmptyRefId)
+        {
+            CellId out;
+            out.mPaged = true;
+            out.mIndex = {};
+            return out;
+        }
+
         CellId operator()(const ESM::StringRefId& id)
         {
             CellId out;
