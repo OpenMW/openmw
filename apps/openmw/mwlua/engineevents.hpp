@@ -12,7 +12,7 @@ namespace MWLua
     class EngineEvents
     {
     public:
-        explicit EngineEvents(GlobalScripts* globalScripts)
+        explicit EngineEvents(GlobalScripts& globalScripts)
             : mGlobalScripts(globalScripts)
         {
         }
@@ -47,7 +47,7 @@ namespace MWLua
     private:
         class Visitor;
 
-        GlobalScripts* mGlobalScripts;
+        GlobalScripts& mGlobalScripts;
         std::vector<Event> mQueue;
     };
 

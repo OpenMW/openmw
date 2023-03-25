@@ -17,12 +17,12 @@ namespace MWLua
     class EngineEvents::Visitor
     {
     public:
-        explicit Visitor(GlobalScripts* globalScripts)
+        explicit Visitor(GlobalScripts& globalScripts)
             : mGlobalScripts(globalScripts)
         {
         }
 
-        void operator()(const OnNewGame&) const { mGlobalScripts->newGameStarted(); }
+        void operator()(const OnNewGame&) const { mGlobalScripts.newGameStarted(); }
 
         void operator()(const OnActive& event) const
         {
@@ -30,15 +30,15 @@ namespace MWLua
             if (ptr.isEmpty())
                 return;
             if (ptr.getCellRef().getRefId() == "player")
-                mGlobalScripts->playerAdded(GObject(ptr));
+                mGlobalScripts.playerAdded(GObject(ptr));
             else
             {
-                mGlobalScripts->objectActive(GObject(ptr));
+                mGlobalScripts.objectActive(GObject(ptr));
                 const MWWorld::Class& objClass = ptr.getClass();
                 if (objClass.isActor())
-                    mGlobalScripts->actorActive(GObject(ptr));
+                    mGlobalScripts.actorActive(GObject(ptr));
                 if (objClass.isItem(ptr))
-                    mGlobalScripts->itemActive(GObject(ptr));
+                    mGlobalScripts.itemActive(GObject(ptr));
             }
             if (auto* scripts = getLocalScripts(ptr))
                 scripts->setActive(true);
@@ -89,7 +89,7 @@ namespace MWLua
 
         LocalScripts* getLocalScripts(const ESM::RefNum& id) const { return getLocalScripts(getPtr(id)); }
 
-        GlobalScripts* mGlobalScripts;
+        GlobalScripts& mGlobalScripts;
         bool mLuaDebug = Settings::Manager::getBool("lua debug", "Lua");
         MWWorld::WorldModel* mWorldModel = MWBase::Environment::get().getWorldModel();
     };

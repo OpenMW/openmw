@@ -172,8 +172,8 @@ namespace MWLua
 
         MWWorld::Ptr mPlayer;
 
-        LuaEvents mLuaEvents{ &mGlobalScripts };
-        EngineEvents mEngineEvents{ &mGlobalScripts };
+        LuaEvents mLuaEvents{ mGlobalScripts };
+        EngineEvents mEngineEvents{ mGlobalScripts };
         std::vector<MWBase::LuaManager::InputEvent> mInputEvents;
 
         std::unique_ptr<LuaUtil::UserdataSerializer> mGlobalSerializer;

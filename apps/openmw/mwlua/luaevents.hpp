@@ -27,7 +27,7 @@ namespace MWLua
     class LuaEvents
     {
     public:
-        explicit LuaEvents(GlobalScripts* globalScripts)
+        explicit LuaEvents(GlobalScripts& globalScripts)
             : mGlobalScripts(globalScripts)
         {
         }
@@ -56,7 +56,7 @@ namespace MWLua
         void save(ESM::ESMWriter& esm) const;
 
     private:
-        GlobalScripts* mGlobalScripts;
+        GlobalScripts& mGlobalScripts;
         std::vector<Global> mNewGlobalEventBatch;
         std::vector<Local> mNewLocalEventBatch;
         std::vector<Global> mGlobalEventBatch;

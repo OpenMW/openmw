@@ -35,10 +35,10 @@ namespace MWLua
 
     void LuaEvents::callEventHandlers()
     {
-        for (Global& e : mGlobalEventBatch)
-            mGlobalScripts->receiveEvent(e.mEventName, e.mEventData);
+        for (const Global& e : mGlobalEventBatch)
+            mGlobalScripts.receiveEvent(e.mEventName, e.mEventData);
         mGlobalEventBatch.clear();
-        for (Local& e : mLocalEventBatch)
+        for (const Local& e : mLocalEventBatch)
         {
             MWWorld::Ptr ptr = MWBase::Environment::get().getWorldModel()->getPtr(e.mDest);
             LocalScripts* scripts = ptr.isEmpty() ? nullptr : ptr.getRefData().getLuaScripts();
