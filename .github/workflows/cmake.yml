@@ -1,6 +1,9 @@
 name: CMake
 
 on:
+  push:
+    branches:
+      - 'master'
   pull_request:
     branches: [ master ]
 
@@ -12,76 +15,94 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: Add OpenMW PPA Dependancies
-      run: sudo add-apt-repository ppa:openmw/openmw; sudo apt-get update
-    
-    - name: Install Building Dependancies
-      run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
+      - uses: actions/checkout@v2
 
-    - name: Prime ccache
-      uses: hendrikmuhs/ccache-action@v1
-      with:
-        key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
-        max-size: 1000M
+      - name: Add OpenMW PPA Dependencies
+        run: sudo add-apt-repository ppa:openmw/openmw; sudo apt-get update
 
-    - name: Install gtest
-      run: |
-        export CONFIGURATION="Release"
-        export GOOGLETEST_DIR="."
-        export GENERATOR="Unix Makefiles"
-        export CC="gcc"
-        export CXX="g++"
-        sudo -E CI/build_googletest.sh
+      - name: Install Building Dependencies
+        run: sudo CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
 
-    - name: Configure
-      run: cmake -S . -B . -DGTEST_ROOT="$(pwd)/googletest/build" -DGMOCK_ROOT="$(pwd)/googletest/build" -DBUILD_UNITTESTS=ON -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_INSTALL_PREFIX=./install -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_FLAGS='-Werror' -DCMAKE_CXX_FLAGS="-Werror -Wno-error=deprecated-declarations -Wno-error=nonnull -Wno-error=deprecated-copy"
+      - name: Prime ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
+          max-size: 1000M
 
-    - name: Build
-      run: cmake --build . --config ${{env.BUILD_TYPE}} --parallel 3
- 
-    - name: Test
-      run: ./openmw_test_suite
+      - name: Configure
+        run: cmake . -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DOPENMW_USE_SYSTEM_RECASTNAVIGATION=1 -DUSE_SYSTEM_TINYXML=1 -DBUILD_UNITTESTS=1 -DCMAKE_INSTALL_PREFIX=install
 
-#    - name: Install
-#      shell: bash
-#      run: cmake --install .
-      
-#    - name: Create Artifact
-#      shell: bash
-#      working-directory: install
-#      run: |
-#        ls -laR
-#        7z a ../build_artifact.7z .
-        
-#    - name: Upload Artifact
-#      uses: actions/upload-artifact@v1
-#      with:
-#        path: ./build_artifact.7z
-#        name: build_artifact.7z
+      - name: Build
+        run: make -j3
+
+      - name: Test
+        run: ./openmw_test_suite
+
+          #    - name: Install
+          #      shell: bash
+          #      run: cmake --install .
+
+          #    - name: Create Artifact
+          #      shell: bash
+          #      working-directory: install
+          #      run: |
+          #        ls -laR
+          #        7z a ../build_artifact.7z .
+
+  #    - name: Upload Artifact
+  #      uses: actions/upload-artifact@v1
+  #      with:
+  #        path: ./build_artifact.7z
+  #        name: build_artifact.7z
 
   MacOS:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Install Building Dependancies
-      run: CI/before_install.osx.sh
+      - name: Install Building Dependencies
+        run: CI/before_install.osx.sh
 
-    - name: Prime ccache
-      uses: hendrikmuhs/ccache-action@v1
-      with:
-        key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
-        max-size: 1000M
+      - name: Prime ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ${{ matrix.os }}-${{ env.BUILD_TYPE }}
+          max-size: 1000M
 
-    - name: Configure
-      run: |
-        rm -fr build  # remove the build directory
-        CI/before_script.osx.sh
+      - name: Configure
+        run: |
+          rm -fr build  # remove the build directory
+          CI/before_script.osx.sh
+      - name: Build
+        run: |
+          cd build 
+          make -j $(sysctl -n hw.logicalcpu) package
+  Windows:
+    runs-on: windows-latest
 
-    - name: Build
-      run: |
-        cd build 
-        make -j $(sysctl -n hw.logicalcpu) package
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Building Dependencies
+        run: |
+          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
+          choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
+          choco source disable -n=chocolatey
+          choco install git --force --params "/GitAndUnixToolsOnPath" -y
+          choco install 7zip -y
+          choco install ccache -y
+          choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
+          choco install vswhere -y
+          choco install ninja -y
+          refreshenv
+      - name: Build
+        run: |
+          $env:CCACHE_BASEDIR = Get-Location
+          $env:CCACHE_DIR = "$(Get-Location)\ccache"
+          New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+          sh CI/before_script.msvc.sh -c $env:BUILD_TYPE -p Win64 -v 2019 -k -V -N -b -t -C -E
+          cd MSVC2019_64_Ninja
+          .\ActivateMSVC.ps1
+          cmake --build . --config $env:BUILD_TYPE
+          ccache --show-stats
