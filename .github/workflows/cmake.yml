@@ -78,31 +78,3 @@ jobs:
         run: |
           cd build 
           make -j $(sysctl -n hw.logicalcpu) package
-  Windows:
-    runs-on: windows-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Install Building Dependencies
-        run: |
-          Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-          choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
-          choco source disable -n=chocolatey
-          choco install git --force --params "/GitAndUnixToolsOnPath" -y
-          choco install 7zip -y
-          choco install ccache -y
-          choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
-          choco install vswhere -y
-          choco install ninja -y
-          refreshenv
-      - name: Build
-        run: |
-          $env:CCACHE_BASEDIR = Get-Location
-          $env:CCACHE_DIR = "$(Get-Location)\ccache"
-          New-Item -Type Directory -Force -Path $env:CCACHE_DIR
-          sh CI/before_script.msvc.sh -c $env:BUILD_TYPE -p Win64 -v 2019 -k -V -N -b -t -C -E
-          cd MSVC2019_64_Ninja
-          .\ActivateMSVC.ps1
-          cmake --build . --config $env:BUILD_TYPE
-          ccache --show-stats
