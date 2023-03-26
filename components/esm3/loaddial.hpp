@@ -30,7 +30,7 @@ namespace ESM
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
         static std::string_view getRecordType() { return "Dialogue"; }
 
-        enum Type
+        enum Type : std::int8_t
         {
             Topic = 0,
             Voice = 1,
@@ -41,7 +41,7 @@ namespace ESM
         };
 
         RefId mId;
-        signed char mType;
+        Type mType;
         InfoContainer mInfo;
         InfoOrder<DialInfo> mInfoOrder;
 

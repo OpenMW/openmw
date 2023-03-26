@@ -12,6 +12,7 @@
 #include <apps/opencs/model/world/cell.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm3/loadbody.hpp>
+#include <components/esm3/loaddial.hpp>
 #include <components/esm3/loadinfo.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadskil.hpp>
@@ -1342,7 +1343,7 @@ namespace CSMWorld
         {
             ESXRecordT record2 = record.get();
 
-            record2.mType = data.toInt();
+            record2.mType = static_cast<ESM::Dialogue::Type>(data.toInt());
 
             record.setModified(record2);
         }
