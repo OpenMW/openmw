@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_LUASCRIPTS_H
 #define OPENMW_ESM_LUASCRIPTS_H
 
+#include <cstdint>
 #include <vector>
 #include <string>
 
