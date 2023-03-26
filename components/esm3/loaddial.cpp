@@ -37,6 +37,7 @@ namespace ESM
                     else
                     {
                         esm.skip(size);
+                        mType = Unknown;
                     }
                     break;
                 }
@@ -67,6 +68,7 @@ namespace ESM
 
     void Dialogue::blank()
     {
+        mType = Unknown;
         mInfo.clear();
     }
 
