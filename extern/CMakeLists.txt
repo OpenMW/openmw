@@ -221,8 +221,8 @@ if (BUILD_BENCHMARKS AND NOT OPENMW_USE_SYSTEM_BENCHMARK)
 
     include(FetchContent)
     FetchContent_Declare(benchmark
-        URL https://github.com/google/benchmark/archive/refs/tags/v1.5.2.zip
-        URL_HASH SHA512=1146deca3b424703800933012ef75805d4657309d58b3484498bb51a99025bd405a69855a75af59c23fc3684bfa027224513999b8d7beaab3320c96fb6d6c540
+        URL https://github.com/google/benchmark/archive/refs/tags/v1.7.1.zip
+        URL_HASH SHA512=bec4016263587a57648e02b094c69e838c0a21e16c3dcfc6f03100397ab8f95d5fab1f5fd0d7e0e8adbb8212fff1eb574581158fdda1fa7fd6ff12762154b0cc
         SOURCE_DIR fetched/benchmark
     )
     FetchContent_MakeAvailableExcludeFromAll(benchmark)

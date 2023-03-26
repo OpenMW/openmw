@@ -58,7 +58,6 @@ namespace MWLua
             { ESM::REC_PROB, ObjectTypeName::Probe },
             { ESM::REC_REPA, ObjectTypeName::Repair },
         };
-
     }
 
     unsigned int getLiveCellRefType(const MWWorld::LiveCellRefBase* ref)

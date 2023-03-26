@@ -60,13 +60,13 @@ namespace ESM
 
     std::ostream& operator<<(std::ostream& stream, StringRefId value)
     {
-        stream << "String{";
+        stream << '"';
         for (char c : *value.mValue)
             if (std::isprint(c) && c != '\t' && c != '\n' && c != '\r')
                 stream << c;
             else
                 stream << "\\x" << std::hex << std::uppercase << static_cast<unsigned>(static_cast<unsigned char>(c));
-        return stream << '}';
+        return stream << '"';
     }
 
     std::string StringRefId::toDebugString() const

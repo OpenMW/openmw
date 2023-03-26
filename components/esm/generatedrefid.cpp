@@ -1,24 +1,28 @@
 #include "generatedrefid.hpp"
 
+#include "serializerefid.hpp"
+
 #include <ostream>
-#include <sstream>
 
 namespace ESM
 {
     std::string GeneratedRefId::toString() const
     {
-        return std::to_string(mValue);
+        std::string result;
+        result.resize(getIntegralSize(mValue) + 2, '\0');
+        serializeIntegral(mValue, 0, result);
+        return result;
     }
 
     std::string GeneratedRefId::toDebugString() const
     {
-        std::ostringstream stream;
-        stream << *this;
-        return stream.str();
+        std::string result;
+        serializeRefIdValue(mValue, generatedRefIdPrefix, result);
+        return result;
     }
 
     std::ostream& operator<<(std::ostream& stream, GeneratedRefId value)
     {
-        return stream << "Generated{" << value.mValue << '}';
+        return stream << value.toDebugString();
     }
 }

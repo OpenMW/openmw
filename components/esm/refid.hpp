@@ -48,8 +48,11 @@ namespace ESM
     public:
         const static RefId sEmpty;
 
-        // Constructs RefId from a string containing byte by byte copy of RefId::mValue.
+        // Constructs RefId from a serialized string containing byte by byte copy of RefId::mValue.
         static ESM::RefId deserialize(std::string_view value);
+
+        // Constructs RefId from a serialized text.
+        static ESM::RefId deserializeText(std::string_view value);
 
         // Constructs RefId from a string using a pointer to a static set of strings.
         static RefId stringRefId(std::string_view value);
@@ -117,6 +120,9 @@ namespace ESM
 
         // Copy mValue byte by byte into a string. Use result only during within the same process.
         std::string serialize() const;
+
+        // Serialize into stable text format.
+        std::string serializeText() const;
 
         friend constexpr bool operator==(const RefId& l, const RefId& r) { return l.mValue == r.mValue; }
 

@@ -1,8 +1,15 @@
 #include "refid.hpp"
 
+#include "serializerefid.hpp"
+
+#include "components/misc/strings/lower.hpp"
+
+#include <charconv>
 #include <ostream>
 #include <sstream>
 #include <stdexcept>
+#include <system_error>
+#include <variant>
 
 namespace ESM
 {
@@ -102,6 +109,19 @@ namespace ESM
                 return false;
             }
         };
+
+        struct SerializeText
+        {
+            std::string operator()(ESM::EmptyRefId /*v*/) const { return std::string(); }
+
+            std::string operator()(ESM::StringRefId v) const { return Misc::StringUtils::lowerCase(v.getValue()); }
+
+            template <class T>
+            std::string operator()(const T& v) const
+            {
+                return v.toDebugString();
+            }
+        };
     }
 
     const RefId RefId::sEmpty = {};
@@ -192,5 +212,32 @@ namespace ESM
         ESM::RefId result;
         std::memcpy(&result.mValue, value.data(), sizeof(result.mValue));
         return result;
+    }
+
+    std::string RefId::serializeText() const
+    {
+        return std::visit(SerializeText{}, mValue);
+    }
+
+    ESM::RefId RefId::deserializeText(std::string_view value)
+    {
+        if (value.empty())
+            return ESM::RefId();
+
+        if (value.starts_with(formIdRefIdPrefix))
+            return ESM::RefId::formIdRefId(deserializeIntegral<ESM4::FormId>(formIdRefIdPrefix.size(), value));
+
+        if (value.starts_with(generatedRefIdPrefix))
+            return ESM::RefId::generated(deserializeIntegral<std::uint64_t>(generatedRefIdPrefix.size(), value));
+
+        if (value.starts_with(indexRefIdPrefix))
+        {
+            ESM::RecNameInts recordType{};
+            std::memcpy(&recordType, value.data() + indexRefIdPrefix.size(), sizeof(recordType));
+            return ESM::RefId::index(recordType,
+                deserializeIntegral<std::uint32_t>(indexRefIdPrefix.size() + sizeof(recordType) + 1, value));
+        }
+
+        return ESM::RefId::stringRefId(value);
     }
 }

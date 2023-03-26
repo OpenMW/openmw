@@ -211,9 +211,9 @@ namespace ESM
             { RefId(), std::string() },
             { RefId::stringRefId("foo"), "foo" },
             { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), { 'a', 0, -1, '\n', '\t' } },
-            { RefId::formIdRefId(42), "42" },
-            { RefId::generated(42), "42" },
-            { RefId::index(REC_ARMO, 42), "ARMO, 42" },
+            { RefId::formIdRefId(42), "0x2a" },
+            { RefId::generated(42), "0x2a" },
+            { RefId::index(REC_ARMO, 42), "ARMO:0x2a" },
         };
 
         INSTANTIATE_TEST_SUITE_P(ESMRefIdToString, ESMRefIdToStringTest, ValuesIn(toStringParams));
@@ -240,14 +240,50 @@ namespace ESM
 
         const std::vector<std::pair<RefId, std::string>> toDebugStringParams = {
             { RefId(), "Empty{}" },
-            { RefId::stringRefId("foo"), "String{foo}" },
-            { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), "String{a\\x0\\xFF\\xA\\x9}" },
-            { RefId::formIdRefId(42), "FormId{42}" },
-            { RefId::generated(42), "Generated{42}" },
-            { RefId::index(REC_ARMO, 42), "Index{ARMO, 42}" },
+            { RefId::stringRefId("foo"), "\"foo\"" },
+            { RefId::stringRefId("BAR"), "\"BAR\"" },
+            { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), "\"a\\x0\\xFF\\xA\\x9\"" },
+            { RefId::formIdRefId(42), "FormId:0x2a" },
+            { RefId::generated(42), "Generated:0x2a" },
+            { RefId::index(REC_ARMO, 42), "Index:ARMO:0x2a" },
         };
 
         INSTANTIATE_TEST_SUITE_P(ESMRefIdToDebugString, ESMRefIdToDebugStringTest, ValuesIn(toDebugStringParams));
+
+        struct ESMRefIdTextTest : TestWithParam<std::pair<RefId, std::string>>
+        {
+        };
+
+        TEST_P(ESMRefIdTextTest, serializeTextShouldReturnString)
+        {
+            EXPECT_EQ(GetParam().first.serializeText(), GetParam().second);
+        }
+
+        TEST_P(ESMRefIdTextTest, deserializeTextShouldReturnRefId)
+        {
+            EXPECT_EQ(RefId::deserializeText(GetParam().second), GetParam().first);
+        }
+
+        const std::vector<std::pair<RefId, std::string>> serializedRefIds = {
+            { RefId(), "" },
+            { RefId::stringRefId("foo"), "foo" },
+            { RefId::stringRefId("BAR"), "bar" },
+            { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), { 'a', 0, -1, '\n', '\t' } },
+            { RefId::formIdRefId(0), "FormId:0x0" },
+            { RefId::formIdRefId(1), "FormId:0x1" },
+            { RefId::formIdRefId(0x1f), "FormId:0x1f" },
+            { RefId::formIdRefId(std::numeric_limits<ESM4::FormId>::max()), "FormId:0xffffffff" },
+            { RefId::generated(0), "Generated:0x0" },
+            { RefId::generated(1), "Generated:0x1" },
+            { RefId::generated(0x1f), "Generated:0x1f" },
+            { RefId::generated(std::numeric_limits<std::uint64_t>::max()), "Generated:0xffffffffffffffff" },
+            { RefId::index(REC_INGR, 0), "Index:INGR:0x0" },
+            { RefId::index(REC_INGR, 1), "Index:INGR:0x1" },
+            { RefId::index(REC_INGR, 0x1f), "Index:INGR:0x1f" },
+            { RefId::index(REC_INGR, std::numeric_limits<std::uint32_t>::max()), "Index:INGR:0xffffffff" },
+        };
+
+        INSTANTIATE_TEST_SUITE_P(ESMRefIdText, ESMRefIdTextTest, ValuesIn(serializedRefIds));
 
         template <class T>
         RefId generateRefId();
@@ -295,7 +331,14 @@ namespace ESM
             EXPECT_EQ(RefId::deserialize(refId.serialize()), refId);
         }
 
-        REGISTER_TYPED_TEST_SUITE_P(ESMRefIdSerializeDeserializeTest, serializeThenDeserializeShouldProduceSameValue);
+        TYPED_TEST_P(ESMRefIdSerializeDeserializeTest, serializeTextThenDeserializeTextShouldProduceSameValue)
+        {
+            const RefId refId = generateRefId<TypeParam>();
+            EXPECT_EQ(RefId::deserializeText(refId.serializeText()), refId);
+        }
+
+        REGISTER_TYPED_TEST_SUITE_P(ESMRefIdSerializeDeserializeTest, serializeThenDeserializeShouldProduceSameValue,
+            serializeTextThenDeserializeTextShouldProduceSameValue);
 
         using RefIdTypeParams = Types<EmptyRefId, StringRefId, FormIdRefId, GeneratedRefId, IndexRefId>;
 

@@ -23,23 +23,18 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        const MWWorld::Store<ESM::Creature>* store
-            = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>();
-        creature["record"] = sol::overload(
-            [](const Object& obj) -> const ESM::Creature* { return obj.ptr().get<ESM::Creature>()->mBase; },
-            [store](const std::string& recordId) -> const ESM::Creature* {
-                return store->find(ESM::RefId::stringRefId(recordId));
-            });
+        addRecordFunctionBinding<ESM::Creature>(creature);
+
         sol::usertype<ESM::Creature> record = context.mLua->sol().new_usertype<ESM::Creature>("ESM3_Creature");
         record[sol::meta_function::to_string]
-            = [](const ESM::Creature& rec) { return "ESM3_Creature[" + rec.mId.getRefIdString() + "]"; };
+            = [](const ESM::Creature& rec) { return "ESM3_Creature[" + rec.mId.toDebugString() + "]"; };
         record["name"] = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Creature& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
         record["mwscript"] = sol::readonly_property(
-            [](const ESM::Creature& rec) -> std::string { return rec.mScript.getRefIdString(); });
+            [](const ESM::Creature& rec) -> std::string { return rec.mScript.serializeText(); });
         record["baseCreature"] = sol::readonly_property(
-            [](const ESM::Creature& rec) -> std::string { return rec.mOriginal.getRefIdString(); });
+            [](const ESM::Creature& rec) -> std::string { return rec.mOriginal.serializeText(); });
     }
 }

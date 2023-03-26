@@ -90,6 +90,7 @@ add_component_dir(esm attr common defs esmcommon records util luascripts format 
     stringrefid
     generatedrefid
     indexrefid
+    serializerefid
     )
 
 add_component_dir(fx pass technique lexer widgets stateupdater)
