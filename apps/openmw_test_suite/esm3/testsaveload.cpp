@@ -71,11 +71,16 @@ namespace ESM
     {
         using namespace ::testing;
 
-        constexpr std::array formats = {
-            MaxLimitedSizeStringsFormatVersion,
-            MaxStringRefIdFormatVersion,
-            CurrentSaveGameFormatVersion,
-        };
+        std::vector<ESM::FormatVersion> getFormats()
+        {
+            std::vector<ESM::FormatVersion> result({
+                MaxLimitedSizeStringsFormatVersion,
+                MaxStringRefIdFormatVersion,
+            });
+            for (ESM::FormatVersion v = result.back() + 1; v <= ESM::CurrentSaveGameFormatVersion; ++v)
+                result.push_back(v);
+            return result;
+        }
 
         constexpr std::uint32_t fakeRecordId = fourCC("FAKE");
 
@@ -327,6 +332,6 @@ namespace ESM
             EXPECT_EQ(result.mKeys, record.mKeys);
         }
 
-        INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(formats));
+        INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(getFormats()));
     }
 }

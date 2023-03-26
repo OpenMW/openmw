@@ -269,22 +269,27 @@ std::unique_ptr<std::istream> getEsmFile(T record, bool deleted, ESM::FormatVers
 
 namespace
 {
-    constexpr std::array formats = {
-        ESM::DefaultFormatVersion,
-        ESM::CurrentContentFormatVersion,
-        ESM::MaxOldWeatherFormatVersion,
-        ESM::MaxOldDeathAnimationFormatVersion,
-        ESM::MaxOldForOfWarFormatVersion,
-        ESM::MaxWerewolfDeprecatedDataFormatVersion,
-        ESM::MaxOldTimeLeftFormatVersion,
-        ESM::MaxIntFallbackFormatVersion,
-        ESM::MaxClearModifiersFormatVersion,
-        ESM::MaxOldAiPackageFormatVersion,
-        ESM::MaxOldSkillsAndAttributesFormatVersion,
-        ESM::MaxOldCreatureStatsFormatVersion,
-        ESM::MaxStringRefIdFormatVersion,
-        ESM::CurrentSaveGameFormatVersion,
-    };
+    std::vector<ESM::FormatVersion> getFormats()
+    {
+        std::vector<ESM::FormatVersion> result({
+            ESM::DefaultFormatVersion,
+            ESM::CurrentContentFormatVersion,
+            ESM::MaxOldWeatherFormatVersion,
+            ESM::MaxOldDeathAnimationFormatVersion,
+            ESM::MaxOldForOfWarFormatVersion,
+            ESM::MaxWerewolfDeprecatedDataFormatVersion,
+            ESM::MaxOldTimeLeftFormatVersion,
+            ESM::MaxIntFallbackFormatVersion,
+            ESM::MaxClearModifiersFormatVersion,
+            ESM::MaxOldAiPackageFormatVersion,
+            ESM::MaxOldSkillsAndAttributesFormatVersion,
+            ESM::MaxOldCreatureStatsFormatVersion,
+            ESM::MaxStringRefIdFormatVersion,
+        });
+        for (ESM::FormatVersion v = result.back() + 1; v <= ESM::CurrentSaveGameFormatVersion; ++v)
+            result.push_back(v);
+        return result;
+    }
 
     template <class T, class = std::void_t<>>
     struct HasBlankFunction : std::false_type
@@ -305,7 +310,7 @@ TYPED_TEST_P(StoreTest, delete_test)
 {
     using RecordType = TypeParam;
 
-    for (const ESM::FormatVersion formatVersion : formats)
+    for (const ESM::FormatVersion formatVersion : getFormats())
     {
         SCOPED_TRACE("FormatVersion: " + std::to_string(formatVersion));
         const ESM::RefId recordId = ESM::RefId::stringRefId("foobar");
@@ -383,7 +388,7 @@ TYPED_TEST_P(StoreTest, overwrite_test)
 {
     using RecordType = TypeParam;
 
-    for (const ESM::FormatVersion formatVersion : formats)
+    for (const ESM::FormatVersion formatVersion : getFormats())
     {
         SCOPED_TRACE("FormatVersion: " + std::to_string(formatVersion));
 
@@ -442,7 +447,7 @@ namespace
         else
             refId = ESM::StringRefId("foobar");
 
-        for (const ESM::FormatVersion formatVersion : formats)
+        for (const ESM::FormatVersion formatVersion : getFormats())
         {
             SCOPED_TRACE("FormatVersion: " + std::to_string(formatVersion));
 
