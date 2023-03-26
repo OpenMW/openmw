@@ -11,8 +11,10 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/records.hpp>
+#include <components/esm/typetraits.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm3/typetraits.hpp>
 #include <components/esm4/common.hpp>
 #include <components/esm4/loadcell.hpp>
 #include <components/esm4/loadligh.hpp>
@@ -20,7 +22,6 @@
 #include <components/esm4/loadstat.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/esm4/readerutils.hpp>
-#include <components/esm4/typetraits.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
@@ -428,19 +429,6 @@ namespace
     {
     };
 
-    template <class T, class = std::void_t<>>
-    struct HasIndex : std::false_type
-    {
-    };
-
-    template <class T>
-    struct HasIndex<T, std::void_t<decltype(T::mIndex)>> : std::true_type
-    {
-    };
-
-    template <class T>
-    constexpr bool hasIndex = HasIndex<T>::value;
-
     TYPED_TEST_SUITE_P(StoreSaveLoadTest);
 
     TYPED_TEST_P(StoreSaveLoadTest, shouldNotChangeRefId)
@@ -449,7 +437,7 @@ namespace
 
         const int index = 3;
         decltype(RecordType::mId) refId;
-        if constexpr (hasIndex<RecordType> && !std::is_same_v<RecordType, ESM::LandTexture>)
+        if constexpr (ESM::hasIndex<RecordType> && !std::is_same_v<RecordType, ESM::LandTexture>)
             refId = RecordType::indexToRefId(index);
         else
             refId = ESM::StringRefId("foobar");
@@ -465,7 +453,7 @@ namespace
 
             record.mId = refId;
 
-            if constexpr (hasIndex<RecordType>)
+            if constexpr (ESM::hasIndex<RecordType>)
                 record.mIndex = index;
 
             if constexpr (std::is_same_v<RecordType, ESM::Global>)
@@ -482,7 +470,7 @@ namespace
             const RecordType* result = nullptr;
             if constexpr (std::is_same_v<RecordType, ESM::LandTexture>)
                 result = esmStore.get<RecordType>().search(index, 0);
-            else if constexpr (hasIndex<RecordType>)
+            else if constexpr (ESM::hasIndex<RecordType>)
                 result = esmStore.get<RecordType>().search(index);
             else
                 result = esmStore.get<RecordType>().search(refId);
@@ -492,7 +480,7 @@ namespace
         }
     }
 
-    static_assert(hasIndex<ESM::MagicEffect>);
+    static_assert(ESM::hasIndex<ESM::MagicEffect>);
 
     template <class T, class = std::void_t<>>
     struct HasSaveFunction : std::false_type
@@ -558,9 +546,9 @@ namespace
     };
 
     using RecordTypes = typename ToRecordTypes<MWWorld::ESMStore::StoreTuple>::Type;
-    using RecordTypesWithId = typename FilterTypes<ESM4::HasId, RecordTypes>::Type;
+    using RecordTypesWithId = typename FilterTypes<ESM::HasId, RecordTypes>::Type;
     using RecordTypesWithSave = typename FilterTypes<HasSaveFunction, RecordTypesWithId>::Type;
-    using RecordTypesWithModel = typename FilterTypes<ESM4::HasModel, RecordTypesWithSave>::Type;
+    using RecordTypesWithModel = typename FilterTypes<ESM::HasModel, RecordTypesWithSave>::Type;
 
     REGISTER_TYPED_TEST_SUITE_P(StoreSaveLoadTest, shouldNotChangeRefId);
 
