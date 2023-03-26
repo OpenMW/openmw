@@ -37,7 +37,7 @@ Engine handler is a function defined by a script, that can be called by the engi
   :widths: 20 80
 
   * - onNewGame()
-    - New game is started
+    - New game is started.
   * - onPlayerAdded(player)
     - Player added to the game world. The argument is a `Game object`.
   * - onObjectActive(object)
@@ -47,6 +47,8 @@ Engine handler is a function defined by a script, that can be called by the engi
   * - onItemActive(item)
     - | Item (Weapon, Potion, ...) becomes active in a cell.
       | Does not apply to items in inventories or containers.
+  * - onActivate(object, actor)
+    - Object is activated by an actor.
 
 **Only for local scripts**
 
