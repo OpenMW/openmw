@@ -144,7 +144,7 @@ bool Config::GameSettings::readFile(QTextStream& stream, QMultiMap<QString, QStr
                     }
                 }
             }
-            else if (ignoreContent && key == QLatin1String("content"))
+            if (ignoreContent && (key == QLatin1String("content") || key == QLatin1String("data")))
                 continue;
 
             QStringList values = cache.values(key);
