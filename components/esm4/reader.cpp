@@ -134,6 +134,8 @@ namespace ESM4
     ReaderContext Reader::getContext()
     {
         mCtx.filePos = mStream->tellg();
+        if (mCtx.filePos == -1)
+            return mCtx;
         mCtx.filePos -= mCtx.recHeaderSize; // update file position
         return mCtx;
     }
