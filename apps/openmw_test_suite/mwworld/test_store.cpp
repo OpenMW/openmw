@@ -441,11 +441,12 @@ namespace
         using RecordType = TypeParam;
 
         const int index = 3;
+        const std::string stringId = "foobar";
         decltype(RecordType::mId) refId;
         if constexpr (ESM::hasIndex<RecordType> && !std::is_same_v<RecordType, ESM::LandTexture>)
             refId = RecordType::indexToRefId(index);
         else
-            refId = ESM::StringRefId("foobar");
+            refId = ESM::StringRefId(stringId);
 
         for (const ESM::FormatVersion formatVersion : getFormats())
         {
@@ -457,6 +458,9 @@ namespace
                 record.blank();
 
             record.mId = refId;
+
+            if constexpr (ESM::hasStringId<RecordType>)
+                record.mStringId = stringId;
 
             if constexpr (ESM::hasIndex<RecordType>)
                 record.mIndex = index;
@@ -486,6 +490,7 @@ namespace
     }
 
     static_assert(ESM::hasIndex<ESM::MagicEffect>);
+    static_assert(ESM::hasStringId<ESM::Dialogue>);
 
     template <class T, class = std::void_t<>>
     struct HasSaveFunction : std::false_type
@@ -593,6 +598,7 @@ namespace
 
         result.mDialogue.blank();
         result.mDialogue.mId = ESM::RefId::stringRefId("dialogue");
+        result.mDialogue.mStringId = "Dialogue";
 
         for (std::size_t i = 0; i < infoCount; ++i)
         {

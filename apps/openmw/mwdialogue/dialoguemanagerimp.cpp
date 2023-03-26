@@ -297,7 +297,7 @@ namespace MWDialogue
 
         if (info)
         {
-            ESM::RefId title;
+            std::string title;
             if (dialogue.mType == ESM::Dialogue::Persuasion)
             {
                 // Determine GMST from dialogue topic. GMSTs are:
@@ -310,14 +310,13 @@ namespace MWDialogue
                 const MWWorld::Store<ESM::GameSetting>& gmsts
                     = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
-                title = ESM::RefId::stringRefId(gmsts.find(modifiedTopic)->mValue.getString());
+                title = gmsts.find(modifiedTopic)->mValue.getString();
             }
             else
-                title = topic;
+                title = dialogue.mStringId;
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(), mActor);
-            callback->addResponse(
-                title.getRefIdString(), Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+            callback->addResponse(title, Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
 
             if (dialogue.mType == ESM::Dialogue::Topic)
             {

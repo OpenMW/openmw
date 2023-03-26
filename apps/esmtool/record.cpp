@@ -741,6 +741,7 @@ namespace EsmTool
     template <>
     void Record<ESM::Dialogue>::print()
     {
+        std::cout << "  StringId: " << mData.mStringId << std::endl;
         std::cout << "  Type: " << dialogTypeLabel(mData.mType) << " (" << (int)mData.mType << ")" << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
         // Sadly, there are no DialInfos, because the loader dumps as it

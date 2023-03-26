@@ -226,6 +226,7 @@ void CSMDoc::Document::createBase()
     {
         ESM::Dialogue record;
         record.mId = ESM::RefId::stringRefId(voice);
+        record.mStringId = voice;
         record.mType = ESM::Dialogue::Voice;
         record.blank();
 
@@ -249,6 +250,7 @@ void CSMDoc::Document::createBase()
     {
         ESM::Dialogue record;
         record.mId = ESM::RefId::stringRefId(greeting);
+        record.mStringId = greeting;
         record.mType = ESM::Dialogue::Greeting;
         record.blank();
 
@@ -272,6 +274,7 @@ void CSMDoc::Document::createBase()
     {
         ESM::Dialogue record;
         record.mId = ESM::RefId::stringRefId(persuasion);
+        record.mStringId = persuasion;
         record.mType = ESM::Dialogue::Persuasion;
         record.blank();
 

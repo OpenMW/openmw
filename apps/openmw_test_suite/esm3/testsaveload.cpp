@@ -2,6 +2,7 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadcont.hpp>
+#include <components/esm3/loaddial.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadscpt.hpp>
 #include <components/esm3/player.hpp>
@@ -330,6 +331,18 @@ namespace ESM
             QuickKeys result;
             saveAndLoadRecord(record, GetParam(), result);
             EXPECT_EQ(result.mKeys, record.mKeys);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, dialogueShouldNotChange)
+        {
+            Dialogue record;
+            record.blank();
+            record.mStringId = generateRandomString(32);
+            record.mId = ESM::RefId::stringRefId(record.mStringId);
+            Dialogue result;
+            saveAndLoadRecord(record, GetParam(), result);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mStringId, record.mStringId);
         }
 
         INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(getFormats()));
