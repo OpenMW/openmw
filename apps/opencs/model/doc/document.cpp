@@ -107,17 +107,16 @@ void CSMDoc::Document::addOptionalGmsts()
 
 void CSMDoc::Document::addOptionalGlobals()
 {
-    static const char* sGlobals[] = {
+    static constexpr std::string_view globals[] = {
         "DaysPassed",
         "PCWerewolf",
         "PCYear",
-        nullptr,
     };
 
-    for (int i = 0; sGlobals[i]; ++i)
+    for (std::size_t i = 0; i < std::size(globals); ++i)
     {
         ESM::Global global;
-        global.mId = ESM::RefId::stringRefId(sGlobals[i]);
+        global.mId = ESM::RefId::stringRefId(globals[i]);
         global.blank();
         global.mValue.setType(ESM::VT_Long);
 
@@ -176,7 +175,7 @@ void CSMDoc::Document::addOptionalMagicEffect(const ESM::MagicEffect& magicEffec
 
 void CSMDoc::Document::createBase()
 {
-    static const char* sGlobals[] = {
+    static constexpr std::string_view globals[] = {
         "Day",
         "DaysPassed",
         "GameHour",
@@ -185,13 +184,12 @@ void CSMDoc::Document::createBase()
         "PCVampire",
         "PCWerewolf",
         "PCYear",
-        nullptr,
     };
 
-    for (int i = 0; sGlobals[i]; ++i)
+    for (std::size_t i = 0; i < std::size(globals); ++i)
     {
         ESM::Global record;
-        record.mId = ESM::RefId::stringRefId(sGlobals[i]);
+        record.mId = ESM::RefId::stringRefId(globals[i]);
         record.mRecordFlags = 0;
         record.mValue.setType(i == 2 ? ESM::VT_Float : ESM::VT_Long);
 
@@ -213,7 +211,7 @@ void CSMDoc::Document::createBase()
         getData().getSkills().add(record);
     }
 
-    static const char* sVoice[] = {
+    static constexpr std::string_view voices[] = {
         "Intruder",
         "Attack",
         "Hello",
@@ -222,20 +220,19 @@ void CSMDoc::Document::createBase()
         "Idle",
         "Flee",
         "Hit",
-        nullptr,
     };
 
-    for (int i = 0; sVoice[i]; ++i)
+    for (const std::string_view voice : voices)
     {
         ESM::Dialogue record;
-        record.mId = ESM::RefId::stringRefId(sVoice[i]);
+        record.mId = ESM::RefId::stringRefId(voice);
         record.mType = ESM::Dialogue::Voice;
         record.blank();
 
         getData().getTopics().add(record);
     }
 
-    static const char* sGreetings[] = {
+    static constexpr std::string_view greetings[] = {
         "Greeting 0",
         "Greeting 1",
         "Greeting 2",
@@ -246,20 +243,19 @@ void CSMDoc::Document::createBase()
         "Greeting 7",
         "Greeting 8",
         "Greeting 9",
-        nullptr,
     };
 
-    for (int i = 0; sGreetings[i]; ++i)
+    for (const std::string_view greeting : greetings)
     {
         ESM::Dialogue record;
-        record.mId = ESM::RefId::stringRefId(sGreetings[i]);
+        record.mId = ESM::RefId::stringRefId(greeting);
         record.mType = ESM::Dialogue::Greeting;
         record.blank();
 
         getData().getTopics().add(record);
     }
 
-    static const char* sPersuasion[] = {
+    static constexpr std::string_view persuasions[] = {
         "Intimidate Success",
         "Intimidate Fail",
         "Service Refusal",
@@ -270,13 +266,12 @@ void CSMDoc::Document::createBase()
         "Admire Fail",
         "Taunt Fail",
         "Bribe Fail",
-        nullptr,
     };
 
-    for (int i = 0; sPersuasion[i]; ++i)
+    for (const std::string_view persuasion : persuasions)
     {
         ESM::Dialogue record;
-        record.mId = ESM::RefId::stringRefId(sPersuasion[i]);
+        record.mId = ESM::RefId::stringRefId(persuasion);
         record.mType = ESM::Dialogue::Persuasion;
         record.blank();
 
