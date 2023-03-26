@@ -13,7 +13,7 @@ namespace ESM
         mPlayerClassId = esm.getHNORefId("PLCL");
         mPlayerClassName = esm.getHNOString("PLCN");
 
-        if (esm.getFormatVersion() <= ESM::MaxSavedGameCellNameAsRefId)
+        if (esm.getFormatVersion() <= ESM::MaxSavedGameCellNameAsRefIdFormatVersion)
             mPlayerCellName = esm.getHNRefId("PLCE").toString();
         else
             mPlayerCellName = esm.getHNString("PLCE");
