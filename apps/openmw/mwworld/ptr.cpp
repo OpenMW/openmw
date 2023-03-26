@@ -21,6 +21,13 @@ namespace MWWorld
         return res;
     }
 
+    SafePtr::SafePtr(const Ptr& ptr)
+        : mId(ptr.getCellRef().getRefNum())
+        , mPtr(ptr)
+        , mLastUpdate(MWBase::Environment::get().getWorldModel()->getPtrIndexUpdateCounter())
+    {
+    }
+
     std::string SafePtr::toString() const
     {
         update();

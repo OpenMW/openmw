@@ -52,7 +52,7 @@ namespace MWLua
             return &mDoorsInScene;
         if (typeid(cls) == typeid(MWClass::Container))
             return &mContainersInScene;
-        if (cls.hasToolTip(ptr))
+        if (cls.isItem(ptr))
             return &mItemsInScene;
         return nullptr;
     }

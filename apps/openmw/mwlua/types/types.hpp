@@ -11,6 +11,7 @@
 #include "apps/openmw/mwworld/store.hpp"
 
 #include "../context.hpp"
+#include "../object.hpp"
 
 namespace MWLua
 {

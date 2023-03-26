@@ -206,32 +206,13 @@ namespace MWLua
             { &mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers, &mOnActivatedHandlers });
     }
 
-    void LocalScripts::receiveEngineEvent(const EngineEvent& event)
+    void LocalScripts::setActive(bool active)
     {
-        std::visit(
-            [this](auto&& arg) {
-                using EventT = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<EventT, OnActive>)
-                {
-                    mData.mIsActive = true;
-                    callEngineHandlers(mOnActiveHandlers);
-                }
-                else if constexpr (std::is_same_v<EventT, OnInactive>)
-                {
-                    mData.mIsActive = false;
-                    callEngineHandlers(mOnInactiveHandlers);
-                }
-                else if constexpr (std::is_same_v<EventT, OnActivated>)
-                {
-                    callEngineHandlers(mOnActivatedHandlers, arg.mActivatingActor);
-                }
-                else
-                {
-                    static_assert(std::is_same_v<EventT, OnConsume>);
-                    callEngineHandlers(mOnConsumeHandlers, arg.mConsumable);
-                }
-            },
-            event);
+        mData.mIsActive = active;
+        if (active)
+            callEngineHandlers(mOnActiveHandlers);
+        else
+            callEngineHandlers(mOnInactiveHandlers);
     }
 
     void LocalScripts::applyStatsCache()

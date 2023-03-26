@@ -26,6 +26,8 @@ namespace MWClass
         std::string_view getName(const MWWorld::ConstPtr& ptr) const override;
         ///< \return name or ID; can return an empty string.
 
+        bool isItem(const MWWorld::ConstPtr&) const override { return true; }
+
         std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
         ///< Generate action for activation
 

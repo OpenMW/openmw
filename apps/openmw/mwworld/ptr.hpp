@@ -159,10 +159,7 @@ namespace MWWorld
             : mId(id)
         {
         }
-        explicit SafePtr(const Ptr& ptr)
-            : SafePtr(ptr.getCellRef().getRefNum())
-        {
-        }
+        explicit SafePtr(const Ptr& ptr);
         virtual ~SafePtr() = default;
         Id id() const { return mId; }
 
