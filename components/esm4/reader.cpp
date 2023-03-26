@@ -134,7 +134,7 @@ namespace ESM4
     ReaderContext Reader::getContext()
     {
         mCtx.filePos = mStream->tellg();
-        if (mCtx.filePos == -1)
+        if (mCtx.filePos == std::numeric_limits<std::size_t>::max())
             return mCtx;
         mCtx.filePos -= mCtx.recHeaderSize; // update file position
         return mCtx;
