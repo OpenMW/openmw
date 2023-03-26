@@ -41,12 +41,13 @@ namespace CSMWorld
         };
 
         DialogueData<ESM::DialInfo> generateDialogueWithInfos(
-            std::size_t infoCount, const ESM::RefId& dialogueId = ESM::RefId::stringRefId("dialogue"))
+            std::size_t infoCount, std::string_view dialogueId = "dialogue")
         {
             DialogueData<ESM::DialInfo> result;
 
             result.mDialogue.blank();
-            result.mDialogue.mId = dialogueId;
+            result.mDialogue.mId = ESM::RefId::stringRefId(dialogueId);
+            result.mDialogue.mStringId = dialogueId;
 
             for (std::size_t i = 0; i < infoCount; ++i)
             {
@@ -133,6 +134,7 @@ namespace CSMWorld
             ESM::Dialogue dialogue;
             dialogue.blank();
             dialogue.mId = ESM::RefId::stringRefId("dialogue");
+            dialogue.mStringId = "Dialogue";
 
             ESM::DialInfo info;
             info.blank();
@@ -157,6 +159,7 @@ namespace CSMWorld
             ESM::Dialogue dialogue;
             dialogue.blank();
             dialogue.mId = ESM::RefId::stringRefId("dialogue");
+            dialogue.mStringId = "Dialogue";
 
             ESM::DialInfo info;
             info.blank();
@@ -181,6 +184,7 @@ namespace CSMWorld
             ESM::Dialogue dialogue;
             dialogue.blank();
             dialogue.mId = ESM::RefId::stringRefId("dialogue");
+            dialogue.mStringId = "Dialogue";
 
             ESM::DialInfo info;
             info.blank();
@@ -207,6 +211,7 @@ namespace CSMWorld
             ESM::Dialogue dialogue;
             dialogue.blank();
             dialogue.mId = ESM::RefId::stringRefId("dialogue");
+            dialogue.mStringId = "Dialogue";
 
             ESM::DialInfo info;
             info.blank();
@@ -233,6 +238,7 @@ namespace CSMWorld
             ESM::Dialogue dialogue;
             dialogue.blank();
             dialogue.mId = ESM::RefId::stringRefId("dialogue");
+            dialogue.mStringId = "Dialogue";
 
             DialInfoData info;
             info.mValue.blank();
@@ -252,6 +258,7 @@ namespace CSMWorld
             ESM::Dialogue dialogue;
             dialogue.blank();
             dialogue.mId = ESM::RefId::stringRefId("dialogue");
+            dialogue.mStringId = "Dialogue";
 
             DialInfoData info;
             info.mValue.blank();
@@ -275,6 +282,7 @@ namespace CSMWorld
             ESM::Dialogue dialogue;
             dialogue.blank();
             dialogue.mId = ESM::RefId::stringRefId("dialogue");
+            dialogue.mStringId = "Dialogue";
 
             DialInfoData info;
             info.mValue.blank();
@@ -535,12 +543,9 @@ namespace CSMWorld
             InfoOrderByTopic infoOrder;
             InfoCollection collection;
 
-            saveAndLoadDialogueWithInfos(
-                generateDialogueWithInfos(2, ESM::RefId::stringRefId("dialogue2")), base, collection, infoOrder);
-            saveAndLoadDialogueWithInfos(
-                generateDialogueWithInfos(2, ESM::RefId::stringRefId("dialogue0")), base, collection, infoOrder);
-            saveAndLoadDialogueWithInfos(
-                generateDialogueWithInfos(2, ESM::RefId::stringRefId("dialogue1")), base, collection, infoOrder);
+            saveAndLoadDialogueWithInfos(generateDialogueWithInfos(2, "dialogue2"), base, collection, infoOrder);
+            saveAndLoadDialogueWithInfos(generateDialogueWithInfos(2, "dialogue0"), base, collection, infoOrder);
+            saveAndLoadDialogueWithInfos(generateDialogueWithInfos(2, "dialogue1"), base, collection, infoOrder);
 
             collection.sort(infoOrder);
 
@@ -558,10 +563,8 @@ namespace CSMWorld
             InfoOrderByTopic infoOrder;
             InfoCollection collection;
 
-            saveAndLoadDialogueWithInfos(
-                generateDialogueWithInfos(2, ESM::RefId::stringRefId("dialogue0")), base, collection, infoOrder);
-            saveAndLoadDialogueWithInfos(
-                generateDialogueWithInfos(2, ESM::RefId::stringRefId("dialogue1")), base, collection, infoOrder);
+            saveAndLoadDialogueWithInfos(generateDialogueWithInfos(2, "dialogue0"), base, collection, infoOrder);
+            saveAndLoadDialogueWithInfos(generateDialogueWithInfos(2, "dialogue1"), base, collection, infoOrder);
 
             collection.sort(infoOrder);
 
@@ -574,10 +577,8 @@ namespace CSMWorld
             InfoOrderByTopic infoOrder;
             InfoCollection collection;
 
-            saveAndLoadDialogueWithInfos(
-                generateDialogueWithInfos(2, ESM::RefId::stringRefId("dialogue0")), base, collection, infoOrder);
-            saveAndLoadDialogueWithInfos(
-                generateDialogueWithInfos(2, ESM::RefId::stringRefId("dialogue1")), base, collection, infoOrder);
+            saveAndLoadDialogueWithInfos(generateDialogueWithInfos(2, "dialogue0"), base, collection, infoOrder);
+            saveAndLoadDialogueWithInfos(generateDialogueWithInfos(2, "dialogue1"), base, collection, infoOrder);
 
             EXPECT_FALSE(collection.reorderRows(5, {}));
         }
@@ -588,10 +589,8 @@ namespace CSMWorld
             InfoOrderByTopic infoOrder;
             InfoCollection collection;
 
-            saveAndLoadDialogueWithInfos(
-                generateDialogueWithInfos(2, ESM::RefId::stringRefId("dialogue0")), base, collection, infoOrder);
-            saveAndLoadDialogueWithInfos(
-                generateDialogueWithInfos(2, ESM::RefId::stringRefId("dialogue1")), base, collection, infoOrder);
+            saveAndLoadDialogueWithInfos(generateDialogueWithInfos(2, "dialogue0"), base, collection, infoOrder);
+            saveAndLoadDialogueWithInfos(generateDialogueWithInfos(2, "dialogue1"), base, collection, infoOrder);
 
             EXPECT_FALSE(collection.reorderRows(0, { 0, 1, 2 }));
         }
@@ -602,10 +601,8 @@ namespace CSMWorld
             InfoOrderByTopic infoOrder;
             InfoCollection collection;
 
-            saveAndLoadDialogueWithInfos(
-                generateDialogueWithInfos(3, ESM::RefId::stringRefId("dialogue0")), base, collection, infoOrder);
-            saveAndLoadDialogueWithInfos(
-                generateDialogueWithInfos(3, ESM::RefId::stringRefId("dialogue1")), base, collection, infoOrder);
+            saveAndLoadDialogueWithInfos(generateDialogueWithInfos(3, "dialogue0"), base, collection, infoOrder);
+            saveAndLoadDialogueWithInfos(generateDialogueWithInfos(3, "dialogue1"), base, collection, infoOrder);
 
             EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue0#info0")), 0);
             EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue0#info1")), 1);
@@ -629,10 +626,8 @@ namespace CSMWorld
             InfoOrderByTopic infoOrder;
             InfoCollection collection;
 
-            saveAndLoadDialogueWithInfos(
-                generateDialogueWithInfos(2, ESM::RefId::stringRefId("d0")), base, collection, infoOrder);
-            saveAndLoadDialogueWithInfos(
-                generateDialogueWithInfos(2, ESM::RefId::stringRefId("d1")), base, collection, infoOrder);
+            saveAndLoadDialogueWithInfos(generateDialogueWithInfos(2, "d0"), base, collection, infoOrder);
+            saveAndLoadDialogueWithInfos(generateDialogueWithInfos(2, "d1"), base, collection, infoOrder);
 
             collection.sort(infoOrder);
 

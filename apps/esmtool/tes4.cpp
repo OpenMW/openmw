@@ -7,6 +7,7 @@
 #include <type_traits>
 
 #include <components/esm/esmcommon.hpp>
+#include <components/esm/typetraits.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/esm4/readerutils.hpp>
 #include <components/esm4/records.hpp>
@@ -93,7 +94,7 @@ namespace EsmTool
             std::cout << "\n  Record: " << ESM::NAME(reader.hdr().record.typeId).toStringView();
             if constexpr (ESM4::hasFormId<T>)
                 std::cout << "\n  FormId: " << value.mFormId;
-            if constexpr (ESM4::hasId<T>)
+            if constexpr (ESM::hasId<T>)
                 std::cout << "\n  Id: " << value.mId;
             if constexpr (ESM4::hasFlags<T>)
                 std::cout << "\n  Record flags: " << recordFlags(value.mFlags);
@@ -103,7 +104,7 @@ namespace EsmTool
                 std::cout << "\n  Parent: " << value.mParent;
             if constexpr (ESM4::hasEditorId<T>)
                 std::cout << "\n  EditorId: " << value.mEditorId;
-            if constexpr (ESM4::hasModel<T>)
+            if constexpr (ESM::hasModel<T>)
                 std::cout << "\n  Model: " << value.mModel;
             if constexpr (ESM4::hasNif<T>)
                 std::cout << "\n  Nif:" << WriteArray("\n  - ", value.mNif);

@@ -11,8 +11,10 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/records.hpp>
+#include <components/esm/typetraits.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm3/typetraits.hpp>
 #include <components/esm4/common.hpp>
 #include <components/esm4/loadcell.hpp>
 #include <components/esm4/loadligh.hpp>
@@ -20,7 +22,6 @@
 #include <components/esm4/loadstat.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/esm4/readerutils.hpp>
-#include <components/esm4/typetraits.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
@@ -268,22 +269,27 @@ std::unique_ptr<std::istream> getEsmFile(T record, bool deleted, ESM::FormatVers
 
 namespace
 {
-    constexpr std::array formats = {
-        ESM::DefaultFormatVersion,
-        ESM::CurrentContentFormatVersion,
-        ESM::MaxOldWeatherFormatVersion,
-        ESM::MaxOldDeathAnimationFormatVersion,
-        ESM::MaxOldForOfWarFormatVersion,
-        ESM::MaxWerewolfDeprecatedDataFormatVersion,
-        ESM::MaxOldTimeLeftFormatVersion,
-        ESM::MaxIntFallbackFormatVersion,
-        ESM::MaxClearModifiersFormatVersion,
-        ESM::MaxOldAiPackageFormatVersion,
-        ESM::MaxOldSkillsAndAttributesFormatVersion,
-        ESM::MaxOldCreatureStatsFormatVersion,
-        ESM::MaxStringRefIdFormatVersion,
-        ESM::CurrentSaveGameFormatVersion,
-    };
+    std::vector<ESM::FormatVersion> getFormats()
+    {
+        std::vector<ESM::FormatVersion> result({
+            ESM::DefaultFormatVersion,
+            ESM::CurrentContentFormatVersion,
+            ESM::MaxOldWeatherFormatVersion,
+            ESM::MaxOldDeathAnimationFormatVersion,
+            ESM::MaxOldForOfWarFormatVersion,
+            ESM::MaxWerewolfDeprecatedDataFormatVersion,
+            ESM::MaxOldTimeLeftFormatVersion,
+            ESM::MaxIntFallbackFormatVersion,
+            ESM::MaxClearModifiersFormatVersion,
+            ESM::MaxOldAiPackageFormatVersion,
+            ESM::MaxOldSkillsAndAttributesFormatVersion,
+            ESM::MaxOldCreatureStatsFormatVersion,
+            ESM::MaxStringRefIdFormatVersion,
+        });
+        for (ESM::FormatVersion v = result.back() + 1; v <= ESM::CurrentSaveGameFormatVersion; ++v)
+            result.push_back(v);
+        return result;
+    }
 
     template <class T, class = std::void_t<>>
     struct HasBlankFunction : std::false_type
@@ -304,7 +310,7 @@ TYPED_TEST_P(StoreTest, delete_test)
 {
     using RecordType = TypeParam;
 
-    for (const ESM::FormatVersion formatVersion : formats)
+    for (const ESM::FormatVersion formatVersion : getFormats())
     {
         SCOPED_TRACE("FormatVersion: " + std::to_string(formatVersion));
         const ESM::RefId recordId = ESM::RefId::stringRefId("foobar");
@@ -382,7 +388,7 @@ TYPED_TEST_P(StoreTest, overwrite_test)
 {
     using RecordType = TypeParam;
 
-    for (const ESM::FormatVersion formatVersion : formats)
+    for (const ESM::FormatVersion formatVersion : getFormats())
     {
         SCOPED_TRACE("FormatVersion: " + std::to_string(formatVersion));
 
@@ -428,19 +434,6 @@ namespace
     {
     };
 
-    template <class T, class = std::void_t<>>
-    struct HasIndex : std::false_type
-    {
-    };
-
-    template <class T>
-    struct HasIndex<T, std::void_t<decltype(T::mIndex)>> : std::true_type
-    {
-    };
-
-    template <class T>
-    constexpr bool hasIndex = HasIndex<T>::value;
-
     TYPED_TEST_SUITE_P(StoreSaveLoadTest);
 
     TYPED_TEST_P(StoreSaveLoadTest, shouldNotChangeRefId)
@@ -448,13 +441,14 @@ namespace
         using RecordType = TypeParam;
 
         const int index = 3;
+        const std::string stringId = "foobar";
         decltype(RecordType::mId) refId;
-        if constexpr (hasIndex<RecordType> && !std::is_same_v<RecordType, ESM::LandTexture>)
+        if constexpr (ESM::hasIndex<RecordType> && !std::is_same_v<RecordType, ESM::LandTexture>)
             refId = RecordType::indexToRefId(index);
         else
-            refId = ESM::StringRefId("foobar");
+            refId = ESM::StringRefId(stringId);
 
-        for (const ESM::FormatVersion formatVersion : formats)
+        for (const ESM::FormatVersion formatVersion : getFormats())
         {
             SCOPED_TRACE("FormatVersion: " + std::to_string(formatVersion));
 
@@ -465,7 +459,10 @@ namespace
 
             record.mId = refId;
 
-            if constexpr (hasIndex<RecordType>)
+            if constexpr (ESM::hasStringId<RecordType>)
+                record.mStringId = stringId;
+
+            if constexpr (ESM::hasIndex<RecordType>)
                 record.mIndex = index;
 
             if constexpr (std::is_same_v<RecordType, ESM::Global>)
@@ -482,7 +479,7 @@ namespace
             const RecordType* result = nullptr;
             if constexpr (std::is_same_v<RecordType, ESM::LandTexture>)
                 result = esmStore.get<RecordType>().search(index, 0);
-            else if constexpr (hasIndex<RecordType>)
+            else if constexpr (ESM::hasIndex<RecordType>)
                 result = esmStore.get<RecordType>().search(index);
             else
                 result = esmStore.get<RecordType>().search(refId);
@@ -492,7 +489,8 @@ namespace
         }
     }
 
-    static_assert(hasIndex<ESM::MagicEffect>);
+    static_assert(ESM::hasIndex<ESM::MagicEffect>);
+    static_assert(ESM::hasStringId<ESM::Dialogue>);
 
     template <class T, class = std::void_t<>>
     struct HasSaveFunction : std::false_type
@@ -558,9 +556,9 @@ namespace
     };
 
     using RecordTypes = typename ToRecordTypes<MWWorld::ESMStore::StoreTuple>::Type;
-    using RecordTypesWithId = typename FilterTypes<ESM4::HasId, RecordTypes>::Type;
+    using RecordTypesWithId = typename FilterTypes<ESM::HasId, RecordTypes>::Type;
     using RecordTypesWithSave = typename FilterTypes<HasSaveFunction, RecordTypesWithId>::Type;
-    using RecordTypesWithModel = typename FilterTypes<ESM4::HasModel, RecordTypesWithSave>::Type;
+    using RecordTypesWithModel = typename FilterTypes<ESM::HasModel, RecordTypesWithSave>::Type;
 
     REGISTER_TYPED_TEST_SUITE_P(StoreSaveLoadTest, shouldNotChangeRefId);
 
@@ -600,6 +598,7 @@ namespace
 
         result.mDialogue.blank();
         result.mDialogue.mId = ESM::RefId::stringRefId("dialogue");
+        result.mDialogue.mStringId = "Dialogue";
 
         for (std::size_t i = 0; i < infoCount; ++i)
         {

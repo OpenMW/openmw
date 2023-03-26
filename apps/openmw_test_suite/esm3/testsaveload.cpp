@@ -2,6 +2,7 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadcont.hpp>
+#include <components/esm3/loaddial.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadscpt.hpp>
 #include <components/esm3/player.hpp>
@@ -71,11 +72,16 @@ namespace ESM
     {
         using namespace ::testing;
 
-        constexpr std::array formats = {
-            MaxLimitedSizeStringsFormatVersion,
-            MaxStringRefIdFormatVersion,
-            CurrentSaveGameFormatVersion,
-        };
+        std::vector<ESM::FormatVersion> getFormats()
+        {
+            std::vector<ESM::FormatVersion> result({
+                MaxLimitedSizeStringsFormatVersion,
+                MaxStringRefIdFormatVersion,
+            });
+            for (ESM::FormatVersion v = result.back() + 1; v <= ESM::CurrentSaveGameFormatVersion; ++v)
+                result.push_back(v);
+            return result;
+        }
 
         constexpr std::uint32_t fakeRecordId = fourCC("FAKE");
 
@@ -327,6 +333,18 @@ namespace ESM
             EXPECT_EQ(result.mKeys, record.mKeys);
         }
 
-        INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(formats));
+        TEST_P(Esm3SaveLoadRecordTest, dialogueShouldNotChange)
+        {
+            Dialogue record;
+            record.blank();
+            record.mStringId = generateRandomString(32);
+            record.mId = ESM::RefId::stringRefId(record.mStringId);
+            Dialogue result;
+            saveAndLoadRecord(record, GetParam(), result);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mStringId, record.mStringId);
+        }
+
+        INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(getFormats()));
     }
 }

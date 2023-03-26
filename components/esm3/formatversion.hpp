@@ -21,8 +21,9 @@ namespace ESM
     inline constexpr FormatVersion MaxOldCreatureStatsFormatVersion = 19;
     inline constexpr FormatVersion MaxLimitedSizeStringsFormatVersion = 22;
     inline constexpr FormatVersion MaxStringRefIdFormatVersion = 23;
-    inline constexpr FormatVersion MaxSavedGameCellNameAsRefId = 24;
-    inline constexpr FormatVersion CurrentSaveGameFormatVersion = 25;
+    inline constexpr FormatVersion MaxSavedGameCellNameAsRefIdFormatVersion = 24;
+    inline constexpr FormatVersion MaxNameIsRefIdOnlyFormatVersion = 25;
+    inline constexpr FormatVersion CurrentSaveGameFormatVersion = 26;
 }
 
 #endif

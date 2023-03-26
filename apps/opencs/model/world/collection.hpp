@@ -14,6 +14,7 @@
 
 #include <QVariant>
 
+#include <components/esm3/loaddial.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "collectionbase.hpp"
@@ -278,6 +279,11 @@ namespace CSMWorld
             }
         }
 
+        if constexpr (std::is_same_v<ESXRecordT, ESM::Dialogue>)
+        {
+            copy->mModified.mStringId = copy->mModified.mId.getRefIdString();
+        }
+
         const int index = getAppendIndex(destination, type);
         insertRecord(std::move(copy), getAppendIndex(destination, type));
 
@@ -488,6 +494,11 @@ namespace CSMWorld
         ESXRecordT record;
         setRecordId(id, record);
         record.blank();
+
+        if constexpr (std::is_same_v<ESXRecordT, ESM::Dialogue>)
+        {
+            record.mStringId = record.mId.getRefIdString();
+        }
 
         auto record2 = std::make_unique<Record<ESXRecordT>>();
         record2->mState = Record<ESXRecordT>::State_ModifiedOnly;
