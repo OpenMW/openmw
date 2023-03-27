@@ -17,7 +17,7 @@ multiview
 :Range:		True/False
 :Default:	False
 
-If enabled, OpenMW will use the `GL_OVR_MultiView` and `GL_OVR_MultiView2` extensions where possible.
+If enabled, OpenMW will use the :code:`GL_OVR_MultiView` and :code:`GL_OVR_MultiView2` extensions where possible.
 
 shared shadow maps
 ------------------
