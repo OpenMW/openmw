@@ -2,24 +2,26 @@ local self = require('openmw.self')
 local interfaces = require('openmw.interfaces')
 
 local function startPackage(args)
+    local cancelOther = args.cancelOther
+    if cancelOther == nil then cancelOther = true end
     if args.type == 'Combat' then
         if not args.target then error("target required") end
-        self:_startAiCombat(args.target)
+        self:_startAiCombat(args.target, cancelOther)
     elseif args.type == 'Pursue' then
         if not args.target then error("target required") end
-        self:_startAiPursue(args.target)
+        self:_startAiPursue(args.target, cancelOther)
     elseif args.type == 'Follow' then
         if not args.target then error("target required") end
-        self:_startAiFollow(args.target)
+        self:_startAiFollow(args.target, cancelOther)
     elseif args.type == 'Escort' then
         if not args.target then error("target required") end
         if not args.destPosition then error("destPosition required") end
-        self:_startAiEscort(args.target, args.destCell or self.cell, args.duration or 0, args.destPosition)
+        self:_startAiEscort(args.target, args.destCell or self.cell, args.duration or 0, args.destPosition, cancelOther)
     elseif args.type == 'Wander' then
-        self:_startAiWander(args.distance or 0, args.duration or 0)
+        self:_startAiWander(args.distance or 0, args.duration or 0, cancelOther)
     elseif args.type == 'Travel' then
         if not args.destPosition then error("destPosition required") end
-        self:_startAiTravel(args.destPosition)
+        self:_startAiTravel(args.destPosition, cancelOther)
     else
         error('Unsupported AI Package: ' .. args.type)
     end

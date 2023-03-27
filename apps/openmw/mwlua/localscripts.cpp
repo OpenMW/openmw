@@ -154,23 +154,23 @@ namespace MWLua
                 return !keep;
             });
         };
-        selfAPI["_startAiCombat"] = [](SelfObject& self, const LObject& target) {
+        selfAPI["_startAiCombat"] = [](SelfObject& self, const LObject& target, bool cancelOther) {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            ai.stack(MWMechanics::AiCombat(target.ptr()), ptr);
+            ai.stack(MWMechanics::AiCombat(target.ptr()), ptr, cancelOther);
         };
-        selfAPI["_startAiPursue"] = [](SelfObject& self, const LObject& target) {
+        selfAPI["_startAiPursue"] = [](SelfObject& self, const LObject& target, bool cancelOther) {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            ai.stack(MWMechanics::AiPursue(target.ptr()), ptr);
+            ai.stack(MWMechanics::AiPursue(target.ptr()), ptr, cancelOther);
         };
-        selfAPI["_startAiFollow"] = [](SelfObject& self, const LObject& target) {
+        selfAPI["_startAiFollow"] = [](SelfObject& self, const LObject& target, bool cancelOther) {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            ai.stack(MWMechanics::AiFollow(target.ptr()), ptr);
+            ai.stack(MWMechanics::AiFollow(target.ptr()), ptr, cancelOther);
         };
         selfAPI["_startAiEscort"] = [](SelfObject& self, const LObject& target, LCell cell, float duration,
-                                        const osg::Vec3f& dest) {
+                                        const osg::Vec3f& dest, bool cancelOther) {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
             // TODO: change AiEscort implementation to accept ptr instead of a non-unique refId.
@@ -178,22 +178,23 @@ namespace MWLua
             int gameHoursDuration = static_cast<int>(std::ceil(duration / 3600.0));
             auto* esmCell = cell.mStore->getCell();
             if (esmCell->isExterior())
-                ai.stack(MWMechanics::AiEscort(refId, gameHoursDuration, dest.x(), dest.y(), dest.z(), false), ptr);
+                ai.stack(MWMechanics::AiEscort(refId, gameHoursDuration, dest.x(), dest.y(), dest.z(), false), ptr,
+                    cancelOther);
             else
                 ai.stack(MWMechanics::AiEscort(
                              refId, esmCell->getNameId(), gameHoursDuration, dest.x(), dest.y(), dest.z(), false),
-                    ptr);
+                    ptr, cancelOther);
         };
-        selfAPI["_startAiWander"] = [](SelfObject& self, int distance, float duration) {
+        selfAPI["_startAiWander"] = [](SelfObject& self, int distance, float duration, bool cancelOther) {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
             int gameHoursDuration = static_cast<int>(std::ceil(duration / 3600.0));
-            ai.stack(MWMechanics::AiWander(distance, gameHoursDuration, 0, {}, false), ptr);
+            ai.stack(MWMechanics::AiWander(distance, gameHoursDuration, 0, {}, false), ptr, cancelOther);
         };
-        selfAPI["_startAiTravel"] = [](SelfObject& self, const osg::Vec3f& target) {
+        selfAPI["_startAiTravel"] = [](SelfObject& self, const osg::Vec3f& target, bool cancelOther) {
             const MWWorld::Ptr& ptr = self.ptr();
             MWMechanics::AiSequence& ai = ptr.getClass().getCreatureStats(ptr).getAiSequence();
-            ai.stack(MWMechanics::AiTravel(target.x(), target.y(), target.z(), false), ptr);
+            ai.stack(MWMechanics::AiTravel(target.x(), target.y(), target.z(), false), ptr, cancelOther);
         };
     }
 
