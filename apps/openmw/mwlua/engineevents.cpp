@@ -56,6 +56,7 @@ namespace MWLua
             MWWorld::Ptr actor = getPtr(event.mActor);
             if (actor.isEmpty() || obj.isEmpty())
                 return;
+            mGlobalScripts.onActivate(GObject(obj), GObject(actor));
             if (auto* scripts = getLocalScripts(obj))
                 scripts->onActivated(LObject(actor));
         }
