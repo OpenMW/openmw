@@ -17,7 +17,7 @@ multiview
 :Range:		True/False
 :Default:	False
 
-If enabled, OpenMW will use the GL_OVR_MultiView and GL_OVR_MultiView2 extensions where possible.
+If enabled, OpenMW will use the `GL_OVR_MultiView` and `GL_OVR_MultiView2` extensions where possible.
 
 shared shadow maps
 ------------------
@@ -26,7 +26,8 @@ shared shadow maps
 :Range:		True/False
 :Default:	True
 
-May accelerate the BruteForce method when shadows are enabled.
+Use one set of shadow maps for both eyes.
+Will likely be significantly faster than the brute-force approach of rendering a separate copy for each eye with no or imperceptible quality loss.
 
 allow display lists for multiview
 ---------------------------------
@@ -45,7 +46,7 @@ use custom view
 :Default:	False
 
 If false, the default OSG horizontal split will be used for stereo.
-If true, the config defined in the [Stereo View] settings category will be used.
+If true, the config defined in the :ref:`[Stereo View]<Stereo View Settings>` settings category will be used.
 
 .. note::
 	This option is ignored in VR, and exists primarily for debugging purposes
