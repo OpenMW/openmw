@@ -7,7 +7,6 @@
 #include <osg/Transform>
 #include <osg/TriangleFunctor>
 
-#include <BulletCollision/CollisionShapes/btEmptyShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
 #include <components/misc/osguservalues.hpp>
@@ -75,21 +74,8 @@ namespace Resource
 
         osg::ref_ptr<BulletShape> getShape()
         {
-            if (!mTriangleMesh)
+            if (!mTriangleMesh || mTriangleMesh->getNumTriangles() == 0)
                 return osg::ref_ptr<BulletShape>();
-
-            if (mTriangleMesh->getNumTriangles() == 0) 
-            {
-                osg::ref_ptr<BulletShape> shape(new BulletShape);
-                mTriangleMesh.reset(nullptr);
-                auto emptyShape = std::make_unique<btEmptyShape>();
-                shape->mCollisionBox.mExtents[0] = 0.0f;
-                shape->mCollisionBox.mExtents[1] = 0.0f;
-                shape->mCollisionBox.mExtents[2] = 0.0f;
-                shape->mCollisionBox.mCenter = osg::Vec3f(0, 0, 0);
-                shape->mCollisionShape.reset(emptyShape.release());
-                return shape;
-            }
 
             osg::ref_ptr<BulletShape> shape(new BulletShape);
 
