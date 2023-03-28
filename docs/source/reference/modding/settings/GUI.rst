@@ -40,7 +40,7 @@ tooltip delay
 -------------
 
 :Type:		floating point
-:Range:		> 0.0
+:Range:		>= 0.0
 :Default:	0.0
 
 This value determines the number of seconds between when you begin hovering over an item and when its tooltip appears.
