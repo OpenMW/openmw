@@ -371,7 +371,7 @@ Ubuntu_Clang_integration_tests:
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   cache:
-    key: Ubuntu_Clang_integration_tests.ubuntu_22.04.v1
+    key: Ubuntu_Clang_integration_tests.ubuntu_22.04.v2
     paths:
       - .cache/pip
       - apt-cache/
