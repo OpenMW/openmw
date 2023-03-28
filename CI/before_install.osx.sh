@@ -1,6 +1,7 @@
 #!/bin/sh -ex
 
 export HOMEBREW_NO_EMOJI=1
+brew tap --repair
 brew update --quiet
 
 # workaround python issue on travis
