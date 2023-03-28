@@ -41,6 +41,7 @@
     Bug #7044: Changing a class' services does not affect autocalculated NPCs
     Bug #7054: Quests aren't sorted by name
     Bug #7064: NPCs don't report crime if the player is casting offensive spells on them while sneaking
+    Bug #7077: OpenMW fails to load certain particle effects in .osgt format
     Bug #7084: Resurrecting an actor doesn't take into account base record changes
     Bug #7088: Deleting last save game of last character doesn't clear character name/details
     Bug #7092: BSA archives from higher priority directories don't take priority
