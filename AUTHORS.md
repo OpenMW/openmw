@@ -159,6 +159,7 @@ Programmers
     Miroslav Puda (pakanek)
     MiroslavR
     Mitchell Schwitzer (schwitzerm)
+    Mitten.O
     naclander
     Narmo
     Nat Meo (Utopium)

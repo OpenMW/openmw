@@ -17,11 +17,37 @@ namespace sol
     };
 }
 
+namespace
+{
+    // Populates a potion struct from a Lua table.
+    ESM::Potion tableToPotion(const sol::table& rec)
+    {
+        ESM::Potion potion;
+        potion.mName = rec["name"];
+        potion.mModel = rec["model"];
+        potion.mIcon = rec["icon"];
+        std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+        potion.mScript = ESM::RefId::deserializeText(scriptId);
+        potion.mData.mWeight = rec["weight"];
+        potion.mData.mValue = rec["value"];
+
+        // Note: The list of effects is not yet present in openmw.types.Potion,
+        // so we don't map it here either.
+        return potion;
+    }
+}
+
 namespace MWLua
 {
     void addPotionBindings(sol::table potion, const Context& context)
     {
         addRecordFunctionBinding<ESM::Potion>(potion);
+
+        // Creates a new potion struct but does not store it in MWWorld::ESMStore.
+        // Global scripts can use world.createRecord to add the potion to the world.
+        // Note: This potion instance must be owned by lua, so we return it
+        // by value.
+        potion["createRecordDraft"] = tableToPotion;
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
         sol::usertype<ESM::Potion> record = context.mLua->sol().new_usertype<ESM::Potion>("ESM3_Potion");
