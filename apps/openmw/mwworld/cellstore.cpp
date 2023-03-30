@@ -6,6 +6,7 @@
 
 #include <components/debug/debuglog.hpp>
 
+#include <components/esm/format.hpp>
 #include <components/esm3/cellid.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/cellstate.hpp>
@@ -764,35 +765,48 @@ namespace MWWorld
     static void visitCell4References(const ESM4::Cell& cell, ESM::ReadersCache& readers, ReferenceInvocable&& invocable)
     {
         auto stream = Files::openBinaryInputFileStream(cell.mReaderContext.filename);
+        stream->seekg(0);
+
         ESM4::Reader readerESM4(
             std::move(stream), cell.mReaderContext.filename, MWBase::Environment::get().getResourceSystem()->getVFS());
 
         readerESM4.setEncoder(readers.getStatelessEncoder());
-        readerESM4.restoreContext(cell.mReaderContext);
-        bool continueRead = true;
-        while (ESM::RefId::formIdRefId(readerESM4.getContext().currCell) == cell.mId && readerESM4.hasMoreRecs()
-            && continueRead)
+        bool contextValid = cell.mReaderContext.filePos != std::streampos(-1);
+        if (contextValid)
+            readerESM4.restoreContext(cell.mReaderContext);
+
+        while (
+            (ESM::RefId::formIdRefId(readerESM4.currCell()) == cell.mId || !contextValid) && readerESM4.hasMoreRecs())
         {
-            continueRead = ESM4::ReaderUtils::readItem(
-                readerESM4,
-                [&](ESM4::Reader& reader) {
-                    auto recordType = static_cast<ESM4::RecordTypes>(reader.hdr().record.typeId);
-                    ESM::RecNameInts esm4RecName = static_cast<ESM::RecNameInts>(ESM::esm4Recname(recordType));
-                    if (esm4RecName == ESM::RecNameInts::REC_REFR4)
-                    {
-                        ESM4::Reference ref;
-                        ref.load(reader);
-                        invocable(ref);
-                        return true;
-                    }
-                    else if (esm4RecName == ESM::RecNameInts::REC_CELL4)
-                    {
-                        ESM4::Cell cellToLoad;
-                        cellToLoad.load(reader); // This is necessary to exit
-                    }
-                    return false;
-                },
-                [&](ESM4::Reader& reader) {});
+            if (!contextValid)
+                readerESM4.exitGroupCheck();
+
+            auto onRecord = [&](ESM4::Reader& reader) {
+                auto recordType = static_cast<ESM4::RecordTypes>(reader.hdr().record.typeId);
+                ESM::RecNameInts esm4RecName = static_cast<ESM::RecNameInts>(ESM::esm4Recname(recordType));
+                if (esm4RecName == ESM::RecNameInts::REC_REFR4 && contextValid)
+                {
+                    reader.getRecordData();
+                    ESM4::Reference ref;
+                    ref.load(reader);
+                    invocable(ref);
+                    return true;
+                }
+                else if (esm4RecName == ESM::RecNameInts::REC_CELL4)
+                {
+                    reader.getRecordData();
+                    ESM4::Cell cellToLoad;
+                    cellToLoad.load(reader); // This is necessary to exit or to find the correct cell
+                    if (cellToLoad.mId == cell.mId)
+                        contextValid = true;
+                    return true;
+                }
+
+                return false;
+            };
+
+            if (!ESM4::ReaderUtils::readItem(readerESM4, onRecord, [&](ESM4::Reader& reader) {}))
+                break;
         }
     }
 

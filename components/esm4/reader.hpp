@@ -62,7 +62,7 @@ namespace ESM4
         //  case the file was re-opened.  default = TES5 size,
         //  can be reduced for TES4 by setRecHeaderSize()
 
-        std::size_t filePos; // assume that the record header will be re-read once
+        std::streampos filePos; // assume that the record header will be re-read once
         //  the context is restored
 
         // for keeping track of things
