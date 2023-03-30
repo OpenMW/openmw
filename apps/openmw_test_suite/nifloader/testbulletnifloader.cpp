@@ -14,6 +14,7 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <span>
 #include <type_traits>
 
 namespace
@@ -60,6 +61,14 @@ namespace
     bool isNear(const btTransform& lhs, const btTransform& rhs)
     {
         return isNear(lhs.getOrigin(), rhs.getOrigin()) && isNear(lhs.getBasis(), rhs.getBasis());
+    }
+
+    bool isNear(std::span<const btVector3> lhs, std::span<const btVector3> rhs)
+    {
+        if (lhs.size() != rhs.size())
+            return false;
+        return std::equal(
+            lhs.begin(), lhs.end(), rhs.begin(), [](const btVector3& l, const btVector3& r) { return isNear(l, r); });
     }
 
     struct WriteVec3f
@@ -237,7 +246,7 @@ static bool operator==(const btBvhTriangleMeshShape& lhs, const btBvhTriangleMes
 {
     return isNear(lhs.getLocalScaling(), rhs.getLocalScaling())
         && lhs.usesQuantizedAabbCompression() == rhs.usesQuantizedAabbCompression()
-        && lhs.getOwnsBvh() == rhs.getOwnsBvh() && getTriangles(lhs) == getTriangles(rhs);
+        && lhs.getOwnsBvh() == rhs.getOwnsBvh() && isNear(getTriangles(lhs), getTriangles(rhs));
 }
 
 static bool operator==(const btCollisionShape& lhs, const btCollisionShape& rhs)
