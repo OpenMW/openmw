@@ -592,8 +592,7 @@ namespace MWWorld
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
-        std::string loadingExteriorText = "#{sLoadingMessage3}";
-        loadingListener->setLabel(loadingExteriorText);
+        loadingListener->setLabel("#{OMWEngine:LoadingExterior}");
         loadingListener->setProgressRange(refsToLoad);
 
         const auto getDistanceToPlayerCell = [&](const std::pair<int, int>& cellPosition) {
@@ -862,8 +861,7 @@ namespace MWWorld
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
-        std::string loadingInteriorText = "#{sLoadingMessage2}";
-        loadingListener->setLabel(loadingInteriorText);
+        loadingListener->setLabel("#{OMWEngine:LoadingInterior}");
         Loading::ScopedLoad load(loadingListener);
 
         if (mCurrentCell != nullptr && *mCurrentCell == *cell)
@@ -1222,7 +1220,7 @@ namespace MWWorld
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
 
-        loadingListener->setLabel("#{sLoadingMessage4}");
+        loadingListener->setLabel("#{OMWEngine:InitializingData}");
 
         while (!mPreloader->syncTerrainLoad(vec, mRendering.getReferenceTime(), *loadingListener))
         {

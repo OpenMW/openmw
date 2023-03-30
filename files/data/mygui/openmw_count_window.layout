@@ -19,10 +19,10 @@
         <Widget type="HBox" skin="" position="0 91 592 28" align="Center Bottom HStretch">
             <Widget type="Spacer" />
             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 53 28" align="Left Top" name="OkButton">
-                <Property key="Caption" value="#{sOk}"/>
+                <Property key="Caption" value="#{Interface:OK}"/>
             </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 86 28" align="Right Top" name="CancelButton">
-                <Property key="Caption" value="#{sCancel}"/>
+                <Property key="Caption" value="#{Interface:Cancel}"/>
             </Widget>
             <Widget type="Spacer" />
         </Widget>

@@ -2,3 +2,26 @@ No: "Nein"
 NotAvailableShort: "N/A"
 Reset: "Zurücksetzen"
 Yes: "Ja"
+
+# To be translated:
+
+#DurationDay: "{days} d "
+#DurationHour: "{hours} h "
+#DurationMinute: "{minutes} min "
+#DurationMonth: |-
+#  {months, plural,
+#    one{{months} mo }
+#    other{{months} mos }
+#  }
+#DurationSecond: "{seconds} s "
+#DurationYear: |-
+#  {years, plural,
+#    one{{years} yr }
+#    other{{years} yrs }
+#  }
+#Cancel: "Cancel"
+#Close: "Close"
+#None: "None"
+#OK: "OK"
+#Off: "Off"
+#On: "On"

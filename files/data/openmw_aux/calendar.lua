@@ -6,16 +6,12 @@
 
 local core = require('openmw.core')
 local time = require('openmw_aux.time')
+local conf = require('openmw_aux.calendarconfig')
 local l10n = core.l10n('Calendar')
 
-local monthsDuration = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
-local daysInWeek = 7
+local monthsDuration = conf.monthsDuration
 local daysInYear = 0
 for _, d in ipairs(monthsDuration) do daysInYear = daysInYear + d end
-
-local startingYear = 427
-local startingYearDay = 227
-local startingWeekDay = 1
 
 local function gameTime(t)
     if not t then
@@ -43,10 +39,10 @@ local function formatGameTime(formatStr, timestamp)
     timestamp = timestamp or core.getGameTime()
 
     local t = {}
-    local day = math.floor(timestamp / time.day)
-    t.year = math.floor(day / daysInYear) + startingYear
-    t.yday = (day + startingYearDay - 1) % daysInYear + 1
-    t.wday = (day + startingWeekDay - 1) % daysInWeek + 1
+    local day = math.floor(timestamp / time.day) + conf.startingYearDay - 1
+    t.year = math.floor(day / daysInYear) + conf.startingYear
+    t.yday = day % daysInYear + 1
+    t.wday = (day + conf.startingWeekDay - conf.startingYearDay) % conf.daysInWeek + 1
     timestamp = timestamp % time.day
     t.hour = math.floor(timestamp / time.hour)
     timestamp = timestamp % time.hour
@@ -75,10 +71,10 @@ local function formatGameTime(formatStr, timestamp)
         if tag == '%M' then return string.format('%02d', t.min) end
         if tag == '%m' then return string.format('%02d', t.month) end
         if tag == '%p' then
-            if t.hour > 0 and t.hour <= 12 then
-                return 'am'
+            if t.hour >= 0 and t.hour < 12 then
+                return l10n('am')
             else
-                return 'pm'
+                return l10n('pm')
             end
         end
         if tag == '%S' then return string.format('%02d', t.sec) end
@@ -122,7 +118,7 @@ return {
 
     --- The number of days in a week
     -- @field [parent=#calendar] #number daysInWeek
-    daysInWeek = daysInWeek,
+    daysInWeek = conf.daysInWeek,
 
     --- The number of days in a month
     -- @function [parent=#calendar] daysInMonth
@@ -153,7 +149,7 @@ return {
     -- @param dayIndex
     -- @return #string
     weekdayName = function(d)
-        return l10n('weekday' .. ((d-1) % daysInWeek + 1))
+        return l10n('weekday' .. ((d-1) % conf.daysInWeek + 1))
     end,
 }
 

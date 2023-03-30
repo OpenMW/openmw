@@ -45,7 +45,7 @@
                     <UserString key="HStretch" value="true"/>
                     <UserString key="VStretch" value="true"/>
                     <Property key="TextAlign" value="Center"/>
-                    <Property key="Caption" value="#{sOn}"/>
+                    <Property key="Caption" value="#{Interface:On}"/>
                 </Widget>
             </Widget>
 		</Widget>

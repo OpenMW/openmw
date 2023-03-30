@@ -29,6 +29,11 @@ namespace l10n
         std::shared_ptr<const MessageBundles> getContext(
             const std::string& contextName, const std::string& fallbackLocale = "en");
 
+        std::string getMessage(const std::string& contextName, std::string_view key)
+        {
+            return getContext(contextName)->formatMessage(key, {}, {});
+        }
+
     private:
         void readLangData(const std::string& name, MessageBundles& ctx, const icu::Locale& lang);
         void updateContext(const std::string& name, MessageBundles& ctx);

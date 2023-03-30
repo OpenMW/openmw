@@ -1,6 +1,9 @@
-On: "sOn"
-Off: "sOff"
+Cancel: "sCancel"
+Close: "sClose"
+No: "sNo"
 None: "sNone"
 OK: "sOK"
+Off: "sOff"
+On: "sOn"
 Yes: "sYes"
-No: "sNo"
+

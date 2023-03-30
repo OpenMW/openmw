@@ -473,7 +473,7 @@ namespace MWInput
             case A_CycleWeaponRight:
                 return "#{sNextWeapon}";
             case A_Console:
-                return "#{sConsoleTitle}";
+                return "#{OMWEngine:ConsoleWindow}";
             case A_Run:
                 return "#{sRun}";
             case A_Sneak:
@@ -528,7 +528,7 @@ namespace MWInput
     std::string BindingsManager::getActionKeyBindingName(int action)
     {
         if (mInputBinder->getChannel(action)->getControlsCount() == 0)
-            return "#{sNone}";
+            return "#{Interface:None}";
 
         ICS::Control* c = mInputBinder->getChannel(action)->getAttachedControls().front().control;
 
@@ -551,16 +551,16 @@ namespace MWInput
                 case ICS::InputControlSystem::MouseWheelClick::LEFT:
                     return "Mouse Wheel Left";
                 default:
-                    return "#{sNone}";
+                    return "#{Interface:None}";
             }
         else
-            return "#{sNone}";
+            return "#{Interface:None}";
     }
 
     std::string BindingsManager::getActionControllerBindingName(int action)
     {
         if (mInputBinder->getChannel(action)->getControlsCount() == 0)
-            return "#{sNone}";
+            return "#{Interface:None}";
 
         ICS::Control* c = mInputBinder->getChannel(action)->getAttachedControls().front().control;
 
@@ -573,7 +573,7 @@ namespace MWInput
             return SDLUtil::sdlControllerButtonToString(
                 mInputBinder->getJoystickButtonBinding(c, sFakeDeviceId, ICS::Control::INCREASE));
         else
-            return "#{sNone}";
+            return "#{Interface:None}";
     }
 
     const std::initializer_list<int>& BindingsManager::getActionKeySorting()

@@ -28,7 +28,7 @@ monthInGenitive10: "Frostfall"
 monthInGenitive11: "Sun's Dusk"
 monthInGenitive12: "Evening Star"
 
-dateFormat: "day {day} of {monthInGenitive} {year}"
+dateFormat: "day {day} of {monthInGenitive} {year, number, :: group-off}"
 
 weekday1: "Sundas"
 weekday2: "Morndas"

@@ -6,6 +6,7 @@ set(BUILTIN_DATA_MW_FILES
     # Month names and date formatting
     l10n/Calendar/de.yaml
     l10n/Calendar/en.yaml
+    l10n/Calendar/gmst.yaml
     l10n/Calendar/ru.yaml
     l10n/Calendar/sv.yaml
     l10n/Calendar/fr.yaml
@@ -15,6 +16,9 @@ set(BUILTIN_DATA_MW_FILES
 
     # L10n for OpenMW menus and non-game-specific messages
     l10n/OMWEngine/gmst.yaml
+
+    # Game-specific settings for calendar.lua
+    openmw_aux/calendarconfig.lua
 )
 
 foreach (f ${BUILTIN_DATA_MW_FILES})

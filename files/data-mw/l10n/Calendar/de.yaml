@@ -28,7 +28,7 @@ monthInGenitive10: "Eisherbst"
 monthInGenitive11: "Abenddämmerung"
 monthInGenitive12: "Abendstern"
 
-dateFormat: "tag {day} im {monthInGenitive} {year}"
+dateFormat: "tag {day} im {monthInGenitive} {year, number, :: group-off}"
 
 weekday1: "Sundas"
 weekday2: "Morndas"

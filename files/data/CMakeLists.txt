@@ -47,7 +47,7 @@ set(BUILTIN_DATA_FILES
     l10n/OMWEngine/ru.yaml
     l10n/OMWEngine/sv.yaml
     l10n/OMWEngine/fr.yaml
-    
+
     # L10n for post-processing HUD and built-in shaders
     l10n/OMWShaders/de.yaml
     l10n/OMWShaders/en.yaml
@@ -58,6 +58,7 @@ set(BUILTIN_DATA_FILES
     openmw_aux/util.lua
     openmw_aux/time.lua
     openmw_aux/calendar.lua
+    openmw_aux/calendarconfig.lua
     openmw_aux/ui.lua
 
     builtin.omwscripts

@@ -126,7 +126,7 @@ namespace MWGui
         }
 
         std::vector<std::string> buttons;
-        buttons.emplace_back("#{sOk}");
+        buttons.emplace_back("#{Interface:OK}");
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);
     }
 }
