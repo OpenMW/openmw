@@ -74,7 +74,7 @@ namespace Resource
 
         osg::ref_ptr<BulletShape> getShape()
         {
-            if (!mTriangleMesh)
+            if (!mTriangleMesh || mTriangleMesh->getNumTriangles() == 0)
                 return osg::ref_ptr<BulletShape>();
 
             osg::ref_ptr<BulletShape> shape(new BulletShape);
