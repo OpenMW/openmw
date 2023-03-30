@@ -40,7 +40,7 @@ namespace
 {
     void contentSubdirs(const QString& path, QStringList& dirs)
     {
-        QStringList fileFilter{ "*.esm", "*.esp", "*.omwaddon", "*.bsa" };
+        QStringList fileFilter{ "*.esm", "*.esp", "*.omwaddon", "*.bsa", "*.omwscripts" };
         QStringList dirFilter{ "bookart", "icons", "meshes", "music", "sound", "textures" };
 
         QDir currentDir(path);
