@@ -461,6 +461,7 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
             file->setDate(info.lastModified());
             file->setFilePath(info.absoluteFilePath());
             addFile(file);
+            setNew(file->fileName(), newfiles);
             continue;
         }
 
