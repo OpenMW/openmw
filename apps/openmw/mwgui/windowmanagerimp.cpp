@@ -2134,7 +2134,7 @@ namespace MWGui
     {
         if (!MWBase::Environment::get().getWorld()->getPostProcessor()->isEnabled())
         {
-            messageBox("Postprocessor is not enabled.");
+            messageBox("#{OMWEngine:PostProcessingIsNotEnabled}");
             return;
         }
 
