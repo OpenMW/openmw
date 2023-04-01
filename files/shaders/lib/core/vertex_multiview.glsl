@@ -1,4 +1,5 @@
-#version 330
+#version 330 compatibility
+// Note: compatibility profile required to access gl_ModelViewMatrix 
 
 #extension GL_OVR_multiview : require
 #extension GL_OVR_multiview2 : require
