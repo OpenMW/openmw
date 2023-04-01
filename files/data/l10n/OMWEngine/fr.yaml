@@ -145,6 +145,7 @@ WindowModeWindowedFullscreen: "Fenêtré plein écran"
 #MenuHelpDelay: "Menu Help Delay"
 #MenuTransparency: "Menu Transparency"
 #Preferences: "Prefs"
+#PostProcessingIsNotEnabled
 #QualityHigh: "High"
 #QualityLow: "Low"
 #QualityMedium: "Medium"
