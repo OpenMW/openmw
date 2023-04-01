@@ -824,6 +824,11 @@
 -- @return #PotionRecord
 
 ---
+-- Returns a read-only list of all @{#PotionRecord}s in the world database.
+-- @function [parent=#Potion] records
+-- @return #list<#PotionRecord>
+
+---
 -- Creates a @{#PotionRecord} without adding it to the world database.
 -- Use @{openmw_world#(world).createRecord} to add the record to the world.
 -- @function [parent=#Potion] createRecordDraft
