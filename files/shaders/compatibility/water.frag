@@ -62,6 +62,13 @@ vec2 normalCoords(vec2 uv, float scale, float speed, float time, float timer1, f
   return uv * (WAVE_SCALE * scale) + WIND_DIR * time * (WIND_SPEED * speed) -(previousNormal.xy/previousNormal.zz) * WAVE_CHOPPYNESS + vec2(time * timer1,time * timer2);
 }
 
+uniform sampler2D rippleMap;
+uniform vec3 playerPos;
+
+varying vec3 worldPos;
+
+varying vec2 rippleMapUV;
+
 varying vec4 position;
 varying float linearDepth;
 
@@ -71,7 +78,6 @@ uniform float osg_SimulationTime;
 
 uniform float near;
 uniform float far;
-uniform vec3 nodePosition;
 
 uniform float rainIntensity;
 
@@ -83,12 +89,11 @@ uniform vec2 screenRes;
 #include "lib/light/lighting.glsl"
 #include "fog.glsl"
 #include "lib/water/fresnel.glsl"
-#include "lib/water/ripples.glsl"
+#include "lib/water/rain_ripples.glsl"
 #include "lib/view/depth.glsl"
 
 void main(void)
 {
-    vec3 worldPos = position.xyz + nodePosition.xyz;
     vec2 UV = worldPos.xy / (8192.0*5.0) * 3.0;
     UV.y *= -1.0;
 
@@ -113,6 +118,11 @@ void main(void)
       rainRipple = vec4(0.0);
 
     vec3 rippleAdd = rainRipple.xyz * 10.0;
+
+    float distToCenter = length(rippleMapUV - vec2(0.5));
+    float blendClose = smoothstep(0.001, 0.02, distToCenter);
+    float blendFar = 1.0 - smoothstep(0.3, 0.4, distToCenter);
+    rippleAdd += vec3(texture2D(rippleMap, rippleMapUV).ba * blendFar * blendClose, 0.0);
 
     vec2 bigWaves = vec2(BIG_WAVES_X,BIG_WAVES_Y);
     vec2 midWaves = mix(vec2(MID_WAVES_X,MID_WAVES_Y),vec2(MID_WAVES_RAIN_X,MID_WAVES_RAIN_Y),rainIntensity);

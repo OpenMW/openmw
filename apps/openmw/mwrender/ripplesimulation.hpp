@@ -5,6 +5,8 @@
 
 #include "../mwworld/ptr.hpp"
 
+#include "ripples.hpp"
+
 namespace osg
 {
     class Group;
@@ -61,6 +63,8 @@ namespace MWRender
         /// Remove all active ripples
         void clear();
 
+        void setRipples(Ripples* ripples) { mRipples = ripples; }
+
     private:
         osg::ref_ptr<osg::Group> mParent;
 
@@ -68,6 +72,8 @@ namespace MWRender
         osg::ref_ptr<osg::PositionAttitudeTransform> mParticleNode;
 
         std::vector<Emitter> mEmitters;
+
+        Ripples* mRipples = nullptr;
     };
 
 }
