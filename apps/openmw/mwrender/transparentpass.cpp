@@ -80,6 +80,11 @@ namespace MWRender
                 mMultiviewResolve[frameId] = std::make_unique<Stereo::MultiviewFramebufferResolve>(
                     msaaFbo ? msaaFbo : fbo, opaqueFbo, GL_DEPTH_BUFFER_BIT);
             }
+            else
+            {
+                mMultiviewResolve[frameId]->setResolveFbo(opaqueFbo);
+                mMultiviewResolve[frameId]->setMsaaFbo(msaaFbo ? msaaFbo : fbo);
+            }
             mMultiviewResolve[frameId]->resolveImplementation(state);
         }
         else
@@ -133,11 +138,4 @@ namespace MWRender
                 : fbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
         state.checkGLErrors("after TransparentDepthBinCallback::drawImplementation");
     }
-
-    void TransparentDepthBinCallback::dirtyFrame(int frameId)
-    {
-        if (mMultiviewResolve[frameId])
-            mMultiviewResolve[frameId]->dirty();
-    }
-
 }

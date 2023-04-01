@@ -340,7 +340,6 @@ namespace MWRender
             mTransparentDepthPostPass->mFbo[frameId] = mFbos[frameId][FBO_Primary];
             mTransparentDepthPostPass->mMsaaFbo[frameId] = mFbos[frameId][FBO_Multisample];
             mTransparentDepthPostPass->mOpaqueFbo[frameId] = mFbos[frameId][FBO_OpaqueDepth];
-            mTransparentDepthPostPass->dirtyFrame(frameId);
         }
 
         size_t frame = cv->getTraversalNumber();
