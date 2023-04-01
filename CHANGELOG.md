@@ -50,6 +50,7 @@
     Bug #7172: Current music playlist continues playing indefinitely if next playlist is empty
     Bug #7229: Error marker loading failure is not handled
     Bug #7243: Get Skyrim.esm loading
+    Bug #7298: Water ripples from projectiles sometimes are not spawned
     Feature #5492: Let rain and snow collide with statics
     Feature #6447: Add LOD support to Object Paging
     Feature #6726: Lua API for creating new objects
