@@ -60,7 +60,7 @@ namespace ESSImport
             , mHour(0.f)
             , mNextActorId(0)
         {
-            mPlayer.mCellId = ESM::Cell::generateIdForExteriorCell(0, 0);
+            mPlayer.mCellId = ESM::RefId::esm3ExteriorCell(0, 0);
             mPlayer.mLastKnownExteriorPosition[0] = mPlayer.mLastKnownExteriorPosition[1]
                 = mPlayer.mLastKnownExteriorPosition[2] = 0.0f;
             mPlayer.mHasMark = 0;

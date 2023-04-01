@@ -62,11 +62,11 @@ namespace ESM
                 mWriter.writeT(v.getValue());
             }
 
-            void operator()(Vec2iRefId v) const
+            void operator()(ESM3ExteriorCellRefId v) const
             {
-                mWriter.writeT(RefIdType::Vec2i);
-                mWriter.writeT(v.getValue().first);
-                mWriter.writeT(v.getValue().second);
+                mWriter.writeT(RefIdType::ESM3ExteriorCell);
+                mWriter.writeT(v.getX());
+                mWriter.writeT(v.getY());
             }
         };
     }

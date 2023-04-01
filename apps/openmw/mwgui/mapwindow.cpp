@@ -1109,7 +1109,7 @@ namespace MWGui
 
     void MapWindow::setGlobalMapMarkerTooltip(MyGUI::Widget* markerWidget, int x, int y)
     {
-        ESM::RefId cellRefId = ESM::Cell::generateIdForExteriorCell(x, y);
+        ESM::RefId cellRefId = ESM::RefId::esm3ExteriorCell(x, y);
         CustomMarkerCollection::RangeType markers = mCustomMarkers.getMarkers(cellRefId);
         std::vector<std::string> destNotes;
         for (CustomMarkerCollection::ContainerType::const_iterator it = markers.first; it != markers.second; ++it)

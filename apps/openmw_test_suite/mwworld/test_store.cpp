@@ -448,7 +448,7 @@ namespace
             refId = RecordType::indexToRefId(index);
         else if constexpr (std::is_same_v<RecordType, ESM::Cell>)
         {
-            refId = ESM::Cell::generateIdForExteriorCell(0, 0);
+            refId = ESM::RefId::esm3ExteriorCell(0, 0);
         }
         else
             refId = ESM::StringRefId(stringId);

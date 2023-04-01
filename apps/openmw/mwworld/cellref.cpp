@@ -90,7 +90,7 @@ namespace MWWorld
             else
             {
                 const osg::Vec2i index = positionToCellIndex(ref.mDoorDest.pos[0], ref.mDoorDest.pos[1]);
-                return ESM::Cell::generateIdForExteriorCell(index.x(), index.y());
+                return ESM::RefId::esm3ExteriorCell(index.x(), index.y());
             }
         };
 

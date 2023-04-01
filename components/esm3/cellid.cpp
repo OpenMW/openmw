@@ -50,11 +50,11 @@ namespace ESM
             out.mIndex = { 0, 0 };
             return out;
         }
-        CellId operator()(const ESM::Vec2iRefId& id)
+        CellId operator()(const ESM::ESM3ExteriorCellRefId& id)
         {
             CellId out;
             out.mPaged = true;
-            out.mIndex = { id.getValue().first, id.getValue().second };
+            out.mIndex = { id.getX(), id.getY() };
             return out;
         }
 

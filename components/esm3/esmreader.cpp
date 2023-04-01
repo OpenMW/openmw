@@ -96,7 +96,7 @@ namespace ESM
             cellId.load(*this);
             if (cellId.mPaged)
             {
-                return ESM::Cell::generateIdForExteriorCell(cellId.mIndex.mX, cellId.mIndex.mY);
+                return ESM::RefId::esm3ExteriorCell(cellId.mIndex.mX, cellId.mIndex.mY);
             }
             else
             {
@@ -491,12 +491,12 @@ namespace ESM
                 getExact(&index, sizeof(std::uint32_t));
                 return RefId::index(recordType, index);
             }
-            case RefIdType::Vec2i:
+            case RefIdType::ESM3ExteriorCell:
             {
-                std::pair<int32_t, int32_t> vec2i;
-                getExact(&vec2i.first, sizeof(std::int32_t));
-                getExact(&vec2i.second, sizeof(std::int32_t));
-                return RefId::vec2i(vec2i);
+                int32_t x, y;
+                getExact(&x, sizeof(std::int32_t));
+                getExact(&y, sizeof(std::int32_t));
+                return RefId::esm3ExteriorCell(x, y);
             }
         }
 

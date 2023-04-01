@@ -226,9 +226,9 @@ MWWorld::CellStore* MWWorld::WorldModel::getInterior(std::string_view name)
 
 struct VisitorCellIdIsESM3Ext
 {
-    bool operator()(const ESM::Vec2iRefId& id)
+    bool operator()(const ESM::ESM3ExteriorCellRefId& id)
     {
-        coordOut = { id.getValue().first, id.getValue().second };
+        coordOut = { id.getX(), id.getY() };
         return true;
     }
 

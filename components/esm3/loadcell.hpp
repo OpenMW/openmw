@@ -193,7 +193,6 @@ namespace ESM
 
         const ESM::RefId& updateId();
 
-        static ESM::RefId generateIdForExteriorCell(int x, int y);
         static ESM::RefId generateIdForCell(bool exterior, std::string_view cellName, int x, int y);
     };
 }

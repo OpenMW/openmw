@@ -64,11 +64,6 @@ namespace ESM
         return mId;
     }
 
-    ESM::RefId Cell::generateIdForExteriorCell(int x, int y)
-    {
-        return ESM::RefId::vec2i({ x, y });
-    }
-
     ESM::RefId Cell::generateIdForCell(bool exterior, std::string_view cellName, int x, int y)
     {
         if (!exterior)
@@ -77,7 +72,7 @@ namespace ESM
         }
         else
         {
-            return generateIdForExteriorCell(x, y);
+            return ESM::RefId::esm3ExteriorCell(x, y);
         }
     }
 

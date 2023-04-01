@@ -379,7 +379,7 @@ namespace MWWorld
                 pos.rot[2] = 0;
 
                 osg::Vec2i exteriorCellPos = positionToCellIndex(pos.pos[0], pos.pos[1]);
-                ESM::RefId cellId = ESM::Cell::generateIdForExteriorCell(exteriorCellPos.x(), exteriorCellPos.y());
+                ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.x(), exteriorCellPos.y());
                 mWorldScene->changeToExteriorCell(cellId, pos, true);
             }
         }
@@ -984,7 +984,7 @@ namespace MWWorld
         }
         removeContainerScripts(getPlayerPtr());
         osg::Vec2i exteriorCellPos = positionToCellIndex(position.pos[0], position.pos[1]);
-        ESM::RefId cellId = ESM::Cell::generateIdForExteriorCell(exteriorCellPos.x(), exteriorCellPos.y());
+        ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.x(), exteriorCellPos.y());
         mWorldScene->changeToExteriorCell(cellId, position, adjustPlayerPos, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
         mRendering->getCamera()->instantTransition();
