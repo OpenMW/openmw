@@ -15,6 +15,43 @@
 -- @field [parent=#world] openmw.core#ObjectList players
 
 ---
+-- Functions related to MWScript (see @{#MWScriptFunctions}).
+-- @field [parent=#world] #MWScriptFunctions mwscript
+
+---
+-- Functions related to MWScript.
+-- @type MWScriptFunctions
+
+---
+-- Returns local mwscript on ``object``. Returns `nil` if the script doesn't exist or is not started.
+-- @function [parent=#MWScriptFunctions] getLocalScript
+-- @param openmw.core#GameObject object
+-- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to get the script if there is a separate instance for each player. Currently has no effect.
+-- @return #MWScript, #nil
+
+---
+-- Returns global mwscript with given recordId. Returns `nil` if the script doesn't exist or is not started.
+-- Currently there can be only one instance of each mwscript, but in multiplayer it will be possible to have a separate instance per player.
+-- @function [parent=#MWScriptFunctions] getGlobalScript
+-- @param #string recordId
+-- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to get the script if there is a separate instance for each player. Currently has no effect.
+-- @return #MWScript, #nil
+
+---
+-- @type MWScript
+-- @field #string recordId Id of the script
+-- @field openmw.core#GameObject object The object the script is attached to.
+-- @field openmw.core#GameObject player The player the script refers to.
+-- @field #MWScriptVariables variables Local variables of the script (mutable)
+-- @usage
+-- for _, script in ipairs(world.mwscript.getLocalScripts(object)) do
+--   -- print the value of local variable 'something' (0 if there is no such variable)
+--   print(script.variables.something)
+--   -- set the variable 'something' (raises an error if there is no such variable)
+--   script.variables.something = 5
+-- end
+
+---
 -- Loads a named cell
 -- @function [parent=#world] getCellByName
 -- @param #string cellName
