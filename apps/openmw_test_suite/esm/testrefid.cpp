@@ -196,6 +196,22 @@ namespace ESM
             EXPECT_NE(stringRefId, formIdRefId);
         }
 
+        TEST(ESMRefIdTest, indexRefIdHashDiffersForDistinctValues)
+        {
+            const RefId a = RefId::index(static_cast<RecNameInts>(3), 1);
+            const RefId b = RefId::index(static_cast<RecNameInts>(3), 2);
+            std::hash<RefId> hash;
+            EXPECT_NE(hash(a), hash(b));
+        }
+
+        TEST(ESMRefIdTest, indexRefIdHashDiffersForDistinctRecords)
+        {
+            const RefId a = RefId::index(static_cast<RecNameInts>(1), 3);
+            const RefId b = RefId::index(static_cast<RecNameInts>(2), 3);
+            std::hash<RefId> hash;
+            EXPECT_NE(hash(a), hash(b));
+        }
+
         struct ESMRefIdToStringTest : TestWithParam<std::pair<RefId, std::string>>
         {
         };
