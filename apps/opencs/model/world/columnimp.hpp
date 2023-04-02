@@ -18,6 +18,8 @@
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/variant.hpp>
 
+#include <optional>
+
 #include <QString>
 #include <QVariant>
 #include <QVector>
@@ -31,6 +33,10 @@
 
 namespace CSMWorld
 {
+    std::optional<std::uint32_t> getSkillIndex(std::string_view value);
+
+    std::string getStringId(ESM::RefId value);
+
     /// \note Shares ID with VarValueColumn. A table can not have both.
     template <typename ESXRecordT>
     struct FloatValueColumn : public Column<ESXRecordT>
@@ -63,7 +69,7 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromStdString(record.get().mId.toString());
+            return QString::fromStdString(getStringId(record.get().mId));
         }
 
         bool isEditable() const override { return false; }
@@ -403,25 +409,16 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            int skill = record.get().mData.getSkill(mIndex, mMajor);
-
-            return QString::fromStdString(ESM::Skill::indexToRefId(skill).toString());
+            return QString::fromStdString(ESM::Skill::sSkillNames[record.get().mData.getSkill(mIndex, mMajor)]);
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
-            std::istringstream stream(data.toString().toUtf8().constData());
-
-            int index = -1;
-            char c;
-
-            stream >> c >> index;
-
-            if (index != -1)
+            if (const auto index = getSkillIndex(data.toString().toStdString()))
             {
                 ESXRecordT record2 = record.get();
 
-                record2.mData.getSkill(mIndex, mMajor) = index;
+                record2.mData.getSkill(mIndex, mMajor) = static_cast<int>(*index);
 
                 record.setModified(record2);
             }
