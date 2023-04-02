@@ -11,6 +11,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <array>
 #include <memory>
 #include <random>
@@ -175,6 +176,13 @@ namespace ESM
             }
 
             RefId generateRandomRefId(std::size_t size = 33) { return RefId::stringRefId(generateRandomString(size)); }
+
+            template <class T, std::size_t n>
+            void generateArray(T (&dst)[n])
+            {
+                for (auto& v : dst)
+                    v = std::uniform_real_distribution<float>{ -1.0f, 1.0f }(mRandom);
+            }
         };
 
         TEST_F(Esm3SaveLoadRecordTest, headerShouldNotChange)
@@ -240,10 +248,39 @@ namespace ESM
             record.mObject.mRef.mRefID = generateRandomRefId();
             std::generate_n(std::inserter(record.mPreviousItems, record.mPreviousItems.end()), 2,
                 [&] { return std::make_pair(generateRandomRefId(), generateRandomRefId()); });
+            record.mCellId.mWorldspace = "worldspace1";
+            record.mCellId.mIndex.mX = 42;
+            record.mCellId.mIndex.mY = 13;
+            record.mCellId.mPaged = true;
+            generateArray(record.mLastKnownExteriorPosition);
+            record.mHasMark = true;
+            record.mMarkedCell.mWorldspace = "worldspace2";
+            record.mMarkedCell.mIndex.mX = 0;
+            record.mMarkedCell.mIndex.mY = 0;
+            record.mMarkedCell.mPaged = false;
+            generateArray(record.mMarkedPosition.pos);
+            generateArray(record.mMarkedPosition.rot);
+            record.mCurrentCrimeId = 42;
+            record.mPaidCrimeId = 13;
             Player result;
             saveAndLoadRecord(record, GetParam(), result);
             EXPECT_EQ(record.mBirthsign, result.mBirthsign);
             EXPECT_EQ(record.mPreviousItems, result.mPreviousItems);
+            EXPECT_EQ(record.mPreviousItems, result.mPreviousItems);
+            EXPECT_EQ(record.mCellId.mWorldspace, result.mCellId.mWorldspace);
+            EXPECT_EQ(record.mCellId.mIndex.mX, result.mCellId.mIndex.mX);
+            EXPECT_EQ(record.mCellId.mIndex.mY, result.mCellId.mIndex.mY);
+            EXPECT_EQ(record.mCellId.mPaged, result.mCellId.mPaged);
+            EXPECT_THAT(record.mLastKnownExteriorPosition, ElementsAreArray(result.mLastKnownExteriorPosition));
+            EXPECT_EQ(record.mHasMark, result.mHasMark);
+            EXPECT_EQ(record.mMarkedCell.mWorldspace, result.mMarkedCell.mWorldspace);
+            EXPECT_EQ(record.mMarkedCell.mIndex.mX, result.mMarkedCell.mIndex.mX);
+            EXPECT_EQ(record.mMarkedCell.mIndex.mY, result.mMarkedCell.mIndex.mY);
+            EXPECT_EQ(record.mMarkedCell.mPaged, result.mMarkedCell.mPaged);
+            EXPECT_THAT(record.mMarkedPosition.pos, ElementsAreArray(result.mMarkedPosition.pos));
+            EXPECT_THAT(record.mMarkedPosition.rot, ElementsAreArray(result.mMarkedPosition.rot));
+            EXPECT_EQ(record.mCurrentCrimeId, result.mCurrentCrimeId);
+            EXPECT_EQ(record.mPaidCrimeId, result.mPaidCrimeId);
         }
 
         TEST_P(Esm3SaveLoadRecordTest, cellRefShouldNotChange)

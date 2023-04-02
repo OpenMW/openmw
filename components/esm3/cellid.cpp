@@ -18,7 +18,11 @@ namespace ESM
             mPaged = true;
         }
         else
+        {
             mPaged = false;
+            mIndex.mX = 0;
+            mIndex.mY = 0;
+        }
     }
 
     void CellId::save(ESMWriter& esm) const
