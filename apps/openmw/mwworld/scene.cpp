@@ -752,7 +752,7 @@ namespace MWWorld
             {
                 assert(!(*iter)->getCell()->isExterior());
 
-                if (it->mName == (*iter)->getCell()->getWorldSpace().toString())
+                if (it->mName == (*iter)->getCell()->getNameId())
                 {
                     unloadCell(*iter, navigatorUpdateGuard.get());
                     break;

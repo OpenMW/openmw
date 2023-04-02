@@ -2801,7 +2801,7 @@ namespace MWWorld
                 // and use its destination to position inside cell.
                 for (const MWWorld::LiveCellRef<ESM::Door>& destDoor : source->getReadOnlyDoors().mList)
                 {
-                    if (ESM::RefId::stringRefId(name) == destDoor.mRef.getDestCell())
+                    if (name == destDoor.mRef.getDestCell())
                     {
                         /// \note Using _any_ door pointed to the interior,
                         /// not the one pointed to current door.
@@ -2869,7 +2869,7 @@ namespace MWWorld
         {
             ext = mWorldModel.getCell(nameId)->getCell();
             if (!ext->isExterior())
-                return ESM::RefId::sEmpty;
+                return ESM::RefId();
         }
         catch (std::exception&)
         {

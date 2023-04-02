@@ -330,7 +330,7 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
 
 const MWMechanics::PathgridGraph& MWMechanics::AiPackage::getPathGridGraph(const MWWorld::CellStore* cell)
 {
-    const ESM::RefId& id = cell->getCell()->getId();
+    const ESM::RefId id = cell->getCell()->getId();
     // static cache is OK for now, pathgrids can never change during runtime
     typedef std::map<ESM::RefId, std::unique_ptr<MWMechanics::PathgridGraph>> CacheMap;
     static CacheMap cache;

@@ -90,7 +90,7 @@ namespace ESM
 
     ESM::RefId ESMReader::getCellId()
     {
-        if (mHeader.mFormatVersion <= ESM::MaxUseEsmCellId)
+        if (mHeader.mFormatVersion <= ESM::MaxUseEsmCellIdFormatVersion)
         {
             ESM::CellId cellId;
             cellId.load(*this);

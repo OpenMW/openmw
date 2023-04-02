@@ -54,8 +54,7 @@ namespace MWWorld
         if (actor == world->getPlayerPtr())
         {
             world->getPlayer().setTeleported(true);
-            if (!mCellId.empty())
-                world->changeToCell(mCellId, mPosition, true);
+            world->changeToCell(mCellId, mPosition, true);
             teleported = world->getPlayerPtr();
         }
         else

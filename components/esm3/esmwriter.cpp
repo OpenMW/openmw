@@ -246,7 +246,7 @@ namespace ESM
 
     void ESMWriter::writeCellId(const ESM::RefId& cellId)
     {
-        if (mHeader.mFormatVersion <= ESM::MaxUseEsmCellId)
+        if (mHeader.mFormatVersion <= ESM::MaxUseEsmCellIdFormatVersion)
         {
             ESM::CellId generatedCellid = ESM::CellId::extractFromRefId(cellId);
             generatedCellid.save(*this);

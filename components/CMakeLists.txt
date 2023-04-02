@@ -392,7 +392,7 @@ if (USE_QT)
         )
 
     add_component_qt_dir (misc
-        helpviewer utf8qtextstream
+        helpviewer utf8qtextstream hash
         )
 
     add_component_qt_dir (files

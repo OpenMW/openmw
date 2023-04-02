@@ -6,6 +6,8 @@
 
 #include <utility>
 
+#include <components/misc/hash.hpp>
+
 namespace ESM
 {
     class ESM3ExteriorCellRefId
@@ -47,7 +49,7 @@ namespace std
     {
         std::size_t operator()(ESM::ESM3ExteriorCellRefId value) const noexcept
         {
-            return (53 + std::hash<int32_t>{}(value.mX)) * 53 + std::hash<int32_t>{}(value.mY);
+            return Misc::hash2dCoord(value.mX, value.mY);
         }
     };
 }

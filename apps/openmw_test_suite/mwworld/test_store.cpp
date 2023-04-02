@@ -285,7 +285,7 @@ namespace
             ESM::MaxOldSkillsAndAttributesFormatVersion,
             ESM::MaxOldCreatureStatsFormatVersion,
             ESM::MaxStringRefIdFormatVersion,
-            ESM::MaxUseEsmCellId,
+            ESM::MaxUseEsmCellIdFormatVersion,
         });
         for (ESM::FormatVersion v = result.back() + 1; v <= ESM::CurrentSaveGameFormatVersion; ++v)
             result.push_back(v);
