@@ -29,6 +29,8 @@ set(SHADER_FILES
     compatibility/fog.glsl
     compatibility/groundcover.vert
     compatibility/groundcover.frag
+    compatibility/groundcover_paging.vert
+    compatibility/groundcover_paging.frag
     compatibility/water.vert
     compatibility/water.frag
     compatibility/objects.vert

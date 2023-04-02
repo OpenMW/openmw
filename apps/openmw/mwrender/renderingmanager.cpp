@@ -161,6 +161,8 @@ namespace MWRender
             , mWindSpeed(0.f)
             , mSkyBlendingStartCoef(Settings::Manager::getFloat("sky blending start", "Fog"))
             , mUsePlayerUniforms(usePlayerUniforms)
+            , mGroundcoverFadeEnd(Settings::Manager::getFloat("rendering distance", "Groundcover"))
+            , mGroundcoverStormDirection(osg::Vec2f(0.f, 0.f))
         {
         }
 
@@ -171,11 +173,14 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("skyBlendingStart", 0.f));
             stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{}));
             stateset->addUniform(new osg::Uniform("isReflection", false));
+            stateset->addUniform(new osg::Uniform("stormDir", osg::Vec2f{}));
 
             if (mUsePlayerUniforms)
             {
                 stateset->addUniform(new osg::Uniform("windSpeed", 0.0f));
                 stateset->addUniform(new osg::Uniform("playerPos", osg::Vec3f(0.f, 0.f, 0.f)));
+                stateset->addUniform(new osg::Uniform("groundcoverFadeEnd", 0.f));
+                stateset->addUniform(new osg::Uniform("stormDir", osg::Vec2f(0.f, 0.f)));
             }
         }
 
@@ -190,6 +195,8 @@ namespace MWRender
             {
                 stateset->getUniform("windSpeed")->set(mWindSpeed);
                 stateset->getUniform("playerPos")->set(mPlayerPos);
+                stateset->getUniform("groundcoverFadeEnd")->set(mGroundcoverFadeEnd);
+                stateset->getUniform("stormDir")->set(mGroundcoverStormDirection);
             }
         }
 
@@ -203,6 +210,10 @@ namespace MWRender
 
         void setPlayerPos(osg::Vec3f playerPos) { mPlayerPos = playerPos; }
 
+        void setGroundcoverFadeEnd(float fadeEnd) { mGroundcoverFadeEnd = fadeEnd; }
+
+        void setGroundcoverStormDirection(osg::Vec2f direction) { mGroundcoverStormDirection = direction; }
+
     private:
         float mNear;
         float mFar;
@@ -211,6 +222,8 @@ namespace MWRender
         bool mUsePlayerUniforms;
         osg::Vec3f mPlayerPos;
         osg::Vec2f mScreenRes;
+        float mGroundcoverFadeEnd;
+        osg::Vec2f mGroundcoverStormDirection;
     };
 
     class StateUpdater : public SceneUtil::StateSetUpdater
@@ -472,8 +485,9 @@ namespace MWRender
         const float lodFactor = Settings::Manager::getFloat("lod factor", "Terrain");
 
         bool groundcover = Settings::Manager::getBool("enabled", "Groundcover");
+        bool groundcoverPaging = Settings::Manager::getBool("paging", "Groundcover");
         bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
-        if (distantTerrain || groundcover)
+        if (distantTerrain || groundcover || groundcoverPaging)
         {
             const int compMapResolution = Settings::Manager::getInt("composite map resolution", "Terrain");
             int compMapPower = Settings::Manager::getInt("composite map level", "Terrain");
@@ -488,7 +502,7 @@ namespace MWRender
                 lodFactor, vertexLodMod, maxCompGeometrySize, debugChunks);
             if (Settings::Manager::getBool("object paging", "Terrain"))
             {
-                mObjectPaging = std::make_unique<ObjectPaging>(mResourceSystem->getSceneManager());
+                mObjectPaging = std::make_unique<ObjectPaging>(mResourceSystem->getSceneManager(), false, groundcoverStore);
                 static_cast<Terrain::QuadTreeWorld*>(mTerrain.get())->addChunkManager(mObjectPaging.get());
                 mResourceSystem->addResourceManager(mObjectPaging.get());
             }
@@ -501,7 +515,7 @@ namespace MWRender
 
         if (groundcover)
         {
-            float density = Settings::Manager::getFloat("density", "Groundcover");
+            float density = Settings::Manager::getFloat("density", "Groundcover")/100.f;
             density = std::clamp(density, 0.f, 1.f);
 
             mGroundcover = std::make_unique<Groundcover>(
@@ -510,10 +524,35 @@ namespace MWRender
             mResourceSystem->addResourceManager(mGroundcover.get());
         }
 
+        if (groundcoverPaging)
+        {
+            osg::ref_ptr<osg::Group> groundcoverRoot = new osg::Group;
+            groundcoverRoot->setNodeMask(Mask_Groundcover);
+            groundcoverRoot->setName("Groundcover Root");
+            sceneRoot->addChild(groundcoverRoot);
+
+            float chunkSize = Settings::Manager::getFloat("min chunk size", "Groundcover");
+            if (chunkSize >= 1.0f)
+                chunkSize = 1.0f;
+            else if (chunkSize >= 0.5f)
+                chunkSize = 0.5f;
+            else if (chunkSize >= 0.25f)
+                chunkSize = 0.25f;
+            else if (chunkSize != 0.125f)
+                chunkSize = 0.125f;
+
+            mGroundcoverWorld = std::make_unique<Terrain::QuadTreeWorld>(groundcoverRoot, mTerrainStorage.get(), Mask_Groundcover, lodFactor, chunkSize);
+            mGroundcoverPaging = std::make_unique<ObjectPaging>(mResourceSystem->getSceneManager(), true, groundcoverStore);
+            static_cast<Terrain::QuadTreeWorld*>(mGroundcoverWorld.get())->addChunkManager(mGroundcoverPaging.get());
+            mResourceSystem->addResourceManager(mGroundcoverPaging.get());
+
+            mGroundcoverWorld->setActiveGrid(osg::Vec4i(0, 0, 0, 0));
+        }
+
         mStateUpdater = new StateUpdater;
         sceneRoot->addUpdateCallback(mStateUpdater);
 
-        mSharedUniformStateUpdater = new SharedUniformStateUpdater(groundcover);
+        mSharedUniformStateUpdater = new SharedUniformStateUpdater(groundcover || groundcoverPaging);
         rootNode->addUpdateCallback(mSharedUniformStateUpdater);
 
         mPerViewUniformStateUpdater = new PerViewUniformStateUpdater(mResourceSystem->getSceneManager());
@@ -789,6 +828,8 @@ namespace MWRender
         if (store->getCell()->isExterior())
         {
             mTerrain->loadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
+            if (mGroundcoverWorld)
+                mGroundcoverWorld->loadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
         }
     }
     void RenderingManager::removeCell(const MWWorld::CellStore* store)
@@ -800,6 +841,8 @@ namespace MWRender
         if (store->getCell()->isExterior())
         {
             mTerrain->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
+            if (mGroundcoverWorld)
+                mGroundcoverWorld->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
         }
 
         mWater->removeCell(store);
@@ -810,6 +853,9 @@ namespace MWRender
         if (!enable)
             mWater->setCullCallback(nullptr);
         mTerrain->enable(enable);
+
+        if (mGroundcoverWorld)
+            mGroundcoverWorld->enable(enable);
     }
 
     void RenderingManager::setSkyEnabled(bool enabled)
@@ -908,6 +954,9 @@ namespace MWRender
             float windSpeed = mSky->getBaseWindSpeed();
             mSharedUniformStateUpdater->setWindSpeed(windSpeed);
             mSharedUniformStateUpdater->setPlayerPos(playerPos);
+
+            osg::Vec2f stormDirection = mSky->getSmoothedStormDirection();
+            mSharedUniformStateUpdater->setGroundcoverStormDirection(stormDirection);
         }
 
         updateNavMesh();
@@ -1187,6 +1236,9 @@ namespace MWRender
         notifyWorldSpaceChanged();
         if (mObjectPaging)
             mObjectPaging->clear();
+
+        if (mGroundcoverPaging)
+            mGroundcoverPaging->clear();
     }
 
     MWRender::Animation* RenderingManager::getAnimation(const MWWorld::Ptr& ptr)
@@ -1314,6 +1366,12 @@ namespace MWRender
         float distanceMult = std::cos(osg::DegreesToRadians(std::min(fov, 140.f)) / 2.f);
         mTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f / distanceMult : 1.f));
 
+        if (mGroundcoverWorld)
+        {
+            float groundcoverDistance = std::max(0.f, Settings::Manager::getFloat("rendering distance", "Groundcover"));
+            mGroundcoverWorld->setViewDistance(groundcoverDistance);
+        }
+
         if (mPostProcessor)
         {
             mPostProcessor->getStateUpdater()->setProjectionMatrix(mPerViewUniformStateUpdater->getProjectionMatrix());
@@ -1389,6 +1447,25 @@ namespace MWRender
             else if (it->first == "Camera" && it->second == "viewing distance")
             {
                 setViewDistance(Settings::Manager::getFloat("viewing distance", "Camera"));
+            }
+            else if (it->first == "Groundcover" && it->second == "rendering distance")
+            {
+                if (mGroundcoverPaging)
+                {
+            	    float groundcoverDistance = std::max(0.f, Settings::Manager::getFloat("rendering distance", "Groundcover"));
+            	    mGroundcoverWorld->setViewDistance(groundcoverDistance);
+                    mSharedUniformStateUpdater->setGroundcoverFadeEnd(groundcoverDistance);
+                }
+            }
+            else if (it->first == "Groundcover" && it->second == "density")
+            {
+                if (mGroundcoverPaging)
+                {
+            	    float groundcoverDensity = std::max(0.f, Settings::Manager::getFloat("density", "Groundcover")/100.f);
+            	    mGroundcoverPaging->setGroundcoverDensity(groundcoverDensity);
+            	    mGroundcoverPaging->clearCache();
+                    mGroundcoverWorld->rebuildViews();
+                }
             }
             else if (it->first == "General"
                 && (it->second == "texture filter" || it->second == "texture mipmap" || it->second == "anisotropy"))
@@ -1625,6 +1702,13 @@ namespace MWRender
             mTerrain->rebuildViews();
             return true;
         }
+
+        if (mGroundcoverPaging && mGroundcoverPaging->unlockCache())
+        {
+            mGroundcoverWorld->rebuildViews();
+            return true;
+        }
+
         return false;
     }
     void RenderingManager::getPagedRefnums(const osg::Vec4i& activeGrid, std::vector<ESM::RefNum>& out)

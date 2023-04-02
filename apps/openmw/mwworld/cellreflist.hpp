@@ -30,6 +30,8 @@ namespace MWWorld
 
         void load(const ESM4::Reference& ref, bool deleted, const MWWorld::ESMStore& esmStore);
 
+        inline bool ignoreInstance (const X* ptr);
+
         LiveRef& insert(const LiveRef& item)
         {
             mList.push_back(item);

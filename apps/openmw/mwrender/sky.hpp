@@ -102,6 +102,8 @@ namespace MWRender
 
         float getBaseWindSpeed() const;
 
+        osg::Vec2f getSmoothedStormDirection() const;
+
         void setSunglare(bool enabled);
 
         SceneUtil::RTTNode* getSkyRTT() { return mSkyRTT.get(); }

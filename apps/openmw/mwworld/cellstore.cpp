@@ -315,6 +315,18 @@ namespace
 
 namespace MWWorld
 {
+        template <typename X>
+        bool CellRefList<X>::ignoreInstance (const X* ptr)
+        {
+            return false;
+        }
+
+        template <>
+        bool CellRefList<ESM::Static>::ignoreInstance (const ESM::Static* ptr)
+        {
+            return ptr->mIsGroundcover;
+        }
+
     struct CellStoreImp
     {
         CellStoreTuple mRefLists;
@@ -353,6 +365,8 @@ namespace MWWorld
 
         if (const X* ptr = store.search(ref.mRefID))
         {
+            if(ignoreInstance(ptr)) return;
+
             typename std::list<LiveRef>::iterator iter = std::find(mList.begin(), mList.end(), ref.mRefNum);
 
             LiveRef liveCellRef(ref, ptr);

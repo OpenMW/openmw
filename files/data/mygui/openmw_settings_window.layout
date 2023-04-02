@@ -400,6 +400,12 @@
                         <Widget type="AutoSizedTextBox" skin="NormalText" position="0 104 0 18" align="Left Top" name="RenderDistanceLabel">
                             <Property key="Caption" value="#{sRender_Distance}"/>
                         </Widget>
+                        <Widget type="TextBox" skin="NormalText" position="0 178 352 18" align="Left Top" name="GrassDistanceLabel">
+                            <Property key="Caption" value="Grass Rendering Distance"/>
+                        </Widget>
+                        <Widget type="TextBox" skin="NormalText" position="0 226 352 18" align="Left Top" name="GrassDensityLabel">
+                            <Property key="Caption" value="Grass Density"/>
+                        </Widget>
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 126 352 18" align="HStretch Top" name="RenderingDistanceSlider">
                             <Property key="Range" value="4669"/>
                             <Property key="Page" value="128"/>
@@ -424,11 +430,35 @@
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
                             <UserString key="SettingLabelCaption" value="#{sRender_Distance} (x%s)"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 148 352 18" align="Left Top">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 202 352 18" align="HStretch Top" name="GrassDistanceSlider">
+                            <Property key="Range" value="21376"/>
+                            <Property key="Page" value="128"/>
+                            <UserString key="SettingType" value="Slider"/>
+                            <UserString key="SettingCategory" value="Groundcover"/>
+                            <UserString key="SettingName" value="rendering distance"/>
+                            <UserString key="SettingValueType" value="Integer"/>
+                            <UserString key="SettingMin" value="3000"/>
+                            <UserString key="SettingMax" value="21504"/>
+                            <UserString key="SettingLabelWidget" value="GrassDistanceLabel"/>
+                            <UserString key="SettingLabelCaption" value="Grass Rendering Distance (%s)"/>
+                        </Widget>
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 250 352 18" align="HStretch Top" name="GrassDensitySlider">
+                            <Property key="Range" value="11"/>
+                            <Property key="Page" value="1"/>
+                            <UserString key="SettingType" value="Slider"/>
+                            <UserString key="SettingCategory" value="Groundcover"/>
+                            <UserString key="SettingName" value="density"/>
+                            <UserString key="SettingValueType" value="Integer"/>
+                            <UserString key="SettingMin" value="1"/>
+                            <UserString key="SettingMax" value="100"/>
+                            <UserString key="SettingLabelWidget" value="GrassDensityLabel"/>
+                            <UserString key="SettingLabelCaption" value="Grass Density (%s%%)"/>
+                        </Widget>
+                        <Widget type="TextBox" skin="SandText" position="0 115 352 18" align="Left Top">
                             <Property key="Caption" value="#{sNear}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
-                        <Widget type="TextBox" skin="SandText" position="0 148 352 18" align="Right Top">
+                        <Widget type="TextBox" skin="SandText" position="0 115 352 18" align="Right Top">
                             <Property key="Caption" value="#{sFar}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>

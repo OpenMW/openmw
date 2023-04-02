@@ -122,6 +122,13 @@ namespace NavMeshTool
                 if (model.empty())
                     continue;
 
+                if (cellRef.mType == ESM::REC_STAT)
+                {
+                    std::string mesh = Misc::StringUtils::lowerCase (model);
+                    if (mesh.find("grass\\") == 0)
+                        continue;
+                }
+
                 if (cellRef.mType != ESM::REC_STAT)
                     model = Misc::ResourceHelpers::correctActorModelPath(model, &vfs);
 

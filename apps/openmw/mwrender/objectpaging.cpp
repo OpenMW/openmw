@@ -8,6 +8,8 @@
 #include <osg/MatrixTransform>
 #include <osg/Sequence>
 #include <osg/Switch>
+#include <osg/AlphaFunc>
+#include <osg/BlendFunc>
 #include <osgAnimation/BasicAnimationManager>
 #include <osgUtil/IncrementalCompileOperation>
 
@@ -42,6 +44,9 @@
 #include "vismask.hpp"
 
 #include <condition_variable>
+
+#include <components/shader/shadermanager.hpp>
+#include "apps/openmw/mwworld/groundcoverstore.hpp"
 
 namespace MWRender
 {
@@ -140,6 +145,7 @@ namespace MWRender
         bool mOptimizeBillboards = true;
         LODRange mDistances = { 0.f, 0.f };
         osg::Vec3f mViewVector;
+        bool mGroundcover = false;
         osg::Node::NodeMask mCopyMask = ~0u;
         mutable std::vector<const osg::Node*> mNodePath;
 
@@ -160,8 +166,33 @@ namespace MWRender
             if (!(node->getNodeMask() & mCopyMask))
                 return nullptr;
 
+//            if (const osg::Drawable* d = node->asDrawable())
+//                return operator()(d);
+
             if (const osg::Drawable* d = node->asDrawable())
-                return operator()(d);
+            {
+                osg::Node* clone = operator()(d);
+                osg::Geometry* geom = clone ? clone->asGeometry() : nullptr;
+                if (!mGroundcover || !geom) return clone;
+
+                osg::Array* vertexArray = geom->getVertexArray();
+                if (!vertexArray || vertexArray->getType() != osg::Array::Vec3ArrayType) return clone;
+                osg::Vec3Array* vertices = static_cast<osg::Vec3Array*>(vertexArray);
+
+                // We should keep an original vertex array to animate groundcover page properly
+                osg::ref_ptr<osg::FloatArray> attrs = new osg::FloatArray(vertices->getNumElements());
+                for (unsigned int i = 0; i < vertices->getNumElements(); i++)
+                {
+                    (*attrs)[i] = (*vertices)[i].z();
+                }
+
+                //if (needvbo(geom))
+                    attrs->setVertexBufferObject(new osg::VertexBufferObject);
+
+                geom->setVertexAttribArray(1, attrs, osg::Array::BIND_PER_VERTEX);
+
+                return geom;
+            }
 
             if (dynamic_cast<const osgParticle::ParticleProcessor*>(node))
                 return nullptr;
@@ -453,9 +484,11 @@ namespace MWRender
         }
     };
 
-    ObjectPaging::ObjectPaging(Resource::SceneManager* sceneManager)
+    ObjectPaging::ObjectPaging(Resource::SceneManager* sceneManager, bool groundcover, const MWWorld::GroundcoverStore& store)
         : GenericResourceManager<ChunkId>(nullptr)
         , mSceneManager(sceneManager)
+        , mGroundcover(groundcover)
+        , mGroundcoverStore(store)
         , mRefTrackerLocked(false)
     {
         mActiveGrid = Settings::Manager::getBool("object paging active grid", "Terrain");
@@ -464,81 +497,166 @@ namespace MWRender
         mMinSize = Settings::Manager::getFloat("object paging min size", "Terrain");
         mMinSizeMergeFactor = Settings::Manager::getFloat("object paging min size merge factor", "Terrain");
         mMinSizeCostMultiplier = Settings::Manager::getFloat("object paging min size cost multiplier", "Terrain");
+
+        if (mGroundcover)
+        {
+            mUseGroundcoverStore = Settings::Manager::getBool("auto load", "Groundcover") == true ? false : true;
+            mMergeFactor = Settings::Manager::getFloat("merge factor", "Groundcover");
+            mGroundcoverDensity = Settings::Manager::getFloat("density", "Groundcover")/100.f;
+            mMinSize = 0.01;
+        }
     }
 
-    osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, bool activeGrid,
-        const osg::Vec3f& viewPoint, bool compile, unsigned char lod)
+    std::map<ESM::RefNum, ESM::CellRef> ObjectPaging::collectRefs(float size, const osg::Vec2f& center)
     {
-        osg::Vec2i startCell = osg::Vec2i(std::floor(center.x() - size / 2.f), std::floor(center.y() - size / 2.f));
-
-        osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0) * ESM::Land::REAL_SIZE;
-        osg::Vec3f relativeViewPoint = viewPoint - worldCenter;
-
         std::map<ESM::RefNum, ESM::CellRef> refs;
         ESM::ReadersCache readers;
         const auto& world = MWBase::Environment::get().getWorld();
         const auto& store = world->getStore();
 
-        for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
+        osg::Vec2i startCell = osg::Vec2i(std::floor(center.x() - size / 2.f), std::floor(center.y() - size / 2.f));
+
+        if (mGroundcover && mUseGroundcoverStore)
         {
-            for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
+            for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
             {
-                const ESM::Cell* cell = store.get<ESM::Cell>().searchStatic(cellX, cellY);
-                if (!cell)
-                    continue;
-                for (size_t i = 0; i < cell->mContextList.size(); ++i)
+                for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
                 {
-                    try
+                    ESM::Cell cell;
+                    mGroundcoverStore.initCell(cell, cellX, cellY);
+                    if (cell.mContextList.empty()) 
+                        continue;
+
+                    float currentGroundcover = 0.f;
+                    for (size_t i = 0; i < cell.mContextList.size(); ++i)
                     {
-                        const std::size_t index = static_cast<std::size_t>(cell->mContextList[i].index);
-                        const ESM::ReadersCache::BusyItem reader = readers.get(index);
-                        cell->restore(*reader, i);
-                        ESM::CellRef ref;
-                        ESM::MovedCellRef cMRef;
-                        bool deleted = false;
-                        bool moved = false;
-                        while (ESM::Cell::getNextRef(
-                            *reader, ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
+                        try
                         {
-                            if (moved)
-                                continue;
-
-                            if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum)
-                                != cell->mMovedRefs.end())
-                                continue;
-
-                            int type = store.findStatic(ref.mRefID);
-                            if (!typeFilter(type, size >= 2))
-                                continue;
-                            if (deleted)
+                            const std::size_t index = static_cast<std::size_t>(cell.mContextList[i].index);
+                            const ESM::ReadersCache::BusyItem reader = readers.get(index);
+                            cell.restore(*reader, i);
+                            ESM::CellRef ref;
+                            bool deleted = false;
+                            while (cell.getNextRef(*reader, ref, deleted))
                             {
-                                refs.erase(ref.mRefNum);
-                                continue;
+                                if (deleted)
+                                {
+                                    refs.erase(ref.mRefNum);
+                                    continue;
+                                }
+
+                                currentGroundcover += mGroundcoverDensity;
+                                if (currentGroundcover < 1.f) continue;
+                                currentGroundcover -= 1.f;
+
+                                refs[ref.mRefNum] = std::move(ref);
                             }
-                            refs[ref.mRefNum] = std::move(ref);
+                        }
+                        catch (std::exception&)
+                        {
+                            continue;
                         }
                     }
-                    catch (std::exception&)
-                    {
-                        continue;
-                    }
                 }
-                for (auto [ref, deleted] : cell->mLeasedRefs)
+            }
+        }
+        else
+        {
+            for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
+            {
+                for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
                 {
-                    if (deleted)
+                    const ESM::Cell* cell = store.get<ESM::Cell>().searchStatic(cellX, cellY);
+                    if (!cell)
+                        continue;
+                    float currentGroundcover = 0.f;
+                    for (size_t i = 0; i < cell->mContextList.size(); ++i)
                     {
-                        refs.erase(ref.mRefNum);
-                        continue;
+                        try
+                        {
+                            const std::size_t index = static_cast<std::size_t>(cell->mContextList[i].index);
+                            const ESM::ReadersCache::BusyItem reader = readers.get(index);
+                            cell->restore(*reader, i);
+                            ESM::CellRef ref;
+                            ESM::MovedCellRef cMRef;
+                            bool deleted = false;
+                            bool moved = false;
+                            while (ESM::Cell::getNextRef(
+                                *reader, ref, deleted, cMRef, moved, ESM::Cell::GetNextRefMode::LoadOnlyNotMoved))
+                            {
+                                if (moved)
+                                    continue;
+
+                                if (std::find(cell->mMovedRefs.begin(), cell->mMovedRefs.end(), ref.mRefNum)
+                                    != cell->mMovedRefs.end())
+                                    continue;
+
+                                int type = store.findStatic(ref.mRefID);
+                                if (!typeFilter(type, size >= 2))
+                                    continue;
+                                if (deleted)
+                                {
+                                    refs.erase(ref.mRefNum);
+                                    continue;
+                                }
+
+                                // FIXME: per-instance check requires search
+                                if(mGroundcover && type != ESM::REC_STAT)
+                                   continue;
+
+                                if(type == ESM::REC_STAT)
+                                {
+                                    bool isGroundcoverModel = store.get<ESM::Static>().searchStatic(ref.mRefID)->mIsGroundcover;
+                                    if(mGroundcover != isGroundcoverModel)
+                                       continue;
+
+                                    if (mGroundcover)
+                                    {
+                                        currentGroundcover += mGroundcoverDensity;
+                                        if (currentGroundcover < 1.f) continue;
+                                        currentGroundcover -= 1.f;
+                                    }
+                                }
+
+                                refs[ref.mRefNum] = std::move(ref);
+                            }
+                        }
+                        catch (std::exception&)
+                        {
+                            continue;
+                        }
                     }
-                    int type = store.findStatic(ref.mRefID);
-                    if (!typeFilter(type, size >= 2))
-                        continue;
-                    refs[ref.mRefNum] = std::move(ref);
+
+                    for (auto [ref, deleted] : cell->mLeasedRefs)
+                    {
+                        if (deleted)
+                        {
+                            refs.erase(ref.mRefNum);
+                            continue;
+                        }
+                        int type = store.findStatic(ref.mRefID);
+                        if (!typeFilter(type, size >= 2))
+                            continue;
+                        refs[ref.mRefNum] = std::move(ref);
+                    }
                 }
             }
         }
 
-        if (activeGrid)
+        return refs;
+    }
+
+    osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, bool activeGrid,
+        const osg::Vec3f& viewPoint, bool compile, unsigned char lod)
+    {
+        osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0) * ESM::Land::REAL_SIZE;
+        osg::Vec3f relativeViewPoint = viewPoint - worldCenter;
+
+        std::map<ESM::RefNum, ESM::CellRef> refs = collectRefs(size, center);
+        const auto& world = MWBase::Environment::get().getWorld();
+        const auto& store = world->getStore();
+
+        if (activeGrid && !mGroundcover)
         {
             std::lock_guard<std::mutex> lock(mRefTrackerMutex);
             for (auto ref : getRefTracker().mBlacklist)
@@ -602,10 +720,17 @@ namespace MWRender
                 continue;
 
             int type = store.findStatic(ref.mRefID);
-            std::string model = getModel(type, ref.mRefID, store);
+            std::string model;
+            if(mGroundcover && mUseGroundcoverStore)
+                model = mGroundcoverStore.getGroundcoverModel(ref.mRefID);
+            else
+                model = getModel(type, ref.mRefID, store);
+
             if (model.empty())
                 continue;
-            model = Misc::ResourceHelpers::correctMeshPath(model, mSceneManager->getVFS());
+
+            if(!mGroundcover || (mGroundcover && !mUseGroundcoverStore))
+                model = Misc::ResourceHelpers::correctMeshPath(model, mSceneManager->getVFS());
 
             if (activeGrid && type != ESM::REC_STAT)
             {
@@ -638,22 +763,25 @@ namespace MWRender
 
             osg::ref_ptr<const osg::Node> cnode = mSceneManager->getTemplate(model, false);
 
-            if (activeGrid)
+            if (!mGroundcover)
             {
-                if (cnode->getNumChildrenRequiringUpdateTraversal() > 0
-                    || SceneUtil::hasUserDescription(cnode, Constants::NightDayLabel)
-                    || SceneUtil::hasUserDescription(cnode, Constants::HerbalismLabel)
-                    || (cnode->getName() == "Collada visual scene group"
-                        && dynamic_cast<const osgAnimation::BasicAnimationManager*>(cnode->getUpdateCallback())))
-                    continue;
-                else
-                    refnumSet->mRefnums.push_back(pair.first);
-            }
+                if (activeGrid)
+                {
+                    if (cnode->getNumChildrenRequiringUpdateTraversal() > 0
+                        || SceneUtil::hasUserDescription(cnode, Constants::NightDayLabel)
+                        || SceneUtil::hasUserDescription(cnode, Constants::HerbalismLabel)
+                        || (cnode->getName() == "Collada visual scene group"
+                            && dynamic_cast<const osgAnimation::BasicAnimationManager*>(cnode->getUpdateCallback())))
+                        continue;
+                    else
+                        refnumSet->mRefnums.push_back(pair.first);
+                }
 
-            {
-                std::lock_guard<std::mutex> lock(mRefTrackerMutex);
-                if (getRefTracker().mDisabled.count(pair.first))
-                    continue;
+                {
+                    std::lock_guard<std::mutex> lock(mRefTrackerMutex);
+                    if (getRefTracker().mDisabled.count(pair.first))
+                        continue;
+                }
             }
 
             float radius2 = cnode->getBound().radius2() * ref.mScale * ref.mScale;
@@ -684,6 +812,7 @@ namespace MWRender
         osg::ref_ptr<Resource::TemplateMultiRef> templateRefs = new Resource::TemplateMultiRef;
         osgUtil::StateToCompile stateToCompile(0, nullptr);
         CopyOp copyop;
+        copyop.mGroundcover = mGroundcover;
         copyop.mCopyMask = copyMask;
         for (const auto& pair : nodes)
         {
@@ -793,11 +922,17 @@ namespace MWRender
         if (mergeGroup->getNumChildren())
         {
             SceneUtil::Optimizer optimizer;
-            if (size > 1 / 8.f)
+            if (!mGroundcover && size > 1/8.f)
             {
                 optimizer.setViewPoint(relativeViewPoint);
                 optimizer.setMergeAlphaBlending(true);
             }
+/*
+            if (mGroundcover)
+            {
+                optimizer.setRemoveAlphaBlending(true);
+            }
+*/
             optimizer.setIsOperationPermissibleForObjectCallback(new CanOptimizeCallback);
             unsigned int options = SceneUtil::Optimizer::FLATTEN_STATIC_TRANSFORMS
                 | SceneUtil::Optimizer::REMOVE_REDUNDANT_NODES | SceneUtil::Optimizer::MERGE_GEOMETRY;
@@ -827,9 +962,9 @@ namespace MWRender
         }
 
         group->getBound();
-        group->setNodeMask(Mask_Static);
+        group->setNodeMask(mGroundcover ? Mask_Groundcover : Mask_Static);
         osg::UserDataContainer* udc = group->getOrCreateUserDataContainer();
-        if (activeGrid)
+        if (activeGrid && !mGroundcover)
         {
             std::sort(refnumSet->mRefnums.begin(), refnumSet->mRefnums.end());
             refnumSet->mRefnums.erase(
@@ -839,12 +974,45 @@ namespace MWRender
         }
         udc->addUserObject(templateRefs);
 
+        if (mGroundcover)
+        {
+            if (mSceneManager->getLightingMethod() != SceneUtil::LightingMethod::FFP)
+                group->setCullCallback(new SceneUtil::LightListCallback);
+/*
+            osg::StateSet* stateset = group->getOrCreateStateSet();
+            stateset->removeAttribute(osg::StateAttribute::MATERIAL);
+            stateset->removeAttribute(osg::StateAttribute::ALPHAFUNC);
+            stateset->removeMode(GL_ALPHA_TEST);
+            stateset->removeAttribute(osg::StateAttribute::BLENDFUNC);
+            stateset->removeMode(GL_BLEND);
+            stateset->setRenderBinToInherit();
+
+            osg::ref_ptr<osg::AlphaFunc> alpha = new osg::AlphaFunc(osg::AlphaFunc::GEQUAL, 128.f / 255.f);
+            stateset->setAttributeAndModes(alpha.get(), osg::StateAttribute::ON);
+*/
+            osg::StateSet* stateset = group->getOrCreateStateSet();
+            osg::ref_ptr<osg::AlphaFunc> alpha = new osg::AlphaFunc(osg::AlphaFunc::GEQUAL, 128.f / 255.f);
+            stateset->setAttributeAndModes(alpha.get(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
+            stateset->setAttributeAndModes(new osg::BlendFunc, osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE);
+            stateset->setRenderBinDetails(0, "RenderBin", osg::StateSet::OVERRIDE_RENDERBIN_DETAILS);
+
+            mSceneManager->reinstateRemovedState(group);
+
+            static const osg::ref_ptr<osg::Program> programTemplate = mSceneManager->getShaderManager().getProgramTemplate()
+                ? Shader::ShaderManager::cloneProgram(mSceneManager->getShaderManager().getProgramTemplate())
+                : osg::ref_ptr<osg::Program>(new osg::Program);
+
+            programTemplate->addBindAttribLocation("originalHeight", 1);
+
+            mSceneManager->recreateShaders(group, "groundcover_paging", true, programTemplate);
+        }
+
         return group;
     }
 
     unsigned int ObjectPaging::getNodeMask()
     {
-        return Mask_Static;
+        return mGroundcover ? Mask_Groundcover : Mask_Static;
     }
 
     struct ClearCacheFunctor
@@ -993,7 +1161,20 @@ namespace MWRender
 
     void ObjectPaging::reportStats(unsigned int frameNumber, osg::Stats* stats) const
     {
-        stats->setAttribute(frameNumber, "Object Chunk", mCache->getCacheSize());
+        if (mGroundcover)
+            stats->setAttribute(frameNumber, "Groundcover Chunk", mCache->getCacheSize());
+        else
+            stats->setAttribute(frameNumber, "Object Chunk", mCache->getCacheSize());
+    }
+
+    float ObjectPaging::getGroundcoverDensity()
+    {
+        return mGroundcoverDensity;
+    }
+
+    void ObjectPaging::setGroundcoverDensity(float density)
+    {
+        mGroundcoverDensity = density;
     }
 
 }

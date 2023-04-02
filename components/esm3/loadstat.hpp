@@ -34,6 +34,7 @@ namespace ESM
         unsigned int mRecordFlags;
         RefId mId;
         std::string mModel;
+        bool mIsGroundcover = false;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

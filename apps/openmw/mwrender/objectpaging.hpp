@@ -14,6 +14,7 @@ namespace Resource
 namespace MWWorld
 {
     class ESMStore;
+    class GroundcoverStore;
 }
 
 namespace MWRender
@@ -24,14 +25,18 @@ namespace MWRender
     class ObjectPaging : public Resource::GenericResourceManager<ChunkId>, public Terrain::QuadTreeWorld::ChunkManager
     {
     public:
-        ObjectPaging(Resource::SceneManager* sceneManager);
+        ObjectPaging(Resource::SceneManager* sceneManager, bool groundcover, const MWWorld::GroundcoverStore& store);
         ~ObjectPaging() = default;
 
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags,
             bool activeGrid, const osg::Vec3f& viewPoint, bool compile) override;
 
+        std::map<ESM::RefNum, ESM::CellRef> collectRefs(float size, const osg::Vec2f& center);
+
         osg::ref_ptr<osg::Node> createChunk(float size, const osg::Vec2f& center, bool activeGrid,
             const osg::Vec3f& viewPoint, bool compile, unsigned char lod);
+
+        bool isGroundcoverInstanceEnabled();
 
         unsigned int getNodeMask() override;
 
@@ -50,11 +55,19 @@ namespace MWRender
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 
+        float getGroundcoverDensity();
+
+        void setGroundcoverDensity(float density);
+
         void getPagedRefnums(const osg::Vec4i& activeGrid, std::vector<ESM::RefNum>& out);
 
     private:
         Resource::SceneManager* mSceneManager;
         bool mActiveGrid;
+        bool mGroundcover;
+        bool mUseGroundcoverStore;
+        float mGroundcoverDensity;
+        const MWWorld::GroundcoverStore& mGroundcoverStore;
         bool mDebugBatches;
         float mMergeFactor;
         float mMinSize;

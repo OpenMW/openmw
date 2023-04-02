@@ -839,6 +839,36 @@ namespace MWRender
         return mBaseWindSpeed;
     }
 
+    // Note fix blizzard
+    osg::Vec2f SkyManager::getSmoothedStormDirection() const
+    {
+        if (!mCreated)
+            return osg::Vec2f(0.f, 0.f);
+
+        int cw = MWBase::Environment::get().getWorld()->getCurrentWeather();
+        int nw = MWBase::Environment::get().getWorld()->getNextWeather();
+        float transition = MWBase::Environment::get().getWorld()->getWeatherTransition();
+
+        transition = (transition != 0.f) ? 1.0 - transition : transition;
+
+        bool cstorm = (cw < 6 && cw != 8) ? false : true;
+        bool nstorm = (nw < 6 && nw != 8) ? false : true;
+
+        osg::Vec2f cdir = cstorm ? osg::Vec2f(mStormDirection[0], mStormDirection[1]) : osg::Vec2f(0.f, 0.f);
+        osg::Vec2f ndir = nstorm ? osg::Vec2f(mNextStormDirection[0], mNextStormDirection[1]) : osg::Vec2f(0.f, 0.f);
+
+
+        osg::Vec2f ret = cdir * (1.0 - transition) + ndir * transition;
+
+/*
+        Log(Debug::Warning) << "t " << transition;
+        Log(Debug::Warning) << "cdir " << float(cdir[0]) << ", " << float(cdir[1]);
+        Log(Debug::Warning) << "ndir " << float(ndir[0]) << ", " << float(ndir[1]);
+        Log(Debug::Warning) << "ret " << float(ret[0]) << ", " << float(ret[1]);
+*/
+        return ret;
+    }
+
     void SkyManager::setSunglare(bool enabled)
     {
         mSunglareEnabled = enabled;
