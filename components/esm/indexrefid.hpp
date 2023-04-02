@@ -53,7 +53,7 @@ namespace std
     {
         std::size_t operator()(ESM::IndexRefId value) const noexcept
         {
-            return std::hash<std::uint64_t>{}(static_cast<std::uint64_t>(value.mRecordType) | value.mValue);
+            return std::hash<std::uint64_t>{}((static_cast<std::uint64_t>(value.mRecordType) << 32) | value.mValue);
         }
     };
 }
