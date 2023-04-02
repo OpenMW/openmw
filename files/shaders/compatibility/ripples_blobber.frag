@@ -17,7 +17,8 @@ void main()
 
     vec4 color = texture2D(imageIn, uv);
     float wavesizeMultiplier = getTemporalWaveSizeMultiplier(osg_SimulationTime);
-    for (int i = 0; i < positionCount; ++i) {
+    for (int i = 0; i < positionCount; ++i)
+    {
         float wavesize = wavesizeMultiplier * positions[i].z;
         float displace = clamp(2.0 * abs(length((positions[i].xy + offset) - gl_FragCoord.xy) / wavesize - 1.0), 0.0, 1.0);
         color.rg = mix(vec2(-1.0), color.rg, displace);
