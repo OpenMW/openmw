@@ -8,6 +8,7 @@ set(DDIRRELATIVE resources/shaders)
 
 set(SHADER_FILES
     lib/water/fresnel.glsl
+    lib/water/rain_ripples.glsl
     lib/water/ripples.glsl
     lib/view/depth.glsl
     lib/luminance/constants.glsl
@@ -26,6 +27,8 @@ set(SHADER_FILES
     lib/sky/passes.glsl
     lib/material/parallax.glsl
     lib/material/alpha.glsl
+    compatibility/ripples_blobber.frag
+    compatibility/ripples_simulate.frag
     compatibility/fog.glsl
     compatibility/groundcover.vert
     compatibility/groundcover.frag
@@ -60,6 +63,8 @@ set(SHADER_FILES
     compatibility/bs/nolighting.frag
     compatibility/luminance/resolve.frag
     compatibility/luminance/luminance.frag
+    core/ripples_blobber.comp
+    core/ripples_simulate.comp
     core/gui.frag
     core/gui.vert
 )

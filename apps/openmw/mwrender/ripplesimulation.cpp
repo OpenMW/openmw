@@ -142,7 +142,16 @@ namespace MWRender
                 || world->isWalkingOnWater(ptr);
 
             if (!shouldEmit)
+            {
                 emitter.mTimer = 0.f;
+            }
+            else if (mRipples)
+            {
+                // Ripple simulation needs to continously apply impulses to keep simulation alive.
+                // Adding a timer delay will introduce many smaller ripples around actor instead of a smooth wake
+                currentPos.z() = mParticleNode->getPosition().z();
+                emitRipple(currentPos);
+            }
             else if (emitter.mTimer <= 0.f || (currentPos - emitter.mLastEmitPosition).length() > 10)
             {
                 emitter.mLastEmitPosition = currentPos;
@@ -210,10 +219,18 @@ namespace MWRender
     {
         if (std::abs(pos.z() - mParticleNode->getPosition().z()) < 20)
         {
-            osgParticle::ParticleSystem::ScopedWriteLock lock(*mParticleSystem->getReadWriteMutex());
-            osgParticle::Particle* p = mParticleSystem->createParticle(nullptr);
-            p->setPosition(osg::Vec3f(pos.x(), pos.y(), 0.f));
-            p->setAngle(osg::Vec3f(0, 0, Misc::Rng::rollProbability() * osg::PI * 2 - osg::PI));
+            if (mRipples)
+            {
+                constexpr float particleRippleSizeInUnits = 12.f;
+                mRipples->emit(osg::Vec3f(pos.x(), pos.y(), 0.f), particleRippleSizeInUnits);
+            }
+            else
+            {
+                osgParticle::ParticleSystem::ScopedWriteLock lock(*mParticleSystem->getReadWriteMutex());
+                osgParticle::Particle* p = mParticleSystem->createParticle(nullptr);
+                p->setPosition(osg::Vec3f(pos.x(), pos.y(), 0.f));
+                p->setAngle(osg::Vec3f(0, 0, Misc::Rng::rollProbability() * osg::PI * 2 - osg::PI));
+            }
         }
     }
 
