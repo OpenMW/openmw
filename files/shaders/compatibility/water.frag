@@ -122,7 +122,8 @@ void main(void)
     float distToCenter = length(rippleMapUV - vec2(0.5));
     float blendClose = smoothstep(0.001, 0.02, distToCenter);
     float blendFar = 1.0 - smoothstep(0.3, 0.4, distToCenter);
-    rippleAdd += vec3(texture2D(rippleMap, rippleMapUV).ba * blendFar * blendClose, 0.0);
+    float distortionLevel = 2.0;
+    rippleAdd += distortionLevel * vec3(texture2D(rippleMap, rippleMapUV).ba * blendFar * blendClose, 0.0);
 
     vec2 bigWaves = vec2(BIG_WAVES_X,BIG_WAVES_Y);
     vec2 midWaves = mix(vec2(MID_WAVES_X,MID_WAVES_Y),vec2(MID_WAVES_RAIN_X,MID_WAVES_RAIN_Y),rainIntensity);
