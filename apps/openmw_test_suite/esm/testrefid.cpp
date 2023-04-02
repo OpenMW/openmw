@@ -285,63 +285,102 @@ namespace ESM
 
         INSTANTIATE_TEST_SUITE_P(ESMRefIdText, ESMRefIdTextTest, ValuesIn(serializedRefIds));
 
-        template <class T>
-        RefId generateRefId();
-
-        template <>
-        RefId generateRefId<EmptyRefId>()
-        {
-            return RefId();
-        }
-
-        template <>
-        RefId generateRefId<StringRefId>()
-        {
-            return RefId::stringRefId("StringRefId");
-        }
-
-        template <>
-        RefId generateRefId<FormIdRefId>()
-        {
-            return RefId::formIdRefId(42);
-        }
-
-        template <>
-        RefId generateRefId<GeneratedRefId>()
-        {
-            return RefId::generated(13);
-        }
-
-        template <>
-        RefId generateRefId<IndexRefId>()
-        {
-            return RefId::index(REC_BOOK, 7);
-        }
+        template <class>
+        [[maybe_unused]] constexpr bool alwaysFalse = false;
 
         template <class T>
-        struct ESMRefIdSerializeDeserializeTest : Test
+        struct GenerateRefId
+        {
+            static_assert(alwaysFalse<T>,
+                "There should be specialization for each RefId type. If this assert fails, probably there are no tests "
+                "for a new RefId type.");
+        };
+
+        template <>
+        struct GenerateRefId<EmptyRefId>
+        {
+            static RefId call() { return RefId(); }
+        };
+
+        template <>
+        struct GenerateRefId<StringRefId>
+        {
+            static RefId call() { return RefId::stringRefId("StringRefId"); }
+        };
+
+        template <>
+        struct GenerateRefId<FormIdRefId>
+        {
+            static RefId call() { return RefId::formIdRefId(42); }
+        };
+
+        template <>
+        struct GenerateRefId<GeneratedRefId>
+        {
+            static RefId call() { return RefId::generated(13); }
+        };
+
+        template <>
+        struct GenerateRefId<IndexRefId>
+        {
+            static RefId call() { return RefId::index(REC_BOOK, 7); }
+        };
+
+        template <class T>
+        struct ESMRefIdTypesTest : Test
         {
         };
 
-        TYPED_TEST_SUITE_P(ESMRefIdSerializeDeserializeTest);
+        TYPED_TEST_SUITE_P(ESMRefIdTypesTest);
 
-        TYPED_TEST_P(ESMRefIdSerializeDeserializeTest, serializeThenDeserializeShouldProduceSameValue)
+        TYPED_TEST_P(ESMRefIdTypesTest, serializeThenDeserializeShouldProduceSameValue)
         {
-            const RefId refId = generateRefId<TypeParam>();
+            const RefId refId = GenerateRefId<TypeParam>::call();
             EXPECT_EQ(RefId::deserialize(refId.serialize()), refId);
         }
 
-        TYPED_TEST_P(ESMRefIdSerializeDeserializeTest, serializeTextThenDeserializeTextShouldProduceSameValue)
+        TYPED_TEST_P(ESMRefIdTypesTest, serializeTextThenDeserializeTextShouldProduceSameValue)
         {
-            const RefId refId = generateRefId<TypeParam>();
+            const RefId refId = GenerateRefId<TypeParam>::call();
             EXPECT_EQ(RefId::deserializeText(refId.serializeText()), refId);
         }
 
-        REGISTER_TYPED_TEST_SUITE_P(ESMRefIdSerializeDeserializeTest, serializeThenDeserializeShouldProduceSameValue,
-            serializeTextThenDeserializeTextShouldProduceSameValue);
+        TYPED_TEST_P(ESMRefIdTypesTest, shouldBeEqualToItself)
+        {
+            const RefId a = GenerateRefId<TypeParam>::call();
+            const RefId b = GenerateRefId<TypeParam>::call();
+            EXPECT_EQ(a, b);
+        }
 
-        using RefIdTypeParams = Types<EmptyRefId, StringRefId, FormIdRefId, GeneratedRefId, IndexRefId>;
+        TYPED_TEST_P(ESMRefIdTypesTest, shouldNotBeNotEqualToItself)
+        {
+            const RefId a = GenerateRefId<TypeParam>::call();
+            const RefId b = GenerateRefId<TypeParam>::call();
+            EXPECT_FALSE(a != b) << a;
+        }
 
-        INSTANTIATE_TYPED_TEST_SUITE_P(RefIdTypes, ESMRefIdSerializeDeserializeTest, RefIdTypeParams);
+        TYPED_TEST_P(ESMRefIdTypesTest, shouldBeNotLessThanItself)
+        {
+            const RefId a = GenerateRefId<TypeParam>::call();
+            const RefId b = GenerateRefId<TypeParam>::call();
+            EXPECT_FALSE(a < b) << a;
+        }
+
+        REGISTER_TYPED_TEST_SUITE_P(ESMRefIdTypesTest, serializeThenDeserializeShouldProduceSameValue,
+            serializeTextThenDeserializeTextShouldProduceSameValue, shouldBeEqualToItself, shouldNotBeNotEqualToItself,
+            shouldBeNotLessThanItself);
+
+        template <class>
+        struct RefIdTypes;
+
+        template <class... Args>
+        struct RefIdTypes<std::variant<Args...>>
+        {
+            using Type = Types<Args...>;
+        };
+
+        using RefIdTypeParams = typename RefIdTypes<RefId::Value>::Type;
+
+        INSTANTIATE_TYPED_TEST_SUITE_P(RefIdTypes, ESMRefIdTypesTest, RefIdTypeParams);
     }
 }
