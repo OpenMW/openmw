@@ -248,16 +248,10 @@ namespace ESM
             record.mObject.mRef.mRefID = generateRandomRefId();
             std::generate_n(std::inserter(record.mPreviousItems, record.mPreviousItems.end()), 2,
                 [&] { return std::make_pair(generateRandomRefId(), generateRandomRefId()); });
-            record.mCellId.mWorldspace = "worldspace1";
-            record.mCellId.mIndex.mX = 42;
-            record.mCellId.mIndex.mY = 13;
-            record.mCellId.mPaged = true;
+            record.mCellId = ESM::RefId::esm3ExteriorCell(0, 0);
             generateArray(record.mLastKnownExteriorPosition);
             record.mHasMark = true;
-            record.mMarkedCell.mWorldspace = "worldspace2";
-            record.mMarkedCell.mIndex.mX = 0;
-            record.mMarkedCell.mIndex.mY = 0;
-            record.mMarkedCell.mPaged = false;
+            record.mMarkedCell = ESM::RefId::esm3ExteriorCell(0, 0);
             generateArray(record.mMarkedPosition.pos);
             generateArray(record.mMarkedPosition.rot);
             record.mCurrentCrimeId = 42;
@@ -267,16 +261,11 @@ namespace ESM
             EXPECT_EQ(record.mBirthsign, result.mBirthsign);
             EXPECT_EQ(record.mPreviousItems, result.mPreviousItems);
             EXPECT_EQ(record.mPreviousItems, result.mPreviousItems);
-            EXPECT_EQ(record.mCellId.mWorldspace, result.mCellId.mWorldspace);
-            EXPECT_EQ(record.mCellId.mIndex.mX, result.mCellId.mIndex.mX);
-            EXPECT_EQ(record.mCellId.mIndex.mY, result.mCellId.mIndex.mY);
-            EXPECT_EQ(record.mCellId.mPaged, result.mCellId.mPaged);
+            EXPECT_EQ(record.mCellId, result.mCellId);
+
             EXPECT_THAT(record.mLastKnownExteriorPosition, ElementsAreArray(result.mLastKnownExteriorPosition));
             EXPECT_EQ(record.mHasMark, result.mHasMark);
-            EXPECT_EQ(record.mMarkedCell.mWorldspace, result.mMarkedCell.mWorldspace);
-            EXPECT_EQ(record.mMarkedCell.mIndex.mX, result.mMarkedCell.mIndex.mX);
-            EXPECT_EQ(record.mMarkedCell.mIndex.mY, result.mMarkedCell.mIndex.mY);
-            EXPECT_EQ(record.mMarkedCell.mPaged, result.mMarkedCell.mPaged);
+            EXPECT_EQ(record.mMarkedCell, result.mMarkedCell);
             EXPECT_THAT(record.mMarkedPosition.pos, ElementsAreArray(result.mMarkedPosition.pos));
             EXPECT_THAT(record.mMarkedPosition.rot, ElementsAreArray(result.mMarkedPosition.rot));
             EXPECT_EQ(record.mCurrentCrimeId, result.mCurrentCrimeId);

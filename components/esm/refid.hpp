@@ -50,7 +50,8 @@ namespace ESM
     public:
         const static RefId sEmpty;
 
-        using Value = std::variant<EmptyRefId, StringRefId, FormIdRefId, GeneratedRefId, IndexRefId>;
+        using Value
+            = std::variant<EmptyRefId, StringRefId, FormIdRefId, GeneratedRefId, IndexRefId, ESM3ExteriorCellRefId>;
 
         // Constructs RefId from a serialized string containing byte by byte copy of RefId::mValue.
         static ESM::RefId deserialize(std::string_view value);

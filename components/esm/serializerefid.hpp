@@ -12,6 +12,7 @@ namespace ESM
     constexpr std::string_view formIdRefIdPrefix = "FormId:";
     constexpr std::string_view generatedRefIdPrefix = "Generated:";
     constexpr std::string_view indexRefIdPrefix = "Index:";
+    constexpr std::string_view esm3ExteriorCellRefIdPrefix = "Esm3ExteriorCell:";
 
     template <class T>
     std::size_t getIntegralSize(T value)

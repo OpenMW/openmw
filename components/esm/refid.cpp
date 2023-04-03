@@ -237,6 +237,13 @@ namespace ESM
             return ESM::RefId::index(recordType,
                 deserializeIntegral<std::uint32_t>(indexRefIdPrefix.size() + sizeof(recordType) + 1, value));
         }
+        if (value.starts_with(esm3ExteriorCellRefIdPrefix))
+        {
+            std::int32_t x = deserializeIntegral<std::int32_t>(esm3ExteriorCellRefIdPrefix.size(), value);
+            std::int32_t y
+                = deserializeIntegral<std::int32_t>(esm3ExteriorCellRefIdPrefix.size() + getIntegralSize(x) + 1, value);
+            return ESM::ESM3ExteriorCellRefId(x, y);
+        }
 
         return ESM::RefId::stringRefId(value);
     }

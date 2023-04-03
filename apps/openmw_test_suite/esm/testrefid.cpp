@@ -342,6 +342,12 @@ namespace ESM
             static RefId call() { return RefId::index(REC_BOOK, 7); }
         };
 
+        template <>
+        struct GenerateRefId<ESM3ExteriorCellRefId>
+        {
+            static RefId call() { return RefId::esm3ExteriorCell(-12, 7); }
+        };
+
         template <class T>
         struct ESMRefIdTypesTest : Test
         {
