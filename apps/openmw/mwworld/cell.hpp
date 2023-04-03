@@ -5,12 +5,10 @@
 
 #include <components/esm/esmbridge.hpp>
 #include <components/esm/refid.hpp>
-#include <components/esm3/cellid.hpp>
 
 namespace ESM
 {
     struct Cell;
-    struct CellId;
 }
 
 namespace ESM4
@@ -42,13 +40,14 @@ namespace MWWorld
         bool isQuasiExterior() const { return mIsQuasiExterior; }
         bool hasWater() const { return mHasWater; }
         bool noSleep() const { return mNoSleep; }
-        const ESM::CellId& getCellId() const { return mCellId; }
         const ESM::RefId& getRegion() const { return mRegion; }
         std::string_view getNameId() const { return mNameID; }
         std::string_view getDisplayName() const { return mDisplayname; }
         std::string getDescription() const;
         const MoodData& getMood() const { return mMood; }
         float getWaterHeight() const { return mWaterHeight; }
+        const ESM::RefId& getId() const { return mId; }
+        ESM::RefId getWorldSpace() const;
 
     private:
         bool mIsExterior;
@@ -60,7 +59,8 @@ namespace MWWorld
         std::string mDisplayname; // How the game displays it
         std::string mNameID; // The name that will be used by the script and console commands
         ESM::RefId mRegion;
-        ESM::CellId mCellId;
+        ESM::RefId mId;
+        ESM::RefId mParent;
         MoodData mMood;
 
         float mWaterHeight;

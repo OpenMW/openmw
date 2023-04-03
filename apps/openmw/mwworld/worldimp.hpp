@@ -349,7 +349,7 @@ namespace MWWorld
         ///< Move to exterior cell.
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        void changeToCell(const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos,
+        void changeToCell(const ESM::RefId& cellId, const ESM::Position& position, bool adjustPlayerPos,
             bool changeEvent = true) override;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
@@ -601,12 +601,12 @@ namespace MWWorld
 
         /// Find center of exterior cell above land surface
         /// \return false if exterior with given name not exists, true otherwise
-        bool findExteriorPosition(std::string_view nameId, ESM::Position& pos) override;
+        ESM::RefId findExteriorPosition(std::string_view nameId, ESM::Position& pos) override;
 
         /// Find position in interior cell near door entrance
         /// \return false if interior with given name not exists, true otherwise
-        bool findInteriorPosition(std::string_view name, ESM::Position& pos) override;
-
+        ESM::RefId findInteriorPosition(std::string_view name, ESM::Position& pos) override;
+        ESM::RefId findCellPosition(std::string_view cellName, ESM::Position& pos) override;
         /// Enables or disables use of teleport spell effects (recall, intervention, etc).
         void enableTeleporting(bool enable) override;
 

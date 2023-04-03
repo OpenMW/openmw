@@ -283,7 +283,7 @@ namespace MWWorld
         ESM::Player player;
 
         mPlayer.save(player.mObject);
-        player.mCellId = mCellStore->getCell()->getCellId();
+        player.mCellId = mCellStore->getCell()->getId();
 
         player.mCurrentCrimeId = mCurrentCrimeId;
         player.mPaidCrimeId = mPaidCrimeId;
@@ -298,7 +298,7 @@ namespace MWWorld
         {
             player.mHasMark = true;
             player.mMarkedPosition = mMarkedPosition;
-            player.mMarkedCell = mMarkedCell->getCell()->getCellId();
+            player.mMarkedCell = mMarkedCell->getCell()->getId();
         }
         else
             player.mHasMark = false;
@@ -371,7 +371,7 @@ namespace MWWorld
             }
             catch (...)
             {
-                Log(Debug::Warning) << "Warning: Player cell '" << player.mCellId.mWorldspace << "' no longer exists";
+                Log(Debug::Warning) << "Warning: Player cell '" << player.mCellId << "' no longer exists";
                 // Cell no longer exists. The loader will have to choose a default cell.
                 mCellStore = nullptr;
             }
@@ -392,12 +392,9 @@ namespace MWWorld
             mLastKnownExteriorPosition.y() = player.mLastKnownExteriorPosition[1];
             mLastKnownExteriorPosition.z() = player.mLastKnownExteriorPosition[2];
 
-            if (player.mHasMark && !player.mMarkedCell.mPaged)
+            if (player.mHasMark)
             {
-                // interior cell -> need to check if it exists (exterior cell will be
-                // generated on the fly)
-
-                if (!world.getStore().get<ESM::Cell>().search(player.mMarkedCell.mWorldspace))
+                if (!world.getStore().get<ESM::Cell>().search(player.mMarkedCell))
                     player.mHasMark = false; // drop mark silently
             }
 

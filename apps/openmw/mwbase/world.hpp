@@ -10,7 +10,6 @@
 #include <string_view>
 #include <vector>
 
-#include <components/esm3/cellid.hpp>
 #include <components/misc/rng.hpp>
 
 #include <osg/Timer>
@@ -114,7 +113,7 @@ namespace MWBase
         {
             std::string name;
             float x, y; // world position
-            ESM::CellId dest;
+            ESM::RefId dest;
         };
 
         World() {}
@@ -256,9 +255,8 @@ namespace MWBase
             = 0;
         ///< Move to exterior cell.
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
-
         virtual void changeToCell(
-            const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
+            const ESM::RefId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
             = 0;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
@@ -514,13 +512,16 @@ namespace MWBase
         virtual bool screenshot360(osg::Image* image) = 0;
 
         /// Find default position inside exterior cell specified by name
-        /// \return false if exterior with given name not exists, true otherwise
-        virtual bool findExteriorPosition(std::string_view name, ESM::Position& pos) = 0;
+        /// \return empty RefId if exterior with given name not exists, the cell's RefId otherwise
+        virtual ESM::RefId findExteriorPosition(std::string_view name, ESM::Position& pos) = 0;
 
         /// Find default position inside interior cell specified by name
-        /// \return false if interior with given name not exists, true otherwise
-        virtual bool findInteriorPosition(std::string_view name, ESM::Position& pos) = 0;
+        /// \return empty RefId if interior with given name not exists, the cell's RefId otherwise
+        virtual ESM::RefId findInteriorPosition(std::string_view name, ESM::Position& pos) = 0;
 
+        /// Find default position inside interior or exterior cell specified by name
+        /// \return empty RefId if interior with given name not exists, the cell's RefId otherwise
+        virtual ESM::RefId findCellPosition(std::string_view cellName, ESM::Position& pos) = 0;
         /// Enables or disables use of teleport spell effects (recall, intervention, etc).
         virtual void enableTeleporting(bool enable) = 0;
 

@@ -13,7 +13,6 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm3/cellid.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
@@ -353,7 +352,7 @@ namespace MWWorld
         if (bypass && !mStartCell.empty())
         {
             ESM::Position pos;
-            if (findExteriorPosition(mStartCell, pos))
+            if (findExteriorPosition(mStartCell, pos).empty())
             {
                 changeToExteriorCell(pos, true);
                 adjustPosition(getPlayerPtr(), false);
@@ -378,7 +377,10 @@ namespace MWWorld
                 pos.rot[0] = 0;
                 pos.rot[1] = 0;
                 pos.rot[2] = 0;
-                mWorldScene->changeToExteriorCell(pos, true);
+
+                osg::Vec2i exteriorCellPos = positionToCellIndex(pos.pos[0], pos.pos[1]);
+                ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.x(), exteriorCellPos.y());
+                mWorldScene->changeToExteriorCell(cellId, pos, true);
             }
         }
 
@@ -974,30 +976,43 @@ namespace MWWorld
         mPhysics->clearQueuedMovement();
         mDiscardMovements = true;
 
-        if (changeEvent && mCurrentWorldSpace != ESM::CellId::sDefaultWorldspace)
+        if (changeEvent && mCurrentWorldSpace != ESM::Cell::sDefaultWorldspace)
         {
             // changed worldspace
             mProjectileManager->clear();
             mRendering->notifyWorldSpaceChanged();
         }
         removeContainerScripts(getPlayerPtr());
-        mWorldScene->changeToExteriorCell(position, adjustPlayerPos, changeEvent);
+        osg::Vec2i exteriorCellPos = positionToCellIndex(position.pos[0], position.pos[1]);
+        ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.x(), exteriorCellPos.y());
+        mWorldScene->changeToExteriorCell(cellId, position, adjustPlayerPos, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
         mRendering->getCamera()->instantTransition();
     }
 
     void World::changeToCell(
-        const ESM::CellId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
+        const ESM::RefId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
-        if (!changeEvent)
-            mCurrentWorldSpace = cellId.mWorldspace;
+        const MWWorld::Cell* destinationCell = getWorldModel().getCell(cellId)->getCell();
+        bool exteriorCell = destinationCell->isExterior();
 
-        if (cellId.mPaged)
-            changeToExteriorCell(position, adjustPlayerPos, changeEvent);
+        mPhysics->clearQueuedMovement();
+        mDiscardMovements = true;
+
+        if (changeEvent && mCurrentWorldSpace != destinationCell->getNameId())
+        {
+            // changed worldspace
+            mProjectileManager->clear();
+            mRendering->notifyWorldSpaceChanged();
+            mCurrentWorldSpace = destinationCell->getNameId();
+        }
+        removeContainerScripts(getPlayerPtr());
+        if (exteriorCell)
+            mWorldScene->changeToExteriorCell(cellId, position, adjustPlayerPos, changeEvent);
         else
-            changeToInteriorCell(cellId.mWorldspace, position, adjustPlayerPos, changeEvent);
-
-        mCurrentDate->setup(mGlobalVariables);
+            mWorldScene->changeToInteriorCell(destinationCell->getNameId(), position, adjustPlayerPos, changeEvent);
+        addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
+        mRendering->getCamera()->instantTransition();
     }
 
     float World::getMaxActivationDistance() const
@@ -1169,7 +1184,7 @@ namespace MWWorld
                     if (mWorldScene->isCellActive(*newCell))
                         mWorldScene->changePlayerCell(newCell, pos, false);
                     else
-                        mWorldScene->changeToExteriorCell(pos, false);
+                        mWorldScene->changeToExteriorCell(newCell->getCell()->getId(), pos, false);
                 }
                 addContainerScripts(getPlayerPtr(), newCell);
                 newPtr = getPlayerPtr();
@@ -1420,9 +1435,9 @@ namespace MWWorld
             esmPos.pos[0] = traced.x();
             esmPos.pos[1] = traced.y();
             esmPos.pos[2] = traced.z();
-            std::string_view cell;
+            ESM::RefId cell;
             if (!actor.getCell()->isExterior())
-                cell = actor.getCell()->getCell()->getNameId();
+                cell = actor.getCell()->getCell()->getId();
             MWWorld::ActionTeleport(cell, esmPos, false).execute(actor);
         }
     }
@@ -2060,24 +2075,7 @@ namespace MWWorld
             {
                 World::DoorMarker newMarker;
                 newMarker.name = MWClass::Door::getDestination(ref);
-
-                ESM::CellId cellid;
-                if (!ref.mRef.getDestCell().empty())
-                {
-                    cellid.mWorldspace = ref.mRef.getDestCell();
-                    cellid.mPaged = false;
-                    cellid.mIndex.mX = 0;
-                    cellid.mIndex.mY = 0;
-                }
-                else
-                {
-                    cellid.mPaged = true;
-                    const osg::Vec2i index
-                        = positionToCellIndex(ref.mRef.getDoorDest().pos[0], ref.mRef.getDoorDest().pos[1]);
-                    cellid.mIndex.mX = index.x();
-                    cellid.mIndex.mY = index.y();
-                }
-                newMarker.dest = cellid;
+                newMarker.dest = ref.mRef.getDestCell();
 
                 ESM::Position pos = ref.mData.getPosition();
 
@@ -2764,7 +2762,7 @@ namespace MWWorld
             physicActor->enableCollisionBody(enable);
     }
 
-    bool World::findInteriorPosition(std::string_view name, ESM::Position& pos)
+    ESM::RefId World::findInteriorPosition(std::string_view name, ESM::Position& pos)
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
         pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
@@ -2772,8 +2770,9 @@ namespace MWWorld
         MWWorld::CellStore* cellStore = mWorldModel.getInterior(name);
 
         if (!cellStore)
-            return false;
+            return ESM::RefId::sEmpty;
 
+        ESM::RefId cellId = cellStore->getCell()->getId();
         std::vector<const MWWorld::CellRef*> sortedDoors;
         for (const MWWorld::LiveCellRef<ESM::Door>& door : cellStore->getReadOnlyDoors().mList)
         {
@@ -2794,19 +2793,8 @@ namespace MWWorld
         for (const MWWorld::CellRef* door : sortedDoors)
         {
             MWWorld::CellStore* source = nullptr;
+            source = mWorldModel.getCell(door->getDestCell());
 
-            // door to exterior
-            if (door->getDestCell().empty())
-            {
-                ESM::Position doorDest = door->getDoorDest();
-                const osg::Vec2i index = positionToCellIndex(doorDest.pos[0], doorDest.pos[1]);
-                source = mWorldModel.getExterior(index.x(), index.y());
-            }
-            // door to interior
-            else
-            {
-                source = mWorldModel.getInterior(door->getDestCell());
-            }
             if (source)
             {
                 // Find door leading to our current teleport door
@@ -2819,7 +2807,7 @@ namespace MWWorld
                         /// not the one pointed to current door.
                         pos = destDoor.mRef.getDoorDest();
                         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-                        return true;
+                        return cellId;
                     }
                 }
             }
@@ -2831,7 +2819,7 @@ namespace MWWorld
                 // found the COC position?
                 pos = stat4.mRef.getPosition();
                 pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-                return true;
+                return cellId;
             }
         }
         // Fall back to the first static location.
@@ -2840,7 +2828,7 @@ namespace MWWorld
         {
             pos = statics4.begin()->mRef.getPosition();
             pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-            return true;
+            return cellId;
         }
         // Fall back to the first static location.
         const MWWorld::CellRefList<ESM::Static>::List& statics = cellStore->getReadOnlyStatics().mList;
@@ -2848,13 +2836,31 @@ namespace MWWorld
         {
             pos = statics.begin()->mRef.getPosition();
             pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-            return true;
+            return cellId;
         }
 
-        return false;
+        return ESM::RefId::sEmpty;
     }
 
-    bool World::findExteriorPosition(std::string_view nameId, ESM::Position& pos)
+    ESM::RefId World::findCellPosition(std::string_view cellName, ESM::Position& pos)
+    {
+        ESM::RefId foundCell;
+        try
+        {
+            foundCell = findInteriorPosition(cellName, pos);
+        }
+        catch (std::exception&)
+        {
+        }
+        if (foundCell.empty())
+        {
+            return findExteriorPosition(cellName, pos);
+        }
+
+        return foundCell;
+    }
+
+    ESM::RefId World::findExteriorPosition(std::string_view nameId, ESM::Position& pos)
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
@@ -2863,7 +2869,7 @@ namespace MWWorld
         {
             ext = mWorldModel.getCell(nameId)->getCell();
             if (!ext->isExterior())
-                return false;
+                return ESM::RefId();
         }
         catch (std::exception&)
         {
@@ -2895,10 +2901,10 @@ namespace MWWorld
             // Note: Z pos will be adjusted by adjustPosition later
             pos.pos[2] = 0;
 
-            return true;
+            return ext->getId();
         }
 
-        return false;
+        return ESM::RefId::sEmpty;
     }
 
     void World::enableTeleporting(bool enable)
@@ -3289,10 +3295,10 @@ namespace MWWorld
 
         // Search for a 'nearest' exterior, counting each cell between the starting
         // cell and the exterior as a distance of 1.  Will fail for isolated interiors.
-        std::set<std::string_view> checkedCells;
-        std::set<std::string_view> currentCells;
-        std::set<std::string_view> nextCells;
-        nextCells.insert(cell->getCell()->getNameId());
+        std::set<ESM::RefId> checkedCells;
+        std::set<ESM::RefId> currentCells;
+        std::set<ESM::RefId> nextCells;
+        nextCells.insert(cell->getCell()->getId());
 
         while (!nextCells.empty())
         {
@@ -3300,7 +3306,7 @@ namespace MWWorld
             nextCells.clear();
             for (const auto& currentCell : currentCells)
             {
-                MWWorld::CellStore* next = mWorldModel.getInterior(currentCell);
+                MWWorld::CellStore* next = mWorldModel.getCell(currentCell);
                 if (!next)
                     continue;
 
@@ -3318,7 +3324,7 @@ namespace MWWorld
                     }
                     else
                     {
-                        const std::string_view dest = ref.mRef.getDestCell();
+                        ESM::RefId dest = ref.mRef.getDestCell();
                         if (!checkedCells.count(dest) && !currentCells.count(dest))
                             nextCells.insert(dest);
                     }
@@ -3342,19 +3348,19 @@ namespace MWWorld
         // Search for a 'nearest' marker, counting each cell between the starting
         // cell and the exterior as a distance of 1.  If an exterior is found, jump
         // to the nearest exterior marker, without further interior searching.
-        std::set<std::string_view> checkedCells;
-        std::set<std::string_view> currentCells;
-        std::set<std::string_view> nextCells;
+        std::set<ESM::RefId> checkedCells;
+        std::set<ESM::RefId> currentCells;
+        std::set<ESM::RefId> nextCells;
         MWWorld::ConstPtr closestMarker;
 
-        nextCells.insert(ptr.getCell()->getCell()->getNameId());
+        nextCells.insert(ptr.getCell()->getCell()->getId());
         while (!nextCells.empty())
         {
             currentCells = nextCells;
             nextCells.clear();
             for (const auto& cell : currentCells)
             {
-                MWWorld::CellStore* next = mWorldModel.getInterior(cell);
+                MWWorld::CellStore* next = mWorldModel.getCell(cell);
                 checkedCells.insert(cell);
                 if (!next)
                     continue;
@@ -3440,11 +3446,11 @@ namespace MWWorld
             return;
         }
 
-        std::string_view cellName = "";
+        ESM::RefId cellId;
         if (!closestMarker.mCell->isExterior())
-            cellName = closestMarker.mCell->getCell()->getNameId();
+            cellId = closestMarker.mCell->getCell()->getId();
 
-        MWWorld::ActionTeleport action(cellName, closestMarker.getRefData().getPosition(), false);
+        MWWorld::ActionTeleport action(cellId, closestMarker.getRefData().getPosition(), false);
         action.execute(ptr);
     }
 
@@ -3646,13 +3652,13 @@ namespace MWWorld
             Log(Debug::Warning) << "Failed to confiscate items: no closest prison marker found.";
             return;
         }
-        std::string_view prisonName = prisonMarker.getCellRef().getDestCell();
+        ESM::RefId prisonName = prisonMarker.getCellRef().getDestCell();
         if (prisonName.empty())
         {
             Log(Debug::Warning) << "Failed to confiscate items: prison marker not linked to prison interior";
             return;
         }
-        MWWorld::CellStore* prison = mWorldModel.getInterior(prisonName);
+        MWWorld::CellStore* prison = mWorldModel.getCell(prisonName);
         if (!prison)
         {
             Log(Debug::Warning) << "Failed to confiscate items: failed to load cell " << prisonName;

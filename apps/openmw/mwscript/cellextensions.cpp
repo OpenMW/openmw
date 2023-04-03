@@ -92,19 +92,9 @@ namespace MWScript
                 ESM::Position pos;
                 MWBase::World* world = MWBase::Environment::get().getWorld();
                 const MWWorld::Ptr playerPtr = world->getPlayerPtr();
-
-                if (world->findExteriorPosition(cell, pos))
-                {
-                    MWWorld::ActionTeleport({}, pos, false).execute(playerPtr);
-                    world->adjustPosition(playerPtr, false);
-                }
-                else
-                {
-                    // Change to interior even if findInteriorPosition()
-                    // yields false. In this case position will be zero-point.
-                    world->findInteriorPosition(cell, pos);
-                    MWWorld::ActionTeleport(cell, pos, false).execute(playerPtr);
-                }
+                ESM::RefId cellId = world->findCellPosition(cell, pos);
+                MWWorld::ActionTeleport(cellId, pos, false).execute(playerPtr);
+                world->adjustPosition(playerPtr, false);
             }
         };
 

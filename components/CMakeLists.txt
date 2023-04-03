@@ -91,6 +91,7 @@ add_component_dir(esm attr common defs esmcommon records util luascripts format 
     generatedrefid
     indexrefid
     serializerefid
+    esm3exteriorcellrefid
     )
 
 add_component_dir(fx pass technique lexer widgets stateupdater)
@@ -391,7 +392,7 @@ if (USE_QT)
         )
 
     add_component_qt_dir (misc
-        helpviewer utf8qtextstream
+        helpviewer utf8qtextstream hash
         )
 
     add_component_qt_dir (files

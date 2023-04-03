@@ -285,6 +285,7 @@ namespace
             ESM::MaxOldSkillsAndAttributesFormatVersion,
             ESM::MaxOldCreatureStatsFormatVersion,
             ESM::MaxStringRefIdFormatVersion,
+            ESM::MaxUseEsmCellIdFormatVersion,
         });
         for (ESM::FormatVersion v = result.back() + 1; v <= ESM::CurrentSaveGameFormatVersion; ++v)
             result.push_back(v);
@@ -445,6 +446,10 @@ namespace
         decltype(RecordType::mId) refId;
         if constexpr (ESM::hasIndex<RecordType> && !std::is_same_v<RecordType, ESM::LandTexture>)
             refId = RecordType::indexToRefId(index);
+        else if constexpr (std::is_same_v<RecordType, ESM::Cell>)
+        {
+            refId = ESM::RefId::esm3ExteriorCell(0, 0);
+        }
         else
             refId = ESM::StringRefId(stringId);
 
@@ -562,7 +567,7 @@ namespace
 
     REGISTER_TYPED_TEST_SUITE_P(StoreSaveLoadTest, shouldNotChangeRefId);
 
-    static_assert(std::tuple_size_v<RecordTypesWithSave> == 38);
+    static_assert(std::tuple_size_v<RecordTypesWithSave> == 39);
 
     INSTANTIATE_TYPED_TEST_SUITE_P(
         RecordTypesTest, StoreSaveLoadTest, typename AsTestingTypes<RecordTypesWithSave>::Type);

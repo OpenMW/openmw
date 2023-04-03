@@ -10,8 +10,6 @@
 
 #include "windowpinnablebase.hpp"
 
-#include <components/esm3/cellid.hpp>
-
 #include <components/esm3/custommarkerstate.hpp>
 #include <components/misc/constants.hpp>
 
@@ -56,14 +54,14 @@ namespace MWGui
 
         size_t size() const;
 
-        typedef std::multimap<ESM::CellId, ESM::CustomMarker> ContainerType;
+        typedef std::multimap<ESM::RefId, ESM::CustomMarker> ContainerType;
 
         typedef std::pair<ContainerType::const_iterator, ContainerType::const_iterator> RangeType;
 
         ContainerType::const_iterator begin() const;
         ContainerType::const_iterator end() const;
 
-        RangeType getMarkers(const ESM::CellId& cellId) const;
+        RangeType getMarkers(const ESM::RefId& cellId) const;
 
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
         EventHandle_Void eventMarkersChanged;

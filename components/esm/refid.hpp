@@ -10,6 +10,7 @@
 
 #include <components/misc/notnullptr.hpp>
 
+#include "esm3exteriorcellrefid.hpp"
 #include "formidrefid.hpp"
 #include "generatedrefid.hpp"
 #include "indexrefid.hpp"
@@ -38,6 +39,7 @@ namespace ESM
         FormId = 3,
         Generated = 4,
         Index = 5,
+        ESM3ExteriorCell = 6,
     };
 
     // RefId is used to represent an Id that identifies an ESM record. These Ids can then be used in
@@ -48,7 +50,8 @@ namespace ESM
     public:
         const static RefId sEmpty;
 
-        using Value = std::variant<EmptyRefId, StringRefId, FormIdRefId, GeneratedRefId, IndexRefId>;
+        using Value
+            = std::variant<EmptyRefId, StringRefId, FormIdRefId, GeneratedRefId, IndexRefId, ESM3ExteriorCellRefId>;
 
         // Constructs RefId from a serialized string containing byte by byte copy of RefId::mValue.
         static ESM::RefId deserialize(std::string_view value);
@@ -69,6 +72,8 @@ namespace ESM
         // Constructs RefId from record type and 32bit index storing the value in-place. Should be used for records
         // identified by index (i.e. ESM3 SKIL).
         static RefId index(RecNameInts recordType, std::uint32_t value) { return RefId(IndexRefId(recordType, value)); }
+
+        static RefId esm3ExteriorCell(int32_t x, int32_t y) { return RefId(ESM3ExteriorCellRefId(x, y)); }
 
         constexpr RefId() = default;
 
@@ -93,6 +98,11 @@ namespace ESM
         }
 
         constexpr RefId(IndexRefId value) noexcept
+            : mValue(value)
+        {
+        }
+
+        constexpr RefId(ESM3ExteriorCellRefId value) noexcept
             : mValue(value)
         {
         }

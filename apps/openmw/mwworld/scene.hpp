@@ -167,7 +167,8 @@ namespace MWWorld
         ///< Move to interior cell.
         /// @param changeEvent Set cellChanged flag?
 
-        void changeToExteriorCell(const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true);
+        void changeToExteriorCell(
+            const ESM::RefId& extCellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true);
         ///< Move to exterior cell.
         /// @param changeEvent Set cellChanged flag?
 

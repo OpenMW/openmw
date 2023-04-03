@@ -1,9 +1,8 @@
 #ifndef OPENMW_ESM_CELLSTATE_H
 #define OPENMW_ESM_CELLSTATE_H
 
-#include "cellid.hpp"
-
 #include "components/esm/defs.hpp"
+#include "components/esm/refid.hpp"
 
 namespace ESM
 {
@@ -15,8 +14,8 @@ namespace ESM
     /// \note Does not include references
     struct CellState
     {
-        CellId mId;
-
+        RefId mId;
+        bool mIsInterior;
         float mWaterLevel;
 
         int mHasFogOfWar; // Do we have fog of war state (0 or 1)? (see fogstate.hpp)

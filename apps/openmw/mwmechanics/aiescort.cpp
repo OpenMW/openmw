@@ -2,6 +2,7 @@
 
 #include <components/esm3/aisequence.hpp>
 #include <components/esm3/loadcell.hpp>
+#include <components/misc/algorithm.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -78,7 +79,7 @@ namespace MWMechanics
             }
         }
 
-        if (!mCellId.empty() && mCellId != actor.getCell()->getCell()->getCellId().mWorldspace)
+        if (!mCellId.empty() && !Misc::StringUtils::ciEqual(mCellId, actor.getCell()->getCell()->getNameId()))
             return false; // Not in the correct cell, pause and rely on the player to go back through a teleport door
 
         actor.getClass().getCreatureStats(actor).setDrawState(DrawState::Nothing);

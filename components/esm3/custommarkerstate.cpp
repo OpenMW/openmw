@@ -10,7 +10,7 @@ namespace ESM
     {
         esm.writeHNT("POSX", mWorldX);
         esm.writeHNT("POSY", mWorldY);
-        mCell.save(esm);
+        esm.writeCellId(mCell);
         if (!mNote.empty())
             esm.writeHNString("NOTE", mNote);
     }
@@ -19,7 +19,7 @@ namespace ESM
     {
         esm.getHNT(mWorldX, "POSX");
         esm.getHNT(mWorldY, "POSY");
-        mCell.load(esm);
+        mCell = esm.getCellId();
         mNote = esm.getHNOString("NOTE");
     }
 

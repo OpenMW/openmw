@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm3/cellid.hpp>
 #include <components/misc/notnullptr.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
@@ -59,6 +60,13 @@ namespace ESM
                 mWriter.writeT(RefIdType::Generated);
                 mWriter.writeT(v.getRecordType());
                 mWriter.writeT(v.getValue());
+            }
+
+            void operator()(ESM3ExteriorCellRefId v) const
+            {
+                mWriter.writeT(RefIdType::ESM3ExteriorCell);
+                mWriter.writeT(v.getX());
+                mWriter.writeT(v.getY());
             }
         };
     }
@@ -234,6 +242,17 @@ namespace ESM
         if (mHeader.mFormatVersion <= MaxStringRefIdFormatVersion)
             return writeHNString(name, value.getRefIdString(), size);
         writeHNRefId(name, value);
+    }
+
+    void ESMWriter::writeCellId(const ESM::RefId& cellId)
+    {
+        if (mHeader.mFormatVersion <= ESM::MaxUseEsmCellIdFormatVersion)
+        {
+            ESM::CellId generatedCellid = ESM::CellId::extractFromRefId(cellId);
+            generatedCellid.save(*this);
+        }
+        else
+            writeHNRefId("NAME", cellId);
     }
 
     void ESMWriter::writeMaybeFixedSizeString(const std::string& data, std::size_t size)

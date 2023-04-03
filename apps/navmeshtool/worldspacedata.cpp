@@ -263,16 +263,18 @@ namespace NavMeshTool
 
             const osg::Vec2i cellPosition(cell.mData.mX, cell.mData.mY);
             const std::size_t cellObjectsBegin = data.mObjects.size();
-            const auto cellNameLowerCase = Misc::StringUtils::lowerCase(cell.mCellId.mWorldspace);
+            const auto cellWorldspace = Misc::StringUtils::lowerCase(
+                (cell.isExterior() ? ESM::RefId::stringRefId(ESM::Cell::sDefaultWorldspace) : cell.mId)
+                    .serializeText());
             WorldspaceNavMeshInput& navMeshInput = [&]() -> WorldspaceNavMeshInput& {
-                auto it = navMeshInputs.find(cellNameLowerCase);
+                auto it = navMeshInputs.find(cellWorldspace);
                 if (it == navMeshInputs.end())
                 {
                     it = navMeshInputs
-                             .emplace(cellNameLowerCase,
-                                 std::make_unique<WorldspaceNavMeshInput>(cellNameLowerCase, settings.mRecast))
+                             .emplace(cellWorldspace,
+                                 std::make_unique<WorldspaceNavMeshInput>(cellWorldspace, settings.mRecast))
                              .first;
-                    it->second->mTileCachedRecastMeshManager.setWorldspace(cellNameLowerCase, nullptr);
+                    it->second->mTileCachedRecastMeshManager.setWorldspace(cellWorldspace, nullptr);
                 }
                 return *it->second;
             }();

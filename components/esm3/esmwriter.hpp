@@ -103,6 +103,8 @@ namespace ESM
                 writeHNCRefId(name, value);
         }
 
+        void writeCellId(const ESM::RefId& cellId);
+
         template <typename T>
         void writeHNT(NAME name, const T& data)
         {

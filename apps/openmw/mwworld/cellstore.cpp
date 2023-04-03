@@ -7,7 +7,6 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/format.hpp>
-#include <components/esm3/cellid.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/containerstate.hpp>
@@ -988,11 +987,11 @@ namespace MWWorld
 
     void CellStore::saveState(ESM::CellState& state) const
     {
-        state.mId = mCellVariant.getCellId();
+        state.mId = mCellVariant.getId();
 
         if (!mCellVariant.isExterior() && mCellVariant.hasWater())
             state.mWaterLevel = mWaterLevel;
-
+        state.mIsInterior = !mCellVariant.isExterior();
         state.mHasFogOfWar = (mFogState.get() ? 1 : 0);
         state.mLastRespawn = mLastRespawn.toEsm();
     }
@@ -1019,10 +1018,10 @@ namespace MWWorld
         for (const auto& [base, store] : mMovedToAnotherCell)
         {
             ESM::RefNum refNum = base->mRef.getRefNum();
-            ESM::CellId movedTo = store->getCell()->getCellId();
+            ESM::RefId movedTo = store->getCell()->getId();
 
             refNum.save(writer, true, "MVRF");
-            movedTo.save(writer);
+            writer.writeCellId(movedTo);
         }
     }
 
@@ -1078,10 +1077,8 @@ namespace MWWorld
         {
             reader.cacheSubName();
             ESM::RefNum refnum;
-            ESM::CellId movedTo;
             refnum.load(reader, true, "MVRF");
-            movedTo.load(reader);
-
+            ESM::RefId movedToId = reader.getCellId();
             if (refnum.hasContentFile())
             {
                 auto iter = contentFileMap.find(refnum.mContentFile);
@@ -1098,12 +1095,12 @@ namespace MWWorld
                 continue;
             }
 
-            CellStore* otherCell = callback->getCellStore(movedTo);
+            CellStore* otherCell = callback->getCellStore(movedToId);
 
             if (otherCell == nullptr)
             {
                 Log(Debug::Warning) << "Warning: Dropping moved ref tag for " << movedRef.getCellRef().getRefId()
-                                    << " (target cell " << movedTo.mWorldspace
+                                    << " (target cell " << movedToId
                                     << " no longer exists). Reference moved back to its original location.";
                 // Note by dropping tag the object will automatically re-appear in its original cell, though
                 // potentially at inapproriate coordinates. Restore original coordinates:
@@ -1122,21 +1119,9 @@ namespace MWWorld
         }
     }
 
-    struct IsEqualVisitor
-    {
-        bool operator()(const ESM::Cell& a, const ESM::Cell& b) const { return a.getCellId() == b.getCellId(); }
-        bool operator()(const ESM4::Cell& a, const ESM4::Cell& b) const { return a.mId == b.mId; }
-
-        template <class L, class R>
-        bool operator()(const L&, const R&) const
-        {
-            return false;
-        }
-    };
-
     bool CellStore::operator==(const CellStore& right) const
     {
-        return ESM::visit(IsEqualVisitor(), this->mCellVariant, right.mCellVariant);
+        return right.mCellVariant.getId() == mCellVariant.getId();
     }
 
     void CellStore::setFog(std::unique_ptr<ESM::FogState>&& fog)

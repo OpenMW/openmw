@@ -61,18 +61,10 @@ namespace MWWorld
         }
 
         // Teleport location for the door, if this is a teleporting door.
-        const ESM::Position& getDoorDest() const
-        {
-            struct Visitor
-            {
-                const ESM::Position& operator()(const ESM::CellRef& ref) { return ref.mDoorDest; }
-                const ESM::Position& operator()(const ESM4::Reference& ref) { return ref.mDoor.destPos; }
-            };
-            return std::visit(Visitor(), mCellRef.mVariant);
-        }
+        ESM::Position getDoorDest() const;
 
         // Destination cell for doors (optional)
-        const std::string& getDestCell() const;
+        ESM::RefId getDestCell() const;
 
         // Scale applied to mesh
         float getScale() const

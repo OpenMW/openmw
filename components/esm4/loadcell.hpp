@@ -36,7 +36,6 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/refid.hpp>
-#include <components/esm3/cellid.hpp>
 #include <components/esm4/reader.hpp>
 
 namespace ESM4
@@ -68,7 +67,7 @@ namespace ESM4
         ESM::RefId mId;
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
-        FormId mParent; // world formId (for grouping cells), from the loading sequence
+        ESM::RefId mParent; // world formId (for grouping cells), from the loading sequence
 
         std::string mEditorId;
         std::string mFullName;

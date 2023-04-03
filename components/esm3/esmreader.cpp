@@ -3,6 +3,8 @@
 #include "readerscache.hpp"
 #include "savedgame.hpp"
 
+#include <components/esm3/cellid.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/openfile.hpp>
 #include <components/misc/strings/algorithm.hpp>
@@ -84,6 +86,24 @@ namespace ESM
             }
             mCtx.parentFileIndices.push_back(index);
         }
+    }
+
+    ESM::RefId ESMReader::getCellId()
+    {
+        if (mHeader.mFormatVersion <= ESM::MaxUseEsmCellIdFormatVersion)
+        {
+            ESM::CellId cellId;
+            cellId.load(*this);
+            if (cellId.mPaged)
+            {
+                return ESM::RefId::esm3ExteriorCell(cellId.mIndex.mX, cellId.mIndex.mY);
+            }
+            else
+            {
+                return ESM::RefId::stringRefId(cellId.mWorldspace);
+            }
+        }
+        return getHNRefId("NAME");
     }
 
     void ESMReader::openRaw(std::unique_ptr<std::istream>&& stream, const std::filesystem::path& name)
@@ -470,6 +490,13 @@ namespace ESM
                 std::uint32_t index{};
                 getExact(&index, sizeof(std::uint32_t));
                 return RefId::index(recordType, index);
+            }
+            case RefIdType::ESM3ExteriorCell:
+            {
+                int32_t x, y;
+                getExact(&x, sizeof(std::int32_t));
+                getExact(&y, sizeof(std::int32_t));
+                return RefId::esm3ExteriorCell(x, y);
             }
         }
 

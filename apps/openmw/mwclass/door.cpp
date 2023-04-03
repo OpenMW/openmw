@@ -23,6 +23,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwgui/tooltips.hpp"
 #include "../mwgui/ustring.hpp"
@@ -298,16 +299,8 @@ namespace MWClass
 
     std::string Door::getDestination(const MWWorld::LiveCellRef<ESM::Door>& door)
     {
-        std::string_view dest = door.mRef.getDestCell();
-        if (dest.empty())
-        {
-            // door leads to exterior, use cell name (if any), otherwise translated region name
-            auto world = MWBase::Environment::get().getWorld();
-            const osg::Vec2i index
-                = MWWorld::positionToCellIndex(door.mRef.getDoorDest().pos[0], door.mRef.getDoorDest().pos[1]);
-            const ESM::Cell* cell = world->getStore().get<ESM::Cell>().search(index.x(), index.y());
-            dest = world->getCellName(cell);
-        }
+        std::string_view dest
+            = MWBase::Environment::get().getWorldModel()->getCell(door.mRef.getDestCell())->getCell()->getDisplayName();
 
         return "#{sCell=" + std::string{ dest } + "}";
     }

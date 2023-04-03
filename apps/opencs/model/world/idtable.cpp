@@ -16,7 +16,7 @@
 #include <apps/opencs/model/world/record.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
 
-#include <components/esm3/cellid.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "collectionbase.hpp"
@@ -337,7 +337,7 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view(int row) c
         return std::make_pair(UniversalId::Type_None, "");
 
     if (id[0] == '#')
-        id = ESM::CellId::sDefaultWorldspace;
+        id = ESM::Cell::sDefaultWorldspace;
 
     return std::make_pair(UniversalId(UniversalId::Type_Scene, id), hint);
 }

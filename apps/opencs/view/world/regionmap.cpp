@@ -16,8 +16,6 @@
 
 #include <apps/opencs/view/world/dragrecordtable.hpp>
 
-#include <components/esm3/cellid.hpp>
-
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/columns.hpp"
@@ -307,7 +305,7 @@ void CSVWorld::RegionMap::view()
     }
 
     emit editRequest(
-        CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Scene, ESM::CellId::sDefaultWorldspace), hint.str());
+        CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Scene, ESM::Cell::sDefaultWorldspace), hint.str());
 }
 
 void CSVWorld::RegionMap::viewInTable()
