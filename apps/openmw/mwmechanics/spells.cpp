@@ -307,7 +307,7 @@ namespace MWMechanics
             if (spell)
                 addSpell(spell);
             else
-                Log(Debug::Warning) << "Warning: ignoring nonexistent spell '" << id << "'";
+                Log(Debug::Warning) << "Warning: ignoring nonexistent spell " << id;
         }
     }
 

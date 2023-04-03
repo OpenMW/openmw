@@ -372,7 +372,7 @@ namespace MWWorld
         }
         else
         {
-            Log(Debug::Warning) << "Warning: could not resolve cell reference '" << ref.mRefID << "'"
+            Log(Debug::Warning) << "Warning: could not resolve cell reference " << ref.mRefID
                                 << " (dropping reference)";
         }
     }
@@ -395,8 +395,7 @@ namespace MWWorld
         }
         else
         {
-            Log(Debug::Warning) << "Warning: could not resolve cell reference '" << ref.mId << "'"
-                                << " (dropping reference)";
+            Log(Debug::Warning) << "Warning: could not resolve cell reference " << ref.mId << " (dropping reference)";
         }
     }
 
