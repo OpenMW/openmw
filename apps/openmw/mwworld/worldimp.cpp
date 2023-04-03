@@ -352,7 +352,7 @@ namespace MWWorld
         if (bypass && !mStartCell.empty())
         {
             ESM::Position pos;
-            if (findExteriorPosition(mStartCell, pos).empty())
+            if (!findExteriorPosition(mStartCell, pos).empty())
             {
                 changeToExteriorCell(pos, true);
                 adjustPosition(getPlayerPtr(), false);
