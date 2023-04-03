@@ -141,7 +141,6 @@ void CSVWorld::Table::contextMenuEvent(QContextMenuEvent* event)
         }
     }
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     if (selectedRows.size() == 1)
     {
         int row = selectedRows.begin()->row();
@@ -173,7 +172,6 @@ void CSVWorld::Table::contextMenuEvent(QContextMenuEvent* event)
                 menu.addAction(mPreviewAction);
         }
     }
-#endif
 
     if (mHelpAction)
         menu.addAction(mHelpAction);
@@ -390,18 +388,14 @@ CSVWorld::Table::Table(const CSMWorld::UniversalId& id, bool createAndDelete, bo
     mViewAction->setIcon(QIcon(":/cell.png"));
     addAction(mViewAction);
     CSMPrefs::Shortcut* viewShortcut = new CSMPrefs::Shortcut("table-view", this);
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     viewShortcut->associateAction(mViewAction);
-#endif
 
     mPreviewAction = new QAction(tr("Preview"), this);
     connect(mPreviewAction, &QAction::triggered, this, &Table::previewRecord);
     mPreviewAction->setIcon(QIcon(":edit-preview"));
     addAction(mPreviewAction);
     CSMPrefs::Shortcut* previewShortcut = new CSMPrefs::Shortcut("table-preview", this);
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     previewShortcut->associateAction(mPreviewAction);
-#endif
 
     mExtendedDeleteAction = new QAction(tr("Extended Delete Record"), this);
     connect(mExtendedDeleteAction, &QAction::triggered, this, &Table::executeExtendedDelete);

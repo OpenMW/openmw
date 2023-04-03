@@ -243,7 +243,11 @@ target_link_libraries(openmw-cs-lib
     components_qt
 )
 
-target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL)
+if (QT_VERSION_MAJOR VERSION_EQUAL 6)
+    target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL Qt::OpenGLWidgets)
+else()
+    target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL)
+endif()
 
 if (WIN32)
     target_link_libraries(openmw-cs-lib ${Boost_LOCALE_LIBRARY})
