@@ -430,7 +430,6 @@
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:ViewDistance} (x%s)"/>
                         </Widget>
-<<<<<<< HEAD
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 202 352 18" align="HStretch Top" name="GrassDistanceSlider">
                             <Property key="Range" value="21376"/>
                             <Property key="Page" value="128"/>
@@ -441,7 +440,7 @@
                             <UserString key="SettingMin" value="3000"/>
                             <UserString key="SettingMax" value="21504"/>
                             <UserString key="SettingLabelWidget" value="GrassDistanceLabel"/>
-                            <UserString key="SettingLabelCaption" value="Grass Rendering Distance (%s)"/>
+                            <UserString key="SettingLabelCaption" value="#{OMWEngine:GrassRenderingDistance} (%s)"/>
                         </Widget>
                         <Widget type="ScrollBar" skin="MW_HScroll" position="0 250 352 18" align="HStretch Top" name="GrassDensitySlider">
                             <Property key="Range" value="11"/>
@@ -453,14 +452,14 @@
                             <UserString key="SettingMin" value="1"/>
                             <UserString key="SettingMax" value="100"/>
                             <UserString key="SettingLabelWidget" value="GrassDensityLabel"/>
-                            <UserString key="SettingLabelCaption" value="Grass Density (%s%%)"/>
+                            <UserString key="SettingLabelCaption" value="#{OMWEngine:GrassDensity} (%s%%)"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 115 352 18" align="Left Top">
                             <Property key="Caption" value="#{OMWEngine:DistanceLow}"/>
                             <Property key="TextAlign" value="Left"/>
                         </Widget>
                         <Widget type="TextBox" skin="SandText" position="0 115 352 18" align="Right Top">
-                            <Property key="Caption" value=#{OMWEngine:DistanceHigh}"/>
+                            <Property key="Caption" value="#{OMWEngine:DistanceHigh}"/>
                             <Property key="TextAlign" value="Right"/>
                         </Widget>
 
