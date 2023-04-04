@@ -35,6 +35,7 @@
 #include <iostream> // FIXME: debug only
 #include <stdexcept>
 
+#include "grouptype.hpp"
 #include "reader.hpp"
 // #include "writer.hpp"
 
