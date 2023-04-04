@@ -8,7 +8,7 @@ namespace ESM
 {
     struct ENAMstruct;
     struct EffectList;
-
+    struct MagicEffect;
     struct MagicEffects;
 }
 
@@ -28,6 +28,8 @@ namespace MWMechanics
         }
 
         EffectKey(const ESM::ENAMstruct& effect);
+
+        std::string toString() const;
     };
 
     bool operator<(const EffectKey& left, const EffectKey& right);
@@ -108,6 +110,8 @@ namespace MWMechanics
         static MagicEffects diff(const MagicEffects& prev, const MagicEffects& now);
         ///< Return changes from \a prev to \a now.
     };
+
+    std::string getMagicEffectString(const ESM::MagicEffect& effect, int attributeArg, int skillArg);
 }
 
 #endif
