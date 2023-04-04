@@ -824,6 +824,13 @@
 -- @return #PotionRecord
 
 ---
+-- Creates a @{#PotionRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Potion] createRecordDraft
+-- @param #PotionRecord potion A Lua table with the fields of a PotionRecord.
+-- @return #PotionRecord A strongly typed Potion record.
+
+---
 -- @type PotionRecord
 -- @field #string id Record id
 -- @field #string name Human-readable name

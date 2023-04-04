@@ -16,7 +16,7 @@
 #include <apps/opencs/model/world/record.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
 
-#include <components/esm3/cellid.hpp>
+#include <components/esm3/loadcell.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "collectionbase.hpp"
@@ -298,10 +298,12 @@ int CSMWorld::IdTable::findColumnIndex(Columns::ColumnId id) const
 
 void CSMWorld::IdTable::reorderRows(int baseIndex, const std::vector<int>& newOrder)
 {
-    if (!newOrder.empty())
-        if (mIdCollection->reorderRows(baseIndex, newOrder))
-            emit dataChanged(index(baseIndex, 0),
-                index(baseIndex + static_cast<int>(newOrder.size()) - 1, mIdCollection->getColumns() - 1));
+    if (newOrder.empty())
+        return;
+    if (!mIdCollection->reorderRows(baseIndex, newOrder))
+        return;
+    emit dataChanged(
+        index(baseIndex, 0), index(baseIndex + static_cast<int>(newOrder.size()) - 1, mIdCollection->getColumns() - 1));
 }
 
 std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view(int row) const
@@ -335,7 +337,7 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view(int row) c
         return std::make_pair(UniversalId::Type_None, "");
 
     if (id[0] == '#')
-        id = ESM::CellId::sDefaultWorldspace;
+        id = ESM::Cell::sDefaultWorldspace;
 
     return std::make_pair(UniversalId(UniversalId::Type_Scene, id), hint);
 }

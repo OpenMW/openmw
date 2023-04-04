@@ -29,6 +29,7 @@
 #include <components/misc/osguservalues.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 #include <components/vfs/manager.hpp>
 
@@ -308,8 +309,8 @@ namespace Resource
                         if (descriptionParts.at(0) == "alphatest")
                         {
                             osg::AlphaFunc::ComparisonFunction mode = getTestMode(descriptionParts.at(1));
-                            osg::ref_ptr<osg::AlphaFunc> alphaFunc(
-                                new osg::AlphaFunc(mode, std::stod(descriptionParts.at(2))));
+                            osg::ref_ptr<osg::AlphaFunc> alphaFunc(new osg::AlphaFunc(
+                                mode, Misc::StringUtils::toNumeric<float>(descriptionParts.at(2), 0.0f)));
                             node.getStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
                         }
                     }

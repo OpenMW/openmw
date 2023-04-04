@@ -16,15 +16,14 @@ namespace MWWorld
         , mDisplayname(cell.mFullName)
         , mNameID(cell.mEditorId)
         , mRegion(ESM::RefId()) // Unimplemented for now
-        , mCellId{
-            .mWorldspace{ Misc::StringUtils::lowerCase(cell.mEditorId) },
-            .mIndex{ cell.getGridX(), cell.getGridY() },
-            .mPaged = isExterior(),}
+        , mId(cell.mId)
+        , mParent(cell.mParent)
         ,mMood{
             .mAmbiantColor = cell.mLighting.ambient,
             .mDirectionalColor = cell.mLighting.directional,
             .mFogColor = cell.mLighting.fogColor,
-            .mFogDensity = cell.mLighting.fogPower,}
+            // TODO: use ESM4::Lighting fog parameters
+            .mFogDensity = 1.f,}
             ,mWaterHeight(cell.mWaterHeight)
     {
     }
@@ -39,7 +38,8 @@ namespace MWWorld
         , mDisplayname(cell.mName)
         , mNameID(cell.mName)
         , mRegion(cell.mRegion)
-        , mCellId(cell.getCellId())
+        , mId(cell.mId)
+        , mParent(ESM::RefId::stringRefId(ESM::Cell::sDefaultWorldspace))
         , mMood{
             .mAmbiantColor = cell.mAmbi.mAmbient,
             .mDirectionalColor = cell.mAmbi.mSunlight,
@@ -57,5 +57,12 @@ namespace MWWorld
                               [&](const ESM4::Cell& cell) { return cell.mEditorId; },
                           },
             *this);
+    }
+    ESM::RefId Cell::getWorldSpace() const
+    {
+        if (isExterior())
+            return mParent;
+        else
+            return mId;
     }
 }

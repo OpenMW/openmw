@@ -2,6 +2,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/defs.hpp>
+#include <components/esm3/cellid.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -20,7 +21,8 @@
 namespace
 {
     template <class Visitor, class Key, class Comp>
-    bool forEachInStore(const ESM::RefId& id, Visitor&& visitor, std::map<Key, MWWorld::CellStore, Comp>& cellStore)
+    bool forEachInStore(
+        const ESM::RefId& id, Visitor&& visitor, std::unordered_map<Key, MWWorld::CellStore, Comp>& cellStore)
     {
         for (auto& cell : cellStore)
         {
@@ -62,27 +64,25 @@ namespace
 
 MWWorld::CellStore* MWWorld::WorldModel::getCellStore(const ESM::Cell* cell)
 {
+    CellStore* cellStore = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
     if (cell->mData.mFlags & ESM::Cell::Interior)
     {
         auto result = mInteriors.find(cell->mName);
 
         if (result == mInteriors.end())
-            result = mInteriors.emplace(cell->mName, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first;
+            result = mInteriors.emplace(cell->mName, cellStore).first;
 
-        return &result->second;
+        return result->second;
     }
     else
     {
-        std::map<std::pair<int, int>, CellStore>::iterator result
+        std::map<std::pair<int, int>, CellStore*>::iterator result
             = mExteriors.find(std::make_pair(cell->getGridX(), cell->getGridY()));
 
         if (result == mExteriors.end())
-            result = mExteriors
-                         .emplace(std::make_pair(cell->getGridX(), cell->getGridY()),
-                             CellStore(MWWorld::Cell(*cell), mStore, mReaders))
-                         .first;
+            result = mExteriors.emplace(std::make_pair(cell->getGridX(), cell->getGridY()), cellStore).first;
 
-        return &result->second;
+        return result->second;
     }
 }
 
@@ -93,6 +93,7 @@ void MWWorld::WorldModel::clear()
     mLastGeneratedRefnum = ESM::RefNum{};
     mInteriors.clear();
     mExteriors.clear();
+    mCells.clear();
     std::fill(mIdCache.begin(), mIdCache.end(), std::make_pair(ESM::RefId(), (MWWorld::CellStore*)nullptr));
     mIdCacheIndex = 0;
 }
@@ -143,7 +144,8 @@ void MWWorld::WorldModel::writeCell(ESM::ESMWriter& writer, CellStore& cell) con
     cell.saveState(cellState);
 
     writer.startRecord(ESM::REC_CSTA);
-    cellState.mId.save(writer);
+
+    writer.writeCellId(cellState.mId);
     cellState.save(writer);
     cell.writeFog(writer);
     cell.writeReferences(writer);
@@ -153,16 +155,14 @@ void MWWorld::WorldModel::writeCell(ESM::ESMWriter& writer, CellStore& cell) con
 MWWorld::WorldModel::WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& readers)
     : mStore(store)
     , mReaders(readers)
-    , mIdCacheIndex(0)
-    , mPtrIndexUpdateCounter(0)
+    , mIdCache(std::clamp(Settings::Manager::getInt("pointers cache size", "Cells"), 40, 1000),
+          { ESM::RefId::sEmpty, nullptr })
 {
-    int cacheSize = std::clamp(Settings::Manager::getInt("pointers cache size", "Cells"), 40, 1000);
-    mIdCache = IdCache(cacheSize, std::pair<ESM::RefId, CellStore*>(ESM::RefId(), (CellStore*)nullptr));
 }
 
 MWWorld::CellStore* MWWorld::WorldModel::getExterior(int x, int y)
 {
-    std::map<std::pair<int, int>, CellStore>::iterator result = mExteriors.find(std::make_pair(x, y));
+    std::map<std::pair<int, int>, CellStore*>::iterator result = mExteriors.find(std::make_pair(x, y));
 
     if (result == mExteriors.end())
     {
@@ -172,29 +172,27 @@ MWWorld::CellStore* MWWorld::WorldModel::getExterior(int x, int y)
         {
             // Cell isn't predefined. Make one on the fly.
             ESM::Cell record;
-            record.mCellId.mWorldspace = ESM::CellId::sDefaultWorldspace;
-            record.mCellId.mPaged = true;
-            record.mCellId.mIndex.mX = x;
-            record.mCellId.mIndex.mY = y;
-
             record.mData.mFlags = ESM::Cell::HasWater;
             record.mData.mX = x;
             record.mData.mY = y;
             record.mWater = 0;
             record.mMapColor = 0;
+            record.updateId();
 
             cell = MWBase::Environment::get().getWorld()->createRecord(record);
         }
 
-        result = mExteriors.emplace(std::make_pair(x, y), CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first;
+        CellStore* cellStore
+            = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
+        result = mExteriors.emplace(std::make_pair(x, y), cellStore).first;
     }
 
-    if (result->second.getState() != CellStore::State_Loaded)
+    if (result->second->getState() != CellStore::State_Loaded)
     {
-        result->second.load();
+        result->second->load();
     }
 
-    return &result->second;
+    return result->second;
 }
 
 MWWorld::CellStore* MWWorld::WorldModel::getInterior(std::string_view name)
@@ -204,32 +202,85 @@ MWWorld::CellStore* MWWorld::WorldModel::getInterior(std::string_view name)
     if (result == mInteriors.end())
     {
         const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().searchCellName(name);
-
+        CellStore* newCellStore = nullptr;
         if (!cell4)
         {
             const ESM::Cell* cell = mStore.get<ESM::Cell>().find(name);
-            result = mInteriors.emplace(name, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first;
+            newCellStore = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
         }
         else
         {
-            result = mInteriors.emplace(name, CellStore(MWWorld::Cell(*cell4), mStore, mReaders)).first;
+            newCellStore
+                = &mCells.emplace(cell4->mId, CellStore(MWWorld::Cell(*cell4), mStore, mReaders)).first->second;
         }
+        result = mInteriors.emplace(name, newCellStore).first;
     }
 
-    if (result->second.getState() != CellStore::State_Loaded)
+    if (result->second->getState() != CellStore::State_Loaded)
     {
-        result->second.load();
+        result->second->load();
     }
 
-    return &result->second;
+    return result->second;
 }
 
-MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::CellId& id)
+struct VisitorCellIdIsESM3Ext
 {
-    if (id.mPaged)
-        return getExterior(id.mIndex.mX, id.mIndex.mY);
+    bool operator()(const ESM::ESM3ExteriorCellRefId& id)
+    {
+        coordOut = { id.getX(), id.getY() };
+        return true;
+    }
 
-    return getInterior(id.mWorldspace);
+    template <typename T>
+    bool operator()(const T&)
+    {
+        return false;
+    }
+
+    std::pair<int32_t, int32_t> coordOut = {};
+};
+
+MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::RefId& id)
+{
+    auto result = mCells.find(id);
+    if (result != mCells.end())
+        return &result->second;
+
+    VisitorCellIdIsESM3Ext isESM3ExteriorVisitor;
+
+    if (visit(isESM3ExteriorVisitor, id)) // That is an exterior cell Id
+    {
+
+        return getExterior(isESM3ExteriorVisitor.coordOut.first, isESM3ExteriorVisitor.coordOut.second);
+    }
+
+    const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().search(id);
+    CellStore* newCellStore = nullptr;
+    if (!cell4)
+    {
+        const ESM::Cell* cell = mStore.get<ESM::Cell>().search(id);
+        newCellStore = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
+    }
+    else
+    {
+        newCellStore = &mCells.emplace(cell4->mId, CellStore(MWWorld::Cell(*cell4), mStore, mReaders)).first->second;
+    }
+    if (newCellStore->getCell()->isExterior())
+    {
+        std::pair<int, int> coord
+            = std::make_pair(newCellStore->getCell()->getGridX(), newCellStore->getCell()->getGridY());
+        mExteriors.emplace(coord, newCellStore);
+    }
+    else
+    {
+        mInteriors.emplace(newCellStore->getCell()->getNameId(), newCellStore);
+    }
+    if (newCellStore->getState() != CellStore::State_Loaded)
+    {
+        newCellStore->load();
+    }
+    return newCellStore;
 }
 
 const ESM::Cell* MWWorld::WorldModel::getESMCellByName(std::string_view name)
@@ -331,17 +382,17 @@ MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name)
     // Then check cells that are already listed
     // Search in reverse, this is a workaround for an ambiguous chargen_plank reference in the vanilla game.
     // there is one at -22,16 and one at -2,-9, the latter should be used.
-    for (std::map<std::pair<int, int>, CellStore>::reverse_iterator iter = mExteriors.rbegin();
+    for (std::map<std::pair<int, int>, CellStore*>::reverse_iterator iter = mExteriors.rbegin();
          iter != mExteriors.rend(); ++iter)
     {
-        Ptr ptr = getPtrAndCache(name, iter->second);
+        Ptr ptr = getPtrAndCache(name, *iter->second);
         if (!ptr.isEmpty())
             return ptr;
     }
 
     for (auto iter = mInteriors.begin(); iter != mInteriors.end(); ++iter)
     {
-        Ptr ptr = getPtrAndCache(name, iter->second);
+        Ptr ptr = getPtrAndCache(name, *iter->second);
         if (!ptr.isEmpty())
             return ptr;
     }
@@ -391,8 +442,7 @@ void MWWorld::WorldModel::getExteriorPtrs(const ESM::RefId& name, std::vector<MW
 std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(const ESM::RefId& id)
 {
     PtrCollector visitor;
-    if (forEachInStore(id, visitor, mInteriors))
-        forEachInStore(id, visitor, mExteriors);
+    forEachInStore(id, visitor, mCells);
     return visitor.mPtrs;
 }
 
@@ -400,12 +450,7 @@ int MWWorld::WorldModel::countSavedGameRecords() const
 {
     int count = 0;
 
-    for (auto iter(mInteriors.begin()); iter != mInteriors.end(); ++iter)
-        if (iter->second.hasState())
-            ++count;
-
-    for (std::map<std::pair<int, int>, CellStore>::const_iterator iter(mExteriors.begin()); iter != mExteriors.end();
-         ++iter)
+    for (auto iter(mCells.begin()); iter != mCells.end(); ++iter)
         if (iter->second.hasState())
             ++count;
 
@@ -414,14 +459,7 @@ int MWWorld::WorldModel::countSavedGameRecords() const
 
 void MWWorld::WorldModel::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
 {
-    for (std::map<std::pair<int, int>, CellStore>::iterator iter(mExteriors.begin()); iter != mExteriors.end(); ++iter)
-        if (iter->second.hasState())
-        {
-            writeCell(writer, iter->second);
-            progress.increaseProgress();
-        }
-
-    for (auto iter(mInteriors.begin()); iter != mInteriors.end(); ++iter)
+    for (auto iter(mCells.begin()); iter != mCells.end(); ++iter)
         if (iter->second.hasState())
         {
             writeCell(writer, iter->second);
@@ -439,7 +477,7 @@ public:
 
     MWWorld::WorldModel& mWorldModel;
 
-    MWWorld::CellStore* getCellStore(const ESM::CellId& cellId) override
+    MWWorld::CellStore* getCellStore(const ESM::RefId& cellId) override
     {
         try
         {
@@ -457,7 +495,7 @@ bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type, cons
     if (type == ESM::REC_CSTA)
     {
         ESM::CellState state;
-        state.mId.load(reader);
+        state.mId = reader.getCellId();
 
         CellStore* cellStore = nullptr;
 
@@ -468,8 +506,7 @@ bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type, cons
         catch (...)
         {
             // silently drop cells that don't exist anymore
-            Log(Debug::Warning) << "Warning: Dropping state for cell " << state.mId.mWorldspace
-                                << " (cell no longer exists)";
+            Log(Debug::Warning) << "Warning: Dropping state for cell " << state.mId << " (cell no longer exists)";
             reader.skipRecord();
             return true;
         }

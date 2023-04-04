@@ -896,7 +896,7 @@ namespace MWGui
             = Misc::ResourceHelpers::correctTexturePath("textures\\levelup\\" + classId.getRefIdString() + ".dds", vfs);
         if (!vfs->exists(classImage))
         {
-            Log(Debug::Warning) << "No class image for " << classId.getRefIdString() << ", falling back to default";
+            Log(Debug::Warning) << "No class image for " << classId << ", falling back to default";
             classImage = "textures\\levelup\\warrior.dds";
         }
         imageBox->setImageTexture(classImage);

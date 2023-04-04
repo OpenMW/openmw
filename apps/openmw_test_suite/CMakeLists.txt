@@ -1,8 +1,3 @@
-if (OPENMW_USE_SYSTEM_GOOGLETEST)
-    find_package(GTest 1.10 REQUIRED)
-    find_package(GMock 1.10 REQUIRED)
-endif()
-
 include_directories(SYSTEM ${GTEST_INCLUDE_DIRS})
 include_directories(SYSTEM ${GMOCK_INCLUDE_DIRS})
 
@@ -23,6 +18,7 @@ file(GLOB UNITTEST_SRC_FILES
 
     esm/test_fixed_string.cpp
     esm/variant.cpp
+    esm/testrefid.cpp
 
     lua/test_lua.cpp
     lua/test_scriptscontainer.cpp
@@ -107,7 +103,7 @@ if (UNIX AND NOT APPLE)
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
-    add_definitions(--coverage)
+    target_compile_options(openmw_test_suite PRIVATE --coverage)
     target_link_libraries(openmw_test_suite gcov)
 endif()
 

@@ -3,7 +3,6 @@
 
 #include <string>
 
-#include "cellid.hpp"
 #include "components/esm/defs.hpp"
 #include "npcstate.hpp"
 
@@ -20,12 +19,12 @@ namespace ESM
     struct Player
     {
         NpcState mObject;
-        CellId mCellId;
+        RefId mCellId;
         float mLastKnownExteriorPosition[3];
         unsigned char mHasMark;
         bool mSetWerewolfAcrobatics;
         Position mMarkedPosition;
-        CellId mMarkedCell;
+        RefId mMarkedCell;
         ESM::RefId mBirthsign;
 
         int mCurrentCrimeId;

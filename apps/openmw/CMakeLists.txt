@@ -23,7 +23,7 @@ add_openmw_dir (mwrender
     creatureanimation effectmanager util renderinginterface pathgrid rendermode weaponanimation screenshotmanager
     bulletdebugdraw globalmap characterpreview camera localmap water terrainstorage ripplesimulation
     renderbin actoranimation landmanager navmesh actorspaths recastmesh fogmanager objectpaging groundcover
-    postprocessor pingpongcull luminancecalculator pingpongcanvas transparentpass navmeshmode precipitationocclusion
+    postprocessor pingpongcull luminancecalculator pingpongcanvas transparentpass navmeshmode precipitationocclusion ripples
     )
 
 add_openmw_dir (mwinput
@@ -59,8 +59,8 @@ add_openmw_dir (mwscript
     )
 
 add_openmw_dir (mwlua
-    luamanagerimp object worldview userdataserializer eventqueue
-    luabindings localscripts playerscripts objectbindings cellbindings
+    luamanagerimp object worldview userdataserializer luaevents engineevents objectvariant
+    context globalscripts localscripts playerscripts luabindings objectbindings cellbindings
     camerabindings uibindings inputbindings nearbybindings postprocessingbindings stats debugbindings
     types/types types/door types/actor types/container types/weapon types/npc types/creature types/activator types/book types/lockpick types/probe types/apparatus types/potion types/ingredient types/misc types/repair types/armor types/light types/static types/clothing
     worker
@@ -196,12 +196,12 @@ if (USE_SYSTEM_TINYXML)
 endif()
 
 if (NOT UNIX)
-target_link_libraries(openmw ${SDL2MAIN_LIBRARY})
+    target_link_libraries(openmw ${SDL2MAIN_LIBRARY})
 endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
-target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(openmw ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 if(APPLE)
@@ -234,8 +234,8 @@ if(APPLE)
 endif(APPLE)
 
 if (BUILD_WITH_CODE_COVERAGE)
-  add_definitions (--coverage)
-  target_link_libraries(openmw gcov)
+    target_compile_options(openmw PRIVATE --coverage)
+    target_link_libraries(openmw gcov)
 endif()
 
 if (WIN32)

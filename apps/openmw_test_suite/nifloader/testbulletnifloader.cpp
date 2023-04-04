@@ -14,6 +14,7 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <span>
 #include <type_traits>
 
 namespace
@@ -60,6 +61,14 @@ namespace
     bool isNear(const btTransform& lhs, const btTransform& rhs)
     {
         return isNear(lhs.getOrigin(), rhs.getOrigin()) && isNear(lhs.getBasis(), rhs.getBasis());
+    }
+
+    bool isNear(std::span<const btVector3> lhs, std::span<const btVector3> rhs)
+    {
+        if (lhs.size() != rhs.size())
+            return false;
+        return std::equal(
+            lhs.begin(), lhs.end(), rhs.begin(), [](const btVector3& l, const btVector3& r) { return isNear(l, r); });
     }
 
     struct WriteVec3f
@@ -237,7 +246,7 @@ static bool operator==(const btBvhTriangleMeshShape& lhs, const btBvhTriangleMes
 {
     return isNear(lhs.getLocalScaling(), rhs.getLocalScaling())
         && lhs.usesQuantizedAabbCompression() == rhs.usesQuantizedAabbCompression()
-        && lhs.getOwnsBvh() == rhs.getOwnsBvh() && getTriangles(lhs) == getTriangles(rhs);
+        && lhs.getOwnsBvh() == rhs.getOwnsBvh() && isNear(getTriangles(lhs), getTriangles(rhs));
 }
 
 static bool operator==(const btCollisionShape& lhs, const btCollisionShape& rhs)
@@ -270,7 +279,7 @@ namespace
         dst.pos = osg::Vec3f(src.getOrigin().x(), src.getOrigin().y(), src.getOrigin().z());
         for (int row = 0; row < 3; ++row)
             for (int column = 0; column < 3; ++column)
-                dst.rotation.mValues[column][row] = src.getBasis().getRow(row)[column];
+                dst.rotation.mValues[row][column] = src.getBasis().getRow(row)[column];
     }
 
     struct TestBulletNifLoader : Test
@@ -292,12 +301,9 @@ namespace
         Nif::NiStringExtraData mNiStringExtraData2;
         Nif::Controller mController;
         btTransform mTransform{ btMatrix3x3(btQuaternion(btVector3(1, 0, 0), 0.5f)), btVector3(1, 2, 3) };
-        btTransform mResultTransform{ btMatrix3x3(1, 0, 0, 0, 0.82417738437652587890625, 0.56633174419403076171875, 0,
-                                          -0.56633174419403076171875, 0.82417738437652587890625),
-            btVector3(1, 2, 3) };
-        btTransform mResultTransform2{ btMatrix3x3(1, 0, 0, 0, 0.7951543331146240234375, 0.606407105922698974609375, 0,
-                                           -0.606407105922698974609375, 0.7951543331146240234375),
-            btVector3(4, 8, 12) };
+        btTransform mTransformScale2{ btMatrix3x3(btQuaternion(btVector3(1, 0, 0), 0.5f)), btVector3(2, 4, 6) };
+        btTransform mTransformScale3{ btMatrix3x3(btQuaternion(btVector3(1, 0, 0), 0.5f)), btVector3(3, 6, 9) };
+        btTransform mTransformScale4{ btMatrix3x3(btQuaternion(btVector3(1, 0, 0), 0.5f)), btVector3(4, 8, 12) };
         const std::string mHash = "hash";
 
         TestBulletNifLoader()
@@ -317,17 +323,20 @@ namespace
 
             mNiTriShapeData.recType = Nif::RC_NiTriShapeData;
             mNiTriShapeData.vertices = { osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0) };
+            mNiTriShapeData.mNumTriangles = 1;
             mNiTriShapeData.triangles = { 0, 1, 2 };
             mNiTriShape.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
 
             mNiTriShapeData2.recType = Nif::RC_NiTriShapeData;
             mNiTriShapeData2.vertices = { osg::Vec3f(0, 0, 1), osg::Vec3f(1, 0, 1), osg::Vec3f(1, 1, 1) };
+            mNiTriShapeData2.mNumTriangles = 1;
             mNiTriShapeData2.triangles = { 0, 1, 2 };
             mNiTriShape2.data = Nif::NiGeometryDataPtr(&mNiTriShapeData2);
 
             mNiTriStripsData.recType = Nif::RC_NiTriStripsData;
             mNiTriStripsData.vertices
                 = { osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0), osg::Vec3f(0, 1, 0) };
+            mNiTriStripsData.mNumTriangles = 2;
             mNiTriStripsData.strips = { { 0, 1, 2, 3 } };
             mNiTriStrips.data = Nif::NiGeometryDataPtr(&mNiTriStripsData);
         }
@@ -586,7 +595,7 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, for_tri_shape_root_node_should_return_shape_with_triangle_mesh_shape)
+    TEST_F(TestBulletNifLoader, for_tri_shape_root_node_should_return_static_shape)
     {
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiTriShape);
@@ -596,14 +605,18 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
         Resource::BulletShape expected;
-        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+        expected.mCollisionShape.reset(compound.release());
 
         EXPECT_EQ(*result, expected);
     }
 
     TEST_F(TestBulletNifLoader,
-        for_tri_shape_root_node_with_bounds_should_return_shape_with_bounds_but_with_null_collision_shape)
+        for_tri_shape_root_node_with_bounds_should_return_static_shape_with_bounds_but_with_null_collision_shape)
     {
         mNiTriShape.hasBounds = true;
         mNiTriShape.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
@@ -623,7 +636,7 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, for_tri_shape_child_node_should_return_shape_with_triangle_mesh_shape)
+    TEST_F(TestBulletNifLoader, for_tri_shape_child_node_should_return_static_shape)
     {
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
@@ -636,13 +649,17 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
         Resource::BulletShape expected;
-        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+        expected.mCollisionShape.reset(compound.release());
 
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, for_nested_tri_shape_child_should_return_shape_with_triangle_mesh_shape)
+    TEST_F(TestBulletNifLoader, for_nested_tri_shape_child_should_return_static_shape)
     {
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiNode2) }));
         mNiNode2.parents.push_back(&mNiNode);
@@ -657,13 +674,17 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
         Resource::BulletShape expected;
-        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+        expected.mCollisionShape.reset(compound.release());
 
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, for_two_tri_shape_children_should_return_shape_with_triangle_mesh_shape_with_all_meshes)
+    TEST_F(TestBulletNifLoader, for_two_tri_shape_children_should_return_static_shape_with_all_meshes)
     {
         mNiTriShape.parents.push_back(&mNiNode);
         mNiTriShape2.parents.push_back(&mNiNode);
@@ -677,16 +698,22 @@ namespace
         const auto result = mLoader.load(file);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
-        triangles->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<btTriangleMesh> triangles2(new btTriangleMesh(false));
+        triangles2->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+        compound->addChildShape(
+            btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles2.release(), true));
+
         Resource::BulletShape expected;
-        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+        expected.mCollisionShape.reset(compound.release());
 
         EXPECT_EQ(*result, expected);
     }
 
     TEST_F(TestBulletNifLoader,
-        for_tri_shape_child_node_and_filename_starting_with_x_and_not_empty_skin_should_return_shape_with_triangle_mesh_shape)
+        for_tri_shape_child_node_and_filename_starting_with_x_and_not_empty_skin_should_return_static_shape)
     {
         mNiTriShape.skin = Nif::NiSkinInstancePtr(&mNiSkinInstance);
         mNiTriShape.parents.push_back(&mNiNode);
@@ -700,14 +727,16 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
         Resource::BulletShape expected;
-        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+        expected.mCollisionShape.reset(compound.release());
 
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader,
-        for_tri_shape_root_node_and_filename_starting_with_x_should_return_shape_with_compound_shape)
+    TEST_F(TestBulletNifLoader, for_tri_shape_root_node_and_filename_starting_with_x_should_return_animated_shape)
     {
         copy(mTransform, mNiTriShape.trafo);
         mNiTriShape.trafo.scale = 3;
@@ -723,7 +752,7 @@ namespace
         std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
         mesh->setLocalScaling(btVector3(3, 3, 3));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(mResultTransform, mesh.release());
+        shape->addChildShape(mTransform, mesh.release());
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = { { -1, 0 } };
@@ -731,8 +760,7 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader,
-        for_tri_shape_child_node_and_filename_starting_with_x_should_return_shape_with_compound_shape)
+    TEST_F(TestBulletNifLoader, for_tri_shape_child_node_and_filename_starting_with_x_should_return_animated_shape)
     {
         copy(mTransform, mNiTriShape.trafo);
         mNiTriShape.trafo.scale = 3;
@@ -751,7 +779,7 @@ namespace
         std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
         mesh->setLocalScaling(btVector3(12, 12, 12));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(mResultTransform2, mesh.release());
+        shape->addChildShape(mTransformScale4, mesh.release());
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = { { -1, 0 } };
@@ -759,8 +787,8 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader,
-        for_two_tri_shape_children_nodes_and_filename_starting_with_x_should_return_shape_with_compound_shape)
+    TEST_F(
+        TestBulletNifLoader, for_two_tri_shape_children_nodes_and_filename_starting_with_x_should_return_animated_shape)
     {
         copy(mTransform, mNiTriShape.trafo);
         mNiTriShape.trafo.scale = 3;
@@ -792,8 +820,8 @@ namespace
         mesh2->setLocalScaling(btVector3(3, 3, 3));
 
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(mResultTransform, mesh.release());
-        shape->addChildShape(mResultTransform, mesh2.release());
+        shape->addChildShape(mTransform, mesh.release());
+        shape->addChildShape(mTransform, mesh2.release());
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = { { -1, 0 } };
@@ -801,7 +829,7 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, for_tri_shape_child_node_with_controller_should_return_shape_with_compound_shape)
+    TEST_F(TestBulletNifLoader, for_tri_shape_child_node_with_controller_should_return_animated_shape)
     {
         mController.recType = Nif::RC_NiKeyframeController;
         mController.flags |= Nif::Controller::Flag_Active;
@@ -823,7 +851,7 @@ namespace
         std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
         mesh->setLocalScaling(btVector3(12, 12, 12));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(mResultTransform2, mesh.release());
+        shape->addChildShape(mTransformScale4, mesh.release());
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = { { -1, 0 } };
@@ -831,8 +859,7 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader,
-        for_two_tri_shape_children_nodes_where_one_with_controller_should_return_shape_with_compound_shape)
+    TEST_F(TestBulletNifLoader, for_two_tri_shape_children_nodes_where_one_with_controller_should_return_animated_shape)
     {
         mController.recType = Nif::RC_NiKeyframeController;
         mController.flags |= Nif::Controller::Flag_Active;
@@ -856,10 +883,9 @@ namespace
         const auto result = mLoader.load(file);
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
-        triangles->addTriangle(
-            btVector3(4, 8, 12), btVector3(16, 8, 12), btVector3(16, 18.5309906005859375, 6.246893405914306640625));
+        triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         std::unique_ptr<Resource::TriangleMeshShape> mesh(new Resource::TriangleMeshShape(triangles.release(), true));
-        mesh->setLocalScaling(btVector3(1, 1, 1));
+        mesh->setLocalScaling(btVector3(12, 12, 12));
 
         std::unique_ptr<btTriangleMesh> triangles2(new btTriangleMesh(false));
         triangles2->addTriangle(btVector3(0, 0, 1), btVector3(1, 0, 1), btVector3(1, 1, 1));
@@ -867,11 +893,11 @@ namespace
         mesh2->setLocalScaling(btVector3(12, 12, 12));
 
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(mResultTransform2, mesh2.release());
-        shape->addChildShape(btTransform::getIdentity(), mesh.release());
+        shape->addChildShape(mTransformScale4, mesh.release());
+        shape->addChildShape(mTransformScale4, mesh2.release());
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(shape.release());
-        expected.mAnimatedShapes = { { -1, 0 } };
+        expected.mAnimatedShapes = { { -1, 1 } };
 
         EXPECT_EQ(*result, expected);
     }
@@ -921,8 +947,11 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
         Resource::BulletShape expected;
-        expected.mAvoidCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), false));
+        expected.mAvoidCollisionShape.reset(compound.release());
 
         EXPECT_EQ(*result, expected);
     }
@@ -980,8 +1009,12 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
         Resource::BulletShape expected;
-        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+        expected.mCollisionShape.reset(compound.release());
+
         expected.mVisualCollisionType = Resource::VisualCollisionType::Camera;
 
         EXPECT_EQ(*result, expected);
@@ -1005,8 +1038,11 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
         Resource::BulletShape expected;
-        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+        expected.mCollisionShape.reset(compound.release());
         expected.mVisualCollisionType = Resource::VisualCollisionType::Camera;
 
         EXPECT_EQ(*result, expected);
@@ -1029,8 +1065,11 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
         Resource::BulletShape expected;
-        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+        expected.mCollisionShape.reset(compound.release());
         expected.mVisualCollisionType = Resource::VisualCollisionType::Default;
 
         EXPECT_EQ(*result, expected);
@@ -1054,8 +1093,11 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
         Resource::BulletShape expected;
-        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+        expected.mCollisionShape.reset(compound.release());
         expected.mVisualCollisionType = Resource::VisualCollisionType::Default;
 
         EXPECT_EQ(*result, expected);
@@ -1085,8 +1127,11 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
         Resource::BulletShape expected;
-        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+        expected.mCollisionShape.reset(compound.release());
         expected.mVisualCollisionType = Resource::VisualCollisionType::Camera;
 
         EXPECT_EQ(*result, expected);
@@ -1133,8 +1178,11 @@ namespace
 
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
         Resource::BulletShape expected;
-        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+        expected.mCollisionShape.reset(compound.release());
 
         EXPECT_EQ(*result, expected);
     }
@@ -1154,7 +1202,7 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, for_tri_strips_root_node_should_return_shape_with_triangle_mesh_shape)
+    TEST_F(TestBulletNifLoader, for_tri_strips_root_node_should_return_static_shape)
     {
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiTriStrips);
@@ -1165,8 +1213,11 @@ namespace
         std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
         triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
         triangles->addTriangle(btVector3(1, 0, 0), btVector3(0, 1, 0), btVector3(1, 1, 0));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
         Resource::BulletShape expected;
-        expected.mCollisionShape.reset(new Resource::TriangleMeshShape(triangles.release(), true));
+        expected.mCollisionShape.reset(compound.release());
 
         EXPECT_EQ(*result, expected);
     }
@@ -1303,18 +1354,8 @@ namespace
         std::unique_ptr<Resource::TriangleMeshShape> mesh2(new Resource::TriangleMeshShape(triangles2.release(), true));
         mesh2->setLocalScaling(btVector3(12, 12, 12));
         std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        const btTransform transform1{
-            btMatrix3x3(1, 0, 0, 0, 0.8004512795493964327775415767973754555, 0.59939782204119995689950428641168400645,
-                0, -0.59939782204119995689950428641168400645, 0.8004512795493964327775415767973754555),
-            btVector3(2, 4, 6)
-        };
-        const btTransform transform2{
-            btMatrix3x3(1, 0, 0, 0, 0.79515431915808965079861536651151254773, 0.60640713116208888600056070572463795543,
-                0, -0.60640713116208888600056070572463795543, 0.79515431915808965079861536651151254773),
-            btVector3(3, 6, 9)
-        };
-        shape->addChildShape(transform1, mesh1.release());
-        shape->addChildShape(transform2, mesh2.release());
+        shape->addChildShape(mTransformScale2, mesh1.release());
+        shape->addChildShape(mTransformScale3, mesh2.release());
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(shape.release());
         expected.mAnimatedShapes = { { -1, 0 } };

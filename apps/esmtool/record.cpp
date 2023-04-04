@@ -6,6 +6,7 @@
 
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/esmreader.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/misc/strings/format.hpp>
 
 namespace
@@ -68,9 +69,7 @@ namespace
 
         std::string type_str = "INVALID";
         std::string func_str = Misc::StringUtils::format("INVALID=%s", rule.substr(1, 3));
-        int func;
-        std::istringstream iss(rule.substr(2, 2));
-        iss >> func;
+        int func = Misc::StringUtils::toNumeric<int>(rule.substr(2, 2), 0);
 
         switch (type)
         {
@@ -221,7 +220,7 @@ namespace EsmTool
 {
     void CellState::load(ESM::ESMReader& reader, bool& deleted)
     {
-        mCellState.mId.load(reader);
+        mCellState.mId = reader.getCellId();
         mCellState.load(reader);
         if (mCellState.mHasFogOfWar)
             mFogState.load(reader);
@@ -742,6 +741,7 @@ namespace EsmTool
     template <>
     void Record<ESM::Dialogue>::print()
     {
+        std::cout << "  StringId: " << mData.mStringId << std::endl;
         std::cout << "  Type: " << dialogTypeLabel(mData.mType) << " (" << (int)mData.mType << ")" << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
         // Sadly, there are no DialInfos, because the loader dumps as it
@@ -1358,11 +1358,8 @@ namespace EsmTool
     void Record<CellState>::print()
     {
         std::cout << "  Id:" << std::endl;
-        std::cout << "    Worldspace: " << mData.mCellState.mId.mWorldspace << std::endl;
+        std::cout << "    CellId: " << mData.mCellState.mId << std::endl;
         std::cout << "    Index:" << std::endl;
-        std::cout << "      X: " << mData.mCellState.mId.mIndex.mX << std::endl;
-        std::cout << "      Y: " << mData.mCellState.mId.mIndex.mY << std::endl;
-        std::cout << "    Paged: " << mData.mCellState.mId.mPaged << std::endl;
         std::cout << "  WaterLevel: " << mData.mCellState.mWaterLevel << std::endl;
         std::cout << "  HasFogOfWar: " << mData.mCellState.mHasFogOfWar << std::endl;
         std::cout << "  LastRespawn:" << std::endl;
@@ -1420,8 +1417,7 @@ namespace EsmTool
     std::string Record<CellState>::getId() const
     {
         std::ostringstream stream;
-        stream << mData.mCellState.mId.mWorldspace << " " << mData.mCellState.mId.mIndex.mX << " "
-               << mData.mCellState.mId.mIndex.mY << " " << mData.mCellState.mId.mPaged;
+        stream << mData.mCellState.mId;
         return stream.str();
     }
 

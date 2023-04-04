@@ -13,7 +13,7 @@ target_link_libraries(openmw-navmeshtool
 )
 
 if (BUILD_WITH_CODE_COVERAGE)
-    add_definitions(--coverage)
+    target_compile_options(openmw-navmeshtool PRIVATE --coverage)
     target_link_libraries(openmw-navmeshtool gcov)
 endif()
 

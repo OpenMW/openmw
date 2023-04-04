@@ -85,7 +85,7 @@ namespace MWGui
     void SaveGameDialog::confirmDeleteSave()
     {
         ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-        dialog->askForConfirmation("#{sMessage3}");
+        dialog->askForConfirmation("#{OMWEngine:DeleteGameConfirmation}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onDeleteSlotConfirmed);
         dialog->eventCancelClicked.clear();
@@ -268,7 +268,7 @@ namespace MWGui
             if (mCurrentSlot != nullptr && !reallySure)
             {
                 ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-                dialog->askForConfirmation("#{sMessage4}");
+                dialog->askForConfirmation("#{OMWEngine:OverwriteGameConfirmation}");
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationGiven);
                 dialog->eventCancelClicked.clear();
@@ -277,7 +277,7 @@ namespace MWGui
             }
             if (mSaveNameEdit->getCaption().empty())
             {
-                MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage65}");
+                MWBase::Environment::get().getWindowManager()->messageBox("#{OMWEngine:EmptySaveNameError}");
                 return;
             }
         }
@@ -289,7 +289,7 @@ namespace MWGui
             if (state == MWBase::StateManager::State_Running && !reallySure)
             {
                 ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-                dialog->askForConfirmation("#{sMessage1}");
+                dialog->askForConfirmation("#{OMWEngine:LoadGameConfirmation}");
                 dialog->eventOkClicked.clear();
                 dialog->eventOkClicked += MyGUI::newDelegate(this, &SaveGameDialog::onConfirmationGiven);
                 dialog->eventCancelClicked.clear();
@@ -414,7 +414,7 @@ namespace MWGui
         text << Misc::fileTimeToString(mCurrentSlot->mTimeStamp, "%Y.%m.%d %T") << "\n";
 
         text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
-        text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCell << "}\n";
+        text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCellName << "}\n";
 
         int hour = int(mCurrentSlot->mProfile.mInGameTime.mGameHour);
         bool pm = hour >= 12;
@@ -425,7 +425,7 @@ namespace MWGui
 
         text << mCurrentSlot->mProfile.mInGameTime.mDay << " "
              << MWBase::Environment::get().getWorld()->getMonthName(mCurrentSlot->mProfile.mInGameTime.mMonth) << " "
-             << hour << " " << (pm ? "#{sSaveMenuHelp05}" : "#{sSaveMenuHelp04}");
+             << hour << " " << (pm ? "#{Calendar:pm}" : "#{Calendar:am}");
 
         if (Settings::Manager::getBool("timeplayed", "Saves"))
         {

@@ -856,7 +856,7 @@ namespace MWMechanics
             for (const ESM::GameSetting& currentSetting : gameSettings)
             {
                 // Don't bother checking this GMST if it's not a sMagicBound* one.
-                if (!Misc::StringUtils::ciStartsWith(currentSetting.mId.getRefIdString(), "smagicbound"))
+                if (!currentSetting.mId.startsWith("smagicbound"))
                     continue;
 
                 // All sMagicBound* GMST's should be of type string
@@ -894,8 +894,7 @@ namespace MWMechanics
             return true;
 
         // TODO: implement a better check to check if target is owned bed
-        if (target.getClass().isActivator()
-            && target.getClass().getScript(target).getRefIdString().starts_with("Bed") != 0)
+        if (target.getClass().isActivator() && !target.getClass().getScript(target).startsWith("Bed"))
             return true;
 
         if (target.getClass().isNpc())

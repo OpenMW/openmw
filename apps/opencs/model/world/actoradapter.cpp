@@ -136,7 +136,7 @@ namespace CSMWorld
         return SceneUtil::getActorSkeleton(firstPerson, mFemale, beast, werewolf);
     }
 
-    std::string_view ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
+    ESM::RefId ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const
     {
         auto it = mParts.find(index);
         if (it == mParts.end())
@@ -146,12 +146,11 @@ namespace CSMWorld
                 if (mFemale)
                 {
                     // Note: we should use male parts for females as fallback
-                    const std::string& femalePart = mRaceData->getFemalePart(index).getRefIdString();
-                    if (!femalePart.empty())
+                    if (const ESM::RefId femalePart = mRaceData->getFemalePart(index); !femalePart.empty())
                         return femalePart;
                 }
 
-                return mRaceData->getMalePart(index).getRefIdString();
+                return mRaceData->getMalePart(index);
             }
 
             return {};
@@ -174,7 +173,7 @@ namespace CSMWorld
                 return;
         }
 
-        mParts[index] = std::make_pair(partId.getRefIdString(), priority);
+        mParts[index] = std::make_pair(partId, priority);
         addOtherDependency(partId);
     }
 
@@ -426,11 +425,6 @@ namespace CSMWorld
         return index;
     }
 
-    bool ActorAdapter::is1stPersonPart(const std::string& name) const
-    {
-        return name.size() >= 4 && name.find(".1st", name.size() - 4) != std::string::npos;
-    }
-
     ActorAdapter::RaceDataPtr ActorAdapter::getRaceData(const ESM::RefId& id)
     {
         // Return cached race data if it exists
@@ -511,7 +505,6 @@ namespace CSMWorld
         // Setup body parts
         for (int i = 0; i < mBodyParts.getSize(); ++i)
         {
-            auto partId = mBodyParts.getId(i);
             auto& partRecord = mBodyParts.getRecord(i);
 
             if (partRecord.isDeleted())
@@ -521,8 +514,7 @@ namespace CSMWorld
             }
 
             auto& part = partRecord.get();
-            if (part.mRace == id && part.mData.mType == ESM::BodyPart::MT_Skin
-                && !is1stPersonPart(part.mId.getRefIdString()))
+            if (part.mRace == id && part.mData.mType == ESM::BodyPart::MT_Skin && !ESM::isFirstPersonBodyPart(part))
             {
                 auto type = (ESM::BodyPart::MeshPart)part.mData.mPart;
                 bool female = part.mData.mFlags & ESM::BodyPart::BPF_Female;

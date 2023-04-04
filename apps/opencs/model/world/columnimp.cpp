@@ -8,10 +8,40 @@
 
 #include <components/esm3/loadland.hpp>
 
+#include <algorithm>
 #include <stdexcept>
 
 namespace CSMWorld
 {
+    namespace
+    {
+        struct GetStringId
+        {
+            std::string operator()(ESM::EmptyRefId /*value*/) const { return std::string(); }
+
+            std::string operator()(ESM::StringRefId value) const { return value.getValue(); }
+
+            std::string operator()(ESM::IndexRefId value) const
+            {
+                switch (value.getRecordType())
+                {
+                    case ESM::REC_SKIL:
+                        return ESM::Skill::sSkillNames[value.getValue()];
+                    default:
+                        break;
+                }
+
+                return value.toDebugString();
+            }
+
+            template <class T>
+            std::string operator()(const T& value) const
+            {
+                return value.toDebugString();
+            }
+        };
+    }
+
     /* LandTextureNicknameColumn */
     LandTextureNicknameColumn::LandTextureNicknameColumn()
         : Column<LandTexture>(Columns::ColumnId_TextureNickname, ColumnBase::Display_String)
@@ -20,7 +50,7 @@ namespace CSMWorld
 
     QVariant LandTextureNicknameColumn::get(const Record<LandTexture>& record) const
     {
-        return QString::fromUtf8(record.get().mId.getRefIdString().c_str());
+        return QString::fromStdString(record.get().mId.toString());
     }
 
     void LandTextureNicknameColumn::set(Record<LandTexture>& record, const QVariant& data)
@@ -298,5 +328,18 @@ namespace CSMWorld
     bool BodyPartRaceColumn::isEditable() const
     {
         return true;
+    }
+
+    std::optional<std::uint32_t> getSkillIndex(std::string_view value)
+    {
+        const auto it = std::find(std::begin(ESM::Skill::sSkillNames), std::end(ESM::Skill::sSkillNames), value);
+        if (it == std::end(ESM::Skill::sSkillNames))
+            return std::nullopt;
+        return static_cast<std::uint32_t>(it - std::begin(ESM::Skill::sSkillNames));
+    }
+
+    std::string getStringId(ESM::RefId value)
+    {
+        return visit(GetStringId{}, value);
     }
 }

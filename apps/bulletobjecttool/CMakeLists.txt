@@ -11,7 +11,7 @@ target_link_libraries(openmw-bulletobjecttool
 )
 
 if (BUILD_WITH_CODE_COVERAGE)
-    add_definitions(--coverage)
+    target_compile_options(openmw-bulletobjecttool PRIVATE --coverage)
     target_link_libraries(openmw-bulletobjecttool gcov)
 endif()
 

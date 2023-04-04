@@ -32,29 +32,25 @@ namespace MWLua
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        const MWWorld::Store<ESM::Book>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Book>();
-        book["record"]
-            = sol::overload([](const Object& obj) -> const ESM::Book* { return obj.ptr().get<ESM::Book>()->mBase; },
-                [store](const std::string& recordId) -> const ESM::Book* {
-                    return store->find(ESM::RefId::stringRefId(recordId));
-                });
+        addRecordFunctionBinding<ESM::Book>(book);
+
         sol::usertype<ESM::Book> record = context.mLua->sol().new_usertype<ESM::Book>("ESM3_Book");
         record[sol::meta_function::to_string]
-            = [](const ESM::Book& rec) { return "ESM3_Book[" + rec.mId.getRefIdString() + "]"; };
+            = [](const ESM::Book& rec) { return "ESM3_Book[" + rec.mId.toDebugString() + "]"; };
         record["id"]
-            = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mId.getRefIdString(); });
+            = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Book& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
         record["mwscript"]
-            = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mScript.getRefIdString(); });
+            = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mScript.serializeText(); });
         record["icon"] = sol::readonly_property([vfs](const ESM::Book& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
         record["text"] = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mText; });
         record["enchant"]
-            = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mEnchant.getRefIdString(); });
+            = sol::readonly_property([](const ESM::Book& rec) -> std::string { return rec.mEnchant.serializeText(); });
         record["isScroll"] = sol::readonly_property([](const ESM::Book& rec) -> bool { return rec.mData.mIsScroll; });
         record["value"] = sol::readonly_property([](const ESM::Book& rec) -> int { return rec.mData.mValue; });
         record["weight"] = sol::readonly_property([](const ESM::Book& rec) -> float { return rec.mData.mWeight; });

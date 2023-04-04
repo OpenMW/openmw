@@ -735,6 +735,20 @@ namespace Stereo
     {
     }
 
+    void MultiviewFramebufferResolve::setResolveFbo(osg::FrameBufferObject* resolveFbo)
+    {
+        if (resolveFbo != mResolveFbo)
+            dirty();
+        mResolveFbo = resolveFbo;
+    }
+
+    void MultiviewFramebufferResolve::setMsaaFbo(osg::FrameBufferObject* msaaFbo)
+    {
+        if (msaaFbo != mMsaaFbo)
+            dirty();
+        mMsaaFbo = msaaFbo;
+    }
+
     void MultiviewFramebufferResolve::resolveImplementation(osg::State& state)
     {
         if (mDirtyLayers)

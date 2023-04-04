@@ -79,7 +79,7 @@ namespace MWSound
 
     SoundManager::SoundManager(const VFS::Manager* vfs, bool useSound)
         : mVFS(vfs)
-        , mOutput(new OpenAL_Output(*this))
+        , mOutput(std::make_unique<OpenAL_Output>(*this))
         , mWaterSoundUpdater(makeWaterSoundUpdaterSettings())
         , mSoundBuffers(*vfs, *mOutput)
         , mListenerUnderwater(false)

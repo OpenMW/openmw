@@ -125,6 +125,9 @@ namespace Stereo
         const osg::FrameBufferObject* resolveFbo() const { return mResolveFbo; }
         const osg::FrameBufferObject* msaaFbo() const { return mMsaaFbo; }
 
+        void setResolveFbo(osg::FrameBufferObject* resolveFbo);
+        void setMsaaFbo(osg::FrameBufferObject* msaaFbo);
+
     private:
         void setupLayers();
 

@@ -94,10 +94,10 @@ MWWorld::ManualRef::ManualRef(const MWWorld::ESMStore& store, const ESM::RefId& 
             create(store.get<ESM4::Static>(), name, mRef, mPtr);
             break;
         case 0:
-            throw std::logic_error("failed to create manual cell ref for " + name.getRefIdString() + " (unknown ID)");
+            throw std::logic_error("failed to create manual cell ref for " + name.toDebugString() + " (unknown ID)");
 
         default:
-            throw std::logic_error("failed to create manual cell ref for " + name.getRefIdString() + " (unknown type)");
+            throw std::logic_error("failed to create manual cell ref for " + name.toDebugString() + " (unknown type)");
     }
 
     mPtr.getRefData().setCount(count);

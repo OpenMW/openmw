@@ -2,10 +2,11 @@
 #include "magiceffects.hpp"
 
 #include <algorithm>
+#include <fstream>
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm3/cellid.hpp>
+#include <components/esm/format.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/containerstate.hpp>
@@ -42,7 +43,10 @@
 #include <components/esm4/loadligh.hpp>
 #include <components/esm4/loadrefr.hpp>
 #include <components/esm4/loadstat.hpp>
+#include <components/esm4/readerutils.hpp>
+#include <components/files/openfile.hpp>
 #include <components/misc/tuplehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
@@ -381,7 +385,7 @@ namespace MWWorld
         }
         else
         {
-            Log(Debug::Warning) << "Warning: could not resolve cell reference '" << ref.mRefID << "'"
+            Log(Debug::Warning) << "Warning: could not resolve cell reference " << ref.mRefID
                                 << " (dropping reference)";
         }
     }
@@ -404,8 +408,7 @@ namespace MWWorld
         }
         else
         {
-            Log(Debug::Warning) << "Warning: could not resolve cell reference '" << ref.mId << "'"
-                                << " (dropping reference)";
+            Log(Debug::Warning) << "Warning: could not resolve cell reference " << ref.mId << " (dropping reference)";
         }
     }
 
@@ -770,17 +773,58 @@ namespace MWWorld
         }
     }
 
+    template <typename ReferenceInvocable>
+    static void visitCell4References(const ESM4::Cell& cell, ESM::ReadersCache& readers, ReferenceInvocable&& invocable)
+    {
+        auto stream = Files::openBinaryInputFileStream(cell.mReaderContext.filename);
+        stream->seekg(0);
+
+        ESM4::Reader readerESM4(
+            std::move(stream), cell.mReaderContext.filename, MWBase::Environment::get().getResourceSystem()->getVFS());
+
+        readerESM4.setEncoder(readers.getStatelessEncoder());
+        bool contextValid = cell.mReaderContext.filePos != std::streampos(-1);
+        if (contextValid)
+            readerESM4.restoreContext(cell.mReaderContext);
+
+        while (
+            (ESM::RefId::formIdRefId(readerESM4.currCell()) == cell.mId || !contextValid) && readerESM4.hasMoreRecs())
+        {
+            if (!contextValid)
+                readerESM4.exitGroupCheck();
+
+            auto onRecord = [&](ESM4::Reader& reader) {
+                auto recordType = static_cast<ESM4::RecordTypes>(reader.hdr().record.typeId);
+                ESM::RecNameInts esm4RecName = static_cast<ESM::RecNameInts>(ESM::esm4Recname(recordType));
+                if (esm4RecName == ESM::RecNameInts::REC_REFR4 && contextValid)
+                {
+                    reader.getRecordData();
+                    ESM4::Reference ref;
+                    ref.load(reader);
+                    invocable(ref);
+                    return true;
+                }
+                else if (esm4RecName == ESM::RecNameInts::REC_CELL4)
+                {
+                    reader.getRecordData();
+                    ESM4::Cell cellToLoad;
+                    cellToLoad.load(reader); // This is necessary to exit or to find the correct cell
+                    if (cellToLoad.mId == cell.mId)
+                        contextValid = true;
+                    return true;
+                }
+
+                return false;
+            };
+
+            if (!ESM4::ReaderUtils::readItem(readerESM4, onRecord, [&](ESM4::Reader& reader) {}))
+                break;
+        }
+    }
+
     void CellStore::listRefs(const ESM4::Cell& cell)
     {
-        auto& refs = MWBase::Environment::get().getWorld()->getStore().get<ESM4::Reference>();
-
-        for (const auto& ref : refs)
-        {
-            if (ref.mParent == cell.mId)
-            {
-                mIds.push_back(ref.mBaseObj);
-            }
-        }
+        visitCell4References(cell, mReaders, [&](ESM4::Reference& ref) { mIds.push_back(ref.mBaseObj); });
     }
 
     void CellStore::listRefs()
@@ -844,15 +888,7 @@ namespace MWWorld
 
     void CellStore::loadRefs(const ESM4::Cell& cell, std::map<ESM::RefNum, ESM::RefId>& refNumToID)
     {
-        auto& refs = MWBase::Environment::get().getWorld()->getStore().get<ESM4::Reference>();
-
-        for (const auto& ref : refs)
-        {
-            if (ref.mParent == cell.mId)
-            {
-                loadRef(ref, false);
-            }
-        }
+        visitCell4References(cell, mReaders, [&](ESM4::Reference& ref) { loadRef(ref, false); });
     }
 
     void CellStore::loadRefs()
@@ -940,13 +976,13 @@ namespace MWWorld
         }
         else
         {
-            Log(Debug::Error) << "Cell reference '" + ref.mRefID.getRefIdString() + "' not found!";
+            Log(Debug::Error) << "Cell reference " << ref.mRefID << " is not found!";
             return;
         }
 
         if (!handledType)
         {
-            Log(Debug::Error) << "Error: Ignoring reference '" << ref.mRefID.getRefIdString() << "' of unhandled type";
+            Log(Debug::Error) << "Error: Ignoring reference " << ref.mRefID << " of unhandled type";
             return;
         }
 
@@ -965,11 +1001,11 @@ namespace MWWorld
 
     void CellStore::saveState(ESM::CellState& state) const
     {
-        state.mId = mCellVariant.getCellId();
+        state.mId = mCellVariant.getId();
 
         if (!mCellVariant.isExterior() && mCellVariant.hasWater())
             state.mWaterLevel = mWaterLevel;
-
+        state.mIsInterior = !mCellVariant.isExterior();
         state.mHasFogOfWar = (mFogState.get() ? 1 : 0);
         state.mLastRespawn = mLastRespawn.toEsm();
     }
@@ -996,10 +1032,10 @@ namespace MWWorld
         for (const auto& [base, store] : mMovedToAnotherCell)
         {
             ESM::RefNum refNum = base->mRef.getRefNum();
-            ESM::CellId movedTo = store->getCell()->getCellId();
+            ESM::RefId movedTo = store->getCell()->getId();
 
             refNum.save(writer, true, "MVRF");
-            movedTo.save(writer);
+            writer.writeCellId(movedTo);
         }
     }
 
@@ -1055,10 +1091,8 @@ namespace MWWorld
         {
             reader.cacheSubName();
             ESM::RefNum refnum;
-            ESM::CellId movedTo;
             refnum.load(reader, true, "MVRF");
-            movedTo.load(reader);
-
+            ESM::RefId movedToId = reader.getCellId();
             if (refnum.hasContentFile())
             {
                 auto iter = contentFileMap.find(refnum.mContentFile);
@@ -1075,12 +1109,12 @@ namespace MWWorld
                 continue;
             }
 
-            CellStore* otherCell = callback->getCellStore(movedTo);
+            CellStore* otherCell = callback->getCellStore(movedToId);
 
             if (otherCell == nullptr)
             {
                 Log(Debug::Warning) << "Warning: Dropping moved ref tag for " << movedRef.getCellRef().getRefId()
-                                    << " (target cell " << movedTo.mWorldspace
+                                    << " (target cell " << movedToId
                                     << " no longer exists). Reference moved back to its original location.";
                 // Note by dropping tag the object will automatically re-appear in its original cell, though
                 // potentially at inapproriate coordinates. Restore original coordinates:
@@ -1099,21 +1133,9 @@ namespace MWWorld
         }
     }
 
-    struct IsEqualVisitor
-    {
-        bool operator()(const ESM::Cell& a, const ESM::Cell& b) const { return a.getCellId() == b.getCellId(); }
-        bool operator()(const ESM4::Cell& a, const ESM4::Cell& b) const { return a.mId == b.mId; }
-
-        template <class L, class R>
-        bool operator()(const L&, const R&) const
-        {
-            return false;
-        }
-    };
-
     bool CellStore::operator==(const CellStore& right) const
     {
-        return ESM::visit(IsEqualVisitor(), this->mCellVariant, right.mCellVariant);
+        return right.mCellVariant.getId() == mCellVariant.getId();
     }
 
     void CellStore::setFog(std::unique_ptr<ESM::FogState>&& fog)

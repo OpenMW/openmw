@@ -11,7 +11,7 @@ namespace ESM
         mObject.mRef.loadId(esm, true);
         mObject.load(esm);
 
-        mCellId.load(esm);
+        mCellId = esm.getCellId();
 
         esm.getHNTSized<12>(mLastKnownExteriorPosition, "LKEP");
 
@@ -19,7 +19,7 @@ namespace ESM
         {
             mHasMark = true;
             esm.getHTSized<24>(mMarkedPosition);
-            mMarkedCell.load(esm);
+            mMarkedCell = esm.getCellId();
         }
         else
             mHasMark = false;
@@ -92,14 +92,14 @@ namespace ESM
     {
         mObject.save(esm);
 
-        mCellId.save(esm);
+        esm.writeCellId(mCellId);
 
         esm.writeHNT("LKEP", mLastKnownExteriorPosition);
 
         if (mHasMark)
         {
             esm.writeHNT("MARK", mMarkedPosition, 24);
-            mMarkedCell.save(esm);
+            esm.writeCellId(mMarkedCell);
         }
 
         esm.writeHNRefId("SIGN", mBirthsign);

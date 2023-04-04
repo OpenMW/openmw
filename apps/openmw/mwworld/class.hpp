@@ -323,6 +323,9 @@ namespace MWWorld
 
         virtual bool isDoor() const { return false; }
 
+        // True if it is an item that can be picked up.
+        virtual bool isItem(const MWWorld::ConstPtr& ptr) const { return false; }
+
         virtual bool isBipedal(const MWWorld::ConstPtr& ptr) const;
         virtual bool canFly(const MWWorld::ConstPtr& ptr) const;
         virtual bool canSwim(const MWWorld::ConstPtr& ptr) const;

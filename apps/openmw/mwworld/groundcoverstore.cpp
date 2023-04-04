@@ -51,7 +51,7 @@ namespace MWWorld
         {
             if (!cell.isExterior())
                 continue;
-            auto cellIndex = std::make_pair(cell.getCellId().mIndex.mX, cell.getCellId().mIndex.mY);
+            auto cellIndex = std::make_pair(cell.getGridX(), cell.getGridY());
             mCellContexts[cellIndex] = std::move(cell.mContextList);
         }
     }

@@ -15,7 +15,6 @@
 
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/esmreader.hpp>
-#include <components/misc/strings/lower.hpp>
 
 #include "mergestate.hpp"
 
@@ -117,7 +116,7 @@ void CSMTools::MergeReferencesStage::perform(int stage, CSMDoc::Messages& messag
 
         ref.mOriginalCell = ref.mCell;
 
-        ref.mRefNum.mIndex = mIndex[Misc::StringUtils::lowerCase(ref.mCell.getRefIdString())]++;
+        ref.mRefNum.mIndex = mIndex[ref.mCell]++;
         ref.mRefNum.mContentFile = 0;
         ref.mNew = false;
 

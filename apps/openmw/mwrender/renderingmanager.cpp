@@ -140,8 +140,7 @@ namespace MWRender
     private:
         osg::Matrixf getEyeProjectionMatrix(int view)
         {
-            return Stereo::Manager::instance().computeEyeViewOffset(view)
-                * Stereo::Manager::instance().computeEyeProjection(view, SceneUtil::AutoDepth::isReversed());
+            return Stereo::Manager::instance().computeEyeProjection(view, SceneUtil::AutoDepth::isReversed());
         }
 
         osg::Matrixf mProjectionMatrix;
@@ -155,12 +154,11 @@ namespace MWRender
     class SharedUniformStateUpdater : public SceneUtil::StateSetUpdater
     {
     public:
-        SharedUniformStateUpdater(bool usePlayerUniforms)
+        SharedUniformStateUpdater()
             : mNear(0.f)
             , mFar(0.f)
             , mWindSpeed(0.f)
             , mSkyBlendingStartCoef(Settings::Manager::getFloat("sky blending start", "Fog"))
-            , mUsePlayerUniforms(usePlayerUniforms)
             , mGroundcoverFadeEnd(Settings::Manager::getFloat("rendering distance", "Groundcover"))
             , mGroundcoverStormDirection(osg::Vec2f(0.f, 0.f))
         {
@@ -173,15 +171,10 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("skyBlendingStart", 0.f));
             stateset->addUniform(new osg::Uniform("screenRes", osg::Vec2f{}));
             stateset->addUniform(new osg::Uniform("isReflection", false));
-            stateset->addUniform(new osg::Uniform("stormDir", osg::Vec2f{}));
-
-            if (mUsePlayerUniforms)
-            {
-                stateset->addUniform(new osg::Uniform("windSpeed", 0.0f));
-                stateset->addUniform(new osg::Uniform("playerPos", osg::Vec3f(0.f, 0.f, 0.f)));
-                stateset->addUniform(new osg::Uniform("groundcoverFadeEnd", 0.f));
-                stateset->addUniform(new osg::Uniform("stormDir", osg::Vec2f(0.f, 0.f)));
-            }
+            stateset->addUniform(new osg::Uniform("windSpeed", 0.0f));
+            stateset->addUniform(new osg::Uniform("playerPos", osg::Vec3f(0.f, 0.f, 0.f)));
+            stateset->addUniform(new osg::Uniform("groundcoverFadeEnd", 0.f));
+            stateset->addUniform(new osg::Uniform("stormDir", osg::Vec2f(0.f, 0.f)));
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
@@ -190,14 +183,10 @@ namespace MWRender
             stateset->getUniform("far")->set(mFar);
             stateset->getUniform("skyBlendingStart")->set(mFar * mSkyBlendingStartCoef);
             stateset->getUniform("screenRes")->set(mScreenRes);
-
-            if (mUsePlayerUniforms)
-            {
-                stateset->getUniform("windSpeed")->set(mWindSpeed);
-                stateset->getUniform("playerPos")->set(mPlayerPos);
-                stateset->getUniform("groundcoverFadeEnd")->set(mGroundcoverFadeEnd);
-                stateset->getUniform("stormDir")->set(mGroundcoverStormDirection);
-            }
+            stateset->getUniform("windSpeed")->set(mWindSpeed);
+            stateset->getUniform("playerPos")->set(mPlayerPos);
+            stateset->getUniform("groundcoverFadeEnd")->set(mGroundcoverFadeEnd);
+            stateset->getUniform("stormDir")->set(mGroundcoverStormDirection);
         }
 
         void setNear(float near) { mNear = near; }
@@ -219,7 +208,6 @@ namespace MWRender
         float mFar;
         float mWindSpeed;
         float mSkyBlendingStartCoef;
-        bool mUsePlayerUniforms;
         osg::Vec3f mPlayerPos;
         osg::Vec2f mScreenRes;
         float mGroundcoverFadeEnd;
@@ -552,7 +540,8 @@ namespace MWRender
         mStateUpdater = new StateUpdater;
         sceneRoot->addUpdateCallback(mStateUpdater);
 
-        mSharedUniformStateUpdater = new SharedUniformStateUpdater(groundcover || groundcoverPaging);
+        mSharedUniformStateUpdater = new SharedUniformStateUpdater();
+
         rootNode->addUpdateCallback(mSharedUniformStateUpdater);
 
         mPerViewUniformStateUpdater = new PerViewUniformStateUpdater(mResourceSystem->getSceneManager());
@@ -607,7 +596,6 @@ namespace MWRender
         {
             int skyTextureUnit = mResourceSystem->getSceneManager()->getShaderManager().reserveGlobalTextureUnits(
                 Shader::ShaderManager::Slot::SkyTexture);
-            Log(Debug::Info) << "Reserving texture unit for sky RTT: " << skyTextureUnit;
             mPerViewUniformStateUpdater->enableSkyRTT(skyTextureUnit, mSky->getSkyRTT());
         }
 
@@ -650,9 +638,6 @@ namespace MWRender
             mRootNode->getOrCreateStateSet()->setAttributeAndModes(new SceneUtil::AutoDepth, osg::StateAttribute::ON);
             mRootNode->getOrCreateStateSet()->setAttributeAndModes(clipcontrol, osg::StateAttribute::ON);
         }
-
-        // Assign a default shader on root to handle empty statesets
-        mResourceSystem->getSceneManager()->recreateShaders(mRootNode, "objects");
 
         SceneUtil::setCameraClearDepth(mViewer->getCamera());
 
@@ -942,11 +927,11 @@ namespace MWRender
         float rainIntensity = mSky->getPrecipitationAlpha();
         mWater->setRainIntensity(rainIntensity);
 
+        mWater->update(dt, paused);
         if (!paused)
         {
             mEffectManager->update(dt);
             mSky->update(dt);
-            mWater->update(dt);
 
             const MWWorld::Ptr& player = mPlayerAnimation->getPtr();
             osg::Vec3f playerPos(player.getRefData().getPosition().asVec3());

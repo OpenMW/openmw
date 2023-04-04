@@ -172,8 +172,9 @@ namespace MWGui
             if (type == checkButtonType)
             {
                 std::string initialValue
-                    = Settings::Manager::getBool(getSettingName(current), getSettingCategory(current)) ? "#{sOn}"
-                                                                                                       : "#{sOff}";
+                    = Settings::Manager::getBool(getSettingName(current), getSettingCategory(current))
+                    ? "#{Interface:On}"
+                    : "#{Interface:Off}";
                 current->castType<MyGUI::Button>()->setCaptionWithReplacing(initialValue);
                 if (init)
                     current->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -253,7 +254,7 @@ namespace MWGui
 
         configureWidgets(mMainWidget, true);
 
-        setTitle("#{sOptions}");
+        setTitle("#{OMWEngine:SettingsWindow}");
 
         getWidget(mSettingsTab, "SettingsTab");
         getWidget(mOkButton, "OkButton");
@@ -422,7 +423,8 @@ namespace MWGui
         mPrimaryLanguage->setIndexSelected(MyGUI::ITEM_NONE);
 
         mSecondaryLanguage->removeAllItems();
-        mSecondaryLanguage->addItem(MyGUI::LanguageManager::getInstance().replaceTags("#{sNone}"), std::string());
+        mSecondaryLanguage->addItem(
+            MyGUI::LanguageManager::getInstance().replaceTags("#{Interface:None}"), std::string());
         mSecondaryLanguage->setIndexSelected(0);
 
         size_t i = 0;
@@ -471,7 +473,7 @@ namespace MWGui
             return;
 
         ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-        dialog->askForConfirmation("#{sNotifyMessage67}");
+        dialog->askForConfirmation("#{OMWEngine:ConfirmResolution}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResolutionAccept);
         dialog->eventCancelClicked.clear();
@@ -550,7 +552,7 @@ namespace MWGui
         _sender->setCaptionWithReplacing(_sender->getItemNameAt(_sender->getIndexSelected()));
 
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
-            "#{OMWEngine:ChangeRequiresRestart}", { "#{sOK}" }, true);
+            "#{OMWEngine:ChangeRequiresRestart}", { "#{Interface:OK}" }, true);
 
         Settings::Manager::setString("lighting method", "Shaders", *_sender->getItemDataAt<std::string>(pos));
         apply();
@@ -564,7 +566,7 @@ namespace MWGui
         _sender->setCaptionWithReplacing(_sender->getItemNameAt(_sender->getIndexSelected()));
 
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
-            "#{OMWEngine:ChangeRequiresRestart}", { "#{sOK}" }, true);
+            "#{OMWEngine:ChangeRequiresRestart}", { "#{Interface:OK}" }, true);
 
         std::vector<std::string> currentLocales = Settings::Manager::getStringArray("preferred locales", "General");
         if (currentLocales.size() <= langPriority)
@@ -632,7 +634,7 @@ namespace MWGui
 
     void SettingsWindow::onLightsResetButtonClicked(MyGUI::Widget* _sender)
     {
-        std::vector<std::string> buttons = { "#{sYes}", "#{sNo}" };
+        std::vector<std::string> buttons = { "#{Interface:Yes}", "#{Interface:No}" };
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
             "#{OMWEngine:LightingResetToDefaults}", buttons, true);
         int selectedButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
@@ -1035,9 +1037,9 @@ namespace MWGui
     {
         int actionId = *_sender->getUserData<int>();
 
-        _sender->castType<MyGUI::Button>()->setCaptionWithReplacing("#{sNone}");
+        _sender->castType<MyGUI::Button>()->setCaptionWithReplacing("#{Interface:None}");
 
-        MWBase::Environment::get().getWindowManager()->staticMessageBox("#{sControlsMenu3}");
+        MWBase::Environment::get().getWindowManager()->staticMessageBox("#{OMWEngine:RebindAction}");
         MWBase::Environment::get().getWindowManager()->disallowMouse();
 
         MWBase::Environment::get().getInputManager()->enableDetectingBindingMode(actionId, mKeyboardMode);
@@ -1055,7 +1057,7 @@ namespace MWGui
     void SettingsWindow::onResetDefaultBindings(MyGUI::Widget* _sender)
     {
         ConfirmationDialog* dialog = MWBase::Environment::get().getWindowManager()->getConfirmationDialog();
-        dialog->askForConfirmation("#{sNotifyMessage66}");
+        dialog->askForConfirmation("#{OMWEngine:ConfirmResetBindings}");
         dialog->eventOkClicked.clear();
         dialog->eventOkClicked += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindingsAccept);
         dialog->eventCancelClicked.clear();

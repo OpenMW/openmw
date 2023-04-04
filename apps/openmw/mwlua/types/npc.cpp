@@ -25,26 +25,22 @@ namespace MWLua
     {
         addNpcStatsBindings(npc, context);
 
-        const MWWorld::Store<ESM::NPC>* store = &MWBase::Environment::get().getWorld()->getStore().get<ESM::NPC>();
-        npc["record"]
-            = sol::overload([](const Object& obj) -> const ESM::NPC* { return obj.ptr().get<ESM::NPC>()->mBase; },
-                [store](const std::string& recordId) -> const ESM::NPC* {
-                    return store->find(ESM::RefId::stringRefId(recordId));
-                });
+        addRecordFunctionBinding<ESM::NPC>(npc);
+
         sol::usertype<ESM::NPC> record = context.mLua->sol().new_usertype<ESM::NPC>("ESM3_NPC");
         record[sol::meta_function::to_string]
-            = [](const ESM::NPC& rec) { return "ESM3_NPC[" + rec.mId.getRefIdString() + "]"; };
+            = [](const ESM::NPC& rec) { return "ESM3_NPC[" + rec.mId.toDebugString() + "]"; };
         record["name"] = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mName; });
         record["race"]
-            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mRace.getRefIdString(); });
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mRace.serializeText(); });
         record["class"]
-            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mClass.getRefIdString(); });
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mClass.serializeText(); });
         record["mwscript"]
-            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mScript.getRefIdString(); });
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mScript.serializeText(); });
         record["hair"]
-            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHair.getRefIdString(); });
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHair.serializeText(); });
         record["head"]
-            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.getRefIdString(); });
+            = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.serializeText(); });
 
         // This function is game-specific, in future we should replace it with something more universal.
         npc["isWerewolf"] = [](const Object& o) {

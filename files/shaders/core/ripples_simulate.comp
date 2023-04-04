@@ -1,0 +1,31 @@
+#version 440 core
+
+layout (binding = 0, rgba16f) restrict writeonly uniform image2D imageOut;
+layout (binding = 1, rgba16f) restrict readonly uniform image2D imageIn;
+
+layout (local_size_x=16, local_size_y=16) in;
+
+#include "lib/water/ripples.glsl"
+
+void main()
+{
+    ivec2 texel = ivec2(gl_GlobalInvocationID.xy);
+
+    vec4 n = vec4(
+        imageLoad(imageIn, texel + ivec2(1, 0)).r,
+        imageLoad(imageIn, texel + ivec2(-1, 0)).r,
+        imageLoad(imageIn, texel + ivec2(0, 1)).r,
+        imageLoad(imageIn, texel + ivec2(0, -1)).r
+    );
+
+    vec4 n2 = vec4(
+        imageLoad(imageIn, texel + ivec2(2, 0)).r,
+        imageLoad(imageIn, texel + ivec2(-2, 0)).r,
+        imageLoad(imageIn, texel + ivec2(0, 2)).r,
+        imageLoad(imageIn, texel + ivec2(0, -2)).r
+    );
+
+    vec4 color = imageLoad(imageIn, texel);
+
+    imageStore(imageOut, texel, applySprings(color, n, n2));
+}

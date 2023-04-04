@@ -14,6 +14,7 @@
 #include <components/esm3/player.hpp>
 #include <components/esm3/savedgame.hpp>
 
+#include <components/esm3/cellid.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadarmo.hpp>
 #include <components/esm3/loadclot.hpp>
@@ -373,7 +374,7 @@ namespace ESSImport
         profile.mInGameTime.mMonth = context.mMonth;
         profile.mInGameTime.mYear = context.mYear;
         profile.mTimePlayed = 0;
-        profile.mPlayerCell = ESM::RefId::stringRefId(header.mGameData.mCurrentCell.toString());
+        profile.mPlayerCellName = context.mPlayerCellName;
         if (context.mPlayerBase.mClass == "NEWCLASSID_CHARGEN")
             profile.mPlayerClassName = context.mCustomPlayerClassName;
         else
@@ -409,16 +410,11 @@ namespace ESSImport
         }
 
         writer.startRecord(ESM::REC_PLAY);
-        if (context.mPlayer.mCellId.mPaged)
-        {
-            // exterior cell -> determine cell coordinates based on position
-            int cellX
-                = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[0] / Constants::CellSizeInUnits));
-            int cellY
-                = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[1] / Constants::CellSizeInUnits));
-            context.mPlayer.mCellId.mIndex.mX = cellX;
-            context.mPlayer.mCellId.mIndex.mY = cellY;
-        }
+        ESM::CellId cellId = ESM::CellId::extractFromRefId(context.mPlayer.mCellId);
+        int cellX = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[0] / Constants::CellSizeInUnits));
+        int cellY = static_cast<int>(std::floor(context.mPlayer.mObject.mPosition.pos[1] / Constants::CellSizeInUnits));
+
+        context.mPlayer.mCellId = ESM::Cell::generateIdForCell(cellId.mPaged, cellId.mWorldspace, cellX, cellY);
         context.mPlayer.save(writer);
         writer.endRecord(ESM::REC_PLAY);
 

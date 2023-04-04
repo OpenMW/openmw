@@ -4,6 +4,8 @@
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadcell.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwclass/container.hpp"
@@ -39,7 +41,7 @@ namespace MWLua
     {
         // It is important to check `isMarker` first.
         // For example "prisonmarker" has class "Door" despite that it is only an invisible marker.
-        if (isMarker(ptr))
+        if (Misc::ResourceHelpers::isHiddenMarker(ptr.getCellRef().getRefId()))
             return nullptr;
         const MWWorld::Class& cls = ptr.getClass();
         if (cls.isActivator())
@@ -50,7 +52,7 @@ namespace MWLua
             return &mDoorsInScene;
         if (typeid(cls) == typeid(MWClass::Container))
             return &mContainersInScene;
-        if (cls.hasToolTip(ptr))
+        if (cls.isItem(ptr))
             return &mItemsInScene;
         return nullptr;
     }

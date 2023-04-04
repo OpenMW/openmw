@@ -27,7 +27,6 @@ namespace ESM
     class ReadersCache;
     struct Cell;
     struct CellState;
-    struct CellId;
     struct RefNum;
     struct Activator;
     struct Potion;
@@ -79,8 +78,6 @@ namespace MWWorld
     /// \brief Mutable state of a cell
     class CellStore
     {
-        friend struct CellStoreImp;
-
     public:
         enum State
         {
@@ -89,78 +86,6 @@ namespace MWWorld
             State_Loaded
         };
 
-    private:
-        const MWWorld::ESMStore& mStore;
-        ESM::ReadersCache& mReaders;
-
-        // Even though fog actually belongs to the player and not cells,
-        // it makes sense to store it here since we need it once for each cell.
-        // Note this is nullptr until the cell is explored to save some memory
-        std::unique_ptr<ESM::FogState> mFogState;
-
-        MWWorld::Cell mCellVariant;
-        State mState;
-        bool mHasState;
-        std::vector<ESM::RefId> mIds;
-        float mWaterLevel;
-
-        MWWorld::TimeStamp mLastRespawn;
-
-        template <typename T>
-        static constexpr std::size_t getTypeIndex()
-        {
-            static_assert(Misc::TupleHasType<CellRefList<T>, CellStoreTuple>::value);
-            return Misc::TupleTypeIndex<CellRefList<T>, CellStoreTuple>::value;
-        }
-
-        std::unique_ptr<CellStoreImp> mCellStoreImp;
-        std::vector<CellRefListBase*> mCellRefLists;
-
-        template <class T>
-        CellRefList<T>& get()
-        {
-            mHasState = true;
-            return static_cast<CellRefList<T>&>(*mCellRefLists[getTypeIndex<T>()]);
-        }
-
-        template <class T>
-        const CellRefList<T>& get() const
-        {
-            return static_cast<const CellRefList<T>&>(*mCellRefLists[getTypeIndex<T>()]);
-        }
-
-        typedef std::map<LiveCellRefBase*, MWWorld::CellStore*> MovedRefTracker;
-        // References owned by a different cell that have been moved here.
-        // <reference, cell the reference originally came from>
-        MovedRefTracker mMovedHere;
-        // References owned by this cell that have been moved to another cell.
-        // <reference, cell the reference was moved to>
-        MovedRefTracker mMovedToAnotherCell;
-
-        // Merged list of ref's currently in this cell - i.e. with added refs from mMovedHere, removed refs from
-        // mMovedToAnotherCell
-        std::vector<LiveCellRefBase*> mMergedRefs;
-
-        // Get the Ptr for the given ref which originated from this cell (possibly moved to another cell at this point).
-        Ptr getCurrentPtr(MWWorld::LiveCellRefBase* ref);
-
-        /// Moves object from the given cell to this cell.
-        void moveFrom(const MWWorld::Ptr& object, MWWorld::CellStore* from);
-
-        /// Repopulate mMergedRefs.
-        void updateMergedRefs();
-
-        // (item, max charge)
-        typedef std::vector<std::pair<LiveCellRefBase*, float>> TRechargingItems;
-        TRechargingItems mRechargingItems;
-
-        bool mRechargingItemsUpToDate;
-
-        void updateRechargingItems();
-        void rechargeItems(float duration);
-        void checkItem(const Ptr& ptr);
-
-    public:
         /// Should this reference be accessible to the outside world (i.e. to scripts / game logic)?
         /// Determined based on the deletion flags. By default, objects deleted by content files are never accessible;
         /// objects deleted by setCount(0) are still accessible *if* they came from a content file (needed for vanilla
@@ -364,9 +289,8 @@ namespace MWWorld
 
         struct GetCellStoreCallback
         {
-        public:
             ///@note must return nullptr if the cell is not found
-            virtual CellStore* getCellStore(const ESM::CellId& cellId) = 0;
+            virtual CellStore* getCellStore(const ESM::RefId& cellId) = 0;
             virtual ~GetCellStoreCallback() = default;
         };
 
@@ -383,6 +307,78 @@ namespace MWWorld
         bool operator==(const CellStore& right) const;
 
     private:
+        friend struct CellStoreImp;
+
+        const MWWorld::ESMStore& mStore;
+        ESM::ReadersCache& mReaders;
+
+        // Even though fog actually belongs to the player and not cells,
+        // it makes sense to store it here since we need it once for each cell.
+        // Note this is nullptr until the cell is explored to save some memory
+        std::unique_ptr<ESM::FogState> mFogState;
+
+        MWWorld::Cell mCellVariant;
+        State mState;
+        bool mHasState;
+        std::vector<ESM::RefId> mIds;
+        float mWaterLevel;
+
+        MWWorld::TimeStamp mLastRespawn;
+
+        template <typename T>
+        static constexpr std::size_t getTypeIndex()
+        {
+            static_assert(Misc::TupleHasType<CellRefList<T>, CellStoreTuple>::value);
+            return Misc::TupleTypeIndex<CellRefList<T>, CellStoreTuple>::value;
+        }
+
+        std::unique_ptr<CellStoreImp> mCellStoreImp;
+        std::vector<CellRefListBase*> mCellRefLists;
+
+        template <class T>
+        CellRefList<T>& get()
+        {
+            mHasState = true;
+            return static_cast<CellRefList<T>&>(*mCellRefLists[getTypeIndex<T>()]);
+        }
+
+        template <class T>
+        const CellRefList<T>& get() const
+        {
+            return static_cast<const CellRefList<T>&>(*mCellRefLists[getTypeIndex<T>()]);
+        }
+
+        typedef std::map<LiveCellRefBase*, MWWorld::CellStore*> MovedRefTracker;
+        // References owned by a different cell that have been moved here.
+        // <reference, cell the reference originally came from>
+        MovedRefTracker mMovedHere;
+        // References owned by this cell that have been moved to another cell.
+        // <reference, cell the reference was moved to>
+        MovedRefTracker mMovedToAnotherCell;
+
+        // Merged list of ref's currently in this cell - i.e. with added refs from mMovedHere, removed refs from
+        // mMovedToAnotherCell
+        std::vector<LiveCellRefBase*> mMergedRefs;
+
+        // Get the Ptr for the given ref which originated from this cell (possibly moved to another cell at this point).
+        Ptr getCurrentPtr(MWWorld::LiveCellRefBase* ref);
+
+        /// Moves object from the given cell to this cell.
+        void moveFrom(const MWWorld::Ptr& object, MWWorld::CellStore* from);
+
+        /// Repopulate mMergedRefs.
+        void updateMergedRefs();
+
+        // (item, max charge)
+        typedef std::vector<std::pair<LiveCellRefBase*, float>> TRechargingItems;
+        TRechargingItems mRechargingItems;
+
+        bool mRechargingItemsUpToDate;
+
+        void updateRechargingItems();
+        void rechargeItems(float duration);
+        void checkItem(const Ptr& ptr);
+
         /// Run through references and store IDs
         void listRefs(const ESM::Cell& cell);
         void listRefs(const ESM4::Cell& cell);

@@ -679,11 +679,11 @@ namespace MWGui
 
     void Console::updateConsoleTitle()
     {
-        std::string title = "#{sConsoleTitle}";
+        std::string title = "#{OMWEngine:ConsoleWindow}";
         if (!mConsoleMode.empty())
             title = mConsoleMode + " " + title;
         if (!mPtr.isEmpty())
-            title.append(" (" + mPtr.getCellRef().getRefId().getRefIdString() + ")");
+            title.append(" (" + mPtr.getCellRef().getRefId().toDebugString() + ")");
         setTitle(title);
     }
 
@@ -709,19 +709,20 @@ namespace MWGui
         const auto filePath = mCfgMgr.getUserConfigPath() / "console_history.txt";
         const size_t retrievalLimit = Settings::Manager::getSize("console history buffer size", "General");
 
-        std::ifstream historyFile(filePath);
-        std::string line;
-
         // Read the previous session's commands from the file
-        while (std::getline(historyFile, line))
+        if (retrievalLimit > 0)
         {
-            // Truncate the list if it exceeds the retrieval limit
-            if (mCommandHistory.size() >= retrievalLimit)
-                mCommandHistory.pop_front();
-            mCommandHistory.push_back(line);
+            std::ifstream historyFile(filePath);
+            std::string line;
+            while (std::getline(historyFile, line))
+            {
+                // Truncate the list if it exceeds the retrieval limit
+                if (mCommandHistory.size() >= retrievalLimit)
+                    mCommandHistory.pop_front();
+                mCommandHistory.push_back(line);
+            }
+            historyFile.close();
         }
-
-        historyFile.close();
 
         mCurrent = mCommandHistory.end();
         try

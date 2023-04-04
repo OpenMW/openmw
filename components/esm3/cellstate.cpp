@@ -21,7 +21,7 @@ namespace ESM
 
     void CellState::save(ESMWriter& esm) const
     {
-        if (!mId.mPaged)
+        if (mIsInterior)
             esm.writeHNT("WLVL", mWaterLevel);
 
         esm.writeHNT("HFOW", mHasFogOfWar);

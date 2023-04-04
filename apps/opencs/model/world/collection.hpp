@@ -9,14 +9,17 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
 
 #include <QVariant>
 
+#include <components/esm3/loaddial.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "collectionbase.hpp"
 #include "columnbase.hpp"
+#include "info.hpp"
 #include "land.hpp"
 #include "landtexture.hpp"
 #include "record.hpp"
@@ -24,10 +27,27 @@
 
 namespace CSMWorld
 {
+    inline std::pair<std::string_view, std::string_view> parseInfoRefId(const ESM::RefId& infoId)
+    {
+        const auto separator = infoId.getRefIdString().find('#');
+        if (separator == std::string::npos)
+            throw std::runtime_error("Invalid info id: " + infoId.getRefIdString());
+        const std::string_view view(infoId.getRefIdString());
+        return { view.substr(0, separator), view.substr(separator + 1) };
+    }
+
     template <typename T>
     void setRecordId(const decltype(T::mId)& id, T& record)
     {
         record.mId = id;
+    }
+
+    inline void setRecordId(const ESM::RefId& id, Info& record)
+    {
+        record.mId = id;
+        const auto [topicId, originalId] = parseInfoRefId(id);
+        record.mTopicId = ESM::RefId::stringRefId(topicId);
+        record.mOriginalId = ESM::RefId::stringRefId(originalId);
     }
 
     template <typename T>
@@ -51,7 +71,7 @@ namespace CSMWorld
         return ESM::RefId::stringRefId(Land::createUniqueRecordId(record.mX, record.mY));
     }
 
-    inline void setRecordId(LandTexture& record, const ESM::RefId& id)
+    inline void setRecordId(const ESM::RefId& id, LandTexture& record)
     {
         int plugin = 0;
         int index = 0;
@@ -85,22 +105,24 @@ namespace CSMWorld
     protected:
         const std::vector<std::unique_ptr<Record<ESXRecordT>>>& getRecords() const;
 
+        void reorderRowsImp(const std::vector<int>& indexOrder);
+
         bool reorderRowsImp(int baseIndex, const std::vector<int>& newOrder);
         ///< Reorder the rows [baseIndex, baseIndex+newOrder.size()) according to the indices
         /// given in \a newOrder (baseIndex+newOrder[0] specifies the new index of row baseIndex).
         ///
         /// \return Success?
 
-        int cloneRecordImp(const std::string& origin, const std::string& dest, UniversalId::Type type);
+        int cloneRecordImp(const ESM::RefId& origin, const ESM::RefId& dest, UniversalId::Type type);
         ///< Returns the index of the clone.
 
-        int touchRecordImp(const std::string& id);
+        int touchRecordImp(const ESM::RefId& id);
         ///< Returns the index of the record on success, -1 on failure.
 
     public:
         Collection();
 
-        virtual ~Collection();
+        ~Collection() override;
 
         void add(const ESXRecordT& record);
         ///< Add a new record (modified)
@@ -119,10 +141,10 @@ namespace CSMWorld
 
         const ColumnBase& getColumn(int column) const override;
 
-        virtual void merge();
+        void merge();
         ///< Merge modified into base.
 
-        virtual void purge();
+        void purge();
         ///< Remove records that are flagged as erased.
 
         void removeRows(int index, int count) override;
@@ -192,6 +214,20 @@ namespace CSMWorld
     }
 
     template <typename ESXRecordT>
+    void Collection<ESXRecordT>::reorderRowsImp(const std::vector<int>& indexOrder)
+    {
+        assert(indexOrder.size() == mRecords.size());
+        assert(std::unordered_set(indexOrder.begin(), indexOrder.end()).size() == indexOrder.size());
+        std::vector<std::unique_ptr<Record<ESXRecordT>>> orderedRecords;
+        for (const int index : indexOrder)
+        {
+            mIndex.at(mRecords[index]->get().mId) = static_cast<int>(orderedRecords.size());
+            orderedRecords.push_back(std::move(mRecords[index]));
+        }
+        mRecords = std::move(orderedRecords);
+    }
+
+    template <typename ESXRecordT>
     bool Collection<ESXRecordT>::reorderRowsImp(int baseIndex, const std::vector<int>& newOrder)
     {
         if (!newOrder.empty())
@@ -227,29 +263,37 @@ namespace CSMWorld
 
     template <typename ESXRecordT>
     int Collection<ESXRecordT>::cloneRecordImp(
-        const std::string& origin, const std::string& destination, UniversalId::Type type)
+        const ESM::RefId& origin, const ESM::RefId& destination, UniversalId::Type type)
     {
         auto copy = std::make_unique<Record<ESXRecordT>>();
-        copy->mModified = getRecord(ESM::RefId::stringRefId(origin)).get();
+        copy->mModified = getRecord(origin).get();
         copy->mState = RecordBase::State_ModifiedOnly;
-        setRecordId(ESM::RefId::stringRefId(destination), copy->get());
+        setRecordId(destination, copy->get());
 
-        if (type == UniversalId::Type_Reference)
+        if constexpr (std::is_same_v<ESXRecordT, CSMWorld::CellRef>)
         {
-            CSMWorld::CellRef* ptr = (CSMWorld::CellRef*)&copy->mModified;
-            ptr->mRefNum.mIndex = 0;
+            if (type == UniversalId::Type_Reference)
+            {
+                CSMWorld::CellRef* ptr = (CSMWorld::CellRef*)&copy->mModified;
+                ptr->mRefNum.mIndex = 0;
+            }
         }
-        ESM::RefId destinationRefId = ESM::RefId::stringRefId(destination);
-        int index = getAppendIndex(destinationRefId, type);
-        insertRecord(std::move(copy), getAppendIndex(destinationRefId, type));
+
+        if constexpr (std::is_same_v<ESXRecordT, ESM::Dialogue>)
+        {
+            copy->mModified.mStringId = copy->mModified.mId.getRefIdString();
+        }
+
+        const int index = getAppendIndex(destination, type);
+        insertRecord(std::move(copy), getAppendIndex(destination, type));
 
         return index;
     }
 
     template <typename ESXRecordT>
-    int Collection<ESXRecordT>::touchRecordImp(const std::string& id)
+    int Collection<ESXRecordT>::touchRecordImp(const ESM::RefId& id)
     {
-        int index = getIndex(ESM::RefId::stringRefId(id));
+        const int index = getIndex(id);
         Record<ESXRecordT>& record = *mRecords.at(index);
         if (record.isDeleted())
         {
@@ -269,27 +313,27 @@ namespace CSMWorld
     void Collection<ESXRecordT>::cloneRecord(
         const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type)
     {
-        cloneRecordImp(origin.getRefIdString(), destination.getRefIdString(), type);
+        cloneRecordImp(origin, destination, type);
     }
 
     template <>
     inline void Collection<Land>::cloneRecord(
         const ESM::RefId& origin, const ESM::RefId& destination, const UniversalId::Type type)
     {
-        int index = cloneRecordImp(origin.getRefIdString(), destination.getRefIdString(), type);
+        const int index = cloneRecordImp(origin, destination, type);
         mRecords.at(index)->get().setPlugin(0);
     }
 
     template <typename ESXRecordT>
     bool Collection<ESXRecordT>::touchRecord(const ESM::RefId& id)
     {
-        return touchRecordImp(id.getRefIdString()) != -1;
+        return touchRecordImp(id) != -1;
     }
 
     template <>
     inline bool Collection<Land>::touchRecord(const ESM::RefId& id)
     {
-        int index = touchRecordImp(id.getRefIdString());
+        const int index = touchRecordImp(id);
         if (index >= 0)
         {
             mRecords.at(index)->get().setPlugin(0);
@@ -450,6 +494,11 @@ namespace CSMWorld
         ESXRecordT record;
         setRecordId(id, record);
         record.blank();
+
+        if constexpr (std::is_same_v<ESXRecordT, ESM::Dialogue>)
+        {
+            record.mStringId = record.mId.getRefIdString();
+        }
 
         auto record2 = std::make_unique<Record<ESXRecordT>>();
         record2->mState = Record<ESXRecordT>::State_ModifiedOnly;

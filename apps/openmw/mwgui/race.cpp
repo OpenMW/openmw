@@ -321,7 +321,6 @@ namespace MWGui
 
         for (const ESM::BodyPart& bodypart : store)
         {
-            const std::string& idString = bodypart.mId.getRefIdString();
             if (bodypart.mData.mFlags & ESM::BodyPart::BPF_NotPlayable)
                 continue;
             if (bodypart.mData.mType != ESM::BodyPart::MT_Skin)
@@ -330,8 +329,7 @@ namespace MWGui
                 continue;
             if (mGenderIndex != (bodypart.mData.mFlags & ESM::BodyPart::BPF_Female))
                 continue;
-            bool firstPerson = Misc::StringUtils::ciEndsWith(idString, "1st");
-            if (firstPerson)
+            if (ESM::isFirstPersonBodyPart(bodypart))
                 continue;
             if (bodypart.mRace == mCurrentRaceId)
                 out.push_back(bodypart.mId);
@@ -454,13 +452,13 @@ namespace MWGui
         const ESM::Race* race = store.get<ESM::Race>().find(mCurrentRaceId);
 
         int i = 0;
-        for (const auto& spellpower : race->mPowers.mList)
+        for (const ESM::RefId& spellpower : race->mPowers.mList)
         {
             Widgets::MWSpellPtr spellPowerWidget = mSpellPowerList->createWidget<Widgets::MWSpell>(
                 "MW_StatName", coord, MyGUI::Align::Default, std::string("SpellPower") + MyGUI::utility::toString(i));
             spellPowerWidget->setSpellId(spellpower);
             spellPowerWidget->setUserString("ToolTipType", "Spell");
-            spellPowerWidget->setUserString("Spell", spellpower.getRefIdString());
+            spellPowerWidget->setUserString("Spell", spellpower.serialize());
 
             mSpellPowerItems.push_back(spellPowerWidget);
 

@@ -29,7 +29,6 @@ namespace ESM4
     class Reader;
     struct Static;
     struct Cell;
-    struct Reference;
     struct Light;
 }
 
@@ -106,7 +105,7 @@ namespace MWWorld
             // Special entry which is hardcoded and not loaded from an ESM
             Store<ESM::Attribute>,
 
-            Store<ESM4::Static>, Store<ESM4::Cell>, Store<ESM4::Reference>, Store<ESM4::Light>>;
+            Store<ESM4::Static>, Store<ESM4::Cell>, Store<ESM4::Light>>;
 
     private:
         template <typename T>
@@ -186,14 +185,11 @@ namespace MWWorld
         template <class T>
         const T* insert(const T& x)
         {
-            const ESM::RefId id = ESM::RefId::stringRefId("$dynamic" + std::to_string(mDynamicCount++));
+            const ESM::RefId id = ESM::RefId::generated(mDynamicCount++);
 
             Store<T>& store = getWritable<T>();
             if (store.search(id) != nullptr)
-            {
-                const std::string msg = "Try to override existing record '" + id.getRefIdString() + "'";
-                throw std::runtime_error(msg);
-            }
+                throw std::runtime_error("Try to override existing record: " + id.toDebugString());
             T record = x;
 
             record.mId = id;
@@ -225,10 +221,7 @@ namespace MWWorld
         {
             Store<T>& store = getWritable<T>();
             if (store.search(x.mId) != nullptr)
-            {
-                const std::string msg = "Try to override existing record '" + x.mId.getRefIdString() + "'";
-                throw std::runtime_error(msg);
-            }
+                throw std::runtime_error("Try to override existing record " + x.mId.toDebugString());
 
             T* ptr = store.insertStatic(x);
             if constexpr (std::is_convertible_v<Store<T>*, DynamicStore*>)

@@ -21,7 +21,7 @@
 
 
         <Widget type="Button" skin="MW_Button" position="8 112 0 24" name="CancelButton">
-            <Property key="Caption" value="#{sCancel}"/>
+            <Property key="Caption" value="#{Interface:Cancel}"/>
         </Widget>
 
     </Widget>

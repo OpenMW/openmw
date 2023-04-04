@@ -9,6 +9,7 @@
 #include <osg/TextureCubeMap>
 
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
@@ -195,13 +196,19 @@ namespace MWRender
         int cubeSize = screenshotMapping == Planet ? screenshotW : screenshotW / 2;
 
         if (settingArgs.size() > 1)
-            screenshotW = std::min(10000, std::atoi(settingArgs[1].c_str()));
+        {
+            screenshotW = std::min(10000, Misc::StringUtils::toNumeric<int>(settingArgs[1], 0));
+        }
 
         if (settingArgs.size() > 2)
-            screenshotH = std::min(10000, std::atoi(settingArgs[2].c_str()));
+        {
+            screenshotH = std::min(10000, Misc::StringUtils::toNumeric<int>(settingArgs[2], 0));
+        }
 
         if (settingArgs.size() > 3)
-            cubeSize = std::min(5000, std::atoi(settingArgs[3].c_str()));
+        {
+            cubeSize = std::min(5000, Misc::StringUtils::toNumeric<int>(settingArgs[3], 0));
+        }
 
         bool rawCubemap = screenshotMapping == RawCubemap;
 

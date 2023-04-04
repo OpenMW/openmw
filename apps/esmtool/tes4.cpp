@@ -7,6 +7,7 @@
 #include <type_traits>
 
 #include <components/esm/esmcommon.hpp>
+#include <components/esm/typetraits.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/esm4/readerutils.hpp>
 #include <components/esm4/records.hpp>
@@ -72,10 +73,33 @@ namespace EsmTool
         };
 
         template <class T>
+        struct WriteData
+        {
+            const T& mValue;
+
+            explicit WriteData(const T& value)
+                : mValue(value)
+            {
+            }
+        };
+
+        template <class T>
         std::ostream& operator<<(std::ostream& stream, const WriteArray<T>& write)
         {
             for (const auto& value : write.mValue)
                 stream << write.mPrefix << value;
+            return stream;
+        }
+
+        template <class T>
+        std::ostream& operator<<(std::ostream& stream, const WriteData<T>& /*write*/)
+        {
+            return stream << " ?";
+        }
+
+        std::ostream& operator<<(std::ostream& stream, const WriteData<ESM4::GameSetting::Data>& write)
+        {
+            std::visit([&](const auto& v) { stream << v; }, write.mValue);
             return stream;
         }
 
@@ -93,7 +117,7 @@ namespace EsmTool
             std::cout << "\n  Record: " << ESM::NAME(reader.hdr().record.typeId).toStringView();
             if constexpr (ESM4::hasFormId<T>)
                 std::cout << "\n  FormId: " << value.mFormId;
-            if constexpr (ESM4::hasId<T>)
+            if constexpr (ESM::hasId<T>)
                 std::cout << "\n  Id: " << value.mId;
             if constexpr (ESM4::hasFlags<T>)
                 std::cout << "\n  Record flags: " << recordFlags(value.mFlags);
@@ -103,7 +127,7 @@ namespace EsmTool
                 std::cout << "\n  Parent: " << value.mParent;
             if constexpr (ESM4::hasEditorId<T>)
                 std::cout << "\n  EditorId: " << value.mEditorId;
-            if constexpr (ESM4::hasModel<T>)
+            if constexpr (ESM::hasModel<T>)
                 std::cout << "\n  Model: " << value.mModel;
             if constexpr (ESM4::hasNif<T>)
                 std::cout << "\n  Nif:" << WriteArray("\n  - ", value.mNif);
@@ -113,6 +137,8 @@ namespace EsmTool
                 std::cout << "\n  Type: " << value.mType;
             if constexpr (ESM4::hasValue<T>)
                 std::cout << "\n  Value: " << value.mValue;
+            if constexpr (ESM4::hasData<T>)
+                std::cout << "\n  Data: " << WriteData(value.mData);
             std::cout << '\n';
         }
 
@@ -252,7 +278,8 @@ namespace EsmTool
                     readTypedRecord<ESM4::GlobalVariable>(params, reader);
                     return true;
                 case ESM4::REC_GMST:
-                    break;
+                    readTypedRecord<ESM4::GameSetting>(params, reader);
+                    return true;
                 case ESM4::REC_GRAS:
                     readTypedRecord<ESM4::Grass>(params, reader);
                     return true;

@@ -31,7 +31,8 @@
 #include <string>
 #include <vector>
 
-#include "common.hpp"
+#include "formid.hpp"
+#include "grid.hpp"
 
 namespace ESM4
 {

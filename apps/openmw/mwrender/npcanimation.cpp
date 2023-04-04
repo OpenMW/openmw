@@ -85,7 +85,6 @@ namespace
 
 namespace MWRender
 {
-
     class HeadAnimationTime : public SceneUtil::ControllerSource
     {
     private:
@@ -526,8 +525,7 @@ namespace MWRender
 
             addAnimSource(smodel, smodel);
 
-            if (!isWerewolf
-                && Misc::StringUtils::lowerCase(mNpc->mRace.getRefIdString()).find("argonian") != std::string::npos)
+            if (!isWerewolf && mNpc->mRace.contains("argonian"))
                 addAnimSource("meshes\\xargonian_swimkna.nif", smodel);
         }
         else
@@ -760,12 +758,6 @@ namespace MWRender
             if (mPartslots[i] == group)
                 removeIndividualPart((ESM::PartReferenceType)i);
         }
-    }
-
-    bool NpcAnimation::isFirstPersonPart(const ESM::BodyPart* bodypart)
-    {
-        std::string_view partName = bodypart->mId.getRefIdString();
-        return partName.size() >= 3 && partName.substr(partName.size() - 3, 3) == "1st";
     }
 
     bool NpcAnimation::isFemalePart(const ESM::BodyPart* bodypart)
@@ -1221,7 +1213,7 @@ namespace MWRender
                 if (!(bodypart.mRace == race))
                     continue;
 
-                bool partFirstPerson = isFirstPersonPart(&bodypart);
+                const bool partFirstPerson = ESM::isFirstPersonBodyPart(bodypart);
 
                 bool isHand = bodypart.mData.mPart == ESM::BodyPart::MP_Hand
                     || bodypart.mData.mPart == ESM::BodyPart::MP_Wrist
@@ -1278,7 +1270,7 @@ namespace MWRender
                             parts[bIt->second] = &bodypart;
 
                         // If we have 3d person fallback bodypart for hand and 1st person fallback found (2)
-                        else if (isHand && !isFirstPersonPart(parts[bIt->second]) && partFirstPerson)
+                        else if (isHand && !ESM::isFirstPersonBodyPart(*parts[bIt->second]) && partFirstPerson)
                             parts[bIt->second] = &bodypart;
 
                         ++bIt;

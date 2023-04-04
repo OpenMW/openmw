@@ -1,7 +1,10 @@
 #ifndef CSM_WOLRD_SCOPE_H
 #define CSM_WOLRD_SCOPE_H
 
-#include <string>
+namespace ESM
+{
+    class RefId;
+}
 
 namespace CSMWorld
 {
@@ -17,7 +20,7 @@ namespace CSMWorld
         Scope_Session = 4
     };
 
-    Scope getScopeFromId(const std::string& id);
+    Scope getScopeFromId(ESM::RefId id);
 }
 
 #endif

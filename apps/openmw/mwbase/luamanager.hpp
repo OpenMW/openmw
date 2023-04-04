@@ -28,7 +28,14 @@ namespace ESM
 
 namespace MWBase
 {
-
+    // \brief LuaManager is the central interface through which the engine invokes lua scripts.
+    //
+    // The native side invokes functions on this interface, which queues events to be handled by the
+    // scripts in the lua thread. Synchronous calls are not possible.
+    //
+    // The main implementation is in apps/openmw/mwlua/luamanagerimp.cpp.
+    // Lua logic in general lives under apps/openmw/mwlua and this interface is
+    // the main way for the rest of the engine to interact with the logic there.
     class LuaManager
     {
     public:

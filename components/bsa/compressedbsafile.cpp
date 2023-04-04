@@ -432,43 +432,6 @@ namespace Bsa
         return std::make_unique<Files::StreamWithBuffer<MemoryInputStream>>(std::move(memoryStreamPtr));
     }
 
-    BsaVersion CompressedBSAFile::detectVersion(const std::filesystem::path& filePath)
-    {
-        std::ifstream input(filePath, std::ios_base::binary);
-
-        // Total archive size
-        std::streamoff fsize = 0;
-        if (input.seekg(0, std::ios_base::end))
-        {
-            fsize = input.tellg();
-            input.seekg(0);
-        }
-
-        if (fsize < 12)
-        {
-            return BSAVER_UNKNOWN;
-        }
-
-        // Get essential header numbers
-
-        // First 12 bytes
-        uint32_t head[3];
-
-        input.read(reinterpret_cast<char*>(head), 12);
-
-        if (head[0] == static_cast<uint32_t>(BSAVER_UNCOMPRESSED))
-        {
-            return BSAVER_UNCOMPRESSED;
-        }
-
-        if (head[0] == static_cast<uint32_t>(BSAVER_COMPRESSED))
-        {
-            return BSAVER_COMPRESSED;
-        }
-
-        return BSAVER_UNKNOWN;
-    }
-
     // mFiles used by OpenMW expects uncompressed sizes
     void CompressedBSAFile::convertCompressedSizesToUncompressed()
     {

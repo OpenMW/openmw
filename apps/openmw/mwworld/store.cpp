@@ -153,7 +153,7 @@ namespace MWWorld
     {
         std::vector<const T*> results;
         std::copy_if(mShared.begin(), mShared.end(), std::back_inserter(results),
-            [prefix](const T* item) { return Misc::StringUtils::ciStartsWith(item->mId.getRefIdString(), prefix); });
+            [prefix](const T* item) { return item->mId.startsWith(prefix); });
         if (!results.empty())
             return results[Misc::Rng::rollDice(results.size(), prng)];
         return nullptr;
@@ -468,13 +468,17 @@ namespace MWWorld
     // Cell
     //=========================================================================
 
+    const ESM::Cell* Store<ESM::Cell>::search(const ESM::RefId& cellId) const
+    {
+        auto foundCellIt = mCells.find(cellId);
+        if (foundCellIt != mCells.end())
+            return &foundCellIt->second;
+        return nullptr;
+    }
+
     const ESM::Cell* Store<ESM::Cell>::search(const ESM::Cell& cell) const
     {
-        if (cell.isExterior())
-        {
-            return search(cell.getGridX(), cell.getGridY());
-        }
-        return search(cell.mName);
+        return search(cell.mId);
     }
 
     // this method *must* be called right after esm3.loadCell()
@@ -522,13 +526,13 @@ namespace MWWorld
         DynamicInt::const_iterator it = mInt.find(nameString);
         if (it != mInt.end())
         {
-            return &(it->second);
+            return it->second;
         }
 
         DynamicInt::const_iterator dit = mDynamicInt.find(nameString);
         if (dit != mDynamicInt.end())
         {
-            return &dit->second;
+            return dit->second;
         }
 
         return nullptr;
@@ -538,11 +542,11 @@ namespace MWWorld
         std::pair<int, int> key(x, y);
         DynamicExt::const_iterator it = mExt.find(key);
         if (it != mExt.end())
-            return &(it->second);
+            return it->second;
 
         DynamicExt::const_iterator dit = mDynamicExt.find(key);
         if (dit != mDynamicExt.end())
-            return &dit->second;
+            return dit->second;
 
         return nullptr;
     }
@@ -550,7 +554,7 @@ namespace MWWorld
     {
         DynamicExt::const_iterator it = mExt.find(std::make_pair(x, y));
         if (it != mExt.end())
-            return &(it->second);
+            return (it->second);
         return nullptr;
     }
     const ESM::Cell* Store<ESM::Cell>::searchOrCreate(int x, int y)
@@ -558,11 +562,11 @@ namespace MWWorld
         std::pair<int, int> key(x, y);
         DynamicExt::const_iterator it = mExt.find(key);
         if (it != mExt.end())
-            return &(it->second);
+            return (it->second);
 
         DynamicExt::const_iterator dit = mDynamicExt.find(key);
         if (dit != mDynamicExt.end())
-            return &dit->second;
+            return dit->second;
 
         ESM::Cell newCell;
         newCell.mData.mX = x;
@@ -572,11 +576,11 @@ namespace MWWorld
         newCell.mAmbi.mSunlight = 0;
         newCell.mAmbi.mFog = 0;
         newCell.mAmbi.mFogDensity = 0;
-        newCell.mCellId.mPaged = true;
-        newCell.mCellId.mIndex.mX = x;
-        newCell.mCellId.mIndex.mY = y;
+        newCell.updateId();
 
-        return &mExt.insert(std::make_pair(key, newCell)).first->second;
+        ESM::Cell* newCellInserted = &mCells.insert(std::make_pair(newCell.mId, newCell)).first->second;
+
+        return mExt.insert(std::make_pair(key, newCellInserted)).first->second;
     }
     const ESM::Cell* Store<ESM::Cell>::find(std::string_view id) const
     {
@@ -608,12 +612,12 @@ namespace MWWorld
         mSharedInt.clear();
         mSharedInt.reserve(mInt.size());
         for (auto& [_, cell] : mInt)
-            mSharedInt.push_back(&cell);
+            mSharedInt.push_back(cell);
 
         mSharedExt.clear();
         mSharedExt.reserve(mExt.size());
         for (auto& [_, cell] : mExt)
-            mSharedExt.push_back(&cell);
+            mSharedExt.push_back(cell);
     }
     RecordId Store<ESM::Cell>::load(ESM::ESMReader& esm)
     {
@@ -623,13 +627,17 @@ namespace MWWorld
         //  are not available until both cells have been loaded at least partially!
 
         // All cells have a name record, even nameless exterior cells.
-        ESM::Cell cell;
+        ESM::Cell* emplacedCell = nullptr;
         bool isDeleted = false;
 
+        {
+            ESM::Cell cellToLoad;
+            cellToLoad.loadNameAndData(esm, isDeleted);
+            emplacedCell = &mCells.insert(std::make_pair(cellToLoad.mId, cellToLoad)).first->second;
+        }
+        ESM::Cell& cell = *emplacedCell;
         // Load the (x,y) coordinates of the cell, if it is an exterior cell,
         // so we can find the cell we need to merge with
-        cell.loadNameAndData(esm, isDeleted);
-
         if (cell.mData.mFlags & ESM::Cell::Interior)
         {
             // Store interior cell by name, try to merge with existing parent data.
@@ -648,7 +656,7 @@ namespace MWWorld
                 // spawn a new cell
                 cell.loadCell(esm, true);
 
-                mInt[cell.mName] = cell;
+                mInt[cell.mName] = &cell;
             }
         }
         else
@@ -701,19 +709,19 @@ namespace MWWorld
             else
             {
                 // spawn a new cell
-                cell.loadCell(esm, false);
+                emplacedCell->loadCell(esm, false);
 
                 // handle moved ref (MVRF) subrecords
-                handleMovedCellRefs(esm, &cell);
+                handleMovedCellRefs(esm, emplacedCell);
 
                 // push the new references on the list of references to manage
-                cell.postLoad(esm);
+                emplacedCell->postLoad(esm);
 
-                mExt[std::make_pair(cell.mData.mX, cell.mData.mY)] = cell;
+                mExt[std::make_pair(cell.mData.mX, cell.mData.mY)] = &cell;
             }
         }
 
-        return RecordId(ESM::RefId::stringRefId(cell.mName), isDeleted);
+        return RecordId(cell.mId, isDeleted);
     }
     Store<ESM::Cell>::iterator Store<ESM::Cell>::intBegin() const
     {
@@ -791,21 +799,22 @@ namespace MWWorld
             const std::string cellType = (cell.isExterior()) ? "exterior" : "interior";
             throw std::runtime_error("Failed to create " + cellType + " cell");
         }
+        ESM::Cell* insertedCell = &mCells.emplace(cell.mId, cell).first->second;
         if (cell.isExterior())
         {
             std::pair<int, int> key(cell.getGridX(), cell.getGridY());
 
             // duplicate insertions are avoided by search(ESM::Cell &)
-            DynamicExt::iterator result = mDynamicExt.emplace(key, cell).first;
-            mSharedExt.push_back(&result->second);
-            return &result->second;
+            DynamicExt::iterator result = mDynamicExt.emplace(key, insertedCell).first;
+            mSharedExt.push_back(result->second);
+            return result->second;
         }
         else
         {
             // duplicate insertions are avoided by search(ESM::Cell &)
-            DynamicInt::iterator result = mDynamicInt.emplace(cell.mName, cell).first;
-            mSharedInt.push_back(&result->second);
-            return &result->second;
+            DynamicInt::iterator result = mDynamicInt.emplace(cell.mName, insertedCell).first;
+            mSharedInt.push_back(result->second);
+            return result->second;
         }
     }
     bool Store<ESM::Cell>::erase(const ESM::Cell& cell)
@@ -830,7 +839,7 @@ namespace MWWorld
 
         for (it = mDynamicInt.begin(); it != mDynamicInt.end(); ++it)
         {
-            mSharedInt.push_back(&it->second);
+            mSharedInt.push_back(it->second);
         }
 
         return true;
@@ -849,7 +858,7 @@ namespace MWWorld
 
         for (it = mDynamicExt.begin(); it != mDynamicExt.end(); ++it)
         {
-            mSharedExt.push_back(&it->second);
+            mSharedExt.push_back(it->second);
         }
 
         return true;
@@ -952,11 +961,8 @@ namespace MWWorld
     const ESM::Pathgrid* Store<ESM::Pathgrid>::find(const ESM::RefId& name) const
     {
         const ESM::Pathgrid* pathgrid = search(name);
-        if (!pathgrid)
-        {
-            const std::string msg = "Pathgrid in cell '" + name.getRefIdString() + "' not found";
-            throw std::runtime_error(msg);
-        }
+        if (pathgrid == nullptr)
+            throw std::runtime_error("Pathgrid in cell " + name.toDebugString() + " is not found");
         return pathgrid;
     }
     const ESM::Pathgrid* Store<ESM::Pathgrid>::search(const ESM::Cell& cell) const
@@ -1072,7 +1078,7 @@ namespace MWWorld
         // DialInfos marked as deleted are kept during the loading phase, so that the linked list
         // structure is kept intact for inserting further INFOs. Delete them now that loading is done.
         for (auto& [_, dial] : mStatic)
-            dial.clearDeletedInfos();
+            dial.setUp();
 
         mShared.clear();
         mShared.reserve(mStatic.size());

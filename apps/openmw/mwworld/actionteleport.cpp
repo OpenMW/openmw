@@ -19,9 +19,9 @@
 
 namespace MWWorld
 {
-    ActionTeleport::ActionTeleport(std::string_view cellName, const ESM::Position& position, bool teleportFollowers)
+    ActionTeleport::ActionTeleport(ESM::RefId cellId, const ESM::Position& position, bool teleportFollowers)
         : Action(true)
-        , mCellName(cellName)
+        , mCellId(cellId)
         , mPosition(position)
         , mTeleportFollowers(teleportFollowers)
     {
@@ -33,7 +33,9 @@ namespace MWWorld
         {
             // Find any NPCs that are following the actor and teleport them with him
             std::set<MWWorld::Ptr> followers;
-            getFollowers(actor, followers, mCellName.empty(), true);
+
+            bool toExterior = MWBase::Environment::get().getWorldModel()->getCell(mCellId)->isExterior();
+            getFollowers(actor, followers, toExterior, true);
 
             for (std::set<MWWorld::Ptr>::iterator it = followers.begin(); it != followers.end(); ++it)
                 teleport(*it);
@@ -52,10 +54,7 @@ namespace MWWorld
         if (actor == world->getPlayerPtr())
         {
             world->getPlayer().setTeleported(true);
-            if (mCellName.empty())
-                world->changeToExteriorCell(mPosition, true);
-            else
-                world->changeToInteriorCell(mCellName, mPosition, true);
+            world->changeToCell(mCellId, mPosition, true);
             teleported = world->getPlayerPtr();
         }
         else
@@ -65,15 +64,9 @@ namespace MWWorld
                 actor.getClass().getCreatureStats(actor).getAiSequence().stopCombat();
                 return;
             }
-            else if (mCellName.empty())
-            {
-                const osg::Vec2i index = positionToCellIndex(mPosition.pos[0], mPosition.pos[1]);
-                teleported = world->moveObject(
-                    actor, worldModel->getExterior(index.x(), index.y()), mPosition.asVec3(), true, true);
-            }
+
             else
-                teleported
-                    = world->moveObject(actor, worldModel->getInterior(mCellName), mPosition.asVec3(), true, true);
+                teleported = world->moveObject(actor, worldModel->getCell(mCellId), mPosition.asVec3(), true, true);
         }
 
         if (!world->isWaterWalkingCastableOnTarget(teleported) && MWMechanics::hasWaterWalking(teleported))

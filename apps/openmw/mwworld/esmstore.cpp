@@ -318,7 +318,7 @@ namespace MWWorld
                 {
                     if (dialogue)
                     {
-                        dialogue->readInfo(esm, esm.getIndex() != 0);
+                        dialogue->readInfo(esm);
                     }
                     else
                     {
@@ -439,9 +439,7 @@ namespace MWWorld
 
         getWritable<ESM::Skill>().setUp();
         getWritable<ESM::MagicEffect>().setUp();
-        ;
         getWritable<ESM::Attribute>().setUp();
-        getWritable<ESM::Dialogue>().setUp();
     }
 
     void ESMStore::validateRecords(ESM::ReadersCache& readers)
@@ -731,12 +729,9 @@ namespace MWWorld
         {
             return npcs.insert(npc);
         }
-        const ESM::RefId id = ESM::RefId::stringRefId("$dynamic" + std::to_string(mDynamicCount++));
+        const ESM::RefId id = ESM::RefId::generated(mDynamicCount++);
         if (npcs.search(id) != nullptr)
-        {
-            const std::string msg = "Try to override existing record '" + id.getRefIdString() + "'";
-            throw std::runtime_error(msg);
-        }
+            throw std::runtime_error("Try to override existing record: " + id.toDebugString());
         ESM::NPC record = npc;
 
         record.mId = id;

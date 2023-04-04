@@ -39,7 +39,7 @@ namespace MWWorld
 
         for (const ESM::Global& esmGlobal : globals)
         {
-            mVariables.emplace(esmGlobal.mId.getRefIdString(), esmGlobal);
+            mVariables.emplace(esmGlobal.mId, esmGlobal);
         }
     }
 
@@ -101,8 +101,7 @@ namespace MWWorld
             // Deleted globals can't appear there, so isDeleted will be ignored here.
             global.load(reader, isDeleted);
 
-            Collection::iterator iter = mVariables.find(global.mId.getRefIdString());
-            if (iter != mVariables.end())
+            if (const auto iter = mVariables.find(global.mId); iter != mVariables.end())
                 iter->second = global;
 
             return true;

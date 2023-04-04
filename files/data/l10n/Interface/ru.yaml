@@ -1,3 +1,5 @@
+Cancel: "Отмена"
+Close: "Закрыть"
 DurationDay: "{days} д "
 DurationHour: "{hours} ч "
 DurationMinute: "{minutes} мин "
@@ -11,5 +13,9 @@ DurationYear: |-
   }
 No: "Нет"
 NotAvailableShort: "Н/Д"
-Reset: "Обнулить"
+None: "Нет"
+OK: "OK"
+Off: "Выкл"
+On: "Вкл"
+Reset: "Сбросить"
 Yes: "Да"

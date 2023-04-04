@@ -7,7 +7,6 @@
 #include <string>
 
 #include <osg/BoundingBox>
-#include <osg/Matrixf>
 #include <osg/Referenced>
 #include <osg/ref_ptr>
 
@@ -60,14 +59,10 @@ namespace NifBullet
         bool hasRootCollisionNode(const Nif::Node& rootNode) const;
         bool collisionShapeIsEmpty(const Nif::Node& rootNode) const;
 
-        void handleNiTriShape(const Nif::NiGeometry& nifNode, const Nif::Parent* parent, const osg::Matrixf& transform,
-            bool isAnimated, bool avoid);
+        void handleNiTriShape(const Nif::NiGeometry& nifNode, const Nif::Parent* parent, bool isAnimated, bool avoid);
 
         std::unique_ptr<btCompoundShape, Resource::DeleteCollisionShape> mCompoundShape;
-
-        std::unique_ptr<btTriangleMesh> mStaticMesh;
-
-        std::unique_ptr<btTriangleMesh> mAvoidStaticMesh;
+        std::unique_ptr<btCompoundShape, Resource::DeleteCollisionShape> mAvoidCompoundShape;
 
         osg::ref_ptr<Resource::BulletShape> mShape;
     };

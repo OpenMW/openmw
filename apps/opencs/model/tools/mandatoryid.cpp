@@ -25,5 +25,5 @@ int CSMTools::MandatoryIdStage::setup()
 void CSMTools::MandatoryIdStage::perform(int stage, CSMDoc::Messages& messages)
 {
     if (mIdCollection.searchId(mIds.at(stage)) == -1 || mIdCollection.getRecord(mIds.at(stage)).isDeleted())
-        messages.add(mCollectionId, "Missing mandatory record: " + mIds.at(stage).getRefIdString());
+        messages.add(mCollectionId, "Missing mandatory record: " + mIds.at(stage).toDebugString());
 }

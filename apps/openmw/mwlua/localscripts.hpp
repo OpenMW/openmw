@@ -16,6 +16,46 @@ namespace MWLua
 {
     struct Context;
 
+    struct SelfObject : public LObject
+    {
+        class CachedStat
+        {
+        public:
+            using Setter = void (*)(int, std::string_view, const MWWorld::Ptr&, const sol::object&);
+
+            CachedStat(Setter setter, int index, std::string_view prop)
+                : mSetter(setter)
+                , mIndex(index)
+                , mProp(std::move(prop))
+            {
+            }
+
+            void operator()(const MWWorld::Ptr& ptr, const sol::object& object) const
+            {
+                mSetter(mIndex, mProp, ptr, object);
+            }
+
+            bool operator<(const CachedStat& other) const
+            {
+                return std::tie(mSetter, mIndex, mProp) < std::tie(other.mSetter, other.mIndex, other.mProp);
+            }
+
+        private:
+            Setter mSetter; // Function that updates a stat's property
+            int mIndex; // Optional index to disambiguate the stat
+            std::string_view mProp; // Name of the stat's property
+        };
+
+        SelfObject(const LObject& obj)
+            : LObject(obj)
+            , mIsActive(false)
+        {
+        }
+        MWBase::LuaManager::ActorControls mControls;
+        std::map<CachedStat, sol::object> mStatsCache;
+        bool mIsActive;
+    };
+
     class LocalScripts : public LuaUtil::ScriptsContainer
     {
     public:
@@ -25,63 +65,9 @@ namespace MWLua
         MWBase::LuaManager::ActorControls* getActorControls() { return &mData.mControls; }
         const MWWorld::Ptr& getPtr() const { return mData.ptr(); }
 
-        struct SelfObject : public LObject
-        {
-            class CachedStat
-            {
-            public:
-                using Setter = void (*)(int, std::string_view, const MWWorld::Ptr&, const sol::object&);
-
-            private:
-                Setter mSetter; // Function that updates a stat's property
-                int mIndex; // Optional index to disambiguate the stat
-                std::string_view mProp; // Name of the stat's property
-            public:
-                CachedStat(Setter setter, int index, std::string_view prop)
-                    : mSetter(setter)
-                    , mIndex(index)
-                    , mProp(std::move(prop))
-                {
-                }
-
-                void operator()(const MWWorld::Ptr& ptr, const sol::object& object) const
-                {
-                    mSetter(mIndex, mProp, ptr, object);
-                }
-
-                bool operator<(const CachedStat& other) const
-                {
-                    return std::tie(mSetter, mIndex, mProp) < std::tie(other.mSetter, other.mIndex, other.mProp);
-                }
-            };
-
-            SelfObject(const LObject& obj)
-                : LObject(obj)
-                , mIsActive(false)
-            {
-            }
-            MWBase::LuaManager::ActorControls mControls;
-            std::map<CachedStat, sol::object> mStatsCache;
-            bool mIsActive;
-        };
-
-        struct OnActive
-        {
-        };
-        struct OnInactive
-        {
-        };
-        struct OnActivated
-        {
-            LObject mActivatingActor;
-        };
-        struct OnConsume
-        {
-            LObject mConsumable;
-        };
-        using EngineEvent = std::variant<OnActive, OnInactive, OnConsume, OnActivated>;
-
-        void receiveEngineEvent(const EngineEvent&);
+        void setActive(bool active);
+        void onConsume(const LObject& consumable) { callEngineHandlers(mOnConsumeHandlers, consumable); }
+        void onActivated(const LObject& actor) { callEngineHandlers(mOnActivatedHandlers, actor); }
 
         void applyStatsCache();
 

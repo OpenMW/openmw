@@ -190,17 +190,16 @@ void CSMDoc::WriteDialogueCollectionStage::perform(int stage, Messages& messages
                     ESM::DialInfo info = record.get();
                     info.mId = record.get().mOriginalId;
 
-                    info.mPrev = ESM::RefId();
-                    if (iter != infos.begin())
-                    {
-                        const auto prev = std::prev(iter);
-                        info.mPrev = (*prev)->get().mOriginalId;
-                    }
+                    if (iter == infos.begin())
+                        info.mPrev = ESM::RefId();
+                    else
+                        info.mPrev = (*std::prev(iter))->get().mOriginalId;
 
                     const auto next = std::next(iter);
 
-                    info.mNext = ESM::RefId();
-                    if (next != infos.end())
+                    if (next == infos.end())
+                        info.mNext = ESM::RefId();
+                    else
                         info.mNext = (*next)->get().mOriginalId;
 
                     writer.startRecord(info.sRecordId);
@@ -236,7 +235,7 @@ CSMDoc::CollectionReferencesStage::CollectionReferencesStage(Document& document,
 
 int CSMDoc::CollectionReferencesStage::setup()
 {
-    mState.getSubRecords().clear();
+    mState.clearSubRecords();
 
     int size = mDocument.getData().getReferences().getSize();
 
@@ -260,10 +259,10 @@ void CSMDoc::CollectionReferencesStage::perform(int stage, Messages& messages)
             const ESM::RefId& cellId
                 = record.get().mOriginalCell.empty() ? record.get().mCell : record.get().mOriginalCell;
 
-            std::deque<int>& indices = mState.getSubRecords()[cellId.getRefIdString()];
+            std::deque<int>& indices = mState.getOrInsertSubRecord(cellId);
 
             // collect moved references at the end of the container
-            bool interior = cellId.getRefIdString()[0] != '#';
+            const bool interior = !cellId.startsWith("#");
             std::ostringstream stream;
             if (!interior)
             {
@@ -360,22 +359,19 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
     std::deque<int> tempRefs;
     std::deque<int> persistentRefs;
 
-    std::map<std::string, std::deque<int>>::const_iterator references
-        = mState.getSubRecords().find(cell.get().mId.getRefIdString());
+    const std::deque<int>* references = mState.findSubRecord(cell.get().mId);
 
-    if (cell.isModified() || cell.mState == CSMWorld::RecordBase::State_Deleted
-        || references != mState.getSubRecords().end())
+    if (cell.isModified() || cell.mState == CSMWorld::RecordBase::State_Deleted || references != nullptr)
     {
         CSMWorld::Cell cellRecord = cell.get();
-        bool interior = cellRecord.mId.getRefIdString()[0] != '#';
+        const bool interior = !cellRecord.mId.startsWith("#");
 
         // count new references and adjust RefNumCount accordingsly
         unsigned int newRefNum = cellRecord.mRefNumCounter;
 
-        if (references != mState.getSubRecords().end())
+        if (references != nullptr)
         {
-            for (std::deque<int>::const_iterator iter(references->second.begin()); iter != references->second.end();
-                 ++iter)
+            for (std::deque<int>::const_iterator iter(references->begin()); iter != references->end(); ++iter)
             {
                 const CSMWorld::Record<CSMWorld::CellRef>& ref = mDocument.getData().getReferences().getRecord(*iter);
 
@@ -421,10 +417,10 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
         cellRecord.save(writer, cell.mState == CSMWorld::RecordBase::State_Deleted);
 
         // write references
-        if (references != mState.getSubRecords().end())
+        if (references != nullptr)
         {
             writeReferences(persistentRefs, interior, newRefNum);
-            cellRecord.saveTempMarker(writer, int(references->second.size()) - persistentRefs.size());
+            cellRecord.saveTempMarker(writer, static_cast<int>(references->size()) - persistentRefs.size());
             writeReferences(tempRefs, interior, newRefNum);
         }
 
@@ -451,10 +447,9 @@ void CSMDoc::WritePathgridCollectionStage::perform(int stage, Messages& messages
     if (pathgrid.isModified() || pathgrid.mState == CSMWorld::RecordBase::State_Deleted)
     {
         CSMWorld::Pathgrid record = pathgrid.get();
-        std::string recordIdString = record.mId.getRefIdString();
-        if (recordIdString[0] == '#')
+        if (record.mId.startsWith("#"))
         {
-            std::istringstream stream(recordIdString.c_str());
+            std::istringstream stream(record.mId.getRefIdString());
             char ignore;
             stream >> ignore >> record.mData.mX >> record.mData.mY;
         }

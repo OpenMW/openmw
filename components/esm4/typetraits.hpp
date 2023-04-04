@@ -19,19 +19,6 @@ namespace ESM4
     inline constexpr bool hasFormId = HasFormId<T>::value;
 
     template <class T, class = std::void_t<>>
-    struct HasId : std::false_type
-    {
-    };
-
-    template <class T>
-    struct HasId<T, std::void_t<decltype(T::mId)>> : std::true_type
-    {
-    };
-
-    template <class T>
-    inline constexpr bool hasId = HasId<T>::value;
-
-    template <class T, class = std::void_t<>>
     struct HasParentFormId : std::false_type
     {
     };
@@ -84,19 +71,6 @@ namespace ESM4
     inline constexpr bool hasEditorId = HasEditorId<T>::value;
 
     template <class T, class = std::void_t<>>
-    struct HasModel : std::false_type
-    {
-    };
-
-    template <class T>
-    struct HasModel<T, std::void_t<decltype(T::mModel)>> : std::true_type
-    {
-    };
-
-    template <class T>
-    inline constexpr bool hasModel = HasModel<T>::value;
-
-    template <class T, class = std::void_t<>>
     struct HasNif : std::false_type
     {
     };
@@ -147,6 +121,19 @@ namespace ESM4
 
     template <class T>
     inline constexpr bool hasValue = HasValue<T>::value;
+
+    template <class T, class = std::void_t<>>
+    struct HasData : std::false_type
+    {
+    };
+
+    template <class T>
+    struct HasData<T, std::void_t<decltype(T::mData)>> : std::true_type
+    {
+    };
+
+    template <class T>
+    inline constexpr bool hasData = HasData<T>::value;
 }
 
 #endif // OPENMW_COMPONENTS_ESM4_TYPETRAITS

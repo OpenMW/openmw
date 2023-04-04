@@ -53,6 +53,7 @@
 #include <components/to_utf8/to_utf8.hpp>
 
 #include "formid.hpp"
+#include "grouptype.hpp"
 
 namespace ESM4
 {
@@ -134,6 +135,8 @@ namespace ESM4
     ReaderContext Reader::getContext()
     {
         mCtx.filePos = mStream->tellg();
+        if (mCtx.filePos == std::streampos(-1))
+            return mCtx;
         mCtx.filePos -= mCtx.recHeaderSize; // update file position
         return mCtx;
     }
@@ -225,8 +228,9 @@ namespace ESM4
         sp.type = stringType;
 
         // TODO: possibly check if the resource exists?
-        Files::IStreamPtr filestream
-            = mVFS ? mVFS->get(stringFile.string()) : Files::openConstrainedFileStream(stringFile);
+        Files::IStreamPtr filestream = mVFS
+            ? mVFS->get(stringFile.string())
+            : Files::openConstrainedFileStream(mCtx.filename.parent_path() / stringFile);
 
         filestream->seekg(0, std::ios::end);
         std::size_t fileSize = filestream->tellg();
@@ -377,7 +381,7 @@ namespace ESM4
             boost::iostreams::copy(inputStreamBuf, sr);
 
             // For debugging only
-            //#if 0
+            // #if 0
             if (dump)
             {
                 std::ostringstream ss;
@@ -395,7 +399,7 @@ namespace ESM4
                 }
                 std::cout << ss.str() << std::endl;
             }
-            //#endif
+            // #endif
             mStream = std::make_unique<Files::StreamWithBuffer<Bsa::MemoryInputStream>>(std::move(memoryStreamPtr));
         }
     }
@@ -513,11 +517,11 @@ namespace ESM4
             lastGroupSize = mCtx.groupStack.back().first.groupSize;
 
             assert(lastGroupSize >= mCtx.groupStack.back().second && "Read more records than available");
-            //#if 0
+            // #if 0
             if (mCtx.groupStack.back().second > lastGroupSize) // FIXME: debugging only
                 std::cerr << printLabel(mCtx.groupStack.back().first.label, mCtx.groupStack.back().first.type)
                           << " read more records than available" << std::endl;
-            //#endif
+            // #endif
         }
     }
 
@@ -739,4 +743,66 @@ namespace ESM4
         return true;
     }
 
+    namespace
+    {
+        constexpr std::string_view sGroupType[] = {
+            "Record Type",
+            "World Child",
+            "Interior Cell",
+            "Interior Sub Cell",
+            "Exterior Cell",
+            "Exterior Sub Cell",
+            "Cell Child",
+            "Topic Child",
+            "Cell Persistent Child",
+            "Cell Temporary Child",
+            "Cell Visible Dist Child",
+            "Unknown",
+        };
+    }
+
+    std::string printLabel(const GroupLabel& label, const std::uint32_t type)
+    {
+        std::ostringstream ss;
+        ss << sGroupType[std::min<std::size_t>(type, std::size(sGroupType))]; // avoid out of range
+
+        switch (type)
+        {
+            case ESM4::Grp_RecordType:
+            {
+                ss << ": " << std::string((char*)label.recordType, 4);
+                break;
+            }
+            case ESM4::Grp_ExteriorCell:
+            case ESM4::Grp_ExteriorSubCell:
+            {
+                // short x, y;
+                // y = label & 0xff;
+                // x = (label >> 16) & 0xff;
+                ss << ": grid (x, y) " << std::dec << label.grid[1] << ", " << label.grid[0];
+
+                break;
+            }
+            case ESM4::Grp_InteriorCell:
+            case ESM4::Grp_InteriorSubCell:
+            {
+                ss << ": block 0x" << std::hex << label.value;
+                break;
+            }
+            case ESM4::Grp_WorldChild:
+            case ESM4::Grp_CellChild:
+            case ESM4::Grp_TopicChild:
+            case ESM4::Grp_CellPersistentChild:
+            case ESM4::Grp_CellTemporaryChild:
+            case ESM4::Grp_CellVisibleDistChild:
+            {
+                ss << ": FormId 0x" << formIdToString(label.value);
+                break;
+            }
+            default:
+                break;
+        }
+
+        return ss.str();
+    }
 }

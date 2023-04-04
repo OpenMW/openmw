@@ -76,12 +76,12 @@ namespace MWGui
         MWWorld::InventoryStore& store = player.getClass().getInventoryStore(player);
         switch (mKey[index].type)
         {
-            case Type_Unassigned:
-            case Type_HandToHand:
-            case Type_Magic:
+            case ESM::QuickKeys::Type::Unassigned:
+            case ESM::QuickKeys::Type::HandToHand:
+            case ESM::QuickKeys::Type::Magic:
                 break;
-            case Type_Item:
-            case Type_MagicItem:
+            case ESM::QuickKeys::Type::Item:
+            case ESM::QuickKeys::Type::MagicItem:
             {
                 MWWorld::Ptr item = *mKey[index].button->getUserData<MWWorld::Ptr>();
                 // Make sure the item is available and is not broken
@@ -133,7 +133,7 @@ namespace MWGui
 
         if (key->index == 10)
         {
-            key->type = Type_HandToHand;
+            key->type = ESM::QuickKeys::Type::HandToHand;
 
             MyGUI::ImageBox* image = key->button->createWidget<MyGUI::ImageBox>(
                 "ImageBox", MyGUI::IntCoord(14, 13, 32, 32), MyGUI::Align::Default);
@@ -143,7 +143,7 @@ namespace MWGui
         }
         else
         {
-            key->type = Type_Unassigned;
+            key->type = ESM::QuickKeys::Type::Unassigned;
             key->id = ESM::RefId();
             key->name.clear();
 
@@ -176,7 +176,7 @@ namespace MWGui
 
         mSelected = &mKey[index];
 
-        // prevent reallocation of zero key from Type_HandToHand
+        // prevent reallocation of zero key from ESM::QuickKeys::Type::HandToHand
         if (mSelected->index == 10)
             return;
 
@@ -236,7 +236,7 @@ namespace MWGui
         while (mSelected->button->getChildCount()) // Destroy number label
             MyGUI::Gui::getInstance().destroyWidget(mSelected->button->getChildAt(0));
 
-        mSelected->type = Type_Item;
+        mSelected->type = ESM::QuickKeys::Type::Item;
         mSelected->id = item.getCellRef().getRefId();
         mSelected->name = item.getClass().getName(item);
 
@@ -260,7 +260,7 @@ namespace MWGui
         while (mSelected->button->getChildCount()) // Destroy number label
             MyGUI::Gui::getInstance().destroyWidget(mSelected->button->getChildAt(0));
 
-        mSelected->type = Type_MagicItem;
+        mSelected->type = ESM::QuickKeys::Type::MagicItem;
         mSelected->id = item.getCellRef().getRefId();
         mSelected->name = item.getClass().getName(item);
 
@@ -290,13 +290,13 @@ namespace MWGui
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
         const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(spellId);
 
-        mSelected->type = Type_Magic;
+        mSelected->type = ESM::QuickKeys::Type::Magic;
         mSelected->id = spellId;
         mSelected->name = spell->mName;
 
         mSelected->button->setItem(MWWorld::Ptr());
         mSelected->button->setUserString("ToolTipType", "Spell");
-        mSelected->button->setUserString("Spell", spellId.getRefIdString());
+        mSelected->button->setUserString("Spell", spellId.serialize());
 
         // use the icon of the first effect
         const ESM::MagicEffect* effect = esmStore.get<ESM::MagicEffect>().find(spell->mEffects.mList.front().mEffectID);
@@ -369,7 +369,7 @@ namespace MWGui
             mActivated = nullptr;
         }
 
-        if (key->type == Type_Item || key->type == Type_MagicItem)
+        if (key->type == ESM::QuickKeys::Type::Item || key->type == ESM::QuickKeys::Type::MagicItem)
         {
             MWWorld::Ptr item = *key->button->getUserData<MWWorld::Ptr>();
 
@@ -396,7 +396,7 @@ namespace MWGui
                 }
             }
 
-            if (key->type == Type_Item)
+            if (key->type == ESM::QuickKeys::Type::Item)
             {
                 if (!store.isEquipped(item))
                     MWBase::Environment::get().getWindowManager()->useItem(item);
@@ -408,7 +408,7 @@ namespace MWGui
                     MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState::Weapon);
                 }
             }
-            else if (key->type == Type_MagicItem)
+            else if (key->type == ESM::QuickKeys::Type::MagicItem)
             {
                 // equip, if it can be equipped and isn't yet equipped
                 if (!item.getClass().getEquipmentSlots(item).first.empty() && !store.isEquipped(item))
@@ -424,7 +424,7 @@ namespace MWGui
                 MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState::Spell);
             }
         }
-        else if (key->type == Type_Magic)
+        else if (key->type == ESM::QuickKeys::Type::Magic)
         {
             const ESM::RefId& spellId = key->id;
 
@@ -443,7 +443,7 @@ namespace MWGui
                 spellId, int(MWMechanics::getSpellSuccessChance(spellId, player)));
             MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState::Spell);
         }
-        else if (key->type == Type_HandToHand)
+        else if (key->type == ESM::QuickKeys::Type::HandToHand)
         {
             store.unequipSlot(MWWorld::InventoryStore::Slot_CarriedRight);
             MWBase::Environment::get().getWorld()->getPlayer().setDrawState(MWMechanics::DrawState::Weapon);
@@ -499,25 +499,25 @@ namespace MWGui
         {
             ItemWidget* button = mKey[i].button;
 
-            int type = mKey[i].type;
+            const ESM::QuickKeys::Type type = mKey[i].type;
 
             ESM::QuickKeys::QuickKey key;
             key.mType = type;
 
             switch (type)
             {
-                case Type_Unassigned:
-                case Type_HandToHand:
+                case ESM::QuickKeys::Type::Unassigned:
+                case ESM::QuickKeys::Type::HandToHand:
                     break;
-                case Type_Item:
-                case Type_MagicItem:
+                case ESM::QuickKeys::Type::Item:
+                case ESM::QuickKeys::Type::MagicItem:
                 {
                     MWWorld::Ptr item = *button->getUserData<MWWorld::Ptr>();
                     key.mId = item.getCellRef().getRefId();
                     break;
                 }
-                case Type_Magic:
-                    key.mId = ESM::RefId::stringRefId(button->getUserString("Spell"));
+                case ESM::QuickKeys::Type::Magic:
+                    key.mId = ESM::RefId::deserialize(button->getUserString("Spell"));
                     break;
             }
 
@@ -551,12 +551,12 @@ namespace MWGui
 
             switch (quickKey.mType)
             {
-                case Type_Magic:
+                case ESM::QuickKeys::Type::Magic:
                     if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(quickKey.mId))
                         onAssignMagic(quickKey.mId);
                     break;
-                case Type_Item:
-                case Type_MagicItem:
+                case ESM::QuickKeys::Type::Item:
+                case ESM::QuickKeys::Type::MagicItem:
                 {
                     // Find the item by id
                     MWWorld::Ptr item = store.findReplacement(quickKey.mId);
@@ -565,16 +565,16 @@ namespace MWGui
                         unassign(mSelected);
                     else
                     {
-                        if (quickKey.mType == Type_Item)
+                        if (quickKey.mType == ESM::QuickKeys::Type::Item)
                             onAssignItem(item);
-                        else // if (quickKey.mType == Type_MagicItem)
+                        else // if (quickKey.mType == ESM::QuickKeys::Type::MagicItem)
                             onAssignMagicItem(item);
                     }
 
                     break;
                 }
-                case Type_Unassigned:
-                case Type_HandToHand:
+                case ESM::QuickKeys::Type::Unassigned:
+                case ESM::QuickKeys::Type::HandToHand:
                     unassign(mSelected);
                     break;
             }

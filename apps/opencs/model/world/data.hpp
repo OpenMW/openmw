@@ -15,6 +15,7 @@
 
 #include <components/esm3/debugprofile.hpp>
 #include <components/esm3/filter.hpp>
+#include <components/esm3/infoorder.hpp>
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadclas.hpp>
@@ -123,7 +124,7 @@ namespace CSMWorld
         const ESM::Dialogue* mDialogue; // last loaded dialogue
         bool mBase;
         bool mProject;
-        std::map<std::string, std::map<unsigned int, unsigned int>, Misc::StringUtils::CiComp> mRefLoadCache;
+        std::map<ESM::RefId, std::map<unsigned int, unsigned int>> mRefLoadCache;
         int mReaderIndex;
 
         bool mFsStrict;
@@ -135,8 +136,8 @@ namespace CSMWorld
 
         std::vector<std::shared_ptr<ESM::ESMReader>> mReaders;
 
-        CSMWorld::InfosByTopic mJournalInfosByTopic;
-        CSMWorld::InfosByTopic mTopicInfosByTopic;
+        InfoOrderByTopic mJournalInfoOrder;
+        InfoOrderByTopic mTopicInfoOrder;
 
         // not implemented
         Data(const Data&);
@@ -306,6 +307,8 @@ namespace CSMWorld
 
         bool continueLoading(CSMDoc::Messages& messages);
         ///< \return Finished?
+
+        void finishLoading();
 
         bool hasId(const std::string& id) const;
 

@@ -19,13 +19,12 @@
 
 #include "character.hpp"
 
-#include <sstream>
-
 #include <components/esm/records.hpp>
 #include <components/misc/mathutil.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 #include <components/settings/settings.hpp>
 
@@ -1006,23 +1005,23 @@ namespace MWMechanics
             std::string_view soundgen = evt.substr(10);
 
             // The event can optionally contain volume and pitch modifiers
-            float volume = 1.f, pitch = 1.f;
+            float volume = 1.0f;
+            float pitch = 1.0f;
+
             if (soundgen.find(' ') != std::string::npos)
             {
                 std::vector<std::string_view> tokens;
                 Misc::StringUtils::split(soundgen, tokens);
                 soundgen = tokens[0];
+
                 if (tokens.size() >= 2)
                 {
-                    std::stringstream stream;
-                    stream << tokens[1];
-                    stream >> volume;
+                    volume = Misc::StringUtils::toNumeric<float>(tokens[1], volume);
                 }
+
                 if (tokens.size() >= 3)
                 {
-                    std::stringstream stream;
-                    stream << tokens[2];
-                    stream >> pitch;
+                    pitch = Misc::StringUtils::toNumeric<float>(tokens[2], pitch);
                 }
             }
 

@@ -5,13 +5,14 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include <components/files/configurationmanager.hpp>
 #include <components/files/qtconversion.hpp>
 
 #include "utils/textinputdialog.hpp"
 
 using namespace Process;
 
-Launcher::ImportPage::ImportPage(Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
+Launcher::ImportPage::ImportPage(const Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
     Config::LauncherSettings& launcherSettings, MainDialog* parent)
     : QWidget(parent)
     , mCfgMgr(cfg)

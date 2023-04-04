@@ -25,14 +25,6 @@
 namespace
 {
 
-    osg::Matrixf getWorldTransform(const Nif::Node& node, const Nif::Parent* nodeParent)
-    {
-        osg::Matrixf result = node.trafo.toMatrix();
-        for (const Nif::Parent* parent = nodeParent; parent != nullptr; parent = parent->mParent)
-            result *= parent->mNiNode.trafo.toMatrix();
-        return result;
-    }
-
     bool pathFileNameStartsWithX(const std::string& path)
     {
         const std::size_t slashpos = path.find_last_of("/\\");
@@ -40,26 +32,28 @@ namespace
         return letterPos < path.size() && (path[letterPos] == 'x' || path[letterPos] == 'X');
     }
 
-    void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriShapeData& data, const osg::Matrixf& transform)
+    void prepareTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriBasedGeomData& data)
     {
+        // FIXME: copying vertices/indices individually is unreasonable
         const std::vector<osg::Vec3f>& vertices = data.vertices;
-        const std::vector<unsigned short>& triangles = data.triangles;
         mesh.preallocateVertices(static_cast<int>(vertices.size()));
-        mesh.preallocateIndices(static_cast<int>(triangles.size()));
+        for (const osg::Vec3f& vertex : vertices)
+            mesh.findOrAddVertex(Misc::Convert::toBullet(vertex), false);
 
-        for (std::size_t i = 0; i < triangles.size(); i += 3)
-        {
-            mesh.addTriangle(Misc::Convert::toBullet(vertices[triangles[i + 0]] * transform),
-                Misc::Convert::toBullet(vertices[triangles[i + 1]] * transform),
-                Misc::Convert::toBullet(vertices[triangles[i + 2]] * transform));
-        }
+        mesh.preallocateIndices(static_cast<int>(data.mNumTriangles * 3));
     }
 
-    void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriStripsData& data, const osg::Matrixf& transform)
+    void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriShapeData& data)
     {
-        mesh.preallocateVertices(static_cast<int>(data.vertices.size()));
-        mesh.preallocateIndices(static_cast<int>(data.mNumTriangles));
+        prepareTriangleMesh(mesh, data);
+        const std::vector<unsigned short>& triangles = data.triangles;
+        for (std::size_t i = 0; i < triangles.size(); i += 3)
+            mesh.addTriangleIndices(triangles[i + 0], triangles[i + 1], triangles[i + 2]);
+    }
 
+    void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriStripsData& data)
+    {
+        prepareTriangleMesh(mesh, data);
         for (const std::vector<unsigned short>& strip : data.strips)
         {
             if (strip.size() < 3)
@@ -75,13 +69,10 @@ namespace
                 c = strip[i];
                 if (a == b || b == c || a == c)
                     continue;
-                const btVector3 vertexA = Misc::Convert::toBullet(data.vertices[a] * transform);
-                const btVector3 vertexB = Misc::Convert::toBullet(data.vertices[b] * transform);
-                const btVector3 vertexC = Misc::Convert::toBullet(data.vertices[c] * transform);
                 if (i % 2 == 0)
-                    mesh.addTriangle(vertexA, vertexB, vertexC);
+                    mesh.addTriangleIndices(a, b, c);
                 else
-                    mesh.addTriangle(vertexA, vertexC, vertexB);
+                    mesh.addTriangleIndices(a, c, b);
             }
         }
     }
@@ -117,22 +108,11 @@ namespace
         return {};
     }
 
-    std::monostate fillTriangleMesh(
-        std::unique_ptr<btTriangleMesh>& mesh, const Nif::NiGeometry& geometry, const osg::Matrixf& transform)
-    {
-        return handleNiGeometry(geometry, [&](const auto& data) {
-            if (mesh == nullptr)
-                mesh = std::make_unique<btTriangleMesh>(false);
-            fillTriangleMesh(*mesh, data, transform);
-            return std::monostate{};
-        });
-    }
-
     std::unique_ptr<btTriangleMesh> makeChildMesh(const Nif::NiGeometry& geometry)
     {
         return handleNiGeometry(geometry, [&](const auto& data) {
             auto mesh = std::make_unique<btTriangleMesh>();
-            fillTriangleMesh(*mesh, data, osg::Matrixf());
+            fillTriangleMesh(*mesh, data);
             return mesh;
         });
     }
@@ -147,8 +127,7 @@ namespace NifBullet
         mShape = new Resource::BulletShape;
 
         mCompoundShape.reset();
-        mStaticMesh.reset();
-        mAvoidStaticMesh.reset();
+        mAvoidCompoundShape.reset();
 
         mShape->mFileHash = nif.getHash();
 
@@ -208,30 +187,10 @@ namespace NifBullet
         }
 
         if (mCompoundShape)
-        {
-            if (mStaticMesh != nullptr && mStaticMesh->getNumTriangles() > 0)
-            {
-                btTransform trans;
-                trans.setIdentity();
-                std::unique_ptr<btCollisionShape> child
-                    = std::make_unique<Resource::TriangleMeshShape>(mStaticMesh.get(), true);
-                mCompoundShape->addChildShape(trans, child.get());
-                std::ignore = child.release();
-                std::ignore = mStaticMesh.release();
-            }
             mShape->mCollisionShape = std::move(mCompoundShape);
-        }
-        else if (mStaticMesh != nullptr && mStaticMesh->getNumTriangles() > 0)
-        {
-            mShape->mCollisionShape.reset(new Resource::TriangleMeshShape(mStaticMesh.get(), true));
-            std::ignore = mStaticMesh.release();
-        }
 
-        if (mAvoidStaticMesh != nullptr && mAvoidStaticMesh->getNumTriangles() > 0)
-        {
-            mShape->mAvoidCollisionShape.reset(new Resource::TriangleMeshShape(mAvoidStaticMesh.get(), false));
-            std::ignore = mAvoidStaticMesh.release();
-        }
+        if (mAvoidCompoundShape)
+            mShape->mAvoidCollisionShape = std::move(mAvoidCompoundShape);
 
         return mShape;
     }
@@ -378,8 +337,7 @@ namespace NifBullet
                 && (node.recType == Nif::RC_NiTriShape || node.recType == Nif::RC_NiTriStrips
                     || node.recType == Nif::RC_BSLODTriShape))
             {
-                handleNiTriShape(static_cast<const Nif::NiGeometry&>(node), parent, getWorldTransform(node, parent),
-                    isAnimated, avoid);
+                handleNiTriShape(static_cast<const Nif::NiGeometry&>(node), parent, isAnimated, avoid);
             }
         }
 
@@ -400,8 +358,8 @@ namespace NifBullet
         }
     }
 
-    void BulletNifLoader::handleNiTriShape(const Nif::NiGeometry& niGeometry, const Nif::Parent* nodeParent,
-        const osg::Matrixf& transform, bool isAnimated, bool avoid)
+    void BulletNifLoader::handleNiTriShape(
+        const Nif::NiGeometry& niGeometry, const Nif::Parent* nodeParent, bool isAnimated, bool avoid)
     {
         if (niGeometry.data.empty() || niGeometry.data->vertices.empty())
             return;
@@ -409,36 +367,42 @@ namespace NifBullet
         if (!niGeometry.skin.empty())
             isAnimated = false;
 
-        if (isAnimated)
-        {
-            std::unique_ptr<btTriangleMesh> childMesh = makeChildMesh(niGeometry);
-            if (childMesh == nullptr || childMesh->getNumTriangles() == 0)
-                return;
+        std::unique_ptr<btTriangleMesh> childMesh = makeChildMesh(niGeometry);
+        if (childMesh == nullptr || childMesh->getNumTriangles() == 0)
+            return;
 
+        auto childShape = std::make_unique<Resource::TriangleMeshShape>(childMesh.get(), true);
+        std::ignore = childMesh.release();
+
+        osg::Matrixf transform = niGeometry.trafo.toMatrix();
+        for (const Nif::Parent* parent = nodeParent; parent != nullptr; parent = parent->mParent)
+            transform *= parent->mNiNode.trafo.toMatrix();
+        childShape->setLocalScaling(Misc::Convert::toBullet(transform.getScale()));
+        transform.orthoNormalize(transform);
+
+        btTransform trans;
+        trans.setOrigin(Misc::Convert::toBullet(transform.getTrans()));
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+                trans.getBasis()[i][j] = transform(j, i);
+
+        if (!avoid)
+        {
             if (!mCompoundShape)
                 mCompoundShape.reset(new btCompoundShape);
 
-            auto childShape = std::make_unique<Resource::TriangleMeshShape>(childMesh.get(), true);
-            std::ignore = childMesh.release();
-
-            float scale = niGeometry.trafo.scale;
-            for (const Nif::Parent* parent = nodeParent; parent != nullptr; parent = parent->mParent)
-                scale *= parent->mNiNode.trafo.scale;
-            osg::Quat q = transform.getRotate();
-            osg::Vec3f v = transform.getTrans();
-            childShape->setLocalScaling(btVector3(scale, scale, scale));
-
-            btTransform trans(btQuaternion(q.x(), q.y(), q.z(), q.w()), btVector3(v.x(), v.y(), v.z()));
-
-            mShape->mAnimatedShapes.emplace(niGeometry.recIndex, mCompoundShape->getNumChildShapes());
-
+            if (isAnimated)
+                mShape->mAnimatedShapes.emplace(niGeometry.recIndex, mCompoundShape->getNumChildShapes());
             mCompoundShape->addChildShape(trans, childShape.get());
-            std::ignore = childShape.release();
         }
-        else if (avoid)
-            fillTriangleMesh(mAvoidStaticMesh, niGeometry, transform);
         else
-            fillTriangleMesh(mStaticMesh, niGeometry, transform);
+        {
+            if (!mAvoidCompoundShape)
+                mAvoidCompoundShape.reset(new btCompoundShape);
+            mAvoidCompoundShape->addChildShape(trans, childShape.get());
+        }
+
+        std::ignore = childShape.release();
     }
 
 } // namespace NifBullet

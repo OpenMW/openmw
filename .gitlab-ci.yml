@@ -47,12 +47,14 @@ variables:
     - df -h
     - du -sh .
     - cmake --install .
-    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_test_suite --gtest_output="xml:tests.xml"; fi
+    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw_test_suite --gtest_output="xml:openmw_tests.xml"; fi
+    - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw-cs-tests --gtest_output="xml:openmw_cs_tests.xml"; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_detournavigator_navmeshtilescache_benchmark; fi
+    - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_esm_refid_benchmark; fi
     - ccache -s
     - df -h
     - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then gcovr --xml-pretty --exclude-unreachable-branches --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
-    - ls | grep -v -e '^extern$' -e '^install$' -e '^tests.xml$' | xargs -I '{}' rm -rf './{}'
+    - ls | grep -v -e '^extern$' -e '^install$' -e '^openmw_tests.xml$' -e '^openmw_cs_tests.xml$' | xargs -I '{}' rm -rf './{}'
     - cd ..
     - df -h
     - du -sh build/
@@ -132,6 +134,7 @@ Clang_Format:
   before_script:
     - CI/install_debian_deps.sh openmw-clang-format
   script:
+    - CI/check_cmake_format.sh
     - CI/check_file_names.sh
     - CI/check_clang_format.sh
 
@@ -174,7 +177,7 @@ Ubuntu_GCC_tests:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 .Ubuntu_GCC_tests_Debug:
   extends: Ubuntu_GCC
@@ -190,7 +193,7 @@ Ubuntu_GCC_tests:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 Ubuntu_GCC_tests_asan:
   extends: Ubuntu_GCC
@@ -208,7 +211,7 @@ Ubuntu_GCC_tests_asan:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
@@ -225,7 +228,7 @@ Ubuntu_GCC_tests_ubsan:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 .Ubuntu_GCC_tests_tsan:
   extends: Ubuntu_GCC
@@ -243,7 +246,7 @@ Ubuntu_GCC_tests_ubsan:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 Ubuntu_GCC_tests_coverage:
   extends: .Ubuntu_GCC_tests_Debug
@@ -262,7 +265,7 @@ Ubuntu_GCC_tests_coverage:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 .Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
@@ -303,7 +306,7 @@ Ubuntu_GCC_tests_coverage:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 Ubuntu_Clang:
   extends: .Ubuntu
@@ -343,7 +346,7 @@ Ubuntu_Clang_Tidy:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 Ubuntu_Clang_tests_Debug:
   extends: Ubuntu_Clang
@@ -358,7 +361,7 @@ Ubuntu_Clang_tests_Debug:
     name: ${CI_JOB_NAME}-${CI_COMMIT_REF_NAME}-${CI_COMMIT_SHA}
     when: always
     reports:
-      junit: build/tests.xml
+      junit: build/*_tests.xml
 
 Ubuntu_Clang_integration_tests:
   extends: .Ubuntu_Image
@@ -368,7 +371,7 @@ Ubuntu_Clang_integration_tests:
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   cache:
-    key: Ubuntu_Clang_integration_tests.ubuntu_22.04.v1
+    key: Ubuntu_Clang_integration_tests.ubuntu_22.04.v2
     paths:
       - .cache/pip
       - apt-cache/
@@ -421,13 +424,13 @@ macOS12_Xcode13:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
   before_script:
+  - Get-Volume
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
   - choco source disable -n=chocolatey
   - choco install git --force --params "/GitAndUnixToolsOnPath" -y
   - choco install 7zip -y
   - choco install ccache -y
-  - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
   - choco install vswhere -y
   - choco install ninja -y
   - choco install python -y
@@ -446,13 +449,16 @@ macOS12_Xcode13:
     }
   stage: build
   script:
+    - Get-Volume
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
     - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+    - New-Item -Type File -Force -Path MSVC2019_64_Ninja\.cmake\api\v1\query\codemodel-v2
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -N -b -t -C $multiview -E
+    - Get-Volume
     - cd MSVC2019_64_Ninja
     - .\ActivateMSVC.ps1
     - cmake --build . --config $config
@@ -463,14 +469,19 @@ macOS12_Xcode13:
     - |
       if (Get-ChildItem -Recurse *.pdb) {
         7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        Push-Location ..
+        ..\CI\Store-Symbols.ps1
+        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
+        Pop-Location
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
     - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
   after_script:
+    - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: ninja-v5
+    key: ninja-v6
     paths:
     - ccache
     - deps
@@ -524,13 +535,13 @@ macOS12_Xcode13:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push"
   before_script:
+  - Get-Volume
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
   - choco source add -n=openmw-proxy -s="https://repo.openmw.org/repository/Chocolatey/" --priority=1
   - choco source disable -n=chocolatey
   - choco install git --force --params "/GitAndUnixToolsOnPath" -y
   - choco install 7zip -y
   - choco install ccache -y
-  - choco install cmake.install --installargs 'ADD_CMAKE_TO_PATH=System' -y
   - choco install vswhere -y
   - choco install python -y
   - refreshenv
@@ -548,14 +559,17 @@ macOS12_Xcode13:
     }
   stage: build
   script:
+    - Get-Volume
     - $time = (Get-Date -Format "HH:mm:ss")
     - echo ${time}
     - echo "started by ${GITLAB_USER_NAME}"
     - $env:CCACHE_BASEDIR = Get-Location
     - $env:CCACHE_DIR = "$(Get-Location)\ccache"
     - New-Item -Type Directory -Force -Path $env:CCACHE_DIR
+    - New-Item -Type File -Force -Path MSVC2019_64\.cmake\api\v1\query\codemodel-v2
     - sh CI/before_script.msvc.sh -c $config -p Win64 -v 2019 -k -V -b -t -C $multiview -E
     - cd MSVC2019_64
+    - Get-Volume
     - cmake --build . --config $config
     - ccache --show-stats
     - cd $config
@@ -564,14 +578,19 @@ macOS12_Xcode13:
     - |
       if (Get-ChildItem -Recurse *.pdb) {
         7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_symbols.zip"))" '*.pdb' CI-ID.txt
+        Push-Location ..
+        ..\CI\Store-Symbols.ps1
+        7z a -tzip "..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}_${CI_JOB_ID}_sym_store.zip"))" '.\SymStore\*' $config\CI-ID.txt
+        Pop-Location
         Get-ChildItem -Recurse *.pdb | Remove-Item
       }
     - 7z a -tzip "..\..\$(Make-SafeFileName("OpenMW_MSVC2019_64_${config}_${CI_COMMIT_REF_NAME}.zip"))" '*'
     - if ($executables) { foreach ($exe in $executables.Split(',')) { & .\$exe } }
   after_script:
+    - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: msbuild-v5
+    key: msbuild-v6
     paths:
     - ccache
     - deps

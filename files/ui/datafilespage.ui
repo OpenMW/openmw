@@ -28,7 +28,7 @@
         <widget class="QWidget" name="contentSelectorWidget" native="true"/>
        </item>
        <item row="1" column="0">
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="dataNoteLabel">
          <property name="text">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;note: content files that are not part of current Content List are &lt;/span&gt;&lt;span style=&quot; font-style:italic; background-color:#00ff00;&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
@@ -49,7 +49,7 @@
         </widget>
        </item>
        <item row="32" column="0" colspan="2">
-        <widget class="QLabel" name="label">
+        <widget class="QLabel" name="directoryNoteLabel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
            <horstretch>0</horstretch>
@@ -208,7 +208,7 @@
         </widget>
        </item>
        <item row="27" column="0" colspan="2">
-        <widget class="QLabel" name="label_2">
+        <widget class="QLabel" name="archiveNoteLabel">
          <property name="text">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;note: archives that are not part of current Content List are &lt;/span&gt;&lt;span style=&quot; font-style:italic; background-color:#00ff00;&quot;&gt;highlighted&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
@@ -238,13 +238,13 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="navigationMeshCacheTab">
       <attribute name="title">
        <string>Navigation Mesh Cache</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
+        <layout class="QHBoxLayout" name="navigationMeshCacheProgressLayout">
          <item>
           <widget class="QPushButton" name="updateNavMeshButton">
            <property name="focusPolicy">
@@ -294,9 +294,9 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <layout class="QHBoxLayout" name="navigationMeshCacheParamsLayout">
          <item>
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="navMeshMaxSizeLabel">
            <property name="text">
             <string>Max size</string>
            </property>

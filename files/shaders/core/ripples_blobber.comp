@@ -1,0 +1,31 @@
+#version 440 core
+
+layout (binding = 0, rgba16f) restrict writeonly uniform image2D imageOut;
+layout (binding = 1, rgba16f) restrict readonly uniform image2D imageIn;
+
+layout (local_size_x=16, local_size_y=16) in;
+
+#define MAX_POSITIONS 100
+uniform vec3 positions[MAX_POSITIONS];
+uniform int positionCount;
+
+uniform float osg_SimulationTime;
+uniform vec2 offset;
+
+#include "lib/water/ripples.glsl"
+
+void main()
+{
+    ivec2 texel = ivec2(gl_GlobalInvocationID.xy + offset);
+
+    vec4 color = imageLoad(imageIn, texel);
+    float wavesizeMultiplier = getTemporalWaveSizeMultiplier(osg_SimulationTime);
+    for (int i = 0; i < positionCount; ++i)
+    {
+        float wavesize = wavesizeMultiplier * positions[i].z;
+        float displace = clamp(2.0 * abs(length((positions[i].xy + offset) - vec2(gl_GlobalInvocationID.xy)) / wavesize - 1.0), 0.0, 1.0);
+        color.rg = mix(vec2(-1.0), color.rg, displace);
+    }
+
+    imageStore(imageOut, ivec2(gl_GlobalInvocationID.xy), color);
+}

@@ -31,6 +31,7 @@
 #include <components/esm/esmcommon.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/esmreader.hpp>
+#include <components/esm3/infoorder.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadglob.hpp>
@@ -55,37 +56,42 @@
 #include "resourcesmanager.hpp"
 #include "resourcetable.hpp"
 
-namespace
+namespace CSMWorld
 {
-    void removeDialogueInfos(const ESM::RefId& dialogueId, const CSMWorld::InfosByTopic& infosByTopic,
-        CSMWorld::InfoCollection& infoCollection)
+    namespace
     {
-        const auto topicInfos = infosByTopic.find(dialogueId);
-
-        if (topicInfos == infosByTopic.end())
-            return;
-
-        std::vector<int> erasedRecords;
-
-        for (const ESM::RefId& id : topicInfos->second)
+        void removeDialogueInfos(
+            const ESM::RefId& dialogueId, InfoOrderByTopic& infoOrders, InfoCollection& infoCollection)
         {
-            const CSMWorld::Record<CSMWorld::Info>& record = infoCollection.getRecord(id);
+            const auto topicInfoOrder = infoOrders.find(dialogueId);
 
-            if (record.mState == CSMWorld::RecordBase::State_ModifiedOnly)
+            if (topicInfoOrder == infoOrders.end())
+                return;
+
+            std::vector<int> erasedRecords;
+
+            for (const OrderedInfo& info : topicInfoOrder->second.getOrderedInfo())
             {
-                erasedRecords.push_back(infoCollection.searchId(record.get().mId));
-                continue;
+                const Record<Info>& record = infoCollection.getRecord(info.mId);
+
+                if (record.mState == RecordBase::State_ModifiedOnly)
+                {
+                    erasedRecords.push_back(infoCollection.searchId(info.mId));
+                    continue;
+                }
+
+                auto deletedRecord = std::make_unique<Record<Info>>(record);
+                deletedRecord->mState = RecordBase::State_Deleted;
+                infoCollection.setRecord(infoCollection.searchId(info.mId), std::move(deletedRecord));
             }
 
-            auto deletedRecord = std::make_unique<CSMWorld::Record<CSMWorld::Info>>(record);
-            deletedRecord->mState = CSMWorld::RecordBase::State_Deleted;
-            infoCollection.setRecord(infoCollection.searchId(record.get().mId), std::move(deletedRecord));
-        }
+            while (!erasedRecords.empty())
+            {
+                infoCollection.removeRows(erasedRecords.back(), 1);
+                erasedRecords.pop_back();
+            }
 
-        while (!erasedRecords.empty())
-        {
-            infoCollection.removeRows(erasedRecords.back(), 1);
-            erasedRecords.pop_back();
+            infoOrders.erase(topicInfoOrder);
         }
     }
 }
@@ -1209,9 +1215,8 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
                 messages.add(id, "Logic error: cell index out of bounds", "", CSMDoc::Message::Severity_Error);
                 index = mCells.getSize() - 1;
             }
-            const std::string cellId = mCells.getId(index).getRefIdString();
 
-            mRefs.load(*mReader, index, mBase, mRefLoadCache[cellId], messages);
+            mRefs.load(*mReader, index, mBase, mRefLoadCache[mCells.getId(index)], messages);
             break;
         }
 
@@ -1290,11 +1295,11 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
 
                 if (mJournals.tryDelete(record.mId))
                 {
-                    removeDialogueInfos(record.mId, mJournalInfosByTopic, mJournalInfos);
+                    removeDialogueInfos(record.mId, mJournalInfoOrder, mJournalInfos);
                 }
                 else if (mTopics.tryDelete(record.mId))
                 {
-                    removeDialogueInfos(record.mId, mTopicInfosByTopic, mTopicInfos);
+                    removeDialogueInfos(record.mId, mTopicInfoOrder, mTopicInfos);
                 }
                 else
                 {
@@ -1332,9 +1337,9 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
             }
 
             if (mDialogue->mType == ESM::Dialogue::Journal)
-                mJournalInfos.load(*mReader, mBase, *mDialogue, mJournalInfosByTopic);
+                mJournalInfos.load(*mReader, mBase, *mDialogue, mJournalInfoOrder);
             else
-                mTopicInfos.load(*mReader, mBase, *mDialogue, mTopicInfosByTopic);
+                mTopicInfos.load(*mReader, mBase, *mDialogue, mTopicInfoOrder);
 
             break;
         }
@@ -1375,6 +1380,12 @@ bool CSMWorld::Data::continueLoading(CSMDoc::Messages& messages)
     }
 
     return false;
+}
+
+void CSMWorld::Data::finishLoading()
+{
+    mTopicInfos.sort(mTopicInfoOrder);
+    mJournalInfos.sort(mJournalInfoOrder);
 }
 
 bool CSMWorld::Data::hasId(const std::string& id) const

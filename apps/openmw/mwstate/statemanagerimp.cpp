@@ -4,11 +4,12 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <components/esm3/cellid.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadclas.hpp>
+
+#include <components/l10n/manager.hpp>
 
 #include <components/loadinglistener/loadinglistener.hpp>
 
@@ -124,11 +125,11 @@ void MWState::StateManager::askLoadRecent()
         {
             MWState::Slot lastSave = *character->begin();
             std::vector<std::string> buttons;
-            buttons.emplace_back("#{sYes}");
-            buttons.emplace_back("#{sNo}");
+            buttons.emplace_back("#{Interface:Yes}");
+            buttons.emplace_back("#{Interface:No}");
+            std::string message
+                = MWBase::Environment::get().getL10nManager()->getMessage("OMWEngine", "AskLoadLastSave");
             std::string_view tag = "%s";
-            std::string message{ MWBase::Environment::get().getWindowManager()->getGameSettingString(
-                "sLoadLastSaveMsg", tag) };
             size_t pos = message.find(tag);
             message.replace(pos, tag.length(), lastSave.mProfile.mDescription);
             MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons);
@@ -172,7 +173,7 @@ void MWState::StateManager::newGame(bool bypass)
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
 
         std::vector<std::string> buttons;
-        buttons.emplace_back("#{sOk}");
+        buttons.emplace_back("#{Interface:OK}");
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
     }
 }
@@ -223,7 +224,7 @@ void MWState::StateManager::saveGame(const std::string& description, const Slot*
         else
             profile.mPlayerClassId = classId;
 
-        profile.mPlayerCell = ESM::RefId::stringRefId(world.getCellName());
+        profile.mPlayerCellName = world.getCellName();
         profile.mInGameTime = world.getEpochTimeStamp();
         profile.mTimePlayed = mTimePlayed;
         profile.mDescription = description;
@@ -274,7 +275,7 @@ void MWState::StateManager::saveGame(const std::string& description, const Slot*
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         // Using only Cells for progress information, since they typically have the largest records by far
         listener.setProgressRange(MWBase::Environment::get().getWorld()->countSavedGameCells());
-        listener.setLabel("#{sNotifyMessage4}", true);
+        listener.setLabel("#{OMWEngine:SavingInProgress}", true);
 
         Loading::ScopedLoad load(&listener);
 
@@ -327,7 +328,7 @@ void MWState::StateManager::saveGame(const std::string& description, const Slot*
         Log(Debug::Error) << error.str();
 
         std::vector<std::string> buttons;
-        buttons.emplace_back("#{sOk}");
+        buttons.emplace_back("#{Interface:OK}");
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
 
         // If no file was written, clean up the slot
@@ -346,7 +347,7 @@ void MWState::StateManager::quickSave(std::string name)
             && MWBase::Environment::get().getWindowManager()->isSavingAllowed()))
     {
         // You can not save your game right now
-        MWBase::Environment::get().getWindowManager()->messageBox("#{sSaveGameDenied}");
+        MWBase::Environment::get().getWindowManager()->messageBox("#{OMWEngine:SaveGameDenied}");
         return;
     }
 
@@ -389,6 +390,11 @@ void MWState::StateManager::loadGame(const std::filesystem::path& filepath)
     loadGame(character, filepath);
 }
 
+struct VersionMismatchError : public std::runtime_error
+{
+    using std::runtime_error::runtime_error;
+};
+
 void MWState::StateManager::loadGame(const Character* character, const std::filesystem::path& filepath)
 {
     try
@@ -401,7 +407,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         reader.open(filepath);
 
         if (reader.getFormatVersion() > ESM::CurrentSaveGameFormatVersion)
-            throw std::runtime_error(
+            throw VersionMismatchError(
                 "This save file was created using a newer version of OpenMW and is thus not supported. Please upgrade "
                 "to the newest OpenMW version to load this file.");
 
@@ -411,7 +417,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
 
         listener.setProgressRange(100);
-        listener.setLabel("#{sLoadingMessage14}");
+        listener.setLabel("#{OMWEngine:LoadingInProgress}");
 
         Loading::ScopedLoad load(&listener);
 
@@ -548,7 +554,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
 
         if (ptr.isInCell())
         {
-            const ESM::CellId& cellId = ptr.getCell()->getCell()->getCellId();
+            const ESM::RefId cellId = ptr.getCell()->getCell()->getId();
 
             // Use detectWorldSpaceChange=false, otherwise some of the data we just loaded would be cleared again
             MWBase::Environment::get().getWorld()->changeToCell(cellId, ptr.getRefData().getPosition(), false, false);
@@ -567,7 +573,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
             pos.rot[0] = 0;
             pos.rot[1] = 0;
             pos.rot[2] = 0;
-            MWBase::Environment::get().getWorld()->changeToCell(cell->getCell()->getCellId(), pos, true, false);
+            MWBase::Environment::get().getWorld()->changeToCell(cell->getCell()->getId(), pos, true, false);
         }
 
         MWBase::Environment::get().getWorld()->updateProjectilesCasters();
@@ -584,17 +590,22 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
     }
     catch (const std::exception& e)
     {
-        std::stringstream error;
-        error << "Failed to load saved game: " << e.what();
+        Log(Debug::Error) << "Failed to load saved game: " << e.what();
 
-        Log(Debug::Error) << error.str();
         cleanup(true);
 
         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
 
         std::vector<std::string> buttons;
-        buttons.emplace_back("#{sOk}");
-        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error.str(), buttons);
+        buttons.emplace_back("#{Interface:OK}");
+
+        std::string error;
+        if (typeid(e) == typeid(VersionMismatchError))
+            error = "#{OMWEngine:LoadingFailed}: #{OMWEngine:LoadingRequiresNewVersionError}";
+        else
+            error = "#{OMWEngine:LoadingFailed}: " + std::string(e.what());
+
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(error, buttons);
     }
 }
 
@@ -669,9 +680,10 @@ bool MWState::StateManager::verifyProfile(const ESM::SavedGame& profile) const
     if (notFound)
     {
         std::vector<std::string> buttons;
-        buttons.emplace_back("#{sYes}");
-        buttons.emplace_back("#{sNo}");
-        MWBase::Environment::get().getWindowManager()->interactiveMessageBox("#{sMissingMastersMsg}", buttons, true);
+        buttons.emplace_back("#{Interface:Yes}");
+        buttons.emplace_back("#{Interface:No}");
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
+            "#{OMWEngine:MissingContentFilesConfirmation}", buttons, true);
         int selectedButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
         if (selectedButton == 1 || selectedButton == -1)
             return false;

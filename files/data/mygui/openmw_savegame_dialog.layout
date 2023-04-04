@@ -54,7 +54,7 @@
 
             <UserString key="HStretch" value="true"/>
             <Widget type="AutoSizedButton" skin="MW_Button" name="DeleteButton">
-                <Property key="Caption" value="#{sDeleteGame}"/>
+                <Property key="Caption" value="#{OMWEngine:DeleteGame}"/>
             </Widget>
 
             <Widget type="EditBox" skin="MW_TextEdit" name="SaveNameEdit">
@@ -63,10 +63,10 @@
             </Widget>
 
             <Widget type="AutoSizedButton" skin="MW_Button" name="OkButton">
-                <Property key="Caption" value="#{sOk}"/>
+                <Property key="Caption" value="#{Interface:OK}"/>
             </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
-                <Property key="Caption" value="#{sCancel}"/>
+                <Property key="Caption" value="#{Interface:Cancel}"/>
             </Widget>
         </Widget>
 

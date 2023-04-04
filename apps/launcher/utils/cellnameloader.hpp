@@ -25,7 +25,7 @@ public:
      * @param contentPaths the file paths of each content file to be examined
      * @return the names of all cells
      */
-    QSet<QString> getCellNames(QStringList& contentPaths);
+    QSet<QString> getCellNames(const QStringList& contentPaths);
 
 private:
     /**

@@ -61,8 +61,8 @@ namespace MWMechanics
         // Vanilla doesn't fail on nonexistent items in levelled lists
         if (!MWBase::Environment::get().getWorld()->getStore().find(item))
         {
-            Log(Debug::Warning) << "Warning: ignoring nonexistent item '" << item << "' in levelled list '"
-                                << levItem->mId << "'";
+            Log(Debug::Warning) << "Warning: ignoring nonexistent item " << item << " in levelled list "
+                                << levItem->mId;
             return ESM::RefId::sEmpty;
         }
 

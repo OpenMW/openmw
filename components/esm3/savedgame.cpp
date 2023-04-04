@@ -13,7 +13,10 @@ namespace ESM
         mPlayerClassId = esm.getHNORefId("PLCL");
         mPlayerClassName = esm.getHNOString("PLCN");
 
-        mPlayerCell = esm.getHNRefId("PLCE");
+        if (esm.getFormatVersion() <= ESM::MaxSavedGameCellNameAsRefIdFormatVersion)
+            mPlayerCellName = esm.getHNRefId("PLCE").toString();
+        else
+            mPlayerCellName = esm.getHNString("PLCE");
         esm.getHNTSized<16>(mInGameTime, "TSTM");
         esm.getHNT(mTimePlayed, "TIME");
         mDescription = esm.getHNString("DESC");
@@ -37,7 +40,7 @@ namespace ESM
         else
             esm.writeHNString("PLCN", mPlayerClassName);
 
-        esm.writeHNRefId("PLCE", mPlayerCell);
+        esm.writeHNString("PLCE", mPlayerCellName);
         esm.writeHNT("TSTM", mInGameTime, 16);
         esm.writeHNT("TIME", mTimePlayed);
         esm.writeHNString("DESC", mDescription);

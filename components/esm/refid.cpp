@@ -1,48 +1,250 @@
 #include "refid.hpp"
 
-#include <iostream>
+#include "serializerefid.hpp"
 
-#include "components/misc/strings/algorithm.hpp"
+#include "components/misc/strings/lower.hpp"
+
+#include <charconv>
+#include <ostream>
+#include <sstream>
+#include <stdexcept>
+#include <system_error>
+#include <variant>
 
 namespace ESM
 {
-    bool RefId::operator==(const RefId& rhs) const
+    namespace
     {
-        return Misc::StringUtils::ciEqual(mId, rhs.mId);
+        const std::string emptyString;
+
+        struct GetRefString
+        {
+            const std::string& operator()(EmptyRefId /*v*/) const { return emptyString; }
+
+            const std::string& operator()(StringRefId v) const { return v.getValue(); }
+
+            template <class T>
+            const std::string& operator()(const T& v) const
+            {
+                std::ostringstream stream;
+                stream << "RefId is not a string: " << v;
+                throw std::runtime_error(stream.str());
+            }
+        };
+
+        struct IsEqualToString
+        {
+            const std::string_view mRhs;
+
+            bool operator()(StringRefId v) const noexcept { return v == mRhs; }
+
+            template <class T>
+            bool operator()(const T& /*v*/) const noexcept
+            {
+                return false;
+            }
+        };
+
+        struct IsLessThanString
+        {
+            const std::string_view mRhs;
+
+            bool operator()(StringRefId v) const noexcept { return v < mRhs; }
+
+            template <class T>
+            bool operator()(const T& /*v*/) const noexcept
+            {
+                return false;
+            }
+        };
+
+        struct IsGreaterThanString
+        {
+            const std::string_view mLhs;
+
+            bool operator()(StringRefId v) const noexcept { return mLhs < v; }
+
+            template <class T>
+            bool operator()(const T& /*v*/) const noexcept
+            {
+                return true;
+            }
+        };
+
+        struct StartsWith
+        {
+            const std::string_view mPrefix;
+
+            bool operator()(StringRefId v) const { return v.startsWith(mPrefix); }
+
+            template <class T>
+            bool operator()(const T& /*v*/) const
+            {
+                return false;
+            }
+        };
+
+        struct EndsWith
+        {
+            const std::string_view mSuffix;
+
+            bool operator()(StringRefId v) const { return v.endsWith(mSuffix); }
+
+            template <class T>
+            bool operator()(const T& /*v*/) const
+            {
+                return false;
+            }
+        };
+
+        struct Contains
+        {
+            const std::string_view mSubString;
+
+            bool operator()(StringRefId v) const { return v.contains(mSubString); }
+
+            template <class T>
+            bool operator()(const T& /*v*/) const
+            {
+                return false;
+            }
+        };
+
+        struct SerializeText
+        {
+            std::string operator()(ESM::EmptyRefId /*v*/) const { return std::string(); }
+
+            std::string operator()(ESM::StringRefId v) const { return Misc::StringUtils::lowerCase(v.getValue()); }
+
+            template <class T>
+            std::string operator()(const T& v) const
+            {
+                return v.toDebugString();
+            }
+        };
     }
 
-    bool RefId::operator<(const RefId& rhs) const
+    const RefId RefId::sEmpty = {};
+
+    std::string EmptyRefId::toString() const
     {
-        return Misc::StringUtils::ciLess(mId, rhs.mId);
+        return std::string();
     }
 
-    std::ostream& operator<<(std::ostream& os, const RefId& refId)
+    std::string EmptyRefId::toDebugString() const
     {
-        os << refId.getRefIdString();
-        return os;
+        return "Empty{}";
     }
 
-    RefId RefId::stringRefId(std::string_view id)
+    std::ostream& operator<<(std::ostream& stream, EmptyRefId value)
     {
-        RefId newRefId;
-        newRefId.mId = id;
-        return newRefId;
-    }
-
-    RefId RefId::formIdRefId(const ESM4::FormId id)
-    {
-        return ESM::RefId::stringRefId(ESM4::formIdToString(id));
+        return stream << value.toDebugString();
     }
 
     bool RefId::operator==(std::string_view rhs) const
     {
-        return Misc::StringUtils::ciEqual(mId, rhs);
+        return std::visit(IsEqualToString{ rhs }, mValue);
     }
 
-    const RefId RefId::sEmpty = {};
-}
+    bool operator<(RefId lhs, std::string_view rhs)
+    {
+        return std::visit(IsLessThanString{ rhs }, lhs.mValue);
+    }
 
-std::size_t std::hash<ESM::RefId>::operator()(const ESM::RefId& k) const
-{
-    return Misc::StringUtils::CiHash()(k.getRefIdString());
+    bool operator<(std::string_view lhs, RefId rhs)
+    {
+        return std::visit(IsGreaterThanString{ lhs }, rhs.mValue);
+    }
+
+    std::ostream& operator<<(std::ostream& stream, RefId value)
+    {
+        return std::visit([&](auto v) -> std::ostream& { return stream << v; }, value.mValue);
+    }
+
+    RefId RefId::stringRefId(std::string_view value)
+    {
+        if (value.empty())
+            return RefId();
+        return RefId(StringRefId(value));
+    }
+
+    const std::string& RefId::getRefIdString() const
+    {
+        return std::visit(GetRefString{}, mValue);
+    }
+
+    std::string RefId::toString() const
+    {
+        return std::visit([](auto v) { return v.toString(); }, mValue);
+    }
+
+    std::string RefId::toDebugString() const
+    {
+        return std::visit([](auto v) { return v.toDebugString(); }, mValue);
+    }
+
+    bool RefId::startsWith(std::string_view prefix) const
+    {
+        return std::visit(StartsWith{ prefix }, mValue);
+    }
+
+    bool RefId::endsWith(std::string_view suffix) const
+    {
+        return std::visit(EndsWith{ suffix }, mValue);
+    }
+
+    bool RefId::contains(std::string_view subString) const
+    {
+        return std::visit(Contains{ subString }, mValue);
+    }
+
+    std::string RefId::serialize() const
+    {
+        std::string result(sizeof(mValue), '\0');
+        std::memcpy(result.data(), &mValue, sizeof(mValue));
+        return result;
+    }
+
+    ESM::RefId RefId::deserialize(std::string_view value)
+    {
+        if (value.size() != sizeof(ESM::RefId::mValue))
+            throw std::runtime_error("Invalid value size to deserialize: " + std::to_string(value.size()));
+        ESM::RefId result;
+        std::memcpy(&result.mValue, value.data(), sizeof(result.mValue));
+        return result;
+    }
+
+    std::string RefId::serializeText() const
+    {
+        return std::visit(SerializeText{}, mValue);
+    }
+
+    ESM::RefId RefId::deserializeText(std::string_view value)
+    {
+        if (value.empty())
+            return ESM::RefId();
+
+        if (value.starts_with(formIdRefIdPrefix))
+            return ESM::RefId::formIdRefId(deserializeIntegral<ESM4::FormId>(formIdRefIdPrefix.size(), value));
+
+        if (value.starts_with(generatedRefIdPrefix))
+            return ESM::RefId::generated(deserializeIntegral<std::uint64_t>(generatedRefIdPrefix.size(), value));
+
+        if (value.starts_with(indexRefIdPrefix))
+        {
+            ESM::RecNameInts recordType{};
+            std::memcpy(&recordType, value.data() + indexRefIdPrefix.size(), sizeof(recordType));
+            return ESM::RefId::index(recordType,
+                deserializeIntegral<std::uint32_t>(indexRefIdPrefix.size() + sizeof(recordType) + 1, value));
+        }
+        if (value.starts_with(esm3ExteriorCellRefIdPrefix))
+        {
+            std::int32_t x = deserializeIntegral<std::int32_t>(esm3ExteriorCellRefIdPrefix.size(), value);
+            std::int32_t y
+                = deserializeIntegral<std::int32_t>(esm3ExteriorCellRefIdPrefix.size() + getIntegralSize(x) + 1, value);
+            return ESM::ESM3ExteriorCellRefId(x, y);
+        }
+
+        return ESM::RefId::stringRefId(value);
+    }
 }

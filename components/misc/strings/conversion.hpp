@@ -1,7 +1,19 @@
 #ifndef COMPONENTS_MISC_STRINGS_CONVERSION_H
 #define COMPONENTS_MISC_STRINGS_CONVERSION_H
 
+#include <charconv>
+#include <optional>
 #include <string>
+#include <system_error>
+
+#if !(defined(_MSC_VER) && (_MSC_VER >= 1924)) && !(defined(__GNUC__) && __GNUC__ >= 11) || defined(__clang__)         \
+    || defined(__apple_build_version__)
+
+#include <ios>
+#include <locale>
+#include <sstream>
+
+#endif
 
 namespace Misc::StringUtils
 {
@@ -45,6 +57,78 @@ namespace Misc::StringUtils
     {
         return { str.begin(), str.end() }; // Undefined behavior if the contents of "char" aren't UTF8 or ASCII.
     }
+
+    template <typename T>
+    inline std::optional<T> toNumeric(std::string_view s)
+    {
+        T result{};
+        auto [ptr, ec]{ std::from_chars(s.data(), s.data() + s.size(), result) };
+
+        if (ec == std::errc())
+        {
+            return result;
+        }
+
+        return std::nullopt;
+    }
+
+    template <typename T>
+    inline T toNumeric(std::string_view s, T defaultValue)
+    {
+        if (auto numeric = toNumeric<T>(s))
+        {
+            return *numeric;
+        }
+
+        return defaultValue;
+    }
+
+    // support for std::from_chars as of 2023-02-27
+    // - Visual Studio 2019 version 16.4 (1924)
+    // - GCC 11
+    // - Clang does not support floating points yet
+    // - Apples Clang does not support floating points yet
+
+#if !(defined(_MSC_VER) && (_MSC_VER >= 1924)) && !(defined(__GNUC__) && __GNUC__ >= 11) || defined(__clang__)         \
+    || defined(__apple_build_version__)
+    template <>
+    inline std::optional<float> toNumeric<float>(std::string_view s)
+    {
+        if (!s.empty())
+        {
+            std::istringstream iss(s.data());
+            iss.imbue(std::locale::classic());
+
+            float value;
+
+            if (iss >> value)
+            {
+                return value;
+            }
+        }
+
+        return std::nullopt;
+    }
+
+    template <>
+    inline std::optional<double> toNumeric<double>(std::string_view s)
+    {
+        if (!s.empty())
+        {
+            std::istringstream iss(s.data());
+            iss.imbue(std::locale::classic());
+
+            double value;
+
+            if (iss >> value)
+            {
+                return value;
+            }
+        }
+
+        return std::nullopt;
+    }
+#endif
 }
 
 #endif // COMPONENTS_MISC_STRINGS_CONVERSION_H

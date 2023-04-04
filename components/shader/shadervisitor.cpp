@@ -212,15 +212,17 @@ namespace Shader
 
     void ShaderVisitor::apply(osg::Node& node)
     {
-        if (node.getStateSet())
+        bool needPop = false;
+        if (node.getStateSet() || mRequirements.empty())
         {
+            needPop = true;
             pushRequirements(node);
-            applyStateSet(node.getStateSet(), node);
-            traverse(node);
-            popRequirements();
+            if (node.getStateSet())
+                applyStateSet(node.getStateSet(), node);
         }
-        else
-            traverse(node);
+        traverse(node);
+        if (needPop)
+            popRequirements();
     }
 
     osg::StateSet* getWritableStateSet(osg::Node& node)
@@ -865,12 +867,12 @@ namespace Shader
 
     void ShaderVisitor::apply(osg::Geometry& geometry)
     {
-        bool needPop = (geometry.getStateSet() != nullptr);
-        if (geometry.getStateSet()) // TODO: check if stateset affects shader permutation before pushing it
-        {
+        bool needPop = geometry.getStateSet() || mRequirements.empty();
+        if (needPop)
             pushRequirements(geometry);
+
+        if (geometry.getStateSet()) // TODO: check if stateset affects shader permutation before pushing it
             applyStateSet(geometry.getStateSet(), geometry);
-        }
 
         if (!mRequirements.empty())
         {
@@ -889,7 +891,7 @@ namespace Shader
 
     void ShaderVisitor::apply(osg::Drawable& drawable)
     {
-        bool needPop = drawable.getStateSet();
+        bool needPop = drawable.getStateSet() || mRequirements.empty();
 
         if (needPop)
         {
@@ -899,36 +901,31 @@ namespace Shader
                 applyStateSet(drawable.getStateSet(), drawable);
         }
 
-        if (!mRequirements.empty())
-        {
-            const ShaderRequirements& reqs = mRequirements.back();
-            createProgram(reqs);
+        const ShaderRequirements& reqs = mRequirements.back();
+        createProgram(reqs);
 
-            if (auto rig = dynamic_cast<SceneUtil::RigGeometry*>(&drawable))
+        if (auto rig = dynamic_cast<SceneUtil::RigGeometry*>(&drawable))
+        {
+            osg::ref_ptr<osg::Geometry> sourceGeometry = rig->getSourceGeometry();
+            if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
+                rig->setSourceGeometry(sourceGeometry);
+        }
+        else if (auto morph = dynamic_cast<SceneUtil::MorphGeometry*>(&drawable))
+        {
+            osg::ref_ptr<osg::Geometry> sourceGeometry = morph->getSourceGeometry();
+            if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
+                morph->setSourceGeometry(sourceGeometry);
+        }
+        else if (auto osgaRig = dynamic_cast<SceneUtil::RigGeometryHolder*>(&drawable))
+        {
+            osg::ref_ptr<SceneUtil::OsgaRigGeometry> sourceOsgaRigGeometry = osgaRig->getSourceRigGeometry();
+            osg::ref_ptr<osg::Geometry> sourceGeometry = sourceOsgaRigGeometry->getSourceGeometry();
+            if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
             {
-                osg::ref_ptr<osg::Geometry> sourceGeometry = rig->getSourceGeometry();
-                if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
-                    rig->setSourceGeometry(sourceGeometry);
-            }
-            else if (auto morph = dynamic_cast<SceneUtil::MorphGeometry*>(&drawable))
-            {
-                osg::ref_ptr<osg::Geometry> sourceGeometry = morph->getSourceGeometry();
-                if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
-                    morph->setSourceGeometry(sourceGeometry);
-            }
-            else if (auto osgaRig = dynamic_cast<SceneUtil::RigGeometryHolder*>(&drawable))
-            {
-                osg::ref_ptr<SceneUtil::OsgaRigGeometry> sourceOsgaRigGeometry = osgaRig->getSourceRigGeometry();
-                osg::ref_ptr<osg::Geometry> sourceGeometry = sourceOsgaRigGeometry->getSourceGeometry();
-                if (sourceGeometry && adjustGeometry(*sourceGeometry, reqs))
-                {
-                    sourceOsgaRigGeometry->setSourceGeometry(sourceGeometry);
-                    osgaRig->setSourceRigGeometry(sourceOsgaRigGeometry);
-                }
+                sourceOsgaRigGeometry->setSourceGeometry(sourceGeometry);
+                osgaRig->setSourceRigGeometry(sourceOsgaRigGeometry);
             }
         }
-        else
-            ensureFFP(drawable);
 
         if (needPop)
             popRequirements();

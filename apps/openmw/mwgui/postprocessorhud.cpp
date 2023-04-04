@@ -316,7 +316,7 @@ namespace MWGui
         std::string_view version = technique->getVersion().empty() ? NA : technique->getVersion();
         std::string_view description = technique->getDescription().empty() ? NA : technique->getDescription();
 
-        auto serializeBool = [](bool value) { return value ? "#{sYes}" : "#{sNo}"; };
+        auto serializeBool = [](bool value) { return value ? "#{Interface:Yes}" : "#{Interface:No}"; };
 
         const auto flags = technique->getFlags();
 

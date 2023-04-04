@@ -33,7 +33,8 @@
 namespace ESM4
 {
 #pragma pack(push, 1)
-    // guesses only for TES4
+
+    // FO3/FNV version of the struct
     struct Lighting
     { //               | Aichan Prison values
         std::uint32_t ambient; //               | 16 17 19 00 (RGBA)
@@ -45,9 +46,10 @@ namespace ESM4
         std::int32_t rotationZ; // rotation z    | 00 00 00 00 = 0
         float fogDirFade; // Fog dir fade  | 00 00 80 3F = 1.f
         float fogClipDist; // Fog clip dist | 00 80 3B 45 = 3000.f
-        float fogPower = std::numeric_limits<float>::max();
+        float fogPower = 1.f; // TES4 doesn't have this
     };
 
+    // Currently unused
     struct Lighting_TES5
     {
         std::uint32_t ambient;

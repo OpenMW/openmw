@@ -3,6 +3,8 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <stdexcept>
+
 namespace ESM
 {
 
@@ -14,7 +16,20 @@ namespace ESM
 
     void Dialogue::loadId(ESMReader& esm)
     {
-        mId = esm.getHNRefId("NAME");
+        if (esm.getFormatVersion() <= MaxStringRefIdFormatVersion)
+        {
+            mStringId = esm.getHNString("NAME");
+            mId = ESM::RefId::stringRefId(mStringId);
+            return;
+        }
+
+        if (esm.getFormatVersion() <= MaxNameIsRefIdOnlyFormatVersion)
+        {
+            mId = esm.getHNRefId("NAME");
+            return;
+        }
+
+        mId = esm.getHNRefId("ID__");
     }
 
     void Dialogue::loadData(ESMReader& esm, bool& isDeleted)
@@ -37,6 +52,7 @@ namespace ESM
                     else
                     {
                         esm.skip(size);
+                        mType = Unknown;
                     }
                     break;
                 }
@@ -45,87 +61,63 @@ namespace ESM
                     mType = Unknown;
                     isDeleted = true;
                     break;
+                case SREC_NAME:
+                    mStringId = esm.getHString();
+                    break;
                 default:
                     esm.fail("Unknown subrecord");
                     break;
             }
         }
+
+        if (!isDeleted && MaxStringRefIdFormatVersion < esm.getFormatVersion()
+            && esm.getFormatVersion() <= MaxNameIsRefIdOnlyFormatVersion)
+            mStringId = mId.toString();
     }
 
     void Dialogue::save(ESMWriter& esm, bool isDeleted) const
     {
-        esm.writeHNCRefId("NAME", mId);
+        if (esm.getFormatVersion() <= MaxStringRefIdFormatVersion)
+        {
+            if (mId != mStringId)
+                throw std::runtime_error("Trying to save Dialogue record with name \"" + mStringId
+                    + "\" not maching id " + mId.toDebugString());
+            esm.writeHNString("NAME", mStringId);
+        }
+        else if (esm.getFormatVersion() <= MaxNameIsRefIdOnlyFormatVersion)
+            esm.writeHNRefId("NAME", mId);
+        else
+            esm.writeHNRefId("ID__", mId);
+
         if (isDeleted)
         {
             esm.writeHNString("DELE", "", 3);
         }
         else
         {
+            if (esm.getFormatVersion() > MaxNameIsRefIdOnlyFormatVersion)
+                esm.writeHNString("NAME", mStringId);
             esm.writeHNT("DATA", mType);
         }
     }
 
     void Dialogue::blank()
     {
+        mType = Unknown;
         mInfo.clear();
     }
 
-    void Dialogue::readInfo(ESMReader& esm, bool merge)
+    void Dialogue::readInfo(ESMReader& esm)
     {
         DialInfo info;
         bool isDeleted = false;
         info.load(esm, isDeleted);
-
-        if (!merge || mInfo.empty())
-        {
-            mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.end(), info), isDeleted);
-            return;
-        }
-
-        LookupMap::iterator lookup = mLookup.find(info.mId);
-
-        if (lookup != mLookup.end())
-        {
-            auto it = lookup->second.first;
-            if (it->mPrev == info.mPrev)
-            {
-                *it = info;
-                lookup->second.second = isDeleted;
-                return;
-            }
-            // Since the new version of this record has a different prev linked list connection, we need to re-insert
-            // the record
-            mInfo.erase(it);
-            mLookup.erase(lookup);
-        }
-
-        if (!info.mPrev.empty())
-        {
-            lookup = mLookup.find(info.mPrev);
-            if (lookup != mLookup.end())
-            {
-                auto it = lookup->second.first;
-
-                mLookup[info.mId] = std::make_pair(mInfo.insert(++it, info), isDeleted);
-            }
-            else
-                mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.end(), info), isDeleted);
-        }
-        else
-            mLookup[info.mId] = std::make_pair(mInfo.insert(mInfo.begin(), info), isDeleted);
+        mInfoOrder.insertInfo(std::move(info), isDeleted);
     }
 
-    void Dialogue::clearDeletedInfos()
+    void Dialogue::setUp()
     {
-        LookupMap::const_iterator current = mLookup.begin();
-        LookupMap::const_iterator end = mLookup.end();
-        for (; current != end; ++current)
-        {
-            if (current->second.second)
-            {
-                mInfo.erase(current->second.first);
-            }
-        }
-        mLookup.clear();
+        mInfoOrder.removeDeleted();
+        mInfoOrder.extractOrderedInfo(mInfo);
     }
 }

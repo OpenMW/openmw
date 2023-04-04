@@ -269,7 +269,7 @@ namespace ESM
             Length
         };
 
-        static std::string indexToId(int index);
+        static RefId indexToRefId(int index);
     };
 }
 #endif

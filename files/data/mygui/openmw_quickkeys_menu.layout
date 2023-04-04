@@ -32,7 +32,7 @@
 
         <Widget type="AutoSizedButton" skin="MW_Button" name="OKButton" position="315 190 32 24" align="Right Bottom">
             <Property key="ExpandDirection" value="Left"/>
-            <Property key="Caption" value="#{sOK}"/>
+            <Property key="Caption" value="#{Interface:OK}"/>
         </Widget>
 
     </Widget>

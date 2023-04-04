@@ -4,4 +4,4 @@
 
 # En: No use translating names on months and weekdays to Swedish when the game's content isn't in Swedish. It will probably just confuse people. Therefore, only dateFormat is present in this file.
 
-dateFormat: "dag {day} av {monthInGenitive} år {year}"
+dateFormat: "dag {day} av {monthInGenitive} år {year, number, :: group-off}"

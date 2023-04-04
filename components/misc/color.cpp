@@ -4,6 +4,7 @@
 #include <array>
 #include <charconv>
 #include <sstream>
+#include <system_error>
 
 namespace Misc
 {

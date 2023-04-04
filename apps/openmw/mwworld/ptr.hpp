@@ -128,6 +128,8 @@ namespace MWWorld
             : PtrBase(liveCellRef, cell, nullptr)
         {
         }
+
+        std::string toString() const;
     };
 
     /// @note The difference between Ptr and ConstPtr is that the second one adds const to the underlying pointers.
@@ -145,6 +147,38 @@ namespace MWWorld
         }
     };
 
+    // SafePtr holds Ptr and automatically updates it via WorldModel if the Ptr becomes invalid.
+    // Uses ESM::RefNum as an unique id. Can not be used for Ptrs without RefNum.
+    // Note: WorldModel automatically assignes RefNum to all registered Ptrs.
+    class SafePtr
+    {
+    public:
+        using Id = ESM::RefNum;
+
+        explicit SafePtr(Id id)
+            : mId(id)
+        {
+        }
+        explicit SafePtr(const Ptr& ptr);
+        virtual ~SafePtr() = default;
+        Id id() const { return mId; }
+
+        std::string toString() const;
+
+        const Ptr& ptrOrNull() const
+        {
+            update();
+            return mPtr;
+        }
+
+    private:
+        const Id mId;
+
+        mutable Ptr mPtr;
+        mutable size_t mLastUpdate = 0;
+
+        void update() const;
+    };
 }
 
 #endif

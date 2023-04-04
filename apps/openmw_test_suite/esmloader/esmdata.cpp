@@ -101,13 +101,14 @@ namespace
         ESM::GameSetting setting;
         setting.mId = ESM::RefId::stringRefId("setting");
         setting.mValue = ESM::Variant(42);
+        setting.mRecordFlags = 0;
         settings.push_back(setting);
-        EXPECT_EQ(EsmLoader::getGameSetting(settings, ESM::RefId::stringRefId("setting")), ESM::Variant(42));
+        EXPECT_EQ(EsmLoader::getGameSetting(settings, "setting"), ESM::Variant(42));
     }
 
     TEST(EsmLoaderGetGameSettingTest, shouldThrowExceptionWhenNotFound)
     {
         const std::vector<ESM::GameSetting> settings;
-        EXPECT_THROW(EsmLoader::getGameSetting(settings, ESM::RefId::stringRefId("setting")), std::runtime_error);
+        EXPECT_THROW(EsmLoader::getGameSetting(settings, "setting"), std::runtime_error);
     }
 }

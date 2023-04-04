@@ -17,7 +17,6 @@ namespace ESM
     class ESMReader;
     class ESMWriter;
     class ReadersCache;
-    struct CellId;
     struct Cell;
     struct RefNum;
 }
@@ -42,13 +41,14 @@ namespace MWWorld
         typedef std::vector<std::pair<ESM::RefId, CellStore*>> IdCache;
         const MWWorld::ESMStore& mStore;
         ESM::ReadersCache& mReaders;
-        mutable std::map<std::string, CellStore, Misc::StringUtils::CiComp> mInteriors;
-        mutable std::map<std::pair<int, int>, CellStore> mExteriors;
+        mutable std::unordered_map<ESM::RefId, CellStore> mCells;
+        mutable std::map<std::string, CellStore*, Misc::StringUtils::CiComp> mInteriors;
+        mutable std::map<std::pair<int, int>, CellStore*> mExteriors;
         IdCache mIdCache;
-        std::size_t mIdCacheIndex;
-
-        WorldModel(const WorldModel&);
-        WorldModel& operator=(const WorldModel&);
+        std::size_t mIdCacheIndex = 0;
+        std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
+        std::size_t mPtrIndexUpdateCounter = 0;
+        ESM::RefNum mLastGeneratedRefnum;
 
         const ESM::Cell* getESMCellByName(std::string_view name);
         ESM::CellVariant getCellByName(std::string_view name);
@@ -58,19 +58,18 @@ namespace MWWorld
 
         void writeCell(ESM::ESMWriter& writer, CellStore& cell) const;
 
-        std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
-        size_t mPtrIndexUpdateCounter;
-        ESM::RefNum mLastGeneratedRefnum;
-
     public:
-        void clear();
-
         explicit WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& reader);
+
+        WorldModel(const WorldModel&) = delete;
+        WorldModel& operator=(const WorldModel&) = delete;
+
+        void clear();
 
         CellStore* getExterior(int x, int y);
         CellStore* getInterior(std::string_view name);
         CellStore* getCell(std::string_view name); // interior or named exterior
-        CellStore* getCell(const ESM::CellId& Id);
+        CellStore* getCell(const ESM::RefId& Id);
 
         // If cellNameInSameWorldSpace is an interior - returns this interior.
         // Otherwise returns exterior cell for given position in the same world space.
@@ -92,9 +91,7 @@ namespace MWWorld
         template <typename Fn>
         void forEachLoadedCellStore(Fn&& fn)
         {
-            for (auto& [_, store] : mInteriors)
-                fn(store);
-            for (auto& [_, store] : mExteriors)
+            for (auto& [_, store] : mCells)
                 fn(store);
         }
 

@@ -21,7 +21,7 @@ namespace MWDialogue
     bool Topic::addEntry(const JournalEntry& entry)
     {
         if (entry.mTopic != mTopic)
-            throw std::runtime_error("topic does not match: " + mTopic.getRefIdString());
+            throw std::runtime_error("topic does not match: " + mTopic.toDebugString());
 
         // bail out if we already have heard this
         for (Topic::TEntryIter it = mEntries.begin(); it != mEntries.end(); ++it)

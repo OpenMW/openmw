@@ -5,6 +5,7 @@
     Bug #3842: Body part skeletons override the main skeleton
     Bug #4127: Weapon animation looks choppy
     Bug #4204: Dead slaughterfish doesn't float to water surface after loading saved game
+    Bug #4382: Sound output device does not change when it should
     Bug #4610: Casting a Bound Weapon spell cancels the casting animation by equipping the weapon prematurely
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
@@ -15,12 +16,14 @@
     Bug #5870: Disposing of actors who were selected in the console doesn't deselect them like vanilla
     Bug #5883: Immobile creatures don't cause water ripples
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
+    Bug #6027: Collisionshape becomes spiderweb-like when the mesh is too complex
     Bug #6313: Followers with high Fight can turn hostile
     Bug #6427: Enemy health bar disappears before damaging effect ends
     Bug #6550: Cloned body parts don't inherit texture effects
     Bug #6645: Enemy block sounds align with animation instead of blocked hits
     Bug #6657: Distant terrain tiles become black when using FWIW mod
     Bug #6661: Saved games that have no preview screenshot cause issues or crashes
+    Bug #6716: mwscript comparison operator handling is too restrictive
     Bug #6807: Ultimate Galleon is not working properly
     Bug #6893: Lua: Inconsistent behavior with actors affected by Disable and SetDelete commands
     Bug #6939: OpenMW-CS: ID columns are too short
@@ -38,6 +41,7 @@
     Bug #7044: Changing a class' services does not affect autocalculated NPCs
     Bug #7054: Quests aren't sorted by name
     Bug #7064: NPCs don't report crime if the player is casting offensive spells on them while sneaking
+    Bug #7077: OpenMW fails to load certain particle effects in .osgt format
     Bug #7084: Resurrecting an actor doesn't take into account base record changes
     Bug #7088: Deleting last save game of last character doesn't clear character name/details
     Bug #7092: BSA archives from higher priority directories don't take priority
@@ -46,6 +50,8 @@
     Bug #7172: Current music playlist continues playing indefinitely if next playlist is empty
     Bug #7229: Error marker loading failure is not handled
     Bug #7243: Get Skyrim.esm loading
+    Bug #7298: Water ripples from projectiles sometimes are not spawned
+    Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6447: Add LOD support to Object Paging
     Feature #6726: Lua API for creating new objects
@@ -63,6 +69,7 @@
     Feature #7148: Optimize string literal lookup in mwscript
     Feature #7194: Ori to show texture paths
     Feature #7214: Searching in the in-game console
+    Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message
 
@@ -225,6 +232,7 @@
     Bug #6937: Divided by Nix Hounds quest is broken
     Bug #7008: Race condition on initializing a vector of reserved node names
     Bug #7121: Crash on TimeStamp construction with invalid hour value
+    Bug #7251: Force shaders setting still renders some drawables with FFP
     Feature #890: OpenMW-CS: Column filtering
     Feature #1465: "Reset" argument for AI functions
     Feature #2491: Ability to make OpenMW "portable"

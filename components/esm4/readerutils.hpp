@@ -1,7 +1,9 @@
 #ifndef OPENMW_COMPONENTS_ESM4_READERUTILS
 #define OPENMW_COMPONENTS_ESM4_READERUTILS
 
-#include <components/esm4/reader.hpp>
+#include "grouptype.hpp"
+#include "reader.hpp"
+
 namespace ESM4
 {
     struct ReaderUtils

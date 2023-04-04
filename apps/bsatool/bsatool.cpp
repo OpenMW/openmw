@@ -6,6 +6,8 @@
 
 #include <boost/program_options.hpp>
 
+#include <components/bsa/ba2dx10file.hpp>
+#include <components/bsa/ba2gnrlfile.hpp>
 #include <components/bsa/compressedbsafile.hpp>
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
@@ -318,12 +320,21 @@ int main(int argc, char** argv)
 
         // Open file
 
-        Bsa::BsaVersion bsaVersion = Bsa::CompressedBSAFile::detectVersion(info.filename);
+        Bsa::BsaVersion bsaVersion = Bsa::BSAFile::detectVersion(info.filename);
 
-        if (bsaVersion == Bsa::BSAVER_COMPRESSED)
-            return call<Bsa::CompressedBSAFile>(info);
-        else
-            return call<Bsa::BSAFile>(info);
+        switch (bsaVersion)
+        {
+            case Bsa::BSAVER_COMPRESSED:
+                return call<Bsa::CompressedBSAFile>(info);
+            case Bsa::BSAVER_BA2_GNRL:
+                return call<Bsa::BA2GNRLFile>(info);
+            case Bsa::BSAVER_BA2_DX10:
+                return call<Bsa::BA2DX10File>(info);
+            case Bsa::BSAVER_UNCOMPRESSED:
+                return call<Bsa::BSAFile>(info);
+            default:
+                throw std::runtime_error("Unrecognised BSA archive");
+        }
     }
     catch (std::exception& e)
     {

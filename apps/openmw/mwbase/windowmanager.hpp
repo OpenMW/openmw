@@ -40,7 +40,6 @@ namespace ESM
 {
     class ESMReader;
     class ESMWriter;
-    struct CellId;
 }
 
 namespace MWMechanics

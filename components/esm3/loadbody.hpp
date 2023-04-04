@@ -72,5 +72,7 @@ namespace ESM
         void blank();
         ///< Set record to default state (does not touch the ID).
     };
+
+    bool isFirstPersonBodyPart(const BodyPart& value);
 }
 #endif

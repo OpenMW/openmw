@@ -5,6 +5,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/misc/strings/format.hpp>
 #include <components/settings/settings.hpp>
 #include <filesystem>
@@ -90,7 +91,7 @@ namespace Shader
                 size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
                 size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
                 std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
-                lineNumber = std::stoi(lineNumberString) - 1;
+                lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2) - 1;
             }
             else
             {
@@ -159,7 +160,7 @@ namespace Shader
                 size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
                 size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
                 std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
-                lineNumber = std::stoi(lineNumberString) - 1;
+                lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2) - 1;
             }
             else
             {
@@ -239,7 +240,7 @@ namespace Shader
             size_t lineNumberStart = lineDirectivePosition + std::string("#line ").length();
             size_t lineNumberEnd = source.find_first_not_of("0123456789", lineNumberStart);
             std::string lineNumberString = source.substr(lineNumberStart, lineNumberEnd - lineNumberStart);
-            lineNumber = std::stoi(lineNumberString);
+            lineNumber = Misc::StringUtils::toNumeric<int>(lineNumberString, 2);
         }
         else
         {
@@ -712,6 +713,27 @@ namespace Shader
         unit.count = count;
 
         mReservedTextureUnitsBySlot[static_cast<int>(slot)] = unit;
+
+        std::string_view slotDescr;
+        switch (slot)
+        {
+            case Slot::OpaqueDepthTexture:
+                slotDescr = "opaque depth texture";
+                break;
+            case Slot::SkyTexture:
+                slotDescr = "sky RTT";
+                break;
+            case Slot::ShadowMaps:
+                slotDescr = "shadow maps";
+                break;
+            default:
+                slotDescr = "UNKNOWN";
+        }
+        if (unit.count == 1)
+            Log(Debug::Info) << "Reserving texture unit for " << slotDescr << ": " << unit.index;
+        else
+            Log(Debug::Info) << "Reserving texture units for " << slotDescr << ": " << unit.index << ".."
+                             << (unit.index + count - 1);
 
         return unit.index;
     }

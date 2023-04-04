@@ -73,10 +73,8 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
     }
 
     cfgMgr.readConfiguration(variables, desc);
-    Settings::Manager::load(cfgMgr);
 
     setupLogging(cfgMgr.getLogPath(), "OpenMW");
-    MWGui::DebugWindow::startLogRecording();
 
     Version::Version v
         = Version::getOpenmwVersion(variables["resources"]
@@ -84,6 +82,10 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
                                         .u8string()); // This call to u8string is redundant, but required to build on
                                                       // MSVC 14.26 due to implementation bugs.
     Log(Debug::Info) << v.describe();
+
+    Settings::Manager::load(cfgMgr);
+
+    MWGui::DebugWindow::startLogRecording();
 
     engine.setGrabMouse(!variables["no-grab"].as<bool>());
 

@@ -65,8 +65,7 @@ namespace MWWorld
             {
                 ESM4::Reader readerESM4(
                     std::move(stream), filepath, MWBase::Environment::get().getResourceSystem()->getVFS());
-                auto statelessEncoder = mEncoder->getStatelessEncoder();
-                readerESM4.setEncoder(&statelessEncoder);
+                readerESM4.setEncoder(mReaders.getStatelessEncoder());
                 mStore.loadESM4(readerESM4);
                 break;
             }

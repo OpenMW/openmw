@@ -58,7 +58,6 @@ namespace MWLua
             { ESM::REC_PROB, ObjectTypeName::Probe },
             { ESM::REC_REPA, ObjectTypeName::Repair },
         };
-
     }
 
     unsigned int getLiveCellRefType(const MWWorld::LiveCellRefBase* ref)
@@ -95,7 +94,7 @@ namespace MWLua
             std::string msg = "Requires type '";
             msg.append(getLuaObjectTypeName(recordType));
             msg.append("', but applied to ");
-            msg.append(ptrToString(ptr));
+            msg.append(ptr.toString());
             throw std::runtime_error(msg);
         }
         return ptr;

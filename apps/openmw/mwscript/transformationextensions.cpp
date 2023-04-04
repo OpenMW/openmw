@@ -35,7 +35,7 @@ namespace MWScript
             std::vector<MWWorld::Ptr> actors;
             MWBase::Environment::get().getWorld()->getActorsStandingOn(ptr, actors);
             for (auto& actor : actors)
-                MWBase::Environment::get().getWorld()->moveObjectBy(actor, diff);
+                MWBase::Environment::get().getWorld()->moveObjectBy(actor, diff, false);
         }
 
         template <class R>
@@ -65,8 +65,8 @@ namespace MWScript
                         from = container;
                     else
                     {
-                        std::string error = "Failed to find the container of object '"
-                            + from.getCellRef().getRefId().getRefIdString() + "'";
+                        const std::string error
+                            = "Failed to find the container of object " + from.getCellRef().getRefId().toDebugString();
                         runtime.getContext().report(error);
                         Log(Debug::Error) << error;
                         runtime.push(0.f);
@@ -77,7 +77,7 @@ namespace MWScript
                 const MWWorld::Ptr to = MWBase::Environment::get().getWorld()->searchPtr(name, false);
                 if (to.isEmpty())
                 {
-                    std::string error = "Failed to find an instance of object '" + name.getRefIdString() + "'";
+                    const std::string error = "Failed to find an instance of object " + name.toDebugString();
                     runtime.getContext().report(error);
                     Log(Debug::Error) << error;
                     runtime.push(0.f);
@@ -87,8 +87,7 @@ namespace MWScript
                 float distance;
                 // If the objects are in different worldspaces, return a large value (just like vanilla)
                 if (!to.isInCell() || !from.isInCell()
-                    || to.getCell()->getCell()->getCellId().mWorldspace
-                        != from.getCell()->getCell()->getCellId().mWorldspace)
+                    || to.getCell()->getCell()->getWorldSpace() != from.getCell()->getCell()->getWorldSpace())
                     distance = std::numeric_limits<float>::max();
                 else
                 {
@@ -331,7 +330,7 @@ namespace MWScript
                 }
 
                 dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext())
-                    .updatePtr(ptr, MWBase::Environment::get().getWorld()->moveObject(ptr, newPos, true, true));
+                    .updatePtr(ptr, MWBase::Environment::get().getWorld()->moveObjectBy(ptr, newPos - curPos, true));
             }
         };
 
@@ -753,7 +752,7 @@ namespace MWScript
                 // This approach can be used to create elevators.
                 moveStandingActors(ptr, diff);
                 dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext())
-                    .updatePtr(ptr, MWBase::Environment::get().getWorld()->moveObjectBy(ptr, diff));
+                    .updatePtr(ptr, MWBase::Environment::get().getWorld()->moveObjectBy(ptr, diff, false));
             }
         };
 
@@ -788,7 +787,7 @@ namespace MWScript
                 // This approach can be used to create elevators.
                 moveStandingActors(ptr, diff);
                 dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext())
-                    .updatePtr(ptr, MWBase::Environment::get().getWorld()->moveObjectBy(ptr, diff));
+                    .updatePtr(ptr, MWBase::Environment::get().getWorld()->moveObjectBy(ptr, diff, false));
             }
         };
 

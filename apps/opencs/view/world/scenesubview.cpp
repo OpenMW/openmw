@@ -14,8 +14,6 @@
 #include <apps/opencs/view/doc/subview.hpp>
 #include <apps/opencs/view/render/worldspacewidget.hpp>
 
-#include <components/esm3/cellid.hpp>
-
 #include "../../model/doc/document.hpp"
 
 #include "../../model/world/cellselection.hpp"
@@ -49,7 +47,7 @@ CSVWorld::SceneSubView::SceneSubView(const CSMWorld::UniversalId& id, CSMDoc::Do
     CSVRender::WorldspaceWidget* worldspaceWidget = nullptr;
     widgetType whatWidget;
 
-    if (Misc::StringUtils::ciEqual(id.getId(), ESM::CellId::sDefaultWorldspace))
+    if (Misc::StringUtils::ciEqual(id.getId(), ESM::Cell::sDefaultWorldspace))
     {
         whatWidget = widget_Paged;
 
@@ -170,7 +168,7 @@ void CSVWorld::SceneSubView::cellSelectionChanged(const CSMWorld::UniversalId& i
 
 void CSVWorld::SceneSubView::cellSelectionChanged(const CSMWorld::CellSelection& selection)
 {
-    setUniversalId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Scene, ESM::CellId::sDefaultWorldspace));
+    setUniversalId(CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Scene, ESM::Cell::sDefaultWorldspace));
     int size = selection.getSize();
 
     std::ostringstream stream;

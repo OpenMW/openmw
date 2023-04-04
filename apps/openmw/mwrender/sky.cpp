@@ -537,7 +537,7 @@ namespace MWRender
             osg::Quat quat;
             quat.makeRotate(MWWorld::Weather::defaultDirection(), mStormParticleDirection);
             // Morrowind deliberately rotates the blizzard mesh, so so should we.
-            if (mCurrentParticleEffect == Settings::Manager::getString("weatherblizzard", "Models"))
+            if (mCurrentParticleEffect == "meshes\\blizzard.nif")
                 quat.makeRotate(osg::Vec3f(-1, 0, 0), mStormParticleDirection);
             mParticleNode->setAttitude(quat);
         }

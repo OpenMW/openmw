@@ -10,6 +10,7 @@
 
 #include <BulletCollision/BroadphaseCollision/btDbvtBroadphase.h>
 #include <BulletCollision/CollisionShapes/btCollisionShape.h>
+#include <LinearMath/btThreads.h>
 
 #include <osg/Stats>
 
@@ -175,16 +176,15 @@ namespace
                     return;
                 auto& [actor, frameDataRef] = *locked;
                 auto& frameData = frameDataRef.get();
-                actor->applyOffsetChange();
-                frameData.mPosition = actor->getPosition();
+                frameData.mPosition = actor->applyOffsetChange();
                 if (frameData.mWaterCollision && frameData.mPosition.z() < frameData.mWaterlevel
                     && actor->canMoveToWaterSurface(frameData.mWaterlevel, mCollisionWorld))
                 {
                     const auto offset = osg::Vec3f(0, 0, frameData.mWaterlevel - frameData.mPosition.z());
-                    MWBase::Environment::get().getWorld()->moveObjectBy(actor->getPtr(), offset);
-                    actor->applyOffsetChange();
-                    frameData.mPosition = actor->getPosition();
+                    MWBase::Environment::get().getWorld()->moveObjectBy(actor->getPtr(), offset, false);
+                    frameData.mPosition = actor->applyOffsetChange();
                 }
+                actor->updateCollisionObjectPosition();
                 frameData.mOldHeight = frameData.mPosition.z();
                 const auto rotation = actor->getPtr().getRefData().getPosition().asRotationVec3();
                 frameData.mRotation = osg::Vec2f(rotation.x(), rotation.z());
@@ -305,10 +305,11 @@ namespace MWPhysics
 {
     namespace
     {
-        int getMaxBulletSupportedThreads()
+        unsigned getMaxBulletSupportedThreads()
         {
             auto broad = std::make_unique<btDbvtBroadphase>();
-            return broad->m_rayTestStacks.size();
+            assert(BT_MAX_THREAD_COUNT > 0);
+            return std::min<unsigned>(broad->m_rayTestStacks.size(), BT_MAX_THREAD_COUNT - 1);
         }
 
         LockingPolicy detectLockingPolicy()
@@ -330,18 +331,71 @@ namespace MWPhysics
                 case LockingPolicy::ExclusiveLocksOnly:
                     return 1;
                 case LockingPolicy::AllowSharedLocks:
-                    return static_cast<unsigned>(std::max(
-                        getMaxBulletSupportedThreads(), Settings::Manager::getInt("async num threads", "Physics")));
+                    return std::clamp<unsigned>(
+                        Settings::Manager::getInt("async num threads", "Physics"), 0, getMaxBulletSupportedThreads());
             }
 
             throw std::runtime_error("Unsupported LockingPolicy: "
                 + std::to_string(static_cast<std::underlying_type_t<LockingPolicy>>(lockingPolicy)));
         }
     }
-}
 
-namespace MWPhysics
-{
+    class PhysicsTaskScheduler::WorkersSync
+    {
+    public:
+        void waitForWorkers()
+        {
+            std::unique_lock lock(mWorkersDoneMutex);
+            if (mFrameCounter != mWorkersFrameCounter)
+                mWorkersDone.wait(lock);
+        }
+
+        void wakeUpWorkers()
+        {
+            const std::lock_guard lock(mHasJobMutex);
+            ++mFrameCounter;
+            mHasJob.notify_all();
+        }
+
+        void stopWorkers()
+        {
+            const std::lock_guard lock(mHasJobMutex);
+            mShouldStop = true;
+            mHasJob.notify_all();
+        }
+
+        void workIsDone()
+        {
+            const std::lock_guard lock(mWorkersDoneMutex);
+            ++mWorkersFrameCounter;
+            mWorkersDone.notify_all();
+        }
+
+        template <class F>
+        void runWorker(F&& f) noexcept
+        {
+            std::size_t lastFrame = 0;
+            std::unique_lock lock(mHasJobMutex);
+            while (!mShouldStop)
+            {
+                mHasJob.wait(lock, [&] { return mShouldStop || mFrameCounter != lastFrame; });
+                lastFrame = mFrameCounter;
+                lock.unlock();
+                f();
+                lock.lock();
+            }
+        }
+
+    private:
+        std::size_t mWorkersFrameCounter = 0;
+        std::condition_variable mWorkersDone;
+        std::mutex mWorkersDoneMutex;
+        std::condition_variable mHasJob;
+        bool mShouldStop = false;
+        std::size_t mFrameCounter = 0;
+        std::mutex mHasJobMutex;
+    };
+
     PhysicsTaskScheduler::PhysicsTaskScheduler(
         float physicsDt, btCollisionWorld* collisionWorld, MWRender::DebugDrawer* debugDrawer)
         : mDefaultPhysicsDt(physicsDt)
@@ -354,9 +408,7 @@ namespace MWPhysics
         , mNumJobs(0)
         , mRemainingSteps(0)
         , mLOSCacheExpiry(Settings::Manager::getInt("lineofsight keep inactive cache", "Physics"))
-        , mFrameCounter(0)
         , mAdvanceSimulation(false)
-        , mQuit(false)
         , mNextJob(0)
         , mNextLOS(0)
         , mFrameNumber(0)
@@ -369,9 +421,11 @@ namespace MWPhysics
         , mTimeBegin(0)
         , mTimeEnd(0)
         , mFrameStart(0)
+        , mWorkersSync(mNumThreads >= 1 ? std::make_unique<WorkersSync>() : nullptr)
     {
         if (mNumThreads >= 1)
         {
+            Log(Debug::Info) << "Using " << mNumThreads << " async physics threads";
             for (unsigned i = 0; i < mNumThreads; ++i)
                 mThreads.emplace_back([&] { worker(); });
         }
@@ -392,11 +446,11 @@ namespace MWPhysics
         waitForWorkers();
         {
             MaybeExclusiveLock lock(mSimulationMutex, mLockingPolicy);
-            mQuit = true;
             mNumJobs = 0;
             mRemainingSteps = 0;
-            mHasJob.notify_all();
         }
+        if (mWorkersSync != nullptr)
+            mWorkersSync->stopWorkers();
         for (auto& thread : mThreads)
             thread.join();
     }
@@ -453,7 +507,14 @@ namespace MWPhysics
         assert(mSimulations != &simulations);
 
         waitForWorkers();
+        prepareWork(timeAccum, simulations, frameStart, frameNumber, stats);
+        if (mWorkersSync != nullptr)
+            mWorkersSync->wakeUpWorkers();
+    }
 
+    void PhysicsTaskScheduler::prepareWork(float& timeAccum, std::vector<Simulation>& simulations,
+        osg::Timer_t frameStart, unsigned int frameNumber, osg::Stats& stats)
+    {
         // This function run in the main thread.
         // While the mSimulationMutex is held, background physics threads can't run.
 
@@ -486,7 +547,6 @@ namespace MWPhysics
         mPhysicsDt = newDelta;
         mSimulations = &simulations;
         mAdvanceSimulation = (mRemainingSteps != 0);
-        ++mFrameCounter;
         mNumJobs = mSimulations->size();
         mNextLOS.store(0, std::memory_order_relaxed);
         mNextJob.store(0, std::memory_order_release);
@@ -507,7 +567,6 @@ namespace MWPhysics
         }
 
         mAsyncStartTime = mTimer->tick();
-        mHasJob.notify_all();
         if (mAdvanceSimulation)
             mBudget.update(mTimer->delta_s(timeStart, mTimer->tick()), 1, mBudgetCursor);
     }
@@ -684,18 +743,10 @@ namespace MWPhysics
 
     void PhysicsTaskScheduler::worker()
     {
-        std::size_t lastFrame = 0;
-        std::shared_lock lock(mSimulationMutex);
-        while (!mQuit)
-        {
-            if (lastFrame == mFrameCounter)
-            {
-                mHasJob.wait(lock, [&] { return mQuit || lastFrame != mFrameCounter; });
-                lastFrame = mFrameCounter;
-            }
-
+        mWorkersSync->runWorker([this] {
+            std::shared_lock lock(mSimulationMutex);
             doSimulation();
-        }
+        });
     }
 
     void PhysicsTaskScheduler::updateActorsPositions()
@@ -814,10 +865,8 @@ namespace MWPhysics
                 mLOSCache.end());
         }
         mTimeEnd = mTimer->tick();
-
-        std::unique_lock lock(mWorkersDoneMutex);
-        ++mWorkersFrameCounter;
-        mWorkersDone.notify_all();
+        if (mWorkersSync != nullptr)
+            mWorkersSync->workIsDone();
     }
 
     void PhysicsTaskScheduler::syncWithMainThread()
@@ -839,10 +888,7 @@ namespace MWPhysics
     // https://docs.microsoft.com/en-us/windows/win32/sync/slim-reader-writer--srw--locks
     void PhysicsTaskScheduler::waitForWorkers()
     {
-        if (mNumThreads == 0)
-            return;
-        std::unique_lock lock(mWorkersDoneMutex);
-        if (mFrameCounter != mWorkersFrameCounter)
-            mWorkersDone.wait(lock);
+        if (mWorkersSync != nullptr)
+            mWorkersSync->waitForWorkers();
     }
 }

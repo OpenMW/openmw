@@ -1,25 +1,88 @@
 #include <components/esm/fourcc.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm3/loadcont.hpp>
+#include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadregn.hpp>
+#include <components/esm3/loadscpt.hpp>
 #include <components/esm3/player.hpp>
+#include <components/esm3/quickkeys.hpp>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <array>
 #include <memory>
 #include <random>
+#include <type_traits>
 
 namespace ESM
 {
     namespace
     {
+        auto tie(const ContItem& value)
+        {
+            return std::tie(value.mCount, value.mItem);
+        }
+
+        auto tie(const ESM::Region::SoundRef& value)
+        {
+            return std::tie(value.mSound, value.mChance);
+        }
+
+        auto tie(const ESM::QuickKeys::QuickKey& value)
+        {
+            return std::tie(value.mType, value.mId);
+        }
+    }
+
+    inline bool operator==(const ESM::ContItem& lhs, const ESM::ContItem& rhs)
+    {
+        return tie(lhs) == tie(rhs);
+    }
+
+    inline std::ostream& operator<<(std::ostream& stream, const ESM::ContItem& value)
+    {
+        return stream << "ESM::ContItem {.mCount = " << value.mCount << ", .mItem = '" << value.mItem << "'}";
+    }
+
+    inline bool operator==(const ESM::Region::SoundRef& lhs, const ESM::Region::SoundRef& rhs)
+    {
+        return tie(lhs) == tie(rhs);
+    }
+
+    inline std::ostream& operator<<(std::ostream& stream, const ESM::Region::SoundRef& value)
+    {
+        return stream << "ESM::Region::SoundRef {.mSound = '" << value.mSound << "', .mChance = " << value.mChance
+                      << "}";
+    }
+
+    inline bool operator==(const ESM::QuickKeys::QuickKey& lhs, const ESM::QuickKeys::QuickKey& rhs)
+    {
+        return tie(lhs) == tie(rhs);
+    }
+
+    inline std::ostream& operator<<(std::ostream& stream, const ESM::QuickKeys::QuickKey& value)
+    {
+        return stream << "ESM::QuickKeys::QuickKey {.mType = '" << static_cast<std::uint32_t>(value.mType)
+                      << "', .mId = " << value.mId << "}";
+    }
+
+    namespace
+    {
         using namespace ::testing;
 
-        constexpr std::array formats = {
-            MaxLimitedSizeStringsFormatVersion,
-            CurrentSaveGameFormatVersion,
-        };
+        std::vector<ESM::FormatVersion> getFormats()
+        {
+            std::vector<ESM::FormatVersion> result({
+                MaxLimitedSizeStringsFormatVersion,
+                MaxStringRefIdFormatVersion,
+            });
+            for (ESM::FormatVersion v = result.back() + 1; v <= ESM::CurrentSaveGameFormatVersion; ++v)
+                result.push_back(v);
+            return result;
+        }
 
         constexpr std::uint32_t fakeRecordId = fourCC("FAKE");
 
@@ -47,10 +110,39 @@ namespace ESM
             return stream;
         }
 
+        template <class T, class = std::void_t<>>
+        struct HasLoad : std::false_type
+        {
+        };
+
         template <class T>
-        void load(ESMReader& reader, T& record)
+        struct HasLoad<T, std::void_t<decltype(std::declval<T>().load(std::declval<ESMReader&>()))>> : std::true_type
+        {
+        };
+
+        template <class T>
+        auto load(ESMReader& reader, T& record) -> std::enable_if_t<HasLoad<std::decay_t<T>>::value>
         {
             record.load(reader);
+        }
+
+        template <class T, class = std::void_t<>>
+        struct HasLoadWithDelete : std::false_type
+        {
+        };
+
+        template <class T>
+        struct HasLoadWithDelete<T,
+            std::void_t<decltype(std::declval<T>().load(std::declval<ESMReader&>(), std::declval<bool&>()))>>
+            : std::true_type
+        {
+        };
+
+        template <class T>
+        auto load(ESMReader& reader, T& record) -> std::enable_if_t<HasLoadWithDelete<std::decay_t<T>>::value>
+        {
+            bool deleted = false;
+            record.load(reader, deleted);
         }
 
         void load(ESMReader& reader, CellRef& record)
@@ -84,6 +176,13 @@ namespace ESM
             }
 
             RefId generateRandomRefId(std::size_t size = 33) { return RefId::stringRefId(generateRandomString(size)); }
+
+            template <class T, std::size_t n>
+            void generateArray(T (&dst)[n])
+            {
+                for (auto& v : dst)
+                    v = std::uniform_real_distribution<float>{ -1.0f, 1.0f }(mRandom);
+            }
         };
 
         TEST_F(Esm3SaveLoadRecordTest, headerShouldNotChange)
@@ -106,6 +205,40 @@ namespace ESM
             EXPECT_EQ(reader.getDesc(), description);
         }
 
+        TEST_F(Esm3SaveLoadRecordTest, containerContItemShouldSupportRefIdLongerThan32)
+        {
+            Container record;
+            record.blank();
+            record.mInventory.mList.push_back(ESM::ContItem{ .mCount = 42, .mItem = generateRandomRefId(33) });
+            record.mInventory.mList.push_back(ESM::ContItem{ .mCount = 13, .mItem = generateRandomRefId(33) });
+            Container result;
+            saveAndLoadRecord(record, CurrentSaveGameFormatVersion, result);
+            EXPECT_EQ(result.mInventory.mList, record.mInventory.mList);
+        }
+
+        TEST_F(Esm3SaveLoadRecordTest, regionSoundRefShouldSupportRefIdLongerThan32)
+        {
+            Region record;
+            record.blank();
+            record.mSoundList.push_back(ESM::Region::SoundRef{ .mSound = generateRandomRefId(33), .mChance = 42 });
+            record.mSoundList.push_back(ESM::Region::SoundRef{ .mSound = generateRandomRefId(33), .mChance = 13 });
+            Region result;
+            saveAndLoadRecord(record, CurrentSaveGameFormatVersion, result);
+            EXPECT_EQ(result.mSoundList, record.mSoundList);
+        }
+
+        TEST_F(Esm3SaveLoadRecordTest, scriptSoundRefShouldSupportRefIdLongerThan32)
+        {
+            Script record;
+            record.blank();
+            record.mId = generateRandomRefId(33);
+            record.mData.mNumShorts = 42;
+            Script result;
+            saveAndLoadRecord(record, CurrentSaveGameFormatVersion, result);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mData.mNumShorts, record.mData.mNumShorts);
+        }
+
         TEST_P(Esm3SaveLoadRecordTest, playerShouldNotChange)
         {
             std::minstd_rand random;
@@ -115,10 +248,28 @@ namespace ESM
             record.mObject.mRef.mRefID = generateRandomRefId();
             std::generate_n(std::inserter(record.mPreviousItems, record.mPreviousItems.end()), 2,
                 [&] { return std::make_pair(generateRandomRefId(), generateRandomRefId()); });
+            record.mCellId = ESM::RefId::esm3ExteriorCell(0, 0);
+            generateArray(record.mLastKnownExteriorPosition);
+            record.mHasMark = true;
+            record.mMarkedCell = ESM::RefId::esm3ExteriorCell(0, 0);
+            generateArray(record.mMarkedPosition.pos);
+            generateArray(record.mMarkedPosition.rot);
+            record.mCurrentCrimeId = 42;
+            record.mPaidCrimeId = 13;
             Player result;
             saveAndLoadRecord(record, GetParam(), result);
             EXPECT_EQ(record.mBirthsign, result.mBirthsign);
             EXPECT_EQ(record.mPreviousItems, result.mPreviousItems);
+            EXPECT_EQ(record.mPreviousItems, result.mPreviousItems);
+            EXPECT_EQ(record.mCellId, result.mCellId);
+
+            EXPECT_THAT(record.mLastKnownExteriorPosition, ElementsAreArray(result.mLastKnownExteriorPosition));
+            EXPECT_EQ(record.mHasMark, result.mHasMark);
+            EXPECT_EQ(record.mMarkedCell, result.mMarkedCell);
+            EXPECT_THAT(record.mMarkedPosition.pos, ElementsAreArray(result.mMarkedPosition.pos));
+            EXPECT_THAT(record.mMarkedPosition.rot, ElementsAreArray(result.mMarkedPosition.rot));
+            EXPECT_EQ(record.mCurrentCrimeId, result.mCurrentCrimeId);
+            EXPECT_EQ(record.mPaidCrimeId, result.mPaidCrimeId);
         }
 
         TEST_P(Esm3SaveLoadRecordTest, cellRefShouldNotChange)
@@ -151,6 +302,75 @@ namespace ESM
             EXPECT_EQ(record.mLastHitObject, result.mLastHitObject);
         }
 
-        INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(formats));
+        TEST_P(Esm3SaveLoadRecordTest, containerShouldNotChange)
+        {
+            Container record;
+            record.blank();
+            record.mId = generateRandomRefId();
+            record.mInventory.mList.push_back(ESM::ContItem{ .mCount = 42, .mItem = generateRandomRefId(32) });
+            record.mInventory.mList.push_back(ESM::ContItem{ .mCount = 13, .mItem = generateRandomRefId(32) });
+            Container result;
+            saveAndLoadRecord(record, GetParam(), result);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mInventory.mList, record.mInventory.mList);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, regionShouldNotChange)
+        {
+            Region record;
+            record.blank();
+            record.mId = generateRandomRefId();
+            record.mSoundList.push_back(ESM::Region::SoundRef{ .mSound = generateRandomRefId(32), .mChance = 42 });
+            record.mSoundList.push_back(ESM::Region::SoundRef{ .mSound = generateRandomRefId(32), .mChance = 13 });
+            Region result;
+            saveAndLoadRecord(record, GetParam(), result);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mSoundList, record.mSoundList);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, scriptShouldNotChange)
+        {
+            Script record;
+            record.blank();
+            record.mId = generateRandomRefId(32);
+            record.mData.mNumShorts = 42;
+            Script result;
+            saveAndLoadRecord(record, GetParam(), result);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mData.mNumShorts, record.mData.mNumShorts);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, quickKeysShouldNotChange)
+        {
+            const QuickKeys record {
+                .mKeys = {
+                    {
+                        .mType = QuickKeys::Type::Magic,
+                        .mId = generateRandomRefId(32),
+                    },
+                    {
+                        .mType = QuickKeys::Type::MagicItem,
+                        .mId = generateRandomRefId(32),
+                    },
+                },
+            };
+            QuickKeys result;
+            saveAndLoadRecord(record, GetParam(), result);
+            EXPECT_EQ(result.mKeys, record.mKeys);
+        }
+
+        TEST_P(Esm3SaveLoadRecordTest, dialogueShouldNotChange)
+        {
+            Dialogue record;
+            record.blank();
+            record.mStringId = generateRandomString(32);
+            record.mId = ESM::RefId::stringRefId(record.mStringId);
+            Dialogue result;
+            saveAndLoadRecord(record, GetParam(), result);
+            EXPECT_EQ(result.mId, record.mId);
+            EXPECT_EQ(result.mStringId, record.mStringId);
+        }
+
+        INSTANTIATE_TEST_SUITE_P(FormatVersions, Esm3SaveLoadRecordTest, ValuesIn(getFormats()));
     }
 }

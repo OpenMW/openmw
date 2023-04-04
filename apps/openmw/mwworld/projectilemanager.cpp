@@ -16,6 +16,7 @@
 #include <components/esm3/projectilestate.hpp>
 
 #include <components/misc/constants.hpp>
+#include <components/misc/convert.hpp>
 #include <components/misc/resourcehelpers.hpp>
 
 #include <components/resource/resourcesystem.hpp>
@@ -546,11 +547,14 @@ namespace MWWorld
                 if (invIt != inv.end() && invIt->getCellRef().getRefId() == projectileState.mBowId)
                     bow = *invIt;
             }
+
+            const auto hitPosition = Misc::Convert::toOsg(projectile->getHitPosition());
+
             if (projectile->getHitWater())
-                mRendering->emitWaterRipple(pos);
+                mRendering->emitWaterRipple(hitPosition);
 
             MWMechanics::projectileHit(
-                caster, target, bow, projectileRef.getPtr(), pos, projectileState.mAttackStrength);
+                caster, target, bow, projectileRef.getPtr(), hitPosition, projectileState.mAttackStrength);
             projectileState.mToDelete = true;
         }
         const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
@@ -574,7 +578,7 @@ namespace MWWorld
             assert(target != caster);
 
             MWMechanics::CastSpell cast(caster, target);
-            cast.mHitPosition = pos;
+            cast.mHitPosition = Misc::Convert::toOsg(projectile->getHitPosition());
             cast.mId = magicBoltState.mSpellId;
             cast.mSourceName = magicBoltState.mSourceName;
             cast.mSlot = magicBoltState.mSlot;

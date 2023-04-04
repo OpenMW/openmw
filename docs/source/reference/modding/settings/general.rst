@@ -29,7 +29,7 @@ Specify the format for screen shots taken by pressing the screen shot key (bound
 This setting should be the file extension commonly associated with the desired format.
 The formats supported will be determined at compilation, but "jpg", "png", and "tga" should be allowed.
 
-This setting can be configured in Advanced tab of the launcher.
+This setting can be configured in the Settings tab of the launcher.
 
 texture mag filter
 ------------------

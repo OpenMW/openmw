@@ -1,4 +1,4 @@
-set (OPENCS_SRC main.cpp
+set (OPENCS_SRC
     ${CMAKE_SOURCE_DIR}/files/windows/opencs.rc
     )
 
@@ -143,7 +143,7 @@ set (OPENCS_UI
     ${CMAKE_SOURCE_DIR}/files/ui/filedialog.ui
     )
 
-source_group (openmw-cs FILES ${OPENCS_SRC} ${OPENCS_HDR})
+source_group (openmw-cs FILES main.cpp ${OPENCS_SRC} ${OPENCS_HDR})
 
 if(WIN32)
     set(QT_USE_QTMAIN TRUE)
@@ -167,19 +167,34 @@ else()
     set (OPENCS_OPENMW_CFG "")
 endif(APPLE)
 
-openmw_add_executable(openmw-cs
-    MACOSX_BUNDLE
+add_library(openmw-cs-lib
     ${OPENCS_SRC}
     ${OPENCS_UI_HDR}
     ${OPENCS_MOC_SRC}
     ${OPENCS_RES_SRC}
-    ${OPENCS_MAC_ICON}
-    ${OPENCS_CFG}
-    ${OPENCS_DEFAULT_FILTERS_FILE}
-    ${OPENCS_OPENMW_CFG}
 )
 
-if(APPLE)
+set_target_properties(openmw-cs-lib PROPERTIES OUTPUT_NAME openmw-cs)
+
+if(BUILD_OPENCS)
+    openmw_add_executable(openmw-cs
+        MACOSX_BUNDLE
+        ${OPENCS_MAC_ICON}
+        ${OPENCS_CFG}
+        ${OPENCS_DEFAULT_FILTERS_FILE}
+        ${OPENCS_OPENMW_CFG}
+        main.cpp
+    )
+
+    target_link_libraries(openmw-cs openmw-cs-lib)
+
+    if (BUILD_WITH_CODE_COVERAGE)
+        target_compile_options(openmw-cs-lib PRIVATE --coverage)
+        target_link_libraries(openmw-cs-lib gcov)
+    endif()
+endif()
+
+if(APPLE AND BUILD_OPENCS)
     set(OPENCS_BUNDLE_NAME "OpenMW-CS")
     set(OPENCS_BUNDLE_RESOURCES_DIR "${OpenMW_BINARY_DIR}/${OPENCS_BUNDLE_NAME}.app/Contents/Resources")
 
@@ -210,9 +225,9 @@ if(APPLE)
     add_custom_command(TARGET openmw-cs
         POST_BUILD
         COMMAND cp "${OpenMW_BINARY_DIR}/resources/version" "${OPENCS_BUNDLE_RESOURCES_DIR}/resources")
-endif(APPLE)
+endif()
 
-target_link_libraries(openmw-cs
+target_link_libraries(openmw-cs-lib
     # CMake's built-in OSG finder does not use pkgconfig, so we have to
     # manually ensure the order is correct for inter-library dependencies.
     # This only makes a difference with `-DOPENMW_USE_SYSTEM_OSG=ON -DOSG_STATIC=ON`.
@@ -228,10 +243,13 @@ target_link_libraries(openmw-cs
     components_qt
 )
 
-target_link_libraries(openmw-cs Qt::Widgets Qt::Core Qt::Network Qt::OpenGL)
+target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL)
 
 if (WIN32)
-    target_link_libraries(openmw-cs ${Boost_LOCALE_LIBRARY})
+    target_link_libraries(openmw-cs-lib ${Boost_LOCALE_LIBRARY})
+endif()
+
+if (WIN32 AND BUILD_OPENCS)
     INSTALL(TARGETS openmw-cs RUNTIME DESTINATION ".")
 
     get_generator_is_multi_config(multi_config)
@@ -251,17 +269,21 @@ if (MSVC)
     endif (CMAKE_CL_64)
 endif (MSVC)
 
-
-if(APPLE)
+if(APPLE AND BUILD_OPENCS)
     INSTALL(TARGETS openmw-cs BUNDLE DESTINATION "." COMPONENT Bundle)
 endif()
 
 if(USE_QT)
-    set_property(TARGET openmw-cs PROPERTY AUTOMOC ON)
+    set_property(TARGET openmw-cs-lib PROPERTY AUTOMOC ON)
 endif(USE_QT)
 
+if (BUILD_WITH_CODE_COVERAGE)
+    target_compile_options(openmw-cs-lib PRIVATE --coverage)
+    target_link_libraries(openmw-cs-lib gcov)
+endif()
+
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
-    target_precompile_headers(openmw-cs PRIVATE
+    target_precompile_headers(openmw-cs-lib PRIVATE
         <boost/filesystem.hpp>
         <boost/program_options/options_description.hpp>
 

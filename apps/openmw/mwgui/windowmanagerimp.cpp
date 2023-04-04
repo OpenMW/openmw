@@ -1408,7 +1408,7 @@ namespace MWGui
         if (player->getDrawState() == MWMechanics::DrawState::Spell)
             player->setDrawState(MWMechanics::DrawState::Nothing);
 
-        mSpellWindow->setTitle("#{sNone}");
+        mSpellWindow->setTitle("#{Interface:None}");
     }
 
     void WindowManager::unsetSelectedWeapon()
@@ -2134,7 +2134,7 @@ namespace MWGui
     {
         if (!MWBase::Environment::get().getWorld()->getPostProcessor()->isEnabled())
         {
-            messageBox("Postprocessor is not enabled.");
+            messageBox("#{OMWEngine:PostProcessingIsNotEnabled}");
             return;
         }
 

@@ -1,6 +1,7 @@
 #ifndef COMPONENTS_L10N_MESSAGEBUNDLES_H
 #define COMPONENTS_L10N_MESSAGEBUNDLES_H
 
+#include <functional>
 #include <map>
 #include <string_view>
 #include <unordered_map>
@@ -42,6 +43,7 @@ namespace l10n
         void load(std::istream& input, const icu::Locale& lang, const std::string& path);
         bool isLoaded(const icu::Locale& loc) const { return mBundles.find(loc.getName()) != mBundles.end(); }
         const icu::Locale& getFallbackLocale() const { return mFallbackLocale; }
+        void setGmstLoader(std::function<std::string(std::string_view)> fn) { mGmstLoader = std::move(fn); }
 
     private:
         // icu::Locale isn't hashable (or comparable), so we use the string form instead, which is canonicalized
@@ -49,6 +51,7 @@ namespace l10n
         const icu::Locale mFallbackLocale;
         std::vector<std::string> mPreferredLocaleStrings;
         std::vector<icu::Locale> mPreferredLocales;
+        std::function<std::string(std::string_view)> mGmstLoader;
         const icu::MessageFormat* findMessage(std::string_view key, const std::string& localeName) const;
     };
 

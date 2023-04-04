@@ -2,6 +2,7 @@
 
 #include <cmath>
 
+#include <components/esm3/loadcell.hpp>
 #include <components/misc/constants.hpp>
 #include <components/misc/strings/lower.hpp>
 
@@ -60,19 +61,9 @@ namespace ESSImport
 
             const PCDT::PNAM::MarkLocation& mark = pcdt.mPNAM.mMarkLocation;
 
-            ESM::CellId cell;
-            cell.mWorldspace = ESM::CellId::sDefaultWorldspace;
-            cell.mPaged = true;
-
-            cell.mIndex.mX = mark.mCellX;
-            cell.mIndex.mY = mark.mCellY;
-
             // TODO: Figure out a better way to detect interiors. (0, 0) is a valid exterior cell.
-            if (mark.mCellX == 0 && mark.mCellY == 0)
-            {
-                cell.mWorldspace = pcdt.mMNAM;
-                cell.mPaged = false;
-            }
+            bool interior = mark.mCellX == 0 && mark.mCellY == 0;
+            ESM::RefId cell = ESM::Cell::generateIdForCell(!interior, pcdt.mMNAM, mark.mCellX, mark.mCellY);
 
             out.mMarkedCell = cell;
             out.mMarkedPosition.pos[0] = mark.mX;

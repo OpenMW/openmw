@@ -35,7 +35,7 @@ namespace CSMWorld
         Q_OBJECT
     public:
         /// A list indexed by ESM::PartReferenceType
-        using ActorPartList = std::map<ESM::PartReferenceType, std::pair<std::string, int>>;
+        using ActorPartList = std::map<ESM::PartReferenceType, std::pair<ESM::RefId, int>>;
         /// A list indexed by ESM::BodyPart::MeshPart
         using RacePartList = std::array<ESM::RefId, ESM::BodyPart::MP_Count>;
         /// Tracks unique strings
@@ -95,7 +95,7 @@ namespace CSMWorld
             /// Returns the skeleton the actor should use for attaching parts to
             std::string getSkeleton() const;
             /// Retrieves the associated actor part
-            std::string_view getPart(ESM::PartReferenceType index) const;
+            ESM::RefId getPart(ESM::PartReferenceType index) const;
             /// Checks if the actor has a data dependency
             bool hasDependency(const ESM::RefId& id) const;
 
@@ -149,7 +149,6 @@ namespace CSMWorld
         ActorAdapter& operator=(const ActorAdapter&) = delete;
 
         QModelIndex getHighestIndex(QModelIndex) const;
-        bool is1stPersonPart(const std::string& id) const;
 
         RaceDataPtr getRaceData(const ESM::RefId& raceId);
 

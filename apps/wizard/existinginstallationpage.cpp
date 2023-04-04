@@ -50,9 +50,8 @@ bool Wizard::ExistingInstallationPage::validatePage()
     // Or failed to be detected due to the target being a symlink
 
     QString path(field(QLatin1String("installation.path")).toString());
-    QFile file(mWizard->mInstallations[path].iniPath);
 
-    if (!file.exists())
+    if (!QFile::exists(mWizard->mInstallations[path].iniPath))
     {
         QMessageBox msgBox;
         msgBox.setWindowTitle(tr("Error detecting Morrowind configuration"));

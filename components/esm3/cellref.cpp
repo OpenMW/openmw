@@ -175,6 +175,11 @@ namespace ESM
         }
     }
 
+    std::string RefNum::toString() const
+    {
+        return std::to_string(mIndex) + "_" + std::to_string(mContentFile);
+    }
+
     void CellRef::load(ESMReader& esm, bool& isDeleted, bool wideRefNum)
     {
         loadId(esm, wideRefNum);

@@ -99,7 +99,6 @@ namespace MWRender
 
         osg::ref_ptr<RotateController> mFirstPersonNeckController;
 
-        static bool isFirstPersonPart(const ESM::BodyPart* bodypart);
         static bool isFemalePart(const ESM::BodyPart* bodypart);
         static NpcType getNpcType(const MWWorld::Ptr& ptr);
 

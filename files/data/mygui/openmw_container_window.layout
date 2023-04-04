@@ -19,7 +19,7 @@
                 <Property key="Caption" value="#{sTakeAll}"/>
             </Widget>
             <Widget type="AutoSizedButton" skin="MW_Button" name="CloseButton" align="Right Bottom">
-                <Property key="Caption" value="#{sClose}"/>
+                <Property key="Caption" value="#{Interface:Close}"/>
             </Widget>
         </Widget>
 

@@ -46,7 +46,7 @@ add_component_dir (settings
     )
 
 add_component_dir (bsa
-    bsa_file compressedbsafile
+    bsa_file compressedbsafile ba2gnrlfile ba2dx10file ba2file memorystream
     )
 
 add_component_dir (vfs
@@ -85,7 +85,14 @@ add_component_dir (to_utf8
     to_utf8
     )
 
-add_component_dir(esm attr common defs esmcommon records util luascripts format refid esmbridge)
+add_component_dir(esm attr common defs esmcommon records util luascripts format refid esmbridge
+    formidrefid
+    stringrefid
+    generatedrefid
+    indexrefid
+    serializerefid
+    esm3exteriorcellrefid
+    )
 
 add_component_dir(fx pass technique lexer widgets stateupdater)
 
@@ -101,6 +108,7 @@ add_component_dir (esm3
     inventorystate containerstate npcstate creaturestate dialoguestate statstate npcstats creaturestats
     weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
     aisequence magiceffects custommarkerstate stolenitems transport animationstate controlsstate mappings readerscache
+    infoorder
     )
 
 add_component_dir (esm3terrain
@@ -108,12 +116,14 @@ add_component_dir (esm3terrain
     )
 
 add_component_dir (esm4
-    acti
     actor
+    cellgrid
     common
     dialogue
     effect
     formid
+    grid
+    grouptype
     inventory
     lighting
     loadachr
@@ -143,6 +153,7 @@ add_component_dir (esm4
     loadflst
     loadfurn
     loadglob
+    loadgmst
     loadgras
     loadgrup
     loadhair
@@ -195,11 +206,13 @@ add_component_dir (esm4
     loadtxst
     loadweap
     loadwrld
+    magiceffectid
     reader
+    readerutils
     reference
     script
-    readerutils
     typetraits
+    vertex
 )
 
 add_component_dir (misc
@@ -384,7 +397,7 @@ if (USE_QT)
         )
 
     add_component_qt_dir (misc
-        helpviewer utf8qtextstream
+        helpviewer utf8qtextstream hash
         )
 
     add_component_qt_dir (files
@@ -462,6 +475,11 @@ if (USE_QT)
     add_library(components_qt STATIC ${COMPONENT_QT_FILES} ${ESM_UI_HDR})
     target_link_libraries(components_qt components Qt::Widgets Qt::Core)
     target_compile_definitions(components_qt PRIVATE OPENMW_DOC_BASEURL="${OPENMW_DOC_BASEURL}")
+
+    if (BUILD_WITH_CODE_COVERAGE)
+        target_compile_options(components_qt PRIVATE --coverage)
+        target_link_libraries(components_qt gcov)
+    endif()
 endif()
 
 if (GIT_CHECKOUT)
@@ -483,11 +501,11 @@ endif()
 
 # Fix for not visible pthreads functions for linker with glibc 2.15
 if (UNIX AND NOT APPLE)
-target_link_libraries(components ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries(components ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
 if (BUILD_WITH_CODE_COVERAGE)
-    add_definitions(--coverage)
+    target_compile_options(components PRIVATE --coverage)
     target_link_libraries(components gcov)
 endif()
 

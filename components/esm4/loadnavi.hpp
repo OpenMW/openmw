@@ -31,7 +31,8 @@
 #include <map>
 #include <vector>
 
-#include "common.hpp" // CellGrid, Vertex
+#include "cellgrid.hpp"
+#include "vertex.hpp"
 
 namespace ESM4
 {

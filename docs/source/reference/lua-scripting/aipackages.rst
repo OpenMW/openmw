@@ -1,6 +1,38 @@
 Built-in AI packages
 ====================
 
+Starting an AI package
+----------------------
+
+There are two ways to start AI package:
+
+.. code-block:: Lua
+
+    -- from local script add package to self
+    local AI = require('openmw.interfaces').AI
+    AI.startPackage(options)
+
+    -- via event to any actor
+    actor:sendEvent('StartAIPackage', options)
+
+``options`` is Lua table with arguments of the AI package.
+
+**Common arguments that can be used with any AI package**
+
+.. list-table::
+  :header-rows: 1
+  :widths: 20 20 60
+
+  * - name
+    - type
+    - description
+  * - type
+    - string [required]
+    - the name of the package (see packages listed below)
+  * - cancelOther
+    - boolean [default=true]
+    - whether to cancel all other AI packages
+
 Combat
 ------
 

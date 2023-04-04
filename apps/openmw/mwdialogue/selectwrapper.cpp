@@ -4,6 +4,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <components/misc/strings/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
 
 namespace
@@ -48,9 +49,7 @@ namespace
 
 MWDialogue::SelectWrapper::Function MWDialogue::SelectWrapper::decodeFunction() const
 {
-    int index = 0;
-
-    std::istringstream(mSelect.mSelectRule.substr(2, 2)) >> index;
+    const int index = Misc::StringUtils::toNumeric<int>(mSelect.mSelectRule.substr(2, 2), 0);
 
     switch (index)
     {

@@ -2,6 +2,7 @@
 
 #include <chrono>
 
+#include <components/esm3/loadalch.hpp>
 #include <components/lua/l10n.hpp>
 #include <components/lua/luastate.hpp>
 
@@ -13,7 +14,7 @@
 #include "../mwworld/scene.hpp"
 #include "../mwworld/store.hpp"
 
-#include "eventqueue.hpp"
+#include "luaevents.hpp"
 #include "luamanagerimp.hpp"
 #include "worldview.hpp"
 
@@ -51,13 +52,13 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 33;
+        api["API_REVISION"] = 35;
         api["quit"] = [lua]() {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
             MWBase::Environment::get().getStateManager()->requestQuit();
         };
         api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData) {
-            context.mGlobalEventQueue->push_back(
+            context.mLuaEvents->addGlobalEvent(
                 { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
         };
         addTimeBindings(api, context, false);
@@ -91,12 +92,20 @@ namespace MWLua
             MWWorld::CellStore* cell = MWBase::Environment::get().getWorldScene()->getCurrentCell();
 
             MWWorld::ManualRef mref(
-                MWBase::Environment::get().getWorld()->getStore(), ESM::RefId::stringRefId(recordId));
+                MWBase::Environment::get().getWorld()->getStore(), ESM::RefId::deserializeText(recordId));
             const MWWorld::Ptr& ptr = mref.getPtr();
             ptr.getRefData().disable();
             MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *cell, count.value_or(1));
             return GObject(getId(newPtr));
         };
+
+        // Creates a new record in the world database.
+        api["createRecord"] = sol::overload([](const ESM::Potion& potion) -> const ESM::Potion* {
+            return MWBase::Environment::get().getWorld()->createRecord(potion);
+        }
+            // TODO: add here overloads for other records
+        );
+
         return LuaUtil::makeReadOnly(api);
     }
 

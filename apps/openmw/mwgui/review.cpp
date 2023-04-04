@@ -315,7 +315,7 @@ namespace MWGui
             "MW_StatName", coord1 + MyGUI::IntSize(coord2.width, 0), MyGUI::Align::Default);
         widget->setSpellId(spell->mId);
         widget->setUserString("ToolTipType", "Spell");
-        widget->setUserString("Spell", spell->mId.getRefIdString());
+        widget->setUserString("Spell", spell->mId.serialize());
         widget->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
         mSkillWidgets.push_back(widget);

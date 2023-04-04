@@ -51,7 +51,7 @@ namespace CSVRender
         void loadBodyParts();
         void attachBodyPart(ESM::PartReferenceType, const std::string& mesh);
 
-        std::string getBodyPartMesh(std::string_view bodyPartId);
+        std::string getBodyPartMesh(const ESM::RefId& bodyPartId);
 
         static const std::string MeshPrefix;
 

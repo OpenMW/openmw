@@ -41,7 +41,7 @@ namespace Launcher
         Ui::DataFilesPage ui;
 
     public:
-        explicit DataFilesPage(Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
+        explicit DataFilesPage(const Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,
             Config::LauncherSettings& launcherSettings, MainDialog* parent = nullptr);
 
         QAbstractItemModel* profilesModel() const;
@@ -104,7 +104,7 @@ namespace Launcher
         TextInputDialog* mNewProfileDialog;
         TextInputDialog* mCloneProfileDialog;
 
-        Files::ConfigurationManager& mCfgMgr;
+        const Files::ConfigurationManager& mCfgMgr;
 
         Config::GameSettings& mGameSettings;
         Config::LauncherSettings& mLauncherSettings;
@@ -138,60 +138,8 @@ namespace Launcher
          * @return the file paths of all selected content files
          */
         QStringList selectedFilePaths() const;
-        QStringList selectedArchivePaths(bool all = false) const;
+        QStringList selectedArchivePaths() const;
         QStringList selectedDirectoriesPaths() const;
-
-        class PathIterator
-        {
-            QStringList::ConstIterator mCitEnd;
-            QStringList::ConstIterator mCitCurrent;
-            QStringList::ConstIterator mCitBegin;
-            QString mFile;
-            QString mFilePath;
-
-        public:
-            PathIterator(const QStringList& list)
-            {
-                mCitBegin = list.constBegin();
-                mCitCurrent = mCitBegin;
-                mCitEnd = list.constEnd();
-            }
-
-            QString findFirstPath(const QString& file)
-            {
-                mCitCurrent = mCitBegin;
-                mFile = file;
-                return path();
-            }
-
-            QString findNextPath() { return path(); }
-
-        private:
-            QString path()
-            {
-                bool success = false;
-                QDir dir;
-                QFileInfo file;
-
-                while (!success)
-                {
-                    if (mCitCurrent == mCitEnd)
-                        break;
-
-                    dir.setPath(*(mCitCurrent++));
-                    file.setFile(dir.absoluteFilePath(mFile));
-
-                    success = file.exists();
-                }
-
-                if (success)
-                    return file.absoluteFilePath();
-
-                return "";
-            }
-        };
-
-        QStringList filesInProfile(const QString& profileName, PathIterator& pathIterator);
     };
 }
 #endif

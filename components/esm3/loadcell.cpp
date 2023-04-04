@@ -7,7 +7,6 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
-#include "cellid.hpp"
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
@@ -40,6 +39,8 @@ namespace ESM
 
 namespace ESM
 {
+    const std::string Cell::sDefaultWorldspace = "sys::default";
+
     // Some overloaded compare operators.
     bool operator==(const MovedCellRef& ref, const RefNum& refNum)
     {
@@ -55,6 +56,24 @@ namespace ESM
     {
         loadNameAndData(esm, isDeleted);
         loadCell(esm, saveContext);
+    }
+
+    const ESM::RefId& Cell::updateId()
+    {
+        mId = generateIdForCell(isExterior(), mName, getGridX(), getGridY());
+        return mId;
+    }
+
+    ESM::RefId Cell::generateIdForCell(bool exterior, std::string_view cellName, int x, int y)
+    {
+        if (!exterior)
+        {
+            return ESM::RefId::stringRefId(cellName);
+        }
+        else
+        {
+            return ESM::RefId::esm3ExteriorCell(x, y);
+        }
     }
 
     void Cell::loadNameAndData(ESMReader& esm, bool& isDeleted)
@@ -91,20 +110,7 @@ namespace ESM
         if (!hasData)
             esm.fail("Missing DATA subrecord");
 
-        mCellId.mPaged = !(mData.mFlags & Interior);
-
-        if (mCellId.mPaged)
-        {
-            mCellId.mWorldspace = CellId::sDefaultWorldspace;
-            mCellId.mIndex.mX = mData.mX;
-            mCellId.mIndex.mY = mData.mY;
-        }
-        else
-        {
-            mCellId.mWorldspace = Misc::StringUtils::lowerCase(mName);
-            mCellId.mIndex.mX = 0;
-            mCellId.mIndex.mY = 0;
-        }
+        updateId();
     }
 
     void Cell::loadCell(ESMReader& esm, bool saveContext)
@@ -333,8 +339,4 @@ namespace ESM
         mAmbi.mFogDensity = 0;
     }
 
-    const CellId& Cell::getCellId() const
-    {
-        return mCellId;
-    }
 }

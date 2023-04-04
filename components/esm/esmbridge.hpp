@@ -15,8 +15,16 @@ namespace ESM4
 namespace ESM
 {
     struct Cell;
-    struct CellId;
     class RefId;
+
+    class CellVariant;
+
+    template <class, class T>
+    using Substitute = T;
+
+    template <class F, class... T>
+    using VisitReturnType = std::enable_if_t<(std::is_base_of_v<CellVariant, std::decay_t<T>> && ...),
+        typename std::invoke_result<F, Substitute<T, const Cell&>...>::type>;
 
     class CellVariant
     {
@@ -39,7 +47,7 @@ namespace ESM
         const ESM::Cell& getEsm3() const;
 
         template <class F, class... T>
-        friend auto visit(F&& f, T&&... v);
+        friend VisitReturnType<F, T...> visit(F&& f, T&&... v);
     };
 
     struct ReferenceVariant
@@ -66,7 +74,7 @@ namespace ESM
     };
 
     template <class F, class... T>
-    auto visit(F&& f, T&&... v)
+    VisitReturnType<F, T...> visit(F&& f, T&&... v)
     {
         return std::visit([&](auto*... ptr) { return std::forward<F>(f)(*ptr...); }, std::forward<T>(v).mVariant...);
     }

@@ -76,7 +76,7 @@
                     <Property key="Caption" value="#{sBarterDialog8}"/>
                 </Widget>
                 <Widget type="AutoSizedButton" skin="MW_Button" name="CancelButton">
-                    <Property key="Caption" value="#{sCancel}"/>
+                    <Property key="Caption" value="#{Interface:Cancel}"/>
                 </Widget>
             </Widget>
 

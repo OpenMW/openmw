@@ -552,9 +552,11 @@ namespace MWWorld
                 unloadCell(cell, navigatorUpdateGuard.get());
         }
 
-        mNavigator.setWorldspace(
-            Misc::StringUtils::lowerCase(
-                mWorld.getWorldModel().getExterior(playerCellX, playerCellY)->getCell()->getCellId().mWorldspace),
+        mNavigator.setWorldspace(Misc::StringUtils::lowerCase(mWorld.getWorldModel()
+                                                                  .getExterior(playerCellX, playerCellY)
+                                                                  ->getCell()
+                                                                  ->getWorldSpace()
+                                                                  .serializeText()),
             navigatorUpdateGuard.get());
         mNavigator.updateBounds(pos, navigatorUpdateGuard.get());
 
@@ -592,8 +594,7 @@ namespace MWWorld
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
-        std::string loadingExteriorText = "#{sLoadingMessage3}";
-        loadingListener->setLabel(loadingExteriorText);
+        loadingListener->setLabel("#{OMWEngine:LoadingExterior}");
         loadingListener->setProgressRange(refsToLoad);
 
         const auto getDistanceToPlayerCell = [&](const std::pair<int, int>& cellPosition) {
@@ -676,8 +677,8 @@ namespace MWWorld
                 "Testing exterior cells (" + std::to_string(i) + "/" + std::to_string(cells.getExtSize()) + ")...");
 
             CellStore* cell = mWorld.getWorldModel().getExterior(it->mData.mX, it->mData.mY);
-            mNavigator.setWorldspace(
-                Misc::StringUtils::lowerCase(cell->getCell()->getCellId().mWorldspace), navigatorUpdateGuard.get());
+            mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell->getCell()->getWorldSpace().serializeText()),
+                navigatorUpdateGuard.get());
             const osg::Vec3f position
                 = osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits;
             mNavigator.updateBounds(position, navigatorUpdateGuard.get());
@@ -734,8 +735,8 @@ namespace MWWorld
                 "Testing interior cells (" + std::to_string(i) + "/" + std::to_string(cells.getIntSize()) + ")...");
 
             CellStore* cell = mWorld.getWorldModel().getInterior(it->mName);
-            mNavigator.setWorldspace(
-                Misc::StringUtils::lowerCase(cell->getCell()->getCellId().mWorldspace), navigatorUpdateGuard.get());
+            mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell->getCell()->getWorldSpace().serializeText()),
+                navigatorUpdateGuard.get());
             ESM::Position position;
             mWorld.findInteriorPosition(it->mName, position);
             mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
@@ -862,8 +863,7 @@ namespace MWWorld
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
 
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
-        std::string loadingInteriorText = "#{sLoadingMessage2}";
-        loadingListener->setLabel(loadingInteriorText);
+        loadingListener->setLabel("#{OMWEngine:LoadingInterior}");
         Loading::ScopedLoad load(loadingListener);
 
         if (mCurrentCell != nullptr && *mCurrentCell == *cell)
@@ -892,7 +892,7 @@ namespace MWWorld
         loadingListener->setProgressRange(cell->count());
 
         mNavigator.setWorldspace(
-            Misc::StringUtils::lowerCase(cell->getCell()->getCellId().mWorldspace), navigatorUpdateGuard.get());
+            Misc::StringUtils::lowerCase(cell->getCell()->getWorldSpace().serializeText()), navigatorUpdateGuard.get());
         mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
 
         // Load cell.
@@ -922,16 +922,18 @@ namespace MWWorld
         MWBase::Environment::get().getWorld()->getPostProcessor()->setExteriorFlag(cell->getCell()->isQuasiExterior());
     }
 
-    void Scene::changeToExteriorCell(const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
+    void Scene::changeToExteriorCell(
+        const ESM::RefId& extCellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
-        const osg::Vec2i cellIndex = positionToCellIndex(position.pos[0], position.pos[1]);
 
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
+        CellStore* current = mWorld.getWorldModel().getCell(extCellId);
+
+        const osg::Vec2i cellIndex(current->getCell()->getGridX(), current->getCell()->getGridY());
 
         changeCellGrid(position.asVec3(), cellIndex.x(), cellIndex.y(), changeEvent);
 
-        CellStore* current = mWorld.getWorldModel().getExterior(cellIndex.x(), cellIndex.y());
         changePlayerCell(current, position, adjustPlayerPos);
 
         if (changeEvent)
@@ -1131,15 +1133,7 @@ namespace MWWorld
             {
                 try
                 {
-                    if (!door.getCellRef().getDestCell().empty())
-                        preloadCell(mWorld.getWorldModel().getInterior(door.getCellRef().getDestCell()));
-                    else
-                    {
-                        osg::Vec3f pos = door.getCellRef().getDoorDest().asVec3();
-                        const osg::Vec2i cellIndex = positionToCellIndex(pos.x(), pos.y());
-                        preloadCell(mWorld.getWorldModel().getExterior(cellIndex.x(), cellIndex.y()), true);
-                        exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
-                    }
+                    preloadCell(mWorld.getWorldModel().getCell(door.getCellRef().getDestCell()));
                 }
                 catch (std::exception&)
                 {
@@ -1222,7 +1216,7 @@ namespace MWWorld
         Loading::Listener* loadingListener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
         Loading::ScopedLoad load(loadingListener);
 
-        loadingListener->setLabel("#{sLoadingMessage4}");
+        loadingListener->setLabel("#{OMWEngine:InitializingData}");
 
         while (!mPreloader->syncTerrainLoad(vec, mRendering.getReferenceTime(), *loadingListener))
         {

@@ -183,8 +183,8 @@ if(NOT OPENMW_USE_SYSTEM_RECASTNAVIGATION)
     # master on 12 Oct 2022
     include(FetchContent)
     FetchContent_Declare(recastnavigation
-        URL https://github.com/recastnavigation/recastnavigation/archive/30edaf442c87e870e71a0e4509a96281418b1af8.zip
-        URL_HASH SHA512=c4268427afd779e9656436427cd4b2619e4f79a9068b5b51eb3ced95806e4fe9d5353feee05d52bf8f21740fa8ca3e4ac643d1921d2a803ebbca7dffdeb35ef0
+        URL https://github.com/recastnavigation/recastnavigation/archive/405cc095ab3a2df976a298421974a2af83843baf.zip
+        URL_HASH SHA512=39580ca258783ab3bda237843facc918697266e729c85065cdae1f0ed3d0ed1429a7ed08b18b926ba64402d9875a18f52904a87f43fe4fe30252f23edcfa6c70
         SOURCE_DIR fetched/recastnavigation
     )
     FetchContent_MakeAvailableExcludeFromAll(recastnavigation)
@@ -193,8 +193,8 @@ endif()
 if (NOT OPENMW_USE_SYSTEM_SQLITE3)
     include(FetchContent)
     FetchContent_Declare(sqlite3
-        URL https://www.sqlite.org/2021/sqlite-amalgamation-3360000.zip
-        URL_HASH SHA512=5c18f158a599b1e91d95c91de3aa5c5de52f986845ad0cb49dfd56b650587e55e24d469571b5b864229b870d0eaf85d78893f61ef950b95389cb41692be37f58
+        URL https://www.sqlite.org/2023/sqlite-amalgamation-3410100.zip
+        URL_HASH SHA512=7de291709e88fffc693cf24ac675950cfc35c1bf7631cfea95167105720a05cf37fb943c57c5c985db2eeaa57b31894b3c0df98a7bd2939b5746fc5a24b5ae87
         SOURCE_DIR fetched/sqlite3
     )
     FetchContent_MakeAvailableExcludeFromAll(sqlite3)
@@ -221,8 +221,8 @@ if (BUILD_BENCHMARKS AND NOT OPENMW_USE_SYSTEM_BENCHMARK)
 
     include(FetchContent)
     FetchContent_Declare(benchmark
-        URL https://github.com/google/benchmark/archive/refs/tags/v1.5.2.zip
-        URL_HASH SHA512=1146deca3b424703800933012ef75805d4657309d58b3484498bb51a99025bd405a69855a75af59c23fc3684bfa027224513999b8d7beaab3320c96fb6d6c540
+        URL https://github.com/google/benchmark/archive/refs/tags/v1.7.1.zip
+        URL_HASH SHA512=bec4016263587a57648e02b094c69e838c0a21e16c3dcfc6f03100397ab8f95d5fab1f5fd0d7e0e8adbb8212fff1eb574581158fdda1fa7fd6ff12762154b0cc
         SOURCE_DIR fetched/benchmark
     )
     FetchContent_MakeAvailableExcludeFromAll(benchmark)
@@ -303,7 +303,7 @@ if (NOT OPENMW_USE_SYSTEM_ICU)
     set(ICU_LIBRARIES ICU::i18n ICU::uc ICU::data PARENT_SCOPE)
 endif()
 
-if (BUILD_UNITTESTS AND NOT OPENMW_USE_SYSTEM_GOOGLETEST)
+if ((BUILD_UNITTESTS OR BUILD_OPENCS_TESTS) AND NOT OPENMW_USE_SYSTEM_GOOGLETEST)
     cmake_minimum_required(VERSION 3.11)
 
     include(FetchContent)

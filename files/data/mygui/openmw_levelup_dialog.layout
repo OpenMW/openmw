@@ -158,7 +158,7 @@
             <UserString key="HStretch" value="true"/>
             <Widget type="Spacer"/>
             <Widget type="AutoSizedButton" skin="MW_Button" position="0 0 0 24" name="OkButton">
-                <Property key="Caption" value="#{sOk}"/>
+                <Property key="Caption" value="#{Interface:OK}"/>
             </Widget>
         </Widget>
 
