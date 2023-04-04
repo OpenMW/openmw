@@ -51,6 +51,7 @@
     Bug #7229: Error marker loading failure is not handled
     Bug #7243: Get Skyrim.esm loading
     Bug #7298: Water ripples from projectiles sometimes are not spawned
+    Bug #7307: Alchemy "Magic Effect" search string does not match on tool tip for effects related to attributes
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6447: Add LOD support to Object Paging

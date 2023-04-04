@@ -3,8 +3,17 @@
 #include <cmath>
 #include <stdexcept>
 
+#include <components/esm/attr.hpp>
 #include <components/esm3/effectlist.hpp>
+#include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadskil.hpp>
 #include <components/esm3/magiceffects.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwworld/esmstore.hpp"
 
 namespace
 {
@@ -38,6 +47,13 @@ namespace MWMechanics
 
             mArg = effect.mAttribute;
         }
+    }
+
+    std::string EffectKey::toString() const
+    {
+        const ESM::MagicEffect* magicEffect
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().search(mId);
+        return getMagicEffectString(*magicEffect, mArg, mArg);
     }
 
     bool operator<(const EffectKey& left, const EffectKey& right)
@@ -207,5 +223,60 @@ namespace MWMechanics
             mCollection[EffectKey(key)].setBase(params.first);
             mCollection[EffectKey(key)].setModifier(params.second);
         }
+    }
+
+    std::string getMagicEffectString(const ESM::MagicEffect& effect, int attributeArg, int skillArg)
+    {
+        const bool targetsSkill = effect.mData.mFlags & ESM::MagicEffect::TargetSkill && skillArg != -1;
+        const bool targetsAttribute = effect.mData.mFlags & ESM::MagicEffect::TargetAttribute && attributeArg != -1;
+
+        std::string spellLine;
+
+        auto windowManager = MWBase::Environment::get().getWindowManager();
+
+        if (targetsSkill || targetsAttribute)
+        {
+            switch (effect.mIndex)
+            {
+                case ESM::MagicEffect::AbsorbAttribute:
+                case ESM::MagicEffect::AbsorbSkill:
+                    spellLine = windowManager->getGameSettingString("sAbsorb", {});
+                    break;
+                case ESM::MagicEffect::DamageAttribute:
+                case ESM::MagicEffect::DamageSkill:
+                    spellLine = windowManager->getGameSettingString("sDamage", {});
+                    break;
+                case ESM::MagicEffect::DrainAttribute:
+                case ESM::MagicEffect::DrainSkill:
+                    spellLine = windowManager->getGameSettingString("sDrain", {});
+                    break;
+                case ESM::MagicEffect::FortifyAttribute:
+                case ESM::MagicEffect::FortifySkill:
+                    spellLine = windowManager->getGameSettingString("sFortify", {});
+                    break;
+                case ESM::MagicEffect::RestoreAttribute:
+                case ESM::MagicEffect::RestoreSkill:
+                    spellLine = windowManager->getGameSettingString("sRestore", {});
+                    break;
+            }
+        }
+
+        if (spellLine.empty())
+        {
+            const std::string& effectIDStr = ESM::MagicEffect::effectIdToString(effect.mIndex);
+            spellLine = windowManager->getGameSettingString(effectIDStr, {});
+        }
+
+        if (targetsSkill)
+        {
+            spellLine += ' ';
+            spellLine += windowManager->getGameSettingString(ESM::Skill::sSkillNameIds[skillArg], {});
+        }
+        else if (targetsAttribute)
+        {
+            spellLine += ' ';
+            spellLine += windowManager->getGameSettingString(ESM::Attribute::sGmstAttributeIds[attributeArg], {});
+        }
+        return spellLine;
     }
 }

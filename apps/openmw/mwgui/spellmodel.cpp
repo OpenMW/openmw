@@ -45,7 +45,6 @@ namespace MWGui
 
     bool SpellModel::matchingEffectExists(std::string filter, const ESM::EffectList& effects)
     {
-        auto wm = MWBase::Environment::get().getWindowManager();
         const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
 
         for (const auto& effect : effects.mList)
@@ -55,22 +54,9 @@ namespace MWGui
             if (effectId != -1)
             {
                 const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().find(effectId);
-                const std::string& effectIDStr = ESM::MagicEffect::effectIdToString(effectId);
-                std::string fullEffectName{ wm->getGameSettingString(effectIDStr, {}) };
 
-                if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill && effect.mSkill != -1)
-                {
-                    fullEffectName += ' ';
-                    fullEffectName += wm->getGameSettingString(ESM::Skill::sSkillNameIds[effect.mSkill], {});
-                }
-
-                if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute && effect.mAttribute != -1)
-                {
-                    fullEffectName += ' ';
-                    fullEffectName
-                        += wm->getGameSettingString(ESM::Attribute::sGmstAttributeIds[effect.mAttribute], {});
-                }
-
+                std::string fullEffectName
+                    = MWMechanics::getMagicEffectString(*magicEffect, effect.mAttribute, effect.mSkill);
                 std::string convert = Utf8Stream::lowerCaseUtf8(fullEffectName);
                 if (convert.find(filter) != std::string::npos)
                 {
