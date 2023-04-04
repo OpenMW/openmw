@@ -73,10 +73,33 @@ namespace EsmTool
         };
 
         template <class T>
+        struct WriteData
+        {
+            const T& mValue;
+
+            explicit WriteData(const T& value)
+                : mValue(value)
+            {
+            }
+        };
+
+        template <class T>
         std::ostream& operator<<(std::ostream& stream, const WriteArray<T>& write)
         {
             for (const auto& value : write.mValue)
                 stream << write.mPrefix << value;
+            return stream;
+        }
+
+        template <class T>
+        std::ostream& operator<<(std::ostream& stream, const WriteData<T>& /*write*/)
+        {
+            return stream << " ?";
+        }
+
+        std::ostream& operator<<(std::ostream& stream, const WriteData<ESM4::GameSetting::Data>& write)
+        {
+            std::visit([&](const auto& v) { stream << v; }, write.mValue);
             return stream;
         }
 
@@ -114,6 +137,8 @@ namespace EsmTool
                 std::cout << "\n  Type: " << value.mType;
             if constexpr (ESM4::hasValue<T>)
                 std::cout << "\n  Value: " << value.mValue;
+            if constexpr (ESM4::hasData<T>)
+                std::cout << "\n  Data: " << WriteData(value.mData);
             std::cout << '\n';
         }
 
@@ -253,7 +278,8 @@ namespace EsmTool
                     readTypedRecord<ESM4::GlobalVariable>(params, reader);
                     return true;
                 case ESM4::REC_GMST:
-                    break;
+                    readTypedRecord<ESM4::GameSetting>(params, reader);
+                    return true;
                 case ESM4::REC_GRAS:
                     readTypedRecord<ESM4::Grass>(params, reader);
                     return true;

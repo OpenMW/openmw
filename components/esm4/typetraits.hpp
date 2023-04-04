@@ -121,6 +121,19 @@ namespace ESM4
 
     template <class T>
     inline constexpr bool hasValue = HasValue<T>::value;
+
+    template <class T, class = std::void_t<>>
+    struct HasData : std::false_type
+    {
+    };
+
+    template <class T>
+    struct HasData<T, std::void_t<decltype(T::mData)>> : std::true_type
+    {
+    };
+
+    template <class T>
+    inline constexpr bool hasData = HasData<T>::value;
 }
 
 #endif // OPENMW_COMPONENTS_ESM4_TYPETRAITS

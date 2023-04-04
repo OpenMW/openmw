@@ -153,6 +153,7 @@ add_component_dir (esm4
     loadflst
     loadfurn
     loadglob
+    loadgmst
     loadgras
     loadgrup
     loadhair
