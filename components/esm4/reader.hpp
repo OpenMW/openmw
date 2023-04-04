@@ -29,6 +29,7 @@
 #include <map>
 #include <memory>
 
+#include "cellgrid.hpp"
 #include "common.hpp"
 #include "loadtes4.hpp"
 
@@ -42,6 +43,51 @@ namespace ToUTF8
 
 namespace ESM4
 {
+#pragma pack(push, 1)
+    // NOTE: the label field of a group is not reliable (http://www.uesp.net/wiki/Tes4Mod:Mod_File_Format)
+    union GroupLabel
+    {
+        std::uint32_t value; // formId, blockNo or raw int representation of type
+        char recordType[4]; // record type in ascii
+        std::int16_t grid[2]; // grid y, x (note the reverse order)
+    };
+
+    struct GroupTypeHeader
+    {
+        std::uint32_t typeId;
+        std::uint32_t groupSize; // includes the 24 bytes (20 for TES4) of header (i.e. this struct)
+        GroupLabel label; // format based on type
+        std::int32_t type;
+        std::uint16_t stamp; // & 0xff for day, & 0xff00 for months since Dec 2002 (i.e. 1 = Jan 2003)
+        std::uint16_t unknown;
+        std::uint16_t version; // not in TES4
+        std::uint16_t unknown2; // not in TES4
+    };
+
+    struct RecordTypeHeader
+    {
+        std::uint32_t typeId;
+        std::uint32_t dataSize; // does *not* include 24 bytes (20 for TES4) of header
+        std::uint32_t flags;
+        FormId id;
+        std::uint32_t revision;
+        std::uint16_t version; // not in TES4
+        std::uint16_t unknown; // not in TES4
+    };
+
+    union RecordHeader
+    {
+        GroupTypeHeader group;
+        RecordTypeHeader record;
+    };
+
+    struct SubRecordHeader
+    {
+        std::uint32_t typeId;
+        std::uint16_t dataSize;
+    };
+#pragma pack(pop)
+
     //                                                   bytes read from group, updated by
     //                                                   getRecordHeader() in advance
     //                                                     |
@@ -316,6 +362,9 @@ namespace ESM4
 
         std::vector<Reader*>* getGlobalReaderList() { return mGlobalReaderList; }
     };
+
+    // For pretty printing GroupHeader labels
+    std::string printLabel(const GroupLabel& label, const std::uint32_t type);
 }
 
 #endif // ESM4_READER_H

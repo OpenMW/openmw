@@ -116,12 +116,14 @@ add_component_dir (esm3terrain
     )
 
 add_component_dir (esm4
-    acti
     actor
+    cellgrid
     common
     dialogue
     effect
     formid
+    grid
+    grouptype
     inventory
     lighting
     loadachr
@@ -203,11 +205,13 @@ add_component_dir (esm4
     loadtxst
     loadweap
     loadwrld
+    magiceffectid
     reader
+    readerutils
     reference
     script
-    readerutils
     typetraits
+    vertex
 )
 
 add_component_dir (misc
