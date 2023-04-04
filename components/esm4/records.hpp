@@ -28,6 +28,7 @@
 #include <components/esm4/loadflst.hpp>
 #include <components/esm4/loadfurn.hpp>
 #include <components/esm4/loadglob.hpp>
+#include <components/esm4/loadgmst.hpp>
 #include <components/esm4/loadgras.hpp>
 #include <components/esm4/loadgrup.hpp>
 #include <components/esm4/loadhair.hpp>
