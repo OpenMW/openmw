@@ -6,6 +6,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/inventorystate.hpp>
 #include <components/esm3/loadench.hpp>
+#include <components/esm3/loadlevlist.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>

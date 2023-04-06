@@ -21,6 +21,7 @@
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadlevlist.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadstat.hpp>
