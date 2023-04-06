@@ -375,6 +375,7 @@ namespace MWWorld
         const ESM::Cell* searchStatic(int x, int y) const;
         const ESM::Cell* searchOrCreate(int x, int y);
 
+        const ESM::Cell* find(const ESM::RefId& id) const;
         const ESM::Cell* find(std::string_view id) const;
         const ESM::Cell* find(int x, int y) const;
 
