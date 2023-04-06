@@ -206,7 +206,7 @@ namespace CSVRender
             CSMPrefs::get()["Tooltips"].update();
         }
 
-        connect(mRenderer, SIGNAL(simulationUpdated(double)), this, SLOT(update(double)));
+        connect(mRenderer, &CompositeOsgRenderer::simulationUpdated, this, &SceneWidget::update);
 
         // Shortcuts
         CSMPrefs::Shortcut* focusToolbarShortcut = new CSMPrefs::Shortcut("scene-focus-toolbar", this);
