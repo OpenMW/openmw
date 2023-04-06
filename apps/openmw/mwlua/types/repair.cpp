@@ -23,7 +23,7 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        addRecordFunctionBinding<ESM::Repair>(repair);
+        addRecordFunctionBinding<ESM::Repair>(repair, context);
 
         sol::usertype<ESM::Repair> record = context.mLua->sol().new_usertype<ESM::Repair>("ESM3_Repair");
         record[sol::meta_function::to_string]

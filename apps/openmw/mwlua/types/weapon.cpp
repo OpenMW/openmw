@@ -40,7 +40,7 @@ namespace MWLua
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        addRecordFunctionBinding<ESM::Weapon>(weapon);
+        addRecordFunctionBinding<ESM::Weapon>(weapon, context);
 
         sol::usertype<ESM::Weapon> record = context.mLua->sol().new_usertype<ESM::Weapon>("ESM3_Weapon");
         record[sol::meta_function::to_string]

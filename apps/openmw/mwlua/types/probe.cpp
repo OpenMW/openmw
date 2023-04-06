@@ -23,7 +23,7 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        addRecordFunctionBinding<ESM::Probe>(probe);
+        addRecordFunctionBinding<ESM::Probe>(probe, context);
 
         sol::usertype<ESM::Probe> record = context.mLua->sol().new_usertype<ESM::Probe>("ESM3_Probe");
         record[sol::meta_function::to_string]

@@ -23,7 +23,7 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        addRecordFunctionBinding<ESM::Creature>(creature);
+        addRecordFunctionBinding<ESM::Creature>(creature, context);
 
         sol::usertype<ESM::Creature> record = context.mLua->sol().new_usertype<ESM::Creature>("ESM3_Creature");
         record[sol::meta_function::to_string]

@@ -23,7 +23,7 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        addRecordFunctionBinding<ESM::Lockpick>(lockpick);
+        addRecordFunctionBinding<ESM::Lockpick>(lockpick, context);
 
         sol::usertype<ESM::Lockpick> record = context.mLua->sol().new_usertype<ESM::Lockpick>("ESM3_Lockpick");
         record[sol::meta_function::to_string]

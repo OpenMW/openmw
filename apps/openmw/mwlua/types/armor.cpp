@@ -37,7 +37,7 @@ namespace MWLua
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        addRecordFunctionBinding<ESM::Armor>(armor);
+        addRecordFunctionBinding<ESM::Armor>(armor, context);
 
         sol::usertype<ESM::Armor> record = context.mLua->sol().new_usertype<ESM::Armor>("ESM3_Armor");
         record[sol::meta_function::to_string]

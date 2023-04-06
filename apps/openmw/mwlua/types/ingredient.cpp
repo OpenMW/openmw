@@ -24,7 +24,7 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        addRecordFunctionBinding<ESM::Ingredient>(ingredient);
+        addRecordFunctionBinding<ESM::Ingredient>(ingredient, context);
 
         sol::usertype<ESM::Ingredient> record = context.mLua->sol().new_usertype<ESM::Ingredient>(("ESM3_Ingredient"));
         record[sol::meta_function::to_string]

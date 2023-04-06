@@ -30,7 +30,7 @@ namespace MWLua
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        addRecordFunctionBinding<ESM::Apparatus>(apparatus);
+        addRecordFunctionBinding<ESM::Apparatus>(apparatus, context);
 
         sol::usertype<ESM::Apparatus> record = context.mLua->sol().new_usertype<ESM::Apparatus>("ESM3_Apparatus");
         record[sol::meta_function::to_string]
