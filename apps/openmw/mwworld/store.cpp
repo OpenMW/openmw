@@ -581,6 +581,16 @@ namespace MWWorld
 
         return mExt.insert(std::make_pair(key, newCellInserted)).first->second;
     }
+    const ESM::Cell* Store<ESM::Cell>::find(const ESM::RefId& id) const
+    {
+        const ESM::Cell* ptr = search(id);
+        if (ptr == nullptr)
+        {
+            const std::string msg = "Cell " + id.toDebugString() + " not found";
+            throw std::runtime_error(msg);
+        }
+        return ptr;
+    }
     const ESM::Cell* Store<ESM::Cell>::find(std::string_view id) const
     {
         const ESM::Cell* ptr = search(id);

@@ -93,6 +93,8 @@ namespace MWScript
                 MWBase::World* world = MWBase::Environment::get().getWorld();
                 const MWWorld::Ptr playerPtr = world->getPlayerPtr();
                 ESM::RefId cellId = world->findCellPosition(cell, pos);
+                if (cellId.empty())
+                    throw std::runtime_error("Cell '" + std::string{ cell } + "' not found");
                 MWWorld::ActionTeleport(cellId, pos, false).execute(playerPtr);
                 world->adjustPosition(playerPtr, false);
             }
@@ -118,7 +120,7 @@ namespace MWScript
 
                 pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-                MWWorld::ActionTeleport({}, pos, false).execute(playerPtr);
+                MWWorld::ActionTeleport(ESM::RefId::esm3ExteriorCell(x, y), pos, false).execute(playerPtr);
                 world->adjustPosition(playerPtr, false);
             }
         };
