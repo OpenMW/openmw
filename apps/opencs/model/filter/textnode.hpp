@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include <QRegularExpression>
+
 #include <apps/opencs/model/world/idtablebase.hpp>
 
 #include "leafnode.hpp"
@@ -15,6 +17,7 @@ namespace CSMFilter
     {
         int mColumnId;
         std::string mText;
+        QRegularExpression mRegExp;
 
     public:
         TextNode(int columnId, const std::string& text);
