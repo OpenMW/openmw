@@ -13,6 +13,7 @@
 
 #include <algorithm>
 #include <array>
+#include <limits>
 #include <memory>
 #include <random>
 #include <type_traits>
@@ -258,11 +259,11 @@ namespace ESM
             record.mPaidCrimeId = 13;
             Player result;
             saveAndLoadRecord(record, GetParam(), result);
+            EXPECT_EQ(record.mObject.mRef.mRefID, result.mObject.mRef.mRefID);
             EXPECT_EQ(record.mBirthsign, result.mBirthsign);
             EXPECT_EQ(record.mPreviousItems, result.mPreviousItems);
             EXPECT_EQ(record.mPreviousItems, result.mPreviousItems);
             EXPECT_EQ(record.mCellId, result.mCellId);
-
             EXPECT_THAT(record.mLastKnownExteriorPosition, ElementsAreArray(result.mLastKnownExteriorPosition));
             EXPECT_EQ(record.mHasMark, result.mHasMark);
             EXPECT_EQ(record.mMarkedCell, result.mMarkedCell);
@@ -276,18 +277,50 @@ namespace ESM
         {
             CellRef record;
             record.blank();
+            record.mRefNum.mIndex = std::numeric_limits<unsigned>::max();
+            record.mRefNum.mContentFile = std::numeric_limits<int>::max();
             record.mRefID = generateRandomRefId();
+            record.mScale = 2;
             record.mOwner = generateRandomRefId();
+            record.mGlobalVariable = generateRandomString(100);
             record.mSoul = generateRandomRefId();
             record.mFaction = generateRandomRefId();
+            record.mFactionRank = std::numeric_limits<int>::max();
+            record.mChargeInt = std::numeric_limits<int>::max();
+            record.mEnchantmentCharge = std::numeric_limits<float>::max();
+            record.mGoldValue = std::numeric_limits<int>::max();
+            record.mTeleport = true;
+            generateArray(record.mDoorDest.pos);
+            generateArray(record.mDoorDest.rot);
+            record.mDestCell = generateRandomString(100);
+            record.mLockLevel = std::numeric_limits<int>::max();
             record.mKey = generateRandomRefId();
+            record.mTrap = generateRandomRefId();
+            record.mReferenceBlocked = std::numeric_limits<signed char>::max();
+            generateArray(record.mPos.pos);
+            generateArray(record.mPos.rot);
             CellRef result;
             saveAndLoadRecord(record, GetParam(), result);
+            EXPECT_EQ(record.mRefNum.mIndex, result.mRefNum.mIndex);
+            EXPECT_EQ(record.mRefNum.mContentFile, result.mRefNum.mContentFile);
             EXPECT_EQ(record.mRefID, result.mRefID);
+            EXPECT_EQ(record.mScale, result.mScale);
             EXPECT_EQ(record.mOwner, result.mOwner);
+            EXPECT_EQ(record.mGlobalVariable, result.mGlobalVariable);
             EXPECT_EQ(record.mSoul, result.mSoul);
             EXPECT_EQ(record.mFaction, result.mFaction);
+            EXPECT_EQ(record.mFactionRank, result.mFactionRank);
+            EXPECT_EQ(record.mChargeInt, result.mChargeInt);
+            EXPECT_EQ(record.mEnchantmentCharge, result.mEnchantmentCharge);
+            EXPECT_EQ(record.mGoldValue, result.mGoldValue);
+            EXPECT_EQ(record.mTeleport, result.mTeleport);
+            EXPECT_EQ(record.mDoorDest, result.mDoorDest);
+            EXPECT_EQ(record.mDestCell, result.mDestCell);
+            EXPECT_EQ(record.mLockLevel, result.mLockLevel);
             EXPECT_EQ(record.mKey, result.mKey);
+            EXPECT_EQ(record.mTrap, result.mTrap);
+            EXPECT_EQ(record.mReferenceBlocked, result.mReferenceBlocked);
+            EXPECT_EQ(record.mPos, result.mPos);
         }
 
         TEST_P(Esm3SaveLoadRecordTest, creatureStatsShouldNotChange)
