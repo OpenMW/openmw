@@ -77,6 +77,7 @@ namespace ESM
         std::vector<ESM::FormatVersion> getFormats()
         {
             std::vector<ESM::FormatVersion> result({
+                CurrentContentFormatVersion,
                 MaxLimitedSizeStringsFormatVersion,
                 MaxStringRefIdFormatVersion,
             });
@@ -242,6 +243,9 @@ namespace ESM
 
         TEST_P(Esm3SaveLoadRecordTest, playerShouldNotChange)
         {
+            // Player state is not saved to vanilla ESM format.
+            if (GetParam() == CurrentContentFormatVersion)
+                return;
             std::minstd_rand random;
             Player record{};
             record.mObject.blank();
