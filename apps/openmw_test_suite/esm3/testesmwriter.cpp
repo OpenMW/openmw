@@ -50,5 +50,38 @@ namespace ESM
             writer.save(stream);
             EXPECT_THROW(writer.writeMaybeFixedSizeString(generateRandomString(33), 32), std::runtime_error);
         }
+
+        struct Esm3EsmWriterRefIdSizeTest : TestWithParam<std::pair<RefId, std::size_t>>
+        {
+        };
+
+        // If this test failed probably there is a change in RefId format and CurrentSaveGameFormatVersion should be
+        // incremented, current version should be handled.
+        TEST_P(Esm3EsmWriterRefIdSizeTest, writeHRefIdShouldProduceCertainNubmerOfBytes)
+        {
+            const auto [refId, size] = GetParam();
+
+            std::ostringstream stream;
+
+            {
+                ESMWriter writer;
+                writer.setFormatVersion(CurrentSaveGameFormatVersion);
+                writer.save(stream);
+                writer.writeHRefId(refId);
+            }
+
+            EXPECT_EQ(stream.view().size(), size);
+        }
+
+        const std::vector<std::pair<RefId, std::size_t>> refIdSizes = {
+            { RefId(), 57 },
+            { RefId::stringRefId(std::string(32, 'a')), 89 },
+            { RefId::formIdRefId(0x1f), 61 },
+            { RefId::generated(0x1f), 65 },
+            { RefId::index(REC_INGR, 0x1f), 65 },
+            { RefId::esm3ExteriorCell(-42, 42), 65 },
+        };
+
+        INSTANTIATE_TEST_SUITE_P(RefIds, Esm3EsmWriterRefIdSizeTest, ValuesIn(refIdSizes));
     }
 }
