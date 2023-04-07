@@ -2848,8 +2848,9 @@ namespace MWWorld
         {
             foundCell = findInteriorPosition(cellName, pos);
         }
-        catch (std::exception&)
+        catch (std::exception& e)
         {
+            Log(Debug::Error) << e.what();
         }
         if (foundCell.empty())
         {

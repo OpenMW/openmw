@@ -340,6 +340,14 @@ namespace ESM
         mStream->write(data, size);
     }
 
+    void ESMWriter::writeFormId(const FormId& formId, bool wide, NAME tag)
+    {
+        if (wide)
+            writeHNT(tag, formId, 8);
+        else
+            writeHNT(tag, formId.toUint32(), 4);
+    }
+
     void ESMWriter::setEncoder(ToUTF8::Utf8Encoder* encoder)
     {
         mEncoder = encoder;

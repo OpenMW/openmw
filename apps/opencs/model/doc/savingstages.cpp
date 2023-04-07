@@ -340,7 +340,7 @@ void CSMDoc::WriteCellCollectionStage::writeReferences(
                 char ignore;
                 istream >> ignore >> moved.mTarget[0] >> moved.mTarget[1];
 
-                refRecord.mRefNum.save(writer, false, "MVRF");
+                writer.writeFormId(refRecord.mRefNum, false, "MVRF");
                 writer.writeHNT("CNDT", moved.mTarget);
             }
 

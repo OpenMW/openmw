@@ -195,6 +195,8 @@ namespace ESM
         // Read the given number of bytes from a named subrecord
         void getHNExact(void* p, int size, NAME name);
 
+        ESM::FormId getFormId(bool wide = false, NAME tag = "FRMR");
+
         /*************************************************************************
          *
          *  Low level sub-record methods

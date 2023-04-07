@@ -151,10 +151,12 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     reader.get(worldSpaceId);
     // FLG_Tamriel    = 0x0000003c, // grid info follows, possibly Tamriel?
     // FLG_Morrowind  = 0x01380000, // grid info follows, probably Skywind
-    if (worldSpaceId == 0x0000003c || worldSpaceId == 0x01380000)
+    if (worldSpaceId == FormId{ 0x3c, 0 } || worldSpaceId == FormId{ 0x380000, 1 })
     {
-        reader.get(cellGrid.grid.y); // NOTE: reverse order
-        reader.get(cellGrid.grid.x);
+        Grid grid;
+        reader.get(grid.y); // NOTE: reverse order
+        reader.get(grid.x);
+        cellGrid = grid;
 // FIXME: debugging only
 #if 0
     std::string padding;
@@ -167,7 +169,9 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     }
     else
     {
-        reader.get(cellGrid.cellId);
+        FormId cellId;
+        reader.get(cellId);
+        cellGrid = cellId;
 
 #if 0
         if (worldSpaceId == 0) // interior
@@ -237,7 +241,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
 //
 void ESM4::Navigation::load(ESM4::Reader& reader)
 {
-    // mFormId = reader.hdr().record.id;
+    // mFormId = reader.hdr().record.getFormId();
     // mFlags  = reader.hdr().record.flags;
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
@@ -312,8 +316,9 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                     std::cout << "node " << std::hex << node // FIXME: debugging only
                         << ", index " << index << ", i " << std::dec << total+i << std::endl;
 #endif
+                    FormId nodeFormId = FormId::fromUint32(node); // should we apply reader.adjustFormId?
                     // std::pair<std::map<FormId, std::uint32_t>::iterator, bool> res =
-                    mPathIndexMap.insert(std::make_pair(node, index));
+                    mPathIndexMap.emplace(nodeFormId, index);
                     // FIXME: this throws if more than one file is being loaded
                     // if (!res.second)
                     // throw std::runtime_error ("node already exists in the preferred path index map");

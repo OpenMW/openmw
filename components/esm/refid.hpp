@@ -62,8 +62,8 @@ namespace ESM
         // Constructs RefId from a string using a pointer to a static set of strings.
         static RefId stringRefId(std::string_view value);
 
-        // Constructs RefId from ESM4 FormId storing the value in-place.
-        static RefId formIdRefId(ESM4::FormId value) noexcept { return RefId(FormIdRefId(value)); }
+        // Constructs RefId from FormId storing the value in-place.
+        static RefId formIdRefId(FormId value) noexcept { return RefId(FormIdRefId(value)); }
 
         // Constructs RefId from uint64 storing the value in-place. Should be used for generated records where id is a
         // global counter.

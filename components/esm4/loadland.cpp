@@ -55,7 +55,7 @@
 //
 void ESM4::Land::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.id;
+    mFormId = reader.hdr().record.getFormId();
     reader.adjustFormId(mFormId);
     mFlags = reader.hdr().record.flags;
     mDataTypes = 0;
@@ -181,8 +181,9 @@ void ESM4::Land::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_VTEX: // only in Oblivion?
             {
-                int count = (int)reader.subRecordHeader().dataSize / sizeof(FormId);
-                assert((reader.subRecordHeader().dataSize % sizeof(FormId)) == 0 && "ESM4::LAND VTEX data size error");
+                int count = (int)reader.subRecordHeader().dataSize / sizeof(FormId32);
+                assert(
+                    (reader.subRecordHeader().dataSize % sizeof(FormId32)) == 0 && "ESM4::LAND VTEX data size error");
 
                 if (count)
                 {
@@ -212,7 +213,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
     bool missing = false;
     for (int i = 0; i < 4; ++i)
     {
-        if (mTextures[i].base.formId == 0)
+        if (mTextures[i].base.formId.isZero())
         {
             // std::cout << "ESM4::LAND " << ESM4::formIdToString(mFormId) << " missing base, quad " << i << std::endl;
             // std::cout << "layers " << mTextures[i].layers.size() << std::endl;

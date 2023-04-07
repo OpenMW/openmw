@@ -4,7 +4,7 @@
 #include <functional>
 #include <iosfwd>
 
-#include <components/esm4/formid.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM
 {
@@ -13,12 +13,12 @@ namespace ESM
     public:
         constexpr FormIdRefId() = default;
 
-        constexpr explicit FormIdRefId(ESM4::FormId value) noexcept
+        constexpr explicit FormIdRefId(ESM::FormId value) noexcept
             : mValue(value)
         {
         }
 
-        ESM4::FormId getValue() const { return mValue; }
+        ESM::FormId getValue() const { return mValue; }
 
         std::string toString() const;
 
@@ -33,7 +33,7 @@ namespace ESM
         friend struct std::hash<FormIdRefId>;
 
     private:
-        ESM4::FormId mValue = 0;
+        ESM::FormId mValue;
     };
 }
 
@@ -42,10 +42,7 @@ namespace std
     template <>
     struct hash<ESM::FormIdRefId>
     {
-        std::size_t operator()(ESM::FormIdRefId value) const noexcept
-        {
-            return std::hash<ESM4::FormId>{}(value.mValue);
-        }
+        std::size_t operator()(ESM::FormIdRefId value) const noexcept { return std::hash<ESM::FormId>{}(value.mValue); }
     };
 }
 

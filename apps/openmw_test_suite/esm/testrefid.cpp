@@ -26,7 +26,7 @@ namespace ESM
 
         TEST(ESMRefIdTest, formIdRefIdIsNotEmpty)
         {
-            const RefId refId = RefId::formIdRefId(42);
+            const RefId refId = RefId::formIdRefId({ 42, 0 });
             EXPECT_FALSE(refId.empty());
         }
 
@@ -53,7 +53,7 @@ namespace ESM
         TEST(ESMRefIdTest, defaultConstructedIsNotEqualToFormIdRefId)
         {
             const RefId a;
-            const RefId b = RefId::formIdRefId(42);
+            const RefId b = RefId::formIdRefId({ 42, 0 });
             EXPECT_NE(a, b);
         }
 
@@ -98,8 +98,8 @@ namespace ESM
 
         TEST(ESMRefIdTest, equalityIsDefinedForFormRefIdAndRefId)
         {
-            const FormIdRefId formIdRefId(42);
-            const RefId refId = RefId::formIdRefId(42);
+            const FormIdRefId formIdRefId({ 42, 0 });
+            const RefId refId = RefId::formIdRefId({ 42, 0 });
             EXPECT_EQ(formIdRefId, refId);
         }
 
@@ -125,8 +125,8 @@ namespace ESM
 
         TEST(ESMRefIdTest, lessThanIsDefinedForFormRefIdAndRefId)
         {
-            const FormIdRefId formIdRefId(13);
-            const RefId refId = RefId::formIdRefId(42);
+            const FormIdRefId formIdRefId({ 13, 0 });
+            const RefId refId = RefId::formIdRefId({ 42, 0 });
             EXPECT_LT(formIdRefId, refId);
         }
 
@@ -164,14 +164,14 @@ namespace ESM
         TEST(ESMRefIdTest, stringRefIdHasStrongOrderWithFormId)
         {
             const RefId stringRefId = RefId::stringRefId("a");
-            const RefId formIdRefId = RefId::formIdRefId(42);
+            const RefId formIdRefId = RefId::formIdRefId({ 42, 0 });
             EXPECT_TRUE(stringRefId < formIdRefId);
             EXPECT_FALSE(formIdRefId < stringRefId);
         }
 
         TEST(ESMRefIdTest, formIdRefIdHasStrongOrderWithStringView)
         {
-            const RefId formIdRefId = RefId::formIdRefId(42);
+            const RefId formIdRefId = RefId::formIdRefId({ 42, 0 });
             const std::string_view stringView = "42";
             EXPECT_TRUE(stringView < formIdRefId);
             EXPECT_FALSE(formIdRefId < stringView);
@@ -192,7 +192,7 @@ namespace ESM
         TEST(ESMRefIdTest, stringRefIdIsNotEqualToFormId)
         {
             const RefId stringRefId = RefId::stringRefId("\0");
-            const RefId formIdRefId = RefId::formIdRefId(0);
+            const RefId formIdRefId = RefId::formIdRefId({ 0, 0 });
             EXPECT_NE(stringRefId, formIdRefId);
         }
 
@@ -235,7 +235,7 @@ namespace ESM
             { RefId(), std::string() },
             { RefId::stringRefId("foo"), "foo" },
             { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), { 'a', 0, -1, '\n', '\t' } },
-            { RefId::formIdRefId(42), "0x2a" },
+            { RefId::formIdRefId({ 42, 0 }), "0x2a" },
             { RefId::generated(42), "0x2a" },
             { RefId::index(REC_ARMO, 42), "ARMO:0x2a" },
             { RefId::esm3ExteriorCell(-13, 42), "-13:42" },
@@ -268,7 +268,7 @@ namespace ESM
             { RefId::stringRefId("foo"), "\"foo\"" },
             { RefId::stringRefId("BAR"), "\"BAR\"" },
             { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), "\"a\\x0\\xFF\\xA\\x9\"" },
-            { RefId::formIdRefId(42), "FormId:0x2a" },
+            { RefId::formIdRefId({ 42, 0 }), "FormId:0x2a" },
             { RefId::generated(42), "Generated:0x2a" },
             { RefId::index(REC_ARMO, 42), "Index:ARMO:0x2a" },
             { RefId::esm3ExteriorCell(-13, 42), "Esm3ExteriorCell:-13:42" },
@@ -295,10 +295,11 @@ namespace ESM
             { RefId::stringRefId("foo"), "foo" },
             { RefId::stringRefId("BAR"), "bar" },
             { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), { 'a', 0, -1, '\n', '\t' } },
-            { RefId::formIdRefId(0), "FormId:0x0" },
-            { RefId::formIdRefId(1), "FormId:0x1" },
-            { RefId::formIdRefId(0x1f), "FormId:0x1f" },
-            { RefId::formIdRefId(std::numeric_limits<ESM4::FormId>::max()), "FormId:0xffffffff" },
+            { RefId::formIdRefId({ 0, 0 }), "FormId:0x0" },
+            { RefId::formIdRefId({ 1, 0 }), "FormId:0x1" },
+            { RefId::formIdRefId({ 0x1f, 0 }), "FormId:0x1f" },
+            { RefId::formIdRefId({ 0x1f, 2 }), "FormId:0x200001f" },
+            { RefId::formIdRefId({ 0xffffff, 0x1abc }), "FormId:0x1abcffffff" },
             { RefId::generated(0), "Generated:0x0" },
             { RefId::generated(1), "Generated:0x1" },
             { RefId::generated(0x1f), "Generated:0x1f" },
@@ -344,7 +345,7 @@ namespace ESM
         template <>
         struct GenerateRefId<FormIdRefId>
         {
-            static RefId call() { return RefId::formIdRefId(42); }
+            static RefId call() { return RefId::formIdRefId({ 42, 0 }); }
         };
 
         template <>

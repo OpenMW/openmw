@@ -983,7 +983,7 @@ namespace MWWorld
             ESM::RefNum refNum = base->mRef.getRefNum();
             ESM::RefId movedTo = store->getCell()->getId();
 
-            refNum.save(writer, true, "MVRF");
+            writer.writeFormId(refNum, true, "MVRF");
             writer.writeCellId(movedTo);
         }
     }
@@ -1039,8 +1039,7 @@ namespace MWWorld
         while (reader.isNextSub("MVRF"))
         {
             reader.cacheSubName();
-            ESM::RefNum refnum;
-            refnum.load(reader, true, "MVRF");
+            ESM::RefNum refnum = reader.getFormId(true, "MVRF");
             ESM::RefId movedToId = reader.getCellId();
             if (refnum.hasContentFile())
             {

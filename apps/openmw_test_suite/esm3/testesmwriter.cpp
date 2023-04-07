@@ -76,7 +76,7 @@ namespace ESM
         const std::vector<std::pair<RefId, std::size_t>> refIdSizes = {
             { RefId(), 57 },
             { RefId::stringRefId(std::string(32, 'a')), 89 },
-            { RefId::formIdRefId(0x1f), 61 },
+            { RefId::formIdRefId({ 0x1f, 0 }), 65 },
             { RefId::generated(0x1f), 65 },
             { RefId::index(REC_INGR, 0x1f), 65 },
             { RefId::esm3ExteriorCell(-42, 42), 65 },

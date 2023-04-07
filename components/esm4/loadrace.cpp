@@ -37,7 +37,7 @@
 
 void ESM4::Race::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.id;
+    mFormId = reader.hdr().record.getFormId();
     reader.adjustFormId(mFormId);
     mFlags = reader.hdr().record.flags;
 
@@ -418,7 +418,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             //
             case ESM4::SUB_HNAM:
             {
-                std::size_t numHairChoices = subHdr.dataSize / sizeof(FormId);
+                std::size_t numHairChoices = subHdr.dataSize / sizeof(FormId32);
                 mHairChoices.resize(numHairChoices);
                 for (unsigned int i = 0; i < numHairChoices; ++i)
                     reader.get(mHairChoices.at(i));
@@ -427,7 +427,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_ENAM:
             {
-                std::size_t numEyeChoices = subHdr.dataSize / sizeof(FormId);
+                std::size_t numEyeChoices = subHdr.dataSize / sizeof(FormId32);
                 mEyeChoices.resize(numEyeChoices);
                 for (unsigned int i = 0; i < numEyeChoices; ++i)
                     reader.get(mEyeChoices.at(i));
@@ -538,7 +538,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_KWDA:
             {
-                std::uint32_t formid;
+                FormId formid;
                 for (unsigned int i = 0; i < mNumKeywords; ++i)
                     reader.getFormId(formid);
                 break;

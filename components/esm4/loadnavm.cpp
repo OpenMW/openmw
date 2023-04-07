@@ -47,7 +47,7 @@ void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
     reader.get(worldSpaceId);
     // FLG_Tamriel    = 0x0000003c, // grid info follows, possibly Tamriel?
     // FLG_Morrowind  = 0x01380000, // grid info follows, probably Skywind
-    if (worldSpaceId == 0x0000003c || worldSpaceId == 0x01380000)
+    if (worldSpaceId == FormId{ 0x3c, 0 } || worldSpaceId == FormId{ 380000, 1 })
     {
         //   ^
         // Y |                   X Y Index
@@ -65,8 +65,10 @@ void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
         //
         // Formula seems to be floor(Skywind coord / 2) <cmath>
         //
-        reader.get(cellGrid.grid.y); // NOTE: reverse order
-        reader.get(cellGrid.grid.x);
+        Grid grid;
+        reader.get(grid.y); // NOTE: reverse order
+        reader.get(grid.x);
+        cellGrid = grid;
 // FIXME: debugging only
 #if 0
         std::string padding;
@@ -79,7 +81,9 @@ void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
     }
     else
     {
-        reader.get(cellGrid.cellId);
+        FormId cellId;
+        reader.get(cellId);
+        cellGrid = cellId;
 
 #if 0
         std::string padding; // FIXME
@@ -186,7 +190,7 @@ void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
 
 void ESM4::NavMesh::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.id;
+    mFormId = reader.hdr().record.getFormId();
     mFlags = reader.hdr().record.flags;
 
     // std::cout << "NavMesh 0x" << std::hex << this << std::endl; // FIXME

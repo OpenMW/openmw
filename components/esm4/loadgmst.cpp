@@ -11,8 +11,7 @@ namespace ESM4
         GameSetting::Data readData(FormId formId, std::string_view editorId, Reader& reader)
         {
             if (editorId.empty())
-                throw std::runtime_error(
-                    "Unknown ESM4 GMST (" + std::to_string(formId) + ") data type: editor id is empty");
+                throw std::runtime_error("Unknown ESM4 GMST (" + formId.toString() + ") data type: editor id is empty");
             const char type = editorId[0];
             switch (type)
             {
@@ -36,14 +35,14 @@ namespace ESM4
                 }
                 default:
                     throw std::runtime_error(
-                        "Unsupported ESM4 GMST (" + std::to_string(formId) + ") data type: " + std::string(editorId));
+                        "Unsupported ESM4 GMST (" + formId.toString() + ") data type: " + std::string(editorId));
             }
         }
     }
 
     void GameSetting::load(Reader& reader)
     {
-        mFormId = reader.hdr().record.id;
+        mFormId = reader.hdr().record.getFormId();
         reader.adjustFormId(mFormId);
         mFlags = reader.hdr().record.flags;
 
@@ -59,8 +58,8 @@ namespace ESM4
                     mData = readData(mFormId, mEditorId, reader);
                     break;
                 default:
-                    throw std::runtime_error("Unknown ESM4 GMST (" + std::to_string(mFormId) + ") subrecord "
-                        + ESM::printName(subHdr.typeId));
+                    throw std::runtime_error(
+                        "Unknown ESM4 GMST (" + mFormId.toString() + ") subrecord " + ESM::printName(subHdr.typeId));
             }
         }
     }

@@ -179,6 +179,8 @@ namespace ESM
 
         void write(const char* data, size_t size);
 
+        void writeFormId(const ESM::FormId&, bool wide = false, NAME tag = "FRMR");
+
     private:
         std::list<RecordData> mRecords;
         std::ostream* mStream;

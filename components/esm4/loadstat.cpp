@@ -34,7 +34,7 @@
 
 void ESM4::Static::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.id;
+    mFormId = reader.hdr().record.getFormId();
     reader.adjustFormId(mFormId);
     mId = ESM::RefId::formIdRefId(mFormId);
     mFlags = reader.hdr().record.flags;

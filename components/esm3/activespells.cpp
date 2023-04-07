@@ -17,7 +17,7 @@ namespace ESM
                 esm.writeHNString("DISP", params.mDisplayName);
                 esm.writeHNT("TYPE", params.mType);
                 if (params.mItem.isSet())
-                    params.mItem.save(esm, true, "ITEM");
+                    esm.writeFormId(params.mItem, true, "ITEM");
                 if (params.mWorsenings >= 0)
                 {
                     esm.writeHNT("WORS", params.mWorsenings);
@@ -56,7 +56,7 @@ namespace ESM
                 {
                     esm.getHNT(params.mType, "TYPE");
                     if (esm.peekNextSub("ITEM"))
-                        params.mItem.load(esm, true, "ITEM");
+                        params.mItem = esm.getFormId(true, "ITEM");
                 }
                 if (esm.isNextSub("WORS"))
                 {

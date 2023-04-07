@@ -45,7 +45,7 @@ namespace ESM4
         struct DoorRef
         {
             std::uint32_t unknown;
-            FormId formId;
+            FormId32 formId;
         };
 
         struct Triangle

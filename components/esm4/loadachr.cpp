@@ -34,7 +34,7 @@
 
 void ESM4::ActorCharacter::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.id;
+    mFormId = reader.hdr().record.getFormId();
     reader.adjustFormId(mFormId);
     mFlags = reader.hdr().record.flags;
     mParent = reader.currCell(); // NOTE: only for persistent achr? (aren't they all persistent?)
@@ -64,8 +64,8 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_XESP:
             {
-                reader.get(mEsp);
-                reader.adjustFormId(mEsp.parent);
+                reader.getFormId(mEsp.parent);
+                reader.get(mEsp.flags);
                 break;
             }
             case ESM4::SUB_XRGD: // ragdoll

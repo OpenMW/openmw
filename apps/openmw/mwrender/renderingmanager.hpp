@@ -42,7 +42,8 @@ namespace osgViewer
 namespace ESM
 {
     struct Cell;
-    struct RefNum;
+    struct FormId;
+    using RefNum = FormId;
 }
 
 namespace Terrain
