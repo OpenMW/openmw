@@ -9,8 +9,8 @@ namespace ESM
     std::string GeneratedRefId::toString() const
     {
         std::string result;
-        result.resize(getIntegralSize(mValue) + 2, '\0');
-        serializeIntegral(mValue, 0, result);
+        result.resize(getHexIntegralSize(mValue) + 2, '\0');
+        serializeHexIntegral(mValue, 0, result);
         return result;
     }
 

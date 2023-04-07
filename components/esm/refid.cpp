@@ -225,23 +225,29 @@ namespace ESM
             return ESM::RefId();
 
         if (value.starts_with(formIdRefIdPrefix))
-            return ESM::RefId::formIdRefId(deserializeIntegral<ESM4::FormId>(formIdRefIdPrefix.size(), value));
+            return ESM::RefId::formIdRefId(deserializeHexIntegral<ESM4::FormId>(formIdRefIdPrefix.size(), value));
 
         if (value.starts_with(generatedRefIdPrefix))
-            return ESM::RefId::generated(deserializeIntegral<std::uint64_t>(generatedRefIdPrefix.size(), value));
+            return ESM::RefId::generated(deserializeHexIntegral<std::uint64_t>(generatedRefIdPrefix.size(), value));
 
         if (value.starts_with(indexRefIdPrefix))
         {
             ESM::RecNameInts recordType{};
             std::memcpy(&recordType, value.data() + indexRefIdPrefix.size(), sizeof(recordType));
             return ESM::RefId::index(recordType,
-                deserializeIntegral<std::uint32_t>(indexRefIdPrefix.size() + sizeof(recordType) + 1, value));
+                deserializeHexIntegral<std::uint32_t>(indexRefIdPrefix.size() + sizeof(recordType) + 1, value));
         }
+
         if (value.starts_with(esm3ExteriorCellRefIdPrefix))
         {
-            std::int32_t x = deserializeIntegral<std::int32_t>(esm3ExteriorCellRefIdPrefix.size(), value);
-            std::int32_t y
-                = deserializeIntegral<std::int32_t>(esm3ExteriorCellRefIdPrefix.size() + getIntegralSize(x) + 1, value);
+            if (value.size() < esm3ExteriorCellRefIdPrefix.size() + 3)
+                throw std::runtime_error("Invalid ESM3ExteriorCellRefId format: not enough size");
+            const std::size_t separator = value.find(':', esm3ExteriorCellRefIdPrefix.size() + 1);
+            if (separator == std::string_view::npos)
+                throw std::runtime_error("Invalid ESM3ExteriorCellRefId format: coordinates separator is not found");
+            const std::int32_t x
+                = deserializeDecIntegral<std::int32_t>(esm3ExteriorCellRefIdPrefix.size(), separator, value);
+            const std::int32_t y = deserializeDecIntegral<std::int32_t>(separator + 1, value.size(), value);
             return ESM::ESM3ExteriorCellRefId(x, y);
         }
 

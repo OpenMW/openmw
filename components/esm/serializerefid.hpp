@@ -3,9 +3,11 @@
 
 #include <charconv>
 #include <cstring>
+#include <limits>
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <type_traits>
 
 namespace ESM
 {
@@ -15,8 +17,19 @@ namespace ESM
     constexpr std::string_view esm3ExteriorCellRefIdPrefix = "Esm3ExteriorCell:";
 
     template <class T>
-    std::size_t getIntegralSize(T value)
+    std::size_t getDecIntegralCapacity(T value)
     {
+        if (value == 0)
+            return 1;
+        if (value > 0)
+            return static_cast<std::size_t>(std::numeric_limits<T>::digits10);
+        return static_cast<std::size_t>(std::numeric_limits<T>::digits10) + 1;
+    }
+
+    template <class T>
+    std::size_t getHexIntegralSize(T value)
+    {
+        static_assert(!std::is_signed_v<T>);
         std::size_t result = sizeof(T) * 2;
         while (true)
         {
@@ -34,30 +47,55 @@ namespace ESM
     }
 
     template <class T>
-    void serializeIntegral(T value, std::size_t shift, std::string& out)
+    std::size_t serializeDecIntegral(T value, std::size_t shift, std::string& out)
     {
+        const auto r = std::to_chars(out.data() + shift, out.data() + out.size(), value, 10);
+        if (r.ec != std::errc())
+            throw std::system_error(std::make_error_code(r.ec), "Failed to serialize ESM::RefId dec integral value");
+        return r.ptr - out.data();
+    }
+
+    template <class T>
+    void serializeHexIntegral(T value, std::size_t shift, std::string& out)
+    {
+        static_assert(!std::is_signed_v<T>);
         out[shift] = '0';
         out[shift + 1] = 'x';
         const auto r = std::to_chars(out.data() + shift + 2, out.data() + out.size(), value, 16);
         if (r.ec != std::errc())
-            throw std::system_error(std::make_error_code(r.ec), "Failed to serialize ESM::RefId integral value");
+            throw std::system_error(std::make_error_code(r.ec), "Failed to serialize ESM::RefId hex integral value");
     }
 
     template <class T>
     void serializeRefIdValue(T value, std::string_view prefix, std::string& out)
     {
-        serializeRefIdPrefix(getIntegralSize(value), prefix, out);
-        serializeIntegral(value, prefix.size(), out);
+        static_assert(!std::is_signed_v<T>);
+        serializeRefIdPrefix(getHexIntegralSize(value), prefix, out);
+        serializeHexIntegral(value, prefix.size(), out);
     }
 
     template <class T>
-    T deserializeIntegral(std::size_t shift, std::string_view value)
+    T deserializeDecIntegral(std::size_t shift, std::size_t end, std::string_view value)
     {
+        T result{};
+        const auto r = std::from_chars(value.data() + shift, value.data() + end, result, 10);
+        if (r.ec != std::errc())
+            throw std::system_error(std::make_error_code(r.ec),
+                "Failed to deserialize ESM::RefId dec integral value: \""
+                    + std::string(value.data() + shift, value.data() + end) + '"');
+        return result;
+    }
+
+    template <class T>
+    T deserializeHexIntegral(std::size_t shift, std::string_view value)
+    {
+        static_assert(!std::is_signed_v<T>);
         T result{};
         const auto r = std::from_chars(value.data() + shift + 2, value.data() + value.size(), result, 16);
         if (r.ec != std::errc())
             throw std::system_error(std::make_error_code(r.ec),
-                "Failed to deserialize ESM::RefId integral value: \"" + std::string(value) + '"');
+                "Failed to deserialize ESM::RefId hex integral value: \""
+                    + std::string(value.data() + shift + 2, value.data() + value.size()) + '"');
         return result;
     }
 }
