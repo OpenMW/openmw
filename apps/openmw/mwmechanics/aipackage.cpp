@@ -13,6 +13,7 @@
 #include "../mwworld/action.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 
 #include "../mwphysics/raycasting.hpp"
@@ -328,7 +329,7 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
     }
 }
 
-const MWMechanics::PathgridGraph& MWMechanics::AiPackage::getPathGridGraph(const MWWorld::CellStore* cell)
+const MWMechanics::PathgridGraph& MWMechanics::AiPackage::getPathGridGraph(const MWWorld::CellStore* cell) const
 {
     const ESM::RefId id = cell->getCell()->getId();
     // static cache is OK for now, pathgrids can never change during runtime
@@ -337,10 +338,17 @@ const MWMechanics::PathgridGraph& MWMechanics::AiPackage::getPathGridGraph(const
     CacheMap::iterator found = cache.find(id);
     if (found == cache.end())
     {
-        cache.insert(
-            std::make_pair(id, std::make_unique<MWMechanics::PathgridGraph>(MWMechanics::PathgridGraph(cell))));
+        const ESM::Pathgrid* pathgrid
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell->getCell());
+        std::unique_ptr<MWMechanics::PathgridGraph> ptr;
+        if (pathgrid)
+            ptr = std::make_unique<MWMechanics::PathgridGraph>(MWMechanics::PathgridGraph(*pathgrid));
+        found = cache.emplace(id, std::move(ptr)).first;
     }
-    return *cache[id].get();
+    const MWMechanics::PathgridGraph* graph = found->second.get();
+    if (!graph)
+        return MWMechanics::PathgridGraph::sEmpty;
+    return *graph;
 }
 
 bool MWMechanics::AiPackage::shortcutPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,

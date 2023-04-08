@@ -273,7 +273,7 @@ namespace MWMechanics
         // Initialization to discover & store allowed node points for this actor.
         if (storage.mPopulateAvailableNodes)
         {
-            getAllowedNodes(actor, actor.getCell()->getCell(), storage);
+            getAllowedNodes(actor, storage);
         }
 
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
@@ -722,7 +722,7 @@ namespace MWMechanics
 
         AiWanderStorage& storage = state.get<AiWanderStorage>();
         if (storage.mPopulateAvailableNodes)
-            getAllowedNodes(actor, actor.getCell()->getCell(), storage);
+            getAllowedNodes(actor, storage);
 
         if (storage.mAllowedNodes.empty())
             return;
@@ -811,12 +811,12 @@ namespace MWMechanics
         getPathGridGraph(currentCell).getNeighbouringPoints(index, points);
     }
 
-    void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, const MWWorld::Cell* cell, AiWanderStorage& storage)
+    void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, AiWanderStorage& storage)
     {
         // infrequently used, therefore no benefit in caching it as a member
-        const ESM::Pathgrid* pathgrid
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell);
         const MWWorld::CellStore* cellStore = actor.getCell();
+        const ESM::Pathgrid* pathgrid
+            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cellStore->getCell());
 
         storage.mAllowedNodes.clear();
 
@@ -835,7 +835,7 @@ namespace MWMechanics
         if (mDistance && storage.mCanWanderAlongPathGrid && !actor.getClass().isPureWaterCreature(actor))
         {
             // get NPC's position in local (i.e. cell) coordinates
-            auto converter = Misc::CoordinateConverter(*cell);
+            auto converter = Misc::CoordinateConverter(*cellStore->getCell());
             const osg::Vec3f npcPos = converter.toLocalVec3(mInitialActorPosition);
 
             // Find closest pathgrid point
@@ -844,8 +844,8 @@ namespace MWMechanics
             // mAllowedNodes for this actor with pathgrid point indexes based on mDistance
             // and if the point is connected to the closest current point
             // NOTE: mPoints is in local coordinates
-            int pointIndex = 0;
-            for (unsigned int counter = 0; counter < pathgrid->mPoints.size(); counter++)
+            size_t pointIndex = 0;
+            for (size_t counter = 0; counter < pathgrid->mPoints.size(); counter++)
             {
                 osg::Vec3f nodePos(PathFinder::makeOsgVec3(pathgrid->mPoints[counter]));
                 if ((npcPos - nodePos).length2() <= mDistance * mDistance
@@ -873,10 +873,10 @@ namespace MWMechanics
     // additional points for NPC to wander to are:
     // 1. NPC's initial location
     // 2. Partway along the path between the point and its connected points.
-    void AiWander::addNonPathGridAllowedPoints(const ESM::Pathgrid* pathGrid, int pointIndex, AiWanderStorage& storage,
-        const Misc::CoordinateConverter& converter)
+    void AiWander::addNonPathGridAllowedPoints(const ESM::Pathgrid* pathGrid, size_t pointIndex,
+        AiWanderStorage& storage, const Misc::CoordinateConverter& converter)
     {
-        for (auto& edge : pathGrid->mEdges)
+        for (const auto& edge : pathGrid->mEdges)
         {
             if (edge.mV0 == pointIndex)
             {

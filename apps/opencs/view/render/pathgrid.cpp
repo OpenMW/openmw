@@ -424,9 +424,9 @@ namespace CSVRender
                 int adjustment1 = 0;
 
                 // Determine necessary adjustment
-                for (std::vector<unsigned short>::iterator point = mSelected.begin(); point != mSelected.end(); ++point)
+                for (const auto point : mSelected)
                 {
-                    if (source->mEdges[edge].mV0 == *point || source->mEdges[edge].mV1 == *point)
+                    if (source->mEdges[edge].mV0 == point || source->mEdges[edge].mV1 == point)
                     {
                         edgeRowsToRemove.insert(static_cast<int>(edge));
 
@@ -435,10 +435,10 @@ namespace CSVRender
                         break;
                     }
 
-                    if (source->mEdges[edge].mV0 > *point)
+                    if (source->mEdges[edge].mV0 > point)
                         --adjustment0;
 
-                    if (source->mEdges[edge].mV1 > *point)
+                    if (source->mEdges[edge].mV1 > point)
                         --adjustment1;
                 }
 
@@ -457,10 +457,9 @@ namespace CSVRender
                 }
             }
 
-            std::set<int, std::greater<int>>::iterator row;
-            for (row = edgeRowsToRemove.begin(); row != edgeRowsToRemove.end(); ++row)
+            for (const auto row : edgeRowsToRemove)
             {
-                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId.getRefIdString(), *row, parentColumn));
+                commands.push(new CSMWorld::DeleteNestedCommand(*model, mId.getRefIdString(), row, parentColumn));
             }
         }
 

@@ -151,7 +151,7 @@ namespace MWMechanics
         void getNeighbouringNodes(
             ESM::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM::Pathgrid::PointList& points);
 
-        void getAllowedNodes(const MWWorld::Ptr& actor, const MWWorld::Cell* cell, AiWanderStorage& storage);
+        void getAllowedNodes(const MWWorld::Ptr& actor, AiWanderStorage& storage);
 
         void trimAllowedNodes(std::vector<ESM::Pathgrid::Point>& nodes, const PathFinder& pathfinder);
 
@@ -164,7 +164,7 @@ namespace MWMechanics
 
         void setCurrentNodeToClosestAllowedNode(AiWanderStorage& storage);
 
-        void addNonPathGridAllowedPoints(const ESM::Pathgrid* pathGrid, int pointIndex, AiWanderStorage& storage,
+        void addNonPathGridAllowedPoints(const ESM::Pathgrid* pathGrid, size_t pointIndex, AiWanderStorage& storage,
             const Misc::CoordinateConverter& converter);
 
         void AddPointBetweenPathGridPoints(
