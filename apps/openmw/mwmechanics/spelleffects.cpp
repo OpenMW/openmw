@@ -487,9 +487,7 @@ namespace MWMechanics
                     world->getPlayer().getMarkedPosition(markedCell, markedPosition);
                     if (markedCell)
                     {
-                        ESM::RefId dest;
-                        if (!markedCell->isExterior())
-                            dest = markedCell->getCell()->getId();
+                        ESM::RefId dest = markedCell->getCell()->getId();
                         MWWorld::ActionTeleport action(dest, markedPosition, false);
                         action.execute(target);
                         if (!caster.isEmpty())
