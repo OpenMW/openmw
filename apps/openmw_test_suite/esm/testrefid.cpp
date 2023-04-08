@@ -212,6 +212,14 @@ namespace ESM
             EXPECT_NE(hash(a), hash(b));
         }
 
+        TEST(ESMRefIdTest, esm3ExteriorCellHasLexicographicalOrder)
+        {
+            const RefId a = RefId::esm3ExteriorCell(0, 0);
+            const RefId b = RefId::esm3ExteriorCell(1, 0);
+            EXPECT_LT(a, b);
+            EXPECT_TRUE(!(b < a));
+        }
+
         struct ESMRefIdToStringTest : TestWithParam<std::pair<RefId, std::string>>
         {
         };

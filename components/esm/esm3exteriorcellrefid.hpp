@@ -28,9 +28,14 @@ namespace ESM
         int32_t getX() const { return mX; }
         int32_t getY() const { return mY; }
 
-        constexpr bool operator==(ESM3ExteriorCellRefId rhs) const noexcept { return mX == rhs.mX && mY == rhs.mY; }
+        friend inline constexpr auto tie(const ESM3ExteriorCellRefId& value) noexcept
+        {
+            return std::tie(value.mX, value.mY);
+        }
 
-        constexpr bool operator<(ESM3ExteriorCellRefId rhs) const noexcept { return mX < rhs.mX && mY < rhs.mY; }
+        constexpr bool operator==(ESM3ExteriorCellRefId rhs) const noexcept { return tie(*this) == tie(rhs); }
+
+        constexpr bool operator<(ESM3ExteriorCellRefId rhs) const noexcept { return tie(*this) < tie(rhs); }
 
         friend std::ostream& operator<<(std::ostream& stream, ESM3ExteriorCellRefId value);
 
