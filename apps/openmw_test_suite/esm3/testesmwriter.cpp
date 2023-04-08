@@ -70,7 +70,7 @@ namespace ESM
                 writer.writeHRefId(refId);
             }
 
-            EXPECT_EQ(stream.view().size(), size);
+            EXPECT_EQ(stream.str().size(), size);
         }
 
         const std::vector<std::pair<RefId, std::size_t>> refIdSizes = {
