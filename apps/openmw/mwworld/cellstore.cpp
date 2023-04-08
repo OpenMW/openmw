@@ -762,55 +762,18 @@ namespace MWWorld
     template <typename ReferenceInvocable>
     static void visitCell4References(const ESM4::Cell& cell, ESM::ReadersCache& readers, ReferenceInvocable&& invocable)
     {
-        auto stream = Files::openBinaryInputFileStream(cell.mReaderContext.filename);
-        stream->seekg(0);
-
-        ESM4::Reader readerESM4(
-            std::move(stream), cell.mReaderContext.filename, MWBase::Environment::get().getResourceSystem()->getVFS());
-
-        readerESM4.setEncoder(readers.getStatelessEncoder());
-        bool contextValid = cell.mReaderContext.filePos != std::streampos(-1);
-        if (contextValid)
-            readerESM4.restoreContext(cell.mReaderContext);
-
-        while (
-            (ESM::RefId::formIdRefId(readerESM4.currCell()) == cell.mId || !contextValid) && readerESM4.hasMoreRecs())
+        for (const ESM4::Reference& ref : MWBase::Environment::get().getWorld()->getStore().get<ESM4::Reference>())
         {
-            if (!contextValid)
-                readerESM4.exitGroupCheck();
-
-            auto onRecord = [&](ESM4::Reader& reader) {
-                auto recordType = static_cast<ESM4::RecordTypes>(reader.hdr().record.typeId);
-                ESM::RecNameInts esm4RecName = static_cast<ESM::RecNameInts>(ESM::esm4Recname(recordType));
-                if (esm4RecName == ESM::RecNameInts::REC_REFR4 && contextValid)
-                {
-                    reader.getRecordData();
-                    ESM4::Reference ref;
-                    ref.load(reader);
-                    invocable(ref);
-                    return true;
-                }
-                else if (esm4RecName == ESM::RecNameInts::REC_CELL4)
-                {
-                    reader.getRecordData();
-                    ESM4::Cell cellToLoad;
-                    cellToLoad.load(reader); // This is necessary to exit or to find the correct cell
-                    if (cellToLoad.mId == cell.mId)
-                        contextValid = true;
-                    return true;
-                }
-
-                return false;
-            };
-
-            if (!ESM4::ReaderUtils::readItem(readerESM4, onRecord, [&](ESM4::Reader& reader) {}))
-                break;
+            if (ref.mParent == cell.mId)
+            {
+                invocable(ref);
+            }
         }
     }
 
     void CellStore::listRefs(const ESM4::Cell& cell)
     {
-        visitCell4References(cell, mReaders, [&](ESM4::Reference& ref) { mIds.push_back(ref.mBaseObj); });
+        visitCell4References(cell, mReaders, [&](const ESM4::Reference& ref) { mIds.push_back(ref.mBaseObj); });
     }
 
     void CellStore::listRefs()
@@ -874,7 +837,7 @@ namespace MWWorld
 
     void CellStore::loadRefs(const ESM4::Cell& cell, std::map<ESM::RefNum, ESM::RefId>& refNumToID)
     {
-        visitCell4References(cell, mReaders, [&](ESM4::Reference& ref) { loadRef(ref, false); });
+        visitCell4References(cell, mReaders, [&](const ESM4::Reference& ref) { loadRef(ref, false); });
     }
 
     void CellStore::loadRefs()

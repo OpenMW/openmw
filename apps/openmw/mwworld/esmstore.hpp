@@ -30,6 +30,7 @@ namespace ESM4
     struct Static;
     struct Cell;
     struct Light;
+    struct Reference;
 }
 
 namespace ESM
@@ -105,7 +106,7 @@ namespace MWWorld
             // Special entry which is hardcoded and not loaded from an ESM
             Store<ESM::Attribute>,
 
-            Store<ESM4::Static>, Store<ESM4::Cell>, Store<ESM4::Light>>;
+            Store<ESM4::Static>, Store<ESM4::Cell>, Store<ESM4::Light>, Store<ESM4::Reference>>;
 
     private:
         template <typename T>
