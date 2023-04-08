@@ -230,6 +230,7 @@ namespace ESM
             { RefId::formIdRefId(42), "0x2a" },
             { RefId::generated(42), "0x2a" },
             { RefId::index(REC_ARMO, 42), "ARMO:0x2a" },
+            { RefId::esm3ExteriorCell(-13, 42), "-13:42" },
         };
 
         INSTANTIATE_TEST_SUITE_P(ESMRefIdToString, ESMRefIdToStringTest, ValuesIn(toStringParams));
@@ -262,6 +263,7 @@ namespace ESM
             { RefId::formIdRefId(42), "FormId:0x2a" },
             { RefId::generated(42), "Generated:0x2a" },
             { RefId::index(REC_ARMO, 42), "Index:ARMO:0x2a" },
+            { RefId::esm3ExteriorCell(-13, 42), "Esm3ExteriorCell:-13:42" },
         };
 
         INSTANTIATE_TEST_SUITE_P(ESMRefIdToDebugString, ESMRefIdToDebugStringTest, ValuesIn(toDebugStringParams));
@@ -297,6 +299,13 @@ namespace ESM
             { RefId::index(REC_INGR, 1), "Index:INGR:0x1" },
             { RefId::index(REC_INGR, 0x1f), "Index:INGR:0x1f" },
             { RefId::index(REC_INGR, std::numeric_limits<std::uint32_t>::max()), "Index:INGR:0xffffffff" },
+            { RefId::esm3ExteriorCell(-13, 42), "Esm3ExteriorCell:-13:42" },
+            { RefId::esm3ExteriorCell(
+                  std::numeric_limits<std::int32_t>::min(), std::numeric_limits<std::int32_t>::min()),
+                "Esm3ExteriorCell:-2147483648:-2147483648" },
+            { RefId::esm3ExteriorCell(
+                  std::numeric_limits<std::int32_t>::max(), std::numeric_limits<std::int32_t>::max()),
+                "Esm3ExteriorCell:2147483647:2147483647" },
         };
 
         INSTANTIATE_TEST_SUITE_P(ESMRefIdText, ESMRefIdTextTest, ValuesIn(serializedRefIds));
@@ -364,7 +373,10 @@ namespace ESM
         TYPED_TEST_P(ESMRefIdTypesTest, serializeTextThenDeserializeTextShouldProduceSameValue)
         {
             const RefId refId = GenerateRefId<TypeParam>::call();
-            EXPECT_EQ(RefId::deserializeText(refId.serializeText()), refId);
+            const std::string text = refId.serializeText();
+            for (std::size_t i = 0; i < text.size(); ++i)
+                ASSERT_TRUE(std::isprint(text[i])) << "index: " << i << ", int value: " << static_cast<int>(text[i]);
+            EXPECT_EQ(RefId::deserializeText(text), refId);
         }
 
         TYPED_TEST_P(ESMRefIdTypesTest, shouldBeEqualToItself)
