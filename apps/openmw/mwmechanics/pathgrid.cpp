@@ -1,10 +1,7 @@
 #include "pathgrid.hpp"
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
-
-#include "../mwworld/cellstore.hpp"
-#include "../mwworld/esmstore.hpp"
+#include <list>
+#include <set>
 
 namespace
 {
@@ -45,20 +42,97 @@ namespace
         // return distance(a, b);
         return manhattan(a, b);
     }
+
+    constexpr size_t NoIndex = static_cast<size_t>(-1);
 }
 
 namespace MWMechanics
 {
-    PathgridGraph::PathgridGraph(const MWWorld::CellStore* cell)
-        : mCell(nullptr)
-        , mPathgrid(nullptr)
-        , mGraph(0)
-        , mIsGraphConstructed(false)
-        , mSCCId(0)
-        , mSCCIndex(0)
+
+    class PathgridGraph::Builder
     {
-        load(cell);
-    }
+        std::vector<Node>& mGraph;
+
+        // variables used to calculate connected components
+        int mSCCId = 0;
+        size_t mSCCIndex = 0;
+        std::vector<size_t> mSCCStack;
+        std::vector<std::pair<size_t, size_t>> mSCCPoint; // first is index, second is lowlink
+
+        // v is the pathgrid point index (some call them vertices)
+        void recursiveStrongConnect(const size_t v)
+        {
+            mSCCPoint[v].first = mSCCIndex; // index
+            mSCCPoint[v].second = mSCCIndex; // lowlink
+            mSCCIndex++;
+            mSCCStack.push_back(v);
+            size_t w;
+
+            for (const auto& edge : mGraph[v].edges)
+            {
+                w = edge.index;
+                if (mSCCPoint[w].first == NoIndex) // not visited
+                {
+                    recursiveStrongConnect(w); // recurse
+                    mSCCPoint[v].second = std::min(mSCCPoint[v].second, mSCCPoint[w].second);
+                }
+                else if (std::find(mSCCStack.begin(), mSCCStack.end(), w) != mSCCStack.end())
+                    mSCCPoint[v].second = std::min(mSCCPoint[v].second, mSCCPoint[w].first);
+            }
+
+            if (mSCCPoint[v].second == mSCCPoint[v].first)
+            { // new component
+                do
+                {
+                    w = mSCCStack.back();
+                    mSCCStack.pop_back();
+                    mGraph[w].componentId = mSCCId;
+                } while (w != v);
+                mSCCId++;
+            }
+        }
+
+    public:
+        /*
+         * mGraph contains the strongly connected component group id's along
+         * with pre-calculated edge costs.
+         *
+         * A cell can have disjointed pathgrids, e.g. Seyda Neen has 3
+         *
+         * mGraph for Seyda Neen will therefore have 3 different values.  When
+         * selecting a random pathgrid point for AiWander, mGraph can be checked
+         * for quickly finding whether the destination is reachable.
+         *
+         * Otherwise, buildPath can automatically select a closest reachable end
+         * pathgrid point (reachable from the closest start point).
+         *
+         * Using Tarjan's algorithm:
+         *
+         *  mGraph                   | graph G   |
+         *  mSCCPoint                | V         | derived from mPoints
+         *  mGraph[v].edges          | E (for v) |
+         *  mSCCIndex                | index     | tracking smallest unused index
+         *  mSCCStack                | S         |
+         *  mGraph[v].edges[i].index | w         |
+         *
+         */
+        explicit Builder(PathgridGraph& graph)
+            : mGraph(graph.mGraph)
+        {
+            // both of these are set to zero in the constructor
+            // mSCCId = 0; // how many strongly connected components in this cell
+            // mSCCIndex = 0;
+            size_t pointsSize = graph.mPathgrid->mPoints.size();
+            mSCCPoint.resize(pointsSize, std::pair<size_t, size_t>(NoIndex, NoIndex));
+            mSCCStack.reserve(pointsSize);
+
+            for (size_t v = 0; v < pointsSize; ++v)
+            {
+                if (mSCCPoint[v].first == NoIndex) // undefined (haven't visited)
+                    recursiveStrongConnect(v);
+            }
+        }
+    };
 
     /*
      * mGraph is populated with the cost of each allowed edge.
@@ -96,132 +170,38 @@ namespace MWMechanics
      *    +---------------->
      *      high cost
      */
-    bool PathgridGraph::load(const MWWorld::CellStore* cell)
+    PathgridGraph::PathgridGraph(const ESM::Pathgrid& pathgrid)
+        : mPathgrid(&pathgrid)
     {
-        if (!cell)
-            return false;
-
-        if (mIsGraphConstructed)
-            return true;
-
-        mCell = cell->getCell();
-
-        mPathgrid = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*mCell);
-        if (!mPathgrid)
-            return false;
-
         mGraph.resize(mPathgrid->mPoints.size());
-        for (int i = 0; i < static_cast<int>(mPathgrid->mEdges.size()); i++)
+        for (const auto& edge : mPathgrid->mEdges)
         {
             ConnectedPoint neighbour;
-            neighbour.cost
-                = costAStar(mPathgrid->mPoints[mPathgrid->mEdges[i].mV0], mPathgrid->mPoints[mPathgrid->mEdges[i].mV1]);
+            neighbour.cost = costAStar(mPathgrid->mPoints[edge.mV0], mPathgrid->mPoints[edge.mV1]);
             // forward path of the edge
-            neighbour.index = mPathgrid->mEdges[i].mV1;
-            mGraph[mPathgrid->mEdges[i].mV0].edges.push_back(neighbour);
+            neighbour.index = edge.mV1;
+            mGraph[edge.mV0].edges.push_back(neighbour);
             // reverse path of the edge
             // NOTE: These are redundant, ESM already contains the required reverse paths
-            // neighbour.index = mPathgrid->mEdges[i].mV0;
-            // mGraph[mPathgrid->mEdges[i].mV1].edges.push_back(neighbour);
+            // neighbour.index = edge.mV0;
+            // mGraph[edge.mV1].edges.push_back(neighbour);
         }
-        buildConnectedPoints();
-        mIsGraphConstructed = true;
-        return true;
+        Builder(*this);
     }
 
-    const ESM::Pathgrid* PathgridGraph::getPathgrid() const
-    {
-        return mPathgrid;
-    }
+    const PathgridGraph PathgridGraph::sEmpty = {};
 
-    // v is the pathgrid point index (some call them vertices)
-    void PathgridGraph::recursiveStrongConnect(int v)
-    {
-        mSCCPoint[v].first = mSCCIndex; // index
-        mSCCPoint[v].second = mSCCIndex; // lowlink
-        mSCCIndex++;
-        mSCCStack.push_back(v);
-        int w;
-
-        for (int i = 0; i < static_cast<int>(mGraph[v].edges.size()); i++)
-        {
-            w = mGraph[v].edges[i].index;
-            if (mSCCPoint[w].first == -1) // not visited
-            {
-                recursiveStrongConnect(w); // recurse
-                mSCCPoint[v].second = std::min(mSCCPoint[v].second, mSCCPoint[w].second);
-            }
-            else
-            {
-                if (find(mSCCStack.begin(), mSCCStack.end(), w) != mSCCStack.end())
-                    mSCCPoint[v].second = std::min(mSCCPoint[v].second, mSCCPoint[w].first);
-            }
-        }
-
-        if (mSCCPoint[v].second == mSCCPoint[v].first)
-        { // new component
-            do
-            {
-                w = mSCCStack.back();
-                mSCCStack.pop_back();
-                mGraph[w].componentId = mSCCId;
-            } while (w != v);
-            mSCCId++;
-        }
-        return;
-    }
-
-    /*
-     * mGraph contains the strongly connected component group id's along
-     * with pre-calculated edge costs.
-     *
-     * A cell can have disjointed pathgrids, e.g. Seyda Neen has 3
-     *
-     * mGraph for Seyda Neen will therefore have 3 different values.  When
-     * selecting a random pathgrid point for AiWander, mGraph can be checked
-     * for quickly finding whether the destination is reachable.
-     *
-     * Otherwise, buildPath can automatically select a closest reachable end
-     * pathgrid point (reachable from the closest start point).
-     *
-     * Using Tarjan's algorithm:
-     *
-     *  mGraph                   | graph G   |
-     *  mSCCPoint                | V         | derived from mPoints
-     *  mGraph[v].edges          | E (for v) |
-     *  mSCCIndex                | index     | tracking smallest unused index
-     *  mSCCStack                | S         |
-     *  mGraph[v].edges[i].index | w         |
-     *
-     */
-    void PathgridGraph::buildConnectedPoints()
-    {
-        // both of these are set to zero in the constructor
-        // mSCCId = 0; // how many strongly connected components in this cell
-        // mSCCIndex = 0;
-        int pointsSize = static_cast<int>(mPathgrid->mPoints.size());
-        mSCCPoint.resize(pointsSize, std::pair<int, int>(-1, -1));
-        mSCCStack.reserve(pointsSize);
-
-        for (int v = 0; v < pointsSize; v++)
-        {
-            if (mSCCPoint[v].first == -1) // undefined (haven't visited)
-                recursiveStrongConnect(v);
-        }
-    }
-
-    bool PathgridGraph::isPointConnected(const int start, const int end) const
+    bool PathgridGraph::isPointConnected(const size_t start, const size_t end) const
     {
         return (mGraph[start].componentId == mGraph[end].componentId);
     }
 
-    void PathgridGraph::getNeighbouringPoints(const int index, ESM::Pathgrid::PointList& nodes) const
+    void PathgridGraph::getNeighbouringPoints(const size_t index, ESM::Pathgrid::PointList& nodes) const
     {
-        for (int i = 0; i < static_cast<int>(mGraph[index].edges.size()); i++)
+        for (const auto& edge : mGraph[index].edges)
         {
-            int neighbourIndex = mGraph[index].edges[i].index;
-            if (neighbourIndex != index)
-                nodes.push_back(mPathgrid->mPoints[neighbourIndex]);
+            if (edge.index != index)
+                nodes.push_back(mPathgrid->mPoints[edge.index]);
         }
     }
 
@@ -252,7 +232,7 @@ namespace MWMechanics
      *       pathgrid points form (currently they are converted to world
      *       coordinates).  Essentially trading speed w/ memory.
      */
-    std::deque<ESM::Pathgrid::Point> PathgridGraph::aStarSearch(const int start, const int goal) const
+    std::deque<ESM::Pathgrid::Point> PathgridGraph::aStarSearch(const size_t start, const size_t goal) const
     {
         std::deque<ESM::Pathgrid::Point> path;
         if (!isPointConnected(start, goal))
@@ -260,20 +240,20 @@ namespace MWMechanics
             return path; // there is no path, return an empty path
         }
 
-        int graphSize = static_cast<int>(mGraph.size());
+        size_t graphSize = mGraph.size();
         std::vector<float> gScore(graphSize, -1);
         std::vector<float> fScore(graphSize, -1);
-        std::vector<int> graphParent(graphSize, -1);
+        std::vector<size_t> graphParent(graphSize, NoIndex);
 
         // gScore & fScore keep costs for each pathgrid point in mPoints
         gScore[start] = 0;
         fScore[start] = costAStar(mPathgrid->mPoints[start], mPathgrid->mPoints[goal]);
 
-        std::list<int> openset;
-        std::list<int> closedset;
+        std::list<size_t> openset;
+        std::set<size_t> closedset;
         openset.push_back(start);
 
-        int current = -1;
+        size_t current = start;
 
         while (!openset.empty())
         {
@@ -283,16 +263,16 @@ namespace MWMechanics
             if (current == goal)
                 break;
 
-            closedset.push_back(current); // remember we've been here
+            closedset.insert(current); // remember we've been here
 
             // check all edges for the current point index
-            for (int j = 0; j < static_cast<int>(mGraph[current].edges.size()); j++)
+            for (const auto& edge : mGraph[current].edges)
             {
-                if (std::find(closedset.begin(), closedset.end(), mGraph[current].edges[j].index) == closedset.end())
+                if (!closedset.contains(edge.index))
                 {
                     // not in closedset - i.e. have not traversed this edge destination
-                    int dest = mGraph[current].edges[j].index;
-                    float tentative_g = gScore[current] + mGraph[current].edges[j].cost;
+                    size_t dest = edge.index;
+                    float tentative_g = gScore[current] + edge.cost;
                     bool isInOpenSet = std::find(openset.begin(), openset.end(), dest) != openset.end();
                     if (!isInOpenSet || tentative_g < gScore[dest])
                     {
@@ -303,8 +283,8 @@ namespace MWMechanics
                         {
                             // add this edge to openset, lowest cost goes to the front
                             // TODO: if this causes performance problems a hash table may help
-                            std::list<int>::iterator it = openset.begin();
-                            for (it = openset.begin(); it != openset.end(); ++it)
+                            auto it = openset.begin();
+                            for (; it != openset.end(); ++it)
                             {
                                 if (fScore[*it] > fScore[dest])
                                     break;
@@ -320,7 +300,7 @@ namespace MWMechanics
             return path; // for some reason couldn't build a path
 
         // reconstruct path to return, using local coordinates
-        while (graphParent[current] != -1)
+        while (graphParent[current] != NoIndex)
         {
             path.push_front(mPathgrid->mPoints[current]);
             current = graphParent[current];

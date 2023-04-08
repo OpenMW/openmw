@@ -23,7 +23,7 @@ namespace CSMTools
     struct Point
     {
         unsigned char mConnectionNum;
-        std::vector<int> mOtherIndex;
+        std::vector<size_t> mOtherIndex;
         Point()
             : mConnectionNum(0)
             , mOtherIndex(0)

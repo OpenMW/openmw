@@ -53,8 +53,8 @@ namespace ESM
 
         struct Edge // path grid edge
         {
-            int mV0, mV1; // index of points connected with this edge
-        }; // 8 bytes
+            size_t mV0, mV1; // index of points connected with this edge
+        };
 
         ESM::RefId mCell; // Cell name
         DATAstruct mData;

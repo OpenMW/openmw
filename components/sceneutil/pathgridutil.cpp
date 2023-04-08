@@ -96,8 +96,7 @@ namespace SceneUtil
             for (ESM::Pathgrid::EdgeList::const_iterator edge = pathgrid.mEdges.begin(); edge != pathgrid.mEdges.end();
                  ++edge)
             {
-                if (edge->mV0 == edge->mV1 || edge->mV0 < 0 || edge->mV0 >= PointCount || edge->mV1 < 0
-                    || edge->mV1 >= PointCount)
+                if (edge->mV0 == edge->mV1 || edge->mV0 >= PointCount || edge->mV1 >= PointCount)
                     continue;
 
                 const ESM::Pathgrid::Point& from = pathgrid.mPoints[edge->mV0];

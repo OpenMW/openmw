@@ -200,9 +200,9 @@ namespace CSMWorld
             case 0:
                 return subRowIndex;
             case 1:
-                return edge.mV0;
+                return static_cast<uint>(edge.mV0);
             case 2:
-                return edge.mV1;
+                return static_cast<uint>(edge.mV1);
             default:
                 throw std::runtime_error("Pathgrid edge subcolumn index out of range");
         }
