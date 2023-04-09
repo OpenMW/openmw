@@ -48,7 +48,7 @@ namespace MWLua
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        addRecordFunctionBinding<ESM::Container>(container);
+        addRecordFunctionBinding<ESM::Container>(container, context);
 
         sol::usertype<ESM::Container> record = context.mLua->sol().new_usertype<ESM::Container>("ESM3_Container");
         record[sol::meta_function::to_string] = [](const ESM::Container& rec) -> std::string {

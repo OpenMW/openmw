@@ -23,7 +23,7 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        addRecordFunctionBinding<ESM::Activator>(activator);
+        addRecordFunctionBinding<ESM::Activator>(activator, context);
 
         sol::usertype<ESM::Activator> record = context.mLua->sol().new_usertype<ESM::Activator>("ESM3_Activator");
         record[sol::meta_function::to_string]
