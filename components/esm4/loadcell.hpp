@@ -44,7 +44,6 @@ namespace ESM4
     class Writer;
     struct ReaderContext;
     struct CellGroup;
-    typedef std::uint32_t FormId;
 
     enum CellFlags // TES4                     TES5
     { // -----------------------  ------------------------------------

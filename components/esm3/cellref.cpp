@@ -24,7 +24,7 @@ namespace ESM
             if constexpr (load)
             {
                 cellRef.blank();
-                cellRef.mRefNum.load(esm, wideRefNum);
+                cellRef.mRefNum = esm.getFormId(wideRefNum);
                 cellRef.mRefID = esm.getHNORefId("NAME");
 
                 if (cellRef.mRefID.empty())
@@ -33,7 +33,7 @@ namespace ESM
             }
             else
             {
-                RefNum{}.load(esm, wideRefNum);
+                esm.getFormId(wideRefNum);
                 esm.skipHNORefId("NAME");
             }
         }
@@ -154,32 +154,6 @@ namespace ESM
         }
     }
 
-    void RefNum::load(ESMReader& esm, bool wide, NAME tag)
-    {
-        if (wide)
-            esm.getHNTSized<8>(*this, tag);
-        else
-            esm.getHNT(mIndex, tag);
-    }
-
-    void RefNum::save(ESMWriter& esm, bool wide, NAME tag) const
-    {
-        if (wide)
-            esm.writeHNT(tag, *this, 8);
-        else
-        {
-            if (isSet() && !hasContentFile())
-                throw std::runtime_error("Generated RefNum can not be saved in 32bit format");
-            int refNum = (mIndex & 0xffffff) | ((hasContentFile() ? mContentFile : 0xff) << 24);
-            esm.writeHNT(tag, refNum, 4);
-        }
-    }
-
-    std::string RefNum::toString() const
-    {
-        return std::to_string(mIndex) + "_" + std::to_string(mContentFile);
-    }
-
     void CellRef::load(ESMReader& esm, bool& isDeleted, bool wideRefNum)
     {
         loadId(esm, wideRefNum);
@@ -198,7 +172,7 @@ namespace ESM
 
     void CellRef::save(ESMWriter& esm, bool wideRefNum, bool inInventory, bool isDeleted) const
     {
-        mRefNum.save(esm, wideRefNum);
+        esm.writeFormId(mRefNum, wideRefNum);
 
         esm.writeHNCRefId("NAME", mRefID);
 

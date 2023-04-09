@@ -27,7 +27,8 @@ namespace ESM
     class ReadersCache;
     struct Cell;
     struct CellState;
-    struct RefNum;
+    struct FormId;
+    using RefNum = FormId;
     struct Activator;
     struct Potion;
     struct Apparatus;

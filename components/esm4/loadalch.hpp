@@ -49,9 +49,9 @@ namespace ESM4
         {
             std::int32_t value;
             std::uint32_t flags;
-            FormId withdrawl;
+            FormId32 withdrawl;
             float chanceAddition;
-            FormId sound;
+            FormId32 sound;
         };
 #pragma pack(pop)
 

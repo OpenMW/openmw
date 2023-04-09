@@ -109,7 +109,7 @@ namespace ESM4
 
     struct ActorFaction
     {
-        FormId faction;
+        FormId32 faction;
         std::int8_t rank;
         std::uint8_t unknown1;
         std::uint8_t unknown2;

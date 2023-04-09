@@ -48,6 +48,7 @@ namespace ESM4
         Vector3 pos;
         Vector3 rot; // angles are in radian, rz applied first and rx applied last
     };
+#pragma pack(pop)
 
     // REFR, ACHR, ACRE
     struct EnableParent
@@ -55,7 +56,6 @@ namespace ESM4
         FormId parent;
         std::uint32_t flags; // 0x0001 = Set Enable State Opposite Parent, 0x0002 = Pop In
     };
-#pragma pack(pop)
 
     struct LODReference
     {

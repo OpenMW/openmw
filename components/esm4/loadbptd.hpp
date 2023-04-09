@@ -66,14 +66,14 @@ namespace ESM4
 
             std::uint8_t explExplosionChance; // %
             std::uint16_t explDebrisCount;
-            FormId explDebris;
-            FormId explExplosion;
+            FormId32 explDebris;
+            FormId32 explExplosion;
             float trackingMaxAngle;
             float explDebrisScale;
 
             std::int32_t sevDebrisCount;
-            FormId sevDebris;
-            FormId sevExplosion;
+            FormId32 sevDebris;
+            FormId32 sevExplosion;
             float sevDebrisScale;
 
             // Struct - Gore Effects Positioning
@@ -84,8 +84,8 @@ namespace ESM4
             float rotY;
             float rotZ;
 
-            FormId sevImpactDataSet;
-            FormId explImpactDataSet;
+            FormId32 sevImpactDataSet;
+            FormId32 explImpactDataSet;
             uint8_t sevDecalCount;
             uint8_t explDecalCount;
             uint16_t Unknown;

@@ -18,7 +18,7 @@ namespace ESM
         mTargetRef = RefNum{};
         mTargetId = esm.getHNORefId("TARG");
         if (esm.peekNextSub("FRMR"))
-            mTargetRef.load(esm, true, "FRMR");
+            mTargetRef = esm.getFormId(true, "FRMR");
     }
 
     void GlobalScript::save(ESMWriter& esm) const
@@ -34,7 +34,7 @@ namespace ESM
         {
             esm.writeHNORefId("TARG", mTargetId);
             if (mTargetRef.isSet())
-                mTargetRef.save(esm, true, "FRMR");
+                esm.writeFormId(mTargetRef, true, "FRMR");
         }
     }
 

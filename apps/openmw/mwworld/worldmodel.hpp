@@ -18,7 +18,6 @@ namespace ESM
     class ESMWriter;
     class ReadersCache;
     struct Cell;
-    struct RefNum;
 }
 
 namespace ESM4

@@ -1,6 +1,7 @@
 #ifndef ESMLOADER_HPP
 #define ESMLOADER_HPP
 
+#include <map>
 #include <optional>
 #include <vector>
 
@@ -38,6 +39,7 @@ namespace MWWorld
         ESM::Dialogue* mDialogue;
         std::optional<int> mMasterFileFormat;
         std::vector<int>& mESMVersions;
+        std::map<std::string, int> mNameToIndex;
     };
 
 } /* namespace MWWorld */

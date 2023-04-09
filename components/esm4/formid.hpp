@@ -23,20 +23,15 @@
 #ifndef ESM4_FORMID_H
 #define ESM4_FORMID_H
 
-#include <cstdint>
 #include <string>
+
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
-    typedef std::uint32_t FormId;
-
-    void formIdToString(FormId formId, std::string& str);
-
-    std::string formIdToString(FormId formId);
-
-    bool isFormId(const std::string& str, FormId* id = nullptr);
-
-    FormId stringToFormId(const std::string& str);
+    using FormId = ESM::FormId;
+    using FormId32 = uint32_t;
+    std::string formIdToString(const FormId& formId);
 }
 
 #endif // ESM4_FORMID_H

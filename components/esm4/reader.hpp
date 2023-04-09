@@ -69,10 +69,12 @@ namespace ESM4
         std::uint32_t typeId;
         std::uint32_t dataSize; // does *not* include 24 bytes (20 for TES4) of header
         std::uint32_t flags;
-        FormId id;
+        FormId32 id;
         std::uint32_t revision;
         std::uint16_t version; // not in TES4
         std::uint16_t unknown; // not in TES4
+
+        FormId getFormId() const { return FormId::fromUint32(id); }
     };
 
     union RecordHeader
@@ -255,8 +257,8 @@ namespace ESM4
 
         // The object setting up this reader needs to supply the file's load order index
         // so that the formId's in this file can be adjusted with the file (i.e. mod) index.
-        void setModIndex(std::uint32_t index) { mCtx.modIndex = (index << 24) & 0xff000000; }
-        void updateModIndices(const std::vector<std::string>& files);
+        void setModIndex(std::uint32_t index) { mCtx.modIndex = index; }
+        void updateModIndices(const std::map<std::string, int>& fileToModIndex);
 
         // Maybe should throw an exception if called when not valid?
         const CellGrid& currCellGrid() const;
@@ -332,6 +334,9 @@ namespace ESM4
 
         // ModIndex adjusted formId according to master file dependencies
         void adjustFormId(FormId& id);
+
+        // Temporary. Doesn't support mod index > 255
+        void adjustFormId(FormId32& id);
 
         bool getFormId(FormId& id);
 

@@ -225,7 +225,12 @@ namespace ESM
             return ESM::RefId();
 
         if (value.starts_with(formIdRefIdPrefix))
-            return ESM::RefId::formIdRefId(deserializeHexIntegral<ESM4::FormId>(formIdRefIdPrefix.size(), value));
+        {
+            uint64_t v = deserializeHexIntegral<uint64_t>(formIdRefIdPrefix.size(), value);
+            uint32_t index = static_cast<uint32_t>(v) & 0xffffff;
+            int contentFile = static_cast<int>(v >> 24);
+            return ESM::RefId::formIdRefId({ index, contentFile });
+        }
 
         if (value.starts_with(generatedRefIdPrefix))
             return ESM::RefId::generated(deserializeHexIntegral<std::uint64_t>(generatedRefIdPrefix.size(), value));

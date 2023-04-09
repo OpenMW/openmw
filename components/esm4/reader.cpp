@@ -64,13 +64,11 @@ namespace ESM4
         , filePos(0)
         , fileRead(0)
         , recordRead(0)
-        , currWorld(0)
-        , currCell(0)
+        , currWorld({ 0, 0 })
+        , currCell({ 0, 0 })
+        , currCellGrid(FormId{ 0, 0 })
         , cellGridValid(false)
     {
-        currCellGrid.cellId = 0;
-        currCellGrid.grid.x = 0;
-        currCellGrid.grid.y = 0;
         subRecordHeader.typeId = 0;
         subRecordHeader.dataSize = 0;
     }
@@ -260,7 +258,7 @@ namespace ESM4
             stream->read((char*)&stringId, sizeof(stringId));
             stream->read((char*)&sp.offset, sizeof(sp.offset));
             sp.offset += (std::uint32_t)dataStart;
-            mLStringIndex[stringId] = sp;
+            mLStringIndex[FormId::fromUint32(stringId)] = sp;
         }
         // assert (dataStart - stream->tell() == 0 && "String file start of data section mismatch");
     }
@@ -273,7 +271,7 @@ namespace ESM4
         std::uint32_t stringId; // FormId
         get(stringId);
         if (stringId) // TES5 FoxRace, BOOK
-            getLocalizedStringImpl(stringId, str);
+            getLocalizedStringImpl(FormId::fromUint32(stringId), str);
     }
 
     // FIXME: very messy and probably slow/inefficient
@@ -577,31 +575,15 @@ namespace ESM4
         return mCtx.currCellGrid;
     }
 
-    // NOTE: the parameter 'files' must have the file names in the loaded order
-    void Reader::updateModIndices(const std::vector<std::string>& files)
+    void Reader::updateModIndices(const std::map<std::string, int>& fileToModIndex)
     {
-        if (files.size() >= 0xff)
-            throw std::runtime_error("ESM4::Reader::updateModIndices too many files"); // 0xff is reserved
-
-        // NOTE: this map is rebuilt each time this method is called (i.e. each time a file is loaded)
-        // Perhaps there is an opportunity to optimize this by saving the result somewhere.
-        // But then, the number of files is at most around 250 so perhaps keeping it simple might be better.
-
-        // build a lookup map
-        std::unordered_map<std::string, size_t> fileIndex;
-
-        for (size_t i = 0; i < files.size(); ++i) // ATTENTION: assumes current file is not included
-            fileIndex[Misc::StringUtils::lowerCase(files[i])] = i;
-
         mCtx.parentFileIndices.resize(mHeader.mMaster.size());
         for (unsigned int i = 0; i < mHeader.mMaster.size(); ++i)
         {
             // locate the position of the dependency in already loaded files
-            std::unordered_map<std::string, size_t>::const_iterator it
-                = fileIndex.find(Misc::StringUtils::lowerCase(mHeader.mMaster[i].name));
-
-            if (it != fileIndex.end())
-                mCtx.parentFileIndices[i] = (std::uint32_t)((it->second << 24) & 0xff000000);
+            auto it = fileToModIndex.find(Misc::StringUtils::lowerCase(mHeader.mMaster[i].name));
+            if (it != fileToModIndex.end())
+                mCtx.parentFileIndices[i] = it->second;
             else
                 throw std::runtime_error("ESM4::Reader::updateModIndices required dependency file not loaded");
 #if 0
@@ -609,9 +591,6 @@ namespace ESM4
                   << formIdToString(mCtx.parentFileIndices[i]) << std::endl;
 #endif
         }
-
-        if (!mCtx.parentFileIndices.empty() && mCtx.parentFileIndices[0] != 0)
-            throw std::runtime_error("ESM4::Reader::updateModIndices base modIndex is not zero");
     }
 
     // ModIndex adjusted formId according to master file dependencies
@@ -626,21 +605,25 @@ namespace ESM4
     //        (see https://www.uesp.net/wiki/Tes4Mod:Formid#ModIndex_Zero)
     void Reader::adjustFormId(FormId& id)
     {
-        if (mCtx.parentFileIndices.empty())
-            return;
-
-        std::size_t index = (id >> 24) & 0xff;
-
-        if (index < mCtx.parentFileIndices.size())
-            id = mCtx.parentFileIndices[index] | (id & 0x00ffffff);
+        if (id.hasContentFile() && id.mContentFile < static_cast<int>(mCtx.parentFileIndices.size()))
+            id.mContentFile = mCtx.parentFileIndices[id.mContentFile];
         else
-            id = mCtx.modIndex | (id & 0x00ffffff);
+            id.mContentFile = mCtx.modIndex;
+    }
+
+    void Reader::adjustFormId(FormId32& id)
+    {
+        FormId formId = FormId::fromUint32(id);
+        adjustFormId(formId);
+        id = formId.toUint32();
     }
 
     bool Reader::getFormId(FormId& id)
     {
-        if (!getExact(id))
+        FormId32 v;
+        if (!getExact(v))
             return false;
+        id = FormId::fromUint32(v);
 
         adjustFormId(id);
         return true;
@@ -796,7 +779,7 @@ namespace ESM4
             case ESM4::Grp_CellTemporaryChild:
             case ESM4::Grp_CellVisibleDistChild:
             {
-                ss << ": FormId 0x" << formIdToString(label.value);
+                ss << ": FormId 0x" << formIdToString(FormId::fromUint32(label.value));
                 break;
             }
             default:

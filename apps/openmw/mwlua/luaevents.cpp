@@ -55,7 +55,7 @@ namespace MWLua
     static void saveEvent(ESM::ESMWriter& esm, const ESM::RefNum& dest, const Event& event)
     {
         esm.writeHNString("LUAE", event.mEventName);
-        dest.save(esm, true);
+        esm.writeFormId(dest, true);
         if (!event.mEventData.empty())
             saveLuaBinaryData(esm, event.mEventData);
     }
@@ -67,8 +67,7 @@ namespace MWLua
         while (esm.isNextSub("LUAE"))
         {
             std::string name = esm.getHString();
-            ESM::RefNum dest;
-            dest.load(esm, true);
+            ESM::RefNum dest = esm.getFormId(true);
             std::string data = loadLuaBinaryData(esm);
             try
             {
