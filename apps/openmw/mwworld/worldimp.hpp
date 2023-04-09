@@ -606,7 +606,7 @@ namespace MWWorld
         /// Find position in interior cell near door entrance
         /// \return false if interior with given name not exists, true otherwise
         ESM::RefId findInteriorPosition(std::string_view name, ESM::Position& pos) override;
-        ESM::RefId findCellPosition(std::string_view cellName, ESM::Position& pos) override;
+
         /// Enables or disables use of teleport spell effects (recall, intervention, etc).
         void enableTeleporting(bool enable) override;
 
