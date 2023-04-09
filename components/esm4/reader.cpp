@@ -603,7 +603,7 @@ namespace ESM4
     // FIXME: Apparently ModIndex '00' in an ESP means the object is defined in one of its masters.
     //        This means we may need to search multiple times to get the correct id.
     //        (see https://www.uesp.net/wiki/Tes4Mod:Formid#ModIndex_Zero)
-    void Reader::adjustFormId(FormId& id)
+    void Reader::adjustFormId(FormId& id) const
     {
         if (id.hasContentFile() && id.mContentFile < static_cast<int>(mCtx.parentFileIndices.size()))
             id.mContentFile = mCtx.parentFileIndices[id.mContentFile];
@@ -611,7 +611,7 @@ namespace ESM4
             id.mContentFile = mCtx.modIndex;
     }
 
-    void Reader::adjustFormId(FormId32& id)
+    void Reader::adjustFormId(FormId32& id) const
     {
         FormId formId = FormId::fromUint32(id);
         adjustFormId(formId);
@@ -627,6 +627,13 @@ namespace ESM4
 
         adjustFormId(id);
         return true;
+    }
+
+    ESM::FormIdRefId Reader::getRefIdFromHeader() const
+    {
+        FormId formId = hdr().record.getFormId();
+        adjustFormId(formId);
+        return ESM::FormIdRefId(formId);
     }
 
     void Reader::adjustGRUPFormId()

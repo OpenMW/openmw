@@ -8,10 +8,6 @@
 #include <components/esm/records.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
-#include <components/esm4/loadcell.hpp>
-#include <components/esm4/loadligh.hpp>
-#include <components/esm4/loadrefr.hpp>
-#include <components/esm4/loadstat.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
 
@@ -1266,7 +1262,18 @@ template class MWWorld::TypedDynamicStore<ESM::StartScript>;
 template class MWWorld::TypedDynamicStore<ESM::Static>;
 template class MWWorld::TypedDynamicStore<ESM::Weapon>;
 
+template class MWWorld::TypedDynamicStore<ESM4::Activator>;
+template class MWWorld::TypedDynamicStore<ESM4::Potion>;
+template class MWWorld::TypedDynamicStore<ESM4::Ammunition>;
+template class MWWorld::TypedDynamicStore<ESM4::Armor>;
+template class MWWorld::TypedDynamicStore<ESM4::Book>;
+template class MWWorld::TypedDynamicStore<ESM4::Clothing>;
+template class MWWorld::TypedDynamicStore<ESM4::Container>;
+template class MWWorld::TypedDynamicStore<ESM4::Door>;
+template class MWWorld::TypedDynamicStore<ESM4::Ingredient>;
+template class MWWorld::TypedDynamicStore<ESM4::MiscItem>;
 template class MWWorld::TypedDynamicStore<ESM4::Static>;
 template class MWWorld::TypedDynamicStore<ESM4::Light>;
 template class MWWorld::TypedDynamicStore<ESM4::Reference>;
 template class MWWorld::TypedDynamicStore<ESM4::Cell>;
+template class MWWorld::TypedDynamicStore<ESM4::Weapon>;

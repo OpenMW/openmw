@@ -33,6 +33,7 @@
 #include "common.hpp"
 #include "loadtes4.hpp"
 
+#include <components/esm/formidrefid.hpp>
 #include <components/files/istreamptr.hpp>
 #include <components/vfs/manager.hpp>
 
@@ -333,12 +334,13 @@ namespace ESM4
         }
 
         // ModIndex adjusted formId according to master file dependencies
-        void adjustFormId(FormId& id);
+        void adjustFormId(FormId& id) const;
 
         // Temporary. Doesn't support mod index > 255
-        void adjustFormId(FormId32& id);
+        void adjustFormId(FormId32& id) const;
 
         bool getFormId(FormId& id);
+        ESM::FormIdRefId getRefIdFromHeader() const;
 
         void adjustGRUPFormId();
 

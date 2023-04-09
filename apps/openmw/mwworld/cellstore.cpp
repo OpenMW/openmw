@@ -7,6 +7,7 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/format.hpp>
+#include <components/esm/records.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/containerstate.hpp>
