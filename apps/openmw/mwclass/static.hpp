@@ -64,6 +64,9 @@ namespace MWClass
         void insertObjectRendering(const MWWorld::Ptr& ptr, const std::string& model,
             MWRender::RenderingInterface& renderingInterface) const override
         {
+            const MWWorld::LiveCellRef<Record>* ref = ptr.get<Record>();
+            if (ref->mBase->mFlags & ESM4::Rec_Marker)
+                return;
             ESM4StaticImpl::insertObjectRendering(ptr, model, renderingInterface);
         }
 
@@ -75,6 +78,9 @@ namespace MWClass
         void insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
             MWPhysics::PhysicsSystem& physics) const override
         {
+            const MWWorld::LiveCellRef<Record>* ref = ptr.get<Record>();
+            if (ref->mBase->mFlags & ESM4::Rec_Marker)
+                return;
             ESM4StaticImpl::insertObjectPhysics(ptr, model, rotation, physics);
         }
 
