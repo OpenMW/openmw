@@ -2841,25 +2841,6 @@ namespace MWWorld
         return ESM::RefId::sEmpty;
     }
 
-    ESM::RefId World::findCellPosition(std::string_view cellName, ESM::Position& pos)
-    {
-        ESM::RefId foundCell;
-        try
-        {
-            foundCell = findInteriorPosition(cellName, pos);
-        }
-        catch (std::exception& e)
-        {
-            Log(Debug::Error) << e.what();
-        }
-        if (foundCell.empty())
-        {
-            return findExteriorPosition(cellName, pos);
-        }
-
-        return foundCell;
-    }
-
     ESM::RefId World::findExteriorPosition(std::string_view nameId, ESM::Position& pos)
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
