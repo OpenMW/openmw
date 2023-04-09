@@ -1014,8 +1014,6 @@ namespace MWWorld
             mWorldScene->changeToInteriorCell(destinationCell->getNameId(), position, adjustPlayerPos, changeEvent);
         addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
         mRendering->getCamera()->instantTransition();
-
-        mCurrentDate->setup(mGlobalVariables);
     }
 
     float World::getMaxActivationDistance() const
@@ -2411,6 +2409,7 @@ namespace MWWorld
     void World::saveLoaded()
     {
         mStore.validateDynamic();
+        mCurrentDate->setup(mGlobalVariables);
     }
 
     void World::setupPlayer()
