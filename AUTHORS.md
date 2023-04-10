@@ -59,7 +59,7 @@ Programmers
     Cory F. Cohen (cfcohen)
     Cris Mihalache (Mirceam)
     crussell187
-    DanielVukelich
+    Dan Vukelich (sanchezman)
     darkf
     David Cernat (davidcernat)
     Declan Millar (declan-millar)

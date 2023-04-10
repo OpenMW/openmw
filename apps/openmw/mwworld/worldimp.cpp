@@ -2409,6 +2409,7 @@ namespace MWWorld
     void World::saveLoaded()
     {
         mStore.validateDynamic();
+        mCurrentDate->setup(mGlobalVariables);
     }
 
     void World::setupPlayer()
