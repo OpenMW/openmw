@@ -10,49 +10,40 @@
 
 #include <components/config/gamesettings.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "utils/openalutil.hpp"
 
 namespace
 {
-    void loadSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group)
+    void loadSettingBool(const Settings::SettingValue<bool>& value, QCheckBox& checkbox)
     {
-        if (Settings::Manager::getBool(setting, group))
-            checkbox->setCheckState(Qt::Checked);
+        checkbox.setCheckState(value ? Qt::Checked : Qt::Unchecked);
     }
 
-    void saveSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group)
+    void saveSettingBool(const QCheckBox& checkbox, Settings::SettingValue<bool>& value)
     {
-        const bool cValue = checkbox->checkState();
-        if (cValue != Settings::Manager::getBool(setting, group))
-            Settings::Manager::setBool(setting, group, cValue);
+        value.set(checkbox.checkState() == Qt::Checked);
     }
 
-    void loadSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group)
+    void loadSettingInt(const Settings::SettingValue<int>& value, QComboBox& comboBox)
     {
-        const int currentIndex = Settings::Manager::getInt(setting, group);
-        comboBox->setCurrentIndex(currentIndex);
+        comboBox.setCurrentIndex(value);
     }
 
-    void saveSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group)
+    void saveSettingInt(const QComboBox& comboBox, Settings::SettingValue<int>& value)
     {
-        const int currentIndex = comboBox->currentIndex();
-        if (currentIndex != Settings::Manager::getInt(setting, group))
-            Settings::Manager::setInt(setting, group, currentIndex);
+        value.set(comboBox.currentIndex());
     }
 
-    void loadSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group)
+    void loadSettingInt(const Settings::SettingValue<int>& value, QSpinBox& spinBox)
     {
-        const int value = Settings::Manager::getInt(setting, group);
-        spinBox->setValue(value);
+        spinBox.setValue(value);
     }
 
-    void saveSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group)
+    void saveSettingInt(const QSpinBox& spinBox, Settings::SettingValue<int>& value)
     {
-        const int value = spinBox->value();
-        if (value != Settings::Manager::getInt(setting, group))
-            Settings::Manager::setInt(setting, group, value);
+        value.set(spinBox.value());
     }
 }
 
@@ -128,88 +119,79 @@ bool Launcher::SettingsPage::loadSettings()
 {
     // Game mechanics
     {
-        loadSettingBool(canLootDuringDeathAnimationCheckBox, "can loot during death animation", "Game");
-        loadSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
-        loadSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
-        loadSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
-        loadSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
-        loadSettingBool(classicReflectedAbsorbSpellsCheckBox, "classic reflected absorb spells behavior", "Game");
-        loadSettingBool(classicCalmSpellsCheckBox, "classic calm spells behavior", "Game");
+        loadSettingBool(Settings::game().mCanLootDuringDeathAnimation, *canLootDuringDeathAnimationCheckBox);
+        loadSettingBool(Settings::game().mFollowersAttackOnSight, *followersAttackOnSightCheckBox);
+        loadSettingBool(Settings::game().mRebalanceSoulGemValues, *rebalanceSoulGemValuesCheckBox);
+        loadSettingBool(Settings::game().mEnchantedWeaponsAreMagical, *enchantedWeaponsMagicalCheckBox);
         loadSettingBool(
-            requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
-        loadSettingBool(uncappedDamageFatigueCheckBox, "uncapped damage fatigue", "Game");
-        loadSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
-        loadSettingBool(swimUpwardCorrectionCheckBox, "swim upward correction", "Game");
-        loadSettingBool(avoidCollisionsCheckBox, "NPCs avoid collisions", "Game");
-        int unarmedFactorsStrengthIndex = Settings::Manager::getInt("strength influences hand to hand", "Game");
-        if (unarmedFactorsStrengthIndex >= 0 && unarmedFactorsStrengthIndex <= 2)
-            unarmedFactorsStrengthComboBox->setCurrentIndex(unarmedFactorsStrengthIndex);
-        loadSettingBool(stealingFromKnockedOutCheckBox, "always allow stealing from knocked out actors", "Game");
-        loadSettingBool(enableNavigatorCheckBox, "enable", "Navigator");
-        int numPhysicsThreads = Settings::Manager::getInt("async num threads", "Physics");
-        if (numPhysicsThreads >= 0)
-            physicsThreadsSpinBox->setValue(numPhysicsThreads);
-        loadSettingBool(allowNPCToFollowOverWaterSurfaceCheckBox, "allow actors to follow over water surface", "Game");
-        loadSettingBool(unarmedCreatureAttacksDamageArmorCheckBox, "unarmed creature attacks damage armor", "Game");
-        const int actorCollisionShapeType = Settings::Manager::getInt("actor collision shape type", "Game");
-        if (0 <= actorCollisionShapeType && actorCollisionShapeType < actorCollisonShapeTypeComboBox->count())
-            actorCollisonShapeTypeComboBox->setCurrentIndex(actorCollisionShapeType);
+            Settings::game().mBarterDispositionChangeIsPermanent, *permanentBarterDispositionChangeCheckBox);
+        loadSettingBool(Settings::game().mClassicReflectedAbsorbSpellsBehavior, *classicReflectedAbsorbSpellsCheckBox);
+        loadSettingBool(Settings::game().mClassicCalmSpellsBehavior, *classicCalmSpellsCheckBox);
+        loadSettingBool(
+            Settings::game().mOnlyAppropriateAmmunitionBypassesResistance, *requireAppropriateAmmunitionCheckBox);
+        loadSettingBool(Settings::game().mUncappedDamageFatigue, *uncappedDamageFatigueCheckBox);
+        loadSettingBool(Settings::game().mNormaliseRaceSpeed, *normaliseRaceSpeedCheckBox);
+        loadSettingBool(Settings::game().mSwimUpwardCorrection, *swimUpwardCorrectionCheckBox);
+        loadSettingBool(Settings::game().mNPCsAvoidCollisions, *avoidCollisionsCheckBox);
+        loadSettingInt(Settings::game().mStrengthInfluencesHandToHand, *unarmedFactorsStrengthComboBox);
+        loadSettingBool(Settings::game().mAlwaysAllowStealingFromKnockedOutActors, *stealingFromKnockedOutCheckBox);
+        loadSettingBool(Settings::navigator().mEnable, *enableNavigatorCheckBox);
+        loadSettingInt(Settings::physics().mAsyncNumThreads, *physicsThreadsSpinBox);
+        loadSettingBool(
+            Settings::game().mAllowActorsToFollowOverWaterSurface, *allowNPCToFollowOverWaterSurfaceCheckBox);
+        loadSettingBool(
+            Settings::game().mUnarmedCreatureAttacksDamageArmor, *unarmedCreatureAttacksDamageArmorCheckBox);
+        loadSettingInt(Settings::game().mActorCollisionShapeType, *actorCollisonShapeTypeComboBox);
     }
 
     // Visuals
     {
-        loadSettingBool(autoUseObjectNormalMapsCheckBox, "auto use object normal maps", "Shaders");
-        loadSettingBool(autoUseObjectSpecularMapsCheckBox, "auto use object specular maps", "Shaders");
-        loadSettingBool(autoUseTerrainNormalMapsCheckBox, "auto use terrain normal maps", "Shaders");
-        loadSettingBool(autoUseTerrainSpecularMapsCheckBox, "auto use terrain specular maps", "Shaders");
-        loadSettingBool(bumpMapLocalLightingCheckBox, "apply lighting to environment maps", "Shaders");
-        loadSettingBool(softParticlesCheckBox, "soft particles", "Shaders");
-        loadSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
-        if (Settings::Manager::getInt("antialiasing", "Video") == 0)
-        {
+        loadSettingBool(Settings::shaders().mAutoUseObjectNormalMaps, *autoUseObjectNormalMapsCheckBox);
+        loadSettingBool(Settings::shaders().mAutoUseObjectSpecularMaps, *autoUseObjectSpecularMapsCheckBox);
+        loadSettingBool(Settings::shaders().mAutoUseTerrainNormalMaps, *autoUseTerrainNormalMapsCheckBox);
+        loadSettingBool(Settings::shaders().mAutoUseTerrainSpecularMaps, *autoUseTerrainSpecularMapsCheckBox);
+        loadSettingBool(Settings::shaders().mApplyLightingToEnvironmentMaps, *bumpMapLocalLightingCheckBox);
+        loadSettingBool(Settings::shaders().mSoftParticles, *softParticlesCheckBox);
+        loadSettingBool(Settings::shaders().mAntialiasAlphaTest, *antialiasAlphaTestCheckBox);
+        if (Settings::shaders().mAntialiasAlphaTest == 0)
             antialiasAlphaTestCheckBox->setCheckState(Qt::Unchecked);
-        }
-        loadSettingBool(adjustCoverageForAlphaTestCheckBox, "adjust coverage for alpha test", "Shaders");
-        loadSettingBool(weatherParticleOcclusionCheckBox, "weather particle occlusion", "Shaders");
-        loadSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
+        loadSettingBool(Settings::shaders().mAdjustCoverageForAlphaTest, *adjustCoverageForAlphaTestCheckBox);
+        loadSettingBool(Settings::shaders().mWeatherParticleOcclusion, *weatherParticleOcclusionCheckBox);
+        loadSettingBool(Settings::game().mUseMagicItemAnimations, *magicItemAnimationsCheckBox);
         connect(animSourcesCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotAnimSourcesToggled);
-        loadSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
+        loadSettingBool(Settings::game().mUseAdditionalAnimSources, *animSourcesCheckBox);
         if (animSourcesCheckBox->checkState() != Qt::Unchecked)
         {
-            loadSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
-            loadSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
+            loadSettingBool(Settings::game().mWeaponSheathing, *weaponSheathingCheckBox);
+            loadSettingBool(Settings::game().mShieldSheathing, *shieldSheathingCheckBox);
         }
-        loadSettingBool(turnToMovementDirectionCheckBox, "turn to movement direction", "Game");
-        loadSettingBool(smoothMovementCheckBox, "smooth movement", "Game");
+        loadSettingBool(Settings::game().mTurnToMovementDirection, *turnToMovementDirectionCheckBox);
+        loadSettingBool(Settings::game().mSmoothMovement, *smoothMovementCheckBox);
 
-        const bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
-        const bool objectPaging = Settings::Manager::getBool("object paging", "Terrain");
-        if (distantTerrain && objectPaging)
-        {
-            distantLandCheckBox->setCheckState(Qt::Checked);
-        }
+        distantLandCheckBox->setCheckState(
+            Settings::terrain().mDistantTerrain && Settings::terrain().mObjectPaging ? Qt::Checked : Qt::Unchecked);
 
-        loadSettingBool(activeGridObjectPagingCheckBox, "object paging active grid", "Terrain");
-        viewingDistanceComboBox->setValue(convertToCells(Settings::Manager::getInt("viewing distance", "Camera")));
-        objectPagingMinSizeComboBox->setValue(Settings::Manager::getDouble("object paging min size", "Terrain"));
+        loadSettingBool(Settings::terrain().mObjectPagingActiveGrid, *activeGridObjectPagingCheckBox);
+        viewingDistanceComboBox->setValue(convertToCells(Settings::camera().mViewingDistance));
+        objectPagingMinSizeComboBox->setValue(Settings::terrain().mObjectPagingMinSize);
 
-        loadSettingBool(nightDaySwitchesCheckBox, "day night switches", "Game");
+        loadSettingBool(Settings::game().mDayNightSwitches, *nightDaySwitchesCheckBox);
 
         connect(postprocessEnabledCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotPostProcessToggled);
-        loadSettingBool(postprocessEnabledCheckBox, "enabled", "Post Processing");
-        loadSettingBool(postprocessTransparentPostpassCheckBox, "transparent postpass", "Post Processing");
-        postprocessHDRTimeComboBox->setValue(Settings::Manager::getDouble("auto exposure speed", "Post Processing"));
+        loadSettingBool(Settings::postProcessing().mEnabled, *postprocessEnabledCheckBox);
+        loadSettingBool(Settings::postProcessing().mTransparentPostpass, *postprocessTransparentPostpassCheckBox);
+        postprocessHDRTimeComboBox->setValue(Settings::postProcessing().mAutoExposureSpeed);
 
         connect(skyBlendingCheckBox, &QCheckBox::toggled, this, &SettingsPage::slotSkyBlendingToggled);
-        loadSettingBool(radialFogCheckBox, "radial fog", "Fog");
-        loadSettingBool(exponentialFogCheckBox, "exponential fog", "Fog");
-        loadSettingBool(skyBlendingCheckBox, "sky blending", "Fog");
-        skyBlendingStartComboBox->setValue(Settings::Manager::getDouble("sky blending start", "Fog"));
+        loadSettingBool(Settings::fog().mRadialFog, *radialFogCheckBox);
+        loadSettingBool(Settings::fog().mExponentialFog, *exponentialFogCheckBox);
+        loadSettingBool(Settings::fog().mSkyBlending, *skyBlendingCheckBox);
+        skyBlendingStartComboBox->setValue(Settings::fog().mSkyBlendingStart);
     }
 
     // Audio
     {
-        const std::string& selectedAudioDevice = Settings::Manager::getString("device", "Sound");
+        const std::string& selectedAudioDevice = Settings::sound().mDevice;
         if (selectedAudioDevice.empty() == false)
         {
             int audioDeviceIndex = audioDeviceSelectorComboBox->findData(QString::fromStdString(selectedAudioDevice));
@@ -218,12 +200,12 @@ bool Launcher::SettingsPage::loadSettings()
                 audioDeviceSelectorComboBox->setCurrentIndex(audioDeviceIndex);
             }
         }
-        int hrtfEnabledIndex = Settings::Manager::getInt("hrtf enable", "Sound");
+        const int hrtfEnabledIndex = Settings::sound().mHrtfEnable;
         if (hrtfEnabledIndex >= -1 && hrtfEnabledIndex <= 1)
         {
             enableHRTFComboBox->setCurrentIndex(hrtfEnabledIndex + 1);
         }
-        const std::string& selectedHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
+        const std::string& selectedHRTFProfile = Settings::sound().mHrtf;
         if (selectedHRTFProfile.empty() == false)
         {
             int hrtfProfileIndex = hrtfProfileSelectorComboBox->findData(QString::fromStdString(selectedHRTFProfile));
@@ -236,48 +218,44 @@ bool Launcher::SettingsPage::loadSettings()
 
     // Interface Changes
     {
-        loadSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
-        loadSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
-        loadSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
-        loadSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
-        loadSettingBool(changeDialogTopicsCheckBox, "color topic enable", "GUI");
-        int showOwnedIndex = Settings::Manager::getInt("show owned", "Game");
-        // Match the index with the option (only 0, 1, 2, or 3 are valid). Will default to 0 if invalid.
-        if (showOwnedIndex >= 0 && showOwnedIndex <= 3)
-            showOwnedComboBox->setCurrentIndex(showOwnedIndex);
-        loadSettingBool(stretchBackgroundCheckBox, "stretch menu background", "GUI");
-        loadSettingBool(useZoomOnMapCheckBox, "allow zooming", "Map");
-        loadSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
-        scalingSpinBox->setValue(Settings::Manager::getFloat("scaling factor", "GUI"));
-        fontSizeSpinBox->setValue(Settings::Manager::getInt("font size", "GUI"));
+        loadSettingBool(Settings::game().mShowEffectDuration, *showEffectDurationCheckBox);
+        loadSettingBool(Settings::game().mShowEnchantChance, *showEnchantChanceCheckBox);
+        loadSettingBool(Settings::game().mShowMeleeInfo, *showMeleeInfoCheckBox);
+        loadSettingBool(Settings::game().mShowProjectileDamage, *showProjectileDamageCheckBox);
+        loadSettingBool(Settings::gui().mColorTopicEnable, *changeDialogTopicsCheckBox);
+        showOwnedComboBox->setCurrentIndex(Settings::game().mShowOwned);
+        loadSettingBool(Settings::gui().mStretchMenuBackground, *stretchBackgroundCheckBox);
+        loadSettingBool(Settings::map().mAllowZooming, *useZoomOnMapCheckBox);
+        loadSettingBool(Settings::game().mGraphicHerbalism, *graphicHerbalismCheckBox);
+        scalingSpinBox->setValue(Settings::gui().mScalingFactor);
+        fontSizeSpinBox->setValue(Settings::gui().mFontSize);
     }
 
     // Bug fixes
     {
-        loadSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
+        loadSettingBool(Settings::game().mPreventMerchantEquipping, *preventMerchantEquippingCheckBox);
         loadSettingBool(
-            trainersTrainingSkillsBasedOnBaseSkillCheckBox, "trainers training skills based on base skill", "Game");
+            Settings::game().mTrainersTrainingSkillsBasedOnBaseSkill, *trainersTrainingSkillsBasedOnBaseSkillCheckBox);
     }
 
     // Miscellaneous
     {
         // Saves
-        loadSettingBool(timePlayedCheckbox, "timeplayed", "Saves");
-        loadSettingInt(maximumQuicksavesComboBox, "max quicksaves", "Saves");
+        loadSettingBool(Settings::saves().mTimeplayed, *timePlayedCheckbox);
+        loadSettingInt(Settings::saves().mMaxQuicksaves, *maximumQuicksavesComboBox);
 
         // Other Settings
-        QString screenshotFormatString
-            = QString::fromStdString(Settings::Manager::getString("screenshot format", "General")).toUpper();
+        QString screenshotFormatString = QString::fromStdString(Settings::general().mScreenshotFormat).toUpper();
         if (screenshotFormatComboBox->findText(screenshotFormatString) == -1)
             screenshotFormatComboBox->addItem(screenshotFormatString);
         screenshotFormatComboBox->setCurrentIndex(screenshotFormatComboBox->findText(screenshotFormatString));
 
-        loadSettingBool(notifyOnSavedScreenshotCheckBox, "notify on saved screenshot", "General");
+        loadSettingBool(Settings::general().mNotifyOnSavedScreenshot, *notifyOnSavedScreenshotCheckBox);
     }
 
     // Testing
     {
-        loadSettingBool(grabCursorCheckBox, "grab cursor", "Input");
+        loadSettingBool(Settings::input().mGrabCursor, *grabCursorCheckBox);
 
         bool skipMenu = mGameSettings.value("skip-menu").toInt() == 1;
         if (skipMenu)
@@ -297,158 +275,121 @@ void Launcher::SettingsPage::saveSettings()
 {
     // Game mechanics
     {
-        saveSettingBool(canLootDuringDeathAnimationCheckBox, "can loot during death animation", "Game");
-        saveSettingBool(followersAttackOnSightCheckBox, "followers attack on sight", "Game");
-        saveSettingBool(rebalanceSoulGemValuesCheckBox, "rebalance soul gem values", "Game");
-        saveSettingBool(enchantedWeaponsMagicalCheckBox, "enchanted weapons are magical", "Game");
-        saveSettingBool(permanentBarterDispositionChangeCheckBox, "barter disposition change is permanent", "Game");
-        saveSettingBool(classicReflectedAbsorbSpellsCheckBox, "classic reflected absorb spells behavior", "Game");
-        saveSettingBool(classicCalmSpellsCheckBox, "classic calm spells behavior", "Game");
+        saveSettingBool(*canLootDuringDeathAnimationCheckBox, Settings::game().mCanLootDuringDeathAnimation);
+        saveSettingBool(*followersAttackOnSightCheckBox, Settings::game().mFollowersAttackOnSight);
+        saveSettingBool(*rebalanceSoulGemValuesCheckBox, Settings::game().mRebalanceSoulGemValues);
+        saveSettingBool(*enchantedWeaponsMagicalCheckBox, Settings::game().mEnchantedWeaponsAreMagical);
         saveSettingBool(
-            requireAppropriateAmmunitionCheckBox, "only appropriate ammunition bypasses resistance", "Game");
-        saveSettingBool(uncappedDamageFatigueCheckBox, "uncapped damage fatigue", "Game");
-        saveSettingBool(normaliseRaceSpeedCheckBox, "normalise race speed", "Game");
-        saveSettingBool(swimUpwardCorrectionCheckBox, "swim upward correction", "Game");
-        saveSettingBool(avoidCollisionsCheckBox, "NPCs avoid collisions", "Game");
-        saveSettingInt(unarmedFactorsStrengthComboBox, "strength influences hand to hand", "Game");
-        saveSettingBool(stealingFromKnockedOutCheckBox, "always allow stealing from knocked out actors", "Game");
-        saveSettingBool(enableNavigatorCheckBox, "enable", "Navigator");
-        saveSettingInt(physicsThreadsSpinBox, "async num threads", "Physics");
-        saveSettingBool(allowNPCToFollowOverWaterSurfaceCheckBox, "allow actors to follow over water surface", "Game");
-        saveSettingBool(unarmedCreatureAttacksDamageArmorCheckBox, "unarmed creature attacks damage armor", "Game");
-        saveSettingInt(actorCollisonShapeTypeComboBox, "actor collision shape type", "Game");
+            *permanentBarterDispositionChangeCheckBox, Settings::game().mBarterDispositionChangeIsPermanent);
+        saveSettingBool(*classicReflectedAbsorbSpellsCheckBox, Settings::game().mClassicReflectedAbsorbSpellsBehavior);
+        saveSettingBool(*classicCalmSpellsCheckBox, Settings::game().mClassicCalmSpellsBehavior);
+        saveSettingBool(
+            *requireAppropriateAmmunitionCheckBox, Settings::game().mOnlyAppropriateAmmunitionBypassesResistance);
+        saveSettingBool(*uncappedDamageFatigueCheckBox, Settings::game().mUncappedDamageFatigue);
+        saveSettingBool(*normaliseRaceSpeedCheckBox, Settings::game().mNormaliseRaceSpeed);
+        saveSettingBool(*swimUpwardCorrectionCheckBox, Settings::game().mSwimUpwardCorrection);
+        saveSettingBool(*avoidCollisionsCheckBox, Settings::game().mNPCsAvoidCollisions);
+        saveSettingInt(*unarmedFactorsStrengthComboBox, Settings::game().mStrengthInfluencesHandToHand);
+        saveSettingBool(*stealingFromKnockedOutCheckBox, Settings::game().mAlwaysAllowStealingFromKnockedOutActors);
+        saveSettingBool(*enableNavigatorCheckBox, Settings::navigator().mEnable);
+        saveSettingInt(*physicsThreadsSpinBox, Settings::physics().mAsyncNumThreads);
+        saveSettingBool(
+            *allowNPCToFollowOverWaterSurfaceCheckBox, Settings::game().mAllowActorsToFollowOverWaterSurface);
+        saveSettingBool(
+            *unarmedCreatureAttacksDamageArmorCheckBox, Settings::game().mUnarmedCreatureAttacksDamageArmor);
+        saveSettingInt(*actorCollisonShapeTypeComboBox, Settings::game().mActorCollisionShapeType);
     }
 
     // Visuals
     {
-        saveSettingBool(autoUseObjectNormalMapsCheckBox, "auto use object normal maps", "Shaders");
-        saveSettingBool(autoUseObjectSpecularMapsCheckBox, "auto use object specular maps", "Shaders");
-        saveSettingBool(autoUseTerrainNormalMapsCheckBox, "auto use terrain normal maps", "Shaders");
-        saveSettingBool(autoUseTerrainSpecularMapsCheckBox, "auto use terrain specular maps", "Shaders");
-        saveSettingBool(bumpMapLocalLightingCheckBox, "apply lighting to environment maps", "Shaders");
-        saveSettingBool(radialFogCheckBox, "radial fog", "Fog");
-        saveSettingBool(softParticlesCheckBox, "soft particles", "Shaders");
-        saveSettingBool(antialiasAlphaTestCheckBox, "antialias alpha test", "Shaders");
-        saveSettingBool(adjustCoverageForAlphaTestCheckBox, "adjust coverage for alpha test", "Shaders");
-        saveSettingBool(weatherParticleOcclusionCheckBox, "weather particle occlusion", "Shaders");
-        saveSettingBool(magicItemAnimationsCheckBox, "use magic item animations", "Game");
-        saveSettingBool(animSourcesCheckBox, "use additional anim sources", "Game");
-        saveSettingBool(weaponSheathingCheckBox, "weapon sheathing", "Game");
-        saveSettingBool(shieldSheathingCheckBox, "shield sheathing", "Game");
-        saveSettingBool(turnToMovementDirectionCheckBox, "turn to movement direction", "Game");
-        saveSettingBool(smoothMovementCheckBox, "smooth movement", "Game");
+        saveSettingBool(*autoUseObjectNormalMapsCheckBox, Settings::shaders().mAutoUseObjectNormalMaps);
+        saveSettingBool(*autoUseObjectSpecularMapsCheckBox, Settings::shaders().mAutoUseObjectSpecularMaps);
+        saveSettingBool(*autoUseTerrainNormalMapsCheckBox, Settings::shaders().mAutoUseTerrainNormalMaps);
+        saveSettingBool(*autoUseTerrainSpecularMapsCheckBox, Settings::shaders().mAutoUseTerrainSpecularMaps);
+        saveSettingBool(*bumpMapLocalLightingCheckBox, Settings::shaders().mApplyLightingToEnvironmentMaps);
+        saveSettingBool(*radialFogCheckBox, Settings::fog().mRadialFog);
+        saveSettingBool(*softParticlesCheckBox, Settings::shaders().mSoftParticles);
+        saveSettingBool(*antialiasAlphaTestCheckBox, Settings::shaders().mAntialiasAlphaTest);
+        saveSettingBool(*adjustCoverageForAlphaTestCheckBox, Settings::shaders().mAdjustCoverageForAlphaTest);
+        saveSettingBool(*weatherParticleOcclusionCheckBox, Settings::shaders().mWeatherParticleOcclusion);
+        saveSettingBool(*magicItemAnimationsCheckBox, Settings::game().mUseMagicItemAnimations);
+        saveSettingBool(*animSourcesCheckBox, Settings::game().mUseAdditionalAnimSources);
+        saveSettingBool(*weaponSheathingCheckBox, Settings::game().mWeaponSheathing);
+        saveSettingBool(*shieldSheathingCheckBox, Settings::game().mShieldSheathing);
+        saveSettingBool(*turnToMovementDirectionCheckBox, Settings::game().mTurnToMovementDirection);
+        saveSettingBool(*smoothMovementCheckBox, Settings::game().mSmoothMovement);
 
-        const bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
-        const bool objectPaging = Settings::Manager::getBool("object paging", "Terrain");
-        const bool wantDistantLand = distantLandCheckBox->checkState();
-        if (wantDistantLand != (distantTerrain && objectPaging))
+        const bool wantDistantLand = distantLandCheckBox->checkState() == Qt::Checked;
+        if (wantDistantLand != (Settings::terrain().mDistantTerrain && Settings::terrain().mObjectPaging))
         {
-            Settings::Manager::setBool("distant terrain", "Terrain", wantDistantLand);
-            Settings::Manager::setBool("object paging", "Terrain", wantDistantLand);
+            Settings::terrain().mDistantTerrain.set(wantDistantLand);
+            Settings::terrain().mObjectPaging.set(wantDistantLand);
         }
 
-        saveSettingBool(activeGridObjectPagingCheckBox, "object paging active grid", "Terrain");
-        int viewingDistance = convertToUnits(viewingDistanceComboBox->value());
-        if (viewingDistance != Settings::Manager::getInt("viewing distance", "Camera"))
-        {
-            Settings::Manager::setInt("viewing distance", "Camera", viewingDistance);
-        }
-        double objectPagingMinSize = objectPagingMinSizeComboBox->value();
-        if (objectPagingMinSize != Settings::Manager::getDouble("object paging min size", "Terrain"))
-            Settings::Manager::setDouble("object paging min size", "Terrain", objectPagingMinSize);
-
-        saveSettingBool(nightDaySwitchesCheckBox, "day night switches", "Game");
-
-        saveSettingBool(postprocessEnabledCheckBox, "enabled", "Post Processing");
-        saveSettingBool(postprocessTransparentPostpassCheckBox, "transparent postpass", "Post Processing");
-        double hdrExposureTime = postprocessHDRTimeComboBox->value();
-        if (hdrExposureTime != Settings::Manager::getDouble("auto exposure speed", "Post Processing"))
-            Settings::Manager::setDouble("auto exposure speed", "Post Processing", hdrExposureTime);
-
-        saveSettingBool(radialFogCheckBox, "radial fog", "Fog");
-        saveSettingBool(exponentialFogCheckBox, "exponential fog", "Fog");
-        saveSettingBool(skyBlendingCheckBox, "sky blending", "Fog");
-        Settings::Manager::setDouble("sky blending start", "Fog", skyBlendingStartComboBox->value());
+        saveSettingBool(*activeGridObjectPagingCheckBox, Settings::terrain().mObjectPagingActiveGrid);
+        Settings::camera().mViewingDistance.set(convertToUnits(viewingDistanceComboBox->value()));
+        Settings::terrain().mObjectPagingMinSize.set(objectPagingMinSizeComboBox->value());
+        saveSettingBool(*nightDaySwitchesCheckBox, Settings::game().mDayNightSwitches);
+        saveSettingBool(*postprocessEnabledCheckBox, Settings::postProcessing().mEnabled);
+        saveSettingBool(*postprocessTransparentPostpassCheckBox, Settings::postProcessing().mTransparentPostpass);
+        Settings::postProcessing().mAutoExposureSpeed.set(postprocessHDRTimeComboBox->value());
+        saveSettingBool(*radialFogCheckBox, Settings::fog().mRadialFog);
+        saveSettingBool(*exponentialFogCheckBox, Settings::fog().mExponentialFog);
+        saveSettingBool(*skyBlendingCheckBox, Settings::fog().mSkyBlending);
+        Settings::fog().mSkyBlendingStart.set(skyBlendingStartComboBox->value());
     }
 
     // Audio
     {
-        int audioDeviceIndex = audioDeviceSelectorComboBox->currentIndex();
-        const std::string& prevAudioDevice = Settings::Manager::getString("device", "Sound");
-        if (audioDeviceIndex != 0)
-        {
-            const std::string& newAudioDevice = audioDeviceSelectorComboBox->currentText().toUtf8().constData();
-            if (newAudioDevice != prevAudioDevice)
-                Settings::Manager::setString("device", "Sound", newAudioDevice);
-        }
-        else if (!prevAudioDevice.empty())
-        {
-            Settings::Manager::setString("device", "Sound", {});
-        }
-        int hrtfEnabledIndex = enableHRTFComboBox->currentIndex() - 1;
-        if (hrtfEnabledIndex != Settings::Manager::getInt("hrtf enable", "Sound"))
-        {
-            Settings::Manager::setInt("hrtf enable", "Sound", hrtfEnabledIndex);
-        }
-        int selectedHRTFProfileIndex = hrtfProfileSelectorComboBox->currentIndex();
-        const std::string& prevHRTFProfile = Settings::Manager::getString("hrtf", "Sound");
-        if (selectedHRTFProfileIndex != 0)
-        {
-            const std::string& newHRTFProfile = hrtfProfileSelectorComboBox->currentText().toUtf8().constData();
-            if (newHRTFProfile != prevHRTFProfile)
-                Settings::Manager::setString("hrtf", "Sound", newHRTFProfile);
-        }
-        else if (!prevHRTFProfile.empty())
-        {
-            Settings::Manager::setString("hrtf", "Sound", {});
-        }
+        if (audioDeviceSelectorComboBox->currentIndex() != 0)
+            Settings::sound().mDevice.set(audioDeviceSelectorComboBox->currentText().toStdString());
+        else
+            Settings::sound().mDevice.set({});
+
+        Settings::sound().mHrtfEnable.set(enableHRTFComboBox->currentIndex() - 1);
+
+        if (hrtfProfileSelectorComboBox->currentIndex() != 0)
+            Settings::sound().mHrtf.set(hrtfProfileSelectorComboBox->currentText().toStdString());
+        else
+            Settings::sound().mHrtf.set({});
     }
 
     // Interface Changes
     {
-        saveSettingBool(showEffectDurationCheckBox, "show effect duration", "Game");
-        saveSettingBool(showEnchantChanceCheckBox, "show enchant chance", "Game");
-        saveSettingBool(showMeleeInfoCheckBox, "show melee info", "Game");
-        saveSettingBool(showProjectileDamageCheckBox, "show projectile damage", "Game");
-        saveSettingBool(changeDialogTopicsCheckBox, "color topic enable", "GUI");
-        saveSettingInt(showOwnedComboBox, "show owned", "Game");
-        saveSettingBool(stretchBackgroundCheckBox, "stretch menu background", "GUI");
-        saveSettingBool(useZoomOnMapCheckBox, "allow zooming", "Map");
-        saveSettingBool(graphicHerbalismCheckBox, "graphic herbalism", "Game");
-
-        float uiScalingFactor = scalingSpinBox->value();
-        if (uiScalingFactor != Settings::Manager::getFloat("scaling factor", "GUI"))
-            Settings::Manager::setFloat("scaling factor", "GUI", uiScalingFactor);
-
-        int fontSize = fontSizeSpinBox->value();
-        if (fontSize != Settings::Manager::getInt("font size", "GUI"))
-            Settings::Manager::setInt("font size", "GUI", fontSize);
+        saveSettingBool(*showEffectDurationCheckBox, Settings::game().mShowEffectDuration);
+        saveSettingBool(*showEnchantChanceCheckBox, Settings::game().mShowEnchantChance);
+        saveSettingBool(*showMeleeInfoCheckBox, Settings::game().mShowMeleeInfo);
+        saveSettingBool(*showProjectileDamageCheckBox, Settings::game().mShowProjectileDamage);
+        saveSettingBool(*changeDialogTopicsCheckBox, Settings::gui().mColorTopicEnable);
+        saveSettingInt(*showOwnedComboBox, Settings::game().mShowOwned);
+        saveSettingBool(*stretchBackgroundCheckBox, Settings::gui().mStretchMenuBackground);
+        saveSettingBool(*useZoomOnMapCheckBox, Settings::map().mAllowZooming);
+        saveSettingBool(*graphicHerbalismCheckBox, Settings::game().mGraphicHerbalism);
+        Settings::gui().mScalingFactor.set(scalingSpinBox->value());
+        Settings::gui().mFontSize.set(fontSizeSpinBox->value());
     }
 
     // Bug fixes
     {
-        saveSettingBool(preventMerchantEquippingCheckBox, "prevent merchant equipping", "Game");
+        saveSettingBool(*preventMerchantEquippingCheckBox, Settings::game().mPreventMerchantEquipping);
         saveSettingBool(
-            trainersTrainingSkillsBasedOnBaseSkillCheckBox, "trainers training skills based on base skill", "Game");
+            *trainersTrainingSkillsBasedOnBaseSkillCheckBox, Settings::game().mTrainersTrainingSkillsBasedOnBaseSkill);
     }
 
     // Miscellaneous
     {
         // Saves Settings
-        saveSettingBool(timePlayedCheckbox, "timeplayed", "Saves");
-        saveSettingInt(maximumQuicksavesComboBox, "max quicksaves", "Saves");
+        saveSettingBool(*timePlayedCheckbox, Settings::saves().mTimeplayed);
+        saveSettingInt(*maximumQuicksavesComboBox, Settings::saves().mMaxQuicksaves);
 
         // Other Settings
-        std::string screenshotFormatString = screenshotFormatComboBox->currentText().toLower().toStdString();
-        if (screenshotFormatString != Settings::Manager::getString("screenshot format", "General"))
-            Settings::Manager::setString("screenshot format", "General", screenshotFormatString);
-
-        saveSettingBool(notifyOnSavedScreenshotCheckBox, "notify on saved screenshot", "General");
+        Settings::general().mScreenshotFormat.set(screenshotFormatComboBox->currentText().toLower().toStdString());
+        saveSettingBool(*notifyOnSavedScreenshotCheckBox, Settings::general().mNotifyOnSavedScreenshot);
     }
 
     // Testing
     {
-        saveSettingBool(grabCursorCheckBox, "grab cursor", "Input");
+        saveSettingBool(*grabCursorCheckBox, Settings::input().mGrabCursor);
 
         int skipMenu = skipMenuCheckBox->checkState() == Qt::Checked;
         if (skipMenu != mGameSettings.value("skip-menu").toInt())
