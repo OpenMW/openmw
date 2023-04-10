@@ -283,7 +283,8 @@ namespace MWMechanics
             const auto agentBounds = world->getPathfindingAgentBounds(actor);
             const auto navigatorFlags = getNavigatorFlags(actor);
             const auto areaCosts = getAreaCosts(actor);
-            const auto pathGridGraph = getPathGridGraph(actor.getCell());
+            const ESM::Pathgrid* pathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
+            const auto& pathGridGraph = getPathGridGraph(pathgrid);
             mPathFinder.buildPath(actor, vActorPos, vTargetPos, actor.getCell(), pathGridGraph, agentBounds,
                 navigatorFlags, areaCosts, storage.mAttackRange, PathType::Full);
 
@@ -378,7 +379,7 @@ namespace MWMechanics
                         for (int i = 0; i < static_cast<int>(pathgrid->mPoints.size()); i++)
                         {
                             if (i != closestPointIndex
-                                && getPathGridGraph(storage.mCell).isPointConnected(closestPointIndex, i))
+                                && getPathGridGraph(pathgrid).isPointConnected(closestPointIndex, i))
                             {
                                 points.push_back(pathgrid->mPoints[static_cast<size_t>(i)]);
                             }
