@@ -36,7 +36,7 @@ namespace
         int closestReachableIndex = 0;
         // TODO: if this full scan causes performance problems mapping pathgrid
         //       points to a quadtree may help
-        for (unsigned int counter = 0; counter < grid->mPoints.size(); counter++)
+        for (size_t counter = 0; counter < grid->mPoints.size(); counter++)
         {
             float potentialDistBetween = MWMechanics::PathFinder::distanceSquared(grid->mPoints[counter], pos);
             if (potentialDistBetween < closestDistanceReachable)
