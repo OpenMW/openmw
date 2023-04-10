@@ -170,9 +170,10 @@
 -- Can be used to move objects from an inventory or a container to the world.
 -- @function [parent=#GameObject] teleport
 -- @param self
--- @param #string cellName Name of the cell to teleport into. For exteriors can be empty.
--- @param openmw.util#Vector3 position New position
--- @param openmw.util#Vector3 rotation New rotation. Optional argument. If missing, then the current rotation is used.
+-- @param #any cellOrName A cell to define the destination worldspace; can be either #Cell, or cell name, or an empty string (empty string means the default exterior worldspace).
+-- If the worldspace has multiple cells (i.e. an exterior), the destination cell is calculated using `position`.
+-- @param openmw.util#Vector3 position New position.
+-- @param openmw.util#Vector3 rotation (optional) New rotation. If missing, then the current rotation is used.
 
 ---
 -- Moves object into a container or an inventory. Enables if was disabled.

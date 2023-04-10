@@ -49,10 +49,8 @@ namespace MWWorld
         std::size_t mPtrIndexUpdateCounter = 0;
         ESM::RefNum mLastGeneratedRefnum;
 
-        const ESM::Cell* getESMCellByName(std::string_view name);
-        ESM::CellVariant getCellByName(std::string_view name);
-
         CellStore* getCellStore(const ESM::Cell* cell);
+        CellStore* getInteriorOrNull(std::string_view name);
         Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);
 
         void writeCell(ESM::ESMWriter& writer, CellStore& cell) const;
@@ -70,10 +68,11 @@ namespace MWWorld
         CellStore* getCell(std::string_view name); // interior or named exterior
         CellStore* getCell(const ESM::RefId& Id);
 
-        // If cellNameInSameWorldSpace is an interior - returns this interior.
-        // Otherwise returns exterior cell for given position in the same world space.
-        // At the moment multiple world spaces are not supported, so all exteriors are in one world space.
-        CellStore* getCellByPosition(const osg::Vec3f& pos, std::string_view cellNameInSameWorldSpace);
+        // Returns the cell that is in the same worldspace as `cellInSameWorldSpace`
+        // (in case of nullptr - default exterior worldspace) and contains given position.
+        // Interiors are single-cell worldspaces, so in case of an interior it just returns
+        // the same cell.
+        CellStore* getCellByPosition(const osg::Vec3f& pos, CellStore* cellInSameWorldSpace = nullptr);
 
         void registerPtr(const MWWorld::Ptr& ptr);
         void deregisterPtr(const MWWorld::Ptr& ptr);

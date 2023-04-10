@@ -48,59 +48,48 @@ namespace MWLua
 
     namespace
     {
-
-        class TeleportAction final : public LuaManager::Action
+        MWWorld::CellStore* findCell(const sol::object& cellOrName, const osg::Vec3f& pos)
         {
-        public:
-            TeleportAction(LuaUtil::LuaState* state, ObjectId object, std::string_view cell, const osg::Vec3f& pos,
-                const osg::Vec3f& rot)
-                : Action(state)
-                , mObject(object)
-                , mCell(std::string(cell))
-                , mPos(pos)
-                , mRot(rot)
+            MWWorld::WorldModel* wm = MWBase::Environment::get().getWorldModel();
+            MWWorld::CellStore* cell;
+            if (cellOrName.is<GCell>())
+                cell = cellOrName.as<const GCell&>().mStore;
+            else
             {
-            }
-
-            void apply() const override
-            {
-                MWWorld::WorldModel& wm = *MWBase::Environment::get().getWorldModel();
-                MWWorld::CellStore* cell = wm.getCellByPosition(mPos, mCell);
-                MWBase::World* world = MWBase::Environment::get().getWorld();
-                MWWorld::Ptr obj = wm.getPtr(mObject);
-                const MWWorld::Class& cls = obj.getClass();
-                bool isPlayer = obj == world->getPlayerPtr();
-                if (cls.isActor())
-                    cls.getCreatureStats(obj).land(isPlayer);
-                if (isPlayer)
-                {
-                    ESM::Position esmPos;
-                    static_assert(sizeof(esmPos) == sizeof(osg::Vec3f) * 2);
-                    std::memcpy(esmPos.pos, &mPos, sizeof(osg::Vec3f));
-                    std::memcpy(esmPos.rot, &mRot, sizeof(osg::Vec3f));
-                    world->getPlayer().setTeleported(true);
-                    if (cell->isExterior())
-                        world->changeToExteriorCell(esmPos, true);
-                    else
-                        world->changeToInteriorCell(mCell, esmPos, true);
-                }
+                std::string_view name = cellOrName.as<std::string_view>();
+                if (name.empty())
+                    cell = nullptr; // default exterior worldspace
                 else
-                {
-                    MWWorld::Ptr newObj = world->moveObject(obj, cell, mPos);
-                    world->rotateObject(newObj, mRot);
-                    if (!newObj.getRefData().isEnabled())
-                        world->enable(newObj);
-                }
+                    cell = wm->getCell(name);
             }
+            return wm->getCellByPosition(pos, cell);
+        }
 
-            std::string toString() const override { return "TeleportAction"; }
+        void teleportPlayer(MWWorld::CellStore* destCell, const osg::Vec3f& pos, const osg::Vec3f& rot)
+        {
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+            ESM::Position esmPos;
+            static_assert(sizeof(esmPos) == sizeof(osg::Vec3f) * 2);
+            std::memcpy(esmPos.pos, &pos, sizeof(osg::Vec3f));
+            std::memcpy(esmPos.rot, &rot, sizeof(osg::Vec3f));
+            MWWorld::Ptr ptr = world->getPlayerPtr();
+            ptr.getClass().getCreatureStats(ptr).land(false);
+            world->getPlayer().setTeleported(true);
+            world->changeToCell(destCell->getCell()->getId(), esmPos, true);
+        }
 
-        private:
-            ObjectId mObject;
-            std::string mCell;
-            osg::Vec3f mPos;
-            osg::Vec3f mRot;
-        };
+        void teleportNotPlayer(
+            const MWWorld::Ptr& ptr, MWWorld::CellStore* destCell, const osg::Vec3f& pos, const osg::Vec3f& rot)
+        {
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+            const MWWorld::Class& cls = ptr.getClass();
+            if (cls.isActor())
+                cls.getCreatureStats(ptr).land(false);
+            MWWorld::Ptr newPtr = world->moveObject(ptr, destCell, pos);
+            world->rotateObject(newPtr, rot);
+            if (!newPtr.getRefData().isEnabled())
+                world->enable(newPtr);
+        }
 
         class ActivateAction final : public LuaManager::Action
         {
@@ -323,8 +312,9 @@ namespace MWLua
                         refData.setCount(0);
                     });
                 };
-                objectT["teleport"] = [removeFn, context](const GObject& object, std::string_view cell,
+                objectT["teleport"] = [removeFn, context](const GObject& object, const sol::object& cellOrName,
                                           const osg::Vec3f& pos, const sol::optional<osg::Vec3f>& optRot) {
+                    MWWorld::CellStore* cell = findCell(cellOrName, pos);
                     MWWorld::Ptr ptr = object.ptr();
                     if (ptr.getRefData().isDeleted())
                         throw std::runtime_error("Object is removed");
@@ -332,18 +322,19 @@ namespace MWLua
                     {
                         // Currently moving to or from containers makes a copy and removes the original.
                         // TODO(#6148): actually move rather than copy and preserve RefNum
-                        auto* cellStore = MWBase::Environment::get().getWorldModel()->getCellByPosition(pos, cell);
-                        MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *cellStore, ptr.getRefData().getCount());
+                        MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *cell, ptr.getRefData().getCount());
                         newPtr.getRefData().disable();
                         removeFn(object, ptr.getRefData().getCount());
                         ptr = newPtr;
                     }
                     osg::Vec3f rot = optRot ? *optRot : ptr.getRefData().getPosition().asRotationVec3();
-                    auto action = std::make_unique<TeleportAction>(context.mLua, getId(ptr), cell, pos, rot);
                     if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
-                        context.mLuaManager->addTeleportPlayerAction(std::move(action));
+                        context.mLuaManager->addTeleportPlayerAction(
+                            [cell, pos, rot] { teleportPlayer(cell, pos, rot); });
                     else
-                        context.mLuaManager->addAction(std::move(action));
+                        context.mLuaManager->addAction(
+                            [object, cell, pos, rot] { teleportNotPlayer(object.ptr(), cell, pos, rot); },
+                            "TeleportAction");
                 };
             }
         }
