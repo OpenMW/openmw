@@ -1223,4 +1223,90 @@
 -- @field #string id Record id
 -- @field #string model VFS path to the model
 
+--- Functions for @{#ESM4Activator} objects
+-- @field [parent=#types] #ESM4Activator ESM4Activator
+
+--- Functions for @{#ESM4Ammunition} objects
+-- @field [parent=#types] #ESM4Ammunition ESM4Ammunition
+
+--- Functions for @{#ESM4Armor} objects
+-- @field [parent=#types] #ESM4Armor ESM4Armor
+
+--- Functions for @{#ESM4Book} objects
+-- @field [parent=#types] #ESM4Book ESM4Book
+
+--- Functions for @{#ESM4Clothing} objects
+-- @field [parent=#types] #ESM4Clothing ESM4Clothing
+
+--- Functions for @{#ESM4Door} objects
+-- @field [parent=#types] #ESM4Door ESM4Door
+
+--- Functions for @{#ESM4Ingredient} objects
+-- @field [parent=#types] #ESM4Ingredient ESM4Ingredient
+
+--- Functions for @{#ESM4Light} objects
+-- @field [parent=#types] #ESM4Light ESM4Light
+
+--- Functions for @{#ESM4Miscellaneous} objects
+-- @field [parent=#types] #ESM4Miscellaneous ESM4Miscellaneous
+
+--- Functions for @{#ESM4Potion} objects
+-- @field [parent=#types] #ESM4Potion ESM4Potion
+
+--- Functions for @{#ESM4Static} objects
+-- @field [parent=#types] #ESM4Static ESM4Static
+
+--- Functions for @{#ESM4Weapon} objects
+-- @field [parent=#types] #ESM4Weapon ESM4Weapon
+
+---
+-- @type ESM4Door
+
+---
+-- Whether the object is a ESM4Door.
+-- @function [parent=#ESM4Door] objectIsInstance
+-- @param openmw.core#GameObject object
+-- @return #boolean
+
+---
+-- Whether the door is a teleport.
+-- @function [parent=#ESM4Door] isTeleport
+-- @param openmw.core#GameObject object
+-- @return #boolean
+
+---
+-- Destination (only if a teleport door).
+-- @function [parent=#ESM4Door] destPosition
+-- @param openmw.core#GameObject object
+-- @return openmw.util#Vector3
+
+---
+-- Destination rotation (only if a teleport door).
+-- @function [parent=#ESM4Door] destRotation
+-- @param openmw.core#GameObject object
+-- @return openmw.util#Vector3
+
+---
+-- Destination cell (only if a teleport door).
+-- @function [parent=#ESM4Door] destCell
+-- @param openmw.core#GameObject object
+-- @return openmw.core#Cell
+
+---
+-- Returns the read-only @{#ESM4DoorRecord} of a door
+-- @function [parent=#ESM4Door] record
+-- @param #any objectOrRecordId
+-- @return #ESM4DoorRecord
+
+---
+-- Returns a read-only list of all @{#ESM4DoorRecord}s in the world database.
+-- @function [parent=#ESM4Door] records
+-- @return #list<#ESM4DoorRecord>
+
+---
+-- @type ESM4DoorRecord
+-- @field #string id Record id
+-- @field #string name Human-readable name
+-- @field #string model VFS path to the model
+
 return nil

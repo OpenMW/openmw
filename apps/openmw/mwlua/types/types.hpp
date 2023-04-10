@@ -63,8 +63,11 @@ namespace MWLua
     void addStaticBindings(sol::table stat, const Context& context);
     void addLightBindings(sol::table light, const Context& context);
 
+    void addESM4DoorBindings(sol::table door, const Context& context);
+
     template <class T>
-    void addRecordFunctionBinding(sol::table table, const Context& context)
+    void addRecordFunctionBinding(
+        sol::table table, const Context& context, const std::string& recordName = std::string(T::getRecordType()))
     {
         const MWWorld::Store<T>& store = MWBase::Environment::get().getWorld()->getStore().get<T>();
 
@@ -75,9 +78,9 @@ namespace MWLua
         // Provide the interface of a read-only array.
         using StoreT = MWWorld::Store<T>;
         sol::state_view& lua = context.mLua->sol();
-        sol::usertype<StoreT> storeT = lua.new_usertype<StoreT>(std::string(T::getRecordType()) + "WorldStore");
-        storeT[sol::meta_function::to_string] = [](const StoreT& store) {
-            return "{" + std::to_string(store.getSize()) + " " + std::string(T::getRecordType()) + " records}";
+        sol::usertype<StoreT> storeT = lua.new_usertype<StoreT>(recordName + "WorldStore");
+        storeT[sol::meta_function::to_string] = [recordName](const StoreT& store) {
+            return "{" + std::to_string(store.getSize()) + " " + recordName + " records}";
         };
         storeT[sol::meta_function::length] = [](const StoreT& store) { return store.getSize(); };
         storeT[sol::meta_function::index] = [](const StoreT& store, size_t index) -> const T* {

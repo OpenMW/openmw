@@ -32,6 +32,20 @@ namespace MWLua
         constexpr std::string_view Probe = "Probe";
         constexpr std::string_view Repair = "Repair";
         constexpr std::string_view Marker = "Marker";
+
+        constexpr std::string_view ESM4Activator = "ESM4Activator";
+        constexpr std::string_view ESM4Ammunition = "ESM4Ammunition";
+        constexpr std::string_view ESM4Armor = "ESM4Armor";
+        constexpr std::string_view ESM4Book = "ESM4Book";
+        constexpr std::string_view ESM4Clothing = "ESM4Clothing";
+        constexpr std::string_view ESM4Container = "ESM4Container";
+        constexpr std::string_view ESM4Door = "ESM4Door";
+        constexpr std::string_view ESM4Ingredient = "ESM4Ingredient";
+        constexpr std::string_view ESM4Light = "ESM4Light";
+        constexpr std::string_view ESM4MiscItem = "ESM4Miscellaneous";
+        constexpr std::string_view ESM4Potion = "ESM4Potion";
+        constexpr std::string_view ESM4Static = "ESM4Static";
+        constexpr std::string_view ESM4Weapon = "ESM4Weapon";
     }
 
     namespace
@@ -57,6 +71,20 @@ namespace MWLua
             { ESM::REC_LOCK, ObjectTypeName::Lockpick },
             { ESM::REC_PROB, ObjectTypeName::Probe },
             { ESM::REC_REPA, ObjectTypeName::Repair },
+
+            { ESM::REC_ACTI4, ObjectTypeName::ESM4Activator },
+            { ESM::REC_AMMO4, ObjectTypeName::ESM4Ammunition },
+            { ESM::REC_ARMO4, ObjectTypeName::ESM4Armor },
+            { ESM::REC_BOOK4, ObjectTypeName::ESM4Book },
+            { ESM::REC_CLOT4, ObjectTypeName::ESM4Clothing },
+            { ESM::REC_CONT4, ObjectTypeName::ESM4Container },
+            { ESM::REC_DOOR4, ObjectTypeName::ESM4Door },
+            { ESM::REC_INGR4, ObjectTypeName::ESM4Ingredient },
+            { ESM::REC_LIGH4, ObjectTypeName::ESM4Light },
+            { ESM::REC_MISC4, ObjectTypeName::ESM4MiscItem },
+            { ESM::REC_ALCH4, ObjectTypeName::ESM4Potion },
+            { ESM::REC_STAT4, ObjectTypeName::ESM4Static },
+            { ESM::REC_WEAP4, ObjectTypeName::ESM4Weapon },
         };
     }
 
@@ -174,6 +202,20 @@ namespace MWLua
         addContainerBindings(addType(ObjectTypeName::Container, { ESM::REC_CONT }), context);
         addDoorBindings(addType(ObjectTypeName::Door, { ESM::REC_DOOR }), context);
         addStaticBindings(addType(ObjectTypeName::Static, { ESM::REC_STAT }), context);
+
+        addType(ObjectTypeName::ESM4Activator, { ESM::REC_ACTI4 });
+        addType(ObjectTypeName::ESM4Ammunition, { ESM::REC_AMMO4 });
+        addType(ObjectTypeName::ESM4Armor, { ESM::REC_ARMO4 });
+        addType(ObjectTypeName::ESM4Book, { ESM::REC_BOOK4 });
+        addType(ObjectTypeName::ESM4Clothing, { ESM::REC_CLOT4 });
+        addType(ObjectTypeName::ESM4Container, { ESM::REC_CONT4 });
+        addESM4DoorBindings(addType(ObjectTypeName::ESM4Door, { ESM::REC_DOOR4 }), context);
+        addType(ObjectTypeName::ESM4Ingredient, { ESM::REC_INGR4 });
+        addType(ObjectTypeName::ESM4Light, { ESM::REC_LIGH4 });
+        addType(ObjectTypeName::ESM4MiscItem, { ESM::REC_MISC4 });
+        addType(ObjectTypeName::ESM4Potion, { ESM::REC_ALCH4 });
+        addType(ObjectTypeName::ESM4Static, { ESM::REC_STAT4 });
+        addType(ObjectTypeName::ESM4Weapon, { ESM::REC_WEAP4 });
 
         sol::table typeToPackage = getTypeToPackageTable(context.mLua->sol());
         sol::table packageToType = getPackageToTypeTable(context.mLua->sol());

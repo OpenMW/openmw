@@ -213,7 +213,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
     bool missing = false;
     for (int i = 0; i < 4; ++i)
     {
-        if (mTextures[i].base.formId.isZero())
+        if (mTextures[i].base.formId.isZeroOrUnset())
         {
             // std::cout << "ESM4::LAND " << ESM4::formIdToString(mFormId) << " missing base, quad " << i << std::endl;
             // std::cout << "layers " << mTextures[i].layers.size() << std::endl;

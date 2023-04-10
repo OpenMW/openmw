@@ -55,7 +55,7 @@ namespace MWWorld
             struct Visitor
             {
                 bool operator()(const ESM::CellRef& ref) { return ref.mTeleport; }
-                bool operator()(const ESM4::Reference& ref) { return 0; }
+                bool operator()(const ESM4::Reference& ref) { return !ref.mDoor.destDoor.isZeroOrUnset(); }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }

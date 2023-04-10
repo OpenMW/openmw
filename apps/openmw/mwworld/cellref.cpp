@@ -3,10 +3,15 @@
 #include <cassert>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/objectstate.hpp>
+#include <components/esm4/loadrefr.hpp>
 
+#include <apps/openmw/mwbase/environment.hpp>
+#include <apps/openmw/mwbase/world.hpp>
 #include <apps/openmw/mwworld/cellutils.hpp>
+#include <apps/openmw/mwworld/esmstore.hpp>
 
 namespace MWWorld
 {
@@ -90,13 +95,18 @@ namespace MWWorld
                 return ESM::RefId::esm3ExteriorCell(index.x(), index.y());
             }
         };
+        auto esm4Visit = [&](const ESM4::Reference& ref) -> ESM::RefId {
+            if (ref.mDoor.destDoor.isZeroOrUnset())
+                return ESM::RefId::sEmpty;
+            const ESM4::Reference* refDest
+                = MWBase::Environment::get().getWorld()->getStore().get<ESM4::Reference>().searchStatic(
+                    ESM::FormIdRefId(ref.mDoor.destDoor));
+            if (refDest)
+                return refDest->mParent;
+            return ESM::RefId::sEmpty;
+        };
 
-        return std::visit(
-            ESM::VisitOverload{
-                [&](const ESM4::Reference& ref) -> ESM::RefId { return ESM::RefId::sEmpty; },
-                esm3Visit,
-            },
-            mCellRef.mVariant);
+        return std::visit(ESM::VisitOverload{ esm3Visit, esm4Visit }, mCellRef.mVariant);
     }
 
     void CellRef::setScale(float scale)
