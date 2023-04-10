@@ -205,11 +205,6 @@ namespace MWWorld
     {
         return mShared.end();
     }
-    template <typename T>
-    const T& TypedDynamicStore<T>::at(size_t index) const
-    {
-        return *mShared.at(index);
-    }
 
     template <typename T>
     size_t TypedDynamicStore<T>::getSize() const

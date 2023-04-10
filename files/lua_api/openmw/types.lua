@@ -453,6 +453,7 @@
 -- @type Creature
 -- @extends #Actor
 -- @field #Actor baseType @{#Actor}
+-- @field #list<#CreatureRecord> records A read-only list of all @{#CreatureRecord}s in the world database.
 
 ---
 -- Whether the object is a creature.
@@ -465,11 +466,6 @@
 -- @function [parent=#Creature] record
 -- @param #any objectOrRecordId
 -- @return #CreatureRecord
-
----
--- Returns a read-only list of all @{#CreatureRecord}s in the world database.
--- @function [parent=#Creature] records
--- @return #list<#CreatureRecord>
 
 ---
 -- @type CreatureRecord
@@ -488,6 +484,7 @@
 -- @extends #Actor
 -- @field #Actor baseType @{#Actor}
 -- @field [parent=#NPC] #NpcStats stats
+-- @field #list<#NpcRecord> records A read-only list of all @{#NpcRecord}s in the world database.
 
 ---
 -- Whether the object is an NPC or a Player.
@@ -506,11 +503,6 @@
 -- @function [parent=#NPC] record
 -- @param #any objectOrRecordId
 -- @return #NpcRecord
-
----
--- Returns a read-only list of all @{#NpcRecord}s in the world database.
--- @function [parent=#Npc] records
--- @return #list<#NpcRecord>
 
 ---
 -- @type NpcRecord
@@ -544,6 +536,7 @@
 -- @type Armor
 -- @extends #Item
 -- @field #Item baseType @{#Item}
+-- @field #list<#ArmorRecord> records A read-only list of all @{#ArmorRecord}s in the world database.
 
 ---
 -- Whether the object is an Armor.
@@ -575,11 +568,6 @@
 -- @return #ArmorRecord
 
 ---
--- Returns a read-only list of all @{#ArmorRecord}s in the world database.
--- @function [parent=#Armor] records
--- @return #list<#ArmorRecord>
-
----
 -- @type ArmorRecord
 -- @field #string id Record id
 -- @field #string name Human-readable name
@@ -603,6 +591,7 @@
 -- @type Book
 -- @extends #Item
 -- @field #Item baseType @{#Item}
+-- @field #list<#BookRecord> records A read-only list of all @{#BookRecord}s in the world database.
 
 ---
 -- Whether the object is a Book.
@@ -650,11 +639,6 @@
 -- @return #BookRecord
 
 ---
--- Returns a read-only list of all @{#BookRecord}s in the world database.
--- @function [parent=#Book] records
--- @return #list<#BookRecord>
-
----
 -- @type BookRecord
 -- @field #string id The record ID of the book
 -- @field #string name Name of the book
@@ -678,6 +662,7 @@
 -- @type Clothing
 -- @extends #Item
 -- @field #Item baseType @{#Item}
+-- @field #list<#ClothingRecord> records A read-only list of all @{#ClothingRecord}s in the world database.
 
 ---
 -- Whether the object is a Clothing.
@@ -708,11 +693,6 @@
 -- @return #ClothingRecord
 
 ---
--- Returns a read-only list of all @{#ClothingRecord}s in the world database.
--- @function [parent=#Clothing] records
--- @return #list<#ClothingRecord>
-
----
 -- @type ClothingRecord
 -- @field #string id Record id
 -- @field #string name Name of the clothing
@@ -735,6 +715,7 @@
 -- @type Ingredient
 -- @extends #Item
 -- @field #Item baseType @{#Item}
+-- @field #list<#IngredientRecord> records A read-only list of all @{#IngredientRecord}s in the world database.
 
 ---
 -- Whether the object is an Ingredient.
@@ -747,11 +728,6 @@
 -- @function [parent=#Ingredient] record
 -- @param #any objectOrRecordId
 -- @return #IngredientRecord
-
----
--- Returns a read-only list of all @{#IngredientRecord}s in the world database.
--- @function [parent=#Ingredient] records
--- @return #list<#IngredientRecord>
 
 ---
 -- @type IngredientRecord
@@ -772,6 +748,7 @@
 -- @type Light
 -- @extends #Item
 -- @field #Item baseType @{#Item}
+-- @field #list<#LightRecord> records A read-only list of all @{#LightRecord}s in the world database.
 
 ---
 -- Whether the object is a Light.
@@ -784,11 +761,6 @@
 -- @function [parent=#Light] record
 -- @param #any objectOrRecordId
 -- @return #LightRecord
-
----
--- Returns a read-only list of all @{#LightRecord}s in the world database.
--- @function [parent=#Light] records
--- @return #list<#LightRecord>
 
 ---
 -- @type LightRecord
@@ -814,6 +786,7 @@
 -- @type Miscellaneous
 -- @extends #Item
 -- @field #Item baseType @{#Item}
+-- @field #list<#MiscellaneousRecord> records A read-only list of all @{#MiscellaneousRecord}s in the world database.
 
 ---
 -- Whether the object is a Miscellaneous.
@@ -826,11 +799,6 @@
 -- @function [parent=#Miscellaneous] record
 -- @param #any objectOrRecordId
 -- @return #MiscellaneousRecord
-
----
--- Returns a read-only list of all @{#MiscellaneousRecord}s in the world database.
--- @function [parent=#Miscellaneous] records
--- @return #list<#MiscellaneousRecord>
 
 ---
 -- @type MiscellaneousRecord
@@ -850,6 +818,7 @@
 -- @type Potion
 -- @extends #Item
 -- @field #Item baseType @{#Item}
+-- @field #list<#PotionRecord> records A read-only list of all @{#PotionRecord}s in the world database.
 
 ---
 -- Whether the object is a Potion.
@@ -862,11 +831,6 @@
 -- @function [parent=#Potion] record
 -- @param #any objectOrRecordId
 -- @return #PotionRecord
-
----
--- Returns a read-only list of all @{#PotionRecord}s in the world database.
--- @function [parent=#Potion] records
--- @return #list<#PotionRecord>
 
 ---
 -- Creates a @{#PotionRecord} without adding it to the world database.
@@ -894,6 +858,7 @@
 -- @type Weapon
 -- @extends #Item
 -- @field #Item baseType @{#Item}
+-- @field #list<#WeaponRecord> records A read-only list of all @{#WeaponRecord}s in the world database.
 
 ---
 -- Whether the object is a Weapon.
@@ -928,11 +893,6 @@
 -- @return #WeaponRecord
 
 ---
--- Returns a read-only list of all @{#WeaponRecord}s in the world database.
--- @function [parent=#Weapon] records
--- @return #list<#WeaponRecord>
-
----
 -- @type WeaponRecord
 -- @field #string id Record id
 -- @field #string name Human-readable name
@@ -965,6 +925,7 @@
 -- @type Apparatus
 -- @extends #Item
 -- @field #Item baseType @{#Item}
+-- @field #list<#ApparatusRecord> records A read-only list of all @{#ApparatusRecord}s in the world database.
 
 ---
 -- Whether the object is an Apparatus.
@@ -989,11 +950,6 @@
 -- @return #ApparatusRecord
 
 ---
--- Returns a read-only list of all @{#ApparatusRecord}s in the world database.
--- @function [parent=#Apparatus] records
--- @return #list<#ApparatusRecord>
-
----
 -- @type ApparatusRecord
 -- @field #string id The record ID of the apparatus
 -- @field #string name The name of the apparatus
@@ -1012,6 +968,7 @@
 -- @type Lockpick
 -- @extends #Item
 -- @field #Item baseType @{#Item}
+-- @field #list<#LockpickRecord> records A read-only list of all @{#LockpickRecord}s in the world database.
 
 ---
 -- Whether the object is a Lockpick.
@@ -1024,11 +981,6 @@
 -- @function [parent=#Lockpick] record
 -- @param #any objectOrRecordId
 -- @return #LockpickRecord
-
----
--- Returns a read-only list of all @{#LockpickRecord}s in the world database.
--- @function [parent=#Lockpick] records
--- @return #list<#LockpickRecord>
 
 ---
 -- @type LockpickRecord
@@ -1049,6 +1001,7 @@
 -- @type Probe
 -- @extends #Item
 -- @field #Item baseType @{#Item}
+-- @field #list<#ProbeRecord> records A read-only list of all @{#ProbeRecord}s in the world database.
 
 ---
 -- Whether the object is a Probe.
@@ -1061,11 +1014,6 @@
 -- @function [parent=#Probe] record
 -- @param #any objectOrRecordId
 -- @return #ProbeRecord
-
----
--- Returns a read-only list of all @{#ProbeRecord}s in the world database.
--- @function [parent=#Probe] records
--- @return #list<#ProbeRecord>
 
 ---
 -- @type ProbeRecord
@@ -1086,6 +1034,7 @@
 -- @type Repair
 -- @extends #Item
 -- @field #Item baseType @{#Item}
+-- @field #list<#RepairRecord> records A read-only list of all @{#RepairRecord}s in the world database.
 
 ---
 -- Whether the object is a Repair.
@@ -1098,11 +1047,6 @@
 -- @function [parent=#Repair] record
 -- @param #any objectOrRecordId
 -- @return #RepairRecord
-
----
--- Returns a read-only list of all @{#RepairRecord}s in the world database.
--- @function [parent=#Repair] records
--- @return #list<#RepairRecord>
 
 ---
 -- @type RepairRecord
@@ -1121,6 +1065,7 @@
 
 ---
 -- @type Activator
+-- @field #list<#ActivatorRecord> records A read-only list of all @{#ActivatorRecord}s in the world database.
 
 ---
 -- Whether the object is an Activator.
@@ -1135,11 +1080,6 @@
 -- @return #ActivatorRecord
 
 ---
--- Returns a read-only list of all @{#ActivatorRecord}s in the world database.
--- @function [parent=#Activator] records
--- @return #list<#ActivatorRecord>
-
----
 -- @type ActivatorRecord
 -- @field #string id Record id
 -- @field #string name Human-readable name
@@ -1151,6 +1091,7 @@
 
 ---
 -- @type Container
+-- @field #list<#ContainerRecord> records A read-only list of all @{#ContainerRecord}s in the world database.
 
 ---
 -- Container content.
@@ -1183,11 +1124,6 @@
 -- @return #ContainerRecord
 
 ---
--- Returns a read-only list of all @{#ContainerRecord}s in the world database.
--- @function [parent=#Container] records
--- @return #list<#ContainerRecord>
-
----
 -- @type ContainerRecord
 -- @field #string id Record id
 -- @field #string name Human-readable name
@@ -1200,6 +1136,7 @@
 
 ---
 -- @type Door
+-- @field #list<#DoorRecord> records A read-only list of all @{#DoorRecord}s in the world database.
 
 ---
 -- Whether the object is a Door.
@@ -1238,11 +1175,6 @@
 -- @return #DoorRecord
 
 ---
--- Returns a read-only list of all @{#DoorRecord}s in the world database.
--- @function [parent=#Door] records
--- @return #list<#DoorRecord>
-
----
 -- @type DoorRecord
 -- @field #string id Record id
 -- @field #string name Human-readable name
@@ -1258,6 +1190,7 @@
 
 ---
 -- @type Static
+-- @field #list<#StaticRecord> records A read-only list of all @{#StaticRecord}s in the world database.
 
 ---
 -- Whether the object is a Static.
@@ -1270,11 +1203,6 @@
 -- @function [parent=#Static] record
 -- @param #any objectOrRecordId
 -- @return #StaticRecord
-
----
--- Returns a read-only list of all @{#StaticRecord}s in the world database.
--- @function [parent=#Static] records
--- @return #list<#StaticRecord>
 
 ---
 -- @type StaticRecord
