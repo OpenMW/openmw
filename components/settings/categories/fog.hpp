@@ -14,20 +14,23 @@
 
 namespace Settings
 {
-    struct FogCategory
+    struct FogCategory : WithIndex
     {
-        SettingValue<bool> mUseDistantFog{ "Fog", "use distant fog" };
-        SettingValue<float> mDistantLandFogStart{ "Fog", "distant land fog start" };
-        SettingValue<float> mDistantLandFogEnd{ "Fog", "distant land fog end" };
-        SettingValue<float> mDistantUnderwaterFogStart{ "Fog", "distant underwater fog start" };
-        SettingValue<float> mDistantUnderwaterFogEnd{ "Fog", "distant underwater fog end" };
-        SettingValue<float> mDistantInteriorFogStart{ "Fog", "distant interior fog start" };
-        SettingValue<float> mDistantInteriorFogEnd{ "Fog", "distant interior fog end" };
-        SettingValue<bool> mRadialFog{ "Fog", "radial fog" };
-        SettingValue<bool> mExponentialFog{ "Fog", "exponential fog" };
-        SettingValue<bool> mSkyBlending{ "Fog", "sky blending" };
-        SettingValue<float> mSkyBlendingStart{ "Fog", "sky blending start", makeClampStrictMaxSanitizerFloat(0, 1) };
-        SettingValue<osg::Vec2f> mSkyRttResolution{ "Fog", "sky rtt resolution" };
+        using WithIndex::WithIndex;
+
+        SettingValue<bool> mUseDistantFog{ mIndex, "Fog", "use distant fog" };
+        SettingValue<float> mDistantLandFogStart{ mIndex, "Fog", "distant land fog start" };
+        SettingValue<float> mDistantLandFogEnd{ mIndex, "Fog", "distant land fog end" };
+        SettingValue<float> mDistantUnderwaterFogStart{ mIndex, "Fog", "distant underwater fog start" };
+        SettingValue<float> mDistantUnderwaterFogEnd{ mIndex, "Fog", "distant underwater fog end" };
+        SettingValue<float> mDistantInteriorFogStart{ mIndex, "Fog", "distant interior fog start" };
+        SettingValue<float> mDistantInteriorFogEnd{ mIndex, "Fog", "distant interior fog end" };
+        SettingValue<bool> mRadialFog{ mIndex, "Fog", "radial fog" };
+        SettingValue<bool> mExponentialFog{ mIndex, "Fog", "exponential fog" };
+        SettingValue<bool> mSkyBlending{ mIndex, "Fog", "sky blending" };
+        SettingValue<float> mSkyBlendingStart{ mIndex, "Fog", "sky blending start",
+            makeClampStrictMaxSanitizerFloat(0, 1) };
+        SettingValue<osg::Vec2f> mSkyRttResolution{ mIndex, "Fog", "sky rtt resolution" };
     };
 }
 

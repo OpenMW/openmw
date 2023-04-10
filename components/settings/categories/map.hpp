@@ -14,16 +14,19 @@
 
 namespace Settings
 {
-    struct MapCategory
+    struct MapCategory : WithIndex
     {
-        SettingValue<int> mGlobalMapCellSize{ "Map", "global map cell size", makeMaxSanitizerInt(1) };
-        SettingValue<int> mLocalMapHudWidgetSize{ "Map", "local map hud widget size", makeMaxSanitizerInt(1) };
-        SettingValue<bool> mLocalMapHudFogOfWar{ "Map", "local map hud fog of war" };
-        SettingValue<int> mLocalMapResolution{ "Map", "local map resolution", makeMaxSanitizerInt(1) };
-        SettingValue<int> mLocalMapWidgetSize{ "Map", "local map widget size", makeMaxSanitizerInt(1) };
-        SettingValue<bool> mGlobal{ "Map", "global" };
-        SettingValue<bool> mAllowZooming{ "Map", "allow zooming" };
-        SettingValue<int> mMaxLocalViewingDistance{ "Map", "max local viewing distance", makeMaxSanitizerInt(1) };
+        using WithIndex::WithIndex;
+
+        SettingValue<int> mGlobalMapCellSize{ mIndex, "Map", "global map cell size", makeMaxSanitizerInt(1) };
+        SettingValue<int> mLocalMapHudWidgetSize{ mIndex, "Map", "local map hud widget size", makeMaxSanitizerInt(1) };
+        SettingValue<bool> mLocalMapHudFogOfWar{ mIndex, "Map", "local map hud fog of war" };
+        SettingValue<int> mLocalMapResolution{ mIndex, "Map", "local map resolution", makeMaxSanitizerInt(1) };
+        SettingValue<int> mLocalMapWidgetSize{ mIndex, "Map", "local map widget size", makeMaxSanitizerInt(1) };
+        SettingValue<bool> mGlobal{ mIndex, "Map", "global" };
+        SettingValue<bool> mAllowZooming{ mIndex, "Map", "allow zooming" };
+        SettingValue<int> mMaxLocalViewingDistance{ mIndex, "Map", "max local viewing distance",
+            makeMaxSanitizerInt(1) };
     };
 }
 

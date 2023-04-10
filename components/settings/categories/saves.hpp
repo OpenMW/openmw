@@ -14,12 +14,14 @@
 
 namespace Settings
 {
-    struct SavesCategory
+    struct SavesCategory : WithIndex
     {
-        SettingValue<std::string> mCharacter{ "Saves", "character" };
-        SettingValue<bool> mAutosave{ "Saves", "autosave" };
-        SettingValue<bool> mTimeplayed{ "Saves", "timeplayed" };
-        SettingValue<int> mMaxQuicksaves{ "Saves", "max quicksaves", makeMaxSanitizerInt(1) };
+        using WithIndex::WithIndex;
+
+        SettingValue<std::string> mCharacter{ mIndex, "Saves", "character" };
+        SettingValue<bool> mAutosave{ mIndex, "Saves", "autosave" };
+        SettingValue<bool> mTimeplayed{ mIndex, "Saves", "timeplayed" };
+        SettingValue<int> mMaxQuicksaves{ mIndex, "Saves", "max quicksaves", makeMaxSanitizerInt(1) };
     };
 }
 

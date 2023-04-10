@@ -93,19 +93,49 @@ namespace
             benchmark::DoNotOptimize(Settings::water().mReflectionDetail.get());
         }
     }
+
+    void settingsStorageGet(benchmark::State& state)
+    {
+        for (auto _ : state)
+        {
+            benchmark::DoNotOptimize(Settings::get<float>("Fog", "sky blending start"));
+        }
+    }
+
+    void settingsStorageGet2(benchmark::State& state)
+    {
+        for (auto _ : state)
+        {
+            benchmark::DoNotOptimize(Settings::get<bool>("Post Processing", "transparent postpass"));
+            benchmark::DoNotOptimize(Settings::get<float>("Camera", "near clip"));
+        }
+    }
+
+    void settingsStorageGet3(benchmark::State& state)
+    {
+        for (auto _ : state)
+        {
+            benchmark::DoNotOptimize(Settings::get<bool>("Post Processing", "transparent postpass"));
+            benchmark::DoNotOptimize(Settings::get<float>("Camera", "near clip"));
+            benchmark::DoNotOptimize(Settings::get<int>("Water", "reflection detail"));
+        }
+    }
 }
 
 BENCHMARK(settingsManager);
 BENCHMARK(localStatic);
 BENCHMARK(settingsStorage);
+BENCHMARK(settingsStorageGet);
 
 BENCHMARK(settingsManager2);
 BENCHMARK(localStatic2);
 BENCHMARK(settingsStorage2);
+BENCHMARK(settingsStorageGet2);
 
 BENCHMARK(settingsManager3);
 BENCHMARK(localStatic3);
 BENCHMARK(settingsStorage3);
+BENCHMARK(settingsStorageGet3);
 
 int main(int argc, char* argv[])
 {
@@ -115,14 +145,14 @@ int main(int argc, char* argv[])
     Settings::SettingsFileParser parser;
     parser.loadSettingsFile(settingsDefaultPath, Settings::Manager::mDefaultSettings);
 
-    Settings::Values::initDefaults();
+    Settings::StaticValues::initDefaults();
 
     Settings::Manager::mUserSettings = Settings::Manager::mDefaultSettings;
     Settings::Manager::mUserSettings.erase({ "Camera", "near clip" });
     Settings::Manager::mUserSettings.erase({ "Post Processing", "transparent postpass" });
     Settings::Manager::mUserSettings.erase({ "Water", "reflection detail" });
 
-    Settings::Values::init();
+    Settings::StaticValues::init();
 
     benchmark::Initialize(&argc, argv);
     benchmark::RunSpecifiedBenchmarks();

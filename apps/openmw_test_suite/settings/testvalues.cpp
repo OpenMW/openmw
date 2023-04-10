@@ -32,26 +32,37 @@ namespace Settings
 
         TEST_F(SettingsValuesTest, shouldLoadFromSettingsManager)
         {
-            Values values;
+            Index index;
+            Values values(index);
             EXPECT_EQ(values.mCamera.mFieldOfView.get(), 60);
+        }
+
+        TEST_F(SettingsValuesTest, shouldFillIndexOnLoad)
+        {
+            Index index;
+            Values values(index);
+            EXPECT_EQ(index.get<float>("Camera", "field of view").get(), 60);
         }
 
         TEST_F(SettingsValuesTest, constructorShouldThrowExceptionOnMissingSetting)
         {
             Manager::mDefaultSettings.erase({ "Camera", "field of view" });
-            EXPECT_THROW([] { Values values; }(), std::runtime_error);
+            Index index;
+            EXPECT_THROW([&] { Values values(index); }(), std::runtime_error);
         }
 
         TEST_F(SettingsValuesTest, constructorShouldSanitize)
         {
             Manager::mUserSettings[std::make_pair("Camera", "field of view")] = "-1";
-            Values values;
+            Index index;
+            Values values(index);
             EXPECT_EQ(values.mCamera.mFieldOfView.get(), 1);
         }
 
         TEST_F(SettingsValuesTest, moveConstructorShouldSetDefaults)
         {
-            Values defaultValues;
+            Index index;
+            Values defaultValues(index);
             Manager::mUserSettings.emplace(std::make_pair("Camera", "field of view"), "61");
             Values values(std::move(defaultValues));
             EXPECT_EQ(values.mCamera.mFieldOfView.get(), 61);
@@ -61,15 +72,38 @@ namespace Settings
 
         TEST_F(SettingsValuesTest, moveConstructorShouldSanitize)
         {
-            Values defaultValues;
+            Index index;
+            Values defaultValues(index);
             Manager::mUserSettings[std::make_pair("Camera", "field of view")] = "-1";
             Values values(std::move(defaultValues));
             EXPECT_EQ(values.mCamera.mFieldOfView.get(), 1);
         }
 
+        TEST_F(SettingsValuesTest, findShouldThrowExceptionOnTypeMismatch)
+        {
+            Index index;
+            Values values(index);
+            EXPECT_THROW(index.find<int>("Camera", "field of view"), std::invalid_argument);
+        }
+
+        TEST_F(SettingsValuesTest, findShouldReturnNullptrForAbsentSetting)
+        {
+            Index index;
+            Values values(index);
+            EXPECT_EQ(index.find<int>("foo", "bar"), nullptr);
+        }
+
+        TEST_F(SettingsValuesTest, getShouldThrowExceptionForAbsentSetting)
+        {
+            Index index;
+            Values values(index);
+            EXPECT_THROW(index.get<int>("foo", "bar").get(), std::invalid_argument);
+        }
+
         TEST_F(SettingsValuesTest, setShouldChangeManagerUserSettings)
         {
-            Values values;
+            Index index;
+            Values values(index);
             values.mCamera.mFieldOfView.set(42);
             EXPECT_EQ(Manager::mUserSettings.at({ "Camera", "field of view" }), "42");
             EXPECT_THAT(Manager::mChangedSettings, ElementsAre(std::make_pair("Camera", "field of view")));
@@ -77,7 +111,8 @@ namespace Settings
 
         TEST_F(SettingsValuesTest, setShouldNotChangeManagerChangedSettingsForNoChange)
         {
-            Values values;
+            Index index;
+            Values values(index);
             values.mCamera.mFieldOfView.set(values.mCamera.mFieldOfView.get());
             EXPECT_THAT(Manager::mChangedSettings, ElementsAre());
         }

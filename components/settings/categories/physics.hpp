@@ -14,10 +14,12 @@
 
 namespace Settings
 {
-    struct PhysicsCategory
+    struct PhysicsCategory : WithIndex
     {
-        SettingValue<int> mAsyncNumThreads{ "Physics", "async num threads", makeMaxSanitizerInt(0) };
-        SettingValue<int> mLineofsightKeepInactiveCache{ "Physics", "lineofsight keep inactive cache",
+        using WithIndex::WithIndex;
+
+        SettingValue<int> mAsyncNumThreads{ mIndex, "Physics", "async num threads", makeMaxSanitizerInt(0) };
+        SettingValue<int> mLineofsightKeepInactiveCache{ mIndex, "Physics", "lineofsight keep inactive cache",
             makeMaxSanitizerInt(-1) };
     };
 }
