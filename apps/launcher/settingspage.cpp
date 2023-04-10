@@ -10,7 +10,51 @@
 
 #include <components/config/gamesettings.hpp>
 
+#include <components/settings/settings.hpp>
+
 #include "utils/openalutil.hpp"
+
+namespace
+{
+    void loadSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group)
+    {
+        if (Settings::Manager::getBool(setting, group))
+            checkbox->setCheckState(Qt::Checked);
+    }
+
+    void saveSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group)
+    {
+        const bool cValue = checkbox->checkState();
+        if (cValue != Settings::Manager::getBool(setting, group))
+            Settings::Manager::setBool(setting, group, cValue);
+    }
+
+    void loadSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group)
+    {
+        const int currentIndex = Settings::Manager::getInt(setting, group);
+        comboBox->setCurrentIndex(currentIndex);
+    }
+
+    void saveSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group)
+    {
+        const int currentIndex = comboBox->currentIndex();
+        if (currentIndex != Settings::Manager::getInt(setting, group))
+            Settings::Manager::setInt(setting, group, currentIndex);
+    }
+
+    void loadSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group)
+    {
+        const int value = Settings::Manager::getInt(setting, group);
+        spinBox->setValue(value);
+    }
+
+    void saveSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group)
+    {
+        const int value = spinBox->value();
+        if (value != Settings::Manager::getInt(setting, group))
+            Settings::Manager::setInt(setting, group, value);
+    }
+}
 
 Launcher::SettingsPage::SettingsPage(Config::GameSettings& gameSettings, QWidget* parent)
     : QWidget(parent)
@@ -419,45 +463,6 @@ void Launcher::SettingsPage::saveSettings()
         if (scriptRun != mGameSettings.value("script-run"))
             mGameSettings.setValue("script-run", scriptRun);
     }
-}
-
-void Launcher::SettingsPage::loadSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group)
-{
-    if (Settings::Manager::getBool(setting, group))
-        checkbox->setCheckState(Qt::Checked);
-}
-
-void Launcher::SettingsPage::saveSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group)
-{
-    bool cValue = checkbox->checkState();
-    if (cValue != Settings::Manager::getBool(setting, group))
-        Settings::Manager::setBool(setting, group, cValue);
-}
-
-void Launcher::SettingsPage::loadSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group)
-{
-    int currentIndex = Settings::Manager::getInt(setting, group);
-    comboBox->setCurrentIndex(currentIndex);
-}
-
-void Launcher::SettingsPage::saveSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group)
-{
-    int currentIndex = comboBox->currentIndex();
-    if (currentIndex != Settings::Manager::getInt(setting, group))
-        Settings::Manager::setInt(setting, group, currentIndex);
-}
-
-void Launcher::SettingsPage::loadSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group)
-{
-    int value = Settings::Manager::getInt(setting, group);
-    spinBox->setValue(value);
-}
-
-void Launcher::SettingsPage::saveSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group)
-{
-    int value = spinBox->value();
-    if (value != Settings::Manager::getInt(setting, group))
-        Settings::Manager::setInt(setting, group, value);
 }
 
 void Launcher::SettingsPage::slotLoadedCellsChanged(QStringList cellNames)

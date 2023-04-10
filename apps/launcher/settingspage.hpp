@@ -6,8 +6,6 @@
 
 #include "ui_settingspage.h"
 
-#include <components/settings/settings.hpp>
-
 namespace Config
 {
     class GameSettings;
@@ -45,12 +43,6 @@ namespace Launcher
          * @param filePaths the file paths of the content files to be examined
          */
         void loadCellsForAutocomplete(QStringList filePaths);
-        static void loadSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group);
-        static void saveSettingBool(QCheckBox* checkbox, const std::string& setting, const std::string& group);
-        static void loadSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group);
-        static void saveSettingInt(QComboBox* comboBox, const std::string& setting, const std::string& group);
-        static void loadSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group);
-        static void saveSettingInt(QSpinBox* spinBox, const std::string& setting, const std::string& group);
     };
 }
 #endif
