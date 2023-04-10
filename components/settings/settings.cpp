@@ -1,5 +1,6 @@
 #include "settings.hpp"
 #include "parser.hpp"
+#include "values.hpp"
 
 #include <charconv>
 #include <filesystem>
@@ -79,11 +80,19 @@ namespace Settings
             return doubleValue;
         }
 #endif
+        template <class T>
+        std::string serialize(const T& value)
+        {
+            std::ostringstream stream;
+            stream << value;
+            return stream.str();
+        }
     }
 
     CategorySettingValueMap Manager::mDefaultSettings = CategorySettingValueMap();
     CategorySettingValueMap Manager::mUserSettings = CategorySettingValueMap();
     CategorySettingVector Manager::mChangedSettings = CategorySettingVector();
+    std::set<std::pair<std::string_view, std::string_view>> Manager::sInitialized;
 
     void Manager::clear()
     {
@@ -135,6 +144,12 @@ namespace Settings
         auto settingspath = paths.back() / userSettingsFile;
         if (std::filesystem::exists(settingspath))
             parser.loadSettingsFile(settingspath, mUserSettings, false, false);
+
+        Settings::Values::init();
+
+        for (const auto& [key, value] : mDefaultSettings)
+            if (!sInitialized.contains(key))
+                throw std::runtime_error("Default setting [" + key.first + "] " + key.second + " is not initialized");
 
         return settingspath;
     }
@@ -201,6 +216,21 @@ namespace Settings
     std::size_t Manager::getSize(std::string_view setting, std::string_view category)
     {
         return parseNumberFromSetting<size_t>(getString(setting, category), setting, category);
+    }
+
+    unsigned Manager::getUnsigned(std::string_view setting, std::string_view category)
+    {
+        return parseNumberFromSetting<unsigned>(getString(setting, category), setting, category);
+    }
+
+    unsigned long Manager::getUnsignedLong(std::string_view setting, std::string_view category)
+    {
+        return parseNumberFromSetting<unsigned long>(getString(setting, category), setting, category);
+    }
+
+    unsigned long long Manager::getUnsignedLongLong(std::string_view setting, std::string_view category)
+    {
+        return parseNumberFromSetting<unsigned long long>(getString(setting, category), setting, category);
     }
 
     bool Manager::getBool(std::string_view setting, std::string_view category)
@@ -358,6 +388,61 @@ namespace Settings
         {
             mChangedSettings.erase(key);
         }
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, int value)
+    {
+        setInt(setting, category, value);
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, unsigned value)
+    {
+        setString(setting, category, serialize(value));
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, unsigned long value)
+    {
+        setString(setting, category, serialize(value));
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, unsigned long long value)
+    {
+        setString(setting, category, serialize(value));
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, float value)
+    {
+        setFloat(setting, category, value);
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, double value)
+    {
+        setDouble(setting, category, value);
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, const std::string& value)
+    {
+        setString(setting, category, value);
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, bool value)
+    {
+        setBool(setting, category, value);
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, const osg::Vec2f& value)
+    {
+        setVector2(setting, category, value);
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, const osg::Vec3f& value)
+    {
+        setVector3(setting, category, value);
+    }
+
+    void Manager::recordInit(std::string_view setting, std::string_view category)
+    {
+        sInitialized.emplace(category, setting);
     }
 
 }
