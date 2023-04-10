@@ -130,6 +130,8 @@ namespace Settings
                 + "\" was properly installed.");
         parser.loadSettingsFile(defaultsBin, mDefaultSettings, true, false);
 
+        const CategorySettingValueMap originalDefaultSettings = mDefaultSettings;
+
         // Load "settings.cfg" or "openmw-cs.cfg" from every config dir except the last one as additional default
         // settings.
         for (int i = 0; i < static_cast<int>(paths.size()) - 1; ++i)
@@ -147,7 +149,7 @@ namespace Settings
 
         Settings::Values::init();
 
-        for (const auto& [key, value] : mDefaultSettings)
+        for (const auto& [key, value] : originalDefaultSettings)
             if (!sInitialized.contains(key))
                 throw std::runtime_error("Default setting [" + key.first + "] " + key.second + " is not initialized");
 
