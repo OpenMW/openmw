@@ -63,7 +63,7 @@ namespace ESM4
 
         struct RegionSound
         {
-            FormId sound;
+            FormId32 sound;
             std::uint32_t flags; // 0 pleasant, 1 cloudy, 2 rainy, 3 snowy
             std::uint32_t chance;
         };

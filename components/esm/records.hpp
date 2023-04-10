@@ -42,6 +42,23 @@
 #include "components/esm3/loadsscr.hpp"
 #include "components/esm3/loadstat.hpp"
 #include "components/esm3/loadweap.hpp"
+
+#include <components/esm4/loadacti.hpp>
+#include <components/esm4/loadalch.hpp>
+#include <components/esm4/loadammo.hpp>
+#include <components/esm4/loadarmo.hpp>
+#include <components/esm4/loadbook.hpp>
+#include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadclot.hpp>
+#include <components/esm4/loadcont.hpp>
+#include <components/esm4/loaddoor.hpp>
+#include <components/esm4/loadingr.hpp>
+#include <components/esm4/loadligh.hpp>
+#include <components/esm4/loadmisc.hpp>
+#include <components/esm4/loadrefr.hpp>
+#include <components/esm4/loadstat.hpp>
+#include <components/esm4/loadweap.hpp>
+
 #include "defs.hpp"
 
 // Special records which are not loaded from ESM

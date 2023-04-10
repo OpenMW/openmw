@@ -259,7 +259,7 @@ MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::RefId& id)
     CellStore* newCellStore = nullptr;
     if (!cell4)
     {
-        const ESM::Cell* cell = mStore.get<ESM::Cell>().search(id);
+        const ESM::Cell* cell = mStore.get<ESM::Cell>().find(id);
         newCellStore = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
     }
     else

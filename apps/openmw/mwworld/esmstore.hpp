@@ -30,6 +30,18 @@ namespace ESM4
     struct Static;
     struct Cell;
     struct Light;
+    struct Reference;
+    struct Activator;
+    struct Potion;
+    struct Ammunition;
+    struct Armor;
+    struct Book;
+    struct Clothing;
+    struct Container;
+    struct Door;
+    struct Ingredient;
+    struct MiscItem;
+    struct Weapon;
 }
 
 namespace ESM
@@ -105,7 +117,10 @@ namespace MWWorld
             // Special entry which is hardcoded and not loaded from an ESM
             Store<ESM::Attribute>,
 
-            Store<ESM4::Static>, Store<ESM4::Cell>, Store<ESM4::Light>>;
+            Store<ESM4::Static>, Store<ESM4::Cell>, Store<ESM4::Light>, Store<ESM4::Reference>, Store<ESM4::Activator>,
+            Store<ESM4::Potion>, Store<ESM4::Ammunition>, Store<ESM4::Armor>, Store<ESM4::Book>, Store<ESM4::Clothing>,
+            Store<ESM4::Container>, Store<ESM4::Door>, Store<ESM4::Ingredient>, Store<ESM4::MiscItem>,
+            Store<ESM4::Weapon>>;
 
     private:
         template <typename T>

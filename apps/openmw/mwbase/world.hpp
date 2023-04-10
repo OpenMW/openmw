@@ -519,9 +519,6 @@ namespace MWBase
         /// \return empty RefId if interior with given name not exists, the cell's RefId otherwise
         virtual ESM::RefId findInteriorPosition(std::string_view name, ESM::Position& pos) = 0;
 
-        /// Find default position inside interior or exterior cell specified by name
-        /// \return empty RefId if interior with given name not exists, the cell's RefId otherwise
-        virtual ESM::RefId findCellPosition(std::string_view cellName, ESM::Position& pos) = 0;
         /// Enables or disables use of teleport spell effects (recall, intervention, etc).
         virtual void enableTeleporting(bool enable) = 0;
 

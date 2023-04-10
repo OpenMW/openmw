@@ -25,7 +25,7 @@ namespace MWWorld
     const ESM::RefNum& CellRef::getRefNum() const
     {
         return std::visit(ESM::VisitOverload{
-                              [&](const ESM4::Reference& /*ref*/) -> const ESM::RefNum& { return emptyRefNum; },
+                              [&](const ESM4::Reference& ref) -> const ESM::RefNum& { return ref.mFormId; },
                               [&](const ESM::CellRef& ref) -> const ESM::RefNum& { return ref.mRefNum; },
                           },
             mCellRef.mVariant);
@@ -33,36 +33,33 @@ namespace MWWorld
 
     const ESM::RefNum& CellRef::getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum)
     {
-        auto esm3Visit = [&](ESM::CellRef& ref) -> const ESM::RefNum& {
-            if (!ref.mRefNum.isSet())
-            {
-                // Generated RefNums have negative mContentFile
-                assert(lastAssignedRefNum.mContentFile < 0);
-                lastAssignedRefNum.mIndex++;
-                if (lastAssignedRefNum.mIndex == 0) // mIndex overflow, so mContentFile should be changed
-                {
-                    if (lastAssignedRefNum.mContentFile > std::numeric_limits<int32_t>::min())
-                        lastAssignedRefNum.mContentFile--;
-                    else
-                        Log(Debug::Error) << "RefNum counter overflow in CellRef::getOrAssignRefNum";
-                }
-                ref.mRefNum = lastAssignedRefNum;
-                mChanged = true;
-            }
-            return ref.mRefNum;
-        };
-        return std::visit(
-            ESM::VisitOverload{
-                [&](ESM4::Reference& /*ref*/) -> const ESM::RefNum& { return emptyRefNum; },
-                esm3Visit,
-            },
+        ESM::RefNum& refNum = std::visit(ESM::VisitOverload{
+                                             [&](ESM4::Reference& ref) -> ESM::RefNum& { return ref.mFormId; },
+                                             [&](ESM::CellRef& ref) -> ESM::RefNum& { return ref.mRefNum; },
+                                         },
             mCellRef.mVariant);
+        if (!refNum.isSet())
+        {
+            // Generated RefNums have negative mContentFile
+            assert(lastAssignedRefNum.mContentFile < 0);
+            lastAssignedRefNum.mIndex++;
+            if (lastAssignedRefNum.mIndex == 0) // mIndex overflow, so mContentFile should be changed
+            {
+                if (lastAssignedRefNum.mContentFile > std::numeric_limits<int32_t>::min())
+                    lastAssignedRefNum.mContentFile--;
+                else
+                    Log(Debug::Error) << "RefNum counter overflow in CellRef::getOrAssignRefNum";
+            }
+            refNum = lastAssignedRefNum;
+            mChanged = true;
+        }
+        return refNum;
     }
 
     void CellRef::unsetRefNum()
     {
         std::visit(ESM::VisitOverload{
-                       [&](ESM4::Reference& /*ref*/) {},
+                       [&](ESM4::Reference& ref) { ref.mFormId = emptyRefNum; },
                        [&](ESM::CellRef& ref) { ref.mRefNum = emptyRefNum; },
                    },
             mCellRef.mVariant);

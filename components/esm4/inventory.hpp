@@ -39,14 +39,14 @@ namespace ESM4
     {
         std::int16_t level;
         std::uint16_t unknown; // sometimes missing
-        FormId item;
+        FormId32 item;
         std::int16_t count;
         std::uint16_t unknown2; // sometimes missing
     };
 
     struct InventoryItem // NPC_, CREA, CONT
     {
-        FormId item;
+        FormId32 item;
         std::uint32_t count;
     };
 #pragma pack(pop)

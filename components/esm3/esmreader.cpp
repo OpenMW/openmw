@@ -248,6 +248,16 @@ namespace ESM
         getHExact(p, size);
     }
 
+    FormId ESMReader::getFormId(bool wide, NAME tag)
+    {
+        FormId res;
+        if (wide)
+            getHNTSized<8>(res, tag);
+        else
+            getHNT(res.mIndex, tag);
+        return res;
+    }
+
     // Get the next subrecord name and check if it matches the parameter
     void ESMReader::getSubNameIs(NAME name)
     {
@@ -473,7 +483,7 @@ namespace ESM
                 return RefId::stringRefId(getStringView(size - sizeof(refIdType)));
             case RefIdType::FormId:
             {
-                ESM4::FormId formId{};
+                FormId formId{};
                 getT(formId);
                 return RefId::formIdRefId(formId);
             }

@@ -43,7 +43,7 @@ namespace MWLua
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        addRecordFunctionBinding<ESM::Door>(door);
+        addRecordFunctionBinding<ESM::Door>(door, context);
 
         sol::usertype<ESM::Door> record = context.mLua->sol().new_usertype<ESM::Door>("ESM3_Door");
         record[sol::meta_function::to_string]

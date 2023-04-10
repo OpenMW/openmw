@@ -145,7 +145,7 @@ namespace MWMechanics
 
         void openDoors(const MWWorld::Ptr& actor);
 
-        const PathgridGraph& getPathGridGraph(const MWWorld::CellStore* cell);
+        const PathgridGraph& getPathGridGraph(const MWWorld::CellStore* cell) const;
 
         DetourNavigator::Flags getNavigatorFlags(const MWWorld::Ptr& actor) const;
 

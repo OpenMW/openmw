@@ -50,7 +50,7 @@
 // longer/shorter/same as loading the subrecords.
 void ESM4::Cell::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.id;
+    mFormId = reader.hdr().record.getFormId();
     reader.adjustFormId(mFormId);
     mId = ESM::RefId::formIdRefId(mFormId);
     mFlags = reader.hdr().record.flags;
@@ -66,8 +66,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
         && reader.grp().label.grid[0] == 0)
     {
         ESM4::CellGrid currCellGrid;
-        currCellGrid.grid.x = 0;
-        currCellGrid.grid.y = 0;
+        currCellGrid = Grid{ 0, 0 };
         reader.setCurrCellGrid(currCellGrid); // side effect: sets mCellGridValid  true
     }
 
@@ -123,10 +122,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 
                 // Remember cell grid for later (loading LAND, NAVM which should be CELL temporary children)
                 // Note that grids only apply for external cells.  For interior cells use the cell's formid.
-                ESM4::CellGrid currCell;
-                currCell.grid.x = (int16_t)mX;
-                currCell.grid.y = (int16_t)mY;
-                reader.setCurrCellGrid(currCell);
+                reader.setCurrCellGrid(Grid{ static_cast<int16_t>(mX), static_cast<int16_t>(mY) });
 
                 break;
             }
@@ -156,7 +152,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_XCLR: // for exterior cells
             {
-                mRegions.resize(subHdr.dataSize / sizeof(FormId));
+                mRegions.resize(subHdr.dataSize / sizeof(FormId32));
                 for (std::vector<FormId>::iterator it = mRegions.begin(); it != mRegions.end(); ++it)
                 {
                     reader.getFormId(*it);

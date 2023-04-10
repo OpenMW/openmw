@@ -14,10 +14,6 @@
 #include <components/misc/algorithm.hpp>
 
 #include <components/esm4/common.hpp>
-#include <components/esm4/loadcell.hpp>
-#include <components/esm4/loadligh.hpp>
-#include <components/esm4/loadrefr.hpp>
-#include <components/esm4/loadstat.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/esm4/readerutils.hpp>
 #include <components/esmloader/load.hpp>
@@ -281,6 +277,16 @@ namespace MWWorld
             case ESM::REC_BODY:
             case ESM::REC_STAT4:
             case ESM::REC_LIGH4:
+            case ESM::REC_ACTI4:
+            case ESM::REC_ALCH4:
+            case ESM::REC_AMMO4:
+            case ESM::REC_ARMO4:
+            case ESM::REC_BOOK4:
+            case ESM::REC_CONT4:
+            case ESM::REC_DOOR4:
+            case ESM::REC_INGR4:
+            case ESM::REC_MISC4:
+            case ESM::REC_WEAP4:
                 return true;
                 break;
         }

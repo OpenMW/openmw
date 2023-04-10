@@ -25,7 +25,7 @@ namespace MWLua
     {
         addNpcStatsBindings(npc, context);
 
-        addRecordFunctionBinding<ESM::NPC>(npc);
+        addRecordFunctionBinding<ESM::NPC>(npc, context);
 
         sol::usertype<ESM::NPC> record = context.mLua->sol().new_usertype<ESM::NPC>("ESM3_NPC");
         record[sol::meta_function::to_string]

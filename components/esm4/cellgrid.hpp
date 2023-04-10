@@ -27,18 +27,14 @@
 #ifndef OPENMW_COMPONENTS_ESM4_CELLGRID_H
 #define OPENMW_COMPONENTS_ESM4_CELLGRID_H
 
-#include <cstdint>
+#include <variant>
 
 #include "formid.hpp"
 #include "grid.hpp"
 
 namespace ESM4
 {
-    union CellGrid
-    {
-        FormId cellId;
-        Grid grid;
-    };
+    using CellGrid = std::variant<ESM::FormId, Grid>;
 }
 
 #endif // OPENMW_COMPONENTS_ESM4_CELLGRID_H

@@ -107,22 +107,27 @@ namespace MWGui
             scanner.listKeywords(mNames);
 
             // identifier
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
             std::vector<ESM::RefId> ids;
-            for (MWWorld::ESMStore::iterator it = store.begin(); it != store.end(); ++it)
+            for (const auto* store : esmStore)
             {
-                (*it)->listIdentifier(ids);
+                store->listIdentifier(ids);
                 for (auto id : ids)
                 {
-                    mNames.push_back(id.getRefIdString());
+                    visit(
+                        [&](auto&& variant) {
+                            using T = std::decay_t<decltype(variant)>;
+                            if constexpr (std::is_same_v<T, ESM::StringRefId>)
+                                mNames.push_back(id.getRefIdString());
+                        },
+                        id);
                 }
                 ids.clear();
             }
 
             // exterior cell names aren't technically identifiers, but since the COC function accepts them,
             // we should list them too
-            for (MWWorld::Store<ESM::Cell>::iterator it = store.get<ESM::Cell>().extBegin();
-                 it != store.get<ESM::Cell>().extEnd(); ++it)
+            for (auto it = esmStore.get<ESM::Cell>().extBegin(); it != esmStore.get<ESM::Cell>().extEnd(); ++it)
             {
                 if (!it->mName.empty())
                     mNames.push_back(it->mName);

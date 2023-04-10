@@ -13,6 +13,8 @@
 CSMFilter::TextNode::TextNode(int columnId, const std::string& text)
     : mColumnId(columnId)
     , mText(text)
+    , mRegExp(QRegularExpression::anchoredPattern(QString::fromUtf8(mText.c_str())),
+          QRegularExpression::CaseInsensitiveOption)
 {
 }
 
@@ -57,9 +59,7 @@ bool CSMFilter::TextNode::test(const CSMWorld::IdTableBase& table, int row, cons
         return false;
 
     /// \todo make pattern syntax configurable
-    QRegularExpression regExp(QRegularExpression::anchoredPattern(QString::fromUtf8(mText.c_str())),
-        QRegularExpression::CaseInsensitiveOption);
-    QRegularExpressionMatch match = regExp.match(string);
+    QRegularExpressionMatch match = mRegExp.match(string);
 
     return match.hasMatch();
 }

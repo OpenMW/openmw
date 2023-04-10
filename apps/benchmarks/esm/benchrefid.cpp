@@ -82,6 +82,23 @@ namespace
         return generateSerializedRefIds(generateGeneratedRefIds(random), serialize);
     }
 
+    template <class Random>
+    std::vector<ESM::RefId> generateESM3ExteriorCellRefIds(Random& random)
+    {
+        std::vector<ESM::RefId> result;
+        result.reserve(refIdsCount);
+        std::uniform_int_distribution<std::int32_t> distribution(-100, 100);
+        std::generate_n(std::back_inserter(result), refIdsCount,
+            [&] { return ESM::ESM3ExteriorCellRefId(distribution(random), distribution(random)); });
+        return result;
+    }
+
+    template <class Random, class Serialize>
+    std::vector<std::string> generateSerializedESM3ExteriorCellRefIds(Random& random, Serialize&& serialize)
+    {
+        return generateSerializedRefIds(generateESM3ExteriorCellRefIds(random), serialize);
+    }
+
     void serializeRefId(benchmark::State& state)
     {
         std::minstd_rand random;
@@ -189,6 +206,33 @@ namespace
                 i = 0;
         }
     }
+
+    void serializeTextESM3ExteriorCellRefId(benchmark::State& state)
+    {
+        std::minstd_rand random;
+        std::vector<ESM::RefId> refIds = generateESM3ExteriorCellRefIds(random);
+        std::size_t i = 0;
+        for (auto _ : state)
+        {
+            benchmark::DoNotOptimize(refIds[i].serializeText());
+            if (++i >= refIds.size())
+                i = 0;
+        }
+    }
+
+    void deserializeTextESM3ExteriorCellRefId(benchmark::State& state)
+    {
+        std::minstd_rand random;
+        std::vector<std::string> serializedRefIds
+            = generateSerializedESM3ExteriorCellRefIds(random, [](ESM::RefId v) { return v.serializeText(); });
+        std::size_t i = 0;
+        for (auto _ : state)
+        {
+            benchmark::DoNotOptimize(ESM::RefId::deserializeText(serializedRefIds[i]));
+            if (++i >= serializedRefIds.size())
+                i = 0;
+        }
+    }
 }
 
 BENCHMARK(serializeRefId)->RangeMultiplier(4)->Range(8, 64);
@@ -199,5 +243,7 @@ BENCHMARK(serializeTextGeneratedRefId);
 BENCHMARK(deserializeTextGeneratedRefId);
 BENCHMARK(serializeTextIndexRefId);
 BENCHMARK(deserializeTextIndexRefId);
+BENCHMARK(serializeTextESM3ExteriorCellRefId);
+BENCHMARK(deserializeTextESM3ExteriorCellRefId);
 
 BENCHMARK_MAIN();

@@ -56,7 +56,7 @@ namespace ESM4
         struct ExtConnection
         {
             std::uint32_t unknown;
-            FormId navMesh;
+            FormId32 navMesh;
             std::uint16_t triangleIndex;
         };
 
@@ -64,7 +64,7 @@ namespace ESM4
         {
             std::uint16_t triangleIndex;
             std::uint32_t unknown;
-            FormId doorRef;
+            FormId32 doorRef;
         };
 #pragma pack(pop)
 

@@ -82,15 +82,13 @@ namespace MWLua
     void WorldView::load(ESM::ESMReader& esm)
     {
         esm.getHNT(mSimulationTime, "LUAW");
-        ObjectId lastAssignedId;
-        lastAssignedId.load(esm, true);
-        MWBase::Environment::get().getWorldModel()->setLastGeneratedRefNum(lastAssignedId);
+        MWBase::Environment::get().getWorldModel()->setLastGeneratedRefNum(esm.getFormId(true));
     }
 
     void WorldView::save(ESM::ESMWriter& esm) const
     {
         esm.writeHNT("LUAW", mSimulationTime);
-        MWBase::Environment::get().getWorldModel()->getLastGeneratedRefNum().save(esm, true);
+        esm.writeFormId(MWBase::Environment::get().getWorldModel()->getLastGeneratedRefNum(), true);
     }
 
     void WorldView::ObjectGroup::updateList()

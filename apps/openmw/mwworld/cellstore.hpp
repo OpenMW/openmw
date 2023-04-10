@@ -27,7 +27,8 @@ namespace ESM
     class ReadersCache;
     struct Cell;
     struct CellState;
-    struct RefNum;
+    struct FormId;
+    using RefNum = FormId;
     struct Activator;
     struct Potion;
     struct Apparatus;
@@ -59,6 +60,17 @@ namespace ESM4
     struct Reference;
     struct Static;
     struct Light;
+    struct Activator;
+    struct Potion;
+    struct Ammunition;
+    struct Armor;
+    struct Book;
+    struct Clothing;
+    struct Container;
+    struct Door;
+    struct Ingredient;
+    struct MiscItem;
+    struct Weapon;
 }
 
 namespace MWWorld
@@ -73,7 +85,10 @@ namespace MWWorld
         CellRefList<ESM::Lockpick>, CellRefList<ESM::Miscellaneous>, CellRefList<ESM::NPC>, CellRefList<ESM::Probe>,
         CellRefList<ESM::Repair>, CellRefList<ESM::Static>, CellRefList<ESM::Weapon>, CellRefList<ESM::BodyPart>,
 
-        CellRefList<ESM4::Static>, CellRefList<ESM4::Light>>;
+        CellRefList<ESM4::Static>, CellRefList<ESM4::Light>, CellRefList<ESM4::Activator>, CellRefList<ESM4::Potion>,
+        CellRefList<ESM4::Ammunition>, CellRefList<ESM4::Armor>, CellRefList<ESM4::Book>, CellRefList<ESM4::Clothing>,
+        CellRefList<ESM4::Container>, CellRefList<ESM4::Door>, CellRefList<ESM4::Ingredient>,
+        CellRefList<ESM4::MiscItem>, CellRefList<ESM4::Weapon>>;
 
     /// \brief Mutable state of a cell
     class CellStore

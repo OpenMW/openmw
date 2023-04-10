@@ -33,8 +33,7 @@
 
 void ESM4::Book::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.id;
-    reader.adjustFormId(mFormId);
+    mId = reader.getRefIdFromHeader();
     mFlags = reader.hdr().record.flags;
     // std::uint32_t esmVer = reader.esmVersion(); // currently unused
 

@@ -21,7 +21,8 @@ namespace ESM
 {
     class ESMWriter;
     class ESMReader;
-    struct RefNum;
+    struct FormId;
+    using RefNum = FormId;
 }
 
 namespace Loading

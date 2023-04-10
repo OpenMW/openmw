@@ -9,6 +9,7 @@
 #include <components/esm4/reader.hpp>
 #include <components/files/conversion.hpp>
 #include <components/files/openfile.hpp>
+#include <components/misc/strings/lower.hpp>
 #include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -66,10 +67,13 @@ namespace MWWorld
                 ESM4::Reader readerESM4(
                     std::move(stream), filepath, MWBase::Environment::get().getResourceSystem()->getVFS());
                 readerESM4.setEncoder(mReaders.getStatelessEncoder());
+                readerESM4.setModIndex(index);
+                readerESM4.updateModIndices(mNameToIndex);
                 mStore.loadESM4(readerESM4);
                 break;
             }
         }
+        mNameToIndex[Misc::StringUtils::lowerCase(Files::pathToUnicodeString(filepath.filename()))] = index;
     }
 
 } /* namespace MWWorld */

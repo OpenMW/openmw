@@ -20,6 +20,7 @@
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadgmst.hpp>
+#include <components/esm3/loadlevlist.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadstat.hpp>
@@ -1435,9 +1436,7 @@ namespace MWWorld
             esmPos.pos[0] = traced.x();
             esmPos.pos[1] = traced.y();
             esmPos.pos[2] = traced.z();
-            ESM::RefId cell;
-            if (!actor.getCell()->isExterior())
-                cell = actor.getCell()->getCell()->getId();
+            ESM::RefId cell = actor.getCell()->getCell()->getId();
             MWWorld::ActionTeleport(cell, esmPos, false).execute(actor);
         }
     }
@@ -2842,24 +2841,6 @@ namespace MWWorld
         return ESM::RefId::sEmpty;
     }
 
-    ESM::RefId World::findCellPosition(std::string_view cellName, ESM::Position& pos)
-    {
-        ESM::RefId foundCell;
-        try
-        {
-            foundCell = findInteriorPosition(cellName, pos);
-        }
-        catch (std::exception&)
-        {
-        }
-        if (foundCell.empty())
-        {
-            return findExteriorPosition(cellName, pos);
-        }
-
-        return foundCell;
-    }
-
     ESM::RefId World::findExteriorPosition(std::string_view nameId, ESM::Position& pos)
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
@@ -3446,9 +3427,7 @@ namespace MWWorld
             return;
         }
 
-        ESM::RefId cellId;
-        if (!closestMarker.mCell->isExterior())
-            cellId = closestMarker.mCell->getCell()->getId();
+        ESM::RefId cellId = closestMarker.mCell->getCell()->getId();
 
         MWWorld::ActionTeleport action(cellId, closestMarker.getRefData().getPosition(), false);
         action.execute(ptr);

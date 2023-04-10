@@ -42,7 +42,39 @@ add_component_dir (l10n
     )
 
 add_component_dir (settings
-    settings parser
+    categories
+    categories/camera
+    categories/cells
+    categories/fog
+    categories/game
+    categories/general
+    categories/groundcover
+    categories/gui
+    categories/hud
+    categories/input
+    categories/lua
+    categories/map
+    categories/models
+    categories/navigator
+    categories/physics
+    categories/postprocessing
+    categories/saves
+    categories/shaders
+    categories/shadows
+    categories/sound
+    categories/stereo
+    categories/stereoview
+    categories/terrain
+    categories/video
+    categories/water
+    categories/windows
+    parser
+    sanitizer
+    sanitizerimpl
+    settings
+    settingvalue
+    shadermanager
+    values
     )
 
 add_component_dir (bsa
@@ -86,6 +118,7 @@ add_component_dir (to_utf8
     )
 
 add_component_dir(esm attr common defs esmcommon records util luascripts format refid esmbridge
+    formid
     formidrefid
     stringrefid
     generatedrefid

@@ -23,7 +23,7 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        addRecordFunctionBinding<ESM::Static>(stat);
+        addRecordFunctionBinding<ESM::Static>(stat, context);
 
         sol::usertype<ESM::Static> record = context.mLua->sol().new_usertype<ESM::Static>("ESM3_Static");
         record[sol::meta_function::to_string]

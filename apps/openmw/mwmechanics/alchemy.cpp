@@ -563,15 +563,9 @@ std::string MWMechanics::Alchemy::suggestPotionName()
 {
     std::set<MWMechanics::EffectKey> effects = listEffects();
     if (effects.empty())
-        return "";
+        return {};
 
-    int effectId = effects.begin()->mId;
-    return MWBase::Environment::get()
-        .getWorld()
-        ->getStore()
-        .get<ESM::GameSetting>()
-        .find(ESM::MagicEffect::effectIdToString(effectId))
-        ->mValue.getString();
+    return effects.begin()->toString();
 }
 
 std::vector<std::string> MWMechanics::Alchemy::effectsDescription(const MWWorld::ConstPtr& ptr, const int alchemySkill)
@@ -580,6 +574,7 @@ std::vector<std::string> MWMechanics::Alchemy::effectsDescription(const MWWorld:
 
     const auto& item = ptr.get<ESM::Ingredient>()->mBase;
     const auto& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+    const auto& mgef = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>();
     const static auto fWortChanceValue = gmst.find("fWortChanceValue")->mValue.getFloat();
     const auto& data = item->mData;
 
@@ -594,12 +589,7 @@ std::vector<std::string> MWMechanics::Alchemy::effectsDescription(const MWWorld:
 
         if (effectID != -1)
         {
-            std::string effect = gmst.find(ESM::MagicEffect::effectIdToString(effectID))->mValue.getString();
-
-            if (skillID != -1)
-                effect += " " + gmst.find(ESM::Skill::sSkillNameIds[skillID])->mValue.getString();
-            else if (attributeID != -1)
-                effect += " " + gmst.find(ESM::Attribute::sGmstAttributeIds[attributeID])->mValue.getString();
+            std::string effect = getMagicEffectString(*mgef.find(effectID), attributeID, skillID);
 
             effects.push_back(effect);
         }

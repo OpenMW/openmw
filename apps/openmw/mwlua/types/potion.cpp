@@ -41,7 +41,7 @@ namespace MWLua
 {
     void addPotionBindings(sol::table potion, const Context& context)
     {
-        addRecordFunctionBinding<ESM::Potion>(potion);
+        addRecordFunctionBinding<ESM::Potion>(potion, context);
 
         // Creates a new potion struct but does not store it in MWWorld::ESMStore.
         // Global scripts can use world.createRecord to add the potion to the world.

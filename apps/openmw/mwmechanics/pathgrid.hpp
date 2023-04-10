@@ -5,49 +5,44 @@
 
 #include <components/esm3/loadpgrd.hpp>
 
-namespace ESM
-{
-    struct Cell;
-}
-
-namespace MWWorld
-{
-    class CellStore;
-    class Cell;
-}
-
 namespace MWMechanics
 {
     class PathgridGraph
     {
+        PathgridGraph()
+            : mPathgrid(nullptr)
+        {
+        }
+
     public:
-        PathgridGraph(const MWWorld::CellStore* cell);
+        explicit PathgridGraph(const ESM::Pathgrid& pathGrid);
 
-        bool load(const MWWorld::CellStore* cell);
-
-        const ESM::Pathgrid* getPathgrid() const;
+        const ESM::Pathgrid* getPathgrid() const { return mPathgrid; }
 
         // returns true if end point is strongly connected (i.e. reachable
         // from start point) both start and end are pathgrid point indexes
-        bool isPointConnected(const int start, const int end) const;
+        bool isPointConnected(const size_t start, const size_t end) const;
 
         // get neighbouring nodes for index node and put them to "nodes" vector
-        void getNeighbouringPoints(const int index, ESM::Pathgrid::PointList& nodes) const;
+        void getNeighbouringPoints(const size_t index, ESM::Pathgrid::PointList& nodes) const;
 
         // the input parameters are pathgrid point indexes
         // the output list is in local (internal cells) or world (external
         // cells) coordinates
         //
         // NOTE: if start equals end an empty path is returned
-        std::deque<ESM::Pathgrid::Point> aStarSearch(const int start, const int end) const;
+        std::deque<ESM::Pathgrid::Point> aStarSearch(const size_t start, const size_t end) const;
+
+        static const PathgridGraph sEmpty;
 
     private:
-        const MWWorld::Cell* mCell;
         const ESM::Pathgrid* mPathgrid;
+
+        class Builder;
 
         struct ConnectedPoint // edge
         {
-            int index; // pathgrid point index of neighbour
+            size_t index; // pathgrid point index of neighbour
             float cost;
         };
 
@@ -67,17 +62,6 @@ namespace MWMechanics
         //   all other pathgrid points are the third set
         //
         std::vector<Node> mGraph;
-        bool mIsGraphConstructed;
-
-        // variables used to calculate connected components
-        int mSCCId;
-        int mSCCIndex;
-        std::vector<int> mSCCStack;
-        typedef std::pair<int, int> VPair; // first is index, second is lowlink
-        std::vector<VPair> mSCCPoint;
-        // methods used to calculate connected components
-        void recursiveStrongConnect(int v);
-        void buildConnectedPoints();
     };
 }
 

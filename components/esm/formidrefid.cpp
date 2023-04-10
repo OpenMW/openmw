@@ -1,23 +1,28 @@
 #include "formidrefid.hpp"
 
-#include "serializerefid.hpp"
-
+#include <cassert>
 #include <ostream>
+
+#include "serializerefid.hpp"
 
 namespace ESM
 {
     std::string FormIdRefId::toString() const
     {
         std::string result;
-        result.resize(getIntegralSize(mValue) + 2, '\0');
-        serializeIntegral(mValue, 0, result);
+        assert((mValue.mIndex & 0xff000000) == 0);
+        size_t v = (static_cast<size_t>(mValue.mContentFile) << 24) | mValue.mIndex;
+        result.resize(getHexIntegralSize(v) + 2, '\0');
+        serializeHexIntegral(v, 0, result);
         return result;
     }
 
     std::string FormIdRefId::toDebugString() const
     {
         std::string result;
-        serializeRefIdValue(mValue, formIdRefIdPrefix, result);
+        assert((mValue.mIndex & 0xff000000) == 0);
+        size_t v = (static_cast<size_t>(mValue.mContentFile) << 24) | mValue.mIndex;
+        serializeRefIdValue(v, formIdRefIdPrefix, result);
         return result;
     }
 

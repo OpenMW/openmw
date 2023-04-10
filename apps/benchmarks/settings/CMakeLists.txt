@@ -1,0 +1,15 @@
+openmw_add_executable(openmw_settings_access_benchmark access.cpp)
+target_link_libraries(openmw_settings_access_benchmark benchmark::benchmark components)
+
+if (UNIX AND NOT APPLE)
+    target_link_libraries(openmw_settings_access_benchmark ${CMAKE_THREAD_LIBS_INIT})
+endif()
+
+if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+    target_precompile_headers(openmw_settings_access_benchmark PRIVATE <algorithm>)
+endif()
+
+if (BUILD_WITH_CODE_COVERAGE)
+    target_compile_options(openmw_settings_access_benchmark PRIVATE --coverage)
+    target_link_libraries(openmw_settings_access_benchmark gcov)
+endif()

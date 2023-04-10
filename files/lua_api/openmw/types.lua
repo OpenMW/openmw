@@ -467,6 +467,11 @@
 -- @return #CreatureRecord
 
 ---
+-- Returns a read-only list of all @{#CreatureRecord}s in the world database.
+-- @function [parent=#Creature] records
+-- @return #list<#CreatureRecord>
+
+---
 -- @type CreatureRecord
 -- @field #string name
 -- @field #string baseCreature Record id of a base creature, which was modified to create this one
@@ -501,6 +506,11 @@
 -- @function [parent=#NPC] record
 -- @param #any objectOrRecordId
 -- @return #NpcRecord
+
+---
+-- Returns a read-only list of all @{#NpcRecord}s in the world database.
+-- @function [parent=#Npc] records
+-- @return #list<#NpcRecord>
 
 ---
 -- @type NpcRecord
@@ -563,6 +573,11 @@
 -- @function [parent=#Armor] record
 -- @param #any objectOrRecordId
 -- @return #ArmorRecord
+
+---
+-- Returns a read-only list of all @{#ArmorRecord}s in the world database.
+-- @function [parent=#Armor] records
+-- @return #list<#ArmorRecord>
 
 ---
 -- @type ArmorRecord
@@ -635,6 +650,11 @@
 -- @return #BookRecord
 
 ---
+-- Returns a read-only list of all @{#BookRecord}s in the world database.
+-- @function [parent=#Book] records
+-- @return #list<#BookRecord>
+
+---
 -- @type BookRecord
 -- @field #string id The record ID of the book
 -- @field #string name Name of the book
@@ -688,6 +708,11 @@
 -- @return #ClothingRecord
 
 ---
+-- Returns a read-only list of all @{#ClothingRecord}s in the world database.
+-- @function [parent=#Clothing] records
+-- @return #list<#ClothingRecord>
+
+---
 -- @type ClothingRecord
 -- @field #string id Record id
 -- @field #string name Name of the clothing
@@ -724,6 +749,11 @@
 -- @return #IngredientRecord
 
 ---
+-- Returns a read-only list of all @{#IngredientRecord}s in the world database.
+-- @function [parent=#Ingredient] records
+-- @return #list<#IngredientRecord>
+
+---
 -- @type IngredientRecord
 -- @field #string id Record id
 -- @field #string name Human-readable name
@@ -754,6 +784,11 @@
 -- @function [parent=#Light] record
 -- @param #any objectOrRecordId
 -- @return #LightRecord
+
+---
+-- Returns a read-only list of all @{#LightRecord}s in the world database.
+-- @function [parent=#Light] records
+-- @return #list<#LightRecord>
 
 ---
 -- @type LightRecord
@@ -793,6 +828,11 @@
 -- @return #MiscellaneousRecord
 
 ---
+-- Returns a read-only list of all @{#MiscellaneousRecord}s in the world database.
+-- @function [parent=#Miscellaneous] records
+-- @return #list<#MiscellaneousRecord>
+
+---
 -- @type MiscellaneousRecord
 -- @field #string id The record ID of the miscellaneous item
 -- @field #string name The name of the miscellaneous item
@@ -822,6 +862,11 @@
 -- @function [parent=#Potion] record
 -- @param #any objectOrRecordId
 -- @return #PotionRecord
+
+---
+-- Returns a read-only list of all @{#PotionRecord}s in the world database.
+-- @function [parent=#Potion] records
+-- @return #list<#PotionRecord>
 
 ---
 -- Creates a @{#PotionRecord} without adding it to the world database.
@@ -883,6 +928,11 @@
 -- @return #WeaponRecord
 
 ---
+-- Returns a read-only list of all @{#WeaponRecord}s in the world database.
+-- @function [parent=#Weapon] records
+-- @return #list<#WeaponRecord>
+
+---
 -- @type WeaponRecord
 -- @field #string id Record id
 -- @field #string name Human-readable name
@@ -939,6 +989,11 @@
 -- @return #ApparatusRecord
 
 ---
+-- Returns a read-only list of all @{#ApparatusRecord}s in the world database.
+-- @function [parent=#Apparatus] records
+-- @return #list<#ApparatusRecord>
+
+---
 -- @type ApparatusRecord
 -- @field #string id The record ID of the apparatus
 -- @field #string name The name of the apparatus
@@ -969,6 +1024,11 @@
 -- @function [parent=#Lockpick] record
 -- @param #any objectOrRecordId
 -- @return #LockpickRecord
+
+---
+-- Returns a read-only list of all @{#LockpickRecord}s in the world database.
+-- @function [parent=#Lockpick] records
+-- @return #list<#LockpickRecord>
 
 ---
 -- @type LockpickRecord
@@ -1003,6 +1063,11 @@
 -- @return #ProbeRecord
 
 ---
+-- Returns a read-only list of all @{#ProbeRecord}s in the world database.
+-- @function [parent=#Probe] records
+-- @return #list<#ProbeRecord>
+
+---
 -- @type ProbeRecord
 -- @field #string id The record ID of the probe
 -- @field #string name The name of the probe
@@ -1035,6 +1100,11 @@
 -- @return #RepairRecord
 
 ---
+-- Returns a read-only list of all @{#RepairRecord}s in the world database.
+-- @function [parent=#Repair] records
+-- @return #list<#RepairRecord>
+
+---
 -- @type RepairRecord
 -- @field #string id The record ID of the repair tool
 -- @field #string name The name of the repair tool
@@ -1063,6 +1133,11 @@
 -- @function [parent=#Activator] record
 -- @param #any objectOrRecordId
 -- @return #ActivatorRecord
+
+---
+-- Returns a read-only list of all @{#ActivatorRecord}s in the world database.
+-- @function [parent=#Activator] records
+-- @return #list<#ActivatorRecord>
 
 ---
 -- @type ActivatorRecord
@@ -1106,6 +1181,11 @@
 -- @function [parent=#Container] record
 -- @param #any objectOrRecordId
 -- @return #ContainerRecord
+
+---
+-- Returns a read-only list of all @{#ContainerRecord}s in the world database.
+-- @function [parent=#Container] records
+-- @return #list<#ContainerRecord>
 
 ---
 -- @type ContainerRecord
@@ -1158,6 +1238,11 @@
 -- @return #DoorRecord
 
 ---
+-- Returns a read-only list of all @{#DoorRecord}s in the world database.
+-- @function [parent=#Door] records
+-- @return #list<#DoorRecord>
+
+---
 -- @type DoorRecord
 -- @field #string id Record id
 -- @field #string name Human-readable name
@@ -1185,6 +1270,11 @@
 -- @function [parent=#Static] record
 -- @param #any objectOrRecordId
 -- @return #StaticRecord
+
+---
+-- Returns a read-only list of all @{#StaticRecord}s in the world database.
+-- @function [parent=#Static] records
+-- @return #list<#StaticRecord>
 
 ---
 -- @type StaticRecord
