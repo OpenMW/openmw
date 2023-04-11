@@ -111,11 +111,9 @@ namespace MWRender
                 }
 
                 // move the plane back along its normal a little bit to prevent bleeding at the water shore
-                unsigned int fov = Settings::Manager::getInt("field of view", "Camera");
-                const float clipFudge = 2.5; // minimum offset of clip plane
-                const float clipFudgeScale = 1.0; // additional offset of clip plane when standing at shore level with default FOV
-                float clipOffset = abs(abs((*mCullPlane)[3]) - eyePoint.z()) * (clipFudgeScale * fov / (-7500.0)) - clipFudge;
-                modelViewMatrix->preMultTranslate(mCullPlane->getNormal() * clipOffset);
+                const float clipFudge = -5;
+                modelViewMatrix->preMultTranslate(mCullPlane->getNormal() * clipFudge);
+
                 cv->pushModelViewMatrix(modelViewMatrix, osg::Transform::RELATIVE_RF);
                 traverse(node, cv);
                 cv->popModelViewMatrix();
