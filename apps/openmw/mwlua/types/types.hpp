@@ -80,17 +80,14 @@ namespace MWLua
             return "{" + std::to_string(store.getSize()) + " " + std::string(T::getRecordType()) + " records}";
         };
         storeT[sol::meta_function::length] = [](const StoreT& store) { return store.getSize(); };
-        storeT[sol::meta_function::index] = [](const StoreT& store, size_t index) -> const T& {
-            if (index > 0 && index <= store.getSize())
-                return store.at(index - 1); // Translate from Lua's 1-based indexing.
-            else
-                throw std::runtime_error("Index out of range");
+        storeT[sol::meta_function::index] = [](const StoreT& store, size_t index) -> const T* {
+            return store.at(index - 1); // Translate from Lua's 1-based indexing.
         };
         storeT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
         storeT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
 
         // Provide access to the store.
-        table["records"] = [&store]() { return &store; };
+        table["records"] = &store;
     }
 }
 

@@ -209,7 +209,7 @@ namespace MWWorld
 
         iterator begin() const;
         iterator end() const;
-        const T& at(size_t index) const;
+        const T* at(size_t index) const { return mShared.at(index); }
 
         size_t getSize() const override;
         int getDynamicSize() const override;
