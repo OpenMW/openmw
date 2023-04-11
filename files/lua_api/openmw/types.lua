@@ -473,6 +473,7 @@
 
 ---
 -- @type CreatureRecord
+-- @field #string id The record ID of the creature
 -- @field #string name
 -- @field #string baseCreature Record id of a base creature, which was modified to create this one
 -- @field #string model VFS path to the creature's model
@@ -514,6 +515,7 @@
 
 ---
 -- @type NpcRecord
+-- @field #string id The record ID of the NPC
 -- @field #string name
 -- @field #string race
 -- @field #string class Name of the NPC's class (e. g. Acrobat)
