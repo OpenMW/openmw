@@ -6,8 +6,11 @@
 #include <QDragEnterEvent>
 #include <QDragMoveEvent>
 #include <QDropEvent>
+#include <QGuiApplication>
 #include <QMouseEvent>
+#include <QScreen>
 #include <QToolTip>
+#include <QWindow>
 
 #include <apps/opencs/model/doc/document.hpp>
 #include <apps/opencs/model/prefs/category.hpp>
@@ -381,9 +384,14 @@ CSMDoc::Document& CSVRender::WorldspaceWidget::getDocument()
 CSVRender::WorldspaceHitResult CSVRender::WorldspaceWidget::mousePick(
     const QPoint& localPos, unsigned int interactionMask) const
 {
+    // may be okay to just use devicePixelRatio() directly
+    QScreen* screen = SceneWidget::windowHandle() && SceneWidget::windowHandle()->screen()
+        ? SceneWidget::windowHandle()->screen()
+        : QGuiApplication::primaryScreen();
+
     // (0,0) is considered the lower left corner of an OpenGL window
-    int x = localPos.x();
-    int y = height() - localPos.y();
+    int x = localPos.x() * screen->devicePixelRatio();
+    int y = height() * screen->devicePixelRatio() - localPos.y() * screen->devicePixelRatio();
 
     // Convert from screen space to world space
     osg::Matrixd wpvMat;

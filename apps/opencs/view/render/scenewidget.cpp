@@ -6,6 +6,7 @@
 
 #include <QLayout>
 #include <QMouseEvent>
+#include <QSurfaceFormat>
 
 #include <apps/opencs/model/prefs/category.hpp>
 #include <apps/opencs/model/prefs/setting.hpp>
@@ -13,9 +14,8 @@
 #include <apps/opencs/view/render/lightingday.hpp>
 #include <apps/opencs/view/render/lightingnight.hpp>
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <extern/osgQt/GraphicsWindowQt>
-#endif
+#include <extern/osgQt/CompositeOsgRenderer.hpp>
+#include <extern/osgQt/osgQOpenGLWidget.hpp>
 
 #include <osg/Array>
 #include <osg/Camera>
@@ -40,7 +40,6 @@
 #include <osgGA/EventQueue>
 #include <osgGA/GUIEventAdapter>
 
-#include <osgViewer/CompositeViewer>
 #include <osgViewer/GraphicsWindow>
 #include <osgViewer/View>
 #include <osgViewer/ViewerBase>
@@ -67,46 +66,33 @@ namespace CSVRender
         : QWidget(parent, f)
         , mRootNode(nullptr)
     {
-
-        osgViewer::CompositeViewer& viewer = CompositeViewer::get();
-
-        osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
-        // ds->setNumMultiSamples(8);
-
-        osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
-        traits->windowName.clear();
-        traits->windowDecoration = true;
-        traits->x = 0;
-        traits->y = 0;
-        traits->width = width();
-        traits->height = height();
-        traits->doubleBuffer = true;
-        traits->alpha = ds->getMinimumNumAlphaBits();
-        traits->stencil = ds->getMinimumNumStencilBits();
-        traits->sampleBuffers = ds->getMultiSamples();
-        traits->samples = ds->getNumMultiSamples();
-        // Doesn't make much sense as we're running on demand updates, and there seems to be a bug with the refresh rate
-        // when running multiple QGLWidgets
-        traits->vsync = false;
-
         mView = new osgViewer::View;
-        updateCameraParameters(traits->width / static_cast<double>(traits->height));
+        updateCameraParameters(width() / static_cast<double>(height()));
 
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        osg::ref_ptr<osgQt::GraphicsWindowQt> window = new osgQt::GraphicsWindowQt(traits.get());
+        mWidget = new osgQOpenGLWidget(this);
+
+        mRenderer = mWidget->getCompositeViewer();
+        osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> window
+            = new osgViewer::GraphicsWindowEmbedded(0, 0, width(), height());
+        mWidget->setGraphicsWindowEmbedded(window);
+
+        int frameRateLimit = CSMPrefs::get()["Rendering"]["framerate-limit"].toInt();
+        mRenderer->setRunMaxFrameRate(frameRateLimit);
+        mRenderer->setUseConfigureAffinity(false);
+
         QLayout* layout = new QHBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
-        layout->addWidget(window->getGLWidget());
+        layout->addWidget(mWidget);
         setLayout(layout);
 
         mView->getCamera()->setGraphicsContext(window);
-#endif
-        mView->getCamera()->setViewport(new osg::Viewport(0, 0, traits->width, traits->height));
 
         SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
         lightMgr->setStartLight(1);
         lightMgr->setLightingMask(Mask_Lighting);
         mRootNode = lightMgr;
+
+        mView->getCamera()->setViewport(new osg::Viewport(0, 0, width(), height()));
 
         mView->getCamera()->getOrCreateStateSet()->setMode(GL_NORMALIZE, osg::StateAttribute::ON);
         mView->getCamera()->getOrCreateStateSet()->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
@@ -122,21 +108,21 @@ namespace CSVRender
         // Add ability to signal osg to show its statistics for debugging purposes
         mView->addEventHandler(new osgViewer::StatsHandler);
 
-        viewer.addView(mView);
-        viewer.setDone(false);
-        viewer.realize();
+        mRenderer->addView(mView);
+        mRenderer->setDone(false);
     }
 
     RenderWidget::~RenderWidget()
     {
         try
         {
-            CompositeViewer::get().removeView(mView);
+            mRenderer->removeView(mView);
         }
         catch (const std::exception& e)
         {
             Log(Debug::Error) << "Error in the destructor: " << e.what();
         }
+        delete mWidget;
     }
 
     void RenderWidget::flagAsModified()
@@ -161,54 +147,6 @@ namespace CSVRender
 
         window->getEventQueue()->keyPress(osgGA::GUIEventAdapter::KEY_S);
         window->getEventQueue()->keyRelease(osgGA::GUIEventAdapter::KEY_S);
-    }
-
-    // --------------------------------------------------
-
-    CompositeViewer::CompositeViewer()
-        : mSimulationTime(0.0)
-    {
-        // TODO: Upgrade osgQt to support osgViewer::ViewerBase::DrawThreadPerContext
-        // https://gitlab.com/OpenMW/openmw/-/issues/5481
-        setThreadingModel(osgViewer::ViewerBase::SingleThreaded);
-
-        setUseConfigureAffinity(false);
-
-        // disable the default setting of viewer.done() by pressing Escape.
-        setKeyEventSetsDone(0);
-
-        // Only render when the camera position changed, or content flagged dirty
-        // setRunFrameScheme(osgViewer::ViewerBase::ON_DEMAND);
-        setRunFrameScheme(osgViewer::ViewerBase::CONTINUOUS);
-
-        connect(&mTimer, &QTimer::timeout, this, &CompositeViewer::update);
-        mTimer.start(10);
-
-        int frameRateLimit = CSMPrefs::get()["Rendering"]["framerate-limit"].toInt();
-        setRunMaxFrameRate(frameRateLimit);
-    }
-
-    CompositeViewer& CompositeViewer::get()
-    {
-        static CompositeViewer sThis;
-        return sThis;
-    }
-
-    void CompositeViewer::update()
-    {
-        double dt = mFrameTimer.time_s();
-        mFrameTimer.setStartTick();
-
-        emit simulationUpdated(dt);
-
-        mSimulationTime += dt;
-        frame(mSimulationTime);
-
-        double minFrameTime = _runMaxFrameRate > 0.0 ? 1.0 / _runMaxFrameRate : 0.0;
-        if (dt < minFrameTime)
-        {
-            std::this_thread::sleep_for(std::chrono::duration<double>(minFrameTime - dt));
-        }
     }
 
     // ---------------------------------------------------
@@ -268,7 +206,7 @@ namespace CSVRender
             CSMPrefs::get()["Tooltips"].update();
         }
 
-        connect(&CompositeViewer::get(), &CompositeViewer::simulationUpdated, this, &SceneWidget::update);
+        connect(mRenderer, &CompositeOsgRenderer::simulationUpdated, this, &SceneWidget::update);
 
         // Shortcuts
         CSMPrefs::Shortcut* focusToolbarShortcut = new CSMPrefs::Shortcut("scene-focus-toolbar", this);
@@ -560,7 +498,7 @@ namespace CSVRender
         }
         else if (*setting == "Rendering/framerate-limit")
         {
-            CompositeViewer::get().setRunMaxFrameRate(setting->toInt());
+            mRenderer->setRunMaxFrameRate(setting->toInt());
         }
         else if (*setting == "Rendering/camera-fov" || *setting == "Rendering/camera-ortho"
             || *setting == "Rendering/camera-ortho-size")

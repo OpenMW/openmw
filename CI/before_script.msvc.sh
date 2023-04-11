@@ -934,7 +934,11 @@ printf "Qt ${QT_VER}... "
 		else
 			DLLSUFFIX=""
 		fi
-		add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_VER:0:1}"{Core,Gui,Network,OpenGL,Widgets}${DLLSUFFIX}.dll
+		if [ "${QT_VER:0:1}" -eq "6" ]; then
+			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_VER:0:1}"{Core,Gui,Network,OpenGL,OpenGLWidgets,Widgets}${DLLSUFFIX}.dll
+		else
+			add_runtime_dlls $CONFIGURATION "$(pwd)/bin/Qt${QT_VER:0:1}"{Core,Gui,Network,OpenGL,Widgets}${DLLSUFFIX}.dll
+		fi
 		add_qt_platform_dlls $CONFIGURATION "$(pwd)/plugins/platforms/qwindows${DLLSUFFIX}.dll"
 		add_qt_style_dlls $CONFIGURATION "$(pwd)/plugins/styles/qwindowsvistastyle${DLLSUFFIX}.dll"
 	done
