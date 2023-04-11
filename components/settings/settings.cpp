@@ -147,7 +147,8 @@ namespace Settings
         if (std::filesystem::exists(settingspath))
             parser.loadSettingsFile(settingspath, mUserSettings, false, false);
 
-        Settings::Values::init();
+        if (!loadEditorSettings)
+            Settings::Values::init();
 
         for (const auto& [key, value] : originalDefaultSettings)
             if (!sInitialized.contains(key))
