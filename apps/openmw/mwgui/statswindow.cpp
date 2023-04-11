@@ -15,7 +15,7 @@
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadrace.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -717,7 +717,7 @@ namespace MWGui
 
     void StatsWindow::onPinToggled()
     {
-        Settings::Manager::setBool("stats pin", "Windows", mPinned);
+        Settings::windows().mStatsPin.set(mPinned);
 
         MWBase::Environment::get().getWindowManager()->setHMSVisibility(!mPinned);
     }

@@ -6,7 +6,7 @@
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/misc/strings/format.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -58,7 +58,7 @@ namespace MWGui
 
     void SpellWindow::onPinToggled()
     {
-        Settings::Manager::setBool("spells pin", "Windows", mPinned);
+        Settings::windows().mSpellsPin.set(mPinned);
 
         MWBase::Environment::get().getWindowManager()->setSpellVisibility(!mPinned);
     }

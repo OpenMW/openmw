@@ -16,7 +16,7 @@
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/globalmap.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -1198,7 +1198,7 @@ namespace MWGui
 
     void MapWindow::onPinToggled()
     {
-        Settings::Manager::setBool("map pin", "Windows", mPinned);
+        Settings::windows().mMapPin.set(mPinned);
 
         MWBase::Environment::get().getWindowManager()->setMinimapVisibility(!mPinned);
     }
