@@ -41,8 +41,6 @@ std::mutex* osgQOpenGLWidget::mutex()
 
 void osgQOpenGLWidget::initializeGL()
 {
-    // Initializes OpenGL function resolution for the current context.
-    initializeOpenGLFunctions();
     createRenderer();
     emit initialized();
 }

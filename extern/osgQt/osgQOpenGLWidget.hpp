@@ -10,7 +10,6 @@
 #include <osg/ArgumentParser>
 
 #include <QOpenGLWidget>
-#include <QOpenGLFunctions>
 #include <QReadWriteLock>
 
 class CompositeOsgRenderer;
@@ -21,8 +20,7 @@ namespace osgViewer
     class GraphicsWindowEmbedded;
 }
 
-class osgQOpenGLWidget : public QOpenGLWidget,
-    protected QOpenGLFunctions
+class osgQOpenGLWidget : public QOpenGLWidget
 {
     Q_OBJECT
 
