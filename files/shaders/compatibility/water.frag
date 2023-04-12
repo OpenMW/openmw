@@ -17,6 +17,7 @@
 // tweakables -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 const float VISIBILITY = 2500.0;
+const float DEPTH_FADE = 18.0; // how quickly shores fade into water
 
 const float BIG_WAVES_X = 0.1; // strength of big waves
 const float BIG_WAVES_Y = 0.1;
@@ -194,9 +195,7 @@ void main(void)
     if (cameraPos.z < 0.0)
         refraction = clamp(mix(refraction, waterColor, clamp(1.0 / (surfaceDepth * VISIBILITY), 0.0, 1.0)) * 1.5, 0.0, 1.0);
     else
-		// a rational curve rising from 0 to 1 between 0 and VISIBILITY units of depth
-        // refraction = mix(refraction, waterColor, clamp((-1.0 / (waterDepthDistorted / (VISIBILITY * DEPTH_FADE) + (-1 + sqrt(1.0 + 4.0 * DEPTH_FADE * DEPTH_FADE)) / (2.0 * DEPTH_FADE)) + (-1.0 + sqrt(1.0 + 4.0 * DEPTH_FADE * DEPTH_FADE)) / (2.0 * DEPTH_FADE)) * DEPTH_FADE + 1.0, 0.0, 1.0));
-        refraction = mix(refraction, waterColor, clamp(-1.0 * VISIBILITY /(25.0 * waterDepthDistorted + 0.96291 * VISIBILITY) + 1.03852, 0.0, 1.0)); // an optimized version of the above function, assuming 0.2 for DEPTH_FADE
+		refraction = mix(refraction, waterColor, clamp(-1.0 * pow(0.5, DEPTH_FADE * waterDepthDistorted / VISIBILITY) + 1.0, 0.0, 1.0));
 		
     // sunlight scattering
     // normal for sunlight scattering
