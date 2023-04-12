@@ -197,8 +197,10 @@ void main(void)
     if (cameraPos.z < 0.0)
         refraction = clamp(mix(refraction, waterColor, clamp(1.0 / (surfaceDepth * VISIBILITY), 0.0, 1.0)) * 1.5, 0.0, 1.0);
     else
+    {
         depthCorrection = sqrt(1.0 + 4.0 * DEPTH_FADE * DEPTH_FADE);
-        refraction = mix(refraction, waterColor, clamp(DEPTH_FADE * DEPTH_FADE / (-0.5 * depthCorrection + 0.5 - waterDepthDistorted / VISIBILITY) + 0.5 * depthCorrection + 0.5, 0.0, 1.0));
+        refraction = mix(refraction, waterColor, clamp(DEPTH_FADE * DEPTH_FADE / (-0.5 * depthCorrection + 0.5 - waterDepthDistorted / VISIBILITY) + 0.5 * depthCorrection + 0.5, 0.0, 1.0)); 
+    }
 
     // sunlight scattering
     // normal for sunlight scattering
