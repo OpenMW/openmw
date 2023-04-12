@@ -151,7 +151,7 @@ void main(void)
     float radialDepth = distance(position.xyz, cameraPos);
     // TODO: Figure out how to properly radialise refraction depth and thus underwater fog
     // while avoiding oddities when the water plane is close to the clipping plane
-	#if @reverseZ
+    #if @reverseZ
         radialise = radialDepth / linearDepth;
 	#else
 	    radialise = mix(1.0, radialDepth / linearDepth, clamp(max(abs(cameraPos.z) - 14.0, 0.0) / 135.0, 0.0, 1.0));
