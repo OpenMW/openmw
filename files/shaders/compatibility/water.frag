@@ -153,8 +153,8 @@ void main(void)
     // while avoiding oddities when the water plane is close to the clipping plane
     #if @reverseZ
         radialise = radialDepth / linearDepth;
-	#else
-	    radialise = mix(1.0, radialDepth / linearDepth, clamp(max(abs(cameraPos.z) - 14.0, 0.0) / 135.0, 0.0, 1.0));
+    #else
+        radialise = mix(1.0, radialDepth / linearDepth, clamp(max(abs(cameraPos.z) - 15.0, 0.0) / 30.0, 0.0, 1.0));
 	#endif
 #else
     float radialDepth = 0.0;
@@ -199,7 +199,7 @@ void main(void)
     else
     {
         depthCorrection = sqrt(1.0 + 4.0 * DEPTH_FADE * DEPTH_FADE);
-        refraction = mix(refraction, waterColor, clamp(DEPTH_FADE * DEPTH_FADE / (-0.5 * depthCorrection + 0.5 - waterDepthDistorted / VISIBILITY) + 0.5 * depthCorrection + 0.5, 0.0, 1.0)); 
+        refraction = mix(refraction, waterColor, clamp(DEPTH_FADE * DEPTH_FADE / (-0.5 * depthCorrection + 0.5 - waterDepthDistorted / VISIBILITY) + 0.5 * depthCorrection + 0.5, 0.0, 1.0));
     }
 
     // sunlight scattering
