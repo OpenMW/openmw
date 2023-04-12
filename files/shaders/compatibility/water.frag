@@ -148,7 +148,7 @@ void main(void)
 
 #if @radialFog
     float radialDepth = distance(position.xyz, cameraPos);
-	// TODO: Figure out how to properly radialise refraction depth and thus underwater fog
+    // TODO: Figure out how to properly radialise refraction depth and thus underwater fog
     // while avoiding oddities when the water plane is close to the clipping plane
 	#if @reverseZ
         radialise = radialDepth / linearDepth;
