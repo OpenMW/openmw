@@ -16,7 +16,7 @@
 
 // tweakables -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-const float VISIBILITY = 5000.0;
+const float VISIBILITY = 2500.0;
 
 const float BIG_WAVES_X = 0.1; // strength of big waves
 const float BIG_WAVES_Y = 0.1;
@@ -34,7 +34,7 @@ const float SMALL_WAVES_RAIN_Y = 0.3;
 const float WAVE_CHOPPYNESS = 0.05;                // wave choppyness
 const float WAVE_SCALE = 75.0;                     // overall wave scale
 
-const float BUMP = 0.0;                            // overall water surface bumpiness
+const float BUMP = 0.5;                            // overall water surface bumpiness
 const float BUMP_RAIN = 2.5;
 const float REFL_BUMP = 0.10;                      // reflection distortion amount
 const float REFR_BUMP = 0.07;                      // refraction distortion amount
@@ -196,8 +196,7 @@ void main(void)
     else
 		// a rational curve rising from 0 to 1 between 0 and VISIBILITY units of depth
         // refraction = mix(refraction, waterColor, clamp((-1.0 / (waterDepthDistorted / (VISIBILITY * DEPTH_FADE) + (-1 + sqrt(1.0 + 4.0 * DEPTH_FADE * DEPTH_FADE)) / (2.0 * DEPTH_FADE)) + (-1.0 + sqrt(1.0 + 4.0 * DEPTH_FADE * DEPTH_FADE)) / (2.0 * DEPTH_FADE)) * DEPTH_FADE + 1.0, 0.0, 1.0));
-        //refraction = mix(refraction, waterColor, clamp(-1.0 * VISIBILITY /(25.0 * waterDepthDistorted + 0.96291 * VISIBILITY) + 1.03852, 0.0, 1.0)); // an optimized version of the above function, assuming 0.2 for DEPTH_FADE
-        refraction = mix(refraction, waterColor, clamp(depthSampleDistorted / VISIBILITY, 0.0, 1.0));
+        refraction = mix(refraction, waterColor, clamp(-1.0 * VISIBILITY /(25.0 * waterDepthDistorted + 0.96291 * VISIBILITY) + 1.03852, 0.0, 1.0)); // an optimized version of the above function, assuming 0.2 for DEPTH_FADE
 		
     // sunlight scattering
     // normal for sunlight scattering
