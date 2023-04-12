@@ -17,7 +17,7 @@
 // tweakables -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
 const float VISIBILITY = 2500.0;
-const float DEPTH_FADE = 18.0; // how quickly shores fade into water
+const float DEPTH_FADE = 0.2;
 
 const float BIG_WAVES_X = 0.1; // strength of big waves
 const float BIG_WAVES_Y = 0.1;
@@ -191,12 +191,15 @@ void main(void)
     vec3 refraction = sampleRefractionMap(screenCoords - screenCoordsOffset).rgb;
     vec3 rawRefraction = refraction;
 
+    float depthCorrection;
+
     // brighten up the refraction underwater
     if (cameraPos.z < 0.0)
         refraction = clamp(mix(refraction, waterColor, clamp(1.0 / (surfaceDepth * VISIBILITY), 0.0, 1.0)) * 1.5, 0.0, 1.0);
     else
-		refraction = mix(refraction, waterColor, clamp(-1.0 * pow(0.5, DEPTH_FADE * waterDepthDistorted / VISIBILITY) + 1.0, 0.0, 1.0));
-		
+        depthCorrection = sqrt(1.0 + 4.0 * DEPTH_FADE * DEPTH_FADE);
+        refraction = mix(refraction, waterColor, clamp(DEPTH_FADE * DEPTH_FADE / (-0.5 * depthCorrection + 0.5 - waterDepthDistorted / VISIBILITY) + 0.5 * depthCorrection + 0.5, 0.0, 1.0));
+
     // sunlight scattering
     // normal for sunlight scattering
     vec3 lNormal = (normal0 * bigWaves.x * 0.5 + normal1 * bigWaves.y * 0.5 + normal2 * midWaves.x * 0.2 +
