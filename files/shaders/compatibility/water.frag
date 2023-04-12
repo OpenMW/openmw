@@ -40,7 +40,7 @@ const float REFL_BUMP = 0.10;                      // reflection distortion amou
 const float REFR_BUMP = 0.07;                      // refraction distortion amount
 
 const float SCATTER_AMOUNT = 0.3;                  // amount of sunlight scattering
-const vec3 SCATTER_COLOUR = vec3(0.0,1.0,0.95);    // color of sunlight scattering
+const vec3 SCATTER_COLOUR = vec3(0.0,1.0,0.95);    // colour of sunlight scattering
 
 const vec3 SUN_EXT = vec3(0.45, 0.55, 0.68);       //sunlight extinction
 
