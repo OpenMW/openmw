@@ -3338,8 +3338,8 @@ namespace MWWorld
         nextCells.insert(ptr.getCell()->getCell()->getId());
         while (!nextCells.empty())
         {
-            currentCells = nextCells;
-            nextCells.clear();
+            currentCells.clear();
+            std::swap(currentCells, nextCells);
             for (const auto& cell : currentCells)
             {
                 MWWorld::CellStore* next = mWorldModel.getCell(cell);
@@ -3359,7 +3359,13 @@ namespace MWWorld
                     if (!ref.mRef.getTeleport())
                         continue;
 
-                    if (ref.mRef.getDestCell().empty())
+                    bool isExterior = visit(
+                        [](auto&& variant) {
+                            using T = std::decay_t<decltype(variant)>;
+                            return std::is_same_v<T, ESM::ESM3ExteriorCellRefId>;
+                        },
+                        ref.mRef.getDestCell());
+                    if (isExterior)
                     {
                         osg::Vec3f worldPos = ref.mRef.getDoorDest().asVec3();
                         return getClosestMarkerFromExteriorPosition(worldPos, id);
@@ -3367,7 +3373,7 @@ namespace MWWorld
                     else
                     {
                         const auto& dest = ref.mRef.getDestCell();
-                        if (!checkedCells.count(dest) && !currentCells.count(dest))
+                        if (!checkedCells.contains(dest) && !currentCells.contains(dest))
                             nextCells.insert(dest);
                     }
                 }
