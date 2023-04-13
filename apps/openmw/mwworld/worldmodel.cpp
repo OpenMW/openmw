@@ -224,36 +224,14 @@ MWWorld::CellStore* MWWorld::WorldModel::getInterior(std::string_view name)
     return result->second;
 }
 
-struct VisitorCellIdIsESM3Ext
-{
-    bool operator()(const ESM::ESM3ExteriorCellRefId& id)
-    {
-        coordOut = { id.getX(), id.getY() };
-        return true;
-    }
-
-    template <typename T>
-    bool operator()(const T&)
-    {
-        return false;
-    }
-
-    std::pair<int32_t, int32_t> coordOut = {};
-};
-
 MWWorld::CellStore* MWWorld::WorldModel::getCell(const ESM::RefId& id)
 {
     auto result = mCells.find(id);
     if (result != mCells.end())
         return &result->second;
 
-    VisitorCellIdIsESM3Ext isESM3ExteriorVisitor;
-
-    if (visit(isESM3ExteriorVisitor, id)) // That is an exterior cell Id
-    {
-
-        return getExterior(isESM3ExteriorVisitor.coordOut.first, isESM3ExteriorVisitor.coordOut.second);
-    }
+    if (const auto* exteriorId = id.getIf<ESM::ESM3ExteriorCellRefId>())
+        return getExterior(exteriorId->getX(), exteriorId->getY());
 
     const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().search(id);
     CellStore* newCellStore = nullptr;

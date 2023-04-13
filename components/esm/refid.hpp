@@ -136,6 +136,12 @@ namespace ESM
         // Serialize into stable text format.
         std::string serializeText() const;
 
+        template <class T>
+        const T* getIf() const
+        {
+            return std::get_if<T>(&mValue);
+        }
+
         friend constexpr bool operator==(const RefId& l, const RefId& r) { return l.mValue == r.mValue; }
 
         bool operator==(std::string_view rhs) const;
