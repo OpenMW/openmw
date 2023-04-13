@@ -3298,7 +3298,7 @@ namespace MWWorld
                     if (!ref.mRef.getTeleport())
                         continue;
 
-                    if (ref.mRef.getDestCell().empty())
+                    if (ref.mRef.getDestCell().is<ESM::ESM3ExteriorCellRefId>())
                     {
                         ESM::Position pos = ref.mRef.getDoorDest();
                         result = pos.asVec3();
