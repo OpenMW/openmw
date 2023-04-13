@@ -142,6 +142,12 @@ namespace ESM
             return std::get_if<T>(&mValue);
         }
 
+        template <class T>
+        bool is() const
+        {
+            return std::holds_alternative<T>(mValue);
+        }
+
         friend constexpr bool operator==(const RefId& l, const RefId& r) { return l.mValue == r.mValue; }
 
         bool operator==(std::string_view rhs) const;

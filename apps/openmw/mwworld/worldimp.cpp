@@ -3359,13 +3359,7 @@ namespace MWWorld
                     if (!ref.mRef.getTeleport())
                         continue;
 
-                    bool isExterior = visit(
-                        [](auto&& variant) {
-                            using T = std::decay_t<decltype(variant)>;
-                            return std::is_same_v<T, ESM::ESM3ExteriorCellRefId>;
-                        },
-                        ref.mRef.getDestCell());
-                    if (isExterior)
+                    if (ref.mRef.getDestCell().is<ESM::ESM3ExteriorCellRefId>())
                     {
                         osg::Vec3f worldPos = ref.mRef.getDoorDest().asVec3();
                         return getClosestMarkerFromExteriorPosition(worldPos, id);
