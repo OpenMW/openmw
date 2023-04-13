@@ -114,13 +114,8 @@ namespace MWGui
                 store->listIdentifier(ids);
                 for (auto id : ids)
                 {
-                    visit(
-                        [&](auto&& variant) {
-                            using T = std::decay_t<decltype(variant)>;
-                            if constexpr (std::is_same_v<T, ESM::StringRefId>)
-                                mNames.push_back(id.getRefIdString());
-                        },
-                        id);
+                    if (id.is<ESM::StringRefId>())
+                        mNames.push_back(id.getRefIdString());
                 }
                 ids.clear();
             }
