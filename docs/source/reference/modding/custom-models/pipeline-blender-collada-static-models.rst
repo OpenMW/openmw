@@ -158,8 +158,28 @@ Texture Paths
 Textures will show properly in OpenMW when the path in the exported COLLADA file 
 is as follows ``textures/the_barrel.dds``. The exporter detects the 
 ``data/textures`` part of the texture's path in Blender and truncates the rest. 
-The texture path can also be set manually in the exported COLALDA file.
+The texture path can also be set manually in the exported COLLADA file.
 
+Textures Not Visible
+====================
+
+If a texture doesn't show on the exported model in OpenMW-CS or in-game, it's likely
+the file path to the texture is incorrect and OpenMW can't find it.
+To fix this you can open the exported ``.dae`` file in a text editor and check
+the texture's filepath. In the example of this barrel model it's found on lines 13-17.
+
+.. code::
+    
+    <library_images>
+        <image id="id-image-4" name="the_barrel">
+            <init_from>textures/the_barrel.dds</init_from>
+        </image>
+    </library_images>
+
+A path to a texture must always start with ``textures/`` and then continues with
+whatever subfolders the texture is in. It's a common issue that the path can start
+with ``../textures/`` in which case you can manually remove the ``../``
+and the textures should then show.
 
 Collision Shapes
 ****************
