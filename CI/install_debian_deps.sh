@@ -12,6 +12,20 @@ declare -rA GROUPED_DEPS=(
   [gcc]="binutils gcc build-essential cmake ccache curl unzip git pkg-config mold"
   [clang]="binutils clang make cmake ccache curl unzip git pkg-config mold"
   [coverity]="binutils clang-11 make cmake ccache curl unzip git pkg-config"
+  [gcc_preprocess]="
+    binutils
+    build-essential
+    clang
+    cmake
+    curl
+    gcc
+    git
+    libclang-dev
+    ninja-build
+    python3-clang
+    python3-pip
+    unzip
+  "
 
   # Common dependencies for building OpenMW.
   [openmw-deps]="
