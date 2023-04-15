@@ -543,7 +543,7 @@ namespace MWRender
                 mParent->addChild(mRefraction);
             }
 
-            if(Settings::Manager::getBool("shader ripples", "Water")
+            if(Settings::Manager::getBool("shader ripples", "Water"))
             {
                 mRipples = new Ripples(mResourceSystem);
                 mSimulation->setRipples(mRipples);
