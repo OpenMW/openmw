@@ -150,6 +150,50 @@
 -- Actor.setEquipment(self, {}) -- unequip all
 
 ---
+-- Return the spells (@{ActorSpells}) of the given actor.
+-- @function [parent=#Actor] spells
+-- @param openmw.core#GameObject actor
+-- @return #ActorSpells
+
+--- List of spells with additional functions add/remove/clear (modification are allowed only in global scripts or on self).
+-- @type ActorSpells
+-- @usage -- print available spells
+-- local mySpells = types.Actor.spells(self)
+-- for _, spell in pairs(mySpells) do print(spell.id) end
+-- @usage -- print available spells (equivalent)
+-- local mySpells = types.Actor.spells(self)
+-- for i = 1, #mySpells do print(mySpells[i].id) end
+-- @usage -- add ALL spells that exist in the world
+-- local mySpells = types.Actor.spells(self)
+-- for _, spell in pairs(core.magic.spells) do
+--     if spell.type == core.magic.SPELL_TYPE.Spell then
+--         mySpells:add(spell)
+--     end
+-- end
+-- @usage -- add specific spell
+-- types.Actor.spells(self):add('thunder fist')
+-- @usage -- check specific spell
+-- local mySpells = types.Actor.spells(self)
+-- if mySpells['thunder fist'] then print('I have thunder fist') end
+
+---
+-- Add spell (only in global scripts or on self).
+-- @function [parent=#ActorSpells] add
+-- @param self
+-- @param #any spellOrId @{openmw.core#Spell} or string spell id
+
+---
+-- Remove spell (only in global scripts or on self).
+-- @function [parent=#ActorSpells] remove
+-- @param self
+-- @param #any spellOrId @{openmw.core#Spell} or string spell id
+
+---
+-- Remove all spells (only in global scripts or on self).
+-- @function [parent=#ActorSpells] clear
+-- @param self
+
+---
 -- @type LevelStat
 -- @field #number current The actor's current level.
 -- @field #number progress The NPC's level progress (read-only.)
@@ -631,7 +675,7 @@
 -- @field #string speechcraft "speechcraft"
 -- @field #string unarmored "unarmored"
 
---- @{#BookSKILL}
+--- DEPRECATED, use @{openmw.core#SKILL}
 -- @field [parent=#Book] #BookSKILL SKILL
 
 ---
@@ -651,7 +695,7 @@
 -- @field #string text The text content of the book
 -- @field #number weight
 -- @field #number value
--- @field #string skill The skill that this book teaches. See @{#Book.SKILL}
+-- @field #string skill The skill that this book teaches. See @{openmw.core#SKILL}
 -- @field #boolean isScroll
 -- @field #number enchantCapacity
 

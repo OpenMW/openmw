@@ -5,6 +5,7 @@
 
 #include <apps/openmw/mwbase/mechanicsmanager.hpp>
 #include <apps/openmw/mwbase/windowmanager.hpp>
+#include <apps/openmw/mwlua/luabindings.hpp>
 #include <apps/openmw/mwmechanics/creaturestats.hpp>
 #include <apps/openmw/mwmechanics/drawstate.hpp>
 #include <apps/openmw/mwworld/class.hpp>
@@ -12,6 +13,7 @@
 
 #include "../localscripts.hpp"
 #include "../luamanagerimp.hpp"
+#include "../magicbindings.hpp"
 #include "../stats.hpp"
 
 namespace MWLua
@@ -218,9 +220,9 @@ namespace MWLua
 
         actor["inventory"] = sol::overload([](const LObject& o) { return Inventory<LObject>{ o }; },
             [](const GObject& o) { return Inventory<GObject>{ o }; });
-        auto getAllEquipment = [context](const Object& o) {
+        auto getAllEquipment = [](sol::this_state lua, const Object& o) {
             const MWWorld::Ptr& ptr = o.ptr();
-            sol::table equipment(context.mLua->sol(), sol::create);
+            sol::table equipment(lua, sol::create);
             if (!ptr.getClass().hasInventoryStore(ptr))
                 return equipment;
 
@@ -231,13 +233,15 @@ namespace MWLua
                 if (it == store.end())
                     continue;
                 MWBase::Environment::get().getWorldModel()->registerPtr(*it);
-                equipment[slot] = o.getObject(context.mLua->sol(), getId(*it));
+                if (dynamic_cast<const GObject*>(&o))
+                    equipment[slot] = sol::make_object(lua, GObject(*it));
+                else
+                    equipment[slot] = sol::make_object(lua, LObject(*it));
             }
             return equipment;
         };
-        auto getEquipmentFromSlot = [context](const Object& o, int slot) -> sol::object {
+        auto getEquipmentFromSlot = [](sol::this_state lua, const Object& o, int slot) -> sol::object {
             const MWWorld::Ptr& ptr = o.ptr();
-            sol::table equipment(context.mLua->sol(), sol::create);
             if (!ptr.getClass().hasInventoryStore(ptr))
                 return sol::nil;
             MWWorld::InventoryStore& store = ptr.getClass().getInventoryStore(ptr);
@@ -245,7 +249,10 @@ namespace MWLua
             if (it == store.end())
                 return sol::nil;
             MWBase::Environment::get().getWorldModel()->registerPtr(*it);
-            return o.getObject(context.mLua->sol(), getId(*it));
+            if (dynamic_cast<const GObject*>(&o))
+                return sol::make_object(lua, GObject(*it));
+            else
+                return sol::make_object(lua, LObject(*it));
         };
         actor["equipment"] = sol::overload(getAllEquipment, getEquipmentFromSlot);
         actor["hasEquipped"] = [](const Object& o, const Object& item) {
@@ -274,16 +281,17 @@ namespace MWLua
             context.mLuaManager->addAction(
                 std::make_unique<SetEquipmentAction>(context.mLua, obj.id(), std::move(eqp)));
         };
-        actor["getPathfindingAgentBounds"] = [context](const LObject& o) {
+        actor["getPathfindingAgentBounds"] = [](sol::this_state lua, const LObject& o) {
             const DetourNavigator::AgentBounds agentBounds
                 = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(o.ptr());
-            sol::table result = context.mLua->newTable();
+            sol::table result(lua, sol::create);
             result["shapeType"] = agentBounds.mShapeType;
             result["halfExtents"] = agentBounds.mHalfExtents;
             return result;
         };
 
         addActorStatsBindings(actor, context);
+        addActorMagicBindings(actor, context);
     }
 
 }
