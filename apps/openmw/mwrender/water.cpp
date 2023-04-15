@@ -543,9 +543,12 @@ namespace MWRender
                 mParent->addChild(mRefraction);
             }
 
-            mRipples = new Ripples(mResourceSystem);
-            mSimulation->setRipples(mRipples);
-            mParent->addChild(mRipples);
+            if(Settings::Manager::getBool("shader ripples", "Water")
+            {
+                mRipples = new Ripples(mResourceSystem);
+                mSimulation->setRipples(mRipples);
+                mParent->addChild(mRipples);
+            }
 
             showWorld(mShowWorld);
 
@@ -694,6 +697,7 @@ namespace MWRender
         defineMap["rain_ripple_detail"] = std::to_string(rippleDetail);
         defineMap["ripple_map_world_scale"] = std::to_string(RipplesSurface::mWorldScaleFactor);
         defineMap["ripple_map_size"] = std::to_string(RipplesSurface::mRTTSize) + ".0";
+        defineMap["shader_ripples"] = Settings::Manager::getBool("shader ripples", "Water") ? "1" : "0";
 
         Stereo::Manager::instance().shaderStereoDefines(defineMap);
 

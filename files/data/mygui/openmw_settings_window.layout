@@ -489,6 +489,20 @@
 
                                 <Widget type="AutoSizedButton" skin="MW_Button">
                                     <UserString key="SettingCategory" value="Water"/>
+                                    <UserString key="SettingName" value="shader ripples"/>
+                                    <UserString key="SettingType" value="CheckButton"/>
+                                </Widget>
+                                <Widget type="AutoSizedTextBox" skin="SandText">
+                                    <Property key="Caption" value="#{OMWEngine:WaterShaderRipples}"/>
+                                </Widget>
+                            </Widget>
+
+                            <Widget type="HBox" align="Stretch">
+                                <UserString key="HStretch" value="true"/>
+                                <UserString key="VStretch" value="false"/>
+
+                                <Widget type="AutoSizedButton" skin="MW_Button">
+                                    <UserString key="SettingCategory" value="Water"/>
                                     <UserString key="SettingName" value="refraction"/>
                                     <UserString key="SettingType" value="CheckButton"/>
                                 </Widget>
