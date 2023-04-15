@@ -397,7 +397,7 @@
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:Anisotropy} (%s)"/>
                         </Widget>
 
-                        <Widget type="AutoSizedTextBox" skin="NormalText" position="0 104 0 18" align="Left Top" name="RenderDistanceLabel">
+                        <Widget type="AutoSizedTextBox" skin="NormalText" position="0 130 0 18" align="Left Top" name="RenderDistanceLabel">
                             <Property key="Caption" value="#{OMWEngine:ViewDistance}"/>
                         </Widget>
                         <Widget type="TextBox" skin="NormalText" position="0 178 352 18" align="Left Top" name="GrassDistanceLabel">
@@ -406,7 +406,7 @@
                         <Widget type="TextBox" skin="NormalText" position="0 226 352 18" align="Left Top" name="GrassDensityLabel">
                             <Property key="Caption" value="Grass Density"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 126 352 18" align="HStretch Top" name="RenderingDistanceSlider">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 154 352 18" align="HStretch Top" name="RenderingDistanceSlider">
                             <Property key="Range" value="4669"/>
                             <Property key="Page" value="128"/>
                             <UserString key="SettingType" value="Slider"/>
@@ -418,7 +418,7 @@
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:ViewDistance} (%s)"/>
                         </Widget>
-                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 126 352 18" align="HStretch Top" name="LargeRenderingDistanceSlider">
+                        <Widget type="ScrollBar" skin="MW_HScroll" position="0 154 352 18" align="HStretch Top" name="LargeRenderingDistanceSlider">
                             <Property key="Range" value="79421"/>
                             <Property key="Page" value="2048"/>
                             <UserString key="SettingType" value="Slider"/>
