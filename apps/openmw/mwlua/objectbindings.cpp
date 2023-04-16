@@ -2,7 +2,6 @@
 
 #include <components/lua/luastate.hpp>
 
-#include "../mwworld/action.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -102,44 +101,6 @@ namespace MWLua
             osg::Vec3f mRot;
         };
 
-        class ActivateAction final : public LuaManager::Action
-        {
-        public:
-            ActivateAction(LuaUtil::LuaState* state, ObjectId object, ObjectId actor)
-                : Action(state)
-                , mObject(object)
-                , mActor(actor)
-            {
-            }
-
-            void apply() const override
-            {
-                MWWorld::Ptr object = MWBase::Environment::get().getWorldModel()->getPtr(mObject);
-                if (object.isEmpty())
-                    throw std::runtime_error(std::string("Object not found: " + mObject.toString()));
-                MWWorld::Ptr actor = MWBase::Environment::get().getWorldModel()->getPtr(mActor);
-                if (actor.isEmpty())
-                    throw std::runtime_error(std::string("Actor not found: " + mActor.toString()));
-
-                if (object.getRefData().activate())
-                {
-                    MWBase::Environment::get().getLuaManager()->objectActivated(object, actor);
-                    std::unique_ptr<MWWorld::Action> action = object.getClass().activate(object, actor);
-                    action->execute(actor);
-                }
-            }
-
-            std::string toString() const override
-            {
-                return std::string("ActivateAction object=") + mObject.toString() + std::string(" actor=")
-                    + mActor.toString();
-            }
-
-        private:
-            ObjectId mObject;
-            ObjectId mActor;
-        };
-
         template <typename ObjT>
         using Cell = std::conditional_t<std::is_same_v<ObjT, LObject>, LCell, GCell>;
 
@@ -165,6 +126,7 @@ namespace MWLua
         template <class ObjectT>
         void addBasicBindings(sol::usertype<ObjectT>& objectT, const Context& context)
         {
+            objectT["id"] = sol::readonly_property([](const ObjectT& o) -> std::string { return o.id().toString(); });
             objectT["isValid"] = [](const ObjectT& o) { return !o.ptrOrNull().isEmpty(); };
             objectT["recordId"] = sol::readonly_property(
                 [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().serializeText(); });
@@ -192,13 +154,16 @@ namespace MWLua
                     { dest.id(), std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
             };
 
-            objectT["activateBy"] = [context](const ObjectT& o, const ObjectT& actor) {
-                uint32_t esmRecordType = actor.ptr().getType();
+            objectT["activateBy"] = [](const ObjectT& object, const ObjectT& actor) {
+                const MWWorld::Ptr& objPtr = object.ptr();
+                const MWWorld::Ptr& actorPtr = actor.ptr();
+                uint32_t esmRecordType = actorPtr.getType();
                 if (esmRecordType != ESM::REC_CREA && esmRecordType != ESM::REC_NPC_)
                     throw std::runtime_error(
                         "The argument of `activateBy` must be an actor who activates the object. Got: "
                         + actor.toString());
-                context.mLuaManager->addAction(std::make_unique<ActivateAction>(context.mLua, o.id(), actor.id()));
+                if (objPtr.getRefData().activate())
+                    MWBase::Environment::get().getLuaManager()->objectActivated(objPtr, actorPtr);
             };
 
             auto isEnabled = [](const ObjectT& o) { return o.ptr().getRefData().isEnabled(); };

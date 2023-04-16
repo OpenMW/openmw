@@ -461,6 +461,9 @@ The order in which the scripts are started is important. So if one mod should ov
   * - Interface
     - Can be used
     - Description
+  * - :ref:`Activation <Interface Activation>`
+    - by global scripts
+    - Allows to extend or override built-in activation mechanics.
   * - :ref:`AI <Interface AI>`
     - by local scripts
     - Control basic AI of NPCs and creatures.

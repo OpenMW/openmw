@@ -63,6 +63,7 @@ set(BUILTIN_DATA_FILES
 
     builtin.omwscripts
 
+    scripts/omw/activationhandlers.lua
     scripts/omw/ai.lua
     scripts/omw/camera/camera.lua
     scripts/omw/camera/head_bobbing.lua

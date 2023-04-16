@@ -8,6 +8,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/manualref.hpp"
@@ -105,6 +106,16 @@ namespace MWLua
         }
             // TODO: add here overloads for other records
         );
+
+        api["_runStandardActivationAction"] = [context](const GObject& object, const GObject& actor) {
+            context.mLuaManager->addAction(
+                [object, actor] {
+                    const MWWorld::Ptr& objPtr = object.ptr();
+                    const MWWorld::Ptr& actorPtr = actor.ptr();
+                    objPtr.getClass().activate(objPtr, actorPtr)->execute(actorPtr);
+                },
+                "_runStandardActivationAction");
+        };
 
         return LuaUtil::makeReadOnly(api);
     }

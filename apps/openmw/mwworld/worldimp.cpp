@@ -3779,13 +3779,8 @@ namespace MWWorld
     void World::activate(const Ptr& object, const Ptr& actor)
     {
         breakInvisibility(actor);
-
         if (object.getRefData().activate())
-        {
             MWBase::Environment::get().getLuaManager()->objectActivated(object, actor);
-            std::unique_ptr<MWWorld::Action> action = object.getClass().activate(object, actor);
-            action->execute(actor);
-        }
     }
 
     struct ResetActorsVisitor
