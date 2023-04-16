@@ -28,6 +28,7 @@
 #include "draganddrop.hpp"
 #include "mapwindow.hpp"
 #include "messagebox.hpp"
+#include "settings.hpp"
 #include "soulgemdialog.hpp"
 #include "statswatcher.hpp"
 #include "textcolours.hpp"
@@ -404,8 +405,8 @@ namespace MWGui
 
         bool mConsoleOnlyScripts;
 
-        std::map<MyGUI::Window*, std::string> mTrackedWindows;
-        void trackWindow(Layout* layout, const std::string& name);
+        std::map<MyGUI::Window*, WindowSettingValues> mTrackedWindows;
+        void trackWindow(Layout* layout, const WindowSettingValues& settings);
         void onWindowChangeCoord(MyGUI::Window* _sender);
 
         ESM::RefId mSelectedSpell;

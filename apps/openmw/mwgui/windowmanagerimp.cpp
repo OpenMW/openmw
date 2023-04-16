@@ -52,6 +52,8 @@
 
 #include <components/lua_ui/util.hpp>
 
+#include <components/settings/values.hpp>
+
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/luamanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -120,6 +122,26 @@
 
 namespace MWGui
 {
+    namespace
+    {
+        Settings::SettingValue<bool>* findHiddenSetting(GuiWindow window)
+        {
+            switch (window)
+            {
+                case GW_Inventory:
+                    return &Settings::windows().mInventoryHidden;
+                case GW_Map:
+                    return &Settings::windows().mMapHidden;
+                case GW_Magic:
+                    return &Settings::windows().mSpellsHidden;
+                case GW_Stats:
+                    return &Settings::windows().mStatsHidden;
+                default:
+                    return nullptr;
+            }
+        }
+    }
+
     WindowManager::WindowManager(SDL_Window* window, osgViewer::Viewer* viewer, osg::Group* guiRoot,
         Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue, const std::filesystem::path& logpath,
         bool consoleOnlyScripts, Translation::Storage& translationDataStorage, ToUTF8::FromType encoding,
@@ -310,12 +332,12 @@ namespace MWGui
         mMap = map.get();
         mWindows.push_back(std::move(map));
         mMap->renderGlobalMap();
-        trackWindow(mMap, "map");
+        trackWindow(mMap, makeMapWindowSettingValues());
 
         auto statsWindow = std::make_unique<StatsWindow>(mDragAndDrop.get());
         mStatsWindow = statsWindow.get();
         mWindows.push_back(std::move(statsWindow));
-        trackWindow(mStatsWindow, "stats");
+        trackWindow(mStatsWindow, makeStatsWindowSettingValues());
 
         auto inventoryWindow = std::make_unique<InventoryWindow>(
             mDragAndDrop.get(), mViewer->getSceneData()->asGroup(), mResourceSystem);
@@ -325,7 +347,7 @@ namespace MWGui
         auto spellWindow = std::make_unique<SpellWindow>(mDragAndDrop.get());
         mSpellWindow = spellWindow.get();
         mWindows.push_back(std::move(spellWindow));
-        trackWindow(mSpellWindow, "spells");
+        trackWindow(mSpellWindow, makeSpellsWindowSettingValues());
 
         mGuiModeStates[GM_Inventory] = GuiModeState({ mMap, mInventoryWindow, mSpellWindow, mStatsWindow });
         mGuiModeStates[GM_None] = GuiModeState({ mMap, mInventoryWindow, mSpellWindow, mStatsWindow });
@@ -333,13 +355,13 @@ namespace MWGui
         auto tradeWindow = std::make_unique<TradeWindow>();
         mTradeWindow = tradeWindow.get();
         mWindows.push_back(std::move(tradeWindow));
-        trackWindow(mTradeWindow, "barter");
+        trackWindow(mTradeWindow, makeBarterWindowSettingValues());
         mGuiModeStates[GM_Barter] = GuiModeState({ mInventoryWindow, mTradeWindow });
 
         auto console = std::make_unique<Console>(w, h, mConsoleOnlyScripts, mCfgMgr);
         mConsole = console.get();
         mWindows.push_back(std::move(console));
-        trackWindow(mConsole, "console");
+        trackWindow(mConsole, makeConsoleWindowSettingValues());
 
         bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
         auto journal = JournalWindow::create(JournalViewModel::create(), questList, mEncoding);
@@ -362,14 +384,14 @@ namespace MWGui
         auto dialogueWindow = std::make_unique<DialogueWindow>();
         mDialogueWindow = dialogueWindow.get();
         mWindows.push_back(std::move(dialogueWindow));
-        trackWindow(mDialogueWindow, "dialogue");
+        trackWindow(mDialogueWindow, makeDialogueWindowSettingValues());
         mGuiModeStates[GM_Dialogue] = GuiModeState(mDialogueWindow);
         mTradeWindow->eventTradeDone += MyGUI::newDelegate(mDialogueWindow, &DialogueWindow::onTradeComplete);
 
         auto containerWindow = std::make_unique<ContainerWindow>(mDragAndDrop.get());
         mContainerWindow = containerWindow.get();
         mWindows.push_back(std::move(containerWindow));
-        trackWindow(mContainerWindow, "container");
+        trackWindow(mContainerWindow, makeContainerWindowSettingValues());
         mGuiModeStates[GM_Container] = GuiModeState({ mContainerWindow, mInventoryWindow });
 
         auto hud = std::make_unique<HUD>(mCustomMarkers, mDragAndDrop.get(), mLocalMapRender.get());
@@ -399,7 +421,7 @@ namespace MWGui
         auto settingsWindow = std::make_unique<SettingsWindow>();
         mSettingsWindow = settingsWindow.get();
         mWindows.push_back(std::move(settingsWindow));
-        trackWindow(mSettingsWindow, "settings");
+        trackWindow(mSettingsWindow, makeSettingsWindowSettingValues());
         mGuiModeStates[GM_Settings] = GuiModeState(mSettingsWindow);
 
         auto confirmationDialog = std::make_unique<ConfirmationDialog>();
@@ -407,7 +429,7 @@ namespace MWGui
         mWindows.push_back(std::move(confirmationDialog));
 
         auto alchemyWindow = std::make_unique<AlchemyWindow>();
-        trackWindow(alchemyWindow.get(), "alchemy");
+        trackWindow(alchemyWindow.get(), makeAlchemyWindowSettingValues());
         mGuiModeStates[GM_Alchemy] = GuiModeState(alchemyWindow.get());
         mWindows.push_back(std::move(alchemyWindow));
 
@@ -448,7 +470,7 @@ namespace MWGui
         mSoulgemDialog = std::make_unique<SoulgemDialog>(mMessageBoxManager.get());
 
         auto companionWindow = std::make_unique<CompanionWindow>(mDragAndDrop.get(), mMessageBoxManager.get());
-        trackWindow(companionWindow.get(), "companion");
+        trackWindow(companionWindow.get(), makeCompanionWindowSettingValues());
         mGuiModeStates[GM_Companion] = GuiModeState({ mInventoryWindow, companionWindow.get() });
         mWindows.push_back(std::move(companionWindow));
 
@@ -492,7 +514,7 @@ namespace MWGui
         auto postProcessorHud = std::make_unique<PostProcessorHud>();
         mPostProcessorHud = postProcessorHud.get();
         mWindows.push_back(std::move(postProcessorHud));
-        trackWindow(mPostProcessorHud, "postprocessor");
+        trackWindow(mPostProcessorHud, makePostprocessorWindowSettingValues());
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>(
             "", 0, 0, w, h, MyGUI::Align::Stretch, "InputBlocker");
@@ -1192,19 +1214,11 @@ namespace MWGui
         if (!mHud)
             return; // UI not initialized yet
 
-        for (std::map<MyGUI::Window*, std::string>::iterator it = mTrackedWindows.begin(); it != mTrackedWindows.end();
-             ++it)
+        for (const auto& [window, settings] : mTrackedWindows)
         {
-            std::string settingName = it->second;
-            if (Settings::Manager::getBool(settingName + " maximized", "Windows"))
-                settingName += " maximized";
-
-            MyGUI::IntPoint pos(static_cast<int>(Settings::Manager::getFloat(settingName + " x", "Windows") * x),
-                static_cast<int>(Settings::Manager::getFloat(settingName + " y", "Windows") * y));
-            MyGUI::IntSize size(static_cast<int>(Settings::Manager::getFloat(settingName + " w", "Windows") * x),
-                static_cast<int>(Settings::Manager::getFloat(settingName + " h", "Windows") * y));
-            it->first->setPosition(pos);
-            it->first->setSize(size);
+            const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mMaximized : settings.mRegular;
+            window->setPosition(MyGUI::IntPoint(static_cast<int>(rect.mX * x), static_cast<int>(rect.mY * y)));
+            window->setSize(MyGUI::IntSize(static_cast<int>(rect.mW * x), static_cast<int>(rect.mH * y)));
         }
 
         for (const auto& window : mWindows)
@@ -1511,31 +1525,8 @@ namespace MWGui
         if (getMode() != GM_Inventory)
             return;
 
-        std::string settingName;
-        switch (wnd)
-        {
-            case GW_Inventory:
-                settingName = "inventory";
-                break;
-            case GW_Map:
-                settingName = "map";
-                break;
-            case GW_Magic:
-                settingName = "spells";
-                break;
-            case GW_Stats:
-                settingName = "stats";
-                break;
-            default:
-                break;
-        }
-
-        if (!settingName.empty())
-        {
-            settingName += " hidden";
-            bool hidden = Settings::Manager::getBool(settingName, "Windows");
-            Settings::Manager::setBool(settingName, "Windows", !hidden);
-        }
+        if (Settings::SettingValue<bool>* const hidden = findHiddenSetting(wnd))
+            hidden->set(!hidden->get());
 
         mShown = (GuiWindow)(mShown ^ wnd);
         updateVisible();
@@ -1721,63 +1712,57 @@ namespace MWGui
         return mCursorVisible && mCursorActive;
     }
 
-    void WindowManager::trackWindow(Layout* layout, const std::string& name)
+    void WindowManager::trackWindow(Layout* layout, const WindowSettingValues& settings)
     {
-        std::string settingName = name;
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        bool isMaximized = Settings::Manager::getBool(name + " maximized", "Windows");
-        if (isMaximized)
-            settingName += " maximized";
 
-        MyGUI::IntPoint pos(
-            static_cast<int>(Settings::Manager::getFloat(settingName + " x", "Windows") * viewSize.width),
-            static_cast<int>(Settings::Manager::getFloat(settingName + " y", "Windows") * viewSize.height));
-        MyGUI::IntSize size(
-            static_cast<int>(Settings::Manager::getFloat(settingName + " w", "Windows") * viewSize.width),
-            static_cast<int>(Settings::Manager::getFloat(settingName + " h", "Windows") * viewSize.height));
-        layout->mMainWidget->setPosition(pos);
-        layout->mMainWidget->setSize(size);
+        const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mMaximized : settings.mRegular;
+
+        layout->mMainWidget->setPosition(
+            MyGUI::IntPoint(static_cast<int>(rect.mX * viewSize.width), static_cast<int>(rect.mY * viewSize.height)));
+        layout->mMainWidget->setSize(
+            MyGUI::IntSize(static_cast<int>(rect.mW * viewSize.width), static_cast<int>(rect.mH * viewSize.height)));
 
         MyGUI::Window* window = layout->mMainWidget->castType<MyGUI::Window>();
         window->eventWindowChangeCoord += MyGUI::newDelegate(this, &WindowManager::onWindowChangeCoord);
-        mTrackedWindows[window] = name;
+        mTrackedWindows.emplace(window, settings);
     }
 
     void WindowManager::toggleMaximized(Layout* layout)
     {
         MyGUI::Window* window = layout->mMainWidget->castType<MyGUI::Window>();
-        std::string setting = mTrackedWindows[window];
-        if (setting.empty())
+        const auto it = mTrackedWindows.find(window);
+        if (it == mTrackedWindows.end())
             return;
 
-        bool maximized = !Settings::Manager::getBool(setting + " maximized", "Windows");
-        if (maximized)
-            setting += " maximized";
+        const WindowSettingValues& settings = it->second;
+        const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mRegular : settings.mMaximized;
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        float x = Settings::Manager::getFloat(setting + " x", "Windows") * float(viewSize.width);
-        float y = Settings::Manager::getFloat(setting + " y", "Windows") * float(viewSize.height);
-        float w = Settings::Manager::getFloat(setting + " w", "Windows") * float(viewSize.width);
-        float h = Settings::Manager::getFloat(setting + " h", "Windows") * float(viewSize.height);
+        const float x = rect.mX * viewSize.width;
+        const float y = rect.mY * viewSize.height;
+        const float w = rect.mW * viewSize.width;
+        const float h = rect.mH * viewSize.height;
         window->setCoord(x, y, w, h);
-        Settings::Manager::setBool(mTrackedWindows[window] + " maximized", "Windows", maximized);
+
+        settings.mIsMaximized.set(!settings.mIsMaximized.get());
     }
 
-    void WindowManager::onWindowChangeCoord(MyGUI::Window* _sender)
+    void WindowManager::onWindowChangeCoord(MyGUI::Window* window)
     {
-        std::string setting = mTrackedWindows[_sender];
+        const auto it = mTrackedWindows.find(window);
+        if (it == mTrackedWindows.end())
+            return;
+
+        const WindowSettingValues& settings = it->second;
+
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        float x = _sender->getPosition().left / float(viewSize.width);
-        float y = _sender->getPosition().top / float(viewSize.height);
-        float w = _sender->getSize().width / float(viewSize.width);
-        float h = _sender->getSize().height / float(viewSize.height);
-        Settings::Manager::setFloat(setting + " x", "Windows", x);
-        Settings::Manager::setFloat(setting + " y", "Windows", y);
-        Settings::Manager::setFloat(setting + " w", "Windows", w);
-        Settings::Manager::setFloat(setting + " h", "Windows", h);
-        bool maximized = Settings::Manager::getBool(setting + " maximized", "Windows");
-        if (maximized)
-            Settings::Manager::setBool(setting + " maximized", "Windows", false);
+        settings.mRegular.mX.set(window->getPosition().left / static_cast<float>(viewSize.width));
+        settings.mRegular.mY.set(window->getPosition().top / static_cast<float>(viewSize.height));
+        settings.mRegular.mW.set(window->getSize().width / static_cast<float>(viewSize.width));
+        settings.mRegular.mH.set(window->getSize().height / static_cast<float>(viewSize.height));
+
+        settings.mIsMaximized.set(false);
     }
 
     void WindowManager::clear()
@@ -2004,20 +1989,20 @@ namespace MWGui
 
     void WindowManager::updatePinnedWindows()
     {
-        mInventoryWindow->setPinned(Settings::Manager::getBool("inventory pin", "Windows"));
-        if (Settings::Manager::getBool("inventory hidden", "Windows"))
+        mInventoryWindow->setPinned(Settings::windows().mInventoryPin);
+        if (Settings::windows().mInventoryHidden)
             mShown = (GuiWindow)(mShown ^ GW_Inventory);
 
-        mMap->setPinned(Settings::Manager::getBool("map pin", "Windows"));
-        if (Settings::Manager::getBool("map hidden", "Windows"))
+        mMap->setPinned(Settings::windows().mMapPin);
+        if (Settings::windows().mMapHidden)
             mShown = (GuiWindow)(mShown ^ GW_Map);
 
-        mSpellWindow->setPinned(Settings::Manager::getBool("spells pin", "Windows"));
-        if (Settings::Manager::getBool("spells hidden", "Windows"))
+        mSpellWindow->setPinned(Settings::windows().mSpellsPin);
+        if (Settings::windows().mSpellsHidden)
             mShown = (GuiWindow)(mShown ^ GW_Magic);
 
-        mStatsWindow->setPinned(Settings::Manager::getBool("stats pin", "Windows"));
-        if (Settings::Manager::getBool("stats hidden", "Windows"))
+        mStatsWindow->setPinned(Settings::windows().mStatsPin);
+        if (Settings::windows().mStatsHidden)
             mShown = (GuiWindow)(mShown ^ GW_Stats);
     }
 
