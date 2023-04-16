@@ -184,19 +184,6 @@ namespace MWRender
         // FIXME: when we skip frames we need to preserve positions. this doesn't work now
         size_t ticks = 1;
 
-        // float referenceTime = state.getFrameStamp()->getReferenceTime();
-        // float frameTime = (mLastFrameTime != 0.0) ? referenceTime - mLastFrameTime : 0.0;
-        // frameTime = std::min(frameTime, 0.5f);
-
-        // mLastFrameTime = referenceTime;
-
-        // constexpr float rate = 60.0;
-        // constexpr float waveStep = 1.0 / rate;
-
-        // mRemainingWaveTime += frameTime;
-        // ticks = mRemainingWaveTime / waveStep;
-        // mRemainingWaveTime -= ticks * waveStep;
-
         // PASS: Blot in all ripple spawners
         mProgramBlobber->apply(state);
         state.apply(frameState.mStateset);
