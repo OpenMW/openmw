@@ -803,6 +803,18 @@
 -- @return #MiscellaneousRecord
 
 ---
+-- Returns the read-only soul of a miscellaneous item
+-- @function [parent=#Miscellaneous] soul
+-- @param openmw.core#GameObject object
+-- @return #string
+
+---
+-- Sets the soul of a miscellaneous item, intended for soul gem objects; Must be used in a global script.
+-- @function [parent=#Miscellaneous] setSoul
+-- @param openmw.core#GameObject object
+-- @param #string soulId Record ID for the soul of the creature to use
+
+---
 -- @type MiscellaneousRecord
 -- @field #string id The record ID of the miscellaneous item
 -- @field #string name The name of the miscellaneous item
