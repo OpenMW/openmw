@@ -8,6 +8,13 @@ stages:
   - build
   - test
 
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
 # https://blog.nimbleways.com/let-s-make-faster-gitlab-ci-cd-pipelines/
 variables:
   FF_USE_NEW_SHELL_ESCAPE: "true"
@@ -22,7 +29,7 @@ variables:
     - linux
   image: ubuntu:22.04
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
 
 .Ubuntu:
   extends: .Ubuntu_Image
@@ -121,7 +128,7 @@ Ubuntu_GCC:
     CCACHE_SIZE: 4G
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
-  
+
 Clang_Format:
   extends: .Ubuntu_Image
   stage: checks
@@ -270,7 +277,7 @@ Ubuntu_GCC_tests_coverage:
 .Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         - "**/CMakeLists.txt"
         - "cmake/**/*"
@@ -422,7 +429,7 @@ macOS12_Xcode13:
   tags:
     - windows
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
   - Get-Volume
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
@@ -533,7 +540,7 @@ macOS12_Xcode13:
   tags:
     - windows
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
   - Get-Volume
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
@@ -616,11 +623,6 @@ macOS12_Xcode13:
     - .Windows_MSBuild_Base
   variables:
     config: "Release"
-# temporarily disabled while this isn't the thing we link on the downloads page
-#  rules:
-#    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
-#    - if: $CI_PIPELINE_SOURCE == "push"
-#    - if: $CI_PIPELINE_SOURCE == "schedule"
 
 .Windows_MSBuild_Debug:
   extends:
@@ -638,16 +640,14 @@ Windows_MSBuild_RelWithDebInfo:
   # temporarily enabled while we're linking these on the downloads page
   rules:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
-    - if: $CI_PIPELINE_SOURCE == "push"
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
 
 .Ubuntu_AndroidNDK_arm64-v8a:
   tags:
     - linux
   image: psi29a/android-ndk:focal-ndk22
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     CCACHE_SIZE: 3G
   cache:
