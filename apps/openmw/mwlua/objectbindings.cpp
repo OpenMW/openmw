@@ -308,6 +308,7 @@ namespace MWLua
                     context.mLuaManager->addAction([item = object, count, cont = inventory.mObj] {
                         auto& refData = item.ptr().getRefData();
                         refData.setCount(count); // temporarily undo removal to run ContainerStore::add
+                        refData.enable();
                         cont.ptr().getClass().getContainerStore(cont.ptr()).add(item.ptr(), count, false);
                         refData.setCount(0);
                     });
