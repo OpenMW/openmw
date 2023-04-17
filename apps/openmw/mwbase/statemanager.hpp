@@ -1,6 +1,7 @@
 #ifndef GAME_MWSTATE_STATEMANAGER_H
 #define GAME_MWSTATE_STATEMANAGER_H
 
+#include <filesystem>
 #include <list>
 #include <string>
 

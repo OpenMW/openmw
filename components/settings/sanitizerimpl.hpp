@@ -5,6 +5,7 @@
 
 #include <osg/Vec3f>
 
+#include <cstdint>
 #include <initializer_list>
 #include <memory>
 #include <string>
