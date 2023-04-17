@@ -158,6 +158,50 @@ namespace MWLua
                         case ESM::REC_REPA:
                             cell.mStore->template forEachType<ESM::Repair>(visitor);
                             break;
+                        case ESM::REC_STAT:
+                            cell.mStore->template forEachType<ESM::Static>(visitor);
+                            break;
+
+                        case ESM::REC_ACTI4:
+                            cell.mStore->template forEachType<ESM4::Activator>(visitor);
+                            break;
+                        case ESM::REC_AMMO4:
+                            cell.mStore->template forEachType<ESM4::Ammunition>(visitor);
+                            break;
+                        case ESM::REC_ARMO4:
+                            cell.mStore->template forEachType<ESM4::Armor>(visitor);
+                            break;
+                        case ESM::REC_BOOK4:
+                            cell.mStore->template forEachType<ESM4::Book>(visitor);
+                            break;
+                        case ESM::REC_CLOT4:
+                            cell.mStore->template forEachType<ESM4::Clothing>(visitor);
+                            break;
+                        case ESM::REC_CONT4:
+                            cell.mStore->template forEachType<ESM4::Container>(visitor);
+                            break;
+                        case ESM::REC_DOOR4:
+                            cell.mStore->template forEachType<ESM4::Door>(visitor);
+                            break;
+                        case ESM::REC_INGR4:
+                            cell.mStore->template forEachType<ESM4::Ingredient>(visitor);
+                            break;
+                        case ESM::REC_LIGH4:
+                            cell.mStore->template forEachType<ESM4::Light>(visitor);
+                            break;
+                        case ESM::REC_MISC4:
+                            cell.mStore->template forEachType<ESM4::MiscItem>(visitor);
+                            break;
+                        case ESM::REC_ALCH4:
+                            cell.mStore->template forEachType<ESM4::Potion>(visitor);
+                            break;
+                        case ESM::REC_STAT4:
+                            cell.mStore->template forEachType<ESM4::Static>(visitor);
+                            break;
+                        case ESM::REC_WEAP4:
+                            cell.mStore->template forEachType<ESM4::Weapon>(visitor);
+                            break;
+
                         default:
                             ok = false;
                     }
