@@ -414,12 +414,8 @@ namespace MWWorld
     class Store<ESM::Pathgrid> : public DynamicStore
     {
     private:
-        typedef std::unordered_map<ESM::RefId, ESM::Pathgrid> Interior;
-        typedef std::map<std::pair<int, int>, ESM::Pathgrid> Exterior;
 
-        Interior mInt;
-        Exterior mExt;
-
+        std::unordered_map<ESM::RefId, ESM::Pathgrid> mStatic;
         Store<ESM::Cell>* mCells;
 
     public:
@@ -431,9 +427,7 @@ namespace MWWorld
 
         void setUp() override;
 
-        const ESM::Pathgrid* search(int x, int y) const;
         const ESM::Pathgrid* search(const ESM::RefId& name) const;
-        const ESM::Pathgrid* find(int x, int y) const;
         const ESM::Pathgrid* find(const ESM::RefId& name) const;
         const ESM::Pathgrid* search(const ESM::Cell& cell) const;
         const ESM::Pathgrid* search(const MWWorld::Cell& cell) const;
