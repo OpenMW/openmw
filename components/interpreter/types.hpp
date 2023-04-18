@@ -2,6 +2,7 @@
 #define INTERPRETER_TYPES_H_INCLUDED
 
 #include <stdexcept>
+#include <cstdint>
 
 namespace Interpreter
 {

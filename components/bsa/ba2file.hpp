@@ -2,6 +2,7 @@
 #define BSA_BA2_FILE_H
 
 #include <string>
+#include <cstdint>
 
 namespace Bsa
 {
