@@ -292,14 +292,19 @@ namespace MWLua
         mWorldView.objectAddedToScene(ptr); // assigns generated RefNum if it is not set yet.
         mEngineEvents.addToQueue(EngineEvents::OnActive{ getId(ptr) });
 
-        if (!ptr.getRefData().getLuaScripts())
+        LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
+        if (!localScripts)
         {
             LuaUtil::ScriptIdsWithInitializationData autoStartConf
                 = mConfiguration.getLocalConf(getLiveCellRefType(ptr.mRef), ptr.getCellRef().getRefId(), getId(ptr));
-            // TODO: put to a queue and apply `addAutoStartedScripts` on next `update()`
             if (!autoStartConf.empty())
-                createLocalScripts(ptr, std::move(autoStartConf))->addAutoStartedScripts();
+            {
+                localScripts = createLocalScripts(ptr, std::move(autoStartConf));
+                localScripts->addAutoStartedScripts(); // TODO: put to a queue and apply on next `update()`
+            }
         }
+        if (localScripts)
+            mActiveLocalScripts.insert(localScripts);
     }
 
     void LuaManager::objectRemovedFromScene(const MWWorld::Ptr& ptr)
