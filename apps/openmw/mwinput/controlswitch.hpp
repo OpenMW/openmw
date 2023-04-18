@@ -1,10 +1,10 @@
 #ifndef MWINPUT_CONTROLSWITCH_H
 #define MWINPUT_CONTROLSWITCH_H
 
+#include <cstdint>
 #include <map>
 #include <string>
 #include <string_view>
-#include <cstdint>
 
 namespace ESM
 {

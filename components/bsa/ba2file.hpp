@@ -1,8 +1,8 @@
 #ifndef BSA_BA2_FILE_H
 #define BSA_BA2_FILE_H
 
-#include <string>
 #include <cstdint>
+#include <string>
 
 namespace Bsa
 {
