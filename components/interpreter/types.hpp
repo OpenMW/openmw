@@ -1,8 +1,8 @@
 #ifndef INTERPRETER_TYPES_H_INCLUDED
 #define INTERPRETER_TYPES_H_INCLUDED
 
-#include <stdexcept>
 #include <cstdint>
+#include <stdexcept>
 
 namespace Interpreter
 {
