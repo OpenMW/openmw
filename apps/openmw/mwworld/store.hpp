@@ -414,7 +414,6 @@ namespace MWWorld
     class Store<ESM::Pathgrid> : public DynamicStore
     {
     private:
-
         std::unordered_map<ESM::RefId, ESM::Pathgrid> mStatic;
         Store<ESM::Cell>* mCells;
 

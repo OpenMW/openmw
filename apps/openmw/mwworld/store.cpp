@@ -902,9 +902,7 @@ namespace MWWorld
         // we assume that these records are empty on purpose (i.e. to remove old pathgrid on an updated cell)
         if (isDeleted || pathgrid.mPoints.empty() || pathgrid.mEdges.empty())
         {
-            auto it = mStatic.find(cell);
-            if (it != mStatic.end())
-                mStatic.erase(it);
+            mStatic.erase(cell);
 
             return RecordId(ESM::RefId(), isDeleted);
         }
