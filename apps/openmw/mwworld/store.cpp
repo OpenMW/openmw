@@ -896,71 +896,35 @@ namespace MWWorld
         bool interior = pathgrid.mData.mX == 0 && pathgrid.mData.mY == 0
             && mCells->search(pathgrid.mCell.getRefIdString()) != nullptr;
 
+        ESM::RefId cell
+            = interior ? pathgrid.mCell : ESM::RefId::esm3ExteriorCell(pathgrid.mData.mX, pathgrid.mData.mY);
         // deal with mods that have empty pathgrid records (Issue #6209)
         // we assume that these records are empty on purpose (i.e. to remove old pathgrid on an updated cell)
         if (isDeleted || pathgrid.mPoints.empty() || pathgrid.mEdges.empty())
         {
-            if (interior)
-            {
-                Interior::iterator it = mInt.find(pathgrid.mCell);
-                if (it != mInt.end())
-                    mInt.erase(it);
-            }
-            else
-            {
-                Exterior::iterator it = mExt.find(std::make_pair(pathgrid.mData.mX, pathgrid.mData.mY));
-                if (it != mExt.end())
-                    mExt.erase(it);
-            }
+            mStatic.erase(cell);
 
             return RecordId(ESM::RefId(), isDeleted);
         }
 
         // Try to overwrite existing record
-        if (interior)
-        {
-            std::pair<Interior::iterator, bool> ret = mInt.insert(std::make_pair(pathgrid.mCell, pathgrid));
-            if (!ret.second)
-                ret.first->second = pathgrid;
-        }
-        else
-        {
-            std::pair<Exterior::iterator, bool> ret
-                = mExt.insert(std::make_pair(std::make_pair(pathgrid.mData.mX, pathgrid.mData.mY), pathgrid));
-            if (!ret.second)
-                ret.first->second = pathgrid;
-        }
+        auto ret = mStatic.emplace(cell, pathgrid);
+        if (!ret.second)
+            ret.first->second = pathgrid;
 
         return RecordId(ESM::RefId(), isDeleted);
     }
     size_t Store<ESM::Pathgrid>::getSize() const
     {
-        return mInt.size() + mExt.size();
+        return mStatic.size();
     }
     void Store<ESM::Pathgrid>::setUp() {}
-    const ESM::Pathgrid* Store<ESM::Pathgrid>::search(int x, int y) const
-    {
-        Exterior::const_iterator it = mExt.find(std::make_pair(x, y));
-        if (it != mExt.end())
-            return &(it->second);
-        return nullptr;
-    }
     const ESM::Pathgrid* Store<ESM::Pathgrid>::search(const ESM::RefId& name) const
     {
-        Interior::const_iterator it = mInt.find(ESM::RefId(name));
-        if (it != mInt.end())
+        auto it = mStatic.find(name);
+        if (it != mStatic.end())
             return &(it->second);
         return nullptr;
-    }
-    const ESM::Pathgrid* Store<ESM::Pathgrid>::find(int x, int y) const
-    {
-        const ESM::Pathgrid* pathgrid = search(x, y);
-        if (!pathgrid)
-        {
-            const std::string msg = "Pathgrid in cell '" + std::to_string(x) + " " + std::to_string(y) + "' not found";
-            throw std::runtime_error(msg);
-        }
-        return pathgrid;
     }
     const ESM::Pathgrid* Store<ESM::Pathgrid>::find(const ESM::RefId& name) const
     {
@@ -971,10 +935,7 @@ namespace MWWorld
     }
     const ESM::Pathgrid* Store<ESM::Pathgrid>::search(const ESM::Cell& cell) const
     {
-        if (!(cell.mData.mFlags & ESM::Cell::Interior))
-            return search(cell.mData.mX, cell.mData.mY);
-        else
-            return search(ESM::RefId::stringRefId(cell.mName));
+        return search(cell.mId);
     }
     const ESM::Pathgrid* Store<ESM::Pathgrid>::search(const MWWorld::Cell& cellVariant) const
     {
@@ -986,10 +947,7 @@ namespace MWWorld
     }
     const ESM::Pathgrid* Store<ESM::Pathgrid>::find(const ESM::Cell& cell) const
     {
-        if (!(cell.mData.mFlags & ESM::Cell::Interior))
-            return find(cell.mData.mX, cell.mData.mY);
-        else
-            return find(ESM::RefId::stringRefId(cell.mName));
+        return find(cell.mId);
     }
 
     // Skill
