@@ -30,7 +30,7 @@ namespace MWWorld
     const ESM::RefNum& CellRef::getRefNum() const
     {
         return std::visit(ESM::VisitOverload{
-                              [&](const ESM4::Reference& ref) -> const ESM::RefNum& { return ref.mFormId; },
+                              [&](const ESM4::Reference& ref) -> const ESM::RefNum& { return ref.mId; },
                               [&](const ESM::CellRef& ref) -> const ESM::RefNum& { return ref.mRefNum; },
                           },
             mCellRef.mVariant);
@@ -39,7 +39,7 @@ namespace MWWorld
     const ESM::RefNum& CellRef::getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum)
     {
         ESM::RefNum& refNum = std::visit(ESM::VisitOverload{
-                                             [&](ESM4::Reference& ref) -> ESM::RefNum& { return ref.mFormId; },
+                                             [&](ESM4::Reference& ref) -> ESM::RefNum& { return ref.mId; },
                                              [&](ESM::CellRef& ref) -> ESM::RefNum& { return ref.mRefNum; },
                                          },
             mCellRef.mVariant);
@@ -64,7 +64,7 @@ namespace MWWorld
     void CellRef::unsetRefNum()
     {
         std::visit(ESM::VisitOverload{
-                       [&](ESM4::Reference& ref) { ref.mFormId = emptyRefNum; },
+                       [&](ESM4::Reference& ref) { ref.mId = emptyRefNum; },
                        [&](ESM::CellRef& ref) { ref.mRefNum = emptyRefNum; },
                    },
             mCellRef.mVariant);
@@ -100,7 +100,7 @@ namespace MWWorld
                 return ESM::RefId::sEmpty;
             const ESM4::Reference* refDest
                 = MWBase::Environment::get().getWorld()->getStore().get<ESM4::Reference>().searchStatic(
-                    ESM::FormIdRefId(ref.mDoor.destDoor));
+                    ref.mDoor.destDoor);
             if (refDest)
                 return refDest->mParent;
             return ESM::RefId::sEmpty;
