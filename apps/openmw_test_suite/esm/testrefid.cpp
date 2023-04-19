@@ -1,10 +1,16 @@
 #include <components/esm/refid.hpp>
 
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
 #include <functional>
 #include <map>
 #include <string>
+
+MATCHER(IsPrint, "")
+{
+    return std::isprint(arg) != 0;
+}
 
 namespace ESM
 {
@@ -26,7 +32,7 @@ namespace ESM
 
         TEST(ESMRefIdTest, formIdRefIdIsNotEmpty)
         {
-            const RefId refId = RefId::formIdRefId({ 42, 0 });
+            const RefId refId = RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 });
             EXPECT_FALSE(refId.empty());
         }
 
@@ -53,7 +59,7 @@ namespace ESM
         TEST(ESMRefIdTest, defaultConstructedIsNotEqualToFormIdRefId)
         {
             const RefId a;
-            const RefId b = RefId::formIdRefId({ 42, 0 });
+            const RefId b = RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 });
             EXPECT_NE(a, b);
         }
 
@@ -98,8 +104,8 @@ namespace ESM
 
         TEST(ESMRefIdTest, equalityIsDefinedForFormRefIdAndRefId)
         {
-            const FormIdRefId formIdRefId({ 42, 0 });
-            const RefId refId = RefId::formIdRefId({ 42, 0 });
+            const FormIdRefId formIdRefId({ .mIndex = 42, .mContentFile = 0 });
+            const RefId refId = RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 });
             EXPECT_EQ(formIdRefId, refId);
         }
 
@@ -125,8 +131,8 @@ namespace ESM
 
         TEST(ESMRefIdTest, lessThanIsDefinedForFormRefIdAndRefId)
         {
-            const FormIdRefId formIdRefId({ 13, 0 });
-            const RefId refId = RefId::formIdRefId({ 42, 0 });
+            const FormIdRefId formIdRefId({ .mIndex = 13, .mContentFile = 0 });
+            const RefId refId = RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 });
             EXPECT_LT(formIdRefId, refId);
         }
 
@@ -164,14 +170,14 @@ namespace ESM
         TEST(ESMRefIdTest, stringRefIdHasStrongOrderWithFormId)
         {
             const RefId stringRefId = RefId::stringRefId("a");
-            const RefId formIdRefId = RefId::formIdRefId({ 42, 0 });
+            const RefId formIdRefId = RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 });
             EXPECT_TRUE(stringRefId < formIdRefId);
             EXPECT_FALSE(formIdRefId < stringRefId);
         }
 
         TEST(ESMRefIdTest, formIdRefIdHasStrongOrderWithStringView)
         {
-            const RefId formIdRefId = RefId::formIdRefId({ 42, 0 });
+            const RefId formIdRefId = RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 });
             const std::string_view stringView = "42";
             EXPECT_TRUE(stringView < formIdRefId);
             EXPECT_FALSE(formIdRefId < stringView);
@@ -197,7 +203,7 @@ namespace ESM
         TEST(ESMRefIdTest, stringRefIdIsNotEqualToFormId)
         {
             const RefId stringRefId = RefId::stringRefId("\0");
-            const RefId formIdRefId = RefId::formIdRefId({ 0, 0 });
+            const RefId formIdRefId = RefId::formIdRefId({ .mIndex = 0, .mContentFile = 0 });
             EXPECT_NE(stringRefId, formIdRefId);
         }
 
@@ -240,10 +246,19 @@ namespace ESM
             { RefId(), std::string() },
             { RefId::stringRefId("foo"), "foo" },
             { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), { 'a', 0, -1, '\n', '\t' } },
-            { RefId::formIdRefId({ 42, 0 }), "0x2a" },
+            { RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 }), "0x2a" },
+            { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = std::numeric_limits<std::int32_t>::min() }),
+                "0xff80000000ffffff" },
+            { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = std::numeric_limits<std::int32_t>::max() }),
+                "0x7fffffffffffff" },
             { RefId::generated(42), "0x2a" },
+            { RefId::generated(std::numeric_limits<std::uint64_t>::max()), "0xffffffffffffffff" },
             { RefId::index(REC_ARMO, 42), "ARMO:0x2a" },
             { RefId::esm3ExteriorCell(-13, 42), "-13:42" },
+            { RefId::esm3ExteriorCell(std::numeric_limits<int>::min(), std::numeric_limits<int>::min()),
+                "-2147483648:-2147483648" },
+            { RefId::esm3ExteriorCell(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()),
+                "2147483647:2147483647" },
         };
 
         INSTANTIATE_TEST_SUITE_P(ESMRefIdToString, ESMRefIdToStringTest, ValuesIn(toStringParams));
@@ -273,10 +288,20 @@ namespace ESM
             { RefId::stringRefId("foo"), "\"foo\"" },
             { RefId::stringRefId("BAR"), "\"BAR\"" },
             { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), "\"a\\x0\\xFF\\xA\\x9\"" },
-            { RefId::formIdRefId({ 42, 0 }), "FormId:0x2a" },
+            { RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 }), "FormId:0x2a" },
+            { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = std::numeric_limits<std::int32_t>::min() }),
+                "FormId:0xff80000000ffffff" },
+            { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = std::numeric_limits<std::int32_t>::max() }),
+                "FormId:0x7fffffffffffff" },
             { RefId::generated(42), "Generated:0x2a" },
+            { RefId::generated(std::numeric_limits<std::uint64_t>::max()), "Generated:0xffffffffffffffff" },
             { RefId::index(REC_ARMO, 42), "Index:ARMO:0x2a" },
+            { RefId::index(REC_ARMO, std::numeric_limits<std::uint32_t>::max()), "Index:ARMO:0xffffffff" },
             { RefId::esm3ExteriorCell(-13, 42), "Esm3ExteriorCell:-13:42" },
+            { RefId::esm3ExteriorCell(std::numeric_limits<int>::min(), std::numeric_limits<int>::min()),
+                "Esm3ExteriorCell:-2147483648:-2147483648" },
+            { RefId::esm3ExteriorCell(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()),
+                "Esm3ExteriorCell:2147483647:2147483647" },
         };
 
         INSTANTIATE_TEST_SUITE_P(ESMRefIdToDebugString, ESMRefIdToDebugStringTest, ValuesIn(toDebugStringParams));
@@ -300,11 +325,16 @@ namespace ESM
             { RefId::stringRefId("foo"), "foo" },
             { RefId::stringRefId("BAR"), "bar" },
             { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), { 'a', 0, -1, '\n', '\t' } },
-            { RefId::formIdRefId({ 0, 0 }), "FormId:0x0" },
-            { RefId::formIdRefId({ 1, 0 }), "FormId:0x1" },
-            { RefId::formIdRefId({ 0x1f, 0 }), "FormId:0x1f" },
-            { RefId::formIdRefId({ 0x1f, 2 }), "FormId:0x200001f" },
-            { RefId::formIdRefId({ 0xffffff, 0x1abc }), "FormId:0x1abcffffff" },
+            { RefId::formIdRefId({ .mIndex = 0, .mContentFile = 0 }), "FormId:0x0" },
+            { RefId::formIdRefId({ .mIndex = 1, .mContentFile = 0 }), "FormId:0x1" },
+            { RefId::formIdRefId({ .mIndex = 0x1f, .mContentFile = 0 }), "FormId:0x1f" },
+            { RefId::formIdRefId({ .mIndex = 0x1f, .mContentFile = 2 }), "FormId:0x200001f" },
+            { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = 0x1abc }), "FormId:0x1abcffffff" },
+            { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = std::numeric_limits<std::int32_t>::max() }),
+                "FormId:0x7fffffffffffff" },
+            { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = -1 }), "FormId:0xffffffffffffffff" },
+            { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = std::numeric_limits<std::int32_t>::min() }),
+                "FormId:0xff80000000ffffff" },
             { RefId::generated(0), "Generated:0x0" },
             { RefId::generated(1), "Generated:0x1" },
             { RefId::generated(0x1f), "Generated:0x1f" },
@@ -350,7 +380,7 @@ namespace ESM
         template <>
         struct GenerateRefId<FormIdRefId>
         {
-            static RefId call() { return RefId::formIdRefId({ 42, 0 }); }
+            static RefId call() { return RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 }); }
         };
 
         template <>
@@ -388,9 +418,25 @@ namespace ESM
         {
             const RefId refId = GenerateRefId<TypeParam>::call();
             const std::string text = refId.serializeText();
-            for (std::size_t i = 0; i < text.size(); ++i)
-                ASSERT_TRUE(std::isprint(text[i])) << "index: " << i << ", int value: " << static_cast<int>(text[i]);
             EXPECT_EQ(RefId::deserializeText(text), refId);
+        }
+
+        TYPED_TEST_P(ESMRefIdTypesTest, serializeTextShouldReturnOnlyPrintableCharacters)
+        {
+            const RefId refId = GenerateRefId<TypeParam>::call();
+            EXPECT_THAT(refId.serializeText(), Each(IsPrint()));
+        }
+
+        TYPED_TEST_P(ESMRefIdTypesTest, toStringShouldReturnOnlyPrintableCharacters)
+        {
+            const RefId refId = GenerateRefId<TypeParam>::call();
+            EXPECT_THAT(refId.toString(), Each(IsPrint()));
+        }
+
+        TYPED_TEST_P(ESMRefIdTypesTest, toDebugStringShouldReturnOnlyPrintableCharacters)
+        {
+            const RefId refId = GenerateRefId<TypeParam>::call();
+            EXPECT_THAT(refId.toDebugString(), Each(IsPrint()));
         }
 
         TYPED_TEST_P(ESMRefIdTypesTest, shouldBeEqualToItself)
@@ -416,7 +462,8 @@ namespace ESM
 
         REGISTER_TYPED_TEST_SUITE_P(ESMRefIdTypesTest, serializeThenDeserializeShouldProduceSameValue,
             serializeTextThenDeserializeTextShouldProduceSameValue, shouldBeEqualToItself, shouldNotBeNotEqualToItself,
-            shouldBeNotLessThanItself);
+            shouldBeNotLessThanItself, serializeTextShouldReturnOnlyPrintableCharacters,
+            toStringShouldReturnOnlyPrintableCharacters, toDebugStringShouldReturnOnlyPrintableCharacters);
 
         template <class>
         struct RefIdTypes;
