@@ -256,25 +256,17 @@ void CSMDoc::CollectionReferencesStage::perform(int stage, Messages& messages)
 
         if (record.isModified() || record.mState == CSMWorld::RecordBase::State_Deleted)
         {
-            const ESM::RefId& cellId
+            const ESM::RefId cellId
                 = record.get().mOriginalCell.empty() ? record.get().mCell : record.get().mOriginalCell;
 
             std::deque<int>& indices = mState.getOrInsertSubRecord(cellId);
 
             // collect moved references at the end of the container
-            const bool interior = !cellId.startsWith("#");
-            std::ostringstream stream;
-            if (!interior)
-            {
-                // recalculate the ref's cell location
-                std::pair<int, int> index = record.get().getCellIndex();
-                stream << "#" << index.first << " " << index.second;
-            }
+            const bool interior = !cellId.is<ESM::ESM3ExteriorCellRefId>();
 
             // An empty mOriginalCell is meant to indicate that it is the same as
             // the current cell.  It is possible that a moved ref is moved again.
-            if ((record.get().mOriginalCell.empty() ? record.get().mCell : record.get().mOriginalCell)
-                    != ESM::RefId::stringRefId(stream.str())
+            if ((record.get().mOriginalCell.empty() ? record.get().mCell : record.get().mOriginalCell) != cellId
                 && !interior && record.mState != CSMWorld::RecordBase::State_ModifiedOnly && !record.get().mNew)
                 indices.push_back(i);
             else
@@ -359,7 +351,7 @@ void CSMDoc::WriteCellCollectionStage::perform(int stage, Messages& messages)
     std::deque<int> tempRefs;
     std::deque<int> persistentRefs;
 
-    const std::deque<int>* references = mState.findSubRecord(cell.get().mId);
+    const std::deque<int>* references = mState.findSubRecord(static_cast<ESM::Cell>(cell.get()).mId);
 
     if (cell.isModified() || cell.mState == CSMWorld::RecordBase::State_Deleted || references != nullptr)
     {
