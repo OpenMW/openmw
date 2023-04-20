@@ -9,6 +9,7 @@ set(DDIRRELATIVE resources/shaders)
 set(SHADER_FILES
     lib/water/fresnel.glsl
     lib/water/rain_ripples.glsl
+    lib/water/rain_ripples_old.glsl
     lib/water/ripples.glsl
     lib/view/depth.glsl
     lib/luminance/constants.glsl

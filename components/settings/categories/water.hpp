@@ -17,6 +17,7 @@ namespace Settings
     struct WaterCategory
     {
         SettingValue<bool> mShader{ "Water", "shader" };
+        SettingValue<bool> mShaderRipples{ "Water", "shader ripples" };
         SettingValue<int> mRttSize{ "Water", "rtt size", makeMaxSanitizerInt(1) };
         SettingValue<bool> mRefraction{ "Water", "refraction" };
         SettingValue<int> mReflectionDetail{ "Water", "reflection detail", makeEnumSanitizerInt({ 0, 1, 2, 3, 4, 5 }) };

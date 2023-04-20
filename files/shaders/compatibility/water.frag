@@ -89,7 +89,11 @@ uniform vec2 screenRes;
 #include "lib/light/lighting.glsl"
 #include "fog.glsl"
 #include "lib/water/fresnel.glsl"
-#include "lib/water/rain_ripples.glsl"
+#if @shader_ripples
+    #include "lib/water/rain_ripples.glsl"
+#else
+    #include "lib/water/rain_ripples_old.glsl"
+#endif
 #include "lib/view/depth.glsl"
 
 void main(void)
@@ -119,11 +123,13 @@ void main(void)
 
     vec3 rippleAdd = rainRipple.xyz * 10.0;
 
+#if @shader_ripples
     float distToCenter = length(rippleMapUV - vec2(0.5));
     float blendClose = smoothstep(0.001, 0.02, distToCenter);
     float blendFar = 1.0 - smoothstep(0.3, 0.4, distToCenter);
     float distortionLevel = 2.0;
     rippleAdd += distortionLevel * vec3(texture2D(rippleMap, rippleMapUV).ba * blendFar * blendClose, 0.0);
+#endif
 
     vec2 bigWaves = vec2(BIG_WAVES_X,BIG_WAVES_Y);
     vec2 midWaves = mix(vec2(MID_WAVES_X,MID_WAVES_Y),vec2(MID_WAVES_RAIN_X,MID_WAVES_RAIN_Y),rainIntensity);
