@@ -377,19 +377,19 @@ namespace MWWorld
             mRendering.notifyWorldSpaceChanged();
     }
 
-    void Scene::loadCell(CellStore* cell, Loading::Listener* loadingListener, bool respawn, const osg::Vec3f& position,
+    void Scene::loadCell(CellStore& cell, Loading::Listener* loadingListener, bool respawn, const osg::Vec3f& position,
         const DetourNavigator::UpdateGuard* navigatorUpdateGuard)
     {
         using DetourNavigator::HeightfieldShape;
 
-        assert(mActiveCells.find(cell) == mActiveCells.end());
-        mActiveCells.insert(cell);
+        assert(mActiveCells.find(&cell) == mActiveCells.end());
+        mActiveCells.insert(&cell);
 
-        Log(Debug::Info) << "Loading cell " << cell->getCell()->getDescription();
+        Log(Debug::Info) << "Loading cell " << cell.getCell()->getDescription();
 
-        const int cellX = cell->getCell()->getGridX();
-        const int cellY = cell->getCell()->getGridY();
-        const MWWorld::Cell& cellVariant = *cell->getCell();
+        const int cellX = cell.getCell()->getGridX();
+        const int cellY = cell.getCell()->getGridY();
+        const MWWorld::Cell& cellVariant = *cell.getCell();
 
         if (cellVariant.isExterior())
         {
@@ -440,22 +440,22 @@ namespace MWWorld
                        },
                        [&](const ESM4::Cell& cell) {},
                    },
-            *cell->getCell());
+            *cell.getCell());
 
         // register local scripts
         // do this before insertCell, to make sure we don't add scripts from levelled creature spawning twice
-        mWorld.getLocalScripts().addCell(cell);
+        mWorld.getLocalScripts().addCell(&cell);
 
         if (respawn)
-            cell->respawn();
+            cell.respawn();
 
-        insertCell(*cell, loadingListener, navigatorUpdateGuard);
+        insertCell(cell, loadingListener, navigatorUpdateGuard);
 
-        mRendering.addCell(cell);
+        mRendering.addCell(&cell);
 
-        MWBase::Environment::get().getWindowManager()->addCell(cell);
-        bool waterEnabled = cellVariant.hasWater() || cell->isExterior();
-        float waterLevel = cell->getWaterLevel();
+        MWBase::Environment::get().getWindowManager()->addCell(&cell);
+        bool waterEnabled = cellVariant.hasWater() || cell.isExterior();
+        float waterLevel = cell.getWaterLevel();
         mRendering.setWaterEnabled(waterEnabled);
         if (waterEnabled)
         {
@@ -477,10 +477,10 @@ namespace MWWorld
         else
             mPhysics->disableWater();
 
-        if (!cell->isExterior() && !cellVariant.isQuasiExterior())
+        if (!cell.isExterior() && !cellVariant.isQuasiExterior())
             mRendering.configureAmbient(cellVariant);
 
-        mPreloader->notifyLoaded(cell);
+        mPreloader->notifyLoaded(&cell);
     }
 
     void Scene::clear()
@@ -615,7 +615,7 @@ namespace MWWorld
             if (!isCellInCollection(x, y, mActiveCells))
             {
                 CellStore& cell = mWorld.getWorldModel().getExterior(x, y);
-                loadCell(&cell, loadingListener, changeEvent, pos, navigatorUpdateGuard.get());
+                loadCell(cell, loadingListener, changeEvent, pos, navigatorUpdateGuard.get());
             }
         }
 
@@ -682,7 +682,7 @@ namespace MWWorld
             const osg::Vec3f position
                 = osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits;
             mNavigator.updateBounds(position, navigatorUpdateGuard.get());
-            loadCell(&cell, nullptr, false, position, navigatorUpdateGuard.get());
+            loadCell(cell, nullptr, false, position, navigatorUpdateGuard.get());
 
             mNavigator.update(position, navigatorUpdateGuard.get());
             navigatorUpdateGuard.reset();
@@ -740,7 +740,7 @@ namespace MWWorld
             ESM::Position position;
             mWorld.findInteriorPosition(it->mName, position);
             mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
-            loadCell(&cell, nullptr, false, position.asVec3(), navigatorUpdateGuard.get());
+            loadCell(cell, nullptr, false, position.asVec3(), navigatorUpdateGuard.get());
 
             mNavigator.update(position.asVec3(), navigatorUpdateGuard.get());
             navigatorUpdateGuard.reset();
@@ -772,21 +772,21 @@ namespace MWWorld
         mRendering.getResourceSystem()->setExpiryDelay(Settings::Manager::getFloat("cache expiry delay", "Cells"));
     }
 
-    void Scene::changePlayerCell(CellStore* cell, const ESM::Position& pos, bool adjustPlayerPos)
+    void Scene::changePlayerCell(CellStore& cell, const ESM::Position& pos, bool adjustPlayerPos)
     {
-        mCurrentCell = cell;
+        mCurrentCell = &cell;
 
-        mRendering.enableTerrain(cell->isExterior());
+        mRendering.enableTerrain(cell.isExterior());
 
         MWWorld::Ptr old = mWorld.getPlayerPtr();
-        mWorld.getPlayer().setCell(cell);
+        mWorld.getPlayer().setCell(&cell);
 
         MWWorld::Ptr player = mWorld.getPlayerPtr();
         mRendering.updatePlayerPtr(player);
 
         // The player is loaded before the scene and by default it is grounded, with the scene fully loaded,
         // we validate and correct this. Only run once, during initial cell load.
-        if (old.mCell == cell)
+        if (old.mCell == &cell)
             mPhysics->traceDown(player, player.getRefData().getPosition().asVec3(), 10.f);
 
         if (adjustPlayerPos)
@@ -897,11 +897,11 @@ namespace MWWorld
 
         // Load cell.
         mPagedRefs.clear();
-        loadCell(&cell, loadingListener, changeEvent, position.asVec3(), navigatorUpdateGuard.get());
+        loadCell(cell, loadingListener, changeEvent, position.asVec3(), navigatorUpdateGuard.get());
 
         navigatorUpdateGuard.reset();
 
-        changePlayerCell(&cell, position, adjustPlayerPos);
+        changePlayerCell(cell, position, adjustPlayerPos);
 
         // adjust fog
         mRendering.configureFog(*mCurrentCell->getCell());
@@ -934,7 +934,7 @@ namespace MWWorld
 
         changeCellGrid(position.asVec3(), cellIndex.x(), cellIndex.y(), changeEvent);
 
-        changePlayerCell(&current, position, adjustPlayerPos);
+        changePlayerCell(current, position, adjustPlayerPos);
 
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
@@ -1133,7 +1133,7 @@ namespace MWWorld
             {
                 try
                 {
-                    preloadCell(&mWorld.getWorldModel().getCell(door.getCellRef().getDestCell()));
+                    preloadCell(mWorld.getWorldModel().getCell(door.getCellRef().getDestCell()));
                 }
                 catch (std::exception&)
                 {
@@ -1177,17 +1177,17 @@ namespace MWWorld
                     + mPreloadDistance;
 
                 if (dist < loadDist)
-                    preloadCell(&mWorld.getWorldModel().getExterior(cellX + dx, cellY + dy));
+                    preloadCell(mWorld.getWorldModel().getExterior(cellX + dx, cellY + dy));
             }
         }
     }
 
-    void Scene::preloadCell(CellStore* cell, bool preloadSurrounding)
+    void Scene::preloadCell(CellStore& cell, bool preloadSurrounding)
     {
-        if (preloadSurrounding && cell->isExterior())
+        if (preloadSurrounding && cell.isExterior())
         {
-            int x = cell->getCell()->getGridX();
-            int y = cell->getCell()->getGridY();
+            int x = cell.getCell()->getGridX();
+            int y = cell.getCell()->getGridY();
             unsigned int numpreloaded = 0;
             for (int dx = -mHalfGridSize; dx <= mHalfGridSize; ++dx)
             {
@@ -1201,7 +1201,7 @@ namespace MWWorld
             }
         }
         else
-            mPreloader->preload(cell, mRendering.getReferenceTime());
+            mPreloader->preload(&cell, mRendering.getReferenceTime());
     }
 
     void Scene::preloadTerrain(const osg::Vec3f& pos, bool sync)
@@ -1274,12 +1274,12 @@ namespace MWWorld
         for (ESM::Transport::Dest& dest : listVisitor.mList)
         {
             if (!dest.mCellName.empty())
-                preloadCell(&mWorld.getWorldModel().getInterior(dest.mCellName));
+                preloadCell(mWorld.getWorldModel().getInterior(dest.mCellName));
             else
             {
                 osg::Vec3f pos = dest.mPos.asVec3();
                 const osg::Vec2i cellIndex = positionToCellIndex(pos.x(), pos.y());
-                preloadCell(&mWorld.getWorldModel().getExterior(cellIndex.x(), cellIndex.y()), true);
+                preloadCell(mWorld.getWorldModel().getExterior(cellIndex.x(), cellIndex.y()), true);
                 exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
             }
         }

@@ -507,7 +507,7 @@ namespace MWWorld
                 {
                     if (getPlayerPtr().getCell()->isExterior())
                         mWorldScene->preloadTerrain(getPlayerPtr().getRefData().getPosition().asVec3());
-                    mWorldScene->preloadCell(getPlayerPtr().getCell(), true);
+                    mWorldScene->preloadCell(*getPlayerPtr().getCell(), true);
                 }
                 break;
             default:
@@ -1183,7 +1183,7 @@ namespace MWWorld
                 else
                 {
                     if (mWorldScene->isCellActive(*newCell))
-                        mWorldScene->changePlayerCell(newCell, pos, false);
+                        mWorldScene->changePlayerCell(*newCell, pos, false);
                     else
                         mWorldScene->changeToExteriorCell(newCell->getCell()->getId(), pos, false);
                 }
@@ -2086,10 +2086,10 @@ namespace MWWorld
         }
     };
 
-    void World::getDoorMarkers(CellStore* cell, std::vector<World::DoorMarker>& out)
+    void World::getDoorMarkers(CellStore& cell, std::vector<World::DoorMarker>& out)
     {
         GetDoorMarkerVisitor visitor{ out };
-        cell->forEachType<ESM::Door>(visitor);
+        cell.forEachType<ESM::Door>(visitor);
     }
 
     void World::setWaterHeight(const float height)

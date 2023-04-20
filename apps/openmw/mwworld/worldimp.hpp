@@ -245,7 +245,7 @@ namespace MWWorld
 
         bool isCellQuasiExterior() const override;
 
-        void getDoorMarkers(MWWorld::CellStore* cell, std::vector<DoorMarker>& out) override;
+        void getDoorMarkers(MWWorld::CellStore& cell, std::vector<DoorMarker>& out) override;
         ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
         void setGlobalInt(GlobalVariableName name, int value) override;

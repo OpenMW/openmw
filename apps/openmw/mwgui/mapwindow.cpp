@@ -633,7 +633,7 @@ namespace MWGui
             for (MyGUI::Widget* widget : mExteriorDoorMarkerWidgets)
                 widget->setVisible(false);
 
-            MWWorld::CellStore* cell = &worldModel->getInterior(mPrefix);
+            MWWorld::CellStore& cell = worldModel->getInterior(mPrefix);
             world->getDoorMarkers(cell, doors);
         }
         else
@@ -641,7 +641,7 @@ namespace MWGui
             for (MapEntry& entry : mMaps)
             {
                 if (!entry.mMapTexture && !widgetCropped(entry.mMapWidget, mLocalMap))
-                    world->getDoorMarkers(&worldModel->getExterior(entry.mCellX, entry.mCellY), doors);
+                    world->getDoorMarkers(worldModel->getExterior(entry.mCellX, entry.mCellY), doors);
             }
             if (doors.empty())
                 return;
