@@ -107,6 +107,7 @@
 -- Player, actors, items, and statics are game objects.
 -- @type GameObject
 -- @extends #userdata
+-- @field #string id A unique id of this object (not record id), can be used as a key in a table.
 -- @field #boolean enabled Whether the object is enabled or disabled. Global scripts can set the value. Items in containers or inventories can't be disabled.
 -- @field openmw.util#Vector3 position Object position.
 -- @field openmw.util#Vector3 rotation Object rotation (ZXY order).

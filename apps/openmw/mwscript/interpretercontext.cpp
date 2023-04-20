@@ -419,13 +419,23 @@ namespace MWScript
 
     void InterpreterContext::executeActivation(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor)
     {
+        // MWScripted activations don't go through Lua because 1-frame delay can brake mwscripts.
+#if 0
         MWBase::Environment::get().getLuaManager()->objectActivated(ptr, actor);
+
+        // TODO: Enable this branch after implementing one of the options:
+        // 1) Pause this mwscript (or maybe all mwscripts) for one frame and continue from the same
+        //     command when the activation is processed by Lua script.
+        // 2) Force Lua scripts to handle a zero-length extra frame right now, so when control
+        //     returns to the mwscript, the activation is already processed.
+#else
         std::unique_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, actor));
         action->execute(actor);
         if (action->getTarget() != MWWorld::Ptr() && action->getTarget() != ptr)
         {
             updatePtr(ptr, action->getTarget());
         }
+#endif
     }
 
     int InterpreterContext::getMemberShort(const ESM::RefId& id, std::string_view name, bool global) const

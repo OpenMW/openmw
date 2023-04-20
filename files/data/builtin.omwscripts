@@ -1,9 +1,17 @@
+# UI framework
 PLAYER: scripts/omw/mwui/init.lua
+
+# Settings framework
 GLOBAL: scripts/omw/settings/global.lua
 PLAYER: scripts/omw/settings/player.lua
+
+# Mechanics
+GLOBAL: scripts/omw/activationhandlers.lua
 PLAYER: scripts/omw/playercontrols.lua
 PLAYER: scripts/omw/camera/camera.lua
 NPC,CREATURE: scripts/omw/ai.lua
+
+# Lua console
 PLAYER: scripts/omw/console/player.lua
 GLOBAL: scripts/omw/console/global.lua
 CUSTOM: scripts/omw/console/local.lua
