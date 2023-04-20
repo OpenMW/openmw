@@ -24,9 +24,8 @@ namespace MWSound
             float mAudioMaxDistanceMult;
         };
 
-        AudioParams makeAudioParams(const MWBase::World& world)
+        AudioParams makeAudioParams(const MWWorld::Store<ESM::GameSetting>& settings)
         {
-            const auto& settings = world.getStore().get<ESM::GameSetting>();
             AudioParams params;
             params.mAudioDefaultMinDistance = settings.find("fAudioDefaultMinDistance")->mValue.getFloat();
             params.mAudioDefaultMaxDistance = settings.find("fAudioDefaultMaxDistance")->mValue.getFloat();
@@ -119,7 +118,8 @@ namespace MWSound
 
     Sound_Buffer* SoundBufferPool::insertSound(const ESM::RefId& soundId, const ESM::Sound& sound)
     {
-        static const AudioParams audioParams = makeAudioParams(*MWBase::Environment::get().getWorld());
+        static const AudioParams audioParams
+            = makeAudioParams(MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>());
 
         float volume = static_cast<float>(std::pow(10.0, (sound.mData.mVolume / 255.0 * 3348.0 - 3348.0) / 2000.0));
         float min = sound.mData.mMinRange;

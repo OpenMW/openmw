@@ -33,7 +33,7 @@ namespace MWMechanics
             default:
                 assert(false);
         }
-        MWBase::Environment::get().getWorld()->createOverrideRecord(copy);
+        MWBase::Environment::get().getWorld()->getStore().overrideRecord(copy);
     }
 }
 

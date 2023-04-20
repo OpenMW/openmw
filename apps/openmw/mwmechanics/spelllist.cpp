@@ -27,7 +27,7 @@ namespace
         T copy = *MWBase::Environment::get().getWorld()->getStore().get<T>().find(id);
         bool changed = function(copy.mSpells.mList);
         if (changed)
-            MWBase::Environment::get().getWorld()->createOverrideRecord(copy);
+            MWBase::Environment::get().getWorld()->getStore().overrideRecord(copy);
         return changed;
     }
 }

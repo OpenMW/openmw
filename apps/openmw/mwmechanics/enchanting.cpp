@@ -98,7 +98,7 @@ namespace MWMechanics
         // Try to find a dynamic enchantment with the same stats, create a new one if not found.
         const ESM::Enchantment* enchantmentPtr = getRecord(enchantment);
         if (enchantmentPtr == nullptr)
-            enchantmentPtr = MWBase::Environment::get().getWorld()->createRecord(enchantment);
+            enchantmentPtr = MWBase::Environment::get().getWorld()->getStore().insert(enchantment);
 
         // Apply the enchantment
         const ESM::RefId& newItemId

@@ -151,7 +151,7 @@ namespace MWClass
         newItem.mData.mIsScroll = 1;
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;
-        const ESM::Book* record = MWBase::Environment::get().getWorld()->createRecord(newItem);
+        const ESM::Book* record = MWBase::Environment::get().getWorld()->getStore().insert(newItem);
         return record->mId;
     }
 

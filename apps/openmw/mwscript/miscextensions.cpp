@@ -1506,7 +1506,7 @@ namespace MWScript
                 ESM::CreatureLevList listCopy
                     = *MWBase::Environment::get().getWorld()->getStore().get<ESM::CreatureLevList>().find(levId);
                 addToLevList(&listCopy, creatureId, level);
-                MWBase::Environment::get().getWorld()->createOverrideRecord(listCopy);
+                MWBase::Environment::get().getWorld()->getStore().overrideRecord(listCopy);
             }
         };
 
@@ -1525,7 +1525,7 @@ namespace MWScript
                 ESM::CreatureLevList listCopy
                     = *MWBase::Environment::get().getWorld()->getStore().get<ESM::CreatureLevList>().find(levId);
                 removeFromLevList(&listCopy, creatureId, level);
-                MWBase::Environment::get().getWorld()->createOverrideRecord(listCopy);
+                MWBase::Environment::get().getWorld()->getStore().overrideRecord(listCopy);
             }
         };
 
@@ -1544,7 +1544,7 @@ namespace MWScript
                 ESM::ItemLevList listCopy
                     = *MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().find(levId);
                 addToLevList(&listCopy, itemId, level);
-                MWBase::Environment::get().getWorld()->createOverrideRecord(listCopy);
+                MWBase::Environment::get().getWorld()->getStore().overrideRecord(listCopy);
             }
         };
 
@@ -1563,7 +1563,7 @@ namespace MWScript
                 ESM::ItemLevList listCopy
                     = *MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().find(levId);
                 removeFromLevList(&listCopy, itemId, level);
-                MWBase::Environment::get().getWorld()->createOverrideRecord(listCopy);
+                MWBase::Environment::get().getWorld()->getStore().overrideRecord(listCopy);
             }
         };
 

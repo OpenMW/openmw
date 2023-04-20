@@ -269,7 +269,7 @@ namespace MWClass
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;
         newItem.mData.mFlags |= ESM::Weapon::Magical;
-        const ESM::Weapon* record = MWBase::Environment::get().getWorld()->createRecord(newItem);
+        const ESM::Weapon* record = MWBase::Environment::get().getWorld()->getStore().insert(newItem);
         return record->mId;
     }
 

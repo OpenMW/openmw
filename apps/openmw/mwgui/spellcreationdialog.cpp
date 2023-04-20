@@ -416,7 +416,7 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Mysticism Hit"));
 
-        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->createRecord(mSpell);
+        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().insert(mSpell);
 
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();

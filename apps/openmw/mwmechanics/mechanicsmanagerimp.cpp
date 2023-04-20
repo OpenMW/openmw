@@ -440,7 +440,7 @@ namespace MWMechanics
         ESM::NPC player = *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mName = name;
 
-        world->createRecord(player);
+        world->getStore().insert(player);
 
         mUpdatePlayer = true;
     }
@@ -457,7 +457,7 @@ namespace MWMechanics
         player.mHair = hair;
         player.setIsMale(male);
 
-        world->createRecord(player);
+        world->getStore().insert(player);
 
         mRaceSelected = true;
         buildPlayer();
@@ -478,7 +478,7 @@ namespace MWMechanics
         ESM::NPC player = *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mClass = id;
 
-        world->createRecord(player);
+        world->getStore().insert(player);
 
         mClassSelected = true;
         buildPlayer();
@@ -489,12 +489,12 @@ namespace MWMechanics
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
-        const ESM::Class* ptr = world->createRecord(cls);
+        const ESM::Class* ptr = world->getStore().insert(cls);
 
         ESM::NPC player = *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mClass = ptr->mId;
 
-        world->createRecord(player);
+        world->getStore().insert(player);
 
         mClassSelected = true;
         buildPlayer();

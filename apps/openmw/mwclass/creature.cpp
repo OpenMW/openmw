@@ -91,8 +91,8 @@ namespace MWClass
         static const GMST staticGmst = [] {
             GMST gmst;
 
-            const MWBase::World* world = MWBase::Environment::get().getWorld();
-            const MWWorld::Store<ESM::GameSetting>& store = world->getStore().get<ESM::GameSetting>();
+            const MWWorld::Store<ESM::GameSetting>& store
+                = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
 
             gmst.fMinWalkSpeedCreature = store.find("fMinWalkSpeedCreature");
             gmst.fMaxWalkSpeedCreature = store.find("fMaxWalkSpeedCreature");

@@ -196,7 +196,7 @@ namespace MWClass
         newItem.mName = newName;
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;
-        const ESM::Clothing* record = MWBase::Environment::get().getWorld()->createRecord(newItem);
+        const ESM::Clothing* record = MWBase::Environment::get().getWorld()->getStore().insert(newItem);
         return record->mId;
     }
 

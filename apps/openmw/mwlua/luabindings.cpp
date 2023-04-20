@@ -120,7 +120,7 @@ namespace MWLua
 
         // Creates a new record in the world database.
         api["createRecord"] = sol::overload([](const ESM::Potion& potion) -> const ESM::Potion* {
-            return MWBase::Environment::get().getWorld()->createRecord(potion);
+            return MWBase::Environment::get().getWorld()->getStore().insert(potion);
         }
             // TODO: add here overloads for other records
         );

@@ -289,7 +289,7 @@ namespace MWClass
         newItem.mName = newName;
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;
-        const ESM::Armor* record = MWBase::Environment::get().getWorld()->createRecord(newItem);
+        const ESM::Armor* record = MWBase::Environment::get().getWorld()->getStore().insert(newItem);
         return record->mId;
     }
 
@@ -300,8 +300,12 @@ namespace MWClass
         int armorSkillType = getEquipmentSkill(ptr);
         float armorSkill = actor.getClass().getSkill(actor, armorSkillType);
 
-        const MWBase::World* world = MWBase::Environment::get().getWorld();
-        int iBaseArmorSkill = world->getStore().get<ESM::GameSetting>().find("iBaseArmorSkill")->mValue.getInteger();
+        int iBaseArmorSkill = MWBase::Environment::get()
+                                  .getWorld()
+                                  ->getStore()
+                                  .get<ESM::GameSetting>()
+                                  .find("iBaseArmorSkill")
+                                  ->mValue.getInteger();
 
         if (ref->mBase->mData.mWeight == 0)
             return ref->mBase->mData.mArmor;

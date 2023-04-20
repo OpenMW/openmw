@@ -315,7 +315,7 @@ void MWMechanics::Alchemy::addPotion(const std::string& name)
 
     const ESM::Potion* record = getRecord(newRecord);
     if (!record)
-        record = MWBase::Environment::get().getWorld()->createRecord(newRecord);
+        record = MWBase::Environment::get().getWorld()->getStore().insert(newRecord);
 
     mAlchemist.getClass().getContainerStore(mAlchemist).add(record->mId, 1);
 }
