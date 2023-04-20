@@ -43,7 +43,7 @@ namespace MWWorld
 
         /// Ask a background thread to preload rendering meshes and collision shapes for objects in this cell.
         /// @note The cell itself must be in State_Loaded or State_Preloaded.
-        void preload(MWWorld::CellStore* cell, double timestamp);
+        void preload(MWWorld::CellStore& cell, double timestamp);
 
         void notifyLoaded(MWWorld::CellStore* cell);
 

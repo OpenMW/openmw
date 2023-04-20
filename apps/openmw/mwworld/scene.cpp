@@ -1194,14 +1194,14 @@ namespace MWWorld
                 for (int dy = -mHalfGridSize; dy <= mHalfGridSize; ++dy)
                 {
                     mPreloader->preload(
-                        &mWorld.getWorldModel().getExterior(x + dx, y + dy), mRendering.getReferenceTime());
+                        mWorld.getWorldModel().getExterior(x + dx, y + dy), mRendering.getReferenceTime());
                     if (++numpreloaded >= mPreloader->getMaxCacheSize())
                         break;
                 }
             }
         }
         else
-            mPreloader->preload(&cell, mRendering.getReferenceTime());
+            mPreloader->preload(cell, mRendering.getReferenceTime());
     }
 
     void Scene::preloadTerrain(const osg::Vec3f& pos, bool sync)
