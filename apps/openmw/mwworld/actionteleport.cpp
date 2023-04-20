@@ -34,7 +34,7 @@ namespace MWWorld
             // Find any NPCs that are following the actor and teleport them with him
             std::set<MWWorld::Ptr> followers;
 
-            bool toExterior = MWBase::Environment::get().getWorldModel()->getCell(mCellId)->isExterior();
+            bool toExterior = MWBase::Environment::get().getWorldModel()->getCell(mCellId).isExterior();
             getFollowers(actor, followers, toExterior, true);
 
             for (std::set<MWWorld::Ptr>::iterator it = followers.begin(); it != followers.end(); ++it)
@@ -66,7 +66,7 @@ namespace MWWorld
             }
 
             else
-                teleported = world->moveObject(actor, worldModel->getCell(mCellId), mPosition.asVec3(), true, true);
+                teleported = world->moveObject(actor, &worldModel->getCell(mCellId), mPosition.asVec3(), true, true);
         }
 
         if (!world->isWaterWalkingCastableOnTarget(teleported) && MWMechanics::hasWaterWalking(teleported))

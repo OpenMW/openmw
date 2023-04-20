@@ -47,9 +47,8 @@ namespace MWLua
             const MWWorld::CellRef& cellRef = doorPtr(o).getCellRef();
             if (!cellRef.getTeleport())
                 return sol::nil;
-            MWWorld::CellStore* cell = MWBase::Environment::get().getWorldModel()->getCell(cellRef.getDestCell());
-            assert(cell);
-            return o.getCell(lua, cell);
+            MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getCell(cellRef.getDestCell());
+            return o.getCell(lua, &cell);
         };
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
@@ -84,9 +83,8 @@ namespace MWLua
             const MWWorld::CellRef& cellRef = door4Ptr(o).getCellRef();
             if (!cellRef.getTeleport())
                 return sol::nil;
-            MWWorld::CellStore* cell = MWBase::Environment::get().getWorldModel()->getCell(cellRef.getDestCell());
-            assert(cell);
-            return o.getCell(lua, cell);
+            MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getCell(cellRef.getDestCell());
+            return o.getCell(lua, &cell);
         };
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();

@@ -130,9 +130,9 @@ namespace MWGui
                 = MWWorld::positionToCellIndex(transport[i].mPos.pos[0], transport[i].mPos.pos[1]);
             if (cellname.empty())
             {
-                MWWorld::CellStore* cell
+                MWWorld::CellStore& cell
                     = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
-                cellname = MWBase::Environment::get().getWorld()->getCellName(cell);
+                cellname = MWBase::Environment::get().getWorld()->getCellName(&cell);
                 interior = false;
             }
             addDestination(ESM::RefId::stringRefId(cellname), transport[i].mPos, interior);

@@ -584,7 +584,7 @@ namespace MWGui
             {
                 if (!mInterior)
                     requestMapRender(
-                        MWBase::Environment::get().getWorldModel()->getExterior(entry.mCellX, entry.mCellY));
+                        &MWBase::Environment::get().getWorldModel()->getExterior(entry.mCellX, entry.mCellY));
 
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(entry.mCellX, entry.mCellY);
                 if (texture)
@@ -633,7 +633,7 @@ namespace MWGui
             for (MyGUI::Widget* widget : mExteriorDoorMarkerWidgets)
                 widget->setVisible(false);
 
-            MWWorld::CellStore* cell = worldModel->getInterior(mPrefix);
+            MWWorld::CellStore& cell = worldModel->getInterior(mPrefix);
             world->getDoorMarkers(cell, doors);
         }
         else

@@ -300,7 +300,7 @@ namespace MWClass
     std::string Door::getDestination(const MWWorld::LiveCellRef<ESM::Door>& door)
     {
         std::string_view dest = MWBase::Environment::get().getWorld()->getCellName(
-            MWBase::Environment::get().getWorldModel()->getCell(door.mRef.getDestCell()));
+            &MWBase::Environment::get().getWorldModel()->getCell(door.mRef.getDestCell()));
 
         return "#{sCell=" + std::string{ dest } + "}";
     }
