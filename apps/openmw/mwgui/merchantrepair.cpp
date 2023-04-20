@@ -56,9 +56,8 @@ namespace MWGui
 
                 int basePrice = iter->getClass().getValue(*iter);
                 float fRepairMult = MWBase::Environment::get()
-                                        .getWorld()
-                                        ->getStore()
-                                        .get<ESM::GameSetting>()
+                                        .getESMStore()
+                                        ->get<ESM::GameSetting>()
                                         .find("fRepairMult")
                                         ->mValue.getFloat();
 
@@ -73,12 +72,7 @@ namespace MWGui
 
                 std::string name{ iter->getClass().getName(*iter) };
                 name += " - " + MyGUI::utility::toString(price)
-                    + MWBase::Environment::get()
-                          .getWorld()
-                          ->getStore()
-                          .get<ESM::GameSetting>()
-                          .find("sgp")
-                          ->mValue.getString();
+                    + MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find("sgp")->mValue.getString();
 
                 MyGUI::Button* button = mList->createWidget<MyGUI::Button>(price <= playerGold
                         ? "SandTextButton"

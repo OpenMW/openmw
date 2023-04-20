@@ -126,9 +126,8 @@ namespace MWClass
         float alchemySkill = player.getClass().getSkill(player, ESM::Skill::Alchemy);
 
         static const float fWortChanceValue = MWBase::Environment::get()
-                                                  .getWorld()
-                                                  ->getStore()
-                                                  .get<ESM::GameSetting>()
+                                                  .getESMStore()
+                                                  ->get<ESM::GameSetting>()
                                                   .find("fWortChanceValue")
                                                   ->mValue.getFloat();
 

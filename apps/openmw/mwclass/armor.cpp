@@ -153,7 +153,7 @@ namespace MWClass
             return -1;
 
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         float iWeight = floor(gmst.find(typeGmst)->mValue.getFloat());
 
@@ -289,7 +289,7 @@ namespace MWClass
         newItem.mName = newName;
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;
-        const ESM::Armor* record = MWBase::Environment::get().getWorld()->getStore().insert(newItem);
+        const ESM::Armor* record = MWBase::Environment::get().getESMStore()->insert(newItem);
         return record->mId;
     }
 
@@ -301,9 +301,8 @@ namespace MWClass
         float armorSkill = actor.getClass().getSkill(actor, armorSkillType);
 
         int iBaseArmorSkill = MWBase::Environment::get()
-                                  .getWorld()
-                                  ->getStore()
-                                  .get<ESM::GameSetting>()
+                                  .getESMStore()
+                                  ->get<ESM::GameSetting>()
                                   .find("iBaseArmorSkill")
                                   ->mValue.getInteger();
 
@@ -331,7 +330,7 @@ namespace MWClass
             const ESM::RefId& npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
-            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+            const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(npcRace);
             if (race->mData.mFlags & ESM::Race::Beast)
             {
                 std::vector<ESM::PartReference> parts = ptr.get<ESM::Armor>()->mBase->mParts.mParts;

@@ -28,7 +28,7 @@ namespace MWRender
 
     bool TerrainStorage::hasData(int cellX, int cellY)
     {
-        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
         const ESM::Land* land = esmStore.get<ESM::Land>().search(cellX, cellY);
         return land != nullptr;
@@ -41,7 +41,7 @@ namespace MWRender
         maxX = 0;
         maxY = 0;
 
-        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
         MWWorld::Store<ESM::Land>::iterator it = esmStore.get<ESM::Land>().begin();
         for (; it != esmStore.get<ESM::Land>().end(); ++it)
@@ -73,7 +73,7 @@ namespace MWRender
 
     const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)
     {
-        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
         return esmStore.get<ESM::LandTexture>().search(index, plugin);
     }
 

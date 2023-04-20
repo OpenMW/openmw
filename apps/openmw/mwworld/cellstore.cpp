@@ -212,7 +212,7 @@ namespace
     void readReferenceCollection(ESM::ESMReader& reader, MWWorld::CellRefList<T>& collection, const ESM::CellRef& cref,
         const std::map<int, int>& contentFileMap, MWWorld::CellStore* cellstore)
     {
-        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
         using StateType = typename RecordToState<T>::StateType;
         StateType state;
@@ -763,7 +763,7 @@ namespace MWWorld
     template <typename ReferenceInvocable>
     static void visitCell4References(const ESM4::Cell& cell, ESM::ReadersCache& readers, ReferenceInvocable&& invocable)
     {
-        for (const ESM4::Reference& ref : MWBase::Environment::get().getWorld()->getStore().get<ESM4::Reference>())
+        for (const ESM4::Reference& ref : MWBase::Environment::get().getESMStore()->get<ESM4::Reference>())
         {
             if (ref.mParent == cell.mId)
             {
@@ -1003,7 +1003,7 @@ namespace MWWorld
             ESM::CellRef cref;
             cref.loadId(reader, true);
 
-            int type = MWBase::Environment::get().getWorld()->getStore().find(cref.mRefID);
+            int type = MWBase::Environment::get().getESMStore()->find(cref.mRefID);
             if (type == 0)
             {
                 Log(Debug::Warning) << "Dropping reference to '" << cref.mRefID << "' (object no longer exists)";
@@ -1101,9 +1101,8 @@ namespace MWWorld
     {
         const MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
         static const float fCorpseClearDelay = MWBase::Environment::get()
-                                                   .getWorld()
-                                                   ->getStore()
-                                                   .get<ESM::GameSetting>()
+                                                   .getESMStore()
+                                                   ->get<ESM::GameSetting>()
                                                    .find("fCorpseClearDelay")
                                                    ->mValue.getFloat();
         if (creatureStats.isDead() && creatureStats.isDeathAnimationFinished() && !ptr.getClass().isPersistent(ptr)
@@ -1184,9 +1183,8 @@ namespace MWWorld
         if (mState == State_Loaded)
         {
             static const int iMonthsToRespawn = MWBase::Environment::get()
-                                                    .getWorld()
-                                                    ->getStore()
-                                                    .get<ESM::GameSetting>()
+                                                    .getESMStore()
+                                                    ->get<ESM::GameSetting>()
                                                     .find("iMonthsToRespawn")
                                                     ->mValue.getInteger();
             if (MWBase::Environment::get().getWorld()->getTimeStamp() - mLastRespawn > 24 * 30 * iMonthsToRespawn)
@@ -1265,7 +1263,7 @@ namespace MWWorld
             return;
 
         const ESM::Enchantment* enchantment
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchantmentId);
+            = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().search(enchantmentId);
         if (!enchantment)
         {
             Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantmentId << "' on item "

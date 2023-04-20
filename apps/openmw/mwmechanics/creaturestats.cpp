@@ -66,7 +66,7 @@ namespace MWMechanics
         float normalised = std::floor(max) == 0 ? 1 : std::max(0.0f, current / max);
 
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         static const float fFatigueBase = gmst.find("fFatigueBase")->mValue.getFloat();
         static const float fFatigueMult = gmst.find("fFatigueMult")->mValue.getFloat();

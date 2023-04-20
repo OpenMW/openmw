@@ -40,7 +40,7 @@ namespace MWGui
 
     void SpellBuyingWindow::addSpell(const ESM::Spell& spell)
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         int price = std::max(1,
             static_cast<int>(
@@ -103,7 +103,7 @@ namespace MWGui
 
             if (actor.getClass().isNpc())
             {
-                const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(
+                const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(
                     actor.get<ESM::NPC>()->mBase->mRace);
                 if (race->mPowers.exists(spell->mId))
                     continue;

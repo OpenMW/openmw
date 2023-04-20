@@ -261,7 +261,7 @@ namespace MWLua
 
         static float getMaxProgress(const MWWorld::Ptr& ptr, int index, const MWMechanics::SkillValue& stat)
         {
-            const auto& store = MWBase::Environment::get().getWorld()->getStore();
+            const auto& store = *MWBase::Environment::get().getESMStore();
             const auto cl = store.get<ESM::Class>().find(ptr.get<ESM::NPC>()->mBase->mClass);
             return ptr.getClass().getNpcStats(ptr).getSkillProgressRequirement(index, *cl);
         }

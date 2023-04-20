@@ -17,6 +17,7 @@ namespace l10n
 
 namespace MWWorld
 {
+    class ESMStore;
     class WorldModel;
     class Scene;
 }
@@ -45,6 +46,7 @@ namespace MWBase
         World* mWorld = nullptr;
         MWWorld::WorldModel* mWorldModel = nullptr;
         MWWorld::Scene* mWorldScene = nullptr;
+        MWWorld::ESMStore* mESMStore = nullptr;
         SoundManager* mSoundManager = nullptr;
         ScriptManager* mScriptManager = nullptr;
         WindowManager* mWindowManager = nullptr;
@@ -71,6 +73,7 @@ namespace MWBase
         void setWorld(World& value) { mWorld = &value; }
         void setWorldModel(MWWorld::WorldModel& value) { mWorldModel = &value; }
         void setWorldScene(MWWorld::Scene& value) { mWorldScene = &value; }
+        void setESMStore(MWWorld::ESMStore& value) { mESMStore = &value; }
 
         void setSoundManager(SoundManager& value) { mSoundManager = &value; }
 
@@ -97,6 +100,7 @@ namespace MWBase
         Misc::NotNullPtr<World> getWorld() const { return mWorld; }
         Misc::NotNullPtr<MWWorld::WorldModel> getWorldModel() const { return mWorldModel; }
         Misc::NotNullPtr<MWWorld::Scene> getWorldScene() const { return mWorldScene; }
+        Misc::NotNullPtr<MWWorld::ESMStore> getESMStore() const { return mESMStore; }
 
         Misc::NotNullPtr<SoundManager> getSoundManager() const { return mSoundManager; }
 

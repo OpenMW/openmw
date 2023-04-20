@@ -211,8 +211,7 @@ namespace MWMechanics
         if (!mPathFinder.isPathConstructed() && mHasDestination)
         {
             const ESM::Pathgrid* pathgrid
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(
-                    *actor.getCell()->getCell());
+                = MWBase::Environment::get().getESMStore()->get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
             if (mUsePathgrid)
             {
                 mPathFinder.buildPathByPathgrid(
@@ -805,7 +804,7 @@ namespace MWMechanics
         ESM::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM::Pathgrid::PointList& points)
     {
         const ESM::Pathgrid* pathgrid
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*currentCell->getCell());
+            = MWBase::Environment::get().getESMStore()->get<ESM::Pathgrid>().search(*currentCell->getCell());
 
         if (pathgrid == nullptr || pathgrid->mPoints.empty())
             return;
@@ -820,7 +819,7 @@ namespace MWMechanics
         // infrequently used, therefore no benefit in caching it as a member
         const MWWorld::CellStore* cellStore = actor.getCell();
         const ESM::Pathgrid* pathgrid
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cellStore->getCell());
+            = MWBase::Environment::get().getESMStore()->get<ESM::Pathgrid>().search(*cellStore->getCell());
 
         storage.mAllowedNodes.clear();
 

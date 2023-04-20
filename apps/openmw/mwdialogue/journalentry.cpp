@@ -19,8 +19,7 @@ namespace MWDialogue
     Entry::Entry(const ESM::RefId& topic, const ESM::RefId& infoId, const MWWorld::Ptr& actor)
         : mInfoId(infoId)
     {
-        const ESM::Dialogue* dialogue
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find(topic);
+        const ESM::Dialogue* dialogue = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().find(topic);
 
         for (ESM::Dialogue::InfoContainer::const_iterator iter(dialogue->mInfo.begin()); iter != dialogue->mInfo.end();
              ++iter)
@@ -87,8 +86,7 @@ namespace MWDialogue
 
     const ESM::RefId& JournalEntry::idFromIndex(const ESM::RefId& topic, int index)
     {
-        const ESM::Dialogue* dialogue
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find(topic);
+        const ESM::Dialogue* dialogue = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().find(topic);
 
         for (ESM::Dialogue::InfoContainer::const_iterator iter(dialogue->mInfo.begin()); iter != dialogue->mInfo.end();
              ++iter)

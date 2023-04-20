@@ -342,9 +342,8 @@ namespace MWGui
                         item.getCellRef().getRefId(), mPtr))
                 {
                     std::string msg = MWBase::Environment::get()
-                                          .getWorld()
-                                          ->getStore()
-                                          .get<ESM::GameSetting>()
+                                          .getESMStore()
+                                          ->get<ESM::GameSetting>()
                                           .find("sNotifyMessage49")
                                           ->mValue.getString();
                     msg = Misc::StringUtils::format(msg, item.getClass().getName(item));

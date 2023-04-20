@@ -99,8 +99,7 @@ namespace MWWorld
             if (ref.mDoor.destDoor.isZeroOrUnset())
                 return ESM::RefId::sEmpty;
             const ESM4::Reference* refDest
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM4::Reference>().searchStatic(
-                    ref.mDoor.destDoor);
+                = MWBase::Environment::get().getESMStore()->get<ESM4::Reference>().searchStatic(ref.mDoor.destDoor);
             if (refDest)
                 return refDest->mParent;
             return ESM::RefId::sEmpty;

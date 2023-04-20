@@ -93,7 +93,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getState(
     if (!LiveCellRef<T>::checkState(state))
         return ContainerStoreIterator(this); // not valid anymore with current content files -> skip
 
-    const T* record = MWBase::Environment::get().getWorld()->getStore().get<T>().search(state.mRef.mRefID);
+    const T* record = MWBase::Environment::get().getESMStore()->get<T>().search(state.mRef.mRefID);
 
     if (!record)
         return ContainerStoreIterator(this);
@@ -265,9 +265,8 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
     // If it has an enchantment, don't stack when some of the charge is already used
     if (!ptr1.getClass().getEnchantment(ptr1).empty())
     {
-        const ESM::Enchantment* enchantment
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
-                ptr1.getClass().getEnchantment(ptr1));
+        const ESM::Enchantment* enchantment = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().find(
+            ptr1.getClass().getEnchantment(ptr1));
         float maxCharge = static_cast<float>(enchantment->mData.mCharge);
         float enchantCharge1
             = ptr1.getCellRef().getEnchantmentCharge() == -1 ? maxCharge : ptr1.getCellRef().getEnchantmentCharge();
@@ -294,7 +293,7 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const ESM::RefId& id, int count)
 {
-    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
+    MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), id, count);
     return add(ref.getPtr(), count);
 }
 
@@ -371,7 +370,7 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp(const Ptr& ptr, 
         resolve();
     int type = getType(ptr);
 
-    const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+    const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
     // gold needs special handling: when it is inserted into a container, the base object automatically becomes Gold_001
     // this ensures that gold piles of different sizes stack with each other (also, several scripts rely on Gold_001 for
@@ -499,7 +498,7 @@ void MWWorld::ContainerStore::updateRechargingItems()
         if (!enchantmentId.empty())
         {
             const ESM::Enchantment* enchantment
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchantmentId);
+                = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().search(enchantmentId);
             if (!enchantment)
             {
                 Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantmentId << "' on item "
@@ -601,7 +600,7 @@ void MWWorld::ContainerStore::addInitialItem(
         return; // Don't restock with nothing.
     try
     {
-        ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id, count);
+        ManualRef ref(*MWBase::Environment::get().getESMStore(), id, count);
         if (ref.getPtr().getClass().getScript(ref.getPtr()).empty())
         {
             addInitialItemImp(ref.getPtr(), owner, count, prng, topLevel);
@@ -932,7 +931,7 @@ void MWWorld::ContainerStore::readState(const ESM::InventoryState& inventory)
     int index = 0;
     for (const ESM::ObjectState& state : inventory.mItems)
     {
-        int type = MWBase::Environment::get().getWorld()->getStore().find(state.mRef.mRefID);
+        int type = MWBase::Environment::get().getESMStore()->find(state.mRef.mRefID);
 
         int thisIndex = index++;
 

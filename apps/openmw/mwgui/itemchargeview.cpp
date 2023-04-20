@@ -194,7 +194,7 @@ namespace MWGui
                 if (enchId.empty())
                     break;
                 const ESM::Enchantment* ench
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchId);
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().search(enchId);
                 if (!ench)
                     break;
 

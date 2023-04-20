@@ -17,14 +17,14 @@ namespace MWMechanics
     template <class T>
     void modifyBaseInventory(const ESM::RefId& actorId, const ESM::RefId& itemId, int amount)
     {
-        T copy = *MWBase::Environment::get().getWorld()->getStore().get<T>().find(actorId);
+        T copy = *MWBase::Environment::get().getESMStore()->get<T>().find(actorId);
         for (auto& it : copy.mInventory.mList)
         {
             if (it.mItem == itemId)
             {
                 const int sign = it.mCount < 1 ? -1 : 1;
                 it.mCount = sign * std::max(it.mCount * sign + amount, 0);
-                MWBase::Environment::get().getWorld()->getStore().overrideRecord(copy);
+                MWBase::Environment::get().getESMStore()->overrideRecord(copy);
                 return;
             }
         }
@@ -34,7 +34,7 @@ namespace MWMechanics
             cont.mItem = itemId;
             cont.mCount = amount;
             copy.mInventory.mList.push_back(cont);
-            MWBase::Environment::get().getWorld()->getStore().overrideRecord(copy);
+            MWBase::Environment::get().getESMStore()->overrideRecord(copy);
         }
     }
 }

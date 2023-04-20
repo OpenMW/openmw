@@ -43,7 +43,7 @@ void MWWorld::LiveCellRefBase::loadImp(const ESM::ObjectState& state)
         if (!scriptId.empty())
         {
             if (const ESM::Script* script
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().search(scriptId))
+                = MWBase::Environment::get().getESMStore()->get<ESM::Script>().search(scriptId))
             {
                 try
                 {
@@ -62,7 +62,7 @@ void MWWorld::LiveCellRefBase::loadImp(const ESM::ObjectState& state)
     mClass->readAdditionalState(ptr, state);
 
     if (!mRef.getSoul().empty()
-        && !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(mRef.getSoul()))
+        && !MWBase::Environment::get().getESMStore()->get<ESM::Creature>().search(mRef.getSoul()))
     {
         Log(Debug::Warning) << "Soul '" << mRef.getSoul() << "' not found, removing the soul from soul gem";
         mRef.setSoul(ESM::RefId());

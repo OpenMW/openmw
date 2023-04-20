@@ -107,7 +107,7 @@ namespace MWGui
             scanner.listKeywords(mNames);
 
             // identifier
-            const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
             std::vector<ESM::RefId> ids;
             for (const auto* store : esmStore)
             {

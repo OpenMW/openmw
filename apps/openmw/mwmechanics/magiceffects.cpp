@@ -52,7 +52,7 @@ namespace MWMechanics
     std::string EffectKey::toString() const
     {
         const ESM::MagicEffect* magicEffect
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().search(mId);
+            = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().search(mId);
         return getMagicEffectString(*magicEffect, mArg, mArg);
     }
 

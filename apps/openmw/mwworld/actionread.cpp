@@ -52,7 +52,7 @@ namespace MWWorld
             MWWorld::LiveCellRef<ESM::NPC>* playerRef = actor.get<ESM::NPC>();
 
             const ESM::Class* class_
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(playerRef->mBase->mClass);
+                = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(playerRef->mBase->mClass);
 
             npcStats.increaseSkill(ref->mBase->mData.mSkillId, *class_, true, true);
 

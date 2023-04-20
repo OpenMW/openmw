@@ -15,7 +15,7 @@ namespace MWMechanics
     template <class T>
     void setBaseAISetting(const ESM::RefId& id, MWMechanics::AiSetting setting, int value)
     {
-        T copy = *MWBase::Environment::get().getWorld()->getStore().get<T>().find(id);
+        T copy = *MWBase::Environment::get().getESMStore()->get<T>().find(id);
         switch (setting)
         {
             case MWMechanics::AiSetting::Hello:
@@ -33,7 +33,7 @@ namespace MWMechanics
             default:
                 assert(false);
         }
-        MWBase::Environment::get().getWorld()->getStore().overrideRecord(copy);
+        MWBase::Environment::get().getESMStore()->overrideRecord(copy);
     }
 }
 

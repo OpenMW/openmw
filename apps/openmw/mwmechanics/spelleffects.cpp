@@ -267,7 +267,7 @@ namespace
         if (effect.mFlags & ESM::ActiveEffect::Flag_Applied && effect.mEffectId != ESM::MagicEffect::Corprus)
         {
             const auto* magicEffect
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectId);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effect.mEffectId);
             if (magicEffect->mData.mFlags & ESM::MagicEffect::Flags::AppliedOnce
                 && (!harmfulOnly || magicEffect->mData.mFlags & ESM::MagicEffect::Flags::Harmful))
                 return true;
@@ -277,7 +277,7 @@ namespace
 
     void absorbSpell(const ESM::RefId& spellId, const MWWorld::Ptr& caster, const MWWorld::Ptr& target)
     {
-        const auto& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const auto& esmStore = *MWBase::Environment::get().getESMStore();
         const ESM::Static* absorbStatic = esmStore.get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_Absorb"));
         MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(target);
         if (animation && !absorbStatic->mModel.empty())
@@ -359,7 +359,7 @@ namespace
         {
             const ESM::Spell* spell = nullptr;
             if (spellParams.getType() == ESM::ActiveSpells::Type_Temporary)
-                spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellParams.getId());
+                spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(spellParams.getId());
             float magnitudeMult
                 = MWMechanics::getEffectMultiplier(effect.mEffectId, target, caster, spell, &magnitudes);
             if (magnitudeMult == 0)
@@ -431,8 +431,7 @@ namespace MWMechanics
                         if (params.getType() == ESM::ActiveSpells::Type_Temporary)
                         {
                             const ESM::Spell* spell
-                                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(
-                                    params.getId());
+                                = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(params.getId());
                             if (spell && spell->mData.mType == ESM::Spell::ST_Spell)
                             {
                                 auto& prng = MWBase::Environment::get().getWorld()->getPrng();

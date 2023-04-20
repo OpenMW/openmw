@@ -71,7 +71,7 @@ namespace MWLua
         api["magic"] = initCoreMagicBindings(context);
         api["l10n"] = LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager());
         const MWWorld::Store<ESM::GameSetting>* gmst
-            = &MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = &MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
         api["getGMST"] = [lua = context.mLua, gmst](const std::string& setting) -> sol::object {
             const ESM::Variant& value = gmst->find(setting)->mValue;
             if (value.getType() == ESM::VT_String)
@@ -110,8 +110,7 @@ namespace MWLua
             // Doesn't matter which cell to use because the new object will be in disabled state.
             MWWorld::CellStore* cell = MWBase::Environment::get().getWorldScene()->getCurrentCell();
 
-            MWWorld::ManualRef mref(
-                MWBase::Environment::get().getWorld()->getStore(), ESM::RefId::deserializeText(recordId));
+            MWWorld::ManualRef mref(*MWBase::Environment::get().getESMStore(), ESM::RefId::deserializeText(recordId));
             const MWWorld::Ptr& ptr = mref.getPtr();
             ptr.getRefData().disable();
             MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *cell, count.value_or(1));
@@ -120,7 +119,7 @@ namespace MWLua
 
         // Creates a new record in the world database.
         api["createRecord"] = sol::overload([](const ESM::Potion& potion) -> const ESM::Potion* {
-            return MWBase::Environment::get().getWorld()->getStore().insert(potion);
+            return MWBase::Environment::get().getESMStore()->insert(potion);
         }
             // TODO: add here overloads for other records
         );

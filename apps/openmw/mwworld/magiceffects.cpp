@@ -20,7 +20,7 @@ namespace
     template <class T>
     void getEnchantedItem(const ESM::RefId& id, ESM::RefId& enchantment, std::string& itemName)
     {
-        const T* item = MWBase::Environment::get().getWorld()->getStore().get<T>().search(id);
+        const T* item = MWBase::Environment::get().getESMStore()->get<T>().search(id);
         if (item)
         {
             enchantment = item->mEnchant;
@@ -33,7 +33,7 @@ namespace MWWorld
 {
     void convertMagicEffects(ESM::CreatureStats& creatureStats, ESM::InventoryState& inventory, ESM::NpcStats* npcStats)
     {
-        const auto& store = MWBase::Environment::get().getWorld()->getStore();
+        const auto& store = *MWBase::Environment::get().getESMStore();
         // Convert corprus to format 10
         for (const auto& [id, oldStats] : creatureStats.mSpells.mCorprusSpells)
         {

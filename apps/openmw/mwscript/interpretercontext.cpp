@@ -56,7 +56,7 @@ namespace MWScript
 
             id = std::ref(ptr.getClass().getScript(ptr));
 
-            ptr.getRefData().setLocals(*MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find(id));
+            ptr.getRefData().setLocals(*MWBase::Environment::get().getESMStore()->get<ESM::Script>().find(id));
 
             return ptr.getRefData().getLocals();
         }
@@ -74,7 +74,7 @@ namespace MWScript
 
             id = std::ref(ptr.getClass().getScript(ptr));
 
-            ptr.getRefData().setLocals(*MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find(id));
+            ptr.getRefData().setLocals(*MWBase::Environment::get().getESMStore()->get<ESM::Script>().find(id));
 
             return ptr.getRefData().getLocals();
         }
@@ -233,8 +233,7 @@ namespace MWScript
 
     std::vector<std::string> InterpreterContext::getGlobals() const
     {
-        const MWWorld::Store<ESM::Global>& globals
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Global>();
+        const MWWorld::Store<ESM::Global>& globals = MWBase::Environment::get().getESMStore()->get<ESM::Global>();
 
         std::vector<std::string> ids;
         for (const auto& globalVariable : globals)
@@ -289,23 +288,21 @@ namespace MWScript
     std::string_view InterpreterContext::getNPCRace() const
     {
         const ESM::NPC* npc = getReferenceImp().get<ESM::NPC>()->mBase;
-        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npc->mRace);
+        const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(npc->mRace);
         return race->mName;
     }
 
     std::string_view InterpreterContext::getNPCClass() const
     {
         const ESM::NPC* npc = getReferenceImp().get<ESM::NPC>()->mBase;
-        const ESM::Class* class_
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(npc->mClass);
+        const ESM::Class* class_ = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
         return class_->mName;
     }
 
     std::string_view InterpreterContext::getNPCFaction() const
     {
         const ESM::NPC* npc = getReferenceImp().get<ESM::NPC>()->mBase;
-        const ESM::Faction* faction
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npc->mFaction);
+        const ESM::Faction* faction = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(npc->mFaction);
         return faction->mName;
     }
 

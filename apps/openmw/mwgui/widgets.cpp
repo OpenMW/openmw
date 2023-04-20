@@ -214,7 +214,7 @@ namespace MWGui::Widgets
     void MWSpell::createEffectWidgets(
         std::vector<MyGUI::Widget*>& effects, MyGUI::Widget* creator, MyGUI::IntCoord& coord, int flags)
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         const ESM::Spell* spell = store.get<ESM::Spell>().search(mId);
         MYGUI_ASSERT(spell, "spell with id '" << mId << "' not found");
@@ -245,7 +245,7 @@ namespace MWGui::Widgets
     {
         if (mSpellNameWidget && MWBase::Environment::get().getWindowManager())
         {
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
             const ESM::Spell* spell = store.get<ESM::Spell>().search(mId);
             if (spell)
@@ -375,7 +375,7 @@ namespace MWGui::Widgets
             return;
         }
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().search(mEffectParams.mEffectID);
 

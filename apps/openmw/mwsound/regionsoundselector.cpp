@@ -45,7 +45,7 @@ namespace MWSound
         }
 
         const ESM::Region* const region
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(mLastRegionName);
+            = MWBase::Environment::get().getESMStore()->get<ESM::Region>().search(mLastRegionName);
 
         if (region == nullptr)
             return {};

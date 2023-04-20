@@ -394,7 +394,7 @@ namespace MWGui
 
     void HUD::setSelectedSpell(const ESM::RefId& spellId, int successChancePercent)
     {
-        const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+        const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(spellId);
 
         const std::string& spellName = spell->mName;
         if (spellName != mSpellName && mSpellVisible)
@@ -412,7 +412,7 @@ namespace MWGui
         mSpellBox->setUserString("Spell", spellId.serialize());
 
         // use the icon of the first effect
-        const ESM::MagicEffect* effect = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(
+        const ESM::MagicEffect* effect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(
             spell->mEffects.mList.front().mEffectID);
 
         std::string icon = effect->mIcon;
@@ -617,9 +617,8 @@ namespace MWGui
         mEnemyHealth->setProgressPosition(static_cast<size_t>(stats.getHealth().getRatio() * 100));
 
         static const float fNPCHealthBarFade = MWBase::Environment::get()
-                                                   .getWorld()
-                                                   ->getStore()
-                                                   .get<ESM::GameSetting>()
+                                                   .getESMStore()
+                                                   ->get<ESM::GameSetting>()
                                                    .find("fNPCHealthBarFade")
                                                    ->mValue.getFloat();
         if (fNPCHealthBarFade > 0.f)
@@ -630,9 +629,8 @@ namespace MWGui
     {
         mEnemyActorId = enemy.getClass().getCreatureStats(enemy).getActorId();
         mEnemyHealthTimer = MWBase::Environment::get()
-                                .getWorld()
-                                ->getStore()
-                                .get<ESM::GameSetting>()
+                                .getESMStore()
+                                ->get<ESM::GameSetting>()
                                 .find("fNPCHealthBarTime")
                                 ->mValue.getFloat();
         if (!mEnemyHealth->getVisible())

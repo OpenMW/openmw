@@ -133,7 +133,7 @@ namespace MWClass
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
             if (animation)
             {
-                const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
                 const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(ESM::MagicEffect::Telekinesis);
 
                 animation->addSpellCastGlow(

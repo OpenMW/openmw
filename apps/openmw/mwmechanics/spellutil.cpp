@@ -31,7 +31,7 @@ namespace MWMechanics
     float calcEffectCost(
         const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect, const EffectCostMethod method)
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         if (!magicEffect)
             magicEffect = store.get<ESM::MagicEffect>().find(effect.mEffectID);
         bool hasMagnitude = !(magicEffect->mData.mFlags & ESM::MagicEffect::NoMagnitude);
@@ -104,7 +104,7 @@ namespace MWMechanics
         {
             float x = static_cast<float>(effect.mDuration);
             const auto magicEffect
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effect.mEffectID);
 
             if (!(magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce))
                 x = std::max(1.f, x);
@@ -115,9 +115,8 @@ namespace MWMechanics
             if (effect.mRange == ESM::RT_Target)
                 x *= 1.5f;
             static const float fEffectCostMult = MWBase::Environment::get()
-                                                     .getWorld()
-                                                     ->getStore()
-                                                     .get<ESM::GameSetting>()
+                                                     .getESMStore()
+                                                     ->get<ESM::GameSetting>()
                                                      .find("fEffectCostMult")
                                                      ->mValue.getFloat();
             x *= fEffectCostMult;
@@ -183,7 +182,7 @@ namespace MWMechanics
     float getSpellSuccessChance(
         const ESM::RefId& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
     {
-        if (const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId))
+        if (const auto spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(spellId))
             return getSpellSuccessChance(spell, actor, effectiveSchool, cap, checkMagicka);
         return 0.f;
     }
@@ -209,7 +208,7 @@ namespace MWMechanics
 
     bool spellIncreasesSkill(const ESM::RefId& spellId)
     {
-        const auto spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
+        const auto spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(spellId);
         return spell && spellIncreasesSkill(spell);
     }
 }

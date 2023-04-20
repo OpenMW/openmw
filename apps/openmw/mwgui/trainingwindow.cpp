@@ -98,7 +98,7 @@ namespace MWGui
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
 
@@ -146,7 +146,7 @@ namespace MWGui
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         int price = pcStats.getSkill(skillId).getBase()
             * store.get<ESM::GameSetting>().find("iTrainingMod")->mValue.getInteger();
@@ -162,7 +162,7 @@ namespace MWGui
         }
 
         // You can not train a skill above its governing attribute
-        const ESM::Skill* skill = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find(skillId);
+        const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(skillId);
         if (pcStats.getSkill(skillId).getBase() >= pcStats.getAttribute(skill->mData.mAttribute).getBase())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage17}");

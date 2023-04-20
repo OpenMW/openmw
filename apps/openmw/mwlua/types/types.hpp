@@ -69,7 +69,7 @@ namespace MWLua
     void addRecordFunctionBinding(
         sol::table table, const Context& context, const std::string& recordName = std::string(T::getRecordType()))
     {
-        const MWWorld::Store<T>& store = MWBase::Environment::get().getWorld()->getStore().get<T>();
+        const MWWorld::Store<T>& store = MWBase::Environment::get().getESMStore()->get<T>();
 
         table["record"] = sol::overload([](const Object& obj) -> const T* { return obj.ptr().get<T>()->mBase; },
             [&store](std::string_view id) -> const T* { return store.find(ESM::RefId::deserializeText(id)); });

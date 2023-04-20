@@ -617,7 +617,7 @@ namespace MWScript
                 if (!ptr.getClass().hasInventoryStore(ptr))
                     return;
 
-                const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
                 store.get<ESM::Creature>().find(
                     creature); // This line throws an exception if it can't find the creature
 
@@ -730,7 +730,7 @@ namespace MWScript
                     }
                 }
 
-                MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), item, 1);
+                MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), item, 1);
                 MWWorld::Ptr itemPtr(ref.getPtr());
                 if (amount > 0)
                 {
@@ -1234,8 +1234,7 @@ namespace MWScript
                 ESM::RefId targetId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                const ESM::Spell* spell
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
+                const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(spellId);
                 if (!spell)
                 {
                     runtime.getContext().report(
@@ -1282,8 +1281,7 @@ namespace MWScript
                 ESM::RefId spellId = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                const ESM::Spell* spell
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(spellId);
+                const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(spellId);
                 if (!spell)
                 {
                     runtime.getContext().report(
@@ -1504,9 +1502,9 @@ namespace MWScript
                 runtime.pop();
 
                 ESM::CreatureLevList listCopy
-                    = *MWBase::Environment::get().getWorld()->getStore().get<ESM::CreatureLevList>().find(levId);
+                    = *MWBase::Environment::get().getESMStore()->get<ESM::CreatureLevList>().find(levId);
                 addToLevList(&listCopy, creatureId, level);
-                MWBase::Environment::get().getWorld()->getStore().overrideRecord(listCopy);
+                MWBase::Environment::get().getESMStore()->overrideRecord(listCopy);
             }
         };
 
@@ -1523,9 +1521,9 @@ namespace MWScript
                 runtime.pop();
 
                 ESM::CreatureLevList listCopy
-                    = *MWBase::Environment::get().getWorld()->getStore().get<ESM::CreatureLevList>().find(levId);
+                    = *MWBase::Environment::get().getESMStore()->get<ESM::CreatureLevList>().find(levId);
                 removeFromLevList(&listCopy, creatureId, level);
-                MWBase::Environment::get().getWorld()->getStore().overrideRecord(listCopy);
+                MWBase::Environment::get().getESMStore()->overrideRecord(listCopy);
             }
         };
 
@@ -1542,9 +1540,9 @@ namespace MWScript
                 runtime.pop();
 
                 ESM::ItemLevList listCopy
-                    = *MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().find(levId);
+                    = *MWBase::Environment::get().getESMStore()->get<ESM::ItemLevList>().find(levId);
                 addToLevList(&listCopy, itemId, level);
-                MWBase::Environment::get().getWorld()->getStore().overrideRecord(listCopy);
+                MWBase::Environment::get().getESMStore()->overrideRecord(listCopy);
             }
         };
 
@@ -1561,9 +1559,9 @@ namespace MWScript
                 runtime.pop();
 
                 ESM::ItemLevList listCopy
-                    = *MWBase::Environment::get().getWorld()->getStore().get<ESM::ItemLevList>().find(levId);
+                    = *MWBase::Environment::get().getESMStore()->get<ESM::ItemLevList>().find(levId);
                 removeFromLevList(&listCopy, itemId, level);
-                MWBase::Environment::get().getWorld()->getStore().overrideRecord(listCopy);
+                MWBase::Environment::get().getESMStore()->overrideRecord(listCopy);
             }
         };
 
@@ -1690,7 +1688,7 @@ namespace MWScript
             {
                 Resource::SceneManager* sceneManager
                     = MWBase::Environment::get().getResourceSystem()->getSceneManager();
-                const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
                 for (const T& record : store.get<T>())
                 {
                     MWWorld::ManualRef ref(store, record.mId);

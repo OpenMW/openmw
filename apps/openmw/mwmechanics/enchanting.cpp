@@ -98,7 +98,7 @@ namespace MWMechanics
         // Try to find a dynamic enchantment with the same stats, create a new one if not found.
         const ESM::Enchantment* enchantmentPtr = getRecord(enchantment);
         if (enchantmentPtr == nullptr)
-            enchantmentPtr = MWBase::Environment::get().getWorld()->getStore().insert(enchantment);
+            enchantmentPtr = MWBase::Environment::get().getESMStore()->insert(enchantment);
 
         // Apply the enchantment
         const ESM::RefId& newItemId
@@ -120,9 +120,8 @@ namespace MWMechanics
             return;
 
         const bool powerfulSoul = getGemCharge() >= MWBase::Environment::get()
-                                                        .getWorld()
-                                                        ->getStore()
-                                                        .get<ESM::GameSetting>()
+                                                        .getESMStore()
+                                                        ->get<ESM::GameSetting>()
                                                         .find("iSoulAmountForConstantEffect")
                                                         ->mValue.getInteger();
         if ((mObjectType == ESM::Armor::sRecordId) || (mObjectType == ESM::Clothing::sRecordId))
@@ -190,7 +189,7 @@ namespace MWMechanics
             // No effects added, cost = 0
             return 0;
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const float fEffectCostMult = store.get<ESM::GameSetting>().find("fEffectCostMult")->mValue.getFloat();
         const float fEnchantmentConstantDurationMult
             = store.get<ESM::GameSetting>().find("fEnchantmentConstantDurationMult")->mValue.getFloat();
@@ -223,7 +222,7 @@ namespace MWMechanics
     const ESM::Enchantment* Enchanting::getRecord(const ESM::Enchantment& toFind) const
     {
         const MWWorld::Store<ESM::Enchantment>& enchantments
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>();
         MWWorld::Store<ESM::Enchantment>::iterator iter(enchantments.begin());
         iter += (enchantments.getSize() - enchantments.getDynamicSize());
         for (; iter != enchantments.end(); ++iter)
@@ -284,9 +283,8 @@ namespace MWMechanics
             return 0;
 
         float priceMultipler = MWBase::Environment::get()
-                                   .getWorld()
-                                   ->getStore()
-                                   .get<ESM::GameSetting>()
+                                   .getESMStore()
+                                   ->get<ESM::GameSetting>()
                                    .find("fEnchantmentValueMult")
                                    ->mValue.getFloat();
         int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(
@@ -297,7 +295,7 @@ namespace MWMechanics
 
     int Enchanting::getGemCharge() const
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         if (soulEmpty())
             return 0;
         if (mSoulGemPtr.getCellRef().getSoul().empty())
@@ -314,7 +312,7 @@ namespace MWMechanics
         if (itemEmpty())
             return 0;
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         return static_cast<int>(mOldItemPtr.getClass().getEnchantmentPoints(mOldItemPtr)
             * store.get<ESM::GameSetting>().find("fEnchantmentMult")->mValue.getFloat());
@@ -345,7 +343,7 @@ namespace MWMechanics
     {
         const CreatureStats& stats = mEnchanter.getClass().getCreatureStats(mEnchanter);
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
         const float a = static_cast<float>(mEnchanter.getClass().getSkill(mEnchanter, ESM::Skill::Enchant));
         const float b = static_cast<float>(stats.getAttribute(ESM::Attribute::Intelligence).getModified());
         const float c = static_cast<float>(stats.getAttribute(ESM::Attribute::Luck).getModified());

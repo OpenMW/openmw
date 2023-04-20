@@ -86,7 +86,7 @@ namespace MWClass
         if (!ptr.getCellRef().getSoul().empty())
         {
             const ESM::Creature* creature
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ref->mRef.getSoul());
+                = MWBase::Environment::get().getESMStore()->get<ESM::Creature>().search(ref->mRef.getSoul());
             if (creature)
             {
                 int soul = creature->mData.mSoul;
@@ -177,7 +177,7 @@ namespace MWClass
     {
         MWWorld::Ptr newPtr;
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         if (isGold(ptr))
         {
