@@ -177,6 +177,11 @@ namespace ESM
             EXPECT_FALSE(formIdRefId < stringView);
         }
 
+        TEST(ESMRefIdTest, formIdRefIdIndexShouldHaveOnly24SignificantBits)
+        {
+            EXPECT_THROW(FormIdRefId(FormId{ .mIndex = 1 << 25, .mContentFile = 0 }), std::invalid_argument);
+        }
+
         TEST(ESMRefIdTest, canBeUsedAsMapKeyWithLookupByStringView)
         {
             const std::map<RefId, int, std::less<>> map({ { RefId::stringRefId("a"), 42 } });

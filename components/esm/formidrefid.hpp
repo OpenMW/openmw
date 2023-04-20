@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <iosfwd>
+#include <stdexcept>
 
 #include <components/esm/formid.hpp>
 
@@ -13,9 +14,11 @@ namespace ESM
     public:
         constexpr FormIdRefId() = default;
 
-        constexpr explicit FormIdRefId(ESM::FormId value) noexcept
+        constexpr explicit FormIdRefId(ESM::FormId value)
             : mValue(value)
         {
+            if ((mValue.mIndex & 0xff000000) != 0)
+                throw std::invalid_argument("Invalid FormIdRefId index value: " + std::to_string(mValue.mIndex));
         }
 
         ESM::FormId getValue() const { return mValue; }

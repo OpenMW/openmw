@@ -1,18 +1,24 @@
 #include "formidrefid.hpp"
 
-#include <cassert>
 #include <ostream>
 
 #include "serializerefid.hpp"
 
 namespace ESM
 {
+    namespace
+    {
+        std::uint64_t truncate(FormId value)
+        {
+            return (static_cast<std::uint64_t>(value.mContentFile) << 24) | value.mIndex;
+        }
+    }
+
     std::string FormIdRefId::toString() const
     {
         std::string result;
-        assert((mValue.mIndex & 0xff000000) == 0);
-        size_t v = (static_cast<size_t>(mValue.mContentFile) << 24) | mValue.mIndex;
-        result.resize(getHexIntegralSize(v) + 2, '\0');
+        const std::uint64_t v = truncate(mValue);
+        result.resize(getHexIntegralSizeWith0x(v), '\0');
         serializeHexIntegral(v, 0, result);
         return result;
     }
@@ -20,8 +26,7 @@ namespace ESM
     std::string FormIdRefId::toDebugString() const
     {
         std::string result;
-        assert((mValue.mIndex & 0xff000000) == 0);
-        size_t v = (static_cast<size_t>(mValue.mContentFile) << 24) | mValue.mIndex;
+        const std::uint64_t v = truncate(mValue);
         serializeRefIdValue(v, formIdRefIdPrefix, result);
         return result;
     }
