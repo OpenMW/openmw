@@ -869,7 +869,7 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromUtf8(record.get().mCell.getRefIdString().c_str());
+            return QString::fromUtf8(record.get().mCell.toString().c_str());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override

@@ -11,9 +11,10 @@ namespace ESM
     {
         constexpr std::size_t separator = 1;
         std::string result;
-        result.resize(getDecIntegralCapacity(mX) + separator + getDecIntegralCapacity(mY), '\0');
-        const std::size_t endX = serializeDecIntegral(mX, 0, result);
-        result[endX] = ':';
+        result.resize(separator + getDecIntegralCapacity(mX) + separator + getDecIntegralCapacity(mY), '\0');
+        result[0] = '#';
+        const std::size_t endX = serializeDecIntegral(mX, separator, result);
+        result[endX] = ' ';
         const std::size_t endY = serializeDecIntegral(mY, endX + separator, result);
         result.resize(endY);
         return result;
