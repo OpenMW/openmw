@@ -340,36 +340,66 @@ elseif(NOT ANDROID)
 endif()
 
 add_component_dir(detournavigator
-    debug
-    makenavmesh
-    findsmoothpath
-    recastmeshbuilder
-    navmeshmanager
-    navigatorimpl
+    agentbounds
+    areatype
     asyncnavmeshupdater
-    recastmesh
-    tilecachedrecastmeshmanager
-    recastmeshobject
-    navmeshtilescache
-    settings
-    navigator
+    bounds
+    changetype
+    collisionshapetype
+    commulativeaabb
+    dbrefgeometryobject
+    debug
+    exceptions
     findrandompointaroundcircle
-    raycast
+    findsmoothpath
+    flags
+    generatenavmeshtile
+    gettilespositions
+    guardednavmeshcacheitem
+    heightfieldshape
+    makenavmesh
+    navigator
+    navigatorimpl
+    navigatorstub
+    navigatorutils
+    navmeshcacheitem
+    navmeshdata
+    navmeshdb
+    navmeshdbutils
+    navmeshmanager
+    navmeshtilescache
     navmeshtileview
+    objectid
+    objecttransform
+    offmeshconnection
     offmeshconnectionsmanager
     preparednavmeshdata
-    navmeshcacheitem
-    navigatorutils
-    generatenavmeshtile
-    navmeshdb
-    serialization
-    navmeshdbutils
+    preparednavmeshdatatuple
+    raycast
     recast
-    gettilespositions
-    collisionshapetype
-    stats
-    commulativeaabb
+    recastallocutils
     recastcontext
+    recastglobalallocator
+    recastmesh
+    recastmeshbuilder
+    recastmeshobject
+    recastmeshprovider
+    recastmeshtiles
+    recastparams
+    recasttempallocator
+    ref
+    serialization
+    settings
+    settingsutils
+    sharednavmeshcacheitem
+    stats
+    status
+    tilebounds
+    tilecachedrecastmeshmanager
+    tileposition
+    tilespositionsrange
+    version
+    waitconditiontype
     )
 
 add_component_dir(loadinglistener
