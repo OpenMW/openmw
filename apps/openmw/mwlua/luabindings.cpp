@@ -2,7 +2,10 @@
 
 #include <chrono>
 
+#include <components/esm/attr.hpp>
+#include <components/esm3/activespells.hpp>
 #include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadskil.hpp>
 #include <components/lua/l10n.hpp>
 #include <components/lua/luastate.hpp>
 
@@ -18,6 +21,8 @@
 #include "luaevents.hpp"
 #include "luamanagerimp.hpp"
 #include "worldview.hpp"
+
+#include "magicbindings.hpp"
 
 namespace MWLua
 {
@@ -53,7 +58,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 35;
+        api["API_REVISION"] = 36;
         api["quit"] = [lua]() {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
             MWBase::Environment::get().getStateManager()->requestQuit();
@@ -63,6 +68,7 @@ namespace MWLua
                 { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
         };
         addTimeBindings(api, context, false);
+        api["magic"] = initCoreMagicBindings(context);
         api["l10n"] = LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager());
         const MWWorld::Store<ESM::GameSetting>* gmst
             = &MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
@@ -75,6 +81,18 @@ namespace MWLua
             else
                 return sol::make_object<float>(lua->sol(), value.getFloat());
         };
+
+        sol::table skill(context.mLua->sol(), sol::create);
+        api["SKILL"] = LuaUtil::makeStrictReadOnly(skill);
+        for (int id = 0; id < ESM::Skill::Length; ++id)
+            skill[ESM::Skill::sSkillNames[id]] = Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[id]);
+
+        sol::table attribute(context.mLua->sol(), sol::create);
+        api["ATTRIBUTE"] = LuaUtil::makeStrictReadOnly(attribute);
+        for (int id = 0; id < ESM::Attribute::Length; ++id)
+            attribute[ESM::Attribute::sAttributeNames[id]]
+                = Misc::StringUtils::lowerCase(ESM::Attribute::sAttributeNames[id]);
+
         return LuaUtil::makeReadOnly(api);
     }
 
@@ -97,7 +115,7 @@ namespace MWLua
             const MWWorld::Ptr& ptr = mref.getPtr();
             ptr.getRefData().disable();
             MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *cell, count.value_or(1));
-            return GObject(getId(newPtr));
+            return GObject(newPtr);
         };
 
         // Creates a new record in the world database.

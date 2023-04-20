@@ -48,7 +48,10 @@ namespace MWLua
             if (!cellRef.getTeleport())
                 return sol::nil;
             MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getCell(cellRef.getDestCell());
-            return o.getCell(lua, &cell);
+            if (dynamic_cast<const GObject*>(&o))
+                return sol::make_object(lua, GCell{ &cell });
+            else
+                return sol::make_object(lua, LCell{ &cell });
         };
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
@@ -84,7 +87,10 @@ namespace MWLua
             if (!cellRef.getTeleport())
                 return sol::nil;
             MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getCell(cellRef.getDestCell());
-            return o.getCell(lua, &cell);
+            if (dynamic_cast<const GObject*>(&o))
+                return sol::make_object(lua, GCell{ &cell });
+            else
+                return sol::make_object(lua, LCell{ &cell });
         };
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();

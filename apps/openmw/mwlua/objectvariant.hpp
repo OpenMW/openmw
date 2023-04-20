@@ -46,6 +46,8 @@ namespace MWLua
                 mVariant);
         }
 
+        Object object() const { return Object(ptr()); }
+
     private:
         std::variant<SelfObject*, LObject, GObject> mVariant;
     };

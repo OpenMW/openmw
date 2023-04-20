@@ -94,6 +94,7 @@ namespace MWWorld
 
         iterator begin() const;
         iterator end() const;
+        iterator findIter(int index) const { return mStatic.find(index); }
 
         void load(ESM::ESMReader& esm);
 
