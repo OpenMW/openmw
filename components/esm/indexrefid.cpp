@@ -9,20 +9,23 @@ namespace ESM
     std::string IndexRefId::toString() const
     {
         std::string result;
-        result.resize(sizeof(mRecordType) + getHexIntegralSize(mValue) + 3, '\0');
+        constexpr std::size_t separator = 1;
+        result.resize(sizeof(mRecordType) + separator + getHexIntegralSizeWith0x(mValue), '\0');
         std::memcpy(result.data(), &mRecordType, sizeof(mRecordType));
         result[sizeof(mRecordType)] = ':';
-        serializeHexIntegral(mValue, sizeof(mRecordType) + 1, result);
+        serializeHexIntegral(mValue, sizeof(mRecordType) + separator, result);
         return result;
     }
 
     std::string IndexRefId::toDebugString() const
     {
         std::string result;
-        serializeRefIdPrefix(sizeof(mRecordType) + getHexIntegralSize(mValue) + 1, indexRefIdPrefix, result);
+        constexpr std::size_t separator = 1;
+        serializeRefIdPrefix(
+            sizeof(mRecordType) + separator + getHexIntegralSizeWith0x(mValue), indexRefIdPrefix, result);
         std::memcpy(result.data() + indexRefIdPrefix.size(), &mRecordType, sizeof(mRecordType));
         result[indexRefIdPrefix.size() + sizeof(mRecordType)] = ':';
-        serializeHexIntegral(mValue, indexRefIdPrefix.size() + sizeof(mRecordType) + 1, result);
+        serializeHexIntegral(mValue, indexRefIdPrefix.size() + sizeof(mRecordType) + separator, result);
         return result;
     }
 
