@@ -398,6 +398,7 @@ add_component_dir(detournavigator
     tilecachedrecastmeshmanager
     tileposition
     tilespositionsrange
+    updateguard
     version
     waitconditiontype
     )

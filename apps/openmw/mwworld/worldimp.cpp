@@ -45,9 +45,9 @@
 #include <components/detournavigator/agentbounds.hpp>
 #include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/navigator.hpp>
-#include <components/detournavigator/navigatorimpl.hpp>
 #include <components/detournavigator/settings.hpp>
 #include <components/detournavigator/stats.hpp>
+#include <components/detournavigator/updateguard.hpp>
 
 #include <components/files/conversion.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>

@@ -20,24 +20,9 @@ namespace DetourNavigator
     class NavMeshManager
     {
     public:
-        class UpdateGuard
-        {
-        public:
-            explicit UpdateGuard(NavMeshManager& manager)
-                : mImpl(manager.mRecastMeshManager)
-            {
-            }
-
-            friend const TileCachedRecastMeshManager::UpdateGuard* getImpl(const UpdateGuard* guard)
-            {
-                return guard == nullptr ? nullptr : &guard->mImpl;
-            }
-
-        private:
-            const TileCachedRecastMeshManager::UpdateGuard mImpl;
-        };
-
         explicit NavMeshManager(const Settings& settings, std::unique_ptr<NavMeshDb>&& db);
+
+        ScopedUpdateGuard makeUpdateGuard() { return mRecastMeshManager.makeUpdateGuard(); }
 
         void setWorldspace(std::string_view worldspace, const UpdateGuard* guard);
 
