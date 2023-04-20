@@ -59,9 +59,9 @@ namespace MWLua
                 if (name.empty())
                     cell = nullptr; // default exterior worldspace
                 else
-                    cell = wm->getCell(name);
+                    cell = &wm->getCell(name);
             }
-            return wm->getCellByPosition(pos, cell);
+            return &wm->getCellByPosition(pos, cell);
         }
 
         void teleportPlayer(MWWorld::CellStore* destCell, const osg::Vec3f& pos, const osg::Vec3f& rot)

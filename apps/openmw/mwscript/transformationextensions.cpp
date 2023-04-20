@@ -398,11 +398,11 @@ namespace MWScript
                 MWWorld::CellStore* store = nullptr;
                 try
                 {
-                    store = worldModel->getCell(cellID);
+                    store = &worldModel->getCell(cellID);
                     if (store->isExterior())
                     {
                         const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                        store = worldModel->getExterior(cellIndex.x(), cellIndex.y());
+                        store = &worldModel->getExterior(cellIndex.x(), cellIndex.y());
                     }
                 }
                 catch (std::exception&)
@@ -417,7 +417,7 @@ namespace MWScript
                     if (!isPlayer)
                         return;
                     const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                    store = worldModel->getExterior(cellIndex.x(), cellIndex.y());
+                    store = &worldModel->getExterior(cellIndex.x(), cellIndex.y());
                 }
                 if (store)
                 {
@@ -474,7 +474,7 @@ namespace MWScript
                 if (isPlayer)
                 {
                     MWWorld::CellStore* cell
-                        = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
+                        = &MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
                     ptr = world->moveObject(ptr, cell, osg::Vec3(x, y, z));
                 }
                 else
@@ -518,7 +518,7 @@ namespace MWScript
                 MWWorld::CellStore* store = nullptr;
                 try
                 {
-                    store = MWBase::Environment::get().getWorldModel()->getCell(cellName);
+                    store = &MWBase::Environment::get().getWorldModel()->getCell(cellName);
                 }
                 catch (std::exception&)
                 {
@@ -568,7 +568,7 @@ namespace MWScript
                 if (player.getCell()->isExterior())
                 {
                     const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                    store = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
+                    store = &MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
                 }
                 else
                     store = player.getCell();

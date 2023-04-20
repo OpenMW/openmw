@@ -554,7 +554,7 @@ namespace MWWorld
 
         mNavigator.setWorldspace(Misc::StringUtils::lowerCase(mWorld.getWorldModel()
                                                                   .getExterior(playerCellX, playerCellY)
-                                                                  ->getCell()
+                                                                  .getCell()
                                                                   ->getWorldSpace()
                                                                   .serializeText()),
             navigatorUpdateGuard.get());
@@ -580,7 +580,7 @@ namespace MWWorld
                 {
                     if (!isCellInCollection(x, y, collection))
                     {
-                        refsToLoad += mWorld.getWorldModel().getExterior(x, y)->count();
+                        refsToLoad += mWorld.getWorldModel().getExterior(x, y).count();
                         cellsPositionsToLoad.emplace_back(x, y);
                     }
                 }
@@ -614,8 +614,8 @@ namespace MWWorld
         {
             if (!isCellInCollection(x, y, mActiveCells))
             {
-                CellStore* cell = mWorld.getWorldModel().getExterior(x, y);
-                loadCell(cell, loadingListener, changeEvent, pos, navigatorUpdateGuard.get());
+                CellStore& cell = mWorld.getWorldModel().getExterior(x, y);
+                loadCell(&cell, loadingListener, changeEvent, pos, navigatorUpdateGuard.get());
             }
         }
 
@@ -623,8 +623,8 @@ namespace MWWorld
 
         navigatorUpdateGuard.reset();
 
-        CellStore* current = mWorld.getWorldModel().getExterior(playerCellX, playerCellY);
-        MWBase::Environment::get().getWindowManager()->changeCell(current);
+        CellStore& current = mWorld.getWorldModel().getExterior(playerCellX, playerCellY);
+        MWBase::Environment::get().getWindowManager()->changeCell(&current);
 
         if (changeEvent)
             mCellChanged = true;
@@ -676,13 +676,13 @@ namespace MWWorld
             loadingListener->setLabel(
                 "Testing exterior cells (" + std::to_string(i) + "/" + std::to_string(cells.getExtSize()) + ")...");
 
-            CellStore* cell = mWorld.getWorldModel().getExterior(it->mData.mX, it->mData.mY);
-            mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell->getCell()->getWorldSpace().serializeText()),
+            CellStore& cell = mWorld.getWorldModel().getExterior(it->mData.mX, it->mData.mY);
+            mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell.getCell()->getWorldSpace().serializeText()),
                 navigatorUpdateGuard.get());
             const osg::Vec3f position
                 = osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits;
             mNavigator.updateBounds(position, navigatorUpdateGuard.get());
-            loadCell(cell, nullptr, false, position, navigatorUpdateGuard.get());
+            loadCell(&cell, nullptr, false, position, navigatorUpdateGuard.get());
 
             mNavigator.update(position, navigatorUpdateGuard.get());
             navigatorUpdateGuard.reset();
@@ -734,13 +734,13 @@ namespace MWWorld
             loadingListener->setLabel(
                 "Testing interior cells (" + std::to_string(i) + "/" + std::to_string(cells.getIntSize()) + ")...");
 
-            CellStore* cell = mWorld.getWorldModel().getInterior(it->mName);
-            mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell->getCell()->getWorldSpace().serializeText()),
+            CellStore& cell = mWorld.getWorldModel().getInterior(it->mName);
+            mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell.getCell()->getWorldSpace().serializeText()),
                 navigatorUpdateGuard.get());
             ESM::Position position;
             mWorld.findInteriorPosition(it->mName, position);
             mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
-            loadCell(cell, nullptr, false, position.asVec3(), navigatorUpdateGuard.get());
+            loadCell(&cell, nullptr, false, position.asVec3(), navigatorUpdateGuard.get());
 
             mNavigator.update(position.asVec3(), navigatorUpdateGuard.get());
             navigatorUpdateGuard.reset();
@@ -857,7 +857,7 @@ namespace MWWorld
     void Scene::changeToInteriorCell(
         std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
-        CellStore* cell = mWorld.getWorldModel().getInterior(cellName);
+        CellStore& cell = mWorld.getWorldModel().getInterior(cellName);
         bool useFading = (mCurrentCell != nullptr);
         if (useFading)
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
@@ -866,7 +866,7 @@ namespace MWWorld
         loadingListener->setLabel("#{OMWEngine:LoadingInterior}");
         Loading::ScopedLoad load(loadingListener);
 
-        if (mCurrentCell != nullptr && *mCurrentCell == *cell)
+        if (mCurrentCell != nullptr && *mCurrentCell == cell)
         {
             mWorld.moveObject(mWorld.getPlayerPtr(), position.asVec3());
             mWorld.rotateObject(mWorld.getPlayerPtr(), position.asRotationVec3());
@@ -889,19 +889,19 @@ namespace MWWorld
         }
         assert(mActiveCells.empty());
 
-        loadingListener->setProgressRange(cell->count());
+        loadingListener->setProgressRange(cell.count());
 
         mNavigator.setWorldspace(
-            Misc::StringUtils::lowerCase(cell->getCell()->getWorldSpace().serializeText()), navigatorUpdateGuard.get());
+            Misc::StringUtils::lowerCase(cell.getCell()->getWorldSpace().serializeText()), navigatorUpdateGuard.get());
         mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
 
         // Load cell.
         mPagedRefs.clear();
-        loadCell(cell, loadingListener, changeEvent, position.asVec3(), navigatorUpdateGuard.get());
+        loadCell(&cell, loadingListener, changeEvent, position.asVec3(), navigatorUpdateGuard.get());
 
         navigatorUpdateGuard.reset();
 
-        changePlayerCell(cell, position, adjustPlayerPos);
+        changePlayerCell(&cell, position, adjustPlayerPos);
 
         // adjust fog
         mRendering.configureFog(*mCurrentCell->getCell());
@@ -919,7 +919,7 @@ namespace MWWorld
 
         MWBase::Environment::get().getWindowManager()->changeCell(mCurrentCell);
 
-        MWBase::Environment::get().getWorld()->getPostProcessor()->setExteriorFlag(cell->getCell()->isQuasiExterior());
+        MWBase::Environment::get().getWorld()->getPostProcessor()->setExteriorFlag(cell.getCell()->isQuasiExterior());
     }
 
     void Scene::changeToExteriorCell(
@@ -928,13 +928,13 @@ namespace MWWorld
 
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.5);
-        CellStore* current = mWorld.getWorldModel().getCell(extCellId);
+        CellStore& current = mWorld.getWorldModel().getCell(extCellId);
 
-        const osg::Vec2i cellIndex(current->getCell()->getGridX(), current->getCell()->getGridY());
+        const osg::Vec2i cellIndex(current.getCell()->getGridX(), current.getCell()->getGridY());
 
         changeCellGrid(position.asVec3(), cellIndex.x(), cellIndex.y(), changeEvent);
 
-        changePlayerCell(current, position, adjustPlayerPos);
+        changePlayerCell(&current, position, adjustPlayerPos);
 
         if (changeEvent)
             MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.5);
@@ -1133,7 +1133,7 @@ namespace MWWorld
             {
                 try
                 {
-                    preloadCell(mWorld.getWorldModel().getCell(door.getCellRef().getDestCell()));
+                    preloadCell(&mWorld.getWorldModel().getCell(door.getCellRef().getDestCell()));
                 }
                 catch (std::exception&)
                 {
@@ -1177,7 +1177,7 @@ namespace MWWorld
                     + mPreloadDistance;
 
                 if (dist < loadDist)
-                    preloadCell(mWorld.getWorldModel().getExterior(cellX + dx, cellY + dy));
+                    preloadCell(&mWorld.getWorldModel().getExterior(cellX + dx, cellY + dy));
             }
         }
     }
@@ -1194,7 +1194,7 @@ namespace MWWorld
                 for (int dy = -mHalfGridSize; dy <= mHalfGridSize; ++dy)
                 {
                     mPreloader->preload(
-                        mWorld.getWorldModel().getExterior(x + dx, y + dy), mRendering.getReferenceTime());
+                        &mWorld.getWorldModel().getExterior(x + dx, y + dy), mRendering.getReferenceTime());
                     if (++numpreloaded >= mPreloader->getMaxCacheSize())
                         break;
                 }
@@ -1274,12 +1274,12 @@ namespace MWWorld
         for (ESM::Transport::Dest& dest : listVisitor.mList)
         {
             if (!dest.mCellName.empty())
-                preloadCell(mWorld.getWorldModel().getInterior(dest.mCellName));
+                preloadCell(&mWorld.getWorldModel().getInterior(dest.mCellName));
             else
             {
                 osg::Vec3f pos = dest.mPos.asVec3();
                 const osg::Vec2i cellIndex = positionToCellIndex(pos.x(), pos.y());
-                preloadCell(mWorld.getWorldModel().getExterior(cellIndex.x(), cellIndex.y()), true);
+                preloadCell(&mWorld.getWorldModel().getExterior(cellIndex.x(), cellIndex.y()), true);
                 exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
             }
         }
