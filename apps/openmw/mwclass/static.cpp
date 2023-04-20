@@ -64,20 +64,4 @@ namespace MWClass
 
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
-
-    void ESM4StaticImpl::insertObjectRendering(
-        const MWWorld::Ptr& ptr, const std::string& model, MWRender::RenderingInterface& renderingInterface)
-    {
-        if (!model.empty())
-        {
-            renderingInterface.getObjects().insertModel(ptr, model);
-            ptr.getRefData().getBaseNode()->setNodeMask(MWRender::Mask_Static);
-        }
-    }
-
-    void ESM4StaticImpl::insertObjectPhysics(
-        const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation, MWPhysics::PhysicsSystem& physics)
-    {
-        physics.addObject(ptr, model, rotation, MWPhysics::CollisionType_World);
-    }
 }

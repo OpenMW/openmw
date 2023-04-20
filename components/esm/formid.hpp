@@ -18,8 +18,8 @@ namespace ESM
         bool hasContentFile() const { return mContentFile >= 0; }
         bool isSet() const { return mIndex != 0 || mContentFile != -1; }
 
-        // Used in ESM4 as a null reference
-        bool isZero() const { return mIndex == 0 && mContentFile == 0; }
+        // Zero is used in ESM4 as a null reference
+        bool isZeroOrUnset() const { return mIndex == 0 && (mContentFile == 0 || mContentFile == -1); }
 
         std::string toString() const;
         FormId32 toUint32() const;

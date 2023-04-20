@@ -25,6 +25,8 @@
 #include "static.hpp"
 #include "weapon.hpp"
 
+#include "esm4base.hpp"
+
 namespace MWClass
 {
     void registerClasses()
@@ -51,18 +53,18 @@ namespace MWClass
         Static::registerSelf();
         BodyPart::registerSelf();
 
-        ESM4Static<ESM4::Activator>::registerSelf();
-        ESM4Static<ESM4::Potion>::registerSelf();
-        ESM4Static<ESM4::Ammunition>::registerSelf();
-        ESM4Static<ESM4::Armor>::registerSelf();
-        ESM4Static<ESM4::Book>::registerSelf();
-        ESM4Static<ESM4::Clothing>::registerSelf();
-        ESM4Static<ESM4::Container>::registerSelf();
-        ESM4Static<ESM4::Door>::registerSelf();
-        ESM4Static<ESM4::Ingredient>::registerSelf();
-        ESM4Static<ESM4::MiscItem>::registerSelf();
-        ESM4Static<ESM4::Static>::registerSelf();
-        ESM4Static<ESM4::Weapon>::registerSelf();
+        ESM4Named<ESM4::Activator>::registerSelf();
+        ESM4Named<ESM4::Potion>::registerSelf();
+        ESM4Named<ESM4::Ammunition>::registerSelf();
+        ESM4Named<ESM4::Armor>::registerSelf();
+        ESM4Named<ESM4::Book>::registerSelf();
+        ESM4Named<ESM4::Clothing>::registerSelf();
+        ESM4Named<ESM4::Container>::registerSelf();
+        ESM4Named<ESM4::Door>::registerSelf();
+        ESM4Named<ESM4::Ingredient>::registerSelf();
+        ESM4Named<ESM4::MiscItem>::registerSelf();
+        ESM4Static::registerSelf();
+        ESM4Named<ESM4::Weapon>::registerSelf();
         ESM4Light::registerSelf();
     }
 }
