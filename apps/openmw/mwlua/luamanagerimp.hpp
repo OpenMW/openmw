@@ -106,7 +106,7 @@ namespace MWLua
 
         void addAction(std::function<void()> action, std::string_view name = "");
         void addAction(std::unique_ptr<Action>&& action) { mActionQueue.push_back(std::move(action)); }
-        void addTeleportPlayerAction(std::unique_ptr<Action>&& action) { mTeleportPlayerAction = std::move(action); }
+        void addTeleportPlayerAction(std::function<void()> action);
 
         // Saving
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) override;

@@ -533,6 +533,11 @@ namespace MWLua
         mActionQueue.push_back(std::make_unique<FunctionAction>(&mLua, std::move(action), name));
     }
 
+    void LuaManager::addTeleportPlayerAction(std::function<void()> action)
+    {
+        mTeleportPlayerAction = std::make_unique<FunctionAction>(&mLua, std::move(action), "TeleportPlayer");
+    }
+
     void LuaManager::reportStats(unsigned int frameNumber, osg::Stats& stats) const
     {
         stats.setAttribute(frameNumber, "Lua UsedMemory", mLua.getTotalMemoryUsage());
