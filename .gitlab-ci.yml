@@ -328,7 +328,7 @@ Ubuntu_Clang:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 3h
 
-Ubuntu_Clang_Tidy:
+.Ubuntu_Clang_Tidy_Base:
   extends: Ubuntu_Clang
   before_script:
     - CI/install_debian_deps.sh clang clang-tidy openmw-deps openmw-deps-dynamic
@@ -338,7 +338,50 @@ Ubuntu_Clang_Tidy:
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
     CI_CLANG_TIDY: 1
-  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+    CCACHE_BASEDIR: $CI_PROJECT_DIR
+    CCACHE_DIR: $CI_PROJECT_DIR/ccache
+  script:
+    - mkdir -pv "${CCACHE_DIR}"
+    - ccache -z -M "${CCACHE_SIZE}"
+    - CI/before_script.linux.sh
+    - cd build
+    - find . -name *.o -exec touch {} \;
+    - cmake --build . -- -j $(nproc) ${BUILD_TARGETS}
+    - ccache -s
+  artifacts:
+    paths:
+      - build/
+    expire_in: 12h
+  timeout: 3h
+
+Ubuntu_Clang_Tidy_components:
+  extends: .Ubuntu_Clang_Tidy_Base
+  variables:
+    BUILD_TARGETS: components components_qt oics osg-ffmpeg-videoplayer osgQt
+  timeout: 3h
+
+Ubuntu_Clang_Tidy_openmw:
+  extends: .Ubuntu_Clang_Tidy_Base
+  needs:
+    - Ubuntu_Clang_Tidy_components
+  variables:
+    BUILD_TARGETS: openmw
+  timeout: 3h
+
+Ubuntu_Clang_Tidy_openmw-cs:
+  extends: .Ubuntu_Clang_Tidy_Base
+  needs:
+    - Ubuntu_Clang_Tidy_components
+  variables:
+    BUILD_TARGETS: openmw-cs openmw-cs-tests
+  timeout: 3h
+
+Ubuntu_Clang_Tidy_other:
+  extends: .Ubuntu_Clang_Tidy_Base
+  needs:
+    - Ubuntu_Clang_Tidy_components
+  variables:
+    BUILD_TARGETS: bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest openmw_test_suite openmw-navmeshtool openmw-bulletobjecttool
   timeout: 3h
 
 .Ubuntu_Clang_tests:
