@@ -254,9 +254,9 @@ namespace ESM
             { RefId::generated(42), "0x2a" },
             { RefId::generated(std::numeric_limits<std::uint64_t>::max()), "0xffffffffffffffff" },
             { RefId::index(REC_ARMO, 42), "ARMO:0x2a" },
-            { RefId::esm3ExteriorCell(-13, 42), "-13:42" },
+            { RefId::esm3ExteriorCell(-13, 42), "#-13 42" },
             { RefId::esm3ExteriorCell(std::numeric_limits<int>::min(), std::numeric_limits<int>::min()),
-                "#2147483648 -2147483648" },
+                "#-2147483648 -2147483648" },
             { RefId::esm3ExteriorCell(std::numeric_limits<int>::max(), std::numeric_limits<int>::max()),
                 "#2147483647 2147483647" },
         };
