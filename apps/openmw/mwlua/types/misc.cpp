@@ -28,7 +28,7 @@ namespace MWLua
 
         miscellaneous["setSoul"] = [](const GObject& object, std::string_view soulId) {
             ESM::RefId creature = ESM::RefId::deserializeText(soulId);
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
             if (!store.get<ESM::Creature>().search(creature))
             {

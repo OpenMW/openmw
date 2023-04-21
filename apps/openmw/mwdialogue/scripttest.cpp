@@ -91,7 +91,7 @@ namespace MWDialogue
         std::pair<int, int> compileAll(const Compiler::Extensions* extensions, int warningsMode)
         {
             int compiled = 0, total = 0;
-            const auto& store = MWBase::Environment::get().getWorld()->getStore();
+            const auto& store = *MWBase::Environment::get().getESMStore();
 
             MWScript::CompilerContext compilerContext(MWScript::CompilerContext::Type_Dialogue);
             compilerContext.setExtensions(extensions);

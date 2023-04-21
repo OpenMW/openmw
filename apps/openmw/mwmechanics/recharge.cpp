@@ -26,9 +26,8 @@ namespace MWMechanics
             return false;
 
         static const float fMagicItemRechargePerSecond = MWBase::Environment::get()
-                                                             .getWorld()
-                                                             ->getStore()
-                                                             .get<ESM::GameSetting>()
+                                                             .getESMStore()
+                                                             ->get<ESM::GameSetting>()
                                                              .find("fMagicItemRechargePerSecond")
                                                              ->mValue.getFloat();
 
@@ -62,13 +61,12 @@ namespace MWMechanics
         if (roll < x)
         {
             const ESM::RefId& soul = gem.getCellRef().getSoul();
-            const ESM::Creature* creature
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().find(soul);
+            const ESM::Creature* creature = MWBase::Environment::get().getESMStore()->get<ESM::Creature>().find(soul);
 
             float restored = creature->mData.mSoul * (roll / x);
 
             const ESM::Enchantment* enchantment
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
+                = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().find(
                     item.getClass().getEnchantment(item));
             item.getCellRef().setEnchantmentCharge(std::min(
                 item.getCellRef().getEnchantmentCharge() + restored, static_cast<float>(enchantment->mData.mCharge)));
@@ -88,9 +86,8 @@ namespace MWMechanics
         if (gem.getRefData().getCount() == 0)
         {
             std::string message = MWBase::Environment::get()
-                                      .getWorld()
-                                      ->getStore()
-                                      .get<ESM::GameSetting>()
+                                      .getESMStore()
+                                      ->get<ESM::GameSetting>()
                                       .find("sNotifyMessage51")
                                       ->mValue.getString();
             message = Misc::StringUtils::format(message, gem.getClass().getName(gem));

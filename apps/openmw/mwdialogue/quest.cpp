@@ -34,8 +34,7 @@ namespace MWDialogue
 
     std::string_view Quest::getName() const
     {
-        const ESM::Dialogue* dialogue
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find(mTopic);
+        const ESM::Dialogue* dialogue = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().find(mTopic);
 
         for (ESM::Dialogue::InfoContainer::const_iterator iter(dialogue->mInfo.begin()); iter != dialogue->mInfo.end();
              ++iter)
@@ -69,7 +68,7 @@ namespace MWDialogue
     bool Quest::addEntry(const JournalEntry& entry)
     {
         const ESM::Dialogue* dialogue
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().find(entry.mTopic);
+            = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().find(entry.mTopic);
 
         auto info = std::find_if(dialogue->mInfo.begin(), dialogue->mInfo.end(),
             [&](const auto& info) { return info.mId == entry.mInfoId; });

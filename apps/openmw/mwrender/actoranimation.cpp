@@ -112,7 +112,7 @@ namespace MWRender
         // Try to recover the body part model, use ground model as a fallback otherwise.
         if (!bodyparts.empty())
         {
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
             const MWWorld::Store<ESM::BodyPart>& partStore = store.get<ESM::BodyPart>();
             for (const auto& part : bodyparts)
             {

@@ -67,7 +67,7 @@ namespace
                     = MWMechanics::getLevelledItem(itemPtr.get<ESM::ItemLevList>()->mBase, false, prng);
                 if (itemId.empty())
                     return;
-                MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), itemId, 1);
+                MWWorld::ManualRef manualRef(*MWBase::Environment::get().getESMStore(), itemId, 1);
                 addRandomToStore(manualRef.getPtr(), count, store, false);
             }
         }
@@ -105,7 +105,7 @@ namespace MWScript
                     item = ESM::RefId::stringRefId("gold_001");
 
                 // Check if "item" can be placed in a container
-                MWWorld::ManualRef manualRef(MWBase::Environment::get().getWorld()->getStore(), item, 1);
+                MWWorld::ManualRef manualRef(*MWBase::Environment::get().getESMStore(), item, 1);
                 MWWorld::Ptr itemPtr = manualRef.getPtr();
                 bool isLevelledList = itemPtr.getClass().getType() == ESM::ItemLevList::sRecordId;
                 if (!isLevelledList)
@@ -113,7 +113,7 @@ namespace MWScript
 
                 // Explicit calls to non-unique actors affect the base record
                 if (!R::implicit && ptr.getClass().isActor()
-                    && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
+                    && MWBase::Environment::get().getESMStore()->getRefCount(ptr.getCellRef().getRefId()) > 1)
                 {
                     ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
                     return;
@@ -125,7 +125,7 @@ namespace MWScript
                 {
                     ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, count);
                     const ESM::Container* baseRecord
-                        = MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>().find(
+                        = MWBase::Environment::get().getESMStore()->get<ESM::Container>().find(
                             ptr.getCellRef().getRefId());
                     const auto& ptrs = MWBase::Environment::get().getWorld()->getAll(ptr.getCellRef().getRefId());
                     for (const auto& container : ptrs)
@@ -222,7 +222,7 @@ namespace MWScript
 
                 // Explicit calls to non-unique actors affect the base record
                 if (!R::implicit && ptr.getClass().isActor()
-                    && MWBase::Environment::get().getWorld()->getStore().getRefCount(ptr.getCellRef().getRefId()) > 1)
+                    && MWBase::Environment::get().getESMStore()->getRefCount(ptr.getCellRef().getRefId()) > 1)
                 {
                     ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
                     return;
@@ -233,7 +233,7 @@ namespace MWScript
                 {
                     ptr.getClass().modifyBaseInventory(ptr.getCellRef().getRefId(), item, -count);
                     const ESM::Container* baseRecord
-                        = MWBase::Environment::get().getWorld()->getStore().get<ESM::Container>().find(
+                        = MWBase::Environment::get().getESMStore()->get<ESM::Container>().find(
                             ptr.getCellRef().getRefId());
                     const auto& ptrs = MWBase::Environment::get().getWorld()->getAll(ptr.getCellRef().getRefId());
                     for (const auto& container : ptrs)
@@ -298,7 +298,7 @@ namespace MWScript
 
                 MWWorld::InventoryStore& invStore = ptr.getClass().getInventoryStore(ptr);
                 auto found = invStore.end();
-                const auto& store = MWBase::Environment::get().getWorld()->getStore();
+                const auto& store = *MWBase::Environment::get().getESMStore();
 
                 // With soul gems we prefer filled ones.
                 for (auto it = invStore.begin(); it != invStore.end(); ++it)

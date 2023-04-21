@@ -147,7 +147,8 @@ namespace MWBase
         virtual MWWorld::Ptr getPlayerPtr() = 0;
         virtual MWWorld::ConstPtr getPlayerConstPtr() const = 0;
 
-        virtual const MWWorld::ESMStore& getStore() const = 0;
+        virtual MWWorld::ESMStore& getStore() = 0;
+        const MWWorld::ESMStore& getStore() const { return const_cast<MWBase::World*>(this)->getStore(); }
 
         virtual const std::vector<int>& getESMVersions() const = 0;
 
@@ -343,66 +344,6 @@ namespace MWBase
         virtual bool toggleRenderMode(MWRender::RenderMode mode) = 0;
         ///< Toggle a render mode.
         ///< \return Resulting mode
-
-        virtual const ESM::Potion* createRecord(const ESM::Potion& record) = 0;
-        ///< Create a new record (of type potion) in the ESM store.
-        /// \return pointer to created record
-
-        virtual const ESM::Spell* createRecord(const ESM::Spell& record) = 0;
-        ///< Create a new record (of type spell) in the ESM store.
-        /// \return pointer to created record
-
-        virtual const ESM::Class* createRecord(const ESM::Class& record) = 0;
-        ///< Create a new record (of type class) in the ESM store.
-        /// \return pointer to created record
-
-        virtual const ESM::Cell* createRecord(const ESM::Cell& record) = 0;
-        ///< Create a new record (of type cell) in the ESM store.
-        /// \return pointer to created record
-
-        virtual const ESM::NPC* createRecord(const ESM::NPC& record) = 0;
-        ///< Create a new record (of type npc) in the ESM store.
-        /// \return pointer to created record
-
-        virtual const ESM::Armor* createRecord(const ESM::Armor& record) = 0;
-        ///< Create a new record (of type armor) in the ESM store.
-        /// \return pointer to created record
-
-        virtual const ESM::Weapon* createRecord(const ESM::Weapon& record) = 0;
-        ///< Create a new record (of type weapon) in the ESM store.
-        /// \return pointer to created record
-
-        virtual const ESM::Clothing* createRecord(const ESM::Clothing& record) = 0;
-        ///< Create a new record (of type clothing) in the ESM store.
-        /// \return pointer to created record
-
-        virtual const ESM::Enchantment* createRecord(const ESM::Enchantment& record) = 0;
-        ///< Create a new record (of type enchantment) in the ESM store.
-        /// \return pointer to created record
-
-        virtual const ESM::Book* createRecord(const ESM::Book& record) = 0;
-        ///< Create a new record (of type book) in the ESM store.
-        /// \return pointer to created record
-
-        virtual const ESM::CreatureLevList* createOverrideRecord(const ESM::CreatureLevList& record) = 0;
-        ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
-        /// \return pointer to created record
-
-        virtual const ESM::ItemLevList* createOverrideRecord(const ESM::ItemLevList& record) = 0;
-        ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
-        /// \return pointer to created record
-
-        virtual const ESM::Creature* createOverrideRecord(const ESM::Creature& record) = 0;
-        ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
-        /// \return pointer to created record
-
-        virtual const ESM::NPC* createOverrideRecord(const ESM::NPC& record) = 0;
-        ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
-        /// \return pointer to created record
-
-        virtual const ESM::Container* createOverrideRecord(const ESM::Container& record) = 0;
-        ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
-        /// \return pointer to created record
 
         virtual MWWorld::Ptr placeObject(const MWWorld::ConstPtr& object, float cursorX, float cursorY, int amount) = 0;
         ///< copy and place an object into the gameworld at the specified cursor position

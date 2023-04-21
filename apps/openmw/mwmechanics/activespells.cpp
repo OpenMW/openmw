@@ -323,9 +323,8 @@ namespace MWMechanics
             }
             if (reflected)
             {
-                const ESM::Static* reflectStatic
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find(
-                        ESM::RefId::stringRefId("VFX_Reflect"));
+                const ESM::Static* reflectStatic = MWBase::Environment::get().getESMStore()->get<ESM::Static>().find(
+                    ESM::RefId::stringRefId("VFX_Reflect"));
                 MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
                 if (animation && !reflectStatic->mModel.empty())
                 {

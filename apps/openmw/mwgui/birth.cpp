@@ -147,8 +147,7 @@ namespace MWGui
     {
         mBirthList->removeAllItems();
 
-        const MWWorld::Store<ESM::BirthSign>& signs
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>();
+        const MWWorld::Store<ESM::BirthSign>& signs = MWBase::Environment::get().getESMStore()->get<ESM::BirthSign>();
 
         // sort by name
         std::vector<std::pair<ESM::RefId, const ESM::BirthSign*>> birthSigns;
@@ -192,7 +191,7 @@ namespace MWGui
         const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
         MyGUI::IntCoord coord(0, 0, mSpellArea->getWidth(), lineHeight);
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         const ESM::BirthSign* birth = store.get<ESM::BirthSign>().find(mCurrentBirthId);
 

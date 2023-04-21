@@ -599,11 +599,6 @@ namespace MWWorld
         return mESMVersions;
     }
 
-    const MWWorld::ESMStore& World::getStore() const
-    {
-        return mStore;
-    }
-
     LocalScripts& World::getLocalScripts()
     {
         return mLocalScripts;
@@ -1719,95 +1714,6 @@ namespace MWWorld
             default:
                 return mRendering->toggleRenderMode(mode);
         }
-    }
-
-    const ESM::Potion* World::createRecord(const ESM::Potion& record)
-    {
-        return mStore.insert(record);
-    }
-
-    const ESM::Class* World::createRecord(const ESM::Class& record)
-    {
-        return mStore.insert(record);
-    }
-
-    const ESM::Spell* World::createRecord(const ESM::Spell& record)
-    {
-        return mStore.insert(record);
-    }
-
-    const ESM::Cell* World::createRecord(const ESM::Cell& record)
-    {
-        return mStore.insert(record);
-    }
-
-    const ESM::CreatureLevList* World::createOverrideRecord(const ESM::CreatureLevList& record)
-    {
-        return mStore.overrideRecord(record);
-    }
-
-    const ESM::ItemLevList* World::createOverrideRecord(const ESM::ItemLevList& record)
-    {
-        return mStore.overrideRecord(record);
-    }
-
-    const ESM::Creature* World::createOverrideRecord(const ESM::Creature& record)
-    {
-        return mStore.overrideRecord(record);
-    }
-
-    const ESM::NPC* World::createOverrideRecord(const ESM::NPC& record)
-    {
-        return mStore.overrideRecord(record);
-    }
-
-    const ESM::Container* World::createOverrideRecord(const ESM::Container& record)
-    {
-        return mStore.overrideRecord(record);
-    }
-
-    const ESM::NPC* World::createRecord(const ESM::NPC& record)
-    {
-        bool update = false;
-
-        if (record.mId == "Player")
-        {
-            const ESM::NPC* player = mPlayer->getPlayer().get<ESM::NPC>()->mBase;
-
-            update = record.isMale() != player->isMale() || !(record.mRace == player->mRace)
-                || !(record.mHead == player->mHead) || !(record.mHair == player->mHair);
-        }
-        const ESM::NPC* ret = mStore.insert(record);
-        if (update)
-        {
-            renderPlayer();
-        }
-        return ret;
-    }
-
-    const ESM::Armor* World::createRecord(const ESM::Armor& record)
-    {
-        return mStore.insert(record);
-    }
-
-    const ESM::Weapon* World::createRecord(const ESM::Weapon& record)
-    {
-        return mStore.insert(record);
-    }
-
-    const ESM::Clothing* World::createRecord(const ESM::Clothing& record)
-    {
-        return mStore.insert(record);
-    }
-
-    const ESM::Enchantment* World::createRecord(const ESM::Enchantment& record)
-    {
-        return mStore.insert(record);
-    }
-
-    const ESM::Book* World::createRecord(const ESM::Book& record)
-    {
-        return mStore.insert(record);
     }
 
     void World::update(float duration, bool paused)
@@ -3211,7 +3117,7 @@ namespace MWWorld
                 {
                     if (playing.insert(effect.mEffectId).second)
                     {
-                        const auto magicEffect = getStore().get<ESM::MagicEffect>().find(effect.mEffectId);
+                        const auto magicEffect = mStore.get<ESM::MagicEffect>().find(effect.mEffectId);
                         if (magicEffect->mData.mFlags & ESM::MagicEffect::ContinuousVfx)
                             MWMechanics::playEffects(ptr, *magicEffect, false);
                     }

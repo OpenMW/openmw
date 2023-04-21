@@ -347,7 +347,7 @@ namespace MWWorld
 
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfItem", prng);
 
@@ -508,15 +508,14 @@ namespace MWWorld
             return result;
 
         const ESM::Enchantment* enchantment
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchantmentName);
+            = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().search(enchantmentName);
         if (!enchantment)
             return result;
 
         assert(enchantment->mEffects.mList.size());
 
-        const ESM::MagicEffect* magicEffect
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().search(
-                enchantment->mEffects.mList.front().mEffectID);
+        const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().search(
+            enchantment->mEffects.mList.front().mEffectID);
         if (!magicEffect)
             return result;
 

@@ -353,7 +353,7 @@ namespace MWGui
             if (!classId.empty())
                 MWBase::Environment::get().getMechanicsManager()->setPlayerClass(classId);
 
-            const ESM::Class* klass = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(classId);
+            const ESM::Class* klass = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(classId);
             if (klass)
             {
                 mPlayerClass = *klass;
@@ -686,8 +686,7 @@ namespace MWGui
 
         MWBase::Environment::get().getMechanicsManager()->setPlayerClass(mGenerateClass);
 
-        const ESM::Class* klass
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mGenerateClass);
+        const ESM::Class* klass = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(mGenerateClass);
 
         mPlayerClass = *klass;
     }

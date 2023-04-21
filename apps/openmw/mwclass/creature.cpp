@@ -91,8 +91,8 @@ namespace MWClass
         static const GMST staticGmst = [] {
             GMST gmst;
 
-            const MWBase::World* world = MWBase::Environment::get().getWorld();
-            const MWWorld::Store<ESM::GameSetting>& store = world->getStore().get<ESM::GameSetting>();
+            const MWWorld::Store<ESM::GameSetting>& store
+                = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
             gmst.fMinWalkSpeedCreature = store.find("fMinWalkSpeedCreature");
             gmst.fMaxWalkSpeedCreature = store.find("fMaxWalkSpeedCreature");
@@ -469,7 +469,7 @@ namespace MWClass
     {
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfCreature", prng);
 
@@ -647,7 +647,7 @@ namespace MWClass
 
         const ESM::RefId& ourId = (ref->mBase->mOriginal.empty()) ? ptr.getCellRef().getRefId() : ref->mBase->mOriginal;
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         auto sound = store.get<ESM::SoundGenerator>().begin();
         while (sound != store.get<ESM::SoundGenerator>().end())
         {
@@ -766,7 +766,7 @@ namespace MWClass
     {
         MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
 
-        const ESM::Skill* skillRecord = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>().find(skill);
+        const ESM::Skill* skillRecord = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(skill);
 
         switch (skillRecord->mData.mSpecialization)
         {
@@ -862,7 +862,7 @@ namespace MWClass
             return;
 
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
         static const float fCorpseRespawnDelay = gmst.find("fCorpseRespawnDelay")->mValue.getFloat();
         static const float fCorpseClearDelay = gmst.find("fCorpseClearDelay")->mValue.getFloat();
 

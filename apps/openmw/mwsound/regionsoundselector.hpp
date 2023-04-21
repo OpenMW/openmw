@@ -15,8 +15,7 @@ namespace MWSound
     class RegionSoundSelector
     {
     public:
-        std::optional<ESM::RefId> getNextRandom(
-            float duration, const ESM::RefId& regionName, const MWBase::World& world);
+        std::optional<ESM::RefId> getNextRandom(float duration, const ESM::RefId& regionName);
 
         RegionSoundSelector();
 

@@ -177,9 +177,8 @@ namespace MWPhysics
             float angleDegrees = osg::RadiansToDegrees(
                 std::acos(stormDirection * velocity / (stormDirection.length() * velocity.length())));
             static const float fStromWalkMult = MWBase::Environment::get()
-                                                    .getWorld()
-                                                    ->getStore()
-                                                    .get<ESM::GameSetting>()
+                                                    .getESMStore()
+                                                    ->get<ESM::GameSetting>()
                                                     .find("fStromWalkMult")
                                                     ->mValue.getFloat();
             velocity *= 1.f - (fStromWalkMult * (angleDegrees / 180.f));

@@ -102,7 +102,7 @@ namespace
     {
         const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
         const MWWorld::Store<ESM::GameSetting>& settings
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         const float endurance = stats.getAttribute(ESM::Attribute::Endurance).getModified();
         const float health = 0.1f * endurance;
@@ -262,15 +262,13 @@ namespace MWMechanics
                 return;
 
             static const float fMaxHeadTrackDistance = MWBase::Environment::get()
-                                                           .getWorld()
-                                                           ->getStore()
-                                                           .get<ESM::GameSetting>()
+                                                           .getESMStore()
+                                                           ->get<ESM::GameSetting>()
                                                            .find("fMaxHeadTrackDistance")
                                                            ->mValue.getFloat();
             static const float fInteriorHeadTrackMult = MWBase::Environment::get()
-                                                            .getWorld()
-                                                            ->getStore()
-                                                            .get<ESM::GameSetting>()
+                                                            .getESMStore()
+                                                            ->get<ESM::GameSetting>()
                                                             .find("fInteriorHeadTrackMult")
                                                             ->mValue.getFloat();
             float maxDistance = fMaxHeadTrackDistance;
@@ -493,9 +491,8 @@ namespace MWMechanics
 
         // Play a random voice greeting if the player gets too close
         static const int iGreetDistanceMultiplier = MWBase::Environment::get()
-                                                        .getWorld()
-                                                        ->getStore()
-                                                        .get<ESM::GameSetting>()
+                                                        .getESMStore()
+                                                        ->get<ESM::GameSetting>()
                                                         .find("iGreetDistanceMultiplier")
                                                         ->mValue.getInteger();
 
@@ -820,7 +817,7 @@ namespace MWMechanics
             return;
 
         const MWWorld::Store<ESM::GameSetting>& settings
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         if (sleep)
         {
@@ -898,7 +895,7 @@ namespace MWMechanics
         // Restore fatigue
         const float endurance = stats.getAttribute(ESM::Attribute::Endurance).getModified();
         const MWWorld::Store<ESM::GameSetting>& settings
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
         static const float fFatigueReturnBase = settings.find("fFatigueReturnBase")->mValue.getFloat();
         static const float fFatigueReturnMult = settings.find("fFatigueReturnMult")->mValue.getFloat();
 
@@ -939,9 +936,8 @@ namespace MWMechanics
 
         // When npc stats are just initialized, mTimeToStartDrowning == -1 and we should get value from GMST
         static const float fHoldBreathTime = MWBase::Environment::get()
-                                                 .getWorld()
-                                                 ->getStore()
-                                                 .get<ESM::GameSetting>()
+                                                 .getESMStore()
+                                                 ->get<ESM::GameSetting>()
                                                  .find("fHoldBreathTime")
                                                  ->mValue.getFloat();
         if (stats.getTimeToStartDrowning() == -1.f)
@@ -1848,7 +1844,7 @@ namespace MWMechanics
         {
             MWBase::Environment::get().getWorld()->deleteObject(ptr);
 
-            const ESM::Static* fx = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().search(
+            const ESM::Static* fx = MWBase::Environment::get().getESMStore()->get<ESM::Static>().search(
                 ESM::RefId::stringRefId("VFX_Summon_End"));
             if (fx)
             {
@@ -2301,7 +2297,7 @@ namespace MWMechanics
                 ESM::RefId id = reader.getRefId();
                 int count;
                 reader.getHNT(count, "COUN");
-                if (MWBase::Environment::get().getWorld()->getStore().find(id))
+                if (MWBase::Environment::get().getESMStore()->find(id))
                     mDeathCount[id] = count;
             }
         }

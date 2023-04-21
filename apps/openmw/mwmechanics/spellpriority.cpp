@@ -32,7 +32,7 @@ namespace
             if (effectFilter == -1)
             {
                 const ESM::Spell* spell
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->getId());
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(it->getId());
                 if (!spell || spell->mData.mType != ESM::Spell::ST_Spell)
                     continue;
             }
@@ -44,7 +44,7 @@ namespace
                 if (effectFilter != -1 && effectId != effectFilter)
                     continue;
                 const ESM::MagicEffect* magicEffect
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
+                    = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectId);
 
                 if (effect.mDuration <= 3) // Don't attempt to dispel if effect runs out shortly anyway
                     continue;
@@ -127,7 +127,7 @@ namespace MWMechanics
         if (actor.getClass().isNpc())
         {
             const ESM::RefId& raceid = actor.get<ESM::NPC>()->mBase->mRace;
-            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(raceid);
+            const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(raceid);
             if (race->mPowers.exists(spell->mId))
                 return 0.f;
         }
@@ -147,9 +147,8 @@ namespace MWMechanics
         if (ptr.getClass().getEnchantment(ptr).empty())
             return 0.f;
 
-        const ESM::Enchantment* enchantment
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(
-                ptr.getClass().getEnchantment(ptr));
+        const ESM::Enchantment* enchantment = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().find(
+            ptr.getClass().getEnchantment(ptr));
 
         // Spells don't stack, so early out if the spell is still active on the target
         int types = getRangeTypes(enchantment->mEffects);
@@ -372,8 +371,7 @@ namespace MWMechanics
                 {
                     // Beast races can't wear helmets or boots
                     const ESM::RefId& raceid = actor.get<ESM::NPC>()->mBase->mRace;
-                    const ESM::Race* race
-                        = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(raceid);
+                    const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(raceid);
                     if (race->mData.mFlags & ESM::Race::Beast)
                         return 0.f;
                 }
@@ -640,7 +638,7 @@ namespace MWMechanics
         }
 
         const ESM::MagicEffect* magicEffect
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
+            = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effect.mEffectID);
         if (magicEffect->mData.mFlags & ESM::MagicEffect::Harmful)
         {
             rating *= -1.f;
@@ -694,7 +692,7 @@ namespace MWMechanics
         float rating = 0.f;
 
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
         static const float fAIMagicSpellMult = gmst.find("fAIMagicSpellMult")->mValue.getFloat();
         static const float fAIRangeMagicSpellMult = gmst.find("fAIRangeMagicSpellMult")->mValue.getFloat();
 
@@ -716,7 +714,7 @@ namespace MWMechanics
     float vanillaRateSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         static const float fAIMagicSpellMult = gmst.find("fAIMagicSpellMult")->mValue.getFloat();
         static const float fAIRangeMagicSpellMult = gmst.find("fAIRangeMagicSpellMult")->mValue.getFloat();

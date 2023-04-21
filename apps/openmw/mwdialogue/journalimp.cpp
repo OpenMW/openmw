@@ -49,7 +49,7 @@ namespace MWDialogue
     bool Journal::isThere(const ESM::RefId& topicId, const ESM::RefId& infoId) const
     {
         if (const ESM::Dialogue* dialogue
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().search(topicId))
+            = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().search(topicId))
         {
             if (infoId.empty())
                 return true;

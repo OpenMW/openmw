@@ -29,9 +29,8 @@ namespace MWMechanics
             return;
 
         float fDiseaseXferChance = MWBase::Environment::get()
-                                       .getWorld()
-                                       ->getStore()
-                                       .get<ESM::GameSetting>()
+                                       .getESMStore()
+                                       ->get<ESM::GameSetting>()
                                        .find("fDiseaseXferChance")
                                        ->mValue.getFloat();
 
@@ -71,9 +70,8 @@ namespace MWMechanics
                 MWBase::Environment::get().getWorld()->applyLoopingParticles(actor);
 
                 std::string msg = MWBase::Environment::get()
-                                      .getWorld()
-                                      ->getStore()
-                                      .get<ESM::GameSetting>()
+                                      .getESMStore()
+                                      ->get<ESM::GameSetting>()
                                       .find("sMagicContractDisease")
                                       ->mValue.getString();
                 msg = Misc::StringUtils::format(msg, spell->mName);

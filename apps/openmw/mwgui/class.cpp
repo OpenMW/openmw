@@ -65,7 +65,7 @@ namespace MWGui
         setClassImage(mClassImage, mCurrentClassId);
 
         mClassName->setCaption(
-            MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(mCurrentClassId)->mName);
+            MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(mCurrentClassId)->mName);
 
         center();
     }
@@ -208,7 +208,7 @@ namespace MWGui
     {
         mClassList->removeAllItems();
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         std::vector<std::pair<ESM::RefId, std::string>> items; // class id, class name
         for (const ESM::Class& classInfo : store.get<ESM::Class>())
@@ -246,7 +246,7 @@ namespace MWGui
     {
         if (mCurrentClassId.empty())
             return;
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::Class* klass = store.get<ESM::Class>().search(mCurrentClassId);
         if (!klass)
             return;

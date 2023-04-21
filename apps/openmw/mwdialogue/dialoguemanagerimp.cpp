@@ -155,8 +155,7 @@ namespace MWDialogue
         mActorKnownTopics.clear();
 
         // greeting
-        const MWWorld::Store<ESM::Dialogue>& dialogs
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+        const MWWorld::Store<ESM::Dialogue>& dialogs = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
 
         Filter filter(actor, mChoice, mTalkedTo);
 
@@ -288,8 +287,7 @@ namespace MWDialogue
     {
         Filter filter(mActor, mChoice, mTalkedTo);
 
-        const MWWorld::Store<ESM::Dialogue>& dialogues
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+        const MWWorld::Store<ESM::Dialogue>& dialogues = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
 
         const ESM::Dialogue& dialogue = *dialogues.find(topic);
 
@@ -308,7 +306,7 @@ namespace MWDialogue
                 modifiedTopic.erase(std::remove(modifiedTopic.begin(), modifiedTopic.end(), ' '), modifiedTopic.end());
 
                 const MWWorld::Store<ESM::GameSetting>& gmsts
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+                    = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
                 title = gmsts.find(modifiedTopic)->mValue.getString();
             }
@@ -343,7 +341,7 @@ namespace MWDialogue
 
     const ESM::Dialogue* DialogueManager::searchDialogue(const ESM::RefId& id)
     {
-        return MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().search(id);
+        return MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().search(id);
     }
 
     void DialogueManager::updateGlobals()
@@ -357,7 +355,7 @@ namespace MWDialogue
 
         mActorKnownTopics.clear();
 
-        const auto& dialogs = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+        const auto& dialogs = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
 
         Filter filter(mActor, -1, mTalkedTo);
 
@@ -607,8 +605,7 @@ namespace MWDialogue
     {
         Filter filter(mActor, service, mTalkedTo);
 
-        const MWWorld::Store<ESM::Dialogue>& dialogues
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+        const MWWorld::Store<ESM::Dialogue>& dialogues = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
 
         const ESM::Dialogue& dialogue = *dialogues.find(ESM::RefId::stringRefId("Service Refusal"));
 
@@ -620,7 +617,7 @@ namespace MWDialogue
             addTopicsFromText(info->mResponse);
 
             const MWWorld::Store<ESM::GameSetting>& gmsts
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+                = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
             MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(), mActor);
 
@@ -654,7 +651,7 @@ namespace MWDialogue
             return;
         }
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::Dialogue* dial = store.get<ESM::Dialogue>().find(topic);
 
         const MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
@@ -695,7 +692,7 @@ namespace MWDialogue
     {
         if (type == ESM::REC_DIAS)
         {
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
             ESM::DialogueState state;
             state.load(reader);
@@ -712,8 +709,8 @@ namespace MWDialogue
     void DialogueManager::modFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2, int diff)
     {
         // Make sure the factions exist
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(faction1);
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(faction2);
+        MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(faction1);
+        MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(faction2);
 
         int newValue = getFactionReaction(faction1, faction2) + diff;
 
@@ -724,8 +721,8 @@ namespace MWDialogue
     void DialogueManager::setFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2, int absolute)
     {
         // Make sure the factions exist
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(faction1);
-        MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(faction2);
+        MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(faction1);
+        MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(faction2);
 
         auto& map = mChangedFactionReaction[faction1];
         map[faction2] = absolute;
@@ -737,8 +734,7 @@ namespace MWDialogue
         if (map != mChangedFactionReaction.end() && map->second.find(faction2) != map->second.end())
             return map->second.at(faction2);
 
-        const ESM::Faction* faction
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(faction1);
+        const ESM::Faction* faction = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(faction1);
 
         auto it = faction->mReactions.begin();
         for (; it != faction->mReactions.end(); ++it)

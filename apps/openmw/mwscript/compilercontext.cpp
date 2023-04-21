@@ -55,14 +55,13 @@ namespace MWScript
         const ESM::RefId* script = nullptr;
         bool reference = false;
 
-        if (const ESM::Script* scriptRecord
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().search(id))
+        if (const ESM::Script* scriptRecord = MWBase::Environment::get().getESMStore()->get<ESM::Script>().search(id))
         {
             script = &scriptRecord->mId;
         }
         else
         {
-            MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), id);
+            MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), id);
 
             script = &ref.getPtr().getClass().getScript(ref.getPtr());
             reference = true;
@@ -79,7 +78,7 @@ namespace MWScript
 
     bool CompilerContext::isId(const ESM::RefId& name) const
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         return store.get<ESM::Activator>().search(name) || store.get<ESM::Potion>().search(name)
             || store.get<ESM::Apparatus>().search(name) || store.get<ESM::Armor>().search(name)

@@ -155,7 +155,7 @@ namespace MWClass
             = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         std::string text;
 
@@ -269,7 +269,7 @@ namespace MWClass
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;
         newItem.mData.mFlags |= ESM::Weapon::Magical;
-        const ESM::Weapon* record = MWBase::Environment::get().getWorld()->createRecord(newItem);
+        const ESM::Weapon* record = MWBase::Environment::get().getESMStore()->insert(newItem);
         return record->mId;
     }
 

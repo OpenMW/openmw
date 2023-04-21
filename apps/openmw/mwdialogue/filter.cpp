@@ -650,8 +650,7 @@ bool MWDialogue::Filter::hasFactionRankSkillRequirements(
     if (!actor.getClass().getNpcStats(actor).hasSkillsForRank(factionId, rank))
         return false;
 
-    const ESM::Faction& faction
-        = *MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionId);
+    const ESM::Faction& faction = *MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionId);
 
     MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
@@ -667,8 +666,7 @@ bool MWDialogue::Filter::hasFactionRankReputationRequirements(
 
     MWMechanics::NpcStats& stats = actor.getClass().getNpcStats(actor);
 
-    const ESM::Faction& faction
-        = *MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionId);
+    const ESM::Faction& faction = *MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionId);
 
     return stats.getFactionReputation(factionId) >= faction.mData.mRankData[rank].mFactReaction;
 }
@@ -724,8 +722,7 @@ std::vector<const ESM::DialInfo*> MWDialogue::Filter::list(
         // No response is valid because of low NPC disposition,
         // search a response in the topic "Info Refusal"
 
-        const MWWorld::Store<ESM::Dialogue>& dialogues
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>();
+        const MWWorld::Store<ESM::Dialogue>& dialogues = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
 
         const ESM::Dialogue& infoRefusalDialogue = *dialogues.find(ESM::RefId::stringRefId("Info Refusal"));
 

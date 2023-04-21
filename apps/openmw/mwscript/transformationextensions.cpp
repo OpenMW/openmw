@@ -533,7 +533,7 @@ namespace MWScript
                     pos.pos[2] = z;
                     pos.rot[0] = pos.rot[1] = 0;
                     pos.rot[2] = osg::DegreesToRadians(zRotDegrees);
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID);
+                    MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), itemID);
                     ref.getPtr().mRef->mData.mPhysicsPostponed = !ref.getPtr().getClass().isActor();
                     ref.getPtr().getCellRef().setPosition(pos);
                     MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(), store, pos);
@@ -579,7 +579,7 @@ namespace MWScript
                 pos.pos[2] = z;
                 pos.rot[0] = pos.rot[1] = 0;
                 pos.rot[2] = osg::DegreesToRadians(zRotDegrees);
-                MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID);
+                MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), itemID);
                 ref.getPtr().mRef->mData.mPhysicsPostponed = !ref.getPtr().getClass().isActor();
                 ref.getPtr().getCellRef().setPosition(pos);
                 MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(), store, pos);
@@ -617,7 +617,7 @@ namespace MWScript
                 for (int i = 0; i < count; ++i)
                 {
                     // create item
-                    MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), itemID, 1);
+                    MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), itemID, 1);
                     ref.getPtr().mRef->mData.mPhysicsPostponed = !ref.getPtr().getClass().isActor();
 
                     MWWorld::Ptr ptr = MWBase::Environment::get().getWorld()->safePlaceObject(

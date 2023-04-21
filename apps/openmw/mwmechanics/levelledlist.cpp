@@ -49,7 +49,7 @@ namespace MWMechanics
         const ESM::RefId& item = *candidates[Misc::Rng::rollDice(candidates.size(), prng)];
 
         // Vanilla doesn't fail on nonexistent items in levelled lists
-        if (!MWBase::Environment::get().getWorld()->getStore().find(item))
+        if (!MWBase::Environment::get().getESMStore()->find(item))
         {
             Log(Debug::Warning) << "Warning: ignoring nonexistent item " << item << " in levelled list "
                                 << levItem->mId;
@@ -57,7 +57,7 @@ namespace MWMechanics
         }
 
         // Is this another levelled item or a real item?
-        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), item, 1);
+        MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), item, 1);
         if (ref.getPtr().getType() != ESM::ItemLevList::sRecordId
             && ref.getPtr().getType() != ESM::CreatureLevList::sRecordId)
         {

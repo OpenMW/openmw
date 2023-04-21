@@ -1315,8 +1315,8 @@ namespace MWGui
 
             for (const ESM::GlobalMap::CellId& cellId : map.mMarkers)
             {
-                const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(
-                    cellId.first, cellId.second);
+                const ESM::Cell* cell
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Cell>().search(cellId.first, cellId.second);
                 if (cell && !cell->mName.empty())
                     addVisitedLocation(cell->mName, cellId.first, cellId.second);
             }

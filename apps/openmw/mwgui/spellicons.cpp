@@ -52,7 +52,7 @@ namespace MWGui
         for (const auto& [effectId, effectInfos] : effects)
         {
             const ESM::MagicEffect* effect
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectId);
 
             float remainingDuration = 0;
             float totalDuration = 0;
@@ -60,9 +60,8 @@ namespace MWGui
             std::string sourcesDescription;
 
             static const float fadeTime = MWBase::Environment::get()
-                                              .getWorld()
-                                              ->getStore()
-                                              .get<ESM::GameSetting>()
+                                              .getESMStore()
+                                              ->get<ESM::GameSetting>()
                                               .find("fMagicStartIconBlink")
                                               ->mValue.getFloat();
 

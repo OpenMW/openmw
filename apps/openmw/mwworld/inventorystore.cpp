@@ -389,8 +389,7 @@ void MWWorld::InventoryStore::autoEquipArmor(TSlots& slots_)
         return;
     }
 
-    const MWBase::World* world = MWBase::Environment::get().getWorld();
-    const MWWorld::Store<ESM::GameSetting>& store = world->getStore().get<ESM::GameSetting>();
+    const MWWorld::Store<ESM::GameSetting>& store = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
     static float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
     static float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();

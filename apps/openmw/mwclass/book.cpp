@@ -58,7 +58,7 @@ namespace MWClass
     {
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfItem", prng);
 
@@ -151,7 +151,7 @@ namespace MWClass
         newItem.mData.mIsScroll = 1;
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;
-        const ESM::Book* record = MWBase::Environment::get().getWorld()->createRecord(newItem);
+        const ESM::Book* record = MWBase::Environment::get().getESMStore()->insert(newItem);
         return record->mId;
     }
 

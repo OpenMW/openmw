@@ -67,7 +67,7 @@ namespace
     template <class T>
     void updateBaseRecord(MWWorld::Ptr& ptr)
     {
-        const auto& store = MWBase::Environment::get().getWorld()->getStore();
+        const auto& store = *MWBase::Environment::get().getESMStore();
         const T* base = store.get<T>().find(ptr.getCellRef().getRefId());
         ptr.get<T>()->mBase = base;
     }
@@ -463,7 +463,7 @@ namespace MWScript
                 ESM::RefId id = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
 
-                const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(id);
+                const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(id);
 
                 MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
                 creatureStats.getSpells().add(spell);
@@ -572,7 +572,7 @@ namespace MWScript
                     runtime.pop();
                 }
                 // Make sure this faction exists
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
+                MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionID);
 
                 if (!factionID.empty())
                 {
@@ -602,7 +602,7 @@ namespace MWScript
                     runtime.pop();
                 }
                 // Make sure this faction exists
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
+                MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionID);
 
                 if (!factionID.empty())
                 {
@@ -639,7 +639,7 @@ namespace MWScript
                     runtime.pop();
                 }
                 // Make sure this faction exists
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
+                MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionID);
 
                 if (!factionID.empty())
                 {
@@ -668,7 +668,7 @@ namespace MWScript
                     factionID = ptr.getClass().getPrimaryFaction(ptr);
                 }
                 // Make sure this faction exists
-                MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(factionID);
+                MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionID);
 
                 if (!factionID.empty())
                 {

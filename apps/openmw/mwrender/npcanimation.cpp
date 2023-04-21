@@ -56,7 +56,7 @@ namespace
 
         if (sVampireMapping.find(thisCombination) == sVampireMapping.end())
         {
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
             for (const ESM::BodyPart& bodypart : store.get<ESM::BodyPart>())
             {
                 if (!bodypart.mData.mVampire)
@@ -463,7 +463,7 @@ namespace MWRender
         for (size_t i = 0; i < ESM::PRT_Count; i++)
             removeIndividualPart((ESM::PartReferenceType)i);
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::Race* race = store.get<ESM::Race>().find(mNpc->mRace);
         NpcType curType = getNpcType();
         bool isWerewolf = (curType == Type_Werewolf);
@@ -873,7 +873,7 @@ namespace MWRender
     void NpcAnimation::addPartGroup(int group, int priority, const std::vector<ESM::PartReference>& parts,
         bool enchantedGlow, osg::Vec4f* glowColor)
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const MWWorld::Store<ESM::BodyPart>& partStore = store.get<ESM::BodyPart>();
 
         const char* ext = (mViewMode == VM_FirstPerson) ? ".1st" : "";
@@ -1201,7 +1201,7 @@ namespace MWRender
             if (werewolf)
                 return parts;
 
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
             for (const ESM::BodyPart& bodypart : store.get<ESM::BodyPart>())
             {

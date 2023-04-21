@@ -19,8 +19,7 @@ namespace MWScript
     {
         if (!mInitialised)
         {
-            const ESM::Script* script
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find(scriptName);
+            const ESM::Script* script = MWBase::Environment::get().getESMStore()->get<ESM::Script>().find(scriptName);
 
             configure(*script);
         }

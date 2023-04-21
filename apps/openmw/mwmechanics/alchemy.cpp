@@ -139,26 +139,20 @@ void MWMechanics::Alchemy::updateEffects()
 
     x *= mTools[ESM::Apparatus::MortarPestle].get<ESM::Apparatus>()->mBase->mData.mQuality;
     x *= MWBase::Environment::get()
-             .getWorld()
-             ->getStore()
-             .get<ESM::GameSetting>()
+             .getESMStore()
+             ->get<ESM::GameSetting>()
              .find("fPotionStrengthMult")
              ->mValue.getFloat();
 
     // value
-    mValue = static_cast<int>(x
-        * MWBase::Environment::get()
-              .getWorld()
-              ->getStore()
-              .get<ESM::GameSetting>()
-              .find("iAlchemyMod")
-              ->mValue.getFloat());
+    mValue = static_cast<int>(
+        x * MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find("iAlchemyMod")->mValue.getFloat());
 
     // build quantified effect list
     for (std::set<EffectKey>::const_iterator iter(effects.begin()); iter != effects.end(); ++iter)
     {
         const ESM::MagicEffect* magicEffect
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(iter->mId);
+            = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(iter->mId);
 
         if (magicEffect->mData.mBaseCost <= 0)
         {
@@ -167,9 +161,8 @@ void MWMechanics::Alchemy::updateEffects()
         }
 
         float fPotionT1MagMul = MWBase::Environment::get()
-                                    .getWorld()
-                                    ->getStore()
-                                    .get<ESM::GameSetting>()
+                                    .getESMStore()
+                                    ->get<ESM::GameSetting>()
                                     .find("fPotionT1MagMult")
                                     ->mValue.getFloat();
 
@@ -177,9 +170,8 @@ void MWMechanics::Alchemy::updateEffects()
             throw std::runtime_error("invalid gmst: fPotionT1MagMul");
 
         float fPotionT1DurMult = MWBase::Environment::get()
-                                     .getWorld()
-                                     ->getStore()
-                                     .get<ESM::GameSetting>()
+                                     .getESMStore()
+                                     ->get<ESM::GameSetting>()
                                      .find("fPotionT1DurMult")
                                      ->mValue.getFloat();
 
@@ -228,7 +220,7 @@ void MWMechanics::Alchemy::updateEffects()
 
 const ESM::Potion* MWMechanics::Alchemy::getRecord(const ESM::Potion& toFind) const
 {
-    const MWWorld::Store<ESM::Potion>& potions = MWBase::Environment::get().getWorld()->getStore().get<ESM::Potion>();
+    const MWWorld::Store<ESM::Potion>& potions = MWBase::Environment::get().getESMStore()->get<ESM::Potion>();
 
     MWWorld::Store<ESM::Potion>::iterator iter = potions.begin();
     for (; iter != potions.end(); ++iter)
@@ -315,7 +307,7 @@ void MWMechanics::Alchemy::addPotion(const std::string& name)
 
     const ESM::Potion* record = getRecord(newRecord);
     if (!record)
-        record = MWBase::Environment::get().getWorld()->createRecord(newRecord);
+        record = MWBase::Environment::get().getESMStore()->insert(newRecord);
 
     mAlchemist.getClass().getContainerStore(mAlchemist).add(record->mId, 1);
 }
@@ -480,12 +472,8 @@ MWMechanics::Alchemy::TEffectsIterator MWMechanics::Alchemy::endEffects() const
 bool MWMechanics::Alchemy::knownEffect(unsigned int potionEffectIndex, const MWWorld::Ptr& npc)
 {
     float alchemySkill = npc.getClass().getSkill(npc, ESM::Skill::Alchemy);
-    static const float fWortChanceValue = MWBase::Environment::get()
-                                              .getWorld()
-                                              ->getStore()
-                                              .get<ESM::GameSetting>()
-                                              .find("fWortChanceValue")
-                                              ->mValue.getFloat();
+    static const float fWortChanceValue
+        = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find("fWortChanceValue")->mValue.getFloat();
     return (potionEffectIndex <= 1 && alchemySkill >= fWortChanceValue)
         || (potionEffectIndex <= 3 && alchemySkill >= fWortChanceValue * 2)
         || (potionEffectIndex <= 5 && alchemySkill >= fWortChanceValue * 3)
@@ -573,8 +561,8 @@ std::vector<std::string> MWMechanics::Alchemy::effectsDescription(const MWWorld:
     std::vector<std::string> effects;
 
     const auto& item = ptr.get<ESM::Ingredient>()->mBase;
-    const auto& gmst = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
-    const auto& mgef = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>();
+    const auto& gmst = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
+    const auto& mgef = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>();
     const static auto fWortChanceValue = gmst.find("fWortChanceValue")->mValue.getFloat();
     const auto& data = item->mData;
 

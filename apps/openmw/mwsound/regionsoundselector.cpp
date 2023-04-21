@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <numeric>
 
+#include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwworld/esmstore.hpp"
 
@@ -26,8 +27,7 @@ namespace MWSound
     {
     }
 
-    std::optional<ESM::RefId> RegionSoundSelector::getNextRandom(
-        float duration, const ESM::RefId& regionName, const MWBase::World& world)
+    std::optional<ESM::RefId> RegionSoundSelector::getNextRandom(float duration, const ESM::RefId& regionName)
     {
         mTimePassed += duration;
 
@@ -44,7 +44,8 @@ namespace MWSound
             mSumChance = 0;
         }
 
-        const ESM::Region* const region = world.getStore().get<ESM::Region>().search(mLastRegionName);
+        const ESM::Region* const region
+            = MWBase::Environment::get().getESMStore()->get<ESM::Region>().search(mLastRegionName);
 
         if (region == nullptr)
             return {};

@@ -67,7 +67,7 @@ namespace MWLua
 
     void LuaManager::initConfiguration()
     {
-        mConfiguration.init(MWBase::Environment::get().getWorld()->getStore().getLuaScriptsCfg());
+        mConfiguration.init(MWBase::Environment::get().getESMStore()->getLuaScriptsCfg());
         Log(Debug::Verbose) << "Lua scripts configuration (" << mConfiguration.size() << " scripts):";
         for (size_t i = 0; i < mConfiguration.size(); ++i)
             Log(Debug::Verbose) << "#" << i << " " << LuaUtil::scriptCfgToString(mConfiguration[i]);

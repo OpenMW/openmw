@@ -362,7 +362,7 @@ namespace MWMechanics
                 if (storage.mLOS && (triggerDist >= 1000 || getDistanceMinusHalfExtents(actor, target) <= triggerDist))
                 {
                     const ESM::Pathgrid* pathgrid
-                        = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cellVariant);
+                        = MWBase::Environment::get().getESMStore()->get<ESM::Pathgrid>().search(*cellVariant);
 
                     bool runFallback = true;
 
@@ -429,9 +429,8 @@ namespace MWMechanics
             case AiCombatStorage::FleeState_RunToDestination:
             {
                 static const float fFleeDistance = MWBase::Environment::get()
-                                                       .getWorld()
-                                                       ->getStore()
-                                                       .get<ESM::GameSetting>()
+                                                       .getESMStore()
+                                                       ->get<ESM::GameSetting>()
                                                        .find("fFleeDistance")
                                                        ->mValue.getFloat();
 
@@ -649,7 +648,7 @@ namespace MWMechanics
                 auto& prng = MWBase::Environment::get().getWorld()->getPrng();
                 mStrength = Misc::Rng::rollClosedProbability(prng);
 
-                const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
                 float baseDelay = store.get<ESM::GameSetting>().find("fCombatDelayCreature")->mValue.getFloat();
                 if (actor.getClass().isNpc())
@@ -741,7 +740,7 @@ namespace
     {
         float projSpeed;
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         // get projectile speed (depending on weapon type)
         if (MWMechanics::getWeaponType(weapType)->mWeaponClass == ESM::WeaponType::Thrown)
