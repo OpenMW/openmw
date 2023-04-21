@@ -35,7 +35,6 @@ float unshadowedLightRatio(float distance)
                 {
                     shadowing = min(shadow2DProj(shadowTexture@shadow_texture_unit_index, shadowSpaceCoords@shadow_texture_unit_index).r, shadowing);
 
-                    
                     doneShadows = all(lessThan(shadowXYZ, vec3(0.95, 0.95, 1.0))) && all(greaterThan(shadowXYZ, vec3(0.05, 0.05, 0.0)));
 #if @perspectiveShadowMaps
                     doneShadows = doneShadows && all(lessThan(shadowRegionXYZ, vec3(1.0, 1.0, 1.0))) && all(greaterThan(shadowRegionXYZ.xy, vec2(-1.0, -1.0)));
@@ -70,12 +69,12 @@ void applyShadowDebugOverlay()
             if (all(lessThan(shadowXYZ.xy, vec2(1.0, 1.0))) && all(greaterThan(shadowXYZ.xy, vec2(0.0, 0.0))))
             {
                 colourIndex = mod(@shadow_texture_unit_index.0, 3.0);
-		        if (colourIndex < 1.0)
-			        gl_FragData[0].x += 0.1;
-		        else if (colourIndex < 2.0)
-			        gl_FragData[0].y += 0.1;
-		        else
-			        gl_FragData[0].z += 0.1;
+                if (colourIndex < 1.0)
+                    gl_FragData[0].x += 0.1;
+                else if (colourIndex < 2.0)
+                    gl_FragData[0].y += 0.1;
+                else
+                    gl_FragData[0].z += 0.1;
 
                 doneOverlay = all(lessThan(shadowXYZ, vec3(0.95, 0.95, 1.0))) && all(greaterThan(shadowXYZ, vec3(0.05, 0.05, 0.0)));
 #if @perspectiveShadowMaps

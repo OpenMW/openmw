@@ -35,7 +35,8 @@ float calcSoftParticleFade(
     const float nearMult = 300.0;
     float viewBias = 1.0;
 
-    if (fade) {
+    if (fade)
+    {
         float VdotN = dot(viewDir, viewNormal);
         viewBias = abs(VdotN) * quickstep(euclidianDepth / nearMult) * (1.0 - pow(1.0 + VdotN, 1.3));
     }

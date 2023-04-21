@@ -4,11 +4,11 @@
 float linearizeDepth(float depth, float near, float far)
 {
 #if @reverseZ
-  depth = 1.0 - depth;
+    depth = 1.0 - depth;
 #endif
-  float z_n = 2.0 * depth - 1.0;
-  depth = 2.0 * near * far / (far + near - z_n * (far - near));
-  return depth;
+    float z_n = 2.0 * depth - 1.0;
+    depth = 2.0 * near * far / (far + near - z_n * (far - near));
+    return depth;
 }
 
 float getLinearDepth(in float z, in float viewZ)
