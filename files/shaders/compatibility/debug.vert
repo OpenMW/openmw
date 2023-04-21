@@ -5,8 +5,8 @@
 uniform vec3 color;
 uniform vec3 trans;
 uniform vec3 scale;
-uniform bool  useNormalAsColor;
-uniform bool  useAdvancedShader = false;
+uniform bool useNormalAsColor;
+uniform bool useAdvancedShader = false;
 
 centroid varying vec4 passColor;
 varying vec3 vertexNormal;
@@ -27,5 +27,4 @@ void main()
         vec3 colorOut = useNormalAsColor? gl_Normal.xyz : color;
         passColor = vec4(colorOut, 1.);
     }
-    
 }
