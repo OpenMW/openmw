@@ -673,8 +673,8 @@ namespace MWWorld
         auto navigatorUpdateGuard = mNavigator.makeUpdateGuard();
         for (; it != cells.extEnd(); ++it)
         {
-            loadingListener->setLabel(
-                "Testing exterior cells (" + std::to_string(i) + "/" + std::to_string(cells.getExtSize()) + ")...");
+            loadingListener->setLabel("#{OMWEngine:TestingExteriorCells} (" + std::to_string(i) + "/"
+                + std::to_string(cells.getExtSize()) + ")...");
 
             CellStore& cell = mWorld.getWorldModel().getExterior(it->mData.mX, it->mData.mY);
             mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell.getCell()->getWorldSpace().serializeText()),
@@ -731,8 +731,8 @@ namespace MWWorld
         auto navigatorUpdateGuard = mNavigator.makeUpdateGuard();
         for (; it != cells.intEnd(); ++it)
         {
-            loadingListener->setLabel(
-                "Testing interior cells (" + std::to_string(i) + "/" + std::to_string(cells.getIntSize()) + ")...");
+            loadingListener->setLabel("#{OMWEngine:TestingInteriorCells} (" + std::to_string(i) + "/"
+                + std::to_string(cells.getIntSize()) + ")...");
 
             CellStore& cell = mWorld.getWorldModel().getInterior(it->mName);
             mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell.getCell()->getWorldSpace().serializeText()),
