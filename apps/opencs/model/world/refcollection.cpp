@@ -73,7 +73,7 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
             // Autocalculate the cell index from coordinates first
             std::pair<int, int> index = ref.getCellIndex();
 
-            ref.mCell = ESM::RefId::esm3ExteriorCell(index.first, index.second);
+            ref.mCell = ESM::RefId::stringRefId(ESM::RefId::esm3ExteriorCell(index.first, index.second).toString());
 
             // Handle non-base moved references
             if (!base && isMoved)
@@ -89,7 +89,8 @@ void CSMWorld::RefCollection::load(ESM::ESMReader& reader, int cellIndex, bool b
                 if (index.first != mref.mTarget[0] || index.second != mref.mTarget[1])
                 {
                     ESM::RefId indexCell = ref.mCell;
-                    ref.mCell = ESM::RefId::esm3ExteriorCell(mref.mTarget[0], mref.mTarget[1]);
+                    ref.mCell = ESM::RefId::stringRefId(
+                        ESM::RefId::esm3ExteriorCell(mref.mTarget[0], mref.mTarget[1]).toString());
 
                     CSMWorld::UniversalId id(CSMWorld::UniversalId::Type_Cell, mCells.getId(cellIndex));
                     messages.add(id, "The position of the moved reference " + ref.mRefID.toDebugString() + " (cell " + indexCell.toDebugString() + ")"
