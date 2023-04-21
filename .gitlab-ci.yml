@@ -31,6 +31,22 @@ variables:
   rules:
     - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
 
+Ubuntu_GCC_preprocess:
+  extends: .Ubuntu_Image
+  cache:
+    key: Ubuntu_GCC_preprocess.ubuntu_22.04.v1
+    paths:
+      - apt-cache/
+      - .cache/pip/
+  stage: build
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  before_script:
+    - CI/install_debian_deps.sh openmw-deps openmw-deps-dynamic gcc_preprocess
+    - pip3 install --user click termtables
+  script:
+    - CI/ubuntu_gcc_preprocess.sh
+
 .Ubuntu:
   extends: .Ubuntu_Image
   cache:
