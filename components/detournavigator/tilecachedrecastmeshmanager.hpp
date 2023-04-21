@@ -16,9 +16,17 @@
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
+#include <LinearMath/btTransform.h>
+
+#include <osg/Vec2i>
+
 #include <map>
+#include <memory>
 #include <mutex>
 #include <optional>
+#include <string>
+#include <string_view>
+#include <unordered_map>
 #include <vector>
 
 namespace DetourNavigator

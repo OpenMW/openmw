@@ -2,7 +2,6 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_COMMULATIVEAABB_H
 
 #include <BulletCollision/Gimpact/btBoxCollision.h>
-#include <LinearMath/btTransform.h>
 
 #include <cstdint>
 

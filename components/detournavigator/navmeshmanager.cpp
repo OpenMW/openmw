@@ -1,6 +1,5 @@
 #include "navmeshmanager.hpp"
 #include "debug.hpp"
-#include "exceptions.hpp"
 #include "gettilespositions.hpp"
 #include "makenavmesh.hpp"
 #include "navmeshcacheitem.hpp"
@@ -8,9 +7,7 @@
 #include "settingsutils.hpp"
 #include "waitconditiontype.hpp"
 
-#include <components/bullethelpers/heightfield.hpp>
 #include <components/debug/debuglog.hpp>
-#include <components/misc/convert.hpp>
 
 #include <osg/io_utils>
 

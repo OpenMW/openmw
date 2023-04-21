@@ -2,6 +2,8 @@
 
 #include <components/misc/convert.hpp>
 
+#include <DetourCommon.h>
+
 #include <algorithm>
 #include <array>
 

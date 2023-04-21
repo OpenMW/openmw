@@ -4,8 +4,11 @@
 #include "navigator.hpp"
 #include "navmeshmanager.hpp"
 
+#include <map>
 #include <memory>
-#include <set>
+#include <optional>
+#include <string_view>
+#include <unordered_map>
 
 namespace DetourNavigator
 {
