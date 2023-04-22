@@ -1127,7 +1127,8 @@ namespace MWWorld
     ESM4::Cell* Store<ESM4::Cell>::insert(const ESM4::Cell& item, bool overrideOnly)
     {
         auto cellPtr = TypedDynamicStore<ESM4::Cell>::insert(item, overrideOnly);
-        mCellNameIndex[cellPtr->mEditorId] = cellPtr;
+        if (!cellPtr->mEditorId.empty())
+            mCellNameIndex[cellPtr->mEditorId] = cellPtr;
         if (cellPtr->isExterior())
             mExteriors[cellPtr->mParent][std::make_pair(cellPtr->getGridX(), cellPtr->getGridY())] = cellPtr;
 
@@ -1137,11 +1138,27 @@ namespace MWWorld
     ESM4::Cell* Store<ESM4::Cell>::insertStatic(const ESM4::Cell& item)
     {
         auto cellPtr = TypedDynamicStore<ESM4::Cell>::insertStatic(item);
-        mCellNameIndex[cellPtr->mEditorId] = cellPtr;
+        if (!cellPtr->mEditorId.empty())
+            mCellNameIndex[cellPtr->mEditorId] = cellPtr;
         if (cellPtr->isExterior())
             mExteriors[cellPtr->mParent][std::make_pair(cellPtr->getGridX(), cellPtr->getGridY())] = cellPtr;
 
         return cellPtr;
+    }
+
+    void Store<ESM4::Cell>::clearDynamic()
+    {
+        for (auto& cellToDeleteIt : mDynamic)
+        {
+            ESM4::Cell& cellToDelete = cellToDeleteIt.second;
+            if (cellToDelete.isExterior())
+            {
+                mExteriors[cellToDelete.mParent].erase(std::make_pair(cellToDelete.mX, cellToDelete.mY));
+            }
+            if (!cellToDelete.mEditorId.empty())
+                mCellNameIndex.erase(cellToDelete.mEditorId);
+        }
+        MWWorld::TypedDynamicStore<ESM4::Cell>::clearDynamic();
     }
 }
 

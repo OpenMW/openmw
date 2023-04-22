@@ -177,6 +177,7 @@ namespace MWWorld
     template <class T, class Id = ESM::RefId>
     class TypedDynamicStore : public DynamicStoreBase<Id>
     {
+    protected:
         typedef std::unordered_map<Id, T> Static;
         Static mStatic;
         /// @par mShared usually preserves the record order as it came from the content files (this
@@ -290,6 +291,7 @@ namespace MWWorld
         bool exteriorExists(ESM::RefId worldspace) const;
         ESM4::Cell* insert(const ESM4::Cell& item, bool overrideOnly = false);
         ESM4::Cell* insertStatic(const ESM4::Cell& item);
+        void clearDynamic() override;
     };
 
     template <>
