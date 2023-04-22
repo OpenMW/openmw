@@ -223,8 +223,8 @@ void ESM4::Race::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_DNAM:
             {
-                reader.get(mDefaultHair[0]); // male
-                reader.get(mDefaultHair[1]); // female
+                reader.getFormId(mDefaultHair[0]); // male
+                reader.getFormId(mDefaultHair[1]); // female
 
                 break;
             }
@@ -421,7 +421,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 std::size_t numHairChoices = subHdr.dataSize / sizeof(FormId32);
                 mHairChoices.resize(numHairChoices);
                 for (unsigned int i = 0; i < numHairChoices; ++i)
-                    reader.get(mHairChoices.at(i));
+                    reader.getFormId(mHairChoices.at(i));
 
                 break;
             }
@@ -430,7 +430,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 std::size_t numEyeChoices = subHdr.dataSize / sizeof(FormId32);
                 mEyeChoices.resize(numEyeChoices);
                 for (unsigned int i = 0; i < numEyeChoices; ++i)
-                    reader.get(mEyeChoices.at(i));
+                    reader.getFormId(mEyeChoices.at(i));
 
                 break;
             }
@@ -495,7 +495,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             {
                 FormId race;
                 std::int32_t adjustment;
-                reader.get(race);
+                reader.getFormId(race);
                 reader.get(adjustment);
                 mDisposition[race] = adjustment;
 
@@ -505,8 +505,8 @@ void ESM4::Race::load(ESM4::Reader& reader)
             {
                 if (subHdr.dataSize == 8) // TES4
                 {
-                    reader.get(mVNAM[0]); // For TES4 seems to be 2 race formids
-                    reader.get(mVNAM[1]);
+                    reader.getFormId(mVNAM[0]); // For TES4 seems to be 2 race formids
+                    reader.getFormId(mVNAM[1]);
                 }
                 else if (subHdr.dataSize == 4) // TES5
                 {

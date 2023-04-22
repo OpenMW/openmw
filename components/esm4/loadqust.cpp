@@ -69,7 +69,7 @@ void ESM4::Quest::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_SCRI:
-                reader.get(mQuestScript);
+                reader.getFormId(mQuestScript);
                 break;
             case ESM4::SUB_CTDA: // FIXME: how to detect if 1st/2nd param is a formid?
             {
