@@ -316,7 +316,7 @@ namespace LuaUtil
     {
         if (!package.is<sol::function>())
             package = makeReadOnly(std::move(package));
-        mCommonPackages.emplace(std::move(packageName), std::move(package));
+        mCommonPackages.insert_or_assign(std::move(packageName), std::move(package));
     }
 
     sol::protected_function_result LuaState::runInNewSandbox(const std::string& path, const std::string& namePrefix,

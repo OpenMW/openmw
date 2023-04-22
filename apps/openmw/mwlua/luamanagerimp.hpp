@@ -1,16 +1,14 @@
 #ifndef MWLUA_LUAMANAGERIMP_H
 #define MWLUA_LUAMANAGERIMP_H
 
+#include <filesystem>
 #include <map>
 #include <set>
 
 #include <components/lua/luastate.hpp>
 #include <components/lua/storage.hpp>
-
 #include <components/lua_ui/resources.hpp>
-
 #include <components/misc/color.hpp>
-#include <filesystem>
 
 #include "../mwbase/luamanager.hpp"
 
@@ -157,14 +155,8 @@ namespace MWLua
         LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;
         LuaUi::ResourceManager mUiResourceManager;
-        sol::table mNearbyPackage;
-        sol::table mUserInterfacePackage;
-        sol::table mCameraPackage;
-        sol::table mInputPackage;
-        sol::table mLocalStoragePackage;
-        sol::table mPlayerStoragePackage;
-        sol::table mPostprocessingPackage;
-        sol::table mDebugPackage;
+        std::map<std::string, sol::object> mLocalPackages;
+        std::map<std::string, sol::object> mPlayerPackages;
 
         GlobalScripts mGlobalScripts{ &mLua };
         std::set<LocalScripts*> mActiveLocalScripts;

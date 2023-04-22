@@ -1,4 +1,4 @@
-#include "luabindings.hpp"
+#include "objectbindings.hpp"
 
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadnpc.hpp>

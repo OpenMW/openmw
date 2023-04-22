@@ -1,4 +1,4 @@
-#include "luabindings.hpp"
+#include "nearbybindings.hpp"
 
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/navigatorutils.hpp>

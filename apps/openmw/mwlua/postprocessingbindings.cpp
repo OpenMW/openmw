@@ -1,4 +1,4 @@
-#include "luabindings.hpp"
+#include "postprocessingbindings.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwrender/postprocessor.hpp"

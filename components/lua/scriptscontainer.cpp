@@ -35,7 +35,7 @@ namespace LuaUtil
 
     void ScriptsContainer::addPackage(std::string packageName, sol::object package)
     {
-        mAPI.emplace(std::move(packageName), makeReadOnly(std::move(package)));
+        mAPI.insert_or_assign(std::move(packageName), makeReadOnly(std::move(package)));
     }
 
     bool ScriptsContainer::addCustomScript(int scriptId, std::string_view initData)

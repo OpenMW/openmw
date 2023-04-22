@@ -1,3 +1,5 @@
+#include "uibindings.hpp"
+
 #include <components/lua_ui/alignment.hpp>
 #include <components/lua_ui/content.hpp>
 #include <components/lua_ui/element.hpp>

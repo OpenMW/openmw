@@ -16,9 +16,6 @@
 
 #include <components/l10n/manager.hpp>
 
-#include <components/lua/asyncpackage.hpp>
-#include <components/lua/utilpackage.hpp>
-
 #include <components/lua_ui/content.hpp>
 #include <components/lua_ui/util.hpp>
 
@@ -31,7 +28,6 @@
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/scene.hpp"
 
-#include "debugbindings.hpp"
 #include "luabindings.hpp"
 #include "playerscripts.hpp"
 #include "types/types.hpp"
@@ -88,31 +84,21 @@ namespace MWLua
         localContext.mIsGlobal = false;
         localContext.mSerializer = mLocalSerializer.get();
 
-        initObjectBindingsForGlobalScripts(context);
-        initCellBindingsForGlobalScripts(context);
-        initObjectBindingsForLocalScripts(localContext);
-        initCellBindingsForLocalScripts(localContext);
-        LocalScripts::initializeSelfPackage(localContext);
+        for (const auto& [name, package] : initCommonPackages(context))
+            mLua.addCommonPackage(name, package);
+        for (const auto& [name, package] : initGlobalPackages(context))
+            mGlobalScripts.addPackage(name, package);
+
+        mLocalPackages = initLocalPackages(localContext);
+        mPlayerPackages = initPlayerPackages(localContext);
+        mPlayerPackages.insert(mLocalPackages.begin(), mLocalPackages.end());
+
         LuaUtil::LuaStorage::initLuaBindings(mLua.sol());
-
-        mLua.addCommonPackage("openmw.async",
-            LuaUtil::getAsyncPackageInitializer(
-                mLua.sol(), [this] { return mWorldView.getSimulationTime(); },
-                [this] { return mWorldView.getGameTime(); }));
-        mLua.addCommonPackage("openmw.util", LuaUtil::initUtilPackage(mLua.sol()));
-        mLua.addCommonPackage("openmw.core", initCorePackage(context));
-        mLua.addCommonPackage("openmw.types", initTypesPackage(context));
-        mGlobalScripts.addPackage("openmw.world", initWorldPackage(context));
-        mGlobalScripts.addPackage("openmw.storage", initGlobalStoragePackage(context, &mGlobalStorage));
-
-        mCameraPackage = initCameraPackage(localContext);
-        mUserInterfacePackage = initUserInterfacePackage(localContext);
-        mInputPackage = initInputPackage(localContext);
-        mNearbyPackage = initNearbyPackage(localContext);
-        mLocalStoragePackage = initLocalStoragePackage(localContext, &mGlobalStorage);
-        mPlayerStoragePackage = initPlayerStoragePackage(localContext, &mGlobalStorage, &mPlayerStorage);
-        mPostprocessingPackage = initPostprocessingPackage(localContext);
-        mDebugPackage = initDebugPackage(localContext);
+        mGlobalScripts.addPackage(
+            "openmw.storage", LuaUtil::LuaStorage::initGlobalPackage(mLua.sol(), &mGlobalStorage));
+        mLocalPackages["openmw.storage"] = LuaUtil::LuaStorage::initLocalPackage(mLua.sol(), &mGlobalStorage);
+        mPlayerPackages["openmw.storage"]
+            = LuaUtil::LuaStorage::initPlayerPackage(mLua.sol(), &mGlobalStorage, &mPlayerStorage);
 
         initConfiguration();
         mInitialized = true;
@@ -147,7 +133,7 @@ namespace MWLua
 
         MWWorld::Ptr newPlayerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (!(getId(mPlayer) == getId(newPlayerPtr)))
-            throw std::logic_error("Player Refnum was changed unexpectedly");
+            throw std::logic_error("Player RefNum was changed unexpectedly");
         if (!mPlayer.isInCell() || !newPlayerPtr.isInCell() || mPlayer.getCell() != newPlayerPtr.getCell())
         {
             mPlayer = newPlayerPtr; // player was moved to another cell, update ptr in registry
@@ -352,12 +338,8 @@ namespace MWLua
         {
             scripts = std::make_shared<PlayerScripts>(&mLua, LObject(getId(ptr)));
             scripts->setAutoStartConf(mConfiguration.getPlayerConf());
-            scripts->addPackage("openmw.ui", mUserInterfacePackage);
-            scripts->addPackage("openmw.camera", mCameraPackage);
-            scripts->addPackage("openmw.input", mInputPackage);
-            scripts->addPackage("openmw.storage", mPlayerStoragePackage);
-            scripts->addPackage("openmw.postprocessing", mPostprocessingPackage);
-            scripts->addPackage("openmw.debug", mDebugPackage);
+            for (const auto& [name, package] : mPlayerPackages)
+                scripts->addPackage(name, package);
         }
         else
         {
@@ -365,9 +347,9 @@ namespace MWLua
             if (!autoStartConf.has_value())
                 autoStartConf = mConfiguration.getLocalConf(type, ptr.getCellRef().getRefId(), getId(ptr));
             scripts->setAutoStartConf(std::move(*autoStartConf));
-            scripts->addPackage("openmw.storage", mLocalStoragePackage);
+            for (const auto& [name, package] : mLocalPackages)
+                scripts->addPackage(name, package);
         }
-        scripts->addPackage("openmw.nearby", mNearbyPackage);
         scripts->setSerializer(mLocalSerializer.get());
 
         MWWorld::RefData& refData = ptr.getRefData();
