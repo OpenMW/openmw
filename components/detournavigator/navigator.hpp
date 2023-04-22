@@ -8,6 +8,7 @@
 #include "objecttransform.hpp"
 #include "recastmeshtiles.hpp"
 #include "sharednavmeshcacheitem.hpp"
+#include "updateguard.hpp"
 #include "waitconditiontype.hpp"
 
 #include <components/resource/bulletshape.hpp>
@@ -58,8 +59,6 @@ namespace DetourNavigator
         }
     };
 
-    class UpdateGuard;
-
     /**
      * @brief Top level interface of detournavigator component. Navigator allows to build a scene with navmesh and find
      * a path for an agent there. Scene contains agents, geometry objects and water. Agent are distinguished only by
@@ -71,7 +70,7 @@ namespace DetourNavigator
     {
         virtual ~Navigator() = default;
 
-        virtual std::unique_ptr<const UpdateGuard> makeUpdateGuard() = 0;
+        virtual ScopedUpdateGuard makeUpdateGuard() = 0;
 
         /**
          * @brief addAgent should be called for each agent even if all of them has same half extents.

@@ -11,7 +11,7 @@
 #include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/heightfieldshape.hpp>
 #include <components/detournavigator/navigator.hpp>
-#include <components/detournavigator/navigatorimpl.hpp>
+#include <components/detournavigator/updateguard.hpp>
 #include <components/esm/records.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/convert.hpp>

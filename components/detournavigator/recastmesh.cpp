@@ -1,8 +1,6 @@
 #include "recastmesh.hpp"
 #include "exceptions.hpp"
 
-#include <Recast.h>
-
 namespace DetourNavigator
 {
     Mesh::Mesh(std::vector<int>&& indices, std::vector<float>&& vertices, std::vector<AreaType>&& areaTypes)

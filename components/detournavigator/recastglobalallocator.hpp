@@ -3,6 +3,8 @@
 
 #include "recasttempallocator.hpp"
 
+#include <RecastAlloc.h>
+
 #include <cstdlib>
 
 namespace DetourNavigator

@@ -8,7 +8,6 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include <osg/Vec3f>
 #include <osg/io_utils>
 
 #include <functional>

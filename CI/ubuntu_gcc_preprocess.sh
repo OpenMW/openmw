@@ -45,13 +45,13 @@ if [[ "${GENERATE_ONLY}" ]]; then
     exit 0
 fi
 
-git remote add target "${CI_MERGE_REQUEST_SOURCE_PROJECT_URL:-https://gitlab.com/OpenMW/openmw.git}"
+git remote add target "${CI_MERGE_REQUEST_PROJECT_URL:-https://gitlab.com/OpenMW/openmw.git}"
 
 TARGET_BRANCH="${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-master}"
 
 git fetch target "${TARGET_BRANCH:?}"
 
-BASE_VERSION=$(git merge-base "target/${TARGET_BRANCH:?}" HEAD)
+BASE_VERSION=$(git merge-base "target/${TARGET_BRANCH:?}" "${VERSION:?}")
 
 # Save and use scripts from this commit because they may be absent or different in the base version
 cp scripts/preprocessed_file_size_stats.py scripts/preprocessed_file_size_stats.bak.py

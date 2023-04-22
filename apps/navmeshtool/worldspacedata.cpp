@@ -279,7 +279,7 @@ namespace NavMeshTool
                 return *it->second;
             }();
 
-            const TileCachedRecastMeshManager::UpdateGuard guard(navMeshInput.mTileCachedRecastMeshManager);
+            const auto guard = navMeshInput.mTileCachedRecastMeshManager.makeUpdateGuard();
 
             if (exterior)
             {
@@ -293,15 +293,15 @@ namespace NavMeshTool
                     getAabb(cellPosition, minHeight, maxHeight), navMeshInput.mAabb, navMeshInput.mAabbInitialized);
 
                 navMeshInput.mTileCachedRecastMeshManager.addHeightfield(
-                    cellPosition, ESM::Land::REAL_SIZE, heightfieldShape, &guard);
+                    cellPosition, ESM::Land::REAL_SIZE, heightfieldShape, guard.get());
 
-                navMeshInput.mTileCachedRecastMeshManager.addWater(cellPosition, ESM::Land::REAL_SIZE, -1, &guard);
+                navMeshInput.mTileCachedRecastMeshManager.addWater(cellPosition, ESM::Land::REAL_SIZE, -1, guard.get());
             }
             else
             {
                 if ((cell.mData.mFlags & ESM::Cell::HasWater) != 0)
                     navMeshInput.mTileCachedRecastMeshManager.addWater(
-                        cellPosition, std::numeric_limits<int>::max(), cell.mWater, &guard);
+                        cellPosition, std::numeric_limits<int>::max(), cell.mWater, guard.get());
             }
 
             forEachObject(cell, esmData, vfs, bulletShapeManager, readers, [&](BulletObject object) {
@@ -319,13 +319,13 @@ namespace NavMeshTool
                     object.getObjectTransform());
 
                 navMeshInput.mTileCachedRecastMeshManager.addObject(
-                    objectId, shape, transform, DetourNavigator::AreaType_ground, &guard);
+                    objectId, shape, transform, DetourNavigator::AreaType_ground, guard.get());
 
                 if (const btCollisionShape* avoid = object.getShapeInstance()->mAvoidCollisionShape.get())
                 {
                     const CollisionShape avoidShape(object.getShapeInstance(), *avoid, object.getObjectTransform());
                     navMeshInput.mTileCachedRecastMeshManager.addObject(
-                        objectId, avoidShape, transform, DetourNavigator::AreaType_null, &guard);
+                        objectId, avoidShape, transform, DetourNavigator::AreaType_null, guard.get());
                 }
 
                 data.mObjects.emplace_back(std::move(object));

@@ -3,6 +3,8 @@
 
 #include "recastallocutils.hpp"
 
+#include <RecastAlloc.h>
+
 #include <cassert>
 #include <memory>
 #include <vector>
