@@ -1268,12 +1268,13 @@ namespace MWWorld
         CellStore* cell = ptr.getCell();
         ESM::RefId worldspaceId
             = cell->isExterior() ? cell->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
-        CellStore& newCell = mWorldModel.getExterior(index.x(), index.y(), worldspaceId);
-        bool isCellActive
-            = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior() && mWorldScene->isCellActive(newCell);
+        CellStore* newCell
+            = cell->isExterior() ? &mWorldModel.getExterior(index.x(), index.y(), worldspaceId) : nullptr;
+        bool isCellActive = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior()
+            && mWorldScene->isCellActive(*newCell);
 
         if (cell->isExterior() || (moveToActive && isCellActive && ptr.getClass().isActor()))
-            cell = &newCell;
+            cell = newCell;
 
         return moveObject(ptr, cell, position, movePhysics);
     }

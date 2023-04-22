@@ -80,6 +80,7 @@ namespace MWWorld
         {
             osg::Vec3f mPosition;
             osg::Vec2i mCell;
+            ESM::RefId exteriorWorldspace;
             bool mChangeEvent;
         };
 
@@ -117,7 +118,8 @@ namespace MWWorld
         osg::Vec2i mCurrentGridCenter;
 
         // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
-        void changeCellGrid(const osg::Vec3f& pos, int playerCellX, int playerCellY, bool changeEvent = true);
+        void changeCellGrid(const osg::Vec3f& pos, int playerCellX, int playerCellY, ESM::RefId exteriorWorldspace,
+            bool changeEvent = true);
 
         void requestChangeCellGrid(const osg::Vec3f& position, const osg::Vec2i& cell, bool changeEvent = true);
 

@@ -208,7 +208,6 @@ MWWorld::CellStore& MWWorld::WorldModel::getExterior(int x, int y, ESM::RefId ex
                 if (!cell)
                 {
                     ESM4::Cell record;
-                    record.mId = MWBase::Environment::get().getESMStore()->generateId();
                     record.mParent = exteriorWorldspace;
                     record.mX = x;
                     record.mY = y;
