@@ -86,24 +86,8 @@ namespace MWLua
         }
 
         // Some changes to the game world can not be done from the scripting thread (because it runs in parallel with
-        // OSG Cull), so we need to queue it and apply from the main thread. All such changes should be implemented as
-        // classes inherited from MWLua::Action.
-        class Action
-        {
-        public:
-            Action(LuaUtil::LuaState* state);
-            virtual ~Action() {}
-
-            void safeApply() const;
-            virtual void apply() const = 0;
-            virtual std::string toString() const = 0;
-
-        private:
-            std::string mCallerTraceback;
-        };
-
+        // OSG Cull), so we need to queue it and apply from the main thread.
         void addAction(std::function<void()> action, std::string_view name = "");
-        void addAction(std::unique_ptr<Action>&& action) { mActionQueue.push_back(std::move(action)); }
         void addTeleportPlayerAction(std::function<void()> action);
 
         // Saving
@@ -183,8 +167,19 @@ namespace MWLua
         std::vector<CallbackWithData> mQueuedCallbacks;
 
         // Queued actions that should be done in main thread. Processed by applyQueuedChanges().
-        std::vector<std::unique_ptr<Action>> mActionQueue;
-        std::unique_ptr<Action> mTeleportPlayerAction;
+        class DelayedAction
+        {
+        public:
+            DelayedAction(LuaUtil::LuaState* state, std::function<void()> fn, std::string_view name);
+            void apply() const;
+
+        private:
+            std::string mCallerTraceback;
+            std::function<void()> mFn;
+            std::string mName;
+        };
+        std::vector<DelayedAction> mActionQueue;
+        std::optional<DelayedAction> mTeleportPlayerAction;
         std::vector<std::string> mUIMessages;
         std::vector<std::pair<std::string, Misc::Color>> mInGameConsoleMessages;
 

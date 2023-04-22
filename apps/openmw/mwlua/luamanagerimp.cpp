@@ -206,12 +206,12 @@ namespace MWLua
             windowManager->printToConsole(msg, "#" + color.toHex());
         mInGameConsoleMessages.clear();
 
-        for (std::unique_ptr<Action>& action : mActionQueue)
-            action->safeApply();
+        for (DelayedAction& action : mActionQueue)
+            action.apply();
         mActionQueue.clear();
 
         if (mTeleportPlayerAction)
-            mTeleportPlayerAction->safeApply();
+            mTeleportPlayerAction->apply();
         mTeleportPlayerAction.reset();
     }
 
@@ -465,22 +465,24 @@ namespace MWLua
                 "No Lua handlers for console\n", MWBase::WindowManager::sConsoleColor_Error);
     }
 
-    LuaManager::Action::Action(LuaUtil::LuaState* state)
+    LuaManager::DelayedAction::DelayedAction(LuaUtil::LuaState* state, std::function<void()> fn, std::string_view name)
+        : mFn(std::move(fn))
+        , mName(name)
     {
         static const bool luaDebug = Settings::Manager::getBool("lua debug", "Lua");
         if (luaDebug)
             mCallerTraceback = state->debugTraceback();
     }
 
-    void LuaManager::Action::safeApply() const
+    void LuaManager::DelayedAction::apply() const
     {
         try
         {
-            apply();
+            mFn();
         }
         catch (const std::exception& e)
         {
-            Log(Debug::Error) << "Error in " << this->toString() << ": " << e.what();
+            Log(Debug::Error) << "Error in DelayedAction " << mName << ": " << e.what();
 
             if (mCallerTraceback.empty())
                 Log(Debug::Error) << "Set 'lua_debug=true' in settings.cfg to enable action tracebacks";
@@ -489,35 +491,14 @@ namespace MWLua
         }
     }
 
-    namespace
-    {
-        class FunctionAction final : public LuaManager::Action
-        {
-        public:
-            FunctionAction(LuaUtil::LuaState* state, std::function<void()> fn, std::string_view name)
-                : Action(state)
-                , mFn(std::move(fn))
-                , mName(name)
-            {
-            }
-
-            void apply() const override { mFn(); }
-            std::string toString() const override { return "FunctionAction " + mName; }
-
-        private:
-            std::function<void()> mFn;
-            std::string mName;
-        };
-    }
-
     void LuaManager::addAction(std::function<void()> action, std::string_view name)
     {
-        mActionQueue.push_back(std::make_unique<FunctionAction>(&mLua, std::move(action), name));
+        mActionQueue.emplace_back(&mLua, std::move(action), name);
     }
 
     void LuaManager::addTeleportPlayerAction(std::function<void()> action)
     {
-        mTeleportPlayerAction = std::make_unique<FunctionAction>(&mLua, std::move(action), "TeleportPlayer");
+        mTeleportPlayerAction = DelayedAction(&mLua, std::move(action), "TeleportPlayer");
     }
 
     void LuaManager::reportStats(unsigned int frameNumber, osg::Stats& stats) const

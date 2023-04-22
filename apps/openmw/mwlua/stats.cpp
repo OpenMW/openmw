@@ -55,29 +55,17 @@ namespace
 
 namespace MWLua
 {
-    namespace
+    static void addStatUpdateAction(MWLua::LuaManager* manager, const SelfObject& obj)
     {
-        class StatUpdateAction final : public LuaManager::Action
-        {
-            ObjectId mId;
-
-        public:
-            StatUpdateAction(LuaUtil::LuaState* state, ObjectId id)
-                : Action(state)
-                , mId(id)
-            {
-            }
-
-            void apply() const override
-            {
-                LObject obj(mId);
+        if (!obj.mStatsCache.empty())
+            return; // was already added before
+        manager->addAction(
+            [obj = Object(obj)] {
                 LocalScripts* scripts = obj.ptr().getRefData().getLuaScripts();
                 if (scripts)
                     scripts->applyStatsCache();
-            }
-
-            std::string toString() const override { return "StatUpdateAction"; }
-        };
+            },
+            "StatUpdateAction");
     }
 
     class LevelStat
@@ -99,8 +87,7 @@ namespace MWLua
         void setCurrent(const Context& context, const sol::object& value) const
         {
             SelfObject* obj = mObject.asSelfObject();
-            if (obj->mStatsCache.empty())
-                context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
+            addStatUpdateAction(context.mLuaManager, *obj);
             obj->mStatsCache[SelfObject::CachedStat{ &LevelStat::setValue, 0, "current" }] = value;
         }
 
@@ -158,8 +145,7 @@ namespace MWLua
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
             SelfObject* obj = mObject.asSelfObject();
-            if (obj->mStatsCache.empty())
-                context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
+            addStatUpdateAction(context.mLuaManager, *obj);
             obj->mStatsCache[SelfObject::CachedStat{ &DynamicStat::setValue, mIndex, prop }] = value;
         }
 
@@ -217,8 +203,7 @@ namespace MWLua
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
             SelfObject* obj = mObject.asSelfObject();
-            if (obj->mStatsCache.empty())
-                context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
+            addStatUpdateAction(context.mLuaManager, *obj);
             obj->mStatsCache[SelfObject::CachedStat{ &AttributeStat::setValue, mIndex, prop }] = value;
         }
 
@@ -302,8 +287,7 @@ namespace MWLua
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
             SelfObject* obj = mObject.asSelfObject();
-            if (obj->mStatsCache.empty())
-                context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
+            addStatUpdateAction(context.mLuaManager, *obj);
             obj->mStatsCache[SelfObject::CachedStat{ &SkillStat::setValue, mIndex, prop }] = value;
         }
 
