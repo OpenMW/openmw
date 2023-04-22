@@ -23,9 +23,24 @@ namespace Settings
             : mCategory(category)
             , mName(name)
             , mSanitizer(std::move(sanitizer))
-            , mValue(sanitize(Settings::Manager::get<T>(name, category)))
+            , mValue(sanitize(Settings::Manager::get<T>(mName, mCategory)))
         {
         }
+
+        SettingValue(SettingValue&& other)
+            : mCategory(other.mCategory)
+            , mName(other.mName)
+            , mSanitizer(std::move(other.mSanitizer))
+            , mDefaultValue(std::move(other.mValue))
+            , mValue(sanitize(Settings::Manager::get<T>(mName, mCategory)))
+        {
+        }
+
+        SettingValue(const SettingValue& other) = delete;
+
+        SettingValue& operator=(const SettingValue& other) = delete;
+
+        SettingValue& operator=(SettingValue&& other) = delete;
 
         const T& get() const { return mValue; }
 
@@ -39,10 +54,13 @@ namespace Settings
             Settings::Manager::set(mName, mCategory, mValue);
         }
 
+        void reset() { set(mDefaultValue); }
+
     private:
         const std::string_view mCategory;
         const std::string_view mName;
-        const std::unique_ptr<const Sanitizer<T>> mSanitizer;
+        std::unique_ptr<const Sanitizer<T>> mSanitizer;
+        T mDefaultValue{};
         T mValue{};
 
         T sanitize(const T& value) const
