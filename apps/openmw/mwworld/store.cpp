@@ -8,6 +8,7 @@
 #include <components/esm/records.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm4/loadwrld.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
 
@@ -1104,10 +1105,32 @@ namespace MWWorld
         return foundCell->second;
     }
 
+    const ESM4::Cell* Store<ESM4::Cell>::searchExterior(int x, int y, ESM::RefId worldSpace) const
+    {
+        const auto foundWorldSpace = mExteriors.find(worldSpace);
+        if (foundWorldSpace == mExteriors.end())
+        {
+            return nullptr;
+        }
+        const auto foundCell = foundWorldSpace->second.find(std::make_pair(x, y));
+        if (foundCell == foundWorldSpace->second.end())
+            return nullptr;
+        return foundCell->second;
+    }
+
+    bool Store<ESM4::Cell>::exteriorExists(ESM::RefId worldspace) const
+    {
+        const auto foundWorldSpace = mExteriors.find(worldspace);
+        return (foundWorldSpace != mExteriors.end());
+    }
+
     ESM4::Cell* Store<ESM4::Cell>::insert(const ESM4::Cell& item, bool overrideOnly)
     {
         auto cellPtr = TypedDynamicStore<ESM4::Cell>::insert(item, overrideOnly);
         mCellNameIndex[cellPtr->mEditorId] = cellPtr;
+        if (cellPtr->isExterior())
+            mExteriors[cellPtr->mParent][std::make_pair(cellPtr->getGridX(), cellPtr->getGridY())] = cellPtr;
+
         return cellPtr;
     }
 
@@ -1115,6 +1138,9 @@ namespace MWWorld
     {
         auto cellPtr = TypedDynamicStore<ESM4::Cell>::insertStatic(item);
         mCellNameIndex[cellPtr->mEditorId] = cellPtr;
+        if (cellPtr->isExterior())
+            mExteriors[cellPtr->mParent][std::make_pair(cellPtr->getGridX(), cellPtr->getGridY())] = cellPtr;
+
         return cellPtr;
     }
 }
@@ -1177,3 +1203,4 @@ template class MWWorld::TypedDynamicStore<ESM4::Light>;
 template class MWWorld::TypedDynamicStore<ESM4::Reference, ESM::FormId>;
 template class MWWorld::TypedDynamicStore<ESM4::Cell>;
 template class MWWorld::TypedDynamicStore<ESM4::Weapon>;
+template class MWWorld::TypedDynamicStore<ESM4::World>;

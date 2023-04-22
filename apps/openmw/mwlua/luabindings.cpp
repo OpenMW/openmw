@@ -113,8 +113,10 @@ namespace MWLua
         addTimeBindings(api, context, true);
         api["getCellByName"]
             = [](std::string_view name) { return GCell{ &MWBase::Environment::get().getWorldModel()->getCell(name) }; };
-        api["getExteriorCell"]
-            = [](int x, int y) { return GCell{ &MWBase::Environment::get().getWorldModel()->getExterior(x, y) }; };
+        api["getExteriorCell"] = [](int x, int y) {
+            return GCell{ &MWBase::Environment::get().getWorldModel()->getExterior(
+                x, y, ESM::Cell::sDefaultWorldspaceId) };
+        };
         api["activeActors"] = GObjectList{ worldView->getActorsInScene() };
         api["createObject"] = [](std::string_view recordId, sol::optional<int> count) -> GObject {
             // Doesn't matter which cell to use because the new object will be in disabled state.

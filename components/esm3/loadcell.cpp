@@ -40,6 +40,7 @@ namespace ESM
 namespace ESM
 {
     const std::string Cell::sDefaultWorldspace = "sys::default";
+    const RefId Cell::sDefaultWorldspaceId = ESM::RefId::stringRefId(Cell::sDefaultWorldspace);
 
     // Some overloaded compare operators.
     bool operator==(const MovedCellRef& ref, const RefNum& refNum)

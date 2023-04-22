@@ -1266,7 +1266,9 @@ namespace MWWorld
         const osg::Vec2i index = positionToCellIndex(position.x(), position.y());
 
         CellStore* cell = ptr.getCell();
-        CellStore& newCell = mWorldModel.getExterior(index.x(), index.y());
+        ESM::RefId worldspaceId
+            = cell->isExterior() ? cell->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
+        CellStore& newCell = mWorldModel.getExterior(index.x(), index.y(), worldspaceId);
         bool isCellActive
             = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior() && mWorldScene->isCellActive(newCell);
 
@@ -2069,7 +2071,7 @@ namespace MWWorld
         if (cell->isExterior())
         {
             const osg::Vec2i index = positionToCellIndex(pos.pos[0], pos.pos[1]);
-            cell = &mWorldModel.getExterior(index.x(), index.y());
+            cell = &mWorldModel.getExterior(index.x(), index.y(), cell->getCell()->getWorldSpace());
         }
 
         MWWorld::Ptr dropped = object.getClass().copyToCell(object, *cell, pos, count);
@@ -2753,7 +2755,7 @@ namespace MWWorld
                 if (xResult.ec == std::errc::result_out_of_range || yResult.ec == std::errc::result_out_of_range)
                     throw std::runtime_error("Cell coordinates out of range.");
                 else if (xResult.ec == std::errc{} && yResult.ec == std::errc{})
-                    ext = mWorldModel.getExterior(x, y).getCell();
+                    ext = mWorldModel.getExterior(x, y, ESM::Cell::sDefaultWorldspaceId).getCell();
                 // ignore std::errc::invalid_argument, as this means that name probably refers to a interior cell
                 // instead of comma separated coordinates
             }

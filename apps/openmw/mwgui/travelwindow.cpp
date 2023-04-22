@@ -130,8 +130,8 @@ namespace MWGui
                 = MWWorld::positionToCellIndex(transport[i].mPos.pos[0], transport[i].mPos.pos[1]);
             if (cellname.empty())
             {
-                MWWorld::CellStore& cell
-                    = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
+                MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getExterior(
+                    cellIndex.x(), cellIndex.y(), ESM::Cell::sDefaultWorldspaceId);
                 cellname = MWBase::Environment::get().getWorld()->getCellName(&cell);
                 interior = false;
             }

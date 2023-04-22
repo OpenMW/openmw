@@ -402,7 +402,8 @@ namespace MWScript
                     if (store->isExterior())
                     {
                         const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                        store = &worldModel->getExterior(cellIndex.x(), cellIndex.y());
+                        store
+                            = &worldModel->getExterior(cellIndex.x(), cellIndex.y(), store->getCell()->getWorldSpace());
                     }
                 }
                 catch (std::exception&)
@@ -417,7 +418,7 @@ namespace MWScript
                     if (!isPlayer)
                         return;
                     const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                    store = &worldModel->getExterior(cellIndex.x(), cellIndex.y());
+                    store = &worldModel->getExterior(cellIndex.x(), cellIndex.y(), store->getCell()->getWorldSpace());
                 }
                 if (store)
                 {
@@ -473,8 +474,8 @@ namespace MWScript
                 MWWorld::Ptr base = ptr;
                 if (isPlayer)
                 {
-                    MWWorld::CellStore* cell
-                        = &MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
+                    MWWorld::CellStore* cell = &MWBase::Environment::get().getWorldModel()->getExterior(
+                        cellIndex.x(), cellIndex.y(), ESM::Cell::sDefaultWorldspaceId);
                     ptr = world->moveObject(ptr, cell, osg::Vec3(x, y, z));
                 }
                 else
@@ -568,7 +569,8 @@ namespace MWScript
                 if (player.getCell()->isExterior())
                 {
                     const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                    store = &MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
+                    store = &MWBase::Environment::get().getWorldModel()->getExterior(
+                        cellIndex.x(), cellIndex.y(), player.getCell()->getCell()->getWorldSpace());
                 }
                 else
                     store = player.getCell();
