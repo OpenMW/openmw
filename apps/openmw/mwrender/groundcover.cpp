@@ -6,6 +6,7 @@
 #include <osg/Geometry>
 #include <osg/Program>
 #include <osg/VertexAttribDivisor>
+#include <osgUtil/CullVisitor>
 
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadland.hpp>
@@ -56,10 +57,10 @@ namespace MWRender
 
                 if (cnfMode != osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES
                     && cnfMode != osg::CullSettings::COMPUTE_NEAR_USING_PRIMITIVES)
-                    return true;
+                    return false;
 
                 if (drawable->isCullingActive() && cullVisitor.isCulled(boundingBox))
-                    return false;
+                    return true;
 
                 osg::Vec3 lookVector = cullVisitor.getLookVectorLocal();
                 unsigned int bbCornerFar
@@ -72,7 +73,7 @@ namespace MWRender
                     std::swap(dNear, dFar);
 
                 if (dFar < 0)
-                    return false;
+                    return true;
 
                 value_type computedZNear = cullVisitor.getCalculatedNearPlane();
                 value_type computedZFar = cullVisitor.getCalculatedFarPlane();
@@ -122,7 +123,7 @@ namespace MWRender
                     }
                 }
 
-                return true;
+                return false;
             }
 
         private:
