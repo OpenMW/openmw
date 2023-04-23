@@ -143,7 +143,7 @@ osg::Group {
               UniqueID 7
               Name "shaderPrefix"
               Value ")"
-              << shaderPrefix << R"("
+            << shaderPrefix << R"("
             }
             osg::BoolValueObject {
               UniqueID 8
