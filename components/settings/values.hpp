@@ -27,6 +27,8 @@
 #include "categories/water.hpp"
 #include "categories/windows.hpp"
 
+#include <cassert>
+
 namespace Settings
 {
     class Values
@@ -70,6 +72,7 @@ namespace Settings
 
     inline Values& values()
     {
+        assert(Values::sValues != nullptr);
         return *Values::sValues;
     }
 
