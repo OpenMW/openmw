@@ -10,9 +10,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
-
 #include <osgDB/Registry>
 
 #include <array>
@@ -55,7 +52,7 @@ namespace
             {
                 if (line.starts_with('#'))
                     continue;
-                boost::trim_right(line);
+                line.erase(line.find_last_not_of(" \t\n\r\f\v") + 1);
                 result += line;
                 result += '\n';
             }
@@ -163,7 +160,7 @@ osg::Group {
   }
 }
 )";
-        return (boost::format(format) % shaderPrefix).str();
+        return (std::ostringstream() << std::string(format) << shaderPrefix).str();
     }
 
     struct ShaderPrefixParams
