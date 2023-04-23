@@ -58,6 +58,8 @@ namespace Settings
         StereoViewCategory mStereoView;
         PostProcessingCategory mPostProcessing;
 
+        static void initDefaults();
+
         static void init();
 
     private:
@@ -195,7 +197,6 @@ namespace Settings
     {
         return values().mPostProcessing;
     }
-
 }
 
 #endif

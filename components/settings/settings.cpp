@@ -141,6 +141,9 @@ namespace Settings
                 parser.loadSettingsFile(additionalDefaults, mDefaultSettings, false, true);
         }
 
+        if (!loadEditorSettings)
+            Settings::Values::initDefaults();
+
         // Load "settings.cfg" or "openmw-cs.cfg" from the last config dir as user settings. This path will be used to
         // save modified settings.
         auto settingspath = paths.back() / userSettingsFile;

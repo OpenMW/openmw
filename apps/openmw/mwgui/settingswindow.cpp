@@ -26,7 +26,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/lightmanager.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/widgets/sharedstatebutton.hpp>
 
@@ -620,21 +620,16 @@ namespace MWGui
         if (selectedButton == 1 || selectedButton == -1)
             return;
 
-        constexpr std::array<const char*, 6> settings = {
-            "light bounds multiplier",
-            "maximum light distance",
-            "light fade start",
-            "minimum interior brightness",
-            "max lights",
-            "lighting method",
-        };
-        for (const auto& setting : settings)
-            Settings::Manager::setString(
-                setting, "Shaders", Settings::Manager::mDefaultSettings[{ "Shaders", setting }]);
+        Settings::shaders().mLightBoundsMultiplier.reset();
+        Settings::shaders().mMaximumLightDistance.reset();
+        Settings::shaders().mLightFadeStart.reset();
+        Settings::shaders().mMinimumInteriorBrightness.reset();
+        Settings::shaders().mMaxLights.reset();
+        Settings::shaders().mLightingMethod.reset();
 
-        auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(
-            Settings::Manager::mDefaultSettings[{ "Shaders", "lighting method" }]);
-        auto lightIndex = mLightingMethodButton->findItemIndexWith(lightingMethodToStr(lightingMethod));
+        const SceneUtil::LightingMethod lightingMethod
+            = SceneUtil::LightManager::getLightingMethodFromString(Settings::shaders().mLightingMethod);
+        const std::size_t lightIndex = mLightingMethodButton->findItemIndexWith(lightingMethodToStr(lightingMethod));
         mLightingMethodButton->setIndexSelected(lightIndex);
         updateMaxLightsComboBox(mMaxLights);
 
