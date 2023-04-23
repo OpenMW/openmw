@@ -142,7 +142,8 @@ osg::Group {
             osg::StringValueObject {
               UniqueID 7
               Name "shaderPrefix"
-              Value ")" << shaderPrefix << R"("
+              Value ")"
+              << shaderPrefix << R"("
             }
             osg::BoolValueObject {
               UniqueID 8
