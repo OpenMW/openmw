@@ -31,8 +31,10 @@ namespace MWWorld
         // If RefNum is not set, assigns a generated one and changes the "lastAssignedRefNum" counter.
         const ESM::RefNum& getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum);
 
+        void setRefNum(ESM::RefNum refNum);
+
         // Set RefNum to its default state.
-        void unsetRefNum();
+        void unsetRefNum() { setRefNum({}); }
 
         /// Does the RefNum have a content file?
         bool hasContentFile() const { return getRefNum().hasContentFile(); }

@@ -23,6 +23,7 @@
 #include "manualref.hpp"
 #include "player.hpp"
 #include "refdata.hpp"
+#include "worldmodel.hpp"
 
 namespace
 {
@@ -303,9 +304,11 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
     Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
 
     MWWorld::ContainerStoreIterator it = addImp(itemPtr, count, resolve);
+    itemPtr.getRefData().setLuaScripts(nullptr); // clear Lua scripts on the original (removed) item.
 
     // The copy of the original item we just made
     MWWorld::Ptr item = *it;
+    MWBase::Environment::get().getWorldModel()->registerPtr(item);
 
     // we may have copied an item from the world, so reset a few things first
     item.getRefData().setBaseNode(
@@ -324,10 +327,6 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
     item.getCellRef().resetGlobalVariable();
     item.getCellRef().setFaction(ESM::RefId());
     item.getCellRef().setFactionRank(-2);
-
-    // must reset the RefNum on the copied item, so that the RefNum on the original item stays unique
-    // maybe we should do this in the copy constructor instead?
-    item.getCellRef().unsetRefNum(); // destroy link to content file
 
     const ESM::RefId& script = item.getClass().getScript(item);
     if (!script.empty())

@@ -313,7 +313,12 @@ namespace MWWorld
 
         virtual Ptr copyToCell(const ConstPtr& ptr, CellStore& cell, int count) const;
 
-        virtual Ptr copyToCell(const ConstPtr& ptr, CellStore& cell, const ESM::Position& pos, int count) const;
+        // Similar to `copyToCell`, but preserves RefNum and moves LuaScripts.
+        // The original is expected to be removed after calling this function,
+        // but this function itself doesn't remove the original.
+        virtual Ptr moveToCell(const Ptr& ptr, CellStore& cell) const;
+
+        Ptr copyToCell(const ConstPtr& ptr, CellStore& cell, const ESM::Position& pos, int count) const;
 
         virtual bool isActivator() const { return false; }
 
