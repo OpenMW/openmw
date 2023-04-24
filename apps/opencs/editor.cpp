@@ -101,7 +101,6 @@ CS::Editor::~Editor()
     mLockFile.unlock();
     mPidFile.close();
 
-
     if (mServer && std::filesystem::exists(mPid))
         std::filesystem::remove(mPid);
 }
