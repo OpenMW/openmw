@@ -1,6 +1,7 @@
 #include "editor.hpp"
 
 #include <QApplication>
+#include <QFileInfo>
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QMessageBox>
@@ -22,6 +23,7 @@
 #ifdef _WIN32
 #include <components/windows.hpp>
 #endif
+
 #include <components/debug/debugging.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/esmreader.hpp>
@@ -42,8 +44,8 @@ CS::Editor::Editor(int argc, char** argv)
     : mConfigVariables(readConfiguration())
     , mSettingsState(mCfgMgr)
     , mDocumentManager(mCfgMgr)
-    , mPid("")
-    , mLock()
+    , mPid(std::filesystem::temp_directory_path() / "openmw-cs.pid")
+    , mLockFile(QFileInfo(mPid.c_str()).absoluteFilePath() + ".lock")
     , mMerge(mDocumentManager)
     , mIpcServerName("org.openmw.OpenCS")
     , mServer(nullptr)
@@ -95,6 +97,7 @@ CS::Editor::~Editor()
 {
     delete mViewManager;
 
+    mLockFile.unlock();
     mPidFile.close();
 
     if (mServer && std::filesystem::exists(mPid))
@@ -336,14 +339,11 @@ bool CS::Editor::makeIPCServer()
 {
     try
     {
-        mPid = std::filesystem::temp_directory_path();
-        mPid /= "openmw-cs.pid";
         bool pidExists = std::filesystem::exists(mPid);
 
         mPidFile.open(mPid);
 
-        mLock = boost::interprocess::file_lock(mPid.c_str());
-        if (!mLock.try_lock())
+        if (!mLockFile.tryLock())
         {
             Log(Debug::Error) << "Error: OpenMW-CS is already running.";
             return false;
