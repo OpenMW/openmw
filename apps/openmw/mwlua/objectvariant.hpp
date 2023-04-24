@@ -18,8 +18,10 @@ namespace MWLua
                 mVariant.emplace<SelfObject*>(obj.as<SelfObject*>());
             else if (obj.is<LObject>())
                 mVariant.emplace<LObject>(obj.as<LObject>());
-            else
+            else if (obj.is<GObject>())
                 mVariant.emplace<GObject>(obj.as<GObject>());
+            else
+                throw std::runtime_error("Expected game object, got: " + LuaUtil::toString(obj));
         }
 
         bool isSelfObject() const { return std::holds_alternative<SelfObject*>(mVariant); }
