@@ -20,7 +20,7 @@ namespace MWRender
         LandManager(int loadFlags);
 
         /// @note Will return nullptr if not found.
-        osg::ref_ptr<ESMTerrain::LandObject> getLand(int x, int y);
+        osg::ref_ptr<ESMTerrain::LandObject> getLand(int x, int y, ESM::RefId worldspace);
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 

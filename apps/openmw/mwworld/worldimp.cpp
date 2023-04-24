@@ -1512,9 +1512,9 @@ namespace MWWorld
         return placed;
     }
 
-    void World::indexToPosition(int cellX, int cellY, float& x, float& y, bool centre) const
+    void World::indexToPosition(int cellX, int cellY, float& x, float& y, bool centre, bool esm4Ext) const
     {
-        const int cellSize = Constants::CellSizeInUnits;
+        const int cellSize = esm4Ext ? Constants::ESM4CellSizeInUnits : Constants::CellSizeInUnits;
 
         x = static_cast<float>(cellSize * cellX);
         y = static_cast<float>(cellSize * cellY);
@@ -2766,7 +2766,8 @@ namespace MWWorld
         {
             int x = ext->getGridX();
             int y = ext->getGridY();
-            indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
+            bool esm4Ext = ext->getWorldSpace() != ESM::Cell::sDefaultWorldspaceId;
+            indexToPosition(x, y, pos.pos[0], pos.pos[1], true, esm4Ext);
 
             // Note: Z pos will be adjusted by adjustPosition later
             pos.pos[2] = 0;

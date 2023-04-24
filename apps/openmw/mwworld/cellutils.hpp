@@ -9,10 +9,10 @@
 
 namespace MWWorld
 {
-    inline osg::Vec2i positionToCellIndex(float x, float y)
+    inline osg::Vec2i positionToCellIndex(float x, float y, bool esm4Ext = false)
     {
-        return { static_cast<int>(std::floor(x / Constants::CellSizeInUnits)),
-            static_cast<int>(std::floor(y / Constants::CellSizeInUnits)) };
+        const float cellSize = esm4Ext ? Constants::ESM4CellSizeInUnits : Constants::CellSizeInUnits;
+        return { static_cast<int>(std::floor(x / cellSize)), static_cast<int>(std::floor(y / cellSize)) };
     }
 }
 
