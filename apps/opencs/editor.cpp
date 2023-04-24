@@ -4,7 +4,6 @@
 #include <QFileInfo>
 #include <QLocalServer>
 #include <QLocalSocket>
-#include <QLockFile>
 #include <QMessageBox>
 #include <QRegularExpression>
 
