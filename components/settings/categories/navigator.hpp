@@ -21,7 +21,7 @@ namespace Settings
         SettingValue<float> mCellHeight{ "Navigator", "cell height", makeMaxStrictSanitizerFloat(0) };
         SettingValue<float> mCellSize{ "Navigator", "cell size", makeMaxStrictSanitizerFloat(0) };
         SettingValue<float> mDetailSampleDist{ "Navigator", "detail sample dist",
-            makeEqualOrMaxSanitizerFloat(0, 0.9) };
+            makeEqualOrMaxSanitizerFloat(0, 0.9f) };
         SettingValue<float> mDetailSampleMaxError{ "Navigator", "detail sample max error", makeMaxSanitizerFloat(0) };
         SettingValue<float> mMaxSimplificationError{ "Navigator", "max simplification error",
             makeMaxSanitizerFloat(0) };
