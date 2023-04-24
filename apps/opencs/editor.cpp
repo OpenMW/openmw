@@ -4,6 +4,7 @@
 #include <QFileInfo>
 #include <QLocalServer>
 #include <QLocalSocket>
+#include <QLockFile>
 #include <QMessageBox>
 #include <QRegularExpression>
 
@@ -24,7 +25,6 @@
 #include <components/windows.hpp>
 #endif
 
-#include <QLockFile>
 #include <components/debug/debugging.hpp>
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/esmreader.hpp>
