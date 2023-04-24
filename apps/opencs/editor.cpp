@@ -98,8 +98,7 @@ CS::Editor::~Editor()
 {
     delete mViewManager;
 
-    QLockFile lock = QLockFile(QFileInfo(mPid.c_str()).absoluteFilePath() + ".lock");
-    lock.unlock();
+    mLockFile.unlock();
     mPidFile.close();
 
 
