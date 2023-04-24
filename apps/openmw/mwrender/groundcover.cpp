@@ -36,8 +36,8 @@ namespace MWRender
 
         inline osg::Matrix computeInstanceMatrix(const Groundcover::GroundcoverEntry& entry)
         {
-            return osg::Matrix::translate(entry.mPos.asVec3()) * osg::Matrix(Misc::Convert::makeOsgQuat(entry.mPos))
-                * osg::Matrix::scale(entry.mScale, entry.mScale, entry.mScale);
+            return osg::Matrix::scale(entry.mScale, entry.mScale, entry.mScale) * osg::Matrix(Misc::Convert::makeOsgQuat(entry.mPos))
+                * osg::Matrix::translate(entry.mPos.asVec3());
         }
 
         class InstancedComputeNearFarCullCallback : public osg::DrawableCullCallback
@@ -100,7 +100,7 @@ namespace MWRender
                             {
                                 osg::Matrix instanceMatrix = computeInstanceMatrix(entry);
                                 value_type newNear = cullVisitor.computeNearestPointInFrustum(
-                                    matrix * instanceMatrix, planes, *drawable);
+                                    instanceMatrix * matrix, planes, *drawable);
                                 dNear = std::min(dNear, newNear);
                             }
                             if (dNear < computedZNear)
@@ -114,7 +114,7 @@ namespace MWRender
                             {
                                 osg::Matrix instanceMatrix = computeInstanceMatrix(entry);
                                 value_type newFar = cullVisitor.computeFurthestPointInFrustum(
-                                    matrix * instanceMatrix, planes, *drawable);
+                                    instanceMatrix * matrix, planes, *drawable);
                                 dFar = std::max(dFar, newFar);
                             }
                             if (dFar > computedZFar)
