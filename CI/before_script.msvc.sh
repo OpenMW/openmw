@@ -764,7 +764,7 @@ printf "cxxopts ${CXXOPTS_VER}... "
     eval 7z x -y "${DEPS}/cxxopts-${CXXOPTS_VER}.zip" $STRIP
     mv "cxxopts-${CXXOPTS_VER}" cxxopts
   fi
-  add_cmake_opts -DCXXOPTS_ROOT="$(real_pwd)/cxxopts"
+  add_cmake_opts -DCXXOPTS_ROOT="$(real_pwd)/cxxopts" -DCXXOPTS_INCLUDE_DIR="$(real_pwd)/cxxopts/include"
   echo Done.
 }
 cd $DEPS
