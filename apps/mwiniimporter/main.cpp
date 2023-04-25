@@ -18,8 +18,8 @@ int main(int argc, char* argv[])
 #else
 
 // Include on Windows only
-#include <locale>
 #include <codecvt>
+#include <locale>
 
 class utf8argv
 {
