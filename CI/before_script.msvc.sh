@@ -554,6 +554,7 @@ if ! [ -z "$USE_CLANG_TIDY" ]; then
 fi
 
 BULLET_VER="2.89"
+CXXOPTS_VER="v3.1.1"
 FFMPEG_VER="4.2.2"
 ICU_VER="70_1"
 LUAJIT_VER="v2.1.0-beta3-452-g7a0cf5fd"
@@ -593,6 +594,11 @@ if [ -z $SKIP_DOWNLOAD ]; then
 			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/boost_${BOOST_VER_URL}-msvc-${MSVC_VER}-${BITS}.exe" \
 			"boost-${BOOST_VER}-msvc${MSVC_VER}-win${BITS}.exe"
 	fi
+
+  # cxxopts
+  download "cxxopts ${CXXOPTS_VER}" \
+    "https://github.com/jarro2783/cxxopts/archive/refs/tags/${CXXOPTS_VER}.zip" \
+    "cxxopts-${CXXOPTS_VER}.zip"
 
 	# Bullet
 	download "Bullet ${BULLET_VER}" \
@@ -747,6 +753,19 @@ printf "Bullet ${BULLET_VER}... "
 	fi
 	add_cmake_opts -DBULLET_ROOT="$(real_pwd)/Bullet"
 	echo Done.
+}
+printf "cxxopts ${CXXOPTS_VER}... "
+{
+  cd $DEPS_INSTALL
+  if [ -d cxxopts ]; then
+    printf -- "Exists. (No version checking) "
+  elif [ -z $SKIP_EXTRACT ]; then
+    rm -rf cxxopts
+    eval 7z x -y "${DEPS}/cxxopts-${CXXOPTS_VER}.zip" $STRIP
+    mv "cxxopts-${CXXOPTS_VER}" cxxopts
+  fi
+  add_cmake_opts -DCXXOPTS_ROOT="$(real_pwd)/cxxopts"
+  echo Done.
 }
 cd $DEPS
 echo
