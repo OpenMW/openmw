@@ -554,7 +554,7 @@ if ! [ -z "$USE_CLANG_TIDY" ]; then
 fi
 
 BULLET_VER="2.89"
-CXXOPTS_VER="v3.1.1"
+CXXOPTS_VER="3.1.1"
 FFMPEG_VER="4.2.2"
 ICU_VER="70_1"
 LUAJIT_VER="v2.1.0-beta3-452-g7a0cf5fd"
@@ -597,7 +597,7 @@ if [ -z $SKIP_DOWNLOAD ]; then
 
   # cxxopts
   download "cxxopts ${CXXOPTS_VER}" \
-    "https://github.com/jarro2783/cxxopts/archive/refs/tags/${CXXOPTS_VER}.zip" \
+    "https://github.com/jarro2783/cxxopts/archive/refs/tags/v${CXXOPTS_VER}.zip" \
     "cxxopts-${CXXOPTS_VER}.zip"
 
 	# Bullet
