@@ -78,7 +78,7 @@ namespace LuaUi
         {
             sol::object result = callMethod("indexOf", name);
             if (result.is<size_t>())
-                return fromLua(result.as<size_t>());
+                return fromLua(LuaUtil::cast<size_t>(result));
             else
                 return std::nullopt;
         }
@@ -86,7 +86,7 @@ namespace LuaUi
         {
             sol::object result = callMethod("indexOf", table);
             if (result.is<size_t>())
-                return fromLua(result.as<size_t>());
+                return fromLua(LuaUtil::cast<size_t>(result));
             else
                 return std::nullopt;
         }

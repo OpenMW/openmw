@@ -36,7 +36,7 @@ namespace LuaUi
 
     private:
         Element(sol::table layout);
-        sol::table layout() { return mLayout.as<sol::table>(); }
+        sol::table layout() { return LuaUtil::cast<sol::table>(mLayout); }
         static std::map<Element*, std::shared_ptr<Element>> sAllElements;
         void updateAttachment();
     };

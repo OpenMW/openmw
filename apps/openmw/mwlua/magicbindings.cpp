@@ -230,7 +230,7 @@ namespace MWLua
             if (spellOrId.is<ESM::Spell>())
                 return spellOrId.as<const ESM::Spell*>()->mId;
             else
-                return ESM::RefId::deserializeText(spellOrId.as<std::string_view>());
+                return ESM::RefId::deserializeText(LuaUtil::cast<std::string_view>(spellOrId));
         };
 
         // types.Actor.spells(o):add(id)

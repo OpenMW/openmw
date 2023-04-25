@@ -123,7 +123,7 @@ namespace MWLua
         {
             auto& stats = ptr.getClass().getCreatureStats(ptr);
             if (prop == "current")
-                stats.setLevel(value.as<int>());
+                stats.setLevel(LuaUtil::cast<int>(value));
         }
     };
 
@@ -167,7 +167,7 @@ namespace MWLua
         {
             auto& stats = ptr.getClass().getCreatureStats(ptr);
             auto stat = stats.getDynamic(index);
-            float floatValue = value.as<float>();
+            float floatValue = LuaUtil::cast<float>(value);
             if (prop == "base")
                 stat.setBase(floatValue);
             else if (prop == "current")
@@ -201,9 +201,9 @@ namespace MWLua
 
         float getModified(const Context& context) const
         {
-            auto base = get(context, "base", &MWMechanics::AttributeValue::getBase).as<float>();
-            auto damage = get(context, "damage", &MWMechanics::AttributeValue::getDamage).as<float>();
-            auto modifier = get(context, "modifier", &MWMechanics::AttributeValue::getModifier).as<float>();
+            auto base = LuaUtil::cast<float>(get(context, "base", &MWMechanics::AttributeValue::getBase));
+            auto damage = LuaUtil::cast<float>(get(context, "damage", &MWMechanics::AttributeValue::getDamage));
+            auto modifier = LuaUtil::cast<float>(get(context, "modifier", &MWMechanics::AttributeValue::getModifier));
             return std::max(0.f, base - damage + modifier); // Should match AttributeValue::getModified
         }
 
@@ -226,7 +226,7 @@ namespace MWLua
         {
             auto& stats = ptr.getClass().getCreatureStats(ptr);
             auto stat = stats.getAttribute(index);
-            float floatValue = value.as<float>();
+            float floatValue = LuaUtil::cast<float>(value);
             if (prop == "base")
                 stat.setBase(floatValue);
             else if (prop == "damage")
@@ -278,9 +278,9 @@ namespace MWLua
 
         float getModified(const Context& context) const
         {
-            auto base = get(context, "base", &MWMechanics::SkillValue::getBase).as<float>();
-            auto damage = get(context, "damage", &MWMechanics::SkillValue::getDamage).as<float>();
-            auto modifier = get(context, "modifier", &MWMechanics::SkillValue::getModifier).as<float>();
+            auto base = LuaUtil::cast<float>(get(context, "base", &MWMechanics::SkillValue::getBase));
+            auto damage = LuaUtil::cast<float>(get(context, "damage", &MWMechanics::SkillValue::getDamage));
+            auto modifier = LuaUtil::cast<float>(get(context, "modifier", &MWMechanics::SkillValue::getModifier));
             return std::max(0.f, base - damage + modifier); // Should match SkillValue::getModified
         }
 
@@ -311,7 +311,7 @@ namespace MWLua
         {
             auto& stats = ptr.getClass().getNpcStats(ptr);
             auto stat = stats.getSkill(index);
-            float floatValue = value.as<float>();
+            float floatValue = LuaUtil::cast<float>(value);
             if (prop == "base")
                 stat.setBase(floatValue);
             else if (prop == "damage")

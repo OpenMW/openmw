@@ -55,7 +55,7 @@ namespace MWLua
                 cell = cellOrName.as<const GCell&>().mStore;
             else
             {
-                std::string_view name = cellOrName.as<std::string_view>();
+                std::string_view name = LuaUtil::cast<std::string_view>(cellOrName);
                 if (name.empty())
                     cell = nullptr; // default exterior worldspace
                 else
@@ -195,7 +195,7 @@ namespace MWLua
                         throw std::runtime_error("Attaching scripts to Static is not allowed: " + std::string(path));
                     if (initData != sol::nil)
                         context.mLuaManager->addCustomLocalScript(object.ptr(), *scriptId,
-                            LuaUtil::serialize(initData.as<sol::table>(), context.mSerializer));
+                            LuaUtil::serialize(LuaUtil::cast<sol::table>(initData), context.mSerializer));
                     else
                         context.mLuaManager->addCustomLocalScript(
                             object.ptr(), *scriptId, cfg[*scriptId].mInitializationData);
