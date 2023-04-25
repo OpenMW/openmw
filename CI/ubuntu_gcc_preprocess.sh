@@ -51,6 +51,15 @@ TARGET_BRANCH="${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-master}"
 
 git fetch target "${TARGET_BRANCH:?}"
 
+if [[ "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}" ]]; then
+    git remote add source "${CI_MERGE_REQUEST_SOURCE_PROJECT_URL}"
+    git fetch source "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
+elif [[ "${CI_COMMIT_BRANCH}" ]]; then
+    git fetch origin "${CI_COMMIT_BRANCH:?}"
+else
+    git fetch origin
+fi
+
 BASE_VERSION=$(git merge-base "target/${TARGET_BRANCH:?}" "${VERSION:?}")
 
 # Save and use scripts from this commit because they may be absent or different in the base version
