@@ -18,7 +18,8 @@ int main(int argc, char* argv[])
 #else
 
 // Include on Windows only
-#include <boost/locale.hpp>
+#include <locale>
+#include <codecvt>
 
 class utf8argv
 {
@@ -28,9 +29,11 @@ public:
         args.reserve(argc);
         argv = new const char*[argc];
 
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+
         for (int i = 0; i < argc; ++i)
         {
-            args.push_back(boost::locale::conv::utf_to_utf<char>(wargv[i]));
+            args.push_back(converter.to_bytes(wargv[i]));
             argv[i] = args.back().c_str();
         }
     }
@@ -50,8 +53,6 @@ private:
     characters interface which presents UTF-16 encoding. The rest of
     OpenMW application stack assumes UTF-8 encoding, therefore this
     conversion.
-
-    For boost::filesystem::path::imbue see components/files/windowspath.cpp
 */
 int wmain(int argc, wchar_t* wargv[])
 {
