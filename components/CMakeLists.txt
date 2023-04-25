@@ -623,8 +623,6 @@ if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
 
         <MyGUI_Widget.h>
 
-        <boost/filesystem.hpp>
-
         <algorithm>
         <filesystem>
         <fstream>
