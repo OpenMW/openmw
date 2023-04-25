@@ -288,7 +288,6 @@ endif()
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
     target_precompile_headers(openmw-cs-lib PRIVATE
-        <boost/filesystem.hpp>
         <boost/program_options/options_description.hpp>
 
         <algorithm>

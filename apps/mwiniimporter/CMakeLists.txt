@@ -35,8 +35,6 @@ endif()
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
     target_precompile_headers(openmw-iniimporter PRIVATE
-        <boost/filesystem.hpp>
-
         <string>
         <vector>
     )
