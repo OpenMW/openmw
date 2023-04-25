@@ -80,7 +80,7 @@ namespace LuaUtil
         if (values)
         {
             for (const auto& [k, v] : *values)
-                mValues[k.as<std::string>()] = Value(v);
+                mValues[cast<std::string>(k)] = Value(v);
         }
         if (mStorage->mListener)
             mStorage->mListener->sectionReplaced(mSectionName, values);
@@ -165,9 +165,9 @@ namespace LuaUtil
             sol::table data = deserialize(mLua, serializedData);
             for (const auto& [sectionName, sectionTable] : data)
             {
-                const std::shared_ptr<Section>& section = getSection(sectionName.as<std::string_view>());
-                for (const auto& [key, value] : sol::table(sectionTable))
-                    section->set(key.as<std::string_view>(), value);
+                const std::shared_ptr<Section>& section = getSection(cast<std::string_view>(sectionName));
+                for (const auto& [key, value] : cast<sol::table>(sectionTable))
+                    section->set(cast<std::string_view>(key), value);
             }
         }
         catch (std::exception& e)

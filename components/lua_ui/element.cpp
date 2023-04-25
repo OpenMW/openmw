@@ -62,7 +62,7 @@ namespace LuaUi
                     destroyWidget(w);
                 return result;
             }
-            ContentView content(contentObj.as<sol::table>());
+            ContentView content(LuaUtil::cast<sol::table>(contentObj));
             result.resize(content.size());
             size_t minSize = std::min(children.size(), content.size());
             for (size_t i = 0; i < minSize; i++)
