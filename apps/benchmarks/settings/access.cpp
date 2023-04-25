@@ -1,32 +1,36 @@
 #include <benchmark/benchmark.h>
 
-#include <components/files/configurationmanager.hpp>
-#include <components/settings/settings.hpp>
-#include <components/settings/values.hpp>
-
-#include <boost/program_options.hpp>
-
-#include <algorithm>
-#include <iostream>
+#include "components/misc/strings/conversion.hpp"
+#include "components/settings/parser.hpp"
+#include "components/settings/settings.hpp"
+#include "components/settings/values.hpp"
 
 namespace
 {
-    namespace bpo = boost::program_options;
-
-    bpo::options_description makeOptionsDescription()
-    {
-        bpo::options_description result;
-        auto addOption = result.add_options();
-        addOption("help", "print help message");
-        Files::ConfigurationManager::addCommonOptions(result);
-        return result;
-    }
-
     void settingsManager(benchmark::State& state)
     {
         for (auto _ : state)
         {
             benchmark::DoNotOptimize(Settings::Manager::getFloat("sky blending start", "Fog"));
+        }
+    }
+
+    void settingsManager2(benchmark::State& state)
+    {
+        for (auto _ : state)
+        {
+            benchmark::DoNotOptimize(Settings::Manager::getFloat("near clip", "Camera"));
+            benchmark::DoNotOptimize(Settings::Manager::getBool("transparent postpass", "Post Processing"));
+        }
+    }
+
+    void settingsManager3(benchmark::State& state)
+    {
+        for (auto _ : state)
+        {
+            benchmark::DoNotOptimize(Settings::Manager::getFloat("near clip", "Camera"));
+            benchmark::DoNotOptimize(Settings::Manager::getBool("transparent postpass", "Post Processing"));
+            benchmark::DoNotOptimize(Settings::Manager::getInt("reflection detail", "Water"));
         }
     }
 
@@ -39,11 +43,54 @@ namespace
         }
     }
 
+    void localStatic2(benchmark::State& state)
+    {
+        for (auto _ : state)
+        {
+            static const float v1 = Settings::Manager::getFloat("near clip", "Camera");
+            static const bool v2 = Settings::Manager::getBool("transparent postpass", "Post Processing");
+            benchmark::DoNotOptimize(v1);
+            benchmark::DoNotOptimize(v2);
+        }
+    }
+
+    void localStatic3(benchmark::State& state)
+    {
+        for (auto _ : state)
+        {
+            static const float v1 = Settings::Manager::getFloat("near clip", "Camera");
+            static const bool v2 = Settings::Manager::getBool("transparent postpass", "Post Processing");
+            static const int v3 = Settings::Manager::getInt("reflection detail", "Water");
+            benchmark::DoNotOptimize(v1);
+            benchmark::DoNotOptimize(v2);
+            benchmark::DoNotOptimize(v3);
+        }
+    }
+
     void settingsStorage(benchmark::State& state)
     {
         for (auto _ : state)
         {
             benchmark::DoNotOptimize(Settings::fog().mSkyBlendingStart.get());
+        }
+    }
+
+    void settingsStorage2(benchmark::State& state)
+    {
+        for (auto _ : state)
+        {
+            benchmark::DoNotOptimize(Settings::postProcessing().mTransparentPostpass.get());
+            benchmark::DoNotOptimize(Settings::camera().mNearClip.get());
+        }
+    }
+
+    void settingsStorage3(benchmark::State& state)
+    {
+        for (auto _ : state)
+        {
+            benchmark::DoNotOptimize(Settings::postProcessing().mTransparentPostpass.get());
+            benchmark::DoNotOptimize(Settings::camera().mNearClip.get());
+            benchmark::DoNotOptimize(Settings::water().mReflectionDetail.get());
         }
     }
 }
@@ -52,31 +99,30 @@ BENCHMARK(settingsManager);
 BENCHMARK(localStatic);
 BENCHMARK(settingsStorage);
 
+BENCHMARK(settingsManager2);
+BENCHMARK(localStatic2);
+BENCHMARK(settingsStorage2);
+
+BENCHMARK(settingsManager3);
+BENCHMARK(localStatic3);
+BENCHMARK(settingsStorage3);
+
 int main(int argc, char* argv[])
 {
-    bpo::options_description desc = makeOptionsDescription();
+    const std::filesystem::path settingsDefaultPath = std::filesystem::path{ OPENMW_PROJECT_SOURCE_DIR } / "files"
+        / Misc::StringUtils::stringToU8String("settings-default.cfg");
 
-    bpo::parsed_options options = bpo::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
-    bpo::variables_map variables;
+    Settings::SettingsFileParser parser;
+    parser.loadSettingsFile(settingsDefaultPath, Settings::Manager::mDefaultSettings);
 
-    bpo::store(options, variables);
-    bpo::notify(variables);
+    Settings::Values::initDefaults();
 
-    if (variables.find("help") != variables.end())
-    {
-        std::cout << desc << std::endl;
-        benchmark::Initialize(&argc, argv);
-        benchmark::Shutdown();
-        return 1;
-    }
+    Settings::Manager::mUserSettings = Settings::Manager::mDefaultSettings;
+    Settings::Manager::mUserSettings.erase({ "Camera", "near clip" });
+    Settings::Manager::mUserSettings.erase({ "Post Processing", "transparent postpass" });
+    Settings::Manager::mUserSettings.erase({ "Water", "reflection detail" });
 
-    Files::ConfigurationManager config;
-
-    bpo::variables_map composingVariables = Files::separateComposingVariables(variables, desc);
-    config.readConfiguration(variables, desc);
-    Files::mergeComposingVariables(variables, composingVariables, desc);
-
-    Settings::Manager::load(config);
+    Settings::Values::init();
 
     benchmark::Initialize(&argc, argv);
     benchmark::RunSpecifiedBenchmarks();

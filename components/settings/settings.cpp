@@ -177,10 +177,8 @@ namespace Settings
         if (it != mDefaultSettings.end())
             return it->second;
 
-        std::string error("Trying to retrieve a non-existing setting: ");
-        error += setting;
-        error += ".\nMake sure the defaults.bin file was properly installed.";
-        throw std::runtime_error(error);
+        throw std::runtime_error("Trying to retrieve a non-existing setting: [" + std::string(category) + "] "
+            + std::string(setting) + ".\nMake sure the defaults.bin file was properly installed.");
     }
 
     std::vector<std::string> Manager::getStringArray(std::string_view setting, std::string_view category)
