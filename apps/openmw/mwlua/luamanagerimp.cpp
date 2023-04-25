@@ -12,7 +12,7 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <components/l10n/manager.hpp>
 
@@ -38,12 +38,12 @@ namespace MWLua
 
     static LuaUtil::LuaStateSettings createLuaStateSettings()
     {
-        if (!Settings::Manager::getBool("lua profiler", "Lua"))
+        if (!Settings::lua().mLuaProfiler)
             LuaUtil::LuaState::disableProfiler();
-        return { .mInstructionLimit = Settings::Manager::getUInt64("instruction limit per call", "Lua"),
-            .mMemoryLimit = Settings::Manager::getUInt64("memory limit", "Lua"),
-            .mSmallAllocMaxSize = Settings::Manager::getUInt64("small alloc max size", "Lua"),
-            .mLogMemoryUsage = Settings::Manager::getBool("log memory usage", "Lua") };
+        return { .mInstructionLimit = Settings::lua().mInstructionLimitPerCall,
+            .mMemoryLimit = Settings::lua().mMemoryLimit,
+            .mSmallAllocMaxSize = Settings::lua().mSmallAllocMaxSize,
+            .mLogMemoryUsage = Settings::lua().mLogMemoryUsage };
     }
 
     LuaManager::LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir)
@@ -122,9 +122,8 @@ namespace MWLua
 
     void LuaManager::update()
     {
-        static const int gcStepCount = Settings::Manager::getInt("gc steps per frame", "Lua");
-        if (gcStepCount > 0)
-            lua_gc(mLua.sol(), LUA_GCSTEP, gcStepCount);
+        if (Settings::lua().mGcStepsPerFrame > 0)
+            lua_gc(mLua.sol(), LUA_GCSTEP, Settings::lua().mGcStepsPerFrame);
 
         if (mPlayer.isEmpty())
             return; // The game is not started yet.
@@ -469,8 +468,7 @@ namespace MWLua
         : mFn(std::move(fn))
         , mName(name)
     {
-        static const bool luaDebug = Settings::Manager::getBool("lua debug", "Lua");
-        if (luaDebug)
+        if (Settings::lua().mLuaDebug)
             mCallerTraceback = state->debugTraceback();
     }
 
@@ -529,7 +527,7 @@ namespace MWLua
                 out << (bytes / (1024 * 1024 * 1024)) << " GB";
         };
 
-        static const uint64_t smallAllocSize = Settings::Manager::getUInt64("small alloc max size", "Lua");
+        const uint64_t smallAllocSize = Settings::lua().mSmallAllocMaxSize;
         out << "Total memory usage:";
         outMemSize(mLua.getTotalMemoryUsage());
         out << "\n";
