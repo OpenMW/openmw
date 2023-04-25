@@ -87,6 +87,23 @@ return {
         EXPECT_EQ(LuaUtil::toString(sol::make_object(mLua.sol(), "something")), "\"something\"");
     }
 
+    TEST_F(LuaStateTest, Cast)
+    {
+        EXPECT_EQ(LuaUtil::cast<int>(sol::make_object(mLua.sol(), 3.14)), 3);
+        EXPECT_ERROR(
+            LuaUtil::cast<int>(sol::make_object(mLua.sol(), "3.14")), "Value \"\"3.14\"\" can not be casted to int");
+        EXPECT_ERROR(LuaUtil::cast<std::string_view>(sol::make_object(mLua.sol(), sol::nil)),
+            "Value \"nil\" can not be casted to string");
+        EXPECT_ERROR(LuaUtil::cast<std::string>(sol::make_object(mLua.sol(), sol::nil)),
+            "Value \"nil\" can not be casted to string");
+        EXPECT_ERROR(LuaUtil::cast<sol::table>(sol::make_object(mLua.sol(), sol::nil)),
+            "Value \"nil\" can not be casted to sol::table");
+        EXPECT_ERROR(LuaUtil::cast<sol::function>(sol::make_object(mLua.sol(), "3.14")),
+            "Value \"\"3.14\"\" can not be casted to sol::function");
+        EXPECT_ERROR(LuaUtil::cast<sol::protected_function>(sol::make_object(mLua.sol(), "3.14")),
+            "Value \"\"3.14\"\" can not be casted to sol::function");
+    }
+
     TEST_F(LuaStateTest, ErrorHandling)
     {
         EXPECT_ERROR(mLua.runInNewSandbox("invalid.lua"), "[string \"invalid.lua\"]:1:");

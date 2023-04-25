@@ -301,4 +301,25 @@ namespace LuaUtil
             return call(sol::state_view(obj.lua_state())["tostring"], obj);
     }
 
+    std::string internal::formatCastingError(const sol::object& obj, const std::type_info& t)
+    {
+        const char* typeName = t.name();
+        if (t == typeid(int))
+            typeName = "int";
+        else if (t == typeid(unsigned))
+            typeName = "uint32";
+        else if (t == typeid(size_t))
+            typeName = "size_t";
+        else if (t == typeid(float))
+            typeName = "float";
+        else if (t == typeid(double))
+            typeName = "double";
+        else if (t == typeid(sol::table))
+            typeName = "sol::table";
+        else if (t == typeid(sol::function) || t == typeid(sol::protected_function))
+            typeName = "sol::function";
+        else if (t == typeid(std::string) || t == typeid(std::string_view))
+            typeName = "string";
+        return std::string("Value \"") + toString(obj) + std::string("\" can not be casted to ") + typeName;
+    }
 }
