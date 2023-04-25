@@ -452,7 +452,7 @@ if(HAVE_MULTIVIEW)
     add_definitions(-DOSG_HAS_MULTIVIEW)
 endif(HAVE_MULTIVIEW)
 
-set(BOOST_COMPONENTS system filesystem program_options iostreams)
+set(BOOST_COMPONENTS system program_options iostreams)
 if(WIN32)
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
     if(MSVC)

@@ -29,7 +29,7 @@ declare -rA GROUPED_DEPS=(
 
   # Common dependencies for building OpenMW.
   [openmw-deps]="
-    libboost-filesystem-dev libboost-program-options-dev
+    libboost-program-options-dev
     libboost-system-dev libboost-iostreams-dev
 
     libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev
@@ -66,7 +66,6 @@ declare -rA GROUPED_DEPS=(
     libavcodec58
     libavformat58
     libavutil56
-    libboost-filesystem1.74.0
     libboost-iostreams1.74.0
     libboost-program-options1.74.0
     libboost-system1.74.0

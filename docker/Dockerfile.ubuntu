@@ -11,7 +11,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends git build-essential cmake \
     libopenal-dev libopenscenegraph-dev libbullet-dev libsdl2-dev \
     libmygui-dev libunshield-dev liblz4-dev libtinyxml-dev libqt5opengl5-dev \
-    libboost-filesystem-dev libboost-program-options-dev libboost-iostreams-dev \
+    libboost-program-options-dev libboost-iostreams-dev \
     libavcodec-dev libavformat-dev libavutil-dev libswscale-dev libswresample-dev \
     librecast-dev libsqlite3-dev libluajit-5.1-dev
 
