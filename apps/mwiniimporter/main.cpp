@@ -85,7 +85,7 @@ int wmain(int argc, wchar_t* wargv[])
         "\n\twin1252 - Western European (Latin) alphabet, used by default");
          */
 
-        options.parse_positional({"ini", "cfg"});
+        options.parse_positional({ "ini", "cfg" });
 
         auto result = options.parse(argc, argv);
 
