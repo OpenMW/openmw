@@ -4,12 +4,11 @@
 #include <fstream>
 #include <iostream>
 
-#include <boost/program_options.hpp>
+#include <cxxopts.hpp>
 
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
 
-namespace bpo = boost::program_options;
 namespace sfs = std::filesystem;
 
 #ifndef _WIN32
@@ -62,57 +61,45 @@ int wmain(int argc, wchar_t* wargv[])
 
     try
     {
-        bpo::options_description desc("Syntax: openmw-iniimporter <options> inifile configfile\nAllowed options");
-        bpo::positional_options_description p_desc;
-        auto addOption = desc.add_options();
-        addOption("help,h", "produce help message");
-        addOption("verbose,v", "verbose output");
-        addOption("ini,i", bpo::value<Files::MaybeQuotedPath>(), "morrowind.ini file");
-        addOption("cfg,c", bpo::value<Files::MaybeQuotedPath>(), "openmw.cfg file");
-        addOption("output,o", bpo::value<Files::MaybeQuotedPath>()->default_value({}), "openmw.cfg file");
-        addOption("game-files,g", "import esm and esp files");
-        addOption("fonts,f", "import bitmap fonts");
-        addOption("no-archives,A", "disable bsa archives import");
-        addOption("encoding,e", bpo::value<std::string>()->default_value("win1252"),
+        cxxopts::Options options("Syntax: openmw-iniimporter <options> inifile configfile\nAllowed options");
+
+        options.add_options()
+            ("h,help", "produce help message")
+            ("v,verbose", "verbose output")
+            ("i,ini", "morrowind.ini file", cxxopts::value<std::string>())
+            ("c,cfg", "openmw.cfg file", cxxopts::value<std::string>())
+            ("o,output", "openmw.cfg file", cxxopts::value<std::string>()->default_value(""))
+            ("g,game-files", "import esm and esp files")
+            ("f,fonts", "import bitmap fonts")
+            ("A,no-archives", "disable bsa archives import")
+            ("e,encoding", "Character encoding used in OpenMW game messages", cxxopts::value<std::string>()->default_value("win1252"))
+        ;
+
+            /*
             "Character encoding used in OpenMW game messages:\n"
             "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, "
             "Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
             "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
             "\n\twin1252 - Western European (Latin) alphabet, used by default");
-        ;
-        p_desc.add("ini", 1).add("cfg", 1);
+             */
 
-        bpo::variables_map vm;
+        options.parse_positional({"ini", "cfg"});
 
-        bpo::parsed_options parsed = bpo::command_line_parser(argc, argv).options(desc).positional(p_desc).run();
-        bpo::store(parsed, vm);
+        auto result = options.parse(argc, argv);
 
-        if (vm.count("help") || !vm.count("ini") || !vm.count("cfg"))
+        if (result.count("help") || !result.count("ini") || !result.count("cfg"))
         {
-            std::cout << desc;
+            std::cout << options.help() << std::endl;
             return 0;
         }
 
-        bpo::notify(vm);
+        std::filesystem::path iniFile(result["ini"].as<Files::MaybeQuotedPath>().u8string());
+        std::filesystem::path cfgFile(result["cfg"].as<Files::MaybeQuotedPath>().u8string());
 
-        std::filesystem::path iniFile(
-            vm["ini"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to
-                                                                // build on MSVC 14.26 due to implementation bugs.
-        std::filesystem::path cfgFile(
-            vm["cfg"].as<Files::MaybeQuotedPath>().u8string()); // This call to u8string is redundant, but required to
-                                                                // build on MSVC 14.26 due to implementation bugs.
-
-        // if no output is given, write back to cfg file
-        std::filesystem::path outputFile = vm["output"]
-                                               .as<Files::MaybeQuotedPath>()
-                                               .u8string(); // This call to u8string is redundant, but required to build
-                                                            // on MSVC 14.26 due to implementation bugs.
-        if (vm["output"].defaulted())
+        std::filesystem::path outputFile = result["output"].as<Files::MaybeQuotedPath>().u8string();
+        if (outputFile.empty())
         {
-            outputFile = vm["cfg"]
-                             .as<Files::MaybeQuotedPath>()
-                             .u8string(); // This call to u8string is redundant, but required to build on MSVC 14.26 due
-                                          // to implementation bugs.
+            outputFile = cfgFile;
         }
 
         if (!std::filesystem::exists(iniFile))
@@ -124,16 +111,16 @@ int wmain(int argc, wchar_t* wargv[])
             std::cerr << "cfg file does not exist" << std::endl;
 
         MwIniImporter importer;
-        importer.setVerbose(vm.count("verbose") != 0);
+        importer.setVerbose(result["verbose"].as<bool>());
 
         // Font encoding settings
-        std::string encoding(vm["encoding"].as<std::string>());
+        std::string encoding(result["encoding"].as<std::string>());
         importer.setInputEncoding(ToUTF8::calculateEncoding(encoding));
 
         MwIniImporter::multistrmap ini = importer.loadIniFile(iniFile);
         MwIniImporter::multistrmap cfg = importer.loadCfgFile(cfgFile);
 
-        if (!vm.count("fonts"))
+        if (!result["fonts"].as<bool>())
         {
             ini.erase("Fonts:Font 0");
             ini.erase("Fonts:Font 1");
@@ -143,12 +130,12 @@ int wmain(int argc, wchar_t* wargv[])
         importer.merge(cfg, ini);
         importer.mergeFallback(cfg, ini);
 
-        if (vm.count("game-files"))
+        if (result["game-files"].as<bool>())
         {
             importer.importGameFiles(cfg, ini, iniFile);
         }
 
-        if (!vm.count("no-archives"))
+        if (!result["no-archives"].as<bool>())
         {
             importer.importArchives(cfg, ini);
         }
