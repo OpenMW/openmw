@@ -30,7 +30,6 @@
 #include <components/esm3/loadtes3.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/fallback/validate.hpp>
-#include <components/files/conversion.hpp>
 #include <components/files/qtconversion.hpp>
 #include <components/misc/rng.hpp>
 #include <components/nifosg/nifloader.hpp>
@@ -46,7 +45,7 @@ CS::Editor::Editor(int argc, char** argv)
     , mSettingsState(mCfgMgr)
     , mDocumentManager(mCfgMgr)
     , mPid(std::filesystem::temp_directory_path() / "openmw-cs.pid")
-    , mLockFile(QFileInfo(QString::fromStdString(Files::pathToUnicodeString(mPid))).absoluteFilePath() + ".lock")
+    , mLockFile(QFileInfo(Files::pathToQString(mPid)).absoluteFilePath() + ".lock")
     , mMerge(mDocumentManager)
     , mIpcServerName("org.openmw.OpenCS")
     , mServer(nullptr)
