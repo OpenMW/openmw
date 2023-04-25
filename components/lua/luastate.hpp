@@ -1,11 +1,11 @@
 #ifndef COMPONENTS_LUA_LUASTATE_H
 #define COMPONENTS_LUA_LUASTATE_H
 
+#include <filesystem>
 #include <map>
+#include <typeinfo>
 
 #include <sol/sol.hpp>
-
-#include <filesystem>
 
 #include "configuration.hpp"
 
@@ -247,15 +247,25 @@ namespace LuaUtil
     // String representation of a Lua object. Should be used for debugging/logging purposes only.
     std::string toString(const sol::object&);
 
+    namespace internal
+    {
+        std::string formatCastingError(const sol::object& obj, const std::type_info&);
+    }
+
+    template <class T>
+    decltype(auto) cast(const sol::object& obj)
+    {
+        if (!obj.is<T>())
+            throw std::runtime_error(internal::formatCastingError(obj, typeid(T)));
+        return obj.as<T>();
+    }
+
     template <class T>
     T getValueOrDefault(const sol::object& obj, const T& defaultValue)
     {
         if (obj == sol::nil)
             return defaultValue;
-        if (obj.is<T>())
-            return obj.as<T>();
-        else
-            throw std::logic_error(std::string("Value \"") + toString(obj) + std::string("\" has unexpected type"));
+        return cast<T>(obj);
     }
 
     // Makes a table read only (when accessed from Lua) by wrapping it with an empty userdata.
