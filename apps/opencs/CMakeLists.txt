@@ -149,7 +149,11 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-qt_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+if (QT_VERSION_MAJOR VERSION_EQUAL 5)
+    qt5_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+else ()
+    qt6_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+endif()
 qt_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
 # for compiled .ui files
