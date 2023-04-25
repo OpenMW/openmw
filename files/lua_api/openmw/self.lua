@@ -22,6 +22,16 @@
 -- The object the script is attached to (readonly)
 -- @field [parent=#self] openmw.core#GameObject object
 
+--- NPC who owns the object or `nil` (mutable).
+-- @field [parent=#self] #string ownerRecordId
+
+--- Faction who owns the object or `nil` (mutable).
+-- @field [parent=#self] #string ownerFactionId
+
+--- Rank required to be allowed to pick up the object (mutable).
+-- @field [parent=#self] #number ownerFactionRank
+
+
 ---
 -- Movement controls (only for actors)
 -- @field [parent=#self] #ActorControls controls
@@ -55,4 +65,3 @@
 -- @param #boolean v
 
 return nil
-
