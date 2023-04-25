@@ -63,6 +63,7 @@ int wmain(int argc, wchar_t* wargv[])
     {
         cxxopts::Options options("Syntax: openmw-iniimporter <options> inifile configfile\nAllowed options");
 
+        // clang-format off
         options.add_options()
             ("h,help", "produce help message")
             ("v,verbose", "verbose output")
@@ -74,14 +75,15 @@ int wmain(int argc, wchar_t* wargv[])
             ("A,no-archives", "disable bsa archives import")
             ("e,encoding", "Character encoding used in OpenMW game messages", cxxopts::value<std::string>()->default_value("win1252"))
         ;
+        // clang-format on
 
-            /*
-            "Character encoding used in OpenMW game messages:\n"
-            "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, "
-            "Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
-            "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
-            "\n\twin1252 - Western European (Latin) alphabet, used by default");
-             */
+        /*
+        "Character encoding used in OpenMW game messages:\n"
+        "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, "
+        "Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
+        "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
+        "\n\twin1252 - Western European (Latin) alphabet, used by default");
+         */
 
         options.parse_positional({"ini", "cfg"});
 
