@@ -14,9 +14,6 @@
 #undef NEAR
 #undef FAR
 
-#include <boost/locale.hpp>
-namespace bconv = boost::locale::conv;
-
 #include <components/debug/debuglog.hpp>
 
 /**
