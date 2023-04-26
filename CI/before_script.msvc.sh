@@ -754,6 +754,8 @@ printf "Bullet ${BULLET_VER}... "
 	add_cmake_opts -DBULLET_ROOT="$(real_pwd)/Bullet"
 	echo Done.
 }
+cd $DEPS
+echo
 printf "cxxopts ${CXXOPTS_VER}... "
 {
   cd $DEPS_INSTALL
@@ -765,7 +767,7 @@ printf "cxxopts ${CXXOPTS_VER}... "
     mv "cxxopts-${CXXOPTS_VER}" cxxopts
   fi
   export CXXOPTS_HOME="$(real_pwd)/cxxopts"
-  add_cmake_opts -DCXXOPTS_INCLUDE_DIRS="${CXXOPTS_HOME}/include"
+  add_cmake_opts -DCXXOPTS_INCLUDE_DIR="${CXXOPTS_HOME}/include"
   echo Done.
 }
 cd $DEPS
