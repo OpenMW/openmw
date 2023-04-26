@@ -49,7 +49,7 @@ namespace MWScript
 
         MWWorld::Ptr getPtr(); // Resolves mTarget to a Ptr and caches the (potentially empty) result
 
-        const ESM::RefId& getId() const; // Returns the target's ID -- if any
+        ESM::RefId getId() const; // Returns the target's ID -- if any
     };
 
     class GlobalScripts

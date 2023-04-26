@@ -169,9 +169,9 @@ namespace MWWorld
         return -1;
     }
 
-    const ESM::RefId& Class::getScript(const ConstPtr& ptr) const
+    ESM::RefId Class::getScript(const ConstPtr& ptr) const
     {
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     float Class::getMaxSpeed(const Ptr& ptr) const
@@ -275,7 +275,7 @@ namespace MWWorld
         throw std::runtime_error("class does not have an down sound");
     }
 
-    const ESM::RefId& Class::getSoundIdFromSndGen(const Ptr& ptr, std::string_view type) const
+    ESM::RefId Class::getSoundIdFromSndGen(const Ptr& ptr, std::string_view type) const
     {
         throw std::runtime_error("class does not support soundgen look up");
     }
@@ -303,9 +303,9 @@ namespace MWWorld
         return true;
     }
 
-    const ESM::RefId& Class::getEnchantment(const ConstPtr& ptr) const
+    ESM::RefId Class::getEnchantment(const ConstPtr& ptr) const
     {
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     void Class::adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const {}
@@ -476,9 +476,9 @@ namespace MWWorld
         return encumbrance / capacity;
     }
 
-    const ESM::RefId& Class::getSound(const MWWorld::ConstPtr&) const
+    ESM::RefId Class::getSound(const MWWorld::ConstPtr&) const
     {
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     int Class::getBaseFightRating(const ConstPtr& ptr) const
@@ -486,9 +486,9 @@ namespace MWWorld
         throw std::runtime_error("class does not support fight rating");
     }
 
-    const ESM::RefId& Class::getPrimaryFaction(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Class::getPrimaryFaction(const MWWorld::ConstPtr& ptr) const
     {
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
     int Class::getPrimaryFactionRank(const MWWorld::ConstPtr& ptr) const
     {

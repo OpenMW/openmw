@@ -48,8 +48,6 @@ namespace ESM
     class RefId
     {
     public:
-        const static RefId sEmpty;
-
         using Value
             = std::variant<EmptyRefId, StringRefId, FormIdRefId, GeneratedRefId, IndexRefId, ESM3ExteriorCellRefId>;
 

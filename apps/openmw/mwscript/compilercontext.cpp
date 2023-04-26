@@ -52,25 +52,25 @@ namespace MWScript
 
     std::pair<char, bool> CompilerContext::getMemberType(const std::string& name, const ESM::RefId& id) const
     {
-        const ESM::RefId* script = nullptr;
+        ESM::RefId script;
         bool reference = false;
 
         if (const ESM::Script* scriptRecord = MWBase::Environment::get().getESMStore()->get<ESM::Script>().search(id))
         {
-            script = &scriptRecord->mId;
+            script = scriptRecord->mId;
         }
         else
         {
             MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), id);
 
-            script = &ref.getPtr().getClass().getScript(ref.getPtr());
+            script = ref.getPtr().getClass().getScript(ref.getPtr());
             reference = true;
         }
 
         char type = ' ';
 
-        if (script && !script->empty())
-            type = MWBase::Environment::get().getScriptManager()->getLocals(*script).getType(
+        if (!script.empty())
+            type = MWBase::Environment::get().getScriptManager()->getLocals(script).getType(
                 Misc::StringUtils::lowerCase(name));
 
         return std::make_pair(type, reference);

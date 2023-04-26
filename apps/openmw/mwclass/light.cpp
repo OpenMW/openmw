@@ -103,7 +103,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    const ESM::RefId& Light::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Light::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Light>* ref = ptr.get<ESM::Light>();
 
@@ -244,7 +244,7 @@ namespace MWClass
         return { 1, {} };
     }
 
-    const ESM::RefId& Light::getSound(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Light::getSound(const MWWorld::ConstPtr& ptr) const
     {
         return ptr.get<ESM::Light>()->mBase->mSound;
     }

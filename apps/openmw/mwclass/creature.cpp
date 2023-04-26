@@ -526,7 +526,7 @@ namespace MWClass
         return isFlagBitSet(ptr, ESM::Creature::Weapon);
     }
 
-    const ESM::RefId& Creature::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Creature::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
 
@@ -634,11 +634,11 @@ namespace MWClass
         return (ref->mBase->mRecordFlags & ESM::FLAG_Persistent) != 0;
     }
 
-    const ESM::RefId& Creature::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
+    ESM::RefId Creature::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
         int type = getSndGenTypeFromName(ptr, name);
         if (type < 0)
-            return ESM::RefId::sEmpty;
+            return ESM::RefId();
 
         std::vector<const ESM::SoundGenerator*> sounds;
         std::vector<const ESM::SoundGenerator*> fallbacksounds;
@@ -690,7 +690,7 @@ namespace MWClass
         if (!fallbacksounds.empty())
             return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size(), prng)]->mSound;
 
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     MWWorld::Ptr Creature::copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const

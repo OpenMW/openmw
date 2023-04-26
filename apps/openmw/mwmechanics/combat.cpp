@@ -45,8 +45,7 @@ namespace MWMechanics
     bool applyOnStrikeEnchantment(const MWWorld::Ptr& attacker, const MWWorld::Ptr& victim, const MWWorld::Ptr& object,
         const osg::Vec3f& hitPosition, const bool fromProjectile)
     {
-        const ESM::RefId& enchantmentName
-            = !object.isEmpty() ? object.getClass().getEnchantment(object) : ESM::RefId::sEmpty;
+        const ESM::RefId enchantmentName = !object.isEmpty() ? object.getClass().getEnchantment(object) : ESM::RefId();
         if (!enchantmentName.empty())
         {
             const ESM::Enchantment* enchantment

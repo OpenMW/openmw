@@ -775,9 +775,9 @@ namespace MWGui
 
         int incr = next ? 1 : -1;
         bool found = false;
-        const ESM::RefId* lastId = &ESM::RefId::sEmpty;
+        ESM::RefId lastId;
         if (selected != -1)
-            lastId = &model.getItem(selected).mBase.getCellRef().getRefId();
+            lastId = model.getItem(selected).mBase.getCellRef().getRefId();
         ItemModel::ModelIndex cycled = selected;
         for (unsigned int i = 0; i < model.getItemCount(); ++i)
         {
@@ -788,10 +788,10 @@ namespace MWGui
 
             // skip different stacks of the same item, or we will get stuck as stacking/unstacking them may change their
             // relative ordering
-            if (*lastId == item.getCellRef().getRefId())
+            if (lastId == item.getCellRef().getRefId())
                 continue;
 
-            lastId = &item.getCellRef().getRefId();
+            lastId = item.getCellRef().getRefId();
 
             if (item.getClass().getType() == ESM::Weapon::sRecordId && isRightHandWeapon(item)
                 && item.getClass().canBeEquipped(item, player).first)

@@ -97,12 +97,12 @@ namespace MWWorld
         };
         auto esm4Visit = [&](const ESM4::Reference& ref) -> ESM::RefId {
             if (ref.mDoor.destDoor.isZeroOrUnset())
-                return ESM::RefId::sEmpty;
+                return ESM::RefId();
             const ESM4::Reference* refDest
                 = MWBase::Environment::get().getESMStore()->get<ESM4::Reference>().searchStatic(ref.mDoor.destDoor);
             if (refDest)
                 return refDest->mParent;
-            return ESM::RefId::sEmpty;
+            return ESM::RefId();
         };
 
         return std::visit(ESM::VisitOverload{ esm3Visit, esm4Visit }, mCellRef.mVariant);

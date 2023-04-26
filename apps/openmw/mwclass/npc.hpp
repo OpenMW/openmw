@@ -91,7 +91,7 @@ namespace MWClass
         std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
         ///< Generate action for activation
 
-        const ESM::RefId& getScript(const MWWorld::ConstPtr& ptr) const override;
+        ESM::RefId getScript(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of the script attached to ptr
 
         float getMaxSpeed(const MWWorld::Ptr& ptr) const override;
@@ -130,7 +130,7 @@ namespace MWClass
 
         bool isPersistent(const MWWorld::ConstPtr& ptr) const override;
 
-        const ESM::RefId& getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const override;
+        ESM::RefId getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const override;
 
         std::string getModel(const MWWorld::ConstPtr& ptr) const override;
 
@@ -161,7 +161,8 @@ namespace MWClass
 
         int getBaseFightRating(const MWWorld::ConstPtr& ptr) const override;
 
-        const ESM::RefId& getPrimaryFaction(const MWWorld::ConstPtr& ptr) const override;
+        ESM::RefId getPrimaryFaction(const MWWorld::ConstPtr& ptr) const override;
+
         int getPrimaryFactionRank(const MWWorld::ConstPtr& ptr) const override;
 
         void setBaseAISetting(const ESM::RefId& id, MWMechanics::AiSetting setting, int value) const override;

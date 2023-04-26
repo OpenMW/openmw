@@ -1025,7 +1025,7 @@ namespace MWMechanics
                 }
             }
 
-            const auto& sound = charClass.getSoundIdFromSndGen(mPtr, soundgen);
+            const ESM::RefId sound = charClass.getSoundIdFromSndGen(mPtr, soundgen);
             if (!sound.empty())
             {
                 MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
@@ -1485,7 +1485,7 @@ namespace MWMechanics
                             = MWBase::Environment::get().getWindowManager()->getSelectedSpell();
                         stats.getSpells().setSelectedSpell(selectedSpell);
                     }
-                    const ESM::RefId* spellid = &stats.getSpells().getSelectedSpell();
+                    ESM::RefId spellid = stats.getSpells().getSelectedSpell();
                     bool isMagicItem = false;
 
                     // Play hand VFX and allow castSpell use (assuming an animation is going to be played) if
@@ -1495,13 +1495,13 @@ namespace MWMechanics
                         spellCastResult = world->startSpellCast(mPtr);
                     mCanCast = spellCastResult == MWWorld::SpellCastState::Success;
 
-                    if (spellid->empty() && cls.hasInventoryStore(mPtr))
+                    if (spellid.empty() && cls.hasInventoryStore(mPtr))
                     {
                         MWWorld::InventoryStore& inv = cls.getInventoryStore(mPtr);
                         if (inv.getSelectedEnchantItem() != inv.end())
                         {
                             const MWWorld::Ptr& enchantItem = *inv.getSelectedEnchantItem();
-                            spellid = &enchantItem.getClass().getEnchantment(enchantItem);
+                            spellid = enchantItem.getClass().getEnchantment(enchantItem);
                             isMagicItem = true;
                         }
                     }
@@ -1520,7 +1520,7 @@ namespace MWMechanics
                     }
                     // Play the spellcasting animation/VFX if the spellcasting was successful or failed due to
                     // insufficient magicka. Used up powers are exempt from this from some reason.
-                    else if (!spellid->empty() && spellCastResult != MWWorld::SpellCastState::PowerAlreadyUsed)
+                    else if (!spellid.empty() && spellCastResult != MWWorld::SpellCastState::PowerAlreadyUsed)
                     {
                         world->breakInvisibility(mPtr);
                         MWMechanics::CastSpell cast(mPtr, {}, false, mCastingManualSpell);
@@ -1529,13 +1529,13 @@ namespace MWMechanics
                         const MWWorld::ESMStore& store = world->getStore();
                         if (isMagicItem)
                         {
-                            const ESM::Enchantment* enchantment = store.get<ESM::Enchantment>().find(*spellid);
+                            const ESM::Enchantment* enchantment = store.get<ESM::Enchantment>().find(spellid);
                             effects = &enchantment->mEffects.mList;
                             cast.playSpellCastingEffects(enchantment);
                         }
                         else
                         {
-                            const ESM::Spell* spell = store.get<ESM::Spell>().find(*spellid);
+                            const ESM::Spell* spell = store.get<ESM::Spell>().find(spellid);
                             effects = &spell->mEffects.mList;
                             cast.playSpellCastingEffects(spell);
                         }
