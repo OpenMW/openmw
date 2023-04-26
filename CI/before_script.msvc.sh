@@ -765,6 +765,7 @@ printf "cxxopts ${CXXOPTS_VER}... "
     mv "cxxopts-${CXXOPTS_VER}" cxxopts
   fi
   export CXXOPTS_HOME="$(real_pwd)/cxxopts"
+  add_cmake_opts -DCXXOPTS_INCLUDE_DIRS="${CXXOPTS_HOME}/include"
   echo Done.
 }
 cd $DEPS
