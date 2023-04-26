@@ -15,6 +15,7 @@ openmw_add_executable(openmw-iniimporter
 
 target_link_libraries(openmw-iniimporter
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
+    ${CXXOPTS_LIBRARY}
     components
 )
 

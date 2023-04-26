@@ -237,6 +237,7 @@ find_package(OpenGL REQUIRED)
 find_package(LZ4 REQUIRED)
 
 find_package(CXXOPTS REQUIRED)
+include_directories(SYSTEM ${CXXOPTS_INCLUDE_DIRS})
 
 if (USE_QT)
     find_package(QT REQUIRED COMPONENTS Core NAMES Qt6 Qt5)
