@@ -190,6 +190,17 @@ if(NOT OPENMW_USE_SYSTEM_RECASTNAVIGATION)
     FetchContent_MakeAvailableExcludeFromAll(recastnavigation)
 endif()
 
+if(NOT OPENMW_USE_SYSTEM_CXXOPTS)
+    include(FetchContent)
+    FetchContent_Declare(cxxopts
+            URL https://github.com/jarro2783/cxxopts/archive/refs/tags/v3.1.1.zip
+            URL_HASH SHA512=df8a322f2ecef9bc0e2b17904b008e19e8f6d0384ba2ec95375c15be14953b008550cb119828f03a4eee12795c8df9a558a6eeb8c0e41ad7092b90270d517f5f
+            SOURCE_DIR fetched/cxxopts
+            )
+    FetchContent_MakeAvailableExcludeFromAll(cxxopts)
+    set(CXXOPTS_INCLUDE_DIRS "${cxxopts_SOURCE_DIR}/include" PARENT_SCOPE)
+endif()
+
 if (NOT OPENMW_USE_SYSTEM_SQLITE3)
     include(FetchContent)
     FetchContent_Declare(sqlite3

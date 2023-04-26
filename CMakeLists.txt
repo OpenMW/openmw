@@ -236,9 +236,6 @@ find_package(OpenGL REQUIRED)
 
 find_package(LZ4 REQUIRED)
 
-find_package(CXXOPTS REQUIRED)
-include_directories(SYSTEM ${CXXOPTS_INCLUDE_DIRS})
-
 if (USE_QT)
     find_package(QT REQUIRED COMPONENTS Core NAMES Qt6 Qt5)
     if (QT_VERSION_MAJOR VERSION_EQUAL 5)
@@ -365,6 +362,13 @@ if (USE_SYSTEM_TINYXML)
     add_definitions (-DTIXML_USE_STL)
     include_directories(SYSTEM ${TinyXML_INCLUDE_DIRS})
 endif()
+
+# CXXOPTS
+option(OPENMW_USE_SYSTEM_CXXOPTS "Use system provided CXXOPTS library" ON)
+if(OPENMW_USE_SYSTEM_CXXOPTS)
+    find_package(CXXOPTS REQUIRED)
+endif()
+include_directories(SYSTEM ${CXXOPTS_INCLUDE_DIRS})
 
 # Platform specific
 if (WIN32)
