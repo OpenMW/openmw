@@ -764,7 +764,7 @@ printf "cxxopts ${CXXOPTS_VER}... "
     eval 7z x -y "${DEPS}/cxxopts-${CXXOPTS_VER}.zip" $STRIP
     mv "cxxopts-${CXXOPTS_VER}" cxxopts
   fi
-  add_cmake_opts -DCMAKE_PREFIX_PATH="$(real_pwd)/cxxopts"
+  export CXXOPTS_HOME="$(real_pwd)/cxxopts"
   echo Done.
 }
 cd $DEPS
