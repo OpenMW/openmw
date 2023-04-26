@@ -67,28 +67,25 @@ int wmain(int argc, wchar_t* wargv[])
         options.add_options()
             ("h,help", "produce help message")
             ("v,verbose", "verbose output")
-            ("i,ini", "morrowind.ini file", cxxopts::value<std::string>())
-            ("c,cfg", "openmw.cfg file", cxxopts::value<std::string>())
+            ("i,ini", "morrowind.ini file")
+            ("c,cfg", "openmw.cfg file")
             ("o,output", "openmw.cfg file", cxxopts::value<std::string>()->default_value(""))
             ("g,game-files", "import esm and esp files")
             ("f,fonts", "import bitmap fonts")
             ("A,no-archives", "disable bsa archives import")
-            ("e,encoding", "Character encoding used in OpenMW game messages", cxxopts::value<std::string>()->default_value("win1252"))
+            ("e,encoding",
+                "Character encoding used in OpenMW game messages\n"
+                "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, "
+                "Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
+                "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
+                "\n\twin1252 - Western European (Latin) alphabet\n\n",
+                cxxopts::value<std::string>()->default_value("win1252"))
         ;
         // clang-format on
-
-        /*
-        "Character encoding used in OpenMW game messages:\n"
-        "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, "
-        "Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
-        "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
-        "\n\twin1252 - Western European (Latin) alphabet, used by default");
-         */
 
         options.parse_positional({ "ini", "cfg" });
 
         auto result = options.parse(argc, argv);
-
         if (result.count("help") || !result.count("ini") || !result.count("cfg"))
         {
             std::cout << options.help() << std::endl;
@@ -97,7 +94,6 @@ int wmain(int argc, wchar_t* wargv[])
 
         std::filesystem::path iniFile(result["ini"].as<Files::MaybeQuotedPath>().u8string());
         std::filesystem::path cfgFile(result["cfg"].as<Files::MaybeQuotedPath>().u8string());
-
         std::filesystem::path outputFile = result["output"].as<Files::MaybeQuotedPath>().u8string();
         if (outputFile.empty())
         {
