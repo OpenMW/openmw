@@ -518,7 +518,7 @@
 -- @field #string baseCreature Record id of a base creature, which was modified to create this one
 -- @field #string model VFS path to the creature's model
 -- @field #string mwscript
--- @field #string soulValue The soul value of the creature record
+-- @field #number soulValue The soul value of the creature record
 
 
 --- @{#NPC} functions
