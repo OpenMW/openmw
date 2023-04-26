@@ -25,6 +25,39 @@
 
 namespace MWLua
 {
+    // class returned via 'types.Actor.spells(obj)' in Lua
+    struct ActorSpells
+    {
+        const ObjectVariant mActor;
+    };
+}
+
+namespace sol
+{
+    template <typename T>
+    struct is_automagical<typename MWWorld::Store<T>> : std::false_type
+    {
+    };
+    template <>
+    struct is_automagical<ESM::Spell> : std::false_type
+    {
+    };
+    template <>
+    struct is_automagical<ESM::ENAMstruct> : std::false_type
+    {
+    };
+    template <>
+    struct is_automagical<ESM::MagicEffect> : std::false_type
+    {
+    };
+    template <>
+    struct is_automagical<MWLua::ActorSpells> : std::false_type
+    {
+    };
+}
+
+namespace MWLua
+{
     sol::table initCoreMagicBindings(const Context& context)
     {
         sol::state_view& lua = context.mLua->sol();
@@ -181,12 +214,6 @@ namespace MWLua
 
         return LuaUtil::makeReadOnly(magicApi);
     }
-
-    // class returned via 'types.Actor.spells(obj)' in Lua
-    struct ActorSpells
-    {
-        const ObjectVariant mActor;
-    };
 
     void addActorMagicBindings(sol::table& actor, const Context& context)
     {
