@@ -366,7 +366,7 @@ endif()
 # CXXOPTS
 option(OPENMW_USE_SYSTEM_CXXOPTS "Use system provided cxxopts library" ON)
 if(OPENMW_USE_SYSTEM_CXXOPTS)
-    find_package(cxxopts REQUIRED)
+    find_package(cxxopts CONFIG REQUIRED)
 endif()
 
 # Platform specific

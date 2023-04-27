@@ -202,6 +202,7 @@ if(NOT OPENMW_USE_SYSTEM_CXXOPTS)
     ### here is what makes all include directories -isystem
     get_target_property(CXXOPTS_IID cxxopts INTERFACE_INCLUDE_DIRECTORIES)
     set_target_properties(cxxopts PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CXXOPTS_IID}")
+    ### TODO: use SYSTEM option to FetchContent_Declare once CMake 3.25 is available and remove the above workaround
 endif()
 
 if (NOT OPENMW_USE_SYSTEM_SQLITE3)
