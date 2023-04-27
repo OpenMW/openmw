@@ -12,7 +12,9 @@ namespace Fallback
     /// @brief contains settings imported from the Morrowind INI file.
     class Map
     {
-        static std::map<std::string, std::string, std::less<>> mFallbackMap;
+        static std::map<std::string, int, std::less<>> mIntFallbackMap;
+        static std::map<std::string, float, std::less<>> mFloatFallbackMap;
+        static std::map<std::string, std::string, std::less<>> mNonNumericFallbackMap;
 
     public:
         static void init(const std::map<std::string, std::string>& fallback);

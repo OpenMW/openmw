@@ -141,7 +141,8 @@ namespace MWGui
         mLevelText->setCaptionWithReplacing("#{sLevelUpMenu1} " + MyGUI::utility::toString(level));
 
         std::string_view levelupdescription;
-        levelupdescription = Fallback::Map::getString("Level_Up_Level" + MyGUI::utility::toString(level));
+        if (level <= 20)
+            levelupdescription = Fallback::Map::getString("Level_Up_Level" + MyGUI::utility::toString(level));
 
         if (levelupdescription.empty())
             levelupdescription = Fallback::Map::getString("Level_Up_Default");
