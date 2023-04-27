@@ -357,7 +357,7 @@ namespace MWLua
                             [cell, pos, rot] { teleportPlayer(cell, pos, rot); });
                     else
                         context.mLuaManager->addAction(
-                            [object, cell, pos, rot] { teleportNotPlayer(object.ptr(), cell, pos, rot); },
+                            [obj = Object(ptr), cell, pos, rot] { teleportNotPlayer(obj.ptr(), cell, pos, rot); },
                             "TeleportAction");
                 };
             }
