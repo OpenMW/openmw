@@ -198,7 +198,6 @@ if(NOT OPENMW_USE_SYSTEM_CXXOPTS)
             SOURCE_DIR fetched/cxxopts
             )
     FetchContent_MakeAvailableExcludeFromAll(cxxopts)
-    set(CXXOPTS_INCLUDE_DIRS "${cxxopts_SOURCE_DIR}/include" PARENT_SCOPE)
 endif()
 
 if (NOT OPENMW_USE_SYSTEM_SQLITE3)
