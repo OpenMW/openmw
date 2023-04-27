@@ -612,6 +612,7 @@ macOS12_Xcode13:
   - choco install vswhere -y
   - choco install python -y
   - vcpkg install cxxopts
+  - vcpkg integrate install
   - refreshenv
   - |
     function Make-SafeFileName {

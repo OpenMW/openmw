@@ -364,9 +364,9 @@ if (USE_SYSTEM_TINYXML)
 endif()
 
 # CXXOPTS
-option(OPENMW_USE_SYSTEM_CXXOPTS "Use system provided CXXOPTS library" ON)
+option(OPENMW_USE_SYSTEM_CXXOPTS "Use system provided cxxopts library" ON)
 if(OPENMW_USE_SYSTEM_CXXOPTS)
-    find_package(CXXOPTS REQUIRED)
+    find_package(cxxopts REQUIRED)
 endif()
 
 # Platform specific
