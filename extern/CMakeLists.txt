@@ -198,6 +198,10 @@ if(NOT OPENMW_USE_SYSTEM_CXXOPTS)
             SOURCE_DIR fetched/cxxopts
             )
     FetchContent_MakeAvailableExcludeFromAll(cxxopts)
+
+    ### here is what makes all include directories -isystem
+    get_target_property(CXXOPTS_IID cxxopts INTERFACE_INCLUDE_DIRECTORIES)
+    set_target_properties(cxxopts PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CXXOPTS_IID}")
 endif()
 
 if (NOT OPENMW_USE_SYSTEM_SQLITE3)
