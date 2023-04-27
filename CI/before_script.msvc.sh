@@ -750,22 +750,6 @@ printf "Bullet ${BULLET_VER}... "
 }
 cd $DEPS
 echo
-printf "cxxopts ${CXXOPTS_VER}... "
-{
-  cd $DEPS_INSTALL
-  if [ -d cxxopts ]; then
-    printf -- "Exists. (No version checking) "
-  elif [ -z $SKIP_EXTRACT ]; then
-    rm -rf cxxopts
-    eval 7z x -y "${DEPS}/cxxopts-${CXXOPTS_VER}.zip" $STRIP
-    mv "cxxopts-${CXXOPTS_VER}" cxxopts
-  fi
-  export CXXOPTS_HOME="$(real_pwd)/cxxopts"
-  add_cmake_opts -DCXXOPTS_INCLUDE_DIR="${CXXOPTS_HOME}/include"
-  echo Done.
-}
-cd $DEPS
-echo
 printf "FFmpeg ${FFMPEG_VER}... "
 {
 	cd $DEPS_INSTALL

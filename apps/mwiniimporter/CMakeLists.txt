@@ -15,6 +15,7 @@ openmw_add_executable(openmw-iniimporter
 
 target_link_libraries(openmw-iniimporter
     components
+    cxxopts::cxxopts
 )
 
 if (WIN32)

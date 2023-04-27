@@ -368,7 +368,6 @@ option(OPENMW_USE_SYSTEM_CXXOPTS "Use system provided CXXOPTS library" ON)
 if(OPENMW_USE_SYSTEM_CXXOPTS)
     find_package(CXXOPTS REQUIRED)
 endif()
-include_directories(SYSTEM ${CXXOPTS_INCLUDE_DIRS})
 
 # Platform specific
 if (WIN32)
