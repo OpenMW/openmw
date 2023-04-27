@@ -1036,7 +1036,7 @@ add_cmake_opts -DOPENMW_MP_BUILD=on
 add_cmake_opts -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}"
 add_cmake_opts -DOPENMW_USE_SYSTEM_SQLITE3=OFF
 add_cmake_opts -DOPENMW_USE_SYSTEM_YAML_CPP=OFF
-add_cmake_opts -DCMAKE_TOOLCHAIN_FILE="C:/vcpkg/scripts/buildsystems/vcpkg.cmake"  # add vcpkg toolchain
+add_cmake_opts -DOPENMW_USE_SYSTEM_CXXOPTS=OFF
 if [ ! -z $CI ]; then
 	case $STEP in
 		components )
