@@ -611,6 +611,7 @@ macOS12_Xcode13:
   - choco install ccache -y
   - choco install vswhere -y
   - choco install python -y
+  - vpkg install cxxopts
   - refreshenv
   - |
     function Make-SafeFileName {

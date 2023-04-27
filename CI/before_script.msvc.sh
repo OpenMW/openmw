@@ -554,7 +554,6 @@ if ! [ -z "$USE_CLANG_TIDY" ]; then
 fi
 
 BULLET_VER="2.89"
-CXXOPTS_VER="3.1.1"
 FFMPEG_VER="4.2.2"
 ICU_VER="70_1"
 LUAJIT_VER="v2.1.0-beta3-452-g7a0cf5fd"
@@ -594,11 +593,6 @@ if [ -z $SKIP_DOWNLOAD ]; then
 			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/boost_${BOOST_VER_URL}-msvc-${MSVC_VER}-${BITS}.exe" \
 			"boost-${BOOST_VER}-msvc${MSVC_VER}-win${BITS}.exe"
 	fi
-
-  # cxxopts
-  download "cxxopts ${CXXOPTS_VER}" \
-    "https://github.com/jarro2783/cxxopts/archive/refs/tags/v${CXXOPTS_VER}.zip" \
-    "cxxopts-${CXXOPTS_VER}.zip"
 
 	# Bullet
 	download "Bullet ${BULLET_VER}" \
