@@ -18,18 +18,18 @@ class IniImporterTest : public ::testing::TestWithParam<TestParam>
 
 TEST_P(IniImporterTest, TestIniImport)
 {
-    auto param = IniImporterTest::GetParam();
+    auto const& param = IniImporterTest::GetParam();
 
     // Create temporary file
     std::string iniData = R"([Archives]
 Archive 0=game1.bsa
 Archive 1=game2.bsa
 )";
-    std::filesystem::path tempIniFile = std::filesystem::temp_directory_path() / param.fileName += "morrowind.ini";
+    std::filesystem::path tempIniFile = std::filesystem::temp_directory_path() / (param.fileName + ".ini");
     std::ofstream tempFile(tempIniFile);
     tempFile << iniData;
     tempFile.close();
-    std::filesystem::path tempCfgFile = std::filesystem::temp_directory_path() / param.fileName += "openmw.cfg";
+    std::filesystem::path tempCfgFile = std::filesystem::temp_directory_path() / (param.fileName + ".cfg");
 
     std::stringstream cmd;
     cmd << "./openmw-iniimporter -i " << tempIniFile << " -c " << tempCfgFile;
