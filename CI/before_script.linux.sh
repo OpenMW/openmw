@@ -50,6 +50,7 @@ if [[ $CI_CLANG_TIDY ]]; then
           -DCMAKE_CXX_CLANG_TIDY="clang-tidy;--warnings-as-errors=*"
           -DBUILD_UNITTESTS=ON
           -DBUILD_OPENCS_TESTS=ON
+          -DBUILD_TOOL_TESTS=ON
           -DBUILD_BENCHMARKS=ON
     )
 fi
@@ -106,6 +107,7 @@ if [[ "${BUILD_TESTS_ONLY}" ]]; then
         -DBUILD_NIFTEST=OFF \
         -DBUILD_UNITTESTS=${BUILD_UNITTESTS} \
         -DBUILD_OPENCS_TESTS=${BUILD_UNITTESTS} \
+        -DBUILD_TOOL_TESTS=${BUILD_UNITTESTS} \
         -DBUILD_BENCHMARKS=${BUILD_BENCHMARKS} \
         ..
 else

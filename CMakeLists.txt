@@ -55,6 +55,7 @@ option(BUILD_BENCHMARKS         "Build benchmarks with Google Benchmark" OFF)
 option(BUILD_NAVMESHTOOL        "Build navmesh tool" ON)
 option(BUILD_BULLETOBJECTTOOL   "Build Bullet object tool" ON)
 option(BUILD_OPENCS_TESTS       "Build OpenMW Construction Set tests" OFF)
+option(BUILD_TOOL_TESTS         "Build OpenMW related tool tests" OFF)
 
 set(OpenGL_GL_PREFERENCE LEGACY)  # Use LEGACY as we use GL2; GLNVD is for GL3 and up.
 
@@ -661,7 +662,7 @@ if (BUILD_LAUNCHER)
     add_subdirectory( apps/launcher )
 endif()
 
-if (BUILD_MWINIIMPORTER)
+if (BUILD_MWINIIMPORTER OR BUILD_TOOL_TESTS)
     add_subdirectory( apps/mwiniimporter )
 endif()
 
@@ -684,7 +685,6 @@ endif(BUILD_NIFTEST)
 # UnitTests
 if (BUILD_UNITTESTS)
     add_subdirectory( apps/openmw_test_suite )
-    add_subdirectory( apps/mwiniimporter_tests )
 endif()
 
 if (BUILD_BENCHMARKS)
@@ -701,6 +701,10 @@ endif()
 
 if (BUILD_OPENCS_TESTS)
     add_subdirectory(apps/opencs_tests)
+endif()
+
+if (BUILD_TOOL_TESTS)
+    add_subdirectory( apps/mwiniimporter_tests )
 endif()
 
 if (WIN32)
