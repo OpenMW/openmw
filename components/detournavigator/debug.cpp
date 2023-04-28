@@ -114,9 +114,17 @@ namespace DetourNavigator
 
     std::ostream& operator<<(std::ostream& stream, const WriteDtStatus& value)
     {
-        for (const auto& status : dtStatuses)
-            if (value.mStatus & status.mStatus)
-                stream << status.mString;
+        bool first = true;
+        for (const auto& v : dtStatuses)
+        {
+            if ((value.mStatus & v.mStatus) == 0)
+                continue;
+            if (first)
+                first = false;
+            else
+                stream << " | ";
+            stream << v.mString;
+        }
         return stream;
     }
 
