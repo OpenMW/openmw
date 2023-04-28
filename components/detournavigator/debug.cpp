@@ -215,6 +215,13 @@ namespace DetourNavigator
         return stream << "TilesPositionsRange {" << value.mBegin << ", " << value.mEnd << "}";
     }
 
+    std::ostream& operator<<(std::ostream& stream, const AreaCosts& value)
+    {
+        return stream << "AreaCosts {"
+                      << ".mWater = " << value.mWater << ", .mDoor = " << value.mDoor
+                      << ", .mPathgrid = " << value.mPathgrid << ", .mGround = " << value.mGround << "}";
+    }
+
     void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix, const std::string& revision,
         const RecastSettings& settings)
     {
