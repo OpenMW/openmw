@@ -4,23 +4,17 @@
 #include <sstream>
 #include <vector>
 
-
 struct TestParam
 {
     std::string name;
     std::string fileName;
 };
 
-const std::vector<TestParam> testParams = {
-    { "ascii", "ascii" },
-    { "unicode", "(╯°□°)╯︵ ┻━┻"},
-    { "emoji", "💩"}
-};
+const std::vector<TestParam> testParams = { { "ascii", "ascii" }, { "unicode", "(╯°□°)╯︵ ┻━┻" }, { "emoji", "💩" } };
 
 class IniImporterTest : public ::testing::TestWithParam<TestParam>
 {
 };
-
 
 TEST_P(IniImporterTest, TestIniImport)
 {
@@ -63,7 +57,6 @@ fallback-archive=game2.bsa
 }
 
 INSTANTIATE_TEST_SUITE_P(IniImporterTests, IniImporterTest, ::testing::ValuesIn(testParams));
-
 
 int main(int argc, char* argv[])
 {
