@@ -4,6 +4,10 @@
 #include <sstream>
 #include <vector>
 
+#ifndef CMAKE_BINARY_DIR
+#define CMAKE_BINARY_DIR "." // default to current directory
+#endif
+
 struct TestParam
 {
     std::string name;
@@ -32,7 +36,7 @@ Archive 1=game2.bsa
     std::filesystem::path tempCfgFile = std::filesystem::temp_directory_path() / (param.fileName + ".cfg");
 
     std::stringstream cmd;
-    cmd << "./openmw-iniimporter -i " << tempIniFile << " -c " << tempCfgFile;
+    cmd << CMAKE_BINARY_DIR << "/openmw-iniimporter -i " << tempIniFile << " -c " << tempCfgFile;
 
     int ret = std::system(cmd.str().c_str());
     ASSERT_EQ(ret, 0);
