@@ -53,7 +53,7 @@ git fetch target "${TARGET_BRANCH:?}"
 
 if [[ "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}" ]]; then
     git remote add source "${CI_MERGE_REQUEST_SOURCE_PROJECT_URL}"
-    git fetch source "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
+    git fetch --unshallow source "${CI_MERGE_REQUEST_SOURCE_BRANCH_NAME}"
 elif [[ "${CI_COMMIT_BRANCH}" ]]; then
     git fetch origin "${CI_COMMIT_BRANCH:?}"
 else
