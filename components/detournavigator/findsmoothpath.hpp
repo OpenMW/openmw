@@ -49,13 +49,13 @@ namespace DetourNavigator
     std::optional<SteerTarget> getSteerTarget(const dtNavMeshQuery& navQuery, const osg::Vec3f& startPos,
         const osg::Vec3f& endPos, const float minTargetDist, const dtPolyRef* path, const std::size_t pathSize);
 
-    template <class OutputIterator>
+    template <class OutputIterator, class Function>
     class OutputTransformIterator
     {
     public:
-        explicit OutputTransformIterator(OutputIterator& impl, const RecastSettings& settings)
+        explicit OutputTransformIterator(OutputIterator& impl, Function&& function)
             : mImpl(impl)
-            , mSettings(settings)
+            , mFunction(std::forward<Function>(function))
         {
         }
 
@@ -76,14 +76,21 @@ namespace DetourNavigator
 
         OutputTransformIterator& operator=(const osg::Vec3f& value)
         {
-            *mImpl.get() = fromNavMeshCoordinates(mSettings, value);
+            *mImpl.get() = mFunction(value);
             return *this;
         }
 
     private:
         std::reference_wrapper<OutputIterator> mImpl;
-        std::reference_wrapper<const RecastSettings> mSettings;
+        Function mFunction;
     };
+
+    template <class OutputIterator>
+    auto withFromNavMeshCoordinates(OutputIterator& impl, const RecastSettings& settings)
+    {
+        return OutputTransformIterator(
+            impl, [&settings](const osg::Vec3f& value) { return fromNavMeshCoordinates(settings, value); });
+    }
 
     dtPolyRef findNearestPoly(const dtNavMeshQuery& query, const dtQueryFilter& filter, const osg::Vec3f& center,
         const osg::Vec3f& halfExtents);
