@@ -684,6 +684,7 @@ endif(BUILD_NIFTEST)
 # UnitTests
 if (BUILD_UNITTESTS)
     add_subdirectory( apps/openmw_test_suite )
+    add_subdirectory( apps/mwiniimporter_tests )
 endif()
 
 if (BUILD_BENCHMARKS)
