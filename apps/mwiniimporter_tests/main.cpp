@@ -5,7 +5,7 @@
 #include <vector>
 
 #ifndef CMAKE_BINARY_DIR
-#define CMAKE_BINARY_DIR "." // default to current directory
+#define CMAKE_BINARY_DIR "." /* default to current directory */
 #endif
 
 struct TestParam
