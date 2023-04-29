@@ -9,7 +9,8 @@ openmw_add_executable(openmw-iniimporter-tests ${INIIMPORTER_TESTS_SRC_FILES})
 target_include_directories(openmw-iniimporter-tests SYSTEM PRIVATE ${GTEST_INCLUDE_DIRS})
 target_include_directories(openmw-iniimporter-tests SYSTEM PRIVATE ${GMOCK_INCLUDE_DIRS})
 
-add_definitions(-DCMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
+#add_definitions(-DCMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
+target_compile_definitions(openmw-iniimporter-tests PRIVATE CMAKE_BINARY_DIR=u8"${CMAKE_BINARY_DIR}")
 
 target_link_libraries(openmw-iniimporter-tests PRIVATE
     GTest::GTest
