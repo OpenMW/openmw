@@ -47,9 +47,11 @@ namespace MWRender
         public:
             InstancedComputeNearFarCullCallback(
                 const std::vector<Groundcover::GroundcoverEntry>& instances, const osg::Vec3& chunkPosition)
-                : mInstances(instances)
-                , mChunkPosition(chunkPosition)
+                : mInstanceMatrices()
             {
+                mInstanceMatrices.reserve(instances.size());
+                for (const auto& instance : instances)
+                    mInstanceMatrices.emplace_back(computeInstanceMatrix(instance, chunkPosition));
             }
 
             bool cull(osg::NodeVisitor* nv, osg::Drawable* drawable, osg::RenderInfo* renderInfo) const override
@@ -100,9 +102,8 @@ namespace MWRender
                         if (dNear < computedZNear)
                         {
                             dNear = std::numeric_limits<value_type>::max();
-                            for (const auto& entry : mInstances)
+                            for (const auto& instanceMatrix : mInstanceMatrices)
                             {
-                                osg::Matrix instanceMatrix = computeInstanceMatrix(entry, mChunkPosition);
                                 value_type newNear = cullVisitor.computeNearestPointInFrustum(
                                     instanceMatrix * matrix, planes, *drawable);
                                 dNear = std::min(dNear, newNear);
@@ -114,9 +115,8 @@ namespace MWRender
                         if (cnfMode == osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES && dFar > computedZFar)
                         {
                             dFar = -std::numeric_limits<value_type>::max();
-                            for (const auto& entry : mInstances)
+                            for (const auto& instanceMatrix : mInstanceMatrices)
                             {
-                                osg::Matrix instanceMatrix = computeInstanceMatrix(entry, mChunkPosition);
                                 value_type newFar = cullVisitor.computeFurthestPointInFrustum(
                                     instanceMatrix * matrix, planes, *drawable);
                                 dFar = std::max(dFar, newFar);
@@ -131,8 +131,7 @@ namespace MWRender
             }
 
         private:
-            std::vector<Groundcover::GroundcoverEntry> mInstances;
-            osg::Vec3 mChunkPosition;
+            std::vector<osg::Matrix> mInstanceMatrices;
         };
 
         class InstancingVisitor : public osg::NodeVisitor
