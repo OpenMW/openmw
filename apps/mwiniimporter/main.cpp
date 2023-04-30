@@ -67,10 +67,10 @@ int wmain(int argc, wchar_t* wargv[])
         app.add_option("-i, --ini", iniFile, "morrowind.ini file")->required()->check(CLI::ExistingFile);
 
         std::filesystem::path cfgFile;
-        app.add_option("-c, --cfg", cfgFile, "openmw.cfg file")->required()->check(CLI::NonexistentPath);
+        app.add_option("-c, --cfg", cfgFile, "openmw.cfg file")->required();
 
         std::filesystem::path outputFile = "";
-        app.add_option("-o,--output", outputFile, "openmw.cfg file")->default_str("")->check(CLI::NonexistentPath);
+        app.add_option("-o,--output", outputFile, "openmw.cfg file")->default_str("");
 
         bool gameFiles = false;
         app.add_flag("-g,--game-files", gameFiles, "import esm and esp files");
