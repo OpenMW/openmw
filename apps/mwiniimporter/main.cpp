@@ -6,10 +6,7 @@
 
 #include "CLI/CLI.hpp"
 
-#include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
-
-namespace sfs = std::filesystem;
 
 #ifndef _WIN32
 int main(int argc, char* argv[])
@@ -93,7 +90,6 @@ int wmain(int argc, wchar_t* wargv[])
             "\n\twin1252 - Western European (Latin) alphabet, used by default"
             )
             ->default_str("win1252")->check(CLI::IsMember({"win1250", "win1251", "win1252"}, CLI::ignore_case));
-        ;
 
         bool verbose = false;
         app.add_flag("-v,--verbose", verbose, "verbose output");

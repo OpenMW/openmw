@@ -4,6 +4,35 @@
 #include <sstream>
 #include <vector>
 
+#ifdef _WIN32
+#include <windows.h>
+#elif defined(__APPLE__)
+#include <mach-o/dyld.h>
+#else
+#include <unistd.h>
+#endif
+
+std::filesystem::path getExecutablePath() {
+#ifdef _WIN32
+    WCHAR buffer[MAX_PATH];
+    GetModuleFileNameW(NULL, buffer, MAX_PATH);
+    std::wstring exe_path(buffer);
+    return std::filesystem::path(exe_path).parent_path();
+#elif defined(__APPLE__)
+    char buffer[PATH_MAX];
+    uint32_t bufsize = sizeof(buffer);
+    _NSGetExecutablePath(buffer, &bufsize);
+    return std::filesystem::path(buffer).parent_path();;
+#else
+    char buffer[PATH_MAX];
+    ssize_t len = ::readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
+    if (len != -1) {
+        buffer[len] = '\0';
+        std::string exe_path(buffer);
+        return std::filesystem::path(exe_path).parent_path();
+#endif
+}
+
 struct TestParam
 {
     std::string name;
@@ -30,7 +59,7 @@ Archive 1=game2.bsa
     tempFile << iniData;
     tempFile.close();
     std::filesystem::path tempCfgFile = std::filesystem::temp_directory_path() / (param.fileName + ".cfg");
-    std::filesystem::path binaryPath = std::filesystem::current_path() / "openmw-iniimporter";
+    std::filesystem::path binaryPath = getExecutablePath() / "openmw-iniimporter";
 
     std::stringstream cmd;
     cmd << binaryPath << " -i " << tempIniFile << " -c " << tempCfgFile;
