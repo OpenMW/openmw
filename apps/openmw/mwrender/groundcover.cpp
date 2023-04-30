@@ -45,8 +45,8 @@ namespace MWRender
         class InstancedComputeNearFarCullCallback : public osg::DrawableCullCallback
         {
         public:
-            InstancedComputeNearFarCullCallback(
-                const std::vector<Groundcover::GroundcoverEntry>& instances, const osg::Vec3& chunkPosition, const osg::BoundingBox& instanceBounds)
+            InstancedComputeNearFarCullCallback(const std::vector<Groundcover::GroundcoverEntry>& instances,
+                const osg::Vec3& chunkPosition, const osg::BoundingBox& instanceBounds)
                 : mInstanceMatrices()
                 , mInstanceBounds(instanceBounds)
             {
@@ -107,11 +107,13 @@ namespace MWRender
                             {
                                 osg::Matrix fullMatrix = instanceMatrix * matrix;
                                 osg::Vec3 instanceLookVector(-fullMatrix(0, 2), -fullMatrix(1, 2), -fullMatrix(2, 2));
-                                unsigned int instanceBbCornerFar
-                                    = (instanceLookVector.x() >= 0 ? 1 : 0) | (instanceLookVector.y() >= 0 ? 2 : 0) | (instanceLookVector.z() >= 0 ? 4 : 0);
+                                unsigned int instanceBbCornerFar = (instanceLookVector.x() >= 0 ? 1 : 0)
+                                    | (instanceLookVector.y() >= 0 ? 2 : 0) | (instanceLookVector.z() >= 0 ? 4 : 0);
                                 unsigned int instanceBbCornerNear = (~instanceBbCornerFar) & 7;
-                                value_type instanceDNear = distance(mInstanceBounds.corner(instanceBbCornerNear), fullMatrix);
-                                value_type instanceDFar = distance(mInstanceBounds.corner(instanceBbCornerFar), fullMatrix);
+                                value_type instanceDNear
+                                    = distance(mInstanceBounds.corner(instanceBbCornerNear), fullMatrix);
+                                value_type instanceDFar
+                                    = distance(mInstanceBounds.corner(instanceBbCornerFar), fullMatrix);
 
                                 if (instanceDNear > instanceDFar)
                                     std::swap(instanceDNear, instanceDFar);
@@ -119,8 +121,8 @@ namespace MWRender
                                 if (instanceDFar < 0 || instanceDNear > dNear)
                                     continue;
 
-                                value_type newNear = cullVisitor.computeNearestPointInFrustum(
-                                    fullMatrix, planes, *drawable);
+                                value_type newNear
+                                    = cullVisitor.computeNearestPointInFrustum(fullMatrix, planes, *drawable);
                                 dNear = std::min(dNear, newNear);
                             }
                             if (dNear < computedZNear)
@@ -134,11 +136,13 @@ namespace MWRender
                             {
                                 osg::Matrix fullMatrix = instanceMatrix * matrix;
                                 osg::Vec3 instanceLookVector(-fullMatrix(0, 2), -fullMatrix(1, 2), -fullMatrix(2, 2));
-                                unsigned int instanceBbCornerFar
-                                    = (instanceLookVector.x() >= 0 ? 1 : 0) | (instanceLookVector.y() >= 0 ? 2 : 0) | (instanceLookVector.z() >= 0 ? 4 : 0);
+                                unsigned int instanceBbCornerFar = (instanceLookVector.x() >= 0 ? 1 : 0)
+                                    | (instanceLookVector.y() >= 0 ? 2 : 0) | (instanceLookVector.z() >= 0 ? 4 : 0);
                                 unsigned int instanceBbCornerNear = (~instanceBbCornerFar) & 7;
-                                value_type instanceDNear = distance(mInstanceBounds.corner(instanceBbCornerNear), fullMatrix);
-                                value_type instanceDFar = distance(mInstanceBounds.corner(instanceBbCornerFar), fullMatrix);
+                                value_type instanceDNear
+                                    = distance(mInstanceBounds.corner(instanceBbCornerNear), fullMatrix);
+                                value_type instanceDFar
+                                    = distance(mInstanceBounds.corner(instanceBbCornerFar), fullMatrix);
 
                                 if (instanceDNear > instanceDFar)
                                     std::swap(instanceDNear, instanceDFar);
