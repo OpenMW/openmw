@@ -46,8 +46,9 @@ namespace MWRender
         {
         public:
             InstancedComputeNearFarCullCallback(
-                const std::vector<Groundcover::GroundcoverEntry>& instances, const osg::Vec3& chunkPosition)
+                const std::vector<Groundcover::GroundcoverEntry>& instances, const osg::Vec3& chunkPosition, const osg::BoundingBox& instanceBounds)
                 : mInstanceMatrices()
+                , mInstanceBounds(instanceBounds)
             {
                 mInstanceMatrices.reserve(instances.size());
                 for (const auto& instance : instances)
@@ -101,11 +102,25 @@ namespace MWRender
 
                         if (dNear < computedZNear)
                         {
-                            dNear = std::numeric_limits<value_type>::max();
+                            dNear = computedZNear;
                             for (const auto& instanceMatrix : mInstanceMatrices)
                             {
+                                osg::Matrix fullMatrix = instanceMatrix * matrix;
+                                osg::Vec3 instanceLookVector(-fullMatrix(0, 2), -fullMatrix(1, 2), -fullMatrix(2, 2));
+                                unsigned int instanceBbCornerFar
+                                    = (instanceLookVector.x() >= 0 ? 1 : 0) | (instanceLookVector.y() >= 0 ? 2 : 0) | (instanceLookVector.z() >= 0 ? 4 : 0);
+                                unsigned int instanceBbCornerNear = (~instanceBbCornerFar) & 7;
+                                value_type instanceDNear = distance(mInstanceBounds.corner(instanceBbCornerNear), fullMatrix);
+                                value_type instanceDFar = distance(mInstanceBounds.corner(instanceBbCornerFar), fullMatrix);
+
+                                if (instanceDNear > instanceDFar)
+                                    std::swap(instanceDNear, instanceDFar);
+
+                                if (instanceDFar < 0 || instanceDNear > dNear)
+                                    continue;
+
                                 value_type newNear = cullVisitor.computeNearestPointInFrustum(
-                                    instanceMatrix * matrix, planes, *drawable);
+                                    fullMatrix, planes, *drawable);
                                 dNear = std::min(dNear, newNear);
                             }
                             if (dNear < computedZNear)
@@ -114,9 +129,23 @@ namespace MWRender
 
                         if (cnfMode == osg::CullSettings::COMPUTE_NEAR_FAR_USING_PRIMITIVES && dFar > computedZFar)
                         {
-                            dFar = -std::numeric_limits<value_type>::max();
+                            dFar = computedZFar;
                             for (const auto& instanceMatrix : mInstanceMatrices)
                             {
+                                osg::Matrix fullMatrix = instanceMatrix * matrix;
+                                osg::Vec3 instanceLookVector(-fullMatrix(0, 2), -fullMatrix(1, 2), -fullMatrix(2, 2));
+                                unsigned int instanceBbCornerFar
+                                    = (instanceLookVector.x() >= 0 ? 1 : 0) | (instanceLookVector.y() >= 0 ? 2 : 0) | (instanceLookVector.z() >= 0 ? 4 : 0);
+                                unsigned int instanceBbCornerNear = (~instanceBbCornerFar) & 7;
+                                value_type instanceDNear = distance(mInstanceBounds.corner(instanceBbCornerNear), fullMatrix);
+                                value_type instanceDFar = distance(mInstanceBounds.corner(instanceBbCornerFar), fullMatrix);
+
+                                if (instanceDNear > instanceDFar)
+                                    std::swap(instanceDNear, instanceDFar);
+
+                                if (instanceDFar < 0 || instanceDFar < dFar)
+                                    continue;
+
                                 value_type newFar = cullVisitor.computeFurthestPointInFrustum(
                                     instanceMatrix * matrix, planes, *drawable);
                                 dFar = std::max(dFar, newFar);
@@ -132,6 +161,7 @@ namespace MWRender
 
         private:
             std::vector<osg::Matrix> mInstanceMatrices;
+            osg::BoundingBox mInstanceBounds;
         };
 
         class InstancingVisitor : public osg::NodeVisitor
@@ -153,7 +183,8 @@ namespace MWRender
 
                 osg::ref_ptr<osg::Vec4Array> transforms = new osg::Vec4Array(mInstances.size());
                 osg::BoundingBox box;
-                float radius = geom.getBoundingBox().radius();
+                osg::BoundingBox originalBox = geom.getBoundingBox();
+                float radius = originalBox.radius();
                 for (unsigned int i = 0; i < transforms->getNumElements(); i++)
                 {
                     osg::Vec3f pos(mInstances[i].mPos.asVec3());
@@ -181,7 +212,7 @@ namespace MWRender
                 geom.setVertexAttribArray(6, transforms.get(), osg::Array::BIND_PER_VERTEX);
                 geom.setVertexAttribArray(7, rotations.get(), osg::Array::BIND_PER_VERTEX);
 
-                geom.addCullCallback(new InstancedComputeNearFarCullCallback(mInstances, mChunkPosition));
+                geom.addCullCallback(new InstancedComputeNearFarCullCallback(mInstances, mChunkPosition, originalBox));
             }
 
         private:
