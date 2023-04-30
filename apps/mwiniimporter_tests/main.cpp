@@ -12,7 +12,8 @@
 #include <unistd.h>
 #endif
 
-std::filesystem::path getExecutablePath() {
+std::filesystem::path getExecutablePath()
+{
 #ifdef _WIN32
     WCHAR buffer[MAX_PATH];
     GetModuleFileNameW(NULL, buffer, MAX_PATH);
@@ -22,14 +23,17 @@ std::filesystem::path getExecutablePath() {
     char buffer[PATH_MAX];
     uint32_t bufsize = sizeof(buffer);
     _NSGetExecutablePath(buffer, &bufsize);
-    return std::filesystem::path(buffer).parent_path();;
+    return std::filesystem::path(buffer).parent_path();
 #else
     char buffer[PATH_MAX];
     ssize_t len = ::readlink("/proc/self/exe", buffer, sizeof(buffer) - 1);
-    if (len != -1) {
-        buffer[len] = '\0';
-        std::string exe_path(buffer);
-        return std::filesystem::path(exe_path).parent_path();
+    if (len == -1)
+    {
+        throw std::runtime_error("Could not retrieve executable path");
+    }
+    buffer[len] = '\0';
+    std::string exe_path(buffer);
+    return std::filesystem::path(exe_path).parent_path();
 #endif
 }
 
