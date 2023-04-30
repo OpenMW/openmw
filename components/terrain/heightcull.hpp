@@ -2,7 +2,6 @@
 #define COMPONENTS_TERRAIN_HEIGHTCULL_H
 
 #include <osg/Referenced>
-#include <osg/ref_ptr>
 
 #include <limits>
 

@@ -9,7 +9,6 @@
 #include <QTimer>
 #include <QWidget>
 
-#include <osg/Timer>
 #include <osg/Vec4f>
 #include <osg/ref_ptr>
 

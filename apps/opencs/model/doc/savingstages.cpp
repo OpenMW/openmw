@@ -25,7 +25,6 @@
 #include <apps/opencs/model/world/refcollection.hpp>
 #include <apps/opencs/model/world/refidcollection.hpp>
 #include <apps/opencs/model/world/refiddata.hpp>
-#include <apps/opencs/model/world/subcellcollection.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
 
 #include <components/esm/esmcommon.hpp>
@@ -39,7 +38,6 @@
 #include <components/misc/strings/lower.hpp>
 
 #include "../world/cellcoordinates.hpp"
-#include "../world/infocollection.hpp"
 
 #include "document.hpp"
 

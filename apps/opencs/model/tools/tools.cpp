@@ -7,11 +7,6 @@
 #include <vector>
 
 #include "../doc/document.hpp"
-#include "../doc/operation.hpp"
-#include "../doc/state.hpp"
-
-#include "../world/data.hpp"
-#include "../world/universalid.hpp"
 
 #include "birthsigncheck.hpp"
 #include "bodypartcheck.hpp"

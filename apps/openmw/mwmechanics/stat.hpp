@@ -1,9 +1,6 @@
 #ifndef GAME_MWMECHANICS_STAT_H
 #define GAME_MWMECHANICS_STAT_H
 
-#include <algorithm>
-#include <limits>
-
 namespace ESM
 {
     template <typename T>

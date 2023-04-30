@@ -28,7 +28,6 @@
 #define ESM4_LIGHTING_H
 
 #include <cstdint>
-#include <limits>
 
 namespace ESM4
 {

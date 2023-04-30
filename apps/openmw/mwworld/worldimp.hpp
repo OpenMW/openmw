@@ -1,6 +1,7 @@
 #ifndef GAME_MWWORLD_WORLDIMP_H
 #define GAME_MWWORLD_WORLDIMP_H
 
+#include <osg/Timer>
 #include <osg/ref_ptr>
 
 #include <components/detournavigator/collisionshapetype.hpp>

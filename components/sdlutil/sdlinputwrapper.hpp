@@ -1,8 +1,6 @@
 #ifndef OPENMW_COMPONENTS_SDLUTIL_SDLINPUTWRAPPER_H
 #define OPENMW_COMPONENTS_SDLUTIL_SDLINPUTWRAPPER_H
 
-#include <map>
-
 #include <osg/ref_ptr>
 
 #include <SDL_events.h>
