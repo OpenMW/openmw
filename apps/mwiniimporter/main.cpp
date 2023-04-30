@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 
-#include <cxxopts.hpp>
+#include "CLI/CLI.hpp"
 
 #include <components/files/configurationmanager.hpp>
 #include <components/files/conversion.hpp>
@@ -61,64 +61,66 @@ int wmain(int argc, wchar_t* wargv[])
 
     try
     {
-        cxxopts::Options options("Syntax: openmw-iniimporter <options> inifile configfile\nAllowed options");
+        CLI::App app("Syntax: openmw-iniimporter inifile configfile");
 
-        // clang-format off
-        options.add_options()
-            ("h,help", "produce help message")
-            ("v,verbose", "verbose output")
-            ("i,ini", "morrowind.ini file", cxxopts::value<Files::MaybeQuotedPath>())
-            ("c,cfg", "openmw.cfg file", cxxopts::value<Files::MaybeQuotedPath>())
-            ("o,output", "openmw.cfg file", cxxopts::value<Files::MaybeQuotedPath>()->default_value(""))
-            ("g,game-files", "import esm and esp files")
-            ("f,fonts", "import bitmap fonts")
-            ("A,no-archives", "disable bsa archives import")
-            ("e,encoding",
-                "Character encoding used in OpenMW game messages\n"
-                "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, "
-                "Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
-                "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
-                "\n\twin1252 - Western European (Latin) alphabet\n\n",
-                cxxopts::value<std::string>()->default_value("win1252"))
+        app.get_formatter()->column_width(40);
+        app.get_formatter()->label("ARGUMENTS", "ARGUMENTS");
+
+        std::filesystem::path iniFile;
+        app.add_option("-i, --ini", iniFile, "morrowind.ini file")->required()->check(CLI::ExistingFile);
+
+        std::filesystem::path cfgFile;
+        app.add_option("-c, --cfg", cfgFile, "openmw.cfg file")->required()->check(CLI::NonexistentPath);
+
+        std::filesystem::path outputFile = "";
+        app.add_option("-o,--output", outputFile, "openmw.cfg file")->default_str("")->check(CLI::NonexistentPath);
+
+        bool gameFiles = false;
+        app.add_flag("-g,--game-files", gameFiles, "import esm and esp files");
+
+        bool fonts = false;
+        app.add_flag("-f,--fonts", fonts, "import bitmap fonts");
+
+        bool noArchives = false;
+        app.add_flag("-A,--no-archives", noArchives, "disable bsa archives import");
+
+        std::string gameEncoding = "win1252";
+        app.add_option("-e,--encoding", gameEncoding,
+            "Character encoding used in OpenMW game messages.\n"
+            "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, "
+            "Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
+            "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
+            "\n\twin1252 - Western European (Latin) alphabet, used by default"
+            )
+            ->default_str("win1252")->check(CLI::IsMember({"win1250", "win1251", "win1252"}, CLI::ignore_case));
         ;
-        // clang-format on
 
-        options.parse_positional({ "ini", "cfg" });
+        bool verbose = false;
+        app.add_flag("-v,--verbose", verbose, "verbose output");
 
-        auto result = options.parse(argc, argv);
-        if (result.count("help") || !result.count("ini") || !result.count("cfg"))
-        {
-            std::cout << options.help() << std::endl;
-            return 0;
+        try {
+            CLI11_PARSE(app, argc, argv)
+        } catch (const CLI::ParseError& e) {
+            std::cerr << e.what() << std::endl;
+            std::cout << app.help() << std::endl;
+            return app.exit(e);
         }
 
-        std::filesystem::path iniFile(result["ini"].as<Files::MaybeQuotedPath>().u8string());
-        std::filesystem::path cfgFile(result["cfg"].as<Files::MaybeQuotedPath>().u8string());
-        std::filesystem::path outputFile = result["output"].as<Files::MaybeQuotedPath>().u8string();
         if (outputFile.empty())
         {
             outputFile = cfgFile;
         }
 
-        if (!std::filesystem::exists(iniFile))
-        {
-            std::cerr << "ini file does not exist" << std::endl;
-            return -3;
-        }
-        if (!std::filesystem::exists(cfgFile))
-            std::cerr << "cfg file does not exist" << std::endl;
-
         MwIniImporter importer;
-        importer.setVerbose(result["verbose"].as<bool>());
+        importer.setVerbose(verbose);
 
         // Font encoding settings
-        std::string encoding(result["encoding"].as<std::string>());
-        importer.setInputEncoding(ToUTF8::calculateEncoding(encoding));
+        importer.setInputEncoding(ToUTF8::calculateEncoding(gameEncoding));
 
         MwIniImporter::multistrmap ini = importer.loadIniFile(iniFile);
         MwIniImporter::multistrmap cfg = importer.loadCfgFile(cfgFile);
 
-        if (!result["fonts"].as<bool>())
+        if (!fonts)
         {
             ini.erase("Fonts:Font 0");
             ini.erase("Fonts:Font 1");
@@ -128,12 +130,12 @@ int wmain(int argc, wchar_t* wargv[])
         importer.merge(cfg, ini);
         importer.mergeFallback(cfg, ini);
 
-        if (result["game-files"].as<bool>())
+        if (gameFiles)
         {
             importer.importGameFiles(cfg, ini, iniFile);
         }
 
-        if (!result["no-archives"].as<bool>())
+        if (!noArchives)
         {
             importer.importArchives(cfg, ini);
         }

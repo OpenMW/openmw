@@ -15,7 +15,7 @@ openmw_add_executable(openmw-iniimporter
 
 target_link_libraries(openmw-iniimporter
     components
-    cxxopts::cxxopts
+    CLI11::CLI11
 )
 
 if (WIN32)

@@ -190,18 +190,18 @@ if(NOT OPENMW_USE_SYSTEM_RECASTNAVIGATION)
     FetchContent_MakeAvailableExcludeFromAll(recastnavigation)
 endif()
 
-if(NOT OPENMW_USE_SYSTEM_CXXOPTS)
+if(NOT OPENMW_USE_SYSTEM_CLI11)
     include(FetchContent)
-    FetchContent_Declare(cxxopts
-            URL https://github.com/jarro2783/cxxopts/archive/refs/tags/v3.1.1.zip
-            URL_HASH SHA512=df8a322f2ecef9bc0e2b17904b008e19e8f6d0384ba2ec95375c15be14953b008550cb119828f03a4eee12795c8df9a558a6eeb8c0e41ad7092b90270d517f5f
-            SOURCE_DIR fetched/cxxopts
+    FetchContent_Declare(CLI11
+            URL https://github.com/CLIUtils/CLI11/archive/refs/tags/v2.3.2.zip
+            URL_HASH SHA512=cefa2bc275654d7ff73cdba8d4269c4b92d917986f223d1e290907087c3c7a82e64809c8430fbd2c3413819e95d267f1e246fb13816fbc3e7808c4ea1069cc19
+            SOURCE_DIR fetched/cli11
             )
-    FetchContent_MakeAvailableExcludeFromAll(cxxopts)
+    FetchContent_MakeAvailableExcludeFromAll(CLI11)
 
     ### here is what makes all include directories -isystem
-    get_target_property(CXXOPTS_IID cxxopts INTERFACE_INCLUDE_DIRECTORIES)
-    set_target_properties(cxxopts PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CXXOPTS_IID}")
+    get_target_property(CLI11_IID CLI11 INTERFACE_INCLUDE_DIRECTORIES)
+    set_target_properties(CLI11 PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${CLI11_IID}")
     ### TODO: use SYSTEM option to FetchContent_Declare once CMake 3.25 is available and remove the above workaround
 endif()
 

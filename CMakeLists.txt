@@ -364,10 +364,10 @@ if (USE_SYSTEM_TINYXML)
     include_directories(SYSTEM ${TinyXML_INCLUDE_DIRS})
 endif()
 
-# CXXOPTS
-option(OPENMW_USE_SYSTEM_CXXOPTS "Use system provided cxxopts library" ON)
-if(OPENMW_USE_SYSTEM_CXXOPTS)
-    find_package(cxxopts CONFIG REQUIRED)
+# cli11
+option(OPENMW_USE_SYSTEM_CLI11 "Use system provided cli11 library" ON)
+if(OPENMW_USE_SYSTEM_CLI11)
+    find_package(CLI11 CONFIG REQUIRED)
 endif()
 
 # Platform specific
