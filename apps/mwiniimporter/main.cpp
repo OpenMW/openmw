@@ -83,20 +83,24 @@ int wmain(int argc, wchar_t* wargv[])
 
         std::string gameEncoding = "win1252";
         app.add_option("-e,--encoding", gameEncoding,
-            "Character encoding used in OpenMW game messages.\n"
-            "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, "
-            "Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
-            "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
-            "\n\twin1252 - Western European (Latin) alphabet, used by default"
+                "Character encoding used in OpenMW game messages.\n"
+                "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, Bosnian, "
+                "Croatian, Serbian (Latin script), Romanian and Albanian languages\n"
+                "\n\twin1251 - Cyrillic alphabet such as Russian, Bulgarian, Serbian Cyrillic and other languages\n"
+                "\n\twin1252 - Western European (Latin) alphabet, used by default"
             )
-            ->default_str("win1252")->check(CLI::IsMember({"win1250", "win1251", "win1252"}, CLI::ignore_case));
+            ->default_str("win1252")
+            ->check(CLI::IsMember({"win1250", "win1251", "win1252"}, CLI::ignore_case));
 
         bool verbose = false;
         app.add_flag("-v,--verbose", verbose, "verbose output");
 
-        try {
+        try
+        {
             CLI11_PARSE(app, argc, argv)
-        } catch (const CLI::ParseError& e) {
+        }
+            catch (const CLI::ParseError& e)
+        {
             std::cerr << e.what() << std::endl;
             std::cout << app.help() << std::endl;
             return app.exit(e);
