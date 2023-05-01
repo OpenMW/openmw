@@ -37,7 +37,8 @@ std::filesystem::path getExecutablePath()
 #endif
 }
 
-int runBinary(const std::filesystem::path& binaryPath, const std::filesystem::path& iniPath, const std::filesystem::path& cfgPath)
+int runBinary(
+    const std::filesystem::path& binaryPath, const std::filesystem::path& iniPath, const std::filesystem::path& cfgPath)
 {
 #ifdef _WIN32
     std::wstring wBinaryPath = binaryPath.native();
