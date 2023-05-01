@@ -37,6 +37,22 @@ std::filesystem::path getExecutablePath()
 #endif
 }
 
+int runBinary(const std::filesystem::path& binaryPath, const std::filesystem::path& iniPath, const std::filesystem::path& cfgPath)
+{
+#ifdef _WIN32
+    std::wstring wBinaryPath = binaryPath.native();
+    std::wstring wIniPath = iniPath.native();
+    std::wstring wCfgPath = cfgPath.native();
+    std::wstringstream cmd;
+    cmd << wBinaryPath << L" -i " << wIniPath << L" -c " << wCfgPath;
+    return _wsystem(cmd.str().c_str());
+#else
+    std::stringstream cmd;
+    cmd << binaryPath << " -i " << iniPath << " -c " << cfgPath;
+    return std::system(cmd.str().c_str());
+#endif
+}
+
 struct TestParam
 {
     std::string name;
@@ -65,10 +81,7 @@ Archive 1=game2.bsa
     std::filesystem::path tempCfgFile = std::filesystem::temp_directory_path() / (param.fileName + ".cfg");
     std::filesystem::path binaryPath = getExecutablePath() / "openmw-iniimporter";
 
-    std::stringstream cmd;
-    cmd << binaryPath << " -i " << tempIniFile << " -c " << tempCfgFile;
-
-    int ret = std::system(cmd.str().c_str());
+    int ret = runBinary(binaryPath, tempIniFile, tempCfgFile);
     ASSERT_EQ(ret, 0);
 
     // Verify the cfg file was created and has the expected contents
