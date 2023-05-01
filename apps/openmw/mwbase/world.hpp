@@ -12,8 +12,6 @@
 
 #include <components/misc/rng.hpp>
 
-#include <osg/Timer>
-
 #include "../mwworld/doorstate.hpp"
 #include "../mwworld/globalvariablename.hpp"
 #include "../mwworld/ptr.hpp"

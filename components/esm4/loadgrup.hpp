@@ -30,8 +30,6 @@
 #include <cstdint>
 #include <vector>
 
-#include "common.hpp" // GroupLabel
-
 namespace ESM4
 {
     // http://www.uesp.net/wiki/Tes4Mod:Mod_File_Format#Hierarchical_Top_Groups

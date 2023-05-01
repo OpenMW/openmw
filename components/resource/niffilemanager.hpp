@@ -1,8 +1,6 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_NIFFILEMANAGER_H
 #define OPENMW_COMPONENTS_RESOURCE_NIFFILEMANAGER_H
 
-#include <osg/ref_ptr>
-
 #include <components/nif/niffile.hpp>
 
 #include "resourcemanager.hpp"

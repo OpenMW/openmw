@@ -23,10 +23,6 @@
 
 #include "../../model/doc/document.hpp"
 #include "../../model/doc/documentmanager.hpp"
-#include "../../model/doc/state.hpp"
-
-#include "../../model/world/columns.hpp"
-#include "../../model/world/idcompletionmanager.hpp"
 
 #include "../../model/prefs/state.hpp"
 
@@ -35,7 +31,6 @@
 #include "../world/idcompletiondelegate.hpp"
 #include "../world/idtypedelegate.hpp"
 #include "../world/recordstatusdelegate.hpp"
-#include "../world/util.hpp"
 #include "../world/vartypedelegate.hpp"
 
 #include "view.hpp"

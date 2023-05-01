@@ -50,7 +50,6 @@
 
 #include "cameracontroller.hpp"
 #include "instancemode.hpp"
-#include "mask.hpp"
 #include "object.hpp"
 #include "pathgridmode.hpp"
 

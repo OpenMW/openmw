@@ -1,8 +1,5 @@
-
 #ifndef COMPONENTS_SCENEUTIL_LIGHTCOMMON
 #define COMPONENTS_SCENEUTIL_LIGHTCOMMON
-#include <string_view>
-#include <variant>
 
 #include <osg/Vec4>
 

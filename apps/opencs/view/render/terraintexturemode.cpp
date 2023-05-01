@@ -14,7 +14,6 @@
 
 #include <osg/Vec2f>
 #include <osg/Vec3d>
-#include <osg/ref_ptr>
 
 #include <apps/opencs/model/prefs/category.hpp>
 #include <apps/opencs/model/prefs/setting.hpp>
@@ -41,7 +40,6 @@
 #include "../../model/world/landtexture.hpp"
 #include "../../model/world/tablemimedata.hpp"
 #include "../../model/world/universalid.hpp"
-#include "../widget/brushshapes.hpp"
 
 #include "brushdraw.hpp"
 #include "editmode.hpp"
