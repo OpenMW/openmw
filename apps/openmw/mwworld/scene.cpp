@@ -1218,9 +1218,7 @@ namespace MWWorld
 
         loadingListener->setLabel("#{OMWEngine:InitializingData}");
 
-        while (!mPreloader->syncTerrainLoad(vec, mRendering.getReferenceTime(), *loadingListener))
-        {
-        }
+        mPreloader->syncTerrainLoad(*loadingListener);
     }
 
     void Scene::reloadTerrain()

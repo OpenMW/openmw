@@ -403,20 +403,10 @@ namespace MWWorld
         mWorkQueue = workQueue;
     }
 
-    bool CellPreloader::syncTerrainLoad(
-        const std::vector<CellPreloader::PositionCellGrid>& positions, double timestamp, Loading::Listener& listener)
+    void CellPreloader::syncTerrainLoad(Loading::Listener& listener)
     {
-        if (!mTerrainPreloadItem)
-            return true;
-        else if (mTerrainPreloadItem->isDone())
-        {
-            return true;
-        }
-        else
-        {
+        if (mTerrainPreloadItem != nullptr && !mTerrainPreloadItem->isDone())
             mTerrainPreloadItem->wait(listener);
-            return true;
-        }
     }
 
     void CellPreloader::abortTerrainPreloadExcept(const CellPreloader::PositionCellGrid* exceptPos)
