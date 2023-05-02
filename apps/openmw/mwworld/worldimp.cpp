@@ -1271,7 +1271,7 @@ namespace MWWorld
         CellStore* newCell
             = cell->isExterior() ? &mWorldModel.getExterior(index.x(), index.y(), worldspaceId) : nullptr;
         bool isCellActive = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior()
-            && mWorldScene->isCellActive(*newCell);
+            && (newCell && mWorldScene->isCellActive(*newCell));
 
         if (cell->isExterior() || (moveToActive && isCellActive && ptr.getClass().isActor()))
             cell = newCell;
