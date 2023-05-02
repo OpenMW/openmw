@@ -41,11 +41,8 @@ int runBinary(
     const std::filesystem::path& binaryPath, const std::filesystem::path& iniPath, const std::filesystem::path& cfgPath)
 {
 #ifdef _WIN32
-    std::wstring wBinaryPath = binaryPath.native();
-    std::wstring wIniPath = iniPath.native();
-    std::wstring wCfgPath = cfgPath.native();
     std::wstringstream cmd;
-    cmd << wBinaryPath << L" -i " << wIniPath << L" -c " << wCfgPath;
+    cmd << binaryPath.native() << L" -i " << iniPath.native() << L" -c " << cfgPath.native();
     return _wsystem(cmd.str().c_str());
 #else
     std::stringstream cmd;

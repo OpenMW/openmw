@@ -6,9 +6,6 @@ source_group(apps\\openmw-iniimporter-tests FILES ${INIIMPORTER_TESTS_SRC_FILES}
 
 openmw_add_executable(openmw-iniimporter-tests ${INIIMPORTER_TESTS_SRC_FILES})
 
-target_include_directories(openmw-iniimporter-tests SYSTEM PRIVATE ${GTEST_INCLUDE_DIRS})
-target_include_directories(openmw-iniimporter-tests SYSTEM PRIVATE ${GMOCK_INCLUDE_DIRS})
-
 target_link_libraries(openmw-iniimporter-tests PRIVATE
     GTest::GTest
     GMock::GMock

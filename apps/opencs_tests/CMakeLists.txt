@@ -8,9 +8,6 @@ source_group(apps\\openmw-cs-tests FILES ${OPENCS_TESTS_SRC_FILES})
 
 openmw_add_executable(openmw-cs-tests ${OPENCS_TESTS_SRC_FILES})
 
-target_include_directories(openmw-cs-tests SYSTEM PRIVATE ${GTEST_INCLUDE_DIRS})
-target_include_directories(openmw-cs-tests SYSTEM PRIVATE ${GMOCK_INCLUDE_DIRS})
-
 target_link_libraries(openmw-cs-tests PRIVATE
     openmw-cs-lib
     GTest::GTest

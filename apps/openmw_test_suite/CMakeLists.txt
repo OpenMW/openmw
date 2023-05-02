@@ -1,6 +1,3 @@
-include_directories(SYSTEM ${GTEST_INCLUDE_DIRS})
-include_directories(SYSTEM ${GMOCK_INCLUDE_DIRS})
-
 file(GLOB UNITTEST_SRC_FILES
     testing_util.hpp
 
