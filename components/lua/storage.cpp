@@ -138,6 +138,34 @@ namespace LuaUtil
         };
     }
 
+    sol::table LuaStorage::initGlobalPackage(lua_State* lua, LuaStorage* globalStorage)
+    {
+        sol::table res(lua, sol::create);
+        res["globalSection"]
+            = [globalStorage](std::string_view section) { return globalStorage->getMutableSection(section); };
+        res["allGlobalSections"] = [globalStorage]() { return globalStorage->getAllSections(); };
+        return LuaUtil::makeReadOnly(res);
+    }
+
+    sol::table LuaStorage::initLocalPackage(lua_State* lua, LuaStorage* globalStorage)
+    {
+        sol::table res(lua, sol::create);
+        res["globalSection"]
+            = [globalStorage](std::string_view section) { return globalStorage->getReadOnlySection(section); };
+        return LuaUtil::makeReadOnly(res);
+    }
+
+    sol::table LuaStorage::initPlayerPackage(lua_State* lua, LuaStorage* globalStorage, LuaStorage* playerStorage)
+    {
+        sol::table res(lua, sol::create);
+        res["globalSection"]
+            = [globalStorage](std::string_view section) { return globalStorage->getReadOnlySection(section); };
+        res["playerSection"]
+            = [playerStorage](std::string_view section) { return playerStorage->getMutableSection(section); };
+        res["allPlayerSections"] = [playerStorage]() { return playerStorage->getAllSections(); };
+        return LuaUtil::makeReadOnly(res);
+    }
+
     void LuaStorage::clearTemporaryAndRemoveCallbacks()
     {
         auto it = mData.begin();

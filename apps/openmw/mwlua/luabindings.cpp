@@ -3,11 +3,12 @@
 #include <chrono>
 
 #include <components/esm/attr.hpp>
-#include <components/esm3/activespells.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadskil.hpp>
+
 #include <components/lua/l10n.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/utilpackage.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -22,7 +23,16 @@
 #include "luamanagerimp.hpp"
 #include "worldview.hpp"
 
+#include "camerabindings.hpp"
+#include "cellbindings.hpp"
+#include "debugbindings.hpp"
+#include "inputbindings.hpp"
 #include "magicbindings.hpp"
+#include "nearbybindings.hpp"
+#include "objectbindings.hpp"
+#include "postprocessingbindings.hpp"
+#include "types/types.hpp"
+#include "uibindings.hpp"
 
 namespace MWLua
 {
@@ -54,7 +64,7 @@ namespace MWLua
         // api["resume"] = []() {};
     }
 
-    sol::table initCorePackage(const Context& context)
+    static sol::table initCorePackage(const Context& context)
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
@@ -96,7 +106,7 @@ namespace MWLua
         return LuaUtil::makeReadOnly(api);
     }
 
-    sol::table initWorldPackage(const Context& context)
+    static sol::table initWorldPackage(const Context& context)
     {
         sol::table api(context.mLua->sol(), sol::create);
         WorldView* worldView = context.mWorldView;
@@ -137,33 +147,48 @@ namespace MWLua
         return LuaUtil::makeReadOnly(api);
     }
 
-    sol::table initGlobalStoragePackage(const Context& context, LuaUtil::LuaStorage* globalStorage)
+    std::map<std::string, sol::object> initCommonPackages(const Context& context)
     {
-        sol::table res(context.mLua->sol(), sol::create);
-        res["globalSection"]
-            = [globalStorage](std::string_view section) { return globalStorage->getMutableSection(section); };
-        res["allGlobalSections"] = [globalStorage]() { return globalStorage->getAllSections(); };
-        return LuaUtil::makeReadOnly(res);
+        sol::state_view lua = context.mLua->sol();
+        WorldView* w = context.mWorldView;
+        return {
+            { "openmw.async",
+                LuaUtil::getAsyncPackageInitializer(
+                    lua, [w] { return w->getSimulationTime(); }, [w] { return w->getGameTime(); }) },
+            { "openmw.core", initCorePackage(context) },
+            { "openmw.types", initTypesPackage(context) },
+            { "openmw.util", LuaUtil::initUtilPackage(lua) },
+        };
     }
 
-    sol::table initLocalStoragePackage(const Context& context, LuaUtil::LuaStorage* globalStorage)
+    std::map<std::string, sol::object> initGlobalPackages(const Context& context)
     {
-        sol::table res(context.mLua->sol(), sol::create);
-        res["globalSection"]
-            = [globalStorage](std::string_view section) { return globalStorage->getReadOnlySection(section); };
-        return LuaUtil::makeReadOnly(res);
+        initObjectBindingsForGlobalScripts(context);
+        initCellBindingsForGlobalScripts(context);
+        return {
+            { "openmw.world", initWorldPackage(context) },
+        };
     }
 
-    sol::table initPlayerStoragePackage(
-        const Context& context, LuaUtil::LuaStorage* globalStorage, LuaUtil::LuaStorage* playerStorage)
+    std::map<std::string, sol::object> initLocalPackages(const Context& context)
     {
-        sol::table res(context.mLua->sol(), sol::create);
-        res["globalSection"]
-            = [globalStorage](std::string_view section) { return globalStorage->getReadOnlySection(section); };
-        res["playerSection"]
-            = [playerStorage](std::string_view section) { return playerStorage->getMutableSection(section); };
-        res["allPlayerSections"] = [playerStorage]() { return playerStorage->getAllSections(); };
-        return LuaUtil::makeReadOnly(res);
+        initObjectBindingsForLocalScripts(context);
+        initCellBindingsForLocalScripts(context);
+        LocalScripts::initializeSelfPackage(context);
+        return {
+            { "openmw.nearby", initNearbyPackage(context) },
+        };
+    }
+
+    std::map<std::string, sol::object> initPlayerPackages(const Context& context)
+    {
+        return {
+            { "openmw.camera", initCameraPackage(context.mLua->sol()) },
+            { "openmw.debug", initDebugPackage(context) },
+            { "openmw.input", initInputPackage(context) },
+            { "openmw.postprocessing", initPostprocessingPackage(context) },
+            { "openmw.ui", initUserInterfacePackage(context) },
+        };
     }
 
 }

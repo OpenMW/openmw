@@ -1,3 +1,5 @@
+#include "uibindings.hpp"
+
 #include <components/lua_ui/alignment.hpp>
 #include <components/lua_ui/content.hpp>
 #include <components/lua_ui/element.hpp>
@@ -18,71 +20,20 @@ namespace MWLua
 {
     namespace
     {
-        class UiAction final : public LuaManager::Action
+        template <typename Fn>
+        void wrapAction(const std::shared_ptr<LuaUi::Element>& element, Fn&& fn)
         {
-        public:
-            enum Type
+            try
             {
-                CREATE = 0,
-                UPDATE,
-                DESTROY,
-            };
-
-            UiAction(Type type, std::shared_ptr<LuaUi::Element> element, LuaUtil::LuaState* state)
-                : Action(state)
-                , mType{ type }
-                , mElement{ std::move(element) }
-            {
+                fn();
             }
-
-            void apply() const override
+            catch (...)
             {
-                try
-                {
-                    switch (mType)
-                    {
-                        case CREATE:
-                            mElement->create();
-                            break;
-                        case UPDATE:
-                            mElement->update();
-                            break;
-                        case DESTROY:
-                            mElement->destroy();
-                            break;
-                    }
-                }
-                catch (std::exception&)
-                {
-                    // prevent any actions on a potentially corrupted widget
-                    mElement->mRoot = nullptr;
-                    throw;
-                }
+                // prevent any actions on a potentially corrupted widget
+                element->mRoot = nullptr;
+                throw;
             }
-
-            std::string toString() const override
-            {
-                std::string result;
-                switch (mType)
-                {
-                    case CREATE:
-                        result += "Create";
-                        break;
-                    case UPDATE:
-                        result += "Update";
-                        break;
-                    case DESTROY:
-                        result += "Destroy";
-                        break;
-                }
-                result += " UI";
-                return result;
-            }
-
-        private:
-            Type mType;
-            std::shared_ptr<LuaUi::Element> mElement;
-        };
+        }
 
         // Lua arrays index from 1
         inline size_t fromLuaIndex(size_t i)
@@ -100,17 +51,17 @@ namespace MWLua
         auto element = context.mLua->sol().new_usertype<LuaUi::Element>("Element");
         element["layout"] = sol::property([](LuaUi::Element& element) { return element.mLayout; },
             [](LuaUi::Element& element, const sol::table& layout) { element.mLayout = layout; });
-        element["update"] = [context](const std::shared_ptr<LuaUi::Element>& element) {
+        element["update"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
             if (element->mDestroy || element->mUpdate)
                 return;
             element->mUpdate = true;
-            context.mLuaManager->addAction(std::make_unique<UiAction>(UiAction::UPDATE, element, context.mLua));
+            luaManager->addAction([element] { wrapAction(element, [&] { element->update(); }); }, "Update UI");
         };
-        element["destroy"] = [context](const std::shared_ptr<LuaUi::Element>& element) {
+        element["destroy"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
             if (element->mDestroy)
                 return;
             element->mDestroy = true;
-            context.mLuaManager->addAction(std::make_unique<UiAction>(UiAction::DESTROY, element, context.mLua));
+            luaManager->addAction([element] { wrapAction(element, [&] { element->destroy(); }); }, "Destroy UI");
         };
 
         sol::table api = context.mLua->newTable();
@@ -142,9 +93,9 @@ namespace MWLua
             }
         };
         api["content"] = LuaUi::loadContentConstructor(context.mLua);
-        api["create"] = [context](const sol::table& layout) {
+        api["create"] = [luaManager = context.mLuaManager](const sol::table& layout) {
             auto element = LuaUi::Element::make(layout);
-            context.mLuaManager->addAction(std::make_unique<UiAction>(UiAction::CREATE, element, context.mLua));
+            luaManager->addAction([element] { wrapAction(element, [&] { element->create(); }); }, "Create UI");
             return element;
         };
         api["updateAll"] = [context]() {

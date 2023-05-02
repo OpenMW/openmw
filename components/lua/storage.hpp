@@ -14,6 +14,9 @@ namespace LuaUtil
     {
     public:
         static void initLuaBindings(lua_State*);
+        static sol::table initGlobalPackage(lua_State* lua, LuaStorage* globalStorage);
+        static sol::table initLocalPackage(lua_State* lua, LuaStorage* globalStorage);
+        static sol::table initPlayerPackage(lua_State* lua, LuaStorage* globalStorage, LuaStorage* playerStorage);
 
         explicit LuaStorage(lua_State* lua)
             : mLua(lua)

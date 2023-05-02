@@ -1,4 +1,4 @@
-#include "luabindings.hpp"
+#include "cellbindings.hpp"
 
 #include <components/esm/esmbridge.hpp>
 #include <components/esm/records.hpp>

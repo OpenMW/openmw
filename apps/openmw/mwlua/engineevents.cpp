@@ -1,7 +1,7 @@
 #include "engineevents.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
@@ -75,7 +75,7 @@ namespace MWLua
         MWWorld::Ptr getPtr(const ESM::RefNum& id) const
         {
             MWWorld::Ptr res = mWorldModel->getPtr(id);
-            if (res.isEmpty() && mLuaDebug)
+            if (res.isEmpty() && Settings::lua().mLuaDebug)
                 Log(Debug::Verbose) << "Can not find object" << id.toString() << " when calling engine hanglers";
             return res;
         }
@@ -91,7 +91,6 @@ namespace MWLua
         LocalScripts* getLocalScripts(const ESM::RefNum& id) const { return getLocalScripts(getPtr(id)); }
 
         GlobalScripts& mGlobalScripts;
-        bool mLuaDebug = Settings::Manager::getBool("lua debug", "Lua");
         MWWorld::WorldModel* mWorldModel = MWBase::Environment::get().getWorldModel();
     };
 

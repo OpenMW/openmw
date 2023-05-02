@@ -4,7 +4,7 @@
 
 #include <apps/openmw/profile.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <osgViewer/Viewer>
 
@@ -14,7 +14,7 @@ namespace MWLua
         : mManager(manager)
         , mViewer(viewer)
     {
-        if (Settings::Manager::getInt("lua num threads", "Lua") > 0)
+        if (Settings::lua().mLuaNumThreads > 0)
             mThread = std::thread([this] { run(); });
     }
 
