@@ -62,7 +62,7 @@ struct TestParam
 };
 
 const std::vector<TestParam> testParams
-    = { { "ascii", "ascii" }, { "space", "spaaaaa ce" }, { "unicode", "(╯°□°)╯︵ ┻━┻" }, { "emoji", "💩" } };
+    = { { "ascii", "ascii" }, { "space", "spaaaaa ce" }, { "unicode", "(╯°□°)╯︵ ┻━┻" }, { "emoji", "🖕" } };
 
 class IniImporterTest : public ::testing::TestWithParam<TestParam>
 {
