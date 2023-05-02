@@ -4,6 +4,8 @@
 #include <osg/Quat>
 #include <osg/Vec3f>
 
+#include <components/esm/refid.hpp>
+
 namespace ESM
 {
 
@@ -42,6 +44,41 @@ namespace ESM
         operator osg::Vec3f() const { return osg::Vec3f(mValues[0], mValues[1], mValues[2]); }
     };
 
+    struct ExteriorCellIndex
+    {
+        int mX, mY;
+        ESM::RefId mWorldspace;
+
+        bool operator==(const ExteriorCellIndex& other) const
+        {
+            return mX == other.mX && mY == other.mY && mWorldspace == other.mWorldspace;
+        }
+
+        bool operator<(const ExteriorCellIndex& other) const
+        {
+            return std::make_tuple(mX, mY, mWorldspace) < std::make_tuple(other.mX, other.mY, other.mWorldspace);
+        }
+
+        friend struct std::hash<ExteriorCellIndex>;
+    };
+
+}
+
+namespace std
+{
+    template <>
+    struct hash<ESM::ExteriorCellIndex>
+    {
+        std::size_t operator()(const ESM::ExteriorCellIndex& toHash) const
+        {
+            // Compute individual hash values for first,
+            // second and third and combine them using XOR
+            // and bit shifting:
+
+            return ((hash<int>()(toHash.mX) ^ (hash<int>()(toHash.mY) << 1)) >> 1)
+                ^ (hash<ESM::RefId>()(toHash.mWorldspace) << 1);
+        }
+    };
 }
 
 #endif

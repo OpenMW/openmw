@@ -1107,21 +1107,10 @@ namespace MWWorld
 
     const ESM4::Cell* Store<ESM4::Cell>::searchExterior(int x, int y, ESM::RefId worldSpace) const
     {
-        const auto foundWorldSpace = mExteriors.find(worldSpace);
-        if (foundWorldSpace == mExteriors.end())
-        {
-            return nullptr;
-        }
-        const auto foundCell = foundWorldSpace->second.find(std::make_pair(x, y));
-        if (foundCell == foundWorldSpace->second.end())
+        const auto foundCell = mExteriors.find({ x, y, worldSpace });
+        if (foundCell == mExteriors.end())
             return nullptr;
         return foundCell->second;
-    }
-
-    bool Store<ESM4::Cell>::exteriorExists(ESM::RefId worldspace) const
-    {
-        const auto foundWorldSpace = mExteriors.find(worldspace);
-        return (foundWorldSpace != mExteriors.end());
     }
 
     ESM4::Cell* Store<ESM4::Cell>::insert(const ESM4::Cell& item, bool overrideOnly)
@@ -1130,7 +1119,9 @@ namespace MWWorld
         if (!cellPtr->mEditorId.empty())
             mCellNameIndex[cellPtr->mEditorId] = cellPtr;
         if (cellPtr->isExterior())
-            mExteriors[cellPtr->mParent][std::make_pair(cellPtr->getGridX(), cellPtr->getGridY())] = cellPtr;
+        {
+            mExteriors[{ cellPtr->mX, cellPtr->mY, cellPtr->mParent }] = cellPtr;
+        }
 
         return cellPtr;
     }
@@ -1141,7 +1132,7 @@ namespace MWWorld
         if (!cellPtr->mEditorId.empty())
             mCellNameIndex[cellPtr->mEditorId] = cellPtr;
         if (cellPtr->isExterior())
-            mExteriors[cellPtr->mParent][std::make_pair(cellPtr->getGridX(), cellPtr->getGridY())] = cellPtr;
+            mExteriors[{ cellPtr->mX, cellPtr->mY, cellPtr->mParent }] = cellPtr;
 
         return cellPtr;
     }
@@ -1153,7 +1144,7 @@ namespace MWWorld
             ESM4::Cell& cellToDelete = cellToDeleteIt.second;
             if (cellToDelete.isExterior())
             {
-                mExteriors[cellToDelete.mParent].erase(std::make_pair(cellToDelete.mX, cellToDelete.mY));
+                mExteriors.erase({ cellToDelete.mX, cellToDelete.mY, cellToDelete.mParent });
             }
             if (!cellToDelete.mEditorId.empty())
                 mCellNameIndex.erase(cellToDelete.mEditorId);

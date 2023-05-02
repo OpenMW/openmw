@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <components/esm/refid.hpp>
+#include <components/esm/util.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loaddial.hpp>
 #include <components/esm3/loadglob.hpp>
@@ -283,12 +284,12 @@ namespace MWWorld
     {
         std::unordered_map<std::string, ESM4::Cell*, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
             mCellNameIndex;
-        std::unordered_map<ESM::RefId, std::map<std::pair<int, int>, ESM4::Cell*>> mExteriors;
+
+        std::unordered_map<ESM::ExteriorCellIndex, ESM4::Cell*> mExteriors;
 
     public:
         const ESM4::Cell* searchCellName(std::string_view) const;
         const ESM4::Cell* searchExterior(int x, int y, ESM::RefId worldSpace) const;
-        bool exteriorExists(ESM::RefId worldspace) const;
         ESM4::Cell* insert(const ESM4::Cell& item, bool overrideOnly = false);
         ESM4::Cell* insertStatic(const ESM4::Cell& item);
         void clearDynamic() override;
