@@ -42,11 +42,11 @@ int runBinary(
 {
 #ifdef _WIN32
     std::wstringstream cmd;
-    cmd << binaryPath.native() << L" -i " << iniPath.native() << L" -c " << cfgPath.native();
+    cmd << binaryPath.native() << L" -i " << '"' << iniPath.native() << '"' << L" -c " << '"' << cfgPath.native() << '"';
     return _wsystem(cmd.str().c_str());
 #else
     std::stringstream cmd;
-    cmd << binaryPath << " -i " << iniPath << " -c " << cfgPath;
+    cmd << binaryPath << " -i " << "'" << iniPath << "'" << " -c " << "'" << cfgPath << "'";
     return std::system(cmd.str().c_str());
 #endif
 }
@@ -57,7 +57,7 @@ struct TestParam
     std::string fileName;
 };
 
-const std::vector<TestParam> testParams = { { "ascii", "ascii" }, { "unicode", "(╯°□°)╯︵ ┻━┻" }, { "emoji", "💩" } };
+const std::vector<TestParam> testParams = { { "ascii", "ascii" }, { "space", "spaaaaa ce" }, { "unicode", "(╯°□°)╯︵ ┻━┻" }, { "emoji", "💩" } };
 
 class IniImporterTest : public ::testing::TestWithParam<TestParam>
 {
