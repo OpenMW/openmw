@@ -1090,11 +1090,6 @@ namespace MWMechanics
         else
         {
             isAllowed = isAllowedToUse(ptr, item, victim);
-            if (!item.getCellRef().hasContentFile())
-            {
-                // this is a manually placed item, which means it was already stolen
-                return;
-            }
         }
 
         if (isAllowed)
