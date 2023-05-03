@@ -42,7 +42,7 @@ int runBinary(
 {
 #ifdef _WIN32
     std::wstringstream cmd;
-    cmd << L'"' << binaryPath.native() << L'"' << L" -i " << '"' << iniPath.native() << '"' << L" -c " << '"'
+    cmd << L'& "' << binaryPath.native() << L'"' << L" -i " << '"' << iniPath.native() << '"' << L" -c " << '"'
         << cfgPath.native() << '"';
     return _wsystem(cmd.str().c_str());
 #else
