@@ -87,7 +87,7 @@ namespace MWLua
             if (cls.isActor())
                 cls.getCreatureStats(ptr).land(false);
             MWWorld::Ptr newPtr = world->moveObject(ptr, destCell, pos);
-            world->rotateObject(newPtr, rot);
+            world->rotateObject(newPtr, rot, MWBase::RotationFlag_none);
             if (!newPtr.getRefData().isEnabled())
                 world->enable(newPtr);
         }
