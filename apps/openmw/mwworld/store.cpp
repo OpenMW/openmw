@@ -1142,7 +1142,7 @@ namespace MWWorld
             list.push_back(dialogue->mId);
     }
 
-    const MWDialogue::KeywordSearch<std::string, int>& Store<ESM::Dialogue>::getDialogIdKeywordSearch() const
+    const MWDialogue::KeywordSearch<int>& Store<ESM::Dialogue>::getDialogIdKeywordSearch() const
     {
         if (mKeywordSearchModFlag)
         {
@@ -1151,7 +1151,7 @@ namespace MWWorld
             std::vector<std::string> keywordList;
             keywordList.reserve(getSize());
             for (const auto& it : *this)
-                keywordList.push_back(Misc::StringUtils::lowerCase(it.mId.getRefIdString()));
+                keywordList.push_back(Misc::StringUtils::lowerCase(it.mStringId));
             sort(keywordList.begin(), keywordList.end());
 
             for (const auto& it : keywordList)

@@ -408,12 +408,12 @@ namespace MWDialogue
         updateActorKnownTopics();
 
         std::list<std::string> keywordList;
-
+        const auto& store = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>();
         for (const auto& [topic, topicInfo] : mActorKnownTopics)
         {
             // does the player know the topic?
-            if (mKnownTopics.count(topic))
-                keywordList.push_back(topic.getRefIdString());
+            if (mKnownTopics.contains(topic))
+                keywordList.push_back(store.find(topic)->mStringId);
         }
 
         // sort again, because the previous sort was case-sensitive
