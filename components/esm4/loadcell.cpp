@@ -42,7 +42,7 @@
 
 #include <components/esm/refid.hpp>
 
-float ESM4::Cell::sInvalidWaterLevel = std::numeric_limits<float>::min();
+float ESM4::Cell::sInvalidWaterLevel = -200000.f;
 
 // TODO: Try loading only EDID and XCLC (along with mFormId, mFlags and mParent)
 //
@@ -79,6 +79,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
     reader.setCurrCell(mFormId); // save for LAND (and other children) to access later
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
+    bool isSkyrim = (esmVer == ESM::VER_170 || esmVer == ESM::VER_094);
 
     while (reader.getSubRecordHeader())
     {
@@ -240,8 +241,11 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 throw std::runtime_error("ESM4::CELL::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
-    if (mWaterHeight > 1e8) // A Bit of a hack for skyrim, there is a value for the cell but it is all wrong.
+    if (isSkyrim) // Skyrim seems to have broken water level records. But the subrecord exists so it
+                  // shouldn't be skipped.
+    {
         mWaterHeight = sInvalidWaterLevel;
+    }
     mReaderContext = reader.getContext();
 }
 
