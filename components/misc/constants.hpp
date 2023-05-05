@@ -24,6 +24,10 @@ namespace Constants
     // Size of one exterior cell in game units
     constexpr int CellSizeInUnits = 8192;
     constexpr int ESM4CellSizeInUnits = 4096;
+    static inline int getCellSize(bool isESM4Ext)
+    {
+        return isESM4Ext ? ESM4CellSizeInUnits : CellSizeInUnits;
+    }
 
     // Size of active cell grid in cells (it is a square with the (2 * CellGridRadius + 1) cells side)
     constexpr int CellGridRadius = 1;

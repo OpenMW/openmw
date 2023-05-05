@@ -517,8 +517,8 @@ namespace MWWorld
             float centerX, centerY;
             mWorld.indexToPosition(currentGridCenter->x(), currentGridCenter->y(), centerX, centerY, true, isEsm4Ext);
             float distance = std::max(std::abs(centerX - pos.x()), std::abs(centerY - pos.y()));
-            const float maxDistance
-                = Constants::CellSizeInUnits / 2 + mCellLoadingThreshold; // 1/2 cell size + threshold
+            float cellSize = Constants::getCellSize(isEsm4Ext);
+            const float maxDistance = cellSize / 2 + mCellLoadingThreshold; // 1/2 cell size + threshold
             if (distance <= maxDistance)
                 return *currentGridCenter;
         }
@@ -1166,6 +1166,8 @@ namespace MWWorld
 
         float centerX, centerY;
         mWorld.indexToPosition(cellX, cellY, centerX, centerY, true);
+        float cellSize = mWorld.getCurrentCellSize();
+        bool esm4Ext = cellSize == Constants::ESM4CellSizeInUnits;
 
         for (int dx = -halfGridSizePlusOne; dx <= halfGridSizePlusOne; ++dx)
         {
@@ -1176,15 +1178,14 @@ namespace MWWorld
                     continue; // only care about the outer (not yet loaded) part of the grid
 
                 float thisCellCenterX, thisCellCenterY;
-                mWorld.indexToPosition(cellX + dx, cellY + dy, thisCellCenterX, thisCellCenterY, true);
+                mWorld.indexToPosition(cellX + dx, cellY + dy, thisCellCenterX, thisCellCenterY, true, esm4Ext);
 
                 float dist
                     = std::max(std::abs(thisCellCenterX - playerPos.x()), std::abs(thisCellCenterY - playerPos.y()));
                 dist = std::min(dist,
                     std::max(
                         std::abs(thisCellCenterX - predictedPos.x()), std::abs(thisCellCenterY - predictedPos.y())));
-                float loadDist = Constants::CellSizeInUnits / 2 + Constants::CellSizeInUnits - mCellLoadingThreshold
-                    + mPreloadDistance;
+                float loadDist = cellSize / 2 + cellSize - mCellLoadingThreshold + mPreloadDistance;
 
                 if (dist < loadDist)
                     preloadCell(mWorld.getWorldModel().getExterior(

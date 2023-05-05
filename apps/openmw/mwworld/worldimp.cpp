@@ -1374,7 +1374,9 @@ namespace MWWorld
             && !(ptr.getClass().isPersistent(ptr) && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished());
         if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && !swims && isActorCollisionEnabled(ptr)))
         {
-            osg::Vec3f traced = mPhysics->traceDown(ptr, pos, Constants::CellSizeInUnits);
+            bool esm4Ext = ptr.getCell()->isExterior()
+                && ptr.getCell()->getCell()->getWorldSpace() != ESM::Cell::sDefaultWorldspaceId;
+            osg::Vec3f traced = mPhysics->traceDown(ptr, pos, Constants::getCellSize(esm4Ext));
             pos.z() = std::min(pos.z(), traced.z());
         }
 
@@ -1409,9 +1411,10 @@ namespace MWWorld
             if (!mPhysics->castRay(pos, targetPos, MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door).mHit)
                 break;
         }
-
+        bool esm4Ext = actor.getCell()->isExterior()
+            && actor.getCell()->getCell()->getWorldSpace() != ESM::Cell::sDefaultWorldspaceId;
         targetPos.z() += distance / 2.f; // move up a bit to get out from geometry, will snap down later
-        osg::Vec3f traced = mPhysics->traceDown(actor, targetPos, Constants::CellSizeInUnits);
+        osg::Vec3f traced = mPhysics->traceDown(actor, targetPos, Constants::getCellSize(esm4Ext));
         if (traced != pos)
         {
             esmPos.pos[0] = traced.x();
@@ -1497,7 +1500,7 @@ namespace MWWorld
 
     void World::indexToPosition(int cellX, int cellY, float& x, float& y, bool centre, bool esm4Ext) const
     {
-        const int cellSize = esm4Ext ? Constants::ESM4CellSizeInUnits : Constants::CellSizeInUnits;
+        const int cellSize = Constants::getCellSize(esm4Ext);
 
         x = static_cast<float>(cellSize * cellX);
         y = static_cast<float>(cellSize * cellY);
@@ -1905,6 +1908,14 @@ namespace MWWorld
             return currentCell->getCell()->isQuasiExterior();
         }
         return false;
+    }
+
+    float World::getCurrentCellSize() const
+    {
+        const CellStore* cellStore = mWorldScene->getCurrentCell();
+        if (cellStore)
+            return Constants::getCellSize(cellStore->getCell()->isEsm4());
+        return Constants::getCellSize(false);
     }
 
     int World::getCurrentWeather() const
