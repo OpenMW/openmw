@@ -49,6 +49,13 @@ namespace ESM
         int mX, mY;
         ESM::RefId mWorldspace;
 
+        ExteriorCellIndex(int x, int y, ESM::RefId worldspace)
+            : mX(x)
+            , mY(y)
+            , mWorldspace(worldspace)
+        {
+        }
+
         bool operator==(const ExteriorCellIndex& other) const
         {
             return mX == other.mX && mY == other.mY && mWorldspace == other.mWorldspace;

@@ -584,7 +584,7 @@ namespace MWGui
             {
                 if (!mInterior)
                     requestMapRender(&MWBase::Environment::get().getWorldModel()->getExterior(
-                        entry.mCellX, entry.mCellY, ESM::Cell::sDefaultWorldspaceId));
+                        ESM::ExteriorCellIndex(entry.mCellX, entry.mCellY, ESM::Cell::sDefaultWorldspaceId)));
 
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(entry.mCellX, entry.mCellY);
                 if (texture)
@@ -641,8 +641,9 @@ namespace MWGui
             for (MapEntry& entry : mMaps)
             {
                 if (!entry.mMapTexture && !widgetCropped(entry.mMapWidget, mLocalMap))
-                    world->getDoorMarkers(
-                        worldModel->getExterior(entry.mCellX, entry.mCellY, ESM::Cell::sDefaultWorldspaceId), doors);
+                    world->getDoorMarkers(worldModel->getExterior(ESM::ExteriorCellIndex(
+                                              entry.mCellX, entry.mCellY, ESM::Cell::sDefaultWorldspaceId)),
+                        doors);
             }
             if (doors.empty())
                 return;

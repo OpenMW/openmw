@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <components/esm/util.hpp>
 #include <components/misc/constants.hpp>
 
 namespace osg
@@ -79,8 +80,7 @@ namespace MWWorld
         struct ChangeCellGridRequest
         {
             osg::Vec3f mPosition;
-            osg::Vec2i mCell;
-            ESM::RefId exteriorWorldspace;
+            ESM::ExteriorCellIndex mCellIndex;
             bool mChangeEvent;
         };
 
@@ -118,8 +118,7 @@ namespace MWWorld
         osg::Vec2i mCurrentGridCenter;
 
         // Load and unload cells as necessary to create a cell grid with "X" and "Y" in the center
-        void changeCellGrid(const osg::Vec3f& pos, int playerCellX, int playerCellY, ESM::RefId exteriorWorldspace,
-            bool changeEvent = true);
+        void changeCellGrid(const osg::Vec3f& pos, ESM::ExteriorCellIndex playerCellIndex, bool changeEvent = true);
 
         void requestChangeCellGrid(const osg::Vec3f& position, const osg::Vec2i& cell, bool changeEvent = true);
 

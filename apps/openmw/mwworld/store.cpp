@@ -1105,9 +1105,9 @@ namespace MWWorld
         return foundCell->second;
     }
 
-    const ESM4::Cell* Store<ESM4::Cell>::searchExterior(int x, int y, ESM::RefId worldSpace) const
+    const ESM4::Cell* Store<ESM4::Cell>::searchExterior(ESM::ExteriorCellIndex cellIndex) const
     {
-        const auto foundCell = mExteriors.find({ x, y, worldSpace });
+        const auto foundCell = mExteriors.find(cellIndex);
         if (foundCell == mExteriors.end())
             return nullptr;
         return foundCell->second;

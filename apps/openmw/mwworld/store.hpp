@@ -289,7 +289,7 @@ namespace MWWorld
 
     public:
         const ESM4::Cell* searchCellName(std::string_view) const;
-        const ESM4::Cell* searchExterior(int x, int y, ESM::RefId worldSpace) const;
+        const ESM4::Cell* searchExterior(ESM::ExteriorCellIndex cellIndex) const;
         ESM4::Cell* insert(const ESM4::Cell& item, bool overrideOnly = false);
         ESM4::Cell* insertStatic(const ESM4::Cell& item);
         void clearDynamic() override;

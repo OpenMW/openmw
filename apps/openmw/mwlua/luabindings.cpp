@@ -115,7 +115,7 @@ namespace MWLua
             = [](std::string_view name) { return GCell{ &MWBase::Environment::get().getWorldModel()->getCell(name) }; };
         api["getExteriorCell"] = [](int x, int y) {
             return GCell{ &MWBase::Environment::get().getWorldModel()->getExterior(
-                x, y, ESM::Cell::sDefaultWorldspaceId) };
+                ESM::ExteriorCellIndex(x, y, ESM::Cell::sDefaultWorldspaceId)) };
         };
         api["activeActors"] = GObjectList{ worldView->getActorsInScene() };
         api["createObject"] = [](std::string_view recordId, sol::optional<int> count) -> GObject {

@@ -65,7 +65,7 @@ namespace MWWorld
 
         void clear();
 
-        CellStore& getExterior(int x, int y, ESM::RefId exteriorWorldSpace);
+        CellStore& getExterior(ESM::ExteriorCellIndex cellIndex);
         CellStore& getInterior(std::string_view name);
         CellStore& getCell(std::string_view name); // interior or named exterior
         CellStore& getCell(const ESM::RefId& Id);

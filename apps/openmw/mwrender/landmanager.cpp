@@ -18,11 +18,12 @@ namespace MWRender
         mCache = new CacheType;
     }
 
-    osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(int x, int y, ESM::RefId worldspace)
+    osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(ESM::ExteriorCellIndex cellIndex)
     {
-        if (worldspace != ESM::Cell::sDefaultWorldspaceId)
+        if (cellIndex.mWorldspace != ESM::Cell::sDefaultWorldspaceId)
             return osg::ref_ptr<ESMTerrain::LandObject>(nullptr);
-
+        int x = cellIndex.mX;
+        int y = cellIndex.mY;
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(std::make_pair(x, y));
         if (obj)
             return static_cast<ESMTerrain::LandObject*>(obj.get());

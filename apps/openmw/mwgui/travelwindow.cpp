@@ -131,7 +131,7 @@ namespace MWGui
             if (cellname.empty())
             {
                 MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getExterior(
-                    cellIndex.x(), cellIndex.y(), ESM::Cell::sDefaultWorldspaceId);
+                    ESM::ExteriorCellIndex(cellIndex.x(), cellIndex.y(), ESM::Cell::sDefaultWorldspaceId));
                 cellname = MWBase::Environment::get().getWorld()->getCellName(&cell);
                 interior = false;
             }

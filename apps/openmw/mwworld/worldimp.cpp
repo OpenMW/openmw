@@ -353,9 +353,10 @@ namespace MWWorld
         if (bypass && !mStartCell.empty())
         {
             ESM::Position pos;
-            if (!findExteriorPosition(mStartCell, pos).empty())
+            ESM::RefId cellId = findExteriorPosition(mStartCell, pos);
+            if (!cellId.empty())
             {
-                changeToExteriorCell(pos, true);
+                changeToCell(cellId, pos, true);
                 adjustPosition(getPlayerPtr(), false);
             }
             else
@@ -967,25 +968,6 @@ namespace MWWorld
         mRendering->getCamera()->instantTransition();
     }
 
-    void World::changeToExteriorCell(const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
-    {
-        mPhysics->clearQueuedMovement();
-        mDiscardMovements = true;
-
-        if (changeEvent && mCurrentWorldSpace != ESM::Cell::sDefaultWorldspace)
-        {
-            // changed worldspace
-            mProjectileManager->clear();
-            mRendering->notifyWorldSpaceChanged();
-        }
-        removeContainerScripts(getPlayerPtr());
-        osg::Vec2i exteriorCellPos = positionToCellIndex(position.pos[0], position.pos[1]);
-        ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.x(), exteriorCellPos.y());
-        mWorldScene->changeToExteriorCell(cellId, position, adjustPlayerPos, changeEvent);
-        addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
-        mRendering->getCamera()->instantTransition();
-    }
-
     void World::changeToCell(
         const ESM::RefId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
@@ -1268,8 +1250,9 @@ namespace MWWorld
         CellStore* cell = ptr.getCell();
         ESM::RefId worldspaceId
             = cell->isExterior() ? cell->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
-        CellStore* newCell
-            = cell->isExterior() ? &mWorldModel.getExterior(index.x(), index.y(), worldspaceId) : nullptr;
+        CellStore* newCell = cell->isExterior()
+            ? &mWorldModel.getExterior(ESM::ExteriorCellIndex(index.x(), index.y(), worldspaceId))
+            : nullptr;
         bool isCellActive = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior()
             && (newCell && mWorldScene->isCellActive(*newCell));
 
@@ -2072,7 +2055,8 @@ namespace MWWorld
         if (cell->isExterior())
         {
             const osg::Vec2i index = positionToCellIndex(pos.pos[0], pos.pos[1]);
-            cell = &mWorldModel.getExterior(index.x(), index.y(), cell->getCell()->getWorldSpace());
+            cell = &mWorldModel.getExterior(
+                ESM::ExteriorCellIndex(index.x(), index.y(), cell->getCell()->getWorldSpace()));
         }
 
         MWWorld::Ptr dropped = object.getClass().copyToCell(object, *cell, pos, count);
@@ -2756,7 +2740,8 @@ namespace MWWorld
                 if (xResult.ec == std::errc::result_out_of_range || yResult.ec == std::errc::result_out_of_range)
                     throw std::runtime_error("Cell coordinates out of range.");
                 else if (xResult.ec == std::errc{} && yResult.ec == std::errc{})
-                    ext = mWorldModel.getExterior(x, y, ESM::Cell::sDefaultWorldspaceId).getCell();
+                    ext = mWorldModel.getExterior(ESM::ExteriorCellIndex(x, y, ESM::Cell::sDefaultWorldspaceId))
+                              .getCell();
                 // ignore std::errc::invalid_argument, as this means that name probably refers to a interior cell
                 // instead of comma separated coordinates
             }

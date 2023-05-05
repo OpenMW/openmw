@@ -250,10 +250,6 @@ namespace MWBase
         ///< Move to interior cell.
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        virtual void changeToExteriorCell(const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
-            = 0;
-        ///< Move to exterior cell.
-        ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
         virtual void changeToCell(
             const ESM::RefId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
             = 0;
