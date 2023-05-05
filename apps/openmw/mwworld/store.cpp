@@ -646,95 +646,70 @@ namespace MWWorld
         // All cells have a name record, even nameless exterior cells.
         ESM::Cell* emplacedCell = nullptr;
         bool isDeleted = false;
+        bool newCell = false;
 
         {
             ESM::Cell cellToLoad;
             cellToLoad.loadNameAndData(esm, isDeleted);
-            emplacedCell = &mCells.insert(std::make_pair(cellToLoad.mId, cellToLoad)).first->second;
+            auto [it, inserted] = mCells.insert(std::make_pair(cellToLoad.mId, cellToLoad));
+            emplacedCell = &it->second;
+            if (!inserted)
+            {
+                emplacedCell->mData = cellToLoad.mData;
+                emplacedCell->mName = cellToLoad.mName;
+            }
+            newCell = inserted;
         }
         ESM::Cell& cell = *emplacedCell;
         // Load the (x,y) coordinates of the cell, if it is an exterior cell,
         // so we can find the cell we need to merge with
         if (cell.mData.mFlags & ESM::Cell::Interior)
         {
-            // Store interior cell by name, try to merge with existing parent data.
-            ESM::Cell* oldcell = const_cast<ESM::Cell*>(search(cell.mName));
-            if (oldcell)
-            {
-                // merge new cell into old cell
-                // push the new references on the list of references to manage (saveContext = true)
-                oldcell->mData = cell.mData;
-                oldcell->mName
-                    = cell.mName; // merge name just to be sure (ID will be the same, but case could have been changed)
-                oldcell->loadCell(esm, true);
-            }
-            else
-            {
-                // spawn a new cell
-                cell.loadCell(esm, true);
-
+            cell.loadCell(esm, true);
+            if (newCell)
                 mInt[cell.mName] = &cell;
-            }
         }
         else
         {
-            // Store exterior cells by grid position, try to merge with existing parent data.
-            ESM::Cell* oldcell = const_cast<ESM::Cell*>(search(cell.getGridX(), cell.getGridY()));
-            if (oldcell)
+            cell.loadCell(esm, false);
+            // handle moved ref (MVRF) subrecords
+            ESM::MovedCellRefTracker newMovedRefs;
+            std::swap(newMovedRefs, cell.mMovedRefs);
+            handleMovedCellRefs(esm, &cell);
+            std::swap(newMovedRefs, cell.mMovedRefs);
+            // push the new references on the list of references to manage
+            cell.postLoad(esm);
+            if (newCell)
+                mExt[std::make_pair(cell.mData.mX, cell.mData.mY)] = &cell;
+            else
             {
-                // merge new cell into old cell
-                oldcell->mData = cell.mData;
-                oldcell->mName = cell.mName;
-                oldcell->loadCell(esm, false);
-
-                // handle moved ref (MVRF) subrecords
-                handleMovedCellRefs(esm, &cell);
-
-                // push the new references on the list of references to manage
-                oldcell->postLoad(esm);
-
                 // merge lists of leased references, use newer data in case of conflict
-                for (ESM::MovedCellRefTracker::const_iterator it = cell.mMovedRefs.begin(); it != cell.mMovedRefs.end();
-                     ++it)
+                for (const auto& movedRef : newMovedRefs)
                 {
                     // remove reference from current leased ref tracker and add it to new cell
-                    ESM::MovedCellRefTracker::iterator itold
-                        = std::find(oldcell->mMovedRefs.begin(), oldcell->mMovedRefs.end(), it->mRefNum);
-                    if (itold != oldcell->mMovedRefs.end())
+                    auto itold = std::find(cell.mMovedRefs.begin(), cell.mMovedRefs.end(), movedRef.mRefNum);
+                    if (itold != cell.mMovedRefs.end())
                     {
-                        if (it->mTarget[0] != itold->mTarget[0] || it->mTarget[1] != itold->mTarget[1])
+                        if (movedRef.mTarget[0] != itold->mTarget[0] || movedRef.mTarget[1] != itold->mTarget[1])
                         {
                             ESM::Cell* wipecell = const_cast<ESM::Cell*>(search(itold->mTarget[0], itold->mTarget[1]));
-                            ESM::CellRefTracker::iterator it_lease = std::find_if(wipecell->mLeasedRefs.begin(),
-                                wipecell->mLeasedRefs.end(), ESM::CellRefTrackerPredicate(it->mRefNum));
+                            auto it_lease = std::find_if(wipecell->mLeasedRefs.begin(), wipecell->mLeasedRefs.end(),
+                                ESM::CellRefTrackerPredicate(movedRef.mRefNum));
                             if (it_lease != wipecell->mLeasedRefs.end())
                                 wipecell->mLeasedRefs.erase(it_lease);
                             else
-                                Log(Debug::Error) << "Error: can't find " << it->mRefNum.mIndex << " "
-                                                  << it->mRefNum.mContentFile << " in leasedRefs";
+                                Log(Debug::Error) << "Error: can't find " << movedRef.mRefNum.mIndex << " "
+                                                  << movedRef.mRefNum.mContentFile << " in leasedRefs";
                         }
-                        *itold = *it;
+                        *itold = movedRef;
                     }
                     else
-                        oldcell->mMovedRefs.push_back(*it);
+                        cell.mMovedRefs.push_back(movedRef);
                 }
 
                 // We don't need to merge mLeasedRefs of cell / oldcell. This list is filled when another cell moves a
                 // reference to this cell, so the list for the new cell should be empty. The list for oldcell,
                 // however, could have leased refs in it and so should be kept.
-            }
-            else
-            {
-                // spawn a new cell
-                emplacedCell->loadCell(esm, false);
-
-                // handle moved ref (MVRF) subrecords
-                handleMovedCellRefs(esm, emplacedCell);
-
-                // push the new references on the list of references to manage
-                emplacedCell->postLoad(esm);
-
-                mExt[std::make_pair(cell.mData.mX, cell.mData.mY)] = &cell;
             }
         }
 
@@ -833,51 +808,6 @@ namespace MWWorld
             mSharedInt.push_back(result->second);
             return result->second;
         }
-    }
-    bool Store<ESM::Cell>::erase(const ESM::Cell& cell)
-    {
-        if (cell.isExterior())
-        {
-            return erase(cell.getGridX(), cell.getGridY());
-        }
-        return erase(cell.mName);
-    }
-    bool Store<ESM::Cell>::erase(std::string_view name)
-    {
-        auto it = mDynamicInt.find(name);
-
-        if (it == mDynamicInt.end())
-        {
-            return false;
-        }
-        mDynamicInt.erase(it);
-        mSharedInt.erase(mSharedInt.begin() + mSharedInt.size(), mSharedInt.end());
-
-        for (it = mDynamicInt.begin(); it != mDynamicInt.end(); ++it)
-        {
-            mSharedInt.push_back(it->second);
-        }
-
-        return true;
-    }
-    bool Store<ESM::Cell>::erase(int x, int y)
-    {
-        std::pair<int, int> key(x, y);
-        DynamicExt::iterator it = mDynamicExt.find(key);
-
-        if (it == mDynamicExt.end())
-        {
-            return false;
-        }
-        mDynamicExt.erase(it);
-        mSharedExt.erase(mSharedExt.begin() + mSharedExt.size(), mSharedExt.end());
-
-        for (it = mDynamicExt.begin(); it != mDynamicExt.end(); ++it)
-        {
-            mSharedExt.push_back(it->second);
-        }
-
-        return true;
     }
 
     // Pathgrid
