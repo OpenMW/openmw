@@ -107,6 +107,8 @@ namespace ESM4
         int getGridX() const { return mX; }
         int getGridY() const { return mY; }
         bool isExterior() const { return !(mCellFlags & CELL_Interior); }
+
+        static float sInvalidWaterLevel;
     };
 }
 

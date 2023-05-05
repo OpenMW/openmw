@@ -33,6 +33,7 @@
 #include <cassert>
 #include <cfloat> // FLT_MAX for gcc
 #include <iostream> // FIXME: debug only
+#include <limits>
 #include <stdexcept>
 
 #include "grouptype.hpp"
@@ -40,6 +41,8 @@
 // #include "writer.hpp"
 
 #include <components/esm/refid.hpp>
+
+float ESM4::Cell::sInvalidWaterLevel = std::numeric_limits<float>::min();
 
 // TODO: Try loading only EDID and XCLC (along with mFormId, mFlags and mParent)
 //
@@ -55,7 +58,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
     mId = ESM::RefId::formIdRefId(mFormId);
     mFlags = reader.hdr().record.flags;
     mParent = ESM::RefId::formIdRefId(reader.currWorld());
-
+    mWaterHeight = sInvalidWaterLevel;
     reader.clearCellGrid(); // clear until XCLC FIXME: somehow do this automatically?
 
     // Sometimes cell 0,0 does not have an XCLC sub record (e.g. ToddLand 000009BF)
@@ -237,7 +240,8 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 throw std::runtime_error("ESM4::CELL::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
-
+    if (mWaterHeight > 1e8) // A Bit of a hack for skyrim, there is a value for the cell but it is all wrong.
+        mWaterHeight = sInvalidWaterLevel;
     mReaderContext = reader.getContext();
 }
 
