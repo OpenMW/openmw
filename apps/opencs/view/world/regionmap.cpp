@@ -305,7 +305,8 @@ void CSVWorld::RegionMap::view()
     }
 
     emit editRequest(
-        CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Scene, ESM::Cell::sDefaultWorldspace), hint.str());
+        CSMWorld::UniversalId(CSMWorld::UniversalId::Type_Scene, ESM::Cell::sDefaultWorldspaceId.getValue()),
+        hint.str());
 }
 
 void CSVWorld::RegionMap::viewInTable()
