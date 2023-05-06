@@ -1459,7 +1459,7 @@ namespace MWGui
         return mScalingFactor;
     }
 
-    void WindowManager::executeInConsole(const std::string& path)
+    void WindowManager::executeInConsole(const std::filesystem::path& path)
     {
         mConsole->executeFile(path);
     }

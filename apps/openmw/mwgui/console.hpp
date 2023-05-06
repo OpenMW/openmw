@@ -60,7 +60,7 @@ namespace MWGui
 
         void execute(const std::string& command);
 
-        void executeFile(const std::string& path);
+        void executeFile(const std::filesystem::path& path);
 
         void updateSelectedObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr);
 

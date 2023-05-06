@@ -2,6 +2,7 @@
 #define GAME_MWBASE_WINDOWMANAGER_H
 
 #include <cstdint>
+#include <filesystem>
 #include <map>
 #include <memory>
 #include <set>
@@ -275,7 +276,7 @@ namespace MWBase
 
         virtual void processChangedSettings(const std::set<std::pair<std::string, std::string>>& changed) = 0;
 
-        virtual void executeInConsole(const std::string& path) = 0;
+        virtual void executeInConsole(const std::filesystem::path& path) = 0;
 
         virtual void enableRest() = 0;
         virtual bool getRestEnabled() = 0;

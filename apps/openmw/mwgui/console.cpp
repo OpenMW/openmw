@@ -13,6 +13,7 @@
 #include <components/compiler/lineparser.hpp>
 #include <components/compiler/locals.hpp>
 #include <components/compiler/scanner.hpp>
+#include <components/files/conversion.hpp>
 #include <components/interpreter/interpreter.hpp>
 #include <components/misc/utf8stream.hpp>
 #include <components/settings/settings.hpp>
@@ -239,19 +240,20 @@ namespace MWGui
         }
     }
 
-    void Console::executeFile(const std::string& path)
+    void Console::executeFile(const std::filesystem::path& path)
     {
-        std::ifstream stream((std::filesystem::path(path)));
+        std::ifstream stream(path);
 
         if (!stream.is_open())
-            printError("failed to open file: " + path);
-        else
         {
-            std::string line;
-
-            while (std::getline(stream, line))
-                execute(line);
+            printError("Failed to open script file \"" + Files::pathToUnicodeString(path)
+                + "\": " + std::generic_category().message(errno));
+            return;
         }
+
+        std::string line;
+        while (std::getline(stream, line))
+            execute(line);
     }
 
     void Console::clear()
