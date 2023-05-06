@@ -1011,7 +1011,7 @@ void OMW::Engine::setScriptConsoleMode(bool enabled)
     mScriptConsoleMode = enabled;
 }
 
-void OMW::Engine::setStartupScript(const std::string& path)
+void OMW::Engine::setStartupScript(const std::filesystem::path& path)
 {
     mStartupScript = path;
 }

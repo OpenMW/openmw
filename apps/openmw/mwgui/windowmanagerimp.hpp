@@ -296,7 +296,7 @@ namespace MWGui
         void watchActor(const MWWorld::Ptr& ptr) override;
         MWWorld::Ptr getWatchedActor() const override;
 
-        void executeInConsole(const std::string& path) override;
+        void executeInConsole(const std::filesystem::path& path) override;
 
         void enableRest() override { mRestAllowed = true; }
         bool getRestEnabled() override;

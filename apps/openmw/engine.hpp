@@ -165,7 +165,7 @@ namespace OMW
         int mWarningsMode;
         std::string mFocusName;
         bool mScriptConsoleMode;
-        std::string mStartupScript;
+        std::filesystem::path mStartupScript;
         int mActivationDistanceOverride;
         std::filesystem::path mSaveGameFile;
         // Grab mouse?
@@ -253,7 +253,7 @@ namespace OMW
         void setScriptConsoleMode(bool enabled);
 
         /// Set path for a script that is run on startup in the console.
-        void setStartupScript(const std::string& path);
+        void setStartupScript(const std::filesystem::path& path);
 
         /// Override the game setting specified activation distance.
         void setActivationDistanceOverride(int distance);
