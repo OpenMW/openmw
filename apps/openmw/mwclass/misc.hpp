@@ -13,6 +13,7 @@ namespace MWClass
 
     public:
         MWWorld::Ptr copyToCell(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell, int count) const override;
+        MWWorld::Ptr moveToCell(const MWWorld::Ptr& ptr, MWWorld::CellStore& cell) const override;
 
         void insertObjectRendering(const MWWorld::Ptr& ptr, const std::string& model,
             MWRender::RenderingInterface& renderingInterface) const override;

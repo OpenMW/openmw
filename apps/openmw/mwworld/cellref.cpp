@@ -25,8 +25,6 @@ namespace MWWorld
     {
     }
 
-    static const ESM::RefNum emptyRefNum = {};
-
     const ESM::RefNum& CellRef::getRefNum() const
     {
         return std::visit(ESM::VisitOverload{
@@ -61,11 +59,11 @@ namespace MWWorld
         return refNum;
     }
 
-    void CellRef::unsetRefNum()
+    void CellRef::setRefNum(ESM::RefNum refNum)
     {
         std::visit(ESM::VisitOverload{
-                       [&](ESM4::Reference& ref) { ref.mId = emptyRefNum; },
-                       [&](ESM::CellRef& ref) { ref.mRefNum = emptyRefNum; },
+                       [&](ESM4::Reference& ref) { ref.mId = refNum; },
+                       [&](ESM::CellRef& ref) { ref.mRefNum = refNum; },
                    },
             mCellRef.mVariant);
     }

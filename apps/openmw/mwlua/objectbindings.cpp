@@ -284,81 +284,100 @@ namespace MWLua
                     localScripts->removeScript(*scriptId);
                 };
 
-                auto removeFn = [context](const GObject& object, int countToRemove) {
-                    MWWorld::Ptr ptr = object.ptr();
+                using DelayedRemovalFn = std::function<void(MWWorld::Ptr)>;
+                auto removeFn = [](const MWWorld::Ptr ptr, int countToRemove) -> std::optional<DelayedRemovalFn> {
                     int currentCount = ptr.getRefData().getCount();
                     if (countToRemove <= 0 || countToRemove > currentCount)
                         throw std::runtime_error("Can't remove " + std::to_string(countToRemove) + " of "
                             + std::to_string(currentCount) + " items");
                     ptr.getRefData().setCount(currentCount - countToRemove); // Immediately change count
-                    if (ptr.getContainerStore() || currentCount == countToRemove)
-                    {
-                        // Delayed action to trigger side effects
-                        context.mLuaManager->addAction([object, countToRemove] {
-                            MWWorld::Ptr ptr = object.ptr();
-                            // Restore original count
-                            ptr.getRefData().setCount(ptr.getRefData().getCount() + countToRemove);
-                            // And now remove properly
-                            if (ptr.getContainerStore())
-                                ptr.getContainerStore()->remove(ptr, countToRemove);
-                            else
-                            {
-                                MWBase::Environment::get().getWorld()->disable(object.ptr());
-                                MWBase::Environment::get().getWorld()->deleteObject(ptr);
-                            }
-                        });
-                    }
+                    if (!ptr.getContainerStore() && currentCount > countToRemove)
+                        return std::nullopt;
+                    // Delayed action to trigger side effects
+                    return [countToRemove](MWWorld::Ptr ptr) {
+                        // Restore the original count
+                        ptr.getRefData().setCount(ptr.getRefData().getCount() + countToRemove);
+                        // And now remove properly
+                        if (ptr.getContainerStore())
+                            ptr.getContainerStore()->remove(ptr, countToRemove);
+                        else
+                        {
+                            MWBase::Environment::get().getWorld()->disable(ptr);
+                            MWBase::Environment::get().getWorld()->deleteObject(ptr);
+                        }
+                    };
                 };
-                objectT["remove"] = [removeFn](const GObject& object, sol::optional<int> count) {
-                    removeFn(object, count.value_or(object.ptr().getRefData().getCount()));
+                objectT["remove"] = [removeFn, context](const GObject& object, sol::optional<int> count) {
+                    std::optional<DelayedRemovalFn> delayed
+                        = removeFn(object.ptr(), count.value_or(object.ptr().getRefData().getCount()));
+                    if (delayed.has_value())
+                        context.mLuaManager->addAction([fn = *delayed, object] { fn(object.ptr()); });
                 };
-                objectT["split"] = [removeFn](const GObject& object, int count) -> GObject {
-                    removeFn(object, count);
-
+                objectT["split"] = [removeFn, context](const GObject& object, int count) -> GObject {
                     // Doesn't matter which cell to use because the new instance will be in disabled state.
                     MWWorld::CellStore* cell = MWBase::Environment::get().getWorldScene()->getCurrentCell();
 
                     const MWWorld::Ptr& ptr = object.ptr();
                     MWWorld::Ptr splitted = ptr.getClass().copyToCell(ptr, *cell, count);
                     splitted.getRefData().disable();
-                    return GObject(getId(splitted));
+
+                    std::optional<DelayedRemovalFn> delayedRemovalFn = removeFn(ptr, count);
+                    if (delayedRemovalFn.has_value())
+                        context.mLuaManager->addAction([fn = *delayedRemovalFn, object] { fn(object.ptr()); });
+
+                    return GObject(splitted);
                 };
                 objectT["moveInto"] = [removeFn, context](const GObject& object, const Inventory<GObject>& inventory) {
-                    // Currently moving to or from containers makes a copy and removes the original.
-                    // TODO(#6148): actually move rather than copy and preserve RefNum
-                    int count = object.ptr().getRefData().getCount();
-                    removeFn(object, count);
-                    context.mLuaManager->addAction([item = object, count, cont = inventory.mObj] {
-                        auto& refData = item.ptr().getRefData();
+                    const MWWorld::Ptr& ptr = object.ptr();
+                    int count = ptr.getRefData().getCount();
+                    std::optional<DelayedRemovalFn> delayedRemovalFn = removeFn(ptr, count);
+                    context.mLuaManager->addAction([item = object, count, cont = inventory.mObj, delayedRemovalFn] {
+                        const MWWorld::Ptr& oldPtr = item.ptr();
+                        auto& refData = oldPtr.getRefData();
                         refData.setCount(count); // temporarily undo removal to run ContainerStore::add
                         refData.enable();
-                        cont.ptr().getClass().getContainerStore(cont.ptr()).add(item.ptr(), count, false);
+                        cont.ptr().getClass().getContainerStore(cont.ptr()).add(oldPtr, count, false);
                         refData.setCount(0);
+                        if (delayedRemovalFn.has_value())
+                            (*delayedRemovalFn)(oldPtr);
                     });
                 };
                 objectT["teleport"] = [removeFn, context](const GObject& object, const sol::object& cellOrName,
                                           const osg::Vec3f& pos, const sol::optional<osg::Vec3f>& optRot) {
                     MWWorld::CellStore* cell = findCell(cellOrName, pos);
                     MWWorld::Ptr ptr = object.ptr();
-                    if (ptr.getRefData().isDeleted())
-                        throw std::runtime_error("Object is removed");
+                    int count = ptr.getRefData().getCount();
+                    if (count == 0)
+                        throw std::runtime_error("Object is either removed or already in the process of teleporting");
+                    osg::Vec3f rot = optRot ? *optRot : ptr.getRefData().getPosition().asRotationVec3();
                     if (ptr.getContainerStore())
                     {
-                        // Currently moving to or from containers makes a copy and removes the original.
-                        // TODO(#6148): actually move rather than copy and preserve RefNum
-                        MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *cell, ptr.getRefData().getCount());
-                        newPtr.getRefData().disable();
-                        removeFn(object, ptr.getRefData().getCount());
-                        ptr = newPtr;
+                        DelayedRemovalFn delayedRemovalFn = *removeFn(ptr, count);
+                        context.mLuaManager->addAction(
+                            [object, cell, pos, rot, count, delayedRemovalFn] {
+                                MWWorld::Ptr oldPtr = object.ptr();
+                                oldPtr.getRefData().setCount(count);
+                                MWWorld::Ptr newPtr = oldPtr.getClass().moveToCell(oldPtr, *cell);
+                                oldPtr.getRefData().setCount(0);
+                                newPtr.getRefData().disable();
+                                teleportNotPlayer(newPtr, cell, pos, rot);
+                                delayedRemovalFn(oldPtr);
+                            },
+                            "TeleportFromContainerAction");
                     }
-                    osg::Vec3f rot = optRot ? *optRot : ptr.getRefData().getPosition().asRotationVec3();
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    else if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                         context.mLuaManager->addTeleportPlayerAction(
                             [cell, pos, rot] { teleportPlayer(cell, pos, rot); });
                     else
+                    {
+                        ptr.getRefData().setCount(0);
                         context.mLuaManager->addAction(
-                            [obj = Object(ptr), cell, pos, rot] { teleportNotPlayer(obj.ptr(), cell, pos, rot); },
+                            [object, cell, pos, rot, count] {
+                                object.ptr().getRefData().setCount(count);
+                                teleportNotPlayer(object.ptr(), cell, pos, rot);
+                            },
                             "TeleportAction");
+                    }
                 };
             }
         }
