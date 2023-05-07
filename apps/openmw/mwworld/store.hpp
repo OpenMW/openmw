@@ -408,11 +408,6 @@ namespace MWWorld
         void listIdentifier(std::vector<ESM::RefId>& list) const override;
 
         ESM::Cell* insert(const ESM::Cell& cell);
-
-        bool erase(const ESM::Cell& cell);
-        bool erase(std::string_view id);
-
-        bool erase(int x, int y);
     };
 
     template <>
