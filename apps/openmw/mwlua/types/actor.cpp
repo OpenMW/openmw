@@ -122,13 +122,14 @@ namespace MWLua
                 { "CarriedLeft", MWWorld::InventoryStore::Slot_CarriedLeft },
                 { "Ammunition", MWWorld::InventoryStore::Slot_Ammunition } }));
 
-        actor["stance"] = [](const Object& o) {
+        actor["getStance"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
             if (cls.isActor())
                 return cls.getCreatureStats(o.ptr()).getDrawState();
             else
                 throw std::runtime_error("Actor expected");
         };
+        actor["stance"] = actor["getStance"]; // for compatibility; should be removed later
         actor["setStance"] = [](const SelfObject& self, int stance) {
             const MWWorld::Class& cls = self.ptr().getClass();
             if (!cls.isActor())
@@ -177,18 +178,23 @@ namespace MWLua
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getMaxSpeed(o.ptr()) > 0;
         };
-        actor["runSpeed"] = [](const Object& o) {
+        actor["getRunSpeed"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getRunSpeed(o.ptr());
         };
-        actor["walkSpeed"] = [](const Object& o) {
+        actor["getWalkSpeed"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getWalkSpeed(o.ptr());
         };
-        actor["currentSpeed"] = [](const Object& o) {
+        actor["getCurrentSpeed"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getCurrentSpeed(o.ptr());
         };
+
+        // for compatibility; should be removed later
+        actor["runSpeed"] = actor["getRunSpeed"];
+        actor["walkSpeed"] = actor["getWalkSpeed"];
+        actor["currentSpeed"] = actor["getCurrentSpeed"];
 
         actor["isOnGround"]
             = [](const LObject& o) { return MWBase::Environment::get().getWorld()->isOnGround(o.ptr()); };
@@ -231,7 +237,8 @@ namespace MWLua
             else
                 return sol::make_object(lua, LObject(*it));
         };
-        actor["equipment"] = sol::overload(getAllEquipment, getEquipmentFromSlot);
+        actor["getEquipment"] = sol::overload(getAllEquipment, getEquipmentFromSlot);
+        actor["equipment"] = actor["getEquipment"]; // for compatibility; should be removed later
         actor["hasEquipped"] = [](const Object& o, const Object& item) {
             const MWWorld::Ptr& ptr = o.ptr();
             if (!ptr.getClass().hasInventoryStore(ptr))
