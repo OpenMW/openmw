@@ -108,7 +108,7 @@ namespace MWGui
         void activated() override;
     };
 
-    typedef MWDialogue::KeywordSearch<std::string, intptr_t> KeywordSearchT;
+    typedef MWDialogue::KeywordSearch<intptr_t> KeywordSearchT;
 
     struct DialogueText
     {

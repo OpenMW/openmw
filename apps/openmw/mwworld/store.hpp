@@ -512,7 +512,7 @@ namespace MWWorld
         std::vector<ESM::Dialogue*> mShared;
 
         mutable bool mKeywordSearchModFlag;
-        mutable MWDialogue::KeywordSearch<std::string, int /*unused*/> mKeywordSearch;
+        mutable MWDialogue::KeywordSearch<int /*unused*/> mKeywordSearch;
 
     public:
         Store();
@@ -535,7 +535,7 @@ namespace MWWorld
 
         void listIdentifier(std::vector<ESM::RefId>& list) const override;
 
-        const MWDialogue::KeywordSearch<std::string, int>& getDialogIdKeywordSearch() const;
+        const MWDialogue::KeywordSearch<int>& getDialogIdKeywordSearch() const;
     };
 
     template <>

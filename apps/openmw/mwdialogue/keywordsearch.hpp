@@ -13,11 +13,11 @@
 namespace MWDialogue
 {
 
-    template <typename string_t, typename value_t>
+    template <typename value_t>
     class KeywordSearch
     {
     public:
-        typedef typename string_t::const_iterator Point;
+        using Point = std::string::const_iterator;
 
         struct Match
         {
@@ -26,11 +26,11 @@ namespace MWDialogue
             value_t mValue;
         };
 
-        void seed(string_t keyword, value_t value)
+        void seed(std::string_view keyword, value_t value)
         {
             if (keyword.empty())
                 return;
-            seed_impl(std::move(keyword), std::move(value), 0, mRoot);
+            seed_impl(keyword, std::move(value), 0, mRoot);
         }
 
         void clear()
@@ -39,23 +39,21 @@ namespace MWDialogue
             mRoot.mKeyword.clear();
         }
 
-        bool containsKeyword(const string_t& keyword, value_t& value)
+        bool containsKeyword(std::string_view keyword, value_t& value)
         {
-            typename Entry::childen_t::iterator current;
-            typename Entry::childen_t::iterator next;
-
-            current = mRoot.mChildren.find(Misc::StringUtils::toLower(*keyword.begin()));
+            auto it = keyword.begin();
+            auto current = mRoot.mChildren.find(Misc::StringUtils::toLower(*it));
             if (current == mRoot.mChildren.end())
                 return false;
-            else if (current->second.mKeyword.size() && Misc::StringUtils::ciEqual(current->second.mKeyword, keyword))
+            else if (Misc::StringUtils::ciEqual(current->second.mKeyword, keyword))
             {
                 value = current->second.mValue;
                 return true;
             }
 
-            for (Point i = ++keyword.begin(); i != keyword.end(); ++i)
+            for (++it; it != keyword.end(); ++it)
             {
-                next = current->second.mChildren.find(Misc::StringUtils::toLower(*i));
+                auto next = current->second.mChildren.find(Misc::StringUtils::toLower(*it));
                 if (next == current->second.mChildren.end())
                     return false;
                 if (Misc::StringUtils::ciEqual(next->second.mKeyword, keyword))
@@ -116,14 +114,12 @@ namespace MWDialogue
                 // candidates first
                 std::reverse(candidates.begin(), candidates.end());
 
-                for (typename std::vector<std::pair<int, typename Entry::childen_t::const_iterator>>::iterator it
-                     = candidates.begin();
-                     it != candidates.end(); ++it)
+                for (const auto& [pos, c] : candidates)
                 {
-                    candidate = it->second;
+                    candidate = c;
                     // try to match the rest of the keyword
-                    Point k = i + it->first;
-                    typename string_t::const_iterator t = candidate->second.mKeyword.begin() + (k - i);
+                    Point k = i + pos;
+                    Point t = candidate->second.mKeyword.begin() + (k - i);
 
                     while (k != end && t != candidate->second.mKeyword.end())
                     {
@@ -196,12 +192,12 @@ namespace MWDialogue
         {
             typedef std::map<wchar_t, Entry> childen_t;
 
-            string_t mKeyword;
+            std::string mKeyword;
             value_t mValue;
             childen_t mChildren;
         };
 
-        void seed_impl(string_t keyword, value_t value, size_t depth, Entry& entry)
+        void seed_impl(std::string_view keyword, value_t value, size_t depth, Entry& entry)
         {
             int ch = Misc::StringUtils::toLower(keyword.at(depth));
 
@@ -210,7 +206,7 @@ namespace MWDialogue
             if (j == entry.mChildren.end())
             {
                 entry.mChildren[ch].mValue = std::move(value);
-                entry.mChildren[ch].mKeyword = std::move(keyword);
+                entry.mChildren[ch].mKeyword = keyword;
             }
             else
             {
@@ -219,22 +215,21 @@ namespace MWDialogue
                     if (keyword == j->second.mKeyword)
                         throw std::runtime_error("duplicate keyword inserted");
 
-                    value_t pushValue = j->second.mValue;
-                    string_t pushKeyword = j->second.mKeyword;
+                    const auto& pushKeyword = j->second.mKeyword;
 
                     if (depth >= pushKeyword.size())
                         throw std::runtime_error("unexpected");
 
                     if (depth + 1 < pushKeyword.size())
                     {
-                        seed_impl(std::move(pushKeyword), std::move(pushValue), depth + 1, j->second);
+                        seed_impl(pushKeyword, j->second.mValue, depth + 1, j->second);
                         j->second.mKeyword.clear();
                     }
                 }
                 if (depth + 1 == keyword.size())
                     j->second.mKeyword = value;
                 else // depth+1 < keyword.size()
-                    seed_impl(std::move(keyword), std::move(value), depth + 1, j->second);
+                    seed_impl(keyword, std::move(value), depth + 1, j->second);
             }
         }
 
