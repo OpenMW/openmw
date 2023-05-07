@@ -98,21 +98,27 @@ namespace MWPhysics
         // Check if we actually found a valid spawn point (use an infinitely thin ray this time).
         // Required for some broken door destinations in Morrowind.esm, where the spawn point
         // intersects with other geometry if the actor's base is taken into account
-        btVector3 from = Misc::Convert::toBullet(position);
+        btVector3 from = Misc::Convert::toBullet(position + offset);
         btVector3 to = from - btVector3(0, 0, maxHeight);
 
-        btCollisionWorld::ClosestRayResultCallback resultCallback1(from, to);
+        btCollisionWorld::ClosestConvexResultCallback resultCallback1(from, to);
         resultCallback1.m_collisionFilterGroup = CollisionType_AnyPhysical;
         resultCallback1.m_collisionFilterMask = CollisionType_World | CollisionType_HeightMap;
 
-        collisionWorld->rayTest(from, to, resultCallback1);
+        const btQuaternion btrot = btQuaternion::getIdentity();
+        collisionWorld->convexSweepTest(
+            actor->getConvexShape(), btTransform(btrot, from), btTransform(btrot, to), resultCallback1);
 
         if (resultCallback1.hasHit()
             && ((Misc::Convert::toOsg(resultCallback1.m_hitPointWorld) - tracer.mEndPos + offset).length2() > 35 * 35
                 || !isWalkableSlope(tracer.mPlaneNormal)))
         {
             actor->setOnSlope(!isWalkableSlope(resultCallback1.m_hitNormalWorld));
-            return Misc::Convert::toOsg(resultCallback1.m_hitPointWorld) + osg::Vec3f(0.f, 0.f, sGroundOffset);
+            osg::Vec3f res = Misc::Convert::toOsg(resultCallback1.m_hitPointWorld);
+            res.x() = position.x();
+            res.y() = position.y();
+            res.z() += sGroundOffset;
+            return res;
         }
 
         actor->setOnSlope(!isWalkableSlope(tracer.mPlaneNormal));
