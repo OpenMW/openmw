@@ -92,6 +92,9 @@ namespace MWRender
                         = cullVisitor.getCurrentCullingSet().getFrustum().getResultMask();
                     if (resultMask)
                     {
+                        // Other objects are likely cheaper and should let us skip all but a few groundcover instances
+                        cullVisitor.computeNearPlane();
+
                         if (dNear < computedZNear)
                         {
                             dNear = computedZNear;
