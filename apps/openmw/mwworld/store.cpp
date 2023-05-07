@@ -687,21 +687,21 @@ namespace MWWorld
                 for (const auto& movedRef : newMovedRefs)
                 {
                     // remove reference from current leased ref tracker and add it to new cell
-                    auto itold = std::find(cell.mMovedRefs.begin(), cell.mMovedRefs.end(), movedRef.mRefNum);
-                    if (itold != cell.mMovedRefs.end())
+                    auto itOld = std::find(cell.mMovedRefs.begin(), cell.mMovedRefs.end(), movedRef.mRefNum);
+                    if (itOld != cell.mMovedRefs.end())
                     {
-                        if (movedRef.mTarget[0] != itold->mTarget[0] || movedRef.mTarget[1] != itold->mTarget[1])
+                        if (movedRef.mTarget[0] != itOld->mTarget[0] || movedRef.mTarget[1] != itOld->mTarget[1])
                         {
-                            ESM::Cell* wipecell = const_cast<ESM::Cell*>(search(itold->mTarget[0], itold->mTarget[1]));
-                            auto it_lease = std::find_if(wipecell->mLeasedRefs.begin(), wipecell->mLeasedRefs.end(),
+                            ESM::Cell* wipecell = const_cast<ESM::Cell*>(search(itOld->mTarget[0], itOld->mTarget[1]));
+                            auto itLease = std::find_if(wipecell->mLeasedRefs.begin(), wipecell->mLeasedRefs.end(),
                                 ESM::CellRefTrackerPredicate(movedRef.mRefNum));
-                            if (it_lease != wipecell->mLeasedRefs.end())
-                                wipecell->mLeasedRefs.erase(it_lease);
+                            if (itLease != wipecell->mLeasedRefs.end())
+                                wipecell->mLeasedRefs.erase(itLease);
                             else
                                 Log(Debug::Error) << "Error: can't find " << movedRef.mRefNum.mIndex << " "
                                                   << movedRef.mRefNum.mContentFile << " in leasedRefs";
                         }
-                        *itold = movedRef;
+                        *itOld = movedRef;
                     }
                     else
                         cell.mMovedRefs.push_back(movedRef);
