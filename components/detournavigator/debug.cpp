@@ -222,6 +222,15 @@ namespace DetourNavigator
                       << ", .mPathgrid = " << value.mPathgrid << ", .mGround = " << value.mGround << "}";
     }
 
+    std::ostream& operator<<(std::ostream& stream, const DetourSettings& value)
+    {
+        return stream << "DetourSettings {"
+                      << ".mMaxPolys = " << value.mMaxPolys
+                      << ", .mMaxNavMeshQueryNodes = " << value.mMaxNavMeshQueryNodes
+                      << ", .mMaxPolygonPathSize = " << value.mMaxPolygonPathSize
+                      << ", .mMaxSmoothPathSize = " << value.mMaxSmoothPathSize << "}";
+    }
+
     void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix, const std::string& revision,
         const RecastSettings& settings)
     {
