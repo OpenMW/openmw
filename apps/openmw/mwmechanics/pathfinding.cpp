@@ -439,10 +439,9 @@ namespace MWMechanics
         PathType pathType, std::back_insert_iterator<std::deque<osg::Vec3f>> out)
     {
         const auto world = MWBase::Environment::get().getWorld();
-        const auto stepSize = getPathStepSize(actor);
         const auto navigator = world->getNavigator();
         const auto status = DetourNavigator::findPath(
-            *navigator, agentBounds, stepSize, startPoint, endPoint, flags, areaCosts, endTolerance, out);
+            *navigator, agentBounds, startPoint, endPoint, flags, areaCosts, endTolerance, out);
 
         if (pathType == PathType::Partial && status == DetourNavigator::Status::PartialPath)
             return DetourNavigator::Status::Success;
@@ -475,8 +474,8 @@ namespace MWMechanics
         std::deque<osg::Vec3f> prePath;
         auto prePathInserter = std::back_inserter(prePath);
         const float endTolerance = 0;
-        const auto status = DetourNavigator::findPath(*navigator, agentBounds, stepSize, startPoint, mPath.front(),
-            flags, areaCosts, endTolerance, prePathInserter);
+        const auto status = DetourNavigator::findPath(
+            *navigator, agentBounds, startPoint, mPath.front(), flags, areaCosts, endTolerance, prePathInserter);
 
         if (status == DetourNavigator::Status::NavMeshNotFound)
             return;

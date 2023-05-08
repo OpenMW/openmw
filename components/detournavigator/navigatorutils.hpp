@@ -25,9 +25,9 @@ namespace DetourNavigator
      * Equal to out if no path is found.
      */
     template <class OutputIterator>
-    inline Status findPath(const Navigator& navigator, const AgentBounds& agentBounds, const float stepSize,
-        const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags, const AreaCosts& areaCosts,
-        float endTolerance, OutputIterator out)
+    inline Status findPath(const Navigator& navigator, const AgentBounds& agentBounds, const osg::Vec3f& start,
+        const osg::Vec3f& end, const Flags includeFlags, const AreaCosts& areaCosts, float endTolerance,
+        OutputIterator out)
     {
         static_assert(std::is_same<typename std::iterator_traits<OutputIterator>::iterator_category,
                           std::output_iterator_tag>::value,
@@ -39,9 +39,8 @@ namespace DetourNavigator
         auto outTransform = withFromNavMeshCoordinates(out, settings.mRecast);
         const auto locked = navMesh->lock();
         return findSmoothPath(locked->getQuery(), toNavMeshCoordinates(settings.mRecast, agentBounds.mHalfExtents),
-            toNavMeshCoordinates(settings.mRecast, stepSize), toNavMeshCoordinates(settings.mRecast, start),
-            toNavMeshCoordinates(settings.mRecast, end), includeFlags, areaCosts, settings.mDetour, endTolerance,
-            outTransform);
+            toNavMeshCoordinates(settings.mRecast, start), toNavMeshCoordinates(settings.mRecast, end), includeFlags,
+            areaCosts, settings.mDetour, endTolerance, outTransform);
     }
 
     /**

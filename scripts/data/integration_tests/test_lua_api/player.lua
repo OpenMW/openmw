@@ -71,7 +71,6 @@ testing.registerLocalTest('findPath',
         local dst = util.vector3(4500, 4500, 700.216)
         local options = {
             agentBounds = types.Actor.getPathfindingAgentBounds(self),
-            stepSize = 50,
             includeFlags = nearby.NAVIGATOR_FLAGS.Walk + nearby.NAVIGATOR_FLAGS.Swim,
             areaCosts = {
                 water = 1,

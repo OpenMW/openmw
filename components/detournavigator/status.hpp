@@ -14,6 +14,7 @@ namespace DetourNavigator
         MoveAlongSurfaceFailed,
         FindPathOverPolygonsFailed,
         InitNavMeshQueryFailed,
+        FindStraightPathFailed,
     };
 
     constexpr const char* getMessage(Status value)
@@ -38,6 +39,8 @@ namespace DetourNavigator
                 return "path over navmesh polygons is not found";
             case Status::InitNavMeshQueryFailed:
                 return "failed to init navmesh query";
+            case Status::FindStraightPathFailed:
+                return "failed to straight path using polygon path";
         }
         return "unknown error";
     }
