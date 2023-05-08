@@ -41,9 +41,15 @@ int runBinary(
     const std::filesystem::path& binaryPath, const std::filesystem::path& iniPath, const std::filesystem::path& cfgPath)
 {
 #ifdef _WIN32
-    std::wstringstream cmd;
-    cmd << L"& '" << binaryPath.native() << L"' -i '" << iniPath.native() << L"' -c '" << cfgPath.native() << "'";
-    return _wsystem(cmd.str().c_str());
+    std::filesystem::path psScriptPath = std::filesystem::temp_directory_path() /
+        ("openmw_iniimporter_tests_" + std::to_string(std::time(nullptr))+ ".ps1");
+    std::wofstream psScriptFile(psScriptPath);
+    psScriptFile << L"& '" << binaryPath.native() << L"' -i '" << iniPath.native() << L"' -c '" << cfgPath.native() << "'";
+    psScriptFile.close();
+
+    std::wstringstream psCmd;
+    psCmd << L"powershell -NoProfile -ExecutionPolicy Bypass -File \"" << psScriptPath.wstring() << L"\"";
+    return _wsystem(psCmd.str().c_str());
 #else
     std::stringstream cmd;
     cmd << binaryPath << " -i "
