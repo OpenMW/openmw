@@ -24,26 +24,26 @@
 
 namespace
 {
-    static char const OptionsOverlay[] = "OptionsOverlay";
-    static char const OptionsBTN[] = "OptionsBTN";
-    static char const PrevPageBTN[] = "PrevPageBTN";
-    static char const NextPageBTN[] = "NextPageBTN";
-    static char const CloseBTN[] = "CloseBTN";
-    static char const JournalBTN[] = "JournalBTN";
-    static char const TopicsBTN[] = "TopicsBTN";
-    static char const QuestsBTN[] = "QuestsBTN";
-    static char const CancelBTN[] = "CancelBTN";
-    static char const ShowAllBTN[] = "ShowAllBTN";
-    static char const ShowActiveBTN[] = "ShowActiveBTN";
-    static char const PageOneNum[] = "PageOneNum";
-    static char const PageTwoNum[] = "PageTwoNum";
-    static char const TopicsList[] = "TopicsList";
-    static char const QuestsList[] = "QuestsList";
-    static char const LeftBookPage[] = "LeftBookPage";
-    static char const RightBookPage[] = "RightBookPage";
-    static char const LeftTopicIndex[] = "LeftTopicIndex";
-    static char const CenterTopicIndex[] = "CenterTopicIndex";
-    static char const RightTopicIndex[] = "RightTopicIndex";
+    static constexpr std::string_view OptionsOverlay = "OptionsOverlay";
+    static constexpr std::string_view OptionsBTN = "OptionsBTN";
+    static constexpr std::string_view PrevPageBTN = "PrevPageBTN";
+    static constexpr std::string_view NextPageBTN = "NextPageBTN";
+    static constexpr std::string_view CloseBTN = "CloseBTN";
+    static constexpr std::string_view JournalBTN = "JournalBTN";
+    static constexpr std::string_view TopicsBTN = "TopicsBTN";
+    static constexpr std::string_view QuestsBTN = "QuestsBTN";
+    static constexpr std::string_view CancelBTN = "CancelBTN";
+    static constexpr std::string_view ShowAllBTN = "ShowAllBTN";
+    static constexpr std::string_view ShowActiveBTN = "ShowActiveBTN";
+    static constexpr std::string_view PageOneNum = "PageOneNum";
+    static constexpr std::string_view PageTwoNum = "PageTwoNum";
+    static constexpr std::string_view TopicsList = "TopicsList";
+    static constexpr std::string_view QuestsList = "QuestsList";
+    static constexpr std::string_view LeftBookPage = "LeftBookPage";
+    static constexpr std::string_view RightBookPage = "RightBookPage";
+    static constexpr std::string_view LeftTopicIndex = "LeftTopicIndex";
+    static constexpr std::string_view CenterTopicIndex = "CenterTopicIndex";
+    static constexpr std::string_view RightTopicIndex = "RightTopicIndex";
 
     struct JournalWindowImpl : MWGui::JournalBooks, MWGui::JournalWindow
     {
@@ -63,7 +63,7 @@ namespace
         bool mAllQuests;
 
         template <typename T>
-        T* getWidget(char const* name)
+        T* getWidget(std::string_view name)
         {
             T* widget;
             WindowBase::getWidget(widget, name);
@@ -71,25 +71,25 @@ namespace
         }
 
         template <typename value_type>
-        void setText(char const* name, value_type const& value)
+        void setText(std::string_view name, value_type const& value)
         {
             getWidget<MyGUI::TextBox>(name)->setCaption(MyGUI::utility::toString(value));
         }
 
-        void setVisible(char const* name, bool visible) { getWidget<MyGUI::Widget>(name)->setVisible(visible); }
+        void setVisible(std::string_view name, bool visible) { getWidget<MyGUI::Widget>(name)->setVisible(visible); }
 
-        void adviseButtonClick(char const* name, void (JournalWindowImpl::*handler)(MyGUI::Widget*))
+        void adviseButtonClick(std::string_view name, void (JournalWindowImpl::*handler)(MyGUI::Widget*))
         {
             getWidget<MyGUI::Widget>(name)->eventMouseButtonClick += newDelegate(this, handler);
         }
 
         void adviseKeyPress(
-            char const* name, void (JournalWindowImpl::*handler)(MyGUI::Widget*, MyGUI::KeyCode, MyGUI::Char))
+            std::string_view name, void (JournalWindowImpl::*handler)(MyGUI::Widget*, MyGUI::KeyCode, MyGUI::Char))
         {
             getWidget<MyGUI::Widget>(name)->eventKeyButtonPressed += newDelegate(this, handler);
         }
 
-        MWGui::BookPage* getPage(char const* name) { return getWidget<MWGui::BookPage>(name); }
+        MWGui::BookPage* getPage(std::string_view name) { return getWidget<MWGui::BookPage>(name); }
 
         JournalWindowImpl(MWGui::JournalViewModel::Ptr Model, bool questList, ToUTF8::FromType encoding)
             : JournalBooks(Model, encoding)
