@@ -31,7 +31,7 @@ end
 
 function M.onFrame(dt)
     if core.isWorldPaused() then return end
-    local newActive = M.enabled and Actor.stance(self) == Actor.STANCE.Nothing
+    local newActive = M.enabled and Actor.getStance(self) == Actor.STANCE.Nothing
     if newActive and not active then
         turnOn()
     elseif not newActive and active then

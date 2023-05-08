@@ -85,7 +85,7 @@ end
 local function updateState()
     local mode = camera.getMode()
     local oldState = state
-    if Actor.stance(self) ~= Actor.STANCE.Nothing and mode == MODE.ThirdPerson then
+    if Actor.getStance(self) ~= Actor.STANCE.Nothing and mode == MODE.ThirdPerson then
         state = STATE.Combat
     elseif Actor.isSwimming(self) then
         state = STATE.Swimming
@@ -94,7 +94,7 @@ local function updateState()
     elseif not state then
         state = defaultShoulder
     end
-    if (mode == MODE.ThirdPerson or Actor.currentSpeed(self) > 0 or state ~= oldState or noThirdPersonLastFrame)
+    if (mode == MODE.ThirdPerson or Actor.getCurrentSpeed(self) > 0 or state ~= oldState or noThirdPersonLastFrame)
        and (state == STATE.LeftShoulder or state == STATE.RightShoulder) then
         if autoSwitchShoulder then
             trySwitchShoulder()

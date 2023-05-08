@@ -38,13 +38,14 @@ namespace MWLua
 
             object.ptr().getCellRef().setSoul(creature);
         };
-        miscellaneous["soul"] = [](const Object& object) -> sol::optional<std::string> {
+        miscellaneous["getSoul"] = [](const Object& object) -> sol::optional<std::string> {
             ESM::RefId soul = object.ptr().getCellRef().getSoul();
             if (soul.empty())
                 return sol::nullopt;
             else
                 return soul.serializeText();
         };
+        miscellaneous["soul"] = miscellaneous["getSoul"]; // for compatibility; should be removed later
         sol::usertype<ESM::Miscellaneous> record
             = context.mLua->sol().new_usertype<ESM::Miscellaneous>("ESM3_Miscellaneous");
         record[sol::meta_function::to_string]

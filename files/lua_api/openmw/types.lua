@@ -71,19 +71,19 @@
 
 ---
 -- Speed of running. For dead actors it still returns a positive value.
--- @function [parent=#Actor] runSpeed
+-- @function [parent=#Actor] getRunSpeed
 -- @param openmw.core#GameObject actor
 -- @return #number
 
 ---
 -- Speed of walking. For dead actors it still returns a positive value.
--- @function [parent=#Actor] walkSpeed
+-- @function [parent=#Actor] getWalkSpeed
 -- @param openmw.core#GameObject actor
 -- @return #number
 
 ---
 -- Current speed.
--- @function [parent=#Actor] currentSpeed
+-- @function [parent=#Actor] getCurrentSpeed
 -- @param openmw.core#GameObject actor
 -- @return #number
 
@@ -101,7 +101,7 @@
 
 ---
 -- Returns the current stance (whether a weapon/spell is readied), see the list of @{#STANCE} values.
--- @function [parent=#Actor] stance
+-- @function [parent=#Actor] getStance
 -- @param openmw.core#GameObject actor
 -- @return #number
 
@@ -114,7 +114,7 @@
 
 ---
 -- Returns `true` if the item is equipped on the actor.
--- @function [parent=#Actor] isEquipped
+-- @function [parent=#Actor] hasEquipped
 -- @param openmw.core#GameObject actor
 -- @param openmw.core#GameObject item
 -- @return #boolean
@@ -131,7 +131,7 @@
 -- See @{#EQUIPMENT_SLOT}. Returns empty table if the actor doesn't have
 -- equipment slots.
 -- 2) With two arguments: returns an item equipped to the given slot.
--- @function [parent=#Actor] equipment
+-- @function [parent=#Actor] getEquipment
 -- @param openmw.core#GameObject actor
 -- @param #number slot Optional number of the equipment slot
 -- @return #EquipmentTable, openmw.core#GameObject
@@ -848,7 +848,7 @@
 
 ---
 -- Returns the read-only soul of a miscellaneous item
--- @function [parent=#Miscellaneous] soul
+-- @function [parent=#Miscellaneous] getSoul
 -- @param openmw.core#GameObject object
 -- @return #string
 
