@@ -79,33 +79,34 @@ namespace LuaUtil
             if (scriptOutput == sol::nil)
                 return true;
             sol::object engineHandlers = sol::nil, eventHandlers = sol::nil;
-            for (const auto& [key, value] : sol::table(scriptOutput))
+            for (const auto& [key, value] : cast<sol::table>(scriptOutput))
             {
-                std::string_view sectionName = key.as<std::string_view>();
+                std::string_view sectionName = cast<std::string_view>(key);
                 if (sectionName == ENGINE_HANDLERS)
                     engineHandlers = value;
                 else if (sectionName == EVENT_HANDLERS)
                     eventHandlers = value;
                 else if (sectionName == INTERFACE_NAME)
-                    script.mInterfaceName = value.as<std::string>();
+                    script.mInterfaceName = cast<std::string>(value);
                 else if (sectionName == INTERFACE)
-                    script.mInterface = value.as<sol::table>();
+                    script.mInterface = cast<sol::table>(value);
                 else
                     Log(Debug::Error) << "Not supported section '" << sectionName << "' in " << debugName;
             }
             if (engineHandlers != sol::nil)
             {
-                for (const auto& [key, fn] : sol::table(engineHandlers))
+                for (const auto& [key, handler] : cast<sol::table>(engineHandlers))
                 {
-                    std::string_view handlerName = key.as<std::string_view>();
+                    std::string_view handlerName = cast<std::string_view>(key);
+                    sol::function fn = cast<sol::function>(handler);
                     if (handlerName == HANDLER_INIT)
-                        onInit = sol::function(fn);
+                        onInit = fn;
                     else if (handlerName == HANDLER_LOAD)
-                        onLoad = sol::function(fn);
+                        onLoad = fn;
                     else if (handlerName == HANDLER_SAVE)
-                        script.mOnSave = sol::function(fn);
+                        script.mOnSave = fn;
                     else if (handlerName == HANDLER_INTERFACE_OVERRIDE)
-                        script.mOnOverride = sol::function(fn);
+                        script.mOnOverride = fn;
                     else
                     {
                         auto it = mEngineHandlers.find(handlerName);
@@ -118,13 +119,13 @@ namespace LuaUtil
             }
             if (eventHandlers != sol::nil)
             {
-                for (const auto& [key, fn] : sol::table(eventHandlers))
+                for (const auto& [key, fn] : cast<sol::table>(eventHandlers))
                 {
-                    std::string_view eventName = key.as<std::string_view>();
+                    std::string_view eventName = cast<std::string_view>(key);
                     auto it = mEventHandlers.find(eventName);
                     if (it == mEventHandlers.end())
                         it = mEventHandlers.emplace(std::string(eventName), EventHandlerList()).first;
-                    insertHandler(it->second, scriptId, fn);
+                    insertHandler(it->second, scriptId, cast<sol::function>(fn));
                 }
             }
 
@@ -280,7 +281,7 @@ namespace LuaUtil
             try
             {
                 sol::object res = LuaUtil::call(list[i].mFn, data);
-                if (res != sol::nil && !res.as<bool>())
+                if (res.is<bool>() && !res.as<bool>())
                     break;  // Skip other handlers if 'false' was returned.
             }
             catch (std::exception& e)

@@ -61,20 +61,20 @@ namespace LuaUtil
         {
             // Argument values
             if (value.is<std::string>())
-                args.push_back(icu::Formattable(value.as<std::string>().c_str()));
+                args.push_back(icu::Formattable(LuaUtil::cast<std::string>(value).c_str()));
             // Note: While we pass all numbers as doubles, they still seem to be handled appropriately.
             // Numbers can be forced to be integers using the argType number and argStyle integer
             //     E.g. {var, number, integer}
             else if (value.is<double>())
-                args.push_back(icu::Formattable(value.as<double>()));
+                args.push_back(icu::Formattable(LuaUtil::cast<double>(value)));
             else
             {
-                Log(Debug::Error) << "Unrecognized argument type for key \"" << key.as<std::string>()
-                    << "\" when formatting message \"" << messageId << "\"";
+                Log(Debug::Error) << "Unrecognized argument type for key \"" << LuaUtil::cast<std::string>(key)
+                                  << "\" when formatting message \"" << messageId << "\"";
             }
 
             // Argument names
-            const auto str = key.as<std::string>();
+            const auto str = LuaUtil::cast<std::string>(key);
             argNames.push_back(icu::UnicodeString::fromUTF8(icu::StringPiece(str.data(), str.size())));
         }
         return std::make_pair(args, argNames);

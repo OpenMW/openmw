@@ -236,11 +236,11 @@ namespace MWLua
             SetEquipmentAction::Equipment eqp;
             for (auto& [key, value] : equipment)
             {
-                int slot = key.as<int>();
+                int slot = LuaUtil::cast<int>(key);
                 if (value.is<Object>())
-                    eqp[slot] = value.as<Object>().id();
+                    eqp[slot] = LuaUtil::cast<Object>(value).id();
                 else
-                    eqp[slot] = value.as<std::string>();
+                    eqp[slot] = LuaUtil::cast<std::string>(value);
             }
             context.mLuaManager->addAction(std::make_unique<SetEquipmentAction>(context.mLua, obj.id(), std::move(eqp)));
         };

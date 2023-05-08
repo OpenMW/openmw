@@ -230,19 +230,19 @@ namespace LuaUtil
             util["bitOr"] = [](unsigned a, sol::variadic_args va)
             {
                 for (const auto& v : va)
-                    a |= v.as<unsigned>();
+                    a |= cast<unsigned>(v);
                 return a;
             };
             util["bitAnd"] = [](unsigned a, sol::variadic_args va)
             {
                 for (const auto& v : va)
-                    a &= v.as<unsigned>();
+                    a &= cast<unsigned>(v);
                 return a;
             };
             util["bitXor"] = [](unsigned a, sol::variadic_args va)
             {
                 for (const auto& v : va)
-                    a ^= v.as<unsigned>();
+                    a ^= cast<unsigned>(v);
                 return a;
             };
             util["bitNot"] = [](unsigned a) { return ~a; };
