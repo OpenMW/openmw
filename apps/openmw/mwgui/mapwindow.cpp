@@ -23,7 +23,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/cellutils.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/worldmodel.hpp"
@@ -277,7 +276,7 @@ namespace MWGui
 
         if (!mInterior)
         {
-            cellIndex = MWWorld::positionToCellIndex(worldX, worldY);
+            cellIndex = ESM::positionToCellIndex(worldX, worldY);
             nX = (worldX - cellSize * cellIndex.x()) / cellSize;
             // Image space is -Y up, cells are Y up
             nY = 1 - (worldY - cellSize * cellIndex.y()) / cellSize;

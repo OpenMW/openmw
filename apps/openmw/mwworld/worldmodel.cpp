@@ -16,7 +16,6 @@
 #include "../mwbase/world.hpp"
 
 #include "cellstore.hpp"
-#include "cellutils.hpp"
 #include "esmstore.hpp"
 
 namespace
@@ -333,7 +332,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getCellByPosition(
 {
     if (cellInSameWorldSpace && !cellInSameWorldSpace->isExterior())
         return *cellInSameWorldSpace;
-    const osg::Vec2i cellIndex = positionToCellIndex(pos.x(), pos.y());
+    const osg::Vec2i cellIndex = ESM::positionToCellIndex(pos.x(), pos.y());
     ESM::RefId exteriorWorldspace
         = cellInSameWorldSpace ? cellInSameWorldSpace->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
     return getExterior(ESM::ExteriorCellIndex(cellIndex.x(), cellIndex.y(), exteriorWorldspace));

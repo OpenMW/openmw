@@ -11,7 +11,6 @@
 #include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/cellutils.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/worldmodel.hpp"
 

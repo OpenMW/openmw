@@ -40,7 +40,6 @@
 
 #include "cellpreloader.hpp"
 #include "cellstore.hpp"
-#include "cellutils.hpp"
 #include "cellvisitors.hpp"
 #include "class.hpp"
 #include "esmstore.hpp"
@@ -525,7 +524,7 @@ namespace MWWorld
             if (distance <= maxDistance)
                 return *currentGridCenter;
         }
-        return positionToCellIndex(pos.x(), pos.y(), isEsm4Ext);
+        return ESM::positionToCellIndex(pos.x(), pos.y(), isEsm4Ext);
     }
 
     void Scene::playerMoved(const osg::Vec3f& pos)
@@ -1293,7 +1292,7 @@ namespace MWWorld
             else
             {
                 osg::Vec3f pos = dest.mPos.asVec3();
-                const osg::Vec2i cellIndex = positionToCellIndex(pos.x(), pos.y());
+                const osg::Vec2i cellIndex = ESM::positionToCellIndex(pos.x(), pos.y());
                 preloadCell(mWorld.getWorldModel().getExterior(
                                 ESM::ExteriorCellIndex(cellIndex.x(), cellIndex.y(), extWorldspace)),
                     true);

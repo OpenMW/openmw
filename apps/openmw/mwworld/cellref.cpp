@@ -10,7 +10,6 @@
 
 #include <apps/openmw/mwbase/environment.hpp>
 #include <apps/openmw/mwbase/world.hpp>
-#include <apps/openmw/mwworld/cellutils.hpp>
 #include <apps/openmw/mwworld/esmstore.hpp>
 
 namespace MWWorld
@@ -89,7 +88,7 @@ namespace MWWorld
             }
             else
             {
-                const osg::Vec2i index = positionToCellIndex(ref.mDoorDest.pos[0], ref.mDoorDest.pos[1]);
+                const osg::Vec2i index = ESM::positionToCellIndex(ref.mDoorDest.pos[0], ref.mDoorDest.pos[1]);
                 return ESM::RefId::esm3ExteriorCell(index.x(), index.y());
             }
         };

@@ -95,7 +95,6 @@
 #include "projectilemanager.hpp"
 #include "weather.hpp"
 
-#include "cellutils.hpp"
 #include "contentloader.hpp"
 #include "esmloader.hpp"
 
@@ -380,7 +379,7 @@ namespace MWWorld
                 pos.rot[1] = 0;
                 pos.rot[2] = 0;
 
-                osg::Vec2i exteriorCellPos = positionToCellIndex(pos.pos[0], pos.pos[1]);
+                osg::Vec2i exteriorCellPos = ESM::positionToCellIndex(pos.pos[0], pos.pos[1]);
                 ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.x(), exteriorCellPos.y());
                 mWorldScene->changeToExteriorCell(cellId, pos, true);
             }
@@ -1245,7 +1244,7 @@ namespace MWWorld
 
     MWWorld::Ptr World::moveObject(const Ptr& ptr, const osg::Vec3f& position, bool movePhysics, bool moveToActive)
     {
-        const osg::Vec2i index = positionToCellIndex(position.x(), position.y());
+        const osg::Vec2i index = ESM::positionToCellIndex(position.x(), position.y());
 
         CellStore* cell = ptr.getCell();
         ESM::RefId worldspaceId
@@ -2064,7 +2063,7 @@ namespace MWWorld
             throw std::runtime_error("copyObjectToCell(): cannot copy object to null cell");
         if (cell->isExterior())
         {
-            const osg::Vec2i index = positionToCellIndex(pos.pos[0], pos.pos[1]);
+            const osg::Vec2i index = ESM::positionToCellIndex(pos.pos[0], pos.pos[1]);
             cell = &mWorldModel.getExterior(
                 ESM::ExteriorCellIndex(index.x(), index.y(), cell->getCell()->getWorldSpace()));
         }

@@ -1,7 +1,10 @@
 #ifndef OPENMW_ESM_UTIL_H
 #define OPENMW_ESM_UTIL_H
+#include <cmath>
 
 #include <osg/Quat>
+#include <osg/Vec2>
+#include <osg/Vec2i>
 #include <osg/Vec3f>
 
 #include <components/esm/refid.hpp>
@@ -80,6 +83,13 @@ namespace ESM
     {
         return isESM4Ext ? Constants::ESM4CellSizeInUnits : Constants::CellSizeInUnits;
     }
+
+    inline osg::Vec2i positionToCellIndex(float x, float y, bool esm4Ext = false)
+    {
+        const float cellSize = esm4Ext ? Constants::ESM4CellSizeInUnits : Constants::CellSizeInUnits;
+        return { static_cast<int>(std::floor(x / cellSize)), static_cast<int>(std::floor(y / cellSize)) };
+    }
+
 }
 
 namespace std
