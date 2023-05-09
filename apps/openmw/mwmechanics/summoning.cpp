@@ -63,17 +63,13 @@ namespace MWMechanics
 
         for (const auto& it : summonMapToGameSetting)
         {
-            summonMap[it.first] = ESM::RefId::stringRefId(MWBase::Environment::get()
-                                                              .getWorld()
-                                                              ->getStore()
-                                                              .get<ESM::GameSetting>()
-                                                              .find(it.second)
-                                                              ->mValue.getString());
+            summonMap[it.first] = ESM::RefId::stringRefId(
+                MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find(it.second)->mValue.getString());
         }
         return summonMap;
     }
 
-    const ESM::RefId& getSummonedCreature(int effectId)
+    ESM::RefId getSummonedCreature(int effectId)
     {
         const auto& summonMap = getSummonMap();
         auto it = summonMap.find(effectId);
@@ -81,7 +77,7 @@ namespace MWMechanics
         {
             return it->second;
         }
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     int summonCreature(int effectId, const MWWorld::Ptr& summoner)

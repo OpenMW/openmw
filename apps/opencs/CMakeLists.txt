@@ -149,7 +149,11 @@ if(WIN32)
     set(QT_USE_QTMAIN TRUE)
 endif(WIN32)
 
-qt_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+if (QT_VERSION_MAJOR VERSION_EQUAL 5)
+    qt5_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+else ()
+    qt6_wrap_ui(OPENCS_UI_HDR ${OPENCS_UI})
+endif()
 qt_add_resources(OPENCS_RES_SRC ${OPENCS_RES})
 
 # for compiled .ui files
@@ -243,7 +247,11 @@ target_link_libraries(openmw-cs-lib
     components_qt
 )
 
-target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL)
+if (QT_VERSION_MAJOR VERSION_EQUAL 6)
+    target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL Qt::OpenGLWidgets)
+else()
+    target_link_libraries(openmw-cs-lib Qt::Widgets Qt::Core Qt::Network Qt::OpenGL)
+endif()
 
 if (WIN32)
     target_link_libraries(openmw-cs-lib ${Boost_LOCALE_LIBRARY})
@@ -284,7 +292,6 @@ endif()
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
     target_precompile_headers(openmw-cs-lib PRIVATE
-        <boost/filesystem.hpp>
         <boost/program_options/options_description.hpp>
 
         <algorithm>

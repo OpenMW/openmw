@@ -287,7 +287,7 @@ namespace MWGui
         while (mSelected->button->getChildCount()) // Destroy number label
             MyGUI::Gui::getInstance().destroyWidget(mSelected->button->getChildAt(0));
 
-        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
         const ESM::Spell* spell = esmStore.get<ESM::Spell>().find(spellId);
 
         mSelected->type = ESM::QuickKeys::Type::Magic;
@@ -552,7 +552,7 @@ namespace MWGui
             switch (quickKey.mType)
             {
                 case ESM::QuickKeys::Type::Magic:
-                    if (MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(quickKey.mId))
+                    if (MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(quickKey.mId))
                         onAssignMagic(quickKey.mId);
                     break;
                 case ESM::QuickKeys::Type::Item:

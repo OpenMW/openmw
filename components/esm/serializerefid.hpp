@@ -21,9 +21,11 @@ namespace ESM
     {
         if (value == 0)
             return 1;
+        constexpr std::size_t lastDigit = 1;
         if (value > 0)
-            return static_cast<std::size_t>(std::numeric_limits<T>::digits10);
-        return static_cast<std::size_t>(std::numeric_limits<T>::digits10) + 1;
+            return static_cast<std::size_t>(std::numeric_limits<T>::digits10) + lastDigit;
+        constexpr std::size_t sign = 1;
+        return static_cast<std::size_t>(std::numeric_limits<T>::digits10) + lastDigit + sign;
     }
 
     template <class T>
@@ -40,9 +42,15 @@ namespace ESM
         return result;
     }
 
+    template <class T>
+    std::size_t getHexIntegralSizeWith0x(T value)
+    {
+        return 2 + getHexIntegralSize(value);
+    }
+
     inline void serializeRefIdPrefix(std::size_t valueSize, std::string_view prefix, std::string& out)
     {
-        out.resize(prefix.size() + valueSize + 2, '\0');
+        out.resize(prefix.size() + valueSize, '\0');
         std::memcpy(out.data(), prefix.data(), prefix.size());
     }
 
@@ -70,7 +78,7 @@ namespace ESM
     void serializeRefIdValue(T value, std::string_view prefix, std::string& out)
     {
         static_assert(!std::is_signed_v<T>);
-        serializeRefIdPrefix(getHexIntegralSize(value), prefix, out);
+        serializeRefIdPrefix(getHexIntegralSizeWith0x(value), prefix, out);
         serializeHexIntegral(value, prefix.size(), out);
     }
 

@@ -29,9 +29,6 @@ namespace MWLua
     {
     public:
         using SafePtr::SafePtr;
-        virtual sol::object getObject(lua_State* lua, ObjectId id) const = 0; // returns LObject or GObject
-        virtual sol::object getCell(lua_State* lua, MWWorld::CellStore* store) const = 0; // returns LCell or GCell
-
         const MWWorld::Ptr& ptr() const
         {
             const MWWorld::Ptr& res = ptrOrNull();
@@ -49,11 +46,6 @@ namespace MWLua
     class LObject : public Object
     {
         using Object::Object;
-        sol::object getObject(lua_State* lua, ObjectId id) const final { return sol::make_object<LObject>(lua, id); }
-        sol::object getCell(lua_State* lua, MWWorld::CellStore* store) const final
-        {
-            return sol::make_object(lua, LCell{ store });
-        }
     };
 
     // Used only in global scripts
@@ -64,11 +56,6 @@ namespace MWLua
     class GObject : public Object
     {
         using Object::Object;
-        sol::object getObject(lua_State* lua, ObjectId id) const final { return sol::make_object<GObject>(lua, id); }
-        sol::object getCell(lua_State* lua, MWWorld::CellStore* store) const final
-        {
-            return sol::make_object(lua, GCell{ store });
-        }
     };
 
     using ObjectIdList = std::shared_ptr<std::vector<ObjectId>>;

@@ -57,6 +57,8 @@ namespace MWGui
 
     MWWorld::Ptr ItemModel::moveItem(const ItemStack& item, size_t count, ItemModel* otherModel)
     {
+        // TODO(#6148): moving an item should preserve RefNum and Lua scripts (unless the item stack is merged with
+        // already existing stack).
         MWWorld::Ptr ret = otherModel->copyItem(item, count);
         removeItem(item, count);
         return ret;

@@ -37,15 +37,13 @@ namespace MWMechanics
 
         float pcSneak = static_cast<float>(mThief.getClass().getSkill(mThief, ESM::Skill::Sneak));
         int iPickMinChance = MWBase::Environment::get()
-                                 .getWorld()
-                                 ->getStore()
-                                 .get<ESM::GameSetting>()
+                                 .getESMStore()
+                                 ->get<ESM::GameSetting>()
                                  .find("iPickMinChance")
                                  ->mValue.getInteger();
         int iPickMaxChance = MWBase::Environment::get()
-                                 .getWorld()
-                                 ->getStore()
-                                 .get<ESM::GameSetting>()
+                                 .getESMStore()
+                                 ->get<ESM::GameSetting>()
                                  .find("iPickMaxChance")
                                  ->mValue.getInteger();
 
@@ -66,9 +64,8 @@ namespace MWMechanics
     {
         float stackValue = static_cast<float>(item.getClass().getValue(item) * count);
         float fPickPocketMod = MWBase::Environment::get()
-                                   .getWorld()
-                                   ->getStore()
-                                   .get<ESM::GameSetting>()
+                                   .getESMStore()
+                                   ->get<ESM::GameSetting>()
                                    .find("fPickPocketMod")
                                    ->mValue.getFloat();
         float valueTerm = 10 * fPickPocketMod * stackValue;

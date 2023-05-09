@@ -1,42 +1,9 @@
-#include "luabindings.hpp"
+#include "postprocessingbindings.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwrender/postprocessor.hpp"
 
 #include "luamanagerimp.hpp"
-
-namespace
-{
-    template <class T>
-    class SetUniformShaderAction final : public MWLua::LuaManager::Action
-    {
-    public:
-        SetUniformShaderAction(
-            LuaUtil::LuaState* state, std::shared_ptr<fx::Technique> shader, const std::string& name, const T& value)
-            : MWLua::LuaManager::Action(state)
-            , mShader(std::move(shader))
-            , mName(name)
-            , mValue(value)
-        {
-        }
-
-        void apply() const override
-        {
-            MWBase::Environment::get().getWorld()->getPostProcessor()->setUniform(mShader, mName, mValue);
-        }
-
-        std::string toString() const override
-        {
-            return std::string("SetUniformShaderAction shader=") + (mShader ? mShader->getName() : "nil")
-                + std::string("uniform=") + (mShader ? mName : "nil");
-        }
-
-    private:
-        std::shared_ptr<fx::Technique> mShader;
-        std::string mName;
-        T mValue;
-    };
-}
 
 namespace MWLua
 {
@@ -84,7 +51,10 @@ namespace MWLua
     {
         return [context](const Shader& shader, const std::string& name, const T& value) {
             context.mLuaManager->addAction(
-                std::make_unique<SetUniformShaderAction<T>>(context.mLua, shader.mShader, name, value));
+                [&] {
+                    MWBase::Environment::get().getWorld()->getPostProcessor()->setUniform(shader.mShader, name, value);
+                },
+                "SetUniformShaderAction");
         };
     }
 
@@ -114,7 +84,10 @@ namespace MWLua
             }
 
             context.mLuaManager->addAction(
-                std::make_unique<SetUniformShaderAction<std::vector<T>>>(context.mLua, shader.mShader, name, values));
+                [&] {
+                    MWBase::Environment::get().getWorld()->getPostProcessor()->setUniform(shader.mShader, name, values);
+                },
+                "SetUniformShaderAction");
         };
     }
 

@@ -154,7 +154,9 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
         {
             if (wasShortcutting || doesPathNeedRecalc(dest, actor)) // if need to rebuild path
             {
-                mPathFinder.buildLimitedPath(actor, position, dest, actor.getCell(), getPathGridGraph(actor.getCell()),
+                const ESM::Pathgrid* pathgrid
+                    = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
+                mPathFinder.buildLimitedPath(actor, position, dest, actor.getCell(), getPathGridGraph(pathgrid),
                     agentBounds, getNavigatorFlags(actor), getAreaCosts(actor), endTolerance, pathType);
                 mRotateOnTheRunChecks = 3;
 
@@ -329,26 +331,16 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
     }
 }
 
-const MWMechanics::PathgridGraph& MWMechanics::AiPackage::getPathGridGraph(const MWWorld::CellStore* cell) const
+const MWMechanics::PathgridGraph& MWMechanics::AiPackage::getPathGridGraph(const ESM::Pathgrid* pathgrid) const
 {
-    const ESM::RefId id = cell->getCell()->getId();
+    if (!pathgrid || pathgrid->mPoints.empty())
+        return PathgridGraph::sEmpty;
     // static cache is OK for now, pathgrids can never change during runtime
-    typedef std::map<ESM::RefId, std::unique_ptr<MWMechanics::PathgridGraph>> CacheMap;
-    static CacheMap cache;
-    CacheMap::iterator found = cache.find(id);
+    static std::map<const ESM::Pathgrid*, std::unique_ptr<MWMechanics::PathgridGraph>> cache;
+    auto found = cache.find(pathgrid);
     if (found == cache.end())
-    {
-        const ESM::Pathgrid* pathgrid
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cell->getCell());
-        std::unique_ptr<MWMechanics::PathgridGraph> ptr;
-        if (pathgrid)
-            ptr = std::make_unique<MWMechanics::PathgridGraph>(MWMechanics::PathgridGraph(*pathgrid));
-        found = cache.emplace(id, std::move(ptr)).first;
-    }
-    const MWMechanics::PathgridGraph* graph = found->second.get();
-    if (!graph)
-        return MWMechanics::PathgridGraph::sEmpty;
-    return *graph;
+        found = cache.emplace(pathgrid, std::make_unique<MWMechanics::PathgridGraph>(*pathgrid)).first;
+    return *found->second.get();
 }
 
 bool MWMechanics::AiPackage::shortcutPath(const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,

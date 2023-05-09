@@ -6,8 +6,6 @@
 #include <apps/opencs/view/render/object.hpp>
 #include <apps/opencs/view/render/scenewidget.hpp>
 
-#include <osg/ref_ptr>
-
 #include "../../model/world/data.hpp"
 #include "../../model/world/idtable.hpp"
 

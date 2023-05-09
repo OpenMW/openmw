@@ -390,7 +390,7 @@ namespace MWGui
             return;
 
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         const std::string& sPersuasion = gmst.find("sPersuasion")->mValue.getString();
         const std::string& sCompanionShare = gmst.find("sCompanionShare")->mValue.getString();
@@ -492,9 +492,8 @@ namespace MWGui
     {
         MWMechanics::CreatureStats& sellerStats = mPtr.getClass().getCreatureStats(mPtr);
         float delay = MWBase::Environment::get()
-                          .getWorld()
-                          ->getStore()
-                          .get<ESM::GameSetting>()
+                          .getESMStore()
+                          ->get<ESM::GameSetting>()
                           .find("fBarterGoldResetDelay")
                           ->mValue.getFloat();
 
@@ -545,7 +544,7 @@ namespace MWGui
                 && !mPtr.get<ESM::Creature>()->mBase->getTransport().empty());
 
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         if (mPtr.getType() == ESM::NPC::sRecordId)
             mTopicsList->addItem(gmst.find("sPersuasion")->mValue.getString());
@@ -639,9 +638,8 @@ namespace MWGui
             auto interactiveId = TypesetBook::InteractiveId(link.get());
             mLinks.push_back(std::move(link));
             const std::string& goodbye = MWBase::Environment::get()
-                                             .getWorld()
-                                             ->getStore()
-                                             .get<ESM::GameSetting>()
+                                             .getESMStore()
+                                             ->get<ESM::GameSetting>()
                                              .find("sGoodbye")
                                              ->mValue.getString();
             BookTypesetter::Style* questionStyle = typesetter->createHotStyle(

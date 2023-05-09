@@ -43,7 +43,7 @@ namespace MWWorld
 
         /// Ask a background thread to preload rendering meshes and collision shapes for objects in this cell.
         /// @note The cell itself must be in State_Loaded or State_Preloaded.
-        void preload(MWWorld::CellStore* cell, double timestamp);
+        void preload(MWWorld::CellStore& cell, double timestamp);
 
         void notifyLoaded(MWWorld::CellStore* cell);
 
@@ -71,8 +71,7 @@ namespace MWWorld
         typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
         void setTerrainPreloadPositions(const std::vector<PositionCellGrid>& positions);
 
-        bool syncTerrainLoad(const std::vector<CellPreloader::PositionCellGrid>& positions, double timestamp,
-            Loading::Listener& listener);
+        void syncTerrainLoad(Loading::Listener& listener);
         void abortTerrainPreloadExcept(const PositionCellGrid* exceptPos);
         bool isTerrainLoaded(const CellPreloader::PositionCellGrid& position, double referenceTime) const;
 

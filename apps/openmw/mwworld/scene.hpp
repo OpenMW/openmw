@@ -134,7 +134,7 @@ namespace MWWorld
         osg::Vec2i getNewGridCenter(const osg::Vec3f& pos, const osg::Vec2i* currentGridCenter = nullptr) const;
 
         void unloadCell(CellStore* cell, const DetourNavigator::UpdateGuard* navigatorUpdateGuard);
-        void loadCell(CellStore* cell, Loading::Listener* loadingListener, bool respawn, const osg::Vec3f& position,
+        void loadCell(CellStore& cell, Loading::Listener* loadingListener, bool respawn, const osg::Vec3f& position,
             const DetourNavigator::UpdateGuard* navigatorUpdateGuard);
 
     public:
@@ -143,13 +143,13 @@ namespace MWWorld
 
         ~Scene();
 
-        void preloadCell(MWWorld::CellStore* cell, bool preloadSurrounding = false);
+        void preloadCell(MWWorld::CellStore& cell, bool preloadSurrounding = false);
         void preloadTerrain(const osg::Vec3f& pos, bool sync = false);
         void reloadTerrain();
 
         void playerMoved(const osg::Vec3f& pos);
 
-        void changePlayerCell(CellStore* newCell, const ESM::Position& position, bool adjustPlayerPos);
+        void changePlayerCell(CellStore& newCell, const ESM::Position& position, bool adjustPlayerPos);
 
         CellStore* getCurrentCell();
 

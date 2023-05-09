@@ -3,16 +3,19 @@
 -- @usage local I = require('openmw.interfaces')
 
 ---
--- @field [parent=#interfaces] scripts.omw.camera.camera#scripts.omw.camera.camera Camera
+-- @field [parent=#interfaces] scripts.omw.ai#scripts.omw.activationhandlers Activation
 
 ---
--- @field [parent=#interfaces] scripts.omw.settings.player#scripts.omw.settings.player Settings
+-- @field [parent=#interfaces] scripts.omw.ai#scripts.omw.ai AI
+
+---
+-- @field [parent=#interfaces] scripts.omw.camera.camera#scripts.omw.camera.camera Camera
 
 ---
 -- @field [parent=#interfaces] scripts.omw.mwui.init#scripts.omw.mwui.init MWUI
 
 ---
--- @field [parent=#interfaces] scripts.omw.ai#scripts.omw.ai AI
+-- @field [parent=#interfaces] scripts.omw.settings.player#scripts.omw.settings.player Settings
 
 ---
 -- @function [parent=#interfaces] __index

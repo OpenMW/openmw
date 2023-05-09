@@ -8,6 +8,13 @@ stages:
   - build
   - test
 
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: $CI_COMMIT_BRANCH
+
 # https://blog.nimbleways.com/let-s-make-faster-gitlab-ci-cd-pipelines/
 variables:
   FF_USE_NEW_SHELL_ESCAPE: "true"
@@ -22,7 +29,23 @@ variables:
     - linux
   image: ubuntu:22.04
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
+
+Ubuntu_GCC_preprocess:
+  extends: .Ubuntu_Image
+  cache:
+    key: Ubuntu_GCC_preprocess.ubuntu_22.04.v1
+    paths:
+      - apt-cache/
+      - .cache/pip/
+  stage: build
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  before_script:
+    - CI/install_debian_deps.sh openmw-deps openmw-deps-dynamic gcc_preprocess
+    - pip3 install --user click termtables
+  script:
+    - CI/ubuntu_gcc_preprocess.sh
 
 .Ubuntu:
   extends: .Ubuntu_Image
@@ -51,6 +74,7 @@ variables:
     - if [[ "${BUILD_TESTS_ONLY}" ]]; then ./openmw-cs-tests --gtest_output="xml:openmw_cs_tests.xml"; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_detournavigator_navmeshtilescache_benchmark; fi
     - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_esm_refid_benchmark; fi
+    - if [[ "${BUILD_TESTS_ONLY}" && ! "${BUILD_WITH_CODE_COVERAGE}" ]]; then ./openmw_settings_access_benchmark; fi
     - ccache -s
     - df -h
     - if [[ "${BUILD_WITH_CODE_COVERAGE}" ]]; then gcovr --xml-pretty --exclude-unreachable-branches --print-summary --root "${CI_PROJECT_DIR}" -j $(nproc) -o ../coverage.xml; fi
@@ -121,7 +145,7 @@ Ubuntu_GCC:
     CCACHE_SIZE: 4G
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
-  
+
 Clang_Format:
   extends: .Ubuntu_Image
   stage: checks
@@ -270,7 +294,7 @@ Ubuntu_GCC_tests_coverage:
 .Ubuntu_Static_Deps:
   extends: Ubuntu_Clang
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
       changes:
         - "**/CMakeLists.txt"
         - "cmake/**/*"
@@ -321,7 +345,7 @@ Ubuntu_Clang:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 3h
 
-Ubuntu_Clang_Tidy:
+.Ubuntu_Clang_Tidy_Base:
   extends: Ubuntu_Clang
   before_script:
     - CI/install_debian_deps.sh clang clang-tidy openmw-deps openmw-deps-dynamic
@@ -331,7 +355,50 @@ Ubuntu_Clang_Tidy:
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
     CI_CLANG_TIDY: 1
-  # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
+    CCACHE_BASEDIR: $CI_PROJECT_DIR
+    CCACHE_DIR: $CI_PROJECT_DIR/ccache
+  script:
+    - mkdir -pv "${CCACHE_DIR}"
+    - ccache -z -M "${CCACHE_SIZE}"
+    - CI/before_script.linux.sh
+    - cd build
+    - find . -name *.o -exec touch {} \;
+    - cmake --build . -- -j $(nproc) ${BUILD_TARGETS}
+    - ccache -s
+  artifacts:
+    paths:
+      - build/
+    expire_in: 12h
+  timeout: 3h
+
+Ubuntu_Clang_Tidy_components:
+  extends: .Ubuntu_Clang_Tidy_Base
+  variables:
+    BUILD_TARGETS: components components_qt oics osg-ffmpeg-videoplayer osgQt
+  timeout: 3h
+
+Ubuntu_Clang_Tidy_openmw:
+  extends: .Ubuntu_Clang_Tidy_Base
+  needs:
+    - Ubuntu_Clang_Tidy_components
+  variables:
+    BUILD_TARGETS: openmw
+  timeout: 3h
+
+Ubuntu_Clang_Tidy_openmw-cs:
+  extends: .Ubuntu_Clang_Tidy_Base
+  needs:
+    - Ubuntu_Clang_Tidy_components
+  variables:
+    BUILD_TARGETS: openmw-cs openmw-cs-tests
+  timeout: 3h
+
+Ubuntu_Clang_Tidy_other:
+  extends: .Ubuntu_Clang_Tidy_Base
+  needs:
+    - Ubuntu_Clang_Tidy_components
+  variables:
+    BUILD_TARGETS: bsatool esmtool openmw-launcher openmw-iniimporter openmw-essimporter openmw-wizard niftest openmw_test_suite openmw-navmeshtool openmw-bulletobjecttool
   timeout: 3h
 
 .Ubuntu_Clang_tests:
@@ -422,7 +489,7 @@ macOS12_Xcode13:
   tags:
     - windows
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
   - Get-Volume
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
@@ -533,7 +600,7 @@ macOS12_Xcode13:
   tags:
     - windows
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   before_script:
   - Get-Volume
   - Import-Module "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
@@ -616,11 +683,6 @@ macOS12_Xcode13:
     - .Windows_MSBuild_Base
   variables:
     config: "Release"
-# temporarily disabled while this isn't the thing we link on the downloads page
-#  rules:
-#    # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
-#    - if: $CI_PIPELINE_SOURCE == "push"
-#    - if: $CI_PIPELINE_SOURCE == "schedule"
 
 .Windows_MSBuild_Debug:
   extends:
@@ -638,16 +700,14 @@ Windows_MSBuild_RelWithDebInfo:
   # temporarily enabled while we're linking these on the downloads page
   rules:
     # run this for both pushes and schedules so 'latest successful pipeline for branch' always includes it
-    - if: $CI_PIPELINE_SOURCE == "push"
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event" || $CI_PIPELINE_SOURCE == "schedule"
 
 .Ubuntu_AndroidNDK_arm64-v8a:
   tags:
     - linux
   image: psi29a/android-ndk:focal-ndk22
   rules:
-    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "push" || $CI_PIPELINE_SOURCE == "merge_request_event"
   variables:
     CCACHE_SIZE: 3G
   cache:

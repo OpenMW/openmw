@@ -58,7 +58,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    const ESM::RefId& Clothing::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Clothing::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 
@@ -179,7 +179,7 @@ namespace MWClass
         return info;
     }
 
-    const ESM::RefId& Clothing::getEnchantment(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Clothing::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 
@@ -196,7 +196,7 @@ namespace MWClass
         newItem.mName = newName;
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;
-        const ESM::Clothing* record = MWBase::Environment::get().getWorld()->createRecord(newItem);
+        const ESM::Clothing* record = MWBase::Environment::get().getESMStore()->insert(newItem);
         return record->mId;
     }
 
@@ -214,7 +214,7 @@ namespace MWClass
             const ESM::RefId& npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
-            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+            const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(npcRace);
             if (race->mData.mFlags & ESM::Race::Beast)
             {
                 std::vector<ESM::PartReference> parts = ptr.get<ESM::Clothing>()->mBase->mParts.mParts;

@@ -27,6 +27,7 @@ Lua API reference
     openmw_aux_util
     openmw_aux_time
     openmw_aux_ui
+    interface_activation
     interface_ai
     interface_camera
     interface_controls
@@ -68,6 +69,9 @@ Interfaces of built-in scripts
   * - Interface
     - Can be used
     - Description
+  * - :ref:`Activation <Interface Activation>`
+    - by global scripts
+    - Allows to extend or override built-in activation mechanics.
   * - :ref:`AI <Interface AI>`
     - by local scripts
     - Control basic AI of NPCs and creatures.

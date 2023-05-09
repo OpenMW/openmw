@@ -77,7 +77,7 @@ namespace MWClass
         return ref->mBase->mData.mHealth;
     }
 
-    const ESM::RefId& Weapon::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Weapon::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
 
@@ -155,7 +155,7 @@ namespace MWClass
             = MyGUI::TextIterator::toTagsString(MWGui::toUString(name)) + MWGui::ToolTips::getCountString(count);
         info.icon = ref->mBase->mIcon;
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         std::string text;
 
@@ -251,7 +251,7 @@ namespace MWClass
         return info;
     }
 
-    const ESM::RefId& Weapon::getEnchantment(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Weapon::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Weapon>* ref = ptr.get<ESM::Weapon>();
 
@@ -269,7 +269,7 @@ namespace MWClass
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;
         newItem.mData.mFlags |= ESM::Weapon::Magical;
-        const ESM::Weapon* record = MWBase::Environment::get().getWorld()->createRecord(newItem);
+        const ESM::Weapon* record = MWBase::Environment::get().getESMStore()->insert(newItem);
         return record->mId;
     }
 

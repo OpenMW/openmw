@@ -35,7 +35,7 @@ namespace MWClass
         int getItemMaxHealth(const MWWorld::ConstPtr& ptr) const override;
         ///< Return item max health or throw an exception, if class does not have item health
 
-        const ESM::RefId& getScript(const MWWorld::ConstPtr& ptr) const override;
+        ESM::RefId getScript(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of the script attached to ptr
 
         std::pair<std::vector<int>, bool> getEquipmentSlots(const MWWorld::ConstPtr& ptr) const override;
@@ -58,7 +58,7 @@ namespace MWClass
         const std::string& getInventoryIcon(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of inventory icon.
 
-        const ESM::RefId& getEnchantment(const MWWorld::ConstPtr& ptr) const override;
+        ESM::RefId getEnchantment(const MWWorld::ConstPtr& ptr) const override;
         ///< @return the enchantment ID if the object is enchanted, otherwise an empty string
 
         const ESM::RefId& applyEnchantment(const MWWorld::ConstPtr& ptr, const ESM::RefId& enchId, int enchCharge,

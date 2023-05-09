@@ -15,7 +15,7 @@
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadrace.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -57,7 +57,7 @@ namespace MWGui
             { "Attrib6", "sAttributeEndurance" }, { "Attrib7", "sAttributePersonality" },
             { "Attrib8", "sAttributeLuck" }, { 0, 0 } };
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         for (int i = 0; names[i][0]; ++i)
         {
             setText(names[i][0], store.get<ESM::GameSetting>().find(names[i][1])->mValue.getString());
@@ -240,7 +240,7 @@ namespace MWGui
     void setSkillProgress(MyGUI::Widget* w, float progress, int skillId)
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
-        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
         float progressRequirement = player.getClass().getNpcStats(player).getSkillProgressRequirement(
             skillId, *esmStore.get<ESM::Class>().find(player.get<ESM::NPC>()->mBase->mClass));
@@ -358,9 +358,8 @@ namespace MWGui
         for (int i = 0; i < 2; ++i)
         {
             int max = MWBase::Environment::get()
-                          .getWorld()
-                          ->getStore()
-                          .get<ESM::GameSetting>()
+                          .getESMStore()
+                          ->get<ESM::GameSetting>()
                           .find("iLevelUpTotal")
                           ->mValue.getInteger();
             getWidget(levelWidget, i == 0 ? "Level_str" : "LevelText");
@@ -510,7 +509,7 @@ namespace MWGui
                 continue;
             const std::string& skillNameId = ESM::Skill::sSkillNameIds[skillId];
 
-            const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
             const ESM::Skill* skill = esmStore.get<ESM::Skill>().find(skillId);
 
@@ -717,7 +716,7 @@ namespace MWGui
 
     void StatsWindow::onPinToggled()
     {
-        Settings::Manager::setBool("stats pin", "Windows", mPinned);
+        Settings::windows().mStatsPin.set(mPinned);
 
         MWBase::Environment::get().getWindowManager()->setHMSVisibility(!mPinned);
     }

@@ -4,6 +4,7 @@
 #include "navigator.hpp"
 #include "settings.hpp"
 #include "stats.hpp"
+#include "updateguard.hpp"
 
 namespace Loading
 {
@@ -17,7 +18,7 @@ namespace DetourNavigator
     public:
         NavigatorStub() = default;
 
-        std::unique_ptr<const UpdateGuard> makeUpdateGuard() override { return nullptr; }
+        ScopedUpdateGuard makeUpdateGuard() override { return nullptr; }
 
         bool addAgent(const AgentBounds& /*agentBounds*/) override { return true; }
 

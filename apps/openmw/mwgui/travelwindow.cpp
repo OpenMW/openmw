@@ -49,7 +49,7 @@ namespace MWGui
         int price;
 
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         int playerGold = player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId);
@@ -130,9 +130,9 @@ namespace MWGui
                 = MWWorld::positionToCellIndex(transport[i].mPos.pos[0], transport[i].mPos.pos[1]);
             if (cellname.empty())
             {
-                MWWorld::CellStore* cell
+                MWWorld::CellStore& cell
                     = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
-                cellname = MWBase::Environment::get().getWorld()->getCellName(cell);
+                cellname = MWBase::Environment::get().getWorld()->getCellName(&cell);
                 interior = false;
             }
             addDestination(ESM::RefId::stringRefId(cellname), transport[i].mPos, interior);
@@ -182,9 +182,8 @@ namespace MWGui
                 = (osg::Vec3f(pos.pos[0], pos.pos[1], 0) - osg::Vec3f(playerPos.pos[0], playerPos.pos[1], 0)).length();
             int hours = static_cast<int>(d
                 / MWBase::Environment::get()
-                      .getWorld()
-                      ->getStore()
-                      .get<ESM::GameSetting>()
+                      .getESMStore()
+                      ->get<ESM::GameSetting>()
                       .find("fTravelTimeMult")
                       ->mValue.getFloat());
             MWBase::Environment::get().getMechanicsManager()->rest(hours, true);

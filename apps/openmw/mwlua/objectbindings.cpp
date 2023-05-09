@@ -1,8 +1,9 @@
-#include "luabindings.hpp"
+#include "objectbindings.hpp"
 
+#include <components/esm3/loadfact.hpp>
+#include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
 
-#include "../mwworld/action.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -48,97 +49,48 @@ namespace MWLua
 
     namespace
     {
-
-        class TeleportAction final : public LuaManager::Action
+        MWWorld::CellStore* findCell(const sol::object& cellOrName, const osg::Vec3f& pos)
         {
-        public:
-            TeleportAction(LuaUtil::LuaState* state, ObjectId object, std::string_view cell, const osg::Vec3f& pos,
-                const osg::Vec3f& rot)
-                : Action(state)
-                , mObject(object)
-                , mCell(std::string(cell))
-                , mPos(pos)
-                , mRot(rot)
+            MWWorld::WorldModel* wm = MWBase::Environment::get().getWorldModel();
+            MWWorld::CellStore* cell;
+            if (cellOrName.is<GCell>())
+                cell = cellOrName.as<const GCell&>().mStore;
+            else
             {
-            }
-
-            void apply() const override
-            {
-                MWWorld::WorldModel& wm = *MWBase::Environment::get().getWorldModel();
-                MWWorld::CellStore* cell = wm.getCellByPosition(mPos, mCell);
-                MWBase::World* world = MWBase::Environment::get().getWorld();
-                MWWorld::Ptr obj = wm.getPtr(mObject);
-                const MWWorld::Class& cls = obj.getClass();
-                bool isPlayer = obj == world->getPlayerPtr();
-                if (cls.isActor())
-                    cls.getCreatureStats(obj).land(isPlayer);
-                if (isPlayer)
-                {
-                    ESM::Position esmPos;
-                    static_assert(sizeof(esmPos) == sizeof(osg::Vec3f) * 2);
-                    std::memcpy(esmPos.pos, &mPos, sizeof(osg::Vec3f));
-                    std::memcpy(esmPos.rot, &mRot, sizeof(osg::Vec3f));
-                    world->getPlayer().setTeleported(true);
-                    if (cell->isExterior())
-                        world->changeToExteriorCell(esmPos, true);
-                    else
-                        world->changeToInteriorCell(mCell, esmPos, true);
-                }
+                std::string_view name = LuaUtil::cast<std::string_view>(cellOrName);
+                if (name.empty())
+                    cell = nullptr; // default exterior worldspace
                 else
-                {
-                    MWWorld::Ptr newObj = world->moveObject(obj, cell, mPos);
-                    world->rotateObject(newObj, mRot);
-                    if (!newObj.getRefData().isEnabled())
-                        world->enable(newObj);
-                }
+                    cell = &wm->getCell(name);
             }
+            return &wm->getCellByPosition(pos, cell);
+        }
 
-            std::string toString() const override { return "TeleportAction"; }
-
-        private:
-            ObjectId mObject;
-            std::string mCell;
-            osg::Vec3f mPos;
-            osg::Vec3f mRot;
-        };
-
-        class ActivateAction final : public LuaManager::Action
+        void teleportPlayer(MWWorld::CellStore* destCell, const osg::Vec3f& pos, const osg::Vec3f& rot)
         {
-        public:
-            ActivateAction(LuaUtil::LuaState* state, ObjectId object, ObjectId actor)
-                : Action(state)
-                , mObject(object)
-                , mActor(actor)
-            {
-            }
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+            ESM::Position esmPos;
+            static_assert(sizeof(esmPos) == sizeof(osg::Vec3f) * 2);
+            std::memcpy(esmPos.pos, &pos, sizeof(osg::Vec3f));
+            std::memcpy(esmPos.rot, &rot, sizeof(osg::Vec3f));
+            MWWorld::Ptr ptr = world->getPlayerPtr();
+            ptr.getClass().getCreatureStats(ptr).land(false);
+            world->getPlayer().setTeleported(true);
+            world->changeToCell(destCell->getCell()->getId(), esmPos, true);
+        }
 
-            void apply() const override
-            {
-                MWWorld::Ptr object = MWBase::Environment::get().getWorldModel()->getPtr(mObject);
-                if (object.isEmpty())
-                    throw std::runtime_error(std::string("Object not found: " + mObject.toString()));
-                MWWorld::Ptr actor = MWBase::Environment::get().getWorldModel()->getPtr(mActor);
-                if (actor.isEmpty())
-                    throw std::runtime_error(std::string("Actor not found: " + mActor.toString()));
-
-                if (object.getRefData().activate())
-                {
-                    MWBase::Environment::get().getLuaManager()->objectActivated(object, actor);
-                    std::unique_ptr<MWWorld::Action> action = object.getClass().activate(object, actor);
-                    action->execute(actor);
-                }
-            }
-
-            std::string toString() const override
-            {
-                return std::string("ActivateAction object=") + mObject.toString() + std::string(" actor=")
-                    + mActor.toString();
-            }
-
-        private:
-            ObjectId mObject;
-            ObjectId mActor;
-        };
+        void teleportNotPlayer(
+            const MWWorld::Ptr& ptr, MWWorld::CellStore* destCell, const osg::Vec3f& pos, const osg::Vec3f& rot)
+        {
+            MWBase::World* world = MWBase::Environment::get().getWorld();
+            const MWWorld::Class& cls = ptr.getClass();
+            if (cls.isActor())
+                cls.getCreatureStats(ptr).land(false);
+            MWWorld::Ptr newPtr = world->moveObject(ptr, destCell, pos);
+            world->rotateObject(newPtr, rot, MWBase::RotationFlag_none);
+            if (!newPtr.getRefData().isEnabled())
+                world->enable(newPtr);
+        }
 
         template <typename ObjT>
         using Cell = std::conditional_t<std::is_same_v<ObjT, LObject>, LCell, GCell>;
@@ -165,6 +117,7 @@ namespace MWLua
         template <class ObjectT>
         void addBasicBindings(sol::usertype<ObjectT>& objectT, const Context& context)
         {
+            objectT["id"] = sol::readonly_property([](const ObjectT& o) -> std::string { return o.id().toString(); });
             objectT["isValid"] = [](const ObjectT& o) { return !o.ptrOrNull().isEmpty(); };
             objectT["recordId"] = sol::readonly_property(
                 [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().serializeText(); });
@@ -191,14 +144,73 @@ namespace MWLua
                 context.mLuaEvents->addLocalEvent(
                     { dest.id(), std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
             };
+            auto getOwnerRecordId = [](const ObjectT& o) -> sol::optional<std::string> {
+                ESM::RefId owner = o.ptr().getCellRef().getOwner();
+                if (owner.empty())
+                    return sol::nullopt;
+                else
+                    return owner.serializeText();
+            };
+            auto setOwnerRecordId = [](const ObjectT& obj, sol::optional<std::string_view> ownerId) {
+                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&obj))
+                    throw std::runtime_error("Local scripts can set an owner only on self");
+                const MWWorld::Ptr& ptr = obj.ptr();
 
-            objectT["activateBy"] = [context](const ObjectT& o, const ObjectT& actor) {
-                uint32_t esmRecordType = actor.ptr().getType();
+                if (!ownerId)
+                {
+                    ptr.getCellRef().setOwner(ESM::RefId());
+                    return;
+                }
+                ESM::RefId owner = ESM::RefId::deserializeText(*ownerId);
+                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+                if (!store.get<ESM::NPC>().search(owner))
+                    throw std::runtime_error("Invalid owner record id");
+                ptr.getCellRef().setOwner(owner);
+            };
+            objectT["ownerRecordId"] = sol::property(getOwnerRecordId, setOwnerRecordId);
+
+            auto getOwnerFactionId = [](const ObjectT& o) -> sol::optional<std::string> {
+                ESM::RefId owner = o.ptr().getCellRef().getFaction();
+                if (owner.empty())
+                    return sol::nullopt;
+                else
+                    return owner.serializeText();
+            };
+            auto setOwnerFactionId = [](const ObjectT& object, sol::optional<std::string> ownerId) {
+                ESM::RefId ownerFac;
+                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&object))
+                    throw std::runtime_error("Local scripts can set an owner faction only on self");
+                if (!ownerId)
+                {
+                    object.ptr().getCellRef().setFaction(ESM::RefId());
+                    return;
+                }
+                ownerFac = ESM::RefId::deserializeText(*ownerId);
+                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+                if (!store.get<ESM::Faction>().search(ownerFac))
+                    throw std::runtime_error("Invalid owner faction id");
+                object.ptr().getCellRef().setFaction(ownerFac);
+            };
+            objectT["ownerFactionId"] = sol::property(getOwnerFactionId, setOwnerFactionId);
+
+            auto getOwnerFactionRank = [](const ObjectT& o) -> int { return o.ptr().getCellRef().getFactionRank(); };
+            auto setOwnerFactionRank = [](const ObjectT& object, int factionRank) {
+                if (std::is_same_v<ObjectT, LObject> && !dynamic_cast<const SelfObject*>(&object))
+                    throw std::runtime_error("Local scripts can set an owner faction rank only on self");
+                object.ptr().getCellRef().setFactionRank(factionRank);
+            };
+            objectT["ownerFactionRank"] = sol::property(getOwnerFactionRank, setOwnerFactionRank);
+
+            objectT["activateBy"] = [](const ObjectT& object, const ObjectT& actor) {
+                const MWWorld::Ptr& objPtr = object.ptr();
+                const MWWorld::Ptr& actorPtr = actor.ptr();
+                uint32_t esmRecordType = actorPtr.getType();
                 if (esmRecordType != ESM::REC_CREA && esmRecordType != ESM::REC_NPC_)
                     throw std::runtime_error(
                         "The argument of `activateBy` must be an actor who activates the object. Got: "
                         + actor.toString());
-                context.mLuaManager->addAction(std::make_unique<ActivateAction>(context.mLua, o.id(), actor.id()));
+                if (objPtr.getRefData().activate())
+                    MWBase::Environment::get().getLuaManager()->objectActivated(objPtr, actorPtr);
             };
 
             auto isEnabled = [](const ObjectT& o) { return o.ptr().getRefData().isEnabled(); };
@@ -241,7 +253,7 @@ namespace MWLua
                         throw std::runtime_error("Attaching scripts to Static is not allowed: " + std::string(path));
                     if (initData != sol::nil)
                         context.mLuaManager->addCustomLocalScript(object.ptr(), *scriptId,
-                            LuaUtil::serialize(initData.as<sol::table>(), context.mSerializer));
+                            LuaUtil::serialize(LuaUtil::cast<sol::table>(initData), context.mSerializer));
                     else
                         context.mLuaManager->addCustomLocalScript(
                             object.ptr(), *scriptId, cfg[*scriptId].mInitializationData);
@@ -272,78 +284,100 @@ namespace MWLua
                     localScripts->removeScript(*scriptId);
                 };
 
-                auto removeFn = [context](const GObject& object, int countToRemove) {
-                    MWWorld::Ptr ptr = object.ptr();
+                using DelayedRemovalFn = std::function<void(MWWorld::Ptr)>;
+                auto removeFn = [](const MWWorld::Ptr ptr, int countToRemove) -> std::optional<DelayedRemovalFn> {
                     int currentCount = ptr.getRefData().getCount();
                     if (countToRemove <= 0 || countToRemove > currentCount)
                         throw std::runtime_error("Can't remove " + std::to_string(countToRemove) + " of "
                             + std::to_string(currentCount) + " items");
                     ptr.getRefData().setCount(currentCount - countToRemove); // Immediately change count
-                    if (ptr.getContainerStore() || currentCount == countToRemove)
-                    {
-                        // Delayed action to trigger side effects
-                        context.mLuaManager->addAction([object, countToRemove] {
-                            MWWorld::Ptr ptr = object.ptr();
-                            // Restore original count
-                            ptr.getRefData().setCount(ptr.getRefData().getCount() + countToRemove);
-                            // And now remove properly
-                            if (ptr.getContainerStore())
-                                ptr.getContainerStore()->remove(ptr, countToRemove);
-                            else
-                            {
-                                MWBase::Environment::get().getWorld()->disable(object.ptr());
-                                MWBase::Environment::get().getWorld()->deleteObject(ptr);
-                            }
-                        });
-                    }
+                    if (!ptr.getContainerStore() && currentCount > countToRemove)
+                        return std::nullopt;
+                    // Delayed action to trigger side effects
+                    return [countToRemove](MWWorld::Ptr ptr) {
+                        // Restore the original count
+                        ptr.getRefData().setCount(ptr.getRefData().getCount() + countToRemove);
+                        // And now remove properly
+                        if (ptr.getContainerStore())
+                            ptr.getContainerStore()->remove(ptr, countToRemove);
+                        else
+                        {
+                            MWBase::Environment::get().getWorld()->disable(ptr);
+                            MWBase::Environment::get().getWorld()->deleteObject(ptr);
+                        }
+                    };
                 };
-                objectT["remove"] = [removeFn](const GObject& object, sol::optional<int> count) {
-                    removeFn(object, count.value_or(object.ptr().getRefData().getCount()));
+                objectT["remove"] = [removeFn, context](const GObject& object, sol::optional<int> count) {
+                    std::optional<DelayedRemovalFn> delayed
+                        = removeFn(object.ptr(), count.value_or(object.ptr().getRefData().getCount()));
+                    if (delayed.has_value())
+                        context.mLuaManager->addAction([fn = *delayed, object] { fn(object.ptr()); });
                 };
-                objectT["split"] = [removeFn](const GObject& object, int count) -> GObject {
-                    removeFn(object, count);
-
+                objectT["split"] = [removeFn, context](const GObject& object, int count) -> GObject {
                     // Doesn't matter which cell to use because the new instance will be in disabled state.
                     MWWorld::CellStore* cell = MWBase::Environment::get().getWorldScene()->getCurrentCell();
 
                     const MWWorld::Ptr& ptr = object.ptr();
                     MWWorld::Ptr splitted = ptr.getClass().copyToCell(ptr, *cell, count);
                     splitted.getRefData().disable();
-                    return GObject(getId(splitted));
+
+                    std::optional<DelayedRemovalFn> delayedRemovalFn = removeFn(ptr, count);
+                    if (delayedRemovalFn.has_value())
+                        context.mLuaManager->addAction([fn = *delayedRemovalFn, object] { fn(object.ptr()); });
+
+                    return GObject(splitted);
                 };
                 objectT["moveInto"] = [removeFn, context](const GObject& object, const Inventory<GObject>& inventory) {
-                    // Currently moving to or from containers makes a copy and removes the original.
-                    // TODO(#6148): actually move rather than copy and preserve RefNum
-                    int count = object.ptr().getRefData().getCount();
-                    removeFn(object, count);
-                    context.mLuaManager->addAction([item = object, count, cont = inventory.mObj] {
-                        auto& refData = item.ptr().getRefData();
+                    const MWWorld::Ptr& ptr = object.ptr();
+                    int count = ptr.getRefData().getCount();
+                    std::optional<DelayedRemovalFn> delayedRemovalFn = removeFn(ptr, count);
+                    context.mLuaManager->addAction([item = object, count, cont = inventory.mObj, delayedRemovalFn] {
+                        const MWWorld::Ptr& oldPtr = item.ptr();
+                        auto& refData = oldPtr.getRefData();
                         refData.setCount(count); // temporarily undo removal to run ContainerStore::add
-                        cont.ptr().getClass().getContainerStore(cont.ptr()).add(item.ptr(), count, false);
+                        refData.enable();
+                        cont.ptr().getClass().getContainerStore(cont.ptr()).add(oldPtr, count, false);
                         refData.setCount(0);
+                        if (delayedRemovalFn.has_value())
+                            (*delayedRemovalFn)(oldPtr);
                     });
                 };
-                objectT["teleport"] = [removeFn, context](const GObject& object, std::string_view cell,
+                objectT["teleport"] = [removeFn, context](const GObject& object, const sol::object& cellOrName,
                                           const osg::Vec3f& pos, const sol::optional<osg::Vec3f>& optRot) {
+                    MWWorld::CellStore* cell = findCell(cellOrName, pos);
                     MWWorld::Ptr ptr = object.ptr();
-                    if (ptr.getRefData().isDeleted())
-                        throw std::runtime_error("Object is removed");
+                    int count = ptr.getRefData().getCount();
+                    if (count == 0)
+                        throw std::runtime_error("Object is either removed or already in the process of teleporting");
+                    osg::Vec3f rot = optRot ? *optRot : ptr.getRefData().getPosition().asRotationVec3();
                     if (ptr.getContainerStore())
                     {
-                        // Currently moving to or from containers makes a copy and removes the original.
-                        // TODO(#6148): actually move rather than copy and preserve RefNum
-                        auto* cellStore = MWBase::Environment::get().getWorldModel()->getCellByPosition(pos, cell);
-                        MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *cellStore, ptr.getRefData().getCount());
-                        newPtr.getRefData().disable();
-                        removeFn(object, ptr.getRefData().getCount());
-                        ptr = newPtr;
+                        DelayedRemovalFn delayedRemovalFn = *removeFn(ptr, count);
+                        context.mLuaManager->addAction(
+                            [object, cell, pos, rot, count, delayedRemovalFn] {
+                                MWWorld::Ptr oldPtr = object.ptr();
+                                oldPtr.getRefData().setCount(count);
+                                MWWorld::Ptr newPtr = oldPtr.getClass().moveToCell(oldPtr, *cell);
+                                oldPtr.getRefData().setCount(0);
+                                newPtr.getRefData().disable();
+                                teleportNotPlayer(newPtr, cell, pos, rot);
+                                delayedRemovalFn(oldPtr);
+                            },
+                            "TeleportFromContainerAction");
                     }
-                    osg::Vec3f rot = optRot ? *optRot : ptr.getRefData().getPosition().asRotationVec3();
-                    auto action = std::make_unique<TeleportAction>(context.mLua, getId(ptr), cell, pos, rot);
-                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
-                        context.mLuaManager->addTeleportPlayerAction(std::move(action));
+                    else if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                        context.mLuaManager->addTeleportPlayerAction(
+                            [cell, pos, rot] { teleportPlayer(cell, pos, rot); });
                     else
-                        context.mLuaManager->addAction(std::move(action));
+                    {
+                        ptr.getRefData().setCount(0);
+                        context.mLuaManager->addAction(
+                            [object, cell, pos, rot, count] {
+                                object.ptr().getRefData().setCount(count);
+                                teleportNotPlayer(object.ptr(), cell, pos, rot);
+                            },
+                            "TeleportAction");
+                    }
                 };
             }
         }

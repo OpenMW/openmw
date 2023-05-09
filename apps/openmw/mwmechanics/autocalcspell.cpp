@@ -30,7 +30,7 @@ namespace MWMechanics
     std::vector<ESM::RefId> autoCalcNpcSpells(const int* actorSkills, const int* actorAttributes, const ESM::Race* race)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
         static const float fNPCbaseMagickaMult = gmst.find("fNPCbaseMagickaMult")->mValue.getFloat();
         float baseMagicka = fNPCbaseMagickaMult * actorAttributes[ESM::Attribute::Intelligence];
 
@@ -62,7 +62,7 @@ namespace MWMechanics
 
         std::vector<ESM::RefId> selectedSpells;
 
-        const MWWorld::Store<ESM::Spell>& spells = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>();
+        const MWWorld::Store<ESM::Spell>& spells = MWBase::Environment::get().getESMStore()->get<ESM::Spell>();
 
         // Note: the algorithm heavily depends on the traversal order of the spells. For vanilla-compatible results the
         // Store must preserve the record ordering as it was in the content files.
@@ -150,7 +150,7 @@ namespace MWMechanics
     std::vector<ESM::RefId> autoCalcPlayerSpells(
         const int* actorSkills, const int* actorAttributes, const ESM::Race* race)
     {
-        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
         static const float fPCbaseMagickaMult
             = esmStore.get<ESM::GameSetting>().find("fPCbaseMagickaMult")->mValue.getFloat();
@@ -231,11 +231,10 @@ namespace MWMechanics
         for (const auto& spellEffect : spell->mEffects.mList)
         {
             const ESM::MagicEffect* magicEffect
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(spellEffect.mEffectID);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(spellEffect.mEffectID);
             static const int iAutoSpellAttSkillMin = MWBase::Environment::get()
-                                                         .getWorld()
-                                                         ->getStore()
-                                                         .get<ESM::GameSetting>()
+                                                         .getESMStore()
+                                                         ->get<ESM::GameSetting>()
                                                          .find("iAutoSpellAttSkillMin")
                                                          ->mValue.getInteger();
 
@@ -264,7 +263,7 @@ namespace MWMechanics
         for (const ESM::ENAMstruct& effect : spell->mEffects.mList)
         {
             const ESM::MagicEffect* magicEffect
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effect.mEffectID);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effect.mEffectID);
 
             int minMagn = 1;
             int maxMagn = 1;
@@ -281,9 +280,8 @@ namespace MWMechanics
                 duration = std::max(1, duration);
 
             static const float fEffectCostMult = MWBase::Environment::get()
-                                                     .getWorld()
-                                                     ->getStore()
-                                                     .get<ESM::GameSetting>()
+                                                     .getESMStore()
+                                                     ->get<ESM::GameSetting>()
                                                      .find("fEffectCostMult")
                                                      ->mValue.getFloat();
 

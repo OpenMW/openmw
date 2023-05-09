@@ -28,6 +28,7 @@
 #include "draganddrop.hpp"
 #include "mapwindow.hpp"
 #include "messagebox.hpp"
+#include "settings.hpp"
 #include "soulgemdialog.hpp"
 #include "statswatcher.hpp"
 #include "textcolours.hpp"
@@ -295,7 +296,7 @@ namespace MWGui
         void watchActor(const MWWorld::Ptr& ptr) override;
         MWWorld::Ptr getWatchedActor() const override;
 
-        void executeInConsole(const std::string& path) override;
+        void executeInConsole(const std::filesystem::path& path) override;
 
         void enableRest() override { mRestAllowed = true; }
         bool getRestEnabled() override;
@@ -404,8 +405,8 @@ namespace MWGui
 
         bool mConsoleOnlyScripts;
 
-        std::map<MyGUI::Window*, std::string> mTrackedWindows;
-        void trackWindow(Layout* layout, const std::string& name);
+        std::map<MyGUI::Window*, WindowSettingValues> mTrackedWindows;
+        void trackWindow(Layout* layout, const WindowSettingValues& settings);
         void onWindowChangeCoord(MyGUI::Window* _sender);
 
         ESM::RefId mSelectedSpell;

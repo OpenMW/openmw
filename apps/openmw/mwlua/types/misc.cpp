@@ -1,5 +1,6 @@
 #include "types.hpp"
 
+#include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -25,6 +26,26 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM::Miscellaneous>(miscellaneous, context);
 
+        miscellaneous["setSoul"] = [](const GObject& object, std::string_view soulId) {
+            ESM::RefId creature = ESM::RefId::deserializeText(soulId);
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+
+            if (!store.get<ESM::Creature>().search(creature))
+            {
+                // TODO: Add Support for NPC Souls
+                throw std::runtime_error("Cannot use non-existent creature as a soul: " + std::string(soulId));
+            }
+
+            object.ptr().getCellRef().setSoul(creature);
+        };
+        miscellaneous["getSoul"] = [](const Object& object) -> sol::optional<std::string> {
+            ESM::RefId soul = object.ptr().getCellRef().getSoul();
+            if (soul.empty())
+                return sol::nullopt;
+            else
+                return soul.serializeText();
+        };
+        miscellaneous["soul"] = miscellaneous["getSoul"]; // for compatibility; should be removed later
         sol::usertype<ESM::Miscellaneous> record
             = context.mLua->sol().new_usertype<ESM::Miscellaneous>("ESM3_Miscellaneous");
         record[sol::meta_function::to_string]

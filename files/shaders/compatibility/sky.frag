@@ -79,7 +79,8 @@ void main()
         paintSun(color);
     else if (pass == PASS_SUNGLARE)
         paintSunglare(color);
-    else if (pass == PASS_SUNFLASH_QUERY) {
+    else if (pass == PASS_SUNFLASH_QUERY)
+    {
         processSunflashQuery();
         return;
     }

@@ -1,9 +1,9 @@
 #ifndef CS_EDITOR_H
 #define CS_EDITOR_H
 
-#include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include <QLockFile>
 #include <QObject>
 #include <QString>
 
@@ -58,7 +58,7 @@ namespace CS
         std::filesystem::path mLocal;
         std::filesystem::path mResources;
         std::filesystem::path mPid;
-        boost::interprocess::file_lock mLock;
+        QLockFile mLockFile;
         std::ofstream mPidFile;
         bool mFsStrict;
         CSVTools::Merge mMerge;

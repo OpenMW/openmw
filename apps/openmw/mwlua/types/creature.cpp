@@ -28,6 +28,8 @@ namespace MWLua
         sol::usertype<ESM::Creature> record = context.mLua->sol().new_usertype<ESM::Creature>("ESM3_Creature");
         record[sol::meta_function::to_string]
             = [](const ESM::Creature& rec) { return "ESM3_Creature[" + rec.mId.toDebugString() + "]"; };
+        record["id"]
+            = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mId.serializeText(); });
         record["name"] = sol::readonly_property([](const ESM::Creature& rec) -> std::string { return rec.mName; });
         record["model"] = sol::readonly_property([vfs](const ESM::Creature& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
@@ -36,5 +38,6 @@ namespace MWLua
             [](const ESM::Creature& rec) -> std::string { return rec.mScript.serializeText(); });
         record["baseCreature"] = sol::readonly_property(
             [](const ESM::Creature& rec) -> std::string { return rec.mOriginal.serializeText(); });
+        record["soulValue"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mSoul; });
     }
 }

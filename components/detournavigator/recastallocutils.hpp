@@ -1,9 +1,7 @@
 #ifndef OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTALLOCUTILS_H
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_RECASTALLOCUTILS_H
 
-#include <RecastAlloc.h>
-
-#include <cstdint>
+#include <cstddef>
 
 namespace DetourNavigator
 {

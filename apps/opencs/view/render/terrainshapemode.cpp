@@ -13,7 +13,6 @@
 
 #include <osg/Camera>
 #include <osg/Vec3f>
-#include <osg/ref_ptr>
 
 #include <apps/opencs/model/doc/document.hpp>
 #include <apps/opencs/model/prefs/category.hpp>

@@ -87,8 +87,7 @@ namespace MWScript
                 Interpreter::Type_Integer id = runtime[0].mInteger;
                 runtime.pop();
 
-                const ESM::Region* reg
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Region>().search(region);
+                const ESM::Region* reg = MWBase::Environment::get().getESMStore()->get<ESM::Region>().search(region);
                 if (reg)
                     MWBase::Environment::get().getWorld()->changeWeather(region, id);
                 else

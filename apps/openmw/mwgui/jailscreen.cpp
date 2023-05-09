@@ -103,7 +103,7 @@ namespace MWGui
         }
 
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         std::string message;
         if (mDays == 1)

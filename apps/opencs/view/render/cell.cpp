@@ -95,7 +95,7 @@ bool CSVRender::Cell::addObjects(int start, int end)
 
     for (int i = start; i <= end; ++i)
     {
-        const auto& cellId = collection.getRecord(i).get().mCell;
+        const auto& cellId = ESM::RefId::stringRefId(collection.getRecord(i).get().mCell.toString());
 
         CSMWorld::RecordBase::State state = collection.getRecord(i).mState;
 

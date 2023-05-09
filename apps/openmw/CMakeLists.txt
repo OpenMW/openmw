@@ -44,7 +44,7 @@ add_openmw_dir (mwgui
     tradeitemmodel companionitemmodel pickpocketitemmodel controllers savegamedialog
     recharge mode videowidget backgroundimage itemwidget screenfader debugwindow spellmodel spellview
     draganddrop timeadvancer jailscreen itemchargeview keyboardnavigation textcolours statswatcher
-    postprocessorhud
+    postprocessorhud settings
     )
 
 add_openmw_dir (mwdialogue
@@ -63,7 +63,7 @@ add_openmw_dir (mwlua
     context globalscripts localscripts playerscripts luabindings objectbindings cellbindings
     camerabindings uibindings inputbindings nearbybindings postprocessingbindings stats debugbindings
     types/types types/door types/actor types/container types/weapon types/npc types/creature types/activator types/book types/lockpick types/probe types/apparatus types/potion types/ingredient types/misc types/repair types/armor types/light types/static types/clothing
-    worker
+    worker magicbindings
     )
 
 add_openmw_dir (mwsound
@@ -90,7 +90,7 @@ add_openmw_dir (mwphysics
 add_openmw_dir (mwclass
     classes activator creature npc weapon armor potion apparatus book clothing container door
     ingredient creaturelevlist itemlevlist light lockpick misc probe repair static actor bodypart
-    light4
+    esm4base light4
     )
 
 add_openmw_dir (mwmechanics
@@ -162,7 +162,6 @@ target_link_libraries(openmw
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
     target_precompile_headers(openmw PRIVATE
-        <boost/filesystem.hpp>
         <boost/program_options/options_description.hpp>
 
         <sol/sol.hpp>

@@ -210,18 +210,19 @@ namespace MWMechanics
         // rebuild a path to it
         if (!mPathFinder.isPathConstructed() && mHasDestination)
         {
+            const ESM::Pathgrid* pathgrid
+                = MWBase::Environment::get().getESMStore()->get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
             if (mUsePathgrid)
             {
                 mPathFinder.buildPathByPathgrid(
-                    pos.asVec3(), mDestination, actor.getCell(), getPathGridGraph(actor.getCell()));
+                    pos.asVec3(), mDestination, actor.getCell(), getPathGridGraph(pathgrid));
             }
             else
             {
                 const auto agentBounds = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(actor);
                 constexpr float endTolerance = 0;
-                mPathFinder.buildPath(actor, pos.asVec3(), mDestination, actor.getCell(),
-                    getPathGridGraph(actor.getCell()), agentBounds, getNavigatorFlags(actor), getAreaCosts(actor),
-                    endTolerance, PathType::Full);
+                mPathFinder.buildPath(actor, pos.asVec3(), mDestination, actor.getCell(), getPathGridGraph(pathgrid),
+                    agentBounds, getNavigatorFlags(actor), getAreaCosts(actor), endTolerance, PathType::Full);
             }
 
             if (mPathFinder.isPathConstructed())
@@ -597,15 +598,17 @@ namespace MWMechanics
     void AiWander::setPathToAnAllowedNode(
         const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos)
     {
-        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        auto world = MWBase::Environment::get().getWorld();
+        auto& prng = world->getPrng();
         unsigned int randNode = Misc::Rng::rollDice(storage.mAllowedNodes.size(), prng);
         const ESM::Pathgrid::Point& dest = storage.mAllowedNodes[randNode];
 
         const osg::Vec3f start = actorPos.asVec3();
 
         // don't take shortcuts for wandering
+        const ESM::Pathgrid* pathgrid = world->getStore().get<ESM::Pathgrid>().search(*actor.getCell()->getCell());
         const osg::Vec3f destVec3f = PathFinder::makeOsgVec3(dest);
-        mPathFinder.buildPathByPathgrid(start, destVec3f, actor.getCell(), getPathGridGraph(actor.getCell()));
+        mPathFinder.buildPathByPathgrid(start, destVec3f, actor.getCell(), getPathGridGraph(pathgrid));
 
         if (mPathFinder.isPathConstructed())
         {
@@ -801,14 +804,14 @@ namespace MWMechanics
         ESM::Pathgrid::Point dest, const MWWorld::CellStore* currentCell, ESM::Pathgrid::PointList& points)
     {
         const ESM::Pathgrid* pathgrid
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*currentCell->getCell());
+            = MWBase::Environment::get().getESMStore()->get<ESM::Pathgrid>().search(*currentCell->getCell());
 
         if (pathgrid == nullptr || pathgrid->mPoints.empty())
             return;
 
         int index = PathFinder::getClosestPoint(pathgrid, PathFinder::makeOsgVec3(dest));
 
-        getPathGridGraph(currentCell).getNeighbouringPoints(index, points);
+        getPathGridGraph(pathgrid).getNeighbouringPoints(index, points);
     }
 
     void AiWander::getAllowedNodes(const MWWorld::Ptr& actor, AiWanderStorage& storage)
@@ -816,7 +819,7 @@ namespace MWMechanics
         // infrequently used, therefore no benefit in caching it as a member
         const MWWorld::CellStore* cellStore = actor.getCell();
         const ESM::Pathgrid* pathgrid
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Pathgrid>().search(*cellStore->getCell());
+            = MWBase::Environment::get().getESMStore()->get<ESM::Pathgrid>().search(*cellStore->getCell());
 
         storage.mAllowedNodes.clear();
 
@@ -849,7 +852,7 @@ namespace MWMechanics
             {
                 osg::Vec3f nodePos(PathFinder::makeOsgVec3(pathgrid->mPoints[counter]));
                 if ((npcPos - nodePos).length2() <= mDistance * mDistance
-                    && getPathGridGraph(cellStore).isPointConnected(closestPointIndex, counter))
+                    && getPathGridGraph(pathgrid).isPointConnected(closestPointIndex, counter))
                 {
                     storage.mAllowedNodes.push_back(converter.toWorldPoint(pathgrid->mPoints[counter]));
                     pointIndex = counter;

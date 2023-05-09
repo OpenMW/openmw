@@ -28,7 +28,6 @@
 #include "../widget/scenetooltoggle2.hpp"
 
 #include "cameracontroller.hpp"
-#include "mask.hpp"
 
 namespace CSVRender
 {

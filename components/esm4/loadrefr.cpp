@@ -34,9 +34,8 @@
 
 void ESM4::Reference::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
-    mId = ESM::RefId::formIdRefId(mFormId);
+    mId = reader.hdr().record.getFormId();
+    reader.adjustFormId(mId);
     mFlags = reader.hdr().record.flags;
     mParentFormId = reader.currCell(); // NOTE: only for persistent refs?
     mParent = ESM::RefId::formIdRefId(mParentFormId);

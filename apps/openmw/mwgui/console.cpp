@@ -13,6 +13,7 @@
 #include <components/compiler/lineparser.hpp>
 #include <components/compiler/locals.hpp>
 #include <components/compiler/scanner.hpp>
+#include <components/files/conversion.hpp>
 #include <components/interpreter/interpreter.hpp>
 #include <components/misc/utf8stream.hpp>
 #include <components/settings/settings.hpp>
@@ -107,20 +108,15 @@ namespace MWGui
             scanner.listKeywords(mNames);
 
             // identifier
-            const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
             std::vector<ESM::RefId> ids;
             for (const auto* store : esmStore)
             {
                 store->listIdentifier(ids);
                 for (auto id : ids)
                 {
-                    visit(
-                        [&](auto&& variant) {
-                            using T = std::decay_t<decltype(variant)>;
-                            if constexpr (std::is_same_v<T, ESM::StringRefId>)
-                                mNames.push_back(id.getRefIdString());
-                        },
-                        id);
+                    if (id.is<ESM::StringRefId>())
+                        mNames.push_back(id.getRefIdString());
                 }
                 ids.clear();
             }
@@ -244,19 +240,20 @@ namespace MWGui
         }
     }
 
-    void Console::executeFile(const std::string& path)
+    void Console::executeFile(const std::filesystem::path& path)
     {
-        std::ifstream stream((std::filesystem::path(path)));
+        std::ifstream stream(path);
 
         if (!stream.is_open())
-            printError("failed to open file: " + path);
-        else
         {
-            std::string line;
-
-            while (std::getline(stream, line))
-                execute(line);
+            printError("Failed to open script file \"" + Files::pathToUnicodeString(path)
+                + "\": " + std::generic_category().message(errno));
+            return;
         }
+
+        std::string line;
+        while (std::getline(stream, line))
+            execute(line);
     }
 
     void Console::clear()

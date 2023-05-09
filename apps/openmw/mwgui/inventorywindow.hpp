@@ -113,8 +113,6 @@ namespace MWGui
 
         void onBackgroundSelected();
 
-        std::string getModeSetting() const;
-
         void sellItem(MyGUI::Widget* sender, int count);
         void dragItem(MyGUI::Widget* sender, int count);
 

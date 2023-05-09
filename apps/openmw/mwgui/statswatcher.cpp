@@ -67,9 +67,8 @@ namespace MWGui
         if (timeToDrown != mWatchedTimeToStartDrowning)
         {
             static const float fHoldBreathTime = MWBase::Environment::get()
-                                                     .getWorld()
-                                                     ->getStore()
-                                                     .get<ESM::GameSetting>()
+                                                     .getESMStore()
+                                                     ->get<ESM::GameSetting>()
                                                      .find("fHoldBreathTime")
                                                      ->mValue.getFloat();
 
@@ -114,7 +113,7 @@ namespace MWGui
             {
                 mWatchedRace = watchedRecord->mRace;
                 const ESM::Race* race
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(watchedRecord->mRace);
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(watchedRecord->mRace);
                 setValue("race", race->mName);
             }
 
@@ -122,7 +121,7 @@ namespace MWGui
             {
                 mWatchedClass = watchedRecord->mClass;
                 const ESM::Class* cls
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(watchedRecord->mClass);
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(watchedRecord->mClass);
                 setValue("class", cls->mName);
 
                 MWBase::WindowManager::SkillList majorSkills(5);

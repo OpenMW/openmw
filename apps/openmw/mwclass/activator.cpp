@@ -84,7 +84,7 @@ namespace MWClass
         return ref->mBase->mName;
     }
 
-    const ESM::RefId& Activator::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Activator::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Activator>* ref = ptr.get<ESM::Activator>();
 
@@ -120,7 +120,7 @@ namespace MWClass
     {
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfActivator", prng);
 
@@ -140,11 +140,11 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    const ESM::RefId& Activator::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
+    ESM::RefId Activator::getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const
     {
         const std::string model
             = getModel(ptr); // Assume it's not empty, since we wouldn't have gotten the soundgen otherwise
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::RefId* creatureId = nullptr;
         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
@@ -191,7 +191,7 @@ namespace MWClass
                 return fallbacksounds[Misc::Rng::rollDice(fallbacksounds.size(), prng)]->mSound;
         }
 
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     int Activator::getSndGenTypeFromName(std::string_view name)

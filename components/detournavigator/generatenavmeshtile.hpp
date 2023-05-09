@@ -7,10 +7,7 @@
 
 #include <components/sceneutil/workqueue.hpp>
 
-#include <osg/Vec3f>
-
 #include <cstdint>
-#include <functional>
 #include <memory>
 #include <optional>
 #include <string_view>

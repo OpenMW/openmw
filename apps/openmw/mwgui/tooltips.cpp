@@ -226,7 +226,7 @@ namespace MWGui
                 {
                     ToolTipInfo info;
 
-                    const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(
+                    const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(
                         ESM::RefId::deserialize(focus->getUserString("Spell")));
                     info.caption = spell->mName;
                     Widgets::SpellEffectList effects;
@@ -420,7 +420,7 @@ namespace MWGui
             text.erase(0, 1);
 
         const ESM::Enchantment* enchant = nullptr;
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         if (!info.enchant.empty())
         {
             enchant = store.get<ESM::Enchantment>().search(info.enchant);
@@ -681,7 +681,7 @@ namespace MWGui
         const ESM::RefId& soul = cellref.getSoul();
         if (soul.empty())
             return {};
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::Creature* creature = store.get<ESM::Creature>().search(soul);
         if (!creature)
             return {};
@@ -697,7 +697,7 @@ namespace MWGui
         const ESM::RefId& factionId = cellref.getFaction();
         if (!factionId.empty())
         {
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
             const ESM::Faction* fact = store.get<ESM::Faction>().search(factionId);
             if (fact != nullptr)
             {
@@ -809,7 +809,7 @@ namespace MWGui
         if (skillId == -1)
             return;
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         const std::string& skillNameId = ESM::Skill::sSkillNameIds[skillId];
         const ESM::Skill* skill = store.get<ESM::Skill>().find(skillId);
@@ -848,7 +848,7 @@ namespace MWGui
         widget->setUserString("Caption_Caption", name);
         std::string specText;
         // get all skills of this specialisation
-        const MWWorld::Store<ESM::Skill>& skills = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
+        const MWWorld::Store<ESM::Skill>& skills = MWBase::Environment::get().getESMStore()->get<ESM::Skill>();
 
         bool isFirst = true;
         for (auto& skillPair : skills)
@@ -870,7 +870,7 @@ namespace MWGui
 
     void ToolTips::createBirthsignToolTip(MyGUI::Widget* widget, const ESM::RefId& birthsignId)
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         const ESM::BirthSign* sign = store.get<ESM::BirthSign>().find(birthsignId);
         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
@@ -953,8 +953,7 @@ namespace MWGui
 
     void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, short id)
     {
-        const ESM::MagicEffect* effect
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(id);
+        const ESM::MagicEffect* effect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(id);
         const std::string& name = ESM::MagicEffect::effectIdToString(id);
 
         std::string icon = effect->mIcon;

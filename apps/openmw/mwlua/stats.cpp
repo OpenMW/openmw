@@ -55,29 +55,17 @@ namespace
 
 namespace MWLua
 {
-    namespace
+    static void addStatUpdateAction(MWLua::LuaManager* manager, const SelfObject& obj)
     {
-        class StatUpdateAction final : public LuaManager::Action
-        {
-            ObjectId mId;
-
-        public:
-            StatUpdateAction(LuaUtil::LuaState* state, ObjectId id)
-                : Action(state)
-                , mId(id)
-            {
-            }
-
-            void apply() const override
-            {
-                LObject obj(mId);
+        if (!obj.mStatsCache.empty())
+            return; // was already added before
+        manager->addAction(
+            [obj = Object(obj)] {
                 LocalScripts* scripts = obj.ptr().getRefData().getLuaScripts();
                 if (scripts)
                     scripts->applyStatsCache();
-            }
-
-            std::string toString() const override { return "StatUpdateAction"; }
-        };
+            },
+            "StatUpdateAction");
     }
 
     class LevelStat
@@ -99,8 +87,7 @@ namespace MWLua
         void setCurrent(const Context& context, const sol::object& value) const
         {
             SelfObject* obj = mObject.asSelfObject();
-            if (obj->mStatsCache.empty())
-                context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
+            addStatUpdateAction(context.mLuaManager, *obj);
             obj->mStatsCache[SelfObject::CachedStat{ &LevelStat::setValue, 0, "current" }] = value;
         }
 
@@ -123,7 +110,7 @@ namespace MWLua
         {
             auto& stats = ptr.getClass().getCreatureStats(ptr);
             if (prop == "current")
-                stats.setLevel(value.as<int>());
+                stats.setLevel(LuaUtil::cast<int>(value));
         }
     };
 
@@ -158,8 +145,7 @@ namespace MWLua
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
             SelfObject* obj = mObject.asSelfObject();
-            if (obj->mStatsCache.empty())
-                context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
+            addStatUpdateAction(context.mLuaManager, *obj);
             obj->mStatsCache[SelfObject::CachedStat{ &DynamicStat::setValue, mIndex, prop }] = value;
         }
 
@@ -167,7 +153,7 @@ namespace MWLua
         {
             auto& stats = ptr.getClass().getCreatureStats(ptr);
             auto stat = stats.getDynamic(index);
-            float floatValue = value.as<float>();
+            float floatValue = LuaUtil::cast<float>(value);
             if (prop == "base")
                 stat.setBase(floatValue);
             else if (prop == "current")
@@ -201,9 +187,9 @@ namespace MWLua
 
         float getModified(const Context& context) const
         {
-            auto base = get(context, "base", &MWMechanics::AttributeValue::getBase).as<float>();
-            auto damage = get(context, "damage", &MWMechanics::AttributeValue::getDamage).as<float>();
-            auto modifier = get(context, "modifier", &MWMechanics::AttributeValue::getModifier).as<float>();
+            auto base = LuaUtil::cast<float>(get(context, "base", &MWMechanics::AttributeValue::getBase));
+            auto damage = LuaUtil::cast<float>(get(context, "damage", &MWMechanics::AttributeValue::getDamage));
+            auto modifier = LuaUtil::cast<float>(get(context, "modifier", &MWMechanics::AttributeValue::getModifier));
             return std::max(0.f, base - damage + modifier); // Should match AttributeValue::getModified
         }
 
@@ -217,8 +203,7 @@ namespace MWLua
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
             SelfObject* obj = mObject.asSelfObject();
-            if (obj->mStatsCache.empty())
-                context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
+            addStatUpdateAction(context.mLuaManager, *obj);
             obj->mStatsCache[SelfObject::CachedStat{ &AttributeStat::setValue, mIndex, prop }] = value;
         }
 
@@ -226,7 +211,7 @@ namespace MWLua
         {
             auto& stats = ptr.getClass().getCreatureStats(ptr);
             auto stat = stats.getAttribute(index);
-            float floatValue = value.as<float>();
+            float floatValue = LuaUtil::cast<float>(value);
             if (prop == "base")
                 stat.setBase(floatValue);
             else if (prop == "damage")
@@ -261,7 +246,7 @@ namespace MWLua
 
         static float getMaxProgress(const MWWorld::Ptr& ptr, int index, const MWMechanics::SkillValue& stat)
         {
-            const auto& store = MWBase::Environment::get().getWorld()->getStore();
+            const auto& store = *MWBase::Environment::get().getESMStore();
             const auto cl = store.get<ESM::Class>().find(ptr.get<ESM::NPC>()->mBase->mClass);
             return ptr.getClass().getNpcStats(ptr).getSkillProgressRequirement(index, *cl);
         }
@@ -278,9 +263,9 @@ namespace MWLua
 
         float getModified(const Context& context) const
         {
-            auto base = get(context, "base", &MWMechanics::SkillValue::getBase).as<float>();
-            auto damage = get(context, "damage", &MWMechanics::SkillValue::getDamage).as<float>();
-            auto modifier = get(context, "modifier", &MWMechanics::SkillValue::getModifier).as<float>();
+            auto base = LuaUtil::cast<float>(get(context, "base", &MWMechanics::SkillValue::getBase));
+            auto damage = LuaUtil::cast<float>(get(context, "damage", &MWMechanics::SkillValue::getDamage));
+            auto modifier = LuaUtil::cast<float>(get(context, "modifier", &MWMechanics::SkillValue::getModifier));
             return std::max(0.f, base - damage + modifier); // Should match SkillValue::getModified
         }
 
@@ -302,8 +287,7 @@ namespace MWLua
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
             SelfObject* obj = mObject.asSelfObject();
-            if (obj->mStatsCache.empty())
-                context.mLuaManager->addAction(std::make_unique<StatUpdateAction>(context.mLua, obj->id()));
+            addStatUpdateAction(context.mLuaManager, *obj);
             obj->mStatsCache[SelfObject::CachedStat{ &SkillStat::setValue, mIndex, prop }] = value;
         }
 
@@ -311,7 +295,7 @@ namespace MWLua
         {
             auto& stats = ptr.getClass().getNpcStats(ptr);
             auto stat = stats.getSkill(index);
-            float floatValue = value.as<float>();
+            float floatValue = LuaUtil::cast<float>(value);
             if (prop == "base")
                 stat.setBase(floatValue);
             else if (prop == "damage")

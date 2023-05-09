@@ -19,7 +19,6 @@
 #include <DetourNavMesh.h>
 #include <DetourNavMeshBuilder.h>
 #include <Recast.h>
-#include <RecastAlloc.h>
 
 #include <algorithm>
 #include <array>

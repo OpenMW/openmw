@@ -773,7 +773,7 @@ namespace MWSound
         if (mCurrentRegionSound && mOutput->isSoundPlaying(mCurrentRegionSound))
             return;
 
-        if (const auto next = mRegionSoundSelector.getNextRandom(duration, cell->getRegion(), *world))
+        if (const auto next = mRegionSoundSelector.getNextRandom(duration, cell->getRegion()))
             mCurrentRegionSound = playSound(*next, 1.0f, 1.0f);
     }
 

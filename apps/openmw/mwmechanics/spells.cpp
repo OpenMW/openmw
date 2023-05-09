@@ -208,7 +208,7 @@ namespace MWMechanics
         for (const ESM::RefId& id : state.mSpells)
         {
             // Discard spells that are no longer available due to changed content files
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(id);
+            const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(id);
             if (spell)
             {
                 addSpell(spell);
@@ -220,15 +220,14 @@ namespace MWMechanics
         // Add spells from the base record
         for (const ESM::RefId& id : baseSpells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(id);
+            const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(id);
             if (spell)
                 addSpell(spell);
         }
 
         for (auto it = state.mUsedPowers.begin(); it != state.mUsedPowers.end(); ++it)
         {
-            const ESM::Spell* spell
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);
+            const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(it->first);
             if (!spell)
                 continue;
             mUsedPowers.emplace_back(spell, MWWorld::TimeStamp(it->second));
@@ -238,8 +237,7 @@ namespace MWMechanics
         // only in old saves. Convert data to the new approach.
         for (auto it = state.mPermanentSpellEffects.begin(); it != state.mPermanentSpellEffects.end(); ++it)
         {
-            const ESM::Spell* spell
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(it->first);
+            const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(it->first);
             if (!spell)
                 continue;
 
@@ -293,7 +291,7 @@ namespace MWMechanics
     bool Spells::setSpells(const ESM::RefId& actorId)
     {
         bool result;
-        std::tie(mSpellList, result) = MWBase::Environment::get().getWorld()->getStore().getSpellList(actorId);
+        std::tie(mSpellList, result) = MWBase::Environment::get().getESMStore()->getSpellList(actorId);
         mSpellList->addListener(this);
         addAllToInstance(mSpellList->getSpells());
         return result;
@@ -303,7 +301,7 @@ namespace MWMechanics
     {
         for (const ESM::RefId& id : spells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().search(id);
+            const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(id);
             if (spell)
                 addSpell(spell);
             else

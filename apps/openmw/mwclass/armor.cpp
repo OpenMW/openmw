@@ -75,7 +75,7 @@ namespace MWClass
         return ref->mBase->mData.mHealth;
     }
 
-    const ESM::RefId& Armor::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Armor::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 
@@ -153,7 +153,7 @@ namespace MWClass
             return -1;
 
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         float iWeight = floor(gmst.find(typeGmst)->mValue.getFloat());
 
@@ -272,7 +272,7 @@ namespace MWClass
         return info;
     }
 
-    const ESM::RefId& Armor::getEnchantment(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Armor::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 
@@ -289,7 +289,7 @@ namespace MWClass
         newItem.mName = newName;
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;
-        const ESM::Armor* record = MWBase::Environment::get().getWorld()->createRecord(newItem);
+        const ESM::Armor* record = MWBase::Environment::get().getESMStore()->insert(newItem);
         return record->mId;
     }
 
@@ -300,8 +300,11 @@ namespace MWClass
         int armorSkillType = getEquipmentSkill(ptr);
         float armorSkill = actor.getClass().getSkill(actor, armorSkillType);
 
-        const MWBase::World* world = MWBase::Environment::get().getWorld();
-        int iBaseArmorSkill = world->getStore().get<ESM::GameSetting>().find("iBaseArmorSkill")->mValue.getInteger();
+        int iBaseArmorSkill = MWBase::Environment::get()
+                                  .getESMStore()
+                                  ->get<ESM::GameSetting>()
+                                  .find("iBaseArmorSkill")
+                                  ->mValue.getInteger();
 
         if (ref->mBase->mData.mWeight == 0)
             return ref->mBase->mData.mArmor;
@@ -327,7 +330,7 @@ namespace MWClass
             const ESM::RefId& npcRace = npc.get<ESM::NPC>()->mBase->mRace;
 
             // Beast races cannot equip shoes / boots, or full helms (head part vs hair part)
-            const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npcRace);
+            const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(npcRace);
             if (race->mData.mFlags & ESM::Race::Beast)
             {
                 std::vector<ESM::PartReference> parts = ptr.get<ESM::Armor>()->mBase->mParts.mParts;

@@ -35,7 +35,7 @@ namespace MWClass
         MWGui::ToolTipInfo getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const override;
         ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
-        const ESM::RefId& getScript(const MWWorld::ConstPtr& ptr) const override;
+        ESM::RefId getScript(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of the script attached to ptr
 
         std::unique_ptr<MWWorld::Action> activate(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor) const override;
@@ -48,7 +48,7 @@ namespace MWClass
 
         bool isActivator() const override;
 
-        const ESM::RefId& getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const override;
+        ESM::RefId getSoundIdFromSndGen(const MWWorld::Ptr& ptr, std::string_view name) const override;
     };
 }
 

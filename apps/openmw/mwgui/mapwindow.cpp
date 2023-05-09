@@ -16,7 +16,7 @@
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/globalmap.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -584,7 +584,7 @@ namespace MWGui
             {
                 if (!mInterior)
                     requestMapRender(
-                        MWBase::Environment::get().getWorldModel()->getExterior(entry.mCellX, entry.mCellY));
+                        &MWBase::Environment::get().getWorldModel()->getExterior(entry.mCellX, entry.mCellY));
 
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(entry.mCellX, entry.mCellY);
                 if (texture)
@@ -633,7 +633,7 @@ namespace MWGui
             for (MyGUI::Widget* widget : mExteriorDoorMarkerWidgets)
                 widget->setVisible(false);
 
-            MWWorld::CellStore* cell = worldModel->getInterior(mPrefix);
+            MWWorld::CellStore& cell = worldModel->getInterior(mPrefix);
             world->getDoorMarkers(cell, doors);
         }
         else
@@ -1232,7 +1232,7 @@ namespace MWGui
 
     void MapWindow::onPinToggled()
     {
-        Settings::Manager::setBool("map pin", "Windows", mPinned);
+        Settings::windows().mMapPin.set(mPinned);
 
         MWBase::Environment::get().getWindowManager()->setMinimapVisibility(!mPinned);
     }
@@ -1349,8 +1349,8 @@ namespace MWGui
 
             for (const ESM::GlobalMap::CellId& cellId : map.mMarkers)
             {
-                const ESM::Cell* cell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Cell>().search(
-                    cellId.first, cellId.second);
+                const ESM::Cell* cell
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Cell>().search(cellId.first, cellId.second);
                 if (cell && !cell->mName.empty())
                     addVisitedLocation(cell->mName, cellId.first, cellId.second);
             }

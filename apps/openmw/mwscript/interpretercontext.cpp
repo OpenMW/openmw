@@ -44,7 +44,7 @@ namespace MWScript
         }
     }
 
-    const Locals& InterpreterContext::getMemberLocals(std::reference_wrapper<const ESM::RefId>& id, bool global) const
+    const Locals& InterpreterContext::getMemberLocals(bool global, ESM::RefId& id) const
     {
         if (global)
         {
@@ -54,15 +54,15 @@ namespace MWScript
         {
             const MWWorld::Ptr ptr = getReferenceImp(id, false);
 
-            id = std::ref(ptr.getClass().getScript(ptr));
+            id = ptr.getClass().getScript(ptr);
 
-            ptr.getRefData().setLocals(*MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find(id));
+            ptr.getRefData().setLocals(*MWBase::Environment::get().getESMStore()->get<ESM::Script>().find(id));
 
             return ptr.getRefData().getLocals();
         }
     }
 
-    Locals& InterpreterContext::getMemberLocals(std::reference_wrapper<const ESM::RefId>& id, bool global)
+    Locals& InterpreterContext::getMemberLocals(bool global, ESM::RefId& id)
     {
         if (global)
         {
@@ -72,9 +72,9 @@ namespace MWScript
         {
             const MWWorld::Ptr ptr = getReferenceImp(id, false);
 
-            id = std::ref(ptr.getClass().getScript(ptr));
+            id = ptr.getClass().getScript(ptr);
 
-            ptr.getRefData().setLocals(*MWBase::Environment::get().getWorld()->getStore().get<ESM::Script>().find(id));
+            ptr.getRefData().setLocals(*MWBase::Environment::get().getESMStore()->get<ESM::Script>().find(id));
 
             return ptr.getRefData().getLocals();
         }
@@ -133,13 +133,13 @@ namespace MWScript
             mGlobalScriptDesc = globalScriptDesc;
     }
 
-    const ESM::RefId& InterpreterContext::getTarget() const
+    ESM::RefId InterpreterContext::getTarget() const
     {
         if (!mReference.isEmpty())
             return mReference.mRef->mRef.getRefId();
         else if (mGlobalScriptDesc)
             return mGlobalScriptDesc->getId();
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     int InterpreterContext::getLocalShort(int index) const
@@ -233,8 +233,7 @@ namespace MWScript
 
     std::vector<std::string> InterpreterContext::getGlobals() const
     {
-        const MWWorld::Store<ESM::Global>& globals
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Global>();
+        const MWWorld::Store<ESM::Global>& globals = MWBase::Environment::get().getESMStore()->get<ESM::Global>();
 
         std::vector<std::string> ids;
         for (const auto& globalVariable : globals)
@@ -289,23 +288,21 @@ namespace MWScript
     std::string_view InterpreterContext::getNPCRace() const
     {
         const ESM::NPC* npc = getReferenceImp().get<ESM::NPC>()->mBase;
-        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(npc->mRace);
+        const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(npc->mRace);
         return race->mName;
     }
 
     std::string_view InterpreterContext::getNPCClass() const
     {
         const ESM::NPC* npc = getReferenceImp().get<ESM::NPC>()->mBase;
-        const ESM::Class* class_
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().find(npc->mClass);
+        const ESM::Class* class_ = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
         return class_->mName;
     }
 
     std::string_view InterpreterContext::getNPCFaction() const
     {
         const ESM::NPC* npc = getReferenceImp().get<ESM::NPC>()->mBase;
-        const ESM::Faction* faction
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>().find(npc->mFaction);
+        const ESM::Faction* faction = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(npc->mFaction);
         return faction->mName;
     }
 
@@ -419,61 +416,65 @@ namespace MWScript
 
     void InterpreterContext::executeActivation(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor)
     {
+        // MWScripted activations don't go through Lua because 1-frame delay can brake mwscripts.
+#if 0
         MWBase::Environment::get().getLuaManager()->objectActivated(ptr, actor);
+
+        // TODO: Enable this branch after implementing one of the options:
+        // 1) Pause this mwscript (or maybe all mwscripts) for one frame and continue from the same
+        //     command when the activation is processed by Lua script.
+        // 2) Force Lua scripts to handle a zero-length extra frame right now, so when control
+        //     returns to the mwscript, the activation is already processed.
+#else
         std::unique_ptr<MWWorld::Action> action = (ptr.getClass().activate(ptr, actor));
         action->execute(actor);
         if (action->getTarget() != MWWorld::Ptr() && action->getTarget() != ptr)
         {
             updatePtr(ptr, action->getTarget());
         }
+#endif
     }
 
-    int InterpreterContext::getMemberShort(const ESM::RefId& id, std::string_view name, bool global) const
+    int InterpreterContext::getMemberShort(ESM::RefId id, std::string_view name, bool global) const
     {
-        auto idRefWrapper = std::ref(id);
-        const Locals& locals = getMemberLocals(idRefWrapper, global);
+        const Locals& locals = getMemberLocals(global, id);
 
-        return locals.mShorts[findLocalVariableIndex(idRefWrapper, name, 's')];
+        return locals.mShorts[findLocalVariableIndex(id, name, 's')];
     }
 
-    int InterpreterContext::getMemberLong(const ESM::RefId& id, std::string_view name, bool global) const
+    int InterpreterContext::getMemberLong(ESM::RefId id, std::string_view name, bool global) const
     {
-        auto idRefWrapper = std::ref(id);
-        const Locals& locals = getMemberLocals(idRefWrapper, global);
+        const Locals& locals = getMemberLocals(global, id);
 
-        return locals.mLongs[findLocalVariableIndex(idRefWrapper, name, 'l')];
+        return locals.mLongs[findLocalVariableIndex(id, name, 'l')];
     }
 
-    float InterpreterContext::getMemberFloat(const ESM::RefId& id, std::string_view name, bool global) const
+    float InterpreterContext::getMemberFloat(ESM::RefId id, std::string_view name, bool global) const
     {
-        auto idRefWrapper = std::ref(id);
-        const Locals& locals = getMemberLocals(idRefWrapper, global);
+        const Locals& locals = getMemberLocals(global, id);
 
-        return locals.mFloats[findLocalVariableIndex(idRefWrapper, name, 'f')];
+        return locals.mFloats[findLocalVariableIndex(id, name, 'f')];
     }
 
-    void InterpreterContext::setMemberShort(const ESM::RefId& id, std::string_view name, int value, bool global)
+    void InterpreterContext::setMemberShort(ESM::RefId id, std::string_view name, int value, bool global)
     {
-        auto idRefWrapper = std::ref(id);
-        Locals& locals = getMemberLocals(idRefWrapper, global);
+        Locals& locals = getMemberLocals(global, id);
 
-        locals.mShorts[findLocalVariableIndex(idRefWrapper, name, 's')] = value;
+        locals.mShorts[findLocalVariableIndex(id, name, 's')] = value;
     }
 
-    void InterpreterContext::setMemberLong(const ESM::RefId& id, std::string_view name, int value, bool global)
+    void InterpreterContext::setMemberLong(ESM::RefId id, std::string_view name, int value, bool global)
     {
-        auto idRefWrapper = std::ref(id);
-        Locals& locals = getMemberLocals(idRefWrapper, global);
+        Locals& locals = getMemberLocals(global, id);
 
-        locals.mLongs[findLocalVariableIndex(idRefWrapper, name, 'l')] = value;
+        locals.mLongs[findLocalVariableIndex(id, name, 'l')] = value;
     }
 
-    void InterpreterContext::setMemberFloat(const ESM::RefId& id, std::string_view name, float value, bool global)
+    void InterpreterContext::setMemberFloat(ESM::RefId id, std::string_view name, float value, bool global)
     {
-        auto idRefWrapper = std::ref(id);
-        Locals& locals = getMemberLocals(idRefWrapper, global);
+        Locals& locals = getMemberLocals(global, id);
 
-        locals.mFloats[findLocalVariableIndex(idRefWrapper, name, 'f')] = value;
+        locals.mFloats[findLocalVariableIndex(id, name, 'f')] = value;
     }
 
     MWWorld::Ptr InterpreterContext::getReference(bool required) const

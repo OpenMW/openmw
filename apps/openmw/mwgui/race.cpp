@@ -316,8 +316,7 @@ namespace MWGui
     void RaceDialog::getBodyParts(int part, std::vector<ESM::RefId>& out)
     {
         out.clear();
-        const MWWorld::Store<ESM::BodyPart>& store
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::BodyPart>();
+        const MWWorld::Store<ESM::BodyPart>& store = MWBase::Environment::get().getESMStore()->get<ESM::BodyPart>();
 
         for (const ESM::BodyPart& bodypart : store)
         {
@@ -373,7 +372,7 @@ namespace MWGui
     {
         mRaceList->removeAllItems();
 
-        const MWWorld::Store<ESM::Race>& races = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>();
+        const MWWorld::Store<ESM::Race>& races = MWBase::Environment::get().getESMStore()->get<ESM::Race>();
 
         std::vector<std::pair<ESM::RefId, std::string>> items; // ID, name
         for (const ESM::Race& race : races)
@@ -411,7 +410,7 @@ namespace MWGui
         const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
         MyGUI::IntCoord coord1(0, 0, mSkillList->getWidth(), 18);
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::Race* race = store.get<ESM::Race>().find(mCurrentRaceId);
         int count = sizeof(race->mData.mBonus)
             / sizeof(race->mData.mBonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
@@ -448,7 +447,7 @@ namespace MWGui
         const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
         MyGUI::IntCoord coord(0, 0, mSpellPowerList->getWidth(), lineHeight);
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::Race* race = store.get<ESM::Race>().find(mCurrentRaceId);
 
         int i = 0;

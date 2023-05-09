@@ -27,7 +27,6 @@ void main()
         texture2D(imageIn, uv + vec2(0.0, -oneAndHalfOffset)).r
     );
 
-
     vec4 color = texture2D(imageIn, uv);
 
     gl_FragColor = applySprings(color, n, n2);

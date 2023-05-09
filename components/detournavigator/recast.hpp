@@ -2,7 +2,6 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_RECAST_H
 
 #include <Recast.h>
-#include <RecastAlloc.h>
 
 #include <cstddef>
 #include <type_traits>

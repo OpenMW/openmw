@@ -124,8 +124,6 @@ namespace ESM
         };
     }
 
-    const RefId RefId::sEmpty = {};
-
     std::string EmptyRefId::toString() const
     {
         return std::string();

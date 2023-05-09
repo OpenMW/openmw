@@ -1,6 +1,7 @@
 #ifndef GAME_MWWORLD_WORLDIMP_H
 #define GAME_MWWORLD_WORLDIMP_H
 
+#include <osg/Timer>
 #include <osg/ref_ptr>
 
 #include <components/detournavigator/collisionshapetype.hpp>
@@ -235,7 +236,7 @@ namespace MWWorld
         MWWorld::Ptr getPlayerPtr() override;
         MWWorld::ConstPtr getPlayerConstPtr() const override;
 
-        const MWWorld::ESMStore& getStore() const override;
+        MWWorld::ESMStore& getStore() override { return mStore; }
 
         const std::vector<int>& getESMVersions() const override;
 
@@ -245,7 +246,7 @@ namespace MWWorld
 
         bool isCellQuasiExterior() const override;
 
-        void getDoorMarkers(MWWorld::CellStore* cell, std::vector<DoorMarker>& out) override;
+        void getDoorMarkers(MWWorld::CellStore& cell, std::vector<DoorMarker>& out) override;
         ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
         void setGlobalInt(GlobalVariableName name, int value) override;
@@ -427,66 +428,6 @@ namespace MWWorld
         bool toggleRenderMode(MWRender::RenderMode mode) override;
         ///< Toggle a render mode.
         ///< \return Resulting mode
-
-        const ESM::Potion* createRecord(const ESM::Potion& record) override;
-        ///< Create a new record (of type potion) in the ESM store.
-        /// \return pointer to created record
-
-        const ESM::Spell* createRecord(const ESM::Spell& record) override;
-        ///< Create a new record (of type spell) in the ESM store.
-        /// \return pointer to created record
-
-        const ESM::Class* createRecord(const ESM::Class& record) override;
-        ///< Create a new record (of type class) in the ESM store.
-        /// \return pointer to created record
-
-        const ESM::Cell* createRecord(const ESM::Cell& record) override;
-        ///< Create a new record (of type cell) in the ESM store.
-        /// \return pointer to created record
-
-        const ESM::NPC* createRecord(const ESM::NPC& record) override;
-        ///< Create a new record (of type npc) in the ESM store.
-        /// \return pointer to created record
-
-        const ESM::Armor* createRecord(const ESM::Armor& record) override;
-        ///< Create a new record (of type armor) in the ESM store.
-        /// \return pointer to created record
-
-        const ESM::Weapon* createRecord(const ESM::Weapon& record) override;
-        ///< Create a new record (of type weapon) in the ESM store.
-        /// \return pointer to created record
-
-        const ESM::Clothing* createRecord(const ESM::Clothing& record) override;
-        ///< Create a new record (of type clothing) in the ESM store.
-        /// \return pointer to created record
-
-        const ESM::Enchantment* createRecord(const ESM::Enchantment& record) override;
-        ///< Create a new record (of type enchantment) in the ESM store.
-        /// \return pointer to created record
-
-        const ESM::Book* createRecord(const ESM::Book& record) override;
-        ///< Create a new record (of type book) in the ESM store.
-        /// \return pointer to created record
-
-        const ESM::CreatureLevList* createOverrideRecord(const ESM::CreatureLevList& record) override;
-        ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
-        /// \return pointer to created record
-
-        const ESM::ItemLevList* createOverrideRecord(const ESM::ItemLevList& record) override;
-        ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
-        /// \return pointer to created record
-
-        const ESM::Creature* createOverrideRecord(const ESM::Creature& record) override;
-        ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
-        /// \return pointer to created record
-
-        const ESM::NPC* createOverrideRecord(const ESM::NPC& record) override;
-        ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
-        /// \return pointer to created record
-
-        const ESM::Container* createOverrideRecord(const ESM::Container& record) override;
-        ///< Write this record to the ESM store, allowing it to override a pre-existing record with the same ID.
-        /// \return pointer to created record
 
         void update(float duration, bool paused);
         void updatePhysics(

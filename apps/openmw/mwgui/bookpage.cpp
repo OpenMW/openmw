@@ -49,8 +49,8 @@ namespace MWGui
                     && partal_match(tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
             }
 
-            bool match(char const* tstFont, const MyGUI::Colour& tstHotColour, const MyGUI::Colour& tstActiveColour,
-                const MyGUI::Colour& tstNormalColour, intptr_t tstInteractiveId)
+            bool match(std::string_view tstFont, const MyGUI::Colour& tstHotColour,
+                const MyGUI::Colour& tstActiveColour, const MyGUI::Colour& tstNormalColour, intptr_t tstInteractiveId)
             {
                 return (mFont->getResourceName() == tstFont)
                     && partal_match(tstHotColour, tstActiveColour, tstNormalColour, tstInteractiveId);
@@ -280,7 +280,7 @@ namespace MWGui
                 fullFontName = "Journalbook " + fullFontName;
 
             for (Styles::iterator i = mBook->mStyles.begin(); i != mBook->mStyles.end(); ++i)
-                if (i->match(fullFontName.c_str(), fontColour, fontColour, fontColour, 0))
+                if (i->match(fullFontName, fontColour, fontColour, fontColour, 0))
                     return &*i;
 
             MyGUI::IFont* font = MyGUI::FontManager::getInstance().getByName(fullFontName);

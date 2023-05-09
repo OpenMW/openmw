@@ -1,5 +1,6 @@
 #include "luabindings.hpp"
 
+#include <components/lua/luastate.hpp>
 #include <components/lua/utilpackage.hpp>
 #include <components/settings/settings.hpp>
 
@@ -13,15 +14,15 @@ namespace MWLua
 
     using CameraMode = MWRender::Camera::Mode;
 
-    sol::table initCameraPackage(const Context& context)
+    sol::table initCameraPackage(sol::state_view& lua)
     {
         MWRender::Camera* camera = MWBase::Environment::get().getWorld()->getCamera();
         MWRender::RenderingManager* renderingManager = MWBase::Environment::get().getWorld()->getRenderingManager();
 
-        sol::table api(context.mLua->sol(), sol::create);
+        sol::table api(lua, sol::create);
         api["MODE"] = LuaUtil::makeStrictReadOnly(
-            context.mLua->sol().create_table_with("Static", CameraMode::Static, "FirstPerson", CameraMode::FirstPerson,
-                "ThirdPerson", CameraMode::ThirdPerson, "Vanity", CameraMode::Vanity, "Preview", CameraMode::Preview));
+            lua.create_table_with("Static", CameraMode::Static, "FirstPerson", CameraMode::FirstPerson, "ThirdPerson",
+                CameraMode::ThirdPerson, "Vanity", CameraMode::Vanity, "Preview", CameraMode::Preview));
 
         api["getMode"] = [camera]() -> int { return static_cast<int>(camera->getMode()); };
         api["getQueuedMode"] = [camera]() -> sol::optional<int> {

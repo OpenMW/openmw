@@ -27,6 +27,8 @@
 #include "categories/water.hpp"
 #include "categories/windows.hpp"
 
+#include <cassert>
+
 namespace Settings
 {
     class Values
@@ -58,6 +60,8 @@ namespace Settings
         StereoViewCategory mStereoView;
         PostProcessingCategory mPostProcessing;
 
+        static void initDefaults();
+
         static void init();
 
     private:
@@ -68,6 +72,7 @@ namespace Settings
 
     inline Values& values()
     {
+        assert(Values::sValues != nullptr);
         return *Values::sValues;
     }
 
@@ -195,7 +200,6 @@ namespace Settings
     {
         return values().mPostProcessing;
     }
-
 }
 
 #endif

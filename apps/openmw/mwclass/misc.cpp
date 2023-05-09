@@ -68,7 +68,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    const ESM::RefId& Miscellaneous::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Miscellaneous::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
 
@@ -86,7 +86,7 @@ namespace MWClass
         if (!ptr.getCellRef().getSoul().empty())
         {
             const ESM::Creature* creature
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(ref->mRef.getSoul());
+                = MWBase::Environment::get().getESMStore()->get<ESM::Creature>().search(ref->mRef.getSoul());
             if (creature)
             {
                 int soul = creature->mData.mSoul;
@@ -173,35 +173,33 @@ namespace MWClass
         return info;
     }
 
+    static MWWorld::Ptr createGold(MWWorld::CellStore& cell, int goldAmount)
+    {
+        std::string_view base = "gold_001";
+        if (goldAmount >= 100)
+            base = "gold_100";
+        else if (goldAmount >= 25)
+            base = "gold_025";
+        else if (goldAmount >= 10)
+            base = "gold_010";
+        else if (goldAmount >= 5)
+            base = "gold_005";
+
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
+        MWWorld::ManualRef newRef(store, ESM::RefId::stringRefId(base));
+        const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = newRef.getPtr().get<ESM::Miscellaneous>();
+
+        MWWorld::Ptr ptr(cell.insert(ref), &cell);
+        ptr.getCellRef().setGoldValue(goldAmount);
+        ptr.getRefData().setCount(1);
+        return ptr;
+    }
+
     MWWorld::Ptr Miscellaneous::copyToCell(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell, int count) const
     {
         MWWorld::Ptr newPtr;
-
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
-
         if (isGold(ptr))
-        {
-            int goldAmount = getValue(ptr) * count;
-
-            std::string_view base = "gold_001";
-            if (goldAmount >= 100)
-                base = "gold_100";
-            else if (goldAmount >= 25)
-                base = "gold_025";
-            else if (goldAmount >= 10)
-                base = "gold_010";
-            else if (goldAmount >= 5)
-                base = "gold_005";
-
-            // Really, I have no idea why moving ref out of conditional
-            // scope causes list::push_back throwing std::bad_alloc
-            MWWorld::ManualRef newRef(store, ESM::RefId::stringRefId(base));
-            const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = newRef.getPtr().get<ESM::Miscellaneous>();
-
-            newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
-            newPtr.getCellRef().setGoldValue(goldAmount);
-            newPtr.getRefData().setCount(1);
-        }
+            newPtr = createGold(cell, getValue(ptr) * count);
         else
         {
             const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
@@ -209,8 +207,29 @@ namespace MWClass
             newPtr.getRefData().setCount(count);
         }
         newPtr.getCellRef().unsetRefNum();
+        newPtr.getRefData().setLuaScripts(nullptr);
         MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
+        return newPtr;
+    }
 
+    MWWorld::Ptr Miscellaneous::moveToCell(const MWWorld::Ptr& ptr, MWWorld::CellStore& cell) const
+    {
+        MWWorld::Ptr newPtr;
+        if (isGold(ptr))
+        {
+            newPtr = createGold(cell, getValue(ptr));
+            newPtr.getRefData() = ptr.getRefData();
+            newPtr.getCellRef().setRefNum(ptr.getCellRef().getRefNum());
+            newPtr.getCellRef().setGoldValue(ptr.getCellRef().getGoldValue());
+            newPtr.getRefData().setCount(1);
+        }
+        else
+        {
+            const MWWorld::LiveCellRef<ESM::Miscellaneous>* ref = ptr.get<ESM::Miscellaneous>();
+            newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
+        }
+        ptr.getRefData().setLuaScripts(nullptr);
+        MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
         return newPtr;
     }
 

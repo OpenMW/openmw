@@ -133,7 +133,7 @@ namespace MWClass
             MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
             if (animation)
             {
-                const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
                 const ESM::MagicEffect* effect = store.get<ESM::MagicEffect>().find(ESM::MagicEffect::Telekinesis);
 
                 animation->addSpellCastGlow(
@@ -256,7 +256,7 @@ namespace MWClass
             return true;
     }
 
-    const ESM::RefId& Door::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Door::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Door>* ref = ptr.get<ESM::Door>();
 
@@ -300,7 +300,7 @@ namespace MWClass
     std::string Door::getDestination(const MWWorld::LiveCellRef<ESM::Door>& door)
     {
         std::string_view dest = MWBase::Environment::get().getWorld()->getCellName(
-            MWBase::Environment::get().getWorldModel()->getCell(door.mRef.getDestCell()));
+            &MWBase::Environment::get().getWorldModel()->getCell(door.mRef.getDestCell()));
 
         return "#{sCell=" + std::string{ dest } + "}";
     }

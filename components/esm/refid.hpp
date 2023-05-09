@@ -48,8 +48,6 @@ namespace ESM
     class RefId
     {
     public:
-        const static RefId sEmpty;
-
         using Value
             = std::variant<EmptyRefId, StringRefId, FormIdRefId, GeneratedRefId, IndexRefId, ESM3ExteriorCellRefId>;
 
@@ -63,7 +61,7 @@ namespace ESM
         static RefId stringRefId(std::string_view value);
 
         // Constructs RefId from FormId storing the value in-place.
-        static RefId formIdRefId(FormId value) noexcept { return RefId(FormIdRefId(value)); }
+        static RefId formIdRefId(FormId value) { return RefId(FormIdRefId(value)); }
 
         // Constructs RefId from uint64 storing the value in-place. Should be used for generated records where id is a
         // global counter.
@@ -87,7 +85,7 @@ namespace ESM
         {
         }
 
-        constexpr RefId(FormIdRefId value) noexcept
+        constexpr RefId(FormIdRefId value)
             : mValue(value)
         {
         }
@@ -135,6 +133,18 @@ namespace ESM
 
         // Serialize into stable text format.
         std::string serializeText() const;
+
+        template <class T>
+        const T* getIf() const
+        {
+            return std::get_if<T>(&mValue);
+        }
+
+        template <class T>
+        bool is() const
+        {
+            return std::holds_alternative<T>(mValue);
+        }
 
         friend constexpr bool operator==(const RefId& l, const RefId& r) { return l.mValue == r.mValue; }
 

@@ -2,7 +2,7 @@
 #define OPENMW_COMPONENTS_DETOURNAVIGATOR_OBJECTID_H
 
 #include <cstddef>
-#include <unordered_map>
+#include <functional>
 
 namespace DetourNavigator
 {

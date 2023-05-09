@@ -20,7 +20,6 @@ namespace MWGui
         Book createEmptyJournalBook();
         Book createJournalBook();
         Book createTopicBook(uintptr_t topicId);
-        Book createTopicBook(const std::string& topicId);
         Book createQuestBook(std::string_view questName);
         Book createTopicIndexBook();
 

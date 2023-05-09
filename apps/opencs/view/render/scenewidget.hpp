@@ -9,7 +9,6 @@
 #include <QTimer>
 #include <QWidget>
 
-#include <osg/Timer>
 #include <osg/Vec4f>
 #include <osg/ref_ptr>
 
@@ -21,6 +20,9 @@
 
 class QMouseEvent;
 class QWheelEvent;
+
+class osgQOpenGLWidget;
+class CompositeOsgRenderer;
 
 namespace Resource
 {
@@ -73,12 +75,12 @@ namespace CSVRender
         osg::Camera* getCamera();
 
     protected:
+        osgQOpenGLWidget* mWidget;
+        CompositeOsgRenderer* mRenderer;
         osg::ref_ptr<osgViewer::View> mView;
         osg::ref_ptr<osg::Group> mRootNode;
 
         void updateCameraParameters(double overrideAspect = -1.0);
-
-        QTimer mTimer;
 
     protected slots:
 
@@ -154,30 +156,6 @@ namespace CSVRender
 
         void focusToolbarRequest();
     };
-
-    // There are rendering glitches when using multiple Viewer instances, work around using CompositeViewer with
-    // multiple views
-    class CompositeViewer : public QObject, public osgViewer::CompositeViewer
-    {
-        Q_OBJECT
-    public:
-        CompositeViewer();
-
-        static CompositeViewer& get();
-
-        QTimer mTimer;
-
-    private:
-        osg::Timer mFrameTimer;
-        double mSimulationTime;
-
-    public slots:
-        void update();
-
-    signals:
-        void simulationUpdated(double dt);
-    };
-
 }
 
 #endif

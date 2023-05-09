@@ -259,20 +259,20 @@ namespace MWWorld
         mPreloadCells.clear();
     }
 
-    void CellPreloader::preload(CellStore* cell, double timestamp)
+    void CellPreloader::preload(CellStore& cell, double timestamp)
     {
         if (!mWorkQueue)
         {
             Log(Debug::Error) << "Error: can't preload, no work queue set";
             return;
         }
-        if (cell->getState() == CellStore::State_Unloaded)
+        if (cell.getState() == CellStore::State_Unloaded)
         {
             Log(Debug::Error) << "Error: can't preload objects for unloaded cell";
             return;
         }
 
-        PreloadMap::iterator found = mPreloadCells.find(cell);
+        PreloadMap::iterator found = mPreloadCells.find(&cell);
         if (found != mPreloadCells.end())
         {
             // already preloaded, nothing to do other than updating the timestamp
@@ -304,11 +304,11 @@ namespace MWWorld
                 return;
         }
 
-        osg::ref_ptr<PreloadItem> item(new PreloadItem(cell, mResourceSystem->getSceneManager(), mBulletShapeManager,
+        osg::ref_ptr<PreloadItem> item(new PreloadItem(&cell, mResourceSystem->getSceneManager(), mBulletShapeManager,
             mResourceSystem->getKeyframeManager(), mTerrain, mLandManager, mPreloadInstances));
         mWorkQueue->addWorkItem(item);
 
-        mPreloadCells[cell] = PreloadEntry(timestamp, item);
+        mPreloadCells[&cell] = PreloadEntry(timestamp, item);
     }
 
     void CellPreloader::notifyLoaded(CellStore* cell)
@@ -403,20 +403,10 @@ namespace MWWorld
         mWorkQueue = workQueue;
     }
 
-    bool CellPreloader::syncTerrainLoad(
-        const std::vector<CellPreloader::PositionCellGrid>& positions, double timestamp, Loading::Listener& listener)
+    void CellPreloader::syncTerrainLoad(Loading::Listener& listener)
     {
-        if (!mTerrainPreloadItem)
-            return true;
-        else if (mTerrainPreloadItem->isDone())
-        {
-            return true;
-        }
-        else
-        {
+        if (mTerrainPreloadItem != nullptr && !mTerrainPreloadItem->isDone())
             mTerrainPreloadItem->wait(listener);
-            return true;
-        }
     }
 
     void CellPreloader::abortTerrainPreloadExcept(const CellPreloader::PositionCellGrid* exceptPos)

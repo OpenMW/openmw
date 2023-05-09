@@ -128,7 +128,7 @@ namespace MWGui
     {
         mRaceId = raceId;
 
-        const ESM::Race* race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().search(mRaceId);
+        const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().search(mRaceId);
         if (race)
         {
             ToolTips::createRaceToolTip(mRaceWidget, race);
@@ -150,7 +150,7 @@ namespace MWGui
         mBirthSignId = signId;
 
         const ESM::BirthSign* sign
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().search(mBirthSignId);
+            = MWBase::Environment::get().getESMStore()->get<ESM::BirthSign>().search(mBirthSignId);
         if (sign)
         {
             mBirthSignWidget->setCaption(sign->mName);
@@ -391,7 +391,7 @@ namespace MWGui
 
         const ESM::Race* race = nullptr;
         if (!mRaceId.empty())
-            race = MWBase::Environment::get().getWorld()->getStore().get<ESM::Race>().find(mRaceId);
+            race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(mRaceId);
 
         int skills[ESM::Skill::Length];
         for (int i = 0; i < ESM::Skill::Length; ++i)
@@ -420,7 +420,7 @@ namespace MWGui
         if (!mBirthSignId.empty())
         {
             const ESM::BirthSign* sign
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::BirthSign>().find(mBirthSignId);
+                = MWBase::Environment::get().getESMStore()->get<ESM::BirthSign>().find(mBirthSignId);
             for (const auto& spellId : sign->mPowers.mList)
             {
                 if (std::find(spells.begin(), spells.end(), spellId) == spells.end())
@@ -434,7 +434,7 @@ namespace MWGui
             coord1, coord2);
         for (auto& spellId : spells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+            const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(spellId);
             if (spell->mData.mType == ESM::Spell::ST_Ability)
                 addItem(spell, coord1, coord2);
         }
@@ -444,7 +444,7 @@ namespace MWGui
             coord2);
         for (auto& spellId : spells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+            const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(spellId);
             if (spell->mData.mType == ESM::Spell::ST_Power)
                 addItem(spell, coord1, coord2);
         }
@@ -454,7 +454,7 @@ namespace MWGui
             coord2);
         for (auto& spellId : spells)
         {
-            const ESM::Spell* spell = MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>().find(spellId);
+            const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(spellId);
             if (spell->mData.mType == ESM::Spell::ST_Spell)
                 addItem(spell, coord1, coord2);
         }

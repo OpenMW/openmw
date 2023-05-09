@@ -30,7 +30,7 @@ namespace MWMechanics
         }
 
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         // Is the player buying?
         bool buying = (merchantOffer < 0);

@@ -56,7 +56,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    const ESM::RefId& Potion::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Potion::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Potion>* ref = ptr.get<ESM::Potion>();
 

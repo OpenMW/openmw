@@ -33,7 +33,6 @@
 #include <limits>
 #include <map>
 #include <memory>
-#include <osg/ref_ptr>
 #include <ostream>
 #include <string>
 #include <string_view>

@@ -782,6 +782,7 @@ void OMW::Engine::prepareEngine()
     mEnvironment.setWorld(*mWorld);
     mEnvironment.setWorldModel(mWorld->getWorldModel());
     mEnvironment.setWorldScene(mWorld->getWorldScene());
+    mEnvironment.setESMStore(mWorld->getStore());
 
     const MWWorld::Store<ESM::GameSetting>* gmst = &mWorld->getStore().get<ESM::GameSetting>();
     mL10nManager->setGmstLoader(
@@ -1018,7 +1019,7 @@ void OMW::Engine::setScriptConsoleMode(bool enabled)
     mScriptConsoleMode = enabled;
 }
 
-void OMW::Engine::setStartupScript(const std::string& path)
+void OMW::Engine::setStartupScript(const std::filesystem::path& path)
 {
     mStartupScript = path;
 }

@@ -41,9 +41,8 @@ namespace
     float getFightDispositionBias(float disposition)
     {
         static const float fFightDispMult = MWBase::Environment::get()
-                                                .getWorld()
-                                                ->getStore()
-                                                .get<ESM::GameSetting>()
+                                                .getESMStore()
+                                                ->get<ESM::GameSetting>()
                                                 .find("fFightDispMult")
                                                 ->mValue.getFloat();
         return ((50.f - disposition) * fFightDispMult);
@@ -53,7 +52,7 @@ namespace
         const MWMechanics::NpcStats& stats, float& rating1, float& rating2, float& rating3, bool player)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         float persTerm = stats.getAttribute(ESM::Attribute::Personality).getModified()
             / gmst.find("fPersonalityMod")->mValue.getFloat();
@@ -140,7 +139,7 @@ namespace MWMechanics
         creatureStats.setAttribute(ESM::Attribute::Endurance, player->mNpdt.mEndurance);
         creatureStats.setAttribute(ESM::Attribute::Personality, player->mNpdt.mPersonality);
         creatureStats.setAttribute(ESM::Attribute::Luck, player->mNpdt.mLuck);
-        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
         // race
         if (mRaceSelected)
@@ -440,7 +439,7 @@ namespace MWMechanics
         ESM::NPC player = *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mName = name;
 
-        world->createRecord(player);
+        world->getStore().insert(player);
 
         mUpdatePlayer = true;
     }
@@ -457,7 +456,7 @@ namespace MWMechanics
         player.mHair = hair;
         player.setIsMale(male);
 
-        world->createRecord(player);
+        world->getStore().insert(player);
 
         mRaceSelected = true;
         buildPlayer();
@@ -478,7 +477,7 @@ namespace MWMechanics
         ESM::NPC player = *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mClass = id;
 
-        world->createRecord(player);
+        world->getStore().insert(player);
 
         mClassSelected = true;
         buildPlayer();
@@ -489,12 +488,12 @@ namespace MWMechanics
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
 
-        const ESM::Class* ptr = world->createRecord(cls);
+        const ESM::Class* ptr = world->getStore().insert(cls);
 
         ESM::NPC player = *world->getPlayerPtr().get<ESM::NPC>()->mBase;
         player.mClass = ptr->mId;
 
-        world->createRecord(player);
+        world->getStore().insert(player);
 
         mClassSelected = true;
         buildPlayer();
@@ -512,7 +511,7 @@ namespace MWMechanics
         const MWMechanics::NpcStats& playerStats = playerPtr.getClass().getNpcStats(playerPtr);
 
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
         static const float fDispRaceMod = gmst.find("fDispRaceMod")->mValue.getFloat();
         if (npc->mBase->mRace == player->mBase->mRace)
             x += fDispRaceMod;
@@ -623,7 +622,7 @@ namespace MWMechanics
         const MWWorld::Ptr& npc, PersuasionType type, bool& success, int& tempChange, int& permChange)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         MWMechanics::NpcStats& npcStats = npc.getClass().getNpcStats(npc);
 
@@ -851,7 +850,7 @@ namespace MWMechanics
         {
             // Build a list of known bound item ID's
             const MWWorld::Store<ESM::GameSetting>& gameSettings
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+                = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
             for (const ESM::GameSetting& currentSetting : gameSettings)
             {
@@ -1091,11 +1090,6 @@ namespace MWMechanics
         else
         {
             isAllowed = isAllowedToUse(ptr, item, victim);
-            if (!item.getCellRef().hasContentFile())
-            {
-                // this is a manually placed item, which means it was already stolen
-                return;
-            }
         }
 
         if (isAllowed)
@@ -1145,7 +1139,7 @@ namespace MWMechanics
         std::vector<MWWorld::Ptr> neighbors;
 
         osg::Vec3f from(player.getRefData().getPosition().asVec3());
-        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
         float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->mValue.getFloat();
 
         mActors.getObjectsInRange(from, radius, neighbors);
@@ -1223,7 +1217,7 @@ namespace MWMechanics
         const MWWorld::Ptr& player, const MWWorld::Ptr& victim, OffenseType type, const ESM::RefId& factionId, int arg)
     {
         const MWWorld::Store<ESM::GameSetting>& store
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         if (type == OT_Murder && !victim.isEmpty())
             victim.getClass().getCreatureStats(victim).notifyMurder();
@@ -1261,7 +1255,7 @@ namespace MWMechanics
         // Make surrounding actors within alarm distance respond to the crime
         std::vector<MWWorld::Ptr> neighbors;
 
-        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
         osg::Vec3f from(player.getRefData().getPosition().asVec3());
         float radius = esmStore.get<ESM::GameSetting>().find("fAlarmRadius")->mValue.getFloat();
@@ -1534,7 +1528,7 @@ namespace MWMechanics
             return false;
 
         const MWWorld::Store<ESM::GameSetting>& store
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 
@@ -1788,8 +1782,7 @@ namespace MWMechanics
                     && MWBase::Environment::get().getWorld()->getGlobalInt(MWWorld::Globals::sPCKnownWerewolf)))
             {
                 const ESM::GameSetting* iWerewolfFightMod
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>().find(
-                        "iWerewolfFightMod");
+                    = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>().find("iWerewolfFightMod");
                 fight += iWerewolfFightMod->mValue.getInteger();
             }
         }
@@ -1887,7 +1880,7 @@ namespace MWMechanics
             // Witnesses of the player's transformation will make them a globally known werewolf
             std::vector<MWWorld::Ptr> neighbors;
             const MWWorld::Store<ESM::GameSetting>& gmst
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+                = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
             getActorsInRange(
                 actor.getRefData().getPosition().asVec3(), gmst.find("fAlarmRadius")->mValue.getFloat(), neighbors);
 
@@ -1928,7 +1921,7 @@ namespace MWMechanics
     void MechanicsManager::applyWerewolfAcrobatics(const MWWorld::Ptr& actor)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
         MWMechanics::NpcStats& stats = actor.getClass().getNpcStats(actor);
         auto& skill = stats.getSkill(ESM::Skill::Acrobatics);
         skill.setModifier(gmst.find("fWerewolfAcrobatics")->mValue.getFloat() - skill.getModified());

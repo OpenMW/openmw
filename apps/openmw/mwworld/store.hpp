@@ -16,6 +16,7 @@
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadpgrd.hpp>
 #include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadrefr.hpp>
 #include <components/misc/rng.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
@@ -52,22 +53,23 @@ namespace MWWorld
     {
     }; // Empty interface to be parent of all store types
 
-    class DynamicStore : public StoreBase
+    template <class Id>
+    class DynamicStoreBase : public StoreBase
     {
     public:
-        virtual ~DynamicStore() {}
+        virtual ~DynamicStoreBase() {}
 
         virtual void setUp() {}
 
         /// List identifiers of records contained in this Store (case-smashed). No-op for Stores that don't use string
         /// IDs.
-        virtual void listIdentifier(std::vector<ESM::RefId>& list) const {}
+        virtual void listIdentifier(std::vector<Id>& list) const {}
 
         virtual size_t getSize() const = 0;
         virtual int getDynamicSize() const { return 0; }
         virtual RecordId load(ESM::ESMReader& esm) = 0;
 
-        virtual bool eraseStatic(const ESM::RefId& id) { return false; }
+        virtual bool eraseStatic(const Id& id) { return false; }
         virtual void clearDynamic() {}
 
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress) const {}
@@ -75,6 +77,8 @@ namespace MWWorld
         virtual RecordId read(ESM::ESMReader& reader, bool overrideOnly = false) { return RecordId(); }
         ///< Read into dynamic storage
     };
+
+    using DynamicStore = DynamicStoreBase<ESM::RefId>;
 
     template <class T>
     class IndexedStore : public StoreBase
@@ -90,6 +94,7 @@ namespace MWWorld
 
         iterator begin() const;
         iterator end() const;
+        iterator findIter(int index) const { return mStatic.find(index); }
 
         void load(ESM::ESMReader& esm);
 
@@ -169,23 +174,23 @@ namespace MWWorld
 
     class ESMStore;
 
-    template <class T>
-    class TypedDynamicStore : public DynamicStore
+    template <class T, class Id = ESM::RefId>
+    class TypedDynamicStore : public DynamicStoreBase<Id>
     {
-        typedef std::unordered_map<ESM::RefId, T> Static;
+        typedef std::unordered_map<Id, T> Static;
         Static mStatic;
         /// @par mShared usually preserves the record order as it came from the content files (this
         /// is relevant for the spell autocalc code and selection order
         /// for heads/hairs in the character creation)
         std::vector<T*> mShared;
-        typedef std::unordered_map<ESM::RefId, T> Dynamic;
+        typedef std::unordered_map<Id, T> Dynamic;
         Dynamic mDynamic;
 
         friend class ESMStore;
 
     public:
         TypedDynamicStore();
-        TypedDynamicStore(const TypedDynamicStore<T>& orig);
+        TypedDynamicStore(const TypedDynamicStore<T, Id>& orig);
 
         typedef SharedIterator<T> iterator;
 
@@ -193,35 +198,35 @@ namespace MWWorld
         void clearDynamic() override;
         void setUp() override;
 
-        const T* search(const ESM::RefId& id) const;
-        const T* searchStatic(const ESM::RefId& id) const;
+        const T* search(const Id& id) const;
+        const T* searchStatic(const Id& id) const;
 
         /**
          * Does the record with this ID come from the dynamic store?
          */
-        bool isDynamic(const ESM::RefId& id) const;
+        bool isDynamic(const Id& id) const;
 
         /** Returns a random record that starts with the named ID, or nullptr if not found. */
         const T* searchRandom(const std::string_view prefix, Misc::Rng::Generator& prng) const;
 
         // calls `search` and throws an exception if not found
-        const T* find(const ESM::RefId& id) const;
+        const T* find(const Id& id) const;
 
         iterator begin() const;
         iterator end() const;
-        const T& at(size_t index) const;
+        const T* at(size_t index) const { return mShared.at(index); }
 
         size_t getSize() const override;
         int getDynamicSize() const override;
 
         /// @note The record identifiers are listed in the order that the records were defined by the content files.
-        void listIdentifier(std::vector<ESM::RefId>& list) const override;
+        void listIdentifier(std::vector<Id>& list) const override;
 
         T* insert(const T& item, bool overrideOnly = false);
         T* insertStatic(const T& item);
 
-        bool eraseStatic(const ESM::RefId& id) override;
-        bool erase(const ESM::RefId& id);
+        bool eraseStatic(const Id& id) override;
+        bool erase(const Id& id);
         bool erase(const T& item);
 
         RecordId load(ESM::ESMReader& esm) override;
@@ -403,23 +408,13 @@ namespace MWWorld
         void listIdentifier(std::vector<ESM::RefId>& list) const override;
 
         ESM::Cell* insert(const ESM::Cell& cell);
-
-        bool erase(const ESM::Cell& cell);
-        bool erase(std::string_view id);
-
-        bool erase(int x, int y);
     };
 
     template <>
     class Store<ESM::Pathgrid> : public DynamicStore
     {
     private:
-        typedef std::unordered_map<ESM::RefId, ESM::Pathgrid> Interior;
-        typedef std::map<std::pair<int, int>, ESM::Pathgrid> Exterior;
-
-        Interior mInt;
-        Exterior mExt;
-
+        std::unordered_map<ESM::RefId, ESM::Pathgrid> mStatic;
         Store<ESM::Cell>* mCells;
 
     public:
@@ -431,9 +426,7 @@ namespace MWWorld
 
         void setUp() override;
 
-        const ESM::Pathgrid* search(int x, int y) const;
         const ESM::Pathgrid* search(const ESM::RefId& name) const;
-        const ESM::Pathgrid* find(int x, int y) const;
         const ESM::Pathgrid* find(const ESM::RefId& name) const;
         const ESM::Pathgrid* search(const ESM::Cell& cell) const;
         const ESM::Pathgrid* search(const MWWorld::Cell& cell) const;
@@ -514,7 +507,7 @@ namespace MWWorld
         std::vector<ESM::Dialogue*> mShared;
 
         mutable bool mKeywordSearchModFlag;
-        mutable MWDialogue::KeywordSearch<std::string, int /*unused*/> mKeywordSearch;
+        mutable MWDialogue::KeywordSearch<int /*unused*/> mKeywordSearch;
 
     public:
         Store();
@@ -537,7 +530,12 @@ namespace MWWorld
 
         void listIdentifier(std::vector<ESM::RefId>& list) const override;
 
-        const MWDialogue::KeywordSearch<std::string, int>& getDialogIdKeywordSearch() const;
+        const MWDialogue::KeywordSearch<int>& getDialogIdKeywordSearch() const;
+    };
+
+    template <>
+    class Store<ESM4::Reference> : public TypedDynamicStore<ESM4::Reference, ESM::FormId>
+    {
     };
 
 } // end namespace

@@ -77,7 +77,7 @@ namespace
         if (!isPlayer || !MWBase::Environment::get().getWorld()->getGodModeState())
         {
             const MWWorld::Store<ESM::GameSetting>& gmst
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+                = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
             const float fFatigueJumpBase = gmst.find("fFatigueJumpBase")->mValue.getFloat();
             const float fFatigueJumpMult = gmst.find("fFatigueJumpMult")->mValue.getFloat();
             const float normalizedEncumbrance = std::min(1.f, ptr.getClass().getNormalizedEncumbrance(ptr));
@@ -209,7 +209,7 @@ namespace MWPhysics
 
         // Use cone shape as fallback
         const MWWorld::Store<ESM::GameSetting>& store
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         btConeShape shape(osg::DegreesToRadians(store.find("fCombatAngleXY")->mValue.getFloat() / 2.0f), queryDistance);
         shape.setLocalScaling(btVector3(
@@ -988,9 +988,8 @@ namespace MWPhysics
         , mSwimLevel(waterlevel
               - (actor.getRenderingHalfExtents().z() * 2
                   * MWBase::Environment::get()
-                        .getWorld()
-                        ->getStore()
-                        .get<ESM::GameSetting>()
+                        .getESMStore()
+                        ->get<ESM::GameSetting>()
                         .find("fSwimHeightScale")
                         ->mValue.getFloat()))
         , mSlowFall(slowFall)

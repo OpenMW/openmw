@@ -130,6 +130,8 @@ namespace Settings
                 + "\" was properly installed.");
         parser.loadSettingsFile(defaultsBin, mDefaultSettings, true, false);
 
+        const CategorySettingValueMap originalDefaultSettings = mDefaultSettings;
+
         // Load "settings.cfg" or "openmw-cs.cfg" from every config dir except the last one as additional default
         // settings.
         for (int i = 0; i < static_cast<int>(paths.size()) - 1; ++i)
@@ -139,15 +141,19 @@ namespace Settings
                 parser.loadSettingsFile(additionalDefaults, mDefaultSettings, false, true);
         }
 
+        if (!loadEditorSettings)
+            Settings::Values::initDefaults();
+
         // Load "settings.cfg" or "openmw-cs.cfg" from the last config dir as user settings. This path will be used to
         // save modified settings.
         auto settingspath = paths.back() / userSettingsFile;
         if (std::filesystem::exists(settingspath))
             parser.loadSettingsFile(settingspath, mUserSettings, false, false);
 
-        Settings::Values::init();
+        if (!loadEditorSettings)
+            Settings::Values::init();
 
-        for (const auto& [key, value] : mDefaultSettings)
+        for (const auto& [key, value] : originalDefaultSettings)
             if (!sInitialized.contains(key))
                 throw std::runtime_error("Default setting [" + key.first + "] " + key.second + " is not initialized");
 
@@ -171,10 +177,8 @@ namespace Settings
         if (it != mDefaultSettings.end())
             return it->second;
 
-        std::string error("Trying to retrieve a non-existing setting: ");
-        error += setting;
-        error += ".\nMake sure the defaults.bin file was properly installed.";
-        throw std::runtime_error(error);
+        throw std::runtime_error("Trying to retrieve a non-existing setting: [" + std::string(category) + "] "
+            + std::string(setting) + ".\nMake sure the defaults.bin file was properly installed.");
     }
 
     std::vector<std::string> Manager::getStringArray(std::string_view setting, std::string_view category)

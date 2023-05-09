@@ -441,7 +441,7 @@ namespace Files
 
     std::istream& operator>>(std::istream& istream, MaybeQuotedPath& MaybeQuotedPath)
     {
-        // If the stream starts with a double quote, read from stream using boost::filesystem::path rules, then discard
+        // If the stream starts with a double quote, read from stream using std::filesystem::path rules, then discard
         // anything remaining. This prevents boost::program_options getting upset that we've not consumed the whole
         // stream. If it doesn't start with a double quote, read the whole thing verbatim
         if (istream.peek() == '"')

@@ -3,6 +3,7 @@
 #include "gettilespositions.hpp"
 #include "recastmeshbuilder.hpp"
 #include "settingsutils.hpp"
+#include "updateguard.hpp"
 
 #include <components/bullethelpers/aabb.hpp>
 #include <components/misc/convert.hpp>
@@ -45,7 +46,7 @@ namespace DetourNavigator
         class MaybeLockGuard
         {
         public:
-            explicit MaybeLockGuard(Mutex& mutex, const TileCachedRecastMeshManager::UpdateGuard* guard)
+            explicit MaybeLockGuard(Mutex& mutex, const UpdateGuard* guard)
                 : mImpl(guard == nullptr ? std::optional<std::unique_lock<Mutex>>(mutex) : std::nullopt)
             {
             }

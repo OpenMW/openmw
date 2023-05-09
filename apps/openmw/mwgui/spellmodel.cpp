@@ -45,7 +45,7 @@ namespace MWGui
 
     bool SpellModel::matchingEffectExists(std::string filter, const ESM::EffectList& effects)
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         for (const auto& effect : effects.mList)
         {
@@ -75,7 +75,7 @@ namespace MWGui
         MWMechanics::CreatureStats& stats = mActor.getClass().getCreatureStats(mActor);
         const MWMechanics::Spells& spells = stats.getSpells();
 
-        const MWWorld::ESMStore& esmStore = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
         std::string filter = Utf8Stream::lowerCaseUtf8(mFilter);
 

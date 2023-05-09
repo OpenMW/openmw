@@ -74,7 +74,7 @@ namespace ESM4
 
         struct BTXT
         {
-            FormId formId;
+            FormId32 formId;
             std::uint8_t quadrant; // 0 = bottom left, 1 = bottom right, 2 = top left, 3 = top right
             std::uint8_t unknown1;
             std::uint16_t unknown2;
@@ -82,7 +82,7 @@ namespace ESM4
 
         struct ATXT
         {
-            FormId formId;
+            FormId32 formId;
             std::uint8_t quadrant; // 0 = bottom left, 1 = bottom right, 2 = top left, 3 = top right
             std::uint8_t unknown;
             std::uint16_t layerIndex; // texture layer, 0..7

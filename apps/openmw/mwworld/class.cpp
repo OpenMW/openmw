@@ -169,9 +169,9 @@ namespace MWWorld
         return -1;
     }
 
-    const ESM::RefId& Class::getScript(const ConstPtr& ptr) const
+    ESM::RefId Class::getScript(const ConstPtr& ptr) const
     {
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     float Class::getMaxSpeed(const Ptr& ptr) const
@@ -275,7 +275,7 @@ namespace MWWorld
         throw std::runtime_error("class does not have an down sound");
     }
 
-    const ESM::RefId& Class::getSoundIdFromSndGen(const Ptr& ptr, std::string_view type) const
+    ESM::RefId Class::getSoundIdFromSndGen(const Ptr& ptr, std::string_view type) const
     {
         throw std::runtime_error("class does not support soundgen look up");
     }
@@ -303,9 +303,9 @@ namespace MWWorld
         return true;
     }
 
-    const ESM::RefId& Class::getEnchantment(const ConstPtr& ptr) const
+    ESM::RefId Class::getEnchantment(const ConstPtr& ptr) const
     {
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     void Class::adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const {}
@@ -347,7 +347,7 @@ namespace MWWorld
 
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfItem", prng);
 
@@ -374,6 +374,17 @@ namespace MWWorld
         Ptr newPtr = copyToCellImpl(ptr, cell);
         newPtr.getCellRef().unsetRefNum(); // This RefNum is only valid within the original cell of the reference
         newPtr.getRefData().setCount(count);
+        newPtr.getRefData().setLuaScripts(nullptr);
+        MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
+        if (hasInventoryStore(newPtr))
+            getInventoryStore(newPtr).setActor(newPtr);
+        return newPtr;
+    }
+
+    MWWorld::Ptr Class::moveToCell(const Ptr& ptr, CellStore& cell) const
+    {
+        Ptr newPtr = copyToCellImpl(ptr, cell);
+        ptr.getRefData().setLuaScripts(nullptr);
         MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
         if (hasInventoryStore(newPtr))
             getInventoryStore(newPtr).setActor(newPtr);
@@ -384,7 +395,6 @@ namespace MWWorld
     {
         Ptr newPtr = copyToCell(ptr, cell, count);
         newPtr.getRefData().setPosition(pos);
-
         return newPtr;
     }
 
@@ -476,9 +486,9 @@ namespace MWWorld
         return encumbrance / capacity;
     }
 
-    const ESM::RefId& Class::getSound(const MWWorld::ConstPtr&) const
+    ESM::RefId Class::getSound(const MWWorld::ConstPtr&) const
     {
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
 
     int Class::getBaseFightRating(const ConstPtr& ptr) const
@@ -486,9 +496,9 @@ namespace MWWorld
         throw std::runtime_error("class does not support fight rating");
     }
 
-    const ESM::RefId& Class::getPrimaryFaction(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Class::getPrimaryFaction(const MWWorld::ConstPtr& ptr) const
     {
-        return ESM::RefId::sEmpty;
+        return ESM::RefId();
     }
     int Class::getPrimaryFactionRank(const MWWorld::ConstPtr& ptr) const
     {
@@ -508,15 +518,14 @@ namespace MWWorld
             return result;
 
         const ESM::Enchantment* enchantment
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchantmentName);
+            = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().search(enchantmentName);
         if (!enchantment)
             return result;
 
         assert(enchantment->mEffects.mList.size());
 
-        const ESM::MagicEffect* magicEffect
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().search(
-                enchantment->mEffects.mList.front().mEffectID);
+        const ESM::MagicEffect* magicEffect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().search(
+            enchantment->mEffects.mList.front().mEffectID);
         if (!magicEffect)
             return result;
 

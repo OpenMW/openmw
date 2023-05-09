@@ -95,6 +95,10 @@ namespace MWMechanics
 
         bool hasBlightDisease() const;
 
+        /// Iteration methods for lua
+        size_t count() const { return mSpells.size(); }
+        const ESM::Spell* at(size_t index) const { return mSpells.at(index); }
+
         void readState(const ESM::SpellState& state, CreatureStats* creatureStats);
         void writeState(ESM::SpellState& state) const;
 

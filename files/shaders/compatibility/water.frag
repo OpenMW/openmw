@@ -117,9 +117,9 @@ void main(void)
     vec4 rainRipple;
 
     if (rainIntensity > 0.01)
-      rainRipple = rainCombined(position.xy/1000.0, waterTimer) * clamp(rainIntensity, 0.0, 1.0);
+        rainRipple = rainCombined(position.xy/1000.0, waterTimer) * clamp(rainIntensity, 0.0, 1.0);
     else
-      rainRipple = vec4(0.0);
+        rainRipple = vec4(0.0);
 
     vec3 rippleAdd = rainRipple.xyz * 10.0;
 

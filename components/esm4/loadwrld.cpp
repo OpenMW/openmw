@@ -79,7 +79,7 @@ void ESM4::World::load(ESM4::Reader& reader)
                 reader.getZString(mMapFile);
                 break; // map filename, Oblivion only?
             case ESM4::SUB_CNAM:
-                reader.get(mClimate);
+                reader.getFormId(mClimate);
                 break;
             case ESM4::SUB_NAM2:
                 reader.getFormId(mWater);

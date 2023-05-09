@@ -58,7 +58,7 @@ namespace MWClass
     {
         if (actor.getClass().isNpc() && actor.getClass().getNpcStats(actor).isWerewolf())
         {
-            const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+            const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
             const ESM::Sound* sound = store.get<ESM::Sound>().searchRandom("WolfItem", prng);
 
@@ -72,7 +72,7 @@ namespace MWClass
         return std::make_unique<MWWorld::ActionRead>(ptr);
     }
 
-    const ESM::RefId& Book::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Book::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Book>* ref = ptr.get<ESM::Book>();
 
@@ -133,7 +133,7 @@ namespace MWClass
         return info;
     }
 
-    const ESM::RefId& Book::getEnchantment(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Book::getEnchantment(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Book>* ref = ptr.get<ESM::Book>();
 
@@ -151,7 +151,7 @@ namespace MWClass
         newItem.mData.mIsScroll = 1;
         newItem.mData.mEnchant = enchCharge;
         newItem.mEnchant = enchId;
-        const ESM::Book* record = MWBase::Environment::get().getWorld()->createRecord(newItem);
+        const ESM::Book* record = MWBase::Environment::get().getESMStore()->insert(newItem);
         return record->mId;
     }
 

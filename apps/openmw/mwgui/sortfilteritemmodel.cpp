@@ -106,7 +106,7 @@ namespace
             if (!leftNameEnch.empty())
             {
                 const ESM::Enchantment* ench
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(leftNameEnch);
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().search(leftNameEnch);
                 if (ench)
                 {
                     if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
@@ -120,7 +120,7 @@ namespace
             if (!rightNameEnch.empty())
             {
                 const ESM::Enchantment* ench
-                    = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(rightNameEnch);
+                    = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().search(rightNameEnch);
                 if (ench)
                 {
                     if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
@@ -263,8 +263,7 @@ namespace MWGui
             return false;
         if ((mFilter & Filter_OnlyChargedSoulstones)
             && (base.getType() != ESM::Miscellaneous::sRecordId || base.getCellRef().getSoul().empty()
-                || !MWBase::Environment::get().getWorld()->getStore().get<ESM::Creature>().search(
-                    base.getCellRef().getSoul())))
+                || !MWBase::Environment::get().getESMStore()->get<ESM::Creature>().search(base.getCellRef().getSoul())))
             return false;
         if ((mFilter & Filter_OnlyRepairTools) && (base.getType() != ESM::Repair::sRecordId))
             return false;
@@ -297,7 +296,7 @@ namespace MWGui
 
             const ESM::RefId& enchId = base.getClass().getEnchantment(base);
             const ESM::Enchantment* ench
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().search(enchId);
+                = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().search(enchId);
             if (!ench)
             {
                 Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchId << "' on item "

@@ -8,7 +8,6 @@
 
 #include <LinearMath/btTransform.h>
 
-#include <osg/Referenced>
 #include <osg/ref_ptr>
 
 #include <functional>

@@ -13,6 +13,7 @@ namespace MWClass
 
     public:
         MWWorld::Ptr copyToCell(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell, int count) const override;
+        MWWorld::Ptr moveToCell(const MWWorld::Ptr& ptr, MWWorld::CellStore& cell) const override;
 
         void insertObjectRendering(const MWWorld::Ptr& ptr, const std::string& model,
             MWRender::RenderingInterface& renderingInterface) const override;
@@ -29,7 +30,7 @@ namespace MWClass
         MWGui::ToolTipInfo getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const override;
         ///< @return the content of the tool tip to be displayed. raises exception if the object has no tooltip.
 
-        const ESM::RefId& getScript(const MWWorld::ConstPtr& ptr) const override;
+        ESM::RefId getScript(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of the script attached to ptr
 
         int getValue(const MWWorld::ConstPtr& ptr) const override;

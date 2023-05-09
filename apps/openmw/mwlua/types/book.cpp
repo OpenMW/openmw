@@ -22,6 +22,8 @@ namespace MWLua
 {
     void addBookBindings(sol::table book, const Context& context)
     {
+        // types.book.SKILL is deprecated (core.SKILL should be used instead)
+        // TODO: Remove book.SKILL after branching 0.49
         sol::table skill(context.mLua->sol(), sol::create);
         book["SKILL"] = LuaUtil::makeStrictReadOnly(skill);
         for (int id = ESM::Skill::Block; id < ESM::Skill::Length; ++id)

@@ -7,7 +7,6 @@
 #include "../mwworld/ptr.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
 #include "actorutil.hpp"
 #include "creaturestats.hpp"
@@ -16,7 +15,7 @@
 namespace MWMechanics
 {
 
-    const ESM::RefId& getLevelledItem(const ESM::LevelledListBase* levItem, bool creature, Misc::Rng::Generator& prng)
+    ESM::RefId getLevelledItem(const ESM::LevelledListBase* levItem, bool creature, Misc::Rng::Generator& prng)
     {
         const std::vector<ESM::LevelledListBase::LevelItem>& items = levItem->mList;
 
@@ -24,7 +23,7 @@ namespace MWMechanics
         int playerLevel = player.getClass().getCreatureStats(player).getLevel();
 
         if (Misc::Rng::roll0to99(prng) < levItem->mChanceNone)
-            return ESM::RefId::sEmpty;
+            return ESM::RefId();
 
         std::vector<const ESM::RefId*> candidates;
         int highestLevel = 0;
@@ -45,19 +44,19 @@ namespace MWMechanics
                 candidates.push_back(&levelledItem.mId);
         }
         if (candidates.empty())
-            return ESM::RefId::sEmpty;
+            return ESM::RefId();
         const ESM::RefId& item = *candidates[Misc::Rng::rollDice(candidates.size(), prng)];
 
         // Vanilla doesn't fail on nonexistent items in levelled lists
-        if (!MWBase::Environment::get().getWorld()->getStore().find(item))
+        if (!MWBase::Environment::get().getESMStore()->find(item))
         {
             Log(Debug::Warning) << "Warning: ignoring nonexistent item " << item << " in levelled list "
                                 << levItem->mId;
-            return ESM::RefId::sEmpty;
+            return ESM::RefId();
         }
 
         // Is this another levelled item or a real item?
-        MWWorld::ManualRef ref(MWBase::Environment::get().getWorld()->getStore(), item, 1);
+        MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), item, 1);
         if (ref.getPtr().getType() != ESM::ItemLevList::sRecordId
             && ref.getPtr().getType() != ESM::CreatureLevList::sRecordId)
         {

@@ -57,7 +57,7 @@ namespace MWClass
         return defaultItemActivate(ptr, actor);
     }
 
-    const ESM::RefId& Ingredient::getScript(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Ingredient::getScript(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Ingredient>* ref = ptr.get<ESM::Ingredient>();
 
@@ -126,9 +126,8 @@ namespace MWClass
         float alchemySkill = player.getClass().getSkill(player, ESM::Skill::Alchemy);
 
         static const float fWortChanceValue = MWBase::Environment::get()
-                                                  .getWorld()
-                                                  ->getStore()
-                                                  .get<ESM::GameSetting>()
+                                                  .getESMStore()
+                                                  ->get<ESM::GameSetting>()
                                                   .find("fWortChanceValue")
                                                   ->mValue.getFloat();
 

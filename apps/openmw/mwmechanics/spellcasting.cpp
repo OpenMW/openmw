@@ -167,7 +167,7 @@ namespace MWMechanics
         bool containsRecastable = false;
         std::vector<const ESM::MagicEffect*> magicEffects;
         magicEffects.reserve(effects.mList.size());
-        const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>();
+        const auto& store = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>();
         for (const ESM::ENAMstruct& effect : effects.mList)
         {
             if (effect.mRange == range)
@@ -278,7 +278,7 @@ namespace MWMechanics
 
     bool CastSpell::cast(const ESM::RefId& id)
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         if (const auto spell = store.get<ESM::Spell>().search(id))
             return cast(spell);
 
@@ -301,7 +301,7 @@ namespace MWMechanics
         mId = item.getCellRef().getRefId();
 
         const ESM::Enchantment* enchantment
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>().find(enchantmentName);
+            = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().find(enchantmentName);
 
         mSlot = slot;
 
@@ -336,7 +336,7 @@ namespace MWMechanics
                     {
                         short effectId = enchantment->mEffects.mList.front().mEffectID;
                         const ESM::MagicEffect* magicEffect
-                            = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(effectId);
+                            = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectId);
                         school = magicEffect->mData.mSchool;
                     }
 
@@ -472,7 +472,7 @@ namespace MWMechanics
         effect.mRange = ESM::RT_Self;
         effect.mArea = 0;
 
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const auto magicEffect = store.get<ESM::MagicEffect>().find(effect.mEffectID);
         const MWMechanics::CreatureStats& creatureStats = mCaster.getClass().getCreatureStats(mCaster);
 
@@ -533,7 +533,7 @@ namespace MWMechanics
 
     void CastSpell::playSpellCastingEffects(const std::vector<ESM::ENAMstruct>& effects) const
     {
-        const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+        const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         std::vector<std::string> addedEffects;
         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
@@ -626,9 +626,9 @@ namespace MWMechanics
         // Add VFX
         const ESM::Static* castStatic;
         if (!magicEffect.mHit.empty())
-            castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find(magicEffect.mHit);
+            castStatic = MWBase::Environment::get().getESMStore()->get<ESM::Static>().find(magicEffect.mHit);
         else
-            castStatic = MWBase::Environment::get().getWorld()->getStore().get<ESM::Static>().find(
+            castStatic = MWBase::Environment::get().getESMStore()->get<ESM::Static>().find(
                 ESM::RefId::stringRefId("VFX_DefaultHit"));
 
         bool loop = (magicEffect.mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;

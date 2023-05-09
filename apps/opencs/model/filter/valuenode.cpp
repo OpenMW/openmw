@@ -4,7 +4,6 @@
 #include <stdexcept>
 #include <utility>
 
-#include "../world/columns.hpp"
 #include "../world/idtablebase.hpp"
 
 CSMFilter::ValueNode::ValueNode(int columnId, Type lowerType, Type upperType, double lower, double upper)

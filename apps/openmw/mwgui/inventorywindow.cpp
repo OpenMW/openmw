@@ -16,7 +16,7 @@
 
 #include <components/myguiplatform/myguitexture.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -34,6 +34,7 @@
 #include "draganddrop.hpp"
 #include "inventoryitemmodel.hpp"
 #include "itemview.hpp"
+#include "settings.hpp"
 #include "sortfilteritemmodel.hpp"
 #include "tooltips.hpp"
 #include "tradeitemmodel.hpp"
@@ -54,6 +55,23 @@ namespace
 
 namespace MWGui
 {
+    namespace
+    {
+        WindowSettingValues getModeSettings(GuiMode mode)
+        {
+            switch (mode)
+            {
+                case GM_Container:
+                    return makeInventoryContainerWindowSettingValues();
+                case GM_Companion:
+                    return makeInventoryCompanionWindowSettingValues();
+                case GM_Barter:
+                    return makeInventoryBarterWindowSettingValues();
+                default:
+                    return makeInventoryWindowSettingValues();
+            }
+        }
+    }
 
     InventoryWindow::InventoryWindow(
         DragAndDrop* dragAndDrop, osg::Group* parent, Resource::ResourceSystem* resourceSystem)
@@ -166,24 +184,18 @@ namespace MWGui
 
     void InventoryWindow::toggleMaximized()
     {
-        std::string setting = getModeSetting();
-
-        bool maximized = !Settings::Manager::getBool(setting + " maximized", "Windows");
-        if (maximized)
-            setting += " maximized";
+        const WindowSettingValues settings = getModeSettings(mGuiMode);
+        const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mRegular : settings.mMaximized;
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        float x = Settings::Manager::getFloat(setting + " x", "Windows") * float(viewSize.width);
-        float y = Settings::Manager::getFloat(setting + " y", "Windows") * float(viewSize.height);
-        float w = Settings::Manager::getFloat(setting + " w", "Windows") * float(viewSize.width);
-        float h = Settings::Manager::getFloat(setting + " h", "Windows") * float(viewSize.height);
+        const float x = rect.mX * viewSize.width;
+        const float y = rect.mY * viewSize.height;
+        const float w = rect.mW * viewSize.width;
+        const float h = rect.mH * viewSize.height;
         MyGUI::Window* window = mMainWidget->castType<MyGUI::Window>();
         window->setCoord(x, y, w, h);
 
-        if (maximized)
-            Settings::Manager::setBool(setting, "Windows", maximized);
-        else
-            Settings::Manager::setBool(setting + " maximized", "Windows", maximized);
+        settings.mIsMaximized.set(!settings.mIsMaximized);
 
         adjustPanes();
         updatePreviewSize();
@@ -192,17 +204,14 @@ namespace MWGui
     void InventoryWindow::setGuiMode(GuiMode mode)
     {
         mGuiMode = mode;
-        std::string setting = getModeSetting();
+        const WindowSettingValues settings = getModeSettings(mGuiMode);
         setPinButtonVisible(mode == GM_Inventory);
 
-        if (Settings::Manager::getBool(setting + " maximized", "Windows"))
-            setting += " maximized";
+        const WindowRectSettingValues& rect = settings.mIsMaximized ? settings.mMaximized : settings.mRegular;
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        MyGUI::IntPoint pos(static_cast<int>(Settings::Manager::getFloat(setting + " x", "Windows") * viewSize.width),
-            static_cast<int>(Settings::Manager::getFloat(setting + " y", "Windows") * viewSize.height));
-        MyGUI::IntSize size(static_cast<int>(Settings::Manager::getFloat(setting + " w", "Windows") * viewSize.width),
-            static_cast<int>(Settings::Manager::getFloat(setting + " h", "Windows") * viewSize.height));
+        MyGUI::IntPoint pos(static_cast<int>(rect.mX * viewSize.width), static_cast<int>(rect.mY * viewSize.height));
+        MyGUI::IntSize size(static_cast<int>(rect.mW * viewSize.width), static_cast<int>(rect.mH * viewSize.height));
 
         bool needUpdate = (size.width != mMainWidget->getWidth() || size.height != mMainWidget->getHeight());
 
@@ -405,44 +414,18 @@ namespace MWGui
         adjustPanes();
     }
 
-    std::string InventoryWindow::getModeSetting() const
-    {
-        std::string setting = "inventory";
-        switch (mGuiMode)
-        {
-            case GM_Container:
-                setting += " container";
-                break;
-            case GM_Companion:
-                setting += " companion";
-                break;
-            case GM_Barter:
-                setting += " barter";
-                break;
-            default:
-                break;
-        }
-
-        return setting;
-    }
-
     void InventoryWindow::onWindowResize(MyGUI::Window* _sender)
     {
         adjustPanes();
-        std::string setting = getModeSetting();
+        const WindowSettingValues settings = getModeSettings(mGuiMode);
 
         MyGUI::IntSize viewSize = MyGUI::RenderManager::getInstance().getViewSize();
-        float x = _sender->getPosition().left / float(viewSize.width);
-        float y = _sender->getPosition().top / float(viewSize.height);
-        float w = _sender->getSize().width / float(viewSize.width);
-        float h = _sender->getSize().height / float(viewSize.height);
-        Settings::Manager::setFloat(setting + " x", "Windows", x);
-        Settings::Manager::setFloat(setting + " y", "Windows", y);
-        Settings::Manager::setFloat(setting + " w", "Windows", w);
-        Settings::Manager::setFloat(setting + " h", "Windows", h);
-        bool maximized = Settings::Manager::getBool(setting + " maximized", "Windows");
-        if (maximized)
-            Settings::Manager::setBool(setting + " maximized", "Windows", false);
+
+        settings.mRegular.mX.set(_sender->getPosition().left / static_cast<float>(viewSize.width));
+        settings.mRegular.mY.set(_sender->getPosition().top / static_cast<float>(viewSize.height));
+        settings.mRegular.mW.set(_sender->getSize().width / static_cast<float>(viewSize.width));
+        settings.mRegular.mH.set(_sender->getSize().height / static_cast<float>(viewSize.height));
+        settings.mIsMaximized.set(false);
 
         if (mMainWidget->getSize().width != mLastXSize || mMainWidget->getSize().height != mLastYSize)
         {
@@ -503,7 +486,7 @@ namespace MWGui
 
     void InventoryWindow::onPinToggled()
     {
-        Settings::Manager::setBool("inventory pin", "Windows", mPinned);
+        Settings::windows().mInventoryPin.set(mPinned);
 
         MWBase::Environment::get().getWindowManager()->setWeaponVisibility(!mPinned);
     }
@@ -792,9 +775,9 @@ namespace MWGui
 
         int incr = next ? 1 : -1;
         bool found = false;
-        const ESM::RefId* lastId = &ESM::RefId::sEmpty;
+        ESM::RefId lastId;
         if (selected != -1)
-            lastId = &model.getItem(selected).mBase.getCellRef().getRefId();
+            lastId = model.getItem(selected).mBase.getCellRef().getRefId();
         ItemModel::ModelIndex cycled = selected;
         for (unsigned int i = 0; i < model.getItemCount(); ++i)
         {
@@ -805,10 +788,10 @@ namespace MWGui
 
             // skip different stacks of the same item, or we will get stuck as stacking/unstacking them may change their
             // relative ordering
-            if (*lastId == item.getCellRef().getRefId())
+            if (lastId == item.getCellRef().getRefId())
                 continue;
 
-            lastId = &item.getCellRef().getRefId();
+            lastId = item.getCellRef().getRefId();
 
             if (item.getClass().getType() == ESM::Weapon::sRecordId && isRightHandWeapon(item)
                 && item.getClass().canBeEquipped(item, player).first)

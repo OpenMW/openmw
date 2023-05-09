@@ -14,8 +14,6 @@
 #include "tileposition.hpp"
 #include "waitconditiontype.hpp"
 
-#include <osg/Vec3f>
-
 #include <atomic>
 #include <chrono>
 #include <condition_variable>

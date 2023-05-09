@@ -30,7 +30,7 @@ local sampleArc = function(x) return 1 - math.cos(x * halfArc) end
 local arcHeight = sampleArc(1)
 
 function M.update(dt, smoothedSpeed)
-    local speed = Actor.currentSpeed(self)
+    local speed = Actor.getCurrentSpeed(self)
     speed = speed / (1 + speed / 500)  -- limit bobbing frequency if the speed is very high
     totalMovement = totalMovement + speed * dt
     if not M.enabled or camera.getMode() ~= camera.MODE.FirstPerson then

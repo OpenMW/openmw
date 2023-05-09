@@ -85,14 +85,14 @@ namespace
 
     struct IdGettingVisitor
     {
-        const ESM::RefId& operator()(const MWWorld::Ptr& ptr) const
+        ESM::RefId operator()(const MWWorld::Ptr& ptr) const
         {
             if (ptr.isEmpty())
-                return ESM::RefId::sEmpty;
+                return ESM::RefId();
             return ptr.mRef->mRef.getRefId();
         }
 
-        const ESM::RefId& operator()(const std::pair<ESM::RefNum, ESM::RefId>& pair) const { return pair.second; }
+        ESM::RefId operator()(const std::pair<ESM::RefNum, ESM::RefId>& pair) const { return pair.second; }
     };
 }
 
@@ -115,7 +115,7 @@ namespace MWScript
         return ptr;
     }
 
-    const ESM::RefId& GlobalScriptDesc::getId() const
+    ESM::RefId GlobalScriptDesc::getId() const
     {
         return std::visit(IdGettingVisitor{}, mTarget);
     }

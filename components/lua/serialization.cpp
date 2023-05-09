@@ -106,7 +106,7 @@ namespace LuaUtil
 
     bool BasicSerializer::serialize(BinaryData& out, const sol::userdata& data) const
     {
-        appendRefNum(out, data.as<ESM::RefNum>());
+        appendRefNum(out, cast<ESM::RefNum>(data));
         return true;
     }
 

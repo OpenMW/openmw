@@ -197,6 +197,7 @@ namespace MWWorld
         }
 
         /// Insert a custom record (i.e. with a generated ID that will not clash will pre-existing records)
+        /// \return pointer to created record
         template <class T>
         const T* insert(const T& x)
         {

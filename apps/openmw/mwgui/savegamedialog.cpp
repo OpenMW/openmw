@@ -189,8 +189,7 @@ namespace MWGui
                 {
                     // Find the localised name for this class from the store
                     const ESM::Class* class_
-                        = MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>().search(
-                            signature.mPlayerClassId);
+                        = MWBase::Environment::get().getESMStore()->get<ESM::Class>().search(signature.mPlayerClassId);
                     if (class_)
                         className = class_->mName;
                     else

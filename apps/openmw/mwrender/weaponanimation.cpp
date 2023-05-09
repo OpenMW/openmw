@@ -114,7 +114,7 @@ namespace MWRender
             * osg::Quat(actor.getRefData().getPosition().rot[2], osg::Vec3f(0, 0, -1));
 
         const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getWorld()->getStore().get<ESM::GameSetting>();
+            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
         MWMechanics::applyFatigueLoss(actor, *weapon, attackStrength);
 

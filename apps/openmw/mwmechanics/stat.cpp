@@ -1,5 +1,7 @@
 #include "stat.hpp"
 
+#include <algorithm>
+
 #include <components/esm3/statstate.hpp>
 
 namespace MWMechanics

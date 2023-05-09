@@ -1414,7 +1414,7 @@ namespace MWRender
                     // given race and gender as well Since it is a quite rare case, there should not be a noticable
                     // performance loss Note: consider that player and werewolves have no custom animation files
                     // attached for now
-                    const MWWorld::ESMStore& store = MWBase::Environment::get().getWorld()->getStore();
+                    const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
                     const ESM::Race* race = store.get<ESM::Race>().find(ref->mBase->mRace);
 
                     bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;

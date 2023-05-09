@@ -10,15 +10,24 @@
 #include "recastmesh.hpp"
 #include "recastmeshobject.hpp"
 #include "tileposition.hpp"
+#include "updateguard.hpp"
 #include "version.hpp"
 
 #include <boost/geometry/geometries/box.hpp>
 #include <boost/geometry/geometries/point.hpp>
 #include <boost/geometry/index/rtree.hpp>
 
+#include <LinearMath/btTransform.h>
+
+#include <osg/Vec2i>
+
 #include <map>
+#include <memory>
 #include <mutex>
 #include <optional>
+#include <string>
+#include <string_view>
+#include <unordered_map>
 #include <vector>
 
 namespace DetourNavigator
@@ -28,19 +37,13 @@ namespace DetourNavigator
     class TileCachedRecastMeshManager
     {
     public:
-        class UpdateGuard
-        {
-        public:
-            explicit UpdateGuard(TileCachedRecastMeshManager& manager)
-                : mImpl(manager.mMutex)
-            {
-            }
-
-        private:
-            const std::lock_guard<std::mutex> mImpl;
-        };
-
         explicit TileCachedRecastMeshManager(const RecastSettings& settings);
+
+        ScopedUpdateGuard makeUpdateGuard()
+        {
+            mMutex.lock();
+            return ScopedUpdateGuard(&mUpdateGuard);
+        }
 
         void setRange(const TilesPositionsRange& range, const UpdateGuard* guard);
 
@@ -139,6 +142,7 @@ namespace DetourNavigator
         std::size_t mGeneration = 0;
         std::size_t mRevision = 0;
         mutable std::mutex mMutex;
+        UpdateGuard mUpdateGuard{ mMutex };
 
         inline static IndexPoint makeIndexPoint(const TilePosition& tilePosition);
 

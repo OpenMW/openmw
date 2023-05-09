@@ -57,6 +57,7 @@ file(GLOB UNITTEST_SRC_FILES
 
     settings/parser.cpp
     settings/shadermanager.cpp
+    settings/testvalues.cpp
 
     shader/parsedefines.cpp
     shader/parsefors.cpp
@@ -115,7 +116,7 @@ file(DOWNLOAD
 
 target_compile_definitions(openmw_test_suite
     PRIVATE OPENMW_DATA_DIR=u8"${CMAKE_CURRENT_BINARY_DIR}/data"
-            OPENMW_TEST_SUITE_SOURCE_DIR=u8"${CMAKE_CURRENT_SOURCE_DIR}")
+            OPENMW_PROJECT_SOURCE_DIR=u8"${PROJECT_SOURCE_DIR}")
 
 if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
     target_precompile_headers(openmw_test_suite PRIVATE

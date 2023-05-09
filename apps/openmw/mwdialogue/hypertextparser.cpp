@@ -48,15 +48,14 @@ namespace MWDialogue
         void tokenizeKeywords(const std::string& text, std::vector<Token>& tokens)
         {
             const auto& keywordSearch
-                = MWBase::Environment::get().getWorld()->getStore().get<ESM::Dialogue>().getDialogIdKeywordSearch();
+                = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().getDialogIdKeywordSearch();
 
-            std::vector<KeywordSearch<std::string, int /*unused*/>::Match> matches;
+            std::vector<KeywordSearch<int /*unused*/>::Match> matches;
             keywordSearch.highlightKeywords(text.begin(), text.end(), matches);
 
-            for (std::vector<KeywordSearch<std::string, int /*unused*/>::Match>::const_iterator it = matches.begin();
-                 it != matches.end(); ++it)
+            for (const auto& match : matches)
             {
-                tokens.emplace_back(std::string(it->mBeg, it->mEnd), Token::ImplicitKeyword);
+                tokens.emplace_back(std::string(match.mBeg, match.mEnd), Token::ImplicitKeyword);
             }
         }
 

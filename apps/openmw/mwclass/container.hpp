@@ -66,7 +66,7 @@ namespace MWClass
         MWWorld::ContainerStore& getContainerStore(const MWWorld::Ptr& ptr) const override;
         ///< Return container store
 
-        const ESM::RefId& getScript(const MWWorld::ConstPtr& ptr) const override;
+        ESM::RefId getScript(const MWWorld::ConstPtr& ptr) const override;
         ///< Return name of the script attached to ptr
 
         float getCapacity(const MWWorld::Ptr& ptr) const override;
