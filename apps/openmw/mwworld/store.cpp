@@ -1116,25 +1116,29 @@ namespace MWWorld
     ESM4::Cell* Store<ESM4::Cell>::insert(const ESM4::Cell& item, bool overrideOnly)
     {
         auto cellPtr = TypedDynamicStore<ESM4::Cell>::insert(item, overrideOnly);
-        if (!cellPtr->mEditorId.empty())
-            mCellNameIndex[cellPtr->mEditorId] = cellPtr;
-        if (cellPtr->isExterior())
-        {
-            mExteriors[{ cellPtr->mX, cellPtr->mY, cellPtr->mParent }] = cellPtr;
-        }
-
+        insertCell(cellPtr);
         return cellPtr;
     }
 
     ESM4::Cell* Store<ESM4::Cell>::insertStatic(const ESM4::Cell& item)
     {
         auto cellPtr = TypedDynamicStore<ESM4::Cell>::insertStatic(item);
+        insertCell(cellPtr);
+        return cellPtr;
+    }
+
+    void Store<ESM4::Cell>::insertCell(ESM4::Cell* cellPtr)
+    {
         if (!cellPtr->mEditorId.empty())
             mCellNameIndex[cellPtr->mEditorId] = cellPtr;
         if (cellPtr->isExterior())
-            mExteriors[{ cellPtr->mX, cellPtr->mY, cellPtr->mParent }] = cellPtr;
-
-        return cellPtr;
+        {
+            ESM::ExteriorCellIndex cellindex = { cellPtr->mX, cellPtr->mY, cellPtr->mParent };
+            if (cellPtr->mCellFlags & ESM4::Rec_Persistent)
+                mPersistentExteriors[cellindex] = cellPtr;
+            else
+                mExteriors[cellindex] = cellPtr;
+        }
     }
 
     void Store<ESM4::Cell>::clearDynamic()
