@@ -169,7 +169,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellIndex cell
 
     if (result == mExteriors.end())
     {
-        if (cellIndex.mWorldspace == ESM::Cell::sDefaultWorldspaceId)
+        if (!ESM::isEsm4Ext(cellIndex.mWorldspace))
         {
             const ESM::Cell* cell = mStore.get<ESM::Cell>().search(cellIndex.mX, cellIndex.mY);
 

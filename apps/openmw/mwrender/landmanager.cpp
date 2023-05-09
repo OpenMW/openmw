@@ -20,7 +20,7 @@ namespace MWRender
 
     osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(ESM::ExteriorCellIndex cellIndex)
     {
-        if (cellIndex.mWorldspace != ESM::Cell::sDefaultWorldspaceId)
+        if (ESM::isEsm4Ext(cellIndex.mWorldspace))
             return osg::ref_ptr<ESMTerrain::LandObject>(nullptr);
         int x = cellIndex.mX;
         int y = cellIndex.mY;

@@ -1374,9 +1374,8 @@ namespace MWWorld
             && !(ptr.getClass().isPersistent(ptr) && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished());
         if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && !swims && isActorCollisionEnabled(ptr)))
         {
-            bool esm4Ext = ptr.getCell()->isExterior()
-                && ptr.getCell()->getCell()->getWorldSpace() != ESM::Cell::sDefaultWorldspaceId;
-            osg::Vec3f traced = mPhysics->traceDown(ptr, pos, Constants::getCellSize(esm4Ext));
+            bool esm4Ext = ptr.getCell()->isExterior() && ESM::isEsm4Ext(ptr.getCell()->getCell()->getWorldSpace());
+            osg::Vec3f traced = mPhysics->traceDown(ptr, pos, ESM::getCellSize(esm4Ext));
             pos.z() = std::min(pos.z(), traced.z());
         }
 
@@ -1411,10 +1410,9 @@ namespace MWWorld
             if (!mPhysics->castRay(pos, targetPos, MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door).mHit)
                 break;
         }
-        bool esm4Ext = actor.getCell()->isExterior()
-            && actor.getCell()->getCell()->getWorldSpace() != ESM::Cell::sDefaultWorldspaceId;
+        bool esm4Ext = actor.getCell()->isExterior() && ESM::isEsm4Ext(actor.getCell()->getCell()->getWorldSpace());
         targetPos.z() += distance / 2.f; // move up a bit to get out from geometry, will snap down later
-        osg::Vec3f traced = mPhysics->traceDown(actor, targetPos, Constants::getCellSize(esm4Ext));
+        osg::Vec3f traced = mPhysics->traceDown(actor, targetPos, ESM::getCellSize(esm4Ext));
         if (traced != pos)
         {
             esmPos.pos[0] = traced.x();
@@ -1500,7 +1498,7 @@ namespace MWWorld
 
     void World::indexToPosition(int cellX, int cellY, float& x, float& y, bool centre, bool esm4Ext) const
     {
-        const int cellSize = Constants::getCellSize(esm4Ext);
+        const int cellSize = ESM::getCellSize(esm4Ext);
 
         x = static_cast<float>(cellSize * cellX);
         y = static_cast<float>(cellSize * cellY);
@@ -1910,12 +1908,12 @@ namespace MWWorld
         return false;
     }
 
-    float World::getCurrentCellSize() const
+    ESM::RefId World::getCurrentWorldspace() const
     {
         const CellStore* cellStore = mWorldScene->getCurrentCell();
         if (cellStore)
-            return Constants::getCellSize(cellStore->getCell()->isEsm4());
-        return Constants::getCellSize(false);
+            return cellStore->getCell()->getWorldSpace();
+        return ESM::Cell::sDefaultWorldspaceId;
     }
 
     int World::getCurrentWeather() const
@@ -2762,7 +2760,7 @@ namespace MWWorld
         {
             int x = ext->getGridX();
             int y = ext->getGridY();
-            bool esm4Ext = ext->getWorldSpace() != ESM::Cell::sDefaultWorldspaceId;
+            bool esm4Ext = ESM::isEsm4Ext(ext->getWorldSpace());
             indexToPosition(x, y, pos.pos[0], pos.pos[1], true, esm4Ext);
 
             // Note: Z pos will be adjusted by adjustPosition later

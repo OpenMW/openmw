@@ -511,13 +511,13 @@ namespace MWWorld
 
     osg::Vec2i Scene::getNewGridCenter(const osg::Vec3f& pos, const osg::Vec2i* currentGridCenter) const
     {
-        bool isEsm4Ext = mCurrentCell && mCurrentCell->getCell()->getWorldSpace() != ESM::Cell::sDefaultWorldspaceId;
+        bool isEsm4Ext = mCurrentCell && ESM::isEsm4Ext(mCurrentCell->getCell()->getWorldSpace());
         if (currentGridCenter)
         {
             float centerX, centerY;
             mWorld.indexToPosition(currentGridCenter->x(), currentGridCenter->y(), centerX, centerY, true, isEsm4Ext);
             float distance = std::max(std::abs(centerX - pos.x()), std::abs(centerY - pos.y()));
-            float cellSize = Constants::getCellSize(isEsm4Ext);
+            float cellSize = ESM::getCellSize(isEsm4Ext);
             const float maxDistance = cellSize / 2 + mCellLoadingThreshold; // 1/2 cell size + threshold
             if (distance <= maxDistance)
                 return *currentGridCenter;
@@ -585,7 +585,7 @@ namespace MWWorld
             {
                 for (int y = playerCellY - range; y <= playerCellY + range; ++y)
                 {
-                    if (!isCellInCollection(playerCellIndex, collection))
+                    if (!isCellInCollection(ESM::ExteriorCellIndex(x, y, playerCellIndex.mWorldspace), collection))
                     {
                         refsToLoad += mWorld.getWorldModel().getExterior(playerCellIndex).count();
                         cellsPositionsToLoad.emplace_back(x, y);
@@ -1102,7 +1102,7 @@ namespace MWWorld
 
         mLastPlayerPos = playerPos;
 
-        if (mPreloadEnabled && mCurrentCell->getCell()->getWorldSpace() == ESM::Cell::sDefaultWorldspaceId)
+        if (mPreloadEnabled && !ESM::isEsm4Ext(mCurrentCell->getCell()->getWorldSpace()))
         {
             if (mPreloadDoors)
                 preloadTeleportDoorDestinations(playerPos, predictedPos, exteriorPositions);
@@ -1166,8 +1166,10 @@ namespace MWWorld
 
         float centerX, centerY;
         mWorld.indexToPosition(cellX, cellY, centerX, centerY, true);
-        float cellSize = mWorld.getCurrentCellSize();
-        bool esm4Ext = cellSize == Constants::ESM4CellSizeInUnits;
+
+        ESM::RefId extWorldspace = mWorld.getCurrentWorldspace();
+        bool esm4Ext = ESM::isEsm4Ext(extWorldspace);
+        float cellSize = ESM::getCellSize(esm4Ext);
 
         for (int dx = -halfGridSizePlusOne; dx <= halfGridSizePlusOne; ++dx)
         {
@@ -1189,7 +1191,7 @@ namespace MWWorld
 
                 if (dist < loadDist)
                     preloadCell(mWorld.getWorldModel().getExterior(
-                        ESM::ExteriorCellIndex(cellX + dx, cellY + dy, ESM::Cell::sDefaultWorldspaceId)));
+                        ESM::ExteriorCellIndex(cellX + dx, cellY + dy, extWorldspace)));
             }
         }
     }

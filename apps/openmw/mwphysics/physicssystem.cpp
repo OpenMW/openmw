@@ -485,7 +485,7 @@ namespace MWPhysics
 
     const HeightField* PhysicsSystem::getHeightField(ESM::ExteriorCellIndex cellIndex) const
     {
-        if (cellIndex.mWorldspace != ESM::Cell::sDefaultWorldspaceId)
+        if (ESM::isEsm4Ext(cellIndex.mWorldspace))
             return nullptr;
         const auto heightField = mHeightFields.find(std::make_pair(cellIndex.mX, cellIndex.mY));
         if (heightField == mHeightFields.end())

@@ -5,6 +5,8 @@
 #include <osg/Vec3f>
 
 #include <components/esm/refid.hpp>
+#include <components/esm3/loadcell.hpp>
+#include <components/misc/constants.hpp>
 
 namespace ESM
 {
@@ -69,6 +71,15 @@ namespace ESM
         friend struct std::hash<ExteriorCellIndex>;
     };
 
+    static inline bool isEsm4Ext(ESM::RefId worldspaceId)
+    {
+        return worldspaceId != ESM::Cell::sDefaultWorldspaceId;
+    }
+
+    static inline int getCellSize(bool isESM4Ext)
+    {
+        return isESM4Ext ? Constants::ESM4CellSizeInUnits : Constants::CellSizeInUnits;
+    }
 }
 
 namespace std
