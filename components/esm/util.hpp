@@ -90,6 +90,8 @@ namespace ESM
         return { static_cast<int>(std::floor(x / cellSize)), static_cast<int>(std::floor(y / cellSize)) };
     }
 
+    osg::Vec2 indexToPosition(const ESM::ExteriorCellIndex& cellIndex, bool centre = false);
+    ///< Convert cell numbers to position.
 }
 
 namespace std
