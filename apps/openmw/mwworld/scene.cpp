@@ -511,12 +511,15 @@ namespace MWWorld
 
     osg::Vec2i Scene::getNewGridCenter(const osg::Vec3f& pos, const osg::Vec2i* currentGridCenter) const
     {
-        bool isEsm4Ext = mCurrentCell && ESM::isEsm4Ext(mCurrentCell->getCell()->getWorldSpace());
+        ESM::RefId worldspace
+            = mCurrentCell ? mCurrentCell->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
+        bool isEsm4Ext = ESM::isEsm4Ext(worldspace);
+
         if (currentGridCenter)
         {
-            float centerX, centerY;
-            mWorld.indexToPosition(currentGridCenter->x(), currentGridCenter->y(), centerX, centerY, true, isEsm4Ext);
-            float distance = std::max(std::abs(centerX - pos.x()), std::abs(centerY - pos.y()));
+            osg::Vec2 center = mWorld.indexToPosition(
+                ESM::ExteriorCellIndex(currentGridCenter->x(), currentGridCenter->y(), worldspace), true);
+            float distance = std::max(std::abs(center.x() - pos.x()), std::abs(center.y() - pos.y()));
             float cellSize = ESM::getCellSize(isEsm4Ext);
             const float maxDistance = cellSize / 2 + mCellLoadingThreshold; // 1/2 cell size + threshold
             if (distance <= maxDistance)
@@ -1163,11 +1166,10 @@ namespace MWWorld
         int cellX, cellY;
         cellX = mCurrentGridCenter.x();
         cellY = mCurrentGridCenter.y();
-
-        float centerX, centerY;
-        mWorld.indexToPosition(cellX, cellY, centerX, centerY, true);
-
         ESM::RefId extWorldspace = mWorld.getCurrentWorldspace();
+
+        osg::Vec2 center = mWorld.indexToPosition(ESM::ExteriorCellIndex(cellX, cellY, extWorldspace), true);
+
         bool esm4Ext = ESM::isEsm4Ext(extWorldspace);
         float cellSize = ESM::getCellSize(esm4Ext);
 
@@ -1179,14 +1181,14 @@ namespace MWWorld
                     && dx != -halfGridSizePlusOne)
                     continue; // only care about the outer (not yet loaded) part of the grid
 
-                float thisCellCenterX, thisCellCenterY;
-                mWorld.indexToPosition(cellX + dx, cellY + dy, thisCellCenterX, thisCellCenterY, true, esm4Ext);
+                osg::Vec2 thisCellCenter
+                    = mWorld.indexToPosition(ESM::ExteriorCellIndex(cellX + dx, cellY + dy, extWorldspace), true);
 
-                float dist
-                    = std::max(std::abs(thisCellCenterX - playerPos.x()), std::abs(thisCellCenterY - playerPos.y()));
+                float dist = std::max(
+                    std::abs(thisCellCenter.x() - playerPos.x()), std::abs(thisCellCenter.y() - playerPos.y()));
                 dist = std::min(dist,
-                    std::max(
-                        std::abs(thisCellCenterX - predictedPos.x()), std::abs(thisCellCenterY - predictedPos.y())));
+                    std::max(std::abs(thisCellCenter.x() - predictedPos.x()),
+                        std::abs(thisCellCenter.y() - predictedPos.y())));
                 float loadDist = cellSize / 2 + cellSize - mCellLoadingThreshold + mPreloadDistance;
 
                 if (dist < loadDist)

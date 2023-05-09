@@ -400,8 +400,7 @@ namespace MWWorld
 
         float getMaxActivationDistance() const override;
 
-        void indexToPosition(
-            int cellX, int cellY, float& x, float& y, bool centre = false, bool esm4Exterior = false) const override;
+        osg::Vec2 indexToPosition(const ESM::ExteriorCellIndex& cellIndex, bool centre = false) const override;
         ///< Convert cell numbers to position.
 
         void queueMovement(const Ptr& ptr, const osg::Vec3f& velocity) override;

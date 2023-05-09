@@ -1496,18 +1496,19 @@ namespace MWWorld
         return placed;
     }
 
-    void World::indexToPosition(int cellX, int cellY, float& x, float& y, bool centre, bool esm4Ext) const
+    osg::Vec2 World::indexToPosition(const ESM::ExteriorCellIndex& cellIndex, bool centre) const
     {
-        const int cellSize = ESM::getCellSize(esm4Ext);
+        const int cellSize = ESM::getCellSize(ESM::isEsm4Ext(cellIndex.mWorldspace));
 
-        x = static_cast<float>(cellSize * cellX);
-        y = static_cast<float>(cellSize * cellY);
+        float x = static_cast<float>(cellSize * cellIndex.mX);
+        float y = static_cast<float>(cellSize * cellIndex.mY);
 
         if (centre)
         {
             x += cellSize / 2;
             y += cellSize / 2;
         }
+        return osg::Vec2(x, y);
     }
 
     void World::queueMovement(const Ptr& ptr, const osg::Vec3f& velocity)
@@ -2760,8 +2761,9 @@ namespace MWWorld
         {
             int x = ext->getGridX();
             int y = ext->getGridY();
-            bool esm4Ext = ESM::isEsm4Ext(ext->getWorldSpace());
-            indexToPosition(x, y, pos.pos[0], pos.pos[1], true, esm4Ext);
+            osg::Vec2 posFromIndex = indexToPosition(ESM::ExteriorCellIndex(x, y, ext->getWorldSpace()), true);
+            pos.pos[0] = posFromIndex.x();
+            pos.pos[1] = posFromIndex.y();
 
             // Note: Z pos will be adjusted by adjustPosition later
             pos.pos[2] = 0;

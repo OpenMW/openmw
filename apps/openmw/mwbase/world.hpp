@@ -55,6 +55,7 @@ namespace ESM
     struct ItemLevList;
     struct TimeStamp;
     class RefId;
+    struct ExteriorCellIndex;
 }
 
 namespace MWPhysics
@@ -312,8 +313,7 @@ namespace MWBase
         /// relative to \a referenceObject (but the object may be placed somewhere else if the wanted location is
         /// obstructed).
 
-        virtual void indexToPosition(
-            int cellX, int cellY, float& x, float& y, bool centre = false, bool esm4Exterior = false) const = 0;
+        virtual osg::Vec2 indexToPosition(const ESM::ExteriorCellIndex& cellIndex, bool centre = false) const = 0;
         ///< Convert cell numbers to position.
 
         virtual void queueMovement(const MWWorld::Ptr& ptr, const osg::Vec3f& velocity) = 0;
