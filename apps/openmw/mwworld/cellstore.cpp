@@ -443,10 +443,6 @@ namespace MWWorld
             throw std::runtime_error(
                 "moveTo: can't move object from a non-loaded cell (how did you get this object anyway?)");
 
-        // Ensure that the object actually exists in the cell
-        if (searchViaRefNum(object.getCellRef().getRefNum()).isEmpty())
-            throw std::runtime_error("moveTo: object is not in this cell");
-
         MWBase::Environment::get().getWorldModel()->registerPtr(MWWorld::Ptr(object.getBase(), cellToMoveTo));
 
         MovedRefTracker::iterator found = mMovedHere.find(object.getBase());
