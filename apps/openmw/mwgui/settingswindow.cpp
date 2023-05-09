@@ -282,7 +282,6 @@ namespace MWGui
         getWidget(mScriptView, "ScriptView");
         getWidget(mScriptAdapter, "ScriptAdapter");
         getWidget(mScriptDisabled, "ScriptDisabled");
-        getWidget(PostProcessButton, "PostProcessButton");
 
 #ifndef WIN32
         // hide gamma controls since it currently does not work under Linux
@@ -297,9 +296,6 @@ namespace MWGui
         getWidget(textBox, "GammaTextLight");
         textBox->setVisible(false);
 #endif
-
-        PostProcessButton->eventMouseButtonClick
-            += MyGUI::newDelegate(this, &SettingsWindow::onButtonRequiringRestartClicked);
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord
             += MyGUI::newDelegate(this, &SettingsWindow::onWindowResize);

@@ -349,9 +349,9 @@ namespace MWRender
 
                 auto primaryFBO = postProcessor->getPrimaryFbo(frameId);
 
-                if (postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId))
-                    postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId)->apply(*state);
-                else
+                //if (postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId))
+                  //  postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId)->apply(*state);
+                //else
                     primaryFBO->apply(*state);
 
                 // depth accumulation pass

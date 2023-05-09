@@ -32,6 +32,8 @@
 #include "removedalphafunc.hpp"
 #include "shadermanager.hpp"
 
+#include <components/sceneutil/depth.hpp>
+
 namespace Shader
 {
     /**
@@ -707,6 +709,13 @@ namespace Shader
                 writableUserData = getWritableUserDataContainer(*writableStateSet);
 
             updateRemovedState(*writableUserData, removedState);
+        }
+
+        if (reqs.mAlphaBlend && Settings::Manager::getBool("transparent postpass", "Post Processing") && Settings::Manager::getBool("enabled", "Post Processing"))
+        {
+            osg::ref_ptr<osg::Depth> depth = new SceneUtil::AutoDepth;
+            depth->setWriteMask(false);
+            writableStateSet->setAttributeAndModes(depth, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
         }
 
         defineMap["softParticles"] = reqs.mSoftParticles ? "1" : "0";

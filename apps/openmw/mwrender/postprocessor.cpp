@@ -165,6 +165,15 @@ namespace MWRender
                 else
                     mTextures[i][Tex_OpaqueDepth] = new osg::Texture2D;
             }
+
+            for (int i = 0; i < 2; ++i)
+            {
+                if (Stereo::getMultiview())
+                    mTextures[i][Tex_Depth] = new osg::Texture2DArray;
+                else
+                    mTextures[i][Tex_Depth] = new osg::Texture2D;
+            }
+
         }
 
         mGLSLVersion = ext->glslLanguageVersion * 100;
@@ -240,10 +249,6 @@ namespace MWRender
 
         mDisableDepthPasses = !mSoftParticles && !postPass;
 
-#ifdef ANDROID
-        mDisableDepthPasses = true;
-#endif
-
         if (!mDisableDepthPasses)
         {
             mTransparentDepthPostPass = new TransparentDepthBinCallback(
@@ -277,7 +282,7 @@ namespace MWRender
     {
         if (!mSoftParticles)
             osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(nullptr);
-
+/*
         if (!SceneUtil::AutoDepth::isReversed() && !mSoftParticles)
         {
             removeChild(mHUDCamera);
@@ -289,7 +294,7 @@ namespace MWRender
 
             mEnabled = false;
         }
-
+*/
         mUsePostProcessing = false;
         mRendering.getSkyManager()->setSunglare(true);
     }
@@ -328,10 +333,7 @@ namespace MWRender
         mPingPongCanvas->setHDR(frameId, getHDR());
 
         mPingPongCanvas->setSceneTexture(frameId, getTexture(Tex_Scene, frameId));
-        if (mDisableDepthPasses)
-            mPingPongCanvas->setDepthTexture(frameId, getTexture(Tex_Depth, frameId));
-        else
-            mPingPongCanvas->setDepthTexture(frameId, getTexture(Tex_OpaqueDepth, frameId));
+        mPingPongCanvas->setDepthTexture(frameId, getTexture(Tex_Depth, frameId));
 
         mPingPongCanvas->setLDRSceneTexture(frameId, getTexture(Tex_Scene_LDR, frameId));
 
@@ -438,10 +440,10 @@ namespace MWRender
 
             mViewer->stopThreading();
 
-            auto& shaderManager = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager();
-            auto defines = shaderManager.getGlobalDefines();
-            defines["disableNormals"] = mNormals ? "0" : "1";
-            shaderManager.setGlobalDefines(defines);
+            //auto& shaderManager = MWBase::Environment::get().getResourceSystem()->getSceneManager()->getShaderManager();
+            //auto defines = shaderManager.getGlobalDefines();
+            //defines["disableNormals"] = mNormals ? "0" : "1";
+            //shaderManager.setGlobalDefines(defines);
 
             mRendering.getLightRoot()->setCollectPPLights(mPassLights);
             mStateUpdater->bindPointLights(mPassLights ? mRendering.getLightRoot()->getPPLightsBuffer() : nullptr);
