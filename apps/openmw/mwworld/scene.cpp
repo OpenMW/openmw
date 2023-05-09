@@ -1102,7 +1102,7 @@ namespace MWWorld
 
         mLastPlayerPos = playerPos;
 
-        if (mPreloadEnabled && !ESM::isEsm4Ext(mCurrentCell->getCell()->getWorldSpace()))
+        if (mPreloadEnabled)
         {
             if (mPreloadDoors)
                 preloadTeleportDoorDestinations(playerPos, predictedPos, exteriorPositions);
@@ -1277,7 +1277,7 @@ namespace MWWorld
     {
         const MWWorld::ConstPtr player = mWorld.getPlayerPtr();
         ListFastTravelDestinationsVisitor listVisitor(mPreloadDistance, player.getRefData().getPosition().asVec3());
-
+        ESM::RefId extWorldspace = mWorld.getCurrentWorldspace();
         for (MWWorld::CellStore* cellStore : mActiveCells)
         {
             cellStore->forEachType<ESM::NPC>(listVisitor);
@@ -1293,7 +1293,7 @@ namespace MWWorld
                 osg::Vec3f pos = dest.mPos.asVec3();
                 const osg::Vec2i cellIndex = positionToCellIndex(pos.x(), pos.y());
                 preloadCell(mWorld.getWorldModel().getExterior(
-                                ESM::ExteriorCellIndex(cellIndex.x(), cellIndex.y(), ESM::Cell::sDefaultWorldspaceId)),
+                                ESM::ExteriorCellIndex(cellIndex.x(), cellIndex.y(), extWorldspace)),
                     true);
                 exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
             }
