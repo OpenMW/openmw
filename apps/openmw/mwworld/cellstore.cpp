@@ -655,13 +655,6 @@ namespace MWWorld
         }
     };
 
-    Ptr CellStore::searchViaRefNum(const ESM::RefNum& refNum)
-    {
-        RefNumSearchVisitor searchVisitor(refNum);
-        forEach(searchVisitor);
-        return searchVisitor.mFound;
-    }
-
     float CellStore::getWaterLevel() const
     {
         if (isExterior())
@@ -1046,7 +1039,7 @@ namespace MWWorld
             }
 
             // Search for the reference. It might no longer exist if its content file was removed.
-            Ptr movedRef = searchViaRefNum(refnum);
+            Ptr movedRef = MWBase::Environment::get().getWorldModel()->getPtr(refnum);
             if (movedRef.isEmpty())
             {
                 Log(Debug::Warning) << "Warning: Dropping moved ref tag for " << refnum.mIndex

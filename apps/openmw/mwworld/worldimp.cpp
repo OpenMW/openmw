@@ -1880,14 +1880,7 @@ namespace MWWorld
 
         facedObject = rayToObject.mHitObject;
         if (facedObject.isEmpty() && rayToObject.mHitRefnum.isSet())
-        {
-            for (CellStore* cellstore : mWorldScene->getActiveCells())
-            {
-                facedObject = cellstore->searchViaRefNum(rayToObject.mHitRefnum);
-                if (!facedObject.isEmpty())
-                    break;
-            }
-        }
+            facedObject = MWBase::Environment::get().getWorldModel()->getPtr(rayToObject.mHitRefnum);
         if (rayToObject.mHit)
             mDistanceToFacedObject = (rayToObject.mRatio * maxDistance) - camDist;
         else
@@ -1904,14 +1897,7 @@ namespace MWWorld
         res.mHitNormal = rayRes.mHitNormalWorld;
         res.mHitObject = rayRes.mHitObject;
         if (res.mHitObject.isEmpty() && rayRes.mHitRefnum.isSet())
-        {
-            for (CellStore* cellstore : mWorldScene->getActiveCells())
-            {
-                res.mHitObject = cellstore->searchViaRefNum(rayRes.mHitRefnum);
-                if (!res.mHitObject.isEmpty())
-                    break;
-            }
-        }
+            res.mHitObject = MWBase::Environment::get().getWorldModel()->getPtr(rayRes.mHitRefnum);
         return res.mHit;
     }
 

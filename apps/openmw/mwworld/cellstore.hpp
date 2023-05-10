@@ -166,11 +166,6 @@ namespace MWWorld
         Ptr searchViaActorId(int id);
         ///< Will return an empty Ptr if cell is not loaded.
 
-        Ptr searchViaRefNum(const ESM::RefNum& refNum);
-        ///< Will return an empty Ptr if cell is not loaded. Does not check references in
-        /// containers.
-        /// @note Triggers CellStore hasState flag.
-
         float getWaterLevel() const;
 
         bool movedHere(const MWWorld::Ptr& ptr) const;
