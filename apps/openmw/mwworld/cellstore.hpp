@@ -128,7 +128,7 @@ namespace MWWorld
             mHasState = true;
             CellRefList<T>& list = get<T>();
             LiveCellRefBase* ret = &list.insert(*ref);
-            updateMergedRefs();
+            requestMergedRefsUpdate();
             return ret;
         }
 
@@ -198,6 +198,8 @@ namespace MWWorld
             if (mState != State_Loaded)
                 return false;
 
+            if (mMergedRefsNeedsUpdate)
+                updateMergedRefs();
             if (mMergedRefs.empty())
                 return true;
 
@@ -225,6 +227,9 @@ namespace MWWorld
             if (mState != State_Loaded)
                 return false;
 
+            if (mMergedRefsNeedsUpdate)
+                updateMergedRefs();
+
             for (unsigned int i = 0; i < mMergedRefs.size(); ++i)
             {
                 if (!isAccessible(mMergedRefs[i]->mData, mMergedRefs[i]->mRef))
@@ -247,6 +252,8 @@ namespace MWWorld
             if (mState != State_Loaded)
                 return false;
 
+            if (mMergedRefsNeedsUpdate)
+                updateMergedRefs();
             if (mMergedRefs.empty())
                 return true;
 
@@ -368,7 +375,8 @@ namespace MWWorld
 
         // Merged list of ref's currently in this cell - i.e. with added refs from mMovedHere, removed refs from
         // mMovedToAnotherCell
-        std::vector<LiveCellRefBase*> mMergedRefs;
+        mutable std::vector<LiveCellRefBase*> mMergedRefs;
+        mutable bool mMergedRefsNeedsUpdate = false;
 
         // Get the Ptr for the given ref which originated from this cell (possibly moved to another cell at this point).
         Ptr getCurrentPtr(MWWorld::LiveCellRefBase* ref);
@@ -377,7 +385,8 @@ namespace MWWorld
         void moveFrom(const MWWorld::Ptr& object, MWWorld::CellStore* from);
 
         /// Repopulate mMergedRefs.
-        void updateMergedRefs();
+        void requestMergedRefsUpdate();
+        void updateMergedRefs() const;
 
         // (item, max charge)
         typedef std::vector<std::pair<LiveCellRefBase*, float>> TRechargingItems;
