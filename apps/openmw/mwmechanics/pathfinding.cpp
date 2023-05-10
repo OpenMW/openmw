@@ -189,7 +189,7 @@ namespace MWMechanics
     {
         const auto pathgrid = pathgridGraph.getPathgrid();
 
-        // Refer to AiWander reseach topic on openmw forums for some background.
+        // Refer to AiWander research topic on openmw forums for some background.
         // Maybe there is no pathgrid for this cell.  Just go to destination and let
         // physics take care of any blockages.
         if (!pathgrid || pathgrid->mPoints.empty())

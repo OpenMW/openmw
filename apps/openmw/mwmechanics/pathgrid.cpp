@@ -227,7 +227,7 @@ namespace MWMechanics
      *   gScore - past accumulated costs vector indexed by point index
      *   fScore - future estimated costs vector indexed by point index
      *
-     * TODO: An intersting exercise might be to cache the paths created for a
+     * TODO: An interesting exercise might be to cache the paths created for a
      *       start/goal pair.  To cache the results the paths need to be in
      *       pathgrid points form (currently they are converted to world
      *       coordinates).  Essentially trading speed w/ memory.

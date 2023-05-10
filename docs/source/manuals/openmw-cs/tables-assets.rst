@@ -30,7 +30,7 @@ Sound Generators
 Sound generators are a way to play Sounds driven by animation events. Animated
 creatures or NPCs always require to be paired with a corresponding textkeys file.
 This textkeys file defines the extents of each animation, and relevant in this
-case, events and triggers occuring at particular animation frames.
+case, events and triggers occurring at particular animation frames.
 
 For example, a typical textkey entry intended for a Sound Generator would be
 named ``SoundGen: Left`` and be hand placed by an animator whenever the left leg

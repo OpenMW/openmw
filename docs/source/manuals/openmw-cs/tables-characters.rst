@@ -49,7 +49,7 @@ Name
     
 Attribute 1 and 2
     Characters of this class receive a +10 starting bonus on the two chosen
-    atributes.
+    attributes.
     
 Specialization
     Characters can specialize in combat, magic, or stealth. Each skill that
@@ -203,7 +203,7 @@ Persuasion
 Topic
     A keyword in the dialogue window that leads to further dialogue text, 
     similar to wiki links. These are the foundation to create dialogues from. 
-    Entires can be freely added, edited, or removed.
+    Entries can be freely added, edited, or removed.
     
 Voice
     Voice entries are specific in-game events used to play a sound. Hardcoded.

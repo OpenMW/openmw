@@ -410,7 +410,7 @@ swim upward coef
 :Default:	0.2
 
 Regulates strength of the "swim upward correction" effect (if enabled).
-Makes player swim a bit upward (or downward in case of negative value) from the line of sight. Recommened range of values is from 0.0 to 0.25.
+Makes player swim a bit upward (or downward in case of negative value) from the line of sight. Recommended range of values is from 0.0 to 0.25.
 
 This setting can only be configured by editing the settings configuration file.
 

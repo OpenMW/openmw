@@ -56,9 +56,9 @@ Name
    
 Spell Type
     * Ability - Constant effect which does not need to be cast. Commonly used for racial or birthsign bonuses to attributes and skills.
-    * Blight - Can be contracted in-game and treated with blight disease cures (common disease cures will not work). Applies a constant effect to the recepient. 
+    * Blight - Can be contracted in-game and treated with blight disease cures (common disease cures will not work). Applies a constant effect to the recipient. 
     * Curse
-    * Disease - Can be contracted in-game and treated with common disease cures. Applies a constant effect to the recepient. 
+    * Disease - Can be contracted in-game and treated with common disease cures. Applies a constant effect to the recipient. 
     * Power - May be cast once per day at no magicka cost. Usually a racial or birthsign bonus.
     * Spell - Can be cast and costs magicka. The chance to successfully cast a spell depends on the caster's skill.
   
@@ -95,7 +95,7 @@ Enchantment Type
     The way this enchantment is triggered.
 
     * Cast once - the enchantment is cast like a regular spell and afterwards the item is gone. Used to make scrolls. 
-    * Constant effect - the effects of the enchantment will always apply as long as the enchanted item is equiped.
+    * Constant effect - the effects of the enchantment will always apply as long as the enchanted item is equipped.
     * When Strikes - the effect will apply to whatever is hit by the weapon with the enchantment.
     * When Used - the enchantment is cast like a regular spell. Instead of spending character's magicka, it uses the item's available charges.
 

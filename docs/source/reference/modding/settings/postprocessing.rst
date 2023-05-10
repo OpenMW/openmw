@@ -49,5 +49,5 @@ objects usually have depth writes disabled and massive margins between the geome
 
 .. warning::
     This can be quite costly with vanilla assets. For best performance it is recommended to use a mod replacer which
-    uses alpha tested foliage and disable this setting. Morrowind Optimizaton Patch is a great option. 
+    uses alpha tested foliage and disable this setting. Morrowind Optimization Patch is a great option. 
     If you are not using any shaders which utilize the depth buffer this setting should be disabled.

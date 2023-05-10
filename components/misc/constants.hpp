@@ -16,9 +16,9 @@ namespace Constants
 
     // Gravity constant in m/sec^2
     // Note: 8.96 m/sec^2 = 9.8 yards/sec^2
-    // Probaly original engine's developers just forgot
+    // Probably original engine's developers just forgot
     // that their engine uses yards instead of meters
-    // and used standart gravity value as it is
+    // and used standard gravity value as it is
     constexpr float GravityConst = 8.96f;
 
     // Size of one exterior cell in game units

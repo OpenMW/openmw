@@ -153,7 +153,7 @@ enable write nav mesh to file
 :Default:	False
 
 Write nav mesh to file to be able to open by RecastDemo application.
-Usually it is more usefull to have both enable write recast mesh to file and this options enabled.
+Usually it is more useful to have both enable write recast mesh to file and this options enabled.
 RecastDemo supports .obj files.
 Potentially decreases performance.
 
@@ -206,7 +206,7 @@ enable nav mesh render
 
 Render navigation mesh.
 Allows to do in-game debug.
-Every nav mesh is visible and every update is noticable.
+Every nav mesh is visible and every update is noticeable.
 Potentially decreases performance.
 
 nav mesh render mode
