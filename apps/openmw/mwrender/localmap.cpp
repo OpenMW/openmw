@@ -257,16 +257,15 @@ namespace MWRender
     {
         mInterior = false;
 
-        int x = cell->getCell()->getGridX();
-        int y = cell->getCell()->getGridY();
+        const int x = cell->getCell()->getGridX();
+        const int y = cell->getCell()->getGridY();
 
         osg::BoundingSphere bound = mSceneRoot->getBound();
         float zmin = bound.center().z() - bound.radius();
         float zmax = bound.center().z() + bound.radius();
 
-        setupRenderToTexture(cell->getCell()->getGridX(), cell->getCell()->getGridY(),
-            x * mMapWorldSize + mMapWorldSize / 2.f, y * mMapWorldSize + mMapWorldSize / 2.f, osg::Vec3d(0, 1, 0), zmin,
-            zmax);
+        setupRenderToTexture(x, y, x * mMapWorldSize + mMapWorldSize / 2.f, y * mMapWorldSize + mMapWorldSize / 2.f,
+            osg::Vec3d(0, 1, 0), zmin, zmax);
 
         if (segment.mFogOfWarImage != nullptr)
             return;
