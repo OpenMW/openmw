@@ -182,22 +182,20 @@ namespace MWRender
 
     void LocalMap::requestMap(const MWWorld::CellStore* cell)
     {
-        if (cell->isExterior())
+        if (!cell->isExterior())
         {
-            int cellX = cell->getCell()->getGridX();
-            int cellY = cell->getCell()->getGridY();
-
-            MapSegment& segment = mExteriorSegments[std::make_pair(cellX, cellY)];
-            if (!segment.needUpdate)
-                return;
-            else
-            {
-                requestExteriorMap(cell);
-                segment.needUpdate = false;
-            }
-        }
-        else
             requestInteriorMap(cell);
+            return;
+        }
+
+        int cellX = cell->getCell()->getGridX();
+        int cellY = cell->getCell()->getGridY();
+
+        MapSegment& segment = mExteriorSegments[std::make_pair(cellX, cellY)];
+        if (!segment.needUpdate)
+            return;
+        requestExteriorMap(cell);
+        segment.needUpdate = false;
     }
 
     void LocalMap::addCell(MWWorld::CellStore* cell)
@@ -272,13 +270,14 @@ namespace MWRender
 
         MapSegment& segment
             = mExteriorSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())];
-        if (!segment.mFogOfWarImage)
-        {
-            if (cell->getFog())
-                segment.loadFogOfWar(cell->getFog()->mFogTextures.back());
-            else
-                segment.initFogOfWar();
-        }
+
+        if (segment.mFogOfWarImage != nullptr)
+            return;
+
+        if (cell->getFog())
+            segment.loadFogOfWar(cell->getFog()->mFogTextures.back());
+        else
+            segment.initFogOfWar();
     }
 
     static osg::Vec2f getNorthVector(const MWWorld::CellStore* cell)
