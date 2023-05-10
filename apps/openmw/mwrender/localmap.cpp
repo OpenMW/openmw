@@ -61,9 +61,6 @@ namespace MWRender
 
         void setDefaults(osg::Camera* camera) override;
 
-        bool isActive() { return mActive; }
-        void setIsActive(bool active) { mActive = active; }
-
         osg::Node* mSceneRoot;
         osg::Matrix mProjectionMatrix;
         osg::Matrix mViewMatrix;
@@ -243,7 +240,7 @@ namespace MWRender
         auto it = mLocalMapRTTs.begin();
         while (it != mLocalMapRTTs.end())
         {
-            if (!(*it)->isActive())
+            if (!(*it)->mActive)
             {
                 mRoot->removeChild(*it);
                 it = mLocalMapRTTs.erase(it);
@@ -758,13 +755,10 @@ namespace MWRender
 
     void CameraLocalUpdateCallback::operator()(LocalMapRenderToTexture* node, osg::NodeVisitor* nv)
     {
-        if (!node->isActive())
+        if (!node->mActive)
             node->setNodeMask(0);
 
-        if (node->isActive())
-        {
-            node->setIsActive(false);
-        }
+        node->mActive = false;
 
         // Rtt-nodes do not forward update traversal to their cameras so we can traverse safely.
         // Traverse in case there are nested callbacks.
