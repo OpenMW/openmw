@@ -109,9 +109,6 @@ namespace MWRender
 
         struct MapSegment
         {
-            MapSegment();
-            ~MapSegment() = default;
-
             void initFogOfWar();
             void loadFogOfWar(const ESM::FogTexture& fog);
             void saveFogOfWar(ESM::FogTexture& fog) const;
@@ -122,8 +119,7 @@ namespace MWRender
             osg::ref_ptr<osg::Image> mFogOfWarImage;
 
             bool needUpdate = true;
-
-            bool mHasFogState;
+            bool mHasFogState = false;
         };
 
         typedef std::map<std::pair<int, int>, MapSegment> SegmentMap;

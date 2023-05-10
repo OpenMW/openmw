@@ -571,11 +571,6 @@ namespace MWRender
         }
     }
 
-    LocalMap::MapSegment::MapSegment()
-        : mHasFogState(false)
-    {
-    }
-
     void LocalMap::MapSegment::createFogOfWarTexture()
     {
         if (mFogOfWarTexture)
