@@ -1141,7 +1141,7 @@ namespace MWMechanics
         // if I was a witness to a crime
         if (npcStats.getCrimeId() != -1)
         {
-            // if you've paid for your crimes and I havent noticed
+            // if you've paid for your crimes and I haven't noticed
             if (npcStats.getCrimeId() <= world->getPlayer().getCrimeId())
             {
                 // Calm witness down
@@ -1743,7 +1743,7 @@ namespace MWMechanics
                 // Used for "OnKnockedOut" command
                 // Put here to ensure that it's run for PRECISELY one frame.
                 if (stats.getKnockedDown() && !stats.getKnockedDownOneFrame() && !stats.getKnockedDownOverOneFrame())
-                { // Start it for one frame if nessesary
+                { // Start it for one frame if necessary
                     stats.setKnockedDownOneFrame(true);
                 }
                 else if (stats.getKnockedDownOneFrame() && !stats.getKnockedDownOverOneFrame())

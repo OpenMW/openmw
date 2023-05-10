@@ -246,7 +246,7 @@ namespace MWMechanics
             if (creatureStats->getActorId() != player.getClass().getCreatureStats(player).getActorId())
                 return;
 
-            // Note: if target actor has the Restore attirbute effects, stats will be restored.
+            // Note: if target actor has the Restore attribute effects, stats will be restored.
             for (std::vector<ESM::SpellState::PermanentSpellEffectInfo>::const_iterator effectIt = it->second.begin();
                  effectIt != it->second.end(); ++effectIt)
             {

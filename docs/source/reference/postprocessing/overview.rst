@@ -18,7 +18,7 @@ Pass
 
 Technique/Shader
     An ordered list of passes, techniques will encompass a single effect like
-    bloom or SSAO. Technique is interchangable with shader.
+    bloom or SSAO. Technique is interchangeable with shader.
 
 Installing and Activating
 =========================

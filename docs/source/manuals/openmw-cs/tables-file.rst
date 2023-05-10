@@ -32,6 +32,6 @@ Description
 Error Log
 *********
 
-The Error Log table shows any errors that occured while loading the game files
+The Error Log table shows any errors that occurred while loading the game files
 into OpenMW-CS. These are the files that come in ``.omwgame``, ``.omwaddon``,
 ``.esm``, and ``.esp`` formats.

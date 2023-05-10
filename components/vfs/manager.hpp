@@ -98,7 +98,7 @@ namespace VFS
 
         std::string getArchive(std::string_view name) const;
 
-        /// Recursivly iterate over the elements of the given path
+        /// Recursively iterate over the elements of the given path
         /// In practice it return all files of the VFS starting with the given path
         /// @note the path is normalized
         /// @note May be called from any thread once the index has been built.

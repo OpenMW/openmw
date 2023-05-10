@@ -122,7 +122,7 @@ Cells
 
 Cells are the basic world-building units that together make up the game's world. 
 Each of these basic building blocks is a container for other objects to exist in.
-Dividing an expansive world into smaller units is neccessary to be able to 
+Dividing an expansive world into smaller units is necessary to be able to 
 efficiently render and process it. Cells can be one of two types:
     
 Exterior cells
@@ -275,5 +275,5 @@ Region Map
 
 The region map shows a grid of exterior cells, their relative positions to one 
 another, and regions they belong to. In summary, it shows the world map. 
-Compared to the cells table which is a list, this view helps vizualize the world.
+Compared to the cells table which is a list, this view helps visualize the world.
 Region map does not show interior cells.

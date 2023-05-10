@@ -150,7 +150,7 @@ Sets the internal handling of light sources.
 pipeline compatible lighting.
 
 'shaders compatibility' removes the light limit controllable through :ref:`max
-lights` and follows a modifed attenuation formula which can drastically reduce
+lights` and follows a modified attenuation formula which can drastically reduce
 light popping and seams. This mode also enables lighting on groundcover and a
 configurable light fade. It is recommended to use this with older hardware and a
 light limit closer to 8. Because of its wide range of compatibility it is set as

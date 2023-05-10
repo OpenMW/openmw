@@ -610,7 +610,7 @@ namespace MWMechanics
         else
             groupName += oneHandFallback;
 
-        // Special case for crossbows - we shouls apply 1h animations a fallback only for lower body
+        // Special case for crossbows - we should apply 1h animations a fallback only for lower body
         if (mWeaponType == ESM::Weapon::MarksmanCrossbow && blendMask != nullptr)
             *blendMask = MWRender::Animation::BlendMask_LowerBody;
 
