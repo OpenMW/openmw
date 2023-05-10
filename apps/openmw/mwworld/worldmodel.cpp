@@ -76,7 +76,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getCellStore(const ESM::Cell* cell)
     }
     else
     {
-        ESM::ExteriorCellIndex extIndex = { cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId };
+        ESM::ExteriorCellIndex extIndex(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId);
         std::map<ESM::ExteriorCellIndex, CellStore*>::iterator result = mExteriors.find(extIndex);
 
         if (result == mExteriors.end())
@@ -172,7 +172,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellIndex cell
         {
             const ESM::Cell* cell = mStore.get<ESM::Cell>().search(cellIndex.mX, cellIndex.mY);
 
-            if (!cell)
+            if (cell == nullptr)
             {
                 // Cell isn't predefined. Make one on the fly.
                 ESM::Cell record;
@@ -193,27 +193,22 @@ MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellIndex cell
         else
         {
             const Store<ESM4::Cell>& cell4Store = mStore.get<ESM4::Cell>();
-            bool exteriorExists = mStore.get<ESM4::World>().search(cellIndex.mWorldspace);
+            bool exteriorExists = mStore.get<ESM4::World>().search(cellIndex.mWorldspace) != nullptr;
             const ESM4::Cell* cell = cell4Store.searchExterior(cellIndex);
-            if (exteriorExists)
+            if (!exteriorExists)
+                throw std::runtime_error("Exterior ESM4 world is not found: " + cellIndex.mWorldspace.toDebugString());
+            if (cell == nullptr)
             {
-                if (!cell)
-                {
-                    ESM4::Cell record;
-                    record.mParent = cellIndex.mWorldspace;
-                    record.mX = cellIndex.mX;
-                    record.mY = cellIndex.mY;
-                    record.mCellFlags = !ESM4::CELL_Interior;
-                    cell = MWBase::Environment::get().getESMStore()->insert(record);
-                }
-                CellStore* cellStore
-                    = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
-                result = mExteriors.emplace(cellIndex, cellStore).first;
+                ESM4::Cell record;
+                record.mParent = cellIndex.mWorldspace;
+                record.mX = cellIndex.mX;
+                record.mY = cellIndex.mY;
+                record.mCellFlags = !ESM4::CELL_Interior;
+                cell = MWBase::Environment::get().getESMStore()->insert(record);
             }
-            else
-            {
-                throw std::runtime_error("exterior not found: '" + cellIndex.mWorldspace.toDebugString() + "'");
-            }
+            CellStore* cellStore
+                = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
+            result = mExteriors.emplace(cellIndex, cellStore).first;
         }
     }
     if (result->second->getState() != CellStore::State_Loaded)

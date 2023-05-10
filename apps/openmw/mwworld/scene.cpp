@@ -548,7 +548,6 @@ namespace MWWorld
         auto navigatorUpdateGuard = mNavigator.makeUpdateGuard();
         int playerCellX = playerCellIndex.mX;
         int playerCellY = playerCellIndex.mY;
-        ESM::RefId exteriorWorldspace = playerCellIndex.mWorldspace;
 
         for (auto iter = mActiveCells.begin(); iter != mActiveCells.end();)
         {
@@ -564,8 +563,7 @@ namespace MWWorld
                 unloadCell(cell, navigatorUpdateGuard.get());
         }
         mNavigator.setWorldspace(
-            Misc::StringUtils::lowerCase(
-                mWorld.getWorldModel().getExterior(playerCellIndex).getCell()->getWorldSpace().serializeText()),
+            mWorld.getWorldModel().getExterior(playerCellIndex).getCell()->getWorldSpace().serializeText(),
             navigatorUpdateGuard.get());
         mNavigator.updateBounds(pos, navigatorUpdateGuard.get());
 
@@ -621,7 +619,7 @@ namespace MWWorld
 
         for (const auto& [x, y] : cellsPositionsToLoad)
         {
-            ESM::ExteriorCellIndex indexToLoad = { x, y, exteriorWorldspace };
+            ESM::ExteriorCellIndex indexToLoad = { x, y, playerCellIndex.mWorldspace };
             if (!isCellInCollection(indexToLoad, mActiveCells))
             {
                 CellStore& cell = mWorld.getWorldModel().getExterior(indexToLoad);
@@ -688,8 +686,7 @@ namespace MWWorld
 
             CellStore& cell = mWorld.getWorldModel().getExterior(
                 ESM::ExteriorCellIndex(it->mData.mX, it->mData.mY, ESM::Cell::sDefaultWorldspaceId));
-            mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell.getCell()->getWorldSpace().serializeText()),
-                navigatorUpdateGuard.get());
+            mNavigator.setWorldspace(cell.getCell()->getWorldSpace().serializeText(), navigatorUpdateGuard.get());
             const osg::Vec3f position
                 = osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits;
             mNavigator.updateBounds(position, navigatorUpdateGuard.get());
@@ -746,8 +743,7 @@ namespace MWWorld
                 + std::to_string(cells.getIntSize()) + ")...");
 
             CellStore& cell = mWorld.getWorldModel().getInterior(it->mName);
-            mNavigator.setWorldspace(Misc::StringUtils::lowerCase(cell.getCell()->getWorldSpace().serializeText()),
-                navigatorUpdateGuard.get());
+            mNavigator.setWorldspace(cell.getCell()->getWorldSpace().serializeText(), navigatorUpdateGuard.get());
             ESM::Position position;
             mWorld.findInteriorPosition(it->mName, position);
             mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
@@ -902,8 +898,7 @@ namespace MWWorld
 
         loadingListener->setProgressRange(cell.count());
 
-        mNavigator.setWorldspace(
-            Misc::StringUtils::lowerCase(cell.getCell()->getWorldSpace().serializeText()), navigatorUpdateGuard.get());
+        mNavigator.setWorldspace(cell.getCell()->getWorldSpace().serializeText(), navigatorUpdateGuard.get());
         mNavigator.updateBounds(position.asVec3(), navigatorUpdateGuard.get());
 
         // Load cell.

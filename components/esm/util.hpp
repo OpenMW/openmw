@@ -70,8 +70,6 @@ namespace ESM
         {
             return std::make_tuple(mX, mY, mWorldspace) < std::make_tuple(other.mX, other.mY, other.mWorldspace);
         }
-
-        friend struct std::hash<ExteriorCellIndex>;
     };
 
     static inline bool isEsm4Ext(ESM::RefId worldspaceId)
