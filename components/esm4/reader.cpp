@@ -585,11 +585,8 @@ namespace ESM4
             if (it != fileToModIndex.end())
                 mCtx.parentFileIndices[i] = it->second;
             else
-                throw std::runtime_error("ESM4::Reader::updateModIndices required dependency file not loaded");
-#if 0
-        std::cout << "Master Mod: " << mCtx.header.mMaster[i].name << ", " // FIXME: debugging only
-                  << formIdToString(mCtx.parentFileIndices[i]) << std::endl;
-#endif
+                throw std::runtime_error(
+                    "ESM4::Reader::updateModIndices required dependency '" + mHeader.mMaster[i].name + "' not found");
         }
     }
 
