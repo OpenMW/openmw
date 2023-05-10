@@ -1,6 +1,7 @@
 #ifndef GAME_RENDER_LOCALMAP_H
 #define GAME_RENDER_LOCALMAP_H
 
+#include <cstdint>
 #include <map>
 #include <set>
 #include <vector>
@@ -107,6 +108,18 @@ namespace MWRender
         typedef std::set<std::pair<int, int>> Grid;
         Grid mCurrentGrid;
 
+        enum NeighbourCellFlag : std::uint8_t
+        {
+            NeighbourCellTopLeft = 1,
+            NeighbourCellTopCenter = 1 << 1,
+            NeighbourCellTopRight = 1 << 2,
+            NeighbourCellMiddleLeft = 1 << 3,
+            NeighbourCellMiddleRight = 1 << 4,
+            NeighbourCellBottomLeft = 1 << 5,
+            NeighbourCellBottomCenter = 1 << 6,
+            NeighbourCellBottomRight = 1 << 7,
+        };
+
         struct MapSegment
         {
             void initFogOfWar();
@@ -114,12 +127,11 @@ namespace MWRender
             void saveFogOfWar(ESM::FogTexture& fog) const;
             void createFogOfWarTexture();
 
+            std::uint8_t mLastRenderNeighbourFlags = 0;
+            bool mHasFogState = false;
             osg::ref_ptr<osg::Texture2D> mMapTexture;
             osg::ref_ptr<osg::Texture2D> mFogOfWarTexture;
             osg::ref_ptr<osg::Image> mFogOfWarImage;
-
-            bool needUpdate = true;
-            bool mHasFogState = false;
         };
 
         typedef std::map<std::pair<int, int>, MapSegment> SegmentMap;
@@ -147,6 +159,8 @@ namespace MWRender
 
         bool mInterior;
         osg::BoundingBox mBounds;
+
+        std::uint8_t getExteriorNeighbourFlags(int cellX, int cellY) const;
     };
 
 }
