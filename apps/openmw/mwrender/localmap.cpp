@@ -468,7 +468,8 @@ namespace MWRender
         int texU = static_cast<int>((sFogOfWarResolution - 1) * nX);
         int texV = static_cast<int>((sFogOfWarResolution - 1) * nY);
 
-        uint32_t clr = ((const uint32_t*)segment.mFogOfWarImage->data())[texV * sFogOfWarResolution + texU];
+        const std::uint32_t clr
+            = reinterpret_cast<const uint32_t*>(segment.mFogOfWarImage->data())[texV * sFogOfWarResolution + texU];
         uint8_t alpha = (clr >> 24);
         return alpha < 200;
     }
@@ -536,7 +537,7 @@ namespace MWRender
                 if (!segment.mFogOfWarImage || !segment.mMapTexture)
                     continue;
 
-                uint32_t* data = (uint32_t*)segment.mFogOfWarImage->data();
+                std::uint32_t* data = reinterpret_cast<std::uint32_t*>(segment.mFogOfWarImage->data());
                 bool changed = false;
                 for (int texV = 0; texV < sFogOfWarResolution; ++texV)
                 {
@@ -545,10 +546,9 @@ namespace MWRender
                         float sqrDist = square((texU + mx * (sFogOfWarResolution - 1)) - u * (sFogOfWarResolution - 1))
                             + square((texV + my * (sFogOfWarResolution - 1)) - v * (sFogOfWarResolution - 1));
 
-                        uint32_t clr = *(uint32_t*)data;
-                        uint8_t alpha = (clr >> 24);
-                        alpha = std::min(alpha, (uint8_t)(std::clamp(sqrDist / sqrExploreRadius, 0.f, 1.f) * 255));
-                        uint32_t val = (uint32_t)(alpha << 24);
+                        const std::uint8_t alpha = std::min<std::uint8_t>(
+                            *data >> 24, std::clamp(sqrDist / sqrExploreRadius, 0.f, 1.f) * 255);
+                        std::uint32_t val = static_cast<std::uint32_t>(alpha << 24);
                         if (*data != val)
                         {
                             *data = val;
