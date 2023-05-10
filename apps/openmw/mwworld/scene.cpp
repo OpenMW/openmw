@@ -1167,8 +1167,6 @@ namespace MWWorld
         cellY = mCurrentGridCenter.y();
         ESM::RefId extWorldspace = mWorld.getCurrentWorldspace();
 
-        osg::Vec2 center = ESM::indexToPosition(ESM::ExteriorCellIndex(cellX, cellY, extWorldspace), true);
-
         bool esm4Ext = ESM::isEsm4Ext(extWorldspace);
         float cellSize = ESM::getCellSize(esm4Ext);
 
@@ -1179,9 +1177,8 @@ namespace MWWorld
                 if (dy != halfGridSizePlusOne && dy != -halfGridSizePlusOne && dx != halfGridSizePlusOne
                     && dx != -halfGridSizePlusOne)
                     continue; // only care about the outer (not yet loaded) part of the grid
-
-                osg::Vec2 thisCellCenter
-                    = ESM::indexToPosition(ESM::ExteriorCellIndex(cellX + dx, cellY + dy, extWorldspace), true);
+                ESM::ExteriorCellIndex cellIndex(cellX + dx, cellY + dy, extWorldspace);
+                osg::Vec2 thisCellCenter = ESM::indexToPosition(cellIndex, true);
 
                 float dist = std::max(
                     std::abs(thisCellCenter.x() - playerPos.x()), std::abs(thisCellCenter.y() - playerPos.y()));
@@ -1191,8 +1188,7 @@ namespace MWWorld
                 float loadDist = cellSize / 2 + cellSize - mCellLoadingThreshold + mPreloadDistance;
 
                 if (dist < loadDist)
-                    preloadCell(mWorld.getWorldModel().getExterior(
-                        ESM::ExteriorCellIndex(cellX + dx, cellY + dy, extWorldspace)));
+                    preloadCell(mWorld.getWorldModel().getExterior(cellIndex));
             }
         }
     }
