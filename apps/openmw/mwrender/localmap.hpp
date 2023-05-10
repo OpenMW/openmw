@@ -143,7 +143,7 @@ namespace MWRender
         float mAngle;
         const osg::Vec2f rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle);
 
-        void requestExteriorMap(const MWWorld::CellStore* cell);
+        void requestExteriorMap(const MWWorld::CellStore* cell, MapSegment& segment);
         void requestInteriorMap(const MWWorld::CellStore* cell);
 
         void setupRenderToTexture(

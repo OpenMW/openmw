@@ -194,7 +194,7 @@ namespace MWRender
         MapSegment& segment = mExteriorSegments[std::make_pair(cellX, cellY)];
         if (!segment.needUpdate)
             return;
-        requestExteriorMap(cell);
+        requestExteriorMap(cell, segment);
         segment.needUpdate = false;
     }
 
@@ -253,7 +253,7 @@ namespace MWRender
         }
     }
 
-    void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell)
+    void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell, MapSegment& segment)
     {
         mInterior = false;
 
@@ -267,9 +267,6 @@ namespace MWRender
         setupRenderToTexture(cell->getCell()->getGridX(), cell->getCell()->getGridY(),
             x * mMapWorldSize + mMapWorldSize / 2.f, y * mMapWorldSize + mMapWorldSize / 2.f, osg::Vec3d(0, 1, 0), zmin,
             zmax);
-
-        MapSegment& segment
-            = mExteriorSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())];
 
         if (segment.mFogOfWarImage != nullptr)
             return;
