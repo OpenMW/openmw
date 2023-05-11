@@ -430,7 +430,7 @@ namespace MWWorld
         {
             mMovedHere.insert(std::make_pair(object.getBase(), from));
         }
-        updateMergedRefs();
+        requestMergedRefsUpdate();
     }
 
     MWWorld::Ptr CellStore::moveTo(const Ptr& object, CellStore* cellToMoveTo)
@@ -442,10 +442,6 @@ namespace MWWorld
         if (mState != State_Loaded)
             throw std::runtime_error(
                 "moveTo: can't move object from a non-loaded cell (how did you get this object anyway?)");
-
-        // Ensure that the object actually exists in the cell
-        if (searchViaRefNum(object.getCellRef().getRefNum()).isEmpty())
-            throw std::runtime_error("moveTo: object is not in this cell");
 
         MWBase::Environment::get().getWorldModel()->registerPtr(MWWorld::Ptr(object.getBase(), cellToMoveTo));
 
@@ -466,14 +462,14 @@ namespace MWWorld
                 originalCell->moveTo(object, cellToMoveTo);
             }
 
-            updateMergedRefs();
+            requestMergedRefsUpdate();
             return MWWorld::Ptr(object.getBase(), cellToMoveTo);
         }
 
         cellToMoveTo->moveFrom(object, this);
         mMovedToAnotherCell.insert(std::make_pair(object.getBase(), cellToMoveTo));
 
-        updateMergedRefs();
+        requestMergedRefsUpdate();
         MWWorld::Ptr ptr(object.getBase(), cellToMoveTo);
         const Class& cls = ptr.getClass();
         if (cls.hasInventoryStore(ptr))
@@ -513,13 +509,19 @@ namespace MWWorld
         const std::map<LiveCellRefBase*, MWWorld::CellStore*>& mMovedToAnotherCell;
     };
 
-    void CellStore::updateMergedRefs()
+    void CellStore::requestMergedRefsUpdate()
+    {
+        mRechargingItemsUpToDate = false;
+        mMergedRefsNeedsUpdate = true;
+    }
+
+    void CellStore::updateMergedRefs() const
     {
         mMergedRefs.clear();
-        mRechargingItemsUpToDate = false;
         MergeVisitor visitor(mMergedRefs, mMovedHere, mMovedToAnotherCell);
-        CellStoreImp::forEachInternal(visitor, *this);
+        CellStoreImp::forEachInternal(visitor, const_cast<CellStore&>(*this));
         visitor.merge();
+        mMergedRefsNeedsUpdate = false;
     }
 
     bool CellStore::movedHere(const MWWorld::Ptr& ptr) const
@@ -659,13 +661,6 @@ namespace MWWorld
         }
     };
 
-    Ptr CellStore::searchViaRefNum(const ESM::RefNum& refNum)
-    {
-        RefNumSearchVisitor searchVisitor(refNum);
-        forEach(searchVisitor);
-        return searchVisitor.mFound;
-    }
-
     float CellStore::getWaterLevel() const
     {
         if (isExterior())
@@ -681,6 +676,8 @@ namespace MWWorld
 
     std::size_t CellStore::count() const
     {
+        if (mMergedRefsNeedsUpdate)
+            updateMergedRefs();
         return mMergedRefs.size();
     }
 
@@ -847,7 +844,7 @@ namespace MWWorld
 
         ESM::visit([&](auto&& cell) { loadRefs(cell, refNumToID); }, mCellVariant);
 
-        updateMergedRefs();
+        requestMergedRefsUpdate();
     }
 
     bool CellStore::isExterior() const
@@ -1033,10 +1030,6 @@ namespace MWWorld
             }
         }
 
-        // Do another update here to make sure objects referred to by MVRF tags can be found
-        // This update is only needed for old saves that used the old copy&delete way of moving objects
-        updateMergedRefs();
-
         while (reader.isNextSub("MVRF"))
         {
             reader.cacheSubName();
@@ -1050,7 +1043,7 @@ namespace MWWorld
             }
 
             // Search for the reference. It might no longer exist if its content file was removed.
-            Ptr movedRef = searchViaRefNum(refnum);
+            Ptr movedRef = MWBase::Environment::get().getWorldModel()->getPtr(refnum);
             if (movedRef.isEmpty())
             {
                 Log(Debug::Warning) << "Warning: Dropping moved ref tag for " << refnum.mIndex
