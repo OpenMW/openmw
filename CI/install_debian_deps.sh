@@ -46,6 +46,7 @@ declare -rA GROUPED_DEPS=(
 
   [openmw-integration-tests]="
     ca-certificates
+    gdb
     git
     git-lfs
     libavcodec58
@@ -55,7 +56,7 @@ declare -rA GROUPED_DEPS=(
     libboost-iostreams1.74.0
     libboost-program-options1.74.0
     libboost-system1.74.0
-    libbullet3.06
+    libbullet3.24
     libcollada-dom2.5-dp0
     libicu70
     libjpeg8
