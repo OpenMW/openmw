@@ -519,12 +519,13 @@ namespace MWWorld
             osg::Vec2 center = ESM::indexToPosition(
                 ESM::ExteriorCellIndex(currentGridCenter->x(), currentGridCenter->y(), worldspace), true);
             float distance = std::max(std::abs(center.x() - pos.x()), std::abs(center.y() - pos.y()));
-            float cellSize = ESM::getCellSize(isEsm4Ext);
+            float cellSize = ESM::getCellSize(worldspace);
             const float maxDistance = cellSize / 2 + mCellLoadingThreshold; // 1/2 cell size + threshold
             if (distance <= maxDistance)
                 return *currentGridCenter;
         }
-        return ESM::positionToCellIndex(pos.x(), pos.y(), isEsm4Ext);
+        ESM::ExteriorCellIndex cellPos = ESM::positionToCellIndex(pos.x(), pos.y(), worldspace);
+        return { cellPos.mX, cellPos.mY };
     }
 
     void Scene::playerMoved(const osg::Vec3f& pos)
@@ -1162,8 +1163,7 @@ namespace MWWorld
         cellY = mCurrentGridCenter.y();
         ESM::RefId extWorldspace = mWorld.getCurrentWorldspace();
 
-        bool esm4Ext = ESM::isEsm4Ext(extWorldspace);
-        float cellSize = ESM::getCellSize(esm4Ext);
+        float cellSize = ESM::getCellSize(extWorldspace);
 
         for (int dx = -halfGridSizePlusOne; dx <= halfGridSizePlusOne; ++dx)
         {
@@ -1283,10 +1283,8 @@ namespace MWWorld
             else
             {
                 osg::Vec3f pos = dest.mPos.asVec3();
-                const osg::Vec2i cellIndex = ESM::positionToCellIndex(pos.x(), pos.y());
-                preloadCell(mWorld.getWorldModel().getExterior(
-                                ESM::ExteriorCellIndex(cellIndex.x(), cellIndex.y(), extWorldspace)),
-                    true);
+                const ESM::ExteriorCellIndex cellIndex = ESM::positionToCellIndex(pos.x(), pos.y(), extWorldspace);
+                preloadCell(mWorld.getWorldModel().getExterior(cellIndex), true);
                 exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
             }
         }

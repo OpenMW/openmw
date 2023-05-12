@@ -2,7 +2,7 @@
 
 osg::Vec2 ESM::indexToPosition(const ESM::ExteriorCellIndex& cellIndex, bool centre)
 {
-    const int cellSize = ESM::getCellSize(ESM::isEsm4Ext(cellIndex.mWorldspace));
+    const int cellSize = ESM::getCellSize(cellIndex.mWorldspace);
 
     float x = static_cast<float>(cellSize * cellIndex.mX);
     float y = static_cast<float>(cellSize * cellIndex.mY);

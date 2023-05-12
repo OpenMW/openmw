@@ -379,8 +379,8 @@ namespace MWWorld
                 pos.rot[1] = 0;
                 pos.rot[2] = 0;
 
-                osg::Vec2i exteriorCellPos = ESM::positionToCellIndex(pos.pos[0], pos.pos[1]);
-                ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.x(), exteriorCellPos.y());
+                ESM::ExteriorCellIndex exteriorCellPos = ESM::positionToCellIndex(pos.pos[0], pos.pos[1]);
+                ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.mX, exteriorCellPos.mY);
                 mWorldScene->changeToExteriorCell(cellId, pos, true);
             }
         }
@@ -1244,14 +1244,12 @@ namespace MWWorld
 
     MWWorld::Ptr World::moveObject(const Ptr& ptr, const osg::Vec3f& position, bool movePhysics, bool moveToActive)
     {
-        const osg::Vec2i index = ESM::positionToCellIndex(position.x(), position.y());
-
         CellStore* cell = ptr.getCell();
         ESM::RefId worldspaceId
             = cell->isExterior() ? cell->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
-        CellStore* newCell = cell->isExterior()
-            ? &mWorldModel.getExterior(ESM::ExteriorCellIndex(index.x(), index.y(), worldspaceId))
-            : nullptr;
+        const ESM::ExteriorCellIndex index = ESM::positionToCellIndex(position.x(), position.y(), worldspaceId);
+
+        CellStore* newCell = cell->isExterior() ? &mWorldModel.getExterior(index) : nullptr;
         bool isCellActive = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior()
             && (newCell && mWorldScene->isCellActive(*newCell));
 
@@ -1373,8 +1371,8 @@ namespace MWWorld
             && !(ptr.getClass().isPersistent(ptr) && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished());
         if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && !swims && isActorCollisionEnabled(ptr)))
         {
-            bool esm4Ext = ptr.getCell()->isExterior() && ESM::isEsm4Ext(ptr.getCell()->getCell()->getWorldSpace());
-            osg::Vec3f traced = mPhysics->traceDown(ptr, pos, ESM::getCellSize(esm4Ext));
+            osg::Vec3f traced
+                = mPhysics->traceDown(ptr, pos, ESM::getCellSize(ptr.getCell()->getCell()->getWorldSpace()));
             pos.z() = std::min(pos.z(), traced.z());
         }
 
@@ -1409,9 +1407,9 @@ namespace MWWorld
             if (!mPhysics->castRay(pos, targetPos, MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door).mHit)
                 break;
         }
-        bool esm4Ext = actor.getCell()->isExterior() && ESM::isEsm4Ext(actor.getCell()->getCell()->getWorldSpace());
         targetPos.z() += distance / 2.f; // move up a bit to get out from geometry, will snap down later
-        osg::Vec3f traced = mPhysics->traceDown(actor, targetPos, ESM::getCellSize(esm4Ext));
+        osg::Vec3f traced
+            = mPhysics->traceDown(actor, targetPos, ESM::getCellSize(actor.getCell()->getCell()->getWorldSpace()));
         if (traced != pos)
         {
             esmPos.pos[0] = traced.x();
@@ -2048,9 +2046,9 @@ namespace MWWorld
             throw std::runtime_error("copyObjectToCell(): cannot copy object to null cell");
         if (cell->isExterior())
         {
-            const osg::Vec2i index = ESM::positionToCellIndex(pos.pos[0], pos.pos[1]);
-            cell = &mWorldModel.getExterior(
-                ESM::ExteriorCellIndex(index.x(), index.y(), cell->getCell()->getWorldSpace()));
+            const ESM::ExteriorCellIndex index
+                = ESM::positionToCellIndex(pos.pos[0], pos.pos[1], cell->getCell()->getWorldSpace());
+            cell = &mWorldModel.getExterior(index);
         }
 
         MWWorld::Ptr dropped = object.getClass().copyToCell(object, *cell, pos, count);

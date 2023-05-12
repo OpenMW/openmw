@@ -276,7 +276,10 @@ namespace MWGui
 
         if (!mInterior)
         {
-            cellIndex = ESM::positionToCellIndex(worldX, worldY);
+            ESM::ExteriorCellIndex cellPos = ESM::positionToCellIndex(worldX, worldY);
+            cellIndex.x() = cellPos.mX;
+            cellIndex.y() = cellPos.mY;
+
             nX = (worldX - cellSize * cellIndex.x()) / cellSize;
             // Image space is -Y up, cells are Y up
             nY = 1 - (worldY - cellSize * cellIndex.y()) / cellSize;

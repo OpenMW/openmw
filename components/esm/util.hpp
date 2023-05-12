@@ -72,20 +72,22 @@ namespace ESM
         }
     };
 
-    static inline bool isEsm4Ext(ESM::RefId worldspaceId)
+    inline bool isEsm4Ext(ESM::RefId worldspaceId)
     {
         return worldspaceId != ESM::Cell::sDefaultWorldspaceId;
     }
 
-    static inline int getCellSize(bool isESM4Ext)
+    inline int getCellSize(ESM::RefId worldspaceId)
     {
-        return isESM4Ext ? Constants::ESM4CellSizeInUnits : Constants::CellSizeInUnits;
+
+        return isEsm4Ext(worldspaceId) ? Constants::ESM4CellSizeInUnits : Constants::CellSizeInUnits;
     }
 
-    inline osg::Vec2i positionToCellIndex(float x, float y, bool esm4Ext = false)
+    inline ESM::ExteriorCellIndex positionToCellIndex(
+        float x, float y, ESM::RefId worldspaceId = ESM::Cell::sDefaultWorldspaceId)
     {
-        const float cellSize = esm4Ext ? Constants::ESM4CellSizeInUnits : Constants::CellSizeInUnits;
-        return { static_cast<int>(std::floor(x / cellSize)), static_cast<int>(std::floor(y / cellSize)) };
+        const float cellSize = getCellSize(worldspaceId);
+        return { static_cast<int>(std::floor(x / cellSize)), static_cast<int>(std::floor(y / cellSize)), worldspaceId };
     }
 
     osg::Vec2 indexToPosition(const ESM::ExteriorCellIndex& cellIndex, bool centre = false);
