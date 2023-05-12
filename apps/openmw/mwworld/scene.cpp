@@ -252,8 +252,7 @@ namespace
         for (auto* cell : collection)
         {
             assert(cell->getCell()->isExterior());
-            if (cellIndex.mX == cell->getCell()->getGridX() && cellIndex.mY == cell->getCell()->getGridY()
-                && cell->getCell()->getWorldSpace() == cellIndex.mWorldspace)
+            if (cellIndex == cell->getCell()->getExteriorCellLocation())
                 return true;
         }
         return false;

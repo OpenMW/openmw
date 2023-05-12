@@ -77,4 +77,9 @@ namespace MWWorld
         else
             return mId;
     }
+
+    ESM::ExteriorCellLocation Cell::getExteriorCellLocation() const
+    {
+        return { mGridPos.x(), mGridPos.y(), getWorldSpace() };
+    }
 }
