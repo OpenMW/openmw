@@ -285,12 +285,12 @@ namespace MWWorld
         std::unordered_map<std::string, ESM4::Cell*, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
             mCellNameIndex;
 
-        std::unordered_map<ESM::ExteriorCellIndex, ESM4::Cell*> mExteriors;
-        std::unordered_map<ESM::ExteriorCellIndex, ESM4::Cell*> mPersistentExteriors;
+        std::unordered_map<ESM::ExteriorCellLocation, ESM4::Cell*> mExteriors;
+        std::unordered_map<ESM::ExteriorCellLocation, ESM4::Cell*> mPersistentExteriors;
 
     public:
         const ESM4::Cell* searchCellName(std::string_view) const;
-        const ESM4::Cell* searchExterior(ESM::ExteriorCellIndex cellIndex) const;
+        const ESM4::Cell* searchExterior(ESM::ExteriorCellLocation cellIndex) const;
         ESM4::Cell* insert(const ESM4::Cell& item, bool overrideOnly = false);
         ESM4::Cell* insertStatic(const ESM4::Cell& item);
         void insertCell(ESM4::Cell* cell);

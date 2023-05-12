@@ -483,7 +483,7 @@ namespace MWPhysics
             mHeightFields.erase(heightfield);
     }
 
-    const HeightField* PhysicsSystem::getHeightField(ESM::ExteriorCellIndex cellIndex) const
+    const HeightField* PhysicsSystem::getHeightField(ESM::ExteriorCellLocation cellIndex) const
     {
         if (ESM::isEsm4Ext(cellIndex.mWorldspace))
             return nullptr;

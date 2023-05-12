@@ -379,7 +379,7 @@ namespace MWWorld
                 pos.rot[1] = 0;
                 pos.rot[2] = 0;
 
-                ESM::ExteriorCellIndex exteriorCellPos = ESM::positionToCellIndex(pos.pos[0], pos.pos[1]);
+                ESM::ExteriorCellLocation exteriorCellPos = ESM::positionToCellIndex(pos.pos[0], pos.pos[1]);
                 ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.mX, exteriorCellPos.mY);
                 mWorldScene->changeToExteriorCell(cellId, pos, true);
             }
@@ -1247,7 +1247,7 @@ namespace MWWorld
         CellStore* cell = ptr.getCell();
         ESM::RefId worldspaceId
             = cell->isExterior() ? cell->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
-        const ESM::ExteriorCellIndex index = ESM::positionToCellIndex(position.x(), position.y(), worldspaceId);
+        const ESM::ExteriorCellLocation index = ESM::positionToCellIndex(position.x(), position.y(), worldspaceId);
 
         CellStore* newCell = cell->isExterior() ? &mWorldModel.getExterior(index) : nullptr;
         bool isCellActive = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior()
@@ -2046,7 +2046,7 @@ namespace MWWorld
             throw std::runtime_error("copyObjectToCell(): cannot copy object to null cell");
         if (cell->isExterior())
         {
-            const ESM::ExteriorCellIndex index
+            const ESM::ExteriorCellLocation index
                 = ESM::positionToCellIndex(pos.pos[0], pos.pos[1], cell->getCell()->getWorldSpace());
             cell = &mWorldModel.getExterior(index);
         }
@@ -2732,7 +2732,7 @@ namespace MWWorld
                 if (xResult.ec == std::errc::result_out_of_range || yResult.ec == std::errc::result_out_of_range)
                     throw std::runtime_error("Cell coordinates out of range.");
                 else if (xResult.ec == std::errc{} && yResult.ec == std::errc{})
-                    ext = mWorldModel.getExterior(ESM::ExteriorCellIndex(x, y, ESM::Cell::sDefaultWorldspaceId))
+                    ext = mWorldModel.getExterior(ESM::ExteriorCellLocation(x, y, ESM::Cell::sDefaultWorldspaceId))
                               .getCell();
                 // ignore std::errc::invalid_argument, as this means that name probably refers to a interior cell
                 // instead of comma separated coordinates
@@ -2743,7 +2743,7 @@ namespace MWWorld
         {
             int x = ext->getGridX();
             int y = ext->getGridY();
-            osg::Vec2 posFromIndex = indexToPosition(ESM::ExteriorCellIndex(x, y, ext->getWorldSpace()), true);
+            osg::Vec2 posFromIndex = indexToPosition(ESM::ExteriorCellLocation(x, y, ext->getWorldSpace()), true);
             pos.pos[0] = posFromIndex.x();
             pos.pos[1] = posFromIndex.y();
 

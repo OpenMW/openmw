@@ -247,7 +247,7 @@ namespace
         return std::abs(cellPosition.first) + std::abs(cellPosition.second);
     }
 
-    bool isCellInCollection(ESM::ExteriorCellIndex cellIndex, MWWorld::Scene::CellStoreCollection& collection)
+    bool isCellInCollection(ESM::ExteriorCellLocation cellIndex, MWWorld::Scene::CellStoreCollection& collection)
     {
         for (auto* cell : collection)
         {
@@ -346,7 +346,7 @@ namespace MWWorld
 
         if (cell->getCell()->isExterior())
         {
-            if (mPhysics->getHeightField(ESM::ExteriorCellIndex(cellX, cellY, cell->getCell()->getWorldSpace()))
+            if (mPhysics->getHeightField(ESM::ExteriorCellLocation(cellX, cellY, cell->getCell()->getWorldSpace()))
                 != nullptr)
                 mNavigator.removeHeightfield(osg::Vec2i(cellX, cellY), navigatorUpdateGuard);
 
@@ -393,7 +393,7 @@ namespace MWWorld
         const int cellY = cell.getCell()->getGridY();
         const MWWorld::Cell& cellVariant = *cell.getCell();
         ESM::RefId worldspace = cellVariant.getWorldSpace();
-        ESM::ExteriorCellIndex cellIndex(cellX, cellY, worldspace);
+        ESM::ExteriorCellLocation cellIndex(cellX, cellY, worldspace);
 
         if (cellVariant.isExterior())
         {
@@ -512,19 +512,17 @@ namespace MWWorld
     {
         ESM::RefId worldspace
             = mCurrentCell ? mCurrentCell->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
-        bool isEsm4Ext = ESM::isEsm4Ext(worldspace);
-
         if (currentGridCenter)
         {
             osg::Vec2 center = ESM::indexToPosition(
-                ESM::ExteriorCellIndex(currentGridCenter->x(), currentGridCenter->y(), worldspace), true);
+                ESM::ExteriorCellLocation(currentGridCenter->x(), currentGridCenter->y(), worldspace), true);
             float distance = std::max(std::abs(center.x() - pos.x()), std::abs(center.y() - pos.y()));
             float cellSize = ESM::getCellSize(worldspace);
             const float maxDistance = cellSize / 2 + mCellLoadingThreshold; // 1/2 cell size + threshold
             if (distance <= maxDistance)
                 return *currentGridCenter;
         }
-        ESM::ExteriorCellIndex cellPos = ESM::positionToCellIndex(pos.x(), pos.y(), worldspace);
+        ESM::ExteriorCellLocation cellPos = ESM::positionToCellIndex(pos.x(), pos.y(), worldspace);
         return { cellPos.mX, cellPos.mY };
     }
 
@@ -541,10 +539,10 @@ namespace MWWorld
     void Scene::requestChangeCellGrid(const osg::Vec3f& position, const osg::Vec2i& cell, bool changeEvent)
     {
         mChangeCellGridRequest = ChangeCellGridRequest{ position,
-            ESM::ExteriorCellIndex(cell.x(), cell.y(), mCurrentCell->getCell()->getWorldSpace()), changeEvent };
+            ESM::ExteriorCellLocation(cell.x(), cell.y(), mCurrentCell->getCell()->getWorldSpace()), changeEvent };
     }
 
-    void Scene::changeCellGrid(const osg::Vec3f& pos, ESM::ExteriorCellIndex playerCellIndex, bool changeEvent)
+    void Scene::changeCellGrid(const osg::Vec3f& pos, ESM::ExteriorCellLocation playerCellIndex, bool changeEvent)
     {
         auto navigatorUpdateGuard = mNavigator.makeUpdateGuard();
         int playerCellX = playerCellIndex.mX;
@@ -586,7 +584,7 @@ namespace MWWorld
             {
                 for (int y = playerCellY - range; y <= playerCellY + range; ++y)
                 {
-                    if (!isCellInCollection(ESM::ExteriorCellIndex(x, y, playerCellIndex.mWorldspace), collection))
+                    if (!isCellInCollection(ESM::ExteriorCellLocation(x, y, playerCellIndex.mWorldspace), collection))
                     {
                         refsToLoad += mWorld.getWorldModel().getExterior(playerCellIndex).count();
                         cellsPositionsToLoad.emplace_back(x, y);
@@ -620,7 +618,7 @@ namespace MWWorld
 
         for (const auto& [x, y] : cellsPositionsToLoad)
         {
-            ESM::ExteriorCellIndex indexToLoad = { x, y, playerCellIndex.mWorldspace };
+            ESM::ExteriorCellLocation indexToLoad = { x, y, playerCellIndex.mWorldspace };
             if (!isCellInCollection(indexToLoad, mActiveCells))
             {
                 CellStore& cell = mWorld.getWorldModel().getExterior(indexToLoad);
@@ -686,7 +684,7 @@ namespace MWWorld
                 + std::to_string(cells.getExtSize()) + ")...");
 
             CellStore& cell = mWorld.getWorldModel().getExterior(
-                ESM::ExteriorCellIndex(it->mData.mX, it->mData.mY, ESM::Cell::sDefaultWorldspaceId));
+                ESM::ExteriorCellLocation(it->mData.mX, it->mData.mY, ESM::Cell::sDefaultWorldspaceId));
             mNavigator.setWorldspace(cell.getCell()->getWorldSpace().serializeText(), navigatorUpdateGuard.get());
             const osg::Vec3f position
                 = osg::Vec3f(it->mData.mX + 0.5f, it->mData.mY + 0.5f, 0) * Constants::CellSizeInUnits;
@@ -940,7 +938,7 @@ namespace MWWorld
         const osg::Vec2i cellIndex(current.getCell()->getGridX(), current.getCell()->getGridY());
 
         changeCellGrid(position.asVec3(),
-            ESM::ExteriorCellIndex(cellIndex.x(), cellIndex.y(), current.getCell()->getWorldSpace()), changeEvent);
+            ESM::ExteriorCellLocation(cellIndex.x(), cellIndex.y(), current.getCell()->getWorldSpace()), changeEvent);
 
         changePlayerCell(current, position, adjustPlayerPos);
 
@@ -1172,7 +1170,7 @@ namespace MWWorld
                 if (dy != halfGridSizePlusOne && dy != -halfGridSizePlusOne && dx != halfGridSizePlusOne
                     && dx != -halfGridSizePlusOne)
                     continue; // only care about the outer (not yet loaded) part of the grid
-                ESM::ExteriorCellIndex cellIndex(cellX + dx, cellY + dy, extWorldspace);
+                ESM::ExteriorCellLocation cellIndex(cellX + dx, cellY + dy, extWorldspace);
                 osg::Vec2 thisCellCenter = ESM::indexToPosition(cellIndex, true);
 
                 float dist = std::max(
@@ -1200,7 +1198,7 @@ namespace MWWorld
                 for (int dy = -mHalfGridSize; dy <= mHalfGridSize; ++dy)
                 {
                     mPreloader->preload(mWorld.getWorldModel().getExterior(
-                                            ESM::ExteriorCellIndex(x + dx, y + dy, cell.getCell()->getWorldSpace())),
+                                            ESM::ExteriorCellLocation(x + dx, y + dy, cell.getCell()->getWorldSpace())),
                         mRendering.getReferenceTime());
                     if (++numpreloaded >= mPreloader->getMaxCacheSize())
                         break;
@@ -1283,7 +1281,7 @@ namespace MWWorld
             else
             {
                 osg::Vec3f pos = dest.mPos.asVec3();
-                const ESM::ExteriorCellIndex cellIndex = ESM::positionToCellIndex(pos.x(), pos.y(), extWorldspace);
+                const ESM::ExteriorCellLocation cellIndex = ESM::positionToCellIndex(pos.x(), pos.y(), extWorldspace);
                 preloadCell(mWorld.getWorldModel().getExterior(cellIndex), true);
                 exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
             }

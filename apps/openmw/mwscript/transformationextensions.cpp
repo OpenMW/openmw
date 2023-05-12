@@ -400,7 +400,7 @@ namespace MWScript
                     store = &worldModel->getCell(cellID);
                     if (store->isExterior())
                     {
-                        const ESM::ExteriorCellIndex cellIndex
+                        const ESM::ExteriorCellLocation cellIndex
                             = ESM::positionToCellIndex(x, y, store->getCell()->getWorldSpace());
                         store = &worldModel->getExterior(cellIndex);
                     }
@@ -416,7 +416,7 @@ namespace MWScript
                     Log(Debug::Warning) << error;
                     if (!isPlayer)
                         return;
-                    const ESM::ExteriorCellIndex cellIndex
+                    const ESM::ExteriorCellLocation cellIndex
                         = ESM::positionToCellIndex(x, y, store->getCell()->getWorldSpace());
                     store = &worldModel->getExterior(cellIndex);
                 }
@@ -467,7 +467,7 @@ namespace MWScript
                 {
                     world->getPlayer().setTeleported(true);
                 }
-                const ESM::ExteriorCellIndex cellIndex
+                const ESM::ExteriorCellLocation cellIndex
                     = ESM::positionToCellIndex(x, y, ESM::Cell::sDefaultWorldspaceId);
 
                 // another morrowind oddity: player will be moved to the exterior cell at this location,
@@ -568,7 +568,7 @@ namespace MWScript
                 MWWorld::CellStore* store = nullptr;
                 if (player.getCell()->isExterior())
                 {
-                    const ESM::ExteriorCellIndex cellIndex
+                    const ESM::ExteriorCellLocation cellIndex
                         = ESM::positionToCellIndex(x, y, player.getCell()->getCell()->getWorldSpace());
                     store = &MWBase::Environment::get().getWorldModel()->getExterior(cellIndex);
                 }

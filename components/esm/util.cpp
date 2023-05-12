@@ -1,6 +1,6 @@
 #include "util.hpp"
 
-osg::Vec2 ESM::indexToPosition(const ESM::ExteriorCellIndex& cellIndex, bool centre)
+osg::Vec2 ESM::indexToPosition(const ESM::ExteriorCellLocation& cellIndex, bool centre)
 {
     const int cellSize = ESM::getCellSize(cellIndex.mWorldspace);
 

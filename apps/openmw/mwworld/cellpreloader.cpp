@@ -103,7 +103,7 @@ namespace MWWorld
                 {
                     mTerrain->cacheCell(mTerrainView.get(), mX, mY);
                     mPreloadedObjects.insert(
-                        mLandManager->getLand(ESM::ExteriorCellIndex(mX, mY, ESM::Cell::sDefaultWorldspaceId)));
+                        mLandManager->getLand(ESM::ExteriorCellLocation(mX, mY, ESM::Cell::sDefaultWorldspaceId)));
                 }
                 catch (std::exception&)
                 {

@@ -190,7 +190,7 @@ namespace MWPhysics
 
         void removeHeightField(int x, int y);
 
-        const HeightField* getHeightField(ESM::ExteriorCellIndex cellIndex) const;
+        const HeightField* getHeightField(ESM::ExteriorCellLocation cellIndex) const;
 
         bool toggleCollisionMode();
 

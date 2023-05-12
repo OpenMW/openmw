@@ -44,7 +44,7 @@ namespace MWWorld
         mutable std::unordered_map<ESM::RefId, CellStore> mCells;
         mutable std::map<std::string, CellStore*, Misc::StringUtils::CiComp> mInteriors;
 
-        mutable std::map<ESM::ExteriorCellIndex, CellStore*> mExteriors;
+        mutable std::map<ESM::ExteriorCellLocation, CellStore*> mExteriors;
         IdCache mIdCache;
         std::size_t mIdCacheIndex = 0;
         std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
@@ -65,7 +65,7 @@ namespace MWWorld
 
         void clear();
 
-        CellStore& getExterior(ESM::ExteriorCellIndex cellIndex);
+        CellStore& getExterior(ESM::ExteriorCellLocation cellIndex);
         CellStore& getInterior(std::string_view name);
         CellStore& getCell(std::string_view name); // interior or named exterior
         CellStore& getCell(const ESM::RefId& Id);

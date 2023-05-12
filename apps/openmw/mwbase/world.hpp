@@ -55,7 +55,7 @@ namespace ESM
     struct ItemLevList;
     struct TimeStamp;
     class RefId;
-    struct ExteriorCellIndex;
+    struct ExteriorCellLocation;
 }
 
 namespace MWPhysics

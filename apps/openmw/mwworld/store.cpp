@@ -1105,7 +1105,7 @@ namespace MWWorld
         return foundCell->second;
     }
 
-    const ESM4::Cell* Store<ESM4::Cell>::searchExterior(ESM::ExteriorCellIndex cellIndex) const
+    const ESM4::Cell* Store<ESM4::Cell>::searchExterior(ESM::ExteriorCellLocation cellIndex) const
     {
         const auto foundCell = mExteriors.find(cellIndex);
         if (foundCell == mExteriors.end())
@@ -1133,7 +1133,7 @@ namespace MWWorld
             mCellNameIndex[cellPtr->mEditorId] = cellPtr;
         if (cellPtr->isExterior())
         {
-            ESM::ExteriorCellIndex cellindex = { cellPtr->mX, cellPtr->mY, cellPtr->mParent };
+            ESM::ExteriorCellLocation cellindex = { cellPtr->mX, cellPtr->mY, cellPtr->mParent };
             if (cellPtr->mCellFlags & ESM4::Rec_Persistent)
                 mPersistentExteriors[cellindex] = cellPtr;
             else

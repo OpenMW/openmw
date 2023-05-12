@@ -276,7 +276,7 @@ namespace MWGui
 
         if (!mInterior)
         {
-            ESM::ExteriorCellIndex cellPos = ESM::positionToCellIndex(worldX, worldY);
+            ESM::ExteriorCellLocation cellPos = ESM::positionToCellIndex(worldX, worldY);
             cellIndex.x() = cellPos.mX;
             cellIndex.y() = cellPos.mY;
 
@@ -586,7 +586,7 @@ namespace MWGui
             {
                 if (!mInterior)
                     requestMapRender(&MWBase::Environment::get().getWorldModel()->getExterior(
-                        ESM::ExteriorCellIndex(entry.mCellX, entry.mCellY, ESM::Cell::sDefaultWorldspaceId)));
+                        ESM::ExteriorCellLocation(entry.mCellX, entry.mCellY, ESM::Cell::sDefaultWorldspaceId)));
 
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(entry.mCellX, entry.mCellY);
                 if (texture)
@@ -643,7 +643,7 @@ namespace MWGui
             for (MapEntry& entry : mMaps)
             {
                 if (!entry.mMapTexture && !widgetCropped(entry.mMapWidget, mLocalMap))
-                    world->getDoorMarkers(worldModel->getExterior(ESM::ExteriorCellIndex(
+                    world->getDoorMarkers(worldModel->getExterior(ESM::ExteriorCellLocation(
                                               entry.mCellX, entry.mCellY, ESM::Cell::sDefaultWorldspaceId)),
                         doors);
             }

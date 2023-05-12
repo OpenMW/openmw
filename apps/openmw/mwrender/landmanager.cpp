@@ -18,7 +18,7 @@ namespace MWRender
         mCache = new CacheType;
     }
 
-    osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(ESM::ExteriorCellIndex cellIndex)
+    osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(ESM::ExteriorCellLocation cellIndex)
     {
         if (ESM::isEsm4Ext(cellIndex.mWorldspace))
             return osg::ref_ptr<ESMTerrain::LandObject>(nullptr);

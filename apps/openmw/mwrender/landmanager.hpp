@@ -21,7 +21,7 @@ namespace MWRender
         LandManager(int loadFlags);
 
         /// @note Will return nullptr if not found.
-        osg::ref_ptr<ESMTerrain::LandObject> getLand(ESM::ExteriorCellIndex cellIndex);
+        osg::ref_ptr<ESMTerrain::LandObject> getLand(ESM::ExteriorCellLocation cellIndex);
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 

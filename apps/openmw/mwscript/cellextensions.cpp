@@ -124,7 +124,7 @@ namespace MWScript
                 const MWWorld::Ptr playerPtr = world->getPlayerPtr();
 
                 osg::Vec2 posFromIndex
-                    = ESM::indexToPosition(ESM::ExteriorCellIndex(x, y, ESM::Cell::sDefaultWorldspaceId), true);
+                    = ESM::indexToPosition(ESM::ExteriorCellLocation(x, y, ESM::Cell::sDefaultWorldspaceId), true);
                 pos.pos[0] = posFromIndex.x();
                 pos.pos[1] = posFromIndex.y();
                 pos.pos[2] = 0;

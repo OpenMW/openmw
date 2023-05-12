@@ -49,24 +49,24 @@ namespace ESM
         operator osg::Vec3f() const { return osg::Vec3f(mValues[0], mValues[1], mValues[2]); }
     };
 
-    struct ExteriorCellIndex
+    struct ExteriorCellLocation
     {
         int mX, mY;
         ESM::RefId mWorldspace;
 
-        ExteriorCellIndex(int x, int y, ESM::RefId worldspace)
+        ExteriorCellLocation(int x, int y, ESM::RefId worldspace)
             : mX(x)
             , mY(y)
             , mWorldspace(worldspace)
         {
         }
 
-        bool operator==(const ExteriorCellIndex& other) const
+        bool operator==(const ExteriorCellLocation& other) const
         {
             return mX == other.mX && mY == other.mY && mWorldspace == other.mWorldspace;
         }
 
-        bool operator<(const ExteriorCellIndex& other) const
+        bool operator<(const ExteriorCellLocation& other) const
         {
             return std::make_tuple(mX, mY, mWorldspace) < std::make_tuple(other.mX, other.mY, other.mWorldspace);
         }
@@ -83,23 +83,23 @@ namespace ESM
         return isEsm4Ext(worldspaceId) ? Constants::ESM4CellSizeInUnits : Constants::CellSizeInUnits;
     }
 
-    inline ESM::ExteriorCellIndex positionToCellIndex(
+    inline ESM::ExteriorCellLocation positionToCellIndex(
         float x, float y, ESM::RefId worldspaceId = ESM::Cell::sDefaultWorldspaceId)
     {
         const float cellSize = getCellSize(worldspaceId);
         return { static_cast<int>(std::floor(x / cellSize)), static_cast<int>(std::floor(y / cellSize)), worldspaceId };
     }
 
-    osg::Vec2 indexToPosition(const ESM::ExteriorCellIndex& cellIndex, bool centre = false);
+    osg::Vec2 indexToPosition(const ESM::ExteriorCellLocation& cellIndex, bool centre = false);
     ///< Convert cell numbers to position.
 }
 
 namespace std
 {
     template <>
-    struct hash<ESM::ExteriorCellIndex>
+    struct hash<ESM::ExteriorCellLocation>
     {
-        std::size_t operator()(const ESM::ExteriorCellIndex& toHash) const
+        std::size_t operator()(const ESM::ExteriorCellLocation& toHash) const
         {
             // Compute individual hash values for first,
             // second and third and combine them using XOR
