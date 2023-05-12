@@ -177,28 +177,28 @@ void LocalMap::setupRenderToTexture(int segment_x, int segment_y, float left, fl
 
 void LocalMap::requestMap(const MWWorld::CellStore* cell)
 {
-    if (cell->isExterior())
+    if (!cell->isExterior())
     {
-        int cellX = cell->getCell()->getGridX();
-        int cellY = cell->getCell()->getGridY();
-
-        MapSegment& segment = mExteriorSegments[std::make_pair(cellX, cellY)];
-        if (!segment.needUpdate)
-            return;
-        else
-        {
-            requestExteriorMap(cell);
-            segment.needUpdate = false;
-        }
-    }
-    else
         requestInteriorMap(cell);
+        return;
+    }
+
+    int cellX = cell->getCell()->getGridX();
+    int cellY = cell->getCell()->getGridY();
+
+    MapSegment& segment = mExteriorSegments[std::make_pair(cellX, cellY)];
+    const std::uint8_t neighbourFlags = getExteriorNeighbourFlags(cellX, cellY);
+    if ((segment.mLastRenderNeighbourFlags & neighbourFlags) == neighbourFlags)
+        return;
+    requestExteriorMap(cell, segment);
+    segment.mLastRenderNeighbourFlags = neighbourFlags;
 }
 
 void LocalMap::addCell(MWWorld::CellStore *cell)
 {
     if (cell->isExterior())
-        mExteriorSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())].needUpdate = true;
+        mExteriorSegments.emplace(
+                std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY()), MapSegment{});
 }
 
 void LocalMap::removeExteriorCell(int x, int y)
@@ -210,7 +210,9 @@ void LocalMap::removeCell(MWWorld::CellStore *cell)
 {
     saveFogOfWar(cell);
 
-    if (!cell->isExterior())
+    if (cell->isExterior())
+        mExteriorSegments.erase({ cell->getCell()->getGridX(), cell->getCell()->getGridY() });
+    else
         mInteriorSegments.clear();
 }
 
@@ -249,7 +251,7 @@ void LocalMap::cleanupCameras()
     }
 }
 
-void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell)
+void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell, MapSegment& segment)
 {
     mInterior = false;
 
@@ -260,18 +262,16 @@ void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell)
     float zmin = bound.center().z() - bound.radius();
     float zmax = bound.center().z() + bound.radius();
 
-    setupRenderToTexture(cell->getCell()->getGridX(), cell->getCell()->getGridY(), 
-        x * mMapWorldSize + mMapWorldSize / 2.f, y * mMapWorldSize + mMapWorldSize / 2.f,
+    setupRenderToTexture(x, y, x * mMapWorldSize + mMapWorldSize / 2.f, y * mMapWorldSize + mMapWorldSize / 2.f,
         osg::Vec3d(0, 1, 0), zmin, zmax);
 
-    MapSegment& segment = mExteriorSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())];
-    if (!segment.mFogOfWarImage)
-    {
-        if (cell->getFog())
-            segment.loadFogOfWar(cell->getFog()->mFogTextures.back());
-        else
-            segment.initFogOfWar();
-    }
+    if (segment.mFogOfWarImage != nullptr)
+        return;
+
+    if (cell->getFog())
+        segment.loadFogOfWar(cell->getFog()->mFogTextures.back());
+    else
+        segment.initFogOfWar();
 }
 
 void LocalMap::requestInteriorMap(const MWWorld::CellStore* cell)
@@ -561,9 +561,23 @@ void LocalMap::updatePlayer (const osg::Vec3f& position, const osg::Quat& orient
     }
 }
 
-LocalMap::MapSegment::MapSegment()
-    : mHasFogState(false)
+std::uint8_t LocalMap::getExteriorNeighbourFlags(int cellX, int cellY) const
 {
+    constexpr std::tuple<NeighbourCellFlag, int, int> flags[] = {
+        { NeighbourCellTopLeft, -1, -1 },
+        { NeighbourCellTopCenter, 0, -1 },
+        { NeighbourCellTopRight, 1, -1 },
+        { NeighbourCellMiddleLeft, -1, 0 },
+        { NeighbourCellMiddleRight, 1, 0 },
+        { NeighbourCellBottomLeft, -1, 1 },
+        { NeighbourCellBottomCenter, 0, 1 },
+        { NeighbourCellBottomRight, 1, 1 },
+    };
+    std::uint8_t result = 0;
+    for (const auto& [flag, dx, dy] : flags)
+        if (mExteriorSegments.contains({cellX + dx, cellY + dy}))
+            result |= flag;
+    return result;
 }
 
 void LocalMap::MapSegment::createFogOfWarTexture()

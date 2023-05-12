@@ -1,6 +1,7 @@
 #ifndef GAME_RENDER_LOCALMAP_H
 #define GAME_RENDER_LOCALMAP_H
 
+#include <cstdint>
 #include <set>
 #include <vector>
 #include <map>
@@ -105,23 +106,30 @@ namespace MWRender
         typedef std::set<std::pair<int, int> > Grid;
         Grid mCurrentGrid;
 
+        enum NeighbourCellFlag : std::uint8_t
+        {
+            NeighbourCellTopLeft = 1,
+            NeighbourCellTopCenter = 1 << 1,
+            NeighbourCellTopRight = 1 << 2,
+            NeighbourCellMiddleLeft = 1 << 3,
+            NeighbourCellMiddleRight = 1 << 4,
+            NeighbourCellBottomLeft = 1 << 5,
+            NeighbourCellBottomCenter = 1 << 6,
+            NeighbourCellBottomRight = 1 << 7,
+        };
+
         struct MapSegment
         {
-            MapSegment();
-            ~MapSegment() = default;
-
             void initFogOfWar();
             void loadFogOfWar(const ESM::FogTexture& fog);
             void saveFogOfWar(ESM::FogTexture& fog) const;
             void createFogOfWarTexture();
 
+            std::uint8_t mLastRenderNeighbourFlags = 0;
+            bool mHasFogState = false;
             osg::ref_ptr<osg::Texture2D> mMapTexture;
             osg::ref_ptr<osg::Texture2D> mFogOfWarTexture;
             osg::ref_ptr<osg::Image> mFogOfWarImage;
-
-            bool needUpdate = true;
-
-            bool mHasFogState;
         };
 
         typedef std::map<std::pair<int, int>, MapSegment> SegmentMap;
@@ -141,13 +149,15 @@ namespace MWRender
         float mAngle;
         const osg::Vec2f rotatePoint(const osg::Vec2f& point, const osg::Vec2f& center, const float angle);
 
-        void requestExteriorMap(const MWWorld::CellStore* cell);
+        void requestExteriorMap(const MWWorld::CellStore* cell, MapSegment& segment);
         void requestInteriorMap(const MWWorld::CellStore* cell);
 
         void setupRenderToTexture(int segment_x, int segment_y, float left, float top, const osg::Vec3d& upVector, float zmin, float zmax);
 
         bool mInterior;
         osg::BoundingBox mBounds;
+
+        std::uint8_t getExteriorNeighbourFlags(int cellX, int cellY) const;
     };
 
 }
