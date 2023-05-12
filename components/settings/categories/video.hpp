@@ -14,20 +14,22 @@
 
 namespace Settings
 {
-    struct VideoCategory
+    struct VideoCategory : WithIndex
     {
-        SettingValue<int> mResolutionX{ "Video", "resolution x", makeMaxSanitizerInt(1) };
-        SettingValue<int> mResolutionY{ "Video", "resolution y", makeMaxSanitizerInt(1) };
-        SettingValue<int> mWindowMode{ "Video", "window mode", makeEnumSanitizerInt({ 0, 1, 2 }) };
-        SettingValue<int> mScreen{ "Video", "screen", makeMaxSanitizerInt(0) };
-        SettingValue<bool> mMinimizeOnFocusLoss{ "Video", "minimize on focus loss" };
-        SettingValue<bool> mWindowBorder{ "Video", "window border" };
-        SettingValue<int> mAntialiasing{ "Video", "antialiasing", makeEnumSanitizerInt({ 0, 2, 4, 8, 16 }) };
-        SettingValue<int> mVsyncMode{ "Video", "vsync mode", makeEnumSanitizerInt({ 0, 1, 2 }) };
-        SettingValue<float> mFramerateLimit{ "Video", "framerate limit", makeMaxSanitizerFloat(0) };
-        SettingValue<float> mContrast{ "Video", "contrast", makeMaxStrictSanitizerFloat(0) };
-        SettingValue<float> mGamma{ "Video", "gamma", makeMaxStrictSanitizerFloat(0) };
-        SettingValue<std::string> mScreenshotType{ "Video", "screenshot type" };
+        using WithIndex::WithIndex;
+
+        SettingValue<int> mResolutionX{ mIndex, "Video", "resolution x", makeMaxSanitizerInt(1) };
+        SettingValue<int> mResolutionY{ mIndex, "Video", "resolution y", makeMaxSanitizerInt(1) };
+        SettingValue<int> mWindowMode{ mIndex, "Video", "window mode", makeEnumSanitizerInt({ 0, 1, 2 }) };
+        SettingValue<int> mScreen{ mIndex, "Video", "screen", makeMaxSanitizerInt(0) };
+        SettingValue<bool> mMinimizeOnFocusLoss{ mIndex, "Video", "minimize on focus loss" };
+        SettingValue<bool> mWindowBorder{ mIndex, "Video", "window border" };
+        SettingValue<int> mAntialiasing{ mIndex, "Video", "antialiasing", makeEnumSanitizerInt({ 0, 2, 4, 8, 16 }) };
+        SettingValue<int> mVsyncMode{ mIndex, "Video", "vsync mode", makeEnumSanitizerInt({ 0, 1, 2 }) };
+        SettingValue<float> mFramerateLimit{ mIndex, "Video", "framerate limit", makeMaxSanitizerFloat(0) };
+        SettingValue<float> mContrast{ mIndex, "Video", "contrast", makeMaxStrictSanitizerFloat(0) };
+        SettingValue<float> mGamma{ mIndex, "Video", "gamma", makeMaxStrictSanitizerFloat(0) };
+        SettingValue<std::string> mScreenshotType{ mIndex, "Video", "screenshot type" };
     };
 }
 

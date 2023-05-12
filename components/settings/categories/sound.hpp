@@ -14,18 +14,20 @@
 
 namespace Settings
 {
-    struct SoundCategory
+    struct SoundCategory : WithIndex
     {
-        SettingValue<std::string> mDevice{ "Sound", "device" };
-        SettingValue<float> mMasterVolume{ "Sound", "master volume", makeClampSanitizerFloat(0, 1) };
-        SettingValue<float> mFootstepsVolume{ "Sound", "footsteps volume", makeClampSanitizerFloat(0, 1) };
-        SettingValue<float> mMusicVolume{ "Sound", "music volume", makeClampSanitizerFloat(0, 1) };
-        SettingValue<float> mSfxVolume{ "Sound", "sfx volume", makeClampSanitizerFloat(0, 1) };
-        SettingValue<float> mVoiceVolume{ "Sound", "voice volume", makeClampSanitizerFloat(0, 1) };
-        SettingValue<int> mBufferCacheMin{ "Sound", "buffer cache min", makeMaxSanitizerInt(1) };
-        SettingValue<int> mBufferCacheMax{ "Sound", "buffer cache max", makeMaxSanitizerInt(1) };
-        SettingValue<int> mHrtfEnable{ "Sound", "hrtf enable", makeEnumSanitizerInt({ -1, 0, 1 }) };
-        SettingValue<std::string> mHrtf{ "Sound", "hrtf" };
+        using WithIndex::WithIndex;
+
+        SettingValue<std::string> mDevice{ mIndex, "Sound", "device" };
+        SettingValue<float> mMasterVolume{ mIndex, "Sound", "master volume", makeClampSanitizerFloat(0, 1) };
+        SettingValue<float> mFootstepsVolume{ mIndex, "Sound", "footsteps volume", makeClampSanitizerFloat(0, 1) };
+        SettingValue<float> mMusicVolume{ mIndex, "Sound", "music volume", makeClampSanitizerFloat(0, 1) };
+        SettingValue<float> mSfxVolume{ mIndex, "Sound", "sfx volume", makeClampSanitizerFloat(0, 1) };
+        SettingValue<float> mVoiceVolume{ mIndex, "Sound", "voice volume", makeClampSanitizerFloat(0, 1) };
+        SettingValue<int> mBufferCacheMin{ mIndex, "Sound", "buffer cache min", makeMaxSanitizerInt(1) };
+        SettingValue<int> mBufferCacheMax{ mIndex, "Sound", "buffer cache max", makeMaxSanitizerInt(1) };
+        SettingValue<int> mHrtfEnable{ mIndex, "Sound", "hrtf enable", makeEnumSanitizerInt({ -1, 0, 1 }) };
+        SettingValue<std::string> mHrtf{ mIndex, "Sound", "hrtf" };
     };
 }
 

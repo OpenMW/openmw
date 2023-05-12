@@ -14,47 +14,49 @@
 
 namespace Settings
 {
-    struct StereoViewCategory
+    struct StereoViewCategory : WithIndex
     {
-        SettingValue<int> mEyeResolutionX{ "Stereo View", "eye resolution x", makeMaxSanitizerInt(1) };
-        SettingValue<int> mEyeResolutionY{ "Stereo View", "eye resolution y", makeMaxSanitizerInt(1) };
-        SettingValue<double> mLeftEyeOffsetX{ "Stereo View", "left eye offset x" };
-        SettingValue<double> mLeftEyeOffsetY{ "Stereo View", "left eye offset y" };
-        SettingValue<double> mLeftEyeOffsetZ{ "Stereo View", "left eye offset z" };
-        SettingValue<double> mLeftEyeOrientationX{ "Stereo View", "left eye orientation x",
+        using WithIndex::WithIndex;
+
+        SettingValue<int> mEyeResolutionX{ mIndex, "Stereo View", "eye resolution x", makeMaxSanitizerInt(1) };
+        SettingValue<int> mEyeResolutionY{ mIndex, "Stereo View", "eye resolution y", makeMaxSanitizerInt(1) };
+        SettingValue<double> mLeftEyeOffsetX{ mIndex, "Stereo View", "left eye offset x" };
+        SettingValue<double> mLeftEyeOffsetY{ mIndex, "Stereo View", "left eye offset y" };
+        SettingValue<double> mLeftEyeOffsetZ{ mIndex, "Stereo View", "left eye offset z" };
+        SettingValue<double> mLeftEyeOrientationX{ mIndex, "Stereo View", "left eye orientation x",
             makeClampSanitizerDouble(-1, 1) };
-        SettingValue<double> mLeftEyeOrientationY{ "Stereo View", "left eye orientation y",
+        SettingValue<double> mLeftEyeOrientationY{ mIndex, "Stereo View", "left eye orientation y",
             makeClampSanitizerDouble(-1, 1) };
-        SettingValue<double> mLeftEyeOrientationZ{ "Stereo View", "left eye orientation z",
+        SettingValue<double> mLeftEyeOrientationZ{ mIndex, "Stereo View", "left eye orientation z",
             makeClampSanitizerDouble(-1, 1) };
-        SettingValue<double> mLeftEyeOrientationW{ "Stereo View", "left eye orientation w",
+        SettingValue<double> mLeftEyeOrientationW{ mIndex, "Stereo View", "left eye orientation w",
             makeClampSanitizerDouble(-1, 1) };
-        SettingValue<double> mLeftEyeFovLeft{ "Stereo View", "left eye fov left",
+        SettingValue<double> mLeftEyeFovLeft{ mIndex, "Stereo View", "left eye fov left",
             makeClampSanitizerDouble(-osg::PI, osg::PI) };
-        SettingValue<double> mLeftEyeFovRight{ "Stereo View", "left eye fov right",
+        SettingValue<double> mLeftEyeFovRight{ mIndex, "Stereo View", "left eye fov right",
             makeClampSanitizerDouble(-osg::PI, osg::PI) };
-        SettingValue<double> mLeftEyeFovUp{ "Stereo View", "left eye fov up",
+        SettingValue<double> mLeftEyeFovUp{ mIndex, "Stereo View", "left eye fov up",
             makeClampSanitizerDouble(-osg::PI, osg::PI) };
-        SettingValue<double> mLeftEyeFovDown{ "Stereo View", "left eye fov down",
+        SettingValue<double> mLeftEyeFovDown{ mIndex, "Stereo View", "left eye fov down",
             makeClampSanitizerDouble(-osg::PI, osg::PI) };
-        SettingValue<double> mRightEyeOffsetX{ "Stereo View", "right eye offset x" };
-        SettingValue<double> mRightEyeOffsetY{ "Stereo View", "right eye offset y" };
-        SettingValue<double> mRightEyeOffsetZ{ "Stereo View", "right eye offset z" };
-        SettingValue<double> mRightEyeOrientationX{ "Stereo View", "right eye orientation x",
+        SettingValue<double> mRightEyeOffsetX{ mIndex, "Stereo View", "right eye offset x" };
+        SettingValue<double> mRightEyeOffsetY{ mIndex, "Stereo View", "right eye offset y" };
+        SettingValue<double> mRightEyeOffsetZ{ mIndex, "Stereo View", "right eye offset z" };
+        SettingValue<double> mRightEyeOrientationX{ mIndex, "Stereo View", "right eye orientation x",
             makeClampSanitizerDouble(-1, 1) };
-        SettingValue<double> mRightEyeOrientationY{ "Stereo View", "right eye orientation y",
+        SettingValue<double> mRightEyeOrientationY{ mIndex, "Stereo View", "right eye orientation y",
             makeClampSanitizerDouble(-1, 1) };
-        SettingValue<double> mRightEyeOrientationZ{ "Stereo View", "right eye orientation z",
+        SettingValue<double> mRightEyeOrientationZ{ mIndex, "Stereo View", "right eye orientation z",
             makeClampSanitizerDouble(-1, 1) };
-        SettingValue<double> mRightEyeOrientationW{ "Stereo View", "right eye orientation w",
+        SettingValue<double> mRightEyeOrientationW{ mIndex, "Stereo View", "right eye orientation w",
             makeClampSanitizerDouble(-1, 1) };
-        SettingValue<double> mRightEyeFovLeft{ "Stereo View", "right eye fov left",
+        SettingValue<double> mRightEyeFovLeft{ mIndex, "Stereo View", "right eye fov left",
             makeClampSanitizerDouble(-osg::PI, osg::PI) };
-        SettingValue<double> mRightEyeFovRight{ "Stereo View", "right eye fov right",
+        SettingValue<double> mRightEyeFovRight{ mIndex, "Stereo View", "right eye fov right",
             makeClampSanitizerDouble(-osg::PI, osg::PI) };
-        SettingValue<double> mRightEyeFovUp{ "Stereo View", "right eye fov up",
+        SettingValue<double> mRightEyeFovUp{ mIndex, "Stereo View", "right eye fov up",
             makeClampSanitizerDouble(-osg::PI, osg::PI) };
-        SettingValue<double> mRightEyeFovDown{ "Stereo View", "right eye fov down",
+        SettingValue<double> mRightEyeFovDown{ mIndex, "Stereo View", "right eye fov down",
             makeClampSanitizerDouble(-osg::PI, osg::PI) };
     };
 }

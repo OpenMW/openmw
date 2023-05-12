@@ -14,14 +14,16 @@
 
 namespace Settings
 {
-    struct StereoCategory
+    struct StereoCategory : WithIndex
     {
-        SettingValue<bool> mStereoEnabled{ "Stereo", "stereo enabled" };
-        SettingValue<bool> mMultiview{ "Stereo", "multiview" };
-        SettingValue<bool> mSharedShadowMaps{ "Stereo", "shared shadow maps" };
-        SettingValue<bool> mAllowDisplayListsForMultiview{ "Stereo", "allow display lists for multiview" };
-        SettingValue<bool> mUseCustomView{ "Stereo", "use custom view" };
-        SettingValue<bool> mUseCustomEyeResolution{ "Stereo", "use custom eye resolution" };
+        using WithIndex::WithIndex;
+
+        SettingValue<bool> mStereoEnabled{ mIndex, "Stereo", "stereo enabled" };
+        SettingValue<bool> mMultiview{ mIndex, "Stereo", "multiview" };
+        SettingValue<bool> mSharedShadowMaps{ mIndex, "Stereo", "shared shadow maps" };
+        SettingValue<bool> mAllowDisplayListsForMultiview{ mIndex, "Stereo", "allow display lists for multiview" };
+        SettingValue<bool> mUseCustomView{ mIndex, "Stereo", "use custom view" };
+        SettingValue<bool> mUseCustomEyeResolution{ mIndex, "Stereo", "use custom eye resolution" };
     };
 }
 

@@ -142,7 +142,7 @@ namespace Settings
         }
 
         if (!loadEditorSettings)
-            Settings::Values::initDefaults();
+            Settings::StaticValues::initDefaults();
 
         // Load "settings.cfg" or "openmw-cs.cfg" from the last config dir as user settings. This path will be used to
         // save modified settings.
@@ -151,7 +151,7 @@ namespace Settings
             parser.loadSettingsFile(settingspath, mUserSettings, false, false);
 
         if (!loadEditorSettings)
-            Settings::Values::init();
+            Settings::StaticValues::init();
 
         for (const auto& [key, value] : originalDefaultSettings)
             if (!sInitialized.contains(key))

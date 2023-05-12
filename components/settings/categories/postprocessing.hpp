@@ -14,13 +14,15 @@
 
 namespace Settings
 {
-    struct PostProcessingCategory
+    struct PostProcessingCategory : WithIndex
     {
-        SettingValue<bool> mEnabled{ "Post Processing", "enabled" };
-        SettingValue<std::string> mChain{ "Post Processing", "chain" };
-        SettingValue<float> mAutoExposureSpeed{ "Post Processing", "auto exposure speed",
+        using WithIndex::WithIndex;
+
+        SettingValue<bool> mEnabled{ mIndex, "Post Processing", "enabled" };
+        SettingValue<std::string> mChain{ mIndex, "Post Processing", "chain" };
+        SettingValue<float> mAutoExposureSpeed{ mIndex, "Post Processing", "auto exposure speed",
             makeMaxStrictSanitizerFloat(0.0001f) };
-        SettingValue<bool> mTransparentPostpass{ "Post Processing", "transparent postpass" };
+        SettingValue<bool> mTransparentPostpass{ mIndex, "Post Processing", "transparent postpass" };
     };
 }
 
