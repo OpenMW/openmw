@@ -23,7 +23,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/cellutils.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/worldmodel.hpp"
@@ -277,7 +276,10 @@ namespace MWGui
 
         if (!mInterior)
         {
-            cellIndex = MWWorld::positionToCellIndex(worldX, worldY);
+            ESM::ExteriorCellLocation cellPos = ESM::positionToCellIndex(worldX, worldY);
+            cellIndex.x() = cellPos.mX;
+            cellIndex.y() = cellPos.mY;
+
             nX = (worldX - cellSize * cellIndex.x()) / cellSize;
             // Image space is -Y up, cells are Y up
             nY = 1 - (worldY - cellSize * cellIndex.y()) / cellSize;
@@ -583,8 +585,8 @@ namespace MWGui
             if (!entry.mMapTexture)
             {
                 if (!mInterior)
-                    requestMapRender(
-                        &MWBase::Environment::get().getWorldModel()->getExterior(entry.mCellX, entry.mCellY));
+                    requestMapRender(&MWBase::Environment::get().getWorldModel()->getExterior(
+                        ESM::ExteriorCellLocation(entry.mCellX, entry.mCellY, ESM::Cell::sDefaultWorldspaceId)));
 
                 osg::ref_ptr<osg::Texture2D> texture = mLocalMapRender->getMapTexture(entry.mCellX, entry.mCellY);
                 if (texture)
@@ -641,7 +643,9 @@ namespace MWGui
             for (MapEntry& entry : mMaps)
             {
                 if (!entry.mMapTexture && !widgetCropped(entry.mMapWidget, mLocalMap))
-                    world->getDoorMarkers(worldModel->getExterior(entry.mCellX, entry.mCellY), doors);
+                    world->getDoorMarkers(worldModel->getExterior(ESM::ExteriorCellLocation(
+                                              entry.mCellX, entry.mCellY, ESM::Cell::sDefaultWorldspaceId)),
+                        doors);
             }
             if (doors.empty())
                 return;

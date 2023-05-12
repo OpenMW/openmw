@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <variant>
 
+#include <components/esm/util.hpp>
 #include <components/misc/algorithm.hpp>
 
 #include "cellstore.hpp"
@@ -42,7 +43,8 @@ namespace MWWorld
         ESM::ReadersCache& mReaders;
         mutable std::unordered_map<ESM::RefId, CellStore> mCells;
         mutable std::map<std::string, CellStore*, Misc::StringUtils::CiComp> mInteriors;
-        mutable std::map<std::pair<int, int>, CellStore*> mExteriors;
+
+        mutable std::map<ESM::ExteriorCellLocation, CellStore*> mExteriors;
         IdCache mIdCache;
         std::size_t mIdCacheIndex = 0;
         std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
@@ -63,7 +65,7 @@ namespace MWWorld
 
         void clear();
 
-        CellStore& getExterior(int x, int y);
+        CellStore& getExterior(ESM::ExteriorCellLocation cellIndex);
         CellStore& getInterior(std::string_view name);
         CellStore& getCell(std::string_view name); // interior or named exterior
         CellStore& getCell(const ESM::RefId& Id);

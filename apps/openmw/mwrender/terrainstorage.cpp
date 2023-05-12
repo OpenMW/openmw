@@ -68,7 +68,7 @@ namespace MWRender
 
     osg::ref_ptr<const ESMTerrain::LandObject> TerrainStorage::getLand(int cellX, int cellY)
     {
-        return mLandManager->getLand(cellX, cellY);
+        return mLandManager->getLand(ESM::ExteriorCellLocation(cellX, cellY, ESM::Cell::sDefaultWorldspaceId));
     }
 
     const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)

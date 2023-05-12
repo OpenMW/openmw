@@ -5,6 +5,7 @@
 
 #include <components/esm/esmbridge.hpp>
 #include <components/esm/refid.hpp>
+#include <components/esm/util.hpp>
 
 namespace ESM
 {
@@ -48,6 +49,7 @@ namespace MWWorld
         float getWaterHeight() const { return mWaterHeight; }
         const ESM::RefId& getId() const { return mId; }
         ESM::RefId getWorldSpace() const;
+        ESM::ExteriorCellLocation getExteriorCellLocation() const;
 
     private:
         bool mIsExterior;

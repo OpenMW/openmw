@@ -17,7 +17,6 @@
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/actiontrap.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/cellutils.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/esmstore.hpp"

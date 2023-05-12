@@ -3,6 +3,7 @@
 
 #include <osg/Object>
 
+#include <components/esm/util.hpp>
 #include <components/esm3terrain/storage.hpp>
 #include <components/resource/resourcemanager.hpp>
 
@@ -20,7 +21,7 @@ namespace MWRender
         LandManager(int loadFlags);
 
         /// @note Will return nullptr if not found.
-        osg::ref_ptr<ESMTerrain::LandObject> getLand(int x, int y);
+        osg::ref_ptr<ESMTerrain::LandObject> getLand(ESM::ExteriorCellLocation cellIndex);
 
         void reportStats(unsigned int frameNumber, osg::Stats* stats) const override;
 

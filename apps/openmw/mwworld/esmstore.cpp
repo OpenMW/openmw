@@ -14,6 +14,7 @@
 #include <components/misc/algorithm.hpp>
 
 #include <components/esm4/common.hpp>
+#include <components/esm4/loadwrld.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/esm4/readerutils.hpp>
 #include <components/esmloader/load.hpp>

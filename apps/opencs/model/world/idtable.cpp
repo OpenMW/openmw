@@ -337,7 +337,7 @@ std::pair<CSMWorld::UniversalId, std::string> CSMWorld::IdTable::view(int row) c
         return std::make_pair(UniversalId::Type_None, "");
 
     if (id[0] == '#')
-        id = ESM::Cell::sDefaultWorldspace;
+        id = ESM::Cell::sDefaultWorldspaceId.getValue();
 
     return std::make_pair(UniversalId(UniversalId::Type_Scene, id), hint);
 }

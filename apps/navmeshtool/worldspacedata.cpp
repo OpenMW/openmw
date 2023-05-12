@@ -264,8 +264,7 @@ namespace NavMeshTool
             const osg::Vec2i cellPosition(cell.mData.mX, cell.mData.mY);
             const std::size_t cellObjectsBegin = data.mObjects.size();
             const auto cellWorldspace = Misc::StringUtils::lowerCase(
-                (cell.isExterior() ? ESM::RefId::stringRefId(ESM::Cell::sDefaultWorldspace) : cell.mId)
-                    .serializeText());
+                (cell.isExterior() ? ESM::Cell::sDefaultWorldspaceId : cell.mId).serializeText());
             WorldspaceNavMeshInput& navMeshInput = [&]() -> WorldspaceNavMeshInput& {
                 auto it = navMeshInputs.find(cellWorldspace);
                 if (it == navMeshInputs.end())

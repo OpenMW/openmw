@@ -2,7 +2,11 @@
 
 #include <components/esm3/loadcell.hpp>
 #include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadwrld.hpp>
 #include <components/misc/algorithm.hpp>
+
+#include "../mwbase/environment.hpp"
+#include "esmstore.hpp"
 
 namespace MWWorld
 {
@@ -26,6 +30,12 @@ namespace MWWorld
             .mFogDensity = 1.f,}
             ,mWaterHeight(cell.mWaterHeight)
     {
+        if (isExterior() && mWaterHeight == ESM4::Cell::sInvalidWaterLevel)
+        {
+            auto& worldStore = MWBase::Environment::get().getESMStore()->get<ESM4::World>();
+            const ESM4::World* cellWorld = worldStore.find(mParent);
+            mWaterHeight = cellWorld->mWaterLevel;
+        }
     }
 
     Cell::Cell(const ESM::Cell& cell)
@@ -39,7 +49,7 @@ namespace MWWorld
         , mNameID(cell.mName)
         , mRegion(cell.mRegion)
         , mId(cell.mId)
-        , mParent(ESM::RefId::stringRefId(ESM::Cell::sDefaultWorldspace))
+        , mParent(ESM::Cell::sDefaultWorldspaceId)
         , mMood{
             .mAmbiantColor = cell.mAmbi.mAmbient,
             .mDirectionalColor = cell.mAmbi.mSunlight,
@@ -48,6 +58,8 @@ namespace MWWorld
         }
         ,mWaterHeight(cell.mWater)
     {
+        if (isExterior())
+            mWaterHeight = -1.f;
     }
 
     std::string Cell::getDescription() const
@@ -64,5 +76,10 @@ namespace MWWorld
             return mParent;
         else
             return mId;
+    }
+
+    ESM::ExteriorCellLocation Cell::getExteriorCellLocation() const
+    {
+        return { mGridPos.x(), mGridPos.y(), getWorldSpace() };
     }
 }

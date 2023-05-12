@@ -55,6 +55,7 @@ namespace ESM
     struct ItemLevList;
     struct TimeStamp;
     class RefId;
+    struct ExteriorCellLocation;
 }
 
 namespace MWPhysics
@@ -250,10 +251,6 @@ namespace MWBase
         ///< Move to interior cell.
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        virtual void changeToExteriorCell(const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
-            = 0;
-        ///< Move to exterior cell.
-        ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
         virtual void changeToCell(
             const ESM::RefId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
             = 0;
@@ -315,9 +312,6 @@ namespace MWBase
         ///< placement
         /// relative to \a referenceObject (but the object may be placed somewhere else if the wanted location is
         /// obstructed).
-
-        virtual void indexToPosition(int cellX, int cellY, float& x, float& y, bool centre = false) const = 0;
-        ///< Convert cell numbers to position.
 
         virtual void queueMovement(const MWWorld::Ptr& ptr, const osg::Vec3f& velocity) = 0;
         ///< Queues movement for \a ptr (in local space), to be applied in the next call to

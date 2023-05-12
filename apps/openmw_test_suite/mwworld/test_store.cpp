@@ -20,6 +20,7 @@
 #include <components/esm4/loadligh.hpp>
 #include <components/esm4/loadrefr.hpp>
 #include <components/esm4/loadstat.hpp>
+#include <components/esm4/loadwrld.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/esm4/readerutils.hpp>
 #include <components/files/configurationmanager.hpp>

@@ -8,6 +8,7 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/loadregn.hpp>
+#include <components/esm4/loadwrld.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/settings/settings.hpp>
 
@@ -15,7 +16,6 @@
 #include "../mwbase/world.hpp"
 
 #include "cellstore.hpp"
-#include "cellutils.hpp"
 #include "esmstore.hpp"
 
 namespace
@@ -76,11 +76,11 @@ MWWorld::CellStore& MWWorld::WorldModel::getCellStore(const ESM::Cell* cell)
     }
     else
     {
-        std::map<std::pair<int, int>, CellStore*>::iterator result
-            = mExteriors.find(std::make_pair(cell->getGridX(), cell->getGridY()));
+        ESM::ExteriorCellLocation extIndex(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId);
+        std::map<ESM::ExteriorCellLocation, CellStore*>::iterator result = mExteriors.find(extIndex);
 
         if (result == mExteriors.end())
-            result = mExteriors.emplace(std::make_pair(cell->getGridX(), cell->getGridY()), cellStore).first;
+            result = mExteriors.emplace(extIndex, cellStore).first;
 
         return *result->second;
     }
@@ -160,33 +160,57 @@ MWWorld::WorldModel::WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCach
 {
 }
 
-MWWorld::CellStore& MWWorld::WorldModel::getExterior(int x, int y)
+MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellLocation cellIndex)
 {
-    std::map<std::pair<int, int>, CellStore*>::iterator result = mExteriors.find(std::make_pair(x, y));
+    std::map<ESM::ExteriorCellLocation, CellStore*>::iterator result;
+
+    result = mExteriors.find(cellIndex);
 
     if (result == mExteriors.end())
     {
-        const ESM::Cell* cell = mStore.get<ESM::Cell>().search(x, y);
-
-        if (!cell)
+        if (!ESM::isEsm4Ext(cellIndex.mWorldspace))
         {
-            // Cell isn't predefined. Make one on the fly.
-            ESM::Cell record;
-            record.mData.mFlags = ESM::Cell::HasWater;
-            record.mData.mX = x;
-            record.mData.mY = y;
-            record.mWater = 0;
-            record.mMapColor = 0;
-            record.updateId();
+            const ESM::Cell* cell = mStore.get<ESM::Cell>().search(cellIndex.mX, cellIndex.mY);
 
-            cell = MWBase::Environment::get().getESMStore()->insert(record);
+            if (cell == nullptr)
+            {
+                // Cell isn't predefined. Make one on the fly.
+                ESM::Cell record;
+                record.mData.mFlags = ESM::Cell::HasWater;
+                record.mData.mX = cellIndex.mX;
+                record.mData.mY = cellIndex.mY;
+                record.mWater = 0;
+                record.mMapColor = 0;
+                record.updateId();
+
+                cell = MWBase::Environment::get().getESMStore()->insert(record);
+            }
+
+            CellStore* cellStore
+                = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
+            result = mExteriors.emplace(cellIndex, cellStore).first;
         }
-
-        CellStore* cellStore
-            = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
-        result = mExteriors.emplace(std::make_pair(x, y), cellStore).first;
+        else
+        {
+            const Store<ESM4::Cell>& cell4Store = mStore.get<ESM4::Cell>();
+            bool exteriorExists = mStore.get<ESM4::World>().search(cellIndex.mWorldspace) != nullptr;
+            const ESM4::Cell* cell = cell4Store.searchExterior(cellIndex);
+            if (!exteriorExists)
+                throw std::runtime_error("Exterior ESM4 world is not found: " + cellIndex.mWorldspace.toDebugString());
+            if (cell == nullptr)
+            {
+                ESM4::Cell record;
+                record.mParent = cellIndex.mWorldspace;
+                record.mX = cellIndex.mX;
+                record.mY = cellIndex.mY;
+                record.mCellFlags = !ESM4::CELL_Interior;
+                cell = MWBase::Environment::get().getESMStore()->insert(record);
+            }
+            CellStore* cellStore
+                = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
+            result = mExteriors.emplace(cellIndex, cellStore).first;
+        }
     }
-
     if (result->second->getState() != CellStore::State_Loaded)
     {
         result->second->load();
@@ -232,7 +256,8 @@ MWWorld::CellStore& MWWorld::WorldModel::getCell(const ESM::RefId& id)
         return result->second;
 
     if (const auto* exteriorId = id.getIf<ESM::ESM3ExteriorCellRefId>())
-        return getExterior(exteriorId->getX(), exteriorId->getY());
+        return getExterior(
+            ESM::ExteriorCellLocation(exteriorId->getX(), exteriorId->getY(), ESM::Cell::sDefaultWorldspaceId));
 
     const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().search(id);
     CellStore* newCellStore = nullptr;
@@ -249,7 +274,8 @@ MWWorld::CellStore& MWWorld::WorldModel::getCell(const ESM::RefId& id)
     {
         std::pair<int, int> coord
             = std::make_pair(newCellStore->getCell()->getGridX(), newCellStore->getCell()->getGridY());
-        mExteriors.emplace(coord, newCellStore);
+        ESM::ExteriorCellLocation extIndex = { coord.first, coord.second, newCellStore->getCell()->getWorldSpace() };
+        mExteriors.emplace(extIndex, newCellStore);
     }
     else
     {
@@ -293,7 +319,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getCell(std::string_view name)
     if (!cell)
         throw std::runtime_error(std::string("Can't find cell with name ") + std::string(name));
 
-    return getExterior(cell->getGridX(), cell->getGridY());
+    return getExterior(ESM::ExteriorCellLocation(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId));
 }
 
 MWWorld::CellStore& MWWorld::WorldModel::getCellByPosition(
@@ -301,8 +327,11 @@ MWWorld::CellStore& MWWorld::WorldModel::getCellByPosition(
 {
     if (cellInSameWorldSpace && !cellInSameWorldSpace->isExterior())
         return *cellInSameWorldSpace;
-    const osg::Vec2i cellIndex = positionToCellIndex(pos.x(), pos.y());
-    return getExterior(cellIndex.x(), cellIndex.y());
+    ESM::RefId exteriorWorldspace
+        = cellInSameWorldSpace ? cellInSameWorldSpace->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
+    const ESM::ExteriorCellLocation cellIndex = ESM::positionToCellIndex(pos.x(), pos.y(), exteriorWorldspace);
+
+    return getExterior(cellIndex);
 }
 
 MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name, CellStore& cell)
@@ -342,8 +371,7 @@ MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name)
     // Then check cells that are already listed
     // Search in reverse, this is a workaround for an ambiguous chargen_plank reference in the vanilla game.
     // there is one at -22,16 and one at -2,-9, the latter should be used.
-    for (std::map<std::pair<int, int>, CellStore*>::reverse_iterator iter = mExteriors.rbegin();
-         iter != mExteriors.rend(); ++iter)
+    for (auto iter = mExteriors.rbegin(); iter != mExteriors.rend(); ++iter)
     {
         Ptr ptr = getPtrAndCache(name, *iter->second);
         if (!ptr.isEmpty())

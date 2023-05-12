@@ -10,7 +10,6 @@
 
 #include "../mwclass/container.hpp"
 
-#include "../mwworld/cellutils.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/timestamp.hpp"
 #include "../mwworld/worldmodel.hpp"

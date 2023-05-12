@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <components/esm/refid.hpp>
+#include <components/esm/util.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loaddial.hpp>
 #include <components/esm3/loadglob.hpp>
@@ -177,6 +178,7 @@ namespace MWWorld
     template <class T, class Id = ESM::RefId>
     class TypedDynamicStore : public DynamicStoreBase<Id>
     {
+    protected:
         typedef std::unordered_map<Id, T> Static;
         Static mStatic;
         /// @par mShared usually preserves the record order as it came from the content files (this
@@ -283,10 +285,16 @@ namespace MWWorld
         std::unordered_map<std::string, ESM4::Cell*, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
             mCellNameIndex;
 
+        std::unordered_map<ESM::ExteriorCellLocation, ESM4::Cell*> mExteriors;
+        std::unordered_map<ESM::ExteriorCellLocation, ESM4::Cell*> mPersistentExteriors;
+
     public:
         const ESM4::Cell* searchCellName(std::string_view) const;
+        const ESM4::Cell* searchExterior(ESM::ExteriorCellLocation cellIndex) const;
         ESM4::Cell* insert(const ESM4::Cell& item, bool overrideOnly = false);
         ESM4::Cell* insertStatic(const ESM4::Cell& item);
+        void insertCell(ESM4::Cell* cell);
+        void clearDynamic() override;
     };
 
     template <>

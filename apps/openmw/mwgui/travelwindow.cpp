@@ -15,7 +15,6 @@
 
 #include "../mwworld/actionteleport.hpp"
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/cellutils.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -126,12 +125,11 @@ namespace MWGui
         {
             std::string_view cellname = transport[i].mCellName;
             bool interior = true;
-            const osg::Vec2i cellIndex
-                = MWWorld::positionToCellIndex(transport[i].mPos.pos[0], transport[i].mPos.pos[1]);
+            const ESM::ExteriorCellLocation cellIndex
+                = ESM::positionToCellIndex(transport[i].mPos.pos[0], transport[i].mPos.pos[1]);
             if (cellname.empty())
             {
-                MWWorld::CellStore& cell
-                    = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
+                MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex);
                 cellname = MWBase::Environment::get().getWorld()->getCellName(&cell);
                 interior = false;
             }
@@ -194,8 +192,8 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
-        osg::Vec2i posCell = MWWorld::positionToCellIndex(pos.pos[0], pos.pos[1]);
-        ESM::RefId cellId = ESM::Cell::generateIdForCell(!interior, cellname, posCell.x(), posCell.y());
+        const ESM::ExteriorCellLocation posCell = ESM::positionToCellIndex(pos.pos[0], pos.pos[1]);
+        ESM::RefId cellId = ESM::Cell::generateIdForCell(!interior, cellname, posCell.mX, posCell.mY);
 
         // Teleports any followers, too.
         MWWorld::ActionTeleport action(cellId, pos, true);

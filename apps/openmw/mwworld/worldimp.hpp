@@ -246,6 +246,8 @@ namespace MWWorld
 
         bool isCellQuasiExterior() const override;
 
+        ESM::RefId getCurrentWorldspace() const;
+
         void getDoorMarkers(MWWorld::CellStore& cell, std::vector<DoorMarker>& out) override;
         ///< get a list of teleport door markers for a given cell, to be displayed on the local map
 
@@ -345,11 +347,6 @@ namespace MWWorld
         ///< Move to interior cell.
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
 
-        void changeToExteriorCell(
-            const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true) override;
-        ///< Move to exterior cell.
-        ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
-
         void changeToCell(const ESM::RefId& cellId, const ESM::Position& position, bool adjustPlayerPos,
             bool changeEvent = true) override;
         ///< @param changeEvent If false, do not trigger cell change flag or detect worldspace changes
@@ -402,9 +399,6 @@ namespace MWWorld
         /// obstructed).
 
         float getMaxActivationDistance() const override;
-
-        void indexToPosition(int cellX, int cellY, float& x, float& y, bool centre = false) const override;
-        ///< Convert cell numbers to position.
 
         void queueMovement(const Ptr& ptr, const osg::Vec3f& velocity) override;
         ///< Queues movement for \a ptr (in local space), to be applied in the next call to

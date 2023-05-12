@@ -123,7 +123,10 @@ namespace MWScript
                 MWBase::World* world = MWBase::Environment::get().getWorld();
                 const MWWorld::Ptr playerPtr = world->getPlayerPtr();
 
-                world->indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
+                osg::Vec2 posFromIndex
+                    = ESM::indexToPosition(ESM::ExteriorCellLocation(x, y, ESM::Cell::sDefaultWorldspaceId), true);
+                pos.pos[0] = posFromIndex.x();
+                pos.pos[1] = posFromIndex.y();
                 pos.pos[2] = 0;
 
                 pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
