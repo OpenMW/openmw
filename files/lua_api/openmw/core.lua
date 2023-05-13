@@ -177,7 +177,13 @@
 -- @param #any cellOrName A cell to define the destination worldspace; can be either #Cell, or cell name, or an empty string (empty string means the default exterior worldspace).
 -- If the worldspace has multiple cells (i.e. an exterior), the destination cell is calculated using `position`.
 -- @param openmw.util#Vector3 position New position.
--- @param openmw.util#Vector3 rotation (optional) New rotation. If missing, then the current rotation is used.
+-- @param #TeleportOptions options (optional) Either table @{#TeleportOptions} or @{openmw.util#Vector3} rotation.
+
+---
+-- Either table with options or @{openmw.util#Vector3} rotation.
+-- @type TeleportOptions
+-- @field openmw.util#Vector3 rotation New rotation; if missing, then the current rotation is used.
+-- @field #boolean onGround If true, adjust destination position to the ground.
 
 ---
 -- Moves object into a container or an inventory. Enables if was disabled.
