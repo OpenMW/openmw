@@ -225,6 +225,7 @@
 -- @field #boolean isQuasiExterior (DEPRECATED, use `hasTag("QuasiExterior")`) Whether the cell is a quasi exterior (like interior but with the sky and the wheather).
 -- @field #number gridX Index of the cell by X (only for exteriors).
 -- @field #number gridY Index of the cell by Y (only for exteriors).
+-- @field #string worldSpaceId Id of the world space.
 -- @field #boolean hasWater True if the cell contains water.
 -- @field #boolean hasSky True if in this cell sky should be rendered.
 

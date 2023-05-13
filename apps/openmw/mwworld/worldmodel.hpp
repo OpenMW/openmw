@@ -65,10 +65,10 @@ namespace MWWorld
 
         void clear();
 
-        CellStore& getExterior(ESM::ExteriorCellLocation cellIndex);
-        CellStore& getInterior(std::string_view name);
-        CellStore& getCell(std::string_view name); // interior or named exterior
-        CellStore& getCell(const ESM::RefId& Id);
+        CellStore& getExterior(ESM::ExteriorCellLocation cellIndex, bool forceLoad = true);
+        CellStore& getInterior(std::string_view name, bool forceLoad = true);
+        CellStore& getCell(std::string_view name, bool forceLoad = true); // interior or named exterior
+        CellStore& getCell(const ESM::RefId& Id, bool forceLoad = true);
 
         // Returns the cell that is in the same worldspace as `cellInSameWorldSpace`
         // (in case of nullptr - default exterior worldspace) and contains given position.

@@ -160,7 +160,7 @@ MWWorld::WorldModel::WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCach
 {
 }
 
-MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellLocation cellIndex)
+MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellLocation cellIndex, bool forceLoad)
 {
     std::map<ESM::ExteriorCellLocation, CellStore*>::iterator result;
 
@@ -211,7 +211,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellLocation c
             result = mExteriors.emplace(cellIndex, cellStore).first;
         }
     }
-    if (result->second->getState() != CellStore::State_Loaded)
+    if (forceLoad && result->second->getState() != CellStore::State_Loaded)
     {
         result->second->load();
     }
@@ -234,22 +234,20 @@ MWWorld::CellStore* MWWorld::WorldModel::getInteriorOrNull(std::string_view name
             return nullptr; // Cell not found
         result = mInteriors.emplace(name, newCellStore).first;
     }
-
-    if (result->second->getState() != CellStore::State_Loaded)
-        result->second->load();
-
     return result->second;
 }
 
-MWWorld::CellStore& MWWorld::WorldModel::getInterior(std::string_view name)
+MWWorld::CellStore& MWWorld::WorldModel::getInterior(std::string_view name, bool forceLoad)
 {
     CellStore* res = getInteriorOrNull(name);
     if (res == nullptr)
         throw std::runtime_error("Interior not found: '" + std::string(name) + "'");
+    if (forceLoad && res->getState() != CellStore::State_Loaded)
+        res->load();
     return *res;
 }
 
-MWWorld::CellStore& MWWorld::WorldModel::getCell(const ESM::RefId& id)
+MWWorld::CellStore& MWWorld::WorldModel::getCell(const ESM::RefId& id, bool forceLoad)
 {
     auto result = mCells.find(id);
     if (result != mCells.end())
@@ -257,7 +255,8 @@ MWWorld::CellStore& MWWorld::WorldModel::getCell(const ESM::RefId& id)
 
     if (const auto* exteriorId = id.getIf<ESM::ESM3ExteriorCellRefId>())
         return getExterior(
-            ESM::ExteriorCellLocation(exteriorId->getX(), exteriorId->getY(), ESM::Cell::sDefaultWorldspaceId));
+            ESM::ExteriorCellLocation(exteriorId->getX(), exteriorId->getY(), ESM::Cell::sDefaultWorldspaceId),
+            forceLoad);
 
     const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().search(id);
     CellStore* newCellStore = nullptr;
@@ -281,17 +280,21 @@ MWWorld::CellStore& MWWorld::WorldModel::getCell(const ESM::RefId& id)
     {
         mInteriors.emplace(newCellStore->getCell()->getNameId(), newCellStore);
     }
-    if (newCellStore->getState() != CellStore::State_Loaded)
+    if (forceLoad && newCellStore->getState() != CellStore::State_Loaded)
     {
         newCellStore->load();
     }
     return *newCellStore;
 }
 
-MWWorld::CellStore& MWWorld::WorldModel::getCell(std::string_view name)
+MWWorld::CellStore& MWWorld::WorldModel::getCell(std::string_view name, bool forceLoad)
 {
     if (CellStore* res = getInteriorOrNull(name)) // first try interiors
+    {
+        if (forceLoad && res->getState() != CellStore::State_Loaded)
+            res->load();
         return *res;
+    }
 
     // try named exteriors
     const ESM::Cell* cell = mStore.get<ESM::Cell>().searchExtByName(name);
@@ -319,7 +322,8 @@ MWWorld::CellStore& MWWorld::WorldModel::getCell(std::string_view name)
     if (!cell)
         throw std::runtime_error(std::string("Can't find cell with name ") + std::string(name));
 
-    return getExterior(ESM::ExteriorCellLocation(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId));
+    return getExterior(
+        ESM::ExteriorCellLocation(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId), forceLoad);
 }
 
 MWWorld::CellStore& MWWorld::WorldModel::getCellByPosition(
