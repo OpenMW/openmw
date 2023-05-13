@@ -74,7 +74,9 @@ namespace MWLua
             std::memcpy(esmPos.pos, &pos, sizeof(osg::Vec3f));
             std::memcpy(esmPos.rot, &rot, sizeof(osg::Vec3f));
             MWWorld::Ptr ptr = world->getPlayerPtr();
-            ptr.getClass().getCreatureStats(ptr).land(false);
+            auto& stats = ptr.getClass().getCreatureStats(ptr);
+            stats.land(true);
+            stats.setTeleported(true);
             world->getPlayer().setTeleported(true);
             world->changeToCell(destCell->getCell()->getId(), esmPos, true);
         }
@@ -85,7 +87,11 @@ namespace MWLua
             MWBase::World* world = MWBase::Environment::get().getWorld();
             const MWWorld::Class& cls = ptr.getClass();
             if (cls.isActor())
-                cls.getCreatureStats(ptr).land(false);
+            {
+                auto& stats = ptr.getClass().getCreatureStats(ptr);
+                stats.land(false);
+                stats.setTeleported(true);
+            }
             MWWorld::Ptr newPtr = world->moveObject(ptr, destCell, pos);
             world->rotateObject(newPtr, rot, MWBase::RotationFlag_none);
             if (!newPtr.getRefData().isEnabled())

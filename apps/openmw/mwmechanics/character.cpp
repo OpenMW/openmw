@@ -1862,12 +1862,18 @@ namespace MWMechanics
         float scale = mPtr.getCellRef().getScale();
 
         static const bool normalizeSpeed = Settings::Manager::getBool("normalise race speed", "Game");
-        if (!normalizeSpeed && mPtr.getClass().isNpc())
+        if (!normalizeSpeed && cls.isNpc())
         {
             const ESM::NPC* npc = mPtr.get<ESM::NPC>()->mBase;
             const ESM::Race* race = world->getStore().get<ESM::Race>().find(npc->mRace);
             float weight = npc->isMale() ? race->mData.mWeight.mMale : race->mData.mWeight.mFemale;
             scale *= weight;
+        }
+
+        if (cls.isActor() && cls.getCreatureStats(mPtr).wasTeleported())
+        {
+            mSmoothedSpeed = osg::Vec2f();
+            cls.getCreatureStats(mPtr).setTeleported(false);
         }
 
         if (!cls.isActor())
