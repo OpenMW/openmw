@@ -710,8 +710,8 @@ namespace MWSound
 
     bool OpenAL_Output::init(const std::string& devname, const std::string& hrtfname, HrtfMode hrtfmode)
     {
-        const std::lock_guard<std::mutex> lock(mReopenMutex);
         deinit();
+        std::lock_guard<std::mutex> lock(mReopenMutex);
 
         Log(Debug::Info) << "Initializing OpenAL...";
 
@@ -979,7 +979,7 @@ namespace MWSound
     void OpenAL_Output::deinit()
     {
         mStreamThread->removeAll();
-        mDefaultDeviceThread.release();
+        mDefaultDeviceThread.reset();
 
         for (ALuint source : mFreeSources)
             alDeleteSources(1, &source);
@@ -1660,7 +1660,6 @@ namespace MWSound
 
     OpenAL_Output::~OpenAL_Output()
     {
-        const std::lock_guard<std::mutex> lock(mReopenMutex);
         OpenAL_Output::deinit();
     }
 
