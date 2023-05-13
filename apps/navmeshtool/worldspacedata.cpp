@@ -37,6 +37,7 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+
 namespace NavMeshTool
 {
     namespace
