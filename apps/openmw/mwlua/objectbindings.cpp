@@ -102,6 +102,11 @@ namespace MWLua
             world->rotateObject(newPtr, rot, MWBase::RotationFlag_none);
             if (placeOnGround)
                 world->adjustPosition(newPtr, true);
+            if (cls.isDoor())
+            { // Change "original position and rotation" because without it teleported animated doors don't work
+              // properly.
+                newPtr.getCellRef().setPosition(newPtr.getRefData().getPosition());
+            }
             if (!newPtr.getRefData().isEnabled())
                 world->enable(newPtr);
         }
