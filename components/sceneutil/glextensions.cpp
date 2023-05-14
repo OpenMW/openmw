@@ -1,5 +1,7 @@
 #include "glextensions.hpp"
 
+#include <osg/GraphicsContext>
+
 namespace SceneUtil
 {
     namespace
