@@ -10,6 +10,11 @@
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadltex.hpp>
 
+namespace ESM4
+{
+    struct Land;
+}
+
 namespace VFS
 {
     class Manager;
@@ -32,7 +37,7 @@ namespace ESMTerrain
 
         META_Object(ESMTerrain, LandObject)
 
-        inline const ESM::Land::LandData* getData(int flags) const
+        inline const ESM::LandData* getData(int flags) const
         {
             if ((mData.mDataLoaded & flags) != flags)
                 return nullptr;
@@ -108,11 +113,11 @@ namespace ESMTerrain
 
         int getBlendmapScale(float chunkSize) override;
 
-        float getVertexHeight(const ESM::Land::LandData* data, int x, int y)
+        float getVertexHeight(const ESM::LandData* data, int x, int y)
         {
             assert(x < ESM::Land::LAND_SIZE);
             assert(y < ESM::Land::LAND_SIZE);
-            return data->mHeights[y * ESM::Land::LAND_SIZE + x];
+            return data->getHeights()[y * ESM::Land::LAND_SIZE + x];
         }
 
     private:
@@ -128,7 +133,7 @@ namespace ESMTerrain
         inline const LandObject* getLand(ESM::ExteriorCellLocation cellLocation, LandCache& cache);
 
         virtual bool useAlteration() const { return false; }
-        virtual void adjustColor(int col, int row, const ESM::Land::LandData* heightData, osg::Vec4ub& color) const;
+        virtual void adjustColor(int col, int row, const ESM::LandData* heightData, osg::Vec4ub& color) const;
         virtual float getAlteredHeight(int col, int row) const;
 
         // Since plugins can define new texture palettes, we need to know the plugin index too

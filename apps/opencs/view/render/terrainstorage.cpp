@@ -72,8 +72,8 @@ namespace CSVRender
         if (index == -1) // no land!
             return height;
 
-        const ESM::Land::LandData* landData = mData.getLand().getRecord(index).get().getLandData(ESM::Land::DATA_VHGT);
-        height = landData->mHeights[inCellY * ESM::Land::LAND_SIZE + inCellX];
+        const ESM::LandData* landData = mData.getLand().getRecord(index).get().getLandData(ESM::Land::DATA_VHGT);
+        height = landData->getHeights()[inCellY * ESM::Land::LAND_SIZE + inCellX];
         return mAlteredHeight[inCellY * ESM::Land::LAND_SIZE + inCellX] + height;
     }
 
@@ -152,13 +152,14 @@ namespace CSVRender
             || getHeightDifferenceToDown(col, row, heightData) >= heightWarningLimit;
     }
 
-    void TerrainStorage::adjustColor(int col, int row, const ESM::Land::LandData* heightData, osg::Vec4ub& color) const
+    void TerrainStorage::adjustColor(int col, int row, const ESM::LandData* heightData, osg::Vec4ub& color) const
     {
         // Highlight broken height changes
+        const ESM::Land::LandData* heightDataEsm3 = dynamic_cast<const ESM::Land::LandData*>(heightData);
         int heightWarningLimit = 1024;
-        if (((col > 0 && row > 0) && leftOrUpIsOverTheLimit(col, row, heightWarningLimit, heightData))
+        if (((col > 0 && row > 0) && leftOrUpIsOverTheLimit(col, row, heightWarningLimit, heightDataEsm3))
             || ((col < ESM::Land::LAND_SIZE - 1 && row < ESM::Land::LAND_SIZE - 1)
-                && rightOrDownIsOverTheLimit(col, row, heightWarningLimit, heightData)))
+                && rightOrDownIsOverTheLimit(col, row, heightWarningLimit, heightDataEsm3)))
         {
             color.r() = 255;
             color.g() = 0;

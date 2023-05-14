@@ -397,13 +397,13 @@ namespace MWWorld
         if (cellVariant.isExterior())
         {
             osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellIndex);
-            const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
-            const int verts = ESM::Land::LAND_SIZE;
-            const int worldsize = ESM::Land::REAL_SIZE;
+            const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
+            const int verts = data->getLandSize();
+            const int worldsize = data->getSize();
             if (data)
             {
-                mPhysics->addHeightField(
-                    data->mHeights, cellX, cellY, worldsize, verts, data->mMinHeight, data->mMaxHeight, land.get());
+                mPhysics->addHeightField(data->getHeights().data(), cellX, cellY, worldsize, verts,
+                    data->getMinHeight(), data->getMaxHeight(), land.get());
             }
             else
             {
@@ -425,14 +425,14 @@ namespace MWWorld
                     else
                     {
                         DetourNavigator::HeightfieldSurface heights;
-                        heights.mHeights = data->mHeights;
-                        heights.mSize = static_cast<std::size_t>(ESM::Land::LAND_SIZE);
-                        heights.mMinHeight = data->mMinHeight;
-                        heights.mMaxHeight = data->mMaxHeight;
+                        heights.mHeights = data->getHeights().data();
+                        heights.mSize = static_cast<std::size_t>(data->getLandSize());
+                        heights.mMinHeight = data->getMinHeight();
+                        heights.mMaxHeight = data->getMaxHeight();
                         return heights;
                     }
                 }();
-                mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shape, navigatorUpdateGuard);
+                mNavigator.addHeightfield(cellPosition, data->getSize(), shape, navigatorUpdateGuard);
             }
         }
 

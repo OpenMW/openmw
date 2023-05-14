@@ -56,7 +56,7 @@ namespace CSVRender
         bool rightOrDownIsOverTheLimit(
             int col, int row, int heightWarningLimit, const ESM::Land::LandData* heightData) const;
 
-        void adjustColor(int col, int row, const ESM::Land::LandData* heightData, osg::Vec4ub& color) const override;
+        void adjustColor(int col, int row, const ESM::LandData* heightData, osg::Vec4ub& color) const override;
         float getAlteredHeight(int col, int row) const override;
     };
 

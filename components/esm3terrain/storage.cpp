@@ -63,15 +63,15 @@ namespace ESMTerrain
 
         int cellX = static_cast<int>(std::floor(origin.x()));
         int cellY = static_cast<int>(std::floor(origin.y()));
-
-        int startRow = (origin.x() - cellX) * ESM::Land::LAND_SIZE;
-        int startColumn = (origin.y() - cellY) * ESM::Land::LAND_SIZE;
-
-        int endRow = startRow + size * (ESM::Land::LAND_SIZE - 1) + 1;
-        int endColumn = startColumn + size * (ESM::Land::LAND_SIZE - 1) + 1;
-
         osg::ref_ptr<const LandObject> land = getLand(ESM::ExteriorCellLocation(cellX, cellY, worldspace));
-        const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
+        const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
+
+        int startRow = (origin.x() - cellX) * data->getLandSize();
+        int startColumn = (origin.y() - cellY) * data->getLandSize();
+
+        int endRow = startRow + size * (data->getLandSize() - 1) + 1;
+        int endColumn = startColumn + size * (data->getLandSize() - 1) + 1;
+
         if (data)
         {
             min = std::numeric_limits<float>::max();
@@ -80,7 +80,7 @@ namespace ESMTerrain
             {
                 for (int col = startColumn; col < endColumn; ++col)
                 {
-                    float h = data->mHeights[col * ESM::Land::LAND_SIZE + row];
+                    float h = data->getHeights()[col * data->getLandSize() + row];
                     if (h > max)
                         max = h;
                     if (h < min)
@@ -98,34 +98,37 @@ namespace ESMTerrain
     void Storage::fixNormal(
         osg::Vec3f& normal, ESM::ExteriorCellLocation cellLocation, int col, int row, LandCache& cache)
     {
-        while (col >= ESM::Land::LAND_SIZE - 1)
+
+        const LandObject* land = getLand(cellLocation, cache);
+        const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VNML) : nullptr;
+        const int landSize = data ? data->getLandSize() : ESM::Land::LAND_SIZE;
+
+        while (col >= landSize - 1)
         {
             ++cellLocation.mY;
-            col -= ESM::Land::LAND_SIZE - 1;
+            col -= landSize - 1;
         }
-        while (row >= ESM::Land::LAND_SIZE - 1)
+        while (row >= landSize - 1)
         {
             ++cellLocation.mX;
-            row -= ESM::Land::LAND_SIZE - 1;
+            row -= landSize - 1;
         }
         while (col < 0)
         {
             --cellLocation.mY;
-            col += ESM::Land::LAND_SIZE - 1;
+            col += landSize - 1;
         }
         while (row < 0)
         {
             --cellLocation.mX;
-            row += ESM::Land::LAND_SIZE - 1;
+            row += landSize - 1;
         }
 
-        const LandObject* land = getLand(cellLocation, cache);
-        const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VNML) : nullptr;
         if (data)
         {
-            normal.x() = data->mNormals[col * ESM::Land::LAND_SIZE * 3 + row * 3];
-            normal.y() = data->mNormals[col * ESM::Land::LAND_SIZE * 3 + row * 3 + 1];
-            normal.z() = data->mNormals[col * ESM::Land::LAND_SIZE * 3 + row * 3 + 2];
+            normal.x() = data->getNormals()[col * landSize * 3 + row * 3];
+            normal.y() = data->getNormals()[col * landSize * 3 + row * 3 + 1];
+            normal.z() = data->getNormals()[col * landSize * 3 + row * 3 + 2];
             normal.normalize();
         }
         else
@@ -147,24 +150,26 @@ namespace ESMTerrain
     void Storage::fixColour(
         osg::Vec4ub& color, ESM::ExteriorCellLocation cellLocation, int col, int row, LandCache& cache)
     {
-        if (col == ESM::Land::LAND_SIZE - 1)
+        const LandObject* land = getLand(cellLocation, cache);
+        const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VCLR) : nullptr;
+        const int landSize = data ? data->getLandSize() : ESM::Land::LAND_SIZE;
+
+        if (col == landSize - 1)
         {
             ++cellLocation.mY;
             col = 0;
         }
-        if (row == ESM::Land::LAND_SIZE - 1)
+        if (row == landSize - 1)
         {
             ++cellLocation.mX;
             row = 0;
         }
 
-        const LandObject* land = getLand(cellLocation, cache);
-        const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VCLR) : nullptr;
         if (data)
         {
-            color.r() = data->mColours[col * ESM::Land::LAND_SIZE * 3 + row * 3];
-            color.g() = data->mColours[col * ESM::Land::LAND_SIZE * 3 + row * 3 + 1];
-            color.b() = data->mColours[col * ESM::Land::LAND_SIZE * 3 + row * 3 + 2];
+            color.r() = data->getColors()[col * landSize * 3 + row * 3];
+            color.g() = data->getColors()[col * landSize * 3 + row * 3 + 1];
+            color.b() = data->getColors()[col * landSize * 3 + row * 3 + 2];
         }
         else
         {
@@ -210,9 +215,11 @@ namespace ESMTerrain
             {
                 ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
                 const LandObject* land = getLand(cellLocation, cache);
-                const ESM::Land::LandData* heightData = nullptr;
-                const ESM::Land::LandData* normalData = nullptr;
-                const ESM::Land::LandData* colourData = nullptr;
+                const ESM::LandData* heightData = nullptr;
+                const ESM::LandData* normalData = nullptr;
+                const ESM::LandData* colourData = nullptr;
+                const int LandSize = ESM::Land::LAND_SIZE;
+                const int LandSizeInUnits = Constants::CellSizeInUnits;
                 if (land)
                 {
                     heightData = land->getData(ESM::Land::DATA_VHGT);
@@ -231,12 +238,12 @@ namespace ESMTerrain
                     rowStart += increment;
 
                 // Only relevant for chunks smaller than (contained in) one cell
-                rowStart += (origin.x() - startCellX) * ESM::Land::LAND_SIZE;
-                colStart += (origin.y() - startCellY) * ESM::Land::LAND_SIZE;
-                int rowEnd = std::min(static_cast<int>(rowStart + std::min(1.f, size) * (ESM::Land::LAND_SIZE - 1) + 1),
-                    static_cast<int>(ESM::Land::LAND_SIZE));
-                int colEnd = std::min(static_cast<int>(colStart + std::min(1.f, size) * (ESM::Land::LAND_SIZE - 1) + 1),
-                    static_cast<int>(ESM::Land::LAND_SIZE));
+                rowStart += (origin.x() - startCellX) * LandSize;
+                colStart += (origin.y() - startCellY) * LandSize;
+                int rowEnd = std::min(
+                    static_cast<int>(rowStart + std::min(1.f, size) * (LandSize - 1) + 1), static_cast<int>(LandSize));
+                int colEnd = std::min(
+                    static_cast<int>(colStart + std::min(1.f, size) * (LandSize - 1) + 1), static_cast<int>(LandSize));
 
                 vertY = vertY_;
                 for (int col = colStart; col < colEnd; col += increment)
@@ -244,27 +251,27 @@ namespace ESMTerrain
                     vertX = vertX_;
                     for (int row = rowStart; row < rowEnd; row += increment)
                     {
-                        int srcArrayIndex = col * ESM::Land::LAND_SIZE * 3 + row * 3;
+                        int srcArrayIndex = col * LandSize * 3 + row * 3;
 
-                        assert(row >= 0 && row < ESM::Land::LAND_SIZE);
-                        assert(col >= 0 && col < ESM::Land::LAND_SIZE);
+                        assert(row >= 0 && row < LandSize);
+                        assert(col >= 0 && col < LandSize);
 
                         assert(vertX < numVerts);
                         assert(vertY < numVerts);
 
                         float height = defaultHeight;
                         if (heightData)
-                            height = heightData->mHeights[col * ESM::Land::LAND_SIZE + row];
+                            height = heightData->getHeights()[col * LandSize + row];
                         if (alteration)
                             height += getAlteredHeight(col, row);
                         (*positions)[static_cast<unsigned int>(vertX * numVerts + vertY)]
-                            = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * Constants::CellSizeInUnits,
-                                (vertY / float(numVerts - 1) - 0.5f) * size * Constants::CellSizeInUnits, height);
+                            = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * LandSizeInUnits,
+                                (vertY / float(numVerts - 1) - 0.5f) * size * LandSizeInUnits, height);
 
                         if (normalData)
                         {
                             for (int i = 0; i < 3; ++i)
-                                normal[i] = normalData->mNormals[srcArrayIndex + i];
+                                normal[i] = normalData->getNormals()[srcArrayIndex + i];
 
                             normal.normalize();
                         }
@@ -272,12 +279,11 @@ namespace ESMTerrain
                             normal = osg::Vec3f(0, 0, 1);
 
                         // Normals apparently don't connect seamlessly between cells
-                        if (col == ESM::Land::LAND_SIZE - 1 || row == ESM::Land::LAND_SIZE - 1)
+                        if (col == LandSize - 1 || row == LandSize - 1)
                             fixNormal(normal, cellLocation, col, row, cache);
 
                         // some corner normals appear to be complete garbage (z < 0)
-                        if ((row == 0 || row == ESM::Land::LAND_SIZE - 1)
-                            && (col == 0 || col == ESM::Land::LAND_SIZE - 1))
+                        if ((row == 0 || row == LandSize - 1) && (col == 0 || col == LandSize - 1))
                             averageNormal(normal, cellLocation, col, row, cache);
 
                         assert(normal.z() > 0);
@@ -287,7 +293,7 @@ namespace ESMTerrain
                         if (colourData)
                         {
                             for (int i = 0; i < 3; ++i)
-                                color[i] = colourData->mColours[srcArrayIndex + i];
+                                color[i] = colourData->getColors()[srcArrayIndex + i];
                         }
                         else
                         {
@@ -299,7 +305,7 @@ namespace ESMTerrain
                             adjustColor(col, row, heightData, color); // Does nothing by default, override in OpenMW-CS
 
                         // Unlike normals, colors mostly connect seamlessly between cells, but not always...
-                        if (col == ESM::Land::LAND_SIZE - 1 || row == ESM::Land::LAND_SIZE - 1)
+                        if (col == LandSize - 1 || row == LandSize - 1)
                             fixColour(color, cellLocation, col, row, cache);
 
                         color.a() = 255;
@@ -347,10 +353,10 @@ namespace ESMTerrain
 
         const LandObject* land = getLand(cellLocation, cache);
 
-        const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VTEX) : nullptr;
+        const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VTEX) : nullptr;
         if (data)
         {
-            int tex = data->mTextures[y * ESM::Land::LAND_TEXTURE_SIZE + x];
+            int tex = data->getTextures()[y * ESM::Land::LAND_TEXTURE_SIZE + x];
             if (tex == 0)
                 return std::make_pair(0, 0); // vtex 0 is always the base texture, regardless of plugin
             return std::make_pair(tex, land->getPlugin());
@@ -458,7 +464,7 @@ namespace ESMTerrain
         if (!land)
             return defaultHeight;
 
-        const ESM::Land::LandData* data = land->getData(ESM::Land::DATA_VHGT);
+        const ESM::LandData* data = land->getData(ESM::Land::DATA_VHGT);
         if (!data)
             return defaultHeight;
 
@@ -542,7 +548,7 @@ namespace ESMTerrain
         }
     }
 
-    void Storage::adjustColor(int col, int row, const ESM::Land::LandData* heightData, osg::Vec4ub& color) const {}
+    void Storage::adjustColor(int col, int row, const ESM::LandData* heightData, osg::Vec4ub& color) const {}
 
     float Storage::getAlteredHeight(int col, int row) const
     {
