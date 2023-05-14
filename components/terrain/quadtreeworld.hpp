@@ -31,7 +31,7 @@ namespace Terrain
         QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem,
             Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask,
             int compMapResolution, float comMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize,
-            bool debugChunks);
+            bool debugChunks, ESM::RefId worldspace);
 
         ~QuadTreeWorld();
 

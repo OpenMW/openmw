@@ -146,8 +146,8 @@ void CSVRender::Cell::updateLand()
             }
             else
             {
-                mTerrain = std::make_unique<Terrain::TerrainGrid>(
-                    mCellNode, mCellNode, mData.getResourceSystem().get(), mTerrainStorage, Mask_Terrain);
+                mTerrain = std::make_unique<Terrain::TerrainGrid>(mCellNode, mCellNode, mData.getResourceSystem().get(),
+                    mTerrainStorage, Mask_Terrain, ESM::Cell::sDefaultWorldspaceId);
             }
 
             mTerrain->loadCell(esmLand.mX, esmLand.mY);

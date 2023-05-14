@@ -16,12 +16,14 @@ namespace Terrain
 {
 
     World::World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem,
-        Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask)
+        Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask,
+        ESM::RefId worldspace)
         : mStorage(storage)
         , mParent(parent)
         , mResourceSystem(resourceSystem)
         , mBorderVisible(false)
         , mHeightCullCallback(new HeightCullCallback)
+        , mWorldspace(worldspace)
     {
         mTerrainRoot = new osg::Group;
         mTerrainRoot->setNodeMask(nodeMask);
@@ -54,7 +56,7 @@ namespace Terrain
         mResourceSystem->addResourceManager(mTextureManager.get());
     }
 
-    World::World(osg::Group* parent, Storage* storage, unsigned int nodeMask)
+    World::World(osg::Group* parent, Storage* storage, unsigned int nodeMask, ESM::RefId worldspace)
         : mStorage(storage)
         , mParent(parent)
         , mCompositeMapCamera(nullptr)
@@ -65,6 +67,7 @@ namespace Terrain
         , mCellBorder(nullptr)
         , mBorderVisible(false)
         , mHeightCullCallback(nullptr)
+        , mWorldspace(worldspace)
     {
         mTerrainRoot = new osg::Group;
         mTerrainRoot->setNodeMask(nodeMask);

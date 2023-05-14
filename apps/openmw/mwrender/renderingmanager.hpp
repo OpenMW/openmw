@@ -230,7 +230,7 @@ namespace MWRender
 
         void setViewDistance(float distance, bool delay = false);
 
-        float getTerrainHeightAt(const osg::Vec3f& pos);
+        float getTerrainHeightAt(const osg::Vec3f& pos, ESM::RefId worldspace);
 
         // camera stuff
         Camera* getCamera() { return mCamera.get(); }

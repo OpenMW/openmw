@@ -473,7 +473,7 @@ namespace MWRender
             bool debugChunks = Settings::Manager::getBool("debug chunks", "Terrain");
             mTerrain = std::make_unique<Terrain::QuadTreeWorld>(sceneRoot, mRootNode, mResourceSystem,
                 mTerrainStorage.get(), Mask_Terrain, Mask_PreCompile, Mask_Debug, compMapResolution, compMapLevel,
-                lodFactor, vertexLodMod, maxCompGeometrySize, debugChunks);
+                lodFactor, vertexLodMod, maxCompGeometrySize, debugChunks, ESM::Cell::sDefaultWorldspaceId);
             if (Settings::Manager::getBool("object paging", "Terrain"))
             {
                 mObjectPaging = std::make_unique<ObjectPaging>(mResourceSystem->getSceneManager());
@@ -483,7 +483,7 @@ namespace MWRender
         }
         else
             mTerrain = std::make_unique<Terrain::TerrainGrid>(sceneRoot, mRootNode, mResourceSystem,
-                mTerrainStorage.get(), Mask_Terrain, Mask_PreCompile, Mask_Debug);
+                mTerrainStorage.get(), Mask_Terrain, ESM::Cell::sDefaultWorldspaceId, Mask_PreCompile, Mask_Debug);
 
         mTerrain->setTargetFrameRate(Settings::cells().mTargetFramerate);
 
@@ -1444,7 +1444,7 @@ namespace MWRender
         updateProjectionMatrix();
     }
 
-    float RenderingManager::getTerrainHeightAt(const osg::Vec3f& pos)
+    float RenderingManager::getTerrainHeightAt(const osg::Vec3f& pos, ESM::RefId worldspace)
     {
         return mTerrain->getHeightAt(pos);
     }
