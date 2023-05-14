@@ -150,6 +150,18 @@
 -- Actor.setEquipment(self, {}) -- unequip all
 
 ---
+-- Get currently selected spell
+-- @function [parent=#Actor] getSelectedSpell
+-- @param openmw.core#GameObject actor
+-- @return openmw.core#Spell, nil
+
+---
+-- Set selected spell
+-- @function [parent=#Actor] setSelectedSpell
+-- @param openmw.core#GameObject actor
+-- @param openmw.core#Spell spell Spell (can be nil)
+
+---
 -- Return the spells (@{ActorSpells}) of the given actor.
 -- @function [parent=#Actor] spells
 -- @param openmw.core#GameObject actor

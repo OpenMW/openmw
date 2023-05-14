@@ -5,7 +5,6 @@
 
 #include <apps/openmw/mwbase/mechanicsmanager.hpp>
 #include <apps/openmw/mwbase/windowmanager.hpp>
-#include <apps/openmw/mwlua/luabindings.hpp>
 #include <apps/openmw/mwmechanics/creaturestats.hpp>
 #include <apps/openmw/mwmechanics/drawstate.hpp>
 #include <apps/openmw/mwworld/class.hpp>
@@ -173,6 +172,9 @@ namespace MWLua
                 return; // can't be interrupted; ignore setStance
             stats.setDrawState(newDrawState);
         };
+
+        // TODO
+        // getSelectedEnchantedItem, setSelectedEnchantedItem
 
         actor["canMove"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
