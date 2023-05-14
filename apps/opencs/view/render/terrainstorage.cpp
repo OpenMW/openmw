@@ -28,12 +28,12 @@ namespace CSVRender
         resetHeights();
     }
 
-    osg::ref_ptr<const ESMTerrain::LandObject> TerrainStorage::getLand(int cellX, int cellY)
+    osg::ref_ptr<const ESMTerrain::LandObject> TerrainStorage::getLand(ESM::ExteriorCellLocation cellLocation)
     {
         // The cell isn't guaranteed to have Land. This is because the terrain implementation
         // has to wrap the vertices of the last row and column to the next cell, which may be a nonexisting cell
-        const int index
-            = mData.getLand().searchId(ESM::RefId::stringRefId(CSMWorld::Land::createUniqueRecordId(cellX, cellY)));
+        const int index = mData.getLand().searchId(
+            ESM::RefId::stringRefId(CSMWorld::Land::createUniqueRecordId(cellLocation.mX, cellLocation.mY)));
         if (index == -1)
             return nullptr;
 

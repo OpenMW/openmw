@@ -101,6 +101,8 @@ namespace Terrain
 
         virtual void setViewDistance(float distance) {}
 
+        ESM::RefId getWorldspace() { return mWorldspace; }
+
         Storage* getStorage() { return mStorage; }
 
         osg::Callback* getHeightCullCallback(float highz, unsigned int mask);

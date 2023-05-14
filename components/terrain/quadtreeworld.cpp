@@ -117,13 +117,14 @@ namespace Terrain
     class QuadTreeBuilder
     {
     public:
-        QuadTreeBuilder(Terrain::Storage* storage, float minSize)
+        QuadTreeBuilder(Terrain::Storage* storage, float minSize, ESM::RefId worldspace)
             : mStorage(storage)
             , mMinX(0.f)
             , mMaxX(0.f)
             , mMinY(0.f)
             , mMaxY(0.f)
             , mMinSize(minSize)
+            , mWorldspace(worldspace)
         {
         }
 
@@ -206,7 +207,8 @@ namespace Terrain
 
             // Do not add child nodes for default cells without data.
             // size = 1 means that the single shape covers the whole cell.
-            if (node->getSize() == 1 && !mStorage->hasData(center.x() - 0.5, center.y() - 0.5))
+            if (node->getSize() == 1
+                && !mStorage->hasData(ESM::ExteriorCellLocation(center.x() - 0.5, center.y() - 0.5, mWorldspace)))
                 return node;
 
             if (node->getSize() <= mMinSize)
@@ -239,13 +241,16 @@ namespace Terrain
         float mMinSize;
 
         osg::ref_ptr<RootNode> mRootNode;
+        ESM::RefId mWorldspace;
     };
 
     class DebugChunkManager : public QuadTreeWorld::ChunkManager
     {
     public:
-        DebugChunkManager(Resource::SceneManager* sceneManager, Storage* storage, unsigned int nodeMask)
-            : mSceneManager(sceneManager)
+        DebugChunkManager(
+            Resource::SceneManager* sceneManager, Storage* storage, unsigned int nodeMask, ESM::RefId worldspace)
+            : QuadTreeWorld::ChunkManager(worldspace)
+            , mSceneManager(sceneManager)
             , mStorage(storage)
             , mNodeMask(nodeMask)
         {
@@ -255,7 +260,7 @@ namespace Terrain
         {
             osg::Vec3f center = { chunkCenter.x(), chunkCenter.y(), 0 };
             auto chunkBorder = CellBorder::createBorderGeometry(center.x() - size / 2.f, center.y() - size / 2.f, size,
-                mStorage, mSceneManager, mNodeMask, 5.f, { 1, 0, 0, 0 });
+                mStorage, mSceneManager, mNodeMask, mWorldspace, 5.f, { 1, 0, 0, 0 });
             osg::ref_ptr<SceneUtil::PositionAttitudeTransform> pat = new SceneUtil::PositionAttitudeTransform;
             pat->setPosition(-center * Constants::CellSizeInUnits);
             pat->addChild(chunkBorder);
@@ -289,8 +294,8 @@ namespace Terrain
 
         if (mDebugTerrainChunks)
         {
-            mDebugChunkManager
-                = std::make_unique<DebugChunkManager>(mResourceSystem->getSceneManager(), mStorage, borderMask);
+            mDebugChunkManager = std::make_unique<DebugChunkManager>(
+                mResourceSystem->getSceneManager(), mStorage, borderMask, mWorldspace);
             addChunkManager(mDebugChunkManager.get());
         }
     }
@@ -499,7 +504,7 @@ namespace Terrain
         if (mQuadTreeBuilt)
             return;
 
-        QuadTreeBuilder builder(mStorage, mMinSize);
+        QuadTreeBuilder builder(mStorage, mMinSize, mWorldspace);
         builder.build();
 
         mRootNode = builder.getRootNode();
@@ -579,7 +584,7 @@ namespace Terrain
     {
         // fallback behavior only for undefined cells (every other is already handled in quadtree)
         float dummy;
-        if (mChunkManager && !mStorage->getMinMaxHeights(1, osg::Vec2f(x + 0.5, y + 0.5), dummy, dummy))
+        if (mChunkManager && !mStorage->getMinMaxHeights(1, osg::Vec2f(x + 0.5, y + 0.5), mWorldspace, dummy, dummy))
             TerrainGrid::loadCell(x, y);
         else
             World::loadCell(x, y);
@@ -589,7 +594,7 @@ namespace Terrain
     {
         // fallback behavior only for undefined cells (every other is already handled in quadtree)
         float dummy;
-        if (mChunkManager && !mStorage->getMinMaxHeights(1, osg::Vec2f(x + 0.5, y + 0.5), dummy, dummy))
+        if (mChunkManager && !mStorage->getMinMaxHeights(1, osg::Vec2f(x + 0.5, y + 0.5), mWorldspace, dummy, dummy))
             TerrainGrid::unloadCell(x, y);
         else
             World::unloadCell(x, y);

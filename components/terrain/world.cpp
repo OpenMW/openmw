@@ -47,7 +47,7 @@ namespace Terrain
 
         mTextureManager = std::make_unique<TextureManager>(mResourceSystem->getSceneManager());
         mChunkManager = std::make_unique<ChunkManager>(
-            mStorage, mResourceSystem->getSceneManager(), mTextureManager.get(), mCompositeMapRenderer);
+            mStorage, mResourceSystem->getSceneManager(), mTextureManager.get(), mCompositeMapRenderer, mWorldspace);
         mChunkManager->setNodeMask(nodeMask);
         mCellBorder
             = std::make_unique<CellBorder>(this, mTerrainRoot.get(), borderMask, mResourceSystem->getSceneManager());
@@ -127,7 +127,7 @@ namespace Terrain
 
     float World::getHeightAt(const osg::Vec3f& worldPos)
     {
-        return mStorage->getHeightAt(worldPos);
+        return mStorage->getHeightAt(worldPos, mWorldspace);
     }
 
     void World::updateTextureFiltering()

@@ -7,6 +7,8 @@
 #include <memory>
 #include <mutex>
 
+#include <components/esm/refid.hpp>
+
 namespace osg
 {
     class NodeVisitor;
@@ -58,6 +60,17 @@ namespace Terrain
         {
         public:
             virtual ~ChunkManager() {}
+            ChunkManager()
+                : mWorldspace(ESM::RefId())
+                , mViewDistance(0.f)
+                , mMaxLodLevel(~0u)
+            {
+            }
+            ChunkManager(ESM::RefId worldspace)
+                : ChunkManager()
+            {
+                mWorldspace = worldspace;
+            }
             virtual osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod,
                 unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
                 = 0;
@@ -70,9 +83,12 @@ namespace Terrain
             unsigned int getMaxLodLevel() const { return mMaxLodLevel; }
             void setMaxLodLevel(unsigned int level) { mMaxLodLevel = level; }
 
+        protected:
+            ESM::RefId mWorldspace;
+
         private:
-            float mViewDistance = 0.f;
-            unsigned int mMaxLodLevel = ~0u;
+            float mViewDistance;
+            unsigned int mMaxLodLevel;
         };
         void addChunkManager(ChunkManager*);
 

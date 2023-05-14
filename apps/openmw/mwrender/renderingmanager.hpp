@@ -281,6 +281,7 @@ namespace MWRender
         void updateAmbient();
         void setFogColor(const osg::Vec4f& color);
         void updateThirdPersonViewMode();
+        Terrain::World* getWorldspaceTerrain(ESM::RefId worldspace);
 
         void reportStats() const;
 
@@ -312,7 +313,8 @@ namespace MWRender
         std::unique_ptr<Pathgrid> mPathgrid;
         std::unique_ptr<Objects> mObjects;
         std::unique_ptr<Water> mWater;
-        std::unique_ptr<Terrain::World> mTerrain;
+        std::unordered_map<ESM::RefId, std::unique_ptr<Terrain::World>> mWorldspaceTerrains;
+        Terrain::World* mTerrain;
         std::unique_ptr<TerrainStorage> mTerrainStorage;
         std::unique_ptr<ObjectPaging> mObjectPaging;
         std::unique_ptr<Groundcover> mGroundcover;

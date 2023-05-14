@@ -4,6 +4,8 @@
 #include <map>
 #include <osg/Group>
 
+#include <components/esm/refid.hpp>
+
 namespace Resource
 {
     class SceneManager;
@@ -33,7 +35,8 @@ namespace Terrain
         void destroyCellBorderGeometry();
 
         static osg::ref_ptr<osg::Group> createBorderGeometry(float x, float y, float size, Storage* terrain,
-            Resource::SceneManager* sceneManager, int mask, float offset = 10.0, osg::Vec4f color = { 1, 1, 0, 0 });
+            Resource::SceneManager* sceneManager, int mask, ESM::RefId worldspace, float offset = 10.0,
+            osg::Vec4f color = { 1, 1, 0, 0 });
 
     protected:
         Terrain::World* mWorld;

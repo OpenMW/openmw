@@ -26,11 +26,11 @@ namespace MWRender
         mResourceSystem->removeResourceManager(mLandManager.get());
     }
 
-    bool TerrainStorage::hasData(int cellX, int cellY)
+    bool TerrainStorage::hasData(ESM::ExteriorCellLocation cellLocation)
     {
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
-        const ESM::Land* land = esmStore.get<ESM::Land>().search(cellX, cellY);
+        const ESM::Land* land = esmStore.get<ESM::Land>().search(cellLocation.mX, cellLocation.mY);
         return land != nullptr;
     }
 
@@ -66,9 +66,9 @@ namespace MWRender
         return mLandManager.get();
     }
 
-    osg::ref_ptr<const ESMTerrain::LandObject> TerrainStorage::getLand(int cellX, int cellY)
+    osg::ref_ptr<const ESMTerrain::LandObject> TerrainStorage::getLand(ESM::ExteriorCellLocation cellLocation)
     {
-        return mLandManager->getLand(ESM::ExteriorCellLocation(cellX, cellY, ESM::Cell::sDefaultWorldspaceId));
+        return mLandManager->getLand(cellLocation);
     }
 
     const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)

@@ -21,10 +21,10 @@ namespace MWRender
             const std::string& specularMapPattern = "", bool autoUseSpecularMaps = false);
         ~TerrainStorage();
 
-        osg::ref_ptr<const ESMTerrain::LandObject> getLand(int cellX, int cellY) override;
+        osg::ref_ptr<const ESMTerrain::LandObject> getLand(ESM::ExteriorCellLocation cellLocation) override;
         const ESM::LandTexture* getLandTexture(int index, short plugin) override;
 
-        bool hasData(int cellX, int cellY) override;
+        bool hasData(ESM::ExteriorCellLocation cellLocation) override;
 
         /// Get bounds of the whole terrain in cell units
         void getBounds(float& minX, float& maxX, float& minY, float& maxY) override;
