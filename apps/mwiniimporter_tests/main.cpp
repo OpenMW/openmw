@@ -44,8 +44,8 @@ int runBinary(
     std::filesystem::path psScriptPath = std::filesystem::temp_directory_path()
         / ("openmw_iniimporter_tests_" + std::to_string(std::time(nullptr)) + ".ps1");
     std::wofstream psScriptFile(psScriptPath);
-    psScriptFile << L"\uFEFF& '" << binaryPath.native() << L"' -i '" << iniPath.native() << L"' -c '" << cfgPath.native()
-                 << "'" << std::endl;
+    psScriptFile << L"\uFEFF& '" << binaryPath.native() << L"' -i '" << iniPath.native() << L"' -c '"
+                 << cfgPath.native() << "'" << std::endl;
     psScriptFile.close();
 
     std::wstringstream psCmd;
