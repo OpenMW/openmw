@@ -10,6 +10,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/color.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/glextensions.hpp>
 #include <components/shader/shadermanager.hpp>
 
 #include "../mwworld/ptr.hpp"
@@ -43,9 +44,9 @@ namespace MWRender
         mUseCompute = false;
 #else
         constexpr float minimumGLVersionRequiredForCompute = 4.4;
-        osg::GLExtensions* exts = osg::GLExtensions::Get(0, false);
-        mUseCompute = exts->glVersion >= minimumGLVersionRequiredForCompute
-            && exts->glslLanguageVersion >= minimumGLVersionRequiredForCompute;
+        osg::GLExtensions& exts = SceneUtil::getGLExtensions();
+        mUseCompute = exts.glVersion >= minimumGLVersionRequiredForCompute
+            && exts.glslLanguageVersion >= minimumGLVersionRequiredForCompute;
 #endif
 
         if (mUseCompute)

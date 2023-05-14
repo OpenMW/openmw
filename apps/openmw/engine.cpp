@@ -31,6 +31,7 @@
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
 
+#include <components/sceneutil/glextensions.hpp>
 #include <components/sceneutil/workqueue.hpp>
 
 #include <components/files/configurationmanager.hpp>
@@ -600,6 +601,7 @@ void OMW::Engine::createWindow()
     mViewer->setRealizeOperation(realizeOperations);
     osg::ref_ptr<IdentifyOpenGLOperation> identifyOp = new IdentifyOpenGLOperation();
     realizeOperations->add(identifyOp);
+    realizeOperations->add(new SceneUtil::GetGLExtensionsOperation());
 
     if (Debug::shouldDebugOpenGL())
         realizeOperations->add(new Debug::EnableGLDebugOperation());
@@ -780,13 +782,13 @@ void OMW::Engine::prepareEngine()
     // gui needs our shaders path before everything else
     mResourceSystem->getSceneManager()->setShaderPath(mResDir / "shaders");
 
-    osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
-    bool shadersSupported = exts && (exts->glslLanguageVersion >= 1.2f);
+    osg::GLExtensions& exts = SceneUtil::getGLExtensions();
+    bool shadersSupported = exts.glslLanguageVersion >= 1.2f;
 
 #if OSG_VERSION_LESS_THAN(3, 6, 6)
     // hack fix for https://github.com/openscenegraph/OpenSceneGraph/issues/1028
-    if (exts)
-        exts->glRenderbufferStorageMultisampleCoverageNV = nullptr;
+    if (!osg::isGLExtensionSupported(exts.contextID, "NV_framebuffer_multisample_coverage"))
+        exts.glRenderbufferStorageMultisampleCoverageNV = nullptr;
 #endif
 
     osg::ref_ptr<osg::Group> guiRoot = new osg::Group;
@@ -844,18 +846,18 @@ void OMW::Engine::prepareEngine()
     const MWWorld::Store<ESM::GameSetting>* gmst = &mWorld->getStore().get<ESM::GameSetting>();
     mL10nManager->setGmstLoader(
         [gmst, misses = std::set<std::string, std::less<>>()](std::string_view gmstName) mutable {
-            const ESM::GameSetting* res = gmst->search(gmstName);
-            if (res && res->mValue.getType() == ESM::VT_String)
-                return res->mValue.getString();
-            else
+        const ESM::GameSetting* res = gmst->search(gmstName);
+        if (res && res->mValue.getType() == ESM::VT_String)
+            return res->mValue.getString();
+        else
+        {
+            if (misses.count(gmstName) == 0)
             {
-                if (misses.count(gmstName) == 0)
-                {
-                    misses.emplace(gmstName);
-                    Log(Debug::Error) << "GMST " << gmstName << " not found";
-                }
-                return std::string("GMST:") + std::string(gmstName);
+                misses.emplace(gmstName);
+                Log(Debug::Error) << "GMST " << gmstName << " not found";
             }
+            return std::string("GMST:") + std::string(gmstName);
+        }
         });
 
     mWindowManager->setStore(mWorld->getStore());
