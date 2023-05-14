@@ -326,7 +326,8 @@ namespace MWGui
         mScrollBar->eventScrollChangePosition += MyGUI::newDelegate(this, &DialogueWindow::onScrollbarMoved);
         mHistory->eventMouseWheel += MyGUI::newDelegate(this, &DialogueWindow::onMouseWheel);
 
-        auto callback = [&](TypesetBook::InteractiveId link) { DialogueWindow::notifyLinkClicked(link); };
+        BookPage::ClickCallback callback =
+            [&](TypesetBook::InteractiveId link) { DialogueWindow::notifyLinkClicked(link); };
         mHistory->adviseLinkClicked(callback);
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord

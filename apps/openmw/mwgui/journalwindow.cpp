@@ -123,7 +123,8 @@ namespace
             topicsList->eventItemSelected += MyGUI::newDelegate(this, &JournalWindowImpl::notifyTopicSelected);
 
             {
-                auto callback = [&](intptr_t linkId) { JournalWindowImpl::notifyTopicClicked(linkId); };
+                MWGui::BookPage::ClickCallback callback =
+                    [&](intptr_t linkId) { JournalWindowImpl::notifyTopicClicked(linkId); };
 
                 getPage(LeftBookPage)->adviseLinkClicked(callback);
                 getPage(RightBookPage)->adviseLinkClicked(callback);
@@ -135,7 +136,8 @@ namespace
             }
 
             {
-                auto callback = [&](MWGui::TypesetBook::InteractiveId index) { JournalWindowImpl::notifyIndexLinkClicked(index); };
+                MWGui::BookPage::ClickCallback callback =
+                    [&](MWGui::TypesetBook::InteractiveId index) { JournalWindowImpl::notifyIndexLinkClicked(index); };
 
                 getPage(LeftTopicIndex)->adviseLinkClicked(callback);
                 getPage(CenterTopicIndex)->adviseLinkClicked(callback);
