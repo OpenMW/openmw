@@ -150,7 +150,7 @@ namespace MWRender
         void addCell(const MWWorld::CellStore* store);
         void removeCell(const MWWorld::CellStore* store);
 
-        void enableTerrain(bool enable);
+        void enableTerrain(bool enable, ESM::RefId worldspace);
 
         void updatePtr(const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
 

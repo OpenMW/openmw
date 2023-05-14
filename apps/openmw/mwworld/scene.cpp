@@ -784,7 +784,7 @@ namespace MWWorld
         mHalfGridSize = cell.getCell()->isEsm4() ? Constants::ESM4CellGridRadius : Constants::CellGridRadius;
         mCurrentCell = &cell;
 
-        mRendering.enableTerrain(cell.isExterior());
+        mRendering.enableTerrain(cell.isExterior(), cell.getCell()->getWorldSpace());
 
         MWWorld::Ptr old = mWorld.getPlayerPtr();
         mWorld.getPlayer().setCell(&cell);

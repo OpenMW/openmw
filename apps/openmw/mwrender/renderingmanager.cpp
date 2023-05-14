@@ -762,10 +762,12 @@ namespace MWRender
         mWater->removeCell(store);
     }
 
-    void RenderingManager::enableTerrain(bool enable)
+    void RenderingManager::enableTerrain(bool enable, ESM::RefId worldspace)
     {
         if (!enable)
             mWater->setCullCallback(nullptr);
+        else
+            mTerrain = getWorldspaceTerrain(worldspace);
         mTerrain->enable(enable);
     }
 
