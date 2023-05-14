@@ -21,6 +21,7 @@
 #include <components/debug/debugging.hpp>
 #include <components/navmeshtool/protocol.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/detournavigator/debug.hpp>
 
 #include <LinearMath/btVector3.h>
 
@@ -35,6 +36,8 @@
 #include <tuple>
 #include <utility>
 #include <vector>
+#include <charconv>
+#include <sstream>
 
 namespace NavMeshTool
 {
@@ -224,6 +227,31 @@ namespace NavMeshTool
             const std::vector<std::byte> data = serialize(value);
             getRawStderr().write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
         }
+
+        std::string toHex(std::string_view value)
+        {
+            std::string buffer(value.size() * 2, '0');
+            char* out = buffer.data();
+            for (const char v : value)
+            {
+                const std::ptrdiff_t space = static_cast<std::ptrdiff_t>(static_cast<std::uint8_t>(v) <= 0xf);
+                const auto [ptr, ec] = std::to_chars(out + space, out + space + 2, static_cast<std::uint8_t>(v), 16);
+                if (ec != std::errc())
+                    throw std::system_error(std::make_error_code(ec));
+                out += 2;
+            }
+            return buffer;
+        }
+
+        std::string makeAddObjectErrorMessage(ObjectId objectId, DetourNavigator::AreaType areaType, const CollisionShape& shape)
+        {
+            std::ostringstream stream;
+            stream << "Failed to add object to recast mesh objectId=" << objectId.value()
+                   << " areaType=" << areaType
+                   << " fileName=" << shape.getInstance()->getSource()->mFileName
+                   << " fileHash=" << toHex(shape.getInstance()->getSource()->mFileHash);
+            return stream.str();
+        }
     }
 
     WorldspaceNavMeshInput::WorldspaceNavMeshInput(std::string worldspace, const DetourNavigator::RecastSettings& settings)
@@ -316,14 +344,17 @@ namespace NavMeshTool
                     const ObjectId objectId(++objectsCounter);
                     const CollisionShape shape(object.getShapeInstance(), *object.getCollisionObject().getCollisionShape(), object.getObjectTransform());
 
-                    navMeshInput.mTileCachedRecastMeshManager.addObject(objectId, shape, transform,
-                        DetourNavigator::AreaType_ground, [] (const auto&) {});
+                    if (!navMeshInput.mTileCachedRecastMeshManager.addObject(objectId, shape, transform,
+                                                                             DetourNavigator::AreaType_ground, [] (const auto&) {}))
+                        throw std::logic_error(makeAddObjectErrorMessage(objectId, DetourNavigator::AreaType_ground, shape));
 
                     if (const btCollisionShape* avoid = object.getShapeInstance()->mAvoidCollisionShape.get())
                     {
+                        const ObjectId avoidObjectId(++objectsCounter);
                         const CollisionShape avoidShape(object.getShapeInstance(), *avoid, object.getObjectTransform());
-                        navMeshInput.mTileCachedRecastMeshManager.addObject(objectId, avoidShape, transform,
-                            DetourNavigator::AreaType_null, [] (const auto&) {});
+                        if (!navMeshInput.mTileCachedRecastMeshManager.addObject(avoidObjectId, avoidShape, transform,
+                                                                                 DetourNavigator::AreaType_null, [] (const auto&) {}))
+                            throw std::logic_error(makeAddObjectErrorMessage(avoidObjectId, DetourNavigator::AreaType_null, avoidShape));
                     }
 
                     data.mObjects.emplace_back(std::move(object));
