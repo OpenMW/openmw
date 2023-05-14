@@ -124,7 +124,7 @@ namespace
 
             {
                 MWGui::BookPage::ClickCallback callback =
-                    [&](intptr_t linkId) { JournalWindowImpl::notifyTopicClicked(linkId); };
+                    [this](intptr_t linkId) { notifyTopicClicked(linkId); };
 
                 getPage(LeftBookPage)->adviseLinkClicked(callback);
                 getPage(RightBookPage)->adviseLinkClicked(callback);
@@ -137,7 +137,7 @@ namespace
 
             {
                 MWGui::BookPage::ClickCallback callback =
-                    [&](MWGui::TypesetBook::InteractiveId index) { JournalWindowImpl::notifyIndexLinkClicked(index); };
+                    [this](MWGui::TypesetBook::InteractiveId index) { notifyTopicClicked(index); };
 
                 getPage(LeftTopicIndex)->adviseLinkClicked(callback);
                 getPage(CenterTopicIndex)->adviseLinkClicked(callback);

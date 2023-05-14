@@ -327,7 +327,7 @@ namespace MWGui
         mHistory->eventMouseWheel += MyGUI::newDelegate(this, &DialogueWindow::onMouseWheel);
 
         BookPage::ClickCallback callback =
-            [&](TypesetBook::InteractiveId link) { DialogueWindow::notifyLinkClicked(link); };
+            [this](TypesetBook::InteractiveId link) { notifyLinkClicked(link); };
         mHistory->adviseLinkClicked(callback);
 
         mMainWidget->castType<MyGUI::Window>()->eventWindowChangeCoord
