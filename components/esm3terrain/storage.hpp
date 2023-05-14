@@ -32,6 +32,8 @@ namespace ESMTerrain
     public:
         LandObject();
         LandObject(const ESM::Land* land, int loadFlags);
+        LandObject(const ESM4::Land* land, int loadFlags);
+
         LandObject(const LandObject& copy, const osg::CopyOp& copyop);
         virtual ~LandObject();
 
@@ -39,17 +41,20 @@ namespace ESMTerrain
 
         inline const ESM::LandData* getData(int flags) const
         {
-            if ((mData.mDataLoaded & flags) != flags)
+            ESM::Land::LandData* esm3Land = dynamic_cast<ESM::Land::LandData*>(mData.get());
+            if (esm3Land && ((esm3Land->mDataLoaded & flags) != flags))
                 return nullptr;
-            return &mData;
+            return mData.get();
         }
         inline int getPlugin() const { return mLand->getPlugin(); }
+        inline int getLandSize() const { return mData->getLandSize(); }
+        inline int getRealSize() const { return mData->getSize(); }
 
     private:
         const ESM::Land* mLand;
         int mLoadFlags;
 
-        ESM::Land::LandData mData;
+        std::unique_ptr<ESM::LandData> mData;
     };
 
     /// @brief Feeds data from ESM terrain records (ESM::Land, ESM::LandTexture)

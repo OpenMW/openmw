@@ -9,6 +9,8 @@ namespace ESM
     {
 
     public:
+        virtual ~LandData() = default;
+
         typedef signed char VNML;
 
         virtual std::span<const float> getHeights() const = 0;

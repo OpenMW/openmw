@@ -15,7 +15,7 @@ namespace ESM
 namespace MWRender
 {
 
-    class LandManager : public Resource::GenericResourceManager<std::pair<int, int>>
+    class LandManager : public Resource::GenericResourceManager<ESM::ExteriorCellLocation>
     {
     public:
         LandManager(int loadFlags);

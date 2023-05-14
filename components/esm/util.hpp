@@ -53,6 +53,12 @@ namespace ESM
     {
         int mX, mY;
         ESM::RefId mWorldspace;
+        ExteriorCellLocation()
+            : mX(0)
+            , mY(0)
+            , mWorldspace(ESM::Cell::sDefaultWorldspaceId)
+        {
+        }
 
         ExteriorCellLocation(int x, int y, ESM::RefId worldspace)
             : mX(x)

@@ -6,6 +6,7 @@
 #include <osg/Plane>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm4/loadland.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/vfs/manager.hpp>
@@ -26,11 +27,21 @@ namespace ESMTerrain
     {
     }
 
+    LandObject::LandObject(const ESM4::Land* land, int loadFlags)
+        : mLand(nullptr)
+        , mLoadFlags(0)
+    {
+        mData = std::make_unique<ESM4::Land>(*land);
+    }
+
     LandObject::LandObject(const ESM::Land* land, int loadFlags)
         : mLand(land)
         , mLoadFlags(loadFlags)
+        , mData()
     {
-        mLand->loadData(mLoadFlags, &mData);
+        auto esm3LandData = new ESM::Land::LandData;
+        mData.reset(esm3LandData);
+        mLand->loadData(mLoadFlags, esm3LandData);
     }
 
     LandObject::LandObject(const LandObject& copy, const osg::CopyOp& copyop)
@@ -218,8 +229,8 @@ namespace ESMTerrain
                 const ESM::LandData* heightData = nullptr;
                 const ESM::LandData* normalData = nullptr;
                 const ESM::LandData* colourData = nullptr;
-                const int LandSize = ESM::Land::LAND_SIZE;
-                const int LandSizeInUnits = Constants::CellSizeInUnits;
+                const int LandSize = land ? land->getLandSize() : ESM::Land::LAND_SIZE;
+                const int LandSizeInUnits = land ? land->getRealSize() : Constants::CellSizeInUnits;
                 if (land)
                 {
                     heightData = land->getData(ESM::Land::DATA_VHGT);

@@ -35,7 +35,7 @@
 #include <iostream> // FIXME: debug only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+// #include "writer.hpp"
 
 //             overlap north
 //
@@ -232,6 +232,24 @@ void ESM4::Land::load(ESM4::Reader& reader)
     // at least one of the quadrants do not have a base texture, return without setting the flag
     if (!missing)
         mDataTypes |= LAND_VTEX;
+
+    mMinHeight = -200000.f;
+    mMaxHeight = 200000.f;
+
+    float row_offset = mHeightMap.heightOffset;
+    for (int y = 0; y < VERTS_PER_SIDE; y++)
+    {
+        row_offset += mHeightMap.gradientData[y * VERTS_PER_SIDE];
+
+        mHeights[y * VERTS_PER_SIDE] = row_offset * HEIGHT_SCALE;
+
+        float colOffset = row_offset;
+        for (int x = 1; x < VERTS_PER_SIDE; x++)
+        {
+            colOffset += mHeightMap.gradientData[y * VERTS_PER_SIDE + x];
+            mHeights[x + y * VERTS_PER_SIDE] = colOffset * HEIGHT_SCALE;
+        }
+    }
 }
 
 // void ESM4::Land::save(ESM4::Writer& writer) const

@@ -33,11 +33,13 @@
 
 #include "formid.hpp"
 
+#include <components/esm/esmterrain.hpp>
+
 namespace ESM4
 {
     class Reader;
 
-    struct Land
+    struct Land : public ESM::LandData
     {
         enum
         {
@@ -117,8 +119,10 @@ namespace ESM4
         // FIXME: lazy loading not yet implemented
         int mDataTypes; // which data types are loaded
 
+        float mHeights[VERTS_PER_SIDE * VERTS_PER_SIDE]; // Float value of compressed Heightmap
+        float mMinHeight, mMaxHeight;
         signed char mVertNorm[VERTS_PER_SIDE * VERTS_PER_SIDE * 3]; // from VNML subrecord
-        signed char mVertColr[VERTS_PER_SIDE * VERTS_PER_SIDE * 3]; // from VCLR subrecord
+        unsigned char mVertColr[VERTS_PER_SIDE * VERTS_PER_SIDE * 3]; // from VCLR subrecord
         VHGT mHeightMap;
         Texture mTextures[4]; // 0 = bottom left, 1 = bottom right, 2 = top left, 3 = top right
         std::vector<FormId> mIds; // land texture (LTEX) formids
@@ -127,6 +131,15 @@ namespace ESM4
         // void save(Writer& writer) const;
 
         // void blank();
+
+        std::span<const float> getHeights() const override { return mHeights; }
+        std::span<const VNML> getNormals() const override { return mVertNorm; }
+        std::span<const unsigned char> getColors() const override { return mVertColr; }
+        std::span<const uint16_t> getTextures() const override { return {}; }
+        float getSize() const override { return REAL_SIZE; }
+        float getMinHeight() const override { return mMinHeight; }
+        float getMaxHeight() const { return mMaxHeight; }
+        int getLandSize() const { return VERTS_PER_SIDE; }
     };
 }
 
