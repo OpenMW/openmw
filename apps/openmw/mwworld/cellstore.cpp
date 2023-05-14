@@ -1073,6 +1073,8 @@ namespace MWWorld
 
             moveTo(movedRef, otherCell);
         }
+
+        requestMergedRefsUpdate();
     }
 
     bool CellStore::operator==(const CellStore& right) const
