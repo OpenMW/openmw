@@ -136,7 +136,7 @@ namespace
 
             {
                 MWGui::BookPage::ClickCallback callback
-                    = [this](MWGui::TypesetBook::InteractiveId index) { notifyTopicClicked(index); };
+                    = [this](MWGui::TypesetBook::InteractiveId index) { notifyIndexLinkClicked(index); };
 
                 getPage(LeftTopicIndex)->adviseLinkClicked(callback);
                 getPage(CenterTopicIndex)->adviseLinkClicked(callback);
