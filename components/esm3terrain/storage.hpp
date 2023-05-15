@@ -41,6 +41,8 @@ namespace ESMTerrain
 
         inline const ESM::LandData* getData(int flags) const
         {
+            if (!mData)
+                return nullptr;
             ESM::Land::LandData* esm3Land = dynamic_cast<ESM::Land::LandData*>(mData.get());
             if (esm3Land && ((esm3Land->mDataLoaded & flags) != flags))
                 return nullptr;

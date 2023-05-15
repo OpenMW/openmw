@@ -37,11 +37,11 @@ namespace ESMTerrain
     LandObject::LandObject(const ESM::Land* land, int loadFlags)
         : mLand(land)
         , mLoadFlags(loadFlags)
-        , mData()
+        , mData(nullptr)
     {
-        auto esm3LandData = new ESM::Land::LandData;
-        mData.reset(esm3LandData);
-        mLand->loadData(mLoadFlags, esm3LandData);
+        std::unique_ptr<ESM::Land::LandData> esm3LandData = std::make_unique<ESM::Land::LandData>();
+        mLand->loadData(mLoadFlags, esm3LandData.get());
+        mData = std::move(esm3LandData);
     }
 
     LandObject::LandObject(const LandObject& copy, const osg::CopyOp& copyop)
@@ -478,15 +478,16 @@ namespace ESMTerrain
         const ESM::LandData* data = land->getData(ESM::Land::DATA_VHGT);
         if (!data)
             return defaultHeight;
+        const int landSize = data->getLandSize();
 
         // Mostly lifted from Ogre::Terrain::getHeightAtTerrainPosition
 
         // Normalized position in the cell
-        float nX = (worldPos.x() - (cellX * Constants::CellSizeInUnits)) / cellSize;
-        float nY = (worldPos.y() - (cellY * Constants::CellSizeInUnits)) / cellSize;
+        float nX = (worldPos.x() - (cellX * cellSize)) / cellSize;
+        float nY = (worldPos.y() - (cellY * cellSize)) / cellSize;
 
         // get left / bottom points (rounded down)
-        float factor = ESM::Land::LAND_SIZE - 1.0f;
+        float factor = landSize - 1.0f;
         float invFactor = 1.0f / factor;
 
         int startX = static_cast<int>(nX * factor);
@@ -494,8 +495,8 @@ namespace ESMTerrain
         int endX = startX + 1;
         int endY = startY + 1;
 
-        endX = std::min(endX, ESM::Land::LAND_SIZE - 1);
-        endY = std::min(endY, ESM::Land::LAND_SIZE - 1);
+        endX = std::min(endX, landSize - 1);
+        endY = std::min(endY, landSize - 1);
 
         // now get points in terrain space (effectively rounding them to boundaries)
         float startXTS = startX * invFactor;

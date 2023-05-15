@@ -8,11 +8,14 @@
 #include <components/esm/records.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
+#include <components/esm4/loadland.hpp>
 #include <components/esm4/loadwrld.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
 
-#include <apps/openmw/mwworld/cell.hpp>
+#include "../mwbase/environment.hpp"
+#include "../mwworld/cell.hpp"
+#include "../mwworld/worldimp.hpp"
 
 namespace
 {
@@ -1189,6 +1192,29 @@ namespace MWWorld
         MWWorld::TypedDynamicStore<ESM4::Cell>::clearDynamic();
     }
 
+    void Store<ESM4::Land>::updateLandPositions(const Store<ESM4::Cell>& cells)
+    {
+        for (auto it : mStatic)
+        {
+            const ESM4::Cell* cell = cells.find(it.second.mCell);
+            mLands[cell->getExteriorCellLocation()] = &it.second;
+        }
+        for (auto it : mDynamic)
+        {
+            const ESM4::Cell* cell = cells.find(it.second.mCell);
+            mLands[cell->getExteriorCellLocation()] = &it.second;
+        }
+    }
+
+    const ESM4::Land* MWWorld::Store<ESM4::Land>::search(ESM::ExteriorCellLocation cellLocation) const
+    {
+        auto foundLand = mLands.find(cellLocation);
+        if (foundLand == mLands.end())
+            return nullptr;
+        else
+            return foundLand->second;
+    }
+    
     // ESM4 Reference
     //=========================================================================
 
@@ -1276,3 +1302,4 @@ template class MWWorld::TypedDynamicStore<ESM4::Reference, ESM::FormId>;
 template class MWWorld::TypedDynamicStore<ESM4::Cell>;
 template class MWWorld::TypedDynamicStore<ESM4::Weapon>;
 template class MWWorld::TypedDynamicStore<ESM4::World>;
+template class MWWorld::TypedDynamicStore<ESM4::Land>;

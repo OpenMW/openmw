@@ -33,7 +33,9 @@
 
 #include "formid.hpp"
 
+#include <components/esm/defs.hpp>
 #include <components/esm/esmterrain.hpp>
+#include <components/esm/refid.hpp>
 
 namespace ESM4
 {
@@ -111,7 +113,7 @@ namespace ESM4
             std::vector<TxtLayer> layers;
         };
 
-        FormId mFormId; // from the header
+        ESM::RefId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::uint32_t mLandFlags; // from DATA subrecord
@@ -126,16 +128,19 @@ namespace ESM4
         VHGT mHeightMap;
         Texture mTextures[4]; // 0 = bottom left, 1 = bottom right, 2 = top left, 3 = top right
         std::vector<FormId> mIds; // land texture (LTEX) formids
-
+        ESM::RefId mCell;
         void load(Reader& reader);
+        Land() = default;
+        Land(const Land& Other);
         // void save(Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::REC_LAND4;
 
         std::span<const float> getHeights() const override { return mHeights; }
         std::span<const VNML> getNormals() const override { return mVertNorm; }
         std::span<const unsigned char> getColors() const override { return mVertColr; }
-        std::span<const uint16_t> getTextures() const override { return {}; }
+        std::span<const uint16_t> getTextures() const override;
         float getSize() const override { return REAL_SIZE; }
         float getMinHeight() const override { return mMinHeight; }
         float getMaxHeight() const { return mMaxHeight; }

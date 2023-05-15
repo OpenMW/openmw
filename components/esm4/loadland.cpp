@@ -54,11 +54,12 @@
 //
 void ESM4::Land::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    ESM::FormId formId = reader.hdr().record.getFormId();
+    reader.adjustFormId(formId);
+    mId = ESM::RefId::formIdRefId(formId);
     mFlags = reader.hdr().record.flags;
     mDataTypes = 0;
-
+    mCell = ESM::RefId::formIdRefId(reader.currCell());
     TxtLayer layer;
     std::int8_t currentAddQuad = -1; // for VTXT following ATXT
 
@@ -250,6 +251,29 @@ void ESM4::Land::load(ESM4::Reader& reader)
             mHeights[x + y * VERTS_PER_SIDE] = colOffset * HEIGHT_SCALE;
         }
     }
+}
+
+ESM4::Land::Land(const Land& Other)
+{
+    mId = Other.mId;
+    mCell = Other.mCell;
+    for (int i = 0; i < VERTS_PER_SIDE * VERTS_PER_SIDE; i++)
+    {
+        mHeights[i] = Other.mHeights[i];
+    }
+    for (int i = 0; i < VERTS_PER_SIDE * VERTS_PER_SIDE * 3; i++)
+    {
+        mVertNorm[i] = Other.mVertNorm[i];
+        mVertColr[i] = Other.mVertColr[i];
+    }
+    mMinHeight = Other.mMinHeight;
+    mMaxHeight = Other.mMaxHeight;
+}
+
+std::span<const uint16_t> ESM4::Land::getTextures() const
+{
+    static uint16_t textureArray[16 * 16] = {};
+    return textureArray;
 }
 
 // void ESM4::Land::save(ESM4::Writer& writer) const

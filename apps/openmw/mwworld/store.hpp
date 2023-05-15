@@ -35,6 +35,11 @@ namespace ESM
     class ESMWriter;
 }
 
+namespace ESM4
+{
+    struct Land;
+}
+
 namespace Loading
 {
     class Listener;
@@ -296,6 +301,17 @@ namespace MWWorld
         ESM4::Cell* insertStatic(const ESM4::Cell& item);
         void insertCell(ESM4::Cell* cell);
         void clearDynamic() override;
+    };
+
+    template <>
+    class Store<ESM4::Land> : public TypedDynamicStore<ESM4::Land>
+    {
+        std::unordered_map<ESM::ExteriorCellLocation, const ESM4::Land*> mLands;
+
+    public:
+        void updateLandPositions(const Store<ESM4::Cell>& cells);
+
+        const ESM4::Land* search(ESM::ExteriorCellLocation cellLocation) const;
     };
 
     template <>

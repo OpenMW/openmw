@@ -262,7 +262,7 @@ namespace Terrain
             auto chunkBorder = CellBorder::createBorderGeometry(center.x() - size / 2.f, center.y() - size / 2.f, size,
                 mStorage, mSceneManager, mNodeMask, mWorldspace, 5.f, { 1, 0, 0, 0 });
             osg::ref_ptr<SceneUtil::PositionAttitudeTransform> pat = new SceneUtil::PositionAttitudeTransform;
-            pat->setPosition(-center * Constants::CellSizeInUnits);
+            pat->setPosition(-center * ESM::getCellSize(mWorldspace));
             pat->addChild(chunkBorder);
             return pat;
         }

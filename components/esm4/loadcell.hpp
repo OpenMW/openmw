@@ -36,6 +36,7 @@
 
 #include <components/esm/defs.hpp>
 #include <components/esm/refid.hpp>
+#include <components/esm/util.hpp>
 #include <components/esm4/reader.hpp>
 
 namespace ESM4
@@ -107,7 +108,10 @@ namespace ESM4
         int getGridX() const { return mX; }
         int getGridY() const { return mY; }
         bool isExterior() const { return !(mCellFlags & CELL_Interior); }
-
+        ESM::ExteriorCellLocation getExteriorCellLocation() const
+        {
+            return ESM::ExteriorCellLocation(mX, mY, isExterior() ? mParent : mId);
+        }
         static float sInvalidWaterLevel;
     };
 }
