@@ -2,6 +2,7 @@
 #define GAME_MWCLASS_ESM4BASE_H
 
 #include <components/esm4/loadstat.hpp>
+#include <components/misc/strings/algorithm.hpp>
 
 #include "../mwgui/tooltips.hpp"
 
@@ -44,9 +45,6 @@ namespace MWClass
         void insertObjectRendering(const MWWorld::Ptr& ptr, const std::string& model,
             MWRender::RenderingInterface& renderingInterface) const override
         {
-            const MWWorld::LiveCellRef<Record>* ref = ptr.get<Record>();
-            if (ref->mBase->mFlags & ESM4::Rec_Marker)
-                return;
             ESM4Impl::insertObjectRendering(ptr, model, renderingInterface);
         }
 
@@ -59,9 +57,6 @@ namespace MWClass
         void insertObjectPhysics(const MWWorld::Ptr& ptr, const std::string& model, const osg::Quat& rotation,
             MWPhysics::PhysicsSystem& physics) const override
         {
-            const MWWorld::LiveCellRef<Record>* ref = ptr.get<Record>();
-            if (ref->mBase->mFlags & ESM4::Rec_Marker)
-                return;
             ESM4Impl::insertObjectPhysics(ptr, model, rotation, physics);
         }
 
@@ -69,7 +64,19 @@ namespace MWClass
 
         std::string_view getName(const MWWorld::ConstPtr& ptr) const override { return ""; }
 
-        std::string getModel(const MWWorld::ConstPtr& ptr) const override { return getClassModel<Record>(ptr); }
+        std::string getModel(const MWWorld::ConstPtr& ptr) const override
+        {
+            std::string model = getClassModel<Record>(ptr);
+
+            // Hide meshes meshes/marker/* and *LOD.nif in ESM4 cells. It is a temporarty hack.
+            // Needed because otherwise LOD meshes are rendered on top of normal meshes.
+            // TODO: Figure out a better way find markers and LOD meshes; show LOD only outside of active grid.
+            if (model.empty() || Misc::StringUtils::ciStartsWith(model, "meshes\\marker")
+                || Misc::StringUtils::ciEndsWith(model, "lod.nif"))
+                return "";
+
+            return model;
+        }
     };
 
     class ESM4Static final : public MWWorld::RegisteredClass<ESM4Static, ESM4Base<ESM4::Static>>
