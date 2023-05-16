@@ -4,6 +4,7 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <span>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -552,6 +553,13 @@ namespace MWWorld
     template <>
     class Store<ESM4::Reference> : public TypedDynamicStore<ESM4::Reference, ESM::FormId>
     {
+    public:
+        void preprocessReferences(const Store<ESM4::Cell>& cells);
+
+        std::span<const ESM4::Reference* const> getByCell(ESM::RefId cellId) const;
+
+    private:
+        std::unordered_map<ESM::RefId, std::vector<ESM4::Reference*>> mPerCellReferences;
     };
 
 } // end namespace

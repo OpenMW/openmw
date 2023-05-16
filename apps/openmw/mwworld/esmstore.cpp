@@ -447,6 +447,7 @@ namespace MWWorld
         getWritable<ESM::Skill>().setUp();
         getWritable<ESM::MagicEffect>().setUp();
         getWritable<ESM::Attribute>().setUp();
+        getWritable<ESM4::Reference>().preprocessReferences(get<ESM4::Cell>());
     }
 
     void ESMStore::validateRecords(ESM::ReadersCache& readers)
