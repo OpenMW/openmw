@@ -28,6 +28,9 @@ namespace Constants
     // Size of active cell grid in cells (it is a square with the (2 * CellGridRadius + 1) cells side)
     constexpr int CellGridRadius = 1;
 
+    // ESM4 cells are twice smaller, so the active grid should have more cells.
+    constexpr int ESM4CellGridRadius = CellGridRadius * 2;
+
     // A label to mark night/day visual switches
     const std::string NightDayLabel = "NightDaySwitch";
 

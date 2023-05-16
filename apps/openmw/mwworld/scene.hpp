@@ -102,7 +102,7 @@ namespace MWWorld
         bool mPreloadFastTravel;
         float mPredictionTime;
 
-        static const int mHalfGridSize = Constants::CellGridRadius;
+        int mHalfGridSize = Constants::CellGridRadius;
 
         osg::Vec3f mLastPlayerPos;
 
