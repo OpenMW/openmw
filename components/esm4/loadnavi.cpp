@@ -80,7 +80,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
 {
     std::uint32_t count;
 
-    reader.get(formId);
+    reader.getFormId(formId);
     reader.get(flags);
     reader.get(x);
     reader.get(y);
@@ -107,10 +107,8 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     {
         // std::cout << "NVMI countMerged " << std::dec << count << std::endl;
         formIdMerged.resize(count);
-        for (std::vector<FormId>::iterator it = formIdMerged.begin(); it != formIdMerged.end(); ++it)
-        {
-            reader.get(*it);
-        }
+        for (FormId& value : formIdMerged)
+            reader.getFormId(value);
     }
 
     reader.get(count); // countPrefMerged;
@@ -118,10 +116,8 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     {
         // std::cout << "NVMI countPrefMerged " << std::dec << count << std::endl;
         formIdPrefMerged.resize(count);
-        for (std::vector<FormId>::iterator it = formIdPrefMerged.begin(); it != formIdPrefMerged.end(); ++it)
-        {
-            reader.get(*it);
-        }
+        for (FormId& value : formIdPrefMerged)
+            reader.getFormId(value);
     }
 
     reader.get(count); // countLinkedDoors;
@@ -148,7 +144,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
 
     reader.get(locationMarker);
 
-    reader.get(worldSpaceId);
+    reader.getFormId(worldSpaceId);
     // FLG_Tamriel    = 0x0000003c, // grid info follows, possibly Tamriel?
     // FLG_Morrowind  = 0x01380000, // grid info follows, probably Skywind
     if (worldSpaceId == FormId{ 0x3c, 0 } || worldSpaceId == FormId{ 0x380000, 1 })
@@ -170,7 +166,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     else
     {
         FormId cellId;
-        reader.get(cellId);
+        reader.getFormId(cellId);
         cellGrid = cellId;
 
 #if 0
@@ -279,14 +275,11 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                         reader.get(node);
                         reader.get(count);
                     }
-                    if (count)
+                    if (count > 0)
                     {
                         preferredPaths.resize(count);
-                        for (std::vector<FormId>::iterator it = preferredPaths.begin(); it != preferredPaths.end();
-                             ++it)
-                        {
-                            reader.get(*it);
-                        }
+                        for (FormId& value : preferredPaths)
+                            reader.getFormId(value);
                     }
                     mPreferredPaths.push_back(std::make_pair(node, preferredPaths));
 #if 0

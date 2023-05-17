@@ -53,8 +53,8 @@ void ESM4::IdleAnimation::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_ANAM:
             {
-                reader.get(mParent);
-                reader.get(mPrevious);
+                reader.getFormId(mParent);
+                reader.getFormId(mPrevious);
                 break;
             }
             case ESM4::SUB_CTDA: // formId

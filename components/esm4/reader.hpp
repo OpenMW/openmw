@@ -226,6 +226,9 @@ namespace ESM4
             mStream->read((char*)&t, sizeof(T));
         }
 
+        // Use getFormId instead
+        void get(FormId& value) = delete;
+
         template <typename T>
         bool getExact(T& t)
         {
