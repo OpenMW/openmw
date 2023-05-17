@@ -71,13 +71,15 @@ namespace Resource
         deleteShape(shape);
     }
 
-    BulletShape::BulletShape(const BulletShape& copy, const osg::CopyOp& copyop)
-        : mCollisionShape(duplicateCollisionShape(copy.mCollisionShape.get()))
-        , mAvoidCollisionShape(duplicateCollisionShape(copy.mAvoidCollisionShape.get()))
-        , mCollisionBox(copy.mCollisionBox)
-        , mAnimatedShapes(copy.mAnimatedShapes)
-        , mFileName(copy.mFileName)
-        , mFileHash(copy.mFileHash)
+    BulletShape::BulletShape(const BulletShape& other, const osg::CopyOp& copyOp)
+        : Object(other, copyOp)
+        , mCollisionShape(duplicateCollisionShape(other.mCollisionShape.get()))
+        , mAvoidCollisionShape(duplicateCollisionShape(other.mAvoidCollisionShape.get()))
+        , mCollisionBox(other.mCollisionBox)
+        , mAnimatedShapes(other.mAnimatedShapes)
+        , mFileName(other.mFileName)
+        , mFileHash(other.mFileHash)
+        , mVisualCollisionType(other.mVisualCollisionType)
     {
     }
 
@@ -94,13 +96,8 @@ namespace Resource
     }
 
     BulletShapeInstance::BulletShapeInstance(osg::ref_ptr<const BulletShape> source)
-        : mSource(std::move(source))
+        : BulletShape(*source)
+        , mSource(std::move(source))
     {
-        mCollisionBox = mSource->mCollisionBox;
-        mAnimatedShapes = mSource->mAnimatedShapes;
-        mVisualCollisionType = mSource->mVisualCollisionType;
-        mCollisionShape = duplicateCollisionShape(mSource->mCollisionShape.get());
-        mAvoidCollisionShape = duplicateCollisionShape(mSource->mAvoidCollisionShape.get());
     }
-
 }

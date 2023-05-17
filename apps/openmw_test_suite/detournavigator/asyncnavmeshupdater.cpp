@@ -197,7 +197,7 @@ namespace
         ASSERT_NE(recastMesh, nullptr);
         const auto objects = makeDbRefGeometryObjects(
             recastMesh->getMeshSources(), [&](const MeshSource& v) { return resolveMeshSource(*dbPtr, v); });
-        EXPECT_FALSE(objects.has_value());
+        EXPECT_TRUE(std::holds_alternative<MeshSource>(objects));
     }
 
     TEST_F(DetourNavigatorAsyncNavMeshUpdaterTest, post_should_read_from_db_on_cache_miss)
@@ -285,13 +285,14 @@ namespace
                 const TilePosition tilePosition(x, y);
                 const auto recastMesh = mRecastMeshManager.getMesh(mWorldspace, tilePosition);
                 ASSERT_NE(recastMesh, nullptr);
-                const std::optional<std::vector<DbRefGeometryObject>> objects = makeDbRefGeometryObjects(
+                const auto objects = makeDbRefGeometryObjects(
                     recastMesh->getMeshSources(), [&](const MeshSource& v) { return resolveMeshSource(*dbPtr, v); });
-                if (!objects.has_value())
+                if (std::holds_alternative<MeshSource>(objects))
                     continue;
                 EXPECT_EQ(dbPtr
                               ->findTile(mWorldspace, tilePosition,
-                                  serialize(mSettings.mRecast, mAgentBounds, *recastMesh, *objects))
+                                  serialize(mSettings.mRecast, mAgentBounds, *recastMesh,
+                                      std::get<std::vector<DbRefGeometryObject>>(objects)))
                               .has_value(),
                     present.find(tilePosition) != present.end())
                     << tilePosition.x() << " " << tilePosition.y()
