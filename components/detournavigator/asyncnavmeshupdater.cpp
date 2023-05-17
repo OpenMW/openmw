@@ -823,6 +823,8 @@ namespace DetourNavigator
 
     void DbWorker::processReadingJob(JobIt job)
     {
+        ++mGetTileCount;
+
         Log(Debug::Debug) << "Processing db read job " << job->mId;
 
         if (job->mInput.empty())
@@ -865,7 +867,6 @@ namespace DetourNavigator
         }
 
         job->mCachedTileData = mDb->getTileData(job->mWorldspace, job->mChangedTile, job->mInput);
-        ++mGetTileCount;
     }
 
     void DbWorker::processWritingJob(JobIt job)

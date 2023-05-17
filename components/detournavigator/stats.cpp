@@ -20,18 +20,15 @@ namespace DetourNavigator
                 out.setAttribute(
                     frameNumber, "NavMesh DbJobs Read", static_cast<double>(stats.mDb->mJobs.mReadingJobs));
 
-                if (stats.mDb->mGetTileCount > 0)
-                    out.setAttribute(frameNumber, "NavMesh DbCacheHitRate",
-                        static_cast<double>(stats.mDbGetTileHits) / static_cast<double>(stats.mDb->mGetTileCount)
-                            * 100.0);
+                out.setAttribute(frameNumber, "NavMesh DbCache Get", static_cast<double>(stats.mDb->mGetTileCount));
+                out.setAttribute(frameNumber, "NavMesh DbCache Hit", static_cast<double>(stats.mDbGetTileHits));
             }
 
             out.setAttribute(frameNumber, "NavMesh CacheSize", static_cast<double>(stats.mCache.mNavMeshCacheSize));
             out.setAttribute(frameNumber, "NavMesh UsedTiles", static_cast<double>(stats.mCache.mUsedNavMeshTiles));
             out.setAttribute(frameNumber, "NavMesh CachedTiles", static_cast<double>(stats.mCache.mCachedNavMeshTiles));
-            if (stats.mCache.mGetCount > 0)
-                out.setAttribute(frameNumber, "NavMesh CacheHitRate",
-                    static_cast<double>(stats.mCache.mHitCount) / stats.mCache.mGetCount * 100.0);
+            out.setAttribute(frameNumber, "NavMesh Cache Get", static_cast<double>(stats.mCache.mGetCount));
+            out.setAttribute(frameNumber, "NavMesh Cache Hit", static_cast<double>(stats.mCache.mHitCount));
         }
     }
 
