@@ -5,7 +5,8 @@ Checks: >
   clang-analyzer-*,
   -clang-analyzer-optin*,
   -clang-analyzer-cplusplus.NewDeleteLeaks,
-  -clang-analyzer-core.CallAndMessage
+  -clang-analyzer-core.CallAndMessage,
+  -modernize-avoid-bind
 WarningsAsErrors: >
   -*,
   boost-*,
