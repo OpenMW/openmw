@@ -66,7 +66,8 @@ namespace MWLua
             return &wm->getCellByPosition(pos, cell);
         }
 
-        void teleportPlayer(MWWorld::CellStore* destCell, const osg::Vec3f& pos, const osg::Vec3f& rot)
+        void teleportPlayer(
+            MWWorld::CellStore* destCell, const osg::Vec3f& pos, const osg::Vec3f& rot, bool placeOnGround)
         {
             MWBase::World* world = MWBase::Environment::get().getWorld();
             ESM::Position esmPos;
@@ -74,20 +75,38 @@ namespace MWLua
             std::memcpy(esmPos.pos, &pos, sizeof(osg::Vec3f));
             std::memcpy(esmPos.rot, &rot, sizeof(osg::Vec3f));
             MWWorld::Ptr ptr = world->getPlayerPtr();
-            ptr.getClass().getCreatureStats(ptr).land(false);
+            auto& stats = ptr.getClass().getCreatureStats(ptr);
+            stats.land(true);
+            stats.setTeleported(true);
             world->getPlayer().setTeleported(true);
-            world->changeToCell(destCell->getCell()->getId(), esmPos, true);
+            world->changeToCell(destCell->getCell()->getId(), esmPos, false);
+            MWWorld::Ptr newPtr = world->getPlayerPtr();
+            world->moveObject(newPtr, pos);
+            world->rotateObject(newPtr, rot);
+            if (placeOnGround)
+                world->adjustPosition(newPtr, true);
         }
 
-        void teleportNotPlayer(
-            const MWWorld::Ptr& ptr, MWWorld::CellStore* destCell, const osg::Vec3f& pos, const osg::Vec3f& rot)
+        void teleportNotPlayer(const MWWorld::Ptr& ptr, MWWorld::CellStore* destCell, const osg::Vec3f& pos,
+            const osg::Vec3f& rot, bool placeOnGround)
         {
             MWBase::World* world = MWBase::Environment::get().getWorld();
             const MWWorld::Class& cls = ptr.getClass();
             if (cls.isActor())
-                cls.getCreatureStats(ptr).land(false);
+            {
+                auto& stats = ptr.getClass().getCreatureStats(ptr);
+                stats.land(false);
+                stats.setTeleported(true);
+            }
             MWWorld::Ptr newPtr = world->moveObject(ptr, destCell, pos);
             world->rotateObject(newPtr, rot, MWBase::RotationFlag_none);
+            if (placeOnGround)
+                world->adjustPosition(newPtr, true);
+            if (cls.isDoor())
+            { // Change "original position and rotation" because without it teleported animated doors don't work
+              // properly.
+                newPtr.getCellRef().setPosition(newPtr.getRefData().getPosition());
+            }
             if (!newPtr.getRefData().isEnabled())
                 world->enable(newPtr);
         }
@@ -343,38 +362,47 @@ namespace MWLua
                     });
                 };
                 objectT["teleport"] = [removeFn, context](const GObject& object, const sol::object& cellOrName,
-                                          const osg::Vec3f& pos, const sol::optional<osg::Vec3f>& optRot) {
+                                          const osg::Vec3f& pos, const sol::object& options) {
                     MWWorld::CellStore* cell = findCell(cellOrName, pos);
                     MWWorld::Ptr ptr = object.ptr();
                     int count = ptr.getRefData().getCount();
                     if (count == 0)
                         throw std::runtime_error("Object is either removed or already in the process of teleporting");
-                    osg::Vec3f rot = optRot ? *optRot : ptr.getRefData().getPosition().asRotationVec3();
+                    osg::Vec3f rot = ptr.getRefData().getPosition().asRotationVec3();
+                    bool placeOnGround = false;
+                    if (options.is<osg::Vec3f>())
+                        rot = options.as<osg::Vec3f>();
+                    else if (options != sol::nil)
+                    {
+                        sol::table t = LuaUtil::cast<sol::table>(options);
+                        rot = LuaUtil::getValueOrDefault(t["rotation"], rot);
+                        placeOnGround = LuaUtil::getValueOrDefault(t["onGround"], placeOnGround);
+                    }
                     if (ptr.getContainerStore())
                     {
                         DelayedRemovalFn delayedRemovalFn = *removeFn(ptr, count);
                         context.mLuaManager->addAction(
-                            [object, cell, pos, rot, count, delayedRemovalFn] {
+                            [object, cell, pos, rot, count, delayedRemovalFn, placeOnGround] {
                                 MWWorld::Ptr oldPtr = object.ptr();
                                 oldPtr.getRefData().setCount(count);
                                 MWWorld::Ptr newPtr = oldPtr.getClass().moveToCell(oldPtr, *cell);
                                 oldPtr.getRefData().setCount(0);
                                 newPtr.getRefData().disable();
-                                teleportNotPlayer(newPtr, cell, pos, rot);
+                                teleportNotPlayer(newPtr, cell, pos, rot, placeOnGround);
                                 delayedRemovalFn(oldPtr);
                             },
                             "TeleportFromContainerAction");
                     }
                     else if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                         context.mLuaManager->addTeleportPlayerAction(
-                            [cell, pos, rot] { teleportPlayer(cell, pos, rot); });
+                            [cell, pos, rot, placeOnGround] { teleportPlayer(cell, pos, rot, placeOnGround); });
                     else
                     {
                         ptr.getRefData().setCount(0);
                         context.mLuaManager->addAction(
-                            [object, cell, pos, rot, count] {
+                            [object, cell, pos, rot, count, placeOnGround] {
                                 object.ptr().getRefData().setCount(count);
-                                teleportNotPlayer(object.ptr(), cell, pos, rot);
+                                teleportNotPlayer(object.ptr(), cell, pos, rot, placeOnGround);
                             },
                             "TeleportAction");
                     }

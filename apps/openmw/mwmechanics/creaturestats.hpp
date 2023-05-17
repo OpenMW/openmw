@@ -85,6 +85,8 @@ namespace MWMechanics
         // The difference between view direction and lower body direction.
         float mSideMovementAngle;
 
+        bool mTeleported = false;
+
     private:
         std::multimap<int, int> mSummonedCreatures; // <Effect, ActorId>
 
@@ -288,6 +290,9 @@ namespace MWMechanics
 
         float getSideMovementAngle() const { return mSideMovementAngle; }
         void setSideMovementAngle(float angle) { mSideMovementAngle = angle; }
+
+        bool wasTeleported() const { return mTeleported; }
+        void setTeleported(bool v) { mTeleported = v; }
     };
 }
 

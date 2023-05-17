@@ -47,7 +47,9 @@ namespace MWWorld
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
         MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
-        actor.getClass().getCreatureStats(actor).land(actor == world->getPlayerPtr());
+        auto& stats = actor.getClass().getCreatureStats(actor);
+        stats.land(actor == world->getPlayerPtr());
+        stats.setTeleported(true);
 
         Ptr teleported;
         if (actor == world->getPlayerPtr())

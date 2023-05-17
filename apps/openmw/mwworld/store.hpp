@@ -413,6 +413,14 @@ namespace MWWorld
         size_t getExtSize() const;
         size_t getIntSize() const;
 
+        const ESM::Cell* at(size_t index) const
+        {
+            if (index < mSharedInt.size())
+                return mSharedInt.at(index);
+            else
+                return mSharedExt.at(index - mSharedInt.size());
+        }
+
         void listIdentifier(std::vector<ESM::RefId>& list) const override;
 
         ESM::Cell* insert(const ESM::Cell& cell);

@@ -33,7 +33,8 @@ namespace MWLua
             auto cell = c.mStore->getCell();
             std::stringstream res;
             if (cell->isExterior())
-                res << "exterior(" << cell->getGridX() << ", " << cell->getGridY() << ")";
+                res << "exterior(" << cell->getGridX() << ", " << cell->getGridY() << ", "
+                    << cell->getWorldSpace().toDebugString() << ")";
             else
                 res << "interior(" << cell->getNameId() << ")";
             return res.str();
@@ -42,6 +43,8 @@ namespace MWLua
         cellT["name"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getNameId(); });
         cellT["region"] = sol::readonly_property(
             [](const CellT& c) -> std::string { return c.mStore->getCell()->getRegion().serializeText(); });
+        cellT["worldSpaceId"] = sol::readonly_property(
+            [](const CellT& c) -> std::string { return c.mStore->getCell()->getWorldSpace().serializeText(); });
         cellT["gridX"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getGridX(); });
         cellT["gridY"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->getGridY(); });
         cellT["hasWater"] = sol::readonly_property([](const CellT& c) { return c.mStore->getCell()->hasWater(); });
@@ -67,13 +70,15 @@ namespace MWLua
             if (!ptr.isInCell())
                 return false;
             MWWorld::CellStore* cell = ptr.getCell();
-            return cell == c.mStore || (cell->isExterior() && c.mStore->isExterior());
+            return cell == c.mStore || (cell->getCell()->getWorldSpace() == c.mStore->getCell()->getWorldSpace());
         };
 
         if constexpr (std::is_same_v<CellT, GCell>)
         { // only for global scripts
             cellT["getAll"] = [ids = getPackageToTypeTable(context.mLua->sol())](
                                   const CellT& cell, sol::optional<sol::table> type) {
+                if (cell.mStore->getState() != MWWorld::CellStore::State_Loaded)
+                    cell.mStore->load();
                 ObjectIdList res = std::make_shared<std::vector<ObjectId>>();
                 auto visitor = [&](const MWWorld::Ptr& ptr) {
                     if (ptr.getRefData().isDeleted())

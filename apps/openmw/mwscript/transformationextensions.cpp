@@ -21,6 +21,7 @@
 #include "../mwworld/worldmodel.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -389,10 +390,10 @@ namespace MWScript
                 bool isPlayer = ptr == MWMechanics::getPlayer();
                 auto world = MWBase::Environment::get().getWorld();
                 auto worldModel = MWBase::Environment::get().getWorldModel();
+                if (ptr.getClass().isActor())
+                    ptr.getClass().getCreatureStats(ptr).setTeleported(true);
                 if (isPlayer)
-                {
                     world->getPlayer().setTeleported(true);
-                }
 
                 MWWorld::CellStore* store = nullptr;
                 try
@@ -463,10 +464,10 @@ namespace MWScript
 
                 bool isPlayer = ptr == MWMechanics::getPlayer();
                 auto world = MWBase::Environment::get().getWorld();
+                if (ptr.getClass().isActor())
+                    ptr.getClass().getCreatureStats(ptr).setTeleported(true);
                 if (isPlayer)
-                {
                     world->getPlayer().setTeleported(true);
-                }
                 const ESM::ExteriorCellLocation cellIndex
                     = ESM::positionToCellIndex(x, y, ESM::Cell::sDefaultWorldspaceId);
 

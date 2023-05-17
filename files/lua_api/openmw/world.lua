@@ -21,7 +21,13 @@
 -- @function [parent=#world] getExteriorCell
 -- @param #number gridX
 -- @param #number gridY
+-- @param #any cellOrName (optional) other cell or cell name in the same exterior world space
 -- @return openmw.core#Cell
+
+---
+-- List of all cells
+-- @field [parent=#world] #list<openmw.core#Cell> cells
+-- @usage for i, cell in ipairs(world.cells) do print(cell) end
 
 ---
 -- Simulation time in seconds.
