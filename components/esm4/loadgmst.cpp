@@ -15,6 +15,12 @@ namespace ESM4
             const char type = editorId[0];
             switch (type)
             {
+                case 'b':
+                {
+                    std::uint32_t value = 0;
+                    reader.get(value);
+                    return value != 0;
+                }
                 case 'i':
                 {
                     std::int32_t value = 0;
