@@ -192,10 +192,18 @@ void ESM4::World::load(ESM4::Reader& reader)
                 throw std::runtime_error("ESM4::WRLD::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
 
-        if (isTES5 && usingDefaultLevels)
+        if (usingDefaultLevels)
         {
-            mLandLevel = -2700.f;
-            mWaterLevel = -14000.f;
+            if (isTES5)
+            {
+                mLandLevel = -2700.f;
+                mWaterLevel = -14000.f;
+            }
+            else
+            {
+                mLandLevel = 0.f; // FIXME: not sure that this value is correct
+                mWaterLevel = 0.f;
+            }
         }
     }
 }
