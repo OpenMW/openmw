@@ -177,12 +177,12 @@ void ESM4::Creature::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_TPLT:
-                reader.get(mBaseTemplate);
+                reader.getFormId(mBaseTemplate);
                 break; // FO3
             case ESM4::SUB_PNAM: // FO3/FONV/TES5
             {
                 FormId bodyPart;
-                reader.get(bodyPart);
+                reader.getFormId(bodyPart);
                 mBodyParts.push_back(bodyPart);
 
                 break;

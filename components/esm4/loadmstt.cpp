@@ -53,7 +53,7 @@ void ESM4::MovableStatic::load(ESM4::Reader& reader)
                 reader.get(mData);
                 break;
             case ESM4::SUB_SNAM:
-                reader.get(mLoopingSound);
+                reader.getFormId(mLoopingSound);
                 break;
             case ESM4::SUB_DEST: // destruction data
             case ESM4::SUB_OBND: // object bounds

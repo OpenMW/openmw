@@ -65,8 +65,8 @@ void ESM4::ActorCreature::load(ESM4::Reader& reader)
                 reader.getFormId(mOwner);
                 break;
             case ESM4::SUB_XGLB:
-                reader.get(mGlobal);
-                break; // FIXME: formId?
+                reader.getFormId(mGlobal);
+                break;
             case ESM4::SUB_XRNK:
                 reader.get(mFactionRank);
                 break;

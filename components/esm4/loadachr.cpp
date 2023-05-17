@@ -60,7 +60,7 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
                 reader.get(mScale);
                 break;
             case ESM4::SUB_XOWN:
-                reader.get(mOwner);
+                reader.getFormId(mOwner);
                 break;
             case ESM4::SUB_XESP:
             {
