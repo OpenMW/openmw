@@ -203,6 +203,11 @@
 -- @usage -- take 50 coins from `money` and put to the container `cont`
 -- money:split(50):moveInto(types.Container.content(cont))
 
+---
+-- The axis aligned bounding box in local coordinates.
+-- @function [parent=#GameObject] getBoundingBox
+-- @param self
+-- @return openmw.util#Box
 
 ---
 -- List of GameObjects. Implements [iterables#List](iterables.html#List) of #GameObject
