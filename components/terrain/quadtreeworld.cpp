@@ -475,7 +475,7 @@ namespace Terrain
             mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
         }
 
-        const float cellWorldSize = ESM::getLandSize(mWorldspace);
+        const float cellWorldSize = ESM::getCellSize(mWorldspace);
 
         for (unsigned int i = 0; i < vd->getNumEntries(); ++i)
         {

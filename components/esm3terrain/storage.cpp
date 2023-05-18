@@ -201,9 +201,10 @@ namespace ESMTerrain
 
         int startCellX = static_cast<int>(std::floor(origin.x()));
         int startCellY = static_cast<int>(std::floor(origin.y()));
-        const int LandSize = ESM::getLandSize(worldspace);
+        const int landSize = ESM::getLandSize(worldspace);
+        const int LandSizeInUnits = ESM::getCellSize(worldspace);
 
-        size_t numVerts = static_cast<size_t>(size * (LandSize - 1) / increment + 1);
+        size_t numVerts = static_cast<size_t>(size * (landSize - 1) / increment + 1);
 
         positions->resize(numVerts * numVerts);
         normals->resize(numVerts * numVerts);
@@ -230,7 +231,6 @@ namespace ESMTerrain
                 const ESM::LandData* heightData = nullptr;
                 const ESM::LandData* normalData = nullptr;
                 const ESM::LandData* colourData = nullptr;
-                const int LandSizeInUnits = land ? land->getRealSize() : Constants::CellSizeInUnits;
                 if (land)
                 {
                     heightData = land->getData(ESM::Land::DATA_VHGT);
@@ -249,12 +249,12 @@ namespace ESMTerrain
                     rowStart += increment;
 
                 // Only relevant for chunks smaller than (contained in) one cell
-                rowStart += (origin.x() - startCellX) * LandSize;
-                colStart += (origin.y() - startCellY) * LandSize;
+                rowStart += (origin.x() - startCellX) * landSize;
+                colStart += (origin.y() - startCellY) * landSize;
                 int rowEnd = std::min(
-                    static_cast<int>(rowStart + std::min(1.f, size) * (LandSize - 1) + 1), static_cast<int>(LandSize));
+                    static_cast<int>(rowStart + std::min(1.f, size) * (landSize - 1) + 1), static_cast<int>(landSize));
                 int colEnd = std::min(
-                    static_cast<int>(colStart + std::min(1.f, size) * (LandSize - 1) + 1), static_cast<int>(LandSize));
+                    static_cast<int>(colStart + std::min(1.f, size) * (landSize - 1) + 1), static_cast<int>(landSize));
 
                 vertY = vertY_;
                 for (int col = colStart; col < colEnd; col += increment)
@@ -262,17 +262,17 @@ namespace ESMTerrain
                     vertX = vertX_;
                     for (int row = rowStart; row < rowEnd; row += increment)
                     {
-                        int srcArrayIndex = col * LandSize * 3 + row * 3;
+                        int srcArrayIndex = col * landSize * 3 + row * 3;
 
-                        assert(row >= 0 && row < LandSize);
-                        assert(col >= 0 && col < LandSize);
+                        assert(row >= 0 && row < landSize);
+                        assert(col >= 0 && col < landSize);
 
                         assert(vertX < numVerts);
                         assert(vertY < numVerts);
 
                         float height = defaultHeight;
                         if (heightData)
-                            height = heightData->getHeights()[col * LandSize + row];
+                            height = heightData->getHeights()[col * landSize + row];
                         if (alteration)
                             height += getAlteredHeight(col, row);
                         (*positions)[static_cast<unsigned int>(vertX * numVerts + vertY)]
@@ -290,11 +290,11 @@ namespace ESMTerrain
                             normal = osg::Vec3f(0, 0, 1);
 
                         // Normals apparently don't connect seamlessly between cells
-                        if (col == LandSize - 1 || row == LandSize - 1)
+                        if (col == landSize - 1 || row == landSize - 1)
                             fixNormal(normal, cellLocation, col, row, cache);
 
                         // some corner normals appear to be complete garbage (z < 0)
-                        if ((row == 0 || row == LandSize - 1) && (col == 0 || col == LandSize - 1))
+                        if ((row == 0 || row == landSize - 1) && (col == 0 || col == landSize - 1))
                             averageNormal(normal, cellLocation, col, row, cache);
 
                         assert(normal.z() > 0);
@@ -316,7 +316,7 @@ namespace ESMTerrain
                             adjustColor(col, row, heightData, color); // Does nothing by default, override in OpenMW-CS
 
                         // Unlike normals, colors mostly connect seamlessly between cells, but not always...
-                        if (col == LandSize - 1 || row == LandSize - 1)
+                        if (col == landSize - 1 || row == landSize - 1)
                             fixColour(color, cellLocation, col, row, cache);
 
                         color.a() = 255;
