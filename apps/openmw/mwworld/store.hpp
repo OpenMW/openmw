@@ -312,6 +312,7 @@ namespace MWWorld
         void updateLandPositions(const Store<ESM4::Cell>& cells);
 
         const ESM4::Land* search(ESM::ExteriorCellLocation cellLocation) const;
+        const std::unordered_map<ESM::ExteriorCellLocation, const ESM4::Land*>& getLands() const { return mLands; };
     };
 
     template <>

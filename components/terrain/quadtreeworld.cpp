@@ -130,7 +130,7 @@ namespace Terrain
 
         void build()
         {
-            mStorage->getBounds(mMinX, mMaxX, mMinY, mMaxY);
+            mStorage->getBounds(mMinX, mMaxX, mMinY, mMaxY, mWorldspace);
 
             int origSizeX = static_cast<int>(mMaxX - mMinX);
             int origSizeY = static_cast<int>(mMaxY - mMinY);

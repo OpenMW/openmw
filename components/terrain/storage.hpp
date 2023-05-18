@@ -29,7 +29,7 @@ namespace Terrain
 
     public:
         /// Get bounds of the whole terrain in cell units
-        virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY) = 0;
+        virtual void getBounds(float& minX, float& maxX, float& minY, float& maxY, ESM::RefId worldspace) = 0;
 
         /// Return true if there is land data for this cell
         /// May be overriden for a faster implementation

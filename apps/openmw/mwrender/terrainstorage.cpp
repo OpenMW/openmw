@@ -34,7 +34,7 @@ namespace MWRender
         return land != nullptr;
     }
 
-    void TerrainStorage::getBounds(float& minX, float& maxX, float& minY, float& maxY)
+    void TerrainStorage::getBounds(float& minX, float& maxX, float& minY, float& maxY, ESM::RefId worldspace)
     {
         minX = 0;
         minY = 0;
@@ -43,19 +43,41 @@ namespace MWRender
 
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
-        MWWorld::Store<ESM::Land>::iterator it = esmStore.get<ESM::Land>().begin();
-        for (; it != esmStore.get<ESM::Land>().end(); ++it)
+        if (ESM::isEsm4Ext(worldspace))
         {
-            if (it->mX < minX)
-                minX = static_cast<float>(it->mX);
-            if (it->mX > maxX)
-                maxX = static_cast<float>(it->mX);
-            if (it->mY < minY)
-                minY = static_cast<float>(it->mY);
-            if (it->mY > maxY)
-                maxY = static_cast<float>(it->mY);
+            const auto& lands = esmStore.get<ESM4::Land>().getLands();
+            for (const auto& it : lands)
+            {
+                if (it.first.mWorldspace == worldspace)
+                {
+                    int x = it.first.mX;
+                    int y = it.first.mY;
+                    if (x < minX)
+                        minX = static_cast<float>(x);
+                    if (x > maxX)
+                        maxX = static_cast<float>(x);
+                    if (y < minY)
+                        minY = static_cast<float>(y);
+                    if (y > maxY)
+                        maxY = static_cast<float>(y);
+                }
+            }
         }
-
+        else
+        {
+            MWWorld::Store<ESM::Land>::iterator it = esmStore.get<ESM::Land>().begin();
+            for (; it != esmStore.get<ESM::Land>().end(); ++it)
+            {
+                if (it->mX < minX)
+                    minX = static_cast<float>(it->mX);
+                if (it->mX > maxX)
+                    maxX = static_cast<float>(it->mX);
+                if (it->mY < minY)
+                    minY = static_cast<float>(it->mY);
+                if (it->mY > maxY)
+                    maxY = static_cast<float>(it->mY);
+            }
+        }
         // since grid coords are at cell origin, we need to add 1 cell
         maxX += 1;
         maxY += 1;

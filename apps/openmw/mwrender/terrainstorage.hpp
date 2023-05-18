@@ -27,7 +27,7 @@ namespace MWRender
         bool hasData(ESM::ExteriorCellLocation cellLocation) override;
 
         /// Get bounds of the whole terrain in cell units
-        void getBounds(float& minX, float& maxX, float& minY, float& maxY) override;
+        void getBounds(float& minX, float& maxX, float& minY, float& maxY, ESM::RefId worldspace) override;
 
         LandManager* getLandManager() const;
 

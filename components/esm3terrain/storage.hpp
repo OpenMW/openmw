@@ -72,7 +72,7 @@ namespace ESMTerrain
         virtual osg::ref_ptr<const LandObject> getLand(ESM::ExteriorCellLocation cellLocation) = 0;
         virtual const ESM::LandTexture* getLandTexture(int index, short plugin) = 0;
         /// Get bounds of the whole terrain in cell units
-        void getBounds(float& minX, float& maxX, float& minY, float& maxY) override = 0;
+        void getBounds(float& minX, float& maxX, float& minY, float& maxY, ESM::RefId worldspace) override = 0;
 
         /// Get the minimum and maximum heights of a terrain region.
         /// @note Will only be called for chunks with size = minBatchSize, i.e. leafs of the quad tree.
