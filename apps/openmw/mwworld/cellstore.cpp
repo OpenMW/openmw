@@ -760,12 +760,10 @@ namespace MWWorld
     template <typename ReferenceInvocable>
     static void visitCell4References(const ESM4::Cell& cell, ESM::ReadersCache& readers, ReferenceInvocable&& invocable)
     {
-        for (const ESM4::Reference& ref : MWBase::Environment::get().getESMStore()->get<ESM4::Reference>())
+        for (const ESM4::Reference* ref :
+            MWBase::Environment::get().getESMStore()->get<ESM4::Reference>().getByCell(cell.mId))
         {
-            if (ref.mParent == cell.mId)
-            {
-                invocable(ref);
-            }
+            invocable(*ref);
         }
     }
 

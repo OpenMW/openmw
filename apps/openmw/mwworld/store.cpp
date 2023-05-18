@@ -1155,6 +1155,33 @@ namespace MWWorld
         }
         MWWorld::TypedDynamicStore<ESM4::Cell>::clearDynamic();
     }
+
+    // ESM4 Reference
+    //=========================================================================
+
+    void Store<ESM4::Reference>::preprocessReferences(const Store<ESM4::Cell>& cells)
+    {
+        for (auto& [_, ref] : mStatic)
+        {
+            const ESM4::Cell* cell = cells.find(ref.mParent);
+            if (cell->isExterior() && (cell->mFlags & ESM4::Rec_Persistent))
+            {
+                const ESM4::Cell* actualCell
+                    = cells.searchExterior(positionToCellIndex(ref.mPos.pos[0], ref.mPos.pos[1], cell->mParent));
+                if (actualCell)
+                    ref.mParent = actualCell->mId;
+            }
+            mPerCellReferences[ref.mParent].push_back(&ref);
+        }
+    }
+
+    std::span<const ESM4::Reference* const> Store<ESM4::Reference>::getByCell(ESM::RefId cellId) const
+    {
+        auto it = mPerCellReferences.find(cellId);
+        if (it == mPerCellReferences.end())
+            return {};
+        return it->second;
+    }
 }
 
 template class MWWorld::TypedDynamicStore<ESM::Activator>;

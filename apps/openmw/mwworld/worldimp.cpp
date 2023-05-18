@@ -1361,10 +1361,9 @@ namespace MWWorld
             return;
         }
 
-        const float terrainHeight
-            = ptr.getCell()->isExterior() ? getTerrainHeightAt(pos) : -std::numeric_limits<float>::max();
-        pos.z() = std::max(pos.z(), terrainHeight)
-            + 20; // place slightly above terrain. will snap down to ground with code below
+        if (ptr.getCell()->isExterior() && !ptr.getCell()->getCell()->isEsm4())
+            pos.z() = std::max(pos.z(), getTerrainHeightAt(pos));
+        pos.z() += 20; // place slightly above terrain. will snap down to ground with code below
 
         // We still should trace down dead persistent actors - they do not use the "swimdeath" animation.
         bool swims = ptr.getClass().isActor() && isSwimming(ptr)
