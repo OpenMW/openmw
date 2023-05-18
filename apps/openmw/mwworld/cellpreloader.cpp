@@ -238,26 +238,7 @@ namespace MWWorld
 
     CellPreloader::~CellPreloader()
     {
-        if (mTerrainPreloadItem)
-        {
-            mTerrainPreloadItem->abort();
-            mTerrainPreloadItem->waitTillDone();
-            mTerrainPreloadItem = nullptr;
-        }
-
-        if (mUpdateCacheItem)
-        {
-            mUpdateCacheItem->waitTillDone();
-            mUpdateCacheItem = nullptr;
-        }
-
-        for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end(); ++it)
-            it->second.mWorkItem->abort();
-
-        for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end(); ++it)
-            it->second.mWorkItem->waitTillDone();
-
-        mPreloadCells.clear();
+        clearAllTasks();
     }
 
     void CellPreloader::preload(CellStore& cell, double timestamp)
@@ -456,6 +437,39 @@ namespace MWWorld
     {
         return mLoadedTerrainTimestamp + mResourceSystem->getSceneManager()->getExpiryDelay() > referenceTime
             && contains(mLoadedTerrainPositions, std::array{ position }, ESM::Land::REAL_SIZE);
+    }
+
+    void CellPreloader::setTerrain(Terrain::World* terrain)
+    {
+        if (terrain != mTerrain)
+        {
+            clearAllTasks();
+            mTerrain = terrain;
+        }
+    }
+
+    void CellPreloader::clearAllTasks()
+    {
+        if (mTerrainPreloadItem)
+        {
+            mTerrainPreloadItem->abort();
+            mTerrainPreloadItem->waitTillDone();
+            mTerrainPreloadItem = nullptr;
+        }
+
+        if (mUpdateCacheItem)
+        {
+            mUpdateCacheItem->waitTillDone();
+            mUpdateCacheItem = nullptr;
+        }
+
+        for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end(); ++it)
+            it->second.mWorkItem->abort();
+
+        for (PreloadMap::iterator it = mPreloadCells.begin(); it != mPreloadCells.end(); ++it)
+            it->second.mWorkItem->waitTillDone();
+
+        mPreloadCells.clear();
     }
 
 }

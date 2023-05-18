@@ -74,8 +74,11 @@ namespace MWWorld
         void syncTerrainLoad(Loading::Listener& listener);
         void abortTerrainPreloadExcept(const PositionCellGrid* exceptPos);
         bool isTerrainLoaded(const CellPreloader::PositionCellGrid& position, double referenceTime) const;
+        void setTerrain(Terrain::World* terrain);
 
     private:
+        void clearAllTasks();
+
         Resource::ResourceSystem* mResourceSystem;
         Resource::BulletShapeManager* mBulletShapeManager;
         Terrain::World* mTerrain;

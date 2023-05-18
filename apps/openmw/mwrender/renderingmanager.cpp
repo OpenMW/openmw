@@ -745,6 +745,7 @@ namespace MWRender
 
         if (store->getCell()->isExterior())
         {
+            enableTerrain(true, store->getCell()->getWorldSpace());
             mTerrain->loadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
         }
     }
@@ -756,7 +757,8 @@ namespace MWRender
 
         if (store->getCell()->isExterior())
         {
-            mTerrain->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
+            getWorldspaceTerrain(store->getCell()->getWorldSpace())
+                ->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
         }
 
         mWater->removeCell(store);

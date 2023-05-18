@@ -284,7 +284,7 @@ namespace Terrain
         , mLodFactor(lodFactor)
         , mVertexLodMod(vertexLodMod)
         , mViewDistance(std::numeric_limits<float>::max())
-        , mMinSize(1 / 8.f)
+        , mMinSize(ESM::isEsm4Ext(worldspace) ? 1 / 4.f : 1 / 8.f)
         , mDebugTerrainChunks(debugChunks)
     {
         mChunkManager->setCompositeMapSize(compMapResolution);
