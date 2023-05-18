@@ -337,7 +337,7 @@ namespace ESMTerrain
     }
 
     Storage::UniqueTextureId Storage::getVtexIndexAt(
-        ESM::ExteriorCellLocation cellLocation, int x, int y, LandCache& cache)
+        ESM::ExteriorCellLocation cellLocation, const LandObject* land, int x, int y, LandCache& cache)
     {
         // For the first/last row/column, we need to get the texture from the neighbour cell
         // to get consistent blending at the borders
@@ -361,8 +361,6 @@ namespace ESMTerrain
 
         assert(x < ESM::Land::LAND_TEXTURE_SIZE);
         assert(y < ESM::Land::LAND_TEXTURE_SIZE);
-
-        const LandObject* land = getLand(cellLocation, cache);
 
         const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VTEX) : nullptr;
         if (data)
@@ -415,13 +413,15 @@ namespace ESMTerrain
 
         LandCache cache;
         std::map<UniqueTextureId, unsigned int> textureIndicesMap;
+        ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
+
+        const LandObject* land = getLand(cellLocation, cache);
 
         for (int y = 0; y < blendmapSize; y++)
         {
             for (int x = 0; x < blendmapSize; x++)
             {
-                ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
-                UniqueTextureId id = getVtexIndexAt(cellLocation, x + rowStart, y + colStart, cache);
+                UniqueTextureId id = getVtexIndexAt(cellLocation, land, x + rowStart, y + colStart, cache);
                 std::map<UniqueTextureId, unsigned int>::iterator found = textureIndicesMap.find(id);
                 if (found == textureIndicesMap.end())
                 {
