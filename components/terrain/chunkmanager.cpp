@@ -250,7 +250,7 @@ namespace Terrain
         if (chunkSize <= 1.f)
             geometry->setLightListCallback(new SceneUtil::LightListCallback);
 
-        unsigned int numVerts = (mStorage->getCellVertices() - 1) * chunkSize / (1 << lod) + 1;
+        unsigned int numVerts = (mStorage->getCellVertices(mWorldspace) - 1) * chunkSize / (1 << lod) + 1;
 
         geometry->addPrimitiveSet(mBufferCache.getIndexBuffer(numVerts, lodFlags));
 
@@ -300,7 +300,7 @@ namespace Terrain
             }
         }
 
-        geometry->setupWaterBoundingBox(-1, chunkSize * mStorage->getCellWorldSize() / numVerts);
+        geometry->setupWaterBoundingBox(-1, chunkSize * mStorage->getCellWorldSize(mWorldspace) / numVerts);
 
         if (!templateGeometry && compile && mSceneManager->getIncrementalCompileOperation())
         {

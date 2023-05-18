@@ -74,7 +74,7 @@ namespace Terrain
             if (!node)
                 return nullptr;
 
-            const float cellWorldSize = mStorage->getCellWorldSize();
+            const float cellWorldSize = mStorage->getCellWorldSize(mWorldspace);
             osg::ref_ptr<SceneUtil::PositionAttitudeTransform> pat = new SceneUtil::PositionAttitudeTransform;
             pat->setPosition(osg::Vec3f(chunkCenter.x() * cellWorldSize, chunkCenter.y() * cellWorldSize, 0.f));
             pat->addChild(node);

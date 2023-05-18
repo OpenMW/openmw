@@ -89,6 +89,9 @@ namespace ESM
         return isEsm4Ext(worldspaceId) ? Constants::ESM4CellSizeInUnits : Constants::CellSizeInUnits;
     }
 
+    // Vertex count of a side of a land record
+    int getLandSize(ESM::RefId worldspaceId);
+
     inline ESM::ExteriorCellLocation positionToExteriorCellLocation(
         float x, float y, ESM::RefId worldspaceId = ESM::Cell::sDefaultWorldspaceId)
     {

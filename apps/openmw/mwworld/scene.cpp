@@ -398,8 +398,9 @@ namespace MWWorld
         {
             osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellIndex);
             const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
-            const int verts = data->getLandSize();
-            const int worldsize = data->getSize();
+            const int verts = ESM::getLandSize(worldspace);
+            const int worldsize = ESM::getCellSize(worldspace);
+
             if (data)
             {
                 mPhysics->addHeightField(data->getHeights().data(), cellX, cellY, worldsize, verts,

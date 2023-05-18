@@ -386,7 +386,6 @@ namespace MWWorld
     {
         auto visitorRec = [this](ESM4::Reader& reader) { return ESMStoreImp::readRecord(reader, *this); };
         ESM4::ReaderUtils::readAll(reader, visitorRec, [](ESM4::Reader&) {});
-        getWritable<ESM4::Land>().updateLandPositions(get<ESM4::Cell>());
     }
 
     void ESMStore::setIdType(const ESM::RefId& id, ESM::RecNameInts type)
@@ -449,6 +448,7 @@ namespace MWWorld
         getWritable<ESM::Skill>().setUp();
         getWritable<ESM::MagicEffect>().setUp();
         getWritable<ESM::Attribute>().setUp();
+        getWritable<ESM4::Land>().updateLandPositions(get<ESM4::Cell>());
         getWritable<ESM4::Reference>().preprocessReferences(get<ESM4::Cell>());
     }
 

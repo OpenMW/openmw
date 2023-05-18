@@ -1194,12 +1194,12 @@ namespace MWWorld
 
     void Store<ESM4::Land>::updateLandPositions(const Store<ESM4::Cell>& cells)
     {
-        for (auto it : mStatic)
+        for (auto& it : mStatic)
         {
             const ESM4::Cell* cell = cells.find(it.second.mCell);
             mLands[cell->getExteriorCellLocation()] = &it.second;
         }
-        for (auto it : mDynamic)
+        for (auto& it : mDynamic)
         {
             const ESM4::Cell* cell = cells.find(it.second.mCell);
             mLands[cell->getExteriorCellLocation()] = &it.second;

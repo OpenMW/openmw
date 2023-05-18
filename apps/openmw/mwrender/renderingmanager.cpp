@@ -767,7 +767,14 @@ namespace MWRender
         if (!enable)
             mWater->setCullCallback(nullptr);
         else
-            mTerrain = getWorldspaceTerrain(worldspace);
+        {
+            Terrain::World* newTerrain = getWorldspaceTerrain(worldspace);
+            if (newTerrain != mTerrain)
+            {
+                mTerrain->enable(false);
+                mTerrain = newTerrain;
+            }
+        }
         mTerrain->enable(enable);
     }
 

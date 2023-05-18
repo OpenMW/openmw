@@ -84,10 +84,10 @@ namespace Terrain
         virtual float getHeightAt(const osg::Vec3f& worldPos, ESM::RefId worldspace) = 0;
 
         /// Get the transformation factor for mapping cell units to world units.
-        virtual float getCellWorldSize() = 0;
+        virtual float getCellWorldSize(ESM::RefId worldspace) = 0;
 
         /// Get the number of vertices on one side for each cell. Should be (power of two)+1
-        virtual int getCellVertices() = 0;
+        virtual int getCellVertices(ESM::RefId worldspace) = 0;
 
         virtual int getBlendmapScale(float chunkSize) = 0;
     };

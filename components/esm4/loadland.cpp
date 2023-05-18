@@ -234,21 +234,27 @@ void ESM4::Land::load(ESM4::Reader& reader)
     if (!missing)
         mDataTypes |= LAND_VTEX;
 
-    mMinHeight = -200000.f;
-    mMaxHeight = 200000.f;
+    mMinHeight = std::numeric_limits<float>::max();
+    mMaxHeight = std::numeric_limits<float>::lowest();
 
     float row_offset = mHeightMap.heightOffset;
     for (int y = 0; y < VERTS_PER_SIDE; y++)
     {
         row_offset += mHeightMap.gradientData[y * VERTS_PER_SIDE];
 
-        mHeights[y * VERTS_PER_SIDE] = row_offset * HEIGHT_SCALE;
+        const float heightY = row_offset * HEIGHT_SCALE;
+        mHeights[y * VERTS_PER_SIDE] = heightY;
+        mMinHeight = std::min(mMinHeight, heightY);
+        mMaxHeight = std::max(mMaxHeight, heightY);
 
         float colOffset = row_offset;
         for (int x = 1; x < VERTS_PER_SIDE; x++)
         {
             colOffset += mHeightMap.gradientData[y * VERTS_PER_SIDE + x];
-            mHeights[x + y * VERTS_PER_SIDE] = colOffset * HEIGHT_SCALE;
+            const float heightX = colOffset * HEIGHT_SCALE;
+            mMinHeight = std::min(mMinHeight, heightX);
+            mMaxHeight = std::max(mMaxHeight, heightX);
+            mHeights[x + y * VERTS_PER_SIDE] = heightX;
         }
     }
 }

@@ -76,12 +76,12 @@ namespace ESMTerrain
         int cellY = static_cast<int>(std::floor(origin.y()));
         osg::ref_ptr<const LandObject> land = getLand(ESM::ExteriorCellLocation(cellX, cellY, worldspace));
         const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
+        const int landSize = ESM::getLandSize(worldspace);
+        int startRow = (origin.x() - cellX) * landSize;
+        int startColumn = (origin.y() - cellY) * landSize;
 
-        int startRow = (origin.x() - cellX) * data->getLandSize();
-        int startColumn = (origin.y() - cellY) * data->getLandSize();
-
-        int endRow = startRow + size * (data->getLandSize() - 1) + 1;
-        int endColumn = startColumn + size * (data->getLandSize() - 1) + 1;
+        int endRow = startRow + size * (landSize - 1) + 1;
+        int endColumn = startColumn + size * (landSize - 1) + 1;
 
         if (data)
         {
@@ -91,7 +91,7 @@ namespace ESMTerrain
             {
                 for (int col = startColumn; col < endColumn; ++col)
                 {
-                    float h = data->getHeights()[col * data->getLandSize() + row];
+                    float h = data->getHeights()[col * landSize + row];
                     if (h > max)
                         max = h;
                     if (h < min)
@@ -112,7 +112,7 @@ namespace ESMTerrain
 
         const LandObject* land = getLand(cellLocation, cache);
         const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VNML) : nullptr;
-        const int landSize = data ? data->getLandSize() : ESM::Land::LAND_SIZE;
+        const int landSize = ESM::getLandSize(cellLocation.mWorldspace);
 
         while (col >= landSize - 1)
         {
@@ -163,7 +163,7 @@ namespace ESMTerrain
     {
         const LandObject* land = getLand(cellLocation, cache);
         const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VCLR) : nullptr;
-        const int landSize = data ? data->getLandSize() : ESM::Land::LAND_SIZE;
+        const int landSize = ESM::getLandSize(cellLocation.mWorldspace);
 
         if (col == landSize - 1)
         {
@@ -201,8 +201,9 @@ namespace ESMTerrain
 
         int startCellX = static_cast<int>(std::floor(origin.x()));
         int startCellY = static_cast<int>(std::floor(origin.y()));
+        const int LandSize = ESM::getLandSize(worldspace);
 
-        size_t numVerts = static_cast<size_t>(size * (ESM::Land::LAND_SIZE - 1) / increment + 1);
+        size_t numVerts = static_cast<size_t>(size * (LandSize - 1) / increment + 1);
 
         positions->resize(numVerts * numVerts);
         normals->resize(numVerts * numVerts);
@@ -229,7 +230,6 @@ namespace ESMTerrain
                 const ESM::LandData* heightData = nullptr;
                 const ESM::LandData* normalData = nullptr;
                 const ESM::LandData* colourData = nullptr;
-                const int LandSize = land ? land->getLandSize() : ESM::Land::LAND_SIZE;
                 const int LandSizeInUnits = land ? land->getRealSize() : Constants::CellSizeInUnits;
                 if (land)
                 {
@@ -615,14 +615,14 @@ namespace ESMTerrain
         return info;
     }
 
-    float Storage::getCellWorldSize()
+    float Storage::getCellWorldSize(ESM::RefId worldspace)
     {
-        return static_cast<float>(ESM::Land::REAL_SIZE);
+        return static_cast<float>(ESM::getCellSize(worldspace));
     }
 
-    int Storage::getCellVertices()
+    int Storage::getCellVertices(ESM::RefId worldspace)
     {
-        return ESM::Land::LAND_SIZE;
+        return ESM::getLandSize(worldspace);
     }
 
     int Storage::getBlendmapScale(float chunkSize)

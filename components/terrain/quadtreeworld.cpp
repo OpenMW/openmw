@@ -145,7 +145,7 @@ namespace Terrain
             addChildren(mRootNode);
 
             mRootNode->initNeighbours();
-            float cellWorldSize = mStorage->getCellWorldSize();
+            float cellWorldSize = mStorage->getCellWorldSize(mWorldspace);
             mRootNode->setInitialBound(
                 osg::BoundingSphere(osg::BoundingBox(osg::Vec3(mMinX * cellWorldSize, mMinY * cellWorldSize, 0),
                     osg::Vec3(mMaxX * cellWorldSize, mMaxY * cellWorldSize, 0))));
@@ -218,7 +218,7 @@ namespace Terrain
                 // height data here.
                 constexpr float minZ = -std::numeric_limits<float>::max();
                 constexpr float maxZ = std::numeric_limits<float>::max();
-                float cellWorldSize = mStorage->getCellWorldSize();
+                float cellWorldSize = mStorage->getCellWorldSize(mWorldspace);
                 osg::BoundingBox boundingBox(
                     osg::Vec3f((center.x() - halfSize) * cellWorldSize, (center.y() - halfSize) * cellWorldSize, minZ),
                     osg::Vec3f((center.x() + halfSize) * cellWorldSize, (center.y() + halfSize) * cellWorldSize, maxZ));
@@ -475,7 +475,7 @@ namespace Terrain
             mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
         }
 
-        const float cellWorldSize = mStorage->getCellWorldSize();
+        const float cellWorldSize = ESM::getLandSize(mWorldspace);
 
         for (unsigned int i = 0; i < vd->getNumEntries(); ++i)
         {
@@ -486,7 +486,7 @@ namespace Terrain
 
         if (mHeightCullCallback && isCullVisitor)
             updateWaterCullingView(mHeightCullCallback, vd, static_cast<osgUtil::CullVisitor*>(&nv),
-                mStorage->getCellWorldSize(), !isGridEmpty());
+                mStorage->getCellWorldSize(mWorldspace), !isGridEmpty());
 
         vd->resetChanged();
 
@@ -534,7 +534,7 @@ namespace Terrain
         std::atomic<bool>& abort, Loading::Reporter& reporter)
     {
         ensureQuadTreeBuilt();
-        const float cellWorldSize = mStorage->getCellWorldSize();
+        const float cellWorldSize = mStorage->getCellWorldSize(mWorldspace);
 
         ViewData* vd = static_cast<ViewData*>(view);
         vd->setViewPoint(viewPoint);
