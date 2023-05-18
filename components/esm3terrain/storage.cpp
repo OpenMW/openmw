@@ -110,8 +110,6 @@ namespace ESMTerrain
         osg::Vec3f& normal, ESM::ExteriorCellLocation cellLocation, int col, int row, LandCache& cache)
     {
 
-        const LandObject* land = getLand(cellLocation, cache);
-        const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VNML) : nullptr;
         const int landSize = ESM::getLandSize(cellLocation.mWorldspace);
 
         while (col >= landSize - 1)
@@ -134,7 +132,8 @@ namespace ESMTerrain
             --cellLocation.mX;
             row += landSize - 1;
         }
-
+        const LandObject* land = getLand(cellLocation, cache);
+        const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VNML) : nullptr;
         if (data)
         {
             normal.x() = data->getNormals()[col * landSize * 3 + row * 3];
@@ -161,8 +160,7 @@ namespace ESMTerrain
     void Storage::fixColour(
         osg::Vec4ub& color, ESM::ExteriorCellLocation cellLocation, int col, int row, LandCache& cache)
     {
-        const LandObject* land = getLand(cellLocation, cache);
-        const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VCLR) : nullptr;
+
         const int landSize = ESM::getLandSize(cellLocation.mWorldspace);
 
         if (col == landSize - 1)
@@ -175,7 +173,8 @@ namespace ESMTerrain
             ++cellLocation.mX;
             row = 0;
         }
-
+        const LandObject* land = getLand(cellLocation, cache);
+        const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VCLR) : nullptr;
         if (data)
         {
             color.r() = data->getColors()[col * landSize * 3 + row * 3];
@@ -342,6 +341,7 @@ namespace ESMTerrain
         // For the first/last row/column, we need to get the texture from the neighbour cell
         // to get consistent blending at the borders
         --x;
+        ESM::ExteriorCellLocation cellLocationIn = cellLocation;
         if (x < 0)
         {
             --cellLocation.mX;
@@ -358,6 +358,9 @@ namespace ESMTerrain
             ++cellLocation.mY;
             y -= ESM::Land::LAND_TEXTURE_SIZE;
         }
+
+        if (cellLocation != cellLocationIn)
+            land = getLand(cellLocation, cache);
 
         assert(x < ESM::Land::LAND_TEXTURE_SIZE);
         assert(y < ESM::Land::LAND_TEXTURE_SIZE);
