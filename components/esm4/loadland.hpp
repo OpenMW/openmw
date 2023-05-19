@@ -137,14 +137,35 @@ namespace ESM4
         // void blank();
         static constexpr ESM::RecNameInts sRecordId = ESM::REC_LAND4;
 
-        std::span<const float> getHeights() const override { return mHeights; }
-        std::span<const VNML> getNormals() const override { return mVertNorm; }
-        std::span<const unsigned char> getColors() const override { return mVertColr; }
+        std::span<const float> getHeights() const override
+        {
+            return mHeights;
+        }
+        std::span<const VNML> getNormals() const override
+        {
+            return mVertNorm;
+        }
+        std::span<const unsigned char> getColors() const override
+        {
+            return mVertColr;
+        }
         std::span<const uint16_t> getTextures() const override;
-        float getSize() const override { return REAL_SIZE; }
-        float getMinHeight() const override { return mMinHeight; }
-        float getMaxHeight() const { return mMaxHeight; }
-        int getLandSize() const { return VERTS_PER_SIDE; }
+        float getSize() const override
+        {
+            return REAL_SIZE;
+        }
+        float getMinHeight() const override
+        {
+            return mMinHeight;
+        }
+        float getMaxHeight() const
+        {
+            return mMaxHeight;
+        }
+        int getLandSize() const
+        {
+            return VERTS_PER_SIDE;
+        }
     };
 }
 

@@ -1192,6 +1192,11 @@ namespace MWWorld
         MWWorld::TypedDynamicStore<ESM4::Cell>::clearDynamic();
     }
 
+    // ESM4 Land
+    //=========================================================================
+    // Needed to avoid include of ESM4::Land in header
+    Store<ESM4::Land>::Store() {}
+
     void Store<ESM4::Land>::updateLandPositions(const Store<ESM4::Cell>& cells)
     {
         for (auto& it : mStatic)
@@ -1214,7 +1219,7 @@ namespace MWWorld
         else
             return foundLand->second;
     }
-    
+
     // ESM4 Reference
     //=========================================================================
 

@@ -16,6 +16,7 @@
 
 #include <deque>
 #include <memory>
+#include <unordered_map>
 
 namespace osg
 {
