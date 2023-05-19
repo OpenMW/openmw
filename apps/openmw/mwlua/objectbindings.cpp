@@ -4,8 +4,6 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/shapes/box.hpp>
-#include <components/sceneutil/cullsafeboundsvisitor.hpp>
-#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
@@ -13,6 +11,7 @@
 #include "../mwworld/player.hpp"
 #include "../mwworld/scene.hpp"
 
+#include "../mwrender/renderingmanager.hpp"
 #include "../mwrender/vismask.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
@@ -157,11 +156,9 @@ namespace MWLua
             objectT["rotation"] = sol::readonly_property(
                 [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getRefData().getPosition().asRotationVec3(); });
             objectT["getBoundingBox"] = [](const ObjectT& o) {
-                const MWWorld::Ptr& ptr = o.ptr();
-                SceneUtil::CullSafeBoundsVisitor computeBounds;
-                computeBounds.setTraversalMask(~(MWRender::Mask_ParticleSystem | MWRender::Mask_Effect));
-                ptr.getRefData().getBaseNode()->accept(computeBounds);
-                osg::BoundingBox bb = computeBounds.mBoundingBox;
+                MWRender::RenderingManager* renderingManager
+                    = MWBase::Environment::get().getWorld()->getRenderingManager();
+                osg::BoundingBox bb = renderingManager->getCullSafeBoundingBox(o.ptr());
                 return LuaUtil::Box{ bb.center(), bb._max - bb.center() };
             };
 
