@@ -39,13 +39,14 @@ namespace Terrain
     class DefaultLodCallback : public LodCallback
     {
     public:
-        DefaultLodCallback(
-            float factor, float minSize, float viewDistance, const osg::Vec4i& grid, float distanceModifier = 0.f)
+        DefaultLodCallback(float factor, float minSize, float viewDistance, const osg::Vec4i& grid, int cellSizeInUnits,
+            float distanceModifier = 0.f)
             : mFactor(factor)
             , mMinSize(minSize)
             , mViewDistance(viewDistance)
             , mActiveGrid(grid)
             , mDistanceModifier(distanceModifier)
+            , mCellSizeInUnits(cellSizeInUnits)
         {
         }
 
@@ -69,7 +70,8 @@ namespace Terrain
             dist = std::max(0.f, dist + mDistanceModifier);
             if (dist > mViewDistance && !activeGrid) // for Scene<->ObjectPaging sync the activegrid must remain loaded
                 return StopTraversal;
-            return getNativeLodLevel(node, mMinSize) <= convertDistanceToLodLevel(dist, mMinSize, mFactor)
+            return getNativeLodLevel(node, mMinSize)
+                    <= convertDistanceToLodLevel(dist, mMinSize, mFactor, mCellSizeInUnits)
                 ? StopTraversalAndUse
                 : Deeper;
         }
@@ -77,9 +79,9 @@ namespace Terrain
         {
             return Log2(static_cast<unsigned int>(node->getSize() / minSize));
         }
-        static unsigned int convertDistanceToLodLevel(float dist, float minSize, float factor)
+        static unsigned int convertDistanceToLodLevel(float dist, float minSize, float factor, int cellSize)
         {
-            return Log2(static_cast<unsigned int>(dist / (Constants::CellSizeInUnits * minSize * factor)));
+            return Log2(static_cast<unsigned int>(dist / (cellSize * minSize * factor)));
         }
 
     private:
@@ -88,6 +90,7 @@ namespace Terrain
         float mViewDistance;
         osg::Vec4i mActiveGrid;
         float mDistanceModifier;
+        int mCellSizeInUnits;
     };
 
     class RootNode : public QuadTreeNode
@@ -471,7 +474,8 @@ namespace Terrain
         if (needsUpdate)
         {
             vd->reset();
-            DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, mActiveGrid);
+            DefaultLodCallback lodCallback(
+                mLodFactor, mMinSize, mViewDistance, mActiveGrid, ESM::getCellSize(mWorldspace));
             mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
         }
 
@@ -549,7 +553,7 @@ namespace Terrain
                 distanceModifier = 1024;
             else if (pass == 2)
                 distanceModifier = -1024;
-            DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, grid, distanceModifier);
+            DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, grid, cellWorldSize, distanceModifier);
             mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
 
             if (pass == 0)
@@ -605,8 +609,9 @@ namespace Terrain
         mChunkManagers.push_back(m);
         mTerrainRoot->setNodeMask(mTerrainRoot->getNodeMask() | m->getNodeMask());
         if (m->getViewDistance())
-            m->setMaxLodLevel(DefaultLodCallback::convertDistanceToLodLevel(
-                m->getViewDistance() + mViewDataMap->getReuseDistance(), mMinSize, mLodFactor));
+            m->setMaxLodLevel(
+                DefaultLodCallback::convertDistanceToLodLevel(m->getViewDistance() + mViewDataMap->getReuseDistance(),
+                    mMinSize, ESM::getCellSize(mWorldspace), mLodFactor));
     }
 
     void QuadTreeWorld::rebuildViews()

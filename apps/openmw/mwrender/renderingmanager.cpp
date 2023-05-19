@@ -1363,6 +1363,9 @@ namespace MWRender
                 mTerrainStorage.get(), Mask_Terrain, worldspace, Mask_PreCompile, Mask_Debug);
 
         newTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
+        float distanceMult = std::cos(osg::DegreesToRadians(std::min(mFieldOfView, 140.f)) / 2.f);
+        newTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f / distanceMult : 1.f));
+
         mWorldspaceTerrains[worldspace] = std::move(newTerrain);
         return mWorldspaceTerrains[worldspace].get();
     }
