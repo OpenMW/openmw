@@ -218,7 +218,7 @@ namespace ESMTerrain
         LandCache cache;
 
         bool alteration = useAlteration();
-
+        bool validHeightDataExists = false;
         float vertY_ = 0; // of current cell corner
         for (int cellY = startCellY; cellY < startCellY + std::ceil(size); ++cellY)
         {
@@ -235,6 +235,7 @@ namespace ESMTerrain
                     heightData = land->getData(ESM::Land::DATA_VHGT);
                     normalData = land->getData(ESM::Land::DATA_VNML);
                     colourData = land->getData(ESM::Land::DATA_VCLR);
+                    validHeightDataExists = true;
                 }
 
                 int rowStart = 0;
@@ -333,6 +334,14 @@ namespace ESMTerrain
             assert(vertX_ == numVerts); // Ensure we covered whole area
         }
         assert(vertY_ == numVerts); // Ensure we covered whole area
+
+        if (!validHeightDataExists && ESM::isEsm4Ext(worldspace))
+        {
+            for (int iVert = 0; iVert < numVerts * numVerts; iVert++)
+            {
+                (*positions)[static_cast<unsigned int>(iVert)] = osg::Vec3f(0.f, 0.f, 0.f);
+            }
+        }
     }
 
     Storage::UniqueTextureId Storage::getVtexIndexAt(

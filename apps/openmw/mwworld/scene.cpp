@@ -406,7 +406,7 @@ namespace MWWorld
                 mPhysics->addHeightField(data->getHeights().data(), cellX, cellY, worldsize, verts,
                     data->getMinHeight(), data->getMaxHeight(), land.get());
             }
-            else
+            else if (!ESM::isEsm4Ext(worldspace))
             {
                 static std::vector<float> defaultHeight;
                 defaultHeight.resize(verts * verts, ESM::Land::DEFAULT_HEIGHT);
