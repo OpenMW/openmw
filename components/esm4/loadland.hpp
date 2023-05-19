@@ -158,11 +158,11 @@ namespace ESM4
         {
             return mMinHeight;
         }
-        float getMaxHeight() const
+        float getMaxHeight() const override
         {
             return mMaxHeight;
         }
-        int getLandSize() const
+        int getLandSize() const override
         {
             return VERTS_PER_SIDE;
         }

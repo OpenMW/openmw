@@ -130,8 +130,8 @@ namespace ESM
             std::span<const uint16_t> getTextures() const override { return mTextures; }
             float getSize() const override { return REAL_SIZE; }
             float getMinHeight() const override { return mMinHeight; }
-            float getMaxHeight() const { return mMaxHeight; }
-            int getLandSize() const { return LAND_SIZE; }
+            float getMaxHeight() const override { return mMaxHeight; }
+            int getLandSize() const override { return LAND_SIZE; }
         };
 
         // low-LOD heightmap (used for rendering the global map)
