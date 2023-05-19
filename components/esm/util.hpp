@@ -51,14 +51,10 @@ namespace ESM
 
     struct ExteriorCellLocation
     {
-        int mX, mY;
-        ESM::RefId mWorldspace;
-        ExteriorCellLocation()
-            : mX(0)
-            , mY(0)
-            , mWorldspace(ESM::Cell::sDefaultWorldspaceId)
-        {
-        }
+        int mX = 0;
+        int mY = 0;
+        ESM::RefId mWorldspace = ESM::Cell::sDefaultWorldspaceId;
+        ExteriorCellLocation() = default;
 
         ExteriorCellLocation(int x, int y, ESM::RefId worldspace)
             : mX(x)

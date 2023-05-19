@@ -337,7 +337,7 @@ namespace ESMTerrain
 
         if (!validHeightDataExists && ESM::isEsm4Ext(worldspace))
         {
-            for (int iVert = 0; iVert < numVerts * numVerts; iVert++)
+            for (unsigned int iVert = 0; iVert < numVerts * numVerts; iVert++)
             {
                 (*positions)[static_cast<unsigned int>(iVert)] = osg::Vec3f(0.f, 0.f, 0.f);
             }
@@ -485,7 +485,7 @@ namespace ESMTerrain
 
         osg::ref_ptr<const LandObject> land = getLand(ESM::ExteriorCellLocation(cellX, cellY, worldspace));
         if (!land)
-            return defaultHeight;
+            return ESM::isEsm4Ext(worldspace) ? std::numeric_limits<float>::lowest() : defaultHeight;
 
         const ESM::LandData* data = land->getData(ESM::Land::DATA_VHGT);
         if (!data)

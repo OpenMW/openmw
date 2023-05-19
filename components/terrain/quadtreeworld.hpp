@@ -60,12 +60,7 @@ namespace Terrain
         {
         public:
             virtual ~ChunkManager() {}
-            ChunkManager()
-                : mWorldspace(ESM::RefId())
-                , mViewDistance(0.f)
-                , mMaxLodLevel(~0u)
-            {
-            }
+            ChunkManager() = default;
             ChunkManager(ESM::RefId worldspace)
                 : ChunkManager()
             {
@@ -84,11 +79,11 @@ namespace Terrain
             void setMaxLodLevel(unsigned int level) { mMaxLodLevel = level; }
 
         protected:
-            ESM::RefId mWorldspace;
+            ESM::RefId mWorldspace = ESM::RefId();
 
         private:
-            float mViewDistance;
-            unsigned int mMaxLodLevel;
+            float mViewDistance = 0.f;
+            unsigned int mMaxLodLevel = ~0u;
         };
         void addChunkManager(ChunkManager*);
 

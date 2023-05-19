@@ -34,6 +34,18 @@ namespace MWRender
         return land != nullptr;
     }
 
+    static void BoundUnion(float& minX, float& maxX, float& minY, float& maxY, float x, float y)
+    {
+        if (x < minX)
+            minX = x;
+        if (x > maxX)
+            maxX = x;
+        if (y < minY)
+            minY = y;
+        if (y > maxY)
+            maxY = y;
+    }
+
     void TerrainStorage::getBounds(float& minX, float& maxX, float& minY, float& maxY, ESM::RefId worldspace)
     {
         minX = 0;
@@ -46,20 +58,11 @@ namespace MWRender
         if (ESM::isEsm4Ext(worldspace))
         {
             const auto& lands = esmStore.get<ESM4::Land>().getLands();
-            for (const auto& it : lands)
+            for (const auto& [landPos, _] : lands)
             {
-                if (it.first.mWorldspace == worldspace)
+                if (landPos.mWorldspace == worldspace)
                 {
-                    int x = it.first.mX;
-                    int y = it.first.mY;
-                    if (x < minX)
-                        minX = static_cast<float>(x);
-                    if (x > maxX)
-                        maxX = static_cast<float>(x);
-                    if (y < minY)
-                        minY = static_cast<float>(y);
-                    if (y > maxY)
-                        maxY = static_cast<float>(y);
+                    BoundUnion(minX, maxX, minY, maxY, static_cast<float>(landPos.mX), static_cast<float>(landPos.mY));
                 }
             }
         }
@@ -68,14 +71,7 @@ namespace MWRender
             MWWorld::Store<ESM::Land>::iterator it = esmStore.get<ESM::Land>().begin();
             for (; it != esmStore.get<ESM::Land>().end(); ++it)
             {
-                if (it->mX < minX)
-                    minX = static_cast<float>(it->mX);
-                if (it->mX > maxX)
-                    maxX = static_cast<float>(it->mX);
-                if (it->mY < minY)
-                    minY = static_cast<float>(it->mY);
-                if (it->mY > maxY)
-                    maxY = static_cast<float>(it->mY);
+                BoundUnion(minX, maxX, minY, maxY, static_cast<float>(it->mX), static_cast<float>(it->mY));
             }
         }
         // since grid coords are at cell origin, we need to add 1 cell

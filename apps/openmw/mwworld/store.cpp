@@ -1199,15 +1199,15 @@ namespace MWWorld
 
     void Store<ESM4::Land>::updateLandPositions(const Store<ESM4::Cell>& cells)
     {
-        for (auto& it : mStatic)
+        for (const auto& [id, value] : mStatic)
         {
-            const ESM4::Cell* cell = cells.find(it.second.mCell);
-            mLands[cell->getExteriorCellLocation()] = &it.second;
+            const ESM4::Cell* cell = cells.find(value.mCell);
+            mLands[cell->getExteriorCellLocation()] = &value;
         }
-        for (auto& it : mDynamic)
+        for (const auto& [id, value] : mDynamic)
         {
-            const ESM4::Cell* cell = cells.find(it.second.mCell);
-            mLands[cell->getExteriorCellLocation()] = &it.second;
+            const ESM4::Cell* cell = cells.find(value.mCell);
+            mLands[cell->getExteriorCellLocation()] = &value;
         }
     }
 
@@ -1216,8 +1216,7 @@ namespace MWWorld
         auto foundLand = mLands.find(cellLocation);
         if (foundLand == mLands.end())
             return nullptr;
-        else
-            return foundLand->second;
+        return foundLand->second;
     }
 
     // ESM4 Reference

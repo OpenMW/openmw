@@ -282,7 +282,7 @@ namespace MWRender
         void updateAmbient();
         void setFogColor(const osg::Vec4f& color);
         void updateThirdPersonViewMode();
-        Terrain::World* getWorldspaceTerrain(ESM::RefId worldspace);
+        Terrain::World& getWorldspaceTerrain(ESM::RefId worldspace);
 
         void reportStats() const;
 

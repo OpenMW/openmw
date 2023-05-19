@@ -458,7 +458,7 @@ namespace MWRender
         mTerrainStorage = std::make_unique<TerrainStorage>(mResourceSystem, normalMapPattern, heightMapPattern,
             useTerrainNormalMaps, specularMapPattern, useTerrainSpecularMaps);
 
-        mTerrain = getWorldspaceTerrain(ESM::Cell::sDefaultWorldspaceId);
+        mTerrain = &getWorldspaceTerrain(ESM::Cell::sDefaultWorldspaceId);
         bool groundcover = Settings::Manager::getBool("enabled", "Groundcover");
 
         if (groundcover)
@@ -758,7 +758,7 @@ namespace MWRender
         if (store->getCell()->isExterior())
         {
             getWorldspaceTerrain(store->getCell()->getWorldSpace())
-                ->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
+                .unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
         }
 
         mWater->removeCell(store);
@@ -770,7 +770,7 @@ namespace MWRender
             mWater->setCullCallback(nullptr);
         else
         {
-            Terrain::World* newTerrain = getWorldspaceTerrain(worldspace);
+            Terrain::World* newTerrain = &getWorldspaceTerrain(worldspace);
             if (newTerrain != mTerrain)
             {
                 mTerrain->enable(false);
@@ -1328,11 +1328,11 @@ namespace MWRender
         mStateUpdater->setFogColor(color);
     }
 
-    Terrain::World* RenderingManager::getWorldspaceTerrain(ESM::RefId worldspace)
+    Terrain::World& RenderingManager::getWorldspaceTerrain(ESM::RefId worldspace)
     {
         auto existingTerrain = mWorldspaceTerrains.find(worldspace);
         if (existingTerrain != mWorldspaceTerrains.end())
-            return existingTerrain->second.get();
+            return *existingTerrain->second.get();
         std::unique_ptr<Terrain::World> newTerrain;
 
         const float lodFactor = Settings::Manager::getFloat("lod factor", "Terrain");
@@ -1366,8 +1366,9 @@ namespace MWRender
         float distanceMult = std::cos(osg::DegreesToRadians(std::min(mFieldOfView, 140.f)) / 2.f);
         newTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f / distanceMult : 1.f));
 
-        mWorldspaceTerrains[worldspace] = std::move(newTerrain);
-        return mWorldspaceTerrains[worldspace].get();
+        Terrain::World* result = newTerrain.get();
+        mWorldspaceTerrains.emplace(worldspace, std::move(newTerrain));
+        return *result;
     }
 
     void RenderingManager::reportStats() const
@@ -1473,7 +1474,7 @@ namespace MWRender
 
     float RenderingManager::getTerrainHeightAt(const osg::Vec3f& pos, ESM::RefId worldspace)
     {
-        return getWorldspaceTerrain(worldspace)->getHeightAt(pos);
+        return getWorldspaceTerrain(worldspace).getHeightAt(pos);
     }
 
     void RenderingManager::overrideFieldOfView(float val)

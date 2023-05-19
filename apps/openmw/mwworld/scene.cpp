@@ -433,7 +433,7 @@ namespace MWWorld
                         return heights;
                     }
                 }();
-                mNavigator.addHeightfield(cellPosition, data->getSize(), shape, navigatorUpdateGuard);
+                mNavigator.addHeightfield(cellPosition, worldsize, shape, navigatorUpdateGuard);
             }
         }
 

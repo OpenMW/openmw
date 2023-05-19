@@ -82,7 +82,7 @@ namespace CSVRender
         return &mAlteredHeight[inCellY * ESM::Land::LAND_SIZE + inCellX];
     }
 
-    void TerrainStorage::getBounds(float& minX, float& maxX, float& minY, float& maxY)
+    void TerrainStorage::getBounds(float& minX, float& maxX, float& minY, float& maxY, ESM::RefId worldspace)
     {
         // not needed at the moment - this returns the bounds of the whole world, but we only edit individual cells
         throw std::runtime_error("getBounds not implemented");

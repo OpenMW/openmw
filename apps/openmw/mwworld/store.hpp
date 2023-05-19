@@ -18,6 +18,7 @@
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadpgrd.hpp>
 #include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadland.hpp>
 #include <components/esm4/loadrefr.hpp>
 #include <components/misc/rng.hpp>
 #include <components/misc/strings/algorithm.hpp>
