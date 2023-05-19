@@ -9,6 +9,8 @@
 
 #include "luastate.hpp"
 
+#include "shapes/box.hpp"
+
 namespace sol
 {
     template <>
@@ -38,6 +40,11 @@ namespace sol
 
     template <>
     struct is_automagical<LuaUtil::TransformQ> : std::false_type
+    {
+    };
+
+    template <>
+    struct is_automagical<LuaUtil::Box> : std::false_type
     {
     };
 }
@@ -120,6 +127,30 @@ namespace LuaUtil
         vec4Type["z"] = sol::readonly_property([](const Vec4& v) -> float { return v.z(); });
         vec4Type["w"] = sol::readonly_property([](const Vec4& v) -> float { return v.w(); });
         addVectorMethods<Vec4>(vec4Type);
+
+        // Lua bindings for Box
+        util["box"] = sol::overload([](const Vec3& center, const Vec3& halfSize) { return Box(center, halfSize); },
+            [](const TransformM& transform) { return Box(transform.mM); });
+        sol::usertype<Box> boxType = lua.new_usertype<Box>("Box");
+        boxType["center"] = sol::readonly_property([](const Box& b) { return b.mCenter; });
+        boxType["halfSize"] = sol::readonly_property([](const Box& b) { return b.mHalfSize; });
+        boxType["transform"] = sol::readonly_property([](const Box& b) { return TransformM{ b.asTransform() }; });
+        boxType["vertices"] = sol::readonly_property([lua](const Box& b) {
+            sol::table table(lua, sol::create);
+            const auto vertices = b.vertices();
+            for (size_t i = 0; i < vertices.size(); ++i)
+                table[i + 1] = vertices[i];
+            return table;
+        });
+        boxType[sol::meta_function::equal_to] = [](const Box& a, const Box& b) { return a == b; };
+        boxType[sol::meta_function::to_string] = [](const Box& b) {
+            std::stringstream ss;
+            ss << "Box{ ";
+            ss << "center(" << b.mCenter.x() << ", " << b.mCenter.y() << ", " << b.mCenter.z() << ") ";
+            ss << "halfSize(" << b.mHalfSize.x() << ", " << b.mHalfSize.y() << ", " << b.mHalfSize.z() << ")";
+            ss << " }";
+            return ss.str();
+        };
 
         // Lua bindings for Color
         sol::usertype<Misc::Color> colorType = lua.new_usertype<Misc::Color>("Color");

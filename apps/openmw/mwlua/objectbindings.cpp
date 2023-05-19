@@ -3,12 +3,17 @@
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/lua/shapes/box.hpp>
+#include <components/sceneutil/cullsafeboundsvisitor.hpp>
+#include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/scene.hpp"
+
+#include "../mwrender/vismask.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
@@ -151,6 +156,14 @@ namespace MWLua
                 [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getRefData().getPosition().asVec3(); });
             objectT["rotation"] = sol::readonly_property(
                 [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getRefData().getPosition().asRotationVec3(); });
+            objectT["getBoundingBox"] = [](const ObjectT& o) {
+                const MWWorld::Ptr& ptr = o.ptr();
+                SceneUtil::CullSafeBoundsVisitor computeBounds;
+                computeBounds.setTraversalMask(~(MWRender::Mask_ParticleSystem | MWRender::Mask_Effect));
+                ptr.getRefData().getBaseNode()->accept(computeBounds);
+                osg::BoundingBox bb = computeBounds.mBoundingBox;
+                return LuaUtil::Box{ bb.center(), bb._max - bb.center() };
+            };
 
             objectT["type"] = sol::readonly_property(
                 [types = getTypeToPackageTable(context.mLua->sol())](
