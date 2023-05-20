@@ -23,7 +23,7 @@
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/statesetupdater.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 namespace Stereo
 {
@@ -309,11 +309,8 @@ namespace Stereo
 
     void Manager::update()
     {
-        double near_ = 1.f;
-        double far_ = 10000.f;
-
-        near_ = Settings::Manager::getFloat("near clip", "Camera");
-        far_ = Settings::Manager::getFloat("viewing distance", "Camera");
+        const double near_ = Settings::camera().mNearClip;
+        const double far_ = Settings::camera().mViewingDistance;
 
         if (mUpdateViewCallback)
         {

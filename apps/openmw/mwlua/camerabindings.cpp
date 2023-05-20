@@ -2,7 +2,7 @@
 
 #include <components/lua/luastate.hpp>
 #include <components/lua/utilpackage.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -82,17 +82,13 @@ namespace MWLua
         api["getCollisionType"] = [camera]() { return camera->getCollisionType(); };
         api["setCollisionType"] = [camera](int collisionType) { camera->setCollisionType(collisionType); };
 
-        api["getBaseFieldOfView"] = []() {
-            return osg::DegreesToRadians(
-                std::clamp(Settings::Manager::getFloat("field of view", "Camera"), 1.f, 179.f));
-        };
+        api["getBaseFieldOfView"] = [] { return osg::DegreesToRadians(Settings::camera().mFieldOfView); };
         api["getFieldOfView"]
             = [renderingManager]() { return osg::DegreesToRadians(renderingManager->getFieldOfView()); };
         api["setFieldOfView"]
             = [renderingManager](float v) { renderingManager->setFieldOfView(osg::RadiansToDegrees(v)); };
 
-        api["getBaseViewDistance"]
-            = []() { return std::max(0.f, Settings::Manager::getFloat("viewing distance", "Camera")); };
+        api["getBaseViewDistance"] = [] { return Settings::camera().mViewingDistance.get(); };
         api["getViewDistance"] = [renderingManager]() { return renderingManager->getViewDistance(); };
         api["setViewDistance"] = [renderingManager](float d) { renderingManager->setViewDistance(d, true); };
 
