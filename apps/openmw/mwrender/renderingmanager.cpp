@@ -33,6 +33,7 @@
 
 #include <components/settings/settings.hpp>
 
+#include <components/sceneutil/cullsafeboundsvisitor.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -1493,6 +1494,49 @@ namespace MWRender
         }
 
         return halfExtents;
+    }
+
+    osg::BoundingBox RenderingManager::getCullSafeBoundingBox(const MWWorld::Ptr& ptr) const
+    {
+        const std::string model = ptr.getClass().getModel(ptr);
+        if (model.empty())
+            return {};
+
+        osg::ref_ptr<SceneUtil::PositionAttitudeTransform> rootNode = new SceneUtil::PositionAttitudeTransform;
+        // Hack even used by osg internally, osg's NodeVisitor won't accept const qualified nodes
+        rootNode->addChild(const_cast<osg::Node*>(mResourceSystem->getSceneManager()->getTemplate(model).get()));
+
+        const SceneUtil::PositionAttitudeTransform* baseNode = ptr.getRefData().getBaseNode();
+        if (baseNode)
+        {
+            rootNode->setPosition(baseNode->getPosition());
+            rootNode->setAttitude(baseNode->getAttitude());
+            rootNode->setScale(baseNode->getScale());
+        }
+        else
+        {
+            rootNode->setPosition(ptr.getRefData().getPosition().asVec3());
+            osg::Vec3f rot = ptr.getRefData().getPosition().asRotationVec3();
+            rootNode->setAttitude(osg::Quat(rot[2], osg::Vec3f(0, 0, -1)) * osg::Quat(rot[1], osg::Vec3f(0, -1, 0))
+                * osg::Quat(rot[0], osg::Vec3f(-1, 0, 0)));
+            const float refScale = ptr.getCellRef().getScale();
+            rootNode->setScale({ refScale, refScale, refScale });
+        }
+
+        SceneUtil::CullSafeBoundsVisitor computeBounds;
+        computeBounds.setTraversalMask(~(MWRender::Mask_ParticleSystem | MWRender::Mask_Effect));
+        rootNode->accept(computeBounds);
+
+        const osg::Vec3f& scale = rootNode->getScale();
+
+        computeBounds.mBoundingBox.xMin() *= scale.x();
+        computeBounds.mBoundingBox.xMax() *= scale.x();
+        computeBounds.mBoundingBox.yMin() *= scale.y();
+        computeBounds.mBoundingBox.yMax() *= scale.y();
+        computeBounds.mBoundingBox.zMin() *= scale.z();
+        computeBounds.mBoundingBox.zMax() *= scale.z();
+
+        return computeBounds.mBoundingBox;
     }
 
     void RenderingManager::resetFieldOfView()

@@ -244,6 +244,9 @@ namespace MWRender
 
         osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& object) const;
 
+        // Return local bounding box. Safe to be called in parallel with cull thread.
+        osg::BoundingBox getCullSafeBoundingBox(const MWWorld::Ptr& ptr) const;
+
         void exportSceneGraph(
             const MWWorld::Ptr& ptr, const std::filesystem::path& filename, const std::string& format);
 
