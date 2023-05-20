@@ -2,6 +2,7 @@
 #define GAME_MWCLASS_ESM4BASE_H
 
 #include <components/esm4/loadstat.hpp>
+#include <components/esm4/loadtree.hpp>
 #include <components/misc/strings/algorithm.hpp>
 
 #include "../mwgui/tooltips.hpp"
@@ -84,6 +85,15 @@ namespace MWClass
         friend MWWorld::RegisteredClass<ESM4Static, ESM4Base<ESM4::Static>>;
         ESM4Static()
             : MWWorld::RegisteredClass<ESM4Static, ESM4Base<ESM4::Static>>(ESM4::Static::sRecordId)
+        {
+        }
+    };
+
+    class ESM4Tree final : public MWWorld::RegisteredClass<ESM4Tree, ESM4Base<ESM4::Tree>>
+    {
+        friend MWWorld::RegisteredClass<ESM4Tree, ESM4Base<ESM4::Tree>>;
+        ESM4Tree()
+            : MWWorld::RegisteredClass<ESM4Tree, ESM4Base<ESM4::Tree>>(ESM4::Tree::sRecordId)
         {
         }
     };

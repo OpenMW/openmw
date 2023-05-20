@@ -39,8 +39,10 @@ namespace ESM4
     struct Clothing;
     struct Container;
     struct Door;
+    struct Furniture;
     struct Ingredient;
     struct MiscItem;
+    struct Tree;
     struct Weapon;
     struct World;
     struct Land;
@@ -122,7 +124,7 @@ namespace MWWorld
             Store<ESM4::Static>, Store<ESM4::Cell>, Store<ESM4::Light>, Store<ESM4::Reference>, Store<ESM4::Activator>,
             Store<ESM4::Potion>, Store<ESM4::Ammunition>, Store<ESM4::Armor>, Store<ESM4::Book>, Store<ESM4::Clothing>,
             Store<ESM4::Container>, Store<ESM4::Door>, Store<ESM4::Ingredient>, Store<ESM4::MiscItem>,
-            Store<ESM4::Weapon>, Store<ESM4::World>, Store<ESM4::Land>>;
+            Store<ESM4::Tree>, Store<ESM4::Weapon>, Store<ESM4::World>, Store<ESM4::Furniture>, Store<ESM4::Land>>;
 
     private:
         template <typename T>
