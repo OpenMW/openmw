@@ -3,6 +3,8 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <components/misc/strings/algorithm.hpp>
+
 namespace ESM
 {
     const std::string Skill::sSkillNames[Length] = {
@@ -96,6 +98,15 @@ namespace ESM
         = { { Block, Armorer, MediumArmor, HeavyArmor, BluntWeapon, LongBlade, Axe, Spear, Athletics, Enchant,
             Destruction, Alteration, Illusion, Conjuration, Mysticism, Restoration, Alchemy, Unarmored, Security, Sneak,
             Acrobatics, LightArmor, ShortBlade, Marksman, Mercantile, Speechcraft, HandToHand } };
+
+    Skill::SkillEnum Skill::stringToSkillId(std::string_view skill)
+    {
+        for (auto id : ESM::Skill::sSkillIds)
+            if (Misc::StringUtils::ciEqual(ESM::Skill::sSkillNames[id], skill))
+                return id;
+
+        throw std::logic_error("No such skill: " + std::string(skill));
+    }
 
     void Skill::load(ESMReader& esm, bool& isDeleted)
     {

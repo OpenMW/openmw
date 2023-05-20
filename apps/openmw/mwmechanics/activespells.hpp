@@ -79,7 +79,8 @@ namespace MWMechanics
             void resetWorsenings();
         };
 
-        typedef std::list<ActiveSpellParams>::const_iterator TIterator;
+        typedef std::list<ActiveSpellParams> Collection;
+        typedef Collection::const_iterator TIterator;
 
         void readState(const ESM::ActiveSpells& state);
         void writeState(ESM::ActiveSpells& state) const;

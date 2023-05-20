@@ -158,16 +158,21 @@ namespace MWMechanics
 
     EffectParam MagicEffects::get(const EffectKey& key) const
     {
+        EffectParam param = EffectParam();
+        get(key, param);
+        return param;
+    }
+
+    bool MagicEffects::get(const EffectKey& key, EffectParam& param) const
+    {
         Collection::const_iterator iter = mCollection.find(key);
 
-        if (iter == mCollection.end())
+        if (iter != mCollection.end())
         {
-            return EffectParam();
+            param = iter->second;
+            return true;
         }
-        else
-        {
-            return iter->second;
-        }
+        return false;
     }
 
     MagicEffects MagicEffects::diff(const MagicEffects& prev, const MagicEffects& now)

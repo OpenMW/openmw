@@ -105,6 +105,7 @@ namespace MWMechanics
         void setModifiers(const MagicEffects& effects);
 
         EffectParam get(const EffectKey& key) const;
+        bool get(const EffectKey& key, EffectParam& param) const;
         ///< This function can safely be used for keys that are not present.
 
         static MagicEffects diff(const MagicEffects& prev, const MagicEffects& now);

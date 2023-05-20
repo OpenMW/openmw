@@ -33,6 +33,8 @@ namespace ESM
         static const std::string sGmstAttributeIds[Length];
         static const std::string sGmstAttributeDescIds[Length];
         static const std::string sAttributeIcons[Length];
+
+        static AttributeID stringToAttributeId(std::string_view attribute);
     };
 }
 #endif
