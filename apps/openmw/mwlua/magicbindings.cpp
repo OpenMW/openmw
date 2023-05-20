@@ -37,11 +37,11 @@ namespace MWLua
     template <typename Store>
     struct ActorStore
     {
-        using Collection = Store::Collection;
-        using Iterator = Collection::const_iterator;
+        using Collection = typename Store::Collection;
+        using Iterator = typename Collection::const_iterator;
         const ObjectVariant mActor;
         Store* store = nullptr;
-        Iterator it;
+        Iterator it = Iterator();
         int index = 0;
 
         void reset()
@@ -106,7 +106,8 @@ namespace MWLua
             return spellOrId.as<const ESM::Spell*>()->mId;
         else
             return ESM::RefId::deserializeText(LuaUtil::cast<std::string_view>(spellOrId));
-    };
+    }
+
     static const ESM::Spell* toSpell(const sol::object& spellOrId)
     {
         if (spellOrId.is<ESM::Spell>())
@@ -117,7 +118,7 @@ namespace MWLua
             auto refId = ESM::RefId::deserializeText(LuaUtil::cast<std::string_view>(spellOrId));
             return store.get<ESM::Spell>().find(refId);
         }
-    };
+    }
 
     sol::table initCoreMagicBindings(const Context& context)
     {
@@ -260,7 +261,7 @@ namespace MWLua
         magicEffectT[sol::meta_function::to_string] = [](const ESM::MagicEffect& rec) {
             return "ESM3_MagicEffect[" + ESM::MagicEffect::effectIdToString(rec.mIndex) + "]";
         };
-        magicEffectT["id"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string_view {
+        magicEffectT["id"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string {
             auto gmstName = ESM::MagicEffect::effectIdToString(rec.mIndex);
             auto name = gmstName.substr(7); // Remove the 'sEffect' prefix
             return Misc::StringUtils::lowerCase(name);
@@ -292,7 +293,7 @@ namespace MWLua
         activeEffectT[sol::meta_function::to_string] = [](const ActiveEffect& effect) {
             return "ActiveEffect[" + ESM::MagicEffect::effectIdToString(effect.key.mId) + "]";
         };
-        activeEffectT["id"] = sol::readonly_property([](const ActiveEffect& effect) -> std::string_view {
+        activeEffectT["id"] = sol::readonly_property([](const ActiveEffect& effect) -> std::string {
             auto gmstName = ESM::MagicEffect::effectIdToString(effect.key.mId);
             auto name = gmstName.substr(7); // Remove the 'sEffect' prefix
             return Misc::StringUtils::lowerCase(name);
