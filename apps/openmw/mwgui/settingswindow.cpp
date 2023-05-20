@@ -697,26 +697,27 @@ namespace MWGui
                 float min, max;
                 getSettingMinMax(scroller, min, max);
                 value = min + (max - min) * value;
-                if (valueType == "Float")
-                    Settings::get<float>(getSettingCategory(scroller), getSettingName(scroller)).set(value);
-                else
-                    Settings::get<int>(getSettingCategory(scroller), getSettingName(scroller))
-                        .set(static_cast<int>(value));
 
                 if (valueType == "Cell")
                 {
+                    Settings::get<float>(getSettingCategory(scroller), getSettingName(scroller)).set(value);
                     std::stringstream ss;
                     ss << std::fixed << std::setprecision(2) << value / Constants::CellSizeInUnits;
                     valueStr = ss.str();
                 }
                 else if (valueType == "Float")
                 {
+                    Settings::get<float>(getSettingCategory(scroller), getSettingName(scroller)).set(value);
                     std::stringstream ss;
                     ss << std::fixed << std::setprecision(2) << value;
                     valueStr = ss.str();
                 }
                 else
+                {
+                    Settings::get<int>(getSettingCategory(scroller), getSettingName(scroller))
+                        .set(static_cast<int>(value));
                     valueStr = MyGUI::utility::toString(int(value));
+                }
             }
             else
             {
