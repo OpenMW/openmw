@@ -563,12 +563,12 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         {
             // Cell no longer exists (i.e. changed game files), choose a default cell
             Log(Debug::Warning) << "Warning: Player character's cell no longer exists, changing to the default cell";
-            MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getExterior(0, 0);
-            float x, y;
-            MWBase::Environment::get().getWorld()->indexToPosition(0, 0, x, y, false);
+            ESM::ExteriorCellLocation cellIndex(0, 0, ESM::Cell::sDefaultWorldspaceId);
+            MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex);
+            osg::Vec2 posFromIndex = ESM::indexToPosition(cellIndex, false);
             ESM::Position pos;
-            pos.pos[0] = x;
-            pos.pos[1] = y;
+            pos.pos[0] = posFromIndex.x();
+            pos.pos[1] = posFromIndex.y();
             pos.pos[2] = 0; // should be adjusted automatically (adjustPlayerPos=true)
             pos.rot[0] = 0;
             pos.rot[1] = 0;

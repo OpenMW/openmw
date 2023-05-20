@@ -14,7 +14,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/cellstore.hpp"
-#include "../mwworld/cellutils.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/player.hpp"
@@ -22,6 +21,7 @@
 #include "../mwworld/worldmodel.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "interpretercontext.hpp"
 #include "ref.hpp"
@@ -390,10 +390,10 @@ namespace MWScript
                 bool isPlayer = ptr == MWMechanics::getPlayer();
                 auto world = MWBase::Environment::get().getWorld();
                 auto worldModel = MWBase::Environment::get().getWorldModel();
+                if (ptr.getClass().isActor())
+                    ptr.getClass().getCreatureStats(ptr).setTeleported(true);
                 if (isPlayer)
-                {
                     world->getPlayer().setTeleported(true);
-                }
 
                 MWWorld::CellStore* store = nullptr;
                 try
@@ -401,8 +401,9 @@ namespace MWScript
                     store = &worldModel->getCell(cellID);
                     if (store->isExterior())
                     {
-                        const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                        store = &worldModel->getExterior(cellIndex.x(), cellIndex.y());
+                        const ESM::ExteriorCellLocation cellIndex
+                            = ESM::positionToCellIndex(x, y, store->getCell()->getWorldSpace());
+                        store = &worldModel->getExterior(cellIndex);
                     }
                 }
                 catch (std::exception&)
@@ -416,8 +417,9 @@ namespace MWScript
                     Log(Debug::Warning) << error;
                     if (!isPlayer)
                         return;
-                    const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                    store = &worldModel->getExterior(cellIndex.x(), cellIndex.y());
+                    const ESM::ExteriorCellLocation cellIndex
+                        = ESM::positionToCellIndex(x, y, store->getCell()->getWorldSpace());
+                    store = &worldModel->getExterior(cellIndex);
                 }
                 if (store)
                 {
@@ -462,19 +464,19 @@ namespace MWScript
 
                 bool isPlayer = ptr == MWMechanics::getPlayer();
                 auto world = MWBase::Environment::get().getWorld();
+                if (ptr.getClass().isActor())
+                    ptr.getClass().getCreatureStats(ptr).setTeleported(true);
                 if (isPlayer)
-                {
                     world->getPlayer().setTeleported(true);
-                }
-                const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
+                const ESM::ExteriorCellLocation cellIndex
+                    = ESM::positionToCellIndex(x, y, ESM::Cell::sDefaultWorldspaceId);
 
                 // another morrowind oddity: player will be moved to the exterior cell at this location,
                 // non-player actors will move within the cell they are in.
                 MWWorld::Ptr base = ptr;
                 if (isPlayer)
                 {
-                    MWWorld::CellStore* cell
-                        = &MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
+                    MWWorld::CellStore* cell = &MWBase::Environment::get().getWorldModel()->getExterior(cellIndex);
                     ptr = world->moveObject(ptr, cell, osg::Vec3(x, y, z));
                 }
                 else
@@ -567,8 +569,9 @@ namespace MWScript
                 MWWorld::CellStore* store = nullptr;
                 if (player.getCell()->isExterior())
                 {
-                    const osg::Vec2i cellIndex = MWWorld::positionToCellIndex(x, y);
-                    store = &MWBase::Environment::get().getWorldModel()->getExterior(cellIndex.x(), cellIndex.y());
+                    const ESM::ExteriorCellLocation cellIndex
+                        = ESM::positionToCellIndex(x, y, player.getCell()->getCell()->getWorldSpace());
+                    store = &MWBase::Environment::get().getWorldModel()->getExterior(cellIndex);
                 }
                 else
                     store = player.getCell();

@@ -61,7 +61,7 @@ namespace Resource
         VisualCollisionType mVisualCollisionType = VisualCollisionType::None;
 
         BulletShape() = default;
-        BulletShape(const BulletShape& copy, const osg::CopyOp& copyop);
+        BulletShape(const BulletShape& other, const osg::CopyOp& copyOp = osg::CopyOp());
 
         META_Object(Resource, BulletShape)
 
@@ -76,7 +76,7 @@ namespace Resource
     class BulletShapeInstance : public BulletShape
     {
     public:
-        BulletShapeInstance(osg::ref_ptr<const BulletShape> source);
+        explicit BulletShapeInstance(osg::ref_ptr<const BulletShape> source);
 
         const osg::ref_ptr<const BulletShape>& getSource() const { return mSource; }
 

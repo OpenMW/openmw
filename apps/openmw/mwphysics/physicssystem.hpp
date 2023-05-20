@@ -17,6 +17,7 @@
 #include <osg/ref_ptr>
 
 #include <components/detournavigator/collisionshapetype.hpp>
+#include <components/esm/util.hpp>
 
 #include "../mwworld/ptr.hpp"
 
@@ -189,7 +190,7 @@ namespace MWPhysics
 
         void removeHeightField(int x, int y);
 
-        const HeightField* getHeightField(int x, int y) const;
+        const HeightField* getHeightField(ESM::ExteriorCellLocation cellIndex) const;
 
         bool toggleCollisionMode();
 

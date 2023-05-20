@@ -9,6 +9,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/misc/thread.hpp>
 
 #include <DetourNavMesh.h>
@@ -199,7 +200,8 @@ namespace DetourNavigator
                     changeType, getManhattanDistance(changedTile, playerTile), processTime);
 
                 Log(Debug::Debug) << "Post job " << it->mId << " for agent=(" << it->mAgentBounds << ")"
-                                  << " changedTile=(" << it->mChangedTile << ")";
+                                  << " changedTile=(" << it->mChangedTile << ") "
+                                  << " changeType=" << it->mChangeType;
 
                 if (playerTileChanged)
                     mWaiting.push_back(it);
@@ -821,6 +823,8 @@ namespace DetourNavigator
 
     void DbWorker::processReadingJob(JobIt job)
     {
+        ++mGetTileCount;
+
         Log(Debug::Debug) << "Processing db read job " << job->mId;
 
         if (job->mInput.empty())
@@ -834,16 +838,35 @@ namespace DetourNavigator
             }
             else
             {
-                const auto objects = makeDbRefGeometryObjects(job->mRecastMesh->getMeshSources(),
+                struct HandleResult
+                {
+                    const RecastSettings& mRecastSettings;
+                    Job& mJob;
+
+                    bool operator()(const std::vector<DbRefGeometryObject>& objects) const
+                    {
+                        mJob.mInput = serialize(mRecastSettings, mJob.mAgentBounds, *mJob.mRecastMesh, objects);
+                        return true;
+                    }
+
+                    bool operator()(const MeshSource& meshSource) const
+                    {
+                        Log(Debug::Debug) << "No object for mesh source (fileName=\"" << meshSource.mShape->mFileName
+                                          << "\", areaType=" << meshSource.mAreaType
+                                          << ", fileHash=" << Misc::StringUtils::toHex(meshSource.mShape->mFileHash)
+                                          << ") for job " << mJob.mId;
+                        return false;
+                    }
+                };
+
+                const auto result = makeDbRefGeometryObjects(job->mRecastMesh->getMeshSources(),
                     [&](const MeshSource& v) { return resolveMeshSource(*mDb, v); });
-                if (!objects.has_value())
+                if (!std::visit(HandleResult{ mRecastSettings, *job }, result))
                     return;
-                job->mInput = serialize(mRecastSettings, job->mAgentBounds, *job->mRecastMesh, *objects);
             }
         }
 
         job->mCachedTileData = mDb->getTileData(job->mWorldspace, job->mChangedTile, job->mInput);
-        ++mGetTileCount;
     }
 
     void DbWorker::processWritingJob(JobIt job)

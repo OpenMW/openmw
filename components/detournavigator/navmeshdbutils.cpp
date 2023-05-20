@@ -2,7 +2,8 @@
 #include "navmeshdb.hpp"
 #include "recastmesh.hpp"
 
-#include <components/debug/debuglog.hpp>
+#include "components/debug/debuglog.hpp"
+#include "components/misc/strings/conversion.hpp"
 
 #include <cassert>
 #include <optional>
@@ -27,7 +28,8 @@ namespace DetourNavigator
                 return *existingShapeId;
             const ShapeId newShapeId = nextShapeId;
             db.insertShape(newShapeId, name, type, hashData);
-            Log(Debug::Verbose) << "Added " << name << " " << type << " shape to navmeshdb with id " << newShapeId;
+            Log(Debug::Verbose) << "Added " << name << " " << Misc::StringUtils::toHex(hash) << " " << type
+                                << " shape to navmeshdb with id " << newShapeId;
             ++nextShapeId;
             return newShapeId;
         }

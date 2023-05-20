@@ -335,7 +335,7 @@
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="field of view"/>
-                            <UserString key="SettingValueType" value="Integer"/>
+                            <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingMin" value="30"/>
                             <UserString key="SettingMax" value="110"/>
                             <UserString key="SettingLabelWidget" value="FovText"/>
@@ -412,7 +412,7 @@
                             <UserString key="SettingType" value="Slider"/>
                             <UserString key="SettingCategory" value="Camera"/>
                             <UserString key="SettingName" value="viewing distance"/>
-                            <UserString key="SettingValueType" value="Integer"/>
+                            <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingMin" value="2500"/>
                             <UserString key="SettingMax" value="7168"/>
                             <UserString key="SettingLabelWidget" value="RenderDistanceLabel"/>
@@ -621,7 +621,7 @@
                             <UserString key="SettingMax" value="8192"/>
                             <UserString key="SettingCategory" value="Shaders"/>
                             <UserString key="SettingName" value="maximum light distance"/>
-                            <UserString key="SettingValueType" value="Integer"/>
+                            <UserString key="SettingValueType" value="Float"/>
                             <UserString key="SettingLabelWidget" value="MaxLightDistanceText"/>
                             <UserString key="SettingLabelCaption" value="#{OMWEngine:LightsMaximumDistance} (%s)"/>
                         </Widget>

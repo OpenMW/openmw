@@ -14,21 +14,23 @@
 
 namespace Settings
 {
-    struct GeneralCategory
+    struct GeneralCategory : WithIndex
     {
-        SettingValue<int> mAnisotropy{ "General", "anisotropy", makeClampSanitizerInt(0, 16) };
-        SettingValue<std::string> mScreenshotFormat{ "General", "screenshot format",
+        using WithIndex::WithIndex;
+
+        SettingValue<int> mAnisotropy{ mIndex, "General", "anisotropy", makeClampSanitizerInt(0, 16) };
+        SettingValue<std::string> mScreenshotFormat{ mIndex, "General", "screenshot format",
             makeEnumSanitizerString({ "jpg", "png", "tga" }) };
-        SettingValue<std::string> mTextureMagFilter{ "General", "texture mag filter",
+        SettingValue<std::string> mTextureMagFilter{ mIndex, "General", "texture mag filter",
             makeEnumSanitizerString({ "nearest", "linear" }) };
-        SettingValue<std::string> mTextureMinFilter{ "General", "texture min filter",
+        SettingValue<std::string> mTextureMinFilter{ mIndex, "General", "texture min filter",
             makeEnumSanitizerString({ "nearest", "linear" }) };
-        SettingValue<std::string> mTextureMipmap{ "General", "texture mipmap",
+        SettingValue<std::string> mTextureMipmap{ mIndex, "General", "texture mipmap",
             makeEnumSanitizerString({ "none", "nearest", "linear" }) };
-        SettingValue<bool> mNotifyOnSavedScreenshot{ "General", "notify on saved screenshot" };
-        SettingValue<std::string> mPreferredLocales{ "General", "preferred locales" };
-        SettingValue<std::size_t> mLogBufferSize{ "General", "log buffer size" };
-        SettingValue<std::size_t> mConsoleHistoryBufferSize{ "General", "console history buffer size" };
+        SettingValue<bool> mNotifyOnSavedScreenshot{ mIndex, "General", "notify on saved screenshot" };
+        SettingValue<std::string> mPreferredLocales{ mIndex, "General", "preferred locales" };
+        SettingValue<std::size_t> mLogBufferSize{ mIndex, "General", "log buffer size" };
+        SettingValue<std::size_t> mConsoleHistoryBufferSize{ mIndex, "General", "console history buffer size" };
     };
 }
 

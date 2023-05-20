@@ -64,22 +64,22 @@ namespace ESM4
     {
         FormId mFormId; // from the header
         ESM::RefId mId;
-        std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
+        std::uint32_t mFlags = 0; // from the header, see enum type RecordFlag for details
 
         ESM::RefId mParent; // world formId (for grouping cells), from the loading sequence
 
         std::string mEditorId;
         std::string mFullName;
-        std::uint16_t mCellFlags; // TES5 can also be 8 bits
+        std::uint16_t mCellFlags = 0; // TES5 can also be 8 bits
 
-        std::int32_t mX;
-        std::int32_t mY;
+        std::int32_t mX = 0;
+        std::int32_t mY = 0;
 
         FormId mOwner;
         FormId mGlobal;
         FormId mClimate;
         FormId mWater;
-        float mWaterHeight;
+        float mWaterHeight = 0;
 
         std::vector<FormId> mRegions;
         Lighting mLighting;
@@ -91,9 +91,9 @@ namespace ESM4
         FormId mAcousticSpace; // FO3/FONV
         // TES4: 0 = default, 1 = public, 2 = dungeon
         // FO3/FONV have more types (not sure how they are used, however)
-        std::uint8_t mMusicType;
+        std::uint8_t mMusicType = 0;
 
-        CellGroup* mCellGroup;
+        CellGroup* mCellGroup = nullptr;
 
         ESM4::ReaderContext mReaderContext;
 
@@ -107,6 +107,8 @@ namespace ESM4
         int getGridX() const { return mX; }
         int getGridY() const { return mY; }
         bool isExterior() const { return !(mCellFlags & CELL_Interior); }
+
+        static float sInvalidWaterLevel;
     };
 }
 

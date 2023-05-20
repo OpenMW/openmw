@@ -397,6 +397,29 @@
 -- @param #Vector4 v
 -- @return #Vector4
 
+---
+-- Immutable box.
+-- @type Box
+-- @field #Vector3 center The center of the box
+-- @field #Vector3 halfSize The half sizes of the box along each axis
+-- @field #Transform transform A transformation which encapsulates the boxes center pointer (translation), half sizes (scale), and rotation.
+-- @field #table vertices Table of the 8 vertices which comprise the box, taking rotation into account
+
+---
+-- Creates a new Box with a given center and half sizes. Boxes are immutable and can not be changed after creation.
+-- @function [parent=#util] Box
+-- @param #Vector3 center
+-- @param #Vector3 halfSize in each dimension (x, y, z)
+-- @return #Box
+
+---
+-- Creates a new Box from a given transformation. Boxes are immutable and can not be changed after creation.
+-- @function [parent=#util] Box
+-- @param #Transform transform A transformation which encapsulates the boxes center pointer (translation), half sizes (scale), and rotation.
+-- @return #Box
+-- @usage
+-- -- Creates a 1x1x1 length box centered at the origin
+-- util.box(util.transform.scale(util.vector3(0.5, 0.5, 0.5)))
 
 ---
 -- Color in RGBA format. All of the component values are in the range [0, 1].

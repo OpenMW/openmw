@@ -129,6 +129,21 @@ namespace Misc::StringUtils
         return std::nullopt;
     }
 #endif
+
+    inline std::string toHex(std::string_view value)
+    {
+        std::string buffer(value.size() * 2, '0');
+        char* out = buffer.data();
+        for (const char v : value)
+        {
+            const std::ptrdiff_t space = static_cast<std::ptrdiff_t>(static_cast<std::uint8_t>(v) <= 0xf);
+            const auto [ptr, ec] = std::to_chars(out + space, out + space + 2, static_cast<std::uint8_t>(v), 16);
+            if (ec != std::errc())
+                throw std::system_error(std::make_error_code(ec));
+            out += 2;
+        }
+        return buffer;
+    }
 }
 
 #endif // COMPONENTS_MISC_STRINGS_CONVERSION_H

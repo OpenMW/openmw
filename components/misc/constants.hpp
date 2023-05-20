@@ -16,16 +16,20 @@ namespace Constants
 
     // Gravity constant in m/sec^2
     // Note: 8.96 m/sec^2 = 9.8 yards/sec^2
-    // Probaly original engine's developers just forgot
+    // Probably original engine's developers just forgot
     // that their engine uses yards instead of meters
-    // and used standart gravity value as it is
+    // and used standard gravity value as it is
     constexpr float GravityConst = 8.96f;
 
     // Size of one exterior cell in game units
     constexpr int CellSizeInUnits = 8192;
+    constexpr int ESM4CellSizeInUnits = 4096;
 
     // Size of active cell grid in cells (it is a square with the (2 * CellGridRadius + 1) cells side)
     constexpr int CellGridRadius = 1;
+
+    // ESM4 cells are twice smaller, so the active grid should have more cells.
+    constexpr int ESM4CellGridRadius = CellGridRadius * 2;
 
     // A label to mark night/day visual switches
     const std::string NightDayLabel = "NightDaySwitch";

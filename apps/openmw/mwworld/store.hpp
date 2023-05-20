@@ -4,11 +4,13 @@
 #include <map>
 #include <memory>
 #include <set>
+#include <span>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 #include <components/esm/refid.hpp>
+#include <components/esm/util.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loaddial.hpp>
 #include <components/esm3/loadglob.hpp>
@@ -177,6 +179,7 @@ namespace MWWorld
     template <class T, class Id = ESM::RefId>
     class TypedDynamicStore : public DynamicStoreBase<Id>
     {
+    protected:
         typedef std::unordered_map<Id, T> Static;
         Static mStatic;
         /// @par mShared usually preserves the record order as it came from the content files (this
@@ -283,10 +286,16 @@ namespace MWWorld
         std::unordered_map<std::string, ESM4::Cell*, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
             mCellNameIndex;
 
+        std::unordered_map<ESM::ExteriorCellLocation, ESM4::Cell*> mExteriors;
+        std::unordered_map<ESM::ExteriorCellLocation, ESM4::Cell*> mPersistentExteriors;
+
     public:
         const ESM4::Cell* searchCellName(std::string_view) const;
+        const ESM4::Cell* searchExterior(ESM::ExteriorCellLocation cellIndex) const;
         ESM4::Cell* insert(const ESM4::Cell& item, bool overrideOnly = false);
         ESM4::Cell* insertStatic(const ESM4::Cell& item);
+        void insertCell(ESM4::Cell* cell);
+        void clearDynamic() override;
     };
 
     template <>
@@ -404,6 +413,14 @@ namespace MWWorld
         size_t getSize() const override;
         size_t getExtSize() const;
         size_t getIntSize() const;
+
+        const ESM::Cell* at(size_t index) const
+        {
+            if (index < mSharedInt.size())
+                return mSharedInt.at(index);
+            else
+                return mSharedExt.at(index - mSharedInt.size());
+        }
 
         void listIdentifier(std::vector<ESM::RefId>& list) const override;
 
@@ -536,6 +553,13 @@ namespace MWWorld
     template <>
     class Store<ESM4::Reference> : public TypedDynamicStore<ESM4::Reference, ESM::FormId>
     {
+    public:
+        void preprocessReferences(const Store<ESM4::Cell>& cells);
+
+        std::span<const ESM4::Reference* const> getByCell(ESM::RefId cellId) const;
+
+    private:
+        std::unordered_map<ESM::RefId, std::vector<ESM4::Reference*>> mPerCellReferences;
     };
 
 } // end namespace

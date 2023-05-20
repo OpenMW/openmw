@@ -78,7 +78,7 @@ function (libfind_header_path PREFIX)
   foreach(name ${OPT_NAMES})
     foreach(path ${paths})
       set(filepath "${${path}}/${name}")
-      # check for existance
+      # check for existence
       if (EXISTS ${filepath})
         set(${OPT_VAR} ${filepath} PARENT_SCOPE) # export path
         return()

@@ -14,17 +14,19 @@
 
 namespace Settings
 {
-    struct CameraCategory
+    struct CameraCategory : WithIndex
     {
-        SettingValue<float> mNearClip{ "Camera", "near clip", makeMaxSanitizerFloat(0.005f) };
-        SettingValue<bool> mSmallFeatureCulling{ "Camera", "small feature culling" };
-        SettingValue<float> mSmallFeatureCullingPixelSize{ "Camera", "small feature culling pixel size",
+        using WithIndex::WithIndex;
+
+        SettingValue<float> mNearClip{ mIndex, "Camera", "near clip", makeMaxSanitizerFloat(0.005f) };
+        SettingValue<bool> mSmallFeatureCulling{ mIndex, "Camera", "small feature culling" };
+        SettingValue<float> mSmallFeatureCullingPixelSize{ mIndex, "Camera", "small feature culling pixel size",
             makeMaxStrictSanitizerFloat(0) };
-        SettingValue<float> mViewingDistance{ "Camera", "viewing distance", makeMaxStrictSanitizerFloat(0) };
-        SettingValue<float> mFieldOfView{ "Camera", "field of view", makeClampSanitizerFloat(1, 179) };
-        SettingValue<float> mFirstPersonFieldOfView{ "Camera", "first person field of view",
+        SettingValue<float> mViewingDistance{ mIndex, "Camera", "viewing distance", makeMaxStrictSanitizerFloat(0) };
+        SettingValue<float> mFieldOfView{ mIndex, "Camera", "field of view", makeClampSanitizerFloat(1, 179) };
+        SettingValue<float> mFirstPersonFieldOfView{ mIndex, "Camera", "first person field of view",
             makeClampSanitizerFloat(1, 179) };
-        SettingValue<bool> mReverseZ{ "Camera", "reverse z" };
+        SettingValue<bool> mReverseZ{ mIndex, "Camera", "reverse z" };
     };
 }
 

@@ -572,7 +572,7 @@ namespace MWMechanics
         {
             // Backing up behaviour
             // Actor backs up slightly further away than opponent's weapon range
-            // (in vanilla - only as far as oponent's weapon range),
+            // (in vanilla - only as far as opponent's weapon range),
             // or not at all if opponent is using a ranged weapon
 
             if (targetUsesRanged

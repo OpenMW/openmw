@@ -36,6 +36,21 @@
 
 namespace MWLua
 {
+    struct CellsStore
+    {
+    };
+}
+
+namespace sol
+{
+    template <>
+    struct is_automagical<MWLua::CellsStore> : std::false_type
+    {
+    };
+}
+
+namespace MWLua
+{
 
     static void addTimeBindings(sol::table& api, const Context& context, bool global)
     {
@@ -68,7 +83,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 37;
+        api["API_REVISION"] = 38;
         api["quit"] = [lua]() {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
             MWBase::Environment::get().getStateManager()->requestQuit();
@@ -106,15 +121,58 @@ namespace MWLua
         return LuaUtil::makeReadOnly(api);
     }
 
+    static void addCellGetters(sol::table& api, const Context& context)
+    {
+        api["getCellByName"] = [](std::string_view name) {
+            return GCell{ &MWBase::Environment::get().getWorldModel()->getCell(name, /*forceLoad=*/false) };
+        };
+        api["getExteriorCell"] = [](int x, int y, sol::object cellOrName) {
+            ESM::RefId worldspace;
+            if (cellOrName.is<GCell>())
+                worldspace = cellOrName.as<GCell>().mStore->getCell()->getWorldSpace();
+            else if (cellOrName.is<std::string_view>() && !cellOrName.as<std::string_view>().empty())
+                worldspace = MWBase::Environment::get()
+                                 .getWorldModel()
+                                 ->getCell(cellOrName.as<std::string_view>())
+                                 .getCell()
+                                 ->getWorldSpace();
+            else
+                worldspace = ESM::Cell::sDefaultWorldspaceId;
+            return GCell{ &MWBase::Environment::get().getWorldModel()->getExterior(
+                ESM::ExteriorCellLocation(x, y, worldspace), /*forceLoad=*/false) };
+        };
+
+        const MWWorld::Store<ESM::Cell>* cells3Store = &MWBase::Environment::get().getESMStore()->get<ESM::Cell>();
+        const MWWorld::Store<ESM4::Cell>* cells4Store = &MWBase::Environment::get().getESMStore()->get<ESM4::Cell>();
+        sol::usertype<CellsStore> cells = context.mLua->sol().new_usertype<CellsStore>("Cells");
+        cells[sol::meta_function::length]
+            = [cells3Store, cells4Store](const CellsStore&) { return cells3Store->getSize() + cells4Store->getSize(); };
+        cells[sol::meta_function::index] = [cells3Store, cells4Store](const CellsStore&, size_t index) -> GCell {
+            index--; // Translate from Lua's 1-based indexing.
+            if (index < cells3Store->getSize())
+            {
+                const ESM::Cell* cellRecord = cells3Store->at(index);
+                return GCell{ &MWBase::Environment::get().getWorldModel()->getCell(
+                    cellRecord->mId, /*forceLoad=*/false) };
+            }
+            else
+            {
+                const ESM4::Cell* cellRecord = cells4Store->at(index - cells3Store->getSize());
+                return GCell{ &MWBase::Environment::get().getWorldModel()->getCell(
+                    cellRecord->mId, /*forceLoad=*/false) };
+            }
+        };
+        cells[sol::meta_function::pairs] = context.mLua->sol()["ipairsForArray"].template get<sol::function>();
+        cells[sol::meta_function::ipairs] = context.mLua->sol()["ipairsForArray"].template get<sol::function>();
+        api["cells"] = CellsStore{};
+    }
+
     static sol::table initWorldPackage(const Context& context)
     {
         sol::table api(context.mLua->sol(), sol::create);
         WorldView* worldView = context.mWorldView;
         addTimeBindings(api, context, true);
-        api["getCellByName"]
-            = [](std::string_view name) { return GCell{ &MWBase::Environment::get().getWorldModel()->getCell(name) }; };
-        api["getExteriorCell"]
-            = [](int x, int y) { return GCell{ &MWBase::Environment::get().getWorldModel()->getExterior(x, y) }; };
+        addCellGetters(api, context);
         api["activeActors"] = GObjectList{ worldView->getActorsInScene() };
         api["createObject"] = [](std::string_view recordId, sol::optional<int> count) -> GObject {
             // Doesn't matter which cell to use because the new object will be in disabled state.

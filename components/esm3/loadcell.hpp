@@ -66,7 +66,7 @@ namespace ESM
      */
     struct Cell
     {
-        static const std::string sDefaultWorldspace;
+        static const ESM::StringRefId sDefaultWorldspaceId;
 
         constexpr static RecNameInts sRecordId = REC_CELL;
 

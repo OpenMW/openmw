@@ -61,9 +61,6 @@ namespace MWRender
 
         void setDefaults(osg::Camera* camera) override;
 
-        bool isActive() { return mActive; }
-        void setIsActive(bool active) { mActive = active; }
-
         osg::Node* mSceneRoot;
         osg::Matrix mProjectionMatrix;
         osg::Matrix mViewMatrix;
@@ -182,29 +179,28 @@ namespace MWRender
 
     void LocalMap::requestMap(const MWWorld::CellStore* cell)
     {
-        if (cell->isExterior())
+        if (!cell->isExterior())
         {
-            int cellX = cell->getCell()->getGridX();
-            int cellY = cell->getCell()->getGridY();
-
-            MapSegment& segment = mExteriorSegments[std::make_pair(cellX, cellY)];
-            if (!segment.needUpdate)
-                return;
-            else
-            {
-                requestExteriorMap(cell);
-                segment.needUpdate = false;
-            }
-        }
-        else
             requestInteriorMap(cell);
+            return;
+        }
+
+        int cellX = cell->getCell()->getGridX();
+        int cellY = cell->getCell()->getGridY();
+
+        MapSegment& segment = mExteriorSegments[std::make_pair(cellX, cellY)];
+        const std::uint8_t neighbourFlags = getExteriorNeighbourFlags(cellX, cellY);
+        if ((segment.mLastRenderNeighbourFlags & neighbourFlags) == neighbourFlags)
+            return;
+        requestExteriorMap(cell, segment);
+        segment.mLastRenderNeighbourFlags = neighbourFlags;
     }
 
     void LocalMap::addCell(MWWorld::CellStore* cell)
     {
         if (cell->isExterior())
-            mExteriorSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())].needUpdate
-                = true;
+            mExteriorSegments.emplace(
+                std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY()), MapSegment{});
     }
 
     void LocalMap::removeExteriorCell(int x, int y)
@@ -216,7 +212,9 @@ namespace MWRender
     {
         saveFogOfWar(cell);
 
-        if (!cell->isExterior())
+        if (cell->isExterior())
+            mExteriorSegments.erase({ cell->getCell()->getGridX(), cell->getCell()->getGridY() });
+        else
             mInteriorSegments.clear();
     }
 
@@ -245,7 +243,7 @@ namespace MWRender
         auto it = mLocalMapRTTs.begin();
         while (it != mLocalMapRTTs.end())
         {
-            if (!(*it)->isActive())
+            if (!(*it)->mActive)
             {
                 mRoot->removeChild(*it);
                 it = mLocalMapRTTs.erase(it);
@@ -255,30 +253,27 @@ namespace MWRender
         }
     }
 
-    void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell)
+    void LocalMap::requestExteriorMap(const MWWorld::CellStore* cell, MapSegment& segment)
     {
         mInterior = false;
 
-        int x = cell->getCell()->getGridX();
-        int y = cell->getCell()->getGridY();
+        const int x = cell->getCell()->getGridX();
+        const int y = cell->getCell()->getGridY();
 
         osg::BoundingSphere bound = mSceneRoot->getBound();
         float zmin = bound.center().z() - bound.radius();
         float zmax = bound.center().z() + bound.radius();
 
-        setupRenderToTexture(cell->getCell()->getGridX(), cell->getCell()->getGridY(),
-            x * mMapWorldSize + mMapWorldSize / 2.f, y * mMapWorldSize + mMapWorldSize / 2.f, osg::Vec3d(0, 1, 0), zmin,
-            zmax);
+        setupRenderToTexture(x, y, x * mMapWorldSize + mMapWorldSize / 2.f, y * mMapWorldSize + mMapWorldSize / 2.f,
+            osg::Vec3d(0, 1, 0), zmin, zmax);
 
-        MapSegment& segment
-            = mExteriorSegments[std::make_pair(cell->getCell()->getGridX(), cell->getCell()->getGridY())];
-        if (!segment.mFogOfWarImage)
-        {
-            if (cell->getFog())
-                segment.loadFogOfWar(cell->getFog()->mFogTextures.back());
-            else
-                segment.initFogOfWar();
-        }
+        if (segment.mFogOfWarImage != nullptr)
+            return;
+
+        if (cell->getFog())
+            segment.loadFogOfWar(cell->getFog()->mFogTextures.back());
+        else
+            segment.initFogOfWar();
     }
 
     static osg::Vec2f getNorthVector(const MWWorld::CellStore* cell)
@@ -476,7 +471,8 @@ namespace MWRender
         int texU = static_cast<int>((sFogOfWarResolution - 1) * nX);
         int texV = static_cast<int>((sFogOfWarResolution - 1) * nY);
 
-        uint32_t clr = ((const uint32_t*)segment.mFogOfWarImage->data())[texV * sFogOfWarResolution + texU];
+        const std::uint32_t clr
+            = reinterpret_cast<const uint32_t*>(segment.mFogOfWarImage->data())[texV * sFogOfWarResolution + texU];
         uint8_t alpha = (clr >> 24);
         return alpha < 200;
     }
@@ -544,7 +540,7 @@ namespace MWRender
                 if (!segment.mFogOfWarImage || !segment.mMapTexture)
                     continue;
 
-                uint32_t* data = (uint32_t*)segment.mFogOfWarImage->data();
+                std::uint32_t* data = reinterpret_cast<std::uint32_t*>(segment.mFogOfWarImage->data());
                 bool changed = false;
                 for (int texV = 0; texV < sFogOfWarResolution; ++texV)
                 {
@@ -553,10 +549,9 @@ namespace MWRender
                         float sqrDist = square((texU + mx * (sFogOfWarResolution - 1)) - u * (sFogOfWarResolution - 1))
                             + square((texV + my * (sFogOfWarResolution - 1)) - v * (sFogOfWarResolution - 1));
 
-                        uint32_t clr = *(uint32_t*)data;
-                        uint8_t alpha = (clr >> 24);
-                        alpha = std::min(alpha, (uint8_t)(std::clamp(sqrDist / sqrExploreRadius, 0.f, 1.f) * 255));
-                        uint32_t val = (uint32_t)(alpha << 24);
+                        const std::uint8_t alpha = std::min<std::uint8_t>(
+                            *data >> 24, std::clamp(sqrDist / sqrExploreRadius, 0.f, 1.f) * 255);
+                        std::uint32_t val = static_cast<std::uint32_t>(alpha << 24);
                         if (*data != val)
                         {
                             *data = val;
@@ -576,9 +571,23 @@ namespace MWRender
         }
     }
 
-    LocalMap::MapSegment::MapSegment()
-        : mHasFogState(false)
+    std::uint8_t LocalMap::getExteriorNeighbourFlags(int cellX, int cellY) const
     {
+        constexpr std::tuple<NeighbourCellFlag, int, int> flags[] = {
+            { NeighbourCellTopLeft, -1, -1 },
+            { NeighbourCellTopCenter, 0, -1 },
+            { NeighbourCellTopRight, 1, -1 },
+            { NeighbourCellMiddleLeft, -1, 0 },
+            { NeighbourCellMiddleRight, 1, 0 },
+            { NeighbourCellBottomLeft, -1, 1 },
+            { NeighbourCellBottomCenter, 0, 1 },
+            { NeighbourCellBottomRight, 1, 1 },
+        };
+        std::uint8_t result = 0;
+        for (const auto& [flag, dx, dy] : flags)
+            if (mExteriorSegments.contains(std::pair(cellX + dx, cellY + dy)))
+                result |= flag;
+        return result;
     }
 
     void LocalMap::MapSegment::createFogOfWarTexture()
@@ -768,13 +777,10 @@ namespace MWRender
 
     void CameraLocalUpdateCallback::operator()(LocalMapRenderToTexture* node, osg::NodeVisitor* nv)
     {
-        if (!node->isActive())
+        if (!node->mActive)
             node->setNodeMask(0);
 
-        if (node->isActive())
-        {
-            node->setIsActive(false);
-        }
+        node->mActive = false;
 
         // Rtt-nodes do not forward update traversal to their cameras so we can traverse safely.
         // Traverse in case there are nested callbacks.

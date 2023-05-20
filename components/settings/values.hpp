@@ -26,54 +26,68 @@
 #include "categories/video.hpp"
 #include "categories/water.hpp"
 #include "categories/windows.hpp"
+#include "settingvalue.hpp"
 
 #include <cassert>
+#include <string_view>
 
 namespace Settings
 {
-    class Values
+    struct Values : WithIndex
+    {
+        using WithIndex::WithIndex;
+
+        CameraCategory mCamera{ mIndex };
+        CellsCategory mCells{ mIndex };
+        TerrainCategory mTerrain{ mIndex };
+        FogCategory mFog{ mIndex };
+        MapCategory mMap{ mIndex };
+        GUICategory mGUI{ mIndex };
+        HUDCategory mHUD{ mIndex };
+        GameCategory mGame{ mIndex };
+        GeneralCategory mGeneral{ mIndex };
+        ShadersCategory mShaders{ mIndex };
+        InputCategory mInput{ mIndex };
+        SavesCategory mSaves{ mIndex };
+        SoundCategory mSound{ mIndex };
+        VideoCategory mVideo{ mIndex };
+        WaterCategory mWater{ mIndex };
+        WindowsCategory mWindows{ mIndex };
+        NavigatorCategory mNavigator{ mIndex };
+        ShadowsCategory mShadows{ mIndex };
+        PhysicsCategory mPhysics{ mIndex };
+        ModelsCategory mModels{ mIndex };
+        GroundcoverCategory mGroundcover{ mIndex };
+        LuaCategory mLua{ mIndex };
+        StereoCategory mStereo{ mIndex };
+        StereoViewCategory mStereoView{ mIndex };
+        PostProcessingCategory mPostProcessing{ mIndex };
+    };
+
+    class StaticValues
     {
     public:
-        CameraCategory mCamera;
-        CellsCategory mCells;
-        TerrainCategory mTerrain;
-        FogCategory mFog;
-        MapCategory mMap;
-        GUICategory mGUI;
-        HUDCategory mHUD;
-        GameCategory mGame;
-        GeneralCategory mGeneral;
-        ShadersCategory mShaders;
-        InputCategory mInput;
-        SavesCategory mSaves;
-        SoundCategory mSound;
-        VideoCategory mVideo;
-        WaterCategory mWater;
-        WindowsCategory mWindows;
-        NavigatorCategory mNavigator;
-        ShadowsCategory mShadows;
-        PhysicsCategory mPhysics;
-        ModelsCategory mModels;
-        GroundcoverCategory mGroundcover;
-        LuaCategory mLua;
-        StereoCategory mStereo;
-        StereoViewCategory mStereoView;
-        PostProcessingCategory mPostProcessing;
-
         static void initDefaults();
 
         static void init();
 
     private:
+        static Index* sIndex;
         static Values* sValues;
 
         friend Values& values();
+
+        template <class T>
+        friend SettingValue<T>* find(std::string_view category, std::string_view name);
+
+        template <class T>
+        friend SettingValue<T>& get(std::string_view category, std::string_view name);
     };
 
     inline Values& values()
     {
-        assert(Values::sValues != nullptr);
-        return *Values::sValues;
+        assert(StaticValues::sValues != nullptr);
+        return *StaticValues::sValues;
     }
 
     inline CameraCategory& camera()
@@ -199,6 +213,18 @@ namespace Settings
     inline PostProcessingCategory& postProcessing()
     {
         return values().mPostProcessing;
+    }
+
+    template <class T>
+    SettingValue<T>* find(std::string_view category, std::string_view name)
+    {
+        return StaticValues::sIndex->find<T>(category, name);
+    }
+
+    template <class T>
+    SettingValue<T>& get(std::string_view category, std::string_view name)
+    {
+        return StaticValues::sIndex->get<T>(category, name);
     }
 }
 

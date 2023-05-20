@@ -3,11 +3,13 @@
 #include <components/bullethelpers/aabb.hpp>
 #include <components/debug/debugging.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/detournavigator/debug.hpp>
 #include <components/detournavigator/gettilespositions.hpp>
 #include <components/detournavigator/objectid.hpp>
 #include <components/detournavigator/recastmesh.hpp>
 #include <components/detournavigator/settings.hpp>
 #include <components/detournavigator/tilecachedrecastmeshmanager.hpp>
+#include <components/esm/refid.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/loadcell.hpp>
@@ -17,6 +19,7 @@
 #include <components/esmloader/lessbyid.hpp>
 #include <components/esmloader/record.hpp>
 #include <components/misc/resourcehelpers.hpp>
+#include <components/misc/strings/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/navmeshtool/protocol.hpp>
 #include <components/resource/bulletshapemanager.hpp>
@@ -29,14 +32,15 @@
 #include <osg/ref_ptr>
 
 #include <algorithm>
-#include <components/esm/refid.hpp>
 #include <memory>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <tuple>
 #include <utility>
 #include <vector>
+
 namespace NavMeshTool
 {
     namespace
@@ -225,6 +229,16 @@ namespace NavMeshTool
             const std::vector<std::byte> data = serialize(value);
             getRawStderr().write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
         }
+
+        std::string makeAddObjectErrorMessage(
+            ObjectId objectId, DetourNavigator::AreaType areaType, const CollisionShape& shape)
+        {
+            std::ostringstream stream;
+            stream << "Failed to add object to recast mesh objectId=" << objectId.value() << " areaType=" << areaType
+                   << " fileName=" << shape.getInstance()->mFileName
+                   << " fileHash=" << Misc::StringUtils::toHex(shape.getInstance()->mFileHash);
+            return stream.str();
+        }
     }
 
     WorldspaceNavMeshInput::WorldspaceNavMeshInput(
@@ -271,8 +285,7 @@ namespace NavMeshTool
             const osg::Vec2i cellPosition(cell.mData.mX, cell.mData.mY);
             const std::size_t cellObjectsBegin = data.mObjects.size();
             const auto cellWorldspace = Misc::StringUtils::lowerCase(
-                (cell.isExterior() ? ESM::RefId::stringRefId(ESM::Cell::sDefaultWorldspace) : cell.mId)
-                    .serializeText());
+                (cell.isExterior() ? ESM::Cell::sDefaultWorldspaceId : cell.mId).serializeText());
             WorldspaceNavMeshInput& navMeshInput = [&]() -> WorldspaceNavMeshInput& {
                 auto it = navMeshInputs.find(cellWorldspace);
                 if (it == navMeshInputs.end())
@@ -325,14 +338,19 @@ namespace NavMeshTool
                 const CollisionShape shape(object.getShapeInstance(), *object.getCollisionObject().getCollisionShape(),
                     object.getObjectTransform());
 
-                navMeshInput.mTileCachedRecastMeshManager.addObject(
-                    objectId, shape, transform, DetourNavigator::AreaType_ground, guard.get());
+                if (!navMeshInput.mTileCachedRecastMeshManager.addObject(
+                        objectId, shape, transform, DetourNavigator::AreaType_ground, guard.get()))
+                    throw std::logic_error(
+                        makeAddObjectErrorMessage(objectId, DetourNavigator::AreaType_ground, shape));
 
                 if (const btCollisionShape* avoid = object.getShapeInstance()->mAvoidCollisionShape.get())
                 {
+                    const ObjectId avoidObjectId(++objectsCounter);
                     const CollisionShape avoidShape(object.getShapeInstance(), *avoid, object.getObjectTransform());
-                    navMeshInput.mTileCachedRecastMeshManager.addObject(
-                        objectId, avoidShape, transform, DetourNavigator::AreaType_null, guard.get());
+                    if (!navMeshInput.mTileCachedRecastMeshManager.addObject(
+                            avoidObjectId, avoidShape, transform, DetourNavigator::AreaType_null, guard.get()))
+                        throw std::logic_error(
+                            makeAddObjectErrorMessage(avoidObjectId, DetourNavigator::AreaType_null, avoidShape));
                 }
 
                 data.mObjects.emplace_back(std::move(object));

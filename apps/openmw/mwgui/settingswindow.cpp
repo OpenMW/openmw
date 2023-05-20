@@ -171,10 +171,9 @@ namespace MWGui
             std::string type = getSettingType(current);
             if (type == checkButtonType)
             {
-                std::string initialValue
-                    = Settings::Manager::getBool(getSettingName(current), getSettingCategory(current))
-                    ? "#{Interface:On}"
-                    : "#{Interface:Off}";
+                const std::string initialValue
+                    = Settings::get<bool>(getSettingCategory(current), getSettingName(current)) ? "#{Interface:On}"
+                                                                                                : "#{Interface:Off}";
                 current->castType<MyGUI::Button>()->setCaptionWithReplacing(initialValue);
                 if (init)
                     current->eventMouseButtonClick += MyGUI::newDelegate(this, &SettingsWindow::onButtonToggled);
@@ -189,22 +188,28 @@ namespace MWGui
                     // TODO: ScrollBar isn't meant for this. should probably use a dedicated FloatSlider widget
                     float min, max;
                     getSettingMinMax(scroll, min, max);
-                    float value = Settings::Manager::getFloat(getSettingName(current), getSettingCategory(current));
+                    float value;
 
                     if (valueType == "Cell")
                     {
+                        value = Settings::get<float>(getSettingCategory(current), getSettingName(current));
                         std::stringstream ss;
                         ss << std::fixed << std::setprecision(2) << value / Constants::CellSizeInUnits;
                         valueStr = ss.str();
                     }
                     else if (valueType == "Float")
                     {
+                        value = Settings::get<float>(getSettingCategory(current), getSettingName(current));
                         std::stringstream ss;
                         ss << std::fixed << std::setprecision(2) << value;
                         valueStr = ss.str();
                     }
                     else
-                        valueStr = MyGUI::utility::toString(int(value));
+                    {
+                        const int intValue = Settings::get<int>(getSettingCategory(current), getSettingName(current));
+                        valueStr = MyGUI::utility::toString(intValue);
+                        value = static_cast<float>(intValue);
+                    }
 
                     value = std::clamp(value, min, max);
                     value = (value - min) / (max - min);
@@ -213,7 +218,7 @@ namespace MWGui
                 }
                 else
                 {
-                    int value = Settings::Manager::getInt(getSettingName(current), getSettingCategory(current));
+                    const int value = Settings::get<int>(getSettingCategory(current), getSettingName(current));
                     valueStr = MyGUI::utility::toString(value);
                     scroll->setScrollPosition(value);
                 }
@@ -673,7 +678,7 @@ namespace MWGui
 
         if (getSettingType(_sender) == checkButtonType)
         {
-            Settings::Manager::setBool(getSettingName(_sender), getSettingCategory(_sender), newState);
+            Settings::get<bool>(getSettingCategory(_sender), getSettingName(_sender)).set(newState);
             apply();
             return;
         }
@@ -710,9 +715,10 @@ namespace MWGui
                 getSettingMinMax(scroller, min, max);
                 value = min + (max - min) * value;
                 if (valueType == "Float")
-                    Settings::Manager::setFloat(getSettingName(scroller), getSettingCategory(scroller), value);
+                    Settings::get<float>(getSettingCategory(scroller), getSettingName(scroller)).set(value);
                 else
-                    Settings::Manager::setInt(getSettingName(scroller), getSettingCategory(scroller), (int)value);
+                    Settings::get<int>(getSettingCategory(scroller), getSettingName(scroller))
+                        .set(static_cast<int>(value));
 
                 if (valueType == "Cell")
                 {
@@ -731,7 +737,7 @@ namespace MWGui
             }
             else
             {
-                Settings::Manager::setInt(getSettingName(scroller), getSettingCategory(scroller), pos);
+                Settings::get<int>(getSettingCategory(scroller), getSettingName(scroller)).set(pos);
                 valueStr = MyGUI::utility::toString(pos);
             }
             updateSliderLabel(scroller, valueStr);

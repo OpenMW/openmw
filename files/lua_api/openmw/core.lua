@@ -177,7 +177,13 @@
 -- @param #any cellOrName A cell to define the destination worldspace; can be either #Cell, or cell name, or an empty string (empty string means the default exterior worldspace).
 -- If the worldspace has multiple cells (i.e. an exterior), the destination cell is calculated using `position`.
 -- @param openmw.util#Vector3 position New position.
--- @param openmw.util#Vector3 rotation (optional) New rotation. If missing, then the current rotation is used.
+-- @param #TeleportOptions options (optional) Either table @{#TeleportOptions} or @{openmw.util#Vector3} rotation.
+
+---
+-- Either table with options or @{openmw.util#Vector3} rotation.
+-- @type TeleportOptions
+-- @field openmw.util#Vector3 rotation New rotation; if missing, then the current rotation is used.
+-- @field #boolean onGround If true, adjust destination position to the ground.
 
 ---
 -- Moves object into a container or an inventory. Enables if was disabled.
@@ -203,6 +209,11 @@
 -- @usage -- take 50 coins from `money` and put to the container `cont`
 -- money:split(50):moveInto(types.Container.content(cont))
 
+---
+-- The axis aligned bounding box in local coordinates.
+-- @function [parent=#GameObject] getBoundingBox
+-- @param self
+-- @return openmw.util#Box
 
 ---
 -- List of GameObjects. Implements [iterables#List](iterables.html#List) of #GameObject
@@ -219,6 +230,7 @@
 -- @field #boolean isQuasiExterior (DEPRECATED, use `hasTag("QuasiExterior")`) Whether the cell is a quasi exterior (like interior but with the sky and the wheather).
 -- @field #number gridX Index of the cell by X (only for exteriors).
 -- @field #number gridY Index of the cell by Y (only for exteriors).
+-- @field #string worldSpaceId Id of the world space.
 -- @field #boolean hasWater True if the cell contains water.
 -- @field #boolean hasSky True if in this cell sky should be rendered.
 

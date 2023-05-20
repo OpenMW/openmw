@@ -18,7 +18,7 @@ lineofsight keep inactive cache
 :Range:		>= -1
 :Default:	0
 
-The line of sight determines if 2 actors can see each other (without taking into account game mechanics such as invisibility or sneaking). It is used by some scripts (the getLOS function), by the AI (to determine if an actor should start combat or chase an opponent) and for functionnalities such as greetings or turning NPC head toward an object.
+The line of sight determines if 2 actors can see each other (without taking into account game mechanics such as invisibility or sneaking). It is used by some scripts (the getLOS function), by the AI (to determine if an actor should start combat or chase an opponent) and for functionalities such as greetings or turning NPC head toward an object.
 This parameters determine for how long a cache of request should be kept warm.
 A value of 0 means that the cache is kept only for the current frame, that is if a request is done 2 times in the same frame, the second request will be in cache.
 Any value > 0 is the number of frames for which the values are kept in cache even if the results was not requested again.

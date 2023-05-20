@@ -119,7 +119,7 @@ namespace Nif
             readRecordList(nif, effects);
 
         // FIXME: stopgap solution until we figure out what Oblivion does if it does anything
-        if (nif->getVersion() > NIFFile::NIFVersion::VER_MW)
+        if (nif->getVersion() > NIFFile::NIFVersion::VER_MW && nif->getVersion() < NIFFile::NIFVersion::VER_BGS)
             return;
 
         // Discard transformations for the root node, otherwise some meshes

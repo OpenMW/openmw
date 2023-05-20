@@ -14,6 +14,7 @@
 #include <components/misc/algorithm.hpp>
 
 #include <components/esm4/common.hpp>
+#include <components/esm4/loadwrld.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/esm4/readerutils.hpp>
 #include <components/esmloader/load.hpp>
@@ -446,6 +447,7 @@ namespace MWWorld
         getWritable<ESM::Skill>().setUp();
         getWritable<ESM::MagicEffect>().setUp();
         getWritable<ESM::Attribute>().setUp();
+        getWritable<ESM4::Reference>().preprocessReferences(get<ESM4::Cell>());
     }
 
     void ESMStore::validateRecords(ESM::ReadersCache& readers)

@@ -45,9 +45,12 @@ namespace ESM4
         std::string mEditorId;
         std::string mCollision;
         std::string mEvent;
+        std::string mModel;
 
         FormId mParent; // IDLE or AACT
         FormId mPrevious;
+
+        float mBoundRadius;
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;

@@ -161,7 +161,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM4::SUB_WNAM:
             {
                 if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
-                    reader.get(mWornArmor);
+                    reader.getFormId(mWornArmor);
                 else
                     reader.get(mFootWeight);
                 break;
@@ -192,7 +192,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_TPLT:
-                reader.get(mBaseTemplate);
+                reader.getFormId(mBaseTemplate);
                 break;
             case ESM4::SUB_FGGS:
             {

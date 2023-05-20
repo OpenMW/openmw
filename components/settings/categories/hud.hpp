@@ -14,9 +14,11 @@
 
 namespace Settings
 {
-    struct HUDCategory
+    struct HUDCategory : WithIndex
     {
-        SettingValue<bool> mCrosshair{ "HUD", "crosshair" };
+        using WithIndex::WithIndex;
+
+        SettingValue<bool> mCrosshair{ mIndex, "HUD", "crosshair" };
     };
 }
 

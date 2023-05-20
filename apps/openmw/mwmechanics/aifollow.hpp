@@ -46,7 +46,7 @@ namespace MWMechanics
         /// Follow Actor for duration or until you arrive at a position in a cell
         AiFollow(
             const ESM::RefId& actorId, std::string_view cellId, float duration, float x, float y, float z, bool repeat);
-        /// Follow Actor indefinitively
+        /// Follow Actor indefinitely
         AiFollow(const MWWorld::Ptr& actor, bool commanded = false);
 
         AiFollow(const ESM::AiSequence::AiFollow* follow);

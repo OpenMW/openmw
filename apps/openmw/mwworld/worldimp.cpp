@@ -95,7 +95,6 @@
 #include "projectilemanager.hpp"
 #include "weather.hpp"
 
-#include "cellutils.hpp"
 #include "contentloader.hpp"
 #include "esmloader.hpp"
 
@@ -353,9 +352,10 @@ namespace MWWorld
         if (bypass && !mStartCell.empty())
         {
             ESM::Position pos;
-            if (!findExteriorPosition(mStartCell, pos).empty())
+            ESM::RefId cellId = findExteriorPosition(mStartCell, pos);
+            if (!cellId.empty())
             {
-                changeToExteriorCell(pos, true);
+                changeToCell(cellId, pos, true);
                 adjustPosition(getPlayerPtr(), false);
             }
             else
@@ -379,8 +379,8 @@ namespace MWWorld
                 pos.rot[1] = 0;
                 pos.rot[2] = 0;
 
-                osg::Vec2i exteriorCellPos = positionToCellIndex(pos.pos[0], pos.pos[1]);
-                ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.x(), exteriorCellPos.y());
+                ESM::ExteriorCellLocation exteriorCellPos = ESM::positionToCellIndex(pos.pos[0], pos.pos[1]);
+                ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.mX, exteriorCellPos.mY);
                 mWorldScene->changeToExteriorCell(cellId, pos, true);
             }
         }
@@ -967,25 +967,6 @@ namespace MWWorld
         mRendering->getCamera()->instantTransition();
     }
 
-    void World::changeToExteriorCell(const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
-    {
-        mPhysics->clearQueuedMovement();
-        mDiscardMovements = true;
-
-        if (changeEvent && mCurrentWorldSpace != ESM::Cell::sDefaultWorldspace)
-        {
-            // changed worldspace
-            mProjectileManager->clear();
-            mRendering->notifyWorldSpaceChanged();
-        }
-        removeContainerScripts(getPlayerPtr());
-        osg::Vec2i exteriorCellPos = positionToCellIndex(position.pos[0], position.pos[1]);
-        ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.x(), exteriorCellPos.y());
-        mWorldScene->changeToExteriorCell(cellId, position, adjustPlayerPos, changeEvent);
-        addContainerScripts(getPlayerPtr(), getPlayerPtr().getCell());
-        mRendering->getCamera()->instantTransition();
-    }
-
     void World::changeToCell(
         const ESM::RefId& cellId, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent)
     {
@@ -1263,15 +1244,17 @@ namespace MWWorld
 
     MWWorld::Ptr World::moveObject(const Ptr& ptr, const osg::Vec3f& position, bool movePhysics, bool moveToActive)
     {
-        const osg::Vec2i index = positionToCellIndex(position.x(), position.y());
-
         CellStore* cell = ptr.getCell();
-        CellStore& newCell = mWorldModel.getExterior(index.x(), index.y());
-        bool isCellActive
-            = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior() && mWorldScene->isCellActive(newCell);
+        ESM::RefId worldspaceId
+            = cell->isExterior() ? cell->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
+        const ESM::ExteriorCellLocation index = ESM::positionToCellIndex(position.x(), position.y(), worldspaceId);
+
+        CellStore* newCell = cell->isExterior() ? &mWorldModel.getExterior(index) : nullptr;
+        bool isCellActive = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior()
+            && (newCell && mWorldScene->isCellActive(*newCell));
 
         if (cell->isExterior() || (moveToActive && isCellActive && ptr.getClass().isActor()))
-            cell = &newCell;
+            cell = newCell;
 
         return moveObject(ptr, cell, position, movePhysics);
     }
@@ -1378,17 +1361,17 @@ namespace MWWorld
             return;
         }
 
-        const float terrainHeight
-            = ptr.getCell()->isExterior() ? getTerrainHeightAt(pos) : -std::numeric_limits<float>::max();
-        pos.z() = std::max(pos.z(), terrainHeight)
-            + 20; // place slightly above terrain. will snap down to ground with code below
+        if (ptr.getCell()->isExterior() && !ptr.getCell()->getCell()->isEsm4())
+            pos.z() = std::max(pos.z(), getTerrainHeightAt(pos));
+        pos.z() += 20; // place slightly above terrain. will snap down to ground with code below
 
         // We still should trace down dead persistent actors - they do not use the "swimdeath" animation.
         bool swims = ptr.getClass().isActor() && isSwimming(ptr)
             && !(ptr.getClass().isPersistent(ptr) && ptr.getClass().getCreatureStats(ptr).isDeathAnimationFinished());
         if (force || !ptr.getClass().isActor() || (!isFlying(ptr) && !swims && isActorCollisionEnabled(ptr)))
         {
-            osg::Vec3f traced = mPhysics->traceDown(ptr, pos, Constants::CellSizeInUnits);
+            osg::Vec3f traced
+                = mPhysics->traceDown(ptr, pos, ESM::getCellSize(ptr.getCell()->getCell()->getWorldSpace()));
             pos.z() = std::min(pos.z(), traced.z());
         }
 
@@ -1423,9 +1406,9 @@ namespace MWWorld
             if (!mPhysics->castRay(pos, targetPos, MWPhysics::CollisionType_World | MWPhysics::CollisionType_Door).mHit)
                 break;
         }
-
         targetPos.z() += distance / 2.f; // move up a bit to get out from geometry, will snap down later
-        osg::Vec3f traced = mPhysics->traceDown(actor, targetPos, Constants::CellSizeInUnits);
+        osg::Vec3f traced
+            = mPhysics->traceDown(actor, targetPos, ESM::getCellSize(actor.getCell()->getCell()->getWorldSpace()));
         if (traced != pos)
         {
             esmPos.pos[0] = traced.x();
@@ -1507,20 +1490,6 @@ namespace MWWorld
         MWWorld::Ptr placed = copyObjectToCell(ptr, referenceCell, ipos, ptr.getRefData().getCount(), false);
         adjustPosition(placed, true); // snap to ground
         return placed;
-    }
-
-    void World::indexToPosition(int cellX, int cellY, float& x, float& y, bool centre) const
-    {
-        const int cellSize = Constants::CellSizeInUnits;
-
-        x = static_cast<float>(cellSize * cellX);
-        y = static_cast<float>(cellSize * cellY);
-
-        if (centre)
-        {
-            x += cellSize / 2;
-            y += cellSize / 2;
-        }
     }
 
     void World::queueMovement(const Ptr& ptr, const osg::Vec3f& velocity)
@@ -1880,14 +1849,7 @@ namespace MWWorld
 
         facedObject = rayToObject.mHitObject;
         if (facedObject.isEmpty() && rayToObject.mHitRefnum.isSet())
-        {
-            for (CellStore* cellstore : mWorldScene->getActiveCells())
-            {
-                facedObject = cellstore->searchViaRefNum(rayToObject.mHitRefnum);
-                if (!facedObject.isEmpty())
-                    break;
-            }
-        }
+            facedObject = MWBase::Environment::get().getWorldModel()->getPtr(rayToObject.mHitRefnum);
         if (rayToObject.mHit)
             mDistanceToFacedObject = (rayToObject.mRatio * maxDistance) - camDist;
         else
@@ -1904,14 +1866,7 @@ namespace MWWorld
         res.mHitNormal = rayRes.mHitNormalWorld;
         res.mHitObject = rayRes.mHitObject;
         if (res.mHitObject.isEmpty() && rayRes.mHitRefnum.isSet())
-        {
-            for (CellStore* cellstore : mWorldScene->getActiveCells())
-            {
-                res.mHitObject = cellstore->searchViaRefNum(rayRes.mHitRefnum);
-                if (!res.mHitObject.isEmpty())
-                    break;
-            }
-        }
+            res.mHitObject = MWBase::Environment::get().getWorldModel()->getPtr(rayRes.mHitRefnum);
         return res.mHit;
     }
 
@@ -1933,6 +1888,14 @@ namespace MWWorld
             return currentCell->getCell()->isQuasiExterior();
         }
         return false;
+    }
+
+    ESM::RefId World::getCurrentWorldspace() const
+    {
+        const CellStore* cellStore = mWorldScene->getCurrentCell();
+        if (cellStore)
+            return cellStore->getCell()->getWorldSpace();
+        return ESM::Cell::sDefaultWorldspaceId;
     }
 
     int World::getCurrentWeather() const
@@ -2082,8 +2045,9 @@ namespace MWWorld
             throw std::runtime_error("copyObjectToCell(): cannot copy object to null cell");
         if (cell->isExterior())
         {
-            const osg::Vec2i index = positionToCellIndex(pos.pos[0], pos.pos[1]);
-            cell = &mWorldModel.getExterior(index.x(), index.y());
+            const ESM::ExteriorCellLocation index
+                = ESM::positionToCellIndex(pos.pos[0], pos.pos[1], cell->getCell()->getWorldSpace());
+            cell = &mWorldModel.getExterior(index);
         }
 
         MWWorld::Ptr dropped = object.getClass().copyToCell(object, *cell, pos, count);
@@ -2767,7 +2731,8 @@ namespace MWWorld
                 if (xResult.ec == std::errc::result_out_of_range || yResult.ec == std::errc::result_out_of_range)
                     throw std::runtime_error("Cell coordinates out of range.");
                 else if (xResult.ec == std::errc{} && yResult.ec == std::errc{})
-                    ext = mWorldModel.getExterior(x, y).getCell();
+                    ext = mWorldModel.getExterior(ESM::ExteriorCellLocation(x, y, ESM::Cell::sDefaultWorldspaceId))
+                              .getCell();
                 // ignore std::errc::invalid_argument, as this means that name probably refers to a interior cell
                 // instead of comma separated coordinates
             }
@@ -2777,7 +2742,9 @@ namespace MWWorld
         {
             int x = ext->getGridX();
             int y = ext->getGridY();
-            indexToPosition(x, y, pos.pos[0], pos.pos[1], true);
+            osg::Vec2 posFromIndex = indexToPosition(ESM::ExteriorCellLocation(x, y, ext->getWorldSpace()), true);
+            pos.pos[0] = posFromIndex.x();
+            pos.pos[1] = posFromIndex.y();
 
             // Note: Z pos will be adjusted by adjustPosition later
             pos.pos[2] = 0;

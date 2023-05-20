@@ -107,7 +107,7 @@ debug chunks
 :Range:		True/False
 :Default:	False
 
-This debug setting allows you to see the borders of each chunks of the world by drawing lines arround them (as with toggleborder). 
+This debug setting allows you to see the borders of each chunks of the world by drawing lines around them (as with toggleborder). 
 If object paging is set to true then this debug setting will allows you to see what objects have been merged in the scene
 by making them colored randomly.
 
@@ -159,7 +159,7 @@ object paging merge factor
 :Range:		>0
 :Default:	250.0
 
-Affects the likelyhood of more complex objects to get paged.
+Affects the likelihood of more complex objects to get paged.
 Higher values improve visual fidelity at the cost of performance and RAM.
 
 Technically this factor is a multiplier of merging benefit and affects the decision

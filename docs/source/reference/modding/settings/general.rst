@@ -76,7 +76,7 @@ preferred locales
 :Default:	en
 
 List of the preferred locales separated by comma.
-For example "de,en" means German as the first prority and English as a fallback.
+For example "de,en" means German as the first priority and English as a fallback.
 
 Each locale must consist of a two-letter language code (e.g. "de" or "en") and
 can also optionally include a two-letter country code (e.g. "en_US", "fr_CA").
