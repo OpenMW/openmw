@@ -285,6 +285,7 @@ namespace MWWorld
         // NOTE: does not account for moved references
         // Should be phased out when we have const version of forEach
         inline const CellRefList<ESM::Door>& getReadOnlyDoors() const { return get<ESM::Door>(); }
+        inline const CellRefList<ESM4::Door>& getReadOnlyEsm4Doors() const { return get<ESM4::Door>(); }
         inline const CellRefList<ESM::Static>& getReadOnlyStatics() const { return get<ESM::Static>(); }
         inline const CellRefList<ESM4::Static>& getReadOnlyEsm4Statics() const { return get<ESM4::Static>(); }
 
