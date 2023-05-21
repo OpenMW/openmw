@@ -472,7 +472,7 @@ namespace MWGui
 
     void SettingsWindow::onResolutionAccept()
     {
-        std::string resStr = mResolutionList->getItemNameAt(mResolutionList->getIndexSelected());
+        const std::string& resStr = mResolutionList->getItemNameAt(mResolutionList->getIndexSelected());
         int resX, resY;
         parseResolution(resX, resY, resStr);
 
@@ -844,7 +844,7 @@ namespace MWGui
             // check if this resolution is supported in fullscreen
             if (mResolutionList->getIndexSelected() != MyGUI::ITEM_NONE)
             {
-                std::string resStr = mResolutionList->getItemNameAt(mResolutionList->getIndexSelected());
+                const std::string& resStr = mResolutionList->getItemNameAt(mResolutionList->getIndexSelected());
                 int resX, resY;
                 parseResolution(resX, resY, resStr);
                 Settings::Manager::setInt("resolution x", "Video", resX);
@@ -853,9 +853,9 @@ namespace MWGui
 
             bool supported = false;
             int fallbackX = 0, fallbackY = 0;
-            for (unsigned int i = 0; i < mResolutionList->getItemCount(); ++i)
+            for (size_t i = 0; i < mResolutionList->getItemCount(); ++i)
             {
-                std::string resStr = mResolutionList->getItemNameAt(i);
+                const std::string& resStr = mResolutionList->getItemNameAt(i);
                 int resX, resY;
                 parseResolution(resX, resY, resStr);
 

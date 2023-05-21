@@ -779,7 +779,7 @@ namespace MWGui
         if (selected != -1)
             lastId = model.getItem(selected).mBase.getCellRef().getRefId();
         ItemModel::ModelIndex cycled = selected;
-        for (unsigned int i = 0; i < model.getItemCount(); ++i)
+        for (size_t i = 0; i < model.getItemCount(); ++i)
         {
             cycled += incr;
             cycled = (cycled + model.getItemCount()) % model.getItemCount();

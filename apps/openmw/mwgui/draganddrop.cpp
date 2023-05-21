@@ -47,7 +47,7 @@ namespace MWGui
             playerModel->update();
 
             ItemModel::ModelIndex newIndex = -1;
-            for (unsigned int i = 0; i < playerModel->getItemCount(); ++i)
+            for (size_t i = 0; i < playerModel->getItemCount(); ++i)
             {
                 if (playerModel->getItem(i).mBase == item)
                 {

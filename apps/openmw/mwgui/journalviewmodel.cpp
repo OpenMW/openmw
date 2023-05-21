@@ -116,10 +116,10 @@ namespace MWGui
                             std::string link = utf8text.substr(pos_begin + 1, pos_end - pos_begin - 1);
                             const char specialPseudoAsteriskCharacter = 127;
                             std::replace(link.begin(), link.end(), specialPseudoAsteriskCharacter, '*');
-                            std::string topicName = MWBase::Environment::get()
-                                                        .getWindowManager()
-                                                        ->getTranslationDataStorage()
-                                                        .topicStandardForm(link);
+                            std::string_view topicName = MWBase::Environment::get()
+                                                             .getWindowManager()
+                                                             ->getTranslationDataStorage()
+                                                             .topicStandardForm(link);
 
                             std::string displayName = link;
                             while (displayName[displayName.size() - 1] == '*')

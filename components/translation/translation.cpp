@@ -9,7 +9,7 @@ namespace Translation
     {
     }
 
-    void Storage::loadTranslationData(const Files::Collections& dataFileCollections, const std::string& esmFileName)
+    void Storage::loadTranslationData(const Files::Collections& dataFileCollections, std::string_view esmFileName)
     {
         std::string esmNameNoExtension(Misc::StringUtils::lowerCase(esmFileName));
         // changing the extension
@@ -64,9 +64,9 @@ namespace Translation
         }
     }
 
-    std::string Storage::translateCellName(const std::string& cellName) const
+    std::string_view Storage::translateCellName(std::string_view cellName) const
     {
-        std::map<std::string, std::string>::const_iterator entry = mCellNamesTranslations.find(cellName);
+        auto entry = mCellNamesTranslations.find(cellName);
 
         if (entry == mCellNamesTranslations.end())
             return cellName;
@@ -74,12 +74,12 @@ namespace Translation
         return entry->second;
     }
 
-    std::string Storage::topicID(const std::string& phrase) const
+    std::string_view Storage::topicID(std::string_view phrase) const
     {
-        std::string result = topicStandardForm(phrase);
+        std::string_view result = topicStandardForm(phrase);
 
         // seeking for the topic ID
-        std::map<std::string, std::string>::const_iterator topicIDIterator = mTopicIDs.find(result);
+        auto topicIDIterator = mTopicIDs.find(result);
 
         if (topicIDIterator != mTopicIDs.end())
             result = topicIDIterator->second;
@@ -87,9 +87,9 @@ namespace Translation
         return result;
     }
 
-    std::string Storage::topicStandardForm(const std::string& phrase) const
+    std::string_view Storage::topicStandardForm(std::string_view phrase) const
     {
-        std::map<std::string, std::string>::const_iterator phraseFormsIterator = mPhraseForms.find(phrase);
+        auto phraseFormsIterator = mPhraseForms.find(phrase);
 
         if (phraseFormsIterator != mPhraseForms.end())
             return phraseFormsIterator->second;

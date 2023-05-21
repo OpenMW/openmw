@@ -162,7 +162,7 @@ namespace MWGui
 
                 // match model against line
                 // if don't match, then major change has happened, so do a full update
-                if (mModel->getItemCount() <= static_cast<unsigned>(spellIndex))
+                if (mModel->getItemCount() <= static_cast<size_t>(spellIndex))
                 {
                     fullUpdateRequired = true;
                     break;

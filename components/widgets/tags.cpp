@@ -7,17 +7,16 @@
 namespace Gui
 {
 
-    bool replaceTag(const MyGUI::UString& tag, MyGUI::UString& out)
+    bool replaceTag(std::string_view tag, MyGUI::UString& out)
     {
-        std::string fontcolour = "fontcolour=";
-        size_t fontcolourLength = fontcolour.length();
+        std::string_view fontcolour = "fontcolour=";
 
-        std::string fontcolourhtml = "fontcolourhtml=";
-        size_t fontcolourhtmlLength = fontcolourhtml.length();
+        std::string_view fontcolourhtml = "fontcolourhtml=";
 
-        if (tag.compare(0, fontcolourLength, fontcolour) == 0)
+        if (tag.starts_with(fontcolour))
         {
-            std::string fallbackName = "FontColor_color_" + tag.substr(fontcolourLength);
+            std::string fallbackName = "FontColor_color_";
+            fallbackName += tag.substr(fontcolour.length());
             std::string_view str = Fallback::Map::getString(fallbackName);
             if (str.empty())
                 throw std::runtime_error("Unknown fallback name: " + fallbackName);
@@ -36,9 +35,10 @@ namespace Gui
             out = col.print();
             return true;
         }
-        else if (tag.compare(0, fontcolourhtmlLength, fontcolourhtml) == 0)
+        else if (tag.starts_with(fontcolourhtml))
         {
-            std::string fallbackName = "FontColor_color_" + tag.substr(fontcolourhtmlLength);
+            std::string fallbackName = "FontColor_color_";
+            fallbackName += tag.substr(fontcolourhtml.length());
             std::string_view str = Fallback::Map::getString(fallbackName);
             if (str.empty())
                 throw std::runtime_error("Unknown fallback name: " + fallbackName);
