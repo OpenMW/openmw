@@ -686,7 +686,8 @@ namespace ESM4
                 {
                     char ch;
                     stream.read(&ch, 1); // read the null terminator
-                    assert(ch == '\0' && "ESM4::Reader::getString string is not terminated with a null");
+                    if (ch != '\0')
+                        throw std::runtime_error("ESM4::Reader::getString string is not terminated with a null");
                 }
 #if 0
             else
