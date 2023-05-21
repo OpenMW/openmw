@@ -530,7 +530,7 @@ namespace ESM
         { MagicEffect::Charm, "Charm" },
         { MagicEffect::CommandCreature, "CommandCreature" },
         { MagicEffect::CommandHumanoid, "CommandHumanoid" },
-        { MagicEffect::Corprus, "Corprus" }, // NB this typo. (bethesda made it)
+        { MagicEffect::Corprus, "Corprus" },
         { MagicEffect::CureBlightDisease, "CureBlightDisease" },
         { MagicEffect::CureCommonDisease, "CureCommonDisease" },
         { MagicEffect::CureCorprusDisease, "CureCorprusDisease" },
