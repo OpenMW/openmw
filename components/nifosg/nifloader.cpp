@@ -2150,6 +2150,8 @@ namespace NifOsg
                             textureSet, texprop->clamp, node->getName(), stateset, imageManager, boundTextures);
                     }
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    if (texprop->doubleSided())
+                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
                     break;
                 }
                 case Nif::RC_BSShaderNoLightingProperty:
@@ -2190,6 +2192,8 @@ namespace NifOsg
                         stateset->addUniform(new osg::Uniform("useFalloff", false));
                     }
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    if (texprop->doubleSided())
+                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
                     break;
                 }
                 case Nif::RC_BSLightingShaderProperty:
@@ -2203,6 +2207,10 @@ namespace NifOsg
                         handleTextureSet(texprop->mTextureSet.getPtr(), texprop->mClamp, node->getName(), stateset,
                             imageManager, boundTextures);
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    if (texprop->doubleSided())
+                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+                    if (texprop->treeAnim())
+                        stateset->addUniform(new osg::Uniform("useTreeAnim", true));
                     break;
                 }
                 case Nif::RC_BSEffectShaderProperty:
@@ -2253,6 +2261,8 @@ namespace NifOsg
                     stateset->addUniform(new osg::Uniform("useFalloff", false)); // Should use the shader flag
                     stateset->addUniform(new osg::Uniform("falloffParams", texprop->mFalloffParams));
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    if (texprop->doubleSided())
+                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
                     break;
                 }
                 // unused by mw

@@ -138,6 +138,9 @@ namespace Nif
         unsigned int type{ 0u }, flags1{ 0u }, flags2{ 0u };
         float envMapIntensity{ 0.f };
         void read(NIFStream* nif) override;
+
+        bool doubleSided() const { return (flags2 >> 4) & 1; }
+        bool treeAnim() const { return (flags2 >> 29) & 1; }
     };
 
     struct BSShaderLightingProperty : public BSShaderProperty

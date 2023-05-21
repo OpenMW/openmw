@@ -38,6 +38,7 @@ uniform float far;
 uniform float alphaRef;
 uniform float emissiveMult;
 uniform float specStrength;
+uniform bool useTreeAnim;
 
 #include "lib/light/lighting.glsl"
 #include "lib/material/alpha.glsl"
@@ -58,7 +59,8 @@ void main()
 #endif
 
     vec4 diffuseColor = getDiffuseColor();
-    gl_FragData[0].a *= diffuseColor.a;
+    if (!useTreeAnim)
+        gl_FragData[0].a *= diffuseColor.a;
     gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
 
 #if @normalMap
