@@ -351,171 +351,307 @@ namespace ESM
             return -1;
     }
 
-    static std::map<short, std::string> genNameMap()
-    {
-        // Map effect ID to GMST name
-        // http://www.uesp.net/morrow/hints/mweffects.shtml
-        std::map<short, std::string> names;
-        names[85] = "sEffectAbsorbAttribute";
-        names[88] = "sEffectAbsorbFatigue";
-        names[86] = "sEffectAbsorbHealth";
-        names[87] = "sEffectAbsorbSpellPoints";
-        names[89] = "sEffectAbsorbSkill";
-        names[63] = "sEffectAlmsiviIntervention";
-        names[47] = "sEffectBlind";
-        names[123] = "sEffectBoundBattleAxe";
-        names[129] = "sEffectBoundBoots";
-        names[127] = "sEffectBoundCuirass";
-        names[120] = "sEffectBoundDagger";
-        names[131] = "sEffectBoundGloves";
-        names[128] = "sEffectBoundHelm";
-        names[125] = "sEffectBoundLongbow";
-        names[126] = "sEffectExtraSpell";
-        names[121] = "sEffectBoundLongsword";
-        names[122] = "sEffectBoundMace";
-        names[130] = "sEffectBoundShield";
-        names[124] = "sEffectBoundSpear";
-        names[7] = "sEffectBurden";
-        names[50] = "sEffectCalmCreature";
-        names[49] = "sEffectCalmHumanoid";
-        names[40] = "sEffectChameleon";
-        names[44] = "sEffectCharm";
-        names[118] = "sEffectCommandCreatures";
-        names[119] = "sEffectCommandHumanoids";
-        names[132] = "sEffectCorpus"; // NB this typo. (bethesda made it)
-        names[70] = "sEffectCureBlightDisease";
-        names[69] = "sEffectCureCommonDisease";
-        names[71] = "sEffectCureCorprusDisease";
-        names[73] = "sEffectCureParalyzation";
-        names[72] = "sEffectCurePoison";
-        names[22] = "sEffectDamageAttribute";
-        names[25] = "sEffectDamageFatigue";
-        names[23] = "sEffectDamageHealth";
-        names[24] = "sEffectDamageMagicka";
-        names[26] = "sEffectDamageSkill";
-        names[54] = "sEffectDemoralizeCreature";
-        names[53] = "sEffectDemoralizeHumanoid";
-        names[64] = "sEffectDetectAnimal";
-        names[65] = "sEffectDetectEnchantment";
-        names[66] = "sEffectDetectKey";
-        names[38] = "sEffectDisintegrateArmor";
-        names[37] = "sEffectDisintegrateWeapon";
-        names[57] = "sEffectDispel";
-        names[62] = "sEffectDivineIntervention";
-        names[17] = "sEffectDrainAttribute";
-        names[20] = "sEffectDrainFatigue";
-        names[18] = "sEffectDrainHealth";
-        names[19] = "sEffectDrainSpellpoints";
-        names[21] = "sEffectDrainSkill";
-        names[8] = "sEffectFeather";
-        names[14] = "sEffectFireDamage";
-        names[4] = "sEffectFireShield";
-        names[117] = "sEffectFortifyAttackBonus";
-        names[79] = "sEffectFortifyAttribute";
-        names[82] = "sEffectFortifyFatigue";
-        names[80] = "sEffectFortifyHealth";
-        names[81] = "sEffectFortifySpellpoints";
-        names[84] = "sEffectFortifyMagickaMultiplier";
-        names[83] = "sEffectFortifySkill";
-        names[52] = "sEffectFrenzyCreature";
-        names[51] = "sEffectFrenzyHumanoid";
-        names[16] = "sEffectFrostDamage";
-        names[6] = "sEffectFrostShield";
-        names[39] = "sEffectInvisibility";
-        names[9] = "sEffectJump";
-        names[10] = "sEffectLevitate";
-        names[41] = "sEffectLight";
-        names[5] = "sEffectLightningShield";
-        names[12] = "sEffectLock";
-        names[60] = "sEffectMark";
-        names[43] = "sEffectNightEye";
-        names[13] = "sEffectOpen";
-        names[45] = "sEffectParalyze";
-        names[27] = "sEffectPoison";
-        names[56] = "sEffectRallyCreature";
-        names[55] = "sEffectRallyHumanoid";
-        names[61] = "sEffectRecall";
-        names[68] = "sEffectReflect";
-        names[100] = "sEffectRemoveCurse";
-        names[95] = "sEffectResistBlightDisease";
-        names[94] = "sEffectResistCommonDisease";
-        names[96] = "sEffectResistCorprusDisease";
-        names[90] = "sEffectResistFire";
-        names[91] = "sEffectResistFrost";
-        names[93] = "sEffectResistMagicka";
-        names[98] = "sEffectResistNormalWeapons";
-        names[99] = "sEffectResistParalysis";
-        names[97] = "sEffectResistPoison";
-        names[92] = "sEffectResistShock";
-        names[74] = "sEffectRestoreAttribute";
-        names[77] = "sEffectRestoreFatigue";
-        names[75] = "sEffectRestoreHealth";
-        names[76] = "sEffectRestoreSpellPoints";
-        names[78] = "sEffectRestoreSkill";
-        names[42] = "sEffectSanctuary";
-        names[3] = "sEffectShield";
-        names[15] = "sEffectShockDamage";
-        names[46] = "sEffectSilence";
-        names[11] = "sEffectSlowFall";
-        names[58] = "sEffectSoultrap";
-        names[48] = "sEffectSound";
-        names[67] = "sEffectSpellAbsorption";
-        names[136] = "sEffectStuntedMagicka";
-        names[106] = "sEffectSummonAncestralGhost";
-        names[110] = "sEffectSummonBonelord";
-        names[108] = "sEffectSummonLeastBonewalker";
-        names[134] = "sEffectSummonCenturionSphere";
-        names[103] = "sEffectSummonClannfear";
-        names[104] = "sEffectSummonDaedroth";
-        names[105] = "sEffectSummonDremora";
-        names[114] = "sEffectSummonFlameAtronach";
-        names[115] = "sEffectSummonFrostAtronach";
-        names[113] = "sEffectSummonGoldenSaint";
-        names[109] = "sEffectSummonGreaterBonewalker";
-        names[112] = "sEffectSummonHunger";
-        names[102] = "sEffectSummonScamp";
-        names[107] = "sEffectSummonSkeletalMinion";
-        names[116] = "sEffectSummonStormAtronach";
-        names[111] = "sEffectSummonWingedTwilight";
-        names[135] = "sEffectSunDamage";
-        names[1] = "sEffectSwiftSwim";
-        names[59] = "sEffectTelekinesis";
-        names[101] = "sEffectTurnUndead";
-        names[133] = "sEffectVampirism";
-        names[0] = "sEffectWaterBreathing";
-        names[2] = "sEffectWaterWalking";
-        names[33] = "sEffectWeaknesstoBlightDisease";
-        names[32] = "sEffectWeaknesstoCommonDisease";
-        names[34] = "sEffectWeaknesstoCorprusDisease";
-        names[28] = "sEffectWeaknesstoFire";
-        names[29] = "sEffectWeaknesstoFrost";
-        names[31] = "sEffectWeaknesstoMagicka";
-        names[36] = "sEffectWeaknesstoNormalWeapons";
-        names[35] = "sEffectWeaknesstoPoison";
-        names[30] = "sEffectWeaknesstoShock";
+    // Map effect ID to GMST name
+    const std::map<int, std::string> MagicEffect::sGmstEffectIds = {
+        { MagicEffect::AbsorbAttribute, "sEffectAbsorbAttribute" },
+        { MagicEffect::AbsorbFatigue, "sEffectAbsorbFatigue" },
+        { MagicEffect::AbsorbHealth, "sEffectAbsorbHealth" },
+        { MagicEffect::AbsorbMagicka, "sEffectAbsorbSpellPoints" },
+        { MagicEffect::AbsorbSkill, "sEffectAbsorbSkill" },
+        { MagicEffect::AlmsiviIntervention, "sEffectAlmsiviIntervention" },
+        { MagicEffect::Blind, "sEffectBlind" },
+        { MagicEffect::BoundBattleAxe, "sEffectBoundBattleAxe" },
+        { MagicEffect::BoundBoots, "sEffectBoundBoots" },
+        { MagicEffect::BoundCuirass, "sEffectBoundCuirass" },
+        { MagicEffect::BoundDagger, "sEffectBoundDagger" },
+        { MagicEffect::BoundGloves, "sEffectBoundGloves" },
+        { MagicEffect::BoundHelm, "sEffectBoundHelm" },
+        { MagicEffect::BoundLongbow, "sEffectBoundLongbow" },
+        { MagicEffect::ExtraSpell, "sEffectExtraSpell" },
+        { MagicEffect::BoundLongsword, "sEffectBoundLongsword" },
+        { MagicEffect::BoundMace, "sEffectBoundMace" },
+        { MagicEffect::BoundShield, "sEffectBoundShield" },
+        { MagicEffect::BoundSpear, "sEffectBoundSpear" },
+        { MagicEffect::Burden, "sEffectBurden" },
+        { MagicEffect::CalmCreature, "sEffectCalmCreature" },
+        { MagicEffect::CalmHumanoid, "sEffectCalmHumanoid" },
+        { MagicEffect::Chameleon, "sEffectChameleon" },
+        { MagicEffect::Charm, "sEffectCharm" },
+        { MagicEffect::CommandCreature, "sEffectCommandCreatures" },
+        { MagicEffect::CommandHumanoid, "sEffectCommandHumanoids" },
+        { MagicEffect::Corprus, "sEffectCorpus" }, // NB this typo. (bethesda made it)
+        { MagicEffect::CureBlightDisease, "sEffectCureBlightDisease" },
+        { MagicEffect::CureCommonDisease, "sEffectCureCommonDisease" },
+        { MagicEffect::CureCorprusDisease, "sEffectCureCorprusDisease" },
+        { MagicEffect::CureParalyzation, "sEffectCureParalyzation" },
+        { MagicEffect::CurePoison, "sEffectCurePoison" },
+        { MagicEffect::DamageAttribute, "sEffectDamageAttribute" },
+        { MagicEffect::DamageFatigue, "sEffectDamageFatigue" },
+        { MagicEffect::DamageHealth, "sEffectDamageHealth" },
+        { MagicEffect::DamageMagicka, "sEffectDamageMagicka" },
+        { MagicEffect::DamageSkill, "sEffectDamageSkill" },
+        { MagicEffect::DemoralizeCreature, "sEffectDemoralizeCreature" },
+        { MagicEffect::DemoralizeHumanoid, "sEffectDemoralizeHumanoid" },
+        { MagicEffect::DetectAnimal, "sEffectDetectAnimal" },
+        { MagicEffect::DetectEnchantment, "sEffectDetectEnchantment" },
+        { MagicEffect::DetectKey, "sEffectDetectKey" },
+        { MagicEffect::DisintegrateArmor, "sEffectDisintegrateArmor" },
+        { MagicEffect::DisintegrateWeapon, "sEffectDisintegrateWeapon" },
+        { MagicEffect::Dispel, "sEffectDispel" },
+        { MagicEffect::DivineIntervention, "sEffectDivineIntervention" },
+        { MagicEffect::DrainAttribute, "sEffectDrainAttribute" },
+        { MagicEffect::DrainFatigue, "sEffectDrainFatigue" },
+        { MagicEffect::DrainHealth, "sEffectDrainHealth" },
+        { MagicEffect::DrainMagicka, "sEffectDrainSpellpoints" },
+        { MagicEffect::DrainSkill, "sEffectDrainSkill" },
+        { MagicEffect::Feather, "sEffectFeather" },
+        { MagicEffect::FireDamage, "sEffectFireDamage" },
+        { MagicEffect::FireShield, "sEffectFireShield" },
+        { MagicEffect::FortifyAttack, "sEffectFortifyAttackBonus" },
+        { MagicEffect::FortifyAttribute, "sEffectFortifyAttribute" },
+        { MagicEffect::FortifyFatigue, "sEffectFortifyFatigue" },
+        { MagicEffect::FortifyHealth, "sEffectFortifyHealth" },
+        { MagicEffect::FortifyMagicka, "sEffectFortifySpellpoints" },
+        { MagicEffect::FortifyMaximumMagicka, "sEffectFortifyMagickaMultiplier" },
+        { MagicEffect::FortifySkill, "sEffectFortifySkill" },
+        { MagicEffect::FrenzyCreature, "sEffectFrenzyCreature" },
+        { MagicEffect::FrenzyHumanoid, "sEffectFrenzyHumanoid" },
+        { MagicEffect::FrostDamage, "sEffectFrostDamage" },
+        { MagicEffect::FrostShield, "sEffectFrostShield" },
+        { MagicEffect::Invisibility, "sEffectInvisibility" },
+        { MagicEffect::Jump, "sEffectJump" },
+        { MagicEffect::Levitate, "sEffectLevitate" },
+        { MagicEffect::Light, "sEffectLight" },
+        { MagicEffect::LightningShield, "sEffectLightningShield" },
+        { MagicEffect::Lock, "sEffectLock" },
+        { MagicEffect::Mark, "sEffectMark" },
+        { MagicEffect::NightEye, "sEffectNightEye" },
+        { MagicEffect::Open, "sEffectOpen" },
+        { MagicEffect::Paralyze, "sEffectParalyze" },
+        { MagicEffect::Poison, "sEffectPoison" },
+        { MagicEffect::RallyCreature, "sEffectRallyCreature" },
+        { MagicEffect::RallyHumanoid, "sEffectRallyHumanoid" },
+        { MagicEffect::Recall, "sEffectRecall" },
+        { MagicEffect::Reflect, "sEffectReflect" },
+        { MagicEffect::RemoveCurse, "sEffectRemoveCurse" },
+        { MagicEffect::ResistBlightDisease, "sEffectResistBlightDisease" },
+        { MagicEffect::ResistCommonDisease, "sEffectResistCommonDisease" },
+        { MagicEffect::ResistCorprusDisease, "sEffectResistCorprusDisease" },
+        { MagicEffect::ResistFire, "sEffectResistFire" },
+        { MagicEffect::ResistFrost, "sEffectResistFrost" },
+        { MagicEffect::ResistMagicka, "sEffectResistMagicka" },
+        { MagicEffect::ResistNormalWeapons, "sEffectResistNormalWeapons" },
+        { MagicEffect::ResistParalysis, "sEffectResistParalysis" },
+        { MagicEffect::ResistPoison, "sEffectResistPoison" },
+        { MagicEffect::ResistShock, "sEffectResistShock" },
+        { MagicEffect::RestoreAttribute, "sEffectRestoreAttribute" },
+        { MagicEffect::RestoreFatigue, "sEffectRestoreFatigue" },
+        { MagicEffect::RestoreHealth, "sEffectRestoreHealth" },
+        { MagicEffect::RestoreMagicka, "sEffectRestoreSpellPoints" },
+        { MagicEffect::RestoreSkill, "sEffectRestoreSkill" },
+        { MagicEffect::Sanctuary, "sEffectSanctuary" },
+        { MagicEffect::Shield, "sEffectShield" },
+        { MagicEffect::ShockDamage, "sEffectShockDamage" },
+        { MagicEffect::Silence, "sEffectSilence" },
+        { MagicEffect::SlowFall, "sEffectSlowFall" },
+        { MagicEffect::Soultrap, "sEffectSoultrap" },
+        { MagicEffect::Sound, "sEffectSound" },
+        { MagicEffect::SpellAbsorption, "sEffectSpellAbsorption" },
+        { MagicEffect::StuntedMagicka, "sEffectStuntedMagicka" },
+        { MagicEffect::SummonAncestralGhost, "sEffectSummonAncestralGhost" },
+        { MagicEffect::SummonBonelord, "sEffectSummonBonelord" },
+        { MagicEffect::SummonBonewalker, "sEffectSummonLeastBonewalker" },
+        { MagicEffect::SummonCenturionSphere, "sEffectSummonCenturionSphere" },
+        { MagicEffect::SummonClannfear, "sEffectSummonClannfear" },
+        { MagicEffect::SummonDaedroth, "sEffectSummonDaedroth" },
+        { MagicEffect::SummonDremora, "sEffectSummonDremora" },
+        { MagicEffect::SummonFlameAtronach, "sEffectSummonFlameAtronach" },
+        { MagicEffect::SummonFrostAtronach, "sEffectSummonFrostAtronach" },
+        { MagicEffect::SummonGoldenSaint, "sEffectSummonGoldenSaint" },
+        { MagicEffect::SummonGreaterBonewalker, "sEffectSummonGreaterBonewalker" },
+        { MagicEffect::SummonHunger, "sEffectSummonHunger" },
+        { MagicEffect::SummonScamp, "sEffectSummonScamp" },
+        { MagicEffect::SummonSkeletalMinion, "sEffectSummonSkeletalMinion" },
+        { MagicEffect::SummonStormAtronach, "sEffectSummonStormAtronach" },
+        { MagicEffect::SummonWingedTwilight, "sEffectSummonWingedTwilight" },
+        { MagicEffect::SunDamage, "sEffectSunDamage" },
+        { MagicEffect::SwiftSwim, "sEffectSwiftSwim" },
+        { MagicEffect::Telekinesis, "sEffectTelekinesis" },
+        { MagicEffect::TurnUndead, "sEffectTurnUndead" },
+        { MagicEffect::Vampirism, "sEffectVampirism" },
+        { MagicEffect::WaterBreathing, "sEffectWaterBreathing" },
+        { MagicEffect::WaterWalking, "sEffectWaterWalking" },
+        { MagicEffect::WeaknessToBlightDisease, "sEffectWeaknesstoBlightDisease" },
+        { MagicEffect::WeaknessToCommonDisease, "sEffectWeaknesstoCommonDisease" },
+        { MagicEffect::WeaknessToCorprusDisease, "sEffectWeaknesstoCorprusDisease" },
+        { MagicEffect::WeaknessToFire, "sEffectWeaknesstoFire" },
+        { MagicEffect::WeaknessToFrost, "sEffectWeaknesstoFrost" },
+        { MagicEffect::WeaknessToMagicka, "sEffectWeaknesstoMagicka" },
+        { MagicEffect::WeaknessToNormalWeapons, "sEffectWeaknesstoNormalWeapons" },
+        { MagicEffect::WeaknessToPoison, "sEffectWeaknesstoPoison" },
+        { MagicEffect::WeaknessToShock, "sEffectWeaknesstoShock" },
 
         // bloodmoon
-        names[138] = "sEffectSummonCreature01";
-        names[139] = "sEffectSummonCreature02";
-        names[140] = "sEffectSummonCreature03";
-        names[141] = "sEffectSummonCreature04";
-        names[142] = "sEffectSummonCreature05";
+        { MagicEffect::SummonWolf, "sEffectSummonCreature01" },
+        { MagicEffect::SummonBear, "sEffectSummonCreature02" },
+        { MagicEffect::SummonBonewolf, "sEffectSummonCreature03" },
+        { MagicEffect::SummonCreature04, "sEffectSummonCreature04" },
+        { MagicEffect::SummonCreature05, "sEffectSummonCreature05" },
 
         // tribunal
-        names[137] = "sEffectSummonFabricant";
+        { MagicEffect::SummonFabricant, "sEffectSummonFabricant" },
+    };
 
-        return names;
-    }
-    const std::map<short, std::string> MagicEffect::sNames = genNameMap();
+    // Map effect ID to identifying name
+    const std::map<int, std::string> MagicEffect::sEffectNames = {
+        { MagicEffect::AbsorbAttribute, "AbsorbAttribute" },
+        { MagicEffect::AbsorbFatigue, "AbsorbFatigue" },
+        { MagicEffect::AbsorbHealth, "AbsorbHealth" },
+        { MagicEffect::AbsorbMagicka, "AbsorbMagicka" },
+        { MagicEffect::AbsorbSkill, "AbsorbSkill" },
+        { MagicEffect::AlmsiviIntervention, "AlmsiviIntervention" },
+        { MagicEffect::Blind, "Blind" },
+        { MagicEffect::BoundBattleAxe, "BoundBattleAxe" },
+        { MagicEffect::BoundBoots, "BoundBoots" },
+        { MagicEffect::BoundCuirass, "BoundCuirass" },
+        { MagicEffect::BoundDagger, "BoundDagger" },
+        { MagicEffect::BoundGloves, "BoundGloves" },
+        { MagicEffect::BoundHelm, "BoundHelm" },
+        { MagicEffect::BoundLongbow, "BoundLongbow" },
+        { MagicEffect::ExtraSpell, "ExtraSpell" },
+        { MagicEffect::BoundLongsword, "BoundLongsword" },
+        { MagicEffect::BoundMace, "BoundMace" },
+        { MagicEffect::BoundShield, "BoundShield" },
+        { MagicEffect::BoundSpear, "BoundSpear" },
+        { MagicEffect::Burden, "Burden" },
+        { MagicEffect::CalmCreature, "CalmCreature" },
+        { MagicEffect::CalmHumanoid, "CalmHumanoid" },
+        { MagicEffect::Chameleon, "Chameleon" },
+        { MagicEffect::Charm, "Charm" },
+        { MagicEffect::CommandCreature, "CommandCreature" },
+        { MagicEffect::CommandHumanoid, "CommandHumanoid" },
+        { MagicEffect::Corprus, "Corprus" }, // NB this typo. (bethesda made it)
+        { MagicEffect::CureBlightDisease, "CureBlightDisease" },
+        { MagicEffect::CureCommonDisease, "CureCommonDisease" },
+        { MagicEffect::CureCorprusDisease, "CureCorprusDisease" },
+        { MagicEffect::CureParalyzation, "CureParalyzation" },
+        { MagicEffect::CurePoison, "CurePoison" },
+        { MagicEffect::DamageAttribute, "DamageAttribute" },
+        { MagicEffect::DamageFatigue, "DamageFatigue" },
+        { MagicEffect::DamageHealth, "DamageHealth" },
+        { MagicEffect::DamageMagicka, "DamageMagicka" },
+        { MagicEffect::DamageSkill, "DamageSkill" },
+        { MagicEffect::DemoralizeCreature, "DemoralizeCreature" },
+        { MagicEffect::DemoralizeHumanoid, "DemoralizeHumanoid" },
+        { MagicEffect::DetectAnimal, "DetectAnimal" },
+        { MagicEffect::DetectEnchantment, "DetectEnchantment" },
+        { MagicEffect::DetectKey, "DetectKey" },
+        { MagicEffect::DisintegrateArmor, "DisintegrateArmor" },
+        { MagicEffect::DisintegrateWeapon, "DisintegrateWeapon" },
+        { MagicEffect::Dispel, "Dispel" },
+        { MagicEffect::DivineIntervention, "DivineIntervention" },
+        { MagicEffect::DrainAttribute, "DrainAttribute" },
+        { MagicEffect::DrainFatigue, "DrainFatigue" },
+        { MagicEffect::DrainHealth, "DrainHealth" },
+        { MagicEffect::DrainMagicka, "DrainMagicka" },
+        { MagicEffect::DrainSkill, "DrainSkill" },
+        { MagicEffect::Feather, "Feather" },
+        { MagicEffect::FireDamage, "FireDamage" },
+        { MagicEffect::FireShield, "FireShield" },
+        { MagicEffect::FortifyAttack, "FortifyAttack" },
+        { MagicEffect::FortifyAttribute, "FortifyAttribute" },
+        { MagicEffect::FortifyFatigue, "FortifyFatigue" },
+        { MagicEffect::FortifyHealth, "FortifyHealth" },
+        { MagicEffect::FortifyMagicka, "FortifyMagicka" },
+        { MagicEffect::FortifyMaximumMagicka, "FortifyMaximumMagicka" },
+        { MagicEffect::FortifySkill, "FortifySkill" },
+        { MagicEffect::FrenzyCreature, "FrenzyCreature" },
+        { MagicEffect::FrenzyHumanoid, "FrenzyHumanoid" },
+        { MagicEffect::FrostDamage, "FrostDamage" },
+        { MagicEffect::FrostShield, "FrostShield" },
+        { MagicEffect::Invisibility, "Invisibility" },
+        { MagicEffect::Jump, "Jump" },
+        { MagicEffect::Levitate, "Levitate" },
+        { MagicEffect::Light, "Light" },
+        { MagicEffect::LightningShield, "LightningShield" },
+        { MagicEffect::Lock, "Lock" },
+        { MagicEffect::Mark, "Mark" },
+        { MagicEffect::NightEye, "NightEye" },
+        { MagicEffect::Open, "Open" },
+        { MagicEffect::Paralyze, "Paralyze" },
+        { MagicEffect::Poison, "Poison" },
+        { MagicEffect::RallyCreature, "RallyCreature" },
+        { MagicEffect::RallyHumanoid, "RallyHumanoid" },
+        { MagicEffect::Recall, "Recall" },
+        { MagicEffect::Reflect, "Reflect" },
+        { MagicEffect::RemoveCurse, "RemoveCurse" },
+        { MagicEffect::ResistBlightDisease, "ResistBlightDisease" },
+        { MagicEffect::ResistCommonDisease, "ResistCommonDisease" },
+        { MagicEffect::ResistCorprusDisease, "ResistCorprusDisease" },
+        { MagicEffect::ResistFire, "ResistFire" },
+        { MagicEffect::ResistFrost, "ResistFrost" },
+        { MagicEffect::ResistMagicka, "ResistMagicka" },
+        { MagicEffect::ResistNormalWeapons, "ResistNormalWeapons" },
+        { MagicEffect::ResistParalysis, "ResistParalysis" },
+        { MagicEffect::ResistPoison, "ResistPoison" },
+        { MagicEffect::ResistShock, "ResistShock" },
+        { MagicEffect::RestoreAttribute, "RestoreAttribute" },
+        { MagicEffect::RestoreFatigue, "RestoreFatigue" },
+        { MagicEffect::RestoreHealth, "RestoreHealth" },
+        { MagicEffect::RestoreMagicka, "RestoreMagicka" },
+        { MagicEffect::RestoreSkill, "RestoreSkill" },
+        { MagicEffect::Sanctuary, "Sanctuary" },
+        { MagicEffect::Shield, "Shield" },
+        { MagicEffect::ShockDamage, "ShockDamage" },
+        { MagicEffect::Silence, "Silence" },
+        { MagicEffect::SlowFall, "SlowFall" },
+        { MagicEffect::Soultrap, "Soultrap" },
+        { MagicEffect::Sound, "Sound" },
+        { MagicEffect::SpellAbsorption, "SpellAbsorption" },
+        { MagicEffect::StuntedMagicka, "StuntedMagicka" },
+        { MagicEffect::SummonAncestralGhost, "SummonAncestralGhost" },
+        { MagicEffect::SummonBonelord, "SummonBonelord" },
+        { MagicEffect::SummonBonewalker, "SummonBonewalker" },
+        { MagicEffect::SummonCenturionSphere, "SummonCenturionSphere" },
+        { MagicEffect::SummonClannfear, "SummonClannfear" },
+        { MagicEffect::SummonDaedroth, "SummonDaedroth" },
+        { MagicEffect::SummonDremora, "SummonDremora" },
+        { MagicEffect::SummonFlameAtronach, "SummonFlameAtronach" },
+        { MagicEffect::SummonFrostAtronach, "SummonFrostAtronach" },
+        { MagicEffect::SummonGoldenSaint, "SummonGoldenSaint" },
+        { MagicEffect::SummonGreaterBonewalker, "SummonGreaterBonewalker" },
+        { MagicEffect::SummonHunger, "SummonHunger" },
+        { MagicEffect::SummonScamp, "SummonScamp" },
+        { MagicEffect::SummonSkeletalMinion, "SummonSkeletalMinion" },
+        { MagicEffect::SummonStormAtronach, "SummonStormAtronach" },
+        { MagicEffect::SummonWingedTwilight, "SummonWingedTwilight" },
+        { MagicEffect::SunDamage, "SunDamage" },
+        { MagicEffect::SwiftSwim, "SwiftSwim" },
+        { MagicEffect::Telekinesis, "Telekinesis" },
+        { MagicEffect::TurnUndead, "TurnUndead" },
+        { MagicEffect::Vampirism, "Vampirism" },
+        { MagicEffect::WaterBreathing, "WaterBreathing" },
+        { MagicEffect::WaterWalking, "WaterWalking" },
+        { MagicEffect::WeaknessToBlightDisease, "WeaknessToBlightDisease" },
+        { MagicEffect::WeaknessToCommonDisease, "WeaknessToCommonDisease" },
+        { MagicEffect::WeaknessToCorprusDisease, "WeaknessToCorprusDisease" },
+        { MagicEffect::WeaknessToFire, "WeaknessToFire" },
+        { MagicEffect::WeaknessToFrost, "WeaknessToFrost" },
+        { MagicEffect::WeaknessToMagicka, "WeaknessToMagicka" },
+        { MagicEffect::WeaknessToNormalWeapons, "WeaknessToNormalWeapons" },
+        { MagicEffect::WeaknessToPoison, "WeaknessToPoison" },
+        { MagicEffect::WeaknessToShock, "WeaknessToShock" },
 
-    const std::string& MagicEffect::effectIdToString(short effectID)
-    {
-        std::map<short, std::string>::const_iterator name = sNames.find(effectID);
-        if (name == sNames.end())
-            throw std::runtime_error(std::string("Unimplemented effect ID ") + std::to_string(effectID));
+        // bloodmoon
+        { MagicEffect::SummonWolf, "SummonWolf" },
+        { MagicEffect::SummonBear, "SummonBear" },
+        { MagicEffect::SummonBonewolf, "SummonBonewolf" },
+        { MagicEffect::SummonCreature04, "SummonCreature04" },
+        { MagicEffect::SummonCreature05, "SummonCreature05" },
 
-        return name->second;
-    }
+        // tribunal
+        { MagicEffect::SummonFabricant, "SummonFabricant" },
+    };
 
     class FindSecond
     {
@@ -534,17 +670,6 @@ namespace ESM
             return false;
         }
     };
-
-    short MagicEffect::effectStringToId(std::string_view effect)
-    {
-        std::map<short, std::string>::const_iterator name;
-
-        name = std::find_if(sNames.begin(), sNames.end(), FindSecond(effect));
-        if (name == sNames.end())
-            throw std::runtime_error("Unimplemented effect " + std::string(effect));
-
-        return name->first;
-    }
 
     MagicEffect::MagnitudeDisplayType MagicEffect::getMagnitudeDisplayType() const
     {
@@ -585,6 +710,42 @@ namespace ESM
         mHitSound = ESM::RefId();
         mAreaSound = ESM::RefId();
         mDescription.clear();
+    }
+
+    std::string_view MagicEffect::effectIdToGmstString(int effectID)
+    {
+        auto name = sGmstEffectIds.find(effectID);
+        if (name == sGmstEffectIds.end())
+            throw std::runtime_error(std::string("Unimplemented effect ID ") + std::to_string(effectID));
+
+        return name->second;
+    }
+
+    std::string_view MagicEffect::effectIdToName(int effectID)
+    {
+        auto name = sEffectNames.find(effectID);
+        if (name == sEffectNames.end())
+            throw std::runtime_error(std::string("Unimplemented effect ID ") + std::to_string(effectID));
+
+        return name->second;
+    }
+
+    int MagicEffect::effectNameToId(std::string_view effect)
+    {
+        auto name = std::find_if(sEffectNames.begin(), sEffectNames.end(), FindSecond(effect));
+        if (name == sEffectNames.end())
+            throw std::runtime_error("Unimplemented effect " + std::string(effect));
+
+        return name->first;
+    }
+
+    int MagicEffect::effectGmstIdToId(std::string_view gmstId)
+    {
+        auto name = std::find_if(sGmstEffectIds.begin(), sGmstEffectIds.end(), FindSecond(gmstId));
+        if (name == sGmstEffectIds.end())
+            throw std::runtime_error("Unimplemented effect " + std::string(gmstId));
+
+        return name->first;
     }
 
     RefId MagicEffect::indexToRefId(int index)

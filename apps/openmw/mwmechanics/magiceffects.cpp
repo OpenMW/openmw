@@ -268,7 +268,7 @@ namespace MWMechanics
 
         if (spellLine.empty())
         {
-            const std::string& effectIDStr = ESM::MagicEffect::effectIdToString(effect.mIndex);
+            std::string_view effectIDStr = ESM::MagicEffect::effectIdToGmstString(effect.mIndex);
             spellLine = windowManager->getGameSettingString(effectIDStr, {});
         }
 

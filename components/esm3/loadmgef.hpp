@@ -79,11 +79,6 @@ namespace ESM
             float mUnknown2; // Called "Size Cap" in CS
         }; // 36 bytes
 
-        static const std::map<short, std::string> sNames;
-
-        static const std::string& effectIdToString(short effectID);
-        static short effectStringToId(std::string_view effect);
-
         /// Returns the effect that provides resistance against \a effect (or -1 if there's none)
         static short getResistanceEffect(short effect);
         /// Returns the effect that induces weakness against \a effect (or -1 if there's none)
@@ -268,6 +263,13 @@ namespace ESM
 
             Length
         };
+
+        static const std::map<int, std::string> sGmstEffectIds;
+        static const std::map<int, std::string> sEffectNames;
+        static std::string_view effectIdToGmstString(int effectID);
+        static std::string_view effectIdToName(int effectID);
+        static int effectNameToId(std::string_view effect);
+        static int effectGmstIdToId(std::string_view gmstId);
 
         static const std::string_view sIndexNames[MagicEffect::Length];
 
