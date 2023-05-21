@@ -128,7 +128,7 @@ namespace MWGui
         setTitle(actor.getClass().getName(actor));
 
         onFilterChanged(mFilterAll);
-        mFilterEdit->setCaption("");
+        mFilterEdit->setCaption({});
     }
 
     void TradeWindow::onFrame(float dt)

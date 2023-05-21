@@ -252,7 +252,7 @@ namespace MWGui
         {
             for (auto& entry : mMaps)
             {
-                entry.mFogWidget->setImageTexture("");
+                entry.mFogWidget->setImageTexture({});
                 entry.mFogTexture.reset();
             }
         }
@@ -891,7 +891,7 @@ namespace MWGui
 
         mEditNoteDialog.setVisible(true);
         mEditNoteDialog.showDeleteButton(false);
-        mEditNoteDialog.setText("");
+        mEditNoteDialog.setText({});
     }
 
     void MapWindow::onMapZoomed(MyGUI::Widget* sender, int rel)
@@ -1122,7 +1122,7 @@ namespace MWGui
         if (!destNotes.empty())
         {
             MarkerUserData data(nullptr);
-            data.notes = destNotes;
+            std::swap(data.notes, destNotes);
             data.caption = markerWidget->getUserString("Caption_TextOneLine");
             markerWidget->setUserData(data);
             markerWidget->setUserString("ToolTipType", "MapMarker");

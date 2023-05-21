@@ -103,7 +103,7 @@ namespace MWDialogue
         void say(const MWWorld::Ptr& actor, const ESM::RefId& topic) override;
 
         // calbacks for the GUI
-        void keywordSelected(const std::string& keyword, ResponseCallback* callback) override;
+        void keywordSelected(std::string_view keyword, ResponseCallback* callback) override;
         void goodbyeSelected() override;
         void questionAnswered(int answer, ResponseCallback* callback) override;
 

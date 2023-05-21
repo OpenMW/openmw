@@ -171,7 +171,7 @@ namespace MWGui
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
         ESM::Position pos = *_sender->getUserData<ESM::Position>();
-        const std::string& cellname = _sender->getUserString("Destination");
+        std::string_view cellname = _sender->getUserString("Destination");
         bool interior = _sender->getUserString("interior") == "y";
         if (mPtr.getCell()->isExterior())
         {

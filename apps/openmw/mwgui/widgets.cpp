@@ -62,7 +62,7 @@ namespace MWGui::Widgets
         {
             if (mSkillId == ESM::Skill::Length)
             {
-                mSkillNameWidget->setCaption("");
+                mSkillNameWidget->setCaption({});
             }
             else
             {
@@ -147,7 +147,7 @@ namespace MWGui::Widgets
         {
             if (mId < 0 || mId >= 8)
             {
-                mAttributeNameWidget->setCaption("");
+                mAttributeNameWidget->setCaption({});
             }
             else
             {
@@ -251,7 +251,7 @@ namespace MWGui::Widgets
             if (spell)
                 mSpellNameWidget->setCaption(spell->mName);
             else
-                mSpellNameWidget->setCaption("");
+                mSpellNameWidget->setCaption({});
         }
     }
 
@@ -371,7 +371,7 @@ namespace MWGui::Widgets
             mTextWidget->setCoord(sIconOffset / 2, mTextWidget->getCoord().top, mTextWidget->getCoord().width,
                 mTextWidget->getCoord().height); // Compensates for the missing image when effect is not known
             mRequestedWidth = mTextWidget->getTextSize().width + sIconOffset;
-            mImageWidget->setImageTexture("");
+            mImageWidget->setImageTexture({});
             return;
         }
 

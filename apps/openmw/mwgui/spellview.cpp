@@ -100,7 +100,7 @@ namespace MWGui
             if (curType != spell.mType)
             {
                 if (spell.mType == Spell::Type_Power)
-                    addGroup("#{sPowers}", "");
+                    addGroup("#{sPowers}", {});
                 else if (spell.mType == Spell::Type_Spell)
                     addGroup("#{sSpells}", mShowCostColumn ? "#{sCostChance}" : "");
                 else
@@ -246,7 +246,7 @@ namespace MWGui
         groupWidget->setTextAlign(MyGUI::Align::Left);
         groupWidget->setNeedMouseFocus(false);
 
-        if (label2 != "")
+        if (!label2.empty())
         {
             MyGUI::TextBox* groupWidget2 = mScrollView->createWidget<Gui::TextBox>("SandBrightText",
                 MyGUI::IntCoord(0, 0, mScrollView->getWidth(), 24), MyGUI::Align::Left | MyGUI::Align::Top);

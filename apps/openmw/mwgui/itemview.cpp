@@ -91,7 +91,7 @@ namespace MWGui
         mModel->update();
 
         MyGUI::Widget* dragArea = mScrollView->createWidget<MyGUI::Widget>(
-            "", 0, 0, mScrollView->getWidth(), mScrollView->getHeight(), MyGUI::Align::Stretch);
+            {}, 0, 0, mScrollView->getWidth(), mScrollView->getHeight(), MyGUI::Align::Stretch);
         dragArea->setNeedMouseFocus(true);
         dragArea->eventMouseButtonClick += MyGUI::newDelegate(this, &ItemView::onSelectedBackground);
         dragArea->eventMouseWheel += MyGUI::newDelegate(this, &ItemView::onMouseWheelMoved);

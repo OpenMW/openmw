@@ -174,7 +174,7 @@ namespace MWDialogue
                     }
 
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(), mActor);
-                    callback->addResponse("", Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
+                    callback->addResponse({}, Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
                     executeScript(info->mResultScript, mActor);
                     mLastTopic = it->mId;
 
@@ -429,14 +429,14 @@ namespace MWDialogue
         return 0;
     }
 
-    void DialogueManager::keywordSelected(const std::string& keyword, ResponseCallback* callback)
+    void DialogueManager::keywordSelected(std::string_view keyword, ResponseCallback* callback)
     {
         if (!mIsInChoice)
         {
             const ESM::Dialogue* dialogue = searchDialogue(ESM::RefId::stringRefId(keyword));
             if (dialogue && dialogue->mType == ESM::Dialogue::Topic)
             {
-                executeTopic(ESM::RefId::stringRefId(keyword), callback);
+                executeTopic(dialogue->mId, callback);
             }
         }
     }
@@ -487,7 +487,7 @@ namespace MWDialogue
                     mChoices.clear();
 
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(), mActor);
-                    callback->addResponse("", Interpreter::fixDefinesDialog(text, interpreterContext));
+                    callback->addResponse({}, Interpreter::fixDefinesDialog(text, interpreterContext));
 
                     if (dialogue->mType == ESM::Dialogue::Topic)
                     {
@@ -731,8 +731,12 @@ namespace MWDialogue
     int DialogueManager::getFactionReaction(const ESM::RefId& faction1, const ESM::RefId& faction2) const
     {
         ModFactionReactionMap::const_iterator map = mChangedFactionReaction.find(faction1);
-        if (map != mChangedFactionReaction.end() && map->second.find(faction2) != map->second.end())
-            return map->second.at(faction2);
+        if (map != mChangedFactionReaction.end())
+        {
+            auto it = map->second.find(faction2);
+            if (it != map->second.end())
+                return it->second;
+        }
 
         const ESM::Faction* faction = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(faction1);
 

@@ -31,7 +31,7 @@ namespace Gui
 
         int getFontHeight();
 
-        static std::string getFontForFace(const std::string& face);
+        static std::string_view getFontForFace(std::string_view face);
 
     private:
         ToUTF8::FromType mEncoding;

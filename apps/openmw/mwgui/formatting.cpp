@@ -34,7 +34,7 @@ namespace MWGui::Formatting
             nullptr, MWWorld::Ptr()); // empty arguments, because there is no locals or actor
         mText = Interpreter::fixDefinesBook(mText, interpreterContext);
 
-        Misc::StringUtils::replaceAll(mText, "\r", "");
+        Misc::StringUtils::replaceAll(mText, "\r", {});
 
         // vanilla game does not show any text after the last EOL tag.
         const std::string lowerText = Misc::StringUtils::lowerCase(mText);
@@ -82,9 +82,9 @@ namespace MWGui::Formatting
                 parseTag(mText.substr(tagStart, tagEnd - tagStart));
                 mIndex = tagEnd;
 
-                if (mTagTypes.find(mTag) != mTagTypes.end())
+                if (auto it = mTagTypes.find(mTag); it != mTagTypes.end())
                 {
-                    Events type = mTagTypes.at(mTag);
+                    Events type = it->second;
 
                     if (type == Event_BrTag || type == Event_PTag)
                     {
@@ -290,13 +290,19 @@ namespace MWGui::Formatting
                 {
                     const BookTextParser::Attributes& attr = parser.getAttributes();
 
-                    if (attr.find("src") == attr.end() || attr.find("width") == attr.end()
-                        || attr.find("height") == attr.end())
+                    auto srcIt = attr.find("src");
+                    if (srcIt == attr.end())
+                        continue;
+                    auto widthIt = attr.find("width");
+                    if (widthIt == attr.end())
+                        continue;
+                    auto heightIt = attr.find("height");
+                    if (heightIt == attr.end())
                         continue;
 
-                    std::string src = attr.at("src");
-                    int width = MyGUI::utility::parseInt(attr.at("width"));
-                    int height = MyGUI::utility::parseInt(attr.at("height"));
+                    const std::string& src = srcIt->second;
+                    int width = MyGUI::utility::parseInt(widthIt->second);
+                    int height = MyGUI::utility::parseInt(heightIt->second);
 
                     auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
                     std::string correctedSrc = Misc::ResourceHelpers::correctBookartPath(src, width, height, vfs);
@@ -349,10 +355,11 @@ namespace MWGui::Formatting
 
     void BookFormatter::handleDiv(const BookTextParser::Attributes& attr)
     {
-        if (attr.find("align") == attr.end())
+        auto it = attr.find("align");
+        if (it == attr.end())
             return;
 
-        std::string align = attr.at("align");
+        const std::string& align = it->second;
 
         if (Misc::StringUtils::ciEqual(align, "center"))
             mBlockStyle.mAlign = MyGUI::Align::HCenter;
@@ -364,19 +371,21 @@ namespace MWGui::Formatting
 
     void BookFormatter::handleFont(const BookTextParser::Attributes& attr)
     {
-        if (attr.find("color") != attr.end())
+        auto it = attr.find("color");
+        if (it != attr.end())
         {
-            auto& colorString = attr.at("color");
+            const auto& colorString = it->second;
             unsigned int color = 0;
             std::from_chars(colorString.data(), colorString.data() + colorString.size(), color, 16);
 
             mTextStyle.mColour
                 = MyGUI::Colour((color >> 16 & 0xFF) / 255.f, (color >> 8 & 0xFF) / 255.f, (color & 0xFF) / 255.f);
         }
-        if (attr.find("face") != attr.end())
+        it = attr.find("face");
+        if (it != attr.end())
         {
-            std::string face = attr.at("face");
-            std::string name = Gui::FontLoader::getFontForFace(face);
+            const std::string& face = it->second;
+            std::string name{ Gui::FontLoader::getFontForFace(face) };
 
             mTextStyle.mFont = "Journalbook " + name;
         }

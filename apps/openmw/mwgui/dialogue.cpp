@@ -32,7 +32,7 @@
 
 namespace MWGui
 {
-    void ResponseCallback::addResponse(const std::string& title, const std::string& text)
+    void ResponseCallback::addResponse(std::string_view title, std::string_view text)
     {
         mWindow->addResponse(title, text, mNeedMargin);
     }
@@ -150,7 +150,7 @@ namespace MWGui
 
     // --------------------------------------------------------------------------------------------------
 
-    Response::Response(const std::string& text, const std::string& title, bool needMargin)
+    Response::Response(std::string_view text, std::string_view title, bool needMargin)
         : mTitle(title)
         , mNeedMargin(needMargin)
     {
@@ -213,7 +213,7 @@ namespace MWGui
         {
             const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
 
-            BookTypesetter::Style* style = typesetter->createStyle("", textColours.normal, false);
+            BookTypesetter::Style* style = typesetter->createStyle({}, textColours.normal, false);
             size_t formatted = 0; // points to the first character that is not laid out yet
             for (auto& hyperLink : hyperLinks)
             {
@@ -252,7 +252,7 @@ namespace MWGui
     {
         const TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();
 
-        BookTypesetter::Style* style = typesetter->createStyle("", textColours.normal, false);
+        BookTypesetter::Style* style = typesetter->createStyle({}, textColours.normal, false);
 
         if (topicId)
             style = typesetter->createHotStyle(
@@ -260,7 +260,7 @@ namespace MWGui
         typesetter->write(style, begin, end);
     }
 
-    Message::Message(const std::string& text)
+    Message::Message(std::string_view text)
     {
         mText = text;
     }
@@ -269,7 +269,7 @@ namespace MWGui
         std::map<std::string, std::unique_ptr<Link>>& topicLinks) const
     {
         const MyGUI::Colour& textColour = MWBase::Environment::get().getWindowManager()->getTextColours().notify;
-        BookTypesetter::Style* title = typesetter->createStyle("", textColour, false);
+        BookTypesetter::Style* title = typesetter->createStyle({}, textColour, false);
         typesetter->sectionBreak(9);
         typesetter->write(title, to_utf8_span(mText));
     }
@@ -335,7 +335,8 @@ namespace MWGui
 
     void DialogueWindow::onTradeComplete()
     {
-        addResponse("", MyGUI::LanguageManager::getInstance().replaceTags("#{sBarterDialog5}"));
+        MyGUI::UString message = MyGUI::LanguageManager::getInstance().replaceTags("#{sBarterDialog5}");
+        addResponse({}, message.asUTF8());
     }
 
     bool DialogueWindow::exit()
@@ -611,7 +612,7 @@ namespace MWGui
         for (const auto& text : mHistoryContents)
             text->write(typesetter, &mKeywordSearch, mTopicLinks);
 
-        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::White, false);
+        BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::White, false);
 
         typesetter->sectionBreak(9);
         // choices
@@ -716,13 +717,13 @@ namespace MWGui
         mHistory->setPosition(0, static_cast<int>(pos) * -1);
     }
 
-    void DialogueWindow::addResponse(const std::string& title, const std::string& text, bool needMargin)
+    void DialogueWindow::addResponse(std::string_view title, std::string_view text, bool needMargin)
     {
         mHistoryContents.push_back(std::make_unique<Response>(text, title, needMargin));
         updateHistory();
     }
 
-    void DialogueWindow::addMessageBox(const std::string& text)
+    void DialogueWindow::addMessageBox(std::string_view text)
     {
         mHistoryContents.push_back(std::make_unique<Message>(text));
         updateHistory();

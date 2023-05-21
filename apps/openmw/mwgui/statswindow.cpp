@@ -347,9 +347,12 @@ namespace MWGui
             float mult = PCstats.getLevelupAttributeMultiplier(attribute);
             mult = std::min(mult, 100 - PCstats.getAttribute(attribute).getBase());
             if (mult > 1)
-                detail << (detail.str().empty() ? "" : "\n") << "#{"
-                       << MyGUI::TextIterator::toTagsString(ESM::Attribute::sGmstAttributeIds[attribute]) << "} x"
-                       << MyGUI::utility::toString(mult);
+            {
+                if (!detail.view().empty())
+                    detail << '\n';
+                detail << "#{" << MyGUI::TextIterator::toTagsString(ESM::Attribute::sGmstAttributeIds[attribute])
+                       << "} x" << MyGUI::utility::toString(mult);
+            }
         }
         detailText = MyGUI::LanguageManager::getInstance().replaceTags(detail.str());
 

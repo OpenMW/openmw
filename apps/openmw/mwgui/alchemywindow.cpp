@@ -267,16 +267,17 @@ namespace MWGui
         mNameEdit->setCaption({});
         mBrewCountEdit->setValue(1);
 
-        int index = 0;
-        for (MWMechanics::Alchemy::TToolsIterator iter(mAlchemy->beginTools());
-             iter != mAlchemy->endTools() && index < static_cast<int>(mApparatus.size()); ++iter, ++index)
+        size_t index = 0;
+        for (auto iter = mAlchemy->beginTools(); iter != mAlchemy->endTools() && index < mApparatus.size();
+             ++iter, ++index)
         {
-            mApparatus.at(index)->setItem(*iter);
-            mApparatus.at(index)->clearUserStrings();
+            const auto& widget = mApparatus[index];
+            widget->setItem(*iter);
+            widget->clearUserStrings();
             if (!iter->isEmpty())
             {
-                mApparatus.at(index)->setUserString("ToolTipType", "ItemPtr");
-                mApparatus.at(index)->setUserData(MWWorld::Ptr(*iter));
+                widget->setUserString("ToolTipType", "ItemPtr");
+                widget->setUserData(MWWorld::Ptr(*iter));
             }
         }
 

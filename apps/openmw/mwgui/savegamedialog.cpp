@@ -146,7 +146,7 @@ namespace MWGui
     {
         WindowModal::onOpen();
 
-        mSaveNameEdit->setCaption("");
+        mSaveNameEdit->setCaption({});
         if (mSaving)
             MWBase::Environment::get().getWindowManager()->setKeyFocusWidget(mSaveNameEdit);
         else
@@ -154,7 +154,7 @@ namespace MWGui
 
         center();
 
-        mCharacterSelection->setCaption("");
+        mCharacterSelection->setCaption({});
         mCharacterSelection->removeAllItems();
         mCurrentCharacter = nullptr;
         mCurrentSlot = nullptr;
@@ -167,7 +167,7 @@ namespace MWGui
 
         mCurrentCharacter = mgr->getCurrentCharacter();
 
-        std::string directory = Misc::StringUtils::lowerCase(Settings::Manager::getString("character", "Saves"));
+        const std::string& directory = Settings::Manager::getString("character", "Saves");
 
         size_t selectedIndex = MyGUI::ITEM_NONE;
 
@@ -203,9 +203,8 @@ namespace MWGui
 
                 if (mCurrentCharacter == &*it
                     || (!mCurrentCharacter && !mSaving
-                        && directory
-                            == Misc::StringUtils::lowerCase(
-                                Files::pathToUnicodeString(it->begin()->mPath.parent_path().filename()))))
+                        && Misc::StringUtils::ciEqual(
+                            directory, Files::pathToUnicodeString(it->begin()->mPath.parent_path().filename()))))
                 {
                     mCurrentCharacter = &*it;
                     selectedIndex = mCharacterSelection->getItemCount() - 1;
@@ -389,8 +388,8 @@ namespace MWGui
         if (pos == MyGUI::ITEM_NONE || !mCurrentCharacter)
         {
             mCurrentSlot = nullptr;
-            mInfoText->setCaption("");
-            mScreenshot->setImageTexture("");
+            mInfoText->setCaption({});
+            mScreenshot->setImageTexture({});
             return;
         }
 

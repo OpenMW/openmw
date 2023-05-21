@@ -366,7 +366,7 @@ namespace MWGui
     void SpellCreationDialog::setPtr(const MWWorld::Ptr& actor)
     {
         mPtr = actor;
-        mNameEdit->setCaption("");
+        mNameEdit->setCaption({});
 
         startEditing();
     }
@@ -384,7 +384,7 @@ namespace MWGui
             return;
         }
 
-        if (mNameEdit->getCaption() == "")
+        if (mNameEdit->getCaption().empty())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage10}");
             return;
@@ -700,7 +700,7 @@ namespace MWGui
             params.mIsConstant = mConstantEffect;
 
             MyGUI::Button* button = mUsedEffectsView->createWidget<MyGUI::Button>(
-                "", MyGUI::IntCoord(0, size.height, 0, 24), MyGUI::Align::Default);
+                {}, MyGUI::IntCoord(0, size.height, 0, 24), MyGUI::Align::Default);
             button->setUserData(i);
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &SpellCreationDialog::onEditEffect);
             button->setNeedMouseFocus(true);

@@ -171,17 +171,17 @@ namespace
 
 namespace Interpreter
 {
-    std::string fixDefinesDialog(const std::string& text, Context& context)
+    std::string fixDefinesDialog(std::string_view text, Context& context)
     {
         return fixDefinesReal(text, true, context);
     }
 
-    std::string fixDefinesMsgBox(const std::string& text, Context& context)
+    std::string fixDefinesMsgBox(std::string_view text, Context& context)
     {
         return fixDefinesReal(text, false, context);
     }
 
-    std::string fixDefinesBook(const std::string& text, Context& context)
+    std::string fixDefinesBook(std::string_view text, Context& context)
     {
         return fixDefinesReal(text, false, context);
     }

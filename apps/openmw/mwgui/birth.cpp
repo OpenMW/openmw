@@ -225,15 +225,15 @@ namespace MWGui
         struct
         {
             const std::vector<ESM::RefId>& spells;
-            const char* label;
+            std::string_view label;
         } categories[3] = { { abilities, "sBirthsignmenu1" }, { powers, "sPowers" }, { spells, "sBirthsignmenu2" } };
 
-        for (int category = 0; category < 3; ++category)
+        for (size_t category = 0; category < 3; ++category)
         {
             if (!categories[category].spells.empty())
             {
-                MyGUI::TextBox* label = mSpellArea->createWidget<MyGUI::TextBox>(
-                    "SandBrightText", coord, MyGUI::Align::Default, std::string("Label"));
+                MyGUI::TextBox* label
+                    = mSpellArea->createWidget<MyGUI::TextBox>("SandBrightText", coord, MyGUI::Align::Default, "Label");
                 label->setCaption(toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
                     categories[category].label, {})));
                 mSpellItems.push_back(label);
@@ -243,8 +243,8 @@ namespace MWGui
                 for (it = categories[category].spells.begin(); it != end; ++it)
                 {
                     const ESM::RefId& spellId = *it;
-                    spellWidget = mSpellArea->createWidget<Widgets::MWSpell>("MW_StatName", coord,
-                        MyGUI::Align::Default, std::string("Spell") + MyGUI::utility::toString(i));
+                    spellWidget = mSpellArea->createWidget<Widgets::MWSpell>(
+                        "MW_StatName", coord, MyGUI::Align::Default, "Spell" + MyGUI::utility::toString(i));
                     spellWidget->setSpellId(spellId);
 
                     mSpellItems.push_back(spellWidget);

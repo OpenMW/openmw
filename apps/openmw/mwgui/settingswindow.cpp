@@ -107,25 +107,25 @@ namespace
         return MyGUI::utility::toString(xaspect) + " : " + MyGUI::utility::toString(yaspect);
     }
 
-    const char* checkButtonType = "CheckButton";
-    const char* sliderType = "Slider";
+    const std::string_view checkButtonType = "CheckButton";
+    const std::string_view sliderType = "Slider";
 
-    std::string getSettingType(MyGUI::Widget* widget)
+    std::string_view getSettingType(MyGUI::Widget* widget)
     {
         return widget->getUserString("SettingType");
     }
 
-    std::string getSettingName(MyGUI::Widget* widget)
+    std::string_view getSettingName(MyGUI::Widget* widget)
     {
         return widget->getUserString("SettingName");
     }
 
-    std::string getSettingCategory(MyGUI::Widget* widget)
+    std::string_view getSettingCategory(MyGUI::Widget* widget)
     {
         return widget->getUserString("SettingCategory");
     }
 
-    std::string getSettingValueType(MyGUI::Widget* widget)
+    std::string_view getSettingValueType(MyGUI::Widget* widget)
     {
         return widget->getUserString("SettingValueType");
     }
@@ -165,7 +165,7 @@ namespace MWGui
         {
             MyGUI::Widget* current = widgets.current();
 
-            std::string type = getSettingType(current);
+            std::string_view type = getSettingType(current);
             if (type == checkButtonType)
             {
                 const std::string initialValue
@@ -179,7 +179,7 @@ namespace MWGui
             {
                 MyGUI::ScrollBar* scroll = current->castType<MyGUI::ScrollBar>();
                 std::string valueStr;
-                std::string valueType = getSettingValueType(current);
+                std::string_view valueType = getSettingValueType(current);
                 if (valueType == "Float" || valueType == "Integer" || valueType == "Cell")
                 {
                     // TODO: ScrollBar isn't meant for this. should probably use a dedicated FloatSlider widget
@@ -689,7 +689,7 @@ namespace MWGui
         if (getSettingType(scroller) == "Slider")
         {
             std::string valueStr;
-            std::string valueType = getSettingValueType(scroller);
+            std::string_view valueType = getSettingValueType(scroller);
             if (valueType == "Float" || valueType == "Integer" || valueType == "Cell")
             {
                 float value = pos / float(scroller->getScrollRange() - 1);

@@ -212,7 +212,7 @@ namespace MWGui
             resourceSystem->getVFS(), mScalingFactor, "mygui", logpath / "MyGUI.log");
 
         mGui = std::make_unique<MyGUI::Gui>();
-        mGui->initialise("");
+        mGui->initialise({});
 
         createTextures();
 
@@ -517,7 +517,7 @@ namespace MWGui
         trackWindow(mPostProcessorHud, makePostprocessorWindowSettingValues());
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>(
-            "", 0, 0, w, h, MyGUI::Align::Stretch, "InputBlocker");
+            {}, 0, 0, w, h, MyGUI::Align::Stretch, "InputBlocker");
 
         mHud->setVisible(true);
 
@@ -796,7 +796,8 @@ namespace MWGui
     {
         if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never)
         {
-            mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(toUString(message)));
+            MyGUI::UString text = MyGUI::LanguageManager::getInstance().replaceTags(toUString(message));
+            mDialogueWindow->addMessageBox(text.asUTF8());
         }
         else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only)
         {
