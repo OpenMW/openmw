@@ -306,4 +306,18 @@ namespace Nif
         for (auto& object : mObjects)
             object.second.post(nif);
     }
+
+    void BSTreeNode::read(NIFStream* nif)
+    {
+        NiNode::read(nif);
+        readRecordList(nif, mBones1);
+        readRecordList(nif, mBones2);
+    }
+
+    void BSTreeNode::post(Reader& nif)
+    {
+        NiNode::post(nif);
+        postRecordList(nif, mBones1);
+        postRecordList(nif, mBones2);
+    }
 }

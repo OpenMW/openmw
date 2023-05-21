@@ -284,5 +284,12 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    struct BSTreeNode : NiNode
+    {
+        NodeList mBones1, mBones2;
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
 } // Namespace
 #endif
