@@ -60,8 +60,8 @@ const std::string Attribute::sAttributeIcons[Attribute::Length] = {
 
 Attribute::AttributeID Attribute::stringToAttributeId(std::string_view attribute)
 {
-    for (auto id : ESM::Attribute::sAttributeIds)
-        if (Misc::StringUtils::ciEqual(ESM::Attribute::sAttributeNames[id], attribute))
+    for (auto id : sAttributeIds)
+        if (Misc::StringUtils::ciEqual(sAttributeNames[id], attribute))
             return id;
 
     throw std::logic_error("No such attribute: " + std::string(attribute));

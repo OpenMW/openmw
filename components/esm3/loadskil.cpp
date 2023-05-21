@@ -101,8 +101,8 @@ namespace ESM
 
     Skill::SkillEnum Skill::stringToSkillId(std::string_view skill)
     {
-        for (auto id : ESM::Skill::sSkillIds)
-            if (Misc::StringUtils::ciEqual(ESM::Skill::sSkillNames[id], skill))
+        for (auto id : sSkillIds)
+            if (Misc::StringUtils::ciEqual(sSkillNames[id], skill))
                 return id;
 
         throw std::logic_error("No such skill: " + std::string(skill));
