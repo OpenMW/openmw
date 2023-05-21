@@ -107,9 +107,10 @@ namespace MWGui
         if (id.starts_with(prefix) && id.size() == prefix.size() + 1)
         {
             char index = id[prefix.size()];
-            auto attribute = static_cast<ESM::Attribute::AttributeID>(index - '0' - 1);
-            if (attribute >= ESM::Attribute::Strength && attribute < ESM::Attribute::Length)
+            if (index >= '1' && index <= '8')
             {
+                // Match [AttribVal1-AttribVal8] to the corresponding AttributeID values [0-7]
+                auto attribute = static_cast<ESM::Attribute::AttributeID>(index - '0' - 1);
                 mPlayerAttributes[attribute] = value;
                 if (mReviewDialog)
                     mReviewDialog->setAttribute(attribute, value);
