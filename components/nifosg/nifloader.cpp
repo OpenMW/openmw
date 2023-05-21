@@ -45,6 +45,7 @@
 #include <components/nif/effect.hpp>
 #include <components/nif/exception.hpp>
 #include <components/nif/extra.hpp>
+#include <components/nif/niffile.hpp>
 #include <components/nif/node.hpp>
 #include <components/nif/property.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
@@ -340,8 +341,8 @@ namespace NifOsg
             created->setDataVariance(osg::Object::STATIC);
             for (const Nif::Node* root : roots)
             {
-                auto node = handleNode(root, nullptr, nullptr, imageManager, std::vector<unsigned int>(), 0, false,
-                    false, false, &textkeys->mTextKeys);
+                auto node = handleNode(nif.getVersion(), root, nullptr, nullptr, imageManager,
+                    std::vector<unsigned int>(), 0, false, false, false, &textkeys->mTextKeys);
                 created->addChild(node);
             }
             if (mHasNightDayLabel)
@@ -597,13 +598,19 @@ namespace NifOsg
             return node;
         }
 
-        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
-            Resource::ImageManager* imageManager, std::vector<unsigned int> boundTextures, int animflags,
-            bool skipMeshes, bool hasMarkers, bool hasAnimatedParents, SceneUtil::TextKeyMap* textKeys,
+        osg::ref_ptr<osg::Node> handleNode(unsigned int nifVersion, const Nif::Node* nifNode, const Nif::Parent* parent,
+            osg::Group* parentNode, Resource::ImageManager* imageManager, std::vector<unsigned int> boundTextures,
+            int animflags, bool skipMeshes, bool hasMarkers, bool hasAnimatedParents, SceneUtil::TextKeyMap* textKeys,
             osg::Node* rootNode = nullptr)
         {
-            if (rootNode != nullptr && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
-                return nullptr;
+            if (rootNode)
+            {
+                if (Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
+                    return nullptr;
+                if (nifVersion > Nif::NIFFile::NIFVersion::VER_MW && !Loader::getShowMarkers()
+                    && Misc::StringUtils::ciEqual(nifNode->name, "EditorMarker"))
+                    return nullptr;
+            }
 
             osg::ref_ptr<osg::Group> node = createNode(nifNode);
 
@@ -802,8 +809,8 @@ namespace NifOsg
                 const Nif::Parent currentParent{ *ninode, parent };
                 for (const auto& child : children)
                     if (!child.empty())
-                        handleNode(child.getPtr(), &currentParent, currentNode, imageManager, boundTextures, animflags,
-                            skipMeshes, hasMarkers, hasAnimatedParents, textKeys, rootNode);
+                        handleNode(nifVersion, child.getPtr(), &currentParent, currentNode, imageManager, boundTextures,
+                            animflags, skipMeshes, hasMarkers, hasAnimatedParents, textKeys, rootNode);
 
                 // Propagate effects to the the direct subgraph instead of the node itself
                 // This simulates their "affected node list" which Morrowind appears to replace with the subgraph (?)
