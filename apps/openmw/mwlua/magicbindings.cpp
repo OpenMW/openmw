@@ -31,7 +31,17 @@ namespace MWLua
     // class returned via 'types.Actor.spells(obj)' in Lua
     struct ActorSpells
     {
-        const ObjectVariant mActor;
+        bool isActor() const { return !mActor.ptr().isEmpty() && mActor.ptr().getClass().isActor(); }
+
+        MWMechanics::Spells* getStore() const
+        {
+            if (!isActor())
+                return nullptr;
+            const MWWorld::Ptr& ptr = mActor.ptr();
+            return &ptr.getClass().getCreatureStats(ptr).getSpells();
+        }
+
+        ObjectVariant mActor;
     };
 
     template <typename Store>
@@ -39,25 +49,67 @@ namespace MWLua
     {
         using Collection = typename Store::Collection;
         using Iterator = typename Collection::const_iterator;
-        const ObjectVariant mActor;
-        Store* store = nullptr;
-        Iterator it = Iterator();
-        int index = 0;
+
+        ActorStore(ObjectVariant actor)
+            : mActor(actor)
+            , mIterator()
+            , mIndex(0)
+        {
+            reset();
+        }
+
+        bool isActor() const { return !mActor.ptr().isEmpty() && mActor.ptr().getClass().isActor(); }
 
         void reset()
         {
-            index = 0;
-            it = store->begin();
+            mIndex = 0;
+            auto* store = getStore();
+            if (store)
+                mIterator = store->begin();
         }
 
-        bool isEnd() { return it == store->end(); }
+        bool isEnd() const
+        {
+            auto* store = getStore();
+            if (store)
+                return mIterator == store->end();
+            return true;
+        }
 
         void advance()
         {
-            it++;
-            index++;
+            auto* store = getStore();
+            if (store)
+            {
+                mIterator++;
+                mIndex++;
+            }
         }
+
+        Store* getStore() const;
+
+        ObjectVariant mActor;
+        Iterator mIterator;
+        int mIndex;
     };
+
+    template <>
+    MWMechanics::MagicEffects* ActorStore<MWMechanics::MagicEffects>::getStore() const
+    {
+        if (!isActor())
+            return nullptr;
+        const MWWorld::Ptr& ptr = mActor.ptr();
+        return &ptr.getClass().getCreatureStats(ptr).getMagicEffects();
+    }
+
+    template <>
+    MWMechanics::ActiveSpells* ActorStore<MWMechanics::ActiveSpells>::getStore() const
+    {
+        if (!isActor())
+            return nullptr;
+        const MWWorld::Ptr& ptr = mActor.ptr();
+        return &ptr.getClass().getCreatureStats(ptr).getActiveSpells();
+    }
 
     struct ActiveEffect
     {
@@ -336,19 +388,21 @@ namespace MWLua
             = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>();
 
         // types.Actor.spells(o)
-        actor["spells"] = [](const sol::object actor) { return ActorSpells{ ObjectVariant(actor) }; };
+        actor["spells"] = [](const sol::object actor) {
+            auto spells = ActorSpells{ ObjectVariant(actor) };
+            if (!spells.isActor())
+                throw std::runtime_error("Actor expected");
+            return spells;
+        };
         auto spellsT = context.mLua->sol().new_usertype<ActorSpells>("ActorSpells");
         spellsT[sol::meta_function::to_string]
             = [](const ActorSpells& spells) { return "ActorSpells[" + spells.mActor.object().toString() + "]"; };
 
         actor["activeSpells"] = [](const sol::object actor) {
-            ActorActiveSpells store = { ObjectVariant(actor) };
-            auto ptr = store.mActor.ptr();
-            if (!ptr.isEmpty())
-            {
-                store.store = &ptr.getClass().getCreatureStats(ptr).getActiveSpells();
-            }
-            return store;
+            auto spells = ActorActiveSpells{ ObjectVariant(actor) };
+            if (!spells.isActor())
+                throw std::runtime_error("Actor expected");
+            return spells;
         };
         auto activeSpellsT = context.mLua->sol().new_usertype<ActorActiveSpells>("ActorActiveSpells");
         activeSpellsT[sol::meta_function::to_string] = [](const ActorActiveSpells& spells) {
@@ -356,13 +410,10 @@ namespace MWLua
         };
 
         actor["activeEffects"] = [](const sol::object actor) {
-            ActorActiveEffects store = { ObjectVariant(actor) };
-            auto ptr = store.mActor.ptr();
-            if (!ptr.isEmpty())
-            {
-                store.store = &ptr.getClass().getCreatureStats(ptr).getMagicEffects();
-            }
-            return store;
+            auto effects = ActorActiveEffects{ ObjectVariant(actor) };
+            if (!effects.isActor())
+                throw std::runtime_error("Actor expected");
+            return effects;
         };
         auto activeEffectsT = context.mLua->sol().new_usertype<ActorActiveEffects>("ActorActiveEffects");
         activeEffectsT[sol::meta_function::to_string] = [](const ActorActiveEffects& effects) {
@@ -416,23 +467,27 @@ namespace MWLua
 
         // #(types.Actor.spells(o))
         spellsT[sol::meta_function::length] = [](const ActorSpells& spells) -> size_t {
-            const MWWorld::Ptr& ptr = spells.mActor.ptr();
-            return ptr.getClass().getCreatureStats(ptr).getSpells().count();
+            if (auto* store = spells.getStore())
+                return store->count();
+            return 0;
         };
 
         // types.Actor.spells(o)[i]
         spellsT[sol::meta_function::index] = sol::overload(
-            [](const ActorSpells& spells, size_t index) -> const ESM::Spell* {
-                const MWWorld::Ptr& ptr = spells.mActor.ptr();
-                return ptr.getClass().getCreatureStats(ptr).getSpells().at(index - 1);
+            [](const ActorSpells& spells, size_t index) -> sol::optional<const ESM::Spell*> {
+                if (auto* store = spells.getStore())
+                    if (index <= store->count())
+                        return store->at(index - 1);
+                return sol::nullopt;
             },
             [spellStore](const ActorSpells& spells, std::string_view spellId) -> sol::optional<const ESM::Spell*> {
-                const MWWorld::Ptr& ptr = spells.mActor.ptr();
-                const ESM::Spell* spell = spellStore->find(ESM::RefId::deserializeText(spellId));
-                if (ptr.getClass().getCreatureStats(ptr).getSpells().hasSpell(spell))
-                    return spell;
-                else
-                    return sol::nullopt;
+                if (auto* store = spells.getStore())
+                {
+                    const ESM::Spell* spell = spellStore->find(ESM::RefId::deserializeText(spellId));
+                    if (store->hasSpell(spell))
+                        return spell;
+                }
+                return sol::nullopt;
             });
 
         // pairs(types.Actor.spells(o))
@@ -447,7 +502,8 @@ namespace MWLua
                 throw std::runtime_error("Local scripts can modify only spells of the actor they are attached to.");
             context.mLuaManager->addAction([obj = spells.mActor.object(), id = toSpellId(spellOrId)]() {
                 const MWWorld::Ptr& ptr = obj.ptr();
-                ptr.getClass().getCreatureStats(ptr).getSpells().add(id);
+                if (ptr.getClass().isActor())
+                    ptr.getClass().getCreatureStats(ptr).getSpells().add(id);
             });
         };
 
@@ -457,7 +513,8 @@ namespace MWLua
                 throw std::runtime_error("Local scripts can modify only spells of the actor they are attached to.");
             context.mLuaManager->addAction([obj = spells.mActor.object(), id = toSpellId(spellOrId)]() {
                 const MWWorld::Ptr& ptr = obj.ptr();
-                ptr.getClass().getCreatureStats(ptr).getSpells().remove(id);
+                if (ptr.getClass().isActor())
+                    ptr.getClass().getCreatureStats(ptr).getSpells().remove(id);
             });
         };
 
@@ -467,7 +524,8 @@ namespace MWLua
                 throw std::runtime_error("Local scripts can modify only spells of the actor they are attached to.");
             context.mLuaManager->addAction([obj = spells.mActor.object()]() {
                 const MWWorld::Ptr& ptr = obj.ptr();
-                ptr.getClass().getCreatureStats(ptr).getSpells().clear();
+                if (ptr.getClass().isActor())
+                    ptr.getClass().getCreatureStats(ptr).getSpells().clear();
             });
         };
 
@@ -480,8 +538,8 @@ namespace MWLua
             return sol::as_function([lua, &self]() mutable -> std::pair<sol::object, sol::object> {
                 if (!self.isEnd())
                 {
-                    auto result = sol::make_object(lua, self.it->getId());
-                    auto index = sol::make_object(lua, self.index);
+                    auto result = sol::make_object(lua, self.mIterator->getId());
+                    auto index = sol::make_object(lua, self.mIndex + 1);
                     self.advance();
                     return { index, result };
                 }
@@ -495,9 +553,9 @@ namespace MWLua
         // types.Actor.activeSpells(o):isSpellActive(id)
         activeSpellsT["isSpellActive"] = [](const ActorActiveSpells& spells, const sol::object& spellOrId) -> bool {
             auto id = toSpellId(spellOrId);
-            const MWWorld::Ptr& ptr = spells.mActor.object().ptr();
-            auto& activeSpells = ptr.getClass().getCreatureStats(ptr).getActiveSpells();
-            return activeSpells.isSpellActive(id);
+            if (auto* store = spells.getStore())
+                return store->isSpellActive(id);
+            return false;
         };
 
         // pairs(types.Actor.activeEffects(o))
@@ -509,10 +567,10 @@ namespace MWLua
             return sol::as_function([lua, &self]() mutable -> std::pair<sol::object, sol::object> {
                 if (!self.isEnd())
                 {
-                    ActiveEffect effect = ActiveEffect{ self.it->first, self.it->second };
+                    ActiveEffect effect = ActiveEffect{ self.mIterator->first, self.mIterator->second };
                     auto result = sol::make_object(lua, effect);
 
-                    auto key = sol::make_object(lua, self.it->first.toString());
+                    auto key = sol::make_object(lua, self.mIterator->first.toString());
                     self.advance();
                     return { key, result };
                 }
@@ -524,8 +582,11 @@ namespace MWLua
         };
 
         // types.Actor.activeEffects(o):getEffect(id, ?arg)
-        activeEffectsT["getEffect"] = [](const ActorActiveEffects& self, std::string_view idStr,
+        activeEffectsT["getEffect"] = [](const ActorActiveEffects& effects, std::string_view idStr,
                                           sol::optional<std::string_view> argStr) -> sol::optional<ActiveEffect> {
+            if (!effects.isActor())
+                return sol::nullopt;
+
             auto id = ESM::MagicEffect::effectStringToId("sEffect" + std::string(idStr));
             auto* rec = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(id);
 
@@ -543,8 +604,9 @@ namespace MWLua
             }
 
             MWMechanics::EffectParam param;
-            if (self.store->get(key, param))
-                return ActiveEffect{ key, param };
+            if (auto* store = effects.getStore())
+                if (store->get(key, param))
+                    return ActiveEffect{ key, param };
             return sol::nullopt;
         };
     }
