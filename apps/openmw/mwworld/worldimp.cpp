@@ -25,6 +25,7 @@
 #include <components/esm3/loadregn.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/esm4/loadcell.hpp>
+#include <components/esm4/loaddoor.hpp>
 #include <components/esm4/loadstat.hpp>
 
 #include <components/misc/constants.hpp>
@@ -2632,20 +2633,30 @@ namespace MWWorld
             physicActor->enableCollisionBody(enable);
     }
 
-    ESM::RefId World::findInteriorPosition(std::string_view name, ESM::Position& pos)
+    static std::optional<ESM::Position> searchMarkerPosition(const CellStore& cellStore, std::string_view editorId)
     {
-        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-        pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
+        for (const MWWorld::LiveCellRef<ESM4::Static>& stat4 : cellStore.getReadOnlyEsm4Statics().mList)
+        {
+            if (Misc::StringUtils::lowerCase(stat4.mBase->mEditorId) == editorId)
+                return stat4.mRef.getPosition();
+        }
+        return std::nullopt;
+    }
 
-        MWWorld::CellStore& cellStore = mWorldModel.getInterior(name);
-
+    static std::optional<ESM::Position> searchDoorDestInCell(const CellStore& cellStore)
+    {
         ESM::RefId cellId = cellStore.getCell()->getId();
         std::vector<const MWWorld::CellRef*> sortedDoors;
         for (const MWWorld::LiveCellRef<ESM::Door>& door : cellStore.getReadOnlyDoors().mList)
         {
             if (!door.mRef.getTeleport())
                 continue;
-
+            sortedDoors.push_back(&door.mRef);
+        }
+        for (const MWWorld::LiveCellRef<ESM4::Door>& door : cellStore.getReadOnlyEsm4Doors().mList)
+        {
+            if (!door.mRef.getTeleport())
+                continue;
             sortedDoors.push_back(&door.mRef);
         }
 
@@ -2657,34 +2668,54 @@ namespace MWWorld
             return lhs->getDestCell() < rhs->getDestCell();
         });
 
+        WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
         for (const MWWorld::CellRef* door : sortedDoors)
         {
-            MWWorld::CellStore& source = mWorldModel.getCell(door->getDestCell());
+            const MWWorld::CellStore& source = worldModel->getCell(door->getDestCell());
 
             // Find door leading to our current teleport door
             // and use its destination to position inside cell.
+            // \note Using _any_ door pointed to the cell,
+            // not the one pointed to current door.
             for (const MWWorld::LiveCellRef<ESM::Door>& destDoor : source.getReadOnlyDoors().mList)
             {
-                if (name == destDoor.mRef.getDestCell())
-                {
-                    /// \note Using _any_ door pointed to the interior,
-                    /// not the one pointed to current door.
-                    pos = destDoor.mRef.getDoorDest();
-                    pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-                    return cellId;
-                }
+                if (cellId == destDoor.mRef.getDestCell())
+                    return destDoor.mRef.getDoorDest();
             }
-        }
-        for (const MWWorld::LiveCellRef<ESM4::Static>& stat4 : cellStore.getReadOnlyEsm4Statics().mList)
-        {
-            if (Misc::StringUtils::lowerCase(stat4.mBase->mEditorId) == "cocmarkerheading")
+            for (const MWWorld::LiveCellRef<ESM4::Door>& destDoor : source.getReadOnlyEsm4Doors().mList)
             {
-                // found the COC position?
-                pos = stat4.mRef.getPosition();
-                pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
-                return cellId;
+                if (cellId == destDoor.mRef.getDestCell())
+                    return destDoor.mRef.getDoorDest();
             }
         }
+
+        return std::nullopt;
+    }
+
+    ESM::RefId World::findInteriorPosition(std::string_view name, ESM::Position& pos)
+    {
+        pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
+        pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
+
+        const MWWorld::CellStore& cellStore = mWorldModel.getInterior(name);
+        ESM::RefId cellId = cellStore.getCell()->getId();
+
+        if (std::optional<ESM::Position> destPos = searchMarkerPosition(cellStore, "cocmarkerheading"))
+        {
+            pos = *destPos;
+            return cellId;
+        }
+        if (std::optional<ESM::Position> destPos = searchDoorDestInCell(cellStore))
+        {
+            pos = *destPos;
+            return cellId;
+        }
+        if (std::optional<ESM::Position> destPos = searchMarkerPosition(cellStore, "xmarkerheading"))
+        {
+            pos = *destPos;
+            return cellId;
+        }
+
         // Fall back to the first static location.
         const MWWorld::CellRefList<ESM4::Static>::List& statics4 = cellStore.getReadOnlyEsm4Statics().mList;
         if (!statics4.empty())
@@ -2693,7 +2724,6 @@ namespace MWWorld
             pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
             return cellId;
         }
-        // Fall back to the first static location.
         const MWWorld::CellRefList<ESM::Static>::List& statics = cellStore.getReadOnlyStatics().mList;
         if (!statics.empty())
         {
@@ -2709,17 +2739,17 @@ namespace MWWorld
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-        const MWWorld::Cell* ext = nullptr;
+        const MWWorld::CellStore* cellStore = nullptr;
         try
         {
-            ext = mWorldModel.getCell(nameId).getCell();
-            if (!ext->isExterior())
+            cellStore = &mWorldModel.getCell(nameId);
+            if (!cellStore->isExterior())
                 return ESM::RefId();
         }
         catch (std::exception&)
         {
         }
-        if (!ext)
+        if (!cellStore)
         {
             size_t comma = nameId.find(',');
             if (comma != std::string::npos)
@@ -2731,28 +2761,38 @@ namespace MWWorld
                 if (xResult.ec == std::errc::result_out_of_range || yResult.ec == std::errc::result_out_of_range)
                     throw std::runtime_error("Cell coordinates out of range.");
                 else if (xResult.ec == std::errc{} && yResult.ec == std::errc{})
-                    ext = mWorldModel.getExterior(ESM::ExteriorCellLocation(x, y, ESM::Cell::sDefaultWorldspaceId))
-                              .getCell();
+                    cellStore
+                        = &mWorldModel.getExterior(ESM::ExteriorCellLocation(x, y, ESM::Cell::sDefaultWorldspaceId));
                 // ignore std::errc::invalid_argument, as this means that name probably refers to a interior cell
                 // instead of comma separated coordinates
             }
         }
 
-        if (ext)
+        if (!cellStore)
+            return ESM::RefId();
+        const MWWorld::Cell* ext = cellStore->getCell();
+
+        if (std::optional<ESM::Position> destPos = searchMarkerPosition(*cellStore, "cocmarkerheading"))
         {
-            int x = ext->getGridX();
-            int y = ext->getGridY();
-            osg::Vec2 posFromIndex = indexToPosition(ESM::ExteriorCellLocation(x, y, ext->getWorldSpace()), true);
-            pos.pos[0] = posFromIndex.x();
-            pos.pos[1] = posFromIndex.y();
-
-            // Note: Z pos will be adjusted by adjustPosition later
-            pos.pos[2] = 0;
-
+            pos = *destPos;
+            return ext->getId();
+        }
+        if (std::optional<ESM::Position> destPos = searchMarkerPosition(*cellStore, "xmarkerheading"))
+        {
+            pos = *destPos;
             return ext->getId();
         }
 
-        return ESM::RefId();
+        int x = ext->getGridX();
+        int y = ext->getGridY();
+        osg::Vec2 posFromIndex = indexToPosition(ESM::ExteriorCellLocation(x, y, ext->getWorldSpace()), true);
+        pos.pos[0] = posFromIndex.x();
+        pos.pos[1] = posFromIndex.y();
+
+        // Note: Z pos will be adjusted by adjustPosition later
+        pos.pos[2] = 0;
+
+        return ext->getId();
     }
 
     void World::enableTeleporting(bool enable)
