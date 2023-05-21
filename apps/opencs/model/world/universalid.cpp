@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <tuple>
 #include <vector>
 
 namespace
@@ -178,10 +179,23 @@ namespace
         // end marker
         { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 },
     };
+
+    struct WriteToStream
+    {
+        std::ostream& mStream;
+
+        void operator()(std::monostate) const {}
+
+        template <class T>
+        void operator()(const T& value) const
+        {
+            mStream << ": " << value;
+        }
+    };
 }
 
 CSMWorld::UniversalId::UniversalId(const std::string& universalId)
-    : mIndex(0)
+    : mValue(std::monostate{})
 {
     std::string::size_type index = universalId.find(':');
 
@@ -192,24 +206,26 @@ CSMWorld::UniversalId::UniversalId(const std::string& universalId)
         for (int i = 0; sIdArg[i].mName; ++i)
             if (type == sIdArg[i].mName)
             {
-                mArgumentType = ArgumentType_Id;
                 mType = sIdArg[i].mType;
                 mClass = sIdArg[i].mClass;
-                mId = universalId.substr(index + 2);
+                mValue = universalId.substr(index + 2);
                 return;
             }
 
         for (int i = 0; sIndexArg[i].mName; ++i)
             if (type == sIndexArg[i].mName)
             {
-                mArgumentType = ArgumentType_Index;
                 mType = sIndexArg[i].mType;
                 mClass = sIndexArg[i].mClass;
 
                 std::istringstream stream(universalId.substr(index + 2));
 
-                if (stream >> mIndex)
+                int index = 0;
+                if (stream >> index)
+                {
+                    mValue = index;
                     return;
+                }
 
                 break;
             }
@@ -219,7 +235,6 @@ CSMWorld::UniversalId::UniversalId(const std::string& universalId)
         for (int i = 0; sNoArg[i].mName; ++i)
             if (universalId == sNoArg[i].mName)
             {
-                mArgumentType = ArgumentType_None;
                 mType = sNoArg[i].mType;
                 mClass = sNoArg[i].mClass;
                 return;
@@ -230,9 +245,8 @@ CSMWorld::UniversalId::UniversalId(const std::string& universalId)
 }
 
 CSMWorld::UniversalId::UniversalId(Type type)
-    : mArgumentType(ArgumentType_None)
-    , mType(type)
-    , mIndex(0)
+    : mType(type)
+    , mValue(std::monostate{})
 {
     for (int i = 0; sNoArg[i].mName; ++i)
         if (type == sNoArg[i].mType)
@@ -244,7 +258,7 @@ CSMWorld::UniversalId::UniversalId(Type type)
     for (int i = 0; sIdArg[i].mName; ++i)
         if (type == sIdArg[i].mType)
         {
-            mArgumentType = ArgumentType_Id;
+            mValue = std::string();
             mClass = sIdArg[i].mClass;
             return;
         }
@@ -252,7 +266,7 @@ CSMWorld::UniversalId::UniversalId(Type type)
     for (int i = 0; sIndexArg[i].mName; ++i)
         if (type == sIndexArg[i].mType)
         {
-            mArgumentType = ArgumentType_Index;
+            mValue = int{};
             mClass = sIndexArg[i].mClass;
             return;
         }
@@ -261,10 +275,8 @@ CSMWorld::UniversalId::UniversalId(Type type)
 }
 
 CSMWorld::UniversalId::UniversalId(Type type, const std::string& id)
-    : mArgumentType(ArgumentType_Id)
-    , mType(type)
-    , mId(id)
-    , mIndex(0)
+    : mType(type)
+    , mValue(id)
 {
     for (int i = 0; sIdArg[i].mName; ++i)
         if (type == sIdArg[i].mType)
@@ -281,9 +293,8 @@ CSMWorld::UniversalId::UniversalId(Type type, const ESM::RefId& id)
 }
 
 CSMWorld::UniversalId::UniversalId(Type type, int index)
-    : mArgumentType(ArgumentType_Index)
-    , mType(type)
-    , mIndex(index)
+    : mType(type)
+    , mValue(index)
 {
     for (int i = 0; sIndexArg[i].mName; ++i)
         if (type == sIndexArg[i].mType)
@@ -302,7 +313,7 @@ CSMWorld::UniversalId::Class CSMWorld::UniversalId::getClass() const
 
 CSMWorld::UniversalId::ArgumentType CSMWorld::UniversalId::getArgumentType() const
 {
-    return mArgumentType;
+    return static_cast<CSMWorld::UniversalId::ArgumentType>(mValue.index());
 }
 
 CSMWorld::UniversalId::Type CSMWorld::UniversalId::getType() const
@@ -312,61 +323,24 @@ CSMWorld::UniversalId::Type CSMWorld::UniversalId::getType() const
 
 const std::string& CSMWorld::UniversalId::getId() const
 {
-    if (mArgumentType != ArgumentType_Id)
-        throw std::logic_error("invalid access to ID of non-ID UniversalId");
+    if (const std::string* result = std::get_if<std::string>(&mValue))
+        return *result;
 
-    return mId;
+    throw std::logic_error("invalid access to ID of non-ID UniversalId");
 }
 
 int CSMWorld::UniversalId::getIndex() const
 {
-    if (mArgumentType != ArgumentType_Index)
-        throw std::logic_error("invalid access to index of non-index UniversalId");
+    if (const int* result = std::get_if<int>(&mValue))
+        return *result;
 
-    return mIndex;
-}
-
-bool CSMWorld::UniversalId::isEqual(const UniversalId& universalId) const
-{
-    if (mClass != universalId.mClass || mArgumentType != universalId.mArgumentType || mType != universalId.mType)
-        return false;
-
-    switch (mArgumentType)
-    {
-        case ArgumentType_Id:
-            return mId == universalId.mId;
-        case ArgumentType_Index:
-            return mIndex == universalId.mIndex;
-
-        default:
-            return true;
-    }
-}
-
-bool CSMWorld::UniversalId::isLess(const UniversalId& universalId) const
-{
-    if (mType < universalId.mType)
-        return true;
-
-    if (mType > universalId.mType)
-        return false;
-
-    switch (mArgumentType)
-    {
-        case ArgumentType_Id:
-            return mId < universalId.mId;
-        case ArgumentType_Index:
-            return mIndex < universalId.mIndex;
-
-        default:
-            return false;
-    }
+    throw std::logic_error("invalid access to index of non-index UniversalId");
 }
 
 std::string CSMWorld::UniversalId::getTypeName() const
 {
     const TypeData* typeData
-        = mArgumentType == ArgumentType_None ? sNoArg : (mArgumentType == ArgumentType_Id ? sIdArg : sIndexArg);
+        = getArgumentType() == ArgumentType_None ? sNoArg : (getArgumentType() == ArgumentType_Id ? sIdArg : sIndexArg);
 
     for (int i = 0; typeData[i].mName; ++i)
         if (typeData[i].mType == mType)
@@ -381,17 +355,7 @@ std::string CSMWorld::UniversalId::toString() const
 
     stream << getTypeName();
 
-    switch (mArgumentType)
-    {
-        case ArgumentType_None:
-            break;
-        case ArgumentType_Id:
-            stream << ": " << mId;
-            break;
-        case ArgumentType_Index:
-            stream << ": " << mIndex;
-            break;
-    }
+    std::visit(WriteToStream{ stream }, mValue);
 
     return stream.str();
 }
@@ -399,7 +363,7 @@ std::string CSMWorld::UniversalId::toString() const
 std::string CSMWorld::UniversalId::getIcon() const
 {
     const TypeData* typeData
-        = mArgumentType == ArgumentType_None ? sNoArg : (mArgumentType == ArgumentType_Id ? sIdArg : sIndexArg);
+        = getArgumentType() == ArgumentType_None ? sNoArg : (getArgumentType() == ArgumentType_Id ? sIdArg : sIndexArg);
 
     for (int i = 0; typeData[i].mName; ++i)
         if (typeData[i].mType == mType)
@@ -463,15 +427,10 @@ CSMWorld::UniversalId::Type CSMWorld::UniversalId::getParentType(Type type)
 
 bool CSMWorld::operator==(const CSMWorld::UniversalId& left, const CSMWorld::UniversalId& right)
 {
-    return left.isEqual(right);
-}
-
-bool CSMWorld::operator!=(const CSMWorld::UniversalId& left, const CSMWorld::UniversalId& right)
-{
-    return !left.isEqual(right);
+    return std::tie(left.mClass, left.mType, left.mValue) == std::tie(right.mClass, right.mType, right.mValue);
 }
 
 bool CSMWorld::operator<(const UniversalId& left, const UniversalId& right)
 {
-    return left.isLess(right);
+    return std::tie(left.mClass, left.mType, left.mValue) < std::tie(right.mClass, right.mType, right.mValue);
 }
