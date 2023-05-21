@@ -160,18 +160,6 @@ namespace MWLua
             return ESM::RefId::deserializeText(LuaUtil::cast<std::string_view>(spellOrId));
     }
 
-    static const ESM::Spell* toSpell(const sol::object& spellOrId)
-    {
-        if (spellOrId.is<ESM::Spell>())
-            return spellOrId.as<const ESM::Spell*>();
-        else
-        {
-            auto& store = MWBase::Environment::get().getWorld()->getStore();
-            auto refId = ESM::RefId::deserializeText(LuaUtil::cast<std::string_view>(spellOrId));
-            return store.get<ESM::Spell>().find(refId);
-        }
-    }
-
     sol::table initCoreMagicBindings(const Context& context)
     {
         sol::state_view& lua = context.mLua->sol();
