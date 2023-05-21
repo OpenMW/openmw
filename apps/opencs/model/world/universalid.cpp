@@ -272,7 +272,7 @@ CSMWorld::UniversalId::UniversalId(Type type, const std::string& id)
             mClass = sIdArg[i].mClass;
             return;
         }
-    throw std::logic_error("invalid ID argument UniversalId type");
+    throw std::logic_error("invalid ID argument UniversalId type: " + std::to_string(type));
 }
 
 CSMWorld::UniversalId::UniversalId(Type type, const ESM::RefId& id)
@@ -292,7 +292,7 @@ CSMWorld::UniversalId::UniversalId(Type type, int index)
             return;
         }
 
-    throw std::logic_error("invalid index argument UniversalId type");
+    throw std::logic_error("invalid index argument UniversalId type: " + std::to_string(type));
 }
 
 CSMWorld::UniversalId::Class CSMWorld::UniversalId::getClass() const
