@@ -78,6 +78,9 @@ void ESM4::Header::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_DATA:
             {
+                if (mMaster.empty())
+                    throw std::runtime_error(
+                        "Failed to read TES4 DATA subrecord: there is no preceding MAST subrecord");
                 // WARNING: assumes DATA always follows MAST
                 if (!reader.getExact(mMaster.back().size))
                     throw std::runtime_error("TES4 DATA data read error");
