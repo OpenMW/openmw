@@ -191,9 +191,9 @@ namespace MWLua
 
         sol::table effect(context.mLua->sol(), sol::create);
         magicApi["EFFECT_TYPE"] = LuaUtil::makeStrictReadOnly(effect);
-        for (const auto& it : ESM::MagicEffect::sEffectNames)
+        for (const auto& name : ESM::MagicEffect::sEffectNames)
         {
-            effect[it.second] = Misc::StringUtils::lowerCase(it.second);
+            effect[name] = Misc::StringUtils::lowerCase(name);
         }
 
         // Spell store
@@ -263,7 +263,7 @@ namespace MWLua
         auto effectParamsT = lua.new_usertype<ESM::ENAMstruct>("ESM3_EffectParams");
         effectParamsT[sol::meta_function::to_string] = [magicEffectStore](const ESM::ENAMstruct& params) {
             const ESM::MagicEffect* const rec = magicEffectStore->find(params.mEffectID);
-            return "ESM3_EffectParams[" + std::string(ESM::MagicEffect::effectIdToGmstString(rec->mIndex)) + "]";
+            return "ESM3_EffectParams[" + ESM::MagicEffect::effectIdToGmstString(rec->mIndex) + "]";
         };
         effectParamsT["effect"]
             = sol::readonly_property([magicEffectStore](const ESM::ENAMstruct& params) -> const ESM::MagicEffect* {
@@ -296,7 +296,7 @@ namespace MWLua
         auto magicEffectT = context.mLua->sol().new_usertype<ESM::MagicEffect>("ESM3_MagicEffect");
 
         magicEffectT[sol::meta_function::to_string] = [](const ESM::MagicEffect& rec) {
-            return "ESM3_MagicEffect[" + std::string(ESM::MagicEffect::effectIdToGmstString(rec.mIndex)) + "]";
+            return "ESM3_MagicEffect[" + ESM::MagicEffect::effectIdToGmstString(rec.mIndex) + "]";
         };
         magicEffectT["id"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string {
             auto name = ESM::MagicEffect::effectIdToName(rec.mIndex);
@@ -327,7 +327,7 @@ namespace MWLua
         auto activeEffectT = context.mLua->sol().new_usertype<ActiveEffect>("ActiveEffect");
 
         activeEffectT[sol::meta_function::to_string] = [](const ActiveEffect& effect) {
-            return "ActiveEffect[" + std::string(ESM::MagicEffect::effectIdToGmstString(effect.key.mId)) + "]";
+            return "ActiveEffect[" + ESM::MagicEffect::effectIdToGmstString(effect.key.mId) + "]";
         };
         activeEffectT["id"] = sol::readonly_property([](const ActiveEffect& effect) -> std::string {
             auto name = ESM::MagicEffect::effectIdToName(effect.key.mId);

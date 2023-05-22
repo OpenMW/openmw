@@ -196,8 +196,7 @@ namespace MWGui
         mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(
             effect->mIcon, MWBase::Environment::get().getResourceSystem()->getVFS()));
 
-        mEffectName->setCaptionWithReplacing(
-            "#{" + std::string(ESM::MagicEffect::effectIdToGmstString(effect->mIndex)) + "}");
+        mEffectName->setCaptionWithReplacing("#{" + ESM::MagicEffect::effectIdToGmstString(effect->mIndex) + "}");
 
         mEffect.mEffectID = effect->mIndex;
 

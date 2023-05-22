@@ -2,11 +2,13 @@
 #define OPENMW_ESM_MGEF_H
 
 #include <map>
+#include <array>
 #include <string>
 #include <string_view>
 
 #include "components/esm/defs.hpp"
 #include "components/esm/refid.hpp"
+#include "components/misc/strings/algorithm.hpp"
 
 namespace ESM
 {
@@ -264,10 +266,13 @@ namespace ESM
             Length
         };
 
-        static const std::map<int, std::string> sGmstEffectIds;
-        static const std::map<int, std::string> sEffectNames;
-        static std::string_view effectIdToGmstString(int effectID);
-        static std::string_view effectIdToName(int effectID);
+        static const std::array<std::string, Length> sGmstEffectIds;
+        static const std::array<std::string, Length> sEffectNames;
+        static const std::map<std::string_view, int, Misc::StringUtils::CiComp> sGmstEffectIdToEffectIdMap;
+        static const std::map<std::string_view, int, Misc::StringUtils::CiComp> sEffectNameToEffectIdMap;
+
+        static const std::string& effectIdToGmstString(int effectID);
+        static const std::string& effectIdToName(int effectID);
         static int effectNameToId(std::string_view effect);
         static int effectGmstIdToId(std::string_view gmstId);
 

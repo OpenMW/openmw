@@ -162,10 +162,10 @@ namespace MWGui
                     image->setImageTexture(Misc::ResourceHelpers::correctIconPath(
                         effect->mIcon, MWBase::Environment::get().getResourceSystem()->getVFS()));
 
-                    std::string_view name = ESM::MagicEffect::effectIdToGmstString(effectId);
+                    const std::string& name = ESM::MagicEffect::effectIdToGmstString(effectId);
 
                     ToolTipInfo tooltipInfo;
-                    tooltipInfo.caption = "#{" + std::string(name) + "}";
+                    tooltipInfo.caption = "#{" + name + "}";
                     tooltipInfo.icon = effect->mIcon;
                     tooltipInfo.imageSize = 16;
                     tooltipInfo.wordWrap = false;
