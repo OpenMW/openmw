@@ -160,6 +160,8 @@ namespace ESM4
 
         std::vector<Reader*>* mGlobalReaderList = nullptr;
 
+        bool mIgnoreMissingLocalizedStrings = false;
+
         void buildLStringIndex(LocalizedStringType stringType, const std::u8string& prefix);
 
         void buildLStringIndex(LocalizedStringType stringType, std::istream& stream);
@@ -187,7 +189,7 @@ namespace ESM4
 
     public:
         Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename, VFS::Manager const* vfs,
-            const ToUTF8::StatelessUtf8Encoder* encoder);
+            const ToUTF8::StatelessUtf8Encoder* encoder, bool ignoreMissingLocalizedStrings = false);
 
         ~Reader();
 

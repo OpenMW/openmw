@@ -91,11 +91,12 @@ namespace ESM4
     }
 
     Reader::Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename, VFS::Manager const* vfs,
-        const ToUTF8::StatelessUtf8Encoder* encoder)
+        const ToUTF8::StatelessUtf8Encoder* encoder, bool ignoreMissingLocalizedStrings)
         : mVFS(vfs)
         , mEncoder(encoder)
         , mFileSize(0)
         , mStream(std::move(esmStream))
+        , mIgnoreMissingLocalizedStrings(ignoreMissingLocalizedStrings)
     {
         // used by ESMReader only?
         mCtx.filename = filename;
@@ -243,12 +244,28 @@ namespace ESM4
 
         if (mVFS != nullptr)
         {
-            const Files::IStreamPtr stream = mVFS->get(Files::pathToUnicodeString(path));
+            const std::string vfsPath = Files::pathToUnicodeString(path);
+
+            if (mIgnoreMissingLocalizedStrings && !mVFS->exists(vfsPath))
+            {
+                Log(Debug::Warning) << "Ignore missing VFS strings file: " << vfsPath;
+                return;
+            }
+
+            const Files::IStreamPtr stream = mVFS->get(vfsPath);
             buildLStringIndex(stringType, *stream);
             return;
         }
 
-        const Files::IStreamPtr stream = Files::openConstrainedFileStream(mCtx.filename.parent_path() / path);
+        const std::filesystem::path fsPath = mCtx.filename.parent_path() / path;
+
+        if (mIgnoreMissingLocalizedStrings && !std::filesystem::exists(fsPath))
+        {
+            Log(Debug::Warning) << "Ignore missing strings file: " << fsPath;
+            return;
+        }
+
+        const Files::IStreamPtr stream = Files::openConstrainedFileStream(fsPath);
         buildLStringIndex(stringType, *stream);
     }
 
@@ -361,8 +378,12 @@ namespace ESM4
         const auto it = mLStringIndex.find(stringId);
 
         if (it == mLStringIndex.end())
+        {
+            if (mIgnoreMissingLocalizedStrings)
+                return;
             throw std::runtime_error(
                 "ESM4::Reader::getLocalizedString localized string not found for " + formIdToString(stringId));
+        }
 
         str = it->second;
     }
