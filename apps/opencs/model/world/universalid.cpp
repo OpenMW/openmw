@@ -184,12 +184,25 @@ namespace
     {
         std::ostream& mStream;
 
-        void operator()(std::monostate) const {}
+        void operator()(std::monostate /*value*/) const {}
 
         template <class T>
         void operator()(const T& value) const
         {
             mStream << ": " << value;
+        }
+    };
+
+    struct GetTypeData
+    {
+        const TypeData* operator()(std::monostate /*value*/) const { return sNoArg; }
+
+        const TypeData* operator()(int /*value*/) const { return sIndexArg; }
+
+        template <class T>
+        const TypeData* operator()(const T& /*value*/) const
+        {
+            return sIdArg;
         }
     };
 }
@@ -287,9 +300,17 @@ CSMWorld::UniversalId::UniversalId(Type type, const std::string& id)
     throw std::logic_error("invalid ID argument UniversalId type: " + std::to_string(type));
 }
 
-CSMWorld::UniversalId::UniversalId(Type type, const ESM::RefId& id)
-    : UniversalId(type, id.getRefIdString())
+CSMWorld::UniversalId::UniversalId(Type type, ESM::RefId id)
+    : mType(type)
+    , mValue(id)
 {
+    for (int i = 0; sIdArg[i].mName; ++i)
+        if (type == sIdArg[i].mType)
+        {
+            mClass = sIdArg[i].mClass;
+            return;
+        }
+    throw std::logic_error("invalid RefId argument UniversalId type: " + std::to_string(type));
 }
 
 CSMWorld::UniversalId::UniversalId(Type type, int index)
@@ -339,8 +360,7 @@ int CSMWorld::UniversalId::getIndex() const
 
 std::string CSMWorld::UniversalId::getTypeName() const
 {
-    const TypeData* typeData
-        = getArgumentType() == ArgumentType_None ? sNoArg : (getArgumentType() == ArgumentType_Id ? sIdArg : sIndexArg);
+    const TypeData* typeData = std::visit(GetTypeData{}, mValue);
 
     for (int i = 0; typeData[i].mName; ++i)
         if (typeData[i].mType == mType)
@@ -362,8 +382,7 @@ std::string CSMWorld::UniversalId::toString() const
 
 std::string CSMWorld::UniversalId::getIcon() const
 {
-    const TypeData* typeData
-        = getArgumentType() == ArgumentType_None ? sNoArg : (getArgumentType() == ArgumentType_Id ? sIdArg : sIndexArg);
+    const TypeData* typeData = std::visit(GetTypeData{}, mValue);
 
     for (int i = 0; typeData[i].mName; ++i)
         if (typeData[i].mType == mType)

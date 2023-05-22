@@ -33,6 +33,7 @@ namespace CSMWorld
             ArgumentType_None,
             ArgumentType_Id,
             ArgumentType_Index,
+            ArgumentType_RefId,
         };
 
         /// \note A record list type must always be immediately followed by the matching
@@ -152,7 +153,7 @@ namespace CSMWorld
         UniversalId(Type type, const std::string& id);
         ///< Using a type for a non-ID-argument UniversalId will throw an exception.
 
-        UniversalId(Type type, const ESM::RefId& id);
+        UniversalId(Type type, ESM::RefId id);
 
         UniversalId(Type type, int index);
         ///< Using a type for a non-index-argument UniversalId will throw an exception.
@@ -188,7 +189,7 @@ namespace CSMWorld
     private:
         Class mClass;
         Type mType;
-        std::variant<std::monostate, std::string, int> mValue;
+        std::variant<std::monostate, std::string, int, ESM::RefId> mValue;
 
         friend bool operator==(const UniversalId& left, const UniversalId& right);
 
