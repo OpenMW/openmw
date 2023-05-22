@@ -526,8 +526,7 @@ namespace EsmTool
         try
         {
             const ToUTF8::StatelessUtf8Encoder encoder(ToUTF8::calculateEncoding(info.encoding));
-            ESM4::Reader reader(std::move(stream), info.filename);
-            reader.setEncoder(&encoder);
+            ESM4::Reader reader(std::move(stream), info.filename, nullptr, &encoder);
             const Params params(info);
 
             if (!params.mQuite)

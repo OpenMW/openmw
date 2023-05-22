@@ -46,6 +46,7 @@
 #include <boost/iostreams/filtering_streambuf.hpp>
 
 #include <components/bsa/memorystream.hpp>
+#include <components/debug/debuglog.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
@@ -56,6 +57,23 @@
 
 namespace ESM4
 {
+    namespace
+    {
+        std::u8string_view getStringsSuffix(LocalizedStringType type)
+        {
+            switch (type)
+            {
+                case LocalizedStringType::Strings:
+                    return u8"_English.STRINGS";
+                case LocalizedStringType::ILStrings:
+                    return u8"_English.ILSTRINGS";
+                case LocalizedStringType::DLStrings:
+                    return u8"_English.DLSTRINGS";
+            }
+
+            throw std::logic_error("Unsupported LocalizedStringType: " + std::to_string(static_cast<int>(type)));
+        }
+    }
 
     ReaderContext::ReaderContext()
         : modIndex(0)
@@ -72,9 +90,10 @@ namespace ESM4
         subRecordHeader.dataSize = 0;
     }
 
-    Reader::Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename, VFS::Manager const* vfs)
+    Reader::Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename, VFS::Manager const* vfs,
+        const ToUTF8::StatelessUtf8Encoder* encoder)
         : mVFS(vfs)
-        , mEncoder(nullptr)
+        , mEncoder(encoder)
         , mFileSize(0)
         , mStream(std::move(esmStream))
     {
@@ -209,58 +228,120 @@ namespace ESM4
         if ((mHeader.mFlags & Rec_ESM) == 0 || (mHeader.mFlags & Rec_Localized) == 0)
             return;
 
-        const auto filename = mCtx.filename.stem().filename().u8string();
+        const std::u8string prefix = mCtx.filename.stem().filename().u8string();
 
-        static const std::filesystem::path s("Strings");
-        buildLStringIndex(s / (filename + u8"_English.STRINGS"), Type_Strings);
-        buildLStringIndex(s / (filename + u8"_English.ILSTRINGS"), Type_ILStrings);
-        buildLStringIndex(s / (filename + u8"_English.DLSTRINGS"), Type_DLStrings);
+        buildLStringIndex(LocalizedStringType::Strings, prefix);
+        buildLStringIndex(LocalizedStringType::ILStrings, prefix);
+        buildLStringIndex(LocalizedStringType::DLStrings, prefix);
     }
 
-    void Reader::buildLStringIndex(const std::filesystem::path& stringFile, LocalizedStringType stringType)
+    void Reader::buildLStringIndex(LocalizedStringType stringType, const std::u8string& prefix)
     {
-        std::uint32_t numEntries;
-        std::uint32_t dataSize;
-        std::uint32_t stringId;
-        LStringOffset sp;
-        sp.type = stringType;
+        static const std::filesystem::path strings("Strings");
+        const std::u8string suffix(getStringsSuffix(stringType));
+        std::filesystem::path path = strings / (prefix + suffix);
 
-        // TODO: possibly check if the resource exists?
-        Files::IStreamPtr filestream = mVFS
-            ? mVFS->get(stringFile.string())
-            : Files::openConstrainedFileStream(mCtx.filename.parent_path() / stringFile);
-
-        filestream->seekg(0, std::ios::end);
-        std::size_t fileSize = filestream->tellg();
-        filestream->seekg(0, std::ios::beg);
-
-        std::istream* stream = filestream.get();
-        switch (stringType)
+        if (mVFS != nullptr)
         {
-            case Type_Strings:
-                mStrings = std::move(filestream);
-                break;
-            case Type_ILStrings:
-                mILStrings = std::move(filestream);
-                break;
-            case Type_DLStrings:
-                mDLStrings = std::move(filestream);
-                break;
-            default:
-                throw std::runtime_error("ESM4::Reader::unknown localised string type");
+            const Files::IStreamPtr stream = mVFS->get(Files::pathToUnicodeString(path));
+            buildLStringIndex(stringType, *stream);
+            return;
         }
 
-        stream->read((char*)&numEntries, sizeof(numEntries));
-        stream->read((char*)&dataSize, sizeof(dataSize));
-        std::size_t dataStart = fileSize - dataSize;
-        for (unsigned int i = 0; i < numEntries; ++i)
+        const Files::IStreamPtr stream = Files::openConstrainedFileStream(mCtx.filename.parent_path() / path);
+        buildLStringIndex(stringType, *stream);
+    }
+
+    void Reader::buildLStringIndex(LocalizedStringType stringType, std::istream& stream)
+    {
+        stream.seekg(0, std::ios::end);
+        const std::istream::pos_type fileSize = stream.tellg();
+        stream.seekg(0, std::ios::beg);
+
+        std::uint32_t numEntries = 0;
+        stream.read(reinterpret_cast<char*>(&numEntries), sizeof(numEntries));
+
+        std::uint32_t dataSize = 0;
+        stream.read(reinterpret_cast<char*>(&dataSize), sizeof(dataSize));
+
+        const std::istream::pos_type dataStart = fileSize - static_cast<std::istream::pos_type>(dataSize);
+
+        struct LocalizedString
         {
-            stream->read((char*)&stringId, sizeof(stringId));
-            stream->read((char*)&sp.offset, sizeof(sp.offset));
-            sp.offset += (std::uint32_t)dataStart;
-            mLStringIndex[FormId::fromUint32(stringId)] = sp;
+            std::uint32_t mOffset = 0;
+            std::uint32_t mStringId = 0;
+        };
+
+        std::vector<LocalizedString> strings;
+        strings.reserve(numEntries);
+
+        for (std::uint32_t i = 0; i < numEntries; ++i)
+        {
+            LocalizedString string;
+
+            stream.read(reinterpret_cast<char*>(&string.mStringId), sizeof(string.mStringId));
+            stream.read(reinterpret_cast<char*>(&string.mOffset), sizeof(string.mOffset));
+
+            strings.push_back(string);
         }
-        // assert (dataStart - stream->tell() == 0 && "String file start of data section mismatch");
+
+        std::sort(strings.begin(), strings.end(),
+            [](const LocalizedString& l, const LocalizedString& r) { return l.mOffset < r.mOffset; });
+
+        std::uint32_t lastOffset = 0;
+        std::string_view lastValue;
+
+        for (const LocalizedString& string : strings)
+        {
+            if (string.mOffset == lastOffset)
+            {
+                mLStringIndex.emplace(FormId::fromUint32(string.mStringId), lastValue);
+                continue;
+            }
+
+            const std::istream::pos_type offset = string.mOffset + dataStart;
+            const std::istream::pos_type pos = stream.tellg();
+            if (pos != offset)
+            {
+                char buffer[4096];
+                if (pos < offset && offset - pos < static_cast<std::istream::pos_type>(sizeof(buffer)))
+                    stream.read(buffer, offset - pos);
+                else
+                    stream.seekg(offset);
+            }
+
+            const auto it
+                = mLStringIndex.emplace(FormId::fromUint32(string.mStringId), readLocalizedString(stringType, stream))
+                      .first;
+            lastOffset = string.mOffset;
+            lastValue = it->second;
+        }
+    }
+
+    std::string Reader::readLocalizedString(LocalizedStringType type, std::istream& stream)
+    {
+        if (type == LocalizedStringType::Strings)
+        {
+            std::string data;
+
+            while (true)
+            {
+                char ch = 0;
+                stream.read(&ch, sizeof(ch));
+                if (ch == 0)
+                    break;
+                data.push_back(ch);
+            }
+
+            return data;
+        }
+
+        std::uint32_t size = 0;
+        stream.read(reinterpret_cast<char*>(&size), sizeof(size));
+
+        std::string result;
+        getStringImpl(result, size, stream, true); // expect null terminated string
+        return result;
     }
 
     void Reader::getLocalizedString(std::string& str)
@@ -277,48 +358,13 @@ namespace ESM4
     // FIXME: very messy and probably slow/inefficient
     void Reader::getLocalizedStringImpl(const FormId stringId, std::string& str)
     {
-        const std::map<FormId, LStringOffset>::const_iterator it = mLStringIndex.find(stringId);
+        const auto it = mLStringIndex.find(stringId);
 
-        if (it != mLStringIndex.end())
-        {
-            std::istream* filestream = nullptr;
+        if (it == mLStringIndex.end())
+            throw std::runtime_error(
+                "ESM4::Reader::getLocalizedString localized string not found for " + formIdToString(stringId));
 
-            switch (it->second.type)
-            {
-                case Type_Strings: // no string size provided
-                {
-                    filestream = mStrings.get();
-                    filestream->seekg(it->second.offset);
-
-                    char ch;
-                    std::vector<char> data;
-                    do
-                    {
-                        filestream->read(&ch, sizeof(ch));
-                        data.push_back(ch);
-                    } while (ch != 0);
-
-                    str = std::string(data.data());
-                    return;
-                }
-                case Type_ILStrings:
-                    filestream = mILStrings.get();
-                    break;
-                case Type_DLStrings:
-                    filestream = mDLStrings.get();
-                    break;
-                default:
-                    throw std::runtime_error("ESM4::Reader::getLocalizedString unknown string type");
-            }
-
-            // get ILStrings or DLStrings (they provide string size)
-            filestream->seekg(it->second.offset);
-            std::uint32_t size = 0;
-            filestream->read((char*)&size, sizeof(size));
-            getStringImpl(str, size, *filestream, mEncoder, true); // expect null terminated string
-        }
-        else
-            throw std::runtime_error("ESM4::Reader::getLocalizedString localized string not found");
+        str = it->second;
     }
 
     bool Reader::getRecordHeader()
@@ -659,19 +705,18 @@ namespace ESM4
         throw std::runtime_error(ss.str());
     }
 
-    bool Reader::getStringImpl(std::string& str, std::size_t size, std::istream& stream,
-        const ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull)
+    bool Reader::getStringImpl(std::string& str, std::size_t size, std::istream& stream, bool hasNull)
     {
         std::size_t newSize = size;
 
-        if (encoder)
+        if (mEncoder != nullptr)
         {
             std::string input(size, '\0');
             stream.read(input.data(), size);
             if (stream.gcount() == static_cast<std::streamsize>(size))
             {
                 const std::string_view result
-                    = encoder->getUtf8(input, ToUTF8::BufferAllocationPolicy::FitToRequiredSize, str);
+                    = mEncoder->getUtf8(input, ToUTF8::BufferAllocationPolicy::FitToRequiredSize, str);
                 if (str.empty() && !result.empty())
                 {
                     str = std::move(input);

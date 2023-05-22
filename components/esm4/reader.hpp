@@ -131,6 +131,13 @@ namespace ESM4
         ReaderContext();
     };
 
+    enum class LocalizedStringType
+    {
+        Strings,
+        ILStrings,
+        DLStrings,
+    };
+
     class Reader
     {
         VFS::Manager const* mVFS;
@@ -149,24 +156,15 @@ namespace ESM4
         Files::IStreamPtr mILStrings;
         Files::IStreamPtr mDLStrings;
 
-        enum LocalizedStringType
-        {
-            Type_Strings = 0,
-            Type_ILStrings = 1,
-            Type_DLStrings = 2
-        };
-
-        struct LStringOffset
-        {
-            LocalizedStringType type;
-            std::uint32_t offset;
-        };
-
-        std::map<FormId, LStringOffset> mLStringIndex;
+        std::unordered_map<FormId, std::string> mLStringIndex;
 
         std::vector<Reader*>* mGlobalReaderList = nullptr;
 
-        void buildLStringIndex(const std::filesystem::path& stringFile, LocalizedStringType stringType);
+        void buildLStringIndex(LocalizedStringType stringType, const std::u8string& prefix);
+
+        void buildLStringIndex(LocalizedStringType stringType, std::istream& stream);
+
+        std::string readLocalizedString(LocalizedStringType type, std::istream& stream);
 
         inline bool hasLocalizedStrings() const { return (mHeader.mFlags & Rec_Localized) != 0; }
 
@@ -185,11 +183,12 @@ namespace ESM4
 
         Reader() = default;
 
-        bool getStringImpl(std::string& str, std::size_t size, std::istream& stream,
-            const ToUTF8::StatelessUtf8Encoder* encoder, bool hasNull = false);
+        bool getStringImpl(std::string& str, std::size_t size, std::istream& stream, bool hasNull = false);
 
     public:
-        Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename, VFS::Manager const* vfs = nullptr);
+        Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename, VFS::Manager const* vfs,
+            const ToUTF8::StatelessUtf8Encoder* encoder);
+
         ~Reader();
 
         void open(const std::filesystem::path& filename);
@@ -197,8 +196,6 @@ namespace ESM4
         void close();
 
         inline bool isEsm4() const { return true; }
-
-        inline void setEncoder(const ToUTF8::StatelessUtf8Encoder* encoder) { mEncoder = encoder; }
 
         const std::vector<ESM::MasterData>& getGameFiles() const { return mHeader.mMaster; }
 
@@ -348,14 +345,8 @@ namespace ESM4
         void adjustGRUPFormId();
 
         // Note: uses the string size from the subrecord header rather than checking null termination
-        bool getZString(std::string& str)
-        {
-            return getStringImpl(str, mCtx.subRecordHeader.dataSize, *mStream, mEncoder, true);
-        }
-        bool getString(std::string& str)
-        {
-            return getStringImpl(str, mCtx.subRecordHeader.dataSize, *mStream, mEncoder);
-        }
+        bool getZString(std::string& str) { return getStringImpl(str, mCtx.subRecordHeader.dataSize, *mStream, true); }
+        bool getString(std::string& str) { return getStringImpl(str, mCtx.subRecordHeader.dataSize, *mStream); }
 
         bool getZeroTerminatedStringArray(std::vector<std::string>& values);
 
