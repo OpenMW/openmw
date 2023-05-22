@@ -3,8 +3,10 @@
 #include <algorithm>
 #include <compare>
 #include <iostream>
+#include <span>
 #include <sstream>
 #include <stdexcept>
+#include <string_view>
 #include <tuple>
 #include <vector>
 
@@ -14,12 +16,12 @@ namespace
     {
         CSMWorld::UniversalId::Class mClass;
         CSMWorld::UniversalId::Type mType;
-        const char* mName;
-        const char* mIcon;
+        std::string_view mName;
+        std::string_view mIcon;
     };
 
-    static const TypeData sNoArg[] = {
-        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, "-", 0 },
+    constexpr TypeData sNoArg[] = {
+        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, "-", ":placeholder" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Globals, "Global Variables",
             ":./global-variable.png" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_Gmsts, "Game Settings", ":./gmst.png" },
@@ -81,11 +83,9 @@ namespace
             ":./start-script.png" },
         { CSMWorld::UniversalId::Class_RecordList, CSMWorld::UniversalId::Type_MetaDatas, "Metadata",
             ":./metadata.png" },
-        // end marker
-        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 },
     };
 
-    static const TypeData sIdArg[] = {
+    constexpr TypeData sIdArg[] = {
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Global, "Global Variable",
             ":./global-variable.png" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_Gmst, "Game Setting", ":./gmst.png" },
@@ -165,19 +165,15 @@ namespace
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_StartScript, "Start Script",
             ":./start-script.png" },
         { CSMWorld::UniversalId::Class_Record, CSMWorld::UniversalId::Type_MetaData, "Metadata", ":./metadata.png" },
-        // end marker
-        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 },
     };
 
-    static const TypeData sIndexArg[] = {
+    constexpr TypeData sIndexArg[] = {
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_VerificationResults,
             "Verification Results", ":./menu-verify.png" },
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_LoadErrorLog, "Load Error Log",
             ":./error-log.png" },
         { CSMWorld::UniversalId::Class_Transient, CSMWorld::UniversalId::Type_Search, "Global Search",
             ":./menu-search.png" },
-        // end marker
-        { CSMWorld::UniversalId::Class_None, CSMWorld::UniversalId::Type_None, 0, 0 },
     };
 
     struct WriteToStream
@@ -195,12 +191,12 @@ namespace
 
     struct GetTypeData
     {
-        const TypeData* operator()(std::monostate /*value*/) const { return sNoArg; }
+        std::span<const TypeData> operator()(std::monostate /*value*/) const { return sNoArg; }
 
-        const TypeData* operator()(int /*value*/) const { return sIndexArg; }
+        std::span<const TypeData> operator()(int /*value*/) const { return sIndexArg; }
 
         template <class T>
-        const TypeData* operator()(const T& /*value*/) const
+        std::span<const TypeData> operator()(const T& /*value*/) const
         {
             return sIdArg;
         }
@@ -216,20 +212,20 @@ CSMWorld::UniversalId::UniversalId(const std::string& universalId)
     {
         std::string type = universalId.substr(0, index);
 
-        for (int i = 0; sIdArg[i].mName; ++i)
-            if (type == sIdArg[i].mName)
+        for (const TypeData& value : sIdArg)
+            if (type == value.mName)
             {
-                mType = sIdArg[i].mType;
-                mClass = sIdArg[i].mClass;
+                mType = value.mType;
+                mClass = value.mClass;
                 mValue = universalId.substr(index + 2);
                 return;
             }
 
-        for (int i = 0; sIndexArg[i].mName; ++i)
-            if (type == sIndexArg[i].mName)
+        for (const TypeData& value : sIndexArg)
+            if (type == value.mName)
             {
-                mType = sIndexArg[i].mType;
-                mClass = sIndexArg[i].mClass;
+                mType = value.mType;
+                mClass = value.mClass;
 
                 std::istringstream stream(universalId.substr(index + 2));
 
@@ -245,11 +241,11 @@ CSMWorld::UniversalId::UniversalId(const std::string& universalId)
     }
     else
     {
-        for (int i = 0; sNoArg[i].mName; ++i)
-            if (universalId == sNoArg[i].mName)
+        for (const TypeData& value : sIndexArg)
+            if (universalId == value.mName)
             {
-                mType = sNoArg[i].mType;
-                mClass = sNoArg[i].mClass;
+                mType = value.mType;
+                mClass = value.mClass;
                 return;
             }
     }
@@ -261,26 +257,26 @@ CSMWorld::UniversalId::UniversalId(Type type)
     : mType(type)
     , mValue(std::monostate{})
 {
-    for (int i = 0; sNoArg[i].mName; ++i)
-        if (type == sNoArg[i].mType)
+    for (const TypeData& value : sNoArg)
+        if (type == value.mType)
         {
-            mClass = sNoArg[i].mClass;
+            mClass = value.mClass;
             return;
         }
 
-    for (int i = 0; sIdArg[i].mName; ++i)
-        if (type == sIdArg[i].mType)
+    for (const TypeData& value : sIdArg)
+        if (type == value.mType)
         {
             mValue = std::string();
-            mClass = sIdArg[i].mClass;
+            mClass = value.mClass;
             return;
         }
 
-    for (int i = 0; sIndexArg[i].mName; ++i)
-        if (type == sIndexArg[i].mType)
+    for (const TypeData& value : sIndexArg)
+        if (type == value.mType)
         {
             mValue = int{};
-            mClass = sIndexArg[i].mClass;
+            mClass = value.mClass;
             return;
         }
 
@@ -291,10 +287,10 @@ CSMWorld::UniversalId::UniversalId(Type type, const std::string& id)
     : mType(type)
     , mValue(id)
 {
-    for (int i = 0; sIdArg[i].mName; ++i)
-        if (type == sIdArg[i].mType)
+    for (const TypeData& value : sIdArg)
+        if (type == value.mType)
         {
-            mClass = sIdArg[i].mClass;
+            mClass = value.mClass;
             return;
         }
     throw std::logic_error("invalid ID argument UniversalId type: " + std::to_string(type));
@@ -304,10 +300,10 @@ CSMWorld::UniversalId::UniversalId(Type type, ESM::RefId id)
     : mType(type)
     , mValue(id)
 {
-    for (int i = 0; sIdArg[i].mName; ++i)
-        if (type == sIdArg[i].mType)
+    for (const TypeData& value : sIdArg)
+        if (type == value.mType)
         {
-            mClass = sIdArg[i].mClass;
+            mClass = value.mClass;
             return;
         }
     throw std::logic_error("invalid RefId argument UniversalId type: " + std::to_string(type));
@@ -317,10 +313,10 @@ CSMWorld::UniversalId::UniversalId(Type type, int index)
     : mType(type)
     , mValue(index)
 {
-    for (int i = 0; sIndexArg[i].mName; ++i)
-        if (type == sIndexArg[i].mType)
+    for (const TypeData& value : sIndexArg)
+        if (type == value.mType)
         {
-            mClass = sIndexArg[i].mClass;
+            mClass = value.mClass;
             return;
         }
 
@@ -360,11 +356,11 @@ int CSMWorld::UniversalId::getIndex() const
 
 std::string CSMWorld::UniversalId::getTypeName() const
 {
-    const TypeData* typeData = std::visit(GetTypeData{}, mValue);
+    const std::span<const TypeData> typeData = std::visit(GetTypeData{}, mValue);
 
-    for (int i = 0; typeData[i].mName; ++i)
-        if (typeData[i].mType == mType)
-            return typeData[i].mName;
+    for (const TypeData& value : typeData)
+        if (value.mType == mType)
+            return std::string(value.mName);
 
     throw std::logic_error("failed to retrieve UniversalId type name");
 }
@@ -382,11 +378,11 @@ std::string CSMWorld::UniversalId::toString() const
 
 std::string CSMWorld::UniversalId::getIcon() const
 {
-    const TypeData* typeData = std::visit(GetTypeData{}, mValue);
+    const std::span<const TypeData> typeData = std::visit(GetTypeData{}, mValue);
 
-    for (int i = 0; typeData[i].mName; ++i)
-        if (typeData[i].mType == mType)
-            return typeData[i].mIcon ? typeData[i].mIcon : ":placeholder";
+    for (const TypeData& value : typeData)
+        if (value.mType == mType)
+            return std::string(value.mIcon);
 
     throw std::logic_error("failed to retrieve UniversalId type icon");
 }
@@ -395,9 +391,9 @@ std::vector<CSMWorld::UniversalId::Type> CSMWorld::UniversalId::listReferenceabl
 {
     std::vector<CSMWorld::UniversalId::Type> list;
 
-    for (int i = 0; sIdArg[i].mName; ++i)
-        if (sIdArg[i].mClass == Class_RefRecord)
-            list.push_back(sIdArg[i].mType);
+    for (const TypeData& value : sIdArg)
+        if (value.mClass == Class_RefRecord)
+            list.push_back(value.mType);
 
     return list;
 }
@@ -406,31 +402,30 @@ std::vector<CSMWorld::UniversalId::Type> CSMWorld::UniversalId::listTypes(int cl
 {
     std::vector<CSMWorld::UniversalId::Type> list;
 
-    for (int i = 0; sNoArg[i].mName; ++i)
-        if (sNoArg[i].mClass & classes)
-            list.push_back(sNoArg[i].mType);
+    for (const TypeData& value : sNoArg)
+        if (value.mClass & classes)
+            list.push_back(value.mType);
 
-    for (int i = 0; sIdArg[i].mName; ++i)
-        if (sIdArg[i].mClass & classes)
-            list.push_back(sIdArg[i].mType);
+    for (const TypeData& value : sIdArg)
+        if (value.mClass & classes)
+            list.push_back(value.mType);
 
-    for (int i = 0; sIndexArg[i].mName; ++i)
-        if (sIndexArg[i].mClass & classes)
-            list.push_back(sIndexArg[i].mType);
+    for (const TypeData& value : sIndexArg)
+        if (value.mClass & classes)
+            list.push_back(value.mType);
 
     return list;
 }
 
 CSMWorld::UniversalId::Type CSMWorld::UniversalId::getParentType(Type type)
 {
-    for (int i = 0; sIdArg[i].mType; ++i)
-        if (type == sIdArg[i].mType)
+    for (const TypeData& value : sIdArg)
+        if (type == value.mType)
         {
-            if (sIdArg[i].mClass == Class_RefRecord)
+            if (value.mClass == Class_RefRecord)
                 return Type_Referenceables;
 
-            if (sIdArg[i].mClass == Class_SubRecord || sIdArg[i].mClass == Class_Record
-                || sIdArg[i].mClass == Class_Resource)
+            if (value.mClass == Class_SubRecord || value.mClass == Class_Record || value.mClass == Class_Resource)
             {
                 if (type == Type_Cell_Missing)
                     return Type_Cells;
