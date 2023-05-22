@@ -529,7 +529,7 @@ namespace Gui
             additional.insert(std::make_pair(84, 0x2122)); // trademark sign
             additional.insert(std::make_pair(45, 0x2212)); // minus sign
 
-            for (const auto [key, value] : additional)
+            for (const auto& [key, value] : additional)
             {
                 if (key != i)
                     continue;
