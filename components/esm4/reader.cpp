@@ -529,7 +529,7 @@ namespace ESM4
     {
         if (mCtx.groupStack.size() == 0)
             throw std::runtime_error("ESM4::Reader::grp mCtx.groupStack.size is zero");
-        if (pos <= mCtx.groupStack.size() - 1)
+        if (pos > mCtx.groupStack.size() - 1)
             throw std::runtime_error("ESM4::Reader::grp - exceeded stack depth");
 
         return (*(mCtx.groupStack.end() - pos - 1)).first;
