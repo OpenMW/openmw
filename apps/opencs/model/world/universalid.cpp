@@ -360,7 +360,7 @@ const std::string& CSMWorld::UniversalId::getId() const
     if (const std::string* result = std::get_if<std::string>(&mValue))
         return *result;
 
-    throw std::logic_error("invalid access to ID of non-ID UniversalId");
+    throw std::logic_error("invalid access to ID of " + ::toString(getArgumentType()) + " UniversalId");
 }
 
 int CSMWorld::UniversalId::getIndex() const
@@ -368,7 +368,7 @@ int CSMWorld::UniversalId::getIndex() const
     if (const int* result = std::get_if<int>(&mValue))
         return *result;
 
-    throw std::logic_error("invalid access to index of non-index UniversalId");
+    throw std::logic_error("invalid access to index of " + ::toString(getArgumentType()) + " UniversalId");
 }
 
 ESM::RefId CSMWorld::UniversalId::getRefId() const
