@@ -484,4 +484,27 @@ namespace Nif
         mKeyList->read(nif);
     }
 
+    void BSMultiBound::read(NIFStream* nif)
+    {
+        mData.read(nif);
+    }
+
+    void BSMultiBound::post(Reader& nif)
+    {
+        mData.post(nif);
+    }
+
+    void BSMultiBoundOBB::read(NIFStream* nif)
+    {
+        mCenter = nif->getVector3();
+        mSize = nif->getVector3();
+        mRotation = nif->getMatrix3();
+    }
+
+    void BSMultiBoundSphere::read(NIFStream* nif)
+    {
+        mCenter = nif->getVector3();
+        mRadius = nif->getFloat();
+    }
+
 } // Namespace

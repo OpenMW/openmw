@@ -320,4 +320,18 @@ namespace Nif
         postRecordList(nif, mBones1);
         postRecordList(nif, mBones2);
     }
+
+    void BSMultiBoundNode::read(NIFStream* nif)
+    {
+        NiNode::read(nif);
+        mMultiBound.read(nif);
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_SKY)
+            mType = nif->getUInt();
+    }
+
+    void BSMultiBoundNode::post(Reader& nif)
+    {
+        NiNode::post(nif);
+        mMultiBound.post(nif);
+    }
 }
