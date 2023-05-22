@@ -440,8 +440,7 @@ namespace MWRender
         if (getenv("OPENMW_DONT_PRECOMPILE") == nullptr)
         {
             mViewer->setIncrementalCompileOperation(new osgUtil::IncrementalCompileOperation);
-            mViewer->getIncrementalCompileOperation()->setTargetFrameRate(
-                Settings::Manager::getFloat("target framerate", "Cells"));
+            mViewer->getIncrementalCompileOperation()->setTargetFrameRate(Settings::cells().mTargetFramerate);
         }
 
         mDebugDraw
@@ -486,7 +485,7 @@ namespace MWRender
             mTerrain = std::make_unique<Terrain::TerrainGrid>(sceneRoot, mRootNode, mResourceSystem,
                 mTerrainStorage.get(), Mask_Terrain, Mask_PreCompile, Mask_Debug);
 
-        mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
+        mTerrain->setTargetFrameRate(Settings::cells().mTargetFramerate);
 
         if (groundcover)
         {

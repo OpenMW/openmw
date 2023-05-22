@@ -20,7 +20,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
@@ -718,7 +718,7 @@ namespace MWWorld
 
         mRendering.getResourceSystem()->getSceneManager()->setIncrementalCompileOperation(
             mRendering.getIncrementalCompileOperation());
-        mRendering.getResourceSystem()->setExpiryDelay(Settings::Manager::getFloat("cache expiry delay", "Cells"));
+        mRendering.getResourceSystem()->setExpiryDelay(Settings::cells().mCacheExpiryDelay);
     }
 
     void Scene::testInteriorCells()
@@ -776,7 +776,7 @@ namespace MWWorld
 
         mRendering.getResourceSystem()->getSceneManager()->setIncrementalCompileOperation(
             mRendering.getIncrementalCompileOperation());
-        mRendering.getResourceSystem()->setExpiryDelay(Settings::Manager::getFloat("cache expiry delay", "Cells"));
+        mRendering.getResourceSystem()->setExpiryDelay(Settings::cells().mCacheExpiryDelay);
     }
 
     void Scene::changePlayerCell(CellStore& cell, const ESM::Position& pos, bool adjustPlayerPos)
@@ -824,23 +824,23 @@ namespace MWWorld
         , mRendering(rendering)
         , mNavigator(navigator)
         , mCellLoadingThreshold(1024.f)
-        , mPreloadDistance(Settings::Manager::getInt("preload distance", "Cells"))
-        , mPreloadEnabled(Settings::Manager::getBool("preload enabled", "Cells"))
-        , mPreloadExteriorGrid(Settings::Manager::getBool("preload exterior grid", "Cells"))
-        , mPreloadDoors(Settings::Manager::getBool("preload doors", "Cells"))
-        , mPreloadFastTravel(Settings::Manager::getBool("preload fast travel", "Cells"))
-        , mPredictionTime(Settings::Manager::getFloat("prediction time", "Cells"))
+        , mPreloadDistance(Settings::cells().mPreloadDistance)
+        , mPreloadEnabled(Settings::cells().mPreloadEnabled)
+        , mPreloadExteriorGrid(Settings::cells().mPreloadExteriorGrid)
+        , mPreloadDoors(Settings::cells().mPreloadDoors)
+        , mPreloadFastTravel(Settings::cells().mPreloadFastTravel)
+        , mPredictionTime(Settings::cells().mPredictionTime)
     {
         mPreloader = std::make_unique<CellPreloader>(rendering.getResourceSystem(), physics->getShapeManager(),
             rendering.getTerrain(), rendering.getLandManager());
         mPreloader->setWorkQueue(mRendering.getWorkQueue());
 
-        rendering.getResourceSystem()->setExpiryDelay(Settings::Manager::getFloat("cache expiry delay", "Cells"));
+        rendering.getResourceSystem()->setExpiryDelay(Settings::cells().mCacheExpiryDelay);
 
-        mPreloader->setExpiryDelay(Settings::Manager::getFloat("preload cell expiry delay", "Cells"));
-        mPreloader->setMinCacheSize(Settings::Manager::getInt("preload cell cache min", "Cells"));
-        mPreloader->setMaxCacheSize(Settings::Manager::getInt("preload cell cache max", "Cells"));
-        mPreloader->setPreloadInstances(Settings::Manager::getBool("preload instances", "Cells"));
+        mPreloader->setExpiryDelay(Settings::cells().mPreloadCellExpiryDelay);
+        mPreloader->setMinCacheSize(Settings::cells().mPreloadCellCacheMin);
+        mPreloader->setMaxCacheSize(Settings::cells().mPreloadCellCacheMax);
+        mPreloader->setPreloadInstances(Settings::cells().mPreloadInstances);
     }
 
     Scene::~Scene()

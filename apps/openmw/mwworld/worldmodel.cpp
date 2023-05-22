@@ -10,7 +10,7 @@
 #include <components/esm3/loadregn.hpp>
 #include <components/esm4/loadwrld.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -155,8 +155,7 @@ void MWWorld::WorldModel::writeCell(ESM::ESMWriter& writer, CellStore& cell) con
 MWWorld::WorldModel::WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& readers)
     : mStore(store)
     , mReaders(readers)
-    , mIdCache(
-          std::clamp(Settings::Manager::getInt("pointers cache size", "Cells"), 40, 1000), { ESM::RefId(), nullptr })
+    , mIdCache(Settings::cells().mPointersCacheSize, { ESM::RefId(), nullptr })
 {
 }
 
