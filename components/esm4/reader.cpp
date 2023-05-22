@@ -28,7 +28,6 @@
 
 #undef DEBUG_GROUPSTACK
 
-#include <cassert>
 #include <iomanip> // for debugging
 #include <iostream> // for debugging
 #include <sstream> // for debugging
@@ -178,7 +177,8 @@ namespace ESM4
         openRaw(std::move(stream), filename);
 
         // should at least have the size of ESM3 record header (20 or 24 bytes for ESM4)
-        assert(mFileSize >= 16);
+        if (mFileSize < 16)
+            throw std::runtime_error("File too small");
         std::uint32_t modVer = 0;
         if (getExact(modVer)) // get the first 4 bytes of the record header only
         {
@@ -404,7 +404,8 @@ namespace ESM4
 
     void Reader::skipRecordData()
     {
-        assert(mCtx.recordRead <= mCtx.recordHeader.record.dataSize && "Skipping after reading more than available");
+        if (mCtx.recordRead > mCtx.recordHeader.record.dataSize)
+            throw std::runtime_error("Skipping after reading more than available");
         mStream->ignore(mCtx.recordHeader.record.dataSize - mCtx.recordRead);
         mCtx.recordRead = mCtx.recordHeader.record.dataSize; // for getSubRecordHeader()
     }
@@ -514,7 +515,9 @@ namespace ESM4
             mCtx.groupStack.back().second += lastGroupSize;
             lastGroupSize = mCtx.groupStack.back().first.groupSize;
 
-            assert(lastGroupSize >= mCtx.groupStack.back().second && "Read more records than available");
+            if (lastGroupSize < mCtx.groupStack.back().second)
+                throw std::runtime_error("Read more records than available");
+
             // #if 0
             if (mCtx.groupStack.back().second > lastGroupSize) // FIXME: debugging only
                 std::cerr << printLabel(mCtx.groupStack.back().first.label, mCtx.groupStack.back().first.type)
@@ -537,7 +540,8 @@ namespace ESM4
 
     void Reader::skipGroupData()
     {
-        assert(!mCtx.groupStack.empty() && "Skipping group with an empty stack");
+        if (mCtx.groupStack.empty())
+            throw std::runtime_error("Skipping group with an empty stack");
 
         // subtract what was already read/skipped
         std::uint32_t skipSize = mCtx.groupStack.back().first.groupSize - mCtx.groupStack.back().second;
@@ -572,8 +576,8 @@ namespace ESM4
 
     const CellGrid& Reader::currCellGrid() const
     {
-        // Maybe should throw an exception instead?
-        assert(mCtx.cellGridValid && "Attempt to use an invalid cell grid");
+        if (!mCtx.cellGridValid)
+            throw std::runtime_error("Attempt to use an invalid cell grid");
 
         return mCtx.currCellGrid;
     }
