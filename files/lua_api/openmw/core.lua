@@ -576,7 +576,7 @@
 
 ---
 -- @type MagicEffect
--- @field #number Effect id string
+-- @field #string Effect id string
 -- @field #string name Localized name of the effect
 -- @field #number school @{#MagicSchool}
 -- @field #number baseCost
@@ -598,8 +598,8 @@
 -- @field #ActiveEffect effect @{#ActiveEffect}
 -- @field #any affectedSkill @{#SKILL} or nil
 -- @field #any affectedAttribute @{#ATTRIBUTE} or nil
--- @field #number id Effect id string
--- @field #number name Localized name of the effect
+-- @field #string id Effect id string
+-- @field #string name Localized name of the effect
 -- @field #number magnitude
 -- @field #number magnitudeBase
 -- @field #number magnitudeModifier
