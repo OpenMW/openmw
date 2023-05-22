@@ -140,7 +140,7 @@ namespace MWGui
 
     void EnchantingDialog::setPtr(const MWWorld::Ptr& ptr)
     {
-        mName->setCaption("");
+        mName->setCaption({});
 
         if (ptr.getClass().isActor())
         {

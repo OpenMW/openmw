@@ -40,7 +40,7 @@ namespace MWGui
 
         void setAttributeValues();
 
-        std::string getLevelupClassImage(
+        std::string_view getLevelupClassImage(
             const int combatIncreases, const int magicIncreases, const int stealthIncreases);
     };
 

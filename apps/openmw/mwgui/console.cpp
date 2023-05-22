@@ -101,7 +101,7 @@ namespace MWGui
         if (mNames.empty())
         {
             // keywords
-            std::istringstream input("");
+            std::istringstream input;
 
             Compiler::Scanner scanner(*this, input, mCompilerContext.getExtensions());
 
@@ -312,7 +312,7 @@ namespace MWGui
             if (oldCaption == newCaption && !matches.empty())
             {
                 int i = 0;
-                printOK("");
+                printOK({});
                 for (std::string& match : matches)
                 {
                     if (i == 50)
@@ -377,7 +377,7 @@ namespace MWGui
         // Reset the command line before the command execution.
         // It prevents the re-triggering of the acceptCommand() event for the same command
         // during the actual command execution
-        mCommandLine->setCaption("");
+        mCommandLine->setCaption({});
 
         execute(cm);
     }
@@ -618,7 +618,7 @@ namespace MWGui
             if ((matches.front().find(' ') != std::string::npos))
             {
                 if (!has_front_quote)
-                    output.append(std::string("\""));
+                    output += '"';
                 return output.append(matches.front() + std::string("\" "));
             }
             else if (has_front_quote)

@@ -41,7 +41,7 @@ namespace MWBase
         {
         public:
             virtual ~ResponseCallback() = default;
-            virtual void addResponse(const std::string& title, const std::string& text) = 0;
+            virtual void addResponse(std::string_view title, std::string_view text) = 0;
         };
 
         DialogueManager() {}
@@ -67,7 +67,7 @@ namespace MWBase
 
         virtual void say(const MWWorld::Ptr& actor, const ESM::RefId& topic) = 0;
 
-        virtual void keywordSelected(const std::string& keyword, ResponseCallback* callback) = 0;
+        virtual void keywordSelected(std::string_view keyword, ResponseCallback* callback) = 0;
         virtual void goodbyeSelected() = 0;
         virtual void questionAnswered(int answer, ResponseCallback* callback) = 0;
 

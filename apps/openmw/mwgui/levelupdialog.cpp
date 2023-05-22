@@ -107,7 +107,7 @@ namespace MWGui
     void LevelupDialog::assignCoins()
     {
         resetCoins();
-        for (unsigned int i = 0; i < mSpentAttributes.size(); ++i)
+        for (size_t i = 0; i < mSpentAttributes.size(); ++i)
         {
             MyGUI::ImageBox* image = mCoins[i];
             image->detachFromWidget();
@@ -115,7 +115,7 @@ namespace MWGui
 
             int attribute = mSpentAttributes[i];
 
-            int xdiff = mAttributeMultipliers[attribute]->getCaption() == "" ? 0 : 20;
+            int xdiff = mAttributeMultipliers[attribute]->getCaption().empty() ? 0 : 20;
 
             MyGUI::IntPoint pos = mAttributes[attribute]->getAbsolutePosition() - mAssignWidget->getAbsolutePosition()
                 - MyGUI::IntPoint(22 + xdiff, 0);
@@ -160,14 +160,17 @@ namespace MWGui
 
                 float mult = pcStats.getLevelupAttributeMultiplier(i);
                 mult = std::min(mult, 100 - pcStats.getAttribute(i).getBase());
-                text->setCaption(mult <= 1 ? "" : "x" + MyGUI::utility::toString(mult));
+                if (mult <= 1)
+                    text->setCaption({});
+                else
+                    text->setCaption("x" + MyGUI::utility::toString(mult));
             }
             else
             {
                 mAttributes[i]->setEnabled(false);
                 mAttributeValues[i]->setEnabled(false);
 
-                text->setCaption("");
+                text->setCaption({});
             }
         }
 
@@ -227,10 +230,10 @@ namespace MWGui
         assignCoins();
     }
 
-    std::string LevelupDialog::getLevelupClassImage(
+    std::string_view LevelupDialog::getLevelupClassImage(
         const int combatIncreases, const int magicIncreases, const int stealthIncreases)
     {
-        std::string ret = "acrobat";
+        std::string_view ret = "acrobat";
 
         int total = combatIncreases + magicIncreases + stealthIncreases;
         if (total == 0)

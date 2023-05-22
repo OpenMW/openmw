@@ -39,9 +39,9 @@ namespace Gui
         void addItem(std::string_view name);
         void addSeparator(); ///< add a seperator between the current and the next item.
         void removeItem(const std::string& name);
-        unsigned int getItemCount();
-        std::string getItemNameAt(unsigned int at); ///< \attention if there are separators, this method will return ""
-                                                    ///< at the place where the separator is
+        size_t getItemCount();
+        const std::string& getItemNameAt(size_t at); ///< \attention if there are separators, this method will return ""
+                                                     ///< at the place where the separator is
         void clear();
 
         MyGUI::Button* getItemWidget(std::string_view name);

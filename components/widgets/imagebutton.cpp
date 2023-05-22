@@ -42,7 +42,7 @@ namespace Gui
             mImagePushed = _value;
         else if (_key == "ImageNormal")
         {
-            if (mImageNormal == "")
+            if (mImageNormal.empty())
             {
                 setImageTexture(_value);
             }

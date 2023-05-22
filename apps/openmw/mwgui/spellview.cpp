@@ -100,7 +100,7 @@ namespace MWGui
             if (curType != spell.mType)
             {
                 if (spell.mType == Spell::Type_Power)
-                    addGroup("#{sPowers}", "");
+                    addGroup("#{sPowers}", {});
                 else if (spell.mType == Spell::Type_Spell)
                     addGroup("#{sSpells}", mShowCostColumn ? "#{sCostChance}" : "");
                 else
@@ -162,7 +162,7 @@ namespace MWGui
 
                 // match model against line
                 // if don't match, then major change has happened, so do a full update
-                if (mModel->getItemCount() <= static_cast<unsigned>(spellIndex))
+                if (mModel->getItemCount() <= static_cast<size_t>(spellIndex))
                 {
                     fullUpdateRequired = true;
                     break;
@@ -246,7 +246,7 @@ namespace MWGui
         groupWidget->setTextAlign(MyGUI::Align::Left);
         groupWidget->setNeedMouseFocus(false);
 
-        if (label2 != "")
+        if (!label2.empty())
         {
             MyGUI::TextBox* groupWidget2 = mScrollView->createWidget<Gui::TextBox>("SandBrightText",
                 MyGUI::IntCoord(0, 0, mScrollView->getWidth(), 24), MyGUI::Align::Left | MyGUI::Align::Top);

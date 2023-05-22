@@ -36,7 +36,7 @@ namespace Gui
 
     void MWList::addSeparator()
     {
-        mItems.emplace_back("");
+        mItems.emplace_back(std::string{});
     }
 
     void MWList::adjustSize()
@@ -46,9 +46,9 @@ namespace Gui
 
     void MWList::redraw(bool scrollbarShown)
     {
-        const int _scrollBarWidth = 20; // fetch this from skin?
+        constexpr int _scrollBarWidth = 20; // fetch this from skin?
         const int scrollBarWidth = scrollbarShown ? _scrollBarWidth : 0;
-        const int spacing = 3;
+        constexpr int spacing = 3;
         int viewPosition = -mScrollView->getViewOffset().top;
 
         while (mScrollView->getChildCount())
@@ -58,16 +58,16 @@ namespace Gui
 
         mItemHeight = 0;
         int i = 0;
-        for (std::vector<std::string>::const_iterator it = mItems.begin(); it != mItems.end(); ++it)
+        for (const auto& item : mItems)
         {
-            if (*it != "")
+            if (!item.empty())
             {
                 if (mListItemSkin.empty())
                     return;
                 MyGUI::Button* button = mScrollView->createWidget<MyGUI::Button>(mListItemSkin,
                     MyGUI::IntCoord(0, mItemHeight, mScrollView->getSize().width - scrollBarWidth - 2, 24),
-                    MyGUI::Align::Left | MyGUI::Align::Top, getName() + "_item_" + (*it));
-                button->setCaption((*it));
+                    MyGUI::Align::Left | MyGUI::Align::Top, getName() + "_item_" + item);
+                button->setCaption(item);
                 button->getSubWidgetText()->setWordWrap(true);
                 button->getSubWidgetText()->setTextAlign(MyGUI::Align::Left);
                 button->eventMouseWheel += MyGUI::newDelegate(this, &MWList::onMouseWheelMoved);
@@ -115,12 +115,12 @@ namespace Gui
             Base::setPropertyOverride(_key, _value);
     }
 
-    unsigned int MWList::getItemCount()
+    size_t MWList::getItemCount()
     {
-        return static_cast<unsigned int>(mItems.size());
+        return mItems.size();
     }
 
-    std::string MWList::getItemNameAt(unsigned int at)
+    const std::string& MWList::getItemNameAt(size_t at)
     {
         assert(at < mItems.size() && "List item out of bounds");
         return mItems[at];
@@ -134,8 +134,9 @@ namespace Gui
 
     void MWList::removeItem(const std::string& name)
     {
-        assert(std::find(mItems.begin(), mItems.end(), name) != mItems.end());
-        mItems.erase(std::find(mItems.begin(), mItems.end(), name));
+        auto it = std::find(mItems.begin(), mItems.end(), name);
+        assert(it != mItems.end());
+        mItems.erase(it);
     }
 
     void MWList::clear()

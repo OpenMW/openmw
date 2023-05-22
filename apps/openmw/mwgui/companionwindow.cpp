@@ -153,7 +153,7 @@ namespace MWGui
             mProfitLabel->setCaptionWithReplacing("#{sProfitValue} " + MyGUI::utility::toString(getProfit(mPtr)));
         }
         else
-            mProfitLabel->setCaption("");
+            mProfitLabel->setCaption({});
     }
 
     void CompanionWindow::onCloseButtonClicked(MyGUI::Widget* _sender)

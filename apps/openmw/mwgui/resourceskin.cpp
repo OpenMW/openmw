@@ -33,9 +33,9 @@ namespace MWGui
             const std::string basisSkinType = basis->findAttribute("type");
             if (Misc::StringUtils::ciEqual(basisSkinType, "SimpleText"))
                 continue;
+            bool isTileRect = Misc::StringUtils::ciEqual(basisSkinType, "TileRect");
 
-            const std::string offset = basis->findAttribute("offset");
-            if (!offset.empty())
+            if (!basis->findAttribute("offset").empty())
                 continue;
 
             basis->addAttribute("offset", coord);
@@ -45,19 +45,17 @@ namespace MWGui
             {
                 if (state->getName() == "State")
                 {
-                    const std::string stateOffset = state->findAttribute("offset");
-                    if (!stateOffset.empty())
+                    if (!state->findAttribute("offset").empty())
                         continue;
 
                     state->addAttribute("offset", coord);
-                    if (Misc::StringUtils::ciEqual(basisSkinType, "TileRect"))
+                    if (isTileRect)
                     {
                         MyGUI::xml::ElementEnumerator property = state->getElementEnumerator();
                         bool hasTileSize = false;
                         while (property.next("Property"))
                         {
-                            const std::string key = property->findAttribute("key");
-                            if (key != "TileSize")
+                            if (property->findAttribute("key") != "TileSize")
                                 continue;
 
                             hasTileSize = true;

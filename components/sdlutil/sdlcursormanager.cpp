@@ -66,20 +66,20 @@ namespace SDLUtil
         }
     }
 
-    void SDLCursorManager::cursorChanged(const std::string& name)
+    void SDLCursorManager::cursorChanged(std::string_view name)
     {
         mCurrentCursor = name;
-        _setGUICursor(name);
+        _setGUICursor(mCurrentCursor);
     }
 
-    void SDLCursorManager::_setGUICursor(const std::string& name)
+    void SDLCursorManager::_setGUICursor(std::string_view name)
     {
         auto it = mCursorMap.find(name);
         if (it != mCursorMap.end())
             SDL_SetCursor(it->second);
     }
 
-    void SDLCursorManager::createCursor(const std::string& name, int rotDegrees, osg::Image* image, Uint8 hotspot_x,
+    void SDLCursorManager::createCursor(std::string_view name, int rotDegrees, osg::Image* image, Uint8 hotspot_x,
         Uint8 hotspot_y, int cursorWidth, int cursorHeight)
     {
 #ifndef ANDROID
@@ -128,7 +128,7 @@ namespace SDLUtil
         return SDLUtil::SurfaceUniquePtr(targetSurface, SDL_FreeSurface);
     }
 
-    void SDLCursorManager::_createCursorFromResource(const std::string& name, int rotDegrees, osg::Image* image,
+    void SDLCursorManager::_createCursorFromResource(std::string_view name, int rotDegrees, osg::Image* image,
         Uint8 hotspot_x, Uint8 hotspot_y, int cursorWidth, int cursorHeight)
     {
         if (mCursorMap.find(name) != mCursorMap.end())
@@ -141,7 +141,7 @@ namespace SDLUtil
             // set the cursor and store it for later
             SDL_Cursor* curs = SDL_CreateColorCursor(surface.get(), hotspot_x, hotspot_y);
 
-            mCursorMap.insert(CursorMap::value_type(std::string(name), curs));
+            mCursorMap.emplace(name, curs);
         }
         catch (std::exception& e)
         {

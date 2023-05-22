@@ -81,7 +81,7 @@ namespace MWGui
 
         mConfigLayout->setVisibleVScroll(true);
 
-        mConfigArea = mConfigLayout->createWidget<MyGUI::Widget>("", {}, MyGUI::Align::Default);
+        mConfigArea = mConfigLayout->createWidget<MyGUI::Widget>({}, {}, MyGUI::Align::Default);
 
         mConfigLayout->eventMouseWheel += MyGUI::newDelegate(this, &PostProcessorHud::notifyMouseWheel);
         mConfigArea->eventMouseWheel += MyGUI::newDelegate(this, &PostProcessorHud::notifyMouseWheel);

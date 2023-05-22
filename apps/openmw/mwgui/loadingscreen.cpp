@@ -226,7 +226,7 @@ namespace MWGui
             mSplashImage->setVisible(true);
             mSplashImage->setBackgroundImage(randomSplash, true, stretch);
         }
-        mSceneImage->setBackgroundImage("");
+        mSceneImage->setBackgroundImage({});
         mSceneImage->setVisible(false);
     }
 
@@ -313,7 +313,7 @@ namespace MWGui
         mViewer->getCamera()->addInitialDrawCallback(mCopyFramebufferToTextureCallback);
         mCopyFramebufferToTextureCallback->reset();
 
-        mSplashImage->setBackgroundImage("");
+        mSplashImage->setBackgroundImage({});
         mSplashImage->setVisible(false);
 
         mSceneImage->setRenderItemTexture(mGuiTexture.get());

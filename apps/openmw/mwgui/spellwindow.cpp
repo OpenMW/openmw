@@ -241,7 +241,7 @@ namespace MWGui
         if ((!godmode && stats.isParalyzed()) || stats.getKnockedDown() || stats.isDead() || stats.getHitRecovery())
             return;
 
-        mSpellView->setModel(new SpellModel(MWMechanics::getPlayer(), ""));
+        mSpellView->setModel(new SpellModel(MWMechanics::getPlayer()));
 
         SpellModel::ModelIndex selected = mSpellView->getModel()->getSelectedIndex();
         if (selected < 0)

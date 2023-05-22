@@ -212,7 +212,7 @@ namespace MWGui
             resourceSystem->getVFS(), mScalingFactor, "mygui", logpath / "MyGUI.log");
 
         mGui = std::make_unique<MyGUI::Gui>();
-        mGui->initialise("");
+        mGui->initialise({});
 
         createTextures();
 
@@ -517,7 +517,7 @@ namespace MWGui
         trackWindow(mPostProcessorHud, makePostprocessorWindowSettingValues());
 
         mInputBlocker = MyGUI::Gui::getInstance().createWidget<MyGUI::Widget>(
-            "", 0, 0, w, h, MyGUI::Align::Stretch, "InputBlocker");
+            {}, 0, 0, w, h, MyGUI::Align::Stretch, "InputBlocker");
 
         mHud->setVisible(true);
 
@@ -796,7 +796,8 @@ namespace MWGui
     {
         if (getMode() == GM_Dialogue && showInDialogueMode != MWGui::ShowInDialogueMode_Never)
         {
-            mDialogueWindow->addMessageBox(MyGUI::LanguageManager::getInstance().replaceTags(toUString(message)));
+            MyGUI::UString text = MyGUI::LanguageManager::getInstance().replaceTags(toUString(message));
+            mDialogueWindow->addMessageBox(text.asUTF8());
         }
         else if (showInDialogueMode != MWGui::ShowInDialogueMode_Only)
         {
@@ -1095,26 +1096,25 @@ namespace MWGui
 
     void WindowManager::onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result)
     {
-        std::string tag(_tag);
+        std::string_view tag = _tag.asUTF8();
 
-        std::string MyGuiPrefix = "setting=";
-        size_t MyGuiPrefixLength = MyGuiPrefix.length();
+        std::string_view MyGuiPrefix = "setting=";
 
-        std::string tokenToFind = "sCell=";
-        size_t tokenLength = tokenToFind.length();
+        std::string_view tokenToFind = "sCell=";
 
-        if (tag.compare(0, MyGuiPrefixLength, MyGuiPrefix) == 0)
+        if (tag.starts_with(MyGuiPrefix))
         {
-            tag = tag.substr(MyGuiPrefixLength, tag.length());
+            tag = tag.substr(MyGuiPrefix.length());
             size_t comma_pos = tag.find(',');
-            std::string settingSection = tag.substr(0, comma_pos);
-            std::string settingTag = tag.substr(comma_pos + 1, tag.length());
+            std::string_view settingSection = tag.substr(0, comma_pos);
+            std::string_view settingTag = tag.substr(comma_pos + 1, tag.length());
 
             _result = Settings::Manager::getString(settingTag, settingSection);
         }
-        else if (tag.compare(0, tokenLength, tokenToFind) == 0)
+        else if (tag.starts_with(tokenToFind))
         {
-            _result = mTranslationDataStorage.translateCellName(tag.substr(tokenLength));
+            std::string_view cellName = mTranslationDataStorage.translateCellName(tag.substr(tokenToFind.length()));
+            _result.assign(cellName.data(), cellName.size());
             _result = MyGUI::TextIterator::toTagsString(_result);
         }
         else if (Gui::replaceTag(tag, _result))
@@ -1124,7 +1124,7 @@ namespace MWGui
         else
         {
             std::vector<std::string> split;
-            Misc::StringUtils::split(tag, split, ":");
+            Misc::StringUtils::split(std::string{ tag }, split, ":");
 
             l10n::Manager& l10nManager = *MWBase::Environment::get().getL10nManager();
 
@@ -1140,7 +1140,7 @@ namespace MWGui
             {
                 Log(Debug::Error) << "Error: WindowManager::onRetrieveTag: no Store set up yet, can not replace '"
                                   << tag << "'";
-                _result = tag;
+                _result.assign(tag.data(), tag.size());
                 return;
             }
             const ESM::GameSetting* setting = mStore->get<ESM::GameSetting>().search(tag);
@@ -1148,7 +1148,7 @@ namespace MWGui
             if (setting && setting->mValue.getType() == ESM::VT_String)
                 _result = setting->mValue.getString();
             else
-                _result = tag;
+                _result.assign(tag.data(), tag.size());
         }
     }
 

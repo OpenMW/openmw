@@ -103,27 +103,17 @@ namespace MWGui
 
     void CharacterCreation::setValue(std::string_view id, const MWMechanics::AttributeValue& value)
     {
-        static const char* ids[] = {
-            "AttribVal1",
-            "AttribVal2",
-            "AttribVal3",
-            "AttribVal4",
-            "AttribVal5",
-            "AttribVal6",
-            "AttribVal7",
-            "AttribVal8",
-            nullptr,
-        };
-
-        for (int i = 0; ids[i]; ++i)
+        std::string_view prefix = "AttribVal";
+        if (id.starts_with(prefix) && id.size() == prefix.size() + 1)
         {
-            if (ids[i] == id)
+            char index = id[prefix.size()];
+            if (index >= '1' && index <= '8')
             {
-                mPlayerAttributes[static_cast<ESM::Attribute::AttributeID>(i)] = value;
+                // Match [AttribVal1-AttribVal8] to the corresponding AttributeID values [0-7]
+                auto attribute = static_cast<ESM::Attribute::AttributeID>(index - '0' - 1);
+                mPlayerAttributes[attribute] = value;
                 if (mReviewDialog)
-                    mReviewDialog->setAttribute(static_cast<ESM::Attribute::AttributeID>(i), value);
-
-                break;
+                    mReviewDialog->setAttribute(attribute, value);
             }
         }
     }

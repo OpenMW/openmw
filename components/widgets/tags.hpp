@@ -2,14 +2,13 @@
 #define OPENMW_WIDGETS_TAGS_H
 
 #include <MyGUI_UString.h>
-#include <map>
-#include <string>
+#include <string_view>
 
 namespace Gui
 {
 
     /// Try to replace a tag. Returns true on success and writes the result to \a out.
-    bool replaceTag(const MyGUI::UString& tag, MyGUI::UString& out);
+    bool replaceTag(std::string_view tag, MyGUI::UString& out);
 
 }
 

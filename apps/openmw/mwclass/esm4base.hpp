@@ -62,7 +62,7 @@ namespace MWClass
 
         bool hasToolTip(const MWWorld::ConstPtr& ptr) const override { return false; }
 
-        std::string_view getName(const MWWorld::ConstPtr& ptr) const override { return ""; }
+        std::string_view getName(const MWWorld::ConstPtr& ptr) const override { return {}; }
 
         std::string getModel(const MWWorld::ConstPtr& ptr) const override
         {
@@ -73,7 +73,7 @@ namespace MWClass
             // TODO: Figure out a better way find markers and LOD meshes; show LOD only outside of active grid.
             if (model.empty() || Misc::StringUtils::ciStartsWith(model, "meshes\\marker")
                 || Misc::StringUtils::ciEndsWith(model, "lod.nif"))
-                return "";
+                return {};
 
             return model;
         }

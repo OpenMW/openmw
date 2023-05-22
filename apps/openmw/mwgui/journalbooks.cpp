@@ -168,8 +168,8 @@ namespace MWGui
     {
         BookTypesetter::Ptr typesetter = createTypesetter();
 
-        BookTypesetter::Style* header = typesetter->createStyle("", MyGUI::Colour(0.60f, 0.00f, 0.00f));
-        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
+        BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
+        BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
 
         typesetter->write(header, to_utf8_span("You have no journal entries!"));
         typesetter->lineBreak();
@@ -183,10 +183,10 @@ namespace MWGui
     {
         BookTypesetter::Ptr typesetter = createTypesetter();
 
-        BookTypesetter::Style* header = typesetter->createStyle("", MyGUI::Colour(0.60f, 0.00f, 0.00f));
-        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
+        BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
+        BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
 
-        mModel->visitJournalEntries("", AddJournalEntry(typesetter, body, header, true));
+        mModel->visitJournalEntries({}, AddJournalEntry(typesetter, body, header, true));
 
         return typesetter->complete();
     }
@@ -195,8 +195,8 @@ namespace MWGui
     {
         BookTypesetter::Ptr typesetter = createTypesetter();
 
-        BookTypesetter::Style* header = typesetter->createStyle("", MyGUI::Colour(0.60f, 0.00f, 0.00f));
-        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
+        BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
+        BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
 
         mModel->visitTopicName(topicId, AddTopicName(typesetter, header));
 
@@ -211,8 +211,8 @@ namespace MWGui
     {
         BookTypesetter::Ptr typesetter = createTypesetter();
 
-        BookTypesetter::Style* header = typesetter->createStyle("", MyGUI::Colour(0.60f, 0.00f, 0.00f));
-        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
+        BookTypesetter::Style* header = typesetter->createStyle({}, MyGUI::Colour(0.60f, 0.00f, 0.00f));
+        BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
 
         AddQuestName addName(typesetter, header);
         addName(to_utf8_span(questName));
@@ -243,7 +243,7 @@ namespace MWGui
         char ch = 'A';
         std::string buffer;
 
-        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
+        BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
         for (int i = 0; i < 26; ++i)
         {
             buffer = "( ";
@@ -272,7 +272,7 @@ namespace MWGui
 
         typesetter->setSectionAlignment(BookTypesetter::AlignCenter);
 
-        BookTypesetter::Style* body = typesetter->createStyle("", MyGUI::Colour::Black);
+        BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
 
         int fontHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
 
@@ -297,7 +297,7 @@ namespace MWGui
             buffer += ch[1];
             buffer += " )";
 
-            Utf8Stream stream((char*)ch);
+            Utf8Stream stream(ch, ch + 2);
             Utf8Stream::UnicodeChar first = stream.peek();
 
             const MWGui::TextColours& textColours = MWBase::Environment::get().getWindowManager()->getTextColours();

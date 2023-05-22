@@ -169,9 +169,9 @@ namespace MWGui
                         return;
                 }
 
-                std::string type = focus->getUserString("ToolTipType");
+                std::string_view type = focus->getUserString("ToolTipType");
 
-                if (type == "")
+                if (type.empty())
                 {
                     return;
                 }
@@ -252,8 +252,8 @@ namespace MWGui
                         int school = MWMechanics::getSpellSchool(spell, player);
                         info.text = "#{sSchool}: " + sSchoolNames[school];
                     }
-                    std::string cost = focus->getUserString("SpellCost");
-                    if (cost != "" && cost != "0")
+                    const std::string& cost = focus->getUserString("SpellCost");
+                    if (!cost.empty() && cost != "0")
                         info.text
                             += MWGui::ToolTips::getValueString(MWMechanics::calcSpellCost(*spell), "#{sCastCost}");
                     info.effects = effects;
@@ -267,7 +267,7 @@ namespace MWGui
 
                     tooltip->setVisible(true);
 
-                    std::map<std::string, std::string> userStrings = focus->getUserStrings();
+                    const auto& userStrings = focus->getUserStrings();
                     for (auto& userStringPair : userStrings)
                     {
                         size_t underscorePos = userStringPair.first.find('_');
@@ -496,7 +496,7 @@ namespace MWGui
 
         if (!info.effects.empty())
         {
-            MyGUI::Widget* effectArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>("",
+            MyGUI::Widget* effectArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>({},
                 MyGUI::IntCoord(padding.left, totalSize.height, 300 - padding.left, 300 - totalSize.height),
                 MyGUI::Align::Stretch);
 
@@ -518,7 +518,7 @@ namespace MWGui
 
         if (enchant)
         {
-            MyGUI::Widget* enchantArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>("",
+            MyGUI::Widget* enchantArea = mDynamicToolTipBox->createWidget<MyGUI::Widget>({},
                 MyGUI::IntCoord(padding.left, totalSize.height, 300 - padding.left, 300 - totalSize.height),
                 MyGUI::Align::Stretch);
 
@@ -932,7 +932,7 @@ namespace MWGui
 
     void ToolTips::createClassToolTip(MyGUI::Widget* widget, const ESM::Class& playerClass)
     {
-        if (playerClass.mName == "")
+        if (playerClass.mName.empty())
             return;
 
         int spec = playerClass.mData.mSpecialization;

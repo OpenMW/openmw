@@ -51,7 +51,7 @@ namespace MWGui
         MyGUI::ImageBox* mVideoBackground;
         VideoWidget* mVideo; // For animated main menus
 
-        std::map<std::string, Gui::ImageButton*> mButtons;
+        std::map<std::string, Gui::ImageButton*, std::less<>> mButtons;
 
         void onButtonClicked(MyGUI::Widget* sender);
         void onNewGameConfirmed();

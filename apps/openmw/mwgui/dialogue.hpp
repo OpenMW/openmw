@@ -35,7 +35,7 @@ namespace MWGui
         {
         }
 
-        void addResponse(const std::string& title, const std::string& text) override;
+        void addResponse(std::string_view title, std::string_view text) override;
 
         void updateTopics() const;
     };
@@ -112,7 +112,7 @@ namespace MWGui
 
     struct DialogueText
     {
-        virtual ~DialogueText() {}
+        virtual ~DialogueText() = default;
         virtual void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch,
             std::map<std::string, std::unique_ptr<Link>>& topicLinks) const = 0;
         std::string mText;
@@ -120,7 +120,7 @@ namespace MWGui
 
     struct Response : DialogueText
     {
-        Response(const std::string& text, const std::string& title = "", bool needMargin = true);
+        Response(std::string_view text, std::string_view title = {}, bool needMargin = true);
         void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch,
             std::map<std::string, std::unique_ptr<Link>>& topicLinks) const override;
         void addTopicLink(BookTypesetter::Ptr typesetter, intptr_t topicId, size_t begin, size_t end) const;
@@ -130,7 +130,7 @@ namespace MWGui
 
     struct Message : DialogueText
     {
-        Message(const std::string& text);
+        Message(std::string_view text);
         void write(BookTypesetter::Ptr typesetter, KeywordSearchT* keywordSearch,
             std::map<std::string, std::unique_ptr<Link>>& topicLinks) const override;
     };
@@ -154,9 +154,9 @@ namespace MWGui
         /// @return true if stale keywords were updated successfully
         bool setKeywords(const std::list<std::string>& keyWord);
 
-        void addResponse(const std::string& title, const std::string& text, bool needMargin = true);
+        void addResponse(std::string_view title, std::string_view text, bool needMargin = true);
 
-        void addMessageBox(const std::string& text);
+        void addMessageBox(std::string_view text);
 
         void onFrame(float dt) override;
         void clear() override { resetReference(); }

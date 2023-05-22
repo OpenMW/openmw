@@ -346,7 +346,7 @@ namespace MWGui
         for (const std::string& text : buttons)
         {
             button = mButtonBar->createWidget<MyGUI::Button>(
-                "MW_Button", coord, MyGUI::Align::Top | MyGUI::Align::HCenter, "");
+                "MW_Button", coord, MyGUI::Align::Top | MyGUI::Align::HCenter, {});
             button->getSubWidgetText()->setWordWrap(true);
             button->setCaption(text);
             fitToText(button);
@@ -386,7 +386,7 @@ namespace MWGui
     ClassChoiceDialog::ClassChoiceDialog()
         : InfoBoxDialog()
     {
-        setText("");
+        setText({});
         ButtonList buttons;
         buttons.emplace_back(
             MWBase::Environment::get().getWindowManager()->getGameSettingString("sClassChoiceMenu1", {}));
