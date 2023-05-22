@@ -13,11 +13,10 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/settings/values.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
-
-#include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -341,8 +340,8 @@ namespace MWRender
     void ScreenshotManager::makeCubemapScreenshot(osg::Image* image, int w, int h, const osg::Matrixd& cameraTransform)
     {
         osg::ref_ptr<osg::Camera> rttCamera(new osg::Camera);
-        float nearClip = Settings::Manager::getFloat("near clip", "Camera");
-        float viewDistance = Settings::Manager::getFloat("viewing distance", "Camera");
+        const float nearClip = Settings::camera().mNearClip;
+        const float viewDistance = Settings::camera().mViewingDistance;
         // each cubemap side sees 90 degrees
         if (SceneUtil::AutoDepth::isReversed())
             rttCamera->setProjectionMatrix(

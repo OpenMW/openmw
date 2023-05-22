@@ -31,7 +31,7 @@
 #include <components/shader/removedalphafunc.hpp>
 #include <components/shader/shadermanager.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <components/sceneutil/cullsafeboundsvisitor.hpp>
 #include <components/sceneutil/depth.hpp>
@@ -315,13 +315,12 @@ namespace MWRender
         , mNightEyeFactor(0.f)
         // TODO: Near clip should not need to be bounded like this, but too small values break OSG shadow calculations
         // CPU-side. See issue: #6072
-        , mNearClip(std::max(0.005f, Settings::Manager::getFloat("near clip", "Camera")))
-        , mViewDistance(Settings::Manager::getFloat("viewing distance", "Camera"))
+        , mNearClip(Settings::camera().mNearClip)
+        , mViewDistance(Settings::camera().mViewingDistance)
         , mFieldOfViewOverridden(false)
         , mFieldOfViewOverride(0.f)
-        , mFieldOfView(std::clamp(Settings::Manager::getFloat("field of view", "Camera"), 1.f, 179.f))
-        , mFirstPersonFieldOfView(
-              std::clamp(Settings::Manager::getFloat("first person field of view", "Camera"), 1.f, 179.f))
+        , mFieldOfView(Settings::camera().mFieldOfView)
+        , mFirstPersonFieldOfView(Settings::camera().mFirstPersonFieldOfView)
     {
         bool reverseZ = SceneUtil::AutoDepth::isReversed();
         auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(
@@ -565,12 +564,11 @@ namespace MWRender
 
         osg::Camera::CullingMode cullingMode = osg::Camera::DEFAULT_CULLING | osg::Camera::FAR_PLANE_CULLING;
 
-        if (!Settings::Manager::getBool("small feature culling", "Camera"))
+        if (!Settings::camera().mSmallFeatureCulling)
             cullingMode &= ~(osg::CullStack::SMALL_FEATURE_CULLING);
         else
         {
-            mViewer->getCamera()->setSmallFeatureCullingPixelSize(
-                Settings::Manager::getFloat("small feature culling pixel size", "Camera"));
+            mViewer->getCamera()->setSmallFeatureCullingPixelSize(Settings::camera().mSmallFeatureCullingPixelSize);
             cullingMode |= osg::CullStack::SMALL_FEATURE_CULLING;
         }
 
@@ -1365,7 +1363,7 @@ namespace MWRender
         {
             if (it->first == "Camera" && it->second == "field of view")
             {
-                mFieldOfView = Settings::Manager::getFloat("field of view", "Camera");
+                mFieldOfView = Settings::camera().mFieldOfView;
                 updateProjection = true;
             }
             else if (it->first == "Video" && (it->second == "resolution x" || it->second == "resolution y"))
@@ -1374,7 +1372,7 @@ namespace MWRender
             }
             else if (it->first == "Camera" && it->second == "viewing distance")
             {
-                setViewDistance(Settings::Manager::getFloat("viewing distance", "Camera"));
+                setViewDistance(Settings::camera().mViewingDistance);
             }
             else if (it->first == "General"
                 && (it->second == "texture filter" || it->second == "texture mipmap" || it->second == "anisotropy"))

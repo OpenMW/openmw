@@ -3,7 +3,7 @@
 #include <algorithm>
 
 #include <components/debug/debuglog.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 namespace SceneUtil
 {
@@ -113,7 +113,7 @@ namespace SceneUtil
     {
         bool enableReverseZ = false;
 
-        if (Settings::Manager::getBool("reverse z", "Camera"))
+        if (Settings::camera().mReverseZ)
         {
             osg::ref_ptr<osg::GLExtensions> exts = osg::GLExtensions::Get(0, false);
             if (exts && exts->isClipControlSupported)
