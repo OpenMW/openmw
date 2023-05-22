@@ -59,10 +59,19 @@ QVariant CSMTools::ReportModel::data(const QModelIndex& index, int role) const
         {
             CSMWorld::UniversalId id = mRows.at(index.row()).mId;
 
-            if (id.getArgumentType() == CSMWorld::UniversalId::ArgumentType_Id)
-                return QString::fromUtf8(id.getId().c_str());
+            switch (id.getArgumentType())
+            {
+                case CSMWorld::UniversalId::ArgumentType_None:
+                    return QString("-");
+                case CSMWorld::UniversalId::ArgumentType_Index:
+                    return QString::number(id.getIndex());
+                case CSMWorld::UniversalId::ArgumentType_Id:
+                    return QString::fromStdString(id.getId());
+                case CSMWorld::UniversalId::ArgumentType_RefId:
+                    return QString::fromStdString(id.getRefId().toString());
+            }
 
-            return QString("-");
+            return QString("unsupported");
         }
 
         case Column_Hint:

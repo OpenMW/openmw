@@ -2,6 +2,7 @@
 #define CSM_WOLRD_UNIVERSALID_H
 
 #include <string>
+#include <variant>
 #include <vector>
 
 #include <QMetaType>
@@ -31,7 +32,8 @@ namespace CSMWorld
         {
             ArgumentType_None,
             ArgumentType_Id,
-            ArgumentType_Index
+            ArgumentType_Index,
+            ArgumentType_RefId,
         };
 
         /// \note A record list type must always be immediately followed by the matching
@@ -144,14 +146,6 @@ namespace CSMWorld
             NumberOfTypes = Type_RunLog + 1
         };
 
-    private:
-        Class mClass;
-        ArgumentType mArgumentType;
-        Type mType;
-        std::string mId;
-        int mIndex;
-
-    public:
         UniversalId(const std::string& universalId);
 
         UniversalId(Type type = Type_None);
@@ -159,7 +153,7 @@ namespace CSMWorld
         UniversalId(Type type, const std::string& id);
         ///< Using a type for a non-ID-argument UniversalId will throw an exception.
 
-        UniversalId(Type type, const ESM::RefId& id);
+        UniversalId(Type type, ESM::RefId id);
 
         UniversalId(Type type, int index);
         ///< Using a type for a non-index-argument UniversalId will throw an exception.
@@ -176,9 +170,7 @@ namespace CSMWorld
         int getIndex() const;
         ///< Calling this function for a non-index type will throw an exception.
 
-        bool isEqual(const UniversalId& universalId) const;
-
-        bool isLess(const UniversalId& universalId) const;
+        ESM::RefId getRefId() const;
 
         std::string getTypeName() const;
 
@@ -195,10 +187,18 @@ namespace CSMWorld
         /// that contains records of type \a type.
         /// Otherwise return Type_None.
         static Type getParentType(Type type);
+
+    private:
+        Class mClass;
+        Type mType;
+        std::variant<std::monostate, std::string, int, ESM::RefId> mValue;
+
+        friend bool operator==(const UniversalId& left, const UniversalId& right);
+
+        friend bool operator<(const UniversalId& left, const UniversalId& right);
     };
 
     bool operator==(const UniversalId& left, const UniversalId& right);
-    bool operator!=(const UniversalId& left, const UniversalId& right);
 
     bool operator<(const UniversalId& left, const UniversalId& right);
 }
