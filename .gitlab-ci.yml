@@ -146,6 +146,15 @@ Ubuntu_GCC:
   # When CCache doesn't exist (e.g. first build on a fork), build takes more than 1h, which is the default for forks.
   timeout: 2h
 
+Ubuntu_GCC_asan:
+  extends: Ubuntu_GCC
+  cache:
+    key: Ubuntu_GCC_asan.ubuntu_22.04.v1
+  variables:
+    CMAKE_BUILD_TYPE: Debug
+    CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak
+    CMAKE_EXE_LINKER_FLAGS: -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak -fuse-ld=mold
+
 Clang_Format:
   extends: .Ubuntu_Image
   stage: checks
@@ -222,7 +231,7 @@ Ubuntu_GCC_tests:
 Ubuntu_GCC_tests_asan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_asan.ubuntu_22.04.v1
+    key: Ubuntu_GCC_tests_asan.ubuntu_22.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -240,7 +249,7 @@ Ubuntu_GCC_tests_asan:
 Ubuntu_GCC_tests_ubsan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_ubsan.ubuntu_22.04.v1
+    key: Ubuntu_GCC_tests_ubsan.ubuntu_22.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -257,7 +266,7 @@ Ubuntu_GCC_tests_ubsan:
 .Ubuntu_GCC_tests_tsan:
   extends: Ubuntu_GCC
   cache:
-    key: Ubuntu_GCC_tsan.ubuntu_22.04.v1
+    key: Ubuntu_GCC_tests_tsan.ubuntu_22.04.v1
   variables:
     CCACHE_SIZE: 1G
     BUILD_TESTS_ONLY: 1
@@ -430,25 +439,41 @@ Ubuntu_Clang_tests_Debug:
     reports:
       junit: build/*_tests.xml
 
-Ubuntu_Clang_integration_tests:
+.Ubuntu_integration_tests_base:
   extends: .Ubuntu_Image
   stage: test
-  needs:
-    - Ubuntu_Clang
   variables:
     PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   cache:
-    key: Ubuntu_Clang_integration_tests.ubuntu_22.04.v2
     paths:
       - .cache/pip
       - apt-cache/
   before_script:
-    - CI/install_debian_deps.sh openmw-integration-tests
+    - CI/install_debian_deps.sh $OPENMW_DEPS
     - pip3 install --user numpy matplotlib termtables click
   script:
     - CI/run_integration_tests.sh
   after_script:
     - if [[ -f /tmp/openmw-crash.log ]]; then cat /tmp/openmw-crash.log; fi
+
+Ubuntu_Clang_integration_tests:
+  extends: .Ubuntu_integration_tests_base
+  needs:
+    - Ubuntu_Clang
+  cache:
+    key: Ubuntu_Clang_integration_tests.ubuntu_22.04.v2
+  variables:
+    OPENMW_DEPS: openmw-integration-tests
+
+Ubuntu_GCC_integration_tests_asan:
+  extends: .Ubuntu_integration_tests_base
+  needs:
+    - Ubuntu_GCC_asan
+  cache:
+    key: Ubuntu_GCC_integration_tests_asan.ubuntu_22.04.v1
+  variables:
+    OPENMW_DEPS: openmw-integration-tests libasan6
+    ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_leaks=0
 
 .MacOS:
   image: macos-11-xcode-12
