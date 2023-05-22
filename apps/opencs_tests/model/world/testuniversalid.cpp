@@ -150,6 +150,10 @@ namespace CSMWorld
 
             Params{ UniversalId("Instance: f"), UniversalId::Type_Reference, UniversalId::Class_SubRecord,
                 UniversalId::ArgumentType_Id, "Instance", "Instance: f", ":./instance.png" },
+
+            Params{ UniversalId(UniversalId::Type_Reference, ESM::RefId::stringRefId("g")), UniversalId::Type_Reference,
+                UniversalId::Class_SubRecord, UniversalId::ArgumentType_Id, "Instance", "Instance: g",
+                ":./instance.png" },
         };
 
         INSTANTIATE_TEST_SUITE_P(ValidParams, CSMWorldUniversalIdValidPerTypeTest, ValuesIn(validParams));

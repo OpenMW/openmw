@@ -276,8 +276,8 @@ CSMWorld::UniversalId::UniversalId(Type type, const std::string& id)
 }
 
 CSMWorld::UniversalId::UniversalId(Type type, const ESM::RefId& id)
+    : UniversalId(type, id.getRefIdString())
 {
-    UniversalId(type, id.getRefIdString());
 }
 
 CSMWorld::UniversalId::UniversalId(Type type, int index)
