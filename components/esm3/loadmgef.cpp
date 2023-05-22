@@ -658,7 +658,7 @@ namespace ESM
         const std::array<std::string, MagicEffect::Length>& strings)
     {
         std::map<std::string_view, int, Misc::StringUtils::CiComp> map;
-        for (int i = 0; i < strings.size(); i++)
+        for (int i = 0; i < (int)strings.size(); i++)
             map[strings[i]] = i;
 
         return map;
@@ -731,7 +731,7 @@ namespace ESM
 
     const std::string& MagicEffect::effectIdToGmstString(int effectID)
     {
-        if (effectID >= sGmstEffectIds.size() || effectID < 0)
+        if (effectID >= (int)sGmstEffectIds.size() || effectID < 0)
             throw std::runtime_error(std::string("Unimplemented effect ID ") + std::to_string(effectID));
 
         return sGmstEffectIds[effectID];
@@ -739,7 +739,7 @@ namespace ESM
 
     const std::string& MagicEffect::effectIdToName(int effectID)
     {
-        if (effectID >= sEffectNames.size() || effectID < 0)
+        if (effectID >= (int)sEffectNames.size() || effectID < 0)
             throw std::runtime_error(std::string("Unimplemented effect ID ") + std::to_string(effectID));
 
         return sEffectNames[effectID];

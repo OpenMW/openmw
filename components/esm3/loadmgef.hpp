@@ -1,8 +1,8 @@
 #ifndef OPENMW_ESM_MGEF_H
 #define OPENMW_ESM_MGEF_H
 
-#include <map>
 #include <array>
+#include <map>
 #include <string>
 #include <string_view>
 
