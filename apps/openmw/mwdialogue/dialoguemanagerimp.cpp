@@ -159,12 +159,12 @@ namespace MWDialogue
 
         Filter filter(actor, mChoice, mTalkedTo);
 
-        for (MWWorld::Store<ESM::Dialogue>::iterator it = dialogs.begin(); it != dialogs.end(); ++it)
+        for (const ESM::Dialogue& dialogue : dialogs)
         {
-            if (it->mType == ESM::Dialogue::Greeting)
+            if (dialogue.mType == ESM::Dialogue::Greeting)
             {
                 // Search a response (we do not accept a fallback to "Info refusal" here)
-                if (const ESM::DialInfo* info = filter.search(*it, false))
+                if (const ESM::DialInfo* info = filter.search(dialogue, false).second)
                 {
                     creatureStats.talkedToPlayer();
 
@@ -176,7 +176,7 @@ namespace MWDialogue
                     MWScript::InterpreterContext interpreterContext(&mActor.getRefData().getLocals(), mActor);
                     callback->addResponse({}, Interpreter::fixDefinesDialog(info->mResponse, interpreterContext));
                     executeScript(info->mResultScript, mActor);
-                    mLastTopic = it->mId;
+                    mLastTopic = dialogue.mId;
 
                     addTopicsFromText(info->mResponse);
 
@@ -291,11 +291,11 @@ namespace MWDialogue
 
         const ESM::Dialogue& dialogue = *dialogues.find(topic);
 
-        const ESM::DialInfo* info = filter.search(dialogue, true);
+        const auto [responseTopic, info] = filter.search(dialogue, true);
 
         if (info)
         {
-            std::string title;
+            std::string_view title;
             if (dialogue.mType == ESM::Dialogue::Persuasion)
             {
                 // Determine GMST from dialogue topic. GMSTs are:
@@ -320,15 +320,8 @@ namespace MWDialogue
             {
                 // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the Info
                 // refusal group, in which case it should not be added to the journal.
-                for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin();
-                     iter != dialogue.mInfo.end(); ++iter)
-                {
-                    if (iter->mId == info->mId)
-                    {
-                        MWBase::Environment::get().getJournal()->addTopic(topic, info->mId, mActor);
-                        break;
-                    }
-                }
+                if (responseTopic == &dialogue)
+                    MWBase::Environment::get().getJournal()->addTopic(topic, info->mId, mActor);
             }
 
             mLastTopic = topic;
@@ -363,7 +356,7 @@ namespace MWDialogue
         {
             if (dialog.mType == ESM::Dialogue::Topic)
             {
-                const auto* answer = filter.search(dialog, true);
+                const auto* answer = filter.search(dialog, true).second;
                 const auto& topicId = dialog.mId;
 
                 if (answer != nullptr)
@@ -477,9 +470,10 @@ namespace MWDialogue
 
             if (dialogue->mType == ESM::Dialogue::Topic || dialogue->mType == ESM::Dialogue::Greeting)
             {
-                if (const ESM::DialInfo* info = filter.search(*dialogue, true))
+                const auto [responseTopic, info] = filter.search(*dialogue, true);
+                if (info)
                 {
-                    std::string text = info->mResponse;
+                    const std::string& text = info->mResponse;
                     addTopicsFromText(text);
 
                     mChoice = -1;
@@ -493,15 +487,8 @@ namespace MWDialogue
                     {
                         // Make sure the returned DialInfo is from the Dialogue we supplied. If could also be from the
                         // Info refusal group, in which case it should not be added to the journal
-                        for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue->mInfo.begin();
-                             iter != dialogue->mInfo.end(); ++iter)
-                        {
-                            if (iter->mId == info->mId)
-                            {
-                                MWBase::Environment::get().getJournal()->addTopic(mLastTopic, info->mId, mActor);
-                                break;
-                            }
-                        }
+                        if (responseTopic == dialogue)
+                            MWBase::Environment::get().getJournal()->addTopic(mLastTopic, info->mId, mActor);
                     }
 
                     executeScript(info->mResultScript, mActor);
@@ -609,10 +596,10 @@ namespace MWDialogue
 
         const ESM::Dialogue& dialogue = *dialogues.find(ESM::RefId::stringRefId("Service Refusal"));
 
-        std::vector<const ESM::DialInfo*> infos = filter.list(dialogue, false, false, true);
+        std::vector<Filter::Response> infos = filter.list(dialogue, false, false, true);
         if (!infos.empty())
         {
-            const ESM::DialInfo* info = infos[0];
+            const ESM::DialInfo* info = infos[0].second;
 
             addTopicsFromText(info->mResponse);
 
@@ -656,7 +643,7 @@ namespace MWDialogue
 
         const MWMechanics::CreatureStats& creatureStats = actor.getClass().getCreatureStats(actor);
         Filter filter(actor, 0, creatureStats.hasTalkedToPlayer());
-        const ESM::DialInfo* info = filter.search(*dial, false);
+        const ESM::DialInfo* info = filter.search(*dial, false).second;
         if (info != nullptr)
         {
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
@@ -697,10 +684,9 @@ namespace MWDialogue
             ESM::DialogueState state;
             state.load(reader);
 
-            for (std::vector<ESM::RefId>::const_iterator iter(state.mKnownTopics.begin());
-                 iter != state.mKnownTopics.end(); ++iter)
-                if (store.get<ESM::Dialogue>().search(*iter))
-                    mKnownTopics.insert(*iter);
+            for (const auto& knownTopic : state.mKnownTopics)
+                if (store.get<ESM::Dialogue>().search(knownTopic))
+                    mKnownTopics.insert(knownTopic);
 
             mChangedFactionReaction = state.mChangedFactionReaction;
         }
