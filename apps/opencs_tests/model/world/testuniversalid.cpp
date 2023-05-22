@@ -27,6 +27,11 @@ namespace CSMWorld
             EXPECT_THROW(UniversalId(UniversalId::Type_Activator, 42), std::logic_error);
         }
 
+        TEST(CSMWorldUniversalIdTest, shouldFailToConstructFromRefIdWithInvalidType)
+        {
+            EXPECT_THROW(UniversalId(UniversalId::Type_Search, ESM::RefId()), std::logic_error);
+        }
+
         TEST(CSMWorldUniversalIdTest, shouldFailToConstructFromInvalidUniversalIdString)
         {
             EXPECT_THROW(UniversalId("invalid"), std::runtime_error);
@@ -60,6 +65,18 @@ namespace CSMWorld
         {
             const UniversalId id(UniversalId::Type_Activator, "a");
             EXPECT_EQ(id.getId(), "a");
+        }
+
+        TEST(CSMWorldUniversalIdTest, getRefIdShouldThrowExceptionForDefaultConstructed)
+        {
+            const UniversalId id;
+            EXPECT_THROW(id.getRefId(), std::logic_error);
+        }
+
+        TEST(CSMWorldUniversalIdTest, getRefIdShouldReturnValueForConstructedFromRefId)
+        {
+            const UniversalId id(UniversalId::Type_Skill, ESM::IndexRefId(ESM::REC_SKIL, 42));
+            EXPECT_EQ(id.getRefId(), ESM::IndexRefId(ESM::REC_SKIL, 42));
         }
 
         struct Params

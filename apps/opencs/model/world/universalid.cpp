@@ -201,6 +201,23 @@ namespace
             return sIdArg;
         }
     };
+
+    std::string toString(CSMWorld::UniversalId::ArgumentType value)
+    {
+        switch (value)
+        {
+            case CSMWorld::UniversalId::ArgumentType_None:
+                return "None";
+            case CSMWorld::UniversalId::ArgumentType_Id:
+                return "Id";
+            case CSMWorld::UniversalId::ArgumentType_Index:
+                return "Index";
+            case CSMWorld::UniversalId::ArgumentType_RefId:
+                return "RefId";
+        }
+
+        return std::to_string(value);
+    }
 }
 
 CSMWorld::UniversalId::UniversalId(const std::string& universalId)
@@ -352,6 +369,14 @@ int CSMWorld::UniversalId::getIndex() const
         return *result;
 
     throw std::logic_error("invalid access to index of non-index UniversalId");
+}
+
+ESM::RefId CSMWorld::UniversalId::getRefId() const
+{
+    if (const ESM::RefId* result = std::get_if<ESM::RefId>(&mValue))
+        return *result;
+
+    throw std::logic_error("invalid access to RefId of " + ::toString(getArgumentType()) + " UniversalId");
 }
 
 std::string CSMWorld::UniversalId::getTypeName() const

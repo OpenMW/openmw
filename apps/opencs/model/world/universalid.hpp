@@ -170,6 +170,8 @@ namespace CSMWorld
         int getIndex() const;
         ///< Calling this function for a non-index type will throw an exception.
 
+        ESM::RefId getRefId() const;
+
         std::string getTypeName() const;
 
         std::string toString() const;
