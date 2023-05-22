@@ -51,8 +51,7 @@ namespace SceneUtil
 
             bool operator()(const std::multimap<float, std::string>::value_type& value) const
             {
-                return value.second.compare(0, mGroupName.size(), mGroupName) == 0
-                    && value.second.compare(mGroupName.size(), 2, ": ") == 0;
+                return value.second.starts_with(mGroupName) && value.second.compare(mGroupName.size(), 2, ": ") == 0;
             }
         };
 

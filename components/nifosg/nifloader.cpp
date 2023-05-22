@@ -726,13 +726,9 @@ namespace NifOsg
 
             if (isGeometry && !skipMeshes)
             {
-                const std::string nodeName = Misc::StringUtils::lowerCase(nifNode->name);
-                static const std::string markerName = "tri editormarker";
-                static const std::string shadowName = "shadow";
-                static const std::string shadowName2 = "tri shadow";
-                const bool isMarker = hasMarkers && !nodeName.compare(0, markerName.size(), markerName);
-                if (!isMarker && nodeName.compare(0, shadowName.size(), shadowName)
-                    && nodeName.compare(0, shadowName2.size(), shadowName2))
+                const bool isMarker = hasMarkers && Misc::StringUtils::ciStartsWith(nifNode->name, "tri editormarker");
+                if (!isMarker && !Misc::StringUtils::ciStartsWith(nifNode->name, "shadow")
+                    && !Misc::StringUtils::ciStartsWith(nifNode->name, "tri shadow"))
                 {
                     Nif::NiSkinInstancePtr skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin;
 

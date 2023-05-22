@@ -217,7 +217,7 @@ namespace Nif
             "Gamebryo File Format",
         };
         const bool supportedHeader = std::any_of(verStrings.begin(), verStrings.end(),
-            [&](const std::string& verString) { return head.compare(0, verString.size(), verString) == 0; });
+            [&](const std::string& verString) { return head.starts_with(verString); });
         if (!supportedHeader)
             throw Nif::Exception("Invalid NIF header: " + head, filename);
 
@@ -321,7 +321,7 @@ namespace Nif
             }
 
             // Record separator. Some Havok records in Oblivion do not have it.
-            if (hasRecordSeparators && rec.compare(0, 3, "bhk"))
+            if (hasRecordSeparators && !rec.starts_with("bhk"))
                 if (nif.getInt())
                     Log(Debug::Warning) << "NIFFile Warning: Record number " << i << " out of " << recNum
                                         << " is preceded by a non-zero separator. File: " << filename;

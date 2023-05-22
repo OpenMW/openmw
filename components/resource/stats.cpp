@@ -47,25 +47,25 @@ namespace Resource
 
             const auto kw = kwList.substr(std::distance(kwList.begin(), kwBegin), std::distance(kwBegin, kwEnd));
 
-            if (kw.compare("gpu") == 0)
+            if (kw == "gpu")
                 collectStatGPU = true;
-            else if (kw.compare("event") == 0)
+            else if (kw == "event")
                 collectStatEvent = true;
-            else if (kw.compare("frame_rate") == 0)
+            else if (kw == "frame_rate")
                 collectStatFrameRate = true;
-            else if (kw.compare("update") == 0)
+            else if (kw == "update")
                 collectStatUpdate = true;
-            else if (kw.compare("engine") == 0)
+            else if (kw == "engine")
                 collectStatEngine = true;
-            else if (kw.compare("rendering") == 0)
+            else if (kw == "rendering")
                 collectStatRendering = true;
-            else if (kw.compare("cameraobjects") == 0)
+            else if (kw == "cameraobjects")
                 collectStatCameraObjects = true;
-            else if (kw.compare("viewerobjects") == 0)
+            else if (kw == "viewerobjects")
                 collectStatViewerObjects = true;
-            else if (kw.compare("resource") == 0)
+            else if (kw == "resource")
                 collectStatResource = true;
-            else if (kw.compare("times") == 0)
+            else if (kw == "times")
             {
                 collectStatGPU = true;
                 collectStatEvent = true;
