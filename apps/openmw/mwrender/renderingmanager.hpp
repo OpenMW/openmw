@@ -282,7 +282,15 @@ namespace MWRender
         void updateAmbient();
         void setFogColor(const osg::Vec4f& color);
         void updateThirdPersonViewMode();
-        Terrain::World& getWorldspaceTerrain(ESM::RefId worldspace);
+
+        struct WorldspaceChunkMgr
+        {
+            std::unique_ptr<Terrain::World> mTerrain;
+            std::unique_ptr<ObjectPaging> mObjectPaging;
+            std::unique_ptr<Groundcover> mGroundcover;
+        };
+
+        WorldspaceChunkMgr& getWorldspaceChunkMgr(ESM::RefId worldspace);
 
         void reportStats() const;
 
@@ -314,11 +322,11 @@ namespace MWRender
         std::unique_ptr<Pathgrid> mPathgrid;
         std::unique_ptr<Objects> mObjects;
         std::unique_ptr<Water> mWater;
-        std::unordered_map<ESM::RefId, std::unique_ptr<Terrain::World>> mWorldspaceTerrains;
+        std::unordered_map<ESM::RefId, WorldspaceChunkMgr> mWorldspaceChunks;
         Terrain::World* mTerrain;
         std::unique_ptr<TerrainStorage> mTerrainStorage;
-        std::unique_ptr<ObjectPaging> mObjectPaging;
-        std::unique_ptr<Groundcover> mGroundcover;
+        ObjectPaging* mObjectPaging;
+        Groundcover* mGroundcover;
         std::unique_ptr<SkyManager> mSky;
         std::unique_ptr<FogManager> mFog;
         std::unique_ptr<ScreenshotManager> mScreenshotManager;
@@ -346,6 +354,7 @@ namespace MWRender
         float mFirstPersonFieldOfView;
         bool mUpdateProjectionMatrix = false;
         bool mNight = false;
+        const MWWorld::GroundcoverStore& mGroundCoverStore;
 
         void operator=(const RenderingManager&);
         RenderingManager(const RenderingManager&);
