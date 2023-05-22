@@ -94,6 +94,7 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
             case ESM4::SUB_MODS:
             case ESM4::SUB_MODT:
             case ESM4::SUB_RNAM:
+            case ESM4::SUB_CNAM:
             {
                 // std::cout << "HDPT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();

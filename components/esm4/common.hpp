@@ -571,6 +571,7 @@ namespace ESM4
         SUB_FLTR = fourCC("FLTR"), // TES5
         SUB_QTGL = fourCC("QTGL"), // TES5
         SUB_TWAT = fourCC("TWAT"), // TES5
+        SUB_SPMV = fourCC("SPMV"), // TES5
         SUB_XIBS = fourCC("XIBS"), // FO3
         SUB_REPL = fourCC("REPL"), // FO3
         SUB_BIPL = fourCC("BIPL"), // FO3
