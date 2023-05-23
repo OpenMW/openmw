@@ -47,6 +47,7 @@
 #include <components/sceneutil/util.hpp>
 
 #include <components/settings/shadermanager.hpp>
+#include <components/settings/values.hpp>
 
 #include "mwinput/inputmanagerimp.hpp"
 
@@ -670,10 +671,7 @@ void OMW::Engine::prepareEngine()
         Settings::Manager::getString("texture mipmap", "General"), Settings::Manager::getInt("anisotropy", "General"));
     mEnvironment.setResourceSystem(*mResourceSystem);
 
-    int numThreads = Settings::Manager::getInt("preload num threads", "Cells");
-    if (numThreads <= 0)
-        throw std::runtime_error("Invalid setting: 'preload num threads' must be >0");
-    mWorkQueue = new SceneUtil::WorkQueue(numThreads);
+    mWorkQueue = new SceneUtil::WorkQueue(Settings::cells().mPreloadNumThreads);
     mUnrefQueue = std::make_unique<SceneUtil::UnrefQueue>();
 
     mScreenCaptureOperation = new SceneUtil::AsyncScreenCaptureOperation(mWorkQueue,
