@@ -7,6 +7,7 @@
 #include <apps/opencs/model/world/record.hpp>
 
 #include <components/esm3/loadland.hpp>
+#include <components/esm3/loadmgef.hpp>
 
 #include <algorithm>
 #include <stdexcept>
@@ -27,6 +28,8 @@ namespace CSMWorld
                 {
                     case ESM::REC_SKIL:
                         return ESM::Skill::sSkillNames[value.getValue()];
+                    case ESM::REC_MGEF:
+                        return std::string(ESM::MagicEffect::sIndexNames[value.getValue()]);
                     default:
                         break;
                 }

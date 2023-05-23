@@ -269,6 +269,8 @@ namespace ESM
             Length
         };
 
+        static const std::string_view sIndexNames[MagicEffect::Length];
+
         static RefId indexToRefId(int index);
     };
 }
