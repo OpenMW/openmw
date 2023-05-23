@@ -87,19 +87,10 @@ namespace MWRender
 
                 if (dNear < computedZNear || dFar > computedZFar)
                 {
-                    osg::Polytope& frustum = cullVisitor.getCurrentCullingSet().getFrustum();
-                    osg::Polytope::ClippingMask resultMask = frustum.getResultMask();
+                    osg::Polytope frustum;
+                    osg::Polytope::ClippingMask resultMask = cullVisitor.getCurrentCullingSet().getFrustum().getResultMask();
                     if (resultMask)
                     {
-                        osg::Polytope::PlaneList planes;
-                        osg::Polytope::ClippingMask selectorMask = 0x1;
-                        for (const auto& plane : frustum.getPlaneList())
-                        {
-                            if (resultMask & selectorMask)
-                                planes.push_back(plane);
-                            selectorMask <<= 1;
-                        }
-
                         if (dNear < computedZNear)
                         {
                             dNear = computedZNear;
@@ -120,6 +111,16 @@ namespace MWRender
 
                                 if (instanceDFar < 0 || instanceDNear > dNear)
                                     continue;
+
+                                frustum.setAndTransformProvidingInverse(cullVisitor.getProjectionCullingStack().back().getFrustum(), fullMatrix);
+                                osg::Polytope::PlaneList planes;
+                                osg::Polytope::ClippingMask selectorMask = 0x1;
+                                for (const auto& plane : frustum.getPlaneList())
+                                {
+                                    if (resultMask & selectorMask)
+                                        planes.push_back(plane);
+                                    selectorMask <<= 1;
+                                }
 
                                 value_type newNear
                                     = cullVisitor.computeNearestPointInFrustum(fullMatrix, planes, *drawable);
@@ -149,6 +150,16 @@ namespace MWRender
 
                                 if (instanceDFar < 0 || instanceDFar < dFar)
                                     continue;
+
+                                frustum.setAndTransformProvidingInverse(cullVisitor.getProjectionCullingStack().back().getFrustum(), fullMatrix);
+                                osg::Polytope::PlaneList planes;
+                                osg::Polytope::ClippingMask selectorMask = 0x1;
+                                for (const auto& plane : frustum.getPlaneList())
+                                {
+                                    if (resultMask & selectorMask)
+                                        planes.push_back(plane);
+                                    selectorMask <<= 1;
+                                }
 
                                 value_type newFar = cullVisitor.computeFurthestPointInFrustum(
                                     instanceMatrix * matrix, planes, *drawable);
