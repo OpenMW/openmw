@@ -30,8 +30,14 @@ namespace MWRender
     {
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
-        const ESM::Land* land = esmStore.get<ESM::Land>().search(cellLocation.mX, cellLocation.mY);
-        return land != nullptr;
+        if (ESM::isEsm4Ext(cellLocation.mWorldspace))
+        {
+            return esmStore.get<ESM4::Land>().search(cellLocation) != nullptr;
+        }
+        else
+        {
+            return esmStore.get<ESM::Land>().search(cellLocation.mX, cellLocation.mY) != nullptr;
+        }
     }
 
     static void BoundUnion(float& minX, float& maxX, float& minY, float& maxY, float x, float y)
