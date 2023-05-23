@@ -28,6 +28,7 @@
 #include <istream>
 #include <map>
 #include <memory>
+#include <unordered_map>
 
 #include "cellgrid.hpp"
 #include "common.hpp"
