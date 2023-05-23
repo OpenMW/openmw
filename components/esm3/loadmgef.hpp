@@ -267,16 +267,14 @@ namespace ESM
         };
 
         static const std::array<std::string, Length> sGmstEffectIds;
-        static const std::array<std::string, Length> sEffectNames;
-        static const std::map<std::string_view, int, Misc::StringUtils::CiComp> sGmstEffectIdToEffectIdMap;
-        static const std::map<std::string_view, int, Misc::StringUtils::CiComp> sEffectNameToEffectIdMap;
+        static const std::array<std::string_view, Length> sIndexNames;
+        static const std::map<std::string_view, int, Misc::StringUtils::CiComp> sGmstEffectIdToIndexMap;
+        static const std::map<std::string_view, int, Misc::StringUtils::CiComp> sIndexNameToIndexMap;
 
-        static const std::string& effectIdToGmstString(int effectID);
-        static const std::string& effectIdToName(int effectID);
-        static int effectNameToId(std::string_view effect);
-        static int effectGmstIdToId(std::string_view gmstId);
-
-        static const std::string_view sIndexNames[MagicEffect::Length];
+        static const std::string& indexToGmstString(int effectID);
+        static std::string_view indexToName(int effectID);
+        static int indexNameToIndex(std::string_view effect);
+        static int effectGmstIdToIndex(std::string_view gmstId);
 
         static RefId indexToRefId(int index);
     };

@@ -374,7 +374,7 @@ namespace MWMechanics
         {
             ESM::MagicEffect::Effects effect
                 = ptr.getClass().isNpc() ? ESM::MagicEffect::CalmHumanoid : ESM::MagicEffect::CalmCreature;
-            if (creatureStats.getMagicEffects().get(effect).getMagnitude() > 0.f)
+            if (creatureStats.getMagicEffects().getOrDefault(effect).getMagnitude() > 0.f)
                 creatureStats.getAiSequence().stopCombat();
         }
     }

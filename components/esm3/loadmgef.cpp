@@ -24,156 +24,6 @@ namespace ESM
             0x1048, 0x1048, 0x1048, 0x1048 };
     }
 
-    const std::string_view MagicEffect::sIndexNames[MagicEffect::Length] = {
-        "WaterBreathing",
-        "SwiftSwim",
-        "WaterWalking",
-        "Shield",
-        "FireShield",
-        "LightningShield",
-        "FrostShield",
-        "Burden",
-        "Feather",
-        "Jump",
-        "Levitate",
-        "SlowFall",
-        "Lock",
-        "Open",
-        "FireDamage",
-        "ShockDamage",
-        "FrostDamage",
-        "DrainAttribute",
-        "DrainHealth",
-        "DrainMagicka",
-        "DrainFatigue",
-        "DrainSkill",
-        "DamageAttribute",
-        "DamageHealth",
-        "DamageMagicka",
-        "DamageFatigue",
-        "DamageSkill",
-        "Poison",
-        "WeaknessToFire",
-        "WeaknessToFrost",
-        "WeaknessToShock",
-        "WeaknessToMagicka",
-        "WeaknessToCommonDisease",
-        "WeaknessToBlightDisease",
-        "WeaknessToCorprusDisease",
-        "WeaknessToPoison",
-        "WeaknessToNormalWeapons",
-        "DisintegrateWeapon",
-        "DisintegrateArmor",
-        "Invisibility",
-        "Chameleon",
-        "Light",
-        "Sanctuary",
-        "NightEye",
-        "Charm",
-        "Paralyze",
-        "Silence",
-        "Blind",
-        "Sound",
-        "CalmHumanoid",
-        "CalmCreature",
-        "FrenzyHumanoid",
-        "FrenzyCreature",
-        "DemoralizeHumanoid",
-        "DemoralizeCreature",
-        "RallyHumanoid",
-        "RallyCreature",
-        "Dispel",
-        "Soultrap",
-        "Telekinesis",
-        "Mark",
-        "Recall",
-        "DivineIntervention",
-        "AlmsiviIntervention",
-        "DetectAnimal",
-        "DetectEnchantment",
-        "DetectKey",
-        "SpellAbsorption",
-        "Reflect",
-        "CureCommonDisease",
-        "CureBlightDisease",
-        "CureCorprusDisease",
-        "CurePoison",
-        "CureParalyzation",
-        "RestoreAttribute",
-        "RestoreHealth",
-        "RestoreMagicka",
-        "RestoreFatigue",
-        "RestoreSkill",
-        "FortifyAttribute",
-        "FortifyHealth",
-        "FortifyMagicka",
-        "FortifyFatigue",
-        "FortifySkill",
-        "FortifyMaximumMagicka",
-        "AbsorbAttribute",
-        "AbsorbHealth",
-        "AbsorbMagicka",
-        "AbsorbFatigue",
-        "AbsorbSkill",
-        "ResistFire",
-        "ResistFrost",
-        "ResistShock",
-        "ResistMagicka",
-        "ResistCommonDisease",
-        "ResistBlightDisease",
-        "ResistCorprusDisease",
-        "ResistPoison",
-        "ResistNormalWeapons",
-        "ResistParalysis",
-        "RemoveCurse",
-        "TurnUndead",
-        "SummonScamp",
-        "SummonClannfear",
-        "SummonDaedroth",
-        "SummonDremora",
-        "SummonAncestralGhost",
-        "SummonSkeletalMinion",
-        "SummonBonewalker",
-        "SummonGreaterBonewalker",
-        "SummonBonelord",
-        "SummonWingedTwilight",
-        "SummonHunger",
-        "SummonGoldenSaint",
-        "SummonFlameAtronach",
-        "SummonFrostAtronach",
-        "SummonStormAtronach",
-        "FortifyAttack",
-        "CommandCreature",
-        "CommandHumanoid",
-        "BoundDagger",
-        "BoundLongsword",
-        "BoundMace",
-        "BoundBattleAxe",
-        "BoundSpear",
-        "BoundLongbow",
-        "ExtraSpell",
-        "BoundCuirass",
-        "BoundHelm",
-        "BoundBoots",
-        "BoundShield",
-        "BoundGloves",
-        "Corprus",
-        "Vampirism",
-        "SummonCenturionSphere",
-        "SunDamage",
-        "StuntedMagicka",
-
-        // Tribunal only
-        "SummonFabricant",
-
-        // Bloodmoon only
-        "SummonWolf",
-        "SummonBear",
-        "SummonBonewolf",
-        "SummonCreature04",
-        "SummonCreature05",
-    };
-
     void MagicEffect::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false; // MagicEffect record can't be deleted now (may be changed in the future)
@@ -504,7 +354,7 @@ namespace ESM
     };
 
     // Map effect ID to identifying name
-    const std::array<std::string, MagicEffect::Length> MagicEffect::sEffectNames = {
+    const std::array<std::string_view, MagicEffect::Length> MagicEffect::sIndexNames = {
         "WaterBreathing",
         "SwiftSwim",
         "WaterWalking",
@@ -654,21 +504,21 @@ namespace ESM
         "SummonCreature05",
     };
 
-    static std::map<std::string_view, int, Misc::StringUtils::CiComp> initStringToIntMap(
-        const std::array<std::string, MagicEffect::Length>& strings)
+    template <typename Collection>
+    static std::map<std::string_view, int, Misc::StringUtils::CiComp> initStringToIntMap(const Collection& strings)
     {
         std::map<std::string_view, int, Misc::StringUtils::CiComp> map;
-        for (int i = 0; i < (int)strings.size(); i++)
+        for (size_t i = 0; i < strings.size(); i++)
             map[strings[i]] = i;
 
         return map;
     }
 
-    const std::map<std::string_view, int, Misc::StringUtils::CiComp> MagicEffect::sGmstEffectIdToEffectIdMap
+    const std::map<std::string_view, int, Misc::StringUtils::CiComp> MagicEffect::sGmstEffectIdToIndexMap
         = initStringToIntMap(MagicEffect::sGmstEffectIds);
 
-    const std::map<std::string_view, int, Misc::StringUtils::CiComp> MagicEffect::sEffectNameToEffectIdMap
-        = initStringToIntMap(MagicEffect::sEffectNames);
+    const std::map<std::string_view, int, Misc::StringUtils::CiComp> MagicEffect::sIndexNameToIndexMap
+        = initStringToIntMap(MagicEffect::sIndexNames);
 
     class FindSecond
     {
@@ -729,35 +579,35 @@ namespace ESM
         mDescription.clear();
     }
 
-    const std::string& MagicEffect::effectIdToGmstString(int effectID)
+    const std::string& MagicEffect::indexToGmstString(int effectID)
     {
-        if (effectID >= (int)sGmstEffectIds.size() || effectID < 0)
+        if (effectID < 0 || static_cast<std::size_t>(effectID) >= sGmstEffectIds.size())
             throw std::runtime_error(std::string("Unimplemented effect ID ") + std::to_string(effectID));
 
         return sGmstEffectIds[effectID];
     }
 
-    const std::string& MagicEffect::effectIdToName(int effectID)
+    std::string_view MagicEffect::indexToName(int effectID)
     {
-        if (effectID >= (int)sEffectNames.size() || effectID < 0)
+        if (effectID < 0 || static_cast<std::size_t>(effectID) >= sIndexNames.size())
             throw std::runtime_error(std::string("Unimplemented effect ID ") + std::to_string(effectID));
 
-        return sEffectNames[effectID];
+        return sIndexNames[effectID];
     }
 
-    int MagicEffect::effectNameToId(std::string_view effect)
+    int MagicEffect::indexNameToIndex(std::string_view effect)
     {
-        auto name = sEffectNameToEffectIdMap.find(effect);
-        if (name == sEffectNameToEffectIdMap.end())
+        auto name = sIndexNameToIndexMap.find(effect);
+        if (name == sIndexNameToIndexMap.end())
             throw std::runtime_error("Unimplemented effect " + std::string(effect));
 
         return name->second;
     }
 
-    int MagicEffect::effectGmstIdToId(std::string_view gmstId)
+    int MagicEffect::effectGmstIdToIndex(std::string_view gmstId)
     {
-        auto name = sGmstEffectIdToEffectIdMap.find(gmstId);
-        if (name == sGmstEffectIdToEffectIdMap.end())
+        auto name = sGmstEffectIdToIndexMap.find(gmstId);
+        if (name == sGmstEffectIdToIndexMap.end())
             throw std::runtime_error("Unimplemented effect " + std::string(gmstId));
 
         return name->second;

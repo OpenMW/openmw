@@ -185,8 +185,8 @@ namespace MWMechanics
             return;
 
         const MWMechanics::MagicEffects& effects = actor.getClass().getCreatureStats(actor).getMagicEffects();
-        const float resistance = effects.get(ESM::MagicEffect::ResistNormalWeapons).getMagnitude() / 100.f;
-        const float weakness = effects.get(ESM::MagicEffect::WeaknessToNormalWeapons).getMagnitude() / 100.f;
+        const float resistance = effects.getOrDefault(ESM::MagicEffect::ResistNormalWeapons).getMagnitude() / 100.f;
+        const float weakness = effects.getOrDefault(ESM::MagicEffect::WeaknessToNormalWeapons).getMagnitude() / 100.f;
 
         damage *= 1.f - std::min(1.f, resistance - weakness);
 
@@ -313,15 +313,17 @@ namespace MWMechanics
             }
             static const float fCombatInvisoMult = gmst.find("fCombatInvisoMult")->mValue.getFloat();
             defenseTerm += std::min(100.f,
-                fCombatInvisoMult * victimStats.getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude());
+                fCombatInvisoMult
+                    * victimStats.getMagicEffects().getOrDefault(ESM::MagicEffect::Chameleon).getMagnitude());
             defenseTerm += std::min(100.f,
-                fCombatInvisoMult * victimStats.getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude());
+                fCombatInvisoMult
+                    * victimStats.getMagicEffects().getOrDefault(ESM::MagicEffect::Invisibility).getMagnitude());
         }
         float attackTerm = skillValue + (stats.getAttribute(ESM::Attribute::Agility).getModified() / 5.0f)
             + (stats.getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         attackTerm *= stats.getFatigueTerm();
-        attackTerm += mageffects.get(ESM::MagicEffect::FortifyAttack).getMagnitude()
-            - mageffects.get(ESM::MagicEffect::Blind).getMagnitude();
+        attackTerm += mageffects.getOrDefault(ESM::MagicEffect::FortifyAttack).getMagnitude()
+            - mageffects.getOrDefault(ESM::MagicEffect::Blind).getMagnitude();
 
         return round(attackTerm - defenseTerm);
     }
@@ -338,7 +340,7 @@ namespace MWMechanics
             float magnitude = victim.getClass()
                                   .getCreatureStats(victim)
                                   .getMagicEffects()
-                                  .get(ESM::MagicEffect::FireShield + i)
+                                  .getOrDefault(ESM::MagicEffect::FireShield + i)
                                   .getMagnitude();
 
             if (!magnitude)

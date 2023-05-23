@@ -151,7 +151,7 @@ namespace MWMechanics
 
         CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-        if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude() && !godmode)
+        if (stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Silence).getMagnitude() && !godmode)
             return 0;
 
         if (spell->mData.mType == ESM::Spell::ST_Power)
@@ -169,7 +169,7 @@ namespace MWMechanics
         if (spell->mData.mFlags & ESM::Spell::F_Always)
             return 100;
 
-        float castBonus = -stats.getMagicEffects().get(ESM::MagicEffect::Sound).getMagnitude();
+        float castBonus = -stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Sound).getMagnitude();
         float castChance = baseChance + castBonus;
         castChance *= stats.getFatigueTerm();
 

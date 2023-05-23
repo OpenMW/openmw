@@ -222,7 +222,7 @@ namespace MWRender
     {
         const MWWorld::Class& cls = ptr.getClass();
         NpcAnimation::NpcType curType = Type_Normal;
-        if (cls.getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude() > 0)
+        if (cls.getCreatureStats(ptr).getMagicEffects().getOrDefault(ESM::MagicEffect::Vampirism).getMagnitude() > 0)
             curType = Type_Vampire;
         if (cls.getNpcStats(ptr).isWerewolf())
             curType = Type_Werewolf;

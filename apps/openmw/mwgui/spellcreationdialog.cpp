@@ -37,8 +37,8 @@ namespace
         const MWWorld::Store<ESM::GameSetting>& gmst
             = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
 
-        return gmst.find(ESM::MagicEffect::effectIdToGmstString(id1))->mValue.getString()
-            < gmst.find(ESM::MagicEffect::effectIdToGmstString(id2))->mValue.getString();
+        return gmst.find(ESM::MagicEffect::indexToGmstString(id1))->mValue.getString()
+            < gmst.find(ESM::MagicEffect::indexToGmstString(id2))->mValue.getString();
     }
 
     void init(ESM::ENAMstruct& effect)
@@ -196,7 +196,7 @@ namespace MWGui
         mEffectImage->setImageTexture(Misc::ResourceHelpers::correctIconPath(
             effect->mIcon, MWBase::Environment::get().getResourceSystem()->getVFS()));
 
-        mEffectName->setCaptionWithReplacing("#{" + ESM::MagicEffect::effectIdToGmstString(effect->mIndex) + "}");
+        mEffectName->setCaptionWithReplacing("#{" + ESM::MagicEffect::indexToGmstString(effect->mIndex) + "}");
 
         mEffect.mEffectID = effect->mIndex;
 
@@ -552,7 +552,7 @@ namespace MWGui
             mAvailableEffectsList->addItem(MWBase::Environment::get()
                                                .getESMStore()
                                                ->get<ESM::GameSetting>()
-                                               .find(ESM::MagicEffect::effectIdToGmstString(effectId))
+                                               .find(ESM::MagicEffect::indexToGmstString(effectId))
                                                ->mValue.getString());
             mButtonMapping[i] = effectId;
             ++i;
@@ -565,7 +565,7 @@ namespace MWGui
             const std::string& name = MWBase::Environment::get()
                                           .getESMStore()
                                           ->get<ESM::GameSetting>()
-                                          .find(ESM::MagicEffect::effectIdToGmstString(effectId))
+                                          .find(ESM::MagicEffect::indexToGmstString(effectId))
                                           ->mValue.getString();
             MyGUI::Widget* w = mAvailableEffectsList->getItemWidget(name);
 

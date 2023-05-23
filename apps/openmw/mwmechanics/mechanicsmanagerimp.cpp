@@ -577,7 +577,11 @@ namespace MWMechanics
         if (playerStats.getDrawState() == MWMechanics::DrawState::Weapon)
             x += fDispWeaponDrawn;
 
-        x += ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Charm).getMagnitude();
+        x += ptr.getClass()
+                 .getCreatureStats(ptr)
+                 .getMagicEffects()
+                 .getOrDefault(ESM::MagicEffect::Charm)
+                 .getMagnitude();
 
         if (clamp)
             return std::clamp<int>(x, 0, 100); //, normally clamped to [0..100] when used
@@ -1558,8 +1562,8 @@ namespace MWMechanics
         osg::Vec3f pos2(observer.getRefData().getPosition().asVec3());
         float distTerm = fSneakDistBase + fSneakDistMult * (pos1 - pos2).length();
 
-        float chameleon = stats.getMagicEffects().get(ESM::MagicEffect::Chameleon).getMagnitude();
-        float invisibility = stats.getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude();
+        float chameleon = stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Chameleon).getMagnitude();
+        float invisibility = stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Invisibility).getMagnitude();
         float x = sneakTerm * distTerm * stats.getFatigueTerm() + chameleon;
         if (invisibility > 0.f)
             x += 100.f;
@@ -1567,7 +1571,7 @@ namespace MWMechanics
         CreatureStats& observerStats = observer.getClass().getCreatureStats(observer);
         float obsAgility = observerStats.getAttribute(ESM::Attribute::Agility).getModified();
         float obsLuck = observerStats.getAttribute(ESM::Attribute::Luck).getModified();
-        float obsBlind = observerStats.getMagicEffects().get(ESM::MagicEffect::Blind).getMagnitude();
+        float obsBlind = observerStats.getMagicEffects().getOrDefault(ESM::MagicEffect::Blind).getMagnitude();
         float obsSneak = observer.getClass().getSkill(observer, ESM::Skill::Sneak);
 
         float obsTerm = obsSneak + 0.2f * obsAgility + 0.1f * obsLuck - obsBlind;
@@ -1755,14 +1759,14 @@ namespace MWMechanics
                 && ptr.getClass()
                         .getCreatureStats(ptr)
                         .getMagicEffects()
-                        .get(ESM::MagicEffect::CalmHumanoid)
+                        .getOrDefault(ESM::MagicEffect::CalmHumanoid)
                         .getMagnitude()
                     > 0)
             || (!ptr.getClass().isNpc()
                 && ptr.getClass()
                         .getCreatureStats(ptr)
                         .getMagicEffects()
-                        .get(ESM::MagicEffect::CalmCreature)
+                        .getOrDefault(ESM::MagicEffect::CalmCreature)
                         .getMagnitude()
                     > 0))
             return false;

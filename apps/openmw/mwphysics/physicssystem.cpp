@@ -666,7 +666,7 @@ namespace MWPhysics
 
         // check if Actor should spawn above water
         const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
-        const bool canWaterWalk = effects.get(ESM::MagicEffect::WaterWalking).getMagnitude() > 0;
+        const bool canWaterWalk = effects.getOrDefault(ESM::MagicEffect::WaterWalking).getMagnitude() > 0;
 
         auto actor = std::make_shared<Actor>(ptr, shape, mTaskScheduler.get(), canWaterWalk, mActorCollisionShapeType);
 
@@ -750,7 +750,7 @@ namespace MWPhysics
             const MWMechanics::MagicEffects& effects = stats.getMagicEffects();
 
             bool waterCollision = false;
-            if (cell->getCell()->hasWater() && effects.get(ESM::MagicEffect::WaterWalking).getMagnitude())
+            if (cell->getCell()->hasWater() && effects.getOrDefault(ESM::MagicEffect::WaterWalking).getMagnitude())
             {
                 if (physicActor->getCollisionMode()
                     || !world->isUnderwater(ptr.getCell(), ptr.getRefData().getPosition().asVec3()))
@@ -761,10 +761,10 @@ namespace MWPhysics
 
             // Slow fall reduces fall speed by a factor of (effect magnitude / 200)
             const float slowFall
-                = 1.f - std::clamp(effects.get(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f, 0.f, 1.f);
+                = 1.f - std::clamp(effects.getOrDefault(ESM::MagicEffect::SlowFall).getMagnitude() * 0.005f, 0.f, 1.f);
             const bool godmode = ptr == world->getPlayerConstPtr() && world->getGodModeState();
             const bool inert = stats.isDead()
-                || (!godmode && stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getModifier() > 0);
+                || (!godmode && stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Paralyze).getModifier() > 0);
 
             simulations.emplace_back(ActorSimulation{
                 physicActor, ActorFrameData{ *physicActor, inert, waterCollision, slowFall, waterlevel } });

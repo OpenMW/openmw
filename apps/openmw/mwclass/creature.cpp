@@ -555,11 +555,11 @@ namespace MWClass
         if (getEncumbrance(ptr) > getCapacity(ptr))
             moveSpeed = 0.0f;
         else if (canFly(ptr)
-            || (mageffects.get(ESM::MagicEffect::Levitate).getMagnitude() > 0 && world->isLevitationEnabled()))
+            || (mageffects.getOrDefault(ESM::MagicEffect::Levitate).getMagnitude() > 0 && world->isLevitationEnabled()))
         {
             float flySpeed = 0.01f
                 * (stats.getAttribute(ESM::Attribute::Speed).getModified()
-                    + mageffects.get(ESM::MagicEffect::Levitate).getMagnitude());
+                    + mageffects.getOrDefault(ESM::MagicEffect::Levitate).getMagnitude());
             flySpeed = gmst.fMinFlySpeed->mValue.getFloat()
                 + flySpeed * (gmst.fMaxFlySpeed->mValue.getFloat() - gmst.fMinFlySpeed->mValue.getFloat());
             const float normalizedEncumbrance = getNormalizedEncumbrance(ptr);
@@ -614,7 +614,7 @@ namespace MWClass
     float Creature::getArmorRating(const MWWorld::Ptr& ptr) const
     {
         // Equipment armor rating is deliberately ignored.
-        return getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Shield).getMagnitude();
+        return getCreatureStats(ptr).getMagicEffects().getOrDefault(ESM::MagicEffect::Shield).getMagnitude();
     }
 
     float Creature::getCapacity(const MWWorld::Ptr& ptr) const
