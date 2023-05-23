@@ -137,12 +137,8 @@ namespace sol
     struct is_automagical<ESM::MagicEffect> : std::false_type
     {
     };
-    template <>
-    struct is_automagical<MWLua::ActorSpells> : std::false_type
-    {
-    };
-    template <>
-    struct is_automagical<MWLua::ActorActiveSpells> : std::false_type
+    template <typename T>
+    struct is_automagical<MWLua::ActorStore<T>> : std::false_type
     {
     };
 }
