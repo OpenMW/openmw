@@ -193,6 +193,7 @@
 -- @function [parent=#ActorActiveEffects] getEffect
 -- @param self
 -- @param string effect ID
+-- @param string Optional skill or attribute ID
 -- @return #ActiveEffect if such an effect is active, nil otherwise
 
 ---
