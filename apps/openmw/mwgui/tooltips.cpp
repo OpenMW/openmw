@@ -274,14 +274,14 @@ namespace MWGui
                         if (underscorePos == std::string::npos)
                             continue;
                         std::string key = userStringPair.first.substr(0, underscorePos);
-                        std::string widgetName = userStringPair.first.substr(
-                            underscorePos + 1, userStringPair.first.size() - (underscorePos + 1));
+                        std::string_view first = userStringPair.first;
+                        std::string_view widgetName = first.substr(underscorePos + 1);
 
                         type = "Property";
                         size_t caretPos = key.find('^');
                         if (caretPos != std::string::npos)
                         {
-                            type = key.substr(0, caretPos);
+                            type = first.substr(0, caretPos);
                             key.erase(key.begin(), key.begin() + caretPos + 1);
                         }
 
