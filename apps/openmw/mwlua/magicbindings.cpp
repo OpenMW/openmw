@@ -28,33 +28,19 @@
 
 namespace MWLua
 {
-    // class returned via 'types.Actor.spells(obj)' in Lua
-    struct ActorSpells
-    {
-        bool isActor() const { return !mActor.ptr().isEmpty() && mActor.ptr().getClass().isActor(); }
-
-        MWMechanics::Spells* getStore() const
-        {
-            if (!isActor())
-                return nullptr;
-            const MWWorld::Ptr& ptr = mActor.ptr();
-            return &ptr.getClass().getCreatureStats(ptr).getSpells();
-        }
-
-        ObjectVariant mActor;
-    };
-
     template <typename Store>
     struct ActorStore
     {
         using Collection = typename Store::Collection;
         using Iterator = typename Collection::const_iterator;
 
-        ActorStore(ObjectVariant actor)
+        ActorStore(const sol::object& actor)
             : mActor(actor)
             , mIterator()
             , mIndex(0)
         {
+            if (!isActor())
+                throw std::runtime_error("Actor expected");
             reset();
         }
 
@@ -94,6 +80,15 @@ namespace MWLua
     };
 
     template <>
+    MWMechanics::Spells* ActorStore<MWMechanics::Spells>::getStore() const
+    {
+        if (!isActor())
+            return nullptr;
+        const MWWorld::Ptr& ptr = mActor.ptr();
+        return &ptr.getClass().getCreatureStats(ptr).getSpells();
+    }
+
+    template <>
     MWMechanics::MagicEffects* ActorStore<MWMechanics::MagicEffects>::getStore() const
     {
         if (!isActor())
@@ -116,6 +111,8 @@ namespace MWLua
         MWMechanics::EffectKey key;
         MWMechanics::EffectParam param;
     };
+    // class returned via 'types.Actor.spells(obj)' in Lua
+    using ActorSpells = ActorStore<MWMechanics::Spells>;
     // class returned via 'types.Actor.activeEffects(obj)' in Lua
     using ActorActiveEffects = ActorStore<MWMechanics::MagicEffects>;
     // class returned via 'types.Actor.activeSpells(obj)' in Lua
@@ -371,33 +368,18 @@ namespace MWLua
             = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Spell>();
 
         // types.Actor.spells(o)
-        actor["spells"] = [](const sol::object actor) {
-            auto spells = ActorSpells{ ObjectVariant(actor) };
-            if (!spells.isActor())
-                throw std::runtime_error("Actor expected");
-            return spells;
-        };
+        actor["spells"] = [](const sol::object& actor) { return ActorSpells{ actor }; };
         auto spellsT = context.mLua->sol().new_usertype<ActorSpells>("ActorSpells");
         spellsT[sol::meta_function::to_string]
             = [](const ActorSpells& spells) { return "ActorSpells[" + spells.mActor.object().toString() + "]"; };
 
-        actor["activeSpells"] = [](const sol::object actor) {
-            auto spells = ActorActiveSpells{ ObjectVariant(actor) };
-            if (!spells.isActor())
-                throw std::runtime_error("Actor expected");
-            return spells;
-        };
+        actor["activeSpells"] = [](const sol::object& actor) { return ActorActiveSpells{ actor }; };
         auto activeSpellsT = context.mLua->sol().new_usertype<ActorActiveSpells>("ActorActiveSpells");
         activeSpellsT[sol::meta_function::to_string] = [](const ActorActiveSpells& spells) {
             return "ActorActiveSpells[" + spells.mActor.object().toString() + "]";
         };
 
-        actor["activeEffects"] = [](const sol::object actor) {
-            auto effects = ActorActiveEffects{ ObjectVariant(actor) };
-            if (!effects.isActor())
-                throw std::runtime_error("Actor expected");
-            return effects;
-        };
+        actor["activeEffects"] = [](const sol::object& actor) { return ActorActiveEffects{ actor }; };
         auto activeEffectsT = context.mLua->sol().new_usertype<ActorActiveEffects>("ActorActiveEffects");
         activeEffectsT[sol::meta_function::to_string] = [](const ActorActiveEffects& effects) {
             return "ActorActiveEffects[" + effects.mActor.object().toString() + "]";
