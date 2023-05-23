@@ -1835,7 +1835,7 @@ namespace MWMechanics
                 mAnimation->disable(mAnimQueue.front().mGroup);
                 mAnimQueue.pop_front();
 
-                bool loopfallback = (mAnimQueue.front().mGroup.compare(0, 4, "idle") == 0);
+                bool loopfallback = mAnimQueue.front().mGroup.starts_with("idle");
                 mAnimation->play(mAnimQueue.front().mGroup, Priority_Default, MWRender::Animation::BlendMask_All, false,
                     1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
             }
@@ -2463,7 +2463,7 @@ namespace MWMechanics
             clearStateAnimation(mCurrentIdle);
             mIdleState = CharState_SpecialIdle;
 
-            bool loopfallback = (mAnimQueue.front().mGroup.compare(0, 4, "idle") == 0);
+            bool loopfallback = mAnimQueue.front().mGroup.starts_with("idle");
             mAnimation->play(anim.mGroup, Priority_Persistent, MWRender::Animation::BlendMask_All, false, 1.0f, "start",
                 "stop", complete, anim.mLoopCount, loopfallback);
         }
@@ -2513,7 +2513,7 @@ namespace MWMechanics
             clearStateAnimation(mCurrentIdle);
 
             mIdleState = CharState_SpecialIdle;
-            bool loopfallback = (entry.mGroup.compare(0, 4, "idle") == 0);
+            bool loopfallback = entry.mGroup.starts_with("idle");
             mAnimation->play(groupname, persist && groupname != "idle" ? Priority_Persistent : Priority_Default,
                 MWRender::Animation::BlendMask_All, false, 1.0f, ((mode == 2) ? "loop start" : "start"), "stop", 0.0f,
                 count - 1, loopfallback);

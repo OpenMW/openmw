@@ -33,7 +33,7 @@ namespace MWWorld
         {
             std::string model = Misc::StringUtils::lowerCase(stat.mModel);
             std::replace(model.begin(), model.end(), '/', '\\');
-            if (model.compare(0, prefix.size(), prefix) != 0)
+            if (!model.starts_with(prefix))
                 continue;
             mMeshCache[stat.mId] = Misc::ResourceHelpers::correctMeshPath(model, vfs);
         }
@@ -42,7 +42,7 @@ namespace MWWorld
         {
             std::string model = Misc::StringUtils::lowerCase(stat.mModel);
             std::replace(model.begin(), model.end(), '/', '\\');
-            if (model.compare(0, prefix.size(), prefix) != 0)
+            if (!model.starts_with(prefix))
                 continue;
             mMeshCache[stat.mId] = Misc::ResourceHelpers::correctMeshPath(model, vfs);
         }

@@ -125,9 +125,9 @@ namespace MWWorld
                         Misc::StringUtils::lowerCaseInPlace(mesh);
                         if (mesh[slashpos + 1] == 'x')
                         {
-                            std::string kfname = mesh;
-                            if (kfname.size() > 4 && kfname.compare(kfname.size() - 4, 4, ".nif") == 0)
+                            if (mesh.size() > 4 && mesh.ends_with(".nif"))
                             {
+                                std::string kfname = mesh;
                                 kfname.replace(kfname.size() - 4, 4, ".kf");
                                 if (mSceneManager->getVFS()->exists(kfname))
                                     mPreloadedObjects.insert(mKeyframeManager->get(kfname));

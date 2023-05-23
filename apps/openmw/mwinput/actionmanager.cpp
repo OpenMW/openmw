@@ -178,7 +178,7 @@ namespace MWInput
     void ActionManager::screenshot()
     {
         const std::string& settingStr = Settings::Manager::getString("screenshot type", "Video");
-        bool regularScreenshot = settingStr.size() == 0 || settingStr.compare("regular") == 0;
+        bool regularScreenshot = settingStr.empty() || settingStr == "regular";
 
         if (regularScreenshot)
         {

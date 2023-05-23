@@ -135,7 +135,7 @@ std::string Misc::ResourceHelpers::correctActorModelPath(const std::string& resP
     else
         mdlname.insert(mdlname.begin(), 'x');
     std::string kfname = mdlname;
-    if (kfname.ends_with(".nif"))
+    if (Misc::StringUtils::ciEndsWith(kfname, ".nif"))
         kfname.replace(kfname.size() - 4, 4, ".kf");
 
     if (!vfs->exists(kfname))

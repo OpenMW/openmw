@@ -545,17 +545,14 @@ void MwIniImporter::importGameFiles(
         if (it == ini.end())
             break;
 
-        for (std::vector<std::string>::const_iterator entry = it->second.begin(); entry != it->second.end(); ++entry)
+        for (const std::string& file : it->second)
         {
-            std::string filetype(entry->substr(entry->length() - 3));
-            Misc::StringUtils::lowerCaseInPlace(filetype);
-
-            if (filetype.compare("esm") == 0 || filetype.compare("esp") == 0)
+            if (Misc::StringUtils::ciEndsWith(file, "esm") || Misc::StringUtils::ciEndsWith(file, "esp"))
             {
                 bool found = false;
                 for (auto& dataPath : dataPaths)
                 {
-                    std::filesystem::path path = dataPath / *entry;
+                    std::filesystem::path path = dataPath / file;
                     std::time_t time = lastWriteTime(path, defaultTime);
                     if (time != defaultTime)
                     {
@@ -565,7 +562,7 @@ void MwIniImporter::importGameFiles(
                     }
                 }
                 if (!found)
-                    std::cout << "Warning: " << *entry << " not found, ignoring" << std::endl;
+                    std::cout << "Warning: " << file << " not found, ignoring" << std::endl;
             }
         }
     }

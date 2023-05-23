@@ -166,17 +166,17 @@ namespace MWRender
         Screenshot360Type screenshotMapping = Spherical;
 
         const std::string& settingStr = Settings::Manager::getString("screenshot type", "Video");
-        std::vector<std::string> settingArgs;
+        std::vector<std::string_view> settingArgs;
         Misc::StringUtils::split(settingStr, settingArgs);
 
         if (settingArgs.size() > 0)
         {
-            std::string typeStrings[4] = { "spherical", "cylindrical", "planet", "cubemap" };
+            std::string_view typeStrings[4] = { "spherical", "cylindrical", "planet", "cubemap" };
             bool found = false;
 
             for (int i = 0; i < 4; ++i)
             {
-                if (settingArgs[0].compare(typeStrings[i]) == 0)
+                if (settingArgs[0] == typeStrings[i])
                 {
                     screenshotMapping = static_cast<Screenshot360Type>(i);
                     found = true;
