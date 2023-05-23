@@ -2,11 +2,6 @@
 
 #include <QApplication>
 #include <QCloseEvent>
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QDesktopWidget>
-#endif
-
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QScreen>
@@ -50,6 +45,16 @@
 #include "subview.hpp"
 #include "subviewfactoryimp.hpp"
 #include "viewmanager.hpp"
+
+QRect desktopRect()
+{
+    QRegion virtualGeometry;
+    for (auto screen : QGuiApplication::screens())
+    {
+        virtualGeometry += screen->geometry();
+    }
+    return virtualGeometry.boundingRect();
+}
 
 void CSVDoc::View::closeEvent(QCloseEvent* event)
 {
@@ -1106,15 +1111,11 @@ void CSVDoc::View::merge()
 
 void CSVDoc::View::updateWidth(bool isGrowLimit, int minSubViewWidth)
 {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
     QRect rect;
     if (isGrowLimit)
         rect = QApplication::screenAt(pos())->geometry();
     else
-        rect = QGuiApplication::screens().at(QApplication::desktop()->screenNumber(this))->geometry();
-#else
-    QRect rect = QApplication::screenAt(pos())->geometry();
-#endif
+        rect = desktopRect();
 
     if (!mScrollbarOnly && mScroll && mSubViews.size() > 1)
     {
