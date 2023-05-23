@@ -2,8 +2,8 @@
 #define GAME_MWMECHANICS_MAGICEFFECTS_H
 
 #include <map>
-#include <string>
 #include <optional>
+#include <string>
 
 namespace ESM
 {
