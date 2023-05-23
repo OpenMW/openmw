@@ -678,12 +678,13 @@ MWDialogue::Filter::Filter(const MWWorld::Ptr& actor, int choice, bool talkedToP
 {
 }
 
-const ESM::DialInfo* MWDialogue::Filter::search(const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const
+MWDialogue::Filter::Response MWDialogue::Filter::search(
+    const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const
 {
-    std::vector<const ESM::DialInfo*> suitableInfos = list(dialogue, fallbackToInfoRefusal, false);
+    auto suitableInfos = list(dialogue, fallbackToInfoRefusal, false);
 
     if (suitableInfos.empty())
-        return nullptr;
+        return {};
     else
         return suitableInfos[0];
 }
@@ -693,22 +694,21 @@ bool MWDialogue::Filter::couldPotentiallyMatch(const ESM::DialInfo& info) const
     return testActor(info) && matchesStaticFilters(info, mActor);
 }
 
-std::vector<const ESM::DialInfo*> MWDialogue::Filter::list(
+std::vector<MWDialogue::Filter::Response> MWDialogue::Filter::list(
     const ESM::Dialogue& dialogue, bool fallbackToInfoRefusal, bool searchAll, bool invertDisposition) const
 {
-    std::vector<const ESM::DialInfo*> infos;
+    std::vector<MWDialogue::Filter::Response> infos;
 
     bool infoRefusal = false;
 
     // Iterate over topic responses to find a matching one
-    for (ESM::Dialogue::InfoContainer::const_iterator iter = dialogue.mInfo.begin(); iter != dialogue.mInfo.end();
-         ++iter)
+    for (const auto& info : dialogue.mInfo)
     {
-        if (testActor(*iter) && testPlayer(*iter) && testSelectStructs(*iter))
+        if (testActor(info) && testPlayer(info) && testSelectStructs(info))
         {
-            if (testDisposition(*iter, invertDisposition))
+            if (testDisposition(info, invertDisposition))
             {
-                infos.push_back(&*iter);
+                infos.emplace_back(&dialogue, &info);
                 if (!searchAll)
                     break;
             }
@@ -726,12 +726,11 @@ std::vector<const ESM::DialInfo*> MWDialogue::Filter::list(
 
         const ESM::Dialogue& infoRefusalDialogue = *dialogues.find(ESM::RefId::stringRefId("Info Refusal"));
 
-        for (ESM::Dialogue::InfoContainer::const_iterator iter = infoRefusalDialogue.mInfo.begin();
-             iter != infoRefusalDialogue.mInfo.end(); ++iter)
-            if (testActor(*iter) && testPlayer(*iter) && testSelectStructs(*iter)
-                && testDisposition(*iter, invertDisposition))
+        for (const auto& info : infoRefusalDialogue.mInfo)
+            if (testActor(info) && testPlayer(info) && testSelectStructs(info)
+                && testDisposition(info, invertDisposition))
             {
-                infos.push_back(&*iter);
+                infos.emplace_back(&dialogue, &info);
                 if (!searchAll)
                     break;
             }

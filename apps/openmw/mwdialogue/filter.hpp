@@ -1,6 +1,7 @@
 #ifndef GAME_MWDIALOGUE_FILTER_H
 #define GAME_MWDIALOGUE_FILTER_H
 
+#include <utility>
 #include <vector>
 
 #include "../mwworld/ptr.hpp"
@@ -52,10 +53,12 @@ namespace MWDialogue
             const MWWorld::Ptr& actor, const ESM::RefId& factionId, int rank) const;
 
     public:
+        using Response = std::pair<const ESM::Dialogue*, const ESM::DialInfo*>;
+
         Filter(const MWWorld::Ptr& actor, int choice, bool talkedToPlayer);
 
-        std::vector<const ESM::DialInfo*> list(const ESM::Dialogue& dialogue, bool fallbackToInfoRefusal,
-            bool searchAll, bool invertDisposition = false) const;
+        std::vector<Response> list(const ESM::Dialogue& dialogue, bool fallbackToInfoRefusal, bool searchAll,
+            bool invertDisposition = false) const;
         ///< List all infos that could be used on the given actor, using the current runtime state of the actor.
         /// \note If fallbackToInfoRefusal is used, the returned DialInfo might not be from the supplied ESM::Dialogue.
 
@@ -63,7 +66,7 @@ namespace MWDialogue
         ///< Check if this INFO could potentially be said by the given actor, ignoring runtime state filters and
         ///< ignoring player filters.
 
-        const ESM::DialInfo* search(const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const;
+        Response search(const ESM::Dialogue& dialogue, const bool fallbackToInfoRefusal) const;
         ///< Get a matching response for the requested dialogue.
         ///  Redirect to "Info Refusal" topic if a response fulfills all conditions but disposition.
     };
