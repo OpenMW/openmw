@@ -4,6 +4,7 @@
 #include <osg/UserDataContainer>
 
 #include <components/misc/resourcehelpers.hpp>
+#include <components/misc/strings/algorithm.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/unrefqueue.hpp>
 
@@ -78,7 +79,7 @@ namespace MWRender
         if (animated && !mesh.empty())
         {
             animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
-            if (animationMesh == mesh)
+            if (animationMesh == mesh && Misc::StringUtils::ciEndsWith(animationMesh, ".nif"))
                 animated = false;
         }
 
@@ -95,7 +96,7 @@ namespace MWRender
 
         bool animated = true;
         std::string animationMesh = Misc::ResourceHelpers::correctActorModelPath(mesh, mResourceSystem->getVFS());
-        if (animationMesh == mesh)
+        if (animationMesh == mesh && Misc::StringUtils::ciEndsWith(animationMesh, ".nif"))
             animated = false;
 
         // CreatureAnimation
