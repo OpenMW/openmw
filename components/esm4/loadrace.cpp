@@ -677,6 +677,8 @@ void ESM4::Race::load(ESM4::Reader& reader)
             case ESM4::SUB_SPED:
             case ESM4::SUB_SWMV:
             case ESM4::SUB_WKMV:
+            case ESM4::SUB_SPMV:
+            case ESM4::SUB_ATKR:
             //
             case ESM4::SUB_YNAM: // FO3
             case ESM4::SUB_NAM2: // FO3

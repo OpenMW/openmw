@@ -64,9 +64,8 @@ namespace MWWorld
             }
             case ESM::Format::Tes4:
             {
-                ESM4::Reader readerESM4(
-                    std::move(stream), filepath, MWBase::Environment::get().getResourceSystem()->getVFS());
-                readerESM4.setEncoder(mReaders.getStatelessEncoder());
+                ESM4::Reader readerESM4(std::move(stream), filepath,
+                    MWBase::Environment::get().getResourceSystem()->getVFS(), mReaders.getStatelessEncoder());
                 readerESM4.setModIndex(index);
                 readerESM4.updateModIndices(mNameToIndex);
                 mStore.loadESM4(readerESM4);

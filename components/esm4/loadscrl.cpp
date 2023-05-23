@@ -72,6 +72,7 @@ void ESM4::Scroll::load(ESM4::Reader& reader)
             case ESM4::SUB_MDOB:
             case ESM4::SUB_MODT:
             case ESM4::SUB_SPIT:
+            case ESM4::SUB_CIS2:
             {
                 // std::cout << "SCRL " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
