@@ -106,5 +106,7 @@ namespace MWLua
         record["model"] = sol::readonly_property([vfs](const ESM4::Door& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);
         });
+        record["isAutomatic"] = sol::readonly_property(
+            [](const ESM4::Door& rec) -> bool { return rec.mDoorFlags & ESM4::Door::Flag_AutomaticDoor; });
     }
 }
