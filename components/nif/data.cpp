@@ -338,9 +338,9 @@ namespace Nif
             && nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 0))
             partitions.read(nif);
 
-        // Has vertex weights flag
-        if (nif->getVersion() > NIFStream::generateVersion(4, 2, 1, 0) && !nif->getBoolean())
-            return;
+        bool hasVertexWeights = true;
+        if (nif->getVersion() > NIFStream::generateVersion(4, 2, 1, 0))
+            hasVertexWeights = nif->getBoolean();
 
         bones.resize(boneNum);
         for (BoneInfo& bi : bones)
@@ -351,8 +351,12 @@ namespace Nif
             bi.boundSphereCenter = nif->getVector3();
             bi.boundSphereRadius = nif->getFloat();
 
-            // Number of vertex weights
-            bi.weights.resize(nif->getUShort());
+            size_t numVertices = nif->getUShort();
+
+            if (!hasVertexWeights)
+                continue;
+
+            bi.weights.resize(numVertices);
             for (size_t j = 0; j < bi.weights.size(); j++)
             {
                 bi.weights[j].vertex = nif->getUShort();
@@ -482,6 +486,29 @@ namespace Nif
     {
         mKeyList = std::make_shared<ByteKeyMap>();
         mKeyList->read(nif);
+    }
+
+    void BSMultiBound::read(NIFStream* nif)
+    {
+        mData.read(nif);
+    }
+
+    void BSMultiBound::post(Reader& nif)
+    {
+        mData.post(nif);
+    }
+
+    void BSMultiBoundOBB::read(NIFStream* nif)
+    {
+        mCenter = nif->getVector3();
+        mSize = nif->getVector3();
+        mRotation = nif->getMatrix3();
+    }
+
+    void BSMultiBoundSphere::read(NIFStream* nif)
+    {
+        mCenter = nif->getVector3();
+        mRadius = nif->getFloat();
     }
 
 } // Namespace

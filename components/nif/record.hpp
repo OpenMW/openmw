@@ -159,6 +159,9 @@ namespace Nif
         RC_NiBlendTransformInterpolator,
         RC_bhkCompressedMeshShape,
         RC_bhkCompressedMeshShapeData,
+        RC_BSMultiBound,
+        RC_BSMultiBoundOBB,
+        RC_BSMultiBoundSphere,
     };
 
     /// Base class for all records

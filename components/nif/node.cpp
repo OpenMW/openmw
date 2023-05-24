@@ -306,4 +306,32 @@ namespace Nif
         for (auto& object : mObjects)
             object.second.post(nif);
     }
+
+    void BSTreeNode::read(NIFStream* nif)
+    {
+        NiNode::read(nif);
+        readRecordList(nif, mBones1);
+        readRecordList(nif, mBones2);
+    }
+
+    void BSTreeNode::post(Reader& nif)
+    {
+        NiNode::post(nif);
+        postRecordList(nif, mBones1);
+        postRecordList(nif, mBones2);
+    }
+
+    void BSMultiBoundNode::read(NIFStream* nif)
+    {
+        NiNode::read(nif);
+        mMultiBound.read(nif);
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_SKY)
+            mType = nif->getUInt();
+    }
+
+    void BSMultiBoundNode::post(Reader& nif)
+    {
+        NiNode::post(nif);
+        mMultiBound.post(nif);
+    }
 }

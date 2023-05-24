@@ -27,6 +27,7 @@ namespace Nif
         enum BethVersion
         {
             BETHVER_FO3 = 34, // Fallout 3
+            BETHVER_SKY = 83, // Skyrim
             BETHVER_FO4 = 130 // Fallout 4
         };
 

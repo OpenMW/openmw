@@ -138,6 +138,8 @@ namespace Nif
             { "NiTransformData", &construct<NiKeyframeData, RC_NiKeyframeData> },
             { "BSFadeNode", &construct<NiNode, RC_NiNode> },
             { "BSLeafAnimNode", &construct<NiNode, RC_NiNode> },
+            { "BSTreeNode", &construct<BSTreeNode, RC_NiNode> },
+            { "BSMultiBoundNode", &construct<BSMultiBoundNode, RC_NiNode> },
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
             { "NiFloatInterpolator", &construct<NiFloatInterpolator, RC_NiFloatInterpolator> },
             { "NiBoolInterpolator", &construct<NiBoolInterpolator, RC_NiBoolInterpolator> },
@@ -185,6 +187,9 @@ namespace Nif
                 &construct<NiBlendTransformInterpolator, RC_NiBlendTransformInterpolator> },
             { "bhkCompressedMeshShape", &construct<bhkCompressedMeshShape, RC_bhkCompressedMeshShape> },
             { "bhkCompressedMeshShapeData", &construct<bhkCompressedMeshShapeData, RC_bhkCompressedMeshShapeData> },
+            { "BSMultiBound", &construct<BSMultiBound, RC_BSMultiBound> },
+            { "BSMultiBoundOBB", &construct<BSMultiBoundOBB, RC_BSMultiBoundOBB> },
+            { "BSMultiBoundSphere", &construct<BSMultiBoundSphere, RC_BSMultiBoundSphere> },
         };
     }
 

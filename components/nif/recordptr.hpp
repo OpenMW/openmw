@@ -146,6 +146,8 @@ namespace Nif
     struct NiDefaultAVObjectPalette;
     struct NiControllerSequence;
     struct bhkCompressedMeshShapeData;
+    struct BSMultiBound;
+    struct BSMultiBoundData;
 
     using NodePtr = RecordPtrT<Node>;
     using ExtraPtr = RecordPtrT<Extra>;
@@ -181,6 +183,8 @@ namespace Nif
     using NiBlendInterpolatorPtr = RecordPtrT<NiBlendInterpolator>;
     using NiDefaultAVObjectPalettePtr = RecordPtrT<NiDefaultAVObjectPalette>;
     using bhkCompressedMeshShapeDataPtr = RecordPtrT<bhkCompressedMeshShapeData>;
+    using BSMultiBoundPtr = RecordPtrT<BSMultiBound>;
+    using BSMultiBoundDataPtr = RecordPtrT<BSMultiBoundData>;
 
     using NodeList = RecordListT<Node>;
     using PropertyList = RecordListT<Property>;

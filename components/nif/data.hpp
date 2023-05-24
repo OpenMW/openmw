@@ -288,5 +288,35 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSMultiBound : public Record
+    {
+        BSMultiBoundDataPtr mData;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    // Abstract
+    struct BSMultiBoundData : public Record
+    {
+    };
+
+    struct BSMultiBoundOBB : public BSMultiBoundData
+    {
+        osg::Vec3f mCenter;
+        osg::Vec3f mSize;
+        Nif::Matrix3 mRotation;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSMultiBoundSphere : public BSMultiBoundData
+    {
+        osg::Vec3f mCenter;
+        float mRadius;
+
+        void read(NIFStream* nif) override;
+    };
+
 } // Namespace
 #endif
