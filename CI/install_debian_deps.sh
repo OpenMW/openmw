@@ -91,6 +91,8 @@ declare -rA GROUPED_DEPS=(
     xvfb
   "
 
+  [libasan6]="libasan6"
+
   [android]="binutils build-essential cmake ccache curl unzip git pkg-config"
   
   [openmw-clang-format]="
