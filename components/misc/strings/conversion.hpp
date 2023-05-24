@@ -2,6 +2,7 @@
 #define COMPONENTS_MISC_STRINGS_CONVERSION_H
 
 #include <charconv>
+#include <cstdint>
 #include <optional>
 #include <string>
 #include <system_error>
