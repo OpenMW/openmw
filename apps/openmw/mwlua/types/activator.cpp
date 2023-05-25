@@ -16,6 +16,19 @@ namespace sol
     {
     };
 }
+namespace
+{
+    // Populates a activator struct from a Lua table.
+    ESM::Activator tableToActivator(const sol::table& rec)
+    {
+        ESM::Activator activator;
+        activator.mName = rec["name"];
+        activator.mModel = rec["model"];
+        std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+        activator.mScript = ESM::RefId::deserializeText(scriptId);
+        return activator;
+    }
+}
 
 namespace MWLua
 {
@@ -23,6 +36,7 @@ namespace MWLua
     {
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
+        activator["createRecordDraft"] = tableToActivator;
         addRecordFunctionBinding<ESM::Activator>(activator, context);
 
         sol::usertype<ESM::Activator> record = context.mLua->sol().new_usertype<ESM::Activator>("ESM3_Activator");

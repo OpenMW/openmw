@@ -18,6 +18,23 @@ namespace sol
     };
 }
 
+namespace
+{
+    // Populates a misc struct from a Lua table.
+    ESM::Miscellaneous tableToMisc(const sol::table& rec)
+    {
+        ESM::Miscellaneous misc;
+        misc.mName = rec["name"];
+        misc.mModel = rec["model"];
+        misc.mIcon = rec["icon"];
+        std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+        misc.mScript = ESM::RefId::deserializeText(scriptId);
+        misc.mData.mWeight = rec["weight"];
+        misc.mData.mValue = rec["value"];
+        return misc;
+    }
+}
+
 namespace MWLua
 {
     void addMiscellaneousBindings(sol::table miscellaneous, const Context& context)
@@ -25,6 +42,7 @@ namespace MWLua
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         addRecordFunctionBinding<ESM::Miscellaneous>(miscellaneous, context);
+        miscellaneous["createRecordDraft"] = tableToMisc;
 
         miscellaneous["setSoul"] = [](const GObject& object, std::string_view soulId) {
             ESM::RefId creature = ESM::RefId::deserializeText(soulId);

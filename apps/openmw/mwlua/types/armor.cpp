@@ -16,6 +16,34 @@ namespace sol
     {
     };
 }
+namespace
+{
+    // Populates an armor struct from a Lua table.
+    ESM::Armor tableToArmor(const sol::table& rec)
+    {
+        ESM::Armor armor;
+        armor.mName = rec["name"];
+        armor.mModel = rec["model"];
+        armor.mIcon = rec["icon"];
+        std::string_view enchantId = rec["enchant"].get<std::string_view>();
+        armor.mEnchant = ESM::RefId::deserializeText(enchantId);
+        std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+        armor.mScript = ESM::RefId::deserializeText(scriptId);
+
+        armor.mData.mWeight = rec["weight"];
+        armor.mData.mValue = rec["value"];
+        int armorType = rec["type"].get<int>();
+        if (armorType >= 0 && armorType <= ESM::Armor::RBracer)
+            armor.mData.mType = armorType;
+        else
+            throw std::runtime_error("Invalid Armor Type provided: " + std::to_string(armorType));
+        armor.mData.mHealth = rec["health"];
+        armor.mData.mArmor = rec["baseArmor"];
+        armor.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
+
+        return armor;
+    }
+}
 
 namespace MWLua
 {
@@ -39,6 +67,7 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM::Armor>(armor, context);
 
+        armor["createRecordDraft"] = tableToArmor;
         sol::usertype<ESM::Armor> record = context.mLua->sol().new_usertype<ESM::Armor>("ESM3_Armor");
         record[sol::meta_function::to_string]
             = [](const ESM::Armor& rec) -> std::string { return "ESM3_Armor[" + rec.mId.toDebugString() + "]"; };

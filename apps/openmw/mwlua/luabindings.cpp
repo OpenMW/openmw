@@ -3,9 +3,14 @@
 #include <chrono>
 
 #include <components/esm/attr.hpp>
+#include <components/esm3/loadacti.hpp>
 #include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadskil.hpp>
-
+#include <components/esm3/loadweap.hpp>
 #include <components/lua/l10n.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/utilpackage.hpp>
@@ -186,11 +191,28 @@ namespace MWLua
         };
 
         // Creates a new record in the world database.
-        api["createRecord"] = sol::overload([](const ESM::Potion& potion) -> const ESM::Potion* {
-            return MWBase::Environment::get().getESMStore()->insert(potion);
-        }
-            // TODO: add here overloads for other records
-        );
+        api["createRecord"] = sol::overload(
+            [](const ESM::Activator& activator) -> const ESM::Activator* {
+                return MWBase::Environment::get().getESMStore()->insert(activator);
+            },
+            [](const ESM::Armor& armor) -> const ESM::Armor* {
+                return MWBase::Environment::get().getESMStore()->insert(armor);
+            },
+            [](const ESM::Clothing& clothing) -> const ESM::Clothing* {
+                return MWBase::Environment::get().getESMStore()->insert(clothing);
+            },
+            [](const ESM::Book& book) -> const ESM::Book* {
+                return MWBase::Environment::get().getESMStore()->insert(book);
+            },
+            [](const ESM::Miscellaneous& misc) -> const ESM::Miscellaneous* {
+                return MWBase::Environment::get().getESMStore()->insert(misc);
+            },
+            [](const ESM::Potion& potion) -> const ESM::Potion* {
+                return MWBase::Environment::get().getESMStore()->insert(potion);
+            },
+            [](const ESM::Weapon& weapon) -> const ESM::Weapon* {
+                return MWBase::Environment::get().getESMStore()->insert(weapon);
+            });
 
         api["_runStandardActivationAction"] = [context](const GObject& object, const GObject& actor) {
             context.mLuaManager->addAction(

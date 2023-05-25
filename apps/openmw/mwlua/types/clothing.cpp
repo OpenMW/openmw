@@ -16,11 +16,36 @@ namespace sol
     {
     };
 }
-
+namespace
+{
+    // Populates a clothing struct from a Lua table.
+    ESM::Clothing tableToClothing(const sol::table& rec)
+    {
+        ESM::Clothing clothing;
+        clothing.mName = rec["name"];
+        clothing.mModel = rec["model"];
+        clothing.mIcon = rec["icon"];
+        std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+        clothing.mScript = ESM::RefId::deserializeText(scriptId);
+        clothing.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
+        std::string_view enchantId = rec["enchant"].get<std::string_view>();
+        clothing.mEnchant = ESM::RefId::deserializeText(enchantId);
+        clothing.mData.mWeight = rec["weight"];
+        clothing.mData.mValue = rec["value"];
+        int clothingType = rec["type"].get<int>();
+        if (clothingType >= 0 && clothingType <= ESM::Clothing::Amulet)
+            clothing.mData.mType = clothingType;
+        else
+            throw std::runtime_error("Invalid Clothing Type provided: " + std::to_string(clothingType));
+        return clothing;
+    }
+}
 namespace MWLua
 {
     void addClothingBindings(sol::table clothing, const Context& context)
     {
+        clothing["createRecordDraft"] = tableToClothing;
+
         clothing["TYPE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
             { "Amulet", ESM::Clothing::Amulet },
             { "Belt", ESM::Clothing::Belt },
