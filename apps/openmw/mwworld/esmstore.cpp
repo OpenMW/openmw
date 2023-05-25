@@ -631,6 +631,7 @@ namespace MWWorld
             + get<ESM::Book>().getDynamicSize() + get<ESM::Class>().getDynamicSize()
             + get<ESM::Clothing>().getDynamicSize() + get<ESM::Enchantment>().getDynamicSize()
             + get<ESM::NPC>().getDynamicSize() + get<ESM::Spell>().getDynamicSize()
+            + get<ESM::Activator>().getDynamicSize() + get<ESM::Miscellaneous>().getDynamicSize()
             + get<ESM::Weapon>().getDynamicSize() + get<ESM::CreatureLevList>().getDynamicSize()
             + get<ESM::ItemLevList>().getDynamicSize() + get<ESM::Creature>().getDynamicSize()
             + get<ESM::Container>().getDynamicSize();
@@ -651,6 +652,8 @@ namespace MWWorld
         get<ESM::Clothing>().write(writer, progress);
         get<ESM::Enchantment>().write(writer, progress);
         get<ESM::NPC>().write(writer, progress);
+        get<ESM::Miscellaneous>().write(writer, progress);
+        get<ESM::Activator>().write(writer, progress);
         get<ESM::Spell>().write(writer, progress);
         get<ESM::Weapon>().write(writer, progress);
         get<ESM::CreatureLevList>().write(writer, progress);
@@ -665,6 +668,8 @@ namespace MWWorld
         switch (type)
         {
             case ESM::REC_ALCH:
+            case ESM::REC_MISC:
+            case ESM::REC_ACTI:
             case ESM::REC_ARMO:
             case ESM::REC_BOOK:
             case ESM::REC_CLAS:

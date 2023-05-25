@@ -570,6 +570,7 @@
 -- @field #string mwscript MWScript that is attached to this NPC
 -- @field #string hair Path to the hair body part model
 -- @field #string head Path to the head body part model
+-- @field #bool isMale The gender setting of the NPC
 
 --- @{#Player} functions
 -- @field [parent=#types] #Player Player
@@ -640,6 +641,12 @@
 -- @field #number baseArmor The base armor rating of this armor
 -- @field #number enchantCapacity
 
+---
+-- Creates a @{#ArmorRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Armor] createRecordDraft
+-- @param #ArmorRecord armor A Lua table with the fields of a ArmorRecord.
+-- @return #ArmorRecord A strongly typed Armor record.
 
 
 --- @{#Book} functions
@@ -711,7 +718,12 @@
 -- @field #boolean isScroll
 -- @field #number enchantCapacity
 
-
+---
+-- Creates a @{#BookRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Book] createRecordDraft
+-- @param #BookRecord book A Lua table with the fields of a BookRecord.
+-- @return #BookRecord A strongly typed Book record.
 
 --- @{#Clothing} functions
 -- @field [parent=#types] #Clothing Clothing
@@ -749,6 +761,13 @@
 -- @function [parent=#Clothing] record
 -- @param #any objectOrRecordId
 -- @return #ClothingRecord
+
+---
+-- Creates a @{#ClothingRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Clothing] createRecordDraft
+-- @param #ClothingRecord clothing A Lua table with the fields of a ClothingRecord.
+-- @return #ClothingRecord A strongly typed clothing record.
 
 ---
 -- @type ClothingRecord
@@ -863,6 +882,13 @@
 -- @function [parent=#Miscellaneous] getSoul
 -- @param openmw.core#GameObject object
 -- @return #string
+
+---
+-- Creates a @{#MiscellaneousRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Miscellaneous] createRecordDraft
+-- @param #MiscellaneousRecord miscellaneous A Lua table with the fields of a MiscellaneousRecord.
+-- @return #MiscellaneousRecord A strongly typed Miscellaneous record.
 
 ---
 -- Sets the soul of a miscellaneous item, intended for soul gem objects; Must be used in a global script.
@@ -986,7 +1012,12 @@
 -- @field #number thrustMinDamage
 -- @field #number thrustMaxDamage
 
-
+---
+-- Creates a @{#WeaponRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Weapon] createRecordDraft
+-- @param #WeaponRecord weapon A Lua table with the fields of a WeaponRecord.
+-- @return #WeaponRecord A strongly typed Weapon record.
 
 --- @{#Apparatus} functions
 -- @field [parent=#types] #Apparatus Apparatus
@@ -1155,6 +1186,13 @@
 -- @field #string name Human-readable name
 -- @field #string model VFS path to the model
 -- @field #string mwscript MWScript on this activator (can be empty)
+
+---
+-- Creates a @{#ActivatorRecord} without adding it to the world database.
+-- Use @{openmw_world#(world).createRecord} to add the record to the world.
+-- @function [parent=#Activator] createRecordDraft
+-- @param #ActivatorRecord activator A Lua table with the fields of a ActivatorRecord.
+-- @return #ActivatorRecord A strongly typed Activator record.
 
 --- @{#Container} functions
 -- @field [parent=#types] #Container Container

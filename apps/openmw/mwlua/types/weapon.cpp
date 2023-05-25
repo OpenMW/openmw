@@ -17,6 +17,48 @@ namespace sol
     };
 }
 #include <components/resource/resourcesystem.hpp>
+
+namespace
+{
+    // Populates a weapon struct from a Lua table.
+    ESM::Weapon tableToWeapon(const sol::table& rec)
+    {
+        ESM::Weapon weapon;
+        weapon.mName = rec["name"];
+        weapon.mModel = rec["model"];
+        weapon.mIcon = rec["icon"];
+        std::string_view enchantId = rec["enchant"].get<std::string_view>();
+        weapon.mEnchant = ESM::RefId::deserializeText(enchantId);
+        std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+        weapon.mScript = ESM::RefId::deserializeText(scriptId);
+        weapon.mData.mFlags = 0;
+        if (rec["isMagical"])
+            weapon.mData.mFlags |= ESM::Weapon::Magical;
+        if (rec["isSilver"])
+            weapon.mData.mFlags |= ESM::Weapon::Silver;
+        int weaponType = rec["type"].get<int>();
+        if (weaponType >= 0 && weaponType <= ESM::Weapon::MarksmanThrown)
+            weapon.mData.mType = weaponType;
+        else
+            throw std::runtime_error("Invalid Weapon Type provided: " + std::to_string(weaponType));
+
+        weapon.mData.mWeight = rec["weight"];
+        weapon.mData.mValue = rec["value"];
+        weapon.mData.mHealth = rec["health"];
+        weapon.mData.mSpeed = rec["speed"];
+        weapon.mData.mReach = rec["reach"];
+        weapon.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
+        weapon.mData.mChop[0] = rec["chopMinDamage"];
+        weapon.mData.mChop[1] = rec["chopMaxDamage"];
+        weapon.mData.mSlash[0] = rec["slashMinDamage"];
+        weapon.mData.mSlash[1] = rec["slashMaxDamage"];
+        weapon.mData.mThrust[0] = rec["thrustMinDamage"];
+        weapon.mData.mThrust[1] = rec["thrustMaxDamage"];
+
+        return weapon;
+    }
+}
+
 namespace MWLua
 {
     void addWeaponBindings(sol::table weapon, const Context& context)
@@ -41,6 +83,7 @@ namespace MWLua
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         addRecordFunctionBinding<ESM::Weapon>(weapon, context);
+        weapon["createRecordDraft"] = tableToWeapon;
 
         sol::usertype<ESM::Weapon> record = context.mLua->sol().new_usertype<ESM::Weapon>("ESM3_Weapon");
         record[sol::meta_function::to_string]

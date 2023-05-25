@@ -461,6 +461,8 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
                     break;
 
                 case ESM::REC_ALCH:
+                case ESM::REC_MISC:
+                case ESM::REC_ACTI:
                 case ESM::REC_ARMO:
                 case ESM::REC_BOOK:
                 case ESM::REC_CLAS:

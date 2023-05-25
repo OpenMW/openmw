@@ -225,7 +225,7 @@ Programmers
     tlmullis
     tri4ng1e
     Thoronador
-    Tobias Tribble (zackogenic)
+    Tobias Tribble (zackhasacat)
     Tom Lowe (Vulpen)
     Tom Mason (wheybags)
     Torben Leif Carrington (TorbenC)

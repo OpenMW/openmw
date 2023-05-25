@@ -1,5 +1,8 @@
 #include "types.hpp"
 
+#include <components/misc/strings/algorithm.hpp>
+#include <components/misc/strings/lower.hpp>
+
 #include <components/esm3/loadbook.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -18,6 +21,43 @@ namespace sol
     };
 }
 
+namespace
+{
+    // Populates a book struct from a Lua table.
+    ESM::Book tableToBook(const sol::table& rec)
+    {
+        ESM::Book book;
+        book.mName = rec["name"];
+        book.mModel = rec["model"];
+        book.mIcon = rec["icon"];
+        book.mText = rec["text"];
+        std::string_view enchantId = rec["enchant"].get<std::string_view>();
+        book.mEnchant = ESM::RefId::deserializeText(enchantId);
+
+        book.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
+        std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+        book.mScript = ESM::RefId::deserializeText(scriptId);
+        book.mData.mWeight = rec["weight"];
+        book.mData.mValue = rec["value"];
+        book.mData.mIsScroll = rec["isScroll"];
+
+        std::string_view skill = rec["skill"].get<std::string_view>();
+
+        book.mData.mSkillId = -1;
+        if (skill.length() > 0)
+        {
+            for (std::size_t i = 0; i < std::size(ESM::Skill::sSkillNames); ++i)
+            {
+                if (Misc::StringUtils::ciEqual(ESM::Skill::sSkillNames[i], skill))
+                    book.mData.mSkillId = i;
+            }
+            if (book.mData.mSkillId == -1)
+                throw std::runtime_error("Incorrect skill: " + std::string(skill));
+        }
+        return book;
+    }
+}
+
 namespace MWLua
 {
     void addBookBindings(sol::table book, const Context& context)
@@ -26,6 +66,7 @@ namespace MWLua
         // TODO: Remove book.SKILL after branching 0.49
         sol::table skill(context.mLua->sol(), sol::create);
         book["SKILL"] = LuaUtil::makeStrictReadOnly(skill);
+        book["createRecordDraft"] = tableToBook;
         for (int id = ESM::Skill::Block; id < ESM::Skill::Length; ++id)
         {
             std::string skillName = Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[id]);
