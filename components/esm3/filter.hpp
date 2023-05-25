@@ -15,6 +15,8 @@ namespace ESM
     {
         constexpr static RecNameInts sRecordId = REC_FILT;
 
+        static constexpr std::string_view getRecordType() { return "Filter"; }
+
         unsigned int mRecordFlags;
         RefId mId;
 

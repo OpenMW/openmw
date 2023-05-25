@@ -296,9 +296,8 @@ namespace CSMWorld
         const int index = getIndex(id);
         Record<ESXRecordT>& record = *mRecords.at(index);
         if (record.isDeleted())
-        {
-            throw std::runtime_error("attempt to touch deleted record");
-        }
+            throw std::runtime_error("attempt to touch deleted record from collection of "
+                + std::string(ESXRecordT::getRecordType()) + ": " + id.toDebugString());
 
         if (!record.isModified())
         {
@@ -394,7 +393,8 @@ namespace CSMWorld
         int index = searchId(id);
 
         if (index == -1)
-            throw std::runtime_error("invalid ID: " + id.getRefIdString());
+            throw std::runtime_error("ID is not found in collection of " + std::string(ESXRecordT::getRecordType())
+                + " records: " + id.getRefIdString());
 
         return index;
     }
@@ -427,7 +427,8 @@ namespace CSMWorld
     NestableColumn* Collection<ESXRecordT>::getNestableColumn(int column) const
     {
         if (column < 0 || column >= static_cast<int>(mColumns.size()))
-            throw std::runtime_error("column index out of range");
+            throw std::runtime_error(
+                "column index out of range [0, " + std::to_string(mColumns.size()) + "): " + std::to_string(column));
 
         return mColumns.at(column);
     }

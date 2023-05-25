@@ -16,6 +16,8 @@ namespace CSMWorld
 {
     struct MetaData
     {
+        static constexpr std::string_view getRecordType() { return "MetaData"; }
+
         ESM::RefId mId;
 
         ESM::FormatVersion mFormatVersion;
