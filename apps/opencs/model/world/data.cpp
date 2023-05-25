@@ -27,6 +27,7 @@
 #include <apps/opencs/model/world/subcellcollection.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm/esmcommon.hpp>
 #include <components/esm3/cellref.hpp>
@@ -1041,6 +1042,8 @@ int CSMWorld::Data::getTotalRecords(const std::vector<std::filesystem::path>& fi
 
 int CSMWorld::Data::startLoading(const std::filesystem::path& path, bool base, bool project)
 {
+    Log(Debug::Info) << "Loading content file " << path;
+
     // Don't delete the Reader yet. Some record types store a reference to the Reader to handle on-demand loading
     std::shared_ptr<ESM::ESMReader> ptr(mReader);
     mReaders.push_back(ptr);
