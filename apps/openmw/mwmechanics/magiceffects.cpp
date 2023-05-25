@@ -147,7 +147,7 @@ namespace MWMechanics
     {
         for (Collection::iterator it = mCollection.begin(); it != mCollection.end(); ++it)
         {
-            it->second.setModifier(effects.get(it->first).getModifier());
+            it->second.setModifier(effects.getOrDefault(it->first).getModifier());
         }
 
         for (Collection::const_iterator it = effects.begin(); it != effects.end(); ++it)
@@ -156,18 +156,23 @@ namespace MWMechanics
         }
     }
 
-    EffectParam MagicEffects::get(const EffectKey& key) const
+    EffectParam MagicEffects::getOrDefault(const EffectKey& key) const
+    {
+        std::optional<EffectParam> param;
+        get(key, param);
+        return param.value_or(EffectParam());
+    }
+
+    bool MagicEffects::get(const EffectKey& key, std::optional<EffectParam>& param) const
     {
         Collection::const_iterator iter = mCollection.find(key);
 
-        if (iter == mCollection.end())
+        if (iter != mCollection.end())
         {
-            return EffectParam();
+            param = iter->second;
+            return true;
         }
-        else
-        {
-            return iter->second;
-        }
+        return false;
     }
 
     MagicEffects MagicEffects::diff(const MagicEffects& prev, const MagicEffects& now)
@@ -263,7 +268,7 @@ namespace MWMechanics
 
         if (spellLine.empty())
         {
-            const std::string& effectIDStr = ESM::MagicEffect::effectIdToString(effect.mIndex);
+            auto& effectIDStr = ESM::MagicEffect::indexToGmstString(effect.mIndex);
             spellLine = windowManager->getGameSettingString(effectIDStr, {});
         }
 

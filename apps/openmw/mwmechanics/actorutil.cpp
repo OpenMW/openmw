@@ -32,13 +32,13 @@ namespace MWMechanics
     bool hasWaterWalking(const MWWorld::Ptr& actor)
     {
         const MWMechanics::MagicEffects& effects = actor.getClass().getCreatureStats(actor).getMagicEffects();
-        return effects.get(ESM::MagicEffect::WaterWalking).getMagnitude() > 0;
+        return effects.getOrDefault(ESM::MagicEffect::WaterWalking).getMagnitude() > 0;
     }
 
     bool isTargetMagicallyHidden(const MWWorld::Ptr& actor)
     {
         const MagicEffects& magicEffects = actor.getClass().getCreatureStats(actor).getMagicEffects();
-        return (magicEffects.get(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
-            || (magicEffects.get(ESM::MagicEffect::Chameleon).getMagnitude() > 75);
+        return (magicEffects.getOrDefault(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
+            || (magicEffects.getOrDefault(ESM::MagicEffect::Chameleon).getMagnitude() > 75);
     }
 }

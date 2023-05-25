@@ -464,7 +464,7 @@ namespace MWMechanics
             if (enemy.getClass()
                     .getCreatureStats(enemy)
                     .getMagicEffects()
-                    .get(ESM::MagicEffect::Levitate)
+                    .getOrDefault(ESM::MagicEffect::Levitate)
                     .getMagnitude()
                 > 0)
             {
@@ -484,7 +484,11 @@ namespace MWMechanics
         if (!actor.getClass().canWalk(actor) && !actor.getClass().isBipedal(actor))
             return true;
 
-        if (actor.getClass().getCreatureStats(actor).getMagicEffects().get(ESM::MagicEffect::Levitate).getMagnitude()
+        if (actor.getClass()
+                .getCreatureStats(actor)
+                .getMagicEffects()
+                .getOrDefault(ESM::MagicEffect::Levitate)
+                .getMagnitude()
             > 0)
             return true;
 

@@ -1021,11 +1021,11 @@ namespace MWClass
         float moveSpeed;
         if (getEncumbrance(ptr) > getCapacity(ptr))
             moveSpeed = 0.0f;
-        else if (mageffects.get(ESM::MagicEffect::Levitate).getMagnitude() > 0 && world->isLevitationEnabled())
+        else if (mageffects.getOrDefault(ESM::MagicEffect::Levitate).getMagnitude() > 0 && world->isLevitationEnabled())
         {
             float flySpeed = 0.01f
                 * (stats.getAttribute(ESM::Attribute::Speed).getModified()
-                    + mageffects.get(ESM::MagicEffect::Levitate).getMagnitude());
+                    + mageffects.getOrDefault(ESM::MagicEffect::Levitate).getMagnitude());
             flySpeed = gmst.fMinFlySpeed->mValue.getFloat()
                 + flySpeed * (gmst.fMaxFlySpeed->mValue.getFloat() - gmst.fMinFlySpeed->mValue.getFloat());
             flySpeed *= 1.0f - gmst.fEncumberedMoveEffect->mValue.getFloat() * normalizedEncumbrance;
@@ -1071,7 +1071,7 @@ namespace MWClass
         float x = gmst.fJumpAcrobaticsBase->mValue.getFloat()
             + std::pow(a / 15.0f, gmst.fJumpAcroMultiplier->mValue.getFloat());
         x += 3.0f * b * gmst.fJumpAcroMultiplier->mValue.getFloat();
-        x += mageffects.get(ESM::MagicEffect::Jump).getMagnitude() * 64;
+        x += mageffects.getOrDefault(ESM::MagicEffect::Jump).getMagnitude() * 64;
         x *= encumbranceTerm;
 
         if (stats.getStance(MWMechanics::CreatureStats::Stance_Run))
@@ -1217,7 +1217,7 @@ namespace MWClass
             }
         }
 
-        float shield = stats.getMagicEffects().get(ESM::MagicEffect::Shield).getMagnitude();
+        float shield = stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Shield).getMagnitude();
 
         return ratings[MWWorld::InventoryStore::Slot_Cuirass] * 0.3f
             + (ratings[MWWorld::InventoryStore::Slot_CarriedLeft] + ratings[MWWorld::InventoryStore::Slot_Helmet]

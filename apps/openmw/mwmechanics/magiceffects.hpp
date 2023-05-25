@@ -2,6 +2,7 @@
 #define GAME_MWMECHANICS_MAGICEFFECTS_H
 
 #include <map>
+#include <optional>
 #include <string>
 
 namespace ESM
@@ -104,7 +105,8 @@ namespace MWMechanics
         /// Copy Modifier values from \a effects, but keep original mBase values.
         void setModifiers(const MagicEffects& effects);
 
-        EffectParam get(const EffectKey& key) const;
+        EffectParam getOrDefault(const EffectKey& key) const;
+        bool get(const EffectKey& key, std::optional<EffectParam>& param) const;
         ///< This function can safely be used for keys that are not present.
 
         static MagicEffects diff(const MagicEffects& prev, const MagicEffects& now);

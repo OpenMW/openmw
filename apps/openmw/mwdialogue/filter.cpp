@@ -582,7 +582,7 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
             return player.getClass()
                        .getCreatureStats(player)
                        .getMagicEffects()
-                       .get(ESM::MagicEffect::Corprus)
+                       .getOrDefault(ESM::MagicEffect::Corprus)
                        .getMagnitude()
                 != 0;
 
@@ -601,7 +601,7 @@ bool MWDialogue::Filter::getSelectStructBoolean(const SelectWrapper& select) con
             return player.getClass()
                        .getCreatureStats(player)
                        .getMagicEffects()
-                       .get(ESM::MagicEffect::Vampirism)
+                       .getOrDefault(ESM::MagicEffect::Vampirism)
                        .getMagnitude()
                 > 0;
 

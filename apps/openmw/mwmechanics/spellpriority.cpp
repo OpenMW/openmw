@@ -265,7 +265,7 @@ namespace MWMechanics
                 const CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
 
                 // Enemy can't cast spells
-                if (stats.getMagicEffects().get(ESM::MagicEffect::Silence).getMagnitude() > 0)
+                if (stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Silence).getMagnitude() > 0)
                     return 0.f;
 
                 if (stats.isParalyzed() || stats.getKnockedDown())
@@ -596,7 +596,7 @@ namespace MWMechanics
             if (effect.mEffectID <= ESM::MagicEffect::BoundLongbow)
             {
                 for (int e = ESM::MagicEffect::BoundDagger; e <= ESM::MagicEffect::BoundLongbow; ++e)
-                    if (actor.getClass().getCreatureStats(actor).getMagicEffects().get(e).getMagnitude() > 0.f
+                    if (actor.getClass().getCreatureStats(actor).getMagicEffects().getOrDefault(e).getMagnitude() > 0.f
                         && (e != ESM::MagicEffect::BoundLongbow || effect.mEffectID == e
                             || rateAmmo(actor, enemy, getWeaponType(ESM::Weapon::MarksmanBow)->mAmmoType) <= 0.f))
                         return 0.f;
@@ -619,7 +619,11 @@ namespace MWMechanics
                 // Prefer summoning items we know how to use
                 rating *= (50.f + actor.getClass().getSkill(actor, skill)) / 100.f;
             }
-            else if (actor.getClass().getCreatureStats(actor).getMagicEffects().get(effect.mEffectID).getMagnitude()
+            else if (actor.getClass()
+                         .getCreatureStats(actor)
+                         .getMagicEffects()
+                         .getOrDefault(effect.mEffectID)
+                         .getMagnitude()
                 > 0.f)
                 return 0.f;
         }
@@ -662,14 +666,14 @@ namespace MWMechanics
             {
                 CreatureStats& stats = enemy.getClass().getCreatureStats(enemy);
 
-                if (stats.getMagicEffects().get(effect.mEffectID).getMagnitude() > 0)
+                if (stats.getMagicEffects().getOrDefault(effect.mEffectID).getMagnitude() > 0)
                     return 0.f;
             }
             else
             {
                 CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-                if (stats.getMagicEffects().get(effect.mEffectID).getMagnitude() > 0)
+                if (stats.getMagicEffects().getOrDefault(effect.mEffectID).getMagnitude() > 0)
                     return 0.f;
             }
         }

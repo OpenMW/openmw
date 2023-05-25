@@ -319,9 +319,9 @@ namespace
         {
             bool canReflect = !(magicEffect->mData.mFlags & ESM::MagicEffect::Unreflectable)
                 && !(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_Reflect)
-                && magnitudes.get(ESM::MagicEffect::Reflect).getMagnitude() > 0.f && !caster.isEmpty();
+                && magnitudes.getOrDefault(ESM::MagicEffect::Reflect).getMagnitude() > 0.f && !caster.isEmpty();
             bool canAbsorb = !(effect.mFlags & ESM::ActiveEffect::Flag_Ignore_SpellAbsorption)
-                && magnitudes.get(ESM::MagicEffect::SpellAbsorption).getMagnitude() > 0.f;
+                && magnitudes.getOrDefault(ESM::MagicEffect::SpellAbsorption).getMagnitude() > 0.f;
             if (canReflect || canAbsorb)
             {
                 auto& prng = MWBase::Environment::get().getWorld()->getPrng();
@@ -561,7 +561,8 @@ namespace MWMechanics
                 {
                     const auto& magnitudes = target.getClass().getCreatureStats(target).getMagicEffects();
                     float volume = std::clamp(
-                        (magnitudes.get(effect.mEffectId).getModifier() + effect.mMagnitude) / 100.f, 0.f, 1.f);
+                        (magnitudes.getOrDefault(effect.mEffectId).getModifier() + effect.mMagnitude) / 100.f, 0.f,
+                        1.f);
                     MWBase::Environment::get().getSoundManager()->playSound3D(target,
                         ESM::RefId::stringRefId("magic sound"), volume, 1.f, MWSound::Type::Sfx,
                         MWSound::PlayMode::LoopNoEnv);
@@ -1058,7 +1059,7 @@ namespace MWMechanics
         {
             case ESM::MagicEffect::CommandCreature:
             case ESM::MagicEffect::CommandHumanoid:
-                if (magnitudes.get(effect.mEffectId).getMagnitude() <= 0.f)
+                if (magnitudes.getOrDefault(effect.mEffectId).getMagnitude() <= 0.f)
                 {
                     auto& seq = target.getClass().getCreatureStats(target).getAiSequence();
                     seq.erasePackageIf([&](const auto& package) {
@@ -1068,7 +1069,7 @@ namespace MWMechanics
                 }
                 break;
             case ESM::MagicEffect::ExtraSpell:
-                if (magnitudes.get(effect.mEffectId).getMagnitude() <= 0.f)
+                if (magnitudes.getOrDefault(effect.mEffectId).getMagnitude() <= 0.f)
                     target.getClass().getInventoryStore(target).autoEquip();
                 break;
             case ESM::MagicEffect::TurnUndead:
@@ -1096,7 +1097,7 @@ namespace MWMechanics
                 break;
             case ESM::MagicEffect::NightEye:
             {
-                const MWMechanics::EffectParam nightEye = magnitudes.get(effect.mEffectId);
+                const MWMechanics::EffectParam nightEye = magnitudes.getOrDefault(effect.mEffectId);
                 if (nightEye.getMagnitude() < 0.f && nightEye.getBase() < 0)
                 {
                     // The PCVisionBonus functions are different from every other magic effect function in that they
@@ -1115,7 +1116,7 @@ namespace MWMechanics
                     target, effect, ESM::MagicEffect::RallyCreature, AiSetting::Flee, effect.mMagnitude, invalid);
                 break;
             case ESM::MagicEffect::Sound:
-                if (magnitudes.get(effect.mEffectId).getModifier() <= 0.f && target == getPlayer())
+                if (magnitudes.getOrDefault(effect.mEffectId).getModifier() <= 0.f && target == getPlayer())
                     MWBase::Environment::get().getSoundManager()->stopSound3D(
                         target, ESM::RefId::stringRefId("magic sound"));
                 break;
@@ -1275,7 +1276,7 @@ namespace MWMechanics
         auto& magnitudes = target.getClass().getCreatureStats(target).getMagicEffects();
         magnitudes.add(EffectKey(effect.mEffectId, effect.mArg), EffectParam(-effect.mMagnitude));
         removeMagicEffect(target, spellParams, effect);
-        if (magnitudes.get(effect.mEffectId).getMagnitude() <= 0.f)
+        if (magnitudes.getOrDefault(effect.mEffectId).getMagnitude() <= 0.f)
         {
             auto anim = MWBase::Environment::get().getWorld()->getAnimation(target);
             if (anim)

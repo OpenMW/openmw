@@ -158,7 +158,7 @@ namespace
     void soulTrap(const MWWorld::Ptr& creature)
     {
         const auto& stats = creature.getClass().getCreatureStats(creature);
-        if (!stats.getMagicEffects().get(ESM::MagicEffect::Soultrap).getMagnitude())
+        if (!stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Soultrap).getMagnitude())
             return;
         const int creatureSoulValue = creature.get<ESM::Creature>()->mBase->mData.mSoul;
         if (creatureSoulValue == 0)
@@ -668,7 +668,7 @@ namespace MWMechanics
             }
         }
 
-        if (creatureStats2.getMagicEffects().get(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
+        if (creatureStats2.getMagicEffects().getOrDefault(ESM::MagicEffect::Invisibility).getMagnitude() > 0)
             return;
 
         // Stop here if target is unreachable
@@ -828,7 +828,8 @@ namespace MWMechanics
             stats.setHealth(stat);
 
             double restoreHours = hours;
-            const bool stunted = stats.getMagicEffects().get(ESM::MagicEffect::StuntedMagicka).getMagnitude() > 0;
+            const bool stunted
+                = stats.getMagicEffects().getOrDefault(ESM::MagicEffect::StuntedMagicka).getMagnitude() > 0;
             if (stunted)
             {
                 // Stunted Magicka effect should be taken into account.
@@ -954,7 +955,7 @@ namespace MWMechanics
         const bool knockedOutUnderwater
             = (isKnockedOut && world->isUnderwater(ptr.getCell(), osg::Vec3f(ptr.getRefData().getPosition().asVec3())));
         if ((world->isSubmerged(ptr) || knockedOutUnderwater)
-            && stats.getMagicEffects().get(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
+            && stats.getMagicEffects().getOrDefault(ESM::MagicEffect::WaterBreathing).getMagnitude() == 0)
         {
             float timeLeft = 0.0f;
             if (knockedOutUnderwater)
@@ -1110,7 +1111,7 @@ namespace MWMechanics
 
         if (actorClass.isClass(ptr, "Guard") && !creatureStats.getAiSequence().isInPursuit()
             && !creatureStats.getAiSequence().isInCombat()
-            && creatureStats.getMagicEffects().get(ESM::MagicEffect::CalmHumanoid).getMagnitude() == 0)
+            && creatureStats.getMagicEffects().getOrDefault(ESM::MagicEffect::CalmHumanoid).getMagnitude() == 0)
         {
             const MWWorld::ESMStore& esmStore = world->getStore();
             static const int cutoff = esmStore.get<ESM::GameSetting>().find("iCrimeThreshold")->mValue.getInteger();
@@ -1814,7 +1815,8 @@ namespace MWMechanics
 
                 // Reset magic effects and recalculate derived effects
                 // One case where we need this is to make sure bound items are removed upon death
-                const float vampirism = stats.getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude();
+                const float vampirism
+                    = stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Vampirism).getMagnitude();
                 stats.getActiveSpells().clear(actor.getPtr());
                 // Make sure spell effects are removed
                 purgeSpellEffects(stats.getActorId());
@@ -2002,7 +2004,7 @@ namespace MWMechanics
         const auto [healthPerHour, magickaPerHour] = getRestorationPerHourOfSleep(ptr);
 
         CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-        const bool stunted = stats.getMagicEffects().get(ESM::MagicEffect::StuntedMagicka).getMagnitude() > 0;
+        const bool stunted = stats.getMagicEffects().getOrDefault(ESM::MagicEffect::StuntedMagicka).getMagnitude() > 0;
 
         const float healthHours = healthPerHour > 0
             ? (stats.getHealth().getModified() - stats.getHealth().getCurrent()) / healthPerHour

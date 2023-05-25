@@ -2137,13 +2137,15 @@ namespace MWWorld
             return false;
 
         const bool isPlayer = ptr == getPlayerConstPtr();
-        if (!(isPlayer && mGodMode) && stats.getMagicEffects().get(ESM::MagicEffect::Paralyze).getModifier() > 0)
+        if (!(isPlayer && mGodMode)
+            && stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Paralyze).getModifier() > 0)
             return false;
 
         if (ptr.getClass().canFly(ptr))
             return true;
 
-        if (stats.getMagicEffects().get(ESM::MagicEffect::Levitate).getMagnitude() > 0 && isLevitationEnabled())
+        if (stats.getMagicEffects().getOrDefault(ESM::MagicEffect::Levitate).getMagnitude() > 0
+            && isLevitationEnabled())
             return true;
 
         const MWPhysics::Actor* actor = mPhysics->getActor(ptr);
@@ -2159,7 +2161,7 @@ namespace MWWorld
             return false;
 
         const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
-        if (stats.getMagicEffects().get(ESM::MagicEffect::SlowFall).getMagnitude() > 0)
+        if (stats.getMagicEffects().getOrDefault(ESM::MagicEffect::SlowFall).getMagnitude() > 0)
             return true;
 
         return false;
@@ -3446,11 +3448,11 @@ namespace MWWorld
         const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
         float dist = 0;
         if (type == World::Detect_Creature)
-            dist = effects.get(ESM::MagicEffect::DetectAnimal).getMagnitude();
+            dist = effects.getOrDefault(ESM::MagicEffect::DetectAnimal).getMagnitude();
         else if (type == World::Detect_Key)
-            dist = effects.get(ESM::MagicEffect::DetectKey).getMagnitude();
+            dist = effects.getOrDefault(ESM::MagicEffect::DetectKey).getMagnitude();
         else if (type == World::Detect_Enchantment)
-            dist = effects.get(ESM::MagicEffect::DetectEnchantment).getMagnitude();
+            dist = effects.getOrDefault(ESM::MagicEffect::DetectEnchantment).getMagnitude();
 
         if (!dist)
             return;
@@ -3478,7 +3480,7 @@ namespace MWWorld
                                           .getClass()
                                           .getCreatureStats(mPlayer->getPlayer())
                                           .getMagicEffects()
-                                          .get(ESM::MagicEffect::Telekinesis)
+                                          .getOrDefault(ESM::MagicEffect::Telekinesis)
                                           .getMagnitude();
         telekinesisRangeBonus = feetToGameUnits(telekinesisRangeBonus);
 

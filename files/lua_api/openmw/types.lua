@@ -162,7 +162,68 @@
 -- @param openmw.core#Spell spell Spell (can be nil)
 
 ---
--- Return the spells (@{ActorSpells}) of the given actor.
+-- Return the active magic effects (@{#ActorActiveEffects}) currently affecting the given actor.
+-- @function [parent=#Actor] activeEffects
+-- @param openmw.core#GameObject actor
+-- @return #ActorActiveEffects
+
+--- Read-only list of effects currently affecting the actor.
+-- @type ActorActiveEffects
+-- @usage -- print active effects
+-- for _, effect in pairs(Actor.activeEffects(self)) do
+--     print('Active Effect: '..effect.id..', attribute='..tostring(effect.affectedAttribute)..', skill='..tostring(effect.affectedSkill)..', magnitude='..tostring(effect.magnitude))
+-- end
+-- @usage -- Check for a specific effect
+-- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.Telekinesis)
+-- if effect then
+--     print(effect.id..', attribute='..tostring(effect.affectedAttribute)..', skill='..tostring(effect.affectedSkill)..', magnitude='..tostring(effect.magnitude))
+-- else
+--     print('No Telekinesis effect')
+-- end
+-- @usage -- Check for a specific effect targeting a specific attribute.
+-- local effect = Actor.activeEffects(self):getEffect(core.magic.EFFECT_TYPE.FortifyAttribute, core.ATTRIBUTE.Luck)
+-- if effect then
+--     print(effect.id..', attribute='..tostring(effect.affectedAttribute)..', skill='..tostring(effect.affectedSkill)..', magnitude='..tostring(effect.magnitude))
+-- else
+--     print('No Fortify Luck effect')
+-- end
+
+---
+-- Get a specific active effect on the actor.
+-- @function [parent=#ActorActiveEffects] getEffect
+-- @param self
+-- @param string effect ID
+-- @param string Optional skill or attribute ID
+-- @return #ActiveEffect if such an effect is active, nil otherwise
+
+---
+-- Return the active spells (@{#ActorActiveSpells}) currently affecting the given actor.
+-- @function [parent=#Actor] activeSpells
+-- @param openmw.core#GameObject actor
+-- @return #ActorActiveSpells
+
+--- Read-only list of spells currently affecting the actor.
+-- @type ActorActiveSpells
+-- @usage -- print active spells
+-- for _, spell in pairs(Actor.activeSpells(self)) do
+--     print('Active Spell: '..tostring(spell))
+-- end
+-- @usage -- Check for a specific spell
+-- if Actor.activeSpells(self):isSpellActive('bound longbow') then
+--     print('Player has bound longbow')
+-- else
+--     print('Player does not have bound longbow')
+-- end
+
+---
+-- Get whether a specific spell is active on the actor.
+-- @function [parent=#ActorActiveSpells] isSpellActive
+-- @param self
+-- @param #any spellOrId @{openmw.core#Spell} or string spell id
+-- @return true if spell is active, false otherwise
+
+---
+-- Return the spells (@{#ActorSpells}) of the given actor.
 -- @function [parent=#Actor] spells
 -- @param openmw.core#GameObject actor
 -- @return #ActorSpells

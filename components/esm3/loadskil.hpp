@@ -81,6 +81,8 @@ namespace ESM
         static const std::string sIconNames[Length];
         static const std::array<SkillEnum, Length> sSkillIds;
 
+        static SkillEnum stringToSkillId(std::string_view skill);
+
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;
 

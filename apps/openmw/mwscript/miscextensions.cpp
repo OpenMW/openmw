@@ -582,7 +582,7 @@ namespace MWScript
                     k.has_value() && *k >= 0 && *k <= 32767)
                     key = *k;
                 else
-                    key = ESM::MagicEffect::effectStringToId({ effect });
+                    key = ESM::MagicEffect::effectGmstIdToIndex(effect);
 
                 const MWMechanics::CreatureStats& stats = ptr.getClass().getCreatureStats(ptr);
 

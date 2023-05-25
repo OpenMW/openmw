@@ -24,156 +24,6 @@ namespace ESM
             0x1048, 0x1048, 0x1048, 0x1048 };
     }
 
-    const std::string_view MagicEffect::sIndexNames[MagicEffect::Length] = {
-        "WaterBreathing",
-        "SwiftSwim",
-        "WaterWalking",
-        "Shield",
-        "FireShield",
-        "LightningShield",
-        "FrostShield",
-        "Burden",
-        "Feather",
-        "Jump",
-        "Levitate",
-        "SlowFall",
-        "Lock",
-        "Open",
-        "FireDamage",
-        "ShockDamage",
-        "FrostDamage",
-        "DrainAttribute",
-        "DrainHealth",
-        "DrainMagicka",
-        "DrainFatigue",
-        "DrainSkill",
-        "DamageAttribute",
-        "DamageHealth",
-        "DamageMagicka",
-        "DamageFatigue",
-        "DamageSkill",
-        "Poison",
-        "WeaknessToFire",
-        "WeaknessToFrost",
-        "WeaknessToShock",
-        "WeaknessToMagicka",
-        "WeaknessToCommonDisease",
-        "WeaknessToBlightDisease",
-        "WeaknessToCorprusDisease",
-        "WeaknessToPoison",
-        "WeaknessToNormalWeapons",
-        "DisintegrateWeapon",
-        "DisintegrateArmor",
-        "Invisibility",
-        "Chameleon",
-        "Light",
-        "Sanctuary",
-        "NightEye",
-        "Charm",
-        "Paralyze",
-        "Silence",
-        "Blind",
-        "Sound",
-        "CalmHumanoid",
-        "CalmCreature",
-        "FrenzyHumanoid",
-        "FrenzyCreature",
-        "DemoralizeHumanoid",
-        "DemoralizeCreature",
-        "RallyHumanoid",
-        "RallyCreature",
-        "Dispel",
-        "Soultrap",
-        "Telekinesis",
-        "Mark",
-        "Recall",
-        "DivineIntervention",
-        "AlmsiviIntervention",
-        "DetectAnimal",
-        "DetectEnchantment",
-        "DetectKey",
-        "SpellAbsorption",
-        "Reflect",
-        "CureCommonDisease",
-        "CureBlightDisease",
-        "CureCorprusDisease",
-        "CurePoison",
-        "CureParalyzation",
-        "RestoreAttribute",
-        "RestoreHealth",
-        "RestoreMagicka",
-        "RestoreFatigue",
-        "RestoreSkill",
-        "FortifyAttribute",
-        "FortifyHealth",
-        "FortifyMagicka",
-        "FortifyFatigue",
-        "FortifySkill",
-        "FortifyMaximumMagicka",
-        "AbsorbAttribute",
-        "AbsorbHealth",
-        "AbsorbMagicka",
-        "AbsorbFatigue",
-        "AbsorbSkill",
-        "ResistFire",
-        "ResistFrost",
-        "ResistShock",
-        "ResistMagicka",
-        "ResistCommonDisease",
-        "ResistBlightDisease",
-        "ResistCorprusDisease",
-        "ResistPoison",
-        "ResistNormalWeapons",
-        "ResistParalysis",
-        "RemoveCurse",
-        "TurnUndead",
-        "SummonScamp",
-        "SummonClannfear",
-        "SummonDaedroth",
-        "SummonDremora",
-        "SummonAncestralGhost",
-        "SummonSkeletalMinion",
-        "SummonBonewalker",
-        "SummonGreaterBonewalker",
-        "SummonBonelord",
-        "SummonWingedTwilight",
-        "SummonHunger",
-        "SummonGoldenSaint",
-        "SummonFlameAtronach",
-        "SummonFrostAtronach",
-        "SummonStormAtronach",
-        "FortifyAttack",
-        "CommandCreature",
-        "CommandHumanoid",
-        "BoundDagger",
-        "BoundLongsword",
-        "BoundMace",
-        "BoundBattleAxe",
-        "BoundSpear",
-        "BoundLongbow",
-        "ExtraSpell",
-        "BoundCuirass",
-        "BoundHelm",
-        "BoundBoots",
-        "BoundShield",
-        "BoundGloves",
-        "Corprus",
-        "Vampirism",
-        "SummonCenturionSphere",
-        "SunDamage",
-        "StuntedMagicka",
-
-        // Tribunal only
-        "SummonFabricant",
-
-        // Bloodmoon only
-        "SummonWolf",
-        "SummonBear",
-        "SummonBonewolf",
-        "SummonCreature04",
-        "SummonCreature05",
-    };
-
     void MagicEffect::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false; // MagicEffect record can't be deleted now (may be changed in the future)
@@ -351,171 +201,324 @@ namespace ESM
             return -1;
     }
 
-    static std::map<short, std::string> genNameMap()
-    {
-        // Map effect ID to GMST name
-        // http://www.uesp.net/morrow/hints/mweffects.shtml
-        std::map<short, std::string> names;
-        names[85] = "sEffectAbsorbAttribute";
-        names[88] = "sEffectAbsorbFatigue";
-        names[86] = "sEffectAbsorbHealth";
-        names[87] = "sEffectAbsorbSpellPoints";
-        names[89] = "sEffectAbsorbSkill";
-        names[63] = "sEffectAlmsiviIntervention";
-        names[47] = "sEffectBlind";
-        names[123] = "sEffectBoundBattleAxe";
-        names[129] = "sEffectBoundBoots";
-        names[127] = "sEffectBoundCuirass";
-        names[120] = "sEffectBoundDagger";
-        names[131] = "sEffectBoundGloves";
-        names[128] = "sEffectBoundHelm";
-        names[125] = "sEffectBoundLongbow";
-        names[126] = "sEffectExtraSpell";
-        names[121] = "sEffectBoundLongsword";
-        names[122] = "sEffectBoundMace";
-        names[130] = "sEffectBoundShield";
-        names[124] = "sEffectBoundSpear";
-        names[7] = "sEffectBurden";
-        names[50] = "sEffectCalmCreature";
-        names[49] = "sEffectCalmHumanoid";
-        names[40] = "sEffectChameleon";
-        names[44] = "sEffectCharm";
-        names[118] = "sEffectCommandCreatures";
-        names[119] = "sEffectCommandHumanoids";
-        names[132] = "sEffectCorpus"; // NB this typo. (bethesda made it)
-        names[70] = "sEffectCureBlightDisease";
-        names[69] = "sEffectCureCommonDisease";
-        names[71] = "sEffectCureCorprusDisease";
-        names[73] = "sEffectCureParalyzation";
-        names[72] = "sEffectCurePoison";
-        names[22] = "sEffectDamageAttribute";
-        names[25] = "sEffectDamageFatigue";
-        names[23] = "sEffectDamageHealth";
-        names[24] = "sEffectDamageMagicka";
-        names[26] = "sEffectDamageSkill";
-        names[54] = "sEffectDemoralizeCreature";
-        names[53] = "sEffectDemoralizeHumanoid";
-        names[64] = "sEffectDetectAnimal";
-        names[65] = "sEffectDetectEnchantment";
-        names[66] = "sEffectDetectKey";
-        names[38] = "sEffectDisintegrateArmor";
-        names[37] = "sEffectDisintegrateWeapon";
-        names[57] = "sEffectDispel";
-        names[62] = "sEffectDivineIntervention";
-        names[17] = "sEffectDrainAttribute";
-        names[20] = "sEffectDrainFatigue";
-        names[18] = "sEffectDrainHealth";
-        names[19] = "sEffectDrainSpellpoints";
-        names[21] = "sEffectDrainSkill";
-        names[8] = "sEffectFeather";
-        names[14] = "sEffectFireDamage";
-        names[4] = "sEffectFireShield";
-        names[117] = "sEffectFortifyAttackBonus";
-        names[79] = "sEffectFortifyAttribute";
-        names[82] = "sEffectFortifyFatigue";
-        names[80] = "sEffectFortifyHealth";
-        names[81] = "sEffectFortifySpellpoints";
-        names[84] = "sEffectFortifyMagickaMultiplier";
-        names[83] = "sEffectFortifySkill";
-        names[52] = "sEffectFrenzyCreature";
-        names[51] = "sEffectFrenzyHumanoid";
-        names[16] = "sEffectFrostDamage";
-        names[6] = "sEffectFrostShield";
-        names[39] = "sEffectInvisibility";
-        names[9] = "sEffectJump";
-        names[10] = "sEffectLevitate";
-        names[41] = "sEffectLight";
-        names[5] = "sEffectLightningShield";
-        names[12] = "sEffectLock";
-        names[60] = "sEffectMark";
-        names[43] = "sEffectNightEye";
-        names[13] = "sEffectOpen";
-        names[45] = "sEffectParalyze";
-        names[27] = "sEffectPoison";
-        names[56] = "sEffectRallyCreature";
-        names[55] = "sEffectRallyHumanoid";
-        names[61] = "sEffectRecall";
-        names[68] = "sEffectReflect";
-        names[100] = "sEffectRemoveCurse";
-        names[95] = "sEffectResistBlightDisease";
-        names[94] = "sEffectResistCommonDisease";
-        names[96] = "sEffectResistCorprusDisease";
-        names[90] = "sEffectResistFire";
-        names[91] = "sEffectResistFrost";
-        names[93] = "sEffectResistMagicka";
-        names[98] = "sEffectResistNormalWeapons";
-        names[99] = "sEffectResistParalysis";
-        names[97] = "sEffectResistPoison";
-        names[92] = "sEffectResistShock";
-        names[74] = "sEffectRestoreAttribute";
-        names[77] = "sEffectRestoreFatigue";
-        names[75] = "sEffectRestoreHealth";
-        names[76] = "sEffectRestoreSpellPoints";
-        names[78] = "sEffectRestoreSkill";
-        names[42] = "sEffectSanctuary";
-        names[3] = "sEffectShield";
-        names[15] = "sEffectShockDamage";
-        names[46] = "sEffectSilence";
-        names[11] = "sEffectSlowFall";
-        names[58] = "sEffectSoultrap";
-        names[48] = "sEffectSound";
-        names[67] = "sEffectSpellAbsorption";
-        names[136] = "sEffectStuntedMagicka";
-        names[106] = "sEffectSummonAncestralGhost";
-        names[110] = "sEffectSummonBonelord";
-        names[108] = "sEffectSummonLeastBonewalker";
-        names[134] = "sEffectSummonCenturionSphere";
-        names[103] = "sEffectSummonClannfear";
-        names[104] = "sEffectSummonDaedroth";
-        names[105] = "sEffectSummonDremora";
-        names[114] = "sEffectSummonFlameAtronach";
-        names[115] = "sEffectSummonFrostAtronach";
-        names[113] = "sEffectSummonGoldenSaint";
-        names[109] = "sEffectSummonGreaterBonewalker";
-        names[112] = "sEffectSummonHunger";
-        names[102] = "sEffectSummonScamp";
-        names[107] = "sEffectSummonSkeletalMinion";
-        names[116] = "sEffectSummonStormAtronach";
-        names[111] = "sEffectSummonWingedTwilight";
-        names[135] = "sEffectSunDamage";
-        names[1] = "sEffectSwiftSwim";
-        names[59] = "sEffectTelekinesis";
-        names[101] = "sEffectTurnUndead";
-        names[133] = "sEffectVampirism";
-        names[0] = "sEffectWaterBreathing";
-        names[2] = "sEffectWaterWalking";
-        names[33] = "sEffectWeaknesstoBlightDisease";
-        names[32] = "sEffectWeaknesstoCommonDisease";
-        names[34] = "sEffectWeaknesstoCorprusDisease";
-        names[28] = "sEffectWeaknesstoFire";
-        names[29] = "sEffectWeaknesstoFrost";
-        names[31] = "sEffectWeaknesstoMagicka";
-        names[36] = "sEffectWeaknesstoNormalWeapons";
-        names[35] = "sEffectWeaknesstoPoison";
-        names[30] = "sEffectWeaknesstoShock";
+    // Map effect ID to GMST name
+    const std::array<std::string, MagicEffect::Length> MagicEffect::sGmstEffectIds = {
 
-        // bloodmoon
-        names[138] = "sEffectSummonCreature01";
-        names[139] = "sEffectSummonCreature02";
-        names[140] = "sEffectSummonCreature03";
-        names[141] = "sEffectSummonCreature04";
-        names[142] = "sEffectSummonCreature05";
+        "sEffectWaterBreathing",
+        "sEffectSwiftSwim",
+        "sEffectWaterWalking",
+        "sEffectShield",
+        "sEffectFireShield",
+        "sEffectLightningShield",
+        "sEffectFrostShield",
+        "sEffectBurden",
+        "sEffectFeather",
+        "sEffectJump",
+        "sEffectLevitate",
+        "sEffectSlowFall",
+        "sEffectLock",
+        "sEffectOpen",
+        "sEffectFireDamage",
+        "sEffectShockDamage",
+        "sEffectFrostDamage",
+        "sEffectDrainAttribute",
+        "sEffectDrainHealth",
+        "sEffectDrainSpellpoints",
+        "sEffectDrainFatigue",
+        "sEffectDrainSkill",
+        "sEffectDamageAttribute",
+        "sEffectDamageHealth",
+        "sEffectDamageMagicka",
+        "sEffectDamageFatigue",
+        "sEffectDamageSkill",
+        "sEffectPoison",
+        "sEffectWeaknesstoFire",
+        "sEffectWeaknesstoFrost",
+        "sEffectWeaknesstoShock",
+        "sEffectWeaknesstoMagicka",
+        "sEffectWeaknesstoCommonDisease",
+        "sEffectWeaknesstoBlightDisease",
+        "sEffectWeaknesstoCorprusDisease",
+        "sEffectWeaknesstoPoison",
+        "sEffectWeaknesstoNormalWeapons",
+        "sEffectDisintegrateWeapon",
+        "sEffectDisintegrateArmor",
+        "sEffectInvisibility",
+        "sEffectChameleon",
+        "sEffectLight",
+        "sEffectSanctuary",
+        "sEffectNightEye",
+        "sEffectCharm",
+        "sEffectParalyze",
+        "sEffectSilence",
+        "sEffectBlind",
+        "sEffectSound",
+        "sEffectCalmHumanoid",
+        "sEffectCalmCreature",
+        "sEffectFrenzyHumanoid",
+        "sEffectFrenzyCreature",
+        "sEffectDemoralizeHumanoid",
+        "sEffectDemoralizeCreature",
+        "sEffectRallyHumanoid",
+        "sEffectRallyCreature",
+        "sEffectDispel",
+        "sEffectSoultrap",
+        "sEffectTelekinesis",
+        "sEffectMark",
+        "sEffectRecall",
+        "sEffectDivineIntervention",
+        "sEffectAlmsiviIntervention",
+        "sEffectDetectAnimal",
+        "sEffectDetectEnchantment",
+        "sEffectDetectKey",
+        "sEffectSpellAbsorption",
+        "sEffectReflect",
+        "sEffectCureCommonDisease",
+        "sEffectCureBlightDisease",
+        "sEffectCureCorprusDisease",
+        "sEffectCurePoison",
+        "sEffectCureParalyzation",
+        "sEffectRestoreAttribute",
+        "sEffectRestoreHealth",
+        "sEffectRestoreSpellPoints",
+        "sEffectRestoreFatigue",
+        "sEffectRestoreSkill",
+        "sEffectFortifyAttribute",
+        "sEffectFortifyHealth",
+        "sEffectFortifySpellpoints",
+        "sEffectFortifyFatigue",
+        "sEffectFortifySkill",
+        "sEffectFortifyMagickaMultiplier",
+        "sEffectAbsorbAttribute",
+        "sEffectAbsorbHealth",
+        "sEffectAbsorbSpellPoints",
+        "sEffectAbsorbFatigue",
+        "sEffectAbsorbSkill",
+        "sEffectResistFire",
+        "sEffectResistFrost",
+        "sEffectResistShock",
+        "sEffectResistMagicka",
+        "sEffectResistCommonDisease",
+        "sEffectResistBlightDisease",
+        "sEffectResistCorprusDisease",
+        "sEffectResistPoison",
+        "sEffectResistNormalWeapons",
+        "sEffectResistParalysis",
+        "sEffectRemoveCurse",
+        "sEffectTurnUndead",
+        "sEffectSummonScamp",
+        "sEffectSummonClannfear",
+        "sEffectSummonDaedroth",
+        "sEffectSummonDremora",
+        "sEffectSummonAncestralGhost",
+        "sEffectSummonSkeletalMinion",
+        "sEffectSummonLeastBonewalker",
+        "sEffectSummonGreaterBonewalker",
+        "sEffectSummonBonelord",
+        "sEffectSummonWingedTwilight",
+        "sEffectSummonHunger",
+        "sEffectSummonGoldenSaint",
+        "sEffectSummonFlameAtronach",
+        "sEffectSummonFrostAtronach",
+        "sEffectSummonStormAtronach",
+        "sEffectFortifyAttackBonus",
+        "sEffectCommandCreatures",
+        "sEffectCommandHumanoids",
+        "sEffectBoundDagger",
+        "sEffectBoundLongsword",
+        "sEffectBoundMace",
+        "sEffectBoundBattleAxe",
+        "sEffectBoundSpear",
+        "sEffectBoundLongbow",
+        "sEffectExtraSpell",
+        "sEffectBoundCuirass",
+        "sEffectBoundHelm",
+        "sEffectBoundBoots",
+        "sEffectBoundShield",
+        "sEffectBoundGloves",
+        "sEffectCorpus", // NB this typo. (bethesda made it)
+        "sEffectVampirism",
+        "sEffectSummonCenturionSphere",
+        "sEffectSunDamage",
+        "sEffectStuntedMagicka",
 
         // tribunal
-        names[137] = "sEffectSummonFabricant";
+        "sEffectSummonFabricant",
 
-        return names;
-    }
-    const std::map<short, std::string> MagicEffect::sNames = genNameMap();
+        // bloodmoon
+        "sEffectSummonCreature01",
+        "sEffectSummonCreature02",
+        "sEffectSummonCreature03",
+        "sEffectSummonCreature04",
+        "sEffectSummonCreature05",
+    };
 
-    const std::string& MagicEffect::effectIdToString(short effectID)
+    // Map effect ID to identifying name
+    const std::array<std::string_view, MagicEffect::Length> MagicEffect::sIndexNames = {
+        "WaterBreathing",
+        "SwiftSwim",
+        "WaterWalking",
+        "Shield",
+        "FireShield",
+        "LightningShield",
+        "FrostShield",
+        "Burden",
+        "Feather",
+        "Jump",
+        "Levitate",
+        "SlowFall",
+        "Lock",
+        "Open",
+        "FireDamage",
+        "ShockDamage",
+        "FrostDamage",
+        "DrainAttribute",
+        "DrainHealth",
+        "DrainMagicka",
+        "DrainFatigue",
+        "DrainSkill",
+        "DamageAttribute",
+        "DamageHealth",
+        "DamageMagicka",
+        "DamageFatigue",
+        "DamageSkill",
+        "Poison",
+        "WeaknessToFire",
+        "WeaknessToFrost",
+        "WeaknessToShock",
+        "WeaknessToMagicka",
+        "WeaknessToCommonDisease",
+        "WeaknessToBlightDisease",
+        "WeaknessToCorprusDisease",
+        "WeaknessToPoison",
+        "WeaknessToNormalWeapons",
+        "DisintegrateWeapon",
+        "DisintegrateArmor",
+        "Invisibility",
+        "Chameleon",
+        "Light",
+        "Sanctuary",
+        "NightEye",
+        "Charm",
+        "Paralyze",
+        "Silence",
+        "Blind",
+        "Sound",
+        "CalmHumanoid",
+        "CalmCreature",
+        "FrenzyHumanoid",
+        "FrenzyCreature",
+        "DemoralizeHumanoid",
+        "DemoralizeCreature",
+        "RallyHumanoid",
+        "RallyCreature",
+        "Dispel",
+        "Soultrap",
+        "Telekinesis",
+        "Mark",
+        "Recall",
+        "DivineIntervention",
+        "AlmsiviIntervention",
+        "DetectAnimal",
+        "DetectEnchantment",
+        "DetectKey",
+        "SpellAbsorption",
+        "Reflect",
+        "CureCommonDisease",
+        "CureBlightDisease",
+        "CureCorprusDisease",
+        "CurePoison",
+        "CureParalyzation",
+        "RestoreAttribute",
+        "RestoreHealth",
+        "RestoreMagicka",
+        "RestoreFatigue",
+        "RestoreSkill",
+        "FortifyAttribute",
+        "FortifyHealth",
+        "FortifyMagicka",
+        "FortifyFatigue",
+        "FortifySkill",
+        "FortifyMaximumMagicka",
+        "AbsorbAttribute",
+        "AbsorbHealth",
+        "AbsorbMagicka",
+        "AbsorbFatigue",
+        "AbsorbSkill",
+        "ResistFire",
+        "ResistFrost",
+        "ResistShock",
+        "ResistMagicka",
+        "ResistCommonDisease",
+        "ResistBlightDisease",
+        "ResistCorprusDisease",
+        "ResistPoison",
+        "ResistNormalWeapons",
+        "ResistParalysis",
+        "RemoveCurse",
+        "TurnUndead",
+        "SummonScamp",
+        "SummonClannfear",
+        "SummonDaedroth",
+        "SummonDremora",
+        "SummonAncestralGhost",
+        "SummonSkeletalMinion",
+        "SummonBonewalker",
+        "SummonGreaterBonewalker",
+        "SummonBonelord",
+        "SummonWingedTwilight",
+        "SummonHunger",
+        "SummonGoldenSaint",
+        "SummonFlameAtronach",
+        "SummonFrostAtronach",
+        "SummonStormAtronach",
+        "FortifyAttack",
+        "CommandCreature",
+        "CommandHumanoid",
+        "BoundDagger",
+        "BoundLongsword",
+        "BoundMace",
+        "BoundBattleAxe",
+        "BoundSpear",
+        "BoundLongbow",
+        "ExtraSpell",
+        "BoundCuirass",
+        "BoundHelm",
+        "BoundBoots",
+        "BoundShield",
+        "BoundGloves",
+        "Corprus",
+        "Vampirism",
+        "SummonCenturionSphere",
+        "SunDamage",
+        "StuntedMagicka",
+
+        // tribunal
+        "SummonFabricant",
+
+        // bloodmoon
+        "SummonWolf",
+        "SummonBear",
+        "SummonBonewolf",
+        "SummonCreature04",
+        "SummonCreature05",
+    };
+
+    template <typename Collection>
+    static std::map<std::string_view, int, Misc::StringUtils::CiComp> initStringToIntMap(const Collection& strings)
     {
-        std::map<short, std::string>::const_iterator name = sNames.find(effectID);
-        if (name == sNames.end())
-            throw std::runtime_error(std::string("Unimplemented effect ID ") + std::to_string(effectID));
+        std::map<std::string_view, int, Misc::StringUtils::CiComp> map;
+        for (size_t i = 0; i < strings.size(); i++)
+            map[strings[i]] = i;
 
-        return name->second;
+        return map;
     }
+
+    const std::map<std::string_view, int, Misc::StringUtils::CiComp> MagicEffect::sGmstEffectIdToIndexMap
+        = initStringToIntMap(MagicEffect::sGmstEffectIds);
+
+    const std::map<std::string_view, int, Misc::StringUtils::CiComp> MagicEffect::sIndexNameToIndexMap
+        = initStringToIntMap(MagicEffect::sIndexNames);
 
     class FindSecond
     {
@@ -534,17 +537,6 @@ namespace ESM
             return false;
         }
     };
-
-    short MagicEffect::effectStringToId(std::string_view effect)
-    {
-        std::map<short, std::string>::const_iterator name;
-
-        name = std::find_if(sNames.begin(), sNames.end(), FindSecond(effect));
-        if (name == sNames.end())
-            throw std::runtime_error("Unimplemented effect " + std::string(effect));
-
-        return name->first;
-    }
 
     MagicEffect::MagnitudeDisplayType MagicEffect::getMagnitudeDisplayType() const
     {
@@ -585,6 +577,40 @@ namespace ESM
         mHitSound = ESM::RefId();
         mAreaSound = ESM::RefId();
         mDescription.clear();
+    }
+
+    const std::string& MagicEffect::indexToGmstString(int effectID)
+    {
+        if (effectID < 0 || static_cast<std::size_t>(effectID) >= sGmstEffectIds.size())
+            throw std::runtime_error(std::string("Unimplemented effect ID ") + std::to_string(effectID));
+
+        return sGmstEffectIds[effectID];
+    }
+
+    std::string_view MagicEffect::indexToName(int effectID)
+    {
+        if (effectID < 0 || static_cast<std::size_t>(effectID) >= sIndexNames.size())
+            throw std::runtime_error(std::string("Unimplemented effect ID ") + std::to_string(effectID));
+
+        return sIndexNames[effectID];
+    }
+
+    int MagicEffect::indexNameToIndex(std::string_view effect)
+    {
+        auto name = sIndexNameToIndexMap.find(effect);
+        if (name == sIndexNameToIndexMap.end())
+            throw std::runtime_error("Unimplemented effect " + std::string(effect));
+
+        return name->second;
+    }
+
+    int MagicEffect::effectGmstIdToIndex(std::string_view gmstId)
+    {
+        auto name = sGmstEffectIdToIndexMap.find(gmstId);
+        if (name == sGmstEffectIdToIndexMap.end())
+            throw std::runtime_error("Unimplemented effect " + std::string(gmstId));
+
+        return name->second;
     }
 
     RefId MagicEffect::indexToRefId(int index)

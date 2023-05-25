@@ -79,16 +79,16 @@ namespace MWMechanics
 
         float resistance = 0;
         if (resistanceEffect != -1)
-            resistance += actorEffects->get(resistanceEffect).getMagnitude();
+            resistance += actorEffects->getOrDefault(resistanceEffect).getMagnitude();
         if (weaknessEffect != -1)
-            resistance -= actorEffects->get(weaknessEffect).getMagnitude();
+            resistance -= actorEffects->getOrDefault(weaknessEffect).getMagnitude();
 
         if (effectId == ESM::MagicEffect::FireDamage)
-            resistance += actorEffects->get(ESM::MagicEffect::FireShield).getMagnitude();
+            resistance += actorEffects->getOrDefault(ESM::MagicEffect::FireShield).getMagnitude();
         if (effectId == ESM::MagicEffect::ShockDamage)
-            resistance += actorEffects->get(ESM::MagicEffect::LightningShield).getMagnitude();
+            resistance += actorEffects->getOrDefault(ESM::MagicEffect::LightningShield).getMagnitude();
         if (effectId == ESM::MagicEffect::FrostDamage)
-            resistance += actorEffects->get(ESM::MagicEffect::FrostShield).getMagnitude();
+            resistance += actorEffects->getOrDefault(ESM::MagicEffect::FrostShield).getMagnitude();
 
         return resistance;
     }

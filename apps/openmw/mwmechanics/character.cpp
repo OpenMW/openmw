@@ -284,8 +284,11 @@ namespace
         if (fallHeight >= fallDistanceMin)
         {
             const float acrobaticsSkill = static_cast<float>(ptr.getClass().getSkill(ptr, ESM::Skill::Acrobatics));
-            const float jumpSpellBonus
-                = ptr.getClass().getCreatureStats(ptr).getMagicEffects().get(ESM::MagicEffect::Jump).getMagnitude();
+            const float jumpSpellBonus = ptr.getClass()
+                                             .getCreatureStats(ptr)
+                                             .getMagicEffects()
+                                             .getOrDefault(ESM::MagicEffect::Jump)
+                                             .getMagnitude();
             const float fallAcroBase = store.find("fFallAcroBase")->mValue.getFloat();
             const float fallAcroMult = store.find("fFallAcroMult")->mValue.getFloat();
             const float fallDistanceBase = store.find("fFallDistanceBase")->mValue.getFloat();
@@ -2387,7 +2390,11 @@ namespace MWMechanics
         {
             if (cls.getCreatureStats(mPtr).isDead()
                 || (!godmode
-                    && cls.getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Paralyze).getModifier() > 0))
+                    && cls.getCreatureStats(mPtr)
+                            .getMagicEffects()
+                            .getOrDefault(ESM::MagicEffect::Paralyze)
+                            .getModifier()
+                        > 0))
             {
                 moved.z() = 1.0;
             }
@@ -2644,7 +2651,7 @@ namespace MWMechanics
                 || mPtr.getClass()
                         .getCreatureStats(mPtr)
                         .getMagicEffects()
-                        .get(MWMechanics::EffectKey(effectId))
+                        .getOrDefault(MWMechanics::EffectKey(effectId))
                         .getMagnitude()
                     <= 0)
                 mAnimation->removeEffect(effectId);
@@ -2656,16 +2663,22 @@ namespace MWMechanics
         if (!mPtr.getClass().isActor())
             return;
 
-        float light
-            = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Light).getMagnitude();
+        float light = mPtr.getClass()
+                          .getCreatureStats(mPtr)
+                          .getMagicEffects()
+                          .getOrDefault(ESM::MagicEffect::Light)
+                          .getMagnitude();
         mAnimation->setLightEffect(light);
 
         // If you're dead you don't care about whether you've started/stopped being a vampire or not
         if (mPtr.getClass().getCreatureStats(mPtr).isDead())
             return;
 
-        bool vampire
-            = mPtr.getClass().getCreatureStats(mPtr).getMagicEffects().get(ESM::MagicEffect::Vampirism).getMagnitude()
+        bool vampire = mPtr.getClass()
+                           .getCreatureStats(mPtr)
+                           .getMagicEffects()
+                           .getOrDefault(ESM::MagicEffect::Vampirism)
+                           .getMagnitude()
             > 0.0f;
         mAnimation->setVampire(vampire);
     }
@@ -2679,7 +2692,7 @@ namespace MWMechanics
             if (mPtr.getClass()
                     .getCreatureStats(mPtr)
                     .getMagicEffects()
-                    .get(ESM::MagicEffect::Invisibility)
+                    .getOrDefault(ESM::MagicEffect::Invisibility)
                     .getModifier()) // Ignore base magnitude (see bug #3555).
             {
                 if (mPtr == getPlayer())
@@ -2690,7 +2703,7 @@ namespace MWMechanics
             float chameleon = mPtr.getClass()
                                   .getCreatureStats(mPtr)
                                   .getMagicEffects()
-                                  .get(ESM::MagicEffect::Chameleon)
+                                  .getOrDefault(ESM::MagicEffect::Chameleon)
                                   .getMagnitude();
             if (chameleon)
             {

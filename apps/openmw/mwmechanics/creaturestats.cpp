@@ -225,8 +225,8 @@ namespace MWMechanics
 
     void CreatureStats::modifyMagicEffects(const MagicEffects& effects)
     {
-        bool recalc = effects.get(ESM::MagicEffect::FortifyMaximumMagicka).getModifier()
-            != mMagicEffects.get(ESM::MagicEffect::FortifyMaximumMagicka).getModifier();
+        bool recalc = effects.getOrDefault(ESM::MagicEffect::FortifyMaximumMagicka).getModifier()
+            != mMagicEffects.getOrDefault(ESM::MagicEffect::FortifyMaximumMagicka).getModifier();
         mMagicEffects.setModifiers(effects);
         if (recalc)
             recalculateMagicka();
@@ -246,7 +246,7 @@ namespace MWMechanics
 
     bool CreatureStats::isParalyzed() const
     {
-        return mMagicEffects.get(ESM::MagicEffect::Paralyze).getMagnitude() > 0;
+        return mMagicEffects.getOrDefault(ESM::MagicEffect::Paralyze).getMagnitude() > 0;
     }
 
     bool CreatureStats::isDead() const
@@ -359,7 +359,7 @@ namespace MWMechanics
         float evasion = (getAttribute(ESM::Attribute::Agility).getModified() / 5.0f)
             + (getAttribute(ESM::Attribute::Luck).getModified() / 10.0f);
         evasion *= getFatigueTerm();
-        evasion += std::min(100.f, mMagicEffects.get(ESM::MagicEffect::Sanctuary).getMagnitude());
+        evasion += std::min(100.f, mMagicEffects.getOrDefault(ESM::MagicEffect::Sanctuary).getMagnitude());
 
         return evasion;
     }
@@ -436,8 +436,8 @@ namespace MWMechanics
         else
             base = world->getStore().get<ESM::GameSetting>().find("fNPCbaseMagickaMult")->mValue.getFloat();
 
-        double magickaFactor
-            = base + mMagicEffects.get(EffectKey(ESM::MagicEffect::FortifyMaximumMagicka)).getMagnitude() * 0.1;
+        double magickaFactor = base
+            + mMagicEffects.getOrDefault(EffectKey(ESM::MagicEffect::FortifyMaximumMagicka)).getMagnitude() * 0.1;
 
         DynamicStat<float> magicka = getMagicka();
         float currentToBaseRatio = magicka.getBase() > 0 ? magicka.getCurrent() / magicka.getBase() : 0;

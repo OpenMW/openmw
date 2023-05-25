@@ -383,6 +383,156 @@
 -- @field #number Restoration Restoration
 
 
+--- Possible @{#MagicEffectId} values
+-- @field [parent=#Magic] #MagicEffectId EFFECT_TYPE
+
+--- `core.magic.EFFECT_TYPE`
+-- @type MagicEffectId
+-- @field #number WaterBreathing "waterbreathing"
+-- @field #number SwiftSwim "swiftswim"
+-- @field #number WaterWalking "waterwalking"
+-- @field #number Shield "shield"
+-- @field #number FireShield "fireshield"
+-- @field #number LightningShield "lightningshield"
+-- @field #number FrostShield "frostshield"
+-- @field #number Burden "burden"
+-- @field #number Feather "feather"
+-- @field #number Jump "jump"
+-- @field #number Levitate "levitate"
+-- @field #number SlowFall "slowfall"
+-- @field #number Lock "lock"
+-- @field #number Open "open"
+-- @field #number FireDamage "firedamage"
+-- @field #number ShockDamage "shockdamage"
+-- @field #number FrostDamage "frostdamage"
+-- @field #number DrainAttribute "drainattribute"
+-- @field #number DrainHealth "drainhealth"
+-- @field #number DrainMagicka "drainmagicka"
+-- @field #number DrainFatigue "drainfatigue"
+-- @field #number DrainSkill "drainskill"
+-- @field #number DamageAttribute "damageattribute"
+-- @field #number DamageHealth "damagehealth"
+-- @field #number DamageMagicka "damagemagicka"
+-- @field #number DamageFatigue "damagefatigue"
+-- @field #number DamageSkill "damageskill"
+-- @field #number Poison "poison"
+-- @field #number WeaknessToFire "weaknesstofire"
+-- @field #number WeaknessToFrost "weaknesstofrost"
+-- @field #number WeaknessToShock "weaknesstoshock"
+-- @field #number WeaknessToMagicka "weaknesstomagicka"
+-- @field #number WeaknessToCommonDisease "weaknesstocommondisease"
+-- @field #number WeaknessToBlightDisease "weaknesstoblightdisease"
+-- @field #number WeaknessToCorprusDisease "weaknesstocorprusdisease"
+-- @field #number WeaknessToPoison "weaknesstopoison"
+-- @field #number WeaknessToNormalWeapons "weaknesstonormalweapons"
+-- @field #number DisintegrateWeapon "disintegrateweapon"
+-- @field #number DisintegrateArmor "disintegratearmor"
+-- @field #number Invisibility "invisibility"
+-- @field #number Chameleon "chameleon"
+-- @field #number Light "light"
+-- @field #number Sanctuary "sanctuary"
+-- @field #number NightEye "nighteye"
+-- @field #number Charm "charm"
+-- @field #number Paralyze "paralyze"
+-- @field #number Silence "silence"
+-- @field #number Blind "blind"
+-- @field #number Sound "sound"
+-- @field #number CalmHumanoid "calmhumanoid"
+-- @field #number CalmCreature "calmcreature"
+-- @field #number FrenzyHumanoid "frenzyhumanoid"
+-- @field #number FrenzyCreature "frenzycreature"
+-- @field #number DemoralizeHumanoid "demoralizehumanoid"
+-- @field #number DemoralizeCreature "demoralizecreature"
+-- @field #number RallyHumanoid "rallyhumanoid"
+-- @field #number RallyCreature "rallycreature"
+-- @field #number Dispel "dispel"
+-- @field #number Soultrap "soultrap"
+-- @field #number Telekinesis "telekinesis"
+-- @field #number Mark "mark"
+-- @field #number Recall "recall"
+-- @field #number DivineIntervention "divineintervention"
+-- @field #number AlmsiviIntervention "almsiviintervention"
+-- @field #number DetectAnimal "detectanimal"
+-- @field #number DetectEnchantment "detectenchantment"
+-- @field #number DetectKey "detectkey"
+-- @field #number SpellAbsorption "spellabsorption"
+-- @field #number Reflect "reflect"
+-- @field #number CureCommonDisease "curecommondisease"
+-- @field #number CureBlightDisease "cureblightdisease"
+-- @field #number CureCorprusDisease "curecorprusdisease"
+-- @field #number CurePoison "curepoison"
+-- @field #number CureParalyzation "cureparalyzation"
+-- @field #number RestoreAttribute "restoreattribute"
+-- @field #number RestoreHealth "restorehealth"
+-- @field #number RestoreMagicka "restoremagicka"
+-- @field #number RestoreFatigue "restorefatigue"
+-- @field #number RestoreSkill "restoreskill"
+-- @field #number FortifyAttribute "fortifyattribute"
+-- @field #number FortifyHealth "fortifyhealth"
+-- @field #number FortifyMagicka "fortifymagicka"
+-- @field #number FortifyFatigue "fortifyfatigue"
+-- @field #number FortifySkill "fortifyskill"
+-- @field #number FortifyMaximumMagicka "fortifymaximummagicka"
+-- @field #number AbsorbAttribute "absorbattribute"
+-- @field #number AbsorbHealth "absorbhealth"
+-- @field #number AbsorbMagicka "absorbmagicka"
+-- @field #number AbsorbFatigue "absorbfatigue"
+-- @field #number AbsorbSkill "absorbskill"
+-- @field #number ResistFire "resistfire"
+-- @field #number ResistFrost "resistfrost"
+-- @field #number ResistShock "resistshock"
+-- @field #number ResistMagicka "resistmagicka"
+-- @field #number ResistCommonDisease "resistcommondisease"
+-- @field #number ResistBlightDisease "resistblightdisease"
+-- @field #number ResistCorprusDisease "resistcorprusdisease"
+-- @field #number ResistPoison "resistpoison"
+-- @field #number ResistNormalWeapons "resistnormalweapons"
+-- @field #number ResistParalysis "resistparalysis"
+-- @field #number RemoveCurse "removecurse"
+-- @field #number TurnUndead "turnundead"
+-- @field #number SummonScamp "summonscamp"
+-- @field #number SummonClannfear "summonclannfear"
+-- @field #number SummonDaedroth "summondaedroth"
+-- @field #number SummonDremora "summondremora"
+-- @field #number SummonAncestralGhost "summonancestralghost"
+-- @field #number SummonSkeletalMinion "summonskeletalminion"
+-- @field #number SummonBonewalker "summonbonewalker"
+-- @field #number SummonGreaterBonewalker "summongreaterbonewalker"
+-- @field #number SummonBonelord "summonbonelord"
+-- @field #number SummonWingedTwilight "summonwingedtwilight"
+-- @field #number SummonHunger "summonhunger"
+-- @field #number SummonGoldenSaint "summongoldensaint"
+-- @field #number SummonFlameAtronach "summonflameatronach"
+-- @field #number SummonFrostAtronach "summonfrostatronach"
+-- @field #number SummonStormAtronach "summonstormatronach"
+-- @field #number FortifyAttack "fortifyattack"
+-- @field #number CommandCreature "commandcreature"
+-- @field #number CommandHumanoid "commandhumanoid"
+-- @field #number BoundDagger "bounddagger"
+-- @field #number BoundLongsword "boundlongsword"
+-- @field #number BoundMace "boundmace"
+-- @field #number BoundBattleAxe "boundbattleaxe"
+-- @field #number BoundSpear "boundspear"
+-- @field #number BoundLongbow "boundlongbow"
+-- @field #number ExtraSpell "extraspell"
+-- @field #number BoundCuirass "boundcuirass"
+-- @field #number BoundHelm "boundhelm"
+-- @field #number BoundBoots "boundboots"
+-- @field #number BoundShield "boundshield"
+-- @field #number BoundGloves "boundgloves"
+-- @field #number Corprus "corprus"
+-- @field #number Vampirism "vampirism"
+-- @field #number SummonCenturionSphere "summoncenturionsphere"
+-- @field #number SunDamage "sundamage"
+-- @field #number StuntedMagicka "stuntedmagicka"
+-- @field #number SummonFabricant "summonfabricant"
+-- @field #number SummonWolf "summonwolf"
+-- @field #number SummonBear "summonbear"
+-- @field #number SummonBonewolf "summonbonewolf"
+-- @field #number SummonCreature04 "summoncreature04"
+-- @field #number SummonCreature05 "summoncreature05"
+
+
 --- Possible @{#SpellType} values
 -- @field [parent=#Magic] #SpellType SPELL_TYPE
 
@@ -407,7 +557,7 @@
 --     end
 -- end
 
---- Map from effectId to @{#SpellEffect}
+--- Map from @{#MagicEffectId} to @{#MagicEffect}
 -- @field [parent=#Magic] #map<#number, #MagicEffect> effects
 -- @usage -- Print all harmful effects
 -- for _, effect in pairs(core.magic.effects) do
@@ -426,8 +576,8 @@
 
 ---
 -- @type MagicEffect
--- @field #number id
--- @field #string name
+-- @field #string Effect id string
+-- @field #string name Localized name of the effect
 -- @field #number school @{#MagicSchool}
 -- @field #number baseCost
 -- @field openmw.util#Color color
@@ -443,5 +593,15 @@
 -- @field #number magnitudeMin
 -- @field #number magnitudeMax
 
+---
+-- @type ActiveEffect
+-- @field #ActiveEffect effect @{#ActiveEffect}
+-- @field #any affectedSkill @{#SKILL} or nil
+-- @field #any affectedAttribute @{#ATTRIBUTE} or nil
+-- @field #string id Effect id string
+-- @field #string name Localized name of the effect
+-- @field #number magnitude
+-- @field #number magnitudeBase
+-- @field #number magnitudeModifier
 
 return nil

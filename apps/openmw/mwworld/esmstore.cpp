@@ -538,7 +538,7 @@ namespace MWWorld
                     {
                         iter->mAttribute = -1;
                         Log(Debug::Verbose)
-                            << ESM::MagicEffect::effectIdToString(iter->mEffectID) << " effect of spell '" << spell.mId
+                            << ESM::MagicEffect::indexToGmstString(iter->mEffectID) << " effect of spell '" << spell.mId
                             << "' has an attribute argument present. Dropping the argument.";
                         changed = true;
                     }
@@ -549,7 +549,7 @@ namespace MWWorld
                     {
                         iter->mSkill = -1;
                         Log(Debug::Verbose)
-                            << ESM::MagicEffect::effectIdToString(iter->mEffectID) << " effect of spell '" << spell.mId
+                            << ESM::MagicEffect::indexToGmstString(iter->mEffectID) << " effect of spell '" << spell.mId
                             << "' has a skill argument present. Dropping the argument.";
                         changed = true;
                     }
@@ -558,7 +558,7 @@ namespace MWWorld
                 {
                     iter->mSkill = -1;
                     iter->mAttribute = -1;
-                    Log(Debug::Verbose) << ESM::MagicEffect::effectIdToString(iter->mEffectID) << " effect of spell '"
+                    Log(Debug::Verbose) << ESM::MagicEffect::indexToGmstString(iter->mEffectID) << " effect of spell '"
                                         << spell.mId << "' has argument(s) present. Dropping the argument(s).";
                     changed = true;
                 }

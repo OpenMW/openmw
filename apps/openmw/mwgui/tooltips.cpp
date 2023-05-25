@@ -954,7 +954,7 @@ namespace MWGui
     void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, short id)
     {
         const ESM::MagicEffect* effect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(id);
-        const std::string& name = ESM::MagicEffect::effectIdToString(id);
+        const std::string& name = ESM::MagicEffect::indexToGmstString(id);
 
         std::string icon = effect->mIcon;
         int slashPos = icon.rfind('\\');

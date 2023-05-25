@@ -1193,17 +1193,17 @@ namespace MWScript
                 MWWorld::Ptr ptr = R()(runtime);
 
                 const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
-                float currentValue = effects.get(mPositiveEffect).getMagnitude();
+                float currentValue = effects.getOrDefault(mPositiveEffect).getMagnitude();
                 if (mNegativeEffect != -1)
-                    currentValue -= effects.get(mNegativeEffect).getMagnitude();
+                    currentValue -= effects.getOrDefault(mNegativeEffect).getMagnitude();
 
                 // GetResist* should take in account elemental shields
                 if (mPositiveEffect == ESM::MagicEffect::ResistFire)
-                    currentValue += effects.get(ESM::MagicEffect::FireShield).getMagnitude();
+                    currentValue += effects.getOrDefault(ESM::MagicEffect::FireShield).getMagnitude();
                 if (mPositiveEffect == ESM::MagicEffect::ResistShock)
-                    currentValue += effects.get(ESM::MagicEffect::LightningShield).getMagnitude();
+                    currentValue += effects.getOrDefault(ESM::MagicEffect::LightningShield).getMagnitude();
                 if (mPositiveEffect == ESM::MagicEffect::ResistFrost)
-                    currentValue += effects.get(ESM::MagicEffect::FrostShield).getMagnitude();
+                    currentValue += effects.getOrDefault(ESM::MagicEffect::FrostShield).getMagnitude();
 
                 int ret = static_cast<int>(currentValue);
                 runtime.push(ret);
@@ -1227,17 +1227,17 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
                 MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
-                float currentValue = effects.get(mPositiveEffect).getMagnitude();
+                float currentValue = effects.getOrDefault(mPositiveEffect).getMagnitude();
                 if (mNegativeEffect != -1)
-                    currentValue -= effects.get(mNegativeEffect).getMagnitude();
+                    currentValue -= effects.getOrDefault(mNegativeEffect).getMagnitude();
 
                 // SetResist* should take in account elemental shields
                 if (mPositiveEffect == ESM::MagicEffect::ResistFire)
-                    currentValue += effects.get(ESM::MagicEffect::FireShield).getMagnitude();
+                    currentValue += effects.getOrDefault(ESM::MagicEffect::FireShield).getMagnitude();
                 if (mPositiveEffect == ESM::MagicEffect::ResistShock)
-                    currentValue += effects.get(ESM::MagicEffect::LightningShield).getMagnitude();
+                    currentValue += effects.getOrDefault(ESM::MagicEffect::LightningShield).getMagnitude();
                 if (mPositiveEffect == ESM::MagicEffect::ResistFrost)
-                    currentValue += effects.get(ESM::MagicEffect::FrostShield).getMagnitude();
+                    currentValue += effects.getOrDefault(ESM::MagicEffect::FrostShield).getMagnitude();
 
                 int arg = runtime[0].mInteger;
                 runtime.pop();
@@ -1276,7 +1276,8 @@ namespace MWScript
             {
                 MWWorld::Ptr player = MWMechanics::getPlayer();
                 MWMechanics::EffectParam nightEye
-                    = player.getClass().getCreatureStats(player).getMagicEffects().get(ESM::MagicEffect::NightEye);
+                    = player.getClass().getCreatureStats(player).getMagicEffects().getOrDefault(
+                        ESM::MagicEffect::NightEye);
                 runtime.push(std::clamp(nightEye.getMagnitude() / 100.f, 0.f, 1.f));
             }
         };
@@ -1290,8 +1291,8 @@ namespace MWScript
                 runtime.pop();
                 MWWorld::Ptr player = MWMechanics::getPlayer();
                 auto& effects = player.getClass().getCreatureStats(player).getMagicEffects();
-                float delta
-                    = std::clamp(arg * 100.f, 0.f, 100.f) - effects.get(ESM::MagicEffect::NightEye).getMagnitude();
+                float delta = std::clamp(arg * 100.f, 0.f, 100.f)
+                    - effects.getOrDefault(ESM::MagicEffect::NightEye).getMagnitude();
                 effects.modifyBase(ESM::MagicEffect::NightEye, static_cast<int>(delta));
             }
         };
@@ -1305,7 +1306,7 @@ namespace MWScript
                 runtime.pop();
                 MWWorld::Ptr player = MWMechanics::getPlayer();
                 auto& effects = player.getClass().getCreatureStats(player).getMagicEffects();
-                const MWMechanics::EffectParam nightEye = effects.get(ESM::MagicEffect::NightEye);
+                const MWMechanics::EffectParam nightEye = effects.getOrDefault(ESM::MagicEffect::NightEye);
                 float newBase = std::clamp(nightEye.getMagnitude() + arg * 100.f, 0.f, 100.f);
                 newBase -= nightEye.getModifier();
                 float delta = std::clamp(newBase, 0.f, 100.f) - nightEye.getMagnitude();
