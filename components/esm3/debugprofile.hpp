@@ -15,6 +15,8 @@ namespace ESM
     {
         constexpr static RecNameInts sRecordId = REC_DBGP;
 
+        static constexpr std::string_view getRecordType() { return "DebugProfile"; }
+
         enum Flags
         {
             Flag_Default = 1, // add to newly opened scene subviews

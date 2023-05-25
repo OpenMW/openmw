@@ -27,6 +27,8 @@ namespace ESM
     class CellRef
     {
     public:
+        static constexpr std::string_view getRecordType() { return "CellRef"; }
+
         // Reference number
         // Note: Currently unused for items in containers
         RefNum mRefNum;
