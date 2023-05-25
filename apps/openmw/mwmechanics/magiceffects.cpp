@@ -158,21 +158,18 @@ namespace MWMechanics
 
     EffectParam MagicEffects::getOrDefault(const EffectKey& key) const
     {
-        std::optional<EffectParam> param;
-        get(key, param);
-        return param.value_or(EffectParam());
+        return get(key).value_or(EffectParam());
     }
 
-    bool MagicEffects::get(const EffectKey& key, std::optional<EffectParam>& param) const
+    std::optional<EffectParam> MagicEffects::get(const EffectKey& key) const
     {
         Collection::const_iterator iter = mCollection.find(key);
 
         if (iter != mCollection.end())
         {
-            param = iter->second;
-            return true;
+            return iter->second;
         }
-        return false;
+        return std::nullopt;
     }
 
     MagicEffects MagicEffects::diff(const MagicEffects& prev, const MagicEffects& now)

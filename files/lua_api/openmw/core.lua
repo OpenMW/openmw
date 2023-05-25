@@ -595,7 +595,6 @@
 
 ---
 -- @type ActiveEffect
--- @field #ActiveEffect effect @{#ActiveEffect}
 -- @field #any affectedSkill @{#SKILL} or nil
 -- @field #any affectedAttribute @{#ATTRIBUTE} or nil
 -- @field #string id Effect id string

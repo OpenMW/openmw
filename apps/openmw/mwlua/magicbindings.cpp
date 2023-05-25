@@ -564,10 +564,9 @@ namespace MWLua
                     key = MWMechanics::EffectKey(id, ESM::Skill::stringToSkillId(argStr.value()));
             }
 
-            std::optional<MWMechanics::EffectParam> param;
             if (auto* store = effects.getStore())
-                if (store->get(key, param))
-                    return ActiveEffect{ key, param.value() };
+                if (auto effect = store->get(key))
+                    return ActiveEffect{ key, effect.value() };
             return sol::nullopt;
         };
     }
