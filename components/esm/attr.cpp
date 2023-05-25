@@ -1,5 +1,6 @@
 #include "attr.hpp"
 #include <components/misc/strings/algorithm.hpp>
+#include <stdexcept>
 
 using namespace ESM;
 
