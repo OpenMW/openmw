@@ -34,6 +34,8 @@
 
 #include <iostream> // FIXME: debug only
 
+#include <components/debug/debuglog.hpp>
+
 #include "reader.hpp"
 // #include "writer.hpp"
 
@@ -122,7 +124,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
                 if (currentAddQuad != -1)
                 {
                     // FIXME: sometimes there are no VTXT following an ATXT?  Just add a dummy one for now
-                    std::cout << "ESM4::Land VTXT empty layer " << (int)layer.texture.layerIndex << std::endl;
+                    Log(Debug::Verbose) << "ESM4::Land VTXT empty layer " << (int)layer.texture.layerIndex;
                     mTextures[currentAddQuad].layers.push_back(layer);
                 }
                 reader.get(layer.texture);
@@ -208,8 +210,8 @@ void ESM4::Land::load(ESM4::Reader& reader)
     if (currentAddQuad != -1)
     {
         // FIXME: not sure if it happens here as well
-        std::cout << "ESM4::Land VTXT empty layer " << (int)layer.texture.layerIndex << " quad "
-                  << (int)layer.texture.quadrant << std::endl;
+        Log(Debug::Verbose) << "ESM4::Land VTXT empty layer " << (int)layer.texture.layerIndex << " quad "
+                            << (int)layer.texture.quadrant;
         mTextures[currentAddQuad].layers.push_back(layer);
     }
 
