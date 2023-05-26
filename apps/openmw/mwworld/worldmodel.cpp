@@ -64,26 +64,18 @@ namespace
 
 MWWorld::CellStore& MWWorld::WorldModel::getCellStore(const ESM::Cell* cell)
 {
-    CellStore* cellStore = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
+    const auto it = mCells.find(cell->mId);
+    if (it != mCells.end())
+        return it->second;
+
+    CellStore& cellStore = mCells.emplace_hint(it, cell->mId, CellStore(Cell(*cell), mStore, mReaders))->second;
     if (cell->mData.mFlags & ESM::Cell::Interior)
-    {
-        auto result = mInteriors.find(cell->mName);
-
-        if (result == mInteriors.end())
-            result = mInteriors.emplace(cell->mName, cellStore).first;
-
-        return *result->second;
-    }
+        mInteriors.emplace(cell->mName, &cellStore);
     else
-    {
-        ESM::ExteriorCellLocation extIndex(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId);
-        std::map<ESM::ExteriorCellLocation, CellStore*>::iterator result = mExteriors.find(extIndex);
+        mExteriors.emplace(
+            ESM::ExteriorCellLocation(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId), &cellStore);
 
-        if (result == mExteriors.end())
-            result = mExteriors.emplace(extIndex, cellStore).first;
-
-        return *result->second;
-    }
+    return cellStore;
 }
 
 void MWWorld::WorldModel::clear()
