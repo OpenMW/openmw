@@ -89,14 +89,12 @@ namespace MWWorld
         bool readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap);
 
     private:
-        using IdCache = std::vector<std::pair<ESM::RefId, CellStore*>>;
-
         const MWWorld::ESMStore& mStore;
         ESM::ReadersCache& mReaders;
         mutable std::unordered_map<ESM::RefId, CellStore> mCells;
         mutable std::map<std::string, CellStore*, Misc::StringUtils::CiComp> mInteriors;
         mutable std::map<ESM::ExteriorCellLocation, CellStore*> mExteriors;
-        IdCache mIdCache;
+        std::vector<std::pair<ESM::RefId, CellStore*>> mIdCache;
         std::size_t mIdCacheIndex = 0;
         std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
         std::size_t mPtrIndexUpdateCounter = 0;

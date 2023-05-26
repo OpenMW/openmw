@@ -334,14 +334,14 @@ MWWorld::CellStore& MWWorld::WorldModel::getCellByPosition(
 
 MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name)
 {
-    // First check the cache
-    for (IdCache::iterator iter(mIdCache.begin()); iter != mIdCache.end(); ++iter)
-        if (iter->first == name && iter->second)
-        {
-            Ptr ptr = iter->second->getPtr(name);
-            if (!ptr.isEmpty())
-                return ptr;
-        }
+    for (const auto& [cachedId, cellStore] : mIdCache)
+    {
+        if (cachedId != name || cellStore == nullptr)
+            continue;
+        Ptr ptr = cellStore->getPtr(name);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
 
     // Then check cells that are already listed
     // Search in reverse, this is a workaround for an ambiguous chargen_plank reference in the vanilla game.
@@ -423,10 +423,10 @@ int MWWorld::WorldModel::countSavedGameRecords() const
 
 void MWWorld::WorldModel::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
 {
-    for (auto iter(mCells.begin()); iter != mCells.end(); ++iter)
-        if (iter->second.hasState())
+    for (auto& [id, cellStore] : mCells)
+        if (cellStore.hasState())
         {
-            writeCell(writer, iter->second);
+            writeCell(writer, cellStore);
             progress.increaseProgress();
         }
 }
