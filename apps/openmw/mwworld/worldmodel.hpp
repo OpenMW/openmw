@@ -51,12 +51,6 @@ namespace MWWorld
         CellStore& getCell(std::string_view name, bool forceLoad = true); // interior or named exterior
         CellStore& getCell(const ESM::RefId& Id, bool forceLoad = true);
 
-        // Returns the cell that is in the same worldspace as `cellInSameWorldSpace`
-        // (in case of nullptr - default exterior worldspace) and contains given position.
-        // Interiors are single-cell worldspaces, so in case of an interior it just returns
-        // the same cell.
-        CellStore& getCellByPosition(const osg::Vec3f& pos, CellStore* cellInSameWorldSpace = nullptr);
-
         void registerPtr(const MWWorld::Ptr& ptr);
         void deregisterPtr(const MWWorld::Ptr& ptr);
         ESM::RefNum getLastGeneratedRefNum() const { return mLastGeneratedRefnum; }

@@ -319,19 +319,6 @@ MWWorld::CellStore& MWWorld::WorldModel::getCell(std::string_view name, bool for
         ESM::ExteriorCellLocation(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId), forceLoad);
 }
 
-MWWorld::CellStore& MWWorld::WorldModel::getCellByPosition(
-    const osg::Vec3f& pos, MWWorld::CellStore* cellInSameWorldSpace)
-{
-    if (cellInSameWorldSpace && !cellInSameWorldSpace->isExterior())
-        return *cellInSameWorldSpace;
-    ESM::RefId exteriorWorldspace
-        = cellInSameWorldSpace ? cellInSameWorldSpace->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
-    const ESM::ExteriorCellLocation cellIndex
-        = ESM::positionToExteriorCellLocation(pos.x(), pos.y(), exteriorWorldspace);
-
-    return getExterior(cellIndex);
-}
-
 MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name)
 {
     for (const auto& [cachedId, cellStore] : mIdCache)
