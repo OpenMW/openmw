@@ -326,7 +326,8 @@ MWWorld::CellStore& MWWorld::WorldModel::getCellByPosition(
         return *cellInSameWorldSpace;
     ESM::RefId exteriorWorldspace
         = cellInSameWorldSpace ? cellInSameWorldSpace->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
-    const ESM::ExteriorCellLocation cellIndex = ESM::positionToCellIndex(pos.x(), pos.y(), exteriorWorldspace);
+    const ESM::ExteriorCellLocation cellIndex
+        = ESM::positionToExteriorCellLocation(pos.x(), pos.y(), exteriorWorldspace);
 
     return getExterior(cellIndex);
 }

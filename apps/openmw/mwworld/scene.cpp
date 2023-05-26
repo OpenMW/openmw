@@ -521,7 +521,7 @@ namespace MWWorld
             if (distance <= maxDistance)
                 return *currentGridCenter;
         }
-        ESM::ExteriorCellLocation cellPos = ESM::positionToCellIndex(pos.x(), pos.y(), worldspace);
+        ESM::ExteriorCellLocation cellPos = ESM::positionToExteriorCellLocation(pos.x(), pos.y(), worldspace);
         return { cellPos.mX, cellPos.mY };
     }
 
@@ -1283,7 +1283,8 @@ namespace MWWorld
             else
             {
                 osg::Vec3f pos = dest.mPos.asVec3();
-                const ESM::ExteriorCellLocation cellIndex = ESM::positionToCellIndex(pos.x(), pos.y(), extWorldspace);
+                const ESM::ExteriorCellLocation cellIndex
+                    = ESM::positionToExteriorCellLocation(pos.x(), pos.y(), extWorldspace);
                 preloadCell(mWorld.getWorldModel().getExterior(cellIndex), true);
                 exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
             }

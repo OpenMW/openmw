@@ -275,7 +275,7 @@ namespace MWGui
 
         if (!mInterior)
         {
-            ESM::ExteriorCellLocation cellPos = ESM::positionToCellIndex(worldX, worldY);
+            ESM::ExteriorCellLocation cellPos = ESM::positionToExteriorCellLocation(worldX, worldY);
             cellIndex.x() = cellPos.mX;
             cellIndex.y() = cellPos.mY;
 

@@ -126,7 +126,7 @@ namespace MWGui
             std::string_view cellname = transport[i].mCellName;
             bool interior = true;
             const ESM::ExteriorCellLocation cellIndex
-                = ESM::positionToCellIndex(transport[i].mPos.pos[0], transport[i].mPos.pos[1]);
+                = ESM::positionToExteriorCellLocation(transport[i].mPos.pos[0], transport[i].mPos.pos[1]);
             if (cellname.empty())
             {
                 MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex);
@@ -192,7 +192,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
 
         MWBase::Environment::get().getWindowManager()->fadeScreenOut(1);
-        const ESM::ExteriorCellLocation posCell = ESM::positionToCellIndex(pos.pos[0], pos.pos[1]);
+        const ESM::ExteriorCellLocation posCell = ESM::positionToExteriorCellLocation(pos.pos[0], pos.pos[1]);
         ESM::RefId cellId = ESM::Cell::generateIdForCell(!interior, cellname, posCell.mX, posCell.mY);
 
         // Teleports any followers, too.

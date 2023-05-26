@@ -88,7 +88,7 @@ namespace MWWorld
             }
             else
             {
-                const auto cellPos = ESM::positionToCellIndex(ref.mDoorDest.pos[0], ref.mDoorDest.pos[1]);
+                const auto cellPos = ESM::positionToExteriorCellLocation(ref.mDoorDest.pos[0], ref.mDoorDest.pos[1]);
                 return ESM::RefId::esm3ExteriorCell(cellPos.mX, cellPos.mY);
             }
         };
