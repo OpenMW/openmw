@@ -396,49 +396,46 @@ namespace MWScript
                 if (isPlayer)
                     world->getPlayer().setTeleported(true);
 
-                MWWorld::CellStore* store = nullptr;
-                try
-                {
-                    store = &worldModel->getCell(cellID);
-                    if (store->isExterior())
-                    {
-                        const ESM::ExteriorCellLocation cellIndex
-                            = ESM::positionToExteriorCellLocation(x, y, store->getCell()->getWorldSpace());
-                        store = &worldModel->getExterior(cellIndex);
-                    }
-                }
-                catch (std::exception&)
+                MWWorld::CellStore* store = worldModel->findCell(cellID);
+
+                if (store != nullptr && store->isExterior())
+                    store = &worldModel->getExterior(
+                        ESM::positionToExteriorCellLocation(x, y, store->getCell()->getWorldSpace()));
+
+                if (store == nullptr)
                 {
                     // cell not found, move to exterior instead if moving the player (vanilla PositionCell
                     // compatibility)
-                    std::string error = "Warning: PositionCell: unknown interior cell (" + std::string(cellID) + ")";
+                    std::string error = "PositionCell: unknown interior cell (" + std::string(cellID) + ")";
                     if (isPlayer)
                         error += ", moving to exterior instead";
                     runtime.getContext().report(error);
-                    Log(Debug::Warning) << error;
                     if (!isPlayer)
+                    {
+                        Log(Debug::Error) << error;
                         return;
-                    store = &worldModel->getExterior(
-                        ESM::positionToExteriorCellLocation(x, y, ESM::Cell::sDefaultWorldspaceId));
+                    }
+                    Log(Debug::Warning) << error;
+                    const ESM::ExteriorCellLocation cellIndex
+                        = ESM::positionToExteriorCellLocation(x, y, ESM::Cell::sDefaultWorldspaceId);
+                    store = &worldModel->getExterior(cellIndex);
                 }
-                if (store)
-                {
-                    MWWorld::Ptr base = ptr;
-                    ptr = world->moveObject(ptr, store, osg::Vec3f(x, y, z));
-                    dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(base, ptr);
 
-                    auto rot = ptr.getRefData().getPosition().asRotationVec3();
-                    // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south
-                    // = 10800, west = 16200) except for when you position the player, then degrees must be used. See
-                    // "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
-                    if (!isPlayer)
-                        zRot = zRot / 60.0f;
-                    rot.z() = osg::DegreesToRadians(zRot);
-                    world->rotateObject(ptr, rot);
+                MWWorld::Ptr base = ptr;
+                ptr = world->moveObject(ptr, store, osg::Vec3f(x, y, z));
+                dynamic_cast<MWScript::InterpreterContext&>(runtime.getContext()).updatePtr(base, ptr);
 
-                    bool cellActive = MWBase::Environment::get().getWorldScene()->isCellActive(*ptr.getCell());
-                    ptr.getClass().adjustPosition(ptr, isPlayer || !cellActive);
-                }
+                auto rot = ptr.getRefData().getPosition().asRotationVec3();
+                // Note that you must specify ZRot in minutes (1 degree = 60 minutes; north = 0, east = 5400, south
+                // = 10800, west = 16200) except for when you position the player, then degrees must be used. See
+                // "Morrowind Scripting for Dummies (9th Edition)" pages 50 and 54 for reference.
+                if (!isPlayer)
+                    zRot = zRot / 60.0f;
+                rot.z() = osg::DegreesToRadians(zRot);
+                world->rotateObject(ptr, rot);
+
+                bool cellActive = MWBase::Environment::get().getWorldScene()->isCellActive(*ptr.getCell());
+                ptr.getClass().adjustPosition(ptr, isPlayer || !cellActive);
             }
         };
 
@@ -468,7 +465,7 @@ namespace MWScript
                     ptr.getClass().getCreatureStats(ptr).setTeleported(true);
                 if (isPlayer)
                     world->getPlayer().setTeleported(true);
-                const ESM::ExteriorCellLocation cellIndex
+                const ESM::ExteriorCellLocation location
                     = ESM::positionToExteriorCellLocation(x, y, ESM::Cell::sDefaultWorldspaceId);
 
                 // another morrowind oddity: player will be moved to the exterior cell at this location,
@@ -476,7 +473,7 @@ namespace MWScript
                 MWWorld::Ptr base = ptr;
                 if (isPlayer)
                 {
-                    MWWorld::CellStore* cell = &MWBase::Environment::get().getWorldModel()->getExterior(cellIndex);
+                    MWWorld::CellStore* cell = &MWBase::Environment::get().getWorldModel()->getExterior(location);
                     ptr = world->moveObject(ptr, cell, osg::Vec3(x, y, z));
                 }
                 else
@@ -517,30 +514,26 @@ namespace MWScript
                 Interpreter::Type_Float zRotDegrees = runtime[0].mFloat;
                 runtime.pop();
 
-                MWWorld::CellStore* store = nullptr;
-                try
+                MWWorld::CellStore* const store = MWBase::Environment::get().getWorldModel()->findCell(cellName);
+                if (store == nullptr)
                 {
-                    store = &MWBase::Environment::get().getWorldModel()->getCell(cellName);
+                    const std::string message = "unknown cell (" + std::string(cellName) + ")";
+                    runtime.getContext().report(message);
+                    Log(Debug::Error) << message;
+                    return;
                 }
-                catch (std::exception&)
-                {
-                    runtime.getContext().report("unknown cell (" + std::string(cellName) + ")");
-                    Log(Debug::Error) << "Error: unknown cell (" << cellName << ")";
-                }
-                if (store)
-                {
-                    ESM::Position pos;
-                    pos.pos[0] = x;
-                    pos.pos[1] = y;
-                    pos.pos[2] = z;
-                    pos.rot[0] = pos.rot[1] = 0;
-                    pos.rot[2] = osg::DegreesToRadians(zRotDegrees);
-                    MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), itemID);
-                    ref.getPtr().mRef->mData.mPhysicsPostponed = !ref.getPtr().getClass().isActor();
-                    ref.getPtr().getCellRef().setPosition(pos);
-                    MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(), store, pos);
-                    placed.getClass().adjustPosition(placed, true);
-                }
+
+                ESM::Position pos;
+                pos.pos[0] = x;
+                pos.pos[1] = y;
+                pos.pos[2] = z;
+                pos.rot[0] = pos.rot[1] = 0;
+                pos.rot[2] = osg::DegreesToRadians(zRotDegrees);
+                MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), itemID);
+                ref.getPtr().mRef->mData.mPhysicsPostponed = !ref.getPtr().getClass().isActor();
+                ref.getPtr().getCellRef().setPosition(pos);
+                MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(ref.getPtr(), store, pos);
+                placed.getClass().adjustPosition(placed, true);
             }
         };
 

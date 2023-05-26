@@ -2744,16 +2744,11 @@ namespace MWWorld
     {
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
-        const MWWorld::CellStore* cellStore = nullptr;
-        try
-        {
-            cellStore = &mWorldModel.getCell(nameId);
-            if (!cellStore->isExterior())
-                return ESM::RefId();
-        }
-        catch (std::exception&)
-        {
-        }
+        const MWWorld::CellStore* cellStore = mWorldModel.findCell(nameId);
+
+        if (cellStore != nullptr && !cellStore->isExterior())
+            return ESM::RefId();
+
         if (!cellStore)
         {
             size_t comma = nameId.find(',');
