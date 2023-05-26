@@ -5,8 +5,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
-
-#include <boost/iostreams/stream.hpp>
+#include <unistd.h>
 
 #include <components/crashcatcher/crashcatcher.hpp>
 #include <components/files/conversion.hpp>
@@ -77,7 +76,7 @@ namespace Debug
         logListener = std::move(listener);
     }
 
-    class DebugOutputBase : public boost::iostreams::sink
+    class DebugOutputBase
     {
     public:
         DebugOutputBase()
@@ -175,6 +174,58 @@ namespace Debug
         }
     };
 
+    class DebugOutputBuffer : public std::streambuf
+    {
+    public:
+        DebugOutputBuffer(std::unique_ptr<DebugOutputBase> sink)
+            : m_sink(std::move(sink))
+        {}
+
+        std::streamsize xsputn(const char* s, std::streamsize n) override
+        {
+            return m_sink->write(s, n);
+        }
+
+        int overflow(int c = EOF) override
+        {
+            if (c != EOF)
+            {
+                char z = c;
+                if (m_sink->write(&z, 1) != 1)
+                    return EOF;
+            }
+            return c;
+        }
+
+        int sync() override
+        {
+            // This is up to you to decide when to sync, or if you need to.
+            return 0;
+        }
+
+    private:
+        std::unique_ptr<DebugOutputBase> m_sink;
+    };
+
+    class DebugOutputStream : public std::ostream
+    {
+    public:
+        DebugOutputStream(std::unique_ptr<DebugOutputBase> sink)
+            : std::ostream(new DebugOutputBuffer(std::move(sink)))
+        {}
+
+        void open(std::unique_ptr<DebugOutputBase> new_sink)
+        {
+            delete rdbuf();
+            rdbuf(new DebugOutputBuffer(std::move(new_sink)));
+        }
+
+        ~DebugOutputStream()
+        {
+            delete rdbuf();
+        }
+    };
+
 #if defined _WIN32 && defined _DEBUG
     class DebugOutput : public DebugOutputBase
     {
@@ -261,13 +312,6 @@ static std::unique_ptr<std::ostream> rawStderr = nullptr;
 static std::unique_ptr<std::mutex> rawStderrMutex = nullptr;
 static std::ofstream logfile;
 
-#if defined(_WIN32) && defined(_DEBUG)
-static boost::iostreams::stream_buffer<Debug::DebugOutput> sb;
-#else
-static boost::iostreams::stream_buffer<Debug::Tee> coutsb;
-static boost::iostreams::stream_buffer<Debug::Tee> cerrsb;
-#endif
-
 std::ostream& getRawStdout()
 {
     return rawStdout ? *rawStdout : std::cout;
@@ -288,18 +332,18 @@ void setupLogging(const std::filesystem::path& logDir, std::string_view appName,
 {
 #if defined(_WIN32) && defined(_DEBUG)
     // Redirect cout and cerr to VS debug output when running in debug mode
-    sb.open(Debug::DebugOutput());
-    std::cout.rdbuf(&sb);
-    std::cerr.rdbuf(&sb);
+    static Debug::DebugOutputStream sb(std::make_unique<Debug::DebugOutput>());
+    std::cout.rdbuf(sb.rdbuf());
+    std::cerr.rdbuf(sb.rdbuf());
 #else
     const std::string logName = Misc::StringUtils::lowerCase(appName) + ".log";
     logfile.open(logDir / logName, mode);
 
-    coutsb.open(Debug::Tee(logfile, *rawStdout));
-    cerrsb.open(Debug::Tee(logfile, *rawStderr));
+    static Debug::DebugOutputStream coutsb(std::make_unique<Debug::Tee>(logfile, *rawStdout));
+    static Debug::DebugOutputStream cerrsb(std::make_unique<Debug::Tee>(logfile, *rawStderr));
 
-    std::cout.rdbuf(&coutsb);
-    std::cerr.rdbuf(&cerrsb);
+    std::cout.rdbuf(coutsb.rdbuf());
+    std::cerr.rdbuf(cerrsb.rdbuf());
 #endif
 }
 
