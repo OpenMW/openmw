@@ -32,13 +32,6 @@ namespace ESM
     // Pixel color value. Standard four-byte rr,gg,bb,aa format.
     typedef uint32_t Color;
 
-    enum Specialization
-    {
-        SPC_Combat = 0,
-        SPC_Magic = 1,
-        SPC_Stealth = 2
-    };
-
     enum RangeType
     {
         RT_Self = 0,

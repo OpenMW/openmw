@@ -936,13 +936,9 @@ namespace MWGui
             return;
 
         int spec = playerClass.mData.mSpecialization;
-        std::string specStr;
-        if (spec == 0)
-            specStr = "#{sSpecializationCombat}";
-        else if (spec == 1)
-            specStr = "#{sSpecializationMagic}";
-        else if (spec == 2)
-            specStr = "#{sSpecializationStealth}";
+        std::string specStr = "#{";
+        specStr += ESM::Class::sGmstSpecializationIds[spec];
+        specStr += '}';
 
         widget->setUserString("Caption_ClassName", playerClass.mName);
         widget->setUserString("Caption_ClassDescription", playerClass.mDescription);

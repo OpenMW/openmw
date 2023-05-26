@@ -29,8 +29,7 @@ namespace ESM
             Stealth = 2
         };
 
-        static const Specialization sSpecializationIds[3];
-        static const char* sGmstSpecializationIds[3];
+        static const std::string_view sGmstSpecializationIds[3];
 
         struct CLDTstruct
         {

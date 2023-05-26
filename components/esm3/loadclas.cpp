@@ -8,9 +8,7 @@
 
 namespace ESM
 {
-    const Class::Specialization Class::sSpecializationIds[3] = { Class::Combat, Class::Magic, Class::Stealth };
-
-    const char* Class::sGmstSpecializationIds[3]
+    const std::string_view Class::sGmstSpecializationIds[3]
         = { "sSpecializationCombat", "sSpecializationMagic", "sSpecializationStealth" };
 
     int& Class::CLDTstruct::getSkill(int index, bool major)

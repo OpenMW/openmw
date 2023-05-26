@@ -254,10 +254,8 @@ namespace MWGui
         ESM::Class::Specialization specialization
             = static_cast<ESM::Class::Specialization>(klass->mData.mSpecialization);
 
-        static const std::string_view specIds[3]
-            = { "sSpecializationCombat", "sSpecializationMagic", "sSpecializationStealth" };
         std::string specName{ MWBase::Environment::get().getWindowManager()->getGameSettingString(
-            specIds[specialization], specIds[specialization]) };
+            ESM::Class::sGmstSpecializationIds[specialization], ESM::Class::sGmstSpecializationIds[specialization]) };
         mSpecializationName->setCaption(specName);
         ToolTips::createSpecializationToolTip(mSpecializationName, specName, specialization);
 
@@ -579,11 +577,10 @@ namespace MWGui
 
     void CreateClassDialog::setSpecialization(int id)
     {
-        mSpecializationId = (ESM::Class::Specialization)id;
-        static const std::string_view specIds[3]
-            = { "sSpecializationCombat", "sSpecializationMagic", "sSpecializationStealth" };
+        mSpecializationId = ESM::Class::Specialization(id);
         std::string specName{ MWBase::Environment::get().getWindowManager()->getGameSettingString(
-            specIds[mSpecializationId], specIds[mSpecializationId]) };
+            ESM::Class::sGmstSpecializationIds[mSpecializationId],
+            ESM::Class::sGmstSpecializationIds[mSpecializationId]) };
         mSpecializationName->setCaption(specName);
         ToolTips::createSpecializationToolTip(mSpecializationName, specName, mSpecializationId);
     }
