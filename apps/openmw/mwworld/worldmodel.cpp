@@ -116,7 +116,7 @@ MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefNum& refNum) const
 
 MWWorld::Ptr MWWorld::WorldModel::getPtrAndCache(const ESM::RefId& name, CellStore& cellStore)
 {
-    Ptr ptr = getPtr(name, cellStore);
+    Ptr ptr = cellStore.getPtr(name);
 
     if (!ptr.isEmpty() && ptr.isInCell())
     {
@@ -332,36 +332,13 @@ MWWorld::CellStore& MWWorld::WorldModel::getCellByPosition(
     return getExterior(cellIndex);
 }
 
-MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name, CellStore& cell)
-{
-    if (cell.getState() == CellStore::State_Unloaded)
-        cell.preload();
-
-    if (cell.getState() == CellStore::State_Preloaded)
-    {
-        if (cell.hasId(name))
-        {
-            cell.load();
-        }
-        else
-            return Ptr();
-    }
-
-    Ptr ptr = cell.search(name);
-
-    if (!ptr.isEmpty() && MWWorld::CellStore::isAccessible(ptr.getRefData(), ptr.getCellRef()))
-        return ptr;
-
-    return Ptr();
-}
-
 MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name)
 {
     // First check the cache
     for (IdCache::iterator iter(mIdCache.begin()); iter != mIdCache.end(); ++iter)
         if (iter->first == name && iter->second)
         {
-            Ptr ptr = getPtr(name, *iter->second);
+            Ptr ptr = iter->second->getPtr(name);
             if (!ptr.isEmpty())
                 return ptr;
         }

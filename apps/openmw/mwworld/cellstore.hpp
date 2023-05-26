@@ -322,6 +322,8 @@ namespace MWWorld
 
         Ptr getMovedActor(int actorId) const;
 
+        Ptr getPtr(ESM::RefId id);
+
         bool operator==(const CellStore& right) const;
 
     private:

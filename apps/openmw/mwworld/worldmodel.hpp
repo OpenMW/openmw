@@ -66,7 +66,6 @@ namespace MWWorld
 
         Ptr getPtr(const ESM::RefNum& refNum) const;
 
-        Ptr getPtr(const ESM::RefId& name, CellStore& cellStore);
         Ptr getPtr(const ESM::RefId& name);
 
         template <typename Fn>

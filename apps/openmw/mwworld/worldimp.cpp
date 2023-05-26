@@ -695,7 +695,7 @@ namespace MWWorld
         {
             // TODO: caching still doesn't work efficiently here (only works for the one CellStore that the reference is
             // in)
-            Ptr ptr = mWorldModel.getPtr(name, *cellstore);
+            Ptr ptr = cellstore->getPtr(name);
 
             if (!ptr.isEmpty())
                 return ptr;
