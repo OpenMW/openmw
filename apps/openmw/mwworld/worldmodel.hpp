@@ -51,8 +51,12 @@ namespace MWWorld
         std::size_t mPtrIndexUpdateCounter = 0;
         ESM::RefNum mLastGeneratedRefnum;
 
-        CellStore& getCellStore(const ESM::Cell& cell);
+        CellStore& getOrInsertCellStore(const ESM::Cell& cell);
+
+        CellStore& insertCellStore(const ESM::Cell& cell);
+
         CellStore* getInteriorOrNull(std::string_view name);
+
         Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);
 
         void writeCell(ESM::ESMWriter& writer, CellStore& cell) const;
