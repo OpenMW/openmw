@@ -1369,7 +1369,7 @@ namespace MWRender
             newChunkMgr.mTerrain = std::make_unique<Terrain::TerrainGrid>(mSceneRoot, mRootNode, mResourceSystem,
                 mTerrainStorage.get(), Mask_Terrain, worldspace, Mask_PreCompile, Mask_Debug);
 
-        newChunkMgr.mTerrain->setTargetFrameRate(Settings::Manager::getFloat("target framerate", "Cells"));
+        newChunkMgr.mTerrain->setTargetFrameRate(Settings::cells().mTargetFramerate);
         float distanceMult = std::cos(osg::DegreesToRadians(std::min(mFieldOfView, 140.f)) / 2.f);
         newChunkMgr.mTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f / distanceMult : 1.f));
 
