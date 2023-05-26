@@ -179,12 +179,10 @@ namespace Debug
     public:
         DebugOutputBuffer(std::unique_ptr<DebugOutputBase> sink)
             : m_sink(std::move(sink))
-        {}
-
-        std::streamsize xsputn(const char* s, std::streamsize n) override
         {
-            return m_sink->write(s, n);
         }
+
+        std::streamsize xsputn(const char* s, std::streamsize n) override { return m_sink->write(s, n); }
 
         int overflow(int c = EOF) override
         {
@@ -212,7 +210,8 @@ namespace Debug
     public:
         DebugOutputStream(std::unique_ptr<DebugOutputBase> sink)
             : std::ostream(new DebugOutputBuffer(std::move(sink)))
-        {}
+        {
+        }
 
         void open(std::unique_ptr<DebugOutputBase> new_sink)
         {
@@ -220,10 +219,7 @@ namespace Debug
             rdbuf(new DebugOutputBuffer(std::move(new_sink)));
         }
 
-        ~DebugOutputStream()
-        {
-            delete rdbuf();
-        }
+        ~DebugOutputStream() { delete rdbuf(); }
     };
 
 #if defined _WIN32 && defined _DEBUG
