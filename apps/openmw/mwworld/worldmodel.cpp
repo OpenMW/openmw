@@ -13,7 +13,6 @@
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
 #include "cellstore.hpp"
 #include "esmstore.hpp"
