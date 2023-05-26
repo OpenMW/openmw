@@ -62,18 +62,18 @@ namespace
     };
 }
 
-MWWorld::CellStore& MWWorld::WorldModel::getCellStore(const ESM::Cell* cell)
+MWWorld::CellStore& MWWorld::WorldModel::getCellStore(const ESM::Cell& cell)
 {
-    const auto it = mCells.find(cell->mId);
+    const auto it = mCells.find(cell.mId);
     if (it != mCells.end())
         return it->second;
 
-    CellStore& cellStore = mCells.emplace_hint(it, cell->mId, CellStore(Cell(*cell), mStore, mReaders))->second;
-    if (cell->mData.mFlags & ESM::Cell::Interior)
-        mInteriors.emplace(cell->mName, &cellStore);
+    CellStore& cellStore = mCells.emplace_hint(it, cell.mId, CellStore(Cell(cell), mStore, mReaders))->second;
+    if (cell.mData.mFlags & ESM::Cell::Interior)
+        mInteriors.emplace(cell.mName, &cellStore);
     else
         mExteriors.emplace(
-            ESM::ExteriorCellLocation(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId), &cellStore);
+            ESM::ExteriorCellLocation(cell.getGridX(), cell.getGridY(), ESM::Cell::sDefaultWorldspaceId), &cellStore);
 
     return cellStore;
 }
@@ -386,7 +386,7 @@ MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name)
 
     for (iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
     {
-        CellStore& cellStore = getCellStore(&(*iter));
+        CellStore& cellStore = getCellStore(*iter);
 
         Ptr ptr = getPtrAndCache(name, cellStore);
 
@@ -396,7 +396,7 @@ MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name)
 
     for (iter = cells.intBegin(); iter != cells.intEnd(); ++iter)
     {
-        CellStore& cellStore = getCellStore(&(*iter));
+        CellStore& cellStore = getCellStore(*iter);
 
         Ptr ptr = getPtrAndCache(name, cellStore);
 
@@ -413,7 +413,7 @@ void MWWorld::WorldModel::getExteriorPtrs(const ESM::RefId& name, std::vector<MW
     const MWWorld::Store<ESM::Cell>& cells = mStore.get<ESM::Cell>();
     for (MWWorld::Store<ESM::Cell>::iterator iter = cells.extBegin(); iter != cells.extEnd(); ++iter)
     {
-        CellStore& cellStore = getCellStore(&(*iter));
+        CellStore& cellStore = getCellStore(*iter);
 
         Ptr ptr = getPtrAndCache(name, cellStore);
 
