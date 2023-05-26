@@ -58,7 +58,6 @@ namespace ESMTerrain
 
     private:
         const ESM::Land* mLand;
-        int mLoadFlags;
 
         ESM::LandData mData;
     };

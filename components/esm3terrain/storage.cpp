@@ -24,27 +24,23 @@ namespace ESMTerrain
 
     LandObject::LandObject()
         : mLand(nullptr)
-        , mLoadFlags(0)
     {
     }
 
     LandObject::LandObject(const ESM4::Land* land, int loadFlags)
         : mLand(nullptr)
-        , mLoadFlags(0)
         , mData(*land, loadFlags)
     {
     }
 
     LandObject::LandObject(const ESM::Land* land, int loadFlags)
         : mLand(land)
-        , mLoadFlags(loadFlags)
         , mData(*land, loadFlags)
     {
     }
 
     LandObject::LandObject(const LandObject& copy, const osg::CopyOp& copyop)
         : mLand(nullptr)
-        , mLoadFlags(0)
     {
     }
 
