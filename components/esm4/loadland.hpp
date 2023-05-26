@@ -34,14 +34,13 @@
 #include "formid.hpp"
 
 #include <components/esm/defs.hpp>
-#include <components/esm/esmterrain.hpp>
 #include <components/esm/refid.hpp>
 
 namespace ESM4
 {
     class Reader;
 
-    struct Land : public ESM::LandData
+    struct Land
     {
         enum
         {
@@ -131,41 +130,10 @@ namespace ESM4
         ESM::RefId mCell;
         void load(Reader& reader);
         Land() = default;
-        Land(const Land& Other);
         // void save(Writer& writer) const;
 
         // void blank();
         static constexpr ESM::RecNameInts sRecordId = ESM::REC_LAND4;
-
-        std::span<const float> getHeights() const override
-        {
-            return mHeights;
-        }
-        std::span<const VNML> getNormals() const override
-        {
-            return mVertNorm;
-        }
-        std::span<const unsigned char> getColors() const override
-        {
-            return mVertColr;
-        }
-        std::span<const uint16_t> getTextures() const override;
-        float getSize() const override
-        {
-            return REAL_SIZE;
-        }
-        float getMinHeight() const override
-        {
-            return mMinHeight;
-        }
-        float getMaxHeight() const override
-        {
-            return mMaxHeight;
-        }
-        int getLandSize() const override
-        {
-            return VERTS_PER_SIDE;
-        }
     };
 }
 

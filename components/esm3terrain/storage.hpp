@@ -6,6 +6,7 @@
 
 #include <components/terrain/storage.hpp>
 
+#include <components/esm/esmterrain.hpp>
 #include <components/esm/util.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadltex.hpp>
@@ -13,6 +14,11 @@
 namespace ESM4
 {
     struct Land;
+}
+
+namespace ESM
+{
+    class LandData;
 }
 
 namespace VFS
@@ -41,22 +47,20 @@ namespace ESMTerrain
 
         inline const ESM::LandData* getData(int flags) const
         {
-            if (!mData)
+            if ((mData.mLoadFlags & flags) != flags)
                 return nullptr;
-            ESM::Land::LandData* esm3Land = dynamic_cast<ESM::Land::LandData*>(mData.get());
-            if (esm3Land && ((esm3Land->mDataLoaded & flags) != flags))
-                return nullptr;
-            return mData.get();
+
+            return &mData;
         }
         inline int getPlugin() const { return mLand->getPlugin(); }
-        inline int getLandSize() const { return mData->getLandSize(); }
-        inline int getRealSize() const { return mData->getSize(); }
+        inline int getLandSize() const { return mData.getLandSize(); }
+        inline int getRealSize() const { return mData.getSize(); }
 
     private:
         const ESM::Land* mLand;
         int mLoadFlags;
 
-        std::unique_ptr<ESM::LandData> mData;
+        ESM::LandData mData;
     };
 
     /// @brief Feeds data from ESM terrain records (ESM::Land, ESM::LandTexture)

@@ -7,7 +7,6 @@
 
 #include "components/esm/defs.hpp"
 #include "components/esm/esmcommon.hpp"
-#include "components/esm/esmterrain.hpp"
 
 namespace ESM
 {
@@ -88,8 +87,10 @@ namespace ESM
         };
 #pragma pack(pop)
 
-        struct LandData : public ESM::LandData
+        struct LandData
         {
+            typedef signed char VNML;
+
             LandData()
                 : mHeightOffset(0)
                 , mMinHeight(0)
@@ -123,15 +124,6 @@ namespace ESM
             uint8_t mUnk2;
 
             int mDataLoaded;
-
-            std::span<const float> getHeights() const override { return mHeights; }
-            std::span<const VNML> getNormals() const override { return mNormals; }
-            std::span<const unsigned char> getColors() const override { return mColours; }
-            std::span<const uint16_t> getTextures() const override { return mTextures; }
-            float getSize() const override { return REAL_SIZE; }
-            float getMinHeight() const override { return mMinHeight; }
-            float getMaxHeight() const override { return mMaxHeight; }
-            int getLandSize() const override { return LAND_SIZE; }
         };
 
         // low-LOD heightmap (used for rendering the global map)

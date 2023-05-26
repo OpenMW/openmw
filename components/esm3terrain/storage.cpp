@@ -6,6 +6,7 @@
 #include <osg/Plane>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm/esmterrain.hpp>
 #include <components/esm4/loadland.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
@@ -30,18 +31,15 @@ namespace ESMTerrain
     LandObject::LandObject(const ESM4::Land* land, int loadFlags)
         : mLand(nullptr)
         , mLoadFlags(0)
+        , mData(*land, loadFlags)
     {
-        mData = std::make_unique<ESM4::Land>(*land);
     }
 
     LandObject::LandObject(const ESM::Land* land, int loadFlags)
         : mLand(land)
         , mLoadFlags(loadFlags)
-        , mData(nullptr)
+        , mData(*land, loadFlags)
     {
-        std::unique_ptr<ESM::Land::LandData> esm3LandData = std::make_unique<ESM::Land::LandData>();
-        mLand->loadData(mLoadFlags, esm3LandData.get());
-        mData = std::move(esm3LandData);
     }
 
     LandObject::LandObject(const LandObject& copy, const osg::CopyOp& copyop)

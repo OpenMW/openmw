@@ -233,53 +233,6 @@ void ESM4::Land::load(ESM4::Reader& reader)
     // at least one of the quadrants do not have a base texture, return without setting the flag
     if (!missing)
         mDataTypes |= LAND_VTEX;
-
-    mMinHeight = std::numeric_limits<float>::max();
-    mMaxHeight = std::numeric_limits<float>::lowest();
-
-    float row_offset = mHeightMap.heightOffset;
-    for (int y = 0; y < VERTS_PER_SIDE; y++)
-    {
-        row_offset += mHeightMap.gradientData[y * VERTS_PER_SIDE];
-
-        const float heightY = row_offset * HEIGHT_SCALE;
-        mHeights[y * VERTS_PER_SIDE] = heightY;
-        mMinHeight = std::min(mMinHeight, heightY);
-        mMaxHeight = std::max(mMaxHeight, heightY);
-
-        float colOffset = row_offset;
-        for (int x = 1; x < VERTS_PER_SIDE; x++)
-        {
-            colOffset += mHeightMap.gradientData[y * VERTS_PER_SIDE + x];
-            const float heightX = colOffset * HEIGHT_SCALE;
-            mMinHeight = std::min(mMinHeight, heightX);
-            mMaxHeight = std::max(mMaxHeight, heightX);
-            mHeights[x + y * VERTS_PER_SIDE] = heightX;
-        }
-    }
-}
-
-ESM4::Land::Land(const Land& Other)
-{
-    mId = Other.mId;
-    mCell = Other.mCell;
-    for (int i = 0; i < VERTS_PER_SIDE * VERTS_PER_SIDE; i++)
-    {
-        mHeights[i] = Other.mHeights[i];
-    }
-    for (int i = 0; i < VERTS_PER_SIDE * VERTS_PER_SIDE * 3; i++)
-    {
-        mVertNorm[i] = Other.mVertNorm[i];
-        mVertColr[i] = Other.mVertColr[i];
-    }
-    mMinHeight = Other.mMinHeight;
-    mMaxHeight = Other.mMaxHeight;
-}
-
-std::span<const uint16_t> ESM4::Land::getTextures() const
-{
-    static uint16_t textureArray[16 * 16] = {};
-    return textureArray;
 }
 
 // void ESM4::Land::save(ESM4::Writer& writer) const
