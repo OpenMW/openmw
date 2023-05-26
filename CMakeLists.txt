@@ -479,6 +479,7 @@ if(OPENMW_USE_SYSTEM_MYGUI)
 endif()
 find_package(SDL2 2.0.9 REQUIRED)
 find_package(OpenAL REQUIRED)
+find_package(ZLIB REQUIRED)
 
 option(USE_LUAJIT "Switch Lua/LuaJit (TRUE is highly recommended)" TRUE)
 if(USE_LUAJIT)
