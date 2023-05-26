@@ -30,7 +30,6 @@
 #undef NDEBUG
 #endif
 
-#include <cassert>
 #include <cfloat> // FLT_MAX for gcc
 #include <iostream> // FIXME: debug only
 #include <limits>
@@ -140,7 +139,8 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                         reader.get(mCellFlags);
                     else
                     {
-                        assert(subHdr.dataSize == 1 && "CELL unexpected DATA flag size");
+                        if (subHdr.dataSize != 1)
+                            throw std::runtime_error("CELL unexpected DATA flag size");
                         reader.get(&mCellFlags, sizeof(std::uint8_t));
                     }
                 else
