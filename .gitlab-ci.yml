@@ -476,13 +476,7 @@ Ubuntu_GCC_integration_tests_asan:
     ASAN_OPTIONS: halt_on_error=1:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1:detect_leaks=0
 
 .MacOS:
-  image: macos-11-xcode-12
-  tags:
-    - shared-macos-amd64
   stage: build
-  only:
-    variables:
-      - $CI_PROJECT_ID == "7107382"
   cache:
     paths:
     - ccache/
@@ -502,11 +496,24 @@ Ubuntu_GCC_integration_tests_asan:
       - build/OpenMW-*.dmg
       - "build/**/*.log"
 
-macOS12_Xcode13:
+macOS12_Xcode14_amd64:
   extends: .MacOS
-  image: macos-12-xcode-13
+  image: macos-12-xcode-14
+  tags:
+    - shared-macos-amd64
   cache:
-    key: macOS12_Xcode13.v1
+    key: macOS12_Xcode14_amd64.v1
+  variables:
+    CCACHE_SIZE: 3G
+    MACOS_AMD64: 1
+
+macOS13_Xcode14_arm64:
+  extends: .MacOS
+  image: macos-12-xcode-14
+  tags:
+    - saas-macos-medium-m1
+  cache:
+    key: macOS12_Xcode14_arm64.v1
   variables:
     CCACHE_SIZE: 3G
 
