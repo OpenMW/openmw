@@ -198,10 +198,7 @@ namespace Debug
             return c;
         }
 
-        int sync() override
-        {
-            return 0;
-        }
+        int sync() override { return 0; }
 
     private:
         std::unique_ptr<DebugOutputBase> m_sink;
