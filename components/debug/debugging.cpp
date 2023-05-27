@@ -5,7 +5,10 @@
 #include <iostream>
 #include <map>
 #include <memory>
+
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include <components/crashcatcher/crashcatcher.hpp>
 #include <components/files/conversion.hpp>
@@ -197,7 +200,6 @@ namespace Debug
 
         int sync() override
         {
-            // This is up to you to decide when to sync, or if you need to.
             return 0;
         }
 
