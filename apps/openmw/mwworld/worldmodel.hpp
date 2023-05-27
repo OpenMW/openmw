@@ -39,7 +39,7 @@ namespace MWWorld
     class WorldModel
     {
     public:
-        explicit WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& reader);
+        explicit WorldModel(ESMStore& store, ESM::ReadersCache& reader);
 
         WorldModel(const WorldModel&) = delete;
         WorldModel& operator=(const WorldModel&) = delete;
@@ -83,7 +83,7 @@ namespace MWWorld
         bool readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap);
 
     private:
-        const MWWorld::ESMStore& mStore;
+        MWWorld::ESMStore& mStore;
         ESM::ReadersCache& mReaders;
         mutable std::unordered_map<ESM::RefId, CellStore> mCells;
         mutable std::map<std::string, CellStore*, Misc::StringUtils::CiComp> mInteriors;

@@ -12,8 +12,6 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/settings/values.hpp>
 
-#include "../mwbase/environment.hpp"
-
 #include "cellstore.hpp"
 #include "esmstore.hpp"
 
@@ -146,7 +144,7 @@ void MWWorld::WorldModel::writeCell(ESM::ESMWriter& writer, CellStore& cell) con
     writer.endRecord(ESM::REC_CSTA);
 }
 
-MWWorld::WorldModel::WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& readers)
+MWWorld::WorldModel::WorldModel(MWWorld::ESMStore& store, ESM::ReadersCache& readers)
     : mStore(store)
     , mReaders(readers)
     , mIdCache(Settings::cells().mPointersCacheSize, { ESM::RefId(), nullptr })
@@ -176,7 +174,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellLocation c
                 record.mMapColor = 0;
                 record.updateId();
 
-                cell = MWBase::Environment::get().getESMStore()->insert(record);
+                cell = mStore.insert(record);
             }
 
             CellStore* cellStore
@@ -197,7 +195,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellLocation c
                 record.mX = cellIndex.mX;
                 record.mY = cellIndex.mY;
                 record.mCellFlags = !ESM4::CELL_Interior;
-                cell = MWBase::Environment::get().getESMStore()->insert(record);
+                cell = mStore.insert(record);
             }
             CellStore* cellStore
                 = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
