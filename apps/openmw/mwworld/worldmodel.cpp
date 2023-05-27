@@ -1,5 +1,7 @@
 #include "worldmodel.hpp"
 
+#include <algorithm>
+
 #include <components/debug/debuglog.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm3/cellid.hpp>
@@ -397,13 +399,7 @@ std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(const ESM::RefId& id)
 
 int MWWorld::WorldModel::countSavedGameRecords() const
 {
-    int count = 0;
-
-    for (auto iter(mCells.begin()); iter != mCells.end(); ++iter)
-        if (iter->second.hasState())
-            ++count;
-
-    return count;
+    return std::count_if(mCells.begin(), mCells.end(), [](const auto& v) { return v.second.hasState(); });
 }
 
 void MWWorld::WorldModel::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
