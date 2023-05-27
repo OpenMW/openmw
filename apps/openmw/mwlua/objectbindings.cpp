@@ -67,7 +67,11 @@ namespace MWLua
                 else
                     cell = &wm->getCell(name);
             }
-            return &wm->getCellByPosition(pos, cell);
+            if (cell != nullptr && !cell->isExterior())
+                return cell;
+            const ESM::RefId worldspace
+                = cell == nullptr ? ESM::Cell::sDefaultWorldspaceId : cell->getCell()->getWorldSpace();
+            return &wm->getExterior(ESM::positionToExteriorCellLocation(pos.x(), pos.y(), worldspace));
         }
 
         void teleportPlayer(

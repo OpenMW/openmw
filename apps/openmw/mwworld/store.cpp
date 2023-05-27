@@ -1166,8 +1166,8 @@ namespace MWWorld
             const ESM4::Cell* cell = cells.find(ref.mParent);
             if (cell->isExterior() && (cell->mFlags & ESM4::Rec_Persistent))
             {
-                const ESM4::Cell* actualCell
-                    = cells.searchExterior(positionToCellIndex(ref.mPos.pos[0], ref.mPos.pos[1], cell->mParent));
+                const ESM4::Cell* actualCell = cells.searchExterior(
+                    positionToExteriorCellLocation(ref.mPos.pos[0], ref.mPos.pos[1], cell->mParent));
                 if (actualCell)
                     ref.mParent = actualCell->mId;
             }

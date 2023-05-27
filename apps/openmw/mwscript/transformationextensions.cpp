@@ -402,7 +402,7 @@ namespace MWScript
                     if (store->isExterior())
                     {
                         const ESM::ExteriorCellLocation cellIndex
-                            = ESM::positionToCellIndex(x, y, store->getCell()->getWorldSpace());
+                            = ESM::positionToExteriorCellLocation(x, y, store->getCell()->getWorldSpace());
                         store = &worldModel->getExterior(cellIndex);
                     }
                 }
@@ -418,7 +418,7 @@ namespace MWScript
                     if (!isPlayer)
                         return;
                     const ESM::ExteriorCellLocation cellIndex
-                        = ESM::positionToCellIndex(x, y, store->getCell()->getWorldSpace());
+                        = ESM::positionToExteriorCellLocation(x, y, store->getCell()->getWorldSpace());
                     store = &worldModel->getExterior(cellIndex);
                 }
                 if (store)
@@ -469,7 +469,7 @@ namespace MWScript
                 if (isPlayer)
                     world->getPlayer().setTeleported(true);
                 const ESM::ExteriorCellLocation cellIndex
-                    = ESM::positionToCellIndex(x, y, ESM::Cell::sDefaultWorldspaceId);
+                    = ESM::positionToExteriorCellLocation(x, y, ESM::Cell::sDefaultWorldspaceId);
 
                 // another morrowind oddity: player will be moved to the exterior cell at this location,
                 // non-player actors will move within the cell they are in.
@@ -570,7 +570,7 @@ namespace MWScript
                 if (player.getCell()->isExterior())
                 {
                     const ESM::ExteriorCellLocation cellIndex
-                        = ESM::positionToCellIndex(x, y, player.getCell()->getCell()->getWorldSpace());
+                        = ESM::positionToExteriorCellLocation(x, y, player.getCell()->getCell()->getWorldSpace());
                     store = &MWBase::Environment::get().getWorldModel()->getExterior(cellIndex);
                 }
                 else

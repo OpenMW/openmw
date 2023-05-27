@@ -83,7 +83,7 @@ namespace ESM
         return isEsm4Ext(worldspaceId) ? Constants::ESM4CellSizeInUnits : Constants::CellSizeInUnits;
     }
 
-    inline ESM::ExteriorCellLocation positionToCellIndex(
+    inline ESM::ExteriorCellLocation positionToExteriorCellLocation(
         float x, float y, ESM::RefId worldspaceId = ESM::Cell::sDefaultWorldspaceId)
     {
         const float cellSize = getCellSize(worldspaceId);

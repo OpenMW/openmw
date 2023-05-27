@@ -38,31 +38,8 @@ namespace MWWorld
     /// \brief Cell container
     class WorldModel
     {
-        typedef std::vector<std::pair<ESM::RefId, CellStore*>> IdCache;
-        const MWWorld::ESMStore& mStore;
-        ESM::ReadersCache& mReaders;
-        mutable std::unordered_map<ESM::RefId, CellStore> mCells;
-        mutable std::map<std::string, CellStore*, Misc::StringUtils::CiComp> mInteriors;
-
-        mutable std::map<ESM::ExteriorCellLocation, CellStore*> mExteriors;
-        IdCache mIdCache;
-        std::size_t mIdCacheIndex = 0;
-        std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
-        std::size_t mPtrIndexUpdateCounter = 0;
-        ESM::RefNum mLastGeneratedRefnum;
-
-        CellStore& getOrInsertCellStore(const ESM::Cell& cell);
-
-        CellStore& insertCellStore(const ESM::Cell& cell);
-
-        CellStore* getInteriorOrNull(std::string_view name);
-
-        Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);
-
-        void writeCell(ESM::ESMWriter& writer, CellStore& cell) const;
-
     public:
-        explicit WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& reader);
+        explicit WorldModel(ESMStore& store, ESM::ReadersCache& reader);
 
         WorldModel(const WorldModel&) = delete;
         WorldModel& operator=(const WorldModel&) = delete;
@@ -74,12 +51,6 @@ namespace MWWorld
         CellStore& getCell(std::string_view name, bool forceLoad = true); // interior or named exterior
         CellStore& getCell(const ESM::RefId& Id, bool forceLoad = true);
 
-        // Returns the cell that is in the same worldspace as `cellInSameWorldSpace`
-        // (in case of nullptr - default exterior worldspace) and contains given position.
-        // Interiors are single-cell worldspaces, so in case of an interior it just returns
-        // the same cell.
-        CellStore& getCellByPosition(const osg::Vec3f& pos, CellStore* cellInSameWorldSpace = nullptr);
-
         void registerPtr(const MWWorld::Ptr& ptr);
         void deregisterPtr(const MWWorld::Ptr& ptr);
         ESM::RefNum getLastGeneratedRefNum() const { return mLastGeneratedRefnum; }
@@ -89,7 +60,6 @@ namespace MWWorld
 
         Ptr getPtr(const ESM::RefNum& refNum) const;
 
-        Ptr getPtr(const ESM::RefId& name, CellStore& cellStore);
         Ptr getPtr(const ESM::RefId& name);
 
         template <typename Fn>
@@ -111,6 +81,28 @@ namespace MWWorld
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
         bool readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap);
+
+    private:
+        MWWorld::ESMStore& mStore;
+        ESM::ReadersCache& mReaders;
+        mutable std::unordered_map<ESM::RefId, CellStore> mCells;
+        mutable std::map<std::string, CellStore*, Misc::StringUtils::CiComp> mInteriors;
+        mutable std::map<ESM::ExteriorCellLocation, CellStore*> mExteriors;
+        std::vector<std::pair<ESM::RefId, CellStore*>> mIdCache;
+        std::size_t mIdCacheIndex = 0;
+        std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
+        std::size_t mPtrIndexUpdateCounter = 0;
+        ESM::RefNum mLastGeneratedRefnum;
+
+        CellStore& getOrInsertCellStore(const ESM::Cell& cell);
+
+        CellStore& insertCellStore(const ESM::Cell& cell);
+
+        CellStore* getInteriorOrNull(std::string_view name);
+
+        Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);
+
+        void writeCell(ESM::ESMWriter& writer, CellStore& cell) const;
     };
 }
 

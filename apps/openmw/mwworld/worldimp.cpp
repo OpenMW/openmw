@@ -380,7 +380,7 @@ namespace MWWorld
                 pos.rot[1] = 0;
                 pos.rot[2] = 0;
 
-                ESM::ExteriorCellLocation exteriorCellPos = ESM::positionToCellIndex(pos.pos[0], pos.pos[1]);
+                ESM::ExteriorCellLocation exteriorCellPos = ESM::positionToExteriorCellLocation(pos.pos[0], pos.pos[1]);
                 ESM::RefId cellId = ESM::RefId::esm3ExteriorCell(exteriorCellPos.mX, exteriorCellPos.mY);
                 mWorldScene->changeToExteriorCell(cellId, pos, true);
             }
@@ -695,7 +695,7 @@ namespace MWWorld
         {
             // TODO: caching still doesn't work efficiently here (only works for the one CellStore that the reference is
             // in)
-            Ptr ptr = mWorldModel.getPtr(name, *cellstore);
+            Ptr ptr = cellstore->getPtr(name);
 
             if (!ptr.isEmpty())
                 return ptr;
@@ -1248,7 +1248,8 @@ namespace MWWorld
         CellStore* cell = ptr.getCell();
         ESM::RefId worldspaceId
             = cell->isExterior() ? cell->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
-        const ESM::ExteriorCellLocation index = ESM::positionToCellIndex(position.x(), position.y(), worldspaceId);
+        const ESM::ExteriorCellLocation index
+            = ESM::positionToExteriorCellLocation(position.x(), position.y(), worldspaceId);
 
         CellStore* newCell = cell->isExterior() ? &mWorldModel.getExterior(index) : nullptr;
         bool isCellActive = getPlayerPtr().isInCell() && getPlayerPtr().getCell()->isExterior()
@@ -2047,7 +2048,7 @@ namespace MWWorld
         if (cell->isExterior())
         {
             const ESM::ExteriorCellLocation index
-                = ESM::positionToCellIndex(pos.pos[0], pos.pos[1], cell->getCell()->getWorldSpace());
+                = ESM::positionToExteriorCellLocation(pos.pos[0], pos.pos[1], cell->getCell()->getWorldSpace());
             cell = &mWorldModel.getExterior(index);
         }
 

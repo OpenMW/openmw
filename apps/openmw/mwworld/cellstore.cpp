@@ -1283,4 +1283,23 @@ namespace MWWorld
         return {};
     }
 
+    Ptr CellStore::getPtr(ESM::RefId id)
+    {
+        if (mState == CellStore::State_Unloaded)
+            preload();
+
+        if (mState == CellStore::State_Preloaded)
+        {
+            if (!std::binary_search(mIds.begin(), mIds.end(), id))
+                return Ptr();
+            load();
+        }
+
+        Ptr ptr = search(id);
+
+        if (!ptr.isEmpty() && isAccessible(ptr.getRefData(), ptr.getCellRef()))
+            return ptr;
+
+        return Ptr();
+    }
 }

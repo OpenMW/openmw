@@ -1,5 +1,7 @@
 #include "worldmodel.hpp"
 
+#include <algorithm>
+
 #include <components/debug/debuglog.hpp>
 #include <components/esm/defs.hpp>
 #include <components/esm3/cellid.hpp>
@@ -11,9 +13,6 @@
 #include <components/esm4/loadwrld.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/settings/values.hpp>
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
 #include "cellstore.hpp"
 #include "esmstore.hpp"
@@ -116,7 +115,7 @@ MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefNum& refNum) const
 
 MWWorld::Ptr MWWorld::WorldModel::getPtrAndCache(const ESM::RefId& name, CellStore& cellStore)
 {
-    Ptr ptr = getPtr(name, cellStore);
+    Ptr ptr = cellStore.getPtr(name);
 
     if (!ptr.isEmpty() && ptr.isInCell())
     {
@@ -147,7 +146,7 @@ void MWWorld::WorldModel::writeCell(ESM::ESMWriter& writer, CellStore& cell) con
     writer.endRecord(ESM::REC_CSTA);
 }
 
-MWWorld::WorldModel::WorldModel(const MWWorld::ESMStore& store, ESM::ReadersCache& readers)
+MWWorld::WorldModel::WorldModel(MWWorld::ESMStore& store, ESM::ReadersCache& readers)
     : mStore(store)
     , mReaders(readers)
     , mIdCache(Settings::cells().mPointersCacheSize, { ESM::RefId(), nullptr })
@@ -177,7 +176,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellLocation c
                 record.mMapColor = 0;
                 record.updateId();
 
-                cell = MWBase::Environment::get().getESMStore()->insert(record);
+                cell = mStore.insert(record);
             }
 
             CellStore* cellStore
@@ -197,8 +196,8 @@ MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellLocation c
                 record.mParent = cellIndex.mWorldspace;
                 record.mX = cellIndex.mX;
                 record.mY = cellIndex.mY;
-                record.mCellFlags = !ESM4::CELL_Interior;
-                cell = MWBase::Environment::get().getESMStore()->insert(record);
+                record.mCellFlags = 0;
+                cell = mStore.insert(record);
             }
             CellStore* cellStore
                 = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
@@ -320,51 +319,16 @@ MWWorld::CellStore& MWWorld::WorldModel::getCell(std::string_view name, bool for
         ESM::ExteriorCellLocation(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId), forceLoad);
 }
 
-MWWorld::CellStore& MWWorld::WorldModel::getCellByPosition(
-    const osg::Vec3f& pos, MWWorld::CellStore* cellInSameWorldSpace)
-{
-    if (cellInSameWorldSpace && !cellInSameWorldSpace->isExterior())
-        return *cellInSameWorldSpace;
-    ESM::RefId exteriorWorldspace
-        = cellInSameWorldSpace ? cellInSameWorldSpace->getCell()->getWorldSpace() : ESM::Cell::sDefaultWorldspaceId;
-    const ESM::ExteriorCellLocation cellIndex = ESM::positionToCellIndex(pos.x(), pos.y(), exteriorWorldspace);
-
-    return getExterior(cellIndex);
-}
-
-MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name, CellStore& cell)
-{
-    if (cell.getState() == CellStore::State_Unloaded)
-        cell.preload();
-
-    if (cell.getState() == CellStore::State_Preloaded)
-    {
-        if (cell.hasId(name))
-        {
-            cell.load();
-        }
-        else
-            return Ptr();
-    }
-
-    Ptr ptr = cell.search(name);
-
-    if (!ptr.isEmpty() && MWWorld::CellStore::isAccessible(ptr.getRefData(), ptr.getCellRef()))
-        return ptr;
-
-    return Ptr();
-}
-
 MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name)
 {
-    // First check the cache
-    for (IdCache::iterator iter(mIdCache.begin()); iter != mIdCache.end(); ++iter)
-        if (iter->first == name && iter->second)
-        {
-            Ptr ptr = getPtr(name, *iter->second);
-            if (!ptr.isEmpty())
-                return ptr;
-        }
+    for (const auto& [cachedId, cellStore] : mIdCache)
+    {
+        if (cachedId != name || cellStore == nullptr)
+            continue;
+        Ptr ptr = cellStore->getPtr(name);
+        if (!ptr.isEmpty())
+            return ptr;
+    }
 
     // Then check cells that are already listed
     // Search in reverse, this is a workaround for an ambiguous chargen_plank reference in the vanilla game.
@@ -435,21 +399,15 @@ std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(const ESM::RefId& id)
 
 int MWWorld::WorldModel::countSavedGameRecords() const
 {
-    int count = 0;
-
-    for (auto iter(mCells.begin()); iter != mCells.end(); ++iter)
-        if (iter->second.hasState())
-            ++count;
-
-    return count;
+    return std::count_if(mCells.begin(), mCells.end(), [](const auto& v) { return v.second.hasState(); });
 }
 
 void MWWorld::WorldModel::write(ESM::ESMWriter& writer, Loading::Listener& progress) const
 {
-    for (auto iter(mCells.begin()); iter != mCells.end(); ++iter)
-        if (iter->second.hasState())
+    for (auto& [id, cellStore] : mCells)
+        if (cellStore.hasState())
         {
-            writeCell(writer, iter->second);
+            writeCell(writer, cellStore);
             progress.increaseProgress();
         }
 }
