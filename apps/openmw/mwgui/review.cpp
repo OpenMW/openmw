@@ -76,13 +76,14 @@ namespace MWGui
 
         // Setup attributes
 
-        Widgets::MWAttributePtr attribute;
-        for (int idx = 0; idx < ESM::Attribute::Length; ++idx)
+        Widgets::MWAttributePtr widget;
+        const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::Attribute>();
+        for (const ESM::Attribute& attribute : store)
         {
-            getWidget(attribute, std::string("Attribute") + MyGUI::utility::toString(idx));
-            mAttributeWidgets.insert(std::make_pair(static_cast<int>(ESM::Attribute::sAttributeIds[idx]), attribute));
-            attribute->setAttributeId(ESM::Attribute::sAttributeIds[idx]);
-            attribute->setAttributeValue(Widgets::MWAttribute::AttributeValue());
+            getWidget(widget, std::string("Attribute").append(1, '0' + attribute.mId));
+            mAttributeWidgets.emplace(attribute.mId, widget);
+            widget->setAttributeId(attribute.mId);
+            widget->setAttributeValue(Widgets::MWAttribute::AttributeValue());
         }
 
         // Setup skills
@@ -234,10 +235,11 @@ namespace MWGui
         std::copy(major.begin(), major.end(), std::inserter(skillSet, skillSet.begin()));
         std::copy(minor.begin(), minor.end(), std::inserter(skillSet, skillSet.begin()));
         mMiscSkills.clear();
-        for (const int skill : ESM::Skill::sSkillIds)
+        const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
+        for (const auto& skill : store)
         {
-            if (skillSet.find(skill) == skillSet.end())
-                mMiscSkills.push_back(skill);
+            if (!skillSet.contains(skill.second.mIndex))
+                mMiscSkills.push_back(skill.second.mIndex);
         }
 
         mUpdateSkillArea = true;

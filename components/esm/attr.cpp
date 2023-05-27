@@ -4,17 +4,6 @@
 
 using namespace ESM;
 
-const Attribute::AttributeID Attribute::sAttributeIds[Attribute::Length] = {
-    Attribute::Strength,
-    Attribute::Intelligence,
-    Attribute::Willpower,
-    Attribute::Agility,
-    Attribute::Speed,
-    Attribute::Endurance,
-    Attribute::Personality,
-    Attribute::Luck,
-};
-
 const std::string Attribute::sAttributeNames[Attribute::Length] = {
     "Strength",
     "Intelligence",
@@ -61,9 +50,9 @@ const std::string Attribute::sAttributeIcons[Attribute::Length] = {
 
 Attribute::AttributeID Attribute::stringToAttributeId(std::string_view attribute)
 {
-    for (auto id : sAttributeIds)
+    for (int id = 0; id < Attribute::Length; ++id)
         if (Misc::StringUtils::ciEqual(sAttributeNames[id], attribute))
-            return id;
+            return Attribute::AttributeID(id);
 
     throw std::logic_error("No such attribute: " + std::string(attribute));
 }

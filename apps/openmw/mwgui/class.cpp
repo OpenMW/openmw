@@ -745,15 +745,16 @@ namespace MWGui
         // Centre dialog
         center();
 
-        for (int i = 0; i < 8; ++i)
+        const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::Attribute>();
+        for (const ESM::Attribute& attribute : store)
         {
-            Widgets::MWAttributePtr attribute;
-            char theIndex = '0' + i;
+            Widgets::MWAttributePtr widget;
+            char theIndex = '0' + attribute.mId;
 
-            getWidget(attribute, std::string("Attribute").append(1, theIndex));
-            attribute->setAttributeId(ESM::Attribute::sAttributeIds[i]);
-            attribute->eventClicked += MyGUI::newDelegate(this, &SelectAttributeDialog::onAttributeClicked);
-            ToolTips::createAttributeToolTip(attribute, attribute->getAttributeId());
+            getWidget(widget, std::string("Attribute").append(1, theIndex));
+            widget->setAttributeId(attribute.mId);
+            widget->eventClicked += MyGUI::newDelegate(this, &SelectAttributeDialog::onAttributeClicked);
+            ToolTips::createAttributeToolTip(widget, widget->getAttributeId());
         }
 
         MyGUI::Button* cancelButton;

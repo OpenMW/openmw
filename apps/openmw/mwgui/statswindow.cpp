@@ -324,10 +324,11 @@ namespace MWGui
         std::copy(major.begin(), major.end(), std::inserter(skillSet, skillSet.begin()));
         std::copy(minor.begin(), minor.end(), std::inserter(skillSet, skillSet.begin()));
         mMiscSkills.clear();
-        for (const int skill : ESM::Skill::sSkillIds)
+        const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
+        for (const auto& skill : store)
         {
-            if (skillSet.find(skill) == skillSet.end())
-                mMiscSkills.push_back(skill);
+            if (!skillSet.contains(skill.second.mIndex))
+                mMiscSkills.push_back(skill.second.mIndex);
         }
 
         updateSkillArea();
