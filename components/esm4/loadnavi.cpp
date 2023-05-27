@@ -30,7 +30,6 @@
 #undef NDEBUG
 #endif
 
-#include <cassert>
 #include <stdexcept>
 
 #include <iostream> // FIXME: debugging only
@@ -288,7 +287,8 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
 #endif
                 }
                 reader.get(count);
-                assert(count == 1 && "expected separator");
+                if (count != 1)
+                    throw std::runtime_error("expected separator");
 
                 reader.get(node); // HACK
                 std::vector<FormId> preferredPaths;
@@ -299,7 +299,9 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
 #endif
 
                 reader.get(count); // HACK
-                assert(count == 10 && "expected 0xa");
+                if (count != 10)
+                    throw std::runtime_error("expected 0xa");
+
                 std::uint32_t index;
                 for (std::uint32_t i = 0; i < count; ++i)
                 {

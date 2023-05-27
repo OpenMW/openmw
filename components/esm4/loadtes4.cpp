@@ -30,7 +30,6 @@
 #undef NDEBUG
 #endif
 
-#include <cassert>
 #include <stdexcept>
 
 #include <iostream> // FIXME: debugging only

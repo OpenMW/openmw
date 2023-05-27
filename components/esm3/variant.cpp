@@ -1,6 +1,5 @@
 #include "variant.hpp"
 
-#include <cassert>
 #include <stdexcept>
 
 #include "esmreader.hpp"

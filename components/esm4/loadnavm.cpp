@@ -26,7 +26,6 @@
 */
 #include "loadnavm.hpp"
 
-#include <cassert>
 #include <cstring>
 #include <stdexcept>
 
@@ -180,7 +179,8 @@ void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
         }
         triSegments.push_back(indices);
     }
-    assert(triSegments.size() == divisor * divisor && "tiangle segments size is not the square of divisor");
+    if (triSegments.size() != divisor * divisor)
+        throw std::runtime_error("Triangle segments size is not the square of divisor");
 #if 0
     if (triSegments.size() != divisor*divisor)
         std::cout << "divisor " << std::dec << divisor << ", segments " << triSegments.size() << //std::endl;
