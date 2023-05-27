@@ -194,7 +194,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellLocation c
                 record.mParent = cellIndex.mWorldspace;
                 record.mX = cellIndex.mX;
                 record.mY = cellIndex.mY;
-                record.mCellFlags = !ESM4::CELL_Interior;
+                record.mCellFlags = 0;
                 cell = mStore.insert(record);
             }
             CellStore* cellStore
