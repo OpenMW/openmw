@@ -115,20 +115,20 @@ namespace MWWorld
         const T* find(int index) const;
     };
 
-    template <class T, class Container = std::vector<T*>>
+    template <class T>
     class SharedIterator
     {
-        typedef typename Container::const_iterator Iter;
-
-        Iter mIter;
-
     public:
-        SharedIterator() {}
+        using Iter = typename std::vector<T*>::const_iterator;
+        using iterator_category = std::random_access_iterator_tag;
+        using value_type = T;
+        using difference_type = std::ptrdiff_t;
+        using pointer = T*;
+        using reference = T&;
 
-        SharedIterator(const SharedIterator& orig)
-            : mIter(orig.mIter)
-        {
-        }
+        SharedIterator() = default;
+
+        SharedIterator(const SharedIterator& other) = default;
 
         SharedIterator(const Iter& iter)
             : mIter(iter)
@@ -151,7 +151,7 @@ namespace MWWorld
             return iter;
         }
 
-        SharedIterator& operator+=(int advance)
+        SharedIterator& operator+=(difference_type advance)
         {
             mIter += advance;
             return *this;
@@ -178,6 +178,14 @@ namespace MWWorld
         const T& operator*() const { return **mIter; }
 
         const T* operator->() const { return &(**mIter); }
+
+    private:
+        Iter mIter;
+
+        friend inline difference_type operator-(const SharedIterator& lhs, const SharedIterator& rhs)
+        {
+            return lhs.mIter - rhs.mIter;
+        }
     };
 
     class ESMStore;
