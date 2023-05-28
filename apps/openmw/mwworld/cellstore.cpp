@@ -275,7 +275,7 @@ namespace
                         iter->mData.enable();
                         MWBase::Environment::get().getWorld()->disable(ptr);
                     }
-                    MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
+                    MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(ptr);
                     return;
                 }
 
@@ -290,7 +290,7 @@ namespace
         collection.mList.push_back(ref);
 
         MWWorld::LiveCellRefBase* base = &collection.mList.back();
-        MWBase::Environment::get().getWorldModel()->registerPtr(MWWorld::Ptr(base, cellstore));
+        MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(MWWorld::Ptr(base, cellstore));
     }
 
     // this function allows us to link a CellRefList<T> to the associated recNameInt, and apply a function
@@ -443,7 +443,8 @@ namespace MWWorld
             throw std::runtime_error(
                 "moveTo: can't move object from a non-loaded cell (how did you get this object anyway?)");
 
-        MWBase::Environment::get().getWorldModel()->registerPtr(MWWorld::Ptr(object.getBase(), cellToMoveTo));
+        MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(
+            MWWorld::Ptr(object.getBase(), cellToMoveTo));
 
         MovedRefTracker::iterator found = mMovedHere.find(object.getBase());
         if (found != mMovedHere.end())
@@ -1041,7 +1042,7 @@ namespace MWWorld
             }
 
             // Search for the reference. It might no longer exist if its content file was removed.
-            Ptr movedRef = MWBase::Environment::get().getWorldModel()->getPtr(refnum);
+            Ptr movedRef = MWBase::Environment::get().getWorldModel()->getPtrRegistry().getOrDefault(refnum);
             if (movedRef.isEmpty())
             {
                 Log(Debug::Warning) << "Warning: Dropping moved ref tag for " << refnum.mIndex

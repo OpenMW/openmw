@@ -83,7 +83,7 @@ namespace MWLua
                 auto visitor = [&](const MWWorld::Ptr& ptr) {
                     if (ptr.getRefData().isDeleted())
                         return true;
-                    MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
+                    MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(ptr);
                     if (getLiveCellRefType(ptr.mRef) == ptr.getType())
                         res->push_back(getId(ptr));
                     return true;
