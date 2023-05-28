@@ -30,7 +30,6 @@
 #undef NDEBUG
 #endif
 
-#include <cassert>
 #include <cstring>
 #include <iostream> // FIXME
 #include <sstream>
@@ -163,7 +162,8 @@ void ESM4::Creature::load(ESM4::Reader& reader)
                     break;
                 }
 
-                assert(subHdr.dataSize == 4 && "CREA NIFT datasize error");
+                if (subHdr.dataSize != 4)
+                    throw std::runtime_error("CREA NIFT datasize error");
                 std::uint32_t nift;
                 reader.get(nift);
                 if (nift)

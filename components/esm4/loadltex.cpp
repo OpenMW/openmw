@@ -30,7 +30,6 @@
 #undef NDEBUG
 #endif
 
-#include <cassert>
 #include <stdexcept>
 //#include <iostream> // FIXME: debugging only
 
@@ -64,13 +63,13 @@ void ESM4::LandTexture::load(ESM4::Reader& reader)
                 if ((reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
                     && subHdr.dataSize == 2) // FO3 is VER_094 but dataSize 3
                 {
-                    // assert(subHdr.dataSize == 2 && "LTEX unexpected HNAM size");
                     reader.get(mHavokFriction);
                     reader.get(mHavokRestitution);
                 }
                 else
                 {
-                    assert(subHdr.dataSize == 3 && "LTEX unexpected HNAM size");
+                    if (subHdr.dataSize != 3)
+                        throw std::runtime_error("LTEX unexpected HNAM size, expected 3");
                     reader.get(mHavokMaterial);
                     reader.get(mHavokFriction);
                     reader.get(mHavokRestitution);

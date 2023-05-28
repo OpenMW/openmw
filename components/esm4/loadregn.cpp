@@ -30,7 +30,6 @@
 #undef NDEBUG
 #endif
 
-#include <cassert>
 #include <stdexcept>
 
 //#include <iostream> // FIXME: debug only
@@ -85,7 +84,8 @@ void ESM4::Region::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_RDMP:
             {
-                assert(mData.type == RDAT_Map && "REGN unexpected data type");
+                if (mData.type != RDAT_Map)
+                    throw std::runtime_error("REGN unexpected data type");
                 reader.getLocalizedString(mMapName);
                 break;
             }
@@ -111,7 +111,6 @@ void ESM4::Region::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_RDSD: // Possibly the same as RDSA
             {
-                // assert(mData.type == RDAT_Map && "REGN unexpected data type");
                 if (mData.type != RDAT_Sound)
                     throw std::runtime_error(
                         "ESM4::REGN::load - unexpected data type " + ESM::printName(subHdr.typeId));

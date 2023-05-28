@@ -93,7 +93,8 @@ namespace ESM
                         {
                             int currentValue;
                             esm.getT(currentValue);
-                            assert(currentValue >= 0);
+                            if (currentValue < 0)
+                                esm.fail("currentValue is less than 0");
                             rawConnections.push_back(static_cast<size_t>(currentValue));
                         }
 
