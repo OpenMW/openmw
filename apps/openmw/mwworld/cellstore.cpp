@@ -50,7 +50,6 @@
 #include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
