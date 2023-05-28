@@ -951,35 +951,44 @@ namespace MWWorld
         mStatic.push_back({ .mId = ESM::Attribute::Strength,
             .mName = "sAttributeStrength",
             .mDescription = "sStrDesc",
-            .mIcon = "icons\\k\\attribute_strength.dds" });
+            .mIcon = "icons\\k\\attribute_strength.dds",
+            .mWerewolfGMST = "fWerewolfStrength" });
         mStatic.push_back({ .mId = ESM::Attribute::Intelligence,
             .mName = "sAttributeIntelligence",
             .mDescription = "sIntDesc",
-            .mIcon = "icons\\k\\attribute_int.dds" });
+            .mIcon = "icons\\k\\attribute_int.dds",
+            // Oh, Bethesda. It's "Intelligence".
+            .mWerewolfGMST = "fWerewolfIntellegence" });
         mStatic.push_back({ .mId = ESM::Attribute::Willpower,
             .mName = "sAttributeWillpower",
             .mDescription = "sWilDesc",
-            .mIcon = "icons\\k\\attribute_wilpower.dds" });
+            .mIcon = "icons\\k\\attribute_wilpower.dds",
+            .mWerewolfGMST = "fWerewolfWillpower" });
         mStatic.push_back({ .mId = ESM::Attribute::Agility,
             .mName = "sAttributeAgility",
             .mDescription = "sAgiDesc",
-            .mIcon = "icons\\k\\attribute_agility.dds" });
+            .mIcon = "icons\\k\\attribute_agility.dds",
+            .mWerewolfGMST = "fWerewolfAgility" });
         mStatic.push_back({ .mId = ESM::Attribute::Speed,
             .mName = "sAttributeSpeed",
             .mDescription = "sSpdDesc",
-            .mIcon = "icons\\k\\attribute_speed.dds" });
+            .mIcon = "icons\\k\\attribute_speed.dds",
+            .mWerewolfGMST = "fWerewolfSpeed" });
         mStatic.push_back({ .mId = ESM::Attribute::Endurance,
             .mName = "sAttributeEndurance",
             .mDescription = "sEndDesc",
-            .mIcon = "icons\\k\\attribute_endurance.dds" });
+            .mIcon = "icons\\k\\attribute_endurance.dds",
+            .mWerewolfGMST = "fWerewolfEndurance" });
         mStatic.push_back({ .mId = ESM::Attribute::Personality,
             .mName = "sAttributePersonality",
             .mDescription = "sPerDesc",
-            .mIcon = "icons\\k\\attribute_personality.dds" });
+            .mIcon = "icons\\k\\attribute_personality.dds",
+            .mWerewolfGMST = "fWerewolfPersonality" });
         mStatic.push_back({ .mId = ESM::Attribute::Luck,
             .mName = "sAttributeLuck",
             .mDescription = "sLucDesc",
-            .mIcon = "icons\\k\\attribute_luck.dds" });
+            .mIcon = "icons\\k\\attribute_luck.dds",
+            .mWerewolfGMST = "fWerewolfLuck" });
     }
     size_t Store<ESM::Attribute>::getSize() const
     {
