@@ -948,14 +948,38 @@ namespace MWWorld
     }
     void Store<ESM::Attribute>::setUp()
     {
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
-        {
-            ESM::Attribute newAttribute;
-            newAttribute.mId = ESM::Attribute::AttributeID(i);
-            newAttribute.mName = ESM::Attribute::sGmstAttributeIds[i];
-            newAttribute.mDescription = ESM::Attribute::sGmstAttributeDescIds[i];
-            mStatic.push_back(newAttribute);
-        }
+        mStatic.push_back({ .mId = ESM::Attribute::Strength,
+            .mName = "sAttributeStrength",
+            .mDescription = "sStrDesc",
+            .mIcon = "icons\\k\\attribute_strength.dds" });
+        mStatic.push_back({ .mId = ESM::Attribute::Intelligence,
+            .mName = "sAttributeIntelligence",
+            .mDescription = "sIntDesc",
+            .mIcon = "icons\\k\\attribute_int.dds" });
+        mStatic.push_back({ .mId = ESM::Attribute::Willpower,
+            .mName = "sAttributeWillpower",
+            .mDescription = "sWilDesc",
+            .mIcon = "icons\\k\\attribute_wilpower.dds" });
+        mStatic.push_back({ .mId = ESM::Attribute::Agility,
+            .mName = "sAttributeAgility",
+            .mDescription = "sAgiDesc",
+            .mIcon = "icons\\k\\attribute_agility.dds" });
+        mStatic.push_back({ .mId = ESM::Attribute::Speed,
+            .mName = "sAttributeSpeed",
+            .mDescription = "sSpdDesc",
+            .mIcon = "icons\\k\\attribute_speed.dds" });
+        mStatic.push_back({ .mId = ESM::Attribute::Endurance,
+            .mName = "sAttributeEndurance",
+            .mDescription = "sEndDesc",
+            .mIcon = "icons\\k\\attribute_endurance.dds" });
+        mStatic.push_back({ .mId = ESM::Attribute::Personality,
+            .mName = "sAttributePersonality",
+            .mDescription = "sPerDesc",
+            .mIcon = "icons\\k\\attribute_personality.dds" });
+        mStatic.push_back({ .mId = ESM::Attribute::Luck,
+            .mName = "sAttributeLuck",
+            .mDescription = "sLucDesc",
+            .mIcon = "icons\\k\\attribute_luck.dds" });
     }
     size_t Store<ESM::Attribute>::getSize() const
     {

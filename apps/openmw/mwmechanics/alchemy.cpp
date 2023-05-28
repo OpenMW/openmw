@@ -561,23 +561,23 @@ std::vector<std::string> MWMechanics::Alchemy::effectsDescription(const MWWorld:
     std::vector<std::string> effects;
 
     const auto& item = ptr.get<ESM::Ingredient>()->mBase;
-    const auto& gmst = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
-    const auto& mgef = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>();
-    const static auto fWortChanceValue = gmst.find("fWortChanceValue")->mValue.getFloat();
+    const auto& store = MWBase::Environment::get().getESMStore();
+    const auto& mgef = store->get<ESM::MagicEffect>();
+    const static auto fWortChanceValue = store->get<ESM::GameSetting>().find("fWortChanceValue")->mValue.getFloat();
     const auto& data = item->mData;
 
     for (auto i = 0; i < 4; ++i)
     {
         const auto effectID = data.mEffectID[i];
         const auto skillID = data.mSkills[i];
-        const auto attributeID = data.mAttributes[i];
 
         if (alchemySkill < fWortChanceValue * (i + 1))
             break;
 
         if (effectID != -1)
         {
-            std::string effect = getMagicEffectString(*mgef.find(effectID), attributeID, skillID);
+            const ESM::Attribute* attribute = store->get<ESM::Attribute>().search(data.mAttributes[i]);
+            std::string effect = getMagicEffectString(*mgef.find(effectID), attribute, skillID);
 
             effects.push_back(effect);
         }
