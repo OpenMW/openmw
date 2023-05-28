@@ -951,7 +951,7 @@ namespace MWWorld
         for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
             ESM::Attribute newAttribute;
-            newAttribute.mId = ESM::Attribute::sAttributeIds[i];
+            newAttribute.mId = ESM::Attribute::AttributeID(i);
             newAttribute.mName = ESM::Attribute::sGmstAttributeIds[i];
             newAttribute.mDescription = ESM::Attribute::sGmstAttributeDescIds[i];
             mStatic.push_back(newAttribute);

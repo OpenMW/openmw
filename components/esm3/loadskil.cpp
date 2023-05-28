@@ -94,16 +94,12 @@ namespace ESM
         "stealth_speechcraft.dds",
         "stealth_handtohand.dds",
     };
-    const std::array<Skill::SkillEnum, Skill::Length> Skill::sSkillIds
-        = { { Block, Armorer, MediumArmor, HeavyArmor, BluntWeapon, LongBlade, Axe, Spear, Athletics, Enchant,
-            Destruction, Alteration, Illusion, Conjuration, Mysticism, Restoration, Alchemy, Unarmored, Security, Sneak,
-            Acrobatics, LightArmor, ShortBlade, Marksman, Mercantile, Speechcraft, HandToHand } };
 
     Skill::SkillEnum Skill::stringToSkillId(std::string_view skill)
     {
-        for (auto id : sSkillIds)
+        for (int id = 0; id < Skill::Length; ++id)
             if (Misc::StringUtils::ciEqual(sSkillNames[id], skill))
-                return id;
+                return Skill::SkillEnum(id);
 
         throw std::logic_error("No such skill: " + std::string(skill));
     }

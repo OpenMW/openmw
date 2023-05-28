@@ -94,11 +94,12 @@ namespace MWGui
         mGenerateClassSpecializations[2] = 0;
 
         // Setup player stats
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
-            mPlayerAttributes.emplace(ESM::Attribute::sAttributeIds[i], MWMechanics::AttributeValue());
+        const auto& store = MWBase::Environment::get().getWorld()->getStore();
+        for (const ESM::Attribute& attribute : store.get<ESM::Attribute>())
+            mPlayerAttributes.emplace(attribute.mId, MWMechanics::AttributeValue());
 
-        for (int i = 0; i < ESM::Skill::Length; ++i)
-            mPlayerSkillValues.emplace(ESM::Skill::sSkillIds[i], MWMechanics::SkillValue());
+        for (const auto& skill : store.get<ESM::Skill>())
+            mPlayerSkillValues.emplace(skill.second.mIndex, MWMechanics::SkillValue());
     }
 
     void CharacterCreation::setValue(std::string_view id, const MWMechanics::AttributeValue& value)
