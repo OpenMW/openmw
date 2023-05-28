@@ -2,6 +2,7 @@
 #define OPENMW_ESMTOOL_LABELS_H
 
 #include <string>
+#include <cstdint>
 
 std::string bodyPartLabel(int idx);
 std::string meshPartLabel(int idx);

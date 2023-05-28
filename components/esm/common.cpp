@@ -1,4 +1,6 @@
-#include "sstream"
+#include "common.hpp"
+
+#include <sstream>
 
 namespace ESM
 {

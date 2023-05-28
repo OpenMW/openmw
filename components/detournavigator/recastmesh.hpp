@@ -17,6 +17,7 @@
 #include <vector>
 #include <tuple>
 #include <numeric>
+#include <cstdint>
 
 namespace DetourNavigator
 {

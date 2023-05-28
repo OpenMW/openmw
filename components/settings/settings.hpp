@@ -8,6 +8,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <cstdint>
 
 #include <osg/Vec2f>
 #include <osg/Vec3f>
