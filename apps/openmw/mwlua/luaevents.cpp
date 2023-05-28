@@ -40,7 +40,7 @@ namespace MWLua
         mGlobalEventBatch.clear();
         for (const Local& e : mLocalEventBatch)
         {
-            MWWorld::Ptr ptr = MWBase::Environment::get().getWorldModel()->getPtr(e.mDest);
+            MWWorld::Ptr ptr = MWBase::Environment::get().getWorldModel()->getPtrRegistry().getOrDefault(e.mDest);
             LocalScripts* scripts = ptr.isEmpty() ? nullptr : ptr.getRefData().getLuaScripts();
             if (scripts)
                 scripts->receiveEvent(e.mEventName, e.mEventData);

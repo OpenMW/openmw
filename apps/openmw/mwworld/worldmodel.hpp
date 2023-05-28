@@ -12,6 +12,7 @@
 
 #include "cellstore.hpp"
 #include "ptr.hpp"
+#include "ptrregistry.hpp"
 
 namespace ESM
 {
@@ -51,16 +52,9 @@ namespace MWWorld
         CellStore& getCell(std::string_view name, bool forceLoad = true); // interior or named exterior
         CellStore& getCell(const ESM::RefId& Id, bool forceLoad = true);
 
-        void registerPtr(const MWWorld::Ptr& ptr);
-        void deregisterPtr(const MWWorld::Ptr& ptr);
-        ESM::RefNum getLastGeneratedRefNum() const { return mLastGeneratedRefnum; }
-        void setLastGeneratedRefNum(ESM::RefNum v) { mLastGeneratedRefnum = v; }
-        size_t getPtrIndexUpdateCounter() const { return mPtrIndexUpdateCounter; }
-        const std::unordered_map<ESM::RefNum, Ptr>& getAllPtrs() const { return mPtrIndex; }
-
-        Ptr getPtr(const ESM::RefNum& refNum) const;
-
         Ptr getPtr(const ESM::RefId& name);
+
+        PtrRegistry& getPtrRegistry() { return mPtrRegistry; }
 
         template <typename Fn>
         void forEachLoadedCellStore(Fn&& fn)
@@ -90,9 +84,7 @@ namespace MWWorld
         mutable std::map<ESM::ExteriorCellLocation, CellStore*> mExteriors;
         std::vector<std::pair<ESM::RefId, CellStore*>> mIdCache;
         std::size_t mIdCacheIndex = 0;
-        std::unordered_map<ESM::RefNum, Ptr> mPtrIndex;
-        std::size_t mPtrIndexUpdateCounter = 0;
-        ESM::RefNum mLastGeneratedRefnum;
+        PtrRegistry mPtrRegistry;
 
         CellStore& getOrInsertCellStore(const ESM::Cell& cell);
 
