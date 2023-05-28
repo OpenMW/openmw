@@ -34,7 +34,7 @@ namespace MWWorld
         {
             mIndex.clear();
             mLastGenerated = ESM::RefNum{};
-            mRevision = 0;
+            ++mRevision;
         }
 
         void insert(const Ptr& ptr)
