@@ -417,9 +417,8 @@ namespace MWScript
                     Log(Debug::Warning) << error;
                     if (!isPlayer)
                         return;
-                    const ESM::ExteriorCellLocation cellIndex
-                        = ESM::positionToExteriorCellLocation(x, y, store->getCell()->getWorldSpace());
-                    store = &worldModel->getExterior(cellIndex);
+                    store = &worldModel->getExterior(
+                        ESM::positionToExteriorCellLocation(x, y, ESM::Cell::sDefaultWorldspaceId));
                 }
                 if (store)
                 {
