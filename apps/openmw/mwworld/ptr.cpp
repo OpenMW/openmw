@@ -40,7 +40,7 @@ namespace MWWorld
     void SafePtr::update() const
     {
         const PtrRegistry& registry = MWBase::Environment::get().getWorldModel()->getPtrRegistry();
-        if (mLastUpdate < registry.getRevision())
+        if (mLastUpdate != registry.getRevision())
         {
             mPtr = registry.getOrDefault(mId);
             mLastUpdate = registry.getRevision();
