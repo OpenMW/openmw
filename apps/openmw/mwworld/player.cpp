@@ -90,22 +90,17 @@ namespace MWWorld
 
     void Player::setWerewolfStats()
     {
-        const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
+        const auto& store = MWBase::Environment::get().getESMStore();
+        const MWWorld::Store<ESM::GameSetting>& gmst = store->get<ESM::GameSetting>();
         MWMechanics::CreatureStats& creatureStats = getPlayer().getClass().getCreatureStats(getPlayer());
         MWMechanics::NpcStats& npcStats = getPlayer().getClass().getNpcStats(getPlayer());
         MWMechanics::DynamicStat<float> health = creatureStats.getDynamic(0);
         creatureStats.setHealth(health.getBase() * gmst.find("fWereWolfHealth")->mValue.getFloat());
-        for (size_t i = 0; i < ESM::Attribute::Length; ++i)
+        for (const auto& attribute : store->get<ESM::Attribute>())
         {
-            // Oh, Bethesda. It's "Intelligence".
-            std::string name = "fWerewolf"
-                + ((i == ESM::Attribute::Intelligence) ? std::string("Intellegence")
-                                                       : ESM::Attribute::sAttributeNames[i]);
-
-            MWMechanics::AttributeValue value = npcStats.getAttribute(i);
-            value.setModifier(gmst.find(name)->mValue.getFloat() - value.getModified());
-            npcStats.setAttribute(i, value);
+            MWMechanics::AttributeValue value = npcStats.getAttribute(attribute.mId);
+            value.setModifier(gmst.find(attribute.mWerewolfGMST)->mValue.getFloat() - value.getModified());
+            npcStats.setAttribute(attribute.mId, value);
         }
 
         for (size_t i = 0; i < ESM::Skill::Length; i++)

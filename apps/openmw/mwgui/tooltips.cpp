@@ -829,12 +829,14 @@ namespace MWGui
 
     void ToolTips::createAttributeToolTip(MyGUI::Widget* widget, int attributeId)
     {
-        if (attributeId == -1)
+        const ESM::Attribute* attribute
+            = MWBase::Environment::get().getESMStore()->get<ESM::Attribute>().search(attributeId);
+        if (!attribute)
             return;
 
-        const std::string& icon = ESM::Attribute::sAttributeIcons[attributeId];
-        const std::string& name = ESM::Attribute::sGmstAttributeIds[attributeId];
-        const std::string& desc = ESM::Attribute::sGmstAttributeDescIds[attributeId];
+        const std::string& icon = attribute->mIcon;
+        const std::string& name = attribute->mName;
+        const std::string& desc = attribute->mDescription;
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "AttributeToolTip");

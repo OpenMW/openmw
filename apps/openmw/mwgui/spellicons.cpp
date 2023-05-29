@@ -48,22 +48,18 @@ namespace MWGui
         }
 
         int w = 2;
-
+        const auto& store = MWBase::Environment::get().getESMStore();
         for (const auto& [effectId, effectInfos] : effects)
         {
-            const ESM::MagicEffect* effect
-                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectId);
+            const ESM::MagicEffect* effect = store->get<ESM::MagicEffect>().find(effectId);
 
             float remainingDuration = 0;
             float totalDuration = 0;
 
             std::string sourcesDescription;
 
-            static const float fadeTime = MWBase::Environment::get()
-                                              .getESMStore()
-                                              ->get<ESM::GameSetting>()
-                                              .find("fMagicStartIconBlink")
-                                              ->mValue.getFloat();
+            static const float fadeTime
+                = store->get<ESM::GameSetting>().find("fMagicStartIconBlink")->mValue.getFloat();
 
             bool addNewLine = false;
             for (const MagicEffectInfo& effectInfo : effectInfos)
@@ -94,9 +90,10 @@ namespace MWGui
                 }
                 if (effect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
                 {
+                    const ESM::Attribute* attribute = store->get<ESM::Attribute>().find(effectInfo.mKey.mArg);
                     sourcesDescription += " (";
-                    sourcesDescription += MWBase::Environment::get().getWindowManager()->getGameSettingString(
-                        ESM::Attribute::sGmstAttributeIds[effectInfo.mKey.mArg], {});
+                    sourcesDescription
+                        += MWBase::Environment::get().getWindowManager()->getGameSettingString(attribute->mName, {});
                     sourcesDescription += ')';
                 }
                 ESM::MagicEffect::MagnitudeDisplayType displayType = effect->getMagnitudeDisplayType();

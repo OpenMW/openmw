@@ -340,20 +340,21 @@ namespace MWGui
 
         MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWMechanics::NpcStats& PCstats = player.getClass().getNpcStats(player);
+        const auto& store = MWBase::Environment::get().getESMStore();
 
         std::string detailText;
         std::stringstream detail;
         bool first = true;
-        for (int attribute = 0; attribute < ESM::Attribute::Length; ++attribute)
+        for (const auto& attribute : store->get<ESM::Attribute>())
         {
-            float mult = PCstats.getLevelupAttributeMultiplier(attribute);
-            mult = std::min(mult, 100 - PCstats.getAttribute(attribute).getBase());
+            float mult = PCstats.getLevelupAttributeMultiplier(attribute.mId);
+            mult = std::min(mult, 100 - PCstats.getAttribute(attribute.mId).getBase());
             if (mult > 1)
             {
                 if (!first)
                     detail << '\n';
-                detail << "#{" << MyGUI::TextIterator::toTagsString(ESM::Attribute::sGmstAttributeIds[attribute])
-                       << "} x" << MyGUI::utility::toString(mult);
+                detail << "#{" << MyGUI::TextIterator::toTagsString(attribute.mName) << "} x"
+                       << MyGUI::utility::toString(mult);
                 first = false;
             }
         }
@@ -363,11 +364,7 @@ namespace MWGui
         MyGUI::Widget* levelWidget;
         for (int i = 0; i < 2; ++i)
         {
-            int max = MWBase::Environment::get()
-                          .getESMStore()
-                          ->get<ESM::GameSetting>()
-                          .find("iLevelUpTotal")
-                          ->mValue.getInteger();
+            int max = store->get<ESM::GameSetting>().find("iLevelUpTotal")->mValue.getInteger();
             getWidget(levelWidget, i == 0 ? "Level_str" : "LevelText");
 
             levelWidget->setUserString(

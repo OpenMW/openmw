@@ -378,6 +378,7 @@ namespace MWGui::Widgets
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
         const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().search(mEffectParams.mEffectID);
+        const ESM::Attribute* attribute = store.get<ESM::Attribute>().search(mEffectParams.mAttribute);
 
         assert(magicEffect);
 
@@ -393,8 +394,7 @@ namespace MWGui::Widgets
         std::string sec = " " + std::string{ windowManager->getGameSettingString("ssecond", {}) };
         std::string secs = " " + std::string{ windowManager->getGameSettingString("sseconds", {}) };
 
-        std::string spellLine
-            = MWMechanics::getMagicEffectString(*magicEffect, mEffectParams.mAttribute, mEffectParams.mSkill);
+        std::string spellLine = MWMechanics::getMagicEffectString(*magicEffect, attribute, mEffectParams.mSkill);
 
         if (mEffectParams.mMagnMin || mEffectParams.mMagnMax)
         {
