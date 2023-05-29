@@ -51,7 +51,7 @@ namespace MWLua
     {
         return [context](const Shader& shader, const std::string& name, const T& value) {
             context.mLuaManager->addAction(
-                [&] {
+                [=] {
                     MWBase::Environment::get().getWorld()->getPostProcessor()->setUniform(shader.mShader, name, value);
                 },
                 "SetUniformShaderAction");
@@ -84,7 +84,7 @@ namespace MWLua
             }
 
             context.mLuaManager->addAction(
-                [&] {
+                [=] {
                     MWBase::Environment::get().getWorld()->getPostProcessor()->setUniform(shader.mShader, name, values);
                 },
                 "SetUniformShaderAction");
