@@ -314,8 +314,6 @@ CSMWorld::RevertCommand::RevertCommand(IdTable& model, const std::string& id, QU
     setText(("Revert record " + id).c_str());
 }
 
-CSMWorld::RevertCommand::~RevertCommand() {}
-
 void CSMWorld::RevertCommand::redo()
 {
     mOld = mModel.getRecord(mId).clone();
@@ -350,8 +348,6 @@ CSMWorld::DeleteCommand::DeleteCommand(
 {
     setText(("Delete record " + id).c_str());
 }
-
-CSMWorld::DeleteCommand::~DeleteCommand() {}
 
 void CSMWorld::DeleteCommand::redo()
 {

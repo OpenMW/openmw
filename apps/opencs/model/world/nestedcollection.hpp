@@ -14,8 +14,8 @@ namespace CSMWorld
     {
 
     public:
-        NestedCollection();
-        virtual ~NestedCollection();
+        NestedCollection() = default;
+        virtual ~NestedCollection() = default;
 
         virtual void addNestedRow(int row, int col, int position) = 0;
 

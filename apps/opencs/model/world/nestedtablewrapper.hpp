@@ -5,11 +5,11 @@ namespace CSMWorld
 {
     struct NestedTableWrapperBase
     {
-        virtual ~NestedTableWrapperBase();
+        virtual ~NestedTableWrapperBase() = default;
 
         virtual int size() const;
 
-        NestedTableWrapperBase();
+        NestedTableWrapperBase() = default;
     };
 
     template <typename NestedTable>
@@ -22,7 +22,7 @@ namespace CSMWorld
         {
         }
 
-        ~NestedTableWrapper() override {}
+        ~NestedTableWrapper() override = default;
 
         int size() const override
         {

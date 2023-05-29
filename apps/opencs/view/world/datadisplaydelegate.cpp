@@ -148,8 +148,6 @@ void CSVWorld::DataDisplayDelegate::updateDisplayMode(const std::string& mode)
         mDisplayMode = Mode_TextOnly;
 }
 
-CSVWorld::DataDisplayDelegate::~DataDisplayDelegate() {}
-
 void CSVWorld::DataDisplayDelegate::settingChanged(const CSMPrefs::Setting* setting)
 {
     if (*setting == mSettingKey)

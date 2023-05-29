@@ -1,7 +1,5 @@
 #include "record.hpp"
 
-CSMWorld::RecordBase::~RecordBase() {}
-
 bool CSMWorld::RecordBase::isDeleted() const
 {
     return mState == State_Deleted || mState == State_Erased;

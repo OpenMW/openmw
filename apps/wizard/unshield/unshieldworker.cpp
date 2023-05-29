@@ -40,8 +40,6 @@ Wizard::UnshieldWorker::UnshieldWorker(qint64 expectedMorrowindBsaSize, QObject*
     qRegisterMetaType<Wizard::Component>("Wizard::Component");
 }
 
-Wizard::UnshieldWorker::~UnshieldWorker() {}
-
 void Wizard::UnshieldWorker::stopWorker()
 {
     mStopped = true;

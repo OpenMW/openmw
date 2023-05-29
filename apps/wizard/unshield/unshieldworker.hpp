@@ -25,7 +25,7 @@ namespace Wizard
 
     public:
         UnshieldWorker(qint64 expectedMorrowindBsaSize, QObject* parent = nullptr);
-        ~UnshieldWorker() override;
+        ~UnshieldWorker() override = default;
 
         void stopWorker();
 

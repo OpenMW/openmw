@@ -35,18 +35,15 @@ namespace CSMWorld
     private:
         NestedCollection* mNestedCollection;
 
-        // not implemented
-        IdTree(const IdTree&);
-        IdTree& operator=(const IdTree&);
-
         unsigned int foldIndexAddress(const QModelIndex& index) const;
         std::pair<int, int> unfoldIndexAddress(unsigned int id) const;
 
     public:
         IdTree(NestedCollection* nestedCollection, CollectionBase* idCollection, unsigned int features = 0);
         ///< The ownerships of \a nestedCollecton and \a idCollection are not transferred.
-
-        ~IdTree() override;
+        IdTree(const IdTree&) = delete;
+        IdTree& operator=(const IdTree&) = delete;
+        ~IdTree() override = default;
 
         int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 

@@ -19,7 +19,7 @@ namespace CSVRender
             : mRootNode(nullptr)
         {
         }
-        virtual ~Lighting();
+        virtual ~Lighting() = default;
 
         virtual void activate(osg::Group* rootNode, bool isExterior) = 0;
 

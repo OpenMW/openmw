@@ -15,7 +15,7 @@ namespace CSVRender
     class LightingDay : public Lighting
     {
     public:
-        LightingDay();
+        LightingDay() = default;
 
         void activate(osg::Group* rootNode, bool /*isExterior*/) override;
 

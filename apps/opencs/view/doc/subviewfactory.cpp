@@ -8,12 +8,6 @@
 
 #include <apps/opencs/model/world/universalid.hpp>
 
-CSVDoc::SubViewFactoryBase::SubViewFactoryBase() {}
-
-CSVDoc::SubViewFactoryBase::~SubViewFactoryBase() {}
-
-CSVDoc::SubViewFactoryManager::SubViewFactoryManager() {}
-
 CSVDoc::SubViewFactoryManager::~SubViewFactoryManager()
 {
     for (std::map<CSMWorld::UniversalId::Type, SubViewFactoryBase*>::iterator iter(mSubViewFactories.begin());

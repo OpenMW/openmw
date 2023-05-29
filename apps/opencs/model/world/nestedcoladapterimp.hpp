@@ -34,7 +34,7 @@ namespace CSMWorld
     class PathgridPointListAdapter : public NestedColumnAdapter<Pathgrid>
     {
     public:
-        PathgridPointListAdapter();
+        PathgridPointListAdapter() = default;
 
         void addRow(Record<Pathgrid>& record, int position) const override;
 
@@ -56,7 +56,7 @@ namespace CSMWorld
     class PathgridEdgeListAdapter : public NestedColumnAdapter<Pathgrid>
     {
     public:
-        PathgridEdgeListAdapter();
+        PathgridEdgeListAdapter() = default;
 
         void addRow(Record<Pathgrid>& record, int position) const override;
 
@@ -78,7 +78,7 @@ namespace CSMWorld
     class FactionReactionsAdapter : public NestedColumnAdapter<ESM::Faction>
     {
     public:
-        FactionReactionsAdapter();
+        FactionReactionsAdapter() = default;
 
         void addRow(Record<ESM::Faction>& record, int position) const override;
 
@@ -101,7 +101,7 @@ namespace CSMWorld
     class FactionRanksAdapter : public NestedColumnAdapter<ESM::Faction>
     {
     public:
-        FactionRanksAdapter();
+        FactionRanksAdapter() = default;
 
         void addRow(Record<ESM::Faction>& record, int position) const override;
 
@@ -124,7 +124,7 @@ namespace CSMWorld
     class RegionSoundListAdapter : public NestedColumnAdapter<ESM::Region>
     {
     public:
-        RegionSoundListAdapter();
+        RegionSoundListAdapter() = default;
 
         void addRow(Record<ESM::Region>& record, int position) const override;
 
@@ -148,7 +148,7 @@ namespace CSMWorld
     class SpellListAdapter : public NestedColumnAdapter<ESXRecordT>
     {
     public:
-        SpellListAdapter() {}
+        SpellListAdapter() = default;
 
         void addRow(Record<ESXRecordT>& record, int position) const override
         {
@@ -249,7 +249,7 @@ namespace CSMWorld
     class EffectsListAdapter : public NestedColumnAdapter<ESXRecordT>
     {
     public:
-        EffectsListAdapter() {}
+        EffectsListAdapter() = default;
 
         void addRow(Record<ESXRecordT>& record, int position) const override
         {
@@ -434,7 +434,7 @@ namespace CSMWorld
     class InfoListAdapter : public NestedColumnAdapter<Info>
     {
     public:
-        InfoListAdapter();
+        InfoListAdapter() = default;
 
         void addRow(Record<Info>& record, int position) const override;
 
@@ -456,7 +456,7 @@ namespace CSMWorld
     class InfoConditionAdapter : public NestedColumnAdapter<Info>
     {
     public:
-        InfoConditionAdapter();
+        InfoConditionAdapter() = default;
 
         void addRow(Record<Info>& record, int position) const override;
 
@@ -478,7 +478,7 @@ namespace CSMWorld
     class RaceAttributeAdapter : public NestedColumnAdapter<ESM::Race>
     {
     public:
-        RaceAttributeAdapter();
+        RaceAttributeAdapter() = default;
 
         void addRow(Record<ESM::Race>& record, int position) const override;
 
@@ -500,7 +500,7 @@ namespace CSMWorld
     class RaceSkillsBonusAdapter : public NestedColumnAdapter<ESM::Race>
     {
     public:
-        RaceSkillsBonusAdapter();
+        RaceSkillsBonusAdapter() = default;
 
         void addRow(Record<ESM::Race>& record, int position) const override;
 
@@ -522,7 +522,7 @@ namespace CSMWorld
     class CellListAdapter : public NestedColumnAdapter<CSMWorld::Cell>
     {
     public:
-        CellListAdapter();
+        CellListAdapter() = default;
 
         void addRow(Record<CSMWorld::Cell>& record, int position) const override;
 
@@ -545,7 +545,7 @@ namespace CSMWorld
     class RegionWeatherAdapter : public NestedColumnAdapter<ESM::Region>
     {
     public:
-        RegionWeatherAdapter();
+        RegionWeatherAdapter() = default;
 
         void addRow(Record<ESM::Region>& record, int position) const override;
 

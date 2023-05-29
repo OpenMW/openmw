@@ -6,10 +6,6 @@
 
 #include "columnbase.hpp"
 
-CSMWorld::NestedCollection::NestedCollection() {}
-
-CSMWorld::NestedCollection::~NestedCollection() {}
-
 int CSMWorld::NestedCollection::getNestedRowsCount(int row, int column) const
 {
     return 0;

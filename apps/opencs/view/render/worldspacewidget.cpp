@@ -138,8 +138,6 @@ CSVRender::WorldspaceWidget::WorldspaceWidget(CSMDoc::Document& document, QWidge
     mInConstructor = false;
 }
 
-CSVRender::WorldspaceWidget::~WorldspaceWidget() {}
-
 void CSVRender::WorldspaceWidget::settingChanged(const CSMPrefs::Setting* setting)
 {
     if (*setting == "3D Scene Input/drag-factor")

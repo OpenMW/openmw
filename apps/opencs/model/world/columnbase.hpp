@@ -156,7 +156,7 @@ namespace CSMWorld
 
         ColumnBase(int columnId, Display displayType, int flag);
 
-        virtual ~ColumnBase();
+        virtual ~ColumnBase() = default;
 
         virtual bool isEditable() const = 0;
 

@@ -19,7 +19,7 @@ namespace CSMWorld
 
         State mState;
 
-        virtual ~RecordBase();
+        virtual ~RecordBase() = default;
 
         virtual std::unique_ptr<RecordBase> clone() const = 0;
 

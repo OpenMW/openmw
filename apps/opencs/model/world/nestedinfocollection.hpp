@@ -26,7 +26,7 @@ namespace CSMWorld
         const NestedColumnAdapter<Info>& getAdapter(const ColumnBase& column) const;
 
     public:
-        NestedInfoCollection();
+        NestedInfoCollection() = default;
         ~NestedInfoCollection() override;
 
         void addNestedRow(int row, int column, int position) override;

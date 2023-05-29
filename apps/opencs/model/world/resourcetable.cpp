@@ -15,8 +15,6 @@ CSMWorld::ResourceTable::ResourceTable(const Resources* resources, unsigned int 
 {
 }
 
-CSMWorld::ResourceTable::~ResourceTable() {}
-
 int CSMWorld::ResourceTable::rowCount(const QModelIndex& parent) const
 {
     if (parent.isValid())

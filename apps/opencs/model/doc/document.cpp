@@ -361,8 +361,6 @@ CSMDoc::Document::Document(const Files::ConfigurationManager& configuration, std
     connect(&mRunner, &Runner::runStateChanged, this, &Document::runStateChanged);
 }
 
-CSMDoc::Document::~Document() {}
-
 QUndoStack& CSMDoc::Document::getUndoStack()
 {
     return mUndoStack;

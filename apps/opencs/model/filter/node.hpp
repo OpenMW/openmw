@@ -21,14 +21,11 @@ namespace CSMFilter
     /// interpreted as "the node and all its children".
     class Node
     {
-        // not implemented
-        Node(const Node&);
-        Node& operator=(const Node&);
-
     public:
-        Node();
-
-        virtual ~Node();
+        Node() = default;
+        Node(const Node&) = delete;
+        Node& operator=(const Node&) = delete;
+        virtual ~Node() = default;
 
         virtual bool test(const CSMWorld::IdTableBase& table, int row, const std::map<int, int>& columns) const = 0;
         ///< \return Can the specified table row pass through to filter?

@@ -46,7 +46,7 @@ namespace CSMWorld
 {
     struct RefIdDataContainerBase
     {
-        virtual ~RefIdDataContainerBase();
+        virtual ~RefIdDataContainerBase() = default;
 
         virtual int getSize() const = 0;
 

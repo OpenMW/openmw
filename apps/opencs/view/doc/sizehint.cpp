@@ -5,8 +5,6 @@ CSVDoc::SizeHintWidget::SizeHintWidget(QWidget* parent)
 {
 }
 
-CSVDoc::SizeHintWidget::~SizeHintWidget() {}
-
 QSize CSVDoc::SizeHintWidget::sizeHint() const
 {
     return mSize;

@@ -29,8 +29,6 @@ CSMWorld::IdTable::IdTable(CollectionBase* idCollection, unsigned int features)
 {
 }
 
-CSMWorld::IdTable::~IdTable() {}
-
 int CSMWorld::IdTable::rowCount(const QModelIndex& parent) const
 {
     if (parent.isValid())

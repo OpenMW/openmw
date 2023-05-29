@@ -29,14 +29,11 @@ namespace CSMWorld
     /// manually.
     class CollectionBase
     {
-        // not implemented
-        CollectionBase(const CollectionBase&);
-        CollectionBase& operator=(const CollectionBase&);
-
     public:
-        CollectionBase();
-
-        virtual ~CollectionBase();
+        CollectionBase() = default;
+        CollectionBase(const CollectionBase&) = delete;
+        CollectionBase& operator=(const CollectionBase&) = delete;
+        virtual ~CollectionBase() = default;
 
         virtual int getSize() const = 0;
 

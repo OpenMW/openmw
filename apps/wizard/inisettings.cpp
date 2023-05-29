@@ -10,10 +10,6 @@
 
 #include <components/files/qtconversion.hpp>
 
-Wizard::IniSettings::IniSettings() {}
-
-Wizard::IniSettings::~IniSettings() {}
-
 QStringList Wizard::IniSettings::findKeys(const QString& text)
 {
     QStringList result;

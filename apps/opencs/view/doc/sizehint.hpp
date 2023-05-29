@@ -12,7 +12,7 @@ namespace CSVDoc
 
     public:
         SizeHintWidget(QWidget* parent = nullptr);
-        ~SizeHintWidget() override;
+        ~SizeHintWidget() override = default;
 
         QSize sizeHint() const override;
         void setSizeHint(const QSize& size);

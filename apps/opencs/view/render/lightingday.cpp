@@ -5,8 +5,6 @@
 #include <osg/LightSource>
 #include <osg/ref_ptr>
 
-CSVRender::LightingDay::LightingDay() {}
-
 void CSVRender::LightingDay::activate(osg::Group* rootNode, bool /*isExterior*/)
 {
     mRootNode = rootNode;
