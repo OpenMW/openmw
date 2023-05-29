@@ -648,7 +648,7 @@ namespace MWWorld
         bool isPlayerTraveling() const override;
 
         /// Return terrain height at \a worldPos position.
-        float getTerrainHeightAt(const osg::Vec3f& worldPos) const override;
+        float getTerrainHeightAt(const osg::Vec3f& worldPos, ESM::RefId worldspace) const override;
 
         /// Return physical or rendering half extents of the given actor.
         osg::Vec3f getHalfExtents(const MWWorld::ConstPtr& actor, bool rendering = false) const override;

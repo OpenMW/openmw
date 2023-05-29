@@ -1363,9 +1363,11 @@ namespace MWWorld
             return;
         }
 
-        if (ptr.getCell()->isExterior() && !ptr.getCell()->getCell()->isEsm4())
-            pos.z() = std::max(pos.z(), getTerrainHeightAt(pos));
-        pos.z() += 20; // place slightly above terrain. will snap down to ground with code below
+        const float terrainHeight = ptr.getCell()->isExterior()
+            ? getTerrainHeightAt(pos, ptr.getCell()->getCell()->getWorldSpace())
+            : -std::numeric_limits<float>::max();
+        pos.z() = std::max(pos.z(), terrainHeight)
+            + 20; // place slightly above terrain. will snap down to ground with code below
 
         // We still should trace down dead persistent actors - they do not use the "swimdeath" animation.
         bool swims = ptr.getClass().isActor() && isSwimming(ptr)
@@ -3607,9 +3609,9 @@ namespace MWWorld
         return mPlayerTraveling;
     }
 
-    float World::getTerrainHeightAt(const osg::Vec3f& worldPos) const
+    float World::getTerrainHeightAt(const osg::Vec3f& worldPos, ESM::RefId worldspace) const
     {
-        return mRendering->getTerrainHeightAt(worldPos);
+        return mRendering->getTerrainHeightAt(worldPos, worldspace);
     }
 
     osg::Vec3f World::getHalfExtents(const ConstPtr& object, bool rendering) const

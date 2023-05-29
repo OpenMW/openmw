@@ -87,10 +87,10 @@ namespace ESM
         };
 #pragma pack(pop)
 
-        typedef signed char VNML;
-
         struct LandData
         {
+            typedef signed char VNML;
+
             LandData()
                 : mHeightOffset(0)
                 , mMinHeight(0)

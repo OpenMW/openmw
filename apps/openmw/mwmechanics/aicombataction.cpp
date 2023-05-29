@@ -474,7 +474,8 @@ namespace MWMechanics
                     if (enemy.getCell()->isExterior())
                     {
                         if (attackDistance < (enemyPos.pos[2]
-                                - MWBase::Environment::get().getWorld()->getTerrainHeightAt(enemyPos.asVec3())))
+                                - MWBase::Environment::get().getWorld()->getTerrainHeightAt(
+                                    enemyPos.asVec3(), enemy.getCell()->getCell()->getWorldSpace())))
                             return false;
                     }
                 }

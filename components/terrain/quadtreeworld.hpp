@@ -7,6 +7,8 @@
 #include <memory>
 #include <mutex>
 
+#include <components/esm/refid.hpp>
+
 namespace osg
 {
     class NodeVisitor;
@@ -31,7 +33,7 @@ namespace Terrain
         QuadTreeWorld(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem,
             Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask,
             int compMapResolution, float comMapLevel, float lodFactor, int vertexLodMod, float maxCompGeometrySize,
-            bool debugChunks);
+            bool debugChunks, ESM::RefId worldspace);
 
         ~QuadTreeWorld();
 
@@ -58,6 +60,12 @@ namespace Terrain
         {
         public:
             virtual ~ChunkManager() {}
+            ChunkManager() = default;
+            ChunkManager(ESM::RefId worldspace)
+                : ChunkManager()
+            {
+                mWorldspace = worldspace;
+            }
             virtual osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod,
                 unsigned int lodFlags, bool activeGrid, const osg::Vec3f& viewPoint, bool compile)
                 = 0;
@@ -69,6 +77,9 @@ namespace Terrain
             // Automatically set by addChunkManager based on getViewDistance()
             unsigned int getMaxLodLevel() const { return mMaxLodLevel; }
             void setMaxLodLevel(unsigned int level) { mMaxLodLevel = level; }
+
+        protected:
+            ESM::RefId mWorldspace = ESM::RefId();
 
         private:
             float mViewDistance = 0.f;

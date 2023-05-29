@@ -316,7 +316,8 @@ namespace MWScript
                     {
                         float terrainHeight = -std::numeric_limits<float>::max();
                         if (ptr.getCell()->isExterior())
-                            terrainHeight = MWBase::Environment::get().getWorld()->getTerrainHeightAt(curPos);
+                            terrainHeight = MWBase::Environment::get().getWorld()->getTerrainHeightAt(
+                                curPos, ptr.getCell()->getCell()->getWorldSpace());
 
                         if (pos < terrainHeight)
                             pos = terrainHeight;

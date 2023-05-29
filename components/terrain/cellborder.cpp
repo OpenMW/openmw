@@ -23,7 +23,7 @@ namespace Terrain
     }
 
     osg::ref_ptr<osg::Group> CellBorder::createBorderGeometry(float x, float y, float size, Terrain::Storage* terrain,
-        Resource::SceneManager* sceneManager, int mask, float offset, osg::Vec4f color)
+        Resource::SceneManager* sceneManager, int mask, ESM::RefId worldspace, float offset, osg::Vec4f color)
     {
         const int cellSize = ESM::Land::REAL_SIZE;
         const int borderSegments = 40;
@@ -45,7 +45,7 @@ namespace Terrain
                                                 : osg::Vec3(size, (i - borderSegments) * borderStep, 0.0f);
 
             pos += cellCorner;
-            pos += osg::Vec3f(0, 0, terrain->getHeightAt(pos) + offset);
+            pos += osg::Vec3f(0, 0, terrain->getHeightAt(pos, worldspace) + offset);
 
             vertices->push_back(pos);
 
@@ -83,7 +83,8 @@ namespace Terrain
 
     void CellBorder::createCellBorderGeometry(int x, int y)
     {
-        auto borderGroup = createBorderGeometry(x, y, 1.f, mWorld->getStorage(), mSceneManager, mBorderMask);
+        auto borderGroup = createBorderGeometry(
+            x, y, 1.f, mWorld->getStorage(), mSceneManager, mBorderMask, mWorld->getWorldspace());
         mRoot->addChild(borderGroup);
 
         mCellBorderNodes[std::make_pair(x, y)] = borderGroup;

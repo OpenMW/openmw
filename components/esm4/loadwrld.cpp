@@ -27,10 +27,10 @@
 #include "loadwrld.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: debug only
+// #include <iostream> // FIXME: debug only
 
 #include "reader.hpp"
-//#include "writer.hpp"
+// #include "writer.hpp"
 
 void ESM4::World::load(ESM4::Reader& reader)
 {

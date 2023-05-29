@@ -35,7 +35,7 @@ namespace Terrain
     {
     public:
         ChunkManager(Storage* storage, Resource::SceneManager* sceneMgr, TextureManager* textureManager,
-            CompositeMapRenderer* renderer);
+            CompositeMapRenderer* renderer, ESM::RefId worldspace);
 
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags,
             bool activeGrid, const osg::Vec3f& viewPoint, bool compile) override;

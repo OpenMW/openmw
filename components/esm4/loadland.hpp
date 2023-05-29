@@ -33,6 +33,9 @@
 
 #include "formid.hpp"
 
+#include <components/esm/defs.hpp>
+#include <components/esm/refid.hpp>
+
 namespace ESM4
 {
     class Reader;
@@ -109,7 +112,7 @@ namespace ESM4
             std::vector<TxtLayer> layers;
         };
 
-        FormId mFormId; // from the header
+        ESM::RefId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::uint32_t mLandFlags; // from DATA subrecord
@@ -117,16 +120,20 @@ namespace ESM4
         // FIXME: lazy loading not yet implemented
         int mDataTypes; // which data types are loaded
 
+        float mHeights[VERTS_PER_SIDE * VERTS_PER_SIDE]; // Float value of compressed Heightmap
+        float mMinHeight, mMaxHeight;
         signed char mVertNorm[VERTS_PER_SIDE * VERTS_PER_SIDE * 3]; // from VNML subrecord
-        signed char mVertColr[VERTS_PER_SIDE * VERTS_PER_SIDE * 3]; // from VCLR subrecord
+        unsigned char mVertColr[VERTS_PER_SIDE * VERTS_PER_SIDE * 3]; // from VCLR subrecord
         VHGT mHeightMap;
         Texture mTextures[4]; // 0 = bottom left, 1 = bottom right, 2 = top left, 3 = top right
         std::vector<FormId> mIds; // land texture (LTEX) formids
-
+        ESM::RefId mCell;
         void load(Reader& reader);
+        Land() = default;
         // void save(Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::REC_LAND4;
     };
 }
 

@@ -12,6 +12,7 @@
 #include <components/detournavigator/heightfieldshape.hpp>
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/updateguard.hpp>
+#include <components/esm/esmterrain.hpp>
 #include <components/esm/records.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
@@ -397,15 +398,16 @@ namespace MWWorld
         if (cellVariant.isExterior())
         {
             osg::ref_ptr<const ESMTerrain::LandObject> land = mRendering.getLandManager()->getLand(cellIndex);
-            const ESM::Land::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
-            const int verts = ESM::Land::LAND_SIZE;
-            const int worldsize = ESM::Land::REAL_SIZE;
+            const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VHGT) : nullptr;
+            const int verts = ESM::getLandSize(worldspace);
+            const int worldsize = ESM::getCellSize(worldspace);
+
             if (data)
             {
-                mPhysics->addHeightField(
-                    data->mHeights, cellX, cellY, worldsize, verts, data->mMinHeight, data->mMaxHeight, land.get());
+                mPhysics->addHeightField(data->getHeights().data(), cellX, cellY, worldsize, verts,
+                    data->getMinHeight(), data->getMaxHeight(), land.get());
             }
-            else
+            else if (!ESM::isEsm4Ext(worldspace))
             {
                 static std::vector<float> defaultHeight;
                 defaultHeight.resize(verts * verts, ESM::Land::DEFAULT_HEIGHT);
@@ -425,14 +427,14 @@ namespace MWWorld
                     else
                     {
                         DetourNavigator::HeightfieldSurface heights;
-                        heights.mHeights = data->mHeights;
-                        heights.mSize = static_cast<std::size_t>(ESM::Land::LAND_SIZE);
-                        heights.mMinHeight = data->mMinHeight;
-                        heights.mMaxHeight = data->mMaxHeight;
+                        heights.mHeights = data->getHeights().data();
+                        heights.mSize = static_cast<std::size_t>(data->getLandSize());
+                        heights.mMinHeight = data->getMinHeight();
+                        heights.mMaxHeight = data->getMaxHeight();
                         return heights;
                     }
                 }();
-                mNavigator.addHeightfield(cellPosition, ESM::Land::REAL_SIZE, shape, navigatorUpdateGuard);
+                mNavigator.addHeightfield(cellPosition, worldsize, shape, navigatorUpdateGuard);
             }
         }
 
@@ -570,7 +572,8 @@ namespace MWWorld
         mCurrentGridCenter = osg::Vec2i(playerCellX, playerCellY);
         osg::Vec4i newGrid = gridCenterToBounds(mCurrentGridCenter);
         mRendering.setActiveGrid(newGrid);
-
+        mRendering.enableTerrain(true, playerCellIndex.mWorldspace);
+        mPreloader->setTerrain(mRendering.getTerrain());
         if (mRendering.pagingUnlockCache())
             mPreloader->abortTerrainPreloadExcept(nullptr);
         if (!mPreloader->isTerrainLoaded(std::make_pair(pos, newGrid), mRendering.getReferenceTime()))
@@ -784,7 +787,7 @@ namespace MWWorld
         mHalfGridSize = cell.getCell()->isEsm4() ? Constants::ESM4CellGridRadius : Constants::CellGridRadius;
         mCurrentCell = &cell;
 
-        mRendering.enableTerrain(cell.isExterior());
+        mRendering.enableTerrain(cell.isExterior(), cell.getCell()->getWorldSpace());
 
         MWWorld::Ptr old = mWorld.getPlayerPtr();
         mWorld.getPlayer().setCell(&cell);

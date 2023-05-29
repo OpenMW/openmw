@@ -51,8 +51,10 @@ namespace ESM
 
     struct ExteriorCellLocation
     {
-        int mX, mY;
-        ESM::RefId mWorldspace;
+        int mX = 0;
+        int mY = 0;
+        ESM::RefId mWorldspace = ESM::Cell::sDefaultWorldspaceId;
+        ExteriorCellLocation() = default;
 
         ExteriorCellLocation(int x, int y, ESM::RefId worldspace)
             : mX(x)
@@ -82,6 +84,9 @@ namespace ESM
 
         return isEsm4Ext(worldspaceId) ? Constants::ESM4CellSizeInUnits : Constants::CellSizeInUnits;
     }
+
+    // Vertex count of a side of a land record
+    int getLandSize(ESM::RefId worldspaceId);
 
     inline ESM::ExteriorCellLocation positionToExteriorCellLocation(
         float x, float y, ESM::RefId worldspaceId = ESM::Cell::sDefaultWorldspaceId)

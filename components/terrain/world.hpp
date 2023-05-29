@@ -8,6 +8,8 @@
 #include <memory>
 #include <set>
 
+#include <components/esm/refid.hpp>
+
 #include "cellborder.hpp"
 
 namespace osg
@@ -48,8 +50,8 @@ namespace Terrain
         /// @param nodeMask mask for the terrain root
         /// @param preCompileMask mask for pre compiling textures
         World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage,
-            unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask);
-        World(osg::Group* parent, Storage* storage, unsigned int nodeMask);
+            unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask, ESM::RefId worldspace);
+        World(osg::Group* parent, Storage* storage, unsigned int nodeMask, ESM::RefId worldspace);
         virtual ~World();
 
         /// See CompositeMapRenderer::setTargetFrameRate
@@ -99,6 +101,8 @@ namespace Terrain
 
         virtual void setViewDistance(float distance) {}
 
+        ESM::RefId getWorldspace() { return mWorldspace; }
+
         Storage* getStorage() { return mStorage; }
 
         osg::Callback* getHeightCullCallback(float highz, unsigned int mask);
@@ -127,6 +131,7 @@ namespace Terrain
         osg::ref_ptr<HeightCullCallback> mHeightCullCallback;
 
         osg::Vec4i mActiveGrid;
+        ESM::RefId mWorldspace;
     };
 }
 

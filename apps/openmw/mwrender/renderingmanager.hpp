@@ -16,6 +16,7 @@
 
 #include <deque>
 #include <memory>
+#include <unordered_map>
 
 namespace osg
 {
@@ -150,7 +151,7 @@ namespace MWRender
         void addCell(const MWWorld::CellStore* store);
         void removeCell(const MWWorld::CellStore* store);
 
-        void enableTerrain(bool enable);
+        void enableTerrain(bool enable, ESM::RefId worldspace);
 
         void updatePtr(const MWWorld::Ptr& old, const MWWorld::Ptr& updated);
 
@@ -230,7 +231,7 @@ namespace MWRender
 
         void setViewDistance(float distance, bool delay = false);
 
-        float getTerrainHeightAt(const osg::Vec3f& pos);
+        float getTerrainHeightAt(const osg::Vec3f& pos, ESM::RefId worldspace);
 
         // camera stuff
         Camera* getCamera() { return mCamera.get(); }
@@ -282,6 +283,15 @@ namespace MWRender
         void setFogColor(const osg::Vec4f& color);
         void updateThirdPersonViewMode();
 
+        struct WorldspaceChunkMgr
+        {
+            std::unique_ptr<Terrain::World> mTerrain;
+            std::unique_ptr<ObjectPaging> mObjectPaging;
+            std::unique_ptr<Groundcover> mGroundcover;
+        };
+
+        WorldspaceChunkMgr& getWorldspaceChunkMgr(ESM::RefId worldspace);
+
         void reportStats() const;
 
         void updateNavMesh();
@@ -312,10 +322,11 @@ namespace MWRender
         std::unique_ptr<Pathgrid> mPathgrid;
         std::unique_ptr<Objects> mObjects;
         std::unique_ptr<Water> mWater;
-        std::unique_ptr<Terrain::World> mTerrain;
+        std::unordered_map<ESM::RefId, WorldspaceChunkMgr> mWorldspaceChunks;
+        Terrain::World* mTerrain;
         std::unique_ptr<TerrainStorage> mTerrainStorage;
-        std::unique_ptr<ObjectPaging> mObjectPaging;
-        std::unique_ptr<Groundcover> mGroundcover;
+        ObjectPaging* mObjectPaging;
+        Groundcover* mGroundcover;
         std::unique_ptr<SkyManager> mSky;
         std::unique_ptr<FogManager> mFog;
         std::unique_ptr<ScreenshotManager> mScreenshotManager;
@@ -343,6 +354,7 @@ namespace MWRender
         float mFirstPersonFieldOfView;
         bool mUpdateProjectionMatrix = false;
         bool mNight = false;
+        const MWWorld::GroundcoverStore& mGroundCoverStore;
 
         void operator=(const RenderingManager&);
         RenderingManager(const RenderingManager&);

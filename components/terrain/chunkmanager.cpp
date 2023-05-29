@@ -20,8 +20,9 @@ namespace Terrain
 {
 
     ChunkManager::ChunkManager(Storage* storage, Resource::SceneManager* sceneMgr, TextureManager* textureManager,
-        CompositeMapRenderer* renderer)
+        CompositeMapRenderer* renderer, ESM::RefId worldspace)
         : GenericResourceManager<ChunkId>(nullptr)
+        , QuadTreeWorld::ChunkManager(worldspace)
         , mStorage(storage)
         , mSceneManager(sceneMgr)
         , mTextureManager(textureManager)
@@ -153,7 +154,7 @@ namespace Terrain
     {
         std::vector<LayerInfo> layerList;
         std::vector<osg::ref_ptr<osg::Image>> blendmaps;
-        mStorage->getBlendmaps(chunkSize, chunkCenter, blendmaps, layerList);
+        mStorage->getBlendmaps(chunkSize, chunkCenter, blendmaps, layerList, mWorldspace);
 
         bool useShaders = mSceneManager->getForceShaders();
         if (!mSceneManager->getClampLighting())
@@ -212,7 +213,7 @@ namespace Terrain
             osg::ref_ptr<osg::Vec4ubArray> colors(new osg::Vec4ubArray);
             colors->setNormalize(true);
 
-            mStorage->fillVertexBuffers(lod, chunkSize, chunkCenter, positions, normals, colors);
+            mStorage->fillVertexBuffers(lod, chunkSize, chunkCenter, mWorldspace, positions, normals, colors);
 
             osg::ref_ptr<osg::VertexBufferObject> vbo(new osg::VertexBufferObject);
             positions->setVertexBufferObject(vbo);
@@ -249,7 +250,7 @@ namespace Terrain
         if (chunkSize <= 1.f)
             geometry->setLightListCallback(new SceneUtil::LightListCallback);
 
-        unsigned int numVerts = (mStorage->getCellVertices() - 1) * chunkSize / (1 << lod) + 1;
+        unsigned int numVerts = (mStorage->getCellVertices(mWorldspace) - 1) * chunkSize / (1 << lod) + 1;
 
         geometry->addPrimitiveSet(mBufferCache.getIndexBuffer(numVerts, lodFlags));
 
@@ -299,7 +300,7 @@ namespace Terrain
             }
         }
 
-        geometry->setupWaterBoundingBox(-1, chunkSize * mStorage->getCellWorldSize() / numVerts);
+        geometry->setupWaterBoundingBox(-1, chunkSize * mStorage->getCellWorldSize(mWorldspace) / numVerts);
 
         if (!templateGeometry && compile && mSceneManager->getIncrementalCompileOperation())
         {

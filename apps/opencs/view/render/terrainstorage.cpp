@@ -28,12 +28,12 @@ namespace CSVRender
         resetHeights();
     }
 
-    osg::ref_ptr<const ESMTerrain::LandObject> TerrainStorage::getLand(int cellX, int cellY)
+    osg::ref_ptr<const ESMTerrain::LandObject> TerrainStorage::getLand(ESM::ExteriorCellLocation cellLocation)
     {
         // The cell isn't guaranteed to have Land. This is because the terrain implementation
         // has to wrap the vertices of the last row and column to the next cell, which may be a nonexisting cell
-        const int index
-            = mData.getLand().searchId(ESM::RefId::stringRefId(CSMWorld::Land::createUniqueRecordId(cellX, cellY)));
+        const int index = mData.getLand().searchId(
+            ESM::RefId::stringRefId(CSMWorld::Land::createUniqueRecordId(cellLocation.mX, cellLocation.mY)));
         if (index == -1)
             return nullptr;
 
@@ -82,83 +82,83 @@ namespace CSVRender
         return &mAlteredHeight[inCellY * ESM::Land::LAND_SIZE + inCellX];
     }
 
-    void TerrainStorage::getBounds(float& minX, float& maxX, float& minY, float& maxY)
+    void TerrainStorage::getBounds(float& minX, float& maxX, float& minY, float& maxY, ESM::RefId worldspace)
     {
         // not needed at the moment - this returns the bounds of the whole world, but we only edit individual cells
         throw std::runtime_error("getBounds not implemented");
     }
 
-    int TerrainStorage::getThisHeight(int col, int row, const ESM::Land::LandData* heightData) const
+    int TerrainStorage::getThisHeight(int col, int row, std::span<const float> heightData) const
     {
-        return heightData->mHeights[col * ESM::Land::LAND_SIZE + row]
+        return heightData[col * ESM::Land::LAND_SIZE + row]
             + mAlteredHeight[static_cast<unsigned int>(col * ESM::Land::LAND_SIZE + row)];
     }
 
-    int TerrainStorage::getLeftHeight(int col, int row, const ESM::Land::LandData* heightData) const
+    int TerrainStorage::getLeftHeight(int col, int row, std::span<const float> heightData) const
     {
-        return heightData->mHeights[(col)*ESM::Land::LAND_SIZE + row - 1]
+        return heightData[(col)*ESM::Land::LAND_SIZE + row - 1]
             + mAlteredHeight[static_cast<unsigned int>((col)*ESM::Land::LAND_SIZE + row - 1)];
     }
 
-    int TerrainStorage::getRightHeight(int col, int row, const ESM::Land::LandData* heightData) const
+    int TerrainStorage::getRightHeight(int col, int row, std::span<const float> heightData) const
     {
-        return heightData->mHeights[col * ESM::Land::LAND_SIZE + row + 1]
+        return heightData[col * ESM::Land::LAND_SIZE + row + 1]
             + mAlteredHeight[static_cast<unsigned int>(col * ESM::Land::LAND_SIZE + row + 1)];
     }
 
-    int TerrainStorage::getUpHeight(int col, int row, const ESM::Land::LandData* heightData) const
+    int TerrainStorage::getUpHeight(int col, int row, std::span<const float> heightData) const
     {
-        return heightData->mHeights[(col - 1) * ESM::Land::LAND_SIZE + row]
+        return heightData[(col - 1) * ESM::Land::LAND_SIZE + row]
             + mAlteredHeight[static_cast<unsigned int>((col - 1) * ESM::Land::LAND_SIZE + row)];
     }
 
-    int TerrainStorage::getDownHeight(int col, int row, const ESM::Land::LandData* heightData) const
+    int TerrainStorage::getDownHeight(int col, int row, std::span<const float> heightData) const
     {
-        return heightData->mHeights[(col + 1) * ESM::Land::LAND_SIZE + row]
+        return heightData[(col + 1) * ESM::Land::LAND_SIZE + row]
             + mAlteredHeight[static_cast<unsigned int>((col + 1) * ESM::Land::LAND_SIZE + row)];
     }
 
-    int TerrainStorage::getHeightDifferenceToLeft(int col, int row, const ESM::Land::LandData* heightData) const
+    int TerrainStorage::getHeightDifferenceToLeft(int col, int row, std::span<const float> heightData) const
     {
         return abs(getThisHeight(col, row, heightData) - getLeftHeight(col, row, heightData));
     }
 
-    int TerrainStorage::getHeightDifferenceToRight(int col, int row, const ESM::Land::LandData* heightData) const
+    int TerrainStorage::getHeightDifferenceToRight(int col, int row, std::span<const float> heightData) const
     {
         return abs(getThisHeight(col, row, heightData) - getRightHeight(col, row, heightData));
     }
 
-    int TerrainStorage::getHeightDifferenceToUp(int col, int row, const ESM::Land::LandData* heightData) const
+    int TerrainStorage::getHeightDifferenceToUp(int col, int row, std::span<const float> heightData) const
     {
         return abs(getThisHeight(col, row, heightData) - getUpHeight(col, row, heightData));
     }
 
-    int TerrainStorage::getHeightDifferenceToDown(int col, int row, const ESM::Land::LandData* heightData) const
+    int TerrainStorage::getHeightDifferenceToDown(int col, int row, std::span<const float> heightData) const
     {
         return abs(getThisHeight(col, row, heightData) - getDownHeight(col, row, heightData));
     }
 
     bool TerrainStorage::leftOrUpIsOverTheLimit(
-        int col, int row, int heightWarningLimit, const ESM::Land::LandData* heightData) const
+        int col, int row, int heightWarningLimit, std::span<const float> heightData) const
     {
         return getHeightDifferenceToLeft(col, row, heightData) >= heightWarningLimit
             || getHeightDifferenceToUp(col, row, heightData) >= heightWarningLimit;
     }
 
     bool TerrainStorage::rightOrDownIsOverTheLimit(
-        int col, int row, int heightWarningLimit, const ESM::Land::LandData* heightData) const
+        int col, int row, int heightWarningLimit, std::span<const float> heightData) const
     {
         return getHeightDifferenceToRight(col, row, heightData) >= heightWarningLimit
             || getHeightDifferenceToDown(col, row, heightData) >= heightWarningLimit;
     }
 
-    void TerrainStorage::adjustColor(int col, int row, const ESM::Land::LandData* heightData, osg::Vec4ub& color) const
+    void TerrainStorage::adjustColor(int col, int row, const ESM::LandData* heightData, osg::Vec4ub& color) const
     {
         // Highlight broken height changes
         int heightWarningLimit = 1024;
-        if (((col > 0 && row > 0) && leftOrUpIsOverTheLimit(col, row, heightWarningLimit, heightData))
+        if (((col > 0 && row > 0) && leftOrUpIsOverTheLimit(col, row, heightWarningLimit, heightData->getHeights()))
             || ((col < ESM::Land::LAND_SIZE - 1 && row < ESM::Land::LAND_SIZE - 1)
-                && rightOrDownIsOverTheLimit(col, row, heightWarningLimit, heightData)))
+                && rightOrDownIsOverTheLimit(col, row, heightWarningLimit, heightData->getHeights())))
         {
             color.r() = 255;
             color.g() = 0;

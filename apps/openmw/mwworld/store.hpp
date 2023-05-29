@@ -18,6 +18,7 @@
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadpgrd.hpp>
 #include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadland.hpp>
 #include <components/esm4/loadrefr.hpp>
 #include <components/misc/rng.hpp>
 #include <components/misc/strings/algorithm.hpp>
@@ -33,6 +34,11 @@ namespace ESM
     struct WeaponType;
     class ESMReader;
     class ESMWriter;
+}
+
+namespace ESM4
+{
+    struct Land;
 }
 
 namespace Loading
@@ -296,6 +302,19 @@ namespace MWWorld
         ESM4::Cell* insertStatic(const ESM4::Cell& item);
         void insertCell(ESM4::Cell* cell);
         void clearDynamic() override;
+    };
+
+    template <>
+    class Store<ESM4::Land> : public TypedDynamicStore<ESM4::Land>
+    {
+        std::unordered_map<ESM::ExteriorCellLocation, const ESM4::Land*> mLands;
+
+    public:
+        Store();
+        void updateLandPositions(const Store<ESM4::Cell>& cells);
+
+        const ESM4::Land* search(ESM::ExteriorCellLocation cellLocation) const;
+        const std::unordered_map<ESM::ExteriorCellLocation, const ESM4::Land*>& getLands() const { return mLands; }
     };
 
     template <>

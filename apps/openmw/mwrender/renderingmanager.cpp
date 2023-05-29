@@ -321,6 +321,7 @@ namespace MWRender
         , mFieldOfViewOverride(0.f)
         , mFieldOfView(Settings::camera().mFieldOfView)
         , mFirstPersonFieldOfView(Settings::camera().mFirstPersonFieldOfView)
+        , mGroundCoverStore(groundcoverStore)
     {
         bool reverseZ = SceneUtil::AutoDepth::isReversed();
         auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(
@@ -457,46 +458,11 @@ namespace MWRender
 
         mTerrainStorage = std::make_unique<TerrainStorage>(mResourceSystem, normalMapPattern, heightMapPattern,
             useTerrainNormalMaps, specularMapPattern, useTerrainSpecularMaps);
-        const float lodFactor = Settings::Manager::getFloat("lod factor", "Terrain");
 
-        bool groundcover = Settings::Manager::getBool("enabled", "Groundcover");
-        bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
-        if (distantTerrain || groundcover)
-        {
-            const int compMapResolution = Settings::Manager::getInt("composite map resolution", "Terrain");
-            int compMapPower = Settings::Manager::getInt("composite map level", "Terrain");
-            compMapPower = std::max(-3, compMapPower);
-            float compMapLevel = pow(2, compMapPower);
-            const int vertexLodMod = Settings::Manager::getInt("vertex lod mod", "Terrain");
-            float maxCompGeometrySize = Settings::Manager::getFloat("max composite geometry size", "Terrain");
-            maxCompGeometrySize = std::max(maxCompGeometrySize, 1.f);
-            bool debugChunks = Settings::Manager::getBool("debug chunks", "Terrain");
-            mTerrain = std::make_unique<Terrain::QuadTreeWorld>(sceneRoot, mRootNode, mResourceSystem,
-                mTerrainStorage.get(), Mask_Terrain, Mask_PreCompile, Mask_Debug, compMapResolution, compMapLevel,
-                lodFactor, vertexLodMod, maxCompGeometrySize, debugChunks);
-            if (Settings::Manager::getBool("object paging", "Terrain"))
-            {
-                mObjectPaging = std::make_unique<ObjectPaging>(mResourceSystem->getSceneManager());
-                static_cast<Terrain::QuadTreeWorld*>(mTerrain.get())->addChunkManager(mObjectPaging.get());
-                mResourceSystem->addResourceManager(mObjectPaging.get());
-            }
-        }
-        else
-            mTerrain = std::make_unique<Terrain::TerrainGrid>(sceneRoot, mRootNode, mResourceSystem,
-                mTerrainStorage.get(), Mask_Terrain, Mask_PreCompile, Mask_Debug);
-
-        mTerrain->setTargetFrameRate(Settings::cells().mTargetFramerate);
-
-        if (groundcover)
-        {
-            float density = Settings::Manager::getFloat("density", "Groundcover");
-            density = std::clamp(density, 0.f, 1.f);
-
-            mGroundcover = std::make_unique<Groundcover>(
-                mResourceSystem->getSceneManager(), density, groundcoverDistance, groundcoverStore);
-            static_cast<Terrain::QuadTreeWorld*>(mTerrain.get())->addChunkManager(mGroundcover.get());
-            mResourceSystem->addResourceManager(mGroundcover.get());
-        }
+        WorldspaceChunkMgr& chunkMgr = getWorldspaceChunkMgr(ESM::Cell::sDefaultWorldspaceId);
+        mTerrain = chunkMgr.mTerrain.get();
+        mGroundcover = chunkMgr.mGroundcover.get();
+        mObjectPaging = chunkMgr.mObjectPaging.get();
 
         mStateUpdater = new StateUpdater;
         sceneRoot->addUpdateCallback(mStateUpdater);
@@ -633,7 +599,7 @@ namespace MWRender
 
     Terrain::World* RenderingManager::getTerrain()
     {
-        return mTerrain.get();
+        return mTerrain;
     }
 
     void RenderingManager::preloadCommonAssets()
@@ -771,6 +737,7 @@ namespace MWRender
 
         if (store->getCell()->isExterior())
         {
+            enableTerrain(true, store->getCell()->getWorldSpace());
             mTerrain->loadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
         }
     }
@@ -782,16 +749,28 @@ namespace MWRender
 
         if (store->getCell()->isExterior())
         {
-            mTerrain->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
+            getWorldspaceChunkMgr(store->getCell()->getWorldSpace())
+                .mTerrain->unloadCell(store->getCell()->getGridX(), store->getCell()->getGridY());
         }
 
         mWater->removeCell(store);
     }
 
-    void RenderingManager::enableTerrain(bool enable)
+    void RenderingManager::enableTerrain(bool enable, ESM::RefId worldspace)
     {
         if (!enable)
             mWater->setCullCallback(nullptr);
+        else
+        {
+            WorldspaceChunkMgr& newChunks = getWorldspaceChunkMgr(worldspace);
+            if (newChunks.mTerrain.get() != mTerrain)
+            {
+                mTerrain->enable(false);
+                mTerrain = newChunks.mTerrain.get();
+                mGroundcover = newChunks.mGroundcover.get();
+                mObjectPaging = newChunks.mObjectPaging.get();
+            }
+        }
         mTerrain->enable(enable);
     }
 
@@ -1343,6 +1322,60 @@ namespace MWRender
         mStateUpdater->setFogColor(color);
     }
 
+    RenderingManager::WorldspaceChunkMgr& RenderingManager::getWorldspaceChunkMgr(ESM::RefId worldspace)
+    {
+        auto existingChunkMgr = mWorldspaceChunks.find(worldspace);
+        if (existingChunkMgr != mWorldspaceChunks.end())
+            return existingChunkMgr->second;
+        RenderingManager::WorldspaceChunkMgr newChunkMgr;
+
+        const float lodFactor = Settings::Manager::getFloat("lod factor", "Terrain");
+        bool groundcover = Settings::Manager::getBool("enabled", "Groundcover");
+        bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
+        if (distantTerrain || groundcover)
+        {
+            const int compMapResolution = Settings::Manager::getInt("composite map resolution", "Terrain");
+            int compMapPower = Settings::Manager::getInt("composite map level", "Terrain");
+            compMapPower = std::max(-3, compMapPower);
+            float compMapLevel = pow(2, compMapPower);
+            const int vertexLodMod = Settings::Manager::getInt("vertex lod mod", "Terrain");
+            float maxCompGeometrySize = Settings::Manager::getFloat("max composite geometry size", "Terrain");
+            maxCompGeometrySize = std::max(maxCompGeometrySize, 1.f);
+            bool debugChunks = Settings::Manager::getBool("debug chunks", "Terrain");
+            auto quadTreeWorld = std::make_unique<Terrain::QuadTreeWorld>(mSceneRoot, mRootNode, mResourceSystem,
+                mTerrainStorage.get(), Mask_Terrain, Mask_PreCompile, Mask_Debug, compMapResolution, compMapLevel,
+                lodFactor, vertexLodMod, maxCompGeometrySize, debugChunks, worldspace);
+            if (Settings::Manager::getBool("object paging", "Terrain"))
+            {
+                newChunkMgr.mObjectPaging = std::make_unique<ObjectPaging>(mResourceSystem->getSceneManager());
+                quadTreeWorld->addChunkManager(newChunkMgr.mObjectPaging.get());
+                mResourceSystem->addResourceManager(newChunkMgr.mObjectPaging.get());
+            }
+            if (groundcover)
+            {
+                float groundcoverDistance
+                    = std::max(0.f, Settings::Manager::getFloat("rendering distance", "Groundcover"));
+                float density = Settings::Manager::getFloat("density", "Groundcover");
+                density = std::clamp(density, 0.f, 1.f);
+
+                newChunkMgr.mGroundcover = std::make_unique<Groundcover>(
+                    mResourceSystem->getSceneManager(), density, groundcoverDistance, mGroundCoverStore);
+                quadTreeWorld->addChunkManager(newChunkMgr.mGroundcover.get());
+                mResourceSystem->addResourceManager(newChunkMgr.mGroundcover.get());
+            }
+            newChunkMgr.mTerrain = std::move(quadTreeWorld);
+        }
+        else
+            newChunkMgr.mTerrain = std::make_unique<Terrain::TerrainGrid>(mSceneRoot, mRootNode, mResourceSystem,
+                mTerrainStorage.get(), Mask_Terrain, worldspace, Mask_PreCompile, Mask_Debug);
+
+        newChunkMgr.mTerrain->setTargetFrameRate(Settings::cells().mTargetFramerate);
+        float distanceMult = std::cos(osg::DegreesToRadians(std::min(mFieldOfView, 140.f)) / 2.f);
+        newChunkMgr.mTerrain->setViewDistance(mViewDistance * (distanceMult ? 1.f / distanceMult : 1.f));
+
+        return mWorldspaceChunks.emplace(worldspace, std::move(newChunkMgr)).first->second;
+    }
+
     void RenderingManager::reportStats() const
     {
         osg::Stats* stats = mViewer->getViewerStats();
@@ -1444,9 +1477,9 @@ namespace MWRender
         updateProjectionMatrix();
     }
 
-    float RenderingManager::getTerrainHeightAt(const osg::Vec3f& pos)
+    float RenderingManager::getTerrainHeightAt(const osg::Vec3f& pos, ESM::RefId worldspace)
     {
-        return mTerrain->getHeightAt(pos);
+        return getWorldspaceChunkMgr(worldspace).mTerrain->getHeightAt(pos);
     }
 
     void RenderingManager::overrideFieldOfView(float val)

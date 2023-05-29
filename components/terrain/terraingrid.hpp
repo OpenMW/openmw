@@ -27,8 +27,9 @@ namespace Terrain
     {
     public:
         TerrainGrid(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem,
-            Storage* storage, unsigned int nodeMask, unsigned int preCompileMask = ~0u, unsigned int borderMask = 0);
-        TerrainGrid(osg::Group* parent, Storage* storage, unsigned int nodeMask = ~0u);
+            Storage* storage, unsigned int nodeMask, ESM::RefId worldspace, unsigned int preCompileMask = ~0u,
+            unsigned int borderMask = 0);
+        TerrainGrid(osg::Group* parent, Storage* storage, ESM::RefId worldspace, unsigned int nodeMask = ~0u);
         ~TerrainGrid();
 
         void cacheCell(View* view, int x, int y) override;

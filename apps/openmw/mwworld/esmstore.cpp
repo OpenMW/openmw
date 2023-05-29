@@ -14,6 +14,7 @@
 #include <components/misc/algorithm.hpp>
 
 #include <components/esm4/common.hpp>
+#include <components/esm4/loadland.hpp>
 #include <components/esm4/loadwrld.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/esm4/readerutils.hpp>
@@ -447,6 +448,7 @@ namespace MWWorld
         getWritable<ESM::Skill>().setUp();
         getWritable<ESM::MagicEffect>().setUp();
         getWritable<ESM::Attribute>().setUp();
+        getWritable<ESM4::Land>().updateLandPositions(get<ESM4::Cell>());
         getWritable<ESM4::Reference>().preprocessReferences(get<ESM4::Cell>());
     }
 
