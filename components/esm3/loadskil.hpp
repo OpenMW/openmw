@@ -44,6 +44,7 @@ namespace ESM
         int mIndex;
 
         std::string mDescription;
+        std::string mName;
 
         enum SkillEnum
         {
@@ -77,7 +78,6 @@ namespace ESM
             Length
         };
         static const std::string sSkillNames[Length];
-        static const std::string sSkillNameIds[Length];
         static const std::string sIconNames[Length];
 
         static SkillEnum stringToSkillId(std::string_view skill);

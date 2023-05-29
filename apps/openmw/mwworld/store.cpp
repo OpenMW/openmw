@@ -901,6 +901,53 @@ namespace MWWorld
 
     Store<ESM::Skill>::Store() {}
 
+    void Store<ESM::Skill>::setUp(const MWWorld::Store<ESM::GameSetting> settings)
+    {
+        constexpr std::string_view skillNameIds[ESM::Skill::Length] = {
+            "sSkillBlock",
+            "sSkillArmorer",
+            "sSkillMediumarmor",
+            "sSkillHeavyarmor",
+            "sSkillBluntweapon",
+            "sSkillLongblade",
+            "sSkillAxe",
+            "sSkillSpear",
+            "sSkillAthletics",
+            "sSkillEnchant",
+            "sSkillDestruction",
+            "sSkillAlteration",
+            "sSkillIllusion",
+            "sSkillConjuration",
+            "sSkillMysticism",
+            "sSkillRestoration",
+            "sSkillAlchemy",
+            "sSkillUnarmored",
+            "sSkillSecurity",
+            "sSkillSneak",
+            "sSkillAcrobatics",
+            "sSkillLightarmor",
+            "sSkillShortblade",
+            "sSkillMarksman",
+            "sSkillMercantile",
+            "sSkillSpeechcraft",
+            "sSkillHandtohand",
+        };
+        for (int i = 0; i < ESM::Skill::Length; ++i)
+        {
+            auto found = mStatic.find(i);
+            if (found != mStatic.end())
+            {
+                ESM::Skill& skill = found->second;
+                std::string_view id = skillNameIds[i];
+                const ESM::GameSetting* setting = settings.search(id);
+                if (setting && setting->mValue.getType() == ESM::VT_String)
+                    skill.mName = setting->mValue.getString();
+                else
+                    skill.mName = id;
+            }
+        }
+    }
+
     // Game Settings
     //=========================================================================
 

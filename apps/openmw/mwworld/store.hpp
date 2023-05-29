@@ -474,6 +474,8 @@ namespace MWWorld
     {
     public:
         Store();
+
+        void setUp(const MWWorld::Store<ESM::GameSetting> settings);
     };
 
     template <>

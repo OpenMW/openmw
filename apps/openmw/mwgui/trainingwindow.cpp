@@ -2,6 +2,7 @@
 
 #include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
+#include <MyGUI_TextIterator.h>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -97,8 +98,9 @@ namespace MWGui
 
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
-        const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
+        const auto& store = MWBase::Environment::get().getESMStore();
+        const MWWorld::Store<ESM::GameSetting>& gmst = store->get<ESM::GameSetting>();
+        const MWWorld::Store<ESM::Skill>& skillStore = store->get<ESM::Skill>();
 
         const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
 
@@ -118,8 +120,9 @@ namespace MWGui
             button->setUserData(skills[i].first);
             button->eventMouseButtonClick += MyGUI::newDelegate(this, &TrainingWindow::onTrainingSelected);
 
+            const ESM::Skill* skill = skillStore.find(skills[i].first);
             button->setCaptionWithReplacing(
-                "#{" + ESM::Skill::sSkillNameIds[skills[i].first] + "} - " + MyGUI::utility::toString(price));
+                MyGUI::TextIterator::toTagsString(skill->mName) + " - " + MyGUI::utility::toString(price));
 
             button->setSize(button->getTextSize().width + 12, button->getSize().height);
 

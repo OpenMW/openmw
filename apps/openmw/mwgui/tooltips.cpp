@@ -6,6 +6,7 @@
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
 #include <MyGUI_RenderManager.h>
+#include <MyGUI_TextIterator.h>
 
 #include <components/esm/records.hpp>
 #include <components/l10n/manager.hpp>
@@ -810,18 +811,14 @@ namespace MWGui
             return;
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-
-        const std::string& skillNameId = ESM::Skill::sSkillNameIds[skillId];
         const ESM::Skill* skill = store.get<ESM::Skill>().find(skillId);
-        assert(skill);
-
         const ESM::Attribute* attr = store.get<ESM::Attribute>().find(skill->mData.mAttribute);
-        assert(attr);
+
         std::string icon = "icons\\k\\" + ESM::Skill::sIconNames[skillId];
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "SkillNoProgressToolTip");
-        widget->setUserString("Caption_SkillNoProgressName", "#{" + skillNameId + "}");
+        widget->setUserString("Caption_SkillNoProgressName", MyGUI::TextIterator::toTagsString(skill->mName));
         widget->setUserString("Caption_SkillNoProgressDescription", skill->mDescription);
         widget->setUserString("Caption_SkillNoProgressAttribute", "#{sGoverningAttribute}: #{" + attr->mName + "}");
         widget->setUserString("ImageTexture_SkillNoProgressImage", icon);
@@ -853,16 +850,16 @@ namespace MWGui
         const MWWorld::Store<ESM::Skill>& skills = MWBase::Environment::get().getESMStore()->get<ESM::Skill>();
 
         bool isFirst = true;
-        for (auto& skillPair : skills)
+        for (const auto& [_, skill] : skills)
         {
-            if (skillPair.second.mData.mSpecialization == specId)
+            if (skill.mData.mSpecialization == specId)
             {
                 if (isFirst)
                     isFirst = false;
                 else
                     specText += "\n";
 
-                specText += std::string("#{") + ESM::Skill::sSkillNameIds[skillPair.first] + "}";
+                specText += MyGUI::TextIterator::toTagsString(skill.mName);
             }
         }
         widget->setUserString("Caption_ColumnText", specText);

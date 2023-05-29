@@ -165,8 +165,8 @@ namespace MWClass
         {
             text += "\n#{sType} ";
 
-            int skill = MWMechanics::getWeaponType(ref->mBase->mData.mType)->mSkill;
-            const std::string& type = ESM::Skill::sSkillNameIds[skill];
+            const ESM::Skill* skill
+                = store.get<ESM::Skill>().find(MWMechanics::getWeaponType(ref->mBase->mData.mType)->mSkill);
             std::string_view oneOrTwoHanded;
             if (weaponType->mWeaponClass == ESM::WeaponType::Melee)
             {
@@ -176,7 +176,7 @@ namespace MWClass
                     oneOrTwoHanded = "sOneHanded";
             }
 
-            text += store.get<ESM::GameSetting>().find(type)->mValue.getString();
+            text += skill->mName;
             if (!oneOrTwoHanded.empty())
                 text += ", " + store.get<ESM::GameSetting>().find(oneOrTwoHanded)->mValue.getString();
 

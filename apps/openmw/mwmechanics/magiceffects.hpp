@@ -12,6 +12,7 @@ namespace ESM
     struct EffectList;
     struct MagicEffect;
     struct MagicEffects;
+    struct Skill;
 }
 
 namespace MWMechanics
@@ -114,7 +115,8 @@ namespace MWMechanics
         ///< Return changes from \a prev to \a now.
     };
 
-    std::string getMagicEffectString(const ESM::MagicEffect& effect, const ESM::Attribute* attribute, int skillArg);
+    std::string getMagicEffectString(
+        const ESM::MagicEffect& effect, const ESM::Attribute* attribute, const ESM::Skill* skill);
 }
 
 #endif

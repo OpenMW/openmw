@@ -341,10 +341,9 @@ namespace MWGui
 
         for (const int& skillId : skills)
         {
-            if (skillId < 0 || skillId >= ESM::Skill::Length) // Skip unknown skill indexes
+            const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().search(skillId);
+            if (!skill) // Skip unknown skill indexes
                 continue;
-            assert(skillId >= 0 && skillId < ESM::Skill::Length);
-            const std::string& skillNameId = ESM::Skill::sSkillNameIds[skillId];
             const MWMechanics::SkillValue& stat = mSkillValues.find(skillId)->second;
             int base = stat.getBase();
             int modified = stat.getModified();
@@ -355,8 +354,7 @@ namespace MWGui
             else if (modified < base)
                 state = "decreased";
             MyGUI::TextBox* widget = addValueItem(
-                MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId),
-                MyGUI::utility::toString(static_cast<int>(modified)), state, coord1, coord2);
+                skill->mName, MyGUI::utility::toString(static_cast<int>(modified)), state, coord1, coord2);
 
             for (int i = 0; i < 2; ++i)
             {
