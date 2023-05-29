@@ -18,8 +18,6 @@ CSMWorld::IdTree::IdTree(NestedCollection* nestedCollection, CollectionBase* idC
 {
 }
 
-CSMWorld::IdTree::~IdTree() {}
-
 int CSMWorld::IdTree::rowCount(const QModelIndex& parent) const
 {
     if (hasChildren(parent))

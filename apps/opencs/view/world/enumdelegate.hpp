@@ -59,7 +59,7 @@ namespace CSVWorld
         std::vector<std::pair<int, QString>> mValues;
 
     public:
-        EnumDelegateFactory();
+        EnumDelegateFactory() = default;
 
         EnumDelegateFactory(const char** names, bool allowNone = false);
         ///< \param names Array of char pointer with a 0-pointer as end mark

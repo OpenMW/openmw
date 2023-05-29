@@ -94,8 +94,6 @@ CSMWorld::IngredEffectRefIdAdapter::IngredEffectRefIdAdapter()
 {
 }
 
-CSMWorld::IngredEffectRefIdAdapter::~IngredEffectRefIdAdapter() {}
-
 void CSMWorld::IngredEffectRefIdAdapter::addNestedRow(
     const RefIdColumn* column, RefIdData& data, int index, int position) const
 {
@@ -882,8 +880,6 @@ void CSMWorld::NpcRefIdAdapter::setData(
     record.setModified(npc);
 }
 
-CSMWorld::NpcAttributesRefIdAdapter::NpcAttributesRefIdAdapter() {}
-
 void CSMWorld::NpcAttributesRefIdAdapter::addNestedRow(
     const RefIdColumn* column, RefIdData& data, int index, int position) const
 {
@@ -1015,8 +1011,6 @@ int CSMWorld::NpcAttributesRefIdAdapter::getNestedRowsCount(
     return 8;
 }
 
-CSMWorld::NpcSkillsRefIdAdapter::NpcSkillsRefIdAdapter() {}
-
 void CSMWorld::NpcSkillsRefIdAdapter::addNestedRow(
     const RefIdColumn* column, RefIdData& data, int index, int position) const
 {
@@ -1105,10 +1099,6 @@ int CSMWorld::NpcSkillsRefIdAdapter::getNestedRowsCount(
     // There are 27 skills
     return ESM::Skill::Length;
 }
-
-CSMWorld::NpcMiscRefIdAdapter::NpcMiscRefIdAdapter() {}
-
-CSMWorld::NpcMiscRefIdAdapter::~NpcMiscRefIdAdapter() {}
 
 void CSMWorld::NpcMiscRefIdAdapter::addNestedRow(
     const RefIdColumn* column, RefIdData& data, int index, int position) const
@@ -1268,8 +1258,6 @@ int CSMWorld::NpcMiscRefIdAdapter::getNestedRowsCount(const RefIdColumn* column,
     return 1; // fixed at size 1
 }
 
-CSMWorld::CreatureAttributesRefIdAdapter::CreatureAttributesRefIdAdapter() {}
-
 void CSMWorld::CreatureAttributesRefIdAdapter::addNestedRow(
     const RefIdColumn* column, RefIdData& data, int index, int position) const
 {
@@ -1401,8 +1389,6 @@ int CSMWorld::CreatureAttributesRefIdAdapter::getNestedRowsCount(
     return 8;
 }
 
-CSMWorld::CreatureAttackRefIdAdapter::CreatureAttackRefIdAdapter() {}
-
 void CSMWorld::CreatureAttackRefIdAdapter::addNestedRow(
     const RefIdColumn* column, RefIdData& data, int index, int position) const
 {
@@ -1490,10 +1476,6 @@ int CSMWorld::CreatureAttackRefIdAdapter::getNestedRowsCount(
     // There are 3 attacks
     return 3;
 }
-
-CSMWorld::CreatureMiscRefIdAdapter::CreatureMiscRefIdAdapter() {}
-
-CSMWorld::CreatureMiscRefIdAdapter::~CreatureMiscRefIdAdapter() {}
 
 void CSMWorld::CreatureMiscRefIdAdapter::addNestedRow(
     const RefIdColumn* column, RefIdData& data, int index, int position) const

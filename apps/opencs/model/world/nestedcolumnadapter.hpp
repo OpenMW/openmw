@@ -14,9 +14,9 @@ namespace CSMWorld
     class NestedColumnAdapter
     {
     public:
-        NestedColumnAdapter() {}
+        NestedColumnAdapter() = default;
 
-        virtual ~NestedColumnAdapter() {}
+        virtual ~NestedColumnAdapter() = default;
 
         virtual void addRow(Record<ESXRecordT>& record, int position) const = 0;
 

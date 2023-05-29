@@ -14,8 +14,7 @@ namespace Wizard
     class IniSettings
     {
     public:
-        explicit IniSettings();
-        ~IniSettings();
+        explicit IniSettings() = default;
 
         inline QVariant value(const QString& key, const QVariant& defaultValue = QVariant()) const
         {

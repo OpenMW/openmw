@@ -55,8 +55,6 @@ QVariant CSVWorld::NastyTableModelHack::getData() const
     return mData;
 }
 
-CSVWorld::CommandDelegateFactory::~CommandDelegateFactory() {}
-
 CSVWorld::CommandDelegateFactoryCollection* CSVWorld::CommandDelegateFactoryCollection::sThis = nullptr;
 
 CSVWorld::CommandDelegateFactoryCollection::CommandDelegateFactoryCollection()

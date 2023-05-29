@@ -33,8 +33,6 @@ QStringList CSMWorld::TableMimeData::formats() const
     return mObjectsFormats;
 }
 
-CSMWorld::TableMimeData::~TableMimeData() {}
-
 std::string CSMWorld::TableMimeData::getIcon() const
 {
     if (mUniversalId.empty())

@@ -15,7 +15,7 @@ namespace CSVRender
     class LightingNight : public Lighting
     {
     public:
-        LightingNight();
+        LightingNight() = default;
 
         void activate(osg::Group* rootNode, bool isExterior) override;
         void deactivate() override;

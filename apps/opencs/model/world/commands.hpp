@@ -192,7 +192,7 @@ namespace CSMWorld
     public:
         RevertCommand(IdTable& model, const std::string& id, QUndoCommand* parent = nullptr);
 
-        virtual ~RevertCommand();
+        ~RevertCommand() override = default;
 
         void redo() override;
 
@@ -214,7 +214,7 @@ namespace CSMWorld
         DeleteCommand(IdTable& model, const std::string& id, UniversalId::Type type = UniversalId::Type_None,
             QUndoCommand* parent = nullptr);
 
-        virtual ~DeleteCommand();
+        ~DeleteCommand() override = default;
 
         void redo() override;
 

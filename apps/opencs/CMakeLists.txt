@@ -9,7 +9,7 @@ opencs_units (model/doc
     )
 
 opencs_units (model/doc
-    stage savingstate savingstages blacklist messages
+    savingstate savingstages blacklist messages
     )
 
 opencs_hdrs (model/doc
@@ -25,7 +25,7 @@ opencs_units (model/world
 
 opencs_units (model/world
     universalid record commands columnbase columnimp scriptcontext cell refidcollection
-    refidadapter refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
+    refiddata refidadapterimp ref collectionbase refcollection columns infocollection tablemimedata cellcoordinates cellselection resources resourcesmanager scope
     pathgrid landtexture land nestedtablewrapper nestedcollection nestedcoladapterimp nestedinfocollection
     idcompletionmanager metadata defaultgmsts infoselectwrapper commandmacro
     )
@@ -124,7 +124,7 @@ opencs_units (model/prefs
     )
 
 opencs_units (model/filter
-    node unarynode narynode leafnode booleannode parser andnode ornode notnode textnode valuenode
+    unarynode narynode leafnode booleannode parser andnode ornode notnode textnode valuenode
     )
 
 opencs_units (view/filter

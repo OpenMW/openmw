@@ -134,8 +134,6 @@ QSize CSVWorld::EnumDelegate::sizeHint(const QStyleOptionViewItem& option, const
     return option.rect.size();
 }
 
-CSVWorld::EnumDelegateFactory::EnumDelegateFactory() {}
-
 CSVWorld::EnumDelegateFactory::EnumDelegateFactory(const char** names, bool allowNone)
 {
     assert(names);

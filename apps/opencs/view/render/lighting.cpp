@@ -62,8 +62,6 @@ private:
     int mIndex;
 };
 
-CSVRender::Lighting::~Lighting() {}
-
 void CSVRender::Lighting::updateDayNightMode(int index)
 {
     if (mRootNode == nullptr)

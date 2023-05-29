@@ -29,7 +29,7 @@ namespace CSMPrefs
     public:
         Setting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label);
 
-        virtual ~Setting();
+        ~Setting() override = default;
 
         /// Return label, input widget.
         ///

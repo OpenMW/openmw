@@ -11,8 +11,6 @@ CSMWorld::ColumnBase::ColumnBase(int columnId, Display displayType, int flags)
 {
 }
 
-CSMWorld::ColumnBase::~ColumnBase() {}
-
 bool CSMWorld::ColumnBase::isUserEditable() const
 {
     return isEditable();

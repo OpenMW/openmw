@@ -98,7 +98,7 @@ namespace CSMDoc
             const std::vector<std::string>& blacklistedScripts, bool fsStrict, const Files::PathContainer& dataPaths,
             const std::vector<std::string>& archives);
 
-        ~Document();
+        ~Document() override = default;
 
         QUndoStack& getUndoStack();
 

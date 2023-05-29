@@ -28,8 +28,6 @@ namespace CSVRender
         connect(mCenterShortcut, qOverload<>(&CSMPrefs::Shortcut::activated), this, &OrbitCameraMode::centerSelection);
     }
 
-    OrbitCameraMode::~OrbitCameraMode() {}
-
     void OrbitCameraMode::activate(CSVWidget::SceneToolbar* toolbar)
     {
         mCenterOnSelection = new QAction("Center on selected object", this);

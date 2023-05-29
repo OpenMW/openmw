@@ -36,7 +36,7 @@ namespace CSMWorld
         IdTable(CollectionBase* idCollection, unsigned int features = 0);
         ///< The ownership of \a idCollection is not transferred.
 
-        virtual ~IdTable();
+        virtual ~IdTable() = default;
 
         int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 

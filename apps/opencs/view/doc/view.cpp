@@ -538,8 +538,6 @@ CSVDoc::View::View(ViewManager& viewManager, CSMDoc::Document* document, int tot
     connect(&CSMPrefs::State::get(), &CSMPrefs::State::settingChanged, this, &View::settingChanged);
 }
 
-CSVDoc::View::~View() {}
-
 const CSMDoc::Document* CSVDoc::View::getDocument() const
 {
     return mDocument;

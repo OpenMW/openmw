@@ -29,7 +29,7 @@ namespace CSVRender
     public:
         OrbitCameraMode(WorldspaceWidget* worldspaceWidget, const QIcon& icon, const QString& tooltip = "",
             QWidget* parent = nullptr);
-        ~OrbitCameraMode();
+        ~OrbitCameraMode() override = default;
 
         void activate(CSVWidget::SceneToolbar* toolbar) override;
         void deactivate(CSVWidget::SceneToolbar* toolbar) override;

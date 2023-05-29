@@ -25,14 +25,11 @@ namespace CSMWorld
 
     class RefIdAdapter
     {
-        // not implemented
-        RefIdAdapter(const RefIdAdapter&);
-        RefIdAdapter& operator=(const RefIdAdapter&);
-
     public:
-        RefIdAdapter();
-
-        virtual ~RefIdAdapter();
+        RefIdAdapter() = default;
+        RefIdAdapter(const RefIdAdapter&) = delete;
+        RefIdAdapter& operator=(const RefIdAdapter&) = delete;
+        virtual ~RefIdAdapter() = default;
 
         virtual QVariant getData(const RefIdColumn* column, const RefIdData& data, int idnex) const = 0;
         ///< If called on the nest column, should return QVariant(true).
@@ -48,9 +45,9 @@ namespace CSMWorld
     class NestedRefIdAdapterBase
     {
     public:
-        NestedRefIdAdapterBase();
+        NestedRefIdAdapterBase() = default;
 
-        virtual ~NestedRefIdAdapterBase();
+        virtual ~NestedRefIdAdapterBase() = default;
 
         virtual void setNestedData(const RefIdColumn* column, RefIdData& data, int row, const QVariant& value,
             int subRowIndex, int subColIndex) const = 0;

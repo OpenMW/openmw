@@ -58,10 +58,6 @@ namespace CSVDoc
         QScrollArea* mScroll;
         bool mScrollbarOnly;
 
-        // not implemented
-        View(const View&);
-        View& operator=(const View&);
-
     private:
         void closeEvent(QCloseEvent* event) override;
 
@@ -107,10 +103,10 @@ namespace CSVDoc
 
     public:
         View(ViewManager& viewManager, CSMDoc::Document* document, int totalViews);
-
         ///< The ownership of \a document is not transferred to *this.
-
-        ~View() override;
+        View(const View&) = delete;
+        View& operator=(const View&) = delete;
+        ~View() override = default;
 
         const CSMDoc::Document* getDocument() const;
 

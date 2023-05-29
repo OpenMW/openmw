@@ -45,8 +45,6 @@ namespace CSVRender
     {
     }
 
-    CameraController::~CameraController() {}
-
     bool CameraController::isActive() const
     {
         return mActive;

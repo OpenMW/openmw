@@ -44,7 +44,7 @@ namespace CSMWorld
 
         TableMimeData(const std::vector<UniversalId>& id, const CSMDoc::Document& document);
 
-        ~TableMimeData();
+        ~TableMimeData() override = default;
 
         QStringList formats() const override;
 

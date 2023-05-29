@@ -25,8 +25,6 @@
 
 namespace CSMWorld
 {
-    PathgridPointListAdapter::PathgridPointListAdapter() {}
-
     void PathgridPointListAdapter::addRow(Record<Pathgrid>& record, int position) const
     {
         Pathgrid pathgrid = record.get();
@@ -134,8 +132,6 @@ namespace CSMWorld
     {
         return static_cast<int>(record.get().mPoints.size());
     }
-
-    PathgridEdgeListAdapter::PathgridEdgeListAdapter() {}
 
     void PathgridEdgeListAdapter::addRow(Record<Pathgrid>& record, int position) const
     {
@@ -245,8 +241,6 @@ namespace CSMWorld
     {
         return static_cast<int>(record.get().mEdges.size());
     }
-
-    FactionReactionsAdapter::FactionReactionsAdapter() {}
 
     void FactionReactionsAdapter::addRow(Record<ESM::Faction>& record, int position) const
     {
@@ -372,8 +366,6 @@ namespace CSMWorld
         return static_cast<int>(record.get().mReactions.size());
     }
 
-    RegionSoundListAdapter::RegionSoundListAdapter() {}
-
     void RegionSoundListAdapter::addRow(Record<ESM::Region>& record, int position) const
     {
         ESM::Region region = record.get();
@@ -479,8 +471,6 @@ namespace CSMWorld
         return static_cast<int>(record.get().mSoundList.size());
     }
 
-    InfoListAdapter::InfoListAdapter() {}
-
     void InfoListAdapter::addRow(Record<Info>& record, int position) const
     {
         throw std::logic_error("cannot add a row to a fixed table");
@@ -532,8 +522,6 @@ namespace CSMWorld
     {
         return 1; // fixed at size 1
     }
-
-    InfoConditionAdapter::InfoConditionAdapter() {}
 
     void InfoConditionAdapter::addRow(Record<Info>& record, int position) const
     {
@@ -722,8 +710,6 @@ namespace CSMWorld
         return static_cast<int>(record.get().mSelects.size());
     }
 
-    RaceAttributeAdapter::RaceAttributeAdapter() {}
-
     void RaceAttributeAdapter::addRow(Record<ESM::Race>& record, int position) const
     {
         // Do nothing, this table cannot be changed by the user
@@ -807,8 +793,6 @@ namespace CSMWorld
         return ESM::Attribute::Length; // there are 8 attributes
     }
 
-    RaceSkillsBonusAdapter::RaceSkillsBonusAdapter() {}
-
     void RaceSkillsBonusAdapter::addRow(Record<ESM::Race>& record, int position) const
     {
         // Do nothing, this table cannot be changed by the user
@@ -890,8 +874,6 @@ namespace CSMWorld
         // there are 7 skill bonuses
         return static_cast<int>(sizeof(record.get().mData.mBonus) / sizeof(record.get().mData.mBonus[0]));
     }
-
-    CellListAdapter::CellListAdapter() {}
 
     void CellListAdapter::addRow(Record<CSMWorld::Cell>& record, int position) const
     {
@@ -1064,8 +1046,6 @@ namespace CSMWorld
         return 1; // fixed at size 1
     }
 
-    RegionWeatherAdapter::RegionWeatherAdapter() {}
-
     void RegionWeatherAdapter::addRow(Record<ESM::Region>& record, int position) const
     {
         throw std::logic_error("cannot add a row to a fixed table");
@@ -1186,8 +1166,6 @@ namespace CSMWorld
     {
         return 10;
     }
-
-    FactionRanksAdapter::FactionRanksAdapter() {}
 
     void FactionRanksAdapter::addRow(Record<ESM::Faction>& record, int position) const
     {

@@ -98,10 +98,6 @@ namespace CSMWorld
         std::map<ESM::RefId, int> mIndex;
         std::vector<Column<ESXRecordT>*> mColumns;
 
-        // not implemented
-        Collection(const Collection&);
-        Collection& operator=(const Collection&);
-
     protected:
         const std::vector<std::unique_ptr<Record<ESXRecordT>>>& getRecords() const;
 
@@ -120,7 +116,9 @@ namespace CSMWorld
         ///< Returns the index of the record on success, -1 on failure.
 
     public:
-        Collection();
+        Collection() = default;
+        Collection(const Collection&) = delete;
+        Collection& operator=(const Collection&) = delete;
 
         ~Collection() override;
 
@@ -340,11 +338,6 @@ namespace CSMWorld
         }
 
         return false;
-    }
-
-    template <typename ESXRecordT>
-    Collection<ESXRecordT>::Collection()
-    {
     }
 
     template <typename ESXRecordT>

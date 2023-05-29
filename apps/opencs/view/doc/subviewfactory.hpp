@@ -16,14 +16,11 @@ namespace CSVDoc
 
     class SubViewFactoryBase
     {
-        // not implemented
-        SubViewFactoryBase(const SubViewFactoryBase&);
-        SubViewFactoryBase& operator=(const SubViewFactoryBase&);
-
     public:
-        SubViewFactoryBase();
-
-        virtual ~SubViewFactoryBase();
+        SubViewFactoryBase() = default;
+        SubViewFactoryBase(const SubViewFactoryBase&) = delete;
+        SubViewFactoryBase& operator=(const SubViewFactoryBase&) = delete;
+        virtual ~SubViewFactoryBase() = default;
 
         virtual SubView* makeSubView(const CSMWorld::UniversalId& id, CSMDoc::Document& document) = 0;
         ///< The ownership of the returned sub view is not transferred.
@@ -33,13 +30,10 @@ namespace CSVDoc
     {
         std::map<CSMWorld::UniversalId::Type, SubViewFactoryBase*> mSubViewFactories;
 
-        // not implemented
-        SubViewFactoryManager(const SubViewFactoryManager&);
-        SubViewFactoryManager& operator=(const SubViewFactoryManager&);
-
     public:
-        SubViewFactoryManager();
-
+        SubViewFactoryManager() = default;
+        SubViewFactoryManager(const SubViewFactoryManager&) = delete;
+        SubViewFactoryManager& operator=(const SubViewFactoryManager&) = delete;
         ~SubViewFactoryManager();
 
         void add(const CSMWorld::UniversalId::Type& id, SubViewFactoryBase* factory);

@@ -7,7 +7,7 @@ namespace CSMDoc
     class Stage
     {
     public:
-        virtual ~Stage();
+        virtual ~Stage() = default;
 
         virtual int setup() = 0;
         ///< \return number of steps

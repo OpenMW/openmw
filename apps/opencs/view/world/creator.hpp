@@ -21,7 +21,7 @@ namespace CSVWorld
         Q_OBJECT
 
     public:
-        virtual ~Creator();
+        ~Creator() override = default;
 
         virtual void reset() = 0;
 
@@ -53,7 +53,7 @@ namespace CSVWorld
     class CreatorFactoryBase
     {
     public:
-        virtual ~CreatorFactoryBase();
+        virtual ~CreatorFactoryBase() = default;
 
         virtual Creator* makeCreator(CSMDoc::Document& document, const CSMWorld::UniversalId& id) const = 0;
         ///< The ownership of the returned Creator is transferred to the caller.

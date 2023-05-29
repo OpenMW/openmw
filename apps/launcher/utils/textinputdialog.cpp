@@ -43,8 +43,6 @@ Launcher::TextInputDialog::TextInputDialog(const QString& title, const QString& 
     connect(mButtonBox, &QDialogButtonBox::rejected, this, &TextInputDialog::reject);
 }
 
-Launcher::TextInputDialog::~TextInputDialog() {}
-
 int Launcher::TextInputDialog::exec()
 {
     mLineEdit->clear();

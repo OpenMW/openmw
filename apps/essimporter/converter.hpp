@@ -56,7 +56,7 @@ namespace ESSImport
         /// @return the order for writing this converter's records to the output file, in relation to other converters
         virtual int getStage() { return 1; }
 
-        virtual ~Converter() {}
+        virtual ~Converter() = default;
 
         void setContext(Context& context) { mContext = &context; }
 

@@ -32,7 +32,7 @@ namespace CSVRender
         static const osg::Vec3d LocalForward;
 
         CameraController(QObject* parent);
-        virtual ~CameraController();
+        ~CameraController() override = default;
 
         bool isActive() const;
 

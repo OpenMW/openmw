@@ -57,7 +57,7 @@ namespace CSVWorld
     class CommandDelegateFactory
     {
     public:
-        virtual ~CommandDelegateFactory();
+        virtual ~CommandDelegateFactory() = default;
 
         virtual CommandDelegate* makeDelegate(
             CSMWorld::CommandDispatcher* dispatcher, CSMDoc::Document& document, QObject* parent) const = 0;

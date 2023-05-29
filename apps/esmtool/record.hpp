@@ -34,7 +34,7 @@ namespace EsmTool
         {
         }
 
-        virtual ~RecordBase() {}
+        virtual ~RecordBase() = default;
 
         virtual std::string getId() const = 0;
 

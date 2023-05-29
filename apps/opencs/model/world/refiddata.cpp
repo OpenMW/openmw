@@ -14,8 +14,6 @@ namespace ESM
     class ESMWriter;
 }
 
-CSMWorld::RefIdDataContainerBase::~RefIdDataContainerBase() {}
-
 ESM::RefId CSMWorld::RefIdData::getRecordId(const CSMWorld::RefIdData::LocalIndex& index) const
 {
     std::map<UniversalId::Type, RefIdDataContainerBase*>::const_iterator found = mRecordContainers.find(index.second);

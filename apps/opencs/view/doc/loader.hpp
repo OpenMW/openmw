@@ -73,7 +73,7 @@ namespace CSVDoc
         std::map<CSMDoc::Document*, LoadingDocument*> mDocuments;
 
     public:
-        Loader();
+        Loader() = default;
 
         ~Loader() override;
 
