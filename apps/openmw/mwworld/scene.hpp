@@ -74,7 +74,7 @@ namespace MWWorld
     class Scene
     {
     public:
-        using CellStoreCollection = std::set<CellStore*>;
+        using CellStoreCollection = std::set<CellStore*, std::less<>>;
 
     private:
         struct ChangeCellGridRequest

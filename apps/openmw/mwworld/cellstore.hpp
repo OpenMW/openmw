@@ -134,7 +134,15 @@ namespace MWWorld
 
         /// @param readerList The readers to use for loading of the cell on-demand.
         CellStore(MWWorld::Cell cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
-        CellStore(CellStore&&);
+
+        CellStore(const CellStore&) = delete;
+
+        CellStore(CellStore&&) = delete;
+
+        CellStore& operator=(const CellStore&) = delete;
+
+        CellStore& operator=(CellStore&&) = delete;
+
         ~CellStore();
 
         const MWWorld::Cell* getCell() const;
@@ -323,8 +331,6 @@ namespace MWWorld
         Ptr getMovedActor(int actorId) const;
 
         Ptr getPtr(ESM::RefId id);
-
-        bool operator==(const CellStore& right) const;
 
     private:
         friend struct CellStoreImp;

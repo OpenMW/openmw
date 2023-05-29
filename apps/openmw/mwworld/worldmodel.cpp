@@ -17,6 +17,22 @@
 #include "cellstore.hpp"
 #include "esmstore.hpp"
 
+namespace MWWorld
+{
+    namespace
+    {
+        template <class T>
+        CellStore& emplaceCellStore(ESM::RefId id, const T& cell, ESMStore& store, ESM::ReadersCache& readers,
+            std::unordered_map<ESM::RefId, CellStore>& cells)
+        {
+            return cells
+                .emplace(std::piecewise_construct, std::forward_as_tuple(id),
+                    std::forward_as_tuple(Cell(cell), store, readers))
+                .first->second;
+        }
+    }
+}
+
 MWWorld::CellStore& MWWorld::WorldModel::getOrInsertCellStore(const ESM::Cell& cell)
 {
     const auto it = mCells.find(cell.mId);
@@ -27,7 +43,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getOrInsertCellStore(const ESM::Cell& c
 
 MWWorld::CellStore& MWWorld::WorldModel::insertCellStore(const ESM::Cell& cell)
 {
-    CellStore& cellStore = mCells.emplace(cell.mId, CellStore(Cell(cell), mStore, mReaders)).first->second;
+    CellStore& cellStore = emplaceCellStore(cell.mId, cell, mStore, mReaders, mCells);
     if (cell.mData.mFlags & ESM::Cell::Interior)
         mInteriors.emplace(cell.mName, &cellStore);
     else
@@ -112,8 +128,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellLocation c
                 cell = mStore.insert(record);
             }
 
-            CellStore* cellStore
-                = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
+            CellStore* cellStore = &emplaceCellStore(cell->mId, *cell, mStore, mReaders, mCells);
             result = mExteriors.emplace(cellIndex, cellStore).first;
         }
         else
@@ -132,8 +147,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellLocation c
                 record.mCellFlags = 0;
                 cell = mStore.insert(record);
             }
-            CellStore* cellStore
-                = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
+            CellStore* cellStore = &emplaceCellStore(cell->mId, *cell, mStore, mReaders, mCells);
             result = mExteriors.emplace(cellIndex, cellStore).first;
         }
     }
@@ -152,10 +166,9 @@ MWWorld::CellStore* MWWorld::WorldModel::getInteriorOrNull(std::string_view name
     {
         CellStore* newCellStore = nullptr;
         if (const ESM::Cell* cell = mStore.get<ESM::Cell>().search(name))
-            newCellStore = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
+            newCellStore = &emplaceCellStore(cell->mId, *cell, mStore, mReaders, mCells);
         else if (const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().searchCellName(name))
-            newCellStore
-                = &mCells.emplace(cell4->mId, CellStore(MWWorld::Cell(*cell4), mStore, mReaders)).first->second;
+            newCellStore = &emplaceCellStore(cell4->mId, *cell4, mStore, mReaders, mCells);
         if (!newCellStore)
             return nullptr; // Cell not found
         result = mInteriors.emplace(name, newCellStore).first;
@@ -189,11 +202,11 @@ MWWorld::CellStore& MWWorld::WorldModel::getCell(const ESM::RefId& id, bool forc
     if (!cell4)
     {
         const ESM::Cell* cell = mStore.get<ESM::Cell>().find(id);
-        newCellStore = &mCells.emplace(cell->mId, CellStore(MWWorld::Cell(*cell), mStore, mReaders)).first->second;
+        newCellStore = &emplaceCellStore(cell->mId, *cell, mStore, mReaders, mCells);
     }
     else
     {
-        newCellStore = &mCells.emplace(cell4->mId, CellStore(MWWorld::Cell(*cell4), mStore, mReaders)).first->second;
+        newCellStore = &emplaceCellStore(cell4->mId, *cell4, mStore, mReaders, mCells);
     }
     if (newCellStore->getCell()->isExterior())
     {

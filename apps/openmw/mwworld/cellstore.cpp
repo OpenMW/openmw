@@ -549,7 +549,6 @@ namespace MWWorld
     }
 
     CellStore::~CellStore() = default;
-    CellStore::CellStore(CellStore&&) = default;
 
     const MWWorld::Cell* CellStore::getCell() const
     {
@@ -1069,11 +1068,6 @@ namespace MWWorld
         }
 
         requestMergedRefsUpdate();
-    }
-
-    bool CellStore::operator==(const CellStore& right) const
-    {
-        return right.mCellVariant.getId() == mCellVariant.getId();
     }
 
     void CellStore::setFog(std::unique_ptr<ESM::FogState>&& fog)
