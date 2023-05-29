@@ -17,50 +17,6 @@
 #include "cellstore.hpp"
 #include "esmstore.hpp"
 
-namespace
-{
-    template <class Visitor, class Key, class Comp>
-    bool forEachInStore(
-        const ESM::RefId& id, Visitor&& visitor, std::unordered_map<Key, MWWorld::CellStore, Comp>& cellStore)
-    {
-        for (auto& cell : cellStore)
-        {
-            if (cell.second.getState() == MWWorld::CellStore::State_Unloaded)
-                cell.second.preload();
-            if (cell.second.getState() == MWWorld::CellStore::State_Preloaded)
-            {
-                if (cell.second.hasId(id))
-                {
-                    cell.second.load();
-                }
-                else
-                    continue;
-            }
-            bool cont = cell.second.forEach([&](MWWorld::Ptr ptr) {
-                if (ptr.getCellRef().getRefId() == id)
-                {
-                    return visitor(ptr);
-                }
-                return true;
-            });
-            if (!cont)
-                return false;
-        }
-        return true;
-    }
-
-    struct PtrCollector
-    {
-        std::vector<MWWorld::Ptr> mPtrs;
-
-        bool operator()(MWWorld::Ptr ptr)
-        {
-            mPtrs.emplace_back(ptr);
-            return true;
-        }
-    };
-}
-
 MWWorld::CellStore& MWWorld::WorldModel::getOrInsertCellStore(const ESM::Cell& cell)
 {
     const auto it = mCells.find(cell.mId);
@@ -369,9 +325,24 @@ void MWWorld::WorldModel::getExteriorPtrs(const ESM::RefId& name, std::vector<MW
 
 std::vector<MWWorld::Ptr> MWWorld::WorldModel::getAll(const ESM::RefId& id)
 {
-    PtrCollector visitor;
-    forEachInStore(id, visitor, mCells);
-    return visitor.mPtrs;
+    std::vector<Ptr> result;
+    for (auto& [cellId, cellStore] : mCells)
+    {
+        if (cellStore.getState() == CellStore::State_Unloaded)
+            cellStore.preload();
+        if (cellStore.getState() == CellStore::State_Preloaded)
+        {
+            if (!cellStore.hasId(id))
+                continue;
+            cellStore.load();
+        }
+        cellStore.forEach([&](const Ptr& ptr) {
+            if (ptr.getCellRef().getRefId() == id)
+                result.push_back(ptr);
+            return true;
+        });
+    }
+    return result;
 }
 
 int MWWorld::WorldModel::countSavedGameRecords() const
