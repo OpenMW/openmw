@@ -125,9 +125,10 @@ namespace ESMTerrain
 
         float getVertexHeight(const ESM::LandData* data, int x, int y)
         {
-            assert(x < ESM::Land::LAND_SIZE);
-            assert(y < ESM::Land::LAND_SIZE);
-            return data->getHeights()[y * ESM::Land::LAND_SIZE + x];
+            const int landSize = data->getLandSize();
+            assert(x < landSize);
+            assert(y < landSize);
+            return data->getHeights()[y * landSize + x];
         }
 
     private:
