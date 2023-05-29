@@ -66,6 +66,13 @@
 -- @return #boolean
 
 ---
+-- Return an object by RefNum/FormId.
+-- @function [parent=#world] getObjectByFormId
+-- @param #string formId String returned by `core.getFormId`
+-- @return openmw.core#GameObject
+-- @usage local obj = world.getObjectByFormId(core.getFormId('Morrowind.esm', 128964))
+
+---
 -- Create a new instance of the given record.
 -- After creation the object is in the disabled state. Use :teleport to place to the world or :moveInto to put it into a container or an inventory.
 -- @function [parent=#world] createObject

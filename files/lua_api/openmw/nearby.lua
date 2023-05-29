@@ -27,6 +27,13 @@
 -- @field [parent=#nearby] openmw.core#ObjectList items
 
 ---
+-- Return an object by RefNum/FormId.
+-- @function [parent=#nearby] getObjectByFormId
+-- @param #string formId String returned by `core.getFormId`
+-- @return openmw.core#GameObject
+-- @usage local obj = nearby.getObjectByFormId(core.getFormId('Morrowind.esm', 128964))
+
+---
 -- @type COLLISION_TYPE
 -- @field [parent=#COLLISION_TYPE] #number World
 -- @field [parent=#COLLISION_TYPE] #number Door

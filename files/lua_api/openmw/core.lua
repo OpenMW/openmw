@@ -103,6 +103,30 @@
 
 
 ---
+-- Return the current load order (list of content file names).
+-- @function [parent=#core] getContentList
+-- @return #list<#string>
+
+---
+-- Return the index of a specific content file in the load order (or `nil` if there is no such content file).
+-- @function [parent=#core] getContentFileIndex
+-- @param #string contentFile
+-- @return #number
+
+---
+-- Construct FormId string from content file name and the index in the file.
+-- @function [parent=#core] getFormId
+-- @param #string contentFile
+-- @param #number index
+-- @return #string
+-- @usage if obj.recordId == core.getFormId('Skyrim.esm', 0x4d7da) then ... end
+-- @usage -- local scripts
+-- local obj = nearby.getObjectByFormId(core.getFormId('Morrowind.esm', 128964))
+-- @usage -- global scripts
+-- local obj = world.getObjectByFormId(core.getFormId('Morrowind.esm', 128964))
+
+
+---
 -- Any object that exists in the game world and has a specific location.
 -- Player, actors, items, and statics are game objects.
 -- @type GameObject
