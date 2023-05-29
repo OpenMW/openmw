@@ -60,16 +60,11 @@ namespace MWGui::Widgets
     {
         if (mSkillNameWidget)
         {
-            if (mSkillId == ESM::Skill::Length)
-            {
+            const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().search(mSkillId);
+            if (skill == nullptr)
                 mSkillNameWidget->setCaption({});
-            }
             else
-            {
-                MyGUI::UString name = toUString(MWBase::Environment::get().getWindowManager()->getGameSettingString(
-                    ESM::Skill::sSkillNameIds[mSkillId], {}));
-                mSkillNameWidget->setCaption(name);
-            }
+                mSkillNameWidget->setCaption(skill->mName);
         }
         if (mSkillValueWidget)
         {
@@ -379,6 +374,7 @@ namespace MWGui::Widgets
 
         const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().search(mEffectParams.mEffectID);
         const ESM::Attribute* attribute = store.get<ESM::Attribute>().search(mEffectParams.mAttribute);
+        const ESM::Skill* skill = store.get<ESM::Skill>().search(mEffectParams.mSkill);
 
         assert(magicEffect);
 
@@ -394,7 +390,7 @@ namespace MWGui::Widgets
         std::string sec = " " + std::string{ windowManager->getGameSettingString("ssecond", {}) };
         std::string secs = " " + std::string{ windowManager->getGameSettingString("sseconds", {}) };
 
-        std::string spellLine = MWMechanics::getMagicEffectString(*magicEffect, attribute, mEffectParams.mSkill);
+        std::string spellLine = MWMechanics::getMagicEffectString(*magicEffect, attribute, skill);
 
         if (mEffectParams.mMagnMin || mEffectParams.mMagnMax)
         {

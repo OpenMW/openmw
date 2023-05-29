@@ -510,8 +510,6 @@ namespace MWGui
         {
             if (skillId < 0 || skillId >= ESM::Skill::Length) // Skip unknown skill indexes
                 continue;
-            const std::string& skillNameId = ESM::Skill::sSkillNameIds[skillId];
-
             const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
             const ESM::Skill* skill = esmStore.get<ESM::Skill>().find(skillId);
@@ -520,9 +518,8 @@ namespace MWGui
 
             const ESM::Attribute* attr = esmStore.get<ESM::Attribute>().find(skill->mData.mAttribute);
 
-            std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets = addValueItem(
-                MWBase::Environment::get().getWindowManager()->getGameSettingString(skillNameId, skillNameId), {},
-                "normal", coord1, coord2);
+            std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets
+                = addValueItem(skill->mName, {}, "normal", coord1, coord2);
             mSkillWidgetMap[skillId] = widgets;
 
             for (int i = 0; i < 2; ++i)
@@ -530,7 +527,7 @@ namespace MWGui
                 mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("ToolTipType", "Layout");
                 mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("ToolTipLayout", "SkillToolTip");
                 mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString(
-                    "Caption_SkillName", "#{" + skillNameId + "}");
+                    "Caption_SkillName", MyGUI::TextIterator::toTagsString(skill->mName));
                 mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString(
                     "Caption_SkillDescription", skill->mDescription);
                 mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString(
@@ -652,8 +649,8 @@ namespace MWGui
                                     text += ", ";
 
                                 firstSkill = false;
-
-                                text += "#{" + ESM::Skill::sSkillNameIds[faction->mData.mSkills[i]] + "}";
+                                const ESM::Skill* skill = store.get<ESM::Skill>().find(faction->mData.mSkills[i]);
+                                text += MyGUI::TextIterator::toTagsString(skill->mName);
                             }
                         }
 

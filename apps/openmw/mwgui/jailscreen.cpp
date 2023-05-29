@@ -88,15 +88,16 @@ namespace MWGui
         // We should not worsen corprus when in prison
         player.getClass().getCreatureStats(player).getActiveSpells().skipWorsenings(mDays * 24);
 
-        std::set<int> skills;
+        const auto& skillStore = MWBase::Environment::get().getESMStore()->get<ESM::Skill>();
+        std::set<const ESM::Skill*> skills;
         for (int day = 0; day < mDays; ++day)
         {
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            int skill = Misc::Rng::rollDice(ESM::Skill::Length, prng);
+            const ESM::Skill* skill = skillStore.find(Misc::Rng::rollDice(ESM::Skill::Length, prng));
             skills.insert(skill);
 
-            MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill);
-            if (skill == ESM::Skill::Security || skill == ESM::Skill::Sneak)
+            MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill->mIndex);
+            if (skill->mIndex == ESM::Skill::Security || skill->mIndex == ESM::Skill::Sneak)
                 value.setBase(std::min(100.f, value.getBase() + 1));
             else
                 value.setBase(std::max(0.f, value.getBase() - 1));
@@ -113,15 +114,14 @@ namespace MWGui
 
         message = Misc::StringUtils::format(message, mDays);
 
-        for (const int& skill : skills)
+        for (const ESM::Skill* skill : skills)
         {
-            const std::string& skillName = gmst.find(ESM::Skill::sSkillNameIds[skill])->mValue.getString();
-            int skillValue = player.getClass().getNpcStats(player).getSkill(skill).getBase();
+            int skillValue = player.getClass().getNpcStats(player).getSkill(skill->mIndex).getBase();
             std::string skillMsg = gmst.find("sNotifyMessage44")->mValue.getString();
-            if (skill == ESM::Skill::Sneak || skill == ESM::Skill::Security)
+            if (skill->mIndex == ESM::Skill::Sneak || skill->mIndex == ESM::Skill::Security)
                 skillMsg = gmst.find("sNotifyMessage39")->mValue.getString();
 
-            skillMsg = Misc::StringUtils::format(skillMsg, skillName, skillValue);
+            skillMsg = Misc::StringUtils::format(skillMsg, skill->mName, skillValue);
             message += "\n" + skillMsg;
         }
 

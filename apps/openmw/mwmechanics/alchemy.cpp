@@ -569,7 +569,6 @@ std::vector<std::string> MWMechanics::Alchemy::effectsDescription(const MWWorld:
     for (auto i = 0; i < 4; ++i)
     {
         const auto effectID = data.mEffectID[i];
-        const auto skillID = data.mSkills[i];
 
         if (alchemySkill < fWortChanceValue * (i + 1))
             break;
@@ -577,7 +576,8 @@ std::vector<std::string> MWMechanics::Alchemy::effectsDescription(const MWWorld:
         if (effectID != -1)
         {
             const ESM::Attribute* attribute = store->get<ESM::Attribute>().search(data.mAttributes[i]);
-            std::string effect = getMagicEffectString(*mgef.find(effectID), attribute, skillID);
+            const ESM::Skill* skill = store->get<ESM::Skill>().search(data.mAttributes[i]);
+            std::string effect = getMagicEffectString(*mgef.find(effectID), attribute, skill);
 
             effects.push_back(effect);
         }

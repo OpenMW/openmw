@@ -445,7 +445,7 @@ namespace MWWorld
             for (const auto& [k, v] : mStoreImp->mIds)
                 mStoreImp->mStaticIds.emplace(k, v);
 
-        getWritable<ESM::Skill>().setUp();
+        getWritable<ESM::Skill>().setUp(get<ESM::GameSetting>());
         getWritable<ESM::MagicEffect>().setUp();
         getWritable<ESM::Attribute>().setUp();
         getWritable<ESM4::Land>().updateLandPositions(get<ESM4::Cell>());

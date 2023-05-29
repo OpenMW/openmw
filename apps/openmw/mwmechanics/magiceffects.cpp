@@ -53,7 +53,8 @@ namespace MWMechanics
     {
         const auto& store = MWBase::Environment::get().getESMStore();
         const ESM::MagicEffect* magicEffect = store->get<ESM::MagicEffect>().search(mId);
-        return getMagicEffectString(*magicEffect, store->get<ESM::Attribute>().find(mArg), mArg);
+        return getMagicEffectString(
+            *magicEffect, store->get<ESM::Attribute>().search(mArg), store->get<ESM::Skill>().search(mArg));
     }
 
     bool operator<(const EffectKey& left, const EffectKey& right)
@@ -227,9 +228,10 @@ namespace MWMechanics
         }
     }
 
-    std::string getMagicEffectString(const ESM::MagicEffect& effect, const ESM::Attribute* attribute, int skillArg)
+    std::string getMagicEffectString(
+        const ESM::MagicEffect& effect, const ESM::Attribute* attribute, const ESM::Skill* skill)
     {
-        const bool targetsSkill = effect.mData.mFlags & ESM::MagicEffect::TargetSkill && skillArg != -1;
+        const bool targetsSkill = effect.mData.mFlags & ESM::MagicEffect::TargetSkill && skill;
         const bool targetsAttribute = effect.mData.mFlags & ESM::MagicEffect::TargetAttribute && attribute;
 
         std::string spellLine;
@@ -272,7 +274,7 @@ namespace MWMechanics
         if (targetsSkill)
         {
             spellLine += ' ';
-            spellLine += windowManager->getGameSettingString(ESM::Skill::sSkillNameIds[skillArg], {});
+            spellLine += skill->mName;
         }
         else if (targetsAttribute)
         {
