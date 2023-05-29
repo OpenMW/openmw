@@ -50,7 +50,6 @@
 #include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -210,10 +209,8 @@ namespace
 
     template <typename T>
     void readReferenceCollection(ESM::ESMReader& reader, MWWorld::CellRefList<T>& collection, const ESM::CellRef& cref,
-        const std::map<int, int>& contentFileMap, MWWorld::CellStore* cellstore)
+        const std::map<int, int>& contentFileMap, const MWWorld::ESMStore& esmStore, MWWorld::CellStore* cellstore)
     {
-        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
-
         using StateType = typename RecordToState<T>::StateType;
         StateType state;
         state.mRef = cref;
@@ -759,18 +756,16 @@ namespace MWWorld
     }
 
     template <typename ReferenceInvocable>
-    static void visitCell4References(const ESM4::Cell& cell, ESM::ReadersCache& readers, ReferenceInvocable&& invocable)
+    static void visitCell4References(
+        const ESM4::Cell& cell, const ESMStore& esmStore, ESM::ReadersCache& readers, ReferenceInvocable&& invocable)
     {
-        for (const ESM4::Reference* ref :
-            MWBase::Environment::get().getESMStore()->get<ESM4::Reference>().getByCell(cell.mId))
-        {
+        for (const ESM4::Reference* ref : esmStore.get<ESM4::Reference>().getByCell(cell.mId))
             invocable(*ref);
-        }
     }
 
     void CellStore::listRefs(const ESM4::Cell& cell)
     {
-        visitCell4References(cell, mReaders, [&](const ESM4::Reference& ref) { mIds.push_back(ref.mBaseObj); });
+        visitCell4References(cell, mStore, mReaders, [&](const ESM4::Reference& ref) { mIds.push_back(ref.mBaseObj); });
     }
 
     void CellStore::listRefs()
@@ -834,7 +829,7 @@ namespace MWWorld
 
     void CellStore::loadRefs(const ESM4::Cell& cell, std::map<ESM::RefNum, ESM::RefId>& refNumToID)
     {
-        visitCell4References(cell, mReaders, [&](const ESM4::Reference& ref) { loadRef(ref, false); });
+        visitCell4References(cell, mStore, mReaders, [&](const ESM4::Reference& ref) { loadRef(ref, false); });
     }
 
     void CellStore::loadRefs()
@@ -999,7 +994,7 @@ namespace MWWorld
             ESM::CellRef cref;
             cref.loadId(reader, true);
 
-            int type = MWBase::Environment::get().getESMStore()->find(cref.mRefID);
+            int type = mStore.find(cref.mRefID);
             if (type == 0)
             {
                 Log(Debug::Warning) << "Dropping reference to '" << cref.mRefID << "' (object no longer exists)";
@@ -1020,7 +1015,7 @@ namespace MWWorld
                         recNameSwitcher(x, static_cast<ESM::RecNameInts>(type),
                             [&reader, this, &cref, &contentFileMap, &foundCorrespondingStore](auto& store) {
                                 foundCorrespondingStore = true;
-                                readReferenceCollection(reader, store, cref, contentFileMap, this);
+                                readReferenceCollection(reader, store, cref, contentFileMap, mStore, this);
                             });
                     });
 
@@ -1091,14 +1086,11 @@ namespace MWWorld
         return mFogState.get();
     }
 
-    void clearCorpse(const MWWorld::Ptr& ptr)
+    static void clearCorpse(const MWWorld::Ptr& ptr, const ESMStore& store)
     {
         const MWMechanics::CreatureStats& creatureStats = ptr.getClass().getCreatureStats(ptr);
-        static const float fCorpseClearDelay = MWBase::Environment::get()
-                                                   .getESMStore()
-                                                   ->get<ESM::GameSetting>()
-                                                   .find("fCorpseClearDelay")
-                                                   ->mValue.getFloat();
+        static const float fCorpseClearDelay
+            = store.get<ESM::GameSetting>().find("fCorpseClearDelay")->mValue.getFloat();
         if (creatureStats.isDead() && creatureStats.isDeathAnimationFinished() && !ptr.getClass().isPersistent(ptr)
             && creatureStats.getTimeOfDeath() + fCorpseClearDelay
                 <= MWBase::Environment::get().getWorld()->getTimeStamp())
@@ -1176,11 +1168,8 @@ namespace MWWorld
     {
         if (mState == State_Loaded)
         {
-            static const int iMonthsToRespawn = MWBase::Environment::get()
-                                                    .getESMStore()
-                                                    ->get<ESM::GameSetting>()
-                                                    .find("iMonthsToRespawn")
-                                                    ->mValue.getInteger();
+            static const int iMonthsToRespawn
+                = mStore.get<ESM::GameSetting>().find("iMonthsToRespawn")->mValue.getInteger();
             if (MWBase::Environment::get().getWorld()->getTimeStamp() - mLastRespawn > 24 * 30 * iMonthsToRespawn)
             {
                 mLastRespawn = MWBase::Environment::get().getWorld()->getTimeStamp();
@@ -1196,14 +1185,14 @@ namespace MWWorld
                  it != get<ESM::Creature>().mList.end(); ++it)
             {
                 Ptr ptr = getCurrentPtr(&*it);
-                clearCorpse(ptr);
+                clearCorpse(ptr, mStore);
                 ptr.getClass().respawn(ptr);
             }
             for (CellRefList<ESM::NPC>::List::iterator it(get<ESM::NPC>().mList.begin());
                  it != get<ESM::NPC>().mList.end(); ++it)
             {
                 Ptr ptr = getCurrentPtr(&*it);
-                clearCorpse(ptr);
+                clearCorpse(ptr, mStore);
                 ptr.getClass().respawn(ptr);
             }
             for (CellRefList<ESM::CreatureLevList>::List::iterator it(get<ESM::CreatureLevList>().mList.begin());
@@ -1256,8 +1245,7 @@ namespace MWWorld
         if (enchantmentId.empty())
             return;
 
-        const ESM::Enchantment* enchantment
-            = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().search(enchantmentId);
+        const ESM::Enchantment* enchantment = mStore.get<ESM::Enchantment>().search(enchantmentId);
         if (!enchantment)
         {
             Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantmentId << "' on item "
