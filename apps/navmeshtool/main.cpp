@@ -48,6 +48,8 @@ namespace NavMeshTool
 
         using StringsVector = std::vector<std::string>;
 
+        constexpr std::string_view applicationName = "NavMeshTool";
+
         bpo::options_description makeOptionsDescription()
         {
             using Fallback::FallbackMap;
@@ -124,10 +126,9 @@ namespace NavMeshTool
             }
 
             Files::ConfigurationManager config;
-
-            bpo::variables_map composingVariables = Files::separateComposingVariables(variables, desc);
             config.readConfiguration(variables, desc);
-            Files::mergeComposingVariables(variables, composingVariables, desc);
+
+            setupLogging(config.getLogPath().string(), applicationName);
 
             const std::string encoding(variables["encoding"].as<std::string>());
             Log(Debug::Info) << ToUTF8::encodingUsingMessage(encoding);
@@ -181,6 +182,8 @@ namespace NavMeshTool
             const std::uint64_t maxDbFileSize = static_cast<std::uint64_t>(Settings::Manager::getInt64("max navmeshdb file size", "Navigator"));
             const std::string dbPath = (config.getUserDataPath() / "navmesh.db").string();
 
+            Log(Debug::Info) << "Using navmeshdb at " << dbPath;
+
             DetourNavigator::NavMeshDb db(dbPath, maxDbFileSize);
 
             ESM::ReadersCache readers;
@@ -231,5 +234,5 @@ namespace NavMeshTool
 
 int main(int argc, char *argv[])
 {
-    return wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, "NavMeshTool");
+    return wrapApplication(NavMeshTool::runNavMeshTool, argc, argv, NavMeshTool::applicationName);
 }

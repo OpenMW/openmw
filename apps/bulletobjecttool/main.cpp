@@ -34,6 +34,8 @@ namespace
 
     using StringsVector = std::vector<std::string>;
 
+    constexpr std::string_view applicationName = "BulletObjectTool";
+
     bpo::options_description makeOptionsDescription()
     {
         using Fallback::FallbackMap;
@@ -126,10 +128,9 @@ namespace
         }
 
         Files::ConfigurationManager config;
-
-        bpo::variables_map composingVariables = Files::separateComposingVariables(variables, desc);
         config.readConfiguration(variables, desc);
-        Files::mergeComposingVariables(variables, composingVariables, desc);
+
+        setupLogging(config.getLogPath().string(), applicationName);
 
         const std::string encoding(variables["encoding"].as<std::string>());
         Log(Debug::Info) << ToUTF8::encodingUsingMessage(encoding);
@@ -199,5 +200,5 @@ namespace
 
 int main(int argc, char *argv[])
 {
-    return wrapApplication(runBulletObjectTool, argc, argv, "BulletObjectTool");
+    return wrapApplication(runBulletObjectTool, argc, argv, applicationName);
 }
