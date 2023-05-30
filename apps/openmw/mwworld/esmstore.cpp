@@ -248,6 +248,7 @@ namespace MWWorld
     {
         for (const auto& store : mDynamicStores)
             store->clearDynamic();
+        mStoreImp->mIds = mStoreImp->mStaticIds;
 
         movePlayerRecord();
     }
@@ -426,32 +427,36 @@ namespace MWWorld
 
     void ESMStore::setUp()
     {
-        mStoreImp->mIds.clear();
+        if (mIsSetUpDone)
+            throw std::logic_error("ESMStore::setUp() is called twice");
+        mIsSetUpDone = true;
 
-        std::map<ESM::RecNameInts, DynamicStore*>::iterator storeIt = mStoreImp->mRecNameToStore.begin();
-        for (; storeIt != mStoreImp->mRecNameToStore.end(); ++storeIt)
-        {
-            storeIt->second->setUp();
-
-            if (isCacheableRecord(storeIt->first))
-            {
-                std::vector<ESM::RefId> identifiers;
-                storeIt->second->listIdentifier(identifiers);
-
-                for (auto& record : identifiers)
-                    mStoreImp->mIds[record] = storeIt->first;
-            }
-        }
-
-        if (mStoreImp->mStaticIds.empty())
-            for (const auto& [k, v] : mStoreImp->mIds)
-                mStoreImp->mStaticIds.emplace(k, v);
+        for (const auto& [_, store] : mStoreImp->mRecNameToStore)
+            store->setUp();
 
         getWritable<ESM::Skill>().setUp(get<ESM::GameSetting>());
         getWritable<ESM::MagicEffect>().setUp();
         getWritable<ESM::Attribute>().setUp();
         getWritable<ESM4::Land>().updateLandPositions(get<ESM4::Cell>());
         getWritable<ESM4::Reference>().preprocessReferences(get<ESM4::Cell>());
+
+        rebuildIdsIndex();
+        mStoreImp->mStaticIds = mStoreImp->mIds;
+    }
+
+    void ESMStore::rebuildIdsIndex()
+    {
+        mStoreImp->mIds.clear();
+        for (const auto& [recordType, store] : mStoreImp->mRecNameToStore)
+        {
+            if (isCacheableRecord(recordType))
+            {
+                std::vector<ESM::RefId> identifiers;
+                store->listIdentifier(identifiers);
+                for (auto& record : identifiers)
+                    mStoreImp->mIds[record] = recordType;
+            }
+        }
     }
 
     void ESMStore::validateRecords(ESM::ReadersCache& readers)
@@ -704,8 +709,6 @@ namespace MWWorld
 
     void ESMStore::checkPlayer()
     {
-        setUp();
-
         const ESM::NPC* player = get<ESM::NPC>().find(ESM::RefId::stringRefId("Player"));
 
         if (!get<ESM::Race>().find(player->mRace) || !get<ESM::Class>().find(player->mClass))

@@ -472,7 +472,7 @@ namespace MWWorld
     {
         // The land is static for given game session, there is no need to refresh it every load.
         if (mBuilt)
-            return;
+            throw std::logic_error("Store<ESM::Land>::setUp() is called twice");
 
         mBuilt = true;
     }

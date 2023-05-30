@@ -325,29 +325,39 @@ TYPED_TEST_P(StoreTest, delete_test)
 
         ESM::ESMReader reader;
         ESM::Dialogue* dialogue = nullptr;
-        MWWorld::ESMStore esmStore;
 
-        // master file inserts a record
-        reader.open(getEsmFile(record, false, formatVersion), "filename");
-        esmStore.load(reader, &dummyListener, dialogue);
-        esmStore.setUp();
+        {
+            MWWorld::ESMStore esmStore;
+            reader.open(getEsmFile(record, false, formatVersion), "filename");
+            esmStore.load(reader, &dummyListener, dialogue); // master file inserts a record
+            esmStore.setUp();
 
-        EXPECT_EQ(esmStore.get<RecordType>().getSize(), 1);
+            EXPECT_EQ(esmStore.get<RecordType>().getSize(), 1);
+        }
+        {
+            MWWorld::ESMStore esmStore;
+            reader.open(getEsmFile(record, false, formatVersion), "filename");
+            esmStore.load(reader, &dummyListener, dialogue); // master file inserts a record
+            reader.open(getEsmFile(record, true, formatVersion), "filename");
+            esmStore.load(reader, &dummyListener, dialogue); // now a plugin deletes it
+            esmStore.setUp();
 
-        // now a plugin deletes it
-        reader.open(getEsmFile(record, true, formatVersion), "filename");
-        esmStore.load(reader, &dummyListener, dialogue);
-        esmStore.setUp();
+            EXPECT_EQ(esmStore.get<RecordType>().getSize(), 0);
+        }
+        {
+            MWWorld::ESMStore esmStore;
+            reader.open(getEsmFile(record, false, formatVersion), "filename");
+            esmStore.load(reader, &dummyListener, dialogue); // master file inserts a record
+            reader.open(getEsmFile(record, true, formatVersion), "filename");
+            esmStore.load(reader, &dummyListener, dialogue); // now a plugin deletes it
+            // now another plugin inserts it again
+            // expected behaviour is the record to reappear rather than staying deleted
+            reader.open(getEsmFile(record, false, formatVersion), "filename");
+            esmStore.load(reader, &dummyListener, dialogue);
+            esmStore.setUp();
 
-        EXPECT_EQ(esmStore.get<RecordType>().getSize(), 0);
-
-        // now another plugin inserts it again
-        // expected behaviour is the record to reappear rather than staying deleted
-        reader.open(getEsmFile(record, false, formatVersion), "filename");
-        esmStore.load(reader, &dummyListener, dialogue);
-        esmStore.setUp();
-
-        EXPECT_EQ(esmStore.get<RecordType>().getSize(), 1);
+            EXPECT_EQ(esmStore.get<RecordType>().getSize(), 1);
+        }
     }
 }
 
@@ -410,13 +420,13 @@ TYPED_TEST_P(StoreTest, overwrite_test)
         // master file inserts a record
         reader.open(getEsmFile(record, false, formatVersion), "filename");
         esmStore.load(reader, &dummyListener, dialogue);
-        esmStore.setUp();
 
         // now a plugin overwrites it with changed data
         record.mId = recordIdUpper; // change id to uppercase, to test case smashing while we're at it
         record.mModel = "the_new_model";
         reader.open(getEsmFile(record, false, formatVersion), "filename");
         esmStore.load(reader, &dummyListener, dialogue);
+
         esmStore.setUp();
 
         // verify that changes were actually applied
