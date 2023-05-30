@@ -28,8 +28,9 @@
 */
 #include "loadpwat.hpp"
 
-#include <iostream> // FIXME: for debugging only
 #include <stdexcept>
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -52,15 +53,12 @@ void ESM4::PlaceableWater::load(ESM4::Reader& reader)
             case ESM4::SUB_MODL:
             case ESM4::SUB_DNAM:
             {
-                // std::cout << "PWAT " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                Log(Debug::Verbose) << "PWAT " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             }
             default:
-                std::cout << "PWAT " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize << std::endl;
-                reader.skipSubRecordData();
-                // throw std::runtime_error("ESM4::PWAT::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
+                throw std::runtime_error("ESM4::PWAT::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
 }

@@ -27,8 +27,8 @@
 #include "loadpgrd.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
-//#include <iomanip>  // FIXME: for debugging only
+
+#include <components/debug/debuglog.hpp>
 
 #include "formid.hpp" // FIXME: for mEditorId workaround
 #include "reader.hpp"
@@ -87,7 +87,7 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
                         // CELL formId 00049E2A
                         // PGRD formId 000304B7
                         // if (mFormId == 0x0001C2C8)
-                        // std::cout << link.startNode << "," << link.endNode << std::endl;
+                        // std::cout << link.startNode << "," << link.endNode;
                         mLinks.push_back(link);
                     }
                 }
@@ -140,10 +140,9 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
                     else if (i < subHdr.dataSize-1)
                         ss << " ";
                 }
-                std::cout << ss.str() << std::endl;
+                std::cout << ss.str();
 #else
-                // std::cout << "PGRD " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                Log(Debug::Verbose) << "PGRD " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
 #endif
                 break;

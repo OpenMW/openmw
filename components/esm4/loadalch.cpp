@@ -26,9 +26,10 @@
 */
 #include "loadalch.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include <cstring>
 #include <stdexcept>
-//#include <iostream> // FIXME
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -68,13 +69,10 @@ void ESM4::Potion::load(ESM4::Reader& reader)
                 reader.get(mBoundRadius);
                 break;
             case ESM4::SUB_SCIT:
-            {
                 reader.get(mEffect);
                 reader.adjustFormId(mEffect.formId);
                 break;
-            }
             case ESM4::SUB_ENIT:
-            {
                 if (subHdr.dataSize == 8) // TES4
                 {
                     reader.get(&mItem, 8);
@@ -82,12 +80,10 @@ void ESM4::Potion::load(ESM4::Reader& reader)
                     mItem.sound = 0;
                     break;
                 }
-
                 reader.get(mItem);
                 reader.adjustFormId(mItem.withdrawl);
                 reader.adjustFormId(mItem.sound);
                 break;
-            }
             case ESM4::SUB_YNAM:
                 reader.getFormId(mPickUpSound);
                 break;
@@ -103,11 +99,9 @@ void ESM4::Potion::load(ESM4::Reader& reader)
             case ESM4::SUB_MODS:
             case ESM4::SUB_OBND:
             case ESM4::SUB_ETYP: // FO3
-            {
-                // std::cout << "ALCH " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "ALCH " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::ALCH::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

@@ -28,11 +28,10 @@
 
 #undef DEBUG_GROUPSTACK
 
-#include <iomanip> // for debugging
-#include <iostream> // for debugging
-#include <sstream> // for debugging
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 #include <stdexcept>
-#include <unordered_map>
 
 #if defined(_MSC_VER)
 #pragma warning(push)
@@ -462,7 +461,7 @@ namespace ESM4
                     else if (i < uncompressedSize - 1)
                         ss << " ";
                 }
-                std::cout << ss.str() << std::endl;
+                std::cout << ss.str();
             }
             // #endif
             mStream = std::make_unique<Files::StreamWithBuffer<Bsa::MemoryInputStream>>(std::move(memoryStreamPtr));
@@ -524,15 +523,14 @@ namespace ESM4
         std::string padding; // FIXME: debugging only
         padding.insert(0, mCtx.groupStack.size() * 2, ' ');
         std::cout << padding << "Starting record group "
-                  << printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type) << std::endl;
+                  << printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type);
 #endif
         // empty group if the group size is same as the header size
         if (mCtx.recordHeader.group.groupSize == (std::uint32_t)mCtx.recHeaderSize)
         {
 #ifdef DEBUG_GROUPSTACK
             std::cout << padding << "Ignoring record group " // FIXME: debugging only
-                      << printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type) << " (empty)"
-                      << std::endl;
+                      << printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type) << " (empty)";
 #endif
             if (!mCtx.groupStack.empty()) // top group may be empty (e.g. HAIR in Skyrim)
             {
@@ -573,7 +571,7 @@ namespace ESM4
 #ifdef DEBUG_GROUPSTACK
             std::string padding; // FIXME: debugging only
             padding.insert(0, mCtx.groupStack.size() * 2, ' ');
-            std::cout << padding << "Finished record group " << printLabel(grp.label, grp.type) << std::endl;
+            std::cout << padding << "Finished record group " << printLabel(grp.label, grp.type);
 #endif
             // if the previous group was the final one no need to do below
             if (mCtx.groupStack.empty())
@@ -588,7 +586,7 @@ namespace ESM4
             // #if 0
             if (mCtx.groupStack.back().second > lastGroupSize) // FIXME: debugging only
                 std::cerr << printLabel(mCtx.groupStack.back().first.label, mCtx.groupStack.back().first.type)
-                          << " read more records than available" << std::endl;
+                          << " read more records than available";
             // #endif
         }
     }
@@ -627,7 +625,7 @@ namespace ESM4
         std::string padding; // FIXME: debugging only
         padding.insert(0, mCtx.groupStack.size() * 2, ' ');
         std::cout << padding << "Skipping record group "
-                  << printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type) << std::endl;
+                  << printLabel(mCtx.recordHeader.group.label, mCtx.recordHeader.group.type);
 #endif
         // subtract the size of header already read before skipping
         std::uint32_t skipSize = mCtx.recordHeader.group.groupSize - (std::uint32_t)mCtx.recHeaderSize;

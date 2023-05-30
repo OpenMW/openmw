@@ -28,6 +28,7 @@
 #define ESM4_LVLI_H
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 #include "formid.hpp"

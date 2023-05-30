@@ -31,7 +31,6 @@
 #endif
 
 #include <stdexcept>
-//#include <iostream> // FIXME: debugging only
 
 #include "reader.hpp"
 //#include "writer.hpp"

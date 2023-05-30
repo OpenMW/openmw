@@ -27,7 +27,8 @@
 #include "loadclot.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -91,17 +92,15 @@ void ESM4::Clothing::load(ESM4::Reader& reader)
             case ESM4::SUB_MO2T:
             case ESM4::SUB_MO3T:
             case ESM4::SUB_MO4T:
-            {
-                // std::cout << "CLOT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "CLOT " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::CLOT::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
     // if ((mClothingFlags&0xffff) == 0x02) // only hair
-    // std::cout << "only hair " << mEditorId << std::endl;
+    // std::cout << "only hair " << mEditorId;
 }
 
 // void ESM4::Clothing::save(ESM4::Writer& writer) const

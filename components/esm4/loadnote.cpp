@@ -27,7 +27,8 @@
 #include "loadnote.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: testing only
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -62,11 +63,9 @@ void ESM4::Note::load(ESM4::Reader& reader)
             case ESM4::SUB_TNAM:
             case ESM4::SUB_XNAM:
             case ESM4::SUB_OBND:
-            {
-                // std::cout << "NOTE " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "NOTE " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::NOTE::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

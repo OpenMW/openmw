@@ -28,7 +28,8 @@
 
 #include <cstring>
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -51,7 +52,7 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
             {
                 if (subHdr.dataSize != sizeof(PKDT) && subHdr.dataSize == 4)
                 {
-                    // std::cout << "skip fallout" << mEditorId << std::endl; // FIXME
+                    // std::cout << "skip fallout" << mEditorId; // FIXME
                     reader.get(mData.flags);
                     mData.type = 0; // FIXME
                 }
@@ -163,12 +164,9 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
             case ESM4::SUB_CIS2: // TES5
             case ESM4::SUB_VMAD: // TES5
             case ESM4::SUB_TPIC: // TES5
-            {
-                // std::cout << "PACK " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                Log(Debug::Verbose) << "PACK " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::PACK::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

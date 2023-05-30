@@ -28,8 +28,9 @@
 */
 #include "loadscol.hpp"
 
-#include <iostream> // FIXME: for debugging only
 #include <stdexcept>
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -53,16 +54,11 @@ void ESM4::StaticCollection::load(ESM4::Reader& reader)
             case ESM4::SUB_MODT:
             case ESM4::SUB_ONAM:
             case ESM4::SUB_DATA:
-            {
-                // std::cout << "SCOL " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                Log(Debug::Verbose) << "SCOL " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
-                std::cout << "SCOL " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize << std::endl;
-                reader.skipSubRecordData();
-                // throw std::runtime_error("ESM4::SCOL::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
+                throw std::runtime_error("ESM4::SCOL::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
 }

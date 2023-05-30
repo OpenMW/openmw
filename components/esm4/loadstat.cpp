@@ -26,8 +26,9 @@
 */
 #include "loadstat.hpp"
 
-#include <iostream> // FIXME: debug only
 #include <stdexcept>
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 // #include "writer.hpp"
@@ -55,7 +56,7 @@ void ESM4::Static::load(ESM4::Reader& reader)
             {
                 // version is only availabe in TES5 (seems to be 27 or 28?)
                 // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
-                // std::cout << "STAT MODT ver: " << std::hex << reader.hdr().record.version << std::endl;
+                // std::cout << "STAT MODT ver: " << std::hex << reader.hdr().record.version;
 
                 // for TES4 these are just a sequence of bytes
                 mMODT.resize(subHdr.dataSize / sizeof(std::uint8_t));
@@ -65,7 +66,7 @@ void ESM4::Static::load(ESM4::Reader& reader)
 #if 0
                     std::string padding;
                     padding.insert(0, reader.stackSize()*2, ' ');
-                    std::cout << padding  << "MODT: " << std::hex << *it << std::endl;
+                    std::cout << padding  << "MODT: " << std::hex << *it;
 #endif
                 }
                 break;
@@ -76,11 +77,9 @@ void ESM4::Static::load(ESM4::Reader& reader)
             case ESM4::SUB_MNAM:
             case ESM4::SUB_BRUS: // FONV
             case ESM4::SUB_RNAM: // FONV
-            {
-                // std::cout << "STAT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "STAT " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::STAT::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

@@ -28,6 +28,8 @@
 
 #include <stdexcept>
 
+#include <components/debug/debuglog.hpp>
+
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -48,7 +50,6 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
                 reader.getLocalizedString(mFullName);
                 break;
             case ESM4::SUB_DATA:
-            {
                 // FO3/FNV or TES4
                 if (subHdr.dataSize == 13 || subHdr.dataSize == 18)
                 {
@@ -81,9 +82,7 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
                     reader.skipSubRecordData();
                 }
                 break;
-            }
             case ESM4::SUB_DAT2:
-            {
                 if (subHdr.dataSize == 20)
                 {
                     reader.get(mData.mProjPerShot);
@@ -97,7 +96,6 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
                     reader.skipSubRecordData();
                 }
                 break;
-            }
             case ESM4::SUB_ICON:
                 reader.getZString(mIcon);
                 break;
@@ -139,19 +137,15 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_SCRI:
-            {
                 reader.getFormId(mScript);
                 break;
-            }
             case ESM4::SUB_MODT:
             case ESM4::SUB_OBND:
             case ESM4::SUB_KSIZ:
             case ESM4::SUB_KWDA:
-            {
-                // std::cout << "AMMO " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "AMMO " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::AMMO::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

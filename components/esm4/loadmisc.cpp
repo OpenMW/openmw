@@ -28,6 +28,8 @@
 
 #include <stdexcept>
 
+#include <components/debug/debuglog.hpp>
+
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -78,11 +80,9 @@ void ESM4::MiscItem::load(ESM4::Reader& reader)
             case ESM4::SUB_OBND:
             case ESM4::SUB_VMAD:
             case ESM4::SUB_RNAM: // FONV
-            {
-                // std::cout << "MISC " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "MISC " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::MISC::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

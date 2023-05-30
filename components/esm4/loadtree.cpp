@@ -28,6 +28,8 @@
 
 #include <stdexcept>
 
+#include <components/debug/debuglog.hpp>
+
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -61,11 +63,9 @@ void ESM4::Tree::load(ESM4::Reader& reader)
             case ESM4::SUB_OBND:
             case ESM4::SUB_PFIG:
             case ESM4::SUB_PFPC:
-            {
-                // std::cout << "TREE " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "TREE " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::TREE::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

@@ -27,7 +27,8 @@
 #include "loadterm.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: testing only
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -83,11 +84,9 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
             case ESM4::SUB_TNAM:
             case ESM4::SUB_OBND:
             case ESM4::SUB_MODS: // FONV
-            {
-                // std::cout << "TERM " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "TERM " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::TERM::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

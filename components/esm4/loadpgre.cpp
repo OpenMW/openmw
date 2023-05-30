@@ -28,8 +28,9 @@
 */
 #include "loadpgre.hpp"
 
-#include <iostream> // FIXME: for debugging only
 #include <stdexcept>
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -75,15 +76,12 @@ void ESM4::PlacedGrenade::load(ESM4::Reader& reader)
             case ESM4::SUB_XSCL:
             case ESM4::SUB_DATA:
             {
-                // std::cout << "PGRE " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                Log(Debug::Verbose) << "PGRE " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             }
             default:
-                std::cout << "PGRE " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize << std::endl;
-                reader.skipSubRecordData();
-                // throw std::runtime_error("ESM4::PGRE::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
+                throw std::runtime_error("ESM4::PGRE::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
 }

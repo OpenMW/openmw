@@ -28,6 +28,8 @@
 
 #include <stdexcept>
 
+#include <components/debug/debuglog.hpp>
+
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -48,11 +50,9 @@ void ESM4::Container::load(ESM4::Reader& reader)
                 reader.getLocalizedString(mFullName);
                 break;
             case ESM4::SUB_DATA:
-            {
                 reader.get(mDataFlags);
                 reader.get(mWeight);
                 break;
-            }
             case ESM4::SUB_CNTO:
             {
                 static InventoryItem inv; // FIXME: use unique_ptr here?
@@ -88,11 +88,9 @@ void ESM4::Container::load(ESM4::Reader& reader)
             case ESM4::SUB_DMDL: // FONV
             case ESM4::SUB_DMDT: // FONV
             case ESM4::SUB_RNAM: // FONV
-            {
-                // std::cout << "CONT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "CONT " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::CONT::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

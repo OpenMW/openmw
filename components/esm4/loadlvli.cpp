@@ -26,8 +26,9 @@
 */
 #include "loadlvli.hpp"
 
-#include <iostream> // FIXME: for debugging
 #include <stdexcept>
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -66,9 +67,6 @@ void ESM4::LevelledItem::load(ESM4::Reader& reader)
                         reader.get(lvlo.level);
                         reader.get(lvlo.item);
                         reader.get(lvlo.count);
-                        //                        std::cout << "LVLI " << mEditorId << " LVLO lev " << lvlo.level << ",
-                        //                        item " << lvlo.item
-                        //                                  << ", count " << lvlo.count << std::endl;
                         break;
                     }
                     else
@@ -85,13 +83,9 @@ void ESM4::LevelledItem::load(ESM4::Reader& reader)
             case ESM4::SUB_OBND: // FO3/FONV
             case ESM4::SUB_COED: // FO3/FONV
             case ESM4::SUB_LVLG: // FO3/FONV
-            {
-
-                // std::cout << "LVLI " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize <<
-                // std::endl;
+                Log(Debug::Verbose) << "LVLI " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::LVLI::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
@@ -99,7 +93,7 @@ void ESM4::LevelledItem::load(ESM4::Reader& reader)
 
     // FIXME: testing
     // if (mHasLvlItemFlags && mChanceNone >= 90)
-    // std::cout << "LVLI " << mEditorId << " chance none " << int(mChanceNone) << std::endl;
+    // std::cout << "LVLI " << mEditorId << " chance none " << int(mChanceNone);
 }
 
 bool ESM4::LevelledItem::calcAllLvlLessThanPlayer() const

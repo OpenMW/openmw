@@ -26,8 +26,9 @@
 */
 #include "loadglob.hpp"
 
-#include <iostream> // FIXME
 #include <stdexcept>
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -59,11 +60,9 @@ void ESM4::GlobalVariable::load(ESM4::Reader& reader)
             case ESM4::SUB_DATA:
             case ESM4::SUB_OBND: // TES5
             case ESM4::SUB_VMAD: // TES5
-            {
-                // std::cout << "GLOB " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "GLOB " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::GLOB::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

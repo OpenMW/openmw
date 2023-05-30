@@ -26,8 +26,8 @@
 */
 #include "loadwrld.hpp"
 
+#include <components/debug/debuglog.hpp>
 #include <stdexcept>
-// #include <iostream> // FIXME: debug only
 
 #include "reader.hpp"
 // #include "writer.hpp"
@@ -146,6 +146,20 @@ void ESM4::World::load(ESM4::Reader& reader)
             case ESM4::SUB_PNAM:
                 reader.get(mParentUseFlags);
                 break;
+            case ESM4::SUB_OFST:
+                if (subSize)
+                {
+                    reader.skipSubRecordData(subSize); // special post XXXX
+                    reader.updateRecordRead(subSize); // WARNING: manually update
+                    subSize = 0;
+                }
+                else
+                    reader.skipSubRecordData(); // FIXME: process the subrecord rather than skip
+
+                break;
+            case ESM4::SUB_XXXX:
+                reader.get(subSize);
+                break;
             case ESM4::SUB_RNAM: // multiple
             case ESM4::SUB_MHDT:
             case ESM4::SUB_LTMP:
@@ -165,29 +179,9 @@ void ESM4::World::load(ESM4::Reader& reader)
             case ESM4::SUB_XNAM: // FO3
             case ESM4::SUB_IMPS: // FO3 Anchorage
             case ESM4::SUB_IMPF: // FO3 Anchorage
-            {
-                // std::cout << "WRLD " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
-                reader.skipSubRecordData(); // FIXME: process the subrecord rather than skip
+                Log(Debug::Verbose) << "WRLD " << ESM::printName(subHdr.typeId) << " skipping...";
+                reader.skipSubRecordData();
                 break;
-            }
-            case ESM4::SUB_OFST:
-            {
-                if (subSize)
-                {
-                    reader.skipSubRecordData(subSize); // special post XXXX
-                    reader.updateRecordRead(subSize); // WARNING: manually update
-                    subSize = 0;
-                }
-                else
-                    reader.skipSubRecordData(); // FIXME: process the subrecord rather than skip
-
-                break;
-            }
-            case ESM4::SUB_XXXX:
-            {
-                reader.get(subSize);
-                break;
-            }
             default:
                 throw std::runtime_error("ESM4::WRLD::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

@@ -32,8 +32,6 @@
 
 #include <stdexcept>
 
-#include <iostream> // FIXME: debugging only
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -51,7 +49,7 @@ void ESM4::Navigation::IslandInfo::load(ESM4::Reader& reader)
     if (count)
     {
         triangles.resize(count);
-        // std::cout << "NVMI island triangles " << std::dec << count << std::endl; // FIXME
+        // std::cout << "NVMI island triangles " << std::dec << count; // FIXME
         for (std::vector<Navigation::Triangle>::iterator it = triangles.begin(); it != triangles.end(); ++it)
         {
             reader.get(*it);
@@ -69,7 +67,7 @@ void ESM4::Navigation::IslandInfo::load(ESM4::Reader& reader)
 #if 0
             std::string padding;
             padding.insert(0, reader.stackSize()*2, ' ');
-            std::cout << padding << "NVMI vert " << std::dec << (*it).x << ", " << (*it).y << ", " << (*it).z << std::endl;
+            std::cout << padding << "NVMI vert " << std::dec << (*it).x << ", " << (*it).y << ", " << (*it).z;
 #endif
         }
     }
@@ -94,9 +92,9 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
         padding.insert(0, 4, '.');
 
     padding.insert(0, reader.stackSize()*2, ' ');
-    std::cout << padding << "NVMI formId: 0x" << std::hex << formId << std::endl;
-    std::cout << padding << "NVMI flags: " << std::hex << flags << std::endl;
-    std::cout << padding << "NVMI center: " << std::dec << x << ", " << y << ", " << z << std::endl;
+    std::cout << padding << "NVMI formId: 0x" << std::hex << formId;
+    std::cout << padding << "NVMI flags: " << std::hex << flags;
+    std::cout << padding << "NVMI center: " << std::dec << x << ", " << y << ", " << z;
 #endif
 
     reader.get(flagPrefMerges);
@@ -104,7 +102,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     reader.get(count); // countMerged;
     if (count)
     {
-        // std::cout << "NVMI countMerged " << std::dec << count << std::endl;
+        // std::cout << "NVMI countMerged " << std::dec << count;
         formIdMerged.resize(count);
         for (FormId& value : formIdMerged)
             reader.getFormId(value);
@@ -113,7 +111,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     reader.get(count); // countPrefMerged;
     if (count)
     {
-        // std::cout << "NVMI countPrefMerged " << std::dec << count << std::endl;
+        // std::cout << "NVMI countPrefMerged " << std::dec << count;
         formIdPrefMerged.resize(count);
         for (FormId& value : formIdPrefMerged)
             reader.getFormId(value);
@@ -122,7 +120,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     reader.get(count); // countLinkedDoors;
     if (count)
     {
-        // std::cout << "NVMI countLinkedDoors " << std::dec << count << std::endl;
+        // std::cout << "NVMI countLinkedDoors " << std::dec << count;
         linkedDoors.resize(count);
         for (std::vector<DoorRef>::iterator it = linkedDoors.begin(); it != linkedDoors.end(); ++it)
         {
@@ -138,8 +136,8 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
         island2.load(reader);
         islandInfo.push_back(island2); // Maybe don't use a vector for just one entry?
     }
-    else if (flags == FLG_Island) // FIXME: debug only
-        std::cerr << "nvmi no island but has 0x20 flag" << std::endl;
+    // else if (flags == FLG_Island) // FIXME: debug only
+    //   std::cerr << "nvmi no island but has 0x20 flag";
 
     reader.get(locationMarker);
 
@@ -157,9 +155,9 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     std::string padding;
     padding.insert(0, reader.stackSize()*2, ' ');
     if (worldSpaceId == ESM4::FLG_Morrowind)
-        std::cout << padding << "NVMI MW: X " << std::dec << cellGrid.grid.x << ", Y " << cellGrid.grid.y << std::endl;
+        std::cout << padding << "NVMI MW: X " << std::dec << cellGrid.grid.x << ", Y " << cellGrid.grid.y;
     else
-        std::cout << padding << "NVMI SR: X " << std::dec << cellGrid.grid.x << ", Y " << cellGrid.grid.y << std::endl;
+        std::cout << padding << "NVMI SR: X " << std::dec << cellGrid.grid.x << ", Y " << cellGrid.grid.y;
 #endif
     }
     else
@@ -170,9 +168,9 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
 
 #if 0
         if (worldSpaceId == 0) // interior
-            std::cout << "NVMI Interior: cellId " << std::hex << cellGrid.cellId << std::endl;
+            std::cout << "NVMI Interior: cellId " << std::hex << cellGrid.cellId;
         else
-            std::cout << "NVMI FormID: cellId " << std::hex << cellGrid.cellId << std::endl;
+            std::cout << "NVMI FormID: cellId " << std::hex << cellGrid.cellId;
 #endif
     }
 }
@@ -283,7 +281,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                     mPreferredPaths.push_back(std::make_pair(node, preferredPaths));
 #if 0
                     std::cout << "node " << std::hex << node // FIXME: debugging only
-                        << ", count " << count << ", i " << std::dec << i << std::endl;
+                        << ", count " << count << ", i " << std::dec << i;
 #endif
                 }
                 reader.get(count);
@@ -295,7 +293,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                 mPreferredPaths.push_back(std::make_pair(node, preferredPaths)); // empty
 #if 0
                 std::cout << "node " << std::hex << node // FIXME: debugging only
-                        << ", count " << 0 << std::endl;
+                        << ", count " << 0;
 #endif
 
                 reader.get(count); // HACK
@@ -309,7 +307,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                     reader.get(index);
 #if 0
                     std::cout << "node " << std::hex << node // FIXME: debugging only
-                        << ", index " << index << ", i " << std::dec << total+i << std::endl;
+                        << ", index " << index << ", i " << std::dec << total+i;
 #endif
                     FormId nodeFormId = FormId::fromUint32(node); // should we apply reader.adjustFormId?
                     // std::pair<std::map<FormId, std::uint32_t>::iterator, bool> res =
@@ -324,7 +322,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             {
                 std::uint32_t version; // always the same? (0x0c)
                 reader.get(version); // TODO: store this or use it for merging?
-                // std::cout << "NAVI version " << std::dec << version << std::endl;
+                // std::cout << "NAVI version " << std::dec << version;
                 break;
             }
             case ESM4::SUB_NVMI: // multiple
@@ -335,7 +333,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                     break;
                 }
 
-                // std::cout << "\nNVMI start" << std::endl;
+                // std::cout << "\nNVMI start";
                 NavMeshInfo nvmi;
                 nvmi.load(reader);
                 mNavMeshInfo.push_back(nvmi);

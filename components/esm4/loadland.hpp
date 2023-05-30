@@ -28,7 +28,6 @@
 #define ESM4_LAND_H
 
 #include <cstdint>
-#include <string>
 #include <vector>
 
 #include "formid.hpp"

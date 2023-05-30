@@ -27,7 +27,6 @@
 #include "loadroad.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
 
 #include "formid.hpp" // FIXME: for workaround
 #include "reader.hpp"

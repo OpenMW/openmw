@@ -26,7 +26,6 @@
 */
 #include "loadclfm.hpp"
 
-#include <iostream> // FIXME: for debugging only
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -50,24 +49,15 @@ void ESM4::Colour::load(ESM4::Reader& reader)
                 reader.getLocalizedString(mFullName);
                 break;
             case ESM4::SUB_CNAM:
-            {
                 reader.get(mColour.red);
                 reader.get(mColour.green);
                 reader.get(mColour.blue);
                 reader.get(mColour.custom);
-
                 break;
-            }
             case ESM4::SUB_FNAM:
-            {
                 reader.get(mPlayable);
-
                 break;
-            }
             default:
-                // std::cout << "CLFM " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
-                // reader.skipSubRecordData();
                 throw std::runtime_error("ESM4::CLFM::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }

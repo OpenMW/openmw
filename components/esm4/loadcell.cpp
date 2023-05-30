@@ -31,9 +31,10 @@
 #endif
 
 #include <cfloat> // FLT_MAX for gcc
-#include <iostream> // FIXME: debug only
 #include <limits>
 #include <stdexcept>
+
+#include <components/debug/debuglog.hpp>
 
 #include "grouptype.hpp"
 #include "reader.hpp"
@@ -92,7 +93,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 #if 0
                 std::string padding;
                 padding.insert(0, reader.stackSize()*2, ' ');
-                std::cout << padding << "CELL Editor ID: " << mEditorId << std::endl;
+                std::cout << padding << "CELL Editor ID: " << mEditorId;
 #endif
                 break;
             }
@@ -115,9 +116,9 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 #if 0
                 std::string padding;
                 padding.insert(0, reader.stackSize()*2, ' ');
-                std::cout << padding << "CELL group " << ESM4::printLabel(reader.grp().label, reader.grp().type) << std::endl;
-                std::cout << padding << "CELL formId " << std::hex << reader.hdr().record.id << std::endl;
-                std::cout << padding << "CELL X " << std::dec << mX << ", Y " << mY << std::endl;
+                std::cout << padding << "CELL group " << ESM4::printLabel(reader.grp().label, reader.grp().type);
+                std::cout << padding << "CELL formId " << std::hex << reader.hdr().record.id;
+                std::cout << padding << "CELL X " << std::dec << mX << ", Y " << mY;
 #endif
                 if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV)
                     if (subHdr.dataSize == 12)
@@ -150,7 +151,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 #if 0
                 std::string padding;
                 padding.insert(0, reader.stackSize()*2, ' ');
-                std::cout << padding  << "flags: " << std::hex << mCellFlags << std::endl;
+                std::cout << padding  << "flags: " << std::hex << mCellFlags;
 #endif
                 break;
             }
@@ -163,7 +164,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 #if 0
                     std::string padding;
                     padding.insert(0, reader.stackSize()*2, ' ');
-                    std::cout << padding  << "region: " << std::hex << *it << std::endl;
+                    std::cout << padding  << "region: " << std::hex << *it;
 #endif
                 }
                 break;
@@ -232,11 +233,9 @@ void ESM4::Cell::load(ESM4::Reader& reader)
             case ESM4::SUB_XRNK: // Oblivion only?
             case ESM4::SUB_XCET: // FO3
             case ESM4::SUB_IMPF: // FO3 Zeta
-            {
-                // std::cout << "CELL " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "CELL " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::CELL::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

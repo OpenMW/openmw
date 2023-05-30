@@ -27,8 +27,9 @@
 #include "loadqust.hpp"
 
 #include <cstring>
-#include <iostream> // FIXME: for debugging only
 #include <stdexcept>
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -61,7 +62,7 @@ void ESM4::Quest::load(ESM4::Reader& reader)
                     mData.questDelay = 0.f; // unused in TES4 but keep it clean
 
                     // if ((mData.flags & Flag_StartGameEnabled) != 0)
-                    // std::cout << "start quest " << mEditorId << std::endl;
+                    // std::cout << "start quest " << mEditorId;
                 }
                 else
                     reader.get(mData); // FO3
@@ -157,18 +158,15 @@ void ESM4::Quest::load(ESM4::Reader& reader)
             case ESM4::SUB_SPOR: // TES5
             case ESM4::SUB_VMAD: // TES5
             case ESM4::SUB_VTCK: // TES5
-            {
-                // std::cout << "QUST " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                Log(Debug::Verbose) << "QUST " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::QUST::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
     // if (mEditorId == "DAConversations")
-    // std::cout << mEditorId << std::endl;
+    // std::cout << mEditorId;
 }
 
 // void ESM4::Quest::save(ESM4::Writer& writer) const

@@ -28,6 +28,7 @@
 #define ESM4_SGST_H
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 #include "effect.hpp"

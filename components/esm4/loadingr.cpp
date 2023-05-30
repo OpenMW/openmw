@@ -29,6 +29,8 @@
 #include <cstring>
 #include <stdexcept>
 
+#include <components/debug/debuglog.hpp>
+
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -107,7 +109,7 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
             case ESM4::SUB_ZNAM:
             case ESM4::SUB_ETYP: // FO3
             {
-                // std::cout << "INGR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "INGR " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             }

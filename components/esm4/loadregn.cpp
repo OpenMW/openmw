@@ -32,8 +32,7 @@
 
 #include <stdexcept>
 
-//#include <iostream> // FIXME: debug only
-//#include "formid.hpp"
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -73,7 +72,7 @@ void ESM4::Region::load(ESM4::Reader& reader)
 #if 0
                     std::string padding;
                     padding.insert(0, reader.stackSize()*2, ' ');
-                    std::cout << padding  << "RPLD: 0x" << std::hex << *it << std::endl;
+                    std::cout << padding  << "RPLD: 0x" << std::hex << *it;
 #endif
                 }
 
@@ -96,7 +95,7 @@ void ESM4::Region::load(ESM4::Reader& reader)
 #if 0
                 int dummy;
                 reader.get(dummy);
-                std::cout << "REGN " << mEditorId << " " << dummy << std::endl;
+                std::cout << "REGN " << mEditorId << " " << dummy;
 #else
                 reader.skipSubRecordData();
 #endif
@@ -105,7 +104,7 @@ void ESM4::Region::load(ESM4::Reader& reader)
             case ESM4::SUB_RDMO: // not seen in FO3/FONV?
             {
                 // std::cout << "REGN " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                // << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             }
@@ -130,7 +129,6 @@ void ESM4::Region::load(ESM4::Reader& reader)
             case ESM4::SUB_RDSB: // FONV
             case ESM4::SUB_RDSI: // FONV
             case ESM4::SUB_NVMI: // TES5
-            {
                 // RDAT skipping... following is a map
                 // RDMP skipping... map name
                 //
@@ -145,11 +143,9 @@ void ESM4::Region::load(ESM4::Reader& reader)
                 // RDAT skipping... following is grass
                 // RDGS skipping... unknown, maybe grass
 
-                // std::cout << "REGN " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
-                reader.skipSubRecordData(); // FIXME: process the subrecord rather than skip
+                Log(Debug::Verbose) << "REGN " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
+                reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::REGN::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

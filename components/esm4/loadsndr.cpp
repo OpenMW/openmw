@@ -27,7 +27,8 @@
 #include "loadsndr.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -47,16 +48,13 @@ void ESM4::SoundReference::load(ESM4::Reader& reader)
                 reader.getZString(mEditorId);
                 break;
             case ESM4::SUB_CTDA:
-            {
                 reader.get(&mTargetCondition, 20);
                 reader.get(mTargetCondition.runOn);
                 reader.get(mTargetCondition.reference);
                 if (mTargetCondition.reference)
                     reader.adjustFormId(mTargetCondition.reference);
                 reader.skipSubRecordData(4); // unknown
-
                 break;
-            }
             case ESM4::SUB_GNAM:
                 reader.getFormId(mSoundCategory);
                 break;
@@ -77,12 +75,9 @@ void ESM4::SoundReference::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_CNAM: // CRC32 hash
             case ESM4::SUB_FNAM: // unknown
-            {
-                // std::cout << "SNDR " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                Log(Debug::Verbose) << "SNDR " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::SNDR::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

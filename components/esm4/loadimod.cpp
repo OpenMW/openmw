@@ -28,8 +28,9 @@
 */
 #include "loadimod.hpp"
 
-#include <iostream> // FIXME: for debugging only
 #include <stdexcept>
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -59,15 +60,12 @@ void ESM4::ItemMod::load(ESM4::Reader& reader)
             case ESM4::SUB_ZNAM:
             case ESM4::SUB_DATA:
             {
-                // std::cout << "IMOD " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                Log(Debug::Verbose) << "IMOD " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             }
             default:
-                std::cout << "IMOD " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize << std::endl;
-                reader.skipSubRecordData();
-                // throw std::runtime_error("ESM4::IMOD::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
+                throw std::runtime_error("ESM4::IMOD::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
 }

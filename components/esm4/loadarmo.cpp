@@ -27,7 +27,8 @@
 #include "loadarmo.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: testing only
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -113,7 +114,6 @@ void ESM4::Armor::load(ESM4::Reader& reader)
                 reader.getZString(mMiniIconFemale);
                 break;
             case ESM4::SUB_BMDT:
-            {
                 if (subHdr.dataSize == 8) // FO3
                 {
                     reader.get(mArmorFlags);
@@ -128,7 +128,6 @@ void ESM4::Armor::load(ESM4::Reader& reader)
                     mGeneralFlags |= TYPE_TES4;
                 }
                 break;
-            }
             case ESM4::SUB_BODT:
             {
                 reader.get(mArmorFlags);
@@ -143,13 +142,11 @@ void ESM4::Armor::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_BOD2:
-            {
                 reader.get(mArmorFlags);
                 reader.get(mGeneralFlags);
                 mGeneralFlags &= 0x0000000f; // 0 (light), 1 (heavy) or 2 (none)
                 mGeneralFlags |= TYPE_TES5;
                 break;
-            }
             case ESM4::SUB_SCRI:
                 reader.getFormId(mScriptId);
                 break;
@@ -201,17 +198,15 @@ void ESM4::Armor::load(ESM4::Reader& reader)
             case ESM4::SUB_MO3S: // FO3
             case ESM4::SUB_BNAM: // FONV
             case ESM4::SUB_SNAM: // FONV
-            {
-                // std::cout << "ARMO " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "ARMO " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::ARMO::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
     // if ((mArmorFlags&0xffff) == 0x02) // only hair
-    // std::cout << "only hair " << mEditorId << std::endl;
+    // std::cout << "only hair " << mEditorId;
 }
 
 // void ESM4::Armor::save(ESM4::Writer& writer) const

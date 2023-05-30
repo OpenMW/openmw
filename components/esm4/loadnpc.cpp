@@ -27,16 +27,12 @@
 #include "loadnpc.hpp"
 
 #include <cstring>
-#include <iomanip> // NOTE: for testing only
-#include <iostream> // NOTE: for testing only
-#include <sstream> // NOTE: for testing only
 #include <stdexcept>
 #include <string> // getline
 
-//#include <boost/iostreams/filtering_streambuf.hpp>
-//#include <boost/iostreams/copy.hpp>
+#include <components/debug/debuglog.hpp>
 
-#include "formid.hpp" // NOTE: for testing only
+#include "formid.hpp"
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -221,8 +217,8 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM4::SUB_FNAM:
             {
                 reader.get(mFgRace);
-                // std::cout << "race " << mEditorId << " " << mRace << std::endl; // FIXME
-                // std::cout << "fg race " << mEditorId << " " << mFgRace << std::endl; // FIXME
+                // std::cout << "race " << mEditorId << " " << mRace; // FIXME
+                // std::cout << "fg race " << mEditorId << " " << mFgRace; // FIXME
                 break;
             }
             case ESM4::SUB_PNAM: // FO3/FONV/TES5
@@ -259,7 +255,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM4::SUB_DSTD:
             case ESM4::SUB_DSTF:
             {
-#if 1
+#if 0
                 std::vector<unsigned char> dataBuf(subHdr.dataSize);
                 reader.get(dataBuf.data(), subHdr.dataSize);
 
@@ -276,10 +272,9 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                     else if (i < (size_t)(subHdr.dataSize - 1)) // quiesce gcc
                         ss << " ";
                 }
-                std::cout << ss.str() << std::endl;
+                std::cout << ss.str();
 #else
-                // std::cout << "NPC_ " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                Log(Debug::Verbose) << "NPC_ " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
 #endif
                 break;
@@ -318,11 +313,9 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM4::SUB_EAMT: // FO3
             case ESM4::SUB_NAM4: // FO3
             case ESM4::SUB_COED: // FO3
-            {
-                // std::cout << "NPC_ " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "NPC_ " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::NPC_::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

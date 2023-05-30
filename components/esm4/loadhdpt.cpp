@@ -26,9 +26,11 @@
 */
 #include "loadhdpt.hpp"
 
+#include <cstdint>
 #include <optional>
 #include <stdexcept>
-//#include <iostream> // FIXME: testing only
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -66,7 +68,6 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
                 std::uint32_t value;
                 reader.get(value);
                 type = value;
-
                 break;
             }
             case ESM4::SUB_NAM1: // TES5
@@ -84,7 +85,6 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
                         "Failed to read ESM4 HDPT record: invalid file type: " + std::to_string(*type));
 
                 mTriFile[*type] = std::move(file);
-
                 break;
             }
             case ESM4::SUB_TNAM:
@@ -95,11 +95,9 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
             case ESM4::SUB_MODT:
             case ESM4::SUB_RNAM:
             case ESM4::SUB_CNAM:
-            {
-                // std::cout << "HDPT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "HDPT " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::HDPT::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

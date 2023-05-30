@@ -26,10 +26,10 @@
 */
 #include "loadaloc.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 #include <cstring>
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
-//#include <iomanip>  // FIXME: for debugging only
 
 //#include "formid.hpp" // FIXME:
 
@@ -145,18 +145,14 @@ void ESM4::MediaLocationController::load(ESM4::Reader& reader)
                     else if (i < subHdr.dataSize-1)
                         ss << " ";
                 }
-                std::cout << ss.str() << std::endl;
+                std::cout << ss.str();
 #else
-                // std::cout << "ALOC " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                Log(Debug::Verbose) << "ALOC " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
 #endif
                 break;
             }
             default:
-                // std::cout << "ALOC " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
-                // reader.skipSubRecordData();
                 throw std::runtime_error("ESM4::ALOC::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }

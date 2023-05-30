@@ -30,7 +30,8 @@
 
 #include <cfloat> // FLT_MAX for gcc
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -50,7 +51,6 @@ void ESM4::LightingTemplate::load(ESM4::Reader& reader)
                 reader.getZString(mEditorId);
                 break;
             case ESM4::SUB_DATA:
-            {
                 if (subHdr.dataSize == 36) // TES4
                     reader.get(&mLighting, 36);
                 if (subHdr.dataSize == 40) // FO3/FONV
@@ -62,16 +62,11 @@ void ESM4::LightingTemplate::load(ESM4::Reader& reader)
                 }
                 else
                     reader.skipSubRecordData(); // throw?
-
                 break;
-            }
             case ESM4::SUB_DALC: // TES5
-            {
-                // std::cout << "LGTM " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                Log(Debug::Verbose) << "LGTM " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::LGTM::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

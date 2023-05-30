@@ -32,7 +32,7 @@
 
 #include <stdexcept>
 
-#include <iostream> // FIXME: debugging only
+#include <components/debug/debuglog.hpp>
 
 #include "common.hpp"
 #include "formid.hpp"
@@ -97,7 +97,7 @@ void ESM4::Header::load(ESM4::Reader& reader)
 #if 0
                     std::string padding;
                     padding.insert(0, reader.stackSize()*2, ' ');
-                    std::cout << padding  << "ESM4::Header::ONAM overrides: " << formIdToString(mOverride) << std::endl;
+                    std::cout << padding  << "ESM4::Header::ONAM overrides: " << formIdToString(mOverride);
 #endif
                 }
                 break;
@@ -106,11 +106,9 @@ void ESM4::Header::load(ESM4::Reader& reader)
             case ESM4::SUB_INCC:
             case ESM4::SUB_OFST: // Oblivion only?
             case ESM4::SUB_DELE: // Oblivion only?
-            {
-                // std::cout << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::Header::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

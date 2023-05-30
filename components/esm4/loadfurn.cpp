@@ -28,6 +28,8 @@
 
 #include <stdexcept>
 
+#include <components/debug/debuglog.hpp>
+
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -77,11 +79,9 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
             case ESM4::SUB_VMAD:
             case ESM4::SUB_WBDT:
             case ESM4::SUB_XMRK:
-            {
-                // std::cout << "FURN " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                Log(Debug::Verbose) << "FURN " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::FURN::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

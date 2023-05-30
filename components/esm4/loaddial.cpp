@@ -27,8 +27,9 @@
 #include "loaddial.hpp"
 
 #include <cstring>
-#include <iostream> // FIXME: for debugging only
 #include <stdexcept>
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -55,7 +56,6 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
                 FormId questId;
                 reader.getFormId(questId);
                 mQuests.push_back(questId);
-
                 break;
             }
             case ESM4::SUB_QSTR: // Seems never used in TES4
@@ -63,7 +63,6 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
                 FormId questRem;
                 reader.getFormId(questRem);
                 mQuestsRemoved.push_back(questRem);
-
                 break;
             }
             case ESM4::SUB_DATA:
@@ -100,8 +99,7 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
             case ESM4::SUB_SNAM: // TES5
             case ESM4::SUB_TIFC: // TES5
             {
-                // std::cout << "DIAL " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                Log(Debug::Verbose) << "DIAL " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             }

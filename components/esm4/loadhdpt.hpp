@@ -29,6 +29,7 @@
 
 #include <array>
 #include <cstdint>
+#include <string>
 
 #include "formid.hpp"
 

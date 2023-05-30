@@ -27,8 +27,9 @@
 #include "loadinfo.hpp"
 
 #include <cstring>
-#include <iostream> // FIXME: for debugging only
 #include <stdexcept>
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -195,16 +196,11 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
             case ESM4::SUB_ONAM: // TES5
             case ESM4::SUB_QNAM: // TES5 for mScript
             case ESM4::SUB_RNAM: // TES5
-            {
-                // std::cout << "INFO " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                Log(Debug::Verbose) << "INFO " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
-                std::cout << "INFO " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize << std::endl;
-                reader.skipSubRecordData();
-                // throw std::runtime_error("ESM4::INFO::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
+                throw std::runtime_error("ESM4::INFO::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
 }
