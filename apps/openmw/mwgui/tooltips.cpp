@@ -814,14 +814,12 @@ namespace MWGui
         const ESM::Skill* skill = store.get<ESM::Skill>().find(skillId);
         const ESM::Attribute* attr = store.get<ESM::Attribute>().find(skill->mData.mAttribute);
 
-        std::string icon = "icons\\k\\" + ESM::Skill::sIconNames[skillId];
-
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "SkillNoProgressToolTip");
         widget->setUserString("Caption_SkillNoProgressName", MyGUI::TextIterator::toTagsString(skill->mName));
         widget->setUserString("Caption_SkillNoProgressDescription", skill->mDescription);
         widget->setUserString("Caption_SkillNoProgressAttribute", "#{sGoverningAttribute}: #{" + attr->mName + "}");
-        widget->setUserString("ImageTexture_SkillNoProgressImage", icon);
+        widget->setUserString("ImageTexture_SkillNoProgressImage", skill->mIcon);
     }
 
     void ToolTips::createAttributeToolTip(MyGUI::Widget* widget, int attributeId)

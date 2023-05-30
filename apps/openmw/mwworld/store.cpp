@@ -903,34 +903,34 @@ namespace MWWorld
 
     void Store<ESM::Skill>::setUp(const MWWorld::Store<ESM::GameSetting> settings)
     {
-        constexpr std::string_view skillNameIds[ESM::Skill::Length] = {
-            "sSkillBlock",
-            "sSkillArmorer",
-            "sSkillMediumarmor",
-            "sSkillHeavyarmor",
-            "sSkillBluntweapon",
-            "sSkillLongblade",
-            "sSkillAxe",
-            "sSkillSpear",
-            "sSkillAthletics",
-            "sSkillEnchant",
-            "sSkillDestruction",
-            "sSkillAlteration",
-            "sSkillIllusion",
-            "sSkillConjuration",
-            "sSkillMysticism",
-            "sSkillRestoration",
-            "sSkillAlchemy",
-            "sSkillUnarmored",
-            "sSkillSecurity",
-            "sSkillSneak",
-            "sSkillAcrobatics",
-            "sSkillLightarmor",
-            "sSkillShortblade",
-            "sSkillMarksman",
-            "sSkillMercantile",
-            "sSkillSpeechcraft",
-            "sSkillHandtohand",
+        constexpr std::string_view skillNameIdsAndIcons[ESM::Skill::Length][2] = {
+            { "sSkillBlock", "icons\\k\\combat_block.dds" },
+            { "sSkillArmorer", "icons\\k\\combat_armor.dds" },
+            { "sSkillMediumarmor", "icons\\k\\combat_mediumarmor.dds" },
+            { "sSkillHeavyarmor", "icons\\k\\combat_heavyarmor.dds" },
+            { "sSkillBluntweapon", "icons\\k\\combat_blunt.dds" },
+            { "sSkillLongblade", "icons\\k\\combat_longblade.dds" },
+            { "sSkillAxe", "icons\\k\\combat_axe.dds" },
+            { "sSkillSpear", "icons\\k\\combat_spear.dds" },
+            { "sSkillAthletics", "icons\\k\\combat_athletics.dds" },
+            { "sSkillEnchant", "icons\\k\\magic_enchant.dds" },
+            { "sSkillDestruction", "icons\\k\\magic_destruction.dds" },
+            { "sSkillAlteration", "icons\\k\\magic_alteration.dds" },
+            { "sSkillIllusion", "icons\\k\\magic_illusion.dds" },
+            { "sSkillConjuration", "icons\\k\\magic_conjuration.dds" },
+            { "sSkillMysticism", "icons\\k\\magic_mysticism.dds" },
+            { "sSkillRestoration", "icons\\k\\magic_restoration.dds" },
+            { "sSkillAlchemy", "icons\\k\\magic_alchemy.dds" },
+            { "sSkillUnarmored", "icons\\k\\magic_unarmored.dds" },
+            { "sSkillSecurity", "icons\\k\\stealth_security.dds" },
+            { "sSkillSneak", "icons\\k\\stealth_sneak.dds" },
+            { "sSkillAcrobatics", "icons\\k\\stealth_acrobatics.dds" },
+            { "sSkillLightarmor", "icons\\k\\stealth_lightarmor.dds" },
+            { "sSkillShortblade", "icons\\k\\stealth_shortblade.dds" },
+            { "sSkillMarksman", "icons\\k\\stealth_marksman.dds" },
+            { "sSkillMercantile", "icons\\k\\stealth_mercantile.dds" },
+            { "sSkillSpeechcraft", "icons\\k\\stealth_speechcraft.dds" },
+            { "sSkillHandtohand", "icons\\k\\stealth_handtohand.dds" },
         };
         for (int i = 0; i < ESM::Skill::Length; ++i)
         {
@@ -938,7 +938,8 @@ namespace MWWorld
             if (found != mStatic.end())
             {
                 ESM::Skill& skill = found->second;
-                std::string_view id = skillNameIds[i];
+                std::string_view id = skillNameIdsAndIcons[i][0];
+                skill.mIcon = skillNameIdsAndIcons[i][1];
                 const ESM::GameSetting* setting = settings.search(id);
                 if (setting && setting->mValue.getType() == ESM::VT_String)
                     skill.mName = setting->mValue.getString();

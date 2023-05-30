@@ -514,8 +514,6 @@ namespace MWGui
 
             const ESM::Skill* skill = esmStore.get<ESM::Skill>().find(skillId);
 
-            std::string icon = "icons\\k\\" + ESM::Skill::sIconNames[skillId];
-
             const ESM::Attribute* attr = esmStore.get<ESM::Attribute>().find(skill->mData.mAttribute);
 
             std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets
@@ -532,7 +530,7 @@ namespace MWGui
                     "Caption_SkillDescription", skill->mDescription);
                 mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString(
                     "Caption_SkillAttribute", "#{sGoverningAttribute}: #{" + attr->mName + "}");
-                mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("ImageTexture_SkillImage", icon);
+                mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("ImageTexture_SkillImage", skill->mIcon);
                 mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("Range_SkillProgress", "100");
             }
 
