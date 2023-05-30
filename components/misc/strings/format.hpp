@@ -1,6 +1,7 @@
 #ifndef COMPONENTS_MISC_STRINGS_FORMAT_H
 #define COMPONENTS_MISC_STRINGS_FORMAT_H
 
+#include <MyGUI_UString.h>
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
@@ -19,6 +20,7 @@ namespace Misc::StringUtils
         T argument(T value) noexcept
         {
             static_assert(!std::is_same_v<T, std::string_view>, "std::string_view is not supported");
+            static_assert(!std::is_same_v<T, MyGUI::UString>, "MyGUI::UString is not supported");
             return value;
         }
 

@@ -261,8 +261,8 @@ void MWMechanics::NpcStats::increaseSkill(
     MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("skillraise"));
 
     std::string message{ MWBase::Environment::get().getWindowManager()->getGameSettingString("sNotifyMessage39", {}) };
-    message
-        = Misc::StringUtils::format(message, MyGUI::TextIterator::toTagsString(skill->mName), static_cast<int>(base));
+    message = Misc::StringUtils::format(
+        message, MyGUI::TextIterator::toTagsString(skill->mName).asUTF8(), static_cast<int>(base));
 
     if (readBook)
         message = "#{sBookSkillMessage}\n" + message;
