@@ -54,7 +54,19 @@ namespace MWWorld
 
         Ptr getPtr(const ESM::RefId& name);
 
-        PtrRegistry& getPtrRegistry() { return mPtrRegistry; }
+        Ptr getPtr(ESM::RefNum refNum) const { return mPtrRegistry.getOrEmpty(refNum); }
+
+        PtrRegistryView getPtrRegistryView() const { return PtrRegistryView(mPtrRegistry); }
+
+        ESM::RefNum getLastGeneratedRefNum() const { return mPtrRegistry.getLastGenerated(); }
+
+        void setLastGeneratedRefNum(ESM::RefNum v) { mPtrRegistry.setLastGenerated(v); }
+
+        std::size_t getPtrRegistryRevision() const { return mPtrRegistry.getRevision(); }
+
+        void registerPtr(const Ptr& ptr) { mPtrRegistry.insert(ptr); }
+
+        void deregisterPtr(const Ptr& ptr) { mPtrRegistry.remove(ptr); }
 
         template <typename Fn>
         void forEachLoadedCellStore(Fn&& fn)

@@ -1853,8 +1853,7 @@ namespace MWWorld
 
         facedObject = rayToObject.mHitObject;
         if (facedObject.isEmpty() && rayToObject.mHitRefnum.isSet())
-            facedObject
-                = MWBase::Environment::get().getWorldModel()->getPtrRegistry().getOrDefault(rayToObject.mHitRefnum);
+            facedObject = MWBase::Environment::get().getWorldModel()->getPtr(rayToObject.mHitRefnum);
         if (rayToObject.mHit)
             mDistanceToFacedObject = (rayToObject.mRatio * maxDistance) - camDist;
         else
@@ -1871,8 +1870,7 @@ namespace MWWorld
         res.mHitNormal = rayRes.mHitNormalWorld;
         res.mHitObject = rayRes.mHitObject;
         if (res.mHitObject.isEmpty() && rayRes.mHitRefnum.isSet())
-            res.mHitObject
-                = MWBase::Environment::get().getWorldModel()->getPtrRegistry().getOrDefault(rayRes.mHitRefnum);
+            res.mHitObject = MWBase::Environment::get().getWorldModel()->getPtr(rayRes.mHitRefnum);
         return res.mHit;
     }
 

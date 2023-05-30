@@ -58,7 +58,7 @@ namespace MWLua
 
     void WorldView::objectAddedToScene(const MWWorld::Ptr& ptr)
     {
-        MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(ptr);
+        MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
         ObjectGroup* group = chooseGroup(ptr);
         if (group)
             addToGroup(*group, ptr);
@@ -81,13 +81,13 @@ namespace MWLua
     void WorldView::load(ESM::ESMReader& esm)
     {
         esm.getHNT(mSimulationTime, "LUAW");
-        MWBase::Environment::get().getWorldModel()->getPtrRegistry().setLastGenerated(esm.getFormId(true));
+        MWBase::Environment::get().getWorldModel()->setLastGeneratedRefNum(esm.getFormId(true));
     }
 
     void WorldView::save(ESM::ESMWriter& esm) const
     {
         esm.writeHNT("LUAW", mSimulationTime);
-        esm.writeFormId(MWBase::Environment::get().getWorldModel()->getPtrRegistry().getLastGenerated(), true);
+        esm.writeFormId(MWBase::Environment::get().getWorldModel()->getLastGeneratedRefNum(), true);
     }
 
     void WorldView::ObjectGroup::updateList()
