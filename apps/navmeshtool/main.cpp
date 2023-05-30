@@ -151,10 +151,9 @@ namespace NavMeshTool
             }
 
             Files::ConfigurationManager config;
-
-            bpo::variables_map composingVariables = Files::separateComposingVariables(variables, desc);
             config.readConfiguration(variables, desc);
-            Files::mergeComposingVariables(variables, composingVariables, desc);
+
+            setupLogging(config.getLogPath(), applicationName);
 
             const std::string encoding(variables["encoding"].as<std::string>());
             Log(Debug::Info) << ToUTF8::encodingUsingMessage(encoding);
@@ -201,8 +200,6 @@ namespace NavMeshTool
 
             Settings::Manager::load(config);
 
-            setupLogging(config.getLogPath(), applicationName);
-
             const auto agentCollisionShape = DetourNavigator::toCollisionShapeType(
                 Settings::Manager::getInt("actor collision shape type", "Game"));
             const osg::Vec3f agentHalfExtents
@@ -210,6 +207,8 @@ namespace NavMeshTool
             const DetourNavigator::AgentBounds agentBounds{ agentCollisionShape, agentHalfExtents };
             const std::uint64_t maxDbFileSize = Settings::Manager::getUInt64("max navmeshdb file size", "Navigator");
             const auto dbPath = Files::pathToUnicodeString(config.getUserDataPath() / "navmesh.db");
+
+            Log(Debug::Info) << "Using navmeshdb at " << dbPath;
 
             DetourNavigator::NavMeshDb db(dbPath, maxDbFileSize);
 

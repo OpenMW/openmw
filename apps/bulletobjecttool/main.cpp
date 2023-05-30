@@ -95,7 +95,7 @@ namespace
 
         addOption("fallback", bpo::value<FallbackMap>()->default_value(FallbackMap(), "")->multitoken()->composing(),
             "fallback values");
-        ;
+
         Files::ConfigurationManager::addCommonOptions(result);
 
         return result;
@@ -132,10 +132,9 @@ namespace
         }
 
         Files::ConfigurationManager config;
-
-        bpo::variables_map composingVariables = Files::separateComposingVariables(variables, desc);
         config.readConfiguration(variables, desc);
-        Files::mergeComposingVariables(variables, composingVariables, desc);
+
+        setupLogging(config.getLogPath(), applicationName);
 
         const std::string encoding(variables["encoding"].as<std::string>());
         Log(Debug::Info) << ToUTF8::encodingUsingMessage(encoding);
@@ -165,8 +164,6 @@ namespace
         VFS::registerArchives(&vfs, fileCollections, archives, true);
 
         Settings::Manager::load(config);
-
-        setupLogging(config.getLogPath(), applicationName);
 
         ESM::ReadersCache readers;
         EsmLoader::Query query;
