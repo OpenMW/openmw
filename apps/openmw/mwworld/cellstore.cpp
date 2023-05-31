@@ -997,7 +997,7 @@ namespace MWWorld
             int type = mStore.find(cref.mRefID);
             if (type == 0)
             {
-                Log(Debug::Warning) << "Dropping reference to '" << cref.mRefID << "' (object no longer exists)";
+                Log(Debug::Warning) << "Dropping reference to " << cref.mRefID << " (object no longer exists)";
                 // Skip until the next OBJE or MVRF
                 while (reader.hasMoreSubs() && !reader.peekNextSub("OBJE") && !reader.peekNextSub("MVRF"))
                 {
@@ -1248,7 +1248,7 @@ namespace MWWorld
         const ESM::Enchantment* enchantment = mStore.get<ESM::Enchantment>().search(enchantmentId);
         if (!enchantment)
         {
-            Log(Debug::Warning) << "Warning: Can't find enchantment '" << enchantmentId << "' on item "
+            Log(Debug::Warning) << "Warning: Can't find enchantment " << enchantmentId << " on item "
                                 << ptr.getCellRef().getRefId();
             return;
         }
