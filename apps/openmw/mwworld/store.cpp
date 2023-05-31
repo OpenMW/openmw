@@ -31,6 +31,22 @@ namespace
         }
         return false;
     }
+
+    std::string_view getGMSTString(const MWWorld::Store<ESM::GameSetting>& settings, std::string_view id)
+    {
+        const ESM::GameSetting* setting = settings.search(id);
+        if (setting && setting->mValue.getType() == ESM::VT_String)
+            return setting->mValue.getString();
+        return id;
+    }
+
+    float getGMSTFloat(const MWWorld::Store<ESM::GameSetting>& settings, std::string_view id)
+    {
+        const ESM::GameSetting* setting = settings.search(id);
+        if (setting && (setting->mValue.getType() == ESM::VT_Float || setting->mValue.getType() == ESM::VT_Int))
+            return setting->mValue.getFloat();
+        return {};
+    }
 }
 
 namespace MWWorld
@@ -901,7 +917,7 @@ namespace MWWorld
 
     Store<ESM::Skill>::Store() {}
 
-    void Store<ESM::Skill>::setUp(const MWWorld::Store<ESM::GameSetting> settings)
+    void Store<ESM::Skill>::setUp(const MWWorld::Store<ESM::GameSetting>& settings)
     {
         constexpr std::string_view skillNameIdsAndIcons[ESM::Skill::Length][2] = {
             { "sSkillBlock", "icons\\k\\combat_block.dds" },
@@ -938,13 +954,8 @@ namespace MWWorld
             if (found != mStatic.end())
             {
                 ESM::Skill& skill = found->second;
-                std::string_view id = skillNameIdsAndIcons[i][0];
+                skill.mName = getGMSTString(settings, skillNameIdsAndIcons[i][0]);
                 skill.mIcon = skillNameIdsAndIcons[i][1];
-                const ESM::GameSetting* setting = settings.search(id);
-                if (setting && setting->mValue.getType() == ESM::VT_String)
-                    skill.mName = setting->mValue.getString();
-                else
-                    skill.mName = id;
             }
         }
     }
@@ -997,49 +1008,49 @@ namespace MWWorld
         }
         return ptr;
     }
-    void Store<ESM::Attribute>::setUp()
+    void Store<ESM::Attribute>::setUp(const MWWorld::Store<ESM::GameSetting>& settings)
     {
         mStatic.push_back({ .mId = ESM::Attribute::Strength,
-            .mName = "sAttributeStrength",
-            .mDescription = "sStrDesc",
+            .mName = std::string{ getGMSTString(settings, "sAttributeStrength") },
+            .mDescription = std::string{ getGMSTString(settings, "sStrDesc") },
             .mIcon = "icons\\k\\attribute_strength.dds",
-            .mWerewolfGMST = "fWerewolfStrength" });
+            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfStrength") });
         mStatic.push_back({ .mId = ESM::Attribute::Intelligence,
-            .mName = "sAttributeIntelligence",
-            .mDescription = "sIntDesc",
+            .mName = std::string{ getGMSTString(settings, "sAttributeIntelligence") },
+            .mDescription = std::string{ getGMSTString(settings, "sIntDesc") },
             .mIcon = "icons\\k\\attribute_int.dds",
             // Oh, Bethesda. It's "Intelligence".
-            .mWerewolfGMST = "fWerewolfIntellegence" });
+            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfIntellegence") });
         mStatic.push_back({ .mId = ESM::Attribute::Willpower,
-            .mName = "sAttributeWillpower",
-            .mDescription = "sWilDesc",
+            .mName = std::string{ getGMSTString(settings, "sAttributeWillpower") },
+            .mDescription = std::string{ getGMSTString(settings, "sWilDesc") },
             .mIcon = "icons\\k\\attribute_wilpower.dds",
-            .mWerewolfGMST = "fWerewolfWillpower" });
+            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfWillpower") });
         mStatic.push_back({ .mId = ESM::Attribute::Agility,
-            .mName = "sAttributeAgility",
-            .mDescription = "sAgiDesc",
+            .mName = std::string{ getGMSTString(settings, "sAttributeAgility") },
+            .mDescription = std::string{ getGMSTString(settings, "sAgiDesc") },
             .mIcon = "icons\\k\\attribute_agility.dds",
-            .mWerewolfGMST = "fWerewolfAgility" });
+            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfAgility") });
         mStatic.push_back({ .mId = ESM::Attribute::Speed,
-            .mName = "sAttributeSpeed",
-            .mDescription = "sSpdDesc",
+            .mName = std::string{ getGMSTString(settings, "sAttributeSpeed") },
+            .mDescription = std::string{ getGMSTString(settings, "sSpdDesc") },
             .mIcon = "icons\\k\\attribute_speed.dds",
-            .mWerewolfGMST = "fWerewolfSpeed" });
+            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfSpeed") });
         mStatic.push_back({ .mId = ESM::Attribute::Endurance,
-            .mName = "sAttributeEndurance",
-            .mDescription = "sEndDesc",
+            .mName = std::string{ getGMSTString(settings, "sAttributeEndurance") },
+            .mDescription = std::string{ getGMSTString(settings, "sEndDesc") },
             .mIcon = "icons\\k\\attribute_endurance.dds",
-            .mWerewolfGMST = "fWerewolfEndurance" });
+            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfEndurance") });
         mStatic.push_back({ .mId = ESM::Attribute::Personality,
-            .mName = "sAttributePersonality",
-            .mDescription = "sPerDesc",
+            .mName = std::string{ getGMSTString(settings, "sAttributePersonality") },
+            .mDescription = std::string{ getGMSTString(settings, "sPerDesc") },
             .mIcon = "icons\\k\\attribute_personality.dds",
-            .mWerewolfGMST = "fWerewolfPersonality" });
+            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfPersonality") });
         mStatic.push_back({ .mId = ESM::Attribute::Luck,
-            .mName = "sAttributeLuck",
-            .mDescription = "sLucDesc",
+            .mName = std::string{ getGMSTString(settings, "sAttributeLuck") },
+            .mDescription = std::string{ getGMSTString(settings, "sLucDesc") },
             .mIcon = "icons\\k\\attribute_luck.dds",
-            .mWerewolfGMST = "fWerewolfLuck" });
+            .mWerewolfValue = getGMSTFloat(settings, "fWerewolfLuck") });
     }
     size_t Store<ESM::Attribute>::getSize() const
     {

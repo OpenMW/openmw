@@ -99,7 +99,7 @@ namespace MWWorld
         for (const auto& attribute : store->get<ESM::Attribute>())
         {
             MWMechanics::AttributeValue value = npcStats.getAttribute(attribute.mId);
-            value.setModifier(gmst.find(attribute.mWerewolfGMST)->mValue.getFloat() - value.getModified());
+            value.setModifier(attribute.mWerewolfValue - value.getModified());
             npcStats.setAttribute(attribute.mId, value);
         }
 
