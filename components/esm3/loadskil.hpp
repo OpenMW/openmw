@@ -46,6 +46,7 @@ namespace ESM
         std::string mDescription;
         std::string mName;
         std::string mIcon;
+        float mWerewolfValue{};
 
         enum SkillEnum
         {
