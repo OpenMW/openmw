@@ -22,7 +22,7 @@ namespace Resource
     class BaseResourceManager
     {
     public:
-        virtual ~BaseResourceManager() {}
+        virtual ~BaseResourceManager() = default;
         virtual void updateCache(double referenceTime) {}
         virtual void clearCache() {}
         virtual void setExpiryDelay(double expiryDelay) {}
@@ -46,7 +46,7 @@ namespace Resource
         {
         }
 
-        virtual ~GenericResourceManager() {}
+        virtual ~GenericResourceManager() = default;
 
         /// Clear cache entries that have not been referenced for longer than expiryDelay.
         void updateCache(double referenceTime) override

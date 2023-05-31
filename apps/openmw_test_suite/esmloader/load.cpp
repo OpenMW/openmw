@@ -26,7 +26,7 @@ namespace
     struct EsmLoaderTest : Test
     {
         const Files::PathContainer mDataDirs{ { std::filesystem::path{ OPENMW_DATA_DIR } } };
-        const Files::Collections mFileCollections{ mDataDirs, true };
+        const Files::Collections mFileCollections{ mDataDirs };
         const std::vector<std::string> mContentFiles{ { "template.omwgame" } };
     };
 

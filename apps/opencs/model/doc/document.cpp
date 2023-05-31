@@ -296,12 +296,12 @@ void CSMDoc::Document::createBase()
 
 CSMDoc::Document::Document(const Files::ConfigurationManager& configuration, std::vector<std::filesystem::path> files,
     bool new_, const std::filesystem::path& savePath, const std::filesystem::path& resDir, ToUTF8::FromType encoding,
-    const std::vector<std::string>& blacklistedScripts, bool fsStrict, const Files::PathContainer& dataPaths,
+    const std::vector<std::string>& blacklistedScripts, const Files::PathContainer& dataPaths,
     const std::vector<std::string>& archives)
     : mSavePath(savePath)
     , mContentFiles(std::move(files))
     , mNew(new_)
-    , mData(encoding, fsStrict, dataPaths, archives, resDir)
+    , mData(encoding, dataPaths, archives, resDir)
     , mTools(*this, encoding)
     , mProjectPath((configuration.getUserDataPath() / "projects") / (savePath.filename().u8string() + u8".project"))
     , mSavingOperation(*this, mProjectPath, encoding)

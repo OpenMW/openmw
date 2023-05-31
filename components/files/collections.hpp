@@ -13,7 +13,7 @@ namespace Files
         Collections();
 
         ///< Directories are listed with increasing priority.
-        Collections(const Files::PathContainer& directories, bool foldCase);
+        Collections(const Files::PathContainer& directories);
 
         ///< Return a file collection for the given extension. Extension must contain the
         /// leading dot and must be all lower-case.
@@ -35,7 +35,6 @@ namespace Files
         typedef std::map<std::string, MultiDirCollection> MultiDirCollectionContainer;
         Files::PathContainer mDirectories;
 
-        bool mFoldCase;
         mutable MultiDirCollectionContainer mCollections;
     };
 }

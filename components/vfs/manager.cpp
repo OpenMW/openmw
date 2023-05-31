@@ -7,38 +7,10 @@
 #include <components/misc/strings/lower.hpp>
 
 #include "archive.hpp"
-
-namespace
-{
-
-    char strict_normalize_char(char ch)
-    {
-        return ch == '\\' ? '/' : ch;
-    }
-
-    char nonstrict_normalize_char(char ch)
-    {
-        return ch == '\\' ? '/' : Misc::StringUtils::toLower(ch);
-    }
-
-    void normalize_path(std::string& path, bool strict)
-    {
-        char (*normalize_char)(char) = strict ? &strict_normalize_char : &nonstrict_normalize_char;
-        std::transform(path.begin(), path.end(), path.begin(), normalize_char);
-    }
-
-}
+#include "pathutil.hpp"
 
 namespace VFS
 {
-
-    Manager::Manager(bool strict)
-        : mStrict(strict)
-    {
-    }
-
-    Manager::~Manager() {}
-
     void Manager::reset()
     {
         mIndex.clear();
@@ -55,15 +27,12 @@ namespace VFS
         mIndex.clear();
 
         for (const auto& archive : mArchives)
-            archive->listResources(mIndex, mStrict ? &strict_normalize_char : &nonstrict_normalize_char);
+            archive->listResources(mIndex);
     }
 
     Files::IStreamPtr Manager::get(std::string_view name) const
     {
-        std::string normalized(name);
-        normalize_path(normalized, mStrict);
-
-        return getNormalized(normalized);
+        return getNormalized(Path::normalizeFilename(name));
     }
 
     Files::IStreamPtr Manager::getNormalized(const std::string& normalizedName) const
@@ -76,26 +45,15 @@ namespace VFS
 
     bool Manager::exists(std::string_view name) const
     {
-        std::string normalized(name);
-        normalize_path(normalized, mStrict);
-
-        return mIndex.find(normalized) != mIndex.end();
-    }
-
-    std::string Manager::normalizeFilename(std::string_view name) const
-    {
-        std::string result(name);
-        normalize_path(result, mStrict);
-        return result;
+        return mIndex.find(Path::normalizeFilename(name)) != mIndex.end();
     }
 
     std::string Manager::getArchive(std::string_view name) const
     {
-        std::string normalized(name);
-        normalize_path(normalized, mStrict);
+        std::string normalized = Path::normalizeFilename(name);
         for (auto it = mArchives.rbegin(); it != mArchives.rend(); ++it)
         {
-            if ((*it)->contains(normalized, mStrict ? &strict_normalize_char : &nonstrict_normalize_char))
+            if ((*it)->contains(normalized))
                 return (*it)->getDescription();
         }
         return {};
@@ -104,7 +62,7 @@ namespace VFS
     std::filesystem::path Manager::getAbsoluteFileName(const std::filesystem::path& name) const
     {
         std::string normalized = Files::pathToUnicodeString(name);
-        normalize_path(normalized, mStrict);
+        Path::normalizeFilenameInPlace(normalized);
 
         const auto found = mIndex.find(normalized);
         if (found == mIndex.end())
@@ -124,7 +82,7 @@ namespace VFS
     {
         if (path.empty())
             return { mIndex.begin(), mIndex.end() };
-        auto normalized = normalizeFilename(path);
+        std::string normalized = Path::normalizeFilename(path);
         const auto it = mIndex.lower_bound(normalized);
         if (it == mIndex.end() || !startsWith(it->first, normalized))
             return { it, it };

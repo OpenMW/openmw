@@ -7,29 +7,9 @@
 
 namespace Files
 {
-    struct NameEqual
+
+    MultiDirCollection::MultiDirCollection(const Files::PathContainer& directories, const std::string& extension)
     {
-        bool mStrict;
-
-        NameEqual(bool strict)
-            : mStrict(strict)
-        {
-        }
-
-        bool operator()(const std::string& left, const std::string& right) const
-        {
-            if (mStrict)
-                return left == right;
-            return Misc::StringUtils::ciEqual(left, right);
-        }
-    };
-
-    MultiDirCollection::MultiDirCollection(
-        const Files::PathContainer& directories, const std::string& extension, bool foldCase)
-        : mFiles(NameLess(!foldCase))
-    {
-        NameEqual equal(!foldCase);
-
         for (const auto& directory : directories)
         {
             if (!std::filesystem::is_directory(directory))
@@ -42,7 +22,7 @@ namespace Files
             {
                 const auto& path = dirIter.path();
 
-                if (!equal(extension, Files::pathToUnicodeString(path.extension())))
+                if (!Misc::StringUtils::ciEqual(extension, Files::pathToUnicodeString(path.extension())))
                     continue;
 
                 const auto filename = Files::pathToUnicodeString(path.filename());

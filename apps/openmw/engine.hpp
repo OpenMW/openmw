@@ -177,7 +177,6 @@ namespace OMW
         std::unique_ptr<Compiler::Context> mScriptContext;
 
         Files::Collections mFileCollections;
-        bool mFSStrict;
         Translation::Storage mTranslationDataStorage;
         std::vector<ESM::RefId> mScriptBlacklist;
         bool mScriptBlacklistUse;
@@ -200,12 +199,6 @@ namespace OMW
     public:
         Engine(Files::ConfigurationManager& configurationManager);
         virtual ~Engine();
-
-        /// Enable strict filesystem mode (do not fold case)
-        ///
-        /// \attention The strict mode must be specified before any path-related settings
-        /// are given to the engine.
-        void enableFSStrict(bool fsStrict);
 
         /// Set data dirs
         void setDataDirs(const Files::PathContainer& dataDirs);

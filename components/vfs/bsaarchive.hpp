@@ -2,6 +2,7 @@
 #define VFS_BSAARCHIVE_HPP_
 
 #include "archive.hpp"
+#include "pathutil.hpp"
 
 #include <components/bsa/ba2dx10file.hpp>
 #include <components/bsa/ba2gnrlfile.hpp>
@@ -47,24 +48,22 @@ namespace VFS
 
         virtual ~BsaArchive() {}
 
-        void listResources(std::map<std::string, File*>& out, char (*normalize_function)(char)) override
+        void listResources(std::map<std::string, File*>& out) override
         {
             for (auto& resource : mResources)
             {
                 std::string ent = resource.mInfo->name();
-                std::transform(ent.begin(), ent.end(), ent.begin(), normalize_function);
+                Path::normalizeFilenameInPlace(ent);
 
                 out[ent] = &resource;
             }
         }
 
-        bool contains(const std::string& file, char (*normalize_function)(char)) const override
+        bool contains(const std::string& file) const override
         {
             for (const auto& it : mResources)
             {
-                std::string ent = it.mInfo->name();
-                std::transform(ent.begin(), ent.end(), ent.begin(), normalize_function);
-                if (file == ent)
+                if (Path::pathEqual(file, it.mInfo->name()))
                     return true;
             }
             return false;

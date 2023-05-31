@@ -17,7 +17,6 @@
 CSMDoc::DocumentManager::DocumentManager(const Files::ConfigurationManager& configuration)
     : mConfiguration(configuration)
     , mEncoding(ToUTF8::WINDOWS_1252)
-    , mFsStrict(false)
 {
     std::filesystem::path projectPath = configuration.getUserDataPath() / "projects";
 
@@ -62,8 +61,8 @@ void CSMDoc::DocumentManager::addDocument(
 CSMDoc::Document* CSMDoc::DocumentManager::makeDocument(
     const std::vector<std::filesystem::path>& files, const std::filesystem::path& savePath, bool new_)
 {
-    return new Document(mConfiguration, files, new_, savePath, mResDir, mEncoding, mBlacklistedScripts, mFsStrict,
-        mDataPaths, mArchives);
+    return new Document(
+        mConfiguration, files, new_, savePath, mResDir, mEncoding, mBlacklistedScripts, mDataPaths, mArchives);
 }
 
 void CSMDoc::DocumentManager::insertDocument(CSMDoc::Document* document)
@@ -123,9 +122,8 @@ void CSMDoc::DocumentManager::documentNotLoaded(Document* document, const std::s
 }
 
 void CSMDoc::DocumentManager::setFileData(
-    bool strict, const Files::PathContainer& dataPaths, const std::vector<std::string>& archives)
+    const Files::PathContainer& dataPaths, const std::vector<std::string>& archives)
 {
-    mFsStrict = strict;
     mDataPaths = dataPaths;
     mArchives = archives;
 }

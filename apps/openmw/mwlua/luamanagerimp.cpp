@@ -48,7 +48,6 @@ namespace MWLua
 
     LuaManager::LuaManager(const VFS::Manager* vfs, const std::filesystem::path& libsDir)
         : mLua(vfs, &mConfiguration, createLuaStateSettings())
-        , mUiResourceManager(vfs)
     {
         Log(Debug::Info) << "Lua version: " << LuaUtil::getLuaVersion();
         mLua.addInternalLibSearchPath(libsDir);

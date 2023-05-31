@@ -6,6 +6,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/pathhelpers.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "objectcache.hpp"
 
@@ -85,7 +86,7 @@ namespace Resource
 
     osg::ref_ptr<osg::Image> ImageManager::getImage(std::string_view filename, bool disableFlip)
     {
-        const std::string normalized = mVFS->normalizeFilename(filename);
+        const std::string normalized = VFS::Path::normalizeFilename(filename);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
         if (obj)

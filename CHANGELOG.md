@@ -75,6 +75,7 @@
     Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message
+    Task #7394: Drop support for --fs-strict
 
 0.48.0
 ------

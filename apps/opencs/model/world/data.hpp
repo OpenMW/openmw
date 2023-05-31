@@ -127,7 +127,6 @@ namespace CSMWorld
         std::map<ESM::RefId, std::map<unsigned int, unsigned int>> mRefLoadCache;
         int mReaderIndex;
 
-        bool mFsStrict;
         Files::PathContainer mDataPaths;
         std::vector<std::string> mArchives;
         std::unique_ptr<VFS::Manager> mVFS;
@@ -153,8 +152,8 @@ namespace CSMWorld
         void loadFallbackEntries();
 
     public:
-        Data(ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
-            const std::vector<std::string>& archives, const std::filesystem::path& resDir);
+        Data(ToUTF8::FromType encoding, const Files::PathContainer& dataPaths, const std::vector<std::string>& archives,
+            const std::filesystem::path& resDir);
 
         ~Data() override;
 

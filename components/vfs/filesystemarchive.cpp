@@ -1,8 +1,8 @@
 #include "filesystemarchive.hpp"
 
-#include <algorithm>
-
 #include <filesystem>
+
+#include "pathutil.hpp"
 
 #include <components/debug/debuglog.hpp>
 #include <components/files/constrainedfilestream.hpp>
@@ -17,7 +17,7 @@ namespace VFS
     {
     }
 
-    void FileSystemArchive::listResources(std::map<std::string, File*>& out, char (*normalize_function)(char))
+    void FileSystemArchive::listResources(std::map<std::string, File*>& out)
     {
         if (!mBuiltIndex)
         {
@@ -33,16 +33,13 @@ namespace VFS
                     continue;
 
                 const auto& path = i.path();
-                const auto& proper = Files::pathToUnicodeString(path);
+                const std::string proper = Files::pathToUnicodeString(path);
 
                 FileSystemArchiveFile file(path);
 
-                std::string searchable;
+                std::string searchable = Path::normalizeFilename(std::string_view{ proper }.substr(prefix));
 
-                std::transform(std::next(proper.begin(), static_cast<std::string::difference_type>(prefix)),
-                    proper.end(), std::back_inserter(searchable), normalize_function);
-
-                const auto inserted = mIndex.insert(std::make_pair(searchable, file));
+                const auto inserted = mIndex.emplace(searchable, file);
                 if (!inserted.second)
                     Log(Debug::Warning)
                         << "Warning: found duplicate file for '" << proper
@@ -61,7 +58,7 @@ namespace VFS
         }
     }
 
-    bool FileSystemArchive::contains(const std::string& file, char (*normalize_function)(char)) const
+    bool FileSystemArchive::contains(const std::string& file) const
     {
         return mIndex.find(file) != mIndex.end();
     }

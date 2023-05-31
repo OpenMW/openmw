@@ -132,7 +132,7 @@ int CSMWorld::Data::count(RecordBase::State state, const CollectionBase& collect
     return number;
 }
 
-CSMWorld::Data::Data(ToUTF8::FromType encoding, bool fsStrict, const Files::PathContainer& dataPaths,
+CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& dataPaths,
     const std::vector<std::string>& archives, const std::filesystem::path& resDir)
     : mEncoder(encoding)
     , mPathgrids(mCells)
@@ -140,12 +140,11 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, bool fsStrict, const Files::Path
     , mReader(nullptr)
     , mDialogue(nullptr)
     , mReaderIndex(1)
-    , mFsStrict(fsStrict)
     , mDataPaths(dataPaths)
     , mArchives(archives)
 {
-    mVFS = std::make_unique<VFS::Manager>(mFsStrict);
-    VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths, !mFsStrict), mArchives, true);
+    mVFS = std::make_unique<VFS::Manager>();
+    VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths), mArchives, true);
 
     mResourcesManager.setVFS(mVFS.get());
     mResourceSystem = std::make_unique<Resource::ResourceSystem>(mVFS.get());
@@ -1444,7 +1443,7 @@ std::vector<ESM::RefId> CSMWorld::Data::getIds(bool listDeleted) const
 void CSMWorld::Data::assetsChanged()
 {
     mVFS.get()->reset();
-    VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths, !mFsStrict), mArchives, true);
+    VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths), mArchives, true);
 
     const UniversalId assetTableIds[] = { UniversalId::Type_Meshes, UniversalId::Type_Icons, UniversalId::Type_Musics,
         UniversalId::Type_SoundsRes, UniversalId::Type_Textures, UniversalId::Type_Videos };

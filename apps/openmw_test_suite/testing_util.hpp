@@ -56,22 +56,16 @@ namespace TestingOpenMW
         {
         }
 
-        void listResources(std::map<std::string, VFS::File*>& out, char (*normalize_function)(char)) override
-        {
-            out = mFiles;
-        }
+        void listResources(std::map<std::string, VFS::File*>& out) override { out = mFiles; }
 
-        bool contains(const std::string& file, char (*normalize_function)(char)) const override
-        {
-            return mFiles.count(file) != 0;
-        }
+        bool contains(const std::string& file) const override { return mFiles.count(file) != 0; }
 
         std::string getDescription() const override { return "TestData"; }
     };
 
     inline std::unique_ptr<VFS::Manager> createTestVFS(std::map<std::string, VFS::File*> files)
     {
-        auto vfs = std::make_unique<VFS::Manager>(true);
+        auto vfs = std::make_unique<VFS::Manager>();
         vfs->addArchive(std::make_unique<VFSTestData>(std::move(files)));
         vfs->buildIndex();
         return vfs;

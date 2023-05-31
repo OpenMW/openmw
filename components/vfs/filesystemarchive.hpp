@@ -27,9 +27,9 @@ namespace VFS
     public:
         FileSystemArchive(const std::filesystem::path& path);
 
-        void listResources(std::map<std::string, File*>& out, char (*normalize_function)(char)) override;
+        void listResources(std::map<std::string, File*>& out) override;
 
-        bool contains(const std::string& file, char (*normalize_function)(char)) const override;
+        bool contains(const std::string& file) const override;
 
         std::string getDescription() const override;
 

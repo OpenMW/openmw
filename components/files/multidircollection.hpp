@@ -13,23 +13,6 @@ namespace Files
 {
     typedef std::vector<std::filesystem::path> PathContainer;
 
-    struct NameLess
-    {
-        bool mStrict;
-
-        NameLess(bool strict)
-            : mStrict(strict)
-        {
-        }
-
-        bool operator()(const std::string& left, const std::string& right) const
-        {
-            if (mStrict)
-                return left < right;
-            return Misc::StringUtils::ciLess(left, right);
-        }
-    };
-
     /// \brief File collection across several directories
     ///
     /// This class lists all files with one specific extensions within one or more
@@ -38,14 +21,14 @@ namespace Files
     class MultiDirCollection
     {
     public:
-        typedef std::map<std::string, std::filesystem::path, NameLess> TContainer;
+        typedef std::map<std::string, std::filesystem::path, Misc::StringUtils::CiComp> TContainer;
         typedef TContainer::const_iterator TIter;
 
     private:
         TContainer mFiles;
 
     public:
-        MultiDirCollection(const Files::PathContainer& directories, const std::string& extension, bool foldCase);
+        MultiDirCollection(const Files::PathContainer& directories, const std::string& extension);
         ///< Directories are listed with increasing priority.
         /// \param extension The extension that should be listed in this collection. Must
         /// contain the leading dot.

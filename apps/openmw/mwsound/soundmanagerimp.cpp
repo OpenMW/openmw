@@ -81,7 +81,7 @@ namespace MWSound
         : mVFS(vfs)
         , mOutput(std::make_unique<OpenAL_Output>(*this))
         , mWaterSoundUpdater(makeWaterSoundUpdaterSettings())
-        , mSoundBuffers(*vfs, *mOutput)
+        , mSoundBuffers(*mOutput)
         , mListenerUnderwater(false)
         , mListenerPos(0, 0, 0)
         , mListenerDir(1, 0, 0)
@@ -357,7 +357,7 @@ namespace MWSound
         if (!mOutput->isInitialized())
             return;
 
-        DecoderPtr decoder = loadVoice(mVFS->normalizeFilename("Sound/" + filename));
+        DecoderPtr decoder = loadVoice("Sound/" + filename);
         if (!decoder)
             return;
 
@@ -389,7 +389,7 @@ namespace MWSound
         if (!mOutput->isInitialized())
             return;
 
-        DecoderPtr decoder = loadVoice(mVFS->normalizeFilename("Sound/" + filename));
+        DecoderPtr decoder = loadVoice("Sound/" + filename);
         if (!decoder)
             return;
 

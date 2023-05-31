@@ -60,7 +60,6 @@ namespace CS
         std::filesystem::path mPid;
         QLockFile mLockFile;
         std::ofstream mPidFile;
-        bool mFsStrict;
         CSVTools::Merge mMerge;
         CSVDoc::ViewManager* mViewManager;
         std::filesystem::path mFileToLoad;

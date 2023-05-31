@@ -32,6 +32,7 @@
 #include <components/misc/strings/conversion.hpp>
 
 #include <components/vfs/manager.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include <components/sceneutil/clone.hpp>
 #include <components/sceneutil/controller.hpp>
@@ -507,7 +508,7 @@ namespace Resource
 
     bool SceneManager::checkLoaded(const std::string& name, double timeStamp)
     {
-        return mCache->checkInObjectCache(mVFS->normalizeFilename(name), timeStamp);
+        return mCache->checkInObjectCache(VFS::Path::normalizeFilename(name), timeStamp);
     }
 
     /// @brief Callback to read image files from the VFS.
@@ -862,7 +863,7 @@ namespace Resource
 
     osg::ref_ptr<const osg::Node> SceneManager::getTemplate(const std::string& name, bool compile)
     {
-        std::string normalized = mVFS->normalizeFilename(name);
+        std::string normalized = VFS::Path::normalizeFilename(name);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
         if (obj)
