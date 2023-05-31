@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -83,7 +81,6 @@ void ESM4::LevelledItem::load(ESM4::Reader& reader)
             case ESM4::SUB_OBND: // FO3/FONV
             case ESM4::SUB_COED: // FO3/FONV
             case ESM4::SUB_LVLG: // FO3/FONV
-                Log(Debug::Verbose) << "LVLI " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             default:

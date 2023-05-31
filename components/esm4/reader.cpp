@@ -22,10 +22,6 @@
 */
 #include "reader.hpp"
 
-#ifdef NDEBUG // FIXME: debugging only
-#undef NDEBUG
-#endif
-
 #undef DEBUG_GROUPSTACK
 
 #include <iomanip>

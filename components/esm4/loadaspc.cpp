@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -67,12 +65,10 @@ void ESM4::AcousticSpace::load(ESM4::Reader& reader)
             {
                 std::uint32_t dummy;
                 reader.get(dummy);
-                Log(Debug::Verbose) << "WNAM " << mEditorId << " " << dummy;
                 break;
             }
             case ESM4::SUB_BNAM: // TES5 reverb formid
             case ESM4::SUB_OBND:
-                Log(Debug::Verbose) << "ASPC " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             default:

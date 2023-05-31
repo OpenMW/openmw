@@ -30,8 +30,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -59,11 +57,8 @@ void ESM4::ItemMod::load(ESM4::Reader& reader)
             case ESM4::SUB_YNAM:
             case ESM4::SUB_ZNAM:
             case ESM4::SUB_DATA:
-            {
-                Log(Debug::Verbose) << "IMOD " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::IMOD::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

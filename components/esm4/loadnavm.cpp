@@ -233,10 +233,8 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_XXXX:
-            {
                 reader.get(subSize);
                 break;
-            }
             case ESM4::SUB_NVER: // FO3
             case ESM4::SUB_DATA: // FO3
             case ESM4::SUB_NVVX: // FO3
@@ -246,7 +244,6 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
             case ESM4::SUB_NVGD: // FO3
             case ESM4::SUB_NVEX: // FO3
             case ESM4::SUB_EDID: // FO3
-                Log(Debug::Verbose) << ESM::printName(reader.subRecordHeader().typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

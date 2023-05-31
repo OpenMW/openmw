@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -178,7 +176,6 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
             case ESM4::SUB_WNM6: // FONV
             case ESM4::SUB_WNM7: // FONV
             case ESM4::SUB_EFSD: // FONV DeadMoney
-                Log(Debug::Verbose) << "WEAP " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

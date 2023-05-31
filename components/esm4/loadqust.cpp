@@ -29,8 +29,6 @@
 #include <cstring>
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -158,7 +156,6 @@ void ESM4::Quest::load(ESM4::Reader& reader)
             case ESM4::SUB_SPOR: // TES5
             case ESM4::SUB_VMAD: // TES5
             case ESM4::SUB_VTCK: // TES5
-                Log(Debug::Verbose) << "QUST " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             default:

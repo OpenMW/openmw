@@ -26,8 +26,6 @@
 */
 #include "loadanio.hpp"
 
-#include <components/debug/debuglog.hpp>
-
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -61,7 +59,6 @@ void ESM4::AnimObject::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_MODT: // TES5 only
             case ESM4::SUB_MODS: // TES5 only
-                Log(Debug::Verbose) << "ANIO " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

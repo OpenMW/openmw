@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -92,7 +90,6 @@ void ESM4::Clothing::load(ESM4::Reader& reader)
             case ESM4::SUB_MO2T:
             case ESM4::SUB_MO3T:
             case ESM4::SUB_MO4T:
-                Log(Debug::Verbose) << "CLOT " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

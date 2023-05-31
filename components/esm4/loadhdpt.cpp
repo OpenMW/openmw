@@ -30,8 +30,6 @@
 #include <optional>
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -95,7 +93,6 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
             case ESM4::SUB_MODT:
             case ESM4::SUB_RNAM:
             case ESM4::SUB_CNAM:
-                Log(Debug::Verbose) << "HDPT " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

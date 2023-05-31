@@ -26,15 +26,9 @@
 */
 #include "loadcell.hpp"
 
-#ifdef NDEBUG // FIXME: debuggigng only
-#undef NDEBUG
-#endif
-
 #include <cfloat> // FLT_MAX for gcc
 #include <limits>
 #include <stdexcept>
-
-#include <components/debug/debuglog.hpp>
 
 #include "grouptype.hpp"
 #include "reader.hpp"
@@ -233,7 +227,6 @@ void ESM4::Cell::load(ESM4::Reader& reader)
             case ESM4::SUB_XRNK: // Oblivion only?
             case ESM4::SUB_XCET: // FO3
             case ESM4::SUB_IMPF: // FO3 Zeta
-                Log(Debug::Verbose) << "CELL " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

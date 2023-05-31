@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "formid.hpp" // FIXME: for mEditorId workaround
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -142,7 +140,6 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
                 }
                 std::cout << ss.str();
 #else
-                Log(Debug::Verbose) << "PGRD " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
 #endif
                 break;

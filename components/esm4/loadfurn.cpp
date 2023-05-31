@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -79,7 +77,6 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
             case ESM4::SUB_VMAD:
             case ESM4::SUB_WBDT:
             case ESM4::SUB_XMRK:
-                Log(Debug::Verbose) << "FURN " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

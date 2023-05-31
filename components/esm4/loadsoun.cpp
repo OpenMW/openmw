@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -68,7 +66,6 @@ void ESM4::Sound::load(ESM4::Reader& reader)
             case ESM4::SUB_GNAM: // FO3
             case ESM4::SUB_HNAM: // FO3
             case ESM4::SUB_RNAM: // FONV
-                Log(Debug::Verbose) << "SOUN " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             default:

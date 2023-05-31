@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -95,7 +93,6 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
             case ESM4::SUB_COED: // owner
             case ESM4::SUB_OBND: // object bounds
             case ESM4::SUB_MODT: // model texture data
-                Log(Debug::Verbose) << "LVLN " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

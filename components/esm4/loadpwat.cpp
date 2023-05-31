@@ -30,8 +30,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -52,11 +50,8 @@ void ESM4::PlaceableWater::load(ESM4::Reader& reader)
             case ESM4::SUB_OBND:
             case ESM4::SUB_MODL:
             case ESM4::SUB_DNAM:
-            {
-                Log(Debug::Verbose) << "PWAT " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::PWAT::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

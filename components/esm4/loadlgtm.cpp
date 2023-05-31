@@ -31,8 +31,6 @@
 #include <cfloat> // FLT_MAX for gcc
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -64,7 +62,6 @@ void ESM4::LightingTemplate::load(ESM4::Reader& reader)
                     reader.skipSubRecordData(); // throw?
                 break;
             case ESM4::SUB_DALC: // TES5
-                Log(Debug::Verbose) << "LGTM " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             default:

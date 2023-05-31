@@ -26,7 +26,6 @@
 */
 #include "loadwrld.hpp"
 
-#include <components/debug/debuglog.hpp>
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -179,7 +178,6 @@ void ESM4::World::load(ESM4::Reader& reader)
             case ESM4::SUB_XNAM: // FO3
             case ESM4::SUB_IMPS: // FO3 Anchorage
             case ESM4::SUB_IMPF: // FO3 Anchorage
-                Log(Debug::Verbose) << "WRLD " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

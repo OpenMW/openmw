@@ -26,8 +26,6 @@
 */
 #include "loadappa.hpp"
 
-#include <components/debug/debuglog.hpp>
-
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -82,7 +80,6 @@ void ESM4::Apparatus::load(ESM4::Reader& reader)
             case ESM4::SUB_MODT:
             case ESM4::SUB_OBND:
             case ESM4::SUB_QUAL:
-                Log(Debug::Verbose) << "APPA " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

@@ -26,8 +26,6 @@
 */
 #include "loadaloc.hpp"
 
-#include <components/debug/debuglog.hpp>
-
 #include <cstring>
 #include <stdexcept>
 
@@ -147,7 +145,6 @@ void ESM4::MediaLocationController::load(ESM4::Reader& reader)
                 }
                 std::cout << ss.str();
 #else
-                Log(Debug::Verbose) << "ALOC " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
 #endif
                 break;

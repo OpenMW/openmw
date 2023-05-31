@@ -29,8 +29,6 @@
 #include <cstring>
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -95,7 +93,6 @@ void ESM4::BodyPartData::load(ESM4::Reader& reader)
             case ESM4::SUB_RAGA: // ragdoll
             case ESM4::SUB_MODS:
             case ESM4::SUB_MODT:
-                Log(Debug::Verbose) << "BPTD " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

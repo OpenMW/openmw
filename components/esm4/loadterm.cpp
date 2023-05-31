@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -84,7 +82,6 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
             case ESM4::SUB_TNAM:
             case ESM4::SUB_OBND:
             case ESM4::SUB_MODS: // FONV
-                Log(Debug::Verbose) << "TERM " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

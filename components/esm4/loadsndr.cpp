@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -75,7 +73,6 @@ void ESM4::SoundReference::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_CNAM: // CRC32 hash
             case ESM4::SUB_FNAM: // unknown
-                Log(Debug::Verbose) << "SNDR " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             default:

@@ -26,13 +26,7 @@
 */
 #include "loadtes4.hpp"
 
-#ifdef NDEBUG // FIXME: debuggigng only
-#undef NDEBUG
-#endif
-
 #include <stdexcept>
-
-#include <components/debug/debuglog.hpp>
 
 #include "common.hpp"
 #include "formid.hpp"
@@ -106,7 +100,6 @@ void ESM4::Header::load(ESM4::Reader& reader)
             case ESM4::SUB_INCC:
             case ESM4::SUB_OFST: // Oblivion only?
             case ESM4::SUB_DELE: // Oblivion only?
-                Log(Debug::Verbose) << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

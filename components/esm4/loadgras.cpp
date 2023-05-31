@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -58,7 +56,6 @@ void ESM4::Grass::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_MODT:
             case ESM4::SUB_OBND:
-                Log(Debug::Verbose) << "GRAS " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

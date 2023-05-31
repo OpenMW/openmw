@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -198,7 +196,6 @@ void ESM4::Armor::load(ESM4::Reader& reader)
             case ESM4::SUB_MO3S: // FO3
             case ESM4::SUB_BNAM: // FONV
             case ESM4::SUB_SNAM: // FONV
-                Log(Debug::Verbose) << "ARMO " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

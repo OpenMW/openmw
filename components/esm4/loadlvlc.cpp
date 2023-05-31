@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -87,11 +85,8 @@ void ESM4::LevelledCreature::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_OBND: // FO3
-            {
-                Log(Debug::Verbose) << "LVLC " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::LVLC::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

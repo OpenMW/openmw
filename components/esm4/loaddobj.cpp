@@ -31,8 +31,6 @@
 #include <cstring>
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -91,7 +89,6 @@ void ESM4::DefaultObj::load(ESM4::Reader& reader)
                 }
                 break;
             case ESM4::SUB_DNAM:
-                Log(Debug::Verbose) << "DOBJ " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             default:

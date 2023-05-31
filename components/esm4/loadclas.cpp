@@ -26,8 +26,6 @@
 */
 #include "loadclas.hpp"
 
-#include <components/debug/debuglog.hpp>
-
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -57,7 +55,6 @@ void ESM4::Class::load(ESM4::Reader& reader)
                 reader.getZString(mIcon);
                 break;
             case ESM4::SUB_DATA:
-                Log(Debug::Verbose) << "CLAS " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

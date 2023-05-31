@@ -30,8 +30,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -54,7 +52,6 @@ void ESM4::StaticCollection::load(ESM4::Reader& reader)
             case ESM4::SUB_MODT:
             case ESM4::SUB_ONAM:
             case ESM4::SUB_DATA:
-                Log(Debug::Verbose) << "SCOL " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             default:

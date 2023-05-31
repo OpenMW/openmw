@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -82,7 +80,6 @@ void ESM4::Door::load(ESM4::Reader& reader)
             case ESM4::SUB_DSTF: // FO3
             case ESM4::SUB_DMDL: // FO3
             case ESM4::SUB_DMDT: // FO3
-                Log(Debug::Verbose) << "DOOR " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

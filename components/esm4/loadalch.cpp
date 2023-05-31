@@ -26,8 +26,6 @@
 */
 #include "loadalch.hpp"
 
-#include <components/debug/debuglog.hpp>
-
 #include <cstring>
 #include <stdexcept>
 
@@ -99,7 +97,6 @@ void ESM4::Potion::load(ESM4::Reader& reader)
             case ESM4::SUB_MODS:
             case ESM4::SUB_OBND:
             case ESM4::SUB_ETYP: // FO3
-                Log(Debug::Verbose) << "ALCH " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

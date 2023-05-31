@@ -29,8 +29,6 @@
 #include <cstring>
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -98,11 +96,8 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
             case ESM4::SUB_BNAM: // TES5
             case ESM4::SUB_SNAM: // TES5
             case ESM4::SUB_TIFC: // TES5
-            {
-                Log(Debug::Verbose) << "DIAL " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::DIAL::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

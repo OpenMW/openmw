@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -143,7 +141,6 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
             case ESM4::SUB_OBND:
             case ESM4::SUB_KSIZ:
             case ESM4::SUB_KWDA:
-                Log(Debug::Verbose) << "AMMO " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

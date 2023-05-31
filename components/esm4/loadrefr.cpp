@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 // #include "writer.hpp"
 
@@ -323,13 +321,10 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             case ESM4::SUB_XSRD: // FONV
             case ESM4::SUB_WMI1: // FONV
             case ESM4::SUB_XLRL: // Unofficial Skyrim Patch
-            {
                 // if (mFormId == 0x0007e90f) // XPRM XPOD
                 // if (mBaseObj == 0x17) //XPRM XOCP occlusion plane data XMBO bound half extents
-                Log(Debug::Verbose) << "REFR " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::REFR::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

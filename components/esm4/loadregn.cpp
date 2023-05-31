@@ -26,13 +26,7 @@
 */
 #include "loadregn.hpp"
 
-#ifdef NDEBUG // FIXME: debuggigng only
-#undef NDEBUG
-#endif
-
 #include <stdexcept>
-
-#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -143,7 +137,6 @@ void ESM4::Region::load(ESM4::Reader& reader)
                 // RDAT skipping... following is grass
                 // RDGS skipping... unknown, maybe grass
 
-                Log(Debug::Verbose) << "REGN " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             default:

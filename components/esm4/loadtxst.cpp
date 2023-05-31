@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -74,7 +72,6 @@ void ESM4::TextureSet::load(ESM4::Reader& reader)
             case ESM4::SUB_DNAM:
             case ESM4::SUB_DODT:
             case ESM4::SUB_OBND: // object bounds
-                Log(Debug::Verbose) << "TXST " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

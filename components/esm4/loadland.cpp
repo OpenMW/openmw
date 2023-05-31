@@ -26,10 +26,6 @@
 */
 #include "loadland.hpp"
 
-#ifdef NDEBUG // FIXME: debuggigng only
-#undef NDEBUG
-#endif
-
 #include <cstdint>
 #include <stdexcept>
 

@@ -30,8 +30,6 @@
 #include <stdexcept>
 #include <string> // getline
 
-#include <components/debug/debuglog.hpp>
-
 #include "formid.hpp"
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -274,7 +272,6 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                 }
                 std::cout << ss.str();
 #else
-                Log(Debug::Verbose) << "NPC_ " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
 #endif
                 break;
@@ -313,7 +310,6 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM4::SUB_EAMT: // FO3
             case ESM4::SUB_NAM4: // FO3
             case ESM4::SUB_COED: // FO3
-                Log(Debug::Verbose) << "NPC_ " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

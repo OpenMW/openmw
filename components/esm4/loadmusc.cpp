@@ -30,8 +30,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 //#include "formid.hpp"
 
 #include "reader.hpp"
@@ -58,7 +56,6 @@ void ESM4::Music::load(ESM4::Reader& reader)
             case ESM4::SUB_WNAM: // TES5
             case ESM4::SUB_PNAM: // TES5
             case ESM4::SUB_TNAM: // TES5
-                Log(Debug::Verbose) << "MUSC " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             default:

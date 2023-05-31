@@ -26,10 +26,6 @@
 */
 #include "loadnavi.hpp"
 
-#ifdef NDEBUG // FIXME: debuggigng only
-#undef NDEBUG
-#endif
-
 #include <stdexcept>
 
 #include "reader.hpp"

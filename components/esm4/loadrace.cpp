@@ -29,8 +29,6 @@
 #include <cstring>
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "formid.hpp"
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -686,7 +684,6 @@ void ESM4::Race::load(ESM4::Reader& reader)
             case ESM4::SUB_MODT: // FO3
             case ESM4::SUB_MODD: // FO3
             case ESM4::SUB_ONAM: // FO3
-                Log(Debug::Verbose) << "RACE " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             default:

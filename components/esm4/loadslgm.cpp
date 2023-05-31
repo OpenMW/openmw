@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -76,7 +74,6 @@ void ESM4::SoulGem::load(ESM4::Reader& reader)
             case ESM4::SUB_KWDA:
             case ESM4::SUB_NAM0:
             case ESM4::SUB_OBND:
-                Log(Debug::Verbose) << "SLGM " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

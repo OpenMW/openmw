@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -104,7 +102,6 @@ void ESM4::Book::load(ESM4::Reader& reader)
             case ESM4::SUB_CNAM:
             case ESM4::SUB_INAM:
             case ESM4::SUB_VMAD:
-                Log(Debug::Verbose) << "BOOK " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

@@ -30,8 +30,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -75,11 +73,8 @@ void ESM4::PlacedGrenade::load(ESM4::Reader& reader)
             case ESM4::SUB_XIBS:
             case ESM4::SUB_XSCL:
             case ESM4::SUB_DATA:
-            {
-                Log(Debug::Verbose) << "PGRE " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::PGRE::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

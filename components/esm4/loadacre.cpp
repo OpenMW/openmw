@@ -25,7 +25,6 @@
 
 */
 #include "loadacre.hpp"
-#include <components/debug/debuglog.hpp>
 
 #include <stdexcept>
 
@@ -80,7 +79,6 @@ void ESM4::ActorCreature::load(ESM4::Reader& reader)
                                  // seems to occur only for dead bodies, e.g. DeadMuffy, DeadDogVicious
             case ESM4::SUB_XRGD: // ragdoll
             case ESM4::SUB_XRGB: // ragdoll biped
-                Log(Debug::Verbose) << "ACRE " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

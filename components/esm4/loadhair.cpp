@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -63,7 +61,6 @@ void ESM4::Hair::load(ESM4::Reader& reader)
                 reader.get(mBoundRadius);
                 break;
             case ESM4::SUB_MODT:
-                Log(Debug::Verbose) << "HAIR " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

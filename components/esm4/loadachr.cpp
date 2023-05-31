@@ -25,7 +25,6 @@
 
 */
 #include "loadachr.hpp"
-#include <components/debug/debuglog.hpp>
 
 #include <stdexcept>
 
@@ -95,7 +94,6 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
             case ESM4::SUB_SCHR: // FO3
             case ESM4::SUB_TNAM: // FO3
             case ESM4::SUB_XATO: // FONV
-                Log(Debug::Verbose) << "ACHR " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:

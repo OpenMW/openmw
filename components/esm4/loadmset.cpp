@@ -28,8 +28,6 @@
 
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
@@ -129,7 +127,6 @@ void ESM4::MediaSet::load(ESM4::Reader& reader)
                 reader.get(mTime4);
                 break;
             case ESM4::SUB_DATA:
-                Log(Debug::Verbose) << "MSET " << ESM::printName(subHdr.typeId) << " skipping..." << subHdr.dataSize;
                 reader.skipSubRecordData();
                 break;
             default:

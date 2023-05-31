@@ -26,10 +26,6 @@
 */
 #include "loadcrea.hpp"
 
-#ifdef NDEBUG // FIXME: debuggigng only
-#undef NDEBUG
-#endif
-
 #include <cstring>
 #include <stdexcept>
 #include <string>
@@ -191,7 +187,6 @@ void ESM4::Creature::load(ESM4::Reader& reader)
             case ESM4::SUB_DMDL: // FO3
             case ESM4::SUB_DMDT: // FO3
             case ESM4::SUB_COED: // FO3
-                Log(Debug::Verbose) << "CREA " << ESM::printName(subHdr.typeId) << " skipping...";
                 reader.skipSubRecordData();
                 break;
             default:
