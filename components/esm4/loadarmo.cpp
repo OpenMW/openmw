@@ -203,7 +203,7 @@ void ESM4::Armor::load(ESM4::Reader& reader)
         }
     }
     // if ((mArmorFlags&0xffff) == 0x02) // only hair
-    // std::cout << "only hair " << mEditorId;
+    // std::cout << "only hair " << mEditorId << std::endl;
 }
 
 // void ESM4::Armor::save(ESM4::Writer& writer) const

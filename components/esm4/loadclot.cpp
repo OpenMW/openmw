@@ -97,7 +97,7 @@ void ESM4::Clothing::load(ESM4::Reader& reader)
         }
     }
     // if ((mClothingFlags&0xffff) == 0x02) // only hair
-    // std::cout << "only hair " << mEditorId;
+    // std::cout << "only hair " << mEditorId << std::endl;
 }
 
 // void ESM4::Clothing::save(ESM4::Writer& writer) const

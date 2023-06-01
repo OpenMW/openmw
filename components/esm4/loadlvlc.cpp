@@ -68,7 +68,7 @@ void ESM4::LevelledCreature::load(ESM4::Reader& reader)
                         reader.get(lvlo.item);
                         reader.get(lvlo.count);
                         // std::cout << "LVLC " << mEditorId << " LVLO lev " << lvlo.level << ", item " << lvlo.item
-                        // << /g", count " << lvlo.count;
+                        // << /g", count " << lvlo.count << std::endl;
                         // FIXME: seems to happen only once, don't add to mLvlObject
                         // LVLC TesKvatchCreature LVLO lev 1, item 1393819648, count 2
                         // 0x0001, 0x5314 0000, 0x0002

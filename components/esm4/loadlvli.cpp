@@ -90,7 +90,7 @@ void ESM4::LevelledItem::load(ESM4::Reader& reader)
 
     // FIXME: testing
     // if (mHasLvlItemFlags && mChanceNone >= 90)
-    // std::cout << "LVLI " << mEditorId << " chance none " << int(mChanceNone);
+    // std::cout << "LVLI " << mEditorId << " chance none " << int(mChanceNone) << std::endl;
 }
 
 bool ESM4::LevelledItem::calcAllLvlLessThanPlayer() const

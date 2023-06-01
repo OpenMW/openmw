@@ -85,7 +85,7 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
                         // CELL formId 00049E2A
                         // PGRD formId 000304B7
                         // if (mFormId == 0x0001C2C8)
-                        // std::cout << link.startNode << "," << link.endNode;
+                        // std::cout << link.startNode << "," << link.endNode << std::endl;
                         mLinks.push_back(link);
                     }
                 }
@@ -138,7 +138,7 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
                     else if (i < subHdr.dataSize-1)
                         ss << " ";
                 }
-                std::cout << ss.str();
+                std::cout << ss.str() << std::endl;
 #else
                 reader.skipSubRecordData();
 #endif

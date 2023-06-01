@@ -143,7 +143,7 @@ void ESM4::MediaLocationController::load(ESM4::Reader& reader)
                     else if (i < subHdr.dataSize-1)
                         ss << " ";
                 }
-                std::cout << ss.str();
+                std::cout << ss.str() << std::endl;
 #else
                 reader.skipSubRecordData();
 #endif

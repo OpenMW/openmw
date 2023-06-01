@@ -109,7 +109,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
 #if 0
                     std::cout << "Base Texture formid: 0x"
                         << std::hex << mTextures[base.quadrant].base.formId
-                        << ", quad " << std::dec << (int)base.quadrant;
+                        << ", quad " << std::dec << (int)base.quadrant << std::endl;
 #endif
                 }
                 break;
@@ -139,9 +139,9 @@ void ESM4::Land::load(ESM4::Reader& reader)
 #if 0
                 std::cout << "Additional Texture formId: 0x"
                     << std::hex << layer.texture.formId
-                    << ", quad " << std::dec << (int)layer.texture.quadrant;
+                    << ", quad " << std::dec << (int)layer.texture.quadrant << std::endl;
                 std::cout << "Additional Texture layer: "
-                    << std::dec << (int)layer.texture.layerIndex;
+                    << std::dec << (int)layer.texture.layerIndex << std::endl;
 #endif
                 currentAddQuad = layer.texture.quadrant;
                 break;
@@ -163,7 +163,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
                     {
                         reader.get(*it);
                         // FIXME: debug only
-                        // std::cout << "pos: " << std::dec << (int)(*it).position;
+                        // std::cout << "pos: " << std::dec << (int)(*it).position << std::endl;
                     }
                 }
                 mTextures[currentAddQuad].layers.push_back(layer);
@@ -176,7 +176,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
                 currentAddQuad = -1;
                 layer.data.clear();
                 // FIXME: debug only
-                // std::cout << "VTXT: count " << std::dec << count;
+                // std::cout << "VTXT: count " << std::dec << count << std::endl;
                 break;
             }
             case ESM4::SUB_VTEX: // only in Oblivion?
@@ -192,7 +192,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
                     {
                         reader.getFormId(*it);
                         // FIXME: debug only
-                        // std::cout << "VTEX: " << std::hex << *it;
+                        // std::cout << "VTEX: " << std::hex << *it << std::endl;
                     }
                 }
                 break;
@@ -215,16 +215,16 @@ void ESM4::Land::load(ESM4::Reader& reader)
     {
         if (mTextures[i].base.formId == 0)
         {
-            // std::cout << "ESM4::LAND " << ESM4::formIdToString(mFormId) << " missing base, quad " << i;
-            // std::cout << "layers " << mTextures[i].layers.size();
+            // std::cout << "ESM4::LAND " << ESM4::formIdToString(mFormId) << " missing base, quad " << i << std::endl;
+            // std::cout << "layers " << mTextures[i].layers.size() << std::endl;
             //  NOTE: can't set the default here since FO3/FONV may have different defaults
             // mTextures[i].base.formId = 0x000008C0; // TerrainHDDirt01.dds
             missing = true;
         }
         // else
         //{
-        //     std::cout << "ESM4::LAND " << ESM4::formIdToString(mFormId) << " base, quad " << i;
-        //     std::cout << "layers " << mTextures[i].layers.size();
+        //     std::cout << "ESM4::LAND " << ESM4::formIdToString(mFormId) << " base, quad " << i << std::endl;
+        //     std::cout << "layers " << mTextures[i].layers.size() << std::endl;
         // }
     }
     // at least one of the quadrants do not have a base texture, return without setting the flag

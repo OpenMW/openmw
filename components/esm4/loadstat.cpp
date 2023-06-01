@@ -54,7 +54,7 @@ void ESM4::Static::load(ESM4::Reader& reader)
             {
                 // version is only availabe in TES5 (seems to be 27 or 28?)
                 // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
-                // std::cout << "STAT MODT ver: " << std::hex << reader.hdr().record.version;
+                // std::cout << "STAT MODT ver: " << std::hex << reader.hdr().record.version << std::endl;
 
                 // for TES4 these are just a sequence of bytes
                 mMODT.resize(subHdr.dataSize / sizeof(std::uint8_t));
@@ -64,7 +64,7 @@ void ESM4::Static::load(ESM4::Reader& reader)
 #if 0
                     std::string padding;
                     padding.insert(0, reader.stackSize()*2, ' ');
-                    std::cout << padding  << "MODT: " << std::hex << *it;
+                    std::cout << padding  << "MODT: " << std::hex << *it << std::endl;
 #endif
                 }
                 break;

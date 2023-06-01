@@ -91,7 +91,7 @@ void ESM4::Header::load(ESM4::Reader& reader)
 #if 0
                     std::string padding;
                     padding.insert(0, reader.stackSize()*2, ' ');
-                    std::cout << padding  << "ESM4::Header::ONAM overrides: " << formIdToString(mOverride);
+                    std::cout << padding  << "ESM4::Header::ONAM overrides: " << formIdToString(mOverride) << std::endl;
 #endif
                 }
                 break;

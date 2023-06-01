@@ -66,7 +66,7 @@ void ESM4::Region::load(ESM4::Reader& reader)
 #if 0
                     std::string padding;
                     padding.insert(0, reader.stackSize()*2, ' ');
-                    std::cout << padding  << "RPLD: 0x" << std::hex << *it;
+                    std::cout << padding  << "RPLD: 0x" << std::hex << *it << std::endl;
 #endif
                 }
 
@@ -89,7 +89,7 @@ void ESM4::Region::load(ESM4::Reader& reader)
 #if 0
                 int dummy;
                 reader.get(dummy);
-                std::cout << "REGN " << mEditorId << " " << dummy;
+                std::cout << "REGN " << mEditorId << " " << dummy << std::endl;
 #else
                 reader.skipSubRecordData();
 #endif
@@ -98,7 +98,7 @@ void ESM4::Region::load(ESM4::Reader& reader)
             case ESM4::SUB_RDMO: // not seen in FO3/FONV?
             {
                 // std::cout << "REGN " << ESM::printName(subHdr.typeId) << " skipping..."
-                // << subHdr.dataSize;
+                // << subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
             }

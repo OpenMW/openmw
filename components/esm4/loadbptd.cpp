@@ -101,7 +101,7 @@ void ESM4::BodyPartData::load(ESM4::Reader& reader)
     }
 
     // if (mEditorId == "DefaultBodyPartData")
-    // std::cout << "BPTD: " << mEditorId; // FIXME: testing only
+    // std::cout << "BPTD: " << mEditorId << std::endl; // FIXME: testing only
 }
 
 // void ESM4::BodyPartData::save(ESM4::Writer& writer) const

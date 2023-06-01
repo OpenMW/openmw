@@ -68,7 +68,7 @@ void ESM4::Script::load(ESM4::Reader& reader)
                     else if (i < 256/*bufSize*/-1)
                         ss << " ";
                 }
-                std::cout << ss.str();
+                std::cout << ss.str() << std::endl;
 #else
                 reader.get(mScript.scriptHeader);
 #endif
@@ -77,7 +77,7 @@ void ESM4::Script::load(ESM4::Reader& reader)
             case ESM4::SUB_SCTX:
                 reader.getString(mScript.scriptSource);
                 // if (mEditorId == "CTrapLogs01SCRIPT")
-                // std::cout << mScript.scriptSource;
+                // std::cout << mScript.scriptSource << std::endl;
                 break;
             case ESM4::SUB_SCDA: // compiled script data
             {
@@ -85,12 +85,12 @@ void ESM4::Script::load(ESM4::Reader& reader)
 #if 0
                 if (subHdr.dataSize >= 4096)
                 {
-                    std::cout << "Skipping " << mEditorId;
+                    std::cout << "Skipping " << mEditorId << std::endl;
                     reader.skipSubRecordData();
                     break;
                 }
 
-                std::cout << mEditorId;
+                std::cout << mEditorId << std::endl;
 
                 unsigned char mDataBuf[4096/*bufSize*/];
                 reader.get(mDataBuf, subHdr.dataSize);
@@ -107,7 +107,7 @@ void ESM4::Script::load(ESM4::Reader& reader)
                     else if (i < 4096/*bufSize*/-1)
                         ss << " ";
                 }
-                std::cout << ss.str();
+                std::cout << ss.str() << std::endl;
 #else
                 reader.skipSubRecordData();
 #endif

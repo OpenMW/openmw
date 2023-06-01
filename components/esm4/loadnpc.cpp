@@ -215,8 +215,8 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM4::SUB_FNAM:
             {
                 reader.get(mFgRace);
-                // std::cout << "race " << mEditorId << " " << mRace; // FIXME
-                // std::cout << "fg race " << mEditorId << " " << mFgRace; // FIXME
+                // std::cout << "race " << mEditorId << " " << mRace << std::endl; // FIXME
+                // std::cout << "fg race " << mEditorId << " " << mFgRace << std::endl; // FIXME
                 break;
             }
             case ESM4::SUB_PNAM: // FO3/FONV/TES5
@@ -270,7 +270,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                     else if (i < (size_t)(subHdr.dataSize - 1)) // quiesce gcc
                         ss << " ";
                 }
-                std::cout << ss.str();
+                std::cout << ss.str() << std::endl;
 #else
                 reader.skipSubRecordData();
 #endif

@@ -60,7 +60,7 @@ void ESM4::Quest::load(ESM4::Reader& reader)
                     mData.questDelay = 0.f; // unused in TES4 but keep it clean
 
                     // if ((mData.flags & Flag_StartGameEnabled) != 0)
-                    // std::cout << "start quest " << mEditorId;
+                    // std::cout << "start quest " << mEditorId << std::endl;
                 }
                 else
                     reader.get(mData); // FO3
@@ -163,7 +163,7 @@ void ESM4::Quest::load(ESM4::Reader& reader)
         }
     }
     // if (mEditorId == "DAConversations")
-    // std::cout << mEditorId;
+    // std::cout << mEditorId << std::endl;
 }
 
 // void ESM4::Quest::save(ESM4::Writer& writer) const

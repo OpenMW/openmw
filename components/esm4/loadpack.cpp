@@ -50,7 +50,7 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
             {
                 if (subHdr.dataSize != sizeof(PKDT) && subHdr.dataSize == 4)
                 {
-                    // std::cout << "skip fallout" << mEditorId; // FIXME
+                    // std::cout << "skip fallout" << mEditorId << std::endl; // FIXME
                     reader.get(mData.flags);
                     mData.type = 0; // FIXME
                 }

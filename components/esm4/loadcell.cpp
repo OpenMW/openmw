@@ -87,7 +87,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 #if 0
                 std::string padding;
                 padding.insert(0, reader.stackSize()*2, ' ');
-                std::cout << padding << "CELL Editor ID: " << mEditorId;
+                std::cout << padding << "CELL Editor ID: " << mEditorId << std::endl;
 #endif
                 break;
             }
@@ -110,9 +110,9 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 #if 0
                 std::string padding;
                 padding.insert(0, reader.stackSize()*2, ' ');
-                std::cout << padding << "CELL group " << ESM4::printLabel(reader.grp().label, reader.grp().type);
-                std::cout << padding << "CELL formId " << std::hex << reader.hdr().record.id;
-                std::cout << padding << "CELL X " << std::dec << mX << ", Y " << mY;
+                std::cout << padding << "CELL group " << ESM4::printLabel(reader.grp().label, reader.grp().type) << std::endl;
+                std::cout << padding << "CELL formId " << std::hex << reader.hdr().record.id << std::endl;
+                std::cout << padding << "CELL X " << std::dec << mX << ", Y " << mY << std::endl;
 #endif
                 if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV)
                     if (subHdr.dataSize == 12)
@@ -145,7 +145,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 #if 0
                 std::string padding;
                 padding.insert(0, reader.stackSize()*2, ' ');
-                std::cout << padding  << "flags: " << std::hex << mCellFlags;
+                std::cout << padding  << "flags: " << std::hex << mCellFlags << std::endl;
 #endif
                 break;
             }
@@ -158,7 +158,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
 #if 0
                     std::string padding;
                     padding.insert(0, reader.stackSize()*2, ' ');
-                    std::cout << padding  << "region: " << std::hex << *it;
+                    std::cout << padding  << "region: " << std::hex << *it << std::endl;
 #endif
                 }
                 break;

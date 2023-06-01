@@ -51,7 +51,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
-        // std::cout << "RACE " << ESM::printName(subHdr.typeId);
+        // std::cout << "RACE " << ESM::printName(subHdr.typeId) << std::endl;
         switch (subHdr.typeId)
         {
             case ESM4::SUB_EDID:
@@ -127,7 +127,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                     else if (i < 256/*bufSize*/-1)
                         ss << " ";
                 }
-                std::cout << ss.str();
+                std::cout << ss.str() << std::endl;
 #else
                 if (subHdr.dataSize == 36) // TES4/FO3/FONV
                 {
@@ -344,12 +344,12 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 }
                 // else if (curr_part == 2) // egt
                 // {
-                //     // std::cout << mEditorId << " egt " << currentIndex; // FIXME
+                //     // std::cout << mEditorId << " egt " << currentIndex << std::endl; // FIXME
                 //     reader.skipSubRecordData(); // FIXME TES5 egt
                 // }
                 else
                 {
-                    // std::cout << mEditorId << " hkx " << currentIndex; // FIXME
+                    // std::cout << mEditorId << " hkx " << currentIndex << std::endl; // FIXME
                     reader.skipSubRecordData(); // FIXME TES5 hkx
                 }
 
@@ -545,7 +545,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             case ESM4::SUB_WNAM: // ARMO FormId
             {
                 reader.getFormId(mSkin);
-                // std::cout << mEditorId << " skin " << formIdToString(mSkin); // FIXME
+                // std::cout << mEditorId << " skin " << formIdToString(mSkin) << std::endl; // FIXME
                 break;
             }
             case ESM4::SUB_BODT: // body template
@@ -582,7 +582,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                     mHeadPartIdsFemale[currentIndex] = formId;
 
                 // std::cout << mEditorId << (isMale ? " male head " : " female head ")
-                // << /gformIdToString(formId) << " " << currentIndex; // FIXME
+                // << formIdToString(formId) << " " << currentIndex << std::endl; // FIXME
 
                 break;
             }
@@ -630,7 +630,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             {
                 std::string name;
                 reader.getZString(name);
-                // std::cout << mEditorId << " " << name;
+                // std::cout << mEditorId << " " << name << std::endl;
 
                 break;
             }
