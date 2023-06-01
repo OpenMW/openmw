@@ -45,6 +45,13 @@ namespace VFS::Path
         return std::equal(
             std::begin(x), std::end(x), std::begin(y), [](char l, char r) { return normalize(l) == normalize(r); });
     }
+
+    struct PathLess
+    {
+        using is_transparent = void;
+
+        bool operator()(std::string_view left, std::string_view right) const { return pathLess(left, right); }
+    };
 }
 
 #endif
