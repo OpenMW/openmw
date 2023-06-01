@@ -1,6 +1,7 @@
 #ifndef MISC_UTF8ITER_HPP
 #define MISC_UTF8ITER_HPP
 
+#include <cstdint>
 #include <cstring>
 #include <string>
 #include <string_view>
@@ -63,9 +64,11 @@ public:
         return val;
     }
 
+    static bool isAscii(unsigned char value) { return (value & 0x80) == 0; }
+
     static std::pair<UnicodeChar, Point> decode(Point cur, Point end)
     {
-        if ((*cur & 0x80) == 0)
+        if (isAscii(*cur))
         {
             UnicodeChar chr = *cur++;
 
@@ -75,8 +78,13 @@ public:
         int octets;
         UnicodeChar chr;
 
-        std::tie(octets, chr) = octet_count(*cur++);
+        std::tie(octets, chr) = getOctetCount(*cur++);
 
+        return decode(cur, end, chr, octets);
+    }
+
+    static std::pair<UnicodeChar, Point> decode(Point cur, Point end, UnicodeChar chr, std::size_t octets)
+    {
         if (octets > 5)
             return std::make_pair(sBadChar(), cur);
 
@@ -161,10 +169,9 @@ public:
         return out;
     }
 
-private:
-    static std::pair<int, UnicodeChar> octet_count(unsigned char octet)
+    static std::pair<std::size_t, UnicodeChar> getOctetCount(unsigned char octet)
     {
-        int octets;
+        std::size_t octets;
 
         unsigned char mark = 0xC0;
         unsigned char mask = 0xE0;
@@ -181,6 +188,7 @@ private:
         return std::make_pair(octets, octet & ~mask);
     }
 
+private:
     void next() { std::tie(val, nxt) = decode(nxt, end); }
 
     Point cur;
