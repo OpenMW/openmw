@@ -18,15 +18,15 @@ namespace CSMWorld
 {
     namespace
     {
-        ESM::RefId makeCompositeRefId(const ESM::RefId& topicId, const ESM::RefId& infoId)
-        {
-            return ESM::RefId::stringRefId(topicId.getRefIdString() + '#' + infoId.getRefIdString());
-        }
-
         std::string_view getInfoTopicId(const ESM::RefId& infoId)
         {
             return parseInfoRefId(infoId).first;
         }
+    }
+
+    ESM::RefId makeCompositeInfoRefId(const ESM::RefId& topicId, const ESM::RefId& infoId)
+    {
+        return ESM::RefId::stringRefId(topicId.getRefIdString() + '#' + infoId.getRefIdString());
     }
 }
 
@@ -65,7 +65,7 @@ void CSMWorld::InfoCollection::load(
 
     info.load(reader, isDeleted);
 
-    const ESM::RefId id = makeCompositeRefId(dialogue.mId, info.mId);
+    const ESM::RefId id = makeCompositeInfoRefId(dialogue.mId, info.mId);
 
     if (isDeleted)
     {
@@ -107,7 +107,7 @@ void CSMWorld::InfoCollection::sort(const InfoOrderByTopic& infoOrders)
     order.reserve(getSize());
     for (const auto& [topicId, infoOrder] : infoOrders)
         for (const OrderedInfo& info : infoOrder.getOrderedInfo())
-            order.push_back(getIndex(makeCompositeRefId(topicId, info.mId)));
+            order.push_back(getIndex(makeCompositeInfoRefId(topicId, info.mId)));
     reorderRowsImp(order);
 }
 
