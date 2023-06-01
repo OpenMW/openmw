@@ -162,6 +162,7 @@ namespace Nif
         RC_BSMultiBound,
         RC_BSMultiBoundOBB,
         RC_BSMultiBoundSphere,
+        RC_BSInvMarker,
     };
 
     /// Base class for all records

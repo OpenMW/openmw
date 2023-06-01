@@ -190,6 +190,7 @@ namespace Nif
             { "BSMultiBound", &construct<BSMultiBound, RC_BSMultiBound> },
             { "BSMultiBoundOBB", &construct<BSMultiBoundOBB, RC_BSMultiBoundOBB> },
             { "BSMultiBoundSphere", &construct<BSMultiBoundSphere, RC_BSMultiBoundSphere> },
+            { "BSInvMarker", &construct<BSInvMarker, RC_BSInvMarker> },
         };
     }
 

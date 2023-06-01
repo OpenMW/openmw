@@ -128,4 +128,14 @@ namespace Nif
         }
     }
 
+    void BSInvMarker::read(NIFStream* nif)
+    {
+        Extra::read(nif);
+        float rotX = nif->getUShort() / 1000.0;
+        float rotY = nif->getUShort() / 1000.0;
+        float rotZ = nif->getUShort() / 1000.0;
+        mScale = nif->getFloat();
+
+        mRotation = osg::Quat(rotX, osg::X_AXIS, rotY, osg::Y_AXIS, rotZ, osg::Z_AXIS);
+    }
 }
