@@ -16,8 +16,7 @@ namespace VFS::Path
 
     inline void normalizeFilenameInPlace(std::string& name)
     {
-        for (char& ch : name)
-            ch = normalize(ch);
+        std::transform(name.begin(), name.end(), name.begin(), normalize);
     }
 
     /// Normalize the given filename, making slashes/backslashes consistent, and lower-casing.
