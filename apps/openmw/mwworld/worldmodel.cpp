@@ -144,7 +144,7 @@ MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellLocation c
                 record.mParent = cellIndex.mWorldspace;
                 record.mX = cellIndex.mX;
                 record.mY = cellIndex.mY;
-                record.mCellFlags = 0;
+                // Other ESM4::Cell members use default values from class definition.
                 cell = mStore.insert(record);
             }
             CellStore* cellStore = &emplaceCellStore(cell->mId, *cell, mStore, mReaders, mCells);

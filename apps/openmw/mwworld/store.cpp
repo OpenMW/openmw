@@ -1212,16 +1212,15 @@ namespace MWWorld
 
     void Store<ESM4::Cell>::insertCell(ESM4::Cell* cellPtr)
     {
+        // Do not index exterior cells with Rec_Persistent flag because they are not real cells.
+        // References from these cells are merged into normal cells.
+        if (cellPtr->isExterior() && cellPtr->mFlags & ESM4::Rec_Persistent)
+            return;
+
         if (!cellPtr->mEditorId.empty())
             mCellNameIndex[cellPtr->mEditorId] = cellPtr;
         if (cellPtr->isExterior())
-        {
-            ESM::ExteriorCellLocation cellindex = { cellPtr->mX, cellPtr->mY, cellPtr->mParent };
-            if (cellPtr->mCellFlags & ESM4::Rec_Persistent)
-                mPersistentExteriors[cellindex] = cellPtr;
-            else
-                mExteriors[cellindex] = cellPtr;
-        }
+            mExteriors[ESM::ExteriorCellLocation(cellPtr->mX, cellPtr->mY, cellPtr->mParent)] = cellPtr;
     }
 
     void Store<ESM4::Cell>::clearDynamic()

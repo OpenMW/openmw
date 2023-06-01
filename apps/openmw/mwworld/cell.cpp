@@ -30,7 +30,7 @@ namespace MWWorld
             .mFogDensity = 1.f,}
             ,mWaterHeight(cell.mWaterHeight)
     {
-        if (isExterior() && mWaterHeight == ESM4::Cell::sInvalidWaterLevel)
+        if (isExterior())
         {
             auto& worldStore = MWBase::Environment::get().getESMStore()->get<ESM4::World>();
             const ESM4::World* cellWorld = worldStore.find(mParent);

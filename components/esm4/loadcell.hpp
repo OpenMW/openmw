@@ -80,13 +80,13 @@ namespace ESM4
         FormId mGlobal;
         FormId mClimate;
         FormId mWater;
-        float mWaterHeight = 0;
+        float mWaterHeight = sInvalidWaterLevel;
 
         std::vector<FormId> mRegions;
         Lighting mLighting;
 
         FormId mLightingTemplate; // FO3/FONV
-        std::uint32_t mLightingTemplateFlags; // FO3/FONV
+        std::uint32_t mLightingTemplateFlags = 0; // FO3/FONV
 
         FormId mMusic; // FO3/FONV
         FormId mAcousticSpace; // FO3/FONV

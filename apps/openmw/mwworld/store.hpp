@@ -291,9 +291,7 @@ namespace MWWorld
     {
         std::unordered_map<std::string, ESM4::Cell*, Misc::StringUtils::CiHash, Misc::StringUtils::CiEqual>
             mCellNameIndex;
-
         std::unordered_map<ESM::ExteriorCellLocation, ESM4::Cell*> mExteriors;
-        std::unordered_map<ESM::ExteriorCellLocation, ESM4::Cell*> mPersistentExteriors;
 
     public:
         const ESM4::Cell* searchCellName(std::string_view) const;
