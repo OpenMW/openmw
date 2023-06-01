@@ -188,6 +188,9 @@ namespace MWLua
                         case ESM::REC_DOOR4:
                             cell.mStore->template forEachType<ESM4::Door>(visitor);
                             break;
+                        case ESM::REC_FURN4:
+                            cell.mStore->template forEachType<ESM4::Furniture>(visitor);
+                            break;
                         case ESM::REC_INGR4:
                             cell.mStore->template forEachType<ESM4::Ingredient>(visitor);
                             break;
@@ -202,6 +205,9 @@ namespace MWLua
                             break;
                         case ESM::REC_STAT4:
                             cell.mStore->template forEachType<ESM4::Static>(visitor);
+                            break;
+                        case ESM::REC_TREE4:
+                            cell.mStore->template forEachType<ESM4::Tree>(visitor);
                             break;
                         case ESM::REC_WEAP4:
                             cell.mStore->template forEachType<ESM4::Weapon>(visitor);

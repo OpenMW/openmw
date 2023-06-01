@@ -299,6 +299,7 @@ namespace
         Nif::NiSkinInstance mNiSkinInstance;
         Nif::NiStringExtraData mNiStringExtraData;
         Nif::NiStringExtraData mNiStringExtraData2;
+        Nif::NiIntegerExtraData mNiIntegerExtraData;
         Nif::Controller mController;
         btTransform mTransform{ btMatrix3x3(btQuaternion(btVector3(1, 0, 0), 0.5f)), btVector3(1, 2, 3) };
         btTransform mTransformScale2{ btMatrix3x3(btQuaternion(btVector3(1, 0, 0), 0.5f)), btVector3(2, 4, 6) };
@@ -1143,6 +1144,25 @@ namespace
         mNiStringExtraData.string = "MRK";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiTriShape.parents.push_back(&mNiNode);
+        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+
+        Nif::NIFFile file("test.nif");
+        file.mRoots.push_back(&mNiNode);
+        file.mHash = mHash;
+
+        const auto result = mLoader.load(file);
+
+        Resource::BulletShape expected;
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, bsx_editor_marker_flag_disables_collision)
+    {
+        mNiIntegerExtraData.data = 32; // BSX flag "editor marker"
+        mNiIntegerExtraData.recType = Nif::RC_BSXFlags;
+        mNiTriShape.extralist.push_back(Nif::ExtraPtr(&mNiIntegerExtraData));
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
 

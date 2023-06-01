@@ -45,6 +45,7 @@
 #include <components/nif/effect.hpp>
 #include <components/nif/exception.hpp>
 #include <components/nif/extra.hpp>
+#include <components/nif/niffile.hpp>
 #include <components/nif/node.hpp>
 #include <components/nif/property.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
@@ -318,6 +319,19 @@ namespace NifOsg
             }
         }
 
+        struct HandleNodeArgs
+        {
+            unsigned int mNifVersion;
+            Resource::ImageManager* mImageManager;
+            SceneUtil::TextKeyMap* mTextKeys;
+            std::vector<unsigned int> mBoundTextures = {};
+            int mAnimFlags = 0;
+            bool mSkipMeshes = false;
+            bool mHasMarkers = false;
+            bool mHasAnimatedParents = false;
+            osg::Node* mRootNode = nullptr;
+        };
+
         osg::ref_ptr<osg::Node> load(Nif::FileView nif, Resource::ImageManager* imageManager)
         {
             const size_t numRoots = nif.numRoots();
@@ -340,8 +354,10 @@ namespace NifOsg
             created->setDataVariance(osg::Object::STATIC);
             for (const Nif::Node* root : roots)
             {
-                auto node = handleNode(root, nullptr, nullptr, imageManager, std::vector<unsigned int>(), 0, false,
-                    false, false, &textkeys->mTextKeys);
+                auto node = handleNode(root, nullptr, nullptr,
+                    { .mNifVersion = nif.getVersion(),
+                        .mImageManager = imageManager,
+                        .mTextKeys = &textkeys->mTextKeys });
                 created->addChild(node);
             }
             if (mHasNightDayLabel)
@@ -597,12 +613,10 @@ namespace NifOsg
             return node;
         }
 
-        osg::ref_ptr<osg::Node> handleNode(const Nif::Node* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
-            Resource::ImageManager* imageManager, std::vector<unsigned int> boundTextures, int animflags,
-            bool skipMeshes, bool hasMarkers, bool hasAnimatedParents, SceneUtil::TextKeyMap* textKeys,
-            osg::Node* rootNode = nullptr)
+        osg::ref_ptr<osg::Node> handleNode(
+            const Nif::Node* nifNode, const Nif::Parent* parent, osg::Group* parentNode, HandleNodeArgs args)
         {
-            if (rootNode != nullptr && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
+            if (args.mRootNode && Misc::StringUtils::ciEqual(nifNode->name, "Bounding Box"))
                 return nullptr;
 
             osg::ref_ptr<osg::Group> node = createNode(nifNode);
@@ -617,8 +631,8 @@ namespace NifOsg
             if (parentNode)
                 parentNode->addChild(node);
 
-            if (!rootNode)
-                rootNode = node;
+            if (!args.mRootNode)
+                args.mRootNode = node;
 
             // The original NIF record index is used for a variety of features:
             // - finding the correct emitter node for a particle system
@@ -637,10 +651,10 @@ namespace NifOsg
 
             for (const auto& e : extraCollection)
             {
-                if (e->recType == Nif::RC_NiTextKeyExtraData && textKeys)
+                if (e->recType == Nif::RC_NiTextKeyExtraData && args.mTextKeys)
                 {
                     const Nif::NiTextKeyExtraData* tk = static_cast<const Nif::NiTextKeyExtraData*>(e.getPtr());
-                    extractTextKeys(tk, *textKeys);
+                    extractTextKeys(tk, *args.mTextKeys);
                 }
                 else if (e->recType == Nif::RC_NiStringExtraData)
                 {
@@ -653,7 +667,7 @@ namespace NifOsg
                     if (sd->string == "MRK" && !Loader::getShowMarkers())
                     {
                         // Marker objects. These meshes are only visible in the editor.
-                        hasMarkers = true;
+                        args.mHasMarkers = true;
                     }
                     else if (sd->string == "BONE")
                     {
@@ -665,10 +679,16 @@ namespace NifOsg
                             Misc::OsgUserValues::sExtraData, sd->string.substr(extraDataIdentifer.length()));
                     }
                 }
+                else if (e->recType == Nif::RC_BSXFlags)
+                {
+                    auto bsxFlags = static_cast<const Nif::NiIntegerExtraData*>(e.getPtr());
+                    if (bsxFlags->data & 32) // Editor marker flag
+                        args.mHasMarkers = true;
+                }
             }
 
             if (nifNode->recType == Nif::RC_NiBSAnimationNode || nifNode->recType == Nif::RC_NiBSParticleNode)
-                animflags = nifNode->flags;
+                args.mAnimFlags = nifNode->flags;
 
             if (nifNode->recType == Nif::RC_NiSortAdjustNode)
             {
@@ -692,7 +712,7 @@ namespace NifOsg
             // We still need to animate the hidden bones so the physics system can access them
             if (nifNode->recType == Nif::RC_RootCollisionNode)
             {
-                skipMeshes = true;
+                args.mSkipMeshes = true;
                 node->setNodeMask(Loader::getHiddenNodeMask());
             }
 
@@ -709,8 +729,8 @@ namespace NifOsg
                 }
 
                 if (!hasVisController)
-                    skipMeshes = true; // skip child meshes, but still create the child node hierarchy for animating
-                                       // collision shapes
+                    args.mSkipMeshes = true; // skip child meshes, but still create the child node hierarchy for
+                                             // animating collision shapes
 
                 node->setNodeMask(Loader::getHiddenNodeMask());
             }
@@ -720,37 +740,44 @@ namespace NifOsg
 
             osg::ref_ptr<SceneUtil::CompositeStateSetUpdater> composite = new SceneUtil::CompositeStateSetUpdater;
 
-            applyNodeProperties(nifNode, node, composite, imageManager, boundTextures, animflags);
+            applyNodeProperties(nifNode, node, composite, args.mImageManager, args.mBoundTextures, args.mAnimFlags);
 
             const bool isGeometry = isTypeGeometry(nifNode->recType);
 
-            if (isGeometry && !skipMeshes)
+            if (isGeometry && !args.mSkipMeshes)
             {
-                const bool isMarker = hasMarkers && Misc::StringUtils::ciStartsWith(nifNode->name, "tri editormarker");
-                if (!isMarker && !Misc::StringUtils::ciStartsWith(nifNode->name, "shadow")
-                    && !Misc::StringUtils::ciStartsWith(nifNode->name, "tri shadow"))
+                bool skip;
+                if (args.mNifVersion <= Nif::NIFFile::NIFVersion::VER_MW)
+                {
+                    skip = (args.mHasMarkers && Misc::StringUtils::ciStartsWith(nifNode->name, "tri editormarker"))
+                        || Misc::StringUtils::ciStartsWith(nifNode->name, "shadow")
+                        || Misc::StringUtils::ciStartsWith(nifNode->name, "tri shadow");
+                }
+                else
+                    skip = args.mHasMarkers && Misc::StringUtils::ciStartsWith(nifNode->name, "EditorMarker");
+                if (!skip)
                 {
                     Nif::NiSkinInstancePtr skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin;
 
                     if (skin.empty())
-                        handleGeometry(nifNode, parent, node, composite, boundTextures, animflags);
+                        handleGeometry(nifNode, parent, node, composite, args.mBoundTextures, args.mAnimFlags);
                     else
-                        handleSkinnedGeometry(nifNode, parent, node, composite, boundTextures, animflags);
+                        handleSkinnedGeometry(nifNode, parent, node, composite, args.mBoundTextures, args.mAnimFlags);
 
                     if (!nifNode->controller.empty())
-                        handleMeshControllers(nifNode, node, composite, boundTextures, animflags);
+                        handleMeshControllers(nifNode, node, composite, args.mBoundTextures, args.mAnimFlags);
                 }
             }
 
             if (nifNode->recType == Nif::RC_NiParticles)
-                handleParticleSystem(nifNode, parent, node, composite, animflags);
+                handleParticleSystem(nifNode, parent, node, composite, args.mAnimFlags);
 
             if (composite->getNumControllers() > 0)
             {
                 osg::Callback* cb = composite;
                 if (composite->getNumControllers() == 1)
                     cb = composite->getController(0);
-                if (animflags & Nif::NiNode::AnimFlag_AutoPlay)
+                if (args.mAnimFlags & Nif::NiNode::AnimFlag_AutoPlay)
                     node->addCullCallback(cb);
                 else
                     node->addUpdateCallback(
@@ -758,10 +785,10 @@ namespace NifOsg
             }
 
             bool isAnimated = false;
-            handleNodeControllers(nifNode, node, animflags, isAnimated);
-            hasAnimatedParents |= isAnimated;
+            handleNodeControllers(nifNode, node, args.mAnimFlags, isAnimated);
+            args.mHasAnimatedParents |= isAnimated;
             // Make sure empty nodes and animated shapes are not optimized away so the physics system can find them.
-            if (isAnimated || (hasAnimatedParents && ((skipMeshes || hasMarkers) || isGeometry)))
+            if (isAnimated || (args.mHasAnimatedParents && ((args.mSkipMeshes || args.mHasMarkers) || isGeometry)))
                 node->setDataVariance(osg::Object::DYNAMIC);
 
             // LOD and Switch nodes must be wrapped by a transform (the current node) to support transformations
@@ -802,8 +829,7 @@ namespace NifOsg
                 const Nif::Parent currentParent{ *ninode, parent };
                 for (const auto& child : children)
                     if (!child.empty())
-                        handleNode(child.getPtr(), &currentParent, currentNode, imageManager, boundTextures, animflags,
-                            skipMeshes, hasMarkers, hasAnimatedParents, textKeys, rootNode);
+                        handleNode(child.getPtr(), &currentParent, currentNode, args);
 
                 // Propagate effects to the the direct subgraph instead of the node itself
                 // This simulates their "affected node list" which Morrowind appears to replace with the subgraph (?)
@@ -812,7 +838,7 @@ namespace NifOsg
                     if (!effect.empty())
                     {
                         osg::ref_ptr<osg::StateSet> effectStateSet = new osg::StateSet;
-                        if (handleEffect(effect.getPtr(), effectStateSet, imageManager))
+                        if (handleEffect(effect.getPtr(), effectStateSet, args.mImageManager))
                             for (unsigned int i = 0; i < currentNode->getNumChildren(); ++i)
                                 currentNode->getChild(i)->getOrCreateStateSet()->merge(*effectStateSet);
                     }
@@ -2143,6 +2169,8 @@ namespace NifOsg
                             textureSet, texprop->clamp, node->getName(), stateset, imageManager, boundTextures);
                     }
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    if (texprop->doubleSided())
+                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
                     break;
                 }
                 case Nif::RC_BSShaderNoLightingProperty:
@@ -2183,6 +2211,8 @@ namespace NifOsg
                         stateset->addUniform(new osg::Uniform("useFalloff", false));
                     }
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    if (texprop->doubleSided())
+                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
                     break;
                 }
                 case Nif::RC_BSLightingShaderProperty:
@@ -2196,6 +2226,10 @@ namespace NifOsg
                         handleTextureSet(texprop->mTextureSet.getPtr(), texprop->mClamp, node->getName(), stateset,
                             imageManager, boundTextures);
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    if (texprop->doubleSided())
+                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+                    if (texprop->treeAnim())
+                        stateset->addUniform(new osg::Uniform("useTreeAnim", true));
                     break;
                 }
                 case Nif::RC_BSEffectShaderProperty:
@@ -2246,6 +2280,8 @@ namespace NifOsg
                     stateset->addUniform(new osg::Uniform("useFalloff", false)); // Should use the shader flag
                     stateset->addUniform(new osg::Uniform("falloffParams", texprop->mFalloffParams));
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
+                    if (texprop->doubleSided())
+                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
                     break;
                 }
                 // unused by mw

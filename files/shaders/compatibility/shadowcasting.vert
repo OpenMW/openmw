@@ -5,6 +5,7 @@ varying vec2 diffuseMapUV;
 varying float alphaPassthrough;
 
 uniform int colorMode;
+uniform bool useTreeAnim;
 uniform bool useDiffuseMapForShadowAlpha = true;
 uniform bool alphaTestShadows = true;
 
@@ -20,7 +21,7 @@ void main(void)
     else
         diffuseMapUV = vec2(0.0); // Avoid undefined behaviour if running on hardware predating the concept of dynamically uniform expressions
     if (colorMode == 2)
-        alphaPassthrough = gl_Color.a;
+        alphaPassthrough = useTreeAnim ? 1.0 : gl_Color.a;
     else
         // This is uniform, so if it's too low, we might be able to put the position/clip vertex outside the view frustum and skip the fragment shader and rasteriser
         alphaPassthrough = gl_FrontMaterial.diffuse.a;

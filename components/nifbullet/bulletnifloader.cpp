@@ -301,7 +301,13 @@ namespace NifBullet
                              << ". Treating it as a common NiTriShape.";
 
         // Check for extra data
+        std::vector<Nif::ExtraPtr> extraCollection;
         for (Nif::ExtraPtr e = node.extra; !e.empty(); e = e->next)
+            extraCollection.emplace_back(e);
+        for (const auto& extraNode : node.extralist)
+            if (!extraNode.empty())
+                extraCollection.emplace_back(extraNode);
+        for (const auto& e : extraCollection)
         {
             if (e->recType == Nif::RC_NiStringExtraData)
             {
@@ -325,6 +331,12 @@ namespace NifBullet
                     // Marker can still have collision if the model explicitely specifies it via a RootCollisionNode.
                     return;
                 }
+            }
+            else if (e->recType == Nif::RC_BSXFlags)
+            {
+                auto bsxFlags = static_cast<const Nif::NiIntegerExtraData*>(e.getPtr());
+                if (bsxFlags->data & 32) // Editor marker flag
+                    return;
             }
         }
 

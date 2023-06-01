@@ -172,6 +172,7 @@ namespace MWRender
             stateset->addUniform(new osg::Uniform("isReflection", false));
             stateset->addUniform(new osg::Uniform("windSpeed", 0.0f));
             stateset->addUniform(new osg::Uniform("playerPos", osg::Vec3f(0.f, 0.f, 0.f)));
+            stateset->addUniform(new osg::Uniform("useTreeAnim", false));
         }
 
         void apply(osg::StateSet* stateset, osg::NodeVisitor* nv) override
