@@ -28,6 +28,11 @@ extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x
 
 using namespace Fallback;
 
+namespace
+{
+    constexpr std::string_view applicationName = "OpenMW";
+}
+
 /**
  * \brief Parses application command line and calls \ref Cfg::ConfigurationManager
  * to parse configuration files.
@@ -67,7 +72,7 @@ bool parseOptions (int argc, char** argv, OMW::Engine& engine, Files::Configurat
     cfgMgr.readConfiguration(variables, desc);
     Settings::Manager::load(cfgMgr);
 
-    setupLogging(cfgMgr.getLogPath().string(), "OpenMW");
+    setupLogging(cfgMgr.getLogPath().string(), applicationName);
     MWGui::DebugWindow::startLogRecording();
 
     Version::Version v = Version::getOpenmwVersion(variables["resources"].as<Files::MaybeQuotedPath>().string());
@@ -235,7 +240,7 @@ extern "C" int SDL_main(int argc, char**argv)
 int main(int argc, char**argv)
 #endif
 {
-    return wrapApplication(&runApplication, argc, argv, "OpenMW", false);
+    return wrapApplication(&runApplication, argc, argv, applicationName);
 }
 
 // Platform specific for Windows when there is no console built into the executable.

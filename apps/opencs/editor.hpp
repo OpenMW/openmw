@@ -36,6 +36,8 @@ namespace CSMDoc
 
 namespace CS
 {
+    inline constexpr std::string_view applicationName = "OpenMW-CS";
+
     class Editor : public QObject
     {
             Q_OBJECT
