@@ -877,7 +877,7 @@ namespace MWWorld
         loadingListener->setLabel("#{OMWEngine:LoadingInterior}");
         Loading::ScopedLoad load(loadingListener);
 
-        if (mCurrentCell != nullptr && *mCurrentCell == cell)
+        if (mCurrentCell == &cell)
         {
             mWorld.moveObject(mWorld.getPlayerPtr(), position.asVec3());
             mWorld.rotateObject(mWorld.getPlayerPtr(), position.asRotationVec3());
@@ -1015,16 +1015,7 @@ namespace MWWorld
 
     bool Scene::isCellActive(const CellStore& cell)
     {
-        CellStoreCollection::iterator active = mActiveCells.begin();
-        while (active != mActiveCells.end())
-        {
-            if (**active == cell)
-            {
-                return true;
-            }
-            ++active;
-        }
-        return false;
+        return mActiveCells.contains(&cell);
     }
 
     Ptr Scene::searchPtrViaActorId(int actorId)
