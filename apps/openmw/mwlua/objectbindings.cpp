@@ -497,7 +497,7 @@ namespace MWLua
                 while (it.getType() != -1)
                 {
                     const MWWorld::Ptr& item = *(it++);
-                    MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(item);
+                    MWBase::Environment::get().getWorldModel()->registerPtr(item);
                     list->push_back(getId(item));
                 }
                 return ObjectList<ObjectT>{ list };
@@ -516,7 +516,7 @@ namespace MWLua
                 {
                     if (item.getCellRef().getRefId() == itemId)
                     {
-                        MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(item);
+                        MWBase::Environment::get().getWorldModel()->registerPtr(item);
                         return ObjectT(getId(item));
                     }
                 }
@@ -531,7 +531,7 @@ namespace MWLua
                 {
                     if (item.getCellRef().getRefId() == itemId)
                     {
-                        MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(item);
+                        MWBase::Environment::get().getWorldModel()->registerPtr(item);
                         list->push_back(getId(item));
                     }
                 }

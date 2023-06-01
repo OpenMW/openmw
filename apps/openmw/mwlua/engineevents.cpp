@@ -74,7 +74,7 @@ namespace MWLua
     private:
         MWWorld::Ptr getPtr(const ESM::RefNum& id) const
         {
-            MWWorld::Ptr res = mWorldModel->getPtrRegistry().getOrDefault(id);
+            MWWorld::Ptr res = mWorldModel->getPtr(id);
             if (res.isEmpty() && Settings::lua().mLuaDebug)
                 Log(Debug::Verbose) << "Can not find object" << id.toString() << " when calling engine hanglers";
             return res;

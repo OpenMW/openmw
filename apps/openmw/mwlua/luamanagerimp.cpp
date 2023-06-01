@@ -136,7 +136,7 @@ namespace MWLua
         if (!mPlayer.isInCell() || !newPlayerPtr.isInCell() || mPlayer.getCell() != newPlayerPtr.getCell())
         {
             mPlayer = newPlayerPtr; // player was moved to another cell, update ptr in registry
-            MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(mPlayer);
+            MWBase::Environment::get().getWorldModel()->registerPtr(mPlayer);
         }
 
         mWorldView.update();
@@ -299,7 +299,7 @@ namespace MWLua
         if (localScripts)
         {
             mActiveLocalScripts.erase(localScripts);
-            if (!MWBase::Environment::get().getWorldModel()->getPtrRegistry().getOrDefault(getId(ptr)).isEmpty())
+            if (!MWBase::Environment::get().getWorldModel()->getPtr(getId(ptr)).isEmpty())
                 mEngineEvents.addToQueue(EngineEvents::OnInactive{ getId(ptr) });
         }
     }
@@ -401,7 +401,7 @@ namespace MWLua
             return;
         }
 
-        MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(ptr);
+        MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
         LocalScripts* scripts = createLocalScripts(ptr);
 
         scripts->setSerializer(mLocalSerializer.get());
@@ -409,7 +409,7 @@ namespace MWLua
         scripts->load(data);
 
         // LiveCellRef is usually copied after loading, so this Ptr will become invalid and should be deregistered.
-        MWBase::Environment::get().getWorldModel()->getPtrRegistry().remove(ptr);
+        MWBase::Environment::get().getWorldModel()->deregisterPtr(ptr);
     }
 
     void LuaManager::reloadAllScripts()
@@ -430,7 +430,7 @@ namespace MWLua
             mGlobalScripts.load(data);
         }
 
-        for (const auto& [id, ptr] : MWBase::Environment::get().getWorldModel()->getPtrRegistry())
+        for (const auto& [id, ptr] : MWBase::Environment::get().getWorldModel()->getPtrRegistryView())
         { // Reload local scripts
             LocalScripts* scripts = ptr.getRefData().getLuaScripts();
             if (scripts == nullptr)

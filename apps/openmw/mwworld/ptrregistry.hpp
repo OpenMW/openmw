@@ -20,7 +20,7 @@ namespace MWWorld
 
         auto end() const { return mIndex.cend(); }
 
-        Ptr getOrDefault(ESM::RefNum refNum) const
+        Ptr getOrEmpty(ESM::RefNum refNum) const
         {
             const auto it = mIndex.find(refNum);
             if (it != mIndex.end())
@@ -53,6 +53,22 @@ namespace MWWorld
         std::size_t mRevision = 0;
         std::unordered_map<ESM::RefNum, Ptr> mIndex;
         ESM::RefNum mLastGenerated;
+    };
+
+    class PtrRegistryView
+    {
+    public:
+        explicit PtrRegistryView(const PtrRegistry& ref)
+            : mPtr(&ref)
+        {
+        }
+
+        auto begin() const { return mPtr->begin(); }
+
+        auto end() const { return mPtr->end(); }
+
+    private:
+        const PtrRegistry* mPtr;
     };
 }
 

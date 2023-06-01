@@ -208,7 +208,7 @@ namespace MWClass
         }
         newPtr.getCellRef().unsetRefNum();
         newPtr.getRefData().setLuaScripts(nullptr);
-        MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(newPtr);
+        MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
         return newPtr;
     }
 
@@ -229,7 +229,7 @@ namespace MWClass
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
         }
         ptr.getRefData().setLuaScripts(nullptr);
-        MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(newPtr);
+        MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
         return newPtr;
     }
 

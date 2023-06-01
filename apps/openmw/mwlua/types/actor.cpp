@@ -32,8 +32,7 @@ namespace MWLua
             MWWorld::Ptr itemPtr;
             if (std::holds_alternative<ObjectId>(item))
             {
-                itemPtr = MWBase::Environment::get().getWorldModel()->getPtrRegistry().getOrDefault(
-                    std::get<ObjectId>(item));
+                itemPtr = MWBase::Environment::get().getWorldModel()->getPtr(std::get<ObjectId>(item));
                 if (old_it != store.end() && *old_it == itemPtr)
                     return true; // already equipped
                 if (itemPtr.isEmpty() || itemPtr.getRefData().getCount() == 0
@@ -218,7 +217,7 @@ namespace MWLua
                 auto it = store.getSlot(slot);
                 if (it == store.end())
                     continue;
-                MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(*it);
+                MWBase::Environment::get().getWorldModel()->registerPtr(*it);
                 if (dynamic_cast<const GObject*>(&o))
                     equipment[slot] = sol::make_object(lua, GObject(*it));
                 else
@@ -234,7 +233,7 @@ namespace MWLua
             auto it = store.getSlot(slot);
             if (it == store.end())
                 return sol::nil;
-            MWBase::Environment::get().getWorldModel()->getPtrRegistry().insert(*it);
+            MWBase::Environment::get().getWorldModel()->registerPtr(*it);
             if (dynamic_cast<const GObject*>(&o))
                 return sol::make_object(lua, GObject(*it));
             else

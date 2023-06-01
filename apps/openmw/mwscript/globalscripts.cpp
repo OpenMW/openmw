@@ -63,7 +63,7 @@ namespace
             if (pair.second.empty())
                 return MWWorld::Ptr();
             else if (pair.first.hasContentFile())
-                return MWBase::Environment::get().getWorldModel()->getPtrRegistry().getOrDefault(pair.first);
+                return MWBase::Environment::get().getWorldModel()->getPtr(pair.first);
             return MWBase::Environment::get().getWorld()->searchPtr(pair.second, false);
         }
     };

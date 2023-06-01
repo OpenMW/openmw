@@ -24,7 +24,7 @@ namespace MWWorld
     SafePtr::SafePtr(const Ptr& ptr)
         : mId(ptr.getCellRef().getRefNum())
         , mPtr(ptr)
-        , mLastUpdate(MWBase::Environment::get().getWorldModel()->getPtrRegistry().getRevision())
+        , mLastUpdate(MWBase::Environment::get().getWorldModel()->getPtrRegistryRevision())
     {
     }
 
@@ -39,11 +39,11 @@ namespace MWWorld
 
     void SafePtr::update() const
     {
-        const PtrRegistry& registry = MWBase::Environment::get().getWorldModel()->getPtrRegistry();
-        if (mLastUpdate != registry.getRevision())
+        const WorldModel& worldModel = *MWBase::Environment::get().getWorldModel();
+        if (mLastUpdate != worldModel.getPtrRegistryRevision())
         {
-            mPtr = registry.getOrDefault(mId);
-            mLastUpdate = registry.getRevision();
+            mPtr = worldModel.getPtr(mId);
+            mLastUpdate = worldModel.getPtrRegistryRevision();
         }
     }
 }
