@@ -80,7 +80,7 @@ void CSMWorld::InfoCollection::load(
 
         if (base)
         {
-            infoOrders.at(dialogue.mId).removeInfo(id);
+            infoOrders.at(dialogue.mId).removeInfo(info.mId);
             removeRows(index, 1);
             return;
         }
