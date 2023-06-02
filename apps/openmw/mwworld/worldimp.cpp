@@ -2284,6 +2284,7 @@ namespace MWWorld
 
     void World::saveLoaded()
     {
+        mStore.rebuildIdsIndex();
         mStore.validateDynamic();
         mCurrentDate->setup(mGlobalVariables);
     }

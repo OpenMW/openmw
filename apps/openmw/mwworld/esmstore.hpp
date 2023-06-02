@@ -165,6 +165,8 @@ namespace MWWorld
             std::filesystem::path>; // path to an omwscripts file
         std::vector<LuaContent> mLuaContent;
 
+        bool mIsSetUpDone = false;
+
     public:
         void addOMWScripts(std::filesystem::path filePath) { mLuaContent.push_back(std::move(filePath)); }
         ESM::LuaScriptsCfg getLuaScriptsCfg() const;
@@ -185,6 +187,7 @@ namespace MWWorld
         ~ESMStore();
 
         void clearDynamic();
+        void rebuildIdsIndex();
 
         void movePlayerRecord();
 
