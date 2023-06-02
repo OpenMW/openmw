@@ -28,6 +28,8 @@
 #define ESM4_QUST_H
 
 #include <cstdint>
+#include <string>
+#include <vector>
 
 #include "formid.hpp"
 #include "script.hpp" // TargetCondition, ScriptDefinition

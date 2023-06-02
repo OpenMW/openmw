@@ -28,6 +28,7 @@
 #define ESM4_SCPT_H
 
 #include <cstdint>
+#include <string>
 
 #include "formid.hpp"
 #include "script.hpp"

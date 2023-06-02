@@ -26,15 +26,11 @@
 */
 #include "loadcrea.hpp"
 
-#ifdef NDEBUG // FIXME: debuggigng only
-#undef NDEBUG
-#endif
-
 #include <cstring>
-#include <iostream> // FIXME
-#include <sstream>
 #include <stdexcept>
 #include <string>
+
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -82,11 +78,9 @@ void ESM4::Creature::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_SNAM:
-            {
                 reader.get(mFaction);
                 reader.adjustFormId(mFaction.faction);
                 break;
-            }
             case ESM4::SUB_INAM:
                 reader.getFormId(mDeathItem);
                 break;
@@ -94,30 +88,24 @@ void ESM4::Creature::load(ESM4::Reader& reader)
                 reader.getFormId(mScriptId);
                 break;
             case ESM4::SUB_AIDT:
-            {
                 if (subHdr.dataSize == 20) // FO3
                     reader.skipSubRecordData();
                 else
                     reader.get(mAIData); // 12 bytes
                 break;
-            }
             case ESM4::SUB_ACBS:
-            {
                 // if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || mIsFONV)
                 if (subHdr.dataSize == 24)
                     reader.get(mBaseConfig);
                 else
                     reader.get(&mBaseConfig, 16); // TES4
                 break;
-            }
             case ESM4::SUB_DATA:
-            {
                 if (subHdr.dataSize == 17) // FO3
                     reader.skipSubRecordData();
                 else
                     reader.get(mData);
                 break;
-            }
             case ESM4::SUB_ZNAM:
                 reader.getFormId(mCombatStyle);
                 break;
@@ -149,11 +137,9 @@ void ESM4::Creature::load(ESM4::Reader& reader)
                 reader.getZString(mBloodDecal);
                 break;
             case ESM4::SUB_NIFZ:
-            {
                 if (!reader.getZeroTerminatedStringArray(mNif))
                     throw std::runtime_error("CREA NIFZ data read error");
                 break;
-            }
             case ESM4::SUB_NIFT:
             {
                 if (subHdr.dataSize != 4) // FIXME: FO3
@@ -167,15 +153,13 @@ void ESM4::Creature::load(ESM4::Reader& reader)
                 std::uint32_t nift;
                 reader.get(nift);
                 if (nift)
-                    std::cout << "CREA NIFT " << mFormId << ", non-zero " << nift << std::endl;
+                    Log(Debug::Verbose) << "CREA NIFT " << mFormId << ", non-zero " << nift;
                 break;
             }
             case ESM4::SUB_KFFZ:
-            {
                 if (!reader.getZeroTerminatedStringArray(mKf))
                     throw std::runtime_error("CREA KFFZ data read error");
                 break;
-            }
             case ESM4::SUB_TPLT:
                 reader.getFormId(mBaseTemplate);
                 break; // FO3
@@ -184,7 +168,6 @@ void ESM4::Creature::load(ESM4::Reader& reader)
                 FormId bodyPart;
                 reader.getFormId(bodyPart);
                 mBodyParts.push_back(bodyPart);
-
                 break;
             }
             case ESM4::SUB_MODT:
@@ -204,11 +187,8 @@ void ESM4::Creature::load(ESM4::Reader& reader)
             case ESM4::SUB_DMDL: // FO3
             case ESM4::SUB_DMDT: // FO3
             case ESM4::SUB_COED: // FO3
-            {
-                // std::cout << "CREA " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::CREA::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

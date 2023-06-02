@@ -22,17 +22,12 @@
 */
 #include "reader.hpp"
 
-#ifdef NDEBUG // FIXME: debugging only
-#undef NDEBUG
-#endif
-
 #undef DEBUG_GROUPSTACK
 
-#include <iomanip> // for debugging
-#include <iostream> // for debugging
-#include <sstream> // for debugging
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 #include <stdexcept>
-#include <unordered_map>
 
 #if defined(_MSC_VER)
 #pragma warning(push)

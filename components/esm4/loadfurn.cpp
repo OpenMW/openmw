@@ -77,11 +77,8 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
             case ESM4::SUB_VMAD:
             case ESM4::SUB_WBDT:
             case ESM4::SUB_XMRK:
-            {
-                // std::cout << "FURN " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::FURN::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

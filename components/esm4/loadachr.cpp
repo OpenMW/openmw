@@ -27,7 +27,6 @@
 #include "loadachr.hpp"
 
 #include <stdexcept>
-//#include <iostream>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -63,18 +62,11 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
                 reader.getFormId(mOwner);
                 break;
             case ESM4::SUB_XESP:
-            {
                 reader.getFormId(mEsp.parent);
                 reader.get(mEsp.flags);
                 break;
-            }
             case ESM4::SUB_XRGD: // ragdoll
             case ESM4::SUB_XRGB: // ragdoll biped
-            {
-                // std::cout << "ACHR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
-                reader.skipSubRecordData();
-                break;
-            }
             case ESM4::SUB_XHRS: // horse formId
             case ESM4::SUB_XMRC: // merchant container formId
             // TES5
@@ -102,11 +94,8 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
             case ESM4::SUB_SCHR: // FO3
             case ESM4::SUB_TNAM: // FO3
             case ESM4::SUB_XATO: // FONV
-            {
-                // std::cout << "ACHR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::ACHR::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

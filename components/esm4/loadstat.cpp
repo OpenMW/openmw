@@ -26,7 +26,6 @@
 */
 #include "loadstat.hpp"
 
-#include <iostream> // FIXME: debug only
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -76,11 +75,8 @@ void ESM4::Static::load(ESM4::Reader& reader)
             case ESM4::SUB_MNAM:
             case ESM4::SUB_BRUS: // FONV
             case ESM4::SUB_RNAM: // FONV
-            {
-                // std::cout << "STAT " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::STAT::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

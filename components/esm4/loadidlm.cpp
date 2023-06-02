@@ -27,7 +27,6 @@
 #include "loadidlm.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -52,7 +51,6 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
                 reader.get(mIdleFlags);
                 break;
             case ESM4::SUB_IDLC:
-            {
                 if (subHdr.dataSize != 1) // FO3 can have 4?
                 {
                     reader.skipSubRecordData();
@@ -61,7 +59,6 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
 
                 reader.get(mIdleCount);
                 break;
-            }
             case ESM4::SUB_IDLT:
                 reader.get(mIdleTimer);
                 break;
@@ -80,11 +77,8 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_OBND: // object bounds
-            {
-                // std::cout << "IDLM " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::IDLM::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

@@ -26,10 +26,6 @@
 */
 #include "loadclas.hpp"
 
-//#ifdef NDEBUG // FIXME: debugging only
-//#undef NDEBUG
-//#endif
-
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -59,11 +55,8 @@ void ESM4::Class::load(ESM4::Reader& reader)
                 reader.getZString(mIcon);
                 break;
             case ESM4::SUB_DATA:
-            {
-                // std::cout << "CLAS " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::CLAS::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

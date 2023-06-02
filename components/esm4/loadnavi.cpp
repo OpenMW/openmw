@@ -26,13 +26,7 @@
 */
 #include "loadnavi.hpp"
 
-#ifdef NDEBUG // FIXME: debuggigng only
-#undef NDEBUG
-#endif
-
 #include <stdexcept>
-
-#include <iostream> // FIXME: debugging only
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -138,8 +132,8 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
         island2.load(reader);
         islandInfo.push_back(island2); // Maybe don't use a vector for just one entry?
     }
-    else if (flags == FLG_Island) // FIXME: debug only
-        std::cerr << "nvmi no island but has 0x20 flag" << std::endl;
+    // else if (flags == FLG_Island) // FIXME: debug only
+    //   std::cerr << "nvmi no island but has 0x20 flag" << std::endl;
 
     reader.get(locationMarker);
 

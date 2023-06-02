@@ -28,7 +28,6 @@
 
 #include <cstring>
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -163,12 +162,8 @@ void ESM4::AIPackage::load(ESM4::Reader& reader)
             case ESM4::SUB_CIS2: // TES5
             case ESM4::SUB_VMAD: // TES5
             case ESM4::SUB_TPIC: // TES5
-            {
-                // std::cout << "PACK " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::PACK::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

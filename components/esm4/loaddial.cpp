@@ -27,7 +27,6 @@
 #include "loaddial.hpp"
 
 #include <cstring>
-#include <iostream> // FIXME: for debugging only
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -55,7 +54,6 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
                 FormId questId;
                 reader.getFormId(questId);
                 mQuests.push_back(questId);
-
                 break;
             }
             case ESM4::SUB_QSTR: // Seems never used in TES4
@@ -63,7 +61,6 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
                 FormId questRem;
                 reader.getFormId(questRem);
                 mQuestsRemoved.push_back(questRem);
-
                 break;
             }
             case ESM4::SUB_DATA:
@@ -99,12 +96,8 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
             case ESM4::SUB_BNAM: // TES5
             case ESM4::SUB_SNAM: // TES5
             case ESM4::SUB_TIFC: // TES5
-            {
-                // std::cout << "DIAL " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::DIAL::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

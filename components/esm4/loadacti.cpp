@@ -26,7 +26,6 @@
 */
 #include "loadacti.hpp"
 
-#include <iostream> // FIXME
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -88,11 +87,8 @@ void ESM4::Activator::load(ESM4::Reader& reader)
             case ESM4::SUB_PNAM:
             case ESM4::SUB_VMAD:
             case ESM4::SUB_WNAM:
-            {
-                // std::cout << "ACTI " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::ACTI::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

@@ -27,7 +27,6 @@
 #include "loadsoun.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -53,7 +52,6 @@ void ESM4::Sound::load(ESM4::Reader& reader)
                 reader.get(mData);
                 break;
             case ESM4::SUB_SNDD:
-            {
                 if (subHdr.dataSize == 8)
                     reader.get(&mData, 8);
                 else
@@ -61,21 +59,15 @@ void ESM4::Sound::load(ESM4::Reader& reader)
                     reader.get(mData);
                     reader.get(mExtra);
                 }
-
                 break;
-            }
             case ESM4::SUB_OBND: // TES5 only
             case ESM4::SUB_SDSC: // TES5 only
             case ESM4::SUB_ANAM: // FO3
             case ESM4::SUB_GNAM: // FO3
             case ESM4::SUB_HNAM: // FO3
             case ESM4::SUB_RNAM: // FONV
-            {
-                // std::cout << "SOUN " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::SOUN::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

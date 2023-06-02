@@ -27,7 +27,6 @@
 #include "loadotft.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -53,16 +52,11 @@ void ESM4::Outfit::load(ESM4::Reader& reader)
                 {
                     FormId formId;
                     reader.getFormId(formId);
-
                     mInventory.push_back(formId);
                 }
-
                 break;
             }
             default:
-                // std::cout << "OTFT " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
-                // reader.skipSubRecordData();
                 throw std::runtime_error("ESM4::OTFT::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }

@@ -27,7 +27,6 @@
 #include "loadarma.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -59,9 +58,6 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
             {
                 std::string model;
                 reader.getZString(model);
-
-                // std::cout << mEditorId << " " << ESM::printName(subHdr.typeId) << " " << model << std::endl;
-
                 break;
             }
             case ESM4::SUB_NAM0:
@@ -74,7 +70,6 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
                 reader.getFormId(mRacePrimary);
                 break;
             case ESM4::SUB_MODL:
-            {
                 if ((esmVer == ESM::VER_094 || esmVer == ESM::VER_170) && subHdr.dataSize == 4) // TES5
                 {
                     FormId formId;
@@ -85,20 +80,15 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
                     reader.skipSubRecordData(); // FIXME: this should be mModelMale for FO3/FONV
 
                 break;
-            }
             case ESM4::SUB_BODT: // body template
-            {
                 reader.get(mBodyTemplate.bodyPart);
                 reader.get(mBodyTemplate.flags);
                 reader.get(mBodyTemplate.unknown1); // probably padding
                 reader.get(mBodyTemplate.unknown2); // probably padding
                 reader.get(mBodyTemplate.unknown3); // probably padding
                 reader.get(mBodyTemplate.type);
-
                 break;
-            }
             case ESM4::SUB_BOD2: // TES5
-            {
                 reader.get(mBodyTemplate.bodyPart);
                 mBodyTemplate.flags = 0;
                 mBodyTemplate.unknown1 = 0; // probably padding
@@ -107,7 +97,6 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
                 reader.get(mBodyTemplate.type);
 
                 break;
-            }
             case ESM4::SUB_DNAM:
             case ESM4::SUB_MO2T: // FIXME: should group with MOD2
             case ESM4::SUB_MO2S: // FIXME: should group with MOD2
@@ -130,11 +119,8 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
             case ESM4::SUB_MODS: // FO3 // FIXME: should group with MODL
             case ESM4::SUB_MODD: // FO3 // FIXME: should group with MODL
             case ESM4::SUB_OBND: // FO3
-            {
-                // std::cout << "ARMA " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::ARMA::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

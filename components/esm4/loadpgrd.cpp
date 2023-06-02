@@ -27,8 +27,6 @@
 #include "loadpgrd.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
-//#include <iomanip>  // FIXME: for debugging only
 
 #include "formid.hpp" // FIXME: for mEditorId workaround
 #include "reader.hpp"
@@ -142,8 +140,6 @@ void ESM4::Pathgrid::load(ESM4::Reader& reader)
                 }
                 std::cout << ss.str() << std::endl;
 #else
-                // std::cout << "PGRD " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
 #endif
                 break;

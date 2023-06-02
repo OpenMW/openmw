@@ -49,7 +49,6 @@ void ESM4::Apparatus::load(ESM4::Reader& reader)
                 reader.getLocalizedString(mFullName);
                 break;
             case ESM4::SUB_DATA:
-            {
                 if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
                 {
                     reader.get(mData.value);
@@ -63,7 +62,6 @@ void ESM4::Apparatus::load(ESM4::Reader& reader)
                     reader.get(mData.quality);
                 }
                 break;
-            }
             case ESM4::SUB_ICON:
                 reader.getZString(mIcon);
                 break;
@@ -82,11 +80,8 @@ void ESM4::Apparatus::load(ESM4::Reader& reader)
             case ESM4::SUB_MODT:
             case ESM4::SUB_OBND:
             case ESM4::SUB_QUAL:
-            {
-                // std::cout << "APPA " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::APPA::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

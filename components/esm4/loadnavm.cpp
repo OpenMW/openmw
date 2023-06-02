@@ -29,7 +29,7 @@
 #include <cstring>
 #include <stdexcept>
 
-#include <iostream> // FIXME: debugging only
+#include <components/debug/debuglog.hpp>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -225,17 +225,16 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
                     subSize = 0;
                 }
                 else
-                    // const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
-                    // std::cout << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                {
+                    const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
+                    Log(Debug::Verbose) << ESM::printName(subHdr.typeId) << " skipping...";
                     reader.skipSubRecordData(); // FIXME: process the subrecord rather than skip
-
+                }
                 break;
             }
             case ESM4::SUB_XXXX:
-            {
                 reader.get(subSize);
                 break;
-            }
             case ESM4::SUB_NVER: // FO3
             case ESM4::SUB_DATA: // FO3
             case ESM4::SUB_NVVX: // FO3
@@ -245,10 +244,8 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
             case ESM4::SUB_NVGD: // FO3
             case ESM4::SUB_NVEX: // FO3
             case ESM4::SUB_EDID: // FO3
-            {
-                reader.skipSubRecordData(); // FIXME:
+                reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error(
                     "ESM4::NAVM::load - Unknown subrecord " + ESM::printName(reader.subRecordHeader().typeId));

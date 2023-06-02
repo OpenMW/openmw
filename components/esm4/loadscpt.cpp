@@ -26,8 +26,6 @@
 */
 #include "loadscpt.hpp"
 
-#include <iomanip>
-#include <iostream> // FIXME: debugging only
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -132,27 +130,17 @@ void ESM4::Script::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_SCVR: // assumed always pair with SLSD
-            {
                 reader.getZString(localVar.variableName);
-
                 mScript.localVarData.push_back(localVar);
-
                 break;
-            }
             case ESM4::SUB_SCRV:
             {
                 std::uint32_t index;
                 reader.get(index);
-
                 mScript.localRefVarIndex.push_back(index);
-
                 break;
             }
             default:
-                // std::cout << "SCPT " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
-                // reader.skipSubRecordData();
-                // break;
                 throw std::runtime_error("ESM4::SCPT::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }

@@ -29,7 +29,6 @@
 #include "loadmusc.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
 
 //#include "formid.hpp"
 
@@ -52,18 +51,13 @@ void ESM4::Music::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_FNAM:
                 reader.getZString(mMusicFile);
-                // std::cout << "music: " << /*formIdToString(mFormId)*/mEditorId << " " << mMusicFile << std::endl;
                 break;
             case ESM4::SUB_ANAM: // FONV float (attenuation in db? loop if positive?)
             case ESM4::SUB_WNAM: // TES5
             case ESM4::SUB_PNAM: // TES5
             case ESM4::SUB_TNAM: // TES5
-            {
-                // std::cout << "MUSC " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::MUSC::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

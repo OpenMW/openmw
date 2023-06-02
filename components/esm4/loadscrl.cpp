@@ -27,7 +27,6 @@
 #include "loadscrl.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: testing only
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -53,11 +52,9 @@ void ESM4::Scroll::load(ESM4::Reader& reader)
                 reader.getLocalizedString(mText);
                 break;
             case ESM4::SUB_DATA:
-            {
                 reader.get(mData.value);
                 reader.get(mData.weight);
                 break;
-            }
             case ESM4::SUB_MODL:
                 reader.getZString(mModel);
                 break;
@@ -73,11 +70,8 @@ void ESM4::Scroll::load(ESM4::Reader& reader)
             case ESM4::SUB_MODT:
             case ESM4::SUB_SPIT:
             case ESM4::SUB_CIS2:
-            {
-                // std::cout << "SCRL " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::SCRL::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

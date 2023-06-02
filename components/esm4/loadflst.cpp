@@ -27,7 +27,6 @@
 #include "loadflst.hpp"
 
 #include <stdexcept>
-//#include <iostream> // FIXME: for debugging only
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -50,19 +49,13 @@ void ESM4::FormIdList::load(ESM4::Reader& reader)
             {
                 FormId formId;
                 reader.getFormId(formId);
-
                 mObjects.push_back(formId);
-
                 break;
             }
             default:
-                // std::cout << "FLST " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
-                // reader.skipSubRecordData();
                 throw std::runtime_error("ESM4::FLST::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
-    // std::cout << "flst " << mEditorId << " " << mObjects.size() << std::endl; // FIXME
 }
 
 // void ESM4::FormIdList::save(ESM4::Writer& writer) const

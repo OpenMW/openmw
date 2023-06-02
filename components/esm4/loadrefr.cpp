@@ -26,7 +26,6 @@
 */
 #include "loadrefr.hpp"
 
-#include <iostream> // FIXME: debug only
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -95,7 +94,7 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 reader.getFormId(mEsp.parent);
                 reader.get(mEsp.flags);
                 // std::cout << "REFR  parent: " << formIdToString(mEsp.parent) << " ref " << formIdToString(mFormId)
-                //<< ", 0x" << std::hex << (mEsp.flags & 0xff) << std::endl;// FIXME
+                // << ", 0x" << std::hex << (mEsp.flags & 0xff) << std::endl;// FIXME
                 break;
             }
             case ESM4::SUB_XTEL:
@@ -197,7 +196,7 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             case ESM4::SUB_FNAM:
             {
                 // std::cout << "REFR " << ESM::printName(subHdr.typeId) << " skipping..."
-                //<< subHdr.dataSize << std::endl;
+                // << subHdr.dataSize << std::endl;
                 reader.skipSubRecordData();
                 break;
             }
@@ -322,13 +321,10 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             case ESM4::SUB_XSRD: // FONV
             case ESM4::SUB_WMI1: // FONV
             case ESM4::SUB_XLRL: // Unofficial Skyrim Patch
-            {
                 // if (mFormId == 0x0007e90f) // XPRM XPOD
                 // if (mBaseObj == 0x17) //XPRM XOCP occlusion plane data XMBO bound half extents
-                // std::cout << "REFR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::REFR::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

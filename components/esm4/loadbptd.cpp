@@ -27,7 +27,6 @@
 #include "loadbptd.hpp"
 
 #include <cstring>
-#include <iostream> // FIXME: testing only
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -86,23 +85,16 @@ void ESM4::BodyPartData::load(ESM4::Reader& reader)
                 reader.getZString(bodyPart.mLimbReplacementModel);
                 break;
             case ESM4::SUB_NAM4: // FIXME: assumed occurs last
-            {
                 reader.getZString(bodyPart.mGoreEffectsTarget); // target bone
-
                 mBodyParts.push_back(bodyPart); // FIXME: possible without copying?
-
                 bodyPart.clear();
                 break;
-            }
             case ESM4::SUB_NAM5:
             case ESM4::SUB_RAGA: // ragdoll
             case ESM4::SUB_MODS:
             case ESM4::SUB_MODT:
-            {
-                // std::cout << "BPTD " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::BPTD::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

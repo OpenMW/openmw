@@ -27,7 +27,6 @@
 #include "loadacre.hpp"
 
 #include <stdexcept>
-//#include <iostream>
 
 #include "reader.hpp"
 //#include "writer.hpp"
@@ -56,11 +55,9 @@ void ESM4::ActorCreature::load(ESM4::Reader& reader)
                 reader.get(mScale);
                 break;
             case ESM4::SUB_XESP:
-            {
                 reader.getFormId(mEsp.parent);
                 reader.get(mEsp.flags);
                 break;
-            }
             case ESM4::SUB_XOWN:
                 reader.getFormId(mOwner);
                 break;
@@ -70,14 +67,6 @@ void ESM4::ActorCreature::load(ESM4::Reader& reader)
             case ESM4::SUB_XRNK:
                 reader.get(mFactionRank);
                 break;
-            case ESM4::SUB_XRGD: // ragdoll
-            case ESM4::SUB_XRGB: // ragdoll biped
-            {
-                // seems to occur only for dead bodies, e.g. DeadMuffy, DeadDogVicious
-                // std::cout << "ACRE " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
-                reader.skipSubRecordData();
-                break;
-            }
             case ESM4::SUB_XLKR: // FO3
             case ESM4::SUB_XLCM: // FO3
             case ESM4::SUB_XEZN: // FO3
@@ -87,11 +76,11 @@ void ESM4::ActorCreature::load(ESM4::Reader& reader)
             case ESM4::SUB_XRDS: // FO3
             case ESM4::SUB_XPRD: // FO3
             case ESM4::SUB_XATO: // FONV
-            {
-                // std::cout << "ACRE " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
+                                 // seems to occur only for dead bodies, e.g. DeadMuffy, DeadDogVicious
+            case ESM4::SUB_XRGD: // ragdoll
+            case ESM4::SUB_XRGB: // ragdoll biped
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::ACRE::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

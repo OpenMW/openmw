@@ -77,11 +77,8 @@ void ESM4::Key::load(ESM4::Reader& reader)
             case ESM4::SUB_KWDA:
             case ESM4::SUB_OBND:
             case ESM4::SUB_VMAD:
-            {
-                // std::cout << "KEYM " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::KEYM::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

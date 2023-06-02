@@ -27,6 +27,8 @@
 #ifndef ESM4_TES4_H
 #define ESM4_TES4_H
 
+#include <cstdint>
+#include <string>
 #include <vector>
 
 #include "../esm/common.hpp" // ESMVersion, MasterData

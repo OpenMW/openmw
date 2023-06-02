@@ -107,7 +107,6 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
             case ESM4::SUB_ZNAM:
             case ESM4::SUB_ETYP: // FO3
             {
-                // std::cout << "INGR " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
             }

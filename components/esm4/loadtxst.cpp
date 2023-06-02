@@ -26,7 +26,6 @@
 */
 #include "loadtxst.hpp"
 
-#include <iostream> // FIXME: testing only
 #include <stdexcept>
 
 #include "reader.hpp"
@@ -73,11 +72,8 @@ void ESM4::TextureSet::load(ESM4::Reader& reader)
             case ESM4::SUB_DNAM:
             case ESM4::SUB_DODT:
             case ESM4::SUB_OBND: // object bounds
-            {
-                // std::cout << "TXST " << ESM::printName(subHdr.typeId) << " skipping..." << std::endl;
                 reader.skipSubRecordData();
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::TXST::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

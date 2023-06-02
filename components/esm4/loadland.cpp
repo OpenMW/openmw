@@ -26,13 +26,8 @@
 */
 #include "loadland.hpp"
 
-#ifdef NDEBUG // FIXME: debuggigng only
-#undef NDEBUG
-#endif
-
+#include <cstdint>
 #include <stdexcept>
-
-#include <iostream> // FIXME: debug only
 
 #include <components/debug/debuglog.hpp>
 
