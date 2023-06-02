@@ -146,5 +146,13 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSInvMarker : public Extra
+    {
+        osg::Quat mRotation;
+        float mScale = 1.0f;
+
+        void read(NIFStream* nif) override;
+    };
+
 } // Namespace
 #endif
