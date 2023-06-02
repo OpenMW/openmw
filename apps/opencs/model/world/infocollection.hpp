@@ -55,6 +55,8 @@ namespace CSMWorld
 
         bool reorderRows(int baseIndex, const std::vector<int>& newOrder) override;
     };
+
+    ESM::RefId makeCompositeInfoRefId(const ESM::RefId& topicId, const ESM::RefId& infoId);
 }
 
 #endif

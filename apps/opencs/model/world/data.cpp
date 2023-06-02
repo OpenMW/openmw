@@ -73,17 +73,18 @@ namespace CSMWorld
 
             for (const OrderedInfo& info : topicInfoOrder->second.getOrderedInfo())
             {
-                const Record<Info>& record = infoCollection.getRecord(info.mId);
+                const ESM::RefId id = makeCompositeInfoRefId(dialogueId, info.mId);
+                const Record<Info>& record = infoCollection.getRecord(id);
 
                 if (record.mState == RecordBase::State_ModifiedOnly)
                 {
-                    erasedRecords.push_back(infoCollection.searchId(info.mId));
+                    erasedRecords.push_back(infoCollection.searchId(id));
                     continue;
                 }
 
                 auto deletedRecord = std::make_unique<Record<Info>>(record);
                 deletedRecord->mState = RecordBase::State_Deleted;
-                infoCollection.setRecord(infoCollection.searchId(info.mId), std::move(deletedRecord));
+                infoCollection.setRecord(infoCollection.searchId(id), std::move(deletedRecord));
             }
 
             while (!erasedRecords.empty())
@@ -91,8 +92,6 @@ namespace CSMWorld
                 infoCollection.removeRows(erasedRecords.back(), 1);
                 erasedRecords.pop_back();
             }
-
-            infoOrders.erase(topicInfoOrder);
         }
     }
 }
