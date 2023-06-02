@@ -99,7 +99,7 @@ namespace ESM
                 {
                     esm.getSubHeader();
                     mId = esm.getMaybeFixedRefIdSize(32);
-                    esm.getT(mData);
+                    esm.getTSized<20>(mData);
 
                     hasHeader = true;
                     break;

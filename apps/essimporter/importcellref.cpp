@@ -48,14 +48,14 @@ namespace ESSImport
         if (esm.isNextSub("ACDT"))
         {
             mActorData.mHasACDT = true;
-            esm.getHT(mActorData.mACDT);
+            esm.getHTSized<264>(mActorData.mACDT);
         }
 
         mActorData.mHasACSC = false;
         if (esm.isNextSub("ACSC"))
         {
             mActorData.mHasACSC = true;
-            esm.getHT(mActorData.mACSC);
+            esm.getHTSized<112>(mActorData.mACSC);
         }
 
         if (esm.isNextSub("ACSL"))
@@ -137,7 +137,7 @@ namespace ESSImport
         if (esm.isNextSub("ANIS"))
         {
             mActorData.mHasANIS = true;
-            esm.getHT(mActorData.mANIS);
+            esm.getHTSized<8>(mActorData.mANIS);
         }
 
         if (esm.isNextSub("LVCR"))

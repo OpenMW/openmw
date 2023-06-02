@@ -13,13 +13,13 @@ namespace ESM
 
         void AiWander::load(ESMReader& esm)
         {
-            esm.getHNT(mData, "DATA");
-            esm.getHNT(mDurationData, "STAR"); // was mStartTime
+            esm.getHNTSized<14>(mData, "DATA");
+            esm.getHNTSized<8>(mDurationData, "STAR"); // was mStartTime
             mStoredInitialActorPosition = false;
             if (esm.isNextSub("POS_"))
             {
                 mStoredInitialActorPosition = true;
-                esm.getHT(mInitialActorPosition);
+                esm.getHTSized<12>(mInitialActorPosition);
             }
         }
 
@@ -33,7 +33,7 @@ namespace ESM
 
         void AiTravel::load(ESMReader& esm)
         {
-            esm.getHNT(mData, "DATA");
+            esm.getHNTSized<12>(mData, "DATA");
             esm.getHNOT(mHidden, "HIDD");
             mRepeat = false;
             esm.getHNOT(mRepeat, "REPT");
@@ -49,7 +49,7 @@ namespace ESM
 
         void AiEscort::load(ESMReader& esm)
         {
-            esm.getHNT(mData, "DATA");
+            esm.getHNTSized<14>(mData, "DATA");
             mTargetId = esm.getHNRefId("TARG");
             mTargetActorId = -1;
             esm.getHNOT(mTargetActorId, "TAID");
@@ -81,7 +81,7 @@ namespace ESM
 
         void AiFollow::load(ESMReader& esm)
         {
-            esm.getHNT(mData, "DATA");
+            esm.getHNTSized<14>(mData, "DATA");
             mTargetId = esm.getHNRefId("TARG");
             mTargetActorId = -1;
             esm.getHNOT(mTargetActorId, "TAID");

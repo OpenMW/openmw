@@ -11,13 +11,13 @@ namespace ESSImport
         {
             ActiveSpell spell;
             esm.getHT(spell.mIndex);
-            esm.getHNT(spell.mSPDT, "SPDT");
+            esm.getHNTSized<160>(spell.mSPDT, "SPDT");
             spell.mTarget = esm.getHNOString("TNAM");
 
             while (esm.isNextSub("NPDT"))
             {
                 ActiveEffect effect;
-                esm.getHT(effect.mNPDT);
+                esm.getHTSized<56>(effect.mNPDT);
 
                 // Effect-specific subrecords can follow:
                 // - INAM for disintegration and bound effects

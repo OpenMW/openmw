@@ -21,7 +21,7 @@ namespace ESM
 
         mTradeTime.mDay = 0;
         mTradeTime.mHour = 0;
-        esm.getHNOT(mTradeTime, "TIME");
+        esm.getHNOTSized<8>(mTradeTime, "TIME");
 
         int flags = 0;
         mDead = false;
@@ -108,7 +108,7 @@ namespace ESM
 
         mTimeOfDeath.mDay = 0;
         mTimeOfDeath.mHour = 0;
-        esm.getHNOT(mTimeOfDeath, "DTIM");
+        esm.getHNOTSized<8>(mTimeOfDeath, "DTIM");
 
         mSpells.load(esm);
         mActiveSpells.load(esm);
@@ -164,7 +164,7 @@ namespace ESM
 
             CorprusStats stats;
             esm.getHNT(stats.mWorsenings, "WORS");
-            esm.getHNT(stats.mNextWorsening, "TIME");
+            esm.getHNTSized<8>(stats.mNextWorsening, "TIME");
 
             mCorprusSpells[id] = stats;
         }

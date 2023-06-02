@@ -144,7 +144,7 @@ namespace ESM
                         mWater = waterLevel;
                     break;
                 case fourCC("AMBI"):
-                    esm.getHT(mAmbi);
+                    esm.getHTSized<16>(mAmbi);
                     mHasAmbi = true;
                     break;
                 case fourCC("RGNN"):
