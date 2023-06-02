@@ -1924,11 +1924,11 @@ namespace MWMechanics
 
     void MechanicsManager::applyWerewolfAcrobatics(const MWWorld::Ptr& actor)
     {
-        const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
+        const ESM::Skill* acrobatics
+            = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(ESM::Skill::Acrobatics);
         MWMechanics::NpcStats& stats = actor.getClass().getNpcStats(actor);
-        auto& skill = stats.getSkill(ESM::Skill::Acrobatics);
-        skill.setModifier(gmst.find("fWerewolfAcrobatics")->mValue.getFloat() - skill.getModified());
+        auto& skill = stats.getSkill(acrobatics->mIndex);
+        skill.setModifier(acrobatics->mWerewolfValue - skill.getModified());
     }
 
     void MechanicsManager::cleanupSummonedCreature(const MWWorld::Ptr& caster, int creatureActorId)

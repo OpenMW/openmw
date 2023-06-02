@@ -342,7 +342,6 @@ namespace MWGui
         const MWMechanics::NpcStats& PCstats = player.getClass().getNpcStats(player);
         const auto& store = MWBase::Environment::get().getESMStore();
 
-        std::string detailText;
         std::stringstream detail;
         bool first = true;
         for (const auto& attribute : store->get<ESM::Attribute>())
@@ -353,12 +352,11 @@ namespace MWGui
             {
                 if (!first)
                     detail << '\n';
-                detail << "#{" << MyGUI::TextIterator::toTagsString(attribute.mName) << "} x"
-                       << MyGUI::utility::toString(mult);
+                detail << attribute.mName << " x" << MyGUI::utility::toString(mult);
                 first = false;
             }
         }
-        detailText = MyGUI::LanguageManager::getInstance().replaceTags(detail.str());
+        std::string detailText = detail.str();
 
         // level progress
         MyGUI::Widget* levelWidget;
@@ -514,8 +512,6 @@ namespace MWGui
 
             const ESM::Skill* skill = esmStore.get<ESM::Skill>().find(skillId);
 
-            std::string icon = "icons\\k\\" + ESM::Skill::sIconNames[skillId];
-
             const ESM::Attribute* attr = esmStore.get<ESM::Attribute>().find(skill->mData.mAttribute);
 
             std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets
@@ -530,9 +526,9 @@ namespace MWGui
                     "Caption_SkillName", MyGUI::TextIterator::toTagsString(skill->mName));
                 mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString(
                     "Caption_SkillDescription", skill->mDescription);
-                mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString(
-                    "Caption_SkillAttribute", "#{sGoverningAttribute}: #{" + attr->mName + "}");
-                mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("ImageTexture_SkillImage", icon);
+                mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("Caption_SkillAttribute",
+                    "#{sGoverningAttribute}: " + MyGUI::TextIterator::toTagsString(attr->mName));
+                mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("ImageTexture_SkillImage", skill->mIcon);
                 mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("Range_SkillProgress", "100");
             }
 
@@ -634,9 +630,10 @@ namespace MWGui
                         const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[0]);
                         const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[1]);
 
-                        text += "\n#{fontcolourhtml=normal}#{" + attr1->mName
-                            + "}: " + MyGUI::utility::toString(rankData.mAttribute1) + ", #{" + attr2->mName
-                            + "}: " + MyGUI::utility::toString(rankData.mAttribute2);
+                        text += "\n#{fontcolourhtml=normal}" + MyGUI::TextIterator::toTagsString(attr1->mName) + ": "
+                            + MyGUI::utility::toString(rankData.mAttribute1) + ", "
+                            + MyGUI::TextIterator::toTagsString(attr2->mName) + ": "
+                            + MyGUI::utility::toString(rankData.mAttribute2);
 
                         text += "\n\n#{fontcolourhtml=header}#{sFavoriteSkills}";
                         text += "\n#{fontcolourhtml=normal}";

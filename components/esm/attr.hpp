@@ -26,7 +26,8 @@ namespace ESM
         };
 
         AttributeID mId;
-        std::string mName, mDescription, mIcon, mWerewolfGMST;
+        std::string mName, mDescription, mIcon;
+        float mWerewolfValue{};
 
         static const std::string sAttributeNames[Length];
 

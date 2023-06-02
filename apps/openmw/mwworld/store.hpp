@@ -473,7 +473,7 @@ namespace MWWorld
     public:
         Store();
 
-        void setUp(const MWWorld::Store<ESM::GameSetting> settings);
+        void setUp(const MWWorld::Store<ESM::GameSetting>& settings);
     };
 
     template <>
@@ -498,7 +498,7 @@ namespace MWWorld
         // calls `search` and throws an exception if not found
         const ESM::Attribute* find(size_t index) const;
 
-        void setUp();
+        void setUp(const MWWorld::Store<ESM::GameSetting>& settings);
 
         size_t getSize() const;
         iterator begin() const;

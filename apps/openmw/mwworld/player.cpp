@@ -99,22 +99,18 @@ namespace MWWorld
         for (const auto& attribute : store->get<ESM::Attribute>())
         {
             MWMechanics::AttributeValue value = npcStats.getAttribute(attribute.mId);
-            value.setModifier(gmst.find(attribute.mWerewolfGMST)->mValue.getFloat() - value.getModified());
+            value.setModifier(attribute.mWerewolfValue - value.getModified());
             npcStats.setAttribute(attribute.mId, value);
         }
 
-        for (size_t i = 0; i < ESM::Skill::Length; i++)
+        for (const auto& [_, skill] : store->get<ESM::Skill>())
         {
             // Acrobatics is set separately for some reason.
-            if (i == ESM::Skill::Acrobatics)
+            if (skill.mIndex == ESM::Skill::Acrobatics)
                 continue;
 
-            // "Mercantile"! >_<
-            std::string name = "fWerewolf"
-                + ((i == ESM::Skill::Mercantile) ? std::string("Merchantile") : ESM::Skill::sSkillNames[i]);
-
-            MWMechanics::SkillValue& value = npcStats.getSkill(i);
-            value.setModifier(gmst.find(name)->mValue.getFloat() - value.getModified());
+            MWMechanics::SkillValue& value = npcStats.getSkill(skill.mIndex);
+            value.setModifier(skill.mWerewolfValue - value.getModified());
         }
     }
 

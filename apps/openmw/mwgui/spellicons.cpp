@@ -89,10 +89,7 @@ namespace MWGui
                 if (effect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
                 {
                     const ESM::Attribute* attribute = store->get<ESM::Attribute>().find(effectInfo.mKey.mArg);
-                    sourcesDescription += " (";
-                    sourcesDescription
-                        += MWBase::Environment::get().getWindowManager()->getGameSettingString(attribute->mName, {});
-                    sourcesDescription += ')';
+                    sourcesDescription += " (" + attribute->mName + ')';
                 }
                 ESM::MagicEffect::MagnitudeDisplayType displayType = effect->getMagnitudeDisplayType();
                 if (displayType == ESM::MagicEffect::MDT_TimesInt)

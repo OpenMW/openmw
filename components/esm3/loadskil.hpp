@@ -45,6 +45,8 @@ namespace ESM
 
         std::string mDescription;
         std::string mName;
+        std::string mIcon;
+        float mWerewolfValue{};
 
         enum SkillEnum
         {
@@ -78,7 +80,6 @@ namespace ESM
             Length
         };
         static const std::string sSkillNames[Length];
-        static const std::string sIconNames[Length];
 
         static SkillEnum stringToSkillId(std::string_view skill);
 

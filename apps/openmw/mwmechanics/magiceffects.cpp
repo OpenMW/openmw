@@ -279,7 +279,7 @@ namespace MWMechanics
         else if (targetsAttribute)
         {
             spellLine += ' ';
-            spellLine += windowManager->getGameSettingString(attribute->mName, {});
+            spellLine += attribute->mName;
         }
         return spellLine;
     }
