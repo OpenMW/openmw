@@ -129,6 +129,11 @@ namespace CSMWorld
             saveAndLoadDialogueWithInfos(data.mDialogue, data.mInfos, base, infoCollection, infoOrder);
         }
 
+        MATCHER_P(InfoId, v, "")
+        {
+            return arg.mId == v;
+        }
+
         TEST(CSMWorldInfoCollectionTest, loadShouldAddRecord)
         {
             ESM::Dialogue dialogue;
@@ -152,6 +157,9 @@ namespace CSMWorld
             EXPECT_EQ(record.mBase.mTopicId, dialogue.mId);
             EXPECT_EQ(record.mBase.mOriginalId, info.mId);
             EXPECT_EQ(record.mBase.mId, ESM::RefId::stringRefId("dialogue#info0"));
+
+            ASSERT_THAT(infoOrder, ElementsAre(Key(dialogue.mId)));
+            EXPECT_THAT(infoOrder.find(dialogue.mId)->second.getOrderedInfo(), ElementsAre(InfoId(info.mId)));
         }
 
         TEST(CSMWorldInfoCollectionTest, loadShouldAddRecordAndMarkModifiedOnlyWhenNotBase)
@@ -177,6 +185,9 @@ namespace CSMWorld
             EXPECT_EQ(record.mModified.mTopicId, dialogue.mId);
             EXPECT_EQ(record.mModified.mOriginalId, info.mId);
             EXPECT_EQ(record.mModified.mId, ESM::RefId::stringRefId("dialogue#info0"));
+
+            ASSERT_THAT(infoOrder, ElementsAre(Key(dialogue.mId)));
+            EXPECT_THAT(infoOrder.find(dialogue.mId)->second.getOrderedInfo(), ElementsAre(InfoId(info.mId)));
         }
 
         TEST(CSMWorldInfoCollectionTest, loadShouldUpdateRecord)
@@ -204,6 +215,9 @@ namespace CSMWorld
             const Record<Info>& record = collection.getRecord(0);
             ASSERT_EQ(record.mState, RecordBase::State_BaseOnly);
             EXPECT_EQ(record.mBase.mActor, ESM::RefId::stringRefId("newActor"));
+
+            ASSERT_THAT(infoOrder, ElementsAre(Key(dialogue.mId)));
+            EXPECT_THAT(infoOrder.find(dialogue.mId)->second.getOrderedInfo(), ElementsAre(InfoId(info.mId)));
         }
 
         TEST(CSMWorldInfoCollectionTest, loadShouldUpdateRecordAndMarkModifiedWhenNotBase)
@@ -231,6 +245,9 @@ namespace CSMWorld
             const Record<Info>& record = collection.getRecord(0);
             ASSERT_EQ(record.mState, RecordBase::State_Modified);
             EXPECT_EQ(record.mModified.mActor, ESM::RefId::stringRefId("newActor"));
+
+            ASSERT_THAT(infoOrder, ElementsAre(Key(dialogue.mId)));
+            EXPECT_THAT(infoOrder.find(dialogue.mId)->second.getOrderedInfo(), ElementsAre(InfoId(info.mId)));
         }
 
         TEST(CSMWorldInfoCollectionTest, loadShouldSkipAbsentDeletedRecord)
@@ -251,6 +268,8 @@ namespace CSMWorld
             saveAndLoadDialogueWithInfos(dialogue, std::array{ info }, base, collection, infoOrder);
 
             EXPECT_EQ(collection.getSize(), 0);
+
+            ASSERT_THAT(infoOrder, ElementsAre());
         }
 
         TEST(CSMWorldInfoCollectionTest, loadShouldRemovePresentDeletedBaseRecord)
@@ -275,6 +294,9 @@ namespace CSMWorld
             saveAndLoadDialogueWithInfos(dialogue, std::array{ info }, base, collection, infoOrder);
 
             EXPECT_EQ(collection.getSize(), 0);
+
+            ASSERT_THAT(infoOrder, ElementsAre(Key(dialogue.mId)));
+            EXPECT_THAT(infoOrder.find(dialogue.mId)->second.getOrderedInfo(), ElementsAre());
         }
 
         TEST(CSMWorldInfoCollectionTest, loadShouldMarkAsDeletedNotBaseRecord)
@@ -301,6 +323,9 @@ namespace CSMWorld
             EXPECT_EQ(collection.getSize(), 1);
             EXPECT_EQ(
                 collection.getRecord(ESM::RefId::stringRefId("dialogue#info0")).mState, RecordBase::State_Deleted);
+
+            ASSERT_THAT(infoOrder, ElementsAre(Key(dialogue.mId)));
+            EXPECT_THAT(infoOrder.find(dialogue.mId)->second.getOrderedInfo(), ElementsAre(InfoId(info.mValue.mId)));
         }
 
         TEST(CSMWorldInfoCollectionTest, sortShouldOrderRecordsBasedOnPrevAndNext)
