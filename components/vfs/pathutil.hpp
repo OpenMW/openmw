@@ -1,5 +1,5 @@
-#ifndef OPENMW_COMPONENTS_RESOURCE_PATH_H
-#define OPENMW_COMPONENTS_RESOURCE_PATH_H
+#ifndef OPENMW_COMPONENTS_VFS_PATHUTIL_H
+#define OPENMW_COMPONENTS_VFS_PATHUTIL_H
 
 #include <components/misc/strings/lower.hpp>
 
