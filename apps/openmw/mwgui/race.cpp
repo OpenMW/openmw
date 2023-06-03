@@ -163,13 +163,13 @@ namespace MWGui
         setGender(proto.isMale() ? GM_Male : GM_Female);
         recountParts();
 
-        for (unsigned int i = 0; i < mAvailableHeads.size(); ++i)
+        for (size_t i = 0; i < mAvailableHeads.size(); ++i)
         {
             if (mAvailableHeads[i] == proto.mHead)
                 mFaceIndex = i;
         }
 
-        for (unsigned int i = 0; i < mAvailableHairs.size(); ++i)
+        for (size_t i = 0; i < mAvailableHairs.size(); ++i)
         {
             if (mAvailableHairs[i] == proto.mHair)
                 mHairIndex = i;

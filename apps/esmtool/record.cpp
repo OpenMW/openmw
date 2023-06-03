@@ -781,7 +781,7 @@ namespace EsmTool
         for (int skill : mData.mData.mSkills)
             if (skill != -1)
                 std::cout << "  Skill: " << skillLabel(skill) << " (" << skill << ")" << std::endl;
-        for (int i = 0; i != mData.mData.mRankData.size(); i++)
+        for (size_t i = 0; i != mData.mData.mRankData.size(); i++)
             if (!mData.mRanks[i].empty())
             {
                 std::cout << "  Rank: " << mData.mRanks[i] << std::endl;

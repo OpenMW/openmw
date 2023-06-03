@@ -134,9 +134,9 @@ CSMWorld::NestableColumn::NestableColumn(int columnId, CSMWorld::ColumnBase::Dis
 
 CSMWorld::NestableColumn::~NestableColumn()
 {
-    for (unsigned int i = 0; i < mNestedColumns.size(); ++i)
+    for (auto* col : mNestedColumns)
     {
-        delete mNestedColumns[i];
+        delete col;
     }
 }
 

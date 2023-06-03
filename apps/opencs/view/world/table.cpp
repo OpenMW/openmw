@@ -611,7 +611,7 @@ void CSVWorld::Table::moveRecords(QDropEvent* event)
 
     std::vector<int> newOrder(highestDifference + 1);
 
-    for (long unsigned int i = 0; i < newOrder.size(); ++i)
+    for (int i = 0; i <= highestDifference; ++i)
     {
         newOrder[i] = i;
     }

@@ -462,7 +462,7 @@ namespace MWGui::Formatting
         mPaginator.setIgnoreLeadingEmptyLines(true);
 
         const MyGUI::VectorLineInfo& lines = mEditBox->getSubWidgetText()->castType<MyGUI::EditText>()->getLineInfo();
-        for (unsigned int i = lastLine; i < lines.size(); ++i)
+        for (size_t i = lastLine; i < lines.size(); ++i)
         {
             if (lines[i].width == 0)
                 ret += lineHeight;

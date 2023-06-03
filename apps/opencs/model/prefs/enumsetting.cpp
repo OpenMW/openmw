@@ -82,9 +82,9 @@ std::pair<QWidget*, QWidget*> CSMPrefs::EnumSetting::makeWidgets(QWidget* parent
 
     mWidget = new QComboBox(parent);
 
-    int index = 0;
+    size_t index = 0;
 
-    for (int i = 0; i < static_cast<int>(mValues.mValues.size()); ++i)
+    for (size_t i = 0; i < mValues.mValues.size(); ++i)
     {
         if (mDefault.mValue == mValues.mValues[i].mValue)
             index = i;
@@ -95,7 +95,7 @@ std::pair<QWidget*, QWidget*> CSMPrefs::EnumSetting::makeWidgets(QWidget* parent
             mWidget->setItemData(i, QString::fromUtf8(mValues.mValues[i].mTooltip.c_str()), Qt::ToolTipRole);
     }
 
-    mWidget->setCurrentIndex(index);
+    mWidget->setCurrentIndex(static_cast<int>(index));
 
     if (!mTooltip.empty())
     {

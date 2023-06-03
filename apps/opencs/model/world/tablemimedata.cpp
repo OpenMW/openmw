@@ -45,21 +45,21 @@ std::string CSMWorld::TableMimeData::getIcon() const
     std::string tmpIcon;
     bool firstIteration = true;
 
-    for (unsigned i = 0; i < mUniversalId.size(); ++i)
+    for (const auto& id : mUniversalId)
     {
         if (firstIteration)
         {
             firstIteration = false;
-            tmpIcon = mUniversalId[i].getIcon();
+            tmpIcon = id.getIcon();
             continue;
         }
 
-        if (tmpIcon != mUniversalId[i].getIcon())
+        if (tmpIcon != id.getIcon())
         {
             return ":/multitype.png"; // icon stolen from gnome TODO: get new icon
         }
 
-        tmpIcon = mUniversalId[i].getIcon();
+        tmpIcon = id.getIcon();
     }
 
     return mUniversalId.begin()->getIcon(); // All objects are of the same type;

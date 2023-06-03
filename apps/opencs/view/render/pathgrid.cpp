@@ -347,10 +347,10 @@ namespace CSVRender
 
             QModelIndex parent = model->index(recordIndex, parentColumn);
 
-            for (size_t i = 0; i < mSelected.size(); ++i)
+            for (const auto& selected : mSelected)
             {
-                const CSMWorld::Pathgrid::Point& point = source->mPoints[mSelected[i]];
-                int row = static_cast<int>(mSelected[i]);
+                const CSMWorld::Pathgrid::Point& point = source->mPoints[selected];
+                int row = static_cast<int>(selected);
 
                 commands.push(new CSMWorld::ModifyCommand(
                     *model, model->index(row, posXColumn, parent), clampToCell(point.mX + offsetX)));
@@ -378,9 +378,9 @@ namespace CSVRender
         const CSMWorld::Pathgrid* source = getPathgridSource();
         if (source)
         {
-            for (size_t i = 0; i < mSelected.size(); ++i)
+            for (const auto& selected : mSelected)
             {
-                addEdge(commands, *source, node, mSelected[i]);
+                addEdge(commands, *source, node, selected);
             }
         }
     }

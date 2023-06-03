@@ -698,9 +698,9 @@ bool CSVRender::PagedWorldspaceWidget::handleDrop(
         return false;
 
     bool selectionChanged = false;
-    for (unsigned i = 0; i < universalIdData.size(); ++i)
+    for (const auto& id : universalIdData)
     {
-        std::pair<int, int> coordinates(getCoordinatesFromId(universalIdData[i].getId()));
+        std::pair<int, int> coordinates(getCoordinatesFromId(id.getId()));
         if (mSelection.add(CSMWorld::CellCoordinates(coordinates.first, coordinates.second)))
         {
             selectionChanged = true;
