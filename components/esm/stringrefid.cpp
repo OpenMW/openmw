@@ -1,13 +1,17 @@
 #include "stringrefid.hpp"
+#include "serializerefid.hpp"
 
+#include <charconv>
 #include <iomanip>
 #include <mutex>
 #include <ostream>
 #include <sstream>
+#include <system_error>
 #include <unordered_set>
 
 #include "components/misc/guarded.hpp"
 #include "components/misc/strings/algorithm.hpp"
+#include "components/misc/utf8stream.hpp"
 
 namespace ESM
 {
@@ -25,6 +29,18 @@ namespace ESM
             if (it == locked->end())
                 it = locked->emplace(id).first;
             return &*it;
+        }
+
+        void addHex(unsigned char value, std::string& result)
+        {
+            const std::size_t size = 2 + getHexIntegralSize(value);
+            const std::size_t shift = result.size();
+            result.resize(shift + size);
+            result[shift] = '\\';
+            result[shift + 1] = 'x';
+            const auto [end, ec] = std::to_chars(result.data() + shift + 2, result.data() + result.size(), value, 16);
+            if (ec != std::errc())
+                throw std::system_error(std::make_error_code(ec));
         }
     }
 
@@ -60,20 +76,43 @@ namespace ESM
 
     std::ostream& operator<<(std::ostream& stream, StringRefId value)
     {
-        stream << '"';
-        for (char c : *value.mValue)
-            if (std::isprint(c) && c != '\t' && c != '\n' && c != '\r')
-                stream << c;
-            else
-                stream << "\\x" << std::hex << std::uppercase << static_cast<unsigned>(static_cast<unsigned char>(c));
-        return stream << '"';
+        return stream << value.toDebugString();
     }
 
     std::string StringRefId::toDebugString() const
     {
-        std::ostringstream stream;
-        stream << *this;
-        return stream.str();
+        std::string result;
+        result.reserve(2 + mValue->size());
+        result.push_back('"');
+        const unsigned char* ptr = reinterpret_cast<const unsigned char*>(mValue->data());
+        const unsigned char* const end = reinterpret_cast<const unsigned char*>(mValue->data() + mValue->size());
+        while (ptr != end)
+        {
+            if (Utf8Stream::isAscii(*ptr))
+            {
+                if (std::isprint(*ptr) && *ptr != '\t' && *ptr != '\n' && *ptr != '\r')
+                    result.push_back(*ptr);
+                else
+                    addHex(*ptr, result);
+                ++ptr;
+                continue;
+            }
+            const auto [octets, first] = Utf8Stream::getOctetCount(*ptr);
+            const auto [chr, next] = Utf8Stream::decode(ptr + 1, end, first, octets);
+            if (chr == Utf8Stream::sBadChar())
+            {
+                while (ptr != std::min(end, ptr + octets))
+                {
+                    addHex(*ptr, result);
+                    ++ptr;
+                }
+                continue;
+            }
+            result.append(ptr, next);
+            ptr = next;
+        }
+        result.push_back('"');
+        return result;
     }
 
     bool StringRefId::startsWith(std::string_view prefix) const
