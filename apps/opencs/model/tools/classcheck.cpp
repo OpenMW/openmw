@@ -50,23 +50,32 @@ void CSMTools::ClassCheckStage::perform(int stage, CSMDoc::Messages& messages)
         messages.add(id, "Description of a playable class is missing", "", CSMDoc::Message::Severity_Warning);
 
     // test for invalid attributes
-    for (int i = 0; i < 2; ++i)
-        if (class_.mData.mAttribute[i] == -1)
-        {
-            messages.add(id, "Attribute #" + std::to_string(i) + " is not set", "", CSMDoc::Message::Severity_Error);
-        }
-
-    if (class_.mData.mAttribute[0] == class_.mData.mAttribute[1] && class_.mData.mAttribute[0] != -1)
+    std::map<int, int> attributeCount;
+    for (size_t i = 0; i < class_.mData.mAttribute.size(); ++i)
     {
-        messages.add(id, "Same attribute is listed twice", "", CSMDoc::Message::Severity_Error);
+        int attribute = class_.mData.mAttribute[i];
+        if (attribute == -1)
+            messages.add(id, "Attribute #" + std::to_string(i) + " is not set", {}, CSMDoc::Message::Severity_Error);
+        else
+        {
+            auto it = attributeCount.find(attribute);
+            if (it == attributeCount.end())
+                attributeCount.emplace(attribute, 1);
+            else
+            {
+                if (it->second == 1)
+                    messages.add(id, "Same attribute is listed twice", {}, CSMDoc::Message::Severity_Error);
+                ++it->second;
+            }
+        }
     }
 
     // test for non-unique skill
     std::map<int, int> skills; // ID, number of occurrences
 
-    for (int i = 0; i < 5; ++i)
-        for (int i2 = 0; i2 < 2; ++i2)
-            ++skills[class_.mData.mSkills[i][i2]];
+    for (const auto& s : class_.mData.mSkills)
+        for (int skill : s)
+            ++skills[skill];
 
     for (auto& skill : skills)
         if (skill.second > 1)

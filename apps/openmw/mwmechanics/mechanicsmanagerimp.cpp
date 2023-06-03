@@ -191,10 +191,9 @@ namespace MWMechanics
         {
             const ESM::Class* class_ = esmStore.get<ESM::Class>().find(player->mClass);
 
-            for (int i = 0; i < 2; ++i)
+            for (int attribute : class_->mData.mAttribute)
             {
-                int attribute = class_->mData.mAttribute[i];
-                if (attribute >= 0 && attribute < 8)
+                if (attribute >= 0 && attribute < ESM::Attribute::Length)
                 {
                     creatureStats.setAttribute(attribute, creatureStats.getAttribute(attribute).getBase() + 10);
                 }
@@ -204,11 +203,11 @@ namespace MWMechanics
             {
                 int bonus = i == 0 ? 10 : 25;
 
-                for (int i2 = 0; i2 < 5; ++i2)
+                for (const auto& skills : class_->mData.mSkills)
                 {
-                    int index = class_->mData.mSkills[i2][i];
+                    int index = skills[i];
 
-                    if (index >= 0 && index < 27)
+                    if (index >= 0 && index < ESM::Skill::Length)
                     {
                         npcStats.getSkill(index).setBase(npcStats.getSkill(index).getBase() + bonus);
                     }

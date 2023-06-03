@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_CLAS_H
 #define OPENMW_ESM_CLAS_H
 
+#include <array>
 #include <string>
 
 #include "components/esm/defs.hpp"
@@ -33,9 +34,9 @@ namespace ESM
 
         struct CLDTstruct
         {
-            int mAttribute[2]; // Attributes that get class bonus
+            std::array<int, 2> mAttribute; // Attributes that get class bonus
             int mSpecialization; // 0 = Combat, 1 = Magic, 2 = Stealth
-            int mSkills[5][2]; // Minor and major skills.
+            std::array<std::array<int, 2>, 5> mSkills; // Minor and major skills.
             int mIsPlayable; // 0x0001 - Playable class
             int mServices;
 

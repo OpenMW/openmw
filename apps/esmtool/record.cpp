@@ -622,18 +622,15 @@ namespace EsmTool
         std::cout << "  Description: " << mData.mDescription << std::endl;
         std::cout << "  Playable: " << mData.mData.mIsPlayable << std::endl;
         std::cout << "  AI Services: " << Misc::StringUtils::format("0x%08X", mData.mData.mServices) << std::endl;
-        std::cout << "  Attribute1: " << attributeLabel(mData.mData.mAttribute[0]) << " (" << mData.mData.mAttribute[0]
-                  << ")" << std::endl;
-        std::cout << "  Attribute2: " << attributeLabel(mData.mData.mAttribute[1]) << " (" << mData.mData.mAttribute[1]
-                  << ")" << std::endl;
+        for (size_t i = 0; i < mData.mData.mAttribute.size(); ++i)
+            std::cout << "  Attribute" << (i + 1) << ": " << attributeLabel(mData.mData.mAttribute[i]) << " ("
+                      << mData.mData.mAttribute[i] << ")" << std::endl;
         std::cout << "  Specialization: " << specializationLabel(mData.mData.mSpecialization) << " ("
                   << mData.mData.mSpecialization << ")" << std::endl;
-        for (int i = 0; i != 5; i++)
-            std::cout << "  Minor Skill: " << skillLabel(mData.mData.mSkills[i][0]) << " (" << mData.mData.mSkills[i][0]
-                      << ")" << std::endl;
-        for (int i = 0; i != 5; i++)
-            std::cout << "  Major Skill: " << skillLabel(mData.mData.mSkills[i][1]) << " (" << mData.mData.mSkills[i][1]
-                      << ")" << std::endl;
+        for (const auto& skills : mData.mData.mSkills)
+            std::cout << "  Minor Skill: " << skillLabel(skills[0]) << " (" << skills[0] << ")" << std::endl;
+        for (const auto& skills : mData.mData.mSkills)
+            std::cout << "  Major Skill: " << skillLabel(skills[1]) << " (" << skills[1] << ")" << std::endl;
         std::cout << "  Deleted: " << mIsDeleted << std::endl;
     }
 

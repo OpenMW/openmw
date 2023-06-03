@@ -473,15 +473,14 @@ namespace MWGui
             klass.mRecordFlags = 0;
 
             std::vector<int> attributes = mCreateClassDialog->getFavoriteAttributes();
-            assert(attributes.size() == 2);
-            klass.mData.mAttribute[0] = attributes[0];
-            klass.mData.mAttribute[1] = attributes[1];
+            assert(attributes.size() == klass.mData.mAttribute.size());
+            std::copy(attributes.begin(), attributes.end(), klass.mData.mAttribute.begin());
 
             std::vector<ESM::Skill::SkillEnum> majorSkills = mCreateClassDialog->getMajorSkills();
             std::vector<ESM::Skill::SkillEnum> minorSkills = mCreateClassDialog->getMinorSkills();
-            assert(majorSkills.size() >= sizeof(klass.mData.mSkills) / sizeof(klass.mData.mSkills[0]));
-            assert(minorSkills.size() >= sizeof(klass.mData.mSkills) / sizeof(klass.mData.mSkills[0]));
-            for (size_t i = 0; i < sizeof(klass.mData.mSkills) / sizeof(klass.mData.mSkills[0]); ++i)
+            assert(majorSkills.size() >= klass.mData.mSkills.size());
+            assert(minorSkills.size() >= klass.mData.mSkills.size());
+            for (size_t i = 0; i < klass.mData.mSkills.size(); ++i)
             {
                 klass.mData.mSkills[i][1] = majorSkills[i];
                 klass.mData.mSkills[i][0] = minorSkills[i];

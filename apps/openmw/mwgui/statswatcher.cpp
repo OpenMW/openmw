@@ -124,10 +124,11 @@ namespace MWGui
                     = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(watchedRecord->mClass);
                 setValue("class", cls->mName);
 
-                MWBase::WindowManager::SkillList majorSkills(5);
-                MWBase::WindowManager::SkillList minorSkills(5);
+                size_t size = cls->mData.mSkills.size();
+                MWBase::WindowManager::SkillList majorSkills(size);
+                MWBase::WindowManager::SkillList minorSkills(size);
 
-                for (int i = 0; i < 5; ++i)
+                for (size_t i = 0; i < size; ++i)
                 {
                     minorSkills[i] = cls->mData.mSkills[i][0];
                     majorSkills[i] = cls->mData.mSkills[i][1];

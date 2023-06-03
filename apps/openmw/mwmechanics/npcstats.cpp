@@ -162,14 +162,14 @@ float MWMechanics::NpcStats::getSkillProgressRequirement(int skillIndex, const E
 
     float typeFactor = gmst.find("fMiscSkillBonus")->mValue.getFloat();
 
-    for (int i = 0; i < 5; ++i)
+    for (const auto& skills : class_.mData.mSkills)
     {
-        if (class_.mData.mSkills[i][0] == skillIndex)
+        if (skills[0] == skillIndex)
         {
             typeFactor = gmst.find("fMinorSkillBonus")->mValue.getFloat();
             break;
         }
-        else if (class_.mData.mSkills[i][1] == skillIndex)
+        else if (skills[1] == skillIndex)
         {
             typeFactor = gmst.find("fMajorSkillBonus")->mValue.getFloat();
             break;
@@ -235,15 +235,15 @@ void MWMechanics::NpcStats::increaseSkill(
 
     // is this a minor or major skill?
     int increase = gmst.find("iLevelupMiscMultAttriubte")->mValue.getInteger(); // Note: GMST has a typo
-    for (int k = 0; k < 5; ++k)
+    for (const auto& skills : class_.mData.mSkills)
     {
-        if (class_.mData.mSkills[k][0] == skillIndex)
+        if (skills[0] == skillIndex)
         {
             mLevelProgress += gmst.find("iLevelUpMinorMult")->mValue.getInteger();
             increase = gmst.find("iLevelUpMinorMultAttribute")->mValue.getInteger();
             break;
         }
-        else if (class_.mData.mSkills[k][1] == skillIndex)
+        else if (skills[1] == skillIndex)
         {
             mLevelProgress += gmst.find("iLevelUpMajorMult")->mValue.getInteger();
             increase = gmst.find("iLevelUpMajorMultAttribute")->mValue.getInteger();

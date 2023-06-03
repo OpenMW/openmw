@@ -13,18 +13,12 @@ namespace ESM
 
     int& Class::CLDTstruct::getSkill(int index, bool major)
     {
-        if (index < 0 || index >= 5)
-            throw std::logic_error("skill index out of range");
-
-        return mSkills[index][major ? 1 : 0];
+        return mSkills.at(index)[major ? 1 : 0];
     }
 
     int Class::CLDTstruct::getSkill(int index, bool major) const
     {
-        if (index < 0 || index >= 5)
-            throw std::logic_error("skill index out of range");
-
-        return mSkills[index][major ? 1 : 0];
+        return mSkills.at(index)[major ? 1 : 0];
     }
 
     void Class::load(ESMReader& esm, bool& isDeleted)
@@ -91,13 +85,12 @@ namespace ESM
         mName.clear();
         mDescription.clear();
 
-        mData.mAttribute[0] = mData.mAttribute[1] = 0;
+        mData.mAttribute.fill(0);
         mData.mSpecialization = 0;
         mData.mIsPlayable = 0;
         mData.mServices = 0;
 
-        for (int i = 0; i < 5; ++i)
-            for (int i2 = 0; i2 < 2; ++i2)
-                mData.mSkills[i][i2] = 0;
+        for (auto& skills : mData.mSkills)
+            skills.fill(0);
     }
 }
