@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_FACT_H
 #define OPENMW_ESM_FACT_H
 
+#include <array>
 #include <map>
 #include <string>
 
@@ -45,12 +46,12 @@ namespace ESM
         struct FADTstruct
         {
             // Which attributes we like
-            int mAttribute[2];
+            std::array<int, 2> mAttribute;
 
-            RankData mRankData[10];
+            std::array<RankData, 10> mRankData;
 
-            int mSkills[7]; // IDs of skills this faction require
-                            // Each element will either contain an Skill index, or -1.
+            std::array<int, 7> mSkills; // IDs of skills this faction require
+                                        // Each element will either contain an Skill index, or -1.
 
             int mIsHidden; // 1 - hidden from player
 

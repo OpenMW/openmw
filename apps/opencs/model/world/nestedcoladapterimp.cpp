@@ -1186,13 +1186,9 @@ namespace CSMWorld
 
     QVariant FactionRanksAdapter::getData(const Record<ESM::Faction>& record, int subRowIndex, int subColIndex) const
     {
-        ESM::Faction faction = record.get();
+        const ESM::Faction& faction = record.get();
 
-        if (subRowIndex < 0
-            || subRowIndex >= static_cast<int>(sizeof(faction.mData.mRankData) / sizeof(faction.mData.mRankData[0])))
-            throw std::runtime_error("index out of range");
-
-        auto& rankData = faction.mData.mRankData[subRowIndex];
+        const auto& rankData = faction.mData.mRankData.at(subRowIndex);
 
         switch (subColIndex)
         {
@@ -1218,11 +1214,7 @@ namespace CSMWorld
     {
         ESM::Faction faction = record.get();
 
-        if (subRowIndex < 0
-            || subRowIndex >= static_cast<int>(sizeof(faction.mData.mRankData) / sizeof(faction.mData.mRankData[0])))
-            throw std::runtime_error("index out of range");
-
-        auto& rankData = faction.mData.mRankData[subRowIndex];
+        auto& rankData = faction.mData.mRankData.at(subRowIndex);
 
         switch (subColIndex)
         {

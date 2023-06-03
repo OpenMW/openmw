@@ -382,17 +382,16 @@ void MWMechanics::NpcStats::setCrimeId(int id)
 
 bool MWMechanics::NpcStats::hasSkillsForRank(const ESM::RefId& factionId, int rank) const
 {
-    if (rank < 0 || rank >= 10)
-        throw std::runtime_error("rank index out of range");
-
     const ESM::Faction& faction = *MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionId);
+
+    const ESM::RankData& rankData = faction.mData.mRankData.at(rank);
 
     std::vector<int> skills;
 
-    for (int i = 0; i < 7; ++i)
+    for (int id : faction.mData.mSkills)
     {
-        if (faction.mData.mSkills[i] != -1)
-            skills.push_back(static_cast<int>(getSkill(faction.mData.mSkills[i]).getBase()));
+        if (id != -1)
+            skills.push_back(static_cast<int>(getSkill(id).getBase()));
     }
 
     if (skills.empty())
@@ -401,8 +400,6 @@ bool MWMechanics::NpcStats::hasSkillsForRank(const ESM::RefId& factionId, int ra
     std::sort(skills.begin(), skills.end());
 
     std::vector<int>::const_reverse_iterator iter = skills.rbegin();
-
-    const ESM::RankData& rankData = faction.mData.mRankData[rank];
 
     if (*iter < rankData.mPrimarySkill)
         return false;

@@ -775,14 +775,13 @@ namespace EsmTool
     {
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Hidden: " << mData.mData.mIsHidden << std::endl;
-        std::cout << "  Attribute1: " << attributeLabel(mData.mData.mAttribute[0]) << " (" << mData.mData.mAttribute[0]
-                  << ")" << std::endl;
-        std::cout << "  Attribute2: " << attributeLabel(mData.mData.mAttribute[1]) << " (" << mData.mData.mAttribute[1]
-                  << ")" << std::endl;
+        for (size_t i = 0; i < mData.mData.mAttribute.size(); ++i)
+            std::cout << "  Attribute" << (i + 1) << ": " << attributeLabel(mData.mData.mAttribute[i]) << " ("
+                      << mData.mData.mAttribute[i] << ")" << std::endl;
         for (int skill : mData.mData.mSkills)
             if (skill != -1)
                 std::cout << "  Skill: " << skillLabel(skill) << " (" << skill << ")" << std::endl;
-        for (int i = 0; i != 10; i++)
+        for (int i = 0; i != mData.mData.mRankData.size(); i++)
             if (!mData.mRanks[i].empty())
             {
                 std::cout << "  Rank: " << mData.mRanks[i] << std::endl;

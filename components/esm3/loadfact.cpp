@@ -7,20 +7,14 @@
 
 namespace ESM
 {
-    int& Faction::FADTstruct::getSkill(int index, bool ignored)
+    int& Faction::FADTstruct::getSkill(int index, bool)
     {
-        if (index < 0 || index >= 7)
-            throw std::logic_error("skill index out of range");
-
-        return mSkills[index];
+        return mSkills.at(index);
     }
 
-    int Faction::FADTstruct::getSkill(int index, bool ignored) const
+    int Faction::FADTstruct::getSkill(int index, bool) const
     {
-        if (index < 0 || index >= 7)
-            throw std::logic_error("skill index out of range");
-
-        return mSkills[index];
+        return mSkills.at(index);
     }
 
     void Faction::load(ESMReader& esm, bool& isDeleted)
@@ -115,10 +109,10 @@ namespace ESM
     {
         mRecordFlags = 0;
         mName.clear();
-        mData.mAttribute[0] = mData.mAttribute[1] = 0;
+        mData.mAttribute.fill(0);
         mData.mIsHidden = 0;
 
-        for (int i = 0; i < 10; ++i)
+        for (size_t i = 0; i < mData.mRankData.size(); ++i)
         {
             mData.mRankData[i].mAttribute1 = mData.mRankData[i].mAttribute2 = 0;
             mData.mRankData[i].mPrimarySkill = mData.mRankData[i].mFavouredSkill = 0;
@@ -127,8 +121,7 @@ namespace ESM
             mRanks[i].clear();
         }
 
-        for (int i = 0; i < 7; ++i)
-            mData.mSkills[i] = 0;
+        mData.mSkills.fill(0);
 
         mReactions.clear();
     }
