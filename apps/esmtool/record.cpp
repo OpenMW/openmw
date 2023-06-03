@@ -1100,8 +1100,8 @@ namespace EsmTool
             std::cout << "    Luck: " << (int)mData.mNpdt.mLuck << std::endl;
 
             std::cout << "  Skills:" << std::endl;
-            for (int i = 0; i != ESM::Skill::Length; i++)
-                std::cout << "    " << skillLabel(i) << ": " << (int)(mData.mNpdt.mSkills[i]) << std::endl;
+            for (size_t i = 0; i != mData.mNpdt.mSkills.size(); i++)
+                std::cout << "    " << skillLabel(i) << ": " << int(mData.mNpdt.mSkills[i]) << std::endl;
 
             std::cout << "  Health: " << mData.mNpdt.mHealth << std::endl;
             std::cout << "  Magicka: " << mData.mNpdt.mMana << std::endl;

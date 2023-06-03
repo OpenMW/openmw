@@ -314,7 +314,7 @@ namespace MWClass
             {
                 gold = ref->mBase->mNpdt.mGold;
 
-                for (unsigned int i = 0; i < ESM::Skill::Length; ++i)
+                for (size_t i = 0; i < ref->mBase->mNpdt.mSkills.size(); ++i)
                     data->mNpcStats.getSkill(i).setBase(ref->mBase->mNpdt.mSkills[i]);
 
                 data->mNpcStats.setAttribute(ESM::Attribute::Strength, ref->mBase->mNpdt.mStrength);

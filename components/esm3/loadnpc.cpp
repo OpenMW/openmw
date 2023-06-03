@@ -215,8 +215,7 @@ namespace ESM
         mNpdt.mLevel = 0;
         mNpdt.mStrength = mNpdt.mIntelligence = mNpdt.mWillpower = mNpdt.mAgility = mNpdt.mSpeed = mNpdt.mEndurance
             = mNpdt.mPersonality = mNpdt.mLuck = 0;
-        for (int i = 0; i < Skill::Length; ++i)
-            mNpdt.mSkills[i] = 0;
+        mNpdt.mSkills.fill(0);
         mNpdt.mReputation = 0;
         mNpdt.mHealth = mNpdt.mMana = mNpdt.mFatigue = 0;
         mNpdt.mDisposition = 0;

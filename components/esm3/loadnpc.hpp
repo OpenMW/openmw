@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_NPC_H
 #define OPENMW_ESM_NPC_H
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -82,7 +83,7 @@ namespace ESM
             unsigned char mStrength, mIntelligence, mWillpower, mAgility, mSpeed, mEndurance, mPersonality, mLuck;
 
             // mSkill can grow up to 200, it must be unsigned
-            unsigned char mSkills[Skill::Length];
+            std::array<unsigned char, Skill::Length> mSkills;
 
             char mUnknown1;
             unsigned short mHealth, mMana, mFatigue;

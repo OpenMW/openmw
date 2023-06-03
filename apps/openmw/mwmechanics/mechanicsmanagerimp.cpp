@@ -128,7 +128,7 @@ namespace MWMechanics
         creatureStats.getSpells().clear(true);
         creatureStats.getActiveSpells().clear(ptr);
 
-        for (int i = 0; i < 27; ++i)
+        for (size_t i = 0; i < player->mNpdt.mSkills.size(); ++i)
             npcStats.getSkill(i).setBase(player->mNpdt.mSkills[i]);
 
         creatureStats.setAttribute(ESM::Attribute::Strength, player->mNpdt.mStrength);
