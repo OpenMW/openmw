@@ -25,11 +25,11 @@ namespace ESSImport
             faction.mReputation = essFaction.mReputation;
             out.mObject.mNpcStats.mFactions[ESM::RefId::stringRefId(essFaction.mFactionName.toString())] = faction;
         }
-        for (int i = 0; i < 3; ++i)
+        for (size_t i = 0; i < out.mObject.mNpcStats.mSpecIncreases.size(); ++i)
             out.mObject.mNpcStats.mSpecIncreases[i] = pcdt.mPNAM.mSpecIncreases[i];
-        for (int i = 0; i < 8; ++i)
+        for (size_t i = 0; i < out.mObject.mNpcStats.mSkillIncrease.size(); ++i)
             out.mObject.mNpcStats.mSkillIncrease[i] = pcdt.mPNAM.mSkillIncreases[i];
-        for (int i = 0; i < 27; ++i)
+        for (size_t i = 0; i < out.mObject.mNpcStats.mSkills.size(); ++i)
             out.mObject.mNpcStats.mSkills[i].mProgress = pcdt.mPNAM.mSkillProgress[i];
         out.mObject.mNpcStats.mLevelProgress = pcdt.mPNAM.mLevelProgress;
 

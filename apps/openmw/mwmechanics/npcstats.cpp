@@ -470,7 +470,7 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
 
     state.mDisposition = mDisposition;
 
-    for (int i = 0; i < ESM::Skill::Length; ++i)
+    for (size_t i = 0; i < state.mSkills.size(); ++i)
         mSkill[i].writeState(state.mSkills[i]);
 
     state.mIsWerewolf = mIsWerewolf;
@@ -489,10 +489,10 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
     state.mWerewolfKills = mWerewolfKills;
     state.mLevelProgress = mLevelProgress;
 
-    for (int i = 0; i < ESM::Attribute::Length; ++i)
+    for (size_t i = 0; i < state.mSkillIncrease.size(); ++i)
         state.mSkillIncrease[i] = mSkillIncreases[i];
 
-    for (int i = 0; i < 3; ++i)
+    for (size_t i = 0; i < state.mSpecIncreases.size(); ++i)
         state.mSpecIncreases[i] = mSpecIncreases[i];
 
     std::copy(mUsedIds.begin(), mUsedIds.end(), std::back_inserter(state.mUsedIds));
@@ -523,7 +523,7 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
 
     mDisposition = state.mDisposition;
 
-    for (int i = 0; i < ESM::Skill::Length; ++i)
+    for (size_t i = 0; i < state.mSkills.size(); ++i)
         mSkill[i].readState(state.mSkills[i]);
 
     mIsWerewolf = state.mIsWerewolf;
@@ -534,10 +534,10 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
     mWerewolfKills = state.mWerewolfKills;
     mLevelProgress = state.mLevelProgress;
 
-    for (int i = 0; i < ESM::Attribute::Length; ++i)
+    for (size_t i = 0; i < state.mSkillIncrease.size(); ++i)
         mSkillIncreases[i] = state.mSkillIncrease[i];
 
-    for (int i = 0; i < 3; ++i)
+    for (size_t i = 0; i < state.mSpecIncreases.size(); ++i)
         mSpecIncreases[i] = state.mSpecIncreases[i];
 
     for (auto iter(state.mUsedIds.begin()); iter != state.mUsedIds.end(); ++iter)
