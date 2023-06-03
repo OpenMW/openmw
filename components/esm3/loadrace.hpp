@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_RACE_H
 #define OPENMW_ESM_RACE_H
 
+#include <array>
 #include <string>
 
 #include "components/esm/defs.hpp"
@@ -53,10 +54,10 @@ namespace ESM
         struct RADTstruct
         {
             // List of skills that get a bonus
-            SkillBonus mBonus[7];
+            std::array<SkillBonus, 7> mBonus;
 
             // Attribute values for male/female
-            MaleFemale mAttributeValues[8];
+            std::array<MaleFemale, 8> mAttributeValues;
 
             // The actual eye level height (in game units) is (probably) given
             // as 'height' times 128. This has not been tested yet.

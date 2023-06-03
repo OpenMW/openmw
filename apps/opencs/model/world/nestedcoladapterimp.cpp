@@ -825,8 +825,7 @@ namespace CSMWorld
     {
         ESM::Race race = record.get();
 
-        if (subRowIndex < 0
-            || subRowIndex >= static_cast<int>(sizeof(race.mData.mBonus) / sizeof(race.mData.mBonus[0])))
+        if (subRowIndex < 0 || static_cast<size_t>(subRowIndex) >= race.mData.mBonus.size())
             throw std::runtime_error("index out of range");
 
         switch (subColIndex)
@@ -845,8 +844,7 @@ namespace CSMWorld
     {
         ESM::Race race = record.get();
 
-        if (subRowIndex < 0
-            || subRowIndex >= static_cast<int>(sizeof(race.mData.mBonus) / sizeof(race.mData.mBonus[0])))
+        if (subRowIndex < 0 || static_cast<size_t>(subRowIndex) >= race.mData.mBonus.size())
             throw std::runtime_error("index out of range");
 
         switch (subColIndex)
@@ -871,8 +869,7 @@ namespace CSMWorld
 
     int RaceSkillsBonusAdapter::getRowsCount(const Record<ESM::Race>& record) const
     {
-        // there are 7 skill bonuses
-        return static_cast<int>(sizeof(record.get().mData.mBonus) / sizeof(record.get().mData.mBonus[0]));
+        return record.get().mData.mBonus.size();
     }
 
     void CellListAdapter::addRow(Record<CSMWorld::Cell>& record, int position) const

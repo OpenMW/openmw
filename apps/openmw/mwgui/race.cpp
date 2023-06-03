@@ -412,20 +412,15 @@ namespace MWGui
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::Race* race = store.get<ESM::Race>().find(mCurrentRaceId);
-        int count = sizeof(race->mData.mBonus)
-            / sizeof(race->mData.mBonus[0]); // TODO: Find a portable macro for this ARRAYSIZE?
-        for (int i = 0; i < count; ++i)
+        for (const auto& bonus : race->mData.mBonus)
         {
-            int skillId = race->mData.mBonus[i].mSkill;
-            if (skillId < 0 || skillId > ESM::Skill::Length) // Skip unknown skill indexes
+            if (bonus.mSkill < 0 || bonus.mSkill >= ESM::Skill::Length) // Skip unknown skill indexes
                 continue;
 
-            skillWidget = mSkillList->createWidget<Widgets::MWSkill>(
-                "MW_StatNameValue", coord1, MyGUI::Align::Default, std::string("Skill") + MyGUI::utility::toString(i));
-            skillWidget->setSkillNumber(skillId);
-            skillWidget->setSkillValue(
-                Widgets::MWSkill::SkillValue(static_cast<float>(race->mData.mBonus[i].mBonus), 0.f));
-            ToolTips::createSkillToolTip(skillWidget, skillId);
+            skillWidget = mSkillList->createWidget<Widgets::MWSkill>("MW_StatNameValue", coord1, MyGUI::Align::Default);
+            skillWidget->setSkillId(ESM::Skill::SkillEnum(bonus.mSkill));
+            skillWidget->setSkillValue(Widgets::MWSkill::SkillValue(static_cast<float>(bonus.mBonus), 0.f));
+            ToolTips::createSkillToolTip(skillWidget, bonus.mSkill);
 
             mSkillItems.push_back(skillWidget);
 

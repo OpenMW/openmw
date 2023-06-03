@@ -201,14 +201,10 @@ namespace
             int raceBonus = 0;
             int specBonus = 0;
 
-            for (int raceSkillIndex = 0; raceSkillIndex < 7; ++raceSkillIndex)
-            {
-                if (race->mData.mBonus[raceSkillIndex].mSkill == skillIndex)
-                {
-                    raceBonus = race->mData.mBonus[raceSkillIndex].mBonus;
-                    break;
-                }
-            }
+            auto bonusIt = std::find_if(race->mData.mBonus.begin(), race->mData.mBonus.end(),
+                [skillIndex](const auto& bonus) { return bonus.mSkill == skillIndex; });
+            if (bonusIt != race->mData.mBonus.end())
+                raceBonus = bonusIt->mBonus;
 
             for (int k = 0; k < 5; ++k)
             {

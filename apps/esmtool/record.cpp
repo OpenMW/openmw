@@ -1188,7 +1188,7 @@ namespace EsmTool
 
             std::cout << (male ? "  Male:" : "  Female:") << std::endl;
 
-            for (int j = 0; j < 8; ++j)
+            for (int j = 0; j < ESM::Attribute::Length; ++j)
                 std::cout << "    " << sAttributeNames[j] << ": " << mData.mData.mAttributeValues[j].getValue(male)
                           << std::endl;
 
@@ -1196,11 +1196,11 @@ namespace EsmTool
             std::cout << "    Weight: " << mData.mData.mWeight.getValue(male) << std::endl;
         }
 
-        for (int i = 0; i != 7; i++)
+        for (const auto& bonus : mData.mData.mBonus)
             // Not all races have 7 skills.
-            if (mData.mData.mBonus[i].mSkill != -1)
-                std::cout << "  Skill: " << skillLabel(mData.mData.mBonus[i].mSkill) << " ("
-                          << mData.mData.mBonus[i].mSkill << ") = " << mData.mData.mBonus[i].mBonus << std::endl;
+            if (bonus.mSkill != -1)
+                std::cout << "  Skill: " << skillLabel(bonus.mSkill) << " (" << bonus.mSkill << ") = " << bonus.mBonus
+                          << std::endl;
 
         for (const auto& power : mData.mPowers.mList)
             std::cout << "  Power: " << power << std::endl;

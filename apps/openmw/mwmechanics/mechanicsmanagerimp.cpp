@@ -148,7 +148,7 @@ namespace MWMechanics
 
             bool male = (player->mFlags & ESM::NPC::Female) == 0;
 
-            for (int i = 0; i < 8; ++i)
+            for (int i = 0; i < ESM::Attribute::Length; ++i)
             {
                 const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
 
@@ -159,12 +159,10 @@ namespace MWMechanics
             {
                 int bonus = 0;
 
-                for (int i2 = 0; i2 < 7; ++i2)
-                    if (race->mData.mBonus[i2].mSkill == i)
-                    {
-                        bonus = race->mData.mBonus[i2].mBonus;
-                        break;
-                    }
+                auto bonusIt = std::find_if(race->mData.mBonus.begin(), race->mData.mBonus.end(),
+                    [i](const auto& bonus) { return bonus.mSkill == i; });
+                if (bonusIt != race->mData.mBonus.end())
+                    bonus = bonusIt->mBonus;
 
                 npcStats.getSkill(i).setBase(5 + bonus);
             }

@@ -84,14 +84,14 @@ namespace ESM
 
         mPowers.mList.clear();
 
-        for (int i = 0; i < 7; ++i)
+        for (auto& bonus : mData.mBonus)
         {
-            mData.mBonus[i].mSkill = -1;
-            mData.mBonus[i].mBonus = 0;
+            bonus.mSkill = -1;
+            bonus.mBonus = 0;
         }
 
-        for (int i = 0; i < 8; ++i)
-            mData.mAttributeValues[i].mMale = mData.mAttributeValues[i].mFemale = 1;
+        for (auto& attribute : mData.mAttributeValues)
+            attribute.mMale = attribute.mFemale = 1;
 
         mData.mHeight.mMale = mData.mHeight.mFemale = 1;
         mData.mWeight.mMale = mData.mWeight.mFemale = 1;
