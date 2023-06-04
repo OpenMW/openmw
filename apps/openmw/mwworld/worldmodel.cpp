@@ -175,12 +175,27 @@ namespace MWWorld
     CellStore* WorldModel::findInterior(std::string_view name, bool forceLoad) const
     {
         const auto it = mInteriors.find(name);
+        CellStore* cellStore = nullptr;
+
         if (it == mInteriors.end())
-            return nullptr;
-        assert(it->second != nullptr);
-        if (forceLoad && it->second->getState() != CellStore::State_Loaded)
-            it->second->load();
-        return it->second;
+        {
+            if (const ESM::Cell* cell = mStore.get<ESM::Cell>().search(name))
+                cellStore = &emplaceCellStore(cell->mId, *cell, mStore, mReaders, mCells);
+            else if (const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().searchCellName(name))
+                cellStore = &emplaceCellStore(cell4->mId, *cell4, mStore, mReaders, mCells);
+            else
+                return nullptr;
+        }
+        else
+        {
+            assert(it->second != nullptr);
+            cellStore = it->second;
+        }
+
+        if (forceLoad && cellStore->getState() != CellStore::State_Loaded)
+            cellStore->load();
+
+        return cellStore;
     }
 
     CellStore& WorldModel::getInterior(std::string_view name, bool forceLoad) const
