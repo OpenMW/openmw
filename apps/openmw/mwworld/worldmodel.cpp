@@ -160,16 +160,26 @@ namespace MWWorld
 {
     CellStore& WorldModel::getExterior(ESM::ExteriorCellLocation location, bool forceLoad) const
     {
-        auto it = mExteriors.find(location);
-        if (it != mExteriors.end())
-            return *it->second;
-        Cell cell = createExteriorCell(location, mStore);
-        const ESM::RefId id = cell.getId();
-        CellStore& cellStore = emplaceCellStore(id, std::move(cell), mStore, mReaders, mCells);
-        mExteriors.emplace(location, &cellStore);
-        if (forceLoad && cellStore.getState() != CellStore::State_Loaded)
-            cellStore.load();
-        return cellStore;
+        const auto it = mExteriors.find(location);
+        CellStore* cellStore = nullptr;
+
+        if (it == mExteriors.end())
+        {
+            Cell cell = createExteriorCell(location, mStore);
+            const ESM::RefId id = cell.getId();
+            cellStore = &emplaceCellStore(id, std::move(cell), mStore, mReaders, mCells);
+            mExteriors.emplace(location, cellStore);
+        }
+        else
+        {
+            assert(it->second != nullptr);
+            cellStore = it->second;
+        }
+
+        if (forceLoad && cellStore->getState() != CellStore::State_Loaded)
+            cellStore->load();
+
+        return *cellStore;
     }
 
     CellStore* WorldModel::findInterior(std::string_view name, bool forceLoad) const
