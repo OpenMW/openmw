@@ -159,6 +159,10 @@ namespace MWLua
                 [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getRefData().getPosition().asVec3(); });
             objectT["rotation"] = sol::readonly_property(
                 [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getRefData().getPosition().asRotationVec3(); });
+            objectT["startingPosition"] = sol::readonly_property(
+                [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getCellRef().getPosition().asVec3(); });
+            objectT["startingRotation"] = sol::readonly_property(
+                [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getCellRef().getPosition().asRotationVec3(); });
             objectT["getBoundingBox"] = [](const ObjectT& o) {
                 MWRender::RenderingManager* renderingManager
                     = MWBase::Environment::get().getWorld()->getRenderingManager();
