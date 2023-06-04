@@ -356,16 +356,9 @@ namespace MWWorld
 
             MWBase::World& world = *MWBase::Environment::get().getWorld();
 
-            try
-            {
-                mCellStore = &MWBase::Environment::get().getWorldModel()->getCell(player.mCellId);
-            }
-            catch (...)
-            {
-                Log(Debug::Warning) << "Warning: Player cell '" << player.mCellId << "' no longer exists";
-                // Cell no longer exists. The loader will have to choose a default cell.
-                mCellStore = nullptr;
-            }
+            mCellStore = MWBase::Environment::get().getWorldModel()->findCell(player.mCellId);
+            if (mCellStore == nullptr)
+                Log(Debug::Warning) << "Player cell " << player.mCellId << " no longer exists";
 
             if (!player.mBirthsign.empty())
             {

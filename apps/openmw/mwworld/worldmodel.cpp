@@ -1,6 +1,8 @@
 #include "worldmodel.hpp"
 
 #include <algorithm>
+#include <cassert>
+#include <optional>
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/defs.hpp>
@@ -29,6 +31,58 @@ namespace MWWorld
                 .emplace(std::piecewise_construct, std::forward_as_tuple(id),
                     std::forward_as_tuple(Cell(cell), store, readers))
                 .first->second;
+        }
+
+        const ESM::Cell* createEsmCell(ESM::ExteriorCellLocation location, ESMStore& store)
+        {
+            ESM::Cell record;
+            record.mData.mFlags = ESM::Cell::HasWater;
+            record.mData.mX = location.mX;
+            record.mData.mY = location.mY;
+            record.mWater = 0;
+            record.mMapColor = 0;
+            record.updateId();
+            return store.insert(record);
+        }
+
+        const ESM4::Cell* createEsm4Cell(ESM::ExteriorCellLocation location, ESMStore& store)
+        {
+            ESM4::Cell record;
+            record.mParent = location.mWorldspace;
+            record.mX = location.mX;
+            record.mY = location.mY;
+            record.mCellFlags = 0;
+            return store.insert(record);
+        }
+
+        Cell createExteriorCell(ESM::ExteriorCellLocation location, ESMStore& store)
+        {
+            if (ESM::isEsm4Ext(location.mWorldspace))
+            {
+                if (store.get<ESM4::World>().search(location.mWorldspace) == nullptr)
+                    throw std::runtime_error(
+                        "Exterior ESM4 world is not found: " + location.mWorldspace.toDebugString());
+                const ESM4::Cell* cell = store.get<ESM4::Cell>().searchExterior(location);
+                if (cell == nullptr)
+                    cell = createEsm4Cell(location, store);
+                assert(cell != nullptr);
+                return MWWorld::Cell(*cell);
+            }
+
+            const ESM::Cell* cell = store.get<ESM::Cell>().search(location.mX, location.mY);
+            if (cell == nullptr)
+                cell = createEsmCell(location, store);
+            assert(cell != nullptr);
+            return Cell(*cell);
+        }
+
+        std::optional<Cell> createCell(ESM::RefId id, const ESMStore& store)
+        {
+            if (const ESM4::Cell* cell = store.get<ESM4::Cell>().search(id))
+                return Cell(*cell);
+            if (const ESM::Cell* cell = store.get<ESM::Cell>().search(id))
+                return Cell(*cell);
+            return std::nullopt;
         }
     }
 }
@@ -102,167 +156,120 @@ MWWorld::WorldModel::WorldModel(MWWorld::ESMStore& store, ESM::ReadersCache& rea
 {
 }
 
-MWWorld::CellStore& MWWorld::WorldModel::getExterior(ESM::ExteriorCellLocation cellIndex, bool forceLoad)
+namespace MWWorld
 {
-    std::map<ESM::ExteriorCellLocation, CellStore*>::iterator result;
-
-    result = mExteriors.find(cellIndex);
-
-    if (result == mExteriors.end())
+    CellStore& WorldModel::getExterior(ESM::ExteriorCellLocation location, bool forceLoad) const
     {
-        if (!ESM::isEsm4Ext(cellIndex.mWorldspace))
-        {
-            const ESM::Cell* cell = mStore.get<ESM::Cell>().search(cellIndex.mX, cellIndex.mY);
+        auto it = mExteriors.find(location);
+        if (it != mExteriors.end())
+            return *it->second;
+        Cell cell = createExteriorCell(location, mStore);
+        const ESM::RefId id = cell.getId();
+        CellStore& cellStore = emplaceCellStore(id, std::move(cell), mStore, mReaders, mCells);
+        mExteriors.emplace(location, &cellStore);
+        if (forceLoad && cellStore.getState() != CellStore::State_Loaded)
+            cellStore.load();
+        return cellStore;
+    }
 
-            if (cell == nullptr)
-            {
-                // Cell isn't predefined. Make one on the fly.
-                ESM::Cell record;
-                record.mData.mFlags = ESM::Cell::HasWater;
-                record.mData.mX = cellIndex.mX;
-                record.mData.mY = cellIndex.mY;
-                record.mWater = 0;
-                record.mMapColor = 0;
-                record.updateId();
+    CellStore* WorldModel::findInterior(std::string_view name, bool forceLoad) const
+    {
+        const auto it = mInteriors.find(name);
+        if (it == mInteriors.end())
+            return nullptr;
+        assert(it->second != nullptr);
+        if (forceLoad && it->second->getState() != CellStore::State_Loaded)
+            it->second->load();
+        return it->second;
+    }
 
-                cell = mStore.insert(record);
-            }
+    CellStore& WorldModel::getInterior(std::string_view name, bool forceLoad) const
+    {
+        CellStore* const cellStore = findInterior(name, forceLoad);
+        if (cellStore == nullptr)
+            throw std::runtime_error("Interior cell is not found: '" + std::string(name) + "'");
+        return *cellStore;
+    }
 
-            CellStore* cellStore = &emplaceCellStore(cell->mId, *cell, mStore, mReaders, mCells);
-            result = mExteriors.emplace(cellIndex, cellStore).first;
-        }
+    CellStore* WorldModel::findCell(ESM::RefId id, bool forceLoad) const
+    {
+        auto it = mCells.find(id);
+        if (it != mCells.end())
+            return &it->second;
+
+        if (const auto* exteriorId = id.getIf<ESM::ESM3ExteriorCellRefId>())
+            return &getExterior(
+                ESM::ExteriorCellLocation(exteriorId->getX(), exteriorId->getY(), ESM::Cell::sDefaultWorldspaceId),
+                forceLoad);
+
+        std::optional<Cell> cell = createCell(id, mStore);
+        if (!cell.has_value())
+            return nullptr;
+
+        CellStore& cellStore = emplaceCellStore(id, std::move(*cell), mStore, mReaders, mCells);
+
+        if (cellStore.isExterior())
+            mExteriors.emplace(ESM::ExteriorCellLocation(cellStore.getCell()->getGridX(),
+                                   cellStore.getCell()->getGridY(), cellStore.getCell()->getWorldSpace()),
+                &cellStore);
         else
+            mInteriors.emplace(cellStore.getCell()->getNameId(), &cellStore);
+
+        if (forceLoad && cellStore.getState() != CellStore::State_Loaded)
+            cellStore.load();
+
+        return &cellStore;
+    }
+
+    CellStore& WorldModel::getCell(ESM::RefId id, bool forceLoad) const
+    {
+        CellStore* const result = findCell(id, forceLoad);
+        if (result == nullptr)
+            throw std::runtime_error("Cell does not exist: " + id.toDebugString());
+        return *result;
+    }
+
+    CellStore* WorldModel::findCell(std::string_view name, bool forceLoad) const
+    {
+        if (CellStore* const cellStore = findInterior(name, forceLoad))
+            return cellStore;
+
+        // try named exteriors
+        const ESM::Cell* cell = mStore.get<ESM::Cell>().searchExtByName(name);
+
+        if (cell == nullptr)
         {
-            const Store<ESM4::Cell>& cell4Store = mStore.get<ESM4::Cell>();
-            bool exteriorExists = mStore.get<ESM4::World>().search(cellIndex.mWorldspace) != nullptr;
-            const ESM4::Cell* cell = cell4Store.searchExterior(cellIndex);
-            if (!exteriorExists)
-                throw std::runtime_error("Exterior ESM4 world is not found: " + cellIndex.mWorldspace.toDebugString());
-            if (cell == nullptr)
-            {
-                ESM4::Cell record;
-                record.mParent = cellIndex.mWorldspace;
-                record.mX = cellIndex.mX;
-                record.mY = cellIndex.mY;
-                // Other ESM4::Cell members use default values from class definition.
-                cell = mStore.insert(record);
-            }
-            CellStore* cellStore = &emplaceCellStore(cell->mId, *cell, mStore, mReaders, mCells);
-            result = mExteriors.emplace(cellIndex, cellStore).first;
+            // treat "Wilderness" like an empty string
+            static const std::string& defaultName
+                = mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
+            if (Misc::StringUtils::ciEqual(name, defaultName))
+                cell = mStore.get<ESM::Cell>().searchExtByName({});
         }
-    }
-    if (forceLoad && result->second->getState() != CellStore::State_Loaded)
-    {
-        result->second->load();
-    }
 
-    return *result->second;
-}
-
-MWWorld::CellStore* MWWorld::WorldModel::getInteriorOrNull(std::string_view name)
-{
-    auto result = mInteriors.find(name);
-    if (result == mInteriors.end())
-    {
-        CellStore* newCellStore = nullptr;
-        if (const ESM::Cell* cell = mStore.get<ESM::Cell>().search(name))
-            newCellStore = &emplaceCellStore(cell->mId, *cell, mStore, mReaders, mCells);
-        else if (const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().searchCellName(name))
-            newCellStore = &emplaceCellStore(cell4->mId, *cell4, mStore, mReaders, mCells);
-        if (!newCellStore)
-            return nullptr; // Cell not found
-        result = mInteriors.emplace(name, newCellStore).first;
-    }
-    return result->second;
-}
-
-MWWorld::CellStore& MWWorld::WorldModel::getInterior(std::string_view name, bool forceLoad)
-{
-    CellStore* res = getInteriorOrNull(name);
-    if (res == nullptr)
-        throw std::runtime_error("Interior not found: '" + std::string(name) + "'");
-    if (forceLoad && res->getState() != CellStore::State_Loaded)
-        res->load();
-    return *res;
-}
-
-MWWorld::CellStore& MWWorld::WorldModel::getCell(const ESM::RefId& id, bool forceLoad)
-{
-    auto result = mCells.find(id);
-    if (result != mCells.end())
-        return result->second;
-
-    if (const auto* exteriorId = id.getIf<ESM::ESM3ExteriorCellRefId>())
-        return getExterior(
-            ESM::ExteriorCellLocation(exteriorId->getX(), exteriorId->getY(), ESM::Cell::sDefaultWorldspaceId),
-            forceLoad);
-
-    const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().search(id);
-    CellStore* newCellStore = nullptr;
-    if (!cell4)
-    {
-        const ESM::Cell* cell = mStore.get<ESM::Cell>().find(id);
-        newCellStore = &emplaceCellStore(cell->mId, *cell, mStore, mReaders, mCells);
-    }
-    else
-    {
-        newCellStore = &emplaceCellStore(cell4->mId, *cell4, mStore, mReaders, mCells);
-    }
-    if (newCellStore->getCell()->isExterior())
-    {
-        std::pair<int, int> coord
-            = std::make_pair(newCellStore->getCell()->getGridX(), newCellStore->getCell()->getGridY());
-        ESM::ExteriorCellLocation extIndex = { coord.first, coord.second, newCellStore->getCell()->getWorldSpace() };
-        mExteriors.emplace(extIndex, newCellStore);
-    }
-    else
-    {
-        mInteriors.emplace(newCellStore->getCell()->getNameId(), newCellStore);
-    }
-    if (forceLoad && newCellStore->getState() != CellStore::State_Loaded)
-    {
-        newCellStore->load();
-    }
-    return *newCellStore;
-}
-
-MWWorld::CellStore& MWWorld::WorldModel::getCell(std::string_view name, bool forceLoad)
-{
-    if (CellStore* res = getInteriorOrNull(name)) // first try interiors
-    {
-        if (forceLoad && res->getState() != CellStore::State_Loaded)
-            res->load();
-        return *res;
-    }
-
-    // try named exteriors
-    const ESM::Cell* cell = mStore.get<ESM::Cell>().searchExtByName(name);
-
-    if (!cell)
-    {
-        // treat "Wilderness" like an empty string
-        static const std::string& defaultName
-            = mStore.get<ESM::GameSetting>().find("sDefaultCellname")->mValue.getString();
-        if (Misc::StringUtils::ciEqual(name, defaultName))
-            cell = mStore.get<ESM::Cell>().searchExtByName({});
-    }
-    if (!cell)
-    {
-        // now check for regions
-        for (const ESM::Region& region : mStore.get<ESM::Region>())
+        if (cell == nullptr)
         {
-            if (Misc::StringUtils::ciEqual(name, region.mName))
-            {
-                cell = mStore.get<ESM::Cell>().searchExtByRegion(region.mId);
-                break;
-            }
+            // now check for regions
+            const Store<ESM::Region>& regions = mStore.get<ESM::Region>();
+            const auto region = std::find_if(regions.begin(), regions.end(),
+                [&](const ESM::Region& v) { return Misc::StringUtils::ciEqual(name, v.mName); });
+            if (region != regions.end())
+                cell = mStore.get<ESM::Cell>().searchExtByRegion(region->mId);
         }
-    }
-    if (!cell)
-        throw std::runtime_error(std::string("Can't find cell with name ") + std::string(name));
 
-    return getExterior(
-        ESM::ExteriorCellLocation(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId), forceLoad);
+        if (cell == nullptr)
+            return nullptr;
+
+        return &getExterior(
+            ESM::ExteriorCellLocation(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId), forceLoad);
+    }
+
+    CellStore& WorldModel::getCell(std::string_view name, bool forceLoad) const
+    {
+        CellStore* const result = findCell(name, forceLoad);
+        if (result == nullptr)
+            throw std::runtime_error(std::string("Can't find cell with name ") + std::string(name));
+        return *result;
+    }
 }
 
 MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name)
@@ -383,17 +390,7 @@ public:
 
     MWWorld::WorldModel& mWorldModel;
 
-    MWWorld::CellStore* getCellStore(const ESM::RefId& cellId) override
-    {
-        try
-        {
-            return &mWorldModel.getCell(cellId);
-        }
-        catch (...)
-        {
-            return nullptr;
-        }
-    }
+    MWWorld::CellStore* getCellStore(const ESM::RefId& cellId) override { return mWorldModel.findCell(cellId); }
 };
 
 bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap)
@@ -403,16 +400,10 @@ bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type, cons
         ESM::CellState state;
         state.mId = reader.getCellId();
 
-        CellStore* cellStore = nullptr;
-
-        try
+        CellStore* const cellStore = findCell(state.mId);
+        if (cellStore == nullptr)
         {
-            cellStore = &getCell(state.mId);
-        }
-        catch (...)
-        {
-            // silently drop cells that don't exist anymore
-            Log(Debug::Warning) << "Warning: Dropping state for cell " << state.mId << " (cell no longer exists)";
+            Log(Debug::Warning) << "Dropping state for cell " << state.mId << " (cell no longer exists)";
             reader.skipRecord();
             return true;
         }

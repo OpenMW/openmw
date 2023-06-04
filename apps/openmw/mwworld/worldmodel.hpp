@@ -4,8 +4,8 @@
 #include <list>
 #include <map>
 #include <string>
+#include <string_view>
 #include <unordered_map>
-#include <variant>
 
 #include <components/esm/util.hpp>
 #include <components/misc/algorithm.hpp>
@@ -47,10 +47,19 @@ namespace MWWorld
 
         void clear();
 
-        CellStore& getExterior(ESM::ExteriorCellLocation cellIndex, bool forceLoad = true);
-        CellStore& getInterior(std::string_view name, bool forceLoad = true);
-        CellStore& getCell(std::string_view name, bool forceLoad = true); // interior or named exterior
-        CellStore& getCell(const ESM::RefId& Id, bool forceLoad = true);
+        CellStore& getExterior(ESM::ExteriorCellLocation location, bool forceLoad = true) const;
+
+        CellStore* findCell(ESM::RefId Id, bool forceLoad = true) const;
+
+        CellStore& getCell(ESM::RefId Id, bool forceLoad = true) const;
+
+        CellStore* findInterior(std::string_view name, bool forceLoad = true) const;
+
+        CellStore& getInterior(std::string_view name, bool forceLoad = true) const;
+
+        CellStore* findCell(std::string_view name, bool forceLoad = true) const;
+
+        CellStore& getCell(std::string_view name, bool forceLoad = true) const;
 
         Ptr getPtr(const ESM::RefId& name);
 
@@ -101,8 +110,6 @@ namespace MWWorld
         CellStore& getOrInsertCellStore(const ESM::Cell& cell);
 
         CellStore& insertCellStore(const ESM::Cell& cell);
-
-        CellStore* getInteriorOrNull(std::string_view name);
 
         Ptr getPtrAndCache(const ESM::RefId& name, CellStore& cellStore);
 
