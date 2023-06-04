@@ -103,6 +103,8 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 reader.get(mDoor.destPos);
                 if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV)
                     reader.get(mDoor.flags); // not in Obvlivion
+                else
+                    mDoor.flags = 0;
                 // std::cout << "REFR  dest door: " << formIdToString(mDoor.destDoor) << std::endl;// FIXME
                 break;
             }

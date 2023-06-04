@@ -60,7 +60,7 @@ namespace ESM4
     {
         FormId destDoor;
         ESM::Position destPos;
-        std::uint32_t flags; // 0x01 no alarm (only in TES5)
+        std::uint32_t flags = 0; // 0x01 no alarm (only in TES5)
     };
 
     struct RadioStationData
