@@ -106,8 +106,8 @@ namespace
                 const ESM::Faction* fact = factions.search(npcFaction);
                 if (!fact)
                 {
-                    Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent faction '"
-                                        << npc.mFaction << "', ignoring it.";
+                    Log(Debug::Verbose) << "NPC " << npc.mId << " (" << npc.mName << ") has nonexistent faction "
+                                        << npc.mFaction << ", ignoring it.";
                     npc.mFaction = ESM::RefId();
                     npc.mNpdt.mRank = 0;
                     changed = true;
@@ -118,8 +118,8 @@ namespace
             const ESM::Class* cls = classes.search(npcClass);
             if (!cls)
             {
-                Log(Debug::Verbose) << "NPC '" << npc.mId << "' (" << npc.mName << ") has nonexistent class '"
-                                    << npc.mClass << "', using '" << defaultCls << "' class as replacement.";
+                Log(Debug::Verbose) << "NPC " << npc.mId << " (" << npc.mName << ") has nonexistent class "
+                                    << npc.mClass << ", using " << defaultCls << " class as replacement.";
                 npc.mClass = defaultCls;
                 changed = true;
             }
@@ -141,8 +141,8 @@ namespace
             if (!item.mScript.empty() && !scripts.search(item.mScript))
             {
                 item.mScript = ESM::RefId();
-                Log(Debug::Verbose) << "Item '" << id << "' (" << item.mName << ") has nonexistent script '"
-                                    << item.mScript << "', ignoring it.";
+                Log(Debug::Verbose) << "Item " << id << " (" << item.mName << ") has nonexistent script "
+                                    << item.mScript << ", ignoring it.";
             }
         }
     }
@@ -623,8 +623,8 @@ namespace MWWorld
             auto first = std::remove_if(entry.second.mList.begin(), entry.second.mList.end(), [&](const auto& item) {
                 if (!find(item.mId))
                 {
-                    Log(Debug::Verbose) << "Leveled list '" << entry.first << "' has nonexistent object '" << item.mId
-                                        << "', ignoring it.";
+                    Log(Debug::Verbose) << "Leveled list " << entry.first << " has nonexistent object " << item.mId
+                                        << ", ignoring it.";
                     return true;
                 }
                 return false;
