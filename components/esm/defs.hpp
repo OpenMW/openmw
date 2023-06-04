@@ -332,17 +332,16 @@ namespace ESM
         return RecName & sEsm4RecnameFlag;
     }
 
-    inline FixedString<6> getRecNameString(ESM::RecNameInts recName)
+    constexpr inline FixedString<6> getRecNameString(ESM::RecNameInts recName)
     {
         ESM::FixedString<6> name;
-        name.assign("");
+        name.mData[5] = '\0';
+
         ESM::NAME fourCCName(recName & ~ESM::sEsm4RecnameFlag);
         for (int i = 0; i < 4; i++)
             name.mData[i] = fourCCName.mData[i];
-        if (ESM::isESM4Rec(recName))
-        {
-            name.mData[4] = '4';
-        }
+
+        name.mData[4] = ESM::isESM4Rec(recName) ? '4' : '\0';
         return name;
     }
 

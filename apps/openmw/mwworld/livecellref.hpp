@@ -142,7 +142,10 @@ namespace MWWorld
         std::string_view getTypeDescription() const override
         {
             if constexpr (ESM::isESM4Rec(X::sRecordId))
-                return ESM::getRecNameString(X::sRecordId).toStringView();
+            {
+                static constexpr ESM::FixedString<6> name = ESM::getRecNameString(X::sRecordId);
+                return name.toStringView();
+            }
             else
                 return X::getRecordType();
         }
