@@ -154,6 +154,7 @@ Ubuntu_GCC_asan:
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -g -O1 -fno-omit-frame-pointer -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak
     CMAKE_EXE_LINKER_FLAGS: -fsanitize=address -fsanitize=pointer-subtract -fsanitize=leak -fuse-ld=mold
+    BUILD_OPENMW_ONLY: 1
 
 Clang_Format:
   extends: .Ubuntu_Image
