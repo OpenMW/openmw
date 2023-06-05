@@ -168,11 +168,19 @@ namespace MWWorld
     {
         if constexpr (std::is_same_v<Id, ESM::RefId>)
         {
-            std::vector<const T*> results;
-            std::copy_if(mShared.begin(), mShared.end(), std::back_inserter(results),
-                [prefix](const T* item) { return item->mId.startsWith(prefix); });
-            if (!results.empty())
-                return results[Misc::Rng::rollDice(results.size(), prng)];
+            if (prefix.empty())
+            {
+                if (!mShared.empty())
+                    return mShared[Misc::Rng::rollDice(mShared.size(), prng)];
+            }
+            else
+            {
+                std::vector<const T*> results;
+                std::copy_if(mShared.begin(), mShared.end(), std::back_inserter(results),
+                    [prefix](const T* item) { return item->mId.startsWith(prefix); });
+                if (!results.empty())
+                    return results[Misc::Rng::rollDice(results.size(), prng)];
+            }
             return nullptr;
         }
         else

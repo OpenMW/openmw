@@ -155,16 +155,16 @@ namespace MWMechanics
                 creatureStats.setAttribute(i, male ? attribute.mMale : attribute.mFemale);
             }
 
-            for (int i = 0; i < 27; ++i)
+            for (const ESM::Skill& skill : esmStore.get<ESM::Skill>())
             {
                 int bonus = 0;
 
                 auto bonusIt = std::find_if(race->mData.mBonus.begin(), race->mData.mBonus.end(),
-                    [i](const auto& bonus) { return bonus.mSkill == i; });
+                    [&](const auto& bonus) { return bonus.mSkill == skill.mIndex; });
                 if (bonusIt != race->mData.mBonus.end())
                     bonus = bonusIt->mBonus;
 
-                npcStats.getSkill(i).setBase(5 + bonus);
+                npcStats.getSkill(skill.mIndex).setBase(5 + bonus);
             }
 
             for (const ESM::RefId& power : race->mPowers.mList)
@@ -217,14 +217,7 @@ namespace MWMechanics
             for (const ESM::Skill& skill : esmStore.get<ESM::Skill>())
             {
                 if (skill.mData.mSpecialization == class_->mData.mSpecialization)
-                {
-                    int index = skill.mIndex;
-
-                    if (index >= 0 && index < 27)
-                    {
-                        npcStats.getSkill(index).setBase(npcStats.getSkill(index).getBase() + 5);
-                    }
-                }
+                    npcStats.getSkill(skill.mIndex).setBase(npcStats.getSkill(skill.mIndex).getBase() + 5);
             }
         }
 

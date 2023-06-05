@@ -93,7 +93,7 @@ namespace MWGui
         for (int day = 0; day < mDays; ++day)
         {
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Skill* skill = skillStore.find(Misc::Rng::rollDice(ESM::Skill::Length, prng));
+            const ESM::Skill* skill = skillStore.searchRandom({}, prng);
             skills.insert(skill);
 
             MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill->mIndex);
