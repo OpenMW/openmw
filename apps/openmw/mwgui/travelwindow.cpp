@@ -121,19 +121,19 @@ namespace MWGui
         else if (mPtr.getType() == ESM::Creature::sRecordId)
             transport = mPtr.get<ESM::Creature>()->mBase->getTransport();
 
-        for (unsigned int i = 0; i < transport.size(); i++)
+        for (const auto& dest : transport)
         {
-            std::string_view cellname = transport[i].mCellName;
+            std::string_view cellname = dest.mCellName;
             bool interior = true;
             const ESM::ExteriorCellLocation cellIndex
-                = ESM::positionToExteriorCellLocation(transport[i].mPos.pos[0], transport[i].mPos.pos[1]);
+                = ESM::positionToExteriorCellLocation(dest.mPos.pos[0], dest.mPos.pos[1]);
             if (cellname.empty())
             {
                 MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getExterior(cellIndex);
                 cellname = MWBase::Environment::get().getWorld()->getCellName(&cell);
                 interior = false;
             }
-            addDestination(ESM::RefId::stringRefId(cellname), transport[i].mPos, interior);
+            addDestination(ESM::RefId::stringRefId(cellname), dest.mPos, interior);
         }
 
         updateLabels();

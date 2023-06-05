@@ -128,7 +128,7 @@ namespace MWMechanics
         creatureStats.getSpells().clear(true);
         creatureStats.getActiveSpells().clear(ptr);
 
-        for (int i = 0; i < 27; ++i)
+        for (size_t i = 0; i < player->mNpdt.mSkills.size(); ++i)
             npcStats.getSkill(i).setBase(player->mNpdt.mSkills[i]);
 
         creatureStats.setAttribute(ESM::Attribute::Strength, player->mNpdt.mStrength);
@@ -148,7 +148,7 @@ namespace MWMechanics
 
             bool male = (player->mFlags & ESM::NPC::Female) == 0;
 
-            for (int i = 0; i < 8; ++i)
+            for (int i = 0; i < ESM::Attribute::Length; ++i)
             {
                 const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
 
@@ -159,12 +159,10 @@ namespace MWMechanics
             {
                 int bonus = 0;
 
-                for (int i2 = 0; i2 < 7; ++i2)
-                    if (race->mData.mBonus[i2].mSkill == i)
-                    {
-                        bonus = race->mData.mBonus[i2].mBonus;
-                        break;
-                    }
+                auto bonusIt = std::find_if(race->mData.mBonus.begin(), race->mData.mBonus.end(),
+                    [i](const auto& bonus) { return bonus.mSkill == i; });
+                if (bonusIt != race->mData.mBonus.end())
+                    bonus = bonusIt->mBonus;
 
                 npcStats.getSkill(i).setBase(5 + bonus);
             }
@@ -193,10 +191,9 @@ namespace MWMechanics
         {
             const ESM::Class* class_ = esmStore.get<ESM::Class>().find(player->mClass);
 
-            for (int i = 0; i < 2; ++i)
+            for (int attribute : class_->mData.mAttribute)
             {
-                int attribute = class_->mData.mAttribute[i];
-                if (attribute >= 0 && attribute < 8)
+                if (attribute >= 0 && attribute < ESM::Attribute::Length)
                 {
                     creatureStats.setAttribute(attribute, creatureStats.getAttribute(attribute).getBase() + 10);
                 }
@@ -206,11 +203,11 @@ namespace MWMechanics
             {
                 int bonus = i == 0 ? 10 : 25;
 
-                for (int i2 = 0; i2 < 5; ++i2)
+                for (const auto& skills : class_->mData.mSkills)
                 {
-                    int index = class_->mData.mSkills[i2][i];
+                    int index = skills[i];
 
-                    if (index >= 0 && index < 27)
+                    if (index >= 0 && index < ESM::Skill::Length)
                     {
                         npcStats.getSkill(index).setBase(npcStats.getSkill(index).getBase() + bonus);
                     }

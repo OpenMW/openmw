@@ -162,14 +162,14 @@ float MWMechanics::NpcStats::getSkillProgressRequirement(int skillIndex, const E
 
     float typeFactor = gmst.find("fMiscSkillBonus")->mValue.getFloat();
 
-    for (int i = 0; i < 5; ++i)
+    for (const auto& skills : class_.mData.mSkills)
     {
-        if (class_.mData.mSkills[i][0] == skillIndex)
+        if (skills[0] == skillIndex)
         {
             typeFactor = gmst.find("fMinorSkillBonus")->mValue.getFloat();
             break;
         }
-        else if (class_.mData.mSkills[i][1] == skillIndex)
+        else if (skills[1] == skillIndex)
         {
             typeFactor = gmst.find("fMajorSkillBonus")->mValue.getFloat();
             break;
@@ -235,15 +235,15 @@ void MWMechanics::NpcStats::increaseSkill(
 
     // is this a minor or major skill?
     int increase = gmst.find("iLevelupMiscMultAttriubte")->mValue.getInteger(); // Note: GMST has a typo
-    for (int k = 0; k < 5; ++k)
+    for (const auto& skills : class_.mData.mSkills)
     {
-        if (class_.mData.mSkills[k][0] == skillIndex)
+        if (skills[0] == skillIndex)
         {
             mLevelProgress += gmst.find("iLevelUpMinorMult")->mValue.getInteger();
             increase = gmst.find("iLevelUpMinorMultAttribute")->mValue.getInteger();
             break;
         }
-        else if (class_.mData.mSkills[k][1] == skillIndex)
+        else if (skills[1] == skillIndex)
         {
             mLevelProgress += gmst.find("iLevelUpMajorMult")->mValue.getInteger();
             increase = gmst.find("iLevelUpMajorMultAttribute")->mValue.getInteger();
@@ -382,17 +382,16 @@ void MWMechanics::NpcStats::setCrimeId(int id)
 
 bool MWMechanics::NpcStats::hasSkillsForRank(const ESM::RefId& factionId, int rank) const
 {
-    if (rank < 0 || rank >= 10)
-        throw std::runtime_error("rank index out of range");
-
     const ESM::Faction& faction = *MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionId);
+
+    const ESM::RankData& rankData = faction.mData.mRankData.at(rank);
 
     std::vector<int> skills;
 
-    for (int i = 0; i < 7; ++i)
+    for (int id : faction.mData.mSkills)
     {
-        if (faction.mData.mSkills[i] != -1)
-            skills.push_back(static_cast<int>(getSkill(faction.mData.mSkills[i]).getBase()));
+        if (id != -1)
+            skills.push_back(static_cast<int>(getSkill(id).getBase()));
     }
 
     if (skills.empty())
@@ -401,8 +400,6 @@ bool MWMechanics::NpcStats::hasSkillsForRank(const ESM::RefId& factionId, int ra
     std::sort(skills.begin(), skills.end());
 
     std::vector<int>::const_reverse_iterator iter = skills.rbegin();
-
-    const ESM::RankData& rankData = faction.mData.mRankData[rank];
 
     if (*iter < rankData.mPrimarySkill)
         return false;
@@ -473,7 +470,7 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
 
     state.mDisposition = mDisposition;
 
-    for (int i = 0; i < ESM::Skill::Length; ++i)
+    for (size_t i = 0; i < state.mSkills.size(); ++i)
         mSkill[i].writeState(state.mSkills[i]);
 
     state.mIsWerewolf = mIsWerewolf;
@@ -492,10 +489,10 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
     state.mWerewolfKills = mWerewolfKills;
     state.mLevelProgress = mLevelProgress;
 
-    for (int i = 0; i < ESM::Attribute::Length; ++i)
+    for (size_t i = 0; i < state.mSkillIncrease.size(); ++i)
         state.mSkillIncrease[i] = mSkillIncreases[i];
 
-    for (int i = 0; i < 3; ++i)
+    for (size_t i = 0; i < state.mSpecIncreases.size(); ++i)
         state.mSpecIncreases[i] = mSpecIncreases[i];
 
     std::copy(mUsedIds.begin(), mUsedIds.end(), std::back_inserter(state.mUsedIds));
@@ -526,7 +523,7 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
 
     mDisposition = state.mDisposition;
 
-    for (int i = 0; i < ESM::Skill::Length; ++i)
+    for (size_t i = 0; i < state.mSkills.size(); ++i)
         mSkill[i].readState(state.mSkills[i]);
 
     mIsWerewolf = state.mIsWerewolf;
@@ -537,10 +534,10 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
     mWerewolfKills = state.mWerewolfKills;
     mLevelProgress = state.mLevelProgress;
 
-    for (int i = 0; i < ESM::Attribute::Length; ++i)
+    for (size_t i = 0; i < state.mSkillIncrease.size(); ++i)
         mSkillIncreases[i] = state.mSkillIncrease[i];
 
-    for (int i = 0; i < 3; ++i)
+    for (size_t i = 0; i < state.mSpecIncreases.size(); ++i)
         mSpecIncreases[i] = state.mSpecIncreases[i];
 
     for (auto iter(state.mUsedIds.begin()); iter != state.mUsedIds.end(); ++iter)

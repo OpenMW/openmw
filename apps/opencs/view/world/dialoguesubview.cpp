@@ -227,11 +227,11 @@ void CSVWorld::DialogueDelegateDispatcher::setEditorData(QWidget* editor, const 
         delegateIt->second->setEditorData(editor, index, true);
     }
 
-    for (unsigned i = 0; i < mProxys.size(); ++i)
+    for (const auto& proxy : mProxys)
     {
-        if (mProxys[i]->getEditor() == editor)
+        if (proxy->getEditor() == editor)
         {
-            mProxys[i]->setIndex(index);
+            proxy->setIndex(index);
         }
     }
 }
@@ -341,9 +341,9 @@ QWidget* CSVWorld::DialogueDelegateDispatcher::makeEditor(
 
 CSVWorld::DialogueDelegateDispatcher::~DialogueDelegateDispatcher()
 {
-    for (unsigned i = 0; i < mProxys.size(); ++i)
+    for (auto* proxy : mProxys)
     {
-        delete mProxys[i]; // unique_ptr could be handy
+        delete proxy; // unique_ptr could be handy
     }
 }
 
@@ -477,8 +477,8 @@ void CSVWorld::EditWidget::createEditorContextMenu(
 
 CSVWorld::EditWidget::~EditWidget()
 {
-    for (unsigned i = 0; i < mNestedModels.size(); ++i)
-        delete mNestedModels[i];
+    for (auto* model : mNestedModels)
+        delete model;
 
     if (mDispatcher)
         delete mDispatcher;
@@ -511,8 +511,8 @@ void CSVWorld::EditWidget::remake(int row)
     }
     mMainWidget = new QWidget(this);
 
-    for (unsigned i = 0; i < mNestedModels.size(); ++i)
-        delete mNestedModels[i];
+    for (auto* model : mNestedModels)
+        delete model;
 
     mNestedModels.clear();
 

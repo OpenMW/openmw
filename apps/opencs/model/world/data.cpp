@@ -1026,12 +1026,12 @@ int CSMWorld::Data::getTotalRecords(const std::vector<std::filesystem::path>& fi
 
     std::unique_ptr<ESM::ESMReader> reader = std::make_unique<ESM::ESMReader>();
 
-    for (unsigned int i = 0; i < files.size(); ++i)
+    for (const auto& file : files)
     {
-        if (!std::filesystem::exists(files[i]))
+        if (!std::filesystem::exists(file))
             continue;
 
-        reader->open(files[i]);
+        reader->open(file);
         records += reader->getRecordCount();
         reader->close();
     }

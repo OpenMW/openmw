@@ -626,7 +626,7 @@ namespace MWGui
                         // player doesn't have max rank yet
                         text += std::string("\n\n#{fontcolourhtml=header}#{sNextRank} ") + faction->mRanks[rank + 1];
 
-                        ESM::RankData rankData = faction->mData.mRankData[rank + 1];
+                        const ESM::RankData& rankData = faction->mData.mRankData[rank + 1];
                         const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[0]);
                         const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[1]);
 
@@ -638,15 +638,15 @@ namespace MWGui
                         text += "\n\n#{fontcolourhtml=header}#{sFavoriteSkills}";
                         text += "\n#{fontcolourhtml=normal}";
                         bool firstSkill = true;
-                        for (int i = 0; i < 7; ++i)
+                        for (int id : faction->mData.mSkills)
                         {
-                            if (faction->mData.mSkills[i] != -1)
+                            if (id != -1)
                             {
                                 if (!firstSkill)
                                     text += ", ";
 
                                 firstSkill = false;
-                                const ESM::Skill* skill = store.get<ESM::Skill>().find(faction->mData.mSkills[i]);
+                                const ESM::Skill* skill = store.get<ESM::Skill>().find(id);
                                 text += MyGUI::TextIterator::toTagsString(skill->mName);
                             }
                         }

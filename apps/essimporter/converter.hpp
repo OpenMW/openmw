@@ -249,7 +249,7 @@ namespace ESSImport
             {
                 ESM::InventoryState& invState = mContext->mPlayer.mObject.mInventory;
 
-                for (unsigned int i = 0; i < invState.mItems.size(); ++i)
+                for (size_t i = 0; i < invState.mItems.size(); ++i)
                 {
                     // FIXME: in case of conflict (multiple items with this refID) use the already equipped one?
                     if (invState.mItems[i].mRef.mRefID == ESM::RefId::stringRefId(refr.mActorData.mSelectedEnchantItem))

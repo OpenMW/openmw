@@ -46,17 +46,30 @@ void CSMTools::FactionCheckStage::perform(int stage, CSMDoc::Messages& messages)
         messages.add(id, "Name is missing", "", CSMDoc::Message::Severity_Error);
 
     // test for invalid attributes
-    if (faction.mData.mAttribute[0] == faction.mData.mAttribute[1] && faction.mData.mAttribute[0] != -1)
+    std::map<int, int> attributeCount;
+    for (size_t i = 0; i < faction.mData.mAttribute.size(); ++i)
     {
-        messages.add(id, "Same attribute is listed twice", "", CSMDoc::Message::Severity_Error);
+        int attribute = faction.mData.mAttribute[i];
+        if (attribute != -1)
+        {
+            auto it = attributeCount.find(attribute);
+            if (it == attributeCount.end())
+                attributeCount.emplace(attribute, 1);
+            else
+            {
+                if (it->second == 1)
+                    messages.add(id, "Same attribute is listed twice", {}, CSMDoc::Message::Severity_Error);
+                ++it->second;
+            }
+        }
     }
 
     // test for non-unique skill
     std::map<int, int> skills; // ID, number of occurrences
 
-    for (int i = 0; i < 7; ++i)
-        if (faction.mData.mSkills[i] != -1)
-            ++skills[faction.mData.mSkills[i]];
+    for (int skill : faction.mData.mSkills)
+        if (skill != -1)
+            ++skills[skill];
 
     for (auto& skill : skills)
         if (skill.second > 1)

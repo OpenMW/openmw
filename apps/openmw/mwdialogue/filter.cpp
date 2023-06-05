@@ -644,9 +644,6 @@ int MWDialogue::Filter::getFactionRank(const MWWorld::Ptr& actor, const ESM::Ref
 bool MWDialogue::Filter::hasFactionRankSkillRequirements(
     const MWWorld::Ptr& actor, const ESM::RefId& factionId, int rank) const
 {
-    if (rank < 0 || rank >= 10)
-        throw std::runtime_error("rank index out of range");
-
     if (!actor.getClass().getNpcStats(actor).hasSkillsForRank(factionId, rank))
         return false;
 
@@ -661,14 +658,11 @@ bool MWDialogue::Filter::hasFactionRankSkillRequirements(
 bool MWDialogue::Filter::hasFactionRankReputationRequirements(
     const MWWorld::Ptr& actor, const ESM::RefId& factionId, int rank) const
 {
-    if (rank < 0 || rank >= 10)
-        throw std::runtime_error("rank index out of range");
-
     MWMechanics::NpcStats& stats = actor.getClass().getNpcStats(actor);
 
     const ESM::Faction& faction = *MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionId);
 
-    return stats.getFactionReputation(factionId) >= faction.mData.mRankData[rank].mFactReaction;
+    return stats.getFactionReputation(factionId) >= faction.mData.mRankData.at(rank).mFactReaction;
 }
 
 MWDialogue::Filter::Filter(const MWWorld::Ptr& actor, int choice, bool talkedToPlayer)

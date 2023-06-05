@@ -98,10 +98,9 @@ namespace
         // class bonus
         const ESM::Class* class_ = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(npc->mClass);
 
-        for (int i = 0; i < 2; ++i)
+        for (int attribute : class_->mData.mAttribute)
         {
-            int attribute = class_->mData.mAttribute[i];
-            if (attribute >= 0 && attribute < 8)
+            if (attribute >= 0 && attribute < ESM::Attribute::Length)
             {
                 creatureStats.setAttribute(attribute, creatureStats.getAttribute(attribute).getBase() + 10);
             }
@@ -121,14 +120,11 @@ namespace
 
                 // is this a minor or major skill?
                 float add = 0.2f;
-                for (int k = 0; k < 5; ++k)
+                for (const auto& skills : class_->mData.mSkills)
                 {
-                    if (class_->mData.mSkills[k][0] == j)
+                    if (skills[0] == j)
                         add = 0.5;
-                }
-                for (int k = 0; k < 5; ++k)
-                {
-                    if (class_->mData.mSkills[k][1] == j)
+                    if (skills[1] == j)
                         add = 1.0;
                 }
                 modifierSum += add;
@@ -149,8 +145,8 @@ namespace
         else if (class_->mData.mSpecialization == ESM::Class::Stealth)
             multiplier += 1;
 
-        if (class_->mData.mAttribute[0] == ESM::Attribute::Endurance
-            || class_->mData.mAttribute[1] == ESM::Attribute::Endurance)
+        if (std::find(class_->mData.mAttribute.begin(), class_->mData.mAttribute.end(), ESM::Attribute::Endurance)
+            != class_->mData.mAttribute.end())
             multiplier += 1;
 
         creatureStats.setHealth(floor(0.5f * (strength + endurance)) + multiplier * (creatureStats.getLevel() - 1));
@@ -183,9 +179,9 @@ namespace
         {
             int bonus = (i == 0) ? 10 : 25;
 
-            for (int i2 = 0; i2 < 5; ++i2)
+            for (const auto& skills : class_->mData.mSkills)
             {
-                int index = class_->mData.mSkills[i2][i];
+                int index = skills[i];
                 if (index >= 0 && index < ESM::Skill::Length)
                 {
                     npcStats.getSkill(index).setBase(npcStats.getSkill(index).getBase() + bonus);
@@ -201,19 +197,15 @@ namespace
             int raceBonus = 0;
             int specBonus = 0;
 
-            for (int raceSkillIndex = 0; raceSkillIndex < 7; ++raceSkillIndex)
-            {
-                if (race->mData.mBonus[raceSkillIndex].mSkill == skillIndex)
-                {
-                    raceBonus = race->mData.mBonus[raceSkillIndex].mBonus;
-                    break;
-                }
-            }
+            auto bonusIt = std::find_if(race->mData.mBonus.begin(), race->mData.mBonus.end(),
+                [skillIndex](const auto& bonus) { return bonus.mSkill == skillIndex; });
+            if (bonusIt != race->mData.mBonus.end())
+                raceBonus = bonusIt->mBonus;
 
-            for (int k = 0; k < 5; ++k)
+            for (const auto& skills : class_->mData.mSkills)
             {
                 // is this a minor or major skill?
-                if ((class_->mData.mSkills[k][0] == skillIndex) || (class_->mData.mSkills[k][1] == skillIndex))
+                if (std::find(skills.begin(), skills.end(), skillIndex) != skills.end())
                 {
                     majorMultiplier = 1.0f;
                     break;
@@ -322,7 +314,7 @@ namespace MWClass
             {
                 gold = ref->mBase->mNpdt.mGold;
 
-                for (unsigned int i = 0; i < ESM::Skill::Length; ++i)
+                for (size_t i = 0; i < ref->mBase->mNpdt.mSkills.size(); ++i)
                     data->mNpcStats.getSkill(i).setBase(ref->mBase->mNpdt.mSkills[i]);
 
                 data->mNpcStats.setAttribute(ESM::Attribute::Strength, ref->mBase->mNpdt.mStrength);

@@ -264,7 +264,7 @@ namespace MWGui
         ToolTips::createAttributeToolTip(mFavoriteAttribute[0], mFavoriteAttribute[0]->getAttributeId());
         ToolTips::createAttributeToolTip(mFavoriteAttribute[1], mFavoriteAttribute[1]->getAttributeId());
 
-        for (int i = 0; i < 5; ++i)
+        for (size_t i = 0; i < klass->mData.mSkills.size(); ++i)
         {
             mMinorSkill[i]->setSkillNumber(klass->mData.mSkills[i][0]);
             mMajorSkill[i]->setSkillNumber(klass->mData.mSkills[i][1]);

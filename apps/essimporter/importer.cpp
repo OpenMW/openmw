@@ -162,7 +162,7 @@ namespace ESSImport
         read(mOutFile, file2); // todo rename variable
 
         // FIXME: use max(size1, size2)
-        for (unsigned int i = 0; i < file1.mRecords.size(); ++i)
+        for (size_t i = 0; i < file1.mRecords.size(); ++i)
         {
             File::Record rec = file1.mRecords[i];
 
@@ -185,7 +185,7 @@ namespace ESSImport
             }
 
             // FIXME: use max(size1, size2)
-            for (unsigned int j = 0; j < rec.mSubrecords.size(); ++j)
+            for (size_t j = 0; j < rec.mSubrecords.size(); ++j)
             {
                 File::Subrecord sub = rec.mSubrecords[j];
 
@@ -221,7 +221,7 @@ namespace ESSImport
                               << std::hex << sub.mFileOffset << " (2) 0x" << sub2.mFileOffset << std::endl;
 
                     std::cout << "Data 1:" << std::endl;
-                    for (unsigned int k = 0; k < sub.mData.size(); ++k)
+                    for (size_t k = 0; k < sub.mData.size(); ++k)
                     {
                         bool different = false;
                         if (k >= sub2.mData.size() || sub2.mData[k] != sub.mData[k])
@@ -236,7 +236,7 @@ namespace ESSImport
                     std::cout << std::endl;
 
                     std::cout << "Data 2:" << std::endl;
-                    for (unsigned int k = 0; k < sub2.mData.size(); ++k)
+                    for (size_t k = 0; k < sub2.mData.size(); ++k)
                     {
                         bool different = false;
                         if (k >= sub.mData.size() || sub.mData[k] != sub2.mData[k])
