@@ -111,14 +111,14 @@ antialiasing
 ------------
 
 :Type:		integer
-:Range:		0, 2, 4, 8, 16
+:Range:		>= 0
 :Default:	0
 
 This setting controls anti-aliasing. Anti-aliasing is a technique designed to improve the appearance of polygon edges,
 so they do not appear to be "jagged".
 Anti-aliasing can smooth these edges at the cost of a minor reduction in the frame rate.
 A value of 0 disables anti-aliasing.
-Other powers of two (e.g. 2, 4, 8, 16) are supported according to the capabilities of your graphics hardware.
+Other values are supported according to the capabilities of your graphics hardware.
 Higher values do a better job of smoothing out the image but have a greater impact on frame rate.
 
 This setting can be configured from a list of valid choices in the Graphics panel of the OpenMW Launcher,
