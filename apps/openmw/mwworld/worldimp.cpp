@@ -502,6 +502,12 @@ namespace MWWorld
             }
             break;
             case ESM::REC_PLAY:
+                // World::write always puts `ESM::REC_PLAY` between ESMStore (that contains dynamic records)
+                // and WorldModel (that can contain instances of dynamic records). Here we need to rebuild
+                // ESMStore index in order to be able to lookup dynamic records while loading the player and
+                // WorldModel.
+                mStore.rebuildIdsIndex();
+
                 mStore.checkPlayer();
                 mPlayer->readRecord(reader, type);
                 if (getPlayerPtr().isInCell())
