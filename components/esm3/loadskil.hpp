@@ -41,7 +41,7 @@ namespace ESM
         // Skill index. Skils don't have an id ("NAME") like most records,
         // they only have a numerical index that matches one of the
         // hard-coded skills in the game.
-        int mIndex;
+        int mIndex{ -1 };
 
         std::string mDescription;
         std::string mName;

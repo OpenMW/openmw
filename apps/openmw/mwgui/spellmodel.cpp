@@ -55,7 +55,7 @@ namespace MWGui
             {
                 const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().find(effectId);
                 const ESM::Attribute* attribute = store.get<ESM::Attribute>().search(effect.mAttribute);
-                const ESM::Skill* skill = store.get<ESM::Skill>().search(effect.mSkill);
+                const ESM::Skill* skill = store.get<ESM::Skill>().search(ESM::Skill::indexToRefId(effect.mSkill));
 
                 std::string fullEffectName = MWMechanics::getMagicEffectString(*magicEffect, attribute, skill);
                 std::string convert = Utf8Stream::lowerCaseUtf8(fullEffectName);

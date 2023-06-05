@@ -103,7 +103,7 @@ namespace MWWorld
             npcStats.setAttribute(attribute.mId, value);
         }
 
-        for (const auto& [_, skill] : store->get<ESM::Skill>())
+        for (const auto& skill : store->get<ESM::Skill>())
         {
             // Acrobatics is set separately for some reason.
             if (skill.mIndex == ESM::Skill::Acrobatics)

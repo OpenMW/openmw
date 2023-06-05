@@ -99,7 +99,7 @@ namespace MWGui
             mPlayerAttributes.emplace(attribute.mId, MWMechanics::AttributeValue());
 
         for (const auto& skill : store.get<ESM::Skill>())
-            mPlayerSkillValues.emplace(skill.second.mIndex, MWMechanics::SkillValue());
+            mPlayerSkillValues.emplace(skill.mIndex, MWMechanics::SkillValue());
     }
 
     void CharacterCreation::setValue(std::string_view id, const MWMechanics::AttributeValue& value)

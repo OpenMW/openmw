@@ -327,8 +327,8 @@ namespace MWGui
         const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
         for (const auto& skill : store)
         {
-            if (!skillSet.contains(skill.second.mIndex))
-                mMiscSkills.push_back(skill.second.mIndex);
+            if (!skillSet.contains(skill.mIndex))
+                mMiscSkills.push_back(skill.mIndex);
         }
 
         updateSkillArea();
@@ -504,13 +504,12 @@ namespace MWGui
         addGroup(
             MWBase::Environment::get().getWindowManager()->getGameSettingString(titleId, titleDefault), coord1, coord2);
 
+        const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
         for (const int skillId : skills)
         {
-            if (skillId < 0 || skillId >= ESM::Skill::Length) // Skip unknown skill indexes
+            const ESM::Skill* skill = esmStore.get<ESM::Skill>().search(ESM::Skill::indexToRefId(skillId));
+            if (!skill) // Skip unknown skills
                 continue;
-            const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
-
-            const ESM::Skill* skill = esmStore.get<ESM::Skill>().find(skillId);
 
             const ESM::Attribute* attr = esmStore.get<ESM::Attribute>().find(skill->mData.mAttribute);
 
@@ -640,13 +639,13 @@ namespace MWGui
                         bool firstSkill = true;
                         for (int id : faction->mData.mSkills)
                         {
-                            if (id != -1)
+                            const ESM::Skill* skill = store.get<ESM::Skill>().search(ESM::Skill::indexToRefId(id));
+                            if (skill)
                             {
                                 if (!firstSkill)
                                     text += ", ";
 
                                 firstSkill = false;
-                                const ESM::Skill* skill = store.get<ESM::Skill>().find(id);
                                 text += MyGUI::TextIterator::toTagsString(skill->mName);
                             }
                         }

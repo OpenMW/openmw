@@ -846,7 +846,7 @@ namespace MWGui
         const MWWorld::Store<ESM::Skill>& skills = MWBase::Environment::get().getESMStore()->get<ESM::Skill>();
 
         bool isFirst = true;
-        for (const auto& [_, skill] : skills)
+        for (const auto& skill : skills)
         {
             if (skill.mData.mSpecialization == specId)
             {

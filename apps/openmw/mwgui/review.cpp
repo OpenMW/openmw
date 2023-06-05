@@ -236,10 +236,10 @@ namespace MWGui
         std::copy(minor.begin(), minor.end(), std::inserter(skillSet, skillSet.begin()));
         mMiscSkills.clear();
         const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
-        for (const auto& skill : store)
+        for (const ESM::Skill& skill : store)
         {
-            if (!skillSet.contains(skill.second.mIndex))
-                mMiscSkills.push_back(skill.second.mIndex);
+            if (!skillSet.contains(skill.mIndex))
+                mMiscSkills.push_back(skill.mIndex);
         }
 
         mUpdateSkillArea = true;
@@ -339,12 +339,13 @@ namespace MWGui
         addGroup(
             MWBase::Environment::get().getWindowManager()->getGameSettingString(titleId, titleDefault), coord1, coord2);
 
-        for (const int& skillId : skills)
+        for (const int& skillIndex : skills)
         {
-            const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().search(skillId);
-            if (!skill) // Skip unknown skill indexes
+            const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().search(
+                ESM::Skill::indexToRefId(skillIndex));
+            if (!skill) // Skip unknown skills
                 continue;
-            const MWMechanics::SkillValue& stat = mSkillValues.find(skillId)->second;
+            const MWMechanics::SkillValue& stat = mSkillValues.find(skill->mIndex)->second;
             int base = stat.getBase();
             int modified = stat.getModified();
 
@@ -358,10 +359,10 @@ namespace MWGui
 
             for (int i = 0; i < 2; ++i)
             {
-                ToolTips::createSkillToolTip(mSkillWidgets[mSkillWidgets.size() - 1 - i], skillId);
+                ToolTips::createSkillToolTip(mSkillWidgets[mSkillWidgets.size() - 1 - i], skill->mIndex);
             }
 
-            mSkillWidgetMap[skillId] = widget;
+            mSkillWidgetMap[skill->mIndex] = widget;
         }
     }
 

@@ -60,7 +60,8 @@ namespace MWGui::Widgets
     {
         if (mSkillNameWidget)
         {
-            const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().search(mSkillId);
+            const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().search(
+                ESM::Skill::indexToRefId(mSkillId));
             if (skill == nullptr)
                 mSkillNameWidget->setCaption({});
             else
@@ -374,7 +375,7 @@ namespace MWGui::Widgets
 
         const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().search(mEffectParams.mEffectID);
         const ESM::Attribute* attribute = store.get<ESM::Attribute>().search(mEffectParams.mAttribute);
-        const ESM::Skill* skill = store.get<ESM::Skill>().search(mEffectParams.mSkill);
+        const ESM::Skill* skill = store.get<ESM::Skill>().search(ESM::Skill::indexToRefId(mEffectParams.mSkill));
 
         assert(magicEffect);
 

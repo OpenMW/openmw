@@ -214,14 +214,11 @@ namespace MWMechanics
                 }
             }
 
-            const MWWorld::Store<ESM::Skill>& skills = esmStore.get<ESM::Skill>();
-
-            MWWorld::Store<ESM::Skill>::iterator iter = skills.begin();
-            for (; iter != skills.end(); ++iter)
+            for (const ESM::Skill& skill : esmStore.get<ESM::Skill>())
             {
-                if (iter->second.mData.mSpecialization == class_->mData.mSpecialization)
+                if (skill.mData.mSpecialization == class_->mData.mSpecialization)
                 {
-                    int index = iter->first;
+                    int index = skill.mIndex;
 
                     if (index >= 0 && index < 27)
                     {
