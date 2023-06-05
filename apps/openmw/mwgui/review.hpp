@@ -94,7 +94,7 @@ namespace MWGui
         std::map<int, Widgets::MWAttributePtr> mAttributeWidgets;
 
         SkillList mMajorSkills, mMinorSkills, mMiscSkills;
-        std::map<int, MWMechanics::SkillValue> mSkillValues;
+        std::map<ESM::RefId, MWMechanics::SkillValue> mSkillValues;
         std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
         ESM::RefId mRaceId, mBirthSignId;
         std::string mName;

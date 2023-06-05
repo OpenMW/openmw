@@ -14,6 +14,7 @@
 
 #include "../mwmechanics/aisetting.hpp"
 #include <components/esm/refid.hpp>
+#include <components/esm3/loadskil.hpp>
 
 namespace ESM
 {
@@ -340,7 +341,11 @@ namespace MWWorld
         bool isPureLandCreature(const MWWorld::Ptr& ptr) const;
         bool isMobile(const MWWorld::Ptr& ptr) const;
 
-        virtual float getSkill(const MWWorld::Ptr& ptr, int skill) const;
+        virtual float getSkill(const MWWorld::Ptr& ptr, ESM::RefId id) const;
+        float getSkill(const MWWorld::Ptr& ptr, ESM::Skill::SkillEnum index) const
+        {
+            return getSkill(ptr, ESM::Skill::indexToRefId(index));
+        };
 
         virtual void readAdditionalState(const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const;
         ///< Read additional state from \a state into \a ptr.

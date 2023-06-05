@@ -298,7 +298,7 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 
         int armorSkillType = getEquipmentSkill(ptr);
-        float armorSkill = actor.getClass().getSkill(actor, armorSkillType);
+        float armorSkill = actor.getClass().getSkill(actor, ESM::Skill::indexToRefId(armorSkillType));
 
         int iBaseArmorSkill = MWBase::Environment::get()
                                   .getESMStore()

@@ -285,7 +285,7 @@ void MWWorld::InventoryStore::autoEquipWeapon(TSlots& slots_)
 
         for (int j = 0; j < static_cast<int>(weaponSkillsLength); ++j)
         {
-            float skillValue = mActor.getClass().getSkill(mActor, static_cast<int>(weaponSkills[j]));
+            float skillValue = mActor.getClass().getSkill(mActor, weaponSkills[j]);
             if (skillValue > max && !weaponSkillVisited[j])
             {
                 max = skillValue;

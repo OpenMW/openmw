@@ -72,7 +72,7 @@ namespace MWGui
         MWMechanics::NpcStats const& actorStats(actor.getClass().getNpcStats(actor));
         for (const ESM::Skill& skill : skillStore)
         {
-            float value = getSkillForTraining(actorStats, skill.mIndex);
+            float value = getSkillForTraining(actorStats, skill.mId);
 
             skills.emplace_back(&skill, value);
         }
@@ -92,7 +92,7 @@ namespace MWGui
         {
             const ESM::Skill* skill = skills[i].first;
             int price = static_cast<int>(
-                pcStats.getSkill(skill->mIndex).getBase() * gmst.find("iTrainingMod")->mValue.getInteger());
+                pcStats.getSkill(skill->mId).getBase() * gmst.find("iTrainingMod")->mValue.getInteger());
             price = std::max(1, price);
             price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
@@ -135,22 +135,22 @@ namespace MWGui
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
-        int price = pcStats.getSkill(skill->mIndex).getBase()
+        int price = pcStats.getSkill(skill->mId).getBase()
             * store.get<ESM::GameSetting>().find("iTrainingMod")->mValue.getInteger();
         price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(mPtr, price, true);
 
         if (price > player.getClass().getContainerStore(player).count(MWWorld::ContainerStore::sGoldId))
             return;
 
-        if (getSkillForTraining(mPtr.getClass().getNpcStats(mPtr), skill->mIndex)
-            <= pcStats.getSkill(skill->mIndex).getBase())
+        if (getSkillForTraining(mPtr.getClass().getNpcStats(mPtr), skill->mId)
+            <= pcStats.getSkill(skill->mId).getBase())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sServiceTrainingWords}");
             return;
         }
 
         // You can not train a skill above its governing attribute
-        if (pcStats.getSkill(skill->mIndex).getBase() >= pcStats.getAttribute(skill->mData.mAttribute).getBase())
+        if (pcStats.getSkill(skill->mId).getBase() >= pcStats.getAttribute(skill->mData.mAttribute).getBase())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage17}");
             return;
@@ -196,11 +196,11 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->exitCurrentGuiMode();
     }
 
-    float TrainingWindow::getSkillForTraining(const MWMechanics::NpcStats& stats, int skillId) const
+    float TrainingWindow::getSkillForTraining(const MWMechanics::NpcStats& stats, ESM::RefId id) const
     {
         if (mTrainingSkillBasedOnBaseSkill)
-            return stats.getSkill(skillId).getBase();
-        return stats.getSkill(skillId).getModified();
+            return stats.getSkill(id).getBase();
+        return stats.getSkill(id).getModified();
     }
 
     void TrainingWindow::onFrame(float dt)

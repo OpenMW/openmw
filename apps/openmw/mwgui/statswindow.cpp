@@ -237,7 +237,7 @@ namespace MWGui
         }
     }
 
-    void setSkillProgress(MyGUI::Widget* w, float progress, int skillId)
+    void setSkillProgress(MyGUI::Widget* w, float progress, ESM::RefId skillId)
     {
         MWWorld::Ptr player = MWMechanics::getPlayer();
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
@@ -296,8 +296,9 @@ namespace MWGui
                 valueWidget->setUserString("Visible_SkillProgressVBox", "true");
                 valueWidget->setUserString("UserData^Hidden_SkillProgressVBox", "false");
 
-                setSkillProgress(nameWidget, value.getProgress(), parSkill);
-                setSkillProgress(valueWidget, value.getProgress(), parSkill);
+                ESM::RefId id = ESM::Skill::indexToRefId(parSkill);
+                setSkillProgress(nameWidget, value.getProgress(), id);
+                setSkillProgress(valueWidget, value.getProgress(), id);
             }
             else
             {

@@ -120,8 +120,8 @@ namespace MWMechanics
         int value = 50.f;
         if (actor.getClass().isNpc())
         {
-            int skill = item.getClass().getEquipmentSkill(item);
-            if (skill != -1)
+            ESM::RefId skill = ESM::Skill::indexToRefId(item.getClass().getEquipmentSkill(item));
+            if (!skill.empty())
                 value = actor.getClass().getSkill(actor, skill);
         }
         else
@@ -179,7 +179,9 @@ namespace MWMechanics
         if (weapon.isEmpty())
             return 0.f;
 
-        float skillMult = actor.getClass().getSkill(actor, weapon.getClass().getEquipmentSkill(weapon)) * 0.01f;
+        float skillMult
+            = actor.getClass().getSkill(actor, ESM::Skill::indexToRefId(weapon.getClass().getEquipmentSkill(weapon)))
+            * 0.01f;
         float chopMult = fAIMeleeWeaponMult;
         float bonusDamage = 0.f;
 

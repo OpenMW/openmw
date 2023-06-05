@@ -90,10 +90,10 @@ namespace MWGui
         getWidget(mSkillView, "SkillView");
         mSkillView->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
-        for (int i = 0; i < ESM::Skill::Length; ++i)
+        for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
         {
-            mSkillValues.insert(std::make_pair(i, MWMechanics::SkillValue()));
-            mSkillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::TextBox*>(nullptr)));
+            mSkillValues.emplace(skill.mId, MWMechanics::SkillValue());
+            mSkillWidgetMap.emplace(skill.mIndex, static_cast<MyGUI::TextBox*>(nullptr));
         }
 
         MyGUI::Button* backButton;
@@ -206,11 +206,12 @@ namespace MWGui
 
     void ReviewDialog::setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::SkillValue& value)
     {
-        mSkillValues[skillId] = value;
+        mSkillValues[ESM::Skill::indexToRefId(skillId)] = value;
         MyGUI::TextBox* widget = mSkillWidgetMap[skillId];
         if (widget)
         {
-            float modified = static_cast<float>(value.getModified()), base = static_cast<float>(value.getBase());
+            float modified = value.getModified();
+            float base = value.getBase();
             std::string text = MyGUI::utility::toString(std::floor(modified));
             std::string state = "normal";
             if (modified > base)
@@ -345,7 +346,7 @@ namespace MWGui
                 ESM::Skill::indexToRefId(skillIndex));
             if (!skill) // Skip unknown skills
                 continue;
-            const MWMechanics::SkillValue& stat = mSkillValues.find(skill->mIndex)->second;
+            const MWMechanics::SkillValue& stat = mSkillValues.find(skill->mId)->second;
             int base = stat.getBase();
             int modified = stat.getModified();
 
@@ -394,15 +395,11 @@ namespace MWGui
         if (!mRaceId.empty())
             race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(mRaceId);
 
-        int skills[ESM::Skill::Length];
-        for (int i = 0; i < ESM::Skill::Length; ++i)
-            skills[i] = mSkillValues.find(i)->second.getBase();
-
         int attributes[ESM::Attribute::Length];
         for (int i = 0; i < ESM::Attribute::Length; ++i)
             attributes[i] = mAttributeWidgets[i]->getAttributeValue().getBase();
 
-        std::vector<ESM::RefId> selectedSpells = MWMechanics::autoCalcPlayerSpells(skills, attributes, race);
+        std::vector<ESM::RefId> selectedSpells = MWMechanics::autoCalcPlayerSpells(mSkillValues, attributes, race);
         for (ESM::RefId& spellId : selectedSpells)
         {
             if (std::find(spells.begin(), spells.end(), spellId) == spells.end())

@@ -5,6 +5,7 @@
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadmgef.hpp>
+#include <components/esm3/loadskil.hpp>
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -385,9 +386,10 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
             return player.getClass().getCreatureStats(player).getAttribute(select.getArgument()).getModified();
 
         case SelectWrapper::Function_PcSkill:
-
-            return static_cast<int>(player.getClass().getNpcStats(player).getSkill(select.getArgument()).getModified());
-
+        {
+            ESM::RefId skill = ESM::Skill::indexToRefId(select.getArgument());
+            return static_cast<int>(player.getClass().getNpcStats(player).getSkill(skill).getModified());
+        }
         case SelectWrapper::Function_FriendlyHit:
         {
             int hits = mActor.getClass().getCreatureStats(mActor).getFriendlyHits();

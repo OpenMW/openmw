@@ -25,8 +25,8 @@ namespace
     using SelfObject = MWLua::SelfObject;
     using ObjectVariant = MWLua::ObjectVariant;
 
-    template <class T>
-    auto addIndexedAccessor(int index)
+    template <class T, class I>
+    auto addIndexedAccessor(I index)
     {
         return [index](const sol::object& o) { return T::create(ObjectVariant(o), index); };
     }
@@ -228,37 +228,36 @@ namespace MWLua
     class SkillStat
     {
         ObjectVariant mObject;
-        int mIndex;
+        ESM::RefId mId;
 
-        SkillStat(ObjectVariant object, int index)
+        SkillStat(ObjectVariant object, ESM::RefId id)
             : mObject(std::move(object))
-            , mIndex(index)
+            , mId(id)
         {
         }
 
-        static float getProgress(const MWWorld::Ptr& ptr, int index, const MWMechanics::SkillValue& stat)
+        static float getProgress(const MWWorld::Ptr& ptr, ESM::RefId id, const MWMechanics::SkillValue& stat)
         {
             float progress = stat.getProgress();
             if (progress != 0.f)
-                progress /= getMaxProgress(ptr, index, stat);
+                progress /= getMaxProgress(ptr, id, stat);
             return progress;
         }
 
-        static float getMaxProgress(const MWWorld::Ptr& ptr, int index, const MWMechanics::SkillValue& stat)
+        static float getMaxProgress(const MWWorld::Ptr& ptr, ESM::RefId id, const MWMechanics::SkillValue& stat)
         {
             const auto& store = *MWBase::Environment::get().getESMStore();
             const auto cl = store.get<ESM::Class>().find(ptr.get<ESM::NPC>()->mBase->mClass);
-            return ptr.getClass().getNpcStats(ptr).getSkillProgressRequirement(index, *cl);
+            return ptr.getClass().getNpcStats(ptr).getSkillProgressRequirement(id, *cl);
         }
 
     public:
         template <class G>
         sol::object get(const Context& context, std::string_view prop, G getter) const
         {
-            return getValue(
-                context, mObject, &SkillStat::setValue, mIndex, prop, [this, getter](const MWWorld::Ptr& ptr) {
-                    return (ptr.getClass().getNpcStats(ptr).getSkill(mIndex).*getter)();
-                });
+            return getValue(context, mObject, &SkillStat::setValue, mId.getIf<ESM::IndexRefId>()->getValue(), prop,
+                [this, getter](
+                    const MWWorld::Ptr& ptr) { return (ptr.getClass().getNpcStats(ptr).getSkill(mId).*getter)(); });
         }
 
         float getModified(const Context& context) const
@@ -271,30 +270,33 @@ namespace MWLua
 
         sol::object getProgress(const Context& context) const
         {
-            return getValue(
-                context, mObject, &SkillStat::setValue, mIndex, "progress", [this](const MWWorld::Ptr& ptr) {
-                    return getProgress(ptr, mIndex, ptr.getClass().getNpcStats(ptr).getSkill(mIndex));
+            return getValue(context, mObject, &SkillStat::setValue, mId.getIf<ESM::IndexRefId>()->getValue(),
+                "progress", [this](const MWWorld::Ptr& ptr) {
+                    return getProgress(ptr, mId, ptr.getClass().getNpcStats(ptr).getSkill(mId));
                 });
         }
 
-        static std::optional<SkillStat> create(ObjectVariant object, int index)
+        static std::optional<SkillStat> create(ObjectVariant object, ESM::RefId id)
         {
             if (!object.ptr().getClass().isNpc())
                 return {};
-            return SkillStat{ std::move(object), index };
+            return SkillStat{ std::move(object), id };
         }
 
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
             SelfObject* obj = mObject.asSelfObject();
             addStatUpdateAction(context.mLuaManager, *obj);
-            obj->mStatsCache[SelfObject::CachedStat{ &SkillStat::setValue, mIndex, prop }] = value;
+            obj->mStatsCache[SelfObject::CachedStat{
+                &SkillStat::setValue, int(mId.getIf<ESM::IndexRefId>()->getValue()), prop }]
+                = value;
         }
 
         static void setValue(int index, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
         {
+            ESM::RefId id = ESM::Skill::indexToRefId(index);
             auto& stats = ptr.getClass().getNpcStats(ptr);
-            auto stat = stats.getSkill(index);
+            auto stat = stats.getSkill(id);
             float floatValue = LuaUtil::cast<float>(value);
             if (prop == "base")
                 stat.setBase(floatValue);
@@ -306,8 +308,8 @@ namespace MWLua
             else if (prop == "modifier")
                 stat.setModifier(floatValue);
             else if (prop == "progress")
-                stat.setProgress(floatValue * getMaxProgress(ptr, index, stat));
-            stats.setSkill(index, stat);
+                stat.setProgress(floatValue * getMaxProgress(ptr, id, stat));
+            stats.setSkill(id, stat);
         }
     };
 }
@@ -385,7 +387,8 @@ namespace MWLua
             [context](const SkillStat& stat, const sol::object& value) { stat.cache(context, "progress", value); });
         sol::table skills(context.mLua->sol(), sol::create);
         npcStats["skills"] = LuaUtil::makeReadOnly(skills);
-        for (int id = ESM::Skill::Block; id < ESM::Skill::Length; ++id)
-            skills[Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[id])] = addIndexedAccessor<SkillStat>(id);
+        for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
+            skills[Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[skill.mIndex])]
+                = addIndexedAccessor<SkillStat>(skill.mId);
     }
 }

@@ -3,6 +3,7 @@
 
 #include "creaturestats.hpp"
 #include <components/esm/refid.hpp>
+#include <components/esm3/loadskil.hpp>
 #include <map>
 #include <set>
 #include <string>
@@ -21,7 +22,7 @@ namespace MWMechanics
     class NpcStats : public CreatureStats
     {
         int mDisposition;
-        SkillValue mSkill[ESM::Skill::Length]; // SkillValue.mProgress used by the player only
+        std::map<ESM::RefId, SkillValue> mSkills; // SkillValue.mProgress used by the player only
 
         int mReputation;
         int mCrimeId;
@@ -58,9 +59,13 @@ namespace MWMechanics
         int getCrimeId() const;
         void setCrimeId(int id);
 
-        const SkillValue& getSkill(int index) const;
-        SkillValue& getSkill(int index);
-        void setSkill(int index, const SkillValue& value);
+        const SkillValue& getSkill(ESM::RefId id) const;
+        const SkillValue& getSkill(ESM::Skill::SkillEnum index) const
+        {
+            return getSkill(ESM::Skill::indexToRefId(index));
+        }
+        SkillValue& getSkill(ESM::RefId id);
+        void setSkill(ESM::RefId id, const SkillValue& value);
 
         int getFactionRank(const ESM::RefId& faction) const;
         const std::map<ESM::RefId, int>& getFactionRanks() const;
@@ -79,7 +84,7 @@ namespace MWMechanics
 
         bool isInFaction(const ESM::RefId& faction) const;
 
-        float getSkillProgressRequirement(int skillIndex, const ESM::Class& class_) const;
+        float getSkillProgressRequirement(ESM::RefId id, const ESM::Class& class_) const;
 
         void useSkill(int skillIndex, const ESM::Class& class_, int usageType = -1, float extraFactor = 1.f);
         ///< Increase skill by usage.
@@ -133,6 +138,8 @@ namespace MWMechanics
 
         void readState(const ESM::CreatureStats& state);
         void readState(const ESM::NpcStats& state);
+
+        const std::map<ESM::RefId, SkillValue>& getSkills() const { return mSkills; }
     };
 }
 

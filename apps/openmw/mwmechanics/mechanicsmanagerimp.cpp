@@ -129,7 +129,7 @@ namespace MWMechanics
         creatureStats.getActiveSpells().clear(ptr);
 
         for (size_t i = 0; i < player->mNpdt.mSkills.size(); ++i)
-            npcStats.getSkill(i).setBase(player->mNpdt.mSkills[i]);
+            npcStats.getSkill(ESM::Skill::indexToRefId(i)).setBase(player->mNpdt.mSkills[i]);
 
         creatureStats.setAttribute(ESM::Attribute::Strength, player->mNpdt.mStrength);
         creatureStats.setAttribute(ESM::Attribute::Intelligence, player->mNpdt.mIntelligence);
@@ -164,7 +164,7 @@ namespace MWMechanics
                 if (bonusIt != race->mData.mBonus.end())
                     bonus = bonusIt->mBonus;
 
-                npcStats.getSkill(skill.mIndex).setBase(5 + bonus);
+                npcStats.getSkill(skill.mId).setBase(5 + bonus);
             }
 
             for (const ESM::RefId& power : race->mPowers.mList)
@@ -205,19 +205,16 @@ namespace MWMechanics
 
                 for (const auto& skills : class_->mData.mSkills)
                 {
-                    int index = skills[i];
-
-                    if (index >= 0 && index < ESM::Skill::Length)
-                    {
-                        npcStats.getSkill(index).setBase(npcStats.getSkill(index).getBase() + bonus);
-                    }
+                    ESM::RefId id = ESM::Skill::indexToRefId(skills[i]);
+                    if (!id.empty())
+                        npcStats.getSkill(id).setBase(npcStats.getSkill(id).getBase() + bonus);
                 }
             }
 
             for (const ESM::Skill& skill : esmStore.get<ESM::Skill>())
             {
                 if (skill.mData.mSpecialization == class_->mData.mSpecialization)
-                    npcStats.getSkill(skill.mIndex).setBase(npcStats.getSkill(skill.mIndex).getBase() + 5);
+                    npcStats.getSkill(skill.mId).setBase(npcStats.getSkill(skill.mId).getBase() + 5);
             }
         }
 
@@ -226,16 +223,12 @@ namespace MWMechanics
         if (mRaceSelected)
             race = esmStore.get<ESM::Race>().find(player->mRace);
 
-        int skills[ESM::Skill::Length];
-        for (int i = 0; i < ESM::Skill::Length; ++i)
-            skills[i] = npcStats.getSkill(i).getBase();
-
         int attributes[ESM::Attribute::Length];
         for (int i = 0; i < ESM::Attribute::Length; ++i)
             attributes[i] = npcStats.getAttribute(i).getBase();
         npcStats.updateHealth();
 
-        std::vector<ESM::RefId> selectedSpells = autoCalcPlayerSpells(skills, attributes, race);
+        std::vector<ESM::RefId> selectedSpells = autoCalcPlayerSpells(npcStats.getSkills(), attributes, race);
 
         for (const ESM::RefId& spell : selectedSpells)
             creatureStats.getSpells().add(spell);
@@ -1914,7 +1907,7 @@ namespace MWMechanics
         const ESM::Skill* acrobatics
             = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(ESM::Skill::Acrobatics);
         MWMechanics::NpcStats& stats = actor.getClass().getNpcStats(actor);
-        auto& skill = stats.getSkill(acrobatics->mIndex);
+        auto& skill = stats.getSkill(acrobatics->mId);
         skill.setModifier(acrobatics->mWerewolfValue - skill.getModified());
     }
 

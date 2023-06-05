@@ -83,13 +83,13 @@ namespace MWGui
             }
         }
 
-        // Loop over ESM::Skill::SkillEnum
-        for (int i = 0; i < ESM::Skill::Length; ++i)
+        for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
         {
-            if (stats.getSkill(i) != mWatchedSkills[i] || mWatchedStatsEmpty)
+            const auto& value = stats.getSkill(skill.mId);
+            if (value != mWatchedSkills[skill.mIndex] || mWatchedStatsEmpty)
             {
-                mWatchedSkills[i] = stats.getSkill(i);
-                setValue((ESM::Skill::SkillEnum)i, stats.getSkill(i));
+                mWatchedSkills[skill.mIndex] = value;
+                setValue(ESM::Skill::SkillEnum(skill.mIndex), value);
             }
         }
 

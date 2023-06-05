@@ -105,7 +105,7 @@ namespace
     void damageSkill(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect, float magnitude)
     {
         auto& npcStats = target.getClass().getNpcStats(target);
-        auto& skill = npcStats.getSkill(effect.mArg);
+        auto& skill = npcStats.getSkill(ESM::Skill::indexToRefId(effect.mArg));
         if (effect.mEffectId == ESM::MagicEffect::DamageSkill)
             magnitude = std::min(skill.getModified(), magnitude);
         skill.damage(magnitude);
@@ -114,14 +114,14 @@ namespace
     void restoreSkill(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect, float magnitude)
     {
         auto& npcStats = target.getClass().getNpcStats(target);
-        auto& skill = npcStats.getSkill(effect.mArg);
+        auto& skill = npcStats.getSkill(ESM::Skill::indexToRefId(effect.mArg));
         skill.restore(magnitude);
     }
 
     void fortifySkill(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect, float magnitude)
     {
         auto& npcStats = target.getClass().getNpcStats(target);
-        auto& skill = npcStats.getSkill(effect.mArg);
+        auto& skill = npcStats.getSkill(ESM::Skill::indexToRefId(effect.mArg));
         skill.setModifier(skill.getModifier() + magnitude);
     }
 
@@ -668,7 +668,7 @@ namespace MWMechanics
                     if (spellParams.getType() == ESM::ActiveSpells::Type_Ability)
                     {
                         auto& npcStats = target.getClass().getNpcStats(target);
-                        SkillValue& skill = npcStats.getSkill(effect.mArg);
+                        SkillValue& skill = npcStats.getSkill(ESM::Skill::indexToRefId(effect.mArg));
                         // Damage Skill abilities reduce base skill :todd:
                         skill.setBase(std::max(skill.getBase() - effect.mMagnitude, 0.f));
                     }
@@ -760,7 +760,7 @@ namespace MWMechanics
                 {
                     // Abilities affect base stats, but not for drain
                     auto& npcStats = target.getClass().getNpcStats(target);
-                    auto& skill = npcStats.getSkill(effect.mArg);
+                    auto& skill = npcStats.getSkill(ESM::Skill::indexToRefId(effect.mArg));
                     skill.setBase(skill.getBase() + effect.mMagnitude);
                 }
                 else
@@ -1218,7 +1218,7 @@ namespace MWMechanics
                 if (spellParams.getType() == ESM::ActiveSpells::Type_Ability)
                 {
                     auto& npcStats = target.getClass().getNpcStats(target);
-                    auto& skill = npcStats.getSkill(effect.mArg);
+                    auto& skill = npcStats.getSkill(ESM::Skill::indexToRefId(effect.mArg));
                     skill.setBase(skill.getBase() - effect.mMagnitude);
                 }
                 else

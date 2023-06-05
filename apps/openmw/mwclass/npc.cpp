@@ -181,10 +181,10 @@ namespace
 
             for (const auto& skills : class_->mData.mSkills)
             {
-                int index = skills[i];
-                if (index >= 0 && index < ESM::Skill::Length)
+                ESM::RefId id = ESM::Skill::indexToRefId(skills[i]);
+                if (!id.empty())
                 {
-                    npcStats.getSkill(index).setBase(npcStats.getSkill(index).getBase() + bonus);
+                    npcStats.getSkill(id).setBase(npcStats.getSkill(id).getBase() + bonus);
                 }
             }
         }
@@ -220,15 +220,11 @@ namespace
                 specBonus = 5;
             }
 
-            npcStats.getSkill(skillIndex)
-                .setBase(std::min(round_ieee_754(npcStats.getSkill(skillIndex).getBase() + 5 + raceBonus + specBonus
+            npcStats.getSkill(skill->mId)
+                .setBase(std::min(round_ieee_754(npcStats.getSkill(skill->mId).getBase() + 5 + raceBonus + specBonus
                                       + (int(level) - 1) * (majorMultiplier + specMultiplier)),
                     100)); // Must gracefully handle level 0
         }
-
-        int skills[ESM::Skill::Length];
-        for (int i = 0; i < ESM::Skill::Length; ++i)
-            skills[i] = npcStats.getSkill(i).getBase();
 
         int attributes[ESM::Attribute::Length];
         for (int i = 0; i < ESM::Attribute::Length; ++i)
@@ -236,7 +232,7 @@ namespace
 
         if (!spellsInitialised)
         {
-            std::vector<ESM::RefId> spells = MWMechanics::autoCalcNpcSpells(skills, attributes, race);
+            std::vector<ESM::RefId> spells = MWMechanics::autoCalcNpcSpells(npcStats.getSkills(), attributes, race);
             npcStats.getSpells().addAllToInstance(spells);
         }
     }
@@ -315,7 +311,7 @@ namespace MWClass
                 gold = ref->mBase->mNpdt.mGold;
 
                 for (size_t i = 0; i < ref->mBase->mNpdt.mSkills.size(); ++i)
-                    data->mNpcStats.getSkill(i).setBase(ref->mBase->mNpdt.mSkills[i]);
+                    data->mNpcStats.getSkill(ESM::Skill::indexToRefId(i)).setBase(ref->mBase->mNpdt.mSkills[i]);
 
                 data->mNpcStats.setAttribute(ESM::Attribute::Strength, ref->mBase->mNpdt.mStrength);
                 data->mNpcStats.setAttribute(ESM::Attribute::Intelligence, ref->mBase->mNpdt.mIntelligence);
@@ -593,7 +589,7 @@ namespace MWClass
         if (!weapon.isEmpty())
             weapskill = weapon.getClass().getEquipmentSkill(weapon);
 
-        float hitchance = MWMechanics::getHitChance(ptr, victim, getSkill(ptr, weapskill));
+        float hitchance = MWMechanics::getHitChance(ptr, victim, getSkill(ptr, ESM::Skill::indexToRefId(weapskill)));
 
         return Misc::Rng::roll0to99(world->getPrng()) < hitchance;
     }
@@ -1052,7 +1048,7 @@ namespace MWClass
         const float encumbranceTerm = gmst.fJumpEncumbranceBase->mValue.getFloat()
             + gmst.fJumpEncumbranceMultiplier->mValue.getFloat() * (1.0f - Npc::getNormalizedEncumbrance(ptr));
 
-        float a = getSkill(ptr, ESM::Skill::Acrobatics);
+        float a = Class::getSkill(ptr, ESM::Skill::Acrobatics);
         float b = 0.0f;
         if (a > 50.0f)
         {
@@ -1185,7 +1181,7 @@ namespace MWClass
 
         float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
         float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
-        float unarmoredSkill = getSkill(ptr, ESM::Skill::Unarmored);
+        float unarmoredSkill = Class::getSkill(ptr, ESM::Skill::Unarmored);
 
         float ratings[MWWorld::InventoryStore::Slots];
         for (int i = 0; i < MWWorld::InventoryStore::Slots; i++)
@@ -1355,9 +1351,9 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    float Npc::getSkill(const MWWorld::Ptr& ptr, int skill) const
+    float Npc::getSkill(const MWWorld::Ptr& ptr, ESM::RefId id) const
     {
-        return getNpcStats(ptr).getSkill(skill).getModified();
+        return getNpcStats(ptr).getSkill(id).getModified();
     }
 
     int Npc::getBloodTexture(const MWWorld::ConstPtr& ptr) const
@@ -1550,7 +1546,7 @@ namespace MWClass
     {
         const GMST& gmst = getGmst();
         return getWalkSpeed(ptr)
-            * (0.01f * getSkill(ptr, ESM::Skill::Athletics) * gmst.fAthleticsRunBonus->mValue.getFloat()
+            * (0.01f * Class::getSkill(ptr, ESM::Skill::Athletics) * gmst.fAthleticsRunBonus->mValue.getFloat()
                 + gmst.fBaseRunMultiplier->mValue.getFloat());
     }
 

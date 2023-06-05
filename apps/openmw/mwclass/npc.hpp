@@ -134,7 +134,7 @@ namespace MWClass
 
         std::string getModel(const MWWorld::ConstPtr& ptr) const override;
 
-        float getSkill(const MWWorld::Ptr& ptr, int skill) const override;
+        float getSkill(const MWWorld::Ptr& ptr, ESM::RefId id) const override;
 
         /// Get a blood texture suitable for \a ptr (see Blood Texture 0-2 in Morrowind.ini)
         int getBloodTexture(const MWWorld::ConstPtr& ptr) const override;

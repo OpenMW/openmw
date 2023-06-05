@@ -565,7 +565,7 @@ namespace MWMechanics
             case ESM::MagicEffect::DrainSkill:
                 if (enemy.isEmpty() || !enemy.getClass().isNpc())
                     return 0.f;
-                if (enemy.getClass().getSkill(enemy, effect.mSkill) <= 0)
+                if (enemy.getClass().getSkill(enemy, ESM::Skill::indexToRefId(effect.mSkill)) <= 0)
                     return 0.f;
                 break;
 

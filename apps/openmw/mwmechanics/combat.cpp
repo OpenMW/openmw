@@ -122,7 +122,8 @@ namespace MWMechanics
         if (weapon.isEmpty())
             attackerSkill = attacker.getClass().getSkill(attacker, ESM::Skill::HandToHand);
         else
-            attackerSkill = attacker.getClass().getSkill(attacker, weapon.getClass().getEquipmentSkill(weapon));
+            attackerSkill = attacker.getClass().getSkill(
+                attacker, ESM::Skill::indexToRefId(weapon.getClass().getEquipmentSkill(weapon)));
         float attackerTerm = attackerSkill + 0.2f * attackerStats.getAttribute(ESM::Attribute::Agility).getModified()
             + 0.1f * attackerStats.getAttribute(ESM::Attribute::Luck).getModified();
         attackerTerm *= attackerStats.getFatigueTerm();
@@ -227,7 +228,7 @@ namespace MWMechanics
             if (attacker == getPlayer())
                 MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
-            int skillValue = attacker.getClass().getSkill(attacker, weaponSkill);
+            int skillValue = attacker.getClass().getSkill(attacker, ESM::Skill::indexToRefId(weaponSkill));
 
             if (Misc::Rng::roll0to99(world->getPrng()) >= getHitChance(attacker, victim, skillValue))
             {
