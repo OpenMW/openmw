@@ -111,20 +111,18 @@ namespace
         {
             float modifierSum = 0;
 
-            for (int j = 0; j < ESM::Skill::Length; ++j)
+            for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
             {
-                const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(j);
-
-                if (skill->mData.mAttribute != attribute)
+                if (skill.mData.mAttribute != attribute)
                     continue;
 
                 // is this a minor or major skill?
                 float add = 0.2f;
                 for (const auto& skills : class_->mData.mSkills)
                 {
-                    if (skills[0] == j)
+                    if (skills[0] == skill.mIndex)
                         add = 0.5;
-                    if (skills[1] == j)
+                    if (skills[1] == skill.mIndex)
                         add = 1.0;
                 }
                 modifierSum += add;
@@ -189,7 +187,7 @@ namespace
             }
         }
 
-        for (int skillIndex = 0; skillIndex < ESM::Skill::Length; ++skillIndex)
+        for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
         {
             float majorMultiplier = 0.1f;
             float specMultiplier = 0.0f;
@@ -198,14 +196,14 @@ namespace
             int specBonus = 0;
 
             auto bonusIt = std::find_if(race->mData.mBonus.begin(), race->mData.mBonus.end(),
-                [skillIndex](const auto& bonus) { return bonus.mSkill == skillIndex; });
+                [&](const auto& bonus) { return bonus.mSkill == skill.mIndex; });
             if (bonusIt != race->mData.mBonus.end())
                 raceBonus = bonusIt->mBonus;
 
             for (const auto& skills : class_->mData.mSkills)
             {
                 // is this a minor or major skill?
-                if (std::find(skills.begin(), skills.end(), skillIndex) != skills.end())
+                if (std::find(skills.begin(), skills.end(), skill.mIndex) != skills.end())
                 {
                     majorMultiplier = 1.0f;
                     break;
@@ -213,16 +211,15 @@ namespace
             }
 
             // is this skill in the same Specialization as the class?
-            const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(skillIndex);
-            if (skill->mData.mSpecialization == class_->mData.mSpecialization)
+            if (skill.mData.mSpecialization == class_->mData.mSpecialization)
             {
                 specMultiplier = 0.5f;
                 specBonus = 5;
             }
 
-            npcStats.getSkill(skill->mId)
-                .setBase(std::min(round_ieee_754(npcStats.getSkill(skill->mId).getBase() + 5 + raceBonus + specBonus
-                                      + (int(level) - 1) * (majorMultiplier + specMultiplier)),
+            npcStats.getSkill(skill.mId).setBase(
+                std::min(round_ieee_754(npcStats.getSkill(skill.mId).getBase() + 5 + raceBonus + specBonus
+                             + (int(level) - 1) * (majorMultiplier + specMultiplier)),
                     100)); // Must gracefully handle level 0
         }
 
