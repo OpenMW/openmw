@@ -496,7 +496,7 @@ Ubuntu_GCC_integration_tests_asan:
       - build/OpenMW-*.dmg
       - "build/**/*.log"
 
-macOS12_Xcode14_amd64:
+.macOS12_Xcode14_amd64:
   extends: .MacOS
   image: macos-12-xcode-14
   tags:
@@ -507,7 +507,7 @@ macOS12_Xcode14_amd64:
     CCACHE_SIZE: 3G
     MACOS_AMD64: 1
 
-macOS13_Xcode14_arm64:
+.macOS13_Xcode14_arm64:
   extends: .MacOS
   image: macos-12-xcode-14
   tags:
@@ -722,7 +722,7 @@ macOS13_Xcode14_arm64:
   variables:
     config: "Debug"
 
-Windows_MSBuild_RelWithDebInfo:
+.Windows_MSBuild_RelWithDebInfo:
   extends:
     - .Windows_MSBuild_Base
   variables:
