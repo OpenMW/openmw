@@ -24,9 +24,10 @@ namespace
 {
     using SelfObject = MWLua::SelfObject;
     using ObjectVariant = MWLua::ObjectVariant;
+    using Index = const SelfObject::CachedStat::Index&;
 
-    template <class T, class I>
-    auto addIndexedAccessor(I index)
+    template <class T>
+    auto addIndexedAccessor(Index index)
     {
         return [index](const sol::object& o) { return T::create(ObjectVariant(o), index); };
     }
@@ -40,7 +41,7 @@ namespace
 
     template <class G>
     sol::object getValue(const MWLua::Context& context, const ObjectVariant& obj, SelfObject::CachedStat::Setter setter,
-        int index, std::string_view prop, G getter)
+        Index index, std::string_view prop, G getter)
     {
         if (obj.isSelfObject())
         {
@@ -99,14 +100,14 @@ namespace MWLua
             return sol::make_object(context.mLua->sol(), ptr.getClass().getNpcStats(ptr).getLevelProgress());
         }
 
-        static std::optional<LevelStat> create(ObjectVariant object, int index)
+        static std::optional<LevelStat> create(ObjectVariant object, Index)
         {
             if (!object.ptr().getClass().isActor())
                 return {};
             return LevelStat{ std::move(object) };
         }
 
-        static void setValue(int, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
+        static void setValue(Index, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
         {
             auto& stats = ptr.getClass().getCreatureStats(ptr);
             if (prop == "current")
@@ -135,10 +136,11 @@ namespace MWLua
                 });
         }
 
-        static std::optional<DynamicStat> create(ObjectVariant object, int index)
+        static std::optional<DynamicStat> create(ObjectVariant object, Index i)
         {
             if (!object.ptr().getClass().isActor())
                 return {};
+            int index = std::get<int>(i);
             return DynamicStat{ std::move(object), index };
         }
 
@@ -149,8 +151,9 @@ namespace MWLua
             obj->mStatsCache[SelfObject::CachedStat{ &DynamicStat::setValue, mIndex, prop }] = value;
         }
 
-        static void setValue(int index, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
+        static void setValue(Index i, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
         {
+            int index = std::get<int>(i);
             auto& stats = ptr.getClass().getCreatureStats(ptr);
             auto stat = stats.getDynamic(index);
             float floatValue = LuaUtil::cast<float>(value);
@@ -193,10 +196,11 @@ namespace MWLua
             return std::max(0.f, base - damage + modifier); // Should match AttributeValue::getModified
         }
 
-        static std::optional<AttributeStat> create(ObjectVariant object, int index)
+        static std::optional<AttributeStat> create(ObjectVariant object, Index i)
         {
             if (!object.ptr().getClass().isActor())
                 return {};
+            int index = std::get<int>(i);
             return AttributeStat{ std::move(object), index };
         }
 
@@ -207,8 +211,9 @@ namespace MWLua
             obj->mStatsCache[SelfObject::CachedStat{ &AttributeStat::setValue, mIndex, prop }] = value;
         }
 
-        static void setValue(int index, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
+        static void setValue(Index i, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
         {
+            int index = std::get<int>(i);
             auto& stats = ptr.getClass().getCreatureStats(ptr);
             auto stat = stats.getAttribute(index);
             float floatValue = LuaUtil::cast<float>(value);
@@ -255,9 +260,9 @@ namespace MWLua
         template <class G>
         sol::object get(const Context& context, std::string_view prop, G getter) const
         {
-            return getValue(context, mObject, &SkillStat::setValue, mId.getIf<ESM::IndexRefId>()->getValue(), prop,
-                [this, getter](
-                    const MWWorld::Ptr& ptr) { return (ptr.getClass().getNpcStats(ptr).getSkill(mId).*getter)(); });
+            return getValue(context, mObject, &SkillStat::setValue, mId, prop, [this, getter](const MWWorld::Ptr& ptr) {
+                return (ptr.getClass().getNpcStats(ptr).getSkill(mId).*getter)();
+            });
         }
 
         float getModified(const Context& context) const
@@ -270,16 +275,16 @@ namespace MWLua
 
         sol::object getProgress(const Context& context) const
         {
-            return getValue(context, mObject, &SkillStat::setValue, mId.getIf<ESM::IndexRefId>()->getValue(),
-                "progress", [this](const MWWorld::Ptr& ptr) {
-                    return getProgress(ptr, mId, ptr.getClass().getNpcStats(ptr).getSkill(mId));
-                });
+            return getValue(context, mObject, &SkillStat::setValue, mId, "progress", [this](const MWWorld::Ptr& ptr) {
+                return getProgress(ptr, mId, ptr.getClass().getNpcStats(ptr).getSkill(mId));
+            });
         }
 
-        static std::optional<SkillStat> create(ObjectVariant object, ESM::RefId id)
+        static std::optional<SkillStat> create(ObjectVariant object, Index index)
         {
             if (!object.ptr().getClass().isNpc())
                 return {};
+            ESM::RefId id = std::get<ESM::RefId>(index);
             return SkillStat{ std::move(object), id };
         }
 
@@ -287,14 +292,12 @@ namespace MWLua
         {
             SelfObject* obj = mObject.asSelfObject();
             addStatUpdateAction(context.mLuaManager, *obj);
-            obj->mStatsCache[SelfObject::CachedStat{
-                &SkillStat::setValue, int(mId.getIf<ESM::IndexRefId>()->getValue()), prop }]
-                = value;
+            obj->mStatsCache[SelfObject::CachedStat{ &SkillStat::setValue, mId, prop }] = value;
         }
 
-        static void setValue(int index, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
+        static void setValue(Index index, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
         {
-            ESM::RefId id = ESM::Skill::indexToRefId(index);
+            ESM::RefId id = std::get<ESM::RefId>(index);
             auto& stats = ptr.getClass().getNpcStats(ptr);
             auto stat = stats.getSkill(id);
             float floatValue = LuaUtil::cast<float>(value);
