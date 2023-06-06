@@ -496,17 +496,6 @@ Ubuntu_GCC_integration_tests_asan:
       - build/OpenMW-*.dmg
       - "build/**/*.log"
 
-macOS12_Xcode14_amd64:
-  extends: .MacOS
-  image: macos-12-xcode-14
-  tags:
-    - shared-macos-amd64
-  cache:
-    key: macOS12_Xcode14_amd64.v1
-  variables:
-    CCACHE_SIZE: 3G
-    MACOS_AMD64: 1
-
 macOS13_Xcode14_arm64:
   extends: .MacOS
   image: macos-12-xcode-14
