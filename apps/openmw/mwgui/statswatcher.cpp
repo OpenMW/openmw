@@ -125,13 +125,13 @@ namespace MWGui
                 setValue("class", cls->mName);
 
                 size_t size = cls->mData.mSkills.size();
-                MWBase::WindowManager::SkillList majorSkills(size);
-                MWBase::WindowManager::SkillList minorSkills(size);
+                std::vector<ESM::RefId> majorSkills(size);
+                std::vector<ESM::RefId> minorSkills(size);
 
                 for (size_t i = 0; i < size; ++i)
                 {
-                    minorSkills[i] = cls->mData.mSkills[i][0];
-                    majorSkills[i] = cls->mData.mSkills[i][1];
+                    minorSkills[i] = ESM::Skill::indexToRefId(cls->mData.mSkills[i][0]);
+                    majorSkills[i] = ESM::Skill::indexToRefId(cls->mData.mSkills[i][1]);
                 }
 
                 configureSkills(majorSkills, minorSkills);
@@ -181,7 +181,7 @@ namespace MWGui
             listener->setValue(id, value);
     }
 
-    void StatsWatcher::configureSkills(const std::vector<int>& major, const std::vector<int>& minor)
+    void StatsWatcher::configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor)
     {
         for (StatsListener* listener : mListeners)
             listener->configureSkills(major, minor);

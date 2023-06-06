@@ -145,7 +145,7 @@ namespace MWGui
             mReviewDialog->setSkillValue(id, value);
     }
 
-    void CharacterCreation::configureSkills(const SkillList& major, const SkillList& minor)
+    void CharacterCreation::configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor)
     {
         if (mReviewDialog)
             mReviewDialog->configureSkills(major, minor);

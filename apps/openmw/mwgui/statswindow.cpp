@@ -304,21 +304,21 @@ namespace MWGui
         }
     }
 
-    void StatsWindow::configureSkills(const std::vector<int>& major, const std::vector<int>& minor)
+    void StatsWindow::configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor)
     {
         mMajorSkills = major;
         mMinorSkills = minor;
 
         // Update misc skills with the remaining skills not in major or minor
-        std::set<int> skillSet;
+        std::set<ESM::RefId> skillSet;
         std::copy(major.begin(), major.end(), std::inserter(skillSet, skillSet.begin()));
         std::copy(minor.begin(), minor.end(), std::inserter(skillSet, skillSet.begin()));
         mMiscSkills.clear();
         const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
         for (const auto& skill : store)
         {
-            if (!skillSet.contains(skill.mIndex))
-                mMiscSkills.push_back(skill.mIndex);
+            if (!skillSet.contains(skill.mId))
+                mMiscSkills.push_back(skill.mId);
         }
 
         updateSkillArea();
@@ -482,7 +482,7 @@ namespace MWGui
         return skillNameWidget;
     }
 
-    void StatsWindow::addSkills(const SkillList& skills, const std::string& titleId, const std::string& titleDefault,
+    void StatsWindow::addSkills(const std::vector<ESM::RefId>& skills, const std::string& titleId, const std::string& titleDefault,
         MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
         // Add a line separator if there are items above
@@ -495,9 +495,9 @@ namespace MWGui
             MWBase::Environment::get().getWindowManager()->getGameSettingString(titleId, titleDefault), coord1, coord2);
 
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
-        for (const int skillId : skills)
+        for (const ESM::RefId& skillId : skills)
         {
-            const ESM::Skill* skill = esmStore.get<ESM::Skill>().search(ESM::Skill::indexToRefId(skillId));
+            const ESM::Skill* skill = esmStore.get<ESM::Skill>().search(skillId);
             if (!skill) // Skip unknown skills
                 continue;
 

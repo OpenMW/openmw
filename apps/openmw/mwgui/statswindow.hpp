@@ -12,8 +12,6 @@ namespace MWGui
     public:
         typedef std::map<ESM::RefId, int> FactionList;
 
-        typedef std::vector<int> SkillList;
-
         StatsWindow(DragAndDrop* drag);
 
         /// automatically updates all the data in the stats window, but only if it has changed.
@@ -28,7 +26,7 @@ namespace MWGui
         void setValue(std::string_view id, const std::string& value) override;
         void setValue(std::string_view id, int value) override;
         void setValue(ESM::RefId id, const MWMechanics::SkillValue& value) override;
-        void configureSkills(const SkillList& major, const SkillList& minor) override;
+        void configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor) override;
 
         void setReputation(int reputation)
         {
@@ -47,8 +45,8 @@ namespace MWGui
         void onOpen() override { onWindowResize(mMainWidget->castType<MyGUI::Window>()); }
 
     private:
-        void addSkills(const SkillList& skills, const std::string& titleId, const std::string& titleDefault,
-            MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
+        void addSkills(const std::vector<ESM::RefId>& skills, const std::string& titleId,
+            const std::string& titleDefault, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
         void addSeparator(MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
         void addGroup(std::string_view label, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
         std::pair<MyGUI::TextBox*, MyGUI::TextBox*> addValueItem(std::string_view text, const std::string& value,
@@ -67,7 +65,7 @@ namespace MWGui
 
         MyGUI::ScrollView* mSkillView;
 
-        SkillList mMajorSkills, mMinorSkills, mMiscSkills;
+        std::vector<ESM::RefId> mMajorSkills, mMinorSkills, mMiscSkills;
         std::map<ESM::RefId, MWMechanics::SkillValue> mSkillValues;
         std::map<ESM::RefId, std::pair<MyGUI::TextBox*, MyGUI::TextBox*>> mSkillWidgetMap;
         std::map<std::string, MyGUI::Widget*> mFactionWidgetMap;

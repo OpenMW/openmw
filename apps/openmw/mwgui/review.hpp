@@ -24,7 +24,6 @@ namespace MWGui
             CLASS_DIALOG,
             BIRTHSIGN_DIALOG
         };
-        typedef std::vector<int> SkillList;
 
         ReviewDialog();
 
@@ -41,7 +40,7 @@ namespace MWGui
 
         void setAttribute(ESM::Attribute::AttributeID attributeId, const MWMechanics::AttributeValue& value);
 
-        void configureSkills(const SkillList& major, const SkillList& minor);
+        void configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor);
         void setSkillValue(ESM::RefId id, const MWMechanics::SkillValue& value);
 
         void onOpen() override;
@@ -76,8 +75,8 @@ namespace MWGui
         void onMouseWheel(MyGUI::Widget* _sender, int _rel);
 
     private:
-        void addSkills(const SkillList& skills, const std::string& titleId, const std::string& titleDefault,
-            MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
+        void addSkills(const std::vector<ESM::RefId>& skills, const std::string& titleId,
+            const std::string& titleDefault, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
         void addSeparator(MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
         void addGroup(std::string_view label, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);
         MyGUI::TextBox* addValueItem(std::string_view text, const std::string& value, const std::string& state,
@@ -93,7 +92,7 @@ namespace MWGui
 
         std::map<int, Widgets::MWAttributePtr> mAttributeWidgets;
 
-        SkillList mMajorSkills, mMinorSkills, mMiscSkills;
+        std::vector<ESM::RefId> mMajorSkills, mMinorSkills, mMiscSkills;
         std::map<ESM::RefId, MWMechanics::SkillValue> mSkillValues;
         std::map<ESM::RefId, MyGUI::TextBox*> mSkillWidgetMap;
         ESM::RefId mRaceId, mBirthSignId;

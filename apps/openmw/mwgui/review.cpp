@@ -226,21 +226,21 @@ namespace MWGui
         mUpdateSkillArea = true;
     }
 
-    void ReviewDialog::configureSkills(const std::vector<int>& major, const std::vector<int>& minor)
+    void ReviewDialog::configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor)
     {
         mMajorSkills = major;
         mMinorSkills = minor;
 
         // Update misc skills with the remaining skills not in major or minor
-        std::set<int> skillSet;
+        std::set<ESM::RefId> skillSet;
         std::copy(major.begin(), major.end(), std::inserter(skillSet, skillSet.begin()));
         std::copy(minor.begin(), minor.end(), std::inserter(skillSet, skillSet.begin()));
         mMiscSkills.clear();
         const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
         for (const ESM::Skill& skill : store)
         {
-            if (!skillSet.contains(skill.mIndex))
-                mMiscSkills.push_back(skill.mIndex);
+            if (!skillSet.contains(skill.mId))
+                mMiscSkills.push_back(skill.mId);
         }
 
         mUpdateSkillArea = true;
@@ -328,8 +328,8 @@ namespace MWGui
         coord2.top += lineHeight;
     }
 
-    void ReviewDialog::addSkills(const SkillList& skills, const std::string& titleId, const std::string& titleDefault,
-        MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
+    void ReviewDialog::addSkills(const std::vector<ESM::RefId>& skills, const std::string& titleId,
+        const std::string& titleDefault, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
         // Add a line separator if there are items above
         if (!mSkillWidgets.empty())
@@ -340,10 +340,9 @@ namespace MWGui
         addGroup(
             MWBase::Environment::get().getWindowManager()->getGameSettingString(titleId, titleDefault), coord1, coord2);
 
-        for (const int& skillIndex : skills)
+        for (const ESM::RefId& skillId : skills)
         {
-            const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().search(
-                ESM::Skill::indexToRefId(skillIndex));
+            const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().search(skillId);
             if (!skill) // Skip unknown skills
                 continue;
             const MWMechanics::SkillValue& stat = mSkillValues.find(skill->mId)->second;

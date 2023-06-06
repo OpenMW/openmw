@@ -38,8 +38,6 @@ namespace MWGui
     class CharacterCreation : public StatsListener
     {
     public:
-        typedef std::vector<int> SkillList;
-
         CharacterCreation(osg::Group* parent, Resource::ResourceSystem* resourceSystem);
         virtual ~CharacterCreation();
 
@@ -49,7 +47,7 @@ namespace MWGui
         void setValue(std::string_view id, const MWMechanics::AttributeValue& value) override;
         void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value) override;
         void setValue(ESM::RefId id, const MWMechanics::SkillValue& value) override;
-        void configureSkills(const SkillList& major, const SkillList& minor) override;
+        void configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor) override;
 
         void onFrame(float duration);
 
@@ -57,7 +55,7 @@ namespace MWGui
         osg::Group* mParent;
         Resource::ResourceSystem* mResourceSystem;
 
-        SkillList mPlayerMajorSkills, mPlayerMinorSkills;
+        std::vector<ESM::RefId> mPlayerMajorSkills, mPlayerMinorSkills;
         std::map<int, MWMechanics::AttributeValue> mPlayerAttributes;
         std::map<ESM::RefId, MWMechanics::SkillValue> mPlayerSkillValues;
 
