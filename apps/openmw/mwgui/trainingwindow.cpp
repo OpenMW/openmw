@@ -160,7 +160,7 @@ namespace MWGui
         MWWorld::LiveCellRef<ESM::NPC>* playerRef = player.get<ESM::NPC>();
 
         const ESM::Class* class_ = store.get<ESM::Class>().find(playerRef->mBase->mClass);
-        pcStats.increaseSkill(skill->mIndex, *class_, true);
+        pcStats.increaseSkill(skill->mId, *class_, true);
 
         // remove gold
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price);

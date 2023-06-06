@@ -654,7 +654,7 @@ namespace MWClass
             int weapskill = ESM::Skill::HandToHand;
             if (!weapon.isEmpty())
                 weapskill = weapon.getClass().getEquipmentSkill(weapon);
-            skillUsageSucceeded(ptr, weapskill, 0);
+            skillUsageSucceeded(ptr, ESM::Skill::indexToRefId(weapskill), 0);
 
             const MWMechanics::AiSequence& seq = victim.getClass().getCreatureStats(victim).getAiSequence();
 
@@ -843,7 +843,8 @@ namespace MWClass
                     }
 
                     if (ptr == MWMechanics::getPlayer())
-                        skillUsageSucceeded(ptr, armor.getClass().getEquipmentSkill(armor), 0);
+                        skillUsageSucceeded(
+                            ptr, ESM::Skill::indexToRefId(armor.getClass().getEquipmentSkill(armor)), 0);
 
                     switch (armor.getClass().getEquipmentSkill(armor))
                     {
@@ -859,7 +860,7 @@ namespace MWClass
                     }
                 }
                 else if (ptr == MWMechanics::getPlayer())
-                    skillUsageSucceeded(ptr, ESM::Skill::Unarmored, 0);
+                    Class::skillUsageSucceeded(ptr, ESM::Skill::Unarmored, 0);
             }
         }
 
@@ -1154,7 +1155,7 @@ namespace MWClass
         return cast.cast(recordId);
     }
 
-    void Npc::skillUsageSucceeded(const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor) const
+    void Npc::skillUsageSucceeded(const MWWorld::Ptr& ptr, ESM::RefId skill, int usageType, float extraFactor) const
     {
         MWMechanics::NpcStats& stats = getNpcStats(ptr);
 

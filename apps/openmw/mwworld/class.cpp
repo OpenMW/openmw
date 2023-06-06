@@ -52,7 +52,7 @@ namespace MWWorld
         return false;
     }
 
-    void Class::skillUsageSucceeded(const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor) const
+    void Class::skillUsageSucceeded(const MWWorld::Ptr& ptr, ESM::RefId skill, int usageType, float extraFactor) const
     {
         throw std::runtime_error("class does not represent an actor");
     }

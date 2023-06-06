@@ -235,10 +235,15 @@ namespace MWWorld
         ///< Consume an item, e. g. a potion.
 
         virtual void skillUsageSucceeded(
-            const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor = 1.f) const;
+            const MWWorld::Ptr& ptr, ESM::RefId skill, int usageType, float extraFactor = 1.f) const;
         ///< Inform actor \a ptr that a skill use has succeeded.
         ///
         /// (default implementations: throws an exception)
+        void skillUsageSucceeded(
+            const MWWorld::Ptr& ptr, ESM::Skill::SkillEnum index, int usageType, float extraFactor = 1.f) const
+        {
+            return skillUsageSucceeded(ptr, ESM::Skill::indexToRefId(index), usageType, extraFactor);
+        };
 
         virtual bool isEssential(const MWWorld::ConstPtr& ptr) const;
         ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)

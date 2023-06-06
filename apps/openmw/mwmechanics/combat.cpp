@@ -259,7 +259,7 @@ namespace MWMechanics
             applyWerewolfDamageMult(victim, projectile, damage);
 
             if (attacker == getPlayer())
-                attacker.getClass().skillUsageSucceeded(attacker, weaponSkill, 0);
+                attacker.getClass().skillUsageSucceeded(attacker, ESM::Skill::indexToRefId(weaponSkill), 0);
 
             const MWMechanics::AiSequence& sequence = victim.getClass().getCreatureStats(victim).getAiSequence();
             bool unaware = attacker == getPlayer() && !sequence.isInCombat()

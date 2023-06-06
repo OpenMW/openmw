@@ -86,10 +86,10 @@ namespace MWMechanics
 
         float getSkillProgressRequirement(ESM::RefId id, const ESM::Class& class_) const;
 
-        void useSkill(int skillIndex, const ESM::Class& class_, int usageType = -1, float extraFactor = 1.f);
+        void useSkill(ESM::RefId id, const ESM::Class& class_, int usageType = -1, float extraFactor = 1.f);
         ///< Increase skill by usage.
 
-        void increaseSkill(int skillIndex, const ESM::Class& class_, bool preserveProgress, bool readBook = false);
+        void increaseSkill(ESM::RefId id, const ESM::Class& class_, bool preserveProgress, bool readBook = false);
 
         int getLevelProgress() const;
 

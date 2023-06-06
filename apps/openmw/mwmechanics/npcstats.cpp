@@ -198,9 +198,9 @@ float MWMechanics::NpcStats::getSkillProgressRequirement(ESM::RefId id, const ES
     return progressRequirement;
 }
 
-void MWMechanics::NpcStats::useSkill(int skillIndex, const ESM::Class& class_, int usageType, float extraFactor)
+void MWMechanics::NpcStats::useSkill(ESM::RefId id, const ESM::Class& class_, int usageType, float extraFactor)
 {
-    const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(skillIndex);
+    const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(id);
     float skillGain = 1;
     if (usageType >= 4)
         throw std::runtime_error("skill usage type out of range");
@@ -219,14 +219,13 @@ void MWMechanics::NpcStats::useSkill(int skillIndex, const ESM::Class& class_, i
     if (int(value.getProgress()) >= int(getSkillProgressRequirement(skill->mId, class_)))
     {
         // skill levelled up
-        increaseSkill(skillIndex, class_, false);
+        increaseSkill(skill->mId, class_, false);
     }
 }
 
-void MWMechanics::NpcStats::increaseSkill(
-    int skillIndex, const ESM::Class& class_, bool preserveProgress, bool readBook)
+void MWMechanics::NpcStats::increaseSkill(ESM::RefId id, const ESM::Class& class_, bool preserveProgress, bool readBook)
 {
-    const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(skillIndex);
+    const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(id);
     float base = getSkill(skill->mId).getBase();
 
     if (base >= 100.f)
@@ -240,13 +239,13 @@ void MWMechanics::NpcStats::increaseSkill(
     int increase = gmst.find("iLevelupMiscMultAttriubte")->mValue.getInteger(); // Note: GMST has a typo
     for (const auto& skills : class_.mData.mSkills)
     {
-        if (skills[0] == skillIndex)
+        if (skills[0] == skill->mIndex)
         {
             mLevelProgress += gmst.find("iLevelUpMinorMult")->mValue.getInteger();
             increase = gmst.find("iLevelUpMinorMultAttribute")->mValue.getInteger();
             break;
         }
-        else if (skills[1] == skillIndex)
+        else if (skills[1] == skill->mIndex)
         {
             mLevelProgress += gmst.find("iLevelUpMajorMult")->mValue.getInteger();
             increase = gmst.find("iLevelUpMajorMultAttribute")->mValue.getInteger();

@@ -120,7 +120,7 @@ namespace MWClass
         /// @param rendering Indicates if the scale to adjust is for the rendering mesh, or for the collision mesh
 
         void skillUsageSucceeded(
-            const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor = 1.f) const override;
+            const MWWorld::Ptr& ptr, ESM::RefId skill, int usageType, float extraFactor = 1.f) const override;
         ///< Inform actor \a ptr that a skill use has succeeded.
 
         bool isEssential(const MWWorld::ConstPtr& ptr) const override;
