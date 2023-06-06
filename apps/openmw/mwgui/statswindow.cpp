@@ -482,8 +482,8 @@ namespace MWGui
         return skillNameWidget;
     }
 
-    void StatsWindow::addSkills(const std::vector<ESM::RefId>& skills, const std::string& titleId, const std::string& titleDefault,
-        MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
+    void StatsWindow::addSkills(const std::vector<ESM::RefId>& skills, const std::string& titleId,
+        const std::string& titleDefault, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
         // Add a line separator if there are items above
         if (!mSkillWidgets.empty())
