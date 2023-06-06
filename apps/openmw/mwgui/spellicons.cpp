@@ -83,7 +83,8 @@ namespace MWGui
 
                 if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
                 {
-                    const ESM::Skill* skill = store->get<ESM::Skill>().find(effectInfo.mKey.mArg);
+                    const ESM::Skill* skill
+                        = store->get<ESM::Skill>().find(ESM::Skill::indexToRefId(effectInfo.mKey.mArg));
                     sourcesDescription += " (" + skill->mName + ')';
                 }
                 if (effect->mData.mFlags & ESM::MagicEffect::TargetAttribute)

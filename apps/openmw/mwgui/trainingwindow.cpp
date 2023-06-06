@@ -110,7 +110,7 @@ namespace MWGui
 
             button->setSize(button->getTextSize().width + 12, button->getSize().height);
 
-            ToolTips::createSkillToolTip(button, skill->mIndex);
+            ToolTips::createSkillToolTip(button, skill->mId);
         }
 
         center();

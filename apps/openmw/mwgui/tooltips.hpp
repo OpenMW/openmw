@@ -93,7 +93,7 @@ namespace MWGui
 
         // these do not create an actual tooltip, but they fill in the data that is required so the tooltip
         // system knows what to show in case this widget is hovered
-        static void createSkillToolTip(MyGUI::Widget* widget, int skillId);
+        static void createSkillToolTip(MyGUI::Widget* widget, ESM::RefId skillId);
         static void createAttributeToolTip(MyGUI::Widget* widget, int attributeId);
         static void createSpecializationToolTip(MyGUI::Widget* widget, const std::string& name, int specId);
         static void createBirthsignToolTip(MyGUI::Widget* widget, const ESM::RefId& birthsignId);

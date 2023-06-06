@@ -805,9 +805,9 @@ namespace MWGui
         mFocusToolTipY = min_y;
     }
 
-    void ToolTips::createSkillToolTip(MyGUI::Widget* widget, int skillId)
+    void ToolTips::createSkillToolTip(MyGUI::Widget* widget, ESM::RefId skillId)
     {
-        if (skillId == -1)
+        if (skillId.empty())
             return;
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();

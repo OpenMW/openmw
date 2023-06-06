@@ -106,7 +106,7 @@ namespace MWWorld
         for (const auto& skill : store->get<ESM::Skill>())
         {
             // Acrobatics is set separately for some reason.
-            if (skill.mIndex == ESM::Skill::Acrobatics)
+            if (skill.mId == ESM::Skill::Acrobatics)
                 continue;
 
             MWMechanics::SkillValue& value = npcStats.getSkill(skill.mId);

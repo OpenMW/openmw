@@ -100,11 +100,10 @@ namespace MWGui
 
             typedef MWMechanics::Stat<float> SkillValue;
 
-            void setSkillId(ESM::Skill::SkillEnum skillId);
-            void setSkillNumber(int skillId);
+            void setSkillId(ESM::RefId skillId);
             void setSkillValue(const SkillValue& value);
 
-            ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
+            ESM::RefId getSkillId() const { return mSkillId; }
             const SkillValue& getSkillValue() const { return mValue; }
 
             // Events
@@ -125,7 +124,7 @@ namespace MWGui
         private:
             void updateWidgets();
 
-            ESM::Skill::SkillEnum mSkillId;
+            ESM::RefId mSkillId;
             SkillValue mValue;
             MyGUI::TextBox* mSkillNameWidget;
             MyGUI::TextBox* mSkillValueWidget;

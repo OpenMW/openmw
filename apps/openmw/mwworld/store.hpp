@@ -481,10 +481,6 @@ namespace MWWorld
     public:
         Store() = default;
 
-        using TypedDynamicStore<ESM::Skill>::find;
-        // TODO delete
-        const ESM::Skill* find(int index) const { return find(ESM::Skill::indexToRefId(index)); }
-
         void setUp(const MWWorld::Store<ESM::GameSetting>& settings);
     };
 

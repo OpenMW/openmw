@@ -1,6 +1,7 @@
 #ifndef MWGUI_CLASS_H
 #define MWGUI_CLASS_H
 
+#include <array>
 #include <memory>
 
 #include <MyGUI_EditBox.h>
@@ -218,7 +219,7 @@ namespace MWGui
 
         bool exit() override;
 
-        ESM::Skill::SkillEnum getSkillId() const { return mSkillId; }
+        ESM::RefId getSkillId() const { return mSkillId; }
 
         // Events
         typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
@@ -242,7 +243,7 @@ namespace MWGui
         Widgets::MWSkillPtr mMagicSkill[9];
         Widgets::MWSkillPtr mStealthSkill[9];
 
-        ESM::Skill::SkillEnum mSkillId;
+        ESM::RefId mSkillId;
     };
 
     class DescriptionDialog : public WindowModal
@@ -278,8 +279,8 @@ namespace MWGui
         std::string getDescription() const;
         ESM::Class::Specialization getSpecializationId() const;
         std::vector<int> getFavoriteAttributes() const;
-        std::vector<ESM::Skill::SkillEnum> getMajorSkills() const;
-        std::vector<ESM::Skill::SkillEnum> getMinorSkills() const;
+        std::vector<ESM::RefId> getMajorSkills() const;
+        std::vector<ESM::RefId> getMinorSkills() const;
 
         void setNextButtonShow(bool shown);
 
@@ -318,8 +319,8 @@ namespace MWGui
         MyGUI::EditBox* mEditName;
         MyGUI::TextBox* mSpecializationName;
         Widgets::MWAttributePtr mFavoriteAttribute0, mFavoriteAttribute1;
-        Widgets::MWSkillPtr mMajorSkill[5];
-        Widgets::MWSkillPtr mMinorSkill[5];
+        std::array<Widgets::MWSkillPtr, 5> mMajorSkill;
+        std::array<Widgets::MWSkillPtr, 5> mMinorSkill;
         std::vector<Widgets::MWSkillPtr> mSkills;
         std::string mDescription;
 

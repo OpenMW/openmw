@@ -299,7 +299,7 @@ namespace MWMechanics
                 x *= 1.5f;
 
             float s = 0.f;
-            ESM::RefId skill = ESM::Skill::indexToRefId(spellSchoolToSkill(magicEffect->mData.mSchool));
+            ESM::RefId skill = spellSchoolToSkill(magicEffect->mData.mSchool);
             auto found = actorSkills.find(skill);
             if (found != actorSkills.end())
                 s = 2.f * found->second.getBase();
@@ -322,10 +322,13 @@ namespace MWMechanics
             return 100.f;
 
         float skillTerm = 0;
-        ESM::RefId skill = ESM::Skill::indexToRefId(spellSchoolToSkill(effectiveSchool));
-        auto found = actorSkills.find(skill);
-        if (found != actorSkills.end())
-            skillTerm = 2.f * found->second.getBase();
+        if (effectiveSchool != -1)
+        {
+            ESM::RefId skill = spellSchoolToSkill(effectiveSchool);
+            auto found = actorSkills.find(skill);
+            if (found != actorSkills.end())
+                skillTerm = 2.f * found->second.getBase();
+        }
         else
             calcWeakestSchool(
                 spell, actorSkills, effectiveSchool, skillTerm); // Note effectiveSchool is unused after this

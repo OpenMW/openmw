@@ -286,9 +286,9 @@ namespace MWGui
         exit();
     }
 
-    void EditEffectDialog::setSkill(int skill)
+    void EditEffectDialog::setSkill(ESM::RefId skill)
     {
-        mEffect.mSkill = skill;
+        mEffect.mSkill = skill.getIf<ESM::IndexRefId>()->getValue();
         eventEffectModified(mEffect);
     }
 

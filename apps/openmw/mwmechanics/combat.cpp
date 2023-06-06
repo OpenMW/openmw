@@ -122,8 +122,7 @@ namespace MWMechanics
         if (weapon.isEmpty())
             attackerSkill = attacker.getClass().getSkill(attacker, ESM::Skill::HandToHand);
         else
-            attackerSkill = attacker.getClass().getSkill(
-                attacker, ESM::Skill::indexToRefId(weapon.getClass().getEquipmentSkill(weapon)));
+            attackerSkill = attacker.getClass().getSkill(attacker, weapon.getClass().getEquipmentSkill(weapon));
         float attackerTerm = attackerSkill + 0.2f * attackerStats.getAttribute(ESM::Attribute::Agility).getModified()
             + 0.1f * attackerStats.getAttribute(ESM::Attribute::Luck).getModified();
         attackerTerm *= attackerStats.getFatigueTerm();
@@ -218,7 +217,7 @@ namespace MWMechanics
 
         bool validVictim = !victim.isEmpty() && victim.getClass().isActor();
 
-        int weaponSkill = ESM::Skill::Marksman;
+        ESM::RefId weaponSkill = ESM::Skill::Marksman;
         if (!weapon.isEmpty())
             weaponSkill = weapon.getClass().getEquipmentSkill(weapon);
 
@@ -228,7 +227,7 @@ namespace MWMechanics
             if (attacker == getPlayer())
                 MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
-            int skillValue = attacker.getClass().getSkill(attacker, ESM::Skill::indexToRefId(weaponSkill));
+            int skillValue = attacker.getClass().getSkill(attacker, weaponSkill);
 
             if (Misc::Rng::roll0to99(world->getPrng()) >= getHitChance(attacker, victim, skillValue))
             {
@@ -259,7 +258,7 @@ namespace MWMechanics
             applyWerewolfDamageMult(victim, projectile, damage);
 
             if (attacker == getPlayer())
-                attacker.getClass().skillUsageSucceeded(attacker, ESM::Skill::indexToRefId(weaponSkill), 0);
+                attacker.getClass().skillUsageSucceeded(attacker, weaponSkill, 0);
 
             const MWMechanics::AiSequence& sequence = victim.getClass().getCreatureStats(victim).getAiSequence();
             bool unaware = attacker == getPlayer() && !sequence.isInCombat()

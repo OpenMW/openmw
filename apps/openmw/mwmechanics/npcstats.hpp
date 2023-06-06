@@ -60,10 +60,6 @@ namespace MWMechanics
         void setCrimeId(int id);
 
         const SkillValue& getSkill(ESM::RefId id) const;
-        const SkillValue& getSkill(ESM::Skill::SkillEnum index) const
-        {
-            return getSkill(ESM::Skill::indexToRefId(index));
-        }
         SkillValue& getSkill(ESM::RefId id);
         void setSkill(ESM::RefId id, const SkillValue& value);
 

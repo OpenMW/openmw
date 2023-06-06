@@ -15,9 +15,9 @@
 
 namespace MWMechanics
 {
-    ESM::Skill::SkillEnum spellSchoolToSkill(int school)
+    ESM::RefId spellSchoolToSkill(int school)
     {
-        static const std::array<ESM::Skill::SkillEnum, 6> schoolSkillArray{
+        static const std::array<ESM::RefId, 6> schoolSkillArray{
             ESM::Skill::Alteration,
             ESM::Skill::Conjuration,
             ESM::Skill::Destruction,

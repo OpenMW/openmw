@@ -360,7 +360,7 @@ namespace MWGui
 
             for (int i = 0; i < 2; ++i)
             {
-                ToolTips::createSkillToolTip(mSkillWidgets[mSkillWidgets.size() - 1 - i], skill->mIndex);
+                ToolTips::createSkillToolTip(mSkillWidgets[mSkillWidgets.size() - 1 - i], skill->mId);
             }
 
             mSkillWidgetMap[skill->mId] = widget;

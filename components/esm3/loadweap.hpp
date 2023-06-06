@@ -109,13 +109,13 @@ namespace ESM
         ESM::RefId mSoundIdUp;
         std::string mAttachBone;
         std::string mSheathingBone;
-        Skill::SkillEnum mSkill;
+        ESM::RefId mSkill;
         Class mWeaponClass;
         int mAmmoType;
         int mFlags;
 
         WeaponType(std::string shortGroup, std::string longGroup, const std::string& soundId, std::string attachBone,
-            std::string sheathingBone, Skill::SkillEnum skill, Class weaponClass, int ammoType, int flags)
+            std::string sheathingBone, ESM::RefId skill, Class weaponClass, int ammoType, int flags)
             : mShortGroup(std::move(shortGroup))
             , mLongGroup(std::move(longGroup))
             , mSoundIdDown(ESM::RefId::stringRefId(soundId + " Down"))

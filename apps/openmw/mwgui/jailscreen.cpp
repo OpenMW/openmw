@@ -97,7 +97,7 @@ namespace MWGui
             skills.insert(skill);
 
             MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill->mId);
-            if (skill->mIndex == ESM::Skill::Security || skill->mIndex == ESM::Skill::Sneak)
+            if (skill->mId == ESM::Skill::Security || skill->mId == ESM::Skill::Sneak)
                 value.setBase(std::min(100.f, value.getBase() + 1));
             else
                 value.setBase(std::max(0.f, value.getBase() - 1));
@@ -118,7 +118,7 @@ namespace MWGui
         {
             int skillValue = player.getClass().getNpcStats(player).getSkill(skill->mId).getBase();
             std::string skillMsg = gmst.find("sNotifyMessage44")->mValue.getString();
-            if (skill->mIndex == ESM::Skill::Sneak || skill->mIndex == ESM::Skill::Security)
+            if (skill->mId == ESM::Skill::Sneak || skill->mId == ESM::Skill::Security)
                 skillMsg = gmst.find("sNotifyMessage39")->mValue.getString();
 
             skillMsg = Misc::StringUtils::format(skillMsg, skill->mName, skillValue);

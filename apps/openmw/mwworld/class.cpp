@@ -209,9 +209,9 @@ namespace MWWorld
         return std::make_pair(std::vector<int>(), false);
     }
 
-    int Class::getEquipmentSkill(const ConstPtr& ptr) const
+    ESM::RefId Class::getEquipmentSkill(const ConstPtr& ptr) const
     {
-        return -1;
+        return {};
     }
 
     int Class::getValue(const ConstPtr& ptr) const

@@ -414,13 +414,14 @@ namespace MWGui
         const ESM::Race* race = store.get<ESM::Race>().find(mCurrentRaceId);
         for (const auto& bonus : race->mData.mBonus)
         {
-            if (bonus.mSkill < 0 || bonus.mSkill >= ESM::Skill::Length) // Skip unknown skill indexes
+            ESM::RefId skill = ESM::Skill::indexToRefId(bonus.mSkill);
+            if (skill.empty()) // Skip unknown skill indexes
                 continue;
 
             skillWidget = mSkillList->createWidget<Widgets::MWSkill>("MW_StatNameValue", coord1, MyGUI::Align::Default);
-            skillWidget->setSkillId(ESM::Skill::SkillEnum(bonus.mSkill));
+            skillWidget->setSkillId(skill);
             skillWidget->setSkillValue(Widgets::MWSkill::SkillValue(static_cast<float>(bonus.mBonus), 0.f));
-            ToolTips::createSkillToolTip(skillWidget, bonus.mSkill);
+            ToolTips::createSkillToolTip(skillWidget, skill);
 
             mSkillItems.push_back(skillWidget);
 

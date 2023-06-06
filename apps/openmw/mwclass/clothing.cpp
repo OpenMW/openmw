@@ -101,14 +101,14 @@ namespace MWClass
         return std::make_pair(slots_, false);
     }
 
-    int Clothing::getEquipmentSkill(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Clothing::getEquipmentSkill(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Clothing>* ref = ptr.get<ESM::Clothing>();
 
         if (ref->mBase->mData.mType == ESM::Clothing::Shoes)
             return ESM::Skill::Unarmored;
 
-        return -1;
+        return {};
     }
 
     int Clothing::getValue(const MWWorld::ConstPtr& ptr) const

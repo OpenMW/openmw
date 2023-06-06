@@ -582,11 +582,11 @@ namespace MWClass
         victim = result.first;
         hitPosition = result.second;
 
-        int weapskill = ESM::Skill::HandToHand;
+        ESM::RefId weapskill = ESM::Skill::HandToHand;
         if (!weapon.isEmpty())
             weapskill = weapon.getClass().getEquipmentSkill(weapon);
 
-        float hitchance = MWMechanics::getHitChance(ptr, victim, getSkill(ptr, ESM::Skill::indexToRefId(weapskill)));
+        float hitchance = MWMechanics::getHitChance(ptr, victim, getSkill(ptr, weapskill));
 
         return Misc::Rng::roll0to99(world->getPrng()) < hitchance;
     }
@@ -651,10 +651,10 @@ namespace MWClass
 
         if (ptr == MWMechanics::getPlayer())
         {
-            int weapskill = ESM::Skill::HandToHand;
+            ESM::RefId weapskill = ESM::Skill::HandToHand;
             if (!weapon.isEmpty())
                 weapskill = weapon.getClass().getEquipmentSkill(weapon);
-            skillUsageSucceeded(ptr, ESM::Skill::indexToRefId(weapskill), 0);
+            skillUsageSucceeded(ptr, weapskill, 0);
 
             const MWMechanics::AiSequence& seq = victim.getClass().getCreatureStats(victim).getAiSequence();
 
@@ -842,25 +842,19 @@ namespace MWClass
                             armor = *inv.unequipItem(armor);
                     }
 
+                    ESM::RefId skill = armor.getClass().getEquipmentSkill(armor);
                     if (ptr == MWMechanics::getPlayer())
-                        skillUsageSucceeded(
-                            ptr, ESM::Skill::indexToRefId(armor.getClass().getEquipmentSkill(armor)), 0);
+                        skillUsageSucceeded(ptr, skill, 0);
 
-                    switch (armor.getClass().getEquipmentSkill(armor))
-                    {
-                        case ESM::Skill::LightArmor:
-                            sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Light Armor Hit"), 1.0f, 1.0f);
-                            break;
-                        case ESM::Skill::MediumArmor:
-                            sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Medium Armor Hit"), 1.0f, 1.0f);
-                            break;
-                        case ESM::Skill::HeavyArmor:
-                            sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Heavy Armor Hit"), 1.0f, 1.0f);
-                            break;
-                    }
+                    if (skill == ESM::Skill::LightArmor)
+                        sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Light Armor Hit"), 1.0f, 1.0f);
+                    else if (skill == ESM::Skill::MediumArmor)
+                        sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Medium Armor Hit"), 1.0f, 1.0f);
+                    else if (skill == ESM::Skill::HeavyArmor)
+                        sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Heavy Armor Hit"), 1.0f, 1.0f);
                 }
                 else if (ptr == MWMechanics::getPlayer())
-                    Class::skillUsageSucceeded(ptr, ESM::Skill::Unarmored, 0);
+                    skillUsageSucceeded(ptr, ESM::Skill::Unarmored, 0);
             }
         }
 
@@ -1046,7 +1040,7 @@ namespace MWClass
         const float encumbranceTerm = gmst.fJumpEncumbranceBase->mValue.getFloat()
             + gmst.fJumpEncumbranceMultiplier->mValue.getFloat() * (1.0f - Npc::getNormalizedEncumbrance(ptr));
 
-        float a = Class::getSkill(ptr, ESM::Skill::Acrobatics);
+        float a = getSkill(ptr, ESM::Skill::Acrobatics);
         float b = 0.0f;
         if (a > 50.0f)
         {
@@ -1179,7 +1173,7 @@ namespace MWClass
 
         float fUnarmoredBase1 = store.find("fUnarmoredBase1")->mValue.getFloat();
         float fUnarmoredBase2 = store.find("fUnarmoredBase2")->mValue.getFloat();
-        float unarmoredSkill = Class::getSkill(ptr, ESM::Skill::Unarmored);
+        float unarmoredSkill = getSkill(ptr, ESM::Skill::Unarmored);
 
         float ratings[MWWorld::InventoryStore::Slots];
         for (int i = 0; i < MWWorld::InventoryStore::Slots; i++)
@@ -1305,18 +1299,13 @@ namespace MWClass
                 if (boots == inv.end() || boots->getType() != ESM::Armor::sRecordId)
                     return (name == "left") ? footBareLeft : footBareRight;
 
-                switch (boots->getClass().getEquipmentSkill(*boots))
-                {
-                    case ESM::Skill::LightArmor:
-                        return (name == "left") ? footLightLeft : footLightRight;
-                        break;
-                    case ESM::Skill::MediumArmor:
-                        return (name == "left") ? footMediumLeft : footMediumRight;
-                        break;
-                    case ESM::Skill::HeavyArmor:
-                        return (name == "left") ? footHeavyLeft : footHeavyRight;
-                        break;
-                }
+                ESM::RefId skill = boots->getClass().getEquipmentSkill(*boots);
+                if (skill == ESM::Skill::LightArmor)
+                    return (name == "left") ? footLightLeft : footLightRight;
+                else if (skill == ESM::Skill::MediumArmor)
+                    return (name == "left") ? footMediumLeft : footMediumRight;
+                else if (skill == ESM::Skill::HeavyArmor)
+                    return (name == "left") ? footHeavyLeft : footHeavyRight;
             }
             return ESM::RefId();
         }
@@ -1544,7 +1533,7 @@ namespace MWClass
     {
         const GMST& gmst = getGmst();
         return getWalkSpeed(ptr)
-            * (0.01f * Class::getSkill(ptr, ESM::Skill::Athletics) * gmst.fAthleticsRunBonus->mValue.getFloat()
+            * (0.01f * getSkill(ptr, ESM::Skill::Athletics) * gmst.fAthleticsRunBonus->mValue.getFloat()
                 + gmst.fBaseRunMultiplier->mValue.getFloat());
     }
 

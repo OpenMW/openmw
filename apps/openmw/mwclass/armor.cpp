@@ -112,7 +112,7 @@ namespace MWClass
         return std::make_pair(slots_, false);
     }
 
-    int Armor::getEquipmentSkill(const MWWorld::ConstPtr& ptr) const
+    ESM::RefId Armor::getEquipmentSkill(const MWWorld::ConstPtr& ptr) const
     {
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 
@@ -150,7 +150,7 @@ namespace MWClass
         }
 
         if (typeGmst.empty())
-            return -1;
+            return {};
 
         const MWWorld::Store<ESM::GameSetting>& gmst
             = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
@@ -178,7 +178,7 @@ namespace MWClass
 
     const ESM::RefId& Armor::getUpSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        int es = getEquipmentSkill(ptr);
+        ESM::RefId es = getEquipmentSkill(ptr);
         static const ESM::RefId lightUp = ESM::RefId::stringRefId("Item Armor Light Up");
         static const ESM::RefId mediumUp = ESM::RefId::stringRefId("Item Armor Medium Up");
         static const ESM::RefId heavyUp = ESM::RefId::stringRefId("Item Armor Heavy Up");
@@ -193,7 +193,7 @@ namespace MWClass
 
     const ESM::RefId& Armor::getDownSoundId(const MWWorld::ConstPtr& ptr) const
     {
-        int es = getEquipmentSkill(ptr);
+        ESM::RefId es = getEquipmentSkill(ptr);
         static const ESM::RefId lightDown = ESM::RefId::stringRefId("Item Armor Light Down");
         static const ESM::RefId mediumDown = ESM::RefId::stringRefId("Item Armor Medium Down");
         static const ESM::RefId heavyDown = ESM::RefId::stringRefId("Item Armor Heavy Down");
@@ -232,7 +232,7 @@ namespace MWClass
         }
         else
         {
-            int armorType = getEquipmentSkill(ptr);
+            ESM::RefId armorType = getEquipmentSkill(ptr);
             if (armorType == ESM::Skill::LightArmor)
                 typeText = "#{sLight}";
             else if (armorType == ESM::Skill::MediumArmor)
@@ -297,8 +297,8 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::Armor>* ref = ptr.get<ESM::Armor>();
 
-        int armorSkillType = getEquipmentSkill(ptr);
-        float armorSkill = actor.getClass().getSkill(actor, ESM::Skill::indexToRefId(armorSkillType));
+        ESM::RefId armorSkillType = getEquipmentSkill(ptr);
+        float armorSkill = actor.getClass().getSkill(actor, armorSkillType);
 
         int iBaseArmorSkill = MWBase::Environment::get()
                                   .getESMStore()

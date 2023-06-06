@@ -236,7 +236,7 @@ void MWWorld::InventoryStore::autoEquipWeapon(TSlots& slots_)
             return;
     }
 
-    static const ESM::Skill::SkillEnum weaponSkills[] = {
+    static const ESM::RefId weaponSkills[] = {
         ESM::Skill::LongBlade,
         ESM::Skill::Axe,
         ESM::Skill::Spear,

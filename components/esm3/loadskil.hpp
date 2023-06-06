@@ -48,40 +48,37 @@ namespace ESM
         std::string mIcon;
         float mWerewolfValue{};
 
-        enum SkillEnum
-        {
-            Block = 0,
-            Armorer = 1,
-            MediumArmor = 2,
-            HeavyArmor = 3,
-            BluntWeapon = 4,
-            LongBlade = 5,
-            Axe = 6,
-            Spear = 7,
-            Athletics = 8,
-            Enchant = 9,
-            Destruction = 10,
-            Alteration = 11,
-            Illusion = 12,
-            Conjuration = 13,
-            Mysticism = 14,
-            Restoration = 15,
-            Alchemy = 16,
-            Unarmored = 17,
-            Security = 18,
-            Sneak = 19,
-            Acrobatics = 20,
-            LightArmor = 21,
-            ShortBlade = 22,
-            Marksman = 23,
-            Mercantile = 24,
-            Speechcraft = 25,
-            HandToHand = 26,
-            Length
-        };
+        static const RefId Block;
+        static const RefId Armorer;
+        static const RefId MediumArmor;
+        static const RefId HeavyArmor;
+        static const RefId BluntWeapon;
+        static const RefId LongBlade;
+        static const RefId Axe;
+        static const RefId Spear;
+        static const RefId Athletics;
+        static const RefId Enchant;
+        static const RefId Destruction;
+        static const RefId Alteration;
+        static const RefId Illusion;
+        static const RefId Conjuration;
+        static const RefId Mysticism;
+        static const RefId Restoration;
+        static const RefId Alchemy;
+        static const RefId Unarmored;
+        static const RefId Security;
+        static const RefId Sneak;
+        static const RefId Acrobatics;
+        static const RefId LightArmor;
+        static const RefId ShortBlade;
+        static const RefId Marksman;
+        static const RefId Mercantile;
+        static const RefId Speechcraft;
+        static const RefId HandToHand;
+        static constexpr int Length = 27;
         static const std::string sSkillNames[Length];
 
-        static SkillEnum stringToSkillId(std::string_view skill);
+        static int stringToSkillId(std::string_view skill);
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

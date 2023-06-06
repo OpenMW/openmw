@@ -42,9 +42,7 @@ namespace MWClass
         ///< \return first: Return IDs of the slot this object can be equipped in; second: can object
         /// stay stacked when equipped?
 
-        int getEquipmentSkill(const MWWorld::ConstPtr& ptr) const override;
-        /// Return the index of the skill this item corresponds to when equipped or -1, if there is
-        /// no such skill.
+        ESM::RefId getEquipmentSkill(const MWWorld::ConstPtr& ptr) const override;
 
         int getValue(const MWWorld::ConstPtr& ptr) const override;
         ///< Return trade value of the object. Throws an exception, if the object can't be traded.

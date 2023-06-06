@@ -209,10 +209,9 @@ namespace MWWorld
         ///
         /// Default implementation: return (empty vector, false).
 
-        virtual int getEquipmentSkill(const ConstPtr& ptr) const;
-        /// Return the index of the skill this item corresponds to when equipped or -1, if there is
-        /// no such skill.
-        /// (default implementation: return -1)
+        virtual ESM::RefId getEquipmentSkill(const ConstPtr& ptr) const;
+        /// Return the index of the skill this item corresponds to when equipped.
+        /// (default implementation: return empty ref id)
 
         virtual int getValue(const ConstPtr& ptr) const;
         ///< Return trade value of the object. Throws an exception, if the object can't be traded.
@@ -239,11 +238,6 @@ namespace MWWorld
         ///< Inform actor \a ptr that a skill use has succeeded.
         ///
         /// (default implementations: throws an exception)
-        void skillUsageSucceeded(
-            const MWWorld::Ptr& ptr, ESM::Skill::SkillEnum index, int usageType, float extraFactor = 1.f) const
-        {
-            return skillUsageSucceeded(ptr, ESM::Skill::indexToRefId(index), usageType, extraFactor);
-        };
 
         virtual bool isEssential(const MWWorld::ConstPtr& ptr) const;
         ///< Is \a ptr essential? (i.e. may losing \a ptr make the game unwinnable)
@@ -347,10 +341,6 @@ namespace MWWorld
         bool isMobile(const MWWorld::Ptr& ptr) const;
 
         virtual float getSkill(const MWWorld::Ptr& ptr, ESM::RefId id) const;
-        float getSkill(const MWWorld::Ptr& ptr, ESM::Skill::SkillEnum index) const
-        {
-            return getSkill(ptr, ESM::Skill::indexToRefId(index));
-        };
 
         virtual void readAdditionalState(const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const;
         ///< Read additional state from \a state into \a ptr.

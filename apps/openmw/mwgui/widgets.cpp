@@ -28,26 +28,15 @@ namespace MWGui::Widgets
     /* MWSkill */
 
     MWSkill::MWSkill()
-        : mSkillId(ESM::Skill::Length)
-        , mSkillNameWidget(nullptr)
+        : mSkillNameWidget(nullptr)
         , mSkillValueWidget(nullptr)
     {
     }
 
-    void MWSkill::setSkillId(ESM::Skill::SkillEnum skill)
+    void MWSkill::setSkillId(ESM::RefId skill)
     {
         mSkillId = skill;
         updateWidgets();
-    }
-
-    void MWSkill::setSkillNumber(int skill)
-    {
-        if (skill < 0)
-            setSkillId(ESM::Skill::Length);
-        else if (skill < ESM::Skill::Length)
-            setSkillId(static_cast<ESM::Skill::SkillEnum>(skill));
-        else
-            throw std::runtime_error("Skill number out of range");
     }
 
     void MWSkill::setSkillValue(const SkillValue& value)
@@ -60,8 +49,7 @@ namespace MWGui::Widgets
     {
         if (mSkillNameWidget)
         {
-            const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().search(
-                ESM::Skill::indexToRefId(mSkillId));
+            const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().search(mSkillId);
             if (skill == nullptr)
                 mSkillNameWidget->setCaption({});
             else

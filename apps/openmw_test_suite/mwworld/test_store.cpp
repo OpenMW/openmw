@@ -496,7 +496,7 @@ namespace
             const RecordType* result = nullptr;
             if constexpr (std::is_same_v<RecordType, ESM::LandTexture>)
                 result = esmStore.get<RecordType>().search(index, 0);
-            else if constexpr (ESM::hasIndex<RecordType>)
+            else if constexpr (ESM::hasIndex<RecordType> && !std::is_same_v<RecordType, ESM::Skill>)
                 result = esmStore.get<RecordType>().search(index);
             else
                 result = esmStore.get<RecordType>().search(refId);

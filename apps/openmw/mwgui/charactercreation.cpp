@@ -475,14 +475,14 @@ namespace MWGui
             assert(attributes.size() == klass.mData.mAttribute.size());
             std::copy(attributes.begin(), attributes.end(), klass.mData.mAttribute.begin());
 
-            std::vector<ESM::Skill::SkillEnum> majorSkills = mCreateClassDialog->getMajorSkills();
-            std::vector<ESM::Skill::SkillEnum> minorSkills = mCreateClassDialog->getMinorSkills();
+            std::vector<ESM::RefId> majorSkills = mCreateClassDialog->getMajorSkills();
+            std::vector<ESM::RefId> minorSkills = mCreateClassDialog->getMinorSkills();
             assert(majorSkills.size() >= klass.mData.mSkills.size());
             assert(minorSkills.size() >= klass.mData.mSkills.size());
             for (size_t i = 0; i < klass.mData.mSkills.size(); ++i)
             {
-                klass.mData.mSkills[i][1] = majorSkills[i];
-                klass.mData.mSkills[i][0] = minorSkills[i];
+                klass.mData.mSkills[i][1] = majorSkills[i].getIf<ESM::IndexRefId>()->getValue();
+                klass.mData.mSkills[i][0] = minorSkills[i].getIf<ESM::IndexRefId>()->getValue();
             }
 
             MWBase::Environment::get().getMechanicsManager()->setPlayerClass(klass);

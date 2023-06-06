@@ -266,10 +266,12 @@ namespace MWGui
 
         for (size_t i = 0; i < klass->mData.mSkills.size(); ++i)
         {
-            mMinorSkill[i]->setSkillNumber(klass->mData.mSkills[i][0]);
-            mMajorSkill[i]->setSkillNumber(klass->mData.mSkills[i][1]);
-            ToolTips::createSkillToolTip(mMinorSkill[i], klass->mData.mSkills[i][0]);
-            ToolTips::createSkillToolTip(mMajorSkill[i], klass->mData.mSkills[i][1]);
+            ESM::RefId minor = ESM::Skill::indexToRefId(klass->mData.mSkills[i][0]);
+            ESM::RefId major = ESM::Skill::indexToRefId(klass->mData.mSkills[i][1]);
+            mMinorSkill[i]->setSkillId(minor);
+            mMajorSkill[i]->setSkillId(major);
+            ToolTips::createSkillToolTip(mMinorSkill[i], minor);
+            ToolTips::createSkillToolTip(mMajorSkill[i], major);
         }
 
         setClassImage(mClassImage, mCurrentClassId);
@@ -514,24 +516,24 @@ namespace MWGui
         return v;
     }
 
-    std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMajorSkills() const
+    std::vector<ESM::RefId> CreateClassDialog::getMajorSkills() const
     {
-        std::vector<ESM::Skill::SkillEnum> v;
-        v.reserve(5);
-        for (int i = 0; i < 5; i++)
+        std::vector<ESM::RefId> v;
+        v.reserve(mMajorSkill.size());
+        for (const auto& widget : mMajorSkill)
         {
-            v.push_back(mMajorSkill[i]->getSkillId());
+            v.push_back(widget->getSkillId());
         }
         return v;
     }
 
-    std::vector<ESM::Skill::SkillEnum> CreateClassDialog::getMinorSkills() const
+    std::vector<ESM::RefId> CreateClassDialog::getMinorSkills() const
     {
-        std::vector<ESM::Skill::SkillEnum> v;
-        v.reserve(5);
-        for (int i = 0; i < 5; i++)
+        std::vector<ESM::RefId> v;
+        v.reserve(mMinorSkill.size());
+        for (const auto& widget : mMinorSkill)
         {
-            v.push_back(mMinorSkill[i]->getSkillId());
+            v.push_back(widget->getSkillId());
         }
         return v;
     }
@@ -624,7 +626,7 @@ namespace MWGui
 
     void CreateClassDialog::onSkillSelected()
     {
-        ESM::Skill::SkillEnum id = mSkillDialog->getSkillId();
+        ESM::RefId id = mSkillDialog->getSkillId();
 
         // Avoid duplicate skills by swapping any skill field that matches the selected one
         for (Widgets::MWSkillPtr& skill : mSkills)
@@ -804,7 +806,7 @@ namespace MWGui
         struct
         {
             Widgets::MWSkillPtr widget;
-            ESM::Skill::SkillEnum skillId;
+            ESM::RefId skillId;
         } mSkills[3][9]
             = { { { mCombatSkill[0], ESM::Skill::Block }, { mCombatSkill[1], ESM::Skill::Armorer },
                     { mCombatSkill[2], ESM::Skill::MediumArmor }, { mCombatSkill[3], ESM::Skill::HeavyArmor },
