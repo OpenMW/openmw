@@ -239,10 +239,6 @@ namespace MWGui
         void onCancelClicked(MyGUI::Widget* _sender);
 
     private:
-        Widgets::MWSkillPtr mCombatSkill[9];
-        Widgets::MWSkillPtr mMagicSkill[9];
-        Widgets::MWSkillPtr mStealthSkill[9];
-
         ESM::RefId mSkillId;
     };
 
