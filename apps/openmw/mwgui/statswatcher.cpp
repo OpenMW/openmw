@@ -86,10 +86,10 @@ namespace MWGui
         for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
         {
             const auto& value = stats.getSkill(skill.mId);
-            if (value != mWatchedSkills[skill.mIndex] || mWatchedStatsEmpty)
+            if (value != mWatchedSkills[skill.mId] || mWatchedStatsEmpty)
             {
-                mWatchedSkills[skill.mIndex] = value;
-                setValue(ESM::Skill::SkillEnum(skill.mIndex), value);
+                mWatchedSkills[skill.mId] = value;
+                setValue(skill.mId, value);
             }
         }
 
@@ -157,12 +157,10 @@ namespace MWGui
             listener->setValue(id, value);
     }
 
-    void StatsWatcher::setValue(ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
+    void StatsWatcher::setValue(ESM::RefId id, const MWMechanics::SkillValue& value)
     {
-        /// \todo Don't use the skill enum as a parameter type (we will have to drop it anyway, once we
-        /// allow custom skills.
         for (StatsListener* listener : mListeners)
-            listener->setValue(parSkill, value);
+            listener->setValue(id, value);
     }
 
     void StatsWatcher::setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value)

@@ -37,17 +37,8 @@ namespace MWGui
         : WindowPinnableBase("openmw_stats_window.layout")
         , NoDrop(drag, mMainWidget)
         , mSkillView(nullptr)
-        , mMajorSkills()
-        , mMinorSkills()
-        , mMiscSkills()
-        , mSkillValues()
-        , mSkillWidgetMap()
-        , mFactionWidgetMap()
-        , mFactions()
-        , mBirthSignId()
         , mReputation(0)
         , mBounty(0)
-        , mSkillWidgets()
         , mChanged(true)
         , mMinFullWidth(mMainWidget->getSize().width)
     {
@@ -67,11 +58,10 @@ namespace MWGui
         getWidget(mLeftPane, "LeftPane");
         getWidget(mRightPane, "RightPane");
 
-        for (int i = 0; i < ESM::Skill::Length; ++i)
+        for (const ESM::Skill& skill : store.get<ESM::Skill>())
         {
-            mSkillValues.insert(std::make_pair(i, MWMechanics::SkillValue()));
-            mSkillWidgetMap.insert(
-                std::make_pair(i, std::make_pair((MyGUI::TextBox*)nullptr, (MyGUI::TextBox*)nullptr)));
+            mSkillValues.emplace(skill.mId, MWMechanics::SkillValue());
+            mSkillWidgetMap.emplace(skill.mId, std::make_pair<MyGUI::TextBox*, MyGUI::TextBox*>(nullptr, nullptr));
         }
 
         MyGUI::Window* t = mMainWidget->castType<MyGUI::Window>();
@@ -255,10 +245,10 @@ namespace MWGui
         w->setUserString("RangePosition_SkillProgress", MyGUI::utility::toString(progressPercent));
     }
 
-    void StatsWindow::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
+    void StatsWindow::setValue(ESM::RefId id, const MWMechanics::SkillValue& value)
     {
-        mSkillValues[parSkill] = value;
-        std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets = mSkillWidgetMap[(int)parSkill];
+        mSkillValues[id] = value;
+        std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets = mSkillWidgetMap[id];
         MyGUI::TextBox* valueWidget = widgets.second;
         MyGUI::TextBox* nameWidget = widgets.first;
         if (valueWidget && nameWidget)
@@ -296,7 +286,6 @@ namespace MWGui
                 valueWidget->setUserString("Visible_SkillProgressVBox", "true");
                 valueWidget->setUserString("UserData^Hidden_SkillProgressVBox", "false");
 
-                ESM::RefId id = ESM::Skill::indexToRefId(parSkill);
                 setSkillProgress(nameWidget, value.getProgress(), id);
                 setSkillProgress(valueWidget, value.getProgress(), id);
             }
@@ -516,7 +505,7 @@ namespace MWGui
 
             std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets
                 = addValueItem(skill->mName, {}, "normal", coord1, coord2);
-            mSkillWidgetMap[skillId] = widgets;
+            mSkillWidgetMap[skill->mId] = widgets;
 
             for (int i = 0; i < 2; ++i)
             {
@@ -532,7 +521,7 @@ namespace MWGui
                 mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("Range_SkillProgress", "100");
             }
 
-            setValue(static_cast<ESM::Skill::SkillEnum>(skillId), mSkillValues.find(skillId)->second);
+            setValue(skill->mId, mSkillValues.find(skill->mId)->second);
         }
     }
 

@@ -48,7 +48,7 @@ namespace MWGui
 
         void setValue(std::string_view id, const MWMechanics::AttributeValue& value) override;
         void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value) override;
-        void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value) override;
+        void setValue(ESM::RefId id, const MWMechanics::SkillValue& value) override;
         void configureSkills(const SkillList& major, const SkillList& minor) override;
 
         void onFrame(float duration);
@@ -59,7 +59,7 @@ namespace MWGui
 
         SkillList mPlayerMajorSkills, mPlayerMinorSkills;
         std::map<int, MWMechanics::AttributeValue> mPlayerAttributes;
-        std::map<int, MWMechanics::SkillValue> mPlayerSkillValues;
+        std::map<ESM::RefId, MWMechanics::SkillValue> mPlayerSkillValues;
 
         // Dialogs
         std::unique_ptr<TextInputDialog> mNameDialog;

@@ -93,7 +93,7 @@ namespace MWGui
         for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
         {
             mSkillValues.emplace(skill.mId, MWMechanics::SkillValue());
-            mSkillWidgetMap.emplace(skill.mIndex, static_cast<MyGUI::TextBox*>(nullptr));
+            mSkillWidgetMap.emplace(skill.mId, static_cast<MyGUI::TextBox*>(nullptr));
         }
 
         MyGUI::Button* backButton;
@@ -204,10 +204,10 @@ namespace MWGui
         }
     }
 
-    void ReviewDialog::setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::SkillValue& value)
+    void ReviewDialog::setSkillValue(ESM::RefId id, const MWMechanics::SkillValue& value)
     {
-        mSkillValues[ESM::Skill::indexToRefId(skillId)] = value;
-        MyGUI::TextBox* widget = mSkillWidgetMap[skillId];
+        mSkillValues[id] = value;
+        MyGUI::TextBox* widget = mSkillWidgetMap[id];
         if (widget)
         {
             float modified = value.getModified();
@@ -363,7 +363,7 @@ namespace MWGui
                 ToolTips::createSkillToolTip(mSkillWidgets[mSkillWidgets.size() - 1 - i], skill->mIndex);
             }
 
-            mSkillWidgetMap[skill->mIndex] = widget;
+            mSkillWidgetMap[skill->mId] = widget;
         }
     }
 

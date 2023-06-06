@@ -99,7 +99,7 @@ namespace MWGui
             mPlayerAttributes.emplace(attribute.mId, MWMechanics::AttributeValue());
 
         for (const auto& skill : store.get<ESM::Skill>())
-            mPlayerSkillValues.emplace(skill.mIndex, MWMechanics::SkillValue());
+            mPlayerSkillValues.emplace(skill.mId, MWMechanics::SkillValue());
     }
 
     void CharacterCreation::setValue(std::string_view id, const MWMechanics::AttributeValue& value)
@@ -138,11 +138,11 @@ namespace MWGui
         }
     }
 
-    void CharacterCreation::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
+    void CharacterCreation::setValue(ESM::RefId id, const MWMechanics::SkillValue& value)
     {
-        mPlayerSkillValues[parSkill] = value;
+        mPlayerSkillValues[id] = value;
         if (mReviewDialog)
-            mReviewDialog->setSkillValue(parSkill, value);
+            mReviewDialog->setSkillValue(id, value);
     }
 
     void CharacterCreation::configureSkills(const SkillList& major, const SkillList& minor)
@@ -275,10 +275,9 @@ namespace MWGui
                         mReviewDialog->setAttribute(
                             static_cast<ESM::Attribute::AttributeID>(attributePair.first), attributePair.second);
                     }
-                    for (auto& skillPair : mPlayerSkillValues)
+                    for (const auto& [skill, value] : mPlayerSkillValues)
                     {
-                        mReviewDialog->setSkillValue(
-                            static_cast<ESM::Skill::SkillEnum>(skillPair.first), skillPair.second);
+                        mReviewDialog->setSkillValue(skill, value);
                     }
                     mReviewDialog->configureSkills(mPlayerMajorSkills, mPlayerMinorSkills);
 

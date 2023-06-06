@@ -27,7 +27,7 @@ namespace MWGui
         void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value) override;
         void setValue(std::string_view id, const std::string& value) override;
         void setValue(std::string_view id, int value) override;
-        void setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value) override;
+        void setValue(ESM::RefId id, const MWMechanics::SkillValue& value) override;
         void configureSkills(const SkillList& major, const SkillList& minor) override;
 
         void setReputation(int reputation)
@@ -68,8 +68,8 @@ namespace MWGui
         MyGUI::ScrollView* mSkillView;
 
         SkillList mMajorSkills, mMinorSkills, mMiscSkills;
-        std::map<int, MWMechanics::SkillValue> mSkillValues;
-        std::map<int, std::pair<MyGUI::TextBox*, MyGUI::TextBox*>> mSkillWidgetMap;
+        std::map<ESM::RefId, MWMechanics::SkillValue> mSkillValues;
+        std::map<ESM::RefId, std::pair<MyGUI::TextBox*, MyGUI::TextBox*>> mSkillWidgetMap;
         std::map<std::string, MyGUI::Widget*> mFactionWidgetMap;
         FactionList mFactions; ///< Stores a list of factions and the current rank
         ESM::RefId mBirthSignId;

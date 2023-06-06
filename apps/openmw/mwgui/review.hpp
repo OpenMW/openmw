@@ -42,7 +42,7 @@ namespace MWGui
         void setAttribute(ESM::Attribute::AttributeID attributeId, const MWMechanics::AttributeValue& value);
 
         void configureSkills(const SkillList& major, const SkillList& minor);
-        void setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::SkillValue& value);
+        void setSkillValue(ESM::RefId id, const MWMechanics::SkillValue& value);
 
         void onOpen() override;
 
@@ -95,7 +95,7 @@ namespace MWGui
 
         SkillList mMajorSkills, mMinorSkills, mMiscSkills;
         std::map<ESM::RefId, MWMechanics::SkillValue> mSkillValues;
-        std::map<int, MyGUI::TextBox*> mSkillWidgetMap;
+        std::map<ESM::RefId, MyGUI::TextBox*> mSkillWidgetMap;
         ESM::RefId mRaceId, mBirthSignId;
         std::string mName;
         ESM::Class mKlass;
