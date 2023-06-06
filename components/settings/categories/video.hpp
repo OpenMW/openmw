@@ -24,7 +24,7 @@ namespace Settings
         SettingValue<int> mScreen{ mIndex, "Video", "screen", makeMaxSanitizerInt(0) };
         SettingValue<bool> mMinimizeOnFocusLoss{ mIndex, "Video", "minimize on focus loss" };
         SettingValue<bool> mWindowBorder{ mIndex, "Video", "window border" };
-        SettingValue<int> mAntialiasing{ mIndex, "Video", "antialiasing", makeEnumSanitizerInt({ 0, 2, 4, 8, 16 }) };
+        SettingValue<int> mAntialiasing{ mIndex, "Video", "antialiasing", makeMaxSanitizerInt(0) };
         SettingValue<int> mVsyncMode{ mIndex, "Video", "vsync mode", makeEnumSanitizerInt({ 0, 1, 2 }) };
         SettingValue<float> mFramerateLimit{ mIndex, "Video", "framerate limit", makeMaxSanitizerFloat(0) };
         SettingValue<float> mContrast{ mIndex, "Video", "contrast", makeMaxStrictSanitizerFloat(0) };
