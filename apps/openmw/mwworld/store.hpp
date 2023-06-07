@@ -478,6 +478,8 @@ namespace MWWorld
     template <>
     class Store<ESM::Skill> : public TypedDynamicStore<ESM::Skill>
     {
+        using TypedDynamicStore<ESM::Skill>::setUp;
+
     public:
         Store() = default;
 
