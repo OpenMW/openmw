@@ -889,14 +889,21 @@ namespace MWGui
 
     void setClassImage(MyGUI::ImageBox* imageBox, const ESM::RefId& classId)
     {
-        const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
-        std::string classImage
-            = Misc::ResourceHelpers::correctTexturePath("textures\\levelup\\" + classId.getRefIdString() + ".dds", vfs);
-        if (!vfs->exists(classImage))
+        std::string_view fallback = "textures\\levelup\\warrior.dds";
+        std::string classImage;
+        if (const auto* id = classId.getIf<ESM::StringRefId>())
         {
-            Log(Debug::Warning) << "No class image for " << classId << ", falling back to default";
-            classImage = "textures\\levelup\\warrior.dds";
+            const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+            classImage
+                = Misc::ResourceHelpers::correctTexturePath("textures\\levelup\\" + id->getValue() + ".dds", vfs);
+            if (!vfs->exists(classImage))
+            {
+                Log(Debug::Warning) << "No class image for " << classId << ", falling back to default";
+                classImage = fallback;
+            }
         }
+        else
+            classImage = fallback;
         imageBox->setImageTexture(classImage);
     }
 
