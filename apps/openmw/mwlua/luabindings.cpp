@@ -84,6 +84,29 @@ namespace MWLua
         // api["resume"] = []() {};
     }
 
+    static sol::table initContentFilesBindings(sol::state_view& lua)
+    {
+        const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
+        sol::table list(lua, sol::create);
+        for (size_t i = 0; i < contentList.size(); ++i)
+            list[i + 1] = Misc::StringUtils::lowerCase(contentList[i]);
+        sol::table res(lua, sol::create);
+        res["list"] = LuaUtil::makeReadOnly(list);
+        res["indexOf"] = [&contentList](std::string_view contentFile) -> sol::optional<int> {
+            for (size_t i = 0; i < contentList.size(); ++i)
+                if (Misc::StringUtils::ciEqual(contentList[i], contentFile))
+                    return i + 1;
+            return sol::nullopt;
+        };
+        res["has"] = [&contentList](std::string_view contentFile) -> bool {
+            for (size_t i = 0; i < contentList.size(); ++i)
+                if (Misc::StringUtils::ciEqual(contentList[i], contentFile))
+                    return true;
+            return false;
+        };
+        return LuaUtil::makeReadOnly(res);
+    }
+
     static sol::table initCorePackage(const Context& context)
     {
         auto* lua = context.mLua;
@@ -97,21 +120,7 @@ namespace MWLua
             context.mLuaEvents->addGlobalEvent(
                 { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
         };
-        api["getContentList"] = [](sol::this_state lua) -> sol::table {
-            const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
-            sol::table res(lua, sol::create);
-            int i = 1;
-            for (const std::string& s : contentList)
-                res[i++] = Misc::StringUtils::lowerCase(s);
-            return res;
-        };
-        api["getContentFileIndex"] = [](std::string_view contentFile) -> sol::optional<int> {
-            const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
-            for (size_t i = 0; i < contentList.size(); ++i)
-                if (Misc::StringUtils::ciEqual(contentList[i], contentFile))
-                    return i + 1;
-            return sol::nullopt;
-        };
+        api["contentFiles"] = initContentFilesBindings(lua->sol());
         api["getFormId"] = [](std::string_view contentFile, unsigned int index) -> std::string {
             const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
             for (size_t i = 0; i < contentList.size(); ++i)
