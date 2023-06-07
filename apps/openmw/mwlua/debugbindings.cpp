@@ -35,6 +35,15 @@ namespace MWLua
             context.mLuaManager->addAction([value] { MWBase::Environment::get().getWorld()->toggleRenderMode(value); });
         };
 
+        api["toggleGodMode"] = []() { MWBase::Environment::get().getWorld()->toggleGodMode(); };
+        api["isGodMode"] = []() { return MWBase::Environment::get().getWorld()->getGodModeState(); };
+
+        api["toggleCollision"] = []() { MWBase::Environment::get().getWorld()->toggleCollisionMode(); };
+        api["isCollisionEnabled"] = []() {
+            auto world = MWBase::Environment::get().getWorld();
+            return world->isActorCollisionEnabled(world->getPlayerPtr());
+        };
+
         api["NAV_MESH_RENDER_MODE"]
             = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWRender::NavMeshMode>({
                 { "AreaType", MWRender::NavMeshMode::AreaType },
