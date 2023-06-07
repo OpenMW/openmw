@@ -28,6 +28,9 @@
 
 ---
 -- Return an object by RefNum/FormId.
+-- Note: the function always returns @{openmw.core#GameObject} and doesn't validate that
+-- the object exists in the game world. If it doesn't exist or not yet loaded to memory),
+-- then `obj:isValid()` will be `false`.
 -- @function [parent=#nearby] getObjectByFormId
 -- @param #string formId String returned by `core.getFormId`
 -- @return openmw.core#GameObject

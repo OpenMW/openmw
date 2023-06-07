@@ -125,11 +125,17 @@
 
 ---
 -- Construct FormId string from content file name and the index in the file.
+-- In ESM3 games (e.g. Morrowind) FormIds are used to reference game objects.
+-- In ESM4 games (e.g. Skyrim) FormIds are used both for game objects and as record ids.
 -- @function [parent=#core] getFormId
 -- @param #string contentFile
 -- @param #number index
 -- @return #string
 -- @usage if obj.recordId == core.getFormId('Skyrim.esm', 0x4d7da) then ... end
+-- @usage -- In ESM3 content files (e.g. Morrowind) ids are human-readable strings
+-- obj.ownerFactionId = 'blades'
+-- -- In ESM4 (e.g. Skyrim) ids should be constructed using `core.getFormId`:
+-- obj.ownerFactionId = core.getFormId('Skyrim.esm', 0x72834)
 -- @usage -- local scripts
 -- local obj = nearby.getObjectByFormId(core.getFormId('Morrowind.esm', 128964))
 -- @usage -- global scripts
