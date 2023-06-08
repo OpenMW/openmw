@@ -297,7 +297,8 @@ namespace ESM
             generateArray(record.mDoorDest.pos);
             generateArray(record.mDoorDest.rot);
             record.mDestCell = generateRandomString(100);
-            record.mLockLevel = std::numeric_limits<int>::max();
+            record.mLockLevel = 0;
+            record.mIsLocked = true;
             record.mKey = generateRandomRefId();
             record.mTrap = generateRandomRefId();
             record.mReferenceBlocked = std::numeric_limits<signed char>::max();
@@ -321,6 +322,7 @@ namespace ESM
             EXPECT_EQ(record.mDoorDest, result.mDoorDest);
             EXPECT_EQ(record.mDestCell, result.mDestCell);
             EXPECT_EQ(record.mLockLevel, result.mLockLevel);
+            EXPECT_EQ(record.mIsLocked, result.mIsLocked);
             EXPECT_EQ(record.mKey, result.mKey);
             EXPECT_EQ(record.mTrap, result.mTrap);
             EXPECT_EQ(record.mReferenceBlocked, result.mReferenceBlocked);

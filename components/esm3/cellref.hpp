@@ -1,7 +1,6 @@
 #ifndef OPENMW_ESM_CELLREF_H
 #define OPENMW_ESM_CELLREF_H
 
-#include <limits>
 #include <string>
 
 #include "components/esm/common.hpp"
@@ -13,8 +12,6 @@ namespace ESM
 {
     class ESMWriter;
     class ESMReader;
-
-    const int UnbreakableLock = std::numeric_limits<int>::max();
 
     using RefNum = ESM::FormId;
 
@@ -84,6 +81,7 @@ namespace ESM
 
         // Lock level for doors and containers
         int mLockLevel;
+        bool mIsLocked{};
         ESM::RefId mKey, mTrap; // Key and trap ID names, if any
 
         // This corresponds to the "Reference Blocked" checkbox in the construction set,

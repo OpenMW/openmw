@@ -883,9 +883,7 @@ namespace MWMechanics
 
         const MWWorld::CellRef& cellref = target.getCellRef();
         // there is no harm to use unlocked doors
-        int lockLevel = cellref.getLockLevel();
-        if (target.getClass().isDoor() && (lockLevel <= 0 || lockLevel == ESM::UnbreakableLock)
-            && cellref.getTrap().empty())
+        if (target.getClass().isDoor() && !cellref.isLocked() && cellref.getTrap().empty())
         {
             return true;
         }
@@ -951,11 +949,10 @@ namespace MWMechanics
         MWWorld::Ptr victim;
         if (isOwned(ptr, item, victim))
         {
-            // Note that attempting to unlock something that has ever been locked (even ESM::UnbreakableLock) is a crime
-            // even if it's already unlocked. Likewise, it's illegal to unlock something that has a trap but isn't
-            // otherwise locked.
+            // Note that attempting to unlock something that has ever been locked is a crime even if it's already
+            // unlocked. Likewise, it's illegal to unlock something that has a trap but isn't otherwise locked.
             const auto& cellref = item.getCellRef();
-            if (cellref.getLockLevel() || !cellref.getTrap().empty())
+            if (cellref.getLockLevel() || cellref.isLocked() || !cellref.getTrap().empty())
                 commitCrime(ptr, victim, OT_Trespassing, item.getCellRef().getFaction());
         }
     }

@@ -28,7 +28,7 @@ namespace MWMechanics
     void Security::pickLock(const MWWorld::Ptr& lock, const MWWorld::Ptr& lockpick, std::string_view& resultMessage,
         std::string_view& resultSound)
     {
-        if (lock.getCellRef().getLockLevel() <= 0 || lock.getCellRef().getLockLevel() == ESM::UnbreakableLock
+        if (lock.getCellRef().getLockLevel() <= 0
             || !lock.getClass().hasToolTip(lock)) // If it's unlocked or can not be unlocked back out immediately
             return;
 

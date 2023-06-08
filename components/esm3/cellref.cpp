@@ -1,11 +1,17 @@
 #include "cellref.hpp"
 
 #include <algorithm>
+#include <limits>
 
 #include <components/debug/debuglog.hpp>
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+
+namespace
+{
+    constexpr int ZeroLock = std::numeric_limits<int>::max();
+}
 
 namespace ESM
 {
@@ -145,11 +151,12 @@ namespace ESM
 
             if constexpr (load)
             {
-                if (cellRef.mLockLevel == 0 && !cellRef.mKey.empty())
-                {
-                    cellRef.mLockLevel = UnbreakableLock;
-                    cellRef.mTrap = ESM::RefId();
-                }
+                if (esm.getFormatVersion() == DefaultFormatVersion) // loading a content file
+                    cellRef.mIsLocked = !cellRef.mKey.empty() || cellRef.mLockLevel > 0;
+                else
+                    cellRef.mIsLocked = cellRef.mLockLevel > 0;
+                if (cellRef.mLockLevel == ZeroLock)
+                    cellRef.mLockLevel = 0;
             }
         }
     }
@@ -217,13 +224,13 @@ namespace ESM
             esm.writeHNOCString("DNAM", mDestCell);
         }
 
-        if (!inInventory && mLockLevel != 0)
-        {
-            esm.writeHNT("FLTV", mLockLevel);
-        }
-
         if (!inInventory)
         {
+            int lockLevel = mLockLevel;
+            if (lockLevel == 0 && mIsLocked)
+                lockLevel = ZeroLock;
+            if (lockLevel != 0)
+                esm.writeHNT("FLTV", lockLevel);
             esm.writeHNOCRefId("KNAM", mKey);
             esm.writeHNOCRefId("TNAM", mTrap);
         }
@@ -251,6 +258,7 @@ namespace ESM
         mGoldValue = 1;
         mDestCell.clear();
         mLockLevel = 0;
+        mIsLocked = false;
         mKey = ESM::RefId();
         mTrap = ESM::RefId();
         mReferenceBlocked = -1;

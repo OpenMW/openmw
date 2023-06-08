@@ -155,7 +155,7 @@ namespace MWClass
         MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& invStore = player.getClass().getInventoryStore(player);
 
-        bool isLocked = ptr.getCellRef().getLockLevel() > 0;
+        bool isLocked = ptr.getCellRef().isLocked();
         bool isTrapped = !ptr.getCellRef().getTrap().empty();
         bool hasKey = false;
         std::string_view keyName;
@@ -253,10 +253,13 @@ namespace MWClass
 
         std::string text;
         int lockLevel = ptr.getCellRef().getLockLevel();
-        if (lockLevel > 0 && lockLevel != ESM::UnbreakableLock)
-            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(lockLevel);
-        else if (lockLevel < 0)
-            text += "\n#{sUnlocked}";
+        if (lockLevel)
+        {
+            if (ptr.getCellRef().isLocked())
+                text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(lockLevel);
+            else
+                text += "\n#{sUnlocked}";
+        }
         if (ptr.getCellRef().getTrap() != ESM::RefId())
             text += "\n#{sTrapped}";
 

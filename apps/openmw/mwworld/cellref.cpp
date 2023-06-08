@@ -283,15 +283,24 @@ namespace MWWorld
 
     void CellRef::lock(int lockLevel)
     {
-        if (lockLevel != 0)
-            setLockLevel(abs(lockLevel)); // Changes lock to locklevel, if positive
-        else
-            setLockLevel(ESM::UnbreakableLock); // If zero, set to max lock level
+        setLockLevel(lockLevel);
+        setLocked(true);
     }
 
     void CellRef::unlock()
     {
-        setLockLevel(-abs(getLockLevel())); // Makes lockLevel negative
+        setLockLevel(-getLockLevel());
+        setLocked(false);
+    }
+
+    bool CellRef::isLocked() const
+    {
+        return std::visit([](auto&& ref) { return ref.mIsLocked; }, mCellRef.mVariant);
+    }
+
+    void CellRef::setLocked(bool locked)
+    {
+        std::visit([=](auto&& ref) { ref.mIsLocked = locked; }, mCellRef.mVariant);
     }
 
     void CellRef::setTrap(const ESM::RefId& trap)
