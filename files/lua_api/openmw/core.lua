@@ -110,6 +110,7 @@
 -- @field #string id A unique id of this object (not record id), can be used as a key in a table.
 -- @field #boolean enabled Whether the object is enabled or disabled. Global scripts can set the value. Items in containers or inventories can't be disabled.
 -- @field openmw.util#Vector3 position Object position.
+-- @field #number scale Object scale.
 -- @field openmw.util#Vector3 rotation Object rotation (ZXY order).
 -- @field openmw.util#Vector3 startingPosition The object original position
 -- @field openmw.util#Vector3 startingRotation The object original rotation
@@ -167,6 +168,13 @@
 -- @function [parent=#GameObject] removeScript
 -- @param self
 -- @param #string scriptPath Path to the script in OpenMW virtual filesystem.
+
+---
+-- Sets the object's scale.
+-- Can be called only from a global script.
+-- @function [parent=#GameObject] setScale
+-- @param self
+-- @param #number scale Scale desired in game.
 
 ---
 -- Moves object to given cell and position.
