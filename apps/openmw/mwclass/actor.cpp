@@ -43,7 +43,7 @@ namespace MWClass
             return;
 
         MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
-        ESM::RefId skill = shield->getClass().getEquipmentSkill(*shield);
+        const ESM::RefId skill = shield->getClass().getEquipmentSkill(*shield);
         if (skill == ESM::Skill::LightArmor)
             sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Light Armor Hit"), 1.0f, 1.0f);
         else if (skill == ESM::Skill::MediumArmor)
