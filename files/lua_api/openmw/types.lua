@@ -647,7 +647,11 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
-
+---
+-- Returns the bounty or crime level of the player
+-- @function [parent=#Player] getCrimeLevel
+-- @param openmw.core#GameObject actor
+-- @return #number
 
 --- @{#Armor} functions
 -- @field [parent=#types] #Armor Armor
