@@ -124,6 +124,13 @@ namespace MWLua
             });
         };
 
+        api["getObjectByFormId"] = [](std::string_view formIdStr) -> LObject {
+            ESM::RefId refId = ESM::RefId::deserializeText(formIdStr);
+            if (!refId.is<ESM::FormIdRefId>())
+                throw std::runtime_error("FormId expected, got " + std::string(formIdStr) + "; use core.getFormId");
+            return LObject(refId.getIf<ESM::FormIdRefId>()->getValue());
+        };
+
         api["activators"] = LObjectList{ worldView->getActivatorsInScene() };
         api["actors"] = LObjectList{ worldView->getActorsInScene() };
         api["containers"] = LObjectList{ worldView->getContainersInScene() };

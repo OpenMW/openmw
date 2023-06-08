@@ -145,6 +145,13 @@ namespace MWLua
         void addBasicBindings(sol::usertype<ObjectT>& objectT, const Context& context)
         {
             objectT["id"] = sol::readonly_property([](const ObjectT& o) -> std::string { return o.id().toString(); });
+            objectT["contentFile"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<std::string> {
+                int contentFileIndex = o.id().mContentFile;
+                const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
+                if (contentFileIndex < 0 || contentFileIndex >= static_cast<int>(contentList.size()))
+                    return sol::nullopt;
+                return Misc::StringUtils::lowerCase(contentList[contentFileIndex]);
+            });
             objectT["isValid"] = [](const ObjectT& o) { return !o.ptrOrNull().isEmpty(); };
             objectT["recordId"] = sol::readonly_property(
                 [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().serializeText(); });

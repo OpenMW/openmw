@@ -103,11 +103,52 @@
 
 
 ---
+-- @{#ContentFiles}: functions working with the list of currently loaded content files.
+-- @field [parent=#core] #ContentFiles contentFiles
+
+---
+-- Functions working with the list of currently loaded content files.
+-- @type ContentFiles
+-- @field #list<#string> list The current load order (list of content file names).
+
+---
+-- Return the index of a specific content file in the load order (or `nil` if there is no such content file).
+-- @function [parent=#ContentFiles] indexOf
+-- @param #string contentFile
+-- @return #number
+
+---
+-- Check if the content file with given name present in the load order.
+-- @function [parent=#ContentFiles] has
+-- @param #string contentFile
+-- @return #boolean
+
+---
+-- Construct FormId string from content file name and the index in the file.
+-- In ESM3 games (e.g. Morrowind) FormIds are used to reference game objects.
+-- In ESM4 games (e.g. Skyrim) FormIds are used both for game objects and as record ids.
+-- @function [parent=#core] getFormId
+-- @param #string contentFile
+-- @param #number index
+-- @return #string
+-- @usage if obj.recordId == core.getFormId('Skyrim.esm', 0x4d7da) then ... end
+-- @usage -- In ESM3 content files (e.g. Morrowind) ids are human-readable strings
+-- obj.ownerFactionId = 'blades'
+-- -- In ESM4 (e.g. Skyrim) ids should be constructed using `core.getFormId`:
+-- obj.ownerFactionId = core.getFormId('Skyrim.esm', 0x72834)
+-- @usage -- local scripts
+-- local obj = nearby.getObjectByFormId(core.getFormId('Morrowind.esm', 128964))
+-- @usage -- global scripts
+-- local obj = world.getObjectByFormId(core.getFormId('Morrowind.esm', 128964))
+
+
+---
 -- Any object that exists in the game world and has a specific location.
 -- Player, actors, items, and statics are game objects.
 -- @type GameObject
 -- @extends #userdata
 -- @field #string id A unique id of this object (not record id), can be used as a key in a table.
+-- @field #string contentFile Lower cased file name of the content file that defines this object; nil for dynamically created objects.
 -- @field #boolean enabled Whether the object is enabled or disabled. Global scripts can set the value. Items in containers or inventories can't be disabled.
 -- @field openmw.util#Vector3 position Object position.
 -- @field openmw.util#Vector3 rotation Object rotation (ZXY order).

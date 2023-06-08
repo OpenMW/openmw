@@ -84,11 +84,34 @@ namespace MWLua
         // api["resume"] = []() {};
     }
 
+    static sol::table initContentFilesBindings(sol::state_view& lua)
+    {
+        const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
+        sol::table list(lua, sol::create);
+        for (size_t i = 0; i < contentList.size(); ++i)
+            list[i + 1] = Misc::StringUtils::lowerCase(contentList[i]);
+        sol::table res(lua, sol::create);
+        res["list"] = LuaUtil::makeReadOnly(list);
+        res["indexOf"] = [&contentList](std::string_view contentFile) -> sol::optional<int> {
+            for (size_t i = 0; i < contentList.size(); ++i)
+                if (Misc::StringUtils::ciEqual(contentList[i], contentFile))
+                    return i + 1;
+            return sol::nullopt;
+        };
+        res["has"] = [&contentList](std::string_view contentFile) -> bool {
+            for (size_t i = 0; i < contentList.size(); ++i)
+                if (Misc::StringUtils::ciEqual(contentList[i], contentFile))
+                    return true;
+            return false;
+        };
+        return LuaUtil::makeReadOnly(res);
+    }
+
     static sol::table initCorePackage(const Context& context)
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 38;
+        api["API_REVISION"] = 39;
         api["quit"] = [lua]() {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
             MWBase::Environment::get().getStateManager()->requestQuit();
@@ -96,6 +119,14 @@ namespace MWLua
         api["sendGlobalEvent"] = [context](std::string eventName, const sol::object& eventData) {
             context.mLuaEvents->addGlobalEvent(
                 { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
+        };
+        api["contentFiles"] = initContentFilesBindings(lua->sol());
+        api["getFormId"] = [](std::string_view contentFile, unsigned int index) -> std::string {
+            const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
+            for (size_t i = 0; i < contentList.size(); ++i)
+                if (Misc::StringUtils::ciEqual(contentList[i], contentFile))
+                    return ESM::RefId(ESM::FormIdRefId(ESM::FormId{ index, int(i) })).serializeText();
+            throw std::runtime_error("Content file not found: " + std::string(contentFile));
         };
         addTimeBindings(api, context, false);
         api["magic"] = initCoreMagicBindings(context);
@@ -188,6 +219,12 @@ namespace MWLua
             ptr.getRefData().disable();
             MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *cell, count.value_or(1));
             return GObject(newPtr);
+        };
+        api["getObjectByFormId"] = [](std::string_view formIdStr) -> GObject {
+            ESM::RefId refId = ESM::RefId::deserializeText(formIdStr);
+            if (!refId.is<ESM::FormIdRefId>())
+                throw std::runtime_error("FormId expected, got " + std::string(formIdStr) + "; use core.getFormId");
+            return GObject(refId.getIf<ESM::FormIdRefId>()->getValue());
         };
 
         // Creates a new record in the world database.

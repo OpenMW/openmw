@@ -27,6 +27,16 @@
 -- @field [parent=#nearby] openmw.core#ObjectList items
 
 ---
+-- Return an object by RefNum/FormId.
+-- Note: the function always returns @{openmw.core#GameObject} and doesn't validate that
+-- the object exists in the game world. If it doesn't exist or not yet loaded to memory),
+-- then `obj:isValid()` will be `false`.
+-- @function [parent=#nearby] getObjectByFormId
+-- @param #string formId String returned by `core.getFormId`
+-- @return openmw.core#GameObject
+-- @usage local obj = nearby.getObjectByFormId(core.getFormId('Morrowind.esm', 128964))
+
+---
 -- @type COLLISION_TYPE
 -- @field [parent=#COLLISION_TYPE] #number World
 -- @field [parent=#COLLISION_TYPE] #number Door
