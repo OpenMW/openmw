@@ -280,8 +280,9 @@ namespace MWLua
 
             if constexpr (std::is_same_v<ObjectT, GObject>)
             { // Only for global scripts
-                objectT["setScale"] = [](const GObject& object, float scale) {
-                    MWBase::Environment::get().getWorld()->scaleObject(object.ptr(), scale);
+                objectT["setScale"] = [context](const GObject& object, float scale) {
+                    context.mLuaManager->addAction(
+                        [object, scale] { MWBase::Environment::get().getWorld()->scaleObject(object.ptr(), scale); });
                 };
                 objectT["addScript"] = [context](const GObject& object, std::string_view path, sol::object initData) {
                     const LuaUtil::ScriptsConfiguration& cfg = context.mLua->getConfiguration();
