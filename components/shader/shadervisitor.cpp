@@ -711,7 +711,7 @@ namespace Shader
 
         defineMap["softParticles"] = reqs.mSoftParticles ? "1" : "0";
 
-        Stereo::Manager::instance().shaderStereoDefines(defineMap);
+        Stereo::shaderStereoDefines(defineMap);
 
         std::string shaderPrefix;
         if (!node.getUserValue("shaderPrefix", shaderPrefix))

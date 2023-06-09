@@ -39,6 +39,9 @@ namespace Stereo
 
     bool getStereo();
 
+    //! Sets up any definitions necessary for stereo rendering
+    void shaderStereoDefines(Shader::ShaderManager::DefineMap& defines);
+
     //! Class that provides tools for managing stereo mode
     class Manager
     {
@@ -51,16 +54,37 @@ namespace Stereo
             virtual void updateView(View& left, View& right) = 0;
         };
 
+        //! An UpdateViewCallback that supplies a fixed, custom view. Useful for debugging purposes,
+        //! such as emulating a given HMD's view.
+        struct CustomViewCallback : public UpdateViewCallback
+        {
+        public:
+            CustomViewCallback(View left, View right);
+
+            void updateView(View& left, View& right) override;
+
+        private:
+            View mLeft;
+            View mRight;
+        };
+
         //! Gets the singleton instance
         static Manager& instance();
 
-        Manager(osgViewer::Viewer* viewer);
+        //! Constructor
+        //!
+        //! @Param viewer the osg viewer whose stereo should be managed.
+        //! @Param enableStereo whether or not stereo should be enabled.
+        //! @Param enableMultiview whether or not to make use of the GL_OVR_Multiview extension, if supported.
+        Manager(osgViewer::Viewer* viewer, bool enableStereo);
         ~Manager();
 
         //! Called during update traversal
         void update();
 
-        void initializeStereo(osg::GraphicsContext* gc);
+        //! Initializes all details of stereo if applicable. If the constructor was called with enableMultiview=true,
+        //! and the GL_OVR_Multiview extension is supported, Stereo::getMultiview() will return true after this call.
+        void initializeStereo(osg::GraphicsContext* gc, bool enableMultiview);
 
         //! Callback that updates stereo configuration during the update pass
         void setUpdateViewCallback(std::shared_ptr<UpdateViewCallback> cb);
@@ -70,9 +94,6 @@ namespace Stereo
 
         osg::Matrixd computeEyeProjection(int view, bool reverseZ) const;
         osg::Matrixd computeEyeViewOffset(int view) const;
-
-        //! Sets up any definitions necessary for stereo rendering
-        void shaderStereoDefines(Shader::ShaderManager::DefineMap& defines) const;
 
         const std::shared_ptr<MultiviewFramebuffer>& multiviewFramebuffer() { return mMultiviewFramebuffer; }
 
@@ -130,6 +151,15 @@ namespace Stereo
         osg::ref_ptr<Identifier> mIdentifierMain = new Identifier();
         osg::ref_ptr<Identifier> mIdentifierLeft = new Identifier();
         osg::ref_ptr<Identifier> mIdentifierRight = new Identifier();
+    };
+
+    //! Performs stereo-specific initialization operations.
+    class InitializeStereoOperation final : public osg::GraphicsOperation
+    {
+    public:
+        InitializeStereoOperation();
+
+        void operator()(osg::GraphicsContext* graphicsContext) override;
     };
 }
 

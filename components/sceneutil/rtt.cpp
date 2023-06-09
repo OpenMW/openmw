@@ -54,11 +54,14 @@ namespace SceneUtil
         if (frameNumber > vdd->mFrameNumber)
         {
             apply(vdd->mCamera);
-            auto& sm = Stereo::Manager::instance();
-            if (sm.getEye(cv) == Stereo::Eye::Left)
-                applyLeft(vdd->mCamera);
-            if (sm.getEye(cv) == Stereo::Eye::Right)
-                applyRight(vdd->mCamera);
+            if (Stereo::getStereo())
+            {
+                auto& sm = Stereo::Manager::instance();
+                if (sm.getEye(cv) == Stereo::Eye::Left)
+                    applyLeft(vdd->mCamera);
+                if (sm.getEye(cv) == Stereo::Eye::Right)
+                    applyRight(vdd->mCamera);
+            }
             vdd->mCamera->accept(*cv);
         }
         vdd->mFrameNumber = frameNumber;

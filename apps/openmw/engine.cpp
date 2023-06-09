@@ -145,20 +145,6 @@ namespace
     private:
         int mMaxTextureImageUnits = 0;
     };
-
-    class InitializeStereoOperation final : public osg::GraphicsOperation
-    {
-    public:
-        InitializeStereoOperation()
-            : GraphicsOperation("InitializeStereoOperation", false)
-        {
-        }
-
-        void operator()(osg::GraphicsContext* graphicsContext) override
-        {
-            Stereo::Manager::instance().initializeStereo(graphicsContext);
-        }
-    };
 }
 
 void OMW::Engine::executeLocalScripts()
@@ -609,10 +595,7 @@ void OMW::Engine::createWindow()
     realizeOperations->add(mSelectColorFormatOperation);
 
     if (Stereo::getStereo())
-    {
-        realizeOperations->add(new InitializeStereoOperation());
-        Stereo::setVertexBufferHint();
-    }
+        realizeOperations->add(new Stereo::InitializeStereoOperation());
 
     mViewer->realize();
     mGlMaxTextureImageUnits = identifyOp->getMaxTextureImageUnits();
@@ -651,7 +634,9 @@ void OMW::Engine::prepareEngine()
     mStateManager = std::make_unique<MWState::StateManager>(mCfgMgr.getUserDataPath() / "saves", mContentFiles);
     mEnvironment.setStateManager(*mStateManager);
 
-    mStereoManager = std::make_unique<Stereo::Manager>(mViewer);
+    bool stereoEnabled
+        = Settings::Manager::getBool("stereo enabled", "Stereo") || osg::DisplaySettings::instance().get()->getStereo();
+    mStereoManager = std::make_unique<Stereo::Manager>(mViewer, stereoEnabled);
 
     osg::ref_ptr<osg::Group> rootNode(new osg::Group);
     mViewer->setSceneData(rootNode);

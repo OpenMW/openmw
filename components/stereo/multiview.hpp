@@ -34,10 +34,10 @@ namespace Stereo
 
     //! Use the provided context to check what extensions are supported and configure use of multiview based on
     //! extensions and settings.
-    void configureExtensions(unsigned int contextID);
+    void configureExtensions(unsigned int contextID, bool enableMultiview);
 
     //! Sets the appropriate vertex buffer hint on OSG's display settings if needed
-    void setVertexBufferHint();
+    void setVertexBufferHint(bool enableMultiview);
 
     //! Creates a Texture2D as a texture view into a Texture2DArray
     osg::ref_ptr<osg::Texture2D> createTextureView_Texture2DFromTexture2DArray(

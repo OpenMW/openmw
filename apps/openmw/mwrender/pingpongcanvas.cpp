@@ -30,7 +30,7 @@ namespace MWRender
         mLuminanceCalculator.disable();
 
         Shader::ShaderManager::DefineMap defines;
-        Stereo::Manager::instance().shaderStereoDefines(defines);
+        Stereo::shaderStereoDefines(defines);
 
         mFallbackProgram = shaderManager.getProgram("fullscreen_tri");
 
