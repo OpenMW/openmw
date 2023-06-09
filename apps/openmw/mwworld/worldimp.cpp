@@ -2709,34 +2709,36 @@ namespace MWWorld
         pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
         pos.pos[0] = pos.pos[1] = pos.pos[2] = 0;
 
-        const MWWorld::CellStore& cellStore = mWorldModel.getInterior(name);
-        ESM::RefId cellId = cellStore.getCell()->getId();
+        const MWWorld::CellStore* cellStore = mWorldModel.findInterior(name);
+        if (!cellStore)
+            return ESM::RefId();
+        ESM::RefId cellId = cellStore->getCell()->getId();
 
-        if (std::optional<ESM::Position> destPos = searchMarkerPosition(cellStore, "cocmarkerheading"))
+        if (std::optional<ESM::Position> destPos = searchMarkerPosition(*cellStore, "cocmarkerheading"))
         {
             pos = *destPos;
             return cellId;
         }
-        if (std::optional<ESM::Position> destPos = searchDoorDestInCell(cellStore))
+        if (std::optional<ESM::Position> destPos = searchDoorDestInCell(*cellStore))
         {
             pos = *destPos;
             return cellId;
         }
-        if (std::optional<ESM::Position> destPos = searchMarkerPosition(cellStore, "xmarkerheading"))
+        if (std::optional<ESM::Position> destPos = searchMarkerPosition(*cellStore, "xmarkerheading"))
         {
             pos = *destPos;
             return cellId;
         }
 
         // Fall back to the first static location.
-        const MWWorld::CellRefList<ESM4::Static>::List& statics4 = cellStore.getReadOnlyEsm4Statics().mList;
+        const MWWorld::CellRefList<ESM4::Static>::List& statics4 = cellStore->getReadOnlyEsm4Statics().mList;
         if (!statics4.empty())
         {
             pos = statics4.begin()->mRef.getPosition();
             pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
             return cellId;
         }
-        const MWWorld::CellRefList<ESM::Static>::List& statics = cellStore.getReadOnlyStatics().mList;
+        const MWWorld::CellRefList<ESM::Static>::List& statics = cellStore->getReadOnlyStatics().mList;
         if (!statics.empty())
         {
             pos = statics.begin()->mRef.getPosition();
