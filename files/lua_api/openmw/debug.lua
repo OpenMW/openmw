@@ -27,6 +27,24 @@
 -- @param #RENDER_MODE value
 
 ---
+-- Toggles god mode
+-- @function [parent=#Debug] toggleGodMode
+
+---
+-- Is god mode enabled
+-- @function [parent=#Debug] isGodMode
+-- @return #boolean
+
+---
+-- Toggles collisions
+-- @function [parent=#Debug] toggleCollision
+
+---
+-- Is player collision enabled
+-- @function [parent=#Debug] isCollisionEnabled
+-- @return #boolean
+
+---
 -- Navigation mesh rendering modes
 -- @type NAV_MESH_RENDER_MODE
 -- @field [parent=#NAV_MESH_RENDER_MODE] #number AreaType
