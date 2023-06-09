@@ -556,7 +556,7 @@ fi
 ICU_VER="70_1"
 
 OSG_ARCHIVE_NAME="OSGoS 3.6.5"
-OSG_ARCHIVE="OSGoS-3.6.5-dd803bc-msvc${OSG_MSVC_YEAR}-win${BITS}"
+OSG_ARCHIVE="OSGoS-3.6.5-123-g68c5c573d-msvc${OSG_MSVC_YEAR}-win${BITS}"
 OSG_ARCHIVE_REPO_URL="https://gitlab.com/OpenMW/openmw-deps/-/raw/main"
 if ! [ -z $OSG_MULTIVIEW_BUILD ]; then
     OSG_ARCHIVE_NAME="OSG-3.6-multiview"
