@@ -21,10 +21,10 @@ testing.registerLocalTest('playerRotation',
             self.controls.run = true
             self.controls.movement = 0
             self.controls.sideMovement = 0
-            self.controls.yawChange = util.normalizeAngle(math.rad(90) - self.rotation.z) * 0.5
+            self.controls.yawChange = util.normalizeAngle(math.rad(90) - self.rotation:getYaw()) * 0.5
             coroutine.yield()
         end
-        testing.expectEqualWithDelta(self.rotation.z, math.rad(90), 0.05, 'Incorrect rotation')
+        testing.expectEqualWithDelta(self.rotation:getYaw(), math.rad(90), 0.05, 'Incorrect rotation')
     end)
 
 testing.registerLocalTest('playerForwardRunning',

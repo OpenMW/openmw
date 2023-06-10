@@ -152,9 +152,9 @@
 -- @field #boolean enabled Whether the object is enabled or disabled. Global scripts can set the value. Items in containers or inventories can't be disabled.
 -- @field openmw.util#Vector3 position Object position.
 -- @field #number scale Object scale.
--- @field openmw.util#Vector3 rotation Object rotation (ZXY order).
+-- @field openmw.util#Transform rotation Object rotation.
 -- @field openmw.util#Vector3 startingPosition The object original position
--- @field openmw.util#Vector3 startingRotation The object original rotation
+-- @field openmw.util#Transform startingRotation The object original rotation
 -- @field #string ownerRecordId NPC who owns the object (nil if missing). Global and self scripts can set the value.
 -- @field #string ownerFactionId Faction who owns the object (nil if missing). Global and self scripts can set the value.
 -- @field #number ownerFactionRank Rank required to be allowed to pick up the object. Global and self scripts can set the value.
@@ -228,12 +228,12 @@
 -- @param #any cellOrName A cell to define the destination worldspace; can be either #Cell, or cell name, or an empty string (empty string means the default exterior worldspace).
 -- If the worldspace has multiple cells (i.e. an exterior), the destination cell is calculated using `position`.
 -- @param openmw.util#Vector3 position New position.
--- @param #TeleportOptions options (optional) Either table @{#TeleportOptions} or @{openmw.util#Vector3} rotation.
+-- @param #TeleportOptions options (optional) Either table @{#TeleportOptions} or @{openmw.util#Transform} rotation.
 
 ---
 -- Either table with options or @{openmw.util#Vector3} rotation.
 -- @type TeleportOptions
--- @field openmw.util#Vector3 rotation New rotation; if missing, then the current rotation is used.
+-- @field openmw.util#Transform rotation New rotation; if missing, then the current rotation is used.
 -- @field #boolean onGround If true, adjust destination position to the ground.
 
 ---

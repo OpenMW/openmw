@@ -36,23 +36,29 @@ local function testTimers()
 end
 
 local function testTeleport()
-    player:teleport('', util.vector3(100, 50, 0), util.vector3(0, 0, math.rad(-90)))
+    player:teleport('', util.vector3(100, 50, 500), util.transform.rotateZ(math.rad(90)))
     coroutine.yield()
     testing.expect(player.cell.isExterior, 'teleport to exterior failed')
     testing.expectEqualWithDelta(player.position.x, 100, 1, 'incorrect position after teleporting')
     testing.expectEqualWithDelta(player.position.y, 50, 1, 'incorrect position after teleporting')
-    testing.expectEqualWithDelta(player.rotation.z, math.rad(-90), 0.05, 'incorrect rotation after teleporting')
+    testing.expectEqualWithDelta(player.position.z, 500, 1, 'incorrect position after teleporting')
+    testing.expectEqualWithDelta(player.rotation:getYaw(), math.rad(90), 0.05, 'incorrect rotation after teleporting')
+
+    player:teleport('', player.position, {rotation=util.transform.rotateZ(math.rad(-90)), onGround=true})
+    coroutine.yield()
+    testing.expectEqualWithDelta(player.rotation:getYaw(), math.rad(-90), 0.05, 'options.rotation is not working')
+    testing.expectLessOrEqual(player.position.z, 400, 'options.onGround is not working')
 
     player:teleport('', util.vector3(50, -100, 0))
     coroutine.yield()
     testing.expect(player.cell.isExterior, 'teleport to exterior failed')
     testing.expectEqualWithDelta(player.position.x, 50, 1, 'incorrect position after teleporting')
     testing.expectEqualWithDelta(player.position.y, -100, 1, 'incorrect position after teleporting')
-    testing.expectEqualWithDelta(player.rotation.z, math.rad(-90), 0.05, 'teleporting changes rotation')
+    testing.expectEqualWithDelta(player.rotation:getYaw(), math.rad(-90), 0.05, 'teleporting changes rotation')
 end
 
 local function initPlayer()
-    player:teleport('', util.vector3(4096, 4096, 867.237), util.vector3(0, 0, 0))
+    player:teleport('', util.vector3(4096, 4096, 867.237), util.transform.identity)
     coroutine.yield()
 end
 

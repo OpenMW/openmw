@@ -502,6 +502,33 @@
 -- @return #Vector3
 
 ---
+-- Get yaw angle (radians)
+-- @function [parent=#Transform] getYaw
+-- @param self
+-- @return #number
+
+---
+-- Get pitch angle (radians)
+-- @function [parent=#Transform] getPitch
+-- @param self
+-- @return #number
+
+---
+-- Get Euler angles for XZ rotation order (pitch and yaw; radians)
+-- @function [parent=#Transform] getAnglesXZ
+-- @param self
+-- @return #number pitch (rotation around X axis)
+-- @return #number yaw (rotation around Z axis)
+
+---
+-- Get Euler angles for ZYX rotation order (radians)
+-- @function [parent=#Transform] getAnglesZYX
+-- @param self
+-- @return #number rotation around Z axis (first rotation)
+-- @return #number rotation around Y axis (second rotation)
+-- @return #number rotation around X axis (third rotation)
+
+---
 -- @type TRANSFORM
 -- @field [parent=#TRANSFORM] #Transform identity Empty transform.
 

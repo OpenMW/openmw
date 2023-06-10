@@ -1333,7 +1333,7 @@
 -- Destination rotation (only if a teleport door).
 -- @function [parent=#Door] destRotation
 -- @param openmw.core#GameObject object
--- @return openmw.util#Vector3
+-- @return openmw.util#Transform
 
 ---
 -- Destination cell (only if a teleport door).
@@ -1443,7 +1443,7 @@
 -- Destination rotation (only if a teleport door).
 -- @function [parent=#ESM4Door] destRotation
 -- @param openmw.core#GameObject object
--- @return openmw.util#Vector3
+-- @return openmw.util#Transform
 
 ---
 -- Destination cell (only if a teleport door).

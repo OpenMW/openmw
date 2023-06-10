@@ -175,7 +175,7 @@ namespace LuaUtil
         sol::table transforms(lua, sol::create);
         util["transform"] = LuaUtil::makeReadOnly(transforms);
 
-        transforms["identity"] = sol::make_object(lua, TransformM{ osg::Matrixf::identity() });
+        transforms["identity"] = sol::make_object(lua, TransformQ{ osg::Quat() });
         transforms["move"] = sol::overload([](const Vec3& v) { return TransformM{ osg::Matrixf::translate(v) }; },
             [](float x, float y, float z) { return TransformM{ osg::Matrixf::translate(x, y, z) }; });
         transforms["scale"] = sol::overload([](const Vec3& v) { return TransformM{ osg::Matrixf::scale(v) }; },
@@ -223,6 +223,22 @@ namespace LuaUtil
                 throw std::runtime_error("This Transform is not invertible");
             return res;
         };
+        transMType["getYaw"] = [](const TransformM& m) {
+            osg::Vec3f angles = Misc::toEulerAnglesXZ(m.mM);
+            return angles.z();
+        };
+        transMType["getPitch"] = [](const TransformM& m) {
+            osg::Vec3f angles = Misc::toEulerAnglesXZ(m.mM);
+            return angles.x();
+        };
+        transMType["getAnglesXZ"] = [](const TransformM& m) {
+            osg::Vec3f angles = Misc::toEulerAnglesXZ(m.mM);
+            return std::make_tuple(angles.x(), angles.z());
+        };
+        transMType["getAnglesZYX"] = [](const TransformM& m) {
+            osg::Vec3f angles = Misc::toEulerAnglesXZ(m.mM);
+            return std::make_tuple(angles.z(), angles.y(), angles.x());
+        };
 
         transQType[sol::meta_function::multiplication]
             = sol::overload([](const TransformQ& a, const Vec3& b) { return a.mQ * b; },
@@ -243,6 +259,22 @@ namespace LuaUtil
         };
         transQType["apply"] = [](const TransformQ& a, const Vec3& b) { return a.mQ * b; },
         transQType["inverse"] = [](const TransformQ& q) { return TransformQ{ q.mQ.inverse() }; };
+        transQType["getYaw"] = [](const TransformQ& q) {
+            osg::Vec3f angles = Misc::toEulerAnglesXZ(q.mQ);
+            return angles.z();
+        };
+        transQType["getPitch"] = [](const TransformQ& q) {
+            osg::Vec3f angles = Misc::toEulerAnglesXZ(q.mQ);
+            return angles.x();
+        };
+        transQType["getAnglesXZ"] = [](const TransformQ& q) {
+            osg::Vec3f angles = Misc::toEulerAnglesXZ(q.mQ);
+            return std::make_tuple(angles.x(), angles.z());
+        };
+        transQType["getAnglesZYX"] = [](const TransformQ& q) {
+            osg::Vec3f angles = Misc::toEulerAnglesXZ(q.mQ);
+            return std::make_tuple(angles.z(), angles.y(), angles.x());
+        };
 
         // Utility functions
         util["clamp"] = [](double value, double from, double to) { return std::clamp(value, from, to); };

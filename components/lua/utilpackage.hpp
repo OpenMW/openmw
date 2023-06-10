@@ -2,6 +2,7 @@
 #define COMPONENTS_LUA_UTILPACKAGE_H
 
 #include <osg/Matrix>
+#include <osg/Quat>
 #include <osg/Vec2>
 #include <osg/Vec3>
 #include <osg/Vec4>
@@ -32,6 +33,11 @@ namespace LuaUtil
     inline TransformQ asTransform(const osg::Quat& q)
     {
         return { q };
+    }
+
+    inline bool isTransform(const sol::object& obj)
+    {
+        return obj.is<TransformM>() || obj.is<TransformQ>();
     }
 
     sol::table initUtilPackage(lua_State*);

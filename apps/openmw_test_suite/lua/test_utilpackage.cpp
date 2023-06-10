@@ -157,7 +157,7 @@ namespace
         EXPECT_EQ(getAsString(lua, "moveAndScale:apply(v(300, 200, 100))"), "(156, 222, 68)");
         EXPECT_THAT(getAsString(lua, "moveAndScale"),
             AllOf(StartsWith("TransformM{ move(6, 22, 18) scale(0.5, 1, 0.5) "), EndsWith(" }")));
-        EXPECT_EQ(getAsString(lua, "T.identity"), "TransformM{ }");
+        EXPECT_EQ(getAsString(lua, "T.identity"), "TransformQ{ rotation(angle=0, axis=(0, 0, 1)) }");
         lua.safe_script("rx = T.rotateX(-math.pi / 2)");
         lua.safe_script("ry = T.rotateY(-math.pi / 2)");
         lua.safe_script("rz = T.rotateZ(-math.pi / 2)");
