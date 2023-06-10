@@ -947,7 +947,7 @@ namespace MWMechanics
                 int magnitude = static_cast<int>(roll(effect));
                 if (target.getCellRef().getLockLevel() <= magnitude)
                 {
-                    if (target.getCellRef().getLockLevel() > 0)
+                    if (target.getCellRef().isLocked())
                     {
                         MWBase::Environment::get().getSoundManager()->playSound3D(
                             target, ESM::RefId::stringRefId("Open Lock"), 1.f, 1.f);

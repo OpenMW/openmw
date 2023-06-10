@@ -313,7 +313,7 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
         if (!isDoorOnTheWay(actor, door, mPathFinder.getPath().front()))
             return;
 
-        if ((door.getCellRef().getTrap().empty() && door.getCellRef().getLockLevel() <= 0))
+        if (door.getCellRef().getTrap().empty() && !door.getCellRef().isLocked())
         {
             world->activate(door, actor);
             return;

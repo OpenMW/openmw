@@ -555,7 +555,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                runtime.push(ptr.getCellRef().getLockLevel() > 0);
+                runtime.push(ptr.getCellRef().isLocked());
             }
         };
 

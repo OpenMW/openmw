@@ -142,7 +142,7 @@ namespace MWClass
 
         MWWorld::ContainerStore& invStore = actor.getClass().getContainerStore(actor);
 
-        bool isLocked = ptr.getCellRef().getLockLevel() > 0;
+        bool isLocked = ptr.getCellRef().isLocked();
         bool isTrapped = !ptr.getCellRef().getTrap().empty();
         bool hasKey = false;
         std::string_view keyName;
@@ -248,8 +248,7 @@ namespace MWClass
 
     bool Door::allowTelekinesis(const MWWorld::ConstPtr& ptr) const
     {
-        if (ptr.getCellRef().getTeleport() && ptr.getCellRef().getLockLevel() <= 0
-            && ptr.getCellRef().getTrap().empty())
+        if (ptr.getCellRef().getTeleport() && !ptr.getCellRef().isLocked() && ptr.getCellRef().getTrap().empty())
             return false;
         else
             return true;
@@ -279,10 +278,13 @@ namespace MWClass
         }
 
         int lockLevel = ptr.getCellRef().getLockLevel();
-        if (lockLevel > 0 && lockLevel != ESM::UnbreakableLock)
-            text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(ptr.getCellRef().getLockLevel());
-        else if (ptr.getCellRef().getLockLevel() < 0)
-            text += "\n#{sUnlocked}";
+        if (lockLevel)
+        {
+            if (ptr.getCellRef().isLocked())
+                text += "\n#{sLockLevel}: " + MWGui::ToolTips::toString(lockLevel);
+            else
+                text += "\n#{sUnlocked}";
+        }
         if (!ptr.getCellRef().getTrap().empty())
             text += "\n#{sTrapped}";
 

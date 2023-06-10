@@ -177,6 +177,8 @@ namespace MWWorld
         void setLockLevel(int lockLevel);
         void lock(int lockLevel);
         void unlock();
+        bool isLocked() const;
+        void setLocked(bool locked);
         // Key and trap ID names, if any
         ESM::RefId getKey() const
         {
