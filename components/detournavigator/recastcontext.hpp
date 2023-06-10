@@ -14,7 +14,8 @@ namespace DetourNavigator
     class RecastContext final : public rcContext
     {
     public:
-        explicit RecastContext(const TilePosition& tilePosition, const AgentBounds& agentBounds);
+        explicit RecastContext(
+            std::string_view worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds);
 
         const std::string& getPrefix() const { return mPrefix; }
 

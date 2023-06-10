@@ -79,7 +79,8 @@ namespace DetourNavigator
                 return;
             }
 
-            const auto data = prepareNavMeshTileData(*recastMesh, mTilePosition, mAgentBounds, mSettings.mRecast);
+            const auto data
+                = prepareNavMeshTileData(*recastMesh, mWorldspace, mTilePosition, mAgentBounds, mSettings.mRecast);
 
             if (data == nullptr)
                 return;
