@@ -7,34 +7,6 @@
 
 namespace ESM
 {
-    const RefId Skill::Block = Skill::indexToRefId(0);
-    const RefId Skill::Armorer = Skill::indexToRefId(1);
-    const RefId Skill::MediumArmor = Skill::indexToRefId(2);
-    const RefId Skill::HeavyArmor = Skill::indexToRefId(3);
-    const RefId Skill::BluntWeapon = Skill::indexToRefId(4);
-    const RefId Skill::LongBlade = Skill::indexToRefId(5);
-    const RefId Skill::Axe = Skill::indexToRefId(6);
-    const RefId Skill::Spear = Skill::indexToRefId(7);
-    const RefId Skill::Athletics = Skill::indexToRefId(8);
-    const RefId Skill::Enchant = Skill::indexToRefId(9);
-    const RefId Skill::Destruction = Skill::indexToRefId(10);
-    const RefId Skill::Alteration = Skill::indexToRefId(11);
-    const RefId Skill::Illusion = Skill::indexToRefId(12);
-    const RefId Skill::Conjuration = Skill::indexToRefId(13);
-    const RefId Skill::Mysticism = Skill::indexToRefId(14);
-    const RefId Skill::Restoration = Skill::indexToRefId(15);
-    const RefId Skill::Alchemy = Skill::indexToRefId(16);
-    const RefId Skill::Unarmored = Skill::indexToRefId(17);
-    const RefId Skill::Security = Skill::indexToRefId(18);
-    const RefId Skill::Sneak = Skill::indexToRefId(19);
-    const RefId Skill::Acrobatics = Skill::indexToRefId(20);
-    const RefId Skill::LightArmor = Skill::indexToRefId(21);
-    const RefId Skill::ShortBlade = Skill::indexToRefId(22);
-    const RefId Skill::Marksman = Skill::indexToRefId(23);
-    const RefId Skill::Mercantile = Skill::indexToRefId(24);
-    const RefId Skill::Speechcraft = Skill::indexToRefId(25);
-    const RefId Skill::HandToHand = Skill::indexToRefId(26);
-
     const std::string Skill::sSkillNames[Length] = {
         "Block",
         "Armorer",
