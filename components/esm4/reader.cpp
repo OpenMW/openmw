@@ -24,21 +24,15 @@
 
 #undef DEBUG_GROUPSTACK
 
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
+#include <optional>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 
-#if defined(_MSC_VER)
-#pragma warning(push)
-#pragma warning(disable : 4706)
-#include <boost/iostreams/filter/zlib.hpp>
-#pragma warning(pop)
-#else
-#include <boost/iostreams/filter/zlib.hpp>
-#endif
-#include <boost/iostreams/copy.hpp>
-#include <boost/iostreams/filtering_streambuf.hpp>
+#include <zlib.h>
 
 #include <components/bsa/memorystream.hpp>
 #include <components/debug/debuglog.hpp>
@@ -67,6 +61,92 @@ namespace ESM4
             }
 
             throw std::logic_error("Unsupported LocalizedStringType: " + std::to_string(static_cast<int>(type)));
+        }
+
+        struct InflateEnd
+        {
+            void operator()(z_stream* stream) const { inflateEnd(stream); }
+        };
+
+        std::optional<std::string> tryDecompressAll(std::span<char> compressed, std::span<char> decompressed)
+        {
+            z_stream stream{};
+
+            stream.next_in = reinterpret_cast<Bytef*>(compressed.data());
+            stream.next_out = reinterpret_cast<Bytef*>(decompressed.data());
+            stream.avail_in = compressed.size();
+            stream.avail_out = decompressed.size();
+
+            if (const int ec = inflateInit(&stream); ec != Z_OK)
+                return "inflateInit error: " + std::to_string(ec) + " " + std::string(stream.msg);
+
+            const std::unique_ptr<z_stream, InflateEnd> streamPtr(&stream);
+
+            if (const int ec = inflate(&stream, Z_NO_FLUSH); ec != Z_STREAM_END)
+                return "inflate error: " + std::to_string(ec) + " " + std::string(stream.msg);
+
+            return std::nullopt;
+        }
+
+        std::optional<std::string> tryDecompressByBlock(
+            std::span<char> compressed, std::span<char> decompressed, std::size_t blockSize)
+        {
+            z_stream stream{};
+
+            if (const int ec = inflateInit(&stream); ec != Z_OK)
+                return "inflateInit error: " + std::to_string(ec) + " " + std::string(stream.msg);
+
+            const std::unique_ptr<z_stream, InflateEnd> streamPtr(&stream);
+
+            while (!compressed.empty() && !decompressed.empty())
+            {
+                const auto prevTotalIn = stream.total_in;
+                const auto prevTotalOut = stream.total_out;
+                stream.next_in = reinterpret_cast<Bytef*>(compressed.data());
+                stream.avail_in = std::min(blockSize, compressed.size());
+                stream.next_out = reinterpret_cast<Bytef*>(decompressed.data());
+                stream.avail_out = std::min(blockSize, decompressed.size());
+                const int ec = inflate(&stream, Z_NO_FLUSH);
+                if (ec == Z_STREAM_END)
+                    break;
+                if (ec != Z_OK)
+                    return "inflate error after reading " + std::to_string(stream.total_in)
+                        + " bytes: " + std::to_string(ec) + " " + std::string(stream.msg);
+                compressed = compressed.subspan(stream.total_in - prevTotalIn);
+                decompressed = decompressed.subspan(stream.total_out - prevTotalOut);
+            }
+
+            return std::nullopt;
+        }
+
+        std::unique_ptr<Bsa::MemoryInputStream> decompress(
+            std::streamoff position, std::span<char> compressed, std::uint32_t uncompressedSize)
+        {
+            auto result = std::make_unique<Bsa::MemoryInputStream>(uncompressedSize);
+
+            const std::span decompressed(result->getRawData(), uncompressedSize);
+
+            const auto allError = tryDecompressAll(compressed, decompressed);
+            if (!allError.has_value())
+                return result;
+
+            Log(Debug::Warning) << "Failed to decompress record data at 0x" << std::hex << position
+                                << std::resetiosflags(std::ios_base::hex) << " compressed size = " << compressed.size()
+                                << " uncompressed size = " << uncompressedSize << ": " << *allError
+                                << ". Trying to decompress by block...";
+
+            std::memset(result->getRawData(), 0, uncompressedSize);
+
+            constexpr std::size_t blockSize = 4;
+            const auto blockError = tryDecompressByBlock(compressed, decompressed, blockSize);
+            if (!blockError.has_value())
+                return result;
+
+            std::ostringstream s;
+            s << "Failed to decompress record data by block of " << blockSize << " bytes at 0x" << std::hex << position
+              << std::resetiosflags(std::ios_base::hex) << " compressed size = " << compressed.size()
+              << " uncompressed size = " << uncompressedSize << ": " << *blockError;
+            throw std::runtime_error(s.str());
         }
     }
 
@@ -423,22 +503,16 @@ namespace ESM4
         {
             mStream->read(reinterpret_cast<char*>(&uncompressedSize), sizeof(std::uint32_t));
 
-            std::size_t recordSize = mCtx.recordHeader.record.dataSize - sizeof(std::uint32_t);
-            Bsa::MemoryInputStream compressedRecord(recordSize);
-            mStream->read(compressedRecord.getRawData(), recordSize);
-            std::istream* fileStream = (std::istream*)&compressedRecord;
+            const std::streamoff position = mStream->tellg();
+
+            const std::uint32_t recordSize = mCtx.recordHeader.record.dataSize - sizeof(std::uint32_t);
+            std::vector<char> compressed(recordSize);
+            mStream->read(compressed.data(), recordSize);
             mSavedStream = std::move(mStream);
 
             mCtx.recordHeader.record.dataSize = uncompressedSize - sizeof(uncompressedSize);
 
-            auto memoryStreamPtr = std::make_unique<Bsa::MemoryInputStream>(uncompressedSize);
-
-            boost::iostreams::filtering_streambuf<boost::iostreams::input> inputStreamBuf;
-            inputStreamBuf.push(boost::iostreams::zlib_decompressor());
-            inputStreamBuf.push(*fileStream);
-
-            boost::iostreams::basic_array_sink<char> sr(memoryStreamPtr->getRawData(), uncompressedSize);
-            boost::iostreams::copy(inputStreamBuf, sr);
+            auto memoryStreamPtr = decompress(position, compressed, uncompressedSize);
 
             // For debugging only
             // #if 0

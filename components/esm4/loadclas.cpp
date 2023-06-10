@@ -55,6 +55,7 @@ void ESM4::Class::load(ESM4::Reader& reader)
                 reader.getZString(mIcon);
                 break;
             case ESM4::SUB_DATA:
+            case ESM4::SUB_ATTR:
                 reader.skipSubRecordData();
                 break;
             default:

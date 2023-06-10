@@ -652,6 +652,10 @@ if [ -z $SKIP_DOWNLOAD ]; then
 	download "ICU ${ICU_VER/_/.}"\
 		"https://github.com/unicode-org/icu/releases/download/release-${ICU_VER/_/-}/icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip" \
 		"icu4c-${ICU_VER}-Win${BITS}-MSVC2019.zip"
+
+	download "zlib 1.2.11"\
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/zlib-1.2.11-msvc2017-win64.7z" \
+		"zlib-1.2.11-msvc2017-win64.7z"
 fi
 
 cd .. #/..
@@ -849,10 +853,10 @@ printf "${OSG_ARCHIVE_NAME}... "
 		fi
 
 		if ! [ -z $OSG_MULTIVIEW_BUILD ]; then
-			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{ot21-OpenThreads,zlib,libpng16}${SUFFIX}.dll \
+			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{ot21-OpenThreads,libpng16}${SUFFIX}.dll \
 				"$(pwd)/OSG/bin/osg162-osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow,Sim}${SUFFIX}.dll
 		else
-			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{OpenThreads,icuuc58,libpng16,zlib}${SUFFIX}.dll \
+			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/"{OpenThreads,icuuc58,libpng16}${SUFFIX}.dll \
 				"$(pwd)/OSG/bin/libxml2"${SUFFIX_UPCASE}.dll \
 				"$(pwd)/OSG/bin/osg"{,Animation,DB,FX,GA,Particle,Text,Util,Viewer,Shadow,Sim}${SUFFIX}.dll
 			add_runtime_dlls $CONFIGURATION "$(pwd)/OSG/bin/icudt58.dll"
@@ -1024,6 +1028,27 @@ printf "ICU ${ICU_VER/_/.}... "
 		add_runtime_dlls $config "$(pwd)/ICU-${ICU_VER}/bin${BITS}/icudt${ICU_VER/_*/}.dll"
 		add_runtime_dlls $config "$(pwd)/ICU-${ICU_VER}/bin${BITS}/icuin${ICU_VER/_*/}.dll"
 		add_runtime_dlls $config "$(pwd)/ICU-${ICU_VER}/bin${BITS}/icuuc${ICU_VER/_*/}.dll"
+	done
+	echo Done.
+}
+
+cd $DEPS
+echo
+printf "zlib 1.2.11... "
+{
+	if [ -d zlib-1.2.11-msvc2017-win64 ]; then
+		printf "Exists. "
+	elif [ -z $SKIP_EXTRACT ]; then
+		rm -rf zlib-1.2.11-msvc2017-win64
+		eval 7z x -y zlib-1.2.11-msvc2017-win64.7z $STRIP
+	fi
+	add_cmake_opts -DZLIB_ROOT="$(real_pwd)/zlib-1.2.11-msvc2017-win64"
+	for config in ${CONFIGURATIONS[@]}; do
+		if [ $CONFIGURATION == "Debug" ]; then
+			add_runtime_dlls $config "$(pwd)/zlib-1.2.11-msvc2017-win64/bin/zlibd.dll"
+		else
+			add_runtime_dlls $config "$(pwd)/zlib-1.2.11-msvc2017-win64/bin/zlib.dll"
+		fi
 	done
 	echo Done.
 }
