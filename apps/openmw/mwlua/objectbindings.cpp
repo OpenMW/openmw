@@ -164,6 +164,8 @@ namespace MWLua
             });
             objectT["position"] = sol::readonly_property(
                 [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getRefData().getPosition().asVec3(); });
+            objectT["scale"]
+                = sol::readonly_property([](const ObjectT& o) -> float { return o.ptr().getCellRef().getScale(); });
             objectT["rotation"] = sol::readonly_property(
                 [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getRefData().getPosition().asRotationVec3(); });
             objectT["startingPosition"] = sol::readonly_property(
@@ -285,6 +287,10 @@ namespace MWLua
 
             if constexpr (std::is_same_v<ObjectT, GObject>)
             { // Only for global scripts
+                objectT["setScale"] = [context](const GObject& object, float scale) {
+                    context.mLuaManager->addAction(
+                        [object, scale] { MWBase::Environment::get().getWorld()->scaleObject(object.ptr(), scale); });
+                };
                 objectT["addScript"] = [context](const GObject& object, std::string_view path, sol::object initData) {
                     const LuaUtil::ScriptsConfiguration& cfg = context.mLua->getConfiguration();
                     std::optional<int> scriptId = cfg.findId(path);
