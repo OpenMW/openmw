@@ -433,8 +433,8 @@ namespace DetourNavigator
                 return JobStatus::MemoryCacheMiss;
             }
 
-            preparedNavMeshData
-                = prepareNavMeshTileData(*recastMesh, job.mChangedTile, job.mAgentBounds, mSettings.get().mRecast);
+            preparedNavMeshData = prepareNavMeshTileData(
+                *recastMesh, job.mWorldspace, job.mChangedTile, job.mAgentBounds, mSettings.get().mRecast);
 
             if (preparedNavMeshData == nullptr)
             {
@@ -483,8 +483,8 @@ namespace DetourNavigator
 
         if (preparedNavMeshData == nullptr)
         {
-            preparedNavMeshData
-                = prepareNavMeshTileData(*job.mRecastMesh, job.mChangedTile, job.mAgentBounds, mSettings.get().mRecast);
+            preparedNavMeshData = prepareNavMeshTileData(
+                *job.mRecastMesh, job.mWorldspace, job.mChangedTile, job.mAgentBounds, mSettings.get().mRecast);
             generatedNavMeshData = true;
         }
 

@@ -42,7 +42,8 @@ namespace DetourNavigator
     }
 
     std::unique_ptr<PreparedNavMeshData> prepareNavMeshTileData(const RecastMesh& recastMesh,
-        const TilePosition& tilePosition, const AgentBounds& agentBounds, const RecastSettings& settings);
+        std::string_view worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds,
+        const RecastSettings& settings);
 
     NavMeshData makeNavMeshTileData(const PreparedNavMeshData& data,
         const std::vector<OffMeshConnection>& offMeshConnections, const AgentBounds& agentBounds,

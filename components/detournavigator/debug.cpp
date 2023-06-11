@@ -114,9 +114,17 @@ namespace DetourNavigator
 
     std::ostream& operator<<(std::ostream& stream, const WriteDtStatus& value)
     {
-        for (const auto& status : dtStatuses)
-            if (value.mStatus & status.mStatus)
-                stream << status.mString;
+        bool first = true;
+        for (const auto& v : dtStatuses)
+        {
+            if ((value.mStatus & v.mStatus) == 0)
+                continue;
+            if (first)
+                first = false;
+            else
+                stream << " | ";
+            stream << v.mString;
+        }
         return stream;
     }
 
@@ -205,6 +213,22 @@ namespace DetourNavigator
     std::ostream& operator<<(std::ostream& stream, const TilesPositionsRange& value)
     {
         return stream << "TilesPositionsRange {" << value.mBegin << ", " << value.mEnd << "}";
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const AreaCosts& value)
+    {
+        return stream << "AreaCosts {"
+                      << ".mWater = " << value.mWater << ", .mDoor = " << value.mDoor
+                      << ", .mPathgrid = " << value.mPathgrid << ", .mGround = " << value.mGround << "}";
+    }
+
+    std::ostream& operator<<(std::ostream& stream, const DetourSettings& value)
+    {
+        return stream << "DetourSettings {"
+                      << ".mMaxPolys = " << value.mMaxPolys
+                      << ", .mMaxNavMeshQueryNodes = " << value.mMaxNavMeshQueryNodes
+                      << ", .mMaxPolygonPathSize = " << value.mMaxPolygonPathSize
+                      << ", .mMaxSmoothPathSize = " << value.mMaxSmoothPathSize << "}";
     }
 
     void writeToFile(const RecastMesh& recastMesh, const std::string& pathPrefix, const std::string& revision,

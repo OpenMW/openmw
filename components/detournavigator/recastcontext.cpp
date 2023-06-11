@@ -23,17 +23,19 @@ namespace DetourNavigator
             return Debug::Debug;
         }
 
-        std::string formatPrefix(const TilePosition& tilePosition, const AgentBounds& agentBounds)
+        std::string formatPrefix(
+            std::string_view worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds)
         {
             std::ostringstream stream;
-            stream << "Tile position: " << tilePosition.x() << ", " << tilePosition.y()
-                   << "; agent bounds: " << agentBounds << "; ";
+            stream << "Worldspace: " << worldspace << "; tile position: " << tilePosition.x() << ", "
+                   << tilePosition.y() << "; agent bounds: " << agentBounds << "; ";
             return stream.str();
         }
     }
 
-    RecastContext::RecastContext(const TilePosition& tilePosition, const AgentBounds& agentBounds)
-        : mPrefix(formatPrefix(tilePosition, agentBounds))
+    RecastContext::RecastContext(
+        std::string_view worldspace, const TilePosition& tilePosition, const AgentBounds& agentBounds)
+        : mPrefix(formatPrefix(worldspace, tilePosition, agentBounds))
     {
     }
 

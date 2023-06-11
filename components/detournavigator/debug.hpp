@@ -20,6 +20,8 @@ namespace DetourNavigator
 {
     struct Version;
     struct TilesPositionsRange;
+    struct AreaCosts;
+    struct DetourSettings;
 
     std::ostream& operator<<(std::ostream& stream, const TileBounds& value);
 
@@ -60,6 +62,10 @@ namespace DetourNavigator
     std::ostream& operator<<(std::ostream& stream, const Version& value);
 
     std::ostream& operator<<(std::ostream& stream, const TilesPositionsRange& value);
+
+    std::ostream& operator<<(std::ostream& stream, const AreaCosts& value);
+
+    std::ostream& operator<<(std::ostream& stream, const DetourSettings& value);
 
     class RecastMesh;
     struct RecastSettings;
