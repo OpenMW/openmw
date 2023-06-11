@@ -292,6 +292,8 @@ namespace MWWorld
 
         const ESM::GameSetting* find(const std::string_view id) const;
         const ESM::GameSetting* search(const std::string_view id) const;
+
+        void setUp() override;
     };
 
     template <>
