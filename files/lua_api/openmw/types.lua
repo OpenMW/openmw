@@ -1382,6 +1382,46 @@
 -- @field #string id Record id
 -- @field #string model VFS path to the model
 
+
+--- @{#CreatureLevelledList} functions
+-- @field [parent=#types] #CreatureLevelledList CreatureLevelledList
+
+---
+-- @type CreatureLevelledList
+-- @field #list<#CreatureLevelledListRecord> records A read-only list of all @{#CreatureLevelledListRecord}s in the world database.
+
+---
+-- Whether the object is a CreatureLevelledList.
+-- @function [parent=#CreatureLevelledList] objectIsInstance
+-- @param openmw.core#GameObject object
+-- @return #boolean
+
+---
+-- Returns the read-only @{#CreatureLevelledListRecord} of a levelled creature
+-- @function [parent=#CreatureLevelledList] record
+-- @param #any objectOrRecordId
+-- @return #CreatureLevelledListRecord
+
+---
+-- @type CreatureLevelledListRecord
+-- @field #string id Record id
+-- @field #number chanceNone Chance this list won't spawn anything [0-100]
+-- @field #boolean calculateFromAllLevels Calculate from all levels <= player level, not just the closest below player
+-- @field #list<#LevelledListItem> creatures
+
+---
+-- Picks a random id from the levelled list.
+-- @function [parent=#CreatureLevelledListRecord] getRandomId
+-- @param openmw.core#CreatureLevelledListRecord The list
+-- @param #number The maximum level to select entries for
+-- @return #string An id
+
+---
+-- @type LevelledListItem
+-- @field #string id Item id
+-- @field #number level The minimum player level at which this item can occur
+
+
 --- Functions for @{#ESM4Activator} objects
 -- @field [parent=#types] #ESM4Activator ESM4Activator
 

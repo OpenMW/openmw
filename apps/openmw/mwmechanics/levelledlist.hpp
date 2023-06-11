@@ -3,6 +3,8 @@
 
 #include <components/misc/rng.hpp>
 
+#include <optional>
+
 namespace ESM
 {
     struct LevelledListBase;
@@ -13,7 +15,8 @@ namespace MWMechanics
 {
 
     /// @return ID of resulting item, or empty if none
-    ESM::RefId getLevelledItem(const ESM::LevelledListBase* levItem, bool creature, Misc::Rng::Generator& prng);
+    ESM::RefId getLevelledItem(
+        const ESM::LevelledListBase* levItem, bool creature, Misc::Rng::Generator& prng, std::optional<int> level = {});
 
 }
 
