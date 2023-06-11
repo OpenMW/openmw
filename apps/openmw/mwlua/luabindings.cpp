@@ -131,16 +131,28 @@ namespace MWLua
         addTimeBindings(api, context, false);
         api["magic"] = initCoreMagicBindings(context);
         api["l10n"] = LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager());
-        const MWWorld::Store<ESM::GameSetting>* gmst
+        const MWWorld::Store<ESM::GameSetting>* gmstStore
             = &MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
-        api["getGMST"] = [lua = context.mLua, gmst](const std::string& setting) -> sol::object {
-            const ESM::Variant& value = gmst->find(setting)->mValue;
-            if (value.getType() == ESM::VT_String)
-                return sol::make_object<std::string>(lua->sol(), value.getString());
-            else if (value.getType() == ESM::VT_Int)
-                return sol::make_object<int>(lua->sol(), value.getInteger());
-            else
-                return sol::make_object<float>(lua->sol(), value.getFloat());
+        api["getGMST"] = [lua = context.mLua, gmstStore](const std::string& setting) -> sol::object {
+            const ESM::GameSetting* gmst = gmstStore->search(setting);
+            if (gmst == nullptr)
+                return sol::nil;
+            const ESM::Variant& value = gmst->mValue;
+            switch (value.getType())
+            {
+                case ESM::VT_Float:
+                    return sol::make_object<float>(lua->sol(), value.getFloat());
+                case ESM::VT_Short:
+                case ESM::VT_Long:
+                case ESM::VT_Int:
+                    return sol::make_object<int>(lua->sol(), value.getInteger());
+                case ESM::VT_String:
+                    return sol::make_object<std::string>(lua->sol(), value.getString());
+                case ESM::VT_Unknown:
+                case ESM::VT_None:
+                    break;
+            }
+            return sol::nil;
         };
 
         sol::table skill(context.mLua->sol(), sol::create);
