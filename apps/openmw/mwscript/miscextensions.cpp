@@ -366,8 +366,8 @@ namespace MWScript
             void execute(Interpreter::Runtime& runtime) override
             {
                 MWWorld::Ptr ptr = R()(runtime);
-
-                ptr.getCellRef().unlock();
+                if (ptr.getCellRef().isLocked())
+                    ptr.getCellRef().unlock();
             }
         };
 
