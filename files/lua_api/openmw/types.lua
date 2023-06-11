@@ -1405,7 +1405,7 @@
 ---
 -- @type CreatureLevelledListRecord
 -- @field #string id Record id
--- @field #number chanceNone Chance this list won't spawn anything [0-100]
+-- @field #number chanceNone Chance this list won't spawn anything [0-1]
 -- @field #boolean calculateFromAllLevels Calculate from all levels <= player level, not just the closest below player
 -- @field #list<#LevelledListItem> creatures
 
