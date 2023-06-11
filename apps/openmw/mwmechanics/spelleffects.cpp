@@ -954,8 +954,8 @@ namespace MWMechanics
 
                         if (caster == getPlayer())
                             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicOpenSuccess}");
+                        target.getCellRef().unlock();
                     }
-                    target.getCellRef().unlock();
                 }
                 else
                 {
