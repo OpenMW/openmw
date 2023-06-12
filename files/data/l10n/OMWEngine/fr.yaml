@@ -1,7 +1,6 @@
 # Console
 
-#-- To be translated
-#ConsoleWindow: "Console"
+ConsoleWindow: "Console"
 
 
 # Debug window
@@ -14,21 +13,19 @@ PhysicsProfiler: "Profileur des performances de la physique"
 # Messages
 
 BuildingNavigationMesh: "Construction du mesh de navigation"
-
-#-- To be translated
-#AskLoadLastSave: "The most recent save is '%s'. Do you want to load it?"
-#InitializingData: "Initializing Data..."
-#LoadingExterior: "Loading Area"
-#LoadingFailed: "Failed to load saved game"
-#LoadingInterior: "Loading Area"
-#LoadingInProgress: "Loading Save Game"
-#LoadingRequiresNewVersionError: |-
-#    This save file was created using a newer version of OpenMW and is thus not supported.
-#    Please upgrade to the newest OpenMW version to load this file.
-#NewGameConfirmation: "Do you want to start a new game and lose the current one?"
-#SaveGameDenied: "The game cannot be saved right now."
-#SavingInProgress: "Saving..."
-#QuitGameConfirmation: "Quit the game?"
+AskLoadLastSave: "La sauvegarde la plus récente est '%s'. Voulez-vous la charger ?"
+InitializingData: "Initialisation des données..."
+LoadingExterior: "Chargement de la zone de jeu"
+LoadingFailed: "Échec du chargement de la sauvegarde"
+LoadingInterior: "Chargement de la zone de jeu"
+LoadingInProgress: "Chargement de la sauvegarde"
+LoadingRequiresNewVersionError: |-
+    Ce fichier de sauvegarde provient d'une version plus récente d'OpenMW, il n'est par consequent pas supporté.
+    Mettez à jour votre version d'OpenMW afin de pouvoir charger cette sauvegarde.
+NewGameConfirmation: "Voulez-vous démarrer une nouvelle partie ? Toute progression non sauvegardée sera perdue."
+SaveGameDenied: "Sauvegarde impossible"
+SavingInProgress: "Sauvegarde en cours..."
+QuitGameConfirmation: "Quitter la partie ?"
 
 
 # Save game menu
@@ -36,16 +33,15 @@ BuildingNavigationMesh: "Construction du mesh de navigation"
 SelectCharacter: "Sélection du personnage..."
 TimePlayed: "Temps de jeu"
 
-#-- To be translated
-#DeleteGame: "Delete Game"
-#DeleteGameConfirmation: "Are you sure you want to delete this saved game?"
-#EmptySaveNameError: "Game can not be saved without a name!"
-#LoadGameConfirmation: "Do you want to load a saved game and lose the current one?"
-#MissingContentFilesConfirmation: |
-#    The currently selected content files do not match the ones used by this save game.
-#    Errors may occur during load or game play.
-#    Do you wish to continue?
-#OverwriteGameConfirmation: "Are you sure you want to overwrite this saved game?"
+DeleteGame: "Supprimer la partie"
+DeleteGameConfirmation: "Voulez-vous réellement supprimer cette partie sauvegardée ?"
+EmptySaveNameError: "Impossible de sauvegarder une partie lui donner un nom !"
+LoadGameConfirmation: "Voulez-vous charger cette autre partie ? Toute progression non sauvegardée sera perdue."
+MissingContentFilesConfirmation: |
+    Les données de jeu actuellement sélectionnées ne correspondent pas à celle indiquée dans cette sauvegarde.
+    Cela peut entraîner des erreurs lors du chargement, mais aussi lors de votre partie.
+    Voulez-vous continuer ?
+OverwriteGameConfirmation: "Écraser la sauvegarde précédente ?"
 
 
 # Settings menu
@@ -116,48 +112,46 @@ WindowMode: "Mode d'affichage"
 WindowModeFullscreen: "Plein écran"
 WindowModeWindowed: "Fenêtré"
 WindowModeWindowedFullscreen: "Fenêtré plein écran"
-
-#-- To be translated
-#Audio: "Audio"
-#AudioMaster: "Master"
-#AudioVoice: "Voice"
-#AudioEffects: "Effects"
-#AudioFootsteps: "Footsteps"
-#AudioMusic: "Music"
-#ConfirmResetBindings: "Reset all controls to the default?"
-#ConfirmResolution: "New resolution will be applied immediately. Do you want to continue?"
-#Controls: "Controls"
-#DelayLow: "Fast"
-#DelayHigh: "Slow"
-#DetailLevel: "Detail Level"
-#Difficulty: "Difficulty"
-#DifficultyEasy: "Easy"
-#DifficultyHard: "Hard"
-#DistanceHigh: "Far"
-#DistanceLow: "Near"
-#EnableController: "Enable Controller"
-#FieldOfViewLow: "Low"
-#FieldOfViewHigh: "High"
-#GammaCorrection: "Gamma Correction"
-#GammaDark: "Dark"
-#GammaLight: "Light"
-#InvertYAxis: "Invert Y Axis"
-#MenuHelpDelay: "Menu Help Delay"
-#MenuTransparency: "Menu Transparency"
-#Preferences: "Prefs"
-#PostProcessingIsNotEnabled
-#QualityHigh: "High"
-#QualityLow: "Low"
-#QualityMedium: "Medium"
-#RebindAction: "Press a key or button to rebind this control."
-#ResetControls: "Reset Controls"
-#SensitivityHigh: "High"
-#SensitivityLow: "Low"
-#SettingsWindow: "Options"
-#Subtitles: "Subtitles"
-#TestingExteriorCells: "Testing exterior cells"
-#TestingInteriorCells: "Testing interior cells"
-#TransparencyFull: "Full"
-#TransparencyNone: "None"
-#Video: "Video"
-#ViewDistance: "View Distance"
+Audio: "Audio"
+AudioMaster: "Général"
+AudioVoice: "Voix"
+AudioEffects: "Ambiance"
+AudioFootsteps: "Bruits de pas"
+AudioMusic: "Musique"
+ConfirmResetBindings: "Réinitialiser tous les contrôles à leurs valeurs par défaut ?"
+ConfirmResolution: "La nouvelle résolution d'affichage sera appliquée instantanément. Voulez-vous continuer ?"
+Controls: "Contrôles"
+DelayLow: "Rapide"
+DelayHigh: "Lent"
+DetailLevel: "Niveau de détails"
+Difficulty: "Difficulté"
+DifficultyEasy: "Facile"
+DifficultyHard: "Difficile"
+DistanceHigh: "Lointain"
+DistanceLow: "Proche"
+EnableController: "Activer la manette"
+FieldOfViewLow: "Restreint"
+FieldOfViewHigh: "Étendu"
+GammaCorrection: "Correction Gamma"
+GammaDark: "Sombre"
+GammaLight: "Clair"
+InvertYAxis: "Inverser l'axe Y"
+MenuHelpDelay: "Délai d'affichage du menu d'aide"
+MenuTransparency: "Transparence des menus"
+TransparencyFull: "Haute"
+TransparencyNone: "Basse"
+Preferences: "Préférences"
+PostProcessingIsNotEnabled: "Le post-traitement est désactivé"
+QualityHigh: "Haute"
+QualityLow: "Basse"
+QualityMedium: "Moyenne"
+RebindAction: "Appuyez sur une touche pour l'associer à cette action"
+ResetControls: "Réinitialiser les contrôles"
+SensitivityHigh: "Haute"
+SensitivityLow: "Faible"
+SettingsWindow: "Options"
+Subtitles: "Sous-titres"
+TestingExteriorCells: "Vérification des espaces (cells) extérieurs"
+TestingInteriorCells: "Vérification des espaces (cells) intérieurs"
+Video: "Graphisme"
+ViewDistance: "Distance d'affichage"
