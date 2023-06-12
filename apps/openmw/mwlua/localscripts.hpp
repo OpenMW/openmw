@@ -63,7 +63,7 @@ namespace MWLua
         LocalScripts(LuaUtil::LuaState* lua, const LObject& obj);
 
         MWBase::LuaManager::ActorControls* getActorControls() { return &mData.mControls; }
-        const MWWorld::Ptr& getPtr() const { return mData.ptr(); }
+        const MWWorld::Ptr& getPtrOrEmpty() const { return mData.ptrOrEmpty(); }
 
         void setActive(bool active);
         void onConsume(const LObject& consumable) { callEngineHandlers(mOnConsumeHandlers, consumable); }

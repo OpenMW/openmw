@@ -152,7 +152,7 @@ namespace MWLua
                     return sol::nullopt;
                 return Misc::StringUtils::lowerCase(contentList[contentFileIndex]);
             });
-            objectT["isValid"] = [](const ObjectT& o) { return !o.ptrOrNull().isEmpty(); };
+            objectT["isValid"] = [](const ObjectT& o) { return !o.ptrOrEmpty().isEmpty(); };
             objectT["recordId"] = sol::readonly_property(
                 [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().serializeText(); });
             objectT["cell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>> {

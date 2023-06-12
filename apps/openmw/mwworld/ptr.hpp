@@ -165,7 +165,7 @@ namespace MWWorld
 
         std::string toString() const;
 
-        const Ptr& ptrOrNull() const
+        const Ptr& ptrOrEmpty() const
         {
             update();
             return mPtr;
