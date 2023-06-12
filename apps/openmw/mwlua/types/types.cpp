@@ -20,6 +20,7 @@ namespace MWLua
         constexpr std::string_view Creature = "Creature";
         constexpr std::string_view Door = "Door";
         constexpr std::string_view Ingredient = "Ingredient";
+        constexpr std::string_view LevelledCreature = "LevelledCreature";
         constexpr std::string_view Light = "Light";
         constexpr std::string_view MiscItem = "Miscellaneous";
         constexpr std::string_view NPC = "NPC";
@@ -63,6 +64,7 @@ namespace MWLua
             { ESM::REC_CREA, ObjectTypeName::Creature },
             { ESM::REC_DOOR, ObjectTypeName::Door },
             { ESM::REC_INGR, ObjectTypeName::Ingredient },
+            { ESM::REC_LEVC, ObjectTypeName::LevelledCreature },
             { ESM::REC_LIGH, ObjectTypeName::Light },
             { ESM::REC_MISC, ObjectTypeName::MiscItem },
             { ESM::REC_NPC_, ObjectTypeName::NPC },
@@ -188,6 +190,8 @@ namespace MWLua
         addNpcBindings(
             addType(ObjectTypeName::NPC, { ESM::REC_INTERNAL_PLAYER, ESM::REC_NPC_ }, ObjectTypeName::Actor), context);
         addPlayerBindings(addType(ObjectTypeName::Player, { ESM::REC_INTERNAL_PLAYER }, ObjectTypeName::NPC), context);
+
+        addLevelledCreatureBindings(addType(ObjectTypeName::LevelledCreature, { ESM::REC_LEVC }), context);
 
         addArmorBindings(addType(ObjectTypeName::Armor, { ESM::REC_ARMO }, ObjectTypeName::Item), context);
         addClothingBindings(addType(ObjectTypeName::Clothing, { ESM::REC_CLOT }, ObjectTypeName::Item), context);

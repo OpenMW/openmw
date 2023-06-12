@@ -63,6 +63,7 @@ namespace MWLua
     void addClothingBindings(sol::table clothing, const Context& context);
     void addStaticBindings(sol::table stat, const Context& context);
     void addLightBindings(sol::table light, const Context& context);
+    void addLevelledCreatureBindings(sol::table list, const Context& context);
 
     void addESM4DoorBindings(sol::table door, const Context& context);
 

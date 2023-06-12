@@ -15,12 +15,20 @@
 namespace MWMechanics
 {
 
-    ESM::RefId getLevelledItem(const ESM::LevelledListBase* levItem, bool creature, Misc::Rng::Generator& prng)
+    ESM::RefId getLevelledItem(
+        const ESM::LevelledListBase* levItem, bool creature, Misc::Rng::Generator& prng, std::optional<int> level)
     {
         const std::vector<ESM::LevelledListBase::LevelItem>& items = levItem->mList;
 
-        const MWWorld::Ptr& player = getPlayer();
-        int playerLevel = player.getClass().getCreatureStats(player).getLevel();
+        int playerLevel;
+        if (level.has_value())
+            playerLevel = *level;
+        else
+        {
+            const MWWorld::Ptr& player = getPlayer();
+            playerLevel = player.getClass().getCreatureStats(player).getLevel();
+            level = playerLevel;
+        }
 
         if (Misc::Rng::roll0to99(prng) < levItem->mChanceNone)
             return ESM::RefId();
@@ -65,9 +73,9 @@ namespace MWMechanics
         else
         {
             if (ref.getPtr().getType() == ESM::ItemLevList::sRecordId)
-                return getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false, prng);
+                return getLevelledItem(ref.getPtr().get<ESM::ItemLevList>()->mBase, false, prng, level);
             else
-                return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, true, prng);
+                return getLevelledItem(ref.getPtr().get<ESM::CreatureLevList>()->mBase, true, prng, level);
         }
     }
 }
