@@ -578,6 +578,16 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+--- Creature.TYPE
+-- @type CreatureTYPE
+-- @field #number Creatures
+-- @field #number Daedra
+-- @field #number Undead
+-- @field #number Humanoid
+
+--- @{#CreatureTYPE}
+-- @field [parent=#Creature] #CreatureTYPE TYPE
+
 ---
 -- Returns the read-only @{#CreatureRecord} of a creature
 -- @function [parent=#Creature] record
@@ -592,6 +602,7 @@
 -- @field #string model VFS path to the creature's model
 -- @field #string mwscript
 -- @field #number soulValue The soul value of the creature record
+-- @field #number type The @{#Creature.TYPE} of the creature
 
 
 --- @{#NPC} functions

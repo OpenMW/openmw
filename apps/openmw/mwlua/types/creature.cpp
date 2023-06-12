@@ -21,6 +21,13 @@ namespace MWLua
 {
     void addCreatureBindings(sol::table creature, const Context& context)
     {
+        creature["TYPE"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
+            { "Creatures", ESM::Creature::Creatures },
+            { "Daedra", ESM::Creature::Daedra },
+            { "Undead", ESM::Creature::Undead },
+            { "Humanoid", ESM::Creature::Humanoid },
+        }));
+
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
         addRecordFunctionBinding<ESM::Creature>(creature, context);
@@ -39,5 +46,6 @@ namespace MWLua
         record["baseCreature"] = sol::readonly_property(
             [](const ESM::Creature& rec) -> std::string { return rec.mOriginal.serializeText(); });
         record["soulValue"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mSoul; });
+        record["type"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mType; });
     }
 }
