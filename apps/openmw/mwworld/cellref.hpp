@@ -184,7 +184,7 @@ namespace MWWorld
         {
             return std::visit([](auto&& ref) -> const ESM::RefId& { return ref.mKey; }, mCellRef.mVariant);
         }
-
+        void setKey(const ESM::RefId& key);
         ESM::RefId getTrap() const
         {
             struct Visitor
