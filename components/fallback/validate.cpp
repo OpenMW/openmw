@@ -95,14 +95,13 @@ static const std::set<std::string, std::less<>> allowedKeysFloat = { "Inventory_
     "Weather_Thunderstorm_Transition_Delta", "Weather_Thunderstorm_Wind_Speed" };
 
 static const std::set<std::string, std::less<>> allowedKeysNonNumeric = { "Blood_Model_0", "Blood_Model_1",
-    "Blood_Model_2", "Blood_Texture_0", "Blood_Texture_1", "Blood_Texture_2", "Blood_Texture_Name_0",
-    "Blood_Texture_Name_1", "Blood_Texture_Name_2", "FontColor_color_active", "FontColor_color_active_over",
-    "FontColor_color_active_pressed", "FontColor_color_answer", "FontColor_color_answer_over",
-    "FontColor_color_answer_pressed", "FontColor_color_background", "FontColor_color_big_answer",
-    "FontColor_color_big_answer_over", "FontColor_color_big_answer_pressed", "FontColor_color_big_header",
-    "FontColor_color_big_link", "FontColor_color_big_link_over", "FontColor_color_big_link_pressed",
-    "FontColor_color_big_normal", "FontColor_color_big_normal_over", "FontColor_color_big_normal_pressed",
-    "FontColor_color_big_notify", "FontColor_color_count", "FontColor_color_disabled", "FontColor_color_disabled_over",
+    "Blood_Model_2", "FontColor_color_active", "FontColor_color_active_over", "FontColor_color_active_pressed",
+    "FontColor_color_answer", "FontColor_color_answer_over", "FontColor_color_answer_pressed",
+    "FontColor_color_background", "FontColor_color_big_answer", "FontColor_color_big_answer_over",
+    "FontColor_color_big_answer_pressed", "FontColor_color_big_header", "FontColor_color_big_link",
+    "FontColor_color_big_link_over", "FontColor_color_big_link_pressed", "FontColor_color_big_normal",
+    "FontColor_color_big_normal_over", "FontColor_color_big_normal_pressed", "FontColor_color_big_notify",
+    "FontColor_color_count", "FontColor_color_disabled", "FontColor_color_disabled_over",
     "FontColor_color_disabled_pressed", "FontColor_color_fatigue", "FontColor_color_focus", "FontColor_color_header",
     "FontColor_color_health", "FontColor_color_journal_link", "FontColor_color_journal_link_over",
     "FontColor_color_journal_link_pressed", "FontColor_color_journal_topic", "FontColor_color_journal_topic_over",
@@ -111,21 +110,17 @@ static const std::set<std::string, std::less<>> allowedKeysNonNumeric = { "Blood
     "FontColor_color_negative", "FontColor_color_normal", "FontColor_color_normal_over",
     "FontColor_color_normal_pressed", "FontColor_color_notify", "FontColor_color_positive",
     "FontColor_color_weapon_fill", "Fonts_Font_0", "Fonts_Font_1", "Fonts_Font_2", "Level_Up_Default",
-    "Level_Up_Level10", "Level_Up_Level11", "Level_Up_Level12", "Level_Up_Level13", "Level_Up_Level14",
-    "Level_Up_Level15", "Level_Up_Level16", "Level_Up_Level17", "Level_Up_Level18", "Level_Up_Level19",
-    "Level_Up_Level2", "Level_Up_Level20", "Level_Up_Level3", "Level_Up_Level4", "Level_Up_Level5", "Level_Up_Level6",
-    "Level_Up_Level7", "Level_Up_Level8", "Level_Up_Level9", "Moons_Script_Color", "Movies_Company_Logo",
-    "Movies_Morrowind_Logo", "Movies_New_Game", "Question_10_AnswerOne", "Question_10_AnswerThree",
-    "Question_10_AnswerTwo", "Question_10_Question", "Question_10_Sound", "Question_1_AnswerOne",
-    "Question_1_AnswerThree", "Question_1_AnswerTwo", "Question_1_Question", "Question_1_Sound", "Question_2_AnswerOne",
-    "Question_2_AnswerThree", "Question_2_AnswerTwo", "Question_2_Question", "Question_2_Sound", "Question_3_AnswerOne",
-    "Question_3_AnswerThree", "Question_3_AnswerTwo", "Question_3_Question", "Question_3_Sound", "Question_4_AnswerOne",
-    "Question_4_AnswerThree", "Question_4_AnswerTwo", "Question_4_Question", "Question_4_Sound", "Question_5_AnswerOne",
-    "Question_5_AnswerThree", "Question_5_AnswerTwo", "Question_5_Question", "Question_5_Sound", "Question_6_AnswerOne",
-    "Question_6_AnswerThree", "Question_6_AnswerTwo", "Question_6_Question", "Question_6_Sound", "Question_7_AnswerOne",
-    "Question_7_AnswerThree", "Question_7_AnswerTwo", "Question_7_Question", "Question_7_Sound", "Question_8_AnswerOne",
-    "Question_8_AnswerThree", "Question_8_AnswerTwo", "Question_8_Question", "Question_8_Sound", "Question_9_AnswerOne",
-    "Question_9_AnswerThree", "Question_9_AnswerTwo", "Question_9_Question", "Question_9_Sound",
+    "Moons_Script_Color", "Movies_Company_Logo", "Movies_Morrowind_Logo", "Movies_New_Game", "Question_10_AnswerOne",
+    "Question_10_AnswerThree", "Question_10_AnswerTwo", "Question_10_Question", "Question_10_Sound",
+    "Question_1_AnswerOne", "Question_1_AnswerThree", "Question_1_AnswerTwo", "Question_1_Question", "Question_1_Sound",
+    "Question_2_AnswerOne", "Question_2_AnswerThree", "Question_2_AnswerTwo", "Question_2_Question", "Question_2_Sound",
+    "Question_3_AnswerOne", "Question_3_AnswerThree", "Question_3_AnswerTwo", "Question_3_Question", "Question_3_Sound",
+    "Question_4_AnswerOne", "Question_4_AnswerThree", "Question_4_AnswerTwo", "Question_4_Question", "Question_4_Sound",
+    "Question_5_AnswerOne", "Question_5_AnswerThree", "Question_5_AnswerTwo", "Question_5_Question", "Question_5_Sound",
+    "Question_6_AnswerOne", "Question_6_AnswerThree", "Question_6_AnswerTwo", "Question_6_Question", "Question_6_Sound",
+    "Question_7_AnswerOne", "Question_7_AnswerThree", "Question_7_AnswerTwo", "Question_7_Question", "Question_7_Sound",
+    "Question_8_AnswerOne", "Question_8_AnswerThree", "Question_8_AnswerTwo", "Question_8_Question", "Question_8_Sound",
+    "Question_9_AnswerOne", "Question_9_AnswerThree", "Question_9_AnswerTwo", "Question_9_Question", "Question_9_Sound",
     "Water_NearWaterIndoorID", "Water_NearWaterOutdoorID", "Water_RippleTexture", "Water_SurfaceTexture",
     "Water_UnderwaterColor", "Weather_Blizzard_Ambient_Day_Color", "Weather_Blizzard_Ambient_Loop_Sound_ID",
     "Weather_Blizzard_Ambient_Night_Color", "Weather_Blizzard_Ambient_Sunrise_Color",
@@ -219,10 +214,15 @@ static const std::set<std::string, std::less<>> allowedKeysNonNumeric = { "Blood
     "Weather_Blizzard_Thunder_Sound_ID_1", "Weather_Blizzard_Thunder_Sound_ID_2",
     "Weather_Blizzard_Thunder_Sound_ID_3" };
 
-static const std::set<std::string, std::less<>> allowedKeysUnused = { "Inventory_UniformScaling", "Movies_Game_Logo",
-    "Movies_Loading", "Movies_Options_Menu", "Movies_Project_Logo", "Water_MaxNumberRipples",
-    "Water_NearWaterUnderwaterFreq", "Water_NearWaterUnderwaterVolume", "Water_RippleAlphas", "Water_RippleScale",
-    "Water_SurfaceTextureSize", "Water_TileTextureDivisor", "Weather_AlphaReduce" };
+static const std::set<std::string, std::less<>> allowedKeysUnused = { "General_Werewolf_FOV",
+    "Inventory_UniformScaling", "Map_Show_Travel_Lines", "Map_Travel_Boat_Blue", "Map_Travel_Boat_Green",
+    "Map_Travel_Boat_Red", "Map_Travel_Magic_Blue", "Map_Travel_Magic_Green", "Map_Travel_Magic_Red",
+    "Map_Travel_Siltstrider_Blue", "Map_Travel_Siltstrider_Green", "Map_Travel_Siltstrider_Red", "Movies_Game_Logo",
+    "PixelWater_Resolution", "PixelWater_SurfaceFPS", "PixelWater_TileCount", "Movies_Loading", "Movies_Options_Menu",
+    "Movies_Project_Logo", "Water_MaxNumberRipples", "Water_NearWaterUnderwaterFreq", "Water_NearWaterUnderwaterVolume",
+    "Water_PSWaterReflectTerrain", "Water_PSWaterReflectUpdate", "Water_RippleAlphas", "Water_RippleScale",
+    "Water_SurfaceTextureSize", "Water_TileTextureDivisor", "Weather_AlphaReduce", "Weather_Ashstorm_Storm_Threshold",
+    "Weather_Blight_Disease_Chance", "Weather_Blight_Storm_Threshold" };
 
 bool Fallback::isAllowedIntFallbackKey(std::string_view key)
 {
@@ -236,7 +236,8 @@ bool Fallback::isAllowedFloatFallbackKey(std::string_view key)
 
 bool Fallback::isAllowedNonNumericFallbackKey(std::string_view key)
 {
-    return allowedKeysNonNumeric.contains(key);
+    return allowedKeysNonNumeric.contains(key) || key.starts_with("Blood_Texture_")
+        || key.starts_with("Level_Up_Level");
 }
 
 bool Fallback::isAllowedUnusedFallbackKey(std::string_view key)
