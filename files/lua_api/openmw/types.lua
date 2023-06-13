@@ -882,6 +882,59 @@
 -- @field #number value
 
 
+--- @{#Lockable} functions
+-- @field [parent=#types] #Lockable Lockable
+
+---
+-- Returns the key record of a lockable object(door, container)
+-- @function [parent=#Lockable] getKeyRecord
+-- @param openmw.core#GameObject object
+-- @return #MiscellaneousRecord
+
+---
+-- Sets the key of a lockable object(door, container); removes it if empty string is provided. Must be used in a global script.
+-- @function [parent=#Lockable] setKeyRecord
+-- @param openmw.core#GameObject object
+-- @param #any miscOrId @{#MiscellaneousRecord} or string misc item id Record ID of the key to use.
+
+---
+-- Returns the trap spell of a lockable object(door, container)
+-- @function [parent=#Lockable] getTrapSpell
+-- @param openmw.core#GameObject object
+-- @return openmw.core#Spell
+
+---
+-- Sets the trap spell of a lockable object(door, container); removes it if empty string is provided. Must be used in a global script.
+-- @function [parent=#Lockable] setTrapSpell
+-- @param openmw.core#GameObject object
+-- @param #any spellOrId @{openmw.core#Spell} or string spell id Record ID for the trap to use
+
+---
+-- Returns the lock level of a lockable object(door, container). Does not determine if an object is locked or not, if an object is locked while this is set above 0, this value will be used if no other value is specified.
+-- @function [parent=#Lockable] getLockLevel
+-- @param openmw.core#GameObject object
+-- @return #number
+
+
+---
+-- Returns true if the lockable object is locked, and false if it is not.
+-- @function [parent=#Lockable] isLocked
+-- @param openmw.core#GameObject object
+-- @return #boolean
+
+
+---
+-- Sets the lock level level of a lockable object(door, container);Locks if not already locked; Must be used in a global script.
+-- @function [parent=#Lockable] lock
+-- @param openmw.core#GameObject object
+-- @param #number lockLevel Level to lock the object at. Optional, if not specified, then 1 will be used, or the previous level if it was locked before.
+
+---
+-- Unlocks the lockable object. Does not change the lock level, it can be kept for future use.
+-- @function [parent=#Lockable] unlock
+-- @param openmw.core#GameObject object
+
+
 
 --- @{#Light} functions
 -- @field [parent=#types] #Light Light
@@ -1264,6 +1317,8 @@
 
 ---
 -- @type Container
+-- @extends #Lockable
+-- @field #Lockable baseType @{#Lockable}
 -- @field #list<#ContainerRecord> records A read-only list of all @{#ContainerRecord}s in the world database.
 
 ---
@@ -1309,6 +1364,8 @@
 
 ---
 -- @type Door
+-- @extends #Lockable
+-- @field #Lockable baseType @{#Lockable}
 -- @field #list<#DoorRecord> records A read-only list of all @{#DoorRecord}s in the world database.
 
 ---
@@ -1460,6 +1517,8 @@
 
 ---
 -- @type ESM4Door
+-- @extends #Lockable
+-- @field #Lockable baseType @{#Lockable}
 
 ---
 -- Whether the object is a ESM4Door.

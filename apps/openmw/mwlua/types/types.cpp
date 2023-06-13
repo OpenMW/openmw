@@ -11,6 +11,7 @@ namespace MWLua
         // These names are part of OpenMW Lua API.
         constexpr std::string_view Actor = "Actor"; // base type for NPC, Creature, Player
         constexpr std::string_view Item = "Item"; // base type for all items
+        constexpr std::string_view Lockable = "Lockable"; // base type for doors and containers
 
         constexpr std::string_view Activator = "Activator";
         constexpr std::string_view Armor = "Armor";
@@ -185,6 +186,8 @@ namespace MWLua
         addType(ObjectTypeName::Item,
             { ESM::REC_ARMO, ESM::REC_BOOK, ESM::REC_CLOT, ESM::REC_INGR, ESM::REC_LIGH, ESM::REC_MISC, ESM::REC_ALCH,
                 ESM::REC_WEAP, ESM::REC_APPA, ESM::REC_LOCK, ESM::REC_PROB, ESM::REC_REPA });
+        addLockableBindings(
+            addType(ObjectTypeName::Lockable, { ESM::REC_CONT, ESM::REC_DOOR, ESM::REC_CONT4, ESM::REC_DOOR4 }));
 
         addCreatureBindings(addType(ObjectTypeName::Creature, { ESM::REC_CREA }, ObjectTypeName::Actor), context);
         addNpcBindings(
@@ -207,8 +210,8 @@ namespace MWLua
         addRepairBindings(addType(ObjectTypeName::Repair, { ESM::REC_REPA }, ObjectTypeName::Item), context);
 
         addActivatorBindings(addType(ObjectTypeName::Activator, { ESM::REC_ACTI }), context);
-        addContainerBindings(addType(ObjectTypeName::Container, { ESM::REC_CONT }), context);
-        addDoorBindings(addType(ObjectTypeName::Door, { ESM::REC_DOOR }), context);
+        addContainerBindings(addType(ObjectTypeName::Container, { ESM::REC_CONT }, ObjectTypeName::Lockable), context);
+        addDoorBindings(addType(ObjectTypeName::Door, { ESM::REC_DOOR }, ObjectTypeName::Lockable), context);
         addStaticBindings(addType(ObjectTypeName::Static, { ESM::REC_STAT }), context);
 
         addType(ObjectTypeName::ESM4Activator, { ESM::REC_ACTI4 });
@@ -217,7 +220,7 @@ namespace MWLua
         addType(ObjectTypeName::ESM4Book, { ESM::REC_BOOK4 });
         addType(ObjectTypeName::ESM4Clothing, { ESM::REC_CLOT4 });
         addType(ObjectTypeName::ESM4Container, { ESM::REC_CONT4 });
-        addESM4DoorBindings(addType(ObjectTypeName::ESM4Door, { ESM::REC_DOOR4 }), context);
+        addESM4DoorBindings(addType(ObjectTypeName::ESM4Door, { ESM::REC_DOOR4 }, ObjectTypeName::Lockable), context);
         addType(ObjectTypeName::ESM4Furniture, { ESM::REC_FURN4 });
         addType(ObjectTypeName::ESM4Ingredient, { ESM::REC_INGR4 });
         addType(ObjectTypeName::ESM4Light, { ESM::REC_LIGH4 });

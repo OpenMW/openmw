@@ -316,6 +316,19 @@ namespace MWWorld
         }
     }
 
+    void CellRef::setKey(const ESM::RefId& key)
+    {
+        if (key != getKey())
+        {
+            mChanged = true;
+            std::visit(ESM::VisitOverload{
+                           [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM::CellRef& ref) { ref.mKey = key; },
+                       },
+                mCellRef.mVariant);
+        }
+    }
+
     void CellRef::setGoldValue(int value)
     {
         if (value != getGoldValue())
