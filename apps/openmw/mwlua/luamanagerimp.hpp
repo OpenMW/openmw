@@ -71,6 +71,10 @@ namespace MWLua
         {
             mEngineEvents.addToQueue(EngineEvents::OnActivate{ getId(actor), getId(object) });
         }
+        void exteriorCreated(MWWorld::CellStore& cell) override
+        {
+            mEngineEvents.addToQueue(EngineEvents::OnNewExterior{ cell });
+        }
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
 

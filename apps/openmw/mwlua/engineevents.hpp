@@ -5,6 +5,8 @@
 
 #include <components/esm3/cellref.hpp> // defines RefNum that is used as a unique id
 
+#include "../mwworld/cellstore.hpp"
+
 namespace MWLua
 {
     class GlobalScripts;
@@ -38,7 +40,11 @@ namespace MWLua
             ESM::RefNum mActor;
             ESM::RefNum mConsumable;
         };
-        using Event = std::variant<OnNewGame, OnActive, OnInactive, OnConsume, OnActivate>;
+        struct OnNewExterior
+        {
+            MWWorld::CellStore& mCell;
+        };
+        using Event = std::variant<OnNewGame, OnActive, OnInactive, OnConsume, OnActivate, OnNewExterior>;
 
         void clear() { mQueue.clear(); }
         void addToQueue(Event e) { mQueue.push_back(std::move(e)); }
