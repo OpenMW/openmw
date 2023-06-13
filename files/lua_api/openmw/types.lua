@@ -717,6 +717,34 @@
 -- @param openmw.core#GameObject actor
 -- @return #number
 
+---
+-- Returns a list containing quests @{<#PlayerQuest>}  for the specified player, indexed by quest ID.
+-- @function [parent=#Player] quests
+-- @param openmw.core#GameObject player
+-- @return #list<#PlayerQuest>
+-- @usage -- Getting the quest for a specified index
+-- stage = types.Player.quests(playerRef)["ms_fargothring].stage
+-- --Get the name of all started quests
+-- for x, quest in pairs(types.Player.quests(playerRef)) do print (quest.name) end
+-- --Start a new quest, add it to the player's quest list but don't add any journal entries
+-- types.Player.quests(playerRef)["ms_fargothring].stage = 0
+
+--- @{#PlayerQuest}
+
+---
+-- @type PlayerQuest
+-- @field #string id The quest ID.
+-- @field #number stage The quest Stage. May only be changed by global scripts. Returns -1 if the quest has not been started or does not exist.
+-- @field #bool isFinished Returns true if the quest is complete, false if not.
+-- @field #string name The Quest's user friendly name. Not all quests have this. Will be nil if the quest has not been started.
+
+---
+-- Sets the quest stage for the given quest, on the given player, and adds the entry to the journal, if there is an entry at the specified stage. Can only be used in global scripts.
+-- @function [parent=#PlayerQuest] addJournalEntry
+-- @param self
+-- @param openmw.core#GameObject actor The actor who is the source of the journal entry, can be the same as player, their name is used in a similar manner as in dialogue.
+-- @param #number stage Quest Stage
+
 --- @{#Armor} functions
 -- @field [parent=#types] #Armor Armor
 

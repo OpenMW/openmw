@@ -31,6 +31,16 @@ namespace MWDialogue
 
         return iter->second;
     }
+    Quest* Journal::getQuestPtr(const ESM::RefId& id)
+    {
+        TQuestContainer::iterator iter = mQuests.find(id);
+        if (iter == mQuests.end())
+        {
+            return nullptr;
+        }
+
+        return &(iter->second);
+    }
 
     Topic& Journal::getTopic(const ESM::RefId& id)
     {
@@ -135,6 +145,10 @@ namespace MWDialogue
             mTopics.erase(mTopics.find(topicId)); // All responses removed -> remove topic
     }
 
+    int Journal::getQuestCount() const
+    {
+        return static_cast<int>(mQuests.size());
+    }
     int Journal::getJournalIndex(const ESM::RefId& id) const
     {
         TQuestContainer::const_iterator iter = mQuests.find(id);

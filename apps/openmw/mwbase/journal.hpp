@@ -49,12 +49,20 @@ namespace MWBase
 
         virtual ~Journal() {}
 
+        virtual MWDialogue::Quest& getQuest(const ESM::RefId& id) = 0;
+        ///< Gets the quest requested. Creates it and inserts it in quests if it does not yet exist.
+        virtual MWDialogue::Quest* getQuestPtr(const ESM::RefId& id) = 0;
+        ///< Gets a pointer to the requested quest. Will return nullptr if the quest has not been started.
+
         virtual void addEntry(const ESM::RefId& id, int index, const MWWorld::Ptr& actor) = 0;
         ///< Add a journal entry.
         /// @param actor Used as context for replacing of escape sequences (%name, etc).
 
         virtual void setJournalIndex(const ESM::RefId& id, int index) = 0;
         ///< Set the journal index without adding an entry.
+
+        virtual int getQuestCount() const = 0;
+        ///< Get the count of quests stored.
 
         virtual int getJournalIndex(const ESM::RefId& id) const = 0;
         ///< Get the journal index.
