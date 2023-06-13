@@ -613,7 +613,8 @@ namespace MWScript
                     }
                     else
                     {
-                        player.getClass().getNpcStats(player).raiseRank(factionID);
+                        int currentRank = player.getClass().getNpcStats(player).getFactionRank(factionID);
+                        player.getClass().getNpcStats(player).setFactionRank(factionID, currentRank + 1);
                     }
                 }
             }
@@ -644,7 +645,8 @@ namespace MWScript
                 if (!factionID.empty())
                 {
                     MWWorld::Ptr player = MWMechanics::getPlayer();
-                    player.getClass().getNpcStats(player).lowerRank(factionID);
+                    int currentRank = player.getClass().getNpcStats(player).getFactionRank(factionID);
+                    player.getClass().getNpcStats(player).setFactionRank(factionID, currentRank - 1);
                 }
             }
         };
@@ -987,14 +989,12 @@ namespace MWScript
                 // Otherwise take rank from base NPC record, increase it and put it to NPC data.
                 int currentRank = ptr.getClass().getNpcStats(ptr).getFactionRank(factionID);
                 if (currentRank >= 0)
-                    ptr.getClass().getNpcStats(ptr).raiseRank(factionID);
+                    ptr.getClass().getNpcStats(ptr).setFactionRank(factionID, currentRank + 1);
                 else
                 {
                     int rank = ptr.getClass().getPrimaryFactionRank(ptr);
-                    rank++;
                     ptr.getClass().getNpcStats(ptr).joinFaction(factionID);
-                    for (int i = 0; i < rank; i++)
-                        ptr.getClass().getNpcStats(ptr).raiseRank(factionID);
+                    ptr.getClass().getNpcStats(ptr).setFactionRank(factionID, rank + 1);
                 }
             }
         };
@@ -1023,14 +1023,12 @@ namespace MWScript
                 if (currentRank == 0)
                     return;
                 else if (currentRank > 0)
-                    ptr.getClass().getNpcStats(ptr).lowerRank(factionID);
+                    ptr.getClass().getNpcStats(ptr).setFactionRank(factionID, currentRank - 1);
                 else
                 {
                     int rank = ptr.getClass().getPrimaryFactionRank(ptr);
-                    rank--;
                     ptr.getClass().getNpcStats(ptr).joinFaction(factionID);
-                    for (int i = 0; i < rank; i++)
-                        ptr.getClass().getNpcStats(ptr).raiseRank(factionID);
+                    ptr.getClass().getNpcStats(ptr).setFactionRank(factionID, std::max(0, rank - 1));
                 }
             }
         };

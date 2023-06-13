@@ -80,37 +80,30 @@ int MWMechanics::NpcStats::getFactionRank(const ESM::RefId& faction) const
     return -1;
 }
 
-void MWMechanics::NpcStats::raiseRank(const ESM::RefId& faction)
-{
-    auto it = mFactionRank.find(faction);
-    if (it != mFactionRank.end())
-    {
-        // Does the next rank exist?
-        const ESM::Faction* factionPtr = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(faction);
-        if (it->second + 1 < 10 && !factionPtr->mRanks[it->second + 1].empty())
-            it->second += 1;
-    }
-}
-
-void MWMechanics::NpcStats::lowerRank(const ESM::RefId& faction)
-{
-    auto it = mFactionRank.find(faction);
-    if (it != mFactionRank.end())
-    {
-        it->second = it->second - 1;
-        if (it->second < 0)
-        {
-            mFactionRank.erase(it);
-            mExpelled.erase(faction);
-        }
-    }
-}
-
 void MWMechanics::NpcStats::joinFaction(const ESM::RefId& faction)
 {
     auto it = mFactionRank.find(faction);
     if (it == mFactionRank.end())
         mFactionRank[faction] = 0;
+}
+
+void MWMechanics::NpcStats::setFactionRank(const ESM::RefId& faction, int newRank)
+{
+    auto it = mFactionRank.find(faction);
+    if (it != mFactionRank.end())
+    {
+        const ESM::Faction* factionPtr = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(faction);
+        if (newRank < 0)
+        {
+            mFactionRank.erase(it);
+            mExpelled.erase(faction);
+        }
+        else if (newRank < static_cast<int>(factionPtr->mData.mRankData.size()))
+            do
+                it->second = newRank;
+            // Does the new rank exist?
+            while (newRank > 0 && factionPtr->mRanks[newRank--].empty());
+    }
 }
 
 bool MWMechanics::NpcStats::getExpelled(const ESM::RefId& factionID) const
