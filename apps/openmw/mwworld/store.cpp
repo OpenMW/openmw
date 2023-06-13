@@ -10,6 +10,7 @@
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm4/loadland.hpp>
 #include <components/esm4/loadwrld.hpp>
+#include <components/fallback/fallback.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
 
@@ -978,6 +979,24 @@ namespace MWWorld
     const ESM::GameSetting* Store<ESM::GameSetting>::search(std::string_view id) const
     {
         return TypedDynamicStore::search(ESM::RefId::stringRefId(id));
+    }
+
+    void Store<ESM::GameSetting>::setUp()
+    {
+        auto addSetting = [&](const std::string& key, ESM::Variant value) {
+            ESM::GameSetting setting;
+            setting.blank();
+            setting.mId = ESM::RefId::stringRefId(key);
+            setting.mValue = std::move(value);
+            mStatic.emplace(setting.mId, std::move(setting));
+        };
+        for (auto& [key, value] : Fallback::Map::getIntFallbackMap())
+            addSetting(key, ESM::Variant(value));
+        for (auto& [key, value] : Fallback::Map::getFloatFallbackMap())
+            addSetting(key, ESM::Variant(value));
+        for (auto& [key, value] : Fallback::Map::getNonNumericFallbackMap())
+            addSetting(key, ESM::Variant(value));
+        TypedDynamicStore<ESM::GameSetting>::setUp();
     }
 
     // Magic effect

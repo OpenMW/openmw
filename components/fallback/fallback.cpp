@@ -7,21 +7,36 @@
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/conversion.hpp>
 
+#include "validate.hpp"
+
 namespace Fallback
 {
-    std::map<std::string, std::string, std::less<>> Map::mFallbackMap;
+    std::map<std::string, int, std::less<>> Map::mIntFallbackMap;
+    std::map<std::string, float, std::less<>> Map::mFloatFallbackMap;
+    std::map<std::string, std::string, std::less<>> Map::mNonNumericFallbackMap;
 
     void Map::init(const std::map<std::string, std::string>& fallback)
     {
-        for (const auto& entry : fallback)
-            mFallbackMap.insert(entry);
+        for (const auto& [key, value] : fallback)
+        {
+            if (isAllowedIntFallbackKey(key))
+                mIntFallbackMap.emplace(key, Misc::StringUtils::toNumeric<int>(value, 0));
+            else if (isAllowedFloatFallbackKey(key))
+                mFloatFallbackMap.emplace(key, Misc::StringUtils::toNumeric<float>(value, 0.0f));
+            else if (isAllowedNonNumericFallbackKey(key))
+                mNonNumericFallbackMap.emplace(key, value);
+            else if (!isAllowedUnusedFallbackKey(key))
+                Log(Debug::Error) << "Ignoring unknown fallback: " << key;
+        }
     }
 
     std::string_view Map::getString(std::string_view fall)
     {
-        auto it = mFallbackMap.find(fall);
-        if (it == mFallbackMap.end())
+        const auto it = mNonNumericFallbackMap.find(fall);
+        if (it == mNonNumericFallbackMap.end())
         {
+            if (!isAllowedNonNumericFallbackKey(fall))
+                throw std::logic_error("Requested invalid string fallback: " + std::string(fall));
             return {};
         }
         return it->second;
@@ -29,20 +44,31 @@ namespace Fallback
 
     float Map::getFloat(std::string_view fall)
     {
-        std::string_view fallback = getString(fall);
-        return Misc::StringUtils::toNumeric<float>(fallback, 0.0f);
+        const auto it = mFloatFallbackMap.find(fall);
+        if (it == mFloatFallbackMap.end())
+        {
+            if (!isAllowedFloatFallbackKey(fall))
+                throw std::logic_error("Requested invalid float fallback: " + std::string(fall));
+            return {};
+        }
+        return it->second;
     }
 
     int Map::getInt(std::string_view fall)
     {
-        std::string_view fallback = getString(fall);
-        return Misc::StringUtils::toNumeric<int>(fallback, 0);
+        const auto it = mIntFallbackMap.find(fall);
+        if (it == mIntFallbackMap.end())
+        {
+            if (!isAllowedIntFallbackKey(fall))
+                throw std::logic_error("Requested invalid int fallback: " + std::string(fall));
+            return {};
+        }
+        return it->second;
     }
 
     bool Map::getBool(std::string_view fall)
     {
-        std::string_view fallback = getString(fall);
-        return !fallback.empty() && fallback != "0";
+        return getInt(fall) != 0;
     }
 
     osg::Vec4f Map::getColour(std::string_view fall)

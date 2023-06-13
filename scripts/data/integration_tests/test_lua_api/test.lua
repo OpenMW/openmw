@@ -51,6 +51,13 @@ local function testTeleport()
     testing.expectEqualWithDelta(player.rotation.z, math.rad(-90), 0.05, 'teleporting changes rotation')
 end
 
+local function testGetGMST()
+    testing.expectEqual(core.getGMST('non-existed gmst'), nil)
+    testing.expectEqual(core.getGMST('Water_RippleFrameCount'), 4)
+    testing.expectEqual(core.getGMST('Inventory_DirectionalDiffuseR'), 0.5)
+    testing.expectEqual(core.getGMST('Level_Up_Level2'), 'something')
+end
+
 local function initPlayer()
     player:teleport('', util.vector3(4096, 4096, 867.237), util.vector3(0, 0, 0))
     coroutine.yield()
@@ -83,6 +90,7 @@ tests = {
         testing.runLocalTest(player, 'castNavigationRay')
     end},
     {'teleport', testTeleport},
+    {'getGMST', testGetGMST},
 }
 
 return {

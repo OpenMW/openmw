@@ -51,7 +51,9 @@ def runTest(name):
                 "content=template.omwgame\n",
             )
         )
-        if (test_dir / "test.omwscripts").exists():
+        if (test_dir / "openmw.cfg").exists():
+            omw_cfg.write(open(test_dir / "openmw.cfg").read())
+        elif (test_dir / "test.omwscripts").exists():
             omw_cfg.write("content=test.omwscripts\n")
     with open(config_dir / "settings.cfg", "a", encoding="utf-8") as settings_cfg:
         settings_cfg.write(
