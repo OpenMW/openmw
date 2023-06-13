@@ -22,7 +22,7 @@ namespace l10n
         }
 
         void dropCache() { mCache.clear(); }
-        void setPreferredLocales(const std::vector<std::string>& locales);
+        void setPreferredLocales(const std::vector<std::string>& locales, bool gmstHasPriority = true);
         const std::vector<icu::Locale>& getPreferredLocales() const { return mPreferredLocales; }
         void setGmstLoader(std::function<std::string(std::string_view)> fn) { mGmstLoader = std::move(fn); }
 

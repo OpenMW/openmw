@@ -55,6 +55,7 @@ ChangeRequiresRestart: "Ce changement requiert un redémarrage de l'application 
 Controller: "Manette"
 FieldOfView: "Champ de vision"
 FrameRateHint: "Note: Appuyez sur F3 pour afficher la fréquence d'affichage (FPS)."
+#GmstOverridesL10n: "Strings from ESM files have priority"   to be translated
 InvertXAxis: "Inverser l'axe X"
 Language: "Localisation"
 LanguageNote: "Note: Ce paramètre n'affecte pas les textes des fichiers ESM."

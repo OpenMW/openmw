@@ -9,10 +9,11 @@
 namespace l10n
 {
 
-    void Manager::setPreferredLocales(const std::vector<std::string>& langs)
+    void Manager::setPreferredLocales(const std::vector<std::string>& langs, bool gmstHasPriority)
     {
         mPreferredLocales.clear();
-        mPreferredLocales.push_back(icu::Locale("gmst"));
+        if (gmstHasPriority)
+            mPreferredLocales.push_back(icu::Locale("gmst"));
         std::set<std::string> langSet;
         for (const auto& lang : langs)
         {
@@ -21,6 +22,8 @@ namespace l10n
             langSet.insert(lang);
             mPreferredLocales.push_back(icu::Locale(lang.c_str()));
         }
+        if (!gmstHasPriority)
+            mPreferredLocales.push_back(icu::Locale("gmst"));
         {
             Log msg(Debug::Info);
             msg << "Preferred locales:";

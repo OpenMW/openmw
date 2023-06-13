@@ -274,6 +274,7 @@ namespace MWGui
         getWidget(mWaterRainRippleDetail, "WaterRainRippleDetail");
         getWidget(mPrimaryLanguage, "PrimaryLanguage");
         getWidget(mSecondaryLanguage, "SecondaryLanguage");
+        getWidget(mGmstOverridesL10n, "GmstOverridesL10nButton");
         getWidget(mWindowModeHint, "WindowModeHint");
         getWidget(mLightingMethodButton, "LightingMethodButton");
         getWidget(mLightsResetButton, "LightsResetButton");
@@ -332,6 +333,8 @@ namespace MWGui
             += MyGUI::newDelegate(this, &SettingsWindow::onPrimaryLanguageChanged);
         mSecondaryLanguage->eventComboChangePosition
             += MyGUI::newDelegate(this, &SettingsWindow::onSecondaryLanguageChanged);
+        mGmstOverridesL10n->eventMouseButtonClick
+            += MyGUI::newDelegate(this, &SettingsWindow::onGmstOverridesL10nChanged);
 
         computeMinimumWindowSize();
 
@@ -403,6 +406,8 @@ namespace MWGui
             if (Misc::getFileExtension(path) == "yaml")
             {
                 std::string localeName(Misc::stemFile(path));
+                if (localeName == "gmst")
+                    continue; // fake locale to get gmst strings from content files
                 if (std::find(availableLanguages.begin(), availableLanguages.end(), localeName)
                     == availableLanguages.end())
                     availableLanguages.push_back(localeName);
@@ -569,6 +574,12 @@ namespace MWGui
             currentLocales.resize(1);
 
         Settings::Manager::setStringArray("preferred locales", "General", currentLocales);
+    }
+
+    void SettingsWindow::onGmstOverridesL10nChanged(MyGUI::Widget*)
+    {
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
+            "#{OMWEngine:ChangeRequiresRestart}", { "#{Interface:OK}" }, true);
     }
 
     void SettingsWindow::onVSyncModeChanged(MyGUI::ComboBox* _sender, size_t pos)
