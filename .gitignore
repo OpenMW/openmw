@@ -84,3 +84,7 @@ moc_*.cxx
 *.[ao]
 *.so
 venv/
+
+## operating system files
+.DS_Store
+Thumbs.db
