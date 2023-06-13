@@ -49,6 +49,8 @@ Engine handler is a function defined by a script, that can be called by the engi
       | Does not apply to items in inventories or containers.
   * - onActivate(object, actor)
     - Object is activated by an actor.
+  * - onNewExterior(cell)
+    - A new exterior cell not defined by a content file has been generated.
 
 **Only for local scripts**
 
