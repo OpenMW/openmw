@@ -643,6 +643,7 @@
 -- @field #number area
 -- @field #number magnitudeMin
 -- @field #number magnitudeMax
+-- @field #number duration
 
 ---
 -- @type ActiveEffect
