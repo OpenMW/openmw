@@ -109,6 +109,7 @@ namespace MWRender
         void setCollisionType(int collisionType) { mCollisionType = collisionType; }
 
         const osg::Matrixf& getViewMatrix() const { return mViewMatrix; }
+        const osg::Matrixf& getProjectionMatrix() const { return mProjectionMatrix; }
 
     private:
         MWWorld::Ptr mTrackingPtr;
@@ -138,6 +139,7 @@ namespace MWRender
         bool mLockPitch = false, mLockYaw = false;
         osg::Vec3d mPosition;
         osg::Matrixf mViewMatrix;
+        osg::Matrixf mProjectionMatrix;
 
         float mCameraDistance, mPreferredCameraDistance;
 
