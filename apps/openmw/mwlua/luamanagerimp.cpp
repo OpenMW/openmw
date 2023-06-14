@@ -141,8 +141,9 @@ namespace MWLua
 
         mWorldView.update();
 
-        std::erase_if(mActiveLocalScripts,
-            [](const LocalScripts* l) { return l->getPtr().isEmpty() || l->getPtr().getRefData().isDeleted(); });
+        std::erase_if(mActiveLocalScripts, [](const LocalScripts* l) {
+            return l->getPtrOrEmpty().isEmpty() || l->getPtrOrEmpty().getRefData().isDeleted();
+        });
 
         mGlobalScripts.statsNextFrame();
         for (LocalScripts* scripts : mActiveLocalScripts)

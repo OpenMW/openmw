@@ -31,7 +31,7 @@ namespace MWLua
         using SafePtr::SafePtr;
         const MWWorld::Ptr& ptr() const
         {
-            const MWWorld::Ptr& res = ptrOrNull();
+            const MWWorld::Ptr& res = ptrOrEmpty();
             if (res.isEmpty())
                 throw std::runtime_error("Object is not available: " + id().toString());
             return res;
