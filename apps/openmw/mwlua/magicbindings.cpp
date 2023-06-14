@@ -284,6 +284,8 @@ namespace MWLua
             = sol::readonly_property([](const ESM::ENAMstruct& params) -> int { return params.mMagnMin; });
         effectParamsT["magnitudeMax"]
             = sol::readonly_property([](const ESM::ENAMstruct& params) -> int { return params.mMagnMax; });
+        effectParamsT["duration"]
+            = sol::readonly_property([](const ESM::ENAMstruct& params) -> int { return params.mDuration; });
 
         // MagicEffect record
         auto magicEffectT = context.mLua->sol().new_usertype<ESM::MagicEffect>("ESM3_MagicEffect");
