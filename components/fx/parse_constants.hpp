@@ -83,7 +83,6 @@ namespace fx
         } };
 
         constexpr std::array<std::pair<std::string_view, osg::Texture::WrapMode>, 6> WrapMode = { {
-            { "clamp", osg::Texture::CLAMP },
             { "clamp_to_edge", osg::Texture::CLAMP_TO_EDGE },
             { "clamp_to_border", osg::Texture::CLAMP_TO_BORDER },
             { "repeat", osg::Texture::REPEAT },

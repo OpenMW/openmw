@@ -62,7 +62,11 @@ namespace fx
                 if (other.mRenderTarget)
                     mRenderTarget = new osg::FrameBufferObject(*other.mRenderTarget, copyOp);
                 if (other.mRenderTexture)
+                {
                     mRenderTexture = new osg::Texture2D(*other.mRenderTexture, copyOp);
+                    mRenderTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+                    mRenderTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+                }
             }
         };
 

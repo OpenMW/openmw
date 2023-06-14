@@ -164,6 +164,8 @@ namespace MWRender
                     mTextures[i][Tex_OpaqueDepth] = new osg::Texture2DArray;
                 else
                     mTextures[i][Tex_OpaqueDepth] = new osg::Texture2D;
+                mTextures[i][Tex_OpaqueDepth]->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+                mTextures[i][Tex_OpaqueDepth]->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
             }
         }
 
@@ -598,13 +600,18 @@ namespace MWRender
             // user-defined samplers
             for (const osg::Texture* texture : technique->getTextures())
             {
-                if (const auto* tex1D = dynamic_cast<const osg::Texture1D*>(texture))
-                    node.mRootStateSet->setTextureAttribute(texUnit, new osg::Texture1D(*tex1D));
-                else if (const auto* tex2D = dynamic_cast<const osg::Texture2D*>(texture))
-                    node.mRootStateSet->setTextureAttribute(texUnit, new osg::Texture2D(*tex2D));
-                else if (const auto* tex3D = dynamic_cast<const osg::Texture3D*>(texture))
-                    node.mRootStateSet->setTextureAttribute(texUnit, new osg::Texture3D(*tex3D));
+                osg::ref_ptr<osg::Texture> sample;
 
+                if (const auto* tex1D = dynamic_cast<const osg::Texture1D*>(texture))
+                    sample = new osg::Texture1D(*tex1D);
+                else if (const auto* tex2D = dynamic_cast<const osg::Texture2D*>(texture))
+                    sample = new osg::Texture2D(*tex2D);
+                else if (const auto* tex3D = dynamic_cast<const osg::Texture3D*>(texture))
+                    sample= new osg::Texture3D(*tex3D);
+
+                sample->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+                sample->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+                node.mRootStateSet->setTextureAttribute(texUnit, sample);
                 node.mRootStateSet->addUniform(new osg::Uniform(texture->getName().c_str(), texUnit++));
             }
 
@@ -637,6 +644,8 @@ namespace MWRender
                     const auto [w, h] = rt.mSize.get(renderWidth(), renderHeight());
 
                     subPass.mRenderTexture = new osg::Texture2D(*rt.mTarget);
+                    subPass.mRenderTexture ->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+                    subPass.mRenderTexture ->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
                     renderTargetCache[rt.mTarget] = subPass.mRenderTexture;
                     subPass.mRenderTexture->setTextureSize(w, h);
                     subPass.mRenderTexture->setName(std::string(pass->getTarget()));

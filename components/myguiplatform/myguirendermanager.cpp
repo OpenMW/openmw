@@ -184,6 +184,8 @@ namespace osgMyGUI
             mStateSet->setMode(GL_BLEND, osg::StateAttribute::ON);
 
             mDummyTexture = new osg::Texture2D;
+            mDummyTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            mDummyTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
             mDummyTexture->setInternalFormat(GL_RGB);
             mDummyTexture->setTextureSize(1, 1);
 
