@@ -19,6 +19,9 @@
 #include "cellstore.hpp"
 #include "esmstore.hpp"
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
+
 namespace MWWorld
 {
     namespace
@@ -55,7 +58,7 @@ namespace MWWorld
             return store.insert(record);
         }
 
-        Cell createExteriorCell(ESM::ExteriorCellLocation location, ESMStore& store)
+        std::tuple<Cell, bool> createExteriorCell(ESM::ExteriorCellLocation location, ESMStore& store)
         {
             if (ESM::isEsm4Ext(location.mWorldspace))
             {
@@ -63,17 +66,19 @@ namespace MWWorld
                     throw std::runtime_error(
                         "Exterior ESM4 world is not found: " + location.mWorldspace.toDebugString());
                 const ESM4::Cell* cell = store.get<ESM4::Cell>().searchExterior(location);
-                if (cell == nullptr)
+                bool created = cell == nullptr;
+                if (created)
                     cell = createEsm4Cell(location, store);
                 assert(cell != nullptr);
-                return MWWorld::Cell(*cell);
+                return { MWWorld::Cell(*cell), created };
             }
 
             const ESM::Cell* cell = store.get<ESM::Cell>().search(location.mX, location.mY);
-            if (cell == nullptr)
+            bool created = cell == nullptr;
+            if (created)
                 cell = createEsmCell(location, store);
             assert(cell != nullptr);
-            return Cell(*cell);
+            return { Cell(*cell), created };
         }
 
         std::optional<Cell> createCell(ESM::RefId id, const ESMStore& store)
@@ -165,10 +170,12 @@ namespace MWWorld
 
         if (it == mExteriors.end())
         {
-            Cell cell = createExteriorCell(location, mStore);
+            auto [cell, created] = createExteriorCell(location, mStore);
             const ESM::RefId id = cell.getId();
             cellStore = &emplaceCellStore(id, std::move(cell), mStore, mReaders, mCells);
             mExteriors.emplace(location, cellStore);
+            if (created)
+                MWBase::Environment::get().getLuaManager()->exteriorCreated(*cellStore);
         }
         else
         {

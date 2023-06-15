@@ -11,6 +11,7 @@
 
 namespace MWWorld
 {
+    class CellStore;
     class Ptr;
 }
 
@@ -47,6 +48,7 @@ namespace MWBase
         virtual void objectRemovedFromScene(const MWWorld::Ptr& ptr) = 0;
         virtual void itemConsumed(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) = 0;
         virtual void objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
+        virtual void exteriorCreated(MWWorld::CellStore& cell) = 0;
         // TODO: notify LuaManager about other events
         // virtual void objectOnHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object,
         //                          const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) = 0;

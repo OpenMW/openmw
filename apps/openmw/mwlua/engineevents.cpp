@@ -71,6 +71,8 @@ namespace MWLua
                 scripts->onConsume(LObject(consumable));
         }
 
+        void operator()(const OnNewExterior& event) const { mGlobalScripts.onNewExterior(GCell{ &event.mCell }); }
+
     private:
         MWWorld::Ptr getPtr(const ESM::RefNum& id) const
         {

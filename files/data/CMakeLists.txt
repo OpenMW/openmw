@@ -65,6 +65,7 @@ set(BUILTIN_DATA_FILES
 
     scripts/omw/activationhandlers.lua
     scripts/omw/ai.lua
+    scripts/omw/cellhandlers.lua
     scripts/omw/camera/camera.lua
     scripts/omw/camera/head_bobbing.lua
     scripts/omw/camera/third_person.lua
