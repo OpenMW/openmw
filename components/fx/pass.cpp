@@ -14,6 +14,7 @@
 #include <components/resource/scenemanager.hpp>
 #include <components/sceneutil/clearcolor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
+#include <components/settings/values.hpp>
 #include <components/stereo/multiview.hpp>
 
 #include "stateupdater.hpp"
@@ -261,8 +262,8 @@ float omw_EstimateFogCoverageFromUV(vec2 uv)
                   { "@uboStruct", StateUpdater::getStructDefinition() }, { "@ubo", mUBO ? "1" : "0" },
                   { "@normals", technique.getNormals() ? "1" : "0" },
                   { "@reverseZ", SceneUtil::AutoDepth::isReversed() ? "1" : "0" },
-                  { "@radialFog", Settings::Manager::getBool("radial fog", "Fog") ? "1" : "0" },
-                  { "@exponentialFog", Settings::Manager::getBool("exponential fog", "Fog") ? "1" : "0" },
+                  { "@radialFog", Settings::fog().mRadialFog ? "1" : "0" },
+                  { "@exponentialFog", Settings::fog().mExponentialFog ? "1" : "0" },
                   { "@hdr", technique.getHDR() ? "1" : "0" }, { "@in", mLegacyGLSL ? "varying" : "in" },
                   { "@out", mLegacyGLSL ? "varying" : "out" }, { "@position", "gl_Position" },
                   { "@texture1D", mLegacyGLSL ? "texture1D" : "texture" },

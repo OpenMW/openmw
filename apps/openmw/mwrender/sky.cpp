@@ -9,7 +9,7 @@
 #include <osgParticle/Operator>
 #include <osgParticle/ParticleSystemUpdater>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <components/sceneutil/controller.hpp>
 #include <components/sceneutil/depth.hpp>
@@ -279,7 +279,7 @@ namespace MWRender
 
         if (enableSkyRTT)
         {
-            mSkyRTT = new SkyRTT(Settings::Manager::getVector2("sky rtt resolution", "Fog"), mEarlyRenderBinRoot);
+            mSkyRTT = new SkyRTT(Settings::fog().mSkyRttResolution, mEarlyRenderBinRoot);
             skyroot->addChild(mSkyRTT);
             mRootNode = new osg::Group;
             skyroot->addChild(mRootNode);
