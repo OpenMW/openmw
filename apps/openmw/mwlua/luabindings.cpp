@@ -156,10 +156,17 @@ namespace MWLua
             return sol::nil;
         };
 
+        // TODO: deprecate this and provide access to the store instead
         sol::table skill(context.mLua->sol(), sol::create);
         api["SKILL"] = LuaUtil::makeStrictReadOnly(skill);
-        for (int id = 0; id < ESM::Skill::Length; ++id)
-            skill[ESM::Skill::sSkillNames[id]] = Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[id]);
+        for (int i = 0; i < ESM::Skill::Length; ++i)
+        {
+            std::string id = ESM::Skill::indexToRefId(i).serializeText();
+            std::string key = id;
+            // force first character to uppercase for backwards compatability
+            key[0] += 'A' - 'a';
+            skill[key] = id;
+        }
 
         sol::table attribute(context.mLua->sol(), sol::create);
         api["ATTRIBUTE"] = LuaUtil::makeStrictReadOnly(attribute);

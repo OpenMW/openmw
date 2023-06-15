@@ -26,8 +26,6 @@ namespace CSMWorld
             {
                 switch (value.getRecordType())
                 {
-                    case ESM::REC_SKIL:
-                        return ESM::Skill::sSkillNames[value.getValue()];
                     case ESM::REC_MGEF:
                         return std::string(ESM::MagicEffect::sIndexNames[value.getValue()]);
                     default:
@@ -335,10 +333,10 @@ namespace CSMWorld
 
     std::optional<std::uint32_t> getSkillIndex(std::string_view value)
     {
-        const auto it = std::find(std::begin(ESM::Skill::sSkillNames), std::end(ESM::Skill::sSkillNames), value);
-        if (it == std::end(ESM::Skill::sSkillNames))
+        int index = ESM::Skill::refIdToIndex(ESM::RefId::stringRefId(value));
+        if (index < 0)
             return std::nullopt;
-        return static_cast<std::uint32_t>(it - std::begin(ESM::Skill::sSkillNames));
+        return static_cast<std::uint32_t>(index);
     }
 
     std::string getStringId(ESM::RefId value)

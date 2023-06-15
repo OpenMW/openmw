@@ -7,44 +7,33 @@
 
 namespace ESM
 {
-    const std::string Skill::sSkillNames[Length] = {
-        "Block",
-        "Armorer",
-        "Mediumarmor",
-        "Heavyarmor",
-        "Bluntweapon",
-        "Longblade",
-        "Axe",
-        "Spear",
-        "Athletics",
-        "Enchant",
-        "Destruction",
-        "Alteration",
-        "Illusion",
-        "Conjuration",
-        "Mysticism",
-        "Restoration",
-        "Alchemy",
-        "Unarmored",
-        "Security",
-        "Sneak",
-        "Acrobatics",
-        "Lightarmor",
-        "Shortblade",
-        "Marksman",
-        "Mercantile",
-        "Speechcraft",
-        "Handtohand",
-    };
-
-    int Skill::stringToSkillId(std::string_view skill)
-    {
-        for (int id = 0; id < Skill::Length; ++id)
-            if (Misc::StringUtils::ciEqual(sSkillNames[id], skill))
-                return id;
-
-        throw std::logic_error("No such skill: " + std::string(skill));
-    }
+    const RefId Skill::Block = RefId::stringRefId("Block");
+    const RefId Skill::Armorer = RefId::stringRefId("Armorer");
+    const RefId Skill::MediumArmor = RefId::stringRefId("MediumArmor");
+    const RefId Skill::HeavyArmor = RefId::stringRefId("HeavyArmor");
+    const RefId Skill::BluntWeapon = RefId::stringRefId("BluntWeapon");
+    const RefId Skill::LongBlade = RefId::stringRefId("LongBlade");
+    const RefId Skill::Axe = RefId::stringRefId("Axe");
+    const RefId Skill::Spear = RefId::stringRefId("Spear");
+    const RefId Skill::Athletics = RefId::stringRefId("Athletics");
+    const RefId Skill::Enchant = RefId::stringRefId("Enchant");
+    const RefId Skill::Destruction = RefId::stringRefId("Destruction");
+    const RefId Skill::Alteration = RefId::stringRefId("Alteration");
+    const RefId Skill::Illusion = RefId::stringRefId("Illusion");
+    const RefId Skill::Conjuration = RefId::stringRefId("Conjuration");
+    const RefId Skill::Mysticism = RefId::stringRefId("Mysticism");
+    const RefId Skill::Restoration = RefId::stringRefId("Restoration");
+    const RefId Skill::Alchemy = RefId::stringRefId("Alchemy");
+    const RefId Skill::Unarmored = RefId::stringRefId("Unarmored");
+    const RefId Skill::Security = RefId::stringRefId("Security");
+    const RefId Skill::Sneak = RefId::stringRefId("Sneak");
+    const RefId Skill::Acrobatics = RefId::stringRefId("Acrobatics");
+    const RefId Skill::LightArmor = RefId::stringRefId("LightArmor");
+    const RefId Skill::ShortBlade = RefId::stringRefId("ShortBlade");
+    const RefId Skill::Marksman = RefId::stringRefId("Marksman");
+    const RefId Skill::Mercantile = RefId::stringRefId("Mercantile");
+    const RefId Skill::Speechcraft = RefId::stringRefId("Speechcraft");
+    const RefId Skill::HandToHand = RefId::stringRefId("HandToHand");
 
     void Skill::load(ESMReader& esm, bool& isDeleted)
     {
@@ -102,19 +91,49 @@ namespace ESM
         mDescription.clear();
     }
 
+    static const RefId sSkills[] = {
+        Skill::Block,
+        Skill::Armorer,
+        Skill::MediumArmor,
+        Skill::HeavyArmor,
+        Skill::BluntWeapon,
+        Skill::LongBlade,
+        Skill::Axe,
+        Skill::Spear,
+        Skill::Athletics,
+        Skill::Enchant,
+        Skill::Destruction,
+        Skill::Alteration,
+        Skill::Illusion,
+        Skill::Conjuration,
+        Skill::Mysticism,
+        Skill::Restoration,
+        Skill::Alchemy,
+        Skill::Unarmored,
+        Skill::Security,
+        Skill::Sneak,
+        Skill::Acrobatics,
+        Skill::LightArmor,
+        Skill::ShortBlade,
+        Skill::Marksman,
+        Skill::Mercantile,
+        Skill::Speechcraft,
+        Skill::HandToHand,
+    };
+
     RefId Skill::indexToRefId(int index)
     {
         if (index < 0 || index >= Length)
             return RefId();
-        return RefId::index(sRecordId, static_cast<std::uint32_t>(index));
+        return sSkills[index];
     }
 
     int Skill::refIdToIndex(RefId id)
     {
-        if (const IndexRefId* index = id.getIf<IndexRefId>())
+        for (int i = 0; i < Length; ++i)
         {
-            if (index->getRecordType() == sRecordId)
-                return index->getValue();
+            if (sSkills[i] == id)
+                return i;
         }
         return -1;
     }
