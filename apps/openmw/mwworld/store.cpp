@@ -991,7 +991,9 @@ namespace MWWorld
             setting.blank();
             setting.mId = ESM::RefId::stringRefId(key);
             setting.mValue = std::move(value);
-            mStatic.emplace(setting.mId, std::move(setting));
+            auto [iter, inserted] = mStatic.insert_or_assign(setting.mId, std::move(setting));
+            if (inserted)
+                mShared.push_back(&iter->second);
         };
         for (auto& [key, value] : Fallback::Map::getIntFallbackMap())
             addSetting(key, ESM::Variant(value));
