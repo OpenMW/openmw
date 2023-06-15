@@ -37,11 +37,11 @@ namespace ESM
         "Handtohand",
     };
 
-    Skill::SkillEnum Skill::stringToSkillId(std::string_view skill)
+    int Skill::stringToSkillId(std::string_view skill)
     {
         for (int id = 0; id < Skill::Length; ++id)
             if (Misc::StringUtils::ciEqual(sSkillNames[id], skill))
-                return Skill::SkillEnum(id);
+                return id;
 
         throw std::logic_error("No such skill: " + std::string(skill));
     }
@@ -75,6 +75,8 @@ namespace ESM
         }
         if (!hasIndex)
             esm.fail("Missing INDX");
+        else if (mIndex < 0 || mIndex >= Length)
+            esm.fail("Invalid INDX");
         if (!hasData)
             esm.fail("Missing SKDT");
 
@@ -101,7 +103,7 @@ namespace ESM
 
     RefId Skill::indexToRefId(int index)
     {
-        if (index == -1)
+        if (index < 0 || index >= Length)
             return RefId();
         return RefId::index(sRecordId, static_cast<std::uint32_t>(index));
     }

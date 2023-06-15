@@ -83,13 +83,13 @@ namespace MWGui
             }
         }
 
-        // Loop over ESM::Skill::SkillEnum
-        for (int i = 0; i < ESM::Skill::Length; ++i)
+        for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
         {
-            if (stats.getSkill(i) != mWatchedSkills[i] || mWatchedStatsEmpty)
+            const auto& value = stats.getSkill(skill.mId);
+            if (value != mWatchedSkills[skill.mId] || mWatchedStatsEmpty)
             {
-                mWatchedSkills[i] = stats.getSkill(i);
-                setValue((ESM::Skill::SkillEnum)i, stats.getSkill(i));
+                mWatchedSkills[skill.mId] = value;
+                setValue(skill.mId, value);
             }
         }
 
@@ -125,13 +125,13 @@ namespace MWGui
                 setValue("class", cls->mName);
 
                 size_t size = cls->mData.mSkills.size();
-                MWBase::WindowManager::SkillList majorSkills(size);
-                MWBase::WindowManager::SkillList minorSkills(size);
+                std::vector<ESM::RefId> majorSkills(size);
+                std::vector<ESM::RefId> minorSkills(size);
 
                 for (size_t i = 0; i < size; ++i)
                 {
-                    minorSkills[i] = cls->mData.mSkills[i][0];
-                    majorSkills[i] = cls->mData.mSkills[i][1];
+                    minorSkills[i] = ESM::Skill::indexToRefId(cls->mData.mSkills[i][0]);
+                    majorSkills[i] = ESM::Skill::indexToRefId(cls->mData.mSkills[i][1]);
                 }
 
                 configureSkills(majorSkills, minorSkills);
@@ -157,12 +157,10 @@ namespace MWGui
             listener->setValue(id, value);
     }
 
-    void StatsWatcher::setValue(ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
+    void StatsWatcher::setValue(ESM::RefId id, const MWMechanics::SkillValue& value)
     {
-        /// \todo Don't use the skill enum as a parameter type (we will have to drop it anyway, once we
-        /// allow custom skills.
         for (StatsListener* listener : mListeners)
-            listener->setValue(parSkill, value);
+            listener->setValue(id, value);
     }
 
     void StatsWatcher::setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value)
@@ -183,7 +181,7 @@ namespace MWGui
             listener->setValue(id, value);
     }
 
-    void StatsWatcher::configureSkills(const std::vector<int>& major, const std::vector<int>& minor)
+    void StatsWatcher::configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor)
     {
         for (StatsListener* listener : mListeners)
             listener->configureSkills(major, minor);

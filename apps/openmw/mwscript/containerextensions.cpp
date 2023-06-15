@@ -392,7 +392,7 @@ namespace MWScript
                     return;
                 }
 
-                int skill = it->getClass().getEquipmentSkill(*it);
+                ESM::RefId skill = it->getClass().getEquipmentSkill(*it);
                 if (skill == ESM::Skill::HeavyArmor)
                     runtime.push(2);
                 else if (skill == ESM::Skill::MediumArmor)

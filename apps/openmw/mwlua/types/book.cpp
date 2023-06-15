@@ -67,7 +67,7 @@ namespace MWLua
         sol::table skill(context.mLua->sol(), sol::create);
         book["SKILL"] = LuaUtil::makeStrictReadOnly(skill);
         book["createRecordDraft"] = tableToBook;
-        for (int id = ESM::Skill::Block; id < ESM::Skill::Length; ++id)
+        for (int id = 0; id < ESM::Skill::Length; ++id)
         {
             std::string skillName = Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[id]);
             skill[skillName] = skillName;

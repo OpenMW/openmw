@@ -565,7 +565,7 @@ namespace MWMechanics
             case ESM::MagicEffect::DrainSkill:
                 if (enemy.isEmpty() || !enemy.getClass().isNpc())
                     return 0.f;
-                if (enemy.getClass().getSkill(enemy, effect.mSkill) <= 0)
+                if (enemy.getClass().getSkill(enemy, ESM::Skill::indexToRefId(effect.mSkill)) <= 0)
                     return 0.f;
                 break;
 
@@ -600,7 +600,7 @@ namespace MWMechanics
                         && (e != ESM::MagicEffect::BoundLongbow || effect.mEffectID == e
                             || rateAmmo(actor, enemy, getWeaponType(ESM::Weapon::MarksmanBow)->mAmmoType) <= 0.f))
                         return 0.f;
-                ESM::Skill::SkillEnum skill = ESM::Skill::ShortBlade;
+                ESM::RefId skill = ESM::Skill::ShortBlade;
                 if (effect.mEffectID == ESM::MagicEffect::BoundLongsword)
                     skill = ESM::Skill::LongBlade;
                 else if (effect.mEffectID == ESM::MagicEffect::BoundMace)

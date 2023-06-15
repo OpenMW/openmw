@@ -114,7 +114,6 @@ namespace MWWorld
 
     // Need to instantiate these before they're used
     template class IndexedStore<ESM::MagicEffect>;
-    template class IndexedStore<ESM::Skill>;
 
     template <class T, class Id>
     TypedDynamicStore<T, Id>::TypedDynamicStore()
@@ -170,11 +169,19 @@ namespace MWWorld
     {
         if constexpr (std::is_same_v<Id, ESM::RefId>)
         {
-            std::vector<const T*> results;
-            std::copy_if(mShared.begin(), mShared.end(), std::back_inserter(results),
-                [prefix](const T* item) { return item->mId.startsWith(prefix); });
-            if (!results.empty())
-                return results[Misc::Rng::rollDice(results.size(), prng)];
+            if (prefix.empty())
+            {
+                if (!mShared.empty())
+                    return mShared[Misc::Rng::rollDice(mShared.size(), prng)];
+            }
+            else
+            {
+                std::vector<const T*> results;
+                std::copy_if(mShared.begin(), mShared.end(), std::back_inserter(results),
+                    [prefix](const T* item) { return item->mId.startsWith(prefix); });
+                if (!results.empty())
+                    return results[Misc::Rng::rollDice(results.size(), prng)];
+            }
             return nullptr;
         }
         else
@@ -916,8 +923,6 @@ namespace MWWorld
     // Skill
     //=========================================================================
 
-    Store<ESM::Skill>::Store() {}
-
     void Store<ESM::Skill>::setUp(const MWWorld::Store<ESM::GameSetting>& settings)
     {
         constexpr std::string_view skillValues[ESM::Skill::Length][3] = {
@@ -950,15 +955,13 @@ namespace MWWorld
             { "sSkillSpeechcraft", "icons\\k\\stealth_speechcraft.dds", "fWerewolfSpeechcraft" },
             { "sSkillHandtohand", "icons\\k\\stealth_handtohand.dds", "fWerewolfHandtohand" },
         };
-        for (int i = 0; i < ESM::Skill::Length; ++i)
+        for (ESM::Skill* skill : mShared)
         {
-            auto found = mStatic.find(i);
-            if (found != mStatic.end())
+            if (skill->mIndex >= 0)
             {
-                ESM::Skill& skill = found->second;
-                skill.mName = getGMSTString(settings, skillValues[i][0]);
-                skill.mIcon = skillValues[i][1];
-                skill.mWerewolfValue = getGMSTFloat(settings, skillValues[i][2]);
+                skill->mName = getGMSTString(settings, skillValues[skill->mIndex][0]);
+                skill->mIcon = skillValues[skill->mIndex][1];
+                skill->mWerewolfValue = getGMSTFloat(settings, skillValues[skill->mIndex][2]);
             }
         }
     }
@@ -1363,7 +1366,7 @@ template class MWWorld::TypedDynamicStore<ESM::Race>;
 template class MWWorld::TypedDynamicStore<ESM::Region>;
 template class MWWorld::TypedDynamicStore<ESM::Repair>;
 template class MWWorld::TypedDynamicStore<ESM::Script>;
-// template class MWWorld::Store<ESM::Skill>;
+template class MWWorld::TypedDynamicStore<ESM::Skill>;
 template class MWWorld::TypedDynamicStore<ESM::Sound>;
 template class MWWorld::TypedDynamicStore<ESM::SoundGenerator>;
 template class MWWorld::TypedDynamicStore<ESM::Spell>;

@@ -345,11 +345,11 @@ namespace MWScript
         template <class R>
         class OpGetSkill : public Interpreter::Opcode0
         {
-            int mIndex;
+            ESM::RefId mId;
 
         public:
-            OpGetSkill(int index)
-                : mIndex(index)
+            OpGetSkill(ESM::RefId id)
+                : mId(id)
             {
             }
 
@@ -357,7 +357,7 @@ namespace MWScript
             {
                 MWWorld::Ptr ptr = R()(runtime);
 
-                Interpreter::Type_Float value = ptr.getClass().getSkill(ptr, mIndex);
+                Interpreter::Type_Float value = ptr.getClass().getSkill(ptr, mId);
 
                 runtime.push(value);
             }
@@ -366,11 +366,11 @@ namespace MWScript
         template <class R>
         class OpSetSkill : public Interpreter::Opcode0
         {
-            int mIndex;
+            ESM::RefId mId;
 
         public:
-            OpSetSkill(int index)
-                : mIndex(index)
+            OpSetSkill(ESM::RefId id)
+                : mId(id)
             {
             }
 
@@ -383,18 +383,18 @@ namespace MWScript
 
                 MWMechanics::NpcStats& stats = ptr.getClass().getNpcStats(ptr);
 
-                stats.getSkill(mIndex).setBase(value, true);
+                stats.getSkill(mId).setBase(value, true);
             }
         };
 
         template <class R>
         class OpModSkill : public Interpreter::Opcode0
         {
-            int mIndex;
+            ESM::RefId mId;
 
         public:
-            OpModSkill(int index)
-                : mIndex(index)
+            OpModSkill(ESM::RefId id)
+                : mId(id)
             {
             }
 
@@ -405,7 +405,7 @@ namespace MWScript
                 Interpreter::Type_Float value = runtime[0].mFloat;
                 runtime.pop();
 
-                MWMechanics::SkillValue& skill = ptr.getClass().getNpcStats(ptr).getSkill(mIndex);
+                MWMechanics::SkillValue& skill = ptr.getClass().getNpcStats(ptr).getSkill(mId);
                 modStat(skill, value);
             }
         };
@@ -1364,14 +1364,15 @@ namespace MWScript
 
             for (int i = 0; i < Compiler::Stats::numberOfSkills; ++i)
             {
-                interpreter.installSegment5<OpGetSkill<ImplicitRef>>(Compiler::Stats::opcodeGetSkill + i, i);
-                interpreter.installSegment5<OpGetSkill<ExplicitRef>>(Compiler::Stats::opcodeGetSkillExplicit + i, i);
+                ESM::RefId id = ESM::Skill::indexToRefId(i);
+                interpreter.installSegment5<OpGetSkill<ImplicitRef>>(Compiler::Stats::opcodeGetSkill + i, id);
+                interpreter.installSegment5<OpGetSkill<ExplicitRef>>(Compiler::Stats::opcodeGetSkillExplicit + i, id);
 
-                interpreter.installSegment5<OpSetSkill<ImplicitRef>>(Compiler::Stats::opcodeSetSkill + i, i);
-                interpreter.installSegment5<OpSetSkill<ExplicitRef>>(Compiler::Stats::opcodeSetSkillExplicit + i, i);
+                interpreter.installSegment5<OpSetSkill<ImplicitRef>>(Compiler::Stats::opcodeSetSkill + i, id);
+                interpreter.installSegment5<OpSetSkill<ExplicitRef>>(Compiler::Stats::opcodeSetSkillExplicit + i, id);
 
-                interpreter.installSegment5<OpModSkill<ImplicitRef>>(Compiler::Stats::opcodeModSkill + i, i);
-                interpreter.installSegment5<OpModSkill<ExplicitRef>>(Compiler::Stats::opcodeModSkillExplicit + i, i);
+                interpreter.installSegment5<OpModSkill<ImplicitRef>>(Compiler::Stats::opcodeModSkill + i, id);
+                interpreter.installSegment5<OpModSkill<ExplicitRef>>(Compiler::Stats::opcodeModSkillExplicit + i, id);
             }
 
             interpreter.installSegment5<OpGetPCCrimeLevel>(Compiler::Stats::opcodeGetPCCrimeLevel);

@@ -111,20 +111,18 @@ namespace
         {
             float modifierSum = 0;
 
-            for (int j = 0; j < ESM::Skill::Length; ++j)
+            for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
             {
-                const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(j);
-
-                if (skill->mData.mAttribute != attribute)
+                if (skill.mData.mAttribute != attribute)
                     continue;
 
                 // is this a minor or major skill?
                 float add = 0.2f;
                 for (const auto& skills : class_->mData.mSkills)
                 {
-                    if (skills[0] == j)
+                    if (skills[0] == skill.mIndex)
                         add = 0.5;
-                    if (skills[1] == j)
+                    if (skills[1] == skill.mIndex)
                         add = 1.0;
                 }
                 modifierSum += add;
@@ -181,15 +179,15 @@ namespace
 
             for (const auto& skills : class_->mData.mSkills)
             {
-                int index = skills[i];
-                if (index >= 0 && index < ESM::Skill::Length)
+                ESM::RefId id = ESM::Skill::indexToRefId(skills[i]);
+                if (!id.empty())
                 {
-                    npcStats.getSkill(index).setBase(npcStats.getSkill(index).getBase() + bonus);
+                    npcStats.getSkill(id).setBase(npcStats.getSkill(id).getBase() + bonus);
                 }
             }
         }
 
-        for (int skillIndex = 0; skillIndex < ESM::Skill::Length; ++skillIndex)
+        for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
         {
             float majorMultiplier = 0.1f;
             float specMultiplier = 0.0f;
@@ -198,14 +196,14 @@ namespace
             int specBonus = 0;
 
             auto bonusIt = std::find_if(race->mData.mBonus.begin(), race->mData.mBonus.end(),
-                [skillIndex](const auto& bonus) { return bonus.mSkill == skillIndex; });
+                [&](const auto& bonus) { return bonus.mSkill == skill.mIndex; });
             if (bonusIt != race->mData.mBonus.end())
                 raceBonus = bonusIt->mBonus;
 
             for (const auto& skills : class_->mData.mSkills)
             {
                 // is this a minor or major skill?
-                if (std::find(skills.begin(), skills.end(), skillIndex) != skills.end())
+                if (std::find(skills.begin(), skills.end(), skill.mIndex) != skills.end())
                 {
                     majorMultiplier = 1.0f;
                     break;
@@ -213,22 +211,17 @@ namespace
             }
 
             // is this skill in the same Specialization as the class?
-            const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(skillIndex);
-            if (skill->mData.mSpecialization == class_->mData.mSpecialization)
+            if (skill.mData.mSpecialization == class_->mData.mSpecialization)
             {
                 specMultiplier = 0.5f;
                 specBonus = 5;
             }
 
-            npcStats.getSkill(skillIndex)
-                .setBase(std::min(round_ieee_754(npcStats.getSkill(skillIndex).getBase() + 5 + raceBonus + specBonus
-                                      + (int(level) - 1) * (majorMultiplier + specMultiplier)),
+            npcStats.getSkill(skill.mId).setBase(
+                std::min(round_ieee_754(npcStats.getSkill(skill.mId).getBase() + 5 + raceBonus + specBonus
+                             + (int(level) - 1) * (majorMultiplier + specMultiplier)),
                     100)); // Must gracefully handle level 0
         }
-
-        int skills[ESM::Skill::Length];
-        for (int i = 0; i < ESM::Skill::Length; ++i)
-            skills[i] = npcStats.getSkill(i).getBase();
 
         int attributes[ESM::Attribute::Length];
         for (int i = 0; i < ESM::Attribute::Length; ++i)
@@ -236,7 +229,7 @@ namespace
 
         if (!spellsInitialised)
         {
-            std::vector<ESM::RefId> spells = MWMechanics::autoCalcNpcSpells(skills, attributes, race);
+            std::vector<ESM::RefId> spells = MWMechanics::autoCalcNpcSpells(npcStats.getSkills(), attributes, race);
             npcStats.getSpells().addAllToInstance(spells);
         }
     }
@@ -315,7 +308,7 @@ namespace MWClass
                 gold = ref->mBase->mNpdt.mGold;
 
                 for (size_t i = 0; i < ref->mBase->mNpdt.mSkills.size(); ++i)
-                    data->mNpcStats.getSkill(i).setBase(ref->mBase->mNpdt.mSkills[i]);
+                    data->mNpcStats.getSkill(ESM::Skill::indexToRefId(i)).setBase(ref->mBase->mNpdt.mSkills[i]);
 
                 data->mNpcStats.setAttribute(ESM::Attribute::Strength, ref->mBase->mNpdt.mStrength);
                 data->mNpcStats.setAttribute(ESM::Attribute::Intelligence, ref->mBase->mNpdt.mIntelligence);
@@ -589,7 +582,7 @@ namespace MWClass
         victim = result.first;
         hitPosition = result.second;
 
-        int weapskill = ESM::Skill::HandToHand;
+        ESM::RefId weapskill = ESM::Skill::HandToHand;
         if (!weapon.isEmpty())
             weapskill = weapon.getClass().getEquipmentSkill(weapon);
 
@@ -658,7 +651,7 @@ namespace MWClass
 
         if (ptr == MWMechanics::getPlayer())
         {
-            int weapskill = ESM::Skill::HandToHand;
+            ESM::RefId weapskill = ESM::Skill::HandToHand;
             if (!weapon.isEmpty())
                 weapskill = weapon.getClass().getEquipmentSkill(weapon);
             skillUsageSucceeded(ptr, weapskill, 0);
@@ -849,21 +842,16 @@ namespace MWClass
                             armor = *inv.unequipItem(armor);
                     }
 
+                    ESM::RefId skill = armor.getClass().getEquipmentSkill(armor);
                     if (ptr == MWMechanics::getPlayer())
-                        skillUsageSucceeded(ptr, armor.getClass().getEquipmentSkill(armor), 0);
+                        skillUsageSucceeded(ptr, skill, 0);
 
-                    switch (armor.getClass().getEquipmentSkill(armor))
-                    {
-                        case ESM::Skill::LightArmor:
-                            sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Light Armor Hit"), 1.0f, 1.0f);
-                            break;
-                        case ESM::Skill::MediumArmor:
-                            sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Medium Armor Hit"), 1.0f, 1.0f);
-                            break;
-                        case ESM::Skill::HeavyArmor:
-                            sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Heavy Armor Hit"), 1.0f, 1.0f);
-                            break;
-                    }
+                    if (skill == ESM::Skill::LightArmor)
+                        sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Light Armor Hit"), 1.0f, 1.0f);
+                    else if (skill == ESM::Skill::MediumArmor)
+                        sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Medium Armor Hit"), 1.0f, 1.0f);
+                    else if (skill == ESM::Skill::HeavyArmor)
+                        sndMgr->playSound3D(ptr, ESM::RefId::stringRefId("Heavy Armor Hit"), 1.0f, 1.0f);
                 }
                 else if (ptr == MWMechanics::getPlayer())
                     skillUsageSucceeded(ptr, ESM::Skill::Unarmored, 0);
@@ -1161,7 +1149,7 @@ namespace MWClass
         return cast.cast(recordId);
     }
 
-    void Npc::skillUsageSucceeded(const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor) const
+    void Npc::skillUsageSucceeded(const MWWorld::Ptr& ptr, ESM::RefId skill, int usageType, float extraFactor) const
     {
         MWMechanics::NpcStats& stats = getNpcStats(ptr);
 
@@ -1311,18 +1299,13 @@ namespace MWClass
                 if (boots == inv.end() || boots->getType() != ESM::Armor::sRecordId)
                     return (name == "left") ? footBareLeft : footBareRight;
 
-                switch (boots->getClass().getEquipmentSkill(*boots))
-                {
-                    case ESM::Skill::LightArmor:
-                        return (name == "left") ? footLightLeft : footLightRight;
-                        break;
-                    case ESM::Skill::MediumArmor:
-                        return (name == "left") ? footMediumLeft : footMediumRight;
-                        break;
-                    case ESM::Skill::HeavyArmor:
-                        return (name == "left") ? footHeavyLeft : footHeavyRight;
-                        break;
-                }
+                ESM::RefId skill = boots->getClass().getEquipmentSkill(*boots);
+                if (skill == ESM::Skill::LightArmor)
+                    return (name == "left") ? footLightLeft : footLightRight;
+                else if (skill == ESM::Skill::MediumArmor)
+                    return (name == "left") ? footMediumLeft : footMediumRight;
+                else if (skill == ESM::Skill::HeavyArmor)
+                    return (name == "left") ? footHeavyLeft : footHeavyRight;
             }
             return ESM::RefId();
         }
@@ -1355,9 +1338,9 @@ namespace MWClass
         return MWWorld::Ptr(cell.insert(ref), &cell);
     }
 
-    float Npc::getSkill(const MWWorld::Ptr& ptr, int skill) const
+    float Npc::getSkill(const MWWorld::Ptr& ptr, ESM::RefId id) const
     {
-        return getNpcStats(ptr).getSkill(skill).getModified();
+        return getNpcStats(ptr).getSkill(id).getModified();
     }
 
     int Npc::getBloodTexture(const MWWorld::ConstPtr& ptr) const

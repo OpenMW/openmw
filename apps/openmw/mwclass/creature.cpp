@@ -762,11 +762,11 @@ namespace MWClass
         throw std::runtime_error("Unexpected soundgen type: " + std::string(name));
     }
 
-    float Creature::getSkill(const MWWorld::Ptr& ptr, int skill) const
+    float Creature::getSkill(const MWWorld::Ptr& ptr, ESM::RefId id) const
     {
         MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
 
-        const ESM::Skill* skillRecord = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(skill);
+        const ESM::Skill* skillRecord = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(id);
 
         switch (skillRecord->mData.mSpecialization)
         {

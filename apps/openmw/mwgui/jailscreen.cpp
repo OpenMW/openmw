@@ -93,11 +93,11 @@ namespace MWGui
         for (int day = 0; day < mDays; ++day)
         {
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            const ESM::Skill* skill = skillStore.find(Misc::Rng::rollDice(ESM::Skill::Length, prng));
+            const ESM::Skill* skill = skillStore.searchRandom({}, prng);
             skills.insert(skill);
 
-            MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill->mIndex);
-            if (skill->mIndex == ESM::Skill::Security || skill->mIndex == ESM::Skill::Sneak)
+            MWMechanics::SkillValue& value = player.getClass().getNpcStats(player).getSkill(skill->mId);
+            if (skill->mId == ESM::Skill::Security || skill->mId == ESM::Skill::Sneak)
                 value.setBase(std::min(100.f, value.getBase() + 1));
             else
                 value.setBase(std::max(0.f, value.getBase() - 1));
@@ -116,9 +116,9 @@ namespace MWGui
 
         for (const ESM::Skill* skill : skills)
         {
-            int skillValue = player.getClass().getNpcStats(player).getSkill(skill->mIndex).getBase();
+            int skillValue = player.getClass().getNpcStats(player).getSkill(skill->mId).getBase();
             std::string skillMsg = gmst.find("sNotifyMessage44")->mValue.getString();
-            if (skill->mIndex == ESM::Skill::Sneak || skill->mIndex == ESM::Skill::Security)
+            if (skill->mId == ESM::Skill::Sneak || skill->mId == ESM::Skill::Security)
                 skillMsg = gmst.find("sNotifyMessage39")->mValue.getString();
 
             skillMsg = Misc::StringUtils::format(skillMsg, skill->mName, skillValue);

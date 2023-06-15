@@ -59,23 +59,23 @@ namespace MWWorld
     {
         MWMechanics::NpcStats& stats = getPlayer().getClass().getNpcStats(getPlayer());
 
-        for (int i = 0; i < ESM::Skill::Length; ++i)
-            mSaveSkills[i] = stats.getSkill(i).getModified();
+        for (size_t i = 0; i < mSaveSkills.size(); ++i)
+            mSaveSkills[i] = stats.getSkill(ESM::Skill::indexToRefId(i)).getModified();
         for (int i = 0; i < ESM::Attribute::Length; ++i)
             mSaveAttributes[i] = stats.getAttribute(i).getModified();
     }
 
     void Player::restoreStats()
     {
-        const MWWorld::Store<ESM::GameSetting>& gmst
-            = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
+        const auto& store = MWBase::Environment::get().getESMStore();
+        const MWWorld::Store<ESM::GameSetting>& gmst = store->get<ESM::GameSetting>();
         MWMechanics::CreatureStats& creatureStats = getPlayer().getClass().getCreatureStats(getPlayer());
         MWMechanics::NpcStats& npcStats = getPlayer().getClass().getNpcStats(getPlayer());
         MWMechanics::DynamicStat<float> health = creatureStats.getDynamic(0);
         creatureStats.setHealth(health.getBase() / gmst.find("fWereWolfHealth")->mValue.getFloat());
-        for (int i = 0; i < ESM::Skill::Length; ++i)
+        for (size_t i = 0; i < mSaveSkills.size(); ++i)
         {
-            auto& skill = npcStats.getSkill(i);
+            auto& skill = npcStats.getSkill(ESM::Skill::indexToRefId(i));
             skill.restore(skill.getDamage());
             skill.setModifier(mSaveSkills[i] - skill.getBase());
         }
@@ -103,13 +103,13 @@ namespace MWWorld
             npcStats.setAttribute(attribute.mId, value);
         }
 
-        for (const auto& [_, skill] : store->get<ESM::Skill>())
+        for (const auto& skill : store->get<ESM::Skill>())
         {
             // Acrobatics is set separately for some reason.
-            if (skill.mIndex == ESM::Skill::Acrobatics)
+            if (skill.mId == ESM::Skill::Acrobatics)
                 continue;
 
-            MWMechanics::SkillValue& value = npcStats.getSkill(skill.mIndex);
+            MWMechanics::SkillValue& value = npcStats.getSkill(skill.mId);
             value.setModifier(skill.mWerewolfValue - value.getModified());
         }
     }
@@ -251,10 +251,7 @@ namespace MWWorld
         mPreviousItems.clear();
         mLastKnownExteriorPosition = osg::Vec3f(0, 0, 0);
 
-        for (int i = 0; i < ESM::Skill::Length; ++i)
-        {
-            mSaveSkills[i] = 0.f;
-        }
+        mSaveSkills.fill(0.f);
 
         for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
@@ -296,7 +293,7 @@ namespace MWWorld
 
         for (int i = 0; i < ESM::Attribute::Length; ++i)
             player.mSaveAttributes[i] = mSaveAttributes[i];
-        for (int i = 0; i < ESM::Skill::Length; ++i)
+        for (size_t i = 0; i < mSaveSkills.size(); ++i)
             player.mSaveSkills[i] = mSaveSkills[i];
 
         player.mPreviousItems = mPreviousItems;
@@ -334,7 +331,7 @@ namespace MWWorld
 
             for (int i = 0; i < ESM::Attribute::Length; ++i)
                 mSaveAttributes[i] = player.mSaveAttributes[i];
-            for (int i = 0; i < ESM::Skill::Length; ++i)
+            for (size_t i = 0; i < mSaveSkills.size(); ++i)
                 mSaveSkills[i] = player.mSaveSkills[i];
 
             if (player.mObject.mNpcStats.mIsWerewolf)

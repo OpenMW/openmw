@@ -14,6 +14,7 @@
 
 #include "../mwmechanics/aisetting.hpp"
 #include <components/esm/refid.hpp>
+#include <components/esm3/loadskil.hpp>
 
 namespace ESM
 {
@@ -208,10 +209,9 @@ namespace MWWorld
         ///
         /// Default implementation: return (empty vector, false).
 
-        virtual int getEquipmentSkill(const ConstPtr& ptr) const;
-        /// Return the index of the skill this item corresponds to when equipped or -1, if there is
-        /// no such skill.
-        /// (default implementation: return -1)
+        virtual ESM::RefId getEquipmentSkill(const ConstPtr& ptr) const;
+        /// Return the index of the skill this item corresponds to when equipped.
+        /// (default implementation: return empty ref id)
 
         virtual int getValue(const ConstPtr& ptr) const;
         ///< Return trade value of the object. Throws an exception, if the object can't be traded.
@@ -234,7 +234,7 @@ namespace MWWorld
         ///< Consume an item, e. g. a potion.
 
         virtual void skillUsageSucceeded(
-            const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor = 1.f) const;
+            const MWWorld::Ptr& ptr, ESM::RefId skill, int usageType, float extraFactor = 1.f) const;
         ///< Inform actor \a ptr that a skill use has succeeded.
         ///
         /// (default implementations: throws an exception)
@@ -340,7 +340,7 @@ namespace MWWorld
         bool isPureLandCreature(const MWWorld::Ptr& ptr) const;
         bool isMobile(const MWWorld::Ptr& ptr) const;
 
-        virtual float getSkill(const MWWorld::Ptr& ptr, int skill) const;
+        virtual float getSkill(const MWWorld::Ptr& ptr, ESM::RefId id) const;
 
         virtual void readAdditionalState(const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const;
         ///< Read additional state from \a state into \a ptr.

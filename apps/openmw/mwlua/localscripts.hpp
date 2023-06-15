@@ -4,6 +4,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <utility>
 
 #include <components/lua/luastate.hpp>
 #include <components/lua/scriptscontainer.hpp>
@@ -21,11 +22,12 @@ namespace MWLua
         class CachedStat
         {
         public:
-            using Setter = void (*)(int, std::string_view, const MWWorld::Ptr&, const sol::object&);
+            using Index = std::variant<int, ESM::RefId>;
+            using Setter = void (*)(const Index&, std::string_view, const MWWorld::Ptr&, const sol::object&);
 
-            CachedStat(Setter setter, int index, std::string_view prop)
+            CachedStat(Setter setter, Index index, std::string_view prop)
                 : mSetter(setter)
-                , mIndex(index)
+                , mIndex(std::move(index))
                 , mProp(std::move(prop))
             {
             }
@@ -42,7 +44,7 @@ namespace MWLua
 
         private:
             Setter mSetter; // Function that updates a stat's property
-            int mIndex; // Optional index to disambiguate the stat
+            Index mIndex; // Optional index to disambiguate the stat
             std::string_view mProp; // Name of the stat's property
         };
 

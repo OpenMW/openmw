@@ -30,7 +30,7 @@ namespace MWGui
 
         void setConstantEffect(bool constant);
 
-        void setSkill(int skill);
+        void setSkill(ESM::RefId skill);
         void setAttribute(int attribute);
 
         void newEffect(const ESM::MagicEffect* effect);

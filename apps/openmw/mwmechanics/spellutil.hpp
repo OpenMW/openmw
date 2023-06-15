@@ -17,7 +17,7 @@ namespace MWWorld
 
 namespace MWMechanics
 {
-    ESM::Skill::SkillEnum spellSchoolToSkill(int school);
+    ESM::RefId spellSchoolToSkill(int school);
 
     enum class EffectCostMethod
     {

@@ -221,7 +221,7 @@ namespace MWWorld
             creatureStats.mAiSettings[i].mMod = 0.f;
         if (npcStats)
         {
-            for (std::size_t i = 0; i < ESM::Skill::Length; ++i)
+            for (std::size_t i = 0; i < npcStats->mSkills.size(); ++i)
                 npcStats->mSkills[i].mMod = 0.f;
         }
     }

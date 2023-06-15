@@ -52,7 +52,7 @@ namespace MWWorld
         return false;
     }
 
-    void Class::skillUsageSucceeded(const MWWorld::Ptr& ptr, int skill, int usageType, float extraFactor) const
+    void Class::skillUsageSucceeded(const MWWorld::Ptr& ptr, ESM::RefId skill, int usageType, float extraFactor) const
     {
         throw std::runtime_error("class does not represent an actor");
     }
@@ -209,9 +209,9 @@ namespace MWWorld
         return std::make_pair(std::vector<int>(), false);
     }
 
-    int Class::getEquipmentSkill(const ConstPtr& ptr) const
+    ESM::RefId Class::getEquipmentSkill(const ConstPtr& ptr) const
     {
-        return -1;
+        return {};
     }
 
     int Class::getValue(const ConstPtr& ptr) const
@@ -438,7 +438,7 @@ namespace MWWorld
         return canSwim(ptr) || canWalk(ptr) || canFly(ptr);
     }
 
-    float Class::getSkill(const MWWorld::Ptr& ptr, int skill) const
+    float Class::getSkill(const MWWorld::Ptr& ptr, ESM::RefId id) const
     {
         throw std::runtime_error("class does not support skills");
     }

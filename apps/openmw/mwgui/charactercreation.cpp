@@ -99,7 +99,7 @@ namespace MWGui
             mPlayerAttributes.emplace(attribute.mId, MWMechanics::AttributeValue());
 
         for (const auto& skill : store.get<ESM::Skill>())
-            mPlayerSkillValues.emplace(skill.second.mIndex, MWMechanics::SkillValue());
+            mPlayerSkillValues.emplace(skill.mId, MWMechanics::SkillValue());
     }
 
     void CharacterCreation::setValue(std::string_view id, const MWMechanics::AttributeValue& value)
@@ -138,14 +138,14 @@ namespace MWGui
         }
     }
 
-    void CharacterCreation::setValue(const ESM::Skill::SkillEnum parSkill, const MWMechanics::SkillValue& value)
+    void CharacterCreation::setValue(ESM::RefId id, const MWMechanics::SkillValue& value)
     {
-        mPlayerSkillValues[parSkill] = value;
+        mPlayerSkillValues[id] = value;
         if (mReviewDialog)
-            mReviewDialog->setSkillValue(parSkill, value);
+            mReviewDialog->setSkillValue(id, value);
     }
 
-    void CharacterCreation::configureSkills(const SkillList& major, const SkillList& minor)
+    void CharacterCreation::configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor)
     {
         if (mReviewDialog)
             mReviewDialog->configureSkills(major, minor);
@@ -275,10 +275,9 @@ namespace MWGui
                         mReviewDialog->setAttribute(
                             static_cast<ESM::Attribute::AttributeID>(attributePair.first), attributePair.second);
                     }
-                    for (auto& skillPair : mPlayerSkillValues)
+                    for (const auto& [skill, value] : mPlayerSkillValues)
                     {
-                        mReviewDialog->setSkillValue(
-                            static_cast<ESM::Skill::SkillEnum>(skillPair.first), skillPair.second);
+                        mReviewDialog->setSkillValue(skill, value);
                     }
                     mReviewDialog->configureSkills(mPlayerMajorSkills, mPlayerMinorSkills);
 
@@ -476,14 +475,14 @@ namespace MWGui
             assert(attributes.size() == klass.mData.mAttribute.size());
             std::copy(attributes.begin(), attributes.end(), klass.mData.mAttribute.begin());
 
-            std::vector<ESM::Skill::SkillEnum> majorSkills = mCreateClassDialog->getMajorSkills();
-            std::vector<ESM::Skill::SkillEnum> minorSkills = mCreateClassDialog->getMinorSkills();
+            std::vector<ESM::RefId> majorSkills = mCreateClassDialog->getMajorSkills();
+            std::vector<ESM::RefId> minorSkills = mCreateClassDialog->getMinorSkills();
             assert(majorSkills.size() >= klass.mData.mSkills.size());
             assert(minorSkills.size() >= klass.mData.mSkills.size());
             for (size_t i = 0; i < klass.mData.mSkills.size(); ++i)
             {
-                klass.mData.mSkills[i][1] = majorSkills[i];
-                klass.mData.mSkills[i][0] = minorSkills[i];
+                klass.mData.mSkills[i][1] = majorSkills[i].getIf<ESM::IndexRefId>()->getValue();
+                klass.mData.mSkills[i][0] = minorSkills[i].getIf<ESM::IndexRefId>()->getValue();
             }
 
             MWBase::Environment::get().getMechanicsManager()->setPlayerClass(klass);

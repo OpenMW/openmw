@@ -53,8 +53,8 @@ namespace MWMechanics
     {
         const auto& store = MWBase::Environment::get().getESMStore();
         const ESM::MagicEffect* magicEffect = store->get<ESM::MagicEffect>().search(mId);
-        return getMagicEffectString(
-            *magicEffect, store->get<ESM::Attribute>().search(mArg), store->get<ESM::Skill>().search(mArg));
+        return getMagicEffectString(*magicEffect, store->get<ESM::Attribute>().search(mArg),
+            store->get<ESM::Skill>().search(ESM::Skill::indexToRefId(mArg)));
     }
 
     bool operator<(const EffectKey& left, const EffectKey& right)

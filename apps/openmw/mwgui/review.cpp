@@ -90,10 +90,10 @@ namespace MWGui
         getWidget(mSkillView, "SkillView");
         mSkillView->eventMouseWheel += MyGUI::newDelegate(this, &ReviewDialog::onMouseWheel);
 
-        for (int i = 0; i < ESM::Skill::Length; ++i)
+        for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
         {
-            mSkillValues.insert(std::make_pair(i, MWMechanics::SkillValue()));
-            mSkillWidgetMap.insert(std::make_pair(i, static_cast<MyGUI::TextBox*>(nullptr)));
+            mSkillValues.emplace(skill.mId, MWMechanics::SkillValue());
+            mSkillWidgetMap.emplace(skill.mId, static_cast<MyGUI::TextBox*>(nullptr));
         }
 
         MyGUI::Button* backButton;
@@ -204,13 +204,14 @@ namespace MWGui
         }
     }
 
-    void ReviewDialog::setSkillValue(ESM::Skill::SkillEnum skillId, const MWMechanics::SkillValue& value)
+    void ReviewDialog::setSkillValue(ESM::RefId id, const MWMechanics::SkillValue& value)
     {
-        mSkillValues[skillId] = value;
-        MyGUI::TextBox* widget = mSkillWidgetMap[skillId];
+        mSkillValues[id] = value;
+        MyGUI::TextBox* widget = mSkillWidgetMap[id];
         if (widget)
         {
-            float modified = static_cast<float>(value.getModified()), base = static_cast<float>(value.getBase());
+            float modified = value.getModified();
+            float base = value.getBase();
             std::string text = MyGUI::utility::toString(std::floor(modified));
             std::string state = "normal";
             if (modified > base)
@@ -225,21 +226,21 @@ namespace MWGui
         mUpdateSkillArea = true;
     }
 
-    void ReviewDialog::configureSkills(const std::vector<int>& major, const std::vector<int>& minor)
+    void ReviewDialog::configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor)
     {
         mMajorSkills = major;
         mMinorSkills = minor;
 
         // Update misc skills with the remaining skills not in major or minor
-        std::set<int> skillSet;
+        std::set<ESM::RefId> skillSet;
         std::copy(major.begin(), major.end(), std::inserter(skillSet, skillSet.begin()));
         std::copy(minor.begin(), minor.end(), std::inserter(skillSet, skillSet.begin()));
         mMiscSkills.clear();
         const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::Skill>();
-        for (const auto& skill : store)
+        for (const ESM::Skill& skill : store)
         {
-            if (!skillSet.contains(skill.second.mIndex))
-                mMiscSkills.push_back(skill.second.mIndex);
+            if (!skillSet.contains(skill.mId))
+                mMiscSkills.push_back(skill.mId);
         }
 
         mUpdateSkillArea = true;
@@ -327,8 +328,8 @@ namespace MWGui
         coord2.top += lineHeight;
     }
 
-    void ReviewDialog::addSkills(const SkillList& skills, const std::string& titleId, const std::string& titleDefault,
-        MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
+    void ReviewDialog::addSkills(const std::vector<ESM::RefId>& skills, const std::string& titleId,
+        const std::string& titleDefault, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2)
     {
         // Add a line separator if there are items above
         if (!mSkillWidgets.empty())
@@ -339,12 +340,12 @@ namespace MWGui
         addGroup(
             MWBase::Environment::get().getWindowManager()->getGameSettingString(titleId, titleDefault), coord1, coord2);
 
-        for (const int& skillId : skills)
+        for (const ESM::RefId& skillId : skills)
         {
             const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().search(skillId);
-            if (!skill) // Skip unknown skill indexes
+            if (!skill) // Skip unknown skills
                 continue;
-            const MWMechanics::SkillValue& stat = mSkillValues.find(skillId)->second;
+            const MWMechanics::SkillValue& stat = mSkillValues.find(skill->mId)->second;
             int base = stat.getBase();
             int modified = stat.getModified();
 
@@ -358,10 +359,10 @@ namespace MWGui
 
             for (int i = 0; i < 2; ++i)
             {
-                ToolTips::createSkillToolTip(mSkillWidgets[mSkillWidgets.size() - 1 - i], skillId);
+                ToolTips::createSkillToolTip(mSkillWidgets[mSkillWidgets.size() - 1 - i], skill->mId);
             }
 
-            mSkillWidgetMap[skillId] = widget;
+            mSkillWidgetMap[skill->mId] = widget;
         }
     }
 
@@ -393,15 +394,11 @@ namespace MWGui
         if (!mRaceId.empty())
             race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(mRaceId);
 
-        int skills[ESM::Skill::Length];
-        for (int i = 0; i < ESM::Skill::Length; ++i)
-            skills[i] = mSkillValues.find(i)->second.getBase();
-
         int attributes[ESM::Attribute::Length];
         for (int i = 0; i < ESM::Attribute::Length; ++i)
             attributes[i] = mAttributeWidgets[i]->getAttributeValue().getBase();
 
-        std::vector<ESM::RefId> selectedSpells = MWMechanics::autoCalcPlayerSpells(skills, attributes, race);
+        std::vector<ESM::RefId> selectedSpells = MWMechanics::autoCalcPlayerSpells(mSkillValues, attributes, race);
         for (ESM::RefId& spellId : selectedSpells)
         {
             if (std::find(spells.begin(), spells.end(), spellId) == spells.end())

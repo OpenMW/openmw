@@ -1,9 +1,12 @@
 #ifndef OPENMW_AUTOCALCSPELL_H
 #define OPENMW_AUTOCALCSPELL_H
 
+#include "creaturestats.hpp"
 #include <components/esm/refid.hpp>
+#include <map>
 #include <string>
 #include <vector>
+
 namespace ESM
 {
     struct Spell;
@@ -17,19 +20,21 @@ namespace MWMechanics
     /// @note We might want to move this code to a component later, so the editor can use it for preview purposes
 
     std::vector<ESM::RefId> autoCalcNpcSpells(
-        const int* actorSkills, const int* actorAttributes, const ESM::Race* race);
+        const std::map<ESM::RefId, SkillValue>& actorSkills, const int* actorAttributes, const ESM::Race* race);
 
     std::vector<ESM::RefId> autoCalcPlayerSpells(
-        const int* actorSkills, const int* actorAttributes, const ESM::Race* race);
+        const std::map<ESM::RefId, SkillValue>& actorSkills, const int* actorAttributes, const ESM::Race* race);
 
     // Helpers
 
-    bool attrSkillCheck(const ESM::Spell* spell, const int* actorSkills, const int* actorAttributes);
+    bool attrSkillCheck(
+        const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills, const int* actorAttributes);
 
-    void calcWeakestSchool(const ESM::Spell* spell, const int* actorSkills, int& effectiveSchool, float& skillTerm);
+    void calcWeakestSchool(const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills,
+        int& effectiveSchool, float& skillTerm);
 
-    float calcAutoCastChance(
-        const ESM::Spell* spell, const int* actorSkills, const int* actorAttributes, int effectiveSchool);
+    float calcAutoCastChance(const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills,
+        const int* actorAttributes, int effectiveSchool);
 
 }
 

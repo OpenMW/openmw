@@ -217,7 +217,7 @@ namespace MWMechanics
 
         bool validVictim = !victim.isEmpty() && victim.getClass().isActor();
 
-        int weaponSkill = ESM::Skill::Marksman;
+        ESM::RefId weaponSkill = ESM::Skill::Marksman;
         if (!weapon.isEmpty())
             weaponSkill = weapon.getClass().getEquipmentSkill(weapon);
 

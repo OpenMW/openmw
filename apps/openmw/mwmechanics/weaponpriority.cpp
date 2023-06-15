@@ -120,8 +120,8 @@ namespace MWMechanics
         int value = 50.f;
         if (actor.getClass().isNpc())
         {
-            int skill = item.getClass().getEquipmentSkill(item);
-            if (skill != -1)
+            ESM::RefId skill = item.getClass().getEquipmentSkill(item);
+            if (!skill.empty())
                 value = actor.getClass().getSkill(actor, skill);
         }
         else

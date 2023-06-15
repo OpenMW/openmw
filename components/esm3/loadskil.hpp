@@ -41,47 +41,44 @@ namespace ESM
         // Skill index. Skils don't have an id ("NAME") like most records,
         // they only have a numerical index that matches one of the
         // hard-coded skills in the game.
-        int mIndex;
+        int mIndex{ -1 };
 
         std::string mDescription;
         std::string mName;
         std::string mIcon;
         float mWerewolfValue{};
 
-        enum SkillEnum
-        {
-            Block = 0,
-            Armorer = 1,
-            MediumArmor = 2,
-            HeavyArmor = 3,
-            BluntWeapon = 4,
-            LongBlade = 5,
-            Axe = 6,
-            Spear = 7,
-            Athletics = 8,
-            Enchant = 9,
-            Destruction = 10,
-            Alteration = 11,
-            Illusion = 12,
-            Conjuration = 13,
-            Mysticism = 14,
-            Restoration = 15,
-            Alchemy = 16,
-            Unarmored = 17,
-            Security = 18,
-            Sneak = 19,
-            Acrobatics = 20,
-            LightArmor = 21,
-            ShortBlade = 22,
-            Marksman = 23,
-            Mercantile = 24,
-            Speechcraft = 25,
-            HandToHand = 26,
-            Length
-        };
+        static constexpr IndexRefId Block{ sRecordId, 0 };
+        static constexpr IndexRefId Armorer{ sRecordId, 1 };
+        static constexpr IndexRefId MediumArmor{ sRecordId, 2 };
+        static constexpr IndexRefId HeavyArmor{ sRecordId, 3 };
+        static constexpr IndexRefId BluntWeapon{ sRecordId, 4 };
+        static constexpr IndexRefId LongBlade{ sRecordId, 5 };
+        static constexpr IndexRefId Axe{ sRecordId, 6 };
+        static constexpr IndexRefId Spear{ sRecordId, 7 };
+        static constexpr IndexRefId Athletics{ sRecordId, 8 };
+        static constexpr IndexRefId Enchant{ sRecordId, 9 };
+        static constexpr IndexRefId Destruction{ sRecordId, 10 };
+        static constexpr IndexRefId Alteration{ sRecordId, 11 };
+        static constexpr IndexRefId Illusion{ sRecordId, 12 };
+        static constexpr IndexRefId Conjuration{ sRecordId, 13 };
+        static constexpr IndexRefId Mysticism{ sRecordId, 14 };
+        static constexpr IndexRefId Restoration{ sRecordId, 15 };
+        static constexpr IndexRefId Alchemy{ sRecordId, 16 };
+        static constexpr IndexRefId Unarmored{ sRecordId, 17 };
+        static constexpr IndexRefId Security{ sRecordId, 18 };
+        static constexpr IndexRefId Sneak{ sRecordId, 19 };
+        static constexpr IndexRefId Acrobatics{ sRecordId, 20 };
+        static constexpr IndexRefId LightArmor{ sRecordId, 21 };
+        static constexpr IndexRefId ShortBlade{ sRecordId, 22 };
+        static constexpr IndexRefId Marksman{ sRecordId, 23 };
+        static constexpr IndexRefId Mercantile{ sRecordId, 24 };
+        static constexpr IndexRefId Speechcraft{ sRecordId, 25 };
+        static constexpr IndexRefId HandToHand{ sRecordId, 26 };
+        static constexpr int Length = 27;
         static const std::string sSkillNames[Length];
 
-        static SkillEnum stringToSkillId(std::string_view skill);
+        static int stringToSkillId(std::string_view skill);
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

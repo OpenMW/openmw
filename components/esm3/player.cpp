@@ -73,7 +73,8 @@ namespace ESM
                     mSaveSkills[i] = skill.mBase + skill.mMod - skill.mDamage;
                     if (mObject.mNpcStats.mIsWerewolf)
                     {
-                        if (i == Skill::Acrobatics)
+                        constexpr int Acrobatics = 20;
+                        if (i == Acrobatics)
                             mSetWerewolfAcrobatics = mObject.mNpcStats.mSkills[i].mBase != skill.mBase;
                         mObject.mNpcStats.mSkills[i] = skill;
                     }
