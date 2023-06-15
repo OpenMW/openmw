@@ -53,13 +53,14 @@ namespace ESM
 
         bool hasIndex = false;
         bool hasData = false;
+        int index = -1;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
                 case fourCC("INDX"):
-                    esm.getHT(mIndex);
+                    esm.getHT(index);
                     hasIndex = true;
                     break;
                 case fourCC("SKDT"):
@@ -75,19 +76,19 @@ namespace ESM
         }
         if (!hasIndex)
             esm.fail("Missing INDX");
-        else if (mIndex < 0 || mIndex >= Length)
+        else if (index < 0 || index >= Length)
             esm.fail("Invalid INDX");
         if (!hasData)
             esm.fail("Missing SKDT");
 
         // create an ID from the index and the name (only used in the editor and likely to change in the
         // future)
-        mId = indexToRefId(mIndex);
+        mId = indexToRefId(index);
     }
 
     void Skill::save(ESMWriter& esm, bool /*isDeleted*/) const
     {
-        esm.writeHNT("INDX", mIndex);
+        esm.writeHNT("INDX", refIdToIndex(mId));
         esm.writeHNT("SKDT", mData, 24);
         esm.writeHNOString("DESC", mDescription);
     }
@@ -106,6 +107,16 @@ namespace ESM
         if (index < 0 || index >= Length)
             return RefId();
         return RefId::index(sRecordId, static_cast<std::uint32_t>(index));
+    }
+
+    int Skill::refIdToIndex(RefId id)
+    {
+        if (const IndexRefId* index = id.getIf<IndexRefId>())
+        {
+            if (index->getRecordType() == sRecordId)
+                return index->getValue();
+        }
+        return -1;
     }
 
     const std::array<RefId, MagicSchool::Length> sMagicSchools = {

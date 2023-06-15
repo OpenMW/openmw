@@ -962,12 +962,14 @@ namespace MWWorld
         };
         for (ESM::Skill* skill : mShared)
         {
-            if (skill->mIndex >= 0)
+            int index = ESM::Skill::refIdToIndex(skill->mId);
+            if (index >= 0)
             {
-                skill->mName = getGMSTString(settings, skillValues[skill->mIndex][0]);
-                skill->mIcon = skillValues[skill->mIndex][1];
-                skill->mWerewolfValue = getGMSTFloat(settings, skillValues[skill->mIndex][2]);
-                const auto& school = skillValues[skill->mIndex][3];
+                const auto& values = skillValues[index];
+                skill->mName = getGMSTString(settings, values[0]);
+                skill->mIcon = values[1];
+                skill->mWerewolfValue = getGMSTFloat(settings, values[2]);
+                const auto& school = values[3];
                 if (!school.empty())
                 {
                     if (!skill->mSchool)

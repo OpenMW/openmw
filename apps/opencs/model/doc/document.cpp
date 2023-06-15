@@ -201,11 +201,10 @@ void CSMDoc::Document::createBase()
 
     addGmsts();
 
-    for (int i = 0; i < 27; ++i)
+    for (int i = 0; i < ESM::Skill::Length; ++i)
     {
         ESM::Skill record;
-        record.mIndex = i;
-        record.mId = ESM::Skill::indexToRefId(record.mIndex);
+        record.mId = ESM::Skill::indexToRefId(i);
         record.blank();
 
         getData().getSkills().add(record);

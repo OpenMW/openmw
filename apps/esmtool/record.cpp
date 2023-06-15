@@ -1264,7 +1264,8 @@ namespace EsmTool
     template <>
     void Record<ESM::Skill>::print()
     {
-        std::cout << "  ID: " << skillLabel(mData.mIndex) << " (" << mData.mIndex << ")" << std::endl;
+        int index = ESM::Skill::refIdToIndex(mData.mId);
+        std::cout << "  ID: " << skillLabel(index) << " (" << index << ")" << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
         std::cout << "  Governing Attribute: " << attributeLabel(mData.mData.mAttribute) << " ("
                   << mData.mData.mAttribute << ")" << std::endl;

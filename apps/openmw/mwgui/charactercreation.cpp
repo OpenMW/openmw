@@ -471,8 +471,8 @@ namespace MWGui
             assert(minorSkills.size() >= klass.mData.mSkills.size());
             for (size_t i = 0; i < klass.mData.mSkills.size(); ++i)
             {
-                klass.mData.mSkills[i][1] = majorSkills[i].getIf<ESM::IndexRefId>()->getValue();
-                klass.mData.mSkills[i][0] = minorSkills[i].getIf<ESM::IndexRefId>()->getValue();
+                klass.mData.mSkills[i][1] = ESM::Skill::refIdToIndex(majorSkills[i]);
+                klass.mData.mSkills[i][0] = ESM::Skill::refIdToIndex(minorSkills[i]);
             }
 
             MWBase::Environment::get().getMechanicsManager()->setPlayerClass(klass);

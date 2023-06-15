@@ -155,15 +155,15 @@ float MWMechanics::NpcStats::getSkillProgressRequirement(ESM::RefId id, const ES
     const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(id);
 
     float typeFactor = gmst.find("fMiscSkillBonus")->mValue.getFloat();
-
+    int index = ESM::Skill::refIdToIndex(skill->mId);
     for (const auto& skills : class_.mData.mSkills)
     {
-        if (skills[0] == skill->mIndex)
+        if (skills[0] == index)
         {
             typeFactor = gmst.find("fMinorSkillBonus")->mValue.getFloat();
             break;
         }
-        else if (skills[1] == skill->mIndex)
+        else if (skills[1] == index)
         {
             typeFactor = gmst.find("fMajorSkillBonus")->mValue.getFloat();
             break;
@@ -228,15 +228,16 @@ void MWMechanics::NpcStats::increaseSkill(ESM::RefId id, const ESM::Class& class
 
     // is this a minor or major skill?
     int increase = gmst.find("iLevelupMiscMultAttriubte")->mValue.getInteger(); // Note: GMST has a typo
+    int index = ESM::Skill::refIdToIndex(skill->mId);
     for (const auto& skills : class_.mData.mSkills)
     {
-        if (skills[0] == skill->mIndex)
+        if (skills[0] == index)
         {
             mLevelProgress += gmst.find("iLevelUpMinorMult")->mValue.getInteger();
             increase = gmst.find("iLevelUpMinorMultAttribute")->mValue.getInteger();
             break;
         }
-        else if (skills[1] == skill->mIndex)
+        else if (skills[1] == index)
         {
             mLevelProgress += gmst.find("iLevelUpMajorMult")->mValue.getInteger();
             increase = gmst.find("iLevelUpMajorMultAttribute")->mValue.getInteger();
@@ -463,7 +464,7 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
     for (const auto& [id, value] : mSkills)
     {
         // TODO extend format
-        auto index = id.getIf<ESM::IndexRefId>()->getValue();
+        auto index = ESM::Skill::refIdToIndex(id);
         value.writeState(state.mSkills[index]);
     }
 

@@ -55,11 +55,6 @@ namespace ESM
         }; // Total size: 24 bytes
         SKDTstruct mData;
 
-        // Skill index. Skils don't have an id ("NAME") like most records,
-        // they only have a numerical index that matches one of the
-        // hard-coded skills in the game.
-        int mIndex{ -1 };
-
         std::string mDescription;
         std::string mName;
         std::string mIcon;
@@ -105,6 +100,7 @@ namespace ESM
         ///< Set record to default state (does not touch the ID/index).
 
         static RefId indexToRefId(int index);
+        static int refIdToIndex(RefId id);
     };
 }
 #endif
