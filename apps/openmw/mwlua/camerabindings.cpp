@@ -106,6 +106,23 @@ namespace MWLua
             return invertedViewMatrix.preMult(osg::Vec3f(x, y, -1)) - camera->getPosition();
         };
 
+        api["worldToViewportVector"] = [camera](osg::Vec3f pos) {
+            double width = Settings::Manager::getInt("resolution x", "Video");
+            double height = Settings::Manager::getInt("resolution y", "Video");
+
+            osg::Matrix windowMatrix
+                = osg::Matrix::translate(1.0, 1.0, 1.0) * osg::Matrix::scale(0.5 * width, 0.5 * height, 0.5);
+            osg::Vec3f vpCoords = pos * (camera->getViewMatrix() * camera->getProjectionMatrix() * windowMatrix);
+
+            // Move 0,0 to top left to match viewportToWorldVector
+            vpCoords.y() = height - vpCoords.y();
+
+            // Set the z component to be distance from camera, in world space units
+            vpCoords.z() = (pos - camera->getPosition()).length();
+
+            return vpCoords;
+        };
+
         return LuaUtil::makeReadOnly(api);
     }
 

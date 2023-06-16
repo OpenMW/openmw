@@ -224,5 +224,11 @@
 -- @param openmw.util#Vector2 normalizedScreenPos
 -- @return openmw.util#Vector3
 
+--- Get vector from the world to the viewport for the given point in world space.
+-- (0, 0) is the top left corner of the screen.
+-- The z component of the return value holds the distance from the camera to the position, in world space
+-- @function [parent=#camera] worldToViewportVector
+-- @param openmw.util#Vector3 worldPos
+-- @return openmw.util#Vector3
 
 return nil
