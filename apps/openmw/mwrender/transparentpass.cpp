@@ -25,6 +25,8 @@ namespace MWRender
             image->setColor(osg::Vec4(1,1,1,1), 0, 0);
 
             osg::ref_ptr<osg::Texture2D> dummyTexture = new osg::Texture2D(image);
+            dummyTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            dummyTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
             constexpr osg::StateAttribute::OverrideValue modeOff = osg::StateAttribute::OFF | osg::StateAttribute::OVERRIDE;
             constexpr osg::StateAttribute::OverrideValue modeOn = osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE;

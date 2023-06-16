@@ -187,6 +187,8 @@ public:
         mDummyTexture = new osg::Texture2D;
         mDummyTexture->setInternalFormat(GL_RGB);
         mDummyTexture->setTextureSize(1,1);
+        mDummyTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        mDummyTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
         // need to flip tex coords since MyGUI uses DirectX convention of top left image origin
         osg::Matrix flipMat;

@@ -318,6 +318,8 @@ namespace MWRender
         texture->setResizeNonPowerOfTwoHint(false);
         texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
         texture->setFilter(osg::Texture::MAG_FILTER, osg::Texture::LINEAR);
+        texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
         camera->attach(osg::Camera::COLOR_BUFFER,texture);
 
         image->setDataType(GL_UNSIGNED_BYTE);
