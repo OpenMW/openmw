@@ -101,9 +101,6 @@ namespace
             }))
             , mImageManager(mVFS.get())
         {
-            Settings::Manager::setBool("radial fog", "Fog", true);
-            Settings::Manager::setBool("exponential fog", "Fog", false);
-            Settings::Manager::setBool("stereo enabled", "Stereo", false);
         }
 
         void compile(const std::string& name)

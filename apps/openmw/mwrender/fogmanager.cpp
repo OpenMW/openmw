@@ -7,19 +7,9 @@
 #include <components/esm4/loadcell.hpp>
 #include <components/fallback/fallback.hpp>
 #include <components/sceneutil/util.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <apps/openmw/mwworld/cell.hpp>
-
-namespace
-{
-    float DLLandFogStart;
-    float DLLandFogEnd;
-    float DLUnderwaterFogStart;
-    float DLUnderwaterFogEnd;
-    float DLInteriorFogStart;
-    float DLInteriorFogEnd;
-}
 
 namespace MWRender
 {
@@ -29,17 +19,10 @@ namespace MWRender
         , mUnderwaterFogStart(0.f)
         , mUnderwaterFogEnd(std::numeric_limits<float>::max())
         , mFogColor(osg::Vec4f())
-        , mDistantFog(Settings::Manager::getBool("use distant fog", "Fog"))
         , mUnderwaterColor(Fallback::Map::getColour("Water_UnderwaterColor"))
         , mUnderwaterWeight(Fallback::Map::getFloat("Water_UnderwaterColorWeight"))
         , mUnderwaterIndoorFog(Fallback::Map::getFloat("Water_UnderwaterIndoorFog"))
     {
-        DLLandFogStart = Settings::Manager::getFloat("distant land fog start", "Fog");
-        DLLandFogEnd = Settings::Manager::getFloat("distant land fog end", "Fog");
-        DLUnderwaterFogStart = Settings::Manager::getFloat("distant underwater fog start", "Fog");
-        DLUnderwaterFogEnd = Settings::Manager::getFloat("distant underwater fog end", "Fog");
-        DLInteriorFogStart = Settings::Manager::getFloat("distant interior fog start", "Fog");
-        DLInteriorFogEnd = Settings::Manager::getFloat("distant interior fog end", "Fog");
     }
 
     void FogManager::configure(float viewDistance, const MWWorld::Cell& cell)
@@ -47,13 +30,14 @@ namespace MWRender
         osg::Vec4f color = SceneUtil::colourFromRGB(cell.getMood().mFogColor);
 
         const float fogDensity = cell.getMood().mFogDensity;
-        if (mDistantFog)
+        if (Settings::fog().mUseDistantFog)
         {
             float density = std::max(0.2f, fogDensity);
-            mLandFogStart = DLInteriorFogEnd * (1.0f - density) + DLInteriorFogStart * density;
-            mLandFogEnd = DLInteriorFogEnd;
-            mUnderwaterFogStart = DLUnderwaterFogStart;
-            mUnderwaterFogEnd = DLUnderwaterFogEnd;
+            mLandFogStart = Settings::fog().mDistantInteriorFogEnd * (1.0f - density)
+                + Settings::fog().mDistantInteriorFogStart * density;
+            mLandFogEnd = Settings::fog().mDistantInteriorFogEnd;
+            mUnderwaterFogStart = Settings::fog().mDistantUnderwaterFogStart;
+            mUnderwaterFogEnd = Settings::fog().mDistantUnderwaterFogEnd;
             mFogColor = color;
         }
         else
@@ -63,12 +47,13 @@ namespace MWRender
     void FogManager::configure(float viewDistance, float fogDepth, float underwaterFog, float dlFactor, float dlOffset,
         const osg::Vec4f& color)
     {
-        if (mDistantFog)
+        if (Settings::fog().mUseDistantFog)
         {
-            mLandFogStart = dlFactor * (DLLandFogStart - dlOffset * DLLandFogEnd);
-            mLandFogEnd = dlFactor * (1.0f - dlOffset) * DLLandFogEnd;
-            mUnderwaterFogStart = DLUnderwaterFogStart;
-            mUnderwaterFogEnd = DLUnderwaterFogEnd;
+            mLandFogStart
+                = dlFactor * (Settings::fog().mDistantLandFogStart - dlOffset * Settings::fog().mDistantLandFogEnd);
+            mLandFogEnd = dlFactor * (1.0f - dlOffset) * Settings::fog().mDistantLandFogEnd;
+            mUnderwaterFogStart = Settings::fog().mDistantUnderwaterFogStart;
+            mUnderwaterFogEnd = Settings::fog().mDistantUnderwaterFogEnd;
         }
         else
         {

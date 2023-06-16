@@ -159,7 +159,7 @@ namespace MWRender
             : mNear(0.f)
             , mFar(0.f)
             , mWindSpeed(0.f)
-            , mSkyBlendingStartCoef(Settings::Manager::getFloat("sky blending start", "Fog"))
+            , mSkyBlendingStartCoef(Settings::fog().mSkyBlendingStart)
         {
         }
 
@@ -306,7 +306,7 @@ namespace MWRender
         Resource::ResourceSystem* resourceSystem, SceneUtil::WorkQueue* workQueue,
         DetourNavigator::Navigator& navigator, const MWWorld::GroundcoverStore& groundcoverStore,
         SceneUtil::UnrefQueue& unrefQueue)
-        : mSkyBlending(Settings::Manager::getBool("sky blending", "Fog"))
+        : mSkyBlending(Settings::fog().mSkyBlending)
         , mViewer(viewer)
         , mRootNode(rootNode)
         , mResourceSystem(resourceSystem)
@@ -330,8 +330,7 @@ namespace MWRender
 
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         // Shadows and radial fog have problems with fixed-function mode.
-        bool forceShaders = Settings::Manager::getBool("radial fog", "Fog")
-            || Settings::Manager::getBool("exponential fog", "Fog")
+        bool forceShaders = Settings::fog().mRadialFog || Settings::fog().mExponentialFog
             || Settings::Manager::getBool("soft particles", "Shaders")
             || Settings::Manager::getBool("force shaders", "Shaders")
             || Settings::Manager::getBool("enable shadows", "Shadows")
@@ -401,8 +400,8 @@ namespace MWRender
         globalDefines["clamp"] = Settings::Manager::getBool("clamp lighting", "Shaders") ? "1" : "0";
         globalDefines["preLightEnv"]
             = Settings::Manager::getBool("apply lighting to environment maps", "Shaders") ? "1" : "0";
-        bool exponentialFog = Settings::Manager::getBool("exponential fog", "Fog");
-        globalDefines["radialFog"] = (exponentialFog || Settings::Manager::getBool("radial fog", "Fog")) ? "1" : "0";
+        const bool exponentialFog = Settings::fog().mExponentialFog;
+        globalDefines["radialFog"] = (exponentialFog || Settings::fog().mRadialFog) ? "1" : "0";
         globalDefines["exponentialFog"] = exponentialFog ? "1" : "0";
         globalDefines["skyBlending"] = mSkyBlending ? "1" : "0";
         globalDefines["refraction_enabled"] = "0";

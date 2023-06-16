@@ -29,8 +29,6 @@ namespace MWRender
         float mUnderwaterFogStart;
         float mUnderwaterFogEnd;
         osg::Vec4f mFogColor;
-        bool mDistantFog;
-
         osg::Vec4f mUnderwaterColor;
         float mUnderwaterWeight;
         float mUnderwaterIndoorFog;
