@@ -16,8 +16,6 @@
 #include <functional>
 #include <vector>
 
-class dtNavMesh;
-
 namespace DetourNavigator
 {
     struct Settings;
@@ -136,9 +134,9 @@ namespace DetourNavigator
     }
 
     template <class OutputIterator>
-    Status makeSmoothPath(const dtNavMesh& navMesh, const dtNavMeshQuery& navMeshQuery, const dtQueryFilter& filter,
-        const osg::Vec3f& start, const osg::Vec3f& end, const float stepSize, std::vector<dtPolyRef>& polygonPath,
-        std::size_t polygonPathSize, std::size_t maxSmoothPathSize, OutputIterator& out)
+    Status makeSmoothPath(const dtNavMeshQuery& navMeshQuery, const dtQueryFilter& filter, const osg::Vec3f& start,
+        const osg::Vec3f& end, const float stepSize, std::vector<dtPolyRef>& polygonPath, std::size_t polygonPathSize,
+        std::size_t maxSmoothPathSize, OutputIterator& out)
     {
         // Iterate over the path to find smooth path on the detail mesh surface.
         osg::Vec3f iterPos;
@@ -220,8 +218,8 @@ namespace DetourNavigator
                 osg::Vec3f endPos;
 
                 // Handle the connection.
-                if (dtStatusSucceed(
-                        navMesh.getOffMeshConnectionPolyEndPoints(prevRef, polyRef, startPos.ptr(), endPos.ptr())))
+                if (dtStatusSucceed(navMeshQuery.getAttachedNavMesh()->getOffMeshConnectionPolyEndPoints(
+                        prevRef, polyRef, startPos.ptr(), endPos.ptr())))
                 {
                     *out++ = startPos;
                     ++smoothPathSize;
@@ -251,9 +249,9 @@ namespace DetourNavigator
     }
 
     template <class OutputIterator>
-    Status findSmoothPath(const dtNavMesh& navMesh, const dtNavMeshQuery& navMeshQuery, const osg::Vec3f& halfExtents,
-        const float stepSize, const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags,
-        const AreaCosts& areaCosts, const DetourSettings& settings, float endTolerance, OutputIterator out)
+    Status findSmoothPath(const dtNavMeshQuery& navMeshQuery, const osg::Vec3f& halfExtents, const float stepSize,
+        const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags, const AreaCosts& areaCosts,
+        const DetourSettings& settings, float endTolerance, OutputIterator out)
     {
         dtQueryFilter queryFilter;
         queryFilter.setIncludeFlags(includeFlags);
@@ -285,8 +283,8 @@ namespace DetourNavigator
             return Status::Success;
 
         const bool partialPath = polygonPath[*polygonPathSize - 1] != endRef;
-        const Status smoothStatus = makeSmoothPath(navMesh, navMeshQuery, queryFilter, start, end, stepSize,
-            polygonPath, *polygonPathSize, settings.mMaxSmoothPathSize, out);
+        const Status smoothStatus = makeSmoothPath(navMeshQuery, queryFilter, start, end, stepSize, polygonPath,
+            *polygonPathSize, settings.mMaxSmoothPathSize, out);
 
         if (smoothStatus != Status::Success)
             return smoothStatus;
