@@ -44,7 +44,7 @@ void CSVPrefs::Dialogue::buildCategorySelector(QSplitter* main)
         list->addItem(label);
     }
 
-    list->setMaximumWidth(maxWidth + 10);
+    list->setMaximumWidth(maxWidth + 50);
 
     connect(list, &ContextMenuList::currentItemChanged, this, &Dialogue::selectionChanged);
 }
@@ -73,6 +73,8 @@ CSVPrefs::Dialogue::Dialogue()
     setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
 
     setMinimumSize(600, 400);
+
+    resize(810, 680);
 
     QSplitter* main = new QSplitter(this);
 
