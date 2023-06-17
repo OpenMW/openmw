@@ -27,6 +27,10 @@
 -- @field [parent=#nearby] openmw.core#ObjectList items
 
 ---
+-- List of nearby players. Currently (since multiplayer is not yet implemented) always has one element.
+-- @field [parent=#nearby] openmw.core#ObjectList players
+
+---
 -- Return an object by RefNum/FormId.
 -- Note: the function always returns @{openmw.core#GameObject} and doesn't validate that
 -- the object exists in the game world. If it doesn't exist or not yet loaded to memory),

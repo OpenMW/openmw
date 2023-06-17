@@ -136,6 +136,7 @@ namespace MWLua
         api["containers"] = LObjectList{ worldView->getContainersInScene() };
         api["doors"] = LObjectList{ worldView->getDoorsInScene() };
         api["items"] = LObjectList{ worldView->getItemsInScene() };
+        api["players"] = LObjectList{ worldView->getPlayers() };
 
         api["NAVIGATOR_FLAGS"]
             = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, DetourNavigator::Flag>({

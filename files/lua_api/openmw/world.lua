@@ -11,6 +11,10 @@
 -- @field [parent=#world] openmw.core#ObjectList activeActors
 
 ---
+-- List of players. Currently (since multiplayer is not yet implemented) always has one element.
+-- @field [parent=#world] openmw.core#ObjectList players
+
+---
 -- Loads a named cell
 -- @function [parent=#world] getCellByName
 -- @param #string cellName
