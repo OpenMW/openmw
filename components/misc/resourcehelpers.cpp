@@ -150,6 +150,17 @@ std::string Misc::ResourceHelpers::correctMeshPath(const std::string& resPath, c
     return "meshes\\" + resPath;
 }
 
+std::string_view Misc::ResourceHelpers::meshPathForESM3(std::string_view resPath)
+{
+    constexpr std::string_view prefix = "meshes";
+    if (resPath.length() < prefix.size() + 1 || !Misc::StringUtils::ciStartsWith(resPath, prefix)
+        || (resPath[prefix.size()] != '/' && resPath[prefix.size()] != '\\'))
+    {
+        throw std::runtime_error("Path should start with 'meshes\\'");
+    }
+    return resPath.substr(prefix.size() + 1);
+}
+
 std::string Misc::ResourceHelpers::correctSoundPath(std::string_view resPath, const VFS::Manager* vfs)
 {
     // Workaround: Bethesda at some point converted some of the files to mp3, but the references were kept as .wav.

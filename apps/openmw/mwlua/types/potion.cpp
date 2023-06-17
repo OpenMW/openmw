@@ -24,7 +24,7 @@ namespace
     {
         ESM::Potion potion;
         potion.mName = rec["name"];
-        potion.mModel = rec["model"];
+        potion.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
         potion.mIcon = rec["icon"];
         std::string_view scriptId = rec["mwscript"].get<std::string_view>();
         potion.mScript = ESM::RefId::deserializeText(scriptId);

@@ -28,7 +28,7 @@ namespace
     {
         ESM::Book book;
         book.mName = rec["name"];
-        book.mModel = rec["model"];
+        book.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
         book.mIcon = rec["icon"];
         book.mText = rec["text"];
         std::string_view enchantId = rec["enchant"].get<std::string_view>();
