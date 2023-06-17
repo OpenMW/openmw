@@ -171,7 +171,7 @@ namespace MWMechanics
             if (actor.getClass().isNpc() && !store.isEquipped(ptr))
                 return 0.f;
 
-            int castCost = getEffectiveEnchantmentCastCost(static_cast<float>(enchantment->mData.mCost), actor);
+            int castCost = getEffectiveEnchantmentCastCost(*enchantment, actor);
 
             if (ptr.getCellRef().getEnchantmentCharge() != -1 && ptr.getCellRef().getEnchantmentCharge() < castCost)
                 return 0.f;

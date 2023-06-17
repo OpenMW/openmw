@@ -15,6 +15,7 @@
 
 #include "actorutil.hpp"
 #include "creaturestats.hpp"
+#include "spellutil.hpp"
 
 namespace MWMechanics
 {
@@ -68,8 +69,9 @@ namespace MWMechanics
             const ESM::Enchantment* enchantment
                 = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().find(
                     item.getClass().getEnchantment(item));
-            item.getCellRef().setEnchantmentCharge(std::min(
-                item.getCellRef().getEnchantmentCharge() + restored, static_cast<float>(enchantment->mData.mCharge)));
+            const int maxCharge = MWMechanics::getEnchantmentCharge(*enchantment);
+            item.getCellRef().setEnchantmentCharge(
+                std::min(item.getCellRef().getEnchantmentCharge() + restored, static_cast<float>(maxCharge)));
 
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Enchant Success"));
 

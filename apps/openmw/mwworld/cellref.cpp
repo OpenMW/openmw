@@ -10,6 +10,7 @@
 
 #include <apps/openmw/mwbase/environment.hpp>
 #include <apps/openmw/mwbase/world.hpp>
+#include <apps/openmw/mwmechanics/spellutil.hpp>
 #include <apps/openmw/mwworld/esmstore.hpp>
 
 namespace MWWorld
@@ -129,8 +130,9 @@ namespace MWWorld
             mCellRef.mVariant);
     }
 
-    float CellRef::getNormalizedEnchantmentCharge(int maxCharge) const
+    float CellRef::getNormalizedEnchantmentCharge(const ESM::Enchantment& enchantment) const
     {
+        const int maxCharge = MWMechanics::getEnchantmentCharge(enchantment);
         if (maxCharge == 0)
         {
             return 0;

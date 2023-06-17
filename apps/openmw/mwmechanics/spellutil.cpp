@@ -2,6 +2,7 @@
 
 #include <limits>
 
+#include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -15,6 +16,27 @@
 
 namespace MWMechanics
 {
+    namespace
+    {
+        float getTotalCost(const ESM::EffectList& list, const EffectCostMethod method = EffectCostMethod::GameSpell)
+        {
+            float cost = 0;
+
+            for (const ESM::ENAMstruct& effect : list.mList)
+            {
+                float effectCost = std::max(0.f, MWMechanics::calcEffectCost(effect, nullptr, method));
+
+                // This is applied to the whole spell cost for each effect when
+                // creating spells, but is only applied on the effect itself in TES:CS.
+                if (effect.mRange == ESM::RT_Target)
+                    effectCost *= 1.5;
+
+                cost += effectCost;
+            }
+            return cost;
+        }
+    }
+
     ESM::RefId spellSchoolToSkill(int school)
     {
         static const std::array<ESM::RefId, 6> schoolSkillArray{
@@ -39,6 +61,11 @@ namespace MWMechanics
         bool appliedOnce = magicEffect->mData.mFlags & ESM::MagicEffect::AppliedOnce;
         int minMagn = hasMagnitude ? effect.mMagnMin : 1;
         int maxMagn = hasMagnitude ? effect.mMagnMax : 1;
+        if (method != EffectCostMethod::GameEnchantment)
+        {
+            minMagn = std::max(1, minMagn);
+            maxMagn = std::max(1, maxMagn);
+        }
         int duration = hasDuration ? effect.mDuration : 1;
         if (!appliedOnce)
             duration = std::max(1, duration);
@@ -52,7 +79,7 @@ namespace MWMechanics
             minArea = 1;
         }
 
-        float x = 0.5 * (std::max(1, minMagn) + std::max(1, maxMagn));
+        float x = 0.5 * (minMagn + maxMagn);
         x *= 0.1 * magicEffect->mData.mBaseCost;
         x *= durationOffset + duration;
         x += 0.05 * std::max(minArea, effect.mArea) * magicEffect->mData.mBaseCost;
@@ -65,19 +92,7 @@ namespace MWMechanics
         if (!(spell.mData.mFlags & ESM::Spell::F_Autocalc))
             return spell.mData.mCost;
 
-        float cost = 0;
-
-        for (const ESM::ENAMstruct& effect : spell.mEffects.mList)
-        {
-            float effectCost = std::max(0.f, MWMechanics::calcEffectCost(effect));
-
-            // This is applied to the whole spell cost for each effect when
-            // creating spells, but is only applied on the effect itself in TES:CS.
-            if (effect.mRange == ESM::RT_Target)
-                effectCost *= 1.5;
-
-            cost += effectCost;
-        }
+        float cost = getTotalCost(spell.mEffects);
 
         return std::round(cost);
     }
@@ -92,6 +107,50 @@ namespace MWMechanics
         const float result = castCost - (castCost / 100) * (eSkill - 10);
 
         return static_cast<int>((result < 1) ? 1 : result);
+    }
+
+    int getEffectiveEnchantmentCastCost(const ESM::Enchantment& enchantment, const MWWorld::Ptr& actor)
+    {
+        float castCost;
+        if (enchantment.mData.mFlags & ESM::Enchantment::Autocalc)
+            castCost = getTotalCost(enchantment.mEffects, EffectCostMethod::GameEnchantment);
+        else
+            castCost = static_cast<float>(enchantment.mData.mCost);
+        return getEffectiveEnchantmentCastCost(castCost, actor);
+    }
+
+    int getEnchantmentCharge(const ESM::Enchantment& enchantment)
+    {
+        if (enchantment.mData.mFlags & ESM::Enchantment::Autocalc)
+        {
+            int charge
+                = static_cast<int>(std::round(getTotalCost(enchantment.mEffects, EffectCostMethod::GameEnchantment)));
+            const auto& store = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
+            switch (enchantment.mData.mType)
+            {
+                case ESM::Enchantment::CastOnce:
+                {
+                    static const int iMagicItemChargeOnce = store.find("iMagicItemChargeOnce")->mValue.getInteger();
+                    return charge * iMagicItemChargeOnce;
+                }
+                case ESM::Enchantment::WhenStrikes:
+                {
+                    static const int iMagicItemChargeStrike = store.find("iMagicItemChargeStrike")->mValue.getInteger();
+                    return charge * iMagicItemChargeStrike;
+                }
+                case ESM::Enchantment::WhenUsed:
+                {
+                    static const int iMagicItemChargeUse = store.find("iMagicItemChargeUse")->mValue.getInteger();
+                    return charge * iMagicItemChargeUse;
+                }
+                case ESM::Enchantment::ConstantEffect:
+                {
+                    static const int iMagicItemChargeConst = store.find("iMagicItemChargeConst")->mValue.getInteger();
+                    return charge * iMagicItemChargeConst;
+                }
+            }
+        }
+        return enchantment.mData.mCharge;
     }
 
     float calcSpellBaseSuccessChance(const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool)

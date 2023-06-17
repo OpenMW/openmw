@@ -6,6 +6,7 @@
 namespace ESM
 {
     struct ENAMstruct;
+    struct Enchantment;
     struct MagicEffect;
     struct Spell;
 }
@@ -23,6 +24,7 @@ namespace MWMechanics
     {
         GameSpell,
         PlayerSpell,
+        GameEnchantment,
     };
 
     float calcEffectCost(const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect = nullptr,
@@ -30,6 +32,8 @@ namespace MWMechanics
     int calcSpellCost(const ESM::Spell& spell);
 
     int getEffectiveEnchantmentCastCost(float castCost, const MWWorld::Ptr& actor);
+    int getEffectiveEnchantmentCastCost(const ESM::Enchantment& enchantment, const MWWorld::Ptr& actor);
+    int getEnchantmentCharge(const ESM::Enchantment& enchantment);
 
     /**
      * @param spell spell to cast
