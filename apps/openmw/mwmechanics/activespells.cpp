@@ -521,9 +521,15 @@ namespace MWMechanics
         purge([=](const ActiveSpellParams& params) { return params.mId == id; }, ptr);
     }
 
-    void ActiveSpells::purgeEffect(const MWWorld::Ptr& ptr, short effectId)
+    void ActiveSpells::purgeEffect(const MWWorld::Ptr& ptr, int effectId, int effectArg)
     {
-        purge([=](const ActiveSpellParams&, const ESM::ActiveEffect& effect) { return effect.mEffectId == effectId; },
+        purge(
+            [=](const ActiveSpellParams&, const ESM::ActiveEffect& effect) {
+                if (effectArg < 0)
+                    return effect.mEffectId == effectId;
+                else
+                    return effect.mEffectId == effectId && effect.mArg == effectArg;
+            },
             ptr);
     }
 

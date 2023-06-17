@@ -192,9 +192,34 @@
 -- Get a specific active effect on the actor.
 -- @function [parent=#ActorActiveEffects] getEffect
 -- @param self
--- @param string effect ID
--- @param string Optional skill or attribute ID
+-- @param #string effectId effect ID
+-- @param #string extraParam Optional skill or attribute ID
 -- @return #ActiveEffect if such an effect is active, nil otherwise
+
+---
+-- Completely removes the active effect from the actor.
+-- This removes both the effects incurred by active spells and effect added by console, mwscript, or luascript.
+-- @function [parent=#ActorActiveEffects] remove
+-- @param self
+-- @param #string effectId effect ID
+-- @param #string extraParam Optional skill or attribute ID
+
+---
+-- Permanently modifies the magnitude of an active effect to be exactly equal to the provided value. This adds the effect to the list of active effects if not already active.
+-- Note that although the modification is permanent, the magnitude will not stay equal to the value if any active spells with this effects are added/removed.
+-- @function [parent=#ActorActiveEffects] set
+-- @param self
+-- @param #number value
+-- @param #string effectId effect ID
+-- @param #string extraParam Optional skill or attribute ID
+
+---
+-- Permanently modifies the magnitude of an active effect by increasing it by the provided value. This adds the effect to the list of active effects if not already active.
+-- @function [parent=#ActorActiveEffects] modify
+-- @param self
+-- @param #number value
+-- @param #string effectId effect ID
+-- @param #string extraParam Optional skill or attribute ID
 
 ---
 -- Return the active spells (@{#ActorActiveSpells}) currently affecting the given actor.
@@ -221,6 +246,12 @@
 -- @param self
 -- @param #any spellOrId @{openmw.core#Spell} or string spell id
 -- @return true if spell is active, false otherwise
+
+---
+-- Remove the given spell and all its effects from the given actor's active spells.
+-- @function [parent=#ActorActiveSpells] remove
+-- @param self
+-- @param #any spellOrId @{openmw.core#Spell} or string spell id
 
 ---
 -- Return the spells (@{#ActorSpells}) of the given actor.

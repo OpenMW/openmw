@@ -9,6 +9,7 @@
 #include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwmechanics/activespells.hpp"
@@ -45,6 +46,8 @@ namespace MWLua
         }
 
         bool isActor() const { return !mActor.ptr().isEmpty() && mActor.ptr().getClass().isActor(); }
+
+        bool isLObject() const { return mActor.isLObject(); }
 
         void reset()
         {
@@ -521,6 +524,18 @@ namespace MWLua
             return false;
         };
 
+        // types.Actor.activeSpells(o):remove(id)
+        activeSpellsT["remove"] = [](const ActorActiveSpells& spells, const sol::object& spellOrId) {
+            if (spells.isLObject())
+                throw std::runtime_error("Local scripts can modify effect only on the actor they are attached to.");
+
+            auto id = toSpellId(spellOrId);
+            if (auto* store = spells.getStore())
+            {
+                store->removeEffects(spells.mActor.ptr(), id);
+            }
+        };
+
         // pairs(types.Actor.activeEffects(o))
         // Note that the indexes are fake, and only for consistency with other lua pairs interfaces. You can't use them
         // for anything.
@@ -544,12 +559,8 @@ namespace MWLua
             });
         };
 
-        // types.Actor.activeEffects(o):getEffect(id, ?arg)
-        activeEffectsT["getEffect"] = [](const ActorActiveEffects& effects, std::string_view idStr,
-                                          sol::optional<std::string_view> argStr) -> sol::optional<ActiveEffect> {
-            if (!effects.isActor())
-                return sol::nullopt;
-
+        auto getEffectKey
+            = [](std::string_view idStr, sol::optional<std::string_view> argStr) -> MWMechanics::EffectKey {
             auto id = ESM::MagicEffect::indexNameToIndex(idStr);
             auto* rec = MWBase::Environment::get().getWorld()->getStore().get<ESM::MagicEffect>().find(id);
 
@@ -566,10 +577,73 @@ namespace MWLua
                     key = MWMechanics::EffectKey(id, ESM::Skill::stringToSkillId(argStr.value()));
             }
 
+            return key;
+        };
+
+        // types.Actor.activeEffects(o):getEffect(id, ?arg)
+        activeEffectsT["getEffect"] = [getEffectKey](const ActorActiveEffects& effects, std::string_view idStr,
+                                          sol::optional<std::string_view> argStr) -> sol::optional<ActiveEffect> {
+            if (!effects.isActor())
+                return sol::nullopt;
+
+            MWMechanics::EffectKey key = getEffectKey(idStr, argStr);
+
             if (auto* store = effects.getStore())
                 if (auto effect = store->get(key))
                     return ActiveEffect{ key, effect.value() };
             return sol::nullopt;
+        };
+
+        // types.Actor.activeEffects(o):removeEffect(id, ?arg)
+        activeEffectsT["remove"] = [getEffectKey](const ActorActiveEffects& effects, std::string_view idStr,
+                                       sol::optional<std::string_view> argStr) {
+            if (!effects.isActor())
+                return;
+
+            if (effects.isLObject())
+                throw std::runtime_error("Local scripts can modify effect only on the actor they are attached to.");
+
+            MWMechanics::EffectKey key = getEffectKey(idStr, argStr);
+
+            // Note that, although this is member method of ActorActiveEffects and we are removing an effect (not a
+            // spell), we still need to use the active spells store to purge this effect from active spells.
+            auto ptr = effects.mActor.ptr();
+
+            // TODO: The current ActiveSpell API does not allow us to differentiate between skill/attribute parameters
+            // of effects. So this cannot remove e.g. "Fortify Luck" without also removing all other fortify attribute
+            // effects such as "Fortify Speed".
+            auto& activeSpells = ptr.getClass().getCreatureStats(ptr).getActiveSpells();
+            activeSpells.purgeEffect(ptr, key.mId, key.mArg);
+
+            // Now remove any leftover effects that have been added by script/console.
+            effects.getStore()->remove(key);
+        };
+
+        // types.Actor.activeEffects(o):set(value, id, ?arg)
+        activeEffectsT["set"] = [getEffectKey](const ActorActiveEffects& effects, int value, std::string_view idStr,
+                                    sol::optional<std::string_view> argStr) {
+            if (!effects.isActor())
+                return;
+
+            if (effects.isLObject())
+                throw std::runtime_error("Local scripts can modify effect only on the actor they are attached to.");
+
+            MWMechanics::EffectKey key = getEffectKey(idStr, argStr);
+            int currentValue = effects.getStore()->getOrDefault(key).getMagnitude();
+            effects.getStore()->modifyBase(key, value - currentValue);
+        };
+
+        // types.Actor.activeEffects(o):modify(value, id, ?arg)
+        activeEffectsT["modify"] = [getEffectKey](const ActorActiveEffects& effects, int value, std::string_view idStr,
+                                       sol::optional<std::string_view> argStr) {
+            if (!effects.isActor())
+                return;
+
+            if (effects.isLObject())
+                throw std::runtime_error("Local scripts can modify effect only on the actor they are attached to.");
+
+            MWMechanics::EffectKey key = getEffectKey(idStr, argStr);
+            effects.getStore()->modifyBase(key, value);
         };
     }
 }
