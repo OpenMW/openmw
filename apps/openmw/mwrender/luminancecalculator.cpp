@@ -44,6 +44,8 @@ namespace MWRender
             buffer.mipmappedSceneLuminanceTex->setInternalFormat(GL_R16F);
             buffer.mipmappedSceneLuminanceTex->setSourceFormat(GL_RED);
             buffer.mipmappedSceneLuminanceTex->setSourceType(GL_FLOAT);
+            buffer.mipmappedSceneLuminanceTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            buffer.mipmappedSceneLuminanceTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
             buffer.mipmappedSceneLuminanceTex->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR_MIPMAP_NEAREST);
             buffer.mipmappedSceneLuminanceTex->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
             buffer.mipmappedSceneLuminanceTex->setTextureSize(mWidth, mHeight);
@@ -53,11 +55,15 @@ namespace MWRender
             buffer.luminanceTex->setInternalFormat(GL_R16F);
             buffer.luminanceTex->setSourceFormat(GL_RED);
             buffer.luminanceTex->setSourceType(GL_FLOAT);
+            buffer.luminanceTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            buffer.luminanceTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
             buffer.luminanceTex->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture2D::NEAREST);
             buffer.luminanceTex->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::NEAREST);
             buffer.luminanceTex->setTextureSize(1, 1);
 
             buffer.luminanceProxyTex = new osg::Texture2D(*buffer.luminanceTex);
+            buffer.luminanceProxyTex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            buffer.luminanceProxyTex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
             buffer.resolveFbo = new osg::FrameBufferObject;
             buffer.resolveFbo->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, osg::FrameBufferAttachment(buffer.luminanceTex));

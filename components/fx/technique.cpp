@@ -273,6 +273,8 @@ namespace fx
         rt.mTarget->setSourceFormat(GL_RGB);
         rt.mTarget->setInternalFormat(GL_RGB);
         rt.mTarget->setSourceType(GL_UNSIGNED_BYTE);
+        rt.mTarget->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        rt.mTarget->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
 
         while (!isNext<Lexer::Close_bracket>() && !isNext<Lexer::Eof>())
         {

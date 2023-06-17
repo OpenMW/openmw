@@ -235,6 +235,8 @@ namespace Stereo
         }
 
         osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D;
+        texture2d->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        texture2d->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
         texture2d->setSubloadCallback(new Texture2DViewSubloadCallback(textureArray, layer));
         texture2d->setTextureSize(textureArray->getTextureWidth(), textureArray->getTextureHeight());
         texture2d->setBorderColor(textureArray->getBorderColor());
@@ -414,12 +416,16 @@ namespace Stereo
                 auto tex = new osg::Texture2DMultisample();
                 tex->setTextureSize(width, height);
                 tex->setNumSamples(samples);
+                tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+                tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
                 return tex;
             }
             else
             {
                 auto tex = new osg::Texture2D();
                 tex->setTextureSize(width, height);
+                tex->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+                tex->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
                 return tex;
             }
         }

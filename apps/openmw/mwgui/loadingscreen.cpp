@@ -289,6 +289,8 @@ namespace MWGui
         if (!mTexture)
         {
             mTexture = new osg::Texture2D;
+            mTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            mTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
             mTexture->setInternalFormat(GL_RGB);
             mTexture->setResizeNonPowerOfTwoHint(false);
         }
