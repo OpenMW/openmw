@@ -20,11 +20,7 @@ local function getRandomOffset()
 end
 
 local function getPlayerLevel()
-    for i, actor in pairs(world.activeActors) do
-        if (types.Player.objectIsInstance(actor)) then
-            return types.Player.stats.level(actor).current
-        end
-    end
+    return types.Player.stats.level(world.players[1]).current
 end
 
 local function spawnFish(cell)
