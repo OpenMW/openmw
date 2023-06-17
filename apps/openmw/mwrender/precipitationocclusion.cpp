@@ -48,6 +48,8 @@ namespace
             : mDummyTexture(new osg::Texture2D)
         {
             mDummyTexture->setInternalFormat(GL_RGB);
+            mDummyTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            mDummyTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
             mDummyTexture->setTextureSize(1, 1);
 
             Shader::ShaderManager& shaderMgr

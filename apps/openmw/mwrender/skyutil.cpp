@@ -482,6 +482,8 @@ namespace MWRender
         , mTexture(new osg::Texture2D(imageManager->getWarningImage()))
         , mForceShaders(forceShaders)
     {
+        mTexture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+        mTexture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
     }
 
     void AtmosphereNightUpdater::setFade(float fade)
