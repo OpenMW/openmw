@@ -20,6 +20,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
+#include "../mwmechanics/magicschool.hpp"
 #include "../mwmechanics/spellutil.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -31,9 +32,6 @@
 
 namespace MWGui
 {
-    std::string ToolTips::sSchoolNames[] = { "#{sSchoolAlteration}", "#{sSchoolConjuration}", "#{sSchoolDestruction}",
-        "#{sSchoolIllusion}", "#{sSchoolMysticism}", "#{sSchoolRestoration}" };
-
     ToolTips::ToolTips()
         : Layout("openmw_tooltips.layout")
         , mFocusToolTipX(0.0)
@@ -250,8 +248,8 @@ namespace MWGui
                             spell)) // display school of spells that contribute to skill progress
                     {
                         MWWorld::Ptr player = MWMechanics::getPlayer();
-                        int school = MWMechanics::getSpellSchool(spell, player);
-                        info.text = "#{sSchool}: " + sSchoolNames[school];
+                        const auto& school = MWMechanics::getMagicSchool(MWMechanics::getSpellSchool(spell, player));
+                        info.text = "#{sSchool}: " + MyGUI::TextIterator::toTagsString(school.mName).asUTF8();
                     }
                     const std::string& cost = focus->getUserString("SpellCost");
                     if (!cost.empty() && cost != "0")
@@ -956,7 +954,9 @@ namespace MWGui
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");
         widget->setUserString("Caption_MagicEffectName", "#{" + name + "}");
         widget->setUserString("Caption_MagicEffectDescription", effect->mDescription);
-        widget->setUserString("Caption_MagicEffectSchool", "#{sSchool}: " + sSchoolNames[effect->mData.mSchool]);
+        widget->setUserString("Caption_MagicEffectSchool",
+            "#{sSchool}: "
+                + MyGUI::TextIterator::toTagsString(MWMechanics::getMagicSchool(effect->mData.mSchool).mName).asUTF8());
         widget->setUserString("ImageTexture_MagicEffectImage", icon);
     }
 

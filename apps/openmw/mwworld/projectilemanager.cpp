@@ -42,6 +42,7 @@
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/creaturestats.hpp"
+#include "../mwmechanics/magicschool.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/weapontype.hpp"
 
@@ -98,12 +99,10 @@ namespace
             else
                 projectileIDs.push_back(magicEffect->mBolt);
 
-            static const std::string schools[]
-                = { "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration" };
             if (!magicEffect->mBoltSound.empty())
                 sounds.emplace(magicEffect->mBoltSound);
             else
-                sounds.emplace(ESM::RefId::stringRefId(schools[magicEffect->mData.mSchool] + " bolt"));
+                sounds.emplace(MWMechanics::getMagicSchool(magicEffect->mData.mSchool).mBoltSound);
             projectileEffects.mList.push_back(*iter);
         }
 

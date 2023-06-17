@@ -13,6 +13,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "magicschool.hpp"
 #include "spellutil.hpp"
 
 namespace MWMechanics
@@ -35,27 +36,14 @@ namespace MWMechanics
         static const float fNPCbaseMagickaMult = gmst.find("fNPCbaseMagickaMult")->mValue.getFloat();
         float baseMagicka = fNPCbaseMagickaMult * actorAttributes.at(ESM::Attribute::Intelligence).getBase();
 
-        static const std::string schools[]
-            = { "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration" };
-        static int iAutoSpellSchoolMax[6];
-        static bool init = false;
-        if (!init)
-        {
-            for (int i = 0; i < 6; ++i)
-            {
-                const std::string& gmstName = "iAutoSpell" + schools[i] + "Max";
-                iAutoSpellSchoolMax[i] = gmst.find(gmstName)->mValue.getInteger();
-            }
-            init = true;
-        }
-
         std::map<int, SchoolCaps> schoolCaps;
-        for (int i = 0; i < 6; ++i)
+        for (int i = 0; i < MagicSchool::Length; ++i)
         {
+            const MagicSchool& school = getMagicSchool(i);
             SchoolCaps caps;
             caps.mCount = 0;
-            caps.mLimit = iAutoSpellSchoolMax[i];
-            caps.mReachedLimit = iAutoSpellSchoolMax[i] <= 0;
+            caps.mLimit = school.mAutoCalcMax;
+            caps.mReachedLimit = school.mAutoCalcMax <= 0;
             caps.mMinCost = std::numeric_limits<int>::max();
             caps.mWeakestSpell = ESM::RefId();
             schoolCaps[i] = caps;
