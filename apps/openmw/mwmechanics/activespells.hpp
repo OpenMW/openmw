@@ -131,7 +131,7 @@ namespace MWMechanics
         void removeEffects(const MWWorld::Ptr& ptr, const ESM::RefId& id);
 
         /// Remove all active effects with this effect id
-        void purgeEffect(const MWWorld::Ptr& ptr, short effectId);
+        void purgeEffect(const MWWorld::Ptr& ptr, int effectId, int effectArg = -1);
 
         void purge(EffectPredicate predicate, const MWWorld::Ptr& ptr);
         void purge(ParamsPredicate predicate, const MWWorld::Ptr& ptr);
