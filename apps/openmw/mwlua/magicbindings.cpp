@@ -622,7 +622,7 @@ namespace MWLua
 
                 if (rec->mData.mFlags & ESM::MagicEffect::TargetSkill)
                 {
-                    ESM::RefId skill = ESM::RefId::stringRefId(argStr.value());
+                    ESM::RefId skill = ESM::RefId::deserializeText(argStr.value());
                     key = MWMechanics::EffectKey(id, ESM::Skill::refIdToIndex(skill));
                 }
             }

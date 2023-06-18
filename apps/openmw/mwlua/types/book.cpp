@@ -41,7 +41,7 @@ namespace
         book.mData.mValue = rec["value"];
         book.mData.mIsScroll = rec["isScroll"];
 
-        ESM::RefId skill = ESM::RefId::stringRefId(rec["skill"].get<std::string_view>());
+        ESM::RefId skill = ESM::RefId::deserializeText(rec["skill"].get<std::string_view>());
 
         book.mData.mSkillId = -1;
         if (!skill.empty())
