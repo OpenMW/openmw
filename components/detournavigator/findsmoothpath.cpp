@@ -9,7 +9,7 @@
 
 namespace DetourNavigator
 {
-    std::size_t fixupCorridor(std::vector<dtPolyRef>& path, std::size_t pathSize, const std::vector<dtPolyRef>& visited)
+    std::size_t fixupCorridor(std::span<dtPolyRef> path, std::size_t pathSize, const std::vector<dtPolyRef>& visited)
     {
         std::vector<dtPolyRef>::const_reverse_iterator furthestVisited;
 

@@ -14,6 +14,7 @@
 
 #include <cassert>
 #include <functional>
+#include <span>
 #include <vector>
 
 namespace DetourNavigator
@@ -23,8 +24,7 @@ namespace DetourNavigator
         return (osg::Vec2f(v1.x(), v1.z()) - osg::Vec2f(v2.x(), v2.z())).length() < r;
     }
 
-    std::size_t fixupCorridor(
-        std::vector<dtPolyRef>& path, std::size_t pathSize, const std::vector<dtPolyRef>& visited);
+    std::size_t fixupCorridor(std::span<dtPolyRef> path, std::size_t pathSize, const std::vector<dtPolyRef>& visited);
 
     // This function checks if the path has a small U-turn, that is,
     // a polygon further in the path is adjacent to the first polygon
@@ -127,9 +127,11 @@ namespace DetourNavigator
 
     template <class OutputIterator>
     Status makeSmoothPath(const dtNavMeshQuery& navMeshQuery, const dtQueryFilter& filter, const osg::Vec3f& start,
-        const osg::Vec3f& end, const float stepSize, std::vector<dtPolyRef>& polygonPath, std::size_t polygonPathSize,
+        const osg::Vec3f& end, const float stepSize, std::span<dtPolyRef> polygonPath, std::size_t polygonPathSize,
         std::size_t maxSmoothPathSize, OutputIterator& out)
     {
+        assert(polygonPathSize <= polygonPath.size());
+
         // Iterate over the path to find smooth path on the detail mesh surface.
         osg::Vec3f iterPos;
         navMeshQuery.closestPointOnPoly(polygonPath.front(), start.ptr(), iterPos.ptr(), nullptr);
