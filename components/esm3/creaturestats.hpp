@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_CREATURESTATS_H
 #define OPENMW_ESM_CREATURESTATS_H
 
+#include <array>
 #include <map>
 #include <string>
 #include <vector>
@@ -26,19 +27,19 @@ namespace ESM
     {
         struct CorprusStats
         {
-            int mWorsenings[Attribute::Length];
+            std::array<int, Attribute::Length> mWorsenings;
             TimeStamp mNextWorsening;
         };
 
-        StatState<float> mAttributes[Attribute::Length];
-        StatState<float> mDynamic[3];
+        std::array<StatState<float>, Attribute::Length> mAttributes;
+        std::array<StatState<float>, 3> mDynamic;
 
         MagicEffects mMagicEffects;
 
         AiSequence::AiSequence mAiSequence;
 
         bool mHasAiSettings;
-        StatState<int> mAiSettings[4];
+        std::array<StatState<int>, 4> mAiSettings;
 
         std::map<SummonKey, int> mSummonedCreatureMap;
         std::multimap<int, int> mSummonedCreatures;

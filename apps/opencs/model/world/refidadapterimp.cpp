@@ -7,6 +7,7 @@
 #include <apps/opencs/model/world/refiddata.hpp>
 #include <apps/opencs/model/world/universalid.hpp>
 
+#include <components/esm/attr.hpp>
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadskil.hpp>
@@ -1007,8 +1008,7 @@ int CSMWorld::NpcAttributesRefIdAdapter::getNestedColumnsCount(const RefIdColumn
 int CSMWorld::NpcAttributesRefIdAdapter::getNestedRowsCount(
     const RefIdColumn* column, const RefIdData& data, int index) const
 {
-    // There are 8 attributes
-    return 8;
+    return ESM::Attribute::Length;
 }
 
 void CSMWorld::NpcSkillsRefIdAdapter::addNestedRow(
@@ -1385,8 +1385,7 @@ int CSMWorld::CreatureAttributesRefIdAdapter::getNestedColumnsCount(
 int CSMWorld::CreatureAttributesRefIdAdapter::getNestedRowsCount(
     const RefIdColumn* column, const RefIdData& data, int index) const
 {
-    // There are 8 attributes
-    return 8;
+    return ESM::Attribute::Length;
 }
 
 void CSMWorld::CreatureAttackRefIdAdapter::addNestedRow(

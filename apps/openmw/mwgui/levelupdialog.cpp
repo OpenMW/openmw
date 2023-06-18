@@ -69,7 +69,7 @@ namespace MWGui
         MWMechanics::CreatureStats& creatureStats = player.getClass().getCreatureStats(player);
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
-        for (int i = 0; i < 8; ++i)
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
             int val = creatureStats.getAttribute(i).getBase();
             if (std::find(mSpentAttributes.begin(), mSpentAttributes.end(), i) != mSpentAttributes.end())
@@ -149,7 +149,7 @@ namespace MWGui
         mLevelDescription->setCaption(toUString(levelupdescription));
 
         unsigned int availableAttributes = 0;
-        for (int i = 0; i < 8; ++i)
+        for (int i = 0; i < ESM::Attribute::Length; ++i)
         {
             MyGUI::TextBox* text = mAttributeMultipliers[i];
             if (pcStats.getAttribute(i).getBase() < 100)

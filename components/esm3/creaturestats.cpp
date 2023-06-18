@@ -10,11 +10,11 @@ namespace ESM
     void CreatureStats::load(ESMReader& esm)
     {
         const bool intFallback = esm.getFormatVersion() <= MaxIntFallbackFormatVersion;
-        for (int i = 0; i < 8; ++i)
-            mAttributes[i].load(esm, intFallback);
+        for (auto& attribute : mAttributes)
+            attribute.load(esm, intFallback);
 
-        for (int i = 0; i < 3; ++i)
-            mDynamic[i].load(esm);
+        for (auto& dynamic : mDynamic)
+            dynamic.load(esm);
 
         mGoldPool = 0;
         esm.getHNOT(mGoldPool, "GOLD");
@@ -154,8 +154,8 @@ namespace ESM
 
         if (mHasAiSettings)
         {
-            for (int i = 0; i < 4; ++i)
-                mAiSettings[i].load(esm);
+            for (auto& setting : mAiSettings)
+                setting.load(esm);
         }
 
         while (esm.isNextSub("CORP"))
@@ -179,11 +179,11 @@ namespace ESM
 
     void CreatureStats::save(ESMWriter& esm) const
     {
-        for (int i = 0; i < 8; ++i)
-            mAttributes[i].save(esm);
+        for (const auto& attribute : mAttributes)
+            attribute.save(esm);
 
-        for (int i = 0; i < 3; ++i)
-            mDynamic[i].save(esm);
+        for (const auto& dynamic : mDynamic)
+            dynamic.save(esm);
 
         if (mGoldPool)
             esm.writeHNT("GOLD", mGoldPool);
@@ -268,8 +268,8 @@ namespace ESM
         esm.writeHNT("AISE", mHasAiSettings);
         if (mHasAiSettings)
         {
-            for (int i = 0; i < 4; ++i)
-                mAiSettings[i].save(esm);
+            for (const auto& setting : mAiSettings)
+                setting.save(esm);
         }
         if (mMissingACDT)
             esm.writeHNT("NOAC", mMissingACDT);

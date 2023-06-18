@@ -535,10 +535,10 @@ namespace MWMechanics
 
     void CreatureStats::writeState(ESM::CreatureStats& state) const
     {
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
+        for (size_t i = 0; i < state.mAttributes.size(); ++i)
             mAttributes[i].writeState(state.mAttributes[i]);
 
-        for (int i = 0; i < 3; ++i)
+        for (size_t i = 0; i < state.mDynamic.size(); ++i)
             mDynamic[i].writeState(state.mDynamic[i]);
 
         state.mTradeTime = mLastRestock.toEsm();
@@ -582,7 +582,7 @@ namespace MWMechanics
         state.mSummonGraveyard = mSummonGraveyard;
 
         state.mHasAiSettings = true;
-        for (int i = 0; i < 4; ++i)
+        for (size_t i = 0; i < state.mAiSettings.size(); ++i)
             mAiSettings[i].writeState(state.mAiSettings[i]);
 
         state.mMissingACDT = false;
@@ -592,10 +592,10 @@ namespace MWMechanics
     {
         if (!state.mMissingACDT)
         {
-            for (int i = 0; i < ESM::Attribute::Length; ++i)
+            for (size_t i = 0; i < state.mAttributes.size(); ++i)
                 mAttributes[i].readState(state.mAttributes[i]);
 
-            for (int i = 0; i < 3; ++i)
+            for (size_t i = 0; i < state.mDynamic.size(); ++i)
                 mDynamic[i].readState(state.mDynamic[i]);
 
             mGoldPool = state.mGoldPool;
@@ -636,7 +636,7 @@ namespace MWMechanics
         mSummonGraveyard = state.mSummonGraveyard;
 
         if (state.mHasAiSettings)
-            for (int i = 0; i < 4; ++i)
+            for (size_t i = 0; i < state.mAiSettings.size(); ++i)
                 mAiSettings[i].readState(state.mAiSettings[i]);
         if (state.mRecalcDynamicStats)
             recalculateMagicka();
