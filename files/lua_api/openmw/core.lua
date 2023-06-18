@@ -317,6 +317,41 @@
 -- local weapons = cell:getAll(types.Weapon)
 
 
+--- Possible @{#EnchantmentType} values
+-- @field [parent=#Magic] #EnchantmentType ENCHANTMENT_TYPE
+
+--- `core.magic.ENCHANTMENT_TYPE`
+-- @type EnchantmentType
+-- @field #number CastOnce Enchantment can be cast once, destroying the enchanted item.
+-- @field #number CastOnStrike Enchantment is cast on strike, if there is enough charge.
+-- @field #number CastOnUse Enchantment is cast when used, if there is enough charge.
+-- @field #number ConstantEffect Enchantment is always active when equipped.
+
+
+---
+-- @type Enchantment
+-- @field #string id Enchantment id
+-- @field #number type @{#EnchantmentType}
+-- @field #number autocalcFlag If set, the casting cost should be computer rather than reading the cost field
+-- @field #number cost
+-- @field #number charge Charge capacity. Should not be confused with current charge.
+-- @field #list<#MagicEffectWithParams> effects The effects (@{#MagicEffectWithParams}) of the enchantment
+-- @usage -- Getting the enchantment of an arbitrary item, if it has one
+-- local function getRecord(item)
+--     if item.type and item.type.record then
+--         return item.type.record(item)
+--     end
+--     return nil
+-- end
+-- local function getEnchantment(item)
+--     local record = getRecord(item)
+--     if record and record.enchant then
+--         return core.magic.enchantments[record.enchant]
+--     end
+--     return nil
+-- end
+
+
 ---
 -- Inventory of a player/NPC or a content of a container.
 -- @type Inventory
@@ -583,7 +618,6 @@
 -- @field #number SummonCreature04 "summoncreature04"
 -- @field #number SummonCreature05 "summoncreature05"
 
-
 --- Possible @{#SpellType} values
 -- @field [parent=#Magic] #SpellType SPELL_TYPE
 
@@ -614,6 +648,17 @@
 -- for _, effect in pairs(core.magic.effects) do
 --     if effect.harmful then
 --         print(effect.name)
+--     end
+-- end
+
+--- List of all @{#Enchantment}s.
+-- @field [parent=#Magic] #list<#Enchantment> enchantments
+-- @usage local enchantment = core.magic.enchantments['marara's boon']  -- get by id
+-- @usage local enchantment = core.magic.enchantments[1]  -- get by index
+-- @usage -- Print all enchantments with constant effect
+-- for _, ench in pairs(core.magic.enchantments) do
+--     if ench.type == core.magic.ENCHANTMENT_TYPE.ConstantEffect then
+--         print(ench.id)
 --     end
 -- end
 

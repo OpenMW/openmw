@@ -1,6 +1,7 @@
 #include "magicbindings.hpp"
 
 #include <components/esm3/activespells.hpp>
+#include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadspel.hpp>
 #include <components/lua/luastate.hpp>
@@ -184,6 +185,13 @@ namespace MWLua
                 { "Curse", ESM::Spell::ST_Curse },
                 { "Power", ESM::Spell::ST_Power },
             }));
+        magicApi["ENCHANTMENT_TYPE"]
+            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, ESM::Enchantment::Type>({
+                { "CastOnce", ESM::Enchantment::Type::CastOnce },
+                { "CastOnStrike", ESM::Enchantment::Type::WhenStrikes },
+                { "CastOnUse", ESM::Enchantment::Type::WhenUsed },
+                { "ConstantEffect", ESM::Enchantment::Type::ConstantEffect },
+            }));
 
         sol::table effect(context.mLua->sol(), sol::create);
         magicApi["EFFECT_TYPE"] = LuaUtil::makeStrictReadOnly(effect);
@@ -208,6 +216,25 @@ namespace MWLua
         spellStoreT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
 
         magicApi["spells"] = spellStore;
+
+        // Enchantment store
+        using EnchantmentStore = MWWorld::Store<ESM::Enchantment>;
+        const EnchantmentStore* enchantmentStore
+            = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Enchantment>();
+        sol::usertype<EnchantmentStore> enchantmentStoreT = lua.new_usertype<EnchantmentStore>("ESM3_EnchantmentStore");
+        enchantmentStoreT[sol::meta_function::to_string] = [](const EnchantmentStore& store) {
+            return "ESM3_EnchantmentStore{" + std::to_string(store.getSize()) + " enchantments}";
+        };
+        enchantmentStoreT[sol::meta_function::length] = [](const EnchantmentStore& store) { return store.getSize(); };
+        enchantmentStoreT[sol::meta_function::index] = sol::overload(
+            [](const EnchantmentStore& store, size_t index) -> const ESM::Enchantment* { return store.at(index - 1); },
+            [](const EnchantmentStore& store, std::string_view enchantmentId) -> const ESM::Enchantment* {
+                return store.find(ESM::RefId::deserializeText(enchantmentId));
+            });
+        enchantmentStoreT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
+        enchantmentStoreT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
+
+        magicApi["enchantments"] = enchantmentStore;
 
         // MagicEffect store
         using MagicEffectStore = MWWorld::Store<ESM::MagicEffect>;
@@ -249,6 +276,25 @@ namespace MWLua
         spellT["type"] = sol::readonly_property([](const ESM::Spell& rec) -> int { return rec.mData.mType; });
         spellT["cost"] = sol::readonly_property([](const ESM::Spell& rec) -> int { return rec.mData.mCost; });
         spellT["effects"] = sol::readonly_property([&lua](const ESM::Spell& rec) -> sol::table {
+            sol::table res(lua, sol::create);
+            for (size_t i = 0; i < rec.mEffects.mList.size(); ++i)
+                res[i + 1] = rec.mEffects.mList[i]; // ESM::ENAMstruct (effect params)
+            return res;
+        });
+
+        // Enchantment record
+        auto enchantT = lua.new_usertype<ESM::Enchantment>("ESM3_Enchantment");
+        enchantT[sol::meta_function::to_string] = [](const ESM::Enchantment& rec) -> std::string {
+            return "ESM3_Enchantment[" + rec.mId.toDebugString() + "]";
+        };
+        enchantT["id"] = sol::readonly_property([](const ESM::Enchantment& rec) { return rec.mId.serializeText(); });
+        enchantT["type"] = sol::readonly_property([](const ESM::Enchantment& rec) -> int { return rec.mData.mType; });
+        enchantT["autocalcFlag"] = sol::readonly_property(
+            [](const ESM::Enchantment& rec) -> bool { return !!(rec.mData.mFlags & ESM::Enchantment::Autocalc); });
+        enchantT["cost"] = sol::readonly_property([](const ESM::Enchantment& rec) -> int { return rec.mData.mCost; });
+        enchantT["charge"]
+            = sol::readonly_property([](const ESM::Enchantment& rec) -> int { return rec.mData.mCharge; });
+        enchantT["effects"] = sol::readonly_property([&lua](const ESM::Enchantment& rec) -> sol::table {
             sol::table res(lua, sol::create);
             for (size_t i = 0; i < rec.mEffects.mList.size(); ++i)
                 res[i + 1] = rec.mEffects.mList[i]; // ESM::ENAMstruct (effect params)

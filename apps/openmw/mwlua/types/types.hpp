@@ -47,6 +47,7 @@ namespace MWLua
     void addBookBindings(sol::table book, const Context& context);
     void addContainerBindings(sol::table container, const Context& context);
     void addDoorBindings(sol::table door, const Context& context);
+    void addItemBindings(sol::table item);
     void addActorBindings(sol::table actor, const Context& context);
     void addWeaponBindings(sol::table weapon, const Context& context);
     void addNpcBindings(sol::table npc, const Context& context);
