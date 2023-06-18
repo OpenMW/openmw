@@ -627,7 +627,8 @@
 
 ---
 -- @type MagicEffect
--- @field #string Effect id string
+-- @field #string id Effect ID
+-- @field #string icon Effect Icon Path
 -- @field #string name Localized name of the effect
 -- @field #number school @{#MagicSchool}
 -- @field #number baseCost
