@@ -135,6 +135,9 @@
 -- @field [parent=#FIND_PATH_STATUS] #number EndPolygonNotFound `destination` position is too far from available
 -- navigation mesh. The status may appear when navigation mesh is not fully generated or position is outside of covered
 -- area;
+-- @field [parent=#FIND_PATH_STATUS] #number TargetPolygonNotFound adjusted `destination` position is too far from available
+-- navigation mesh. The status may appear when navigation mesh is not fully generated or position is outside of covered
+-- area;
 -- @field [parent=#FIND_PATH_STATUS] #number MoveAlongSurfaceFailed Found path couldn't be smoothed due to imperfect
 -- algorithm implementation or bad navigation mesh data;
 -- @field [parent=#FIND_PATH_STATUS] #number FindPathOverPolygonsFailed Path over navigation mesh from `source` to
