@@ -346,6 +346,10 @@ namespace MWLua
             auto name = ESM::MagicEffect::indexToName(rec.mIndex);
             return Misc::StringUtils::lowerCase(name);
         });
+        magicEffectT["icon"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string {
+            auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+        });
         magicEffectT["name"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> std::string_view {
             return MWBase::Environment::get()
                 .getWorld()
