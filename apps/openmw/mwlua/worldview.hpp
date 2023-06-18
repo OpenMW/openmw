@@ -51,9 +51,12 @@ namespace MWLua
         ObjectIdList getContainersInScene() const { return mContainersInScene.mList; }
         ObjectIdList getDoorsInScene() const { return mDoorsInScene.mList; }
         ObjectIdList getItemsInScene() const { return mItemsInScene.mList; }
+        ObjectIdList getPlayers() const { return mPlayers; }
 
         void objectAddedToScene(const MWWorld::Ptr& ptr);
         void objectRemovedFromScene(const MWWorld::Ptr& ptr);
+
+        void setPlayer(const MWWorld::Ptr& player) { *mPlayers = { getId(player) }; }
 
         void load(ESM::ESMReader& esm);
         void save(ESM::ESMWriter& esm) const;
@@ -78,6 +81,7 @@ namespace MWLua
         ObjectGroup mContainersInScene;
         ObjectGroup mDoorsInScene;
         ObjectGroup mItemsInScene;
+        ObjectIdList mPlayers = std::make_shared<std::vector<ObjectId>>();
 
         double mSimulationTime = 0;
         bool mPaused = false;

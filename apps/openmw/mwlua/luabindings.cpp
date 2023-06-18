@@ -222,6 +222,7 @@ namespace MWLua
         addTimeBindings(api, context, true);
         addCellGetters(api, context);
         api["activeActors"] = GObjectList{ worldView->getActorsInScene() };
+        api["players"] = GObjectList{ worldView->getPlayers() };
         api["createObject"] = [](std::string_view recordId, sol::optional<int> count) -> GObject {
             // Doesn't matter which cell to use because the new object will be in disabled state.
             MWWorld::CellStore* cell = MWBase::Environment::get().getWorldScene()->getCurrentCell();
