@@ -162,6 +162,18 @@
 -- @param openmw.core#Spell spell Spell (can be nil)
 
 ---
+-- Get currently selected enchanted item
+-- @function [parent=#Actor] getSelectedEnchantedItem
+-- @param openmw.core#GameObject actor
+-- @return openmw.core#GameObject, nil enchanted item or nil
+
+---
+-- Set currently selected enchanted item, equipping it if applicable
+-- @function [parent=#Actor] setSelectedEnchantedItem
+-- @param openmw.core#GameObject actor
+-- @param openmw.core#GameObject item enchanted item
+
+---
 -- Return the active magic effects (@{#ActorActiveEffects}) currently affecting the given actor.
 -- @function [parent=#Actor] activeEffects
 -- @param openmw.core#GameObject actor
@@ -592,7 +604,17 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+---
+-- Get this item's current enchantment charge.
+-- @function [parent=#Item] getEnchantmentCharge
+-- @param #Item item
+-- @return #number The charge remaining. -1 if the enchantment has never been used, implying the charge is full. Unenchanted items will always return a value of -1.
 
+---
+-- Set this item's enchantment charge.
+-- @function [parent=#Item] setEnchantmentCharge
+-- @param #Item item
+-- @param #number charge
 
 --- @{#Creature} functions
 -- @field [parent=#types] #Creature Creature
