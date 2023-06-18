@@ -749,23 +749,28 @@ namespace MWGui
         center();
 
         const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::Attribute>();
+        MyGUI::ScrollView* attributes;
+        getWidget(attributes, "Attributes");
+        MyGUI::IntCoord coord{ 0, 0, attributes->getWidth(), 18 };
         for (const ESM::Attribute& attribute : store)
         {
-            Widgets::MWAttributePtr widget;
-            char theIndex = '0' + attribute.mId;
-
-            getWidget(widget, std::string("Attribute").append(1, theIndex));
+            auto* widget
+                = attributes->createWidget<Widgets::MWAttribute>("MW_StatNameButtonC", coord, MyGUI::Align::Default);
+            coord.top += coord.height;
             widget->setAttributeId(attribute.mId);
             widget->eventClicked += MyGUI::newDelegate(this, &SelectAttributeDialog::onAttributeClicked);
-            ToolTips::createAttributeToolTip(widget, widget->getAttributeId());
+            ToolTips::createAttributeToolTip(widget, attribute.mId);
         }
+
+        attributes->setVisibleVScroll(false);
+        attributes->setCanvasSize(MyGUI::IntSize(attributes->getWidth(), std::max(attributes->getHeight(), coord.top)));
+        attributes->setVisibleVScroll(true);
+        attributes->setViewOffset(MyGUI::IntPoint());
 
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectAttributeDialog::onCancelClicked);
     }
-
-    SelectAttributeDialog::~SelectAttributeDialog() {}
 
     // widget controls
 
