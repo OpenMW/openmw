@@ -76,14 +76,22 @@ namespace MWGui
 
         // Setup attributes
 
-        Widgets::MWAttributePtr widget;
+        MyGUI::Widget* attributes = getWidget("Attributes");
         const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::Attribute>();
+        MyGUI::IntCoord coord{ 8, 4, 250, 18 };
         for (const ESM::Attribute& attribute : store)
         {
-            getWidget(widget, std::string("Attribute").append(1, '0' + attribute.mId));
+            auto* widget
+                = attributes->createWidget<Widgets::MWAttribute>("MW_StatNameValue", coord, MyGUI::Align::Default);
             mAttributeWidgets.emplace(attribute.mId, widget);
+            widget->setUserString("ToolTipType", "Layout");
+            widget->setUserString("ToolTipLayout", "AttributeToolTip");
+            widget->setUserString("Caption_AttributeName", attribute.mName);
+            widget->setUserString("Caption_AttributeDescription", attribute.mDescription);
+            widget->setUserString("ImageTexture_AttributeImage", attribute.mIcon);
             widget->setAttributeId(attribute.mId);
             widget->setAttributeValue(Widgets::MWAttribute::AttributeValue());
+            coord.top += coord.height;
         }
 
         // Setup skills
