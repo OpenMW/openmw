@@ -113,15 +113,15 @@ namespace DetourNavigator
 
     inline std::optional<std::size_t> findPath(const dtNavMeshQuery& navMeshQuery, const dtPolyRef startRef,
         const dtPolyRef endRef, const osg::Vec3f& startPos, const osg::Vec3f& endPos, const dtQueryFilter& queryFilter,
-        dtPolyRef* path, const std::size_t maxSize)
+        std::span<dtPolyRef> pathBuffer)
     {
         int pathLen = 0;
-        const auto status = navMeshQuery.findPath(
-            startRef, endRef, startPos.ptr(), endPos.ptr(), &queryFilter, path, &pathLen, static_cast<int>(maxSize));
+        const auto status = navMeshQuery.findPath(startRef, endRef, startPos.ptr(), endPos.ptr(), &queryFilter,
+            pathBuffer.data(), &pathLen, static_cast<int>(pathBuffer.size()));
         if (!dtStatusSucceed(status))
             return {};
         assert(pathLen >= 0);
-        assert(static_cast<std::size_t>(pathLen) <= maxSize);
+        assert(static_cast<std::size_t>(pathLen) <= pathBuffer.size());
         return static_cast<std::size_t>(pathLen);
     }
 
@@ -267,8 +267,7 @@ namespace DetourNavigator
             return Status::EndPolygonNotFound;
 
         std::vector<dtPolyRef> polygonPath(settings.mMaxPolygonPathSize);
-        const auto polygonPathSize
-            = findPath(navMeshQuery, startRef, endRef, start, end, queryFilter, polygonPath.data(), polygonPath.size());
+        const auto polygonPathSize = findPath(navMeshQuery, startRef, endRef, start, end, queryFilter, polygonPath);
 
         if (!polygonPathSize.has_value())
             return Status::FindPathOverPolygonsFailed;
