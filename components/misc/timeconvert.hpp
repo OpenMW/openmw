@@ -15,14 +15,11 @@ namespace Misc
 {
     inline std::time_t toTimeT(std::filesystem::file_time_type tp)
     {
-        using namespace std::chrono;
-#if __cpp_lib_chrono >= 201907
-        const auto systemTime = clock_cast<system_clock>(tp);
-#else
-        auto systemTime = time_point_cast<system_clock::duration>(
-            tp - std::filesystem::file_time_type::clock::now() + system_clock::now());
-#endif
-        return system_clock::to_time_t(systemTime);
+        // Note: this conversion has a precision loss, so it should not be used in exact comparisons
+        // or another cases when milliseconds matter.
+        auto systemTime = time_point_cast<std::chrono::system_clock::duration>(
+            tp - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now());
+        return std::chrono::system_clock::to_time_t(systemTime);
     }
 
     inline std::string timeTToString(const std::time_t tp, const char* fmt)
