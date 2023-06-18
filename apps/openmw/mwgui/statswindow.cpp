@@ -1,5 +1,6 @@
 #include "statswindow.hpp"
 
+#include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
 #include <MyGUI_ImageBox.h>
 #include <MyGUI_InputManager.h>
@@ -43,15 +44,26 @@ namespace MWGui
         , mMinFullWidth(mMainWidget->getSize().width)
     {
 
-        const char* names[][2] = { { "Attrib1", "sAttributeStrength" }, { "Attrib2", "sAttributeIntelligence" },
-            { "Attrib3", "sAttributeWillpower" }, { "Attrib4", "sAttributeAgility" }, { "Attrib5", "sAttributeSpeed" },
-            { "Attrib6", "sAttributeEndurance" }, { "Attrib7", "sAttributePersonality" },
-            { "Attrib8", "sAttributeLuck" }, { 0, 0 } };
-
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
-        for (int i = 0; names[i][0]; ++i)
+        MyGUI::Widget* attributeView = getWidget("AttributeView");
+        MyGUI::IntCoord coord{ 0, 0, 204, 144 };
+        const MyGUI::Align align = MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch;
+        for (const ESM::Attribute& attribute : store.get<ESM::Attribute>())
         {
-            setText(names[i][0], store.get<ESM::GameSetting>().find(names[i][1])->mValue.getString());
+            auto* box = attributeView->createWidget<MyGUI::Button>({}, coord, align);
+            box->setUserString("ToolTipType", "Layout");
+            box->setUserString("ToolTipLayout", "AttributeToolTip");
+            box->setUserString("Caption_AttributeName", attribute.mName);
+            box->setUserString("Caption_AttributeDescription", attribute.mDescription);
+            box->setUserString("ImageTexture_AttributeImage", attribute.mIcon);
+            coord.top += 18;
+            auto* name = box->createWidget<MyGUI::TextBox>("SandText", { 0, 0, 160, 18 }, align);
+            name->setNeedMouseFocus(false);
+            name->setCaption(attribute.mName);
+            auto* value = box->createWidget<MyGUI::TextBox>(
+                "SandTextRight", { 160, 0, 44, 18 }, MyGUI::Align::Right | MyGUI::Align::Top);
+            value->setNeedMouseFocus(false);
+            mAttributeWidgets.emplace(attribute.mId, value);
         }
 
         getWidget(mSkillView, "SkillView");
@@ -143,37 +155,20 @@ namespace MWGui
         mMainWidget->castType<MyGUI::Window>()->setCaption(playerName);
     }
 
-    void StatsWindow::setValue(std::string_view id, const MWMechanics::AttributeValue& value)
+    void StatsWindow::setValue(ESM::Attribute::AttributeID id, const MWMechanics::AttributeValue& value)
     {
-        static const char* ids[] = {
-            "AttribVal1",
-            "AttribVal2",
-            "AttribVal3",
-            "AttribVal4",
-            "AttribVal5",
-            "AttribVal6",
-            "AttribVal7",
-            "AttribVal8",
-            nullptr,
-        };
-
-        for (int i = 0; ids[i]; ++i)
-            if (ids[i] == id)
-            {
-                setText(id, std::to_string(static_cast<int>(value.getModified())));
-
-                MyGUI::TextBox* box;
-                getWidget(box, id);
-
-                if (value.getModified() > value.getBase())
-                    box->_setWidgetState("increased");
-                else if (value.getModified() < value.getBase())
-                    box->_setWidgetState("decreased");
-                else
-                    box->_setWidgetState("normal");
-
-                break;
-            }
+        auto it = mAttributeWidgets.find(id);
+        if (it != mAttributeWidgets.end())
+        {
+            MyGUI::TextBox* box = it->second;
+            box->setCaption(std::to_string(static_cast<int>(value.getModified())));
+            if (value.getModified() > value.getBase())
+                box->_setWidgetState("increased");
+            else if (value.getModified() < value.getBase())
+                box->_setWidgetState("decreased");
+            else
+                box->_setWidgetState("normal");
+        }
     }
 
     void StatsWindow::setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value)

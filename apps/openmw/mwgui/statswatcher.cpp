@@ -35,14 +35,16 @@ namespace MWGui
         if (mWatched.isEmpty())
             return;
 
+        const auto& store = MWBase::Environment::get().getESMStore();
         MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
         const MWMechanics::NpcStats& stats = mWatched.getClass().getNpcStats(mWatched);
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
+        for (const ESM::Attribute& attribute : store->get<ESM::Attribute>())
         {
-            if (stats.getAttribute(i) != mWatchedAttributes[i] || mWatchedStatsEmpty)
+            const auto& value = stats.getAttribute(attribute.mId);
+            if (value != mWatchedAttributes[attribute.mId] || mWatchedStatsEmpty)
             {
-                mWatchedAttributes[i] = stats.getAttribute(i);
-                setValue("AttribVal" + std::to_string(i + 1), stats.getAttribute(i));
+                mWatchedAttributes[attribute.mId] = value;
+                setValue(attribute.mId, value);
             }
         }
 
@@ -83,7 +85,7 @@ namespace MWGui
             }
         }
 
-        for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
+        for (const ESM::Skill& skill : store->get<ESM::Skill>())
         {
             const auto& value = stats.getSkill(skill.mId);
             if (value != mWatchedSkills[skill.mId] || mWatchedStatsEmpty)
@@ -112,16 +114,14 @@ namespace MWGui
             if (watchedRecord->mRace != mWatchedRace || mWatchedStatsEmpty)
             {
                 mWatchedRace = watchedRecord->mRace;
-                const ESM::Race* race
-                    = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(watchedRecord->mRace);
+                const ESM::Race* race = store->get<ESM::Race>().find(watchedRecord->mRace);
                 setValue("race", race->mName);
             }
 
             if (watchedRecord->mClass != mWatchedClass || mWatchedStatsEmpty)
             {
                 mWatchedClass = watchedRecord->mClass;
-                const ESM::Class* cls
-                    = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(watchedRecord->mClass);
+                const ESM::Class* cls = store->get<ESM::Class>().find(watchedRecord->mClass);
                 setValue("class", cls->mName);
 
                 size_t size = cls->mData.mSkills.size();
@@ -151,7 +151,7 @@ namespace MWGui
         mListeners.erase(listener);
     }
 
-    void StatsWatcher::setValue(std::string_view id, const MWMechanics::AttributeValue& value)
+    void StatsWatcher::setValue(ESM::Attribute::AttributeID id, const MWMechanics::AttributeValue& value)
     {
         for (StatsListener* listener : mListeners)
             listener->setValue(id, value);
