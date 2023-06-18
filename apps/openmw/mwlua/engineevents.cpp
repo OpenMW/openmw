@@ -48,6 +48,12 @@ namespace MWLua
                 scripts->setActive(false);
         }
 
+        void operator()(const OnTeleported& event) const
+        {
+            if (auto* scripts = getLocalScripts(event.mObject))
+                scripts->onTeleported();
+        }
+
         void operator()(const OnActivate& event) const
         {
             MWWorld::Ptr obj = getPtr(event.mObject);

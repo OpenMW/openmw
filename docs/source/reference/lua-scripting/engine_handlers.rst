@@ -64,6 +64,8 @@ Engine handler is a function defined by a script, that can be called by the engi
     - | Object became inactive. Since it is inactive the handler
       | can not access anything nearby, but it is possible to send
       | an event to global scripts.
+  * - onTeleported()
+    - Object was teleported.
   * - onActivated(actor)
     - | Called on an object when an actor activates it. Note that picking
       | up an item is also an activation and works this way: (1) a copy of

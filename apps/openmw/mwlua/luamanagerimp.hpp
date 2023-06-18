@@ -75,6 +75,7 @@ namespace MWLua
         {
             mEngineEvents.addToQueue(EngineEvents::OnNewExterior{ cell });
         }
+        void objectTeleported(const MWWorld::Ptr& ptr) override;
         void questUpdated(const ESM::RefId& questId, int stage) override;
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;

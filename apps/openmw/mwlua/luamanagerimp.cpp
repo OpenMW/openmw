@@ -178,6 +178,20 @@ namespace MWLua
         }
     }
 
+    void LuaManager::objectTeleported(const MWWorld::Ptr& ptr)
+    {
+        if (ptr == mPlayer)
+        {
+            // For player run the onTeleported handler immediately,
+            // so it can adjust camera position after teleporting.
+            PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
+            if (playerScripts)
+                playerScripts->onTeleported();
+        }
+        else
+            mEngineEvents.addToQueue(EngineEvents::OnTeleported{ getId(ptr) });
+    }
+
     void LuaManager::questUpdated(const ESM::RefId& questId, int stage)
     {
         if (mPlayer.isEmpty())

@@ -4,6 +4,7 @@
 #include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -65,7 +66,6 @@ namespace MWWorld
                 actor.getClass().getCreatureStats(actor).getAiSequence().stopCombat();
                 return;
             }
-
             else
                 teleported = world->moveObject(actor, &worldModel->getCell(mCellId), mPosition.asVec3(), true, true);
         }
@@ -75,6 +75,8 @@ namespace MWWorld
                 .getCreatureStats(teleported)
                 .getActiveSpells()
                 .purgeEffect(actor, ESM::MagicEffect::WaterWalking);
+
+        MWBase::Environment::get().getLuaManager()->objectTeleported(teleported);
     }
 
     void ActionTeleport::getFollowers(

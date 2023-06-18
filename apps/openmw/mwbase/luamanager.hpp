@@ -47,6 +47,7 @@ namespace MWBase
         virtual void gameLoaded() = 0;
         virtual void objectAddedToScene(const MWWorld::Ptr& ptr) = 0;
         virtual void objectRemovedFromScene(const MWWorld::Ptr& ptr) = 0;
+        virtual void objectTeleported(const MWWorld::Ptr& ptr) = 0;
         virtual void itemConsumed(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) = 0;
         virtual void objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
         virtual void exteriorCreated(MWWorld::CellStore& cell) = 0;
