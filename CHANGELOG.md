@@ -290,6 +290,7 @@
     Feature #6700: Support windowed fullscreen
     Feature #6706: Save the size of the Options window
     Feature #6721: OpenMW-CS: Add option to open records in new window
+    Feature #6823: Animation layering for osgAnimation formats
     Feature #6867: Add a way to localize hardcoded strings in GUI
     Feature #6888: Add switch for armor degradation fix
     Feature #6925: Allow to use a mouse wheel to rotate a head in the race selection menu
