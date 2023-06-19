@@ -385,6 +385,19 @@
 -- @usage inventory:find('gold_001')
 
 ---
+-- Will resolve the inventory, filling it with levelled items if applicable, making its contents permanent. Must be used in a global script.
+-- @function [parent=#Inventory] resolve
+-- @param self
+-- @usage inventory:resolve()
+
+---
+-- Checks if the inventory has a resolved item list.
+-- @function [parent=#Inventory] isResolved
+-- @param self
+-- @return #boolean
+-- @usage inventory:isResolved()
+
+---
 -- Get all items with given recordId from the inventory.
 -- @function [parent=#Inventory] findAll
 -- @param self
