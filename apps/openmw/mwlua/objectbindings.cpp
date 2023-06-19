@@ -525,6 +525,19 @@ namespace MWLua
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
                 return store.count(ESM::RefId::stringRefId(recordId));
             };
+            if constexpr (std::is_same_v<ObjectT, GObject>)
+            {
+                inventoryT["resolve"] = [](const InventoryT& inventory) {
+                    const MWWorld::Ptr& ptr = inventory.mObj.ptr();
+                    MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+                    store.resolve();
+                };
+            }
+            inventoryT["isResolved"] = [](const InventoryT& inventory) -> bool {
+                const MWWorld::Ptr& ptr = inventory.mObj.ptr();
+                MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
+                return store.isResolved();
+            };
             inventoryT["find"] = [](const InventoryT& inventory, std::string_view recordId) -> sol::optional<ObjectT> {
                 const MWWorld::Ptr& ptr = inventory.mObj.ptr();
                 MWWorld::ContainerStore& store = ptr.getClass().getContainerStore(ptr);
