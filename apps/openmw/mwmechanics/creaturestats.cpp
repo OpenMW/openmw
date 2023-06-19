@@ -46,6 +46,10 @@ namespace MWMechanics
         , mLevel(0)
         , mAttackingOrSpell(false)
     {
+        for (const ESM::Attribute& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
+        {
+            mAttributes.emplace(attribute.mId, AttributeValue{});
+        }
     }
 
     const AiSequence& CreatureStats::getAiSequence() const
@@ -74,13 +78,9 @@ namespace MWMechanics
         return fFatigueBase - fFatigueMult * (1 - normalised);
     }
 
-    const AttributeValue& CreatureStats::getAttribute(int index) const
+    const AttributeValue& CreatureStats::getAttribute(ESM::Attribute::AttributeID id) const
     {
-        if (index < 0 || index > 7)
-        {
-            throw std::runtime_error("attribute index is out of range");
-        }
-        return mAttributes[index];
+        return mAttributes.at(id);
     }
 
     const DynamicStat<float>& CreatureStats::getHealth() const
@@ -147,30 +147,25 @@ namespace MWMechanics
         return mMagicEffects;
     }
 
-    void CreatureStats::setAttribute(int index, float base)
+    void CreatureStats::setAttribute(ESM::Attribute::AttributeID id, float base)
     {
-        AttributeValue current = getAttribute(index);
+        AttributeValue current = getAttribute(id);
         current.setBase(base);
-        setAttribute(index, current);
+        setAttribute(id, current);
     }
 
-    void CreatureStats::setAttribute(int index, const AttributeValue& value)
+    void CreatureStats::setAttribute(ESM::Attribute::AttributeID id, const AttributeValue& value)
     {
-        if (index < 0 || index > 7)
-        {
-            throw std::runtime_error("attribute index is out of range");
-        }
-
-        const AttributeValue& currentValue = mAttributes[index];
+        const AttributeValue& currentValue = mAttributes.at(id);
 
         if (value != currentValue)
         {
-            mAttributes[index] = value;
+            mAttributes[id] = value;
 
-            if (index == ESM::Attribute::Intelligence)
+            if (id == ESM::Attribute::Intelligence)
                 recalculateMagicka();
-            else if (index == ESM::Attribute::Strength || index == ESM::Attribute::Willpower
-                || index == ESM::Attribute::Agility || index == ESM::Attribute::Endurance)
+            else if (id == ESM::Attribute::Strength || id == ESM::Attribute::Willpower || id == ESM::Attribute::Agility
+                || id == ESM::Attribute::Endurance)
             {
                 float strength = getAttribute(ESM::Attribute::Strength).getModified();
                 float willpower = getAttribute(ESM::Attribute::Willpower).getModified();
@@ -536,7 +531,7 @@ namespace MWMechanics
     void CreatureStats::writeState(ESM::CreatureStats& state) const
     {
         for (size_t i = 0; i < state.mAttributes.size(); ++i)
-            mAttributes[i].writeState(state.mAttributes[i]);
+            getAttribute(static_cast<ESM::Attribute::AttributeID>(i)).writeState(state.mAttributes[i]);
 
         for (size_t i = 0; i < state.mDynamic.size(); ++i)
             mDynamic[i].writeState(state.mDynamic[i]);
@@ -593,7 +588,7 @@ namespace MWMechanics
         if (!state.mMissingACDT)
         {
             for (size_t i = 0; i < state.mAttributes.size(); ++i)
-                mAttributes[i].readState(state.mAttributes[i]);
+                mAttributes[static_cast<ESM::Attribute::AttributeID>(i)].readState(state.mAttributes[i]);
 
             for (size_t i = 0; i < state.mDynamic.size(); ++i)
                 mDynamic[i].readState(state.mDynamic[i]);

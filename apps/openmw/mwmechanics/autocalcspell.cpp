@@ -27,13 +27,13 @@ namespace MWMechanics
         ESM::RefId mWeakestSpell;
     };
 
-    std::vector<ESM::RefId> autoCalcNpcSpells(
-        const std::map<ESM::RefId, SkillValue>& actorSkills, const int* actorAttributes, const ESM::Race* race)
+    std::vector<ESM::RefId> autoCalcNpcSpells(const std::map<ESM::RefId, SkillValue>& actorSkills,
+        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes, const ESM::Race* race)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
             = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
         static const float fNPCbaseMagickaMult = gmst.find("fNPCbaseMagickaMult")->mValue.getFloat();
-        float baseMagicka = fNPCbaseMagickaMult * actorAttributes[ESM::Attribute::Intelligence];
+        float baseMagicka = fNPCbaseMagickaMult * actorAttributes.at(ESM::Attribute::Intelligence).getBase();
 
         static const std::string schools[]
             = { "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration" };
@@ -148,15 +148,15 @@ namespace MWMechanics
         return selectedSpells;
     }
 
-    std::vector<ESM::RefId> autoCalcPlayerSpells(
-        const std::map<ESM::RefId, SkillValue>& actorSkills, const int* actorAttributes, const ESM::Race* race)
+    std::vector<ESM::RefId> autoCalcPlayerSpells(const std::map<ESM::RefId, SkillValue>& actorSkills,
+        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes, const ESM::Race* race)
     {
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
         static const float fPCbaseMagickaMult
             = esmStore.get<ESM::GameSetting>().find("fPCbaseMagickaMult")->mValue.getFloat();
 
-        float baseMagicka = fPCbaseMagickaMult * actorAttributes[ESM::Attribute::Intelligence];
+        float baseMagicka = fPCbaseMagickaMult * actorAttributes.at(ESM::Attribute::Intelligence).getBase();
         bool reachedLimit = false;
         const ESM::Spell* weakestSpell = nullptr;
         int minCost = std::numeric_limits<int>::max();
@@ -227,8 +227,8 @@ namespace MWMechanics
         return selectedSpells;
     }
 
-    bool attrSkillCheck(
-        const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills, const int* actorAttributes)
+    bool attrSkillCheck(const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills,
+        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes)
     {
         for (const auto& spellEffect : spell->mEffects.mList)
         {
@@ -250,8 +250,8 @@ namespace MWMechanics
 
             if ((magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute))
             {
-                assert(spellEffect.mAttribute >= 0 && spellEffect.mAttribute < ESM::Attribute::Length);
-                if (actorAttributes[spellEffect.mAttribute] < iAutoSpellAttSkillMin)
+                auto found = actorAttributes.find(ESM::Attribute::AttributeID(spellEffect.mAttribute));
+                if (found == actorAttributes.end() || found->second.getBase() < iAutoSpellAttSkillMin)
                     return false;
             }
         }
@@ -313,7 +313,7 @@ namespace MWMechanics
     }
 
     float calcAutoCastChance(const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills,
-        const int* actorAttributes, int effectiveSchool)
+        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes, int effectiveSchool)
     {
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100.f;
@@ -334,7 +334,8 @@ namespace MWMechanics
                 spell, actorSkills, effectiveSchool, skillTerm); // Note effectiveSchool is unused after this
 
         float castChance = skillTerm - MWMechanics::calcSpellCost(*spell)
-            + 0.2f * actorAttributes[ESM::Attribute::Willpower] + 0.1f * actorAttributes[ESM::Attribute::Luck];
+            + 0.2f * actorAttributes.at(ESM::Attribute::Willpower).getBase()
+            + 0.1f * actorAttributes.at(ESM::Attribute::Luck).getBase();
         return castChance;
     }
 }

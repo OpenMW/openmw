@@ -102,13 +102,13 @@ namespace MWGui::Widgets
     /* MWAttribute */
 
     MWAttribute::MWAttribute()
-        : mId(-1)
+        : mId(ESM::Attribute::Length)
         , mAttributeNameWidget(nullptr)
         , mAttributeValueWidget(nullptr)
     {
     }
 
-    void MWAttribute::setAttributeId(int attributeId)
+    void MWAttribute::setAttributeId(ESM::Attribute::AttributeID attributeId)
     {
         mId = attributeId;
         updateWidgets();
@@ -153,8 +153,6 @@ namespace MWGui::Widgets
                 mAttributeValueWidget->_setWidgetState("normal");
         }
     }
-
-    MWAttribute::~MWAttribute() {}
 
     void MWAttribute::initialiseOverride()
     {

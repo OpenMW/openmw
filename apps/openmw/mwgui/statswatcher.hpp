@@ -31,7 +31,7 @@ namespace MWGui
     {
         MWWorld::Ptr mWatched;
 
-        MWMechanics::AttributeValue mWatchedAttributes[ESM::Attribute::Length];
+        std::map<ESM::Attribute::AttributeID, MWMechanics::AttributeValue> mWatchedAttributes;
         std::map<ESM::RefId, MWMechanics::SkillValue> mWatchedSkills;
 
         MWMechanics::DynamicStat<float> mWatchedHealth;

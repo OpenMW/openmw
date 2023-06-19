@@ -148,11 +148,11 @@ namespace MWMechanics
 
             bool male = (player->mFlags & ESM::NPC::Female) == 0;
 
-            for (int i = 0; i < ESM::Attribute::Length; ++i)
+            for (const ESM::Attribute& attribute : esmStore.get<ESM::Attribute>())
             {
-                const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
+                const ESM::Race::MaleFemale& value = race->mData.mAttributeValues[attribute.mId];
 
-                creatureStats.setAttribute(i, male ? attribute.mMale : attribute.mFemale);
+                creatureStats.setAttribute(attribute.mId, male ? value.mMale : value.mFemale);
             }
 
             for (const ESM::Skill& skill : esmStore.get<ESM::Skill>())
@@ -195,7 +195,8 @@ namespace MWMechanics
             {
                 if (attribute >= 0 && attribute < ESM::Attribute::Length)
                 {
-                    creatureStats.setAttribute(attribute, creatureStats.getAttribute(attribute).getBase() + 10);
+                    auto id = static_cast<ESM::Attribute::AttributeID>(attribute);
+                    creatureStats.setAttribute(id, creatureStats.getAttribute(id).getBase() + 10);
                 }
             }
 
@@ -223,12 +224,10 @@ namespace MWMechanics
         if (mRaceSelected)
             race = esmStore.get<ESM::Race>().find(player->mRace);
 
-        int attributes[ESM::Attribute::Length];
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
-            attributes[i] = npcStats.getAttribute(i).getBase();
         npcStats.updateHealth();
 
-        std::vector<ESM::RefId> selectedSpells = autoCalcPlayerSpells(npcStats.getSkills(), attributes, race);
+        std::vector<ESM::RefId> selectedSpells
+            = autoCalcPlayerSpells(npcStats.getSkills(), npcStats.getAttributes(), race);
 
         for (const ESM::RefId& spell : selectedSpells)
             creatureStats.getSpells().add(spell);

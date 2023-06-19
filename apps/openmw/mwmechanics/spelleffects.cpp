@@ -79,27 +79,30 @@ namespace
     void damageAttribute(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect, float magnitude)
     {
         auto& creatureStats = target.getClass().getCreatureStats(target);
-        auto attr = creatureStats.getAttribute(effect.mArg);
+        auto attribute = static_cast<ESM::Attribute::AttributeID>(effect.mArg);
+        auto attr = creatureStats.getAttribute(attribute);
         if (effect.mEffectId == ESM::MagicEffect::DamageAttribute)
             magnitude = std::min(attr.getModified(), magnitude);
         attr.damage(magnitude);
-        creatureStats.setAttribute(effect.mArg, attr);
+        creatureStats.setAttribute(attribute, attr);
     }
 
     void restoreAttribute(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect, float magnitude)
     {
         auto& creatureStats = target.getClass().getCreatureStats(target);
-        auto attr = creatureStats.getAttribute(effect.mArg);
+        auto attribute = static_cast<ESM::Attribute::AttributeID>(effect.mArg);
+        auto attr = creatureStats.getAttribute(attribute);
         attr.restore(magnitude);
-        creatureStats.setAttribute(effect.mArg, attr);
+        creatureStats.setAttribute(attribute, attr);
     }
 
     void fortifyAttribute(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect, float magnitude)
     {
         auto& creatureStats = target.getClass().getCreatureStats(target);
-        auto attr = creatureStats.getAttribute(effect.mArg);
+        auto attribute = static_cast<ESM::Attribute::AttributeID>(effect.mArg);
+        auto attr = creatureStats.getAttribute(attribute);
         attr.setModifier(attr.getModifier() + magnitude);
-        creatureStats.setAttribute(effect.mArg, attr);
+        creatureStats.setAttribute(attribute, attr);
     }
 
     void damageSkill(const MWWorld::Ptr& target, const ESM::ActiveEffect& effect, float magnitude)
@@ -740,9 +743,10 @@ namespace MWMechanics
                 if (spellParams.getType() == ESM::ActiveSpells::Type_Ability)
                 {
                     auto& creatureStats = target.getClass().getCreatureStats(target);
-                    AttributeValue attr = creatureStats.getAttribute(effect.mArg);
+                    auto attribute = static_cast<ESM::Attribute::AttributeID>(effect.mArg);
+                    AttributeValue attr = creatureStats.getAttribute(attribute);
                     attr.setBase(attr.getBase() + effect.mMagnitude);
-                    creatureStats.setAttribute(effect.mArg, attr);
+                    creatureStats.setAttribute(attribute, attr);
                 }
                 else
                     fortifyAttribute(target, effect, effect.mMagnitude);
@@ -1203,9 +1207,10 @@ namespace MWMechanics
                 if (spellParams.getType() == ESM::ActiveSpells::Type_Ability)
                 {
                     auto& creatureStats = target.getClass().getCreatureStats(target);
-                    AttributeValue attr = creatureStats.getAttribute(effect.mArg);
+                    auto attribute = static_cast<ESM::Attribute::AttributeID>(effect.mArg);
+                    AttributeValue attr = creatureStats.getAttribute(attribute);
                     attr.setBase(attr.getBase() - effect.mMagnitude);
-                    creatureStats.setAttribute(effect.mArg, attr);
+                    creatureStats.setAttribute(attribute, attr);
                 }
                 else
                     fortifyAttribute(target, effect, -effect.mMagnitude);

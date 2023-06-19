@@ -27,9 +27,10 @@
             <UserString key="VStretch" value="false"/>
         </Widget>
 
-        <Widget type="Widget" skin="" position="0 280 420 84" name="AssignWidget">
+        <Widget type="ScrollView" skin="MW_ScrollView" position="0 280 420 84" name="AssignWidget">
             <UserString key="HStretch" value="false"/>
             <UserString key="VStretch" value="false"/>
+            <Property key="CanvasAlign" value="Left"/>
         </Widget>
 
         <Widget type="HBox" skin="" position="0 0 330 24">

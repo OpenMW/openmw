@@ -201,7 +201,7 @@ namespace MWGui
 
     void ReviewDialog::setAttribute(ESM::Attribute::AttributeID attributeId, const MWMechanics::AttributeValue& value)
     {
-        std::map<int, Widgets::MWAttributePtr>::iterator attr = mAttributeWidgets.find(static_cast<int>(attributeId));
+        auto attr = mAttributeWidgets.find(attributeId);
         if (attr == mAttributeWidgets.end())
             return;
 
@@ -402,9 +402,9 @@ namespace MWGui
         if (!mRaceId.empty())
             race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(mRaceId);
 
-        int attributes[ESM::Attribute::Length];
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
-            attributes[i] = mAttributeWidgets[i]->getAttributeValue().getBase();
+        std::map<ESM::Attribute::AttributeID, MWMechanics::AttributeValue> attributes;
+        for (const auto& [key, value] : mAttributeWidgets)
+            attributes[key] = value->getAttributeValue();
 
         std::vector<ESM::RefId> selectedSpells = MWMechanics::autoCalcPlayerSpells(mSkillValues, attributes, race);
         for (ESM::RefId& spellId : selectedSpells)

@@ -28,9 +28,9 @@ namespace MWGui
         MyGUI::EditBox* mLevelDescription;
 
         MyGUI::Widget* mCoinBox;
-        MyGUI::Widget* mAssignWidget;
+        MyGUI::ScrollView* mAssignWidget;
 
-        std::vector<Widgets> mAttributeWidgets;
+        std::map<ESM::Attribute::AttributeID, Widgets> mAttributeWidgets;
         std::vector<MyGUI::ImageBox*> mCoins;
 
         std::vector<ESM::Attribute::AttributeID> mSpentAttributes;

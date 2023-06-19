@@ -61,8 +61,8 @@ namespace MWWorld
 
         for (size_t i = 0; i < mSaveSkills.size(); ++i)
             mSaveSkills[i] = stats.getSkill(ESM::Skill::indexToRefId(i)).getModified();
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
-            mSaveAttributes[i] = stats.getAttribute(i).getModified();
+        for (size_t i = 0; i < mSaveAttributes.size(); ++i)
+            mSaveAttributes[i] = stats.getAttribute(static_cast<ESM::Attribute::AttributeID>(i)).getModified();
     }
 
     void Player::restoreStats()
@@ -79,12 +79,13 @@ namespace MWWorld
             skill.restore(skill.getDamage());
             skill.setModifier(mSaveSkills[i] - skill.getBase());
         }
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
+        for (size_t i = 0; i < mSaveAttributes.size(); ++i)
         {
-            auto attribute = npcStats.getAttribute(i);
+            auto id = static_cast<ESM::Attribute::AttributeID>(i);
+            auto attribute = npcStats.getAttribute(id);
             attribute.restore(attribute.getDamage());
             attribute.setModifier(mSaveAttributes[i] - attribute.getBase());
-            npcStats.setAttribute(i, attribute);
+            npcStats.setAttribute(id, attribute);
         }
     }
 
@@ -252,11 +253,7 @@ namespace MWWorld
         mLastKnownExteriorPosition = osg::Vec3f(0, 0, 0);
 
         mSaveSkills.fill(0.f);
-
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
-        {
-            mSaveAttributes[i] = 0.f;
-        }
+        mSaveAttributes.fill(0.f);
 
         mMarkedPosition.pos[0] = 0;
         mMarkedPosition.pos[1] = 0;
@@ -291,7 +288,7 @@ namespace MWWorld
         else
             player.mHasMark = false;
 
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
+        for (size_t i = 0; i < mSaveAttributes.size(); ++i)
             player.mSaveAttributes[i] = mSaveAttributes[i];
         for (size_t i = 0; i < mSaveSkills.size(); ++i)
             player.mSaveSkills[i] = mSaveSkills[i];
@@ -329,7 +326,7 @@ namespace MWWorld
 
             mPlayer.load(player.mObject);
 
-            for (int i = 0; i < ESM::Attribute::Length; ++i)
+            for (size_t i = 0; i < mSaveAttributes.size(); ++i)
                 mSaveAttributes[i] = player.mSaveAttributes[i];
             for (size_t i = 0; i < mSaveSkills.size(); ++i)
                 mSaveSkills[i] = player.mSaveSkills[i];

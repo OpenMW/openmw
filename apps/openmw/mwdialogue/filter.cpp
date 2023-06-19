@@ -382,9 +382,10 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
                 .getModified(false);
 
         case SelectWrapper::Function_PcAttribute:
-
-            return player.getClass().getCreatureStats(player).getAttribute(select.getArgument()).getModified();
-
+        {
+            auto attribute = static_cast<ESM::Attribute::AttributeID>(select.getArgument());
+            return player.getClass().getCreatureStats(player).getAttribute(attribute).getModified();
+        }
         case SelectWrapper::Function_PcSkill:
         {
             ESM::RefId skill = ESM::Skill::indexToRefId(select.getArgument());
@@ -653,8 +654,10 @@ bool MWDialogue::Filter::hasFactionRankSkillRequirements(
 
     MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-    return stats.getAttribute(faction.mData.mAttribute[0]).getBase() >= faction.mData.mRankData[rank].mAttribute1
-        && stats.getAttribute(faction.mData.mAttribute[1]).getBase() >= faction.mData.mRankData[rank].mAttribute2;
+    return stats.getAttribute(ESM::Attribute::AttributeID(faction.mData.mAttribute[0])).getBase()
+        >= faction.mData.mRankData[rank].mAttribute1
+        && stats.getAttribute(ESM::Attribute::AttributeID(faction.mData.mAttribute[1])).getBase()
+        >= faction.mData.mRankData[rank].mAttribute2;
 }
 
 bool MWDialogue::Filter::hasFactionRankReputationRequirements(

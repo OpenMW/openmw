@@ -260,8 +260,8 @@ namespace MWGui
         mSpecializationName->setCaption(specName);
         ToolTips::createSpecializationToolTip(mSpecializationName, specName, specialization);
 
-        mFavoriteAttribute[0]->setAttributeId(klass->mData.mAttribute[0]);
-        mFavoriteAttribute[1]->setAttributeId(klass->mData.mAttribute[1]);
+        mFavoriteAttribute[0]->setAttributeId(static_cast<ESM::Attribute::AttributeID>(klass->mData.mAttribute[0]));
+        mFavoriteAttribute[1]->setAttributeId(static_cast<ESM::Attribute::AttributeID>(klass->mData.mAttribute[1]));
         ToolTips::createAttributeToolTip(mFavoriteAttribute[0], mFavoriteAttribute[0]->getAttributeId());
         ToolTips::createAttributeToolTip(mFavoriteAttribute[1], mFavoriteAttribute[1]->getAttributeId());
 
@@ -776,8 +776,7 @@ namespace MWGui
 
     void SelectAttributeDialog::onAttributeClicked(Widgets::MWAttributePtr _sender)
     {
-        // TODO: Change MWAttribute to set and get AttributeID enum instead of int
-        mAttributeId = static_cast<ESM::Attribute::AttributeID>(_sender->getAttributeId());
+        mAttributeId = _sender->getAttributeId();
         eventItemSelected();
     }
 

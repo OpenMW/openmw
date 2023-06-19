@@ -10,7 +10,7 @@
             </Widget>
 
             <!-- Attribute list -->
-            <Widget type="ScrollView" skin="MW_ScrollView" position="0 28 216 172" name="Attributes" align="Left Top">
+            <Widget type="ScrollView" skin="MW_ScrollView" position="0 28 216 144" name="Attributes" align="Left Top">
                 <Property key="CanvasAlign" value="Left"/>
             </Widget>
 

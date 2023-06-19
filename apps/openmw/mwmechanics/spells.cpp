@@ -247,23 +247,24 @@ namespace MWMechanics
                 return;
 
             // Note: if target actor has the Restore attribute effects, stats will be restored.
-            for (std::vector<ESM::SpellState::PermanentSpellEffectInfo>::const_iterator effectIt = it->second.begin();
-                 effectIt != it->second.end(); ++effectIt)
+            for (const ESM::SpellState::PermanentSpellEffectInfo& info : it->second)
             {
                 // Applied corprus effects are already in loaded stats modifiers
-                if (effectIt->mId == ESM::MagicEffect::FortifyAttribute)
+                if (info.mId == ESM::MagicEffect::FortifyAttribute)
                 {
-                    AttributeValue attr = creatureStats->getAttribute(effectIt->mArg);
-                    attr.setModifier(attr.getModifier() - effectIt->mMagnitude);
-                    attr.damage(-effectIt->mMagnitude);
-                    creatureStats->setAttribute(effectIt->mArg, attr);
+                    auto id = static_cast<ESM::Attribute::AttributeID>(info.mArg);
+                    AttributeValue attr = creatureStats->getAttribute(id);
+                    attr.setModifier(attr.getModifier() - info.mMagnitude);
+                    attr.damage(-info.mMagnitude);
+                    creatureStats->setAttribute(id, attr);
                 }
-                else if (effectIt->mId == ESM::MagicEffect::DrainAttribute)
+                else if (info.mId == ESM::MagicEffect::DrainAttribute)
                 {
-                    AttributeValue attr = creatureStats->getAttribute(effectIt->mArg);
-                    attr.setModifier(attr.getModifier() + effectIt->mMagnitude);
-                    attr.damage(effectIt->mMagnitude);
-                    creatureStats->setAttribute(effectIt->mArg, attr);
+                    auto id = static_cast<ESM::Attribute::AttributeID>(info.mArg);
+                    AttributeValue attr = creatureStats->getAttribute(id);
+                    attr.setModifier(attr.getModifier() + info.mMagnitude);
+                    attr.damage(info.mMagnitude);
+                    creatureStats->setAttribute(id, attr);
                 }
             }
         }

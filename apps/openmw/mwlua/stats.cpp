@@ -182,9 +182,10 @@ namespace MWLua
         template <class G>
         sol::object get(const Context& context, std::string_view prop, G getter) const
         {
+            auto id = static_cast<ESM::Attribute::AttributeID>(mIndex);
             return getValue(
-                context, mObject, &AttributeStat::setValue, mIndex, prop, [this, getter](const MWWorld::Ptr& ptr) {
-                    return (ptr.getClass().getCreatureStats(ptr).getAttribute(mIndex).*getter)();
+                context, mObject, &AttributeStat::setValue, mIndex, prop, [id, getter](const MWWorld::Ptr& ptr) {
+                    return (ptr.getClass().getCreatureStats(ptr).getAttribute(id).*getter)();
                 });
         }
 
@@ -213,9 +214,9 @@ namespace MWLua
 
         static void setValue(Index i, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
         {
-            int index = std::get<int>(i);
+            auto id = static_cast<ESM::Attribute::AttributeID>(std::get<int>(i));
             auto& stats = ptr.getClass().getCreatureStats(ptr);
-            auto stat = stats.getAttribute(index);
+            auto stat = stats.getAttribute(id);
             float floatValue = LuaUtil::cast<float>(value);
             if (prop == "base")
                 stat.setBase(floatValue);
@@ -226,7 +227,7 @@ namespace MWLua
             }
             else if (prop == "modifier")
                 stat.setModifier(floatValue);
-            stats.setAttribute(index, stat);
+            stats.setAttribute(id, stat);
         }
     };
 

@@ -7,6 +7,7 @@
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Widget.h>
 
+#include <components/esm/attr.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm3/effectlist.hpp>
 #include <components/esm3/loadskil.hpp>
@@ -31,8 +32,6 @@ namespace MWGui
     namespace Widgets
     {
         class MWEffectList;
-
-        void fixTexturePath(std::string& path);
 
         struct SpellEffectParams
         {
@@ -139,10 +138,10 @@ namespace MWGui
 
             typedef MWMechanics::AttributeValue AttributeValue;
 
-            void setAttributeId(int attributeId);
+            void setAttributeId(ESM::Attribute::AttributeID attributeId);
             void setAttributeValue(const AttributeValue& value);
 
-            int getAttributeId() const { return mId; }
+            ESM::Attribute::AttributeID getAttributeId() const { return mId; }
             const AttributeValue& getAttributeValue() const { return mValue; }
 
             // Events
@@ -154,7 +153,7 @@ namespace MWGui
             EventHandle_AttributeVoid eventClicked;
 
         protected:
-            virtual ~MWAttribute();
+            ~MWAttribute() override = default;
 
             void initialiseOverride() override;
 
@@ -163,7 +162,7 @@ namespace MWGui
         private:
             void updateWidgets();
 
-            int mId;
+            ESM::Attribute::AttributeID mId;
             AttributeValue mValue;
             MyGUI::TextBox* mAttributeNameWidget;
             MyGUI::TextBox* mAttributeValueWidget;

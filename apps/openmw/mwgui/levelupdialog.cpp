@@ -3,6 +3,7 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_ScrollView.h>
 #include <MyGUI_TextBox.h>
 
 #include <components/fallback/fallback.hpp>
@@ -50,9 +51,9 @@ namespace MWGui
             size_t i = 0;
             for (const ESM::Attribute& attribute : store)
             {
-                auto& widgets = mAttributeWidgets.emplace_back();
                 const int offset = sCols[i / perCol];
                 const int row = static_cast<int>(i % perCol);
+                Widgets widgets;
                 widgets.mMultiplier = mAssignWidget->createWidget<MyGUI::TextBox>(
                     "SandTextVCenter", { offset, 20 * row, 100, 20 }, MyGUI::Align::Default);
                 auto* hbox = mAssignWidget->createWidget<Gui::HBox>(
@@ -68,8 +69,15 @@ namespace MWGui
                 widgets.mButton->setUserString("ImageTexture_AttributeImage", attribute.mIcon);
                 widgets.mButton->setCaption(attribute.mName);
                 widgets.mValue = hbox->createWidget<Gui::AutoSizedTextBox>("SandText", {}, MyGUI::Align::Default);
+                mAttributeWidgets.emplace(attribute.mId, widgets);
                 ++i;
             }
+
+            mAssignWidget->setVisibleVScroll(false);
+            mAssignWidget->setCanvasSize(MyGUI::IntSize(
+                mAssignWidget->getWidth(), std::max(mAssignWidget->getHeight(), static_cast<int>(20 * perCol))));
+            mAssignWidget->setVisibleVScroll(true);
+            mAssignWidget->setViewOffset(MyGUI::IntPoint());
         }
 
         for (unsigned int i = 0; i < sMaxCoins; ++i)
@@ -136,11 +144,12 @@ namespace MWGui
             const auto& attribute = mSpentAttributes[i];
             const auto& widgets = mAttributeWidgets[attribute];
 
-            int xdiff = widgets.mMultiplier->getCaption().empty() ? 0 : 20;
+            const int xdiff = widgets.mMultiplier->getCaption().empty() ? 0 : 20;
+            const auto* hbox = widgets.mButton->getParent();
 
-            MyGUI::IntPoint pos = widgets.mButton->getAbsolutePosition() - mAssignWidget->getAbsolutePosition()
-                - MyGUI::IntPoint(22 + xdiff, 0);
-            pos.top += (widgets.mButton->getHeight() - image->getHeight()) / 2;
+            MyGUI::IntPoint pos = hbox->getPosition();
+            pos.left -= 22 + xdiff;
+            pos.top += (hbox->getHeight() - image->getHeight()) / 2;
             image->setPosition(pos);
         }
 

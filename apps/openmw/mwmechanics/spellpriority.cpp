@@ -540,7 +540,11 @@ namespace MWMechanics
             case ESM::MagicEffect::DamageAttribute:
             case ESM::MagicEffect::DrainAttribute:
                 if (!enemy.isEmpty()
-                    && enemy.getClass().getCreatureStats(enemy).getAttribute(effect.mAttribute).getModified() <= 0)
+                    && enemy.getClass()
+                            .getCreatureStats(enemy)
+                            .getAttribute(ESM::Attribute::AttributeID(effect.mAttribute))
+                            .getModified()
+                        <= 0)
                     return 0.f;
                 {
                     if (effect.mAttribute >= 0 && effect.mAttribute < ESM::Attribute::Length)

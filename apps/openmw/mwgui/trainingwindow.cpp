@@ -150,7 +150,8 @@ namespace MWGui
         }
 
         // You can not train a skill above its governing attribute
-        if (pcStats.getSkill(skill->mId).getBase() >= pcStats.getAttribute(skill->mData.mAttribute).getBase())
+        if (pcStats.getSkill(skill->mId).getBase()
+            >= pcStats.getAttribute(ESM::Attribute::AttributeID(skill->mData.mAttribute)).getBase())
         {
             MWBase::Environment::get().getWindowManager()->messageBox("#{sNotifyMessage17}");
             return;

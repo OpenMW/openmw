@@ -109,10 +109,10 @@ namespace MWScript
         template <class R>
         class OpGetAttribute : public Interpreter::Opcode0
         {
-            int mIndex;
+            ESM::Attribute::AttributeID mIndex;
 
         public:
-            OpGetAttribute(int index)
+            OpGetAttribute(ESM::Attribute::AttributeID index)
                 : mIndex(index)
             {
             }
@@ -130,10 +130,10 @@ namespace MWScript
         template <class R>
         class OpSetAttribute : public Interpreter::Opcode0
         {
-            int mIndex;
+            ESM::Attribute::AttributeID mIndex;
 
         public:
-            OpSetAttribute(int index)
+            OpSetAttribute(ESM::Attribute::AttributeID index)
                 : mIndex(index)
             {
             }
@@ -154,10 +154,10 @@ namespace MWScript
         template <class R>
         class OpModAttribute : public Interpreter::Opcode0
         {
-            int mIndex;
+            ESM::Attribute::AttributeID mIndex;
 
         public:
-            OpModAttribute(int index)
+            OpModAttribute(ESM::Attribute::AttributeID index)
                 : mIndex(index)
             {
             }
@@ -1322,17 +1322,18 @@ namespace MWScript
         {
             for (int i = 0; i < Compiler::Stats::numberOfAttributes; ++i)
             {
-                interpreter.installSegment5<OpGetAttribute<ImplicitRef>>(Compiler::Stats::opcodeGetAttribute + i, i);
+                auto id = static_cast<ESM::Attribute::AttributeID>(i);
+                interpreter.installSegment5<OpGetAttribute<ImplicitRef>>(Compiler::Stats::opcodeGetAttribute + i, id);
                 interpreter.installSegment5<OpGetAttribute<ExplicitRef>>(
-                    Compiler::Stats::opcodeGetAttributeExplicit + i, i);
+                    Compiler::Stats::opcodeGetAttributeExplicit + i, id);
 
-                interpreter.installSegment5<OpSetAttribute<ImplicitRef>>(Compiler::Stats::opcodeSetAttribute + i, i);
+                interpreter.installSegment5<OpSetAttribute<ImplicitRef>>(Compiler::Stats::opcodeSetAttribute + i, id);
                 interpreter.installSegment5<OpSetAttribute<ExplicitRef>>(
-                    Compiler::Stats::opcodeSetAttributeExplicit + i, i);
+                    Compiler::Stats::opcodeSetAttributeExplicit + i, id);
 
-                interpreter.installSegment5<OpModAttribute<ImplicitRef>>(Compiler::Stats::opcodeModAttribute + i, i);
+                interpreter.installSegment5<OpModAttribute<ImplicitRef>>(Compiler::Stats::opcodeModAttribute + i, id);
                 interpreter.installSegment5<OpModAttribute<ExplicitRef>>(
-                    Compiler::Stats::opcodeModAttributeExplicit + i, i);
+                    Compiler::Stats::opcodeModAttributeExplicit + i, id);
             }
 
             for (int i = 0; i < Compiler::Stats::numberOfDynamics; ++i)
