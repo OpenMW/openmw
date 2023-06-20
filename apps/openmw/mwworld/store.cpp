@@ -210,21 +210,28 @@ namespace MWWorld
     template <class T, class Id>
     RecordId TypedDynamicStore<T, Id>::load(ESM::ESMReader& esm)
     {
-        T record;
-        bool isDeleted = false;
         if constexpr (!ESM::isESM4Rec(T::sRecordId))
         {
+            T record;
+            bool isDeleted = false;
             record.load(esm, isDeleted);
+
+            std::pair<typename Static::iterator, bool> inserted = mStatic.insert_or_assign(record.mId, record);
+            if (inserted.second)
+                mShared.push_back(&inserted.first->second);
+
+            if constexpr (std::is_same_v<Id, ESM::RefId>)
+                return RecordId(record.mId, isDeleted);
+            else
+                return RecordId();
         }
-
-        std::pair<typename Static::iterator, bool> inserted = mStatic.insert_or_assign(record.mId, record);
-        if (inserted.second)
-            mShared.push_back(&inserted.first->second);
-
-        if constexpr (std::is_same_v<Id, ESM::RefId>)
-            return RecordId(record.mId, isDeleted);
         else
-            return RecordId();
+        {
+            std::stringstream msg;
+            msg << "Can not load record of type ESM::REC_" << getRecNameString(T::sRecordId).toStringView()
+                << ": ESM::ESMReader can load only ESM3 records.";
+            throw std::runtime_error(msg.str());
+        }
     }
 
     template <class T, class Id>
