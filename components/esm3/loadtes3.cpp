@@ -35,8 +35,8 @@ void Header::load (ESMReader &esm)
       esm.getSubHeader();
       esm.getT(mData.version);
       esm.getT(mData.type);
-      mData.author.assign( esm.getString(32) );
-      mData.desc.assign( esm.getString(256) );
+      mData.author.assign(esm.getMaybeFixedStringSize(32));
+      mData.desc.assign(esm.getMaybeFixedStringSize(256));
       esm.getT(mData.records);
     }
 

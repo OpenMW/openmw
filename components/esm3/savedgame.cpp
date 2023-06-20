@@ -14,6 +14,10 @@ void SavedGame::load (ESMReader &esm)
     esm.getHNOT (mPlayerLevel, "PLLE");
 
     mPlayerClassId = esm.getHNOString("PLCL");
+    // Erase RefId type
+    if (esm.getFormat() >= 22 && !mPlayerClassId.empty())
+        mPlayerClassId = mPlayerClassId.substr(1);
+
     mPlayerClassName = esm.getHNOString("PLCN");
 
     mPlayerCell = esm.getHNString("PLCE");
