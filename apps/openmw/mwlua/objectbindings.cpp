@@ -4,6 +4,9 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/shapes/box.hpp>
+#include <components/lua/utilpackage.hpp>
+#include <components/misc/convert.hpp>
+#include <components/misc/mathutil.hpp>
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
@@ -141,6 +144,28 @@ namespace MWLua
             listT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
         }
 
+        osg::Vec3f toEulerRotation(const sol::object& transform, bool isActor)
+        {
+            if (transform.is<LuaUtil::TransformQ>())
+            {
+                const osg::Quat& q = transform.as<LuaUtil::TransformQ>().mQ;
+                return isActor ? Misc::toEulerAnglesXZ(q) : Misc::toEulerAnglesZYX(q);
+            }
+            else
+            {
+                const osg::Matrixf& m = LuaUtil::cast<LuaUtil::TransformM>(transform).mM;
+                return isActor ? Misc::toEulerAnglesXZ(m) : Misc::toEulerAnglesZYX(m);
+            }
+        }
+
+        osg::Quat toQuat(const ESM::Position& pos, bool isActor)
+        {
+            if (isActor)
+                return osg::Quat(pos.rot[0], osg::Vec3(-1, 0, 0)) * osg::Quat(pos.rot[2], osg::Vec3(0, 0, -1));
+            else
+                return Misc::Convert::makeOsgQuat(pos.rot);
+        }
+
         template <class ObjectT>
         void addBasicBindings(sol::usertype<ObjectT>& objectT, const Context& context)
         {
@@ -166,12 +191,14 @@ namespace MWLua
                 [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getRefData().getPosition().asVec3(); });
             objectT["scale"]
                 = sol::readonly_property([](const ObjectT& o) -> float { return o.ptr().getCellRef().getScale(); });
-            objectT["rotation"] = sol::readonly_property(
-                [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getRefData().getPosition().asRotationVec3(); });
+            objectT["rotation"] = sol::readonly_property([](const ObjectT& o) -> LuaUtil::TransformQ {
+                return { toQuat(o.ptr().getRefData().getPosition(), o.ptr().getClass().isActor()) };
+            });
             objectT["startingPosition"] = sol::readonly_property(
                 [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getCellRef().getPosition().asVec3(); });
-            objectT["startingRotation"] = sol::readonly_property(
-                [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getCellRef().getPosition().asRotationVec3(); });
+            objectT["startingRotation"] = sol::readonly_property([](const ObjectT& o) -> LuaUtil::TransformQ {
+                return { toQuat(o.ptr().getCellRef().getPosition(), o.ptr().getClass().isActor()) };
+            });
             objectT["getBoundingBox"] = [](const ObjectT& o) {
                 MWRender::RenderingManager* renderingManager
                     = MWBase::Environment::get().getWorld()->getRenderingManager();
@@ -401,12 +428,14 @@ namespace MWLua
                         throw std::runtime_error("Object is either removed or already in the process of teleporting");
                     osg::Vec3f rot = ptr.getRefData().getPosition().asRotationVec3();
                     bool placeOnGround = false;
-                    if (options.is<osg::Vec3f>())
-                        rot = options.as<osg::Vec3f>();
+                    if (LuaUtil::isTransform(options))
+                        rot = toEulerRotation(options, ptr.getClass().isActor());
                     else if (options != sol::nil)
                     {
                         sol::table t = LuaUtil::cast<sol::table>(options);
-                        rot = LuaUtil::getValueOrDefault(t["rotation"], rot);
+                        sol::object rotationArg = t["rotation"];
+                        if (rotationArg != sol::nil)
+                            rot = toEulerRotation(rotationArg, ptr.getClass().isActor());
                         placeOnGround = LuaUtil::getValueOrDefault(t["onGround"], placeOnGround);
                     }
                     if (ptr.getContainerStore())

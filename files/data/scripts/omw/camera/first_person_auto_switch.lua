@@ -34,7 +34,7 @@ function M.onUpdate(dt)
         return
     end
     if camera.getMode() == camera.MODE.ThirdPerson and camera.getThirdPersonDistance() < limitSwitch
-            and math.abs(util.normalizeAngle(camera.getYaw() - self.rotation.z)) < math.rad(10) then
+            and math.abs(util.normalizeAngle(camera.getYaw() - self.rotation:getYaw())) < math.rad(10) then
         if castRayBackward() <= limitSwitch then
             camera.setMode(camera.MODE.FirstPerson, true)
             forcedFirstPerson = true
