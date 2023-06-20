@@ -30,9 +30,11 @@ namespace
         potion.mScript = ESM::RefId::deserializeText(scriptId);
         potion.mData.mWeight = rec["weight"];
         potion.mData.mValue = rec["value"];
-
-        // Note: The list of effects is not yet present in openmw.types.Potion,
-        // so we don't map it here either.
+        sol::table effectsTable = rec["effects"];
+        size_t numEffects = effectsTable.size();
+        potion.mEffects.mList.resize(numEffects);
+        for (size_t i = 0; i < numEffects; ++i)
+            potion.mEffects.mList[i] = LuaUtil::cast<ESM::ENAMstruct>(effectsTable[i + 1]);
         return potion;
     }
 }
@@ -66,5 +68,11 @@ namespace MWLua
             = sol::readonly_property([](const ESM::Potion& rec) -> std::string { return rec.mScript.serializeText(); });
         record["weight"] = sol::readonly_property([](const ESM::Potion& rec) -> float { return rec.mData.mWeight; });
         record["value"] = sol::readonly_property([](const ESM::Potion& rec) -> int { return rec.mData.mValue; });
+        record["effects"] = sol::readonly_property([context](const ESM::Potion& rec) -> sol::table {
+            sol::table res(context.mLua->sol(), sol::create);
+            for (size_t i = 0; i < rec.mEffects.mList.size(); ++i)
+                res[i + 1] = rec.mEffects.mList[i]; // ESM::ENAMstruct (effect params)
+            return res;
+        });
     }
 }
