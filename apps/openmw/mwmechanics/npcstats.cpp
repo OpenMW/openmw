@@ -484,8 +484,9 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
     state.mWerewolfKills = mWerewolfKills;
     state.mLevelProgress = mLevelProgress;
 
-    for (size_t i = 0; i < state.mSkillIncrease.size(); ++i)
-        state.mSkillIncrease[i] = mSkillIncreases.at(static_cast<ESM::Attribute::AttributeID>(i));
+    state.mSkillIncrease.fill(0);
+    for (const auto& [key, value] : mSkillIncreases)
+        state.mSkillIncrease[key] = value;
 
     for (size_t i = 0; i < state.mSpecIncreases.size(); ++i)
         state.mSpecIncreases[i] = mSpecIncreases[i];
