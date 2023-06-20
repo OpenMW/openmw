@@ -944,6 +944,7 @@
 -- @field #string icon VFS path to the icon
 -- @field #number weight
 -- @field #number value
+-- @field #list<openmw.core#MagicEffectWithParam> effects The effects (@{#list<openmw.core#MagicEffectWithParam>}) of the ingredient
 
 
 --- @{#Lockable} functions
@@ -1126,6 +1127,7 @@
 -- @field #string icon VFS path to the icon
 -- @field #number weight
 -- @field #number value
+-- @field #list<openmw.core#MagicEffectWithParam> effects The effects (@{#list<openmw.core#MagicEffectWithParam>}) of the potion
 
 
 

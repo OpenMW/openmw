@@ -1,5 +1,6 @@
 #include "types.hpp"
 
+#include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadingr.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -43,5 +44,21 @@ namespace MWLua
         record["weight"]
             = sol::readonly_property([](const ESM::Ingredient& rec) -> float { return rec.mData.mWeight; });
         record["value"] = sol::readonly_property([](const ESM::Ingredient& rec) -> int { return rec.mData.mValue; });
+        record["effects"] = sol::readonly_property([context](const ESM::Ingredient& rec) -> sol::table {
+            sol::table res(context.mLua->sol(), sol::create);
+            for (size_t i = 0; i < 4; ++i)
+            {
+                if (rec.mData.mEffectID[i] < 0)
+                    continue;
+                ESM::ENAMstruct effect;
+                effect.mEffectID = rec.mData.mEffectID[i];
+                effect.mSkill = rec.mData.mSkills[i];
+                effect.mAttribute = rec.mData.mAttributes[i];
+                effect.mRange = ESM::RT_Self;
+                effect.mArea = 0;
+                res[i + 1] = effect;
+            }
+            return res;
+        });
     }
 }

@@ -27,7 +27,7 @@ namespace ESM
         {
             float mWeight;
             int mValue;
-            int mEffectID[4]; // Effect, 0 or -1 means none
+            int mEffectID[4]; // Effect, -1 means none
             int mSkills[4]; // SkillEnum related to effect
             int mAttributes[4]; // Attribute related to effect
         };
