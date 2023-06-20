@@ -62,6 +62,44 @@ void ESMReader::clearCtx()
    mCtx.subName.clear();
 }
 
+std::string ESMReader::getMaybeFixedStringSize(std::size_t size)
+{
+    if (mHeader.mFormat > 22)
+    {
+        std::uint32_t storedSize = 0;
+        getT(storedSize);
+        if (storedSize > mCtx.leftSub)
+            fail("String does not fit subrecord (" + std::to_string(storedSize) + " > "
+                + std::to_string(mCtx.leftSub) + ")");
+        size = static_cast<std::size_t>(storedSize);
+    }
+
+    return std::string(getStringView(size));
+}
+
+std::string_view ESMReader::getStringView(std::size_t size)
+{
+    if (mBuffer.size() <= size)
+        // Add some extra padding to reduce the chance of having to resize
+        // again later.
+        mBuffer.resize(3 * size);
+
+    // And make sure the string is zero terminated
+    mBuffer[size] = 0;
+
+    // read ESM data
+    char* ptr = mBuffer.data();
+    getExact(ptr, size);
+
+    size = strnlen(ptr, size);
+
+    // Convert to UTF8 and return
+    if (mEncoder != nullptr)
+        return mEncoder->getUtf8(std::string_view(ptr, size));
+
+    return std::string_view(ptr, size);
+}
+
 void ESMReader::resolveParentFileIndices(ReadersCache& readers)
 {
     mCtx.parentFileIndices.clear();

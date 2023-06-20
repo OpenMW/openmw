@@ -43,6 +43,9 @@ public:
   const std::string& getName() const { return mCtx.filename; };
   bool isOpen() const { return mEsm != nullptr; }
 
+  std::string getMaybeFixedStringSize(std::size_t size);
+  std::string_view getStringView(std::size_t size);
+
   /*************************************************************************
    *
    *  Opening and closing
