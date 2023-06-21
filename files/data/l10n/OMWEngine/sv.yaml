@@ -23,7 +23,7 @@ LoadingInProgress: "Laddar sparat spel"
 LoadingRequiresNewVersionError: |-
     Denna sparfil skapades i en nyare version av OpenMW och stöds därför inte.
     Uppgradera till den senaste versionen av OpenMW för att ladda filen.
-NewGameConfirmation: "Vill du starta ett nytt spel och förlora nuvarande spel?"
+NewGameConfirmation: "Vill du starta ett nytt spel och förlora det pågående spelet?"
 SaveGameDenied: "Spelet kan inte sparas just nu."
 SavingInProgress: "Sparar..."
 QuitGameConfirmation: "Avsluta spelet?"
@@ -33,9 +33,9 @@ QuitGameConfirmation: "Avsluta spelet?"
 
 TimePlayed: "Speltid"
 DeleteGame: "Radera spel"
-DeleteGameConfirmation: "Är du säker på att du vill radera detta sparade spel?"
+DeleteGameConfirmation: "Är du säker på att du vill radera sparfilen?"
 EmptySaveNameError: "Spelet kan inte sparas utan ett namn!"
-LoadGameConfirmation: "Vill du ladda ett sparat spel och förlora nuvarande spel?"
+LoadGameConfirmation: "Vill du ladda ett sparat spel och förlora det pågående spelet?"
 MissingContentFilesConfirmation: |
     De valda innehållsfilerna matchar inte filerna som används av denna sparfil.
     Fel kan uppstå vid laddning eller under spel.
@@ -57,9 +57,9 @@ CameraSensitivity: "Kamerakänslighet"
 CameraZoomIn: "Zooma in kamera"
 CameraZoomOut: "Zooma ut kamera"
 ChangeRequiresRestart: "Den här ändringen kräver omstart för att ge effekt."
-ConfirmResetBindings: "Återställa alla kontroller till standard?"
+ConfirmResetBindings: "Återställ alla kontroller till standard?"
 ConfirmResolution: "Ny upplösning kommer ställas in omedelbart. Vill du fortsätta?"
-Controller: "Handkontroll" # Assuming "gamepad" as the word in question
+Controller: "Handkontroll"
 Controls: "Kontroller"
 DelayLow: "Snabbt"
 DelayHigh: "Långsamt"
