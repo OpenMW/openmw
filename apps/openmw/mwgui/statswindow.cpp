@@ -47,17 +47,17 @@ namespace MWGui
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         MyGUI::Widget* attributeView = getWidget("AttributeView");
         MyGUI::IntCoord coord{ 0, 0, 204, 18 };
-        const MyGUI::Align align = MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch;
+        const MyGUI::Align alignment = MyGUI::Align::Left | MyGUI::Align::Top | MyGUI::Align::HStretch;
         for (const ESM::Attribute& attribute : store.get<ESM::Attribute>())
         {
-            auto* box = attributeView->createWidget<MyGUI::Button>({}, coord, align);
+            auto* box = attributeView->createWidget<MyGUI::Button>({}, coord, alignment);
             box->setUserString("ToolTipType", "Layout");
             box->setUserString("ToolTipLayout", "AttributeToolTip");
             box->setUserString("Caption_AttributeName", attribute.mName);
             box->setUserString("Caption_AttributeDescription", attribute.mDescription);
             box->setUserString("ImageTexture_AttributeImage", attribute.mIcon);
             coord.top += coord.height;
-            auto* name = box->createWidget<MyGUI::TextBox>("SandText", { 0, 0, 160, 18 }, align);
+            auto* name = box->createWidget<MyGUI::TextBox>("SandText", { 0, 0, 160, 18 }, alignment);
             name->setNeedMouseFocus(false);
             name->setCaption(attribute.mName);
             auto* value = box->createWidget<MyGUI::TextBox>(

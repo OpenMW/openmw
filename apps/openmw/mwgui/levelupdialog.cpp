@@ -27,7 +27,7 @@
 namespace
 {
     constexpr unsigned int sMaxCoins = 3;
-    constexpr int sCols[] = { 32, 218 };
+    constexpr int sColumnOffsets[] = { 32, 218 };
 }
 namespace MWGui
 {
@@ -47,11 +47,11 @@ namespace MWGui
         {
             const auto& store = MWBase::Environment::get().getESMStore()->get<ESM::Attribute>();
             const size_t perCol
-                = static_cast<size_t>(std::ceil(store.getSize() / static_cast<float>(std::size(sCols))));
+                = static_cast<size_t>(std::ceil(store.getSize() / static_cast<float>(std::size(sColumnOffsets))));
             size_t i = 0;
             for (const ESM::Attribute& attribute : store)
             {
-                const int offset = sCols[i / perCol];
+                const int offset = sColumnOffsets[i / perCol];
                 const int row = static_cast<int>(i % perCol);
                 Widgets widgets;
                 widgets.mMultiplier = mAssignWidget->createWidget<MyGUI::TextBox>(
