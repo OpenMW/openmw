@@ -701,6 +701,16 @@
                     <UserString key="Caption_Text" value="#{OMWEngine:SecondaryLanguageTooltip}"/>
                 </Widget>
                 <Widget type="ComboBox" skin="MW_ComboBox" position="262 52 250 24" align="Left Top" name="SecondaryLanguage" />
+                <Widget type="HBox" position="4 84 500 32">
+                    <Widget type="AutoSizedButton" skin="MW_Button" name="GmstOverridesL10nButton">
+                        <UserString key="SettingCategory" value="General"/>
+                        <UserString key="SettingName" value="gmst overrides l10n"/>
+                        <UserString key="SettingType" value="CheckButton"/>
+                    </Widget>
+                    <Widget type="AutoSizedTextBox" skin="SandText">
+                        <Property key="Caption" value="#{OMWEngine:GmstOverridesL10n} "/>
+                    </Widget>
+                </Widget>
             </Widget>
         </Widget>
         <Widget type="AutoSizedButton" skin="MW_Button" position="320 420 56 24" align="Right Bottom" name="OkButton">

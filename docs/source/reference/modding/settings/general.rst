@@ -87,6 +87,19 @@ refer to any of the country-specific variants.
 
 Two highest priority locales may be assigned via the Localization tab of the in-game options.
 
+gmst overrides l10n
+-------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	True
+
+If true, localization GMSTs in content have priority over l10n files.
+Setting to false can be useful if selected preferred locale doesn't
+match the language of content files.
+
+Can be changed via the Localization tab of the in-game options.
+
 log buffer size
 ---------------
 

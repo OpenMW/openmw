@@ -671,7 +671,8 @@ void OMW::Engine::prepareEngine()
     mViewer->addEventHandler(mScreenCaptureHandler);
 
     mL10nManager = std::make_unique<l10n::Manager>(mVFS.get());
-    mL10nManager->setPreferredLocales(Settings::Manager::getStringArray("preferred locales", "General"));
+    mL10nManager->setPreferredLocales(Settings::Manager::getStringArray("preferred locales", "General"),
+        Settings::Manager::getBool("gmst overrides l10n", "General"));
     mEnvironment.setL10nManager(*mL10nManager);
 
     mLuaManager = std::make_unique<MWLua::LuaManager>(mVFS.get(), mResDir / "lua_libs");
