@@ -24,6 +24,7 @@
 #include "../mwworld/nullaction.hpp"
 
 #include "../mwmechanics/alchemy.hpp"
+#include "../mwmechanics/spellutil.hpp"
 
 namespace
 {
@@ -112,8 +113,8 @@ namespace
                     if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
                         leftChargePercent = 101;
                     else
-                        leftChargePercent = static_cast<int>(
-                            left.mBase.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
+                        leftChargePercent
+                            = static_cast<int>(left.mBase.getCellRef().getNormalizedEnchantmentCharge(*ench) * 100);
                 }
             }
 
@@ -126,8 +127,8 @@ namespace
                     if (ench->mData.mType == ESM::Enchantment::ConstantEffect)
                         rightChargePercent = 101;
                     else
-                        rightChargePercent = static_cast<int>(
-                            right.mBase.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
+                        rightChargePercent
+                            = static_cast<int>(right.mBase.getCellRef().getNormalizedEnchantmentCharge(*ench) * 100);
                 }
             }
 
@@ -304,8 +305,8 @@ namespace MWGui
                 return false;
             }
 
-            if (base.getCellRef().getEnchantmentCharge() >= ench->mData.mCharge
-                || base.getCellRef().getEnchantmentCharge() == -1)
+            if (base.getCellRef().getEnchantmentCharge() == -1
+                || base.getCellRef().getEnchantmentCharge() >= MWMechanics::getEnchantmentCharge(*ench))
                 return false;
         }
 

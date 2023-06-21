@@ -9,6 +9,7 @@
 
 namespace ESM
 {
+    struct Enchantment;
     struct ObjectState;
 }
 
@@ -87,7 +88,7 @@ namespace MWWorld
         float getEnchantmentCharge() const;
 
         // Remaining enchantment charge rescaled to the supplied maximum charge (such as one of the enchantment).
-        float getNormalizedEnchantmentCharge(int maxCharge) const;
+        float getNormalizedEnchantmentCharge(const ESM::Enchantment& enchantment) const;
 
         void setEnchantmentCharge(float charge);
 

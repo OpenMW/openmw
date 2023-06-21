@@ -108,7 +108,7 @@ namespace MWMechanics
             const ESM::Enchantment* enchantment = world->getStore().get<ESM::Enchantment>().find(weapon->mEnchant);
             if (enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
             {
-                int castCost = getEffectiveEnchantmentCastCost(static_cast<float>(enchantment->mData.mCost), actor);
+                int castCost = getEffectiveEnchantmentCastCost(*enchantment, actor);
                 float charge = item.getCellRef().getEnchantmentCharge();
 
                 if (charge == -1 || charge >= castCost || weapclass == ESM::WeaponType::Thrown

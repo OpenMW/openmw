@@ -55,6 +55,7 @@
     Bug #7307: Alchemy "Magic Effect" search string does not match on tool tip for effects related to attributes
     Bug #7413: Generated wilderness cells don't spawn fish
     Bug #7415: Unbreakable lock discrepancies
+    Bug #7428: AutoCalc flag is not used to calculate enchantment costs
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6447: Add LOD support to Object Paging

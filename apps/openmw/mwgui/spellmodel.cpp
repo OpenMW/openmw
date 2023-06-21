@@ -153,13 +153,12 @@ namespace MWGui
                     && item.getClass().canBeEquipped(item, mActor).first == 0)
                     continue;
 
-                int castCost
-                    = MWMechanics::getEffectiveEnchantmentCastCost(static_cast<float>(enchant->mData.mCost), mActor);
+                int castCost = MWMechanics::getEffectiveEnchantmentCastCost(*enchant, mActor);
 
                 std::string cost = std::to_string(castCost);
                 int currentCharge = int(item.getCellRef().getEnchantmentCharge());
                 if (currentCharge == -1)
-                    currentCharge = enchant->mData.mCharge;
+                    currentCharge = MWMechanics::getEnchantmentCharge(*enchant);
                 std::string charge = std::to_string(currentCharge);
                 newSpell.mCostColumn = cost + "/" + charge;
 

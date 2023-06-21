@@ -1384,8 +1384,7 @@ namespace MWGui
         mSelectedSpell = ESM::RefId();
         const ESM::Enchantment* ench = mStore->get<ESM::Enchantment>().find(item.getClass().getEnchantment(item));
 
-        int chargePercent
-            = static_cast<int>(item.getCellRef().getNormalizedEnchantmentCharge(ench->mData.mCharge) * 100);
+        int chargePercent = static_cast<int>(item.getCellRef().getNormalizedEnchantmentCharge(*ench) * 100);
         mHud->setSelectedEnchantItem(item, chargePercent);
         mSpellWindow->setTitle(item.getClass().getName(item));
     }

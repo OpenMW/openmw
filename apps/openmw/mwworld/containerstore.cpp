@@ -16,6 +16,7 @@
 
 #include "../mwmechanics/levelledlist.hpp"
 #include "../mwmechanics/recharge.hpp"
+#include "../mwmechanics/spellutil.hpp"
 
 #include "class.hpp"
 #include "esmstore.hpp"
@@ -268,7 +269,7 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
     {
         const ESM::Enchantment* enchantment = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().find(
             ptr1.getClass().getEnchantment(ptr1));
-        float maxCharge = static_cast<float>(enchantment->mData.mCharge);
+        const float maxCharge = static_cast<float>(MWMechanics::getEnchantmentCharge(*enchantment));
         float enchantCharge1
             = ptr1.getCellRef().getEnchantmentCharge() == -1 ? maxCharge : ptr1.getCellRef().getEnchantmentCharge();
         float enchantCharge2
@@ -507,7 +508,7 @@ void MWWorld::ContainerStore::updateRechargingItems()
 
             if (enchantment->mData.mType == ESM::Enchantment::WhenUsed
                 || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
-                mRechargingItems.emplace_back(it, static_cast<float>(enchantment->mData.mCharge));
+                mRechargingItems.emplace_back(it, static_cast<float>(MWMechanics::getEnchantmentCharge(*enchantment)));
         }
     }
 }

@@ -55,6 +55,7 @@
 
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/recharge.hpp"
+#include "../mwmechanics/spellutil.hpp"
 
 #include "class.hpp"
 #include "containerstore.hpp"
@@ -1248,7 +1249,8 @@ namespace MWWorld
 
         if (enchantment->mData.mType == ESM::Enchantment::WhenUsed
             || enchantment->mData.mType == ESM::Enchantment::WhenStrikes)
-            mRechargingItems.emplace_back(ptr.getBase(), static_cast<float>(enchantment->mData.mCharge));
+            mRechargingItems.emplace_back(
+                ptr.getBase(), static_cast<float>(MWMechanics::getEnchantmentCharge(*enchantment)));
     }
 
     Ptr MWWorld::CellStore::getMovedActor(int actorId) const

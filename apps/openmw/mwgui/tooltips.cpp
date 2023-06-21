@@ -539,7 +539,7 @@ namespace MWGui
             if (enchant->mData.mType == ESM::Enchantment::WhenStrikes
                 || enchant->mData.mType == ESM::Enchantment::WhenUsed)
             {
-                int maxCharge = enchant->mData.mCharge;
+                const int maxCharge = MWMechanics::getEnchantmentCharge(*enchant);
                 int charge = (info.remainingEnchantCharge == -1) ? maxCharge : info.remainingEnchantCharge;
 
                 const int chargeWidth = 204;

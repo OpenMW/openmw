@@ -12,6 +12,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
+#include "../mwmechanics/spellutil.hpp"
+
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
@@ -199,8 +201,8 @@ namespace MWGui
                     break;
 
                 line.mCharge->setVisible(true);
-                line.mCharge->setValue(
-                    static_cast<int>(line.mItemPtr.getCellRef().getEnchantmentCharge()), ench->mData.mCharge);
+                line.mCharge->setValue(static_cast<int>(line.mItemPtr.getCellRef().getEnchantmentCharge()),
+                    MWMechanics::getEnchantmentCharge(*ench));
                 break;
         }
     }

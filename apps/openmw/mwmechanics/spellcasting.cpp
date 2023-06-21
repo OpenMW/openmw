@@ -319,10 +319,11 @@ namespace MWMechanics
         if (!godmode
             && (type == ESM::Enchantment::WhenUsed || (!isProjectile && type == ESM::Enchantment::WhenStrikes)))
         {
-            int castCost = getEffectiveEnchantmentCastCost(static_cast<float>(enchantment->mData.mCost), mCaster);
+            int castCost = getEffectiveEnchantmentCastCost(*enchantment, mCaster);
 
             if (item.getCellRef().getEnchantmentCharge() == -1)
-                item.getCellRef().setEnchantmentCharge(static_cast<float>(enchantment->mData.mCharge));
+                item.getCellRef().setEnchantmentCharge(
+                    static_cast<float>(MWMechanics::getEnchantmentCharge(*enchantment)));
 
             if (item.getCellRef().getEnchantmentCharge() < castCost)
             {

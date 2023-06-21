@@ -296,8 +296,7 @@ namespace
         {
             const ESM::Enchantment* enchantment = esmStore.get<ESM::Enchantment>().search(spellId);
             if (enchantment)
-                spellCost = MWMechanics::getEffectiveEnchantmentCastCost(
-                    static_cast<float>(enchantment->mData.mCost), caster);
+                spellCost = MWMechanics::getEffectiveEnchantmentCastCost(*enchantment, caster);
         }
 
         // Magicka is increased by the cost of the spell
