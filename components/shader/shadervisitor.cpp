@@ -848,6 +848,11 @@ namespace Shader
     {
         bool needPop = drawable.getStateSet() || mRequirements.empty();
 
+        // We need to push and pop a requirements object because particle systems can have
+        // different shader requirements to other drawables, so might need a different shader variant.
+        if (!needPop && dynamic_cast<osgParticle::ParticleSystem*>(&drawable))
+            needPop = true;
+
         if (needPop)
         {
             pushRequirements(drawable);
