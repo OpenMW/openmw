@@ -30,3 +30,4 @@ few chapters to familiarise yourself with the new interface.
     record-types
     record-filters
     cell-view
+    records-drag-and-drop
