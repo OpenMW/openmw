@@ -23,6 +23,7 @@ namespace MWRender
         osg::Group* mSkyNode;
         osg::Group* mSceneNode;
         osg::Group* mRootNode;
+        osg::ref_ptr<osg::Callback> mSkyCullCallback;
         osg::ref_ptr<osg::Camera> mCamera;
         osg::ref_ptr<osg::Camera> mSceneCamera;
         osg::ref_ptr<osg::Texture2D> mDepthTexture;

@@ -147,7 +147,8 @@ namespace MWRender
 
     void PrecipitationOccluder::enable()
     {
-        mSkyNode->setCullCallback(new PrecipitationOcclusionUpdater(mDepthTexture));
+        mSkyCullCallback = new PrecipitationOcclusionUpdater(mDepthTexture);
+        mSkyNode->addCullCallback(mSkyCullCallback);
         mCamera->setCullCallback(new DepthCameraUpdater);
 
         mRootNode->removeChild(mCamera);
@@ -156,8 +157,9 @@ namespace MWRender
 
     void PrecipitationOccluder::disable()
     {
-        mSkyNode->setCullCallback(nullptr);
+        mSkyNode->removeCullCallback(mSkyCullCallback);
         mCamera->setCullCallback(nullptr);
+        mSkyCullCallback = nullptr;
 
         mRootNode->removeChild(mCamera);
     }
