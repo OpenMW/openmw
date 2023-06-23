@@ -13,53 +13,63 @@ PhysicsProfiler: "Fysikprofilerare"
 
 # Messages
 
+AskLoadLastSave: "Den senaste sparfilen är '%s'. Vill du ladda den?"
 BuildingNavigationMesh: "Bygger navigeringsmesh"
-
-#-- To be translated
-#AskLoadLastSave: "The most recent save is '%s'. Do you want to load it?"
-#InitializingData: "Initializing Data..."
-#LoadingExterior: "Loading Area"
-#LoadingFailed: "Failed to load saved game"
-#LoadingInterior: "Loading Area"
-#LoadingInProgress: "Loading Save Game"
-#LoadingRequiresNewVersionError: |-
-#    This save file was created using a newer version of OpenMW and is thus not supported.
-#    Please upgrade to the newest OpenMW version to load this file.
-#NewGameConfirmation: "Do you want to start a new game and lose the current one?"
-#SaveGameDenied: "The game cannot be saved right now."
-#SavingInProgress: "Saving..."
-#QuitGameConfirmation: "Quit the game?"
+InitializingData: "Initialiserar data..."
+LoadingExterior: "Laddar område"
+LoadingFailed: "Misslyckades med att ladda sparat spel"
+LoadingInterior: "Laddar område"
+LoadingInProgress: "Laddar sparat spel"
+LoadingRequiresNewVersionError: |-
+    Denna sparfil skapades i en nyare version av OpenMW och stöds därför inte.
+    Uppgradera till den senaste versionen av OpenMW för att ladda filen.
+NewGameConfirmation: "Vill du starta ett nytt spel och förlora det pågående spelet?"
+SaveGameDenied: "Spelet kan inte sparas just nu."
+SavingInProgress: "Sparar..."
+QuitGameConfirmation: "Avsluta spelet?"
 
 
 # Save game menu
 
-SelectCharacter: "Välj spelfigur..."
 TimePlayed: "Speltid"
-
-
-#-- To be translated
-#DeleteGame: "Delete Game"
-#DeleteGameConfirmation: "Are you sure you want to delete this saved game?"
-#EmptySaveNameError: "Game can not be saved without a name!"
-#LoadGameConfirmation: "Do you want to load a saved game and lose the current one?"
-#MissingContentFilesConfirmation: |
-#    The currently selected content files do not match the ones used by this save game.
-#    Errors may occur during load or game play.
-#    Do you wish to continue?
-#OverwriteGameConfirmation: "Are you sure you want to overwrite this saved game?"
+DeleteGame: "Radera spel"
+DeleteGameConfirmation: "Är du säker på att du vill radera sparfilen?"
+EmptySaveNameError: "Spelet kan inte sparas utan ett namn!"
+LoadGameConfirmation: "Vill du ladda ett sparat spel och förlora det pågående spelet?"
+MissingContentFilesConfirmation: |
+    De valda innehållsfilerna matchar inte filerna som används av denna sparfil.
+    Fel kan uppstå vid laddning eller under spel.
+    Vill du fortsätta?
+OverwriteGameConfirmation: "Är du säker på att du vill skriva över det här sparade spelet?"
+SelectCharacter: "Välj spelfigur..."
 
 
 # Settings menu
 
 ActorsProcessingRange: "Processavstånd för figurer"
 Anisotropy: "Anisotropi"
+Audio: "Ljud"
+AudioEffects: "Effekter"
+AudioFootsteps: "Fotsteg"
+AudioMusic: "Musik"
+AudioVoice: "Röster"
 CameraSensitivity: "Kamerakänslighet"
 CameraZoomIn: "Zooma in kamera"
 CameraZoomOut: "Zooma ut kamera"
 ChangeRequiresRestart: "Den här ändringen kräver omstart för att ge effekt."
-Controller: "Handkontroll" # Assuming "gamepad" as the word in question
+ConfirmResetBindings: "Återställ alla kontroller till standard?"
+ConfirmResolution: "Ny upplösning kommer ställas in omedelbart. Vill du fortsätta?"
+Controller: "Handkontroll"
+Controls: "Kontroller"
+DelayLow: "Snabbt"
+DelayHigh: "Långsamt"
+DetailLevel: "Detaljnivå"
+Difficulty: "Svårighetsgrad"
+DifficultyEasy: "Lätt"
+DifficultyHard: "Svårt"
 FieldOfView: "Synfält"
 FrameRateHint: "Tips: tryck på F3 för att visa\naktuell bilduppdateringsfrekvens."
+EnableController: "Aktivera handkontroll"
 InvertXAxis: "Invertera X-axeln"
 Language: "Språk"
 LanguageNote: "Notera: dessa inställningar påverkar inte strängar från ESM-filer."
@@ -79,6 +89,7 @@ LightsMinimumInteriorBrightness: "Minsta ljusstyrka i interiörer"
 LightsMinimumInteriorBrightnessTooltip: "Förvalt: 0.08\nMinsta omgivande ljusstyrka i interiörer.\n\nÖka värdet om du anser att interiörer är för mörka."
 MaxLights: "Max antal ljuskällor"
 MaxLightsTooltip: "Förvalt: 8\nMaximalt antal ljuskällor per objekt.\n\nEtt lågt tal nära det förvalda kommer orsaka att ljuskällor poppar upp som vid ljussättningsmetoden Gammaldags."
+MenuTransparency: "Menytransparens"
 MouseAndKeyboard: "Mus/Tangentbord"
 PostProcessing: "Postprocessing"
 PostProcessingTooltip: "Justeras via Postprocessing-gränssnittet, se input bindings."
@@ -101,6 +112,8 @@ Scripts: "Skript"
 ScriptsDisabled: "Ladda ett spel för att nå skriptinställningar."
 SecondaryLanguage: "Sekundärt språk"
 SecondaryLanguageTooltip: "Lokaliseringsfiler för detta språk används i fall då det primära språkets filer saknar nödvändiga strängar."
+SettingsWindow: "Inställningar"
+Subtitles: "Undertexter"
 TextureFiltering: "Texturfiltrering"
 TextureFilteringBilinear: "Bilinjär"
 TextureFilteringDisabled: "Ingen"
@@ -108,6 +121,9 @@ TextureFilteringOther: "Annan"
 TextureFilteringTrilinear: "Trilinjär"
 ToggleHUD: "Växla till HUD"
 TogglePostProcessorHUD: "Växla till Postprocess-HUD"
+TransparencyFull: "Full"
+TransparencyNone: "Ingen"
+Video: "Video"
 VSync: "VSynk"
 Water: "Vatten"
 WaterShader: "Vattenshader"
@@ -120,24 +136,9 @@ WindowModeWindowed: "Fönster"
 WindowModeWindowedFullscreen: "Fullskärm i fönsterläge"
 
 #-- To be translated
-#Audio: "Audio"
 #AudioMaster: "Master"
-#AudioVoice: "Voice"
-#AudioEffects: "Effects"
-#AudioFootsteps: "Footsteps"
-#AudioMusic: "Music"
-#ConfirmResetBindings: "Reset all controls to the default?"
-#ConfirmResolution: "New resolution will be applied immediately. Do you want to continue?"
-#Controls: "Controls"
-#DelayLow: "Fast"
-#DelayHigh: "Slow"
-#DetailLevel: "Detail Level"
-#Difficulty: "Difficulty"
-#DifficultyEasy: "Easy"
-#DifficultyHard: "Hard"
 #DistanceHigh: "Far"
 #DistanceLow: "Near"
-#EnableController: "Enable Controller"
 #FieldOfViewLow: "Low"
 #FieldOfViewHigh: "High"
 #GammaCorrection: "Gamma Correction"
@@ -146,7 +147,6 @@ WindowModeWindowedFullscreen: "Fullskärm i fönsterläge"
 #GmstOverridesL10n: "Strings from ESM files have priority"
 #InvertYAxis: "Invert Y Axis"
 #MenuHelpDelay: "Menu Help Delay"
-#MenuTransparency: "Menu Transparency"
 #Preferences: "Prefs"
 #PostProcessingIsNotEnabled
 #QualityHigh: "High"
@@ -156,11 +156,6 @@ WindowModeWindowedFullscreen: "Fullskärm i fönsterläge"
 #ResetControls: "Reset Controls"
 #SensitivityHigh: "High"
 #SensitivityLow: "Low"
-#SettingsWindow: "Options"
-#Subtitles: "Subtitles"
 #TestingExteriorCells: "Testing exterior cells"
 #TestingInteriorCells: "Testing interior cells"
-#TransparencyFull: "Full"
-#TransparencyNone: "None"
-#Video: "Video"
 #ViewDistance: "View Distance"
