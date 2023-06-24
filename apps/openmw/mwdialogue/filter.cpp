@@ -726,7 +726,7 @@ std::vector<MWDialogue::Filter::Response> MWDialogue::Filter::list(
             if (testActor(info) && testPlayer(info) && testSelectStructs(info)
                 && testDisposition(info, invertDisposition))
             {
-                infos.emplace_back(&dialogue, &info);
+                infos.emplace_back(&infoRefusalDialogue, &info);
                 if (!searchAll)
                     break;
             }
