@@ -143,8 +143,10 @@ Interior cells
     
     Due to internal workings of Morrowind, ``ID`` of interior cells is derived 
     from their ``Name``. This means interior cells **MUST** have a name and their
-    name needs to be unique. If no name is given to an interior cell, their ``ID``
-    will be broken and they won't show in the Cells table nor work properly in-game.
+    name needs to be unique. In OpenMW-CS the ``ID`` of exterior cells will be
+    updated and shown the next time the editor is opened. If no names are given to
+    interior cells, their ``ID`` will be broken and they won't show in the Cells
+    table nor work properly in-game.
 
 The Cells table provides you with a list of cells in the game and exposes 
 their various parameters to edit.
