@@ -3,8 +3,11 @@
 #include <MyGUI_Button.h>
 #include <MyGUI_EditBox.h>
 #include <MyGUI_ImageBox.h>
+#include <MyGUI_ScrollView.h>
+#include <MyGUI_TextBox.h>
 
 #include <components/fallback/fallback.hpp>
+#include <components/widgets/box.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -12,6 +15,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
+#include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -20,9 +24,13 @@
 #include "class.hpp"
 #include "ustring.hpp"
 
+namespace
+{
+    constexpr unsigned int sMaxCoins = 3;
+    constexpr int sColumnOffsets[] = { 32, 218 };
+}
 namespace MWGui
 {
-    const unsigned int LevelupDialog::sMaxCoins = 3;
     LevelupDialog::LevelupDialog()
         : WindowBase("openmw_levelup_dialog.layout")
         , mCoinCount(sMaxCoins)
@@ -36,23 +44,43 @@ namespace MWGui
 
         mOkButton->eventMouseButtonClick += MyGUI::newDelegate(this, &LevelupDialog::onOkButtonClicked);
 
-        for (int i = 1; i < 9; ++i)
         {
-            MyGUI::TextBox* t;
-            getWidget(t, "AttribVal" + MyGUI::utility::toString(i));
-            mAttributeValues.push_back(t);
+            const auto& store = MWBase::Environment::get().getESMStore()->get<ESM::Attribute>();
+            const size_t perCol
+                = static_cast<size_t>(std::ceil(store.getSize() / static_cast<float>(std::size(sColumnOffsets))));
+            size_t i = 0;
+            for (const ESM::Attribute& attribute : store)
+            {
+                const int offset = sColumnOffsets[i / perCol];
+                const int row = static_cast<int>(i % perCol);
+                Widgets widgets;
+                widgets.mMultiplier = mAssignWidget->createWidget<MyGUI::TextBox>(
+                    "SandTextVCenter", { offset, 20 * row, 100, 20 }, MyGUI::Align::Default);
+                auto* hbox = mAssignWidget->createWidget<Gui::HBox>(
+                    {}, { offset + 20, 20 * row, 200, 20 }, MyGUI::Align::Default);
+                widgets.mButton = hbox->createWidget<Gui::AutoSizedButton>("SandTextButton", {}, MyGUI::Align::Default);
+                widgets.mButton->setUserData(attribute.mId);
+                widgets.mButton->eventMouseButtonClick += MyGUI::newDelegate(this, &LevelupDialog::onAttributeClicked);
+                widgets.mButton->setUserString("TextPadding", "0 0");
+                widgets.mButton->setUserString("ToolTipType", "Layout");
+                widgets.mButton->setUserString("ToolTipLayout", "AttributeToolTip");
+                widgets.mButton->setUserString("Caption_AttributeName", attribute.mName);
+                widgets.mButton->setUserString("Caption_AttributeDescription", attribute.mDescription);
+                widgets.mButton->setUserString("ImageTexture_AttributeImage", attribute.mIcon);
+                widgets.mButton->setCaption(attribute.mName);
+                widgets.mValue = hbox->createWidget<Gui::AutoSizedTextBox>("SandText", {}, MyGUI::Align::Default);
+                mAttributeWidgets.emplace(attribute.mId, widgets);
+                ++i;
+            }
 
-            MyGUI::Button* b;
-            getWidget(b, "Attrib" + MyGUI::utility::toString(i));
-            b->setUserData(i - 1);
-            b->eventMouseButtonClick += MyGUI::newDelegate(this, &LevelupDialog::onAttributeClicked);
-            mAttributes.push_back(b);
-
-            getWidget(t, "AttribMultiplier" + MyGUI::utility::toString(i));
-            mAttributeMultipliers.push_back(t);
+            mAssignWidget->setVisibleVScroll(false);
+            mAssignWidget->setCanvasSize(MyGUI::IntSize(
+                mAssignWidget->getWidth(), std::max(mAssignWidget->getHeight(), static_cast<int>(20 * perCol))));
+            mAssignWidget->setVisibleVScroll(true);
+            mAssignWidget->setViewOffset(MyGUI::IntPoint());
         }
 
-        for (unsigned int i = 0; i < mCoinCount; ++i)
+        for (unsigned int i = 0; i < sMaxCoins; ++i)
         {
             MyGUI::ImageBox* image = mCoinBox->createWidget<MyGUI::ImageBox>(
                 "ImageBox", MyGUI::IntCoord(0, 0, 16, 16), MyGUI::Align::Default);
@@ -69,24 +97,24 @@ namespace MWGui
         MWMechanics::CreatureStats& creatureStats = player.getClass().getCreatureStats(player);
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
-        for (int i = 0; i < 8; ++i)
+        for (const ESM::Attribute& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
         {
-            int val = creatureStats.getAttribute(i).getBase();
-            if (std::find(mSpentAttributes.begin(), mSpentAttributes.end(), i) != mSpentAttributes.end())
+            int val = creatureStats.getAttribute(attribute.mId).getBase();
+            if (std::find(mSpentAttributes.begin(), mSpentAttributes.end(), attribute.mId) != mSpentAttributes.end())
             {
-                val += pcStats.getLevelupAttributeMultiplier(i);
+                val += pcStats.getLevelupAttributeMultiplier(attribute.mId);
             }
 
             if (val >= 100)
                 val = 100;
 
-            mAttributeValues[i]->setCaption(MyGUI::utility::toString(val));
+            mAttributeWidgets[attribute.mId].mValue->setCaption(MyGUI::utility::toString(val));
         }
     }
 
     void LevelupDialog::resetCoins()
     {
-        const int coinSpacing = 33;
+        constexpr int coinSpacing = 33;
         int curX = mCoinBox->getWidth() / 2 - (coinSpacing * (mCoinCount - 1) + 16 * mCoinCount) / 2;
         for (unsigned int i = 0; i < sMaxCoins; ++i)
         {
@@ -113,13 +141,15 @@ namespace MWGui
             image->detachFromWidget();
             image->attachToWidget(mAssignWidget);
 
-            int attribute = mSpentAttributes[i];
+            const auto& attribute = mSpentAttributes[i];
+            const auto& widgets = mAttributeWidgets[attribute];
 
-            int xdiff = mAttributeMultipliers[attribute]->getCaption().empty() ? 0 : 20;
+            const int xdiff = widgets.mMultiplier->getCaption().empty() ? 0 : 20;
+            const auto* hbox = widgets.mButton->getParent();
 
-            MyGUI::IntPoint pos = mAttributes[attribute]->getAbsolutePosition() - mAssignWidget->getAbsolutePosition()
-                - MyGUI::IntPoint(22 + xdiff, 0);
-            pos.top += (mAttributes[attribute]->getHeight() - image->getHeight()) / 2;
+            MyGUI::IntPoint pos = hbox->getPosition();
+            pos.left -= 22 + xdiff;
+            pos.top += (hbox->getHeight() - image->getHeight()) / 2;
             image->setPosition(pos);
         }
 
@@ -130,8 +160,8 @@ namespace MWGui
     {
         MWBase::World* world = MWBase::Environment::get().getWorld();
         MWWorld::Ptr player = world->getPlayerPtr();
-        MWMechanics::CreatureStats& creatureStats = player.getClass().getCreatureStats(player);
-        MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
+        const MWMechanics::CreatureStats& creatureStats = player.getClass().getCreatureStats(player);
+        const MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
         setClassImage(mClassImage,
             ESM::RefId::stringRefId(getLevelupClassImage(pcStats.getSkillIncreasesForSpecialization(0),
@@ -149,28 +179,28 @@ namespace MWGui
         mLevelDescription->setCaption(toUString(levelupdescription));
 
         unsigned int availableAttributes = 0;
-        for (int i = 0; i < 8; ++i)
+        for (const ESM::Attribute& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
         {
-            MyGUI::TextBox* text = mAttributeMultipliers[i];
-            if (pcStats.getAttribute(i).getBase() < 100)
+            const auto& widgets = mAttributeWidgets[attribute.mId];
+            if (pcStats.getAttribute(attribute.mId).getBase() < 100)
             {
-                mAttributes[i]->setEnabled(true);
-                mAttributeValues[i]->setEnabled(true);
+                widgets.mButton->setEnabled(true);
+                widgets.mValue->setEnabled(true);
                 availableAttributes++;
 
-                float mult = pcStats.getLevelupAttributeMultiplier(i);
-                mult = std::min(mult, 100 - pcStats.getAttribute(i).getBase());
+                float mult = pcStats.getLevelupAttributeMultiplier(attribute.mId);
+                mult = std::min(mult, 100 - pcStats.getAttribute(attribute.mId).getBase());
                 if (mult <= 1)
-                    text->setCaption({});
+                    widgets.mMultiplier->setCaption({});
                 else
-                    text->setCaption("x" + MyGUI::utility::toString(mult));
+                    widgets.mMultiplier->setCaption("x" + MyGUI::utility::toString(mult));
             }
             else
             {
-                mAttributes[i]->setEnabled(false);
-                mAttributeValues[i]->setEnabled(false);
+                widgets.mButton->setEnabled(false);
+                widgets.mValue->setEnabled(false);
 
-                text->setCaption({});
+                widgets.mMultiplier->setCaption({});
             }
         }
 
@@ -215,9 +245,9 @@ namespace MWGui
 
     void LevelupDialog::onAttributeClicked(MyGUI::Widget* sender)
     {
-        int attribute = *sender->getUserData<int>();
+        auto attribute = *sender->getUserData<ESM::Attribute::AttributeID>();
 
-        std::vector<int>::iterator found = std::find(mSpentAttributes.begin(), mSpentAttributes.end(), attribute);
+        auto found = std::find(mSpentAttributes.begin(), mSpentAttributes.end(), attribute);
         if (found != mSpentAttributes.end())
             mSpentAttributes.erase(found);
         else

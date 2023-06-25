@@ -40,7 +40,7 @@ namespace MWMechanics
     {
         static int sActorId;
         DrawState mDrawState;
-        AttributeValue mAttributes[ESM::Attribute::Length];
+        std::map<ESM::Attribute::AttributeID, AttributeValue> mAttributes;
         DynamicStat<float> mDynamic[3]; // health, magicka, fatigue
         Spells mSpells;
         ActiveSpells mActiveSpells;
@@ -113,7 +113,7 @@ namespace MWMechanics
         /// @return total fall height
         float land(bool isPlayer = false);
 
-        const AttributeValue& getAttribute(int index) const;
+        const AttributeValue& getAttribute(ESM::Attribute::AttributeID id) const;
 
         const DynamicStat<float>& getHealth() const;
 
@@ -139,9 +139,9 @@ namespace MWMechanics
 
         MagicEffects& getMagicEffects();
 
-        void setAttribute(int index, const AttributeValue& value);
+        void setAttribute(ESM::Attribute::AttributeID id, const AttributeValue& value);
         // Shortcut to set only the base
-        void setAttribute(int index, float base);
+        void setAttribute(ESM::Attribute::AttributeID id, float base);
 
         void setHealth(const DynamicStat<float>& value);
 
@@ -293,6 +293,8 @@ namespace MWMechanics
 
         bool wasTeleported() const { return mTeleported; }
         void setTeleported(bool v) { mTeleported = v; }
+
+        const std::map<ESM::Attribute::AttributeID, AttributeValue> getAttributes() const { return mAttributes; }
     };
 }
 

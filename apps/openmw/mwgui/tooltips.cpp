@@ -823,7 +823,7 @@ namespace MWGui
         widget->setUserString("ImageTexture_SkillNoProgressImage", skill->mIcon);
     }
 
-    void ToolTips::createAttributeToolTip(MyGUI::Widget* widget, int attributeId)
+    void ToolTips::createAttributeToolTip(MyGUI::Widget* widget, ESM::Attribute::AttributeID attributeId)
     {
         const ESM::Attribute* attribute
             = MWBase::Environment::get().getESMStore()->get<ESM::Attribute>().search(attributeId);

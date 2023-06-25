@@ -76,14 +76,22 @@ namespace MWGui
 
         // Setup attributes
 
-        Widgets::MWAttributePtr widget;
+        MyGUI::Widget* attributes = getWidget("Attributes");
         const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::Attribute>();
+        MyGUI::IntCoord coord{ 8, 4, 250, 18 };
         for (const ESM::Attribute& attribute : store)
         {
-            getWidget(widget, std::string("Attribute").append(1, '0' + attribute.mId));
+            auto* widget
+                = attributes->createWidget<Widgets::MWAttribute>("MW_StatNameValue", coord, MyGUI::Align::Default);
             mAttributeWidgets.emplace(attribute.mId, widget);
+            widget->setUserString("ToolTipType", "Layout");
+            widget->setUserString("ToolTipLayout", "AttributeToolTip");
+            widget->setUserString("Caption_AttributeName", attribute.mName);
+            widget->setUserString("Caption_AttributeDescription", attribute.mDescription);
+            widget->setUserString("ImageTexture_AttributeImage", attribute.mIcon);
             widget->setAttributeId(attribute.mId);
             widget->setAttributeValue(Widgets::MWAttribute::AttributeValue());
+            coord.top += coord.height;
         }
 
         // Setup skills
@@ -193,7 +201,7 @@ namespace MWGui
 
     void ReviewDialog::setAttribute(ESM::Attribute::AttributeID attributeId, const MWMechanics::AttributeValue& value)
     {
-        std::map<int, Widgets::MWAttributePtr>::iterator attr = mAttributeWidgets.find(static_cast<int>(attributeId));
+        auto attr = mAttributeWidgets.find(attributeId);
         if (attr == mAttributeWidgets.end())
             return;
 
@@ -394,9 +402,9 @@ namespace MWGui
         if (!mRaceId.empty())
             race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(mRaceId);
 
-        int attributes[ESM::Attribute::Length];
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
-            attributes[i] = mAttributeWidgets[i]->getAttributeValue().getBase();
+        std::map<ESM::Attribute::AttributeID, MWMechanics::AttributeValue> attributes;
+        for (const auto& [key, value] : mAttributeWidgets)
+            attributes[key] = value->getAttributeValue();
 
         std::vector<ESM::RefId> selectedSpells = MWMechanics::autoCalcPlayerSpells(mSkillValues, attributes, race);
         for (ESM::RefId& spellId : selectedSpells)

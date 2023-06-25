@@ -90,7 +90,7 @@ namespace MWGui
 
         Widgets::MWDynamicStatPtr mHealth, mMagicka, mFatigue;
 
-        std::map<int, Widgets::MWAttributePtr> mAttributeWidgets;
+        std::map<ESM::Attribute::AttributeID, Widgets::MWAttributePtr> mAttributeWidgets;
 
         std::vector<ESM::RefId> mMajorSkills, mMinorSkills, mMiscSkills;
         std::map<ESM::RefId, MWMechanics::SkillValue> mSkillValues;

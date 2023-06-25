@@ -19,22 +19,22 @@ namespace MWMechanics
     /// Contains algorithm for calculating an NPC's spells based on stats
     /// @note We might want to move this code to a component later, so the editor can use it for preview purposes
 
-    std::vector<ESM::RefId> autoCalcNpcSpells(
-        const std::map<ESM::RefId, SkillValue>& actorSkills, const int* actorAttributes, const ESM::Race* race);
+    std::vector<ESM::RefId> autoCalcNpcSpells(const std::map<ESM::RefId, SkillValue>& actorSkills,
+        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes, const ESM::Race* race);
 
-    std::vector<ESM::RefId> autoCalcPlayerSpells(
-        const std::map<ESM::RefId, SkillValue>& actorSkills, const int* actorAttributes, const ESM::Race* race);
+    std::vector<ESM::RefId> autoCalcPlayerSpells(const std::map<ESM::RefId, SkillValue>& actorSkills,
+        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes, const ESM::Race* race);
 
     // Helpers
 
-    bool attrSkillCheck(
-        const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills, const int* actorAttributes);
+    bool attrSkillCheck(const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills,
+        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes);
 
     void calcWeakestSchool(const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills,
         int& effectiveSchool, float& skillTerm);
 
     float calcAutoCastChance(const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills,
-        const int* actorAttributes, int effectiveSchool);
+        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes, int effectiveSchool);
 
 }
 

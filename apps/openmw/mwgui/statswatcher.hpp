@@ -19,7 +19,7 @@ namespace MWGui
         virtual ~StatsListener() = default;
 
         /// Set value for the given ID.
-        virtual void setValue(std::string_view id, const MWMechanics::AttributeValue& value) {}
+        virtual void setValue(ESM::Attribute::AttributeID id, const MWMechanics::AttributeValue& value) {}
         virtual void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value) {}
         virtual void setValue(std::string_view, const std::string& value) {}
         virtual void setValue(std::string_view, int value) {}
@@ -31,7 +31,7 @@ namespace MWGui
     {
         MWWorld::Ptr mWatched;
 
-        MWMechanics::AttributeValue mWatchedAttributes[ESM::Attribute::Length];
+        std::map<ESM::Attribute::AttributeID, MWMechanics::AttributeValue> mWatchedAttributes;
         std::map<ESM::RefId, MWMechanics::SkillValue> mWatchedSkills;
 
         MWMechanics::DynamicStat<float> mWatchedHealth;
@@ -50,7 +50,7 @@ namespace MWGui
 
         std::set<StatsListener*> mListeners;
 
-        void setValue(std::string_view id, const MWMechanics::AttributeValue& value);
+        void setValue(ESM::Attribute::AttributeID id, const MWMechanics::AttributeValue& value);
         void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value);
         void setValue(std::string_view id, const std::string& value);
         void setValue(std::string_view id, int value);

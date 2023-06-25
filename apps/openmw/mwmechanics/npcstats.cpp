@@ -28,7 +28,6 @@ MWMechanics::NpcStats::NpcStats()
     , mTimeToStartDrowning(-1.0) // set breath to special value, it will be replaced during actor update
     , mIsWerewolf(false)
 {
-    mSkillIncreases.resize(ESM::Attribute::Length, 0);
     mSpecIncreases.resize(3, 0);
     for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
         mSkills.emplace(skill.mId, SkillValue{});
@@ -246,7 +245,7 @@ void MWMechanics::NpcStats::increaseSkill(ESM::RefId id, const ESM::Class& class
         }
     }
 
-    mSkillIncreases[skill->mData.mAttribute] += increase;
+    mSkillIncreases[ESM::Attribute::AttributeID(skill->mData.mAttribute)] += increase;
 
     mSpecIncreases[skill->mData.mSpecialization] += gmst.find("iLevelupSpecialization")->mValue.getInteger();
 
@@ -286,8 +285,7 @@ void MWMechanics::NpcStats::levelUp()
     mLevelProgress -= gmst.find("iLevelUpTotal")->mValue.getInteger();
     mLevelProgress = std::max(0, mLevelProgress); // might be necessary when levelup was invoked via console
 
-    for (int i = 0; i < ESM::Attribute::Length; ++i)
-        mSkillIncreases[i] = 0;
+    mSkillIncreases.clear();
 
     const float endurance = getAttribute(ESM::Attribute::Endurance).getBase();
 
@@ -312,14 +310,12 @@ void MWMechanics::NpcStats::updateHealth()
     setHealth(floor(0.5f * (strength + endurance)));
 }
 
-int MWMechanics::NpcStats::getLevelupAttributeMultiplier(int attribute) const
+int MWMechanics::NpcStats::getLevelupAttributeMultiplier(ESM::Attribute::AttributeID attribute) const
 {
-    int num = mSkillIncreases[attribute];
-
-    if (num == 0)
+    auto it = mSkillIncreases.find(attribute);
+    if (it == mSkillIncreases.end() || it->second == 0)
         return 1;
-
-    num = std::min(10, num);
+    int num = std::min(10, it->second);
 
     // iLevelUp01Mult - iLevelUp10Mult
     std::stringstream gmst;
@@ -488,8 +484,9 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
     state.mWerewolfKills = mWerewolfKills;
     state.mLevelProgress = mLevelProgress;
 
-    for (size_t i = 0; i < state.mSkillIncrease.size(); ++i)
-        state.mSkillIncrease[i] = mSkillIncreases[i];
+    state.mSkillIncrease.fill(0);
+    for (const auto& [key, value] : mSkillIncreases)
+        state.mSkillIncrease[key] = value;
 
     for (size_t i = 0; i < state.mSpecIncreases.size(); ++i)
         state.mSpecIncreases[i] = mSpecIncreases[i];
@@ -538,7 +535,7 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
     mLevelProgress = state.mLevelProgress;
 
     for (size_t i = 0; i < state.mSkillIncrease.size(); ++i)
-        mSkillIncreases[i] = state.mSkillIncrease[i];
+        mSkillIncreases[static_cast<ESM::Attribute::AttributeID>(i)] = state.mSkillIncrease[i];
 
     for (size_t i = 0; i < state.mSpecIncreases.size(); ++i)
         mSpecIncreases[i] = state.mSpecIncreases[i];

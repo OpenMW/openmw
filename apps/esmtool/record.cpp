@@ -1171,7 +1171,7 @@ namespace EsmTool
     template <>
     void Record<ESM::Race>::print()
     {
-        static const char* sAttributeNames[8]
+        static const char* sAttributeNames[ESM::Attribute::Length]
             = { "Strength", "Intelligence", "Willpower", "Agility", "Speed", "Endurance", "Personality", "Luck" };
 
         std::cout << "  Name: " << mData.mName << std::endl;

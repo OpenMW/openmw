@@ -102,13 +102,13 @@ namespace MWGui::Widgets
     /* MWAttribute */
 
     MWAttribute::MWAttribute()
-        : mId(-1)
+        : mId(ESM::Attribute::Length)
         , mAttributeNameWidget(nullptr)
         , mAttributeValueWidget(nullptr)
     {
     }
 
-    void MWAttribute::setAttributeId(int attributeId)
+    void MWAttribute::setAttributeId(ESM::Attribute::AttributeID attributeId)
     {
         mId = attributeId;
         updateWidgets();
@@ -129,17 +129,15 @@ namespace MWGui::Widgets
     {
         if (mAttributeNameWidget)
         {
-            if (mId < 0 || mId >= 8)
+            const ESM::Attribute* attribute
+                = MWBase::Environment::get().getESMStore()->get<ESM::Attribute>().search(mId);
+            if (!attribute)
             {
                 mAttributeNameWidget->setCaption({});
             }
             else
             {
-                static const std::string_view attributes[8]
-                    = { "sAttributeStrength", "sAttributeIntelligence", "sAttributeWillpower", "sAttributeAgility",
-                          "sAttributeSpeed", "sAttributeEndurance", "sAttributePersonality", "sAttributeLuck" };
-                MyGUI::UString name = toUString(
-                    MWBase::Environment::get().getWindowManager()->getGameSettingString(attributes[mId], {}));
+                MyGUI::UString name = toUString(attribute->mName);
                 mAttributeNameWidget->setCaption(name);
             }
         }
@@ -155,8 +153,6 @@ namespace MWGui::Widgets
                 mAttributeValueWidget->_setWidgetState("normal");
         }
     }
-
-    MWAttribute::~MWAttribute() {}
 
     void MWAttribute::initialiseOverride()
     {

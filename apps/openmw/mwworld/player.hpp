@@ -52,7 +52,7 @@ namespace MWWorld
 
         // Saved stats prior to becoming a werewolf
         std::array<float, ESM::Skill::Length> mSaveSkills;
-        float mSaveAttributes[ESM::Attribute::Length];
+        std::array<float, ESM::Attribute::Length> mSaveAttributes;
 
         bool mJumping;
 

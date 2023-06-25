@@ -43,8 +43,7 @@ namespace MWWorld
 
             ESM::CreatureStats::CorprusStats stats;
             stats.mNextWorsening = oldStats.mNextWorsening;
-            for (int i = 0; i < ESM::Attribute::Length; ++i)
-                stats.mWorsenings[i] = 0;
+            stats.mWorsenings.fill(0);
 
             for (auto& effect : spell->mEffects.mList)
             {
@@ -179,8 +178,8 @@ namespace MWWorld
             {
                 it->mNextWorsening = spell.second.mNextWorsening;
                 int worsenings = 0;
-                for (int i = 0; i < ESM::Attribute::Length; ++i)
-                    worsenings = std::max(spell.second.mWorsenings[i], worsenings);
+                for (const auto& worsening : spell.second.mWorsenings)
+                    worsenings = std::max(worsening, worsenings);
                 it->mWorsenings = worsenings;
             }
         }
@@ -209,20 +208,19 @@ namespace MWWorld
             }
         }
         // Reset modifiers that were previously recalculated each frame
-        for (std::size_t i = 0; i < ESM::Attribute::Length; ++i)
-            creatureStats.mAttributes[i].mMod = 0.f;
-        for (std::size_t i = 0; i < 3; ++i)
+        for (auto& attribute : creatureStats.mAttributes)
+            attribute.mMod = 0.f;
+        for (auto& dynamic : creatureStats.mDynamic)
         {
-            auto& dynamic = creatureStats.mDynamic[i];
             dynamic.mCurrent -= dynamic.mMod - dynamic.mBase;
             dynamic.mMod = 0.f;
         }
-        for (std::size_t i = 0; i < 4; ++i)
-            creatureStats.mAiSettings[i].mMod = 0.f;
+        for (auto& setting : creatureStats.mAiSettings)
+            setting.mMod = 0.f;
         if (npcStats)
         {
-            for (std::size_t i = 0; i < npcStats->mSkills.size(); ++i)
-                npcStats->mSkills[i].mMod = 0.f;
+            for (auto& skill : npcStats->mSkills)
+                skill.mMod = 0.f;
         }
     }
 
@@ -230,9 +228,9 @@ namespace MWWorld
     // version or not
     void convertStats(ESM::CreatureStats& creatureStats)
     {
-        for (std::size_t i = 0; i < 3; ++i)
-            creatureStats.mDynamic[i].mMod = 0.f;
-        for (std::size_t i = 0; i < 4; ++i)
-            creatureStats.mAiSettings[i].mMod = 0.f;
+        for (auto& dynamic : creatureStats.mDynamic)
+            dynamic.mMod = 0.f;
+        for (auto& setting : creatureStats.mAiSettings)
+            setting.mMod = 0.f;
     }
 }

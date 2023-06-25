@@ -44,7 +44,7 @@ namespace MWGui
         // Show a dialog
         void spawnDialog(const char id);
 
-        void setValue(std::string_view id, const MWMechanics::AttributeValue& value) override;
+        void setValue(ESM::Attribute::AttributeID id, const MWMechanics::AttributeValue& value) override;
         void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value) override;
         void setValue(ESM::RefId id, const MWMechanics::SkillValue& value) override;
         void configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor) override;

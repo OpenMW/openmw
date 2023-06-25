@@ -1,6 +1,8 @@
 #ifndef MWGUI_LEVELUPDIALOG_H
 #define MWGUI_LEVELUPDIALOG_H
 
+#include <components/esm/attr.hpp>
+
 #include "windowbase.hpp"
 
 namespace MWGui
@@ -14,23 +16,26 @@ namespace MWGui
         void onOpen() override;
 
     private:
+        struct Widgets
+        {
+            MyGUI::Button* mButton;
+            MyGUI::TextBox* mValue;
+            MyGUI::TextBox* mMultiplier;
+        };
         MyGUI::Button* mOkButton;
         MyGUI::ImageBox* mClassImage;
         MyGUI::TextBox* mLevelText;
         MyGUI::EditBox* mLevelDescription;
 
         MyGUI::Widget* mCoinBox;
-        MyGUI::Widget* mAssignWidget;
+        MyGUI::ScrollView* mAssignWidget;
 
-        std::vector<MyGUI::Button*> mAttributes;
-        std::vector<MyGUI::TextBox*> mAttributeValues;
-        std::vector<MyGUI::TextBox*> mAttributeMultipliers;
+        std::map<ESM::Attribute::AttributeID, Widgets> mAttributeWidgets;
         std::vector<MyGUI::ImageBox*> mCoins;
 
-        std::vector<int> mSpentAttributes;
+        std::vector<ESM::Attribute::AttributeID> mSpentAttributes;
 
         unsigned int mCoinCount;
-        static const unsigned int sMaxCoins;
 
         void onOkButtonClicked(MyGUI::Widget* sender);
         void onAttributeClicked(MyGUI::Widget* sender);

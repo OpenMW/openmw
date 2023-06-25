@@ -184,7 +184,7 @@ namespace MWGui
     {
     public:
         SelectAttributeDialog();
-        ~SelectAttributeDialog();
+        ~SelectAttributeDialog() override = default;
 
         bool exit() override;
 

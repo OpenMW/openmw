@@ -10,14 +10,9 @@
             </Widget>
 
             <!-- Attribute list -->
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 28 216 18" name="Attribute0" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 46 216 18" name="Attribute1" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 64 216 18" name="Attribute2" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 82 216 18" name="Attribute3" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 100 216 18" name="Attribute4" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 118 216 18" name="Attribute5" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 136 216 18" name="Attribute6" align="Left Top"/>
-            <Widget type="MWAttribute" skin="MW_StatNameButtonC" position="0 154 216 18" name="Attribute7" align="Left Top"/>
+            <Widget type="ScrollView" skin="MW_ScrollView" position="0 28 216 144" name="Attributes" align="Left Top">
+                <Property key="CanvasAlign" value="Left"/>
+            </Widget>
 
             <!-- Dialog buttons -->
             <Widget type="HBox" position="0 175 216 28">

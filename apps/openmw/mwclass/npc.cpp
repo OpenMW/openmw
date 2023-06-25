@@ -88,11 +88,12 @@ namespace
 
         bool male = (npc->mFlags & ESM::NPC::Female) == 0;
 
+        const auto& attributes = MWBase::Environment::get().getESMStore()->get<ESM::Attribute>();
         int level = creatureStats.getLevel();
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
+        for (const ESM::Attribute& attribute : attributes)
         {
-            const ESM::Race::MaleFemale& attribute = race->mData.mAttributeValues[i];
-            creatureStats.setAttribute(i, male ? attribute.mMale : attribute.mFemale);
+            const ESM::Race::MaleFemale& value = race->mData.mAttributeValues[attribute.mId];
+            creatureStats.setAttribute(attribute.mId, male ? value.mMale : value.mFemale);
         }
 
         // class bonus
@@ -102,18 +103,19 @@ namespace
         {
             if (attribute >= 0 && attribute < ESM::Attribute::Length)
             {
-                creatureStats.setAttribute(attribute, creatureStats.getAttribute(attribute).getBase() + 10);
+                auto id = static_cast<ESM::Attribute::AttributeID>(attribute);
+                creatureStats.setAttribute(id, creatureStats.getAttribute(id).getBase() + 10);
             }
         }
 
         // skill bonus
-        for (int attribute = 0; attribute < ESM::Attribute::Length; ++attribute)
+        for (const ESM::Attribute& attribute : attributes)
         {
             float modifierSum = 0;
 
             for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
             {
-                if (skill.mData.mAttribute != attribute)
+                if (skill.mData.mAttribute != attribute.mId)
                     continue;
 
                 // is this a minor or major skill?
@@ -127,9 +129,10 @@ namespace
                 }
                 modifierSum += add;
             }
-            creatureStats.setAttribute(attribute,
+            creatureStats.setAttribute(attribute.mId,
                 std::min(
-                    round_ieee_754(creatureStats.getAttribute(attribute).getBase() + (level - 1) * modifierSum), 100));
+                    round_ieee_754(creatureStats.getAttribute(attribute.mId).getBase() + (level - 1) * modifierSum),
+                    100));
         }
 
         // initial health
@@ -223,13 +226,10 @@ namespace
                     100)); // Must gracefully handle level 0
         }
 
-        int attributes[ESM::Attribute::Length];
-        for (int i = 0; i < ESM::Attribute::Length; ++i)
-            attributes[i] = npcStats.getAttribute(i).getBase();
-
         if (!spellsInitialised)
         {
-            std::vector<ESM::RefId> spells = MWMechanics::autoCalcNpcSpells(npcStats.getSkills(), attributes, race);
+            std::vector<ESM::RefId> spells
+                = MWMechanics::autoCalcNpcSpells(npcStats.getSkills(), npcStats.getAttributes(), race);
             npcStats.getSpells().addAllToInstance(spells);
         }
     }

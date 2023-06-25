@@ -260,8 +260,8 @@ namespace MWGui
         mSpecializationName->setCaption(specName);
         ToolTips::createSpecializationToolTip(mSpecializationName, specName, specialization);
 
-        mFavoriteAttribute[0]->setAttributeId(klass->mData.mAttribute[0]);
-        mFavoriteAttribute[1]->setAttributeId(klass->mData.mAttribute[1]);
+        mFavoriteAttribute[0]->setAttributeId(static_cast<ESM::Attribute::AttributeID>(klass->mData.mAttribute[0]));
+        mFavoriteAttribute[1]->setAttributeId(static_cast<ESM::Attribute::AttributeID>(klass->mData.mAttribute[1]));
         ToolTips::createAttributeToolTip(mFavoriteAttribute[0], mFavoriteAttribute[0]->getAttributeId());
         ToolTips::createAttributeToolTip(mFavoriteAttribute[1], mFavoriteAttribute[1]->getAttributeId());
 
@@ -749,30 +749,34 @@ namespace MWGui
         center();
 
         const auto& store = MWBase::Environment::get().getWorld()->getStore().get<ESM::Attribute>();
+        MyGUI::ScrollView* attributes;
+        getWidget(attributes, "Attributes");
+        MyGUI::IntCoord coord{ 0, 0, attributes->getWidth(), 18 };
         for (const ESM::Attribute& attribute : store)
         {
-            Widgets::MWAttributePtr widget;
-            char theIndex = '0' + attribute.mId;
-
-            getWidget(widget, std::string("Attribute").append(1, theIndex));
+            auto* widget
+                = attributes->createWidget<Widgets::MWAttribute>("MW_StatNameButtonC", coord, MyGUI::Align::Default);
+            coord.top += coord.height;
             widget->setAttributeId(attribute.mId);
             widget->eventClicked += MyGUI::newDelegate(this, &SelectAttributeDialog::onAttributeClicked);
-            ToolTips::createAttributeToolTip(widget, widget->getAttributeId());
+            ToolTips::createAttributeToolTip(widget, attribute.mId);
         }
+
+        attributes->setVisibleVScroll(false);
+        attributes->setCanvasSize(MyGUI::IntSize(attributes->getWidth(), std::max(attributes->getHeight(), coord.top)));
+        attributes->setVisibleVScroll(true);
+        attributes->setViewOffset(MyGUI::IntPoint());
 
         MyGUI::Button* cancelButton;
         getWidget(cancelButton, "CancelButton");
         cancelButton->eventMouseButtonClick += MyGUI::newDelegate(this, &SelectAttributeDialog::onCancelClicked);
     }
 
-    SelectAttributeDialog::~SelectAttributeDialog() {}
-
     // widget controls
 
     void SelectAttributeDialog::onAttributeClicked(Widgets::MWAttributePtr _sender)
     {
-        // TODO: Change MWAttribute to set and get AttributeID enum instead of int
-        mAttributeId = static_cast<ESM::Attribute::AttributeID>(_sender->getAttributeId());
+        mAttributeId = _sender->getAttributeId();
         eventItemSelected();
     }
 
