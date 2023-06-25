@@ -131,7 +131,7 @@ Exterior cells
     we enter its neighbouring cell. It is also possible to move into another
     interior or exterior cell through door objects.
     
-    They all fit on a grid where cells have unique coordinates and border one
+    They all fit on a grid where exterior cells have unique coordinates and border one
     another. Their ``ID`` is based on the unique coordinates a cell takes on the
     exterior world grid and they can optionally also have a ``Name``.
 
