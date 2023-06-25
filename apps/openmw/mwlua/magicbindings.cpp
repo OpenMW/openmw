@@ -554,7 +554,7 @@ namespace MWLua
             return sol::as_function([lua, &self]() mutable -> std::pair<sol::object, sol::object> {
                 if (!self.isEnd())
                 {
-                    auto result = sol::make_object(lua, self.mIterator->getId());
+                    auto result = sol::make_object(lua, self.mIterator->getId().serializeText());
                     auto index = sol::make_object(lua, self.mIndex + 1);
                     self.advance();
                     return { index, result };
