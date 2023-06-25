@@ -637,7 +637,7 @@
 --- `core.magic.SPELL_TYPE`
 -- @type SpellType
 -- @field #number Spell Normal spell, must be cast and costs mana
--- @field #number Ability Inert ability, always in effect
+-- @field #number Ability Innate ability, always in effect
 -- @field #number Blight Blight disease
 -- @field #number Disease Common disease
 -- @field #number Curse Curse
