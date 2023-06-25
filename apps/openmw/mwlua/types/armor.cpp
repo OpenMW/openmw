@@ -23,7 +23,7 @@ namespace
     {
         ESM::Armor armor;
         armor.mName = rec["name"];
-        armor.mModel = rec["model"];
+        armor.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
         armor.mIcon = rec["icon"];
         std::string_view enchantId = rec["enchant"].get<std::string_view>();
         armor.mEnchant = ESM::RefId::deserializeText(enchantId);

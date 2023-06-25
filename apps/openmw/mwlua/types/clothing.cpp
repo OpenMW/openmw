@@ -23,7 +23,7 @@ namespace
     {
         ESM::Clothing clothing;
         clothing.mName = rec["name"];
-        clothing.mModel = rec["model"];
+        clothing.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
         clothing.mIcon = rec["icon"];
         std::string_view scriptId = rec["mwscript"].get<std::string_view>();
         clothing.mScript = ESM::RefId::deserializeText(scriptId);

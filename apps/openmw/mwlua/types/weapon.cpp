@@ -25,7 +25,7 @@ namespace
     {
         ESM::Weapon weapon;
         weapon.mName = rec["name"];
-        weapon.mModel = rec["model"];
+        weapon.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
         weapon.mIcon = rec["icon"];
         std::string_view enchantId = rec["enchant"].get<std::string_view>();
         weapon.mEnchant = ESM::RefId::deserializeText(enchantId);

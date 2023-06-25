@@ -25,7 +25,7 @@ namespace
     {
         ESM::Miscellaneous misc;
         misc.mName = rec["name"];
-        misc.mModel = rec["model"];
+        misc.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
         misc.mIcon = rec["icon"];
         std::string_view scriptId = rec["mwscript"].get<std::string_view>();
         misc.mScript = ESM::RefId::deserializeText(scriptId);
