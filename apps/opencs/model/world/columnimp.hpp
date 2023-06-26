@@ -2040,13 +2040,16 @@ namespace CSMWorld
         {
         }
 
-        QVariant get(const Record<ESXRecordT>& record) const override { return record.get().mData.mSchool; }
+        QVariant get(const Record<ESXRecordT>& record) const override
+        {
+            return ESM::MagicSchool::skillRefIdToIndex(record.get().mData.mSchool);
+        }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
         {
             ESXRecordT record2 = record.get();
 
-            record2.mData.mSchool = data.toInt();
+            record2.mData.mSchool = ESM::MagicSchool::indexToSkillRefId(data.toInt());
 
             record.setModified(record2);
         }

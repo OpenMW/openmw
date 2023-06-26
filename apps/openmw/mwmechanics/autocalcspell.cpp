@@ -13,7 +13,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
-#include "magicschool.hpp"
 #include "spellutil.hpp"
 
 namespace MWMechanics
@@ -36,17 +35,18 @@ namespace MWMechanics
         static const float fNPCbaseMagickaMult = gmst.find("fNPCbaseMagickaMult")->mValue.getFloat();
         float baseMagicka = fNPCbaseMagickaMult * actorAttributes.at(ESM::Attribute::Intelligence).getBase();
 
-        std::map<int, SchoolCaps> schoolCaps;
-        for (int i = 0; i < MagicSchool::Length; ++i)
+        std::map<ESM::RefId, SchoolCaps> schoolCaps;
+        for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
         {
-            const MagicSchool& school = getMagicSchool(i);
+            if (!skill.mSchool)
+                continue;
             SchoolCaps caps;
             caps.mCount = 0;
-            caps.mLimit = school.mAutoCalcMax;
-            caps.mReachedLimit = school.mAutoCalcMax <= 0;
+            caps.mLimit = skill.mSchool->mAutoCalcMax;
+            caps.mReachedLimit = skill.mSchool->mAutoCalcMax <= 0;
             caps.mMinCost = std::numeric_limits<int>::max();
             caps.mWeakestSpell = ESM::RefId();
-            schoolCaps[i] = caps;
+            schoolCaps[skill.mId] = caps;
         }
 
         std::vector<ESM::RefId> selectedSpells;
@@ -72,10 +72,10 @@ namespace MWMechanics
             if (!attrSkillCheck(&spell, actorSkills, actorAttributes))
                 continue;
 
-            int school;
+            ESM::RefId school;
             float skillTerm;
             calcWeakestSchool(&spell, actorSkills, school, skillTerm);
-            assert(school >= 0 && school < 6);
+            assert(!school.empty());
             SchoolCaps& cap = schoolCaps[school];
 
             if (cap.mReachedLimit && spellCost <= cap.mMinCost)
@@ -171,7 +171,7 @@ namespace MWMechanics
 
             static const float fAutoPCSpellChance
                 = esmStore.get<ESM::GameSetting>().find("fAutoPCSpellChance")->mValue.getFloat();
-            if (calcAutoCastChance(&spell, actorSkills, actorAttributes, -1) < fAutoPCSpellChance)
+            if (calcAutoCastChance(&spell, actorSkills, actorAttributes, {}) < fAutoPCSpellChance)
                 continue;
 
             if (!attrSkillCheck(&spell, actorSkills, actorAttributes))
@@ -248,7 +248,7 @@ namespace MWMechanics
     }
 
     void calcWeakestSchool(const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills,
-        int& effectiveSchool, float& skillTerm)
+        ESM::RefId& effectiveSchool, float& skillTerm)
     {
         // Morrowind for some reason uses a formula slightly different from magicka cost calculation
         float minChance = std::numeric_limits<float>::max();
@@ -287,8 +287,7 @@ namespace MWMechanics
                 x *= 1.5f;
 
             float s = 0.f;
-            ESM::RefId skill = spellSchoolToSkill(magicEffect->mData.mSchool);
-            auto found = actorSkills.find(skill);
+            auto found = actorSkills.find(magicEffect->mData.mSchool);
             if (found != actorSkills.end())
                 s = 2.f * found->second.getBase();
             if (s - x < minChance)
@@ -301,7 +300,7 @@ namespace MWMechanics
     }
 
     float calcAutoCastChance(const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills,
-        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes, int effectiveSchool)
+        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes, ESM::RefId effectiveSchool)
     {
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100.f;
@@ -310,10 +309,9 @@ namespace MWMechanics
             return 100.f;
 
         float skillTerm = 0;
-        if (effectiveSchool != -1)
+        if (!effectiveSchool.empty())
         {
-            ESM::RefId skill = spellSchoolToSkill(effectiveSchool);
-            auto found = actorSkills.find(skill);
+            auto found = actorSkills.find(effectiveSchool);
             if (found != actorSkills.end())
                 skillTerm = 2.f * found->second.getBase();
         }

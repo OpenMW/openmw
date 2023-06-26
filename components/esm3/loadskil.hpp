@@ -2,6 +2,7 @@
 #define OPENMW_ESM_SKIL_H
 
 #include <array>
+#include <optional>
 #include <string>
 
 #include "components/esm/defs.hpp"
@@ -12,6 +13,22 @@ namespace ESM
 
     class ESMReader;
     class ESMWriter;
+
+    struct MagicSchool
+    {
+        ESM::RefId mAreaSound;
+        ESM::RefId mBoltSound;
+        ESM::RefId mCastSound;
+        ESM::RefId mFailureSound;
+        ESM::RefId mHitSound;
+        std::string mName;
+        int mAutoCalcMax;
+
+        static constexpr int Length = 6;
+
+        static RefId indexToSkillRefId(int index);
+        static int skillRefIdToIndex(RefId id);
+    };
 
     /*
      * Skill information
@@ -47,6 +64,7 @@ namespace ESM
         std::string mName;
         std::string mIcon;
         float mWerewolfValue{};
+        std::optional<MagicSchool> mSchool;
 
         static constexpr IndexRefId Block{ sRecordId, 0 };
         static constexpr IndexRefId Armorer{ sRecordId, 1 };

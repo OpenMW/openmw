@@ -42,7 +42,6 @@
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/combat.hpp"
 #include "../mwmechanics/creaturestats.hpp"
-#include "../mwmechanics/magicschool.hpp"
 #include "../mwmechanics/spellcasting.hpp"
 #include "../mwmechanics/weapontype.hpp"
 
@@ -102,7 +101,11 @@ namespace
             if (!magicEffect->mBoltSound.empty())
                 sounds.emplace(magicEffect->mBoltSound);
             else
-                sounds.emplace(MWMechanics::getMagicSchool(magicEffect->mData.mSchool).mBoltSound);
+                sounds.emplace(MWBase::Environment::get()
+                                   .getESMStore()
+                                   ->get<ESM::Skill>()
+                                   .find(magicEffect->mData.mSchool)
+                                   ->mSchool->mBoltSound);
             projectileEffects.mList.push_back(*iter);
         }
 

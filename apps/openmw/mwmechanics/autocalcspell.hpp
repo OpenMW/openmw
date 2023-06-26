@@ -31,10 +31,10 @@ namespace MWMechanics
         const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes);
 
     void calcWeakestSchool(const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills,
-        int& effectiveSchool, float& skillTerm);
+        ESM::RefId& effectiveSchool, float& skillTerm);
 
     float calcAutoCastChance(const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills,
-        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes, int effectiveSchool);
+        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes, ESM::RefId effectiveSchool);
 
 }
 

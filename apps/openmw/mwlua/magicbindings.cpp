@@ -358,8 +358,8 @@ namespace MWLua
                 .find(ESM::MagicEffect::indexToGmstString(rec.mIndex))
                 ->mValue.getString();
         });
-        magicEffectT["school"]
-            = sol::readonly_property([](const ESM::MagicEffect& rec) -> int { return rec.mData.mSchool; });
+        magicEffectT["school"] = sol::readonly_property(
+            [](const ESM::MagicEffect& rec) -> int { return ESM::MagicSchool::skillRefIdToIndex(rec.mData.mSchool); });
         magicEffectT["baseCost"]
             = sol::readonly_property([](const ESM::MagicEffect& rec) -> float { return rec.mData.mBaseCost; });
         magicEffectT["color"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> Misc::Color {

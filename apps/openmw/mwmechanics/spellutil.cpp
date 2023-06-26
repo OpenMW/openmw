@@ -37,19 +37,6 @@ namespace MWMechanics
         }
     }
 
-    ESM::RefId spellSchoolToSkill(int school)
-    {
-        static const std::array<ESM::RefId, 6> schoolSkillArray{
-            ESM::Skill::Alteration,
-            ESM::Skill::Conjuration,
-            ESM::Skill::Destruction,
-            ESM::Skill::Illusion,
-            ESM::Skill::Mysticism,
-            ESM::Skill::Restoration,
-        };
-        return schoolSkillArray.at(school);
-    }
-
     float calcEffectCost(
         const ESM::ENAMstruct& effect, const ESM::MagicEffect* magicEffect, const EffectCostMethod method)
     {
@@ -153,7 +140,7 @@ namespace MWMechanics
         return enchantment.mData.mCharge;
     }
 
-    float calcSpellBaseSuccessChance(const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool)
+    float calcSpellBaseSuccessChance(const ESM::Spell* spell, const MWWorld::Ptr& actor, ESM::RefId* effectiveSchool)
     {
         // Morrowind for some reason uses a formula slightly different from magicka cost calculation
         float y = std::numeric_limits<float>::max();
@@ -180,7 +167,7 @@ namespace MWMechanics
                                                      ->mValue.getFloat();
             x *= fEffectCostMult;
 
-            float s = 2.0f * actor.getClass().getSkill(actor, spellSchoolToSkill(magicEffect->mData.mSchool));
+            float s = 2.0f * actor.getClass().getSkill(actor, magicEffect->mData.mSchool);
             if (s - x < y)
             {
                 y = s - x;
@@ -201,7 +188,7 @@ namespace MWMechanics
     }
 
     float getSpellSuccessChance(
-        const ESM::Spell* spell, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
+        const ESM::Spell* spell, const MWWorld::Ptr& actor, ESM::RefId* effectiveSchool, bool cap, bool checkMagicka)
     {
         // NB: Base chance is calculated here because the effective school pointer must be filled
         float baseChance = calcSpellBaseSuccessChance(spell, actor, effectiveSchool);
@@ -239,23 +226,23 @@ namespace MWMechanics
     }
 
     float getSpellSuccessChance(
-        const ESM::RefId& spellId, const MWWorld::Ptr& actor, int* effectiveSchool, bool cap, bool checkMagicka)
+        const ESM::RefId& spellId, const MWWorld::Ptr& actor, ESM::RefId* effectiveSchool, bool cap, bool checkMagicka)
     {
         if (const auto spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().search(spellId))
             return getSpellSuccessChance(spell, actor, effectiveSchool, cap, checkMagicka);
         return 0.f;
     }
 
-    int getSpellSchool(const ESM::RefId& spellId, const MWWorld::Ptr& actor)
+    ESM::RefId getSpellSchool(const ESM::RefId& spellId, const MWWorld::Ptr& actor)
     {
-        int school = 0;
+        ESM::RefId school;
         getSpellSuccessChance(spellId, actor, &school);
         return school;
     }
 
-    int getSpellSchool(const ESM::Spell* spell, const MWWorld::Ptr& actor)
+    ESM::RefId getSpellSchool(const ESM::Spell* spell, const MWWorld::Ptr& actor)
     {
-        int school = 0;
+        ESM::RefId school;
         getSpellSuccessChance(spell, actor, &school);
         return school;
     }
