@@ -206,7 +206,7 @@
 -- @param self
 -- @param #string effectId effect ID
 -- @param #string extraParam Optional skill or attribute ID
--- @return #ActiveEffect if such an effect is active, nil otherwise
+-- @return openmw.core#ActiveEffect if such an effect is active, nil otherwise
 
 ---
 -- Completely removes the active effect from the actor.
