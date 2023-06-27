@@ -1170,11 +1170,6 @@ namespace MWMechanics
         updateProcessingRange();
     }
 
-    float Actors::getProcessingRange() const
-    {
-        return mActorsProcessingRange;
-    }
-
     void Actors::updateProcessingRange()
     {
         // We have to cap it since using high values (larger than 7168) will make some quests harder or impossible to

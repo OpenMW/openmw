@@ -193,8 +193,6 @@ namespace MWMechanics
 
         void processChangedSettings(const Settings::CategorySettingVector& settings) override;
 
-        float getActorsProcessingRange() const override;
-
         void notifyDied(const MWWorld::Ptr& actor) override;
 
         /// Check if the target actor was detected by an observer

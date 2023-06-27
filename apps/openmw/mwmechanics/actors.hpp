@@ -57,7 +57,6 @@ namespace MWMechanics
         void updateMagicEffects(const MWWorld::Ptr& ptr) const;
 
         void updateProcessingRange();
-        float getProcessingRange() const;
 
         void addActor(const MWWorld::Ptr& ptr, bool updateImmediately = false);
         ///< Register an actor for stats management

@@ -363,11 +363,6 @@ namespace MWMechanics
         mActors.notifyDied(actor);
     }
 
-    float MechanicsManager::getActorsProcessingRange() const
-    {
-        return mActors.getProcessingRange();
-    }
-
     bool MechanicsManager::isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer)
     {
         return mActors.isActorDetected(actor, observer);
