@@ -31,8 +31,6 @@ namespace MWClass
     {
         friend MWWorld::RegisteredClass<Container>;
 
-        const bool mHarvestEnabled;
-
         Container();
 
         void ensureCustomData(const MWWorld::Ptr& ptr) const;

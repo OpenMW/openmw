@@ -50,7 +50,6 @@ namespace MWGui
 
         WaitDialogProgressBar mProgressBar;
         TimeAdvancer mTimeAdvancer;
-        bool mTrainingSkillBasedOnBaseSkill; // corresponds to the setting 'training skills based on base skill'
     };
 
 }

@@ -23,7 +23,7 @@
 #include <components/interpreter/defines.hpp>
 #include <components/interpreter/interpreter.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/journal.hpp"
@@ -583,7 +583,7 @@ namespace MWDialogue
             updateOriginalDisposition();
             mCurrentDisposition += delta;
             mActor.getClass().getNpcStats(mActor).setBaseDisposition(mCurrentDisposition);
-            if (Settings::Manager::getBool("barter disposition change is permanent", "Game"))
+            if (Settings::game().mBarterDispositionChangeIsPermanent)
                 mPermanentDispositionChange += delta;
         }
     }

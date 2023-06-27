@@ -23,7 +23,7 @@
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/lightcommon.hpp>
 #include <components/sceneutil/visitor.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <components/vfs/manager.hpp>
 
@@ -297,8 +297,7 @@ namespace MWRender
         rebuild();
         setRenderBin();
 
-        static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
-        if (viewChange && shieldSheathing)
+        if (viewChange && Settings::game().mShieldSheathing)
         {
             int weaptype = ESM::Weapon::None;
             MWMechanics::getActiveWeapon(mPtr, &weaptype);
@@ -988,8 +987,7 @@ namespace MWRender
 
     bool NpcAnimation::updateCarriedLeftVisible(const int weaptype) const
     {
-        static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
-        if (shieldSheathing)
+        if (Settings::game().mShieldSheathing)
         {
             const MWWorld::Class& cls = mPtr.getClass();
             MWMechanics::CreatureStats& stats = cls.getCreatureStats(mPtr);
@@ -1125,8 +1123,7 @@ namespace MWRender
 
     void NpcAnimation::equipmentChanged()
     {
-        static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
-        if (shieldSheathing)
+        if (Settings::game().mShieldSheathing)
         {
             int weaptype = ESM::Weapon::None;
             MWMechanics::getActiveWeapon(mPtr, &weaptype);

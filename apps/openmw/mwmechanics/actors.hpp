@@ -40,8 +40,6 @@ namespace MWMechanics
     class Actors
     {
     public:
-        Actors();
-
         std::list<Actor>::const_iterator begin() const { return mActors.begin(); }
         std::list<Actor>::const_iterator end() const { return mActors.end(); }
         std::size_t size() const { return mActors.size(); }
@@ -55,8 +53,6 @@ namespace MWMechanics
         /// Update magic effects for an actor. Usually done automatically once per frame, but if we're currently
         /// paused we may want to do it manually (after equipping permanent enchantment)
         void updateMagicEffects(const MWWorld::Ptr& ptr) const;
-
-        void updateProcessingRange();
 
         void addActor(const MWWorld::Ptr& ptr, bool updateImmediately = false);
         ///< Register an actor for stats management
@@ -186,8 +182,6 @@ namespace MWMechanics
         float mTimerUpdateHello = 0;
         float mSneakTimer = 0; // Times update of sneak icon
         float mSneakSkillTimer = 0; // Times sneak skill progress from "avoid notice"
-        float mActorsProcessingRange;
-        bool mSmoothMovement;
         MusicType mCurrentMusic = MusicType::Title;
 
         void updateVisibility(const MWWorld::Ptr& ptr, CharacterController& ctrl) const;

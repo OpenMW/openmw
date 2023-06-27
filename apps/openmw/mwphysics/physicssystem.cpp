@@ -27,7 +27,7 @@
 #include <components/misc/strings/conversion.hpp>
 #include <components/resource/bulletshapemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -104,8 +104,6 @@ namespace MWPhysics
         , mWaterEnabled(false)
         , mParentNode(parentNode)
         , mPhysicsDt(1.f / 60.f)
-        , mActorCollisionShapeType(
-              DetourNavigator::toCollisionShapeType(Settings::Manager::getInt("actor collision shape type", "Game")))
     {
         mResourceSystem->addResourceManager(mShapeManager.get());
 
@@ -668,7 +666,8 @@ namespace MWPhysics
         const MWMechanics::MagicEffects& effects = ptr.getClass().getCreatureStats(ptr).getMagicEffects();
         const bool canWaterWalk = effects.getOrDefault(ESM::MagicEffect::WaterWalking).getMagnitude() > 0;
 
-        auto actor = std::make_shared<Actor>(ptr, shape, mTaskScheduler.get(), canWaterWalk, mActorCollisionShapeType);
+        auto actor = std::make_shared<Actor>(
+            ptr, shape, mTaskScheduler.get(), canWaterWalk, Settings::game().mActorCollisionShapeType);
 
         mActors.emplace(ptr.mRef, std::move(actor));
     }

@@ -6,7 +6,7 @@
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadnpc.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -90,7 +90,7 @@ namespace MWClass
             if (creature)
             {
                 int soul = creature->mData.mSoul;
-                if (Settings::Manager::getBool("rebalance soul gem values", "Game"))
+                if (Settings::game().mRebalanceSoulGemValues)
                 {
                     // use the 'soul gem value rebalance' formula from the Morrowind Code Patch
                     float soulValue = 0.0001 * pow(soul, 3) + 2 * soul;

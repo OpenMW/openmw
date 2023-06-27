@@ -350,8 +350,6 @@ namespace MWMechanics
                 if (state != MWBase::StateManager::State_Running)
                     continue;
 
-                mActors.updateProcessingRange();
-
                 // Update mechanics for new processing range immediately
                 update(0.f, false);
             }

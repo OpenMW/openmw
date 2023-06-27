@@ -42,7 +42,7 @@
 #include <components/sceneutil/util.hpp>
 #include <components/sceneutil/visitor.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -616,8 +616,7 @@ namespace MWRender
 
         addSingleAnimSource(kfname, baseModel);
 
-        static const bool useAdditionalSources = Settings::Manager::getBool("use additional anim sources", "Game");
-        if (useAdditionalSources)
+        if (Settings::game().mUseAdditionalAnimSources)
             loadAllAnimationsInFolder(kfname, baseModel);
     }
 
@@ -1388,11 +1387,10 @@ namespace MWRender
         mAccumRoot = nullptr;
         mAccumCtrl = nullptr;
 
-        static const bool useAdditionalSources = Settings::Manager::getBool("use additional anim sources", "Game");
         std::string defaultSkeleton;
         bool inject = false;
 
-        if (useAdditionalSources && mPtr.getClass().isActor())
+        if (Settings::game().mUseAdditionalAnimSources && mPtr.getClass().isActor())
         {
             if (isCreature)
             {
@@ -1867,8 +1865,7 @@ namespace MWRender
             visitor.remove();
         }
 
-        if (Settings::Manager::getBool("day night switches", "Game")
-            && SceneUtil::hasUserDescription(mObjectRoot, Constants::NightDayLabel))
+        if (Settings::game().mDayNightSwitches && SceneUtil::hasUserDescription(mObjectRoot, Constants::NightDayLabel))
         {
             AddSwitchCallbacksVisitor visitor;
             mObjectRoot->accept(visitor);

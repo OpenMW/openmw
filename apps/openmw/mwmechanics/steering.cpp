@@ -1,7 +1,7 @@
 #include "steering.hpp"
 
 #include <components/misc/mathutil.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/ptr.hpp"
@@ -26,8 +26,7 @@ namespace MWMechanics
 
         float limit
             = getAngularVelocity(actor.getClass().getMaxSpeed(actor)) * MWBase::Environment::get().getFrameDuration();
-        static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
-        if (smoothMovement)
+        if (Settings::game().mSmoothMovement)
             limit *= std::min(absDiff / osg::PI + 0.1, 0.5);
 
         if (absDiff > limit)

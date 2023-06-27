@@ -10,7 +10,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadgmst.hpp>
@@ -425,7 +425,7 @@ namespace MWMechanics
 
     void Actors::updateMovementSpeed(const MWWorld::Ptr& actor) const
     {
-        if (mSmoothMovement)
+        if (Settings::game().mSmoothMovement)
             return;
 
         const auto& actorClass = actor.getClass();
@@ -559,7 +559,7 @@ namespace MWMechanics
             float angle = std::atan2(from, to);
             actorState.setAngleToPlayer(angle);
             float deltaAngle = Misc::normalizeAngle(angle - actor.getRefData().getPosition().rot[2]);
-            if (!mSmoothMovement || std::abs(deltaAngle) > osg::DegreesToRadians(60.f))
+            if (!Settings::game().mSmoothMovement || std::abs(deltaAngle) > osg::DegreesToRadians(60.f))
                 actorState.setTurningToPlayer(true);
         }
     }
@@ -598,8 +598,9 @@ namespace MWMechanics
         const osg::Vec3f actor1Pos(actor1.getRefData().getPosition().asVec3());
         const osg::Vec3f actor2Pos(actor2.getRefData().getPosition().asVec3());
         const float sqrDist = (actor1Pos - actor2Pos).length2();
+        const int actorsProcessingRange = Settings::game().mActorsProcessingRange;
 
-        if (sqrDist > mActorsProcessingRange * mActorsProcessingRange)
+        if (sqrDist > actorsProcessingRange * actorsProcessingRange)
             return;
 
         // If this is set to true, actor1 will start combat with actor2 if the awareness check at the end of the method
@@ -677,8 +678,7 @@ namespace MWMechanics
 
         // If set in the settings file, player followers and escorters will become aggressive toward enemies in combat
         // with them or the player
-        static const bool followersAttackOnSight = Settings::Manager::getBool("followers attack on sight", "Game");
-        if (!aggressive && isPlayerFollowerOrEscorter && followersAttackOnSight)
+        if (!aggressive && isPlayerFollowerOrEscorter && Settings::game().mFollowersAttackOnSight)
         {
             if (creatureStats2.getAiSequence().isInCombat(actor1))
                 aggressive = true;
@@ -1161,23 +1161,6 @@ namespace MWMechanics
         }
     }
 
-    Actors::Actors()
-        : mSmoothMovement(Settings::Manager::getBool("smooth movement", "Game"))
-    {
-        updateProcessingRange();
-    }
-
-    void Actors::updateProcessingRange()
-    {
-        // We have to cap it since using high values (larger than 7168) will make some quests harder or impossible to
-        // complete (bug #1876)
-        static constexpr float maxRange = 7168.f;
-        static constexpr float minRange = maxRange / 2.f;
-
-        mActorsProcessingRange
-            = std::clamp(Settings::Manager::getFloat("actors processing range", "Game"), minRange, maxRange);
-    }
-
     void Actors::addActor(const MWWorld::Ptr& ptr, bool updateImmediately)
     {
         removeActor(ptr, true);
@@ -1208,7 +1191,8 @@ namespace MWMechanics
 
         const float dist
             = (player.getRefData().getPosition().asVec3() - ptr.getRefData().getPosition().asVec3()).length();
-        if (dist > mActorsProcessingRange)
+        const int actorsProcessingRange = Settings::game().mActorsProcessingRange;
+        if (dist > actorsProcessingRange)
         {
             ptr.getRefData().getBaseNode()->setNodeMask(0);
             return;
@@ -1218,8 +1202,8 @@ namespace MWMechanics
 
         // Fade away actors on large distance (>90% of actor's processing distance)
         float visibilityRatio = 1.0;
-        const float fadeStartDistance = mActorsProcessingRange * 0.9f;
-        const float fadeEndDistance = mActorsProcessingRange;
+        const float fadeStartDistance = actorsProcessingRange * 0.9f;
+        const float fadeEndDistance = actorsProcessingRange;
         const float fadeRatio = (dist - fadeStartDistance) / (fadeEndDistance - fadeStartDistance);
         if (fadeRatio > 0)
             visibilityRatio -= std::max(0.f, fadeRatio);
@@ -1263,7 +1247,7 @@ namespace MWMechanics
         // Otherwise check if any actor in AI processing range sees the target actor
         std::vector<MWWorld::Ptr> neighbors;
         osg::Vec3f position(actor.getRefData().getPosition().asVec3());
-        getObjectsInRange(position, mActorsProcessingRange, neighbors);
+        getObjectsInRange(position, Settings::game().mActorsProcessingRange, neighbors);
         for (const MWWorld::Ptr& neighbor : neighbors)
         {
             if (neighbor == actor)
@@ -1310,13 +1294,15 @@ namespace MWMechanics
 
         if (aiActive)
         {
+            const int actorsProcessingRange = Settings::game().mActorsProcessingRange;
             for (const Actor& actor : mActors)
             {
                 if (actor.getPtr() == player)
                     continue;
 
-                bool inProcessingRange = (playerPos - actor.getPtr().getRefData().getPosition().asVec3()).length2()
-                    <= mActorsProcessingRange * mActorsProcessingRange;
+                const bool inProcessingRange
+                    = (playerPos - actor.getPtr().getRefData().getPosition().asVec3()).length2()
+                    <= actorsProcessingRange * actorsProcessingRange;
                 if (inProcessingRange)
                 {
                     MWMechanics::CreatureStats& stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
@@ -1353,7 +1339,7 @@ namespace MWMechanics
         const float maxDistForPartialAvoiding = 200.f;
         const float maxDistForStrictAvoiding = 100.f;
         const float maxTimeToCheck = 2.0f;
-        static const bool giveWayWhenIdle = Settings::Manager::getBool("NPCs give way", "Game");
+        const bool giveWayWhenIdle = Settings::game().mNPCsGiveWay;
 
         const MWWorld::Ptr player = getPlayer();
         const MWBase::World* const world = MWBase::Environment::get().getWorld();
@@ -1538,6 +1524,7 @@ namespace MWMechanics
                     player.getClass().getCreatureStats(player).setHitAttemptActorId(-1);
             }
             const bool godmode = MWBase::Environment::get().getWorld()->getGodModeState();
+            const int actorsProcessingRange = Settings::game().mActorsProcessingRange;
 
             // AI and magic effects update
             for (Actor& actor : mActors)
@@ -1549,7 +1536,7 @@ namespace MWMechanics
 
                 const float distSqr = (playerPos - actor.getPtr().getRefData().getPosition().asVec3()).length2();
                 // AI processing is only done within given distance to the player.
-                const bool inProcessingRange = distSqr <= mActorsProcessingRange * mActorsProcessingRange;
+                const bool inProcessingRange = distSqr <= actorsProcessingRange * actorsProcessingRange;
 
                 // If dead or no longer in combat, no longer store any actors who attempted to hit us. Also remove for
                 // the player.
@@ -1648,8 +1635,7 @@ namespace MWMechanics
                 }
             }
 
-            static const bool avoidCollisions = Settings::Manager::getBool("NPCs avoid collisions", "Game");
-            if (avoidCollisions)
+            if (Settings::game().mNPCsAvoidCollisions)
                 predictAndAvoidCollisions(duration);
 
             mTimerUpdateHeadTrack += duration;
@@ -1671,7 +1657,7 @@ namespace MWMechanics
                     MWMechanics::AiSequence& seq = stats.getAiSequence();
                     alwaysActive = !seq.isEmpty() && seq.getActivePackage().alwaysActive();
                 }
-                const bool inRange = isPlayer || dist <= mActorsProcessingRange || alwaysActive;
+                const bool inRange = isPlayer || dist <= actorsProcessingRange || alwaysActive;
                 const int activeFlag = isPlayer ? 2 : 1; // Can be changed back to '2' to keep updating bounding boxes
                                                          // off screen (more accurate, but slower)
                 const int active = inRange ? activeFlag : 0;
@@ -1885,6 +1871,7 @@ namespace MWMechanics
 
         const MWWorld::Ptr player = MWBase::Environment::get().getWorld()->getPlayerPtr();
         const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
+        const int actorsProcessingRange = Settings::game().mActorsProcessingRange;
 
         for (const Actor& actor : mActors)
         {
@@ -1899,7 +1886,7 @@ namespace MWMechanics
 
             if ((!actor.getPtr().getRefData().getBaseNode())
                 || (playerPos - actor.getPtr().getRefData().getPosition().asVec3()).length2()
-                    > mActorsProcessingRange * mActorsProcessingRange)
+                    > actorsProcessingRange * actorsProcessingRange)
                 continue;
 
             adjustMagicEffects(actor.getPtr(), duration);
@@ -1947,7 +1934,7 @@ namespace MWMechanics
 
             std::vector<MWWorld::Ptr> observers;
             const osg::Vec3f position(player.getRefData().getPosition().asVec3());
-            const float radius = std::min(fSneakUseDist, mActorsProcessingRange);
+            const float radius = std::min<float>(fSneakUseDist, Settings::game().mActorsProcessingRange);
             getObjectsInRange(position, radius, observers);
 
             std::set<MWWorld::Ptr> sidingActors;
@@ -2231,7 +2218,7 @@ namespace MWMechanics
         std::vector<MWWorld::Ptr> list;
         std::vector<MWWorld::Ptr> neighbors;
         const osg::Vec3f position(actor.getRefData().getPosition().asVec3());
-        getObjectsInRange(position, mActorsProcessingRange, neighbors);
+        getObjectsInRange(position, Settings::game().mActorsProcessingRange, neighbors);
         for (const MWWorld::Ptr& neighbor : neighbors)
         {
             if (neighbor == actor)
@@ -2252,7 +2239,7 @@ namespace MWMechanics
         std::vector<MWWorld::Ptr> list;
         std::vector<MWWorld::Ptr> neighbors;
         osg::Vec3f position(actor.getRefData().getPosition().asVec3());
-        getObjectsInRange(position, mActorsProcessingRange, neighbors);
+        getObjectsInRange(position, Settings::game().mActorsProcessingRange, neighbors);
 
         std::set<MWWorld::Ptr> followers;
         getActorsFollowing(actor, followers);

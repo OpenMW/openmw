@@ -3,7 +3,7 @@
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/misc/rng.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
@@ -368,11 +368,10 @@ namespace MWMechanics
             ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(mWeaponType)->mWeaponClass;
             if (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ammo)
             {
-                static const float multiplier
-                    = std::clamp(Settings::Manager::getFloat("projectiles enchant multiplier", "Game"), 0.f, 1.f);
                 MWWorld::Ptr player = getPlayer();
                 count = player.getClass().getContainerStore(player).count(mOldItemPtr.getCellRef().getRefId());
-                count = std::clamp<int>(getGemCharge() * multiplier / enchantPoints, 1, count);
+                count = std::clamp<int>(
+                    getGemCharge() * Settings::game().mProjectilesEnchantMultiplier / enchantPoints, 1, count);
             }
         }
 
@@ -381,8 +380,7 @@ namespace MWMechanics
 
     float Enchanting::getTypeMultiplier() const
     {
-        static const bool useMultiplier = Settings::Manager::getFloat("projectiles enchant multiplier", "Game") > 0;
-        if (useMultiplier && mWeaponType != -1 && getEnchantPoints() > 0)
+        if (Settings::game().mProjectilesEnchantMultiplier > 0 && mWeaponType != -1 && getEnchantPoints() > 0)
         {
             ESM::WeaponType::Class weapclass = MWMechanics::getWeaponType(mWeaponType)->mWeaponClass;
             if (weapclass == ESM::WeaponType::Thrown || weapclass == ESM::WeaponType::Ammo)

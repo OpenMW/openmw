@@ -4,7 +4,6 @@
 #include <osg/Timer>
 #include <osg/ref_ptr>
 
-#include <components/detournavigator/collisionshapetype.hpp>
 #include <components/esm3/readerscache.hpp>
 #include <components/misc/rng.hpp>
 #include <components/settings/settings.hpp>
@@ -113,9 +112,6 @@ namespace MWWorld
         std::vector<std::string> mContentFiles;
 
         std::filesystem::path mUserDataPath;
-
-        osg::Vec3f mDefaultHalfExtents;
-        DetourNavigator::CollisionShapeType mDefaultActorCollisionShapeType;
 
         int mActivationDistanceOverride;
 

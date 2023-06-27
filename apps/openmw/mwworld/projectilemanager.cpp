@@ -27,7 +27,7 @@
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/visitor.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -431,7 +431,7 @@ namespace MWWorld
 
     void ProjectileManager::moveMagicBolts(float duration)
     {
-        static const bool normaliseRaceSpeed = Settings::Manager::getBool("normalise race speed", "Game");
+        const bool normaliseRaceSpeed = Settings::game().mNormaliseRaceSpeed;
         for (auto& magicBoltState : mMagicBolts)
         {
             if (magicBoltState.mToDelete)

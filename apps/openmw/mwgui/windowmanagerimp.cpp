@@ -196,7 +196,6 @@ namespace MWGui
         , mForceHidden(GW_None)
         , mAllowed(GW_ALL)
         , mRestAllowed(true)
-        , mShowOwned(0)
         , mEncoding(encoding)
         , mVersionDescription(versionDescription)
         , mWindowVisible(true)
@@ -296,8 +295,6 @@ namespace MWGui
             += MyGUI::newDelegate(this, &WindowManager::onClipboardChanged);
         MyGUI::ClipboardManager::getInstance().eventClipboardRequested
             += MyGUI::newDelegate(this, &WindowManager::onClipboardRequested);
-
-        mShowOwned = Settings::Manager::getInt("show owned", "Game");
 
         mVideoWrapper = std::make_unique<SDLUtil::VideoWrapper>(window, viewer);
         mVideoWrapper->setGammaContrast(
@@ -1040,7 +1037,8 @@ namespace MWGui
     {
         mToolTips->setFocusObject(focus);
 
-        if (mHud && (mShowOwned == 2 || mShowOwned == 3))
+        const int showOwned = Settings::game().mShowOwned;
+        if (mHud && (showOwned == 2 || showOwned == 3))
         {
             bool owned = mToolTips->checkOwned();
             mHud->setCrosshairOwned(owned);

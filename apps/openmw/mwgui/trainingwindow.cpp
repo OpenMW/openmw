@@ -17,7 +17,7 @@
 #include "../mwmechanics/npcstats.hpp"
 
 #include <components/esm3/loadclas.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "tooltips.hpp"
 
@@ -27,8 +27,6 @@ namespace MWGui
     TrainingWindow::TrainingWindow()
         : WindowBase("openmw_trainingwindow.layout")
         , mTimeAdvancer(0.05f)
-        , mTrainingSkillBasedOnBaseSkill(
-              Settings::Manager::getBool("trainers training skills based on base skill", "Game"))
     {
         getWidget(mTrainingOptions, "TrainingOptions");
         getWidget(mCancelButton, "CancelButton");
@@ -199,7 +197,7 @@ namespace MWGui
 
     float TrainingWindow::getSkillForTraining(const MWMechanics::NpcStats& stats, ESM::RefId id) const
     {
-        if (mTrainingSkillBasedOnBaseSkill)
+        if (Settings::game().mTrainersTrainingSkillsBasedOnBaseSkill)
             return stats.getSkill(id).getBase();
         return stats.getSkill(id).getModified();
     }
