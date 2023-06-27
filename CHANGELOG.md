@@ -214,6 +214,7 @@
     Feature #6867: Add a way to localize hardcoded strings in GUI
     Feature #6888: Add switch for armor degradation fix
     Feature #6925: Allow to use a mouse wheel to rotate a head in the race selection menu
+    Feature #6941: Allow users to easily change font size and ttf resolution
     Feature #7434: Exponential fog
     Feature #7435: Sky blending
     Task #5534: Remove support for OSG 3.4
