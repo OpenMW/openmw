@@ -7,6 +7,7 @@
     Bug #4204: Dead slaughterfish doesn't float to water surface after loading saved game
     Bug #4382: Sound output device does not change when it should
     Bug #4610: Casting a Bound Weapon spell cancels the casting animation by equipping the weapon prematurely
+    Bug #4754: Stack of ammunition cannot be equipped partially
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
     Bug #5129: Stuttering animation on Centurion Archer
@@ -26,6 +27,7 @@
     Bug #6716: mwscript comparison operator handling is too restrictive
     Bug #6807: Ultimate Galleon is not working properly
     Bug #6893: Lua: Inconsistent behavior with actors affected by Disable and SetDelete commands
+    Bug #6894: Added item combines with equipped stack instead of creating a new unequipped stack
     Bug #6939: OpenMW-CS: ID columns are too short
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
     Bug #6964: Nerasa Dralor Won't Follow
