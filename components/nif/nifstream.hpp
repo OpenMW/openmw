@@ -75,16 +75,47 @@ namespace Nif
 
         void skip(size_t size) { inp->ignore(size); }
 
+        template <class T>
+        void read(T& data)
+        {
+            data = readLittleEndianType<T>(inp);
+        }
+
+        template <class T>
+        T get()
+        {
+            return readLittleEndianType<T>(inp);
+        }
+
+        template <class T>
+        void readVector(std::vector<T>& vec, size_t size)
+        {
+            vec.resize(size);
+            readLittleEndianDynamicBufferOfType<T>(inp, vec.data(), size);
+        }
+
+        template <class T, size_t size>
+        void readArray(std::array<T, size>& arr)
+        {
+            readLittleEndianDynamicBufferOfType<T>(inp, arr.data(), size);
+        }
+
+        // DEPRECATED: Use read() or get() whenever relevant
         char getChar() { return readLittleEndianType<char>(inp); }
 
+        // DEPRECATED: Use read() or get() whenever relevant
         short getShort() { return readLittleEndianType<short>(inp); }
 
+        // DEPRECATED: Use read() or get() whenever relevant
         unsigned short getUShort() { return readLittleEndianType<unsigned short>(inp); }
 
+        // DEPRECATED: Use read() or get() whenever relevant
         int getInt() { return readLittleEndianType<int>(inp); }
 
+        // DEPRECATED: Use read() or get() whenever relevant
         unsigned int getUInt() { return readLittleEndianType<unsigned int>(inp); }
 
+        // DEPRECATED: Use read() or get() whenever relevant
         float getFloat() { return readLittleEndianType<float>(inp); }
 
         osg::Vec2f getVector2()
@@ -180,36 +211,42 @@ namespace Nif
             return str;
         }
 
+        // DEPRECATED: Use readVector()
         void getChars(std::vector<char>& vec, size_t size)
         {
             vec.resize(size);
             readLittleEndianDynamicBufferOfType<char>(inp, vec.data(), size);
         }
 
+        // DEPRECATED: Use readVector()
         void getUChars(std::vector<unsigned char>& vec, size_t size)
         {
             vec.resize(size);
             readLittleEndianDynamicBufferOfType<unsigned char>(inp, vec.data(), size);
         }
 
+        // DEPRECATED: Use readVector()
         void getUShorts(std::vector<unsigned short>& vec, size_t size)
         {
             vec.resize(size);
             readLittleEndianDynamicBufferOfType<unsigned short>(inp, vec.data(), size);
         }
 
+        // DEPRECATED: Use readVector()
         void getFloats(std::vector<float>& vec, size_t size)
         {
             vec.resize(size);
             readLittleEndianDynamicBufferOfType<float>(inp, vec.data(), size);
         }
 
+        // DEPRECATED: Use readVector()
         void getInts(std::vector<int>& vec, size_t size)
         {
             vec.resize(size);
             readLittleEndianDynamicBufferOfType<int>(inp, vec.data(), size);
         }
 
+        // DEPRECATED: Use readVector()
         void getUInts(std::vector<unsigned int>& vec, size_t size)
         {
             vec.resize(size);
