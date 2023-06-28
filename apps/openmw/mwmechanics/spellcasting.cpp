@@ -83,15 +83,14 @@ namespace MWMechanics
                     mHitPosition, static_cast<float>(effectInfo.mArea * 2));
 
             // Play explosion sound (make sure to use NoTrack, since we will delete the projectile now)
-            static const std::string schools[]
-                = { "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration" };
             {
                 MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
                 if (!effect->mAreaSound.empty())
                     sndMgr->playSound3D(mHitPosition, effect->mAreaSound, 1.0f, 1.0f);
                 else
-                    sndMgr->playSound3D(
-                        mHitPosition, ESM::RefId::stringRefId(schools[effect->mData.mSchool] + " area"), 1.0f, 1.0f);
+                    sndMgr->playSound3D(mHitPosition,
+                        world->getStore().get<ESM::Skill>().find(effect->mData.mSchool)->mSchool->mAreaSound, 1.0f,
+                        1.0f);
             }
             // Get the actors in range of the effect
             std::vector<MWWorld::Ptr> objects;
@@ -300,8 +299,8 @@ namespace MWMechanics
         mSourceName = item.getClass().getName(item);
         mId = item.getCellRef().getRefId();
 
-        const ESM::Enchantment* enchantment
-            = MWBase::Environment::get().getESMStore()->get<ESM::Enchantment>().find(enchantmentName);
+        const auto& store = MWBase::Environment::get().getESMStore();
+        const ESM::Enchantment* enchantment = store->get<ESM::Enchantment>().find(enchantmentName);
 
         mSlot = slot;
 
@@ -332,20 +331,17 @@ namespace MWMechanics
                     MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicInsufficientCharge}");
 
                     // Failure sound
-                    int school = 0;
+                    ESM::RefId school = ESM::Skill::Alteration;
                     if (!enchantment->mEffects.mList.empty())
                     {
                         short effectId = enchantment->mEffects.mList.front().mEffectID;
-                        const ESM::MagicEffect* magicEffect
-                            = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(effectId);
+                        const ESM::MagicEffect* magicEffect = store->get<ESM::MagicEffect>().find(effectId);
                         school = magicEffect->mData.mSchool;
                     }
 
-                    static const std::string schools[]
-                        = { "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration" };
                     MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
                     sndMgr->playSound3D(
-                        mCaster, ESM::RefId::stringRefId("Spell Failure " + schools[school]), 1.0f, 1.0f);
+                        mCaster, store->get<ESM::Skill>().find(school)->mSchool->mFailureSound, 1.0f, 1.0f);
                 }
                 return false;
             }
@@ -401,7 +397,7 @@ namespace MWMechanics
         mSourceName = spell->mName;
         mId = spell->mId;
 
-        int school = 0;
+        ESM::RefId school = ESM::Skill::Alteration;
 
         bool godmode = mCaster == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
 
@@ -428,12 +424,9 @@ namespace MWMechanics
                 if (fail)
                 {
                     // Failure sound
-                    static const std::string schools[]
-                        = { "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration" };
-
                     MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
-                    sndMgr->playSound3D(
-                        mCaster, ESM::RefId::stringRefId("Spell Failure " + schools[school]), 1.0f, 1.0f);
+                    const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().find(school);
+                    sndMgr->playSound3D(mCaster, skill->mSchool->mFailureSound, 1.0f, 1.0f);
                     return false;
                 }
             }
@@ -444,7 +437,7 @@ namespace MWMechanics
         }
 
         if (!mManualSpell && mCaster == getPlayer() && spellIncreasesSkill(spell))
-            mCaster.getClass().skillUsageSucceeded(mCaster, spellSchoolToSkill(school), 0);
+            mCaster.getClass().skillUsageSucceeded(mCaster, school, 0);
 
         // A non-actor doesn't play its spell cast effects from a character controller, so play them here
         if (!mCaster.getClass().isActor())
@@ -595,9 +588,6 @@ namespace MWMechanics
             if (animation && !mCaster.getClass().isActor())
                 animation->addSpellCastGlow(effect);
 
-            static const std::string schools[]
-                = { "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration" };
-
             addedEffects.push_back(Misc::ResourceHelpers::correctMeshPath(castStatic->mModel, vfs));
 
             MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
@@ -605,32 +595,29 @@ namespace MWMechanics
                 sndMgr->playSound3D(mCaster, effect->mCastSound, 1.0f, 1.0f);
             else
                 sndMgr->playSound3D(
-                    mCaster, ESM::RefId::stringRefId(schools[effect->mData.mSchool] + " cast"), 1.0f, 1.0f);
+                    mCaster, store.get<ESM::Skill>().find(effect->mData.mSchool)->mSchool->mCastSound, 1.0f, 1.0f);
         }
     }
 
     void playEffects(const MWWorld::Ptr& target, const ESM::MagicEffect& magicEffect, bool playNonLooping)
     {
+        const auto& store = MWBase::Environment::get().getESMStore();
         if (playNonLooping)
         {
-            static const std::string schools[]
-                = { "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration" };
-
             MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
             if (!magicEffect.mHitSound.empty())
                 sndMgr->playSound3D(target, magicEffect.mHitSound, 1.0f, 1.0f);
             else
                 sndMgr->playSound3D(
-                    target, ESM::RefId::stringRefId(schools[magicEffect.mData.mSchool] + " hit"), 1.0f, 1.0f);
+                    target, store->get<ESM::Skill>().find(magicEffect.mData.mSchool)->mSchool->mHitSound, 1.0f, 1.0f);
         }
 
         // Add VFX
         const ESM::Static* castStatic;
         if (!magicEffect.mHit.empty())
-            castStatic = MWBase::Environment::get().getESMStore()->get<ESM::Static>().find(magicEffect.mHit);
+            castStatic = store->get<ESM::Static>().find(magicEffect.mHit);
         else
-            castStatic = MWBase::Environment::get().getESMStore()->get<ESM::Static>().find(
-                ESM::RefId::stringRefId("VFX_DefaultHit"));
+            castStatic = store->get<ESM::Static>().find(ESM::RefId::stringRefId("VFX_DefaultHit"));
 
         bool loop = (magicEffect.mData.mFlags & ESM::MagicEffect::ContinuousVfx) != 0;
         MWRender::Animation* anim = MWBase::Environment::get().getWorld()->getAnimation(target);

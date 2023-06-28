@@ -2,6 +2,7 @@
 
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
+#include "loadskil.hpp"
 
 #include <components/misc/strings/algorithm.hpp>
 
@@ -33,7 +34,20 @@ namespace ESM
 
         mId = indexToRefId(mIndex);
 
-        esm.getHNTSized<36>(mData, "MEDT");
+        esm.getSubNameIs("MEDT");
+        esm.getSubHeader();
+        int school;
+        esm.getT(school);
+        mData.mSchool = MagicSchool::indexToSkillRefId(school);
+        esm.getT(mData.mBaseCost);
+        esm.getT(mData.mFlags);
+        esm.getT(mData.mRed);
+        esm.getT(mData.mGreen);
+        esm.getT(mData.mBlue);
+        esm.getT(mData.mUnknown1);
+        esm.getT(mData.mSpeed);
+        esm.getT(mData.mUnknown2);
+
         if (esm.getFormatVersion() == DefaultFormatVersion)
         {
             // don't allow mods to change fixed flags in the legacy format
@@ -91,7 +105,17 @@ namespace ESM
     {
         esm.writeHNT("INDX", mIndex);
 
-        esm.writeHNT("MEDT", mData, 36);
+        esm.startSubRecord("MEDT");
+        esm.writeT(MagicSchool::skillRefIdToIndex(mData.mSchool));
+        esm.writeT(mData.mBaseCost);
+        esm.writeT(mData.mFlags);
+        esm.writeT(mData.mRed);
+        esm.writeT(mData.mGreen);
+        esm.writeT(mData.mBlue);
+        esm.writeT(mData.mUnknown1);
+        esm.writeT(mData.mSpeed);
+        esm.writeT(mData.mUnknown2);
+        esm.endRecord("MEDT");
 
         esm.writeHNOCString("ITEX", mIcon);
         esm.writeHNOCString("PTEX", mParticle);
@@ -558,7 +582,7 @@ namespace ESM
     void MagicEffect::blank()
     {
         mRecordFlags = 0;
-        mData.mSchool = 0;
+        mData.mSchool = ESM::Skill::Alteration;
         mData.mBaseCost = 0;
         mData.mFlags = 0;
         mData.mRed = 0;

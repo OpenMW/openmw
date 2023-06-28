@@ -31,9 +31,6 @@
 
 namespace MWGui
 {
-    std::string ToolTips::sSchoolNames[] = { "#{sSchoolAlteration}", "#{sSchoolConjuration}", "#{sSchoolDestruction}",
-        "#{sSchoolIllusion}", "#{sSchoolMysticism}", "#{sSchoolRestoration}" };
-
     ToolTips::ToolTips()
         : Layout("openmw_tooltips.layout")
         , mFocusToolTipX(0.0)
@@ -227,8 +224,9 @@ namespace MWGui
                 {
                     ToolTipInfo info;
 
-                    const ESM::Spell* spell = MWBase::Environment::get().getESMStore()->get<ESM::Spell>().find(
-                        ESM::RefId::deserialize(focus->getUserString("Spell")));
+                    const auto& store = MWBase::Environment::get().getESMStore();
+                    const ESM::Spell* spell
+                        = store->get<ESM::Spell>().find(ESM::RefId::deserialize(focus->getUserString("Spell")));
                     info.caption = spell->mName;
                     Widgets::SpellEffectList effects;
                     for (const ESM::ENAMstruct& spellEffect : spell->mEffects.mList)
@@ -250,8 +248,9 @@ namespace MWGui
                             spell)) // display school of spells that contribute to skill progress
                     {
                         MWWorld::Ptr player = MWMechanics::getPlayer();
-                        int school = MWMechanics::getSpellSchool(spell, player);
-                        info.text = "#{sSchool}: " + sSchoolNames[school];
+                        const auto& school
+                            = store->get<ESM::Skill>().find(MWMechanics::getSpellSchool(spell, player))->mSchool;
+                        info.text = "#{sSchool}: " + MyGUI::TextIterator::toTagsString(school->mName).asUTF8();
                     }
                     const std::string& cost = focus->getUserString("SpellCost");
                     if (!cost.empty() && cost != "0")
@@ -944,7 +943,8 @@ namespace MWGui
 
     void ToolTips::createMagicEffectToolTip(MyGUI::Widget* widget, short id)
     {
-        const ESM::MagicEffect* effect = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(id);
+        const auto& store = MWBase::Environment::get().getESMStore();
+        const ESM::MagicEffect* effect = store->get<ESM::MagicEffect>().find(id);
         const std::string& name = ESM::MagicEffect::indexToGmstString(id);
 
         std::string icon = effect->mIcon;
@@ -956,7 +956,11 @@ namespace MWGui
         widget->setUserString("ToolTipLayout", "MagicEffectToolTip");
         widget->setUserString("Caption_MagicEffectName", "#{" + name + "}");
         widget->setUserString("Caption_MagicEffectDescription", effect->mDescription);
-        widget->setUserString("Caption_MagicEffectSchool", "#{sSchool}: " + sSchoolNames[effect->mData.mSchool]);
+        widget->setUserString("Caption_MagicEffectSchool",
+            "#{sSchool}: "
+                + MyGUI::TextIterator::toTagsString(
+                    store->get<ESM::Skill>().find(effect->mData.mSchool)->mSchool->mName)
+                      .asUTF8());
         widget->setUserString("ImageTexture_MagicEffectImage", icon);
     }
 

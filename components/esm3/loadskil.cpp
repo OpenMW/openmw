@@ -107,4 +107,30 @@ namespace ESM
             return RefId();
         return RefId::index(sRecordId, static_cast<std::uint32_t>(index));
     }
+
+    const std::array<RefId, MagicSchool::Length> sMagicSchools = {
+        Skill::Alteration,
+        Skill::Conjuration,
+        Skill::Destruction,
+        Skill::Illusion,
+        Skill::Mysticism,
+        Skill::Restoration,
+    };
+
+    RefId MagicSchool::indexToSkillRefId(int index)
+    {
+        if (index < 0 || index >= Length)
+            return {};
+        return sMagicSchools[index];
+    }
+
+    int MagicSchool::skillRefIdToIndex(RefId id)
+    {
+        for (size_t i = 0; i < sMagicSchools.size(); ++i)
+        {
+            if (id == sMagicSchools[i])
+                return static_cast<int>(i);
+        }
+        return -1;
+    }
 }

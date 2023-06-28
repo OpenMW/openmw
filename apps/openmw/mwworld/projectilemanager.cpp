@@ -98,12 +98,14 @@ namespace
             else
                 projectileIDs.push_back(magicEffect->mBolt);
 
-            static const std::string schools[]
-                = { "alteration", "conjuration", "destruction", "illusion", "mysticism", "restoration" };
             if (!magicEffect->mBoltSound.empty())
                 sounds.emplace(magicEffect->mBoltSound);
             else
-                sounds.emplace(ESM::RefId::stringRefId(schools[magicEffect->mData.mSchool] + " bolt"));
+                sounds.emplace(MWBase::Environment::get()
+                                   .getESMStore()
+                                   ->get<ESM::Skill>()
+                                   .find(magicEffect->mData.mSchool)
+                                   ->mSchool->mBoltSound);
             projectileEffects.mList.push_back(*iter);
         }
 

@@ -1032,8 +1032,8 @@ namespace EsmTool
             std::cout << "  Area Static: " << mData.mArea << std::endl;
         if (!mData.mAreaSound.empty())
             std::cout << "  Area Sound: " << mData.mAreaSound << std::endl;
-        std::cout << "  School: " << schoolLabel(mData.mData.mSchool) << " (" << mData.mData.mSchool << ")"
-                  << std::endl;
+        std::cout << "  School: " << schoolLabel(ESM::MagicSchool::skillRefIdToIndex(mData.mData.mSchool)) << " ("
+                  << mData.mData.mSchool << ")" << std::endl;
         std::cout << "  Base Cost: " << mData.mData.mBaseCost << std::endl;
         std::cout << "  Unknown 1: " << mData.mData.mUnknown1 << std::endl;
         std::cout << "  Speed: " << mData.mData.mSpeed << std::endl;

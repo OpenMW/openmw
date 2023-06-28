@@ -70,7 +70,7 @@ namespace ESM
 
         struct MEDTstruct
         {
-            int mSchool; // SpellSchool, see defs.hpp
+            RefId mSchool; // Skill id
             float mBaseCost;
             int mFlags;
             // Glow color for enchanted items with this effect
