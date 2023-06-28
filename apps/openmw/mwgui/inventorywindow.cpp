@@ -579,7 +579,28 @@ namespace MWGui
                     mDragAndDrop->mItem, mDragAndDrop->mDraggedCount, mTradeModel);
             }
 
-            useItem(ptr);
+            // Handles partial equipping
+            const std::pair<std::vector<int>, bool> slots = ptr.getClass().getEquipmentSlots(ptr);
+            if (!slots.first.empty() && slots.second)
+            {
+                int equippedStackableCount = 0;
+                MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
+                MWWorld::ConstContainerStoreIterator slotIt = invStore.getSlot(slots.first.front());
+
+                // Get the count before useItem()
+                if (slotIt != invStore.end() && slotIt->getCellRef().getRefId() == ptr.getCellRef().getRefId())
+                    equippedStackableCount = slotIt->getRefData().getCount();
+
+                useItem(ptr);
+                int unequipCount = ptr.getRefData().getCount() - mDragAndDrop->mDraggedCount - equippedStackableCount;
+                if (unequipCount > 0)
+                {
+                    invStore.unequipItemQuantity(ptr, unequipCount);
+                    updateItemView();
+                }
+            }
+            else
+                useItem(ptr);
 
             // If item is ingredient or potion don't stop drag and drop to simplify action of taking more than one 1
             // item

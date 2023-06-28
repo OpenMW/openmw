@@ -1,4 +1,5 @@
 #include "containerstore.hpp"
+#include "inventorystore.hpp"
 
 #include <cassert>
 #include <stdexcept>
@@ -396,6 +397,11 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp(const Ptr& ptr, 
     // determine whether to stack or not
     for (MWWorld::ContainerStoreIterator iter(begin(type)); iter != end(); ++iter)
     {
+        // Don't stack with equipped items
+        if (!mActor.isEmpty() && mActor.getClass().hasInventoryStore(mActor))
+            if (mActor.getClass().getInventoryStore(mActor).isEquipped(*iter))
+                continue;
+
         if (stacks(*iter, ptr))
         {
             // stack
