@@ -291,6 +291,8 @@ namespace MWLua
                 if (enable && object.ptr().getRefData().isDeleted())
                     throw std::runtime_error("Object is removed");
                 context.mLuaManager->addAction([object, enable] {
+                    if (object.ptr().getRefData().isDeleted())
+                        return;
                     if (object.ptr().isInCell())
                     {
                         if (enable)
