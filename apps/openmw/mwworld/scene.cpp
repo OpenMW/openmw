@@ -577,7 +577,7 @@ namespace MWWorld
         if (mRendering.pagingUnlockCache())
             mPreloader->abortTerrainPreloadExcept(nullptr);
         if (!mPreloader->isTerrainLoaded(std::make_pair(pos, newGrid), mRendering.getReferenceTime()))
-            preloadTerrain(pos, true);
+            preloadTerrain(pos, playerCellIndex.mWorldspace, true);
         mPagedRefs.clear();
         mRendering.getPagedRefnums(newGrid, mPagedRefs);
 
@@ -1205,10 +1205,11 @@ namespace MWWorld
             mPreloader->preload(cell, mRendering.getReferenceTime());
     }
 
-    void Scene::preloadTerrain(const osg::Vec3f& pos, bool sync)
+    void Scene::preloadTerrain(const osg::Vec3f& pos, ESM::RefId worldspace, bool sync)
     {
+        ESM::ExteriorCellLocation cellPos = ESM::positionToExteriorCellLocation(pos.x(), pos.y(), worldspace);
         std::vector<PositionCellGrid> vec;
-        vec.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
+        vec.emplace_back(pos, gridCenterToBounds({ cellPos.mX, cellPos.mY }));
         mPreloader->abortTerrainPreloadExcept(vec.data());
         mPreloader->setTerrainPreloadPositions(vec);
         if (!sync)
