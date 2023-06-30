@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_GAME_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_GAME_H
 
+#include "components/detournavigator/collisionshapetype.hpp"
 #include "components/settings/sanitizerimpl.hpp"
 #include "components/settings/settingvalue.hpp"
 
@@ -69,8 +70,8 @@ namespace Settings
         SettingValue<bool> mDayNightSwitches{ mIndex, "Game", "day night switches" };
         SettingValue<bool> mUnarmedCreatureAttacksDamageArmor{ mIndex, "Game",
             "unarmed creature attacks damage armor" };
-        SettingValue<int> mActorCollisionShapeType{ mIndex, "Game", "actor collision shape type",
-            makeEnumSanitizerInt({ 0, 1, 2 }) };
+        SettingValue<DetourNavigator::CollisionShapeType> mActorCollisionShapeType{ mIndex, "Game",
+            "actor collision shape type" };
     };
 }
 

@@ -5,6 +5,7 @@
 #include "settings.hpp"
 
 #include "components/debug/debuglog.hpp"
+#include "components/detournavigator/collisionshapetype.hpp"
 
 #include <osg/io_utils>
 
@@ -31,10 +32,11 @@ namespace Settings
         String,
         Vec2f,
         Vec3f,
+        CollisionShapeType,
     };
 
     template <class T>
-    constexpr SettingValueType getSettingValueType();
+    constexpr SettingValueType getSettingValueType() = delete;
 
     template <>
     inline constexpr SettingValueType getSettingValueType<bool>()
@@ -108,6 +110,12 @@ namespace Settings
         return SettingValueType::Vec3f;
     }
 
+    template <>
+    inline constexpr SettingValueType getSettingValueType<DetourNavigator::CollisionShapeType>()
+    {
+        return SettingValueType::CollisionShapeType;
+    }
+
     inline constexpr std::string_view getSettingValueTypeName(SettingValueType type)
     {
         switch (type)
@@ -136,6 +144,8 @@ namespace Settings
                 return "vec2f";
             case SettingValueType::Vec3f:
                 return "vec3f";
+            case SettingValueType::CollisionShapeType:
+                return "collision shape type";
         }
         return "unsupported";
     }
@@ -274,6 +284,19 @@ namespace Settings
         T mDefaultValue{};
         T mValue{};
 
+        struct WriteValue
+        {
+            const T& mValue;
+
+            friend std::ostream& operator<<(std::ostream& stream, const WriteValue& value)
+            {
+                if constexpr (std::is_enum_v<T>)
+                    return stream << static_cast<std::underlying_type_t<T>>(value.mValue);
+                else
+                    return stream << value.mValue;
+            }
+        };
+
         T sanitize(const T& value) const
         {
             if (mSanitizer == nullptr)
@@ -283,8 +306,8 @@ namespace Settings
                 T sanitizedValue = mSanitizer->apply(value);
                 if (sanitizedValue != value)
                     Log(Debug::Warning) << getSettingDescription<T>(mCategory, mName)
-                                        << " value is out of allowed values set: " << value << ", sanitized to "
-                                        << sanitizedValue;
+                                        << " value is out of allowed values set: " << WriteValue{ value }
+                                        << ", sanitized to " << WriteValue{ sanitizedValue };
                 return sanitizedValue;
             }
             catch (const std::exception& e)
