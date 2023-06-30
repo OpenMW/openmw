@@ -179,7 +179,8 @@ namespace MWMechanics
         std::map<ESM::RefId, int> mDeathCount;
         std::list<Actor> mActors;
         std::map<const MWWorld::LiveCellRefBase*, std::list<Actor>::iterator> mIndex;
-        float mTimerDisposeSummonsCorpses;
+        // We should add a delay between summoned creature death and its corpse despawning
+        float mTimerDisposeSummonsCorpses = 0.2f;
         float mTimerUpdateHeadTrack = 0;
         float mTimerUpdateEquippedLight = 0;
         float mTimerUpdateHello = 0;

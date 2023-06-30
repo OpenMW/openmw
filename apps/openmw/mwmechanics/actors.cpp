@@ -1164,9 +1164,6 @@ namespace MWMechanics
     Actors::Actors()
         : mSmoothMovement(Settings::Manager::getBool("smooth movement", "Game"))
     {
-        mTimerDisposeSummonsCorpses
-            = 0.2f; // We should add a delay between summoned creature death and its corpse despawning
-
         updateProcessingRange();
     }
 
