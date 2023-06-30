@@ -246,8 +246,8 @@ namespace MWLua
             return;
         if (!mPlayer.isEmpty())
             throw std::logic_error("Player is initialized twice");
-        mWorldView.setPlayer(ptr);
         mWorldView.objectAddedToScene(ptr);
+        mWorldView.setPlayer(ptr);
         mPlayer = ptr;
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
         if (!localScripts)
