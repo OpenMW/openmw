@@ -18,20 +18,17 @@
 
 namespace MWDialogue
 {
-    Quest& Journal::getQuest(const ESM::RefId& id)
+    Quest& Journal::getOrStartQuest(const ESM::RefId& id)
     {
         TQuestContainer::iterator iter = mQuests.find(id);
 
         if (iter == mQuests.end())
-        {
-            std::pair<TQuestContainer::iterator, bool> result = mQuests.insert(std::make_pair(id, Quest(id)));
-
-            iter = result.first;
-        }
+            iter = mQuests.emplace(id, Quest(id)).first;
 
         return iter->second;
     }
-    Quest* Journal::getQuestPtr(const ESM::RefId& id)
+
+    Quest* Journal::getQuestOrNull(const ESM::RefId& id)
     {
         TQuestContainer::iterator iter = mQuests.find(id);
         if (iter == mQuests.end())
@@ -99,7 +96,7 @@ namespace MWDialogue
 
         StampedJournalEntry entry = StampedJournalEntry::makeFromQuest(id, index, actor);
 
-        Quest& quest = getQuest(id);
+        Quest& quest = getOrStartQuest(id);
         if (quest.addEntry(entry)) // we are doing slicing on purpose here
         {
             // Restart all "other" quests with the same name as well
@@ -121,7 +118,7 @@ namespace MWDialogue
 
     void Journal::setJournalIndex(const ESM::RefId& id, int index)
     {
-        Quest& quest = getQuest(id);
+        Quest& quest = getOrStartQuest(id);
 
         quest.setIndex(index);
     }
@@ -145,10 +142,6 @@ namespace MWDialogue
             mTopics.erase(mTopics.find(topicId)); // All responses removed -> remove topic
     }
 
-    int Journal::getQuestCount() const
-    {
-        return static_cast<int>(mQuests.size());
-    }
     int Journal::getJournalIndex(const ESM::RefId& id) const
     {
         TQuestContainer::const_iterator iter = mQuests.find(id);
@@ -267,7 +260,7 @@ namespace MWDialogue
                 {
                     case ESM::JournalEntry::Type_Quest:
 
-                        getQuest(record.mTopic).insertEntry(record);
+                        getOrStartQuest(record.mTopic).insertEntry(record);
                         break;
 
                     case ESM::JournalEntry::Type_Journal:

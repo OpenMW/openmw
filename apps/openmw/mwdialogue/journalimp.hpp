@@ -24,18 +24,15 @@ namespace MWDialogue
 
         void clear() override;
 
-        Quest* getQuestPtr(const ESM::RefId& id) override;
+        Quest* getQuestOrNull(const ESM::RefId& id) override;
         ///< Gets a pointer to the requested quest. Will return nullptr if the quest has not been started.
 
-        Quest& getQuest(const ESM::RefId& id) override;
-        ///< Gets the quest requested. Attempts to create it and inserts it in quests if it does not yet exist.
+        Quest& getOrStartQuest(const ESM::RefId& id) override;
+        ///< Gets the quest requested. Attempts to create it and inserts it in quests if it is not yet started.
 
         void addEntry(const ESM::RefId& id, int index, const MWWorld::Ptr& actor) override;
         ///< Add a journal entry.
         /// @param actor Used as context for replacing of escape sequences (%name, etc).
-
-        int getQuestCount() const override;
-        ///< Get the count of saved quests.
 
         void setJournalIndex(const ESM::RefId& id, int index) override;
         ///< Set the journal index without adding an entry.

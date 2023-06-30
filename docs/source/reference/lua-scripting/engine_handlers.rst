@@ -89,7 +89,7 @@ Engine handler is a function defined by a script, that can be called by the engi
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is pressed.
       | Usage example:
       | ``if key.symbol == 'z' and key.withShift then ...``
-  * - onQuestUpdate(questId,stage)
+  * - onQuestUpdate(questId, stage)
     - | Called when a quest is updated.
   * - onKeyRelease(key)
     - | `Key <openmw_input.html##(KeyboardEvent)>`_ is released.
