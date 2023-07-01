@@ -31,6 +31,7 @@
     Bug #6939: OpenMW-CS: ID columns are too short
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
     Bug #6964: Nerasa Dralor Won't Follow
+    Bug #6973: Fade in happens after the scene load and is shown
     Bug #6974: Only harmful effects are reflected
     Bug #6977: Sun damage implementation does not match research
     Bug #6986: Sound magic effect does not make noise

@@ -61,6 +61,7 @@ Programmers
     crussell187
     Dan Vukelich (sanchezman)
     darkf
+    Dave Corley (S3ctor)
     David Cernat (davidcernat)
     Declan Millar (declan-millar)
     devnexen

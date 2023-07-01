@@ -170,17 +170,13 @@ namespace MWGui
         MWMechanics::NpcStats& npcStats = mPtr.getClass().getNpcStats(mPtr);
         npcStats.setGoldPool(npcStats.getGoldPool() + price);
 
-        // advance time
-        MWBase::Environment::get().getMechanicsManager()->rest(2, false);
-        MWBase::Environment::get().getWorld()->advanceTime(2);
-
         setVisible(false);
         mProgressBar.setVisible(true);
         mProgressBar.setProgress(0, 2);
         mTimeAdvancer.run(2);
 
-        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.25);
-        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.25, false, 0.25);
+        MWBase::Environment::get().getWindowManager()->fadeScreenOut(0.2);
+        MWBase::Environment::get().getWindowManager()->fadeScreenIn(0.2, false, 0.2);
     }
 
     void TrainingWindow::onTrainingProgressChanged(int cur, int total)
@@ -191,6 +187,10 @@ namespace MWGui
     void TrainingWindow::onTrainingFinished()
     {
         mProgressBar.setVisible(false);
+
+        // advance time
+        MWBase::Environment::get().getMechanicsManager()->rest(2, false);
+        MWBase::Environment::get().getWorld()->advanceTime(2);
 
         // go back to game mode
         MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Training);
