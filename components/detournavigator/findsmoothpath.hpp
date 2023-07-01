@@ -18,8 +18,6 @@
 
 namespace DetourNavigator
 {
-    struct Settings;
-
     inline bool inRange(const osg::Vec3f& v1, const osg::Vec3f& v2, const float r)
     {
         return (osg::Vec2f(v1.x(), v1.z()) - osg::Vec2f(v2.x(), v2.z())).length() < r;
@@ -86,12 +84,6 @@ namespace DetourNavigator
         std::reference_wrapper<OutputIterator> mImpl;
         std::reference_wrapper<const RecastSettings> mSettings;
     };
-
-    inline bool initNavMeshQuery(dtNavMeshQuery& value, const dtNavMesh& navMesh, const int maxNodes)
-    {
-        const auto status = value.init(&navMesh, maxNodes);
-        return dtStatusSucceed(status);
-    }
 
     dtPolyRef findNearestPoly(const dtNavMeshQuery& query, const dtQueryFilter& filter, const osg::Vec3f& center,
         const osg::Vec3f& halfExtents);
