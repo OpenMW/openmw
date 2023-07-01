@@ -3,8 +3,8 @@
 #include <components/settings/settings.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/ptr.hpp"
 
 #include "actorutil.hpp"
 
