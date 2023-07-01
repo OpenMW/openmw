@@ -588,12 +588,12 @@
 -- @usage
 -- local util = require('openmw.util')
 -- local trans = util.transform
--- local fromActorSpace = trans.move(actor.position) * trans.rotateZ(actor.rotation.z)
+-- local fromActorSpace = trans.move(actor.position) * trans.rotateZ(actor.rotation:getYaw())
 --
 -- -- rotation is applied first, movement is second
 -- local posBehindActor = fromActorSpace * util.vector3(0, -100, 0)
 --
--- -- equivalent to trans.rotateZ(-actor.rotation.z) * trans.move(-actor.position)
+-- -- equivalent to trans.rotateZ(-actor.rotation:getYaw()) * trans.move(-actor.position)
 -- local toActorSpace = fromActorSpace:inverse()
 -- local relativeTargetPos = toActorSpace * target.position
 -- local deltaAngle = math.atan2(relativeTargetPos.y, relativeTargetPos.x)
