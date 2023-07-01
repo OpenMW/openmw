@@ -15,17 +15,23 @@
 
 namespace MWMechanics
 {
-    // NOTE: determined empirically but probably need further tweaking
-    static const float DIST_SAME_SPOT = 0.5f;
-    static const float DURATION_SAME_SPOT = 1.5f;
-    static const float DURATION_TO_EVADE = 0.4f;
+    namespace
+    {
+        // NOTE: determined empirically but probably need further tweaking
+        constexpr float distanceSameSpot = 0.5f;
+        constexpr float durationSameSpot = 1.5f;
+        constexpr float durationToEvade = 1;
 
-    const float ObstacleCheck::evadeDirections[NUM_EVADE_DIRECTIONS][2] = {
-        { 1.0f, 0.0f }, // move to side
-        { 1.0f, -1.0f }, // move to side and backwards
-        { -1.0f, 0.0f }, // move to other side
-        { -1.0f, -1.0f } // move to side and backwards
-    };
+        constexpr float evadeDirections[][2] = {
+            { 1.0f, 1.0f }, // move to side and forward
+            { 1.0f, 0.0f }, // move to side
+            { 1.0f, -1.0f }, // move to side and backwards
+            { 0.0f, -1.0f }, // move backwards
+            { -1.0f, -1.0f }, // move to other side and backwards
+            { -1.0f, 0.0f }, // move to other side
+            { -1.0f, 1.0f }, // move to other side and forward
+        };
+    }
 
     bool proximityToDoor(const MWWorld::Ptr& actor, float minDist)
     {
@@ -94,9 +100,7 @@ namespace MWMechanics
     }
 
     ObstacleCheck::ObstacleCheck()
-        : mWalkState(WalkState::Initial)
-        , mStateDuration(0)
-        , mEvadeDirectionIndex(0)
+        : mEvadeDirectionIndex(std::size(evadeDirections) - 1)
     {
     }
 
@@ -150,7 +154,7 @@ namespace MWMechanics
                 mDestination = destination;
             }
 
-            const float distSameSpot = DIST_SAME_SPOT * actor.getClass().getCurrentSpeed(actor) * duration;
+            const float distSameSpot = distanceSameSpot * actor.getClass().getCurrentSpeed(actor) * duration;
             const float prevDistance = (destination - mPrev).length();
             const float currentDistance = (destination - position).length();
             const float movedDistance = prevDistance - currentDistance;
@@ -174,19 +178,20 @@ namespace MWMechanics
             }
 
             mStateDuration += duration;
-            if (mStateDuration < DURATION_SAME_SPOT)
+            if (mStateDuration < durationSameSpot)
             {
                 return;
             }
 
             mWalkState = WalkState::Evade;
             mStateDuration = 0;
-            chooseEvasionDirection();
+            if (++mEvadeDirectionIndex == std::size(evadeDirections))
+                mEvadeDirectionIndex = 0;
             return;
         }
 
         mStateDuration += duration;
-        if (mStateDuration >= DURATION_TO_EVADE)
+        if (mStateDuration >= durationToEvade)
         {
             // tried to evade, assume all is ok and start again
             mWalkState = WalkState::Norm;
@@ -200,15 +205,4 @@ namespace MWMechanics
         actorMovement.mPosition[0] = evadeDirections[mEvadeDirectionIndex][0];
         actorMovement.mPosition[1] = evadeDirections[mEvadeDirectionIndex][1];
     }
-
-    void ObstacleCheck::chooseEvasionDirection()
-    {
-        // change direction if attempt didn't work
-        ++mEvadeDirectionIndex;
-        if (mEvadeDirectionIndex == NUM_EVADE_DIRECTIONS)
-        {
-            mEvadeDirectionIndex = 0;
-        }
-    }
-
 }

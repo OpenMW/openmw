@@ -63,6 +63,7 @@
     Bug #7413: Generated wilderness cells don't spawn fish
     Bug #7415: Unbreakable lock discrepancies
     Bug #7428: AutoCalc flag is not used to calculate enchantment costs
+    Bug #7450: Evading obstacles does not work for actors missing certain animations
     Bug #7459: Icons get stacked on the cursor when picking up multiple items simultaneously
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
