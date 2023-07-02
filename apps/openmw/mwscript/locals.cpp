@@ -35,13 +35,13 @@ namespace MWScript
         if (mInitialised)
             return false;
 
-        const Locals* global
-            = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getLocalsIfPresent(script.mId);
+        const GlobalScriptDesc* global
+            = MWBase::Environment::get().getScriptManager()->getGlobalScripts().getScriptIfPresent(script.mId);
         if (global)
         {
-            mShorts = global->mShorts;
-            mLongs = global->mLongs;
-            mFloats = global->mFloats;
+            mShorts = global->mLocals.mShorts;
+            mLongs = global->mLocals.mLongs;
+            mFloats = global->mLocals.mFloats;
         }
         else
         {

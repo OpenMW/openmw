@@ -309,12 +309,12 @@ namespace MWScript
         return iter->second->mLocals;
     }
 
-    const Locals* GlobalScripts::getLocalsIfPresent(const ESM::RefId& name) const
+    const GlobalScriptDesc* GlobalScripts::getScriptIfPresent(const ESM::RefId& name) const
     {
         auto iter = mScripts.find(name);
         if (iter == mScripts.end())
             return nullptr;
-        return &iter->second->mLocals;
+        return iter->second.get();
     }
 
     void GlobalScripts::updatePtrs(const MWWorld::Ptr& base, const MWWorld::Ptr& updated)

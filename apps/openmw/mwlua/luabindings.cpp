@@ -26,6 +26,7 @@
 
 #include "luaevents.hpp"
 #include "luamanagerimp.hpp"
+#include "mwscriptbindings.hpp"
 #include "worldview.hpp"
 
 #include "camerabindings.hpp"
@@ -111,7 +112,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 40;
+        api["API_REVISION"] = 41;
         api["quit"] = [lua]() {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
             MWBase::Environment::get().getStateManager()->requestQuit();
@@ -221,6 +222,7 @@ namespace MWLua
         WorldView* worldView = context.mWorldView;
         addTimeBindings(api, context, true);
         addCellGetters(api, context);
+        api["mwscript"] = initMWScriptBindings(context);
         api["activeActors"] = GObjectList{ worldView->getActorsInScene() };
         api["players"] = GObjectList{ worldView->getPlayers() };
         api["createObject"] = [](std::string_view recordId, sol::optional<int> count) -> GObject {
