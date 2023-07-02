@@ -59,7 +59,7 @@ namespace MWSound
     class SoundBufferPool
     {
     public:
-        SoundBufferPool(const VFS::Manager& vfs, Sound_Output& output);
+        SoundBufferPool(Sound_Output& output);
 
         SoundBufferPool(const SoundBufferPool&) = delete;
 
@@ -92,7 +92,6 @@ namespace MWSound
         void clear();
 
     private:
-        const VFS::Manager* const mVfs;
         Sound_Output* mOutput;
         std::deque<Sound_Buffer> mSoundBuffers;
         std::unordered_map<ESM::RefId, Sound_Buffer*> mBufferNameMap;

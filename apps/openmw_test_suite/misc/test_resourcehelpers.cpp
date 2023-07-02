@@ -27,7 +27,7 @@ namespace
     {
         std::unique_ptr<VFS::Manager> mVFS = TestingOpenMW::createTestVFS({});
         EXPECT_EQ(correctSoundPath("sound\\foo.wav", mVFS.get()), "sound/foo.mp3");
-        EXPECT_EQ(correctSoundPath("SOUND\\foo.WAV", mVFS.get()), "SOUND/foo.mp3");
+        EXPECT_EQ(correctSoundPath("SOUND\\foo.WAV", mVFS.get()), "sound/foo.mp3");
     }
 
     namespace

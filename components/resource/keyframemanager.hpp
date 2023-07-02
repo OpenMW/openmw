@@ -49,7 +49,7 @@ namespace Resource
     {
     public:
         KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager);
-        ~KeyframeManager();
+        ~KeyframeManager() = default;
 
         /// Retrieve a read-only keyframe resource by name (case-insensitive).
         /// @note Throws an exception if the resource is not found.

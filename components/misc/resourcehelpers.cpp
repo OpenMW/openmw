@@ -12,6 +12,7 @@
 #include <components/misc/strings/lower.hpp>
 
 #include <components/vfs/manager.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace
 {
@@ -168,9 +169,10 @@ std::string Misc::ResourceHelpers::correctSoundPath(std::string_view resPath, co
     {
         std::string sound{ resPath };
         changeExtension(sound, ".mp3");
-        return vfs->normalizeFilename(sound);
+        VFS::Path::normalizeFilenameInPlace(sound);
+        return sound;
     }
-    return vfs->normalizeFilename(resPath);
+    return VFS::Path::normalizeFilename(resPath);
 }
 
 bool Misc::ResourceHelpers::isHiddenMarker(const ESM::RefId& id)
@@ -184,7 +186,7 @@ namespace
     {
         if (auto w = Misc::findExtension(resPath); w != std::string::npos)
             resPath.insert(w, pattern);
-        return vfs->normalizeFilename(resPath);
+        return VFS::Path::normalizeFilename(resPath);
     }
 
     std::string getBestLODMeshName(std::string const& resPath, const VFS::Manager* vfs, std::string_view pattern)

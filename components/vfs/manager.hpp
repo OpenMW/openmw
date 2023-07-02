@@ -9,11 +9,10 @@
 #include <string>
 #include <vector>
 
+#include "archive.hpp"
+
 namespace VFS
 {
-
-    class Archive;
-    class File;
 
     template <typename Iterator>
     class IteratorPair
@@ -62,12 +61,6 @@ namespace VFS
         using RecursiveDirectoryRange = IteratorPair<RecursiveDirectoryIterator>;
 
     public:
-        /// @param strict Use strict path handling? If enabled, no case folding will
-        /// be done, but slash/backslash conversions are always done.
-        Manager(bool strict);
-
-        ~Manager();
-
         // Empty the file index and unregister archives.
         void reset();
 
@@ -81,10 +74,6 @@ namespace VFS
         /// Does a file with this name exist?
         /// @note May be called from any thread once the index has been built.
         bool exists(std::string_view name) const;
-
-        /// Normalize the given filename, making slashes/backslashes consistent, and lower-casing if mStrict is false.
-        /// @note May be called from any thread once the index has been built.
-        [[nodiscard]] std::string normalizeFilename(std::string_view name) const;
 
         /// Retrieve a file by name.
         /// @note Throws an exception if the file can not be found.
@@ -110,8 +99,6 @@ namespace VFS
         std::filesystem::path getAbsoluteFileName(const std::filesystem::path& name) const;
 
     private:
-        bool mStrict;
-
         std::vector<std::unique_ptr<Archive>> mArchives;
 
         std::map<std::string, File*> mIndex;

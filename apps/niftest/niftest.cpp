@@ -79,7 +79,7 @@ void readVFS(std::unique_ptr<VFS::Archive>&& anArchive, const std::filesystem::p
     if (anArchive == nullptr)
         return;
 
-    VFS::Manager myManager(true);
+    VFS::Manager myManager;
     myManager.addArchive(std::move(anArchive));
     myManager.buildIndex();
 
@@ -176,7 +176,7 @@ int main(int argc, char** argv)
     std::unique_ptr<VFS::Manager> vfs;
     if (!archives.empty())
     {
-        vfs = std::make_unique<VFS::Manager>(true);
+        vfs = std::make_unique<VFS::Manager>();
         for (const std::filesystem::path& path : archives)
             if (auto archive = makeArchive(path))
                 vfs->addArchive(std::move(archive));

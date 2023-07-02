@@ -91,9 +91,6 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
     Log(Debug::Info) << ToUTF8::encodingUsingMessage(encoding);
     engine.setEncoding(ToUTF8::calculateEncoding(encoding));
 
-    // directory settings
-    engine.enableFSStrict(variables["fs-strict"].as<bool>());
-
     Files::PathContainer dataDirs(asPathContainer(variables["data"].as<Files::MaybeQuotedPathContainer>()));
 
     Files::PathContainer::value_type local(variables["data-local"]

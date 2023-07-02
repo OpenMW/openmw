@@ -8,14 +8,12 @@ namespace Files
 {
     Collections::Collections()
         : mDirectories()
-        , mFoldCase(false)
         , mCollections()
     {
     }
 
-    Collections::Collections(const Files::PathContainer& directories, bool foldCase)
+    Collections::Collections(const Files::PathContainer& directories)
         : mDirectories(directories)
-        , mFoldCase(foldCase)
         , mCollections()
     {
     }
@@ -27,7 +25,7 @@ namespace Files
         if (iter == mCollections.end())
         {
             std::pair<MultiDirCollectionContainer::iterator, bool> result
-                = mCollections.emplace(ext, MultiDirCollection(mDirectories, ext, mFoldCase));
+                = mCollections.emplace(ext, MultiDirCollection(mDirectories, ext));
 
             iter = result.first;
         }
@@ -44,12 +42,7 @@ namespace Files
                 const auto& path = iter2.path();
                 const auto str = Files::pathToUnicodeString(path.filename());
 
-                if (mFoldCase)
-                {
-                    if (Misc::StringUtils::ciEqual(file, str))
-                        return path;
-                }
-                else if (str == file)
+                if (Misc::StringUtils::ciEqual(file, str))
                     return path;
             }
         }
@@ -66,12 +59,7 @@ namespace Files
                 const auto& path = iter2.path();
                 const auto str = Files::pathToUnicodeString(path.filename());
 
-                if (mFoldCase)
-                {
-                    if (Misc::StringUtils::ciEqual(file, str))
-                        return true;
-                }
-                else if (str == file)
+                if (Misc::StringUtils::ciEqual(file, str))
                     return true;
             }
         }

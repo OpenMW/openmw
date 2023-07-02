@@ -95,7 +95,7 @@ namespace CSMDoc
     public:
         Document(const Files::ConfigurationManager& configuration, std::vector<std::filesystem::path> files, bool new_,
             const std::filesystem::path& savePath, const std::filesystem::path& resDir, ToUTF8::FromType encoding,
-            const std::vector<std::string>& blacklistedScripts, bool fsStrict, const Files::PathContainer& dataPaths,
+            const std::vector<std::string>& blacklistedScripts, const Files::PathContainer& dataPaths,
             const std::vector<std::string>& archives);
 
         ~Document() override = default;

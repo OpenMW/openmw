@@ -114,7 +114,7 @@ protected:
         if (!dataLocal.empty())
             dataDirs.insert(dataDirs.end(), dataLocal.begin(), dataLocal.end());
 
-        Files::Collections collections(dataDirs, true);
+        Files::Collections collections(dataDirs);
 
         std::vector<std::string> contentFiles = variables["content"].as<std::vector<std::string>>();
         for (auto& contentFile : contentFiles)

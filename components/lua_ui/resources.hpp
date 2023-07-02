@@ -28,16 +28,10 @@ namespace LuaUi
     class ResourceManager
     {
     public:
-        ResourceManager(const VFS::Manager* vfs)
-            : mVfs(vfs)
-        {
-        }
-
         std::shared_ptr<TextureResource> registerTexture(TextureData data);
         void clear();
 
     private:
-        const VFS::Manager* mVfs;
         using TextureResources = std::vector<std::shared_ptr<TextureResource>>;
         std::unordered_map<std::string, TextureResources> mTextures;
     };

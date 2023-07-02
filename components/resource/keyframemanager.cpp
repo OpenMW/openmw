@@ -14,6 +14,7 @@
 #include <components/nifosg/nifloader.hpp>
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/osgacontroller.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "animation.hpp"
 #include "objectcache.hpp"
@@ -210,11 +211,9 @@ namespace Resource
     {
     }
 
-    KeyframeManager::~KeyframeManager() {}
-
     osg::ref_ptr<const SceneUtil::KeyframeHolder> KeyframeManager::get(const std::string& name)
     {
-        const std::string normalized = mVFS->normalizeFilename(name);
+        const std::string normalized = VFS::Path::normalizeFilename(name);
 
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
         if (obj)

@@ -345,7 +345,6 @@ OMW::Engine::Engine(Files::ConfigurationManager& configurationManager)
     , mActivationDistanceOverride(-1)
     , mGrab(true)
     , mRandomSeed(0)
-    , mFSStrict(false)
     , mScriptBlacklistUse(true)
     , mNewGame(false)
     , mCfgMgr(configurationManager)
@@ -404,18 +403,13 @@ OMW::Engine::~Engine()
     SDL_Quit();
 }
 
-void OMW::Engine::enableFSStrict(bool fsStrict)
-{
-    mFSStrict = fsStrict;
-}
-
 // Set data dir
 
 void OMW::Engine::setDataDirs(const Files::PathContainer& dataDirs)
 {
     mDataDirs = dataDirs;
     mDataDirs.insert(mDataDirs.begin(), mResDir / "vfs");
-    mFileCollections = Files::Collections(mDataDirs, !mFSStrict);
+    mFileCollections = Files::Collections(mDataDirs);
 }
 
 // Add BSA archive
@@ -643,7 +637,7 @@ void OMW::Engine::prepareEngine()
 
     createWindow();
 
-    mVFS = std::make_unique<VFS::Manager>(mFSStrict);
+    mVFS = std::make_unique<VFS::Manager>();
 
     VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true);
 

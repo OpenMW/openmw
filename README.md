@@ -85,8 +85,6 @@ Command line options
       --skip-menu [=arg(=1)] (=0)           skip main menu on game startup
       --new-game [=arg(=1)] (=0)            run new game sequence (ignored if
                                             skip-menu=0)
-      --fs-strict [=arg(=1)] (=0)           strict file system handling (no case
-                                            folding)
       --encoding arg (=win1252)             Character encoding used in OpenMW game
                                             messages:
 

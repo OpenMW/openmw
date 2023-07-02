@@ -7,6 +7,7 @@
 #include <components/misc/strings/conversion.hpp>
 #include <components/vfs/archive.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/vfs/pathutil.hpp>
 
 namespace TestingOpenMW
 {
@@ -49,29 +50,27 @@ namespace TestingOpenMW
 
     struct VFSTestData : public VFS::Archive
     {
-        std::map<std::string, VFS::File*> mFiles;
+        std::map<std::string, VFS::File*, VFS::Path::PathLess> mFiles;
 
-        VFSTestData(std::map<std::string, VFS::File*> files)
+        VFSTestData(std::map<std::string, VFS::File*, VFS::Path::PathLess> files)
             : mFiles(std::move(files))
         {
         }
 
-        void listResources(std::map<std::string, VFS::File*>& out, char (*normalize_function)(char)) override
+        void listResources(std::map<std::string, VFS::File*>& out) override
         {
-            out = mFiles;
+            for (const auto& [key, value] : mFiles)
+                out.emplace(VFS::Path::normalizeFilename(key), value);
         }
 
-        bool contains(const std::string& file, char (*normalize_function)(char)) const override
-        {
-            return mFiles.count(file) != 0;
-        }
+        bool contains(const std::string& file) const override { return mFiles.count(file) != 0; }
 
         std::string getDescription() const override { return "TestData"; }
     };
 
-    inline std::unique_ptr<VFS::Manager> createTestVFS(std::map<std::string, VFS::File*> files)
+    inline std::unique_ptr<VFS::Manager> createTestVFS(std::map<std::string, VFS::File*, VFS::Path::PathLess> files)
     {
-        auto vfs = std::make_unique<VFS::Manager>(true);
+        auto vfs = std::make_unique<VFS::Manager>();
         vfs->addArchive(std::make_unique<VFSTestData>(std::move(files)));
         vfs->buildIndex();
         return vfs;

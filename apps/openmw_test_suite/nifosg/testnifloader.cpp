@@ -27,7 +27,7 @@ namespace
 
     struct BaseNifOsgLoaderTest
     {
-        VFS::Manager mVfs{ false };
+        VFS::Manager mVfs;
         Resource::ImageManager mImageManager{ &mVfs };
         const osgDB::ReaderWriter* mReaderWriter = osgDB::Registry::instance()->getReaderWriterForExtension("osgt");
         osg::ref_ptr<osgDB::Options> mOptions = new osgDB::Options;

@@ -96,9 +96,6 @@ namespace NavMeshTool
                 bpo::value<StringsVector>()->default_value(StringsVector(), "")->multitoken()->composing(),
                 "content file(s): esm/esp, or omwgame/omwaddon/omwscripts");
 
-            addOption("fs-strict", bpo::value<bool>()->implicit_value(true)->default_value(false),
-                "strict file system handling (no case folding)");
-
             addOption("encoding", bpo::value<std::string>()->default_value("win1252"),
                 "Character encoding used in OpenMW game messages:\n"
                 "\n\twin1250 - Central and Eastern European such as Polish, Czech, Slovak, Hungarian, Slovene, "
@@ -167,12 +164,11 @@ namespace NavMeshTool
 
             config.filterOutNonExistingPaths(dataDirs);
 
-            const auto fsStrict = variables["fs-strict"].as<bool>();
             const auto resDir = variables["resources"].as<Files::MaybeQuotedPath>();
             Version::Version v = Version::getOpenmwVersion(resDir);
             Log(Debug::Info) << v.describe();
             dataDirs.insert(dataDirs.begin(), resDir / "vfs");
-            const auto fileCollections = Files::Collections(dataDirs, !fsStrict);
+            const auto fileCollections = Files::Collections(dataDirs);
             const auto archives = variables["fallback-archive"].as<StringsVector>();
             const auto contentFiles = variables["content"].as<StringsVector>();
             const std::size_t threadsNumber = variables["threads"].as<std::size_t>();
@@ -194,7 +190,7 @@ namespace NavMeshTool
 
             Fallback::Map::init(variables["fallback"].as<Fallback::FallbackMap>().mMap);
 
-            VFS::Manager vfs(fsStrict);
+            VFS::Manager vfs;
 
             VFS::registerArchives(&vfs, fileCollections, archives, true);
 

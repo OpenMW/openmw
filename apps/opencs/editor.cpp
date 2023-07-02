@@ -62,7 +62,7 @@ CS::Editor::Editor(int argc, char** argv)
 
     NifOsg::Loader::setShowMarkers(true);
 
-    mDocumentManager.setFileData(mFsStrict, config.first, config.second);
+    mDocumentManager.setFileData(config.first, config.second);
 
     mNewGame.setLocalData(mLocal);
     mFileDialog.setLocalData(mLocal);
@@ -118,7 +118,6 @@ boost::program_options::variables_map CS::Editor::readConfiguration()
     addOption("data-local",
         boost::program_options::value<Files::MaybeQuotedPathContainer::value_type>()->default_value(
             Files::MaybeQuotedPathContainer::value_type(), ""));
-    addOption("fs-strict", boost::program_options::value<bool>()->implicit_value(true)->default_value(false));
     addOption("encoding", boost::program_options::value<std::string>()->default_value("win1252"));
     addOption("resources",
         boost::program_options::value<Files::MaybeQuotedPath>()->default_value(Files::MaybeQuotedPath(), "resources"));
@@ -164,8 +163,6 @@ std::pair<Files::PathContainer, std::vector<std::string>> CS::Editor::readConfig
 
     if (variables["script-blacklist-use"].as<bool>())
         mDocumentManager.setBlacklistedScripts(variables["script-blacklist"].as<std::vector<std::string>>());
-
-    mFsStrict = variables["fs-strict"].as<bool>();
 
     Files::PathContainer dataDirs, dataLocal;
     if (!variables["data"].empty())

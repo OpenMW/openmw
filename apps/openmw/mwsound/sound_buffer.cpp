@@ -7,7 +7,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadsoun.hpp>
 #include <components/settings/settings.hpp>
-#include <components/vfs/manager.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -35,9 +35,8 @@ namespace MWSound
         }
     }
 
-    SoundBufferPool::SoundBufferPool(const VFS::Manager& vfs, Sound_Output& output)
-        : mVfs(&vfs)
-        , mOutput(&output)
+    SoundBufferPool::SoundBufferPool(Sound_Output& output)
+        : mOutput(&output)
         , mBufferCacheMax(std::max(Settings::Manager::getInt("buffer cache max", "Sound"), 1) * 1024 * 1024)
         , mBufferCacheMin(
               std::min(static_cast<std::size_t>(std::max(Settings::Manager::getInt("buffer cache min", "Sound"), 1))
@@ -135,7 +134,7 @@ namespace MWSound
         max = std::max(min, max);
 
         Sound_Buffer& sfx = mSoundBuffers.emplace_back("Sound/" + sound.mSound, volume, min, max);
-        sfx.mResourceName = mVfs->normalizeFilename(sfx.mResourceName);
+        VFS::Path::normalizeFilenameInPlace(sfx.mResourceName);
 
         mBufferNameMap.emplace(soundId, &sfx);
         return &sfx;

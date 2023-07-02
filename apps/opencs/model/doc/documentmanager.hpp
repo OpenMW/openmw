@@ -35,7 +35,6 @@ namespace CSMDoc
 
         std::filesystem::path mResDir;
 
-        bool mFsStrict;
         Files::PathContainer mDataPaths;
         std::vector<std::string> mArchives;
 
@@ -68,7 +67,7 @@ namespace CSMDoc
         void setBlacklistedScripts(const std::vector<std::string>& scriptIds);
 
         /// Sets the file data that gets passed to newly created documents.
-        void setFileData(bool strict, const Files::PathContainer& dataPaths, const std::vector<std::string>& archives);
+        void setFileData(const Files::PathContainer& dataPaths, const std::vector<std::string>& archives);
 
         bool isEmpty();
 

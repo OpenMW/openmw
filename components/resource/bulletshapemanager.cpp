@@ -13,6 +13,7 @@
 #include <components/misc/pathhelpers.hpp>
 #include <components/sceneutil/visitor.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include <components/nifbullet/bulletnifloader.hpp>
 
@@ -109,7 +110,7 @@ namespace Resource
 
     osg::ref_ptr<const BulletShape> BulletShapeManager::getShape(const std::string& name)
     {
-        const std::string normalized = mVFS->normalizeFilename(name);
+        const std::string normalized = VFS::Path::normalizeFilename(name);
 
         osg::ref_ptr<BulletShape> shape;
         osg::ref_ptr<osg::Object> obj = mCache->getRefFromObjectCache(normalized);
@@ -169,7 +170,7 @@ namespace Resource
 
     osg::ref_ptr<BulletShapeInstance> BulletShapeManager::cacheInstance(const std::string& name)
     {
-        const std::string normalized = mVFS->normalizeFilename(name);
+        const std::string normalized = VFS::Path::normalizeFilename(name);
 
         osg::ref_ptr<BulletShapeInstance> instance = createInstance(normalized);
         if (instance)
@@ -179,7 +180,7 @@ namespace Resource
 
     osg::ref_ptr<BulletShapeInstance> BulletShapeManager::getInstance(const std::string& name)
     {
-        const std::string normalized = mVFS->normalizeFilename(name);
+        const std::string normalized = VFS::Path::normalizeFilename(name);
 
         osg::ref_ptr<osg::Object> obj = mInstanceCache->takeFromObjectCache(normalized);
         if (obj.get())
