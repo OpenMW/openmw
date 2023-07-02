@@ -53,7 +53,7 @@
     Bug #7163: Myar Aranath: Wheat breaks the GUI
     Bug #7172: Current music playlist continues playing indefinitely if next playlist is empty
     Bug #7229: Error marker loading failure is not handled
-    Bug #7243: Get Skyrim.esm loading
+    Bug #7243: Supporting loading external files from VFS from esm files
     Bug #7298: Water ripples from projectiles sometimes are not spawned
     Bug #7307: Alchemy "Magic Effect" search string does not match on tool tip for effects related to attributes
     Bug #7413: Generated wilderness cells don't spawn fish
