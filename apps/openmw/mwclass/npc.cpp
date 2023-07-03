@@ -50,6 +50,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/localscripts.hpp"
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwrender/npcanimation.hpp"
 #include "../mwrender/objects.hpp"
@@ -1144,6 +1145,7 @@ namespace MWClass
         MWBase::Environment::get().getWorld()->breakInvisibility(actor);
         MWMechanics::CastSpell cast(actor, actor);
         const ESM::RefId& recordId = consumable.getCellRef().getRefId();
+        MWBase::Environment::get().getWorldModel()->registerPtr(consumable);
         MWBase::Environment::get().getLuaManager()->itemConsumed(consumable, actor);
         actor.getClass().getContainerStore(actor).remove(consumable, 1);
         return cast.cast(recordId);
