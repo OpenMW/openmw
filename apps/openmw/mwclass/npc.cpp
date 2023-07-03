@@ -16,7 +16,7 @@
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadsoun.hpp>
 #include <components/esm3/npcstate.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
@@ -826,12 +826,10 @@ namespace MWClass
                 }
                 if (hasArmor)
                 {
-                    static const bool creatureDamage
-                        = Settings::Manager::getBool("unarmed creature attacks damage armor", "Game");
-
+                    // Unarmed creature attacks don't affect armor condition unless it was
+                    // explicitly requested.
                     if (!object.isEmpty() || attacker.isEmpty() || attacker.getClass().isNpc()
-                        || creatureDamage) // Unarmed creature attacks don't affect armor condition unless it was
-                                           // explicitly requested.
+                        || Settings::game().mUnarmedCreatureAttacksDamageArmor)
                     {
                         int armorhealth = armor.getClass().getItemHealth(armor);
                         armorhealth -= std::min(damageDiff, armorhealth);
@@ -919,10 +917,8 @@ namespace MWClass
 
         if (stats.isDead())
         {
-            bool canLoot = Settings::Manager::getBool("can loot during death animation", "Game");
-
             // by default user can loot friendly actors during death animation
-            if (canLoot && !stats.getAiSequence().isInCombat())
+            if (Settings::game().mCanLootDuringDeathAnimation && !stats.getAiSequence().isInCombat())
                 return std::make_unique<MWWorld::ActionOpen>(ptr);
 
             // otherwise wait until death animation
@@ -940,9 +936,7 @@ namespace MWClass
         }
         else // In combat
         {
-            const bool stealingInCombat
-                = Settings::Manager::getBool("always allow stealing from knocked out actors", "Game");
-            if (stealingInCombat && stats.getKnockedDown())
+            if (Settings::game().mAlwaysAllowStealingFromKnockedOutActors && stats.getKnockedDown())
                 return std::make_unique<MWWorld::ActionOpen>(ptr); // stealing
         }
 
@@ -1090,9 +1084,7 @@ namespace MWClass
         if (!customData.mNpcStats.getAiSequence().isInCombat())
             return true;
 
-        const bool stealingInCombat
-            = Settings::Manager::getBool("always allow stealing from knocked out actors", "Game");
-        if (stealingInCombat && customData.mNpcStats.getKnockedDown())
+        if (Settings::game().mAlwaysAllowStealingFromKnockedOutActors && customData.mNpcStats.getKnockedDown())
             return true;
 
         return false;

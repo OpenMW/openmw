@@ -20,7 +20,7 @@
 
 #include <components/misc/resourcehelpers.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <components/vfs/manager.hpp>
 
@@ -163,8 +163,7 @@ namespace MWRender
 
     bool ActorAnimation::updateCarriedLeftVisible(const int weaptype) const
     {
-        static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
-        if (shieldSheathing)
+        if (Settings::game().mShieldSheathing)
         {
             const MWWorld::Class& cls = mPtr.getClass();
             MWMechanics::CreatureStats& stats = cls.getCreatureStats(mPtr);
@@ -189,8 +188,7 @@ namespace MWRender
 
     void ActorAnimation::updateHolsteredShield(bool showCarriedLeft)
     {
-        static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
-        if (!shieldSheathing)
+        if (!Settings::game().mShieldSheathing)
             return;
 
         if (!mPtr.getClass().hasInventoryStore(mPtr))
@@ -256,8 +254,7 @@ namespace MWRender
 
     bool ActorAnimation::useShieldAnimations() const
     {
-        static const bool shieldSheathing = Settings::Manager::getBool("shield sheathing", "Game");
-        if (!shieldSheathing)
+        if (!Settings::game().mShieldSheathing)
             return false;
 
         const MWWorld::Class& cls = mPtr.getClass();
@@ -325,8 +322,7 @@ namespace MWRender
 
     void ActorAnimation::updateHolsteredWeapon(bool showHolsteredWeapons)
     {
-        static const bool weaponSheathing = Settings::Manager::getBool("weapon sheathing", "Game");
-        if (!weaponSheathing)
+        if (!Settings::game().mWeaponSheathing)
             return;
 
         if (!mPtr.getClass().hasInventoryStore(mPtr))
@@ -405,8 +401,7 @@ namespace MWRender
 
     void ActorAnimation::updateQuiver()
     {
-        static const bool weaponSheathing = Settings::Manager::getBool("weapon sheathing", "Game");
-        if (!weaponSheathing)
+        if (!Settings::game().mWeaponSheathing)
             return;
 
         if (!mPtr.getClass().hasInventoryStore(mPtr))

@@ -444,6 +444,11 @@ namespace Settings
         setVector3(setting, category, value);
     }
 
+    void Manager::set(std::string_view setting, std::string_view category, DetourNavigator::CollisionShapeType value)
+    {
+        setInt(setting, category, static_cast<int>(value));
+    }
+
     void Manager::recordInit(std::string_view setting, std::string_view category)
     {
         sInitialized.emplace(category, setting);

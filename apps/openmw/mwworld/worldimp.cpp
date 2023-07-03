@@ -53,6 +53,8 @@
 #include <components/files/conversion.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 
+#include <components/settings/values.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -256,9 +258,6 @@ namespace MWWorld
         , mDiscardMovements(true)
         , mContentFiles(contentFiles)
         , mUserDataPath(userDataPath)
-        , mDefaultHalfExtents(Settings::Manager::getVector3("default actor pathfind half extents", "Game"))
-        , mDefaultActorCollisionShapeType(
-              DetourNavigator::toCollisionShapeType(Settings::Manager::getInt("actor collision shape type", "Game")))
         , mActivationDistanceOverride(activationDistanceOverride)
         , mStartCell(startCell)
         , mDistanceToFacedObject(-1.f)
@@ -3808,7 +3807,8 @@ namespace MWWorld
     {
         const MWPhysics::Actor* physicsActor = mPhysics->getActor(actor);
         if (physicsActor == nullptr || !actor.isInCell() || actor.getCell()->isExterior())
-            return DetourNavigator::AgentBounds{ mDefaultActorCollisionShapeType, mDefaultHalfExtents };
+            return DetourNavigator::AgentBounds{ Settings::game().mActorCollisionShapeType,
+                Settings::game().mDefaultActorPathfindHalfExtents };
         else
             return DetourNavigator::AgentBounds{ physicsActor->getCollisionShapeType(),
                 physicsActor->getHalfExtents() };

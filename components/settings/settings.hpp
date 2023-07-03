@@ -3,6 +3,8 @@
 
 #include "categories.hpp"
 
+#include "components/detournavigator/collisionshapetype.hpp"
+
 #include <set>
 #include <string>
 #include <string_view>
@@ -101,6 +103,7 @@ namespace Settings
         static void set(std::string_view setting, std::string_view category, bool value);
         static void set(std::string_view setting, std::string_view category, const osg::Vec2f& value);
         static void set(std::string_view setting, std::string_view category, const osg::Vec3f& value);
+        static void set(std::string_view setting, std::string_view category, DetourNavigator::CollisionShapeType value);
 
     private:
         static std::set<std::pair<std::string_view, std::string_view>> sInitialized;
@@ -169,6 +172,13 @@ namespace Settings
     inline osg::Vec3f Manager::getImpl<osg::Vec3f>(std::string_view setting, std::string_view category)
     {
         return getVector3(setting, category);
+    }
+
+    template <>
+    inline DetourNavigator::CollisionShapeType Manager::getImpl<DetourNavigator::CollisionShapeType>(
+        std::string_view setting, std::string_view category)
+    {
+        return DetourNavigator::toCollisionShapeType(getInt(setting, category));
     }
 }
 

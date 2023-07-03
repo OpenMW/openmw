@@ -8,7 +8,7 @@
 #include <components/esm3/loadstat.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -649,9 +649,8 @@ namespace MWMechanics
                         modDynamicStat(target, index, -effect.mMagnitude);
                     else
                     {
-                        static const bool uncappedDamageFatigue
-                            = Settings::Manager::getBool("uncapped damage fatigue", "Game");
-                        adjustDynamicStat(target, index, -effect.mMagnitude, index == 2 && uncappedDamageFatigue);
+                        adjustDynamicStat(
+                            target, index, -effect.mMagnitude, index == 2 && Settings::game().mUncappedDamageFatigue);
                         if (index == 0)
                             receivedMagicDamage = affectedHealth = true;
                     }
@@ -716,10 +715,9 @@ namespace MWMechanics
             case ESM::MagicEffect::DrainFatigue:
                 if (!godmode)
                 {
-                    static const bool uncappedDamageFatigue
-                        = Settings::Manager::getBool("uncapped damage fatigue", "Game");
                     int index = effect.mEffectId - ESM::MagicEffect::DrainHealth;
-                    adjustDynamicStat(target, index, -effect.mMagnitude, uncappedDamageFatigue && index == 2);
+                    adjustDynamicStat(
+                        target, index, -effect.mMagnitude, Settings::game().mUncappedDamageFatigue && index == 2);
                     if (index == 0)
                         receivedMagicDamage = affectedHealth = true;
                 }

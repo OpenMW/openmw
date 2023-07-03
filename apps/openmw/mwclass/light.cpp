@@ -6,7 +6,7 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/objectstate.hpp>
 #include <components/esm4/loadligh.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -166,8 +166,7 @@ namespace MWClass
         std::string text;
 
         // Don't show duration for infinite light sources.
-        if (Settings::Manager::getBool("show effect duration", "Game")
-            && ptr.getClass().getRemainingUsageTime(ptr) != -1)
+        if (Settings::game().mShowEffectDuration && ptr.getClass().getRemainingUsageTime(ptr) != -1)
             text += MWGui::ToolTips::getDurationString(ptr.getClass().getRemainingUsageTime(ptr), "\n#{sDuration}");
 
         text += MWGui::ToolTips::getWeightString(ref->mBase->mData.mWeight, "#{sWeight}");

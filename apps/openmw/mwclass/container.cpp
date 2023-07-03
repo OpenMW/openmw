@@ -5,7 +5,7 @@
 #include <components/esm3/containerstate.hpp>
 #include <components/esm3/loadcont.hpp>
 #include <components/esm3/loadsoun.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -61,7 +61,6 @@ namespace MWClass
 
     Container::Container()
         : MWWorld::RegisteredClass<Container>(ESM::Container::sRecordId)
-        , mHarvestEnabled(Settings::Manager::getBool("graphic herbalism", "Game"))
     {
     }
 
@@ -80,7 +79,7 @@ namespace MWClass
 
     bool Container::canBeHarvested(const MWWorld::ConstPtr& ptr) const
     {
-        if (!mHarvestEnabled)
+        if (!Settings::game().mGraphicHerbalism)
             return false;
         const MWRender::Animation* animation = MWBase::Environment::get().getWorld()->getAnimation(ptr);
         if (animation == nullptr)

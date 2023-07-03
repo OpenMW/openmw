@@ -12,7 +12,7 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadstat.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "actorutil.hpp"
 #include "creaturestats.hpp"
@@ -289,9 +289,7 @@ namespace MWMechanics
                 {
                     if (!reflected)
                     {
-                        static const bool keepOriginalCaster
-                            = Settings::Manager::getBool("classic reflected absorb spells behavior", "Game");
-                        if (keepOriginalCaster)
+                        if (Settings::game().mClassicReflectedAbsorbSpellsBehavior)
                             reflected = { *spellIt, caster };
                         else
                             reflected = { *spellIt, ptr };
@@ -369,8 +367,7 @@ namespace MWMechanics
             ++spellIt;
         }
 
-        static const bool keepCalm = Settings::Manager::getBool("classic calm spells behavior", "Game");
-        if (keepCalm)
+        if (Settings::game().mClassicCalmSpellsBehavior)
         {
             ESM::MagicEffect::Effects effect
                 = ptr.getClass().isNpc() ? ESM::MagicEffect::CalmHumanoid : ESM::MagicEffect::CalmCreature;

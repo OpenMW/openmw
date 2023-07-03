@@ -5,7 +5,7 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadweap.hpp>
 #include <components/misc/constants.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -160,8 +160,7 @@ namespace MWClass
         std::string text;
 
         // weapon type & damage
-        if (weaponType->mWeaponClass != ESM::WeaponType::Ammo
-            || Settings::Manager::getBool("show projectile damage", "Game"))
+        if (weaponType->mWeaponClass != ESM::WeaponType::Ammo || Settings::game().mShowProjectileDamage)
         {
             text += "\n#{sType} ";
 
@@ -215,7 +214,7 @@ namespace MWClass
                 + MWGui::ToolTips::toString(ref->mBase->mData.mHealth);
         }
 
-        const bool verbose = Settings::Manager::getBool("show melee info", "Game");
+        const bool verbose = Settings::game().mShowMeleeInfo;
         // add reach for melee weapon
         if (weaponType->mWeaponClass == ESM::WeaponType::Melee && verbose)
         {

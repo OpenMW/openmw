@@ -31,9 +31,19 @@ namespace
         comboBox.setCurrentIndex(value);
     }
 
+    void loadSettingInt(const Settings::SettingValue<DetourNavigator::CollisionShapeType>& value, QComboBox& comboBox)
+    {
+        comboBox.setCurrentIndex(static_cast<int>(value.get()));
+    }
+
     void saveSettingInt(const QComboBox& comboBox, Settings::SettingValue<int>& value)
     {
         value.set(comboBox.currentIndex());
+    }
+
+    void saveSettingInt(const QComboBox& comboBox, Settings::SettingValue<DetourNavigator::CollisionShapeType>& value)
+    {
+        value.set(static_cast<DetourNavigator::CollisionShapeType>(comboBox.currentIndex()));
     }
 
     void loadSettingInt(const Settings::SettingValue<int>& value, QSpinBox& spinBox)

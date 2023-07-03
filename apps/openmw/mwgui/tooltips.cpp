@@ -11,7 +11,7 @@
 #include <components/esm/records.hpp>
 #include <components/l10n/manager.hpp>
 #include <components/misc/resourcehelpers.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/widgets/box.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -42,7 +42,6 @@ namespace MWGui
         , mLastMouseY(0)
         , mEnabled(true)
         , mFullHelp(false)
-        , mShowOwned(0)
         , mFrameDuration(0.f)
     {
         getWidget(mDynamicToolTipBox, "DynamicToolTipBox");
@@ -61,8 +60,6 @@ namespace MWGui
         {
             mMainWidget->getChildAt(i)->setVisible(false);
         }
-
-        mShowOwned = Settings::Manager::getInt("show owned", "Game");
     }
 
     void ToolTips::setEnabled(bool enabled)
@@ -402,7 +399,8 @@ namespace MWGui
     {
         mDynamicToolTipBox->setVisible(true);
 
-        if ((mShowOwned == 1 || mShowOwned == 3) && isOwned)
+        const int showOwned = Settings::game().mShowOwned;
+        if ((showOwned == 1 || showOwned == 3) && isOwned)
             mDynamicToolTipBox->changeWidgetSkin(MWBase::Environment::get().getWindowManager()->isGuiMode()
                     ? "HUD_Box_NoTransp_Owned"
                     : "HUD_Box_Owned");

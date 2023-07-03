@@ -134,8 +134,6 @@ namespace MWGui
 
         bool mFullHelp;
 
-        int mShowOwned;
-
         float mFrameDuration;
     };
 }

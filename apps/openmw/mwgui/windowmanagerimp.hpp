@@ -515,8 +515,6 @@ namespace MWGui
 
         void updateMap();
 
-        int mShowOwned;
-
         ToUTF8::FromType mEncoding;
 
         std::string mVersionDescription;

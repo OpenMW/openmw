@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_GAME_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_GAME_H
 
+#include "components/detournavigator/collisionshapetype.hpp"
 #include "components/settings/sanitizerimpl.hpp"
 #include "components/settings/settingvalue.hpp"
 
@@ -24,6 +25,8 @@ namespace Settings
         SettingValue<bool> mShowEnchantChance{ mIndex, "Game", "show enchant chance" };
         SettingValue<bool> mBestAttack{ mIndex, "Game", "best attack" };
         SettingValue<int> mDifficulty{ mIndex, "Game", "difficulty", makeClampSanitizerInt(-500, 500) };
+        // We have to cap it since using high values (larger than 7168) will make some quests harder or impossible to
+        // complete (bug #1876)
         SettingValue<int> mActorsProcessingRange{ mIndex, "Game", "actors processing range",
             makeClampSanitizerInt(3584, 7168) };
         SettingValue<bool> mClassicReflectedAbsorbSpellsBehavior{ mIndex, "Game",
@@ -69,8 +72,8 @@ namespace Settings
         SettingValue<bool> mDayNightSwitches{ mIndex, "Game", "day night switches" };
         SettingValue<bool> mUnarmedCreatureAttacksDamageArmor{ mIndex, "Game",
             "unarmed creature attacks damage armor" };
-        SettingValue<int> mActorCollisionShapeType{ mIndex, "Game", "actor collision shape type",
-            makeEnumSanitizerInt({ 0, 1, 2 }) };
+        SettingValue<DetourNavigator::CollisionShapeType> mActorCollisionShapeType{ mIndex, "Game",
+            "actor collision shape type" };
     };
 }
 

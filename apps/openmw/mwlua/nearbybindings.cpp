@@ -3,7 +3,7 @@
 #include <components/detournavigator/navigator.hpp>
 #include <components/detournavigator/navigatorutils.hpp>
 #include <components/lua/luastate.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -166,8 +166,8 @@ namespace MWLua
             }));
 
         static const DetourNavigator::AgentBounds defaultAgentBounds{
-            DetourNavigator::toCollisionShapeType(Settings::Manager::getInt("actor collision shape type", "Game")),
-            Settings::Manager::getVector3("default actor pathfind half extents", "Game"),
+            Settings::game().mActorCollisionShapeType,
+            Settings::game().mDefaultActorPathfindHalfExtents,
         };
         static const float defaultStepSize
             = 2 * std::max(defaultAgentBounds.mHalfExtents.x(), defaultAgentBounds.mHalfExtents.y());

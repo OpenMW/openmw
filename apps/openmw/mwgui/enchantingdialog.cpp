@@ -7,7 +7,7 @@
 #include <MyGUI_ScrollView.h>
 
 #include <components/misc/strings/format.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/widgets/list.hpp>
 
 #include <components/esm3/loadgmst.hpp>
@@ -158,8 +158,7 @@ namespace MWGui
             mEnchanting.setSelfEnchanting(true);
             mEnchanting.setEnchanter(MWMechanics::getPlayer());
             mBuyButton->setCaptionWithReplacing("#{sCreate}");
-            bool enabled = Settings::Manager::getBool("show enchant chance", "Game");
-            mChanceLayout->setVisible(enabled);
+            mChanceLayout->setVisible(Settings::game().mShowEnchantChance);
             mPtr = MWMechanics::getPlayer();
             setSoulGem(ptr);
             mPrice->setVisible(false);

@@ -23,7 +23,7 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/niffilemanager.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 #include <components/version/version.hpp>
 #include <components/vfs/manager.hpp>
@@ -196,11 +196,10 @@ namespace NavMeshTool
 
             Settings::Manager::load(config);
 
-            const auto agentCollisionShape = DetourNavigator::toCollisionShapeType(
-                Settings::Manager::getInt("actor collision shape type", "Game"));
-            const osg::Vec3f agentHalfExtents
-                = Settings::Manager::getVector3("default actor pathfind half extents", "Game");
-            const DetourNavigator::AgentBounds agentBounds{ agentCollisionShape, agentHalfExtents };
+            const DetourNavigator::AgentBounds agentBounds{
+                Settings::game().mActorCollisionShapeType,
+                Settings::game().mDefaultActorPathfindHalfExtents,
+            };
             const std::uint64_t maxDbFileSize = Settings::Manager::getUInt64("max navmeshdb file size", "Navigator");
             const auto dbPath = Files::pathToUnicodeString(config.getUserDataPath() / "navmesh.db");
 

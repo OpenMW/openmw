@@ -8,7 +8,7 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -136,7 +136,7 @@ namespace MWGui
                                 += MWBase::Environment::get().getWindowManager()->getGameSettingString("spoint", {});
                     }
                 }
-                if (effectInfo.mRemainingTime > -1 && Settings::Manager::getBool("show effect duration", "Game"))
+                if (effectInfo.mRemainingTime > -1 && Settings::game().mShowEffectDuration)
                     sourcesDescription
                         += MWGui::ToolTips::getDurationString(effectInfo.mRemainingTime, " #{sDuration}");
 

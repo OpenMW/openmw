@@ -8,7 +8,7 @@
 #include <components/esm3/loadsndg.hpp>
 #include <components/esm3/loadsoun.hpp>
 #include <components/misc/rng.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/aisetting.hpp"
@@ -484,10 +484,8 @@ namespace MWClass
 
         if (stats.isDead())
         {
-            bool canLoot = Settings::Manager::getBool("can loot during death animation", "Game");
-
             // by default user can loot friendly actors during death animation
-            if (canLoot && !stats.getAiSequence().isInCombat())
+            if (Settings::game().mCanLootDuringDeathAnimation && !stats.getAiSequence().isInCombat())
                 return std::make_unique<MWWorld::ActionOpen>(ptr);
 
             // otherwise wait until death animation

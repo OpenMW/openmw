@@ -5,7 +5,7 @@
 #include <components/esm3/loadcell.hpp>
 #include <components/esm3/loadland.hpp>
 #include <components/misc/coordinateconverter.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -190,7 +190,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     const float pointTolerance
         = getPointTolerance(actor.getClass().getMaxSpeed(actor), duration, world->getHalfExtents(actor));
 
-    static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
+    const bool smoothMovement = Settings::game().mSmoothMovement;
 
     PathFinder::UpdateFlags updateFlags{};
 
@@ -469,15 +469,12 @@ bool MWMechanics::AiPackage::isReachableRotatingOnTheRun(const MWWorld::Ptr& act
 
 DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::Ptr& actor) const
 {
-    static const bool allowToFollowOverWaterSurface
-        = Settings::Manager::getBool("allow actors to follow over water surface", "Game");
-
     const MWWorld::Class& actorClass = actor.getClass();
     DetourNavigator::Flags result = DetourNavigator::Flag_none;
 
     if ((actorClass.isPureWaterCreature(actor)
             || (getTypeId() != AiPackageTypeId::Wander
-                && ((allowToFollowOverWaterSurface && getTypeId() == AiPackageTypeId::Follow)
+                && ((Settings::game().mAllowActorsToFollowOverWaterSurface && getTypeId() == AiPackageTypeId::Follow)
                     || actorClass.canSwim(actor) || hasWaterWalking(actor))))
         && actorClass.getSwimSpeed(actor) > 0)
         result |= DetourNavigator::Flag_swim;

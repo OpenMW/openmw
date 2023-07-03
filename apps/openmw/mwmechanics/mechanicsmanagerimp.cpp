@@ -350,8 +350,6 @@ namespace MWMechanics
                 if (state != MWBase::StateManager::State_Running)
                     continue;
 
-                mActors.updateProcessingRange();
-
                 // Update mechanics for new processing range immediately
                 update(0.f, false);
             }
@@ -361,11 +359,6 @@ namespace MWMechanics
     void MechanicsManager::notifyDied(const MWWorld::Ptr& actor)
     {
         mActors.notifyDied(actor);
-    }
-
-    float MechanicsManager::getActorsProcessingRange() const
-    {
-        return mActors.getProcessingRange();
     }
 
     bool MechanicsManager::isActorDetected(const MWWorld::Ptr& actor, const MWWorld::Ptr& observer)

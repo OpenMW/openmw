@@ -239,8 +239,6 @@ namespace MWBase
 
         virtual void processChangedSettings(const std::set<std::pair<std::string, std::string>>& settings) = 0;
 
-        virtual float getActorsProcessingRange() const = 0;
-
         virtual void notifyDied(const MWWorld::Ptr& actor) = 0;
 
         virtual bool onOpen(const MWWorld::Ptr& ptr) = 0;

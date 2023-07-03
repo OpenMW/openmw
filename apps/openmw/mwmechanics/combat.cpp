@@ -2,7 +2,7 @@
 #include "combat.hpp"
 
 #include <components/misc/rng.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -174,8 +174,7 @@ namespace MWMechanics
         bool isMagical = flags & ESM::Weapon::Magical;
         bool isEnchanted = !weapon.getClass().getEnchantment(weapon).empty();
 
-        return !isSilver && !isMagical
-            && (!isEnchanted || !Settings::Manager::getBool("enchanted weapons are magical", "Game"));
+        return !isSilver && !isMagical && (!isEnchanted || !Settings::game().mEnchantedWeaponsAreMagical);
     }
 
     void resistNormalWeapon(
@@ -251,8 +250,7 @@ namespace MWMechanics
 
         if (validVictim)
         {
-            if (weapon == projectile
-                || Settings::Manager::getBool("only appropriate ammunition bypasses resistance", "Game")
+            if (weapon == projectile || Settings::game().mOnlyAppropriateAmmunitionBypassesResistance
                 || isNormalWeapon(weapon))
                 resistNormalWeapon(victim, attacker, projectile, damage);
             applyWerewolfDamageMult(victim, projectile, damage);
@@ -469,7 +467,7 @@ namespace MWMechanics
         // 0 = Do not factor strength into hand-to-hand combat.
         // 1 = Factor into werewolf hand-to-hand combat.
         // 2 = Ignore werewolves.
-        int factorStrength = Settings::Manager::getInt("strength influences hand to hand", "Game");
+        const int factorStrength = Settings::game().mStrengthInfluencesHandToHand;
         if (factorStrength == 1 || (factorStrength == 2 && !isWerewolf))
         {
             damage

@@ -26,7 +26,7 @@
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/conversion.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <components/sceneutil/positionattitudetransform.hpp>
 
@@ -1509,9 +1509,7 @@ namespace MWMechanics
                         }
                     }
 
-                    static const bool useCastingAnimations
-                        = Settings::Manager::getBool("use magic item animations", "Game");
-                    if (isMagicItem && !useCastingAnimations)
+                    if (isMagicItem && !Settings::game().mUseMagicItemAnimations)
                     {
                         world->breakInvisibility(mPtr);
                         // Enchanted items by default do not use casting animations
@@ -1619,7 +1617,7 @@ namespace MWMechanics
                             mAttackType = "shoot";
                         else if (mPtr == getPlayer())
                         {
-                            if (Settings::Manager::getBool("best attack", "Game"))
+                            if (Settings::game().mBestAttack)
                             {
                                 if (!mWeapon.isEmpty() && mWeapon.getType() == ESM::Weapon::sRecordId)
                                 {
@@ -1864,8 +1862,7 @@ namespace MWMechanics
 
         float scale = mPtr.getCellRef().getScale();
 
-        static const bool normalizeSpeed = Settings::Manager::getBool("normalise race speed", "Game");
-        if (!normalizeSpeed && cls.isNpc())
+        if (!Settings::game().mNormaliseRaceSpeed && cls.isNpc())
         {
             const ESM::NPC* npc = mPtr.get<ESM::NPC>()->mBase;
             const ESM::Race* race = world->getStore().get<ESM::Race>().find(npc->mRace);
@@ -1913,11 +1910,9 @@ namespace MWMechanics
             movementSettings.mSpeedFactor = std::min(vec.length(), 1.f);
             vec.normalize();
 
-            static const bool smoothMovement = Settings::Manager::getBool("smooth movement", "Game");
+            const bool smoothMovement = Settings::game().mSmoothMovement;
             if (smoothMovement)
             {
-                static const float playerTurningCoef = 1.0
-                    / std::max(0.01f, Settings::Manager::getFloat("smooth movement player turning delay", "Game"));
                 float angle = mPtr.getRefData().getPosition().rot[2];
                 osg::Vec2f targetSpeed
                     = Misc::rotateVec2f(osg::Vec2f(vec.x(), vec.y()), -angle) * movementSettings.mSpeedFactor;
@@ -1930,7 +1925,7 @@ namespace MWMechanics
                     maxDelta = 1;
                 else if (std::abs(speedDelta) < deltaLen / 2)
                     // Turning is smooth for player and less smooth for NPCs (otherwise NPC can miss a path point).
-                    maxDelta = duration * (isPlayer ? playerTurningCoef : 6.f);
+                    maxDelta = duration * (isPlayer ? 1.0 / Settings::game().mSmoothMovementPlayerTurningDelay : 6.f);
                 else if (isPlayer && speedDelta < -deltaLen / 2)
                     // As soon as controls are released, mwinput switches player from running to walking.
                     // So stopping should be instant for player, otherwise it causes a small twitch.
@@ -1964,8 +1959,7 @@ namespace MWMechanics
 
             float effectiveRotation = rot.z();
             bool canMove = cls.getMaxSpeed(mPtr) > 0;
-            static const bool turnToMovementDirection
-                = Settings::Manager::getBool("turn to movement direction", "Game");
+            const bool turnToMovementDirection = Settings::game().mTurnToMovementDirection;
             if (!turnToMovementDirection || isFirstPersonPlayer)
             {
                 movementSettings.mIsStrafing = std::abs(vec.x()) > std::abs(vec.y()) * 2;
@@ -2230,13 +2224,11 @@ namespace MWMechanics
             else
                 mAnimation->setBodyPitchRadians(0);
 
-            static const bool swimUpwardCorrection = Settings::Manager::getBool("swim upward correction", "Game");
-            if (inwater && isPlayer && !isFirstPersonPlayer && swimUpwardCorrection)
+            if (inwater && isPlayer && !isFirstPersonPlayer && Settings::game().mSwimUpwardCorrection)
             {
-                static const float swimUpwardCoef = Settings::Manager::getFloat("swim upward coef", "Game");
-                static const float swimForwardCoef = sqrtf(1.0f - swimUpwardCoef * swimUpwardCoef);
+                const float swimUpwardCoef = Settings::game().mSwimUpwardCoef;
                 vec.z() = std::abs(vec.y()) * swimUpwardCoef;
-                vec.y() *= swimForwardCoef;
+                vec.y() *= std::sqrt(1.0f - swimUpwardCoef * swimUpwardCoef);
             }
 
             // Player can not use smooth turning as NPCs, so we play turning animation a bit to avoid jittering
