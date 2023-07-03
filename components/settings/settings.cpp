@@ -449,6 +449,11 @@ namespace Settings
         setInt(setting, category, static_cast<int>(value));
     }
 
+    void Manager::set(std::string_view setting, std::string_view category, const std::vector<std::string>& value)
+    {
+        setStringArray(setting, category, value);
+    }
+
     void Manager::recordInit(std::string_view setting, std::string_view category)
     {
         sInitialized.emplace(category, setting);

@@ -1292,11 +1292,8 @@ namespace MWRender
     {
         mViewer->stopThreading();
 
-        mResourceSystem->getSceneManager()->setFilterSettings(
-            Settings::Manager::getString("texture mag filter", "General"),
-            Settings::Manager::getString("texture min filter", "General"),
-            Settings::Manager::getString("texture mipmap", "General"),
-            Settings::Manager::getInt("anisotropy", "General"));
+        mResourceSystem->getSceneManager()->setFilterSettings(Settings::general().mTextureMagFilter,
+            Settings::general().mTextureMinFilter, Settings::general().mTextureMipmap, Settings::general().mAnisotropy);
 
         mTerrain->updateTextureFiltering();
         mWater->processChangedSettings({});

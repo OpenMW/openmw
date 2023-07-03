@@ -28,7 +28,7 @@ namespace Settings
         SettingValue<std::string> mTextureMipmap{ mIndex, "General", "texture mipmap",
             makeEnumSanitizerString({ "none", "nearest", "linear" }) };
         SettingValue<bool> mNotifyOnSavedScreenshot{ mIndex, "General", "notify on saved screenshot" };
-        SettingValue<std::string> mPreferredLocales{ mIndex, "General", "preferred locales" };
+        SettingValue<std::vector<std::string>> mPreferredLocales{ mIndex, "General", "preferred locales" };
         SettingValue<bool> mGmstOverridesL10n{ mIndex, "General", "gmst overrides l10n" };
         SettingValue<std::size_t> mLogBufferSize{ mIndex, "General", "log buffer size" };
         SettingValue<std::size_t> mConsoleHistoryBufferSize{ mIndex, "General", "console history buffer size" };

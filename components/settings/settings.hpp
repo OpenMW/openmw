@@ -104,12 +104,13 @@ namespace Settings
         static void set(std::string_view setting, std::string_view category, const osg::Vec2f& value);
         static void set(std::string_view setting, std::string_view category, const osg::Vec3f& value);
         static void set(std::string_view setting, std::string_view category, DetourNavigator::CollisionShapeType value);
+        static void set(std::string_view setting, std::string_view category, const std::vector<std::string>& value);
 
     private:
         static std::set<std::pair<std::string_view, std::string_view>> sInitialized;
 
         template <class T>
-        static T getImpl(std::string_view setting, std::string_view category);
+        static T getImpl(std::string_view setting, std::string_view category) = delete;
 
         static void recordInit(std::string_view setting, std::string_view category);
     };
@@ -179,6 +180,13 @@ namespace Settings
         std::string_view setting, std::string_view category)
     {
         return DetourNavigator::toCollisionShapeType(getInt(setting, category));
+    }
+
+    template <>
+    inline std::vector<std::string> Manager::getImpl<std::vector<std::string>>(
+        std::string_view setting, std::string_view category)
+    {
+        return getStringArray(setting, category);
     }
 }
 

@@ -15,6 +15,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <vector>
 
 namespace Settings
 {
@@ -33,6 +34,7 @@ namespace Settings
         Vec2f,
         Vec3f,
         CollisionShapeType,
+        StringArray,
     };
 
     template <class T>
@@ -116,6 +118,12 @@ namespace Settings
         return SettingValueType::CollisionShapeType;
     }
 
+    template <>
+    inline constexpr SettingValueType getSettingValueType<std::vector<std::string>>()
+    {
+        return SettingValueType::StringArray;
+    }
+
     inline constexpr std::string_view getSettingValueTypeName(SettingValueType type)
     {
         switch (type)
@@ -146,6 +154,8 @@ namespace Settings
                 return "vec3f";
             case SettingValueType::CollisionShapeType:
                 return "collision shape type";
+            case SettingValueType::StringArray:
+                return "string array";
         }
         return "unsupported";
     }
@@ -292,6 +302,18 @@ namespace Settings
             {
                 if constexpr (std::is_enum_v<T>)
                     return stream << static_cast<std::underlying_type_t<T>>(value.mValue);
+                else if constexpr (std::is_same_v<T, std::vector<std::string>>)
+                {
+                    bool first = true;
+                    for (const std::string& v : value.mValue)
+                    {
+                        if (std::exchange(first, false))
+                            stream << v;
+                        else
+                            stream << "," << v;
+                    }
+                    return stream;
+                }
                 else
                     return stream << value.mValue;
             }
