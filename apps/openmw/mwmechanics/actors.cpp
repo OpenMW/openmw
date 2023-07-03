@@ -17,7 +17,7 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadstat.hpp>
 
-#include "../mwworld/actionequip.hpp"
+#include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
@@ -39,7 +39,6 @@
 
 #include "actor.hpp"
 #include "actorutil.hpp"
-#include "aicombat.hpp"
 #include "aicombataction.hpp"
 #include "aifollow.hpp"
 #include "aipursue.hpp"
@@ -48,7 +47,6 @@
 #include "creaturestats.hpp"
 #include "movement.hpp"
 #include "npcstats.hpp"
-#include "spellcasting.hpp"
 #include "steering.hpp"
 #include "summoning.hpp"
 
