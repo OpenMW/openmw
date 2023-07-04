@@ -1,4 +1,6 @@
-#include <components/esm/refid.hpp>
+#include "components/esm/refid.hpp"
+#include "components/esm3/esmreader.hpp"
+#include "components/esm3/esmwriter.hpp"
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -464,10 +466,34 @@ namespace ESM
             EXPECT_FALSE(a < b) << a;
         }
 
+        TYPED_TEST_P(ESMRefIdTypesTest, saveAndLoadShouldNotChange)
+        {
+            constexpr NAME fakeRecordId(fourCC("FAKE"));
+            constexpr NAME subRecordId(fourCC("NAME"));
+            const RefId expected = GenerateRefId<TypeParam>::call();
+            auto stream = std::make_unique<std::stringstream>();
+            {
+                ESMWriter writer;
+                writer.setFormatVersion(CurrentSaveGameFormatVersion);
+                writer.save(*stream);
+                writer.startRecord(fakeRecordId);
+                writer.writeHNCRefId(subRecordId, expected);
+                writer.endRecord(fakeRecordId);
+            }
+            ESMReader reader;
+            reader.open(std::move(stream), "stream");
+            ASSERT_TRUE(reader.hasMoreRecs());
+            ASSERT_EQ(reader.getRecName().toInt(), fakeRecordId);
+            reader.getRecHeader();
+            const RefId actual = reader.getHNRefId(subRecordId);
+            EXPECT_EQ(actual, expected);
+        }
+
         REGISTER_TYPED_TEST_SUITE_P(ESMRefIdTypesTest, serializeThenDeserializeShouldProduceSameValue,
             serializeTextThenDeserializeTextShouldProduceSameValue, shouldBeEqualToItself, shouldNotBeNotEqualToItself,
             shouldBeNotLessThanItself, serializeTextShouldReturnOnlyPrintableCharacters,
-            toStringShouldReturnOnlyPrintableCharacters, toDebugStringShouldReturnOnlyPrintableCharacters);
+            toStringShouldReturnOnlyPrintableCharacters, toDebugStringShouldReturnOnlyPrintableCharacters,
+            saveAndLoadShouldNotChange);
 
         template <class>
         struct RefIdTypes;
