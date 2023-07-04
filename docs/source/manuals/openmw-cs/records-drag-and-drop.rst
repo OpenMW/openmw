@@ -6,7 +6,7 @@ drop functionality. This article covers the many situations where this works.
 
 
 Records to Input Fields
-#######################
+***********************
 
 Certain record types in OpenMW-CS have input fields where other records need to 
 be assigned. Assignment can be done manually by typing the ID of the record in 
@@ -25,14 +25,14 @@ a particular instance.
 
 
 Objects to 3D scene
-###################
+*******************
 
 Records can be dragged from the Objects table into the 3D View to create a new 
 instance of that object in the target cell.
 
 
 Filtering
-#########
+*********
 
 Using regular expressions to filter table contents is powerful, but can at the same 
 time be rather complicated for users not familiar with the syntax. OpenMW-CS thus
@@ -57,7 +57,7 @@ can be used for filtering across OpenMW-CS.
     
 
 Creating Topic Infos
-####################
+********************
 
 Topic Infos can be created by hand, but since a typical game can have hundreds of 
 Topic Infos this can become very time-consuming . An alternative, and quite faster 
@@ -67,7 +67,7 @@ appropriate Topic.
 
 
 Land Texture for Terrain Painting
-#################################
+*********************************
 
 Drag and dropping a Land Texture record onto the paint brush button in the 3D 
 view will allow painting the terrain with that particular texture.
