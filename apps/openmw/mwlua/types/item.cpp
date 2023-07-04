@@ -1,3 +1,6 @@
+#include <sol/sol.hpp>
+
+#include "../../mwworld/class.hpp"
 
 #include "types.hpp"
 

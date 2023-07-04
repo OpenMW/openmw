@@ -23,7 +23,7 @@
 -- @field [parent=#nearby] openmw.core#ObjectList doors
 
 ---
--- Everything that can be picked up in the nearby.
+-- Everything in the nearby that is derived from @{openmw.types#Item}.
 -- @field [parent=#nearby] openmw.core#ObjectList items
 
 ---
