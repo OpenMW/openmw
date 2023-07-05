@@ -315,6 +315,8 @@ namespace MWMechanics
         void setHeadTrackTarget(const MWWorld::ConstPtr& target);
 
         void playSwishSound() const;
+
+        MWWorld::MovementDirectionFlags getSupportedMovementDirections() const;
     };
 }
 

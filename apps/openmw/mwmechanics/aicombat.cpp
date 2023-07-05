@@ -134,7 +134,8 @@ namespace MWMechanics
                 const osg::Vec3f destination = storage.mUseCustomDestination
                     ? storage.mCustomDestination
                     : target.getRefData().getPosition().asVec3();
-                const bool is_target_reached = pathTo(actor, destination, duration, targetReachedTolerance);
+                const bool is_target_reached = pathTo(actor, destination, duration,
+                    characterController.getSupportedMovementDirections(), targetReachedTolerance);
                 if (is_target_reached)
                     storage.mReadyToAttack = true;
             }
@@ -149,7 +150,7 @@ namespace MWMechanics
         }
         else
         {
-            updateFleeing(actor, target, duration, storage);
+            updateFleeing(actor, target, duration, characterController.getSupportedMovementDirections(), storage);
         }
         storage.mActionCooldown -= duration;
 
@@ -342,8 +343,8 @@ namespace MWMechanics
             storage.mUpdateLOSTimer -= duration;
     }
 
-    void MWMechanics::AiCombat::updateFleeing(
-        const MWWorld::Ptr& actor, const MWWorld::Ptr& target, float duration, MWMechanics::AiCombatStorage& storage)
+    void MWMechanics::AiCombat::updateFleeing(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, float duration,
+        MWWorld::MovementDirectionFlags supportedMovementDirections, AiCombatStorage& storage)
     {
         static const float BLIND_RUN_DURATION = 1.0f;
 
@@ -437,7 +438,7 @@ namespace MWMechanics
                 float dist
                     = (actor.getRefData().getPosition().asVec3() - target.getRefData().getPosition().asVec3()).length();
                 if ((dist > fFleeDistance && !storage.mLOS)
-                    || pathTo(actor, PathFinder::makeOsgVec3(storage.mFleeDest), duration))
+                    || pathTo(actor, PathFinder::makeOsgVec3(storage.mFleeDest), duration, supportedMovementDirections))
                 {
                     state = AiCombatStorage::FleeState_Idle;
                 }

@@ -11,6 +11,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 
+#include "character.hpp"
 #include "creaturestats.hpp"
 #include "steering.hpp"
 
@@ -202,7 +203,9 @@ namespace MWMechanics
             return false;
         }
 
-        storage.mMoving = !pathTo(actor, targetPos, duration, baseFollowDistance); // Go to the destination
+        // Go to the destination
+        storage.mMoving = !pathTo(
+            actor, targetPos, duration, characterController.getSupportedMovementDirections(), baseFollowDistance);
 
         if (storage.mMoving)
         {

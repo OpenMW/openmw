@@ -1,6 +1,7 @@
 #include "obstacle.hpp"
 
 #include <array>
+#include <span>
 
 #include <components/detournavigator/agentbounds.hpp>
 #include <components/esm3/loaddoor.hpp>
@@ -22,14 +23,21 @@ namespace MWMechanics
         constexpr float durationSameSpot = 1.5f;
         constexpr float durationToEvade = 1;
 
-        constexpr float evadeDirections[][2] = {
-            { 1.0f, 1.0f }, // move to side and forward
-            { 1.0f, 0.0f }, // move to side
-            { 1.0f, -1.0f }, // move to side and backwards
-            { 0.0f, -1.0f }, // move backwards
-            { -1.0f, -1.0f }, // move to other side and backwards
-            { -1.0f, 0.0f }, // move to other side
-            { -1.0f, 1.0f }, // move to other side and forward
+        struct EvadeDirection
+        {
+            float mMovementX;
+            float mMovementY;
+            MWWorld::MovementDirectionFlag mRequiredAnimation;
+        };
+
+        constexpr EvadeDirection evadeDirections[] = {
+            { 1.0f, 1.0f, MWWorld::MovementDirectionFlag_Forward }, // move to right and forward
+            { 1.0f, 0.0f, MWWorld::MovementDirectionFlag_Right }, // move to right
+            { 1.0f, -1.0f, MWWorld::MovementDirectionFlag_Back }, // move to right and backwards
+            { 0.0f, -1.0f, MWWorld::MovementDirectionFlag_Back }, // move backwards
+            { -1.0f, -1.0f, MWWorld::MovementDirectionFlag_Back }, // move to left and backwards
+            { -1.0f, 0.0f, MWWorld::MovementDirectionFlag_Left }, // move to left
+            { -1.0f, 1.0f, MWWorld::MovementDirectionFlag_Forward }, // move to left and forward
         };
     }
 
@@ -132,7 +140,8 @@ namespace MWMechanics
      * u = how long to move sideways
      *
      */
-    void ObstacleCheck::update(const MWWorld::Ptr& actor, const osg::Vec3f& destination, float duration)
+    void ObstacleCheck::update(const MWWorld::Ptr& actor, const osg::Vec3f& destination, float duration,
+        MWWorld::MovementDirectionFlags supportedMovementDirection)
     {
         const auto position = actor.getRefData().getPosition().asVec3();
 
@@ -185,8 +194,15 @@ namespace MWMechanics
 
             mWalkState = WalkState::Evade;
             mStateDuration = 0;
-            if (++mEvadeDirectionIndex == std::size(evadeDirections))
-                mEvadeDirectionIndex = 0;
+            std::size_t newEvadeDirectionIndex = mEvadeDirectionIndex;
+            do
+            {
+                ++newEvadeDirectionIndex;
+                if (newEvadeDirectionIndex == std::size(evadeDirections))
+                    newEvadeDirectionIndex = 0;
+                if ((evadeDirections[newEvadeDirectionIndex].mRequiredAnimation & supportedMovementDirection) != 0)
+                    break;
+            } while (mEvadeDirectionIndex != newEvadeDirectionIndex);
             return;
         }
 
@@ -202,7 +218,7 @@ namespace MWMechanics
 
     void ObstacleCheck::takeEvasiveAction(MWMechanics::Movement& actorMovement) const
     {
-        actorMovement.mPosition[0] = evadeDirections[mEvadeDirectionIndex][0];
-        actorMovement.mPosition[1] = evadeDirections[mEvadeDirectionIndex][1];
+        actorMovement.mPosition[0] = evadeDirections[mEvadeDirectionIndex].mMovementX;
+        actorMovement.mPosition[1] = evadeDirections[mEvadeDirectionIndex].mMovementY;
     }
 }

@@ -1,6 +1,8 @@
 #ifndef OPENMW_MECHANICS_OBSTACLE_H
 #define OPENMW_MECHANICS_OBSTACLE_H
 
+#include "apps/openmw/mwworld/movementdirection.hpp"
+
 #include <osg/Vec3f>
 
 #include <vector>
@@ -36,7 +38,8 @@ namespace MWMechanics
         bool isEvading() const;
 
         // Updates internal state, call each frame for moving actor
-        void update(const MWWorld::Ptr& actor, const osg::Vec3f& destination, float duration);
+        void update(const MWWorld::Ptr& actor, const osg::Vec3f& destination, float duration,
+            MWWorld::MovementDirectionFlags supportedMovementDirection);
 
         // change direction to try to fix "stuck" actor
         void takeEvasiveAction(Movement& actorMovement) const;

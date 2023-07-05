@@ -1,5 +1,6 @@
 #include "animation.hpp"
 
+#include <algorithm>
 #include <iomanip>
 #include <limits>
 
@@ -1798,6 +1799,28 @@ namespace MWRender
 
         if (mObjectRoot != nullptr)
             mInsert->removeChild(mObjectRoot);
+    }
+
+    MWWorld::MovementDirectionFlags Animation::getSupportedMovementDirections(
+        std::span<const std::string_view> prefixes) const
+    {
+        MWWorld::MovementDirectionFlags result = 0;
+        for (const std::string_view animation : mSupportedAnimations)
+        {
+            if (std::find_if(
+                    prefixes.begin(), prefixes.end(), [&](std::string_view v) { return animation.starts_with(v); })
+                == prefixes.end())
+                continue;
+            if (animation.ends_with("forward"))
+                result |= MWWorld::MovementDirectionFlag_Forward;
+            else if (animation.ends_with("back"))
+                result |= MWWorld::MovementDirectionFlag_Back;
+            else if (animation.ends_with("left"))
+                result |= MWWorld::MovementDirectionFlag_Left;
+            else if (animation.ends_with("right"))
+                result |= MWWorld::MovementDirectionFlag_Right;
+        }
+        return result;
     }
 
     // ------------------------------------------------------

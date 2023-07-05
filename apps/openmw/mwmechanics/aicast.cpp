@@ -9,6 +9,7 @@
 #include "../mwworld/class.hpp"
 
 #include "aicombataction.hpp"
+#include "character.hpp"
 #include "steering.hpp"
 
 namespace MWMechanics
@@ -48,7 +49,9 @@ bool MWMechanics::AiCast::execute(const MWWorld::Ptr& actor, MWMechanics::Charac
         if (target.isEmpty())
             return true;
 
-        if (!mManual && !pathTo(actor, target.getRefData().getPosition().asVec3(), duration, mDistance))
+        if (!mManual
+            && !pathTo(actor, target.getRefData().getPosition().asVec3(), duration,
+                characterController.getSupportedMovementDirections(), mDistance))
         {
             return false;
         }

@@ -44,6 +44,8 @@ namespace SceneUtil
 
         bool hasGroupStart(std::string_view groupName) const { return mGroups.count(groupName) > 0; }
 
+        const std::set<std::string, std::less<>>& getGroups() const { return mGroups; }
+
     private:
         struct IsGroupStart
         {
