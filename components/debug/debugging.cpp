@@ -314,6 +314,16 @@ void setupLogging(const std::filesystem::path& logDir, std::string_view appName,
     std::cout.rdbuf(&coutsb);
     std::cerr.rdbuf(&cerrsb);
 #endif
+
+#ifdef _WIN32
+    if (Crash::CrashCatcher::instance())
+    {
+        const std::string crashDumpName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
+        const std::string freezeDumpName = Misc::StringUtils::lowerCase(appName) + "-freeze.dmp";
+        std::filesystem::path dumpDirectory = logDir;
+        Crash::CrashCatcher::instance()->updateDumpPaths(dumpDirectory / crashDumpName, dumpDirectory / freezeDumpName);
+    }
+#endif
 }
 
 int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, char* argv[], std::string_view appName)

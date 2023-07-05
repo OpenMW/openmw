@@ -77,6 +77,32 @@ namespace Crash
             CloseHandle(mShmHandle);
     }
 
+    void CrashCatcher::updateDumpPaths(
+        const std::filesystem::path& crashDumpPath, const std::filesystem::path& freezeDumpPath)
+    {
+        shmLock();
+
+        memset(mShm->mStartup.mCrashDumpFilePath, 0, sizeof(mShm->mStartup.mCrashDumpFilePath));
+        const auto str = crashDumpPath.u8string();
+        size_t length = str.length();
+        if (length >= MAX_LONG_PATH)
+            length = MAX_LONG_PATH - 1;
+        strncpy_s(mShm->mStartup.mCrashDumpFilePath, sizeof mShm->mStartup.mCrashDumpFilePath,
+            Misc::StringUtils::u8StringToString(str).c_str(), length);
+        mShm->mStartup.mCrashDumpFilePath[length] = '\0';
+
+        memset(mShm->mStartup.mFreezeDumpFilePath, 0, sizeof(mShm->mStartup.mFreezeDumpFilePath));
+        const auto strFreeze = freezeDumpPath.u8string();
+        length = strFreeze.length();
+        if (length >= MAX_LONG_PATH)
+            length = MAX_LONG_PATH - 1;
+        strncpy_s(mShm->mStartup.mFreezeDumpFilePath, sizeof mShm->mStartup.mFreezeDumpFilePath,
+            Misc::StringUtils::u8StringToString(strFreeze).c_str(), length);
+        mShm->mStartup.mFreezeDumpFilePath[length] = '\0';
+
+        shmUnlock();
+    }
+
     void CrashCatcher::setupIpc()
     {
         SECURITY_ATTRIBUTES attributes;
