@@ -27,9 +27,15 @@ namespace Crash
     class CrashCatcher final
     {
     public:
+        static CrashCatcher* instance()
+        {
+            return sInstance;
+        }
 
         CrashCatcher(int argc, char** argv, const std::string& crashDumpPath, const std::string& freezeDumpPath);
         ~CrashCatcher();
+
+        void updateDumpPaths(const std::string& crashDumpPath, const std::string& freezeDumpPath);
 
     private:
 
