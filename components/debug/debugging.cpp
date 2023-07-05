@@ -10,11 +10,17 @@
 #include <components/crashcatcher/windows_crashcatcher.hpp>
 #include <components/windows.hpp>
 #include <Knownfolders.h>
+
+#pragma push_macro("FAR")
+#pragma push_macro("NEAR")
+#undef FAR
 #define FAR
+#undef NEAR
 #define NEAR
 #include <Shlobj.h>
-#undef NEAR
-#undef FAR
+#pragma pop_macro("NEAR")
+#pragma pop_macro("FAR")
+
 #endif
 
 #include <SDL_messagebox.h>
