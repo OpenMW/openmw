@@ -1536,35 +1536,21 @@ namespace MWRender
         // Hack even used by osg internally, osg's NodeVisitor won't accept const qualified nodes
         rootNode->addChild(const_cast<osg::Node*>(mResourceSystem->getSceneManager()->getTemplate(model).get()));
 
-        const SceneUtil::PositionAttitudeTransform* baseNode = ptr.getRefData().getBaseNode();
-        if (baseNode)
+        const float refScale = ptr.getCellRef().getScale();
+        rootNode->setScale({ refScale, refScale, refScale });
+        rootNode->setPosition(osg::Vec3(0, 0, 0));
+
+        osg::ref_ptr<Animation> animation = nullptr;
+
+        if (ptr.getClass().isNpc())
         {
-            rootNode->setPosition(baseNode->getPosition());
-            rootNode->setAttitude(baseNode->getAttitude());
-            rootNode->setScale(baseNode->getScale());
-        }
-        else
-        {
-            rootNode->setPosition(ptr.getRefData().getPosition().asVec3());
-            osg::Vec3f rot = ptr.getRefData().getPosition().asRotationVec3();
-            rootNode->setAttitude(osg::Quat(rot[2], osg::Vec3f(0, 0, -1)) * osg::Quat(rot[1], osg::Vec3f(0, -1, 0))
-                * osg::Quat(rot[0], osg::Vec3f(-1, 0, 0)));
-            const float refScale = ptr.getCellRef().getScale();
-            rootNode->setScale({ refScale, refScale, refScale });
+            rootNode->setNodeMask(Mask_Actor);
+            animation = new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(rootNode), mResourceSystem);
         }
 
         SceneUtil::CullSafeBoundsVisitor computeBounds;
         computeBounds.setTraversalMask(~(MWRender::Mask_ParticleSystem | MWRender::Mask_Effect));
         rootNode->accept(computeBounds);
-
-        const osg::Vec3f& scale = rootNode->getScale();
-
-        computeBounds.mBoundingBox.xMin() *= scale.x();
-        computeBounds.mBoundingBox.xMax() *= scale.x();
-        computeBounds.mBoundingBox.yMin() *= scale.y();
-        computeBounds.mBoundingBox.yMax() *= scale.y();
-        computeBounds.mBoundingBox.zMin() *= scale.z();
-        computeBounds.mBoundingBox.zMax() *= scale.z();
 
         return computeBounds.mBoundingBox;
     }

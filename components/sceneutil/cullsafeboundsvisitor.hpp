@@ -12,7 +12,7 @@
 
 namespace SceneUtil
 {
-    // Computes local bounding box of a node without dirtying itself or any of its children
+    // Computes bounding box of a node without dirtying it or any of its children
     struct CullSafeBoundsVisitor : osg::NodeVisitor
     {
         CullSafeBoundsVisitor(osg::NodeVisitor::TraversalMode traversalMode = TRAVERSE_ALL_CHILDREN)
@@ -38,6 +38,8 @@ namespace SceneUtil
             osg::Matrix matrix;
             if (!mMatrixStack.empty())
                 matrix = mMatrixStack.back();
+
+            transform.computeLocalToWorldMatrix(matrix, this);
 
             mMatrixStack.push_back(matrix);
             traverse(transform);
