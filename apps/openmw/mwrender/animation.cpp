@@ -660,6 +660,9 @@ namespace MWRender
 
         mAnimSources.push_back(std::move(animsrc));
 
+        for (const std::string& group : mAnimSources.back()->getTextKeys().getGroups())
+            mSupportedAnimations.insert(group);
+
         SceneUtil::AssignControllerSourcesVisitor assignVisitor(mAnimationTimePtr[0]);
         mObjectRoot->accept(assignVisitor);
 
@@ -698,6 +701,7 @@ namespace MWRender
 
         mAccumCtrl = nullptr;
 
+        mSupportedAnimations.clear();
         mAnimSources.clear();
 
         mAnimVelocities.clear();
@@ -705,15 +709,7 @@ namespace MWRender
 
     bool Animation::hasAnimation(std::string_view anim) const
     {
-        AnimSourceList::const_iterator iter(mAnimSources.begin());
-        for (; iter != mAnimSources.end(); ++iter)
-        {
-            const SceneUtil::TextKeyMap& keys = (*iter)->getTextKeys();
-            if (keys.hasGroupStart(anim))
-                return true;
-        }
-
-        return false;
+        return mSupportedAnimations.find(anim) != mSupportedAnimations.end();
     }
 
     float Animation::getStartTime(const std::string& groupname) const
