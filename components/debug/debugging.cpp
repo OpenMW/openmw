@@ -17,6 +17,19 @@
 #include <components/crashcatcher/windows_crashcatcher.hpp>
 #include <components/files/conversion.hpp>
 #include <components/windows.hpp>
+
+#include <Knownfolders.h>
+
+#pragma push_macro("FAR")
+#pragma push_macro("NEAR")
+#undef FAR
+#define FAR
+#undef NEAR
+#define NEAR
+#include <Shlobj.h>
+#pragma pop_macro("NEAR")
+#pragma pop_macro("FAR")
+
 #endif
 
 #include <SDL_messagebox.h>
@@ -169,10 +182,7 @@ namespace Debug
             CurrentDebugLevel = Verbose;
         }
 
-        virtual std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel)
-        {
-            return size;
-        }
+        virtual std::streamsize writeImpl(const char* str, std::streamsize size, Level debugLevel) { return size; }
     };
 
 #if defined _WIN32 && defined _DEBUG
@@ -319,9 +329,16 @@ int wrapApplication(int (*innerApplication)(int argc, char* argv[]), int argc, c
             env == nullptr || Misc::StringUtils::toNumeric<int>(env, 0) == 0)
         {
 #if defined(_WIN32)
-            const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
-            Crash::CrashCatcher crashy(
-                argc, argv, Files::pathToUnicodeString(std::filesystem::temp_directory_path() / crashLogName));
+            const std::string crashDumpName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
+            const std::string freezeDumpName = Misc::StringUtils::lowerCase(appName) + "-freeze.dmp";
+            std::filesystem::path dumpDirectory = std::filesystem::temp_directory_path();
+            PWSTR userProfile = nullptr;
+            if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &userProfile)))
+            {
+                dumpDirectory = userProfile;
+            }
+            CoTaskMemFree(userProfile);
+            Crash::CrashCatcher crashy(argc, argv, dumpDirectory / crashDumpName, dumpDirectory / freezeDumpName);
 #else
             const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
             // install the crash handler as soon as possible.

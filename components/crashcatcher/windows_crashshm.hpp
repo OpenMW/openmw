@@ -28,7 +28,8 @@ namespace Crash
             HANDLE mSignalApp;
             HANDLE mSignalMonitor;
             HANDLE mShmMutex;
-            char mLogFilePath[MAX_LONG_PATH];
+            char mCrashDumpFilePath[MAX_LONG_PATH];
+            char mFreezeDumpFilePath[MAX_LONG_PATH];
         } mStartup;
 
         struct Crashed

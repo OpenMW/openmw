@@ -51,7 +51,7 @@ namespace Crash
 
         void shmUnlock();
 
-        void handleCrash();
+        void handleCrash(bool isFreeze);
 
         void showFreezeMessageBox();
 
