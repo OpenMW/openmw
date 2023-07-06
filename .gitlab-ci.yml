@@ -478,6 +478,8 @@ Ubuntu_GCC_integration_tests_asan:
 
 .MacOS:
   stage: build
+  rules:
+    - if: $CI_PROJECT_ID == "7107382"
   cache:
     paths:
     - ccache/
