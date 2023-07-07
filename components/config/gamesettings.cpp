@@ -179,11 +179,18 @@ bool Config::GameSettings::writeFile(QTextStream& stream)
     {
         i--;
 
+        // path lines (e.g. 'data=...') need quotes and ampersands escaping to match how boost::filesystem::path uses
+        // boost::io::quoted
+        // We don't actually use boost::filesystem::path anymore, but use a custom class MaybeQuotedPath which uses
+        // Boost-like quoting rules but internally stores as a std::filesystem::path.
+        // Caution: This is intentional behaviour to duplicate how Boost and what we replaced it with worked, and we
+        // rely on that.
         if (i.key() == QLatin1String("data") || i.key() == QLatin1String("data-local")
             || i.key() == QLatin1String("resources") || i.key() == QLatin1String("load-savegame"))
         {
             stream << i.key() << "=";
 
+            // Equivalent to stream << std::quoted(i.value(), '"', '&'), which won't work on QStrings.
             QChar delim = '\"';
             QChar escape = '&';
             QString string = i.value();
@@ -396,13 +403,18 @@ bool Config::GameSettings::writeFileWithComments(QFile& file)
     {
         it--;
 
+        // path lines (e.g. 'data=...') need quotes and ampersands escaping to match how boost::filesystem::path uses
+        // boost::io::quoted
+        // We don't actually use boost::filesystem::path anymore, but use a custom class MaybeQuotedPath which uses
+        // Boost-like quoting rules but internally stores as a std::filesystem::path.
+        // Caution: This is intentional behaviour to duplicate how Boost and what we replaced it with worked, and we
+        // rely on that.
         if (it.key() == QLatin1String("data") || it.key() == QLatin1String("data-local")
             || it.key() == QLatin1String("resources") || it.key() == QLatin1String("load-savegame"))
         {
             settingLine = it.key() + "=";
 
-            // The following is based on boost::io::detail::quoted_manip.hpp, but calling those functions did not work
-            // as there are too may QStrings involved
+            // Equivalent to settingLine += std::quoted(it.value(), '"', '&'), which won't work on QStrings.
             QChar delim = '\"';
             QChar escape = '&';
             QString string = it.value();
