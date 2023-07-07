@@ -440,12 +440,22 @@ namespace Files
 
     std::istream& operator>>(std::istream& istream, MaybeQuotedPath& MaybeQuotedPath)
     {
-        // If the stream starts with a double quote, read from stream using std::filesystem::path rules, then discard
-        // anything remaining. This prevents boost::program_options getting upset that we've not consumed the whole
-        // stream. If it doesn't start with a double quote, read the whole thing verbatim
+        // If the stream starts with a double quote, read from stream using boost::filesystem::path rules (which are not
+        // the same as std::filesystem::path rules), then discard anything remaining. This prevents
+        // boost::program_options getting upset that we've not consumed the whole stream. If it doesn't start with a
+        // double quote, read the whole thing verbatim.
+
+        // This function's implementation and comments have a history of being changed by well-meaning but incorrect
+        // OpenMW developers. Please be very careful you aren't joining them. If you're insufficiently apprehensive,
+        // here's a 737-word GitLab comment to scare you:
+        // https://gitlab.com/OpenMW/openmw/-/merge_requests/2979#note_1371082428.
         if (istream.peek() == '"')
         {
             std::string intermediate;
+            // std::filesystem::path would use '"', '\' here.
+            // We use & because it's easier when copying and pasting Windows paths, which have many backslashes and few
+            // ampersands, and because it's backwards-compatible with the previous format, which used
+            // boost::filesystem::path's operator>>.
             istream >> std::quoted(intermediate, '"', '&');
             static_cast<std::filesystem::path&>(MaybeQuotedPath) = Misc::StringUtils::stringToU8String(intermediate);
             if (istream && !istream.eof() && istream.peek() != EOF)
