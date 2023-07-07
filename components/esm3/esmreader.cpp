@@ -1,7 +1,6 @@
 #include "esmreader.hpp"
 
 #include "readerscache.hpp"
-#include "savedgame.hpp"
 
 #include <components/esm3/cellid.hpp>
 #include <components/esm3/loadcell.hpp>

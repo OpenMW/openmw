@@ -6,7 +6,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/scriptmanager.hpp"
-#include "../mwbase/world.hpp"
 
 #include "../mwscript/compilercontext.hpp"
 

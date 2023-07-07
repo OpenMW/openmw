@@ -14,8 +14,6 @@
 #include "../mwphysics/physicssystem.hpp"
 #include "../mwworld/ptr.hpp"
 
-#include "classmodel.hpp"
-
 namespace MWClass
 {
     void ESM4Impl::insertObjectRendering(

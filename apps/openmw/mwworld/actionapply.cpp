@@ -2,8 +2,6 @@
 
 #include "class.hpp"
 
-#include "../mwmechanics/actorutil.hpp"
-
 namespace MWWorld
 {
     ActionApply::ActionApply(const Ptr& object, const ESM::RefId& id)

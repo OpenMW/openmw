@@ -1,7 +1,6 @@
 #include "sound_buffer.hpp"
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include <components/debug/debuglog.hpp>

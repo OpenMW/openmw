@@ -2,7 +2,6 @@
 #define OPENMW_MWMECHANICS_INVENTORY_H
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
 

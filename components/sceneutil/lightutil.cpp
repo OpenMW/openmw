@@ -11,7 +11,6 @@
 
 #include "lightcontroller.hpp"
 #include "lightmanager.hpp"
-#include "util.hpp"
 #include "visitor.hpp"
 
 namespace

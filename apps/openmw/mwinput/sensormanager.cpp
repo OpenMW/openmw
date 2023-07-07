@@ -2,12 +2,6 @@
 
 #include <components/debug/debuglog.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/inputmanager.hpp"
-#include "../mwbase/world.hpp"
-
-#include "../mwworld/player.hpp"
-
 namespace MWInput
 {
     SensorManager::SensorManager()

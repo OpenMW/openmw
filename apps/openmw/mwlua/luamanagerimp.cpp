@@ -23,7 +23,6 @@
 
 #include "../mwrender/postprocessor.hpp"
 
-#include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/scene.hpp"

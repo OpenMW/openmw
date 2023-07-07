@@ -1,10 +1,7 @@
 #include "light4.hpp"
-#include "classmodel.hpp"
 
-#include "../mwphysics/physicssystem.hpp"
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
-#include "../mwworld/cellstore.hpp"
 #include "../mwworld/ptr.hpp"
 
 #include <components/esm4/loadligh.hpp>

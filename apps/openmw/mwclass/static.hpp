@@ -1,13 +1,9 @@
 #ifndef GAME_MWCLASS_STATIC_H
 #define GAME_MWCLASS_STATIC_H
 
-#include "../mwgui/tooltips.hpp"
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/registeredclass.hpp"
 
-#include "classmodel.hpp"
-
-#include "../mwgui/ustring.hpp"
 #include <MyGUI_TextIterator.h>
 
 namespace MWClass

@@ -15,7 +15,6 @@
 #include "../mwworld/scene.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
-#include "../mwrender/vismask.hpp"
 
 #include "../mwmechanics/creaturestats.hpp"
 
