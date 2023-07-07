@@ -645,9 +645,8 @@ void OMW::Engine::prepareEngine()
     mResourceSystem->getSceneManager()->getShaderManager().setMaxTextureUnits(mGlMaxTextureImageUnits);
     mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(
         false); // keep to Off for now to allow better state sharing
-    mResourceSystem->getSceneManager()->setFilterSettings(Settings::Manager::getString("texture mag filter", "General"),
-        Settings::Manager::getString("texture min filter", "General"),
-        Settings::Manager::getString("texture mipmap", "General"), Settings::Manager::getInt("anisotropy", "General"));
+    mResourceSystem->getSceneManager()->setFilterSettings(Settings::general().mTextureMagFilter,
+        Settings::general().mTextureMinFilter, Settings::general().mTextureMipmap, Settings::general().mAnisotropy);
     mEnvironment.setResourceSystem(*mResourceSystem);
 
     mWorkQueue = new SceneUtil::WorkQueue(Settings::cells().mPreloadNumThreads);
@@ -655,8 +654,8 @@ void OMW::Engine::prepareEngine()
 
     mScreenCaptureOperation = new SceneUtil::AsyncScreenCaptureOperation(mWorkQueue,
         new SceneUtil::WriteScreenshotToFileOperation(mCfgMgr.getScreenshotPath(),
-            Settings::Manager::getString("screenshot format", "General"),
-            Settings::Manager::getBool("notify on saved screenshot", "General")
+            Settings::general().mScreenshotFormat,
+            Settings::general().mNotifyOnSavedScreenshot
                 ? std::function<void(std::string)>(ScheduleNonDialogMessageBox{})
                 : std::function<void(std::string)>(IgnoreString{})));
 
@@ -665,8 +664,7 @@ void OMW::Engine::prepareEngine()
     mViewer->addEventHandler(mScreenCaptureHandler);
 
     mL10nManager = std::make_unique<l10n::Manager>(mVFS.get());
-    mL10nManager->setPreferredLocales(Settings::Manager::getStringArray("preferred locales", "General"),
-        Settings::Manager::getBool("gmst overrides l10n", "General"));
+    mL10nManager->setPreferredLocales(Settings::general().mPreferredLocales, Settings::general().mGmstOverridesL10n);
     mEnvironment.setL10nManager(*mL10nManager);
 
     mLuaManager = std::make_unique<MWLua::LuaManager>(mVFS.get(), mResDir / "lua_libs");

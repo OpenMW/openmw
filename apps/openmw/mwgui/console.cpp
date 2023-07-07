@@ -16,7 +16,7 @@
 #include <components/files/conversion.hpp>
 #include <components/interpreter/interpreter.hpp>
 #include <components/misc/utf8stream.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwscript/extensions.hpp"
 #include "../mwscript/interpretercontext.hpp"
@@ -709,7 +709,7 @@ namespace MWGui
     void Console::initConsoleHistory()
     {
         const auto filePath = mCfgMgr.getUserConfigPath() / "console_history.txt";
-        const size_t retrievalLimit = Settings::Manager::getSize("console history buffer size", "General");
+        const size_t retrievalLimit = Settings::general().mConsoleHistoryBufferSize;
 
         // Read the previous session's commands from the file
         if (retrievalLimit > 0)

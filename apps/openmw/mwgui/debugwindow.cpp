@@ -6,7 +6,7 @@
 
 #include <LinearMath/btQuickprof.h>
 #include <components/debug/debugging.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
@@ -132,7 +132,7 @@ namespace MWGui
 
     void DebugWindow::startLogRecording()
     {
-        sLogCircularBuffer.resize(Settings::Manager::getSize("log buffer size", "General"));
+        sLogCircularBuffer.resize(Settings::general().mLogBufferSize);
         Debug::setLogListener([](Debug::Level level, std::string_view prefix, std::string_view msg) {
             if (sLogCircularBuffer.empty())
                 return; // Log viewer is disabled.

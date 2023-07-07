@@ -367,7 +367,7 @@ namespace MWGui
         }
         highlightCurrentResolution();
 
-        const std::string& tmip = Settings::Manager::getString("texture mipmap", "General");
+        const std::string& tmip = Settings::general().mTextureMipmap;
         mTextureFilteringButton->setCaptionWithReplacing(textureMipmappingToStr(tmip));
 
         int waterTextureSize = Settings::Manager::getInt("rtt size", "Water");
@@ -416,7 +416,7 @@ namespace MWGui
 
         std::sort(availableLanguages.begin(), availableLanguages.end());
 
-        std::vector<std::string> currentLocales = Settings::Manager::getStringArray("preferred locales", "General");
+        std::vector<std::string> currentLocales = Settings::general().mPreferredLocales;
         if (currentLocales.empty())
             currentLocales.push_back("en");
 
@@ -563,7 +563,7 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
             "#{OMWEngine:ChangeRequiresRestart}", { "#{Interface:OK}" }, true);
 
-        std::vector<std::string> currentLocales = Settings::Manager::getStringArray("preferred locales", "General");
+        std::vector<std::string> currentLocales = Settings::general().mPreferredLocales;
         if (currentLocales.size() <= langPriority)
             currentLocales.resize(langPriority + 1, "en");
 
@@ -573,7 +573,7 @@ namespace MWGui
         else
             currentLocales.resize(1);
 
-        Settings::Manager::setStringArray("preferred locales", "General", currentLocales);
+        Settings::general().mPreferredLocales.set(currentLocales);
     }
 
     void SettingsWindow::onGmstOverridesL10nChanged(MyGUI::Widget*)
@@ -681,9 +681,9 @@ namespace MWGui
     void SettingsWindow::onTextureFilteringChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
         if (pos == 0)
-            Settings::Manager::setString("texture mipmap", "General", "nearest");
+            Settings::general().mTextureMipmap.set("nearest");
         else if (pos == 1)
-            Settings::Manager::setString("texture mipmap", "General", "linear");
+            Settings::general().mTextureMipmap.set("linear");
         else
             Log(Debug::Warning) << "Unexpected option pos " << pos;
         apply();
