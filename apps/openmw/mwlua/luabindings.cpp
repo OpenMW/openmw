@@ -21,8 +21,8 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/manualref.hpp"
-#include "../mwworld/scene.hpp"
 #include "../mwworld/store.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "luaevents.hpp"
 #include "luamanagerimp.hpp"
@@ -226,13 +226,11 @@ namespace MWLua
         api["activeActors"] = GObjectList{ worldView->getActorsInScene() };
         api["players"] = GObjectList{ worldView->getPlayers() };
         api["createObject"] = [](std::string_view recordId, sol::optional<int> count) -> GObject {
-            // Doesn't matter which cell to use because the new object will be in disabled state.
-            MWWorld::CellStore* cell = MWBase::Environment::get().getWorldScene()->getCurrentCell();
-
             MWWorld::ManualRef mref(*MWBase::Environment::get().getESMStore(), ESM::RefId::deserializeText(recordId));
             const MWWorld::Ptr& ptr = mref.getPtr();
             ptr.getRefData().disable();
-            MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, *cell, count.value_or(1));
+            MWWorld::CellStore& cell = MWBase::Environment::get().getWorldModel()->getDraftCell();
+            MWWorld::Ptr newPtr = ptr.getClass().copyToCell(ptr, cell, count.value_or(1));
             return GObject(newPtr);
         };
         api["getObjectByFormId"] = [](std::string_view formIdStr) -> GObject {

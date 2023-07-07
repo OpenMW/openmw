@@ -26,6 +26,8 @@ namespace MWWorld
 {
     namespace
     {
+        const ESM::RefId draftCellId = ESM::RefId::index(ESM::REC_CSTA, 0);
+
         template <class T>
         CellStore& emplaceCellStore(ESM::RefId id, const T& cell, ESMStore& store, ESM::ReadersCache& readers,
             std::unordered_map<ESM::RefId, CellStore>& cells)
@@ -159,6 +161,7 @@ MWWorld::WorldModel::WorldModel(MWWorld::ESMStore& store, ESM::ReadersCache& rea
     , mReaders(readers)
     , mIdCache(Settings::cells().mPointersCacheSize, { ESM::RefId(), nullptr })
 {
+    mDraftCell.mId = draftCellId;
 }
 
 namespace MWWorld
@@ -229,6 +232,13 @@ namespace MWWorld
         if (it != mCells.end())
             return &it->second;
 
+        if (id == draftCellId)
+        {
+            CellStore& cellStore = emplaceCellStore(id, Cell(mDraftCell), mStore, mReaders, mCells);
+            cellStore.load();
+            return &cellStore;
+        }
+
         if (const auto* exteriorId = id.getIf<ESM::ESM3ExteriorCellRefId>())
             return &getExterior(
                 ESM::ExteriorCellLocation(exteriorId->getX(), exteriorId->getY(), ESM::Cell::sDefaultWorldspaceId),
@@ -259,6 +269,11 @@ namespace MWWorld
         if (result == nullptr)
             throw std::runtime_error("Cell does not exist: " + id.toDebugString());
         return *result;
+    }
+
+    CellStore& WorldModel::getDraftCell() const
+    {
+        return getCell(draftCellId);
     }
 
     CellStore* WorldModel::findCell(std::string_view name, bool forceLoad) const

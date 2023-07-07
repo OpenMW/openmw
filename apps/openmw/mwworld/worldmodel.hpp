@@ -53,6 +53,10 @@ namespace MWWorld
 
         CellStore& getCell(ESM::RefId Id, bool forceLoad = true) const;
 
+        // Returns a special cell that is never active. Can be used for creating objects
+        // without adding them to the scene.
+        CellStore& getDraftCell() const;
+
         CellStore* findInterior(std::string_view name, bool forceLoad = true) const;
 
         CellStore& getInterior(std::string_view name, bool forceLoad = true) const;
@@ -103,6 +107,7 @@ namespace MWWorld
         mutable std::unordered_map<ESM::RefId, CellStore> mCells;
         mutable std::map<std::string, CellStore*, Misc::StringUtils::CiComp> mInteriors;
         mutable std::map<ESM::ExteriorCellLocation, CellStore*> mExteriors;
+        ESM::Cell mDraftCell;
         std::vector<std::pair<ESM::RefId, CellStore*>> mIdCache;
         std::size_t mIdCacheIndex = 0;
         PtrRegistry mPtrRegistry;

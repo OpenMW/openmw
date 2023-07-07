@@ -182,7 +182,8 @@ namespace MWLua
                 [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().serializeText(); });
             objectT["cell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>> {
                 const MWWorld::Ptr& ptr = o.ptr();
-                if (ptr.isInCell())
+                MWWorld::WorldModel* wm = MWBase::Environment::get().getWorldModel();
+                if (ptr.isInCell() && ptr.getCell() != &wm->getDraftCell())
                     return Cell<ObjectT>{ ptr.getCell() };
                 else
                     return sol::nullopt;
