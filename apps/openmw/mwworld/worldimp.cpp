@@ -2892,7 +2892,7 @@ namespace MWWorld
     void World::loadGroundcoverFiles(const Files::Collections& fileCollections,
         const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
-        if (!Settings::Manager::getBool("enabled", "Groundcover"))
+        if (!Settings::groundcover().mEnabled)
             return;
 
         Log(Debug::Info) << "Loading groundcover:";
