@@ -218,6 +218,12 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::unstack(const Ptr& ptr,
     if (ptr.getRefData().getCount() <= count)
         return end();
     MWWorld::ContainerStoreIterator it = addNewStack(ptr, subtractItems(ptr.getRefData().getCount(false), count));
+
+    MWWorld::Ptr newPtr = *it;
+    newPtr.getCellRef().unsetRefNum();
+    newPtr.getRefData().setLuaScripts(nullptr);
+    MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
+
     const ESM::RefId& script = it->getClass().getScript(*it);
     if (!script.empty())
         MWBase::Environment::get().getWorld()->getLocalScripts().add(script, *it);
