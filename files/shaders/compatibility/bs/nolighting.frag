@@ -21,7 +21,6 @@ varying float passFalloff;
 
 uniform vec2 screenRes;
 uniform bool useFalloff;
-uniform float emissiveMult;
 uniform float far;
 uniform float alphaRef;
 
@@ -44,10 +43,6 @@ void main()
 
     if (useFalloff)
         gl_FragData[0].a *= passFalloff;
-
-    vec4 emissionColor = getEmissionColor();
-    gl_FragData[0].rgb *= emissionColor.rgb * emissiveMult;
-    gl_FragData[0].a *= emissionColor.a * emissionColor.a; // sic
 
     gl_FragData[0].a = alphaTest(gl_FragData[0].a, alphaRef);
 
