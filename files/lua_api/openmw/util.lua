@@ -407,14 +407,14 @@
 
 ---
 -- Creates a new Box with a given center and half sizes. Boxes are immutable and can not be changed after creation.
--- @function [parent=#util] Box
+-- @function [parent=#util] box
 -- @param #Vector3 center
 -- @param #Vector3 halfSize in each dimension (x, y, z)
 -- @return #Box
 
 ---
 -- Creates a new Box from a given transformation. Boxes are immutable and can not be changed after creation.
--- @function [parent=#util] Box
+-- @function [parent=#util] box
 -- @param #Transform transform A transformation which encapsulates the boxes center pointer (translation), half sizes (scale), and rotation.
 -- @return #Box
 -- @usage
