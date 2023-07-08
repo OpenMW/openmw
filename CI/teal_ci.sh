@@ -1,3 +1,5 @@
+set -e
+
 docs/source/install_luadocumentor_in_docker.sh
 PATH=$PATH:~/luarocks/bin
 
