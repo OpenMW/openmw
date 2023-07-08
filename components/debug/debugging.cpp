@@ -9,6 +9,18 @@
 #ifdef _WIN32
 #include <components/crashcatcher/windows_crashcatcher.hpp>
 #include <components/windows.hpp>
+#include <Knownfolders.h>
+
+#pragma push_macro("FAR")
+#pragma push_macro("NEAR")
+#undef FAR
+#define FAR
+#undef NEAR
+#define NEAR
+#include <Shlobj.h>
+#pragma pop_macro("NEAR")
+#pragma pop_macro("FAR")
+
 #endif
 
 #include <SDL_messagebox.h>
@@ -284,6 +296,16 @@ void setupLogging(const std::string& logDir, std::string_view appName)
     std::cout.rdbuf(&coutsb);
     std::cerr.rdbuf(&cerrsb);
 #endif
+
+#ifdef _WIN32
+    if (Crash::CrashCatcher::instance())
+    {
+        const std::string crashDumpName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
+        const std::string freezeDumpName = Misc::StringUtils::lowerCase(appName) + "-freeze.dmp";
+        boost::filesystem::path dumpDirectory(logDir);
+        Crash::CrashCatcher::instance()->updateDumpPaths((dumpDirectory / crashDumpName).make_preferred().string(), (dumpDirectory / freezeDumpName).make_preferred().string());
+    }
+#endif
 }
 
 int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, char *argv[],
@@ -304,8 +326,16 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
         if (const auto env = std::getenv("OPENMW_DISABLE_CRASH_CATCHER"); env == nullptr || std::atol(env) == 0)
         {
 #if defined(_WIN32)
-            const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
-            Crash::CrashCatcher crashy(argc, argv, (boost::filesystem::temp_directory_path() / crashLogName).make_preferred().string());
+            const std::string crashDumpName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
+            const std::string freezeDumpName = Misc::StringUtils::lowerCase(appName) + "-freeze.dmp";
+            boost::filesystem::path dumpDirectory = boost::filesystem::temp_directory_path();
+            PWSTR userProfile = nullptr;
+            if (SUCCEEDED(SHGetKnownFolderPath(FOLDERID_Profile, 0, nullptr, &userProfile)))
+            {
+                dumpDirectory = userProfile;
+            }
+            CoTaskMemFree(userProfile);
+            Crash::CrashCatcher crashy(argc, argv, (dumpDirectory / crashDumpName).make_preferred().string(), (dumpDirectory / freezeDumpName).make_preferred().string());
 #else
             const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
             // install the crash handler as soon as possible. note that the log path

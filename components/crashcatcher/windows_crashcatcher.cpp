@@ -26,7 +26,7 @@ namespace Crash
 
     CrashCatcher* CrashCatcher::sInstance = nullptr;
 
-    CrashCatcher::CrashCatcher(int argc, char **argv, const std::string& crashLogPath)
+    CrashCatcher::CrashCatcher(int argc, char** argv, const std::string& crashDumpPath, const std::string& freezeDumpPath)
     {
         assert(sInstance == nullptr); // don't allow two instances
 
@@ -48,7 +48,7 @@ namespace Crash
         if (!shmHandle)
         {
             setupIpc();
-            startMonitorProcess(crashLogPath);
+            startMonitorProcess(crashDumpPath, freezeDumpPath);
             installHandler();
         }
         else
@@ -73,6 +73,25 @@ namespace Crash
 
         if (mShmHandle)
             CloseHandle(mShmHandle);
+    }
+
+    void CrashCatcher::updateDumpPaths(const std::string& crashDumpPath, const std::string& freezeDumpPath)
+    {
+        shmLock();
+
+        memset(mShm->mStartup.mCrashDumpFilePath, 0, sizeof(mShm->mStartup.mCrashDumpFilePath));
+        size_t length = crashDumpPath.length();
+        if (length >= MAX_LONG_PATH) length = MAX_LONG_PATH - 1;
+        strncpy(mShm->mStartup.mCrashDumpFilePath, crashDumpPath.c_str(), length);
+        mShm->mStartup.mCrashDumpFilePath[length] = '\0';
+
+        memset(mShm->mStartup.mFreezeDumpFilePath, 0, sizeof(mShm->mStartup.mFreezeDumpFilePath));
+        length = freezeDumpPath.length();
+        if (length >= MAX_LONG_PATH) length = MAX_LONG_PATH - 1;
+        strncpy(mShm->mStartup.mFreezeDumpFilePath, freezeDumpPath.c_str(), length);
+        mShm->mStartup.mFreezeDumpFilePath[length] = '\0';
+
+        shmUnlock();
     }
 
     void CrashCatcher::setupIpc()
@@ -124,7 +143,7 @@ namespace Crash
         SetUnhandledExceptionFilter(vectoredExceptionHandler);
     }
 
-    void CrashCatcher::startMonitorProcess(const std::string& crashLogPath)
+    void CrashCatcher::startMonitorProcess(const std::string& crashDumpPath, const std::string& freezeDumpPath)
     {
         std::wstring executablePath;
         DWORD copied = 0;
@@ -134,11 +153,17 @@ namespace Crash
         } while (copied >= executablePath.size());
         executablePath.resize(copied);
 
-        memset(mShm->mStartup.mLogFilePath, 0, sizeof(mShm->mStartup.mLogFilePath));
-        size_t length = crashLogPath.length();
+        memset(mShm->mStartup.mCrashDumpFilePath, 0, sizeof(mShm->mStartup.mCrashDumpFilePath));
+        size_t length = crashDumpPath.length();
         if (length >= MAX_LONG_PATH) length = MAX_LONG_PATH - 1;
-        strncpy(mShm->mStartup.mLogFilePath, crashLogPath.c_str(), length);
-        mShm->mStartup.mLogFilePath[length] = '\0';
+        strncpy(mShm->mStartup.mCrashDumpFilePath, crashDumpPath.c_str(), length);
+        mShm->mStartup.mCrashDumpFilePath[length] = '\0';
+
+        memset(mShm->mStartup.mFreezeDumpFilePath, 0, sizeof(mShm->mStartup.mFreezeDumpFilePath));
+        length = freezeDumpPath.length();
+        if (length >= MAX_LONG_PATH) length = MAX_LONG_PATH - 1;
+        strncpy(mShm->mStartup.mFreezeDumpFilePath, freezeDumpPath.c_str(), length);
+        mShm->mStartup.mFreezeDumpFilePath[length] = '\0';
 
         // note that we don't need to lock the SHM here, the other process has not started yet
         mShm->mEvent = CrashSHM::Event::Startup;
@@ -197,7 +222,7 @@ namespace Crash
         // must remain until monitor has finished
         waitMonitor();
 
-        std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(mShm->mStartup.mLogFilePath) + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
+        std::string message = "OpenMW has encountered a fatal error.\nCrash log saved to '" + std::string(mShm->mStartup.mCrashDumpFilePath) + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
         SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
     }
 
