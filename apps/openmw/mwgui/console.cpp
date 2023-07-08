@@ -121,12 +121,18 @@ namespace MWGui
                 ids.clear();
             }
 
-            // exterior cell names aren't technically identifiers, but since the COC function accepts them,
-            // we should list them too
+            // exterior cell names and editor IDs aren't technically identifiers,
+            // but since the COC function accepts them, we should list them too
             for (auto it = esmStore.get<ESM::Cell>().extBegin(); it != esmStore.get<ESM::Cell>().extEnd(); ++it)
             {
                 if (!it->mName.empty())
                     mNames.push_back(it->mName);
+            }
+
+            for (const auto& cell : esmStore.get<ESM4::Cell>())
+            {
+                if (!cell.mEditorId.empty())
+                    mNames.push_back(cell.mEditorId);
             }
 
             // sort
