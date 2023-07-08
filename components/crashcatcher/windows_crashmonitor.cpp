@@ -192,7 +192,7 @@ namespace Crash
                         case CrashSHM::Event::None:
                             break;
                         case CrashSHM::Event::Crashed:
-                            handleCrash();
+                            handleCrash(false);
                             running = false;
                             break;
                         case CrashSHM::Event::Shutdown:
@@ -211,10 +211,10 @@ namespace Crash
 
             if (mFreezeAbort)
             {
-                handleCrash();
+                handleCrash(true);
                 TerminateProcess(mAppProcessHandle, 0xDEAD);
                 std::string message = "OpenMW appears to have frozen.\nCrash log saved to '"
-                    + std::string(mShm->mStartup.mLogFilePath)
+                    + std::string(mShm->mStartup.mFreezeDumpFilePath)
                     + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
                 SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
             }
@@ -238,7 +238,7 @@ namespace Crash
         return utf16;
     }
 
-    void CrashMonitor::handleCrash()
+    void CrashMonitor::handleCrash(bool isFreeze)
     {
         DWORD processId = GetProcessId(mAppProcessHandle);
 
@@ -256,7 +256,8 @@ namespace Crash
             if (miniDumpWriteDump == NULL)
                 return;
 
-            std::wstring utf16Path = utf8ToUtf16(mShm->mStartup.mLogFilePath);
+            std::wstring utf16Path
+                = utf8ToUtf16(isFreeze ? mShm->mStartup.mFreezeDumpFilePath : mShm->mStartup.mCrashDumpFilePath);
             if (utf16Path.empty())
                 return;
 
