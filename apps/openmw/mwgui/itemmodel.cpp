@@ -57,11 +57,23 @@ namespace MWGui
 
     MWWorld::Ptr ItemModel::moveItem(const ItemStack& item, size_t count, ItemModel* otherModel)
     {
-        // TODO(#6148): moving an item should preserve RefNum and Lua scripts (unless the item stack is merged with
-        // already existing stack).
-        MWWorld::Ptr ret = otherModel->copyItem(item, count);
+        MWWorld::Ptr ret = otherModel->addItem(item, count);
+        // Unstacking here ensures that new a refnum is assigned to the leftover stack if there is a leftover.
+        // Otherwise we end up with duplicated instances.
+        unstackItem(item, count);
         removeItem(item, count);
         return ret;
+    }
+
+    MWWorld::Ptr ItemModel::addItem(const ItemStack& item, size_t count, bool allowAutoEquip)
+    {
+        return copyItem(item, count, allowAutoEquip);
+    }
+
+    MWWorld::Ptr ItemModel::unstackItem(const ItemStack& item, size_t count)
+    {
+        // By default does nothing
+        return MWWorld::Ptr();
     }
 
     bool ItemModel::allowedToUseItems() const
@@ -141,6 +153,16 @@ namespace MWGui
     bool ProxyItemModel::onTakeItem(const MWWorld::Ptr& item, int count)
     {
         return mSourceModel->onTakeItem(item, count);
+    }
+
+    MWWorld::Ptr ProxyItemModel::unstackItem(const ItemStack& item, size_t count)
+    {
+        return mSourceModel->unstackItem(item, count);
+    }
+
+    MWWorld::Ptr ProxyItemModel::addItem(const ItemStack& item, size_t count, bool allowAutoEquip)
+    {
+        return mSourceModel->addItem(item, count, allowAutoEquip);
     }
 
     bool ProxyItemModel::usesContainer(const MWWorld::Ptr& container)

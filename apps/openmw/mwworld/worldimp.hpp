@@ -143,6 +143,8 @@ namespace MWWorld
 
         void updateWeather(float duration, bool paused = false);
 
+        void addObjectToCell(const Ptr& ptr, CellStore* cell, ESM::Position pos, bool adjustPos);
+        Ptr moveObjectToCell(const Ptr& ptr, CellStore* cell, ESM::Position pos, int count, bool adjustPos);
         Ptr copyObjectToCell(const ConstPtr& ptr, CellStore* cell, ESM::Position pos, int count, bool adjustPos);
 
         void updateSoundListener();
@@ -425,7 +427,8 @@ namespace MWWorld
 
         void updateWindowManager();
 
-        MWWorld::Ptr placeObject(const MWWorld::ConstPtr& object, float cursorX, float cursorY, int amount) override;
+        MWWorld::Ptr placeObject(
+            const MWWorld::Ptr& object, float cursorX, float cursorY, int amount, bool copy = true) override;
         ///< copy and place an object into the gameworld at the specified cursor position
         /// @param object
         /// @param cursor X (relative 0-1)
@@ -433,7 +436,7 @@ namespace MWWorld
         /// @param number of objects to place
 
         MWWorld::Ptr dropObjectOnGround(
-            const MWWorld::Ptr& actor, const MWWorld::ConstPtr& object, int amount) override;
+            const MWWorld::Ptr& actor, const MWWorld::Ptr& object, int amount, bool copy = true) override;
         ///< copy and place an object into the gameworld at the given actor's position
         /// @param actor giving the dropped object position
         /// @param object

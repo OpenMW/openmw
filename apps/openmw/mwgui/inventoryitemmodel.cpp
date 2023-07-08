@@ -46,11 +46,27 @@ namespace MWGui
         return -1;
     }
 
-    MWWorld::Ptr InventoryItemModel::copyItem(const ItemStack& item, size_t count, bool allowAutoEquip)
+    MWWorld::Ptr InventoryItemModel::addItem(const ItemStack& item, size_t count, bool allowAutoEquip)
     {
         if (item.mBase.getContainerStore() == &mActor.getClass().getContainerStore(mActor))
-            throw std::runtime_error("Item to copy needs to be from a different container!");
+            throw std::runtime_error("Item to add needs to be from a different container!");
         return *mActor.getClass().getContainerStore(mActor).add(item.mBase, count, allowAutoEquip);
+    }
+
+    MWWorld::Ptr InventoryItemModel::copyItem(const ItemStack& item, size_t count, bool allowAutoEquip)
+    {
+        // TODO: This does not copy the item, but adds it directly. This will duplicate the item's
+        // refnum and other ref data unless the caller handles that.
+        return addItem(item, count, allowAutoEquip);
+    }
+
+    MWWorld::Ptr InventoryItemModel::unstackItem(const ItemStack& item, size_t count)
+    {
+        MWWorld::ContainerStore& store = mActor.getClass().getContainerStore(mActor);
+        auto it = store.unstack(item.mBase, count);
+        if (it != store.end())
+            return *it;
+        return MWWorld::Ptr();
     }
 
     void InventoryItemModel::removeItem(const ItemStack& item, size_t count)
