@@ -3,7 +3,7 @@
 -- @usage local I = require('openmw.interfaces')
 
 ---
--- @field [parent=#interfaces] scripts.omw.ai#scripts.omw.activationhandlers Activation
+-- @field [parent=#interfaces] scripts.omw.activationhandlers#scripts.omw.activationhandlers Activation
 
 ---
 -- @field [parent=#interfaces] scripts.omw.ai#scripts.omw.ai AI

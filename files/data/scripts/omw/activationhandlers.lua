@@ -71,7 +71,7 @@ return {
         -- If `handler(object, actor)` returns false, other handlers for
         -- the same object (including type handlers) will be skipped.
         -- @function [parent=#Activation] addHandlerForType
-        -- @param #userdata type A type from the `openmw.types` package.
+        -- @param #any type A type from the `openmw.types` package.
         -- @param #function handler The handler.
         addHandlerForType = function(type, handler)
             local handlers = handlersPerType[type]
