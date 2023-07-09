@@ -268,6 +268,8 @@ namespace MWGui
 
         void asyncPrepareSaveMap();
 
+        std::string_view getWindowIdForLua() const override { return "Map"; }
+
     private:
         void onDragStart(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);
         void onMouseDrag(MyGUI::Widget* _sender, int _left, int _top, MyGUI::MouseButton _id);

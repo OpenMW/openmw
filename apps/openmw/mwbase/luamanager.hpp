@@ -7,6 +7,7 @@
 
 #include <SDL_events.h>
 
+#include "../mwgui/mode.hpp"
 #include <components/sdlutil/events.hpp>
 
 namespace MWWorld
@@ -52,6 +53,10 @@ namespace MWBase
         virtual void objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
         virtual void exteriorCreated(MWWorld::CellStore& cell) = 0;
         virtual void questUpdated(const ESM::RefId& questId, int stage) = 0;
+
+        // `arg` is either forwarded from MWGui::pushGuiMode or empty
+        virtual void uiModeChanged(const MWWorld::Ptr& arg) = 0;
+
         // TODO: notify LuaManager about other events
         // virtual void objectOnHit(const MWWorld::Ptr &ptr, float damage, bool ishealth, const MWWorld::Ptr &object,
         //                          const MWWorld::Ptr &attacker, const osg::Vec3f &hitPosition, bool successful) = 0;

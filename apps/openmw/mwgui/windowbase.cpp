@@ -48,6 +48,7 @@ void WindowBase::onDoubleClick(MyGUI::Widget* _sender)
 
 void WindowBase::setVisible(bool visible)
 {
+    visible = visible && !mDisabledByLua;
     bool wasVisible = mMainWidget->getVisible();
     mMainWidget->setVisible(visible);
 

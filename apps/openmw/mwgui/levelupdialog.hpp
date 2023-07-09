@@ -15,6 +15,8 @@ namespace MWGui
 
         void onOpen() override;
 
+        std::string_view getWindowIdForLua() const override { return "LevelUpDialog"; }
+
     private:
         struct Widgets
         {

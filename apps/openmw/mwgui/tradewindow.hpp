@@ -47,6 +47,8 @@ namespace MWGui
         typedef MyGUI::delegates::MultiDelegate<> EventHandle_TradeDone;
         EventHandle_TradeDone eventTradeDone;
 
+        std::string_view getWindowIdForLua() const override { return "Trade"; }
+
     private:
         ItemView* mItemView;
         SortFilterItemModel* mSortModel;

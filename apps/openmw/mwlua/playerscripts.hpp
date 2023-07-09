@@ -20,7 +20,7 @@ namespace MWLua
         {
             registerEngineHandlers({ &mConsoleCommandHandlers, &mKeyPressHandlers, &mKeyReleaseHandlers,
                 &mControllerButtonPressHandlers, &mControllerButtonReleaseHandlers, &mActionHandlers, &mOnFrameHandlers,
-                &mTouchpadPressed, &mTouchpadReleased, &mTouchpadMoved, &mQuestUpdate });
+                &mTouchpadPressed, &mTouchpadReleased, &mTouchpadMoved, &mQuestUpdate, &mUiModeChanged });
         }
 
         void processInputEvent(const MWBase::LuaManager::InputEvent& event)
@@ -65,6 +65,15 @@ namespace MWLua
             return !mConsoleCommandHandlers.mList.empty();
         }
 
+        // `arg` is either forwarded from MWGui::pushGuiMode or empty
+        void uiModeChanged(const MWWorld::Ptr& arg)
+        {
+            if (arg.isEmpty())
+                callEngineHandlers(mUiModeChanged);
+            else
+                callEngineHandlers(mUiModeChanged, LObject(arg));
+        }
+
     private:
         EngineHandlerList mConsoleCommandHandlers{ "onConsoleCommand" };
         EngineHandlerList mKeyPressHandlers{ "onKeyPress" };
@@ -77,6 +86,7 @@ namespace MWLua
         EngineHandlerList mTouchpadReleased{ "onTouchRelease" };
         EngineHandlerList mTouchpadMoved{ "onTouchMove" };
         EngineHandlerList mQuestUpdate{ "onQuestUpdate" };
+        EngineHandlerList mUiModeChanged{ "_onUiModeChanged" };
     };
 
 }

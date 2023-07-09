@@ -45,6 +45,8 @@ namespace MWGui
 
         void onOpen() override { onWindowResize(mMainWidget->castType<MyGUI::Window>()); }
 
+        std::string_view getWindowIdForLua() const override { return "Stats"; }
+
     private:
         void addSkills(const std::vector<ESM::RefId>& skills, const std::string& titleId,
             const std::string& titleDefault, MyGUI::IntCoord& coord1, MyGUI::IntCoord& coord2);

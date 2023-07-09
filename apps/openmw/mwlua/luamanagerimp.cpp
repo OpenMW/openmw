@@ -311,6 +311,15 @@ namespace MWLua
         mGlobalScriptsStarted = true;
     }
 
+    void LuaManager::uiModeChanged(const MWWorld::Ptr& arg)
+    {
+        if (mPlayer.isEmpty())
+            return;
+        PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
+        if (playerScripts)
+            playerScripts->uiModeChanged(arg);
+    }
+
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)
     {
         mObjectLists.objectAddedToScene(ptr); // assigns generated RefNum if it is not set yet.

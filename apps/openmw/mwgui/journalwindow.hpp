@@ -29,6 +29,8 @@ namespace MWGui
 
         /// show/hide the journal window
         void setVisible(bool newValue) override = 0;
+
+        std::string_view getWindowIdForLua() const override { return "Journal"; }
     };
 }
 

@@ -387,6 +387,12 @@ namespace MWGui
 
         void asyncPrepareSaveMap() override;
 
+        // Used in Lua bindings
+        const std::vector<GuiMode>& getGuiModeStack() const override { return mGuiModes; }
+        void setDisabledByLua(std::string_view windowId, bool disabled) override;
+        std::vector<std::string_view> getAllWindowIds() const override;
+        std::vector<std::string_view> getAllowedWindowIds(GuiMode mode) const override;
+
     private:
         unsigned int mOldUpdateMask;
         unsigned int mOldCullMask;
@@ -450,6 +456,9 @@ namespace MWGui
         ContainerWindow* mContainerWindow;
 
         std::vector<std::unique_ptr<WindowBase>> mWindows;
+
+        // Mapping windowId -> Window; used by Lua bindings.
+        std::map<std::string_view, WindowBase*> mLuaIdToWindow;
 
         Translation::Storage& mTranslationDataStorage;
 

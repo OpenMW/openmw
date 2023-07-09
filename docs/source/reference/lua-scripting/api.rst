@@ -34,6 +34,7 @@ Lua API reference
     interface_controls
     interface_mwui
     interface_settings
+    interface_ui
     iterables
 
 
@@ -90,3 +91,7 @@ Interfaces of built-in scripts
   * - :ref:`MWUI <Interface MWUI>`
     - by player scripts
     - Morrowind-style UI templates.
+  * - :ref:`UI <Interface UI>`
+    - by player scripts
+    - | High-level UI modes interface. Allows to override parts
+      | of the interface.

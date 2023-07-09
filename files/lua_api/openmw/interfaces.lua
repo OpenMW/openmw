@@ -18,6 +18,9 @@
 -- @field [parent=#interfaces] scripts.omw.settings.player#scripts.omw.settings.player Settings
 
 ---
+-- @field [parent=#interfaces] scripts.omw.ui#scripts.omw.ui UI
+
+---
 -- @function [parent=#interfaces] __index
 -- @param #interfaces self
 -- @param #string key

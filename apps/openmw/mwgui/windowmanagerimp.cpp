@@ -525,6 +525,13 @@ namespace MWGui
         mStatsWatcher->addListener(mHud);
         mStatsWatcher->addListener(mStatsWindow);
         mStatsWatcher->addListener(mCharGen.get());
+
+        for (auto& window : mWindows)
+        {
+            std::string_view id = window->getWindowIdForLua();
+            if (!id.empty())
+                mLuaIdToWindow.emplace(id, window.get());
+        }
     }
 
     void WindowManager::setNewGame(bool newgame)
@@ -1277,6 +1284,7 @@ namespace MWGui
         mKeyboardNavigation->restoreFocus(mode);
 
         updateVisible();
+        MWBase::Environment::get().getLuaManager()->uiModeChanged(arg);
     }
 
     void WindowManager::setCullMask(uint32_t mask)
@@ -1309,6 +1317,7 @@ namespace MWGui
             mGuiModeStates[mode].update(false);
             if (!noSound)
                 playSound(mGuiModeStates[mode].mCloseSound);
+            MWBase::Environment::get().getLuaManager()->uiModeChanged(MWWorld::Ptr());
         }
 
         if (!mGuiModes.empty())
@@ -1343,6 +1352,7 @@ namespace MWGui
         }
 
         updateVisible();
+        MWBase::Environment::get().getLuaManager()->uiModeChanged(MWWorld::Ptr());
     }
 
     void WindowManager::goToJail(int days)
@@ -1748,7 +1758,10 @@ namespace MWGui
         mPlayerBounty = -1;
 
         for (const auto& window : mWindows)
+        {
             window->clear();
+            window->setDisabledByLua(false);
+        }
 
         if (mLocalMapRender)
             mLocalMapRender->clear();
@@ -2333,5 +2346,46 @@ namespace MWGui
     void WindowManager::asyncPrepareSaveMap()
     {
         mMap->asyncPrepareSaveMap();
+    }
+
+    void WindowManager::setDisabledByLua(std::string_view windowId, bool disabled)
+    {
+        mLuaIdToWindow.at(windowId)->setDisabledByLua(disabled);
+        updateVisible();
+    }
+
+    std::vector<std::string_view> WindowManager::getAllWindowIds() const
+    {
+        std::vector<std::string_view> res;
+        for (const auto& [id, _] : mLuaIdToWindow)
+            res.push_back(id);
+        return res;
+    }
+
+    std::vector<std::string_view> WindowManager::getAllowedWindowIds(GuiMode mode) const
+    {
+        std::vector<std::string_view> res;
+        if (mode == GM_Inventory)
+        {
+            if (mAllowed & GW_Map)
+                res.push_back(mMap->getWindowIdForLua());
+            if (mAllowed & GW_Inventory)
+                res.push_back(mInventoryWindow->getWindowIdForLua());
+            if (mAllowed & GW_Magic)
+                res.push_back(mSpellWindow->getWindowIdForLua());
+            if (mAllowed & GW_Stats)
+                res.push_back(mStatsWindow->getWindowIdForLua());
+        }
+        else
+        {
+            auto it = mGuiModeStates.find(mode);
+            if (it != mGuiModeStates.end())
+            {
+                for (const auto* w : it->second.mWindows)
+                    if (!w->getWindowIdForLua().empty())
+                        res.push_back(w->getWindowIdForLua());
+            }
+        }
+        return res;
     }
 }

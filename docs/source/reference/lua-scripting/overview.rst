@@ -481,6 +481,10 @@ The order in which the scripts are started is important. So if one mod should ov
   * - :ref:`MWUI <Interface MWUI>`
     - by player scripts
     - Morrowind-style UI templates.
+  * - :ref:`UI <Interface UI>`
+    - by player scripts
+    - | High-level UI modes interface. Allows to override parts
+      | of the interface.
 
 Event system
 ============

@@ -22,6 +22,8 @@ namespace MWGui
 
         void onResChange(int, int) override { center(); }
 
+        std::string_view getWindowIdForLua() const override { return "Scroll"; }
+
     protected:
         void onCloseButtonClicked(MyGUI::Widget* _sender);
         void onTakeButtonClicked(MyGUI::Widget* _sender);

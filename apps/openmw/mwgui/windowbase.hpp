@@ -49,11 +49,16 @@ namespace MWGui
 
         virtual void onDeleteCustomData(const MWWorld::Ptr& ptr) {}
 
+        virtual std::string_view getWindowIdForLua() const { return ""; }
+        void setDisabledByLua(bool disabled) { mDisabledByLua = disabled; }
+
     protected:
         virtual void onTitleDoubleClicked();
 
     private:
         void onDoubleClick(MyGUI::Widget* _sender);
+
+        bool mDisabledByLua = false;
     };
 
     /*

@@ -16,6 +16,8 @@ namespace MWGui
 
         bool exit() override { return false; }
 
+        std::string_view getWindowIdForLua() const override { return "JailScreen"; }
+
     private:
         int mDays;
 

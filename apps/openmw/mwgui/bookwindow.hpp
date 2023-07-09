@@ -19,6 +19,8 @@ namespace MWGui
 
         void onResChange(int, int) override { center(); }
 
+        std::string_view getWindowIdForLua() const override { return "Book"; }
+
     protected:
         void onNextPageButtonClicked(MyGUI::Widget* sender);
         void onPrevPageButtonClicked(MyGUI::Widget* sender);

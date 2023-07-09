@@ -33,6 +33,8 @@ namespace MWGui
 
         void resetReference() override;
 
+        std::string_view getWindowIdForLua() const override { return "EnchantingDialog"; }
+
     protected:
         void onReferenceUnavailable() override;
         void notifyEffectsChanged() override;

@@ -16,6 +16,8 @@ namespace MWGui
 
         void setPtr(const MWWorld::Ptr& actor) override;
 
+        std::string_view getWindowIdForLua() const override { return "MerchantRepair"; }
+
     private:
         MyGUI::ScrollView* mList;
         MyGUI::Button* mOkButton;

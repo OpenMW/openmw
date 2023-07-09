@@ -165,6 +165,8 @@ namespace MWGui
 
         void onClose() override;
 
+        std::string_view getWindowIdForLua() const override { return "Dialogue"; }
+
     protected:
         void updateTopicsPane();
         bool isCompanion(const MWWorld::Ptr& actor);

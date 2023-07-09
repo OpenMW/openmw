@@ -13,6 +13,9 @@ PLAYER: scripts/omw/playercontrols.lua
 PLAYER: scripts/omw/camera/camera.lua
 NPC,CREATURE: scripts/omw/ai.lua
 
+# User interface
+PLAYER: scripts/omw/ui.lua
+
 # Lua console
 PLAYER: scripts/omw/console/player.lua
 GLOBAL: scripts/omw/console/global.lua

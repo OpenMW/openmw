@@ -23,6 +23,8 @@ namespace MWGui
         /// Cycle to next/previous spell
         void cycle(bool next);
 
+        std::string_view getWindowIdForLua() const override { return "Magic"; }
+
     protected:
         MyGUI::Widget* mEffectBox;
 

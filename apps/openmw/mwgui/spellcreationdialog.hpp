@@ -158,6 +158,8 @@ namespace MWGui
 
         void setPtr(const MWWorld::Ptr& actor) override;
 
+        std::string_view getWindowIdForLua() const override { return "SpellCreationDialog"; }
+
     protected:
         void onReferenceUnavailable() override;
 
