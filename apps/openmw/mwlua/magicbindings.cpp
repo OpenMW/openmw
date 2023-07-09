@@ -655,9 +655,6 @@ namespace MWLua
             // spell), we still need to use the active spells store to purge this effect from active spells.
             auto ptr = effects.mActor.ptr();
 
-            // TODO: The current ActiveSpell API does not allow us to differentiate between skill/attribute parameters
-            // of effects. So this cannot remove e.g. "Fortify Luck" without also removing all other fortify attribute
-            // effects such as "Fortify Speed".
             auto& activeSpells = ptr.getClass().getCreatureStats(ptr).getActiveSpells();
             activeSpells.purgeEffect(ptr, key.mId, key.mArg);
 
