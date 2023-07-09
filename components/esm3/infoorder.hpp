@@ -24,14 +24,15 @@ namespace ESM
 
             auto it = mInfoPositions.find(value.mId);
 
-            if (it != mInfoPositions.end() && it->second.mPosition->mPrev == value.mPrev)
+            if (it != mInfoPositions.end())
             {
+                bool samePrev = it->second.mPosition->mPrev == value.mPrev;
                 *it->second.mPosition = std::forward<V>(value);
                 it->second.mDeleted = deleted;
-                return;
+                if (samePrev)
+                    return;
             }
-
-            if (it == mInfoPositions.end())
+            else
                 it = mInfoPositions.emplace(value.mId, Item{ .mPosition = mOrderedInfo.end(), .mDeleted = deleted })
                          .first;
 
@@ -54,13 +55,6 @@ namespace ESM
             if (prevIt != mInfoPositions.end())
             {
                 insertOrSplice(std::next(prevIt->second.mPosition));
-                return;
-            }
-
-            const auto nextIt = mInfoPositions.find(value.mNext);
-            if (nextIt != mInfoPositions.end())
-            {
-                insertOrSplice(nextIt->second.mPosition);
                 return;
             }
 
