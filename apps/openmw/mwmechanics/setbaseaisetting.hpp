@@ -4,7 +4,6 @@
 #include <string>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
 

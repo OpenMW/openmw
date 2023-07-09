@@ -16,13 +16,10 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/globals.hpp"
-#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/player.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/npcstats.hpp"
-
-#include "../mwgui/messagebox.hpp"
 
 #include "actions.hpp"
 #include "bindingsmanager.hpp"

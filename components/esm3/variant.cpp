@@ -5,8 +5,6 @@
 #include "esmreader.hpp"
 #include "variantimp.hpp"
 
-#include "components/esm/defs.hpp"
-
 namespace ESM
 {
     namespace

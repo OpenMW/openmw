@@ -1,5 +1,3 @@
-#include "../luabindings.hpp"
-#include "../worldview.hpp"
 
 #include "types.hpp"
 

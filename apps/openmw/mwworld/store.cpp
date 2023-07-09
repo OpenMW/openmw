@@ -14,9 +14,7 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
 
-#include "../mwbase/environment.hpp"
 #include "../mwworld/cell.hpp"
-#include "../mwworld/worldimp.hpp"
 
 namespace
 {

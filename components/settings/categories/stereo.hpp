@@ -1,7 +1,6 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_STEREO_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_STEREO_H
 
-#include "components/settings/sanitizerimpl.hpp"
 #include "components/settings/settingvalue.hpp"
 
 #include <osg/Math>

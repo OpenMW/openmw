@@ -3,10 +3,8 @@
 #include <components/l10n/manager.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
 #include "duration.hpp"
-#include "esmstore.hpp"
 #include "globals.hpp"
 #include "timestamp.hpp"
 

@@ -16,7 +16,6 @@
 #include "../mwworld/ptr.hpp"
 
 #include "context.hpp"
-#include "worldview.hpp"
 
 namespace sol
 {

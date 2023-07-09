@@ -9,7 +9,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/luamanager.hpp"
-#include "../mwbase/world.hpp"
 
 #include "class.hpp"
 #include "esmstore.hpp"

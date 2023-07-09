@@ -9,8 +9,6 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
 
-#include "../mwworld/player.hpp"
-
 namespace MWInput
 {
     ControlSwitch::ControlSwitch()

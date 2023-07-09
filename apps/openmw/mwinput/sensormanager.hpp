@@ -1,6 +1,8 @@
 #ifndef MWINPUT_MWSENSORMANAGER_H
 #define MWINPUT_MWSENSORMANAGER_H
 
+#include <array>
+
 #include <SDL_sensor.h>
 
 #include <osg/Matrixf>

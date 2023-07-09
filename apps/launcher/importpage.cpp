@@ -8,8 +8,6 @@
 #include <components/files/configurationmanager.hpp>
 #include <components/files/qtconversion.hpp>
 
-#include "utils/textinputdialog.hpp"
-
 using namespace Process;
 
 Launcher::ImportPage::ImportPage(const Files::ConfigurationManager& cfg, Config::GameSettings& gameSettings,

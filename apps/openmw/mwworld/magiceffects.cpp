@@ -11,7 +11,6 @@
 #include <components/esm3/npcstate.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/magiceffects.hpp"
 

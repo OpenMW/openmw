@@ -1,5 +1,4 @@
 #include "gamesettings.hpp"
-#include "launchersettings.hpp"
 
 #include <QDir>
 #include <QRegularExpression>

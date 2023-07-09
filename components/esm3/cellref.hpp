@@ -3,9 +3,7 @@
 
 #include <string>
 
-#include "components/esm/common.hpp"
 #include "components/esm/defs.hpp"
-#include "components/esm/esmcommon.hpp"
 #include "components/esm/refid.hpp"
 
 namespace ESM

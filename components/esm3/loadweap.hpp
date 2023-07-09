@@ -4,7 +4,6 @@
 #include <string>
 
 #include "components/esm/refid.hpp"
-#include "loadskil.hpp"
 
 namespace ESM
 {

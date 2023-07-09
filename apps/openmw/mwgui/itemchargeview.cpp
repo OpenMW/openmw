@@ -10,7 +10,6 @@
 #include <components/esm3/loadench.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/spellutil.hpp"
 

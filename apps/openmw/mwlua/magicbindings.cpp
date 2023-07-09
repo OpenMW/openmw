@@ -10,15 +10,12 @@
 #include <components/resource/resourcesystem.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 #include "../mwmechanics/activespells.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/magiceffects.hpp"
-#include "../mwmechanics/npcstats.hpp"
 #include "../mwmechanics/spellutil.hpp"
-#include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
 
@@ -26,7 +23,6 @@
 #include "luamanagerimp.hpp"
 #include "object.hpp"
 #include "objectvariant.hpp"
-#include "worldview.hpp"
 
 namespace MWLua
 {
