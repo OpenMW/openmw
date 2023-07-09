@@ -372,9 +372,21 @@ namespace Nif
 
     void NiSkinPartition::read(NIFStream* nif)
     {
-        unsigned int num = nif->getUInt();
-        data.resize(num);
-        for (auto& partition : data)
+        nif->read(mPartitionNum);
+        mPartitions.resize(mPartitionNum);
+
+        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
+        {
+            nif->read(mDataSize);
+            nif->read(mVertexSize);
+            mVertexDesc.read(nif);
+
+            mVertexData.resize(mDataSize / mVertexSize);
+            for (auto& vertexData : mVertexData)
+                vertexData.read(nif, mVertexDesc.mFlags);
+        }
+
+        for (auto& partition : mPartitions)
             partition.read(nif);
     }
 
@@ -425,6 +437,12 @@ namespace Nif
         {
             nif->getChar(); // LOD level
             nif->getBoolean(); // Global VB
+        }
+
+        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
+        {
+            mVertexDesc.read(nif);
+            nif->readVector(trueTriangles, numTriangles * 3);
         }
     }
 

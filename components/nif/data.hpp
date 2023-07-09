@@ -27,6 +27,7 @@
 #include "nifkey.hpp"
 #include "niftypes.hpp" // Transformation
 #include "recordptr.hpp"
+#include <components/nif/node.hpp>
 
 namespace Nif
 {
@@ -218,10 +219,18 @@ namespace Nif
             std::vector<float> weights;
             std::vector<std::vector<unsigned short>> strips;
             std::vector<unsigned short> triangles;
+            std::vector<unsigned short> trueTriangles;
             std::vector<char> boneIndices;
+            BSVertexDesc mVertexDesc;
             void read(NIFStream* nif);
         };
-        std::vector<Partition> data;
+        unsigned int mPartitionNum;
+        std::vector<Partition> mPartitions;
+
+        unsigned int mDataSize;
+        unsigned int mVertexSize;
+        BSVertexDesc mVertexDesc;
+        std::vector<BSVertexData> mVertexData;
 
         void read(NIFStream* nif) override;
     };

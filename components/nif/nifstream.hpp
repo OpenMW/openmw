@@ -12,6 +12,7 @@
 
 #include <components/files/istreamptr.hpp>
 #include <components/misc/endianness.hpp>
+#include <components/misc/float16.hpp>
 
 #include <osg/Quat>
 #include <osg/Vec3f>
@@ -24,10 +25,16 @@ namespace Nif
 
     class Reader;
 
+    template <class T>
+    struct is_arithmetic
+        : std::integral_constant<bool, std::is_arithmetic_v<T> || std::is_same<T, Misc::float16_t>::value>
+    {
+    };
+
     template <std::size_t numInstances, typename T>
     inline void readLittleEndianBufferOfType(Files::IStreamPtr& pIStream, T* dest)
     {
-        static_assert(std::is_arithmetic_v<T>, "Buffer element type is not arithmetic");
+        static_assert(is_arithmetic<T>(), "Buffer element type is not arithmetic");
         pIStream->read((char*)dest, numInstances * sizeof(T));
         if (pIStream->bad())
             throw std::runtime_error("Failed to read little endian typed (" + std::string(typeid(T).name())
@@ -40,7 +47,7 @@ namespace Nif
     template <typename T>
     inline void readLittleEndianDynamicBufferOfType(Files::IStreamPtr& pIStream, T* dest, std::size_t numInstances)
     {
-        static_assert(std::is_arithmetic_v<T>, "Buffer element type is not arithmetic");
+        static_assert(is_arithmetic<T>(), "Buffer element type is not arithmetic");
         pIStream->read((char*)dest, numInstances * sizeof(T));
         if (pIStream->bad())
             throw std::runtime_error(
@@ -80,6 +87,8 @@ namespace Nif
         {
             data = readLittleEndianType<T>(inp);
         }
+
+        void read(osg::Vec3f& data) { readLittleEndianBufferOfType<3, float>(inp, data._v); }
 
         template <class T>
         T get()
@@ -125,6 +134,7 @@ namespace Nif
             return vec;
         }
 
+        // DEPRECATED: Use read() whenever relevant
         osg::Vec3f getVector3()
         {
             osg::Vec3f vec;
