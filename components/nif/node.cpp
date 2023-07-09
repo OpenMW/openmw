@@ -157,11 +157,9 @@ namespace Nif
             num = nif->getBoolean(); // Has Shader
         else if (nif->getVersion() >= NIFStream::generateVersion(20, 2, 0, 5))
             num = nif->getUInt();
-        if (num)
-        {
-            nif->getStrings(names, num);
-            nif->getInts(extra, num);
-        }
+
+        nif->readVector(names, num);
+        nif->readVector(extra, num);
         if (nif->getVersion() >= NIFStream::generateVersion(20, 2, 0, 5))
             active = nif->getUInt();
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS)
@@ -377,10 +375,7 @@ namespace Nif
         }
 
         if (mDataSize > 0)
-        {
-            mTriangles.resize(triNum * 3);
             nif->readVector(mTriangles, triNum * 3);
-        }
 
         if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
         {

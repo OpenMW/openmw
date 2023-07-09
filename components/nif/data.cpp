@@ -55,7 +55,7 @@ namespace Nif
             nif->skip(2); // Keep flags and compress flags
 
         if (nif->getBoolean())
-            nif->getVector3s(vertices, verts);
+            nif->readVector(vertices, verts);
 
         unsigned int dataFlags = 0;
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
@@ -67,11 +67,11 @@ namespace Nif
 
         if (nif->getBoolean())
         {
-            nif->getVector3s(normals, verts);
+            nif->readVector(normals, verts);
             if (dataFlags & 0x1000)
             {
-                nif->getVector3s(tangents, verts);
-                nif->getVector3s(bitangents, verts);
+                nif->readVector(tangents, verts);
+                nif->readVector(bitangents, verts);
             }
         }
 
@@ -79,7 +79,7 @@ namespace Nif
         radius = nif->getFloat();
 
         if (nif->getBoolean())
-            nif->getVector4s(colors, verts);
+            nif->readVector(colors, verts);
 
         unsigned int numUVs = dataFlags;
         if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
@@ -102,7 +102,7 @@ namespace Nif
             uvlist.resize(numUVs);
             for (unsigned int i = 0; i < numUVs; i++)
             {
-                nif->getVector2s(uvlist[i], verts);
+                nif->readVector(uvlist[i], verts);
                 // flip the texture coordinates to convert them to the OpenGL convention of bottom-left image origin
                 for (unsigned int uv = 0; uv < uvlist[i].size(); ++uv)
                 {
@@ -135,7 +135,7 @@ namespace Nif
         if (nif->getVersion() > NIFFile::NIFVersion::VER_OB_OLD)
             hasTriangles = nif->getBoolean();
         if (hasTriangles)
-            nif->getUShorts(triangles, cnt);
+            nif->readVector(triangles, cnt);
 
         // Read the match list, which lists the vertices that are equal to
         // vertices. We don't actually need need this for anything, so
@@ -157,7 +157,7 @@ namespace Nif
         int numStrips = nif->getUShort();
 
         std::vector<unsigned short> lengths;
-        nif->getUShorts(lengths, numStrips);
+        nif->readVector(lengths, numStrips);
 
         // "Has Strips" flag. Exceptionally useful.
         bool hasStrips = true;
@@ -168,15 +168,15 @@ namespace Nif
 
         strips.resize(numStrips);
         for (int i = 0; i < numStrips; i++)
-            nif->getUShorts(strips[i], lengths[i]);
+            nif->readVector(strips[i], lengths[i]);
     }
 
     void NiLinesData::read(NIFStream* nif)
     {
         NiGeometryData::read(nif);
         size_t num = vertices.size();
-        std::vector<char> flags;
-        nif->getChars(flags, num);
+        std::vector<uint8_t> flags;
+        nif->readVector(flags, num);
         // Can't construct a line from a single vertex.
         if (num < 2)
             return;
@@ -208,21 +208,21 @@ namespace Nif
         if (nif->getVersion() <= NIFStream::generateVersion(10, 0, 1, 0))
             std::fill(particleRadii.begin(), particleRadii.end(), nif->getFloat());
         else if (nif->getBoolean())
-            nif->getFloats(particleRadii, vertices.size());
+            nif->readVector(particleRadii, vertices.size());
         activeCount = nif->getUShort();
 
         // Particle sizes
         if (nif->getBoolean())
-            nif->getFloats(sizes, vertices.size());
+            nif->readVector(sizes, vertices.size());
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0) && nif->getBoolean())
-            nif->getQuaternions(rotations, vertices.size());
+            nif->readVector(rotations, vertices.size());
         if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 4))
         {
             if (nif->getBoolean())
-                nif->getFloats(rotationAngles, vertices.size());
+                nif->readVector(rotationAngles, vertices.size());
             if (nif->getBoolean())
-                nif->getVector3s(rotationAxes, vertices.size());
+                nif->readVector(rotationAxes, vertices.size());
         }
     }
 
@@ -231,7 +231,7 @@ namespace Nif
         NiParticlesData::read(nif);
 
         if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0) && nif->getBoolean())
-            nif->getQuaternions(rotations, vertices.size());
+            nif->readVector(rotations, vertices.size());
     }
 
     void NiPosData::read(NIFStream* nif)
@@ -301,8 +301,7 @@ namespace Nif
         unsigned int numPixels = nif->getUInt();
         bool hasFaces = nif->getVersion() >= NIFStream::generateVersion(10, 4, 0, 2);
         unsigned int numFaces = hasFaces ? nif->getUInt() : 1;
-        if (numPixels && numFaces)
-            nif->getUChars(data, numPixels * numFaces);
+        nif->readVector(data, numPixels * numFaces);
     }
 
     void NiPixelData::post(Reader& nif)
@@ -397,24 +396,22 @@ namespace Nif
         size_t numBones = nif->getUShort();
         size_t numStrips = nif->getUShort();
         size_t bonesPerVertex = nif->getUShort();
-        if (numBones)
-            nif->getUShorts(bones, numBones);
+        nif->readVector(bones, numBones);
 
         bool hasVertexMap = true;
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             hasVertexMap = nif->getBoolean();
-        if (hasVertexMap && numVertices)
-            nif->getUShorts(vertexMap, numVertices);
+        if (hasVertexMap)
+            nif->readVector(vertexMap, numVertices);
 
         bool hasVertexWeights = true;
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             hasVertexWeights = nif->getBoolean();
-        if (hasVertexWeights && numVertices && bonesPerVertex)
-            nif->getFloats(weights, numVertices * bonesPerVertex);
+        if (hasVertexWeights)
+            nif->readVector(weights, numVertices * bonesPerVertex);
 
         std::vector<unsigned short> stripLengths;
-        if (numStrips)
-            nif->getUShorts(stripLengths, numStrips);
+        nif->readVector(stripLengths, numStrips);
 
         bool hasFaces = true;
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
@@ -425,14 +422,14 @@ namespace Nif
             {
                 strips.resize(numStrips);
                 for (size_t i = 0; i < numStrips; i++)
-                    nif->getUShorts(strips[i], stripLengths[i]);
+                    nif->readVector(strips[i], stripLengths[i]);
             }
-            else if (numTriangles)
-                nif->getUShorts(triangles, numTriangles * 3);
+            else
+                nif->readVector(triangles, numTriangles * 3);
         }
         bool hasBoneIndices = nif->getChar() != 0;
-        if (hasBoneIndices && numVertices && bonesPerVertex)
-            nif->getChars(boneIndices, numVertices * bonesPerVertex);
+        if (hasBoneIndices)
+            nif->readVector(boneIndices, numVertices * bonesPerVertex);
         if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
         {
             nif->getChar(); // LOD level
@@ -490,7 +487,7 @@ namespace Nif
         {
             mMorphs[i].mKeyFrames = std::make_shared<FloatKeyMap>();
             mMorphs[i].mKeyFrames->read(nif, /*morph*/ true);
-            nif->getVector3s(mMorphs[i].mVertices, vertCount);
+            nif->readVector(mMorphs[i].mVertices, vertCount);
         }
     }
 

@@ -155,19 +155,6 @@ namespace Nif
         Transformation getTrafo() { return get<Transformation>(); }
         bool getBoolean() { return get<bool>(); }
         std::string getString() { return get<std::string>(); }
-
-        /// DEPRECATED: Use readVector()
-        void getChars(std::vector<char>& vec, size_t size) { readVector(vec, size); }
-        void getUChars(std::vector<unsigned char>& vec, size_t size) { readVector(vec, size); }
-        void getUShorts(std::vector<unsigned short>& vec, size_t size) { readVector(vec, size); }
-        void getFloats(std::vector<float>& vec, size_t size) { readVector(vec, size); }
-        void getInts(std::vector<int>& vec, size_t size) { readVector(vec, size); }
-        void getUInts(std::vector<unsigned int>& vec, size_t size) { readVector(vec, size); }
-        void getVector2s(std::vector<osg::Vec2f>& vec, size_t size) { readVector(vec, size); }
-        void getVector3s(std::vector<osg::Vec3f>& vec, size_t size) { readVector(vec, size); }
-        void getVector4s(std::vector<osg::Vec4f>& vec, size_t size) { readVector(vec, size); }
-        void getQuaternions(std::vector<osg::Quat>& vec, size_t size) { readVector(vec, size); }
-        void getStrings(std::vector<std::string>& vec, size_t size) { readVector(vec, size); }
     };
 
     template <>
