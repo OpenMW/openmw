@@ -342,10 +342,7 @@ namespace ESM
         getUint(mCtx.leftSub);
         mCtx.leftRec -= sizeof(mCtx.leftSub);
 
-        // Adjust number of record bytes left
-        if (mCtx.leftRec < mCtx.leftSub)
-            fail("Record size is larger than rest of file: " + std::to_string(mCtx.leftRec) + " < "
-                + std::to_string(mCtx.leftSub));
+        // Adjust number of record bytes left; may go negative
         mCtx.leftRec -= mCtx.leftSub;
     }
 
@@ -353,6 +350,13 @@ namespace ESM
     {
         if (!hasMoreRecs())
             fail("No more records, getRecName() failed");
+        if (hasMoreSubs())
+            fail("Previous record contains unread bytes");
+
+        // We went out of the previous record's bounds. Backtrack.
+        if (mCtx.leftRec < 0)
+            mEsm->seekg(mCtx.leftRec, std::ios::cur);
+
         getName(mCtx.recName);
         mCtx.leftFile -= decltype(mCtx.recName)::sCapacity;
 
@@ -373,11 +377,8 @@ namespace ESM
 
     void ESMReader::getRecHeader(uint32_t& flags)
     {
-        // General error checking
         if (mCtx.leftFile < static_cast<std::streamsize>(3 * sizeof(uint32_t)))
             fail("End of file while reading record header");
-        if (mCtx.leftRec)
-            fail("Previous record contains unread bytes");
 
         std::uint32_t leftRec = 0;
         getUint(leftRec);
