@@ -232,6 +232,8 @@ namespace Nif
         std::string mGreyscaleTexture;
 
         void read(NIFStream* nif) override;
+
+        bool useFalloff() const { return (flags >> 6) & 1; }
     };
 
     struct NiDitherProperty : public Property

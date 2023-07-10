@@ -2177,6 +2177,7 @@ namespace NifOsg
                 {
                     auto texprop = static_cast<const Nif::BSShaderNoLightingProperty*>(property);
                     bool shaderRequired = true;
+                    bool useFalloff = false;
                     node->setUserValue("shaderPrefix", std::string(getBSShaderPrefix(texprop->type)));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
@@ -2200,16 +2201,13 @@ namespace NifOsg
                         const unsigned int uvSet = 0;
                         stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
                         boundTextures.push_back(uvSet);
+                        if (mBethVersion >= 27)
+                        {
+                            useFalloff = true;
+                            stateset->addUniform(new osg::Uniform("falloffParams", texprop->falloffParams));
+                        }
                     }
-                    if (mBethVersion >= 27)
-                    {
-                        stateset->addUniform(new osg::Uniform("useFalloff", true));
-                        stateset->addUniform(new osg::Uniform("falloffParams", texprop->falloffParams));
-                    }
-                    else
-                    {
-                        stateset->addUniform(new osg::Uniform("useFalloff", false));
-                    }
+                    stateset->addUniform(new osg::Uniform("useFalloff", useFalloff));
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
                     if (texprop->doubleSided())
                         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
@@ -2236,6 +2234,7 @@ namespace NifOsg
                 {
                     auto texprop = static_cast<const Nif::BSEffectShaderProperty*>(property);
                     bool shaderRequired = true;
+                    // TODO: implement BSEffectShader as a shader
                     node->setUserValue("shaderPrefix", std::string("bs/nolighting"));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
@@ -2277,8 +2276,10 @@ namespace NifOsg
                             stateset->setTextureAttributeAndModes(texUnit, texMat, osg::StateAttribute::ON);
                         }
                     }
-                    stateset->addUniform(new osg::Uniform("useFalloff", false)); // Should use the shader flag
-                    stateset->addUniform(new osg::Uniform("falloffParams", texprop->mFalloffParams));
+                    bool useFalloff = texprop->useFalloff();
+                    stateset->addUniform(new osg::Uniform("useFalloff", useFalloff));
+                    if (useFalloff)
+                        stateset->addUniform(new osg::Uniform("falloffParams", texprop->mFalloffParams));
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
                     if (texprop->doubleSided())
                         stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
@@ -2469,11 +2470,6 @@ namespace NifOsg
                         }
                         break;
                     }
-                    case Nif::RC_BSShaderNoLightingProperty:
-                    {
-                        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(1.f, 1.f, 1.f, 1.f));
-                        break;
-                    }
                     case Nif::RC_BSLightingShaderProperty:
                     {
                         auto shaderprop = static_cast<const Nif::BSLightingShaderProperty*>(property);
@@ -2483,13 +2479,6 @@ namespace NifOsg
                         mat->setShininess(osg::Material::FRONT_AND_BACK, shaderprop->mGlossiness);
                         emissiveMult = shaderprop->mEmissiveMult;
                         specStrength = shaderprop->mSpecStrength;
-                        break;
-                    }
-                    case Nif::RC_BSEffectShaderProperty:
-                    {
-                        auto shaderprop = static_cast<const Nif::BSEffectShaderProperty*>(property);
-                        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(shaderprop->mBaseColor));
-                        emissiveMult = shaderprop->mBaseColorScale;
                         break;
                     }
                     default:
