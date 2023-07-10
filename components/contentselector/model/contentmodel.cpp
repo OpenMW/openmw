@@ -1,13 +1,17 @@
 #include "contentmodel.hpp"
 #include "esmfile.hpp"
 
+#include <fstream>
 #include <stdexcept>
 #include <unordered_set>
 
 #include <QDebug>
 #include <QDir>
 
+#include <components/esm/format.hpp>
 #include <components/esm3/esmreader.hpp>
+#include <components/esm4/reader.hpp>
+#include <components/files/openfile.hpp>
 #include <components/files/qtconversion.hpp>
 
 ContentSelectorModel::ContentModel::ContentModel(QObject* parent, QIcon warningIcon, bool showOMWScripts)
@@ -467,29 +471,59 @@ void ContentSelectorModel::ContentModel::addFiles(const QString& path, bool newf
 
         try
         {
-            ESM::ESMReader fileReader;
-            ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncoding.toStdString()));
-            fileReader.setEncoder(&encoder);
-            fileReader.open(Files::pathFromQString(dir.absoluteFilePath(path2)));
-
             EsmFile* file = new EsmFile(path2);
-
-            for (std::vector<ESM::Header::MasterData>::const_iterator itemIter = fileReader.getGameFiles().begin();
-                 itemIter != fileReader.getGameFiles().end(); ++itemIter)
-                file->addGameFile(QString::fromUtf8(itemIter->name.c_str()));
-
-            file->setAuthor(QString::fromUtf8(fileReader.getAuthor().c_str()));
             file->setDate(info.lastModified());
-            file->setFormat(fileReader.getFormatVersion());
             file->setFilePath(info.absoluteFilePath());
-            file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
+            std::filesystem::path filepath = Files::pathFromQString(info.absoluteFilePath());
 
-            // HACK
-            // Load order constraint of Bloodmoon.esm needing Tribunal.esm is missing
-            // from the file supplied by Bethesda, so we have to add it ourselves
-            if (file->fileName().compare("Bloodmoon.esm", Qt::CaseInsensitive) == 0)
+            auto stream = Files::openBinaryInputFileStream(filepath);
+            if (!stream->is_open())
             {
-                file->addGameFile(QString::fromUtf8("Tribunal.esm"));
+                qWarning() << "Failed to open addon file " << info.fileName() << ": "
+                           << std::generic_category().message(errno).c_str();
+                continue;
+            }
+            const ESM::Format format = ESM::readFormat(*stream);
+            stream->seekg(0);
+            switch (format)
+            {
+                case ESM::Format::Tes3:
+                {
+                    ToUTF8::Utf8Encoder encoder(ToUTF8::calculateEncoding(mEncoding.toStdString()));
+                    ESM::ESMReader fileReader;
+                    fileReader.setEncoder(&encoder);
+                    fileReader.open(std::move(stream), filepath);
+                    file->setAuthor(QString::fromUtf8(fileReader.getAuthor().c_str()));
+                    file->setFormat(fileReader.getFormatVersion());
+                    file->setDescription(QString::fromUtf8(fileReader.getDesc().c_str()));
+                    for (const auto& master : fileReader.getGameFiles())
+                        file->addGameFile(QString::fromUtf8(master.name.c_str()));
+
+                    // HACK
+                    // Load order constraint of Bloodmoon.esm needing Tribunal.esm is missing
+                    // from the file supplied by Bethesda, so we have to add it ourselves
+                    if (file->fileName().compare("Bloodmoon.esm", Qt::CaseInsensitive) == 0)
+                        file->addGameFile(QString::fromUtf8("Tribunal.esm"));
+
+                    break;
+                }
+                case ESM::Format::Tes4:
+                {
+                    ToUTF8::StatelessUtf8Encoder encoder(ToUTF8::calculateEncoding(mEncoding.toStdString()));
+                    ESM4::Reader reader(std::move(stream), filepath, nullptr, &encoder, true);
+                    file->setAuthor(QString::fromUtf8(reader.getAuthor().c_str()));
+                    file->setFormat(reader.esmVersion());
+                    file->setDescription(QString::fromUtf8(reader.getDesc().c_str()));
+                    for (const auto& master : reader.getGameFiles())
+                        file->addGameFile(QString::fromUtf8(master.name.c_str()));
+                    break;
+                }
+                default:
+                {
+                    qWarning() << "Error reading addon file " << info.fileName() << ": unsupported ESM format "
+                               << ESM::NAME(format).toString().c_str();
+                    continue;
+                }
             }
 
             // Put the file in the table

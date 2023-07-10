@@ -1,7 +1,11 @@
 #include "cellnameloader.hpp"
 
+#include <fstream>
+
 #include <components/debug/debuglog.hpp>
+#include <components/esm/format.hpp>
 #include <components/esm3/loadcell.hpp>
+#include <components/files/openfile.hpp>
 #include <components/files/qtconversion.hpp>
 
 QSet<QString> CellNameLoader::getCellNames(const QStringList& contentPaths)
@@ -16,7 +20,17 @@ QSet<QString> CellNameLoader::getCellNames(const QStringList& contentPaths)
             continue;
         try
         {
-            esmReader.open(Files::pathFromQString(contentPath));
+            std::filesystem::path filepath = Files::pathFromQString(contentPath);
+            auto stream = Files::openBinaryInputFileStream(filepath);
+            if (!stream->is_open())
+                continue;
+
+            const ESM::Format format = ESM::readFormat(*stream);
+            if (format != ESM::Format::Tes3)
+                continue;
+
+            stream->seekg(0);
+            esmReader.open(std::move(stream), filepath);
 
             // Loop through all records
             while (esmReader.hasMoreRecs())
