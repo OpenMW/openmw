@@ -166,6 +166,7 @@ namespace Nif
         RC_BSInvMarker,
         RC_BSTriShape,
         RC_BSEffectShaderPropertyFloatController,
+        RC_BSEffectShaderPropertyColorController,
     };
 
     /// Base class for all records

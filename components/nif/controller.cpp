@@ -643,4 +643,10 @@ namespace Nif
         NiFloatInterpController::read(nif);
         nif->read(mControlledVariable);
     }
+
+    void BSEffectShaderPropertyColorController::read(NIFStream* nif)
+    {
+        NiPoint3InterpController::read(nif);
+        nif->read(mControlledColor);
+    }
 }

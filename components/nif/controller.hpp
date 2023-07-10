@@ -412,5 +412,12 @@ namespace Nif
 
         void read(NIFStream* nif) override;
     };
+
+    struct BSEffectShaderPropertyColorController : public NiPoint3InterpController
+    {
+        unsigned int mControlledColor;
+
+        void read(NIFStream* nif) override;
+    };
 } // Namespace
 #endif

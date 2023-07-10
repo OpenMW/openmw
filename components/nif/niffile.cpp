@@ -200,6 +200,10 @@ namespace Nif
             { "BSTriShape", &construct<BSTriShape, RC_BSTriShape> },
             { "BSEffectShaderPropertyFloatController",
                 &construct<BSEffectShaderPropertyFloatController, RC_BSEffectShaderPropertyFloatController> },
+            { "BSLightingShaderPropertyFloatController",
+                &construct<BSEffectShaderPropertyFloatController, RC_BSEffectShaderPropertyFloatController> },
+            { "BSEffectShaderPropertyColorController",
+                &construct<BSEffectShaderPropertyColorController, RC_BSEffectShaderPropertyColorController> },
         };
     }
 
