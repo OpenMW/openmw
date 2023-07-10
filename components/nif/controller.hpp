@@ -406,5 +406,11 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSEffectShaderPropertyFloatController : public NiFloatInterpController
+    {
+        unsigned int mControlledVariable;
+
+        void read(NIFStream* nif) override;
+    };
 } // Namespace
 #endif

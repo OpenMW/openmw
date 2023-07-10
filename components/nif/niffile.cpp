@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <array>
-#include <components/nif/node.hpp>
 #include <limits>
 #include <map>
 #include <sstream>
@@ -17,6 +16,7 @@
 #include "effect.hpp"
 #include "exception.hpp"
 #include "extra.hpp"
+#include "node.hpp"
 #include "physics.hpp"
 #include "property.hpp"
 
@@ -198,6 +198,8 @@ namespace Nif
             { "BSMultiBoundSphere", &construct<BSMultiBoundSphere, RC_BSMultiBoundSphere> },
             { "BSInvMarker", &construct<BSInvMarker, RC_BSInvMarker> },
             { "BSTriShape", &construct<BSTriShape, RC_BSTriShape> },
+            { "BSEffectShaderPropertyFloatController",
+                &construct<BSEffectShaderPropertyFloatController, RC_BSEffectShaderPropertyFloatController> },
         };
     }
 

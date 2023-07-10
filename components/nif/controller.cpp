@@ -637,4 +637,10 @@ namespace Nif
                 mScaleValue = 1.f;
         }
     }
+
+    void BSEffectShaderPropertyFloatController::read(NIFStream* nif)
+    {
+        NiFloatInterpController::read(nif);
+        nif->read(mControlledVariable);
+    }
 }

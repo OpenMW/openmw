@@ -165,6 +165,7 @@ namespace Nif
         RC_BSMultiBoundSphere,
         RC_BSInvMarker,
         RC_BSTriShape,
+        RC_BSEffectShaderPropertyFloatController,
     };
 
     /// Base class for all records
