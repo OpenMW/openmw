@@ -1158,12 +1158,13 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, bsx_editor_marker_flag_disables_collision)
+    TEST_F(TestBulletNifLoader, bsx_editor_marker_flag_disables_collision_for_markers)
     {
         mNiIntegerExtraData.data = 32; // BSX flag "editor marker"
         mNiIntegerExtraData.recType = Nif::RC_BSXFlags;
         mNiTriShape.extralist.push_back(Nif::ExtraPtr(&mNiIntegerExtraData));
         mNiTriShape.parents.push_back(&mNiNode);
+        mNiTriShape.name = "EditorMarker";
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
 
         Nif::NIFFile file("test.nif");
