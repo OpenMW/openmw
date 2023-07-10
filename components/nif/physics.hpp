@@ -426,5 +426,10 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct bhkSimpleShapePhantom : public bhkWorldObject
+    {
+        osg::Matrixf mTransform;
+        void read(NIFStream* nif) override;
+    };
 } // Namespace
 #endif

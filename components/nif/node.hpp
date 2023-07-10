@@ -377,5 +377,20 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    struct BSValueNode : NiNode
+    {
+        unsigned int mValue;
+        char mValueFlags;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSOrderedNode : NiNode
+    {
+        osg::Vec4f mAlphaSortBound;
+        char mStaticBound;
+
+        void read(NIFStream* nif) override;
+    };
 } // Namespace
 #endif

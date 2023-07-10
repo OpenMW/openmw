@@ -138,6 +138,7 @@ namespace Nif
         RC_hkPackedNiTriStripsData,
         RC_bhkConvexVerticesShape,
         RC_bhkConvexTransformShape,
+        RC_bhkSimpleShapePhantom,
         RC_bhkBoxShape,
         RC_bhkCapsuleShape,
         RC_bhkSphereShape,

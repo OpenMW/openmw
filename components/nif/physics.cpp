@@ -440,4 +440,12 @@ namespace Nif
             mBodyFlags = nif->getUShort();
     }
 
+    void bhkSimpleShapePhantom::read(NIFStream* nif)
+    {
+        bhkWorldObject::read(nif);
+        nif->skip(8); // Unused
+        std::vector<float> mat;
+        nif->readVector(mat, 16);
+        mTransform.set(mat.data());
+    }
 } // Namespace
