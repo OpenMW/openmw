@@ -762,6 +762,10 @@ namespace MWGui
         }
         if (i == mTradeModel->getItemCount())
             throw std::runtime_error("Added item not found");
+
+        if (mDragAndDrop->mIsOnDragAndDrop)
+            mDragAndDrop->finish();
+
         mDragAndDrop->startDrag(i, mSortModel, mTradeModel, mItemView, count);
 
         MWBase::Environment::get().getWindowManager()->updateSpellWindow();
