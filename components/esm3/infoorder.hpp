@@ -38,27 +38,19 @@ namespace ESM
 
             Item& item = it->second;
 
-            const auto insertOrSplice = [&](typename std::list<T>::const_iterator before) {
-                if (item.mPosition == mOrderedInfo.end())
-                    item.mPosition = mOrderedInfo.insert(before, std::forward<V>(value));
+            auto before = mOrderedInfo.begin();
+            if (!value.mPrev.empty())
+            {
+                const auto prevIt = mInfoPositions.find(value.mPrev);
+                if (prevIt != mInfoPositions.end())
+                    before = std::next(prevIt->second.mPosition);
                 else
-                    mOrderedInfo.splice(before, mOrderedInfo, item.mPosition);
-            };
-
-            if (value.mPrev.empty())
-            {
-                insertOrSplice(mOrderedInfo.begin());
-                return;
+                    before = mOrderedInfo.end();
             }
-
-            const auto prevIt = mInfoPositions.find(value.mPrev);
-            if (prevIt != mInfoPositions.end())
-            {
-                insertOrSplice(std::next(prevIt->second.mPosition));
-                return;
-            }
-
-            insertOrSplice(mOrderedInfo.end());
+            if (item.mPosition == mOrderedInfo.end())
+                item.mPosition = mOrderedInfo.insert(before, std::forward<V>(value));
+            else
+                mOrderedInfo.splice(before, mOrderedInfo, item.mPosition);
         }
 
         void removeInfo(const RefId& infoRefId)
