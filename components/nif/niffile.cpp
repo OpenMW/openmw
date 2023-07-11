@@ -162,6 +162,7 @@ namespace Nif
             { "NiCollisionObject", &construct<NiCollisionObject, RC_NiCollisionObject> },
             { "bhkCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
             { "bhkSPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
+            { "bhkPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
             { "BSDismemberSkinInstance", &construct<BSDismemberSkinInstance, RC_BSDismemberSkinInstance> },
             { "NiControllerManager", &construct<NiControllerManager, RC_NiControllerManager> },
             { "bhkMoppBvTreeShape", &construct<bhkMoppBvTreeShape, RC_bhkMoppBvTreeShape> },
