@@ -167,6 +167,7 @@ namespace Nif
         RC_BSTriShape,
         RC_BSEffectShaderPropertyFloatController,
         RC_BSEffectShaderPropertyColorController,
+        RC_BSLightingShaderPropertyFloatController,
     };
 
     /// Base class for all records

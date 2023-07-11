@@ -201,7 +201,7 @@ namespace Nif
             { "BSEffectShaderPropertyFloatController",
                 &construct<BSEffectShaderPropertyFloatController, RC_BSEffectShaderPropertyFloatController> },
             { "BSLightingShaderPropertyFloatController",
-                &construct<BSEffectShaderPropertyFloatController, RC_BSEffectShaderPropertyFloatController> },
+                &construct<BSEffectShaderPropertyFloatController, RC_BSLightingShaderPropertyFloatController> },
             { "BSEffectShaderPropertyColorController",
                 &construct<BSEffectShaderPropertyColorController, RC_BSEffectShaderPropertyColorController> },
         };
