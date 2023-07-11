@@ -17,15 +17,14 @@ namespace Crash
     namespace
     {
         template <class T, std::size_t N>
-        void writePathToShm(T(&buffer)[N], const std::filesystem::path& path)
+        void writePathToShm(T (&buffer)[N], const std::filesystem::path& path)
         {
             memset(buffer, 0, sizeof(buffer));
             const auto str = path.u8string();
             size_t length = str.length();
             if (length >= sizeof(buffer))
                 length = sizeof(buffer) - 1;
-            strncpy_s(buffer, sizeof(buffer),
-                Misc::StringUtils::u8StringToString(str).c_str(), length);
+            strncpy_s(buffer, sizeof(buffer), Misc::StringUtils::u8StringToString(str).c_str(), length);
             buffer[length] = '\0';
         }
     }
