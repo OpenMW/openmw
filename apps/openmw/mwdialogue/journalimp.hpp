@@ -15,8 +15,6 @@ namespace MWDialogue
         TTopicContainer mTopics;
 
     private:
-        Quest& getQuest(const ESM::RefId& id);
-
         Topic& getTopic(const ESM::RefId& id);
 
         bool isThere(const ESM::RefId& topicId, const ESM::RefId& infoId = ESM::RefId()) const;
@@ -25,6 +23,12 @@ namespace MWDialogue
         Journal();
 
         void clear() override;
+
+        Quest* getQuestOrNull(const ESM::RefId& id) override;
+        ///< Gets a pointer to the requested quest. Will return nullptr if the quest has not been started.
+
+        Quest& getOrStartQuest(const ESM::RefId& id) override;
+        ///< Gets the quest requested. Attempts to create it and inserts it in quests if it is not yet started.
 
         void addEntry(const ESM::RefId& id, int index, const MWWorld::Ptr& actor) override;
         ///< Add a journal entry.

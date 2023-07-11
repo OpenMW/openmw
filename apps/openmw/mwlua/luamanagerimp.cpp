@@ -178,6 +178,17 @@ namespace MWLua
         }
     }
 
+    void LuaManager::questUpdated(const ESM::RefId& questId, int stage)
+    {
+        if (mPlayer.isEmpty())
+            return; // The game is not started yet.
+        PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
+        if (playerScripts)
+        {
+            playerScripts->onQuestUpdate(questId.serializeText(), stage);
+        }
+    }
+
     void LuaManager::synchronizedUpdate()
     {
         if (mPlayer.isEmpty())

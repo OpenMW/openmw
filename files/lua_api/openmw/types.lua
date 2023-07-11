@@ -697,7 +697,9 @@
 -- @field #string head Path to the head body part model
 -- @field #bool isMale The gender setting of the NPC
 
---- @{#Player} functions
+
+--------------------------------------------------------------------------------
+-- @{#Player} functions
 -- @field [parent=#types] #Player Player
 
 ---
@@ -714,10 +716,38 @@
 ---
 -- Returns the bounty or crime level of the player
 -- @function [parent=#Player] getCrimeLevel
--- @param openmw.core#GameObject actor
+-- @param openmw.core#GameObject player
 -- @return #number
 
---- @{#Armor} functions
+---
+-- Returns a list containing quests @{#PlayerQuest} for the specified player, indexed by quest ID.
+-- @function [parent=#Player] quests
+-- @param openmw.core#GameObject player
+-- @return #list<#PlayerQuest>
+-- @usage -- Get stage of a specific quest
+-- stage = types.Player.quests(player)["ms_fargothring"].stage
+-- @usage -- Get names of all started quests
+-- for x, quest in pairs(types.Player.quests(player)) do print (quest.name) end
+-- @usage -- Start a new quest, add it to the player's quest list but don't add any journal entries
+-- types.Player.quests(player)["ms_fargothring"].stage = 0
+
+---
+-- @type PlayerQuest
+-- @field #string id The quest id.
+-- @field #number stage The quest stage (global and player scripts can change it). Changing the stage starts the quest if it wasn't started.
+-- @field #bool started Whether the quest is started.
+-- @field #bool finished Whether the quest is finished (global and player scripts can change it).
+
+---
+-- Sets the quest stage for the given quest, on the given player, and adds the entry to the journal, if there is an entry at the specified stage. Can only be used in global or player scripts.
+-- @function [parent=#PlayerQuest] addJournalEntry
+-- @param self
+-- @param #number stage Quest stage
+-- @param openmw.core#GameObject actor (optional) The actor who is the source of the journal entry, it may be used in journal entries with variables such as `%name(The speaker's name)` or `%race(The speaker's race)`.
+
+
+--------------------------------------------------------------------------------
+-- @{#Armor} functions
 -- @field [parent=#types] #Armor Armor
 
 ---

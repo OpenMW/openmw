@@ -4,6 +4,7 @@
 
 #include <components/esm3/queststate.hpp>
 
+#include "../mwbase/luamanager.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -51,6 +52,7 @@ namespace MWDialogue
     void Quest::setIndex(int index)
     {
         // The index must be set even if no related journal entry was found
+        MWBase::Environment::get().getLuaManager()->questUpdated(mTopic, index);
         mIndex = index;
     }
 
@@ -79,7 +81,10 @@ namespace MWDialogue
             mFinished = info->mQuestStatus == ESM::DialInfo::QS_Finished;
 
         if (info->mData.mJournalIndex > mIndex)
+        {
             mIndex = info->mData.mJournalIndex;
+            MWBase::Environment::get().getLuaManager()->questUpdated(mTopic, mIndex);
+        }
 
         for (TEntryIter iter(mEntries.begin()); iter != mEntries.end(); ++iter)
             if (iter->mInfoId == entry.mInfoId)

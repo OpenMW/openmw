@@ -18,18 +18,25 @@
 
 namespace MWDialogue
 {
-    Quest& Journal::getQuest(const ESM::RefId& id)
+    Quest& Journal::getOrStartQuest(const ESM::RefId& id)
     {
         TQuestContainer::iterator iter = mQuests.find(id);
 
         if (iter == mQuests.end())
-        {
-            std::pair<TQuestContainer::iterator, bool> result = mQuests.insert(std::make_pair(id, Quest(id)));
-
-            iter = result.first;
-        }
+            iter = mQuests.emplace(id, Quest(id)).first;
 
         return iter->second;
+    }
+
+    Quest* Journal::getQuestOrNull(const ESM::RefId& id)
+    {
+        TQuestContainer::iterator iter = mQuests.find(id);
+        if (iter == mQuests.end())
+        {
+            return nullptr;
+        }
+
+        return &(iter->second);
     }
 
     Topic& Journal::getTopic(const ESM::RefId& id)
@@ -89,7 +96,7 @@ namespace MWDialogue
 
         StampedJournalEntry entry = StampedJournalEntry::makeFromQuest(id, index, actor);
 
-        Quest& quest = getQuest(id);
+        Quest& quest = getOrStartQuest(id);
         if (quest.addEntry(entry)) // we are doing slicing on purpose here
         {
             // Restart all "other" quests with the same name as well
@@ -111,7 +118,7 @@ namespace MWDialogue
 
     void Journal::setJournalIndex(const ESM::RefId& id, int index)
     {
-        Quest& quest = getQuest(id);
+        Quest& quest = getOrStartQuest(id);
 
         quest.setIndex(index);
     }
@@ -253,7 +260,7 @@ namespace MWDialogue
                 {
                     case ESM::JournalEntry::Type_Quest:
 
-                        getQuest(record.mTopic).insertEntry(record);
+                        getOrStartQuest(record.mTopic).insertEntry(record);
                         break;
 
                     case ESM::JournalEntry::Type_Journal:
