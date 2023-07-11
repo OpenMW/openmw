@@ -16,6 +16,7 @@
 #include "effect.hpp"
 #include "exception.hpp"
 #include "extra.hpp"
+#include "node.hpp"
 #include "physics.hpp"
 #include "property.hpp"
 
@@ -139,6 +140,8 @@ namespace Nif
             { "BSFadeNode", &construct<NiNode, RC_NiNode> },
             { "BSLeafAnimNode", &construct<NiNode, RC_NiNode> },
             { "BSTreeNode", &construct<BSTreeNode, RC_NiNode> },
+            { "BSValueNode", &construct<BSValueNode, RC_NiNode> },
+            { "BSOrderedNode", &construct<BSOrderedNode, RC_NiNode> },
             { "BSMultiBoundNode", &construct<BSMultiBoundNode, RC_NiNode> },
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
             { "NiFloatInterpolator", &construct<NiFloatInterpolator, RC_NiFloatInterpolator> },
@@ -158,6 +161,8 @@ namespace Nif
             { "BSFurnitureMarkerNode", &construct<BSFurnitureMarker, RC_BSFurnitureMarker> },
             { "NiCollisionObject", &construct<NiCollisionObject, RC_NiCollisionObject> },
             { "bhkCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
+            { "bhkSPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
+            { "bhkPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
             { "BSDismemberSkinInstance", &construct<BSDismemberSkinInstance, RC_BSDismemberSkinInstance> },
             { "NiControllerManager", &construct<NiControllerManager, RC_NiControllerManager> },
             { "bhkMoppBvTreeShape", &construct<bhkMoppBvTreeShape, RC_bhkMoppBvTreeShape> },
@@ -166,6 +171,8 @@ namespace Nif
             { "hkPackedNiTriStripsData", &construct<hkPackedNiTriStripsData, RC_hkPackedNiTriStripsData> },
             { "bhkConvexVerticesShape", &construct<bhkConvexVerticesShape, RC_bhkConvexVerticesShape> },
             { "bhkConvexTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },
+            { "bhkTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },
+            { "bhkSimpleShapePhantom", &construct<bhkSimpleShapePhantom, RC_bhkSimpleShapePhantom> },
             { "bhkBoxShape", &construct<bhkBoxShape, RC_bhkBoxShape> },
             { "bhkCapsuleShape", &construct<bhkCapsuleShape, RC_bhkCapsuleShape> },
             { "bhkSphereShape", &construct<bhkSphereShape, RC_bhkSphereShape> },
@@ -192,6 +199,12 @@ namespace Nif
             { "BSMultiBoundSphere", &construct<BSMultiBoundSphere, RC_BSMultiBoundSphere> },
             { "BSInvMarker", &construct<BSInvMarker, RC_BSInvMarker> },
             { "BSTriShape", &construct<BSTriShape, RC_BSTriShape> },
+            { "BSEffectShaderPropertyFloatController",
+                &construct<BSEffectShaderPropertyFloatController, RC_BSEffectShaderPropertyFloatController> },
+            { "BSLightingShaderPropertyFloatController",
+                &construct<BSEffectShaderPropertyFloatController, RC_BSLightingShaderPropertyFloatController> },
+            { "BSEffectShaderPropertyColorController",
+                &construct<BSEffectShaderPropertyColorController, RC_BSEffectShaderPropertyColorController> },
         };
     }
 

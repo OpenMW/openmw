@@ -89,6 +89,7 @@ namespace Nif
         }
 
         void read(osg::Vec3f& data) { readLittleEndianBufferOfType<3, float>(inp, data._v); }
+        void read(osg::Vec4f& data) { readLittleEndianBufferOfType<4, float>(inp, data._v); }
 
         template <class T>
         T get()

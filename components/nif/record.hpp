@@ -138,6 +138,7 @@ namespace Nif
         RC_hkPackedNiTriStripsData,
         RC_bhkConvexVerticesShape,
         RC_bhkConvexTransformShape,
+        RC_bhkSimpleShapePhantom,
         RC_bhkBoxShape,
         RC_bhkCapsuleShape,
         RC_bhkSphereShape,
@@ -164,6 +165,9 @@ namespace Nif
         RC_BSMultiBoundSphere,
         RC_BSInvMarker,
         RC_BSTriShape,
+        RC_BSEffectShaderPropertyFloatController,
+        RC_BSEffectShaderPropertyColorController,
+        RC_BSLightingShaderPropertyFloatController,
     };
 
     /// Base class for all records

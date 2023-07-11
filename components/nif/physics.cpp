@@ -327,8 +327,8 @@ namespace Nif
         mHavokMaterial.read(nif);
         mRadius = nif->getFloat();
         nif->skip(8); // Unused
-        std::vector<float> mat;
-        nif->getFloats(mat, 16);
+        std::array<float, 16> mat;
+        nif->readArray(mat);
         mTransform.set(mat.data());
     }
 
@@ -440,4 +440,12 @@ namespace Nif
             mBodyFlags = nif->getUShort();
     }
 
+    void bhkSimpleShapePhantom::read(NIFStream* nif)
+    {
+        bhkWorldObject::read(nif);
+        nif->skip(8); // Unused
+        std::array<float, 16> mat;
+        nif->readArray(mat);
+        mTransform.set(mat.data());
+    }
 } // Namespace

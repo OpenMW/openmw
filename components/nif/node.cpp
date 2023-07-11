@@ -483,4 +483,18 @@ namespace Nif
             nif->read(mEyeData);
         }
     }
+
+    void BSValueNode::read(NIFStream* nif)
+    {
+        NiNode::read(nif);
+        nif->read(mValue);
+        nif->read(mValueFlags);
+    }
+
+    void BSOrderedNode::read(NIFStream* nif)
+    {
+        NiNode::read(nif);
+        nif->read(mAlphaSortBound);
+        nif->read(mStaticBound);
+    }
 }
