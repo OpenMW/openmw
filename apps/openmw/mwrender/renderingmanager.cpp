@@ -414,13 +414,11 @@ namespace MWRender
             globalDefines[itr->first] = itr->second;
 
         // Refactor this at some point - most shaders don't care about these defines
-        float groundcoverDistance = std::max(0.f, Settings::Manager::getFloat("rendering distance", "Groundcover"));
+        const float groundcoverDistance = Settings::groundcover().mRenderingDistance;
         globalDefines["groundcoverFadeStart"] = std::to_string(groundcoverDistance * 0.9f);
         globalDefines["groundcoverFadeEnd"] = std::to_string(groundcoverDistance);
-        globalDefines["groundcoverStompMode"]
-            = std::to_string(std::clamp(Settings::Manager::getInt("stomp mode", "Groundcover"), 0, 2));
-        globalDefines["groundcoverStompIntensity"]
-            = std::to_string(std::clamp(Settings::Manager::getInt("stomp intensity", "Groundcover"), 0, 2));
+        globalDefines["groundcoverStompMode"] = std::to_string(Settings::groundcover().mStompMode);
+        globalDefines["groundcoverStompIntensity"] = std::to_string(Settings::groundcover().mStompIntensity);
 
         globalDefines["reverseZ"] = reverseZ ? "1" : "0";
 
@@ -1327,7 +1325,7 @@ namespace MWRender
         RenderingManager::WorldspaceChunkMgr newChunkMgr;
 
         const float lodFactor = Settings::Manager::getFloat("lod factor", "Terrain");
-        bool groundcover = Settings::Manager::getBool("enabled", "Groundcover");
+        const bool groundcover = Settings::groundcover().mEnabled;
         bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
         if (distantTerrain || groundcover)
         {
@@ -1350,10 +1348,8 @@ namespace MWRender
             }
             if (groundcover)
             {
-                float groundcoverDistance
-                    = std::max(0.f, Settings::Manager::getFloat("rendering distance", "Groundcover"));
-                float density = Settings::Manager::getFloat("density", "Groundcover");
-                density = std::clamp(density, 0.f, 1.f);
+                const float groundcoverDistance = Settings::groundcover().mRenderingDistance;
+                const float density = Settings::groundcover().mDensity;
 
                 newChunkMgr.mGroundcover = std::make_unique<Groundcover>(
                     mResourceSystem->getSceneManager(), density, groundcoverDistance, mGroundCoverStore);
