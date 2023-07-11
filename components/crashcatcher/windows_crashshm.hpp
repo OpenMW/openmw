@@ -8,6 +8,7 @@ namespace Crash
 
     // Used to communicate between the app and the monitor, fields are is overwritten with each event.
     static constexpr const int MAX_LONG_PATH = 0x7fff;
+    static constexpr const int MAX_FILENAME = 0xff;
 
     struct CrashSHM
     {
@@ -28,8 +29,9 @@ namespace Crash
             HANDLE mSignalApp;
             HANDLE mSignalMonitor;
             HANDLE mShmMutex;
-            char mCrashDumpFilePath[MAX_LONG_PATH];
-            char mFreezeDumpFilePath[MAX_LONG_PATH];
+            char mDumpDirectoryPath[MAX_LONG_PATH];
+            char mCrashDumpFileName[MAX_FILENAME];
+            char mFreezeDumpFileName[MAX_FILENAME];
         } mStartup;
 
         struct Crashed

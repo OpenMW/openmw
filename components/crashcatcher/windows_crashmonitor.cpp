@@ -12,7 +12,9 @@
 
 #include "windows_crashcatcher.hpp"
 #include "windows_crashshm.hpp"
+#include "windowscrashdumppathhelpers.hpp"
 #include <components/debug/debuglog.hpp>
+#include <components/misc/strings/conversion.hpp>
 
 namespace Crash
 {
@@ -214,7 +216,7 @@ namespace Crash
                 handleCrash(true);
                 TerminateProcess(mAppProcessHandle, 0xDEAD);
                 std::string message = "OpenMW appears to have frozen.\nCrash log saved to '"
-                    + std::string(mShm->mStartup.mFreezeDumpFilePath)
+                    + Misc::StringUtils::u8StringToString(getFreezeDumpPath(*mShm).u8string())
                     + "'.\nPlease report this to https://gitlab.com/OpenMW/openmw/issues !";
                 SDL_ShowSimpleMessageBox(0, "Fatal Error", message.c_str(), nullptr);
             }
@@ -256,8 +258,7 @@ namespace Crash
             if (miniDumpWriteDump == NULL)
                 return;
 
-            std::wstring utf16Path
-                = utf8ToUtf16(isFreeze ? mShm->mStartup.mFreezeDumpFilePath : mShm->mStartup.mCrashDumpFilePath);
+            std::wstring utf16Path = (isFreeze ? getFreezeDumpPath(*mShm) : getCrashDumpPath(*mShm)).native();
             if (utf16Path.empty())
                 return;
 
