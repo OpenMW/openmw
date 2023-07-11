@@ -106,7 +106,7 @@ Qt::ItemFlags ContentSelectorModel::ContentModel::flags(const QModelIndex& index
         return Qt::NoItemFlags;
 
     // game files can always be checked
-    if (file->isGameFile())
+    if (file == mGameFile)
         return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsUserCheckable;
 
     Qt::ItemFlags returnFlags;
@@ -216,7 +216,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
 
         case Qt::CheckStateRole:
         {
-            if (file->isGameFile())
+            if (file == mGameFile)
                 return QVariant();
 
             return mCheckStates[file->filePath()];
@@ -224,7 +224,7 @@ QVariant ContentSelectorModel::ContentModel::data(const QModelIndex& index, int 
 
         case Qt::UserRole:
         {
-            if (file->isGameFile())
+            if (file == mGameFile)
                 return ContentType_GameFile;
             else if (flags(index))
                 return ContentType_Addon;
@@ -577,6 +577,15 @@ QStringList ContentSelectorModel::ContentModel::gameFiles() const
     return gameFiles;
 }
 
+void ContentSelectorModel::ContentModel::setCurrentGameFile(const EsmFile* file)
+{
+    QModelIndex oldIndex = indexFromItem(mGameFile);
+    QModelIndex index = indexFromItem(file);
+    mGameFile = file;
+    emit dataChanged(oldIndex, oldIndex);
+    emit dataChanged(index, index);
+}
+
 void ContentSelectorModel::ContentModel::sortFiles()
 {
     emit layoutAboutToBeChanged();
@@ -591,10 +600,9 @@ void ContentSelectorModel::ContentModel::sortFiles()
             for (int j = 0; j < i; ++j)
             {
                 const QStringList& gameFiles = mFiles.at(j)->gameFiles();
-                if (gameFiles.contains(file->fileName(), Qt::CaseInsensitive)
-                    || (!mFiles.at(j)->isGameFile() && gameFiles.isEmpty()
-                        && file->fileName().compare("Morrowind.esm", Qt::CaseInsensitive)
-                            == 0)) // Hack: implicit dependency on Morrowind.esm for dependency-less files
+                // All addon files are implicitly dependent on the game file
+                // so that they don't accidentally become the game file
+                if (gameFiles.contains(file->fileName(), Qt::CaseInsensitive) || file == mGameFile)
                 {
                     index = j;
                     break;

@@ -232,6 +232,7 @@ void ContentSelectorView::ContentSelector::setGameFileSelected(int index, bool s
         QModelIndex index2(mContentModel->indexFromItem(file));
         mContentModel->setData(index2, selected, Qt::UserRole + 1);
     }
+    mContentModel->setCurrentGameFile(selected ? file : nullptr);
 }
 
 void ContentSelectorView::ContentSelector::slotAddonTableItemActivated(const QModelIndex& index)
