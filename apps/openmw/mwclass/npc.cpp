@@ -614,15 +614,16 @@ namespace MWClass
         if (ptr == MWMechanics::getPlayer())
             MWBase::Environment::get().getWindowManager()->setEnemy(victim);
 
+        float damage = 0.0f;
         if (!success)
         {
-            othercls.onHit(victim, 0.0f, false, weapon, ptr, osg::Vec3f(), false);
-            MWMechanics::reduceWeaponCondition(0.f, false, weapon, ptr);
+            othercls.onHit(victim, damage, false, weapon, ptr, osg::Vec3f(), false);
+            MWMechanics::reduceWeaponCondition(damage, false, weapon, ptr);
+            MWMechanics::resistNormalWeapon(victim, ptr, weapon, damage);
             return;
         }
 
         bool healthdmg;
-        float damage = 0.0f;
         if (!weapon.isEmpty())
         {
             const unsigned char* attack = nullptr;
