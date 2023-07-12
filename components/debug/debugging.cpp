@@ -300,10 +300,8 @@ void setupLogging(const std::string& logDir, std::string_view appName)
 #ifdef _WIN32
     if (Crash::CrashCatcher::instance())
     {
-        const std::string crashDumpName = Misc::StringUtils::lowerCase(appName) + "-crash.dmp";
-        const std::string freezeDumpName = Misc::StringUtils::lowerCase(appName) + "-freeze.dmp";
         boost::filesystem::path dumpDirectory(logDir);
-        Crash::CrashCatcher::instance()->updateDumpPaths((dumpDirectory / crashDumpName).make_preferred().string(), (dumpDirectory / freezeDumpName).make_preferred().string());
+        Crash::CrashCatcher::instance()->updateDumpPath(dumpDirectory.make_preferred().string());
     }
 #endif
 }
@@ -335,7 +333,7 @@ int wrapApplication(int (*innerApplication)(int argc, char *argv[]), int argc, c
                 dumpDirectory = userProfile;
             }
             CoTaskMemFree(userProfile);
-            Crash::CrashCatcher crashy(argc, argv, (dumpDirectory / crashDumpName).make_preferred().string(), (dumpDirectory / freezeDumpName).make_preferred().string());
+            Crash::CrashCatcher crashy(argc, argv, dumpDirectory.make_preferred().string(), crashDumpName, freezeDumpName);
 #else
             const std::string crashLogName = Misc::StringUtils::lowerCase(appName) + "-crash.log";
             // install the crash handler as soon as possible. note that the log path
