@@ -25,7 +25,6 @@ namespace Crash
             if (length >= sizeof(buffer))
                 length = sizeof(buffer) - 1;
             strncpy_s(buffer, sizeof(buffer), Misc::StringUtils::u8StringToString(str).c_str(), length);
-            buffer[length] = '\0';
         }
     }
 
