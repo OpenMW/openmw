@@ -228,18 +228,6 @@ namespace Crash
         signalApp();
     }
 
-    static std::wstring utf8ToUtf16(const std::string& utf8)
-    {
-        const int nLenWide = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), utf8.size(), nullptr, 0);
-
-        std::wstring utf16;
-        utf16.resize(nLenWide);
-        if (MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), utf8.size(), utf16.data(), nLenWide) != nLenWide)
-            return {};
-
-        return utf16;
-    }
-
     void CrashMonitor::handleCrash(bool isFreeze)
     {
         DWORD processId = GetProcessId(mAppProcessHandle);
