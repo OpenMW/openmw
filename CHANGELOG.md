@@ -18,6 +18,7 @@
     Bug #5883: Immobile creatures don't cause water ripples
     Bug #5977: Fatigueless NPCs' corpse underwater changes animation on game load
     Bug #6027: Collisionshape becomes spiderweb-like when the mesh is too complex
+    Bug #6222: global map cell size can crash openmw if set to too high a value
     Bug #6313: Followers with high Fight can turn hostile
     Bug #6427: Enemy health bar disappears before damaging effect ends
     Bug #6550: Cloned body parts don't inherit texture effects

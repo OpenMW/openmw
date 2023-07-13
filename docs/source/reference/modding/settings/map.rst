@@ -15,7 +15,7 @@ global map cell size
 --------------------
 
 :Type:		integer
-:Range:		>= 1
+:Range:		1 to 50
 :Default:	18
 
 This setting adjusts the scale of the world map in the GUI mode map window.
