@@ -284,6 +284,7 @@ if(WIN32)
         windows_crashcatcher
         windows_crashmonitor
         windows_crashshm
+        windowscrashdumppathhelpers
     )
 elseif(NOT ANDROID)
     add_component_dir (crashcatcher

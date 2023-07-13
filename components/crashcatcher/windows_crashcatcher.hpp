@@ -32,10 +32,12 @@ namespace Crash
             return sInstance;
         }
 
-        CrashCatcher(int argc, char** argv, const std::string& crashDumpPath, const std::string& freezeDumpPath);
+        CrashCatcher(int argc, char** argv, const std::string& dumpPath, const std::string& crashDumpName, const std::string& freezeDumpName);
         ~CrashCatcher();
 
-        void updateDumpPaths(const std::string& crashDumpPath, const std::string& freezeDumpPath);
+        void updateDumpPath(const std::string& dumpPath);
+
+        void updateDumpNames(const std::string& crashDumpName, const std::string& freezeDumpName);
 
     private:
 
@@ -62,7 +64,7 @@ namespace Crash
 
         void shmUnlock();
 
-        void startMonitorProcess(const std::string& crashDumpPath, const std::string& freezeDumpPath);
+        void startMonitorProcess(const std::string& dumpPath, const std::string& crashDumpName, const std::string& freezeDumpName);
 
         void waitMonitor();
 
