@@ -290,6 +290,7 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             case ESM4::SUB_XNDP:
             case ESM4::SUB_XOCP:
             case ESM4::SUB_XPOD:
+            case ESM4::SUB_XPTL:
             case ESM4::SUB_XPPA:
             case ESM4::SUB_XPRD:
             case ESM4::SUB_XPWR:
