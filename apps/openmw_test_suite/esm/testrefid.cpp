@@ -124,6 +124,12 @@ namespace ESM
             EXPECT_LT(a, b);
         }
 
+        TEST(ESMRefIdTest, stringRefIdDeserializationReturnsEmptyRefIdForNonExistentValues)
+        {
+            RefId id = RefId::deserializeText("this stringrefid should not exist");
+            EXPECT_TRUE(id.empty());
+        }
+
         TEST(ESMRefIdTest, lessThanIsDefinedForStringRefIdAndRefId)
         {
             const StringRefId stringRefId("a");

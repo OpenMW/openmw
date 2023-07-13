@@ -21,13 +21,17 @@ namespace ESM
 
         const std::string emptyString;
 
-        Misc::NotNullPtr<const std::string> getOrInsertString(std::string_view id)
+        Misc::NotNullPtr<const std::string> getOrInsertString(std::string_view id, bool insert)
         {
             static Misc::ScopeGuarded<StringsSet> refIds;
             const auto locked = refIds.lock();
             auto it = locked->find(id);
             if (it == locked->end())
+            {
+                if (!insert)
+                    return &emptyString;
                 it = locked->emplace(id).first;
+            }
             return &*it;
         }
 
@@ -50,7 +54,7 @@ namespace ESM
     }
 
     StringRefId::StringRefId(std::string_view value)
-        : mValue(getOrInsertString(value))
+        : mValue(getOrInsertString(value, true))
     {
     }
 
@@ -128,5 +132,15 @@ namespace ESM
     bool StringRefId::contains(std::string_view subString) const
     {
         return Misc::StringUtils::ciFind(*mValue, subString) != std::string_view::npos;
+    }
+
+    std::optional<StringRefId> StringRefId::deserializeExisting(std::string_view value)
+    {
+        auto string = getOrInsertString(value, false);
+        if (string->empty())
+            return {};
+        StringRefId id;
+        id.mValue = string;
+        return id;
     }
 }

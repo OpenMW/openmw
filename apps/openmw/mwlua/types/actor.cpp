@@ -41,13 +41,14 @@ namespace MWLua
         }
         else
         {
-            ESM::RefId recordId = ESM::RefId::deserializeText(std::get<std::string>(item));
+            const auto& stringId = std::get<std::string>(item);
+            ESM::RefId recordId = ESM::RefId::deserializeText(stringId);
             if (old_it != store.end() && old_it->getCellRef().getRefId() == recordId)
                 return { old_it, true }; // already equipped
             itemPtr = store.search(recordId);
             if (itemPtr.isEmpty() || itemPtr.getRefData().getCount() == 0)
             {
-                Log(Debug::Warning) << "There is no object with recordId='" << recordId << "' in inventory";
+                Log(Debug::Warning) << "There is no object with recordId='" << stringId << "' in inventory";
                 return { store.end(), false };
             }
         }

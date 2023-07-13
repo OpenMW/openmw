@@ -254,6 +254,8 @@ namespace ESM
             return ESM::ESM3ExteriorCellRefId(x, y);
         }
 
-        return ESM::RefId::stringRefId(value);
+        if (auto id = ESM::StringRefId::deserializeExisting(value))
+            return *id;
+        return {};
     }
 }
