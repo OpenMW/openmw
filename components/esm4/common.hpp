@@ -294,6 +294,7 @@ namespace ESM4
         SUB_XPRM = fourCC("XPRM"),
         SUB_XMBO = fourCC("XMBO"),
         SUB_XPOD = fourCC("XPOD"),
+        SUB_XPTL = fourCC("XPTL"),
         SUB_XRMR = fourCC("XRMR"),
         SUB_INAM = fourCC("INAM"),
         SUB_SCHR = fourCC("SCHR"),
