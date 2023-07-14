@@ -9,7 +9,7 @@
 #include <osgDB/WriteFile>
 
 #include <components/files/memorystream.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <components/debug/debuglog.hpp>
 
@@ -263,7 +263,8 @@ namespace MWRender
     };
 
     GlobalMap::GlobalMap(osg::Group* root, SceneUtil::WorkQueue* workQueue)
-        : mRoot(root)
+        : mCellSize(Settings::map().mGlobalMapCellSize)
+        , mRoot(root)
         , mWorkQueue(workQueue)
         , mWidth(0)
         , mHeight(0)
@@ -271,9 +272,7 @@ namespace MWRender
         , mMaxX(0)
         , mMinY(0)
         , mMaxY(0)
-
     {
-        mCellSize = Settings::Manager::getInt("global map cell size", "Map");
     }
 
     GlobalMap::~GlobalMap()

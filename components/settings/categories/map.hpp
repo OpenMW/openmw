@@ -18,7 +18,7 @@ namespace Settings
     {
         using WithIndex::WithIndex;
 
-        SettingValue<int> mGlobalMapCellSize{ mIndex, "Map", "global map cell size", makeMaxSanitizerInt(1) };
+        SettingValue<int> mGlobalMapCellSize{ mIndex, "Map", "global map cell size", makeClampSanitizerInt(1, 50) };
         SettingValue<int> mLocalMapHudWidgetSize{ mIndex, "Map", "local map hud widget size", makeMaxSanitizerInt(1) };
         SettingValue<bool> mLocalMapHudFogOfWar{ mIndex, "Map", "local map hud fog of war" };
         SettingValue<int> mLocalMapResolution{ mIndex, "Map", "local map resolution", makeMaxSanitizerInt(1) };
