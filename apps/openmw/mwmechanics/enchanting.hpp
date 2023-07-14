@@ -27,6 +27,11 @@ namespace MWMechanics
         int mWeaponType;
 
         const ESM::Enchantment* getRecord(const ESM::Enchantment& newEnchantment) const;
+        int getBaseCastCost() const; // To be saved in the enchantment's record
+        int getEnchantItemsCount() const;
+        float getTypeMultiplier() const;
+        void payForEnchantment(int count) const;
+        int getEnchantPrice(int count) const;
 
     public:
         Enchanting();
@@ -42,18 +47,14 @@ namespace MWMechanics
         void nextCastStyle(); // Set enchant type to next possible type (for mOldItemPtr object)
         int getCastStyle() const;
         float getEnchantPoints(bool precise = true) const;
-        int getBaseCastCost() const; // To be saved in the enchantment's record
         int getEffectiveCastCost()
             const; // Effective cost taking player Enchant skill into account, used for preview purposes in the UI
-        int getEnchantPrice() const;
+        int getEnchantPrice() const { return getEnchantPrice(getEnchantItemsCount()); }
         int getMaxEnchantValue() const;
         int getGemCharge() const;
         int getEnchantChance() const;
-        int getEnchantItemsCount() const;
-        float getTypeMultiplier() const;
         bool soulEmpty() const; // Return true if empty
         bool itemEmpty() const; // Return true if empty
-        void payForEnchantment() const;
     };
 }
 #endif

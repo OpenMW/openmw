@@ -357,9 +357,7 @@ namespace MWGui
             }
         }
 
-        int result = mEnchanting.create();
-
-        if (result == 1)
+        if (mEnchanting.create())
         {
             MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("enchant success"));
             MWBase::Environment::get().getWindowManager()->messageBox("#{sEnchantmentMenu12}");
