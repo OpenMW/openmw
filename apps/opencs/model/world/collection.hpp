@@ -15,6 +15,7 @@
 #include <QVariant>
 
 #include <components/esm3/loaddial.hpp>
+#include <components/esm3/loadskil.hpp>
 #include <components/misc/strings/lower.hpp>
 
 #include "collectionbase.hpp"
@@ -84,6 +85,13 @@ namespace CSMWorld
     inline ESM::RefId getRecordId(const LandTexture& record)
     {
         return ESM::RefId::stringRefId(LandTexture::createUniqueRecordId(record.mPluginIndex, record.mIndex));
+    }
+
+    inline void setRecordId(const ESM::RefId& id, ESM::Skill& record)
+    {
+        if (const auto* skillId = id.getIf<ESM::SkillId>())
+            record.mId = *skillId;
+        throw std::runtime_error("Invalid skill id: " + id.toDebugString());
     }
 
     /// \brief Single-type record collection

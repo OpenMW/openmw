@@ -14,6 +14,8 @@ namespace ESM
     class ESMReader;
     class ESMWriter;
 
+    using SkillId = StringRefId;
+
     struct MagicSchool
     {
         ESM::RefId mAreaSound;
@@ -43,7 +45,7 @@ namespace ESM
         static std::string_view getRecordType() { return "Skill"; }
 
         unsigned int mRecordFlags;
-        RefId mId;
+        SkillId mId;
 
         struct SKDTstruct
         {
@@ -61,33 +63,33 @@ namespace ESM
         float mWerewolfValue{};
         std::optional<MagicSchool> mSchool;
 
-        static const RefId Block;
-        static const RefId Armorer;
-        static const RefId MediumArmor;
-        static const RefId HeavyArmor;
-        static const RefId BluntWeapon;
-        static const RefId LongBlade;
-        static const RefId Axe;
-        static const RefId Spear;
-        static const RefId Athletics;
-        static const RefId Enchant;
-        static const RefId Destruction;
-        static const RefId Alteration;
-        static const RefId Illusion;
-        static const RefId Conjuration;
-        static const RefId Mysticism;
-        static const RefId Restoration;
-        static const RefId Alchemy;
-        static const RefId Unarmored;
-        static const RefId Security;
-        static const RefId Sneak;
-        static const RefId Acrobatics;
-        static const RefId LightArmor;
-        static const RefId ShortBlade;
-        static const RefId Marksman;
-        static const RefId Mercantile;
-        static const RefId Speechcraft;
-        static const RefId HandToHand;
+        static const SkillId Block;
+        static const SkillId Armorer;
+        static const SkillId MediumArmor;
+        static const SkillId HeavyArmor;
+        static const SkillId BluntWeapon;
+        static const SkillId LongBlade;
+        static const SkillId Axe;
+        static const SkillId Spear;
+        static const SkillId Athletics;
+        static const SkillId Enchant;
+        static const SkillId Destruction;
+        static const SkillId Alteration;
+        static const SkillId Illusion;
+        static const SkillId Conjuration;
+        static const SkillId Mysticism;
+        static const SkillId Restoration;
+        static const SkillId Alchemy;
+        static const SkillId Unarmored;
+        static const SkillId Security;
+        static const SkillId Sneak;
+        static const SkillId Acrobatics;
+        static const SkillId LightArmor;
+        static const SkillId ShortBlade;
+        static const SkillId Marksman;
+        static const SkillId Mercantile;
+        static const SkillId Speechcraft;
+        static const SkillId HandToHand;
         static constexpr int Length = 27;
 
         void load(ESMReader& esm, bool& isDeleted);

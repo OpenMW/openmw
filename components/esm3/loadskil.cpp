@@ -7,33 +7,33 @@
 
 namespace ESM
 {
-    const RefId Skill::Block = RefId::stringRefId("Block");
-    const RefId Skill::Armorer = RefId::stringRefId("Armorer");
-    const RefId Skill::MediumArmor = RefId::stringRefId("MediumArmor");
-    const RefId Skill::HeavyArmor = RefId::stringRefId("HeavyArmor");
-    const RefId Skill::BluntWeapon = RefId::stringRefId("BluntWeapon");
-    const RefId Skill::LongBlade = RefId::stringRefId("LongBlade");
-    const RefId Skill::Axe = RefId::stringRefId("Axe");
-    const RefId Skill::Spear = RefId::stringRefId("Spear");
-    const RefId Skill::Athletics = RefId::stringRefId("Athletics");
-    const RefId Skill::Enchant = RefId::stringRefId("Enchant");
-    const RefId Skill::Destruction = RefId::stringRefId("Destruction");
-    const RefId Skill::Alteration = RefId::stringRefId("Alteration");
-    const RefId Skill::Illusion = RefId::stringRefId("Illusion");
-    const RefId Skill::Conjuration = RefId::stringRefId("Conjuration");
-    const RefId Skill::Mysticism = RefId::stringRefId("Mysticism");
-    const RefId Skill::Restoration = RefId::stringRefId("Restoration");
-    const RefId Skill::Alchemy = RefId::stringRefId("Alchemy");
-    const RefId Skill::Unarmored = RefId::stringRefId("Unarmored");
-    const RefId Skill::Security = RefId::stringRefId("Security");
-    const RefId Skill::Sneak = RefId::stringRefId("Sneak");
-    const RefId Skill::Acrobatics = RefId::stringRefId("Acrobatics");
-    const RefId Skill::LightArmor = RefId::stringRefId("LightArmor");
-    const RefId Skill::ShortBlade = RefId::stringRefId("ShortBlade");
-    const RefId Skill::Marksman = RefId::stringRefId("Marksman");
-    const RefId Skill::Mercantile = RefId::stringRefId("Mercantile");
-    const RefId Skill::Speechcraft = RefId::stringRefId("Speechcraft");
-    const RefId Skill::HandToHand = RefId::stringRefId("HandToHand");
+    const SkillId Skill::Block("Block");
+    const SkillId Skill::Armorer("Armorer");
+    const SkillId Skill::MediumArmor("MediumArmor");
+    const SkillId Skill::HeavyArmor("HeavyArmor");
+    const SkillId Skill::BluntWeapon("BluntWeapon");
+    const SkillId Skill::LongBlade("LongBlade");
+    const SkillId Skill::Axe("Axe");
+    const SkillId Skill::Spear("Spear");
+    const SkillId Skill::Athletics("Athletics");
+    const SkillId Skill::Enchant("Enchant");
+    const SkillId Skill::Destruction("Destruction");
+    const SkillId Skill::Alteration("Alteration");
+    const SkillId Skill::Illusion("Illusion");
+    const SkillId Skill::Conjuration("Conjuration");
+    const SkillId Skill::Mysticism("Mysticism");
+    const SkillId Skill::Restoration("Restoration");
+    const SkillId Skill::Alchemy("Alchemy");
+    const SkillId Skill::Unarmored("Unarmored");
+    const SkillId Skill::Security("Security");
+    const SkillId Skill::Sneak("Sneak");
+    const SkillId Skill::Acrobatics("Acrobatics");
+    const SkillId Skill::LightArmor("LightArmor");
+    const SkillId Skill::ShortBlade("ShortBlade");
+    const SkillId Skill::Marksman("Marksman");
+    const SkillId Skill::Mercantile("Mercantile");
+    const SkillId Skill::Speechcraft("Speechcraft");
+    const SkillId Skill::HandToHand("HandToHand");
 
     void Skill::load(ESMReader& esm, bool& isDeleted)
     {
@@ -70,9 +70,7 @@ namespace ESM
         if (!hasData)
             esm.fail("Missing SKDT");
 
-        // create an ID from the index and the name (only used in the editor and likely to change in the
-        // future)
-        mId = indexToRefId(index);
+        mId = *indexToRefId(index).getIf<SkillId>();
     }
 
     void Skill::save(ESMWriter& esm, bool /*isDeleted*/) const
