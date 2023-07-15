@@ -180,6 +180,7 @@ namespace Nif
             { "bhkRigidBody", &construct<bhkRigidBody, RC_bhkRigidBody> },
             { "bhkRigidBodyT", &construct<bhkRigidBody, RC_bhkRigidBodyT> },
             { "bhkRagdollConstraint", &construct<bhkRagdollConstraint, RC_bhkRagdollConstraint> },
+            { "bhkHingeConstraint", &construct<bhkHingeConstraint, RC_bhkHingeConstraint> },
             { "BSLightingShaderProperty", &construct<BSLightingShaderProperty, RC_BSLightingShaderProperty> },
             { "BSEffectShaderProperty", &construct<BSEffectShaderProperty, RC_BSEffectShaderProperty> },
             { "NiSortAdjustNode", &construct<NiSortAdjustNode, RC_NiSortAdjustNode> },
