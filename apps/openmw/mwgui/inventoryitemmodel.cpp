@@ -92,7 +92,8 @@ namespace MWGui
         }
     }
 
-    MWWorld::Ptr InventoryItemModel::moveItem(const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip)
+    MWWorld::Ptr InventoryItemModel::moveItem(
+        const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip)
     {
         // Can't move conjured items: This is a general fix that also takes care of issues with taking conjured items
         // via the 'Take All' button.

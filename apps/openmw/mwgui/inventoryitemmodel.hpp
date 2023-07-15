@@ -22,7 +22,8 @@ namespace MWGui
         void removeItem(const ItemStack& item, size_t count) override;
 
         /// Move items from this model to \a otherModel.
-        MWWorld::Ptr moveItem(const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip = true) override;
+        MWWorld::Ptr moveItem(
+            const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip = true) override;
 
         void update() override;
 

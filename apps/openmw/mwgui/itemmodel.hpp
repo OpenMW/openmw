@@ -63,7 +63,8 @@ namespace MWGui
 
         /// Move items from this model to \a otherModel.
         /// @note Derived implementations may return an empty Ptr if the move was unsuccessful.
-        virtual MWWorld::Ptr moveItem(const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip = true);
+        virtual MWWorld::Ptr moveItem(
+            const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip = true);
 
         /// Unstacks items from this model and returns a ptr to the new remainder stack.
         /// @note Returns en empty ptr if there is no remainder or the item model does not support unstacking.
