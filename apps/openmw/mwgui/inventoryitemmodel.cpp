@@ -53,13 +53,6 @@ namespace MWGui
         return *mActor.getClass().getContainerStore(mActor).add(item.mBase, count, allowAutoEquip);
     }
 
-    MWWorld::Ptr InventoryItemModel::copyItem(const ItemStack& item, size_t count, bool allowAutoEquip)
-    {
-        // TODO: This does not copy the item, but adds it directly. This will duplicate the item's
-        // refnum and other ref data unless the caller handles that.
-        return addItem(item, count, allowAutoEquip);
-    }
-
     MWWorld::Ptr InventoryItemModel::unstackItem(const ItemStack& item, size_t count)
     {
         MWWorld::ContainerStore& store = mActor.getClass().getContainerStore(mActor);
@@ -99,16 +92,14 @@ namespace MWGui
         }
     }
 
-    MWWorld::Ptr InventoryItemModel::moveItem(const ItemStack& item, size_t count, ItemModel* otherModel)
+    MWWorld::Ptr InventoryItemModel::moveItem(const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip)
     {
         // Can't move conjured items: This is a general fix that also takes care of issues with taking conjured items
         // via the 'Take All' button.
         if (item.mFlags & ItemStack::Flag_Bound)
             return MWWorld::Ptr();
 
-        MWWorld::Ptr ret = otherModel->copyItem(item, count);
-        removeItem(item, count);
-        return ret;
+        return ItemModel::moveItem(item, count, otherModel, allowAutoEquip);
     }
 
     void InventoryItemModel::update()

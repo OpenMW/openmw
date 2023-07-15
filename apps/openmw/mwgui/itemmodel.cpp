@@ -55,19 +55,14 @@ namespace MWGui
 
     ItemModel::ItemModel() {}
 
-    MWWorld::Ptr ItemModel::moveItem(const ItemStack& item, size_t count, ItemModel* otherModel)
+    MWWorld::Ptr ItemModel::moveItem(const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip)
     {
-        MWWorld::Ptr ret = otherModel->addItem(item, count);
+        MWWorld::Ptr ret = otherModel->addItem(item, count, allowAutoEquip);
         // Unstacking here ensures that new a refnum is assigned to the leftover stack if there is a leftover.
         // Otherwise we end up with duplicated instances.
         unstackItem(item, count);
         removeItem(item, count);
         return ret;
-    }
-
-    MWWorld::Ptr ItemModel::addItem(const ItemStack& item, size_t count, bool allowAutoEquip)
-    {
-        return copyItem(item, count, allowAutoEquip);
     }
 
     MWWorld::Ptr ItemModel::unstackItem(const ItemStack& item, size_t count)
@@ -94,11 +89,6 @@ namespace MWGui
     bool ProxyItemModel::allowedToUseItems() const
     {
         return mSourceModel->allowedToUseItems();
-    }
-
-    MWWorld::Ptr ProxyItemModel::copyItem(const ItemStack& item, size_t count, bool allowAutoEquip)
-    {
-        return mSourceModel->copyItem(item, count, allowAutoEquip);
     }
 
     void ProxyItemModel::removeItem(const ItemStack& item, size_t count)
