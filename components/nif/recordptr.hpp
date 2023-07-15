@@ -176,6 +176,7 @@ namespace Nif
     using NiCollisionObjectPtr = RecordPtrT<NiCollisionObject>;
     using bhkWorldObjectPtr = RecordPtrT<bhkWorldObject>;
     using bhkShapePtr = RecordPtrT<bhkShape>;
+    using bhkEntityPtr = RecordPtrT<bhkEntity>;
     using hkPackedNiTriStripsDataPtr = RecordPtrT<hkPackedNiTriStripsData>;
     using NiAccumulatorPtr = RecordPtrT<NiAccumulator>;
     using NiInterpolatorPtr = RecordPtrT<NiInterpolator>;

@@ -219,7 +219,8 @@ namespace Nif
 
     struct bhkConstraintCInfo
     {
-        bhkEntityList mEntities;
+        bhkEntityPtr mEntityA;
+        bhkEntityPtr mEntityB;
         ConstraintPriority mPriority;
         void read(NIFStream* nif);
         void post(Reader& nif);
@@ -274,14 +275,15 @@ namespace Nif
 
     struct bhkRagdollConstraintCInfo
     {
-        struct EntityData
+        struct Data
         {
             osg::Vec4f mPivot;
             osg::Vec4f mPlane;
             osg::Vec4f mTwist;
             osg::Vec4f mMotor;
         };
-        std::vector<EntityData> mEntityData;
+        Data mDataA;
+        Data mDataB;
         float mConeMaxAngle;
         float mPlaneMinAngle, mPlaneMaxAngle;
         float mTwistMinAngle, mTwistMaxAngle;

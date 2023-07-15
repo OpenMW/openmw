@@ -190,16 +190,16 @@ namespace Nif
     void bhkConstraintCInfo::read(NIFStream* nif)
     {
         nif->get<unsigned int>(); // Number of entities, unused
-        mEntities.resize(2); // Hardcoded
-        for (auto& entity : mEntities)
-            entity.read(nif);
+        mEntityA.read(nif);
+        mEntityB.read(nif);
 
         mPriority = static_cast<ConstraintPriority>(nif->get<uint32_t>());
     }
 
     void bhkConstraintCInfo::post(Reader& nif)
     {
-        postRecordList(nif, mEntities);
+        mEntityA.post(nif);
+        mEntityB.post(nif);
     }
 
     void bhkPositionConstraintMotor::read(NIFStream* nif)
@@ -254,25 +254,25 @@ namespace Nif
 
     void bhkRagdollConstraintCInfo::read(NIFStream* nif)
     {
-        mEntityData.resize(2); // Hardcoded by the format
         if (nif->getBethVersion() <= 16)
         {
-            for (EntityData& data: mEntityData)
-            {
-                nif->read(data.mPivot);
-                nif->read(data.mPlane);
-                nif->read(data.mTwist);
-            }
+            nif->read(mDataA.mPivot);
+            nif->read(mDataA.mPlane);
+            nif->read(mDataA.mTwist);
+            nif->read(mDataB.mPivot);
+            nif->read(mDataB.mPlane);
+            nif->read(mDataB.mTwist);
         }
         else
         {
-            for (EntityData& data: mEntityData)
-            {
-                nif->read(data.mTwist);
-                nif->read(data.mPlane);
-                nif->read(data.mMotor);
-                nif->read(data.mPivot);
-            }
+            nif->read(mDataA.mTwist);
+            nif->read(mDataA.mPlane);
+            nif->read(mDataA.mMotor);
+            nif->read(mDataA.mPivot);
+            nif->read(mDataB.mTwist);
+            nif->read(mDataB.mPlane);
+            nif->read(mDataB.mMotor);
+            nif->read(mDataB.mPivot);
         }
         nif->read(mConeMaxAngle);
         nif->read(mPlaneMinAngle);
