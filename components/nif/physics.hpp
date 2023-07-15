@@ -210,6 +210,21 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
+    enum class ConstraintPriority : uint32_t
+    {
+        Priority_Invalid = 0,
+        Priority_PhysicsTime = 1,
+        Priority_TimeOfImpact = 3
+    };
+
+    struct bhkConstraintCInfo
+    {
+        bhkEntityList mEntities;
+        ConstraintPriority mPriority;
+        void read(NIFStream* nif);
+        void post(Reader& nif);
+    };
+
     /// Record types
 
     // Abstract Bethesda Havok object
@@ -431,5 +446,14 @@ namespace Nif
         osg::Matrixf mTransform;
         void read(NIFStream* nif) override;
     };
+
+    // Abstract constraint
+    struct bhkConstraint : public bhkSerializable
+    {
+        bhkConstraintCInfo mInfo;
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
 } // Namespace
 #endif

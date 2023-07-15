@@ -187,6 +187,21 @@ namespace Nif
             nif->skip(12); // Unused
     }
 
+    void bhkConstraintCInfo::read(NIFStream* nif)
+    {
+        nif->get<unsigned int>(); // Number of entities, unused
+        mEntities.resize(2); // Hardcoded
+        for (auto& entity : mEntities)
+            entity.read(nif);
+
+        mPriority = static_cast<ConstraintPriority>(nif->get<uint32_t>());
+    }
+
+    void bhkConstraintCInfo::post(Reader& nif)
+    {
+        postRecordList(nif, mEntities);
+    }
+
     /// Record types
 
     void bhkCollisionObject::read(NIFStream* nif)
@@ -448,4 +463,15 @@ namespace Nif
         nif->readArray(mat);
         mTransform.set(mat.data());
     }
+
+    void bhkConstraint::read(NIFStream* nif)
+    {
+        mInfo.read(nif);
+    }
+
+    void bhkConstraint::post(Reader& nif)
+    {
+        mInfo.post(nif);
+    }
+
 } // Namespace
