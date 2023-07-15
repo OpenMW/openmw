@@ -18,8 +18,8 @@ namespace MWGui
         bool isRunning() const;
 
         // signals
-        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
-        typedef MyGUI::delegates::CMultiDelegate2<int, int> EventHandle_IntInt;
+        typedef MyGUI::delegates::MultiDelegate<> EventHandle_Void;
+        typedef MyGUI::delegates::MultiDelegate<int, int> EventHandle_IntInt;
 
         EventHandle_IntInt eventProgressChanged;
         EventHandle_Void eventInterrupted;

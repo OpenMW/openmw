@@ -50,7 +50,7 @@ namespace MWGui
         void setSize(const MyGUI::IntSize& value) override;
         void setCoord(const MyGUI::IntCoord& value) override;
 
-        MyGUI::delegates::CMultiDelegate2<MyGUI::Widget*, const MWWorld::Ptr&> eventItemClicked;
+        MyGUI::delegates::MultiDelegate<MyGUI::Widget*, const MWWorld::Ptr&> eventItemClicked;
 
     private:
         struct Line

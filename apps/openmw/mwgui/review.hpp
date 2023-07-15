@@ -48,8 +48,8 @@ namespace MWGui
         void onFrame(float duration) override;
 
         // Events
-        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
-        typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
+        typedef MyGUI::delegates::MultiDelegate<> EventHandle_Void;
+        typedef MyGUI::delegates::MultiDelegate<int> EventHandle_Int;
 
         /** Event : Back button clicked.\n
         signature : void method()\n

@@ -15,8 +15,8 @@ namespace Gui
     public:
         MWList();
 
-        typedef MyGUI::delegates::CMultiDelegate2<const std::string&, int> EventHandle_StringInt;
-        typedef MyGUI::delegates::CMultiDelegate1<MyGUI::Widget*> EventHandle_Widget;
+        typedef MyGUI::delegates::MultiDelegate<const std::string&, int> EventHandle_StringInt;
+        typedef MyGUI::delegates::MultiDelegate<MyGUI::Widget*> EventHandle_Widget;
 
         /**
          * Event: Item selected with the mouse.

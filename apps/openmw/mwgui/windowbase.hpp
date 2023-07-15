@@ -20,7 +20,7 @@ namespace MWGui
         virtual MyGUI::Widget* getDefaultKeyFocus() { return nullptr; }
 
         // Events
-        typedef MyGUI::delegates::CMultiDelegate1<WindowBase*> EventHandle_WindowBase;
+        typedef MyGUI::delegates::MultiDelegate<WindowBase*> EventHandle_WindowBase;
 
         /// Open this object in the GUI, for windows that support it
         virtual void setPtr(const MWWorld::Ptr& ptr) {}

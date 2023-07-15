@@ -106,7 +106,7 @@ namespace MWGui
             const SkillValue& getSkillValue() const { return mValue; }
 
             // Events
-            typedef MyGUI::delegates::CMultiDelegate1<MWSkill*> EventHandle_SkillVoid;
+            typedef MyGUI::delegates::MultiDelegate<MWSkill*> EventHandle_SkillVoid;
 
             /** Event : Skill clicked.\n
                 signature : void method(MWSkill* _sender)\n
@@ -145,7 +145,7 @@ namespace MWGui
             const AttributeValue& getAttributeValue() const { return mValue; }
 
             // Events
-            typedef MyGUI::delegates::CMultiDelegate1<MWAttribute*> EventHandle_AttributeVoid;
+            typedef MyGUI::delegates::MultiDelegate<MWAttribute*> EventHandle_AttributeVoid;
 
             /** Event : Attribute clicked.\n
                 signature : void method(MWAttribute* _sender)\n

@@ -52,7 +52,7 @@ namespace MWGui
         bool exit() override { return false; }
 
         // Events
-        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::MultiDelegate<> EventHandle_Void;
 
         /** Event : Back button clicked.\n
             signature : void method()\n

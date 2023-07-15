@@ -12,7 +12,7 @@ namespace MWGui
         void askForConfirmation(const std::string& message);
         bool exit() override;
 
-        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::MultiDelegate<> EventHandle_Void;
 
         /** Event : Ok button was clicked.\n
             signature : void method()\n

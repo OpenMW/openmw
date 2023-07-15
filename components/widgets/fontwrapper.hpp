@@ -41,8 +41,8 @@ namespace Gui
                 = std::to_string(std::clamp(Settings::Manager::getInt("font size", "GUI"), 12, 18));
             return fontSize;
         }
-    };
 #endif
+    };
 }
 
 #endif

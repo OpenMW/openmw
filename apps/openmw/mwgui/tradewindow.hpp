@@ -44,7 +44,7 @@ namespace MWGui
 
         void onDeleteCustomData(const MWWorld::Ptr& ptr) override;
 
-        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_TradeDone;
+        typedef MyGUI::delegates::MultiDelegate<> EventHandle_TradeDone;
         EventHandle_TradeDone eventTradeDone;
 
     private:
