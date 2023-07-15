@@ -453,8 +453,9 @@ namespace MWRender
         }
     };
 
-    ObjectPaging::ObjectPaging(Resource::SceneManager* sceneManager)
+    ObjectPaging::ObjectPaging(Resource::SceneManager* sceneManager, ESM::RefId worldspace)
         : GenericResourceManager<ChunkId>(nullptr)
+        , Terrain::QuadTreeWorld::ChunkManager(worldspace)
         , mSceneManager(sceneManager)
         , mRefTrackerLocked(false)
     {
@@ -466,19 +467,11 @@ namespace MWRender
         mMinSizeCostMultiplier = Settings::Manager::getFloat("object paging min size cost multiplier", "Terrain");
     }
 
-    osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, bool activeGrid,
-        const osg::Vec3f& viewPoint, bool compile, unsigned char lod)
+    std::map<ESM::RefNum, ESM::CellRef> ObjectPaging::collectESM3References(
+        float size, const osg::Vec2i& startCell, ESM::ReadersCache& readers) const
     {
-        osg::Vec2i startCell = osg::Vec2i(std::floor(center.x() - size / 2.f), std::floor(center.y() - size / 2.f));
-
-        osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0) * ESM::Land::REAL_SIZE;
-        osg::Vec3f relativeViewPoint = viewPoint - worldCenter;
-
         std::map<ESM::RefNum, ESM::CellRef> refs;
-        ESM::ReadersCache readers;
-        const auto& world = MWBase::Environment::get().getWorld();
-        const auto& store = world->getStore();
-
+        const auto& store = MWBase::Environment::get().getWorld()->getStore();
         for (int cellX = startCell.x(); cellX < startCell.x() + size; ++cellX)
         {
             for (int cellY = startCell.y(); cellY < startCell.y() + size; ++cellY)
@@ -537,6 +530,30 @@ namespace MWRender
                 }
             }
         }
+        return refs;
+    }
+
+    osg::ref_ptr<osg::Node> ObjectPaging::createChunk(float size, const osg::Vec2f& center, bool activeGrid,
+        const osg::Vec3f& viewPoint, bool compile, unsigned char lod)
+    {
+        osg::Vec2i startCell = osg::Vec2i(std::floor(center.x() - size / 2.f), std::floor(center.y() - size / 2.f));
+
+        osg::Vec3f worldCenter = osg::Vec3f(center.x(), center.y(), 0) * getCellSize(mWorldspace);
+        osg::Vec3f relativeViewPoint = viewPoint - worldCenter;
+
+        std::map<ESM::RefNum, ESM::CellRef> refs;
+        ESM::ReadersCache readers;
+        const auto& world = MWBase::Environment::get().getWorld();
+        const auto& store = world->getStore();
+
+        if (mWorldspace == ESM::Cell::sDefaultWorldspaceId)
+        {
+            refs = collectESM3References(size, startCell, readers);
+        }
+        else
+        {
+            // TODO
+        }
 
         if (activeGrid)
         {
@@ -563,11 +580,12 @@ namespace MWRender
         // Since ObjectPaging does not handle VisController, we can just ignore both types of nodes.
         constexpr auto copyMask = ~Mask_UpdateVisitor;
 
-        const auto smallestDistanceToChunk = (size > 1 / 8.f) ? (size * ESM::Land::REAL_SIZE) : 0.f;
+        auto cellSize = getCellSize(mWorldspace);
+        const auto smallestDistanceToChunk = (size > 1 / 8.f) ? (size * cellSize) : 0.f;
         const auto higherDistanceToChunk = [&] {
             if (!activeGrid)
                 return smallestDistanceToChunk + 1;
-            return ((size < 1) ? 5 : 3) * ESM::Land::REAL_SIZE * size + 1;
+            return ((size < 1) ? 5 : 3) * cellSize * size + 1;
         }();
 
         AnalyzeVisitor analyzeVisitor(copyMask);
@@ -581,7 +599,7 @@ namespace MWRender
             osg::Vec3f pos = ref.mPos.asVec3();
             if (size < 1.f)
             {
-                osg::Vec3f cellPos = pos / ESM::Land::REAL_SIZE;
+                osg::Vec3f cellPos = pos / cellSize;
                 if ((minBound.x() > std::floor(minBound.x()) && cellPos.x() < minBound.x())
                     || (minBound.y() > std::floor(minBound.y()) && cellPos.y() < minBound.y())
                     || (maxBound.x() < std::ceil(maxBound.x()) && cellPos.x() >= maxBound.x())
@@ -858,7 +876,7 @@ namespace MWRender
         {
             if (mActiveGridOnly && !std::get<2>(id))
                 return false;
-            pos /= ESM::Land::REAL_SIZE;
+            pos /= getCellSize(mWorldspace);
             clampToCell(pos);
             osg::Vec2f center = std::get<0>(id);
             float halfSize = std::get<1>(id) / 2;
@@ -872,6 +890,7 @@ namespace MWRender
         }
         osg::Vec3f mPosition;
         osg::Vec2i mCell;
+        ESM::RefId mWorldspace;
         std::set<MWRender::ChunkId> mToClear;
         bool mActiveGridOnly = false;
     };
@@ -895,6 +914,7 @@ namespace MWRender
         ClearCacheFunctor ccf;
         ccf.mPosition = pos;
         ccf.mCell = cell;
+        ccf.mWorldspace = mWorldspace;
         mCache->call(ccf);
         if (ccf.mToClear.empty())
             return false;
@@ -921,6 +941,7 @@ namespace MWRender
         ccf.mPosition = pos;
         ccf.mCell = cell;
         ccf.mActiveGridOnly = true;
+        ccf.mWorldspace = mWorldspace;
         mCache->call(ccf);
         if (ccf.mToClear.empty())
             return false;

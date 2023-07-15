@@ -1342,7 +1342,8 @@ namespace MWRender
                 lodFactor, vertexLodMod, maxCompGeometrySize, debugChunks, worldspace);
             if (Settings::Manager::getBool("object paging", "Terrain"))
             {
-                newChunkMgr.mObjectPaging = std::make_unique<ObjectPaging>(mResourceSystem->getSceneManager());
+                newChunkMgr.mObjectPaging
+                    = std::make_unique<ObjectPaging>(mResourceSystem->getSceneManager(), worldspace);
                 quadTreeWorld->addChunkManager(newChunkMgr.mObjectPaging.get());
                 mResourceSystem->addResourceManager(newChunkMgr.mObjectPaging.get());
             }
