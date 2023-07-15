@@ -428,6 +428,18 @@ namespace Nif
         nif->getUInt(); // Zero
     }
 
+    void BSEffectShaderPropertyFloatController::read(NIFStream* nif)
+    {
+        NiFloatInterpController::read(nif);
+        nif->read(mControlledVariable);
+    }
+
+    void BSEffectShaderPropertyColorController::read(NIFStream* nif)
+    {
+        NiPoint3InterpController::read(nif);
+        nif->read(mControlledColor);
+    }
+
     void NiControllerManager::read(NIFStream* nif)
     {
         Controller::read(nif);
@@ -636,17 +648,5 @@ namespace Nif
             if (!nif->getBoolean())
                 mScaleValue = 1.f;
         }
-    }
-
-    void BSEffectShaderPropertyFloatController::read(NIFStream* nif)
-    {
-        NiFloatInterpController::read(nif);
-        nif->read(mControlledVariable);
-    }
-
-    void BSEffectShaderPropertyColorController::read(NIFStream* nif)
-    {
-        NiPoint3InterpController::read(nif);
-        nif->read(mControlledColor);
     }
 }
