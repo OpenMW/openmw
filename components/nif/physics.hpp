@@ -225,6 +225,71 @@ namespace Nif
         void post(Reader& nif);
     };
 
+    enum class hkMotorType : uint8_t
+    {
+        Motor_None = 0,
+        Motor_Position = 1,
+        Motor_Velocity = 2,
+        Motor_SpringDamper = 3
+    };
+
+    struct bhkPositionConstraintMotor
+    {
+        float mMinForce, mMaxForce;
+        float mTau;
+        float mDamping;
+        float mProportionalRecoveryVelocity;
+        float mConstantRecoveryVelocity;
+        bool mEnabled;
+        void read(NIFStream* nif);
+    };
+
+    struct bhkVelocityConstraintMotor
+    {
+        float mMinForce, mMaxForce;
+        float mTau;
+        float mTargetVelocity;
+        bool mUseVelocityTarget;
+        bool mEnabled;
+        void read(NIFStream* nif);
+    };
+
+    struct bhkSpringDamperConstraintMotor
+    {
+        float mMinForce, mMaxForce;
+        float mSpringConstant;
+        float mSpringDamping;
+        bool mEnabled;
+        void read(NIFStream* nif);
+    };
+
+    struct bhkConstraintMotorCInfo
+    {
+        hkMotorType mType;
+        bhkPositionConstraintMotor mPositionMotor;
+        bhkVelocityConstraintMotor mVelocityMotor;
+        bhkSpringDamperConstraintMotor mSpringDamperMotor;
+        void read(NIFStream* nif);
+    };
+
+    struct bhkRagdollConstraintCInfo
+    {
+        struct EntityData
+        {
+            osg::Vec4f mPivot;
+            osg::Vec4f mPlane;
+            osg::Vec4f mTwist;
+            osg::Vec4f mMotor;
+        };
+        std::vector<EntityData> mEntityData;
+        float mConeMaxAngle;
+        float mPlaneMinAngle, mPlaneMaxAngle;
+        float mTwistMinAngle, mTwistMaxAngle;
+        float mMaxFriction;
+        bhkConstraintMotorCInfo mMotor;
+        void read(NIFStream* nif);
+    };
+
     /// Record types
 
     // Abstract Bethesda Havok object
@@ -453,6 +518,12 @@ namespace Nif
         bhkConstraintCInfo mInfo;
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
+    };
+
+    struct bhkRagdollConstraint : public bhkConstraint
+    {
+        bhkRagdollConstraintCInfo mConstraint;
+        void read(NIFStream* nif) override;
     };
 
 } // Namespace
