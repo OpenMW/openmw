@@ -88,6 +88,8 @@ namespace Nif
             { "NiBSPArrayController", &construct<NiBSPArrayController, RC_NiBSPArrayController> },
             { "NiParticleSystemController", &construct<NiParticleSystemController, RC_NiParticleSystemController> },
             { "NiFlipController", &construct<NiFlipController, RC_NiFlipController> },
+            { "NiTextureTransformController",
+                &construct<NiTextureTransformController, RC_NiTextureTransformController> },
             { "NiAmbientLight", &construct<NiLight, RC_NiLight> },
             { "NiDirectionalLight", &construct<NiLight, RC_NiLight> },
             { "NiPointLight", &construct<NiPointLight, RC_NiLight> },

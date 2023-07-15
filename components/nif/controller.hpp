@@ -25,6 +25,7 @@
 #define OPENMW_COMPONENTS_NIF_CONTROLLER_HPP
 
 #include "base.hpp"
+#include "property.hpp"
 
 namespace Nif
 {
@@ -283,6 +284,17 @@ namespace Nif
         int mTexSlot; // NiTexturingProperty::TextureType
         float mDelta; // Time between two flips. delta = (start_time - stop_time) / num_sources
         NiSourceTextureList mSources;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct NiTextureTransformController : public NiFloatInterpController
+    {
+        bool mShaderMap;
+        int mTexSlot; // NiTexturingProperty::TextureType
+        unsigned int mTransformMember;
+        NiFloatDataPtr mData;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
