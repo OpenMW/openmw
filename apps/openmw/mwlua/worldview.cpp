@@ -81,7 +81,10 @@ namespace MWLua
     void WorldView::load(ESM::ESMReader& esm)
     {
         esm.getHNT(mSimulationTime, "LUAW");
-        MWBase::Environment::get().getWorldModel()->setLastGeneratedRefNum(esm.getFormId(true));
+        ESM::FormId lastGenerated = esm.getFormId(true);
+        if (lastGenerated.hasContentFile())
+            throw std::runtime_error("Last generated RefNum is invalid");
+        MWBase::Environment::get().getWorldModel()->setLastGeneratedRefNum(lastGenerated);
     }
 
     void WorldView::save(ESM::ESMWriter& esm) const
