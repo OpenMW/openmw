@@ -49,7 +49,7 @@ namespace ESM
     {
     public:
         using Value
-            = std::variant<EmptyRefId, StringRefId, FormIdRefId, GeneratedRefId, IndexRefId, ESM3ExteriorCellRefId>;
+            = std::variant<EmptyRefId, ESM3ExteriorCellRefId, StringRefId, FormIdRefId, GeneratedRefId, IndexRefId>;
 
         // Constructs RefId from a serialized string containing byte by byte copy of RefId::mValue.
         static ESM::RefId deserialize(std::string_view value);
