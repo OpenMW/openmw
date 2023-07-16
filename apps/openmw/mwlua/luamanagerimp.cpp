@@ -2,6 +2,7 @@
 
 #include <filesystem>
 
+#include <MyGUI_InputManager.h>
 #include <osg/Stats>
 
 #include "sol/state_view.hpp"
@@ -349,6 +350,15 @@ namespace MWLua
             mActiveLocalScripts.erase(localScripts);
             if (!MWBase::Environment::get().getWorldModel()->getPtr(getId(ptr)).isEmpty())
                 mEngineEvents.addToQueue(EngineEvents::OnInactive{ getId(ptr) });
+        }
+    }
+
+    void LuaManager::inputEvent(const InputEvent& event)
+    {
+        if (!MyGUI::InputManager::getInstance().isModalAny()
+            && !MWBase::Environment::get().getWindowManager()->isConsoleMode())
+        {
+            mInputEvents.push_back(event);
         }
     }
 
