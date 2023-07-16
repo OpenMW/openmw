@@ -16,6 +16,11 @@ namespace MWWorld
     class ESMStore;
 }
 
+namespace ESM
+{
+    class ReadersCache;
+}
+
 namespace MWRender
 {
 
@@ -24,7 +29,7 @@ namespace MWRender
     class ObjectPaging : public Resource::GenericResourceManager<ChunkId>, public Terrain::QuadTreeWorld::ChunkManager
     {
     public:
-        ObjectPaging(Resource::SceneManager* sceneManager);
+        ObjectPaging(Resource::SceneManager* sceneManager, ESM::RefId worldspace);
         ~ObjectPaging() = default;
 
         osg::ref_ptr<osg::Node> getChunk(float size, const osg::Vec2f& center, unsigned char lod, unsigned int lodFlags,
@@ -77,6 +82,9 @@ namespace MWRender
 
         const RefTracker& getRefTracker() const { return mRefTracker; }
         RefTracker& getWritableRefTracker() { return mRefTrackerLocked ? mRefTrackerNew : mRefTracker; }
+
+        std::map<ESM::RefNum, ESM::CellRef> collectESM3References(
+            float size, const osg::Vec2i& startCell, ESM::ReadersCache& readers) const;
 
         std::mutex mSizeCacheMutex;
         typedef std::map<ESM::RefNum, float> SizeCache;
