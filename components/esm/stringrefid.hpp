@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <iosfwd>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <variant>
@@ -45,6 +46,9 @@ namespace ESM
         friend std::ostream& operator<<(std::ostream& stream, StringRefId value);
 
         friend struct std::hash<StringRefId>;
+
+        // Similar to the constructor but only returns preexisting ids
+        static std::optional<StringRefId> deserializeExisting(std::string_view value);
 
     private:
         Misc::NotNullPtr<const std::string> mValue;
