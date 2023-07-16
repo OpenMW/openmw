@@ -40,7 +40,7 @@ namespace MWGui
         /// @param reset Reset the pressed button to -1 after reading it.
         int readPressedButton(bool reset = true);
 
-        typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_Int;
+        typedef MyGUI::delegates::MultiDelegate<int> EventHandle_Int;
 
         // Note: this delegate unassigns itself after it was fired, i.e. works once.
         EventHandle_Int eventButtonPressed;

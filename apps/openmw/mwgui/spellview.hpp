@@ -43,7 +43,7 @@ namespace MWGui
         /// simplified update called each frame
         void incrementalUpdate();
 
-        typedef MyGUI::delegates::CMultiDelegate1<SpellModel::ModelIndex> EventHandle_ModelIndex;
+        typedef MyGUI::delegates::MultiDelegate<SpellModel::ModelIndex> EventHandle_ModelIndex;
         /// Fired when a spell was clicked
         EventHandle_ModelIndex eventSpellClicked;
 

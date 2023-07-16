@@ -26,7 +26,7 @@ namespace MWGui
 
     protected:
         void onOkClicked(MyGUI::Widget* _sender);
-        void onTextAccepted(MyGUI::Edit* _sender);
+        void onTextAccepted(MyGUI::EditBox* _sender);
 
     private:
         MyGUI::EditBox* mTextEdit;

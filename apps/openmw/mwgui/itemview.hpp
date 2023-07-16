@@ -20,8 +20,8 @@ namespace MWGui
         /// Takes ownership of \a model
         void setModel(std::unique_ptr<ItemModel> model);
 
-        typedef MyGUI::delegates::CMultiDelegate1<ItemModel::ModelIndex> EventHandle_ModelIndex;
-        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::MultiDelegate<ItemModel::ModelIndex> EventHandle_ModelIndex;
+        typedef MyGUI::delegates::MultiDelegate<> EventHandle_Void;
         /// Fired when an item was clicked
         EventHandle_ModelIndex eventItemClicked;
         /// Fired when the background was clicked (useful for drag and drop)

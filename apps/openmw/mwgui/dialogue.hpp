@@ -79,7 +79,7 @@ namespace MWGui
 
     struct Topic : Link
     {
-        typedef MyGUI::delegates::CMultiDelegate1<const std::string&> EventHandle_TopicId;
+        typedef MyGUI::delegates::MultiDelegate<const std::string&> EventHandle_TopicId;
         EventHandle_TopicId eventTopicActivated;
         Topic(const std::string& id)
             : mTopicId(id)
@@ -91,7 +91,7 @@ namespace MWGui
 
     struct Choice : Link
     {
-        typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_ChoiceId;
+        typedef MyGUI::delegates::MultiDelegate<int> EventHandle_ChoiceId;
         EventHandle_ChoiceId eventChoiceActivated;
         Choice(int id)
             : mChoiceId(id)
@@ -103,7 +103,7 @@ namespace MWGui
 
     struct Goodbye : Link
     {
-        typedef MyGUI::delegates::CMultiDelegate0 Event_Activated;
+        typedef MyGUI::delegates::MultiDelegate<> Event_Activated;
         Event_Activated eventActivated;
         void activated() override;
     };
@@ -145,7 +145,7 @@ namespace MWGui
         bool exit() override;
 
         // Events
-        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::MultiDelegate<> EventHandle_Void;
 
         void notifyLinkClicked(TypesetBook::InteractiveId link);
 

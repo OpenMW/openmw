@@ -26,7 +26,7 @@ namespace Gui
         void initialiseOverride() override;
         void shutdownOverride() override;
 
-        typedef MyGUI::delegates::CMultiDelegate1<int> EventHandle_ValueChanged;
+        typedef MyGUI::delegates::MultiDelegate<int> EventHandle_ValueChanged;
         EventHandle_ValueChanged eventValueChanged;
 
         /// @note Does not trigger eventValueChanged

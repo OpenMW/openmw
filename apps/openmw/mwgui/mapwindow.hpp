@@ -63,7 +63,7 @@ namespace MWGui
 
         RangeType getMarkers(const ESM::RefId& cellId) const;
 
-        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::MultiDelegate<> EventHandle_Void;
         EventHandle_Void eventMarkersChanged;
 
     private:
@@ -214,7 +214,7 @@ namespace MWGui
         void setText(const std::string& text);
         std::string getText();
 
-        typedef MyGUI::delegates::CMultiDelegate0 EventHandle_Void;
+        typedef MyGUI::delegates::MultiDelegate<> EventHandle_Void;
 
         EventHandle_Void eventDeleteClicked;
         EventHandle_Void eventOkClicked;
