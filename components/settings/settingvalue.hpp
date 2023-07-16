@@ -35,6 +35,7 @@ namespace Settings
         Vec3f,
         CollisionShapeType,
         StringArray,
+        MyGuiColour,
     };
 
     template <class T>
@@ -124,6 +125,12 @@ namespace Settings
         return SettingValueType::StringArray;
     }
 
+    template <>
+    inline constexpr SettingValueType getSettingValueType<MyGUI::Colour>()
+    {
+        return SettingValueType::MyGuiColour;
+    }
+
     inline constexpr std::string_view getSettingValueTypeName(SettingValueType type)
     {
         switch (type)
@@ -156,6 +163,8 @@ namespace Settings
                 return "collision shape type";
             case SettingValueType::StringArray:
                 return "string array";
+            case SettingValueType::MyGuiColour:
+                return "colour";
         }
         return "unsupported";
     }

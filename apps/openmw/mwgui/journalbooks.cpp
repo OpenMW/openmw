@@ -4,6 +4,7 @@
 #include "../mwbase/windowmanager.hpp"
 
 #include <components/misc/utf8stream.hpp>
+#include <components/settings/values.hpp>
 
 #include "textcolours.hpp"
 
@@ -274,13 +275,11 @@ namespace MWGui
 
         BookTypesetter::Style* body = typesetter->createStyle({}, MyGUI::Colour::Black);
 
-        int fontHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
-
         // for small font size split alphabet to two columns (2x15 characers), for big font size split it to three
         // colums (3x10 characters).
         int sectionBreak = 10;
         mIndexPagesCount = 3;
-        if (fontHeight < 18)
+        if (Settings::gui().mFontSize < 18)
         {
             sectionBreak = 15;
             mIndexPagesCount = 2;

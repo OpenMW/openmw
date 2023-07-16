@@ -239,14 +239,12 @@ namespace MWGui
         const MWWorld::Ptr& getSelectedEnchantItem() const override;
         void setSelectedWeapon(const MWWorld::Ptr& item) override;
         const MWWorld::Ptr& getSelectedWeapon() const override;
-        int getFontHeight() const override;
         void unsetSelectedSpell() override;
         void unsetSelectedWeapon() override;
 
         void updateConsoleObjectPtr(const MWWorld::Ptr& currentPtr, const MWWorld::Ptr& newPtr) override;
 
         void showCrosshair(bool show) override;
-        bool getSubtitlesEnabled() override;
 
         /// Turn visibility of HUD on or off
         bool toggleHud() override;
@@ -460,9 +458,6 @@ namespace MWGui
         MyGUI::Widget* mInputBlocker;
 
         bool mCrosshairEnabled;
-        bool mSubtitlesEnabled;
-        bool mHitFaderEnabled;
-        bool mWerewolfOverlayEnabled;
         bool mHudEnabled;
         bool mCursorVisible;
         bool mCursorActive;

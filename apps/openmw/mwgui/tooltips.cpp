@@ -35,8 +35,7 @@ namespace MWGui
         , mFocusToolTipX(0.0)
         , mFocusToolTipY(0.0)
         , mHorizontalScrollIndex(0)
-        , mDelay(0.0)
-        , mRemainingDelay(0.0)
+        , mRemainingDelay(Settings::gui().mTooltipDelay)
         , mLastMouseX(0)
         , mLastMouseY(0)
         , mEnabled(true)
@@ -51,9 +50,6 @@ namespace MWGui
         // even if the mouse is over the tooltip
         mDynamicToolTipBox->setNeedMouseFocus(false);
         mMainWidget->setNeedMouseFocus(false);
-
-        mDelay = Settings::Manager::getFloat("tooltip delay", "GUI");
-        mRemainingDelay = mDelay;
 
         for (unsigned int i = 0; i < mMainWidget->getChildCount(); ++i)
         {
@@ -140,7 +136,7 @@ namespace MWGui
                 else
                 {
                     mHorizontalScrollIndex = 0;
-                    mRemainingDelay = mDelay;
+                    mRemainingDelay = Settings::gui().mTooltipDelay;
                 }
                 mLastMouseX = mousePos.left;
                 mLastMouseY = mousePos.top;
@@ -960,11 +956,4 @@ namespace MWGui
                       .asUTF8());
         widget->setUserString("ImageTexture_MagicEffectImage", icon);
     }
-
-    void ToolTips::setDelay(float delay)
-    {
-        mDelay = delay;
-        mRemainingDelay = mDelay;
-    }
-
 }

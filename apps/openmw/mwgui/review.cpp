@@ -10,6 +10,7 @@
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/loadspel.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -274,7 +275,7 @@ namespace MWGui
         groupWidget->setCaption(toUString(label));
         mSkillWidgets.push_back(groupWidget);
 
-        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
         coord1.top += lineHeight;
         coord2.top += lineHeight;
     }
@@ -297,7 +298,7 @@ namespace MWGui
         mSkillWidgets.push_back(skillNameWidget);
         mSkillWidgets.push_back(skillValueWidget);
 
-        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
         coord1.top += lineHeight;
         coord2.top += lineHeight;
 
@@ -315,7 +316,7 @@ namespace MWGui
 
         mSkillWidgets.push_back(skillNameWidget);
 
-        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
         coord1.top += lineHeight;
         coord2.top += lineHeight;
     }
@@ -331,7 +332,7 @@ namespace MWGui
 
         mSkillWidgets.push_back(widget);
 
-        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
         coord1.top += lineHeight;
         coord2.top += lineHeight;
     }

@@ -5,14 +5,16 @@
 
 #include "components/detournavigator/collisionshapetype.hpp"
 
+#include <filesystem>
 #include <set>
 #include <string>
 #include <string_view>
 #include <vector>
 
-#include <filesystem>
 #include <osg/Vec2f>
 #include <osg/Vec3f>
+
+#include <MyGUI_Colour.h>
 
 namespace Files
 {
@@ -105,6 +107,7 @@ namespace Settings
         static void set(std::string_view setting, std::string_view category, const osg::Vec3f& value);
         static void set(std::string_view setting, std::string_view category, DetourNavigator::CollisionShapeType value);
         static void set(std::string_view setting, std::string_view category, const std::vector<std::string>& value);
+        static void set(std::string_view setting, std::string_view category, const MyGUI::Colour& value);
 
     private:
         static std::set<std::pair<std::string_view, std::string_view>> sInitialized;
@@ -187,6 +190,12 @@ namespace Settings
         std::string_view setting, std::string_view category)
     {
         return getStringArray(setting, category);
+    }
+
+    template <>
+    inline MyGUI::Colour Manager::getImpl<MyGUI::Colour>(std::string_view setting, std::string_view category)
+    {
+        return MyGUI::Colour::parse(getString(setting, category));
     }
 }
 

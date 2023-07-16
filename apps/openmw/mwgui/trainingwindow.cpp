@@ -84,7 +84,7 @@ namespace MWGui
 
         MWMechanics::NpcStats& pcStats = player.getClass().getNpcStats(player);
 
-        const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
 
         for (int i = 0; i < 3; ++i)
         {

@@ -6,13 +6,12 @@
 #include <MyGUI_TextBox.h>
 
 #include <components/debug/debuglog.hpp>
-// correctIconPath
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/windowmanager.hpp"
 
 #include "../mwworld/class.hpp"
 
@@ -20,13 +19,11 @@ namespace
 {
     std::string getCountString(int count)
     {
-        static const int fontHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
-
         if (count == 1)
             return {};
 
         // With small text size we can use up to 4 characters, while with large ones - only up to 3.
-        if (fontHeight > 16)
+        if (Settings::gui().mFontSize > 16)
         {
             if (count > 999999999)
                 return MyGUI::utility::toString(count / 1000000000) + "b";

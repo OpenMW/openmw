@@ -14,10 +14,10 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
-#include "../mwbase/windowmanager.hpp"
 #include "../mwscript/interpretercontext.hpp"
 
 namespace MWGui::Formatting
@@ -452,7 +452,7 @@ namespace MWGui::Formatting
     int TextElement::pageSplit()
     {
         // split lines
-        const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
+        const int lineHeight = Settings::gui().mFontSize;
         unsigned int lastLine = (mPaginator.getStartTop() + mPaginator.getPageHeight() - mPaginator.getCurrentTop());
         if (lineHeight > 0)
             lastLine /= lineHeight;

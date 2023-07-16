@@ -5,10 +5,10 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/opcodes.hpp>
 #include <components/interpreter/runtime.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
-#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
@@ -40,7 +40,7 @@ namespace MWScript
 
                 MWBase::Environment::get().getSoundManager()->say(ptr, file);
 
-                if (MWBase::Environment::get().getWindowManager()->getSubtitlesEnabled())
+                if (Settings::gui().mSubtitles)
                     context.messageBox(text);
             }
         };

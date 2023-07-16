@@ -1,6 +1,7 @@
 #include "merchantrepair.hpp"
 
 #include <components/esm3/loadgmst.hpp>
+#include <components/settings/values.hpp>
 
 #include <MyGUI_Button.h>
 #include <MyGUI_Gui.h>
@@ -36,7 +37,7 @@ namespace MWGui
         while (mList->getChildCount())
             MyGUI::Gui::getInstance().destroyWidget(mList->getChildAt(0));
 
-        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
         int currentY = 0;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();

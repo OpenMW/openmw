@@ -7,6 +7,7 @@
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadgmst.hpp>
 #include <components/misc/strings/conversion.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -79,7 +80,7 @@ namespace MWGui
         // Apply followers cost, unlike vanilla the first follower doesn't travel for free
         price *= 1 + static_cast<int>(followers.size());
 
-        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
 
         MyGUI::Button* toAdd = mDestinationsView->createWidget<MyGUI::Button>(
             "SandTextButton", 0, mCurrentY, 200, lineHeight, MyGUI::Align::Default);
