@@ -141,6 +141,7 @@ namespace Nif
 
         bool doubleSided() const { return (flags2 >> 4) & 1; }
         bool treeAnim() const { return (flags2 >> 29) & 1; }
+        bool decal() const { return (flags1 >> 26) & 1; }
     };
 
     struct BSShaderLightingProperty : public BSShaderProperty

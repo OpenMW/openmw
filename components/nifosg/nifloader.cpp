@@ -36,6 +36,7 @@
 #include <osg/FrontFace>
 #include <osg/Material>
 #include <osg/PolygonMode>
+#include <osg/PolygonOffset>
 #include <osg/Stencil>
 #include <osg/TexEnv>
 #include <osg/TexEnvCombine>
@@ -48,6 +49,7 @@
 #include <components/nif/niffile.hpp>
 #include <components/nif/node.hpp>
 #include <components/nif/property.hpp>
+#include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/skeleton.hpp>
@@ -2479,6 +2481,31 @@ namespace NifOsg
                         mat->setShininess(osg::Material::FRONT_AND_BACK, shaderprop->mGlossiness);
                         emissiveMult = shaderprop->mEmissiveMult;
                         specStrength = shaderprop->mSpecStrength;
+                        if (shaderprop->decal())
+                        {
+                            osg::StateSet* stateset = node->getOrCreateStateSet();
+                            if (!mPushedSorter && !hasSortAlpha)
+                                stateset->setRenderBinDetails(1, "SORT_BACK_TO_FRONT");
+                            osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
+                            polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
+                            polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
+                            stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
+                        }
+                        break;
+                    }
+                    case Nif::RC_BSEffectShaderProperty:
+                    {
+                        auto shaderprop = static_cast<const Nif::BSEffectShaderProperty*>(property);
+                        if (shaderprop->decal())
+                        {
+                            osg::StateSet* stateset = node->getOrCreateStateSet();
+                            if (!mPushedSorter && !hasSortAlpha)
+                                stateset->setRenderBinDetails(1, "SORT_BACK_TO_FRONT");
+                            osg::ref_ptr<osg::PolygonOffset> polygonOffset(new osg::PolygonOffset);
+                            polygonOffset->setUnits(SceneUtil::AutoDepth::isReversed() ? 1.f : -1.f);
+                            polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
+                            stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
+                        }
                         break;
                     }
                     default:
