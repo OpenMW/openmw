@@ -422,10 +422,38 @@ namespace Nif
         postRecordList(nif, mSources);
     }
 
+    void NiTextureTransformController::read(NIFStream* nif)
+    {
+        NiFloatInterpController::read(nif);
+        mShaderMap = nif->getBoolean();
+        nif->read(mTexSlot);
+        nif->read(mTransformMember);
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 103))
+            mData.read(nif);
+    }
+
+    void NiTextureTransformController::post(Reader& nif)
+    {
+        NiFloatInterpController::post(nif);
+        mData.post(nif);
+    }
+
     void bhkBlendController::read(NIFStream* nif)
     {
         Controller::read(nif);
         nif->getUInt(); // Zero
+    }
+
+    void BSEffectShaderPropertyFloatController::read(NIFStream* nif)
+    {
+        NiFloatInterpController::read(nif);
+        nif->read(mControlledVariable);
+    }
+
+    void BSEffectShaderPropertyColorController::read(NIFStream* nif)
+    {
+        NiPoint3InterpController::read(nif);
+        nif->read(mControlledColor);
     }
 
     void NiControllerManager::read(NIFStream* nif)
@@ -636,17 +664,5 @@ namespace Nif
             if (!nif->getBoolean())
                 mScaleValue = 1.f;
         }
-    }
-
-    void BSEffectShaderPropertyFloatController::read(NIFStream* nif)
-    {
-        NiFloatInterpController::read(nif);
-        nif->read(mControlledVariable);
-    }
-
-    void BSEffectShaderPropertyColorController::read(NIFStream* nif)
-    {
-        NiPoint3InterpController::read(nif);
-        nif->read(mControlledColor);
     }
 }

@@ -70,6 +70,7 @@ namespace Nif
         RC_NiBSPArrayController,
         RC_NiParticleSystemController,
         RC_NiFlipController,
+        RC_NiTextureTransformController,
         RC_NiBSAnimationNode,
         RC_NiLight,
         RC_NiTextureEffect,
