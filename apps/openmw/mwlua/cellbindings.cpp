@@ -88,19 +88,15 @@ namespace MWLua
                     return true;
                 };
 
-                bool ok = false;
-                sol::optional<uint32_t> typeId = sol::nullopt;
-                if (type.has_value())
-                    typeId = ids[*type];
+                bool ok = true;
+                if (!type.has_value())
+                    cell.mStore->forEach(std::move(visitor));
+                else if (ids[*type] == sol::nil)
+                    ok = false;
                 else
                 {
-                    ok = true;
-                    cell.mStore->forEach(std::move(visitor));
-                }
-                if (typeId.has_value())
-                {
-                    ok = true;
-                    switch (*typeId)
+                    uint32_t typeId = ids[*type];
+                    switch (typeId)
                     {
                         case ESM::REC_INTERNAL_PLAYER:
                         {

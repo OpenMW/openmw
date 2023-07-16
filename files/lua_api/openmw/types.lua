@@ -592,10 +592,11 @@
 -- @field #SkillStats skills
 
 
---- @{#Item} functions (all pickable items that can be placed to an inventory or container)
+--------------------------------------------------------------------------------
+-- @{#Item} functions (all items that can be placed to an inventory or container)
 -- @field [parent=#types] #Item Item
 
---- Functions for pickable items that can be placed to an inventory or container
+--- Functions for items that can be placed to an inventory or container
 -- @type Item
 
 ---
@@ -607,16 +608,26 @@
 ---
 -- Get this item's current enchantment charge.
 -- @function [parent=#Item] getEnchantmentCharge
--- @param #Item item
+-- @param openmw.core#GameObject item
 -- @return #number The charge remaining. -1 if the enchantment has never been used, implying the charge is full. Unenchanted items will always return a value of -1.
 
 ---
 -- Set this item's enchantment charge.
 -- @function [parent=#Item] setEnchantmentCharge
--- @param #Item item
+-- @param openmw.core#GameObject item
 -- @param #number charge
 
---- @{#Creature} functions
+---
+-- Whether the object is supposed to be carriable. It is true for all items except
+-- lights without the Carry flag. Non-carriable lights can still be put into
+-- an inventory with an explicit `object:moveInto` call.
+-- @function [parent=#Item] isCarriable
+-- @param openmw.core#GameObject object
+-- @return #boolean
+
+
+--------------------------------------------------------------------------------
+-- @{#Creature} functions
 -- @field [parent=#types] #Creature Creature
 
 ---

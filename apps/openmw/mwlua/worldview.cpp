@@ -51,7 +51,7 @@ namespace MWLua
             return &mDoorsInScene;
         if (typeid(cls) == typeid(MWClass::Container))
             return &mContainersInScene;
-        if (cls.isItem(ptr))
+        if (cls.isItem(ptr) || ptr.mRef->getType() == ESM::REC_LIGH)
             return &mItemsInScene;
         return nullptr;
     }
