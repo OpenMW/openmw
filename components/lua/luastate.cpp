@@ -246,6 +246,9 @@ namespace LuaUtil
                 local nextFn, t, firstKey = ipairs(getmetatable(v).t)
                 return function(_, k) return nextFn(t, k) end, v, firstKey
             end
+            function lenForReadOnly(v)
+                return #getmetatable(v).t
+            end
             local function nextForArray(array, index)
                 index = (index or 0) + 1
                 if index <= #array then
@@ -300,6 +303,7 @@ namespace LuaUtil
             meta["__index"] = table;
         meta["__pairs"] = lua["pairsForReadOnly"];
         meta["__ipairs"] = lua["ipairsForReadOnly"];
+        meta["__len"] = lua["lenForReadOnly"];
 
         lua_newuserdata(luaState, 0);
         sol::stack::push(luaState, meta);
