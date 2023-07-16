@@ -187,6 +187,125 @@ namespace Nif
             nif->skip(12); // Unused
     }
 
+    void bhkConstraintCInfo::read(NIFStream* nif)
+    {
+        nif->get<unsigned int>(); // Number of entities, unused
+        mEntityA.read(nif);
+        mEntityB.read(nif);
+
+        mPriority = static_cast<ConstraintPriority>(nif->get<uint32_t>());
+    }
+
+    void bhkConstraintCInfo::post(Reader& nif)
+    {
+        mEntityA.post(nif);
+        mEntityB.post(nif);
+    }
+
+    void bhkPositionConstraintMotor::read(NIFStream* nif)
+    {
+        nif->read(mMinForce);
+        nif->read(mMaxForce);
+        nif->read(mTau);
+        nif->read(mDamping);
+        nif->read(mProportionalRecoveryVelocity);
+        nif->read(mConstantRecoveryVelocity);
+        mEnabled = nif->getBoolean();
+    }
+
+    void bhkVelocityConstraintMotor::read(NIFStream* nif)
+    {
+        nif->read(mMinForce);
+        nif->read(mMaxForce);
+        nif->read(mTau);
+        nif->read(mTargetVelocity);
+        mUseVelocityTarget = nif->getBoolean();
+        mEnabled = nif->getBoolean();
+    }
+
+    void bhkSpringDamperConstraintMotor::read(NIFStream* nif)
+    {
+        nif->read(mMinForce);
+        nif->read(mMaxForce);
+        nif->read(mSpringConstant);
+        nif->read(mSpringDamping);
+        mEnabled = nif->getBoolean();
+    }
+
+    void bhkConstraintMotorCInfo::read(NIFStream* nif)
+    {
+        mType = static_cast<hkMotorType>(nif->get<uint32_t>());
+        switch (mType)
+        {
+            case hkMotorType::Motor_Position:
+                mPositionMotor.read(nif);
+                break;
+            case hkMotorType::Motor_Velocity:
+                mVelocityMotor.read(nif);
+                break;
+            case hkMotorType::Motor_SpringDamper:
+                mSpringDamperMotor.read(nif);
+                break;
+            case hkMotorType::Motor_None:
+            default:
+                break;
+        }
+    }
+
+    void bhkRagdollConstraintCInfo::read(NIFStream* nif)
+    {
+        if (nif->getBethVersion() <= 16)
+        {
+            nif->read(mDataA.mPivot);
+            nif->read(mDataA.mPlane);
+            nif->read(mDataA.mTwist);
+            nif->read(mDataB.mPivot);
+            nif->read(mDataB.mPlane);
+            nif->read(mDataB.mTwist);
+        }
+        else
+        {
+            nif->read(mDataA.mTwist);
+            nif->read(mDataA.mPlane);
+            nif->read(mDataA.mMotor);
+            nif->read(mDataA.mPivot);
+            nif->read(mDataB.mTwist);
+            nif->read(mDataB.mPlane);
+            nif->read(mDataB.mMotor);
+            nif->read(mDataB.mPivot);
+        }
+        nif->read(mConeMaxAngle);
+        nif->read(mPlaneMinAngle);
+        nif->read(mPlaneMaxAngle);
+        nif->read(mTwistMinAngle);
+        nif->read(mTwistMaxAngle);
+        nif->read(mMaxFriction);
+        if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > 16)
+            mMotor.read(nif);
+    }
+
+    void bhkHingeConstraintCInfo::read(NIFStream* nif)
+    {
+        if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
+        {
+            nif->read(mDataA.mPivot);
+            nif->read(mDataA.mPerpAxis1);
+            nif->read(mDataA.mPerpAxis2);
+            nif->read(mDataB.mPivot);
+            nif->read(mDataB.mAxis);
+        }
+        else
+        {
+            nif->read(mDataA.mAxis);
+            nif->read(mDataA.mPerpAxis1);
+            nif->read(mDataA.mPerpAxis2);
+            nif->read(mDataA.mPivot);
+            nif->read(mDataB.mAxis);
+            nif->read(mDataB.mPerpAxis1);
+            nif->read(mDataB.mPerpAxis2);
+            nif->read(mDataB.mPivot);
+        }
+    }
     /// Record types
 
     void bhkCollisionObject::read(NIFStream* nif)
@@ -448,4 +567,27 @@ namespace Nif
         nif->readArray(mat);
         mTransform.set(mat.data());
     }
+
+    void bhkConstraint::read(NIFStream* nif)
+    {
+        mInfo.read(nif);
+    }
+
+    void bhkConstraint::post(Reader& nif)
+    {
+        mInfo.post(nif);
+    }
+
+    void bhkRagdollConstraint::read(NIFStream* nif)
+    {
+        bhkConstraint::read(nif);
+        mConstraint.read(nif);
+    }
+
+    void bhkHingeConstraint::read(NIFStream* nif)
+    {
+        bhkConstraint::read(nif);
+        mConstraint.read(nif);
+    }
+
 } // Namespace

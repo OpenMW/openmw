@@ -210,6 +210,102 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
+    enum class ConstraintPriority : uint32_t
+    {
+        Priority_Invalid = 0,
+        Priority_PhysicsTime = 1,
+        Priority_TimeOfImpact = 3
+    };
+
+    struct bhkConstraintCInfo
+    {
+        bhkEntityPtr mEntityA;
+        bhkEntityPtr mEntityB;
+        ConstraintPriority mPriority;
+        void read(NIFStream* nif);
+        void post(Reader& nif);
+    };
+
+    enum class hkMotorType : uint8_t
+    {
+        Motor_None = 0,
+        Motor_Position = 1,
+        Motor_Velocity = 2,
+        Motor_SpringDamper = 3
+    };
+
+    struct bhkPositionConstraintMotor
+    {
+        float mMinForce, mMaxForce;
+        float mTau;
+        float mDamping;
+        float mProportionalRecoveryVelocity;
+        float mConstantRecoveryVelocity;
+        bool mEnabled;
+        void read(NIFStream* nif);
+    };
+
+    struct bhkVelocityConstraintMotor
+    {
+        float mMinForce, mMaxForce;
+        float mTau;
+        float mTargetVelocity;
+        bool mUseVelocityTarget;
+        bool mEnabled;
+        void read(NIFStream* nif);
+    };
+
+    struct bhkSpringDamperConstraintMotor
+    {
+        float mMinForce, mMaxForce;
+        float mSpringConstant;
+        float mSpringDamping;
+        bool mEnabled;
+        void read(NIFStream* nif);
+    };
+
+    struct bhkConstraintMotorCInfo
+    {
+        hkMotorType mType;
+        bhkPositionConstraintMotor mPositionMotor;
+        bhkVelocityConstraintMotor mVelocityMotor;
+        bhkSpringDamperConstraintMotor mSpringDamperMotor;
+        void read(NIFStream* nif);
+    };
+
+    struct bhkRagdollConstraintCInfo
+    {
+        struct Data
+        {
+            osg::Vec4f mPivot;
+            osg::Vec4f mPlane;
+            osg::Vec4f mTwist;
+            osg::Vec4f mMotor;
+        };
+        Data mDataA;
+        Data mDataB;
+        float mConeMaxAngle;
+        float mPlaneMinAngle, mPlaneMaxAngle;
+        float mTwistMinAngle, mTwistMaxAngle;
+        float mMaxFriction;
+        bhkConstraintMotorCInfo mMotor;
+        void read(NIFStream* nif);
+    };
+
+    struct bhkHingeConstraintCInfo
+    {
+        struct HingeData
+        {
+            osg::Vec4f mPivot;
+            osg::Vec4f mAxis;
+            osg::Vec4f mPerpAxis1;
+            osg::Vec4f mPerpAxis2;
+        };
+        HingeData mDataA;
+        HingeData mDataB;
+        void read(NIFStream* nif);
+    };
+
     /// Record types
 
     // Abstract Bethesda Havok object
@@ -431,5 +527,26 @@ namespace Nif
         osg::Matrixf mTransform;
         void read(NIFStream* nif) override;
     };
+
+    // Abstract constraint
+    struct bhkConstraint : public bhkSerializable
+    {
+        bhkConstraintCInfo mInfo;
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct bhkRagdollConstraint : public bhkConstraint
+    {
+        bhkRagdollConstraintCInfo mConstraint;
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkHingeConstraint : public bhkConstraint
+    {
+        bhkHingeConstraintCInfo mConstraint;
+        void read(NIFStream* nif) override;
+    };
+
 } // Namespace
 #endif

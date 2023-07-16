@@ -137,6 +137,7 @@ namespace Nif
     struct bhkWorldObject;
     struct bhkShape;
     struct bhkSerializable;
+    struct bhkEntity;
     struct hkPackedNiTriStripsData;
     struct NiAccumulator;
     struct NiInterpolator;
@@ -175,6 +176,7 @@ namespace Nif
     using NiCollisionObjectPtr = RecordPtrT<NiCollisionObject>;
     using bhkWorldObjectPtr = RecordPtrT<bhkWorldObject>;
     using bhkShapePtr = RecordPtrT<bhkShape>;
+    using bhkEntityPtr = RecordPtrT<bhkEntity>;
     using hkPackedNiTriStripsDataPtr = RecordPtrT<hkPackedNiTriStripsData>;
     using NiAccumulatorPtr = RecordPtrT<NiAccumulator>;
     using NiInterpolatorPtr = RecordPtrT<NiInterpolator>;
@@ -194,6 +196,7 @@ namespace Nif
     using NiTriStripsDataList = RecordListT<NiTriStripsData>;
     using bhkShapeList = RecordListT<bhkShape>;
     using bhkSerializableList = RecordListT<bhkSerializable>;
+    using bhkEntityList = RecordListT<bhkEntity>;
     using NiControllerSequenceList = RecordListT<NiControllerSequence>;
 
 } // Namespace
