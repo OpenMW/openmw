@@ -66,10 +66,6 @@ namespace MWGui
         virtual MWWorld::Ptr moveItem(
             const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip = true);
 
-        /// Unstacks items from this model and returns a ptr to the new remainder stack.
-        /// @note Returns en empty ptr if there is no remainder or the item model does not support unstacking.
-        virtual MWWorld::Ptr unstackItem(const ItemStack& item, size_t count);
-
         virtual MWWorld::Ptr addItem(const ItemStack& item, size_t count, bool allowAutoEquip = true) = 0;
         virtual void removeItem(const ItemStack& item, size_t count) = 0;
 
@@ -100,7 +96,6 @@ namespace MWGui
         bool onDropItem(const MWWorld::Ptr& item, int count) override;
         bool onTakeItem(const MWWorld::Ptr& item, int count) override;
 
-        MWWorld::Ptr unstackItem(const ItemStack& item, size_t count) override;
         MWWorld::Ptr addItem(const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
         void removeItem(const ItemStack& item, size_t count) override;
         ModelIndex getIndex(const ItemStack& item) override;

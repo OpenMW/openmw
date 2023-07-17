@@ -2063,7 +2063,7 @@ namespace MWWorld
 
         MWWorld::Ptr dropped = object.getClass().copyToCell(object, *cell, pos, count);
 
-        addObjectToCell(dropped, cell, pos, adjustPos);
+        initObjectInCell(dropped, *cell, adjustPos);
 
         return dropped;
     }
@@ -2079,30 +2079,16 @@ namespace MWWorld
             cell = &mWorldModel.getExterior(index);
         }
 
-        MWWorld::Ptr dropped = object.getClass().moveToCell(object, *cell);
-        dropped.getRefData().setCount(count);
-        dropped.getRefData().setPosition(pos);
+        MWWorld::Ptr dropped = object.getClass().moveToCell(object, *cell, pos, count);
 
-        addObjectToCell(dropped, cell, pos, adjustPos);
+        initObjectInCell(dropped, *cell, adjustPos);
 
         return dropped;
     }
 
-    void World::addObjectToCell(const Ptr& object, CellStore* cell, ESM::Position pos, bool adjustPos)
+    void World::initObjectInCell(const Ptr& object, CellStore& cell, bool adjustPos)
     {
-        if (!cell)
-            throw std::runtime_error("addObjectToCell(): cannot add object to null cell");
-        if (cell->isExterior())
-        {
-            const ESM::ExteriorCellLocation index
-                = ESM::positionToExteriorCellLocation(pos.pos[0], pos.pos[1], cell->getCell()->getWorldSpace());
-            cell = &mWorldModel.getExterior(index);
-        }
-
-        // Reset some position values that could be uninitialized if this item came from a container
-        object.getCellRef().setPosition(pos);
-
-        if (mWorldScene->isCellActive(*cell))
+        if (mWorldScene->isCellActive(cell))
         {
             if (object.getRefData().isEnabled())
             {
@@ -2113,7 +2099,7 @@ namespace MWWorld
             {
                 mLocalScripts.add(script, object);
             }
-            addContainerScripts(object, cell);
+            addContainerScripts(object, &cell);
         }
 
         if (!object.getClass().isActor() && adjustPos && object.getRefData().getBaseNode())
@@ -2125,6 +2111,7 @@ namespace MWWorld
             osg::BoundingBox bounds = computeBounds.getBoundingBox();
             if (bounds.valid())
             {
+                ESM::Position pos = object.getRefData().getPosition();
                 bounds.set(bounds._min - pos.asVec3(), bounds._max - pos.asVec3());
 
                 osg::Vec3f adjust(

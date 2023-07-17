@@ -53,15 +53,6 @@ namespace MWGui
         return *mActor.getClass().getContainerStore(mActor).add(item.mBase, count, allowAutoEquip);
     }
 
-    MWWorld::Ptr InventoryItemModel::unstackItem(const ItemStack& item, size_t count)
-    {
-        MWWorld::ContainerStore& store = mActor.getClass().getContainerStore(mActor);
-        auto it = store.unstack(item.mBase, count);
-        if (it != store.end())
-            return *it;
-        return MWWorld::Ptr();
-    }
-
     void InventoryItemModel::removeItem(const ItemStack& item, size_t count)
     {
         int removed = 0;

@@ -67,14 +67,9 @@ namespace MWGui
             ret.getCellRef().unsetRefNum();
             ret.getRefData().setLuaScripts(nullptr);
             MWBase::Environment::get().getWorldModel()->registerPtr(ret);
+            MWBase::Environment::get().getWorldModel()->registerPtr(item.mBase);
         }
         return ret;
-    }
-
-    MWWorld::Ptr ItemModel::unstackItem(const ItemStack& item, size_t count)
-    {
-        // By default does nothing
-        return MWWorld::Ptr();
     }
 
     bool ItemModel::allowedToUseItems() const
@@ -149,11 +144,6 @@ namespace MWGui
     bool ProxyItemModel::onTakeItem(const MWWorld::Ptr& item, int count)
     {
         return mSourceModel->onTakeItem(item, count);
-    }
-
-    MWWorld::Ptr ProxyItemModel::unstackItem(const ItemStack& item, size_t count)
-    {
-        return mSourceModel->unstackItem(item, count);
     }
 
     MWWorld::Ptr ProxyItemModel::addItem(const ItemStack& item, size_t count, bool allowAutoEquip)
