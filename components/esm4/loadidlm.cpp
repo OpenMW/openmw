@@ -76,7 +76,12 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
                     reader.getFormId(value);
                 break;
             }
+            case ESM4::SUB_MODL:
+                reader.getZString(mModel);
+                break;
             case ESM4::SUB_OBND: // object bounds
+            case ESM4::SUB_MODT:
+            case ESM4::SUB_MODS:
                 reader.skipSubRecordData();
                 break;
             default:
