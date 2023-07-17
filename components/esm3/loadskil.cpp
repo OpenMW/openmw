@@ -5,6 +5,8 @@
 
 #include <components/misc/strings/algorithm.hpp>
 
+#include <cstdint>
+
 namespace ESM
 {
     const SkillId Skill::Block("Block");
@@ -42,7 +44,7 @@ namespace ESM
 
         bool hasIndex = false;
         bool hasData = false;
-        int index = -1;
+        int32_t index = -1;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
@@ -89,7 +91,7 @@ namespace ESM
         mDescription.clear();
     }
 
-    static const RefId sSkills[] = {
+    static const RefId sSkills[Skill::Length] = {
         Skill::Block,
         Skill::Armorer,
         Skill::MediumArmor,

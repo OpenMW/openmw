@@ -49,7 +49,7 @@ namespace ESM
             mWerewolfDeprecatedData = true;
             std::vector<StatState<float>> skills(mSkills.begin(), mSkills.end());
 
-            for (int i = 0; i < ESM::Skill::Length; ++i)
+            for (size_t i = 0; i < std::size(mSkills); ++i)
             {
                 StatState<float> skill;
                 skill.load(esm, intFallback);
