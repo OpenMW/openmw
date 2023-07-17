@@ -8,6 +8,7 @@
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/manualref.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -51,6 +52,14 @@ namespace MWGui
         if (item.mBase.getContainerStore() == &mActor.getClass().getContainerStore(mActor))
             throw std::runtime_error("Item to add needs to be from a different container!");
         return *mActor.getClass().getContainerStore(mActor).add(item.mBase, count, allowAutoEquip);
+    }
+
+    MWWorld::Ptr InventoryItemModel::copyItem(const ItemStack& item, size_t count, bool allowAutoEquip)
+    {
+        if (item.mBase.getContainerStore() == &mActor.getClass().getContainerStore(mActor))
+            throw std::runtime_error("Item to copy needs to be from a different container!");
+        return *mActor.getClass().getContainerStore(mActor).add(
+            item.mBase.getCellRef().getRefId(), count, allowAutoEquip);
     }
 
     void InventoryItemModel::removeItem(const ItemStack& item, size_t count)

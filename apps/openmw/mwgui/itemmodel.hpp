@@ -67,6 +67,7 @@ namespace MWGui
             const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip = true);
 
         virtual MWWorld::Ptr addItem(const ItemStack& item, size_t count, bool allowAutoEquip = true) = 0;
+        virtual MWWorld::Ptr copyItem(const ItemStack& item, size_t count, bool allowAutoEquip = true) = 0;
         virtual void removeItem(const ItemStack& item, size_t count) = 0;
 
         /// Is the player allowed to use items from this item model? (default true)
@@ -97,6 +98,7 @@ namespace MWGui
         bool onTakeItem(const MWWorld::Ptr& item, int count) override;
 
         MWWorld::Ptr addItem(const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
+        MWWorld::Ptr copyItem(const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
         void removeItem(const ItemStack& item, size_t count) override;
         ModelIndex getIndex(const ItemStack& item) override;
 

@@ -7,6 +7,8 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 
+#include <components/debug/debuglog.hpp>
+
 namespace MWGui
 {
 
@@ -58,16 +60,19 @@ namespace MWGui
 
     MWWorld::Ptr ItemModel::moveItem(const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip)
     {
-        MWWorld::Ptr ret = otherModel->addItem(item, count, allowAutoEquip);
-        removeItem(item, count);
-        // Although logically the same as an unstack, to avoid unneccesarily allocating a new stack
-        // and then immediately removing it, we assign a new refnum here instead of calling unstack()
-        if (!item.mBase.getRefData().isDeleted())
+        MWWorld::Ptr ret = MWWorld::Ptr();
+        if (item.mBase.getRefData().getCount() <= count)
         {
-            ret.getCellRef().unsetRefNum();
-            ret.getRefData().setLuaScripts(nullptr);
-            MWBase::Environment::get().getWorldModel()->registerPtr(ret);
-            MWBase::Environment::get().getWorldModel()->registerPtr(item.mBase);
+            // We are moving the full stack
+            ret = otherModel->addItem(item, count, allowAutoEquip);
+            removeItem(item, count);
+        }
+        else
+        {
+            // We are moving only part of the stack, so create a copy in the other model
+            // and then remove count from this model.
+            ret = otherModel->copyItem(item, count, allowAutoEquip);
+            removeItem(item, count);
         }
         return ret;
     }
@@ -90,6 +95,11 @@ namespace MWGui
     bool ProxyItemModel::allowedToUseItems() const
     {
         return mSourceModel->allowedToUseItems();
+    }
+
+    MWWorld::Ptr ProxyItemModel::copyItem(const ItemStack& item, size_t count, bool allowAutoEquip)
+    {
+        return mSourceModel->copyItem(item, count, allowAutoEquip);
     }
 
     void ProxyItemModel::removeItem(const ItemStack& item, size_t count)

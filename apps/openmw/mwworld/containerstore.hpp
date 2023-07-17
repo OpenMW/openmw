@@ -198,7 +198,7 @@ namespace MWWorld
         /// @return if stacking happened, return iterator to the item that was stacked against, otherwise iterator to
         /// the newly inserted item.
 
-        ContainerStoreIterator add(const ESM::RefId& id, int count);
+        ContainerStoreIterator add(const ESM::RefId& id, int count, bool allowAutoEquip = true);
         ///< Utility to construct a ManualRef and call add(ptr, count, actorPtr, true)
 
         int remove(const ESM::RefId& itemId, int count, bool equipReplacement = 0, bool resolve = true);

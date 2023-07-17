@@ -33,6 +33,7 @@ namespace MWGui
         size_t getItemCount() override;
 
         MWWorld::Ptr addItem(const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
+        MWWorld::Ptr copyItem(const ItemStack& item, size_t count, bool allowAutoEquip = true) override;
         void removeItem(const ItemStack& item, size_t count) override;
 
         void update() override;
