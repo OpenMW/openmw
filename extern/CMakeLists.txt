@@ -18,7 +18,6 @@ macro(FetchContent_MakeAvailableExcludeFromAll)
 endmacro()
 
 if(NOT OPENMW_USE_SYSTEM_BULLET)
-    cmake_minimum_required(VERSION 3.11) # for FetchContent
 
     set(BUILD_BULLET3 OFF CACHE BOOL "")
     set(BUILD_EXTRAS OFF CACHE BOOL "")
@@ -63,7 +62,6 @@ if(NOT OPENMW_USE_SYSTEM_BULLET)
 endif()
 
 if(NOT OPENMW_USE_SYSTEM_MYGUI)
-    cmake_minimum_required(VERSION 3.11) # for FetchContent
 
     set(MYGUI_RENDERSYSTEM 4 CACHE STRING "")
     set(MYGUI_DISABLE_PLUGINS TRUE CACHE BOOL "")
@@ -95,7 +93,6 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
 endif()
 
 if(NOT OPENMW_USE_SYSTEM_OSG)
-    cmake_minimum_required(VERSION 3.11) # for FetchContent
 
     set(BUILD_OSG_APPLICATIONS OFF CACHE BOOL "")
     set(BUILD_OSG_DEPRECATED_SERIALIZERS OFF CACHE BOOL "")
@@ -213,7 +210,6 @@ endif()
 add_subdirectory(smhasher)
 
 if (BUILD_BENCHMARKS AND NOT OPENMW_USE_SYSTEM_BENCHMARK)
-    cmake_minimum_required(VERSION 3.11)
 
     set(BENCHMARK_ENABLE_TESTING OFF)
     set(BENCHMARK_ENABLE_INSTALL OFF)
@@ -304,7 +300,6 @@ if (NOT OPENMW_USE_SYSTEM_ICU)
 endif()
 
 if ((BUILD_UNITTESTS OR BUILD_OPENCS_TESTS) AND NOT OPENMW_USE_SYSTEM_GOOGLETEST)
-    cmake_minimum_required(VERSION 3.11)
 
     include(FetchContent)
     FetchContent_Declare(googletest

@@ -1,26 +1,7 @@
-cmake_minimum_required(VERSION 3.1.0)
-
-# for link time optimization, remove if cmake version is >= 3.9
-if(POLICY CMP0069) # LTO
-    cmake_policy(SET CMP0069 NEW)
-endif()
-
-# for position-independent executable, remove if cmake version is >= 3.14
-if(POLICY CMP0083)
-    cmake_policy(SET CMP0083 NEW)
-endif()
-
-# to link with freetype library
-if(POLICY CMP0079)
-    cmake_policy(SET CMP0079 NEW)
-endif()
-
-# don't add /W3 flag by default for MSVC
-if(POLICY CMP0092)
-    cmake_policy(SET CMP0092 NEW)
-endif()
+cmake_minimum_required(VERSION 3.16.0)
 
 #  set the timestamps of extracted contents to the time of extraction
+# remove if cmake version is >= 3.24
 if(POLICY CMP0135)
     cmake_policy(SET CMP0135 NEW)
 endif()
