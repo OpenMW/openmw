@@ -438,6 +438,7 @@ namespace MWLua
             mGlobalScripts.setSavedDataDeserializer(mGlobalSerializer.get());
             ESM::LuaScripts data;
             mGlobalScripts.save(data);
+            mGlobalStorage.clearTemporaryAndRemoveCallbacks();
             mGlobalScripts.load(data);
         }
 
