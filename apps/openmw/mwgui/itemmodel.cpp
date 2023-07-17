@@ -61,7 +61,7 @@ namespace MWGui
     MWWorld::Ptr ItemModel::moveItem(const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip)
     {
         MWWorld::Ptr ret = MWWorld::Ptr();
-        if (item.mBase.getRefData().getCount() <= count)
+        if (static_cast<size_t>(item.mBase.getRefData().getCount()) <= count)
         {
             // We are moving the full stack
             ret = otherModel->addItem(item, count, allowAutoEquip);
