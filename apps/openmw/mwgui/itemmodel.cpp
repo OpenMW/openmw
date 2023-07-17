@@ -2,6 +2,7 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -58,10 +59,15 @@ namespace MWGui
     MWWorld::Ptr ItemModel::moveItem(const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip)
     {
         MWWorld::Ptr ret = otherModel->addItem(item, count, allowAutoEquip);
-        // Unstacking here ensures that new a refnum is assigned to the leftover stack if there is a leftover.
-        // Otherwise we end up with duplicated instances.
-        unstackItem(item, count);
         removeItem(item, count);
+        // Although logically the same as an unstack, to avoid unneccesarily allocating a new stack
+        // and then immediately removing it, we assign a new refnum here instead of calling unstack()
+        if (!item.mBase.getRefData().isDeleted())
+        {
+            ret.getCellRef().unsetRefNum();
+            ret.getRefData().setLuaScripts(nullptr);
+            MWBase::Environment::get().getWorldModel()->registerPtr(ret);
+        }
         return ret;
     }
 
