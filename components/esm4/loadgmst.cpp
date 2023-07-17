@@ -13,7 +13,10 @@ namespace ESM4
         GameSetting::Data readData(FormId formId, std::string_view editorId, Reader& reader)
         {
             if (editorId.empty())
-                throw std::runtime_error("Unknown ESM4 GMST (" + formId.toString() + ") data type: editor id is empty");
+            {
+                reader.skipSubRecordData();
+                return std::monostate{};
+            }
             const char type = editorId[0];
             switch (type)
             {
