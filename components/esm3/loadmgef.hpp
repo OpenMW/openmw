@@ -10,6 +10,8 @@
 #include "components/esm/refid.hpp"
 #include "components/misc/strings/algorithm.hpp"
 
+#include <osg/Vec4>
+
 namespace ESM
 {
 
@@ -55,7 +57,7 @@ namespace ESM
             // Originally modifiable flags
             AllowSpellmaking = 0x200, // Can be used for spellmaking
             AllowEnchanting = 0x400, // Can be used for enchanting
-            NegativeLight = 0x800 // Unused
+            NegativeLight = 0x800 // Inverts the effect's color
         };
 
         enum MagnitudeDisplayType
@@ -112,6 +114,8 @@ namespace ESM
 
         /// Set record to default state (does not touch the ID/index).
         void blank();
+
+        osg::Vec4f getColor() const;
 
         enum Effects
         {
