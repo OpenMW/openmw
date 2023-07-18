@@ -170,8 +170,7 @@ Allow Enchanting
     When enabled, this magic effect can be used to create enchantments.
         
 Negative Light
-    This is a flag present in Morrowind, but is not actually used.
-    It doesn’t do anything in OpenMW either.
+    When enabled, the colour of the light cast by this magic effect is inverted.
       
 Description
     Flavour text that appears in the user interface.
