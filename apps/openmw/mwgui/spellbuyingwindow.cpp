@@ -6,6 +6,7 @@
 
 #include <components/esm3/loadgmst.hpp>
 #include <components/esm3/loadrace.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
@@ -51,7 +52,7 @@ namespace MWGui
 
         // TODO: refactor to use MyGUI::ListBox
 
-        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
 
         MyGUI::Button* toAdd = mSpellsView->createWidget<MyGUI::Button>(price <= playerGold
                 ? "SandTextButton"

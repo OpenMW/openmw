@@ -8,6 +8,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcrea.hpp>
+#include <components/settings/values.hpp>
 #include <components/translation/translation.hpp>
 #include <components/widgets/box.hpp>
 #include <components/widgets/list.hpp>
@@ -88,7 +89,7 @@ namespace MWGui
 
     void PersuasionDialog::adjustAction(MyGUI::Widget* action, int& totalHeight)
     {
-        const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
         auto currentCoords = action->getCoord();
         action->setCoord(currentCoords.left, totalHeight, currentCoords.width, lineHeight);
         totalHeight += lineHeight;
@@ -782,21 +783,21 @@ namespace MWGui
 
     void DialogueWindow::updateTopicFormat()
     {
-        if (!Settings::Manager::getBool("color topic enable", "GUI"))
+        if (!Settings::gui().mColorTopicEnable)
             return;
 
-        const std::string& specialColour = Settings::Manager::getString("color topic specific", "GUI");
-        const std::string& oldColour = Settings::Manager::getString("color topic exhausted", "GUI");
+        const MyGUI::Colour& specialColour = Settings::gui().mColorTopicSpecific;
+        const MyGUI::Colour& oldColour = Settings::gui().mColorTopicExhausted;
 
         for (const std::string& keyword : mKeywords)
         {
             int flag = MWBase::Environment::get().getDialogueManager()->getTopicFlag(ESM::RefId::stringRefId(keyword));
             MyGUI::Button* button = mTopicsList->getItemWidget(keyword);
 
-            if (!specialColour.empty() && flag & MWBase::DialogueManager::TopicType::Specific)
-                button->getSubWidgetText()->setTextColour(MyGUI::Colour::parse(specialColour));
-            else if (!oldColour.empty() && flag & MWBase::DialogueManager::TopicType::Exhausted)
-                button->getSubWidgetText()->setTextColour(MyGUI::Colour::parse(oldColour));
+            if (flag & MWBase::DialogueManager::TopicType::Specific)
+                button->getSubWidgetText()->setTextColour(specialColour);
+            else if (flag & MWBase::DialogueManager::TopicType::Exhausted)
+                button->getSubWidgetText()->setTextColour(oldColour);
         }
     }
 

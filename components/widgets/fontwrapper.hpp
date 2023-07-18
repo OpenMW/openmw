@@ -2,7 +2,8 @@
 #define OPENMW_WIDGETS_WRAPPER_H
 
 #include <MyGUI_Prerequest.h>
-#include <components/settings/settings.hpp>
+
+#include "components/settings/values.hpp"
 
 #include <algorithm>
 
@@ -16,7 +17,7 @@ namespace Gui
         void setFontName(const std::string& name) override
         {
             T::setFontName(name);
-            T::setPropertyOverride("FontHeight", getFontSize());
+            T::setPropertyOverride("FontHeight", std::to_string(Settings::gui().mFontSize));
         }
 
     protected:
@@ -29,17 +30,8 @@ namespace Gui
             // We should restore it.
             if (_key == "FontName")
             {
-                T::setPropertyOverride("FontHeight", getFontSize());
+                T::setPropertyOverride("FontHeight", std::to_string(Settings::gui().mFontSize));
             }
-        }
-
-    private:
-        const std::string& getFontSize()
-        {
-            // Note: we can not use the FontLoader here, so there is a code duplication a bit.
-            static const std::string fontSize
-                = std::to_string(std::clamp(Settings::Manager::getInt("font size", "GUI"), 12, 18));
-            return fontSize;
         }
 #endif
     };

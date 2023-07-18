@@ -9,10 +9,7 @@
 #include <functional>
 #include <memory>
 
-#include <components/settings/settings.hpp>
-
-#include "../mwbase/environment.hpp"
-#include "../mwbase/windowmanager.hpp"
+#include <components/settings/values.hpp>
 
 namespace MWGui
 {
@@ -50,12 +47,10 @@ namespace MWGui
 
         GlyphInfo(MyGUI::IFont* font, MyGUI::Char ch)
         {
-            static const int fontHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
-
             const MyGUI::GlyphInfo* gi = font->getGlyphInfo(ch);
             if (gi)
             {
-                const float scale = font->getDefaultHeight() / (float)fontHeight;
+                const float scale = font->getDefaultHeight() / static_cast<float>(Settings::gui().mFontSize);
 
                 codePoint = gi->codePoint;
                 bearingX = (int)gi->bearingX / scale;

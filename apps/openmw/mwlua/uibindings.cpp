@@ -9,7 +9,7 @@
 #include <components/lua_ui/util.hpp>
 
 #include <components/misc/strings/format.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "context.hpp"
 #include "luamanagerimp.hpp"
@@ -103,7 +103,7 @@ namespace MWLua
             context.mLuaManager->addAction(
                 []() { LuaUi::Element::forEach([](LuaUi::Element* e) { e->update(); }); }, "Update all UI elements");
         };
-        api["_getMenuTransparency"] = []() { return Settings::Manager::getFloat("menu transparency", "GUI"); };
+        api["_getMenuTransparency"] = []() -> float { return Settings::gui().mMenuTransparency; };
 
         auto uiLayer = context.mLua->sol().new_usertype<LuaUi::Layer>("UiLayer");
         uiLayer["name"] = sol::property([](LuaUi::Layer& self) { return self.name(); });

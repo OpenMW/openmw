@@ -10,6 +10,7 @@
 
 #include <components/misc/utf8stream.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/settings/values.hpp>
 
 namespace MWGui
 {
@@ -551,7 +552,7 @@ namespace MWGui
             if (mPartialWhitespace.empty() && mPartialWord.empty())
                 return;
 
-            int fontHeight = MWBase::Environment::get().getWindowManager()->getFontHeight();
+            const int fontHeight = Settings::gui().mFontSize;
             int space_width = 0;
             int word_width = 0;
 

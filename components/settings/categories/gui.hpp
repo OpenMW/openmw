@@ -8,6 +8,8 @@
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 
+#include <MyGUI_Colour.h>
+
 #include <cstdint>
 #include <string>
 #include <string_view>
@@ -32,9 +34,8 @@ namespace Settings
             makeClampSanitizerFloat(0, 1) };
         SettingValue<bool> mKeyboardNavigation{ mIndex, "GUI", "keyboard navigation" };
         SettingValue<bool> mColorTopicEnable{ mIndex, "GUI", "color topic enable" };
-        SettingValue<float> mColorTopicSpecific{ mIndex, "GUI", "color topic specific", makeClampSanitizerFloat(0, 1) };
-        SettingValue<float> mColorTopicExhausted{ mIndex, "GUI", "color topic exhausted",
-            makeClampSanitizerFloat(0, 1) };
+        SettingValue<MyGUI::Colour> mColorTopicSpecific{ mIndex, "GUI", "color topic specific" };
+        SettingValue<MyGUI::Colour> mColorTopicExhausted{ mIndex, "GUI", "color topic exhausted" };
     };
 }
 

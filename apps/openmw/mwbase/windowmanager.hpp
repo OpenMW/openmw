@@ -225,12 +225,10 @@ namespace MWBase
         virtual const MWWorld::Ptr& getSelectedEnchantItem() const = 0;
         virtual void setSelectedWeapon(const MWWorld::Ptr& item) = 0;
         virtual const MWWorld::Ptr& getSelectedWeapon() const = 0;
-        virtual int getFontHeight() const = 0;
         virtual void unsetSelectedSpell() = 0;
         virtual void unsetSelectedWeapon() = 0;
 
         virtual void showCrosshair(bool show) = 0;
-        virtual bool getSubtitlesEnabled() = 0;
         virtual bool toggleHud() = 0;
 
         virtual void disallowMouse() = 0;

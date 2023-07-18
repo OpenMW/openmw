@@ -419,7 +419,7 @@ namespace MWGui
         groupWidget->eventMouseWheel += MyGUI::newDelegate(this, &StatsWindow::onMouseWheel);
         mSkillWidgets.push_back(groupWidget);
 
-        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
         coord1.top += lineHeight;
         coord2.top += lineHeight;
     }
@@ -449,7 +449,7 @@ namespace MWGui
         mSkillWidgets.push_back(skillNameWidget);
         mSkillWidgets.push_back(skillValueWidget);
 
-        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
         coord1.top += lineHeight;
         coord2.top += lineHeight;
 
@@ -470,7 +470,7 @@ namespace MWGui
 
         mSkillWidgets.push_back(skillNameWidget);
 
-        int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
         coord1.top += lineHeight;
         coord2.top += lineHeight;
 

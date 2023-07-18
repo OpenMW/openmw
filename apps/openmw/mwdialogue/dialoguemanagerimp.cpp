@@ -647,7 +647,7 @@ namespace MWDialogue
         if (info != nullptr)
         {
             MWBase::WindowManager* winMgr = MWBase::Environment::get().getWindowManager();
-            if (winMgr->getSubtitlesEnabled())
+            if (Settings::gui().mSubtitles)
                 winMgr->messageBox(info->mResponse);
             if (!info->mSound.empty())
                 sndMgr->say(actor, info->mSound);

@@ -29,14 +29,11 @@ namespace Gui
 
         void overrideLineHeight(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version);
 
-        int getFontHeight();
-
         static std::string_view getFontForFace(std::string_view face);
 
     private:
         ToUTF8::FromType mEncoding;
         const VFS::Manager* mVFS;
-        int mFontHeight;
         float mScalingFactor;
 
         void loadFonts();

@@ -25,7 +25,7 @@
 
 #include <components/myguiplatform/scalinglayer.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 namespace
 {
@@ -229,7 +229,6 @@ namespace Gui
 
     FontLoader::FontLoader(ToUTF8::FromType encoding, const VFS::Manager* vfs, float scalingFactor)
         : mVFS(vfs)
-        , mFontHeight(std::clamp(Settings::Manager::getInt("font size", "GUI"), 12, 18))
         , mScalingFactor(scalingFactor)
     {
         if (encoding == ToUTF8::WINDOWS_1252)
@@ -325,7 +324,7 @@ namespace Gui
 
         MyGUI::xml::ElementPtr sizeNode = resourceNode->createChild("Property");
         sizeNode->addAttribute("key", "Size");
-        sizeNode->addAttribute("value", std::to_string(mFontHeight));
+        sizeNode->addAttribute("value", std::to_string(Settings::gui().mFontSize));
 
         MyGUI::ResourceTrueTypeFont* font = static_cast<MyGUI::ResourceTrueTypeFont*>(
             MyGUI::FactoryManager::getInstance().createObject("Resource", "ResourceTrueTypeFont"));
@@ -623,16 +622,11 @@ namespace Gui
                 // We should adjust line height for MyGUI widgets depending on font size
                 MyGUI::xml::ElementPtr heightNode = resourceNode->createChild("Property");
                 heightNode->addAttribute("key", "HeightLine");
-                heightNode->addAttribute("value", std::to_string(mFontHeight + 2));
+                heightNode->addAttribute("value", std::to_string(Settings::gui().mFontSize + 2));
             }
         }
 
         MyGUI::ResourceManager::getInstance().loadFromXmlNode(_node, _file, _version);
-    }
-
-    int FontLoader::getFontHeight()
-    {
-        return mFontHeight;
     }
 
     std::string_view FontLoader::getFontForFace(std::string_view face)

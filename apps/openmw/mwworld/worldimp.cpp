@@ -3683,7 +3683,7 @@ namespace MWWorld
 
     void World::spawnBloodEffect(const Ptr& ptr, const osg::Vec3f& worldPosition)
     {
-        if (ptr == getPlayerPtr() && Settings::Manager::getBool("hit fader", "GUI"))
+        if (ptr == getPlayerPtr() && Settings::gui().mHitFader)
             return;
 
         std::string_view texture

@@ -909,7 +909,7 @@ namespace MWGui
 
     void SettingsWindow::layoutControlsBox()
     {
-        const int h = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int h = Settings::gui().mFontSize + 2;
         const int w = mControlsBox->getWidth() - 28;
         const int noWidgetsInRow = 2;
         const int totalH = mControlsBox->getChildCount() / noWidgetsInRow * h;

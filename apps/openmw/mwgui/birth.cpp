@@ -9,6 +9,7 @@
 #include <components/esm3/loadspel.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -188,7 +189,7 @@ namespace MWGui
             return;
 
         Widgets::MWSpellPtr spellWidget;
-        const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
         MyGUI::IntCoord coord(0, 0, mSpellArea->getWidth(), lineHeight);
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();

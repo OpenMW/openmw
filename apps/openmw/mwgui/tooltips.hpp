@@ -60,8 +60,6 @@ namespace MWGui
         bool toggleFullHelp(); ///< show extra info in item tooltips (owner, script)
         bool getFullHelp() const;
 
-        void setDelay(float delay);
-
         void clear();
 
         void setFocusObject(const MWWorld::Ptr& focus);
@@ -124,7 +122,6 @@ namespace MWGui
 
         int mHorizontalScrollIndex;
 
-        float mDelay;
         float mRemainingDelay; // remaining time until tooltip will show
 
         int mLastMouseX;

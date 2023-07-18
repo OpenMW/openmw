@@ -15,7 +15,7 @@
 #include <components/misc/rng.hpp>
 #include <components/myguiplatform/myguitexture.hpp>
 #include <components/resource/resourcesystem.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -222,9 +222,8 @@ namespace MWGui
             // TODO: add option (filename pattern?) to use image aspect ratio instead of 4:3
             // we can't do this by default, because the Morrowind splash screens are 1024x1024, but should be displayed
             // as 4:3
-            bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
             mSplashImage->setVisible(true);
-            mSplashImage->setBackgroundImage(randomSplash, true, stretch);
+            mSplashImage->setBackgroundImage(randomSplash, true, Settings::gui().mStretchMenuBackground);
         }
         mSceneImage->setBackgroundImage({});
         mSceneImage->setVisible(false);

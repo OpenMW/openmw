@@ -4,7 +4,7 @@
 #include <MyGUI_RenderManager.h>
 #include <MyGUI_TextBox.h>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/widgets/imagebutton.hpp>
 
@@ -156,7 +156,7 @@ namespace MWGui
         if (!show)
             return;
 
-        bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
+        const bool stretch = Settings::gui().mStretchMenuBackground;
 
         if (mHasAnimatedMenu)
         {

@@ -8,10 +8,10 @@
 #include <osg/Texture2D>
 
 #include <components/debug/debuglog.hpp>
-#include <components/myguiplatform/myguitexture.hpp>
-
 #include <components/esm3/loadbody.hpp>
 #include <components/esm3/loadrace.hpp>
+#include <components/myguiplatform/myguitexture.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -406,7 +406,7 @@ namespace MWGui
             return;
 
         Widgets::MWSkillPtr skillWidget;
-        const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
         MyGUI::IntCoord coord1(0, 0, mSkillList->getWidth(), 18);
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
@@ -439,7 +439,7 @@ namespace MWGui
         if (mCurrentRaceId.empty())
             return;
 
-        const int lineHeight = MWBase::Environment::get().getWindowManager()->getFontHeight() + 2;
+        const int lineHeight = Settings::gui().mFontSize + 2;
         MyGUI::IntCoord coord(0, 0, mSpellPowerList->getWidth(), lineHeight);
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();

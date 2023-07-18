@@ -454,6 +454,11 @@ namespace Settings
         setStringArray(setting, category, value);
     }
 
+    void Manager::set(std::string_view setting, std::string_view category, const MyGUI::Colour& value)
+    {
+        setString(setting, category, value.print());
+    }
+
     void Manager::recordInit(std::string_view setting, std::string_view category)
     {
         sInitialized.emplace(category, setting);

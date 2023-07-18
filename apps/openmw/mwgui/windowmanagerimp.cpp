@@ -54,6 +54,7 @@
 
 #include <components/settings/values.hpp>
 
+#include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
 #include "../mwbase/luamanager.hpp"
 #include "../mwbase/soundmanager.hpp"
@@ -183,9 +184,6 @@ namespace MWGui
         , mTranslationDataStorage(translationDataStorage)
         , mInputBlocker(nullptr)
         , mCrosshairEnabled(Settings::Manager::getBool("crosshair", "HUD"))
-        , mSubtitlesEnabled(Settings::Manager::getBool("subtitles", "GUI"))
-        , mHitFaderEnabled(Settings::Manager::getBool("hit fader", "GUI"))
-        , mWerewolfOverlayEnabled(Settings::Manager::getBool("werewolf overlay", "GUI"))
         , mHudEnabled(true)
         , mCursorVisible(true)
         , mCursorActive(true)
@@ -206,7 +204,7 @@ namespace MWGui
         int dw, dh;
         SDL_GL_GetDrawableSize(window, &dw, &dh);
 
-        mScalingFactor = std::clamp(Settings::Manager::getFloat("scaling factor", "GUI"), 0.5f, 8.f) * (dw / w);
+        mScalingFactor = Settings::gui().mScalingFactor * (dw / w);
         mGuiPlatform = std::make_unique<osgMyGUI::Platform>(viewer, guiRoot, resourceSystem->getImageManager(),
             resourceSystem->getVFS(), mScalingFactor, "mygui", logpath / "MyGUI.log");
 
@@ -249,7 +247,7 @@ namespace MWGui
             "Resource", "AutoSizedResourceSkin");
         MyGUI::ResourceManager::getInstance().load("core.xml");
 
-        bool keyboardNav = Settings::Manager::getBool("keyboard navigation", "GUI");
+        const bool keyboardNav = Settings::gui().mKeyboardNavigation;
         mKeyboardNavigation = std::make_unique<KeyboardNavigation>();
         mKeyboardNavigation->setEnabled(keyboardNav);
         Gui::ImageButton::setDefaultNeedKeyFocus(keyboardNav);
@@ -528,11 +526,6 @@ namespace MWGui
         mStatsWatcher->addListener(mHud);
         mStatsWatcher->addListener(mStatsWindow);
         mStatsWatcher->addListener(mCharGen.get());
-    }
-
-    int WindowManager::getFontHeight() const
-    {
-        return mFontLoader->getFontHeight();
     }
 
     void WindowManager::setNewGame(bool newgame)
@@ -1152,17 +1145,13 @@ namespace MWGui
 
     void WindowManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
-        mToolTips->setDelay(Settings::Manager::getFloat("tooltip delay", "GUI"));
-
         bool changeRes = false;
         for (const auto& setting : changed)
         {
             if (setting.first == "HUD" && setting.second == "crosshair")
                 mCrosshairEnabled = Settings::Manager::getBool("crosshair", "HUD");
-            else if (setting.first == "GUI" && setting.second == "subtitles")
-                mSubtitlesEnabled = Settings::Manager::getBool("subtitles", "GUI");
             else if (setting.first == "GUI" && setting.second == "menu transparency")
-                setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
+                setMenuTransparency(Settings::gui().mMenuTransparency);
             else if (setting.first == "Video"
                 && (setting.second == "resolution x" || setting.second == "resolution y"
                     || setting.second == "window mode" || setting.second == "window border"))
@@ -1604,11 +1593,6 @@ namespace MWGui
         mQuickKeysMenu->activateQuickKey(index);
     }
 
-    bool WindowManager::getSubtitlesEnabled()
-    {
-        return mSubtitlesEnabled;
-    }
-
     bool WindowManager::toggleHud()
     {
         mHudEnabled = !mHudEnabled;
@@ -1923,9 +1907,8 @@ namespace MWGui
     void WindowManager::sizeVideo(int screenWidth, int screenHeight)
     {
         // Use black bars to correct aspect ratio
-        bool stretch = Settings::Manager::getBool("stretch menu background", "GUI");
         mVideoBackground->setSize(screenWidth, screenHeight);
-        mVideoWidget->autoResize(stretch);
+        mVideoWidget->autoResize(Settings::gui().mStretchMenuBackground);
     }
 
     void WindowManager::exitCurrentModal()
@@ -2054,7 +2037,7 @@ namespace MWGui
 
     void WindowManager::activateHitOverlay(bool interrupt)
     {
-        if (!mHitFaderEnabled)
+        if (!Settings::gui().mHitFader)
             return;
 
         if (!interrupt && !mHitFader->isEmpty())
@@ -2067,7 +2050,7 @@ namespace MWGui
 
     void WindowManager::setWerewolfOverlay(bool set)
     {
-        if (!mWerewolfOverlayEnabled)
+        if (!Settings::gui().mWerewolfOverlay)
             return;
 
         if (mWerewolfFader)
@@ -2240,7 +2223,7 @@ namespace MWGui
         {
             MyGUI::ITexture* tex = MyGUI::RenderManager::getInstance().createTexture("transparent");
             tex->createManual(8, 8, MyGUI::TextureUsage::Write, MyGUI::PixelFormat::R8G8B8A8);
-            setMenuTransparency(Settings::Manager::getFloat("menu transparency", "GUI"));
+            setMenuTransparency(Settings::gui().mMenuTransparency);
         }
     }
 
