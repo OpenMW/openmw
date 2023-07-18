@@ -45,18 +45,29 @@ namespace MWGui
         {
         }
         virtual ~WorldItemModel() override {}
-        MWWorld::Ptr copyItem(const ItemStack& item, size_t count, bool /*allowAutoEquip*/) override
+
+        MWWorld::Ptr dropItemImpl(const ItemStack& item, size_t count, bool copy)
         {
             MWBase::World* world = MWBase::Environment::get().getWorld();
 
             MWWorld::Ptr dropped;
             if (world->canPlaceObject(mLeft, mTop))
-                dropped = world->placeObject(item.mBase, mLeft, mTop, count);
+                dropped = world->placeObject(item.mBase, mLeft, mTop, count, copy);
             else
-                dropped = world->dropObjectOnGround(world->getPlayerPtr(), item.mBase, count);
+                dropped = world->dropObjectOnGround(world->getPlayerPtr(), item.mBase, count, copy);
             dropped.getCellRef().setOwner(ESM::RefId());
 
             return dropped;
+        }
+
+        MWWorld::Ptr addItem(const ItemStack& item, size_t count, bool /*allowAutoEquip*/) override
+        {
+            return dropItemImpl(item, count, false);
+        }
+
+        MWWorld::Ptr copyItem(const ItemStack& item, size_t count, bool /*allowAutoEquip*/) override
+        {
+            return dropItemImpl(item, count, true);
         }
 
         void removeItem(const ItemStack& item, size_t count) override

@@ -2001,7 +2001,7 @@ namespace MWWorld
             item.getRefData().getLocals().setVarByInt(script, "onpcdrop", 1);
     }
 
-    MWWorld::Ptr World::placeObject(const MWWorld::ConstPtr& object, float cursorX, float cursorY, int amount)
+    MWWorld::Ptr World::placeObject(const MWWorld::Ptr& object, float cursorX, float cursorY, int amount, bool copy)
     {
         const float maxDist = 200.f;
 
@@ -2022,7 +2022,8 @@ namespace MWWorld
         pos.rot[1] = 0;
 
         // copy the object and set its count
-        Ptr dropped = copyObjectToCell(object, cell, pos, amount, true);
+        Ptr dropped = copy ? copyObjectToCell(object, cell, pos, amount, true)
+                           : moveObjectToCell(object, cell, pos, amount, true);
 
         // only the player place items in the world, so no need to check actor
         PCDropped(dropped);
@@ -2062,33 +2063,55 @@ namespace MWWorld
 
         MWWorld::Ptr dropped = object.getClass().copyToCell(object, *cell, pos, count);
 
-        // Reset some position values that could be uninitialized if this item came from a container
-        dropped.getCellRef().setPosition(pos);
-        dropped.getCellRef().unsetRefNum();
+        initObjectInCell(dropped, *cell, adjustPos);
 
-        if (mWorldScene->isCellActive(*cell))
+        return dropped;
+    }
+
+    Ptr World::moveObjectToCell(const Ptr& object, CellStore* cell, ESM::Position pos, int count, bool adjustPos)
+    {
+        if (!cell)
+            throw std::runtime_error("moveObjectToCell(): cannot move object to null cell");
+        if (cell->isExterior())
         {
-            if (dropped.getRefData().isEnabled())
-            {
-                mWorldScene->addObjectToScene(dropped);
-            }
-            const auto& script = dropped.getClass().getScript(dropped);
-            if (!script.empty())
-            {
-                mLocalScripts.add(script, dropped);
-            }
-            addContainerScripts(dropped, cell);
+            const ESM::ExteriorCellLocation index
+                = ESM::positionToExteriorCellLocation(pos.pos[0], pos.pos[1], cell->getCell()->getWorldSpace());
+            cell = &mWorldModel.getExterior(index);
         }
 
-        if (!object.getClass().isActor() && adjustPos && dropped.getRefData().getBaseNode())
+        MWWorld::Ptr dropped = object.getClass().moveToCell(object, *cell, pos, count);
+
+        initObjectInCell(dropped, *cell, adjustPos);
+
+        return dropped;
+    }
+
+    void World::initObjectInCell(const Ptr& object, CellStore& cell, bool adjustPos)
+    {
+        if (mWorldScene->isCellActive(cell))
+        {
+            if (object.getRefData().isEnabled())
+            {
+                mWorldScene->addObjectToScene(object);
+            }
+            const auto& script = object.getClass().getScript(object);
+            if (!script.empty())
+            {
+                mLocalScripts.add(script, object);
+            }
+            addContainerScripts(object, &cell);
+        }
+
+        if (!object.getClass().isActor() && adjustPos && object.getRefData().getBaseNode())
         {
             // Adjust position so the location we wanted ends up in the middle of the object bounding box
             osg::ComputeBoundsVisitor computeBounds;
             computeBounds.setTraversalMask(~MWRender::Mask_ParticleSystem);
-            dropped.getRefData().getBaseNode()->accept(computeBounds);
+            object.getRefData().getBaseNode()->accept(computeBounds);
             osg::BoundingBox bounds = computeBounds.getBoundingBox();
             if (bounds.valid())
             {
+                ESM::Position pos = object.getRefData().getPosition();
                 bounds.set(bounds._min - pos.asVec3(), bounds._max - pos.asVec3());
 
                 osg::Vec3f adjust(
@@ -2096,14 +2119,12 @@ namespace MWWorld
                 pos.pos[0] -= adjust.x();
                 pos.pos[1] -= adjust.y();
                 pos.pos[2] -= adjust.z();
-                moveObject(dropped, pos.asVec3());
+                moveObject(object, pos.asVec3());
             }
         }
-
-        return dropped;
     }
 
-    MWWorld::Ptr World::dropObjectOnGround(const Ptr& actor, const ConstPtr& object, int amount)
+    MWWorld::Ptr World::dropObjectOnGround(const Ptr& actor, const Ptr& object, int amount, bool copy)
     {
         MWWorld::CellStore* cell = actor.getCell();
 
@@ -2123,7 +2144,8 @@ namespace MWWorld
             pos.pos[2] = result.mHitPointWorld.z();
 
         // copy the object and set its count
-        Ptr dropped = copyObjectToCell(object, cell, pos, amount, true);
+        Ptr dropped = copy ? copyObjectToCell(object, cell, pos, amount, true)
+                           : moveObjectToCell(object, cell, pos, amount, true);
 
         if (actor == mPlayer->getPlayer()) // Only call if dropped by player
             PCDropped(dropped);

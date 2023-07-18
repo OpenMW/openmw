@@ -139,11 +139,8 @@ namespace MWGui
             if (i == sourceModel->getItemCount())
                 throw std::runtime_error("The borrowed item disappeared");
 
-            const ItemStack& item = sourceModel->getItem(i);
-            // copy the borrowed items to our model
-            copyItem(item, itemStack.mCount, !Settings::game().mPreventMerchantEquipping);
-            // then remove them from the source model
-            sourceModel->removeItem(item, itemStack.mCount);
+            sourceModel->moveItem(
+                sourceModel->getItem(i), itemStack.mCount, this, !Settings::game().mPreventMerchantEquipping);
         }
         mBorrowedToUs.clear();
         mBorrowedFromUs.clear();

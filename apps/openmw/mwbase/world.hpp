@@ -337,14 +337,17 @@ namespace MWBase
         ///< Toggle a render mode.
         ///< \return Resulting mode
 
-        virtual MWWorld::Ptr placeObject(const MWWorld::ConstPtr& object, float cursorX, float cursorY, int amount) = 0;
+        virtual MWWorld::Ptr placeObject(
+            const MWWorld::Ptr& object, float cursorX, float cursorY, int amount, bool copy = true)
+            = 0;
         ///< copy and place an object into the gameworld at the specified cursor position
         /// @param object
         /// @param cursor X (relative 0-1)
         /// @param cursor Y (relative 0-1)
         /// @param number of objects to place
 
-        virtual MWWorld::Ptr dropObjectOnGround(const MWWorld::Ptr& actor, const MWWorld::ConstPtr& object, int amount)
+        virtual MWWorld::Ptr dropObjectOnGround(
+            const MWWorld::Ptr& actor, const MWWorld::Ptr& object, int amount, bool copy = true)
             = 0;
         ///< copy and place an object into the gameworld at the given actor's position
         /// @param actor giving the dropped object position

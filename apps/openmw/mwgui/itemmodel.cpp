@@ -2,9 +2,12 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
+
+#include <components/debug/debuglog.hpp>
 
 namespace MWGui
 {
@@ -55,12 +58,22 @@ namespace MWGui
 
     ItemModel::ItemModel() {}
 
-    MWWorld::Ptr ItemModel::moveItem(const ItemStack& item, size_t count, ItemModel* otherModel)
+    MWWorld::Ptr ItemModel::moveItem(const ItemStack& item, size_t count, ItemModel* otherModel, bool allowAutoEquip)
     {
-        // TODO(#6148): moving an item should preserve RefNum and Lua scripts (unless the item stack is merged with
-        // already existing stack).
-        MWWorld::Ptr ret = otherModel->copyItem(item, count);
-        removeItem(item, count);
+        MWWorld::Ptr ret = MWWorld::Ptr();
+        if (static_cast<size_t>(item.mBase.getRefData().getCount()) <= count)
+        {
+            // We are moving the full stack
+            ret = otherModel->addItem(item, count, allowAutoEquip);
+            removeItem(item, count);
+        }
+        else
+        {
+            // We are moving only part of the stack, so create a copy in the other model
+            // and then remove count from this model.
+            ret = otherModel->copyItem(item, count, allowAutoEquip);
+            removeItem(item, count);
+        }
         return ret;
     }
 
@@ -141,6 +154,11 @@ namespace MWGui
     bool ProxyItemModel::onTakeItem(const MWWorld::Ptr& item, int count)
     {
         return mSourceModel->onTakeItem(item, count);
+    }
+
+    MWWorld::Ptr ProxyItemModel::addItem(const ItemStack& item, size_t count, bool allowAutoEquip)
+    {
+        return mSourceModel->addItem(item, count, allowAutoEquip);
     }
 
     bool ProxyItemModel::usesContainer(const MWWorld::Ptr& container)

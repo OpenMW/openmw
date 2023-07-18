@@ -300,10 +300,10 @@ bool MWWorld::ContainerStore::stacks(const ConstPtr& ptr1, const ConstPtr& ptr2)
                 && cls2.getItemHealth(ptr2) == cls2.getItemMaxHealth(ptr2)));
 }
 
-MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const ESM::RefId& id, int count)
+MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(const ESM::RefId& id, int count, bool allowAutoEquip)
 {
     MWWorld::ManualRef ref(*MWBase::Environment::get().getESMStore(), id, count);
-    return add(ref.getPtr(), count);
+    return add(ref.getPtr(), count, allowAutoEquip);
 }
 
 MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
