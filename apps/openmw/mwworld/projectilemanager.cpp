@@ -136,21 +136,14 @@ namespace
     {
         // Calculate combined light diffuse color from magical effects
         osg::Vec4 lightDiffuseColor;
-        float lightDiffuseRed = 0.0f;
-        float lightDiffuseGreen = 0.0f;
-        float lightDiffuseBlue = 0.0f;
-        for (std::vector<ESM::ENAMstruct>::const_iterator iter(effects.mList.begin()); iter != effects.mList.end();
-             ++iter)
+        for (const ESM::ENAMstruct& enam : effects.mList)
         {
             const ESM::MagicEffect* magicEffect
-                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(iter->mEffectID);
-            lightDiffuseRed += (static_cast<float>(magicEffect->mData.mRed) / 255.f);
-            lightDiffuseGreen += (static_cast<float>(magicEffect->mData.mGreen) / 255.f);
-            lightDiffuseBlue += (static_cast<float>(magicEffect->mData.mBlue) / 255.f);
+                = MWBase::Environment::get().getESMStore()->get<ESM::MagicEffect>().find(enam.mEffectID);
+            lightDiffuseColor += magicEffect->getColor();
         }
         int numberOfEffects = effects.mList.size();
-        lightDiffuseColor = osg::Vec4(lightDiffuseRed / numberOfEffects, lightDiffuseGreen / numberOfEffects,
-            lightDiffuseBlue / numberOfEffects, 1.0f);
+        lightDiffuseColor /= numberOfEffects;
 
         return lightDiffuseColor;
     }

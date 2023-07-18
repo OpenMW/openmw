@@ -1490,11 +1490,6 @@ namespace MWRender
 
     void Animation::addSpellCastGlow(const ESM::MagicEffect* effect, float glowDuration)
     {
-        osg::Vec4f glowColor(1, 1, 1, 1);
-        glowColor.x() = effect->mData.mRed / 255.f;
-        glowColor.y() = effect->mData.mGreen / 255.f;
-        glowColor.z() = effect->mData.mBlue / 255.f;
-
         if (!mGlowUpdater || (mGlowUpdater->isDone() || (mGlowUpdater->isPermanentGlowUpdater() == true)))
         {
             if (mGlowUpdater && mGlowUpdater->isDone())
@@ -1502,11 +1497,12 @@ namespace MWRender
 
             if (mGlowUpdater && mGlowUpdater->isPermanentGlowUpdater())
             {
-                mGlowUpdater->setColor(glowColor);
+                mGlowUpdater->setColor(effect->getColor());
                 mGlowUpdater->setDuration(glowDuration);
             }
             else
-                mGlowUpdater = SceneUtil::addEnchantedGlow(mObjectRoot, mResourceSystem, glowColor, glowDuration);
+                mGlowUpdater
+                    = SceneUtil::addEnchantedGlow(mObjectRoot, mResourceSystem, effect->getColor(), glowDuration);
         }
     }
 

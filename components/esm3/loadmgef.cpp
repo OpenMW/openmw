@@ -603,6 +603,14 @@ namespace ESM
         mDescription.clear();
     }
 
+    osg::Vec4f MagicEffect::getColor() const
+    {
+        osg::Vec4f color{ mData.mRed / 255.f, mData.mGreen / 255.f, mData.mBlue / 255.f, 1.f };
+        if (mData.mFlags & NegativeLight)
+            return osg::Vec4f(1.f, 1.f, 1.f, 2.f) - color;
+        return color;
+    }
+
     const std::string& MagicEffect::indexToGmstString(int effectID)
     {
         if (effectID < 0 || static_cast<std::size_t>(effectID) >= sGmstEffectIds.size())
