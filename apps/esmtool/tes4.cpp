@@ -97,6 +97,11 @@ namespace EsmTool
             return stream << " ?";
         }
 
+        std::ostream& operator<<(std::ostream& stream, const std::monostate&)
+        {
+            return stream << "[none]";
+        }
+
         std::ostream& operator<<(std::ostream& stream, const WriteData<ESM4::GameSetting::Data>& write)
         {
             std::visit([&](const auto& v) { stream << v; }, write.mValue);

@@ -53,6 +53,9 @@ namespace ESM4
         std::string mModel;
         std::string mText;
 
+        FormId mPickUpSound;
+        FormId mDropSound;
+
         Data mData;
 
         void load(ESM4::Reader& reader);

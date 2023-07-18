@@ -70,6 +70,8 @@ void ESM4::TalkingActivator::load(ESM4::Reader& reader)
             case ESM4::SUB_PNAM:
             case ESM4::SUB_MODT: // texture file hash?
             case ESM4::SUB_OBND:
+            case ESM4::SUB_VMAD:
+            case ESM4::SUB_MODS:
                 reader.skipSubRecordData();
                 break;
             default:

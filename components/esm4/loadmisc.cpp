@@ -78,6 +78,12 @@ void ESM4::MiscItem::load(ESM4::Reader& reader)
             case ESM4::SUB_OBND:
             case ESM4::SUB_VMAD:
             case ESM4::SUB_RNAM: // FONV
+            case ESM4::SUB_DEST: // Destruction data start
+            case ESM4::SUB_DSTD:
+            case ESM4::SUB_DMDL:
+            case ESM4::SUB_DMDT:
+            case ESM4::SUB_DMDS:
+            case ESM4::SUB_DSTF: // Destruction data end
                 reader.skipSubRecordData();
                 break;
             default:

@@ -58,6 +58,12 @@ void ESM4::Scroll::load(ESM4::Reader& reader)
             case ESM4::SUB_MODL:
                 reader.getZString(mModel);
                 break;
+            case ESM4::SUB_YNAM:
+                reader.getFormId(mPickUpSound);
+                break;
+            case ESM4::SUB_ZNAM:
+                reader.getFormId(mDropSound);
+                break;
             // case ESM4::SUB_MODB: reader.get(mBoundRadius);  break;
             case ESM4::SUB_OBND:
             case ESM4::SUB_CTDA:
