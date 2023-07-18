@@ -1421,11 +1421,12 @@ namespace NifOsg
                 {
                     if (niGeometryData->recType != Nif::RC_NiTriShapeData)
                         return;
-                    auto triangles = static_cast<const Nif::NiTriShapeData*>(niGeometryData)->triangles;
+                    auto data = static_cast<const Nif::NiTriShapeData*>(niGeometryData);
+                    const std::vector<unsigned short>& triangles = data->triangles;
                     if (triangles.empty())
                         return;
-                    geometry->addPrimitiveSet(new osg::DrawElementsUShort(
-                        osg::PrimitiveSet::TRIANGLES, triangles.size(), (unsigned short*)triangles.data()));
+                    geometry->addPrimitiveSet(
+                        new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, triangles.size(), triangles.data()));
                 }
                 else if (niGeometry->recType == Nif::RC_NiTriStrips)
                 {
@@ -1433,12 +1434,12 @@ namespace NifOsg
                         return;
                     auto data = static_cast<const Nif::NiTriStripsData*>(niGeometryData);
                     bool hasGeometry = false;
-                    for (const auto& strip : data->strips)
+                    for (const std::vector<unsigned short>& strip : data->strips)
                     {
                         if (strip.size() < 3)
                             continue;
-                        geometry->addPrimitiveSet(new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP,
-                            strip.size(), reinterpret_cast<const unsigned short*>(strip.data())));
+                        geometry->addPrimitiveSet(
+                            new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(), strip.data()));
                         hasGeometry = true;
                     }
                     if (!hasGeometry)
@@ -1452,8 +1453,8 @@ namespace NifOsg
                     const auto& line = data->lines;
                     if (line.empty())
                         return;
-                    geometry->addPrimitiveSet(new osg::DrawElementsUShort(
-                        osg::PrimitiveSet::LINES, line.size(), reinterpret_cast<const unsigned short*>(line.data())));
+                    geometry->addPrimitiveSet(
+                        new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, line.size(), line.data()));
                 }
             }
             handleNiGeometryData(geometry, niGeometryData, boundTextures, nifNode->name);
