@@ -457,7 +457,6 @@ namespace MWGui
 
         MyGUI::Widget* mInputBlocker;
 
-        bool mCrosshairEnabled;
         bool mHudEnabled;
         bool mCursorVisible;
         bool mCursorActive;
