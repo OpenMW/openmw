@@ -281,6 +281,9 @@ return {
             end
             move360.onInputAction(action)
         end,
+        onTeleported = function()
+            camera.instantTransition()
+        end,
         onActive = init,
         onLoad = function(data)
             if data and data.distance then third_person.baseDistance = data.distance end
