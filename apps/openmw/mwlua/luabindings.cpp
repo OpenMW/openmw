@@ -38,6 +38,7 @@
 #include "nearbybindings.hpp"
 #include "objectbindings.hpp"
 #include "postprocessingbindings.hpp"
+#include "soundbindings.hpp"
 #include "types/types.hpp"
 #include "uibindings.hpp"
 
@@ -123,6 +124,7 @@ namespace MWLua
                 { std::move(eventName), LuaUtil::serialize(eventData, context.mSerializer) });
         };
         api["contentFiles"] = initContentFilesBindings(lua->sol());
+        api["sound"] = initCoreSoundBindings(context);
         api["getFormId"] = [](std::string_view contentFile, unsigned int index) -> std::string {
             const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
             for (size_t i = 0; i < contentList.size(); ++i)
@@ -324,6 +326,7 @@ namespace MWLua
     std::map<std::string, sol::object> initPlayerPackages(const Context& context)
     {
         return {
+            { "openmw.ambient", initAmbientPackage(context) },
             { "openmw.camera", initCameraPackage(context.mLua->sol()) },
             { "openmw.debug", initDebugPackage(context) },
             { "openmw.input", initInputPackage(context) },

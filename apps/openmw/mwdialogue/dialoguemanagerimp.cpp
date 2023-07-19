@@ -23,6 +23,8 @@
 #include <components/interpreter/defines.hpp>
 #include <components/interpreter/interpreter.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -650,7 +652,7 @@ namespace MWDialogue
             if (Settings::gui().mSubtitles)
                 winMgr->messageBox(info->mResponse);
             if (!info->mSound.empty())
-                sndMgr->say(actor, info->mSound);
+                sndMgr->say(actor, Misc::ResourceHelpers::correctSoundPath(info->mSound));
             if (!info->mResultScript.empty())
                 executeScript(info->mResultScript, actor);
         }

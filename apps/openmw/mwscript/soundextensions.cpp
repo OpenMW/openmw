@@ -5,6 +5,7 @@
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/opcodes.hpp>
 #include <components/interpreter/runtime.hpp>
+#include <components/misc/resourcehelpers.hpp>
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -38,7 +39,7 @@ namespace MWScript
                 std::string_view text = runtime.getStringLiteral(runtime[0].mInteger);
                 runtime.pop();
 
-                MWBase::Environment::get().getSoundManager()->say(ptr, file);
+                MWBase::Environment::get().getSoundManager()->say(ptr, Misc::ResourceHelpers::correctSoundPath(file));
 
                 if (Settings::gui().mSubtitles)
                     context.messageBox(text);

@@ -4,6 +4,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/fallback/fallback.hpp>
+#include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -656,7 +657,7 @@ namespace MWGui
             += MyGUI::newDelegate(this, &CharacterCreation::onClassQuestionChosen);
         mGenerateClassQuestionDialog->setVisible(true);
 
-        MWBase::Environment::get().getSoundManager()->say(step.mSound);
+        MWBase::Environment::get().getSoundManager()->say(Misc::ResourceHelpers::correctSoundPath(step.mSound));
     }
 
     void CharacterCreation::selectGeneratedClass()

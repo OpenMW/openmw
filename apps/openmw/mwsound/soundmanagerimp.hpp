@@ -132,6 +132,13 @@ namespace MWSound
 
         void cull3DSound(SoundBase* sound);
 
+        bool remove3DSoundAtDistance(PlayMode mode, const MWWorld::ConstPtr& ptr) const;
+
+        Sound* playSound(Sound_Buffer* sfx, float volume, float pitch, Type type = Type::Sfx,
+            PlayMode mode = PlayMode::Normal, float offset = 0);
+        Sound* playSound3D(const MWWorld::ConstPtr& ptr, Sound_Buffer* sfx, float volume, float pitch, Type type,
+            PlayMode mode, float offset);
+
         void updateSounds(float duration);
         void updateRegionSound(float duration);
         void updateWaterSound();
@@ -183,11 +190,11 @@ namespace MWSound
 
         void say(const MWWorld::ConstPtr& reference, const std::string& filename) override;
         ///< Make an actor say some text.
-        /// \param filename name of a sound file in "Sound/" in the data directory.
+        /// \param filename name of a sound file in the VFS
 
         void say(const std::string& filename) override;
         ///< Say some text, without an actor ref
-        /// \param filename name of a sound file in "Sound/" in the data directory.
+        /// \param filename name of a sound file in the VFS
 
         bool sayActive(const MWWorld::ConstPtr& reference = MWWorld::ConstPtr()) const override;
         ///< Is actor not speaking?
@@ -219,7 +226,18 @@ namespace MWSound
         ///< Play a sound, independently of 3D-position
         ///< @param offset Number of seconds into the sound to start playback.
 
+        Sound* playSound(std::string_view fileName, float volume, float pitch, Type type = Type::Sfx,
+            PlayMode mode = PlayMode::Normal, float offset = 0) override;
+        ///< Play a sound, independently of 3D-position
+        ///< @param offset Number of seconds into the sound to start playback.
+
         Sound* playSound3D(const MWWorld::ConstPtr& reference, const ESM::RefId& soundId, float volume, float pitch,
+            Type type = Type::Sfx, PlayMode mode = PlayMode::Normal, float offset = 0) override;
+        ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless
+        ///< Play_NoTrack is specified.
+        ///< @param offset Number of seconds into the sound to start playback.
+
+        Sound* playSound3D(const MWWorld::ConstPtr& reference, std::string_view fileName, float volume, float pitch,
             Type type = Type::Sfx, PlayMode mode = PlayMode::Normal, float offset = 0) override;
         ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless
         ///< Play_NoTrack is specified.
@@ -236,7 +254,10 @@ namespace MWSound
         /// @note no-op if \a sound is null
 
         void stopSound3D(const MWWorld::ConstPtr& reference, const ESM::RefId& soundId) override;
-        ///< Stop the given object from playing the given sound,
+        ///< Stop the given object from playing the given sound.
+
+        void stopSound3D(const MWWorld::ConstPtr& reference, std::string_view fileName) override;
+        ///< Stop the given object from playing the given sound.
 
         void stopSound3D(const MWWorld::ConstPtr& reference) override;
         ///< Stop the given object from playing all sounds.
@@ -251,6 +272,9 @@ namespace MWSound
         ///< @param duration Time until volume reaches 0.
 
         bool getSoundPlaying(const MWWorld::ConstPtr& reference, const ESM::RefId& soundId) const override;
+        ///< Is the given sound currently playing on the given object?
+
+        bool getSoundPlaying(const MWWorld::ConstPtr& reference, std::string_view fileName) const override;
         ///< Is the given sound currently playing on the given object?
 
         void pauseSounds(MWSound::BlockerType blocker, int types = int(Type::Mask)) override;

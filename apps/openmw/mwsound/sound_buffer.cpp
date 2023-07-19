@@ -5,6 +5,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadsoun.hpp>
+#include <components/misc/resourcehelpers.hpp>
 #include <components/settings/settings.hpp>
 #include <components/vfs/pathutil.hpp>
 
@@ -61,6 +62,35 @@ namespace MWSound
         return nullptr;
     }
 
+    Sound_Buffer* SoundBufferPool::lookup(std::string_view fileName) const
+    {
+        auto soundId = ESM::RefId::stringRefId(fileName);
+        return lookup(soundId);
+    }
+
+    Sound_Buffer* SoundBufferPool::loadSfx(Sound_Buffer* sfx)
+    {
+        if (sfx->getHandle() != nullptr)
+            return sfx;
+
+        auto [handle, size] = mOutput->loadSound(sfx->getResourceName());
+        if (handle == nullptr)
+            return {};
+
+        sfx->mHandle = handle;
+
+        mBufferCacheSize += size;
+        if (mBufferCacheSize > mBufferCacheMax)
+        {
+            unloadUnused();
+            if (!mUnusedBuffers.empty() && mBufferCacheSize > mBufferCacheMax)
+                Log(Debug::Warning) << "No unused sound buffers to free, using " << mBufferCacheSize << " bytes!";
+        }
+        mUnusedBuffers.push_front(sfx);
+
+        return sfx;
+    }
+
     Sound_Buffer* SoundBufferPool::load(const ESM::RefId& soundId)
     {
         if (mBufferNameMap.empty())
@@ -81,25 +111,23 @@ namespace MWSound
             sfx = insertSound(soundId, *sound);
         }
 
-        if (sfx->getHandle() == nullptr)
+        return loadSfx(sfx);
+    }
+
+    Sound_Buffer* SoundBufferPool::load(std::string_view fileName)
+    {
+        auto soundId = ESM::RefId::stringRefId(fileName);
+
+        Sound_Buffer* sfx;
+        const auto it = mBufferNameMap.find(soundId);
+        if (it != mBufferNameMap.end())
+            sfx = it->second;
+        else
         {
-            auto [handle, size] = mOutput->loadSound(sfx->getResourceName());
-            if (handle == nullptr)
-                return {};
-
-            sfx->mHandle = handle;
-
-            mBufferCacheSize += size;
-            if (mBufferCacheSize > mBufferCacheMax)
-            {
-                unloadUnused();
-                if (!mUnusedBuffers.empty() && mBufferCacheSize > mBufferCacheMax)
-                    Log(Debug::Warning) << "No unused sound buffers to free, using " << mBufferCacheSize << " bytes!";
-            }
-            mUnusedBuffers.push_front(sfx);
+            sfx = insertSound(fileName);
         }
 
-        return sfx;
+        return loadSfx(sfx);
     }
 
     void SoundBufferPool::clear()
@@ -111,6 +139,24 @@ namespace MWSound
             sfx.mHandle = nullptr;
         }
         mUnusedBuffers.clear();
+    }
+
+    Sound_Buffer* SoundBufferPool::insertSound(std::string_view fileName)
+    {
+        static const AudioParams audioParams
+            = makeAudioParams(MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>());
+
+        float volume = 1.f;
+        float min = std::max(audioParams.mAudioDefaultMinDistance * audioParams.mAudioMinDistanceMult, 1.f);
+        float max = std::max(min, audioParams.mAudioDefaultMaxDistance * audioParams.mAudioMaxDistanceMult);
+
+        min = std::max(min, 1.0f);
+        max = std::max(min, max);
+
+        Sound_Buffer& sfx = mSoundBuffers.emplace_back(fileName, volume, min, max);
+
+        mBufferNameMap.emplace(ESM::RefId::stringRefId(fileName), &sfx);
+        return &sfx;
     }
 
     Sound_Buffer* SoundBufferPool::insertSound(const ESM::RefId& soundId, const ESM::Sound& sound)
@@ -132,7 +178,8 @@ namespace MWSound
         min = std::max(min, 1.0f);
         max = std::max(min, max);
 
-        Sound_Buffer& sfx = mSoundBuffers.emplace_back("Sound/" + sound.mSound, volume, min, max);
+        Sound_Buffer& sfx
+            = mSoundBuffers.emplace_back(Misc::ResourceHelpers::correctSoundPath(sound.mSound), volume, min, max);
         VFS::Path::normalizeFilenameInPlace(sfx.mResourceName);
 
         mBufferNameMap.emplace(soundId, &sfx);
