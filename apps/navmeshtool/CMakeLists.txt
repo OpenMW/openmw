@@ -21,7 +21,7 @@ if (WIN32)
     install(TARGETS openmw-navmeshtool RUNTIME DESTINATION ".")
 endif()
 
-if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+if (MSVC)
     target_precompile_headers(openmw-navmeshtool PRIVATE
         <algorithm>
         <memory>

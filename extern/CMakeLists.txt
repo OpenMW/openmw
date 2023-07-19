@@ -239,7 +239,7 @@ if (NOT OPENMW_USE_SYSTEM_YAML_CPP)
     )
     FetchContent_MakeAvailableExcludeFromAll(yaml-cpp)
 
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+    if (MSVC)
         target_precompile_headers(yaml-cpp PRIVATE <algorithm>)
     endif()
 endif()

@@ -156,7 +156,7 @@ target_link_libraries(openmw
     components
 )
 
-if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+if (MSVC)
     target_precompile_headers(openmw PRIVATE
         <boost/program_options/options_description.hpp>
 
