@@ -22,8 +22,6 @@ namespace MWLua
         {
         }
 
-        void operator()(const OnNewGame&) const { mGlobalScripts.newGameStarted(); }
-
         void operator()(const OnActive& event) const
         {
             MWWorld::Ptr ptr = getPtr(event.mObject);

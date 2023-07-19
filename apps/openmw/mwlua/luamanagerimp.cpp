@@ -194,6 +194,14 @@ namespace MWLua
         if (mPlayer.isEmpty())
             return; // The game is not started yet.
 
+        if (mNewGameStarted)
+        {
+            mNewGameStarted = false;
+            // Run onNewGame handler in synchronizedUpdate (at the beginning of the frame), so it
+            // can teleport the player to the starting location before the first frame is rendered.
+            mGlobalScripts.newGameStarted();
+        }
+
         // We apply input events in `synchronizedUpdate` rather than in `update` in order to reduce input latency.
         mProcessingInputEvents = true;
         PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
@@ -237,6 +245,7 @@ namespace MWLua
         mWorldView.clear();
         mGlobalScripts.removeAllScripts();
         mGlobalScriptsStarted = false;
+        mNewGameStarted = false;
         if (!mPlayer.isEmpty())
         {
             mPlayer.getCellRef().unsetRefNum();
@@ -273,7 +282,7 @@ namespace MWLua
         mInputEvents.clear();
         mGlobalScripts.addAutoStartedScripts();
         mGlobalScriptsStarted = true;
-        mEngineEvents.addToQueue(EngineEvents::OnNewGame{});
+        mNewGameStarted = true;
     }
 
     void LuaManager::gameLoaded()
