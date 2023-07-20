@@ -145,6 +145,8 @@ namespace Nif
             { "BSValueNode", &construct<BSValueNode, RC_NiNode> },
             { "BSOrderedNode", &construct<BSOrderedNode, RC_NiNode> },
             { "BSMultiBoundNode", &construct<BSMultiBoundNode, RC_NiNode> },
+            { "BSRangeNode", &construct<BSRangeNode, RC_NiNode> },
+            { "BSBlastNode", &construct<BSRangeNode, RC_NiNode> },
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
             { "NiFloatInterpolator", &construct<NiFloatInterpolator, RC_NiFloatInterpolator> },
             { "NiBoolInterpolator", &construct<NiBoolInterpolator, RC_NiBoolInterpolator> },

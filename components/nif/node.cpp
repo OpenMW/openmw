@@ -497,4 +497,12 @@ namespace Nif
         nif->read(mAlphaSortBound);
         nif->read(mStaticBound);
     }
+
+    void BSRangeNode::read(NIFStream* nif)
+    {
+        NiNode::read(nif);
+        nif->read(mMin);
+        nif->read(mMax);
+        nif->read(mCurrent);
+    }
 }

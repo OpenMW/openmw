@@ -392,5 +392,13 @@ namespace Nif
 
         void read(NIFStream* nif) override;
     };
+
+    struct BSRangeNode : NiNode
+    {
+        uint8_t mMin, mMax;
+        uint8_t mCurrent;
+
+        void read(NIFStream* nif) override;
+    };
 } // Namespace
 #endif
