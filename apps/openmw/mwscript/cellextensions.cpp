@@ -91,11 +91,12 @@ namespace MWScript
 
                 ESM::Position pos;
                 MWBase::World* world = MWBase::Environment::get().getWorld();
-                const MWWorld::Ptr playerPtr = world->getPlayerPtr();
+                MWWorld::Ptr playerPtr = world->getPlayerPtr();
 
                 if (const ESM::RefId refId = world->findExteriorPosition(cell, pos); !refId.empty())
                 {
                     MWWorld::ActionTeleport(refId, pos, false).execute(playerPtr);
+                    playerPtr = world->getPlayerPtr(); // could be changed by ActionTeleport
                     world->adjustPosition(playerPtr, false);
                     return;
                 }
@@ -121,7 +122,7 @@ namespace MWScript
 
                 ESM::Position pos;
                 MWBase::World* world = MWBase::Environment::get().getWorld();
-                const MWWorld::Ptr playerPtr = world->getPlayerPtr();
+                MWWorld::Ptr playerPtr = world->getPlayerPtr();
 
                 osg::Vec2 posFromIndex
                     = ESM::indexToPosition(ESM::ExteriorCellLocation(x, y, ESM::Cell::sDefaultWorldspaceId), true);
@@ -132,6 +133,7 @@ namespace MWScript
                 pos.rot[0] = pos.rot[1] = pos.rot[2] = 0;
 
                 MWWorld::ActionTeleport(ESM::RefId::esm3ExteriorCell(x, y), pos, false).execute(playerPtr);
+                playerPtr = world->getPlayerPtr(); // could be changed by ActionTeleport
                 world->adjustPosition(playerPtr, false);
             }
         };
