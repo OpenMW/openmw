@@ -121,6 +121,7 @@ namespace Nif
         RC_NiFloatInterpolator,
         RC_NiPoint3Interpolator,
         RC_NiBoolInterpolator,
+        RC_NiBoolTimelineInterpolator,
         RC_NiTransformInterpolator,
         RC_NiColorInterpolator,
         RC_BSShaderTextureSet,

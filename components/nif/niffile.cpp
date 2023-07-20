@@ -150,6 +150,7 @@ namespace Nif
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
             { "NiFloatInterpolator", &construct<NiFloatInterpolator, RC_NiFloatInterpolator> },
             { "NiBoolInterpolator", &construct<NiBoolInterpolator, RC_NiBoolInterpolator> },
+            { "NiBoolTimelineInterpolator", &construct<NiBoolInterpolator, RC_NiBoolTimelineInterpolator> },
             { "NiPoint3Interpolator", &construct<NiPoint3Interpolator, RC_NiPoint3Interpolator> },
             { "NiTransformController", &construct<NiKeyframeController, RC_NiKeyframeController> },
             { "NiMultiTargetTransformController",
