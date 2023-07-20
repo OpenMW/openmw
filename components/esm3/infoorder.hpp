@@ -24,47 +24,33 @@ namespace ESM
 
             auto it = mInfoPositions.find(value.mId);
 
-            if (it != mInfoPositions.end() && it->second.mPosition->mPrev == value.mPrev)
+            if (it != mInfoPositions.end())
             {
+                bool samePrev = it->second.mPosition->mPrev == value.mPrev;
                 *it->second.mPosition = std::forward<V>(value);
                 it->second.mDeleted = deleted;
-                return;
+                if (samePrev)
+                    return;
             }
-
-            if (it == mInfoPositions.end())
+            else
                 it = mInfoPositions.emplace(value.mId, Item{ .mPosition = mOrderedInfo.end(), .mDeleted = deleted })
                          .first;
 
             Item& item = it->second;
 
-            const auto insertOrSplice = [&](typename std::list<T>::const_iterator before) {
-                if (item.mPosition == mOrderedInfo.end())
-                    item.mPosition = mOrderedInfo.insert(before, std::forward<V>(value));
+            auto before = mOrderedInfo.begin();
+            if (!value.mPrev.empty())
+            {
+                const auto prevIt = mInfoPositions.find(value.mPrev);
+                if (prevIt != mInfoPositions.end())
+                    before = std::next(prevIt->second.mPosition);
                 else
-                    mOrderedInfo.splice(before, mOrderedInfo, item.mPosition);
-            };
-
-            if (value.mPrev.empty())
-            {
-                insertOrSplice(mOrderedInfo.begin());
-                return;
+                    before = mOrderedInfo.end();
             }
-
-            const auto prevIt = mInfoPositions.find(value.mPrev);
-            if (prevIt != mInfoPositions.end())
-            {
-                insertOrSplice(std::next(prevIt->second.mPosition));
-                return;
-            }
-
-            const auto nextIt = mInfoPositions.find(value.mNext);
-            if (nextIt != mInfoPositions.end())
-            {
-                insertOrSplice(nextIt->second.mPosition);
-                return;
-            }
-
-            insertOrSplice(mOrderedInfo.end());
+            if (item.mPosition == mOrderedInfo.end())
+                item.mPosition = mOrderedInfo.insert(before, std::forward<V>(value));
+            else
+                mOrderedInfo.splice(before, mOrderedInfo, item.mPosition);
         }
 
         void removeInfo(const RefId& infoRefId)

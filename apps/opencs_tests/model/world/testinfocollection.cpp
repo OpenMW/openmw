@@ -328,7 +328,7 @@ namespace CSMWorld
             EXPECT_THAT(infoOrder.find(dialogue.mId)->second.getOrderedInfo(), ElementsAre(InfoId(info.mValue.mId)));
         }
 
-        TEST(CSMWorldInfoCollectionTest, sortShouldOrderRecordsBasedOnPrevAndNext)
+        TEST(CSMWorldInfoCollectionTest, sortShouldOrderRecordsBasedOnPrev)
         {
             const DialogueData<ESM::DialInfo> data = generateDialogueWithInfos(3);
 
@@ -345,7 +345,7 @@ namespace CSMWorld
             EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue#info2")), 2);
         }
 
-        TEST(CSMWorldInfoCollectionTest, sortShouldOrderRecordsBasedOnPrevAndNextWhenReversed)
+        TEST(CSMWorldInfoCollectionTest, sortShouldOrderRecordsBasedOnPrevWhenReversed)
         {
             DialogueData<ESM::DialInfo> data = generateDialogueWithInfos(3);
 
@@ -360,8 +360,8 @@ namespace CSMWorld
 
             EXPECT_EQ(collection.getSize(), 3);
             EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue#info0")), 0);
-            EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue#info1")), 1);
-            EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue#info2")), 2);
+            EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue#info2")), 1);
+            EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue#info1")), 2);
         }
 
         TEST(CSMWorldInfoCollectionTest, sortShouldInsertNewRecordBasedOnPrev)
@@ -379,33 +379,6 @@ namespace CSMWorld
             newInfo.mId = ESM::RefId::stringRefId("newInfo");
             newInfo.mPrev = data.mInfos[1].mId;
             newInfo.mNext = ESM::RefId::stringRefId("invalid");
-
-            saveAndLoadDialogueWithInfos(data.mDialogue, std::array{ newInfo }, base, collection, infoOrder);
-
-            collection.sort(infoOrder);
-
-            EXPECT_EQ(collection.getSize(), 4);
-            EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue#info0")), 0);
-            EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue#info1")), 1);
-            EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue#newInfo")), 2);
-            EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue#info2")), 3);
-        }
-
-        TEST(CSMWorldInfoCollectionTest, sortShouldInsertNewRecordBasedOnNextWhenPrevIsNotFound)
-        {
-            const bool base = true;
-            InfoOrderByTopic infoOrder;
-            InfoCollection collection;
-
-            const DialogueData<ESM::DialInfo> data = generateDialogueWithInfos(3);
-
-            saveAndLoadDialogueWithInfos(data, base, collection, infoOrder);
-
-            ESM::DialInfo newInfo;
-            newInfo.blank();
-            newInfo.mId = ESM::RefId::stringRefId("newInfo");
-            newInfo.mPrev = ESM::RefId::stringRefId("invalid");
-            newInfo.mNext = data.mInfos[2].mId;
 
             saveAndLoadDialogueWithInfos(data.mDialogue, std::array{ newInfo }, base, collection, infoOrder);
 
@@ -444,7 +417,7 @@ namespace CSMWorld
             EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue#info2")), 3);
         }
 
-        TEST(CSMWorldInfoCollectionTest, sortShouldInsertNewRecordToBackWhenNextIsEmpty)
+        TEST(CSMWorldInfoCollectionTest, sortShouldInsertNewRecordToBackWhenPrevIsNotFound)
         {
             const bool base = true;
             InfoOrderByTopic infoOrder;
@@ -539,7 +512,7 @@ namespace CSMWorld
             EXPECT_EQ(collection.searchId(ESM::RefId::stringRefId("dialogue#info2")), 0);
         }
 
-        TEST(CSMWorldInfoCollectionTest, sortShouldMoveToBackUpdatedRecordWhenNextIsEmpty)
+        TEST(CSMWorldInfoCollectionTest, sortShouldMoveToBackUpdatedRecordWhenPrevIsNotFound)
         {
             const bool base = true;
             InfoOrderByTopic infoOrder;
