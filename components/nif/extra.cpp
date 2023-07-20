@@ -138,4 +138,12 @@ namespace Nif
 
         mRotation = osg::Quat(rotX, osg::X_AXIS, rotY, osg::Y_AXIS, rotZ, osg::Z_AXIS);
     }
+
+    void BSBehaviorGraphExtraData::read(NIFStream* nif)
+    {
+        Extra::read(nif);
+        mFile = nif->getString();
+        mControlsBaseSkeleton = nif->getBoolean();
+    }
+
 }

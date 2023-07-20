@@ -211,6 +211,7 @@ namespace Nif
                 &construct<BSEffectShaderPropertyColorController, RC_BSEffectShaderPropertyColorController> },
             { "BSLightingShaderPropertyColorController",
                 &construct<BSEffectShaderPropertyColorController, RC_BSLightingShaderPropertyColorController> },
+            { "BSBehaviorGraphExtraData", &construct<BSBehaviorGraphExtraData, RC_BSBehaviorGraphExtraData> },
         };
     }
 

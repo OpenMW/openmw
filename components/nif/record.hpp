@@ -172,6 +172,7 @@ namespace Nif
         RC_BSEffectShaderPropertyColorController,
         RC_BSLightingShaderPropertyFloatController,
         RC_BSLightingShaderPropertyColorController,
+        RC_BSBehaviorGraphExtraData,
     };
 
     /// Base class for all records
