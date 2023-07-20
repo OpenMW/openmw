@@ -148,6 +148,7 @@ namespace Nif
         RC_bhkRigidBodyT,
         RC_bhkRagdollConstraint,
         RC_bhkHingeConstraint,
+        RC_bhkLimitedHingeConstraint,
         RC_BSLightingShaderProperty,
         RC_BSEffectShaderProperty,
         RC_NiClusterAccumulator,
