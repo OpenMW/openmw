@@ -462,6 +462,8 @@ namespace
         {
             refId = ESM::RefId::esm3ExteriorCell(0, 0);
         }
+        else if constexpr (std::is_same_v<RecordType, ESM::Skill>)
+            refId = ESM::Skill::Block;
         else
             refId = ESM::StringRefId(stringId);
 
@@ -496,7 +498,7 @@ namespace
             const RecordType* result = nullptr;
             if constexpr (std::is_same_v<RecordType, ESM::LandTexture>)
                 result = esmStore.get<RecordType>().search(index, 0);
-            else if constexpr (ESM::hasIndex<RecordType> && !std::is_same_v<RecordType, ESM::Skill>)
+            else if constexpr (ESM::hasIndex<RecordType>)
                 result = esmStore.get<RecordType>().search(index);
             else
                 result = esmStore.get<RecordType>().search(refId);

@@ -41,18 +41,14 @@ namespace
         book.mData.mValue = rec["value"];
         book.mData.mIsScroll = rec["isScroll"];
 
-        std::string_view skill = rec["skill"].get<std::string_view>();
+        ESM::RefId skill = ESM::RefId::deserializeText(rec["skill"].get<std::string_view>());
 
         book.mData.mSkillId = -1;
-        if (skill.length() > 0)
+        if (!skill.empty())
         {
-            for (std::size_t i = 0; i < std::size(ESM::Skill::sSkillNames); ++i)
-            {
-                if (Misc::StringUtils::ciEqual(ESM::Skill::sSkillNames[i], skill))
-                    book.mData.mSkillId = i;
-            }
+            book.mData.mSkillId = ESM::Skill::refIdToIndex(skill);
             if (book.mData.mSkillId == -1)
-                throw std::runtime_error("Incorrect skill: " + std::string(skill));
+                throw std::runtime_error("Incorrect skill: " + skill.toDebugString());
         }
         return book;
     }
@@ -69,7 +65,7 @@ namespace MWLua
         book["createRecordDraft"] = tableToBook;
         for (int id = 0; id < ESM::Skill::Length; ++id)
         {
-            std::string skillName = Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[id]);
+            std::string skillName = ESM::Skill::indexToRefId(id).serializeText();
             skill[skillName] = skillName;
         }
 
@@ -100,10 +96,10 @@ namespace MWLua
         record["enchantCapacity"]
             = sol::readonly_property([](const ESM::Book& rec) -> float { return rec.mData.mEnchant * 0.1f; });
         record["skill"] = sol::readonly_property([](const ESM::Book& rec) -> sol::optional<std::string> {
-            if (rec.mData.mSkillId >= 0)
-                return Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[rec.mData.mSkillId]);
-            else
-                return sol::nullopt;
+            ESM::RefId skill = ESM::Skill::indexToRefId(rec.mData.mSkillId);
+            if (!skill.empty())
+                return skill.serializeText();
+            return sol::nullopt;
         });
     }
 }

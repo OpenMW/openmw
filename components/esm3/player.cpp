@@ -54,7 +54,7 @@ namespace ESM
                 = esm.getFormatVersion() <= MaxClearModifiersFormatVersion && !mObject.mNpcStats.mIsWerewolf;
             if (esm.hasMoreSubs())
             {
-                for (int i = 0; i < Attribute::Length; ++i)
+                for (size_t i = 0; i < std::size(mSaveAttributes); ++i)
                 {
                     StatState<float> attribute;
                     attribute.load(esm, intFallback);
@@ -64,7 +64,7 @@ namespace ESM
                     if (mObject.mNpcStats.mIsWerewolf)
                         mObject.mCreatureStats.mAttributes[i] = attribute;
                 }
-                for (int i = 0; i < Skill::Length; ++i)
+                for (size_t i = 0; i < std::size(mSaveSkills); ++i)
                 {
                     StatState<float> skill;
                     skill.load(esm, intFallback);

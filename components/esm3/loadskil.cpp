@@ -5,46 +5,37 @@
 
 #include <components/misc/strings/algorithm.hpp>
 
+#include <cstdint>
+
 namespace ESM
 {
-    const std::string Skill::sSkillNames[Length] = {
-        "Block",
-        "Armorer",
-        "Mediumarmor",
-        "Heavyarmor",
-        "Bluntweapon",
-        "Longblade",
-        "Axe",
-        "Spear",
-        "Athletics",
-        "Enchant",
-        "Destruction",
-        "Alteration",
-        "Illusion",
-        "Conjuration",
-        "Mysticism",
-        "Restoration",
-        "Alchemy",
-        "Unarmored",
-        "Security",
-        "Sneak",
-        "Acrobatics",
-        "Lightarmor",
-        "Shortblade",
-        "Marksman",
-        "Mercantile",
-        "Speechcraft",
-        "Handtohand",
-    };
-
-    int Skill::stringToSkillId(std::string_view skill)
-    {
-        for (int id = 0; id < Skill::Length; ++id)
-            if (Misc::StringUtils::ciEqual(sSkillNames[id], skill))
-                return id;
-
-        throw std::logic_error("No such skill: " + std::string(skill));
-    }
+    const SkillId Skill::Block("Block");
+    const SkillId Skill::Armorer("Armorer");
+    const SkillId Skill::MediumArmor("MediumArmor");
+    const SkillId Skill::HeavyArmor("HeavyArmor");
+    const SkillId Skill::BluntWeapon("BluntWeapon");
+    const SkillId Skill::LongBlade("LongBlade");
+    const SkillId Skill::Axe("Axe");
+    const SkillId Skill::Spear("Spear");
+    const SkillId Skill::Athletics("Athletics");
+    const SkillId Skill::Enchant("Enchant");
+    const SkillId Skill::Destruction("Destruction");
+    const SkillId Skill::Alteration("Alteration");
+    const SkillId Skill::Illusion("Illusion");
+    const SkillId Skill::Conjuration("Conjuration");
+    const SkillId Skill::Mysticism("Mysticism");
+    const SkillId Skill::Restoration("Restoration");
+    const SkillId Skill::Alchemy("Alchemy");
+    const SkillId Skill::Unarmored("Unarmored");
+    const SkillId Skill::Security("Security");
+    const SkillId Skill::Sneak("Sneak");
+    const SkillId Skill::Acrobatics("Acrobatics");
+    const SkillId Skill::LightArmor("LightArmor");
+    const SkillId Skill::ShortBlade("ShortBlade");
+    const SkillId Skill::Marksman("Marksman");
+    const SkillId Skill::Mercantile("Mercantile");
+    const SkillId Skill::Speechcraft("Speechcraft");
+    const SkillId Skill::HandToHand("HandToHand");
 
     void Skill::load(ESMReader& esm, bool& isDeleted)
     {
@@ -53,13 +44,14 @@ namespace ESM
 
         bool hasIndex = false;
         bool hasData = false;
+        int32_t index = -1;
         while (esm.hasMoreSubs())
         {
             esm.getSubName();
             switch (esm.retSubName().toInt())
             {
                 case fourCC("INDX"):
-                    esm.getHT(mIndex);
+                    esm.getHT(index);
                     hasIndex = true;
                     break;
                 case fourCC("SKDT"):
@@ -75,19 +67,17 @@ namespace ESM
         }
         if (!hasIndex)
             esm.fail("Missing INDX");
-        else if (mIndex < 0 || mIndex >= Length)
+        else if (index < 0 || index >= Length)
             esm.fail("Invalid INDX");
         if (!hasData)
             esm.fail("Missing SKDT");
 
-        // create an ID from the index and the name (only used in the editor and likely to change in the
-        // future)
-        mId = indexToRefId(mIndex);
+        mId = *indexToRefId(index).getIf<SkillId>();
     }
 
     void Skill::save(ESMWriter& esm, bool /*isDeleted*/) const
     {
-        esm.writeHNT("INDX", mIndex);
+        esm.writeHNT("INDX", refIdToIndex(mId));
         esm.writeHNT("SKDT", mData, 24);
         esm.writeHNOString("DESC", mDescription);
     }
@@ -101,11 +91,51 @@ namespace ESM
         mDescription.clear();
     }
 
+    static const RefId sSkills[Skill::Length] = {
+        Skill::Block,
+        Skill::Armorer,
+        Skill::MediumArmor,
+        Skill::HeavyArmor,
+        Skill::BluntWeapon,
+        Skill::LongBlade,
+        Skill::Axe,
+        Skill::Spear,
+        Skill::Athletics,
+        Skill::Enchant,
+        Skill::Destruction,
+        Skill::Alteration,
+        Skill::Illusion,
+        Skill::Conjuration,
+        Skill::Mysticism,
+        Skill::Restoration,
+        Skill::Alchemy,
+        Skill::Unarmored,
+        Skill::Security,
+        Skill::Sneak,
+        Skill::Acrobatics,
+        Skill::LightArmor,
+        Skill::ShortBlade,
+        Skill::Marksman,
+        Skill::Mercantile,
+        Skill::Speechcraft,
+        Skill::HandToHand,
+    };
+
     RefId Skill::indexToRefId(int index)
     {
         if (index < 0 || index >= Length)
             return RefId();
-        return RefId::index(sRecordId, static_cast<std::uint32_t>(index));
+        return sSkills[index];
+    }
+
+    int Skill::refIdToIndex(RefId id)
+    {
+        for (int i = 0; i < Length; ++i)
+        {
+            if (sSkills[i] == id)
+                return i;
+        }
+        return -1;
     }
 
     const std::array<RefId, MagicSchool::Length> sMagicSchools = {

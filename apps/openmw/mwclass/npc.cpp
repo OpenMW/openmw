@@ -121,11 +121,12 @@ namespace
 
                 // is this a minor or major skill?
                 float add = 0.2f;
+                int index = ESM::Skill::refIdToIndex(skill.mId);
                 for (const auto& skills : class_->mData.mSkills)
                 {
-                    if (skills[0] == skill.mIndex)
+                    if (skills[0] == index)
                         add = 0.5;
-                    if (skills[1] == skill.mIndex)
+                    if (skills[1] == index)
                         add = 1.0;
                 }
                 modifierSum += add;
@@ -199,15 +200,16 @@ namespace
             int raceBonus = 0;
             int specBonus = 0;
 
+            int index = ESM::Skill::refIdToIndex(skill.mId);
             auto bonusIt = std::find_if(race->mData.mBonus.begin(), race->mData.mBonus.end(),
-                [&](const auto& bonus) { return bonus.mSkill == skill.mIndex; });
+                [&](const auto& bonus) { return bonus.mSkill == index; });
             if (bonusIt != race->mData.mBonus.end())
                 raceBonus = bonusIt->mBonus;
 
             for (const auto& skills : class_->mData.mSkills)
             {
                 // is this a minor or major skill?
-                if (std::find(skills.begin(), skills.end(), skill.mIndex) != skills.end())
+                if (std::find(skills.begin(), skills.end(), index) != skills.end())
                 {
                     majorMultiplier = 1.0f;
                     break;

@@ -392,7 +392,6 @@ namespace MWLua
         sol::table skills(context.mLua->sol(), sol::create);
         npcStats["skills"] = LuaUtil::makeReadOnly(skills);
         for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
-            skills[Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[skill.mIndex])]
-                = addIndexedAccessor<SkillStat>(skill.mId);
+            skills[ESM::RefId(skill.mId).serializeText()] = addIndexedAccessor<SkillStat>(skill.mId);
     }
 }

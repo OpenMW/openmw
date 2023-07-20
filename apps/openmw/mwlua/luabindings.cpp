@@ -14,6 +14,7 @@
 #include <components/lua/l10n.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/lua/utilpackage.hpp>
+#include <components/misc/strings/lower.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -156,10 +157,18 @@ namespace MWLua
             return sol::nil;
         };
 
-        sol::table skill(context.mLua->sol(), sol::create);
-        api["SKILL"] = LuaUtil::makeStrictReadOnly(skill);
-        for (int id = 0; id < ESM::Skill::Length; ++id)
-            skill[ESM::Skill::sSkillNames[id]] = Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[id]);
+        // TODO: deprecate this and provide access to the store instead
+        sol::table skills(context.mLua->sol(), sol::create);
+        api["SKILL"] = LuaUtil::makeStrictReadOnly(skills);
+        for (int i = 0; i < ESM::Skill::Length; ++i)
+        {
+            ESM::RefId skill = ESM::Skill::indexToRefId(i);
+            std::string id = skill.serializeText();
+            std::string key = Misc::StringUtils::lowerCase(skill.getRefIdString());
+            // force first character to uppercase for backwards compatability
+            key[0] += 'A' - 'a';
+            skills[key] = id;
+        }
 
         sol::table attribute(context.mLua->sol(), sol::create);
         api["ATTRIBUTE"] = LuaUtil::makeStrictReadOnly(attribute);

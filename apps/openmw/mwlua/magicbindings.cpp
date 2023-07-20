@@ -309,10 +309,10 @@ namespace MWLua
               });
         effectParamsT["affectedSkill"]
             = sol::readonly_property([](const ESM::ENAMstruct& params) -> sol::optional<std::string> {
-                  if (params.mSkill >= 0 && params.mSkill < ESM::Skill::Length)
-                      return Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[params.mSkill]);
-                  else
-                      return sol::nullopt;
+                  ESM::RefId id = ESM::Skill::indexToRefId(params.mSkill);
+                  if (!id.empty())
+                      return id.serializeText();
+                  return sol::nullopt;
               });
         effectParamsT["affectedAttribute"]
             = sol::readonly_property([](const ESM::ENAMstruct& params) -> sol::optional<std::string> {
@@ -383,11 +383,12 @@ namespace MWLua
         activeEffectT["affectedSkill"]
             = sol::readonly_property([magicEffectStore](const ActiveEffect& effect) -> sol::optional<std::string> {
                   auto* rec = magicEffectStore->find(effect.key.mId);
-                  if ((rec->mData.mFlags & ESM::MagicEffect::TargetSkill) && effect.key.mArg >= 0
-                      && effect.key.mArg < ESM::Skill::Length)
-                      return Misc::StringUtils::lowerCase(ESM::Skill::sSkillNames[effect.key.mArg]);
-                  else
-                      return sol::nullopt;
+                  if (rec->mData.mFlags & ESM::MagicEffect::TargetSkill)
+                  {
+                      ESM::RefId id = ESM::Skill::indexToRefId(effect.key.mArg);
+                      return id.serializeText();
+                  }
+                  return sol::nullopt;
               });
         activeEffectT["affectedAttribute"]
             = sol::readonly_property([magicEffectStore](const ActiveEffect& effect) -> sol::optional<std::string> {
@@ -620,7 +621,10 @@ namespace MWLua
                     key = MWMechanics::EffectKey(id, ESM::Attribute::stringToAttributeId(argStr.value()));
 
                 if (rec->mData.mFlags & ESM::MagicEffect::TargetSkill)
-                    key = MWMechanics::EffectKey(id, ESM::Skill::stringToSkillId(argStr.value()));
+                {
+                    ESM::RefId skill = ESM::RefId::deserializeText(argStr.value());
+                    key = MWMechanics::EffectKey(id, ESM::Skill::refIdToIndex(skill));
+                }
             }
 
             return key;

@@ -409,7 +409,8 @@ namespace CSMWorld
 
         QVariant get(const Record<ESXRecordT>& record) const override
         {
-            return QString::fromStdString(ESM::Skill::sSkillNames[record.get().mData.getSkill(mIndex, mMajor)]);
+            return QString::fromStdString(
+                ESM::Skill::indexToRefId(record.get().mData.getSkill(mIndex, mMajor)).getRefIdString());
         }
 
         void set(Record<ESXRecordT>& record, const QVariant& data) override
