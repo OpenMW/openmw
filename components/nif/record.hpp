@@ -171,6 +171,7 @@ namespace Nif
         RC_BSEffectShaderPropertyFloatController,
         RC_BSEffectShaderPropertyColorController,
         RC_BSLightingShaderPropertyFloatController,
+        RC_BSLightingShaderPropertyColorController,
     };
 
     /// Base class for all records
