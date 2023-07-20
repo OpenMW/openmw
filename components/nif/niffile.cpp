@@ -147,6 +147,7 @@ namespace Nif
             { "BSMultiBoundNode", &construct<BSMultiBoundNode, RC_NiNode> },
             { "BSRangeNode", &construct<BSRangeNode, RC_NiNode> },
             { "BSBlastNode", &construct<BSRangeNode, RC_NiNode> },
+            { "BSDamageStage", &construct<BSRangeNode, RC_NiNode> },
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
             { "NiFloatInterpolator", &construct<NiFloatInterpolator, RC_NiFloatInterpolator> },
             { "NiBoolInterpolator", &construct<NiBoolInterpolator, RC_NiBoolInterpolator> },
