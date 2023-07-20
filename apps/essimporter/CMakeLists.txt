@@ -47,7 +47,7 @@ if (WIN32)
     INSTALL(TARGETS openmw-essimporter RUNTIME DESTINATION ".")
 endif(WIN32)
 
-if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+if (MSVC)
     target_precompile_headers(openmw-essimporter PRIVATE
         <algorithm>
         <filesystem>

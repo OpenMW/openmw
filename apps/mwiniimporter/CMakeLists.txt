@@ -33,7 +33,7 @@ if (BUILD_WITH_CODE_COVERAGE)
     target_link_libraries(openmw-iniimporter gcov)
 endif()
 
-if (CMAKE_VERSION VERSION_GREATER_EQUAL 3.16 AND MSVC)
+if (MSVC)
     target_precompile_headers(openmw-iniimporter PRIVATE
         <string>
         <vector>
