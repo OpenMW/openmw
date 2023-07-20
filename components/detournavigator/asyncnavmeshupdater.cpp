@@ -339,7 +339,7 @@ namespace DetourNavigator
                     switch (status)
                     {
                         case JobStatus::Done:
-                            unlockTile(job->mAgentBounds, job->mChangedTile);
+                            unlockTile(job->mId, job->mAgentBounds, job->mChangedTile);
                             if (job->mGeneratedNavMeshData != nullptr)
                                 mDbWorker->enqueueJob(job);
                             else
@@ -565,12 +565,14 @@ namespace DetourNavigator
 
         mWaiting.pop_front();
 
+        Log(Debug::Debug) << "Pop job " << job->mId << " by thread=" << std::this_thread::get_id();
+
         if (job->mRecastMesh != nullptr)
             return job;
 
-        if (!lockTile(job->mAgentBounds, job->mChangedTile))
+        if (!lockTile(job->mId, job->mAgentBounds, job->mChangedTile))
         {
-            Log(Debug::Debug) << "Failed to lock tile by " << job->mId;
+            Log(Debug::Debug) << "Failed to lock tile by job " << job->mId << " try=" << job->mTryNumber;
             ++job->mTryNumber;
             insertPrioritizedJob(job, mWaiting);
             return mJobs.end();
@@ -610,7 +612,7 @@ namespace DetourNavigator
 
     void AsyncNavMeshUpdater::repost(JobIt job)
     {
-        unlockTile(job->mAgentBounds, job->mChangedTile);
+        unlockTile(job->mId, job->mAgentBounds, job->mChangedTile);
 
         if (mShouldStop || job->mTryNumber > 2)
             return;
@@ -628,17 +630,21 @@ namespace DetourNavigator
         mJobs.erase(job);
     }
 
-    bool AsyncNavMeshUpdater::lockTile(const AgentBounds& agentBounds, const TilePosition& changedTile)
+    bool AsyncNavMeshUpdater::lockTile(
+        std::size_t jobId, const AgentBounds& agentBounds, const TilePosition& changedTile)
     {
-        Log(Debug::Debug) << "Locking tile agent=" << agentBounds << " changedTile=(" << changedTile << ")";
+        Log(Debug::Debug) << "Locking tile by job " << jobId << " agent=" << agentBounds << " changedTile=("
+                          << changedTile << ")";
         return mProcessingTiles.lock()->emplace(agentBounds, changedTile).second;
     }
 
-    void AsyncNavMeshUpdater::unlockTile(const AgentBounds& agentBounds, const TilePosition& changedTile)
+    void AsyncNavMeshUpdater::unlockTile(
+        std::size_t jobId, const AgentBounds& agentBounds, const TilePosition& changedTile)
     {
         auto locked = mProcessingTiles.lock();
         locked->erase(std::tie(agentBounds, changedTile));
-        Log(Debug::Debug) << "Unlocked tile agent=" << agentBounds << " changedTile=(" << changedTile << ")";
+        Log(Debug::Debug) << "Unlocked tile by job " << jobId << " agent=" << agentBounds << " changedTile=("
+                          << changedTile << ")";
         if (locked->empty())
             mProcessed.notify_all();
     }
