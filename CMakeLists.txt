@@ -1085,7 +1085,6 @@ elseif(NOT APPLE)
 
         # Install resources
         INSTALL(DIRECTORY "${INSTALL_SOURCE}/resources" DESTINATION "${DATADIR}" COMPONENT "Resources")
-        INSTALL(DIRECTORY DESTINATION "${DATADIR}/data" COMPONENT "Resources")
     endif(WIN32)
 endif(OPENMW_OSX_DEPLOYMENT AND APPLE)
 
