@@ -183,7 +183,6 @@ namespace MWGui
         , mContainerWindow(nullptr)
         , mTranslationDataStorage(translationDataStorage)
         , mInputBlocker(nullptr)
-        , mCrosshairEnabled(Settings::Manager::getBool("crosshair", "HUD"))
         , mHudEnabled(true)
         , mCursorVisible(true)
         , mCursorActive(true)
@@ -1148,9 +1147,7 @@ namespace MWGui
         bool changeRes = false;
         for (const auto& setting : changed)
         {
-            if (setting.first == "HUD" && setting.second == "crosshair")
-                mCrosshairEnabled = Settings::Manager::getBool("crosshair", "HUD");
-            else if (setting.first == "GUI" && setting.second == "menu transparency")
+            if (setting.first == "GUI" && setting.second == "menu transparency")
                 setMenuTransparency(Settings::gui().mMenuTransparency);
             else if (setting.first == "Video"
                 && (setting.second == "resolution x" || setting.second == "resolution y"
@@ -1580,7 +1577,7 @@ namespace MWGui
     void WindowManager::showCrosshair(bool show)
     {
         if (mHud)
-            mHud->setCrosshairVisible(show && mCrosshairEnabled);
+            mHud->setCrosshairVisible(show && Settings::hud().mCrosshair);
     }
 
     void WindowManager::updateActivatedQuickKey()
