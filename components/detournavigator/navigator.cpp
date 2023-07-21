@@ -15,10 +15,11 @@ namespace DetourNavigator
         std::unique_ptr<NavMeshDb> db;
         if (settings.mEnableNavMeshDiskCache)
         {
+            const std::string path = Files::pathToUnicodeString(userDataPath / "navmesh.db");
+            Log(Debug::Info) << "Using " << path << " to store navigation mesh cache";
             try
             {
-                db = std::make_unique<NavMeshDb>(
-                    Files::pathToUnicodeString(userDataPath / "navmesh.db"), settings.mMaxDbFileSize);
+                db = std::make_unique<NavMeshDb>(path, settings.mMaxDbFileSize);
             }
             catch (const std::exception& e)
             {
