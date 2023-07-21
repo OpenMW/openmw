@@ -17,8 +17,25 @@
 namespace ESM
 {
     template <class T>
-    constexpr bool IsReadable
-        = std::is_arithmetic_v<T> || std::is_enum_v<T> || (std::is_array_v<T> && IsReadable<std::remove_extent_t<T>>);
+    struct GetArray
+    {
+        using type = void;
+    };
+    template <class T, size_t N>
+    struct GetArray<std::array<T, N>>
+    {
+        using type = T;
+    };
+    template <class T, size_t N>
+    struct GetArray<T[N]>
+    {
+        using type = T;
+    };
+
+    template <class T>
+    constexpr bool IsReadable = std::is_arithmetic_v<T> || std::is_enum_v<T> || IsReadable<typename GetArray<T>::type>;
+    template <>
+    constexpr bool IsReadable<void> = false;
 
     class ReadersCache;
 

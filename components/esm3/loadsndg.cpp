@@ -23,7 +23,7 @@ namespace ESM
                     hasName = true;
                     break;
                 case fourCC("DATA"):
-                    esm.getHTSized<4>(mType);
+                    esm.getHT(mType);
                     hasData = true;
                     break;
                 case fourCC("CNAM"):

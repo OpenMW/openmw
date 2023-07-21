@@ -35,7 +35,7 @@ namespace ESM
         if (esm.isNextSub("POS_"))
         {
             std::array<float, 6> pos;
-            esm.getHTSized<24>(pos);
+            esm.getHT(pos);
             memcpy(mPosition.pos, pos.data(), sizeof(float) * 3);
             memcpy(mPosition.rot, pos.data() + 3, sizeof(float) * 3);
         }

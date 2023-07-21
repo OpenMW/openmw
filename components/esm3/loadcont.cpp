@@ -53,11 +53,11 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("CNDT"):
-                    esm.getHTSized<4>(mWeight);
+                    esm.getHT(mWeight);
                     hasWeight = true;
                     break;
                 case fourCC("FLAG"):
-                    esm.getHTSized<4>(mFlags);
+                    esm.getHT(mFlags);
                     if (mFlags & 0xf4)
                         esm.fail("Unknown flags");
                     if (!(mFlags & 0x8))
