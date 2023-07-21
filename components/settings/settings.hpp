@@ -2,6 +2,7 @@
 #define COMPONENTS_SETTINGS_H
 
 #include "categories.hpp"
+#include "gyroscopeaxis.hpp"
 
 #include "components/detournavigator/collisionshapetype.hpp"
 
@@ -196,6 +197,14 @@ namespace Settings
     inline MyGUI::Colour Manager::getImpl<MyGUI::Colour>(std::string_view setting, std::string_view category)
     {
         return MyGUI::Colour::parse(getString(setting, category));
+    }
+
+    GyroscopeAxis parseGyroscopeAxis(std::string_view value);
+
+    template <>
+    inline GyroscopeAxis Manager::getImpl<GyroscopeAxis>(std::string_view setting, std::string_view category)
+    {
+        return parseGyroscopeAxis(getString(setting, category));
     }
 }
 

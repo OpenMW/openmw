@@ -33,8 +33,6 @@ namespace MWInput
         void touchpadPressed(int deviceId, const SDLUtil::TouchEvent& arg) override;
         void touchpadReleased(int deviceId, const SDLUtil::TouchEvent& arg) override;
 
-        void processChangedSettings(const Settings::CategorySettingVector& changed);
-
         void setJoystickLastUsed(bool enabled) { mJoystickLastUsed = enabled; }
         bool joystickLastUsed() const { return mJoystickLastUsed; }
 
@@ -59,9 +57,7 @@ namespace MWInput
         BindingsManager* mBindingsManager;
         MouseManager* mMouseManager;
 
-        bool mJoystickEnabled;
         bool mGyroAvailable;
-        float mGamepadCursorSpeed;
         bool mGamepadGuiCursorEnabled;
         bool mGuiCursorEnabled;
         bool mJoystickLastUsed;

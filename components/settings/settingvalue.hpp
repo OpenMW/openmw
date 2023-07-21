@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_SETTINGVALUE_H
 #define OPENMW_COMPONENTS_SETTINGS_SETTINGVALUE_H
 
+#include "gyroscopeaxis.hpp"
 #include "sanitizer.hpp"
 #include "settings.hpp"
 
@@ -36,6 +37,7 @@ namespace Settings
         CollisionShapeType,
         StringArray,
         MyGuiColour,
+        GyroscopeAxis,
     };
 
     template <class T>
@@ -131,6 +133,12 @@ namespace Settings
         return SettingValueType::MyGuiColour;
     }
 
+    template <>
+    inline constexpr SettingValueType getSettingValueType<GyroscopeAxis>()
+    {
+        return SettingValueType::GyroscopeAxis;
+    }
+
     inline constexpr std::string_view getSettingValueTypeName(SettingValueType type)
     {
         switch (type)
@@ -165,6 +173,8 @@ namespace Settings
                 return "string array";
             case SettingValueType::MyGuiColour:
                 return "colour";
+            case SettingValueType::GyroscopeAxis:
+                return "gyroscope axis";
         }
         return "unsupported";
     }

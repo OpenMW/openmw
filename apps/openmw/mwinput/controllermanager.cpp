@@ -8,6 +8,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -29,9 +30,7 @@ namespace MWInput
         const std::filesystem::path& userControllerBindingsFile, const std::filesystem::path& controllerBindingsFile)
         : mBindingsManager(bindingsManager)
         , mMouseManager(mouseManager)
-        , mJoystickEnabled(Settings::Manager::getBool("enable controller", "Input"))
         , mGyroAvailable(false)
-        , mGamepadCursorSpeed(Settings::Manager::getFloat("gamepad cursor speed", "Input"))
         , mGamepadGuiCursorEnabled(true)
         , mGuiCursorEnabled(true)
         , mJoystickLastUsed(false)
@@ -64,18 +63,7 @@ namespace MWInput
             }
         }
 
-        float deadZoneRadius = Settings::Manager::getFloat("joystick dead zone", "Input");
-        deadZoneRadius = std::clamp(deadZoneRadius, 0.f, 0.5f);
-        mBindingsManager->setJoystickDeadZone(deadZoneRadius);
-    }
-
-    void ControllerManager::processChangedSettings(const Settings::CategorySettingVector& changed)
-    {
-        for (const auto& setting : changed)
-        {
-            if (setting.first == "Input" && setting.second == "enable controller")
-                mJoystickEnabled = Settings::Manager::getBool("enable controller", "Input");
-        }
+        mBindingsManager->setJoystickDeadZone(Settings::input().mJoystickDeadZone);
     }
 
     void ControllerManager::update(float dt)
@@ -92,8 +80,9 @@ namespace MWInput
             // We keep track of our own mouse position, so that moving the mouse while in
             // game mode does not move the position of the GUI cursor
             float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
-            float xMove = xAxis * dt * 1500.0f / uiScale * mGamepadCursorSpeed;
-            float yMove = yAxis * dt * 1500.0f / uiScale * mGamepadCursorSpeed;
+            const float gamepadCursorSpeed = Settings::input().mEnableController;
+            const float xMove = xAxis * dt * 1500.0f / uiScale * gamepadCursorSpeed;
+            const float yMove = yAxis * dt * 1500.0f / uiScale * gamepadCursorSpeed;
 
             float mouseWheelMove = -zAxis * dt * 1500.0f;
             if (xMove != 0 || yMove != 0 || mouseWheelMove != 0)
@@ -120,7 +109,7 @@ namespace MWInput
 
     void ControllerManager::buttonPressed(int deviceID, const SDL_ControllerButtonEvent& arg)
     {
-        if (!mJoystickEnabled || mBindingsManager->isDetectingBindingState())
+        if (!Settings::input().mEnableController || mBindingsManager->isDetectingBindingState())
             return;
 
         MWBase::Environment::get().getLuaManager()->inputEvent(
@@ -170,13 +159,13 @@ namespace MWInput
             return;
         }
 
-        if (mJoystickEnabled)
+        if (Settings::input().mEnableController)
         {
             MWBase::Environment::get().getLuaManager()->inputEvent(
                 { MWBase::LuaManager::InputEvent::ControllerReleased, arg.button });
         }
 
-        if (!mJoystickEnabled || MWBase::Environment::get().getInputManager()->controlsDisabled())
+        if (!Settings::input().mEnableController || MWBase::Environment::get().getInputManager()->controlsDisabled())
             return;
 
         mJoystickLastUsed = true;
@@ -208,7 +197,7 @@ namespace MWInput
 
     void ControllerManager::axisMoved(int deviceID, const SDL_ControllerAxisEvent& arg)
     {
-        if (!mJoystickEnabled || MWBase::Environment::get().getInputManager()->controlsDisabled())
+        if (!Settings::input().mEnableController || MWBase::Environment::get().getInputManager()->controlsDisabled())
             return;
 
         mJoystickLastUsed = true;

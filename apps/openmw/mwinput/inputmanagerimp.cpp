@@ -5,6 +5,7 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/sdlutil/sdlinputwrapper.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -79,7 +80,7 @@ namespace MWInput
         mSensorManager->update(dt);
         mActionManager->update(dt);
 
-        if (mGyroManager->isEnabled())
+        if (Settings::input().mEnableGyroscope)
         {
             bool controllerAvailable = mControllerManager->isGyroAvailable();
             bool sensorAvailable = mSensorManager->isGyroAvailable();
@@ -118,9 +119,7 @@ namespace MWInput
 
     void InputManager::processChangedSettings(const Settings::CategorySettingVector& changed)
     {
-        mMouseManager->processChangedSettings(changed);
         mSensorManager->processChangedSettings(changed);
-        mGyroManager->processChangedSettings(changed);
     }
 
     bool InputManager::getControlSwitch(std::string_view sw)
