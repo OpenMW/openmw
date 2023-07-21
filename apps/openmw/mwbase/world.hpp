@@ -377,7 +377,7 @@ namespace MWBase
         virtual bool isFirstPerson() const = 0;
         virtual bool isPreviewModeEnabled() const = 0;
         virtual bool toggleVanityMode(bool enable) = 0;
-        virtual bool vanityRotateCamera(float* rot) = 0;
+        virtual bool vanityRotateCamera(const float* rot) = 0;
         virtual void applyDeferredPreviewRotationToPlayer(float dt) = 0;
         virtual void disableDeferredPreviewRotation() = 0;
 

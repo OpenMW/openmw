@@ -468,7 +468,7 @@ namespace MWWorld
         bool toggleVanityMode(bool enable) override;
 
         MWRender::Camera* getCamera() override;
-        bool vanityRotateCamera(float* rot) override;
+        bool vanityRotateCamera(const float* rot) override;
 
         void applyDeferredPreviewRotationToPlayer(float dt) override;
         void disableDeferredPreviewRotation() override;
