@@ -419,7 +419,7 @@ namespace MWWorld
 
         void loadRefs();
 
-        void loadRef(const ESM4::Reference& ref, bool deleted);
+        void loadRef(const ESM4::Reference& ref);
         void loadRef(ESM::CellRef& ref, bool deleted, std::map<ESM::RefNum, ESM::RefId>& refNumToID);
         ///< Make case-adjustments to \a ref and insert it into the respective container.
         ///
