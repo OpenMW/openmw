@@ -115,7 +115,7 @@
 
 ---
 -- @type COLLISION_SHAPE_TYPE
--- @field [parent=#CCOLLISION_SHAPE_TYPE] #number Aabb Axis-Aligned Bounding Box is used for NPC and symmetric
+-- @field [parent=#COLLISION_SHAPE_TYPE] #number Aabb Axis-Aligned Bounding Box is used for NPC and symmetric
 -- Creatures;
 -- @field [parent=#COLLISION_SHAPE_TYPE] #number RotatingBox is used for Creatures with big difference in width and
 -- height;

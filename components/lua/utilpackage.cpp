@@ -2,6 +2,8 @@
 
 #include <algorithm>
 #include <array>
+#include <iomanip>
+#include <limits>
 #include <sstream>
 
 #include <components/misc/color.hpp>
@@ -87,6 +89,7 @@ namespace LuaUtil
             };
             vectorType[sol::meta_function::to_string] = [](const T& v) {
                 std::stringstream ss;
+                ss << std::setprecision(std::numeric_limits<typename T::value_type>::max_exponent10);
                 ss << "(" << v[0];
                 for (int i = 1; i < T::num_components; ++i)
                     ss << ", " << v[i];
