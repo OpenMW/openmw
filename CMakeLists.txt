@@ -333,7 +333,7 @@ endif()
 # Required for building the FFmpeg headers
 add_definitions(-D__STDC_CONSTANT_MACROS)
 
-# Reqiuired for unity build
+# Required for unity build
 add_definitions(-DMYGUI_DONT_REPLACE_NULLPTR)
 
 # TinyXML
@@ -456,7 +456,7 @@ if(Boost_VERSION_STRING VERSION_GREATER_EQUAL 1.77.0)
 endif()
 
 if(OPENMW_USE_SYSTEM_MYGUI)
-    find_package(MyGUI 3.4.1 REQUIRED)
+    find_package(MyGUI 3.4.2 REQUIRED)
 endif()
 find_package(SDL2 2.0.9 REQUIRED)
 find_package(OpenAL REQUIRED)
@@ -708,18 +708,6 @@ if (WIN32)
             4996 # Function was declared deprecated
             5054 # Deprecated operations between enumerations of different types caused by Qt headers
             )
-
-        if( "${MyGUI_VERSION}" VERSION_LESS_EQUAL "3.4.0" )
-            set(WARNINGS_DISABLE ${WARNINGS_DISABLE}
-            4866 # compiler may not enforce left-to-right evaluation order for call
-            )
-        endif()
-
-        if( "${MyGUI_VERSION}" VERSION_LESS_EQUAL "3.4.1" )
-            set(WARNINGS_DISABLE ${WARNINGS_DISABLE}
-            4275 # non dll-interface class 'MyGUI::delegates::IDelegateUnlink' used as base for dll-interface class 'MyGUI::Widget'
-            )
-        endif()
 
         foreach(d ${WARNINGS_DISABLE})
             set(WARNINGS "${WARNINGS} /wd${d}")
