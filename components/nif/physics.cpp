@@ -234,7 +234,7 @@ namespace Nif
 
     void bhkConstraintMotorCInfo::read(NIFStream* nif)
     {
-        mType = static_cast<hkMotorType>(nif->get<uint32_t>());
+        mType = static_cast<hkMotorType>(nif->get<uint8_t>());
         switch (mType)
         {
             case hkMotorType::Motor_Position:

@@ -121,6 +121,7 @@ namespace Nif
         RC_NiFloatInterpolator,
         RC_NiPoint3Interpolator,
         RC_NiBoolInterpolator,
+        RC_NiBoolTimelineInterpolator,
         RC_NiTransformInterpolator,
         RC_NiColorInterpolator,
         RC_BSShaderTextureSet,
@@ -171,6 +172,8 @@ namespace Nif
         RC_BSEffectShaderPropertyFloatController,
         RC_BSEffectShaderPropertyColorController,
         RC_BSLightingShaderPropertyFloatController,
+        RC_BSLightingShaderPropertyColorController,
+        RC_BSBehaviorGraphExtraData,
     };
 
     /// Base class for all records

@@ -145,9 +145,13 @@ namespace Nif
             { "BSValueNode", &construct<BSValueNode, RC_NiNode> },
             { "BSOrderedNode", &construct<BSOrderedNode, RC_NiNode> },
             { "BSMultiBoundNode", &construct<BSMultiBoundNode, RC_NiNode> },
+            { "BSRangeNode", &construct<BSRangeNode, RC_NiNode> },
+            { "BSBlastNode", &construct<BSRangeNode, RC_NiNode> },
+            { "BSDamageStage", &construct<BSRangeNode, RC_NiNode> },
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
             { "NiFloatInterpolator", &construct<NiFloatInterpolator, RC_NiFloatInterpolator> },
             { "NiBoolInterpolator", &construct<NiBoolInterpolator, RC_NiBoolInterpolator> },
+            { "NiBoolTimelineInterpolator", &construct<NiBoolInterpolator, RC_NiBoolTimelineInterpolator> },
             { "NiPoint3Interpolator", &construct<NiPoint3Interpolator, RC_NiPoint3Interpolator> },
             { "NiTransformController", &construct<NiKeyframeController, RC_NiKeyframeController> },
             { "NiMultiTargetTransformController",
@@ -209,6 +213,9 @@ namespace Nif
                 &construct<BSEffectShaderPropertyFloatController, RC_BSLightingShaderPropertyFloatController> },
             { "BSEffectShaderPropertyColorController",
                 &construct<BSEffectShaderPropertyColorController, RC_BSEffectShaderPropertyColorController> },
+            { "BSLightingShaderPropertyColorController",
+                &construct<BSEffectShaderPropertyColorController, RC_BSLightingShaderPropertyColorController> },
+            { "BSBehaviorGraphExtraData", &construct<BSBehaviorGraphExtraData, RC_BSBehaviorGraphExtraData> },
         };
     }
 

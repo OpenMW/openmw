@@ -154,5 +154,13 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSBehaviorGraphExtraData : public Extra
+    {
+        std::string mFile;
+        bool mControlsBaseSkeleton;
+
+        void read(NIFStream* nif) override;
+    };
+
 } // Namespace
 #endif
