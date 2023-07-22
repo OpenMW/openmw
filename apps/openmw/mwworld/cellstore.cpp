@@ -376,7 +376,7 @@ namespace MWWorld
     }
 
     template <typename X>
-    void CellRefList<X>::load(const ESM4::Reference& ref, bool deleted, const MWWorld::ESMStore& esmStore)
+    void CellRefList<X>::load(const ESM4::Reference& ref, const MWWorld::ESMStore& esmStore)
     {
 
         if constexpr (!ESM::isESM4Rec(X::sRecordId))
@@ -387,8 +387,6 @@ namespace MWWorld
         if (const X* ptr = store.search(ref.mBaseObj))
         {
             LiveRef liveCellRef(ref, ptr);
-            if (deleted)
-                liveCellRef.mData.setDeletedByContentFile(true);
             mList.push_back(liveCellRef);
         }
         else
@@ -828,7 +826,7 @@ namespace MWWorld
 
     void CellStore::loadRefs(const ESM4::Cell& cell, std::map<ESM::RefNum, ESM::RefId>& refNumToID)
     {
-        visitCell4References(cell, mStore, mReaders, [&](const ESM4::Reference& ref) { loadRef(ref, false); });
+        visitCell4References(cell, mStore, mReaders, [&](const ESM4::Reference& ref) { loadRef(ref); });
     }
 
     void CellStore::loadRefs()
@@ -870,15 +868,14 @@ namespace MWWorld
         return Ptr();
     }
 
-    void CellStore::loadRef(const ESM4::Reference& ref, bool deleted)
+    void CellStore::loadRef(const ESM4::Reference& ref)
     {
         const MWWorld::ESMStore& store = mStore;
 
         ESM::RecNameInts foundType = static_cast<ESM::RecNameInts>(store.find(ref.mBaseObj));
 
-        Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, &deleted, &store, foundType](auto& x) {
-            recNameSwitcher(
-                x, foundType, [&ref, &deleted, &store](auto& storeIn) { storeIn.load(ref, deleted, store); });
+        Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, &store, foundType](auto& x) {
+            recNameSwitcher(x, foundType, [&ref, &store](auto& storeIn) { storeIn.load(ref, store); });
         });
     }
 

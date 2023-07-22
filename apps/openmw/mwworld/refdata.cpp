@@ -85,13 +85,13 @@ namespace MWWorld
     {
     }
 
-    RefData::RefData(const ESM4::Reference& cellRef)
+    RefData::RefData(const ESM4::Reference& ref)
         : mBaseNode(nullptr)
-        , mDeletedByContentFile(false)
-        , mEnabled(true)
+        , mDeletedByContentFile(ref.mFlags & ESM4::Rec_Deleted)
+        , mEnabled(!(ref.mFlags & ESM4::Rec_Disabled))
         , mPhysicsPostponed(false)
-        , mCount(1)
-        , mPosition(cellRef.mPos)
+        , mCount(ref.mCount)
+        , mPosition(ref.mPos)
         , mCustomData(nullptr)
         , mChanged(false)
         , mFlags(0)
