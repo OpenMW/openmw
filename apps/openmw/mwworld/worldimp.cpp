@@ -3704,12 +3704,6 @@ namespace MWWorld
         mRendering->spawnEffect(model, textureOverride, worldPos, scale, isMagicVFX);
     }
 
-    void World::activate(const Ptr& object, const Ptr& actor)
-    {
-        breakInvisibility(actor);
-        MWBase::Environment::get().getLuaManager()->objectActivated(object, actor);
-    }
-
     struct ResetActorsVisitor
     {
         World& mWorld;

@@ -18,6 +18,7 @@
 #include "../mwworld/worldmodel.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -194,7 +195,7 @@ namespace MWWorld
         if (!toActivate.getClass().hasToolTip(toActivate))
             return;
 
-        MWBase::Environment::get().getWorld()->activate(toActivate, player);
+        MWBase::Environment::get().getLuaManager()->objectActivated(toActivate, player);
     }
 
     bool Player::wasTeleported() const

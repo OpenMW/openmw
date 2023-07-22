@@ -8,6 +8,7 @@
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/cellstore.hpp"
@@ -265,8 +266,7 @@ void MWMechanics::AiPackage::evadeObstacles(const MWWorld::Ptr& actor)
         return;
 
     // first check if obstacle is a door
-    static float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
-
+    float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
     const MWWorld::Ptr door = getNearbyDoor(actor, distance);
     if (!door.isEmpty() && canOpenDoors(actor))
     {
@@ -300,9 +300,7 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
     if (mPathFinder.getPathSize() == 0)
         return;
 
-    MWBase::World* world = MWBase::Environment::get().getWorld();
-    static float distance = world->getMaxActivationDistance();
-
+    float distance = MWBase::Environment::get().getWorld()->getMaxActivationDistance();
     const MWWorld::Ptr door = getNearbyDoor(actor, distance);
     if (door == MWWorld::Ptr())
         return;
@@ -314,7 +312,7 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
 
         if (door.getCellRef().getTrap().empty() && !door.getCellRef().isLocked())
         {
-            world->activate(door, actor);
+            MWBase::Environment::get().getLuaManager()->objectActivated(door, actor);
             return;
         }
 
@@ -326,7 +324,7 @@ void MWMechanics::AiPackage::openDoors(const MWWorld::Ptr& actor)
         MWWorld::Ptr keyPtr = invStore.search(keyId);
 
         if (!keyPtr.isEmpty())
-            world->activate(door, actor);
+            MWBase::Environment::get().getLuaManager()->objectActivated(door, actor);
     }
 }
 

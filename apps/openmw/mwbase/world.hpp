@@ -540,8 +540,6 @@ namespace MWBase
             const osg::Vec3f& worldPos, float scale = 1.f, bool isMagicVFX = true)
             = 0;
 
-        virtual void activate(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
-
         /// @see MWWorld::WeatherManager::isInStorm
         virtual bool isInStorm() const = 0;
 

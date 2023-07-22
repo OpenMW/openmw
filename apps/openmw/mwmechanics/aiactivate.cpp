@@ -3,6 +3,7 @@
 #include <components/esm3/aisequence.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/class.hpp"
@@ -44,7 +45,7 @@ namespace MWMechanics
         {
             // Note: we intentionally do not cancel package after activation here for backward compatibility with
             // original engine.
-            MWBase::Environment::get().getWorld()->activate(target, actor);
+            MWBase::Environment::get().getLuaManager()->objectActivated(target, actor);
         }
         return false;
     }
