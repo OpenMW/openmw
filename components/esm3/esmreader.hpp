@@ -33,9 +33,10 @@ namespace ESM
     };
 
     template <class T>
-    constexpr bool IsReadable = std::is_arithmetic_v<T> || std::is_enum_v<T> || IsReadable<typename GetArray<T>::type>;
+    inline constexpr bool IsReadable
+        = std::is_arithmetic_v<T> || std::is_enum_v<T> || IsReadable<typename GetArray<T>::type>;
     template <>
-    constexpr bool IsReadable<void> = false;
+    inline constexpr bool IsReadable<void> = false;
 
     class ReadersCache;
 
