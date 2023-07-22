@@ -779,7 +779,7 @@ if (WIN32)
     #set_target_properties(openmw PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
 endif()
 
-if (BUILD_OPENMW AND APPLE)
+if (APPLE)
     target_compile_definitions(components PRIVATE GL_SILENCE_DEPRECATION=1)
     target_compile_definitions(openmw PRIVATE GL_SILENCE_DEPRECATION=1)
 endif()
