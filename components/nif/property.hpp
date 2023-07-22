@@ -139,6 +139,7 @@ namespace Nif
         float envMapIntensity{ 0.f };
         void read(NIFStream* nif) override;
 
+        bool specular() const { return flags1 & 1; }
         bool doubleSided() const { return (flags2 >> 4) & 1; }
         bool treeAnim() const { return (flags2 >> 29) & 1; }
         bool decal() const { return (flags1 >> 26) & 1; }

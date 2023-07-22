@@ -2472,6 +2472,12 @@ namespace NifOsg
                         }
                         break;
                     }
+                    case Nif::RC_BSShaderPPLightingProperty:
+                    {
+                        auto shaderprop = static_cast<const Nif::BSShaderPPLightingProperty*>(property);
+                        specEnabled = shaderprop->specular();
+                        break;
+                    }
                     case Nif::RC_BSLightingShaderProperty:
                     {
                         auto shaderprop = static_cast<const Nif::BSLightingShaderProperty*>(property);
@@ -2481,6 +2487,7 @@ namespace NifOsg
                         mat->setShininess(osg::Material::FRONT_AND_BACK, shaderprop->mGlossiness);
                         emissiveMult = shaderprop->mEmissiveMult;
                         specStrength = shaderprop->mSpecStrength;
+                        specEnabled = shaderprop->specular();
                         if (shaderprop->decal())
                         {
                             osg::StateSet* stateset = node->getOrCreateStateSet();
