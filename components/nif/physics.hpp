@@ -306,6 +306,23 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
+    struct bhkLimitedHingeConstraintCInfo
+    {
+        struct HingeData
+        {
+            osg::Vec4f mPivot;
+            osg::Vec4f mAxis;
+            osg::Vec4f mPerpAxis1;
+            osg::Vec4f mPerpAxis2;
+        };
+        HingeData mDataA;
+        HingeData mDataB;
+        float mMinAngle, mMaxAngle;
+        float mMaxFriction;
+        bhkConstraintMotorCInfo mMotor;
+        void read(NIFStream* nif);
+    };
+
     /// Record types
 
     // Abstract Bethesda Havok object
@@ -545,6 +562,12 @@ namespace Nif
     struct bhkHingeConstraint : public bhkConstraint
     {
         bhkHingeConstraintCInfo mConstraint;
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkLimitedHingeConstraint : public bhkConstraint
+    {
+        bhkLimitedHingeConstraintCInfo mConstraint;
         void read(NIFStream* nif) override;
     };
 

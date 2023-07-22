@@ -306,6 +306,37 @@ namespace Nif
             nif->read(mDataB.mPivot);
         }
     }
+
+    void bhkLimitedHingeConstraintCInfo::read(NIFStream* nif)
+    {
+        if (nif->getBethVersion() <= 16)
+        {
+            nif->read(mDataA.mPivot);
+            nif->read(mDataA.mAxis);
+            nif->read(mDataA.mPerpAxis1);
+            nif->read(mDataA.mPerpAxis2);
+            nif->read(mDataB.mPivot);
+            nif->read(mDataB.mAxis);
+            nif->read(mDataB.mPerpAxis2);
+        }
+        else
+        {
+            nif->read(mDataA.mAxis);
+            nif->read(mDataA.mPerpAxis1);
+            nif->read(mDataA.mPerpAxis2);
+            nif->read(mDataA.mPivot);
+            nif->read(mDataB.mAxis);
+            nif->read(mDataB.mPerpAxis1);
+            nif->read(mDataB.mPerpAxis2);
+            nif->read(mDataB.mPivot);
+        }
+        nif->read(mMinAngle);
+        nif->read(mMaxAngle);
+        nif->read(mMaxFriction);
+        if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > 16)
+            mMotor.read(nif);
+    }
+
     /// Record types
 
     void bhkCollisionObject::read(NIFStream* nif)
@@ -585,6 +616,12 @@ namespace Nif
     }
 
     void bhkHingeConstraint::read(NIFStream* nif)
+    {
+        bhkConstraint::read(nif);
+        mConstraint.read(nif);
+    }
+
+    void bhkLimitedHingeConstraint::read(NIFStream* nif)
     {
         bhkConstraint::read(nif);
         mConstraint.read(nif);
