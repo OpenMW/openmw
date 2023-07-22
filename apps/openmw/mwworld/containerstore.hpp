@@ -99,6 +99,19 @@ namespace MWWorld
 
         static const ESM::RefId sGoldId;
 
+        static constexpr bool isStorableType(unsigned int t)
+        {
+            return t == ESM::Potion::sRecordId || t == ESM::Apparatus::sRecordId || t == ESM::Armor::sRecordId
+                || t == ESM::Book::sRecordId || t == ESM::Clothing::sRecordId || t == ESM::Ingredient::sRecordId
+                || t == ESM::Light::sRecordId || t == ESM::Lockpick::sRecordId || t == ESM::Miscellaneous::sRecordId
+                || t == ESM::Probe::sRecordId || t == ESM::Repair::sRecordId || t == ESM::Weapon::sRecordId;
+        }
+        template <typename T>
+        static constexpr bool isStorableType()
+        {
+            return isStorableType(T::sRecordId);
+        }
+
     protected:
         ContainerStoreListener* mListener;
 
