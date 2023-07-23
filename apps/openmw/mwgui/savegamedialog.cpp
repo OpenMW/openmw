@@ -301,7 +301,8 @@ namespace MWGui
 
         if (mSaving)
         {
-            MWBase::Environment::get().getStateManager()->saveGame(mSaveNameEdit->getCaption(), mCurrentSlot);
+            std::string_view nameAsStringView = std::basic_string_view(mSaveNameEdit->getCaption().asUTF8().c_str());
+            MWBase::Environment::get().getStateManager()->saveGame(nameAsStringView, mCurrentSlot);
         }
         else
         {
