@@ -32,10 +32,10 @@ namespace MWWorld
         CellStore& emplaceCellStore(ESM::RefId id, const T& cell, ESMStore& store, ESM::ReadersCache& readers,
             std::unordered_map<ESM::RefId, CellStore>& cells)
         {
-            return cells
-                .emplace(std::piecewise_construct, std::forward_as_tuple(id),
-                    std::forward_as_tuple(Cell(cell), store, readers))
-                .first->second;
+            const auto [it, inserted] = cells.emplace(
+                std::piecewise_construct, std::forward_as_tuple(id), std::forward_as_tuple(Cell(cell), store, readers));
+            assert(inserted);
+            return it->second;
         }
 
         const ESM::Cell* createEsmCell(ESM::ExteriorCellLocation location, ESMStore& store)
@@ -205,6 +205,7 @@ namespace MWWorld
                 cellStore = &emplaceCellStore(cell4->mId, *cell4, mStore, mReaders, mCells);
             else
                 return nullptr;
+            mInteriors.emplace(name, cellStore);
         }
         else
         {
