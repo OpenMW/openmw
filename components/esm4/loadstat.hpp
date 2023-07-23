@@ -27,6 +27,7 @@
 #ifndef ESM4_STAT_H
 #define ESM4_STAT_H
 
+#include <array>
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -53,6 +54,7 @@ namespace ESM4
 
         float mBoundRadius;
         std::vector<std::uint8_t> mMODT; // FIXME texture hash
+        std::array<std::string, 4> mLOD;
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
