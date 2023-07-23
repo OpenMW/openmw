@@ -277,9 +277,17 @@ namespace
                     return;
                 }
 
-            Log(Debug::Warning) << "Warning: Dropping reference to " << state.mRef.mRefID
-                                << " (invalid content file link)";
-            return;
+            // Note: we preserve RefNum when picking up or dropping an item. So if this RefNum is not found
+            // in this cell in content files, it doesn't mean that the instance is invalid.
+            // But non-storable item are always stored in saves together with their original cell.
+            // If a non-storable item references a content file, but is not found in this content file,
+            // we should drop it.
+            if (!MWWorld::ContainerStore::isStorableType<T>())
+            {
+                Log(Debug::Warning) << "Warning: Dropping reference to " << state.mRef.mRefID
+                                    << " (invalid content file link)";
+                return;
+            }
         }
 
         // new reference
