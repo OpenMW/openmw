@@ -95,8 +95,8 @@ Coverity:
     - linux
   image: ubuntu:22.04
   stage: build
-#  rules:
-#    - if: $CI_PIPELINE_SOURCE == "schedule"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
   cache:
     key: Coverity.ubuntu_22.04.v1
     paths:
