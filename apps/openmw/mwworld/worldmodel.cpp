@@ -231,7 +231,12 @@ namespace MWWorld
     {
         auto it = mCells.find(id);
         if (it != mCells.end())
-            return &it->second;
+        {
+            CellStore& cellStore = it->second;
+            if (forceLoad && cellStore.getState() != CellStore::State_Loaded)
+                cellStore.load();
+            return &cellStore;
+        }
 
         if (id == draftCellId)
         {
