@@ -113,8 +113,6 @@ namespace osgMyGUI
         /** @see IRenderTarget::getInfo */
         const MyGUI::RenderTargetInfo& getInfo() const override { return mInfo; }
 
-        bool checkTexture(MyGUI::ITexture* _texture);
-
         void setViewSize(int width, int height) override;
 
         void registerShader(const std::string& _shaderName, const std::string& _vertexProgramFile,
