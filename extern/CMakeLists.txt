@@ -79,11 +79,10 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
         set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
     endif()
 
-    # master on 13 Mar 2021
     include(FetchContent)
     FetchContent_Declare(mygui
-        URL https://github.com/MyGUI/mygui/archive/59c1388b942721887d18743ada15f1906ff11a1f.zip
-        URL_HASH SHA512=56b112b261fdc4c9b782de8ef8a9d239af3a75b8cfaa617daecc77c38ecd6521624cf5c17e6ac839b0870be5c31608d4f2a1574165d9d049f14f9e6ae03a8f98
+        URL https://github.com/MyGUI/mygui/archive/refs/tags/MyGUI3.4.2.zip
+        URL_HASH SHA512=d15de716102237ca55b952c2ab52f84b91766332a0357a50b17c20cf2f168666ddaab52d088d7bb8f713ad0fc27e19d74e6ae2673f310a8f60a3b5754f0a0ba7
         SOURCE_DIR fetched/mygui
     )
     FetchContent_MakeAvailableExcludeFromAll(mygui)
@@ -109,9 +108,9 @@ if(NOT OPENMW_USE_SYSTEM_OSG)
     set(BUILD_OSG_PLUGIN_PNG ON CACHE BOOL "")
     set(BUILD_OSG_PLUGIN_TGA ON CACHE BOOL "")
 
-    set(OSG_USE_FLOAT_MATRIX ON CACHE BOOL "")
-    set(OSG_USE_FLOAT_PLANE ON CACHE BOOL "")
-    set(OSG_USE_FLOAT_QUAT ON CACHE BOOL "")
+    set(OSG_USE_FLOAT_MATRIX OFF CACHE BOOL "")
+    set(OSG_USE_FLOAT_PLANE OFF CACHE BOOL "")
+    set(OSG_USE_FLOAT_QUAT OFF CACHE BOOL "")
 
     set(OPENGL_PROFILE "GL2" CACHE STRING "")
 
