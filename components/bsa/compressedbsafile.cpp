@@ -470,7 +470,11 @@ namespace Bsa
             return 0;
         std::replace(str.begin(), str.end(), '/', '\\');
         Misc::StringUtils::lowerCaseInPlace(str);
-        uint64_t result = str[len - 1] | (len >= 3 ? (str[len - 2] << 8) : 0) | (len << 16) | (str[0] << 24);
+        uint64_t result = str[len - 1];
+        if (len >= 3)
+            result |= str[len - 2] << 8;
+        result |= len << 16;
+        result |= static_cast<uint32_t>(str[0] << 24);
         if (len >= 4)
         {
             uint32_t hash = 0;
