@@ -93,19 +93,19 @@ Coverity:
   tags:
     - docker
     - linux
-  image: ubuntu:20.04
+  image: ubuntu:22.04
   stage: build
   rules:
     - if: $CI_PIPELINE_SOURCE == "schedule"
   cache:
-    key: Coverity.ubuntu_20.04.v1
+    key: Coverity.ubuntu_22.04.v1
     paths:
     - apt-cache/
     - ccache/
   variables:
     CCACHE_SIZE: 2G
-    CC: clang-11
-    CXX: clang++-11
+    CC: clang-12
+    CXX: clang++-12
     CMAKE_BUILD_TYPE: Debug
     CMAKE_CXX_FLAGS_DEBUG: -O0
   before_script:

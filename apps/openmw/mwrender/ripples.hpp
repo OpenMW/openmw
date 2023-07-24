@@ -79,10 +79,6 @@ namespace MWRender
 
         bool mPaused = false;
         bool mUseCompute = false;
-
-        // Read/written in draw thread only
-        mutable float mRemainingWaveTime = 0;
-        mutable double mLastFrameTime = 0;
     };
 
     class Ripples : public osg::Camera
