@@ -38,6 +38,8 @@
 
 #include <components/l10n/manager.hpp>
 
+#include <components/loadinglistener/loadinglistener.hpp>
+
 #include <components/misc/frameratelimiter.hpp>
 
 #include <components/sceneutil/color.hpp>
@@ -736,6 +738,13 @@ void OMW::Engine::prepareEngine()
     mSoundManager = std::make_unique<MWSound::SoundManager>(mVFS.get(), mUseSound);
     mEnvironment.setSoundManager(*mSoundManager);
 
+    // Create the world
+    mWorld = std::make_unique<MWWorld::World>(
+        mResourceSystem.get(), mActivationDistanceOverride, mCellName, mCfgMgr.getUserDataPath());
+
+    std::thread loadDataThread(
+        [&] { mWorld->loadData(mFileCollections, mContentFiles, mGroundcoverFiles, mEncoder.get()); });
+
     if (!mSkipMenu)
     {
         std::string_view logo = Fallback::Map::getString("Movies_Company_Logo");
@@ -743,10 +752,12 @@ void OMW::Engine::prepareEngine()
             mWindowManager->playVideo(logo, true);
     }
 
-    // Create the world
-    mWorld = std::make_unique<MWWorld::World>(mViewer, rootNode, mResourceSystem.get(), mWorkQueue.get(), *mUnrefQueue,
-        mFileCollections, mContentFiles, mGroundcoverFiles, mEncoder.get(), mActivationDistanceOverride, mCellName,
-        mCfgMgr.getUserDataPath());
+    Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+    listener->loadingOn();
+    loadDataThread.join();
+    listener->loadingOff();
+
+    mWorld->init(mViewer, rootNode, mWorkQueue.get(), *mUnrefQueue);
     mWorld->setupPlayer();
     mWorld->setRandomSeed(mRandomSeed);
     mEnvironment.setWorld(*mWorld);
