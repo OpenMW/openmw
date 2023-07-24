@@ -180,7 +180,7 @@ namespace MWMechanics
     void resistNormalWeapon(
         const MWWorld::Ptr& actor, const MWWorld::Ptr& attacker, const MWWorld::Ptr& weapon, float& damage)
     {
-        if (damage == 0 || weapon.isEmpty() || !isNormalWeapon(weapon))
+        if (weapon.isEmpty() || !isNormalWeapon(weapon))
             return;
 
         const MWMechanics::MagicEffects& effects = actor.getClass().getCreatureStats(actor).getMagicEffects();
@@ -189,7 +189,7 @@ namespace MWMechanics
 
         damage *= 1.f - std::min(1.f, resistance - weakness);
 
-        if (damage == 0 && attacker == getPlayer())
+        if (resistance - weakness >= 1.f && attacker == getPlayer())
             MWBase::Environment::get().getWindowManager()->messageBox("#{sMagicTargetResistsWeapons}");
     }
 

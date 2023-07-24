@@ -57,6 +57,7 @@
     Bug #7172: Current music playlist continues playing indefinitely if next playlist is empty
     Bug #7229: Error marker loading failure is not handled
     Bug #7243: Supporting loading external files from VFS from esm files
+    Bug #7284: "Your weapon has no effect." message doesn't always show when the player character attempts to attack
     Bug #7298: Water ripples from projectiles sometimes are not spawned
     Bug #7307: Alchemy "Magic Effect" search string does not match on tool tip for effects related to attributes
     Bug #7322: Shadows don't cover groundcover depending on the view angle and perspective with compute scene bounds = primitives
