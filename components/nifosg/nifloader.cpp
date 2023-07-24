@@ -2386,7 +2386,7 @@ namespace NifOsg
             auto setBin_Traversal = [](osg::StateSet* ss) { ss->setRenderBinDetails(2, "TraversalOrderBin"); };
             auto setBin_Inherit = [](osg::StateSet* ss) { ss->setRenderBinToInherit(); };
 
-            int lightmode = 1;
+            auto lightmode = Nif::NiVertexColorProperty::LightMode::LightMode_EmiAmbDif;
             float emissiveMult = 1.f;
             float specStrength = 1.f;
 
@@ -2442,7 +2442,8 @@ namespace NifOsg
                             }
                             case Nif::NiVertexColorProperty::VertexMode::VertMode_SrcAmbDif:
                             {
-                                switch (vertprop->mLightingMode)
+                                lightmode = vertprop->mLightingMode;
+                                switch (lightmode)
                                 {
                                     case Nif::NiVertexColorProperty::LightMode::LightMode_Emissive:
                                     {
@@ -2565,7 +2566,7 @@ namespace NifOsg
             if (mVersion <= Nif::NIFFile::VER_MW || !specEnabled)
                 mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(0.f, 0.f, 0.f, 0.f));
 
-            if (lightmode == 0)
+            if (lightmode == Nif::NiVertexColorProperty::LightMode::LightMode_Emissive)
             {
                 osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
                 diffuse = osg::Vec4f(0, 0, 0, diffuse.a());
