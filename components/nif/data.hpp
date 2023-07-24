@@ -222,7 +222,10 @@ namespace Nif
             std::vector<unsigned short> trueTriangles;
             std::vector<char> boneIndices;
             BSVertexDesc mVertexDesc;
+
             void read(NIFStream* nif);
+            std::vector<unsigned short> getTrueTriangles() const;
+            std::vector<std::vector<unsigned short>> getTrueStrips() const;
         };
         unsigned int mPartitionNum;
         std::vector<Partition> mPartitions;

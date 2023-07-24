@@ -446,6 +446,39 @@ namespace Nif
         }
     }
 
+    std::vector<unsigned short> NiSkinPartition::Partition::getTrueTriangles() const
+    {
+        if (!trueTriangles.empty())
+            return trueTriangles;
+
+        std::vector<unsigned short> remappedTriangles;
+        if (vertexMap.empty() || triangles.empty())
+            return remappedTriangles;
+
+        remappedTriangles = triangles;
+
+        for (unsigned short& index : remappedTriangles)
+            index = vertexMap[index];
+        return remappedTriangles;
+    }
+
+    std::vector<std::vector<unsigned short>> NiSkinPartition::Partition::getTrueStrips() const
+    {
+        if (!trueTriangles.empty())
+            return {};
+
+        std::vector<std::vector<unsigned short>> remappedStrips;
+        if (vertexMap.empty() || strips.empty())
+            return remappedStrips;
+
+        remappedStrips = strips;
+        for (auto& strip : remappedStrips)
+            for (auto& index : strip)
+                index = vertexMap[index];
+
+        return remappedStrips;
+    }
+
     void NiMorphData::read(NIFStream* nif)
     {
         int morphCount = nif->getInt();

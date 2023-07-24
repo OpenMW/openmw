@@ -385,6 +385,7 @@ namespace NifBullet
 
         if (!niGeometry.skin.empty())
             args.mAnimated = false;
+        // TODO: handle NiSkinPartition
 
         std::unique_ptr<btTriangleMesh> childMesh = makeChildMesh(niGeometry);
         if (childMesh == nullptr || childMesh->getNumTriangles() == 0)
