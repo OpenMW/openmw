@@ -69,10 +69,21 @@ void ESM4::Static::load(ESM4::Reader& reader)
                 }
                 break;
             }
+            case ESM4::SUB_MNAM:
+            {
+                for (std::string& level : mLOD)
+                {
+                    level.resize(260);
+                    reader.get(level.data(), 260);
+                    size_t end = level.find('\0');
+                    if (end != std::string::npos)
+                        level.erase(end);
+                }
+                break;
+            }
             case ESM4::SUB_MODS:
             case ESM4::SUB_OBND:
             case ESM4::SUB_DNAM:
-            case ESM4::SUB_MNAM:
             case ESM4::SUB_BRUS: // FONV
             case ESM4::SUB_RNAM: // FONV
                 reader.skipSubRecordData();
