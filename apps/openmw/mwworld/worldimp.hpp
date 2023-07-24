@@ -345,12 +345,6 @@ namespace MWWorld
 
         float getDistanceToFacedObject() override;
 
-        /// Returns a pointer to the object the provided object would hit (if within the
-        /// specified distance), and the point where the hit occurs. This will attempt to
-        /// use the "Head" node as a basis.
-        std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(
-            const MWWorld::ConstPtr& ptr, float distance, std::vector<MWWorld::Ptr>& targets) override;
-
         /// @note No-op for items in containers. Use ContainerStore::removeItem instead.
         void deleteObject(const Ptr& ptr) override;
 
@@ -626,9 +620,6 @@ namespace MWWorld
         /// @note The length of the vector is the distance between actor and target.
         osg::Vec3f aimToTarget(
             const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target, bool isRangedCombat) override;
-
-        /// Return the distance between actor's weapon and target's collision box.
-        float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) override;
 
         bool isPlayerInJail() const override;
 

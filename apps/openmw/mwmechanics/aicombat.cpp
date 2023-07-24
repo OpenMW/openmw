@@ -23,6 +23,7 @@
 #include "actorutil.hpp"
 #include "aicombataction.hpp"
 #include "character.hpp"
+#include "combat.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
 #include "pathgrid.hpp"
@@ -242,7 +243,7 @@ namespace MWMechanics
         const osg::Vec3f vActorPos(pos.asVec3());
         const osg::Vec3f vTargetPos(target.getRefData().getPosition().asVec3());
 
-        float distToTarget = MWBase::Environment::get().getWorld()->getHitDistance(actor, target);
+        float distToTarget = getDistanceToBounds(actor, target);
 
         storage.mReadyToAttack = (currentAction->isAttackingOrSpell() && distToTarget <= rangeAttack && storage.mLOS);
 

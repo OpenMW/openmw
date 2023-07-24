@@ -569,23 +569,8 @@ namespace MWClass
             * (!weapon.isEmpty() ? weapon.get<ESM::Weapon>()->mBase->mData.mReach
                                  : store.find("fHandToHandReach")->mValue.getFloat());
 
-        // For AI actors, get combat targets to use in the ray cast. Only those targets will return a positive hit
-        // result.
-        std::vector<MWWorld::Ptr> targetActors;
-        if (ptr != MWMechanics::getPlayer())
-            getCreatureStats(ptr).getAiSequence().getCombatTargets(targetActors);
-
-        // TODO: Use second to work out the hit angle
-        std::pair<MWWorld::Ptr, osg::Vec3f> result = world->getHitContact(ptr, dist, targetActors);
+        const std::pair<MWWorld::Ptr, osg::Vec3f> result = MWMechanics::getHitContact(ptr, dist);
         if (result.first.isEmpty()) // Didn't hit anything
-            return true;
-
-        const MWWorld::Class& othercls = result.first.getClass();
-        if (!othercls.isActor()) // Can't hit non-actors
-            return true;
-
-        MWMechanics::CreatureStats& otherstats = othercls.getCreatureStats(result.first);
-        if (otherstats.isDead()) // Can't hit dead actors
             return true;
 
         // Note that earlier we returned true in spite of an apparent failure to hit anything alive.

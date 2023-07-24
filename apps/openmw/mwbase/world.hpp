@@ -252,13 +252,6 @@ namespace MWBase
 
         virtual float getMaxActivationDistance() const = 0;
 
-        /// Returns a pointer to the object the provided object would hit (if within the
-        /// specified distance), and the point where the hit occurs. This will attempt to
-        /// use the "Head" node, or alternatively the "Bip01 Head" node as a basis.
-        virtual std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(
-            const MWWorld::ConstPtr& ptr, float distance, std::vector<MWWorld::Ptr>& targets)
-            = 0;
-
         virtual void adjustPosition(const MWWorld::Ptr& ptr, bool force) = 0;
         ///< Adjust position after load to be on ground. Must be called after model load.
         /// @param force do this even if the ptr is flying
@@ -545,9 +538,6 @@ namespace MWBase
         virtual osg::Vec3f aimToTarget(
             const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target, bool isRangedCombat)
             = 0;
-
-        /// Return the distance between actor's weapon and target's collision box.
-        virtual float getHitDistance(const MWWorld::ConstPtr& actor, const MWWorld::ConstPtr& target) = 0;
 
         virtual void addContainerScripts(const MWWorld::Ptr& reference, MWWorld::CellStore* cell) = 0;
         virtual void removeContainerScripts(const MWWorld::Ptr& reference) = 0;

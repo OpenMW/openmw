@@ -23,12 +23,6 @@ namespace MWPhysics
     public:
         virtual ~RayCastingInterface() = default;
 
-        /// Get distance from \a point to the collision shape of \a target. Uses a raycast to find where the
-        /// target vector hits the collision shape and then calculates distance from the intersection point.
-        /// This can be used to find out how much nearer we need to move to the target for a "getHitContact" to be
-        /// successful. \note Only Actor targets are supported at the moment.
-        virtual float getHitDistance(const osg::Vec3f& point, const MWWorld::ConstPtr& target) const = 0;
-
         /// @param me Optional, a Ptr to ignore in the list of results. targets are actors to filter for, ignoring all
         /// other actors.
         virtual RayCastingResult castRay(const osg::Vec3f& from, const osg::Vec3f& to,

@@ -551,4 +551,102 @@ namespace MWMechanics
             return distanceIgnoreZ(lhs, rhs);
         return distance(lhs, rhs);
     }
+
+    float getDistanceToBounds(const MWWorld::Ptr& actor, const MWWorld::Ptr& target)
+    {
+        osg::Vec3f actorPos(actor.getRefData().getPosition().asVec3());
+        osg::Vec3f targetPos(target.getRefData().getPosition().asVec3());
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+
+        float dist = (targetPos - actorPos).length();
+        dist -= world->getHalfExtents(actor).y();
+        dist -= world->getHalfExtents(target).y();
+        return dist;
+    }
+
+    std::pair<MWWorld::Ptr, osg::Vec3f> getHitContact(const MWWorld::Ptr& actor, float reach)
+    {
+        // Lasciate ogne speranza, voi ch'entrate
+        MWWorld::Ptr result;
+        osg::Vec3f hitPos;
+        float minDist = std::numeric_limits<float>::max();
+        MWBase::World* world = MWBase::Environment::get().getWorld();
+        const MWWorld::Store<ESM::GameSetting>& store = world->getStore().get<ESM::GameSetting>();
+
+        const ESM::Position& posdata = actor.getRefData().getPosition();
+        const osg::Vec3f actorPos(posdata.asVec3());
+
+        // Morrowind uses body orientation or camera orientation if available
+        // The difference between that and this is subtle
+        osg::Quat actorRot
+            = osg::Quat(posdata.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(posdata.rot[2], osg::Vec3f(0, 0, -1));
+
+        const float fCombatAngleXY = store.find("fCombatAngleXY")->mValue.getFloat();
+        const float fCombatAngleZ = store.find("fCombatAngleZ")->mValue.getFloat();
+        const float combatAngleXYcos = std::cos(osg::DegreesToRadians(fCombatAngleXY));
+        const float combatAngleZcos = std::cos(osg::DegreesToRadians(fCombatAngleZ));
+
+        // The player can target any active actor, non-playable actors only target their targets
+        std::vector<MWWorld::Ptr> targets;
+        if (actor != getPlayer())
+            actor.getClass().getCreatureStats(actor).getAiSequence().getCombatTargets(targets);
+        else
+            MWBase::Environment::get().getMechanicsManager()->getActorsInRange(
+                actorPos, Settings::game().mActorsProcessingRange, targets);
+
+        for (MWWorld::Ptr& target : targets)
+        {
+            if (actor == target || target.getClass().getCreatureStats(target).isDead())
+                continue;
+            float dist = getDistanceToBounds(actor, target);
+            osg::Vec3f targetPos(target.getRefData().getPosition().asVec3());
+            osg::Vec3f dirToTarget = targetPos - actorPos;
+            if (dist >= reach || dist >= minDist || std::abs(dirToTarget.z()) >= reach)
+                continue;
+
+            dirToTarget.normalize();
+
+            // The idea is to use fCombatAngleXY and fCombatAngleZ as tolerance angles
+            // in XY and YZ planes of the coordinate system where the actor's orientation
+            // corresponds to (0, 1, 0) vector. This is not exactly what Morrowind does
+            // but Morrowind does something (even more) stupid here
+            osg::Vec3f hitDir = actorRot.inverse() * dirToTarget;
+            if (combatAngleXYcos * std::abs(hitDir.x()) > hitDir.y())
+                continue;
+
+            // Nice cliff racer hack Todd
+            if (combatAngleZcos * std::abs(hitDir.z()) > hitDir.y() && !MWMechanics::canActorMoveByZAxis(target))
+                continue;
+
+            // Gotta use physics somehow!
+            if (!world->getLOS(actor, target))
+                continue;
+
+            minDist = dist;
+            result = target;
+        }
+
+        // This hit position is currently used for spawning the blood effect.
+        // Morrowind does this elsewhere, but roughly at the same time
+        // and it would be hard to track the original hit results outside of this function
+        // without code duplication
+        // The idea is to use a random point on a plane in front of the target
+        // that is defined by its width and height
+        if (!result.isEmpty())
+        {
+            osg::Vec3f resultPos(result.getRefData().getPosition().asVec3());
+            osg::Vec3f dirToActor = actorPos - resultPos;
+            dirToActor.normalize();
+
+            hitPos = resultPos + dirToActor * world->getHalfExtents(result).y();
+            // -25% to 25% of width
+            float xOffset = Misc::Rng::deviate(0.f, 0.25f, world->getPrng());
+            // 20% to 100% of height
+            float zOffset = Misc::Rng::deviate(0.6f, 0.4f, world->getPrng());
+            hitPos.x() += world->getHalfExtents(result).x() * 2.f * xOffset;
+            hitPos.z() += world->getHalfExtents(result).z() * 2.f * zOffset;
+        }
+
+        return std::make_pair(result, hitPos);
+    }
 }
