@@ -257,6 +257,7 @@ namespace MWWorld
         , mUserDataPath(userDataPath)
         , mActivationDistanceOverride(activationDistanceOverride)
         , mStartCell(startCell)
+        , mSwimHeightScale(0.f)
         , mDistanceToFacedObject(-1.f)
         , mTeleportEnabled(true)
         , mLevitationEnabled(true)
