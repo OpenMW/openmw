@@ -624,8 +624,6 @@ namespace MWWorld
         void spawnEffect(const std::string& model, const std::string& textureOverride, const osg::Vec3f& worldPos,
             float scale = 1.f, bool isMagicVFX = true) override;
 
-        void activate(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) override;
-
         /// @see MWWorld::WeatherManager::isInStorm
         bool isInStorm() const override;
 

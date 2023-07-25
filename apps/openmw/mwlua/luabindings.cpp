@@ -274,6 +274,8 @@ namespace MWLua
             });
 
         api["_runStandardActivationAction"] = [context](const GObject& object, const GObject& actor) {
+            if (!object.ptr().getRefData().activate())
+                return;
             context.mLuaManager->addAction(
                 [object, actor] {
                     const MWWorld::Ptr& objPtr = object.ptr();
