@@ -317,7 +317,7 @@ namespace MWWorld
         // The original is expected to be removed after calling this function,
         // but this function itself doesn't remove the original.
         virtual Ptr moveToCell(const Ptr& ptr, CellStore& cell) const;
-        Ptr moveToCell(const Ptr& ptr, CellStore& cell, const ESM::Position& pos, int count) const;
+        Ptr moveToCell(const Ptr& ptr, CellStore& cell, const ESM::Position& pos) const;
 
         Ptr copyToCell(const ConstPtr& ptr, CellStore& cell, const ESM::Position& pos, int count) const;
 
