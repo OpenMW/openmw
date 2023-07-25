@@ -102,6 +102,8 @@ namespace MWWorld
         bool readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap);
 
     private:
+        PtrRegistry mPtrRegistry; // defined before mCells because during destruction it should be the last
+
         MWWorld::ESMStore& mStore;
         ESM::ReadersCache& mReaders;
         mutable std::unordered_map<ESM::RefId, CellStore> mCells;
@@ -110,7 +112,6 @@ namespace MWWorld
         ESM::Cell mDraftCell;
         std::vector<std::pair<ESM::RefId, CellStore*>> mIdCache;
         std::size_t mIdCacheIndex = 0;
-        PtrRegistry mPtrRegistry;
 
         CellStore& getOrInsertCellStore(const ESM::Cell& cell);
 

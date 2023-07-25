@@ -245,7 +245,7 @@ namespace MWGui
 
                     const ESM::NPC* playerNpc = world->getPlayerPtr().get<ESM::NPC>()->mBase;
 
-                    const MWWorld::Player player = world->getPlayer();
+                    const MWWorld::Player& player = world->getPlayer();
 
                     const ESM::Class* playerClass = world->getStore().get<ESM::Class>().find(playerNpc->mClass);
 

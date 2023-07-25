@@ -16,9 +16,7 @@ namespace
         cellRef.blank();
         cellRef.mRefID = name;
 
-        MWWorld::LiveCellRef<T> ref(cellRef, base);
-
-        refValue = ref;
+        refValue = MWWorld::LiveCellRef<T>(cellRef, base);
         ptrValue = MWWorld::Ptr(&std::any_cast<MWWorld::LiveCellRef<T>&>(refValue), nullptr);
     }
 }
