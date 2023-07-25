@@ -41,6 +41,7 @@
 #include <components/esm3/npcstate.hpp>
 #include <components/esm3/objectstate.hpp>
 #include <components/esm3/readerscache.hpp>
+#include <components/esm4/loadachr.hpp>
 #include <components/esm4/loadligh.hpp>
 #include <components/esm4/loadrefr.hpp>
 #include <components/esm4/loadstat.hpp>
@@ -384,24 +385,32 @@ namespace MWWorld
         }
     }
 
+    static constexpr bool isESM4ActorRec(unsigned int rec)
+    {
+        return rec == ESM::REC_NPC_4 || rec == ESM::REC_CREA4 || rec == ESM::REC_LVLN4 || rec == ESM::REC_LVLC4;
+    }
+
+    template <typename X, typename R>
+    static void loadImpl(const R& ref, const MWWorld::ESMStore& esmStore, auto& list)
+    {
+        const MWWorld::Store<X>& store = esmStore.get<X>();
+        if (const X* ptr = store.search(ref.mBaseObj))
+            list.emplace_back(ref, ptr);
+        else
+            Log(Debug::Warning) << "Warning: could not resolve cell reference " << ref.mId << " (dropping reference)";
+    }
+
     template <typename X>
     void CellRefList<X>::load(const ESM4::Reference& ref, const MWWorld::ESMStore& esmStore)
     {
-
-        if constexpr (!ESM::isESM4Rec(X::sRecordId))
-            return;
-
-        const MWWorld::Store<X>& store = esmStore.get<X>();
-
-        if (const X* ptr = store.search(ref.mBaseObj))
-        {
-            LiveRef liveCellRef(ref, ptr);
-            mList.push_back(liveCellRef);
-        }
-        else
-        {
-            Log(Debug::Warning) << "Warning: could not resolve cell reference " << ref.mId << " (dropping reference)";
-        }
+        if constexpr (ESM::isESM4Rec(X::sRecordId) && !isESM4ActorRec(X::sRecordId))
+            loadImpl<X>(ref, esmStore, mList);
+    }
+    template <typename X>
+    void CellRefList<X>::load(const ESM4::ActorCharacter& ref, const MWWorld::ESMStore& esmStore)
+    {
+        if constexpr (isESM4ActorRec(X::sRecordId))
+            loadImpl<X>(ref, esmStore, mList);
     }
 
     template <typename X>
@@ -769,9 +778,21 @@ namespace MWWorld
             invocable(*ref);
     }
 
+    template <typename ReferenceInvocable>
+    static void visitCell4ActorReferences(
+        const ESM4::Cell& cell, const ESMStore& esmStore, ESM::ReadersCache& readers, ReferenceInvocable&& invocable)
+    {
+        for (const ESM4::ActorCharacter* ref : esmStore.get<ESM4::ActorCharacter>().getByCell(cell.mId))
+            invocable(*ref);
+        for (const ESM4::ActorCharacter* ref : esmStore.get<ESM4::ActorCreature>().getByCell(cell.mId))
+            invocable(*ref);
+    }
+
     void CellStore::listRefs(const ESM4::Cell& cell)
     {
         visitCell4References(cell, mStore, mReaders, [&](const ESM4::Reference& ref) { mIds.push_back(ref.mBaseObj); });
+        visitCell4ActorReferences(
+            cell, mStore, mReaders, [&](const ESM4::ActorCharacter& ref) { mIds.push_back(ref.mBaseObj); });
     }
 
     void CellStore::listRefs()
@@ -836,6 +857,7 @@ namespace MWWorld
     void CellStore::loadRefs(const ESM4::Cell& cell, std::map<ESM::RefNum, ESM::RefId>& refNumToID)
     {
         visitCell4References(cell, mStore, mReaders, [&](const ESM4::Reference& ref) { loadRef(ref); });
+        visitCell4ActorReferences(cell, mStore, mReaders, [&](const ESM4::ActorCharacter& ref) { loadRef(ref); });
     }
 
     void CellStore::loadRefs()
@@ -881,6 +903,16 @@ namespace MWWorld
     {
         const MWWorld::ESMStore& store = mStore;
 
+        ESM::RecNameInts foundType = static_cast<ESM::RecNameInts>(store.find(ref.mBaseObj));
+
+        Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, &store, foundType](auto& x) {
+            recNameSwitcher(x, foundType, [&ref, &store](auto& storeIn) { storeIn.load(ref, store); });
+        });
+    }
+
+    void CellStore::loadRef(const ESM4::ActorCharacter& ref)
+    {
+        const MWWorld::ESMStore& store = mStore;
         ESM::RecNameInts foundType = static_cast<ESM::RecNameInts>(store.find(ref.mBaseObj));
 
         Misc::tupleForEach(this->mCellStoreImp->mRefLists, [&ref, &store, foundType](auto& x) {

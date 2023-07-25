@@ -33,10 +33,10 @@
 
 void ESM4::ActorCharacter::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.hdr().record.getFormId();
+    reader.adjustFormId(mId);
     mFlags = reader.hdr().record.flags;
-    mParent = reader.currCell(); // NOTE: only for persistent achr? (aren't they all persistent?)
+    mParent = ESM::RefId::formIdRefId(reader.currCell());
 
     while (reader.getSubRecordHeader())
     {
@@ -50,10 +50,14 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
                 reader.getZString(mFullName);
                 break;
             case ESM4::SUB_NAME:
-                reader.getFormId(mBaseObj);
+            {
+                FormId baseId;
+                reader.getFormId(baseId);
+                mBaseObj = ESM::RefId::formIdRefId(baseId);
                 break;
+            }
             case ESM4::SUB_DATA:
-                reader.get(mPlacement);
+                reader.get(mPos);
                 break;
             case ESM4::SUB_XSCL:
                 reader.get(mScale);
@@ -97,7 +101,7 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
                 reader.skipSubRecordData();
                 break;
             default:
-                throw std::runtime_error("ESM4::ACHR::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
+                throw std::runtime_error("ESM4 ACHR/ACRE load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
 }

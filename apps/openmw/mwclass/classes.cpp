@@ -68,5 +68,7 @@ namespace MWClass
         ESM4Tree::registerSelf();
         ESM4Named<ESM4::Weapon>::registerSelf();
         ESM4Light::registerSelf();
+        ESM4Actor<ESM4::Npc>::registerSelf();
+        ESM4Actor<ESM4::Creature>::registerSelf();
     }
 }

@@ -1,10 +1,12 @@
 #ifndef COMPONENTS_ESM_ESMBRIDGE
 #define COMPONENTS_ESM_ESMBRIDGE
+
 #include <string>
 #include <string_view>
 #include <variant>
 
 #include <components/esm3/cellref.hpp>
+#include <components/esm4/loadachr.hpp>
 #include <components/esm4/loadrefr.hpp>
 
 namespace ESM4
@@ -52,9 +54,14 @@ namespace ESM
 
     struct ReferenceVariant
     {
-        std::variant<ESM::CellRef, ESM4::Reference> mVariant;
+        std::variant<ESM::CellRef, ESM4::Reference, ESM4::ActorCharacter> mVariant;
 
         explicit ReferenceVariant(const ESM4::Reference& ref)
+            : mVariant(ref)
+        {
+        }
+
+        explicit ReferenceVariant(const ESM4::ActorCharacter& ref)
             : mVariant(ref)
         {
         }
@@ -63,14 +70,6 @@ namespace ESM
             : mVariant(ref)
         {
         }
-
-        bool isESM4() const { return std::holds_alternative<ESM4::Reference>(mVariant); }
-
-        const ESM::CellRef& getEsm3() const { return std::get<ESM::CellRef>(mVariant); }
-        const ESM4::Reference& getEsm4() const { return std::get<ESM4::Reference>(mVariant); }
-
-        ESM::CellRef& getEsm3() { return std::get<ESM::CellRef>(mVariant); }
-        ESM4::Reference& getEsm4() { return std::get<ESM4::Reference>(mVariant); }
     };
 
     template <class F, class... T>

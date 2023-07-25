@@ -124,6 +124,39 @@ namespace MWClass
             return ptr.get<Record>()->mBase->mFullName;
         }
     };
+
+    template <typename Record>
+    class ESM4Actor : public MWWorld::RegisteredClass<ESM4Actor<Record>, ESM4Base<Record>>
+    {
+    public:
+        friend MWWorld::RegisteredClass<ESM4Actor, ESM4Base<Record>>;
+
+        ESM4Actor()
+            : MWWorld::RegisteredClass<ESM4Actor, ESM4Base<Record>>(Record::sRecordId)
+        {
+        }
+
+        void insertObjectPhysics(
+            const MWWorld::Ptr&, const std::string&, const osg::Quat&, MWPhysics::PhysicsSystem&) const override
+        {
+        }
+
+        bool hasToolTip(const MWWorld::ConstPtr& ptr) const override { return true; }
+
+        MWGui::ToolTipInfo getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const override
+        {
+            return ESM4Impl::getToolTipInfo(ptr.get<Record>()->mBase->mEditorId, count);
+        }
+
+        std::string getModel(const MWWorld::ConstPtr& ptr) const override
+        {
+            // TODO: Not clear where to get something renderable:
+            // ESM4::Npc::mModel is usually an empty string
+            // ESM4::Race::mModelMale is only a skeleton
+            // For now show error marker as a dummy model.
+            return "meshes/marker_error.nif";
+        }
+    };
 }
 
 #endif // GAME_MWCLASS_ESM4BASE_H

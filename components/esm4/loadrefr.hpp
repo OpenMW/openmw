@@ -29,7 +29,7 @@
 
 #include <cstdint>
 
-#include "reference.hpp" // FormId, Placement, EnableParent
+#include "reference.hpp" // EnableParent
 
 #include <components/esm/defs.hpp>
 #include <components/esm/refid.hpp>
@@ -58,7 +58,7 @@ namespace ESM4
 
     struct TeleportDest
     {
-        FormId destDoor;
+        ESM::FormId destDoor;
         ESM::Position destPos;
         std::uint32_t flags = 0; // 0x01 no alarm (only in TES5)
     };
@@ -69,16 +69,15 @@ namespace ESM4
         // 0 radius, 1 everywhere, 2 worldspace and linked int, 3 linked int, 4 current cell only
         std::uint32_t broadcastRange;
         float staticPercentage;
-        FormId posReference; // only used if broadcastRange == 0
+        ESM::FormId posReference; // only used if broadcastRange == 0
     };
 
     struct Reference
     {
-        FormId mId; // from the header
+        ESM::FormId mId; // from the header
 
-        FormId mParentFormId; // cell FormId (currently persistent refs only), from the loading sequence
-                              // NOTE: for exterior cells it will be the dummy cell FormId
-        ESM::RefId mParent;
+        ESM::RefId mParent; // cell FormId, from the loading sequence
+                            // NOTE: for exterior cells it will be the dummy cell FormId
 
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
@@ -88,19 +87,18 @@ namespace ESM4
 
         ESM::Position mPos;
         float mScale = 1.0f;
-        FormId mOwner;
-        FormId mGlobal;
+        ESM::FormId mOwner;
+        ESM::FormId mGlobal;
         std::int32_t mFactionRank = -1;
 
-        bool mInitiallyDisabled; // TODO may need to check mFlags & 0x800 (initially disabled)
-        bool mIsMapMarker;
+        bool mIsMapMarker = false;
         std::uint16_t mMapMarker;
 
         EnableParent mEsp;
 
         std::uint32_t mCount = 1; // only if > 1
 
-        FormId mAudioLocation;
+        ESM::FormId mAudioLocation;
 
         RadioStationData mRadio;
 
@@ -109,7 +107,7 @@ namespace ESM4
         std::int8_t mLockLevel;
         ESM::RefId mKey;
 
-        FormId mTargetRef;
+        ESM::FormId mTargetRef;
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;

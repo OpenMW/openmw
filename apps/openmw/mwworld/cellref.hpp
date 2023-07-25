@@ -24,6 +24,7 @@ namespace MWWorld
         explicit CellRef(const ESM::CellRef& ref);
 
         explicit CellRef(const ESM4::Reference& ref);
+        explicit CellRef(const ESM4::ActorCharacter& ref);
 
         // Note: Currently unused for items in containers
         const ESM::RefNum& getRefNum() const;
@@ -47,6 +48,7 @@ namespace MWWorld
             {
                 ESM::RefId operator()(const ESM::CellRef& ref) { return ref.mRefID; }
                 ESM::RefId operator()(const ESM4::Reference& ref) { return ref.mBaseObj; }
+                ESM::RefId operator()(const ESM4::ActorCharacter& ref) { return ref.mBaseObj; }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -59,6 +61,7 @@ namespace MWWorld
             {
                 bool operator()(const ESM::CellRef& ref) { return ref.mTeleport; }
                 bool operator()(const ESM4::Reference& ref) { return !ref.mDoor.destDoor.isZeroOrUnset(); }
+                bool operator()(const ESM4::ActorCharacter&) { throw std::logic_error("Not applicable"); }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -101,6 +104,7 @@ namespace MWWorld
             {
                 int operator()(const ESM::CellRef& ref) { return ref.mChargeInt; }
                 int operator()(const ESM4::Reference& /*ref*/) { return 0; }
+                int operator()(const ESM4::ActorCharacter&) { throw std::logic_error("Not applicable"); }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -110,6 +114,7 @@ namespace MWWorld
             {
                 float operator()(const ESM::CellRef& ref) { return ref.mChargeFloat; }
                 float operator()(const ESM4::Reference& /*ref*/) { return 0; }
+                float operator()(const ESM4::ActorCharacter&) { throw std::logic_error("Not applicable"); }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         } // Implemented as union with int charge
@@ -123,7 +128,8 @@ namespace MWWorld
             struct Visitor
             {
                 ESM::RefId operator()(const ESM::CellRef& ref) { return ref.mOwner; }
-                ESM::RefId operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId(); }
+                ESM::RefId operator()(const ESM4::Reference& ref) { return ESM::RefId::formIdRefId(ref.mOwner); }
+                ESM::RefId operator()(const ESM4::ActorCharacter& ref) { return ESM::RefId::formIdRefId(ref.mOwner); }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -143,6 +149,7 @@ namespace MWWorld
             {
                 ESM::RefId operator()(const ESM::CellRef& ref) { return ref.mSoul; }
                 ESM::RefId operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId(); }
+                ESM::RefId operator()(const ESM4::ActorCharacter&) { throw std::logic_error("Not applicable"); }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -156,6 +163,7 @@ namespace MWWorld
             {
                 ESM::RefId operator()(const ESM::CellRef& ref) { return ref.mFaction; }
                 ESM::RefId operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId(); }
+                ESM::RefId operator()(const ESM4::ActorCharacter& /*ref*/) { return ESM::RefId(); }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -165,7 +173,13 @@ namespace MWWorld
         void setFactionRank(int factionRank);
         int getFactionRank() const
         {
-            return std::visit([&](auto&& ref) { return ref.mFactionRank; }, mCellRef.mVariant);
+            struct Visitor
+            {
+                int operator()(const ESM::CellRef& ref) { return ref.mFactionRank; }
+                int operator()(const ESM4::Reference& ref) { return ref.mFactionRank; }
+                int operator()(const ESM4::ActorCharacter&) { throw std::logic_error("Not applicable"); }
+            };
+            return std::visit(Visitor(), mCellRef.mVariant);
         }
 
         // Lock level for doors and containers
@@ -173,7 +187,13 @@ namespace MWWorld
         // For an unlocked door, it is set to -(previous locklevel)
         int getLockLevel() const
         {
-            return std::visit([](auto&& ref) { return static_cast<int>(ref.mLockLevel); }, mCellRef.mVariant);
+            struct Visitor
+            {
+                int operator()(const ESM::CellRef& ref) { return ref.mLockLevel; }
+                int operator()(const ESM4::Reference& ref) { return ref.mLockLevel; }
+                int operator()(const ESM4::ActorCharacter&) { throw std::logic_error("Not applicable"); }
+            };
+            return std::visit(Visitor(), mCellRef.mVariant);
         }
         void setLockLevel(int lockLevel);
         void lock(int lockLevel);
@@ -183,7 +203,13 @@ namespace MWWorld
         // Key and trap ID names, if any
         ESM::RefId getKey() const
         {
-            return std::visit([](auto&& ref) -> const ESM::RefId& { return ref.mKey; }, mCellRef.mVariant);
+            struct Visitor
+            {
+                ESM::RefId operator()(const ESM::CellRef& ref) { return ref.mKey; }
+                ESM::RefId operator()(const ESM4::Reference& ref) { return ref.mKey; }
+                ESM::RefId operator()(const ESM4::ActorCharacter&) { throw std::logic_error("Not applicable"); }
+            };
+            return std::visit(Visitor(), mCellRef.mVariant);
         }
         void setKey(const ESM::RefId& key);
         ESM::RefId getTrap() const
@@ -192,6 +218,7 @@ namespace MWWorld
             {
                 ESM::RefId operator()(const ESM::CellRef& ref) { return ref.mTrap; }
                 ESM::RefId operator()(const ESM4::Reference& /*ref*/) { return ESM::RefId(); }
+                ESM::RefId operator()(const ESM4::ActorCharacter&) { throw std::logic_error("Not applicable"); }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
@@ -204,6 +231,7 @@ namespace MWWorld
             {
                 int operator()(const ESM::CellRef& ref) { return ref.mGoldValue; }
                 int operator()(const ESM4::Reference& /*ref*/) { return 0; }
+                int operator()(const ESM4::ActorCharacter&) { throw std::logic_error("Not applicable"); }
             };
             return std::visit(Visitor(), mCellRef.mVariant);
         }
