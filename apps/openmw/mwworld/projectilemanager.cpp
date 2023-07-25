@@ -263,7 +263,7 @@ namespace MWWorld
     }
 
     void ProjectileManager::launchMagicBolt(
-        const ESM::RefId& spellId, const Ptr& caster, const osg::Vec3f& fallbackDirection, int slot)
+        const ESM::RefId& spellId, const Ptr& caster, const osg::Vec3f& fallbackDirection, ESM::RefNum item)
     {
         osg::Vec3f pos = caster.getRefData().getPosition().asVec3();
         if (caster.getClass().isActor())
@@ -287,7 +287,7 @@ namespace MWWorld
         MagicBoltState state;
         state.mSpellId = spellId;
         state.mCasterHandle = caster;
-        state.mSlot = slot;
+        state.mItem = item;
         if (caster.getClass().isActor())
             state.mActorId = caster.getClass().getCreatureStats(caster).getActorId();
         else
@@ -575,7 +575,7 @@ namespace MWWorld
             cast.mHitPosition = Misc::Convert::toOsg(projectile->getHitPosition());
             cast.mId = magicBoltState.mSpellId;
             cast.mSourceName = magicBoltState.mSourceName;
-            cast.mSlot = magicBoltState.mSlot;
+            cast.mItem = magicBoltState.mItem;
             // Grab original effect list so the indices are correct
             const ESM::EffectList* effects;
             if (const ESM::Spell* spell = esmStore.get<ESM::Spell>().search(magicBoltState.mSpellId))
@@ -669,7 +669,7 @@ namespace MWWorld
             state.mPosition = ESM::Vector3(osg::Vec3f(it->mNode->getPosition()));
             state.mOrientation = ESM::Quaternion(osg::Quat(it->mNode->getAttitude()));
             state.mActorId = it->mActorId;
-            state.mSlot = it->mSlot;
+            state.mItem = it->mItem;
             state.mSpellId = it->mSpellId;
             state.mSpeed = it->mSpeed;
 
@@ -727,7 +727,7 @@ namespace MWWorld
             state.mSpellId = esm.mSpellId;
             state.mActorId = esm.mActorId;
             state.mToDelete = false;
-            state.mSlot = esm.mSlot;
+            state.mItem = esm.mItem;
             std::string texture;
 
             try

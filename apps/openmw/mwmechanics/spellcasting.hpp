@@ -43,7 +43,7 @@ namespace MWMechanics
         bool mFromProjectile; // True if spell is cast by enchantment of some projectile (arrow, bolt or thrown weapon)
         bool mManualSpell; // True if spell is casted from script and ignores some checks (mana level, success chance,
                            // etc.)
-        int mSlot{ 0 };
+        ESM::RefNum mItem;
         ESM::ActiveSpells::EffectType mType{ ESM::ActiveSpells::Type_Temporary };
 
         CastSpell(const MWWorld::Ptr& caster, const MWWorld::Ptr& target, const bool fromProjectile = false,
@@ -54,7 +54,7 @@ namespace MWMechanics
         /// @note mCaster must be an actor
         /// @param launchProjectile If set to false, "on target" effects are directly applied instead of being launched
         /// as projectile originating from the caster.
-        bool cast(const MWWorld::Ptr& item, int slot, bool launchProjectile = true);
+        bool cast(const MWWorld::Ptr& item, bool launchProjectile = true);
 
         /// @note mCaster must be an NPC
         bool cast(const ESM::Ingredient* ingredient);

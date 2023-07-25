@@ -117,7 +117,7 @@ namespace MWWorld
 
         // Used in clone() to unset refnums of copies.
         // (RefNum should be unique, copy can not have the same RefNum).
-        void clearRefNums();
+        void updateRefNums();
 
         // (item, max charge)
         typedef std::vector<std::pair<ContainerStoreIterator, float>> TRechargingItems;
@@ -185,7 +185,7 @@ namespace MWWorld
         virtual std::unique_ptr<ContainerStore> clone()
         {
             auto res = std::make_unique<ContainerStore>(*this);
-            res->clearRefNums();
+            res->updateRefNums();
             return res;
         }
 

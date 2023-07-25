@@ -54,7 +54,7 @@ namespace MWMechanics
             {
                 MWMechanics::CastSpell cast(attacker, victim, fromProjectile);
                 cast.mHitPosition = hitPosition;
-                cast.cast(object, 0, false);
+                cast.cast(object, false);
                 // Apply magic effects directly instead of waiting a frame to allow soul trap to work on one-hit kills
                 if (!victim.isEmpty() && victim.getClass().isActor())
                     MWBase::Environment::get().getMechanicsManager()->updateMagicEffects(victim);

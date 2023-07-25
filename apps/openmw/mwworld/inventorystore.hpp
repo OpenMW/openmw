@@ -100,7 +100,7 @@ namespace MWWorld
         std::unique_ptr<ContainerStore> clone() override
         {
             auto res = std::make_unique<InventoryStore>(*this);
-            res->clearRefNums();
+            res->updateRefNums();
             return res;
         }
 

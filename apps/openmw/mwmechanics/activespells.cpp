@@ -85,7 +85,7 @@ namespace MWMechanics
         : mId(cast.mId)
         , mDisplayName(cast.mSourceName)
         , mCasterActorId(-1)
-        , mSlot(cast.mSlot)
+        , mItem(cast.mItem)
         , mType(cast.mType)
         , mWorsenings(-1)
     {
@@ -98,7 +98,6 @@ namespace MWMechanics
         : mId(spell->mId)
         , mDisplayName(spell->mName)
         , mCasterActorId(actor.getClass().getCreatureStats(actor).getActorId())
-        , mSlot(0)
         , mType(spell->mData.mType == ESM::Spell::ST_Ability ? ESM::ActiveSpells::Type_Ability
                                                              : ESM::ActiveSpells::Type_Permanent)
         , mWorsenings(-1)
@@ -108,11 +107,11 @@ namespace MWMechanics
     }
 
     ActiveSpells::ActiveSpellParams::ActiveSpellParams(
-        const MWWorld::ConstPtr& item, const ESM::Enchantment* enchantment, int slotIndex, const MWWorld::Ptr& actor)
+        const MWWorld::ConstPtr& item, const ESM::Enchantment* enchantment, const MWWorld::Ptr& actor)
         : mId(item.getCellRef().getRefId())
         , mDisplayName(item.getClass().getName(item))
         , mCasterActorId(actor.getClass().getCreatureStats(actor).getActorId())
-        , mSlot(slotIndex)
+        , mItem(item.getCellRef().getRefNum())
         , mType(ESM::ActiveSpells::Type_Enchantment)
         , mWorsenings(-1)
     {
@@ -125,7 +124,7 @@ namespace MWMechanics
         , mEffects(params.mEffects)
         , mDisplayName(params.mDisplayName)
         , mCasterActorId(params.mCasterActorId)
-        , mSlot(params.mItem.isSet() ? params.mItem.mIndex : 0)
+        , mItem(params.mItem)
         , mType(params.mType)
         , mWorsenings(params.mWorsenings)
         , mNextWorsening({ params.mNextWorsening })
@@ -136,7 +135,7 @@ namespace MWMechanics
         : mId(params.mId)
         , mDisplayName(params.mDisplayName)
         , mCasterActorId(actor.getClass().getCreatureStats(actor).getActorId())
-        , mSlot(params.mSlot)
+        , mItem(params.mItem)
         , mType(params.mType)
         , mWorsenings(-1)
     {
@@ -149,12 +148,7 @@ namespace MWMechanics
         params.mEffects = mEffects;
         params.mDisplayName = mDisplayName;
         params.mCasterActorId = mCasterActorId;
-        if (mSlot)
-        {
-            // Note that we're storing the inventory slot as a RefNum instead of an int as a matter of future proofing
-            // mSlot needs to be replaced with a RefNum once inventory items get persistent RefNum (#4508 #6148)
-            params.mItem = { static_cast<unsigned int>(mSlot), 0 };
-        }
+        params.mItem = mItem;
         params.mType = mType;
         params.mWorsenings = mWorsenings;
         params.mNextWorsening = mNextWorsening.toEsm();
@@ -254,7 +248,8 @@ namespace MWMechanics
                         continue;
                     if (std::find_if(mSpells.begin(), mSpells.end(),
                             [&](const ActiveSpellParams& params) {
-                                return params.mSlot == slotIndex && params.mType == ESM::ActiveSpells::Type_Enchantment
+                                return params.mItem == slot->getCellRef().getRefNum()
+                                    && params.mType == ESM::ActiveSpells::Type_Enchantment
                                     && params.mId == slot->getCellRef().getRefId();
                             })
                         != mSpells.end())
@@ -264,7 +259,7 @@ namespace MWMechanics
                     purgeEffect(ptr, ESM::MagicEffect::Invisibility);
                     applyPurges(ptr);
                     const ActiveSpellParams& params
-                        = mSpells.emplace_back(ActiveSpellParams{ *slot, enchantment, slotIndex, ptr });
+                        = mSpells.emplace_back(ActiveSpellParams{ *slot, enchantment, ptr });
                     for (const auto& effect : params.mEffects)
                         MWMechanics::playEffects(
                             ptr, *world->getStore().get<ESM::MagicEffect>().find(effect.mEffectId), playNonLooping);
@@ -351,9 +346,19 @@ namespace MWMechanics
             }
             else if (spellIt->mType == ESM::ActiveSpells::Type_Enchantment)
             {
+                // Remove constant effect enchantments that have been unequipped
                 const auto& store = ptr.getClass().getInventoryStore(ptr);
-                auto slot = store.getSlot(spellIt->mSlot);
-                remove = slot == store.end() || slot->getCellRef().getRefId() != spellIt->mId;
+                remove = true;
+                for (int slotIndex = 0; slotIndex < MWWorld::InventoryStore::Slots; slotIndex++)
+                {
+                    auto slot = store.getSlot(slotIndex);
+                    if (slot != store.end() && slot->getCellRef().getRefNum().isSet()
+                        && slot->getCellRef().getRefNum() == spellIt->mItem)
+                    {
+                        remove = false;
+                        break;
+                    }
+                }
             }
             if (remove)
             {
@@ -382,7 +387,7 @@ namespace MWMechanics
         {
             auto found = std::find_if(mSpells.begin(), mSpells.end(), [&](const auto& existing) {
                 return spell.mId == existing.mId && spell.mCasterActorId == existing.mCasterActorId
-                    && spell.mSlot == existing.mSlot;
+                    && spell.mItem == existing.mItem;
             });
             if (found != mSpells.end())
             {

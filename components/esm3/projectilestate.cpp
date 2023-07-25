@@ -28,7 +28,8 @@ namespace ESM
 
         esm.writeHNRefId("SPEL", mSpellId);
         esm.writeHNT("SPED", mSpeed);
-        esm.writeHNT("SLOT", mSlot);
+        if (mItem.isSet())
+            esm.writeFormId(mItem, true, "ITEM");
     }
 
     void MagicBoltState::load(ESMReader& esm)
@@ -40,10 +41,10 @@ namespace ESM
             esm.skipHSub();
         EffectList().load(esm); // for backwards compatibility
         esm.getHNT(mSpeed, "SPED");
-        if (esm.getFormatVersion() <= MaxClearModifiersFormatVersion)
-            mSlot = 0;
-        else
-            esm.getHNT(mSlot, "SLOT");
+        if (esm.peekNextSub("ITEM"))
+            mItem = esm.getFormId(true, "ITEM");
+        if (esm.isNextSub("SLOT")) // for backwards compatibility
+            esm.skipHSub();
         if (esm.isNextSub("STCK")) // for backwards compatibility
             esm.skipHSub();
         if (esm.isNextSub("SOUN")) // for backwards compatibility
