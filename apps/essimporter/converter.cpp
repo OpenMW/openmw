@@ -491,7 +491,7 @@ namespace ESSImport
 
                 out.mSpellId = ESM::RefId::stringRefId(it->mSPDT.mId.toString());
                 out.mSpeed = pnam.mSpeed * 0.001f; // not sure where this factor comes from
-                out.mSlot = 0;
+                out.mItem = ESM::RefNum();
 
                 esm.startRecord(ESM::REC_MPRJ);
                 out.save(esm);

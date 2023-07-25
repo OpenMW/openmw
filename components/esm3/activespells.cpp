@@ -56,7 +56,14 @@ namespace ESM
                 {
                     esm.getHNT(params.mType, "TYPE");
                     if (esm.peekNextSub("ITEM"))
-                        params.mItem = esm.getFormId(true, "ITEM");
+                    {
+                        if (format <= MaxActiveSpellSlotIndexFormatVersion)
+                            // Previous versions saved slot index in this record.
+                            // Ignore these values as we can't use them
+                            esm.getFormId(true, "ITEM");
+                        else
+                            params.mItem = esm.getFormId(true, "ITEM");
+                    }
                 }
                 if (esm.isNextSub("WORS"))
                 {

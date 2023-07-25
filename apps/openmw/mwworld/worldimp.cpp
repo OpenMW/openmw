@@ -3136,9 +3136,9 @@ namespace MWWorld
     }
 
     void World::launchMagicBolt(
-        const ESM::RefId& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, int slot)
+        const ESM::RefId& spellId, const MWWorld::Ptr& caster, const osg::Vec3f& fallbackDirection, ESM::RefNum item)
     {
-        mProjectileManager->launchMagicBolt(spellId, caster, fallbackDirection, slot);
+        mProjectileManager->launchMagicBolt(spellId, caster, fallbackDirection, item);
     }
 
     void World::updateProjectilesCasters()

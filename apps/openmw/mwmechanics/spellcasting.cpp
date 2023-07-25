@@ -146,7 +146,7 @@ namespace MWMechanics
             fallbackDirection = (mTarget.getRefData().getPosition().asVec3() + offset)
                 - (mCaster.getRefData().getPosition().asVec3());
 
-        MWBase::Environment::get().getWorld()->launchMagicBolt(mId, mCaster, fallbackDirection, mSlot);
+        MWBase::Environment::get().getWorld()->launchMagicBolt(mId, mCaster, fallbackDirection, mItem);
     }
 
     void CastSpell::inflict(
@@ -290,7 +290,7 @@ namespace MWMechanics
         throw std::runtime_error("ID type cannot be casted");
     }
 
-    bool CastSpell::cast(const MWWorld::Ptr& item, int slot, bool launchProjectile)
+    bool CastSpell::cast(const MWWorld::Ptr& item, bool launchProjectile)
     {
         const ESM::RefId& enchantmentName = item.getClass().getEnchantment(item);
         if (enchantmentName.empty())
@@ -302,7 +302,10 @@ namespace MWMechanics
         const auto& store = MWBase::Environment::get().getESMStore();
         const ESM::Enchantment* enchantment = store->get<ESM::Enchantment>().find(enchantmentName);
 
-        mSlot = slot;
+        // CastOnce enchantments (i.e. scrolls) never stack and the item is immediately destroyed,
+        // so don't track the source item.
+        if (enchantment->mData.mType != ESM::Enchantment::CastOnce)
+            mItem = item.getCellRef().getRefNum();
 
         bool godmode = mCaster == MWMechanics::getPlayer() && MWBase::Environment::get().getWorld()->getGodModeState();
         bool isProjectile = false;

@@ -104,8 +104,10 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getState(
     LiveCellRef<T> ref(record);
     ref.load(state);
     collection.mList.push_back(ref);
+    auto it = ContainerStoreIterator(this, --collection.mList.end());
+    MWBase::Environment::get().getWorldModel()->registerPtr(*it);
 
-    return ContainerStoreIterator(this, --collection.mList.end());
+    return it;
 }
 
 void MWWorld::ContainerStore::storeEquipmentState(
@@ -155,7 +157,12 @@ MWWorld::ContainerStore::ContainerStore()
 {
 }
 
-MWWorld::ContainerStore::~ContainerStore() {}
+MWWorld::ContainerStore::~ContainerStore()
+{
+    MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
+    for (MWWorld::ContainerStoreIterator iter(begin()); iter != end(); ++iter)
+        worldModel->deregisterPtr(*iter);
+}
 
 MWWorld::ConstContainerStoreIterator MWWorld::ContainerStore::cbegin(int mask) const
 {
@@ -196,10 +203,14 @@ int MWWorld::ContainerStore::count(const ESM::RefId& id) const
     return total;
 }
 
-void MWWorld::ContainerStore::clearRefNums()
+void MWWorld::ContainerStore::updateRefNums()
 {
     for (const auto& iter : *this)
+    {
         iter.getCellRef().unsetRefNum();
+        iter.getRefData().setLuaScripts(nullptr);
+        MWBase::Environment::get().getWorldModel()->registerPtr(iter);
+    }
 }
 
 MWWorld::ContainerStoreListener* MWWorld::ContainerStore::getContListener() const
@@ -656,7 +667,8 @@ void MWWorld::ContainerStore::addInitialItemImp(
     else
     {
         ptr.getCellRef().setOwner(owner);
-        addImp(ptr, count, false);
+        MWWorld::ContainerStoreIterator it = addImp(ptr, count, false);
+        MWBase::Environment::get().getWorldModel()->registerPtr(*it);
     }
 }
 

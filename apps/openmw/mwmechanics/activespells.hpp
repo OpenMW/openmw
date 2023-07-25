@@ -37,17 +37,18 @@ namespace MWMechanics
             std::vector<ActiveEffect> mEffects;
             std::string mDisplayName;
             int mCasterActorId;
-            int mSlot;
+            ESM::RefNum mItem;
             ESM::ActiveSpells::EffectType mType;
             int mWorsenings;
             MWWorld::TimeStamp mNextWorsening;
+            MWWorld::Ptr mSource;
 
             ActiveSpellParams(const ESM::ActiveSpells::ActiveSpellParams& params);
 
             ActiveSpellParams(const ESM::Spell* spell, const MWWorld::Ptr& actor, bool ignoreResistances = false);
 
-            ActiveSpellParams(const MWWorld::ConstPtr& item, const ESM::Enchantment* enchantment, int slotIndex,
-                const MWWorld::Ptr& actor);
+            ActiveSpellParams(
+                const MWWorld::ConstPtr& item, const ESM::Enchantment* enchantment, const MWWorld::Ptr& actor);
 
             ActiveSpellParams(const ActiveSpellParams& params, const MWWorld::Ptr& actor);
 

@@ -33,7 +33,7 @@ namespace ESM
     {
         RefId mSpellId;
         float mSpeed;
-        int mSlot;
+        RefNum mItem;
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;
