@@ -342,7 +342,7 @@ namespace Nif
 
         if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_F76)
         {
-            nif->readVector(mBoundMinMax, 6);
+            nif->readArray(mBoundMinMax);
         }
 
         mSkin.read(nif);
