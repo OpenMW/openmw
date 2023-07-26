@@ -7,7 +7,7 @@ namespace Nif
     osg::Quat NIFStream::getQuaternion()
     {
         float f[4];
-        readBufferOfType<4, float>(inp, f);
+        readBufferOfType<4, float>(mStream, f);
         osg::Quat quat;
         quat.w() = f[0];
         quat.x() = f[1];
@@ -34,20 +34,20 @@ namespace Nif
     /// Read in a string, either from the string table using the index or from the stream using the specified length
     std::string NIFStream::getString()
     {
-        return getVersion() < generateVersion(20, 1, 0, 1) ? getSizedString() : file.getString(getUInt());
+        return getVersion() < generateVersion(20, 1, 0, 1) ? getSizedString() : mReader.getString(getUInt());
     }
 
     // Convenience utility functions: get the versions of the currently read file
     unsigned int NIFStream::getVersion() const
     {
-        return file.getVersion();
+        return mReader.getVersion();
     }
     unsigned int NIFStream::getUserVersion() const
     {
-        return file.getBethVersion();
+        return mReader.getBethVersion();
     }
     unsigned int NIFStream::getBethVersion() const
     {
-        return file.getBethVersion();
+        return mReader.getBethVersion();
     }
 }

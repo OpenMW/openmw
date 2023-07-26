@@ -65,72 +65,70 @@ namespace Nif
 
     class NIFStream
     {
-        const Reader& file;
-
-        /// Input stream
-        Files::IStreamPtr inp;
+        const Reader& mReader;
+        Files::IStreamPtr mStream;
 
     public:
-        explicit NIFStream(const Reader& file, Files::IStreamPtr&& inp)
-            : file(file)
-            , inp(std::move(inp))
+        explicit NIFStream(const Reader& reader, Files::IStreamPtr&& stream)
+            : mReader(reader)
+            , mStream(std::move(stream))
         {
         }
 
-        const Reader& getFile() const { return file; }
+        const Reader& getFile() const { return mReader; }
 
-        void skip(size_t size) { inp->ignore(size); }
+        void skip(size_t size) { mStream->ignore(size); }
 
         template <class T>
         void read(T& data)
         {
-            data = readType<T>(inp);
+            data = readType<T>(mStream);
         }
 
-        void read(osg::Vec3f& data) { readBufferOfType<3, float>(inp, data._v); }
-        void read(osg::Vec4f& data) { readBufferOfType<4, float>(inp, data._v); }
+        void read(osg::Vec3f& data) { readBufferOfType<3, float>(mStream, data._v); }
+        void read(osg::Vec4f& data) { readBufferOfType<4, float>(mStream, data._v); }
 
         template <class T>
         T get()
         {
-            return readType<T>(inp);
+            return readType<T>(mStream);
         }
 
         template <class T>
         void readVector(std::vector<T>& vec, size_t size)
         {
             vec.resize(size);
-            readDynamicBufferOfType<T>(inp, vec.data(), size);
+            readDynamicBufferOfType<T>(mStream, vec.data(), size);
         }
 
         template <class T, size_t size>
         void readArray(std::array<T, size>& arr)
         {
-            readDynamicBufferOfType<T>(inp, arr.data(), size);
+            readDynamicBufferOfType<T>(mStream, arr.data(), size);
         }
 
         // DEPRECATED: Use read() or get() whenever relevant
-        char getChar() { return readType<char>(inp); }
+        char getChar() { return readType<char>(mStream); }
 
         // DEPRECATED: Use read() or get() whenever relevant
-        short getShort() { return readType<short>(inp); }
+        short getShort() { return readType<short>(mStream); }
 
         // DEPRECATED: Use read() or get() whenever relevant
-        unsigned short getUShort() { return readType<unsigned short>(inp); }
+        unsigned short getUShort() { return readType<unsigned short>(mStream); }
 
         // DEPRECATED: Use read() or get() whenever relevant
-        int getInt() { return readType<int>(inp); }
+        int getInt() { return readType<int>(mStream); }
 
         // DEPRECATED: Use read() or get() whenever relevant
-        unsigned int getUInt() { return readType<unsigned int>(inp); }
+        unsigned int getUInt() { return readType<unsigned int>(mStream); }
 
         // DEPRECATED: Use read() or get() whenever relevant
-        float getFloat() { return readType<float>(inp); }
+        float getFloat() { return readType<float>(mStream); }
 
         osg::Vec2f getVector2()
         {
             osg::Vec2f vec;
-            readBufferOfType<2, float>(inp, vec._v);
+            readBufferOfType<2, float>(mStream, vec._v);
             return vec;
         }
 
@@ -138,21 +136,21 @@ namespace Nif
         osg::Vec3f getVector3()
         {
             osg::Vec3f vec;
-            readBufferOfType<3, float>(inp, vec._v);
+            readBufferOfType<3, float>(mStream, vec._v);
             return vec;
         }
 
         osg::Vec4f getVector4()
         {
             osg::Vec4f vec;
-            readBufferOfType<4, float>(inp, vec._v);
+            readBufferOfType<4, float>(mStream, vec._v);
             return vec;
         }
 
         Matrix3 getMatrix3()
         {
             Matrix3 mat;
-            readBufferOfType<9, float>(inp, (float*)&mat.mValues);
+            readBufferOfType<9, float>(mStream, (float*)&mat.mValues);
             return mat;
         }
 
@@ -178,8 +176,8 @@ namespace Nif
         std::string getSizedString(size_t length)
         {
             std::string str(length, '\0');
-            inp->read(str.data(), length);
-            if (inp->bad())
+            mStream->read(str.data(), length);
+            if (mStream->bad())
                 throw std::runtime_error("Failed to read sized string of " + std::to_string(length) + " chars");
             size_t end = str.find('\0');
             if (end != std::string::npos)
@@ -189,14 +187,14 @@ namespace Nif
         /// Read in a string of the length specified in the file
         std::string getSizedString()
         {
-            size_t size = readType<uint32_t>(inp);
+            size_t size = readType<uint32_t>(mStream);
             return getSizedString(size);
         }
 
         /// Specific to Bethesda headers, uses a byte for length
         std::string getExportString()
         {
-            size_t size = static_cast<size_t>(readType<uint8_t>(inp));
+            size_t size = static_cast<size_t>(readType<uint8_t>(mStream));
             return getSizedString(size);
         }
 
@@ -204,8 +202,8 @@ namespace Nif
         std::string getVersionString()
         {
             std::string result;
-            std::getline(*inp, result);
-            if (inp->bad())
+            std::getline(*mStream, result);
+            if (mStream->bad())
                 throw std::runtime_error("Failed to read version string");
             return result;
         }
@@ -213,10 +211,10 @@ namespace Nif
         /// Read a sequence of null-terminated strings
         std::string getStringPalette()
         {
-            size_t size = readType<uint32_t>(inp);
+            size_t size = readType<uint32_t>(mStream);
             std::string str(size, '\0');
-            inp->read(str.data(), size);
-            if (inp->bad())
+            mStream->read(str.data(), size);
+            if (mStream->bad())
                 throw std::runtime_error("Failed to read string palette of " + std::to_string(size) + " chars");
             return str;
         }
@@ -225,63 +223,63 @@ namespace Nif
         void getChars(std::vector<char>& vec, size_t size)
         {
             vec.resize(size);
-            readDynamicBufferOfType<char>(inp, vec.data(), size);
+            readDynamicBufferOfType<char>(mStream, vec.data(), size);
         }
 
         // DEPRECATED: Use readVector()
         void getUChars(std::vector<unsigned char>& vec, size_t size)
         {
             vec.resize(size);
-            readDynamicBufferOfType<unsigned char>(inp, vec.data(), size);
+            readDynamicBufferOfType<unsigned char>(mStream, vec.data(), size);
         }
 
         // DEPRECATED: Use readVector()
         void getUShorts(std::vector<unsigned short>& vec, size_t size)
         {
             vec.resize(size);
-            readDynamicBufferOfType<unsigned short>(inp, vec.data(), size);
+            readDynamicBufferOfType<unsigned short>(mStream, vec.data(), size);
         }
 
         // DEPRECATED: Use readVector()
         void getFloats(std::vector<float>& vec, size_t size)
         {
             vec.resize(size);
-            readDynamicBufferOfType<float>(inp, vec.data(), size);
+            readDynamicBufferOfType<float>(mStream, vec.data(), size);
         }
 
         // DEPRECATED: Use readVector()
         void getInts(std::vector<int>& vec, size_t size)
         {
             vec.resize(size);
-            readDynamicBufferOfType<int>(inp, vec.data(), size);
+            readDynamicBufferOfType<int>(mStream, vec.data(), size);
         }
 
         // DEPRECATED: Use readVector()
         void getUInts(std::vector<unsigned int>& vec, size_t size)
         {
             vec.resize(size);
-            readDynamicBufferOfType<unsigned int>(inp, vec.data(), size);
+            readDynamicBufferOfType<unsigned int>(mStream, vec.data(), size);
         }
 
         void getVector2s(std::vector<osg::Vec2f>& vec, size_t size)
         {
             vec.resize(size);
             /* The packed storage of each Vec2f is 2 floats exactly */
-            readDynamicBufferOfType<float>(inp, (float*)vec.data(), size * 2);
+            readDynamicBufferOfType<float>(mStream, (float*)vec.data(), size * 2);
         }
 
         void getVector3s(std::vector<osg::Vec3f>& vec, size_t size)
         {
             vec.resize(size);
             /* The packed storage of each Vec3f is 3 floats exactly */
-            readDynamicBufferOfType<float>(inp, (float*)vec.data(), size * 3);
+            readDynamicBufferOfType<float>(mStream, (float*)vec.data(), size * 3);
         }
 
         void getVector4s(std::vector<osg::Vec4f>& vec, size_t size)
         {
             vec.resize(size);
             /* The packed storage of each Vec4f is 4 floats exactly */
-            readDynamicBufferOfType<float>(inp, (float*)vec.data(), size * 4);
+            readDynamicBufferOfType<float>(mStream, (float*)vec.data(), size * 4);
         }
 
         void getQuaternions(std::vector<osg::Quat>& quat, size_t size)
