@@ -107,6 +107,8 @@ namespace Nif
         template <class T>
         void readVector(std::vector<T>& vec, size_t size)
         {
+            if (size == 0)
+                return;
             vec.resize(size);
             read(vec.data(), size);
         }
