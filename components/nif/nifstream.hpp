@@ -27,7 +27,7 @@ namespace Nif
     class Reader;
 
     template <std::size_t numInstances, typename T>
-    inline void readLittleEndianBufferOfType(Files::IStreamPtr& pIStream, T* dest)
+    inline void readBufferOfType(Files::IStreamPtr& pIStream, T* dest)
     {
         static_assert(
             std::is_arithmetic_v<T> || std::is_same_v<T, Misc::float16_t>, "Buffer element type is not arithmetic");
@@ -42,7 +42,7 @@ namespace Nif
     }
 
     template <typename T>
-    inline void readLittleEndianDynamicBufferOfType(Files::IStreamPtr& pIStream, T* dest, std::size_t numInstances)
+    inline void readDynamicBufferOfType(Files::IStreamPtr& pIStream, T* dest, std::size_t numInstances)
     {
         static_assert(
             std::is_arithmetic_v<T> || std::is_same_v<T, Misc::float16_t>, "Buffer element type is not arithmetic");
@@ -56,10 +56,10 @@ namespace Nif
                 Misc::swapEndiannessInplace(dest[i]);
     }
     template <typename type>
-    type inline readLittleEndianType(Files::IStreamPtr& pIStream)
+    type inline readType(Files::IStreamPtr& pIStream)
     {
         type val;
-        readLittleEndianBufferOfType<1, type>(pIStream, &val);
+        readBufferOfType<1, type>(pIStream, &val);
         return val;
     }
 
@@ -84,53 +84,53 @@ namespace Nif
         template <class T>
         void read(T& data)
         {
-            data = readLittleEndianType<T>(inp);
+            data = readType<T>(inp);
         }
 
-        void read(osg::Vec3f& data) { readLittleEndianBufferOfType<3, float>(inp, data._v); }
-        void read(osg::Vec4f& data) { readLittleEndianBufferOfType<4, float>(inp, data._v); }
+        void read(osg::Vec3f& data) { readBufferOfType<3, float>(inp, data._v); }
+        void read(osg::Vec4f& data) { readBufferOfType<4, float>(inp, data._v); }
 
         template <class T>
         T get()
         {
-            return readLittleEndianType<T>(inp);
+            return readType<T>(inp);
         }
 
         template <class T>
         void readVector(std::vector<T>& vec, size_t size)
         {
             vec.resize(size);
-            readLittleEndianDynamicBufferOfType<T>(inp, vec.data(), size);
+            readDynamicBufferOfType<T>(inp, vec.data(), size);
         }
 
         template <class T, size_t size>
         void readArray(std::array<T, size>& arr)
         {
-            readLittleEndianDynamicBufferOfType<T>(inp, arr.data(), size);
+            readDynamicBufferOfType<T>(inp, arr.data(), size);
         }
 
         // DEPRECATED: Use read() or get() whenever relevant
-        char getChar() { return readLittleEndianType<char>(inp); }
+        char getChar() { return readType<char>(inp); }
 
         // DEPRECATED: Use read() or get() whenever relevant
-        short getShort() { return readLittleEndianType<short>(inp); }
+        short getShort() { return readType<short>(inp); }
 
         // DEPRECATED: Use read() or get() whenever relevant
-        unsigned short getUShort() { return readLittleEndianType<unsigned short>(inp); }
+        unsigned short getUShort() { return readType<unsigned short>(inp); }
 
         // DEPRECATED: Use read() or get() whenever relevant
-        int getInt() { return readLittleEndianType<int>(inp); }
+        int getInt() { return readType<int>(inp); }
 
         // DEPRECATED: Use read() or get() whenever relevant
-        unsigned int getUInt() { return readLittleEndianType<unsigned int>(inp); }
+        unsigned int getUInt() { return readType<unsigned int>(inp); }
 
         // DEPRECATED: Use read() or get() whenever relevant
-        float getFloat() { return readLittleEndianType<float>(inp); }
+        float getFloat() { return readType<float>(inp); }
 
         osg::Vec2f getVector2()
         {
             osg::Vec2f vec;
-            readLittleEndianBufferOfType<2, float>(inp, vec._v);
+            readBufferOfType<2, float>(inp, vec._v);
             return vec;
         }
 
@@ -138,21 +138,21 @@ namespace Nif
         osg::Vec3f getVector3()
         {
             osg::Vec3f vec;
-            readLittleEndianBufferOfType<3, float>(inp, vec._v);
+            readBufferOfType<3, float>(inp, vec._v);
             return vec;
         }
 
         osg::Vec4f getVector4()
         {
             osg::Vec4f vec;
-            readLittleEndianBufferOfType<4, float>(inp, vec._v);
+            readBufferOfType<4, float>(inp, vec._v);
             return vec;
         }
 
         Matrix3 getMatrix3()
         {
             Matrix3 mat;
-            readLittleEndianBufferOfType<9, float>(inp, (float*)&mat.mValues);
+            readBufferOfType<9, float>(inp, (float*)&mat.mValues);
             return mat;
         }
 
@@ -189,14 +189,14 @@ namespace Nif
         /// Read in a string of the length specified in the file
         std::string getSizedString()
         {
-            size_t size = readLittleEndianType<uint32_t>(inp);
+            size_t size = readType<uint32_t>(inp);
             return getSizedString(size);
         }
 
         /// Specific to Bethesda headers, uses a byte for length
         std::string getExportString()
         {
-            size_t size = static_cast<size_t>(readLittleEndianType<uint8_t>(inp));
+            size_t size = static_cast<size_t>(readType<uint8_t>(inp));
             return getSizedString(size);
         }
 
@@ -213,7 +213,7 @@ namespace Nif
         /// Read a sequence of null-terminated strings
         std::string getStringPalette()
         {
-            size_t size = readLittleEndianType<uint32_t>(inp);
+            size_t size = readType<uint32_t>(inp);
             std::string str(size, '\0');
             inp->read(str.data(), size);
             if (inp->bad())
@@ -225,63 +225,63 @@ namespace Nif
         void getChars(std::vector<char>& vec, size_t size)
         {
             vec.resize(size);
-            readLittleEndianDynamicBufferOfType<char>(inp, vec.data(), size);
+            readDynamicBufferOfType<char>(inp, vec.data(), size);
         }
 
         // DEPRECATED: Use readVector()
         void getUChars(std::vector<unsigned char>& vec, size_t size)
         {
             vec.resize(size);
-            readLittleEndianDynamicBufferOfType<unsigned char>(inp, vec.data(), size);
+            readDynamicBufferOfType<unsigned char>(inp, vec.data(), size);
         }
 
         // DEPRECATED: Use readVector()
         void getUShorts(std::vector<unsigned short>& vec, size_t size)
         {
             vec.resize(size);
-            readLittleEndianDynamicBufferOfType<unsigned short>(inp, vec.data(), size);
+            readDynamicBufferOfType<unsigned short>(inp, vec.data(), size);
         }
 
         // DEPRECATED: Use readVector()
         void getFloats(std::vector<float>& vec, size_t size)
         {
             vec.resize(size);
-            readLittleEndianDynamicBufferOfType<float>(inp, vec.data(), size);
+            readDynamicBufferOfType<float>(inp, vec.data(), size);
         }
 
         // DEPRECATED: Use readVector()
         void getInts(std::vector<int>& vec, size_t size)
         {
             vec.resize(size);
-            readLittleEndianDynamicBufferOfType<int>(inp, vec.data(), size);
+            readDynamicBufferOfType<int>(inp, vec.data(), size);
         }
 
         // DEPRECATED: Use readVector()
         void getUInts(std::vector<unsigned int>& vec, size_t size)
         {
             vec.resize(size);
-            readLittleEndianDynamicBufferOfType<unsigned int>(inp, vec.data(), size);
+            readDynamicBufferOfType<unsigned int>(inp, vec.data(), size);
         }
 
         void getVector2s(std::vector<osg::Vec2f>& vec, size_t size)
         {
             vec.resize(size);
             /* The packed storage of each Vec2f is 2 floats exactly */
-            readLittleEndianDynamicBufferOfType<float>(inp, (float*)vec.data(), size * 2);
+            readDynamicBufferOfType<float>(inp, (float*)vec.data(), size * 2);
         }
 
         void getVector3s(std::vector<osg::Vec3f>& vec, size_t size)
         {
             vec.resize(size);
             /* The packed storage of each Vec3f is 3 floats exactly */
-            readLittleEndianDynamicBufferOfType<float>(inp, (float*)vec.data(), size * 3);
+            readDynamicBufferOfType<float>(inp, (float*)vec.data(), size * 3);
         }
 
         void getVector4s(std::vector<osg::Vec4f>& vec, size_t size)
         {
             vec.resize(size);
             /* The packed storage of each Vec4f is 4 floats exactly */
-            readLittleEndianDynamicBufferOfType<float>(inp, (float*)vec.data(), size * 4);
+            readDynamicBufferOfType<float>(inp, (float*)vec.data(), size * 4);
         }
 
         void getQuaternions(std::vector<osg::Quat>& quat, size_t size)
