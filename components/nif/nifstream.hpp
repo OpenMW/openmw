@@ -55,13 +55,6 @@ namespace Nif
             for (std::size_t i = 0; i < numInstances; i++)
                 Misc::swapEndiannessInplace(dest[i]);
     }
-    template <typename type>
-    type inline readType(Files::IStreamPtr& pIStream)
-    {
-        type val;
-        readBufferOfType<1, type>(pIStream, &val);
-        return val;
-    }
 
     class NIFStream
     {
@@ -77,23 +70,37 @@ namespace Nif
 
         const Reader& getFile() const { return mReader; }
 
+        unsigned int getVersion() const;
+        unsigned int getUserVersion() const;
+        unsigned int getBethVersion() const;
+
+        /// Convert human-readable version numbers into a number that can be compared.
+        static constexpr uint32_t generateVersion(uint8_t major, uint8_t minor, uint8_t patch, uint8_t rev)
+        {
+            return (major << 24) + (minor << 16) + (patch << 8) + rev;
+        }
+
         void skip(size_t size) { mStream->ignore(size); }
 
         /// Read into a single instance of type
         template <class T>
         void read(T& data)
         {
-            data = readType<T>(mStream);
+            readBufferOfType<1>(mStream, &data);
         }
 
-        void read(osg::Vec3f& data) { readBufferOfType<3, float>(mStream, data._v); }
-        void read(osg::Vec4f& data) { readBufferOfType<4, float>(mStream, data._v); }
-
-        /// Extract an instance of type
-        template <class T>
-        T get()
+        /// Read multiple instances of type into an array
+        template <class T, size_t size>
+        void readArray(std::array<T, size>& arr)
         {
-            return readType<T>(mStream);
+            readBufferOfType<size>(mStream, arr.data());
+        }
+
+        /// Read instances of type into a dynamic buffer
+        template <class T>
+        void read(T* dest, size_t size)
+        {
+            readDynamicBufferOfType<T>(mStream, dest, size);
         }
 
         /// Read multiple instances of type into a vector
@@ -101,216 +108,99 @@ namespace Nif
         void readVector(std::vector<T>& vec, size_t size)
         {
             vec.resize(size);
-            readDynamicBufferOfType<T>(mStream, vec.data(), size);
+            read(vec.data(), size);
         }
 
-        /// Read multiple instances of type into an array
-        template <class T, size_t size>
-        void readArray(std::array<T, size>& arr)
+        /// Extract an instance of type
+        template <class T>
+        T get()
         {
-            readBufferOfType<T, size>(mStream, arr.data());
-        }
-
-        // DEPRECATED: Use read() or get() whenever relevant
-        char getChar() { return readType<char>(mStream); }
-
-        // DEPRECATED: Use read() or get() whenever relevant
-        short getShort() { return readType<short>(mStream); }
-
-        // DEPRECATED: Use read() or get() whenever relevant
-        unsigned short getUShort() { return readType<unsigned short>(mStream); }
-
-        // DEPRECATED: Use read() or get() whenever relevant
-        int getInt() { return readType<int>(mStream); }
-
-        // DEPRECATED: Use read() or get() whenever relevant
-        unsigned int getUInt() { return readType<unsigned int>(mStream); }
-
-        // DEPRECATED: Use read() or get() whenever relevant
-        float getFloat() { return readType<float>(mStream); }
-
-        osg::Vec2f getVector2()
-        {
-            osg::Vec2f vec;
-            readBufferOfType<2, float>(mStream, vec._v);
-            return vec;
-        }
-
-        // DEPRECATED: Use read() whenever relevant
-        osg::Vec3f getVector3()
-        {
-            osg::Vec3f vec;
-            readBufferOfType<3, float>(mStream, vec._v);
-            return vec;
-        }
-
-        osg::Vec4f getVector4()
-        {
-            osg::Vec4f vec;
-            readBufferOfType<4, float>(mStream, vec._v);
-            return vec;
-        }
-
-        Matrix3 getMatrix3()
-        {
-            Matrix3 mat;
-            readBufferOfType<9, float>(mStream, (float*)&mat.mValues);
-            return mat;
-        }
-
-        osg::Quat getQuaternion();
-
-        Transformation getTrafo();
-
-        /// Read in a boolean. Boolean serialization format differs between versions
-        bool getBoolean();
-
-        /// Read in a string, either from the string table or from the stream depending on the version
-        std::string getString();
-
-        unsigned int getVersion() const;
-        unsigned int getUserVersion() const;
-        unsigned int getBethVersion() const;
-
-        /// Convert human-readable version numbers into a number that can be compared
-        static constexpr uint32_t generateVersion(uint8_t major, uint8_t minor, uint8_t patch, uint8_t rev)
-        {
-            return (major << 24) + (minor << 16) + (patch << 8) + rev;
+            T data;
+            read(data);
+            return data;
         }
 
         /// Read a string of the given length
-        std::string getSizedString(size_t length)
-        {
-            std::string str(length, '\0');
-            mStream->read(str.data(), length);
-            if (mStream->bad())
-                throw std::runtime_error("Failed to read sized string of " + std::to_string(length) + " chars");
-            size_t end = str.find('\0');
-            if (end != std::string::npos)
-                str.erase(end);
-            return str;
-        }
+        std::string getSizedString(size_t length);
 
         /// Read a string of the length specified in the file
-        std::string getSizedString()
-        {
-            size_t size = readType<uint32_t>(mStream);
-            return getSizedString(size);
-        }
-
-        /// Read a Bethesda header string that uses a byte for length
-        std::string getExportString()
-        {
-            size_t size = static_cast<size_t>(readType<uint8_t>(mStream));
-            return getSizedString(size);
-        }
-
-        /// Read the version string which doesn't start with a number and ends with "\n"
-        std::string getVersionString()
-        {
-            std::string result;
-            std::getline(*mStream, result);
-            if (mStream->bad())
-                throw std::runtime_error("Failed to read version string");
-            return result;
-        }
-
-        /// Read a sequence of null-terminated strings
-        std::string getStringPalette()
-        {
-            size_t size = readType<uint32_t>(mStream);
-            std::string str(size, '\0');
-            mStream->read(str.data(), size);
-            if (mStream->bad())
-                throw std::runtime_error("Failed to read string palette of " + std::to_string(size) + " chars");
-            return str;
-        }
-
-        // DEPRECATED: Use readVector()
-        void getChars(std::vector<char>& vec, size_t size)
-        {
-            vec.resize(size);
-            readDynamicBufferOfType<char>(mStream, vec.data(), size);
-        }
-
-        // DEPRECATED: Use readVector()
-        void getUChars(std::vector<unsigned char>& vec, size_t size)
-        {
-            vec.resize(size);
-            readDynamicBufferOfType<unsigned char>(mStream, vec.data(), size);
-        }
-
-        // DEPRECATED: Use readVector()
-        void getUShorts(std::vector<unsigned short>& vec, size_t size)
-        {
-            vec.resize(size);
-            readDynamicBufferOfType<unsigned short>(mStream, vec.data(), size);
-        }
-
-        // DEPRECATED: Use readVector()
-        void getFloats(std::vector<float>& vec, size_t size)
-        {
-            vec.resize(size);
-            readDynamicBufferOfType<float>(mStream, vec.data(), size);
-        }
-
-        // DEPRECATED: Use readVector()
-        void getInts(std::vector<int>& vec, size_t size)
-        {
-            vec.resize(size);
-            readDynamicBufferOfType<int>(mStream, vec.data(), size);
-        }
-
-        // DEPRECATED: Use readVector()
-        void getUInts(std::vector<unsigned int>& vec, size_t size)
-        {
-            vec.resize(size);
-            readDynamicBufferOfType<unsigned int>(mStream, vec.data(), size);
-        }
-
-        void getVector2s(std::vector<osg::Vec2f>& vec, size_t size)
-        {
-            vec.resize(size);
-            // The packed storage of each Vec2f is 2 floats exactly
-            readDynamicBufferOfType<float>(mStream, (float*)vec.data(), size * 2);
-        }
-
-        void getVector3s(std::vector<osg::Vec3f>& vec, size_t size)
-        {
-            vec.resize(size);
-            // The packed storage of each Vec3f is 3 floats exactly
-            readDynamicBufferOfType<float>(mStream, (float*)vec.data(), size * 3);
-        }
-
-        void getVector4s(std::vector<osg::Vec4f>& vec, size_t size)
-        {
-            vec.resize(size);
-            // The packed storage of each Vec4f is 4 floats exactly
-            readDynamicBufferOfType<float>(mStream, (float*)vec.data(), size * 4);
-        }
-
-        void getQuaternions(std::vector<osg::Quat>& quat, size_t size)
-        {
-            quat.resize(size);
-            for (size_t i = 0; i < quat.size(); i++)
-                quat[i] = getQuaternion();
-        }
-
-        void getStrings(std::vector<std::string>& vec, size_t size)
-        {
-            vec.resize(size);
-            for (size_t i = 0; i < vec.size(); i++)
-                vec[i] = getString();
-        }
+        std::string getSizedString() { return getSizedString(get<uint32_t>()); }
 
         /// Read a list of strings without using the string table, e.g. the string table itself
-        void getSizedStrings(std::vector<std::string>& vec, size_t size)
-        {
-            vec.resize(size);
-            for (size_t i = 0; i < vec.size(); i++)
-                vec[i] = getSizedString();
-        }
+        void getSizedStrings(std::vector<std::string>& vec, size_t size);
+
+        /// Read a Bethesda header string that uses a byte for length
+        std::string getExportString() { return getSizedString(get<uint8_t>()); }
+
+        /// Read the version string which doesn't start with a number and ends with "\n"
+        std::string getVersionString();
+
+        /// Read a sequence of null-terminated strings
+        std::string getStringPalette();
+
+        /// DEPRECATED: Use read() or get()
+        char getChar() { return get<char>(); }
+        short getShort() { return get<short>(); }
+        unsigned short getUShort() { return get<unsigned short>(); }
+        int getInt() { return get<int>(); }
+        unsigned int getUInt() { return get<unsigned int>(); }
+        float getFloat() { return get<float>(); }
+        osg::Vec2f getVector2() { return get<osg::Vec2f>(); }
+        osg::Vec3f getVector3() { return get<osg::Vec3f>(); }
+        osg::Vec4f getVector4() { return get<osg::Vec4f>(); }
+        Matrix3 getMatrix3() { return get<Matrix3>(); }
+        osg::Quat getQuaternion() { return get<osg::Quat>(); }
+        Transformation getTrafo() { return get<Transformation>(); }
+        bool getBoolean() { return get<bool>(); }
+        std::string getString() { return get<std::string>(); }
+
+        /// DEPRECATED: Use readVector()
+        void getChars(std::vector<char>& vec, size_t size) { readVector(vec, size); }
+        void getUChars(std::vector<unsigned char>& vec, size_t size) { readVector(vec, size); }
+        void getUShorts(std::vector<unsigned short>& vec, size_t size) { readVector(vec, size); }
+        void getFloats(std::vector<float>& vec, size_t size) { readVector(vec, size); }
+        void getInts(std::vector<int>& vec, size_t size) { readVector(vec, size); }
+        void getUInts(std::vector<unsigned int>& vec, size_t size) { readVector(vec, size); }
+        void getVector2s(std::vector<osg::Vec2f>& vec, size_t size) { readVector(vec, size); }
+        void getVector3s(std::vector<osg::Vec3f>& vec, size_t size) { readVector(vec, size); }
+        void getVector4s(std::vector<osg::Vec4f>& vec, size_t size) { readVector(vec, size); }
+        void getQuaternions(std::vector<osg::Quat>& vec, size_t size) { readVector(vec, size); }
+        void getStrings(std::vector<std::string>& vec, size_t size) { readVector(vec, size); }
     };
+
+    template <>
+    void NIFStream::read<osg::Vec2f>(osg::Vec2f& vec);
+    template <>
+    void NIFStream::read<osg::Vec3f>(osg::Vec3f& vec);
+    template <>
+    void NIFStream::read<osg::Vec4f>(osg::Vec4f& vec);
+    template <>
+    void NIFStream::read<Matrix3>(Matrix3& mat);
+    template <>
+    void NIFStream::read<osg::Quat>(osg::Quat& quat);
+    template <>
+    void NIFStream::read<Transformation>(Transformation& t);
+    template <>
+    void NIFStream::read<bool>(bool& data);
+    template <>
+    void NIFStream::read<std::string>(std::string& str);
+
+    template <>
+    void NIFStream::read<osg::Vec2f>(osg::Vec2f* dest, size_t size);
+    template <>
+    void NIFStream::read<osg::Vec3f>(osg::Vec3f* dest, size_t size);
+    template <>
+    void NIFStream::read<osg::Vec4f>(osg::Vec4f* dest, size_t size);
+    template <>
+    void NIFStream::read<Matrix3>(Matrix3* dest, size_t size);
+    template <>
+    void NIFStream::read<osg::Quat>(osg::Quat* dest, size_t size);
+    template <>
+    void NIFStream::read<Transformation>(Transformation* dest, size_t size);
+    template <>
+    void NIFStream::read<bool>(bool* dest, size_t size);
+    template <>
+    void NIFStream::read<std::string>(std::string* dest, size_t size);
 
 }
 
