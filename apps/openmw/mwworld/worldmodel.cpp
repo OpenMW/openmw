@@ -38,6 +38,19 @@ namespace MWWorld
             return it->second;
         }
 
+        CellStore* emplaceInteriorCellStore(std::string_view name, ESMStore& store, ESM::ReadersCache& readers,
+            std::unordered_map<ESM::RefId, CellStore>& cells)
+        {
+            if (const ESM::Cell* cell = store.get<ESM::Cell>().search(name))
+                return &emplaceCellStore(cell->mId, *cell, store, readers, cells);
+            if (const ESM4::Cell* cell = store.get<ESM4::Cell>().searchCellName(name);
+                cell != nullptr && !cell->isExterior())
+            {
+                return &emplaceCellStore(cell->mId, *cell, store, readers, cells);
+            }
+            return nullptr;
+        }
+
         const ESM::Cell* createEsmCell(ESM::ExteriorCellLocation location, ESMStore& store)
         {
             ESM::Cell record;
@@ -199,12 +212,9 @@ namespace MWWorld
 
         if (it == mInteriors.end())
         {
-            if (const ESM::Cell* cell = mStore.get<ESM::Cell>().search(name))
-                cellStore = &emplaceCellStore(cell->mId, *cell, mStore, mReaders, mCells);
-            else if (const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().searchCellName(name))
-                cellStore = &emplaceCellStore(cell4->mId, *cell4, mStore, mReaders, mCells);
-            else
-                return nullptr;
+            cellStore = emplaceInteriorCellStore(name, mStore, mReaders, mCells);
+            if (cellStore == nullptr)
+                return cellStore;
             mInteriors.emplace(name, cellStore);
         }
         else
@@ -309,11 +319,18 @@ namespace MWWorld
                 cell = mStore.get<ESM::Cell>().searchExtByRegion(region->mId);
         }
 
-        if (cell == nullptr)
-            return nullptr;
+        if (cell != nullptr)
+            return &getExterior(
+                ESM::ExteriorCellLocation(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId),
+                forceLoad);
 
-        return &getExterior(
-            ESM::ExteriorCellLocation(cell->getGridX(), cell->getGridY(), ESM::Cell::sDefaultWorldspaceId), forceLoad);
+        if (const ESM4::Cell* cell4 = mStore.get<ESM4::Cell>().searchCellName(name);
+            cell4 != nullptr && cell4->isExterior())
+        {
+            return &getExterior(cell4->getExteriorCellLocation(), forceLoad);
+        }
+
+        return nullptr;
     }
 
     CellStore& WorldModel::getCell(std::string_view name, bool forceLoad) const
