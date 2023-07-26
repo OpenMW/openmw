@@ -104,7 +104,7 @@ namespace Nif
         template <class T, size_t size>
         void readArray(std::array<T, size>& arr)
         {
-            readDynamicBufferOfType<T>(mStream, arr.data(), size);
+            readBufferOfType<T, size>(mStream, arr.data());
         }
 
         // DEPRECATED: Use read() or get() whenever relevant
