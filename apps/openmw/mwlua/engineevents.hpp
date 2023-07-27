@@ -19,14 +19,15 @@ namespace MWLua
         {
         }
 
-        struct OnNewGame
-        {
-        };
         struct OnActive
         {
             ESM::RefNum mObject;
         };
         struct OnInactive
+        {
+            ESM::RefNum mObject;
+        };
+        struct OnTeleported
         {
             ESM::RefNum mObject;
         };
@@ -44,7 +45,7 @@ namespace MWLua
         {
             MWWorld::CellStore& mCell;
         };
-        using Event = std::variant<OnNewGame, OnActive, OnInactive, OnConsume, OnActivate, OnNewExterior>;
+        using Event = std::variant<OnActive, OnInactive, OnConsume, OnActivate, OnNewExterior, OnTeleported>;
 
         void clear() { mQueue.clear(); }
         void addToQueue(Event e) { mQueue.push_back(std::move(e)); }

@@ -75,6 +75,7 @@ namespace MWLua
         {
             mEngineEvents.addToQueue(EngineEvents::OnNewExterior{ cell });
         }
+        void objectTeleported(const MWWorld::Ptr& ptr) override;
         void questUpdated(const ESM::RefId& questId, int stage) override;
 
         MWBase::LuaManager::ActorControls* getActorControls(const MWWorld::Ptr&) const override;
@@ -141,6 +142,7 @@ namespace MWLua
         bool mInitialized = false;
         bool mGlobalScriptsStarted = false;
         bool mProcessingInputEvents = false;
+        bool mNewGameStarted = false;
         LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;
         LuaUi::ResourceManager mUiResourceManager;

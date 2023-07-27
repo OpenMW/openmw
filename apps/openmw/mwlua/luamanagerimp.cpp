@@ -178,6 +178,20 @@ namespace MWLua
         }
     }
 
+    void LuaManager::objectTeleported(const MWWorld::Ptr& ptr)
+    {
+        if (ptr == mPlayer)
+        {
+            // For player run the onTeleported handler immediately,
+            // so it can adjust camera position after teleporting.
+            PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
+            if (playerScripts)
+                playerScripts->onTeleported();
+        }
+        else
+            mEngineEvents.addToQueue(EngineEvents::OnTeleported{ getId(ptr) });
+    }
+
     void LuaManager::questUpdated(const ESM::RefId& questId, int stage)
     {
         if (mPlayer.isEmpty())
@@ -193,6 +207,14 @@ namespace MWLua
     {
         if (mPlayer.isEmpty())
             return; // The game is not started yet.
+
+        if (mNewGameStarted)
+        {
+            mNewGameStarted = false;
+            // Run onNewGame handler in synchronizedUpdate (at the beginning of the frame), so it
+            // can teleport the player to the starting location before the first frame is rendered.
+            mGlobalScripts.newGameStarted();
+        }
 
         // We apply input events in `synchronizedUpdate` rather than in `update` in order to reduce input latency.
         mProcessingInputEvents = true;
@@ -237,6 +259,7 @@ namespace MWLua
         mWorldView.clear();
         mGlobalScripts.removeAllScripts();
         mGlobalScriptsStarted = false;
+        mNewGameStarted = false;
         if (!mPlayer.isEmpty())
         {
             mPlayer.getCellRef().unsetRefNum();
@@ -273,7 +296,7 @@ namespace MWLua
         mInputEvents.clear();
         mGlobalScripts.addAutoStartedScripts();
         mGlobalScriptsStarted = true;
-        mEngineEvents.addToQueue(EngineEvents::OnNewGame{});
+        mNewGameStarted = true;
     }
 
     void LuaManager::gameLoaded()

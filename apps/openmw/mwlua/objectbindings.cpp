@@ -95,6 +95,7 @@ namespace MWLua
             world->rotateObject(newPtr, rot);
             if (placeOnGround)
                 world->adjustPosition(newPtr, true);
+            MWBase::Environment::get().getLuaManager()->objectTeleported(newPtr);
         }
 
         void teleportNotPlayer(const MWWorld::Ptr& ptr, MWWorld::CellStore* destCell, const osg::Vec3f& pos,
@@ -119,6 +120,7 @@ namespace MWLua
             }
             if (!newPtr.getRefData().isEnabled())
                 world->enable(newPtr);
+            MWBase::Environment::get().getLuaManager()->objectTeleported(newPtr);
         }
 
         template <typename ObjT>

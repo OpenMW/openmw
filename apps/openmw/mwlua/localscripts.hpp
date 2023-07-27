@@ -70,6 +70,7 @@ namespace MWLua
         void setActive(bool active);
         void onConsume(const LObject& consumable) { callEngineHandlers(mOnConsumeHandlers, consumable); }
         void onActivated(const LObject& actor) { callEngineHandlers(mOnActivatedHandlers, actor); }
+        void onTeleported() { callEngineHandlers(mOnTeleportedHandlers); }
 
         void applyStatsCache();
 
@@ -81,6 +82,7 @@ namespace MWLua
         EngineHandlerList mOnInactiveHandlers{ "onInactive" };
         EngineHandlerList mOnConsumeHandlers{ "onConsume" };
         EngineHandlerList mOnActivatedHandlers{ "onActivated" };
+        EngineHandlerList mOnTeleportedHandlers{ "onTeleported" };
     };
 
 }

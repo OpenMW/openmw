@@ -11,6 +11,7 @@
 #include <components/interpreter/runtime.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/cellstore.hpp"
@@ -436,6 +437,7 @@ namespace MWScript
 
                 bool cellActive = MWBase::Environment::get().getWorldScene()->isCellActive(*ptr.getCell());
                 ptr.getClass().adjustPosition(ptr, isPlayer || !cellActive);
+                MWBase::Environment::get().getLuaManager()->objectTeleported(ptr);
             }
         };
 
@@ -492,6 +494,7 @@ namespace MWScript
                 world->rotateObject(ptr, rot);
                 bool cellActive = MWBase::Environment::get().getWorldScene()->isCellActive(*ptr.getCell());
                 ptr.getClass().adjustPosition(ptr, isPlayer || !cellActive);
+                MWBase::Environment::get().getLuaManager()->objectTeleported(ptr);
             }
         };
 

@@ -22,8 +22,6 @@ namespace MWLua
         {
         }
 
-        void operator()(const OnNewGame&) const { mGlobalScripts.newGameStarted(); }
-
         void operator()(const OnActive& event) const
         {
             MWWorld::Ptr ptr = getPtr(event.mObject);
@@ -48,6 +46,12 @@ namespace MWLua
         {
             if (auto* scripts = getLocalScripts(event.mObject))
                 scripts->setActive(false);
+        }
+
+        void operator()(const OnTeleported& event) const
+        {
+            if (auto* scripts = getLocalScripts(event.mObject))
+                scripts->onTeleported();
         }
 
         void operator()(const OnActivate& event) const

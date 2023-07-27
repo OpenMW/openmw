@@ -169,8 +169,8 @@ namespace MWLua
         , mData(obj)
     {
         this->addPackage("openmw.self", sol::make_object(lua->sol(), &mData));
-        registerEngineHandlers(
-            { &mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers, &mOnActivatedHandlers });
+        registerEngineHandlers({ &mOnActiveHandlers, &mOnInactiveHandlers, &mOnConsumeHandlers, &mOnActivatedHandlers,
+            &mOnTeleportedHandlers });
     }
 
     void LocalScripts::setActive(bool active)
