@@ -2300,7 +2300,7 @@ namespace MWWorld
         return mRendering->getCamera();
     }
 
-    bool World::vanityRotateCamera(float* rot)
+    bool World::vanityRotateCamera(const float* rot)
     {
         auto* camera = mRendering->getCamera();
         if (!camera->isVanityOrPreviewModeEnabled())

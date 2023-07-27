@@ -6,6 +6,7 @@
 
 #include <components/sdlutil/sdlinputwrapper.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -21,12 +22,7 @@ namespace MWInput
 {
     MouseManager::MouseManager(
         BindingsManager* bindingsManager, SDLUtil::InputWrapper* inputWrapper, SDL_Window* window)
-        : mInvertX(Settings::Manager::getBool("invert x axis", "Input"))
-        , mInvertY(Settings::Manager::getBool("invert y axis", "Input"))
-        , mGrabCursor(Settings::Manager::getBool("grab cursor", "Input"))
-        , mCameraSensitivity(Settings::Manager::getFloat("camera sensitivity", "Input"))
-        , mCameraYMultiplier(Settings::Manager::getFloat("camera y multiplier", "Input"))
-        , mBindingsManager(bindingsManager)
+        : mBindingsManager(bindingsManager)
         , mInputWrapper(inputWrapper)
         , mGuiCursorX(0)
         , mGuiCursorY(0)
@@ -42,24 +38,6 @@ namespace MWInput
         float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
         mGuiCursorX = w / (2.f * uiScale);
         mGuiCursorY = h / (2.f * uiScale);
-    }
-
-    void MouseManager::processChangedSettings(const Settings::CategorySettingVector& changed)
-    {
-        for (const auto& setting : changed)
-        {
-            if (setting.first == "Input" && setting.second == "invert x axis")
-                mInvertX = Settings::Manager::getBool("invert x axis", "Input");
-
-            if (setting.first == "Input" && setting.second == "invert y axis")
-                mInvertY = Settings::Manager::getBool("invert y axis", "Input");
-
-            if (setting.first == "Input" && setting.second == "camera sensitivity")
-                mCameraSensitivity = Settings::Manager::getFloat("camera sensitivity", "Input");
-
-            if (setting.first == "Input" && setting.second == "grab cursor")
-                mGrabCursor = Settings::Manager::getBool("grab cursor", "Input");
-        }
     }
 
     void MouseManager::mouseMoved(const SDLUtil::MouseMotionEvent& arg)
@@ -96,8 +74,10 @@ namespace MWInput
         {
             MWBase::World* world = MWBase::Environment::get().getWorld();
 
-            float x = arg.xrel * mCameraSensitivity * (mInvertX ? -1 : 1) / 256.f;
-            float y = arg.yrel * mCameraSensitivity * (mInvertY ? -1 : 1) * mCameraYMultiplier / 256.f;
+            const float cameraSensitivity = Settings::input().mCameraSensitivity;
+            float x = arg.xrel * cameraSensitivity * (Settings::input().mInvertXAxis ? -1 : 1) / 256.f;
+            float y = arg.yrel * cameraSensitivity * (Settings::input().mInvertYAxis ? -1 : 1)
+                * Settings::input().mCameraYMultiplier / 256.f;
 
             float rot[3];
             rot[0] = -y;
@@ -194,7 +174,7 @@ namespace MWInput
         mInputWrapper->setMouseRelative(isRelative);
 
         // we let the mouse escape in the main menu
-        mInputWrapper->setGrabPointer(grab && (mGrabCursor || isRelative));
+        mInputWrapper->setGrabPointer(grab && (Settings::input().mGrabCursor || isRelative));
 
         // we switched to non-relative mode, move our cursor to where the in-game
         // cursor is
@@ -216,10 +196,13 @@ namespace MWInput
         if (xAxis == 0 && yAxis == 0)
             return;
 
-        float rot[3];
-        rot[0] = -yAxis * dt * 1000.0f * mCameraSensitivity * (mInvertY ? -1 : 1) * mCameraYMultiplier / 256.f;
-        rot[1] = 0.0f;
-        rot[2] = -xAxis * dt * 1000.0f * mCameraSensitivity * (mInvertX ? -1 : 1) / 256.f;
+        const float cameraSensitivity = Settings::input().mCameraSensitivity;
+        const float rot[3] = {
+            -yAxis * dt * 1000.0f * cameraSensitivity * (Settings::input().mInvertYAxis ? -1 : 1)
+                * Settings::input().mCameraYMultiplier / 256.f,
+            0.0f,
+            -xAxis * dt * 1000.0f * cameraSensitivity * (Settings::input().mInvertXAxis ? -1 : 1) / 256.f,
+        };
 
         // Only actually turn player when we're not in vanity mode
         bool controls = MWBase::Environment::get().getInputManager()->getControlSwitch("playercontrols");

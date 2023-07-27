@@ -30,10 +30,8 @@ namespace Settings
         SettingValue<float> mJoystickDeadZone{ mIndex, "Input", "joystick dead zone",
             makeClampSanitizerFloat(0, 0.5f) };
         SettingValue<bool> mEnableGyroscope{ mIndex, "Input", "enable gyroscope" };
-        SettingValue<std::string> mGyroHorizontalAxis{ mIndex, "Input", "gyro horizontal axis",
-            makeEnumSanitizerString({ "x", "y", "z", "-x", "-y", "-z" }) };
-        SettingValue<std::string> mGyroVerticalAxis{ mIndex, "Input", "gyro vertical axis",
-            makeEnumSanitizerString({ "x", "y", "z", "-x", "-y", "-z" }) };
+        SettingValue<GyroscopeAxis> mGyroHorizontalAxis{ mIndex, "Input", "gyro horizontal axis" };
+        SettingValue<GyroscopeAxis> mGyroVerticalAxis{ mIndex, "Input", "gyro vertical axis" };
         SettingValue<float> mGyroInputThreshold{ mIndex, "Input", "gyro input threshold", makeMaxSanitizerFloat(0) };
         SettingValue<float> mGyroHorizontalSensitivity{ mIndex, "Input", "gyro horizontal sensitivity",
             makeMaxStrictSanitizerFloat(0) };

@@ -28,8 +28,6 @@ namespace MWInput
         void mouseReleased(const SDL_MouseButtonEvent& arg, Uint8 id) override;
         void mouseWheelMoved(const SDL_MouseWheelEvent& arg) override;
 
-        void processChangedSettings(const Settings::CategorySettingVector& changed);
-
         bool injectMouseButtonPress(Uint8 button);
         bool injectMouseButtonRelease(Uint8 button);
         void injectMouseMove(float xMove, float yMove, float mouseWheelMove);
@@ -42,12 +40,6 @@ namespace MWInput
         int getMouseMoveY() const { return mMouseMoveY; }
 
     private:
-        bool mInvertX;
-        bool mInvertY;
-        bool mGrabCursor;
-        float mCameraSensitivity;
-        float mCameraYMultiplier;
-
         BindingsManager* mBindingsManager;
         SDLUtil::InputWrapper* mInputWrapper;
 

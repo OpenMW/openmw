@@ -464,4 +464,21 @@ namespace Settings
         sInitialized.emplace(category, setting);
     }
 
+    GyroscopeAxis parseGyroscopeAxis(std::string_view value)
+    {
+        if (value == "x")
+            return GyroscopeAxis::X;
+        else if (value == "y")
+            return GyroscopeAxis::Y;
+        else if (value == "z")
+            return GyroscopeAxis::Z;
+        else if (value == "-x")
+            return GyroscopeAxis::MinusX;
+        else if (value == "-y")
+            return GyroscopeAxis::MinusY;
+        else if (value == "-z")
+            return GyroscopeAxis::MinusZ;
+
+        throw std::runtime_error("Invalid gyroscope axis: " + std::string(value));
+    }
 }
