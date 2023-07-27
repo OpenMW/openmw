@@ -21,6 +21,7 @@
 #include "../mwphysics/raycasting.hpp"
 
 #include "actorutil.hpp"
+#include "character.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
 #include "pathgrid.hpp"
@@ -190,7 +191,7 @@ namespace MWMechanics
      * will kick in.
      */
     bool AiWander::execute(
-        const MWWorld::Ptr& actor, CharacterController& /*characterController*/, AiState& state, float duration)
+        const MWWorld::Ptr& actor, CharacterController& characterController, AiState& state, float duration)
     {
         MWMechanics::CreatureStats& cStats = actor.getClass().getCreatureStats(actor);
         if (cStats.isDead() || cStats.getHealth().getCurrent() <= 0)
@@ -244,7 +245,7 @@ namespace MWMechanics
             }
         }
 
-        doPerFrameActionsForState(actor, duration, storage);
+        doPerFrameActionsForState(actor, duration, characterController.getSupportedMovementDirections(), storage);
 
         if (storage.mReaction.update(duration) == Misc::TimerStatus::Waiting)
             return false;
@@ -454,7 +455,8 @@ namespace MWMechanics
         storage.setState(AiWanderStorage::Wander_IdleNow);
     }
 
-    void AiWander::doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage)
+    void AiWander::doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration,
+        MWWorld::MovementDirectionFlags supportedMovementDirections, AiWanderStorage& storage)
     {
         switch (storage.mState)
         {
@@ -463,7 +465,7 @@ namespace MWMechanics
                 break;
 
             case AiWanderStorage::Wander_Walking:
-                onWalkingStatePerFrameActions(actor, duration, storage);
+                onWalkingStatePerFrameActions(actor, duration, supportedMovementDirections, storage);
                 break;
 
             case AiWanderStorage::Wander_ChooseAction:
@@ -520,11 +522,13 @@ namespace MWMechanics
         return false;
     }
 
-    void AiWander::onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage)
+    void AiWander::onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration,
+        MWWorld::MovementDirectionFlags supportedMovementDirections, AiWanderStorage& storage)
     {
         // Is there no destination or are we there yet?
         if ((!mPathFinder.isPathConstructed())
-            || pathTo(actor, osg::Vec3f(mPathFinder.getPath().back()), duration, DESTINATION_TOLERANCE))
+            || pathTo(actor, osg::Vec3f(mPathFinder.getPath().back()), duration, supportedMovementDirections,
+                DESTINATION_TOLERANCE))
         {
             stopWalking(actor);
             storage.setState(AiWanderStorage::Wander_ChooseAction);

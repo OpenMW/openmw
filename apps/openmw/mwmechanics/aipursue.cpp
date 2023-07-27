@@ -10,6 +10,7 @@
 #include "../mwworld/class.hpp"
 
 #include "actorutil.hpp"
+#include "character.hpp"
 #include "creaturestats.hpp"
 
 namespace MWMechanics
@@ -55,7 +56,8 @@ namespace MWMechanics
         const float pathTolerance = 100.f;
 
         // check the true distance in case the target is far away in Z-direction
-        bool reached = pathTo(actor, dest, duration, pathTolerance, (actorPos - dest).length(), PathType::Partial)
+        bool reached = pathTo(actor, dest, duration, characterController.getSupportedMovementDirections(),
+                           pathTolerance, (actorPos - dest).length(), PathType::Partial)
             && std::abs(dest.z() - actorPos.z()) < pathTolerance;
 
         if (reached)

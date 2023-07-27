@@ -10,6 +10,7 @@
 
 #include "../mwworld/class.hpp"
 
+#include "character.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
 
@@ -89,7 +90,7 @@ namespace MWMechanics
         if (!isWithinMaxRange(targetPos, actorPos))
             return mHidden;
 
-        if (pathTo(actor, targetPos, duration))
+        if (pathTo(actor, targetPos, duration, characterController.getSupportedMovementDirections()))
         {
             actor.getClass().getMovementSettings(actor).mPosition[1] = 0;
             return true;

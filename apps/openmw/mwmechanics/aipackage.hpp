@@ -125,7 +125,8 @@ namespace MWMechanics
     protected:
         /// Handles path building and shortcutting with obstacles avoiding
         /** \return If the actor has arrived at his destination **/
-        bool pathTo(const MWWorld::Ptr& actor, const osg::Vec3f& dest, float duration, float destTolerance = 0.0f,
+        bool pathTo(const MWWorld::Ptr& actor, const osg::Vec3f& dest, float duration,
+            MWWorld::MovementDirectionFlags supportedMovementDirections, float destTolerance = 0.0f,
             float endTolerance = 0.0f, PathType pathType = PathType::Full);
 
         /// Check if there aren't any obstacles along the path to make shortcut possible

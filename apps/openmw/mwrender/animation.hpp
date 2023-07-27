@@ -1,6 +1,7 @@
 #ifndef GAME_RENDER_ANIMATION_H
 #define GAME_RENDER_ANIMATION_H
 
+#include "../mwworld/movementdirection.hpp"
 #include "../mwworld/ptr.hpp"
 
 #include <components/misc/strings/algorithm.hpp>
@@ -9,7 +10,9 @@
 #include <components/sceneutil/textkeymap.hpp>
 #include <components/sceneutil/util.hpp>
 
+#include <span>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace ESM
@@ -230,6 +233,8 @@ namespace MWRender
 
         typedef std::vector<std::shared_ptr<AnimSource>> AnimSourceList;
         AnimSourceList mAnimSources;
+
+        std::unordered_set<std::string_view> mSupportedAnimations;
 
         osg::ref_ptr<osg::Group> mInsert;
 
@@ -468,6 +473,9 @@ namespace MWRender
         /// Return a node with the specified name, or nullptr if not existing.
         /// @note The matching is case-insensitive.
         const osg::Node* getNode(std::string_view name) const;
+
+        MWWorld::MovementDirectionFlags getSupportedMovementDirections(
+            std::span<const std::string_view> prefixes) const;
 
         virtual bool useShieldAnimations() const { return false; }
         virtual bool getWeaponsShown() const { return false; }

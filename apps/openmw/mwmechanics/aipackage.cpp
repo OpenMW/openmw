@@ -111,7 +111,8 @@ void MWMechanics::AiPackage::reset()
 }
 
 bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f& dest, float duration,
-    float destTolerance, float endTolerance, PathType pathType)
+    MWWorld::MovementDirectionFlags supportedMovementDirections, float destTolerance, float endTolerance,
+    PathType pathType)
 {
     const Misc::TimerStatus timerStatus = mReaction.update(duration);
 
@@ -231,7 +232,7 @@ bool MWMechanics::AiPackage::pathTo(const MWWorld::Ptr& actor, const osg::Vec3f&
     smoothTurn(actor, mPathFinder.getXAngleToNext(position.x(), position.y(), position.z()), 0);
 
     const auto destination = getNextPathPoint(dest);
-    mObstacleCheck.update(actor, destination, duration);
+    mObstacleCheck.update(actor, destination, duration, supportedMovementDirections);
 
     if (smoothMovement)
     {

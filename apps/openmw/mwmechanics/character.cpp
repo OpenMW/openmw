@@ -19,6 +19,8 @@
 
 #include "character.hpp"
 
+#include <array>
+
 #include <components/esm/records.hpp>
 #include <components/misc/mathutil.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -2924,6 +2926,79 @@ namespace MWMechanics
 
         mAnimation->setHeadPitch(xAngleRadians);
         mAnimation->setHeadYaw(zAngleRadians);
+    }
+
+    MWWorld::MovementDirectionFlags CharacterController::getSupportedMovementDirections() const
+    {
+        using namespace std::string_view_literals;
+        // There are fallbacks in the CharacterController::refreshMovementAnims for certain animations. Arrays below
+        // represent them.
+        constexpr std::array all = { ""sv };
+        constexpr std::array walk = { "walk"sv };
+        constexpr std::array swimWalk = { "swimwalk"sv, "walk"sv };
+        constexpr std::array sneak = { "sneak"sv };
+        constexpr std::array run = { "run"sv, "walk"sv };
+        constexpr std::array swimRun = { "swimrun"sv, "run"sv, "walk"sv };
+        constexpr std::array swim = { "swim"sv };
+        switch (mMovementState)
+        {
+            case CharState_None:
+            case CharState_SpecialIdle:
+            case CharState_Idle:
+            case CharState_IdleSwim:
+            case CharState_IdleSneak:
+                return mAnimation->getSupportedMovementDirections(all);
+            case CharState_WalkForward:
+            case CharState_WalkBack:
+            case CharState_WalkLeft:
+            case CharState_WalkRight:
+                return mAnimation->getSupportedMovementDirections(walk);
+            case CharState_SwimWalkForward:
+            case CharState_SwimWalkBack:
+            case CharState_SwimWalkLeft:
+            case CharState_SwimWalkRight:
+                return mAnimation->getSupportedMovementDirections(swimWalk);
+            case CharState_RunForward:
+            case CharState_RunBack:
+            case CharState_RunLeft:
+            case CharState_RunRight:
+                return mAnimation->getSupportedMovementDirections(run);
+            case CharState_SwimRunForward:
+            case CharState_SwimRunBack:
+            case CharState_SwimRunLeft:
+            case CharState_SwimRunRight:
+                return mAnimation->getSupportedMovementDirections(swimRun);
+            case CharState_SneakForward:
+            case CharState_SneakBack:
+            case CharState_SneakLeft:
+            case CharState_SneakRight:
+                return mAnimation->getSupportedMovementDirections(sneak);
+            case CharState_TurnLeft:
+            case CharState_TurnRight:
+                return mAnimation->getSupportedMovementDirections(all);
+            case CharState_SwimTurnLeft:
+            case CharState_SwimTurnRight:
+                return mAnimation->getSupportedMovementDirections(swim);
+            case CharState_Death1:
+            case CharState_Death2:
+            case CharState_Death3:
+            case CharState_Death4:
+            case CharState_Death5:
+            case CharState_SwimDeath:
+            case CharState_SwimDeathKnockDown:
+            case CharState_SwimDeathKnockOut:
+            case CharState_DeathKnockDown:
+            case CharState_DeathKnockOut:
+            case CharState_Hit:
+            case CharState_SwimHit:
+            case CharState_KnockDown:
+            case CharState_KnockOut:
+            case CharState_SwimKnockDown:
+            case CharState_SwimKnockOut:
+            case CharState_Block:
+                return mAnimation->getSupportedMovementDirections(all);
+        }
+        return 0;
     }
 
 }

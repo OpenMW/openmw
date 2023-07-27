@@ -123,9 +123,11 @@ namespace MWMechanics
         int getRandomIdle() const;
         void setPathToAnAllowedNode(const MWWorld::Ptr& actor, AiWanderStorage& storage, const ESM::Position& actorPos);
         void evadeObstacles(const MWWorld::Ptr& actor, AiWanderStorage& storage);
-        void doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
+        void doPerFrameActionsForState(const MWWorld::Ptr& actor, float duration,
+            MWWorld::MovementDirectionFlags supportedMovementDirections, AiWanderStorage& storage);
         void onIdleStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
-        void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration, AiWanderStorage& storage);
+        void onWalkingStatePerFrameActions(const MWWorld::Ptr& actor, float duration,
+            MWWorld::MovementDirectionFlags supportedMovementDirections, AiWanderStorage& storage);
         void onChooseActionStatePerFrameActions(const MWWorld::Ptr& actor, AiWanderStorage& storage);
         bool reactionTimeActions(const MWWorld::Ptr& actor, AiWanderStorage& storage, ESM::Position& pos);
         inline bool isPackageCompleted() const;

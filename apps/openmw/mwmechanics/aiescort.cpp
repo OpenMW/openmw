@@ -11,6 +11,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 
+#include "character.hpp"
 #include "creaturestats.hpp"
 #include "movement.hpp"
 
@@ -94,7 +95,7 @@ namespace MWMechanics
         if ((leaderPos - followerPos).length2() <= mMaxDist * mMaxDist)
         {
             const osg::Vec3f dest(mX, mY, mZ);
-            if (pathTo(actor, dest, duration, maxHalfExtent)) // Returns true on path complete
+            if (pathTo(actor, dest, duration, characterController.getSupportedMovementDirections(), maxHalfExtent))
             {
                 mRemainingDuration = mDuration;
                 return true;

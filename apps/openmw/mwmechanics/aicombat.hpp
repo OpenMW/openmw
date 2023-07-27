@@ -111,8 +111,8 @@ namespace MWMechanics
 
         void updateLOS(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, float duration, AiCombatStorage& storage);
 
-        void updateFleeing(
-            const MWWorld::Ptr& actor, const MWWorld::Ptr& target, float duration, AiCombatStorage& storage);
+        void updateFleeing(const MWWorld::Ptr& actor, const MWWorld::Ptr& target, float duration,
+            MWWorld::MovementDirectionFlags supportedMovementDirections, AiCombatStorage& storage);
 
         /// Transfer desired movement (from AiCombatStorage) to Actor
         void updateActorsMovement(const MWWorld::Ptr& actor, float duration, AiCombatStorage& storage);
