@@ -32,6 +32,9 @@
 #include <map>
 #include <vector>
 
+#include <components/esm/defs.hpp>
+#include <components/esm/refid.hpp>
+
 #include "actor.hpp" // AttributeValues, BodyTemplate
 #include "formid.hpp"
 
@@ -106,7 +109,7 @@ namespace ESM4
             std::string texture; // can be empty e.g. eye left, eye right
         };
 
-        FormId mFormId; // from the header
+        ESM::RefId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         bool mIsTES5;
@@ -165,6 +168,7 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_RACE4;
     };
 }
 

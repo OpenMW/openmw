@@ -29,6 +29,7 @@ namespace MWWorld
         void load(ESM::CellRef& ref, bool deleted, const MWWorld::ESMStore& esmStore);
 
         void load(const ESM4::Reference& ref, const MWWorld::ESMStore& esmStore);
+        void load(const ESM4::ActorCharacter& ref, const MWWorld::ESMStore& esmStore);
 
         LiveRef& insert(const LiveRef& item)
         {

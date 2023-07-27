@@ -27,6 +27,7 @@ namespace ESM
 
 namespace ESM4
 {
+    struct ActorCharacter;
     struct Reference;
 }
 
@@ -82,6 +83,7 @@ namespace MWWorld
         /// to reset the position as the original data is still held in the CellRef
         RefData(const ESM::CellRef& cellRef);
         RefData(const ESM4::Reference& cellRef);
+        RefData(const ESM4::ActorCharacter& cellRef);
 
         RefData(const ESM::ObjectState& objectState, bool deletedByContentFile);
         ///< Ignores local variables and custom data (not enough context available here to

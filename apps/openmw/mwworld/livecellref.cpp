@@ -28,6 +28,13 @@ MWWorld::LiveCellRefBase::LiveCellRefBase(unsigned int type, const ESM4::Referen
 {
 }
 
+MWWorld::LiveCellRefBase::LiveCellRefBase(unsigned int type, const ESM4::ActorCharacter& cref)
+    : mClass(&Class::get(type))
+    , mRef(cref)
+    , mData(cref)
+{
+}
+
 void MWWorld::LiveCellRefBase::loadImp(const ESM::ObjectState& state)
 {
     mRef = MWWorld::CellRef(state.mRef);

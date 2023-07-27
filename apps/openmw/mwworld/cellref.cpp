@@ -25,10 +25,16 @@ namespace MWWorld
     {
     }
 
+    CellRef::CellRef(const ESM4::ActorCharacter& ref)
+        : mCellRef(ESM::ReferenceVariant(ref))
+    {
+    }
+
     const ESM::RefNum& CellRef::getRefNum() const
     {
         return std::visit(ESM::VisitOverload{
                               [&](const ESM4::Reference& ref) -> const ESM::RefNum& { return ref.mId; },
+                              [&](const ESM4::ActorCharacter& ref) -> const ESM::RefNum& { return ref.mId; },
                               [&](const ESM::CellRef& ref) -> const ESM::RefNum& { return ref.mRefNum; },
                           },
             mCellRef.mVariant);
@@ -38,6 +44,7 @@ namespace MWWorld
     {
         ESM::RefNum& refNum = std::visit(ESM::VisitOverload{
                                              [&](ESM4::Reference& ref) -> ESM::RefNum& { return ref.mId; },
+                                             [&](ESM4::ActorCharacter& ref) -> ESM::RefNum& { return ref.mId; },
                                              [&](ESM::CellRef& ref) -> ESM::RefNum& { return ref.mRefNum; },
                                          },
             mCellRef.mVariant);
@@ -63,6 +70,7 @@ namespace MWWorld
     {
         std::visit(ESM::VisitOverload{
                        [&](ESM4::Reference& ref) { ref.mId = refNum; },
+                       [&](ESM4::ActorCharacter& ref) { ref.mId = refNum; },
                        [&](ESM::CellRef& ref) { ref.mRefNum = refNum; },
                    },
             mCellRef.mVariant);
@@ -73,10 +81,12 @@ namespace MWWorld
     ESM::Position CellRef::getDoorDest() const
     {
 
-        return std::visit(ESM::VisitOverload{
-                              [&](const ESM4::Reference& ref) { return ref.mDoor.destPos; },
-                              [&](const ESM::CellRef& ref) -> ESM::Position { return ref.mDoorDest; },
-                          },
+        return std::visit(
+            ESM::VisitOverload{
+                [&](const ESM4::Reference& ref) { return ref.mDoor.destPos; },
+                [&](const ESM::CellRef& ref) -> ESM::Position { return ref.mDoorDest; },
+                [&](const ESM4::ActorCharacter&) -> ESM::Position { throw std::logic_error("Not applicable"); },
+            },
             mCellRef.mVariant);
     }
 
@@ -102,8 +112,10 @@ namespace MWWorld
                 return refDest->mParent;
             return ESM::RefId();
         };
+        auto actorDestCell
+            = [&](const ESM4::ActorCharacter&) -> ESM::RefId { throw std::logic_error("Not applicable"); };
 
-        return std::visit(ESM::VisitOverload{ esm3Visit, esm4Visit }, mCellRef.mVariant);
+        return std::visit(ESM::VisitOverload{ esm3Visit, esm4Visit, actorDestCell }, mCellRef.mVariant);
     }
 
     void CellRef::setScale(float scale)
@@ -126,6 +138,7 @@ namespace MWWorld
         return std::visit(ESM::VisitOverload{
                               [&](const ESM4::Reference& /*ref*/) { return 0.f; },
                               [&](const ESM::CellRef& ref) { return ref.mEnchantmentCharge; },
+                              [&](const ESM4::ActorCharacter&) -> float { throw std::logic_error("Not applicable"); },
                           },
             mCellRef.mVariant);
     }
@@ -155,6 +168,7 @@ namespace MWWorld
 
             std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM4::ActorCharacter&) {},
                            [&](ESM::CellRef& ref) { ref.mEnchantmentCharge = charge; },
                        },
                 mCellRef.mVariant);
@@ -165,6 +179,7 @@ namespace MWWorld
     {
         std::visit(ESM::VisitOverload{
                        [&](ESM4::Reference& /*ref*/) {},
+                       [&](ESM4::ActorCharacter&) {},
                        [&](ESM::CellRef& ref) { ref.mChargeInt = charge; },
                    },
             mCellRef.mVariant);
@@ -188,11 +203,11 @@ namespace MWWorld
                 cellRef3.mChargeIntRemainder = newChargeRemainder;
             }
         };
-        std::visit(
-            ESM::VisitOverload{
-                [&](ESM4::Reference& /*ref*/) {},
-                esm3Visit,
-            },
+        std::visit(ESM::VisitOverload{
+                       [&](ESM4::Reference& /*ref*/) {},
+                       [&](ESM4::ActorCharacter&) {},
+                       esm3Visit,
+                   },
             mCellRef.mVariant);
     }
 
@@ -200,6 +215,7 @@ namespace MWWorld
     {
         std::visit(ESM::VisitOverload{
                        [&](ESM4::Reference& /*ref*/) {},
+                       [&](ESM4::ActorCharacter&) {},
                        [&](ESM::CellRef& ref) { ref.mChargeFloat = charge; },
                    },
             mCellRef.mVariant);
@@ -209,6 +225,7 @@ namespace MWWorld
     {
         return std::visit(ESM::VisitOverload{
                               [&](const ESM4::Reference& /*ref*/) -> const std::string& { return emptyString; },
+                              [&](const ESM4::ActorCharacter& /*ref*/) -> const std::string& { return emptyString; },
                               [&](const ESM::CellRef& ref) -> const std::string& { return ref.mGlobalVariable; },
                           },
             mCellRef.mVariant);
@@ -221,6 +238,7 @@ namespace MWWorld
             mChanged = true;
             std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM4::ActorCharacter& /*ref*/) {},
                            [&](ESM::CellRef& ref) { ref.mGlobalVariable.erase(); },
                        },
                 mCellRef.mVariant);
@@ -232,7 +250,9 @@ namespace MWWorld
         if (factionRank != getFactionRank())
         {
             mChanged = true;
-            std::visit([&](auto&& ref) { ref.mFactionRank = factionRank; }, mCellRef.mVariant);
+            std::visit(ESM::VisitOverload{
+                           [&](ESM4::ActorCharacter&) {}, [&](auto&& ref) { ref.mFactionRank = factionRank; } },
+                mCellRef.mVariant);
         }
     }
 
@@ -242,6 +262,7 @@ namespace MWWorld
         {
             std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM4::ActorCharacter&) {},
                            [&](ESM::CellRef& ref) { ref.mOwner = owner; },
                        },
                 mCellRef.mVariant);
@@ -255,6 +276,7 @@ namespace MWWorld
             mChanged = true;
             std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM4::ActorCharacter&) {},
                            [&](ESM::CellRef& ref) { ref.mSoul = soul; },
                        },
                 mCellRef.mVariant);
@@ -268,6 +290,7 @@ namespace MWWorld
             mChanged = true;
             std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM4::ActorCharacter&) {},
                            [&](ESM::CellRef& ref) { ref.mFaction = faction; },
                        },
                 mCellRef.mVariant);
@@ -279,7 +302,12 @@ namespace MWWorld
         if (lockLevel != getLockLevel())
         {
             mChanged = true;
-            std::visit([&](auto&& ref) { ref.mLockLevel = lockLevel; }, mCellRef.mVariant);
+            std::visit(ESM::VisitOverload{
+                           [&](ESM4::Reference& ref) { ref.mLockLevel = lockLevel; },
+                           [&](ESM4::ActorCharacter&) {},
+                           [&](ESM::CellRef& ref) { ref.mLockLevel = lockLevel; },
+                       },
+                mCellRef.mVariant);
         }
     }
 
@@ -297,12 +325,23 @@ namespace MWWorld
 
     bool CellRef::isLocked() const
     {
-        return std::visit([](auto&& ref) { return ref.mIsLocked; }, mCellRef.mVariant);
+        struct Visitor
+        {
+            bool operator()(const ESM::CellRef& ref) { return ref.mIsLocked; }
+            bool operator()(const ESM4::Reference& ref) { return ref.mIsLocked; }
+            bool operator()(const ESM4::ActorCharacter&) { throw std::logic_error("Not applicable"); }
+        };
+        return std::visit(Visitor(), mCellRef.mVariant);
     }
 
     void CellRef::setLocked(bool locked)
     {
-        std::visit([=](auto&& ref) { ref.mIsLocked = locked; }, mCellRef.mVariant);
+        std::visit(ESM::VisitOverload{
+                       [&](ESM4::Reference& ref) { ref.mIsLocked = locked; },
+                       [&](ESM4::ActorCharacter&) {},
+                       [&](ESM::CellRef& ref) { ref.mIsLocked = locked; },
+                   },
+            mCellRef.mVariant);
     }
 
     void CellRef::setTrap(const ESM::RefId& trap)
@@ -312,6 +351,7 @@ namespace MWWorld
             mChanged = true;
             std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM4::ActorCharacter&) {},
                            [&](ESM::CellRef& ref) { ref.mTrap = trap; },
                        },
                 mCellRef.mVariant);
@@ -325,6 +365,7 @@ namespace MWWorld
             mChanged = true;
             std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM4::ActorCharacter&) {},
                            [&](ESM::CellRef& ref) { ref.mKey = key; },
                        },
                 mCellRef.mVariant);
@@ -338,6 +379,7 @@ namespace MWWorld
             mChanged = true;
             std::visit(ESM::VisitOverload{
                            [&](ESM4::Reference& /*ref*/) {},
+                           [&](ESM4::ActorCharacter&) {},
                            [&](ESM::CellRef& ref) { ref.mGoldValue = value; },
                        },
                 mCellRef.mVariant);
@@ -348,6 +390,7 @@ namespace MWWorld
     {
         std::visit(ESM::VisitOverload{
                        [&](const ESM4::Reference& /*ref*/) {},
+                       [&](const ESM4::ActorCharacter&) {},
                        [&](const ESM::CellRef& ref) { state.mRef = ref; },
                    },
             mCellRef.mVariant);

@@ -2,7 +2,6 @@
 #define COMPONENTS_ESM4_RECORDS_H
 
 #include <components/esm4/loadachr.hpp>
-#include <components/esm4/loadacre.hpp>
 #include <components/esm4/loadacti.hpp>
 #include <components/esm4/loadalch.hpp>
 #include <components/esm4/loadaloc.hpp>

@@ -1,6 +1,8 @@
 #include "refdata.hpp"
 
 #include <components/esm3/objectstate.hpp>
+#include <components/esm4/loadachr.hpp>
+#include <components/esm4/loadrefr.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 
 #include "customdata.hpp"
@@ -91,6 +93,19 @@ namespace MWWorld
         , mEnabled(!(ref.mFlags & ESM4::Rec_Disabled))
         , mPhysicsPostponed(false)
         , mCount(ref.mCount)
+        , mPosition(ref.mPos)
+        , mCustomData(nullptr)
+        , mChanged(false)
+        , mFlags(0)
+    {
+    }
+
+    RefData::RefData(const ESM4::ActorCharacter& ref)
+        : mBaseNode(nullptr)
+        , mDeletedByContentFile(ref.mFlags & ESM4::Rec_Deleted)
+        , mEnabled(!(ref.mFlags & ESM4::Rec_Disabled))
+        , mPhysicsPostponed(false)
+        , mCount(mDeletedByContentFile ? 0 : 1)
         , mPosition(ref.mPos)
         , mCustomData(nullptr)
         , mChanged(false)

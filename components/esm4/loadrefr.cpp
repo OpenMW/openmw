@@ -36,11 +36,8 @@ void ESM4::Reference::load(ESM4::Reader& reader)
     mId = reader.hdr().record.getFormId();
     reader.adjustFormId(mId);
     mFlags = reader.hdr().record.flags;
-    mParentFormId = reader.currCell(); // NOTE: only for persistent refs?
-    mParent = ESM::RefId::formIdRefId(mParentFormId);
+    mParent = ESM::RefId::formIdRefId(reader.currCell());
 
-    // TODO: Let the engine apply this? Saved games?
-    // mInitiallyDisabled = ((mFlags & ESM4::Rec_Disabled) != 0) ? true : false;
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 
@@ -63,15 +60,6 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 FormId BaseId;
                 reader.getFormId(BaseId);
                 mBaseObj = ESM::RefId::formIdRefId(BaseId);
-#if 0
-                if (mFlags & ESM4::Rec_Disabled)
-                    std::cout << "REFR disable at start " << formIdToString(mFormId) <<
-                        " baseobj " << formIdToString(mBaseObj) <<
-                        " " << (mEditorId.empty() ? "" : mEditorId) << std::endl; // FIXME
-#endif
-                // if (mBaseObj == 0x20) // e.g. FO3 mFormId == 0x0007E90F
-                // if (mBaseObj == 0x17)
-                // std::cout << mEditorId << std::endl;
                 break;
             }
             case ESM4::SUB_DATA:

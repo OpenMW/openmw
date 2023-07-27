@@ -1326,33 +1326,6 @@ namespace MWWorld
             return nullptr;
         return foundLand->second;
     }
-
-    // ESM4 Reference
-    //=========================================================================
-
-    void Store<ESM4::Reference>::preprocessReferences(const Store<ESM4::Cell>& cells)
-    {
-        for (auto& [_, ref] : mStatic)
-        {
-            const ESM4::Cell* cell = cells.find(ref.mParent);
-            if (cell->isExterior() && (cell->mFlags & ESM4::Rec_Persistent))
-            {
-                const ESM4::Cell* actualCell = cells.searchExterior(
-                    positionToExteriorCellLocation(ref.mPos.pos[0], ref.mPos.pos[1], cell->mParent));
-                if (actualCell)
-                    ref.mParent = actualCell->mId;
-            }
-            mPerCellReferences[ref.mParent].push_back(&ref);
-        }
-    }
-
-    std::span<const ESM4::Reference* const> Store<ESM4::Reference>::getByCell(ESM::RefId cellId) const
-    {
-        auto it = mPerCellReferences.find(cellId);
-        if (it == mPerCellReferences.end())
-            return {};
-        return it->second;
-    }
 }
 
 template class MWWorld::TypedDynamicStore<ESM::Activator>;
@@ -1405,14 +1378,21 @@ template class MWWorld::TypedDynamicStore<ESM4::Armor>;
 template class MWWorld::TypedDynamicStore<ESM4::Book>;
 template class MWWorld::TypedDynamicStore<ESM4::Clothing>;
 template class MWWorld::TypedDynamicStore<ESM4::Container>;
+template class MWWorld::TypedDynamicStore<ESM4::Creature>;
 template class MWWorld::TypedDynamicStore<ESM4::Door>;
 template class MWWorld::TypedDynamicStore<ESM4::Furniture>;
 template class MWWorld::TypedDynamicStore<ESM4::Ingredient>;
 template class MWWorld::TypedDynamicStore<ESM4::MiscItem>;
 template class MWWorld::TypedDynamicStore<ESM4::Static>;
 template class MWWorld::TypedDynamicStore<ESM4::Tree>;
+template class MWWorld::TypedDynamicStore<ESM4::LevelledCreature>;
+template class MWWorld::TypedDynamicStore<ESM4::LevelledNpc>;
 template class MWWorld::TypedDynamicStore<ESM4::Light>;
+template class MWWorld::TypedDynamicStore<ESM4::Npc>;
 template class MWWorld::TypedDynamicStore<ESM4::Reference, ESM::FormId>;
+template class MWWorld::TypedDynamicStore<ESM4::ActorCharacter, ESM::FormId>;
+template class MWWorld::TypedDynamicStore<ESM4::ActorCreature, ESM::FormId>;
+template class MWWorld::TypedDynamicStore<ESM4::Race>;
 template class MWWorld::TypedDynamicStore<ESM4::Cell>;
 template class MWWorld::TypedDynamicStore<ESM4::Weapon>;
 template class MWWorld::TypedDynamicStore<ESM4::World>;

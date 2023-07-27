@@ -161,7 +161,6 @@ add_component_dir (esm4
     inventory
     lighting
     loadachr
-    loadacre
     loadacti
     loadalch
     loadaloc

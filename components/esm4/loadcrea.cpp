@@ -37,8 +37,7 @@
 
 void ESM4::Creature::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.getRefIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
@@ -153,7 +152,7 @@ void ESM4::Creature::load(ESM4::Reader& reader)
                 std::uint32_t nift;
                 reader.get(nift);
                 if (nift)
-                    Log(Debug::Verbose) << "CREA NIFT " << mFormId << ", non-zero " << nift;
+                    Log(Debug::Verbose) << "CREA NIFT " << mId << ", non-zero " << nift;
                 break;
             }
             case ESM4::SUB_KFFZ:

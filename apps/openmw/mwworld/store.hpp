@@ -18,6 +18,7 @@
 #include <components/esm3/loadland.hpp>
 #include <components/esm3/loadpgrd.hpp>
 #include <components/esm3/loadskil.hpp>
+#include <components/esm4/loadachr.hpp>
 #include <components/esm4/loadcell.hpp>
 #include <components/esm4/loadland.hpp>
 #include <components/esm4/loadrefr.hpp>
@@ -581,16 +582,51 @@ namespace MWWorld
         const MWDialogue::KeywordSearch<int>& getDialogIdKeywordSearch() const;
     };
 
-    template <>
-    class Store<ESM4::Reference> : public TypedDynamicStore<ESM4::Reference, ESM::FormId>
+    template <typename T>
+    class ESM4RefsStore : public TypedDynamicStore<T, ESM::FormId>
     {
     public:
-        void preprocessReferences(const Store<ESM4::Cell>& cells);
+        void preprocessReferences(const Store<ESM4::Cell>& cells)
+        {
+            for (auto& [_, ref] : this->mStatic)
+            {
+                const ESM4::Cell* cell = cells.find(ref.mParent);
+                if (cell->isExterior() && (cell->mFlags & ESM4::Rec_Persistent))
+                {
+                    const ESM4::Cell* actualCell = cells.searchExterior(
+                        positionToExteriorCellLocation(ref.mPos.pos[0], ref.mPos.pos[1], cell->mParent));
+                    if (actualCell)
+                        ref.mParent = actualCell->mId;
+                }
+                mPerCellReferences[ref.mParent].push_back(&ref);
+            }
+        }
 
-        std::span<const ESM4::Reference* const> getByCell(ESM::RefId cellId) const;
+        std::span<const T* const> getByCell(ESM::RefId cellId) const
+        {
+            auto it = mPerCellReferences.find(cellId);
+            if (it == mPerCellReferences.end())
+                return {};
+            return it->second;
+        }
 
     private:
-        std::unordered_map<ESM::RefId, std::vector<ESM4::Reference*>> mPerCellReferences;
+        std::unordered_map<ESM::RefId, std::vector<T*>> mPerCellReferences;
+    };
+
+    template <>
+    class Store<ESM4::Reference> : public ESM4RefsStore<ESM4::Reference>
+    {
+    };
+
+    template <>
+    class Store<ESM4::ActorCharacter> : public ESM4RefsStore<ESM4::ActorCharacter>
+    {
+    };
+
+    template <>
+    class Store<ESM4::ActorCreature> : public ESM4RefsStore<ESM4::ActorCreature>
+    {
     };
 
 } // end namespace

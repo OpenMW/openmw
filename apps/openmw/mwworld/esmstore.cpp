@@ -278,6 +278,8 @@ namespace MWWorld
             case ESM::REC_STAT:
             case ESM::REC_WEAP:
             case ESM::REC_BODY:
+            case ESM::REC_ACHR4:
+            case ESM::REC_ACRE4:
             case ESM::REC_STAT4:
             case ESM::REC_LIGH4:
             case ESM::REC_ACTI4:
@@ -286,10 +288,15 @@ namespace MWWorld
             case ESM::REC_ARMO4:
             case ESM::REC_BOOK4:
             case ESM::REC_CONT4:
+            case ESM::REC_CREA4:
             case ESM::REC_DOOR4:
             case ESM::REC_FURN4:
             case ESM::REC_INGR4:
+            case ESM::REC_LVLC4:
+            case ESM::REC_LVLN4:
             case ESM::REC_MISC4:
+            case ESM::REC_NPC_4:
+            case ESM::REC_RACE4:
             case ESM::REC_TREE4:
             case ESM::REC_WEAP4:
                 return true;
@@ -439,6 +446,8 @@ namespace MWWorld
         getWritable<ESM::Attribute>().setUp(get<ESM::GameSetting>());
         getWritable<ESM4::Land>().updateLandPositions(get<ESM4::Cell>());
         getWritable<ESM4::Reference>().preprocessReferences(get<ESM4::Cell>());
+        getWritable<ESM4::ActorCharacter>().preprocessReferences(get<ESM4::Cell>());
+        getWritable<ESM4::ActorCreature>().preprocessReferences(get<ESM4::Cell>());
 
         rebuildIdsIndex();
         mStoreImp->mStaticIds = mStoreImp->mIds;
