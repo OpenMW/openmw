@@ -2025,8 +2025,8 @@ namespace MWWorld
         pos.rot[1] = 0;
 
         // copy the object and set its count
-        Ptr dropped = copy ? copyObjectToCell(object, cell, pos, amount, true)
-                           : moveObjectToCell(object, cell, pos, amount, true);
+        Ptr dropped
+            = copy ? copyObjectToCell(object, cell, pos, amount, true) : moveObjectToCell(object, cell, pos, true);
 
         // only the player place items in the world, so no need to check actor
         PCDropped(dropped);
@@ -2071,7 +2071,7 @@ namespace MWWorld
         return dropped;
     }
 
-    Ptr World::moveObjectToCell(const Ptr& object, CellStore* cell, ESM::Position pos, int count, bool adjustPos)
+    Ptr World::moveObjectToCell(const Ptr& object, CellStore* cell, ESM::Position pos, bool adjustPos)
     {
         if (!cell)
             throw std::runtime_error("moveObjectToCell(): cannot move object to null cell");
@@ -2082,7 +2082,7 @@ namespace MWWorld
             cell = &mWorldModel.getExterior(index);
         }
 
-        MWWorld::Ptr dropped = object.getClass().moveToCell(object, *cell, pos, count);
+        MWWorld::Ptr dropped = object.getClass().moveToCell(object, *cell, pos);
 
         initObjectInCell(dropped, *cell, adjustPos);
 
@@ -2147,8 +2147,8 @@ namespace MWWorld
             pos.pos[2] = result.mHitPointWorld.z();
 
         // copy the object and set its count
-        Ptr dropped = copy ? copyObjectToCell(object, cell, pos, amount, true)
-                           : moveObjectToCell(object, cell, pos, amount, true);
+        Ptr dropped
+            = copy ? copyObjectToCell(object, cell, pos, amount, true) : moveObjectToCell(object, cell, pos, true);
 
         if (actor == mPlayer->getPlayer()) // Only call if dropped by player
             PCDropped(dropped);

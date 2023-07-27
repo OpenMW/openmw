@@ -391,12 +391,11 @@ namespace MWWorld
         return newPtr;
     }
 
-    Ptr Class::moveToCell(const Ptr& ptr, CellStore& cell, const ESM::Position& pos, int count) const
+    Ptr Class::moveToCell(const Ptr& ptr, CellStore& cell, const ESM::Position& pos) const
     {
         Ptr newPtr = moveToCell(ptr, cell);
         newPtr.getRefData().setPosition(pos);
         newPtr.getCellRef().setPosition(pos);
-        newPtr.getRefData().setCount(count);
         return newPtr;
     }
 

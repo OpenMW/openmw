@@ -216,10 +216,9 @@ namespace MWClass
         MWWorld::Ptr newPtr;
         if (isGold(ptr))
         {
-            newPtr = createGold(cell, getValue(ptr));
+            newPtr = createGold(cell, getValue(ptr) * ptr.getRefData().getCount());
             newPtr.getRefData() = ptr.getRefData();
             newPtr.getCellRef().setRefNum(ptr.getCellRef().getRefNum());
-            newPtr.getCellRef().setGoldValue(ptr.getCellRef().getGoldValue());
             newPtr.getRefData().setCount(1);
         }
         else
