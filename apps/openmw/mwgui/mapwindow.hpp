@@ -73,7 +73,7 @@ namespace MWGui
     class LocalMapBase
     {
     public:
-        LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender, bool fogOfWarEnabled = true);
+        LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender);
         virtual ~LocalMapBase();
         void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int cellDistance = Constants::CellGridRadius);
 
@@ -125,9 +125,6 @@ namespace MWGui
         std::string mPrefix;
         bool mChanged;
         bool mFogOfWarToggled;
-        bool mFogOfWarEnabled;
-
-        int mMapWidgetSize;
 
         int mNumCells; // for convenience, mCellDistance * 2 + 1
         int mCellDistance;
@@ -301,7 +298,6 @@ namespace MWGui
         MyGUI::ImageBox* mPlayerArrowGlobal;
         MyGUI::Button* mButton;
         MyGUI::IntPoint mLastDragPos;
-        bool mGlobal;
 
         MyGUI::IntCoord mLastScrollWindowCoordinates;
 
@@ -328,7 +324,6 @@ namespace MWGui
 
         EditNoteDialog mEditNoteDialog;
         ESM::CustomMarker mEditingMarker;
-        bool mAllowZooming;
 
         void onPinToggled() override;
         void onTitleDoubleClicked() override;

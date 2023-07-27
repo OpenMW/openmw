@@ -86,8 +86,6 @@ namespace MWRender
             bool clear, bool cpuCopy, float srcLeft = 0.f, float srcTop = 0.f, float srcRight = 1.f,
             float srcBottom = 1.f);
 
-        int mCellSize;
-
         osg::ref_ptr<osg::Group> mRoot;
 
         typedef std::vector<osg::ref_ptr<osg::Camera>> CameraVector;

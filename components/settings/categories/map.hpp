@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_MAP_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_MAP_H
 
+#include "components/misc/constants.hpp"
 #include "components/settings/sanitizerimpl.hpp"
 #include "components/settings/settingvalue.hpp"
 
@@ -25,7 +26,7 @@ namespace Settings
         SettingValue<bool> mGlobal{ mIndex, "Map", "global" };
         SettingValue<bool> mAllowZooming{ mIndex, "Map", "allow zooming" };
         SettingValue<int> mMaxLocalViewingDistance{ mIndex, "Map", "max local viewing distance",
-            makeMaxSanitizerInt(1) };
+            makeMaxSanitizerInt(Constants::CellGridRadius) };
     };
 }
 
