@@ -132,7 +132,7 @@ Technically scripts can be placed anywhere in the virtual file system, but we re
 
 - ``scripts/<ModName>/<ScriptName>.lua``: general case.
 - ``scripts/<AuthorName>/<ModName>/<ScriptName>.lua``: if "ModName" is short and can potentially collide with other mods.
-- ``scripts/<ModName>.lua``: if it is a simple mod that consists from a single script, the script can placed to ``scripts/`` without subdirs.
+- ``scripts/<ModName>.lua``: if it is a simple mod that consists of a single script, the script can be placed in ``scripts/`` without subdirs.
 
 ``scripts/omw/`` is reserved for built-in scripts, don't use it in mods. Overriding built-in scripts is not recommended, prefer to adjust their behaviour via :ref:`Interfaces of built-in scripts` instead.
 
