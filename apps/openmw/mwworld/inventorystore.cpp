@@ -211,13 +211,9 @@ MWWorld::ContainerStoreIterator MWWorld::InventoryStore::findSlot(int slot) cons
     if (mSlots[slot] == end())
         return mSlots[slot];
 
-    if (mSlots[slot]->getRefData().getCount() < 1)
-    {
-        // Object has been deleted
-        // This should no longer happen, since the new remove function will unequip first
-        throw std::runtime_error(
-            "Invalid slot, make sure you are not calling RefData::setCount for a container object");
-    }
+    // NOTE: mSlots[slot]->getRefData().getCount() can be zero if the item is marked
+    // for removal by a Lua script, but the removal action is not yet processed.
+    // The item will be automatically unequiped in the current frame.
 
     return mSlots[slot];
 }

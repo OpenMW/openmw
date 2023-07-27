@@ -378,7 +378,7 @@ namespace MWLua
                         ptr.getRefData().setCount(ptr.getRefData().getCount() + countToRemove);
                         // And now remove properly
                         if (ptr.getContainerStore())
-                            ptr.getContainerStore()->remove(ptr, countToRemove);
+                            ptr.getContainerStore()->remove(ptr, countToRemove, false);
                         else
                         {
                             MWBase::Environment::get().getWorld()->disable(ptr);
