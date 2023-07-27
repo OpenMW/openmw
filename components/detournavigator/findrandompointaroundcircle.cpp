@@ -1,5 +1,4 @@
 #include "findrandompointaroundcircle.hpp"
-#include "findsmoothpath.hpp"
 
 #include <DetourNavMesh.h>
 #include <DetourNavMeshQuery.h>
@@ -13,9 +12,11 @@ namespace DetourNavigator
         dtQueryFilter queryFilter;
         queryFilter.setIncludeFlags(includeFlags);
 
-        dtPolyRef startRef = findNearestPoly(navMeshQuery, queryFilter, start, halfExtents * 4);
-        if (startRef == 0)
-            return std::optional<osg::Vec3f>();
+        dtPolyRef startRef = 0;
+        const dtStatus status
+            = navMeshQuery.findNearestPoly(start.ptr(), halfExtents.ptr(), &queryFilter, &startRef, nullptr);
+        if (dtStatusFailed(status))
+            return std::nullopt;
 
         dtPolyRef resultRef = 0;
         osg::Vec3f resultPosition;

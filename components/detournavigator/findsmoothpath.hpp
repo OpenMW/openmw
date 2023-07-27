@@ -7,59 +7,27 @@
 #include "settingsutils.hpp"
 #include "status.hpp"
 
+#include <DetourCommon.h>
 #include <DetourNavMesh.h>
 #include <DetourNavMeshQuery.h>
 
 #include <osg/Vec3f>
 
+#include <array>
 #include <cassert>
 #include <functional>
+#include <span>
 #include <vector>
-
-class dtNavMesh;
 
 namespace DetourNavigator
 {
-    struct Settings;
-
-    inline bool inRange(const osg::Vec3f& v1, const osg::Vec3f& v2, const float r)
-    {
-        return (osg::Vec2f(v1.x(), v1.z()) - osg::Vec2f(v2.x(), v2.z())).length() < r;
-    }
-
-    std::size_t fixupCorridor(
-        std::vector<dtPolyRef>& path, std::size_t pathSize, const std::vector<dtPolyRef>& visited);
-
-    // This function checks if the path has a small U-turn, that is,
-    // a polygon further in the path is adjacent to the first polygon
-    // in the path. If that happens, a shortcut is taken.
-    // This can happen if the target (T) location is at tile boundary,
-    // and we're (S) approaching it parallel to the tile edge.
-    // The choice at the vertex can be arbitrary,
-    //  +---+---+
-    //  |:::|:::|
-    //  +-S-+-T-+
-    //  |:::|   | <-- the step can end up in here, resulting U-turn path.
-    //  +---+---+
-    std::size_t fixupShortcuts(dtPolyRef* path, std::size_t pathSize, const dtNavMeshQuery& navQuery);
-
-    struct SteerTarget
-    {
-        osg::Vec3f mSteerPos;
-        unsigned char mSteerPosFlag;
-        dtPolyRef mSteerPosRef;
-    };
-
-    std::optional<SteerTarget> getSteerTarget(const dtNavMeshQuery& navQuery, const osg::Vec3f& startPos,
-        const osg::Vec3f& endPos, const float minTargetDist, const dtPolyRef* path, const std::size_t pathSize);
-
-    template <class OutputIterator>
+    template <class OutputIterator, class Function>
     class OutputTransformIterator
     {
     public:
-        explicit OutputTransformIterator(OutputIterator& impl, const RecastSettings& settings)
+        explicit OutputTransformIterator(OutputIterator& impl, Function&& function)
             : mImpl(impl)
-            , mSettings(settings)
+            , mFunction(std::forward<Function>(function))
         {
         }
 
@@ -80,180 +48,64 @@ namespace DetourNavigator
 
         OutputTransformIterator& operator=(const osg::Vec3f& value)
         {
-            *mImpl.get() = fromNavMeshCoordinates(mSettings, value);
+            *mImpl.get() = mFunction(value);
             return *this;
         }
 
     private:
         std::reference_wrapper<OutputIterator> mImpl;
-        std::reference_wrapper<const RecastSettings> mSettings;
+        Function mFunction;
     };
 
-    inline bool initNavMeshQuery(dtNavMeshQuery& value, const dtNavMesh& navMesh, const int maxNodes)
+    template <class OutputIterator>
+    auto withFromNavMeshCoordinates(OutputIterator& impl, const RecastSettings& settings)
     {
-        const auto status = value.init(&navMesh, maxNodes);
-        return dtStatusSucceed(status);
-    }
-
-    dtPolyRef findNearestPoly(const dtNavMeshQuery& query, const dtQueryFilter& filter, const osg::Vec3f& center,
-        const osg::Vec3f& halfExtents);
-
-    struct MoveAlongSurfaceResult
-    {
-        osg::Vec3f mResultPos;
-        std::vector<dtPolyRef> mVisited;
-    };
-
-    inline std::optional<MoveAlongSurfaceResult> moveAlongSurface(const dtNavMeshQuery& navMeshQuery,
-        const dtPolyRef startRef, const osg::Vec3f& startPos, const osg::Vec3f& endPos, const dtQueryFilter& filter,
-        const std::size_t maxVisitedSize)
-    {
-        MoveAlongSurfaceResult result;
-        result.mVisited.resize(maxVisitedSize);
-        int visitedNumber = 0;
-        const auto status = navMeshQuery.moveAlongSurface(startRef, startPos.ptr(), endPos.ptr(), &filter,
-            result.mResultPos.ptr(), result.mVisited.data(), &visitedNumber, static_cast<int>(maxVisitedSize));
-        if (!dtStatusSucceed(status))
-            return {};
-        assert(visitedNumber >= 0);
-        assert(visitedNumber <= static_cast<int>(maxVisitedSize));
-        result.mVisited.resize(static_cast<std::size_t>(visitedNumber));
-        return { std::move(result) };
+        return OutputTransformIterator(
+            impl, [&settings](const osg::Vec3f& value) { return fromNavMeshCoordinates(settings, value); });
     }
 
     inline std::optional<std::size_t> findPath(const dtNavMeshQuery& navMeshQuery, const dtPolyRef startRef,
         const dtPolyRef endRef, const osg::Vec3f& startPos, const osg::Vec3f& endPos, const dtQueryFilter& queryFilter,
-        dtPolyRef* path, const std::size_t maxSize)
+        std::span<dtPolyRef> pathBuffer)
     {
         int pathLen = 0;
-        const auto status = navMeshQuery.findPath(
-            startRef, endRef, startPos.ptr(), endPos.ptr(), &queryFilter, path, &pathLen, static_cast<int>(maxSize));
+        const auto status = navMeshQuery.findPath(startRef, endRef, startPos.ptr(), endPos.ptr(), &queryFilter,
+            pathBuffer.data(), &pathLen, static_cast<int>(pathBuffer.size()));
         if (!dtStatusSucceed(status))
             return {};
         assert(pathLen >= 0);
-        assert(static_cast<std::size_t>(pathLen) <= maxSize);
+        assert(static_cast<std::size_t>(pathLen) <= pathBuffer.size());
         return static_cast<std::size_t>(pathLen);
     }
 
     template <class OutputIterator>
-    Status makeSmoothPath(const dtNavMesh& navMesh, const dtNavMeshQuery& navMeshQuery, const dtQueryFilter& filter,
-        const osg::Vec3f& start, const osg::Vec3f& end, const float stepSize, std::vector<dtPolyRef>& polygonPath,
-        std::size_t polygonPathSize, std::size_t maxSmoothPathSize, OutputIterator& out)
+    Status makeSmoothPath(const dtNavMeshQuery& navMeshQuery, const osg::Vec3f& start, const osg::Vec3f& end,
+        std::span<dtPolyRef> polygonPath, std::size_t polygonPathSize, std::size_t maxSmoothPathSize,
+        OutputIterator& out)
     {
-        // Iterate over the path to find smooth path on the detail mesh surface.
-        osg::Vec3f iterPos;
-        navMeshQuery.closestPointOnPoly(polygonPath.front(), start.ptr(), iterPos.ptr(), nullptr);
+        assert(polygonPathSize <= polygonPath.size());
 
-        osg::Vec3f targetPos;
-        navMeshQuery.closestPointOnPoly(polygonPath[polygonPathSize - 1], end.ptr(), targetPos.ptr(), nullptr);
+        std::vector<float> cornerVertsBuffer(maxSmoothPathSize * 3);
+        std::vector<unsigned char> cornerFlagsBuffer(maxSmoothPathSize);
+        std::vector<dtPolyRef> cornerPolysBuffer(maxSmoothPathSize);
+        int cornersCount = 0;
+        constexpr int findStraightPathOptions = DT_STRAIGHTPATH_AREA_CROSSINGS | DT_STRAIGHTPATH_ALL_CROSSINGS;
+        if (const dtStatus status = navMeshQuery.findStraightPath(start.ptr(), end.ptr(), polygonPath.data(),
+                static_cast<int>(polygonPathSize), cornerVertsBuffer.data(), cornerFlagsBuffer.data(),
+                cornerPolysBuffer.data(), &cornersCount, static_cast<int>(maxSmoothPathSize), findStraightPathOptions);
+            dtStatusFailed(status))
+            return Status::FindStraightPathFailed;
 
-        constexpr float slop = 0.01f;
-
-        *out++ = iterPos;
-
-        std::size_t smoothPathSize = 1;
-
-        // Move towards target a small advancement at a time until target reached or
-        // when ran out of memory to store the path.
-        while (polygonPathSize > 0 && smoothPathSize < maxSmoothPathSize)
-        {
-            // Find location to steer towards.
-            const auto steerTarget
-                = getSteerTarget(navMeshQuery, iterPos, targetPos, slop, polygonPath.data(), polygonPathSize);
-
-            if (!steerTarget)
-                break;
-
-            const bool endOfPath = bool(steerTarget->mSteerPosFlag & DT_STRAIGHTPATH_END);
-            const bool offMeshConnection = bool(steerTarget->mSteerPosFlag & DT_STRAIGHTPATH_OFFMESH_CONNECTION);
-
-            // Find movement delta.
-            const osg::Vec3f delta = steerTarget->mSteerPos - iterPos;
-            float len = delta.length();
-            // If the steer target is end of path or off-mesh link, do not move past the location.
-            if ((endOfPath || offMeshConnection) && len < stepSize)
-                len = 1;
-            else
-                len = stepSize / len;
-
-            const osg::Vec3f moveTgt = iterPos + delta * len;
-            const auto result = moveAlongSurface(navMeshQuery, polygonPath.front(), iterPos, moveTgt, filter, 16);
-
-            if (!result)
-                return Status::MoveAlongSurfaceFailed;
-
-            polygonPathSize = fixupCorridor(polygonPath, polygonPathSize, result->mVisited);
-            polygonPathSize = fixupShortcuts(polygonPath.data(), polygonPathSize, navMeshQuery);
-
-            // Handle end of path and off-mesh links when close enough.
-            if (endOfPath && inRange(result->mResultPos, steerTarget->mSteerPos, slop))
-            {
-                // Reached end of path.
-                iterPos = targetPos;
-                *out++ = iterPos;
-                ++smoothPathSize;
-                break;
-            }
-
-            dtPolyRef polyRef = polygonPath.front();
-            osg::Vec3f polyPos = result->mResultPos;
-
-            if (offMeshConnection && inRange(polyPos, steerTarget->mSteerPos, slop))
-            {
-                // Advance the path up to and over the off-mesh connection.
-                dtPolyRef prevRef = 0;
-                std::size_t npos = 0;
-                while (npos < polygonPathSize && polyRef != steerTarget->mSteerPosRef)
-                {
-                    prevRef = polyRef;
-                    polyRef = polygonPath[npos];
-                    ++npos;
-                }
-                if (npos > 0)
-                {
-                    std::copy(polygonPath.begin() + npos, polygonPath.begin() + polygonPathSize, polygonPath.begin());
-                    polygonPathSize -= npos;
-                }
-
-                // Reached off-mesh connection.
-                osg::Vec3f startPos;
-                osg::Vec3f endPos;
-
-                // Handle the connection.
-                if (dtStatusSucceed(
-                        navMesh.getOffMeshConnectionPolyEndPoints(prevRef, polyRef, startPos.ptr(), endPos.ptr())))
-                {
-                    *out++ = startPos;
-                    ++smoothPathSize;
-
-                    // Hack to make the dotted path not visible during off-mesh connection.
-                    if (smoothPathSize & 1)
-                    {
-                        *out++ = startPos;
-                        ++smoothPathSize;
-                    }
-
-                    // Move position at the other side of the off-mesh link.
-                    polyPos = endPos;
-                }
-            }
-
-            navMeshQuery.getPolyHeight(polyRef, polyPos.ptr(), &iterPos.y());
-            iterPos.x() = result->mResultPos.x();
-            iterPos.z() = result->mResultPos.z();
-
-            // Store results.
-            *out++ = iterPos;
-            ++smoothPathSize;
-        }
+        for (int i = 0; i < cornersCount; ++i)
+            *out++ = Misc::Convert::makeOsgVec3f(&cornerVertsBuffer[static_cast<std::size_t>(i) * 3]);
 
         return Status::Success;
     }
 
     template <class OutputIterator>
-    Status findSmoothPath(const dtNavMesh& navMesh, const dtNavMeshQuery& navMeshQuery, const osg::Vec3f& halfExtents,
-        const float stepSize, const osg::Vec3f& start, const osg::Vec3f& end, const Flags includeFlags,
-        const AreaCosts& areaCosts, const Settings& settings, float endTolerance, OutputIterator out)
+    Status findSmoothPath(const dtNavMeshQuery& navMeshQuery, const osg::Vec3f& halfExtents, const osg::Vec3f& start,
+        const osg::Vec3f& end, const Flags includeFlags, const AreaCosts& areaCosts, const DetourSettings& settings,
+        float endTolerance, OutputIterator out)
     {
         dtQueryFilter queryFilter;
         queryFilter.setIncludeFlags(includeFlags);
@@ -265,18 +117,24 @@ namespace DetourNavigator
         constexpr float polyDistanceFactor = 4;
         const osg::Vec3f polyHalfExtents = halfExtents * polyDistanceFactor;
 
-        const dtPolyRef startRef = findNearestPoly(navMeshQuery, queryFilter, start, polyHalfExtents);
-        if (startRef == 0)
+        osg::Vec3f startNavMeshPos;
+        dtPolyRef startRef = 0;
+        if (const dtStatus status = navMeshQuery.findNearestPoly(
+                start.ptr(), polyHalfExtents.ptr(), &queryFilter, &startRef, startNavMeshPos.ptr());
+            dtStatusFailed(status) || startRef == 0)
             return Status::StartPolygonNotFound;
 
-        const dtPolyRef endRef = findNearestPoly(
-            navMeshQuery, queryFilter, end, polyHalfExtents + osg::Vec3f(endTolerance, endTolerance, endTolerance));
-        if (endRef == 0)
+        osg::Vec3f endNavMeshPos;
+        const osg::Vec3f endPolyHalfExtents = polyHalfExtents + osg::Vec3f(endTolerance, endTolerance, endTolerance);
+        dtPolyRef endRef;
+        if (const dtStatus status = navMeshQuery.findNearestPoly(
+                end.ptr(), endPolyHalfExtents.ptr(), &queryFilter, &endRef, endNavMeshPos.ptr());
+            dtStatusFailed(status) || endRef == 0)
             return Status::EndPolygonNotFound;
 
-        std::vector<dtPolyRef> polygonPath(settings.mDetour.mMaxPolygonPathSize);
+        std::vector<dtPolyRef> polygonPath(settings.mMaxPolygonPathSize);
         const auto polygonPathSize
-            = findPath(navMeshQuery, startRef, endRef, start, end, queryFilter, polygonPath.data(), polygonPath.size());
+            = findPath(navMeshQuery, startRef, endRef, startNavMeshPos, endNavMeshPos, queryFilter, polygonPath);
 
         if (!polygonPathSize.has_value())
             return Status::FindPathOverPolygonsFailed;
@@ -284,10 +142,15 @@ namespace DetourNavigator
         if (*polygonPathSize == 0)
             return Status::Success;
 
+        osg::Vec3f targetNavMeshPos;
+        if (const dtStatus status = navMeshQuery.closestPointOnPoly(
+                polygonPath[*polygonPathSize - 1], end.ptr(), targetNavMeshPos.ptr(), nullptr);
+            dtStatusFailed(status))
+            return Status::TargetPolygonNotFound;
+
         const bool partialPath = polygonPath[*polygonPathSize - 1] != endRef;
-        auto outTransform = OutputTransformIterator<OutputIterator>(out, settings.mRecast);
-        const Status smoothStatus = makeSmoothPath(navMesh, navMeshQuery, queryFilter, start, end, stepSize,
-            polygonPath, *polygonPathSize, settings.mDetour.mMaxSmoothPathSize, outTransform);
+        const Status smoothStatus = makeSmoothPath(navMeshQuery, startNavMeshPos, targetNavMeshPos, polygonPath,
+            *polygonPathSize, settings.mMaxSmoothPathSize, out);
 
         if (smoothStatus != Status::Success)
             return smoothStatus;

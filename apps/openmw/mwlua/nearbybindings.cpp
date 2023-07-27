@@ -163,21 +163,19 @@ namespace MWLua
                 { "MoveAlongSurfaceFailed", DetourNavigator::Status::MoveAlongSurfaceFailed },
                 { "FindPathOverPolygonsFailed", DetourNavigator::Status::FindPathOverPolygonsFailed },
                 { "InitNavMeshQueryFailed", DetourNavigator::Status::InitNavMeshQueryFailed },
+                { "FindStraightPathFailed", DetourNavigator::Status::FindStraightPathFailed },
             }));
 
         static const DetourNavigator::AgentBounds defaultAgentBounds{
             Settings::game().mActorCollisionShapeType,
             Settings::game().mDefaultActorPathfindHalfExtents,
         };
-        static const float defaultStepSize
-            = 2 * std::max(defaultAgentBounds.mHalfExtents.x(), defaultAgentBounds.mHalfExtents.y());
         static constexpr DetourNavigator::Flags defaultIncludeFlags = DetourNavigator::Flag_walk
             | DetourNavigator::Flag_swim | DetourNavigator::Flag_openDoor | DetourNavigator::Flag_usePathgrid;
 
         api["findPath"]
             = [](const osg::Vec3f& source, const osg::Vec3f& destination, const sol::optional<sol::table>& options) {
                   DetourNavigator::AgentBounds agentBounds = defaultAgentBounds;
-                  float stepSize = defaultStepSize;
                   DetourNavigator::Flags includeFlags = defaultIncludeFlags;
                   DetourNavigator::AreaCosts areaCosts{};
                   float destinationTolerance = 1;
@@ -189,13 +187,8 @@ namespace MWLua
                           if (const auto& v = t->get<sol::optional<DetourNavigator::CollisionShapeType>>("shapeType"))
                               agentBounds.mShapeType = *v;
                           if (const auto& v = t->get<sol::optional<osg::Vec3f>>("halfExtents"))
-                          {
                               agentBounds.mHalfExtents = *v;
-                              stepSize = 2 * std::max(v->x(), v->y());
-                          }
                       }
-                      if (const auto& v = options->get<sol::optional<float>>("stepSize"))
-                          stepSize = *v;
                       if (const auto& v = options->get<sol::optional<DetourNavigator::Flags>>("includeFlags"))
                           includeFlags = *v;
                       if (const auto& t = options->get<sol::optional<sol::table>>("areaCosts"))
@@ -216,8 +209,8 @@ namespace MWLua
                   std::vector<osg::Vec3f> result;
 
                   const DetourNavigator::Status status = DetourNavigator::findPath(
-                      *MWBase::Environment::get().getWorld()->getNavigator(), agentBounds, stepSize, source,
-                      destination, includeFlags, areaCosts, destinationTolerance, std::back_inserter(result));
+                      *MWBase::Environment::get().getWorld()->getNavigator(), agentBounds, source, destination,
+                      includeFlags, areaCosts, destinationTolerance, std::back_inserter(result));
 
                   return std::make_tuple(status, std::move(result));
               };

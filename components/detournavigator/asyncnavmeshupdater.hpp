@@ -199,9 +199,9 @@ namespace DetourNavigator
 
         void repost(JobIt job);
 
-        bool lockTile(const AgentBounds& agentBounds, const TilePosition& changedTile);
+        bool lockTile(std::size_t jobId, const AgentBounds& agentBounds, const TilePosition& changedTile);
 
-        void unlockTile(const AgentBounds& agentBounds, const TilePosition& changedTile);
+        void unlockTile(std::size_t jobId, const AgentBounds& agentBounds, const TilePosition& changedTile);
 
         inline std::size_t getTotalJobs() const;
 

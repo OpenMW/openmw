@@ -478,11 +478,7 @@ DetourNavigator::Flags MWMechanics::AiPackage::getNavigatorFlags(const MWWorld::
         result |= DetourNavigator::Flag_swim;
 
     if (actorClass.canWalk(actor) && actor.getClass().getWalkSpeed(actor) > 0)
-    {
-        result |= DetourNavigator::Flag_walk;
-        if (getTypeId() == AiPackageTypeId::Travel)
-            result |= DetourNavigator::Flag_usePathgrid;
-    }
+        result |= DetourNavigator::Flag_walk | DetourNavigator::Flag_usePathgrid;
 
     if (canOpenDoors(actor) && getTypeId() != AiPackageTypeId::Wander)
         result |= DetourNavigator::Flag_openDoor;

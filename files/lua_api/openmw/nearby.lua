@@ -135,12 +135,16 @@
 -- @field [parent=#FIND_PATH_STATUS] #number EndPolygonNotFound `destination` position is too far from available
 -- navigation mesh. The status may appear when navigation mesh is not fully generated or position is outside of covered
 -- area;
+-- @field [parent=#FIND_PATH_STATUS] #number TargetPolygonNotFound adjusted `destination` position is too far from available
+-- navigation mesh. The status may appear when navigation mesh is not fully generated or position is outside of covered
+-- area;
 -- @field [parent=#FIND_PATH_STATUS] #number MoveAlongSurfaceFailed Found path couldn't be smoothed due to imperfect
 -- algorithm implementation or bad navigation mesh data;
 -- @field [parent=#FIND_PATH_STATUS] #number FindPathOverPolygonsFailed Path over navigation mesh from `source` to
 -- `destination` does not exist or navigation mesh is not fully generated to provide the path;
 -- @field [parent=#FIND_PATH_STATUS] #number InitNavMeshQueryFailed Couldn't initialize required data due to bad input
 -- or bad navigation mesh data.
+-- @field [parent=#FIND_PATH_STATUS] #number FindStraightPathFailed Couldn't map path over polygons into world coordinates.
 
 ---
 -- Find path over navigation mesh from source to destination with given options. Result is unstable since navigation
@@ -154,8 +158,6 @@
 --
 --     * `shapeType` - one of @{#COLLISION_SHAPE_TYPE} values;
 --     * `halfExtents` - @{openmw.util#Vector3} defining agent bounds size;
---   * `stepSize` - a floating point number to define frequency of path points
---     (default: `2 * math.max(halfExtents:x, halfExtents:y)`)
 --   * `includeFlags` - allowed areas for agent to move, a sum of @{#NAVIGATOR_FLAGS} values
 --     (default: @{#NAVIGATOR_FLAGS.Walk} + @{#NAVIGATOR_FLAGS.Swim} +
 --     @{#NAVIGATOR_FLAGS.OpenDoor} + @{#NAVIGATOR_FLAGS.UsePathgrid});
