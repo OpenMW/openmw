@@ -69,6 +69,7 @@ namespace MWMechanics
         enchantment.mData.mFlags = 0;
         enchantment.mData.mType = mCastStyle;
         enchantment.mData.mCost = getBaseCastCost();
+        enchantment.mRecordFlags = 0;
 
         store.remove(mSoulGemPtr, 1);
 

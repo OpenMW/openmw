@@ -155,7 +155,7 @@ bool MWDialogue::Filter::testActor(const ESM::DialInfo& info) const
     if (!isCreature)
     {
         MWWorld::LiveCellRef<ESM::NPC>* npc = mActor.get<ESM::NPC>();
-        if (info.mData.mGender == (npc->mBase->mFlags & npc->mBase->Female ? 0 : 1))
+        if (info.mData.mGender == (npc->mBase->mFlags & ESM::NPC::Female) ? 0 : 1)
             return false;
     }
 

@@ -29,7 +29,7 @@ namespace ESM
         float getMaxHeight() const { return mMaxHeight; }
         int getLandSize() const { return mLandSize; }
 
-        int mLoadFlags;
+        int mLoadFlags = 0;
 
     private:
         float mMinHeight = 0.f;

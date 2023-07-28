@@ -931,7 +931,7 @@ namespace MWGui
             = MWBase::Environment::get().getLuaManager()->getActorControls(player);
         bool triedToMove = playerControls
             && (playerControls->mMovement != 0 || playerControls->mSideMovement != 0 || playerControls->mJump);
-        if (triedToMove && playerCls.getEncumbrance(player) > playerCls.getCapacity(player))
+        if (mMessageBoxManager && triedToMove && playerCls.getEncumbrance(player) > playerCls.getCapacity(player))
         {
             const auto& msgboxs = mMessageBoxManager->getActiveMessageBoxes();
             auto it

@@ -19,6 +19,7 @@ namespace ESSImport
             item.mCount = contItem.mCount;
             item.mRelativeEquipmentSlot = -1;
             item.mLockLevel = 0;
+            item.mChargeIntRemainder = 0;
 
             unsigned int itemCount = std::abs(item.mCount);
             bool separateStacks = false;

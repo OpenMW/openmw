@@ -56,6 +56,7 @@ namespace MWLua
                 effect.mAttribute = rec.mData.mAttributes[i];
                 effect.mRange = ESM::RT_Self;
                 effect.mArea = 0;
+                effect.mDuration = 0;
                 res[i + 1] = effect;
             }
             return res;

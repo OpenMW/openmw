@@ -32,6 +32,7 @@ namespace
         std::string_view scriptId = rec["mwscript"].get<std::string_view>();
         weapon.mScript = ESM::RefId::deserializeText(scriptId);
         weapon.mData.mFlags = 0;
+        weapon.mRecordFlags = 0;
         if (rec["isMagical"])
             weapon.mData.mFlags |= ESM::Weapon::Magical;
         if (rec["isSilver"])

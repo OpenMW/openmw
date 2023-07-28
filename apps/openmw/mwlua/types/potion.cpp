@@ -30,6 +30,7 @@ namespace
         potion.mScript = ESM::RefId::deserializeText(scriptId);
         potion.mData.mWeight = rec["weight"];
         potion.mData.mValue = rec["value"];
+        potion.mRecordFlags = 0;
         sol::table effectsTable = rec["effects"];
         size_t numEffects = effectsTable.size();
         potion.mEffects.mList.resize(numEffects);

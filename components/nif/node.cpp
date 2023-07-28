@@ -505,7 +505,7 @@ namespace Nif
         if (flags & BSVertexDesc::VertexAttribute::Eye_Data)
         {
             throw Nif::Exception("Unhandled Eye Data in BSTriShape: ", nif->getFile().getFilename());
-            nif->read(mEyeData);
+            // nif->read(mEyeData);
         }
     }
 

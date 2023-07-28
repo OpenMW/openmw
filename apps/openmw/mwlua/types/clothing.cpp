@@ -32,6 +32,7 @@ namespace
         clothing.mEnchant = ESM::RefId::deserializeText(enchantId);
         clothing.mData.mWeight = rec["weight"];
         clothing.mData.mValue = rec["value"];
+        clothing.mRecordFlags = 0;
         int clothingType = rec["type"].get<int>();
         if (clothingType >= 0 && clothingType <= ESM::Clothing::Amulet)
             clothing.mData.mType = clothingType;
