@@ -195,15 +195,11 @@ namespace MWWorld
         void addContainerScripts(const Ptr& reference, CellStore* cell) override;
         void removeContainerScripts(const Ptr& reference) override;
 
-        World(Resource::ResourceSystem* resourceSystem, int activationDistanceOverride, const std::string& startCell,
-            const std::filesystem::path& userDataPath);
-
-        void loadData(const Files::Collections& fileCollections, const std::vector<std::string>& contentFiles,
-            const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder);
-
-        // Must be called after `loadData`.
-        void init(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, SceneUtil::WorkQueue* workQueue,
-            SceneUtil::UnrefQueue& unrefQueue);
+        World(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
+            SceneUtil::WorkQueue* workQueue, SceneUtil::UnrefQueue& unrefQueue,
+            const Files::Collections& fileCollections, const std::vector<std::string>& contentFiles,
+            const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder,
+            int activationDistanceOverride, const std::string& startCell, const std::filesystem::path& userDataPath);
 
         virtual ~World();
 

@@ -244,16 +244,19 @@ namespace MWWorld
             mRendering->setSkyEnabled(false);
     }
 
-    World::World(Resource::ResourceSystem* resourceSystem, int activationDistanceOverride, const std::string& startCell,
+    World::World(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, Resource::ResourceSystem* resourceSystem,
+        SceneUtil::WorkQueue* workQueue, SceneUtil::UnrefQueue& unrefQueue, const Files::Collections& fileCollections,
+        const std::vector<std::string>& contentFiles, const std::vector<std::string>& groundcoverFiles,
+        ToUTF8::Utf8Encoder* encoder, int activationDistanceOverride, const std::string& startCell,
         const std::filesystem::path& userDataPath)
         : mResourceSystem(resourceSystem)
         , mLocalScripts(mStore)
         , mWorldModel(mStore, mReaders)
-        , mCurrentDate(std::make_unique<DateTimeManager>())
         , mSky(true)
         , mGodMode(false)
         , mScriptsEnabled(true)
         , mDiscardMovements(true)
+        , mContentFiles(contentFiles)
         , mUserDataPath(userDataPath)
         , mActivationDistanceOverride(activationDistanceOverride)
         , mStartCell(startCell)
@@ -267,19 +270,18 @@ namespace MWWorld
         , mPlayerInJail(false)
         , mSpellPreloadTimer(0.f)
     {
-    }
-
-    void World::loadData(const Files::Collections& fileCollections, const std::vector<std::string>& contentFiles,
-        const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder)
-    {
-        mContentFiles = contentFiles;
         if (encoder)
             mReaders.setStatelessEncoder(encoder->getStatelessEncoder());
         mESMVersions.resize(mContentFiles.size(), -1);
         Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+        listener->loadingOn();
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
         loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder, listener);
+
+        listener->loadingOff();
+
+        mCurrentDate = std::make_unique<DateTimeManager>();
 
         fillGlobalVariables();
 
@@ -288,18 +290,14 @@ namespace MWWorld
         mStore.movePlayerRecord();
 
         mSwimHeightScale = mStore.get<ESM::GameSetting>().find("fSwimHeightScale")->mValue.getFloat();
-    }
 
-    void World::init(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, SceneUtil::WorkQueue* workQueue,
-        SceneUtil::UnrefQueue& unrefQueue)
-    {
-        mPhysics = std::make_unique<MWPhysics::PhysicsSystem>(mResourceSystem, rootNode);
+        mPhysics = std::make_unique<MWPhysics::PhysicsSystem>(resourceSystem, rootNode);
 
         if (Settings::Manager::getBool("enable", "Navigator"))
         {
             auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
             navigatorSettings.mRecast.mSwimHeightScale = mSwimHeightScale;
-            mNavigator = DetourNavigator::makeNavigator(navigatorSettings, mUserDataPath);
+            mNavigator = DetourNavigator::makeNavigator(navigatorSettings, userDataPath);
         }
         else
         {
@@ -307,9 +305,9 @@ namespace MWWorld
         }
 
         mRendering = std::make_unique<MWRender::RenderingManager>(
-            viewer, rootNode, mResourceSystem, workQueue, *mNavigator, mGroundcoverStore, unrefQueue);
+            viewer, rootNode, resourceSystem, workQueue, *mNavigator, mGroundcoverStore, unrefQueue);
         mProjectileManager = std::make_unique<ProjectileManager>(
-            mRendering->getLightRoot()->asGroup(), mResourceSystem, mRendering.get(), mPhysics.get());
+            mRendering->getLightRoot()->asGroup(), resourceSystem, mRendering.get(), mPhysics.get());
         mRendering->preloadCommonAssets();
 
         mWeatherManager = std::make_unique<MWWorld::WeatherManager>(*mRendering, mStore);
