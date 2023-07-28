@@ -1,15 +1,9 @@
 #include "box.hpp"
 
 #include <MyGUI_EditText.h>
-#include <MyGUI_LanguageManager.h>
 
 namespace Gui
 {
-    void ComboBox::setPropertyOverride(const std::string& _key, const std::string& _value)
-    {
-        MyGUI::ComboBox::setPropertyOverride(_key, _value);
-    }
-
     void AutoSizedWidget::notifySizeChange(MyGUI::Widget* w)
     {
         MyGUI::Widget* parent = w->getParent();

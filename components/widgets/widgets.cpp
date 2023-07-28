@@ -28,7 +28,6 @@ namespace Gui
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::NumericEditBox>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::SharedStateButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::WindowCaption>("Widget");
-        MyGUI::FactoryManager::getInstance().registerFactory<Gui::ComboBox>("Widget");
     }
 
 }
