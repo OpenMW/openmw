@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_RESOURCE_SCENEMANAGER_H
 #define OPENMW_COMPONENTS_RESOURCE_SCENEMANAGER_H
 
+#include <array>
 #include <memory>
 #include <mutex>
 #include <string>

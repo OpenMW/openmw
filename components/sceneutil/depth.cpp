@@ -1,6 +1,7 @@
 #include "depth.hpp"
 
 #include <algorithm>
+#include <array>
 
 #include <components/debug/debuglog.hpp>
 #include <components/settings/values.hpp>

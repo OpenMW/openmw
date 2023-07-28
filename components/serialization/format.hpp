@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_SERIALIZATION_FORMAT_H
 
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <functional>

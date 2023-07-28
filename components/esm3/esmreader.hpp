@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_READER_H
 #define OPENMW_ESM_READER_H
 
+#include <array>
 #include <cstdint>
 #include <filesystem>
 #include <istream>

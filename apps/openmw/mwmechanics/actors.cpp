@@ -1,5 +1,6 @@
 #include "actors.hpp"
 
+#include <array>
 #include <optional>
 
 #include <components/esm3/esmreader.hpp>

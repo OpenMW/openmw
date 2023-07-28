@@ -1,5 +1,7 @@
 #include "types.hpp"
 
+#include <array>
+
 #include <components/detournavigator/agentbounds.hpp>
 #include <components/lua/luastate.hpp>
 
