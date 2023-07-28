@@ -27,6 +27,7 @@
 #include "nifkey.hpp"
 #include "niftypes.hpp" // Transformation
 #include "recordptr.hpp"
+#include <components/nif/controller.hpp>
 #include <components/nif/node.hpp>
 
 namespace Nif
@@ -40,6 +41,8 @@ namespace Nif
         std::vector<std::vector<osg::Vec2f>> uvlist;
         osg::Vec3f center;
         float radius;
+
+        bool NiPSysDataFlag = false;
 
         void read(NIFStream* nif) override;
     };
@@ -73,24 +76,6 @@ namespace Nif
         // Lines, series of indices that correspond to connected vertices.
         std::vector<unsigned short> lines;
 
-        void read(NIFStream* nif) override;
-    };
-
-    struct NiParticlesData : public NiGeometryData
-    {
-        int numParticles{ 0 };
-
-        int activeCount{ 0 };
-
-        std::vector<float> particleRadii, sizes, rotationAngles;
-        std::vector<osg::Quat> rotations;
-        std::vector<osg::Vec3f> rotationAxes;
-
-        void read(NIFStream* nif) override;
-    };
-
-    struct NiRotatingParticlesData : public NiParticlesData
-    {
         void read(NIFStream* nif) override;
     };
 
@@ -329,6 +314,5 @@ namespace Nif
 
         void read(NIFStream* nif) override;
     };
-
 } // Namespace
 #endif

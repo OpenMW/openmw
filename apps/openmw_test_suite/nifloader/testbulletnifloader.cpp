@@ -326,20 +326,20 @@ namespace
             mNiTriShapeData.vertices = { osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0) };
             mNiTriShapeData.mNumTriangles = 1;
             mNiTriShapeData.triangles = { 0, 1, 2 };
-            mNiTriShape.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
+            mNiTriShape.mData = Nif::NiGeometryDataPtr(&mNiTriShapeData);
 
             mNiTriShapeData2.recType = Nif::RC_NiTriShapeData;
             mNiTriShapeData2.vertices = { osg::Vec3f(0, 0, 1), osg::Vec3f(1, 0, 1), osg::Vec3f(1, 1, 1) };
             mNiTriShapeData2.mNumTriangles = 1;
             mNiTriShapeData2.triangles = { 0, 1, 2 };
-            mNiTriShape2.data = Nif::NiGeometryDataPtr(&mNiTriShapeData2);
+            mNiTriShape2.mData = Nif::NiGeometryDataPtr(&mNiTriShapeData2);
 
             mNiTriStripsData.recType = Nif::RC_NiTriStripsData;
             mNiTriStripsData.vertices
                 = { osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0), osg::Vec3f(0, 1, 0) };
             mNiTriStripsData.mNumTriangles = 2;
             mNiTriStripsData.strips = { { 0, 1, 2, 3 } };
-            mNiTriStrips.data = Nif::NiGeometryDataPtr(&mNiTriStripsData);
+            mNiTriStrips.mData = Nif::NiGeometryDataPtr(&mNiTriStripsData);
         }
     };
 
@@ -716,7 +716,7 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_child_node_and_filename_starting_with_x_and_not_empty_skin_should_return_static_shape)
     {
-        mNiTriShape.skin = Nif::NiSkinInstancePtr(&mNiSkinInstance);
+        mNiTriShape.mSkinInstance = Nif::NiSkinInstancePtr(&mNiSkinInstance);
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
 
@@ -959,7 +959,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_with_empty_data_should_return_shape_with_null_collision_shape)
     {
-        mNiTriShape.data = Nif::NiGeometryDataPtr(nullptr);
+        mNiTriShape.mData = Nif::NiGeometryDataPtr(nullptr);
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
 
@@ -977,7 +977,7 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_child_node_with_empty_data_triangles_should_return_shape_with_null_collision_shape)
     {
-        auto data = static_cast<Nif::NiTriShapeData*>(mNiTriShape.data.getPtr());
+        auto data = static_cast<Nif::NiTriShapeData*>(mNiTriShape.mData.getPtr());
         data->triangles.clear();
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
@@ -1111,7 +1111,7 @@ namespace
         init(niTriShape);
         init(emptyCollisionNode);
 
-        niTriShape.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
+        niTriShape.mData = Nif::NiGeometryDataPtr(&mNiTriShapeData);
         niTriShape.parents.push_back(&mNiNode);
 
         emptyCollisionNode.recType = Nif::RC_RootCollisionNode;
@@ -1210,7 +1210,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, should_ignore_tri_shape_data_with_mismatching_data_rec_type)
     {
-        mNiTriShape.data = Nif::NiGeometryDataPtr(&mNiTriStripsData);
+        mNiTriShape.mData = Nif::NiGeometryDataPtr(&mNiTriStripsData);
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiTriShape);
@@ -1245,7 +1245,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, should_ignore_tri_strips_data_with_mismatching_data_rec_type)
     {
-        mNiTriStrips.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
+        mNiTriStrips.mData = Nif::NiGeometryDataPtr(&mNiTriShapeData);
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiTriStrips);

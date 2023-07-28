@@ -149,7 +149,13 @@ namespace Nif
     struct bhkCompressedMeshShapeData;
     struct BSMultiBound;
     struct BSMultiBoundData;
+    struct NiPSysData;
+    struct NiParticleSystem;
+    struct NiPSysModifier;
+    struct NiPSysSpawnModifier;
+    struct NiNode;
 
+    using RecordPtr = RecordPtrT<Record>;
     using NodePtr = RecordPtrT<Node>;
     using ExtraPtr = RecordPtrT<Extra>;
     using NiUVDataPtr = RecordPtrT<NiUVData>;
@@ -187,6 +193,11 @@ namespace Nif
     using bhkCompressedMeshShapeDataPtr = RecordPtrT<bhkCompressedMeshShapeData>;
     using BSMultiBoundPtr = RecordPtrT<BSMultiBound>;
     using BSMultiBoundDataPtr = RecordPtrT<BSMultiBoundData>;
+    using NiPSysDataPtr = RecordPtrT<NiPSysData>;
+    using NiParticleSystemPtr = RecordPtrT<NiParticleSystem>;
+    using NiPSysModifierPtr = RecordPtrT<NiPSysModifier>;
+    using NiPSysSpawnModifierPtr = RecordPtrT<NiPSysSpawnModifier>;
+    using NiNodePtr = RecordPtrT<NiNode>;
 
     using NodeList = RecordListT<Node>;
     using PropertyList = RecordListT<Property>;
