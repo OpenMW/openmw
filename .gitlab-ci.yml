@@ -512,7 +512,7 @@ macOS13_Xcode14_arm64:
   tags:
     - saas-macos-medium-m1
   cache:
-    key: macOS12_Xcode14_arm64.v2
+    key: macOS12_Xcode14_arm64.v3
   variables:
     CCACHE_SIZE: 3G
 
