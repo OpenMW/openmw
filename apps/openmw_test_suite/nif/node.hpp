@@ -35,8 +35,8 @@ namespace Nif::Testing
     inline void init(NiGeometry& value)
     {
         init(static_cast<Node&>(value));
-        value.data = NiGeometryDataPtr(nullptr);
-        value.skin = NiSkinInstancePtr(nullptr);
+        value.mData = NiGeometryDataPtr(nullptr);
+        value.mSkinInstance = NiSkinInstancePtr(nullptr);
     }
 
     inline void init(NiTriShape& value)
