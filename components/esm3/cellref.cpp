@@ -110,9 +110,13 @@ namespace ESM
                         getHTOrSkip(cellRef.mGoldValue);
                         break;
                     case fourCC("DODT"):
-                        getHTOrSkip(cellRef.mDoorDest);
                         if constexpr (load)
+                        {
+                            esm.getHTSized<24>(cellRef.mDoorDest);
                             cellRef.mTeleport = true;
+                        }
+                        else
+                            esm.skipHTSized<24, ESM::Position>();
                         break;
                     case fourCC("DNAM"):
                         getHStringOrSkip(cellRef.mDestCell);

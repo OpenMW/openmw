@@ -484,7 +484,7 @@ namespace ESM
             case RefIdType::FormId:
             {
                 FormId formId{};
-                getT(formId);
+                getTSized<8>(formId);
                 return RefId::formIdRefId(formId);
             }
             case RefIdType::Generated:

@@ -68,7 +68,7 @@ namespace ESM
                 if (esm.isNextSub("WORS"))
                 {
                     esm.getHT(params.mWorsenings);
-                    esm.getHNT(params.mNextWorsening, "TIME");
+                    esm.getHNTSized<8>(params.mNextWorsening, "TIME");
                 }
                 else
                     params.mWorsenings = -1;

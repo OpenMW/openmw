@@ -97,7 +97,7 @@ namespace ESSImport
     void ConvertFMAP::read(ESM::ESMReader& esm)
     {
         MAPH maph;
-        esm.getHNT(maph, "MAPH");
+        esm.getHNTSized<8>(maph, "MAPH");
         std::vector<char> data;
         esm.getSubNameIs("MAPD");
         esm.getSubHeader();

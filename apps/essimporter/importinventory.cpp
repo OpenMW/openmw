@@ -12,7 +12,7 @@ namespace ESSImport
         while (esm.isNextSub("NPCO"))
         {
             ContItem contItem;
-            esm.getHT(contItem);
+            esm.getHTSized<36>(contItem);
 
             InventoryItem item;
             item.mId = contItem.mItem.toString();

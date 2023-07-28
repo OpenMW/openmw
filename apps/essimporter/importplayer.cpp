@@ -19,7 +19,7 @@ namespace ESSImport
             mMNAM = esm.getHString();
         }
 
-        esm.getHNT(mPNAM, "PNAM");
+        esm.getHNTSized<212>(mPNAM, "PNAM");
 
         if (esm.isNextSub("SNAM"))
             esm.skipHSub();
@@ -54,7 +54,7 @@ namespace ESSImport
         if (esm.isNextSub("ENAM"))
         {
             mHasENAM = true;
-            esm.getHT(mENAM);
+            esm.getHTSized<8>(mENAM);
         }
 
         if (esm.isNextSub("LNAM"))
@@ -63,7 +63,7 @@ namespace ESSImport
         while (esm.isNextSub("FNAM"))
         {
             FNAM fnam;
-            esm.getHT(fnam);
+            esm.getHTSized<44>(fnam);
             mFactions.push_back(fnam);
         }
 
@@ -71,7 +71,7 @@ namespace ESSImport
         if (esm.isNextSub("AADT")) // Attack animation data?
         {
             mHasAADT = true;
-            esm.getHT(mAADT);
+            esm.getHTSized<44>(mAADT);
         }
 
         if (esm.isNextSub("KNAM"))

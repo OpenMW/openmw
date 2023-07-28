@@ -45,7 +45,7 @@ namespace ESM
 
         if (esm.isNextSub("GMDT"))
         {
-            esm.getHT(mGameData);
+            esm.getHTSized<124>(mGameData);
         }
         if (esm.isNextSub("SCRD"))
         {

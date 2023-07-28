@@ -16,7 +16,7 @@ namespace ESSImport
         }
         else if (esm.getSubSize() == 96)
         {
-            esm.getT(mGMDT);
+            esm.getTSized<96>(mGMDT);
         }
         else
             esm.fail("unexpected subrecord size for GAME.GMDT");

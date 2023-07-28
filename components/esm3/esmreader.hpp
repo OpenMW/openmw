@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <istream>
 #include <memory>
+#include <type_traits>
 #include <vector>
 
 #include <components/to_utf8/to_utf8.hpp>
@@ -15,6 +16,27 @@
 
 namespace ESM
 {
+    template <class T>
+    struct GetArray
+    {
+        using type = void;
+    };
+    template <class T, size_t N>
+    struct GetArray<std::array<T, N>>
+    {
+        using type = T;
+    };
+    template <class T, size_t N>
+    struct GetArray<T[N]>
+    {
+        using type = T;
+    };
+
+    template <class T>
+    inline constexpr bool IsReadable
+        = std::is_arithmetic_v<T> || std::is_enum_v<T> || IsReadable<typename GetArray<T>::type>;
+    template <>
+    inline constexpr bool IsReadable<void> = false;
 
     class ReadersCache;
 
@@ -100,19 +122,17 @@ namespace ESM
         ESM::RefId getCellId();
 
         // Read data of a given type, stored in a subrecord of a given name
-        template <typename X>
+        template <typename X, typename = std::enable_if_t<IsReadable<X>>>
         void getHNT(X& x, NAME name)
         {
-            getSubNameIs(name);
-            getHT(x);
+            getHNTSized<sizeof(X)>(x, name);
         }
 
         // Optional version of getHNT
-        template <typename X>
+        template <typename X, typename = std::enable_if_t<IsReadable<X>>>
         void getHNOT(X& x, NAME name)
         {
-            if (isNextSub(name))
-                getHT(x);
+            getHNOTSized<sizeof(X)>(x, name);
         }
 
         // Version with extra size checking, to make sure the compiler
@@ -120,34 +140,28 @@ namespace ESM
         template <std::size_t size, typename X>
         void getHNTSized(X& x, NAME name)
         {
-            static_assert(sizeof(X) == size);
-            getHNT(x, name);
+            getSubNameIs(name);
+            getHTSized<size>(x);
         }
 
         template <std::size_t size, typename X>
         void getHNOTSized(X& x, NAME name)
         {
-            static_assert(sizeof(X) == size);
-            getHNOT(x, name);
+            if (isNextSub(name))
+                getHTSized<size>(x);
         }
 
         // Get data of a given type/size, including subrecord header
-        template <typename X>
+        template <typename X, typename = std::enable_if_t<IsReadable<X>>>
         void getHT(X& x)
         {
-            getSubHeader();
-            if (mCtx.leftSub != sizeof(X))
-                reportSubSizeMismatch(sizeof(X), mCtx.leftSub);
-            getT(x);
+            getHTSized<sizeof(X)>(x);
         }
 
-        template <typename T>
+        template <typename T, typename = std::enable_if_t<IsReadable<T>>>
         void skipHT()
         {
-            getSubHeader();
-            if (mCtx.leftSub != sizeof(T))
-                reportSubSizeMismatch(sizeof(T), mCtx.leftSub);
-            skipT<T>();
+            skipHTSized<sizeof(T), T>();
         }
 
         // Version with extra size checking, to make sure the compiler
@@ -155,15 +169,27 @@ namespace ESM
         template <std::size_t size, typename X>
         void getHTSized(X& x)
         {
-            static_assert(sizeof(X) == size);
-            getHT(x);
+            getSubHeader();
+            if (mCtx.leftSub != size)
+                reportSubSizeMismatch(size, mCtx.leftSub);
+            getTSized<size>(x);
         }
 
         template <std::size_t size, typename T>
         void skipHTSized()
         {
             static_assert(sizeof(T) == size);
-            skipHT<T>();
+            getSubHeader();
+            if (mCtx.leftSub != size)
+                reportSubSizeMismatch(size, mCtx.leftSub);
+            skip(size);
+        }
+
+        template <std::size_t size, typename X>
+        void getTSized(X& x)
+        {
+            static_assert(sizeof(X) == size);
+            getExact(&x, size);
         }
 
         // Read a string by the given name if it is the next record.
@@ -266,13 +292,13 @@ namespace ESM
          *
          *************************************************************************/
 
-        template <typename X>
+        template <typename X, typename = std::enable_if_t<IsReadable<X>>>
         void getT(X& x)
         {
             getExact(&x, sizeof(X));
         }
 
-        template <typename T>
+        template <typename T, typename = std::enable_if_t<IsReadable<T>>>
         void skipT()
         {
             skip(sizeof(T));
@@ -283,7 +309,7 @@ namespace ESM
             mEsm->read(static_cast<char*>(x), static_cast<std::streamsize>(size));
         }
 
-        void getName(NAME& name) { getT(name); }
+        void getName(NAME& name) { getTSized<4>(name); }
         void getUint(uint32_t& u) { getT(u); }
 
         std::string getMaybeFixedStringSize(std::size_t size);

@@ -16,7 +16,7 @@ namespace ESM
 
         mLastRespawn.mDay = 0;
         mLastRespawn.mHour = 0;
-        esm.getHNOT(mLastRespawn, "RESP");
+        esm.getHNOTSized<8>(mLastRespawn, "RESP");
     }
 
     void CellState::save(ESMWriter& esm) const

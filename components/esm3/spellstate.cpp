@@ -79,7 +79,7 @@ namespace ESM
 
             CorprusStats stats;
             esm.getHNT(stats.mWorsenings, "WORS");
-            esm.getHNT(stats.mNextWorsening, "TIME");
+            esm.getHNTSized<8>(stats.mNextWorsening, "TIME");
 
             mCorprusSpells[id] = stats;
         }
@@ -88,7 +88,7 @@ namespace ESM
         {
             ESM::RefId id = esm.getRefId();
             TimeStamp time;
-            esm.getHNT(time, "TIME");
+            esm.getHNTSized<8>(time, "TIME");
 
             mUsedPowers[id] = time;
         }

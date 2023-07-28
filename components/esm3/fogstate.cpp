@@ -58,7 +58,7 @@ namespace ESM
 
     void FogState::load(ESMReader& esm)
     {
-        esm.getHNOT(mBounds, "BOUN");
+        esm.getHNOTSized<16>(mBounds, "BOUN");
         esm.getHNOT(mNorthMarkerAngle, "ANGL");
         const FormatVersion dataFormat = esm.getFormatVersion();
         while (esm.isNextSub("FTEX"))

@@ -17,8 +17,8 @@ namespace ESM
     void BaseProjectileState::load(ESMReader& esm)
     {
         mId = esm.getHNRefId("ID__");
-        esm.getHNT(mPosition, "VEC3");
-        esm.getHNT(mOrientation, "QUAT");
+        esm.getHNTSized<12>(mPosition, "VEC3");
+        esm.getHNTSized<16>(mOrientation, "QUAT");
         esm.getHNT(mActorId, "ACTO");
     }
 
@@ -65,7 +65,7 @@ namespace ESM
         BaseProjectileState::load(esm);
 
         mBowId = esm.getHNRefId("BOW_");
-        esm.getHNT(mVelocity, "VEL_");
+        esm.getHNTSized<12>(mVelocity, "VEL_");
 
         mAttackStrength = 1.f;
         esm.getHNOT(mAttackStrength, "STR_");

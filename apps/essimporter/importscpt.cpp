@@ -7,7 +7,7 @@ namespace ESSImport
 
     void SCPT::load(ESM::ESMReader& esm)
     {
-        esm.getHNT(mSCHD, "SCHD");
+        esm.getHNTSized<52>(mSCHD, "SCHD");
 
         mSCRI.load(esm);
 

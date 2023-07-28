@@ -29,7 +29,7 @@ namespace ESM
                     // Cold weather not included before 1.3
                     if (esm.getSubSize() == sizeof(mData))
                     {
-                        esm.getT(mData);
+                        esm.getTSized<10>(mData);
                     }
                     else if (esm.getSubSize() == sizeof(mData) - 2)
                     {
