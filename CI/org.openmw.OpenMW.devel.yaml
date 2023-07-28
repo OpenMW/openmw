@@ -126,7 +126,7 @@ modules:
     sources:
       - type: archive
         url: https://github.com/MyGUI/mygui/archive/refs/tags/MyGUI3.4.2.tar.gz
-        sha256: bdf730bdeb4ad89e6b8223967db01aa5274d2b93adc2c0d6aa4842faeed4de1a
+        sha256: 1cc45fb96c9438e3476778449af0378443d84794a458978a29c75306e45dd45a
 
   - name: libunshield
     buildsystem: cmake-ninja
