@@ -6,6 +6,7 @@
 #include <SDL.h>
 
 #include <components/debug/debuglog.hpp>
+#include <components/esm/refid.hpp>
 #include <components/files/conversion.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
 #include <components/settings/values.hpp>
@@ -15,11 +16,7 @@
 #include "../mwbase/luamanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/world.hpp"
 
-#include "../mwworld/player.hpp"
-
-#include "actionmanager.hpp"
 #include "actions.hpp"
 #include "bindingsmanager.hpp"
 #include "mousemanager.hpp"

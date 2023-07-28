@@ -4,16 +4,15 @@
 
 #include <MyGUI_ScrollView.h>
 
+#include <components/esm3/loadrepa.hpp>
 #include <components/widgets/box.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/containerstore.hpp"
 
 #include "inventoryitemmodel.hpp"
 #include "itemchargeview.hpp"

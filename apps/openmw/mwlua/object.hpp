@@ -2,15 +2,14 @@
 #define MWLUA_OBJECT_H
 
 #include <map>
+#include <stdexcept>
 #include <typeindex>
 
 #include <sol/sol.hpp>
 
 #include <components/esm3/cellref.hpp>
 
-#include "../mwbase/environment.hpp"
 #include "../mwworld/ptr.hpp"
-#include "../mwworld/worldmodel.hpp"
 
 namespace MWLua
 {

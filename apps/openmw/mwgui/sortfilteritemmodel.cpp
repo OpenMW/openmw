@@ -1,7 +1,5 @@
 #include "sortfilteritemmodel.hpp"
 
-#include "../mwbase/environment.hpp"
-#include "../mwbase/world.hpp"
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadappa.hpp>
@@ -19,9 +17,12 @@
 #include <components/esm3/loadweap.hpp>
 #include <components/misc/utf8stream.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-#include "../mwworld/nullaction.hpp"
 
 #include "../mwmechanics/alchemy.hpp"
 #include "../mwmechanics/spellutil.hpp"

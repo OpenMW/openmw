@@ -3,6 +3,7 @@
 #include <components/compiler/extensions.hpp>
 #include <components/compiler/opcodes.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/interpreter/context.hpp>
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/opcodes.hpp>
 #include <components/interpreter/runtime.hpp>
@@ -16,7 +17,6 @@
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwworld/class.hpp"
 
-#include "interpretercontext.hpp"
 #include "ref.hpp"
 
 namespace MWScript

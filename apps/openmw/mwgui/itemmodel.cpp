@@ -2,12 +2,9 @@
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
-#include "../mwworld/worldmodel.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
-
-#include <components/debug/debuglog.hpp>
 
 namespace MWGui
 {

@@ -4,6 +4,7 @@
 #include <components/esm/records.hpp>
 
 #include "../mwworld/cellstore.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "types/types.hpp"
 

@@ -3,12 +3,13 @@
 #include <components/detournavigator/agentbounds.hpp>
 #include <components/lua/luastate.hpp>
 
-#include <apps/openmw/mwbase/mechanicsmanager.hpp>
-#include <apps/openmw/mwbase/windowmanager.hpp>
-#include <apps/openmw/mwmechanics/creaturestats.hpp>
-#include <apps/openmw/mwmechanics/drawstate.hpp>
-#include <apps/openmw/mwworld/class.hpp>
-#include <apps/openmw/mwworld/inventorystore.hpp>
+#include "apps/openmw/mwbase/mechanicsmanager.hpp"
+#include "apps/openmw/mwbase/windowmanager.hpp"
+#include "apps/openmw/mwmechanics/creaturestats.hpp"
+#include "apps/openmw/mwmechanics/drawstate.hpp"
+#include "apps/openmw/mwworld/class.hpp"
+#include "apps/openmw/mwworld/inventorystore.hpp"
+#include "apps/openmw/mwworld/worldmodel.hpp"
 
 #include "../localscripts.hpp"
 #include "../luamanagerimp.hpp"

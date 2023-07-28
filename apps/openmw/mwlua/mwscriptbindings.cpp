@@ -1,11 +1,16 @@
 #include "mwscriptbindings.hpp"
 
 #include <components/lua/luastate.hpp>
+#include <components/misc/strings/lower.hpp>
 
+#include "../mwbase/environment.hpp"
+#include "../mwbase/scriptmanager.hpp"
 #include "../mwbase/world.hpp"
-#include "../mwscript/scriptmanagerimp.hpp"
+#include "../mwscript/globalscripts.hpp"
 
 #include "object.hpp"
+
+#include <stdexcept>
 
 namespace MWLua
 {

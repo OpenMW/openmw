@@ -10,8 +10,6 @@
 #include <MyGUI_Widget.h>
 
 #include <algorithm>
-#include <components/fx/widgets.hpp>
-#include <components/misc/strings/format.hpp>
 #include <memory>
 #include <string>
 #include <vector>
@@ -19,6 +17,8 @@
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 #include <osg/Vec4f>
+
+#include <components/misc/strings/format.hpp>
 
 #include "types.hpp"
 

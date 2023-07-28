@@ -2,13 +2,14 @@
 
 #include <limits>
 
-#include "../mwworld/esmstore.hpp"
-
 #include <components/compiler/opcodes.hpp>
 
+#include <components/interpreter/context.hpp>
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/opcodes.hpp>
 #include <components/interpreter/runtime.hpp>
+
+#include <components/misc/strings/algorithm.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -19,8 +20,6 @@
 #include "../mwworld/scene.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
-
-#include "interpretercontext.hpp"
 
 namespace MWScript
 {
