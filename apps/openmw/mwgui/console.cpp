@@ -277,7 +277,7 @@ namespace MWGui
         {
             if (key == MyGUI::KeyCode::W)
             {
-                const auto& caption = mCommandLine->getCaption();
+                auto caption = mCommandLine->getOnlyText();
                 if (caption.empty())
                     return;
                 size_t max = mCommandLine->getTextCursor();
@@ -288,9 +288,8 @@ namespace MWGui
                 size_t length = mCommandLine->getTextCursor() - max;
                 if (length > 0)
                 {
-                    auto text = caption;
-                    text.erase(max, length);
-                    mCommandLine->setCaption(text);
+                    caption.erase(max, length);
+                    mCommandLine->setOnlyText(caption);
                     mCommandLine->setTextCursor(max);
                 }
             }
@@ -298,9 +297,9 @@ namespace MWGui
             {
                 if (mCommandLine->getTextCursor() > 0)
                 {
-                    auto text = mCommandLine->getCaption();
+                    auto text = mCommandLine->getOnlyText();
                     text.erase(0, mCommandLine->getTextCursor());
-                    mCommandLine->setCaption(text);
+                    mCommandLine->setOnlyText(text);
                     mCommandLine->setTextCursor(0);
                 }
             }
@@ -309,9 +308,9 @@ namespace MWGui
         {
             std::vector<std::string> matches;
             listNames();
-            std::string oldCaption = mCommandLine->getCaption();
+            std::string oldCaption = mCommandLine->getOnlyText();
             std::string newCaption = complete(mCommandLine->getOnlyText(), matches);
-            mCommandLine->setCaption(newCaption);
+            mCommandLine->setOnlyText(newCaption);
 
             // List candidates if repeatedly pressing tab
             if (oldCaption == newCaption && !matches.empty())
@@ -342,7 +341,7 @@ namespace MWGui
             if (mCurrent != mCommandHistory.begin())
             {
                 --mCurrent;
-                mCommandLine->setCaption(*mCurrent);
+                mCommandLine->setOnlyText(*mCurrent);
             }
         }
         else if (key == MyGUI::KeyCode::ArrowDown)
@@ -352,10 +351,10 @@ namespace MWGui
                 ++mCurrent;
 
                 if (mCurrent != mCommandHistory.end())
-                    mCommandLine->setCaption(*mCurrent);
+                    mCommandLine->setOnlyText(*mCurrent);
                 else
                     // Restore the edit string
-                    mCommandLine->setCaption(mEditString);
+                    mCommandLine->setOnlyText(mEditString);
             }
         }
     }
