@@ -412,6 +412,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
                 "to the newest OpenMW version to load this file.");
 
         std::map<int, int> contentFileMap = buildContentFileIndexMap(reader);
+        reader.setContentFileMapping(&contentFileMap);
         MWBase::Environment::get().getLuaManager()->setContentFileMapping(contentFileMap);
 
         Loading::Listener& listener = *MWBase::Environment::get().getWindowManager()->getLoadingScreen();
@@ -485,7 +486,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
                 case ESM::REC_CREA:
                 case ESM::REC_CONT:
                 case ESM::REC_RAND:
-                    MWBase::Environment::get().getWorld()->readRecord(reader, n.toInt(), contentFileMap);
+                    MWBase::Environment::get().getWorld()->readRecord(reader, n.toInt());
                     break;
 
                 case ESM::REC_CAM_:
@@ -494,8 +495,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
 
                 case ESM::REC_GSCR:
 
-                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().readRecord(
-                        reader, n.toInt(), contentFileMap);
+                    MWBase::Environment::get().getScriptManager()->getGlobalScripts().readRecord(reader, n.toInt());
                     break;
 
                 case ESM::REC_GMAP:

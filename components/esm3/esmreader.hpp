@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <filesystem>
 #include <istream>
+#include <map>
 #include <memory>
 #include <type_traits>
 #include <vector>
@@ -111,6 +112,13 @@ namespace ESM
         /// @note Does not validate.
         void resolveParentFileIndices(ReadersCache& readers);
         const std::vector<int>& getParentFileIndices() const { return mCtx.parentFileIndices; }
+
+        // Used only when loading saves to adjust FormIds if load order was changes.
+        void setContentFileMapping(const std::map<int, int>* mapping) { mContentFileMapping = mapping; }
+        const std::map<int, int>* getContentFileMapping();
+
+        // Returns false if content file not found.
+        bool applyContentFileMapping(FormId& id);
 
         /*************************************************************************
          *
@@ -368,6 +376,8 @@ namespace ESM
         ToUTF8::Utf8Encoder* mEncoder;
 
         size_t mFileSize;
+
+        const std::map<int, int>* mContentFileMapping = nullptr;
     };
 }
 #endif

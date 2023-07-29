@@ -47,6 +47,10 @@ namespace ESM
             state.mRef.loadId(esm, true);
             state.load(esm);
 
+            // Update content file index if load order was changed.
+            if (!esm.applyContentFileMapping(state.mRef.mRefNum))
+                state.mRef.mRefNum = FormId(); // content file removed; unset refnum, but keep object.
+
             if (state.mCount == 0)
                 continue;
 

@@ -486,7 +486,7 @@ namespace MWWorld
         writer.endRecord(ESM::REC_CAM_);
     }
 
-    void World::readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap)
+    void World::readRecord(ESM::ESMReader& reader, uint32_t type)
     {
         switch (type)
         {
@@ -522,8 +522,7 @@ namespace MWWorld
                 break;
             default:
                 if (!mStore.readRecord(reader, type) && !mGlobalVariables.readRecord(reader, type)
-                    && !mWeatherManager->readRecord(reader, type)
-                    && !mWorldModel.readRecord(reader, type, contentFileMap)
+                    && !mWeatherManager->readRecord(reader, type) && !mWorldModel.readRecord(reader, type)
                     && !mProjectileManager->readRecord(reader, type))
                 {
                     throw std::runtime_error("unknown record in saved game");
