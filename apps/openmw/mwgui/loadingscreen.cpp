@@ -76,10 +76,6 @@ namespace MWGui
 
     void LoadingScreen::setLabel(const std::string& label, bool important)
     {
-        std::lock_guard<std::mutex> guard(mMutex);
-        if (!isVisible())
-            return;
-
         mImportantLabel = important;
 
         mLoadingText->setCaptionWithReplacing(label);
@@ -145,8 +141,6 @@ namespace MWGui
 
     void LoadingScreen::loadingOn(bool visible)
     {
-        std::lock_guard<std::mutex> guard(mMutex);
-
         // Early-out if already on
         if (mNestedLoadingCount++ > 0 && mMainWidget->getVisible())
             return;
@@ -187,8 +181,6 @@ namespace MWGui
 
     void LoadingScreen::loadingOff()
     {
-        std::lock_guard<std::mutex> guard(mMutex);
-
         if (--mNestedLoadingCount > 0)
             return;
         mLoadingBox->setVisible(true); // restore
@@ -247,10 +239,6 @@ namespace MWGui
 
     void LoadingScreen::setProgress(size_t value)
     {
-        std::lock_guard<std::mutex> guard(mMutex);
-        if (!isVisible())
-            return;
-
         // skip expensive update if there isn't enough visible progress
         if (mProgressBar->getWidth() <= 0
             || value - mProgress < mProgressBar->getScrollRange() / mProgressBar->getWidth())
@@ -265,10 +253,6 @@ namespace MWGui
 
     void LoadingScreen::increaseProgress(size_t increase)
     {
-        std::lock_guard<std::mutex> guard(mMutex);
-        if (!isVisible())
-            return;
-
         mProgressBar->setScrollPosition(0);
         size_t value = mProgress + increase;
         value = std::min(value, mProgressBar->getScrollRange() - 1);

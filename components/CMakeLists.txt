@@ -292,7 +292,7 @@ add_component_dir (terrain
     )
 
 add_component_dir (loadinglistener
-    loadinglistener
+    loadinglistener asynclistener
     )
 
 add_component_dir (myguiplatform

@@ -2,7 +2,6 @@
 #define MWGUI_LOADINGSCREEN_H
 
 #include <memory>
-#include <mutex>
 
 #include <osg/Timer>
 #include <osg/ref_ptr>
@@ -69,8 +68,6 @@ namespace MWGui
 
         bool mVisible;
         int mNestedLoadingCount;
-
-        std::mutex mMutex;
 
         size_t mProgress;
 
