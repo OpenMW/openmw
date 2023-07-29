@@ -336,7 +336,7 @@ namespace Debug
 }
 
 Debug::DebugDrawer::DebugDrawer(Shader::ShaderManager& shaderManager, osg::ref_ptr<osg::Group> parentNode)
-    : mParentNode(parentNode)
+    : mParentNode(std::move(parentNode))
 {
     mCurrentFrame = 0;
 

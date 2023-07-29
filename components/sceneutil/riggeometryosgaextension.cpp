@@ -69,7 +69,7 @@ namespace SceneUtil
         }
 
         osg::ref_ptr<OsgaRigGeometry> rigGeometry = new OsgaRigGeometry(*copy.getSourceRigGeometry(), copyop);
-        setSourceRigGeometry(rigGeometry);
+        setSourceRigGeometry(std::move(rigGeometry));
     }
 
     RigGeometryHolder::RigGeometryHolder(const osgAnimation::RigGeometry& copy, const osg::CopyOp& copyop)
@@ -80,7 +80,7 @@ namespace SceneUtil
         setUseVertexBufferObjects(true);
 
         osg::ref_ptr<OsgaRigGeometry> rigGeometry = new OsgaRigGeometry(copy, copyop);
-        setSourceRigGeometry(rigGeometry);
+        setSourceRigGeometry(std::move(rigGeometry));
     }
 
     void RigGeometryHolder::setSourceRigGeometry(osg::ref_ptr<OsgaRigGeometry> sourceRigGeometry)

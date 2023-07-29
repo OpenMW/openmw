@@ -42,7 +42,7 @@ namespace MWRender
 
     ActorAnimation::ActorAnimation(
         const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
-        : Animation(ptr, parentNode, resourceSystem)
+        : Animation(ptr, std::move(parentNode), resourceSystem)
     {
         MWWorld::ContainerStore& store = mPtr.getClass().getContainerStore(mPtr);
 
@@ -474,7 +474,7 @@ namespace MWRender
             osg::ref_ptr<osg::Group> arrowNode = ammoNode->getChild(i)->asGroup();
             osg::ref_ptr<osg::Node> arrow = mResourceSystem->getSceneManager()->getInstance(model, arrowNode);
             if (!ammo->getClass().getEnchantment(*ammo).empty())
-                mGlowUpdater = SceneUtil::addEnchantedGlow(arrow, mResourceSystem, glowColor);
+                mGlowUpdater = SceneUtil::addEnchantedGlow(std::move(arrow), mResourceSystem, glowColor);
         }
     }
 

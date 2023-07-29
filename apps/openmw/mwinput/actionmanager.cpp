@@ -31,8 +31,8 @@ namespace MWInput
         osgViewer::ScreenCaptureHandler::CaptureOperation* screenCaptureOperation,
         osg::ref_ptr<osgViewer::Viewer> viewer, osg::ref_ptr<osgViewer::ScreenCaptureHandler> screenCaptureHandler)
         : mBindingsManager(bindingsManager)
-        , mViewer(viewer)
-        , mScreenCaptureHandler(screenCaptureHandler)
+        , mViewer(std::move(viewer))
+        , mScreenCaptureHandler(std::move(screenCaptureHandler))
         , mScreenCaptureOperation(screenCaptureOperation)
         , mTimeIdle(0.f)
     {

@@ -26,7 +26,7 @@ namespace MWRender
 
     Pathgrid::Pathgrid(osg::ref_ptr<osg::Group> root)
         : mPathgridEnabled(false)
-        , mRootNode(root)
+        , mRootNode(std::move(root))
         , mPathGridRoot(nullptr)
         , mInteriorPathgridNode(nullptr)
     {

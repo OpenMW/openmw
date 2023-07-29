@@ -13,7 +13,7 @@ namespace SDLUtil
 
     VideoWrapper::VideoWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer)
         : mWindow(window)
-        , mViewer(viewer)
+        , mViewer(std::move(viewer))
         , mGamma(1.f)
         , mContrast(1.f)
         , mHasSetGammaContrast(false)

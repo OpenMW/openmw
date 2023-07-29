@@ -255,7 +255,7 @@ namespace MWRender
 
     NpcAnimation::NpcAnimation(const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode,
         Resource::ResourceSystem* resourceSystem, bool disableSounds, ViewMode viewMode, float firstPersonFieldOfView)
-        : ActorAnimation(ptr, parentNode, resourceSystem)
+        : ActorAnimation(ptr, std::move(parentNode), resourceSystem)
         , mViewMode(viewMode)
         , mShowWeapons(false)
         , mShowCarriedLeft(true)

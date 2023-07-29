@@ -83,7 +83,7 @@ CompositeOsgRenderer* osgQOpenGLWidget::getCompositeViewer()
 
 void osgQOpenGLWidget::setGraphicsWindowEmbedded(osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> osgWinEmb)
 {
-    if (m_renderer) m_renderer->setGraphicsWindowEmbedded(osgWinEmb);
+    if (m_renderer) m_renderer->setGraphicsWindowEmbedded(std::move(osgWinEmb));
 }
 
 void osgQOpenGLWidget::createRenderer()

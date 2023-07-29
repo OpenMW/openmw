@@ -95,7 +95,7 @@ namespace MWWorld
         {
             PreloadEntry(double timestamp, osg::ref_ptr<SceneUtil::WorkItem> workItem)
                 : mTimeStamp(timestamp)
-                , mWorkItem(workItem)
+                , mWorkItem(std::move(workItem))
             {
             }
             PreloadEntry()

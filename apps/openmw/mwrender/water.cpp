@@ -625,8 +625,8 @@ namespace MWRender
             , mReflection(reflection)
             , mRefraction(refraction)
             , mRipples(ripples)
-            , mProgram(program)
-            , mNormalMap(normalMap)
+            , mProgram(std::move(program))
+            , mNormalMap(std::move(normalMap))
         {
         }
 
@@ -714,7 +714,7 @@ namespace MWRender
         node->setUpdateCallback(mRainIntensityUpdater);
 
         mShaderWaterStateSetUpdater
-            = new ShaderWaterStateSetUpdater(this, mReflection, mRefraction, mRipples, program, normalMap);
+            = new ShaderWaterStateSetUpdater(this, mReflection, mRefraction, mRipples, std::move(program), normalMap);
         node->addCullCallback(mShaderWaterStateSetUpdater);
     }
 

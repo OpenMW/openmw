@@ -26,7 +26,7 @@ namespace MWRender
 {
 
     DebugDrawer::DebugDrawer(osg::ref_ptr<osg::Group> parentNode, btCollisionWorld* world, int debugMode)
-        : mParentNode(parentNode)
+        : mParentNode(std::move(parentNode))
         , mWorld(world)
     {
         DebugDrawer::setDebugMode(debugMode);
