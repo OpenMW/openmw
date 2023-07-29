@@ -264,6 +264,6 @@ void Fallback::validate(boost::any& v, std::vector<std::string> const& tokens, F
         std::string key(token.substr(0, sep));
         std::string value(token.substr(sep + 1));
 
-        map->mMap[key] = value;
+        map->mMap[key] = std::move(value);
     }
 }

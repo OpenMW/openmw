@@ -63,7 +63,7 @@ namespace MWWorld
 
     public:
         ResolutionHandle(std::shared_ptr<ResolutionListener> listener)
-            : mListener(listener)
+            : mListener(std::move(listener))
         {
         }
         ResolutionHandle() = default;

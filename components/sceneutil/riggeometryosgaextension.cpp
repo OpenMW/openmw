@@ -192,7 +192,7 @@ namespace SceneUtil
             }
             osg::MatrixList mtxList
                 = root->getWorldMatrices(root); // We always assume that RigGeometries have origin at their root
-            geom->computeMatrixFromRootSkeleton(mtxList);
+            geom->computeMatrixFromRootSkeleton(std::move(mtxList));
 
             if (mIsBodyPart && mBackToOrigin)
                 updateBackToOriginTransform(geom);

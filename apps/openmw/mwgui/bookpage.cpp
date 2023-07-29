@@ -1283,11 +1283,11 @@ namespace MWGui
         {
         }
 
-        void showPage(TypesetBook::Ptr book, size_t page) override { mPageDisplay->showPage(book, page); }
+        void showPage(TypesetBook::Ptr book, size_t page) override { mPageDisplay->showPage(std::move(book), page); }
 
         void adviseLinkClicked(std::function<void(InteractiveId)> linkClicked) override
         {
-            mPageDisplay->mLinkClicked = linkClicked;
+            mPageDisplay->mLinkClicked = std::move(linkClicked);
         }
 
         void unadviseLinkClicked() override { mPageDisplay->mLinkClicked = std::function<void(InteractiveId)>(); }

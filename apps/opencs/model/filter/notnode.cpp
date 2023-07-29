@@ -9,7 +9,7 @@ namespace CSMWorld
 }
 
 CSMFilter::NotNode::NotNode(std::shared_ptr<Node> child)
-    : UnaryNode(child, "not")
+    : UnaryNode(std::move(child), "not")
 {
 }
 

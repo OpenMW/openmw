@@ -666,7 +666,7 @@ void CSVRender::TerrainTextureMode::pushEditToCommand(CSMWorld::LandTexturesColu
     undoStack.push(new CSMWorld::TouchLandCommand(landTable, ltexTable, cellId));
 }
 
-void CSVRender::TerrainTextureMode::createTexture(std::string textureFileName)
+void CSVRender::TerrainTextureMode::createTexture(const std::string& textureFileName)
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
 
@@ -696,12 +696,10 @@ void CSVRender::TerrainTextureMode::createTexture(std::string textureFileName)
     } while (freeIndexFound == false);
 
     std::size_t idlocation = textureFileName.find("Texture: ");
-    textureFileName = textureFileName.substr(idlocation + 9);
-
-    QVariant textureNameVariant;
+    QString fileName = QString::fromStdString(textureFileName.substr(idlocation + 9));
 
     QVariant textureFileNameVariant;
-    textureFileNameVariant.setValue(QString::fromStdString(textureFileName));
+    textureFileNameVariant.setValue(fileName);
 
     undoStack.beginMacro("Add land texture record");
 
@@ -712,7 +710,7 @@ void CSVRender::TerrainTextureMode::createTexture(std::string textureFileName)
     mBrushTexture = newId;
 }
 
-bool CSVRender::TerrainTextureMode::allowLandTextureEditing(std::string cellId)
+bool CSVRender::TerrainTextureMode::allowLandTextureEditing(const std::string& cellId)
 {
     CSMDoc::Document& document = getWorldspaceWidget().getDocument();
     CSMWorld::IdTable& landTable
@@ -840,5 +838,5 @@ void CSVRender::TerrainTextureMode::setBrushShape(CSVWidget::BrushShape brushSha
 
 void CSVRender::TerrainTextureMode::setBrushTexture(std::string brushTexture)
 {
-    mBrushTexture = brushTexture;
+    mBrushTexture = std::move(brushTexture);
 }

@@ -418,7 +418,7 @@ void Launcher::SettingsPage::saveSettings()
 
 void Launcher::SettingsPage::slotLoadedCellsChanged(QStringList cellNames)
 {
-    loadCellsForAutocomplete(cellNames);
+    loadCellsForAutocomplete(std::move(cellNames));
 }
 
 void Launcher::SettingsPage::slotAnimSourcesToggled(bool checked)

@@ -29,12 +29,12 @@ namespace SceneUtil
 
     void Controller::setSource(std::shared_ptr<ControllerSource> source)
     {
-        mSource = source;
+        mSource = std::move(source);
     }
 
     void Controller::setFunction(std::shared_ptr<ControllerFunction> function)
     {
-        mFunction = function;
+        mFunction = std::move(function);
     }
 
     std::shared_ptr<ControllerSource> Controller::getSource() const
@@ -105,7 +105,7 @@ namespace SceneUtil
 
     AssignControllerSourcesVisitor::AssignControllerSourcesVisitor(std::shared_ptr<ControllerSource> toAssign)
         : ControllerVisitor()
-        , mToAssign(toAssign)
+        , mToAssign(std::move(toAssign))
     {
     }
 
@@ -121,7 +121,7 @@ namespace SceneUtil
     }
 
     ForceControllerSourcesVisitor::ForceControllerSourcesVisitor(std::shared_ptr<ControllerSource> toAssign)
-        : AssignControllerSourcesVisitor(toAssign)
+        : AssignControllerSourcesVisitor(std::move(toAssign))
     {
     }
 

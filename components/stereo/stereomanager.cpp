@@ -348,7 +348,7 @@ namespace Stereo
 
     void Manager::setUpdateViewCallback(std::shared_ptr<UpdateViewCallback> cb)
     {
-        mUpdateViewCallback = cb;
+        mUpdateViewCallback = std::move(cb);
     }
 
     void Manager::setCullCallback(osg::ref_ptr<osg::NodeCallback> cb)
@@ -382,7 +382,7 @@ namespace Stereo
         return sStereoEnabled;
     }
 
-    Manager::CustomViewCallback::CustomViewCallback(View left, View right)
+    Manager::CustomViewCallback::CustomViewCallback(View& left, View& right)
         : mLeft(left)
         , mRight(right)
     {

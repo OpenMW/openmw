@@ -10,7 +10,7 @@
 #include <components/esm3/esmreader.hpp>
 #include <components/files/qtconversion.hpp>
 
-ContentSelectorModel::ContentModel::ContentModel(QObject* parent, QIcon warningIcon, bool showOMWScripts)
+ContentSelectorModel::ContentModel::ContentModel(QObject* parent, QIcon& warningIcon, bool showOMWScripts)
     : QAbstractTableModel(parent)
     , mWarningIcon(warningIcon)
     , mShowOMWScripts(showOMWScripts)

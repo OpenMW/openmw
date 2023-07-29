@@ -300,7 +300,7 @@ namespace ESSImport
             ESM::CustomMarker marker;
             marker.mWorldX = notepos[0];
             marker.mWorldY = notepos[1];
-            marker.mNote = note;
+            marker.mNote = std::move(note);
             marker.mCell = cell.mId;
             mMarkers.push_back(marker);
         }

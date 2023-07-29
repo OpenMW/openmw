@@ -60,7 +60,7 @@ namespace MWRender
             NavMeshMode mode)
             : mId(id)
             , mVersion(version)
-            , mNavMesh(navMesh)
+            , mNavMesh(std::move(navMesh))
             , mGroupStateSet(groupStateSet)
             , mDebugDrawStateSet(debugDrawStateSet)
             , mSettings(settings)

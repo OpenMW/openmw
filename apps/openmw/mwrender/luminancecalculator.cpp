@@ -21,8 +21,8 @@ namespace MWRender
         auto luminanceFragment = shaderManager.getShader("luminance/luminance.frag", defines);
         auto resolveFragment = shaderManager.getShader("luminance/resolve.frag", defines);
 
-        mResolveProgram = shaderManager.getProgram(vertex, resolveFragment);
-        mLuminanceProgram = shaderManager.getProgram(vertex, luminanceFragment);
+        mResolveProgram = shaderManager.getProgram(vertex, std::move(resolveFragment));
+        mLuminanceProgram = shaderManager.getProgram(vertex, std::move(luminanceFragment));
     }
 
     void LuminanceCalculator::compile()

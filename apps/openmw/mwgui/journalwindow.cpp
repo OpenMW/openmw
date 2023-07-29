@@ -91,8 +91,8 @@ namespace
 
         MWGui::BookPage* getPage(std::string_view name) { return getWidget<MWGui::BookPage>(name); }
 
-        JournalWindowImpl(MWGui::JournalViewModel::Ptr Model, bool questList, ToUTF8::FromType encoding)
-            : JournalBooks(Model, encoding)
+        JournalWindowImpl(MWGui::JournalViewModel::Ptr model, bool questList, ToUTF8::FromType encoding)
+            : JournalBooks(std::move(model), encoding)
             , JournalWindow()
         {
             center();
@@ -313,7 +313,7 @@ namespace
                 notifyTopics(getWidget<MyGUI::Widget>(TopicsList));
         }
 
-        void pushBook(Book book, unsigned int page)
+        void pushBook(Book& book, unsigned int page)
         {
             DisplayState bs;
             bs.mPage = page;
@@ -323,7 +323,7 @@ namespace
             updateCloseJournalButton();
         }
 
-        void replaceBook(Book book, unsigned int page)
+        void replaceBook(Book& book, unsigned int page)
         {
             assert(!mStates.empty());
             mStates.top().mBook = book;

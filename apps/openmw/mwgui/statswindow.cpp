@@ -500,7 +500,7 @@ namespace MWGui
 
             std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets
                 = addValueItem(skill->mName, {}, "normal", coord1, coord2);
-            mSkillWidgetMap[skill->mId] = widgets;
+            mSkillWidgetMap[skill->mId] = std::move(widgets);
 
             for (int i = 0; i < 2; ++i)
             {

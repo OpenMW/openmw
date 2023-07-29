@@ -408,7 +408,7 @@ namespace Gui
         file.reset();
 
         // Create the font texture
-        std::string bitmapFilename = "fonts/" + std::string(name) + ".tex";
+        std::string bitmapFilename = "fonts/" + std::move(name) + ".tex";
 
         Files::IStreamPtr bitmapFile = mVFS->get(bitmapFilename);
 

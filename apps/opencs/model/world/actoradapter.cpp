@@ -533,7 +533,7 @@ namespace CSMWorld
         auto& npc = dynamic_cast<const Record<ESM::NPC>&>(mReferenceables.getRecord(index)).get();
 
         RaceDataPtr raceData = getRaceData(npc.mRace);
-        data->reset_data(id, "", false, !npc.isMale(), raceData);
+        data->reset_data(id, "", false, !npc.isMale(), std::move(raceData));
 
         // Add head and hair
         data->setPart(ESM::PRT_Head, npc.mHead, 0);

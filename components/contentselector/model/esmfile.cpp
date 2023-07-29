@@ -12,7 +12,7 @@ QString ContentSelectorModel::EsmFile::sToolTip = QString(
                                               <br/><b>Description:</b><br/>%5<br/> \
                                               <br/><b>Dependencies: </b>%6<br/>");
 
-ContentSelectorModel::EsmFile::EsmFile(QString fileName, ModelItem* parent)
+ContentSelectorModel::EsmFile::EsmFile(const QString& fileName, ModelItem* parent)
     : ModelItem(parent)
     , mFileName(fileName)
 {

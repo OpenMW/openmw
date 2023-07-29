@@ -12,7 +12,7 @@
 #include "state.hpp"
 
 CSMPrefs::StringSetting::StringSetting(
-    Category* parent, QMutex* mutex, const std::string& key, const std::string& label, std::string default_)
+    Category* parent, QMutex* mutex, const std::string& key, const std::string& label, std::string_view default_)
     : Setting(parent, mutex, key, label)
     , mDefault(default_)
     , mWidget(nullptr)

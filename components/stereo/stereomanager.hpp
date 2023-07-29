@@ -59,7 +59,7 @@ namespace Stereo
         struct CustomViewCallback : public UpdateViewCallback
         {
         public:
-            CustomViewCallback(View left, View right);
+            CustomViewCallback(View& left, View& right);
 
             void updateView(View& left, View& right) override;
 

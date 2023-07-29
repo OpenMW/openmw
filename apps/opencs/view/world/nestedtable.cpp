@@ -19,7 +19,7 @@
 #include "tableeditidaction.hpp"
 #include "util.hpp"
 
-CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document, CSMWorld::UniversalId id,
+CSVWorld::NestedTable::NestedTable(CSMDoc::Document& document, const CSMWorld::UniversalId& id,
     CSMWorld::NestedTableProxyModel* model, QWidget* parent, bool editable, bool fixedRows)
     : DragRecordTable(document, parent)
     , mAddNewRowAction(nullptr)

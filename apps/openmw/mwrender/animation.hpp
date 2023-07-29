@@ -172,7 +172,7 @@ namespace MWRender
             std::shared_ptr<float> mTimePtr;
 
         public:
-            void setTimePtr(std::shared_ptr<float> time) { mTimePtr = time; }
+            void setTimePtr(std::shared_ptr<float> time) { mTimePtr = std::move(time); }
             std::shared_ptr<float> getTimePtr() const { return mTimePtr; }
 
             float getValue(osg::NodeVisitor* nv) override;
