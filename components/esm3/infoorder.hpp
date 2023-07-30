@@ -24,19 +24,12 @@ namespace ESM
 
             auto it = mInfoPositions.find(value.mId);
 
-            if (it != mInfoPositions.end())
+            if (it != mInfoPositions.end() && it->second.mPosition->mPrev == value.mPrev)
             {
-                bool samePrev = it->second.mPosition->mPrev == value.mPrev;
                 *it->second.mPosition = std::forward<V>(value);
                 it->second.mDeleted = deleted;
-                if (samePrev)
-                    return;
+                return;
             }
-            else
-                it = mInfoPositions.emplace(value.mId, Item{ .mPosition = mOrderedInfo.end(), .mDeleted = deleted })
-                         .first;
-
-            Item& item = it->second;
 
             auto before = mOrderedInfo.begin();
             if (!value.mPrev.empty())
@@ -47,10 +40,22 @@ namespace ESM
                 else
                     before = mOrderedInfo.end();
             }
-            if (item.mPosition == mOrderedInfo.end())
-                item.mPosition = mOrderedInfo.insert(before, std::forward<V>(value));
+
+            if (it == mInfoPositions.end())
+            {
+                const RefId id = value.mId;
+                mInfoPositions.emplace(id,
+                    Item{
+                        .mPosition = mOrderedInfo.insert(before, std::forward<V>(value)),
+                        .mDeleted = deleted,
+                    });
+            }
             else
-                mOrderedInfo.splice(before, mOrderedInfo, item.mPosition);
+            {
+                *it->second.mPosition = std::forward<V>(value);
+                it->second.mDeleted = deleted;
+                mOrderedInfo.splice(before, mOrderedInfo, it->second.mPosition);
+            }
         }
 
         void removeInfo(const RefId& infoRefId)
