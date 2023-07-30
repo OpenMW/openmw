@@ -136,11 +136,15 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                     {
                         if (subHdr.dataSize != 1)
                             throw std::runtime_error("CELL unexpected DATA flag size");
-                        reader.get(&mCellFlags, sizeof(std::uint8_t));
+                        std::uint8_t value = 0;
+                        reader.get(value);
+                        mCellFlags = value;
                     }
                 else
                 {
-                    reader.get((std::uint8_t&)mCellFlags); // 8 bits in Obvlivion
+                    std::uint8_t value = 0;
+                    reader.get(value); // 8 bits in Obvlivion
+                    mCellFlags = value;
                 }
 #if 0
                 std::string padding;
