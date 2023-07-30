@@ -142,7 +142,7 @@ add_component_dir (esm3
     inventorystate containerstate npcstate creaturestate dialoguestate statstate npcstats creaturestats
     weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
     aisequence magiceffects custommarkerstate stolenitems transport animationstate controlsstate mappings readerscache
-    infoorder
+    infoorder timestamp
     )
 
 add_component_dir (esm3terrain

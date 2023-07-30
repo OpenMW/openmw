@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <string>
 
-#include <components/esm/defs.hpp>
+#include <components/esm3/timestamp.hpp>
 
 #include "duration.hpp"
 

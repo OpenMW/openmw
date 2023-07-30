@@ -8,6 +8,7 @@
 
 #include "components/esm/defs.hpp"
 #include "components/esm/refid.hpp"
+#include "timestamp.hpp"
 
 namespace ESM
 {
@@ -20,21 +21,21 @@ namespace ESM
     {
         struct CorprusStats
         {
-            int mWorsenings;
+            int32_t mWorsenings;
             TimeStamp mNextWorsening;
         };
 
         struct PermanentSpellEffectInfo
         {
-            int mId;
-            int mArg;
+            int32_t mId;
+            int32_t mArg;
             float mMagnitude;
         };
 
         struct SpellParams
         {
-            std::map<int, float> mEffectRands; // <effect index, normalised random magnitude>
-            std::set<int> mPurgedEffects; // indices of purged effects
+            std::map<int32_t, float> mEffectRands; // <effect index, normalised random magnitude>
+            std::set<int32_t> mPurgedEffects; // indices of purged effects
         };
         std::vector<ESM::RefId> mSpells;
 

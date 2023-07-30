@@ -128,6 +128,17 @@ namespace ESM
             getHNTSized<sizeof(X)>(x, name);
         }
 
+        template <class... Args>
+        void getHNT(NAME name, Args&... args)
+        {
+            constexpr size_t size = (0 + ... + sizeof(Args));
+            getSubNameIs(name);
+            getSubHeader();
+            if (mCtx.leftSub != size)
+                reportSubSizeMismatch(size, mCtx.leftSub);
+            (getT(args), ...);
+        }
+
         // Optional version of getHNT
         template <typename X, typename = std::enable_if_t<IsReadable<X>>>
         void getHNOT(X& x, NAME name)

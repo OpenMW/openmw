@@ -17,7 +17,7 @@ namespace ESM
                 SpellParams state;
                 while (esm.isNextSub("INDX"))
                 {
-                    int index;
+                    int32_t index;
                     esm.getHT(index);
 
                     float magnitude;
@@ -28,7 +28,7 @@ namespace ESM
 
                 while (esm.isNextSub("PURG"))
                 {
-                    int index;
+                    int32_t index;
                     esm.getHT(index);
                     state.mPurgedEffects.insert(index);
                 }
@@ -79,7 +79,7 @@ namespace ESM
 
             CorprusStats stats;
             esm.getHNT(stats.mWorsenings, "WORS");
-            esm.getHNTSized<8>(stats.mNextWorsening, "TIME");
+            stats.mNextWorsening.load(esm);
 
             mCorprusSpells[id] = stats;
         }
@@ -87,10 +87,7 @@ namespace ESM
         while (esm.isNextSub("USED"))
         {
             ESM::RefId id = esm.getRefId();
-            TimeStamp time;
-            esm.getHNTSized<8>(time, "TIME");
-
-            mUsedPowers[id] = time;
+            mUsedPowers[id].load(esm);
         }
 
         mSelectedSpell = esm.getHNORefId("SLCT");
