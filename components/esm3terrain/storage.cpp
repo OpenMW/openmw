@@ -194,7 +194,7 @@ namespace ESMTerrain
         int startCellX = static_cast<int>(std::floor(origin.x()));
         int startCellY = static_cast<int>(std::floor(origin.y()));
         const int landSize = ESM::getLandSize(worldspace);
-        const int LandSizeInUnits = ESM::getCellSize(worldspace);
+        const int landSizeInUnits = ESM::getCellSize(worldspace);
 
         size_t numVerts = static_cast<size_t>(size * (landSize - 1) / increment + 1);
 
@@ -268,9 +268,10 @@ namespace ESMTerrain
                             height = heightData->getHeights()[col * landSize + row];
                         if (alteration)
                             height += getAlteredHeight(col, row);
+
                         positions[static_cast<unsigned int>(vertX * numVerts + vertY)]
-                            = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * LandSizeInUnits,
-                                (vertY / float(numVerts - 1) - 0.5f) * size * LandSizeInUnits, height);
+                            = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * landSizeInUnits,
+                                (vertY / float(numVerts - 1) - 0.5f) * size * landSizeInUnits, height);
 
                         if (normalData)
                         {
