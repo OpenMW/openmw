@@ -1,15 +1,47 @@
 #include "cell.hpp"
 
+#include "esmstore.hpp"
+
+#include "../mwbase/environment.hpp"
+
 #include <components/esm3/loadcell.hpp>
 #include <components/esm4/loadcell.hpp>
 #include <components/esm4/loadwrld.hpp>
 #include <components/misc/algorithm.hpp>
 
-#include "../mwbase/environment.hpp"
-#include "esmstore.hpp"
+#include <stdexcept>
+#include <string>
 
 namespace MWWorld
 {
+    namespace
+    {
+        std::string getDescription(const ESM4::World& value)
+        {
+            if (!value.mEditorId.empty())
+                return value.mEditorId;
+
+            return value.mId.serializeText();
+        }
+
+        std::string getCellDescription(const ESM4::Cell& cell, const ESM4::World* world)
+        {
+            std::string result;
+
+            if (!cell.mEditorId.empty())
+                result = cell.mEditorId;
+            else if (world != nullptr && cell.isExterior())
+                result = getDescription(*world);
+            else
+                result = cell.mId.serializeText();
+
+            if (cell.isExterior())
+                result += " (" + std::to_string(cell.mX) + ", " + std::to_string(cell.mY) + ")";
+
+            return result;
+        }
+    }
+
     Cell::Cell(const ESM4::Cell& cell)
         : ESM::CellVariant(cell)
         , mIsExterior(!(cell.mCellFlags & ESM4::CELL_Interior))
@@ -23,7 +55,6 @@ namespace MWWorld
         , mId(cell.mId)
         , mParent(cell.mParent)
         , mWaterHeight(cell.mWaterHeight)
-        , mDescription(cell.mEditorId)
         , mMood{
             .mAmbiantColor = cell.mLighting.ambient,
             .mDirectionalColor = cell.mLighting.directional,
@@ -32,12 +63,15 @@ namespace MWWorld
             .mFogDensity = 1.f,
         }
     {
+        const ESM4::World* world = MWBase::Environment::get().getESMStore()->get<ESM4::World>().search(mParent);
         if (isExterior())
         {
-            auto& worldStore = MWBase::Environment::get().getESMStore()->get<ESM4::World>();
-            const ESM4::World* cellWorld = worldStore.find(mParent);
-            mWaterHeight = cellWorld->mWaterLevel;
+            if (world == nullptr)
+                throw std::runtime_error(
+                    "Cell " + cell.mId.toDebugString() + " parent world " + mParent.toDebugString() + " is not found");
+            mWaterHeight = world->mWaterLevel;
         }
+        mDescription = getCellDescription(cell, world);
     }
 
     Cell::Cell(const ESM::Cell& cell)
