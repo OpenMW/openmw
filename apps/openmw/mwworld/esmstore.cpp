@@ -5,20 +5,18 @@
 #include <tuple>
 
 #include <components/debug/debuglog.hpp>
+
 #include <components/esm/records.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
 #include <components/esm3/readerscache.hpp>
-#include <components/loadinglistener/loadinglistener.hpp>
-#include <components/lua/configuration.hpp>
-#include <components/misc/algorithm.hpp>
-
 #include <components/esm4/common.hpp>
-#include <components/esm4/loadland.hpp>
-#include <components/esm4/loadwrld.hpp>
 #include <components/esm4/reader.hpp>
 #include <components/esm4/readerutils.hpp>
 #include <components/esmloader/load.hpp>
+#include <components/loadinglistener/loadinglistener.hpp>
+#include <components/lua/configuration.hpp>
+#include <components/misc/algorithm.hpp>
 
 #include "../mwmechanics/spelllist.hpp"
 
@@ -278,10 +276,6 @@ namespace MWWorld
             case ESM::REC_STAT:
             case ESM::REC_WEAP:
             case ESM::REC_BODY:
-            case ESM::REC_ACHR4:
-            case ESM::REC_ACRE4:
-            case ESM::REC_STAT4:
-            case ESM::REC_LIGH4:
             case ESM::REC_ACTI4:
             case ESM::REC_ALCH4:
             case ESM::REC_AMMO4:
@@ -292,11 +286,13 @@ namespace MWWorld
             case ESM::REC_DOOR4:
             case ESM::REC_FURN4:
             case ESM::REC_INGR4:
+            case ESM::REC_LIGH4:
+            case ESM::REC_LVLI4:
             case ESM::REC_LVLC4:
             case ESM::REC_LVLN4:
             case ESM::REC_MISC4:
             case ESM::REC_NPC_4:
-            case ESM::REC_RACE4:
+            case ESM::REC_STAT4:
             case ESM::REC_TREE4:
             case ESM::REC_WEAP4:
                 return true;

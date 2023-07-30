@@ -5,11 +5,11 @@
 #include <stdexcept>
 
 #include <components/debug/debuglog.hpp>
+
 #include <components/esm/records.hpp>
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
-#include <components/esm4/loadland.hpp>
-#include <components/esm4/loadwrld.hpp>
+
 #include <components/fallback/fallback.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/rng.hpp>
@@ -1371,29 +1371,35 @@ template class MWWorld::TypedDynamicStore<ESM::StartScript>;
 template class MWWorld::TypedDynamicStore<ESM::Static>;
 template class MWWorld::TypedDynamicStore<ESM::Weapon>;
 
+template class MWWorld::TypedDynamicStore<ESM4::Reference, ESM::FormId>;
+template class MWWorld::TypedDynamicStore<ESM4::ActorCharacter, ESM::FormId>;
+template class MWWorld::TypedDynamicStore<ESM4::ActorCreature, ESM::FormId>;
+
 template class MWWorld::TypedDynamicStore<ESM4::Activator>;
-template class MWWorld::TypedDynamicStore<ESM4::Potion>;
 template class MWWorld::TypedDynamicStore<ESM4::Ammunition>;
 template class MWWorld::TypedDynamicStore<ESM4::Armor>;
+template class MWWorld::TypedDynamicStore<ESM4::ArmorAddon>;
 template class MWWorld::TypedDynamicStore<ESM4::Book>;
+template class MWWorld::TypedDynamicStore<ESM4::Cell>;
 template class MWWorld::TypedDynamicStore<ESM4::Clothing>;
 template class MWWorld::TypedDynamicStore<ESM4::Container>;
 template class MWWorld::TypedDynamicStore<ESM4::Creature>;
 template class MWWorld::TypedDynamicStore<ESM4::Door>;
 template class MWWorld::TypedDynamicStore<ESM4::Furniture>;
+template class MWWorld::TypedDynamicStore<ESM4::Hair>;
+template class MWWorld::TypedDynamicStore<ESM4::HeadPart>;
 template class MWWorld::TypedDynamicStore<ESM4::Ingredient>;
-template class MWWorld::TypedDynamicStore<ESM4::MiscItem>;
-template class MWWorld::TypedDynamicStore<ESM4::Static>;
-template class MWWorld::TypedDynamicStore<ESM4::Tree>;
+template class MWWorld::TypedDynamicStore<ESM4::Land>;
 template class MWWorld::TypedDynamicStore<ESM4::LevelledCreature>;
+template class MWWorld::TypedDynamicStore<ESM4::LevelledItem>;
 template class MWWorld::TypedDynamicStore<ESM4::LevelledNpc>;
 template class MWWorld::TypedDynamicStore<ESM4::Light>;
+template class MWWorld::TypedDynamicStore<ESM4::MiscItem>;
 template class MWWorld::TypedDynamicStore<ESM4::Npc>;
-template class MWWorld::TypedDynamicStore<ESM4::Reference, ESM::FormId>;
-template class MWWorld::TypedDynamicStore<ESM4::ActorCharacter, ESM::FormId>;
-template class MWWorld::TypedDynamicStore<ESM4::ActorCreature, ESM::FormId>;
+template class MWWorld::TypedDynamicStore<ESM4::Outfit>;
+template class MWWorld::TypedDynamicStore<ESM4::Potion>;
 template class MWWorld::TypedDynamicStore<ESM4::Race>;
-template class MWWorld::TypedDynamicStore<ESM4::Cell>;
+template class MWWorld::TypedDynamicStore<ESM4::Static>;
+template class MWWorld::TypedDynamicStore<ESM4::Tree>;
 template class MWWorld::TypedDynamicStore<ESM4::Weapon>;
 template class MWWorld::TypedDynamicStore<ESM4::World>;
-template class MWWorld::TypedDynamicStore<ESM4::Land>;
