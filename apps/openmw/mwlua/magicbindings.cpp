@@ -240,8 +240,12 @@ namespace MWLua
         magicEffectStoreT[sol::meta_function::to_string] = [](const MagicEffectStore& store) {
             return "ESM3_MagicEffectStore{" + std::to_string(store.getSize()) + " effects}";
         };
-        magicEffectStoreT[sol::meta_function::index]
-            = [](const MagicEffectStore& store, int id) -> const ESM::MagicEffect* { return store.find(id); };
+        magicEffectStoreT[sol::meta_function::index] = sol::overload(
+            [](const MagicEffectStore& store, int id) -> const ESM::MagicEffect* { return store.find(id); },
+            [](const MagicEffectStore& store, std::string_view id) -> const ESM::MagicEffect* {
+                int index = ESM::MagicEffect::indexNameToIndex(id);
+                return store.find(index);
+            });
         auto magicEffectsIter = [magicEffectStore](sol::this_state lua, const sol::object& /*store*/,
                                     sol::optional<int> id) -> std::tuple<sol::object, sol::object> {
             MagicEffectStore::iterator iter;
