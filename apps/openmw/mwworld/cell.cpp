@@ -22,13 +22,15 @@ namespace MWWorld
         , mRegion(ESM::RefId()) // Unimplemented for now
         , mId(cell.mId)
         , mParent(cell.mParent)
-        ,mMood{
+        , mWaterHeight(cell.mWaterHeight)
+        , mDescription(cell.mEditorId)
+        , mMood{
             .mAmbiantColor = cell.mLighting.ambient,
             .mDirectionalColor = cell.mLighting.directional,
             .mFogColor = cell.mLighting.fogColor,
             // TODO: use ESM4::Lighting fog parameters
-            .mFogDensity = 1.f,}
-            ,mWaterHeight(cell.mWaterHeight)
+            .mFogDensity = 1.f,
+        }
     {
         if (isExterior())
         {
@@ -50,26 +52,19 @@ namespace MWWorld
         , mRegion(cell.mRegion)
         , mId(cell.mId)
         , mParent(ESM::Cell::sDefaultWorldspaceId)
+        , mWaterHeight(cell.mWater)
+        , mDescription(cell.getDescription())
         , mMood{
             .mAmbiantColor = cell.mAmbi.mAmbient,
             .mDirectionalColor = cell.mAmbi.mSunlight,
             .mFogColor = cell.mAmbi.mFog,
             .mFogDensity = cell.mAmbi.mFogDensity,
         }
-        ,mWaterHeight(cell.mWater)
     {
         if (isExterior())
             mWaterHeight = -1.f;
     }
 
-    std::string Cell::getDescription() const
-    {
-        return ESM::visit(ESM::VisitOverload{
-                              [&](const ESM::Cell& cell) { return cell.getDescription(); },
-                              [&](const ESM4::Cell& cell) { return cell.mEditorId; },
-                          },
-            *this);
-    }
     ESM::RefId Cell::getWorldSpace() const
     {
         if (isExterior())
