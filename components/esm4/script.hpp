@@ -33,7 +33,8 @@
 #include <string>
 #include <vector>
 
-#include "formid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -326,7 +327,7 @@ namespace ESM4
         std::uint32_t unknown1;
         std::uint32_t responseNo; // 1 byte + padding
         // below FO3/FONV
-        FormId32 sound; // when 20 bytes usually 0 but there are exceptions (FO3 INFO FormId = 0x0002241f)
+        ESM::FormId32 sound; // when 20 bytes usually 0 but there are exceptions (FO3 INFO FormId = 0x0002241f)
         std::uint32_t flags; // 1 byte + padding (0x01 = use emotion anim)
     };
 
@@ -339,7 +340,7 @@ namespace ESM4
         std::uint32_t param2;
         std::uint32_t runOn; // 0 subject, 1 target, 2 reference, 3 combat target, 4 linked reference
         // below FO3/FONV/TES5
-        FormId32 reference;
+        ESM::FormId32 reference;
     };
 
     struct ScriptHeader
@@ -380,7 +381,7 @@ namespace ESM4
         std::string scriptSource;
         std::vector<ScriptLocalVariableData> localVarData;
         std::vector<std::uint32_t> localRefVarIndex;
-        FormId globReference;
+        ESM::FormId globReference;
     };
 }
 

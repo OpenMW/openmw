@@ -33,8 +33,7 @@
 
 void ESM4::World::load(ESM4::Reader& reader)
 {
-    FormId formid = reader.hdr().record.getFormId();
-    reader.adjustFormId(formid);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     // It should be possible to save the current world formId automatically while reading in
@@ -44,8 +43,7 @@ void ESM4::World::load(ESM4::Reader& reader)
     // Alternatively it may be possible to figure it out by examining the group headers, but
     // apparently the label field is not reliable so the parent world formid may have been
     // corrupted by the use of ignore flag (TODO: should check to verify).
-    reader.setCurrWorld(formid); // save for CELL later
-    mId = ESM::FormIdRefId(formid);
+    reader.setCurrWorld(mId); // save for CELL later
 
     std::uint32_t subSize = 0; // for XXXX sub record
 

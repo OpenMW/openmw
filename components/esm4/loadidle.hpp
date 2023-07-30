@@ -30,7 +30,8 @@
 #include <cstdint>
 #include <string>
 
-#include "formid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -39,7 +40,7 @@ namespace ESM4
 
     struct IdleAnimation
     {
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -47,8 +48,8 @@ namespace ESM4
         std::string mEvent;
         std::string mModel;
 
-        FormId mParent; // IDLE or AACT
-        FormId mPrevious;
+        ESM::FormId mParent; // IDLE or AACT
+        ESM::FormId mPrevious;
 
         float mBoundRadius;
 
@@ -56,6 +57,7 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_IDLE4;
     };
 }
 

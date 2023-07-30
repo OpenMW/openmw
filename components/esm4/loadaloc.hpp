@@ -31,7 +31,8 @@
 #include <string>
 #include <vector>
 
-#include "formid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -52,22 +53,22 @@ namespace ESM4
 
     struct MediaLocationController
     {
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
         std::string mFullName;
 
-        std::vector<FormId> mBattleSets;
-        std::vector<FormId> mLocationSets;
-        std::vector<FormId> mEnemySets;
-        std::vector<FormId> mNeutralSets;
-        std::vector<FormId> mFriendSets;
-        std::vector<FormId> mAllySets;
+        std::vector<ESM::FormId> mBattleSets;
+        std::vector<ESM::FormId> mLocationSets;
+        std::vector<ESM::FormId> mEnemySets;
+        std::vector<ESM::FormId> mNeutralSets;
+        std::vector<ESM::FormId> mFriendSets;
+        std::vector<ESM::FormId> mAllySets;
 
         MLC_Flags mMediaFlags;
 
-        FormId mConditionalFaction;
+        ESM::FormId mConditionalFaction;
 
         float mLocationDelay;
         float mRetriggerDelay;
@@ -79,6 +80,7 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_ALOC4;
     };
 }
 

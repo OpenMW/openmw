@@ -32,9 +32,8 @@
 #include <vector>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
+#include <components/esm/formid.hpp>
 
-#include "formid.hpp"
 #include "inventory.hpp" // InventoryItem
 
 namespace ESM4
@@ -44,7 +43,7 @@ namespace ESM4
 
     struct Container
     {
-        ESM::RefId mId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -55,9 +54,9 @@ namespace ESM4
         unsigned char mDataFlags;
         float mWeight;
 
-        FormId mOpenSound;
-        FormId mCloseSound;
-        FormId mScriptId; // TES4 only
+        ESM::FormId mOpenSound;
+        ESM::FormId mCloseSound;
+        ESM::FormId mScriptId; // TES4 only
 
         std::vector<InventoryItem> mInventory;
 

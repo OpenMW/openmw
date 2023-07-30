@@ -172,7 +172,7 @@ namespace MWWorld
                 if (!mShared.empty())
                     return mShared[Misc::Rng::rollDice(mShared.size(), prng)];
             }
-            else
+            else if constexpr (!std::is_same_v<decltype(T::mId), ESM::FormId>)
             {
                 std::vector<const T*> results;
                 std::copy_if(mShared.begin(), mShared.end(), std::back_inserter(results),

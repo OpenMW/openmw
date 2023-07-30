@@ -36,18 +36,21 @@
 
 #include <components/bsa/memorystream.hpp>
 #include <components/debug/debuglog.hpp>
+#include <components/esm/refid.hpp>
 #include <components/files/constrainedfilestream.hpp>
 #include <components/files/conversion.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/to_utf8/to_utf8.hpp>
 
-#include "formid.hpp"
 #include "grouptype.hpp"
 
 namespace ESM4
 {
     namespace
     {
+        using FormId = ESM::FormId;
+        using FormId32 = ESM::FormId32;
+
         std::string getError(const std::string& header, const int errorCode, const char* msg)
         {
             return header + ": code " + std::to_string(errorCode) + ", " + std::string(msg != nullptr ? msg : "(null)");
@@ -461,8 +464,8 @@ namespace ESM4
         {
             if (mIgnoreMissingLocalizedStrings)
                 return;
-            throw std::runtime_error(
-                "ESM4::Reader::getLocalizedString localized string not found for " + formIdToString(stringId));
+            throw std::runtime_error("ESM4::Reader::getLocalizedString localized string not found for "
+                + ESM::RefId(stringId).toDebugString());
         }
 
         str = it->second;
@@ -774,11 +777,11 @@ namespace ESM4
         return true;
     }
 
-    ESM::FormIdRefId Reader::getRefIdFromHeader() const
+    ESM::FormId Reader::getFormIdFromHeader() const
     {
         FormId formId = hdr().record.getFormId();
         adjustFormId(formId);
-        return ESM::FormIdRefId(formId);
+        return formId;
     }
 
     void Reader::adjustGRUPFormId()
@@ -931,7 +934,7 @@ namespace ESM4
             case ESM4::Grp_CellTemporaryChild:
             case ESM4::Grp_CellVisibleDistChild:
             {
-                ss << ": FormId 0x" << formIdToString(FormId::fromUint32(label.value));
+                ss << ": " << ESM::RefId(FormId::fromUint32(label.value));
                 break;
             }
             default:

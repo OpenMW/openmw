@@ -34,8 +34,7 @@
 
 void ESM4::Dialogue::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
@@ -50,19 +49,11 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
                 reader.getZString(mTopicName);
                 break;
             case ESM4::SUB_QSTI:
-            {
-                FormId questId;
-                reader.getFormId(questId);
-                mQuests.push_back(questId);
+                reader.getFormId(mQuests.emplace_back());
                 break;
-            }
             case ESM4::SUB_QSTR: // Seems never used in TES4
-            {
-                FormId questRem;
-                reader.getFormId(questRem);
-                mQuestsRemoved.push_back(questRem);
+                reader.getFormId(mQuestsRemoved.emplace_back());
                 break;
-            }
             case ESM4::SUB_DATA:
             {
                 if (subHdr.dataSize == 4) // TES5

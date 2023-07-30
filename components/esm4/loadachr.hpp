@@ -32,7 +32,7 @@
 #include <components/esm/defs.hpp>
 #include <components/esm/refid.hpp>
 
-#include "reference.hpp" // FormId, Placement, EnableParent
+#include "reference.hpp" // Placement, EnableParent
 
 namespace ESM4
 {
@@ -48,7 +48,7 @@ namespace ESM4
 
         std::string mEditorId;
         std::string mFullName;
-        ESM::RefId mBaseObj;
+        ESM::FormId mBaseObj;
 
         ESM::Position mPos;
         float mScale = 1.0f;

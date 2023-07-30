@@ -31,9 +31,7 @@
 #include <string>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
-
-#include "formid.hpp"
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -42,7 +40,7 @@ namespace ESM4
 
     struct Furniture
     {
-        ESM::RefId mId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -51,7 +49,7 @@ namespace ESM4
 
         float mBoundRadius;
 
-        FormId mScriptId;
+        ESM::FormId mScriptId;
         std::uint32_t mActiveMarkerFlags;
 
         void load(ESM4::Reader& reader);

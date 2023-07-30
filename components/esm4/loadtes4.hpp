@@ -31,8 +31,8 @@
 #include <string>
 #include <vector>
 
-#include "../esm/common.hpp" // ESMVersion, MasterData
-#include "formid.hpp"
+#include <components/esm/common.hpp> // ESMVersion, MasterData
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -57,7 +57,7 @@ namespace ESM4
         std::string mDesc; // File description
         std::vector<ESM::MasterData> mMaster;
 
-        std::vector<FormId> mOverrides; // Skyrim only, cell children (ACHR, LAND, NAVM, PGRE, PHZD, REFR)
+        std::vector<ESM::FormId> mOverrides; // Skyrim only, cell children (ACHR, LAND, NAVM, PGRE, PHZD, REFR)
 
         // position in the vector = mod index of master files above
         // value = adjusted mod index based on all the files loaded so far

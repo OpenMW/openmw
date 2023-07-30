@@ -208,11 +208,12 @@ namespace ESM
             EXPECT_EQ(map.count(RefId::stringRefId("A")), 1);
         }
 
-        TEST(ESMRefIdTest, stringRefIdIsNotEqualToFormId)
+        TEST(ESMRefIdTest, emptyRefId)
         {
-            const RefId stringRefId = RefId::stringRefId("\0");
-            const RefId formIdRefId = RefId::formIdRefId({ .mIndex = 0, .mContentFile = 0 });
-            EXPECT_NE(stringRefId, formIdRefId);
+            EXPECT_EQ(RefId(), EmptyRefId());
+            EXPECT_EQ(RefId(), RefId::stringRefId("\0"));
+            EXPECT_EQ(RefId(), RefId::formIdRefId({ .mIndex = 0, .mContentFile = 0 }));
+            EXPECT_EQ(RefId(), RefId::formIdRefId({ .mIndex = 0, .mContentFile = -1 }));
         }
 
         TEST(ESMRefIdTest, indexRefIdHashDiffersForDistinctValues)
@@ -337,7 +338,6 @@ namespace ESM
             { RefId::stringRefId("foo"), "foo" },
             { RefId::stringRefId("BAR"), "bar" },
             { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), { 'a', 0, -1, '\n', '\t' } },
-            { RefId::formIdRefId({ .mIndex = 0, .mContentFile = 0 }), "FormId:0x0" },
             { RefId::formIdRefId({ .mIndex = 1, .mContentFile = 0 }), "FormId:0x1" },
             { RefId::formIdRefId({ .mIndex = 0x1f, .mContentFile = 0 }), "FormId:0x1f" },
             { RefId::formIdRefId({ .mIndex = 0x1f, .mContentFile = 2 }), "FormId:0x200001f" },

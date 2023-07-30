@@ -6,32 +6,6 @@
 namespace ESM4
 {
     template <class T, class = std::void_t<>>
-    struct HasFormId : std::false_type
-    {
-    };
-
-    template <class T>
-    struct HasFormId<T, std::void_t<decltype(T::mFormId)>> : std::true_type
-    {
-    };
-
-    template <class T>
-    inline constexpr bool hasFormId = HasFormId<T>::value;
-
-    template <class T, class = std::void_t<>>
-    struct HasParentFormId : std::false_type
-    {
-    };
-
-    template <class T>
-    struct HasParentFormId<T, std::void_t<decltype(T::mParentFormId)>> : std::true_type
-    {
-    };
-
-    template <class T>
-    inline constexpr bool hasParentFormId = HasParentFormId<T>::value;
-
-    template <class T, class = std::void_t<>>
     struct HasParent : std::false_type
     {
     };

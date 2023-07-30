@@ -83,7 +83,7 @@ namespace ESM4
 
         std::string mEditorId;
         std::string mFullName;
-        ESM::RefId mBaseObj;
+        ESM::FormId mBaseObj;
 
         ESM::Position mPos;
         float mScale = 1.0f;
@@ -105,7 +105,7 @@ namespace ESM4
         TeleportDest mDoor;
         bool mIsLocked;
         std::int8_t mLockLevel;
-        ESM::RefId mKey;
+        ESM::FormId mKey;
 
         ESM::FormId mTargetRef;
 

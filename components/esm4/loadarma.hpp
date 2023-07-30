@@ -31,8 +31,10 @@
 #include <string>
 #include <vector>
 
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
+
 #include "actor.hpp" // BodyTemplate
-#include "formid.hpp"
 
 namespace ESM4
 {
@@ -41,7 +43,7 @@ namespace ESM4
 
     struct ArmorAddon
     {
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -49,11 +51,11 @@ namespace ESM4
         std::string mModelMale;
         std::string mModelFemale;
 
-        FormId mTextureMale;
-        FormId mTextureFemale;
+        ESM::FormId mTextureMale;
+        ESM::FormId mTextureFemale;
 
-        FormId mRacePrimary;
-        std::vector<FormId> mRaces; // TES5 only
+        ESM::FormId mRacePrimary;
+        std::vector<ESM::FormId> mRaces; // TES5 only
 
         BodyTemplate mBodyTemplate; // TES5
 
@@ -61,6 +63,7 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_ARMA4;
     };
 }
 

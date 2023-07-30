@@ -31,13 +31,12 @@
 #include <string>
 #include <vector>
 
-#include "formid.hpp"
-#include "lighting.hpp"
-
 #include <components/esm/defs.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm/util.hpp>
 #include <components/esm4/reader.hpp>
+
+#include "lighting.hpp"
 
 namespace ESM4
 {
@@ -63,8 +62,7 @@ namespace ESM4
     // The cells need to be organised under world spaces.
     struct Cell
     {
-        FormId mFormId; // from the header
-        ESM::RefId mId;
+        ESM::RefId mId; // from the header
         std::uint32_t mFlags = 0; // from the header, see enum type RecordFlag for details
 
         ESM::RefId mParent; // world formId (for grouping cells), from the loading sequence
@@ -76,20 +74,20 @@ namespace ESM4
         std::int32_t mX = 0;
         std::int32_t mY = 0;
 
-        FormId mOwner;
-        FormId mGlobal;
-        FormId mClimate;
-        FormId mWater;
+        ESM::FormId mOwner;
+        ESM::FormId mGlobal;
+        ESM::FormId mClimate;
+        ESM::FormId mWater;
         float mWaterHeight = sInvalidWaterLevel;
 
-        std::vector<FormId> mRegions;
+        std::vector<ESM::FormId> mRegions;
         Lighting mLighting;
 
-        FormId mLightingTemplate; // FO3/FONV
+        ESM::FormId mLightingTemplate; // FO3/FONV
         std::uint32_t mLightingTemplateFlags = 0; // FO3/FONV
 
-        FormId mMusic; // FO3/FONV
-        FormId mAcousticSpace; // FO3/FONV
+        ESM::FormId mMusic; // FO3/FONV
+        ESM::FormId mAcousticSpace; // FO3/FONV
         // TES4: 0 = default, 1 = public, 2 = dungeon
         // FO3/FONV have more types (not sure how they are used, however)
         std::uint8_t mMusicType = 0;

@@ -46,7 +46,8 @@ void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
     reader.getFormId(worldSpaceId);
     // FLG_Tamriel    = 0x0000003c, // grid info follows, possibly Tamriel?
     // FLG_Morrowind  = 0x01380000, // grid info follows, probably Skywind
-    if (worldSpaceId == FormId{ 0x3c, 0 } || worldSpaceId == FormId{ 380000, 1 })
+    // FIXME: this check doesn't work because `getFormId` adjusts content file index
+    if (worldSpaceId == ESM::FormId{ 0x3c, 0 } || worldSpaceId == ESM::FormId{ 380000, 1 })
     {
         //   ^
         // Y |                   X Y Index
@@ -80,7 +81,7 @@ void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
     }
     else
     {
-        FormId cellId;
+        ESM::FormId cellId;
         reader.getFormId(cellId);
         cellGrid = cellId;
 
@@ -190,7 +191,7 @@ void ESM4::NavMesh::NVNMstruct::load(ESM4::Reader& reader)
 
 void ESM4::NavMesh::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     // std::cout << "NavMesh 0x" << std::hex << this << std::endl; // FIXME

@@ -31,7 +31,8 @@
 #include <string>
 #include <vector>
 
-#include "formid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -63,18 +64,18 @@ namespace ESM4
 
         struct RegionSound
         {
-            FormId32 sound;
+            ESM::FormId32 sound;
             std::uint32_t flags; // 0 pleasant, 1 cloudy, 2 rainy, 3 snowy
             std::uint32_t chance;
         };
 #pragma pack(pop)
 
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
         std::uint32_t mColour; // RGBA
-        FormId mWorldId; // worldspace formid
+        ESM::FormId mWorldId; // worldspace formid
 
         std::string mShader; //?? ICON
         std::string mMapName;
@@ -89,6 +90,7 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_REGN4;
     };
 }
 

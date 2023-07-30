@@ -30,7 +30,8 @@
 #include <cstdint>
 #include <string>
 
-#include "formid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -50,7 +51,7 @@ namespace ESM4
 
     struct TalkingActivator
     {
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see above for details
 
         std::string mEditorId;
@@ -58,15 +59,16 @@ namespace ESM4
 
         std::string mModel;
 
-        FormId mScriptId;
-        FormId mVoiceType; // VTYP
-        FormId mLoopSound; // SOUN
-        FormId mRadioTemplate; // SOUN
+        ESM::FormId mScriptId;
+        ESM::FormId mVoiceType; // VTYP
+        ESM::FormId mLoopSound; // SOUN
+        ESM::FormId mRadioTemplate; // SOUN
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_TACT4;
     };
 }
 

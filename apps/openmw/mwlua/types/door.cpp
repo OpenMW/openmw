@@ -100,10 +100,11 @@ namespace MWLua
         addRecordFunctionBinding<ESM4::Door>(door, context, "ESM4Door");
 
         sol::usertype<ESM4::Door> record = context.mLua->sol().new_usertype<ESM4::Door>("ESM4_Door");
-        record[sol::meta_function::to_string]
-            = [](const ESM4::Door& rec) -> std::string { return "ESM4_Door[" + rec.mId.toDebugString() + "]"; };
-        record["id"]
-            = sol::readonly_property([](const ESM4::Door& rec) -> std::string { return rec.mId.serializeText(); });
+        record[sol::meta_function::to_string] = [](const ESM4::Door& rec) -> std::string {
+            return "ESM4_Door[" + ESM::RefId(rec.mId).toDebugString() + "]";
+        };
+        record["id"] = sol::readonly_property(
+            [](const ESM4::Door& rec) -> std::string { return ESM::RefId(rec.mId).serializeText(); });
         record["name"] = sol::readonly_property([](const ESM4::Door& rec) -> std::string { return rec.mFullName; });
         record["model"] = sol::readonly_property([vfs](const ESM4::Door& rec) -> std::string {
             return Misc::ResourceHelpers::correctMeshPath(rec.mModel, vfs);

@@ -36,13 +36,13 @@ void ESM4::Reference::load(ESM4::Reader& reader)
     mId = reader.hdr().record.getFormId();
     reader.adjustFormId(mId);
     mFlags = reader.hdr().record.flags;
-    mParent = ESM::RefId::formIdRefId(reader.currCell());
+    mParent = reader.currCell();
 
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 
-    FormId mid;
-    FormId sid;
+    ESM::FormId mid;
+    ESM::FormId sid;
 
     while (reader.getSubRecordHeader())
     {
@@ -57,9 +57,9 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_NAME:
             {
-                FormId BaseId;
+                ESM::FormId BaseId;
                 reader.getFormId(BaseId);
-                mBaseObj = ESM::RefId::formIdRefId(BaseId);
+                mBaseObj = BaseId;
                 break;
             }
             case ESM4::SUB_DATA:
@@ -165,7 +165,7 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 //    MQ11BravilGate      XRTM : 0018AE1B
                 // e.g. some are XMarkerHeading
                 //    XRTM : 000A4DD7 in OblivionRDCavesMiddleA05 (maybe spawn points?)
-                FormId marker;
+                ESM::FormId marker;
                 reader.getFormId(marker);
                 // std::cout << "REFR " << mEditorId << " XRTM : " << formIdToString(marker) << std::endl;// FIXME
                 break;
@@ -224,9 +224,9 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 reader.get(dummy);
                 reader.get(dummy);
                 reader.get(dummy);
-                FormId keyForm;
+                ESM::FormId keyForm;
                 reader.getFormId(keyForm);
-                mKey = ESM::RefId::formIdRefId(keyForm);
+                mKey = keyForm;
                 reader.get(dummy); // flag?
                 reader.get(dummy);
                 reader.get(dummy);

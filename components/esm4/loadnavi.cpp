@@ -100,7 +100,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     {
         // std::cout << "NVMI countMerged " << std::dec << count << std::endl;
         formIdMerged.resize(count);
-        for (FormId& value : formIdMerged)
+        for (ESM::FormId& value : formIdMerged)
             reader.getFormId(value);
     }
 
@@ -109,7 +109,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     {
         // std::cout << "NVMI countPrefMerged " << std::dec << count << std::endl;
         formIdPrefMerged.resize(count);
-        for (FormId& value : formIdPrefMerged)
+        for (ESM::FormId& value : formIdPrefMerged)
             reader.getFormId(value);
     }
 
@@ -140,7 +140,8 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     reader.getFormId(worldSpaceId);
     // FLG_Tamriel    = 0x0000003c, // grid info follows, possibly Tamriel?
     // FLG_Morrowind  = 0x01380000, // grid info follows, probably Skywind
-    if (worldSpaceId == FormId{ 0x3c, 0 } || worldSpaceId == FormId{ 0x380000, 1 })
+    // FIXME: this check doesn't work because `getFormId` changes the index of content file.
+    if (worldSpaceId == ESM::FormId{ 0x3c, 0 } || worldSpaceId == ESM::FormId{ 0x380000, 1 })
     {
         Grid grid;
         reader.get(grid.y); // NOTE: reverse order
@@ -158,7 +159,7 @@ void ESM4::Navigation::NavMeshInfo::load(ESM4::Reader& reader)
     }
     else
     {
-        FormId cellId;
+        ESM::FormId cellId;
         reader.getFormId(cellId);
         cellGrid = cellId;
 
@@ -266,7 +267,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                 bool nodeFound = false;
                 for (std::uint32_t i = 0; i < total; ++i)
                 {
-                    std::vector<FormId> preferredPaths;
+                    std::vector<ESM::FormId> preferredPaths;
                     reader.get(count);
                     if (count == 1)
                     {
@@ -277,7 +278,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                     if (count > 0)
                     {
                         preferredPaths.resize(count);
-                        for (FormId& value : preferredPaths)
+                        for (ESM::FormId& value : preferredPaths)
                             reader.getFormId(value);
                     }
                     if (!nodeFound)
@@ -294,7 +295,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                     throw std::runtime_error("expected separator");
 
                 reader.get(node); // HACK
-                std::vector<FormId> preferredPaths;
+                std::vector<ESM::FormId> preferredPaths;
                 mPreferredPaths.push_back(std::make_pair(node, preferredPaths)); // empty
 #if 0
                 std::cout << "node " << std::hex << node // FIXME: debugging only
@@ -314,7 +315,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                     std::cout << "node " << std::hex << node // FIXME: debugging only
                         << ", index " << index << ", i " << std::dec << total+i << std::endl;
 #endif
-                    FormId nodeFormId = FormId::fromUint32(node); // should we apply reader.adjustFormId?
+                    ESM::FormId nodeFormId = ESM::FormId::fromUint32(node); // should we apply reader.adjustFormId?
                     // std::pair<std::map<FormId, std::uint32_t>::iterator, bool> res =
                     mPathIndexMap.emplace(nodeFormId, index);
                     // FIXME: this throws if more than one file is being loaded

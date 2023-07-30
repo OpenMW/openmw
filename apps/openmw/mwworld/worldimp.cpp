@@ -711,7 +711,7 @@ namespace MWWorld
 
         if (!activeOnly)
         {
-            ret = mWorldModel.getPtr(name);
+            ret = mWorldModel.getPtrByRefId(name);
             if (!ret.isEmpty())
                 return ret;
         }

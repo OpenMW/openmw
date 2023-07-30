@@ -29,8 +29,8 @@
 
 #include <variant>
 
-#include "formid.hpp"
 #include "grid.hpp"
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {

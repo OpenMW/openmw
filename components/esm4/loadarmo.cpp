@@ -33,7 +33,7 @@
 
 void ESM4::Armor::load(ESM4::Reader& reader)
 {
-    mId = reader.getRefIdFromHeader();
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
     std::uint32_t esmVer = reader.esmVersion();
     mIsFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
@@ -76,12 +76,7 @@ void ESM4::Armor::load(ESM4::Reader& reader)
             {
                 // if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV)
                 if (subHdr.dataSize == 4) // FO3 has zstring even though VER_094
-                {
-                    FormId formId;
-                    reader.getFormId(formId);
-
-                    mAddOns.push_back(formId);
-                }
+                    reader.getFormId(mAddOns.emplace_back());
                 else
                 {
                     if (!reader.getZString(mModelMale))

@@ -21,7 +21,7 @@ namespace MWWorld
             if (!value.mEditorId.empty())
                 return value.mEditorId;
 
-            return value.mId.serializeText();
+            return ESM::RefId(value.mId).serializeText();
         }
 
         std::string getCellDescription(const ESM4::Cell& cell, const ESM4::World* world)

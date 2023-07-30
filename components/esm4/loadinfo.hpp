@@ -30,8 +30,9 @@
 #include <cstdint>
 #include <string>
 
-#include "formid.hpp"
 #include "script.hpp" // TargetCondition
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -54,13 +55,13 @@ namespace ESM4
 
     struct DialogInfo
     {
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId; // FIXME: no such record for INFO, but keep here to avoid extra work for now
 
-        FormId mQuest;
-        FormId mSound; // unused?
+        ESM::FormId mQuest;
+        ESM::FormId mSound; // unused?
 
         TargetResponseData mResponseData;
         std::string mResponse;
@@ -72,7 +73,7 @@ namespace ESM4
         std::uint16_t mInfoFlags; // see above enum
 
         TargetCondition mTargetCondition;
-        FormId mParam3; // TES5 only
+        ESM::FormId mParam3; // TES5 only
 
         ScriptDefinition mScript; // FIXME: ignoring the second one after the NEXT sub-record
 
@@ -80,6 +81,7 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_INFO4;
     };
 }
 

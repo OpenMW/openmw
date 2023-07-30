@@ -33,8 +33,7 @@
 
 void ESM4::IdleMarker::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     std::uint32_t esmVer = reader.esmVersion();
@@ -72,7 +71,7 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
                 }
 
                 mIdleAnim.resize(mIdleCount);
-                for (FormId& value : mIdleAnim)
+                for (ESM::FormId& value : mIdleAnim)
                     reader.getFormId(value);
                 break;
             }

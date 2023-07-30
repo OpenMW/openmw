@@ -33,8 +33,7 @@
 
 void ESM4::FormIdList::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
@@ -46,12 +45,8 @@ void ESM4::FormIdList::load(ESM4::Reader& reader)
                 reader.getZString(mEditorId);
                 break;
             case ESM4::SUB_LNAM:
-            {
-                FormId formId;
-                reader.getFormId(formId);
-                mObjects.push_back(formId);
+                reader.getFormId(mObjects.emplace_back());
                 break;
-            }
             default:
                 throw std::runtime_error("ESM4::FLST::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

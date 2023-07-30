@@ -31,8 +31,9 @@
 #include <string>
 #include <vector>
 
-#include "formid.hpp"
 #include "script.hpp" // TargetCondition, ScriptDefinition
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -59,13 +60,13 @@ namespace ESM4
             Flag_AllowRepeatStages = 0x08
         };
 
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
         std::string mQuestName;
         std::string mFileName; // texture file
-        FormId mQuestScript;
+        ESM::FormId mQuestScript;
 
         QuestData mData;
 
@@ -77,6 +78,7 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_QUST4;
     };
 }
 

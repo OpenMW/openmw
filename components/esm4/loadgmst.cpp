@@ -10,7 +10,7 @@ namespace ESM4
 {
     namespace
     {
-        GameSetting::Data readData(FormId formId, std::string_view editorId, Reader& reader)
+        GameSetting::Data readData(ESM::FormId formId, std::string_view editorId, Reader& reader)
         {
             if (editorId.empty())
             {
@@ -53,8 +53,7 @@ namespace ESM4
 
     void GameSetting::load(Reader& reader)
     {
-        mFormId = reader.hdr().record.getFormId();
-        reader.adjustFormId(mFormId);
+        mId = reader.getFormIdFromHeader();
         mFlags = reader.hdr().record.flags;
 
         while (reader.getSubRecordHeader())
@@ -66,11 +65,11 @@ namespace ESM4
                     reader.getZString(mEditorId);
                     break;
                 case ESM4::SUB_DATA:
-                    mData = readData(mFormId, mEditorId, reader);
+                    mData = readData(mId, mEditorId, reader);
                     break;
                 default:
                     throw std::runtime_error(
-                        "Unknown ESM4 GMST (" + mFormId.toString() + ") subrecord " + ESM::printName(subHdr.typeId));
+                        "Unknown ESM4 GMST (" + mId.toString() + ") subrecord " + ESM::printName(subHdr.typeId));
             }
         }
     }

@@ -65,7 +65,7 @@ namespace MWWorld
 
         CellStore& getCell(std::string_view name, bool forceLoad = true) const;
 
-        Ptr getPtr(const ESM::RefId& name);
+        Ptr getPtrByRefId(const ESM::RefId& name);
 
         Ptr getPtr(ESM::RefNum refNum) const { return mPtrRegistry.getOrEmpty(refNum); }
 

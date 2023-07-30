@@ -31,7 +31,8 @@
 #include <cstdint>
 #include <string>
 
-#include "formid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -40,7 +41,7 @@ namespace ESM4
 
     struct HeadPart
     {
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -49,15 +50,16 @@ namespace ESM4
 
         std::uint8_t mData;
 
-        FormId mAdditionalPart;
+        ESM::FormId mAdditionalPart;
 
         std::array<std::string, 3> mTriFile;
-        FormId mBaseTexture;
+        ESM::FormId mBaseTexture;
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_HDPT4;
     };
 }
 

@@ -29,7 +29,7 @@
 
 #include <cstdint>
 
-#include "formid.hpp"
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -109,7 +109,7 @@ namespace ESM4
 
     struct ActorFaction
     {
-        FormId32 faction;
+        ESM::FormId32 faction;
         std::int8_t rank;
         std::uint8_t unknown1;
         std::uint8_t unknown2;

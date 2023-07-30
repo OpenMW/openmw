@@ -33,10 +33,9 @@
 
 void ESM4::ActorCharacter::load(ESM4::Reader& reader)
 {
-    mId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
-    mParent = ESM::RefId::formIdRefId(reader.currCell());
+    mParent = reader.currCell();
 
     while (reader.getSubRecordHeader())
     {
@@ -50,12 +49,8 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
                 reader.getZString(mFullName);
                 break;
             case ESM4::SUB_NAME:
-            {
-                FormId baseId;
-                reader.getFormId(baseId);
-                mBaseObj = ESM::RefId::formIdRefId(baseId);
+                reader.getFormId(mBaseObj);
                 break;
-            }
             case ESM4::SUB_DATA:
                 reader.get(mPos);
                 break;

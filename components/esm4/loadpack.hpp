@@ -31,7 +31,8 @@
 #include <string>
 #include <vector>
 
-#include "formid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -60,14 +61,14 @@ namespace ESM4
         {
             std::int32_t type = 0xff; // 0 = near ref, 1 = in cell, 2 = current loc, 3 = editor loc, 4 = obj id, 5 = obj
                                       // type, 0xff = no location data
-            FormId32 location; // uint32_t if type = 5
+            ESM::FormId32 location; // uint32_t if type = 5
             std::int32_t radius;
         };
 
         struct PTDT // target
         {
             std::int32_t type = 0xff; // 0 = specific ref, 1 = obj id, 2 = obj type, 0xff = no target data
-            FormId32 target; // uint32_t if type = 2
+            ESM::FormId32 target; // uint32_t if type = 2
             std::int32_t distance;
         };
 
@@ -81,13 +82,13 @@ namespace ESM4
             std::uint8_t unknown3; // probably padding
             float compValue;
             std::int32_t fnIndex;
-            FormId32 param1;
-            FormId32 param2;
+            ESM::FormId32 param1;
+            ESM::FormId32 param2;
             std::uint32_t unknown4; // probably padding
         };
 #pragma pack(pop)
 
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -102,6 +103,7 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_PACK4;
     };
 }
 

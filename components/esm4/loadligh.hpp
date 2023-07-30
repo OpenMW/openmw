@@ -30,10 +30,8 @@
 #include <cstdint>
 #include <string>
 
-#include "formid.hpp"
-
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -84,7 +82,7 @@ namespace ESM4
             float weight;
         };
 
-        ESM::RefId mId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -94,8 +92,8 @@ namespace ESM4
 
         float mBoundRadius;
 
-        FormId mScriptId;
-        FormId mSound;
+        ESM::FormId mScriptId;
+        ESM::FormId mSound;
 
         float mFade;
 

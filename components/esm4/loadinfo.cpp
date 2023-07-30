@@ -29,16 +29,17 @@
 #include <cstring>
 #include <stdexcept>
 
+#include <components/esm/refid.hpp>
+
 #include "reader.hpp"
 //#include "writer.hpp"
 
 void ESM4::DialogInfo::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
-    mEditorId = formIdToString(mFormId); // FIXME: quick workaround to use existing code
+    mEditorId = ESM::RefId(mId).serializeText(); // FIXME: quick workaround to use existing code
 
     static ScriptLocalVariableData localVar;
     bool ignore = false;
