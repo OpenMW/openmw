@@ -190,6 +190,8 @@ void MWState::StateManager::resumeGame()
 
 void MWState::StateManager::saveGame(std::string_view description, const Slot* slot)
 {
+    MWBase::Environment::get().getLuaManager()->applyDelayedActions();
+
     MWState::Character* character = getCurrentCharacter();
 
     try

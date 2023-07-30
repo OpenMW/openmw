@@ -98,6 +98,9 @@ namespace MWBase
         virtual void write(ESM::ESMWriter& writer, Loading::Listener& progress) = 0;
         virtual void saveLocalScripts(const MWWorld::Ptr& ptr, ESM::LuaScripts& data) = 0;
 
+        // Must be called before save, otherwise the world can be saved in an inconsistent state.
+        virtual void applyDelayedActions() = 0;
+
         // Loading from a save
         virtual void readRecord(ESM::ESMReader& reader, uint32_t type) = 0;
         virtual void loadLocalScripts(const MWWorld::Ptr& ptr, const ESM::LuaScripts& data) = 0;
