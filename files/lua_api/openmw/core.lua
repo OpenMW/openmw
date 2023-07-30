@@ -663,6 +663,9 @@
 --         print(effect.name)
 --     end
 -- end
+-- @usage -- Look up the record of a specific effect and print its icon
+-- local mgef = core.magic.effects[core.magic.EFFECT_TYPE.Reflect]
+-- print('Reflect Icon: '..tostring(mgef.icon))
 
 --- List of all @{#Enchantment}s.
 -- @field [parent=#Magic] #list<#Enchantment> enchantments
