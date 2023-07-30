@@ -642,7 +642,7 @@ namespace
     }
 
     std::unique_ptr<std::stringstream> saveDialogueWithInfos(
-        const ESM::Dialogue& dialogue, std::span<const ESM::DialInfo> infos)
+        const ESM::Dialogue& dialogue, std::span<const ESM::DialInfo> infos, std::span<const std::size_t> deleted = {})
     {
         auto stream = std::make_unique<std::stringstream>();
 
@@ -654,10 +654,10 @@ namespace
         dialogue.save(writer);
         writer.endRecord(ESM::REC_DIAL);
 
-        for (const ESM::DialInfo& info : infos)
+        for (std::size_t i = 0; i < infos.size(); ++i)
         {
             writer.startRecord(ESM::REC_INFO);
-            info.save(writer);
+            infos[i].save(writer, std::find(deleted.begin(), deleted.end(), i) != deleted.end());
             writer.endRecord(ESM::REC_INFO);
         }
 
@@ -860,5 +860,19 @@ namespace
         ASSERT_NE(dialogue, nullptr);
         EXPECT_THAT(dialogue->mInfo, ElementsAre(HasIdEqualTo("info1"), HasIdEqualTo("info2"), HasIdEqualTo("info0")));
         EXPECT_EQ(dialogue->mInfo.begin()->mResponse, "test");
+    }
+
+    TEST(MWWorldStoreTest, setUpShouldRemoveDeletedDialogueInfos)
+    {
+        const DialogueData data = generateDialogueWithInfos(3);
+
+        MWWorld::ESMStore esmStore;
+        const std::array<std::size_t, 1> deleted = { 1 };
+        loadEsmStore(0, saveDialogueWithInfos(data.mDialogue, data.mInfos, deleted), esmStore);
+        esmStore.setUp();
+
+        const ESM::Dialogue* dialogue = esmStore.get<ESM::Dialogue>().search(ESM::RefId::stringRefId("dialogue"));
+        ASSERT_NE(dialogue, nullptr);
+        EXPECT_THAT(dialogue->mInfo, ElementsAre(HasIdEqualTo("info0"), HasIdEqualTo("info2")));
     }
 }
