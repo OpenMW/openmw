@@ -57,6 +57,8 @@ namespace MWLua
                 effect.mRange = ESM::RT_Self;
                 effect.mArea = 0;
                 effect.mDuration = 0;
+                effect.mMagnMin = 0;
+                effect.mMagnMax = 0;
                 res[i + 1] = effect;
             }
             return res;

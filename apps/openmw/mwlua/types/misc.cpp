@@ -31,6 +31,7 @@ namespace
         misc.mScript = ESM::RefId::deserializeText(scriptId);
         misc.mData.mWeight = rec["weight"];
         misc.mData.mValue = rec["value"];
+        misc.mData.mFlags = 0;
         misc.mRecordFlags = 0;
         return misc;
     }
