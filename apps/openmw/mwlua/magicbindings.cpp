@@ -1,9 +1,15 @@
 #include "magicbindings.hpp"
 
 #include <components/esm3/activespells.hpp>
+#include <components/esm3/loadalch.hpp>
+#include <components/esm3/loadarmo.hpp>
+#include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclot.hpp>
 #include <components/esm3/loadench.hpp>
+#include <components/esm3/loadingr.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadspel.hpp>
+#include <components/esm3/loadweap.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/color.hpp>
 #include <components/misc/resourcehelpers.hpp>
@@ -111,6 +117,12 @@ namespace MWLua
         MWMechanics::EffectKey key;
         MWMechanics::EffectParam param;
     };
+    struct ActiveSpell
+    {
+        ObjectVariant mActor;
+        MWMechanics::ActiveSpells::ActiveSpellParams mParams;
+    };
+
     // class returned via 'types.Actor.spells(obj)' in Lua
     using ActorSpells = ActorStore<MWMechanics::Spells>;
     // class returned via 'types.Actor.activeEffects(obj)' in Lua
@@ -141,6 +153,10 @@ namespace sol
     struct is_automagical<MWLua::ActorStore<T>> : std::false_type
     {
     };
+    template <>
+    struct is_automagical<MWLua::ActiveSpell> : std::false_type
+    {
+    };
 }
 
 namespace MWLua
@@ -151,6 +167,27 @@ namespace MWLua
             return spellOrId.as<const ESM::Spell*>()->mId;
         else
             return ESM::RefId::deserializeText(LuaUtil::cast<std::string_view>(spellOrId));
+    }
+    static ESM::RefId toRecordId(const sol::object& recordOrId)
+    {
+        if (recordOrId.is<ESM::Spell>())
+            return recordOrId.as<const ESM::Spell*>()->mId;
+        else if (recordOrId.is<ESM::Potion>())
+            return recordOrId.as<const ESM::Potion*>()->mId;
+        else if (recordOrId.is<ESM::Ingredient>())
+            return recordOrId.as<const ESM::Ingredient*>()->mId;
+        else if (recordOrId.is<ESM::Enchantment>())
+            return recordOrId.as<const ESM::Enchantment*>()->mId;
+        else if (recordOrId.is<ESM::Armor>())
+            return recordOrId.as<const ESM::Armor*>()->mId;
+        else if (recordOrId.is<ESM::Book>())
+            return recordOrId.as<const ESM::Book*>()->mId;
+        else if (recordOrId.is<ESM::Clothing>())
+            return recordOrId.as<const ESM::Clothing*>()->mId;
+        else if (recordOrId.is<ESM::Weapon>())
+            return recordOrId.as<const ESM::Weapon*>()->mId;
+        else
+            return ESM::RefId::deserializeText(LuaUtil::cast<std::string_view>(recordOrId));
     }
 
     sol::table initCoreMagicBindings(const Context& context)
@@ -368,6 +405,122 @@ namespace MWLua
         // magicEffectT["projectileSpeed"]
         //     = sol::readonly_property([](const ESM::MagicEffect& rec) -> float { return rec.mData.mSpeed; });
 
+        auto activeSpellEffectT = context.mLua->sol().new_usertype<ESM::ActiveEffect>("ActiveSpellEffect");
+        activeSpellEffectT[sol::meta_function::to_string] = [](const ESM::ActiveEffect& effect) {
+            return "ActiveSpellEffect[" + ESM::MagicEffect::indexToGmstString(effect.mEffectId) + "]";
+        };
+        activeSpellEffectT["id"] = sol::readonly_property([](const ESM::ActiveEffect& effect) -> std::string {
+            auto name = ESM::MagicEffect::indexToName(effect.mEffectId);
+            return Misc::StringUtils::lowerCase(name);
+        });
+        activeSpellEffectT["name"] = sol::readonly_property([](const ESM::ActiveEffect& effect) -> std::string {
+            return MWMechanics::EffectKey(effect.mEffectId, effect.mArg).toString();
+        });
+        activeSpellEffectT["affectedSkill"]
+            = sol::readonly_property([magicEffectStore](const ESM::ActiveEffect& effect) -> sol::optional<std::string> {
+                  auto* rec = magicEffectStore->find(effect.mEffectId);
+                  if ((rec->mData.mFlags & ESM::MagicEffect::TargetSkill) && effect.mArg >= 0
+                      && effect.mArg < ESM::Skill::Length)
+                      return ESM::Skill::indexToRefId(effect.mArg).serializeText();
+                  else
+                      return sol::nullopt;
+              });
+        activeSpellEffectT["affectedAttribute"]
+            = sol::readonly_property([magicEffectStore](const ESM::ActiveEffect& effect) -> sol::optional<std::string> {
+                  auto* rec = magicEffectStore->find(effect.mEffectId);
+                  if ((rec->mData.mFlags & ESM::MagicEffect::TargetAttribute) && effect.mArg >= 0
+                      && effect.mArg < ESM::Attribute::Length)
+                      return Misc::StringUtils::lowerCase(ESM::Attribute::sAttributeNames[effect.mArg]);
+                  else
+                      return sol::nullopt;
+              });
+        activeSpellEffectT["magnitudeThisFrame"]
+            = sol::readonly_property([magicEffectStore](const ESM::ActiveEffect& effect) -> sol::optional<float> {
+                  auto* rec = magicEffectStore->find(effect.mEffectId);
+                  if (rec->mData.mFlags & ESM::MagicEffect::Flags::NoMagnitude)
+                      return sol::nullopt;
+                  return effect.mMagnitude;
+              });
+        activeSpellEffectT["minMagnitude"]
+            = sol::readonly_property([magicEffectStore](const ESM::ActiveEffect& effect) -> sol::optional<float> {
+                  auto* rec = magicEffectStore->find(effect.mEffectId);
+                  if (rec->mData.mFlags & ESM::MagicEffect::Flags::NoMagnitude)
+                      return sol::nullopt;
+                  return effect.mMinMagnitude;
+              });
+        activeSpellEffectT["maxMagnitude"]
+            = sol::readonly_property([magicEffectStore](const ESM::ActiveEffect& effect) -> sol::optional<float> {
+                  auto* rec = magicEffectStore->find(effect.mEffectId);
+                  if (rec->mData.mFlags & ESM::MagicEffect::Flags::NoMagnitude)
+                      return sol::nullopt;
+                  return effect.mMaxMagnitude;
+              });
+        activeSpellEffectT["durationLeft"]
+            = sol::readonly_property([magicEffectStore](const ESM::ActiveEffect& effect) -> sol::optional<float> {
+                  // Permanent/constant effects, abilities, etc. will have a negative duration
+                  if (effect.mDuration < 0)
+                      return sol::nullopt;
+                  auto* rec = magicEffectStore->find(effect.mEffectId);
+                  if (rec->mData.mFlags & ESM::MagicEffect::Flags::NoDuration)
+                      return sol::nullopt;
+                  return effect.mTimeLeft;
+              });
+        activeSpellEffectT["duration"]
+            = sol::readonly_property([magicEffectStore](const ESM::ActiveEffect& effect) -> sol::optional<float> {
+                  // Permanent/constant effects, abilities, etc. will have a negative duration
+                  if (effect.mDuration < 0)
+                      return sol::nullopt;
+                  auto* rec = magicEffectStore->find(effect.mEffectId);
+                  if (rec->mData.mFlags & ESM::MagicEffect::Flags::NoDuration)
+                      return sol::nullopt;
+                  return effect.mDuration;
+              });
+
+        auto activeSpellT = context.mLua->sol().new_usertype<ActiveSpell>("ActiveSpellParams");
+        activeSpellT[sol::meta_function::to_string] = [](const ActiveSpell& activeSpell) {
+            return "ActiveSpellParams[" + activeSpell.mParams.getId().serializeText() + "]";
+        };
+        activeSpellT["name"] = sol::readonly_property(
+            [](const ActiveSpell& activeSpell) -> std::string_view { return activeSpell.mParams.getDisplayName(); });
+        activeSpellT["id"] = sol::readonly_property(
+            [](const ActiveSpell& activeSpell) -> std::string { return activeSpell.mParams.getId().serializeText(); });
+        activeSpellT["item"] = sol::readonly_property([&lua](const ActiveSpell& activeSpell) -> sol::object {
+            auto item = activeSpell.mParams.getItem();
+            if (!item.isSet())
+                return sol::nil;
+            auto itemPtr = MWBase::Environment::get().getWorldModel()->getPtr(item);
+            if (itemPtr.isEmpty())
+                return sol::nil;
+            if (activeSpell.mActor.isGObject())
+                return sol::make_object(lua, GObject(itemPtr));
+            else
+                return sol::make_object(lua, LObject(itemPtr));
+        });
+        activeSpellT["caster"] = sol::readonly_property([&lua](const ActiveSpell& activeSpell) -> sol::object {
+            auto caster
+                = MWBase::Environment::get().getWorld()->searchPtrViaActorId(activeSpell.mParams.getCasterActorId());
+            if (caster.isEmpty())
+                return sol::nil;
+            else
+            {
+                if (activeSpell.mActor.isGObject())
+                    return sol::make_object(lua, GObject(getId(caster)));
+                else
+                    return sol::make_object(lua, LObject(getId(caster)));
+            }
+        });
+        activeSpellT["effects"] = sol::readonly_property([&lua](const ActiveSpell& activeSpell) -> sol::table {
+            sol::table res(lua, sol::create);
+            size_t tableIndex = 0;
+            for (const ESM::ActiveEffect& effect : activeSpell.mParams.getEffects())
+            {
+                if (!(effect.mFlags & ESM::ActiveEffect::Flag_Applied))
+                    continue;
+                res[++tableIndex] = effect; // ESM::ActiveEffect (effect params)
+            }
+            return res;
+        });
+
         auto activeEffectT = context.mLua->sol().new_usertype<ActiveEffect>("ActiveEffect");
 
         activeEffectT[sol::meta_function::to_string] = [](const ActiveEffect& effect) {
@@ -543,18 +696,16 @@ namespace MWLua
         };
 
         // pairs(types.Actor.activeSpells(o))
-        // Note that the indexes are fake, and only for consistency with other lua pairs interfaces. You can't use them
-        // for anything.
         activeSpellsT["__pairs"] = [](sol::this_state ts, ActorActiveSpells& self) {
             sol::state_view lua(ts);
             self.reset();
-            return sol::as_function([lua, &self]() mutable -> std::pair<sol::object, sol::object> {
+            return sol::as_function([lua, self]() mutable -> std::pair<sol::object, sol::object> {
                 if (!self.isEnd())
                 {
-                    auto result = sol::make_object(lua, self.mIterator->getId());
-                    auto index = sol::make_object(lua, self.mIndex + 1);
+                    auto id = sol::make_object(lua, self.mIterator->getId().serializeText());
+                    auto params = sol::make_object(lua, ActiveSpell{ self.mActor, *self.mIterator });
                     self.advance();
-                    return { index, result };
+                    return { params, params };
                 }
                 else
                 {
@@ -564,10 +715,13 @@ namespace MWLua
         };
 
         // types.Actor.activeSpells(o):isSpellActive(id)
-        activeSpellsT["isSpellActive"] = [](const ActorActiveSpells& spells, const sol::object& spellOrId) -> bool {
-            auto id = toSpellId(spellOrId);
-            if (auto* store = spells.getStore())
-                return store->isSpellActive(id);
+        activeSpellsT["isSpellActive"]
+            = [](const ActorActiveSpells& activeSpells, const sol::object& recordOrId) -> bool {
+            if (auto* store = activeSpells.getStore())
+            {
+                auto id = toRecordId(recordOrId);
+                return store->isSpellActive(id) || store->isEnchantmentActive(id);
+            }
             return false;
         };
 
@@ -589,7 +743,7 @@ namespace MWLua
         activeEffectsT["__pairs"] = [](sol::this_state ts, ActorActiveEffects& self) {
             sol::state_view lua(ts);
             self.reset();
-            return sol::as_function([lua, &self]() mutable -> std::pair<sol::object, sol::object> {
+            return sol::as_function([lua, self]() mutable -> std::pair<sol::object, sol::object> {
                 if (!self.isEnd())
                 {
                     ActiveEffect effect = ActiveEffect{ self.mIterator->first, self.mIterator->second };

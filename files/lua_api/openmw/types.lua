@@ -239,7 +239,7 @@
 -- @param openmw.core#GameObject actor
 -- @return #ActorActiveSpells
 
---- Read-only list of spells currently affecting the actor.
+--- Read-only list of spells currently affecting the actor. Can be iterated over for a list of @{openmw.core#ActiveSpell}
 -- @type ActorActiveSpells
 -- @usage -- print active spells
 -- for _, spell in pairs(Actor.activeSpells(self)) do
@@ -251,12 +251,33 @@
 -- else
 --     print('Player does not have bound longbow')
 -- end
+-- @usage -- Print all information about active spells
+-- for id, params in pairs(Actor.activeSpells(self)) do
+--     print('active spell '..tostring(id)..':')
+--     print('  name: '..tostring(params.name))
+--     print('  id: '..tostring(params.id))
+--     print('  item: '..tostring(params.item))
+--     print('  caster: '..tostring(params.caster))
+--     print('  effects: '..tostring(params.effects))
+--     for _, effect in pairs(params.effects) do
+--         print('  -> effects['..tostring(effect)..']:')
+--         print('       id: '..tostring(effect.id))
+--         print('       name: '..tostring(effect.name))
+--         print('       affectedSkill: '..tostring(effect.affectedSkill))
+--         print('       affectedAttribute: '..tostring(effect.affectedAttribute))
+--         print('       magnitudeThisFrame: '..tostring(effect.magnitudeThisFrame))
+--         print('       minMagnitude: '..tostring(effect.minMagnitude))
+--         print('       maxMagnitude: '..tostring(effect.maxMagnitude))
+--         print('       duration: '..tostring(effect.duration))
+--         print('       durationLeft: '..tostring(effect.durationLeft))
+--     end
+-- end
 
 ---
 -- Get whether a specific spell is active on the actor.
 -- @function [parent=#ActorActiveSpells] isSpellActive
 -- @param self
--- @param #any spellOrId @{openmw.core#Spell} or string spell id
+-- @param #any recordOrId record or string record ID of the active spell's source. valid records are @{openmw.core#Spell}, @{openmw.core#Enchantment}, #IngredientRecord, or #PotionRecord
 -- @return true if spell is active, false otherwise
 
 ---

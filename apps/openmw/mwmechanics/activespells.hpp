@@ -72,6 +72,8 @@ namespace MWMechanics
 
             const std::string& getDisplayName() const { return mDisplayName; }
 
+            ESM::RefNum getItem() const { return mItem; }
+
             // Increments worsenings count and sets the next timestamp
             void worsen();
 
@@ -143,8 +145,12 @@ namespace MWMechanics
         /// Remove all spells
         void clear(const MWWorld::Ptr& ptr);
 
+        /// True if a spell associated with this id is active
+        /// \note For enchantments, this is the id of the enchanted item, not the enchantment itself
         bool isSpellActive(const ESM::RefId& id) const;
-        ///< case insensitive
+
+        /// True if the enchantment is active
+        bool isEnchantmentActive(const ESM::RefId& id) const;
 
         void skipWorsenings(double hours);
 
