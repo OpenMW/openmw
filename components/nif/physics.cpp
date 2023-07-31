@@ -3,6 +3,8 @@
 #include "data.hpp"
 #include "node.hpp"
 
+#include <array>
+
 namespace Nif
 {
 

@@ -5,6 +5,7 @@
 #include <components/compiler/opcodes.hpp>
 
 #include <components/esm3/loadregn.hpp>
+#include <components/interpreter/context.hpp>
 #include <components/interpreter/interpreter.hpp>
 #include <components/interpreter/opcodes.hpp>
 #include <components/interpreter/runtime.hpp>
@@ -13,8 +14,6 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/esmstore.hpp"
-
-#include "interpretercontext.hpp"
 
 namespace MWScript
 {

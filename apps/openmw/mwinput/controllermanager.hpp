@@ -1,11 +1,12 @@
 #ifndef MWINPUT_MWCONTROLLERMANAGER_H
 #define MWINPUT_MWCONTROLLERMANAGER_H
 
+#include <array>
+#include <filesystem>
 #include <string>
 
 #include <components/sdlutil/events.hpp>
 #include <components/settings/settings.hpp>
-#include <filesystem>
 
 namespace MWInput
 {

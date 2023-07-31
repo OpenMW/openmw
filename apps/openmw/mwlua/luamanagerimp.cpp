@@ -26,6 +26,7 @@
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/scene.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "luabindings.hpp"
 #include "playerscripts.hpp"

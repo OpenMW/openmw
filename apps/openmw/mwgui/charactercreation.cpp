@@ -13,7 +13,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
-#include "../mwmechanics/npcstats.hpp"
+#include "../mwmechanics/creaturestats.hpp"
 
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"

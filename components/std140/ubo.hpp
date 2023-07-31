@@ -5,6 +5,7 @@
 #include <osg/Vec2f>
 #include <osg/Vec4f>
 
+#include <array>
 #include <cstdint>
 #include <cstring>
 #include <string>

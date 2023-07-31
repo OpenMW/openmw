@@ -1,5 +1,6 @@
 #include "skyutil.hpp"
 
+#include <array>
 #include <cmath>
 
 #include <osg/AlphaFunc>

@@ -1,6 +1,7 @@
 #include "spelleffects.hpp"
 
 #include <algorithm>
+#include <array>
 
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadench.hpp>

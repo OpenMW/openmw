@@ -1,5 +1,7 @@
 #include "keyframemanager.hpp"
 
+#include <array>
+
 #include <components/vfs/manager.hpp>
 
 #include <osg/Stats>

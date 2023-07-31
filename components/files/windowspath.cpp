@@ -2,6 +2,7 @@
 
 #if defined(_WIN32) || defined(__WINDOWS__)
 
+#include <array>
 #include <cstring>
 
 #define FAR

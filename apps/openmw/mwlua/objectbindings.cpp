@@ -13,6 +13,7 @@
 #include "../mwworld/containerstore.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/scene.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwrender/renderingmanager.hpp"
 
