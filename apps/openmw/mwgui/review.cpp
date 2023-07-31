@@ -354,7 +354,16 @@ namespace MWGui
             const ESM::Skill* skill = MWBase::Environment::get().getESMStore()->get<ESM::Skill>().search(skillId);
             if (!skill) // Skip unknown skills
                 continue;
-            const MWMechanics::SkillValue& stat = mSkillValues.find(skill->mId)->second;
+
+            auto skillValue = mSkillValues.find(skill->mId);
+            if (skillValue == mSkillValues.end())
+            {
+                Log(Debug::Error) << "Failed to update stats review window: can not find value for skill "
+                                  << skill->mId;
+                continue;
+            }
+
+            const MWMechanics::SkillValue& stat = skillValue->second;
             int base = stat.getBase();
             int modified = stat.getModified();
 

@@ -151,7 +151,10 @@ namespace MWGui
 
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
         MWMechanics::Spells& spells = stats.getSpells();
-        spells.add(mSpellsWidgetMap.find(_sender)->second);
+        auto spell = mSpellsWidgetMap.find(_sender);
+        assert(spell != mSpellsWidgetMap.end());
+
+        spells.add(spell->second);
         player.getClass().getContainerStore(player).remove(MWWorld::ContainerStore::sGoldId, price);
 
         // add gold to NPC trading gold pool

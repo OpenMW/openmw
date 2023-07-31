@@ -10,6 +10,8 @@
 #include <MyGUI_TextIterator.h>
 #include <MyGUI_Window.h>
 
+#include <components/debug/debuglog.hpp>
+
 #include <components/esm3/loadbsgn.hpp>
 #include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadfact.hpp>
@@ -496,6 +498,13 @@ namespace MWGui
             if (!skill) // Skip unknown skills
                 continue;
 
+            auto skillValue = mSkillValues.find(skill->mId);
+            if (skillValue == mSkillValues.end())
+            {
+                Log(Debug::Error) << "Failed to update stats window: can not find value for skill " << skill->mId;
+                continue;
+            }
+
             const ESM::Attribute* attr = esmStore.get<ESM::Attribute>().find(skill->mData.mAttribute);
 
             std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets
@@ -516,7 +525,7 @@ namespace MWGui
                 mSkillWidgets[mSkillWidgets.size() - 1 - i]->setUserString("Range_SkillProgress", "100");
             }
 
-            setValue(skill->mId, mSkillValues.find(skill->mId)->second);
+            setValue(skill->mId, skillValue->second);
         }
     }
 

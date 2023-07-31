@@ -1,6 +1,7 @@
 #include "shadermanager.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <chrono>
 #include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
@@ -472,9 +473,15 @@ namespace Shader
                     {
                         ShaderManager::ShaderMap::iterator shaderIt
                             = Manager.mShaders.find(std::make_pair(templateName, shaderDefines));
+                        if (shaderIt == Manager.mShaders.end())
+                        {
+                            Log(Debug::Error) << "Failed to find shader " << templateName;
+                            continue;
+                        }
 
                         ShaderManager::TemplateMap::iterator templateIt = Manager.mShaderTemplates.find(
                             templateName); // Can't be Null, if we're here it means the template was added
+                        assert(templateIt != Manager.mShaderTemplates.end());
                         std::string& shaderSource = templateIt->second;
                         std::set<std::filesystem::path> insertedPaths;
                         std::filesystem::path path = (std::filesystem::path(Manager.mPath) / templateName);

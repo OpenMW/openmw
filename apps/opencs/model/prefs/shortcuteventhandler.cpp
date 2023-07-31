@@ -100,6 +100,7 @@ namespace CSMPrefs
         {
             QWidget* widget = static_cast<QWidget*>(watched);
             ShortcutMap::iterator shortcutListIt = mWidgetShortcuts.find(widget);
+            assert(shortcutListIt != mWidgetShortcuts.end());
 
             // Deactivate in case events are missed
             for (ShortcutList::iterator it = shortcutListIt->second.begin(); it != shortcutListIt->second.end(); ++it)
