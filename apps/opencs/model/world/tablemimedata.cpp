@@ -13,6 +13,7 @@
 
 CSMWorld::TableMimeData::TableMimeData(UniversalId id, const CSMDoc::Document& document)
     : mDocument(document)
+    , mTableOfDragStart(nullptr)
 {
     mUniversalId.push_back(id);
     mObjectsFormats << QString::fromUtf8(("tabledata/" + id.getTypeName()).c_str());
@@ -21,6 +22,7 @@ CSMWorld::TableMimeData::TableMimeData(UniversalId id, const CSMDoc::Document& d
 CSMWorld::TableMimeData::TableMimeData(const std::vector<CSMWorld::UniversalId>& id, const CSMDoc::Document& document)
     : mUniversalId(id)
     , mDocument(document)
+    , mTableOfDragStart(nullptr)
 {
     for (std::vector<UniversalId>::iterator it(mUniversalId.begin()); it != mUniversalId.end(); ++it)
     {

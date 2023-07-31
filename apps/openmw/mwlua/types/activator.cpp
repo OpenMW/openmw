@@ -26,6 +26,7 @@ namespace
         activator.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
         std::string_view scriptId = rec["mwscript"].get<std::string_view>();
         activator.mScript = ESM::RefId::deserializeText(scriptId);
+        activator.mRecordFlags = 0;
         return activator;
     }
 }

@@ -291,6 +291,7 @@ void MWMechanics::Alchemy::addPotion(const std::string& name)
 
     newRecord.mData.mValue = mValue;
     newRecord.mData.mAutoCalc = 0;
+    newRecord.mRecordFlags = 0;
 
     newRecord.mName = name;
 

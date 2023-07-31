@@ -40,6 +40,7 @@ namespace
         book.mData.mWeight = rec["weight"];
         book.mData.mValue = rec["value"];
         book.mData.mIsScroll = rec["isScroll"];
+        book.mRecordFlags = 0;
 
         ESM::RefId skill = ESM::RefId::deserializeText(rec["skill"].get<std::string_view>());
 

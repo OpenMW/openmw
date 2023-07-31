@@ -960,7 +960,7 @@ namespace MWGui
 
                 ActiveTextFormats::iterator i = mActiveTextFormats.find(Font);
 
-                if (mNode)
+                if (mNode && i != mActiveTextFormats.end())
                     mNode->outOfDate(i->second->mRenderItem);
             }
         }

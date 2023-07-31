@@ -40,6 +40,7 @@ namespace
         armor.mData.mHealth = rec["health"];
         armor.mData.mArmor = rec["baseArmor"];
         armor.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
+        armor.mRecordFlags = 0;
 
         return armor;
     }
