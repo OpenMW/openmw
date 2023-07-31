@@ -4,6 +4,7 @@
 
 #include <apps/openmw/profile.hpp>
 
+#include <components/debug/debuglog.hpp>
 #include <components/settings/values.hpp>
 
 #include <osgViewer/Viewer>
@@ -82,7 +83,14 @@ namespace MWLua
             if (mJoinRequest)
                 break;
 
-            update();
+            try
+            {
+                update();
+            }
+            catch (std::exception& e)
+            {
+                Log(Debug::Error) << "Failed to update LuaManager: " << e.what();
+            }
 
             mUpdateRequest = false;
             lk.unlock();

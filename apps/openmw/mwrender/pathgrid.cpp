@@ -6,6 +6,7 @@
 #include <osg/Group>
 #include <osg/PositionAttitudeTransform>
 
+#include <components/debug/debuglog.hpp>
 #include <components/esm3/loadpgrd.hpp>
 #include <components/misc/coordinateconverter.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -36,7 +37,14 @@ namespace MWRender
     {
         if (mPathgridEnabled)
         {
-            togglePathgrid();
+            try
+            {
+                togglePathgrid();
+            }
+            catch (std::exception& e)
+            {
+                Log(Debug::Error) << "Failed to destroy pathgrid: " << e.what();
+            }
         }
     }
 
