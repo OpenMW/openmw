@@ -314,13 +314,6 @@ namespace MWMechanics
             completeManualWalking(actor, storage);
         }
 
-        if (storage.mState == AiWanderStorage::Wander_Walking && mUsePathgrid)
-        {
-            const auto agentBounds = MWBase::Environment::get().getWorld()->getPathfindingAgentBounds(actor);
-            mPathFinder.buildPathByNavMeshToNextPoint(
-                actor, agentBounds, getNavigatorFlags(actor), getAreaCosts(actor));
-        }
-
         if (storage.mState == AiWanderStorage::Wander_MoveNow && storage.mCanWanderAlongPathGrid)
         {
             // Construct a new path if there isn't one

@@ -115,10 +115,6 @@ namespace MWMechanics
             const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Flags flags,
             const DetourNavigator::AreaCosts& areaCosts, float endTolerance, PathType pathType);
 
-        void buildPathByNavMeshToNextPoint(const MWWorld::ConstPtr& actor,
-            const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Flags flags,
-            const DetourNavigator::AreaCosts& areaCosts);
-
         void buildLimitedPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint, const osg::Vec3f& endPoint,
             const MWWorld::CellStore* cell, const PathgridGraph& pathgridGraph,
             const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Flags flags,

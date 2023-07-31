@@ -75,13 +75,6 @@ namespace
         return sqrDistance(osg::Vec2f(lhs.x(), lhs.y()), osg::Vec2f(rhs.x(), rhs.y()));
     }
 
-    float getPathStepSize(const MWWorld::ConstPtr& actor)
-    {
-        const auto world = MWBase::Environment::get().getWorld();
-        const auto realHalfExtents = world->getHalfExtents(actor);
-        return 2 * std::max(realHalfExtents.x(), realHalfExtents.y());
-    }
-
     float getHeight(const MWWorld::ConstPtr& actor)
     {
         const auto world = MWBase::Environment::get().getWorld();
@@ -455,47 +448,6 @@ namespace MWMechanics
         }
 
         return status;
-    }
-
-    void PathFinder::buildPathByNavMeshToNextPoint(const MWWorld::ConstPtr& actor,
-        const DetourNavigator::AgentBounds& agentBounds, const DetourNavigator::Flags flags,
-        const DetourNavigator::AreaCosts& areaCosts)
-    {
-        if (mPath.empty())
-            return;
-
-        const auto stepSize = getPathStepSize(actor);
-        const auto startPoint = actor.getRefData().getPosition().asVec3();
-
-        if (sqrDistanceIgnoreZ(mPath.front(), startPoint) <= 4 * stepSize * stepSize)
-            return;
-
-        const auto navigator = MWBase::Environment::get().getWorld()->getNavigator();
-        std::deque<osg::Vec3f> prePath;
-        auto prePathInserter = std::back_inserter(prePath);
-        const float endTolerance = 0;
-        const auto status = DetourNavigator::findPath(
-            *navigator, agentBounds, startPoint, mPath.front(), flags, areaCosts, endTolerance, prePathInserter);
-
-        if (status == DetourNavigator::Status::NavMeshNotFound)
-            return;
-
-        if (status != DetourNavigator::Status::Success)
-        {
-            Log(Debug::Debug) << "Build path by navigator error: \"" << DetourNavigator::getMessage(status)
-                              << "\" for \"" << actor.getClass().getName(actor) << "\" (" << actor.getBase()
-                              << ") from " << startPoint << " to " << mPath.front() << " with flags ("
-                              << DetourNavigator::WriteFlags{ flags } << ")";
-            return;
-        }
-
-        while (!prePath.empty() && sqrDistanceIgnoreZ(prePath.front(), startPoint) < stepSize * stepSize)
-            prePath.pop_front();
-
-        while (!prePath.empty() && sqrDistanceIgnoreZ(prePath.back(), mPath.front()) < stepSize * stepSize)
-            prePath.pop_back();
-
-        std::copy(prePath.rbegin(), prePath.rend(), std::front_inserter(mPath));
     }
 
     void PathFinder::buildLimitedPath(const MWWorld::ConstPtr& actor, const osg::Vec3f& startPoint,
