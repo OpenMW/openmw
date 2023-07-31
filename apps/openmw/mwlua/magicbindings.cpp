@@ -24,6 +24,7 @@
 #include "../mwmechanics/spellutil.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "localscripts.hpp"
 #include "luamanagerimp.hpp"
