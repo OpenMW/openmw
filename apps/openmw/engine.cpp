@@ -2,8 +2,8 @@
 
 #include <cerrno>
 #include <chrono>
+#include <future>
 #include <system_error>
-#include <thread>
 
 #include <osgDB/WriteFile>
 #include <osgViewer/ViewerEventHandlers>
@@ -38,6 +38,7 @@
 
 #include <components/l10n/manager.hpp>
 
+#include <components/loadinglistener/asynclistener.hpp>
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include <components/misc/frameratelimiter.hpp>
@@ -742,8 +743,10 @@ void OMW::Engine::prepareEngine()
     mWorld = std::make_unique<MWWorld::World>(
         mResourceSystem.get(), mActivationDistanceOverride, mCellName, mCfgMgr.getUserDataPath());
 
-    std::thread loadDataThread(
-        [&] { mWorld->loadData(mFileCollections, mContentFiles, mGroundcoverFiles, mEncoder.get()); });
+    Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
+    Loading::AsyncListener asyncListener(*listener);
+    auto dataLoading = std::async(std::launch::async,
+        [&] { mWorld->loadData(mFileCollections, mContentFiles, mGroundcoverFiles, mEncoder.get(), &asyncListener); });
 
     if (!mSkipMenu)
     {
@@ -752,9 +755,12 @@ void OMW::Engine::prepareEngine()
             mWindowManager->playVideo(logo, true);
     }
 
-    Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
     listener->loadingOn();
-    loadDataThread.join();
+    {
+        using namespace std::chrono_literals;
+        while (dataLoading.wait_for(50ms) != std::future_status::ready)
+            asyncListener.update();
+    }
     listener->loadingOff();
 
     mWorld->init(mViewer, rootNode, mWorkQueue.get(), *mUnrefQueue);

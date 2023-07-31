@@ -199,7 +199,8 @@ namespace MWWorld
             const std::filesystem::path& userDataPath);
 
         void loadData(const Files::Collections& fileCollections, const std::vector<std::string>& contentFiles,
-            const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder);
+            const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder,
+            Loading::Listener* listener);
 
         // Must be called after `loadData`.
         void init(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode, SceneUtil::WorkQueue* workQueue,

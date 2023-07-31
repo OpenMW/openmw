@@ -270,13 +270,12 @@ namespace MWWorld
     }
 
     void World::loadData(const Files::Collections& fileCollections, const std::vector<std::string>& contentFiles,
-        const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder)
+        const std::vector<std::string>& groundcoverFiles, ToUTF8::Utf8Encoder* encoder, Loading::Listener* listener)
     {
         mContentFiles = contentFiles;
         if (encoder)
             mReaders.setStatelessEncoder(encoder->getStatelessEncoder());
         mESMVersions.resize(mContentFiles.size(), -1);
-        Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
 
         loadContentFiles(fileCollections, contentFiles, encoder, listener);
         loadGroundcoverFiles(fileCollections, groundcoverFiles, encoder, listener);
