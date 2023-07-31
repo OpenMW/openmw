@@ -316,6 +316,26 @@
 -- local all = cell:getAll()
 -- local weapons = cell:getAll(types.Weapon)
 
+---
+-- @type ActiveSpell
+-- @field #string name The spell or item display name
+-- @field #string id Record id of the spell or item used to cast the spell
+-- @field openmw.core#GameObject item The enchanted item used to cast the spell, or nil if the spell was not cast from an enchanted item. Note that if the spell was cast for a single-use enchantment such as a scroll, this will be nil.
+-- @field openmw.core#GameObject caster The caster object, or nil if the spell has no defined caster
+-- @field #list<#ActiveSpellEffect> effects The active effects (@{#ActiveSpellEffect}) of this spell.
+
+---
+-- @type ActiveSpellEffect
+-- @field #string affectedSkill @{#SKILL} or nil
+-- @field #string affectedAttribute @{#ATTRIBUTE} or nil
+-- @field #string id Magic effect id
+-- @field #string name Localized name of the effect
+-- @field #number magnitudeThisFrame The magnitude of the effect in the current frame. This will be a new random number between minMagnitude and maxMagnitude every frame. Or nil if the effect has no magnitude.
+-- @field #number minMagnitude The minimum magnitude of this effect, or nil if the effect has no magnitude.
+-- @field #number maxMagnitude The maximum magnitude of this effect, or nil if the effect has no magnitude.
+-- @field #number duration Total duration in seconds of this spell effect, should not be confused with remaining duration. Or nil if the effect is not temporary.
+-- @field #number durationLeft Remaining duration in seconds of this spell effect, or nil if the effect is not temporary.
+
 
 --- Possible @{#EnchantmentType} values
 -- @field [parent=#Magic] #EnchantmentType ENCHANTMENT_TYPE
@@ -699,8 +719,8 @@
 ---
 -- @type MagicEffectWithParams
 -- @field #MagicEffect effect @{#MagicEffect}
--- @field #any affectedSkill @{#SKILL} or nil
--- @field #any affectedAttribute @{#ATTRIBUTE} or nil
+-- @field #string affectedSkill @{#SKILL} or nil
+-- @field #string affectedAttribute @{#ATTRIBUTE} or nil
 -- @field #number range
 -- @field #number area
 -- @field #number magnitudeMin
@@ -709,8 +729,8 @@
 
 ---
 -- @type ActiveEffect
--- @field #any affectedSkill @{#SKILL} or nil
--- @field #any affectedAttribute @{#ATTRIBUTE} or nil
+-- @field #string affectedSkill @{#SKILL} or nil
+-- @field #string affectedAttribute @{#ATTRIBUTE} or nil
 -- @field #string id Effect id string
 -- @field #string name Localized name of the effect
 -- @field #number magnitude
