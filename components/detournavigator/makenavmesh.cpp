@@ -162,15 +162,9 @@ namespace DetourNavigator
             const osg::Vec3f bmin(shift.x() - halfBoundsSize, minZ, shift.y() - halfBoundsSize);
             const osg::Vec3f bmax(shift.x() + halfBoundsSize, maxZ, shift.y() + halfBoundsSize);
 
-            if (width < 0)
+            if (size < 0)
             {
-                Log(Debug::Warning) << context.getPrefix() << "Invalid width to init heightfield: " << width;
-                return false;
-            }
-
-            if (height < 0)
-            {
-                Log(Debug::Warning) << context.getPrefix() << "Invalid height to init heightfield: " << height;
+                Log(Debug::Warning) << context.getPrefix() << "Invalid size to init heightfield: " << size;
                 return false;
             }
 
