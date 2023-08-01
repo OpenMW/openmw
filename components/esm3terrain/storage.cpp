@@ -187,12 +187,12 @@ namespace ESMTerrain
         osg::Vec3Array& positions, osg::Vec3Array& normals, osg::Vec4ubArray& colours)
     {
         // LOD level n means every 2^n-th vertex is kept
-        size_t increment = static_cast<size_t>(1) << lodLevel;
+        const std::size_t increment = static_cast<std::size_t>(1) << lodLevel;
 
-        osg::Vec2f origin = center - osg::Vec2f(size / 2.f, size / 2.f);
+        const osg::Vec2f origin = center - osg::Vec2f(size, size) / 2;
 
-        int startCellX = static_cast<int>(std::floor(origin.x()));
-        int startCellY = static_cast<int>(std::floor(origin.y()));
+        const int startCellX = static_cast<int>(std::floor(origin.x()));
+        const int startCellY = static_cast<int>(std::floor(origin.y()));
         const int landSize = ESM::getLandSize(worldspace);
         const int landSizeInUnits = ESM::getCellSize(worldspace);
 
@@ -204,7 +204,7 @@ namespace ESMTerrain
 
         LandCache cache;
 
-        bool alteration = useAlteration();
+        const bool alteration = useAlteration();
         bool validHeightDataExists = false;
         std::size_t baseVertY = 0; // of current cell corner
         for (int cellY = startCellY; cellY < startCellY + std::ceil(size); ++cellY)
@@ -213,8 +213,8 @@ namespace ESMTerrain
             std::size_t vertY = baseVertY;
             for (int cellX = startCellX; cellX < startCellX + std::ceil(size); ++cellX)
             {
-                ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
-                const LandObject* land = getLand(cellLocation, cache);
+                const ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
+                const LandObject* const land = getLand(cellLocation, cache);
                 const ESM::LandData* heightData = nullptr;
                 const ESM::LandData* normalData = nullptr;
                 const ESM::LandData* colourData = nullptr;
@@ -239,9 +239,9 @@ namespace ESMTerrain
                 // Only relevant for chunks smaller than (contained in) one cell
                 rowStart += (origin.x() - startCellX) * landSize;
                 colStart += (origin.y() - startCellY) * landSize;
-                int rowEnd = std::min(
+                const int rowEnd = std::min(
                     static_cast<int>(rowStart + std::min(1.f, size) * (landSize - 1) + 1), static_cast<int>(landSize));
-                int colEnd = std::min(
+                const int colEnd = std::min(
                     static_cast<int>(colStart + std::min(1.f, size) * (landSize - 1) + 1), static_cast<int>(landSize));
 
                 vertY = baseVertY;
@@ -251,10 +251,10 @@ namespace ESMTerrain
                     vertX = baseVertX;
                     for (int row = rowStart; row < rowEnd; row += increment)
                     {
-                        int srcArrayIndex = col * landSize * 3 + row * 3;
-
                         assert(row >= 0 && row < landSize);
                         assert(col >= 0 && col < landSize);
+
+                        const int srcArrayIndex = col * landSize * 3 + row * 3;
 
                         assert(vertX < numVerts);
                         assert(vertY < numVerts);
