@@ -28,7 +28,7 @@ namespace MWRender
             if (node.getUserValue("overrideFx", index))
             {
                 if (index == 1)
-                    overrideTexture(mTexture, mResourcesystem, nodePtr);
+                    overrideTexture(mTexture, mResourcesystem, std::move(nodePtr));
             }
             traverse(node);
         }

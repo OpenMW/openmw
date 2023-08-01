@@ -95,7 +95,10 @@ namespace fx
             mData.get<WeatherTransition>() = transition > 0 ? 1 - transition : 0;
         }
 
-        void bindPointLights(std::shared_ptr<SceneUtil::PPLightBuffer> buffer) { mPointLightBuffer = buffer; }
+        void bindPointLights(std::shared_ptr<SceneUtil::PPLightBuffer> buffer)
+        {
+            mPointLightBuffer = std::move(buffer);
+        }
 
         static std::string getStructDefinition()
         {

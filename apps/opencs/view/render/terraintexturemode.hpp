@@ -118,10 +118,10 @@ namespace CSVRender
             CSMWorld::IdTable& landTable, std::string cellId);
 
         /// \brief Create new land texture record from texture asset
-        void createTexture(std::string textureFileName);
+        void createTexture(const std::string& textureFileName);
 
         /// \brief Create new cell and land if needed
-        bool allowLandTextureEditing(std::string textureFileName);
+        bool allowLandTextureEditing(const std::string& textureFileName);
 
         std::string mCellId;
         std::string mBrushTexture;

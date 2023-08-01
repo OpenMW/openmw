@@ -154,7 +154,7 @@ namespace CSVRender
     SceneWidget::SceneWidget(std::shared_ptr<Resource::ResourceSystem> resourceSystem, QWidget* parent,
         Qt::WindowFlags f, bool retrieveInput)
         : RenderWidget(parent, f)
-        , mResourceSystem(resourceSystem)
+        , mResourceSystem(std::move(resourceSystem))
         , mLighting(nullptr)
         , mHasDefaultAmbient(false)
         , mIsExterior(true)
@@ -225,7 +225,7 @@ namespace CSVRender
         mResourceSystem->releaseGLObjects(mView->getCamera()->getGraphicsContext()->getState());
     }
 
-    osg::ref_ptr<osg::Geometry> SceneWidget::createGradientRectangle(QColor bgColour, QColor gradientColour)
+    osg::ref_ptr<osg::Geometry> SceneWidget::createGradientRectangle(QColor& bgColour, QColor& gradientColour)
     {
         osg::ref_ptr<osg::Geometry> geometry = new osg::Geometry;
 
@@ -266,7 +266,7 @@ namespace CSVRender
         return geometry;
     }
 
-    osg::ref_ptr<osg::Camera> SceneWidget::createGradientCamera(QColor bgColour, QColor gradientColour)
+    osg::ref_ptr<osg::Camera> SceneWidget::createGradientCamera(QColor& bgColour, QColor& gradientColour)
     {
         osg::ref_ptr<osg::Camera> camera = new osg::Camera();
         camera->setReferenceFrame(osg::Transform::ABSOLUTE_RF);
@@ -284,11 +284,11 @@ namespace CSVRender
 
         osg::ref_ptr<osg::Geometry> gradientQuad = createGradientRectangle(bgColour, gradientColour);
 
-        camera->addChild(gradientQuad);
+        camera->addChild(std::move(gradientQuad));
         return camera;
     }
 
-    void SceneWidget::updateGradientCamera(QColor bgColour, QColor gradientColour)
+    void SceneWidget::updateGradientCamera(QColor& bgColour, QColor& gradientColour)
     {
         osg::ref_ptr<osg::Geometry> gradientRect = createGradientRectangle(bgColour, gradientColour);
         // Replaces previous rectangle

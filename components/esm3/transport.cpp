@@ -22,7 +22,7 @@ namespace ESM
             if (mList.empty())
                 Log(Debug::Warning) << "Encountered DNAM record without DODT record, skipped.";
             else
-                mList.back().mCellName = name;
+                mList.back().mCellName = std::move(name);
         }
     }
 

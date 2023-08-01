@@ -114,9 +114,9 @@ namespace CSVRender
         void mouseMoveEvent(QMouseEvent* event) override;
         void wheelEvent(QWheelEvent* event) override;
 
-        osg::ref_ptr<osg::Geometry> createGradientRectangle(QColor bgColour, QColor gradientColour);
-        osg::ref_ptr<osg::Camera> createGradientCamera(QColor bgColour, QColor gradientColour);
-        void updateGradientCamera(QColor bgColour, QColor gradientColour);
+        osg::ref_ptr<osg::Geometry> createGradientRectangle(QColor& bgColour, QColor& gradientColour);
+        osg::ref_ptr<osg::Camera> createGradientCamera(QColor& bgColour, QColor& gradientColour);
+        void updateGradientCamera(QColor& bgColour, QColor& gradientColour);
 
         std::shared_ptr<Resource::ResourceSystem> mResourceSystem;
 

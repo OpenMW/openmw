@@ -30,7 +30,7 @@ namespace Resource
         const VFS::Manager* vfs)
         : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
         , mTarget(target)
-        , mAnimationManager(animationManager)
+        , mAnimationManager(std::move(animationManager))
         , mNormalized(normalized)
         , mVFS(vfs)
     {

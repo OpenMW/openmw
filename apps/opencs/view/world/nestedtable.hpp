@@ -36,7 +36,7 @@ namespace CSVWorld
         CSMWorld::CommandDispatcher* mDispatcher;
 
     public:
-        NestedTable(CSMDoc::Document& document, CSMWorld::UniversalId id, CSMWorld::NestedTableProxyModel* model,
+        NestedTable(CSMDoc::Document& document, const CSMWorld::UniversalId& id, CSMWorld::NestedTableProxyModel* model,
             QWidget* parent = nullptr, bool editable = true, bool fixedRows = false);
 
         std::vector<CSMWorld::UniversalId> getDraggedRecords() const override;

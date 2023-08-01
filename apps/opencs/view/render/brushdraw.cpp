@@ -24,7 +24,7 @@
 #include "mask.hpp"
 
 CSVRender::BrushDraw::BrushDraw(osg::ref_ptr<osg::Group> parentNode, bool textureMode)
-    : mParentNode(parentNode)
+    : mParentNode(std::move(parentNode))
     , mTextureMode(textureMode)
 {
     mBrushDrawNode = new osg::Group();

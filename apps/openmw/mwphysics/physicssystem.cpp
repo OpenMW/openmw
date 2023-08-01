@@ -102,7 +102,7 @@ namespace MWPhysics
         , mProjectileId(0)
         , mWaterHeight(0)
         , mWaterEnabled(false)
-        , mParentNode(parentNode)
+        , mParentNode(std::move(parentNode))
         , mPhysicsDt(1.f / 60.f)
     {
         mResourceSystem->addResourceManager(mShapeManager.get());

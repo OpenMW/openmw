@@ -10,7 +10,7 @@ namespace SDLUtil
 
     InputWrapper::InputWrapper(SDL_Window* window, osg::ref_ptr<osgViewer::Viewer> viewer, bool grab)
         : mSDLWindow(window)
-        , mViewer(viewer)
+        , mViewer(std::move(viewer))
         , mMouseListener(nullptr)
         , mSensorListener(nullptr)
         , mKeyboardListener(nullptr)

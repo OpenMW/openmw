@@ -22,7 +22,7 @@ namespace SceneUtil
     public:
         CopyRigVisitor(osg::ref_ptr<osg::Group> parent, std::string_view filter)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
-            , mParent(parent)
+            , mParent(std::move(parent))
             , mFilter(filter)
         {
         }

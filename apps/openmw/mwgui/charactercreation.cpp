@@ -52,9 +52,9 @@ namespace
             "Question_" + MyGUI::utility::toString(number) + "_AnswerThree") };
         std::string sound = "vo\\misc\\chargen qa" + MyGUI::utility::toString(number) + ".wav";
 
-        Response r0 = { answer0, ESM::Class::Combat };
-        Response r1 = { answer1, ESM::Class::Magic };
-        Response r2 = { answer2, ESM::Class::Stealth };
+        Response r0 = { std::move(answer0), ESM::Class::Combat };
+        Response r1 = { std::move(answer1), ESM::Class::Magic };
+        Response r2 = { std::move(answer2), ESM::Class::Stealth };
 
         // randomize order in which responses are displayed
         int order = Misc::Rng::rollDice(6);

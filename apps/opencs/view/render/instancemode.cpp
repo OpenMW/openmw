@@ -197,7 +197,7 @@ CSVRender::InstanceMode::InstanceMode(
     , mDragAxis(-1)
     , mLocked(false)
     , mUnitScaleDist(1)
-    , mParentNode(parentNode)
+    , mParentNode(std::move(parentNode))
 {
     connect(this, &InstanceMode::requestFocus, worldspaceWidget, &WorldspaceWidget::requestFocus);
 

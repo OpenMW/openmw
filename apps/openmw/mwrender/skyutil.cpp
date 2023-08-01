@@ -128,8 +128,8 @@ namespace MWRender
 
     OcclusionCallback::OcclusionCallback(
         osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
-        : mOcclusionQueryVisiblePixels(oqnVisible)
-        , mOcclusionQueryTotalPixels(oqnTotal)
+        : mOcclusionQueryVisiblePixels(std::move(oqnVisible))
+        , mOcclusionQueryTotalPixels(std::move(oqnTotal))
     {
     }
 
@@ -166,7 +166,7 @@ namespace MWRender
     public:
         SunFlashCallback(
             osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible, osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal)
-            : OcclusionCallback(oqnVisible, oqnTotal)
+            : OcclusionCallback(std::move(oqnVisible), std::move(oqnTotal))
             , mGlareView(1.f)
         {
         }
@@ -238,8 +238,8 @@ namespace MWRender
     public:
         SunGlareCallback(osg::ref_ptr<osg::OcclusionQueryNode> oqnVisible,
             osg::ref_ptr<osg::OcclusionQueryNode> oqnTotal, osg::ref_ptr<osg::PositionAttitudeTransform> sunTransform)
-            : OcclusionCallback(oqnVisible, oqnTotal)
-            , mSunTransform(sunTransform)
+            : OcclusionCallback(std::move(oqnVisible), std::move(oqnTotal))
+            , mSunTransform(std::move(sunTransform))
             , mTimeOfDayFade(1.f)
             , mGlareView(1.f)
         {

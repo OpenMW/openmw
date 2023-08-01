@@ -554,7 +554,7 @@ namespace MWRender
     public:
         UpdateCameraCallback(
             osg::ref_ptr<const osg::Node> nodeToFollow, const osg::Vec3& posOffset, const osg::Vec3& lookAtOffset)
-            : mNodeToFollow(nodeToFollow)
+            : mNodeToFollow(std::move(nodeToFollow))
             , mPosOffset(posOffset)
             , mLookAtOffset(lookAtOffset)
         {

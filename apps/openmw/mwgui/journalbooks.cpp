@@ -16,7 +16,7 @@ namespace
         MWGui::BookTypesetter::Style* mBodyStyle;
 
         AddContent(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style)
-            : mTypesetter(typesetter)
+            : mTypesetter(std::move(typesetter))
             , mBodyStyle(body_style)
         {
         }
@@ -48,7 +48,7 @@ namespace
         MWGui::BookTypesetter::Style* mBodyStyle;
 
         AddEntry(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style)
-            : mTypesetter(typesetter)
+            : mTypesetter(std::move(typesetter))
             , mBodyStyle(body_style)
         {
         }
@@ -68,7 +68,7 @@ namespace
 
         AddJournalEntry(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style,
             MWGui::BookTypesetter::Style* header_style, bool add_header)
-            : AddEntry(typesetter, body_style)
+            : AddEntry(std::move(typesetter), body_style)
             , mAddHeader(add_header)
             , mHeaderStyle(header_style)
         {
@@ -95,7 +95,7 @@ namespace
 
         AddTopicEntry(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style,
             MWGui::BookTypesetter::Style* header_style, intptr_t contentId)
-            : AddEntry(typesetter, body_style)
+            : AddEntry(std::move(typesetter), body_style)
             , mContentId(contentId)
             , mHeaderStyle(header_style)
         {
@@ -118,7 +118,7 @@ namespace
     struct AddTopicName : AddContent
     {
         AddTopicName(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* style)
-            : AddContent(typesetter, style)
+            : AddContent(std::move(typesetter), style)
         {
         }
 
@@ -132,7 +132,7 @@ namespace
     struct AddQuestName : AddContent
     {
         AddQuestName(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* style)
-            : AddContent(typesetter, style)
+            : AddContent(std::move(typesetter), style)
         {
         }
 

@@ -515,7 +515,7 @@ namespace MWRender
 
     Animation::Animation(
         const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
-        : mInsert(parentNode)
+        : mInsert(std::move(parentNode))
         , mSkeleton(nullptr)
         , mNodeMapCreated(false)
         , mPtr(ptr)
@@ -1912,7 +1912,7 @@ namespace MWRender
     // ------------------------------
 
     PartHolder::PartHolder(osg::ref_ptr<osg::Node> node)
-        : mNode(node)
+        : mNode(std::move(node))
     {
     }
 

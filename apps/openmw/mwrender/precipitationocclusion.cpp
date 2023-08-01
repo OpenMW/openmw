@@ -20,7 +20,7 @@ namespace
     {
     public:
         PrecipitationOcclusionUpdater(osg::ref_ptr<osg::Texture2D> depthTexture)
-            : mDepthTexture(depthTexture)
+            : mDepthTexture(std::move(depthTexture))
         {
         }
 

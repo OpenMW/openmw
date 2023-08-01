@@ -17,7 +17,7 @@ namespace MWRender
 {
 
     EffectManager::EffectManager(osg::ref_ptr<osg::Group> parent, Resource::ResourceSystem* resourceSystem)
-        : mParentNode(parent)
+        : mParentNode(std::move(parent))
         , mResourceSystem(resourceSystem)
     {
     }

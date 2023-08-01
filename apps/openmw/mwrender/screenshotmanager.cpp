@@ -133,8 +133,8 @@ namespace MWRender
     ScreenshotManager::ScreenshotManager(osgViewer::Viewer* viewer, osg::ref_ptr<osg::Group> rootNode,
         osg::ref_ptr<osg::Group> sceneRoot, Resource::ResourceSystem* resourceSystem, Water* water)
         : mViewer(viewer)
-        , mRootNode(rootNode)
-        , mSceneRoot(sceneRoot)
+        , mRootNode(std::move(rootNode))
+        , mSceneRoot(std::move(sceneRoot))
         , mDrawCompleteCallback(new NotifyDrawCompletedCallback)
         , mResourceSystem(resourceSystem)
         , mWater(water)

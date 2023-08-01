@@ -105,7 +105,7 @@ namespace SceneUtil
         const std::string& screenshotFormat, std::function<void(std::string)> callback)
         : mScreenshotPath(screenshotPath)
         , mScreenshotFormat(screenshotFormat)
-        , mCallback(callback)
+        , mCallback(std::move(callback))
     {
     }
 

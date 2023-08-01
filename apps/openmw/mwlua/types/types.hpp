@@ -71,7 +71,7 @@ namespace MWLua
 
     template <class T>
     void addRecordFunctionBinding(
-        sol::table table, const Context& context, const std::string& recordName = std::string(T::getRecordType()))
+        sol::table& table, const Context& context, const std::string& recordName = std::string(T::getRecordType()))
     {
         const MWWorld::Store<T>& store = MWBase::Environment::get().getESMStore()->get<T>();
 

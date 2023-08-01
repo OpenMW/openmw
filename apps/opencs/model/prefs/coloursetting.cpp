@@ -16,7 +16,7 @@
 CSMPrefs::ColourSetting::ColourSetting(
     Category* parent, QMutex* mutex, const std::string& key, const std::string& label, QColor default_)
     : Setting(parent, mutex, key, label)
-    , mDefault(default_)
+    , mDefault(std::move(default_))
     , mWidget(nullptr)
 {
 }
