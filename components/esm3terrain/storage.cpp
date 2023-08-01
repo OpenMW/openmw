@@ -202,9 +202,6 @@ namespace ESMTerrain
         normals.resize(numVerts * numVerts);
         colours.resize(numVerts * numVerts);
 
-        osg::Vec3f normal;
-        osg::Vec4ub color;
-
         LandCache cache;
 
         bool alteration = useAlteration();
@@ -272,15 +269,15 @@ namespace ESMTerrain
                         positions[vertIndex] = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * landSizeInUnits,
                             (vertY / float(numVerts - 1) - 0.5f) * size * landSizeInUnits, height);
 
-                        if (normalData)
+                        osg::Vec3f normal(0, 0, 1);
+
+                        if (normalData != nullptr)
                         {
                             for (int i = 0; i < 3; ++i)
                                 normal[i] = normalData->getNormals()[srcArrayIndex + i];
 
                             normal.normalize();
                         }
-                        else
-                            normal = osg::Vec3f(0, 0, 1);
 
                         // Normals apparently don't connect seamlessly between cells
                         if (col == landSize - 1 || row == landSize - 1)
@@ -294,25 +291,18 @@ namespace ESMTerrain
 
                         normals[vertIndex] = normal;
 
-                        if (colourData)
-                        {
+                        osg::Vec4ub color(255, 255, 255, 255);
+
+                        if (colourData != nullptr)
                             for (int i = 0; i < 3; ++i)
                                 color[i] = colourData->getColors()[srcArrayIndex + i];
-                        }
-                        else
-                        {
-                            color.r() = 255;
-                            color.g() = 255;
-                            color.b() = 255;
-                        }
+
                         if (alteration)
                             adjustColor(col, row, heightData, color); // Does nothing by default, override in OpenMW-CS
 
                         // Unlike normals, colors mostly connect seamlessly between cells, but not always...
                         if (col == landSize - 1 || row == landSize - 1)
                             fixColour(color, cellLocation, col, row, cache);
-
-                        color.a() = 255;
 
                         colours[vertIndex] = color;
 
