@@ -196,7 +196,7 @@ namespace ESMTerrain
         const int landSize = ESM::getLandSize(worldspace);
         const int landSizeInUnits = ESM::getCellSize(worldspace);
 
-        size_t numVerts = static_cast<size_t>(size * (landSize - 1) / increment + 1);
+        const std::size_t numVerts = static_cast<std::size_t>(size * (landSize - 1) / increment + 1);
 
         positions.resize(numVerts * numVerts);
         normals.resize(numVerts * numVerts);
@@ -205,17 +205,17 @@ namespace ESMTerrain
         osg::Vec3f normal;
         osg::Vec4ub color;
 
-        float vertY = 0;
-        float vertX = 0;
+        std::size_t vertY = 0;
+        std::size_t vertX = 0;
 
         LandCache cache;
 
         bool alteration = useAlteration();
         bool validHeightDataExists = false;
-        float vertY_ = 0; // of current cell corner
+        std::size_t vertY_ = 0; // of current cell corner
         for (int cellY = startCellY; cellY < startCellY + std::ceil(size); ++cellY)
         {
-            float vertX_ = 0; // of current cell corner
+            std::size_t vertX_ = 0; // of current cell corner
             for (int cellX = startCellX; cellX < startCellX + std::ceil(size); ++cellX)
             {
                 ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
@@ -263,15 +263,15 @@ namespace ESMTerrain
                         assert(vertX < numVerts);
                         assert(vertY < numVerts);
 
+                        const std::size_t vertIndex = vertX * numVerts + vertY;
+
                         float height = defaultHeight;
                         if (heightData)
                             height = heightData->getHeights()[col * landSize + row];
                         if (alteration)
                             height += getAlteredHeight(col, row);
-
-                        positions[static_cast<unsigned int>(vertX * numVerts + vertY)]
-                            = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * landSizeInUnits,
-                                (vertY / float(numVerts - 1) - 0.5f) * size * landSizeInUnits, height);
+                        positions[vertIndex] = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * landSizeInUnits,
+                            (vertY / float(numVerts - 1) - 0.5f) * size * landSizeInUnits, height);
 
                         if (normalData)
                         {
@@ -293,7 +293,7 @@ namespace ESMTerrain
 
                         assert(normal.z() > 0);
 
-                        normals[static_cast<unsigned int>(vertX * numVerts + vertY)] = normal;
+                        normals[vertIndex] = normal;
 
                         if (colourData)
                         {
@@ -315,7 +315,7 @@ namespace ESMTerrain
 
                         color.a() = 255;
 
-                        colours[static_cast<unsigned int>(vertX * numVerts + vertY)] = color;
+                        colours[vertIndex] = color;
 
                         ++vertX;
                     }
