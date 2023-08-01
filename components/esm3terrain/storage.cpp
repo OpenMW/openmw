@@ -202,6 +202,10 @@ namespace ESMTerrain
         normals.resize(numVerts * numVerts);
         colours.resize(numVerts * numVerts);
 
+        // Only relevant for chunks smaller than (contained in) one cell
+        const int offsetX = (origin.x() - startCellX) * landSize;
+        const int offsetY = (origin.y() - startCellY) * landSize;
+
         LandCache cache;
 
         const bool alteration = useAlteration();
@@ -226,8 +230,8 @@ namespace ESMTerrain
                     validHeightDataExists = true;
                 }
 
-                int rowStart = 0;
-                int colStart = 0;
+                int rowStart = offsetX;
+                int colStart = offsetY;
                 // Skip the first row / column unless we're at a chunk edge,
                 // since this row / column is already contained in a previous cell
                 // This is only relevant if we're creating a chunk spanning multiple cells
@@ -236,9 +240,6 @@ namespace ESMTerrain
                 if (baseVertX != 0)
                     rowStart += increment;
 
-                // Only relevant for chunks smaller than (contained in) one cell
-                rowStart += (origin.x() - startCellX) * landSize;
-                colStart += (origin.y() - startCellY) * landSize;
                 const int rowEnd = std::min(
                     static_cast<int>(rowStart + std::min(1.f, size) * (landSize - 1) + 1), static_cast<int>(landSize));
                 const int colEnd = std::min(
