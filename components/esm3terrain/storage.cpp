@@ -205,17 +205,15 @@ namespace ESMTerrain
         osg::Vec3f normal;
         osg::Vec4ub color;
 
-        std::size_t vertY = 0;
-        std::size_t vertX = 0;
-
         LandCache cache;
 
         bool alteration = useAlteration();
         bool validHeightDataExists = false;
-        std::size_t vertY_ = 0; // of current cell corner
+        std::size_t baseVertY = 0; // of current cell corner
         for (int cellY = startCellY; cellY < startCellY + std::ceil(size); ++cellY)
         {
-            std::size_t vertX_ = 0; // of current cell corner
+            std::size_t baseVertX = 0; // of current cell corner
+            std::size_t vertY = baseVertY;
             for (int cellX = startCellX; cellX < startCellX + std::ceil(size); ++cellX)
             {
                 ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
@@ -236,9 +234,9 @@ namespace ESMTerrain
                 // Skip the first row / column unless we're at a chunk edge,
                 // since this row / column is already contained in a previous cell
                 // This is only relevant if we're creating a chunk spanning multiple cells
-                if (vertY_ != 0)
+                if (baseVertY != 0)
                     colStart += increment;
-                if (vertX_ != 0)
+                if (baseVertX != 0)
                     rowStart += increment;
 
                 // Only relevant for chunks smaller than (contained in) one cell
@@ -249,10 +247,11 @@ namespace ESMTerrain
                 int colEnd = std::min(
                     static_cast<int>(colStart + std::min(1.f, size) * (landSize - 1) + 1), static_cast<int>(landSize));
 
-                vertY = vertY_;
+                vertY = baseVertY;
+                std::size_t vertX = baseVertX;
                 for (int col = colStart; col < colEnd; col += increment)
                 {
-                    vertX = vertX_;
+                    vertX = baseVertX;
                     for (int row = rowStart; row < rowEnd; row += increment)
                     {
                         int srcArrayIndex = col * landSize * 3 + row * 3;
@@ -321,13 +320,13 @@ namespace ESMTerrain
                     }
                     ++vertY;
                 }
-                vertX_ = vertX;
+                baseVertX = vertX;
             }
-            vertY_ = vertY;
+            baseVertY = vertY;
 
-            assert(vertX_ == numVerts); // Ensure we covered whole area
+            assert(baseVertX == numVerts); // Ensure we covered whole area
         }
-        assert(vertY_ == numVerts); // Ensure we covered whole area
+        assert(baseVertY == numVerts); // Ensure we covered whole area
 
         if (!validHeightDataExists && ESM::isEsm4Ext(worldspace))
         {
