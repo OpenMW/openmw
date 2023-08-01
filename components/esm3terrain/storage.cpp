@@ -266,8 +266,9 @@ namespace ESMTerrain
                             height = heightData->getHeights()[col * landSize + row];
                         if (alteration)
                             height += getAlteredHeight(col, row);
-                        positions[vertIndex] = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * landSizeInUnits,
-                            (vertY / float(numVerts - 1) - 0.5f) * size * landSizeInUnits, height);
+                        positions[vertIndex]
+                            = osg::Vec3f((vertX / static_cast<float>(numVerts - 1) - 0.5f) * size * landSizeInUnits,
+                                (vertY / static_cast<float>(numVerts - 1) - 0.5f) * size * landSizeInUnits, height);
 
                         osg::Vec3f normal(0, 0, 1);
 
