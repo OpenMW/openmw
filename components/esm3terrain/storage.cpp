@@ -1,6 +1,6 @@
 #include "storage.hpp"
 
-#include <set>
+#include <algorithm>
 
 #include <osg/Image>
 #include <osg/Plane>
@@ -320,12 +320,7 @@ namespace ESMTerrain
         assert(baseVertY == numVerts); // Ensure we covered whole area
 
         if (!validHeightDataExists && ESM::isEsm4Ext(worldspace))
-        {
-            for (unsigned int iVert = 0; iVert < numVerts * numVerts; iVert++)
-            {
-                positions[static_cast<unsigned int>(iVert)] = osg::Vec3f(0.f, 0.f, 0.f);
-            }
-        }
+            std::fill(positions.begin(), positions.end(), osg::Vec3f());
     }
 
     Storage::UniqueTextureId Storage::getVtexIndexAt(
