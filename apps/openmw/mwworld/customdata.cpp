@@ -77,4 +77,17 @@ namespace MWWorld
         throw std::logic_error(error.str());
     }
 
+    MWClass::ESM4NpcCustomData& CustomData::asESM4NpcCustomData()
+    {
+        std::stringstream error;
+        error << "bad cast " << typeid(this).name() << " to ESM4NpcCustomData";
+        throw std::logic_error(error.str());
+    }
+
+    const MWClass::ESM4NpcCustomData& CustomData::asESM4NpcCustomData() const
+    {
+        std::stringstream error;
+        error << "bad cast " << typeid(this).name() << " to ESM4NpcCustomData";
+        throw std::logic_error(error.str());
+    }
 }
