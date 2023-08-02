@@ -44,7 +44,7 @@ namespace MWWorld
         const ESM::RefId& getRegion() const { return mRegion; }
         std::string_view getNameId() const { return mNameID; }
         std::string_view getDisplayName() const { return mDisplayname; }
-        std::string getDescription() const;
+        std::string_view getDescription() const { return mDescription; }
         const MoodData& getMood() const { return mMood; }
         float getWaterHeight() const { return mWaterHeight; }
         const ESM::RefId& getId() const { return mId; }
@@ -63,9 +63,9 @@ namespace MWWorld
         ESM::RefId mRegion;
         ESM::RefId mId;
         ESM::RefId mParent;
-        MoodData mMood;
-
         float mWaterHeight;
+        std::string mDescription;
+        MoodData mMood;
     };
 }
 
