@@ -266,7 +266,7 @@ namespace LuaUi
             mOnCoordChange.value()(this, newCoord);
     }
 
-    void WidgetExtension::setProperties(sol::object props)
+    void WidgetExtension::setProperties(const sol::object& props)
     {
         mProperties = props;
         updateProperties();

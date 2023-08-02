@@ -25,7 +25,7 @@ namespace LuaUi
     }
 
     template <typename T, typename LuaT>
-    sol::optional<T> parseValue(sol::object table, std::string_view field, std::string_view errorPrefix)
+    sol::optional<T> parseValue(const sol::object& table, std::string_view field, std::string_view errorPrefix)
     {
         sol::object opt = LuaUtil::getFieldOrNil(table, field);
         if (opt != sol::nil && !opt.is<LuaT>())
@@ -51,7 +51,7 @@ namespace LuaUi
     }
 
     template <typename T>
-    sol::optional<T> parseValue(sol::object table, std::string_view field, std::string_view errorPrefix)
+    sol::optional<T> parseValue(const sol::object& table, std::string_view field, std::string_view errorPrefix)
     {
         if constexpr (isMyGuiVector<T>())
             return parseValue<T, osg::Vec2f>(table, field, errorPrefix);

@@ -44,10 +44,10 @@ namespace LuaUi
         void setCallback(const std::string&, const LuaUtil::Callback&);
         void clearCallbacks();
 
-        void setProperties(sol::object);
-        void setTemplateProperties(sol::object props) { mTemplateProperties = props; }
+        void setProperties(const sol::object& props);
+        void setTemplateProperties(const sol::object& props) { mTemplateProperties = props; }
 
-        void setExternal(sol::object external) { mExternal = external; }
+        void setExternal(const sol::object& external) { mExternal = external; }
 
         MyGUI::IntCoord forcedCoord();
         void forceCoord(const MyGUI::IntCoord& offset);

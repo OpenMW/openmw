@@ -532,7 +532,7 @@ namespace LuaUtil
         t.mScriptId = scriptId;
         t.mSerializable = true;
         t.mTime = time;
-        t.mArg = callbackArg;
+        t.mArg = std::move(callbackArg);
         t.mSerializedArg = serialize(t.mArg, mSerializer);
         insertTimer(type == TimerType::GAME_TIME ? mGameTimersQueue : mSimulationTimersQueue, std::move(t));
     }
