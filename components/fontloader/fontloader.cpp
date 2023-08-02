@@ -398,7 +398,6 @@ namespace Gui
         file->read(name_, sizeof(name_));
         if (!file->good())
             fail(*file, fileName, "File too small to be a valid font");
-        std::string name(name_);
 
         GlyphInfo data[256];
         file->read((char*)data, sizeof(data));
@@ -408,7 +407,7 @@ namespace Gui
         file.reset();
 
         // Create the font texture
-        std::string bitmapFilename = "fonts/" + std::move(name) + ".tex";
+        std::string bitmapFilename = "fonts/" + std::string(name_) + ".tex";
 
         Files::IStreamPtr bitmapFile = mVFS->get(bitmapFilename);
 
