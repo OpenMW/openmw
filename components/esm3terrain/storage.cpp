@@ -187,7 +187,7 @@ namespace ESMTerrain
         osg::Vec3Array& positions, osg::Vec3Array& normals, osg::Vec4ubArray& colours)
     {
         // LOD level n means every 2^n-th vertex is kept
-        const std::size_t increment = static_cast<std::size_t>(1) << lodLevel;
+        const std::size_t sampleSize = std::size_t{ 1 } << lodLevel;
 
         const osg::Vec2f origin = center - osg::Vec2f(size, size) / 2;
 
@@ -196,7 +196,7 @@ namespace ESMTerrain
         const int landSize = ESM::getLandSize(worldspace);
         const int landSizeInUnits = ESM::getCellSize(worldspace);
 
-        const std::size_t numVerts = static_cast<std::size_t>(size * (landSize - 1) / increment + 1);
+        const std::size_t numVerts = static_cast<std::size_t>(size * (landSize - 1) / sampleSize + 1);
 
         positions.resize(numVerts * numVerts);
         normals.resize(numVerts * numVerts);
@@ -223,9 +223,9 @@ namespace ESMTerrain
                 // since this row / column is already contained in a previous cell
                 // This is only relevant if we're creating a chunk spanning multiple cells
                 if (baseVertY != 0)
-                    colStart += increment;
+                    colStart += sampleSize;
                 if (baseVertX != 0)
-                    rowStart += increment;
+                    rowStart += sampleSize;
 
                 const int rowEnd = std::min(
                     static_cast<int>(rowStart + std::min(1.f, size) * (landSize - 1) + 1), static_cast<int>(landSize));
@@ -250,10 +250,10 @@ namespace ESMTerrain
 
                 vertY = baseVertY;
                 std::size_t vertX = baseVertX;
-                for (int col = colStart; col < colEnd; col += increment)
+                for (int col = colStart; col < colEnd; col += sampleSize)
                 {
                     vertX = baseVertX;
-                    for (int row = rowStart; row < rowEnd; row += increment)
+                    for (int row = rowStart; row < rowEnd; row += sampleSize)
                     {
                         assert(row >= 0 && row < landSize);
                         assert(col >= 0 && col < landSize);
