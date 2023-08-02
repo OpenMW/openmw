@@ -15,12 +15,6 @@
 namespace ESM
 {
 
-    struct TimeStamp
-    {
-        float mHour;
-        int mDay;
-    };
-
     struct EpochTimeStamp
     {
         float mGameHour;

@@ -4,6 +4,7 @@
 #include "cellref.hpp"
 #include "components/esm/defs.hpp"
 #include "components/esm/refid.hpp"
+#include "timestamp.hpp"
 
 #include <string>
 #include <vector>
@@ -27,15 +28,15 @@ namespace ESM
             Flag_Ignore_SpellAbsorption = 1 << 4
         };
 
-        int mEffectId;
+        int32_t mEffectId;
         float mMagnitude;
         float mMinMagnitude;
         float mMaxMagnitude;
-        int mArg; // skill or attribute
+        int32_t mArg; // skill or attribute
         float mDuration;
         float mTimeLeft;
-        int mEffectIndex;
-        int mFlags;
+        int32_t mEffectIndex;
+        int32_t mFlags;
     };
 
     // format 0, saved games only
@@ -55,10 +56,10 @@ namespace ESM
             RefId mId;
             std::vector<ActiveEffect> mEffects;
             std::string mDisplayName;
-            int mCasterActorId;
+            int32_t mCasterActorId;
             RefNum mItem;
             EffectType mType;
-            int mWorsenings;
+            int32_t mWorsenings;
             TimeStamp mNextWorsening;
         };
 

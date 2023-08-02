@@ -16,6 +16,7 @@
 #include "components/esm/refid.hpp"
 #include "magiceffects.hpp"
 #include "spellstate.hpp"
+#include "timestamp.hpp"
 
 namespace ESM
 {
@@ -27,7 +28,7 @@ namespace ESM
     {
         struct CorprusStats
         {
-            std::array<int, Attribute::Length> mWorsenings;
+            std::array<int32_t, Attribute::Length> mWorsenings;
             TimeStamp mNextWorsening;
         };
 
@@ -78,15 +79,15 @@ namespace ESM
         bool mKnockdownOverOneFrame;
         bool mHitRecovery;
         bool mBlock;
-        unsigned int mMovementFlags;
+        uint32_t mMovementFlags;
         float mFallHeight;
         ESM::RefId mLastHitObject;
         ESM::RefId mLastHitAttemptObject;
         bool mRecalcDynamicStats;
-        int mDrawState;
-        signed char mDeathAnimation;
+        int32_t mDrawState;
+        int8_t mDeathAnimation;
         TimeStamp mTimeOfDeath;
-        int mLevel;
+        int32_t mLevel;
         bool mMissingACDT;
 
         std::map<ESM::RefId, CorprusStats> mCorprusSpells;

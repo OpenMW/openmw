@@ -3,6 +3,7 @@
 
 #include "components/esm/defs.hpp"
 #include "components/esm/refid.hpp"
+#include "timestamp.hpp"
 
 namespace ESM
 {
@@ -18,7 +19,7 @@ namespace ESM
         bool mIsInterior;
         float mWaterLevel;
 
-        int mHasFogOfWar; // Do we have fog of war state (0 or 1)? (see fogstate.hpp)
+        int32_t mHasFogOfWar; // Do we have fog of war state (0 or 1)? (see fogstate.hpp)
 
         TimeStamp mLastRespawn;
 

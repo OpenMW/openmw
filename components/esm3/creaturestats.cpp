@@ -21,9 +21,10 @@ namespace ESM
 
         mTradeTime.mDay = 0;
         mTradeTime.mHour = 0;
-        esm.getHNOTSized<8>(mTradeTime, "TIME");
+        if (esm.peekNextSub("TIME"))
+            mTradeTime.load(esm);
 
-        int flags = 0;
+        int32_t flags = 0;
         mDead = false;
         mDeathAnimationFinished = false;
         mDied = false;
@@ -108,7 +109,8 @@ namespace ESM
 
         mTimeOfDeath.mDay = 0;
         mTimeOfDeath.mHour = 0;
-        esm.getHNOTSized<8>(mTimeOfDeath, "DTIM");
+        if (esm.peekNextSub("DTIM"))
+            mTimeOfDeath.load(esm, "DTIM");
 
         mSpells.load(esm);
         mActiveSpells.load(esm);
@@ -119,12 +121,12 @@ namespace ESM
         {
             while (esm.isNextSub("SUMM"))
             {
-                int magicEffect;
+                int32_t magicEffect;
                 esm.getHT(magicEffect);
                 ESM::RefId source = esm.getHNORefId("SOUR");
-                int effectIndex = -1;
+                int32_t effectIndex = -1;
                 esm.getHNOT(effectIndex, "EIND");
-                int actorId;
+                int32_t actorId;
                 esm.getHNT(actorId, "ACID");
                 mSummonedCreatureMap[SummonKey(magicEffect, source, effectIndex)] = actorId;
                 mSummonedCreatures.emplace(magicEffect, actorId);
@@ -134,9 +136,9 @@ namespace ESM
         {
             while (esm.isNextSub("SUMM"))
             {
-                int magicEffect;
+                int32_t magicEffect;
                 esm.getHT(magicEffect);
-                int actorId;
+                int32_t actorId;
                 esm.getHNT(actorId, "ACID");
                 mSummonedCreatures.emplace(magicEffect, actorId);
             }
@@ -144,7 +146,7 @@ namespace ESM
 
         while (esm.isNextSub("GRAV"))
         {
-            int actorId;
+            int32_t actorId;
             esm.getHT(actorId);
             mSummonGraveyard.push_back(actorId);
         }
@@ -164,7 +166,7 @@ namespace ESM
 
             CorprusStats stats;
             esm.getHNT(stats.mWorsenings, "WORS");
-            esm.getHNTSized<8>(stats.mNextWorsening, "TIME");
+            stats.mNextWorsening.load(esm);
 
             mCorprusSpells[id] = stats;
         }
@@ -191,7 +193,7 @@ namespace ESM
         if (mTradeTime.mDay != 0 || mTradeTime.mHour != 0)
             esm.writeHNT("TIME", mTradeTime);
 
-        int flags = 0;
+        int32_t flags = 0;
         if (mDead)
             flags |= Dead;
         if (mDeathAnimationFinished)
@@ -260,7 +262,7 @@ namespace ESM
             esm.writeHNT("ACID", actorId);
         }
 
-        for (int key : mSummonGraveyard)
+        for (int32_t key : mSummonGraveyard)
         {
             esm.writeHNT("GRAV", key);
         }
