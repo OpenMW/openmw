@@ -217,19 +217,6 @@ namespace ESMTerrain
             std::size_t vertY = baseVertY;
             for (int cellX = startCellX; cellX < startCellX + std::ceil(size); ++cellX)
             {
-                const ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
-                const LandObject* const land = getLand(cellLocation, cache);
-                const ESM::LandData* heightData = nullptr;
-                const ESM::LandData* normalData = nullptr;
-                const ESM::LandData* colourData = nullptr;
-                if (land)
-                {
-                    heightData = land->getData(ESM::Land::DATA_VHGT);
-                    normalData = land->getData(ESM::Land::DATA_VNML);
-                    colourData = land->getData(ESM::Land::DATA_VCLR);
-                    validHeightDataExists = true;
-                }
-
                 int rowStart = offsetX;
                 int colStart = offsetY;
                 // Skip the first row / column unless we're at a chunk edge,
@@ -244,6 +231,22 @@ namespace ESMTerrain
                     static_cast<int>(rowStart + std::min(1.f, size) * (landSize - 1) + 1), static_cast<int>(landSize));
                 const int colEnd = std::min(
                     static_cast<int>(colStart + std::min(1.f, size) * (landSize - 1) + 1), static_cast<int>(landSize));
+
+                if (colEnd <= colStart || rowEnd <= rowStart)
+                    continue;
+
+                const ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
+                const LandObject* const land = getLand(cellLocation, cache);
+                const ESM::LandData* heightData = nullptr;
+                const ESM::LandData* normalData = nullptr;
+                const ESM::LandData* colourData = nullptr;
+                if (land)
+                {
+                    heightData = land->getData(ESM::Land::DATA_VHGT);
+                    normalData = land->getData(ESM::Land::DATA_VNML);
+                    colourData = land->getData(ESM::Land::DATA_VCLR);
+                    validHeightDataExists = true;
+                }
 
                 vertY = baseVertY;
                 std::size_t vertX = baseVertX;
