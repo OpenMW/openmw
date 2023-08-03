@@ -129,7 +129,9 @@ CSVWidget::ModeButton* CSVWidget::SceneToolMode::getCurrent()
 
 std::string CSVWidget::SceneToolMode::getCurrentId() const
 {
-    return mButtons.find(mCurrent)->second;
+    auto currentButton = mButtons.find(mCurrent);
+    assert(currentButton != mButtons.end());
+    return currentButton->second;
 }
 
 void CSVWidget::SceneToolMode::setButton(const std::string& id)

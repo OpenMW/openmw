@@ -5,6 +5,7 @@
 #include <extern/oics/ICSChannelListener.h>
 #include <extern/oics/ICSInputControlSystem.h>
 
+#include <components/debug/debuglog.hpp>
 #include <components/files/conversion.hpp>
 #include <components/sdlutil/sdlmappings.hpp>
 
@@ -193,7 +194,14 @@ namespace MWInput
 
     BindingsManager::~BindingsManager()
     {
-        mInputBinder->save(Files::pathToUnicodeString(mUserFile));
+        try
+        {
+            mInputBinder->save(Files::pathToUnicodeString(mUserFile));
+        }
+        catch (std::exception& e)
+        {
+            Log(Debug::Error) << "Failed to save input bindings: " << e.what();
+        }
     }
 
     void BindingsManager::update(float dt)

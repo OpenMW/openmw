@@ -178,11 +178,20 @@ int main(int argc, char** argv)
     {
         vfs = std::make_unique<VFS::Manager>();
         for (const std::filesystem::path& path : archives)
-            if (auto archive = makeArchive(path))
-                vfs->addArchive(std::move(archive));
-            else
-                std::cerr << '"' << path << "\" is unsupported archive" << std::endl;
-        vfs->buildIndex();
+        {
+            try
+            {
+                if (auto archive = makeArchive(path))
+                    vfs->addArchive(std::move(archive));
+                else
+                    std::cerr << '"' << path << "\" is unsupported archive" << std::endl;
+                vfs->buildIndex();
+            }
+            catch (std::exception& e)
+            {
+                std::cerr << "ERROR, an exception has occurred:  " << e.what() << std::endl;
+            }
+        }
     }
 
     //     std::cout << "Reading Files" << std::endl;

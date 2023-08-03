@@ -48,6 +48,11 @@ namespace ESM4
 {
     namespace
     {
+        std::string getError(const std::string& header, const int errorCode, const char* msg)
+        {
+            return header + ": code " + std::to_string(errorCode) + ", " + std::string(msg != nullptr ? msg : "(null)");
+        }
+
         std::u8string_view getStringsSuffix(LocalizedStringType type)
         {
             switch (type)
@@ -78,12 +83,12 @@ namespace ESM4
             stream.avail_out = decompressed.size();
 
             if (const int ec = inflateInit(&stream); ec != Z_OK)
-                return "inflateInit error: " + std::to_string(ec) + " " + std::string(stream.msg);
+                return getError("inflateInit error", ec, stream.msg);
 
             const std::unique_ptr<z_stream, InflateEnd> streamPtr(&stream);
 
             if (const int ec = inflate(&stream, Z_NO_FLUSH); ec != Z_STREAM_END)
-                return "inflate error: " + std::to_string(ec) + " " + std::string(stream.msg);
+                return getError("inflate error", ec, stream.msg);
 
             return std::nullopt;
         }
@@ -94,7 +99,7 @@ namespace ESM4
             z_stream stream{};
 
             if (const int ec = inflateInit(&stream); ec != Z_OK)
-                return "inflateInit error: " + std::to_string(ec) + " " + std::string(stream.msg);
+                return getError("inflateInit error", ec, stream.msg);
 
             const std::unique_ptr<z_stream, InflateEnd> streamPtr(&stream);
 
@@ -110,8 +115,8 @@ namespace ESM4
                 if (ec == Z_STREAM_END)
                     break;
                 if (ec != Z_OK)
-                    return "inflate error after reading " + std::to_string(stream.total_in)
-                        + " bytes: " + std::to_string(ec) + " " + std::string(stream.msg);
+                    return getError(
+                        "inflate error after reading " + std::to_string(stream.total_in) + " bytes", ec, stream.msg);
                 compressed = compressed.subspan(stream.total_in - prevTotalIn);
                 decompressed = decompressed.subspan(stream.total_out - prevTotalOut);
             }

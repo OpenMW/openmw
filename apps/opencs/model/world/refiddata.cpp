@@ -429,7 +429,9 @@ void CSMWorld::RefIdData::copyTo(int index, RefIdData& target) const
 {
     LocalIndex localIndex = globalToLocalIndex(index);
 
-    RefIdDataContainerBase* source = mRecordContainers.find(localIndex.second)->second;
+    auto foundIndex = mRecordContainers.find(localIndex.second);
+    assert(foundIndex != mRecordContainers.end());
+    RefIdDataContainerBase* source = foundIndex->second;
 
     target.insertRecord(
         source->getRecord(localIndex.first).modifiedCopy(), localIndex.second, source->getId(localIndex.first));

@@ -457,6 +457,8 @@ namespace DetourNavigator
 
         const auto offMeshConnections = mOffMeshConnectionsManager.get().get(job.mChangedTile);
 
+        assert(preparedNavMeshDataPtr != nullptr);
+
         const UpdateNavMeshStatus status
             = navMeshCacheItem.lock()->updateTile(job.mChangedTile, std::move(cachedNavMeshData),
                 makeNavMeshTileData(*preparedNavMeshDataPtr, offMeshConnections, job.mAgentBounds, job.mChangedTile,
