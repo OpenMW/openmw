@@ -257,8 +257,13 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                     break;
                 }
 
-                total -= 10; // HACK
-                std::uint32_t node;
+                if (total >= 10)
+                    total -= 10; // HACK
+                else
+                    throw std::runtime_error("expected total amount of chunks >= 0xa");
+
+                std::uint32_t node = 0;
+                bool nodeFound = false;
                 for (std::uint32_t i = 0; i < total; ++i)
                 {
                     std::vector<FormId> preferredPaths;
@@ -267,6 +272,7 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                     {
                         reader.get(node);
                         reader.get(count);
+                        nodeFound = true;
                     }
                     if (count > 0)
                     {
@@ -274,6 +280,9 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
                         for (FormId& value : preferredPaths)
                             reader.getFormId(value);
                     }
+                    if (!nodeFound)
+                        throw std::runtime_error("node not found");
+
                     mPreferredPaths.push_back(std::make_pair(node, preferredPaths));
 #if 0
                     std::cout << "node " << std::hex << node // FIXME: debugging only
