@@ -3,7 +3,6 @@
 #include "controlled.hpp"
 #include "data.hpp"
 #include "node.hpp"
-#include "particle.hpp"
 #include "recordptr.hpp"
 
 namespace Nif

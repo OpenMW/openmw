@@ -1,9 +1,6 @@
 #include "nifloader.hpp"
 
-#include <algorithm>
-#include <components/nif/record.hpp>
 #include <mutex>
-#include <osg/Vec3>
 #include <string_view>
 
 #include <osg/Array>
@@ -51,7 +48,6 @@
 #include <components/nif/extra.hpp>
 #include <components/nif/niffile.hpp>
 #include <components/nif/node.hpp>
-#include <components/nif/particle.hpp>
 #include <components/nif/property.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
@@ -131,10 +127,10 @@ namespace
         auto geometry = dynamic_cast<const Nif::NiGeometry*>(nifNode);
         if (geometry)
         {
-            if (!geometry->mShaderProperty.empty())
-                out.emplace_back(geometry->mShaderProperty.getPtr());
-            if (!geometry->mAlphaProperty.empty())
-                out.emplace_back(geometry->mAlphaProperty.getPtr());
+            if (!geometry->shaderprop.empty())
+                out.emplace_back(geometry->shaderprop.getPtr());
+            if (!geometry->alphaprop.empty())
+                out.emplace_back(geometry->alphaprop.getPtr());
         }
     }
 
@@ -440,8 +436,8 @@ namespace NifOsg
 
             auto geometry = dynamic_cast<const Nif::NiGeometry*>(nifNode);
             // NiGeometry's NiAlphaProperty doesn't get handled here because it's a drawable property
-            if (geometry && !geometry->mShaderProperty.empty())
-                handleProperty(geometry->mShaderProperty.getPtr(), applyTo, composite, imageManager, boundTextures,
+            if (geometry && !geometry->shaderprop.empty())
+                handleProperty(geometry->shaderprop.getPtr(), applyTo, composite, imageManager, boundTextures,
                     animflags, hasStencilProperty);
         }
 
@@ -763,7 +759,7 @@ namespace NifOsg
                     skip = args.mHasMarkers && Misc::StringUtils::ciStartsWith(nifNode->name, "EditorMarker");
                 if (!skip)
                 {
-                    Nif::NiSkinInstancePtr skin = static_cast<const Nif::NiGeometry*>(nifNode)->mSkinInstance;
+                    Nif::NiSkinInstancePtr skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin;
 
                     if (skin.empty())
                         handleGeometry(nifNode, parent, node, composite, args.mBoundTextures, args.mAnimFlags);
@@ -1124,13 +1120,13 @@ namespace NifOsg
             const Nif::Node* nifNode, ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
         {
             auto particleNode = static_cast<const Nif::NiParticles*>(nifNode);
-            if (particleNode->mData.empty() || particleNode->mData->recType != Nif::RC_NiParticlesData)
+            if (particleNode->data.empty() || particleNode->data->recType != Nif::RC_NiParticlesData)
             {
                 partsys->setQuota(partctrl->numParticles);
                 return;
             }
 
-            auto particledata = static_cast<const Nif::NiParticlesData*>(particleNode->mData.getPtr());
+            auto particledata = static_cast<const Nif::NiParticlesData*>(particleNode->data.getPtr());
             partsys->setQuota(particledata->numParticles);
 
             osg::BoundingBox box;
@@ -1380,13 +1376,13 @@ namespace NifOsg
             const std::vector<unsigned int>& boundTextures, int animflags)
         {
             const Nif::NiGeometry* niGeometry = static_cast<const Nif::NiGeometry*>(nifNode);
-            if (niGeometry->mData.empty())
+            if (niGeometry->data.empty())
                 return;
 
             bool hasPartitions = false;
-            if (!niGeometry->mSkinInstance.empty())
+            if (!niGeometry->skin.empty())
             {
-                const Nif::NiSkinInstance* skin = niGeometry->mSkinInstance.getPtr();
+                const Nif::NiSkinInstance* skin = niGeometry->skin.getPtr();
                 const Nif::NiSkinData* data = nullptr;
                 const Nif::NiSkinPartition* partitions = nullptr;
                 if (!skin->data.empty())
@@ -1420,7 +1416,7 @@ namespace NifOsg
                 }
             }
 
-            const Nif::NiGeometryData* niGeometryData = niGeometry->mData.getPtr();
+            const Nif::NiGeometryData* niGeometryData = niGeometry->data.getPtr();
             if (!hasPartitions)
             {
                 if (niGeometry->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_BSLODTriShape)
@@ -1546,7 +1542,7 @@ namespace NifOsg
             // Assign bone weights
             osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map(new SceneUtil::RigGeometry::InfluenceMap);
 
-            const Nif::NiSkinInstance* skin = static_cast<const Nif::NiGeometry*>(nifNode)->mSkinInstance.getPtr();
+            const Nif::NiSkinInstance* skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin.getPtr();
             const Nif::NiSkinData* data = skin->data.getPtr();
             const Nif::NodeList& bones = skin->bones;
             for (std::size_t i = 0, n = bones.size(); i < n; ++i)
@@ -2680,4 +2676,5 @@ namespace NifOsg
         LoaderImpl impl(kf.getFilename(), kf.getVersion(), kf.getUserVersion(), kf.getBethVersion());
         impl.loadKf(kf, target);
     }
+
 }

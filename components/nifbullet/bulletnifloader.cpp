@@ -79,14 +79,14 @@ namespace
 
     template <class Function>
     auto handleNiGeometry(const Nif::NiGeometry& geometry, Function&& function)
-        -> decltype(function(static_cast<const Nif::NiTriShapeData&>(geometry.mData.get())))
+        -> decltype(function(static_cast<const Nif::NiTriShapeData&>(geometry.data.get())))
     {
         if (geometry.recType == Nif::RC_NiTriShape || geometry.recType == Nif::RC_BSLODTriShape)
         {
-            if (geometry.mData->recType != Nif::RC_NiTriShapeData)
+            if (geometry.data->recType != Nif::RC_NiTriShapeData)
                 return {};
 
-            auto data = static_cast<const Nif::NiTriShapeData*>(geometry.mData.getPtr());
+            auto data = static_cast<const Nif::NiTriShapeData*>(geometry.data.getPtr());
             if (data->triangles.empty())
                 return {};
 
@@ -95,10 +95,10 @@ namespace
 
         if (geometry.recType == Nif::RC_NiTriStrips)
         {
-            if (geometry.mData->recType != Nif::RC_NiTriStripsData)
+            if (geometry.data->recType != Nif::RC_NiTriStripsData)
                 return {};
 
-            auto data = static_cast<const Nif::NiTriStripsData*>(geometry.mData.getPtr());
+            auto data = static_cast<const Nif::NiTriStripsData*>(geometry.data.getPtr());
             if (data->strips.empty())
                 return {};
 
@@ -380,10 +380,10 @@ namespace NifBullet
         if (args.mHasMarkers && Misc::StringUtils::ciStartsWith(niGeometry.name, "EditorMarker"))
             return;
 
-        if (niGeometry.mData.empty() || niGeometry.mData->vertices.empty())
+        if (niGeometry.data.empty() || niGeometry.data->vertices.empty())
             return;
 
-        if (!niGeometry.mSkinInstance.empty())
+        if (!niGeometry.skin.empty())
             args.mAnimated = false;
         // TODO: handle NiSkinPartition
 

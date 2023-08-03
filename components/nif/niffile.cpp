@@ -17,7 +17,6 @@
 #include "exception.hpp"
 #include "extra.hpp"
 #include "node.hpp"
-#include "particle.hpp"
 #include "physics.hpp"
 #include "property.hpp"
 
@@ -218,26 +217,6 @@ namespace Nif
             { "BSLightingShaderPropertyColorController",
                 &construct<BSEffectShaderPropertyColorController, RC_BSLightingShaderPropertyColorController> },
             { "BSBehaviorGraphExtraData", &construct<BSBehaviorGraphExtraData, RC_BSBehaviorGraphExtraData> },
-            { "NiPSysData", &construct<NiPSysData, RC_NiPSysData> },
-            { "NiParticleSystem", &construct<NiParticleSystem, RC_NiParticleSystem> },
-            { "NiPSysEmitterCtlr", &construct<NiPSysEmitterCtlr, RC_NiPSysEmitterCtlr> },
-            { "NiPSysUpdateCtlr", &construct<Controller, RC_Controller> },
-            { "NiPSysAgeDeathModifier", &construct<NiPSysAgeDeathModifier, RC_NiPSysAgeDeathModifier> },
-            { "BSPSysLODModifier", &construct<BSPSysLODModifier, RC_BSPSysLODModifier> },
-            { "NiPSysCylinderEmitter", &construct<NiPSysCylinderEmitter, RC_NiPSysCylinderEmitter> },
-            { "NiPSysSpawnModifier", &construct<NiPSysSpawnModifier, RC_NiPSysSpawnModifier> },
-            { "BSPSysSimpleColorModifier", &construct<BSPSysSimpleColorModifier, RC_BSPSysSimpleColorModifier> },
-            { "NiPSysRotationModifier", &construct<NiPSysRotationModifier, RC_NiPSysRotationModifier> },
-            { "BSPSysScaleModifier", &construct<BSPSysScaleModifier, RC_BSPSysScaleModifier> },
-            { "NiPSysGravityModifier", &construct<NiPSysGravityModifier, RC_NiPSysGravityModifier> },
-            { "NiPSysPositionModifier", &construct<NiPSysModifier, RC_NiPSysModifier> },
-            { "NiPSysBoundUpdateModifier", &construct<NiPSysBoundUpdateModifier, RC_NiPSysBoundUpdateModifier> },
-            { "NiPSysModifierActiveCtlr", &construct<NiPSysModifierActiveCtlr, RC_NiPSysModifierActiveCtlr> },
-            { "NiPSysMeshEmitter", &construct<NiPSysMeshEmitter, RC_NiPSysMeshEmitter> },
-            { "BSPSysInheritVelocityModifier",
-                &construct<BSPSysInheritVelocityModifier, RC_BSPSysInheritVelocityModifier> },
-            { "NiPSysBombModifier", &construct<NiPSysBombModifier, RC_NiPSysBombModifier> },
-            { "NiPSysDragModifier", &construct<NiPSysDragModifier, RC_NiPSysDragModifier> },
         };
     }
 

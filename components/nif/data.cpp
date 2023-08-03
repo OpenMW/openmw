@@ -46,47 +46,29 @@ namespace Nif
 
     void NiGeometryData::read(NIFStream* nif)
     {
-        bool isBS202 = nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > 0;
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 114))
             nif->getInt(); // Group ID. (Almost?) always 0.
 
-        unsigned short verts = 0;
-        if ((nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO3 && NiPSysDataFlag) || !NiPSysDataFlag)
-        {
-            nif->read(verts);
-        }
-
-        unsigned short BSMaxVertices = 0;
-        if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && NiPSysDataFlag
-            && nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_FO3)
-        {
-            nif->read(BSMaxVertices);
-        }
+        int verts = nif->getUShort();
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             nif->skip(2); // Keep flags and compress flags
 
-        bool hasVertices = true;
-        hasVertices = nif->getBoolean();
-        if (hasVertices)
+        if (nif->getBoolean())
             nif->getVector3s(vertices, verts);
 
-        unsigned short NiDataFlags = 0, BSDataFlags = 0;
-        if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0) && !isBS202)
-            nif->read(NiDataFlags);
-        if (isBS202)
-            nif->read(BSDataFlags);
+        unsigned int dataFlags = 0;
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
+            dataFlags = nif->getUShort();
 
         if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS
             && nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
             nif->getUInt(); // Material CRC
 
-        bool hasNormals;
-        hasNormals = nif->getBoolean();
-        if (hasNormals)
+        if (nif->getBoolean())
         {
             nif->getVector3s(normals, verts);
-            if ((NiDataFlags | BSDataFlags) & 0x1000)
+            if (dataFlags & 0x1000)
             {
                 nif->getVector3s(tangents, verts);
                 nif->getVector3s(bitangents, verts);
@@ -96,36 +78,41 @@ namespace Nif
         center = nif->getVector3();
         radius = nif->getFloat();
 
-        bool hasVertexColors;
-        hasVertexColors = nif->getBoolean();
-        if (hasVertexColors)
+        if (nif->getBoolean())
             nif->getVector4s(colors, verts);
 
+        unsigned int numUVs = dataFlags;
         if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
-            nif->read(NiDataFlags);
+            numUVs = nif->getUShort();
 
-        unsigned short numUVs = (NiDataFlags & 0x3F) | (BSDataFlags & 0x1);
         // In Morrowind this field only corresponds to the number of UV sets.
         // In later games only the first 6 bits are used as a count and the rest are flags.
-
-        if (nif->getVersion() <= NIFFile::NIFVersion::VER_MW)
-            // nif->read(hasUVs);
-            nif->getBoolean(); // hasUVs
-
-        uvlist.resize(numUVs);
-        for (unsigned int i = 0; i < numUVs; i++)
+        if (nif->getVersion() > NIFFile::NIFVersion::VER_MW)
         {
-            nif->getVector2s(uvlist[i], verts);
-            for (auto& uv : uvlist[i])
+            numUVs &= 0x3f;
+            if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > 0)
+                numUVs &= 0x1;
+        }
+
+        bool hasUVs = true;
+        if (nif->getVersion() <= NIFFile::NIFVersion::VER_MW)
+            hasUVs = nif->getBoolean();
+        if (hasUVs)
+        {
+            uvlist.resize(numUVs);
+            for (unsigned int i = 0; i < numUVs; i++)
             {
+                nif->getVector2s(uvlist[i], verts);
                 // flip the texture coordinates to convert them to the OpenGL convention of bottom-left image origin
-                uv = osg::Vec2f(uv.x(), 1.f - uv.y());
+                for (unsigned int uv = 0; uv < uvlist[i].size(); ++uv)
+                {
+                    uvlist[i][uv] = osg::Vec2f(uvlist[i][uv].x(), 1.f - uvlist[i][uv].y());
+                }
             }
         }
 
-        unsigned short consistencyFlag;
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
-            nif->read(consistencyFlag);
+            nif->getUShort(); // Consistency flags
 
         if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 4))
             nif->skip(4); // Additional data
@@ -208,6 +195,43 @@ namespace Nif
             lines.emplace_back(num - 1);
             lines.emplace_back(0);
         }
+    }
+
+    void NiParticlesData::read(NIFStream* nif)
+    {
+        NiGeometryData::read(nif);
+
+        // Should always match the number of vertices
+        if (nif->getVersion() <= NIFFile::NIFVersion::VER_MW)
+            numParticles = nif->getUShort();
+
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 0, 1, 0))
+            std::fill(particleRadii.begin(), particleRadii.end(), nif->getFloat());
+        else if (nif->getBoolean())
+            nif->getFloats(particleRadii, vertices.size());
+        activeCount = nif->getUShort();
+
+        // Particle sizes
+        if (nif->getBoolean())
+            nif->getFloats(sizes, vertices.size());
+
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0) && nif->getBoolean())
+            nif->getQuaternions(rotations, vertices.size());
+        if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 4))
+        {
+            if (nif->getBoolean())
+                nif->getFloats(rotationAngles, vertices.size());
+            if (nif->getBoolean())
+                nif->getVector3s(rotationAxes, vertices.size());
+        }
+    }
+
+    void NiRotatingParticlesData::read(NIFStream* nif)
+    {
+        NiParticlesData::read(nif);
+
+        if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0) && nif->getBoolean())
+            nif->getQuaternions(rotations, vertices.size());
     }
 
     void NiPosData::read(NIFStream* nif)
@@ -537,4 +561,5 @@ namespace Nif
         mCenter = nif->getVector3();
         mRadius = nif->getFloat();
     }
+
 } // Namespace

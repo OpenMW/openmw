@@ -2,7 +2,6 @@
 #define OPENMW_COMPONENTS_NIF_NODE_HPP
 
 #include <array>
-#include <components/nif/recordptr.hpp>
 #include <unordered_map>
 
 #include <osg/Plane>
@@ -152,17 +151,11 @@ namespace Nif
             void read(NIFStream* nif);
         };
 
-        NiGeometryDataPtr mData;
-        NiSkinInstancePtr mSkinInstance;
-        RecordPtr mSkin;
+        NiGeometryDataPtr data;
+        NiSkinInstancePtr skin;
         MaterialData material;
-        BSShaderPropertyPtr mShaderProperty;
-        NiAlphaPropertyPtr mAlphaProperty;
-
-        NiBoundingVolume::NiSphereBV mBoundingVolume;
-        float mBoundMinMax;
-
-        bool NiParticleSystemFlag = false;
+        BSShaderPropertyPtr shaderprop;
+        NiAlphaPropertyPtr alphaprop;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -180,6 +173,9 @@ namespace Nif
     {
     };
     struct NiLines : NiGeometry
+    {
+    };
+    struct NiParticles : NiGeometry
     {
     };
 

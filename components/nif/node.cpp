@@ -171,48 +171,25 @@ namespace Nif
     void NiGeometry::read(NIFStream* nif)
     {
         Node::read(nif);
-
-        if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && NiParticleSystemFlag)
-        {
-            if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_SSE)
-                mBoundingVolume.read(nif);
-
-            if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_F76)
-                nif->read(mBoundMinMax);
-
-            if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_SSE)
-                mSkin.read(nif);
-        }
-
-        bool SSE_flag = (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_SSE && !NiParticleSystemFlag
-            && nif->getVersion() == NIFFile::NIFVersion::VER_BGS);
-        if (nif->getBethVersion() < NIFFile::BethVersion::BETHVER_SSE || SSE_flag)
-            mData.read(nif);
-        if ((nif->getBethVersion() < NIFFile::BethVersion::BETHVER_SSE
-                && nif->getVersion() > NIFStream::generateVersion(3, 3, 0, 13))
-            || SSE_flag)
-            mSkinInstance.read(nif);
-        if ((nif->getBethVersion() < NIFFile::BethVersion::BETHVER_SSE
-                && nif->getVersion() > NIFStream::generateVersion(10, 0, 1, 0))
-            || SSE_flag)
-            material.read(nif);
+        data.read(nif);
+        skin.read(nif);
+        material.read(nif);
         if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS
             && nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
         {
-            mShaderProperty.read(nif);
-            mAlphaProperty.read(nif);
+            shaderprop.read(nif);
+            alphaprop.read(nif);
         }
     }
 
     void NiGeometry::post(Reader& nif)
     {
         Node::post(nif);
-        mData.post(nif);
-        mSkin.post(nif);
-        mSkinInstance.post(nif);
-        mShaderProperty.post(nif);
-        mAlphaProperty.post(nif);
-        if (recType != RC_NiParticles && !mSkinInstance.empty())
+        data.post(nif);
+        skin.post(nif);
+        shaderprop.post(nif);
+        alphaprop.post(nif);
+        if (recType != RC_NiParticles && !skin.empty())
             nif.setUseSkinning(true);
     }
 
@@ -410,9 +387,7 @@ namespace Nif
             nif->read(mParticleDataSize);
             if (mParticleDataSize > 0)
             {
-                nif->getVector3s(mParticleVerts, vertNum);
-                // nif->readVector(mParticleNormals, vertNum); //Documentation seems to be wrong about this one
-                nif->readVector(mParticleTriangles, triNum * 3);
+                throw Nif::Exception("Unhandled Particle Data in BSTriShape: ", nif->getFile().getFilename());
             }
         }
     }
