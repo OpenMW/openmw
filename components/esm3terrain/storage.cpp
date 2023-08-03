@@ -184,8 +184,7 @@ namespace ESMTerrain
     }
 
     void Storage::fillVertexBuffers(int lodLevel, float size, const osg::Vec2f& center, ESM::RefId worldspace,
-        osg::ref_ptr<osg::Vec3Array> positions, osg::ref_ptr<osg::Vec3Array> normals,
-        osg::ref_ptr<osg::Vec4ubArray> colours)
+        osg::Vec3Array& positions, osg::Vec3Array& normals, osg::Vec4ubArray& colours)
     {
         // LOD level n means every 2^n-th vertex is kept
         size_t increment = static_cast<size_t>(1) << lodLevel;
@@ -199,9 +198,9 @@ namespace ESMTerrain
 
         size_t numVerts = static_cast<size_t>(size * (landSize - 1) / increment + 1);
 
-        positions->resize(numVerts * numVerts);
-        normals->resize(numVerts * numVerts);
-        colours->resize(numVerts * numVerts);
+        positions.resize(numVerts * numVerts);
+        normals.resize(numVerts * numVerts);
+        colours.resize(numVerts * numVerts);
 
         osg::Vec3f normal;
         osg::Vec4ub color;
@@ -269,7 +268,7 @@ namespace ESMTerrain
                             height = heightData->getHeights()[col * landSize + row];
                         if (alteration)
                             height += getAlteredHeight(col, row);
-                        (*positions)[static_cast<unsigned int>(vertX * numVerts + vertY)]
+                        positions[static_cast<unsigned int>(vertX * numVerts + vertY)]
                             = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * LandSizeInUnits,
                                 (vertY / float(numVerts - 1) - 0.5f) * size * LandSizeInUnits, height);
 
@@ -293,7 +292,7 @@ namespace ESMTerrain
 
                         assert(normal.z() > 0);
 
-                        (*normals)[static_cast<unsigned int>(vertX * numVerts + vertY)] = normal;
+                        normals[static_cast<unsigned int>(vertX * numVerts + vertY)] = normal;
 
                         if (colourData)
                         {
@@ -315,7 +314,7 @@ namespace ESMTerrain
 
                         color.a() = 255;
 
-                        (*colours)[static_cast<unsigned int>(vertX * numVerts + vertY)] = color;
+                        colours[static_cast<unsigned int>(vertX * numVerts + vertY)] = color;
 
                         ++vertX;
                     }
@@ -333,7 +332,7 @@ namespace ESMTerrain
         {
             for (unsigned int iVert = 0; iVert < numVerts * numVerts; iVert++)
             {
-                (*positions)[static_cast<unsigned int>(iVert)] = osg::Vec3f(0.f, 0.f, 0.f);
+                positions[static_cast<unsigned int>(iVert)] = osg::Vec3f(0.f, 0.f, 0.f);
             }
         }
     }
