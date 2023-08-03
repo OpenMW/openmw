@@ -166,7 +166,7 @@ namespace MWMechanics
         auto& creatureStats = summoner.getClass().getCreatureStats(summoner);
         creatureStats.getActiveSpells().purge(
             [summon](const auto& spell, const auto& effect) {
-                return effect.mEffectId == summon.first && effect.mArg == summon.second;
+                return effect.mEffectId == summon.first && effect.getActorId() == summon.second;
             },
             summoner);
 

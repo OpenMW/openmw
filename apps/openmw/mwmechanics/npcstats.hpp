@@ -36,7 +36,7 @@ namespace MWMechanics
         std::set<ESM::RefId> mExpelled;
         std::map<ESM::RefId, int> mFactionReputation;
         int mLevelProgress; // 0-10
-        std::map<ESM::Attribute::AttributeID, int>
+        std::map<ESM::RefId, int>
             mSkillIncreases; // number of skill increases for each attribute (resets after leveling up)
         std::vector<int> mSpecIncreases; // number of skill increases for each specialization (accumulates throughout
                                          // the entire game)

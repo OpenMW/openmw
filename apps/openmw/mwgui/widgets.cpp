@@ -101,13 +101,12 @@ namespace MWGui::Widgets
     /* MWAttribute */
 
     MWAttribute::MWAttribute()
-        : mId(ESM::Attribute::Length)
-        , mAttributeNameWidget(nullptr)
+        : mAttributeNameWidget(nullptr)
         , mAttributeValueWidget(nullptr)
     {
     }
 
-    void MWAttribute::setAttributeId(ESM::Attribute::AttributeID attributeId)
+    void MWAttribute::setAttributeId(ESM::RefId attributeId)
     {
         mId = attributeId;
         updateWidgets();
@@ -204,8 +203,8 @@ namespace MWGui::Widgets
                 = creator->createWidget<MWSpellEffect>("MW_EffectImage", coord, MyGUI::Align::Default);
             SpellEffectParams params;
             params.mEffectID = effectInfo.mEffectID;
-            params.mSkill = effectInfo.mSkill;
-            params.mAttribute = effectInfo.mAttribute;
+            params.mSkill = ESM::Skill::indexToRefId(effectInfo.mSkill);
+            params.mAttribute = ESM::Attribute::indexToRefId(effectInfo.mAttribute);
             params.mDuration = effectInfo.mDuration;
             params.mMagnMin = effectInfo.mMagnMin;
             params.mMagnMax = effectInfo.mMagnMax;
@@ -315,8 +314,8 @@ namespace MWGui::Widgets
         {
             SpellEffectParams params;
             params.mEffectID = effectInfo.mEffectID;
-            params.mSkill = effectInfo.mSkill;
-            params.mAttribute = effectInfo.mAttribute;
+            params.mSkill = ESM::Skill::indexToRefId(effectInfo.mSkill);
+            params.mAttribute = ESM::Attribute::indexToRefId(effectInfo.mAttribute);
             params.mDuration = effectInfo.mDuration;
             params.mMagnMin = effectInfo.mMagnMin;
             params.mMagnMax = effectInfo.mMagnMax;
@@ -358,7 +357,7 @@ namespace MWGui::Widgets
 
         const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().search(mEffectParams.mEffectID);
         const ESM::Attribute* attribute = store.get<ESM::Attribute>().search(mEffectParams.mAttribute);
-        const ESM::Skill* skill = store.get<ESM::Skill>().search(ESM::Skill::indexToRefId(mEffectParams.mSkill));
+        const ESM::Skill* skill = store.get<ESM::Skill>().search(mEffectParams.mSkill);
 
         assert(magicEffect);
 

@@ -184,7 +184,7 @@ namespace MWWorld
         }
         for (const auto& [key, actorId] : creatureStats.mSummonedCreatureMap)
         {
-            if (actorId == -1)
+            if (actorId < 0)
                 continue;
             for (auto& params : creatureStats.mActiveSpells.mSpells)
             {
@@ -195,7 +195,7 @@ namespace MWWorld
                     {
                         if (effect.mEffectId == key.mEffectId && effect.mEffectIndex == key.mEffectIndex)
                         {
-                            effect.mArg = actorId;
+                            effect.mArg = ESM::RefId::generated(static_cast<uint64_t>(actorId));
                             effect.mFlags |= ESM::ActiveEffect::Flag_Applied | ESM::ActiveEffect::Flag_Remove;
                             found = true;
                             break;

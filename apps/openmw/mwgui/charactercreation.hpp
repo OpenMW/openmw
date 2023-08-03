@@ -44,7 +44,7 @@ namespace MWGui
         // Show a dialog
         void spawnDialog(const char id);
 
-        void setValue(ESM::Attribute::AttributeID id, const MWMechanics::AttributeValue& value) override;
+        void setAttribute(ESM::RefId id, const MWMechanics::AttributeValue& value) override;
         void setValue(std::string_view id, const MWMechanics::DynamicStat<float>& value) override;
         void setValue(ESM::RefId id, const MWMechanics::SkillValue& value) override;
         void configureSkills(const std::vector<ESM::RefId>& major, const std::vector<ESM::RefId>& minor) override;
@@ -56,7 +56,7 @@ namespace MWGui
         Resource::ResourceSystem* mResourceSystem;
 
         std::vector<ESM::RefId> mPlayerMajorSkills, mPlayerMinorSkills;
-        std::map<int, MWMechanics::AttributeValue> mPlayerAttributes;
+        std::map<ESM::RefId, MWMechanics::AttributeValue> mPlayerAttributes;
         std::map<ESM::RefId, MWMechanics::SkillValue> mPlayerSkillValues;
 
         // Dialogs

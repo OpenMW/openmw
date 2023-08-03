@@ -573,7 +573,7 @@ namespace MWMechanics
                 if (!enemy.isEmpty()
                     && enemy.getClass()
                             .getCreatureStats(enemy)
-                            .getAttribute(ESM::Attribute::AttributeID(effect.mAttribute))
+                            .getAttribute(ESM::Attribute::indexToRefId(effect.mAttribute))
                             .getModified()
                         <= 0)
                     return 0.f;

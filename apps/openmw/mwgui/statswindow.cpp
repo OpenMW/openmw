@@ -157,7 +157,7 @@ namespace MWGui
         mMainWidget->castType<MyGUI::Window>()->setCaption(playerName);
     }
 
-    void StatsWindow::setValue(ESM::Attribute::AttributeID id, const MWMechanics::AttributeValue& value)
+    void StatsWindow::setAttribute(ESM::RefId id, const MWMechanics::AttributeValue& value)
     {
         auto it = mAttributeWidgets.find(id);
         if (it != mAttributeWidgets.end())
@@ -505,7 +505,8 @@ namespace MWGui
                 continue;
             }
 
-            const ESM::Attribute* attr = esmStore.get<ESM::Attribute>().find(skill->mData.mAttribute);
+            const ESM::Attribute* attr
+                = esmStore.get<ESM::Attribute>().find(ESM::Attribute::indexToRefId(skill->mData.mAttribute));
 
             std::pair<MyGUI::TextBox*, MyGUI::TextBox*> widgets
                 = addValueItem(skill->mName, {}, "normal", coord1, coord2);
@@ -620,8 +621,10 @@ namespace MWGui
                         text += std::string("\n\n#{fontcolourhtml=header}#{sNextRank} ") + faction->mRanks[rank + 1];
 
                         const ESM::RankData& rankData = faction->mData.mRankData[rank + 1];
-                        const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[0]);
-                        const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(faction->mData.mAttribute[1]);
+                        const ESM::Attribute* attr1 = store.get<ESM::Attribute>().find(
+                            ESM::Attribute::indexToRefId(faction->mData.mAttribute[0]));
+                        const ESM::Attribute* attr2 = store.get<ESM::Attribute>().find(
+                            ESM::Attribute::indexToRefId(faction->mData.mAttribute[1]));
 
                         text += "\n#{fontcolourhtml=normal}" + MyGUI::TextIterator::toTagsString(attr1->mName) + ": "
                             + MyGUI::utility::toString(rankData.mAttribute1) + ", "

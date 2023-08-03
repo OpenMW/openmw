@@ -45,9 +45,10 @@ std::set<MWMechanics::EffectKey> MWMechanics::Alchemy::listEffects() const
             for (int i = 0; i < 4; ++i)
                 if (ingredient->mBase->mData.mEffectID[i] != -1)
                 {
-                    EffectKey key(ingredient->mBase->mData.mEffectID[i],
-                        ingredient->mBase->mData.mSkills[i] != -1 ? ingredient->mBase->mData.mSkills[i]
-                                                                  : ingredient->mBase->mData.mAttributes[i]);
+                    ESM::RefId arg = ESM::Skill::indexToRefId(ingredient->mBase->mData.mSkills[i]);
+                    if (arg.empty())
+                        arg = ESM::Attribute::indexToRefId(ingredient->mBase->mData.mAttributes[i]);
+                    EffectKey key(ingredient->mBase->mData.mEffectID[i], arg);
 
                     if (seenEffects.insert(key).second)
                         ++effects[key];
@@ -203,9 +204,9 @@ void MWMechanics::Alchemy::updateEffects()
             effect.mSkill = -1;
 
             if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetSkill)
-                effect.mSkill = iter->mArg;
+                effect.mSkill = ESM::Skill::refIdToIndex(iter->mArg);
             else if (magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute)
-                effect.mAttribute = iter->mArg;
+                effect.mAttribute = ESM::Attribute::refIdToIndex(iter->mArg);
 
             effect.mRange = 0;
             effect.mArea = 0;
@@ -576,7 +577,8 @@ std::vector<std::string> MWMechanics::Alchemy::effectsDescription(const MWWorld:
 
         if (effectID != -1)
         {
-            const ESM::Attribute* attribute = store->get<ESM::Attribute>().search(data.mAttributes[i]);
+            const ESM::Attribute* attribute
+                = store->get<ESM::Attribute>().search(ESM::Attribute::indexToRefId(data.mAttributes[i]));
             const ESM::Skill* skill = store->get<ESM::Skill>().search(ESM::Skill::indexToRefId(data.mSkills[i]));
             std::string effect = getMagicEffectString(*mgef.find(effectID), attribute, skill);
 

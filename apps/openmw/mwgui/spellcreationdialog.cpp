@@ -291,9 +291,9 @@ namespace MWGui
         eventEffectModified(mEffect);
     }
 
-    void EditEffectDialog::setAttribute(int attribute)
+    void EditEffectDialog::setAttribute(ESM::RefId attribute)
     {
-        mEffect.mAttribute = attribute;
+        mEffect.mAttribute = ESM::Attribute::refIdToIndex(attribute);
         eventEffectModified(mEffect);
     }
 
@@ -689,8 +689,8 @@ namespace MWGui
         {
             Widgets::SpellEffectParams params;
             params.mEffectID = effectInfo.mEffectID;
-            params.mSkill = effectInfo.mSkill;
-            params.mAttribute = effectInfo.mAttribute;
+            params.mSkill = ESM::Skill::indexToRefId(effectInfo.mSkill);
+            params.mAttribute = ESM::Attribute::indexToRefId(effectInfo.mAttribute);
             params.mDuration = effectInfo.mDuration;
             params.mMagnMin = effectInfo.mMagnMin;
             params.mMagnMax = effectInfo.mMagnMax;

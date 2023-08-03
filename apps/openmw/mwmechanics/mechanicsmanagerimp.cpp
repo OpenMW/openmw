@@ -150,7 +150,8 @@ namespace MWMechanics
 
             for (const ESM::Attribute& attribute : esmStore.get<ESM::Attribute>())
             {
-                const ESM::Race::MaleFemale& value = race->mData.mAttributeValues[attribute.mId];
+                const ESM::Race::MaleFemale& value
+                    = race->mData.mAttributeValues[ESM::Attribute::refIdToIndex(attribute.mId)];
 
                 creatureStats.setAttribute(attribute.mId, male ? value.mMale : value.mFemale);
             }
@@ -193,11 +194,9 @@ namespace MWMechanics
 
             for (int attribute : class_->mData.mAttribute)
             {
-                if (attribute >= 0 && attribute < ESM::Attribute::Length)
-                {
-                    auto id = static_cast<ESM::Attribute::AttributeID>(attribute);
+                ESM::RefId id = ESM::Attribute::indexToRefId(attribute);
+                if (!id.empty())
                     creatureStats.setAttribute(id, creatureStats.getAttribute(id).getBase() + 10);
-                }
             }
 
             for (int i = 0; i < 2; ++i)

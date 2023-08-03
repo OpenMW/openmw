@@ -109,10 +109,10 @@ namespace MWScript
         template <class R>
         class OpGetAttribute : public Interpreter::Opcode0
         {
-            ESM::Attribute::AttributeID mIndex;
+            ESM::RefId mIndex;
 
         public:
-            OpGetAttribute(ESM::Attribute::AttributeID index)
+            OpGetAttribute(ESM::RefId index)
                 : mIndex(index)
             {
             }
@@ -130,10 +130,10 @@ namespace MWScript
         template <class R>
         class OpSetAttribute : public Interpreter::Opcode0
         {
-            ESM::Attribute::AttributeID mIndex;
+            ESM::RefId mIndex;
 
         public:
-            OpSetAttribute(ESM::Attribute::AttributeID index)
+            OpSetAttribute(ESM::RefId index)
                 : mIndex(index)
             {
             }
@@ -154,10 +154,10 @@ namespace MWScript
         template <class R>
         class OpModAttribute : public Interpreter::Opcode0
         {
-            ESM::Attribute::AttributeID mIndex;
+            ESM::RefId mIndex;
 
         public:
-            OpModAttribute(ESM::Attribute::AttributeID index)
+            OpModAttribute(ESM::RefId index)
                 : mIndex(index)
             {
             }
@@ -1322,7 +1322,7 @@ namespace MWScript
         {
             for (int i = 0; i < Compiler::Stats::numberOfAttributes; ++i)
             {
-                auto id = static_cast<ESM::Attribute::AttributeID>(i);
+                ESM::RefId id = ESM::Attribute::indexToRefId(i);
                 interpreter.installSegment5<OpGetAttribute<ImplicitRef>>(Compiler::Stats::opcodeGetAttribute + i, id);
                 interpreter.installSegment5<OpGetAttribute<ExplicitRef>>(
                     Compiler::Stats::opcodeGetAttributeExplicit + i, id);

@@ -5,6 +5,8 @@
 #include <optional>
 #include <string>
 
+#include <components/esm/refid.hpp>
+
 namespace ESM
 {
     struct Attribute;
@@ -20,11 +22,11 @@ namespace MWMechanics
     struct EffectKey
     {
         int mId;
-        int mArg; // skill or ability
+        ESM::RefId mArg; // skill or ability
 
         EffectKey();
 
-        EffectKey(int id, int arg = -1)
+        EffectKey(int id, ESM::RefId arg = {})
             : mId(id)
             , mArg(arg)
         {

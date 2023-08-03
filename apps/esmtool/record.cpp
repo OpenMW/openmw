@@ -1171,9 +1171,6 @@ namespace EsmTool
     template <>
     void Record<ESM::Race>::print()
     {
-        static const char* sAttributeNames[ESM::Attribute::Length]
-            = { "Strength", "Intelligence", "Willpower", "Agility", "Speed", "Endurance", "Personality", "Luck" };
-
         std::cout << "  Name: " << mData.mName << std::endl;
         std::cout << "  Description: " << mData.mDescription << std::endl;
         std::cout << "  Flags: " << raceFlags(mData.mData.mFlags) << std::endl;
@@ -1185,8 +1182,8 @@ namespace EsmTool
             std::cout << (male ? "  Male:" : "  Female:") << std::endl;
 
             for (int j = 0; j < ESM::Attribute::Length; ++j)
-                std::cout << "    " << sAttributeNames[j] << ": " << mData.mData.mAttributeValues[j].getValue(male)
-                          << std::endl;
+                std::cout << "    " << ESM::Attribute::indexToRefId(j) << ": "
+                          << mData.mData.mAttributeValues[j].getValue(male) << std::endl;
 
             std::cout << "    Height: " << mData.mData.mHeight.getValue(male) << std::endl;
             std::cout << "    Weight: " << mData.mData.mWeight.getValue(male) << std::endl;

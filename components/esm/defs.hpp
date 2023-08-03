@@ -180,6 +180,8 @@ namespace ESM
         // format 21 - Random state in saved games.
         REC_RAND = esm3Recname("RAND"), // Random state.
 
+        REC_ATTR = esm3Recname("ATTR"), // Attribute
+
         REC_AACT4 = esm4Recname(ESM4::REC_AACT), // Action
         REC_ACHR4 = esm4Recname(ESM4::REC_ACHR), // Actor Reference
         REC_ACTI4 = esm4Recname(ESM4::REC_ACTI), // Activator

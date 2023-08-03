@@ -31,7 +31,7 @@ namespace MWGui
         void setConstantEffect(bool constant);
 
         void setSkill(ESM::RefId skill);
-        void setAttribute(int attribute);
+        void setAttribute(ESM::RefId attribute);
 
         void newEffect(const ESM::MagicEffect* effect);
         void editEffect(ESM::ENAMstruct effect);

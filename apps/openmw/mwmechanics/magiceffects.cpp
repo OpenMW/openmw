@@ -27,24 +27,21 @@ namespace MWMechanics
 {
     EffectKey::EffectKey()
         : mId(0)
-        , mArg(-1)
     {
     }
 
     EffectKey::EffectKey(const ESM::ENAMstruct& effect)
     {
         mId = effect.mEffectID;
-        mArg = -1;
+        mArg = ESM::Skill::indexToRefId(effect.mSkill);
 
-        if (effect.mSkill != -1)
-            mArg = effect.mSkill;
-
-        if (effect.mAttribute != -1)
+        ESM::RefId attribute = ESM::Attribute::indexToRefId(effect.mAttribute);
+        if (!attribute.empty())
         {
-            if (mArg != -1)
+            if (!mArg.empty())
                 throw std::runtime_error("magic effect can't have both a skill and an attribute argument");
 
-            mArg = effect.mAttribute;
+            mArg = attribute;
         }
     }
 
@@ -52,8 +49,8 @@ namespace MWMechanics
     {
         const auto& store = MWBase::Environment::get().getESMStore();
         const ESM::MagicEffect* magicEffect = store->get<ESM::MagicEffect>().search(mId);
-        return getMagicEffectString(*magicEffect, store->get<ESM::Attribute>().search(mArg),
-            store->get<ESM::Skill>().search(ESM::Skill::indexToRefId(mArg)));
+        return getMagicEffectString(
+            *magicEffect, store->get<ESM::Attribute>().search(mArg), store->get<ESM::Skill>().search(mArg));
     }
 
     bool operator<(const EffectKey& left, const EffectKey& right)
