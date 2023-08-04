@@ -105,12 +105,12 @@ namespace MWMechanics
         const ESM::RefId& newItemId
             = mOldItemPtr.getClass().applyEnchantment(mOldItemPtr, enchantmentPtr->mId, getGemCharge(), mNewItemName);
 
+        if (!mSelfEnchanting)
+            payForEnchantment(count);
+
         // Add the new item to player inventory and remove the old one
         store.remove(mOldItemPtr, count);
         store.add(newItemId, count);
-
-        if (!mSelfEnchanting)
-            payForEnchantment();
 
         return true;
     }
@@ -278,7 +278,7 @@ namespace MWMechanics
         return getEffectiveEnchantmentCastCost(static_cast<float>(baseCost), player);
     }
 
-    int Enchanting::getEnchantPrice() const
+    int Enchanting::getEnchantPrice(int count) const
     {
         if (mEnchanter.isEmpty())
             return 0;
@@ -290,7 +290,7 @@ namespace MWMechanics
                                    ->mValue.getFloat();
         int price = MWBase::Environment::get().getMechanicsManager()->getBarterOffer(
             mEnchanter, static_cast<int>(getEnchantPoints() * priceMultipler), true);
-        price *= getEnchantItemsCount() * getTypeMultiplier();
+        price *= count * getTypeMultiplier();
         return std::max(1, price);
     }
 
@@ -391,15 +391,16 @@ namespace MWMechanics
         return 1.f;
     }
 
-    void Enchanting::payForEnchantment() const
+    void Enchanting::payForEnchantment(int count) const
     {
         const MWWorld::Ptr& player = getPlayer();
         MWWorld::ContainerStore& store = player.getClass().getContainerStore(player);
 
-        store.remove(MWWorld::ContainerStore::sGoldId, getEnchantPrice());
+        int price = getEnchantPrice(count);
+        store.remove(MWWorld::ContainerStore::sGoldId, price);
 
         // add gold to NPC trading gold pool
         CreatureStats& enchanterStats = mEnchanter.getClass().getCreatureStats(mEnchanter);
-        enchanterStats.setGoldPool(enchanterStats.getGoldPool() + getEnchantPrice());
+        enchanterStats.setGoldPool(enchanterStats.getGoldPool() + price);
     }
 }
