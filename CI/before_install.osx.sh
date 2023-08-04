@@ -11,7 +11,7 @@ brew tap --repair
 brew update --quiet
 
 # Some of these tools can come from places other than brew, so check before installing
-brew reinstall xquartz fontconfig freetype harfbuzz brotli
+brew reinstall xquartz fontconfig freetype harfbuzz brotli graphite2
 
 # Fix: can't open file: @loader_path/libbrotlicommon.1.dylib (No such file or directory)
 BREW_LIB_PATH="$(brew --prefix)/lib"
