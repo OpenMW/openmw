@@ -31,6 +31,8 @@ namespace MWGui
         MyGUI::EditBox* mSearchTerm;
         MyGUI::Button* mNextButton;
         MyGUI::Button* mPreviousButton;
+        MyGUI::Button* mCaseSensitiveToggleButton;
+        MyGUI::Button* mRegExSearchToggleButton;
 
         typedef std::list<std::string> StringList;
 
@@ -83,12 +85,25 @@ namespace MWGui
         void commandBoxKeyPress(MyGUI::Widget* _sender, MyGUI::KeyCode key, MyGUI::Char _char);
         void acceptCommand(MyGUI::EditBox* _sender);
 
+        enum class SearchDirection;
+        void toggleCaseSensitiveSearch(MyGUI::Widget* _sender);
+        void toggleRegExSearch(MyGUI::Widget* _sender);
         void acceptSearchTerm(MyGUI::EditBox* _sender);
         void findNextOccurrence(MyGUI::Widget* _sender);
-        void findPreviousOccurence(MyGUI::Widget* _sender);
+        void findPreviousOccurrence(MyGUI::Widget* _sender);
+        void findOccurrence(SearchDirection direction);
+        void findInHistoryText(
+            const std::string& historyText, SearchDirection direction, size_t firstIndex, size_t lastIndex);
+        void findWithRegex(
+            const std::string& historyText, SearchDirection direction, size_t firstIndex, size_t lastIndex);
+        void findWithStringSearch(
+            const std::string& historyText, SearchDirection direction, size_t firstIndex, size_t lastIndex);
         void markOccurrence(size_t textPosition, size_t length);
-        size_t mCurrentOccurrence = std::string::npos;
+        size_t mCurrentOccurrenceIndex = std::string::npos;
+        size_t mCurrentOccurrenceLength = 0;
         std::string mCurrentSearchTerm;
+        bool mCaseSensitiveSearch;
+        bool mRegExSearch;
 
         std::string complete(std::string input, std::vector<std::string>& matches);
 

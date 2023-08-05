@@ -6,7 +6,7 @@
     <Property key="Visible" value="false"/>
 
     <!-- Log window -->
-    <Widget type="EditBox" skin="MW_TextBoxEdit" position="5 5 380 328" align="Stretch" name="list_History">
+    <Widget type="EditBox" skin="MW_TextBoxEdit" position="5 30 380 303" align="Stretch" name="list_History">
         <Property key="MultiLine" value="1"/>
         <Property key="ReadOnly" value="true"/>
         <Property key="FontName" value="MonoFont"/>
@@ -17,26 +17,38 @@
         <Property key="MaxTextLength" value="10000"/>
     </Widget>
 
+    <Widget type="HBox" position="1 0 379 28" align="Left Top HStretch">
+        <!-- "Previous" button -->
+        <Widget type="Button" skin="MW_Button" position="0 0 28 28" name="button_Previous" align="Top Right">
+            <Property key="Caption" value="<"/>
+        </Widget>
+
+        <!-- "Next" button -->
+        <Widget type="Button" skin="MW_Button" position="0 0 28 28" name="button_Next" align="Top Right">
+            <Property key="Caption" value=">"/>
+        </Widget>
+
+        <!-- Search box -->
+        <Widget type="EditBox" skin="MW_ConsoleCommand" position="0 0 0 28" align="Top Right" name="edit_SearchTerm">
+            <Property key="InvertSelected" value="false"/>
+            <UserString key="HStretch" value="true"/>
+        </Widget>
+
+        <!-- "CaseSensitive" toggle -->
+        <Widget type="Button" skin="MW_Button" position="0 0 28 28" name="button_CaseSensitive" align="Top Right">
+            <Property key="Caption" value="Aa"/>
+        </Widget>
+
+        <!-- "RegEx" toggle -->
+        <Widget type="Button" skin="MW_Button" position="0 0 28 28" name="button_RegExSearch" align="Top Right">
+            <Property key="Caption" value=".*"/>
+        </Widget>
+    </Widget>
+
     <!-- Command line -->
     <Widget type="EditBox" skin="MW_ConsoleCommand" position="0 338 384 28" align="HStretch Bottom" name="edit_Command">
         <Property key="InvertSelected" value="false"/>
         <UserString key="AcceptTab" value="true"/>
     </Widget>
-
-    <!-- Search box -->
-    <Widget type="EditBox" skin="MW_ConsoleCommand" position="250 1 115 28" align="Top Right" name="edit_SearchTerm">
-        <Property key="InvertSelected" value="false"/>
-    </Widget>
-
-    <!-- "Next" button -->
-    <Widget type="Button" skin="MW_Button" position="220 0 28 28" name="button_Next" align="Top Right">
-        <Property key="Caption" value=">"/>
-    </Widget>
-
-    <!-- "Previous" button -->
-    <Widget type="Button" skin="MW_Button" position="190 0 28 28" name="button_Previous" align="Top Right">
-        <Property key="Caption" value="<"/>
-    </Widget>
-
   </Widget>
 </MyGUI>

@@ -7,7 +7,9 @@
 
 #include <filesystem>
 #include <fstream>
+#include <regex>
 
+#include <apps/openmw/mwgui/textcolours.hpp>
 #include <components/compiler/exception.hpp>
 #include <components/compiler/extensions0.hpp>
 #include <components/compiler/lineparser.hpp>
@@ -144,6 +146,8 @@ namespace MWGui
 
     Console::Console(int w, int h, bool consoleOnlyScripts, Files::ConfigurationManager& cfgMgr)
         : WindowBase("openmw_console.layout")
+        , mCaseSensitiveSearch(false)
+        , mRegExSearch(false)
         , mCompilerContext(MWScript::CompilerContext::Type_Console)
         , mConsoleOnlyScripts(consoleOnlyScripts)
         , mCfgMgr(cfgMgr)
@@ -155,6 +159,8 @@ namespace MWGui
         getWidget(mSearchTerm, "edit_SearchTerm");
         getWidget(mNextButton, "button_Next");
         getWidget(mPreviousButton, "button_Previous");
+        getWidget(mCaseSensitiveToggleButton, "button_CaseSensitive");
+        getWidget(mRegExSearchToggleButton, "button_RegExSearch");
 
         // Set up the command line box
         mCommandLine->eventEditSelectAccept += newDelegate(this, &Console::acceptCommand);
@@ -163,7 +169,9 @@ namespace MWGui
         // Set up the search term box
         mSearchTerm->eventEditSelectAccept += newDelegate(this, &Console::acceptSearchTerm);
         mNextButton->eventMouseButtonClick += newDelegate(this, &Console::findNextOccurrence);
-        mPreviousButton->eventMouseButtonClick += newDelegate(this, &Console::findPreviousOccurence);
+        mPreviousButton->eventMouseButtonClick += newDelegate(this, &Console::findPreviousOccurrence);
+        mCaseSensitiveToggleButton->eventMouseButtonClick += newDelegate(this, &Console::toggleCaseSensitiveSearch);
+        mRegExSearchToggleButton->eventMouseButtonClick += newDelegate(this, &Console::toggleRegExSearch);
 
         // Set up the log window
         mHistory->setOverflowToTheLeft(true);
@@ -387,6 +395,37 @@ namespace MWGui
         execute(cm);
     }
 
+    void Console::toggleCaseSensitiveSearch(MyGUI::Widget* _sender)
+    {
+        mCaseSensitiveSearch = !mCaseSensitiveSearch;
+
+        // Reset console search highlight position search parameters have changed
+        mCurrentOccurrenceIndex = std::string::npos;
+
+        // Adjust color to reflect toggled status
+        const TextColours& textColours{ MWBase::Environment::get().getWindowManager()->getTextColours() };
+        mCaseSensitiveToggleButton->setTextColour(mCaseSensitiveSearch ? textColours.link : textColours.normal);
+    }
+
+    void Console::toggleRegExSearch(MyGUI::Widget* _sender)
+    {
+        mRegExSearch = !mRegExSearch;
+
+        // Reset console search highlight position search parameters have changed
+        mCurrentOccurrenceIndex = std::string::npos;
+
+        // Adjust color to reflect toggled status
+        const TextColours& textColours{ MWBase::Environment::get().getWindowManager()->getTextColours() };
+        mRegExSearchToggleButton->setTextColour(mRegExSearch ? textColours.link : textColours.normal);
+
+        // RegEx searches are always case sensitive
+        mCaseSensitiveSearch = mRegExSearch;
+
+        // Dim case sensitive and set disabled if regex search toggled on, restore when toggled off
+        mCaseSensitiveToggleButton->setTextColour(mCaseSensitiveSearch ? textColours.linkPressed : textColours.normal);
+        mCaseSensitiveToggleButton->setEnabled(!mRegExSearch);
+    }
+
     void Console::acceptSearchTerm(MyGUI::EditBox* _sender)
     {
         const std::string& searchTerm = mSearchTerm->getOnlyText();
@@ -396,81 +435,84 @@ namespace MWGui
             return;
         }
 
-        mCurrentSearchTerm = Utf8Stream::lowerCaseUtf8(searchTerm);
-        mCurrentOccurrence = std::string::npos;
+        std::string newSearchTerm = mCaseSensitiveSearch ? searchTerm : Utf8Stream::lowerCaseUtf8(searchTerm);
+
+        // If new search term reset position, otherwise continue from current position
+        if (newSearchTerm != mCurrentSearchTerm)
+        {
+            mCurrentSearchTerm = newSearchTerm;
+            mCurrentOccurrenceIndex = std::string::npos;
+        }
 
         findNextOccurrence(nullptr);
     }
 
+    enum class Console::SearchDirection
+    {
+        Forward,
+        Reverse
+    };
+
     void Console::findNextOccurrence(MyGUI::Widget* _sender)
     {
-        if (mCurrentSearchTerm.empty())
-        {
-            return;
-        }
-
-        const auto historyText = Utf8Stream::lowerCaseUtf8(mHistory->getOnlyText().asUTF8());
-
-        // Search starts at the beginning
-        size_t startIndex = 0;
-
-        // If this is not the first search, we start right AFTER the last occurrence.
-        if (mCurrentOccurrence != std::string::npos && historyText.length() - mCurrentOccurrence > 1)
-        {
-            startIndex = mCurrentOccurrence + 1;
-        }
-
-        mCurrentOccurrence = historyText.find(mCurrentSearchTerm, startIndex);
-
-        // If the last search did not find anything AND we didn't start at
-        // the beginning, we repeat the search one time for wrapping around the text.
-        if (mCurrentOccurrence == std::string::npos && startIndex != 0)
-        {
-            mCurrentOccurrence = historyText.find(mCurrentSearchTerm);
-        }
-
-        // Only scroll & select if we actually found something
-        if (mCurrentOccurrence != std::string::npos)
-        {
-            markOccurrence(mCurrentOccurrence, mCurrentSearchTerm.length());
-        }
-        else
-        {
-            markOccurrence(0, 0);
-        }
+        findOccurrence(SearchDirection::Forward);
     }
 
-    void Console::findPreviousOccurence(MyGUI::Widget* _sender)
+    void Console::findPreviousOccurrence(MyGUI::Widget* _sender)
     {
+        findOccurrence(SearchDirection::Reverse);
+    }
+
+    void Console::findOccurrence(const SearchDirection direction)
+    {
+
         if (mCurrentSearchTerm.empty())
         {
             return;
         }
 
-        const auto historyText = Utf8Stream::lowerCaseUtf8(mHistory->getOnlyText().asUTF8());
+        const auto historyText{ mCaseSensitiveSearch ? mHistory->getOnlyText().asUTF8()
+                                                     : Utf8Stream::lowerCaseUtf8(mHistory->getOnlyText().asUTF8()) };
 
-        // Search starts at the end
-        size_t startIndex = historyText.length();
+        // Setup default search range
+        size_t firstIndex{ 0 };
+        size_t lastIndex{ historyText.length() };
 
-        // If this is not the first search, we start right BEFORE the last occurrence.
-        if (mCurrentOccurrence != std::string::npos && mCurrentOccurrence > 1)
+        // If search is not the first adjust the range based on the direction and previous occurrence.
+        if (mCurrentOccurrenceIndex != std::string::npos)
         {
-            startIndex = mCurrentOccurrence - 1;
+            if (direction == SearchDirection::Forward && mCurrentOccurrenceIndex > 1)
+            {
+                firstIndex = mCurrentOccurrenceIndex + mCurrentOccurrenceLength;
+            }
+            else if (direction == SearchDirection::Reverse
+                && (historyText.length() - mCurrentOccurrenceIndex) > mCurrentOccurrenceLength)
+            {
+                lastIndex = mCurrentOccurrenceIndex - 1;
+            }
         }
 
-        mCurrentOccurrence = historyText.rfind(mCurrentSearchTerm, startIndex);
+        findInHistoryText(historyText, direction, firstIndex, lastIndex);
 
-        // If the last search did not find anything AND we didn't start at
-        // the end, we repeat the search one time for wrapping around the text.
-        if (mCurrentOccurrence == std::string::npos && startIndex != historyText.length())
+        // If the last search did not find anything AND...
+        if (mCurrentOccurrenceIndex == std::string::npos)
         {
-            mCurrentOccurrence = historyText.rfind(mCurrentSearchTerm, historyText.length());
+            if (direction == SearchDirection::Forward && firstIndex != 0)
+            {
+                // ... We didn't start at the beginning, we apply the search to the other half of the text.
+                findInHistoryText(historyText, direction, 0, firstIndex);
+            }
+            else if (direction == SearchDirection::Reverse && lastIndex != historyText.length())
+            {
+                // ... We didn't search to the end, we apply the search to the other half of the text.
+                findInHistoryText(historyText, direction, lastIndex, historyText.length());
+            }
         }
 
         // Only scroll & select if we actually found something
-        if (mCurrentOccurrence != std::string::npos)
+        if (mCurrentOccurrenceIndex != std::string::npos)
         {
-            markOccurrence(mCurrentOccurrence, mCurrentSearchTerm.length());
+            markOccurrence(mCurrentOccurrenceIndex, mCurrentOccurrenceLength);
         }
         else
         {
@@ -478,6 +520,78 @@ namespace MWGui
         }
     }
 
+    void Console::findInHistoryText(const std::string& historyText, const SearchDirection direction,
+        const size_t firstIndex, const size_t lastIndex)
+    {
+        if (mRegExSearch)
+        {
+            findWithRegex(historyText, direction, firstIndex, lastIndex);
+        }
+        else
+        {
+            findWithStringSearch(historyText, direction, firstIndex, lastIndex);
+        }
+    }
+
+    void Console::findWithRegex(const std::string& historyText, const SearchDirection direction,
+        const size_t firstIndex, const size_t lastIndex)
+    {
+        // Search text for regex match in given interval
+        const std::regex pattern{ mCurrentSearchTerm };
+        std::sregex_iterator match{ (historyText.cbegin() + firstIndex), (historyText.cbegin() + lastIndex), pattern };
+        const std::sregex_iterator end{};
+
+        // If reverse search get last result in interval
+        if (direction == SearchDirection::Reverse)
+        {
+            std::sregex_iterator lastMatch{ end };
+            while (match != end)
+            {
+                lastMatch = match;
+                ++match;
+            }
+            match = lastMatch;
+        }
+
+        // If regex match is found in text, set new current occurrence values
+        if (match != end)
+        {
+            mCurrentOccurrenceIndex = match->position() + firstIndex;
+            mCurrentOccurrenceLength = match->length();
+        }
+        else
+        {
+            mCurrentOccurrenceIndex = std::string::npos;
+            mCurrentOccurrenceLength = 0;
+        }
+    }
+
+    void Console::findWithStringSearch(const std::string& historyText, const SearchDirection direction,
+        const size_t firstIndex, const size_t lastIndex)
+    {
+        // Search in given text interval for search term
+        const size_t substringLength{ (lastIndex - firstIndex) + 1 };
+        const std::string_view historyTextView((historyText.c_str() + firstIndex), substringLength);
+        if (direction == SearchDirection::Forward)
+        {
+            mCurrentOccurrenceIndex = historyTextView.find(mCurrentSearchTerm);
+        }
+        else
+        {
+            mCurrentOccurrenceIndex = historyTextView.rfind(mCurrentSearchTerm);
+        }
+
+        // If search term is found in text, set new current occurrence values
+        if (mCurrentOccurrenceIndex != std::string::npos)
+        {
+            mCurrentOccurrenceIndex += firstIndex;
+            mCurrentOccurrenceLength = mCurrentSearchTerm.length();
+        }
+        else
+        {
+            mCurrentOccurrenceLength = 0;
+        }
+    }
     void Console::markOccurrence(const size_t textPosition, const size_t length)
     {
         if (textPosition == 0 && length == 0)
