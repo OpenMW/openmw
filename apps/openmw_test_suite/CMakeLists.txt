@@ -92,6 +92,8 @@ file(GLOB UNITTEST_SRC_FILES
     esm3/testinfoorder.cpp
 
     nifosg/testnifloader.cpp
+
+    esmterrain/testgridsampling.cpp
 )
 
 source_group(apps\\openmw_test_suite FILES openmw_test_suite.cpp ${UNITTEST_SRC_FILES})
