@@ -1440,7 +1440,9 @@
 -- @param #ActivatorRecord activator A Lua table with the fields of a ActivatorRecord.
 -- @return #ActivatorRecord A strongly typed Activator record.
 
---- @{#Container} functions
+
+--------------------------------------------------------------------------------
+-- @{#Container} functions
 -- @field [parent=#types] #Container Container
 
 ---
@@ -1452,6 +1454,12 @@
 ---
 -- Container content.
 -- @function [parent=#Container] content
+-- @param openmw.core#GameObject object
+-- @return openmw.core#Inventory
+
+---
+-- Container content (same as `Container.content`, added for consistency with `Actor.inventory`).
+-- @function [parent=#Container] inventory
 -- @param openmw.core#GameObject object
 -- @return openmw.core#Inventory
 
@@ -1487,7 +1495,9 @@
 -- @field #string mwscript MWScript on this container (can be empty)
 -- @field #number weight capacity of this container
 
---- @{#Door} functions
+
+--------------------------------------------------------------------------------
+-- @{#Door} functions
 -- @field [parent=#types] #Door Door
 
 ---
