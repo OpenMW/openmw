@@ -1,6 +1,7 @@
 #include "storage.hpp"
 
 #include <algorithm>
+#include <stdexcept>
 
 #include <osg/Image>
 #include <osg/Plane>
@@ -186,6 +187,12 @@ namespace ESMTerrain
     void Storage::fillVertexBuffers(int lodLevel, float size, const osg::Vec2f& center, ESM::RefId worldspace,
         osg::Vec3Array& positions, osg::Vec3Array& normals, osg::Vec4ubArray& colours)
     {
+        if (lodLevel < 0 || 63 < lodLevel)
+            throw std::invalid_argument("Invalid terrain lod level: " + std::to_string(lodLevel));
+
+        if (size <= 0)
+            throw std::invalid_argument("Invalid terrain size: " + std::to_string(size));
+
         // LOD level n means every 2^n-th vertex is kept
         const std::size_t sampleSize = std::size_t{ 1 } << lodLevel;
 
