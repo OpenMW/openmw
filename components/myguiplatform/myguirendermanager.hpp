@@ -74,6 +74,8 @@ namespace osgMyGUI
             return static_cast<RenderManager*>(MyGUI::RenderManager::getInstancePtr());
         }
 
+        bool checkTexture(MyGUI::ITexture* _texture);
+
         /** @see RenderManager::getViewSize */
         const MyGUI::IntSize& getViewSize() const override { return mViewSize; }
 
