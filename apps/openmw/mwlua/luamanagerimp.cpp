@@ -238,6 +238,11 @@ namespace MWLua
             windowManager->printToConsole(msg, "#" + color.toHex());
         mInGameConsoleMessages.clear();
 
+        applyDelayedActions();
+    }
+
+    void LuaManager::applyDelayedActions()
+    {
         for (DelayedAction& action : mActionQueue)
             action.apply();
         mActionQueue.clear();

@@ -56,6 +56,11 @@ namespace MWLua
         // Can use the scene graph and applies the actions queued during update()
         void synchronizedUpdate();
 
+        // Normally it is called by `synchronizedUpdate` every frame.
+        // Additionally must be called before making a save to ensure that there are no pending delayed
+        // actions and the world is in a consistent state.
+        void applyDelayedActions() override;
+
         // Available everywhere through the MWBase::LuaManager interface.
         // LuaManager queues these events and propagates to scripts on the next `update` call.
         void newGameStarted() override;
