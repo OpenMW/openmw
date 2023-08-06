@@ -30,15 +30,12 @@
 
 #include <stdexcept>
 
-//#include "formid.hpp"
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
 void ESM4::Music::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())

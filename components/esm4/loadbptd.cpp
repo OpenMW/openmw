@@ -45,8 +45,7 @@ void ESM4::BodyPartData::BodyPart::clear()
 
 void ESM4::BodyPartData::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     BodyPart bodyPart;

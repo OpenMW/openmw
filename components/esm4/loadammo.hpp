@@ -32,9 +32,7 @@
 #include <vector>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
-
-#include "formid.hpp"
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -52,12 +50,12 @@ namespace ESM4
             float mDamage{ 0.f };
             std::uint8_t mClipRounds{ 0u };
             std::uint32_t mProjPerShot{ 0u };
-            FormId mProjectile;
-            FormId mConsumedAmmo;
+            ESM::FormId mProjectile;
+            ESM::FormId mConsumedAmmo;
             float mConsumedPercentage{ 0.f };
         };
 
-        ESM::RefId mId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -69,17 +67,17 @@ namespace ESM4
         std::string mIcon; // inventory
         std::string mMiniIcon; // inventory
 
-        FormId mPickUpSound;
-        FormId mDropSound;
+        ESM::FormId mPickUpSound;
+        ESM::FormId mDropSound;
 
         float mBoundRadius;
 
         std::uint16_t mEnchantmentPoints;
-        FormId mEnchantment;
+        ESM::FormId mEnchantment;
 
-        std::vector<FormId> mAmmoEffects;
+        std::vector<ESM::FormId> mAmmoEffects;
 
-        FormId mScript;
+        ESM::FormId mScript;
 
         Data mData;
 

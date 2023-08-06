@@ -47,11 +47,10 @@ float ESM4::Cell::sInvalidWaterLevel = -200000.f;
 // longer/shorter/same as loading the subrecords.
 void ESM4::Cell::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
-    mId = ESM::RefId::formIdRefId(mFormId);
+    ESM::FormId formId = reader.getFormIdFromHeader();
+    mId = formId;
     mFlags = reader.hdr().record.flags;
-    mParent = ESM::RefId::formIdRefId(reader.currWorld());
+    mParent = reader.currWorld();
     mWaterHeight = sInvalidWaterLevel;
     reader.clearCellGrid(); // clear until XCLC FIXME: somehow do this automatically?
 
@@ -70,7 +69,7 @@ void ESM4::Cell::load(ESM4::Reader& reader)
     // WARN: we need to call setCurrCell (and maybe setCurrCellGrid?) again before loading
     // cell child groups if we are loading them after restoring the context
     // (may be easier to update the context before saving?)
-    reader.setCurrCell(mFormId); // save for LAND (and other children) to access later
+    reader.setCurrCell(formId); // save for LAND (and other children) to access later
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
     bool isSkyrim = (esmVer == ESM::VER_170 || esmVer == ESM::VER_094);
@@ -155,8 +154,8 @@ void ESM4::Cell::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_XCLR: // for exterior cells
             {
-                mRegions.resize(subHdr.dataSize / sizeof(FormId32));
-                for (std::vector<FormId>::iterator it = mRegions.begin(); it != mRegions.end(); ++it)
+                mRegions.resize(subHdr.dataSize / sizeof(ESM::FormId32));
+                for (std::vector<ESM::FormId>::iterator it = mRegions.begin(); it != mRegions.end(); ++it)
                 {
                     reader.getFormId(*it);
 #if 0

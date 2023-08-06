@@ -1,6 +1,22 @@
 #include "classes.hpp"
 
-#include <components/esm/records.hpp>
+#include <components/esm4/loadacti.hpp>
+#include <components/esm4/loadalch.hpp>
+#include <components/esm4/loadammo.hpp>
+#include <components/esm4/loadarmo.hpp>
+#include <components/esm4/loadbook.hpp>
+#include <components/esm4/loadclot.hpp>
+#include <components/esm4/loadcont.hpp>
+#include <components/esm4/loadcrea.hpp>
+#include <components/esm4/loaddoor.hpp>
+#include <components/esm4/loadfurn.hpp>
+#include <components/esm4/loadingr.hpp>
+#include <components/esm4/loadligh.hpp>
+#include <components/esm4/loadmisc.hpp>
+#include <components/esm4/loadnpc.hpp>
+#include <components/esm4/loadstat.hpp>
+#include <components/esm4/loadtree.hpp>
+#include <components/esm4/loadweap.hpp>
 
 #include "activator.hpp"
 #include "apparatus.hpp"

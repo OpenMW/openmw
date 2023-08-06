@@ -30,7 +30,8 @@
 #include <cstdint>
 #include <string>
 
-#include "formid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -39,7 +40,7 @@ namespace ESM4
 
     struct MediaSet
     {
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -83,13 +84,14 @@ namespace ESM4
         float mTime3;
         float mTime4;
 
-        FormId mSoundIntro; // HNAM
-        FormId mSoundOutro; // INAM
+        ESM::FormId mSoundIntro; // HNAM
+        ESM::FormId mSoundOutro; // INAM
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_MSET4;
     };
 }
 

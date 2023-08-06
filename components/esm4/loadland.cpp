@@ -51,12 +51,10 @@
 //
 void ESM4::Land::load(ESM4::Reader& reader)
 {
-    ESM::FormId formId = reader.hdr().record.getFormId();
-    reader.adjustFormId(formId);
-    mId = ESM::RefId::formIdRefId(formId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
     mDataTypes = 0;
-    mCell = ESM::RefId::formIdRefId(reader.currCell());
+    mCell = reader.currCell();
     TxtLayer layer;
     std::int8_t currentAddQuad = -1; // for VTXT following ATXT
 
@@ -181,19 +179,15 @@ void ESM4::Land::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_VTEX: // only in Oblivion?
             {
-                int count = (int)reader.subRecordHeader().dataSize / sizeof(FormId32);
-                if ((reader.subRecordHeader().dataSize % sizeof(FormId32)) != 0)
+                int count = (int)reader.subRecordHeader().dataSize / sizeof(ESM::FormId32);
+                if ((reader.subRecordHeader().dataSize % sizeof(ESM::FormId32)) != 0)
                     throw std::runtime_error("ESM4::LAND VTEX data size error");
 
                 if (count)
                 {
                     mIds.resize(count);
-                    for (std::vector<FormId>::iterator it = mIds.begin(); it != mIds.end(); ++it)
-                    {
-                        reader.getFormId(*it);
-                        // FIXME: debug only
-                        // std::cout << "VTEX: " << std::hex << *it << std::endl;
-                    }
+                    for (ESM::FormId& id : mIds)
+                        reader.getFormId(id);
                 }
                 break;
             }

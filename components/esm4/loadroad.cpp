@@ -28,18 +28,17 @@
 
 #include <stdexcept>
 
-#include "formid.hpp" // FIXME: for workaround
 #include "reader.hpp"
+#include <components/esm/refid.hpp> // FIXME: for workaround
 //#include "writer.hpp"
 
 void ESM4::Road::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
     mParent = reader.currWorld();
 
-    mEditorId = formIdToString(mFormId); // FIXME: quick workaround to use existing code
+    mEditorId = ESM::RefId(mId).serializeText(); // FIXME: quick workaround to use existing code
 
     while (reader.getSubRecordHeader())
     {

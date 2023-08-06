@@ -30,10 +30,8 @@
 #include <cstdint>
 #include <vector>
 
-#include "formid.hpp"
-
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -76,7 +74,7 @@ namespace ESM4
 
         struct BTXT
         {
-            FormId32 formId;
+            ESM::FormId32 formId;
             std::uint8_t quadrant; // 0 = bottom left, 1 = bottom right, 2 = top left, 3 = top right
             std::uint8_t unknown1;
             std::uint16_t unknown2;
@@ -84,7 +82,7 @@ namespace ESM4
 
         struct ATXT
         {
-            FormId32 formId;
+            ESM::FormId32 formId;
             std::uint8_t quadrant; // 0 = bottom left, 1 = bottom right, 2 = top left, 3 = top right
             std::uint8_t unknown;
             std::uint16_t layerIndex; // texture layer, 0..7
@@ -111,7 +109,7 @@ namespace ESM4
             std::vector<TxtLayer> layers;
         };
 
-        ESM::RefId mId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::uint32_t mLandFlags; // from DATA subrecord
@@ -125,8 +123,8 @@ namespace ESM4
         unsigned char mVertColr[VERTS_PER_SIDE * VERTS_PER_SIDE * 3]; // from VCLR subrecord
         VHGT mHeightMap;
         Texture mTextures[4]; // 0 = bottom left, 1 = bottom right, 2 = top left, 3 = top right
-        std::vector<FormId> mIds; // land texture (LTEX) formids
-        ESM::RefId mCell;
+        std::vector<ESM::FormId> mIds; // land texture (LTEX) formids
+        ESM::FormId mCell;
         void load(Reader& reader);
         Land() = default;
         // void save(Writer& writer) const;

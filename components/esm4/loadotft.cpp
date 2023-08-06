@@ -33,8 +33,7 @@
 
 void ESM4::Outfit::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
@@ -47,13 +46,9 @@ void ESM4::Outfit::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_INAM:
             {
-                std::size_t numObj = subHdr.dataSize / sizeof(FormId32);
-                for (std::size_t i = 0; i < numObj; ++i)
-                {
-                    FormId formId;
+                mInventory.resize(subHdr.dataSize / sizeof(ESM::FormId32));
+                for (ESM::FormId& formId : mInventory)
                     reader.getFormId(formId);
-                    mInventory.push_back(formId);
-                }
                 break;
             }
             default:

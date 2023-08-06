@@ -31,11 +31,10 @@
 #include <string>
 #include <vector>
 
-#include "formid.hpp"
-#include "grid.hpp"
-
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
+#include <components/esm/formid.hpp>
+
+#include "grid.hpp"
 
 namespace ESM4
 {
@@ -58,7 +57,7 @@ namespace ESM4
 
         struct REFRcoord
         {
-            FormId formId;
+            ESM::FormId formId;
             std::int16_t unknown1;
             std::int16_t unknown2;
         };
@@ -84,15 +83,15 @@ namespace ESM4
             float initialPitch;
         };
 
-        ESM::RefId mId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
         std::string mFullName;
-        FormId mParent; // parent worldspace formid
+        ESM::FormId mParent; // parent worldspace formid
         std::uint8_t mWorldFlags;
-        FormId mClimate;
-        FormId mWater;
+        ESM::FormId mClimate;
+        ESM::FormId mWater;
         float mLandLevel;
         float mWaterLevel;
 
@@ -114,7 +113,7 @@ namespace ESM4
         RNAMstruct mData;
 
         // ----------------------
-        FormId mMusic;
+        ESM::FormId mMusic;
 
         // 0x01 use Land data
         // 0x02 use LOD data
@@ -127,8 +126,8 @@ namespace ESM4
         std::uint16_t mParentUseFlags; // FO3/FONV
 
         // cache formId's of children (e.g. CELL, ROAD)
-        std::vector<FormId> mCells;
-        std::vector<FormId> mRoads;
+        std::vector<ESM::FormId> mCells;
+        std::vector<ESM::FormId> mRoads;
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;

@@ -34,7 +34,7 @@
 #include "common.hpp"
 #include "loadtes4.hpp"
 
-#include <components/esm/formidrefid.hpp>
+#include <components/esm/formid.hpp>
 #include <components/files/istreamptr.hpp>
 #include <components/vfs/manager.hpp>
 
@@ -71,12 +71,12 @@ namespace ESM4
         std::uint32_t typeId;
         std::uint32_t dataSize; // does *not* include 24 bytes (20 for TES4) of header
         std::uint32_t flags;
-        FormId32 id;
+        ESM::FormId32 id;
         std::uint32_t revision;
         std::uint16_t version; // not in TES4
         std::uint16_t unknown; // not in TES4
 
-        FormId getFormId() const { return FormId::fromUint32(id); }
+        ESM::FormId getFormId() const { return ESM::FormId::fromUint32(id); }
     };
 
     union RecordHeader
@@ -123,8 +123,8 @@ namespace ESM4
         SubRecordHeader subRecordHeader; // header of the current sub record being processed
         std::uint32_t recordRead; // bytes read from the sub records, incl. the current one
 
-        FormId currWorld; // formId of current world - for grouping CELL records
-        FormId currCell; // formId of current cell
+        ESM::FormId currWorld; // formId of current world - for grouping CELL records
+        ESM::FormId currCell; // formId of current cell
         // FIXME: try to get rid of these two members, seem like massive hacks
         CellGrid currCellGrid; // TODO: should keep a map of cell formids
         bool cellGridValid;
@@ -157,7 +157,7 @@ namespace ESM4
         Files::IStreamPtr mILStrings;
         Files::IStreamPtr mDLStrings;
 
-        std::unordered_map<FormId, std::string> mLStringIndex;
+        std::unordered_map<ESM::FormId, std::string> mLStringIndex;
 
         std::vector<Reader*>* mGlobalReaderList = nullptr;
 
@@ -171,7 +171,7 @@ namespace ESM4
 
         inline bool hasLocalizedStrings() const { return (mHeader.mFlags & Rec_Localized) != 0; }
 
-        void getLocalizedStringImpl(const FormId stringId, std::string& str);
+        void getLocalizedStringImpl(const ESM::FormId stringId, std::string& str);
 
         // Close the file, resets all information.
         // After calling close() the structure may be reused to load a new file.
@@ -227,7 +227,7 @@ namespace ESM4
         }
 
         // Use getFormId instead
-        void get(FormId& value) = delete;
+        void get(ESM::FormId& value) = delete;
 
         template <typename T>
         bool getExact(T& t)
@@ -284,14 +284,14 @@ namespace ESM4
         inline void clearCellGrid() { mCtx.cellGridValid = false; }
 
         // Should be set at the beginning of a CELL load
-        inline void setCurrCell(FormId formId) { mCtx.currCell = formId; }
+        inline void setCurrCell(ESM::FormId formId) { mCtx.currCell = formId; }
 
-        inline FormId currCell() const { return mCtx.currCell; }
+        inline ESM::FormId currCell() const { return mCtx.currCell; }
 
         // Should be set at the beginning of a WRLD load
-        inline void setCurrWorld(FormId formId) { mCtx.currWorld = formId; }
+        inline void setCurrWorld(ESM::FormId formId) { mCtx.currWorld = formId; }
 
-        inline FormId currWorld() const { return mCtx.currWorld; }
+        inline ESM::FormId currWorld() const { return mCtx.currWorld; }
 
         // Get the data part of a record
         // Note: assumes the header was read correctly and nothing else was read
@@ -337,13 +337,13 @@ namespace ESM4
         }
 
         // ModIndex adjusted formId according to master file dependencies
-        void adjustFormId(FormId& id) const;
+        void adjustFormId(ESM::FormId& id) const;
 
         // Temporary. Doesn't support mod index > 255
-        void adjustFormId(FormId32& id) const;
+        void adjustFormId(ESM::FormId32& id) const;
 
-        bool getFormId(FormId& id);
-        ESM::FormIdRefId getRefIdFromHeader() const;
+        bool getFormId(ESM::FormId& id);
+        ESM::FormId getFormIdFromHeader() const;
 
         void adjustGRUPFormId();
 

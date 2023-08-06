@@ -33,8 +33,7 @@
 
 void ESM4::AcousticSpace::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
@@ -49,12 +48,8 @@ void ESM4::AcousticSpace::load(ESM4::Reader& reader)
                 reader.get(mEnvironmentType);
                 break;
             case ESM4::SUB_SNAM:
-            {
-                FormId id;
-                reader.getFormId(id);
-                mAmbientLoopSounds.push_back(id);
+                reader.getFormId(mAmbientLoopSounds.emplace_back());
                 break;
-            }
             case ESM4::SUB_RDAT:
                 reader.getFormId(mSoundRegion);
                 break;

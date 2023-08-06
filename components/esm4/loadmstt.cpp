@@ -33,8 +33,7 @@
 
 void ESM4::MovableStatic::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())

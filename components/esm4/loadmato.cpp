@@ -33,8 +33,7 @@
 
 void ESM4::Material::load(ESM4::Reader& reader)
 {
-    // mFormId = reader.adjustFormId(reader.hdr().record.id); // FIXME: use master adjusted?
-    mFormId = reader.hdr().record.getFormId();
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())

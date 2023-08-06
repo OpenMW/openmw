@@ -31,9 +31,7 @@
 #include <string>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
-
-#include "formid.hpp"
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -42,21 +40,21 @@ namespace ESM4
 
     struct Activator
     {
-        ESM::RefId mId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
         std::string mFullName;
         std::string mModel;
 
-        FormId mScriptId;
-        FormId mLoopingSound; // SOUN
-        FormId mActivationSound; // SOUN
+        ESM::FormId mScriptId;
+        ESM::FormId mLoopingSound; // SOUN
+        ESM::FormId mActivationSound; // SOUN
 
         float mBoundRadius;
 
-        FormId mRadioTemplate; // SOUN
-        FormId mRadioStation; // TACT
+        ESM::FormId mRadioTemplate; // SOUN
+        ESM::FormId mRadioStation; // TACT
 
         std::string mActivationPrompt;
 

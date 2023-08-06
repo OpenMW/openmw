@@ -30,13 +30,12 @@
 #include <stdexcept>
 #include <string> // getline
 
-#include "formid.hpp"
 #include "reader.hpp"
 //#include "writer.hpp"
 
 void ESM4::Npc::load(ESM4::Reader& reader)
 {
-    mId = reader.getRefIdFromHeader();
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     std::uint32_t esmVer = reader.esmVersion();
@@ -67,19 +66,11 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_SPLO:
-            {
-                FormId id;
-                reader.getFormId(id);
-                mSpell.push_back(id);
+                reader.getFormId(mSpell.emplace_back());
                 break;
-            }
             case ESM4::SUB_PKID:
-            {
-                FormId id;
-                reader.getFormId(id);
-                mAIPackages.push_back(id);
+                reader.getFormId(mAIPackages.emplace_back());
                 break;
-            }
             case ESM4::SUB_SNAM:
             {
                 reader.get(mFaction);
@@ -219,13 +210,8 @@ void ESM4::Npc::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_PNAM: // FO3/FONV/TES5
-            {
-                FormId headPart;
-                reader.getFormId(headPart);
-                mHeadParts.push_back(headPart);
-
+                reader.getFormId(mHeadParts.emplace_back());
                 break;
-            }
             case ESM4::SUB_HCLF: // TES5 hair colour
             {
                 reader.getFormId(mHairColourId);

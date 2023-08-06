@@ -33,7 +33,7 @@
 
 void ESM4::Ammunition::load(ESM4::Reader& reader)
 {
-    mId = reader.getRefIdFromHeader();
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
@@ -128,12 +128,8 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
                 reader.getLocalizedString(mAbbrev);
                 break;
             case ESM4::SUB_RCIL:
-            {
-                FormId effect;
-                reader.getFormId(effect);
-                mAmmoEffects.push_back(effect);
+                reader.getFormId(mAmmoEffects.emplace_back());
                 break;
-            }
             case ESM4::SUB_SCRI:
                 reader.getFormId(mScript);
                 break;

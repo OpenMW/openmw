@@ -31,9 +31,7 @@
 #include <string>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
-
-#include "formid.hpp"
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -50,7 +48,7 @@ namespace ESM4
             Flag_MinimalUse = 0x08
         };
 
-        ESM::RefId mId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -60,11 +58,11 @@ namespace ESM4
         float mBoundRadius;
 
         std::uint8_t mDoorFlags;
-        FormId mScriptId;
-        FormId mOpenSound; // SNDR for TES5, SOUN for others
-        FormId mCloseSound; // SNDR for TES5, SOUN for others
-        FormId mLoopSound;
-        FormId mRandomTeleport;
+        ESM::FormId mScriptId;
+        ESM::FormId mOpenSound; // SNDR for TES5, SOUN for others
+        ESM::FormId mCloseSound; // SNDR for TES5, SOUN for others
+        ESM::FormId mLoopSound;
+        ESM::FormId mRandomTeleport;
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;

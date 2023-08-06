@@ -33,8 +33,7 @@
 
 void ESM4::ArmorAddon::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     std::uint32_t esmVer = reader.esmVersion();
@@ -71,11 +70,7 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_MODL:
                 if ((esmVer == ESM::VER_094 || esmVer == ESM::VER_170) && subHdr.dataSize == 4) // TES5
-                {
-                    FormId formId;
-                    reader.getFormId(formId);
-                    mRaces.push_back(formId);
-                }
+                    reader.getFormId(mRaces.emplace_back());
                 else
                     reader.skipSubRecordData(); // FIXME: this should be mModelMale for FO3/FONV
 

@@ -32,7 +32,8 @@
 #include <cstdint>
 #include <string>
 
-#include "formid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -41,46 +42,46 @@ namespace ESM4
 
     struct Defaults
     {
-        FormId stimpack;
-        FormId superStimpack;
-        FormId radX;
-        FormId radAway;
-        FormId morphine;
-        FormId perkParalysis;
-        FormId playerFaction;
-        FormId mysteriousStrangerNPC;
-        FormId mysteriousStrangerFaction;
-        FormId defaultMusic;
-        FormId battleMusic;
-        FormId deathMusic;
-        FormId successMusic;
-        FormId levelUpMusic;
-        FormId playerVoiceMale;
-        FormId playerVoiceMaleChild;
-        FormId playerVoiceFemale;
-        FormId playerVoiceFemaleChild;
-        FormId eatPackageDefaultFood;
-        FormId everyActorAbility;
-        FormId drugWearsOffImageSpace;
+        ESM::FormId stimpack;
+        ESM::FormId superStimpack;
+        ESM::FormId radX;
+        ESM::FormId radAway;
+        ESM::FormId morphine;
+        ESM::FormId perkParalysis;
+        ESM::FormId playerFaction;
+        ESM::FormId mysteriousStrangerNPC;
+        ESM::FormId mysteriousStrangerFaction;
+        ESM::FormId defaultMusic;
+        ESM::FormId battleMusic;
+        ESM::FormId deathMusic;
+        ESM::FormId successMusic;
+        ESM::FormId levelUpMusic;
+        ESM::FormId playerVoiceMale;
+        ESM::FormId playerVoiceMaleChild;
+        ESM::FormId playerVoiceFemale;
+        ESM::FormId playerVoiceFemaleChild;
+        ESM::FormId eatPackageDefaultFood;
+        ESM::FormId everyActorAbility;
+        ESM::FormId drugWearsOffImageSpace;
         // below FONV only
-        FormId doctorsBag;
-        FormId missFortuneNPC;
-        FormId missFortuneFaction;
-        FormId meltdownExplosion;
-        FormId unarmedForwardPA;
-        FormId unarmedBackwardPA;
-        FormId unarmedLeftPA;
-        FormId unarmedRightPA;
-        FormId unarmedCrouchPA;
-        FormId unarmedCounterPA;
-        FormId spotterEffect;
-        FormId itemDetectedEfect;
-        FormId cateyeMobileEffectNYI;
+        ESM::FormId doctorsBag;
+        ESM::FormId missFortuneNPC;
+        ESM::FormId missFortuneFaction;
+        ESM::FormId meltdownExplosion;
+        ESM::FormId unarmedForwardPA;
+        ESM::FormId unarmedBackwardPA;
+        ESM::FormId unarmedLeftPA;
+        ESM::FormId unarmedRightPA;
+        ESM::FormId unarmedCrouchPA;
+        ESM::FormId unarmedCounterPA;
+        ESM::FormId spotterEffect;
+        ESM::FormId itemDetectedEfect;
+        ESM::FormId cateyeMobileEffectNYI;
     };
 
     struct DefaultObj
     {
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -91,6 +92,7 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_DOBJ4;
     };
 }
 

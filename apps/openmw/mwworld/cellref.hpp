@@ -125,13 +125,7 @@ namespace MWWorld
         // The NPC that owns this object (and will get angry if you steal it)
         ESM::RefId getOwner() const
         {
-            struct Visitor
-            {
-                ESM::RefId operator()(const ESM::CellRef& ref) { return ref.mOwner; }
-                ESM::RefId operator()(const ESM4::Reference& ref) { return ESM::RefId::formIdRefId(ref.mOwner); }
-                ESM::RefId operator()(const ESM4::ActorCharacter& ref) { return ESM::RefId::formIdRefId(ref.mOwner); }
-            };
-            return std::visit(Visitor(), mCellRef.mVariant);
+            return std::visit([](auto&& ref) -> ESM::RefId { return ref.mOwner; }, mCellRef.mVariant);
         }
         void setOwner(const ESM::RefId& owner);
 

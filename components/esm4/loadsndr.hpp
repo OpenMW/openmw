@@ -30,8 +30,9 @@
 #include <cstdint>
 #include <string>
 
-#include "formid.hpp"
 #include "script.hpp" // TargetCondition
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -58,14 +59,14 @@ namespace ESM4
 
     struct SoundReference
     {
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
 
-        FormId mSoundCategory; // SNCT
-        FormId mSoundId; // another SNDR
-        FormId mOutputModel; // SOPM
+        ESM::FormId mSoundCategory; // SNCT
+        ESM::FormId mSoundId; // another SNDR
+        ESM::FormId mOutputModel; // SOPM
 
         std::string mSoundFile;
         LoopInfo mLoopInfo;
@@ -77,6 +78,7 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_SNDR4;
     };
 }
 

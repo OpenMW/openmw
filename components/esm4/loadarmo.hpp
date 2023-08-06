@@ -32,9 +32,7 @@
 #include <vector>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
-
-#include "formid.hpp"
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -151,7 +149,7 @@ namespace ESM4
         };
 #pragma pack(pop)
 
-        ESM::RefId mId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         bool mIsTES4; // TODO: check that these match the general flags
@@ -170,8 +168,8 @@ namespace ESM4
         std::string mIconFemale;
         std::string mMiniIconFemale;
 
-        FormId mPickUpSound;
-        FormId mDropSound;
+        ESM::FormId mPickUpSound;
+        ESM::FormId mDropSound;
 
         std::string mModel; // FIXME: for OpenCS
 
@@ -179,11 +177,11 @@ namespace ESM4
 
         std::uint32_t mArmorFlags;
         std::uint32_t mGeneralFlags;
-        FormId mScriptId;
+        ESM::FormId mScriptId;
         std::uint16_t mEnchantmentPoints;
-        FormId mEnchantment;
+        ESM::FormId mEnchantment;
 
-        std::vector<FormId> mAddOns; // TES5 ARMA
+        std::vector<ESM::FormId> mAddOns; // TES5 ARMA
         Data mData;
 
         void load(ESM4::Reader& reader);

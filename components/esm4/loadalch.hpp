@@ -31,7 +31,7 @@
 #include <string>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
+#include <components/esm/formid.hpp>
 
 #include "effect.hpp" // FormId, ScriptEffect
 
@@ -52,13 +52,13 @@ namespace ESM4
         {
             std::int32_t value;
             std::uint32_t flags;
-            FormId32 withdrawl;
+            ESM::FormId32 withdrawl;
             float chanceAddition;
-            FormId32 sound;
+            ESM::FormId32 sound;
         };
 #pragma pack(pop)
 
-        ESM::RefId mId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -67,10 +67,10 @@ namespace ESM4
         std::string mIcon; // inventory
         std::string mMiniIcon; // inventory
 
-        FormId mPickUpSound;
-        FormId mDropSound;
+        ESM::FormId mPickUpSound;
+        ESM::FormId mDropSound;
 
-        FormId mScriptId;
+        ESM::FormId mScriptId;
         ScriptEffect mEffect;
 
         float mBoundRadius;

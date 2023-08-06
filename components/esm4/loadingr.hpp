@@ -31,7 +31,7 @@
 #include <vector>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
+#include <components/esm/formid.hpp>
 
 #include "effect.hpp"
 
@@ -56,7 +56,7 @@ namespace ESM4
         };
 #pragma pack(pop)
 
-        ESM::RefId mId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -67,7 +67,7 @@ namespace ESM4
         float mBoundRadius;
 
         std::vector<std::string> mScriptEffect; // FIXME: prob. should be in a struct
-        FormId mScriptId;
+        ESM::FormId mScriptId;
         ScriptEffect mEffect;
         ENIT mEnchantment;
 

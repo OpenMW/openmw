@@ -33,7 +33,7 @@
 
 void ESM4::Light::load(ESM4::Reader& reader)
 {
-    mId = reader.getRefIdFromHeader();
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
     std::uint32_t esmVer = reader.esmVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;

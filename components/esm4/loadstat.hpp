@@ -32,10 +32,8 @@
 #include <string>
 #include <vector>
 
-#include "formid.hpp"
-
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -44,8 +42,7 @@ namespace ESM4
 
     struct Static
     {
-        FormId mFormId; // from the header
-        ESM::RefId mId;
+        ESM::FormId mId; // from the header
 
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 

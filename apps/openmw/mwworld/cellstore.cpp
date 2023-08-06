@@ -7,7 +7,6 @@
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm/format.hpp>
-#include <components/esm/records.hpp>
 #include <components/esm3/cellref.hpp>
 #include <components/esm3/cellstate.hpp>
 #include <components/esm3/containerstate.hpp>
@@ -41,11 +40,29 @@
 #include <components/esm3/npcstate.hpp>
 #include <components/esm3/objectstate.hpp>
 #include <components/esm3/readerscache.hpp>
+
 #include <components/esm4/loadachr.hpp>
+#include <components/esm4/loadacti.hpp>
+#include <components/esm4/loadalch.hpp>
+#include <components/esm4/loadammo.hpp>
+#include <components/esm4/loadarmo.hpp>
+#include <components/esm4/loadbook.hpp>
+#include <components/esm4/loadcell.hpp>
+#include <components/esm4/loadclot.hpp>
+#include <components/esm4/loadcont.hpp>
+#include <components/esm4/loadcrea.hpp>
+#include <components/esm4/loaddoor.hpp>
+#include <components/esm4/loadfurn.hpp>
+#include <components/esm4/loadingr.hpp>
 #include <components/esm4/loadligh.hpp>
+#include <components/esm4/loadmisc.hpp>
+#include <components/esm4/loadnpc.hpp>
 #include <components/esm4/loadrefr.hpp>
 #include <components/esm4/loadstat.hpp>
+#include <components/esm4/loadtree.hpp>
+#include <components/esm4/loadweap.hpp>
 #include <components/esm4/readerutils.hpp>
+
 #include <components/files/openfile.hpp>
 #include <components/misc/tuplehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -387,7 +404,7 @@ namespace MWWorld
 
     static constexpr bool isESM4ActorRec(unsigned int rec)
     {
-        return rec == ESM::REC_NPC_4 || rec == ESM::REC_CREA4 || rec == ESM::REC_LVLN4 || rec == ESM::REC_LVLC4;
+        return rec == ESM::REC_NPC_4 || rec == ESM::REC_CREA4;
     }
 
     template <typename X, typename R>

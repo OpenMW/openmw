@@ -30,6 +30,9 @@
 #include <cstdint>
 #include <vector>
 
+#include <components/esm/formid.hpp>
+#include <components/esm4/reader.hpp>
+
 namespace ESM4
 {
     // http://www.uesp.net/wiki/Tes4Mod:Mod_File_Format#Hierarchical_Top_Groups
@@ -76,14 +79,14 @@ namespace ESM4
     //
     struct WorldGroup
     {
-        FormId mWorld; // WRLD record for this group
+        ESM::FormId mWorld; // WRLD record for this group
 
         // occurs only after World Child (type 1)
         // since GRUP label may not be reliable, need to keep the formid of the current WRLD in
         // the reader's context
-        FormId mRoad;
+        ESM::FormId mRoad;
 
-        std::vector<FormId> mCells; // FIXME should this be CellGroup* instead?
+        std::vector<ESM::FormId> mCells; // FIXME should this be CellGroup* instead?
     };
 
     // http://www.uesp.net/wiki/Tes4Mod:Mod_File_Format/CELL
@@ -99,7 +102,7 @@ namespace ESM4
     // NOTE: There may be many CELL records in one subblock
     struct CellGroup
     {
-        FormId mCell; // CELL record for this cell group
+        ESM::FormId mCell; // CELL record for this cell group
         int mCellModIndex; // from which file to get the CELL record (e.g. may have been updated)
 
         // For retrieving parent group size (for lazy loading or skipping) and sub-block number / grid
@@ -129,20 +132,20 @@ namespace ESM4
         // cache (modindex adjusted) formId's of children
         // FIXME: also need file index + file context of all those that has type 8 GRUP
         GroupTypeHeader mHdrPersist;
-        std::vector<FormId> mPersistent; // REFR, ACHR, ACRE
-        std::vector<FormId> mdelPersistent;
+        std::vector<ESM::FormId> mPersistent; // REFR, ACHR, ACRE
+        std::vector<ESM::FormId> mdelPersistent;
 
         // FIXME: also need file index + file context of all those that has type 10 GRUP
         GroupTypeHeader mHdrVisDist;
-        std::vector<FormId> mVisibleDist; // REFR, ACHR, ACRE
-        std::vector<FormId> mdelVisibleDist;
+        std::vector<ESM::FormId> mVisibleDist; // REFR, ACHR, ACRE
+        std::vector<ESM::FormId> mdelVisibleDist;
 
         // FIXME: also need file index + file context of all those that has type 9 GRUP
         GroupTypeHeader mHdrTemp;
-        FormId mLand; // if present, assume only one LAND per exterior CELL
-        FormId mPgrd; // if present, seems to be the first record after LAND in Temp Cell Child GRUP
-        std::vector<FormId> mTemporary; // REFR, ACHR, ACRE
-        std::vector<FormId> mdelTemporary;
+        ESM::FormId mLand; // if present, assume only one LAND per exterior CELL
+        ESM::FormId mPgrd; // if present, seems to be the first record after LAND in Temp Cell Child GRUP
+        std::vector<ESM::FormId> mTemporary; // REFR, ACHR, ACRE
+        std::vector<ESM::FormId> mdelTemporary;
 
         // need to keep modindex and context for lazy loading (of all the files that contribute
         // to this group)

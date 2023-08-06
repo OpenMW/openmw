@@ -24,82 +24,87 @@ namespace MWMechanics
     class SpellList;
 }
 
+namespace ESM
+{
+    class ReadersCache;
+    class Script;
+    struct Activator;
+    struct Apparatus;
+    struct Armor;
+    struct Attribute;
+    struct BirthSign;
+    struct BodyPart;
+    struct Book;
+    struct Cell;
+    struct Class;
+    struct Clothing;
+    struct Container;
+    struct Creature;
+    struct CreatureLevList;
+    struct Dialogue;
+    struct Door;
+    struct Enchantment;
+    struct Faction;
+    struct GameSetting;
+    struct Global;
+    struct Ingredient;
+    struct ItemLevList;
+    struct Land;
+    struct LandTexture;
+    struct Light;
+    struct Lockpick;
+    struct MagicEffect;
+    struct Miscellaneous;
+    struct NPC;
+    struct Pathgrid;
+    struct Potion;
+    struct Probe;
+    struct Race;
+    struct Region;
+    struct Repair;
+    struct Skill;
+    struct Sound;
+    struct SoundGenerator;
+    struct Spell;
+    struct StartScript;
+    struct Static;
+    struct Weapon;
+}
+
 namespace ESM4
 {
     class Reader;
-    struct Static;
-    struct Cell;
-    struct Light;
-    struct Reference;
+    struct Activator;
     struct ActorCharacter;
     struct ActorCreature;
-    struct Activator;
-    struct Potion;
     struct Ammunition;
     struct Armor;
+    struct ArmorAddon;
     struct Book;
+    struct Cell;
     struct Clothing;
     struct Container;
     struct Creature;
     struct Door;
     struct Furniture;
+    struct Hair;
+    struct HeadPart;
     struct Ingredient;
+    struct Land;
     struct LevelledCreature;
+    struct LevelledItem;
     struct LevelledNpc;
+    struct Light;
     struct MiscItem;
     struct Npc;
+    struct Outfit;
+    struct Potion;
     struct Race;
+    struct Reference;
+    struct Static;
     struct Tree;
     struct Weapon;
     struct World;
-    struct Land;
-}
-
-namespace ESM
-{
-    class ReadersCache;
-    struct Activator;
-    struct Potion;
-    struct Apparatus;
-    struct Armor;
-    struct BodyPart;
-    struct Book;
-    struct BirthSign;
-    struct Class;
-    struct Clothing;
-    struct Container;
-    struct Creature;
-    struct Dialogue;
-    struct Door;
-    struct Enchantment;
-    struct Faction;
-    struct Global;
-    struct Ingredient;
-    struct CreatureLevList;
-    struct ItemLevList;
-    struct Light;
-    struct Lockpick;
-    struct Miscellaneous;
-    struct NPC;
-    struct Probe;
-    struct Race;
-    struct Region;
-    struct Repair;
-    struct SoundGenerator;
-    struct Sound;
-    struct Spell;
-    struct StartScript;
-    struct Static;
-    struct Weapon;
-    struct GameSetting;
-    class Script;
-    struct Cell;
-    struct Land;
-    struct LandTexture;
-    struct Pathgrid;
-    struct MagicEffect;
-    struct Skill;
-    struct Attribute;
 }
 
 namespace MWWorld
@@ -128,12 +133,13 @@ namespace MWWorld
             // Special entry which is hardcoded and not loaded from an ESM
             Store<ESM::Attribute>,
 
-            Store<ESM4::Static>, Store<ESM4::Cell>, Store<ESM4::Light>, Store<ESM4::Reference>, Store<ESM4::Activator>,
-            Store<ESM4::Potion>, Store<ESM4::Ammunition>, Store<ESM4::Armor>, Store<ESM4::Book>, Store<ESM4::Clothing>,
-            Store<ESM4::Container>, Store<ESM4::Door>, Store<ESM4::Ingredient>, Store<ESM4::MiscItem>,
-            Store<ESM4::Tree>, Store<ESM4::Weapon>, Store<ESM4::World>, Store<ESM4::Furniture>, Store<ESM4::Land>,
-            Store<ESM4::ActorCharacter>, Store<ESM4::ActorCreature>, Store<ESM4::Race>, Store<ESM4::Creature>,
-            Store<ESM4::LevelledCreature>, Store<ESM4::Npc>, Store<ESM4::LevelledNpc>>;
+            Store<ESM4::Activator>, Store<ESM4::ActorCharacter>, Store<ESM4::ActorCreature>, Store<ESM4::Ammunition>,
+            Store<ESM4::Armor>, Store<ESM4::ArmorAddon>, Store<ESM4::Book>, Store<ESM4::Cell>, Store<ESM4::Clothing>,
+            Store<ESM4::Container>, Store<ESM4::Creature>, Store<ESM4::Door>, Store<ESM4::Furniture>, Store<ESM4::Hair>,
+            Store<ESM4::HeadPart>, Store<ESM4::Ingredient>, Store<ESM4::Land>, Store<ESM4::LevelledCreature>,
+            Store<ESM4::LevelledItem>, Store<ESM4::LevelledNpc>, Store<ESM4::Light>, Store<ESM4::MiscItem>,
+            Store<ESM4::Npc>, Store<ESM4::Outfit>, Store<ESM4::Potion>, Store<ESM4::Race>, Store<ESM4::Reference>,
+            Store<ESM4::Static>, Store<ESM4::Tree>, Store<ESM4::Weapon>, Store<ESM4::World>>;
 
     private:
         template <typename T>

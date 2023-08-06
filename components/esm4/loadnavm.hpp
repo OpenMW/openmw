@@ -30,6 +30,9 @@
 #include <cstdint>
 #include <vector>
 
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
+
 #include "cellgrid.hpp"
 #include "vertex.hpp"
 
@@ -56,7 +59,7 @@ namespace ESM4
         struct ExtConnection
         {
             std::uint32_t unknown;
-            FormId32 navMesh;
+            ESM::FormId32 navMesh;
             std::uint16_t triangleIndex;
         };
 
@@ -64,7 +67,7 @@ namespace ESM4
         {
             std::uint16_t triangleIndex;
             std::uint32_t unknown;
-            FormId32 doorRef;
+            ESM::FormId32 doorRef;
         };
 #pragma pack(pop)
 
@@ -72,7 +75,7 @@ namespace ESM4
         {
             std::uint32_t unknownNVER;
             std::uint32_t unknownLCTN;
-            FormId worldSpaceId;
+            ESM::FormId worldSpaceId;
             CellGrid cellGrid;
             std::vector<Vertex> verticies;
             std::vector<Triangle> triangles;
@@ -96,13 +99,14 @@ namespace ESM4
 
         std::vector<NVNMstruct> mData; // Up to 4 skywind cells in one Morrowind cell
 
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
 
         void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_NAVM4;
     };
 
 }

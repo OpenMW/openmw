@@ -31,7 +31,8 @@
 #include <string>
 #include <vector>
 
-#include "formid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -68,14 +69,14 @@ namespace ESM4
 
             std::uint8_t explExplosionChance; // %
             std::uint16_t explDebrisCount;
-            FormId32 explDebris;
-            FormId32 explExplosion;
+            ESM::FormId32 explDebris;
+            ESM::FormId32 explExplosion;
             float trackingMaxAngle;
             float explDebrisScale;
 
             std::int32_t sevDebrisCount;
-            FormId32 sevDebris;
-            FormId32 sevExplosion;
+            ESM::FormId32 sevDebris;
+            ESM::FormId32 sevExplosion;
             float sevDebrisScale;
 
             // Struct - Gore Effects Positioning
@@ -86,8 +87,8 @@ namespace ESM4
             float rotY;
             float rotZ;
 
-            FormId32 sevImpactDataSet;
-            FormId32 explImpactDataSet;
+            ESM::FormId32 sevImpactDataSet;
+            ESM::FormId32 explImpactDataSet;
             uint8_t sevDecalCount;
             uint8_t explDecalCount;
             uint16_t Unknown;
@@ -108,7 +109,7 @@ namespace ESM4
             void clear();
         };
 
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -121,6 +122,7 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_BPTD4;
     };
 }
 

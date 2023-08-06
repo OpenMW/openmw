@@ -15,15 +15,15 @@ namespace ESM
         uint32_t mIndex = 0;
         int32_t mContentFile = -1;
 
-        bool hasContentFile() const { return mContentFile >= 0; }
-        bool isSet() const { return mIndex != 0 || mContentFile != -1; }
+        constexpr bool hasContentFile() const { return mContentFile >= 0; }
+        constexpr bool isSet() const { return mIndex != 0 || mContentFile != -1; }
 
         // Zero is used in ESM4 as a null reference
-        bool isZeroOrUnset() const { return mIndex == 0 && (mContentFile == 0 || mContentFile == -1); }
+        constexpr bool isZeroOrUnset() const { return mIndex == 0 && (mContentFile == 0 || mContentFile == -1); }
 
         std::string toString() const;
         FormId32 toUint32() const;
-        static FormId fromUint32(FormId32 v) { return { v & 0xffffff, static_cast<int32_t>(v >> 24) }; }
+        static constexpr FormId fromUint32(FormId32 v) { return { v & 0xffffff, static_cast<int32_t>(v >> 24) }; }
     };
 
     inline constexpr bool operator==(const FormId& left, const FormId& right)

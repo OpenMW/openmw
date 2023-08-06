@@ -30,7 +30,8 @@
 #include <cstdint>
 #include <string>
 
-#include "formid.hpp"
+#include <components/esm/defs.hpp>
+#include <components/esm/formid.hpp>
 
 namespace ESM4
 {
@@ -47,7 +48,7 @@ namespace ESM4
         };
 #pragma pack(pop)
 
-        FormId mFormId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
@@ -57,7 +58,7 @@ namespace ESM4
 
         float mBoundRadius;
 
-        FormId mScriptId;
+        ESM::FormId mScriptId;
         std::uint8_t mSoul; // 0 = None, 1 = Petty, 2 = Lesser, 3 = Common, 4 = Greater, 5 = Grand
         std::uint8_t mSoulCapacity; // 0 = None, 1 = Petty, 2 = Lesser, 3 = Common, 4 = Greater, 5 = Grand
 
@@ -67,6 +68,7 @@ namespace ESM4
         // void save(ESM4::Writer& writer) const;
 
         // void blank();
+        static constexpr ESM::RecNameInts sRecordId = ESM::RecNameInts::REC_SLGM4;
     };
 }
 

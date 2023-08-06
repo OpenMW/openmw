@@ -29,15 +29,12 @@
 #include <cstring>
 #include <stdexcept>
 
-//#include "formid.hpp" // FIXME:
-
 #include "reader.hpp"
 //#include "writer.hpp"
 
 void ESM4::MediaLocationController::load(ESM4::Reader& reader)
 {
-    mFormId = reader.hdr().record.getFormId();
-    reader.adjustFormId(mFormId);
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())
@@ -52,53 +49,23 @@ void ESM4::MediaLocationController::load(ESM4::Reader& reader)
                 reader.getZString(mFullName);
                 break;
             case ESM4::SUB_GNAM:
-            {
-                FormId id;
-                reader.getFormId(id);
-                mBattleSets.push_back(id);
-
+                reader.getFormId(mBattleSets.emplace_back());
                 break;
-            }
             case ESM4::SUB_LNAM:
-            {
-                FormId id;
-                reader.getFormId(id);
-                mLocationSets.push_back(id);
-
+                reader.getFormId(mLocationSets.emplace_back());
                 break;
-            }
             case ESM4::SUB_YNAM:
-            {
-                FormId id;
-                reader.getFormId(id);
-                mEnemySets.push_back(id);
-
+                reader.getFormId(mEnemySets.emplace_back());
                 break;
-            }
             case ESM4::SUB_HNAM:
-            {
-                FormId id;
-                reader.getFormId(id);
-                mNeutralSets.push_back(id);
-
+                reader.getFormId(mNeutralSets.emplace_back());
                 break;
-            }
             case ESM4::SUB_XNAM:
-            {
-                FormId id;
-                reader.getFormId(id);
-                mFriendSets.push_back(id);
-
+                reader.getFormId(mFriendSets.emplace_back());
                 break;
-            }
             case ESM4::SUB_ZNAM:
-            {
-                FormId id;
-                reader.getFormId(id);
-                mAllySets.push_back(id);
-
+                reader.getFormId(mAllySets.emplace_back());
                 break;
-            }
             case ESM4::SUB_RNAM:
                 reader.getFormId(mConditionalFaction);
                 break;

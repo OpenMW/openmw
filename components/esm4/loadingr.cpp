@@ -34,7 +34,7 @@
 
 void ESM4::Ingredient::load(ESM4::Reader& reader)
 {
-    mId = reader.getRefIdFromHeader();
+    mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
     while (reader.getSubRecordHeader())

@@ -61,7 +61,7 @@ namespace ESM
         static RefId stringRefId(std::string_view value);
 
         // Constructs RefId from FormId storing the value in-place.
-        static RefId formIdRefId(FormId value) { return RefId(FormIdRefId(value)); }
+        static RefId formIdRefId(FormId value) { return RefId(value); }
 
         // Constructs RefId from uint64 storing the value in-place. Should be used for generated records where id is a
         // global counter.
@@ -88,6 +88,14 @@ namespace ESM
         constexpr RefId(FormIdRefId value)
             : mValue(value)
         {
+        }
+
+        constexpr RefId(FormId value)
+        {
+            if (value.isZeroOrUnset())
+                mValue = EmptyRefId();
+            else
+                mValue = FormIdRefId(value);
         }
 
         constexpr RefId(GeneratedRefId value) noexcept

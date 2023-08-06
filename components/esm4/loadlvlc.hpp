@@ -31,9 +31,8 @@
 #include <vector>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
+#include <components/esm/formid.hpp>
 
-#include "formid.hpp"
 #include "inventory.hpp"
 
 namespace ESM4
@@ -43,13 +42,13 @@ namespace ESM4
 
     struct LevelledCreature
     {
-        ESM::RefId mId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
 
-        FormId mScriptId;
-        FormId mTemplate;
+        ESM::FormId mScriptId;
+        ESM::FormId mTemplate;
         std::int8_t mChanceNone;
 
         bool mHasLvlCreaFlags;

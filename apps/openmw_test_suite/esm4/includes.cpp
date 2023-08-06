@@ -2,7 +2,6 @@
 #include <components/esm4/common.hpp>
 #include <components/esm4/dialogue.hpp>
 #include <components/esm4/effect.hpp>
-#include <components/esm4/formid.hpp>
 #include <components/esm4/inventory.hpp>
 #include <components/esm4/lighting.hpp>
 #include <components/esm4/loadachr.hpp>

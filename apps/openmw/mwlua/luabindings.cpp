@@ -127,7 +127,7 @@ namespace MWLua
             const std::vector<std::string>& contentList = MWBase::Environment::get().getWorld()->getContentFiles();
             for (size_t i = 0; i < contentList.size(); ++i)
                 if (Misc::StringUtils::ciEqual(contentList[i], contentFile))
-                    return ESM::RefId(ESM::FormIdRefId(ESM::FormId{ index, int(i) })).serializeText();
+                    return ESM::RefId(ESM::FormId{ index, int(i) }).serializeText();
             throw std::runtime_error("Content file not found: " + std::string(contentFile));
         };
         addTimeBindings(api, context, false);

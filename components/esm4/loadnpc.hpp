@@ -32,7 +32,7 @@
 #include <vector>
 
 #include <components/esm/defs.hpp>
-#include <components/esm/refid.hpp>
+#include <components/esm/formid.hpp>
 
 #include "actor.hpp"
 #include "inventory.hpp"
@@ -167,7 +167,7 @@ namespace ESM4
 
 #pragma pack(pop)
 
-        ESM::RefId mId; // from the header
+        ESM::FormId mId; // from the header
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         bool mIsTES4;
@@ -177,29 +177,29 @@ namespace ESM4
         std::string mFullName;
         std::string mModel; // skeleton model (can be a marker in FO3/FONV)
 
-        FormId mRace;
-        FormId mClass;
-        FormId mHair; // not for TES5, see mHeadParts
-        FormId mEyes;
+        ESM::FormId mRace;
+        ESM::FormId mClass;
+        ESM::FormId mHair; // not for TES5, see mHeadParts
+        ESM::FormId mEyes;
 
-        std::vector<FormId> mHeadParts; // FO3/FONV/TES5
+        std::vector<ESM::FormId> mHeadParts; // FO3/FONV/TES5
 
         float mHairLength;
         HairColour mHairColour; // TES4/FO3/FONV
-        FormId mHairColourId; // TES5
+        ESM::FormId mHairColourId; // TES5
 
-        FormId mDeathItem;
-        std::vector<FormId> mSpell;
-        FormId mScriptId;
+        ESM::FormId mDeathItem;
+        std::vector<ESM::FormId> mSpell;
+        ESM::FormId mScriptId;
 
         AIData mAIData;
-        std::vector<FormId> mAIPackages; // seems to be in priority order, 0 = highest priority
+        std::vector<ESM::FormId> mAIPackages; // seems to be in priority order, 0 = highest priority
         ActorBaseConfig mBaseConfig; // union
         ActorFaction mFaction;
         Data mData;
-        FormId mCombatStyle;
-        FormId mSoundBase;
-        FormId mSound;
+        ESM::FormId mCombatStyle;
+        ESM::FormId mSoundBase;
+        ESM::FormId mSound;
         std::uint8_t mSoundChance;
         float mFootWeight;
 
@@ -208,12 +208,12 @@ namespace ESM4
 
         std::vector<InventoryItem> mInventory;
 
-        FormId mBaseTemplate; // FO3/FONV/TES5
-        FormId mWornArmor; // TES5 only?
+        ESM::FormId mBaseTemplate; // FO3/FONV/TES5
+        ESM::FormId mWornArmor; // TES5 only?
 
-        FormId mDefaultOutfit; // TES5 OTFT
-        FormId mSleepOutfit; // TES5 OTFT
-        FormId mDefaultPkg;
+        ESM::FormId mDefaultOutfit; // TES5 OTFT
+        ESM::FormId mSleepOutfit; // TES5 OTFT
+        ESM::FormId mDefaultPkg;
 
         std::vector<float> mSymShapeModeCoefficients; // size 0 or 50
         std::vector<float> mAsymShapeModeCoefficients; // size 0 or 30

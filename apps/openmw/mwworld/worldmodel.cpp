@@ -342,7 +342,7 @@ namespace MWWorld
     }
 }
 
-MWWorld::Ptr MWWorld::WorldModel::getPtr(const ESM::RefId& name)
+MWWorld::Ptr MWWorld::WorldModel::getPtrByRefId(const ESM::RefId& name)
 {
     for (const auto& [cachedId, cellStore] : mIdCache)
     {
