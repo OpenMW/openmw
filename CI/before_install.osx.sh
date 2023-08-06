@@ -4,7 +4,7 @@ export HOMEBREW_NO_EMOJI=1
 
 brew uninstall --ignore-dependencies python@3.8 || true
 brew uninstall --ignore-dependencies python@3.9 || true
-brew uninstall --ignore-dependencies qt@5 || true
+brew uninstall --ignore-dependencies qt@6 || true
 brew uninstall --ignore-dependencies jpeg || true
 
 brew tap --repair
@@ -20,7 +20,9 @@ install_name_tool -change "@loader_path/libbrotlicommon.1.dylib" "${BREW_LIB_PAT
 
 command -v ccache >/dev/null 2>&1 || brew install ccache
 command -v cmake >/dev/null 2>&1 || brew install cmake
-command -v qmake >/dev/null 2>&1 || brew install qt@6
+command -v qmake >/dev/null 2>&1 || brew install qt@5
+export PATH="/opt/homebrew/opt/qt@5/bin:$PATH"
+
 
 # Install deps
 brew install icu4c yaml-cpp sqlite

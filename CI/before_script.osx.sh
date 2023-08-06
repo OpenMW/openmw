@@ -8,7 +8,7 @@ git config --global advice.detachedHead false
 
 DEPENDENCIES_ROOT="/tmp/openmw-deps"
 
-QT_PATH=$(brew --prefix qt@6)
+QT_PATH=$(brew --prefix qt@5)
 ICU_PATH=$(brew --prefix icu4c)
 CCACHE_EXECUTABLE=$(brew --prefix ccache)/bin/ccache
 mkdir build
