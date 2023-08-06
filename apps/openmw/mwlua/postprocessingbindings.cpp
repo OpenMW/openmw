@@ -1,6 +1,7 @@
 #include "postprocessingbindings.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/world.hpp"
 #include "../mwrender/postprocessor.hpp"
 
 #include "luamanagerimp.hpp"

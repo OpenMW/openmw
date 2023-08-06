@@ -10,6 +10,7 @@
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/datetimemanager.hpp"
 
 #include "character.hpp"
 #include "creaturestats.hpp"
@@ -156,7 +157,9 @@ namespace MWMechanics
             // Check if we've run out of time
             if (mDuration > 0)
             {
-                mRemainingDuration -= ((duration * MWBase::Environment::get().getWorld()->getTimeScaleFactor()) / 3600);
+                mRemainingDuration
+                    -= ((duration * MWBase::Environment::get().getWorld()->getTimeManager()->getGameTimeScale())
+                        / 3600);
                 if (mRemainingDuration <= 0)
                 {
                     mRemainingDuration = mDuration;

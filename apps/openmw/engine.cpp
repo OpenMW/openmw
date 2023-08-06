@@ -65,6 +65,7 @@
 #include "mwsound/soundmanagerimp.hpp"
 
 #include "mwworld/class.hpp"
+#include "mwworld/datetimemanager.hpp"
 #include "mwworld/worldimp.hpp"
 
 #include "mwrender/vismask.hpp"
@@ -239,7 +240,7 @@ bool OMW::Engine::frame(float frametime)
 
                 if (!guiActive)
                 {
-                    double hours = (frametime * mWorld->getTimeScaleFactor()) / 3600.0;
+                    double hours = (frametime * mWorld->getTimeManager()->getGameTimeScale()) / 3600.0;
                     mWorld->advanceTime(hours, true);
                     mWorld->rechargeItems(frametime, true);
                 }
@@ -935,7 +936,7 @@ void OMW::Engine::go()
         const double dt = std::chrono::duration_cast<std::chrono::duration<double>>(
                               std::min(frameRateLimiter.getLastFrameDuration(), maxSimulationInterval))
                               .count()
-            * mEnvironment.getWorld()->getSimulationTimeScale();
+            * mWorld->getTimeManager()->getSimulationTimeScale();
 
         mViewer->advance(simulationTime);
 

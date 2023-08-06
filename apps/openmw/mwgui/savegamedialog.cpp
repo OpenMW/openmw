@@ -29,6 +29,7 @@
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
+#include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwstate/character.hpp"
@@ -422,8 +423,9 @@ namespace MWGui
             hour = 12;
 
         text << mCurrentSlot->mProfile.mInGameTime.mDay << " "
-             << MWBase::Environment::get().getWorld()->getMonthName(mCurrentSlot->mProfile.mInGameTime.mMonth) << " "
-             << hour << " " << (pm ? "#{Calendar:pm}" : "#{Calendar:am}");
+             << MWBase::Environment::get().getWorld()->getTimeManager()->getMonthName(
+                    mCurrentSlot->mProfile.mInGameTime.mMonth)
+             << " " << hour << " " << (pm ? "#{Calendar:pm}" : "#{Calendar:am}");
 
         if (Settings::Manager::getBool("timeplayed", "Saves"))
         {

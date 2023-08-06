@@ -10,6 +10,7 @@
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/datetimemanager.hpp"
 
 #include "character.hpp"
 #include "creaturestats.hpp"
@@ -72,7 +73,8 @@ namespace MWMechanics
         // and the duration is not infinite, the package is complete.
         if (mDuration > 0)
         {
-            mRemainingDuration -= ((duration * MWBase::Environment::get().getWorld()->getTimeScaleFactor()) / 3600);
+            mRemainingDuration
+                -= ((duration * MWBase::Environment::get().getWorld()->getTimeManager()->getGameTimeScale()) / 3600);
             if (mRemainingDuration <= 0)
             {
                 mRemainingDuration = mDuration;

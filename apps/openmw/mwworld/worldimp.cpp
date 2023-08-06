@@ -249,7 +249,7 @@ namespace MWWorld
         : mResourceSystem(resourceSystem)
         , mLocalScripts(mStore)
         , mWorldModel(mStore, mReaders)
-        , mCurrentDate(std::make_unique<DateTimeManager>())
+        , mTimeManager(std::make_unique<DateTimeManager>())
         , mSky(true)
         , mGodMode(false)
         , mScriptsEnabled(true)
@@ -319,7 +319,7 @@ namespace MWWorld
     void World::fillGlobalVariables()
     {
         mGlobalVariables.fill(mStore);
-        mCurrentDate->setup(mGlobalVariables);
+        mTimeManager->setup(mGlobalVariables);
     }
 
     void World::startNewGame(bool bypass)
@@ -399,7 +399,7 @@ namespace MWWorld
             mPhysics->toggleCollisionMode();
 
         MWBase::Environment::get().getWindowManager()->updatePlayer();
-        mCurrentDate->setup(mGlobalVariables);
+        mTimeManager->setup(mGlobalVariables);
 
         // Initial seed.
         mPrng.seed(mRandomSeed);
@@ -614,7 +614,7 @@ namespace MWWorld
 
     void World::setGlobalInt(GlobalVariableName name, int value)
     {
-        bool dateUpdated = mCurrentDate->updateGlobalInt(name, value);
+        bool dateUpdated = mTimeManager->updateGlobalInt(name, value);
         if (dateUpdated)
             updateSkyDate();
 
@@ -623,7 +623,7 @@ namespace MWWorld
 
     void World::setGlobalFloat(GlobalVariableName name, float value)
     {
-        bool dateUpdated = mCurrentDate->updateGlobalFloat(name, value);
+        bool dateUpdated = mTimeManager->updateGlobalFloat(name, value);
         if (dateUpdated)
             updateSkyDate();
 
@@ -643,11 +643,6 @@ namespace MWWorld
     char World::getGlobalVariableType(GlobalVariableName name) const
     {
         return mGlobalVariables.getType(name);
-    }
-
-    std::string_view World::getMonthName(int month) const
-    {
-        return mCurrentDate->getMonthName(month);
     }
 
     std::string_view World::getCellName(const MWWorld::CellStore* cell) const
@@ -892,7 +887,7 @@ namespace MWWorld
             // When we fast-forward time, we should recharge magic items
             // in all loaded cells, using game world time
             float duration = hours * 3600;
-            const float timeScaleFactor = getTimeScaleFactor();
+            const float timeScaleFactor = mTimeManager->getGameTimeScale();
             if (timeScaleFactor != 0.0f)
                 duration /= timeScaleFactor;
 
@@ -900,7 +895,7 @@ namespace MWWorld
         }
 
         mWeatherManager->advanceTime(hours, incremental);
-        mCurrentDate->advanceTime(hours, mGlobalVariables);
+        mTimeManager->advanceTime(hours, mGlobalVariables);
         updateSkyDate();
 
         if (!incremental)
@@ -911,25 +906,9 @@ namespace MWWorld
         }
     }
 
-    float World::getTimeScaleFactor() const
-    {
-        return mCurrentDate->getTimeScaleFactor();
-    }
-
-    void World::setSimulationTimeScale(float scale)
-    {
-        mSimulationTimeScale = std::max(0.f, scale);
-        MWBase::Environment::get().getSoundManager()->setSimulationTimeScale(mSimulationTimeScale);
-    }
-
     TimeStamp World::getTimeStamp() const
     {
-        return mCurrentDate->getTimeStamp();
-    }
-
-    ESM::EpochTimeStamp World::getEpochTimeStamp() const
-    {
-        return mCurrentDate->getEpochTimeStamp();
+        return mTimeManager->getTimeStamp();
     }
 
     bool World::toggleSky()
@@ -2313,7 +2292,7 @@ namespace MWWorld
     {
         mStore.rebuildIdsIndex();
         mStore.validateDynamic();
-        mCurrentDate->setup(mGlobalVariables);
+        mTimeManager->setup(mGlobalVariables);
     }
 
     void World::setupPlayer()
@@ -3863,7 +3842,7 @@ namespace MWWorld
 
     void World::updateSkyDate()
     {
-        ESM::EpochTimeStamp currentDate = mCurrentDate->getEpochTimeStamp();
+        ESM::EpochTimeStamp currentDate = mTimeManager->getEpochTimeStamp();
         mRendering->skySetDate(currentDate.mDay, currentDate.mMonth);
     }
 

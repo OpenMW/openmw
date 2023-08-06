@@ -92,6 +92,7 @@ namespace MWWorld
     class ESMStore;
     class RefData;
     class Cell;
+    class DateTimeManager;
 
     typedef std::vector<std::pair<MWWorld::Ptr, MWMechanics::Movement>> PtrMovementList;
 }
@@ -209,14 +210,8 @@ namespace MWBase
         virtual void advanceTime(double hours, bool incremental = false) = 0;
         ///< Advance in-game time.
 
-        virtual std::string_view getMonthName(int month = -1) const = 0;
-        ///< Return name of month (-1: current month)
-
         virtual MWWorld::TimeStamp getTimeStamp() const = 0;
         ///< Return current in-game time and number of day since new game start.
-
-        virtual ESM::EpochTimeStamp getEpochTimeStamp() const = 0;
-        ///< Return current in-game date and time.
 
         virtual bool toggleSky() = 0;
         ///< \return Resulting mode
@@ -238,12 +233,6 @@ namespace MWBase
         virtual void setMoonColour(bool red) = 0;
 
         virtual void modRegion(const ESM::RefId& regionid, const std::vector<char>& chances) = 0;
-
-        virtual float getTimeScaleFactor() const = 0;
-
-        virtual float getSimulationTimeScale() const = 0;
-
-        virtual void setSimulationTimeScale(float scale) = 0;
 
         virtual void changeToInteriorCell(
             std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos, bool changeEvent = true)
@@ -611,6 +600,8 @@ namespace MWBase
         virtual MWRender::RenderingManager* getRenderingManager() = 0;
 
         virtual MWRender::PostProcessor* getPostProcessor() = 0;
+
+        virtual MWWorld::DateTimeManager* getTimeManager() = 0;
 
         virtual void setActorActive(const MWWorld::Ptr& ptr, bool value) = 0;
     };

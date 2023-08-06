@@ -3,6 +3,7 @@
 
 #include <filesystem>
 #include <map>
+#include <osg/Stats>
 #include <set>
 
 #include <components/lua/luastate.hpp>

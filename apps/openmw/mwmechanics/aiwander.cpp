@@ -16,6 +16,7 @@
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwphysics/raycasting.hpp"
@@ -200,7 +201,8 @@ namespace MWMechanics
         // get or create temporary storage
         AiWanderStorage& storage = state.get<AiWanderStorage>();
 
-        mRemainingDuration -= ((duration * MWBase::Environment::get().getWorld()->getTimeScaleFactor()) / 3600);
+        mRemainingDuration
+            -= ((duration * MWBase::Environment::get().getWorld()->getTimeManager()->getGameTimeScale()) / 3600);
 
         cStats.setDrawState(DrawState::Nothing);
         cStats.setMovementFlag(CreatureStats::Flag_Run, false);

@@ -3,6 +3,8 @@
 #include <components/l10n/manager.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/soundmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "duration.hpp"
 #include "globals.hpp"
@@ -53,7 +55,8 @@ namespace MWWorld
         mDay = globalVariables[Globals::sDay].getInteger();
         mMonth = globalVariables[Globals::sMonth].getInteger();
         mYear = globalVariables[Globals::sYear].getInteger();
-        mTimeScale = globalVariables[Globals::sTimeScale].getFloat();
+        mGameTimeScale = globalVariables[Globals::sTimeScale].getFloat();
+        setSimulationTimeScale(1.0);
     }
 
     void DateTimeManager::setHour(double hour)
@@ -103,9 +106,9 @@ namespace MWWorld
         return TimeStamp(mGameHour, mDaysPassed);
     }
 
-    float DateTimeManager::getTimeScaleFactor() const
+    void DateTimeManager::setGameTimeScale(float scale)
     {
-        return mTimeScale;
+        MWBase::Environment::get().getWorld()->setGlobalFloat(MWWorld::Globals::sTimeScale, scale);
     }
 
     ESM::EpochTimeStamp DateTimeManager::getEpochTimeStamp() const
@@ -199,7 +202,7 @@ namespace MWWorld
         }
         else if (name == Globals::sTimeScale)
         {
-            mTimeScale = value;
+            mGameTimeScale = value;
         }
         else if (name == Globals::sDaysPassed)
         {
@@ -232,7 +235,7 @@ namespace MWWorld
         }
         else if (name == Globals::sTimeScale)
         {
-            mTimeScale = static_cast<float>(value);
+            mGameTimeScale = static_cast<float>(value);
         }
         else if (name == Globals::sDaysPassed)
         {
@@ -240,5 +243,11 @@ namespace MWWorld
         }
 
         return false;
+    }
+
+    void DateTimeManager::setSimulationTimeScale(float scale)
+    {
+        mSimulationTimeScale = std::max(0.f, scale);
+        MWBase::Environment::get().getSoundManager()->setSimulationTimeScale(mSimulationTimeScale);
     }
 }

@@ -14,6 +14,7 @@
 #include "context.hpp"
 #include "luamanagerimp.hpp"
 
+#include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 namespace MWLua

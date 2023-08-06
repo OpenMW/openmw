@@ -19,6 +19,7 @@
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 
 #include "../mwmechanics/actorutil.hpp"
@@ -154,17 +155,17 @@ namespace MWGui
         onHourSliderChangedPosition(mHourSlider, 0);
         mHourSlider->setScrollPosition(0);
 
-        std::string_view month = MWBase::Environment::get().getWorld()->getMonthName();
-        int hour = static_cast<int>(MWBase::Environment::get().getWorld()->getTimeStamp().getHour());
+        const MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
+        std::string_view month = timeManager.getMonthName();
+        int hour = static_cast<int>(timeManager.getTimeStamp().getHour());
         bool pm = hour >= 12;
         if (hour >= 13)
             hour -= 12;
         if (hour == 0)
             hour = 12;
 
-        ESM::EpochTimeStamp currentDate = MWBase::Environment::get().getWorld()->getEpochTimeStamp();
-        std::string daysPassed = Misc::StringUtils::format(
-            "(#{Calendar:day} %i)", MWBase::Environment::get().getWorld()->getTimeStamp().getDay());
+        ESM::EpochTimeStamp currentDate = timeManager.getEpochTimeStamp();
+        std::string daysPassed = Misc::StringUtils::format("(#{Calendar:day} %i)", timeManager.getTimeStamp().getDay());
         std::string_view formattedHour(pm ? "#{Calendar:pm}" : "#{Calendar:am}");
         std::string dateTimeText
             = Misc::StringUtils::format("%i %s %s %i %s", currentDate.mDay, month, daysPassed, hour, formattedHour);

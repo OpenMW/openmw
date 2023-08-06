@@ -102,7 +102,7 @@ namespace MWWorld
         std::unique_ptr<MWRender::RenderingManager> mRendering;
         std::unique_ptr<MWWorld::Scene> mWorldScene;
         std::unique_ptr<MWWorld::WeatherManager> mWeatherManager;
-        std::unique_ptr<MWWorld::DateTimeManager> mCurrentDate;
+        std::unique_ptr<MWWorld::DateTimeManager> mTimeManager;
         std::unique_ptr<ProjectileManager> mProjectileManager;
 
         bool mSky;
@@ -134,8 +134,6 @@ namespace MWWorld
         ///< only holds doors that are currently moving. 1 = opening, 2 = closing
 
         uint32_t mRandomSeed{};
-
-        float mSimulationTimeScale = 1.0;
 
         // not implemented
         World(const World&);
@@ -309,14 +307,8 @@ namespace MWWorld
         void advanceTime(double hours, bool incremental = false) override;
         ///< Advance in-game time.
 
-        std::string_view getMonthName(int month = -1) const override;
-        ///< Return name of month (-1: current month)
-
         TimeStamp getTimeStamp() const override;
         ///< Return current in-game time and number of day since new game start.
-
-        ESM::EpochTimeStamp getEpochTimeStamp() const override;
-        ///< Return current in-game date and time.
 
         bool toggleSky() override;
         ///< \return Resulting mode
@@ -338,12 +330,6 @@ namespace MWWorld
         void setMoonColour(bool red) override;
 
         void modRegion(const ESM::RefId& regionid, const std::vector<char>& chances) override;
-
-        float getTimeScaleFactor() const override;
-
-        float getSimulationTimeScale() const override { return mSimulationTimeScale; }
-
-        void setSimulationTimeScale(float scale) override;
 
         void changeToInteriorCell(const std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos,
             bool changeEvent = true) override;
@@ -689,6 +675,8 @@ namespace MWWorld
         MWRender::RenderingManager* getRenderingManager() override { return mRendering.get(); }
 
         MWRender::PostProcessor* getPostProcessor() override;
+
+        DateTimeManager* getTimeManager() override { return mTimeManager.get(); }
 
         void setActorActive(const MWWorld::Ptr& ptr, bool value) override;
     };

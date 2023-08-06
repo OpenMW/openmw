@@ -13,6 +13,7 @@
 #include "localscripts.hpp"
 #include "luamanagerimp.hpp"
 
+#include "../mwbase/environment.hpp"
 #include "../mwmechanics/creaturestats.hpp"
 #include "../mwmechanics/npcstats.hpp"
 #include "../mwworld/class.hpp"

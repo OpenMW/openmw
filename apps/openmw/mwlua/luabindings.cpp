@@ -20,6 +20,7 @@
 #include "../mwbase/statemanager.hpp"
 #include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/manualref.hpp"
 #include "../mwworld/store.hpp"
@@ -61,12 +62,12 @@ namespace MWLua
 
     static void addTimeBindings(sol::table& api, const Context& context, bool global)
     {
-        MWBase::World* world = MWBase::Environment::get().getWorld();
+        MWWorld::DateTimeManager* timeManager = MWBase::Environment::get().getWorld()->getTimeManager();
 
-        api["getSimulationTime"] = [world = context.mWorldView]() { return world->getSimulationTime(); };
-        api["getSimulationTimeScale"] = [world]() { return world->getSimulationTimeScale(); };
-        api["getGameTime"] = [world = context.mWorldView]() { return world->getGameTime(); };
-        api["getGameTimeScale"] = [world = context.mWorldView]() { return world->getGameTimeScale(); };
+        api["getSimulationTime"] = [timeManager]() { return timeManager->getSimulationTime(); };
+        api["getSimulationTimeScale"] = [timeManager]() { return timeManager->getSimulationTimeScale(); };
+        api["getGameTime"] = [timeManager]() { return timeManager->getGameTime(); };
+        api["getGameTimeScale"] = [timeManager]() { return timeManager->getGameTimeScale(); };
         api["isWorldPaused"] = [world = context.mWorldView]() { return world->isPaused(); };
         api["getRealTime"] = []() {
             return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
@@ -75,10 +76,9 @@ namespace MWLua
         if (!global)
             return;
 
-        api["setGameTimeScale"] = [world = context.mWorldView](double scale) { world->setGameTimeScale(scale); };
-
-        api["setSimulationTimeScale"] = [context, world](float scale) {
-            context.mLuaManager->addAction([scale, world] { world->setSimulationTimeScale(scale); });
+        api["setGameTimeScale"] = [timeManager](double scale) { timeManager->setGameTimeScale(scale); };
+        api["setSimulationTimeScale"] = [context, timeManager](float scale) {
+            context.mLuaManager->addAction([scale, timeManager] { timeManager->setSimulationTimeScale(scale); });
         };
 
         // TODO: Ability to pause/resume world from Lua (needed for UI dehardcoding)
@@ -291,11 +291,11 @@ namespace MWLua
     std::map<std::string, sol::object> initCommonPackages(const Context& context)
     {
         sol::state_view lua = context.mLua->sol();
-        WorldView* w = context.mWorldView;
+        MWWorld::DateTimeManager* tm = MWBase::Environment::get().getWorld()->getTimeManager();
         return {
             { "openmw.async",
                 LuaUtil::getAsyncPackageInitializer(
-                    lua, [w] { return w->getSimulationTime(); }, [w] { return w->getGameTime(); }) },
+                    lua, [tm] { return tm->getSimulationTime(); }, [tm] { return tm->getGameTime(); }) },
             { "openmw.core", initCorePackage(context) },
             { "openmw.types", initTypesPackage(context) },
             { "openmw.util", LuaUtil::initUtilPackage(lua) },

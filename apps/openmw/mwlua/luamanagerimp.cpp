@@ -23,6 +23,7 @@
 
 #include "../mwrender/postprocessor.hpp"
 
+#include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/scene.hpp"
@@ -152,9 +153,10 @@ namespace MWLua
 
         if (!mWorldView.isPaused())
         { // Update time and process timers
-            double simulationTime = mWorldView.getSimulationTime() + frameDuration;
-            mWorldView.setSimulationTime(simulationTime);
-            double gameTime = mWorldView.getGameTime();
+            MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
+            double simulationTime = timeManager.getSimulationTime() + frameDuration;
+            timeManager.setSimulationTime(simulationTime);
+            double gameTime = timeManager.getGameTime();
 
             mGlobalScripts.processTimers(simulationTime, gameTime);
             for (LocalScripts* scripts : mActiveLocalScripts)
@@ -400,7 +402,8 @@ namespace MWLua
     {
         writer.startRecord(ESM::REC_LUAM);
 
-        mWorldView.save(writer);
+        writer.writeHNT<double>("LUAW", MWBase::Environment::get().getWorld()->getTimeManager()->getSimulationTime());
+        writer.writeFormId(MWBase::Environment::get().getWorldModel()->getLastGeneratedRefNum(), true);
         ESM::LuaScripts globalScripts;
         mGlobalScripts.save(globalScripts);
         globalScripts.save(writer);
@@ -414,7 +417,14 @@ namespace MWLua
         if (type != ESM::REC_LUAM)
             throw std::runtime_error("ESM::REC_LUAM is expected");
 
-        mWorldView.load(reader);
+        double simulationTime;
+        reader.getHNT(simulationTime, "LUAW");
+        MWBase::Environment::get().getWorld()->getTimeManager()->setSimulationTime(simulationTime);
+        ESM::FormId lastGenerated = reader.getFormId(true);
+        if (lastGenerated.hasContentFile())
+            throw std::runtime_error("Last generated RefNum is invalid");
+        MWBase::Environment::get().getWorldModel()->setLastGeneratedRefNum(lastGenerated);
+
         ESM::LuaScripts globalScripts;
         globalScripts.load(reader);
         mLuaEvents.load(mLua.sol(), reader, mContentFileMapping, mGlobalLoader.get());
