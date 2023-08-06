@@ -263,8 +263,7 @@ namespace MWRender
     };
 
     GlobalMap::GlobalMap(osg::Group* root, SceneUtil::WorkQueue* workQueue)
-        : mCellSize(Settings::map().mGlobalMapCellSize)
-        , mRoot(root)
+        : mRoot(root)
         , mWorkQueue(workQueue)
         , mWidth(0)
         , mHeight(0)
@@ -304,11 +303,13 @@ namespace MWRender
                 mMaxY = it->getGridY();
         }
 
-        mWidth = mCellSize * (mMaxX - mMinX + 1);
-        mHeight = mCellSize * (mMaxY - mMinY + 1);
+        const int cellSize = Settings::map().mGlobalMapCellSize;
+
+        mWidth = cellSize * (mMaxX - mMinX + 1);
+        mHeight = cellSize * (mMaxY - mMinY + 1);
 
         mWorkItem
-            = new CreateMapWorkItem(mWidth, mHeight, mMinX, mMinY, mMaxX, mMaxY, mCellSize, esmStore.get<ESM::Land>());
+            = new CreateMapWorkItem(mWidth, mHeight, mMinX, mMinY, mMaxX, mMaxY, cellSize, esmStore.get<ESM::Land>());
         mWorkQueue->addWorkItem(mWorkItem);
     }
 
@@ -412,14 +413,15 @@ namespace MWRender
         if (!localMapTexture)
             return;
 
-        int originX = (cellX - mMinX) * mCellSize;
-        int originY = (cellY - mMinY + 1)
-            * mCellSize; // +1 because we want the top left corner of the cell, not the bottom left
+        const int cellSize = Settings::map().mGlobalMapCellSize;
+        const int originX = (cellX - mMinX) * cellSize;
+        // +1 because we want the top left corner of the cell, not the bottom left
+        const int originY = (cellY - mMinY + 1) * cellSize;
 
         if (cellX > mMaxX || cellX < mMinX || cellY > mMaxY || cellY < mMinY)
             return;
 
-        requestOverlayTextureUpdate(originX, mHeight - originY, mCellSize, mCellSize, localMapTexture, false, true);
+        requestOverlayTextureUpdate(originX, mHeight - originY, cellSize, cellSize, localMapTexture, false, true);
     }
 
     void GlobalMap::clear()
@@ -520,7 +522,7 @@ namespace MWRender
         // If cell bounds of the currently loaded content and the loaded savegame do not match,
         // we need to resize source/dest boxes to accommodate
         // This means nonexisting cells will be dropped silently
-        int cellImageSizeDst = mCellSize;
+        const int cellImageSizeDst = Settings::map().mGlobalMapCellSize;
 
         // Completely off-screen? -> no need to blit anything
         if (bounds.mMaxX < mMinX || bounds.mMaxY < mMinY || bounds.mMinX > mMaxX || bounds.mMinY > mMaxY)

@@ -36,26 +36,6 @@ Values from 12 to 36 are recommended. For reference, Vvardenfell is approximatel
 
 This setting can not be configured except by editing the settings configuration file.
 
-local map hud widget size
--------------------------
-
-:Type:		integer
-:Range:		>= 1
-:Default:	256
-
-This setting controls the zoom level for the HUD map widget (the map in the lower right corner of the window).
-A value of 64 results in the HUD map widget displaying one entire exterior cell.
-Since the GUI mode map displays 3x3 cells, a value of approximately 21 displays the same area as the GUI mode map.
-Larger values increase the level of zoom,
-while smaller values are wasteful since there's no map data to display beyond the 3x3 cell grid.
-
-Note that the actual size of the widget is always the same on the screen
-unless the scaling factor setting in the "GUI" section is changed.
-Increasing both the scaling factor of the GUI and this setting does result in a higher resolution HUD map,
-unfortunately with a scaled direction pointer on top of it.
-
-This setting can not be configured except by editing the settings configuration file.
-
 local map hud fog of war
 ------------------------
 

@@ -22,7 +22,7 @@
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
 #include <components/sceneutil/visitor.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/stereo/multiview.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -75,16 +75,13 @@ namespace MWRender
 
     LocalMap::LocalMap(osg::Group* root)
         : mRoot(root)
-        , mMapResolution(Settings::Manager::getInt("local map resolution", "Map"))
+        , mMapResolution(
+              Settings::map().mLocalMapResolution * MWBase::Environment::get().getWindowManager()->getScalingFactor())
         , mMapWorldSize(Constants::CellSizeInUnits)
         , mCellDistance(Constants::CellGridRadius)
         , mAngle(0.f)
         , mInterior(false)
     {
-        // Increase map resolution, if use UI scaling
-        float uiScale = MWBase::Environment::get().getWindowManager()->getScalingFactor();
-        mMapResolution *= uiScale;
-
         SceneUtil::FindByNameVisitor find("Scene Root");
         mRoot->accept(find);
         mSceneRoot = find.mFoundNode;

@@ -88,7 +88,7 @@ namespace MWGui
 
     HUD::HUD(CustomMarkerCollection& customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender)
         : WindowBase("openmw_hud.layout")
-        , LocalMapBase(customMarkers, localMapRender, Settings::Manager::getBool("local map hud fog of war", "Map"))
+        , LocalMapBase(customMarkers, localMapRender)
         , mHealth(nullptr)
         , mMagicka(nullptr)
         , mStamina(nullptr)
