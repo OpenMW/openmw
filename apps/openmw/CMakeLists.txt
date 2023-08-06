@@ -219,7 +219,6 @@ if(APPLE)
     target_link_libraries(openmw ${COCOA_FRAMEWORK} ${IOKIT_FRAMEWORK})
 
     if (FFmpeg_FOUND)
-        target_link_libraries(openmw z)
         target_link_options(openmw PRIVATE "LINKER:SHELL:-framework CoreVideo"
                                            "LINKER:SHELL:-framework CoreMedia"
                                            "LINKER:SHELL:-framework VideoToolbox"
