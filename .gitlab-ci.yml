@@ -187,7 +187,7 @@ Teal:
 Ubuntu_GCC_Debug:
   extends: .Ubuntu
   cache:
-    key: Ubuntu_GCC_Debug.ubuntu_22.04.v1
+    key: Ubuntu_GCC_Debug.ubuntu_22.04.v2
   before_script:
     - CI/install_debian_deps.sh gcc openmw-deps openmw-deps-dynamic
   variables:
@@ -512,7 +512,7 @@ macOS13_Xcode14_arm64:
   tags:
     - saas-macos-medium-m1
   cache:
-    key: macOS12_Xcode14_arm64.v1
+    key: macOS12_Xcode14_arm64.v4
   variables:
     CCACHE_SIZE: 3G
 

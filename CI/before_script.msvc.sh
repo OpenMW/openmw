@@ -607,14 +607,14 @@ if [ -z $SKIP_DOWNLOAD ]; then
 		"ffmpeg-${FFMPEG_VER}-dev-win${BITS}.zip"
 
 	# MyGUI
-	download "MyGUI 3.4.1" \
-		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}.7z" \
-		"MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}.7z"
+	download "MyGUI 3.4.2" \
+		"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.2-msvc${MYGUI_MSVC_YEAR}-win${BITS}.7z" \
+		"MyGUI-3.4.2-msvc${MYGUI_MSVC_YEAR}-win${BITS}.7z"
 
 	if [ -n "$PDBS" ]; then
 		download "MyGUI symbols" \
-			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}-sym.7z" \
-			"MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}-sym.7z"
+			"https://gitlab.com/OpenMW/openmw-deps/-/raw/main/windows/MyGUI-3.4.2-msvc${MYGUI_MSVC_YEAR}-win${BITS}-sym.7z" \
+			"MyGUI-3.4.2-msvc${MYGUI_MSVC_YEAR}-win${BITS}-sym.7z"
 	fi
 
 	# OpenAL
@@ -778,20 +778,20 @@ printf "FFmpeg ${FFMPEG_VER}... "
 }
 cd $DEPS
 echo
-printf "MyGUI 3.4.1... "
+printf "MyGUI 3.4.2... "
 {
 	cd $DEPS_INSTALL
 	if [ -d MyGUI ] && \
 		grep "MYGUI_VERSION_MAJOR 3" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null && \
 		grep "MYGUI_VERSION_MINOR 4" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null && \
-		grep "MYGUI_VERSION_PATCH 1" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null
+		grep "MYGUI_VERSION_PATCH 2" MyGUI/include/MYGUI/MyGUI_Prerequest.h > /dev/null
 	then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
 		rm -rf MyGUI
-		eval 7z x -y "${DEPS}/MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}.7z" $STRIP
-		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}-sym.7z" $STRIP
-		mv "MyGUI-3.4.1-msvc${MYGUI_MSVC_YEAR}-win${BITS}" MyGUI
+		eval 7z x -y "${DEPS}/MyGUI-3.4.2-msvc${MYGUI_MSVC_YEAR}-win${BITS}.7z" $STRIP
+		[ -n "$PDBS" ] && eval 7z x -y "${DEPS}/MyGUI-3.4.2-msvc${MYGUI_MSVC_YEAR}-win${BITS}-sym.7z" $STRIP
+		mv "MyGUI-3.4.2-msvc${MYGUI_MSVC_YEAR}-win${BITS}" MyGUI
 	fi
 	export MYGUI_HOME="$(real_pwd)/MyGUI"
 	for CONFIGURATION in ${CONFIGURATIONS[@]}; do
