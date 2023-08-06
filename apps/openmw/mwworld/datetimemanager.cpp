@@ -4,6 +4,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "duration.hpp"
@@ -57,6 +58,8 @@ namespace MWWorld
         mYear = globalVariables[Globals::sYear].getInteger();
         mGameTimeScale = globalVariables[Globals::sTimeScale].getFloat();
         setSimulationTimeScale(1.0);
+        mPaused = false;
+        mPausedTags.clear();
     }
 
     void DateTimeManager::setHour(double hour)
@@ -249,5 +252,17 @@ namespace MWWorld
     {
         mSimulationTimeScale = std::max(0.f, scale);
         MWBase::Environment::get().getSoundManager()->setSimulationTimeScale(mSimulationTimeScale);
+    }
+
+    void DateTimeManager::unpause(std::string_view tag)
+    {
+        auto it = mPausedTags.find(tag);
+        if (it != mPausedTags.end())
+            mPausedTags.erase(it);
+    }
+
+    void DateTimeManager::updateIsPaused()
+    {
+        mPaused = !mPausedTags.empty() || MWBase::Environment::get().getWindowManager()->isGuiMode();
     }
 }

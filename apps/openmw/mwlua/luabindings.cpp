@@ -68,7 +68,7 @@ namespace MWLua
         api["getSimulationTimeScale"] = [timeManager]() { return timeManager->getSimulationTimeScale(); };
         api["getGameTime"] = [timeManager]() { return timeManager->getGameTime(); };
         api["getGameTimeScale"] = [timeManager]() { return timeManager->getGameTimeScale(); };
-        api["isWorldPaused"] = [world = context.mWorldView]() { return world->isPaused(); };
+        api["isWorldPaused"] = [timeManager]() { return timeManager->isPaused(); };
         api["getRealTime"] = []() {
             return std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
         };
@@ -81,9 +81,16 @@ namespace MWLua
             context.mLuaManager->addAction([scale, timeManager] { timeManager->setSimulationTimeScale(scale); });
         };
 
-        // TODO: Ability to pause/resume world from Lua (needed for UI dehardcoding)
-        // api["pause"] = []() {};
-        // api["resume"] = []() {};
+        api["pause"]
+            = [timeManager](sol::optional<std::string_view> tag) { timeManager->pause(tag.value_or("paused")); };
+        api["unpause"]
+            = [timeManager](sol::optional<std::string_view> tag) { timeManager->unpause(tag.value_or("paused")); };
+        api["getPausedTags"] = [timeManager](sol::this_state lua) {
+            sol::table res(lua, sol::create);
+            for (const std::string& tag : timeManager->getPausedTags())
+                res[tag] = tag;
+            return res;
+        };
     }
 
     static sol::table initContentFilesBindings(sol::state_view& lua)

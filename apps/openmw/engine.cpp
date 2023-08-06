@@ -201,9 +201,6 @@ bool OMW::Engine::frame(float frametime)
                 mSoundManager->update(frametime);
         }
 
-        // Main menu opened? Then scripts are also paused.
-        bool paused = mWindowManager->containsMode(MWGui::GM_MainMenu);
-
         {
             ScopedProfile<UserStatsType::LuaSyncUpdate> profile(frameStart, frameNumber, *timer, *stats);
             // Should be called after input manager update and before any change to the game world.
@@ -217,14 +214,14 @@ bool OMW::Engine::frame(float frametime)
             mStateManager->update(frametime);
         }
 
-        bool guiActive = mWindowManager->isGuiMode();
+        bool paused = mWorld->getTimeManager()->isPaused();
 
         {
             ScopedProfile<UserStatsType::Script> profile(frameStart, frameNumber, *timer, *stats);
 
             if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
-                if (!paused)
+                if (!mWindowManager->containsMode(MWGui::GM_MainMenu))
                 {
                     if (mWorld->getScriptsEnabled())
                     {
@@ -238,7 +235,7 @@ bool OMW::Engine::frame(float frametime)
                     mWorld->getWorldScene().markCellAsUnchanged();
                 }
 
-                if (!guiActive)
+                if (!paused)
                 {
                     double hours = (frametime * mWorld->getTimeManager()->getGameTimeScale()) / 3600.0;
                     mWorld->advanceTime(hours, true);
@@ -253,13 +250,13 @@ bool OMW::Engine::frame(float frametime)
 
             if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
-                mMechanicsManager->update(frametime, guiActive);
+                mMechanicsManager->update(frametime, paused);
             }
 
             if (mStateManager->getState() == MWBase::StateManager::State_Running)
             {
                 MWWorld::Ptr player = mWorld->getPlayerPtr();
-                if (!guiActive && player.getClass().getCreatureStats(player).isDead())
+                if (!paused && player.getClass().getCreatureStats(player).isDead())
                     mStateManager->endGame();
             }
         }
@@ -270,7 +267,7 @@ bool OMW::Engine::frame(float frametime)
 
             if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
-                mWorld->updatePhysics(frametime, guiActive, frameStart, frameNumber, *stats);
+                mWorld->updatePhysics(frametime, paused, frameStart, frameNumber, *stats);
             }
         }
 
@@ -280,7 +277,7 @@ bool OMW::Engine::frame(float frametime)
 
             if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
             {
-                mWorld->update(frametime, guiActive);
+                mWorld->update(frametime, paused);
             }
         }
 
@@ -928,7 +925,7 @@ void OMW::Engine::go()
     }
 
     // Start the main rendering loop
-    double simulationTime = 0.0;
+    MWWorld::DateTimeManager& timeManager = *mWorld->getTimeManager();
     Misc::FrameRateLimiter frameRateLimiter = Misc::makeFrameRateLimiter(mEnvironment.getFrameRateLimit());
     const std::chrono::steady_clock::duration maxSimulationInterval(std::chrono::milliseconds(200));
     while (!mViewer->done() && !mStateManager->hasQuitRequest())
@@ -936,21 +933,18 @@ void OMW::Engine::go()
         const double dt = std::chrono::duration_cast<std::chrono::duration<double>>(
                               std::min(frameRateLimiter.getLastFrameDuration(), maxSimulationInterval))
                               .count()
-            * mWorld->getTimeManager()->getSimulationTimeScale();
+            * timeManager.getSimulationTimeScale();
 
-        mViewer->advance(simulationTime);
+        mViewer->advance(timeManager.getSimulationTime());
 
         if (!frame(dt))
         {
             std::this_thread::sleep_for(std::chrono::milliseconds(5));
             continue;
         }
-        else
-        {
-            bool guiActive = mWindowManager->isGuiMode();
-            if (!guiActive)
-                simulationTime += dt;
-        }
+        timeManager.updateIsPaused();
+        if (!timeManager.isPaused())
+            timeManager.setSimulationTime(timeManager.getSimulationTime() + dt);
 
         if (stats)
         {

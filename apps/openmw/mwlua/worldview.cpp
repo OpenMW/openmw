@@ -24,7 +24,6 @@ namespace MWLua
         mContainersInScene.updateList();
         mDoorsInScene.updateList();
         mItemsInScene.updateList();
-        mPaused = MWBase::Environment::get().getWindowManager()->isGuiMode();
     }
 
     void WorldView::clear()

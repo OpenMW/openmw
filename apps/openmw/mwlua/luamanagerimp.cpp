@@ -128,8 +128,6 @@ namespace MWLua
         if (mPlayer.isEmpty())
             return; // The game is not started yet.
 
-        float frameDuration = MWBase::Environment::get().getFrameDuration();
-
         MWWorld::Ptr newPlayerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (!(getId(mPlayer) == getId(newPlayerPtr)))
             throw std::logic_error("Player RefNum was changed unexpectedly");
@@ -151,16 +149,12 @@ namespace MWLua
 
         mLuaEvents.finalizeEventBatch();
 
-        if (!mWorldView.isPaused())
-        { // Update time and process timers
-            MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
-            double simulationTime = timeManager.getSimulationTime() + frameDuration;
-            timeManager.setSimulationTime(simulationTime);
-            double gameTime = timeManager.getGameTime();
-
-            mGlobalScripts.processTimers(simulationTime, gameTime);
+        MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
+        if (!timeManager.isPaused())
+        {
+            mGlobalScripts.processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
             for (LocalScripts* scripts : mActiveLocalScripts)
-                scripts->processTimers(simulationTime, gameTime);
+                scripts->processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
         }
 
         // Run event handlers for events that were sent before `finalizeEventBatch`.
@@ -173,8 +167,9 @@ namespace MWLua
 
         // Run engine handlers
         mEngineEvents.callEngineHandlers();
-        if (!mWorldView.isPaused())
+        if (!timeManager.isPaused())
         {
+            float frameDuration = MWBase::Environment::get().getFrameDuration();
             for (LocalScripts* scripts : mActiveLocalScripts)
                 scripts->update(frameDuration);
             mGlobalScripts.update(frameDuration);
@@ -222,17 +217,19 @@ namespace MWLua
         // We apply input events in `synchronizedUpdate` rather than in `update` in order to reduce input latency.
         mProcessingInputEvents = true;
         PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
-        if (playerScripts && !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
+        MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
+        if (playerScripts && !windowManager->containsMode(MWGui::GM_MainMenu))
         {
             for (const auto& event : mInputEvents)
                 playerScripts->processInputEvent(event);
         }
         mInputEvents.clear();
         if (playerScripts)
-            playerScripts->onFrame(mWorldView.isPaused() ? 0.0 : MWBase::Environment::get().getFrameDuration());
+            playerScripts->onFrame(MWBase::Environment::get().getWorld()->getTimeManager()->isPaused()
+                    ? 0.0
+                    : MWBase::Environment::get().getFrameDuration());
         mProcessingInputEvents = false;
 
-        MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
         for (const std::string& message : mUIMessages)
             windowManager->messageBox(message);
         mUIMessages.clear();

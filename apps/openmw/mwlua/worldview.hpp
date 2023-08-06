@@ -18,9 +18,6 @@ namespace MWLua
         void update(); // Should be called every frame.
         void clear(); // Should be called every time before starting or loading a new game.
 
-        // Whether the world is paused (i.e. game time is not changing and actors don't move).
-        bool isPaused() const { return mPaused; }
-
         ObjectIdList getActivatorsInScene() const { return mActivatorsInScene.mList; }
         ObjectIdList getActorsInScene() const { return mActorsInScene.mList; }
         ObjectIdList getContainersInScene() const { return mContainersInScene.mList; }
@@ -54,8 +51,6 @@ namespace MWLua
         ObjectGroup mDoorsInScene;
         ObjectGroup mItemsInScene;
         ObjectIdList mPlayers = std::make_shared<std::vector<ObjectId>>();
-
-        bool mPaused = false;
     };
 
 }

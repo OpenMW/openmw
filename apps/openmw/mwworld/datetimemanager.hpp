@@ -1,6 +1,7 @@
 #ifndef GAME_MWWORLD_DATETIMEMANAGER_H
 #define GAME_MWWORLD_DATETIMEMANAGER_H
 
+#include <set>
 #include <string_view>
 
 #include "globalvariablename.hpp"
@@ -34,6 +35,17 @@ namespace MWWorld
         float getSimulationTimeScale() const { return mSimulationTimeScale; }
         void setSimulationTimeScale(float scale); // simulation time to real time ratio
 
+        // Whether the game is paused in the current frame.
+        bool isPaused() const { return mPaused; }
+
+        // Pauses the game starting from the next frame until `unpause` is called with the same tag.
+        void pause(std::string_view tag) { mPausedTags.emplace(tag); }
+        void unpause(std::string_view tag);
+        const std::set<std::string, std::less<>>& getPausedTags() const { return mPausedTags; }
+
+        // Updates mPaused; should be called once a frame.
+        void updateIsPaused();
+
     private:
         friend class World;
         void setup(Globals& globalVariables);
@@ -53,6 +65,8 @@ namespace MWWorld
         float mGameTimeScale = 0.f;
         float mSimulationTimeScale = 1.0;
         double mSimulationTime = 0.0;
+        bool mPaused = false;
+        std::set<std::string, std::less<>> mPausedTags;
     };
 }
 

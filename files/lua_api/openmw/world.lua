@@ -107,6 +107,21 @@
 -- @return #boolean
 
 ---
+-- Pause the game starting from the next frame.
+-- @function [parent=#world] pause
+-- @param #string tag (optional) The game will be paused until `unpause` is called with the same tag.
+
+---
+-- Remove given tag from the list of pause tags. Resume the game starting from the next frame if the list became empty.
+-- @function [parent=#world] unpause
+-- @param #string tag (optional) Needed to undo `pause` called with this tag.
+
+---
+-- The tags that are currently pausing the game.
+-- @function [parent=#world] getPausedTags
+-- @return #table
+
+---
 -- Return an object by RefNum/FormId.
 -- Note: the function always returns @{openmw.core#GameObject} and doesn't validate that
 -- the object exists in the game world. If it doesn't exist or not yet loaded to memory),
