@@ -409,11 +409,18 @@ namespace MWLua
 
                     return GObject(splitted);
                 };
-                objectT["moveInto"] = [removeFn, context](const GObject& object, const Inventory<GObject>& inventory) {
+                objectT["moveInto"] = [removeFn, context](const GObject& object, const sol::object& dest) {
                     const MWWorld::Ptr& ptr = object.ptr();
                     int count = ptr.getRefData().getCount();
+                    MWWorld::Ptr destPtr;
+                    if (dest.is<GObject>())
+                        destPtr = dest.as<GObject>().ptr();
+                    else
+                        destPtr = LuaUtil::cast<Inventory<GObject>>(dest).mObj.ptr();
+                    destPtr.getContainerStore(); // raises an error if there is no container store
+
                     std::optional<DelayedRemovalFn> delayedRemovalFn = removeFn(ptr, count);
-                    context.mLuaManager->addAction([item = object, count, cont = inventory.mObj, delayedRemovalFn] {
+                    context.mLuaManager->addAction([item = object, count, cont = GObject(destPtr), delayedRemovalFn] {
                         const MWWorld::Ptr& oldPtr = item.ptr();
                         auto& refData = oldPtr.getRefData();
                         refData.setCount(count); // temporarily undo removal to run ContainerStore::add
