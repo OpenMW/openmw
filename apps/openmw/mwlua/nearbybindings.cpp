@@ -10,7 +10,7 @@
 #include "../mwphysics/raycasting.hpp"
 
 #include "luamanagerimp.hpp"
-#include "worldview.hpp"
+#include "objectlists.hpp"
 
 namespace sol
 {
@@ -25,7 +25,7 @@ namespace MWLua
     sol::table initNearbyPackage(const Context& context)
     {
         sol::table api(context.mLua->sol(), sol::create);
-        WorldView* worldView = context.mWorldView;
+        ObjectLists* objectLists = context.mObjectLists;
 
         sol::usertype<MWPhysics::RayCastingResult> rayResult
             = context.mLua->sol().new_usertype<MWPhysics::RayCastingResult>("RayCastingResult");
@@ -131,12 +131,12 @@ namespace MWLua
             return LObject(refId.getIf<ESM::FormIdRefId>()->getValue());
         };
 
-        api["activators"] = LObjectList{ worldView->getActivatorsInScene() };
-        api["actors"] = LObjectList{ worldView->getActorsInScene() };
-        api["containers"] = LObjectList{ worldView->getContainersInScene() };
-        api["doors"] = LObjectList{ worldView->getDoorsInScene() };
-        api["items"] = LObjectList{ worldView->getItemsInScene() };
-        api["players"] = LObjectList{ worldView->getPlayers() };
+        api["activators"] = LObjectList{ objectLists->getActivatorsInScene() };
+        api["actors"] = LObjectList{ objectLists->getActorsInScene() };
+        api["containers"] = LObjectList{ objectLists->getContainersInScene() };
+        api["doors"] = LObjectList{ objectLists->getDoorsInScene() };
+        api["items"] = LObjectList{ objectLists->getItemsInScene() };
+        api["players"] = LObjectList{ objectLists->getPlayers() };
 
         api["NAVIGATOR_FLAGS"]
             = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, DetourNavigator::Flag>({

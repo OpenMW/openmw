@@ -29,7 +29,7 @@
 #include "luaevents.hpp"
 #include "luamanagerimp.hpp"
 #include "mwscriptbindings.hpp"
-#include "worldview.hpp"
+#include "objectlists.hpp"
 
 #include "camerabindings.hpp"
 #include "cellbindings.hpp"
@@ -235,12 +235,12 @@ namespace MWLua
     static sol::table initWorldPackage(const Context& context)
     {
         sol::table api(context.mLua->sol(), sol::create);
-        WorldView* worldView = context.mWorldView;
+        ObjectLists* objectLists = context.mObjectLists;
         addTimeBindings(api, context, true);
         addCellGetters(api, context);
         api["mwscript"] = initMWScriptBindings(context);
-        api["activeActors"] = GObjectList{ worldView->getActorsInScene() };
-        api["players"] = GObjectList{ worldView->getPlayers() };
+        api["activeActors"] = GObjectList{ objectLists->getActorsInScene() };
+        api["players"] = GObjectList{ objectLists->getPlayers() };
         api["createObject"] = [](std::string_view recordId, sol::optional<int> count) -> GObject {
             MWWorld::ManualRef mref(*MWBase::Environment::get().getESMStore(), ESM::RefId::deserializeText(recordId));
             const MWWorld::Ptr& ptr = mref.getPtr();

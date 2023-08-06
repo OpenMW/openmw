@@ -18,7 +18,7 @@
 #include "localscripts.hpp"
 #include "luaevents.hpp"
 #include "object.hpp"
-#include "worldview.hpp"
+#include "objectlists.hpp"
 
 namespace MWLua
 {
@@ -157,7 +157,7 @@ namespace MWLua
 
         GlobalScripts mGlobalScripts{ &mLua };
         std::set<LocalScripts*> mActiveLocalScripts;
-        WorldView mWorldView;
+        ObjectLists mObjectLists;
 
         MWWorld::Ptr mPlayer;
 

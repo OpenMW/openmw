@@ -76,7 +76,7 @@ namespace MWLua
         context.mIsGlobal = true;
         context.mLuaManager = this;
         context.mLua = &mLua;
-        context.mWorldView = &mWorldView;
+        context.mObjectLists = &mObjectLists;
         context.mLuaEvents = &mLuaEvents;
         context.mSerializer = mGlobalSerializer.get();
 
@@ -137,7 +137,7 @@ namespace MWLua
             MWBase::Environment::get().getWorldModel()->registerPtr(mPlayer);
         }
 
-        mWorldView.update();
+        mObjectLists.update();
 
         std::erase_if(mActiveLocalScripts, [](const LocalScripts* l) {
             return l->getPtrOrEmpty().isEmpty() || l->getPtrOrEmpty().getRefData().isDeleted();
@@ -261,7 +261,7 @@ namespace MWLua
         mLuaEvents.clear();
         mEngineEvents.clear();
         mInputEvents.clear();
-        mWorldView.clear();
+        mObjectLists.clear();
         mGlobalScripts.removeAllScripts();
         mGlobalScriptsStarted = false;
         mNewGameStarted = false;
@@ -283,8 +283,8 @@ namespace MWLua
             return;
         if (!mPlayer.isEmpty())
             throw std::logic_error("Player is initialized twice");
-        mWorldView.objectAddedToScene(ptr);
-        mWorldView.setPlayer(ptr);
+        mObjectLists.objectAddedToScene(ptr);
+        mObjectLists.setPlayer(ptr);
         mPlayer = ptr;
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
         if (!localScripts)
@@ -313,7 +313,7 @@ namespace MWLua
 
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)
     {
-        mWorldView.objectAddedToScene(ptr); // assigns generated RefNum if it is not set yet.
+        mObjectLists.objectAddedToScene(ptr); // assigns generated RefNum if it is not set yet.
         mEngineEvents.addToQueue(EngineEvents::OnActive{ getId(ptr) });
 
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
@@ -333,7 +333,7 @@ namespace MWLua
 
     void LuaManager::objectRemovedFromScene(const MWWorld::Ptr& ptr)
     {
-        mWorldView.objectRemovedFromScene(ptr);
+        mObjectLists.objectRemovedFromScene(ptr);
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
         if (localScripts)
         {

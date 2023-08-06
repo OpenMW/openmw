@@ -1,4 +1,4 @@
-#include "worldview.hpp"
+#include "objectlists.hpp"
 
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
@@ -17,7 +17,7 @@
 namespace MWLua
 {
 
-    void WorldView::update()
+    void ObjectLists::update()
     {
         mActivatorsInScene.updateList();
         mActorsInScene.updateList();
@@ -26,7 +26,7 @@ namespace MWLua
         mItemsInScene.updateList();
     }
 
-    void WorldView::clear()
+    void ObjectLists::clear()
     {
         mActivatorsInScene.clear();
         mActorsInScene.clear();
@@ -35,7 +35,7 @@ namespace MWLua
         mItemsInScene.clear();
     }
 
-    WorldView::ObjectGroup* WorldView::chooseGroup(const MWWorld::Ptr& ptr)
+    ObjectLists::ObjectGroup* ObjectLists::chooseGroup(const MWWorld::Ptr& ptr)
     {
         // It is important to check `isMarker` first.
         // For example "prisonmarker" has class "Door" despite that it is only an invisible marker.
@@ -55,7 +55,7 @@ namespace MWLua
         return nullptr;
     }
 
-    void WorldView::objectAddedToScene(const MWWorld::Ptr& ptr)
+    void ObjectLists::objectAddedToScene(const MWWorld::Ptr& ptr)
     {
         MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
         ObjectGroup* group = chooseGroup(ptr);
@@ -63,14 +63,14 @@ namespace MWLua
             addToGroup(*group, ptr);
     }
 
-    void WorldView::objectRemovedFromScene(const MWWorld::Ptr& ptr)
+    void ObjectLists::objectRemovedFromScene(const MWWorld::Ptr& ptr)
     {
         ObjectGroup* group = chooseGroup(ptr);
         if (group)
             removeFromGroup(*group, ptr);
     }
 
-    void WorldView::ObjectGroup::updateList()
+    void ObjectLists::ObjectGroup::updateList()
     {
         if (mChanged)
         {
@@ -81,20 +81,20 @@ namespace MWLua
         }
     }
 
-    void WorldView::ObjectGroup::clear()
+    void ObjectLists::ObjectGroup::clear()
     {
         mChanged = false;
         mList->clear();
         mSet.clear();
     }
 
-    void WorldView::addToGroup(ObjectGroup& group, const MWWorld::Ptr& ptr)
+    void ObjectLists::addToGroup(ObjectGroup& group, const MWWorld::Ptr& ptr)
     {
         group.mSet.insert(getId(ptr));
         group.mChanged = true;
     }
 
-    void WorldView::removeFromGroup(ObjectGroup& group, const MWWorld::Ptr& ptr)
+    void ObjectLists::removeFromGroup(ObjectGroup& group, const MWWorld::Ptr& ptr)
     {
         group.mSet.erase(getId(ptr));
         group.mChanged = true;

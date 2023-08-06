@@ -1,5 +1,5 @@
-#ifndef MWLUA_WORLDVIEW_H
-#define MWLUA_WORLDVIEW_H
+#ifndef MWLUA_OBJECTLISTS_H
+#define MWLUA_OBJECTLISTS_H
 
 #include <set>
 
@@ -8,11 +8,8 @@
 namespace MWLua
 {
 
-    // WorldView is a kind of an extension to mwworld. It was created on initial stage of
-    // OpenMW Lua development in order to minimize the risk of merge conflicts.
-    // TODO: Move get*InScene functions to mwworld/scene
-    // TODO: Remove WorldView.
-    class WorldView
+    // ObjectLists is used to track lists of game objects like nearby.items, nearby.actors, etc.
+    class ObjectLists
     {
     public:
         void update(); // Should be called every frame.
@@ -55,4 +52,4 @@ namespace MWLua
 
 }
 
-#endif // MWLUA_WORLDVIEW_H
+#endif // MWLUA_OBJECTLISTS_H
