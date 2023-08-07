@@ -49,46 +49,48 @@
 
     <!-- Main energy bar widget definitions. There's one for each color.-->
 
-    <Resource type="ResourceSkin" name="MW_Progress_Red" size="64 12">
-        <Property key="TrackSkin" value="MW_Track_Red"/>
-        <Property key="TrackFill" value="1"/>
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
-        <Child type="Widget" skin="TransparentBG" offset="2 2 60 8" align="Stretch" name="Client"/>
+    <Resource type="ResourceLayout" name="MW_Progress_Red" size="64 12">
+        <Widget type="Widget" position="0 0 64 12" name="Root">
+            <UserString key="TrackSkin" value="MW_Track_Red"/>
+            <UserString key="TrackFill" value="true"/>
+            <Widget type="Widget" skin="TransparentBG" position="2 2 60 8" align="Stretch" name="Client" />
+            <Widget type="Widget" skin="MW_Box" position="0 0 64 12" align="Stretch" />
+        </Widget>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_Progress_Green" size="64 12">
-        <Property key="TrackSkin" value="MW_Track_Green"/>
-        <Property key="TrackFill" value="1"/>
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
-        <Child type="Widget" skin="TransparentBG" offset="2 2 60 8" align="Stretch" name="Client"/>
+    <Resource type="ResourceLayout" name="MW_Progress_Green" size="64 12">
+        <Widget type="Widget" position="0 0 64 12" name="Root">
+            <UserString key="TrackSkin" value="MW_Track_Green"/>
+            <UserString key="TrackFill" value="true"/>
+            <Widget type="Widget" skin="TransparentBG" position="2 2 60 8" align="Stretch" name="Client" />
+            <Widget type="Widget" skin="MW_Box" position="0 0 64 12" align="Stretch" />
+        </Widget>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_Progress_Blue" size="64 12">
-        <Property key="TrackSkin" value="MW_Track_Blue"/>
-        <Property key="TrackFill" value="1"/>
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
-        <Child type="Widget" skin="TransparentBG" offset="2 2 60 8" align="Stretch" name="Client"/>
+    <Resource type="ResourceLayout" name="MW_Progress_Blue" size="64 12">
+        <Widget type="Widget" position="0 0 64 12" name="Root">
+            <UserString key="TrackSkin" value="MW_Track_Blue"/>
+            <UserString key="TrackFill" value="true"/>
+            <Widget type="Widget" skin="TransparentBG" position="2 2 60 8" align="Stretch" name="Client" />
+            <Widget type="Widget" skin="MW_Box" position="0 0 64 12" align="Stretch" />
+        </Widget>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_Progress_Drowning_Full" size="64 6">
-        <Property key="TrackSkin" value="MW_Progress_Drowning_Full_Small"/>
-        <Property key="TrackFill" value="1"/>
-        <Child type="Widget" skin="TransparentBG" offset="2 2 60 2" align="Stretch" name="Client"/>
+    <Resource type="ResourceLayout" name="MW_Progress_Drowning_Full" size="64 6">
+        <Widget type="Widget" position="0 0 64 6" name="Root">
+            <UserString key="TrackSkin" value="MW_Progress_Drowning_Full_Small"/>
+            <UserString key="TrackFill" value="true"/>
+            <Widget type="Widget" skin="TransparentBG" position="2 2 60 2" align="Stretch" name="Client" />
+        </Widget>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_ProgressScroll_Loading" size="64 6">
-        <Property key="TrackFill" value="1"/>
-        <Property key="TrackRangeMargins" value="0 0"/>
-        <Property key="MinTrackSize" value="1"/>
-        <Property key="VerticalAlignment" value="false"/>
-        <Property key="MoveToClick" value="false"/>
-
-        <Child type="Widget" skin="TransparentBG" offset="2 2 60 2" align="Stretch" name="Client"/>
-        <Child type="Button" skin="MW_Progress_Loading_Small" offset="0 0 1 6" align="Left VStretch" name="Track"/>
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 64 6" align="Stretch"/>
+    <Resource type="ResourceLayout" name="MW_ProgressScroll_Loading" size="64 6">
+        <Widget type="Widget" position="0 0 64 6" name="Root">
+            <UserString key="TrackFill" value="true"/>
+            <Property key="VerticalAlignment" value="false"/>
+            <Widget type="Widget" skin="TransparentBG" position="2 2 60 2" align="Stretch" />
+            <Widget type="Button" skin="MW_Progress_Loading_Small" position="0 0 1 6" align="Left VStretch" name="Track" />
+            <Widget type="Widget" skin="MW_Box" position="0 0 64 6" align="Stretch" />
+        </Widget>
     </Resource>
 </MyGUI>

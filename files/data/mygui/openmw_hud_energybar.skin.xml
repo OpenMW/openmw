@@ -59,51 +59,58 @@
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_EnergyBar_Magic" size="64 12">
-        <Property key="TrackSkin" value="MW_BarTrack_Magic"/>
-        <Property key="TrackFill" value="1"/>
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
-        <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
-    </Resource>
-    <Resource type="ResourceSkin" name="MW_EnergyBar_Weapon" size="64 12">
-        <Property key="TrackSkin" value="MW_BarTrack_Weapon"/>
-        <Property key="TrackFill" value="1"/>
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
-        <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
+    <Resource type="ResourceLayout" name="MW_EnergyBar_Magic" size="64 12">
+        <Widget type="Widget" position="0 0 64 12" name="Root">
+            <UserString key="TrackSkin" value="MW_BarTrack_Magic"/>
+            <UserString key="TrackFill" value="true"/>
+            <Widget type="Widget" skin="BlackBG" position="2 2 60 8" align="Stretch" name="Client" />
+            <Widget type="Widget" skin="MW_Box" position="0 0 64 12" align="Stretch" />
+        </Widget>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_EnergyBar_Red" size="64 12">
-        <Property key="TrackSkin" value="MW_BarTrack_Red"/>
-        <Property key="TrackFill" value="1"/>
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
-        <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
+    <Resource type="ResourceLayout" name="MW_EnergyBar_Weapon" size="64 12">
+        <Widget type="Widget" position="0 0 64 12" name="Root">
+            <UserString key="TrackSkin" value="MW_BarTrack_Weapon"/>
+            <UserString key="TrackFill" value="true"/>
+            <Widget type="Widget" skin="BlackBG" position="2 2 60 8" align="Stretch" name="Client" />
+            <Widget type="Widget" skin="MW_Box" position="0 0 64 12" align="Stretch" />
+        </Widget>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_EnergyBar_Green" size="64 12">
-        <Property key="TrackSkin" value="MW_BarTrack_Green"/>
-        <Property key="TrackFill" value="1"/>
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
-        <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
+    <Resource type="ResourceLayout" name="MW_EnergyBar_Red" size="64 12">
+        <Widget type="Widget" position="0 0 64 12" name="Root">
+            <UserString key="TrackSkin" value="MW_BarTrack_Red"/>
+            <UserString key="TrackFill" value="true"/>
+            <Widget type="Widget" skin="BlackBG" position="2 2 60 8" align="Stretch" name="Client" />
+            <Widget type="Widget" skin="MW_Box" position="0 0 64 12" align="Stretch" />
+        </Widget>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_EnergyBar_Blue" size="64 12">
-        <Property key="TrackSkin" value="MW_BarTrack_Blue"/>
-        <Property key="TrackFill" value="1"/>
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
-        <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
+    <Resource type="ResourceLayout" name="MW_EnergyBar_Green" size="64 12">
+        <Widget type="Widget" position="0 0 64 12" name="Root">
+            <UserString key="TrackSkin" value="MW_BarTrack_Green"/>
+            <UserString key="TrackFill" value="true"/>
+            <Widget type="Widget" skin="BlackBG" position="2 2 60 8" align="Stretch" name="Client" />
+            <Widget type="Widget" skin="MW_Box" position="0 0 64 12" align="Stretch" />
+        </Widget>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_EnergyBar_Yellow" size="64 12">
-        <Property key="TrackSkin" value="MW_BarTrack_Yellow"/>
-        <Property key="TrackFill" value="1"/>
+    <Resource type="ResourceLayout" name="MW_EnergyBar_Blue" size="64 12">
+        <Widget type="Widget" position="0 0 64 12" name="Root">
+            <UserString key="TrackSkin" value="MW_BarTrack_Blue"/>
+            <UserString key="TrackFill" value="true"/>
+            <Widget type="Widget" skin="BlackBG" position="2 2 60 8" align="Stretch" name="Client" />
+            <Widget type="Widget" skin="MW_Box" position="0 0 64 12" align="Stretch" />
+        </Widget>
+    </Resource>
 
-        <Child type="Widget" skin="MW_Box" offset="0 0 64 12" align="Stretch"/>
-        <Child type="Widget" skin="BlackBG" offset="2 2 60 8" align="Stretch" name="Client"/>
+    <Resource type="ResourceLayout" name="MW_EnergyBar_Yellow" size="64 12">
+        <Widget type="Widget" position="0 0 64 12" name="Root">
+            <UserString key="TrackSkin" value="MW_BarTrack_Yellow"/>
+            <UserString key="TrackFill" value="true"/>
+            <Widget type="Widget" skin="BlackBG" position="2 2 60 8" align="Stretch" name="Client" />
+            <Widget type="Widget" skin="MW_Box" position="0 0 64 12" align="Stretch" />
+        </Widget>
     </Resource>
 
 </MyGUI>
