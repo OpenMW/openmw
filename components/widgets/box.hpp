@@ -51,7 +51,7 @@ namespace Gui
         void initialiseOverride() override;
 
     protected:
-        void setPropertyOverride(std::string_view _key, const std::string_view _value) override;
+        void setPropertyOverride(std::string_view _key, std::string_view _value) override;
         int getWidth();
         std::string mFontSize;
         bool mShrink = false;
@@ -68,7 +68,7 @@ namespace Gui
         void setCaption(const MyGUI::UString& _value) override;
 
     protected:
-        void setPropertyOverride(std::string_view _key, const std::string_view _value) override;
+        void setPropertyOverride(std::string_view _key, std::string_view _value) override;
         std::string mFontSize;
     };
 

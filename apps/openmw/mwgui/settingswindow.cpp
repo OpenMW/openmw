@@ -168,7 +168,7 @@ namespace MWGui
             std::string_view type = getSettingType(current);
             if (type == checkButtonType)
             {
-                const std::string initialValue
+                std::string_view initialValue
                     = Settings::get<bool>(getSettingCategory(current), getSettingName(current)) ? "#{Interface:On}"
                                                                                                 : "#{Interface:Off}";
                 current->castType<MyGUI::Button>()->setCaptionWithReplacing(initialValue);
@@ -247,8 +247,8 @@ namespace MWGui
         {
             MyGUI::TextBox* textBox;
             getWidget(textBox, labelWidgetName);
-            auto labelCaption = scroller->getUserString("SettingLabelCaption");
-            labelCaption = Misc::StringUtils::format(std::string(labelCaption), value);
+            std::string labelCaption{ scroller->getUserString("SettingLabelCaption") };
+            labelCaption = Misc::StringUtils::format(labelCaption, value);
             textBox->setCaptionWithReplacing(labelCaption);
         }
     }

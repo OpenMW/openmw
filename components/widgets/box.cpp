@@ -40,7 +40,7 @@ namespace Gui
         notifySizeChange(this);
     }
 
-    void AutoSizedTextBox::setPropertyOverride(std::string_view _key, const std::string_view _value)
+    void AutoSizedTextBox::setPropertyOverride(std::string_view _key, std::string_view _value)
     {
         if (_key == "ExpandDirection")
         {
@@ -103,7 +103,7 @@ namespace Gui
         setEditStatic(true);
     }
 
-    void AutoSizedEditBox::setPropertyOverride(std::string_view _key, const std::string_view _value)
+    void AutoSizedEditBox::setPropertyOverride(std::string_view _key, std::string_view _value)
     {
         if (_key == "ExpandDirection")
         {
@@ -136,7 +136,7 @@ namespace Gui
         notifySizeChange(this);
     }
 
-    void AutoSizedButton::setPropertyOverride(std::string_view _key, const std::string_view _value)
+    void AutoSizedButton::setPropertyOverride(std::string_view _key, std::string_view _value)
     {
         if (_key == "ExpandDirection")
         {
@@ -160,7 +160,7 @@ namespace Gui
         align();
     }
 
-    bool Box::_setPropertyImpl(std::string_view _key, const std::string_view _value)
+    bool Box::_setPropertyImpl(std::string_view _key, std::string_view _value)
     {
         if (_key == "Spacing")
             mSpacing = MyGUI::utility::parseValue<int>(_value);
@@ -261,7 +261,7 @@ namespace Gui
         }
     }
 
-    void HBox::setPropertyOverride(std::string_view _key, const std::string_view _value)
+    void HBox::setPropertyOverride(std::string_view _key, std::string_view _value)
     {
         if (!Box::_setPropertyImpl(_key, _value))
             MyGUI::Widget::setPropertyOverride(_key, _value);
@@ -416,7 +416,7 @@ namespace Gui
         }
     }
 
-    void VBox::setPropertyOverride(std::string_view _key, const std::string_view _value)
+    void VBox::setPropertyOverride(std::string_view _key, std::string_view _value)
     {
         if (!Box::_setPropertyImpl(_key, _value))
             MyGUI::Widget::setPropertyOverride(_key, _value);
