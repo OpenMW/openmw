@@ -7,7 +7,6 @@
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Widget.h>
 
-
 namespace Gui
 {
     class AutoSizedWidget

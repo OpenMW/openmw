@@ -66,8 +66,6 @@ namespace osgMyGUI
 
         void enableShaders(Shader::ShaderManager& shaderManager);
 
-        void setScalingFactor(float factor);
-
         static RenderManager& getInstance() { return *getInstancePtr(); }
         static RenderManager* getInstancePtr()
         {
@@ -77,16 +75,10 @@ namespace osgMyGUI
         bool checkTexture(MyGUI::ITexture* _texture) override;
 
         /** @see RenderManager::getViewSize */
-        const MyGUI::IntSize& getViewSize() const override
-        {
-            return mViewSize;
-        }
+        const MyGUI::IntSize& getViewSize() const override { return mViewSize; }
 
         /** @see RenderManager::getVertexFormat */
-        MyGUI::VertexColourType getVertexFormat() const override
-        {
-            return mVertexFormat;
-        }
+        MyGUI::VertexColourType getVertexFormat() const override { return mVertexFormat; }
 
         /** @see RenderManager::isFormatSupported */
         bool isFormatSupported(MyGUI::PixelFormat format, MyGUI::TextureUsage usage) override;
@@ -119,10 +111,7 @@ namespace osgMyGUI
         void setInjectState(osg::StateSet* stateSet);
 
         /** @see IRenderTarget::getInfo */
-        const MyGUI::RenderTargetInfo& getInfo() const override
-        {
-            return mInfo;
-        }
+        const MyGUI::RenderTargetInfo& getInfo() const override { return mInfo; }
 
         void setViewSize(int width, int height) override;
 

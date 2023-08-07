@@ -3,7 +3,6 @@
 
 #include <MyGUI_EditBox.h>
 
-
 namespace Gui
 {
 
