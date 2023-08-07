@@ -244,7 +244,7 @@ namespace MWGui
                             = store->get<ESM::Skill>().find(MWMechanics::getSpellSchool(spell, player))->mSchool;
                         info.text = "#{sSchool}: " + MyGUI::TextIterator::toTagsString(school->mName).asUTF8();
                     }
-                    const std::string& cost = focus->getUserString("SpellCost");
+                    auto cost = focus->getUserString("SpellCost");
                     if (!cost.empty() && cost != "0")
                         info.text
                             += MWGui::ToolTips::getValueString(MWMechanics::calcSpellCost(*spell), "#{sCastCost}");

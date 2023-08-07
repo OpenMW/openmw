@@ -31,7 +31,7 @@ namespace osgMyGUI
         void flush() override;
 
         void log(const std::string& _section, MyGUI::LogLevel _level, const struct tm* _time,
-            const std::string& _message, const char* _file, int _line) override;
+            const std::string& _message, const char* _file, int _line);
 
     private:
         std::ofstream mStream;

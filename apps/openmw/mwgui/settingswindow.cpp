@@ -242,13 +242,13 @@ namespace MWGui
 
     void SettingsWindow::updateSliderLabel(MyGUI::ScrollBar* scroller, const std::string& value)
     {
-        std::string labelWidgetName = scroller->getUserString("SettingLabelWidget");
+        auto labelWidgetName = scroller->getUserString("SettingLabelWidget");
         if (!labelWidgetName.empty())
         {
             MyGUI::TextBox* textBox;
             getWidget(textBox, labelWidgetName);
-            std::string labelCaption = scroller->getUserString("SettingLabelCaption");
-            labelCaption = Misc::StringUtils::format(labelCaption, value);
+            auto labelCaption = scroller->getUserString("SettingLabelCaption");
+            labelCaption = Misc::StringUtils::format(std::string(labelCaption), value);
             textBox->setCaptionWithReplacing(labelCaption);
         }
     }
