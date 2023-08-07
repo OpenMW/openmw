@@ -3,7 +3,6 @@
 
 #include <MyGUI_EditBox.h>
 
-#include "fontwrapper.hpp"
 
 namespace Gui
 {
@@ -11,7 +10,7 @@ namespace Gui
     /**
      * @brief A variant of the EditBox that only allows integer inputs
      */
-    class NumericEditBox final : public FontWrapper<MyGUI::EditBox>
+    class NumericEditBox final : public MyGUI::EditBox
     {
         MYGUI_RTTI_DERIVED(NumericEditBox)
 

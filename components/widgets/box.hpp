@@ -7,25 +7,9 @@
 #include <MyGUI_TextBox.h>
 #include <MyGUI_Widget.h>
 
-#include "fontwrapper.hpp"
 
 namespace Gui
 {
-    class Button : public FontWrapper<MyGUI::Button>
-    {
-        MYGUI_RTTI_DERIVED(Button)
-    };
-
-    class TextBox : public FontWrapper<MyGUI::TextBox>
-    {
-        MYGUI_RTTI_DERIVED(TextBox)
-    };
-
-    class EditBox : public FontWrapper<MyGUI::EditBox>
-    {
-        MYGUI_RTTI_DERIVED(EditBox)
-    };
-
     class AutoSizedWidget
     {
     public:
@@ -44,7 +28,7 @@ namespace Gui
         MyGUI::Align mExpandDirection;
     };
 
-    class AutoSizedTextBox : public AutoSizedWidget, public TextBox
+    class AutoSizedTextBox : public AutoSizedWidget, public MyGUI::TextBox
     {
         MYGUI_RTTI_DERIVED(AutoSizedTextBox)
 
@@ -57,7 +41,7 @@ namespace Gui
         std::string mFontSize;
     };
 
-    class AutoSizedEditBox : public AutoSizedWidget, public EditBox
+    class AutoSizedEditBox : public AutoSizedWidget, public MyGUI::EditBox
     {
         MYGUI_RTTI_DERIVED(AutoSizedEditBox)
 
@@ -76,7 +60,7 @@ namespace Gui
         int mMaxWidth = 0;
     };
 
-    class AutoSizedButton : public AutoSizedWidget, public Button
+    class AutoSizedButton : public AutoSizedWidget, public MyGUI::Button
     {
         MYGUI_RTTI_DERIVED(AutoSizedButton)
 
@@ -156,7 +140,7 @@ namespace Gui
         void align() override;
         MyGUI::IntSize getRequestedSize() override;
 
-        void setPropertyOverride(std::string_view _key, std::string_view _value);
+        void setPropertyOverride(std::string_view _key, std::string_view _value) override;
 
         void onWidgetCreated(MyGUI::Widget* _widget) override;
     };

@@ -443,7 +443,7 @@ namespace MWGui
         const std::string realImage
             = Misc::ResourceHelpers::correctIconPath(image, MWBase::Environment::get().getResourceSystem()->getVFS());
 
-        Gui::EditBox* captionWidget = mDynamicToolTipBox->createWidget<Gui::EditBox>(
+        MyGUI::EditBox* captionWidget = mDynamicToolTipBox->createWidget<MyGUI::EditBox>(
             "NormalText", MyGUI::IntCoord(0, 0, 300, 300), MyGUI::Align::Left | MyGUI::Align::Top, "ToolTipCaption");
         captionWidget->setEditStatic(true);
         captionWidget->setNeedKeyFocus(false);
@@ -452,7 +452,7 @@ namespace MWGui
 
         int captionHeight = std::max(!caption.empty() ? captionSize.height : 0, imageSize);
 
-        Gui::EditBox* textWidget = mDynamicToolTipBox->createWidget<Gui::EditBox>("SandText",
+        MyGUI::EditBox* textWidget = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("SandText",
             MyGUI::IntCoord(0, captionHeight + imageCaptionVPadding, 300, 300 - captionHeight - imageCaptionVPadding),
             MyGUI::Align::Stretch, "ToolTipText");
         textWidget->setEditStatic(true);
@@ -474,7 +474,7 @@ namespace MWGui
             MyGUI::ImageBox* icon = mDynamicToolTipBox->createWidget<MyGUI::ImageBox>("MarkerButton",
                 MyGUI::IntCoord(padding.left, totalSize.height + padding.top, 8, 8), MyGUI::Align::Default);
             icon->setColour(MyGUI::Colour(1.0f, 0.3f, 0.3f));
-            Gui::EditBox* edit = mDynamicToolTipBox->createWidget<Gui::EditBox>("SandText",
+            MyGUI::EditBox* edit = mDynamicToolTipBox->createWidget<MyGUI::EditBox>("SandText",
                 MyGUI::IntCoord(padding.left + 8 + 4, totalSize.height + padding.top, 300 - padding.left - 8 - 4,
                     300 - totalSize.height),
                 MyGUI::Align::Default);
