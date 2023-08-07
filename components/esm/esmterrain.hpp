@@ -2,6 +2,7 @@
 #define COMPONENTS_ESM_ESMTERRAIN
 
 #include <cstdint>
+#include <memory>
 #include <span>
 #include <vector>
 
@@ -15,8 +16,8 @@ namespace ESM
     public:
         ~LandData() = default;
         LandData() = default;
-        LandData(const ESM::Land& Land, int loadFLags);
-        LandData(const ESM4::Land& Land, int loadFLags);
+        LandData(const ESM::Land& Land, int loadFlags);
+        LandData(const ESM4::Land& Land, int loadFlags);
 
         std::span<const float> getHeights() const { return mHeights; }
         std::span<const std::int8_t> getNormals() const { return mNormals; }
@@ -30,16 +31,18 @@ namespace ESM
         int getPlugin() const { return mPlugin; }
 
     private:
+        std::unique_ptr<const ESM::Land::LandData> mData;
         int mLoadFlags = 0;
+        std::vector<float> mHeightsData;
         float mMinHeight = 0.f;
         float mMaxHeight = 0.f;
         float mSize = 0.f;
         int mLandSize = 0;
         int mPlugin = 0;
-        std::vector<float> mHeights;
-        std::vector<std::int8_t> mNormals;
-        std::vector<std::uint8_t> mColors;
-        std::vector<std::uint16_t> mTextures;
+        std::span<const float> mHeights;
+        std::span<const std::int8_t> mNormals;
+        std::span<const std::uint8_t> mColors;
+        std::span<const std::uint16_t> mTextures;
     };
 
 }
