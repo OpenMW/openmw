@@ -213,7 +213,7 @@ namespace Terrain
             osg::ref_ptr<osg::Vec4ubArray> colors(new osg::Vec4ubArray);
             colors->setNormalize(true);
 
-            mStorage->fillVertexBuffers(lod, chunkSize, chunkCenter, mWorldspace, positions, normals, colors);
+            mStorage->fillVertexBuffers(lod, chunkSize, chunkCenter, mWorldspace, *positions, *normals, *colors);
 
             osg::ref_ptr<osg::VertexBufferObject> vbo(new osg::VertexBufferObject);
             positions->setVertexBufferObject(vbo);

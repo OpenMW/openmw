@@ -1,5 +1,5 @@
-#ifndef COMPONENTS_ESM_TERRAIN_STORAGE_H
-#define COMPONENTS_ESM_TERRAIN_STORAGE_H
+#ifndef OPENMW_COMPONENTS_ESMTERRAIN_STORAGE_H
+#define OPENMW_COMPONENTS_ESMTERRAIN_STORAGE_H
 
 #include <cassert>
 #include <mutex>
@@ -99,8 +99,7 @@ namespace ESMTerrain
         /// @param normals buffer to write vertex normals
         /// @param colours buffer to write vertex colours
         void fillVertexBuffers(int lodLevel, float size, const osg::Vec2f& center, ESM::RefId worldspace,
-            osg::ref_ptr<osg::Vec3Array> positions, osg::ref_ptr<osg::Vec3Array> normals,
-            osg::ref_ptr<osg::Vec4ubArray> colours) override;
+            osg::Vec3Array& positions, osg::Vec3Array& normals, osg::Vec4ubArray& colours) override;
 
         /// Create textures holding layer blend values for a terrain chunk.
         /// @note The terrain chunk shouldn't be larger than one cell since otherwise we might

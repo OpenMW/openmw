@@ -7,6 +7,8 @@
 #include <osg/Vec2f>
 #include <osg/Vec3f>
 
+#include <type_traits>
+
 namespace Misc
 {
 
@@ -63,8 +65,10 @@ namespace Misc
         return toEulerAnglesZYX(forward, up);
     }
 
-    inline bool isPowerOfTwo(int x)
+    template <class T>
+    bool isPowerOfTwo(T x)
     {
+        static_assert(std::is_integral_v<T>);
         return ((x > 0) && ((x & (x - 1)) == 0));
     }
 

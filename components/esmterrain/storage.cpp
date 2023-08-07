@@ -1,6 +1,7 @@
 #include "storage.hpp"
 
-#include <set>
+#include <algorithm>
+#include <stdexcept>
 
 #include <osg/Image>
 #include <osg/Plane>
@@ -11,6 +12,8 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/vfs/manager.hpp>
+
+#include "gridsampling.hpp"
 
 namespace ESMTerrain
 {
@@ -184,47 +187,52 @@ namespace ESMTerrain
     }
 
     void Storage::fillVertexBuffers(int lodLevel, float size, const osg::Vec2f& center, ESM::RefId worldspace,
-        osg::ref_ptr<osg::Vec3Array> positions, osg::ref_ptr<osg::Vec3Array> normals,
-        osg::ref_ptr<osg::Vec4ubArray> colours)
+        osg::Vec3Array& positions, osg::Vec3Array& normals, osg::Vec4ubArray& colours)
     {
+        if (lodLevel < 0 || 63 < lodLevel)
+            throw std::invalid_argument("Invalid terrain lod level: " + std::to_string(lodLevel));
+
+        if (size <= 0)
+            throw std::invalid_argument("Invalid terrain size: " + std::to_string(size));
+
         // LOD level n means every 2^n-th vertex is kept
-        size_t increment = static_cast<size_t>(1) << lodLevel;
+        const std::size_t sampleSize = std::size_t{ 1 } << lodLevel;
+        const std::size_t cellSize = static_cast<std::size_t>(ESM::getLandSize(worldspace));
+        const std::size_t numVerts = static_cast<std::size_t>(size * (cellSize - 1) / sampleSize) + 1;
 
-        osg::Vec2f origin = center - osg::Vec2f(size / 2.f, size / 2.f);
-
-        int startCellX = static_cast<int>(std::floor(origin.x()));
-        int startCellY = static_cast<int>(std::floor(origin.y()));
-        const int landSize = ESM::getLandSize(worldspace);
-        const int LandSizeInUnits = ESM::getCellSize(worldspace);
-
-        size_t numVerts = static_cast<size_t>(size * (landSize - 1) / increment + 1);
-
-        positions->resize(numVerts * numVerts);
-        normals->resize(numVerts * numVerts);
-        colours->resize(numVerts * numVerts);
-
-        osg::Vec3f normal;
-        osg::Vec4ub color;
-
-        float vertY = 0;
-        float vertX = 0;
+        positions.resize(numVerts * numVerts);
+        normals.resize(numVerts * numVerts);
+        colours.resize(numVerts * numVerts);
 
         LandCache cache;
 
-        bool alteration = useAlteration();
+        const bool alteration = useAlteration();
+        const int landSizeInUnits = ESM::getCellSize(worldspace);
+        const osg::Vec2f origin = center - osg::Vec2f(size, size) * 0.5f;
+        const int startCellX = static_cast<int>(std::floor(origin.x()));
+        const int startCellY = static_cast<int>(std::floor(origin.y()));
+        ESM::ExteriorCellLocation lastCellLocation(startCellX - 1, startCellY - 1, worldspace);
+        const LandObject* land = nullptr;
+        const ESM::LandData* heightData = nullptr;
+        const ESM::LandData* normalData = nullptr;
+        const ESM::LandData* colourData = nullptr;
         bool validHeightDataExists = false;
-        float vertY_ = 0; // of current cell corner
-        for (int cellY = startCellY; cellY < startCellY + std::ceil(size); ++cellY)
-        {
-            float vertX_ = 0; // of current cell corner
-            for (int cellX = startCellX; cellX < startCellX + std::ceil(size); ++cellX)
+
+        const auto handleSample = [&](std::size_t cellShiftX, std::size_t cellShiftY, std::size_t row, std::size_t col,
+                                      std::size_t vertX, std::size_t vertY) {
+            const int cellX = startCellX + cellShiftX;
+            const int cellY = startCellY + cellShiftY;
+            const ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
+
+            if (lastCellLocation != cellLocation)
             {
-                ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
-                const LandObject* land = getLand(cellLocation, cache);
-                const ESM::LandData* heightData = nullptr;
-                const ESM::LandData* normalData = nullptr;
-                const ESM::LandData* colourData = nullptr;
-                if (land)
+                land = getLand(cellLocation, cache);
+
+                heightData = nullptr;
+                normalData = nullptr;
+                colourData = nullptr;
+
+                if (land != nullptr)
                 {
                     heightData = land->getData(ESM::Land::DATA_VHGT);
                     normalData = land->getData(ESM::Land::DATA_VNML);
@@ -232,110 +240,70 @@ namespace ESMTerrain
                     validHeightDataExists = true;
                 }
 
-                int rowStart = 0;
-                int colStart = 0;
-                // Skip the first row / column unless we're at a chunk edge,
-                // since this row / column is already contained in a previous cell
-                // This is only relevant if we're creating a chunk spanning multiple cells
-                if (vertY_ != 0)
-                    colStart += increment;
-                if (vertX_ != 0)
-                    rowStart += increment;
-
-                // Only relevant for chunks smaller than (contained in) one cell
-                rowStart += (origin.x() - startCellX) * landSize;
-                colStart += (origin.y() - startCellY) * landSize;
-                int rowEnd = std::min(
-                    static_cast<int>(rowStart + std::min(1.f, size) * (landSize - 1) + 1), static_cast<int>(landSize));
-                int colEnd = std::min(
-                    static_cast<int>(colStart + std::min(1.f, size) * (landSize - 1) + 1), static_cast<int>(landSize));
-
-                vertY = vertY_;
-                for (int col = colStart; col < colEnd; col += increment)
-                {
-                    vertX = vertX_;
-                    for (int row = rowStart; row < rowEnd; row += increment)
-                    {
-                        int srcArrayIndex = col * landSize * 3 + row * 3;
-
-                        assert(row >= 0 && row < landSize);
-                        assert(col >= 0 && col < landSize);
-
-                        assert(vertX < numVerts);
-                        assert(vertY < numVerts);
-
-                        float height = defaultHeight;
-                        if (heightData)
-                            height = heightData->getHeights()[col * landSize + row];
-                        if (alteration)
-                            height += getAlteredHeight(col, row);
-                        (*positions)[static_cast<unsigned int>(vertX * numVerts + vertY)]
-                            = osg::Vec3f((vertX / float(numVerts - 1) - 0.5f) * size * LandSizeInUnits,
-                                (vertY / float(numVerts - 1) - 0.5f) * size * LandSizeInUnits, height);
-
-                        if (normalData)
-                        {
-                            for (int i = 0; i < 3; ++i)
-                                normal[i] = normalData->getNormals()[srcArrayIndex + i];
-
-                            normal.normalize();
-                        }
-                        else
-                            normal = osg::Vec3f(0, 0, 1);
-
-                        // Normals apparently don't connect seamlessly between cells
-                        if (col == landSize - 1 || row == landSize - 1)
-                            fixNormal(normal, cellLocation, col, row, cache);
-
-                        // some corner normals appear to be complete garbage (z < 0)
-                        if ((row == 0 || row == landSize - 1) && (col == 0 || col == landSize - 1))
-                            averageNormal(normal, cellLocation, col, row, cache);
-
-                        assert(normal.z() > 0);
-
-                        (*normals)[static_cast<unsigned int>(vertX * numVerts + vertY)] = normal;
-
-                        if (colourData)
-                        {
-                            for (int i = 0; i < 3; ++i)
-                                color[i] = colourData->getColors()[srcArrayIndex + i];
-                        }
-                        else
-                        {
-                            color.r() = 255;
-                            color.g() = 255;
-                            color.b() = 255;
-                        }
-                        if (alteration)
-                            adjustColor(col, row, heightData, color); // Does nothing by default, override in OpenMW-CS
-
-                        // Unlike normals, colors mostly connect seamlessly between cells, but not always...
-                        if (col == landSize - 1 || row == landSize - 1)
-                            fixColour(color, cellLocation, col, row, cache);
-
-                        color.a() = 255;
-
-                        (*colours)[static_cast<unsigned int>(vertX * numVerts + vertY)] = color;
-
-                        ++vertX;
-                    }
-                    ++vertY;
-                }
-                vertX_ = vertX;
+                lastCellLocation = cellLocation;
             }
-            vertY_ = vertY;
 
-            assert(vertX_ == numVerts); // Ensure we covered whole area
-        }
-        assert(vertY_ == numVerts); // Ensure we covered whole area
+            float height = defaultHeight;
+            if (heightData != nullptr)
+                height = heightData->getHeights()[col * cellSize + row];
+            if (alteration)
+                height += getAlteredHeight(col, row);
+
+            const std::size_t vertIndex = vertX * numVerts + vertY;
+
+            positions[vertIndex]
+                = osg::Vec3f((vertX / static_cast<float>(numVerts - 1) - 0.5f) * size * landSizeInUnits,
+                    (vertY / static_cast<float>(numVerts - 1) - 0.5f) * size * landSizeInUnits, height);
+
+            const std::size_t srcArrayIndex = col * cellSize * 3 + row * 3;
+
+            osg::Vec3f normal(0, 0, 1);
+
+            if (normalData != nullptr)
+            {
+                for (std::size_t i = 0; i < 3; ++i)
+                    normal[i] = normalData->getNormals()[srcArrayIndex + i];
+
+                normal.normalize();
+            }
+
+            // Normals apparently don't connect seamlessly between cells
+            if (col == cellSize - 1 || row == cellSize - 1)
+                fixNormal(normal, cellLocation, col, row, cache);
+
+            // some corner normals appear to be complete garbage (z < 0)
+            if ((row == 0 || row == cellSize - 1) && (col == 0 || col == cellSize - 1))
+                averageNormal(normal, cellLocation, col, row, cache);
+
+            assert(normal.z() > 0);
+
+            normals[vertIndex] = normal;
+
+            osg::Vec4ub color(255, 255, 255, 255);
+
+            if (colourData != nullptr)
+                for (std::size_t i = 0; i < 3; ++i)
+                    color[i] = colourData->getColors()[srcArrayIndex + i];
+
+            // Does nothing by default, override in OpenMW-CS
+            if (alteration)
+                adjustColor(col, row, heightData, color);
+
+            // Unlike normals, colors mostly connect seamlessly between cells, but not always...
+            if (col == cellSize - 1 || row == cellSize - 1)
+                fixColour(color, cellLocation, col, row, cache);
+
+            colours[vertIndex] = color;
+        };
+
+        const std::size_t beginX = static_cast<std::size_t>((origin.x() - startCellX) * cellSize);
+        const std::size_t beginY = static_cast<std::size_t>((origin.y() - startCellY) * cellSize);
+        const std::size_t distance = static_cast<std::size_t>(size * (cellSize - 1)) + 1;
+
+        sampleCellGrid(cellSize, sampleSize, beginX, beginY, distance, handleSample);
 
         if (!validHeightDataExists && ESM::isEsm4Ext(worldspace))
-        {
-            for (unsigned int iVert = 0; iVert < numVerts * numVerts; iVert++)
-            {
-                (*positions)[static_cast<unsigned int>(iVert)] = osg::Vec3f(0.f, 0.f, 0.f);
-            }
-        }
+            std::fill(positions.begin(), positions.end(), osg::Vec3f());
     }
 
     Storage::UniqueTextureId Storage::getVtexIndexAt(

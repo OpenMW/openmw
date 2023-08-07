@@ -1,7 +1,7 @@
 #include "terrainstorage.hpp"
 
 #include <components/esm3/loadltex.hpp>
-#include <components/esm3terrain/storage.hpp>
+#include <components/esmterrain/storage.hpp>
 #include <components/resource/resourcesystem.hpp>
 
 #include <apps/opencs/model/world/data.hpp>

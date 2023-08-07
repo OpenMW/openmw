@@ -145,7 +145,7 @@ add_component_dir (esm3
     infoorder timestamp
     )
 
-add_component_dir (esm3terrain
+add_component_dir (esmterrain
     storage
     )
 
