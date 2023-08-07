@@ -15,7 +15,6 @@ namespace MWRender
         : GenericResourceManager<ESM::ExteriorCellLocation>(nullptr)
         , mLoadFlags(loadFlags)
     {
-        mCache = new CacheType;
     }
 
     osg::ref_ptr<ESMTerrain::LandObject> LandManager::getLand(ESM::ExteriorCellLocation cellIndex)
