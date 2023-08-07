@@ -41,6 +41,12 @@ namespace Nif
                 Misc::swapEndiannessInplace(dest[i]);
     }
 
+    template <std::size_t numInstances, typename T>
+    inline void readBufferOfType(Files::IStreamPtr& pIStream, T (&dest)[numInstances])
+    {
+        readBufferOfType<numInstances>(pIStream, static_cast<T*>(dest));
+    }
+
     template <typename T>
     inline void readDynamicBufferOfType(Files::IStreamPtr& pIStream, T* dest, std::size_t numInstances)
     {

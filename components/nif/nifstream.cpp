@@ -1,6 +1,35 @@
 #include "nifstream.hpp"
 
+#include <span>
+
 #include "niffile.hpp"
+
+namespace
+{
+
+    // Read a range of elements into a dynamic buffer per-element
+    // This one should be used if the type cannot be read contiguously
+    // (e.g. quaternions)
+    template <class T>
+    void readRange(Nif::NIFStream& stream, T* dest, size_t size)
+    {
+        for (T& value : std::span(dest, size))
+            stream.read(value);
+    }
+
+    // Read a range of elements into a dynamic buffer
+    // This one should be used if the type can be read contiguously as an array of a different type
+    // (e.g. osg::VecXf can be read as a float array of X elements)
+    template <class elementType, size_t numElements, class T>
+    void readAlignedRange(Files::IStreamPtr& stream, T* dest, size_t size)
+    {
+        static_assert(std::is_standard_layout_v<T>);
+        static_assert(std::alignment_of_v<T> == std::alignment_of_v<elementType>);
+        static_assert(sizeof(T) == sizeof(elementType) * numElements);
+        Nif::readDynamicBufferOfType(stream, reinterpret_cast<elementType*>(dest), size * numElements);
+    }
+
+}
 
 namespace Nif
 {
@@ -61,25 +90,25 @@ namespace Nif
     template <>
     void NIFStream::read<osg::Vec2f>(osg::Vec2f& vec)
     {
-        readBufferOfType<2>(mStream, vec._v);
+        readBufferOfType(mStream, vec._v);
     }
 
     template <>
     void NIFStream::read<osg::Vec3f>(osg::Vec3f& vec)
     {
-        readBufferOfType<3>(mStream, vec._v);
+        readBufferOfType(mStream, vec._v);
     }
 
     template <>
     void NIFStream::read<osg::Vec4f>(osg::Vec4f& vec)
     {
-        readBufferOfType<4>(mStream, vec._v);
+        readBufferOfType(mStream, vec._v);
     }
 
     template <>
     void NIFStream::read<Matrix3>(Matrix3& mat)
     {
-        readBufferOfType<9>(mStream, (float*)&mat.mValues);
+        readBufferOfType<9>(mStream, reinterpret_cast<float*>(&mat.mValues));
     }
 
     template <>
@@ -122,43 +151,37 @@ namespace Nif
     template <>
     void NIFStream::read<osg::Vec2f>(osg::Vec2f* dest, size_t size)
     {
-        // The packed storage of each Vec2f is 2 floats exactly
-        readDynamicBufferOfType<float>(mStream, (float*)dest, size * 2);
+        readAlignedRange<float, 2>(mStream, dest, size);
     }
 
     template <>
     void NIFStream::read<osg::Vec3f>(osg::Vec3f* dest, size_t size)
     {
-        // The packed storage of each Vec3f is 3 floats exactly
-        readDynamicBufferOfType<float>(mStream, (float*)dest, size * 3);
+        readAlignedRange<float, 3>(mStream, dest, size);
     }
 
     template <>
     void NIFStream::read<osg::Vec4f>(osg::Vec4f* dest, size_t size)
     {
-        // The packed storage of each Vec4f is 4 floats exactly
-        readDynamicBufferOfType<float>(mStream, (float*)dest, size * 4);
+        readAlignedRange<float, 4>(mStream, dest, size);
     }
 
     template <>
     void NIFStream::read<Matrix3>(Matrix3* dest, size_t size)
     {
-        // The packed storage of each Matrix3 is 9 floats exactly
-        readDynamicBufferOfType<float>(mStream, (float*)dest, size * 9);
+        readAlignedRange<float, 9>(mStream, dest, size);
     }
 
     template <>
     void NIFStream::read<osg::Quat>(osg::Quat* dest, size_t size)
     {
-        for (size_t i = 0; i < size; i++)
-            read(dest[i]);
+        readRange(*this, dest, size);
     }
 
     template <>
     void NIFStream::read<Transformation>(Transformation* dest, size_t size)
     {
-        for (size_t i = 0; i < size; i++)
-            read(dest[i]);
+        readRange(*this, dest, size);
     }
 
     template <>
@@ -166,13 +189,13 @@ namespace Nif
     {
         if (getVersion() < generateVersion(4, 1, 0, 0))
         {
-            for (size_t i = 0; i < size; i++)
-                dest[i] = get<int32_t>() != 0;
+            for (bool& value : std::span(dest, size))
+                value = get<int32_t>() != 0;
         }
         else
         {
-            for (size_t i = 0; i < size; i++)
-                dest[i] = get<int8_t>() != 0;
+            for (bool& value : std::span(dest, size))
+                value = get<int8_t>() != 0;
         }
     }
 
@@ -181,13 +204,13 @@ namespace Nif
     {
         if (getVersion() < generateVersion(20, 1, 0, 1))
         {
-            for (size_t i = 0; i < size; i++)
-                dest[i] = getSizedString();
+            for (std::string& value : std::span(dest, size))
+                value = getSizedString();
         }
         else
         {
-            for (size_t i = 0; i < size; i++)
-                dest[i] = mReader.getString(get<uint32_t>());
+            for (std::string& value : std::span(dest, size))
+                value = mReader.getString(get<uint32_t>());
         }
     }
 
