@@ -54,6 +54,7 @@ namespace ContentSelectorModel
         const EsmFile* item(int row) const;
         EsmFile* item(int row);
         QStringList gameFiles() const;
+        void setCurrentGameFile(const EsmFile* file);
 
         bool isEnabled(const QModelIndex& index) const;
         bool isChecked(const QString& filepath) const;
@@ -81,6 +82,7 @@ namespace ContentSelectorModel
 
         QString toolTip(const EsmFile* file) const;
 
+        const EsmFile* mGameFile;
         ContentFileList mFiles;
         QStringList mArchives;
         QHash<QString, Qt::CheckState> mCheckStates;
