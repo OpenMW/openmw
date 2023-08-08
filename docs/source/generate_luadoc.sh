@@ -44,6 +44,7 @@ if [ -f /.dockerenv ]; then
     cd ~
     git clone https://gitlab.com/ptmikheev/openmw-luadocumentor.git
     cd openmw-luadocumentor/luarocks
+    git checkout 156b1ad3597c739e51f537afe08d8d7ad1e95671
     luarocks --local pack openmwluadocumentor-0.1.1-1.rockspec
     luarocks --local install openmwluadocumentor-0.1.1-1.src.rock
 fi
