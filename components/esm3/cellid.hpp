@@ -2,6 +2,7 @@
 #define OPENMW_ESM_CELLID_H
 
 #include <components/esm/refid.hpp>
+#include <cstdint>
 #include <string>
 
 namespace ESM
@@ -13,8 +14,8 @@ namespace ESM
     {
         struct CellIndex
         {
-            int mX;
-            int mY;
+            int32_t mX;
+            int32_t mY;
         };
 
         std::string mWorldspace;

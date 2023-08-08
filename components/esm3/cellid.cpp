@@ -13,7 +13,7 @@ namespace ESM
 
         if (esm.isNextSub("CIDX"))
         {
-            esm.getHTSized<8>(mIndex);
+            esm.getHT(mIndex.mX, mIndex.mY);
             mPaged = true;
         }
         else
