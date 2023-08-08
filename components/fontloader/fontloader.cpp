@@ -616,15 +616,6 @@ namespace Gui
         {
             std::string type = resourceNode->findAttribute("type");
 
-            if (Misc::StringUtils::ciEqual(type, "ResourceSkin")
-                || Misc::StringUtils::ciEqual(type, "AutoSizedResourceSkin"))
-            {
-
-                MyGUI::xml::ElementPtr heightNode = resourceNode->createChild("Property");
-                heightNode->addAttribute("key", "HeightLine");
-                heightNode->addAttribute("value", std::to_string(Settings::gui().mFontSize + 2));
-            }
-
             if (Misc::StringUtils::ciEqual(type, "ResourceLayout"))
             {
                 MyGUI::xml::ElementEnumerator resourceRootNode = resourceNode->getElementEnumerator();
