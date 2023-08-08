@@ -87,6 +87,18 @@ namespace ESM
         }
     }
 
+    bool ESMReader::applyContentFileMapping(FormId& id)
+    {
+        if (mContentFileMapping && id.hasContentFile())
+        {
+            auto iter = mContentFileMapping->find(id.mContentFile);
+            if (iter == mContentFileMapping->end())
+                return false;
+            id.mContentFile = iter->second;
+        }
+        return true;
+    }
+
     ESM::RefId ESMReader::getCellId()
     {
         if (mHeader.mFormatVersion <= ESM::MaxUseEsmCellIdFormatVersion)
@@ -485,7 +497,10 @@ namespace ESM
             {
                 FormId formId{};
                 getTSized<8>(formId);
-                return RefId::formIdRefId(formId);
+                if (applyContentFileMapping(formId))
+                    return RefId::formIdRefId(formId);
+                else
+                    return RefId(); // content file was removed from load order
             }
             case RefIdType::Generated:
             {

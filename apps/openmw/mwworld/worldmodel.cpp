@@ -463,7 +463,7 @@ public:
     MWWorld::CellStore* getCellStore(const ESM::RefId& cellId) override { return mWorldModel.findCell(cellId); }
 };
 
-bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap)
+bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type)
 {
     if (type == ESM::REC_CSTA)
     {
@@ -489,7 +489,7 @@ bool MWWorld::WorldModel::readRecord(ESM::ESMReader& reader, uint32_t type, cons
 
         GetCellStoreCallback callback(*this);
 
-        cellStore->readReferences(reader, contentFileMap, &callback);
+        cellStore->readReferences(reader, &callback);
 
         return true;
     }

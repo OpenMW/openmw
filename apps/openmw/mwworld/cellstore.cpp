@@ -228,7 +228,7 @@ namespace
 
     template <typename T>
     void readReferenceCollection(ESM::ESMReader& reader, MWWorld::CellRefList<T>& collection, const ESM::CellRef& cref,
-        const std::map<int, int>& contentFileMap, const MWWorld::ESMStore& esmStore, MWWorld::CellStore* cellstore)
+        const MWWorld::ESMStore& esmStore, MWWorld::CellStore* cellstore)
     {
         using StateType = typename RecordToState<T>::StateType;
         StateType state;
@@ -236,15 +236,8 @@ namespace
         state.load(reader);
 
         // If the reference came from a content file, make sure this content file is loaded
-        if (state.mRef.mRefNum.hasContentFile())
-        {
-            std::map<int, int>::const_iterator iter = contentFileMap.find(state.mRef.mRefNum.mContentFile);
-
-            if (iter == contentFileMap.end())
-                return; // content file has been removed -> skip
-
-            state.mRef.mRefNum.mContentFile = iter->second;
-        }
+        if (!reader.applyContentFileMapping(state.mRef.mRefNum))
+            return; // content file has been removed -> skip
 
         if (!MWWorld::LiveCellRef<T>::checkState(state))
             return; // not valid anymore with current content files -> skip
@@ -1034,8 +1027,7 @@ namespace MWWorld
         }
     }
 
-    void CellStore::readReferences(
-        ESM::ESMReader& reader, const std::map<int, int>& contentFileMap, GetCellStoreCallback* callback)
+    void CellStore::readReferences(ESM::ESMReader& reader, GetCellStoreCallback* callback)
     {
         mHasState = true;
 
@@ -1064,12 +1056,12 @@ namespace MWWorld
             if (type != 0)
             {
                 bool foundCorrespondingStore = false;
-                Misc::tupleForEach(this->mCellStoreImp->mRefLists,
-                    [&reader, this, &cref, &contentFileMap, &foundCorrespondingStore, type](auto&& x) {
+                Misc::tupleForEach(
+                    this->mCellStoreImp->mRefLists, [&reader, this, &cref, &foundCorrespondingStore, type](auto&& x) {
                         recNameSwitcher(x, static_cast<ESM::RecNameInts>(type),
-                            [&reader, this, &cref, &contentFileMap, &foundCorrespondingStore](auto& store) {
+                            [&reader, this, &cref, &foundCorrespondingStore](auto& store) {
                                 foundCorrespondingStore = true;
-                                readReferenceCollection(reader, store, cref, contentFileMap, mStore, this);
+                                readReferenceCollection(reader, store, cref, mStore, this);
                             });
                     });
 
@@ -1083,14 +1075,14 @@ namespace MWWorld
             reader.cacheSubName();
             ESM::RefNum refnum = reader.getFormId(true, "MVRF");
             ESM::RefId movedToId = reader.getCellId();
-            if (refnum.hasContentFile())
+            if (!reader.applyContentFileMapping(refnum))
             {
-                auto iter = contentFileMap.find(refnum.mContentFile);
-                if (iter != contentFileMap.end())
-                    refnum.mContentFile = iter->second;
+                Log(Debug::Warning) << "Warning: Dropping moved ref tag for " << refnum.mIndex
+                                    << " (content file no longer exists)";
+                continue;
             }
 
-            // Search for the reference. It might no longer exist if its content file was removed.
+            // Search for the reference. It might no longer exist if its content file was changed.
             Ptr movedRef = MWBase::Environment::get().getWorldModel()->getPtr(refnum);
             if (movedRef.isEmpty())
             {

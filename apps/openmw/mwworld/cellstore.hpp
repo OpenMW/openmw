@@ -328,8 +328,7 @@ namespace MWWorld
 
         /// @param callback to use for retrieving of additional CellStore objects by ID (required for resolving moved
         /// references)
-        void readReferences(
-            ESM::ESMReader& reader, const std::map<int, int>& contentFileMap, GetCellStoreCallback* callback);
+        void readReferences(ESM::ESMReader& reader, GetCellStoreCallback* callback);
 
         void respawn();
         ///< Check mLastRespawn and respawn references if necessary. This is a no-op if the cell is not loaded.

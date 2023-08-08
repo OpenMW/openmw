@@ -99,7 +99,7 @@ namespace MWWorld
 
         void write(ESM::ESMWriter& writer, Loading::Listener& progress) const;
 
-        bool readRecord(ESM::ESMReader& reader, uint32_t type, const std::map<int, int>& contentFileMap);
+        bool readRecord(ESM::ESMReader& reader, uint32_t type);
 
     private:
         PtrRegistry mPtrRegistry; // defined before mCells because during destruction it should be the last
