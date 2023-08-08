@@ -89,6 +89,7 @@
     Feature #7284: Searching in the console with regex and toggleable case-sensitivity 
     Feature #7477: NegativeLight Magic Effect flag
     Feature #7499: OpenMW-CS: Generate record filters by drag & dropping cell content to the filters field
+    Task #5896: Do not use deprecated MyGUI properties
     Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector
     Task #7151: Do not use std::strerror to get errno error message
