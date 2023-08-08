@@ -123,39 +123,36 @@
         </BasisSkin>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_List" size="516 516" align="Left Top">
-        <Property key="NeedKey" value="true"/>
-        <Property key="SkinLine" value="MW_ListLine"/>
-
-        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
-
-        <Child type="ScrollBar" skin="MW_VScroll" offset="498 4 14 508" align="Right VStretch" name="VScroll"/>
-
-        <Child type="Widget" skin="" offset="3 4 493 508" align="Stretch" name="Client"/>
-
+    <Resource type="ResourceLayout" name="MW_List" size="516 516" align="Left Top">
+        <Widget type="Widget" position="0 0 516 516" name="Root">
+            <Property key="NeedKey" value="true"/>
+            <UserString key="SkinLine" value="MW_ListLine"/>
+            <Widget type="Widget" skin="MW_Box" position="0 0 516 516" align="Stretch" />
+            <Widget type="ScrollBar" skin="MW_VScroll" position="498 4 14 508" align="Right VStretch" name="VScroll" />
+            <Widget type="Widget" skin="" position="3 4 493 508" align="Stretch" name="Client" />
+        </Widget>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_PopupList" size="516 516" align="Left Top">
-        <Property key="NeedKey" value="true"/>
-        <Property key="SkinLine" value="MW_ListLine"/>
-        <Child type="Widget" skin="BlackBG" offset="0 0 516 516" align="Stretch"/>
-        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
-
-        <Child type="ScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="Right VStretch" name="VScroll"/>
-
-        <Child type="Widget" skin="" offset="3 3 493 509" align="Stretch" name="Client"/>
+    <Resource type="ResourceLayout" name="MW_PopupList" size="516 516" align="Left Top">
+        <Widget type="Widget" position="0 0 516 516" name="Root">
+            <Property key="NeedKey" value="true"/>
+            <UserString key="SkinLine" value="MW_ListLine"/>
+            <Widget type="Widget" skin="BlackBG" position="0 0 516 516" align="Stretch" />
+            <Widget type="Widget" skin="MW_Box" position="0 0 516 516" align="Stretch" />
+            <Widget type="ScrollBar" skin="MW_VScroll" position="498 3 14 509" align="Right VStretch" name="VScroll" />
+            <Widget type="Widget" skin="" position="3 3 493 509" align="Stretch" name="Client" />
+        </Widget>
     </Resource>
 
-    <Resource type="ResourceSkin" name="MW_PopupListNoTransp" size="516 516" align="Left Top">
-        <Property key="NeedKey" value="true"/>
-        <Property key="SkinLine" value="MW_ListLine"/>
-
-        <Child type="Widget" skin="FullBlackBG" offset="0 0 516 516" align="Stretch"/>
-        <Child type="Widget" skin="MW_Box" offset="0 0 516 516" align="Stretch"/>
-
-        <Child type="ScrollBar" skin="MW_VScroll" offset="498 3 14 509" align="Right VStretch" name="VScroll"/>
-
-        <Child type="Widget" skin="" offset="3 3 493 509" align="Stretch" name="Client"/>
+    <Resource type="ResourceLayout" name="MW_PopupListNoTransp" size="516 516" align="Left Top">
+        <Widget type="Widget" position="0 0 516 516" name="Root">
+            <Property key="NeedKey" value="true"/>
+            <UserString key="SkinLine" value="MW_ListLine"/>
+            <Widget type="Widget" skin="FullBlackBG" position="0 0 516 516" align="Stretch" />
+            <Widget type="Widget" skin="MW_Box" position="0 0 516 516" align="Stretch" />
+            <Widget type="ScrollBar" skin="MW_VScroll" position="498 3 14 509" align="Right VStretch" name="VScroll" />
+            <Widget type="Widget" skin="" position="3 3 493 509" align="Stretch" name="Client" />
+        </Widget>
     </Resource>
 
     <Resource type="ResourceSkin" name="MW_ItemView" size="516 516" align="Left Top">
