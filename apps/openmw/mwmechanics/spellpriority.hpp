@@ -25,7 +25,8 @@ namespace MWMechanics
 
     int getRangeTypes(const ESM::EffectList& effects);
 
-    float rateSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
+    float rateSpell(
+        const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool checkMagicka = true);
     float rateMagicItem(const MWWorld::Ptr& ptr, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy);
     float ratePotion(const MWWorld::Ptr& item, const MWWorld::Ptr& actor);
 

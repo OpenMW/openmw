@@ -14,7 +14,7 @@ namespace MWMechanics
         virtual ~Action() {}
         virtual void prepare(const MWWorld::Ptr& actor) = 0;
         virtual float getCombatRange(bool& isRanged) const = 0;
-        virtual float getActionCooldown() { return 0.f; }
+        virtual float getActionCooldown() const { return 0.f; }
         virtual const ESM::Weapon* getWeapon() const { return nullptr; }
         virtual bool isAttackingOrSpell() const { return true; }
         virtual bool isFleeing() const { return false; }
@@ -26,7 +26,7 @@ namespace MWMechanics
         ActionFlee() {}
         void prepare(const MWWorld::Ptr& actor) override {}
         float getCombatRange(bool& isRanged) const override { return 0.0f; }
-        float getActionCooldown() override { return 3.0f; }
+        float getActionCooldown() const override { return 3.0f; }
         bool isAttackingOrSpell() const override { return false; }
         bool isFleeing() const override { return true; }
     };
@@ -58,7 +58,7 @@ namespace MWMechanics
         float getCombatRange(bool& isRanged) const override;
 
         /// Since this action has no animation, apply a small cool down for using it
-        float getActionCooldown() override { return 0.75f; }
+        float getActionCooldown() const override { return 0.75f; }
     };
 
     class ActionPotion : public Action
@@ -75,7 +75,7 @@ namespace MWMechanics
         bool isAttackingOrSpell() const override { return false; }
 
         /// Since this action has no animation, apply a small cool down for using it
-        float getActionCooldown() override { return 0.75f; }
+        float getActionCooldown() const override { return 0.75f; }
     };
 
     class ActionWeapon : public Action

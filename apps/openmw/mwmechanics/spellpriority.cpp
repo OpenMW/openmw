@@ -1,6 +1,8 @@
 #include "spellpriority.hpp"
 #include "weaponpriority.hpp"
 
+#include <cmath>
+
 #include <components/esm3/loadench.hpp>
 #include <components/esm3/loadmgef.hpp>
 #include <components/esm3/loadrace.hpp>
@@ -86,6 +88,21 @@ namespace
             return spell.getCasterActorId() == actorId && spell.getId() == id;
         }) != active.end();
     }
+
+    float getRestoreMagickaPriority(const MWWorld::Ptr& actor)
+    {
+        const MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
+        const MWMechanics::DynamicStat<float>& current = stats.getMagicka();
+        for (const ESM::Spell* spell : stats.getSpells())
+        {
+            if (spell->mData.mType != ESM::Spell::ST_Spell)
+                continue;
+            int cost = MWMechanics::calcSpellCost(*spell);
+            if (cost > current.getCurrent() && cost < current.getModified())
+                return 2.f;
+        }
+        return 0.f;
+    }
 }
 
 namespace MWMechanics
@@ -114,9 +131,9 @@ namespace MWMechanics
         return rateEffects(potion->mEffects, actor, MWWorld::Ptr());
     }
 
-    float rateSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy)
+    float rateSpell(const ESM::Spell* spell, const MWWorld::Ptr& actor, const MWWorld::Ptr& enemy, bool checkMagicka)
     {
-        float successChance = MWMechanics::getSpellSuccessChance(spell, actor);
+        float successChance = MWMechanics::getSpellSuccessChance(spell, actor, nullptr, true, checkMagicka);
         if (successChance == 0.f)
             return 0.f;
 
@@ -136,7 +153,7 @@ namespace MWMechanics
         int types = getRangeTypes(spell->mEffects);
         if ((types & Self) && isSpellActive(actor, actor, spell->mId))
             return 0.f;
-        if (((types & Touch) || (types & Target)) && isSpellActive(actor, enemy, spell->mId))
+        if (((types & Touch) || (types & Target)) && !enemy.isEmpty() && isSpellActive(actor, enemy, spell->mId))
             return 0.f;
 
         return rateEffects(spell->mEffects, actor, enemy) * (successChance / 100.f);
@@ -405,30 +422,44 @@ namespace MWMechanics
                     return 0.f;
                 break;
 
+            case ESM::MagicEffect::AbsorbMagicka:
+                if (!enemy.isEmpty() && enemy.getClass().getCreatureStats(enemy).getMagicka().getCurrent() <= 0.f)
+                {
+                    rating = 0.5f;
+                    rating *= getRestoreMagickaPriority(actor);
+                }
+                break;
             case ESM::MagicEffect::RestoreHealth:
             case ESM::MagicEffect::RestoreMagicka:
             case ESM::MagicEffect::RestoreFatigue:
                 if (effect.mRange == ESM::RT_Self)
                 {
-                    int priority = 1;
-                    if (effect.mEffectID == ESM::MagicEffect::RestoreHealth)
-                        priority = 10;
                     const MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
                     const DynamicStat<float>& current
                         = stats.getDynamic(effect.mEffectID - ESM::MagicEffect::RestoreHealth);
                     // NB: this currently assumes the hardcoded magic effect flags are used
                     const float magnitude = (effect.mMagnMin + effect.mMagnMax) / 2.f;
                     const float toHeal = magnitude * std::max(1, effect.mDuration);
-                    // Effect doesn't heal more than we need, *or* we are below 1/2 health
-                    if (current.getModified() - current.getCurrent() > toHeal
-                        || current.getCurrent() < current.getModified() * 0.5)
+                    const float damage = current.getModified() - current.getCurrent();
+                    float priority = 0.f;
+                    if (effect.mEffectID == ESM::MagicEffect::RestoreHealth)
+                        priority = 4.f;
+                    else if (effect.mEffectID == ESM::MagicEffect::RestoreMagicka)
+                        priority = std::max(0.1f, getRestoreMagickaPriority(actor));
+                    else if (effect.mEffectID == ESM::MagicEffect::RestoreFatigue)
+                        priority = 2.f;
+                    float overheal = 0.f;
+                    float heal = toHeal;
+                    if (damage < toHeal && current.getCurrent() > current.getModified() * 0.5)
                     {
-                        return 10000.f * priority
-                            - (toHeal
-                                - (current.getModified() - current.getCurrent())); // prefer the most fitting potion
+                        overheal = toHeal - damage;
+                        heal = damage;
                     }
-                    else
-                        return -10000.f * priority; // Save for later
+
+                    priority = (std::pow(priority + heal / current.getModified(), damage * 4.f / current.getModified())
+                                   - priority - overheal / current.getModified())
+                        / priority;
+                    rating = priority;
                 }
                 break;
 

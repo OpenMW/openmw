@@ -17,6 +17,7 @@
 #include "combat.hpp"
 #include "npcstats.hpp"
 #include "spellpriority.hpp"
+#include "spellutil.hpp"
 #include "weaponpriority.hpp"
 #include "weapontype.hpp"
 
@@ -181,23 +182,25 @@ namespace MWMechanics
 
             for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
             {
-                float rating = ratePotion(*it, actor);
-                if (rating > bestActionRating)
+                if (it->getType() == ESM::Potion::sRecordId)
                 {
-                    bestActionRating = rating;
-                    bestAction = std::make_unique<ActionPotion>(*it);
-                    antiFleeRating = std::numeric_limits<float>::max();
+                    float rating = ratePotion(*it, actor);
+                    if (rating > bestActionRating)
+                    {
+                        bestActionRating = rating;
+                        bestAction = std::make_unique<ActionPotion>(*it);
+                        antiFleeRating = std::numeric_limits<float>::max();
+                    }
                 }
-            }
-
-            for (MWWorld::ContainerStoreIterator it = store.begin(); it != store.end(); ++it)
-            {
-                float rating = rateMagicItem(*it, actor, enemy);
-                if (rating > bestActionRating)
+                else if (!it->getClass().getEnchantment(*it).empty())
                 {
-                    bestActionRating = rating;
-                    bestAction = std::make_unique<ActionEnchantedItem>(it);
-                    antiFleeRating = std::numeric_limits<float>::max();
+                    float rating = rateMagicItem(*it, actor, enemy);
+                    if (rating > bestActionRating)
+                    {
+                        bestActionRating = rating;
+                        bestAction = std::make_unique<ActionEnchantedItem>(it);
+                        antiFleeRating = std::numeric_limits<float>::max();
+                    }
                 }
             }
 
