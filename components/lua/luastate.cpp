@@ -12,6 +12,7 @@
 #include <components/vfs/manager.hpp>
 
 #include "scriptscontainer.hpp"
+#include "utf8.hpp"
 
 namespace LuaUtil
 {
@@ -51,7 +52,7 @@ namespace LuaUtil
 
     static const std::string safeFunctions[] = { "assert", "error", "ipairs", "next", "pairs", "pcall", "select",
         "tonumber", "tostring", "type", "unpack", "xpcall", "rawequal", "rawget", "rawset", "setmetatable" };
-    static const std::string safePackages[] = { "coroutine", "math", "string", "table" };
+    static const std::string safePackages[] = { "coroutine", "math", "string", "table", "utf8" };
 
     static constexpr int64_t countHookStep = 1000;
 
@@ -180,6 +181,8 @@ namespace LuaUtil
 
         mSol["math"]["randomseed"](static_cast<unsigned>(std::time(nullptr)));
         mSol["math"]["randomseed"] = [] {};
+
+        mSol["utf8"] = LuaUtf8::initUtf8Package(mSol);
 
         mSol["writeToLog"] = [](std::string_view s) { Log(Debug::Level::Info) << s; };
 

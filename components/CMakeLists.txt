@@ -34,7 +34,7 @@ endif (GIT_CHECKOUT)
 # source files
 
 add_component_dir (lua
-    luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage
+    luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage utf8
     shapes/box
     )
 
