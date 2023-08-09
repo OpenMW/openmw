@@ -465,7 +465,7 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
     {
         // TODO extend format
         auto index = ESM::Skill::refIdToIndex(id);
-        value.writeState(state.mSkills[index]);
+        value.writeState(state.mSkills[static_cast<unsigned int>(index)]);
     }
 
     state.mIsWerewolf = mIsWerewolf;
