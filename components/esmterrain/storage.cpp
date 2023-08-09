@@ -17,6 +17,27 @@
 
 namespace ESMTerrain
 {
+    namespace
+    {
+        UniqueTextureId getTextureIdAt(const LandObject* land, std::size_t x, std::size_t y)
+        {
+            assert(x < ESM::Land::LAND_TEXTURE_SIZE);
+            assert(y < ESM::Land::LAND_TEXTURE_SIZE);
+
+            if (land == nullptr)
+                return { 0, 0 };
+
+            const ESM::LandData* data = land->getData(ESM::Land::DATA_VTEX);
+            if (data == nullptr)
+                return { 0, 0 };
+
+            const std::uint16_t tex = data->getTextures()[y * ESM::Land::LAND_TEXTURE_SIZE + x];
+            if (tex == 0)
+                return { 0, 0 }; // vtex 0 is always the base texture, regardless of plugin
+
+            return { tex, land->getPlugin() };
+        }
+    }
 
     class LandCache
     {
@@ -306,47 +327,6 @@ namespace ESMTerrain
             std::fill(positions.begin(), positions.end(), osg::Vec3f());
     }
 
-    Storage::UniqueTextureId Storage::getVtexIndexAt(
-        ESM::ExteriorCellLocation cellLocation, const LandObject* land, int x, int y, LandCache& cache)
-    {
-        // For the first/last row/column, we need to get the texture from the neighbour cell
-        // to get consistent blending at the borders
-        --x;
-        ESM::ExteriorCellLocation cellLocationIn = cellLocation;
-        if (x < 0)
-        {
-            --cellLocation.mX;
-            x += ESM::Land::LAND_TEXTURE_SIZE;
-        }
-        while (x >= ESM::Land::LAND_TEXTURE_SIZE)
-        {
-            ++cellLocation.mX;
-            x -= ESM::Land::LAND_TEXTURE_SIZE;
-        }
-        while (
-            y >= ESM::Land::LAND_TEXTURE_SIZE) // Y appears to be wrapped from the other side because why the hell not?
-        {
-            ++cellLocation.mY;
-            y -= ESM::Land::LAND_TEXTURE_SIZE;
-        }
-
-        if (cellLocation != cellLocationIn)
-            land = getLand(cellLocation, cache);
-
-        assert(x < ESM::Land::LAND_TEXTURE_SIZE);
-        assert(y < ESM::Land::LAND_TEXTURE_SIZE);
-
-        const ESM::LandData* data = land ? land->getData(ESM::Land::DATA_VTEX) : nullptr;
-        if (data)
-        {
-            int tex = data->getTextures()[y * ESM::Land::LAND_TEXTURE_SIZE + x];
-            if (tex == 0)
-                return std::make_pair(0, 0); // vtex 0 is always the base texture, regardless of plugin
-            return std::make_pair(tex, land->getPlugin());
-        }
-        return std::make_pair(0, 0);
-    }
-
     std::string Storage::getTextureName(UniqueTextureId id)
     {
         static constexpr char defaultTexture[] = "textures\\_land_default.dds";
@@ -371,31 +351,40 @@ namespace ESMTerrain
     void Storage::getBlendmaps(float chunkSize, const osg::Vec2f& chunkCenter, ImageVector& blendmaps,
         std::vector<Terrain::LayerInfo>& layerList, ESM::RefId worldspace)
     {
-        osg::Vec2f origin = chunkCenter - osg::Vec2f(chunkSize / 2.f, chunkSize / 2.f);
-        int cellX = static_cast<int>(std::floor(origin.x()));
-        int cellY = static_cast<int>(std::floor(origin.y()));
-
-        int realTextureSize = ESM::Land::LAND_TEXTURE_SIZE + 1; // add 1 to wrap around next cell
-
-        int rowStart = (origin.x() - cellX) * realTextureSize;
-        int colStart = (origin.y() - cellY) * realTextureSize;
-
-        const int blendmapSize = (realTextureSize - 1) * chunkSize + 1;
+        const osg::Vec2f origin = chunkCenter - osg::Vec2f(chunkSize, chunkSize) * 0.5f;
+        const int startCellX = static_cast<int>(std::floor(origin.x()));
+        const int startCellY = static_cast<int>(std::floor(origin.y()));
+        const std::size_t blendmapSize = getBlendmapSize(chunkSize, ESM::Land::LAND_TEXTURE_SIZE);
         // We need to upscale the blendmap 2x with nearest neighbor sampling to look like Vanilla
-        const int imageScaleFactor = 2;
-        const int blendmapImageSize = blendmapSize * imageScaleFactor;
+        constexpr std::size_t imageScaleFactor = 2;
+        const std::size_t blendmapImageSize = blendmapSize * imageScaleFactor;
 
+        std::vector<UniqueTextureId> textureIds(blendmapSize * blendmapSize);
         LandCache cache;
-        std::map<UniqueTextureId, unsigned int> textureIndicesMap;
-        ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
+        std::pair lastCell{ startCellX, startCellY };
+        const LandObject* land = getLand(ESM::ExteriorCellLocation(startCellX, startCellY, worldspace), cache);
 
-        const LandObject* land = getLand(cellLocation, cache);
-
-        for (int y = 0; y < blendmapSize; y++)
-        {
-            for (int x = 0; x < blendmapSize; x++)
+        const auto handleSample = [&](const CellSample& sample) {
+            const std::pair cell{ sample.mCellX, sample.mCellY };
+            if (lastCell != cell)
             {
-                UniqueTextureId id = getVtexIndexAt(cellLocation, land, x + rowStart, y + colStart, cache);
+                land = getLand(ESM::ExteriorCellLocation(sample.mCellX, sample.mCellY, worldspace), cache);
+                lastCell = cell;
+            }
+
+            textureIds[sample.mDstCol * blendmapSize + sample.mDstRow]
+                = getTextureIdAt(land, sample.mSrcRow, sample.mSrcCol);
+        };
+
+        sampleBlendmaps(chunkSize, origin.x(), origin.y(), ESM::Land::LAND_TEXTURE_SIZE, handleSample);
+
+        std::map<UniqueTextureId, unsigned int> textureIndicesMap;
+
+        for (std::size_t y = 0; y < blendmapSize; ++y)
+        {
+            for (std::size_t x = 0; x < blendmapSize; ++x)
+            {
+                const UniqueTextureId id = textureIds[y * blendmapSize + x];
                 std::map<UniqueTextureId, unsigned int>::iterator found = textureIndicesMap.find(id);
                 if (found == textureIndicesMap.end())
                 {
@@ -417,21 +406,21 @@ namespace ESMTerrain
                     if (layerIndex >= layerList.size())
                     {
                         osg::ref_ptr<osg::Image> image(new osg::Image);
-                        image->allocateImage(blendmapImageSize, blendmapImageSize, 1, GL_ALPHA, GL_UNSIGNED_BYTE);
-                        unsigned char* pData = image->data();
-                        memset(pData, 0, image->getTotalDataSize());
-                        blendmaps.emplace_back(image);
-                        layerList.emplace_back(info);
+                        image->allocateImage(static_cast<int>(blendmapImageSize), static_cast<int>(blendmapImageSize),
+                            1, GL_ALPHA, GL_UNSIGNED_BYTE);
+                        std::memset(image->data(), 0, image->getTotalDataSize());
+                        blendmaps.push_back(std::move(image));
+                        layerList.push_back(std::move(info));
                     }
                 }
-                unsigned int layerIndex = found->second;
-                unsigned char* pData = blendmaps[layerIndex]->data();
-                int realY = (blendmapSize - y - 1) * imageScaleFactor;
-                int realX = x * imageScaleFactor;
-                pData[((realY + 0) * blendmapImageSize + realX + 0)] = 255;
-                pData[((realY + 1) * blendmapImageSize + realX + 0)] = 255;
-                pData[((realY + 0) * blendmapImageSize + realX + 1)] = 255;
-                pData[((realY + 1) * blendmapImageSize + realX + 1)] = 255;
+                const unsigned int layerIndex = found->second;
+                unsigned char* const data = blendmaps[layerIndex]->data();
+                const std::size_t realY = (blendmapSize - y - 1) * imageScaleFactor;
+                const std::size_t realX = x * imageScaleFactor;
+                data[((realY + 0) * blendmapImageSize + realX + 0)] = 255;
+                data[((realY + 1) * blendmapImageSize + realX + 0)] = 255;
+                data[((realY + 0) * blendmapImageSize + realX + 1)] = 255;
+                data[((realY + 1) * blendmapImageSize + realX + 1)] = 255;
             }
         }
 

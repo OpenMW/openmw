@@ -4,6 +4,7 @@
 #include <components/misc/mathutil.hpp>
 
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <stdexcept>
 #include <string>
@@ -37,6 +38,16 @@ namespace ESMTerrain
             ++vertY;
         }
     }
+
+    struct CellSample
+    {
+        int mCellX;
+        int mCellY;
+        std::size_t mSrcRow;
+        std::size_t mSrcCol;
+        std::size_t mDstRow;
+        std::size_t mDstCol;
+    };
 
     template <class F>
     void sampleCellGridSimple(std::size_t cellSize, std::size_t sampleSize, std::size_t beginX, std::size_t beginY,
@@ -113,6 +124,71 @@ namespace ESMTerrain
             }
 
             baseVertY = vertY + 1;
+        }
+    }
+
+    inline int getBlendmapSize(float size, int textureSize)
+    {
+        return static_cast<int>(textureSize * size) + 1;
+    }
+
+    inline void adjustTextureCoordinates(int textureSize, int& cellX, int& cellY, int& x, int& y)
+    {
+        --x;
+        if (x < 0)
+        {
+            --cellX;
+            x += textureSize;
+        }
+
+        while (x >= textureSize)
+        {
+            ++cellX;
+            x -= textureSize;
+        }
+
+        while (y >= textureSize)
+        {
+            ++cellY;
+            y -= textureSize;
+        }
+    }
+
+    template <class F>
+    void sampleBlendmaps(float size, float minX, float minY, int textureSize, F&& f)
+    {
+        if (size <= 0)
+            throw std::invalid_argument("Invalid size for blendmap sampling: " + std::to_string(size));
+
+        if (textureSize <= 0)
+            throw std::invalid_argument("Invalid texture size for blendmap sampling: " + std::to_string(textureSize));
+
+        const int beginCellX = static_cast<int>(std::floor(minX));
+        const int beginCellY = static_cast<int>(std::floor(minY));
+        const int beginRow = static_cast<int>((minX - beginCellX) * (textureSize + 1));
+        const int beginCol = static_cast<int>((minY - beginCellY) * (textureSize + 1));
+        const int blendmapSize = getBlendmapSize(size, textureSize);
+
+        for (int y = 0; y < blendmapSize; y++)
+        {
+            for (int x = 0; x < blendmapSize; x++)
+            {
+                int cellX = beginCellX;
+                int cellY = beginCellY;
+                int srcX = x + beginRow;
+                int srcY = y + beginCol;
+
+                adjustTextureCoordinates(textureSize, cellX, cellY, srcX, srcY);
+
+                f(CellSample{
+                    .mCellX = cellX,
+                    .mCellY = cellY,
+                    .mSrcRow = static_cast<std::size_t>(srcX),
+                    .mSrcCol = static_cast<std::size_t>(srcY),
+                    .mDstRow = static_cast<std::size_t>(x),
+                    .mDstCol = static_cast<std::size_t>(y),
+                });
+            }
         }
     }
 }

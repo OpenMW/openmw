@@ -362,5 +362,130 @@ namespace ESMTerrain
                     Sample{ .mCellX = 0, .mCellY = 3, .mLocalX = 0, .mLocalY = 2, .mVertexX = 0, .mVertexY = 1 },
                     Sample{ .mCellX = 3, .mCellY = 3, .mLocalX = 2, .mLocalY = 2, .mVertexX = 1, .mVertexY = 1 }));
         }
+
+        auto tie(const CellSample& v)
+        {
+            return std::tie(v.mCellX, v.mCellY, v.mSrcRow, v.mSrcCol, v.mDstRow, v.mDstCol);
+        }
+    }
+
+    static bool operator==(const CellSample& l, const CellSample& r)
+    {
+        return tie(l) == tie(r);
+    }
+
+    static std::ostream& operator<<(std::ostream& stream, const CellSample& v)
+    {
+        return stream << "CellSample{.mCellX = " << v.mCellX << ", .mCellY = " << v.mCellY
+                      << ", .mSrcRow = " << v.mSrcRow << ", .mSrcCol = " << v.mSrcCol << ", .mDstRow = " << v.mDstRow
+                      << ", .mDstCol = " << v.mDstCol << "}";
+    }
+
+    namespace
+    {
+        struct CollectCellSamples
+        {
+            std::vector<CellSample>& mSamples;
+
+            void operator()(const CellSample& value) { mSamples.push_back(value); }
+        };
+
+        TEST(ESMTerrainSampleBlendmaps, doesNotSupportNotPositiveSize)
+        {
+            const float size = 0;
+            EXPECT_THROW(sampleBlendmaps(size, 0, 0, 0, [](auto...) {}), std::invalid_argument);
+        }
+
+        TEST(ESMTerrainSampleBlendmaps, doesNotSupportNotPositiveTextureSize)
+        {
+            const float size = 1;
+            const int textureSize = 0;
+            EXPECT_THROW(sampleBlendmaps(size, 0, 0, textureSize, [](auto...) {}), std::invalid_argument);
+        }
+
+        TEST(ESMTerrainSampleBlendmaps, shouldDecrementBeginRow)
+        {
+            const float size = 0.125f;
+            const float minX = 0.125f;
+            const float minY = 0.125f;
+            const int textureSize = 8;
+            std::vector<CellSample> samples;
+            sampleBlendmaps(size, minX, minY, textureSize, CollectCellSamples{ samples });
+            EXPECT_THAT(samples,
+                ElementsAre( //
+                    CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 0, .mDstCol = 0 },
+                    CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 1, .mSrcCol = 1, .mDstRow = 1, .mDstCol = 0 },
+                    CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 2, .mDstRow = 0, .mDstCol = 1 },
+                    CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 1, .mSrcCol = 2, .mDstRow = 1, .mDstCol = 1 }));
+        }
+
+        TEST(ESMTerrainSampleBlendmaps, shouldDecrementBeginRowOverCellBorder)
+        {
+            const float size = 0.125f;
+            const float minX = 0;
+            const float minY = 0;
+            const int textureSize = 8;
+            std::vector<CellSample> samples;
+            sampleBlendmaps(size, minX, minY, textureSize, CollectCellSamples{ samples });
+            EXPECT_THAT(samples,
+                ElementsAre( //
+                    CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 7, .mSrcCol = 0, .mDstRow = 0, .mDstCol = 0 },
+                    CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 1, .mDstCol = 0 },
+                    CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 7, .mSrcCol = 1, .mDstRow = 0, .mDstCol = 1 },
+                    CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 1, .mDstCol = 1 }));
+        }
+
+        TEST(ESMTerrainSampleBlendmaps, shouldSupportNegativeCoordinates)
+        {
+            const float size = 0.125f;
+            const float minX = -0.5f;
+            const float minY = -0.5f;
+            const int textureSize = 8;
+            std::vector<CellSample> samples;
+            sampleBlendmaps(size, minX, minY, textureSize, CollectCellSamples{ samples });
+            EXPECT_THAT(samples,
+                ElementsAre( //
+                    CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 3, .mSrcCol = 4, .mDstRow = 0, .mDstCol = 0 },
+                    CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 4, .mSrcCol = 4, .mDstRow = 1, .mDstCol = 0 },
+                    CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 3, .mSrcCol = 5, .mDstRow = 0, .mDstCol = 1 },
+                    CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 4, .mSrcCol = 5, .mDstRow = 1, .mDstCol = 1 }));
+        }
+
+        TEST(ESMTerrainSampleBlendmaps, shouldCoverMultipleCells)
+        {
+            const float size = 2;
+            const float minX = -1.5f;
+            const float minY = -1.5f;
+            const int textureSize = 2;
+            std::vector<CellSample> samples;
+            sampleBlendmaps(size, minX, minY, textureSize, CollectCellSamples{ samples });
+            EXPECT_THAT(samples,
+                ElementsAre( //
+                    CellSample{ .mCellX = -2, .mCellY = -2, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 0, .mDstCol = 0 },
+                    CellSample{ .mCellX = -2, .mCellY = -2, .mSrcRow = 1, .mSrcCol = 1, .mDstRow = 1, .mDstCol = 0 },
+                    CellSample{ .mCellX = -1, .mCellY = -2, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 2, .mDstCol = 0 },
+                    CellSample{ .mCellX = -1, .mCellY = -2, .mSrcRow = 1, .mSrcCol = 1, .mDstRow = 3, .mDstCol = 0 },
+                    CellSample{ .mCellX = 0, .mCellY = -2, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 4, .mDstCol = 0 },
+                    CellSample{ .mCellX = -2, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 0, .mDstCol = 1 },
+                    CellSample{ .mCellX = -2, .mCellY = -1, .mSrcRow = 1, .mSrcCol = 0, .mDstRow = 1, .mDstCol = 1 },
+                    CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 2, .mDstCol = 1 },
+                    CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 1, .mSrcCol = 0, .mDstRow = 3, .mDstCol = 1 },
+                    CellSample{ .mCellX = 0, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 4, .mDstCol = 1 },
+                    CellSample{ .mCellX = -2, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 0, .mDstCol = 2 },
+                    CellSample{ .mCellX = -2, .mCellY = -1, .mSrcRow = 1, .mSrcCol = 1, .mDstRow = 1, .mDstCol = 2 },
+                    CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 2, .mDstCol = 2 },
+                    CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 1, .mSrcCol = 1, .mDstRow = 3, .mDstCol = 2 },
+                    CellSample{ .mCellX = 0, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 4, .mDstCol = 2 },
+                    CellSample{ .mCellX = -2, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 0, .mDstCol = 3 },
+                    CellSample{ .mCellX = -2, .mCellY = 0, .mSrcRow = 1, .mSrcCol = 0, .mDstRow = 1, .mDstCol = 3 },
+                    CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 2, .mDstCol = 3 },
+                    CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 1, .mSrcCol = 0, .mDstRow = 3, .mDstCol = 3 },
+                    CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 4, .mDstCol = 3 },
+                    CellSample{ .mCellX = -2, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 0, .mDstCol = 4 },
+                    CellSample{ .mCellX = -2, .mCellY = 0, .mSrcRow = 1, .mSrcCol = 1, .mDstRow = 1, .mDstCol = 4 },
+                    CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 2, .mDstCol = 4 },
+                    CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 1, .mSrcCol = 1, .mDstRow = 3, .mDstCol = 4 },
+                    CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 4, .mDstCol = 4 }));
+        }
     }
 }

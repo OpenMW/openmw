@@ -62,6 +62,11 @@ namespace ESMTerrain
         ESM::LandData mData;
     };
 
+    // Since plugins can define new texture palettes, we need to know the plugin index too
+    // in order to retrieve the correct texture name.
+    // pair  <texture id, plugin id>
+    using UniqueTextureId = std::pair<std::uint16_t, int>;
+
     /// @brief Feeds data from ESM terrain records (ESM::Land, ESM::LandTexture)
     ///        into the terrain component, converting it on the fly as needed.
     class Storage : public Terrain::Storage
@@ -146,13 +151,6 @@ namespace ESMTerrain
         virtual void adjustColor(int col, int row, const ESM::LandData* heightData, osg::Vec4ub& color) const;
         virtual float getAlteredHeight(int col, int row) const;
 
-        // Since plugins can define new texture palettes, we need to know the plugin index too
-        // in order to retrieve the correct texture name.
-        // pair  <texture id, plugin id>
-        typedef std::pair<short, short> UniqueTextureId;
-
-        inline UniqueTextureId getVtexIndexAt(
-            ESM::ExteriorCellLocation cellLocation, const LandObject* land, int x, int y, LandCache&);
         std::string getTextureName(UniqueTextureId id);
 
         std::map<std::string, Terrain::LayerInfo> mLayerInfoMap;
