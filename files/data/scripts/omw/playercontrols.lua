@@ -106,7 +106,7 @@ local function processAttacking()
 end
 
 local function onFrame(dt)
-    controlsAllowed = input.getControlSwitch(input.CONTROL_SWITCH.Controls) and not core.isWorldPaused()
+    local controlsAllowed = input.getControlSwitch(input.CONTROL_SWITCH.Controls) and not core.isWorldPaused()
     if not movementControlsOverridden then
         if controlsAllowed then
             processMovement()
