@@ -1115,8 +1115,12 @@ namespace MWMechanics
                 }
                 ++hitKey;
             }
-            if (!hasHitKey && mAttackStrength != -1.f)
+            if (!hasHitKey)
             {
+                // State update doesn't expect the start key to be the hit key,
+                // so we have to do this early.
+                prepareHit();
+
                 if (groupname == "attack1" || groupname == "swimattack1")
                     charClass.hit(
                         mPtr, mAttackStrength, ESM::Weapon::AT_Chop, mAttackVictim, mAttackHitPos, mAttackSuccess);
@@ -1126,7 +1130,6 @@ namespace MWMechanics
                 else if (groupname == "attack3" || groupname == "swimattack3")
                     charClass.hit(
                         mPtr, mAttackStrength, ESM::Weapon::AT_Thrust, mAttackVictim, mAttackHitPos, mAttackSuccess);
-                mAttackStrength = -1.f;
             }
         }
         else if (action == "shoot attach")
@@ -1217,6 +1220,25 @@ namespace MWMechanics
 
         return std::clamp(
             (mAnimation->getCurrentTime(mCurrentWeapon) - minAttackTime) / (maxAttackTime - minAttackTime), 0.f, 1.f);
+    }
+
+    void CharacterController::prepareHit()
+    {
+        if (mAttackStrength != -1.f)
+            return;
+
+        auto& prng = MWBase::Environment::get().getWorld()->getPrng();
+        mAttackStrength = calculateWindUp();
+        if (mAttackStrength == -1.f)
+            mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
+        ESM::WeaponType::Class weapclass = getWeaponType(mWeaponType)->mWeaponClass;
+        if (weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
+        {
+            mAttackSuccess = mPtr.getClass().evaluateHit(mPtr, mAttackVictim, mAttackHitPos);
+            if (!mAttackSuccess)
+                mAttackStrength = 0.f;
+            playSwishSound();
+        }
     }
 
     bool CharacterController::updateWeaponState()
@@ -1641,8 +1663,6 @@ namespace MWMechanics
                         stopKey = mAttackType + " max attack";
                     }
 
-                    mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, false,
-                        weapSpeed, startKey, stopKey, 0.0f, 0);
                     mUpperBodyState = UpperBodyState::AttackWindUp;
 
                     // Reset the attack results when the attack starts.
@@ -1651,6 +1671,9 @@ namespace MWMechanics
                     mAttackSuccess = false;
                     mAttackVictim = MWWorld::Ptr();
                     mAttackHitPos = osg::Vec3f();
+
+                    mAnimation->play(mCurrentWeapon, priorityWeapon, MWRender::Animation::BlendMask_All, false,
+                        weapSpeed, startKey, stopKey, 0.0f, 0);
                 }
             }
 
@@ -1688,18 +1711,11 @@ namespace MWMechanics
                         sndMgr->playSound3D(target, ESM::RefId::stringRefId(resultSound), 1.0f, 1.0f);
                 }
             }
+            // Evaluate the attack results and play the swish sound.
+            // Attack animations with no hit key do this earlier.
             else
             {
-                mAttackStrength = calculateWindUp();
-                if (mAttackStrength == -1.f)
-                    mAttackStrength = std::min(1.f, 0.1f + Misc::Rng::rollClosedProbability(prng));
-                if (weapclass != ESM::WeaponType::Ranged && weapclass != ESM::WeaponType::Thrown)
-                {
-                    mAttackSuccess = cls.evaluateHit(mPtr, mAttackVictim, mAttackHitPos);
-                    if (!mAttackSuccess)
-                        mAttackStrength = 0.f;
-                    playSwishSound();
-                }
+                prepareHit();
             }
 
             if (mWeaponType == ESM::Weapon::PickProbe || isRandomAttackAnimation(mCurrentWeapon))

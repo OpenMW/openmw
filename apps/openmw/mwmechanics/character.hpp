@@ -242,6 +242,8 @@ namespace MWMechanics
         bool getAttackingOrSpell() const;
         void setAttackingOrSpell(bool attackingOrSpell) const;
 
+        void prepareHit();
+
     public:
         CharacterController(const MWWorld::Ptr& ptr, MWRender::Animation* anim);
         virtual ~CharacterController();
