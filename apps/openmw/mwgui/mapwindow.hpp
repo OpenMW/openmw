@@ -73,7 +73,7 @@ namespace MWGui
     class LocalMapBase
     {
     public:
-        LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender);
+        LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender, bool fogOfWarEnabled);
         virtual ~LocalMapBase();
         void init(MyGUI::ScrollView* widget, MyGUI::ImageBox* compass, int cellDistance = Constants::CellGridRadius);
 
@@ -125,6 +125,7 @@ namespace MWGui
         std::string mPrefix;
         bool mChanged;
         bool mFogOfWarToggled;
+        bool mFogOfWarEnabled;
 
         int mNumCells; // for convenience, mCellDistance * 2 + 1
         int mCellDistance;

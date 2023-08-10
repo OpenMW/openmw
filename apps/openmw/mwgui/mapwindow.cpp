@@ -167,7 +167,8 @@ namespace MWGui
 
     // ------------------------------------------------------
 
-    LocalMapBase::LocalMapBase(CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender)
+    LocalMapBase::LocalMapBase(
+        CustomMarkerCollection& markers, MWRender::LocalMap* localMapRender, bool fogOfWarEnabled)
         : mLocalMapRender(localMapRender)
         , mCurX(0)
         , mCurY(0)
@@ -176,6 +177,7 @@ namespace MWGui
         , mCompass(nullptr)
         , mChanged(true)
         , mFogOfWarToggled(true)
+        , mFogOfWarEnabled(fogOfWarEnabled)
         , mNumCells(1)
         , mCellDistance(0)
         , mCustomMarkers(markers)
@@ -244,7 +246,7 @@ namespace MWGui
 
     void LocalMapBase::applyFogOfWar()
     {
-        if (!mFogOfWarToggled || !Settings::map().mLocalMapHudFogOfWar)
+        if (!mFogOfWarToggled || !mFogOfWarEnabled)
         {
             for (auto& entry : mMaps)
             {
@@ -595,7 +597,7 @@ namespace MWGui
                 else
                     entry.mMapTexture = std::make_unique<osgMyGUI::OSGTexture>(std::string(), nullptr);
             }
-            if (!entry.mFogTexture && mFogOfWarToggled && Settings::map().mLocalMapHudFogOfWar)
+            if (!entry.mFogTexture && mFogOfWarToggled && mFogOfWarEnabled)
             {
                 osg::ref_ptr<osg::Texture2D> tex = mLocalMapRender->getFogOfWarTexture(entry.mCellX, entry.mCellY);
                 if (tex)
@@ -752,7 +754,7 @@ namespace MWGui
 #else
         : WindowPinnableBase("openmw_map_window.layout")
 #endif
-        , LocalMapBase(customMarkers, localMapRender)
+        , LocalMapBase(customMarkers, localMapRender, true)
         , NoDrop(drag, mMainWidget)
         , mGlobalMap(nullptr)
         , mGlobalMapImage(nullptr)
