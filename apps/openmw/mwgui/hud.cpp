@@ -11,7 +11,7 @@
 #include <components/esm3/loadmgef.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -88,7 +88,7 @@ namespace MWGui
 
     HUD::HUD(CustomMarkerCollection& customMarkers, DragAndDrop* dragAndDrop, MWRender::LocalMap* localMapRender)
         : WindowBase("openmw_hud.layout")
-        , LocalMapBase(customMarkers, localMapRender)
+        , LocalMapBase(customMarkers, localMapRender, Settings::map().mLocalMapHudFogOfWar)
         , mHealth(nullptr)
         , mMagicka(nullptr)
         , mStamina(nullptr)
