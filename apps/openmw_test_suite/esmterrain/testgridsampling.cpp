@@ -430,8 +430,8 @@ namespace ESMTerrain
             EXPECT_THAT(samples,
                 ElementsAre( //
                     CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 7, .mSrcCol = 0, .mDstRow = 0, .mDstCol = 0 },
-                    CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 1, .mDstCol = 0 },
                     CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 7, .mSrcCol = 1, .mDstRow = 0, .mDstCol = 1 },
+                    CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 1, .mDstCol = 0 },
                     CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 1, .mDstCol = 1 }));
         }
 
@@ -468,23 +468,23 @@ namespace ESMTerrain
                     CellSample{ .mCellX = 0, .mCellY = -2, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 4, .mDstCol = 0 },
                     CellSample{ .mCellX = -2, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 0, .mDstCol = 1 },
                     CellSample{ .mCellX = -2, .mCellY = -1, .mSrcRow = 1, .mSrcCol = 0, .mDstRow = 1, .mDstCol = 1 },
-                    CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 2, .mDstCol = 1 },
-                    CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 1, .mSrcCol = 0, .mDstRow = 3, .mDstCol = 1 },
-                    CellSample{ .mCellX = 0, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 4, .mDstCol = 1 },
                     CellSample{ .mCellX = -2, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 0, .mDstCol = 2 },
                     CellSample{ .mCellX = -2, .mCellY = -1, .mSrcRow = 1, .mSrcCol = 1, .mDstRow = 1, .mDstCol = 2 },
+                    CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 2, .mDstCol = 1 },
+                    CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 1, .mSrcCol = 0, .mDstRow = 3, .mDstCol = 1 },
                     CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 2, .mDstCol = 2 },
                     CellSample{ .mCellX = -1, .mCellY = -1, .mSrcRow = 1, .mSrcCol = 1, .mDstRow = 3, .mDstCol = 2 },
+                    CellSample{ .mCellX = 0, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 4, .mDstCol = 1 },
                     CellSample{ .mCellX = 0, .mCellY = -1, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 4, .mDstCol = 2 },
                     CellSample{ .mCellX = -2, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 0, .mDstCol = 3 },
                     CellSample{ .mCellX = -2, .mCellY = 0, .mSrcRow = 1, .mSrcCol = 0, .mDstRow = 1, .mDstCol = 3 },
-                    CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 2, .mDstCol = 3 },
-                    CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 1, .mSrcCol = 0, .mDstRow = 3, .mDstCol = 3 },
-                    CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 4, .mDstCol = 3 },
                     CellSample{ .mCellX = -2, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 0, .mDstCol = 4 },
                     CellSample{ .mCellX = -2, .mCellY = 0, .mSrcRow = 1, .mSrcCol = 1, .mDstRow = 1, .mDstCol = 4 },
+                    CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 2, .mDstCol = 3 },
+                    CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 1, .mSrcCol = 0, .mDstRow = 3, .mDstCol = 3 },
                     CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 2, .mDstCol = 4 },
                     CellSample{ .mCellX = -1, .mCellY = 0, .mSrcRow = 1, .mSrcCol = 1, .mDstRow = 3, .mDstCol = 4 },
+                    CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 0, .mDstRow = 4, .mDstCol = 3 },
                     CellSample{ .mCellX = 0, .mCellY = 0, .mSrcRow = 0, .mSrcCol = 1, .mDstRow = 4, .mDstCol = 4 }));
         }
     }

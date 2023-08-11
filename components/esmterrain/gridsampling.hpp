@@ -132,26 +132,16 @@ namespace ESMTerrain
         return static_cast<int>(textureSize * size) + 1;
     }
 
-    inline void adjustTextureCoordinates(int textureSize, int& cellX, int& cellY, int& x, int& y)
+    inline std::pair<std::size_t, std::size_t> getBlendmapLocalRange(
+        int cell, int minCell, int textureSize, int min, int max)
     {
-        --x;
-        if (x < 0)
-        {
-            --cellX;
-            x += textureSize;
-        }
-
-        while (x >= textureSize)
-        {
-            ++cellX;
-            x -= textureSize;
-        }
-
-        while (y >= textureSize)
-        {
-            ++cellY;
-            y -= textureSize;
-        }
+        const int cellMin = (cell - minCell) * textureSize;
+        const int cellMax = cellMin + textureSize - 1;
+        const std::size_t begin = min > cellMin ? min - cellMin : 0;
+        const std::size_t end = cellMax < max ? textureSize : max - cellMin + 1;
+        assert(begin < end);
+        assert(static_cast<int>(end) <= textureSize);
+        return { begin, end };
     }
 
     template <class F>
@@ -163,32 +153,52 @@ namespace ESMTerrain
         if (textureSize <= 0)
             throw std::invalid_argument("Invalid texture size for blendmap sampling: " + std::to_string(textureSize));
 
-        const int beginCellX = static_cast<int>(std::floor(minX));
-        const int beginCellY = static_cast<int>(std::floor(minY));
-        const int beginRow = static_cast<int>((minX - beginCellX) * (textureSize + 1));
-        const int beginCol = static_cast<int>((minY - beginCellY) * (textureSize + 1));
-        const int blendmapSize = getBlendmapSize(size, textureSize);
+        int minCellX = static_cast<int>(std::floor(minX));
+        const int minCellY = static_cast<int>(std::floor(minY));
+        int minRow = static_cast<int>((minX - minCellX) * (textureSize + 1)) - 1;
+        const int minCol = static_cast<int>((minY - minCellY) * (textureSize + 1));
 
-        for (int y = 0; y < blendmapSize; y++)
+        if (minRow < 0)
         {
-            for (int x = 0; x < blendmapSize; x++)
+            --minCellX;
+            minRow += textureSize;
+        }
+
+        const int maxRow = minRow + static_cast<int>(textureSize * size);
+        const int maxCol = minCol + static_cast<int>(textureSize * size);
+        const int maxCellX = minCellX + maxRow / textureSize;
+        const int maxCellY = minCellY + maxCol / textureSize;
+
+        std::size_t baseDstCol = 0;
+        for (int cellY = minCellY; cellY <= maxCellY; ++cellY)
+        {
+            std::size_t baseDstRow = 0;
+
+            const auto [localBeginCol, localEndCol]
+                = getBlendmapLocalRange(cellY, minCellY, textureSize, minCol, maxCol);
+            const std::size_t colCount = localEndCol - localBeginCol;
+
+            for (int cellX = minCellX; cellX <= maxCellX; ++cellX)
             {
-                int cellX = beginCellX;
-                int cellY = beginCellY;
-                int srcX = x + beginRow;
-                int srcY = y + beginCol;
+                const auto [localBeginRow, localEndRow]
+                    = getBlendmapLocalRange(cellX, minCellX, textureSize, minRow, maxRow);
+                const std::size_t rowCount = localEndRow - localBeginRow;
 
-                adjustTextureCoordinates(textureSize, cellX, cellY, srcX, srcY);
+                for (std::size_t col = 0; col < colCount; ++col)
+                    for (std::size_t row = 0; row < rowCount; ++row)
+                        f(CellSample{
+                            .mCellX = cellX,
+                            .mCellY = cellY,
+                            .mSrcRow = localBeginRow + row,
+                            .mSrcCol = localBeginCol + col,
+                            .mDstRow = baseDstRow + row,
+                            .mDstCol = baseDstCol + col,
+                        });
 
-                f(CellSample{
-                    .mCellX = cellX,
-                    .mCellY = cellY,
-                    .mSrcRow = static_cast<std::size_t>(srcX),
-                    .mSrcCol = static_cast<std::size_t>(srcY),
-                    .mDstRow = static_cast<std::size_t>(x),
-                    .mDstCol = static_cast<std::size_t>(y),
-                });
+                baseDstRow += rowCount;
             }
+
+            baseDstCol += colCount;
         }
     }
 }
