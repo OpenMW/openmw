@@ -23,7 +23,7 @@
 -- @field [parent=#nearby] openmw.core#ObjectList doors
 
 ---
--- Everything in the nearby that is derived from @{openmw.types#Item}.
+-- Everything nearby that is derived from @{openmw.types#Item}.
 -- @field [parent=#nearby] openmw.core#ObjectList items
 
 ---
@@ -49,7 +49,7 @@
 -- @field [parent=#COLLISION_TYPE] #number Projectile
 -- @field [parent=#COLLISION_TYPE] #number Water
 -- @field [parent=#COLLISION_TYPE] #number Default Used by default: World+Door+Actor+HeightMap
--- @field [parent=#COLLISION_TYPE] #number AnyPhysical : World+Door+Actor+HeightMap+Projectile+Water
+-- @field [parent=#COLLISION_TYPE] #number AnyPhysical World+Door+Actor+HeightMap+Projectile+Water
 -- @field [parent=#COLLISION_TYPE] #number Camera Objects that should collide only with camera
 -- @field [parent=#COLLISION_TYPE] #number VisualOnly Objects that were not intended to be part of the physics world
 

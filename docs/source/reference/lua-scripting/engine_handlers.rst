@@ -39,7 +39,8 @@ Engine handler is a function defined by a script, that can be called by the engi
   * - onNewGame()
     - New game is started.
   * - onPlayerAdded(player)
-    - Player added to the game world. The argument is a `Game object`.
+    - | Player added to the game world. The argument is a `Game object`. 
+      | Note that this is triggered at the start of a game, and when a game is loaded.
   * - onObjectActive(object)
     - Object becomes active.
   * - onActorActive(actor)
