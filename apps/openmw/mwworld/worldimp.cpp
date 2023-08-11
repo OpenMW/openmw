@@ -584,7 +584,8 @@ namespace MWWorld
     World::~World()
     {
         // Must be cleared before mRendering is destroyed
-        mProjectileManager->clear();
+        if (mProjectileManager)
+            mProjectileManager->clear();
     }
 
     void World::setRandomSeed(uint32_t seed)

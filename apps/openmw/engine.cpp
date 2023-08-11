@@ -673,9 +673,6 @@ void OMW::Engine::prepareEngine()
     mLuaManager = std::make_unique<MWLua::LuaManager>(mVFS.get(), mResDir / "lua_libs");
     mEnvironment.setLuaManager(*mLuaManager);
 
-    // starts a separate lua thread if "lua num threads" > 0
-    mLuaWorker = std::make_unique<MWLua::Worker>(*mLuaManager, *mViewer);
-
     // Create input and UI first to set up a bootstrapping environment for
     // showing a loading screen and keeping the window responsive while doing so
 
@@ -760,6 +757,7 @@ void OMW::Engine::prepareEngine()
         using namespace std::chrono_literals;
         while (dataLoading.wait_for(50ms) != std::future_status::ready)
             asyncListener.update();
+        dataLoading.get();
     }
     listener->loadingOff();
 
@@ -835,6 +833,9 @@ void OMW::Engine::prepareEngine()
 
     mLuaManager->init();
     mLuaManager->loadPermanentStorage(mCfgMgr.getUserConfigPath());
+
+    // starts a separate lua thread if "lua num threads" > 0
+    mLuaWorker = std::make_unique<MWLua::Worker>(*mLuaManager, *mViewer);
 }
 
 // Initialise and enter main loop.
