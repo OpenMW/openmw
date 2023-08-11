@@ -306,7 +306,7 @@
 -- end
 
 ---
--- Get all objects of given type from the cell.
+-- Get all objects of given type from the cell; Only available from global scripts.
 -- @function [parent=#Cell] getAll
 -- @param self
 -- @param type (optional) object type (see @{openmw.types#types})
