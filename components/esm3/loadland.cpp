@@ -332,20 +332,9 @@ namespace ESM
 
     Land& Land::operator=(const Land& land)
     {
-        Land tmp(land);
-        swap(tmp);
+        Land copy(land);
+        *this = std::move(copy);
         return *this;
-    }
-
-    void Land::swap(Land& land)
-    {
-        std::swap(mFlags, land.mFlags);
-        std::swap(mX, land.mX);
-        std::swap(mY, land.mY);
-        std::swap(mContext, land.mContext);
-        std::swap(mDataTypes, land.mDataTypes);
-        std::swap(mLandData, land.mLandData);
-        std::swap(mWnam, land.mWnam);
     }
 
     const Land::LandData* Land::getLandData(int flags) const

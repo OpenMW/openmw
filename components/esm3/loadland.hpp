@@ -28,6 +28,14 @@ namespace ESM
 
         Land() = default;
 
+        Land(const Land& land);
+
+        Land(Land&& other) = default;
+
+        Land& operator=(const Land& land);
+
+        Land& operator=(Land&& land) = default;
+
         // Only first four bits seem to be used, don't know what they mean.
         std::uint32_t mFlags = 0;
         // Map coordinates.
@@ -137,12 +145,6 @@ namespace ESM
 
         /// Check if given data type is loaded
         bool isDataLoaded(int flags) const;
-
-        Land(const Land& land);
-
-        Land& operator=(const Land& land);
-
-        void swap(Land& land);
 
         /// Return land data with at least the data types specified in \a flags loaded (if they
         /// are available). Will return a 0-pointer if there is no data for any of the
