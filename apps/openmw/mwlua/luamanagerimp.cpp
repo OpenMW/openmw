@@ -524,7 +524,7 @@ namespace MWLua
             Log(Debug::Error) << "Error in DelayedAction " << mName << ": " << e.what();
 
             if (mCallerTraceback.empty())
-                Log(Debug::Error) << "Set 'lua_debug=true' in settings.cfg to enable action tracebacks";
+                Log(Debug::Error) << "Set 'lua debug=true' in settings.cfg to enable action tracebacks";
             else
                 Log(Debug::Error) << "Caller " << mCallerTraceback;
         }
