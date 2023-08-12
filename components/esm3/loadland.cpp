@@ -94,7 +94,7 @@ namespace ESM
                     mDataTypes |= DATA_VHGT;
                     break;
                 case fourCC("WNAM"):
-                    esm.getHExact(mWnam, sizeof(mWnam));
+                    esm.getHExact(mWnam.data(), mWnam.size());
                     mDataTypes |= DATA_WNAM;
                     break;
                 case fourCC("VCLR"):
@@ -325,9 +325,9 @@ namespace ESM
         , mY(land.mY)
         , mContext(land.mContext)
         , mDataTypes(land.mDataTypes)
+        , mWnam(land.mWnam)
         , mLandData(land.mLandData != nullptr ? std::make_unique<LandData>(*land.mLandData) : nullptr)
     {
-        std::copy(land.mWnam, land.mWnam + LAND_GLOBAL_MAP_LOD_SIZE, mWnam);
     }
 
     Land& Land::operator=(const Land& land)

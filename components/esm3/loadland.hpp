@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_LAND_H
 #define OPENMW_ESM_LAND_H
 
+#include <array>
 #include <cstdint>
 #include <memory>
 
@@ -125,7 +126,7 @@ namespace ESM
         };
 
         // low-LOD heightmap (used for rendering the global map)
-        std::int8_t mWnam[LAND_GLOBAL_MAP_LOD_SIZE];
+        std::array<std::int8_t, LAND_GLOBAL_MAP_LOD_SIZE> mWnam;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;
