@@ -390,20 +390,4 @@ namespace ESM
         mDataTypes |= flags;
         mLandData->mDataLoaded |= flags;
     }
-
-    void Land::remove(int flags)
-    {
-        mDataTypes &= ~flags;
-
-        if (mLandData)
-        {
-            mLandData->mDataLoaded &= ~flags;
-
-            if (!mLandData->mDataLoaded)
-            {
-                delete mLandData;
-                mLandData = nullptr;
-            }
-        }
-    }
 }

@@ -148,9 +148,6 @@ namespace ESM
         /// Check if given data type is loaded
         bool isDataLoaded(int flags) const;
 
-        /// Sets the flags and creates a LandData if needed
-        void setDataLoaded(int flags);
-
         Land(const Land& land);
 
         Land& operator=(const Land& land);
@@ -172,9 +169,6 @@ namespace ESM
         ///
         /// \note Added data fields will be uninitialised
         void add(int flags);
-
-        /// \attention Must not be called on objects that aren't fully loaded.
-        void remove(int flags);
 
     private:
         /// Loads data and marks it as loaded
