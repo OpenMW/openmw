@@ -38,11 +38,6 @@ namespace ESM
         }
     }
 
-    Land::~Land()
-    {
-        delete mLandData;
-    }
-
     void Land::load(ESMReader& esm, bool& isDeleted)
     {
         isDeleted = false;
@@ -204,8 +199,8 @@ namespace ESM
 
         std::fill(std::begin(mWnam), std::end(mWnam), 0);
 
-        if (!mLandData)
-            mLandData = new LandData;
+        if (mLandData == nullptr)
+            mLandData = std::make_unique<LandData>();
 
         mLandData->mHeightOffset = 0;
         std::fill(std::begin(mLandData->mHeights), std::end(mLandData->mHeights), 0);
@@ -232,13 +227,11 @@ namespace ESM
     void Land::loadData(int flags, LandData* target) const
     {
         // Create storage if nothing is loaded
-        if (!target && !mLandData)
-        {
-            mLandData = new LandData;
-        }
+        if (target == nullptr && mLandData == nullptr)
+            mLandData = std::make_unique<LandData>();
 
-        if (!target)
-            target = mLandData;
+        if (target == nullptr)
+            target = mLandData.get();
 
         // Try to load only available data
         flags = flags & mDataTypes;
@@ -252,7 +245,7 @@ namespace ESM
         if (mContext.filename.empty())
         {
             // Make sure there is data, and that it doesn't point to the same object.
-            if (mLandData && mLandData != target)
+            if (mLandData != nullptr && mLandData.get() != target)
                 *target = *mLandData;
 
             return;
@@ -318,11 +311,7 @@ namespace ESM
 
     void Land::unloadData() const
     {
-        if (mLandData)
-        {
-            delete mLandData;
-            mLandData = nullptr;
-        }
+        mLandData = nullptr;
     }
 
     bool Land::isDataLoaded(int flags) const
@@ -336,7 +325,7 @@ namespace ESM
         , mY(land.mY)
         , mContext(land.mContext)
         , mDataTypes(land.mDataTypes)
-        , mLandData(land.mLandData ? new LandData(*land.mLandData) : nullptr)
+        , mLandData(land.mLandData != nullptr ? std::make_unique<LandData>(*land.mLandData) : nullptr)
     {
         std::copy(land.mWnam, land.mWnam + LAND_GLOBAL_MAP_LOD_SIZE, mWnam);
     }
@@ -365,13 +354,13 @@ namespace ESM
             return nullptr;
 
         loadData(flags);
-        return mLandData;
+        return mLandData.get();
     }
 
     void Land::add(int flags)
     {
-        if (!mLandData)
-            mLandData = new LandData;
+        if (mLandData == nullptr)
+            mLandData = std::make_unique<LandData>();
 
         mDataTypes |= flags;
         mLandData->mDataLoaded |= flags;

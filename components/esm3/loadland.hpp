@@ -2,6 +2,7 @@
 #define OPENMW_ESM_LAND_H
 
 #include <cstdint>
+#include <memory>
 
 #include <components/misc/constants.hpp>
 
@@ -26,7 +27,6 @@ namespace ESM
         static std::string_view getRecordType() { return "Land"; }
 
         Land() = default;
-        ~Land();
 
         // Only first four bits seem to be used, don't know what they mean.
         std::uint32_t mFlags = 0;
@@ -152,13 +152,13 @@ namespace ESM
         /// Return land data without loading first anything. Can return a 0-pointer.
         const LandData* getLandData() const
         {
-            return mLandData;
+            return mLandData.get();
         }
 
         /// Return land data without loading first anything. Can return a 0-pointer.
         LandData* getLandData()
         {
-            return mLandData;
+            return mLandData.get();
         }
 
         /// \attention Must not be called on objects that aren't fully loaded.
@@ -167,7 +167,7 @@ namespace ESM
         void add(int flags);
 
     private:
-        mutable LandData* mLandData = nullptr;
+        mutable std::unique_ptr<LandData> mLandData;
     };
 
 }
