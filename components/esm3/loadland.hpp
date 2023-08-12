@@ -161,11 +161,6 @@ namespace ESM
         void add(int flags);
 
     private:
-        /// Loads data and marks it as loaded
-        /// \return true if data is actually loaded from file, false otherwise
-        /// including the case when data is already loaded
-        bool condLoad(ESMReader& reader, int flags, int& targetFlags, int dataFlag, void* ptr, unsigned int size) const;
-
         mutable LandData* mLandData = nullptr;
     };
 

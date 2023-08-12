@@ -22,6 +22,20 @@ namespace ESM
                         for (int x2 = 0; x2 < 4; x2++)
                             out[(y1 * 4 + y2) * 16 + (x1 * 4 + x2)] = in[readPos++];
         }
+
+        // Loads data and marks it as loaded. Return true if data is actually loaded from reader, false otherwise
+        // including the case when data is already loaded.
+        bool condLoad(ESMReader& reader, int flags, int& targetFlags, int dataFlag, void* ptr, unsigned int size)
+        {
+            if ((targetFlags & dataFlag) == 0 && (flags & dataFlag) != 0)
+            {
+                reader.getHExact(ptr, size);
+                targetFlags |= dataFlag;
+                return true;
+            }
+            reader.skipHSubSize(size);
+            return false;
+        }
     }
 
     Land::~Land()
@@ -309,19 +323,6 @@ namespace ESM
             delete mLandData;
             mLandData = nullptr;
         }
-    }
-
-    bool Land::condLoad(
-        ESMReader& reader, int flags, int& targetFlags, int dataFlag, void* ptr, unsigned int size) const
-    {
-        if ((targetFlags & dataFlag) == 0 && (flags & dataFlag) != 0)
-        {
-            reader.getHExact(ptr, size);
-            targetFlags |= dataFlag;
-            return true;
-        }
-        reader.skipHSubSize(size);
-        return false;
     }
 
     bool Land::isDataLoaded(int flags) const
