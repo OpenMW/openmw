@@ -29,12 +29,12 @@ ESM::LandData::LandData(const ESM::Land& land, int loadFlags)
 ESM::LandData::LandData(const ESM4::Land& land, int /*loadFlags*/)
     : mLoadFlags(land.mDataTypes) // ESM4::Land is always fully loaded. TODO: implement lazy loading
     , mSize(Constants::ESM4CellSizeInUnits)
-    , mLandSize(ESM4::Land::VERTS_PER_SIDE)
+    , mLandSize(ESM4::Land::sVertsPerSide)
 {
 
     mMinHeight = std::numeric_limits<float>::max();
     mMaxHeight = std::numeric_limits<float>::lowest();
-    mHeights.resize(ESM4::Land::LAND_NUM_VERTS);
+    mHeights.resize(ESM4::Land::sLandNumVerts);
     mTextures.resize(ESM::Land::LAND_NUM_TEXTURES);
     std::fill(mTextures.begin(), mTextures.end(), 0);
 
@@ -43,7 +43,7 @@ ESM::LandData::LandData(const ESM4::Land& land, int /*loadFlags*/)
     {
         row_offset += land.mHeightMap.gradientData[y * mLandSize];
 
-        const float heightY = row_offset * ESM4::Land::HEIGHT_SCALE;
+        const float heightY = row_offset * ESM4::Land::sHeightScale;
         mHeights[y * mLandSize] = heightY;
         mMinHeight = std::min(mMinHeight, heightY);
         mMaxHeight = std::max(mMaxHeight, heightY);
@@ -52,7 +52,7 @@ ESM::LandData::LandData(const ESM4::Land& land, int /*loadFlags*/)
         for (int x = 1; x < mLandSize; x++)
         {
             colOffset += land.mHeightMap.gradientData[y * mLandSize + x];
-            const float heightX = colOffset * ESM4::Land::HEIGHT_SCALE;
+            const float heightX = colOffset * ESM4::Land::sHeightScale;
             mMinHeight = std::min(mMinHeight, heightX);
             mMaxHeight = std::max(mMaxHeight, heightX);
             mHeights[x + y * mLandSize] = heightX;

@@ -19,5 +19,5 @@ osg::Vec2 ESM::indexToPosition(const ESM::ExteriorCellLocation& cellIndex, bool 
 
 int ESM::getLandSize(ESM::RefId worldspaceId)
 {
-    return isEsm4Ext(worldspaceId) ? ESM4::Land::VERTS_PER_SIDE : ESM::Land::LAND_SIZE;
+    return isEsm4Ext(worldspaceId) ? ESM4::Land::sVertsPerSide : ESM::Land::LAND_SIZE;
 }
