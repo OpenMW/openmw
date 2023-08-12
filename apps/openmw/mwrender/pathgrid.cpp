@@ -116,7 +116,7 @@ namespace MWRender
             return;
 
         osg::Vec3f cellPathGridPos(0, 0, 0);
-        Misc::CoordinateConverter(*store->getCell()).toWorld(cellPathGridPos);
+        Misc::makeCoordinateConverter(*store->getCell()).toWorld(cellPathGridPos);
 
         osg::ref_ptr<osg::PositionAttitudeTransform> cellPathGrid = new osg::PositionAttitudeTransform;
         cellPathGrid->setPosition(cellPathGridPos);

@@ -3,9 +3,9 @@
 
 #include <components/esm/esmbridge.hpp>
 #include <components/esm3/loadcell.hpp>
-#include <components/esm3/loadland.hpp>
 #include <components/esm3/loadpgrd.hpp>
 #include <components/esm4/loadcell.hpp>
+#include <components/misc/constants.hpp>
 
 namespace Misc
 {
@@ -13,21 +13,9 @@ namespace Misc
     class CoordinateConverter
     {
     public:
-        CoordinateConverter(bool exterior, int cellX, int cellY)
-            : mCellX(exterior ? cellX * ESM::Land::REAL_SIZE : 0)
-            , mCellY(exterior ? cellY * ESM::Land::REAL_SIZE : 0)
-        {
-        }
-
-        explicit CoordinateConverter(const ESM::CellVariant& cell)
-            : CoordinateConverter(cell.isEsm4() ? cell.getEsm4().isExterior() : cell.getEsm3().isExterior(),
-                cell.isEsm4() ? cell.getEsm4().getGridX() : cell.getEsm3().getGridX(),
-                cell.isEsm4() ? cell.getEsm4().getGridY() : cell.getEsm3().getGridY())
-        {
-        }
-
-        explicit CoordinateConverter(const ESM::Cell* cell)
-            : CoordinateConverter(cell->isExterior(), cell->getGridX(), cell->getGridY())
+        explicit CoordinateConverter(int cellX, int cellY)
+            : mCellX(cellX)
+            , mCellY(cellY)
         {
         }
 
@@ -81,6 +69,29 @@ namespace Misc
         int mCellX;
         int mCellY;
     };
+
+    template <class T>
+    CoordinateConverter makeCoordinateConverterImpl(const T& cell)
+    {
+        if (cell.isExterior())
+            return CoordinateConverter(cell.sSize * cell.getGridX(), cell.sSize * cell.getGridY());
+        return CoordinateConverter(0, 0);
+    }
+
+    inline CoordinateConverter makeCoordinateConverter(const ESM::Cell& cell)
+    {
+        return makeCoordinateConverterImpl(cell);
+    }
+
+    inline CoordinateConverter makeCoordinateConverter(const ESM4::Cell& cell)
+    {
+        return makeCoordinateConverterImpl(cell);
+    }
+
+    inline CoordinateConverter makeCoordinateConverter(const ESM::CellVariant& cell)
+    {
+        return visit([](const auto& v) { return makeCoordinateConverterImpl(v); }, cell);
+    }
 }
 
 #endif

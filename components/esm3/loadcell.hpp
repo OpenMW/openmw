@@ -5,10 +5,13 @@
 #include <string>
 #include <vector>
 
-#include "cellref.hpp"
 #include "components/esm/defs.hpp"
 #include "components/esm/esmcommon.hpp"
 #include "components/esm/refid.hpp"
+
+#include <components/misc/constants.hpp>
+
+#include "cellref.hpp"
 
 namespace MWWorld
 {
@@ -69,6 +72,8 @@ namespace ESM
         static const ESM::StringRefId sDefaultWorldspaceId;
 
         constexpr static RecNameInts sRecordId = REC_CELL;
+
+        static constexpr int sSize = Constants::CellSizeInUnits;
 
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
         static std::string_view getRecordType() { return "Cell"; }
