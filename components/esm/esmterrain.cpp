@@ -9,7 +9,7 @@ ESM::LandData::LandData(const ESM::Land& land, int loadFlags)
     , mPlugin(land.getPlugin())
 {
     ESM::Land::LandData data;
-    land.loadData(loadFlags, &data);
+    land.loadData(loadFlags, data);
     mLoadFlags = data.mDataLoaded;
     std::span<const float> heights(data.mHeights);
     mHeights = std::vector(heights.begin(), heights.end());

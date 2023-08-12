@@ -206,7 +206,7 @@ namespace NavMeshTool
                     ESM::Land::DEFAULT_HEIGHT };
 
             ESM::Land::LandData& landData = *landDatas.emplace_back(std::make_unique<ESM::Land::LandData>());
-            land->loadData(ESM::Land::DATA_VHGT, &landData);
+            land->loadData(ESM::Land::DATA_VHGT, landData);
             heightfields.push_back(std::vector<float>(std::begin(landData.mHeights), std::end(landData.mHeights)));
             HeightfieldSurface surface;
             surface.mHeights = heightfields.back().data();

@@ -227,29 +227,29 @@ namespace ESM
         mContext.filename.clear();
     }
 
-    void Land::loadData(int flags, LandData* target) const
+    void Land::loadData(int flags) const
     {
-        // Create storage if nothing is loaded
-        if (target == nullptr && mLandData == nullptr)
+        if (mLandData == nullptr)
             mLandData = std::make_unique<LandData>();
 
-        if (target == nullptr)
-            target = mLandData.get();
+        loadData(flags, *mLandData);
+    }
 
+    void Land::loadData(int flags, LandData& data) const
+    {
         // Try to load only available data
         flags = flags & mDataTypes;
         // Return if all required data is loaded
-        if ((target->mDataLoaded & flags) == flags)
+        if ((data.mDataLoaded & flags) == flags)
         {
             return;
         }
 
-        // Copy data to target if no file
         if (mContext.filename.empty())
         {
             // Make sure there is data, and that it doesn't point to the same object.
-            if (mLandData != nullptr && mLandData.get() != target)
-                *target = *mLandData;
+            if (mLandData != nullptr && mLandData.get() != &data)
+                data = *mLandData;
 
             return;
         }
@@ -259,41 +259,41 @@ namespace ESM
 
         if (reader.isNextSub("VNML"))
         {
-            condLoad(reader, flags, target->mDataLoaded, DATA_VNML, target->mNormals, sizeof(target->mNormals));
+            condLoad(reader, flags, data.mDataLoaded, DATA_VNML, data.mNormals, sizeof(data.mNormals));
         }
 
         if (reader.isNextSub("VHGT"))
         {
             VHGT vhgt;
-            if (condLoad(reader, flags, target->mDataLoaded, DATA_VHGT, &vhgt, sizeof(vhgt)))
+            if (condLoad(reader, flags, data.mDataLoaded, DATA_VHGT, &vhgt, sizeof(vhgt)))
             {
-                target->mMinHeight = std::numeric_limits<float>::max();
-                target->mMaxHeight = -std::numeric_limits<float>::max();
+                data.mMinHeight = std::numeric_limits<float>::max();
+                data.mMaxHeight = -std::numeric_limits<float>::max();
                 float rowOffset = vhgt.mHeightOffset;
                 for (int y = 0; y < LAND_SIZE; y++)
                 {
                     rowOffset += vhgt.mHeightData[y * LAND_SIZE];
 
-                    target->mHeights[y * LAND_SIZE] = rowOffset * HEIGHT_SCALE;
-                    if (rowOffset * HEIGHT_SCALE > target->mMaxHeight)
-                        target->mMaxHeight = rowOffset * HEIGHT_SCALE;
-                    if (rowOffset * HEIGHT_SCALE < target->mMinHeight)
-                        target->mMinHeight = rowOffset * HEIGHT_SCALE;
+                    data.mHeights[y * LAND_SIZE] = rowOffset * HEIGHT_SCALE;
+                    if (rowOffset * HEIGHT_SCALE > data.mMaxHeight)
+                        data.mMaxHeight = rowOffset * HEIGHT_SCALE;
+                    if (rowOffset * HEIGHT_SCALE < data.mMinHeight)
+                        data.mMinHeight = rowOffset * HEIGHT_SCALE;
 
                     float colOffset = rowOffset;
                     for (int x = 1; x < LAND_SIZE; x++)
                     {
                         colOffset += vhgt.mHeightData[y * LAND_SIZE + x];
-                        target->mHeights[x + y * LAND_SIZE] = colOffset * HEIGHT_SCALE;
+                        data.mHeights[x + y * LAND_SIZE] = colOffset * HEIGHT_SCALE;
 
-                        if (colOffset * HEIGHT_SCALE > target->mMaxHeight)
-                            target->mMaxHeight = colOffset * HEIGHT_SCALE;
-                        if (colOffset * HEIGHT_SCALE < target->mMinHeight)
-                            target->mMinHeight = colOffset * HEIGHT_SCALE;
+                        if (colOffset * HEIGHT_SCALE > data.mMaxHeight)
+                            data.mMaxHeight = colOffset * HEIGHT_SCALE;
+                        if (colOffset * HEIGHT_SCALE < data.mMinHeight)
+                            data.mMinHeight = colOffset * HEIGHT_SCALE;
                     }
                 }
-                target->mUnk1 = vhgt.mUnk1;
-                target->mUnk2 = vhgt.mUnk2;
+                data.mUnk1 = vhgt.mUnk1;
+                data.mUnk2 = vhgt.mUnk2;
             }
         }
 
@@ -301,18 +301,18 @@ namespace ESM
             reader.skipHSub();
 
         if (reader.isNextSub("VCLR"))
-            condLoad(reader, flags, target->mDataLoaded, DATA_VCLR, target->mColours, 3 * LAND_NUM_VERTS);
+            condLoad(reader, flags, data.mDataLoaded, DATA_VCLR, data.mColours, 3 * LAND_NUM_VERTS);
         if (reader.isNextSub("VTEX"))
         {
             uint16_t vtex[LAND_NUM_TEXTURES];
-            if (condLoad(reader, flags, target->mDataLoaded, DATA_VTEX, vtex, sizeof(vtex)))
+            if (condLoad(reader, flags, data.mDataLoaded, DATA_VTEX, vtex, sizeof(vtex)))
             {
-                transposeTextureData(vtex, target->mTextures);
+                transposeTextureData(vtex, data.mTextures);
             }
         }
     }
 
-    void Land::unloadData() const
+    void Land::unloadData()
     {
         mLandData = nullptr;
     }

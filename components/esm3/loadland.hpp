@@ -133,16 +133,14 @@ namespace ESM
 
         void blank();
 
-        /**
-         * Actually loads data into target
-         * If target is nullptr, assumed target is mLandData
-         */
-        void loadData(int flags, LandData* target = nullptr) const;
+        void loadData(int flags) const;
+
+        void loadData(int flags, LandData& data) const;
 
         /**
          * Frees memory allocated for mLandData
          */
-        void unloadData() const;
+        void unloadData();
 
         /// Check if given data type is loaded
         bool isDataLoaded(int flags) const;
