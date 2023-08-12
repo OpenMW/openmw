@@ -1,6 +1,7 @@
 #include "loadland.hpp"
 
 #include <algorithm>
+#include <cstdint>
 #include <limits>
 #include <utility>
 
@@ -10,14 +11,17 @@
 
 namespace ESM
 {
-    void transposeTextureData(const uint16_t* in, uint16_t* out)
+    namespace
     {
-        int readPos = 0; // bit ugly, but it works
-        for (int y1 = 0; y1 < 4; y1++)
-            for (int x1 = 0; x1 < 4; x1++)
-                for (int y2 = 0; y2 < 4; y2++)
-                    for (int x2 = 0; x2 < 4; x2++)
-                        out[(y1 * 4 + y2) * 16 + (x1 * 4 + x2)] = in[readPos++];
+        void transposeTextureData(const std::uint16_t* in, std::uint16_t* out)
+        {
+            int readPos = 0; // bit ugly, but it works
+            for (int y1 = 0; y1 < 4; y1++)
+                for (int x1 = 0; x1 < 4; x1++)
+                    for (int y2 = 0; y2 < 4; y2++)
+                        for (int x2 = 0; x2 < 4; x2++)
+                            out[(y1 * 4 + y2) * 16 + (x1 * 4 + x2)] = in[readPos++];
+        }
     }
 
     Land::~Land()
