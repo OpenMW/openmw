@@ -118,7 +118,6 @@ namespace ESM4
         int mDataTypes; // which data types are loaded
 
         float mHeights[sVertsPerSide * sVertsPerSide]; // Float value of compressed Heightmap
-        float mMinHeight, mMaxHeight;
         std::int8_t mVertNorm[sVertsPerSide * sVertsPerSide * 3]; // from VNML subrecord
         std::uint8_t mVertColr[sVertsPerSide * sVertsPerSide * 3]; // from VCLR subrecord
         VHGT mHeightMap;
