@@ -1,17 +1,24 @@
-#include <components/misc/constants.hpp>
-
 #include "esmterrain.hpp"
+
+#include <components/esm3/loadland.hpp>
+#include <components/esm4/loadland.hpp>
+#include <components/misc/constants.hpp>
 
 namespace
 {
-    constexpr std::uint16_t textures[ESM::Land::LAND_NUM_TEXTURES]{ 0 };
+    constexpr std::uint16_t textures[ESM::LandRecordData::sLandNumTextures]{ 0 };
 
-    std::unique_ptr<const ESM::Land::LandData> loadData(const ESM::Land& land, int loadFlags)
+    std::unique_ptr<const ESM::LandRecordData> loadData(const ESM::Land& land, int loadFlags)
     {
-        std::unique_ptr<ESM::Land::LandData> result = std::make_unique<ESM::Land::LandData>();
+        std::unique_ptr<ESM::LandRecordData> result = std::make_unique<ESM::LandRecordData>();
         land.loadData(loadFlags, *result);
         return result;
     }
+}
+
+namespace ESM
+{
+    LandData::LandData() = default;
 }
 
 ESM::LandData::LandData(const ESM::Land& land, int loadFlags)
@@ -62,4 +69,9 @@ ESM::LandData::LandData(const ESM4::Land& land, int /*loadFlags*/)
     }
 
     mHeights = mHeightsData;
+}
+
+namespace ESM
+{
+    LandData::~LandData() = default;
 }

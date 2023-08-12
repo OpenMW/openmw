@@ -1,5 +1,7 @@
 #include "terrainstorage.hpp"
 
+#include <components/esm3/loadland.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwworld/esmstore.hpp"
 

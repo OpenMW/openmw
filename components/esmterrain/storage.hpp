@@ -8,7 +8,6 @@
 
 #include <components/esm/esmterrain.hpp>
 #include <components/esm/util.hpp>
-#include <components/esm3/loadland.hpp>
 #include <components/esm3/loadltex.hpp>
 
 namespace ESM4

@@ -6,18 +6,24 @@
 #include <span>
 #include <vector>
 
-#include <components/esm3/loadland.hpp>
-#include <components/esm4/loadland.hpp>
+namespace ESM4
+{
+    struct Land;
+}
 
 namespace ESM
 {
+    struct Land;
+    struct LandRecordData;
+
     class LandData
     {
     public:
-        ~LandData() = default;
-        LandData() = default;
+        LandData();
         LandData(const ESM::Land& Land, int loadFlags);
         LandData(const ESM4::Land& Land, int loadFlags);
+
+        ~LandData();
 
         std::span<const float> getHeights() const { return mHeights; }
         std::span<const std::int8_t> getNormals() const { return mNormals; }
@@ -31,7 +37,7 @@ namespace ESM
         int getPlugin() const { return mPlugin; }
 
     private:
-        std::unique_ptr<const ESM::Land::LandData> mData;
+        std::unique_ptr<const ESM::LandRecordData> mData;
         int mLoadFlags = 0;
         std::vector<float> mHeightsData;
         float mMinHeight = 0.f;

@@ -10,6 +10,8 @@
 #include "components/esm/defs.hpp"
 #include "components/esm/esmcommon.hpp"
 
+#include "landrecorddata.hpp"
+
 namespace ESM
 {
 
@@ -68,21 +70,21 @@ namespace ESM
         static constexpr int DEFAULT_HEIGHT = -2048;
 
         // number of vertices per side
-        static constexpr int LAND_SIZE = 65;
+        static constexpr int LAND_SIZE = LandRecordData::sLandSize;
 
         // cell terrain size in world coords
         static constexpr int REAL_SIZE = Constants::CellSizeInUnits;
 
         // total number of vertices
-        static constexpr int LAND_NUM_VERTS = LAND_SIZE * LAND_SIZE;
+        static constexpr int LAND_NUM_VERTS = LandRecordData::sLandNumVerts;
 
         static constexpr int HEIGHT_SCALE = 8;
 
         // number of textures per side of land
-        static constexpr int LAND_TEXTURE_SIZE = 16;
+        static constexpr int LAND_TEXTURE_SIZE = LandRecordData::sLandTextureSize;
 
         // total number of textures per land
-        static constexpr int LAND_NUM_TEXTURES = LAND_TEXTURE_SIZE * LAND_TEXTURE_SIZE;
+        static constexpr int LAND_NUM_TEXTURES = LandRecordData::sLandNumTextures;
 
         static constexpr int LAND_GLOBAL_MAP_LOD_SIZE = 81;
 
@@ -98,32 +100,7 @@ namespace ESM
         };
 #pragma pack(pop)
 
-        struct LandData
-        {
-            // Initial reference height for the first vertex, only needed for filling mHeights
-            float mHeightOffset = 0;
-            // Height in world space for each vertex
-            float mHeights[LAND_NUM_VERTS];
-            float mMinHeight = 0;
-            float mMaxHeight = 0;
-
-            // 24-bit normals, these aren't always correct though. Edge and corner normals may be garbage.
-            std::int8_t mNormals[LAND_NUM_VERTS * 3];
-
-            // 2D array of texture indices. An index can be used to look up an LandTexture,
-            // but to do so you must subtract 1 from the index first!
-            // An index of 0 indicates the default texture.
-            std::uint16_t mTextures[LAND_NUM_TEXTURES];
-
-            // 24-bit RGB color for each vertex
-            std::uint8_t mColours[3 * LAND_NUM_VERTS];
-
-            // ???
-            std::uint16_t mUnk1 = 0;
-            std::uint8_t mUnk2 = 0;
-
-            int mDataLoaded = 0;
-        };
+        using LandData = ESM::LandRecordData;
 
         // low-LOD heightmap (used for rendering the global map)
         std::array<std::int8_t, LAND_GLOBAL_MAP_LOD_SIZE> mWnam;

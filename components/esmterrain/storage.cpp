@@ -8,6 +8,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/esmterrain.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/esm4/loadland.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>

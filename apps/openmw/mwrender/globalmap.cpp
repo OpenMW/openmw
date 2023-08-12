@@ -18,6 +18,7 @@
 #include <components/sceneutil/workqueue.hpp>
 
 #include <components/esm3/globalmap.hpp>
+#include <components/esm3/loadland.hpp>
 
 #include "../mwbase/environment.hpp"
 
