@@ -12,9 +12,13 @@ namespace Nif
         if (nif->getVersion() >= nif->generateVersion(10, 1, 0, 106)
             && nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO4)
             nif->getBoolean(); // Switch state
-        unsigned int numAffectedNodes = nif->getUInt();
-        for (unsigned int i = 0; i < numAffectedNodes; ++i)
-            nif->getUInt(); // ref to another Node
+        if (nif->getVersion() <= NIFFile::VER_MW
+            || (nif->getVersion() >= nif->generateVersion(10, 1, 0, 0)
+                && nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO4))
+        {
+            size_t numAffectedNodes = nif->get<uint32_t>();
+            nif->skip(numAffectedNodes * 4);
+        }
     }
 
     void NiLight::read(NIFStream* nif)
