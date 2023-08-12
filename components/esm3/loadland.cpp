@@ -145,7 +145,8 @@ namespace ESM
                 for (int i = 0; i < LAND_SIZE; ++i)
                 {
                     float diff = (mLandData->mHeights[number] - prevY) / HEIGHT_SCALE;
-                    offsets.mHeightData[number] = (diff >= 0) ? (int8_t)(diff + 0.5) : (int8_t)(diff - 0.5);
+                    offsets.mHeightData[number]
+                        = diff >= 0 ? static_cast<std::int8_t>(diff + 0.5) : static_cast<std::int8_t>(diff - 0.5);
 
                     float prevX = prevY = mLandData->mHeights[number];
                     ++number;
@@ -153,7 +154,8 @@ namespace ESM
                     for (int j = 1; j < LAND_SIZE; ++j)
                     {
                         diff = (mLandData->mHeights[number] - prevX) / HEIGHT_SCALE;
-                        offsets.mHeightData[number] = (diff >= 0) ? (int8_t)(diff + 0.5) : (int8_t)(diff - 0.5);
+                        offsets.mHeightData[number]
+                            = diff >= 0 ? static_cast<std::int8_t>(diff + 0.5) : static_cast<std::int8_t>(diff - 0.5);
 
                         prevX = mLandData->mHeights[number];
                         ++number;
@@ -172,7 +174,8 @@ namespace ESM
                 {
                     for (int col = 0; col < LAND_GLOBAL_MAP_LOD_SIZE_SQRT; ++col)
                     {
-                        float height = mLandData->mHeights[int(row * vertMult) * Land::LAND_SIZE + int(col * vertMult)];
+                        float height = mLandData->mHeights[static_cast<int>(row * vertMult) * Land::LAND_SIZE
+                            + static_cast<int>(col * vertMult)];
                         height /= height > 0 ? 128.f : 16.f;
                         height = std::clamp(height, min, max);
                         wnam[row * LAND_GLOBAL_MAP_LOD_SIZE_SQRT + col] = static_cast<std::int8_t>(height);
