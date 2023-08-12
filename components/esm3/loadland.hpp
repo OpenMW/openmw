@@ -25,14 +25,14 @@ namespace ESM
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
         static std::string_view getRecordType() { return "Land"; }
 
-        Land();
+        Land() = default;
         ~Land();
 
         // Only first four bits seem to be used, don't know what they mean.
-        std::uint32_t mFlags;
+        std::uint32_t mFlags = 0;
         // Map coordinates.
-        std::int32_t mX;
-        std::int32_t mY;
+        std::int32_t mX = 0;
+        std::int32_t mY = 0;
 
         // Plugin index, used to reference the correct material palette.
         int getPlugin() const { return mContext.index; }
@@ -44,7 +44,7 @@ namespace ESM
         // in which case the filename will be empty.
         ESM_Context mContext;
 
-        int mDataTypes;
+        int mDataTypes = 0;
 
         enum
         {
@@ -91,22 +91,12 @@ namespace ESM
 
         struct LandData
         {
-            LandData()
-                : mHeightOffset(0)
-                , mMinHeight(0)
-                , mMaxHeight(0)
-                , mUnk1(0)
-                , mUnk2(0)
-                , mDataLoaded(0)
-            {
-            }
-
             // Initial reference height for the first vertex, only needed for filling mHeights
-            float mHeightOffset;
+            float mHeightOffset = 0;
             // Height in world space for each vertex
             float mHeights[LAND_NUM_VERTS];
-            float mMinHeight;
-            float mMaxHeight;
+            float mMinHeight = 0;
+            float mMaxHeight = 0;
 
             // 24-bit normals, these aren't always correct though. Edge and corner normals may be garbage.
             std::int8_t mNormals[LAND_NUM_VERTS * 3];
@@ -120,10 +110,10 @@ namespace ESM
             std::uint8_t mColours[3 * LAND_NUM_VERTS];
 
             // ???
-            std::uint16_t mUnk1;
-            std::uint8_t mUnk2;
+            std::uint16_t mUnk1 = 0;
+            std::uint8_t mUnk2 = 0;
 
-            int mDataLoaded;
+            int mDataLoaded = 0;
         };
 
         // low-LOD heightmap (used for rendering the global map)
@@ -176,7 +166,7 @@ namespace ESM
         /// including the case when data is already loaded
         bool condLoad(ESMReader& reader, int flags, int& targetFlags, int dataFlag, void* ptr, unsigned int size) const;
 
-        mutable LandData* mLandData;
+        mutable LandData* mLandData = nullptr;
     };
 
 }

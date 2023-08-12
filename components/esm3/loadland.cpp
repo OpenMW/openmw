@@ -10,15 +10,6 @@
 
 namespace ESM
 {
-    Land::Land()
-        : mFlags(0)
-        , mX(0)
-        , mY(0)
-        , mDataTypes(0)
-        , mLandData(nullptr)
-    {
-    }
-
     void transposeTextureData(const uint16_t* in, uint16_t* out)
     {
         int readPos = 0; // bit ugly, but it works
