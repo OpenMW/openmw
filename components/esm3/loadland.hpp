@@ -150,10 +150,16 @@ namespace ESM
         const LandData* getLandData(int flags) const;
 
         /// Return land data without loading first anything. Can return a 0-pointer.
-        const LandData* getLandData() const;
+        const LandData* getLandData() const
+        {
+            return mLandData;
+        }
 
         /// Return land data without loading first anything. Can return a 0-pointer.
-        LandData* getLandData();
+        LandData* getLandData()
+        {
+            return mLandData;
+        }
 
         /// \attention Must not be called on objects that aren't fully loaded.
         ///

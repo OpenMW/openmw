@@ -368,16 +368,6 @@ namespace ESM
         return mLandData;
     }
 
-    const Land::LandData* Land::getLandData() const
-    {
-        return mLandData;
-    }
-
-    Land::LandData* Land::getLandData()
-    {
-        return mLandData;
-    }
-
     void Land::add(int flags)
     {
         if (!mLandData)
