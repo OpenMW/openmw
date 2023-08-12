@@ -6,6 +6,7 @@ ESM::LandData::LandData(const ESM::Land& land, int loadFlags)
     : mLoadFlags(loadFlags)
     , mSize(Constants::CellSizeInUnits)
     , mLandSize(ESM::Land::LAND_SIZE)
+    , mPlugin(land.getPlugin())
 {
     ESM::Land::LandData data;
     land.loadData(loadFlags, &data);

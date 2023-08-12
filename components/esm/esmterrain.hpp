@@ -27,6 +27,7 @@ namespace ESM
         float getMaxHeight() const { return mMaxHeight; }
         int getLandSize() const { return mLandSize; }
         int getLoadFlags() const { return mLoadFlags; }
+        int getPlugin() const { return mPlugin; }
 
     private:
         int mLoadFlags = 0;
@@ -34,6 +35,7 @@ namespace ESM
         float mMaxHeight = 0.f;
         float mSize = 0.f;
         int mLandSize = 0;
+        int mPlugin = 0;
         std::vector<float> mHeights;
         std::vector<std::int8_t> mNormals;
         std::vector<std::uint8_t> mColors;

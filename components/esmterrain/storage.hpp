@@ -36,30 +36,26 @@ namespace ESMTerrain
     class LandObject : public osg::Object
     {
     public:
-        LandObject();
+        LandObject() = default;
         LandObject(const ESM::Land* land, int loadFlags);
         LandObject(const ESM4::Land* land, int loadFlags);
 
-        LandObject(const LandObject& copy, const osg::CopyOp& copyop);
-        virtual ~LandObject();
-
         META_Object(ESMTerrain, LandObject)
 
-        inline const ESM::LandData* getData(int flags) const
+        const ESM::LandData* getData(int flags) const
         {
             if ((mData.getLoadFlags() & flags) != flags)
                 return nullptr;
 
             return &mData;
         }
-        inline int getPlugin() const { return mLand->getPlugin(); }
-        inline int getLandSize() const { return mData.getLandSize(); }
-        inline int getRealSize() const { return mData.getSize(); }
+
+        int getPlugin() const { return mData.getPlugin(); }
 
     private:
-        const ESM::Land* mLand;
-
         ESM::LandData mData;
+
+        LandObject(const LandObject& copy, const osg::CopyOp& copyOp);
     };
 
     // Since plugins can define new texture palettes, we need to know the plugin index too

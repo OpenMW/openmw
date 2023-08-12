@@ -46,29 +46,20 @@ namespace ESMTerrain
         Map mMap;
     };
 
-    LandObject::LandObject()
-        : mLand(nullptr)
-    {
-    }
-
     LandObject::LandObject(const ESM4::Land* land, int loadFlags)
-        : mLand(nullptr)
-        , mData(*land, loadFlags)
+        : mData(*land, loadFlags)
     {
     }
 
     LandObject::LandObject(const ESM::Land* land, int loadFlags)
-        : mLand(land)
-        , mData(*land, loadFlags)
+        : mData(*land, loadFlags)
     {
     }
 
-    LandObject::LandObject(const LandObject& copy, const osg::CopyOp& copyop)
-        : mLand(nullptr)
+    LandObject::LandObject(const LandObject& /*copy*/, const osg::CopyOp& /*copyOp*/)
     {
+        throw std::logic_error("LandObject copy constructor is not implemented");
     }
-
-    LandObject::~LandObject() {}
 
     const float defaultHeight = ESM::Land::DEFAULT_HEIGHT;
 
