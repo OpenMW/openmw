@@ -47,7 +47,7 @@ namespace ESMTerrain
 
         inline const ESM::LandData* getData(int flags) const
         {
-            if ((mData.mLoadFlags & flags) != flags)
+            if ((mData.getLoadFlags() & flags) != flags)
                 return nullptr;
 
             return &mData;

@@ -12,7 +12,6 @@ namespace ESM
 {
     class LandData
     {
-
     public:
         ~LandData() = default;
         LandData() = default;
@@ -27,10 +26,10 @@ namespace ESM
         float getMinHeight() const { return mMinHeight; }
         float getMaxHeight() const { return mMaxHeight; }
         int getLandSize() const { return mLandSize; }
-
-        int mLoadFlags = 0;
+        int getLoadFlags() const { return mLoadFlags; }
 
     private:
+        int mLoadFlags = 0;
         float mMinHeight = 0.f;
         float mMaxHeight = 0.f;
         float mSize = 0.f;
