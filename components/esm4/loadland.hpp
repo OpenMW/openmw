@@ -69,7 +69,7 @@ namespace ESM4
             float heightOffset;
             std::int8_t gradientData[VERTS_PER_SIDE * VERTS_PER_SIDE];
             std::uint16_t unknown1;
-            unsigned char unknown2;
+            std::uint8_t unknown2;
         };
 
         struct BTXT
@@ -119,8 +119,8 @@ namespace ESM4
 
         float mHeights[VERTS_PER_SIDE * VERTS_PER_SIDE]; // Float value of compressed Heightmap
         float mMinHeight, mMaxHeight;
-        signed char mVertNorm[VERTS_PER_SIDE * VERTS_PER_SIDE * 3]; // from VNML subrecord
-        unsigned char mVertColr[VERTS_PER_SIDE * VERTS_PER_SIDE * 3]; // from VCLR subrecord
+        std::int8_t mVertNorm[VERTS_PER_SIDE * VERTS_PER_SIDE * 3]; // from VNML subrecord
+        std::uint8_t mVertColr[VERTS_PER_SIDE * VERTS_PER_SIDE * 3]; // from VCLR subrecord
         VHGT mHeightMap;
         Texture mTextures[4]; // 0 = bottom left, 1 = bottom right, 2 = top left, 3 = top right
         std::vector<ESM::FormId> mIds; // land texture (LTEX) formids

@@ -759,7 +759,7 @@ std::string enchantmentFlags(int flags)
     return properties;
 }
 
-std::string landFlags(int flags)
+std::string landFlags(std::uint32_t flags)
 {
     std::string properties;
     // The ESM component says that this first four bits are used, but

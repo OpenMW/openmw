@@ -1,7 +1,7 @@
 #ifndef OPENMW_ESM_LAND_H
 #define OPENMW_ESM_LAND_H
 
-#include <stdint.h>
+#include <cstdint>
 
 #include <components/misc/constants.hpp>
 
@@ -28,9 +28,11 @@ namespace ESM
         Land();
         ~Land();
 
-        int mFlags; // Only first four bits seem to be used, don't know what
-        // they mean.
-        int mX, mY; // Map coordinates.
+        // Only first four bits seem to be used, don't know what they mean.
+        std::uint32_t mFlags;
+        // Map coordinates.
+        std::int32_t mX;
+        std::int32_t mY;
 
         // Plugin index, used to reference the correct material palette.
         int getPlugin() const { return mContext.index; }
@@ -81,16 +83,14 @@ namespace ESM
         struct VHGT
         {
             float mHeightOffset;
-            int8_t mHeightData[LAND_NUM_VERTS];
-            short mUnk1;
-            char mUnk2;
+            std::int8_t mHeightData[LAND_NUM_VERTS];
+            std::uint16_t mUnk1;
+            std::uint8_t mUnk2;
         };
 #pragma pack(pop)
 
         struct LandData
         {
-            typedef signed char VNML;
-
             LandData()
                 : mHeightOffset(0)
                 , mMinHeight(0)
@@ -109,25 +109,25 @@ namespace ESM
             float mMaxHeight;
 
             // 24-bit normals, these aren't always correct though. Edge and corner normals may be garbage.
-            VNML mNormals[LAND_NUM_VERTS * 3];
+            std::int8_t mNormals[LAND_NUM_VERTS * 3];
 
             // 2D array of texture indices. An index can be used to look up an LandTexture,
             // but to do so you must subtract 1 from the index first!
             // An index of 0 indicates the default texture.
-            uint16_t mTextures[LAND_NUM_TEXTURES];
+            std::uint16_t mTextures[LAND_NUM_TEXTURES];
 
             // 24-bit RGB color for each vertex
-            unsigned char mColours[3 * LAND_NUM_VERTS];
+            std::uint8_t mColours[3 * LAND_NUM_VERTS];
 
             // ???
-            short mUnk1;
-            uint8_t mUnk2;
+            std::uint16_t mUnk1;
+            std::uint8_t mUnk2;
 
             int mDataLoaded;
         };
 
         // low-LOD heightmap (used for rendering the global map)
-        signed char mWnam[LAND_GLOBAL_MAP_LOD_SIZE];
+        std::int8_t mWnam[LAND_GLOBAL_MAP_LOD_SIZE];
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

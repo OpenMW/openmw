@@ -49,8 +49,8 @@ namespace ESM
                     esm.getSubHeader();
                     if (esm.getSubSize() != 8)
                         esm.fail("Subrecord size is not equal to 8");
-                    esm.getT<int>(mX);
-                    esm.getT<int>(mY);
+                    esm.getT(mX);
+                    esm.getT(mY);
                     hasLocation = true;
                     break;
                 case fourCC("DATA"):
@@ -160,9 +160,9 @@ namespace ESM
             if (mDataTypes & Land::DATA_WNAM)
             {
                 // Generate WNAM record
-                signed char wnam[LAND_GLOBAL_MAP_LOD_SIZE];
-                constexpr float max = std::numeric_limits<signed char>::max();
-                constexpr float min = std::numeric_limits<signed char>::min();
+                std::int8_t wnam[LAND_GLOBAL_MAP_LOD_SIZE];
+                constexpr float max = std::numeric_limits<std::int8_t>::max();
+                constexpr float min = std::numeric_limits<std::int8_t>::min();
                 constexpr float vertMult = static_cast<float>(Land::LAND_SIZE - 1) / LAND_GLOBAL_MAP_LOD_SIZE_SQRT;
                 for (int row = 0; row < LAND_GLOBAL_MAP_LOD_SIZE_SQRT; ++row)
                 {
@@ -171,7 +171,7 @@ namespace ESM
                         float height = mLandData->mHeights[int(row * vertMult) * Land::LAND_SIZE + int(col * vertMult)];
                         height /= height > 0 ? 128.f : 16.f;
                         height = std::clamp(height, min, max);
-                        wnam[row * LAND_GLOBAL_MAP_LOD_SIZE_SQRT + col] = static_cast<signed char>(height);
+                        wnam[row * LAND_GLOBAL_MAP_LOD_SIZE_SQRT + col] = static_cast<std::int8_t>(height);
                     }
                 }
                 esm.writeHNT("WNAM", wnam);

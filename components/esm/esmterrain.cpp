@@ -13,10 +13,10 @@ ESM::LandData::LandData(const ESM::Land& land, int loadFlags)
     std::span<const float> heights(data.mHeights);
     mHeights = std::vector(heights.begin(), heights.end());
 
-    std::span<const VNML> normals(data.mNormals);
+    std::span<const std::int8_t> normals(data.mNormals);
     mNormals = std::vector(normals.begin(), normals.end());
 
-    std::span<const unsigned char> colors(data.mColours);
+    std::span<const std::uint8_t> colors(data.mColours);
     mColors = std::vector(colors.begin(), colors.end());
 
     std::span<const uint16_t> textures(data.mTextures);
@@ -59,9 +59,9 @@ ESM::LandData::LandData(const ESM4::Land& land, int /*loadFlags*/)
         }
     }
 
-    std::span<const VNML> normals(land.mVertNorm);
+    std::span<const std::int8_t> normals(land.mVertNorm);
     mNormals = std::vector(normals.begin(), normals.end());
 
-    std::span<const unsigned char> colors(land.mVertColr);
+    std::span<const std::uint8_t> colors(land.mVertColr);
     mColors = std::vector(colors.begin(), colors.end());
 }
