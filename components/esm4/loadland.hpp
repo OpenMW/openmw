@@ -125,11 +125,13 @@ namespace ESM4
         Texture mTextures[4]; // 0 = bottom left, 1 = bottom right, 2 = top left, 3 = top right
         std::vector<ESM::FormId> mIds; // land texture (LTEX) formids
         ESM::FormId mCell;
+
         void load(Reader& reader);
-        Land() = default;
+
         // void save(Writer& writer) const;
 
         // void blank();
+
         static constexpr ESM::RecNameInts sRecordId = ESM::REC_LAND4;
     };
 }
