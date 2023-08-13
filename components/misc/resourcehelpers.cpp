@@ -46,8 +46,8 @@ bool Misc::ResourceHelpers::changeExtensionToDds(std::string& path)
     return changeExtension(path, ".dds");
 }
 
-std::string Misc::ResourceHelpers::correctResourcePath(
-    std::string_view topLevelDirectory, std::string_view resPath, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctResourcePath(std::string_view topLevelDirectory, std::string_view resPath,
+    const VFS::Manager* vfs, const std::vector<std::string_view>& alternativeDirectories)
 {
     /* Bethesda at some point converted all their BSA
      * textures from tga to dds for increased load speed, but all
@@ -69,12 +69,18 @@ std::string Misc::ResourceHelpers::correctResourcePath(
     if (!correctedPath.starts_with(topLevelDirectory) || correctedPath.size() <= topLevelDirectory.size()
         || correctedPath[topLevelDirectory.size()] != '\\')
     {
-        std::string topLevelPrefix = std::string{ topLevelDirectory } + '\\';
-        size_t topLevelPos = correctedPath.find('\\' + topLevelPrefix);
-        if (topLevelPos == std::string::npos)
-            correctedPath = topLevelPrefix + correctedPath;
-        else
-            correctedPath.erase(0, topLevelPos + 1);
+        bool needsPrefix = true;
+        for (std::string_view alternativeDirectory : alternativeDirectories)
+        {
+            if (!correctedPath.starts_with(alternativeDirectory) || correctedPath.size() <= alternativeDirectory.size()
+                || correctedPath[alternativeDirectory.size()] != '\\')
+            {
+                needsPrefix = false;
+                break;
+            }
+        }
+        if (needsPrefix)
+            correctedPath = std::string{ topLevelDirectory } + '\\' + correctedPath;
     }
 
     std::string origExt = correctedPath;
@@ -110,7 +116,7 @@ std::string Misc::ResourceHelpers::correctResourcePath(
 
 std::string Misc::ResourceHelpers::correctTexturePath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath("textures", resPath, vfs);
+    return correctResourcePath("textures", resPath, vfs, { "bookart" });
 }
 
 std::string Misc::ResourceHelpers::correctIconPath(std::string_view resPath, const VFS::Manager* vfs)
@@ -120,7 +126,7 @@ std::string Misc::ResourceHelpers::correctIconPath(std::string_view resPath, con
 
 std::string Misc::ResourceHelpers::correctBookartPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return correctResourcePath("bookart", resPath, vfs);
+    return correctResourcePath("bookart", resPath, vfs, { "textures" });
 }
 
 std::string Misc::ResourceHelpers::correctBookartPath(
