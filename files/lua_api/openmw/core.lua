@@ -320,8 +320,8 @@
 -- @type ActiveSpell
 -- @field #string name The spell or item display name
 -- @field #string id Record id of the spell or item used to cast the spell
--- @field openmw.core#GameObject item The enchanted item used to cast the spell, or nil if the spell was not cast from an enchanted item. Note that if the spell was cast for a single-use enchantment such as a scroll, this will be nil.
--- @field openmw.core#GameObject caster The caster object, or nil if the spell has no defined caster
+-- @field #GameObject item The enchanted item used to cast the spell, or nil if the spell was not cast from an enchanted item. Note that if the spell was cast for a single-use enchantment such as a scroll, this will be nil.
+-- @field #GameObject caster The caster object, or nil if the spell has no defined caster
 -- @field #list<#ActiveSpellEffect> effects The active effects (@{#ActiveSpellEffect}) of this spell.
 
 ---
