@@ -69,15 +69,10 @@ namespace MWGui
         std::vector<std::pair<const ESM::Skill*, float>> skills;
         skills.reserve(maxSkills);
 
-        const auto sortSkills = [&]() {
-            for (size_t i = skills.size() - 1; i > 0; --i)
-            {
-                if (skills[i].second > skills[i - 1].second)
-                    std::swap(skills[i], skills[i - 1]);
-                else
-                    break;
-            }
-        };
+        const auto sortByValue
+            = [](const std::pair<const ESM::Skill*, float>& lhs, const std::pair<const ESM::Skill*, float>& rhs) {
+                  return lhs.second > rhs.second;
+              };
         // Maintain a sorted vector of max maxSkills elements, ordering skills by value and content file order
         const MWMechanics::NpcStats& actorStats = actor.getClass().getNpcStats(actor);
         for (const ESM::Skill& skill : skillStore)
@@ -86,7 +81,7 @@ namespace MWGui
             if (skills.size() < maxSkills)
             {
                 skills.emplace_back(&skill, value);
-                sortSkills();
+                std::stable_sort(skills.begin(), skills.end(), sortByValue);
             }
             else
             {
@@ -95,7 +90,7 @@ namespace MWGui
                 {
                     lowest.first = &skill;
                     lowest.second = value;
-                    sortSkills();
+                    std::stable_sort(skills.begin(), skills.end(), sortByValue);
                 }
             }
         }
