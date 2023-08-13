@@ -24,7 +24,7 @@ sys.path.insert(0, project_root)
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-needs_sphinx = '1.7'
+needs_sphinx = '1.8'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -145,11 +145,9 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
 
-#html_css_files = 'figures.css'         use this once Sphinx 1.8 is released!!!
-
 def setup(app):
-    app.add_stylesheet('figures.css')
-    app.add_stylesheet('luadoc.css')
+    app.add_css_file('figures.css')
+    app.add_css_file('luadoc.css')
     try:
         subprocess.call(['bash', project_root + '/docs/source/generate_luadoc.sh'])
     except Exception as e:
