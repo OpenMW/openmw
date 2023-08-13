@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'OpenMW'
-copyright = u'2020, OpenMW Team'
+copyright = u'2023, OpenMW Team'
 
 
 # The version info for the project you're documenting, acts as replacement for
