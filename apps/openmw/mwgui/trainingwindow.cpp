@@ -65,19 +65,40 @@ namespace MWGui
         const MWWorld::Store<ESM::Skill>& skillStore = store->get<ESM::Skill>();
 
         // NPC can train you in his best 3 skills
+        constexpr size_t maxSkills = 3;
         std::vector<std::pair<const ESM::Skill*, float>> skills;
+        skills.reserve(maxSkills);
 
-        MWMechanics::NpcStats const& actorStats(actor.getClass().getNpcStats(actor));
+        const auto sortSkills = [&]() {
+            for (size_t i = skills.size() - 1; i > 0; --i)
+            {
+                if (skills[i].second > skills[i - 1].second)
+                    std::swap(skills[i], skills[i - 1]);
+                else
+                    break;
+            }
+        };
+        // Maintain a sorted vector of max maxSkills elements, ordering skills by value and content file order
+        const MWMechanics::NpcStats& actorStats = actor.getClass().getNpcStats(actor);
         for (const ESM::Skill& skill : skillStore)
         {
             float value = getSkillForTraining(actorStats, skill.mId);
-
-            skills.emplace_back(&skill, value);
+            if (skills.size() < maxSkills)
+            {
+                skills.emplace_back(&skill, value);
+                sortSkills();
+            }
+            else
+            {
+                auto& lowest = skills[maxSkills - 1];
+                if (lowest.second < value)
+                {
+                    lowest.first = &skill;
+                    lowest.second = value;
+                    sortSkills();
+                }
+            }
         }
-
-        std::sort(skills.begin(), skills.end(), [](const auto& left, const auto& right) {
-            return std::tie(right.second, left.first->mId) < std::tie(left.second, right.first->mId);
-        });
 
         MyGUI::EnumeratorWidgetPtr widgets = mTrainingOptions->getEnumerator();
         MyGUI::Gui::getInstance().destroyWidgets(widgets);
@@ -86,7 +107,7 @@ namespace MWGui
 
         const int lineHeight = Settings::gui().mFontSize + 2;
 
-        for (int i = 0; i < 3; ++i)
+        for (size_t i = 0; i < skills.size(); ++i)
         {
             const ESM::Skill* skill = skills[i].first;
             int price = static_cast<int>(
