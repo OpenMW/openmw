@@ -96,7 +96,10 @@ namespace MWWorld
         }
     {
         if (isExterior())
+        {
             mWaterHeight = -1.f;
+            mHasWater = true;
+        }
     }
 
     ESM::RefId Cell::getWorldSpace() const
