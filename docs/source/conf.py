@@ -11,6 +11,7 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
+import re
 import os
 import sys
 import subprocess
@@ -66,26 +67,15 @@ copyright = u'2023, OpenMW Team'
 
 release = version = "UNRELEASED"
 
-
-def get_openmw_version(haystack):
-    needle = 'OPENMW_VERSION_MAJOR'
-    line_counter = 0
-    for hay in haystack:
-        if needle in str(hay):
-            break
-        line_counter += 1
-
-    version = '.'.join([haystack[line_counter][1][1].contents,
-                        haystack[line_counter+1][1][1].contents,
-                        haystack[line_counter+2][1][1].contents])
-    return version
-
-
 try:
-    from parse_cmake import parsing
     cmake_raw = open(project_root+'/CMakeLists.txt', 'r').read()
-    cmake_data = parsing.parse(cmake_raw)
-    release = version = get_openmw_version(cmake_data)
+    majorVersionMatch = re.search('set\(OPENMW_VERSION_MAJOR (\d+)\)', cmake_raw)
+    minorVersionMatch = re.search('set\(OPENMW_VERSION_MINOR (\d+)\)', cmake_raw)
+    releaseVersionMatch = re.search('set\(OPENMW_VERSION_RELEASE (\d+)\)', cmake_raw)
+    if majorVersionMatch and minorVersionMatch and releaseVersionMatch:
+        release = version = '.'.join((majorVersionMatch.group(1),
+                                     minorVersionMatch.group(1),
+                                     releaseVersionMatch.group(1)))
 
 except Exception as ex:
     print("WARNING: Version will be set to '{0}' because: '{1}'.".format(release, str(ex)))
