@@ -371,7 +371,8 @@ namespace MWMechanics
                         && !actor.getClass().isPureWaterCreature(actor))
                     {
                         ESM::Pathgrid::PointList points;
-                        Misc::CoordinateConverter coords(*storage.mCell->getCell());
+                        const Misc::CoordinateConverter coords
+                            = Misc::makeCoordinateConverter(*storage.mCell->getCell());
 
                         osg::Vec3f localPos = actor.getRefData().getPosition().asVec3();
                         coords.toLocal(localPos);

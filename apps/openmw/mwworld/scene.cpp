@@ -346,10 +346,7 @@ namespace MWWorld
 
         if (cell->getCell()->isExterior())
         {
-            if (mPhysics->getHeightField(ESM::ExteriorCellLocation(cellX, cellY, cell->getCell()->getWorldSpace()))
-                != nullptr)
-                mNavigator.removeHeightfield(osg::Vec2i(cellX, cellY), navigatorUpdateGuard);
-
+            mNavigator.removeHeightfield(osg::Vec2i(cellX, cellY), navigatorUpdateGuard);
             mPhysics->removeHeightField(cellX, cellY);
         }
 
@@ -414,7 +411,7 @@ namespace MWWorld
                 mPhysics->addHeightField(defaultHeight.data(), cellX, cellY, worldsize, verts,
                     ESM::Land::DEFAULT_HEIGHT, ESM::Land::DEFAULT_HEIGHT, land.get());
             }
-            if (const auto heightField = mPhysics->getHeightField(cellIndex))
+            if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
             {
                 const osg::Vec2i cellPosition(cellX, cellY);
                 const btVector3& origin = heightField->getCollisionObject()->getWorldTransform().getOrigin();
@@ -469,7 +466,7 @@ namespace MWWorld
 
             if (cellVariant.isExterior())
             {
-                if (const auto heightField = mPhysics->getHeightField(cellIndex))
+                if (const auto heightField = mPhysics->getHeightField(cellX, cellY))
                     mNavigator.addWater(
                         osg::Vec2i(cellX, cellY), ESM::Land::REAL_SIZE, waterLevel, navigatorUpdateGuard);
             }
