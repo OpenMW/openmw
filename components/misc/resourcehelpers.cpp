@@ -72,8 +72,8 @@ std::string Misc::ResourceHelpers::correctResourcePath(std::string_view topLevel
         bool needsPrefix = true;
         for (std::string_view alternativeDirectory : alternativeDirectories)
         {
-            if (!correctedPath.starts_with(alternativeDirectory) || correctedPath.size() <= alternativeDirectory.size()
-                || correctedPath[alternativeDirectory.size()] != '\\')
+            if (correctedPath.starts_with(alternativeDirectory) && correctedPath.size() > alternativeDirectory.size()
+                && correctedPath[alternativeDirectory.size()] == '\\')
             {
                 needsPrefix = false;
                 break;
