@@ -354,14 +354,14 @@ namespace Nif
             if (rec.empty())
             {
                 std::stringstream error;
-                error << "Record number " << i << " out of " << recNum << " is blank.";
+                error << "Record type is blank (index " << i << ")";
                 throw Nif::Exception(error.str(), filename);
             }
 
             // Record separator. Some Havok records in Oblivion do not have it.
             if (hasRecordSeparators && !rec.starts_with("bhk"))
                 if (nif.getInt())
-                    Log(Debug::Warning) << "NIFFile Warning: Record number " << i << " out of " << recNum
+                    Log(Debug::Warning) << "NIFFile Warning: Record of type " << rec << ", index " << i
                                         << " is preceded by a non-zero separator. File: " << filename;
 
             const auto entry = factories.find(rec);
