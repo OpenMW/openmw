@@ -92,6 +92,7 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
             case ESM4::SUB_MODT:
             case ESM4::SUB_RNAM:
             case ESM4::SUB_CNAM:
+            case ESM4::SUB_CTDA:
                 reader.skipSubRecordData();
                 break;
             default:

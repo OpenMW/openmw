@@ -56,6 +56,9 @@ void ESM4::Colour::load(ESM4::Reader& reader)
             case ESM4::SUB_FNAM:
                 reader.get(mPlayable);
                 break;
+            case ESM4::SUB_CTDA:
+                reader.skipSubRecordData();
+                break;
             default:
                 throw std::runtime_error("ESM4::CLFM::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
