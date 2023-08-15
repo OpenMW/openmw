@@ -64,7 +64,7 @@ namespace MWGui
         const MWWorld::Store<ESM::GameSetting>& gmst = store->get<ESM::GameSetting>();
         const MWWorld::Store<ESM::Skill>& skillStore = store->get<ESM::Skill>();
 
-        // NPC can train you in his best 3 skills
+        // NPC can train you in their best 3 skills
         constexpr size_t maxSkills = 3;
         std::vector<std::pair<const ESM::Skill*, float>> skills;
         skills.reserve(maxSkills);
