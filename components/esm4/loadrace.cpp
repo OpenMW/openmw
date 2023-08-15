@@ -315,7 +315,11 @@ void ESM4::Race::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_MODL:
             {
-                if (curr_part == 0) // head part
+                if (currentIndex == 0xffffffff)
+                {
+                    reader.skipSubRecordData();
+                }
+                else if (curr_part == 0) // head part
                 {
                     if (isMale || isTES4)
                         reader.getZString(mHeadParts[currentIndex].mesh);
@@ -351,7 +355,11 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 break; // always 0x0000?
             case ESM4::SUB_ICON:
             {
-                if (curr_part == 0) // head part
+                if (currentIndex == 0xffffffff)
+                {
+                    reader.skipSubRecordData();
+                }
+                else if (curr_part == 0) // head part
                 {
                     if (isMale || isTES4)
                         reader.getZString(mHeadParts[currentIndex].texture);
@@ -581,11 +589,14 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 ESM::FormId formId;
                 reader.getFormId(formId);
 
-                // FIXME: no order? head, mouth, eyes, brow, hair
-                if (isMale)
-                    mHeadPartIdsMale[currentIndex] = formId;
-                else
-                    mHeadPartIdsFemale[currentIndex] = formId;
+                if (currentIndex != 0xffffffff)
+                {
+                    // FIXME: no order? head, mouth, eyes, brow, hair
+                    if (isMale)
+                        mHeadPartIdsMale[currentIndex] = formId;
+                    else
+                        mHeadPartIdsFemale[currentIndex] = formId;
+                }
 
                 // std::cout << mEditorId << (isMale ? " male head " : " female head ")
                 // << formIdToString(formId) << " " << currentIndex << std::endl; // FIXME
