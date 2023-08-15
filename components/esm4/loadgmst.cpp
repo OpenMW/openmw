@@ -44,6 +44,12 @@ namespace ESM4
                     reader.getZString(value);
                     return value;
                 }
+                case 'u':
+                {
+                    std::uint32_t value = 0;
+                    reader.get(value);
+                    return value;
+                }
                 default:
                     throw std::runtime_error(
                         "Unsupported ESM4 GMST (" + formId.toString() + ") data type: " + std::string(editorId));
