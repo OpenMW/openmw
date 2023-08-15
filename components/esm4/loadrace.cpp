@@ -287,7 +287,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 }
                 else if (isTES4)
                     mHeadParts.resize(9); // assumed based on Construction Set
-                else
+                else // Optimized for TES5
                 {
                     mHeadPartIdsMale.resize(5);
                     mHeadPartIdsFemale.resize(5);
@@ -593,9 +593,17 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 {
                     // FIXME: no order? head, mouth, eyes, brow, hair
                     if (isMale)
+                    {
+                        if (currentIndex >= mHeadPartIdsMale.size())
+                            mHeadPartIdsMale.resize(currentIndex + 1);
                         mHeadPartIdsMale[currentIndex] = formId;
+                    }
                     else
+                    {
+                        if (currentIndex >= mHeadPartIdsFemale.size())
+                            mHeadPartIdsFemale.resize(currentIndex + 1);
                         mHeadPartIdsFemale[currentIndex] = formId;
+                    }
                 }
 
                 // std::cout << mEditorId << (isMale ? " male head " : " female head ")
