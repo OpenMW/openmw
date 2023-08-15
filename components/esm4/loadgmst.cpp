@@ -41,7 +41,7 @@ namespace ESM4
                 case 's':
                 {
                     std::string value;
-                    reader.getZString(value);
+                    reader.getLocalizedString(value);
                     return value;
                 }
                 case 'u':
