@@ -68,6 +68,7 @@ namespace MWLua
     void addLevelledCreatureBindings(sol::table list, const Context& context);
 
     void addESM4DoorBindings(sol::table door, const Context& context);
+    void addESM4TerminalBindings(sol::table term, const Context& context);
 
     template <class T>
     void addRecordFunctionBinding(

@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include "reader.hpp"
-//#include "writer.hpp"
+// #include "writer.hpp"
 
 void ESM4::Terminal::load(ESM4::Reader& reader)
 {
@@ -69,7 +69,7 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
             case ESM4::SUB_ANAM: // flags
             case ESM4::SUB_CTDA:
             case ESM4::SUB_INAM:
-            case ESM4::SUB_ITXT:
+            case ESM4::SUB_ITXT: // Menu Item
             case ESM4::SUB_MODT: // texture hash?
             case ESM4::SUB_SCDA:
             case ESM4::SUB_SCHR:

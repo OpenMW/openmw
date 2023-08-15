@@ -15,6 +15,7 @@
 #include <components/esm4/loadmisc.hpp>
 #include <components/esm4/loadnpc.hpp>
 #include <components/esm4/loadstat.hpp>
+#include <components/esm4/loadterm.hpp>
 #include <components/esm4/loadtree.hpp>
 #include <components/esm4/loadweap.hpp>
 
@@ -81,6 +82,7 @@ namespace MWClass
         ESM4Named<ESM4::Ingredient>::registerSelf();
         ESM4Named<ESM4::MiscItem>::registerSelf();
         ESM4Static::registerSelf();
+        ESM4Named<ESM4::Terminal>::registerSelf();
         ESM4Tree::registerSelf();
         ESM4Named<ESM4::Weapon>::registerSelf();
         ESM4Light::registerSelf();
