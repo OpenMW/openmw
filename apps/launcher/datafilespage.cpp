@@ -40,7 +40,7 @@ namespace
 {
     void contentSubdirs(const QString& path, QStringList& dirs)
     {
-        QStringList fileFilter{ "*.esm", "*.esp", "*.omwaddon", "*.bsa", "*.omwscripts" };
+        QStringList fileFilter{ "*.esm", "*.esp", "*.omwaddon", "*.bsa", "*.ba2", "*.omwscripts" };
         QStringList dirFilter{ "bookart", "icons", "meshes", "music", "sound", "textures" };
 
         QDir currentDir(path);
@@ -722,13 +722,14 @@ void Launcher::DataFilesPage::addArchive(const QString& name, Qt::CheckState sel
 
 void Launcher::DataFilesPage::addArchivesFromDir(const QString& path)
 {
-    QDir dir(path, "*.bsa");
+    QStringList archiveFilter{ "*.bsa", "*.ba2" };
+    QDir dir(path);
 
     std::unordered_set<QString> archives;
     for (int i = 0; i < ui.archiveListWidget->count(); ++i)
         archives.insert(ui.archiveListWidget->item(i)->text());
 
-    for (const auto& fileinfo : dir.entryInfoList())
+    for (const auto& fileinfo : dir.entryInfoList(archiveFilter))
     {
         const auto absPath = fileinfo.absoluteFilePath();
         if (Bsa::BSAFile::detectVersion(Files::pathFromQString(absPath)) == Bsa::BSAVER_UNKNOWN)
