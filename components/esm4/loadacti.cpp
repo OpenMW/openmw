@@ -87,6 +87,7 @@ void ESM4::Activator::load(ESM4::Reader& reader)
             case ESM4::SUB_PNAM:
             case ESM4::SUB_VMAD:
             case ESM4::SUB_WNAM:
+            case ESM4::SUB_PRPS:
                 reader.skipSubRecordData();
                 break;
             default:

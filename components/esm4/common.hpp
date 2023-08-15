@@ -657,6 +657,8 @@ namespace ESM4
         SUB_WNM7 = fourCC("WNM7"), // FONV
         SUB_JNAM = fourCC("JNAM"), // FONV
         SUB_EFSD = fourCC("EFSD"), // FONV DeadMoney
+
+        SUB_PRPS = fourCC("PRPS"), // FO4
     };
 
     // Based on http://www.uesp.net/wiki/Tes5Mod:Mod_File_Format#Records

@@ -675,6 +675,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
             case ESM4::SUB_MODT: // FO3
             case ESM4::SUB_MODD: // FO3
             case ESM4::SUB_ONAM: // FO3
+            case ESM4::SUB_PRPS: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

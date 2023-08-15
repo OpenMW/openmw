@@ -108,6 +108,7 @@ void ESM4::Light::load(ESM4::Reader& reader)
             case ESM4::SUB_DMDT:
             case ESM4::SUB_DMDS:
             case ESM4::SUB_DSTF: // Destruction data end
+            case ESM4::SUB_PRPS:
                 reader.skipSubRecordData();
                 break;
             default:

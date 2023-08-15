@@ -72,6 +72,7 @@ void ESM4::Flora::load(ESM4::Reader& reader)
             case ESM4::SUB_PNAM:
             case ESM4::SUB_RNAM:
             case ESM4::SUB_VMAD:
+            case ESM4::SUB_PRPS:
                 reader.skipSubRecordData();
                 break;
             default:

@@ -86,6 +86,7 @@ void ESM4::Static::load(ESM4::Reader& reader)
             case ESM4::SUB_DNAM:
             case ESM4::SUB_BRUS: // FONV
             case ESM4::SUB_RNAM: // FONV
+            case ESM4::SUB_PRPS:
                 reader.skipSubRecordData();
                 break;
             default:

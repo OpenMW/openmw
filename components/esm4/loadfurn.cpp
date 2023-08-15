@@ -77,6 +77,7 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
             case ESM4::SUB_VMAD:
             case ESM4::SUB_WBDT:
             case ESM4::SUB_XMRK:
+            case ESM4::SUB_PRPS:
                 reader.skipSubRecordData();
                 break;
             default:

@@ -81,6 +81,7 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
             case ESM4::SUB_TNAM:
             case ESM4::SUB_OBND:
             case ESM4::SUB_MODS: // FONV
+            case ESM4::SUB_PRPS: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

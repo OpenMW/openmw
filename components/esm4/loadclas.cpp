@@ -55,6 +55,7 @@ void ESM4::Class::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_DATA:
             case ESM4::SUB_ATTR:
+            case ESM4::SUB_PRPS:
                 reader.skipSubRecordData();
                 break;
             default:

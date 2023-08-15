@@ -86,6 +86,7 @@ void ESM4::Container::load(ESM4::Reader& reader)
             case ESM4::SUB_DMDL: // FONV
             case ESM4::SUB_DMDT: // FONV
             case ESM4::SUB_RNAM: // FONV
+            case ESM4::SUB_PRPS: // FO4
                 reader.skipSubRecordData();
                 break;
             default:
