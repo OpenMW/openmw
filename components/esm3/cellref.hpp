@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_CELLREF_H
 #define OPENMW_ESM_CELLREF_H
 
+#include <cstdint>
 #include <string>
 
 #include "components/esm/defs.hpp"
@@ -48,7 +49,7 @@ namespace ESM
         ESM::RefId mFaction;
 
         // PC faction rank required to use the item. Sometimes is -1, which means "any rank".
-        int mFactionRank;
+        int32_t mFactionRank;
 
         // For weapon or armor, this is the remaining item health.
         // For tools (lockpicks, probes, repair hammer) it is the remaining uses.
@@ -56,7 +57,7 @@ namespace ESM
         // This could be -1 if the charge was not touched yet (i.e. full).
         union
         {
-            int mChargeInt; // Used by everything except lights
+            int32_t mChargeInt; // Used by everything except lights
             float mChargeFloat; // Used only by lights
         };
         float mChargeIntRemainder; // Stores amount of charge not subtracted from mChargeInt
@@ -65,7 +66,7 @@ namespace ESM
         float mEnchantmentCharge;
 
         // This is 5 for Gold_005 references, 100 for Gold_100 and so on.
-        int mGoldValue;
+        int32_t mGoldValue;
 
         // For doors - true if this door teleports to somewhere else, false
         // if it should open through animation.
@@ -78,7 +79,7 @@ namespace ESM
         std::string mDestCell;
 
         // Lock level for doors and containers
-        int mLockLevel;
+        int32_t mLockLevel;
         bool mIsLocked{};
         ESM::RefId mKey, mTrap; // Key and trap ID names, if any
 

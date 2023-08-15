@@ -112,7 +112,7 @@ namespace ESM
                     case fourCC("DODT"):
                         if constexpr (load)
                         {
-                            esm.getHTSized<24>(cellRef.mDoorDest);
+                            esm.getHT(cellRef.mDoorDest.pos, cellRef.mDoorDest.rot);
                             cellRef.mTeleport = true;
                         }
                         else
@@ -132,7 +132,7 @@ namespace ESM
                         break;
                     case fourCC("DATA"):
                         if constexpr (load)
-                            esm.getHTSized<24>(cellRef.mPos);
+                            esm.getHT(cellRef.mPos.pos, cellRef.mPos.rot);
                         else
                             esm.skipHTSized<24, decltype(cellRef.mPos)>();
                         break;

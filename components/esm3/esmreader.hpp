@@ -172,10 +172,14 @@ namespace ESM
         }
 
         // Get data of a given type/size, including subrecord header
-        template <typename X, typename = std::enable_if_t<IsReadable<X>>>
-        void getHT(X& x)
+        template <class... Args>
+        void getHT(Args&... args)
         {
-            getHTSized<sizeof(X)>(x);
+            constexpr size_t size = (0 + ... + sizeof(Args));
+            getSubHeader();
+            if (mCtx.leftSub != size)
+                reportSubSizeMismatch(size, mCtx.leftSub);
+            (getT(args), ...);
         }
 
         template <typename T, typename = std::enable_if_t<IsReadable<T>>>
