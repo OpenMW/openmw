@@ -139,7 +139,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                     reader.get(mWeightFemale);
                     reader.get(mRaceFlags);
                 }
-                else if (subHdr.dataSize >= 128 && subHdr.dataSize <= 164) // TES5
+                else if (subHdr.dataSize == 128 || subHdr.dataSize == 164) // TES5
                 {
                     mIsTES5 = true;
 
@@ -188,7 +188,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                     reader.get(dummy); // angular tolerance
                     reader.get(dummy2); // flags
 
-                    if (subHdr.dataSize > 128)
+                    if (subHdr.dataSize == 164)
                     {
                         reader.get(dummy2); // unknown 1
                         reader.get(dummy2); // unknown 2
@@ -217,7 +217,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_CNAM: // Only in TES4?
+            case ESM4::SUB_CNAM:
                 //              CNAM       SNAM                     VNAM
                 // Sheogorath   0x0  0000  98 2b  10011000 00101011
                 // Golden Saint 0x3  0011  26 46  00100110 01000110
@@ -407,10 +407,16 @@ void ESM4::Race::load(ESM4::Reader& reader)
             //
             case ESM4::SUB_HNAM:
             {
-                std::size_t numHairChoices = subHdr.dataSize / sizeof(ESM::FormId32);
-                mHairChoices.resize(numHairChoices);
-                for (unsigned int i = 0; i < numHairChoices; ++i)
-                    reader.getFormId(mHairChoices.at(i));
+                // FIXME: this is a texture name in FO4
+                if (subHdr.dataSize % sizeof(ESM::FormId32) != 0)
+                    reader.skipSubRecordData();
+                else
+                {
+                    std::size_t numHairChoices = subHdr.dataSize / sizeof(ESM::FormId32);
+                    mHairChoices.resize(numHairChoices);
+                    for (unsigned int i = 0; i < numHairChoices; ++i)
+                        reader.getFormId(mHairChoices.at(i));
+                }
 
                 break;
             }
@@ -550,14 +556,23 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_BOD2: // TES5
+            case ESM4::SUB_BOD2:
             {
-                reader.get(mBodyTemplate.bodyPart);
-                mBodyTemplate.flags = 0;
-                mBodyTemplate.unknown1 = 0; // probably padding
-                mBodyTemplate.unknown2 = 0; // probably padding
-                mBodyTemplate.unknown3 = 0; // probably padding
-                reader.get(mBodyTemplate.type);
+                if (subHdr.dataSize == 8 || subHdr.dataSize == 4) // TES5, FO4
+                {
+                    reader.get(mBodyTemplate.bodyPart);
+                    mBodyTemplate.flags = 0;
+                    mBodyTemplate.unknown1 = 0; // probably padding
+                    mBodyTemplate.unknown2 = 0; // probably padding
+                    mBodyTemplate.unknown3 = 0; // probably padding
+                    mBodyTemplate.type = 0;
+                    if (subHdr.dataSize == 8)
+                        reader.get(mBodyTemplate.type);
+                }
+                else
+                {
+                    reader.skipSubRecordData();
+                }
 
                 break;
             }
@@ -675,7 +690,57 @@ void ESM4::Race::load(ESM4::Reader& reader)
             case ESM4::SUB_MODT: // FO3
             case ESM4::SUB_MODD: // FO3
             case ESM4::SUB_ONAM: // FO3
-            case ESM4::SUB_PRPS: // FO4
+            // FO4
+            case ESM4::SUB_APPR:
+            case ESM4::SUB_ATKS:
+            case ESM4::SUB_ATKT:
+            case ESM4::SUB_ATKW:
+            case ESM4::SUB_BMMP:
+            case ESM4::SUB_BSMB:
+            case ESM4::SUB_BSMP:
+            case ESM4::SUB_BSMS:
+            case ESM4::SUB_CTDA:
+            case ESM4::SUB_FMRI:
+            case ESM4::SUB_FMRN:
+            case ESM4::SUB_HLTX:
+            case ESM4::SUB_MLSI:
+            case ESM4::SUB_MPGN:
+            case ESM4::SUB_MPGS:
+            case ESM4::SUB_MPPC:
+            case ESM4::SUB_MPPF:
+            case ESM4::SUB_MPPI:
+            case ESM4::SUB_MPPK:
+            case ESM4::SUB_MPPM:
+            case ESM4::SUB_MPPN:
+            case ESM4::SUB_MPPT:
+            case ESM4::SUB_MSID:
+            case ESM4::SUB_MSM0:
+            case ESM4::SUB_MSM1:
+            case ESM4::SUB_NNAM:
+            case ESM4::SUB_NTOP:
+            case ESM4::SUB_PRPS:
+            case ESM4::SUB_PTOP:
+            case ESM4::SUB_QSTI:
+            case ESM4::SUB_RBPC:
+            case ESM4::SUB_SADD:
+            case ESM4::SUB_SAKD:
+            case ESM4::SUB_SAPT:
+            case ESM4::SUB_SGNM:
+            case ESM4::SUB_SRAC:
+            case ESM4::SUB_SRAF:
+            case ESM4::SUB_STCP:
+            case ESM4::SUB_STKD:
+            case ESM4::SUB_TETI:
+            case ESM4::SUB_TTEB:
+            case ESM4::SUB_TTEC:
+            case ESM4::SUB_TTED:
+            case ESM4::SUB_TTEF:
+            case ESM4::SUB_TTET:
+            case ESM4::SUB_TTGE:
+            case ESM4::SUB_TTGP:
+            case ESM4::SUB_UNWP:
+            case ESM4::SUB_WMAP:
+            case ESM4::SUB_ZNAM:
                 reader.skipSubRecordData();
                 break;
             default:
