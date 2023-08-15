@@ -687,6 +687,7 @@ namespace ESM4
         SUB_PRPS = fourCC("PRPS"),
         SUB_PTOP = fourCC("PTOP"),
         SUB_RBPC = fourCC("RBPC"),
+        SUB_REPT = fourCC("REPT"),
         SUB_SADD = fourCC("SADD"),
         SUB_SAKD = fourCC("SAKD"),
         SUB_SAPT = fourCC("SAPT"),
