@@ -53,6 +53,7 @@ namespace ESM4
         std::string mEnvMap;
         std::string mUnknown;
         std::string mSpecular;
+        std::string mMaterial;
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;

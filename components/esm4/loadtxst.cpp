@@ -68,6 +68,9 @@ void ESM4::TextureSet::load(ESM4::Reader& reader)
             case ESM4::SUB_TX07:
                 reader.getZString(mSpecular);
                 break;
+            case ESM4::SUB_MNAM:
+                reader.getZString(mMaterial);
+                break;
             case ESM4::SUB_DNAM:
             case ESM4::SUB_DODT:
             case ESM4::SUB_OBND: // object bounds
