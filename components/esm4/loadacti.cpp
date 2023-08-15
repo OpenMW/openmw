@@ -87,8 +87,19 @@ void ESM4::Activator::load(ESM4::Reader& reader)
             case ESM4::SUB_PNAM:
             case ESM4::SUB_VMAD:
             case ESM4::SUB_WNAM:
-            case ESM4::SUB_PRPS:
             case ESM4::SUB_CTDA:
+            case ESM4::SUB_CIS1:
+            case ESM4::SUB_CIS2:
+            case ESM4::SUB_CITC:
+            case ESM4::SUB_NVNM:
+            // Introduced in FO4
+            case ESM4::SUB_ATTX:
+            case ESM4::SUB_FTYP:
+            case ESM4::SUB_NTRM:
+            case ESM4::SUB_PTRN:
+            case ESM4::SUB_PRPS:
+            case ESM4::SUB_RADR:
+            case ESM4::SUB_STCP:
                 reader.skipSubRecordData();
                 break;
             default:
