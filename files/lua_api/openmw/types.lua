@@ -1625,6 +1625,9 @@
 --- Functions for @{#ESM4Door} objects
 -- @field [parent=#types] #ESM4Door ESM4Door
 
+--- Functions for @{#ESM4Terminal} objects
+-- @field [parent=#types] #ESM4Terminal ESM4Terminal
+
 --- Functions for @{#ESM4Ingredient} objects
 -- @field [parent=#types] #ESM4Ingredient ESM4Ingredient
 
@@ -1642,6 +1645,31 @@
 
 --- Functions for @{#ESM4Weapon} objects
 -- @field [parent=#types] #ESM4Weapon ESM4Weapon
+
+---
+-- @type ESM4Terminal
+-- @field #list<#ESM4TerminalRecord> records A read-only list of all @{#ESM4TerminalRecord}s in the world database.
+
+---
+-- Whether the object is a ESM4Terminal.
+-- @function [parent=#ESM4Terminal] objectIsInstance
+-- @param openmw.core#GameObject object
+-- @return #boolean
+
+---
+-- Returns the read-only @{#ESM4TerminalRecord} of a terminal
+-- @function [parent=#ESM4Terminal] record
+-- @param #any objectOrRecordId
+-- @return #ESM4TerminalRecord
+
+---
+-- @type ESM4TerminalRecord
+-- @field #string id Record id (Form ID)
+-- @field #string editorId Human-readable ID
+-- @field #string name Human-readable name
+-- @field #string model VFS path to the model
+-- @field #string text Text body of the terminal record
+-- @field #string resultText Result text of the terminal record
 
 ---
 -- @type ESM4Door

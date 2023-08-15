@@ -102,6 +102,7 @@ namespace ESM4
     struct Race;
     struct Reference;
     struct Static;
+    struct Terminal;
     struct Tree;
     struct Weapon;
     struct World;
@@ -139,7 +140,7 @@ namespace MWWorld
             Store<ESM4::HeadPart>, Store<ESM4::Ingredient>, Store<ESM4::Land>, Store<ESM4::LevelledCreature>,
             Store<ESM4::LevelledItem>, Store<ESM4::LevelledNpc>, Store<ESM4::Light>, Store<ESM4::MiscItem>,
             Store<ESM4::Npc>, Store<ESM4::Outfit>, Store<ESM4::Potion>, Store<ESM4::Race>, Store<ESM4::Reference>,
-            Store<ESM4::Static>, Store<ESM4::Tree>, Store<ESM4::Weapon>, Store<ESM4::World>>;
+            Store<ESM4::Static>, Store<ESM4::Terminal>, Store<ESM4::Tree>, Store<ESM4::Weapon>, Store<ESM4::World>>;
 
     private:
         template <typename T>
