@@ -61,11 +61,11 @@ namespace ESM4
             switch (type)
             {
                 case LocalizedStringType::Strings:
-                    return u8"_English.STRINGS";
+                    return u8".STRINGS";
                 case LocalizedStringType::ILStrings:
-                    return u8"_English.ILSTRINGS";
+                    return u8".ILSTRINGS";
                 case LocalizedStringType::DLStrings:
-                    return u8"_English.DLSTRINGS";
+                    return u8".DLSTRINGS";
             }
 
             throw std::logic_error("Unsupported LocalizedStringType: " + std::to_string(static_cast<int>(type)));
@@ -322,34 +322,49 @@ namespace ESM4
     void Reader::buildLStringIndex(LocalizedStringType stringType, const std::u8string& prefix)
     {
         static const std::filesystem::path strings("Strings");
+        const std::u8string language(u8"_En");
+        const std::u8string altLanguage(u8"_English");
         const std::u8string suffix(getStringsSuffix(stringType));
-        std::filesystem::path path = strings / (prefix + suffix);
-
+        std::filesystem::path path = strings / (prefix + language + suffix);
         if (mVFS != nullptr)
         {
-            const std::string vfsPath = Files::pathToUnicodeString(path);
+            std::string vfsPath = Files::pathToUnicodeString(path);
+            if (!mVFS->exists(vfsPath))
+            {
+                path = strings / (prefix + altLanguage + suffix);
+                vfsPath = Files::pathToUnicodeString(path);
+            }
 
-            if (mIgnoreMissingLocalizedStrings && !mVFS->exists(vfsPath))
+            if (mVFS->exists(vfsPath))
+            {
+                const Files::IStreamPtr stream = mVFS->get(vfsPath);
+                buildLStringIndex(stringType, *stream);
+                return;
+            }
+
+            if (mIgnoreMissingLocalizedStrings)
             {
                 Log(Debug::Warning) << "Ignore missing VFS strings file: " << vfsPath;
                 return;
             }
+        }
 
-            const Files::IStreamPtr stream = mVFS->get(vfsPath);
+        std::filesystem::path fsPath = mCtx.filename.parent_path() / path;
+        if (!std::filesystem::exists(fsPath))
+        {
+            path = strings / (prefix + altLanguage + suffix);
+            fsPath = mCtx.filename.parent_path() / path;
+        }
+
+        if (std::filesystem::exists(fsPath))
+        {
+            const Files::IStreamPtr stream = Files::openConstrainedFileStream(fsPath);
             buildLStringIndex(stringType, *stream);
             return;
         }
 
-        const std::filesystem::path fsPath = mCtx.filename.parent_path() / path;
-
-        if (mIgnoreMissingLocalizedStrings && !std::filesystem::exists(fsPath))
-        {
+        if (mIgnoreMissingLocalizedStrings)
             Log(Debug::Warning) << "Ignore missing strings file: " << fsPath;
-            return;
-        }
-
-        const Files::IStreamPtr stream = Files::openConstrainedFileStream(fsPath);
-        buildLStringIndex(stringType, *stream);
     }
 
     void Reader::buildLStringIndex(LocalizedStringType stringType, std::istream& stream)
