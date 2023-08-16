@@ -89,6 +89,9 @@ void ESM4::MiscItem::load(ESM4::Reader& reader)
             case ESM4::SUB_DSTA:
             case ESM4::SUB_DSTD:
             case ESM4::SUB_DSTF: // Destructible end
+            case ESM4::SUB_CDIX: // FO4
+            case ESM4::SUB_CVPA: // FO4
+            case ESM4::SUB_FIMD: // FO4
             case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();
                 break;
