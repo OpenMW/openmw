@@ -71,6 +71,8 @@ void ESM4::Flora::load(ESM4::Reader& reader)
             case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_FNAM:
             case ESM4::SUB_OBND:
+            case ESM4::SUB_KSIZ:
+            case ESM4::SUB_KWDA:
             case ESM4::SUB_PNAM:
             case ESM4::SUB_RNAM:
             case ESM4::SUB_VMAD:
@@ -85,6 +87,7 @@ void ESM4::Flora::load(ESM4::Reader& reader)
             case ESM4::SUB_DSTF: // Destructible end
             case ESM4::SUB_PRPS: // FO4
             case ESM4::SUB_PTRN: // FO4
+            case ESM4::SUB_ATTX: // FO4
                 reader.skipSubRecordData();
                 break;
             default:
