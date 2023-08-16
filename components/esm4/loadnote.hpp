@@ -48,6 +48,11 @@ namespace ESM4
         std::string mModel;
         std::string mIcon;
 
+        float mBoundRadius;
+
+        ESM::FormId mPickUpSound;
+        ESM::FormId mDropSound;
+
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
 
