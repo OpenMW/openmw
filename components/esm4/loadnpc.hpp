@@ -187,6 +187,7 @@ namespace ESM4
         float mHairLength;
         HairColour mHairColour; // TES4/FO3/FONV
         ESM::FormId mHairColourId; // TES5
+        ESM::FormId mBeardColourId; // FO4
 
         ESM::FormId mDeathItem;
         std::vector<ESM::FormId> mSpell;

@@ -100,11 +100,26 @@ namespace ESM4
         std::uint16_t bleedoutOverride;
     };
 
+    struct ACBS_FO4
+    {
+        std::uint32_t flags;
+        std::int16_t xpOffset;
+        std::int16_t levelOrMult;
+        std::uint16_t calcMinlevel;
+        std::uint16_t calcMaxlevel;
+        std::int16_t dispositionBase;
+        std::uint16_t templateFlags;
+        std::uint16_t bleedoutOverride;
+        std::uint16_t padding;
+    };
+
+
     union ActorBaseConfig
     {
         ACBS_TES4 tes4;
         ACBS_FO3 fo3;
         ACBS_TES5 tes5;
+        ACBS_FO4 fo4;
     };
 
     struct ActorFaction
