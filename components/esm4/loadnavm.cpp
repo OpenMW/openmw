@@ -207,14 +207,25 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
 #endif
     while (reader.getSubRecordHeader())
     {
-        switch (reader.subRecordHeader().typeId)
+        const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
+        switch (subHdr.typeId)
         {
             case ESM4::SUB_NVNM:
             {
-                // FIXME: FO4 appears to have a different format
                 if (esmVer == 0x3F800000)
                 {
-                    reader.skipSubRecordData();
+                    // TODO: check if any valid TES5 plugin prepends XXXX to NVNM
+                    if (subSize)
+                    {
+                        reader.skipSubRecordData(subSize);
+                        reader.updateRecordRead(subSize);
+                        subSize = 0;
+                    }
+                    else
+                    {
+                        // FIXME: FO4 appears to have a different format
+                        reader.skipSubRecordData();
+                    }
                     break;
                 }
 
@@ -235,7 +246,6 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
                 }
                 else
                 {
-                    const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
                     Log(Debug::Verbose) << ESM::printName(subHdr.typeId) << " skipping...";
                     reader.skipSubRecordData(); // FIXME: process the subrecord rather than skip
                 }
@@ -257,8 +267,7 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
                 reader.skipSubRecordData();
                 break;
             default:
-                throw std::runtime_error(
-                    "ESM4::NAVM::load - Unknown subrecord " + ESM::printName(reader.subRecordHeader().typeId));
+                throw std::runtime_error("ESM4::NAVM::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
     // std::cout << "num nvnm " << std::dec << mData.size() << std::endl; // FIXME
