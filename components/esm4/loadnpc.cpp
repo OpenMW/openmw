@@ -279,6 +279,10 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM4::SUB_COED: // FO3
             case ESM4::SUB_PRPS: // FO4
             case ESM4::SUB_PTRN: // FO4
+            case ESM4::SUB_OBTE: // FO4 object template start
+            case ESM4::SUB_OBTF:
+            case ESM4::SUB_OBTS:
+            case ESM4::SUB_STOP: // FO4 object template end
                 reader.skipSubRecordData();
                 break;
             default:
