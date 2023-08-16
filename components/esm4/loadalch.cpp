@@ -97,6 +97,21 @@ void ESM4::Potion::load(ESM4::Reader& reader)
             case ESM4::SUB_MODS:
             case ESM4::SUB_OBND:
             case ESM4::SUB_ETYP: // FO3
+            case ESM4::SUB_DESC:
+            // Destructible
+            case ESM4::SUB_DAMC:
+            case ESM4::SUB_DEST:
+            case ESM4::SUB_DMDC:
+            case ESM4::SUB_DMDL:
+            case ESM4::SUB_DMDT:
+            case ESM4::SUB_DMDS:
+            case ESM4::SUB_DSTA:
+            case ESM4::SUB_DSTD:
+            case ESM4::SUB_DSTF:
+            // FO4
+            case ESM4::SUB_DNAM:
+            case ESM4::SUB_PTRN:
+            case ESM4::SUB_CUSD:
                 reader.skipSubRecordData();
                 break;
             default:
