@@ -113,7 +113,6 @@ namespace ESM4
         std::uint16_t padding;
     };
 
-
     union ActorBaseConfig
     {
         ACBS_TES4 tes4;
