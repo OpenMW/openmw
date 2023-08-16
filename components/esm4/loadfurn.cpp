@@ -60,9 +60,15 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
                 reader.get(mBoundRadius);
                 break;
             case ESM4::SUB_MODT:
+            case ESM4::SUB_DAMC: // Destructible
             case ESM4::SUB_DEST:
+            case ESM4::SUB_DMDC:
+            case ESM4::SUB_DMDL:
+            case ESM4::SUB_DMDT:
+            case ESM4::SUB_DMDS:
+            case ESM4::SUB_DSTA:
             case ESM4::SUB_DSTD:
-            case ESM4::SUB_DSTF:
+            case ESM4::SUB_DSTF: // Destructible end
             case ESM4::SUB_ENAM:
             case ESM4::SUB_FNAM:
             case ESM4::SUB_FNMK:

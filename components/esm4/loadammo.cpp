@@ -137,6 +137,15 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
             case ESM4::SUB_OBND:
             case ESM4::SUB_KSIZ:
             case ESM4::SUB_KWDA:
+            case ESM4::SUB_DAMC: // Destructible
+            case ESM4::SUB_DEST:
+            case ESM4::SUB_DMDC:
+            case ESM4::SUB_DMDL:
+            case ESM4::SUB_DMDT:
+            case ESM4::SUB_DMDS:
+            case ESM4::SUB_DSTA:
+            case ESM4::SUB_DSTD:
+            case ESM4::SUB_DSTF: // Destructible end
                 reader.skipSubRecordData();
                 break;
             default:

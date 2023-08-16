@@ -98,8 +98,7 @@ void ESM4::Potion::load(ESM4::Reader& reader)
             case ESM4::SUB_OBND:
             case ESM4::SUB_ETYP: // FO3
             case ESM4::SUB_DESC:
-            // Destructible
-            case ESM4::SUB_DAMC:
+            case ESM4::SUB_DAMC: // Destructible
             case ESM4::SUB_DEST:
             case ESM4::SUB_DMDC:
             case ESM4::SUB_DMDL:
@@ -107,7 +106,7 @@ void ESM4::Potion::load(ESM4::Reader& reader)
             case ESM4::SUB_DMDS:
             case ESM4::SUB_DSTA:
             case ESM4::SUB_DSTD:
-            case ESM4::SUB_DSTF:
+            case ESM4::SUB_DSTF: // Destructible end
             // FO4
             case ESM4::SUB_DNAM:
             case ESM4::SUB_PTRN:

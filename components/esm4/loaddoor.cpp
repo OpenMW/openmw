@@ -75,11 +75,15 @@ void ESM4::Door::load(ESM4::Reader& reader)
             case ESM4::SUB_MODS:
             case ESM4::SUB_OBND:
             case ESM4::SUB_VMAD:
-            case ESM4::SUB_DEST: // FO3
-            case ESM4::SUB_DSTD: // FO3
-            case ESM4::SUB_DSTF: // FO3
-            case ESM4::SUB_DMDL: // FO3
-            case ESM4::SUB_DMDT: // FO3
+            case ESM4::SUB_DAMC: // Destructible
+            case ESM4::SUB_DEST:
+            case ESM4::SUB_DMDC:
+            case ESM4::SUB_DMDL:
+            case ESM4::SUB_DMDT:
+            case ESM4::SUB_DMDS:
+            case ESM4::SUB_DSTA:
+            case ESM4::SUB_DSTD:
+            case ESM4::SUB_DSTF: // Destructible end
                 reader.skipSubRecordData();
                 break;
             default:
