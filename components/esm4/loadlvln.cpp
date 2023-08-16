@@ -95,6 +95,9 @@ void ESM4::LevelledNpc::load(ESM4::Reader& reader)
             case ESM4::SUB_MODC:
             case ESM4::SUB_MODS:
             case ESM4::SUB_MODF: // Model data end
+            case ESM4::SUB_LLKC: // FO4
+            case ESM4::SUB_LVLG: // FO4
+            case ESM4::SUB_LVLM: // FO4
                 reader.skipSubRecordData();
                 break;
             default:
