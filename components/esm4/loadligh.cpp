@@ -35,9 +35,6 @@ void ESM4::Light::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
-    std::uint32_t esmVer = reader.esmVersion();
-    bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
-
     while (reader.getSubRecordHeader())
     {
         const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
@@ -51,31 +48,31 @@ void ESM4::Light::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_DATA:
             {
-                // FIXME: TES4 might be uint32 as well, need to check
-                if (isFONV || (esmVer == ESM::VER_094 && subHdr.dataSize == 32) /*FO3*/)
+                if (subHdr.dataSize != 32 && subHdr.dataSize != 48 && subHdr.dataSize != 64)
                 {
-                    reader.get(mData.time); // uint32
+                    reader.skipSubRecordData();
+                    break;
                 }
-                else
-                    reader.get(mData.duration); // float
-
+                reader.get(mData.time);
                 reader.get(mData.radius);
                 reader.get(mData.colour);
                 reader.get(mData.flags);
-                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
-                if (subHdr.dataSize == 48)
+                reader.get(mData.falloff);
+                reader.get(mData.FOV);
+                // TES5, FO4
+                if (subHdr.dataSize >= 48)
                 {
-                    reader.get(mData.falloff);
-                    reader.get(mData.FOV);
                     reader.get(mData.nearClip);
                     reader.get(mData.frequency);
                     reader.get(mData.intensityAmplitude);
                     reader.get(mData.movementAmplitude);
-                }
-                else if (subHdr.dataSize == 32) // TES4
-                {
-                    reader.get(mData.falloff);
-                    reader.get(mData.FOV);
+                    if (subHdr.dataSize == 64)
+                    {
+                        reader.get(mData.constant);
+                        reader.get(mData.scalar);
+                        reader.get(mData.exponent);
+                        reader.get(mData.godRaysNearClip);
+                    }
                 }
                 reader.get(mData.value);
                 reader.get(mData.weight);
@@ -104,7 +101,7 @@ void ESM4::Light::load(ESM4::Reader& reader)
             case ESM4::SUB_MODS:
             case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_OBND:
-            case ESM4::SUB_VMAD: // Dragonborn only?
+            case ESM4::SUB_VMAD:
             case ESM4::SUB_DAMC: // Destructible
             case ESM4::SUB_DEST:
             case ESM4::SUB_DMDC:
@@ -114,8 +111,14 @@ void ESM4::Light::load(ESM4::Reader& reader)
             case ESM4::SUB_DSTA:
             case ESM4::SUB_DSTD:
             case ESM4::SUB_DSTF: // Destructible end
+            case ESM4::SUB_KSIZ:
+            case ESM4::SUB_KWDA:
+            case ESM4::SUB_LNAM: // FO4
+            case ESM4::SUB_MICO: // FO4
+            case ESM4::SUB_NAM0: // FO4
             case ESM4::SUB_PRPS: // FO4
             case ESM4::SUB_PTRN: // FO4
+            case ESM4::SUB_WGDR: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

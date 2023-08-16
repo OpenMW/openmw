@@ -56,8 +56,7 @@ namespace ESM4
 
         struct Data
         {
-            std::uint32_t time; // FO/FONV only
-            float duration = -1;
+            std::int32_t time;
             std::uint32_t radius;
             std::uint32_t colour; // RGBA
             // flags:
@@ -74,10 +73,14 @@ namespace ESM4
             std::int32_t flags;
             float falloff = 1.f;
             float FOV = 90; // FIXME: FOV in degrees or radians?
-            float nearClip; // TES5 only
-            float frequency; // TES5 only
-            float intensityAmplitude; // TES5 only
-            float movementAmplitude; // TES5 only
+            float nearClip; // TES5+
+            float frequency; // TES5+
+            float intensityAmplitude; // TES5+
+            float movementAmplitude; // TES5+
+            float constant; // FO4
+            float scalar; // FO4
+            float exponent; // FO4
+            float godRaysNearClip; // FO4
             std::uint32_t value; // gold
             float weight;
         };
