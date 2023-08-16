@@ -45,8 +45,14 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
                 reader.getZString(mEditorId);
                 break;
             case ESM4::SUB_FULL:
-                reader.getLocalizedString(mFullName);
+            {
+                std::string name;
+                reader.getLocalizedString(name);
+                // FIXME: subsequent FULL subrecords name object combinations (FO4)
+                if (mFullName.empty())
+                    mFullName = name;
                 break;
+            }
             case ESM4::SUB_MODL:
                 reader.getZString(mModel);
                 break;
@@ -89,7 +95,23 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
             case ESM4::SUB_CTDA:
             case ESM4::SUB_CIS1:
             case ESM4::SUB_CIS2:
+            case ESM4::SUB_APPR: // FO4
+            case ESM4::SUB_ATTX: // FO4
+            case ESM4::SUB_CITC: // FO4
+            case ESM4::SUB_CNTO: // FO4
+            case ESM4::SUB_COCT: // FO4
+            case ESM4::SUB_COED: // FO4
+            case ESM4::SUB_FTYP: // FO4
+            case ESM4::SUB_NAM1: // FO4
+            case ESM4::SUB_NTRM: // FO4
+            case ESM4::SUB_NVNM: // FO4
             case ESM4::SUB_PTRN: // FO4
+            case ESM4::SUB_SNAM: // FO4
+            case ESM4::SUB_WNAM: // FO4
+            case ESM4::SUB_OBTE: // FO4 object template start
+            case ESM4::SUB_OBTF:
+            case ESM4::SUB_OBTS:
+            case ESM4::SUB_STOP: // FO4 object template end
                 reader.skipSubRecordData();
                 break;
             default:
