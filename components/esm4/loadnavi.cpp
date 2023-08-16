@@ -249,6 +249,12 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_NVPP:
             {
+                // FO4
+                if (esmVer == 0x3F800000)
+                {
+                    reader.skipSubRecordData();
+                    break;
+                }
                 std::uint32_t total;
                 std::uint32_t count;
                 reader.get(total);
@@ -333,9 +339,9 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_NVMI: // multiple
             {
-                if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV)
+                if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV || esmVer == 0x3F800000)
                 {
-                    reader.skipSubRecordData(); // FIXME: FO3/FONV have different form of NavMeshInfo
+                    reader.skipSubRecordData(); // FIXME: FO3+ have different form of NavMeshInfo
                     break;
                 }
 
