@@ -62,9 +62,9 @@ void ESM4::World::load(ESM4::Reader& reader)
             case ESM4::SUB_FULL:
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_WCTR:
+            case ESM4::SUB_WCTR: // TES5+
                 reader.get(mCenterCell);
-                break; // Center cell, TES5 only
+                break;
             case ESM4::SUB_WNAM:
                 reader.getFormId(mParent);
                 break;
@@ -73,7 +73,7 @@ void ESM4::World::load(ESM4::Reader& reader)
                 break; // sound, Oblivion only?
             case ESM4::SUB_ICON:
                 reader.getZString(mMapFile);
-                break; // map filename, Oblivion only?
+                break;
             case ESM4::SUB_CNAM:
                 reader.getFormId(mClimate);
                 break;
@@ -164,6 +164,8 @@ void ESM4::World::load(ESM4::Reader& reader)
             case ESM4::SUB_XNAM: // FO3
             case ESM4::SUB_IMPS: // FO3 Anchorage
             case ESM4::SUB_IMPF: // FO3 Anchorage
+            case ESM4::SUB_CLSZ: // FO4
+            case ESM4::SUB_WLEV: // FO4
                 reader.skipSubRecordData();
                 break;
             default:
