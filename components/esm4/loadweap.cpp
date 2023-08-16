@@ -141,9 +141,11 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
             case ESM4::SUB_MO2T: // FO3
             case ESM4::SUB_MO2S: // FO3
             case ESM4::SUB_NAM6: // FO3
-            case ESM4::SUB_MOD4: // FO3
-            case ESM4::SUB_MO4T: // FO3
-            case ESM4::SUB_MO4S: // FO3
+            case ESM4::SUB_MOD4: // First person model data
+            case ESM4::SUB_MO4T:
+            case ESM4::SUB_MO4S:
+            case ESM4::SUB_MO4C:
+            case ESM4::SUB_MO4F: // First person model data end
             case ESM4::SUB_BIPL: // FO3
             case ESM4::SUB_NAM7: // FO3
             case ESM4::SUB_MOD3: // FO3
@@ -182,7 +184,17 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
             case ESM4::SUB_WNM6: // FONV
             case ESM4::SUB_WNM7: // FONV
             case ESM4::SUB_EFSD: // FONV DeadMoney
+            case ESM4::SUB_APPR: // FO4
+            case ESM4::SUB_DAMA: // FO4
+            case ESM4::SUB_FLTR: // FO4
+            case ESM4::SUB_FNAM: // FO4
+            case ESM4::SUB_INRD: // FO4
+            case ESM4::SUB_LNAM: // FO4
+            case ESM4::SUB_MASE: // FO4
             case ESM4::SUB_PTRN: // FO4
+            case ESM4::SUB_STCP: // FO4
+            case ESM4::SUB_WAMD: // FO4
+            case ESM4::SUB_WZMD: // FO4
             case ESM4::SUB_OBTE: // FO4 object template start
             case ESM4::SUB_OBTF:
             case ESM4::SUB_OBTS:

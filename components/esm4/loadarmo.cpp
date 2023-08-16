@@ -92,7 +92,6 @@ void ESM4::Armor::load(ESM4::Reader& reader)
                             mAddOns.resize(currentIndex + 1);
                         reader.getFormId(mAddOns[currentIndex]);
                     }
-
                 }
                 else
                 {
