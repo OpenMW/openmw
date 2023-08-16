@@ -30,6 +30,8 @@
 #include <limits>
 #include <stdexcept>
 
+#include <components/debug/debuglog.hpp>
+
 #include "grouptype.hpp"
 #include "reader.hpp"
 // #include "writer.hpp"
@@ -71,7 +73,6 @@ void ESM4::Cell::load(ESM4::Reader& reader)
     // (may be easier to update the context before saving?)
     reader.setCurrCell(formId); // save for LAND (and other children) to access later
     std::uint32_t esmVer = reader.esmVersion();
-    bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
     bool isSkyrim = (esmVer == ESM::VER_170 || esmVer == ESM::VER_094);
 
     while (reader.getSubRecordHeader())
@@ -106,16 +107,8 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 uint32_t flags;
                 reader.get(mX);
                 reader.get(mY);
-#if 0
-                std::string padding;
-                padding.insert(0, reader.stackSize()*2, ' ');
-                std::cout << padding << "CELL group " << ESM4::printLabel(reader.grp().label, reader.grp().type) << std::endl;
-                std::cout << padding << "CELL formId " << std::hex << reader.hdr().record.id << std::endl;
-                std::cout << padding << "CELL X " << std::dec << mX << ", Y " << mY << std::endl;
-#endif
-                if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV)
-                    if (subHdr.dataSize == 12)
-                        reader.get(flags); // not in Obvlivion, nor FO3/FONV
+                if (subHdr.dataSize == 12)
+                    reader.get(flags);
 
                 // Remember cell grid for later (loading LAND, NAVM which should be CELL temporary children)
                 // Note that grids only apply for external cells.  For interior cells use the cell's formid.
@@ -155,8 +148,23 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_XOWN:
-                reader.getFormId(mOwner);
+            {
+                if (subHdr.dataSize == 4 || subHdr.dataSize == 12)
+                {
+                    reader.getFormId(mOwner);
+                    if (subHdr.dataSize == 12)
+                    {
+                        std::uint32_t dummy;
+                        reader.get(dummy); // Unknown
+                        reader.get(dummy); // Flags
+                    }
+                }
+                else
+                {
+                    reader.skipSubRecordData();
+                }
                 break;
+            }
             case ESM4::SUB_XGLB:
                 reader.getFormId(mGlobal);
                 break; // Oblivion only?

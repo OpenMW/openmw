@@ -66,8 +66,23 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 reader.get(mScale);
                 break;
             case ESM4::SUB_XOWN:
-                reader.getFormId(mOwner);
+            {
+                if (subHdr.dataSize == 4 || subHdr.dataSize == 12)
+                {
+                    reader.getFormId(mOwner);
+                    if (subHdr.dataSize == 12)
+                    {
+                        std::uint32_t dummy;
+                        reader.get(dummy); // Unknown
+                        reader.get(dummy); // Flags
+                    }
+                }
+                else
+                {
+                    reader.skipSubRecordData();
+                }
                 break;
+            }
             case ESM4::SUB_XGLB:
                 reader.getFormId(mGlobal);
                 break;
