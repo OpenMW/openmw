@@ -194,6 +194,7 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
+    std::uint32_t esmVer = reader.esmVersion();
     // std::cout << "NavMesh 0x" << std::hex << this << std::endl; // FIXME
     std::uint32_t subSize = 0; // for XXXX sub record
 
@@ -210,6 +211,13 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
         {
             case ESM4::SUB_NVNM:
             {
+                // FIXME: FO4 appears to have a different format
+                if (esmVer == 0x3F800000)
+                {
+                    reader.skipSubRecordData();
+                    break;
+                }
+
                 NVNMstruct nvnm;
                 nvnm.load(reader);
                 mData.push_back(nvnm); // FIXME try swap
@@ -245,6 +253,7 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
             case ESM4::SUB_NVGD: // FO3
             case ESM4::SUB_NVEX: // FO3
             case ESM4::SUB_EDID: // FO3
+            case ESM4::SUB_MNAM: // FO4
                 reader.skipSubRecordData();
                 break;
             default:
