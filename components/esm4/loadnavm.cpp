@@ -196,7 +196,6 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
 
     std::uint32_t esmVer = reader.esmVersion();
     // std::cout << "NavMesh 0x" << std::hex << this << std::endl; // FIXME
-    std::uint32_t subSize = 0; // for XXXX sub record
 
 // FIXME: debugging only
 #if 0
@@ -214,18 +213,7 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
             {
                 if (esmVer == 0x3F800000)
                 {
-                    // TODO: check if any valid TES5 plugin prepends XXXX to NVNM
-                    if (subSize)
-                    {
-                        reader.skipSubRecordData(subSize);
-                        reader.updateRecordRead(subSize);
-                        subSize = 0;
-                    }
-                    else
-                    {
-                        // FIXME: FO4 appears to have a different format
-                        reader.skipSubRecordData();
-                    }
+                    reader.skipSubRecordData();
                     break;
                 }
 
@@ -237,23 +225,6 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
             case ESM4::SUB_ONAM:
             case ESM4::SUB_PNAM:
             case ESM4::SUB_NNAM:
-            {
-                if (subSize)
-                {
-                    reader.skipSubRecordData(subSize); // special post XXXX
-                    reader.updateRecordRead(subSize); // WARNING: manual update
-                    subSize = 0;
-                }
-                else
-                {
-                    Log(Debug::Verbose) << ESM::printName(subHdr.typeId) << " skipping...";
-                    reader.skipSubRecordData(); // FIXME: process the subrecord rather than skip
-                }
-                break;
-            }
-            case ESM4::SUB_XXXX:
-                reader.get(subSize);
-                break;
             case ESM4::SUB_NVER: // FO3
             case ESM4::SUB_DATA: // FO3
             case ESM4::SUB_NVVX: // FO3

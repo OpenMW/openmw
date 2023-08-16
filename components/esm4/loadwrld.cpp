@@ -45,8 +45,6 @@ void ESM4::World::load(ESM4::Reader& reader)
     // corrupted by the use of ignore flag (TODO: should check to verify).
     reader.setCurrWorld(mId); // save for CELL later
 
-    std::uint32_t subSize = 0; // for XXXX sub record
-
     std::uint32_t esmVer = reader.esmVersion();
     // bool isTES4 = (esmVer == ESM::VER_080 || esmVer == ESM::VER_100);
     // bool isFONV = (esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134);
@@ -144,19 +142,6 @@ void ESM4::World::load(ESM4::Reader& reader)
                 reader.get(mParentUseFlags);
                 break;
             case ESM4::SUB_OFST:
-                if (subSize)
-                {
-                    reader.skipSubRecordData(subSize); // special post XXXX
-                    reader.updateRecordRead(subSize); // WARNING: manually update
-                    subSize = 0;
-                }
-                else
-                    reader.skipSubRecordData(); // FIXME: process the subrecord rather than skip
-
-                break;
-            case ESM4::SUB_XXXX:
-                reader.get(subSize);
-                break;
             case ESM4::SUB_RNAM: // multiple
             case ESM4::SUB_MHDT:
             case ESM4::SUB_LTMP:

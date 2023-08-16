@@ -558,9 +558,6 @@ namespace ESM4
     {
         bool result = false;
         // NOTE: some SubRecords have 0 dataSize (e.g. SUB_RDSD in one of REC_REGN records in Oblivion.esm).
-        // Also SUB_XXXX has zero dataSize and the following 4 bytes represent the actual dataSize
-        // - hence it require manual updtes to mCtx.recordRead via updateRecordRead()
-        // See ESM4::NavMesh and ESM4::World.
         if (mCtx.recordHeader.record.dataSize - mCtx.recordRead >= sizeof(mCtx.subRecordHeader))
         {
             result = getExact(mCtx.subRecordHeader);
@@ -580,6 +577,20 @@ namespace ESM4
             mStream->seekg(pos - overshoot);
 
             return false;
+        }
+
+        // Extended storage subrecord redefines the following subrecord's size.
+        // Would need to redesign the loader to support that, so skip over both subrecords.
+        if (result && mCtx.subRecordHeader.typeId == ESM4::SUB_XXXX)
+        {
+            std::uint32_t extDataSize;
+            get(extDataSize);
+            if (!getSubRecordHeader())
+                return false;
+
+            skipSubRecordData(extDataSize);
+            mCtx.recordRead += extDataSize - mCtx.subRecordHeader.dataSize;
+            return getSubRecordHeader();
         }
 
         return result;
