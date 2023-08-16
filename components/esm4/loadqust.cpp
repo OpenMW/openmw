@@ -142,6 +142,7 @@ void ESM4::Quest::load(ESM4::Reader& reader)
             case ESM4::SUB_ALSP: // TES5
             case ESM4::SUB_ALST: // TES5
             case ESM4::SUB_ALUA: // TES5
+            case ESM4::SUB_CIS1: // TES5
             case ESM4::SUB_CIS2: // TES5
             case ESM4::SUB_CNTO: // TES5
             case ESM4::SUB_COCT: // TES5
@@ -155,6 +156,19 @@ void ESM4::Quest::load(ESM4::Reader& reader)
             case ESM4::SUB_SPOR: // TES5
             case ESM4::SUB_VMAD: // TES5
             case ESM4::SUB_VTCK: // TES5
+            case ESM4::SUB_ALCC: // FO4
+            case ESM4::SUB_ALCS: // FO4
+            case ESM4::SUB_ALDI: // FO4
+            case ESM4::SUB_ALFV: // FO4
+            case ESM4::SUB_ALLA: // FO4
+            case ESM4::SUB_ALMI: // FO4
+            case ESM4::SUB_GNAM: // FO4
+            case ESM4::SUB_GWOR: // FO4
+            case ESM4::SUB_LNAM: // FO4
+            case ESM4::SUB_NAM2: // FO4
+            case ESM4::SUB_OCOR: // FO4
+            case ESM4::SUB_SNAM: // FO4
+            case ESM4::SUB_XNAM: // FO4
                 reader.skipSubRecordData();
                 break;
             default:
