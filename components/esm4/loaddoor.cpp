@@ -86,6 +86,11 @@ void ESM4::Door::load(ESM4::Reader& reader)
             case ESM4::SUB_DSTA:
             case ESM4::SUB_DSTD:
             case ESM4::SUB_DSTF: // Destructible end
+            case ESM4::SUB_KSIZ:
+            case ESM4::SUB_KWDA:
+            case ESM4::SUB_CNAM: // FO4
+            case ESM4::SUB_NTRM: // FO4
+            case ESM4::SUB_ONAM: // FO4
             case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();
                 break;
