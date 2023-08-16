@@ -53,6 +53,7 @@ namespace ESM4
             ESM::FormId mProjectile;
             ESM::FormId mConsumedAmmo;
             float mConsumedPercentage{ 0.f };
+            std::uint32_t mHealth{ 0u };
         };
 
         ESM::FormId mId; // from the header

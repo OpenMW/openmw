@@ -75,6 +75,12 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
                     if (subHdr.dataSize == 20)
                         reader.get(mData.mWeight);
                 }
+                // FO4
+                else if (subHdr.dataSize == 8)
+                {
+                    reader.get(mData.mValue);
+                    reader.get(mData.mWeight);
+                }
                 else
                 {
                     reader.skipSubRecordData();
@@ -93,6 +99,13 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
                 {
                     reader.skipSubRecordData();
                 }
+                break;
+            case ESM4::SUB_DNAM:
+                reader.getFormId(mData.mProjectile);
+                reader.get(mData.mFlags);
+                mData.mFlags &= 0xFF;
+                reader.get(mData.mDamage);
+                reader.get(mData.mHealth);
                 break;
             case ESM4::SUB_ICON:
                 reader.getZString(mIcon);
@@ -150,6 +163,8 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
             case ESM4::SUB_DSTD:
             case ESM4::SUB_DSTF: // Destructible end
             case ESM4::SUB_PTRN: // FO4
+            case ESM4::SUB_NAM1: // FO4 casing model data
+            case ESM4::SUB_NAM2: //
                 reader.skipSubRecordData();
                 break;
             default:
