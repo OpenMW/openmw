@@ -90,8 +90,10 @@ void ESM4::BodyPartData::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_NAM5:
             case ESM4::SUB_RAGA: // ragdoll
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
             case ESM4::SUB_MODS:
-            case ESM4::SUB_MODT:
+            case ESM4::SUB_MODF: // Model data end
                 reader.skipSubRecordData();
                 break;
             default:

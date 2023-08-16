@@ -70,7 +70,10 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
             case ESM4::SUB_CTDA:
             case ESM4::SUB_INAM:
             case ESM4::SUB_ITXT: // Menu Item
-            case ESM4::SUB_MODT: // texture hash?
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_SCDA:
             case ESM4::SUB_SCHR:
             case ESM4::SUB_SCRO:
@@ -80,7 +83,6 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
             case ESM4::SUB_SLSD:
             case ESM4::SUB_TNAM:
             case ESM4::SUB_OBND:
-            case ESM4::SUB_MODS: // FONV
             case ESM4::SUB_PRPS: // FO4
             case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();

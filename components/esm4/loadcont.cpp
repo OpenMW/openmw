@@ -74,8 +74,10 @@ void ESM4::Container::load(ESM4::Reader& reader)
             case ESM4::SUB_MODB:
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_MODT:
-            case ESM4::SUB_MODS: // TES5 only
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_VMAD: // TES5 only
             case ESM4::SUB_OBND: // TES5 only
             case ESM4::SUB_COCT: // TES5 only

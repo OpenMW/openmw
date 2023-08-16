@@ -109,7 +109,10 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
             case ESM4::SUB_ZNAM:
                 reader.getFormId(mDropSound);
                 break;
-            case ESM4::SUB_MODT:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_BAMT:
             case ESM4::SUB_BIDS:
             case ESM4::SUB_INAM:
@@ -132,7 +135,6 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
             case ESM4::SUB_WNAM:
             case ESM4::SUB_XNAM: // Dawnguard only?
             case ESM4::SUB_NNAM:
-            case ESM4::SUB_MODS:
             case ESM4::SUB_NAM0: // FO3
             case ESM4::SUB_REPL: // FO3
             case ESM4::SUB_MOD2: // FO3

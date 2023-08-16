@@ -164,13 +164,16 @@ void ESM4::World::load(ESM4::Reader& reader)
             case ESM4::SUB_XLCN:
             case ESM4::SUB_NAM3:
             case ESM4::SUB_NAM4:
-            case ESM4::SUB_MODL:
             case ESM4::SUB_NAMA:
             case ESM4::SUB_ONAM:
             case ESM4::SUB_TNAM:
             case ESM4::SUB_UNAM:
             case ESM4::SUB_XWEM:
-            case ESM4::SUB_MODT: // from Dragonborn onwards?
+            case ESM4::SUB_MODL: // Model data start
+            case ESM4::SUB_MODT:
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_INAM: // FO3
             case ESM4::SUB_NNAM: // FO3
             case ESM4::SUB_XNAM: // FO3

@@ -705,11 +705,14 @@ void ESM4::Race::load(ESM4::Reader& reader)
             case ESM4::SUB_CTDA:
             case ESM4::SUB_CIS1:
             case ESM4::SUB_CIS2:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             //
             case ESM4::SUB_YNAM: // FO3
             case ESM4::SUB_NAM2: // FO3
             case ESM4::SUB_VTCK: // FO3
-            case ESM4::SUB_MODT: // FO3
             case ESM4::SUB_MODD: // FO3
             case ESM4::SUB_ONAM: // FO3
             case ESM4::SUB_APPR: // FO4

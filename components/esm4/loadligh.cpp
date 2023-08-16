@@ -99,7 +99,10 @@ void ESM4::Light::load(ESM4::Reader& reader)
             case ESM4::SUB_FNAM:
                 reader.get(mFade);
                 break;
-            case ESM4::SUB_MODT:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_OBND:
             case ESM4::SUB_VMAD: // Dragonborn only?
             case ESM4::SUB_DAMC: // Destructible

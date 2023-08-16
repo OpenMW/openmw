@@ -56,8 +56,10 @@ void ESM4::AnimObject::load(ESM4::Reader& reader)
             case ESM4::SUB_MODB:
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_MODT: // TES5 only
-            case ESM4::SUB_MODS: // TES5 only
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
                 reader.skipSubRecordData();
                 break;
             default:

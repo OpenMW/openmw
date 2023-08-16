@@ -63,8 +63,10 @@ void ESM4::MovableStatic::load(ESM4::Reader& reader)
             case ESM4::SUB_DSTD:
             case ESM4::SUB_DSTF: // Destructible end
             case ESM4::SUB_OBND: // object bounds
-            case ESM4::SUB_MODT: // model texture data
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
             case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_FULL:
             case ESM4::SUB_MODB:
             case ESM4::SUB_PRPS:

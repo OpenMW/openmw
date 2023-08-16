@@ -55,6 +55,10 @@ void ESM4::Note::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_DATA:
             case ESM4::SUB_MODB:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_ONAM:
             case ESM4::SUB_SNAM:
             case ESM4::SUB_TNAM:

@@ -84,7 +84,9 @@ void ESM4::Static::load(ESM4::Reader& reader)
                 }
                 break;
             }
+            case ESM4::SUB_MODC: // More model data
             case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_OBND:
             case ESM4::SUB_DNAM:
             case ESM4::SUB_BRUS: // FONV

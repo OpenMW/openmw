@@ -79,8 +79,10 @@ void ESM4::IdleMarker::load(ESM4::Reader& reader)
                 reader.getZString(mModel);
                 break;
             case ESM4::SUB_OBND: // object bounds
-            case ESM4::SUB_MODT:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
             case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
                 reader.skipSubRecordData();
                 break;
             default:

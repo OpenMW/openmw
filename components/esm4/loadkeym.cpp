@@ -71,7 +71,10 @@ void ESM4::Key::load(ESM4::Reader& reader)
             case ESM4::SUB_ZNAM:
                 reader.getFormId(mDropSound);
                 break;
-            case ESM4::SUB_MODT:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_KSIZ:
             case ESM4::SUB_KWDA:
             case ESM4::SUB_OBND:

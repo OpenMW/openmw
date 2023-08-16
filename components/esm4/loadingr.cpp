@@ -95,8 +95,10 @@ void ESM4::Ingredient::load(ESM4::Reader& reader)
                 reader.adjustFormId(mEffect.formId);
                 break;
             }
-            case ESM4::SUB_MODT:
-            case ESM4::SUB_MODS: // Dragonborn only?
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_EFID:
             case ESM4::SUB_EFIT:
             case ESM4::SUB_OBND:

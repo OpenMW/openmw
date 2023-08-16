@@ -49,6 +49,10 @@ void ESM4::Material::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_DNAM:
             case ESM4::SUB_DATA:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
                 reader.skipSubRecordData();
                 break;
             default:

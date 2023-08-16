@@ -59,7 +59,10 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
             case ESM4::SUB_MODB:
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_MODT:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_DAMC: // Destructible
             case ESM4::SUB_DEST:
             case ESM4::SUB_DMDC:
@@ -76,7 +79,6 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
             case ESM4::SUB_KNAM:
             case ESM4::SUB_KSIZ:
             case ESM4::SUB_KWDA:
-            case ESM4::SUB_MODS:
             case ESM4::SUB_NAM0:
             case ESM4::SUB_OBND:
             case ESM4::SUB_PNAM:
