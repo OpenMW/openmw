@@ -44,6 +44,9 @@ void ESM4::MovableStatic::load(ESM4::Reader& reader)
             case ESM4::SUB_EDID:
                 reader.getZString(mEditorId);
                 break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
             case ESM4::SUB_MODL:
                 reader.getZString(mModel);
                 break;
@@ -63,11 +66,13 @@ void ESM4::MovableStatic::load(ESM4::Reader& reader)
             case ESM4::SUB_DSTD:
             case ESM4::SUB_DSTF: // Destructible end
             case ESM4::SUB_OBND: // object bounds
+            case ESM4::SUB_KSIZ:
+            case ESM4::SUB_KWDA:
+            case ESM4::SUB_VMAD:
             case ESM4::SUB_MODT: // Model data
             case ESM4::SUB_MODC:
             case ESM4::SUB_MODS:
             case ESM4::SUB_MODF: // Model data end
-            case ESM4::SUB_FULL:
             case ESM4::SUB_MODB:
             case ESM4::SUB_PRPS:
             case ESM4::SUB_PTRN: // FO4
