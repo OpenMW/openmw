@@ -94,7 +94,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
                 mDataTypes |= LAND_VCLR;
                 break;
             }
-            case ESM4::SUA_BTXT:
+            case ESM4::SUB_BTXT:
             {
                 BTXT base;
                 if (reader.getExact(base))
