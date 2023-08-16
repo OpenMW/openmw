@@ -30,8 +30,6 @@
 #include <limits>
 #include <stdexcept>
 
-#include <components/debug/debuglog.hpp>
-
 #include "grouptype.hpp"
 #include "reader.hpp"
 // #include "writer.hpp"
