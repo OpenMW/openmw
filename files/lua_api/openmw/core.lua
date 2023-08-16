@@ -843,4 +843,21 @@
 -- @usage -- check global voice
 -- local isActive = isSayActive();
 
+---
+-- @type Sound
+-- @field #string id Sound id
+-- @field #string fileName Normalized path to sound file in VFS
+-- @field #number volume Raw sound volume, from 0 to 255
+-- @field #number minRange Raw minimal range value, from 0 to 255
+-- @field #number maxRange Raw maximal range value, from 0 to 255
+
+--- List of all @{#Sound}s.
+-- @field [parent=#Sound] #list<#Sound> sounds
+-- @usage local sound = core.sound.sounds['Ashstorm']  -- get by id
+-- @usage local sound = core.sound.sounds[1]  -- get by index
+-- @usage -- Print all sound files paths
+-- for _, sound in pairs(core.sound.sounds) do
+--     print(sound.fileName)
+-- end
+
 return nil

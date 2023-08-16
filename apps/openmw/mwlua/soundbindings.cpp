@@ -5,6 +5,12 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 
+#include <components/esm3/loadsoun.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/vfs/pathutil.hpp>
+
+#include "../mwworld/esmstore.hpp"
+
 #include "luamanagerimp.hpp"
 
 namespace MWLua
@@ -92,7 +98,8 @@ namespace MWLua
 
     sol::table initCoreSoundBindings(const Context& context)
     {
-        sol::table api(context.mLua->sol(), sol::create);
+        sol::state_view& lua = context.mLua->sol();
+        sol::table api(lua, sol::create);
 
         api["playSound3d"]
             = [](std::string_view soundId, const Object& object, const sol::optional<sol::table>& options) {
@@ -153,6 +160,38 @@ namespace MWLua
                 return MWBase::Environment::get().getSoundManager()->sayActive(objPtr);
             },
             []() { return MWBase::Environment::get().getSoundManager()->sayActive(MWWorld::ConstPtr()); });
+
+        // Sound store
+        using SoundStore = MWWorld::Store<ESM::Sound>;
+        const SoundStore* soundStore = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Sound>();
+        sol::usertype<SoundStore> soundStoreT = lua.new_usertype<SoundStore>("ESM3_SoundStore");
+        soundStoreT[sol::meta_function::to_string]
+            = [](const SoundStore& store) { return "ESM3_SoundStore{" + std::to_string(store.getSize()) + " sounds}"; };
+        soundStoreT[sol::meta_function::length] = [](const SoundStore& store) { return store.getSize(); };
+        soundStoreT[sol::meta_function::index] = sol::overload(
+            [](const SoundStore& store, size_t index) -> const ESM::Sound* { return store.at(index - 1); },
+            [](const SoundStore& store, std::string_view soundId) -> const ESM::Sound* {
+                return store.find(ESM::RefId::deserializeText(soundId));
+            });
+        soundStoreT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
+        soundStoreT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
+
+        api["sounds"] = soundStore;
+
+        // Sound record
+        auto soundT = lua.new_usertype<ESM::Sound>("ESM3_Sound");
+        soundT[sol::meta_function::to_string]
+            = [](const ESM::Sound& rec) -> std::string { return "ESM3_Sound[" + rec.mId.toDebugString() + "]"; };
+        soundT["id"] = sol::readonly_property([](const ESM::Sound& rec) { return rec.mId.serializeText(); });
+        soundT["volume"]
+            = sol::readonly_property([](const ESM::Sound& rec) -> unsigned char { return rec.mData.mVolume; });
+        soundT["minRange"]
+            = sol::readonly_property([](const ESM::Sound& rec) -> unsigned char { return rec.mData.mMinRange; });
+        soundT["maxRange"]
+            = sol::readonly_property([](const ESM::Sound& rec) -> unsigned char { return rec.mData.mMaxRange; });
+        soundT["fileName"] = sol::readonly_property([](const ESM::Sound& rec) -> std::string {
+            return VFS::Path::normalizeFilename(Misc::ResourceHelpers::correctSoundPath(rec.mSound));
+        });
 
         return LuaUtil::makeReadOnly(api);
     }
