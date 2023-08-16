@@ -46,7 +46,7 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
                 reader.getZString(mEditorId);
                 break;
             case ESM4::SUB_FULL:
-                reader.getZString(mTopicName);
+                reader.getLocalizedString(mTopicName);
                 break;
             case ESM4::SUB_QSTI:
                 reader.getFormId(mQuests.emplace_back());
@@ -87,6 +87,7 @@ void ESM4::Dialogue::load(ESM4::Reader& reader)
             case ESM4::SUB_BNAM: // TES5
             case ESM4::SUB_SNAM: // TES5
             case ESM4::SUB_TIFC: // TES5
+            case ESM4::SUB_KNAM: // FO4
                 reader.skipSubRecordData();
                 break;
             default:
