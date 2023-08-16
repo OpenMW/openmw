@@ -85,6 +85,9 @@ void ESM4::Furniture::load(ESM4::Reader& reader)
             case ESM4::SUB_XMRK:
             case ESM4::SUB_PRPS:
             case ESM4::SUB_CTDA:
+            case ESM4::SUB_CIS1:
+            case ESM4::SUB_CIS2:
+            case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

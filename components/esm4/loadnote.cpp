@@ -60,6 +60,7 @@ void ESM4::Note::load(ESM4::Reader& reader)
             case ESM4::SUB_TNAM:
             case ESM4::SUB_XNAM:
             case ESM4::SUB_OBND:
+            case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

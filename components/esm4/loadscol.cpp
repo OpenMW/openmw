@@ -51,6 +51,7 @@ void ESM4::StaticCollection::load(ESM4::Reader& reader)
             case ESM4::SUB_MODT:
             case ESM4::SUB_ONAM:
             case ESM4::SUB_DATA:
+            case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

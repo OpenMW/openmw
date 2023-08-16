@@ -95,14 +95,13 @@ void ESM4::Activator::load(ESM4::Reader& reader)
             case ESM4::SUB_CIS2:
             case ESM4::SUB_CITC:
             case ESM4::SUB_NVNM:
-            // Introduced in FO4
-            case ESM4::SUB_ATTX:
-            case ESM4::SUB_FTYP:
-            case ESM4::SUB_NTRM:
-            case ESM4::SUB_PTRN:
-            case ESM4::SUB_PRPS:
-            case ESM4::SUB_RADR:
-            case ESM4::SUB_STCP:
+            case ESM4::SUB_ATTX: // FO4
+            case ESM4::SUB_FTYP: // FO4
+            case ESM4::SUB_NTRM: // FO4
+            case ESM4::SUB_PTRN: // FO4
+            case ESM4::SUB_PRPS: // FO4
+            case ESM4::SUB_RADR: // FO4
+            case ESM4::SUB_STCP: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

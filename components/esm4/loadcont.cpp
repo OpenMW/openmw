@@ -91,6 +91,7 @@ void ESM4::Container::load(ESM4::Reader& reader)
             case ESM4::SUB_DSTF: // Destructible end
             case ESM4::SUB_RNAM: // FONV
             case ESM4::SUB_PRPS: // FO4
+            case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

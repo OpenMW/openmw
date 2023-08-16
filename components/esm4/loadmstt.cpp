@@ -68,6 +68,7 @@ void ESM4::MovableStatic::load(ESM4::Reader& reader)
             case ESM4::SUB_FULL:
             case ESM4::SUB_MODB:
             case ESM4::SUB_PRPS:
+            case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

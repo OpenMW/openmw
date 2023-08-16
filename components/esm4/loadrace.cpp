@@ -702,6 +702,9 @@ void ESM4::Race::load(ESM4::Reader& reader)
             case ESM4::SUB_WKMV:
             case ESM4::SUB_SPMV:
             case ESM4::SUB_ATKR:
+            case ESM4::SUB_CTDA:
+            case ESM4::SUB_CIS1:
+            case ESM4::SUB_CIS2:
             //
             case ESM4::SUB_YNAM: // FO3
             case ESM4::SUB_NAM2: // FO3
@@ -709,57 +712,56 @@ void ESM4::Race::load(ESM4::Reader& reader)
             case ESM4::SUB_MODT: // FO3
             case ESM4::SUB_MODD: // FO3
             case ESM4::SUB_ONAM: // FO3
-            // FO4
-            case ESM4::SUB_APPR:
-            case ESM4::SUB_ATKS:
-            case ESM4::SUB_ATKT:
-            case ESM4::SUB_ATKW:
-            case ESM4::SUB_BMMP:
-            case ESM4::SUB_BSMB:
-            case ESM4::SUB_BSMP:
-            case ESM4::SUB_BSMS:
-            case ESM4::SUB_CTDA:
-            case ESM4::SUB_FMRI:
-            case ESM4::SUB_FMRN:
-            case ESM4::SUB_HLTX:
-            case ESM4::SUB_MLSI:
-            case ESM4::SUB_MPGN:
-            case ESM4::SUB_MPGS:
-            case ESM4::SUB_MPPC:
-            case ESM4::SUB_MPPF:
-            case ESM4::SUB_MPPI:
-            case ESM4::SUB_MPPK:
-            case ESM4::SUB_MPPM:
-            case ESM4::SUB_MPPN:
-            case ESM4::SUB_MPPT:
-            case ESM4::SUB_MSID:
-            case ESM4::SUB_MSM0:
-            case ESM4::SUB_MSM1:
-            case ESM4::SUB_NNAM:
-            case ESM4::SUB_NTOP:
-            case ESM4::SUB_PRPS:
-            case ESM4::SUB_PTOP:
-            case ESM4::SUB_QSTI:
-            case ESM4::SUB_RBPC:
-            case ESM4::SUB_SADD:
-            case ESM4::SUB_SAKD:
-            case ESM4::SUB_SAPT:
-            case ESM4::SUB_SGNM:
-            case ESM4::SUB_SRAC:
-            case ESM4::SUB_SRAF:
-            case ESM4::SUB_STCP:
-            case ESM4::SUB_STKD:
-            case ESM4::SUB_TETI:
-            case ESM4::SUB_TTEB:
-            case ESM4::SUB_TTEC:
-            case ESM4::SUB_TTED:
-            case ESM4::SUB_TTEF:
-            case ESM4::SUB_TTET:
-            case ESM4::SUB_TTGE:
-            case ESM4::SUB_TTGP:
-            case ESM4::SUB_UNWP:
-            case ESM4::SUB_WMAP:
-            case ESM4::SUB_ZNAM:
+            case ESM4::SUB_APPR: // FO4
+            case ESM4::SUB_ATKS: // FO4
+            case ESM4::SUB_ATKT: // FO4
+            case ESM4::SUB_ATKW: // FO4
+            case ESM4::SUB_BMMP: // FO4
+            case ESM4::SUB_BSMB: // FO4
+            case ESM4::SUB_BSMP: // FO4
+            case ESM4::SUB_BSMS: // FO4
+
+            case ESM4::SUB_FMRI: // FO4
+            case ESM4::SUB_FMRN: // FO4
+            case ESM4::SUB_HLTX: // FO4
+            case ESM4::SUB_MLSI: // FO4
+            case ESM4::SUB_MPGN: // FO4
+            case ESM4::SUB_MPGS: // FO4
+            case ESM4::SUB_MPPC: // FO4
+            case ESM4::SUB_MPPF: // FO4
+            case ESM4::SUB_MPPI: // FO4
+            case ESM4::SUB_MPPK: // FO4
+            case ESM4::SUB_MPPM: // FO4
+            case ESM4::SUB_MPPN: // FO4
+            case ESM4::SUB_MPPT: // FO4
+            case ESM4::SUB_MSID: // FO4
+            case ESM4::SUB_MSM0: // FO4
+            case ESM4::SUB_MSM1: // FO4
+            case ESM4::SUB_NNAM: // FO4
+            case ESM4::SUB_NTOP: // FO4
+            case ESM4::SUB_PRPS: // FO4
+            case ESM4::SUB_PTOP: // FO4
+            case ESM4::SUB_QSTI: // FO4
+            case ESM4::SUB_RBPC: // FO4
+            case ESM4::SUB_SADD: // FO4
+            case ESM4::SUB_SAKD: // FO4
+            case ESM4::SUB_SAPT: // FO4
+            case ESM4::SUB_SGNM: // FO4
+            case ESM4::SUB_SRAC: // FO4
+            case ESM4::SUB_SRAF: // FO4
+            case ESM4::SUB_STCP: // FO4
+            case ESM4::SUB_STKD: // FO4
+            case ESM4::SUB_TETI: // FO4
+            case ESM4::SUB_TTEB: // FO4
+            case ESM4::SUB_TTEC: // FO4
+            case ESM4::SUB_TTED: // FO4
+            case ESM4::SUB_TTEF: // FO4
+            case ESM4::SUB_TTET: // FO4
+            case ESM4::SUB_TTGE: // FO4
+            case ESM4::SUB_TTGP: // FO4
+            case ESM4::SUB_UNWP: // FO4
+            case ESM4::SUB_WMAP: // FO4
+            case ESM4::SUB_ZNAM: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

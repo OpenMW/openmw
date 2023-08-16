@@ -180,6 +180,7 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
             case ESM4::SUB_WNM6: // FONV
             case ESM4::SUB_WNM7: // FONV
             case ESM4::SUB_EFSD: // FONV DeadMoney
+            case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

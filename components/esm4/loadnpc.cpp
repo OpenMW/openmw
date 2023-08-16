@@ -278,6 +278,7 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             case ESM4::SUB_NAM4: // FO3
             case ESM4::SUB_COED: // FO3
             case ESM4::SUB_PRPS: // FO4
+            case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();
                 break;
             default:
