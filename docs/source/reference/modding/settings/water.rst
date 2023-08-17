@@ -78,7 +78,7 @@ In interiors the lowest level is 2.
 This setting can be changed ingame with the "Reflection shader detail" dropdown under the Water tab of the Video panel in the Options menu.
 
 rain ripple detail
------------------
+------------------
 
 :Type:		integer
 :Range:		0, 1, 2

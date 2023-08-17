@@ -11,6 +11,7 @@
 #
 # All configuration values have a default; values that are commented out
 # serve to show the default.
+import re
 import os
 import sys
 import subprocess
@@ -24,7 +25,7 @@ sys.path.insert(0, project_root)
 # -- General configuration ------------------------------------------------
 
 # If your documentation needs a minimal Sphinx version, state it here.
-needs_sphinx = '1.7'
+needs_sphinx = '1.8'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -54,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'OpenMW'
-copyright = u'2020, OpenMW Team'
+copyright = u'2023, OpenMW Team'
 
 
 # The version info for the project you're documenting, acts as replacement for
@@ -66,26 +67,15 @@ copyright = u'2020, OpenMW Team'
 
 release = version = "UNRELEASED"
 
-
-def get_openmw_version(haystack):
-    needle = 'OPENMW_VERSION_MAJOR'
-    line_counter = 0
-    for hay in haystack:
-        if needle in str(hay):
-            break
-        line_counter += 1
-
-    version = '.'.join([haystack[line_counter][1][1].contents,
-                        haystack[line_counter+1][1][1].contents,
-                        haystack[line_counter+2][1][1].contents])
-    return version
-
-
 try:
-    from parse_cmake import parsing
     cmake_raw = open(project_root+'/CMakeLists.txt', 'r').read()
-    cmake_data = parsing.parse(cmake_raw)
-    release = version = get_openmw_version(cmake_data)
+    majorVersionMatch = re.search('set\(OPENMW_VERSION_MAJOR (\d+)\)', cmake_raw)
+    minorVersionMatch = re.search('set\(OPENMW_VERSION_MINOR (\d+)\)', cmake_raw)
+    releaseVersionMatch = re.search('set\(OPENMW_VERSION_RELEASE (\d+)\)', cmake_raw)
+    if majorVersionMatch and minorVersionMatch and releaseVersionMatch:
+        release = version = '.'.join((majorVersionMatch.group(1),
+                                     minorVersionMatch.group(1),
+                                     releaseVersionMatch.group(1)))
 
 except Exception as ex:
     print("WARNING: Version will be set to '{0}' because: '{1}'.".format(release, str(ex)))
@@ -145,11 +135,9 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
 
-#html_css_files = 'figures.css'         use this once Sphinx 1.8 is released!!!
-
 def setup(app):
-    app.add_stylesheet('figures.css')
-    app.add_stylesheet('luadoc.css')
+    app.add_css_file('figures.css')
+    app.add_css_file('luadoc.css')
     try:
         subprocess.call(['bash', project_root + '/docs/source/generate_luadoc.sh'])
     except Exception as e:
