@@ -211,7 +211,9 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
         {
             case ESM4::SUB_NVNM:
             {
-                if (esmVer == 0x3F800000)
+                // See FIXME in ESM4::Navigation::load.
+                // FO4 updates the format
+                if (esmVer == ESM::VER_100)
                 {
                     reader.skipSubRecordData();
                     break;

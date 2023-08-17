@@ -249,8 +249,9 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_NVPP:
             {
-                // FO4
-                if (esmVer == 0x3F800000)
+                // FIXME: this is both the version for FO4 and for some TES4 files
+                // How to distinguish?
+                if (esmVer == ESM::VER_100)
                 {
                     reader.skipSubRecordData();
                     break;
@@ -339,9 +340,11 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_NVMI: // multiple
             {
-                if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV || esmVer == 0x3F800000)
+                // Can only read TES4 navmesh data
+                // Note FO4 FIXME above
+                if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV || esmVer == ESM::VER_100)
                 {
-                    reader.skipSubRecordData(); // FIXME: FO3+ have different form of NavMeshInfo
+                    reader.skipSubRecordData();
                     break;
                 }
 
