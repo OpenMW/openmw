@@ -114,9 +114,8 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                         if (subHdr.dataSize >= 32)
                         {
                             reader.get(mDoor.flags);
-                            // FO4
                             if (subHdr.dataSize == 36)
-                                reader.getFormId(mDoor.transitionInt);
+                                reader.getFormId(mDoor.transitionInterior);
                         }
                         break;
                     }
