@@ -52,20 +52,25 @@ void ESM4::IdleAnimation::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_ANAM:
             {
-                if (subHdr.dataSize == 8)
+                switch (subHdr.dataSize)
                 {
-                    reader.getFormId(mParent);
-                    reader.getFormId(mPrevious);
-                }
-                // Animation Group Section. TES4 stores the IDs above in DATA
-                else if (subHdr.dataSize == 1)
-                {
-                    uint8_t dummy;
-                    reader.get(dummy);
-                }
-                else
-                {
-                    reader.skipSubRecordData();
+                    case 1: // TES4
+                    {
+                        // Animation group section
+                        uint8_t dummy;
+                        reader.get(dummy);
+                        break;
+                    }
+                    case 8: // Everything else
+                    {
+                        // These IDs go into DATA for TES4
+                        reader.getFormId(mParent);
+                        reader.getFormId(mPrevious);
+                        break;
+                    }
+                    default:
+                        reader.skipSubRecordData();
+                        break;
                 }
                 break;
             }

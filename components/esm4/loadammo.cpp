@@ -48,42 +48,42 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
                 reader.getLocalizedString(mFullName);
                 break;
             case ESM4::SUB_DATA:
-                // FO3/FNV or TES4
-                if (subHdr.dataSize == 13 || subHdr.dataSize == 18)
+                switch (subHdr.dataSize)
                 {
-                    reader.get(mData.mSpeed);
-                    reader.get(mData.mFlags);
-                    mData.mFlags &= 0xFF;
-                    reader.get(mData.mValue);
-                    if (subHdr.dataSize == 13)
-                        reader.get(mData.mClipRounds);
-                    else
+                    case 18: // TES4
+                    case 13: // FO3/FNV
                     {
-                        reader.get(mData.mWeight);
-                        std::uint16_t damageInt;
-                        reader.get(damageInt);
-                        mData.mDamage = static_cast<float>(damageInt);
+                        reader.get(mData.mSpeed);
+                        reader.get(mData.mFlags);
+                        mData.mFlags &= 0xFF;
+                        reader.get(mData.mValue);
+                        if (subHdr.dataSize == 13)
+                            reader.get(mData.mClipRounds);
+                        else
+                        {
+                            reader.get(mData.mWeight);
+                            std::uint16_t damageInt;
+                            reader.get(damageInt);
+                            mData.mDamage = static_cast<float>(damageInt);
+                        }
+                        break;
                     }
-                }
-                // TES5/SSE
-                else if (subHdr.dataSize == 16 || subHdr.dataSize == 20)
-                {
-                    reader.getFormId(mData.mProjectile);
-                    reader.get(mData.mFlags);
-                    reader.get(mData.mDamage);
-                    reader.get(mData.mValue);
-                    if (subHdr.dataSize == 20)
+                    case 16: // TES5
+                    case 20: // SSE
+                        reader.getFormId(mData.mProjectile);
+                        reader.get(mData.mFlags);
+                        reader.get(mData.mDamage);
+                        reader.get(mData.mValue);
+                        if (subHdr.dataSize == 20)
+                            reader.get(mData.mWeight);
+                        break;
+                    case 8:
+                        reader.get(mData.mValue);
                         reader.get(mData.mWeight);
-                }
-                // FO4
-                else if (subHdr.dataSize == 8)
-                {
-                    reader.get(mData.mValue);
-                    reader.get(mData.mWeight);
-                }
-                else
-                {
-                    reader.skipSubRecordData();
+                        break;
+                    default:
+                        reader.skipSubRecordData();
+                        break;
                 }
                 break;
             case ESM4::SUB_DAT2:

@@ -147,19 +147,22 @@ void ESM4::Cell::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_XOWN:
             {
-                if (subHdr.dataSize == 4 || subHdr.dataSize == 12)
+                switch (subHdr.dataSize)
                 {
-                    reader.getFormId(mOwner);
-                    if (subHdr.dataSize == 12)
+                    case 4:
+                        reader.getFormId(mOwner);
+                        break;
+                    case 12:
                     {
+                        reader.getFormId(mOwner);
                         std::uint32_t dummy;
                         reader.get(dummy); // Unknown
-                        reader.get(dummy); // Flags
+                        reader.get(dummy); // No crime flag, FO4
+                        break;
                     }
-                }
-                else
-                {
-                    reader.skipSubRecordData();
+                    default:
+                        reader.skipSubRecordData();
+                        break;
                 }
                 break;
             }
@@ -177,27 +180,20 @@ void ESM4::Cell::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_XCLL:
             {
-                // TES4
-                if (subHdr.dataSize == 36)
-                    reader.get(&mLighting, 36);
-                // FO3, FONV
-                else if (subHdr.dataSize == 40)
-                    reader.get(mLighting);
-                // TES5
-                else if (subHdr.dataSize == 92)
+                switch (subHdr.dataSize)
                 {
-                    reader.get(mLighting);
-                    reader.skipSubRecordData(52); // FIXME
-                }
-                // FO4
-                else if (subHdr.dataSize == 136)
-                {
-                    reader.get(mLighting);
-                    reader.skipSubRecordData(96); // FIXME
-                }
-                else
-                {
-                    reader.skipSubRecordData();
+                    case 36: // TES4
+                        reader.get(&mLighting, 36);
+                        break;
+                    case 40: // FO3/FNV
+                    case 92: // TES5 (FIXME)
+                    case 136: // FO4 (FIXME)
+                        reader.get(mLighting);
+                        reader.skipSubRecordData(subHdr.dataSize - 40);
+                        break;
+                    default:
+                        reader.skipSubRecordData();
+                        break;
                 }
                 break;
             }

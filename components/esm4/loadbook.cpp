@@ -53,30 +53,32 @@ void ESM4::Book::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_DATA:
             {
-                if (subHdr.dataSize == 8 || subHdr.dataSize == 10 || subHdr.dataSize == 16)
+                switch (subHdr.dataSize)
                 {
-                    // TES4, FO3, FNV
-                    if (subHdr.dataSize == 10)
-                    {
+                    case 10: // TES4, FO3, FNV
                         reader.get(mData.flags);
                         reader.get(mData.bookSkill);
-                    }
-                    // TES5
-                    else if (subHdr.dataSize == 16)
+                        reader.get(mData.value);
+                        reader.get(mData.weight);
+                        break;
+                    case 16: // TES5
                     {
                         reader.get(mData.flags);
                         reader.get(mData.type);
                         std::uint16_t dummy;
                         reader.get(dummy);
                         reader.get(mData.teaches);
+                        reader.get(mData.value);
+                        reader.get(mData.weight);
+                        break;
                     }
-                    // else: FO4
-                    reader.get(mData.value);
-                    reader.get(mData.weight);
-                }
-                else
-                {
-                    reader.skipSubRecordData();
+                    case 8: // FO4
+                        reader.get(mData.value);
+                        reader.get(mData.weight);
+                        break;
+                    default:
+                        reader.skipSubRecordData();
+                        break;
                 }
                 break;
             }

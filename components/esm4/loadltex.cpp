@@ -46,22 +46,18 @@ void ESM4::LandTexture::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_HNAM:
             {
-                // TES5+
-                if (subHdr.dataSize == 2)
+                switch (subHdr.dataSize)
                 {
-                    reader.get(mHavokFriction);
-                    reader.get(mHavokRestitution);
-                }
-                // TES4, FO3, FNV
-                else if (subHdr.dataSize == 3)
-                {
-                    reader.get(mHavokMaterial);
-                    reader.get(mHavokFriction);
-                    reader.get(mHavokRestitution);
-                }
-                else
-                {
-                    reader.skipSubRecordData();
+                    case 3: // TES4, FO3, FNV
+                        reader.get(mHavokMaterial);
+                        [[fallthrough]];
+                    case 2:
+                        reader.get(mHavokFriction);
+                        reader.get(mHavokRestitution);
+                        break;
+                    default:
+                        reader.skipSubRecordData();
+                        break;
                 }
                 break;
             }

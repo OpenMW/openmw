@@ -67,19 +67,22 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_XOWN:
             {
-                if (subHdr.dataSize == 4 || subHdr.dataSize == 12)
+                switch (subHdr.dataSize)
                 {
-                    reader.getFormId(mOwner);
-                    if (subHdr.dataSize == 12)
+                    case 4:
+                        reader.getFormId(mOwner);
+                        break;
+                    case 12:
                     {
+                        reader.getFormId(mOwner);
                         std::uint32_t dummy;
                         reader.get(dummy); // Unknown
-                        reader.get(dummy); // Flags
+                        reader.get(dummy); // No crime flag, FO4
+                        break;
                     }
-                }
-                else
-                {
-                    reader.skipSubRecordData();
+                    default:
+                        reader.skipSubRecordData();
+                        break;
                 }
                 break;
             }
@@ -99,22 +102,27 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_XTEL:
             {
-                if (subHdr.dataSize == 28 || subHdr.dataSize == 32 || subHdr.dataSize == 36)
+                switch (subHdr.dataSize)
                 {
-                    reader.getFormId(mDoor.destDoor);
-                    reader.get(mDoor.destPos);
-                    mDoor.flags = 0;
-                    if (subHdr.dataSize == 32 || subHdr.dataSize == 36)
+                    case 28:
+                    case 32: // FO3, FNV, TES5
+                    case 36: // FO4
                     {
-                        reader.get(mDoor.flags);
-                        // FO4
-                        if (subHdr.dataSize == 36)
-                            reader.getFormId(mDoor.transitionInt);
+                        reader.getFormId(mDoor.destDoor);
+                        reader.get(mDoor.destPos);
+                        mDoor.flags = 0;
+                        if (subHdr.dataSize >= 32)
+                        {
+                            reader.get(mDoor.flags);
+                            // FO4
+                            if (subHdr.dataSize == 36)
+                                reader.getFormId(mDoor.transitionInt);
+                        }
+                        break;
                     }
-                }
-                else
-                {
-                    reader.skipSubRecordData();
+                    default:
+                        reader.skipSubRecordData();
+                        break;
                 }
                 break;
             }

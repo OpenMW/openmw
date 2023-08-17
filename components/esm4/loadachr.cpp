@@ -59,19 +59,22 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_XOWN:
             {
-                if (subHdr.dataSize == 4 || subHdr.dataSize == 12)
+                switch (subHdr.dataSize)
                 {
-                    reader.getFormId(mOwner);
-                    if (subHdr.dataSize == 12)
+                    case 4:
+                        reader.getFormId(mOwner);
+                        break;
+                    case 12:
                     {
+                        reader.getFormId(mOwner);
                         std::uint32_t dummy;
                         reader.get(dummy); // Unknown
-                        reader.get(dummy); // Flags
+                        reader.get(dummy); // No crime flag, FO4
+                        break;
                     }
-                }
-                else
-                {
-                    reader.skipSubRecordData();
+                    default:
+                        reader.skipSubRecordData();
+                        break;
                 }
                 break;
             }

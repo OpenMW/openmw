@@ -114,15 +114,17 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_ACBS:
             {
-                if (subHdr.dataSize == 24)
-                    reader.get(mBaseConfig);
-                // TES4
-                else if (subHdr.dataSize == 16)
-                    reader.get(&mBaseConfig, 16);
-                // FO4
-                else if (subHdr.dataSize == 20)
-                    reader.get(&mBaseConfig, 20);
-
+                switch (subHdr.dataSize)
+                {
+                    case 16: // TES4
+                    case 24: // FO3/FNV, TES5
+                    case 20: // FO4
+                        reader.get(&mBaseConfig, subHdr.dataSize);
+                        break;
+                    default:
+                        reader.skipSubRecordData();
+                        break;
+                }
                 break;
             }
             case ESM4::SUB_DATA:
