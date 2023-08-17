@@ -45,6 +45,7 @@ namespace ESM4
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
+        std::string mFullName;
 
         std::vector<ESM::FormId> mObjects;
 

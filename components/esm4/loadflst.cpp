@@ -44,6 +44,9 @@ void ESM4::FormIdList::load(ESM4::Reader& reader)
             case ESM4::SUB_EDID:
                 reader.getZString(mEditorId);
                 break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
             case ESM4::SUB_LNAM:
                 reader.getFormId(mObjects.emplace_back());
                 break;
