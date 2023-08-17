@@ -147,12 +147,7 @@ namespace EsmTool
 
             std::cout << "\n  Record: " << ESM::NAME(reader.hdr().record.typeId).toStringView();
             if constexpr (ESM::hasId<T>)
-            {
-                if constexpr (std::is_same_v<decltype(value.mId), ESM::FormId>)
-                    std::cout << "\n  " << ESM::RefId(value.mId);
-                else
-                    std::cout << "\n  Id: " << value.mId;
-            }
+                std::cout << "\n  Id: " << value.mId;
             if constexpr (ESM4::hasFlags<T>)
                 std::cout << "\n  Record flags: " << recordFlags(value.mFlags);
             if constexpr (ESM4::hasParent<T>)
