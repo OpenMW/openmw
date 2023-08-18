@@ -109,7 +109,10 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
             case ESM4::SUB_ZNAM:
                 reader.getFormId(mDropSound);
                 break;
-            case ESM4::SUB_MODT:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_BAMT:
             case ESM4::SUB_BIDS:
             case ESM4::SUB_INAM:
@@ -132,16 +135,17 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
             case ESM4::SUB_WNAM:
             case ESM4::SUB_XNAM: // Dawnguard only?
             case ESM4::SUB_NNAM:
-            case ESM4::SUB_MODS:
             case ESM4::SUB_NAM0: // FO3
             case ESM4::SUB_REPL: // FO3
             case ESM4::SUB_MOD2: // FO3
             case ESM4::SUB_MO2T: // FO3
             case ESM4::SUB_MO2S: // FO3
             case ESM4::SUB_NAM6: // FO3
-            case ESM4::SUB_MOD4: // FO3
-            case ESM4::SUB_MO4T: // FO3
-            case ESM4::SUB_MO4S: // FO3
+            case ESM4::SUB_MOD4: // First person model data
+            case ESM4::SUB_MO4T:
+            case ESM4::SUB_MO4S:
+            case ESM4::SUB_MO4C:
+            case ESM4::SUB_MO4F: // First person model data end
             case ESM4::SUB_BIPL: // FO3
             case ESM4::SUB_NAM7: // FO3
             case ESM4::SUB_MOD3: // FO3
@@ -149,11 +153,15 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
             case ESM4::SUB_MO3S: // FO3
             case ESM4::SUB_MODD: // FO3
                                  // case ESM4::SUB_MOSD: // FO3
-            case ESM4::SUB_DEST: // FO3
-            case ESM4::SUB_DSTD: // FO3
-            case ESM4::SUB_DSTF: // FO3
-            case ESM4::SUB_DMDL: // FO3
-            case ESM4::SUB_DMDT: // FO3
+            case ESM4::SUB_DAMC: // Destructible
+            case ESM4::SUB_DEST:
+            case ESM4::SUB_DMDC:
+            case ESM4::SUB_DMDL:
+            case ESM4::SUB_DMDT:
+            case ESM4::SUB_DMDS:
+            case ESM4::SUB_DSTA:
+            case ESM4::SUB_DSTD:
+            case ESM4::SUB_DSTF: // Destructible end
             case ESM4::SUB_VATS: // FONV
             case ESM4::SUB_VANM: // FONV
             case ESM4::SUB_MWD1: // FONV
@@ -176,6 +184,21 @@ void ESM4::Weapon::load(ESM4::Reader& reader)
             case ESM4::SUB_WNM6: // FONV
             case ESM4::SUB_WNM7: // FONV
             case ESM4::SUB_EFSD: // FONV DeadMoney
+            case ESM4::SUB_APPR: // FO4
+            case ESM4::SUB_DAMA: // FO4
+            case ESM4::SUB_FLTR: // FO4
+            case ESM4::SUB_FNAM: // FO4
+            case ESM4::SUB_INRD: // FO4
+            case ESM4::SUB_LNAM: // FO4
+            case ESM4::SUB_MASE: // FO4
+            case ESM4::SUB_PTRN: // FO4
+            case ESM4::SUB_STCP: // FO4
+            case ESM4::SUB_WAMD: // FO4
+            case ESM4::SUB_WZMD: // FO4
+            case ESM4::SUB_OBTE: // FO4 object template start
+            case ESM4::SUB_OBTF:
+            case ESM4::SUB_OBTS:
+            case ESM4::SUB_STOP: // FO4 object template end
                 reader.skipSubRecordData();
                 break;
             default:

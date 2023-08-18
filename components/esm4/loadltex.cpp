@@ -35,8 +35,6 @@ void ESM4::LandTexture::load(ESM4::Reader& reader)
 {
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
-    std::uint32_t esmVer = reader.esmVersion();
-    bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
 
     while (reader.getSubRecordHeader())
     {
@@ -48,25 +46,18 @@ void ESM4::LandTexture::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_HNAM:
             {
-                if (isFONV)
+                switch (subHdr.dataSize)
                 {
-                    reader.skipSubRecordData(); // FIXME: skip FONV for now
-                    break;
-                }
-
-                if ((reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
-                    && subHdr.dataSize == 2) // FO3 is VER_094 but dataSize 3
-                {
-                    reader.get(mHavokFriction);
-                    reader.get(mHavokRestitution);
-                }
-                else
-                {
-                    if (subHdr.dataSize != 3)
-                        throw std::runtime_error("LTEX unexpected HNAM size, expected 3");
-                    reader.get(mHavokMaterial);
-                    reader.get(mHavokFriction);
-                    reader.get(mHavokRestitution);
+                    case 3: // TES4, FO3, FNV
+                        reader.get(mHavokMaterial);
+                        [[fallthrough]];
+                    case 2:
+                        reader.get(mHavokFriction);
+                        reader.get(mHavokRestitution);
+                        break;
+                    default:
+                        reader.skipSubRecordData();
+                        break;
                 }
                 break;
             }
@@ -77,14 +68,14 @@ void ESM4::LandTexture::load(ESM4::Reader& reader)
                 reader.get(mTextureSpecular);
                 break;
             case ESM4::SUB_GNAM:
-                reader.getFormId(mGrass);
+                reader.getFormId(mGrass.emplace_back());
                 break;
             case ESM4::SUB_TNAM:
                 reader.getFormId(mTexture);
-                break; // TES5 only
+                break; // TES5, FO4
             case ESM4::SUB_MNAM:
                 reader.getFormId(mMaterial);
-                break; // TES5 only
+                break; // TES5, FO4
             default:
                 throw std::runtime_error("ESM4::LTEX::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

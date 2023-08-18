@@ -53,13 +53,29 @@ void ESM4::Note::load(ESM4::Reader& reader)
             case ESM4::SUB_ICON:
                 reader.getZString(mIcon);
                 break;
-            case ESM4::SUB_DATA:
             case ESM4::SUB_MODB:
+                reader.get(mBoundRadius);
+                break;
+            case ESM4::SUB_YNAM:
+                reader.getFormId(mPickUpSound);
+                break;
+            case ESM4::SUB_ZNAM:
+                reader.getFormId(mDropSound);
+                break;
+            case ESM4::SUB_DATA:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_ONAM:
             case ESM4::SUB_SNAM:
             case ESM4::SUB_TNAM:
             case ESM4::SUB_XNAM:
             case ESM4::SUB_OBND:
+            case ESM4::SUB_VMAD:
+            case ESM4::SUB_DNAM: // FO4
+            case ESM4::SUB_PNAM: // FO4
+            case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

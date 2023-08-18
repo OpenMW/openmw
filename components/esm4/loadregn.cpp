@@ -122,6 +122,8 @@ void ESM4::Region::load(ESM4::Reader& reader)
             case ESM4::SUB_RDSB: // FONV
             case ESM4::SUB_RDSI: // FONV
             case ESM4::SUB_NVMI: // TES5
+            case ESM4::SUB_ANAM: // FO4
+            case ESM4::SUB_RLDM: // FO4
                 // RDAT skipping... following is a map
                 // RDMP skipping... map name
                 //

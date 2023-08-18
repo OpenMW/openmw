@@ -49,14 +49,14 @@ namespace ESM4
         std::uint8_t mHavokRestitution;
 
         std::uint8_t mTextureSpecular; // default 30
-        ESM::FormId mGrass;
+        std::vector<ESM::FormId> mGrass;
 
         // ------ TES4 only -----
 
         std::string mTextureFile;
         std::uint8_t mHavokMaterial;
 
-        // ------ TES5 only -----
+        // ------ TES5, FO4 -----
 
         ESM::FormId mTexture;
         ESM::FormId mMaterial;

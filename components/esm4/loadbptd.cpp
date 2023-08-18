@@ -78,7 +78,11 @@ void ESM4::BodyPartData::load(ESM4::Reader& reader)
                 reader.getZString(bodyPart.mIKStartNode);
                 break;
             case ESM4::SUB_BPND:
-                reader.get(bodyPart.mData);
+                if (subHdr.dataSize == sizeof(bodyPart.mData))
+                    reader.get(bodyPart.mData);
+                // FIXME: FO4
+                else
+                    reader.skipSubRecordData();
                 break;
             case ESM4::SUB_NAM1:
                 reader.getZString(bodyPart.mLimbReplacementModel);
@@ -90,8 +94,18 @@ void ESM4::BodyPartData::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_NAM5:
             case ESM4::SUB_RAGA: // ragdoll
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
             case ESM4::SUB_MODS:
-            case ESM4::SUB_MODT:
+            case ESM4::SUB_MODF: // Model data end
+            case ESM4::SUB_BNAM: // FO4
+            case ESM4::SUB_CNAM: // FO4
+            case ESM4::SUB_DNAM: // FO4
+            case ESM4::SUB_ENAM: // FO4
+            case ESM4::SUB_FNAM: // FO4
+            case ESM4::SUB_INAM: // FO4
+            case ESM4::SUB_JNAM: // FO4
+            case ESM4::SUB_NAM2: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

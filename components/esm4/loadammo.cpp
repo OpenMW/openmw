@@ -48,36 +48,42 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
                 reader.getLocalizedString(mFullName);
                 break;
             case ESM4::SUB_DATA:
-                // FO3/FNV or TES4
-                if (subHdr.dataSize == 13 || subHdr.dataSize == 18)
+                switch (subHdr.dataSize)
                 {
-                    reader.get(mData.mSpeed);
-                    reader.get(mData.mFlags);
-                    mData.mFlags &= 0xFF;
-                    reader.get(mData.mValue);
-                    if (subHdr.dataSize == 13)
-                        reader.get(mData.mClipRounds);
-                    else
+                    case 18: // TES4
+                    case 13: // FO3/FNV
                     {
-                        reader.get(mData.mWeight);
-                        std::uint16_t damageInt;
-                        reader.get(damageInt);
-                        mData.mDamage = static_cast<float>(damageInt);
+                        reader.get(mData.mSpeed);
+                        reader.get(mData.mFlags);
+                        mData.mFlags &= 0xFF;
+                        reader.get(mData.mValue);
+                        if (subHdr.dataSize == 13)
+                            reader.get(mData.mClipRounds);
+                        else
+                        {
+                            reader.get(mData.mWeight);
+                            std::uint16_t damageInt;
+                            reader.get(damageInt);
+                            mData.mDamage = static_cast<float>(damageInt);
+                        }
+                        break;
                     }
-                }
-                // TES5/SSE
-                else if (subHdr.dataSize == 16 || subHdr.dataSize == 20)
-                {
-                    reader.getFormId(mData.mProjectile);
-                    reader.get(mData.mFlags);
-                    reader.get(mData.mDamage);
-                    reader.get(mData.mValue);
-                    if (subHdr.dataSize == 20)
+                    case 16: // TES5
+                    case 20: // SSE
+                        reader.getFormId(mData.mProjectile);
+                        reader.get(mData.mFlags);
+                        reader.get(mData.mDamage);
+                        reader.get(mData.mValue);
+                        if (subHdr.dataSize == 20)
+                            reader.get(mData.mWeight);
+                        break;
+                    case 8:
+                        reader.get(mData.mValue);
                         reader.get(mData.mWeight);
-                }
-                else
-                {
-                    reader.skipSubRecordData();
+                        break;
+                    default:
+                        reader.skipSubRecordData();
+                        break;
                 }
                 break;
             case ESM4::SUB_DAT2:
@@ -93,6 +99,13 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
                 {
                     reader.skipSubRecordData();
                 }
+                break;
+            case ESM4::SUB_DNAM:
+                reader.getFormId(mData.mProjectile);
+                reader.get(mData.mFlags);
+                mData.mFlags &= 0xFF;
+                reader.get(mData.mDamage);
+                reader.get(mData.mHealth);
                 break;
             case ESM4::SUB_ICON:
                 reader.getZString(mIcon);
@@ -133,10 +146,25 @@ void ESM4::Ammunition::load(ESM4::Reader& reader)
             case ESM4::SUB_SCRI:
                 reader.getFormId(mScript);
                 break;
-            case ESM4::SUB_MODT:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_OBND:
             case ESM4::SUB_KSIZ:
             case ESM4::SUB_KWDA:
+            case ESM4::SUB_DAMC: // Destructible
+            case ESM4::SUB_DEST:
+            case ESM4::SUB_DMDC:
+            case ESM4::SUB_DMDL:
+            case ESM4::SUB_DMDT:
+            case ESM4::SUB_DMDS:
+            case ESM4::SUB_DSTA:
+            case ESM4::SUB_DSTD:
+            case ESM4::SUB_DSTF: // Destructible end
+            case ESM4::SUB_PTRN: // FO4
+            case ESM4::SUB_NAM1: // FO4 casing model data
+            case ESM4::SUB_NAM2: //
                 reader.skipSubRecordData();
                 break;
             default:

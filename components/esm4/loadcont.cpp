@@ -74,18 +74,32 @@ void ESM4::Container::load(ESM4::Reader& reader)
             case ESM4::SUB_MODB:
                 reader.get(mBoundRadius);
                 break;
-            case ESM4::SUB_MODT:
-            case ESM4::SUB_MODS: // TES5 only
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_VMAD: // TES5 only
             case ESM4::SUB_OBND: // TES5 only
             case ESM4::SUB_COCT: // TES5 only
             case ESM4::SUB_COED: // TES5 only
-            case ESM4::SUB_DEST: // FONV
-            case ESM4::SUB_DSTD: // FONV
-            case ESM4::SUB_DSTF: // FONV
-            case ESM4::SUB_DMDL: // FONV
-            case ESM4::SUB_DMDT: // FONV
+            case ESM4::SUB_DAMC: // Destructible
+            case ESM4::SUB_DEST:
+            case ESM4::SUB_DMDC:
+            case ESM4::SUB_DMDL:
+            case ESM4::SUB_DMDT:
+            case ESM4::SUB_DMDS:
+            case ESM4::SUB_DSTA:
+            case ESM4::SUB_DSTD:
+            case ESM4::SUB_DSTF: // Destructible end
+            case ESM4::SUB_KSIZ:
+            case ESM4::SUB_KWDA:
+            case ESM4::SUB_ONAM:
             case ESM4::SUB_RNAM: // FONV
+            case ESM4::SUB_TNAM:
+            case ESM4::SUB_FTYP: // FO4
+            case ESM4::SUB_NTRM: // FO4
+            case ESM4::SUB_PRPS: // FO4
+            case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

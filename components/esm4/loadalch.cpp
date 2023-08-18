@@ -88,15 +88,30 @@ void ESM4::Potion::load(ESM4::Reader& reader)
             case ESM4::SUB_ZNAM:
                 reader.getFormId(mDropSound);
                 break;
-            case ESM4::SUB_MODT:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_EFID:
             case ESM4::SUB_EFIT:
             case ESM4::SUB_CTDA:
             case ESM4::SUB_KSIZ:
             case ESM4::SUB_KWDA:
-            case ESM4::SUB_MODS:
             case ESM4::SUB_OBND:
             case ESM4::SUB_ETYP: // FO3
+            case ESM4::SUB_DESC:
+            case ESM4::SUB_DAMC: // Destructible
+            case ESM4::SUB_DEST:
+            case ESM4::SUB_DMDC:
+            case ESM4::SUB_DMDL:
+            case ESM4::SUB_DMDT:
+            case ESM4::SUB_DMDS:
+            case ESM4::SUB_DSTA:
+            case ESM4::SUB_DSTD:
+            case ESM4::SUB_DSTF: // Destructible end
+            case ESM4::SUB_DNAM: // FO4
+            case ESM4::SUB_PTRN: // FO4
+            case ESM4::SUB_CUSD: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

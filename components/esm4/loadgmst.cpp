@@ -41,7 +41,13 @@ namespace ESM4
                 case 's':
                 {
                     std::string value;
-                    reader.getZString(value);
+                    reader.getLocalizedString(value);
+                    return value;
+                }
+                case 'u':
+                {
+                    std::uint32_t value = 0;
+                    reader.get(value);
                     return value;
                 }
                 default:

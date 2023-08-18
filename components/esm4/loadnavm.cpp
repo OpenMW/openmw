@@ -194,8 +194,8 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
     mId = reader.getFormIdFromHeader();
     mFlags = reader.hdr().record.flags;
 
+    std::uint32_t esmVer = reader.esmVersion();
     // std::cout << "NavMesh 0x" << std::hex << this << std::endl; // FIXME
-    std::uint32_t subSize = 0; // for XXXX sub record
 
 // FIXME: debugging only
 #if 0
@@ -206,10 +206,19 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
 #endif
     while (reader.getSubRecordHeader())
     {
-        switch (reader.subRecordHeader().typeId)
+        const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
+        switch (subHdr.typeId)
         {
             case ESM4::SUB_NVNM:
             {
+                // See FIXME in ESM4::Navigation::load.
+                // FO4 updates the format
+                if (esmVer == ESM::VER_100)
+                {
+                    reader.skipSubRecordData();
+                    break;
+                }
+
                 NVNMstruct nvnm;
                 nvnm.load(reader);
                 mData.push_back(nvnm); // FIXME try swap
@@ -218,24 +227,6 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
             case ESM4::SUB_ONAM:
             case ESM4::SUB_PNAM:
             case ESM4::SUB_NNAM:
-            {
-                if (subSize)
-                {
-                    reader.skipSubRecordData(subSize); // special post XXXX
-                    reader.updateRecordRead(subSize); // WARNING: manual update
-                    subSize = 0;
-                }
-                else
-                {
-                    const ESM4::SubRecordHeader& subHdr = reader.subRecordHeader();
-                    Log(Debug::Verbose) << ESM::printName(subHdr.typeId) << " skipping...";
-                    reader.skipSubRecordData(); // FIXME: process the subrecord rather than skip
-                }
-                break;
-            }
-            case ESM4::SUB_XXXX:
-                reader.get(subSize);
-                break;
             case ESM4::SUB_NVER: // FO3
             case ESM4::SUB_DATA: // FO3
             case ESM4::SUB_NVVX: // FO3
@@ -245,11 +236,11 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
             case ESM4::SUB_NVGD: // FO3
             case ESM4::SUB_NVEX: // FO3
             case ESM4::SUB_EDID: // FO3
+            case ESM4::SUB_MNAM: // FO4
                 reader.skipSubRecordData();
                 break;
             default:
-                throw std::runtime_error(
-                    "ESM4::NAVM::load - Unknown subrecord " + ESM::printName(reader.subRecordHeader().typeId));
+                throw std::runtime_error("ESM4::NAVM::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
     }
     // std::cout << "num nvnm " << std::dec << mData.size() << std::endl; // FIXME

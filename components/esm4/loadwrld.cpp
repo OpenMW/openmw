@@ -45,8 +45,6 @@ void ESM4::World::load(ESM4::Reader& reader)
     // corrupted by the use of ignore flag (TODO: should check to verify).
     reader.setCurrWorld(mId); // save for CELL later
 
-    std::uint32_t subSize = 0; // for XXXX sub record
-
     std::uint32_t esmVer = reader.esmVersion();
     // bool isTES4 = (esmVer == ESM::VER_080 || esmVer == ESM::VER_100);
     // bool isFONV = (esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134);
@@ -64,9 +62,9 @@ void ESM4::World::load(ESM4::Reader& reader)
             case ESM4::SUB_FULL:
                 reader.getLocalizedString(mFullName);
                 break;
-            case ESM4::SUB_WCTR:
+            case ESM4::SUB_WCTR: // TES5+
                 reader.get(mCenterCell);
-                break; // Center cell, TES5 only
+                break;
             case ESM4::SUB_WNAM:
                 reader.getFormId(mParent);
                 break;
@@ -75,7 +73,7 @@ void ESM4::World::load(ESM4::Reader& reader)
                 break; // sound, Oblivion only?
             case ESM4::SUB_ICON:
                 reader.getZString(mMapFile);
-                break; // map filename, Oblivion only?
+                break;
             case ESM4::SUB_CNAM:
                 reader.getFormId(mClimate);
                 break;
@@ -144,19 +142,6 @@ void ESM4::World::load(ESM4::Reader& reader)
                 reader.get(mParentUseFlags);
                 break;
             case ESM4::SUB_OFST:
-                if (subSize)
-                {
-                    reader.skipSubRecordData(subSize); // special post XXXX
-                    reader.updateRecordRead(subSize); // WARNING: manually update
-                    subSize = 0;
-                }
-                else
-                    reader.skipSubRecordData(); // FIXME: process the subrecord rather than skip
-
-                break;
-            case ESM4::SUB_XXXX:
-                reader.get(subSize);
-                break;
             case ESM4::SUB_RNAM: // multiple
             case ESM4::SUB_MHDT:
             case ESM4::SUB_LTMP:
@@ -164,18 +149,23 @@ void ESM4::World::load(ESM4::Reader& reader)
             case ESM4::SUB_XLCN:
             case ESM4::SUB_NAM3:
             case ESM4::SUB_NAM4:
-            case ESM4::SUB_MODL:
             case ESM4::SUB_NAMA:
             case ESM4::SUB_ONAM:
             case ESM4::SUB_TNAM:
             case ESM4::SUB_UNAM:
             case ESM4::SUB_XWEM:
-            case ESM4::SUB_MODT: // from Dragonborn onwards?
+            case ESM4::SUB_MODL: // Model data start
+            case ESM4::SUB_MODT:
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_INAM: // FO3
             case ESM4::SUB_NNAM: // FO3
             case ESM4::SUB_XNAM: // FO3
             case ESM4::SUB_IMPS: // FO3 Anchorage
             case ESM4::SUB_IMPF: // FO3 Anchorage
+            case ESM4::SUB_CLSZ: // FO4
+            case ESM4::SUB_WLEV: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

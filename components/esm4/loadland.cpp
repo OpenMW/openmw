@@ -94,7 +94,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
                 mDataTypes |= LAND_VCLR;
                 break;
             }
-            case ESM4::SUA_BTXT:
+            case ESM4::SUB_BTXT:
             {
                 BTXT base;
                 if (reader.getExact(base))
@@ -191,6 +191,9 @@ void ESM4::Land::load(ESM4::Reader& reader)
                 }
                 break;
             }
+            case ESM4::SUB_MPCD: // FO4
+                reader.skipSubRecordData();
+                break;
             default:
                 throw std::runtime_error("ESM4::LAND::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }

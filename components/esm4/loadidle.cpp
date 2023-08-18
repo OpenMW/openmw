@@ -51,9 +51,29 @@ void ESM4::IdleAnimation::load(ESM4::Reader& reader)
                 reader.getZString(mEvent);
                 break;
             case ESM4::SUB_ANAM:
-                reader.getFormId(mParent);
-                reader.getFormId(mPrevious);
+            {
+                switch (subHdr.dataSize)
+                {
+                    case 1: // TES4
+                    {
+                        // Animation group section
+                        uint8_t dummy;
+                        reader.get(dummy);
+                        break;
+                    }
+                    case 8: // Everything else
+                    {
+                        // These IDs go into DATA for TES4
+                        reader.getFormId(mParent);
+                        reader.getFormId(mPrevious);
+                        break;
+                    }
+                    default:
+                        reader.skipSubRecordData();
+                        break;
+                }
                 break;
+            }
             case ESM4::SUB_MODL:
                 reader.getZString(mModel);
                 break;
@@ -61,7 +81,14 @@ void ESM4::IdleAnimation::load(ESM4::Reader& reader)
                 reader.get(mBoundRadius);
                 break;
             case ESM4::SUB_CTDA: // formId
-            case ESM4::SUB_DATA: // formId
+            case ESM4::SUB_CTDT:
+            case ESM4::SUB_CIS1:
+            case ESM4::SUB_CIS2:
+            case ESM4::SUB_DATA:
+            case ESM4::SUB_MODD:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODT:
+            case ESM4::SUB_GNAM: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

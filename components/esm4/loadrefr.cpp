@@ -38,9 +38,6 @@ void ESM4::Reference::load(ESM4::Reader& reader)
     mFlags = reader.hdr().record.flags;
     mParent = reader.currCell();
 
-    std::uint32_t esmVer = reader.esmVersion();
-    bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
-
     ESM::FormId mid;
     ESM::FormId sid;
 
@@ -69,8 +66,26 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 reader.get(mScale);
                 break;
             case ESM4::SUB_XOWN:
-                reader.getFormId(mOwner);
+            {
+                switch (subHdr.dataSize)
+                {
+                    case 4:
+                        reader.getFormId(mOwner);
+                        break;
+                    case 12:
+                    {
+                        reader.getFormId(mOwner);
+                        std::uint32_t dummy;
+                        reader.get(dummy); // Unknown
+                        reader.get(dummy); // No crime flag, FO4
+                        break;
+                    }
+                    default:
+                        reader.skipSubRecordData();
+                        break;
+                }
                 break;
+            }
             case ESM4::SUB_XGLB:
                 reader.getFormId(mGlobal);
                 break;
@@ -87,13 +102,27 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_XTEL:
             {
-                reader.getFormId(mDoor.destDoor);
-                reader.get(mDoor.destPos);
-                if (esmVer == ESM::VER_094 || esmVer == ESM::VER_170 || isFONV)
-                    reader.get(mDoor.flags); // not in Obvlivion
-                else
-                    mDoor.flags = 0;
-                // std::cout << "REFR  dest door: " << formIdToString(mDoor.destDoor) << std::endl;// FIXME
+                switch (subHdr.dataSize)
+                {
+                    case 28:
+                    case 32: // FO3, FNV, TES5
+                    case 36: // FO4
+                    {
+                        reader.getFormId(mDoor.destDoor);
+                        reader.get(mDoor.destPos);
+                        mDoor.flags = 0;
+                        if (subHdr.dataSize >= 32)
+                        {
+                            reader.get(mDoor.flags);
+                            if (subHdr.dataSize == 36)
+                                reader.getFormId(mDoor.transitionInterior);
+                        }
+                        break;
+                    }
+                    default:
+                        reader.skipSubRecordData();
+                        break;
+                }
                 break;
             }
             case ESM4::SUB_XSED:
@@ -201,6 +230,7 @@ void ESM4::Reference::load(ESM4::Reader& reader)
                 break; // FONV
             case ESM4::SUB_XRDO: // FO3
             {
+                // FIXME: completely different meaning in FO4
                 reader.get(mRadio.rangeRadius);
                 reader.get(mRadio.broadcastRange);
                 reader.get(mRadio.staticPercentage);
@@ -288,7 +318,7 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             case ESM4::SUB_XTRI:
             case ESM4::SUB_XWCN:
             case ESM4::SUB_XWCU:
-            case ESM4::SUB_XATR: // Dawnguard only?
+            case ESM4::SUB_XATR:
             case ESM4::SUB_XHLT: // Unofficial Oblivion Patch
             case ESM4::SUB_XCHG: // thievery.exp
             case ESM4::SUB_XHLP: // FO3
@@ -312,6 +342,19 @@ void ESM4::Reference::load(ESM4::Reader& reader)
             case ESM4::SUB_XSRD: // FONV
             case ESM4::SUB_WMI1: // FONV
             case ESM4::SUB_XLRL: // Unofficial Skyrim Patch
+            case ESM4::SUB_XASP: // FO4
+            case ESM4::SUB_XATP: // FO4
+            case ESM4::SUB_XBSD: // FO4
+            case ESM4::SUB_XCVR: // FO4
+            case ESM4::SUB_XCZR: // FO4
+            case ESM4::SUB_XLKT: // FO4
+            case ESM4::SUB_XLYR: // FO4
+            case ESM4::SUB_XMSP: // FO4
+            case ESM4::SUB_XPDD: // FO4
+            case ESM4::SUB_XPLK: // FO4
+            case ESM4::SUB_XRFG: // FO4
+            case ESM4::SUB_XWPG: // FO4
+            case ESM4::SUB_XWPN: // FO4
                 // if (mFormId == 0x0007e90f) // XPRM XPOD
                 // if (mBaseObj == 0x17) //XPRM XOCP occlusion plane data XMBO bound half extents
                 reader.skipSubRecordData();

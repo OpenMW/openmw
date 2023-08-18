@@ -44,6 +44,9 @@ void ESM4::Static::load(ESM4::Reader& reader)
             case ESM4::SUB_EDID:
                 reader.getZString(mEditorId);
                 break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
             case ESM4::SUB_MODL:
                 reader.getZString(mModel);
                 break;
@@ -81,11 +84,18 @@ void ESM4::Static::load(ESM4::Reader& reader)
                 }
                 break;
             }
+            case ESM4::SUB_MODC: // More model data
             case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_OBND:
             case ESM4::SUB_DNAM:
             case ESM4::SUB_BRUS: // FONV
             case ESM4::SUB_RNAM: // FONV
+            case ESM4::SUB_FTYP: // FO4
+            case ESM4::SUB_NVNM: // FO4
+            case ESM4::SUB_PRPS: // FO4
+            case ESM4::SUB_PTRN: // FO4
+            case ESM4::SUB_VMAD: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

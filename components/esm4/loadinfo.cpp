@@ -71,7 +71,7 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
                 break;
             }
             case ESM4::SUB_NAM1:
-                reader.getZString(mResponse);
+                reader.getLocalizedString(mResponse);
                 break; // response text
             case ESM4::SUB_NAM2:
                 reader.getZString(mNotes);
@@ -185,6 +185,7 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
             case ESM4::SUB_TCFU: // FONV
             case ESM4::SUB_TIFC: // TES5
             case ESM4::SUB_TWAT: // TES5
+            case ESM4::SUB_CIS1: // TES5
             case ESM4::SUB_CIS2: // TES5
             case ESM4::SUB_CNAM: // TES5
             case ESM4::SUB_ENAM: // TES5
@@ -195,6 +196,23 @@ void ESM4::DialogInfo::load(ESM4::Reader& reader)
             case ESM4::SUB_ONAM: // TES5
             case ESM4::SUB_QNAM: // TES5 for mScript
             case ESM4::SUB_RNAM: // TES5
+            case ESM4::SUB_ALFA: // FO4
+            case ESM4::SUB_GNAM: // FO4
+            case ESM4::SUB_GREE: // FO4
+            case ESM4::SUB_INAM: // FO4
+            case ESM4::SUB_INCC: // FO4
+            case ESM4::SUB_INTV: // FO4
+            case ESM4::SUB_IOVR: // FO4
+            case ESM4::SUB_MODQ: // FO4
+            case ESM4::SUB_NAM0: // FO4
+            case ESM4::SUB_NAM4: // FO4
+            case ESM4::SUB_NAM9: // FO4
+            case ESM4::SUB_SRAF: // FO4
+            case ESM4::SUB_TIQS: // FO4
+            case ESM4::SUB_TNAM: // FO4
+            case ESM4::SUB_TRDA: // FO4
+            case ESM4::SUB_TSCE: // FO4
+            case ESM4::SUB_WZMD: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

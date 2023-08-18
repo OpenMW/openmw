@@ -68,10 +68,25 @@ void ESM4::SoundReference::load(ESM4::Reader& reader)
                 reader.get(mLoopInfo);
                 break;
             case ESM4::SUB_BNAM:
-                reader.get(mData);
+            {
+                if (subHdr.dataSize == 6)
+                    reader.get(mData);
+                else if (subHdr.dataSize == 4)
+                    reader.getFormId(mBaseDescriptor);
+                else
+                    reader.skipSubRecordData();
                 break;
+            }
+            case ESM4::SUB_CIS1:
+            case ESM4::SUB_CIS2:
             case ESM4::SUB_CNAM: // CRC32 hash
+            case ESM4::SUB_DNAM: // FO4
             case ESM4::SUB_FNAM: // unknown
+            case ESM4::SUB_INTV: // FO4
+            case ESM4::SUB_ITMC: // FO4
+            case ESM4::SUB_ITME: // FO4
+            case ESM4::SUB_ITMS: // FO4
+            case ESM4::SUB_NNAM: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

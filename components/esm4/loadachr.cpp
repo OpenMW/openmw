@@ -58,8 +58,26 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
                 reader.get(mScale);
                 break;
             case ESM4::SUB_XOWN:
-                reader.getFormId(mOwner);
+            {
+                switch (subHdr.dataSize)
+                {
+                    case 4:
+                        reader.getFormId(mOwner);
+                        break;
+                    case 12:
+                    {
+                        reader.getFormId(mOwner);
+                        std::uint32_t dummy;
+                        reader.get(dummy); // Unknown
+                        reader.get(dummy); // No crime flag, FO4
+                        break;
+                    }
+                    default:
+                        reader.skipSubRecordData();
+                        break;
+                }
                 break;
+            }
             case ESM4::SUB_XESP:
                 reader.getFormId(mEsp.parent);
                 reader.get(mEsp.flags);
@@ -93,6 +111,20 @@ void ESM4::ActorCharacter::load(ESM4::Reader& reader)
             case ESM4::SUB_SCHR: // FO3
             case ESM4::SUB_TNAM: // FO3
             case ESM4::SUB_XATO: // FONV
+            case ESM4::SUB_MNAM: // FO4
+            case ESM4::SUB_XATP: // FO4
+            case ESM4::SUB_XCNT: // FO4
+            case ESM4::SUB_XEMI: // FO4
+            case ESM4::SUB_XFVC: // FO4
+            case ESM4::SUB_XHLT: // FO4
+            case ESM4::SUB_XHTW: // FO4
+            case ESM4::SUB_XLKT: // FO4
+            case ESM4::SUB_XLYR: // FO4
+            case ESM4::SUB_XMBR: // FO4
+            case ESM4::SUB_XMSP: // FO4
+            case ESM4::SUB_XPLK: // FO4
+            case ESM4::SUB_XRFG: // FO4
+            case ESM4::SUB_XRNK: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

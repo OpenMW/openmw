@@ -139,7 +139,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                     reader.get(mWeightFemale);
                     reader.get(mRaceFlags);
                 }
-                else if (subHdr.dataSize >= 128 && subHdr.dataSize <= 164) // TES5
+                else if (subHdr.dataSize == 128 || subHdr.dataSize == 164) // TES5
                 {
                     mIsTES5 = true;
 
@@ -188,7 +188,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                     reader.get(dummy); // angular tolerance
                     reader.get(dummy2); // flags
 
-                    if (subHdr.dataSize > 128)
+                    if (subHdr.dataSize == 164)
                     {
                         reader.get(dummy2); // unknown 1
                         reader.get(dummy2); // unknown 2
@@ -217,7 +217,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_CNAM: // Only in TES4?
+            case ESM4::SUB_CNAM:
                 //              CNAM       SNAM                     VNAM
                 // Sheogorath   0x0  0000  98 2b  10011000 00101011
                 // Golden Saint 0x3  0011  26 46  00100110 01000110
@@ -287,7 +287,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 }
                 else if (isTES4)
                     mHeadParts.resize(9); // assumed based on Construction Set
-                else
+                else // Optimized for TES5
                 {
                     mHeadPartIdsMale.resize(5);
                     mHeadPartIdsFemale.resize(5);
@@ -315,7 +315,11 @@ void ESM4::Race::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_MODL:
             {
-                if (curr_part == 0) // head part
+                if (currentIndex == 0xffffffff)
+                {
+                    reader.skipSubRecordData();
+                }
+                else if (curr_part == 0) // head part
                 {
                     if (isMale || isTES4)
                         reader.getZString(mHeadParts[currentIndex].mesh);
@@ -351,7 +355,11 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 break; // always 0x0000?
             case ESM4::SUB_ICON:
             {
-                if (curr_part == 0) // head part
+                if (currentIndex == 0xffffffff)
+                {
+                    reader.skipSubRecordData();
+                }
+                else if (curr_part == 0) // head part
                 {
                     if (isMale || isTES4)
                         reader.getZString(mHeadParts[currentIndex].texture);
@@ -407,10 +415,16 @@ void ESM4::Race::load(ESM4::Reader& reader)
             //
             case ESM4::SUB_HNAM:
             {
-                std::size_t numHairChoices = subHdr.dataSize / sizeof(ESM::FormId32);
-                mHairChoices.resize(numHairChoices);
-                for (unsigned int i = 0; i < numHairChoices; ++i)
-                    reader.getFormId(mHairChoices.at(i));
+                // FIXME: this is a texture name in FO4
+                if (subHdr.dataSize % sizeof(ESM::FormId32) != 0)
+                    reader.skipSubRecordData();
+                else
+                {
+                    std::size_t numHairChoices = subHdr.dataSize / sizeof(ESM::FormId32);
+                    mHairChoices.resize(numHairChoices);
+                    for (unsigned int i = 0; i < numHairChoices; ++i)
+                        reader.getFormId(mHairChoices.at(i));
+                }
 
                 break;
             }
@@ -550,14 +564,23 @@ void ESM4::Race::load(ESM4::Reader& reader)
 
                 break;
             }
-            case ESM4::SUB_BOD2: // TES5
+            case ESM4::SUB_BOD2:
             {
-                reader.get(mBodyTemplate.bodyPart);
-                mBodyTemplate.flags = 0;
-                mBodyTemplate.unknown1 = 0; // probably padding
-                mBodyTemplate.unknown2 = 0; // probably padding
-                mBodyTemplate.unknown3 = 0; // probably padding
-                reader.get(mBodyTemplate.type);
+                if (subHdr.dataSize == 8 || subHdr.dataSize == 4) // TES5, FO4
+                {
+                    reader.get(mBodyTemplate.bodyPart);
+                    mBodyTemplate.flags = 0;
+                    mBodyTemplate.unknown1 = 0; // probably padding
+                    mBodyTemplate.unknown2 = 0; // probably padding
+                    mBodyTemplate.unknown3 = 0; // probably padding
+                    mBodyTemplate.type = 0;
+                    if (subHdr.dataSize == 8)
+                        reader.get(mBodyTemplate.type);
+                }
+                else
+                {
+                    reader.skipSubRecordData();
+                }
 
                 break;
             }
@@ -566,11 +589,22 @@ void ESM4::Race::load(ESM4::Reader& reader)
                 ESM::FormId formId;
                 reader.getFormId(formId);
 
-                // FIXME: no order? head, mouth, eyes, brow, hair
-                if (isMale)
-                    mHeadPartIdsMale[currentIndex] = formId;
-                else
-                    mHeadPartIdsFemale[currentIndex] = formId;
+                if (currentIndex != 0xffffffff)
+                {
+                    // FIXME: no order? head, mouth, eyes, brow, hair
+                    if (isMale)
+                    {
+                        if (currentIndex >= mHeadPartIdsMale.size())
+                            mHeadPartIdsMale.resize(currentIndex + 1);
+                        mHeadPartIdsMale[currentIndex] = formId;
+                    }
+                    else
+                    {
+                        if (currentIndex >= mHeadPartIdsFemale.size())
+                            mHeadPartIdsFemale.resize(currentIndex + 1);
+                        mHeadPartIdsFemale[currentIndex] = formId;
+                    }
+                }
 
                 // std::cout << mEditorId << (isMale ? " male head " : " female head ")
                 // << formIdToString(formId) << " " << currentIndex << std::endl; // FIXME
@@ -668,13 +702,69 @@ void ESM4::Race::load(ESM4::Reader& reader)
             case ESM4::SUB_WKMV:
             case ESM4::SUB_SPMV:
             case ESM4::SUB_ATKR:
+            case ESM4::SUB_CTDA:
+            case ESM4::SUB_CIS1:
+            case ESM4::SUB_CIS2:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             //
             case ESM4::SUB_YNAM: // FO3
             case ESM4::SUB_NAM2: // FO3
             case ESM4::SUB_VTCK: // FO3
-            case ESM4::SUB_MODT: // FO3
             case ESM4::SUB_MODD: // FO3
             case ESM4::SUB_ONAM: // FO3
+            case ESM4::SUB_APPR: // FO4
+            case ESM4::SUB_ATKS: // FO4
+            case ESM4::SUB_ATKT: // FO4
+            case ESM4::SUB_ATKW: // FO4
+            case ESM4::SUB_BMMP: // FO4
+            case ESM4::SUB_BSMB: // FO4
+            case ESM4::SUB_BSMP: // FO4
+            case ESM4::SUB_BSMS: // FO4
+
+            case ESM4::SUB_FMRI: // FO4
+            case ESM4::SUB_FMRN: // FO4
+            case ESM4::SUB_HLTX: // FO4
+            case ESM4::SUB_MLSI: // FO4
+            case ESM4::SUB_MPGN: // FO4
+            case ESM4::SUB_MPGS: // FO4
+            case ESM4::SUB_MPPC: // FO4
+            case ESM4::SUB_MPPF: // FO4
+            case ESM4::SUB_MPPI: // FO4
+            case ESM4::SUB_MPPK: // FO4
+            case ESM4::SUB_MPPM: // FO4
+            case ESM4::SUB_MPPN: // FO4
+            case ESM4::SUB_MPPT: // FO4
+            case ESM4::SUB_MSID: // FO4
+            case ESM4::SUB_MSM0: // FO4
+            case ESM4::SUB_MSM1: // FO4
+            case ESM4::SUB_NNAM: // FO4
+            case ESM4::SUB_NTOP: // FO4
+            case ESM4::SUB_PRPS: // FO4
+            case ESM4::SUB_PTOP: // FO4
+            case ESM4::SUB_QSTI: // FO4
+            case ESM4::SUB_RBPC: // FO4
+            case ESM4::SUB_SADD: // FO4
+            case ESM4::SUB_SAKD: // FO4
+            case ESM4::SUB_SAPT: // FO4
+            case ESM4::SUB_SGNM: // FO4
+            case ESM4::SUB_SRAC: // FO4
+            case ESM4::SUB_SRAF: // FO4
+            case ESM4::SUB_STCP: // FO4
+            case ESM4::SUB_STKD: // FO4
+            case ESM4::SUB_TETI: // FO4
+            case ESM4::SUB_TTEB: // FO4
+            case ESM4::SUB_TTEC: // FO4
+            case ESM4::SUB_TTED: // FO4
+            case ESM4::SUB_TTEF: // FO4
+            case ESM4::SUB_TTET: // FO4
+            case ESM4::SUB_TTGE: // FO4
+            case ESM4::SUB_TTGP: // FO4
+            case ESM4::SUB_UNWP: // FO4
+            case ESM4::SUB_WMAP: // FO4
+            case ESM4::SUB_ZNAM: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

@@ -44,6 +44,9 @@ void ESM4::MovableStatic::load(ESM4::Reader& reader)
             case ESM4::SUB_EDID:
                 reader.getZString(mEditorId);
                 break;
+            case ESM4::SUB_FULL:
+                reader.getLocalizedString(mFullName);
+                break;
             case ESM4::SUB_MODL:
                 reader.getZString(mModel);
                 break;
@@ -53,16 +56,26 @@ void ESM4::MovableStatic::load(ESM4::Reader& reader)
             case ESM4::SUB_SNAM:
                 reader.getFormId(mLoopingSound);
                 break;
-            case ESM4::SUB_DEST: // destruction data
-            case ESM4::SUB_OBND: // object bounds
-            case ESM4::SUB_MODT: // model texture data
+            case ESM4::SUB_DAMC: // Destructible
+            case ESM4::SUB_DEST:
+            case ESM4::SUB_DMDC:
             case ESM4::SUB_DMDL:
             case ESM4::SUB_DMDT:
+            case ESM4::SUB_DMDS:
+            case ESM4::SUB_DSTA:
             case ESM4::SUB_DSTD:
-            case ESM4::SUB_DSTF:
+            case ESM4::SUB_DSTF: // Destructible end
+            case ESM4::SUB_OBND: // object bounds
+            case ESM4::SUB_KSIZ:
+            case ESM4::SUB_KWDA:
+            case ESM4::SUB_VMAD:
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
             case ESM4::SUB_MODS:
-            case ESM4::SUB_FULL:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_MODB:
+            case ESM4::SUB_PRPS:
+            case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

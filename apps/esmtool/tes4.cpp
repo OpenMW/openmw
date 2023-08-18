@@ -329,8 +329,7 @@ namespace EsmTool
                     readTypedRecord<ESM4::HeadPart>(params, reader);
                     return true;
                 case ESM4::REC_IDLE:
-                    // FIXME: ESM4::IdleAnimation::load does not work with Oblivion.esm
-                    // readTypedRecord<ESM4::IdleAnimation>(params, reader);
+                    readTypedRecord<ESM4::IdleAnimation>(params, reader);
                     return true;
                     break;
                 case ESM4::REC_IDLM:

@@ -57,7 +57,11 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
                 reader.getFormId(mPasswordNote);
                 break;
             case ESM4::SUB_SNAM:
-                reader.getFormId(mSound);
+                if (subHdr.dataSize == 4)
+                    reader.getFormId(mSound);
+                // FIXME: FO4 sound marker params
+                else
+                    reader.skipSubRecordData();
                 break;
             case ESM4::SUB_MODL:
                 reader.getZString(mModel);
@@ -68,9 +72,14 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
             case ESM4::SUB_DNAM: // difficulty
             case ESM4::SUB_ANAM: // flags
             case ESM4::SUB_CTDA:
+            case ESM4::SUB_CIS1:
+            case ESM4::SUB_CIS2:
             case ESM4::SUB_INAM:
             case ESM4::SUB_ITXT: // Menu Item
-            case ESM4::SUB_MODT: // texture hash?
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_SCDA:
             case ESM4::SUB_SCHR:
             case ESM4::SUB_SCRO:
@@ -80,7 +89,25 @@ void ESM4::Terminal::load(ESM4::Reader& reader)
             case ESM4::SUB_SLSD:
             case ESM4::SUB_TNAM:
             case ESM4::SUB_OBND:
-            case ESM4::SUB_MODS: // FONV
+            case ESM4::SUB_VMAD:
+            case ESM4::SUB_KSIZ:
+            case ESM4::SUB_KWDA:
+            case ESM4::SUB_BSIZ: // FO4
+            case ESM4::SUB_BTXT: // FO4
+            case ESM4::SUB_COCT: // FO4
+            case ESM4::SUB_CNTO: // FO4
+            case ESM4::SUB_FNAM: // FO4
+            case ESM4::SUB_ISIZ: // FO4
+            case ESM4::SUB_ITID: // FO4
+            case ESM4::SUB_MNAM: // FO4
+            case ESM4::SUB_NAM0: // FO4
+            case ESM4::SUB_PRPS: // FO4
+            case ESM4::SUB_PTRN: // FO4
+            case ESM4::SUB_UNAM: // FO4
+            case ESM4::SUB_VNAM: // FO4
+            case ESM4::SUB_WBDT: // FO4
+            case ESM4::SUB_WNAM: // FO4
+            case ESM4::SUB_XMRK: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

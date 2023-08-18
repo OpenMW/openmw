@@ -80,6 +80,10 @@ void ESM4::LevelledItem::load(ESM4::Reader& reader)
             case ESM4::SUB_OBND: // FO3/FONV
             case ESM4::SUB_COED: // FO3/FONV
             case ESM4::SUB_LVLG: // FO3/FONV
+            case ESM4::SUB_LLKC: // FO4
+            case ESM4::SUB_LVLM: // FO4
+            case ESM4::SUB_LVSG: // FO4
+            case ESM4::SUB_ONAM: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

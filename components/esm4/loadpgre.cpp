@@ -62,6 +62,7 @@ void ESM4::PlacedGrenade::load(ESM4::Reader& reader)
             case ESM4::SUB_XPWR:
             case ESM4::SUB_XDCR:
             case ESM4::SUB_XLKR:
+            case ESM4::SUB_XLKT: // FO4
             case ESM4::SUB_XCLP:
             case ESM4::SUB_XAPD:
             case ESM4::SUB_XAPR:
@@ -72,6 +73,21 @@ void ESM4::PlacedGrenade::load(ESM4::Reader& reader)
             case ESM4::SUB_XIBS:
             case ESM4::SUB_XSCL:
             case ESM4::SUB_DATA:
+            case ESM4::SUB_VMAD:
+            case ESM4::SUB_MNAM: // FO4
+            case ESM4::SUB_XAMC: // FO4
+            case ESM4::SUB_XASP: // FO4
+            case ESM4::SUB_XATP: // FO4
+            case ESM4::SUB_XCVR: // FO4
+            case ESM4::SUB_XFVC: // FO4
+            case ESM4::SUB_XHTW: // FO4
+            case ESM4::SUB_XIS2: // FO4
+            case ESM4::SUB_XLOD: // FO4
+            case ESM4::SUB_XLRL: // FO4
+            case ESM4::SUB_XLRT: // FO4
+            case ESM4::SUB_XLYR: // FO4
+            case ESM4::SUB_XMSP: // FO4
+            case ESM4::SUB_XRFG: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

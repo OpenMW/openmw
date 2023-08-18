@@ -67,6 +67,7 @@ namespace ESM4
         ESM::FormId mSoundCategory; // SNCT
         ESM::FormId mSoundId; // another SNDR
         ESM::FormId mOutputModel; // SOPM
+        ESM::FormId mBaseDescriptor; // BNAM
 
         std::string mSoundFile;
         LoopInfo mLoopInfo;

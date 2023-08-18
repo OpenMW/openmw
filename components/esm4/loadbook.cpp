@@ -53,22 +53,33 @@ void ESM4::Book::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_DATA:
             {
-                reader.get(mData.flags);
-                // if (reader.esmVersion() == ESM::VER_094 || reader.esmVersion() == ESM::VER_170)
-                if (subHdr.dataSize == 16) // FO3 has 10 bytes even though VER_094
+                switch (subHdr.dataSize)
                 {
-                    static std::uint8_t dummy;
-                    reader.get(mData.type);
-                    reader.get(dummy);
-                    reader.get(dummy);
-                    reader.get(mData.teaches);
+                    case 10: // TES4, FO3, FNV
+                        reader.get(mData.flags);
+                        reader.get(mData.bookSkill);
+                        reader.get(mData.value);
+                        reader.get(mData.weight);
+                        break;
+                    case 16: // TES5
+                    {
+                        reader.get(mData.flags);
+                        reader.get(mData.type);
+                        std::uint16_t dummy;
+                        reader.get(dummy);
+                        reader.get(mData.teaches);
+                        reader.get(mData.value);
+                        reader.get(mData.weight);
+                        break;
+                    }
+                    case 8: // FO4
+                        reader.get(mData.value);
+                        reader.get(mData.weight);
+                        break;
+                    default:
+                        reader.skipSubRecordData();
+                        break;
                 }
-                else
-                {
-                    reader.get(mData.bookSkill);
-                }
-                reader.get(mData.value);
-                reader.get(mData.weight);
                 break;
             }
             case ESM4::SUB_ICON:
@@ -94,14 +105,30 @@ void ESM4::Book::load(ESM4::Reader& reader)
                 break;
             case ESM4::SUB_ZNAM:
                 reader.getFormId(mDropSound);
-                break; // TODO: does this exist?
-            case ESM4::SUB_MODT:
+                break;
+            case ESM4::SUB_MODT: // Model data
+            case ESM4::SUB_MODC:
+            case ESM4::SUB_MODS:
+            case ESM4::SUB_MODF: // Model data end
             case ESM4::SUB_OBND:
             case ESM4::SUB_KSIZ:
             case ESM4::SUB_KWDA:
             case ESM4::SUB_CNAM:
             case ESM4::SUB_INAM:
             case ESM4::SUB_VMAD:
+            case ESM4::SUB_DAMC: // Destructible
+            case ESM4::SUB_DEST:
+            case ESM4::SUB_DMDC:
+            case ESM4::SUB_DMDL:
+            case ESM4::SUB_DMDT:
+            case ESM4::SUB_DMDS:
+            case ESM4::SUB_DSTA:
+            case ESM4::SUB_DSTD:
+            case ESM4::SUB_DSTF: // Destructible end
+            case ESM4::SUB_DNAM: // FO4
+            case ESM4::SUB_FIMD: // FO4
+            case ESM4::SUB_MICO: // FO4
+            case ESM4::SUB_PTRN: // FO4
                 reader.skipSubRecordData();
                 break;
             default:

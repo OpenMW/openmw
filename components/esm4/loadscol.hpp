@@ -46,6 +46,7 @@ namespace ESM4
         std::uint32_t mFlags; // from the header, see enum type RecordFlag for details
 
         std::string mEditorId;
+        std::string mFullName;
 
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
