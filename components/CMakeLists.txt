@@ -520,9 +520,14 @@ target_link_libraries(components
     SQLite::SQLite3
     smhasher
     ${ICU_LIBRARIES}
-    yaml-cpp
     ZLIB::ZLIB
     )
+
+if(yaml-cpp_VERSION VERSION_GREATER_EQUAL 0.8.0)
+    target_link_libraries(components yaml-cpp::yaml-cpp)
+else()
+    target_link_libraries(components yaml-cpp)
+endif()
 
 if(Boost_VERSION_STRING VERSION_GREATER_EQUAL 1.77.0)
     target_link_libraries(components ${Boost_ATOMIC_LIBRARY})

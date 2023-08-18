@@ -1,15 +1,14 @@
 #include "soundbindings.hpp"
-#include "luabindings.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/soundmanager.hpp"
-#include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
+
+#include "../mwworld/esmstore.hpp"
 
 #include <components/esm3/loadsoun.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/vfs/pathutil.hpp>
-
-#include "../mwworld/esmstore.hpp"
 
 #include "luamanagerimp.hpp"
 
@@ -161,9 +160,7 @@ namespace MWLua
             },
             []() { return MWBase::Environment::get().getSoundManager()->sayActive(MWWorld::ConstPtr()); });
 
-        // Sound store
         using SoundStore = MWWorld::Store<ESM::Sound>;
-        const SoundStore* soundStore = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Sound>();
         sol::usertype<SoundStore> soundStoreT = lua.new_usertype<SoundStore>("ESM3_SoundStore");
         soundStoreT[sol::meta_function::to_string]
             = [](const SoundStore& store) { return "ESM3_SoundStore{" + std::to_string(store.getSize()) + " sounds}"; };
@@ -176,7 +173,7 @@ namespace MWLua
         soundStoreT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
         soundStoreT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
 
-        api["sounds"] = soundStore;
+        api["sounds"] = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Sound>();
 
         // Sound record
         auto soundT = lua.new_usertype<ESM::Sound>("ESM3_Sound");
