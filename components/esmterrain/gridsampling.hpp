@@ -4,6 +4,7 @@
 #include <components/misc/mathutil.hpp>
 
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <stdexcept>
 #include <string>
@@ -37,6 +38,16 @@ namespace ESMTerrain
             ++vertY;
         }
     }
+
+    struct CellSample
+    {
+        int mCellX;
+        int mCellY;
+        std::size_t mSrcRow;
+        std::size_t mSrcCol;
+        std::size_t mDstRow;
+        std::size_t mDstCol;
+    };
 
     template <class F>
     void sampleCellGridSimple(std::size_t cellSize, std::size_t sampleSize, std::size_t beginX, std::size_t beginY,
@@ -113,6 +124,81 @@ namespace ESMTerrain
             }
 
             baseVertY = vertY + 1;
+        }
+    }
+
+    inline int getBlendmapSize(float size, int textureSize)
+    {
+        return static_cast<int>(textureSize * size) + 1;
+    }
+
+    inline std::pair<std::size_t, std::size_t> getBlendmapLocalRange(
+        int cell, int minCell, int textureSize, int min, int max)
+    {
+        const int cellMin = (cell - minCell) * textureSize;
+        const int cellMax = cellMin + textureSize - 1;
+        const std::size_t begin = min > cellMin ? min - cellMin : 0;
+        const std::size_t end = cellMax < max ? textureSize : max - cellMin + 1;
+        assert(begin < end);
+        assert(static_cast<int>(end) <= textureSize);
+        return { begin, end };
+    }
+
+    template <class F>
+    void sampleBlendmaps(float size, float minX, float minY, int textureSize, F&& f)
+    {
+        if (size <= 0)
+            throw std::invalid_argument("Invalid size for blendmap sampling: " + std::to_string(size));
+
+        if (textureSize <= 0)
+            throw std::invalid_argument("Invalid texture size for blendmap sampling: " + std::to_string(textureSize));
+
+        int minCellX = static_cast<int>(std::floor(minX));
+        const int minCellY = static_cast<int>(std::floor(minY));
+        int minRow = static_cast<int>((minX - minCellX) * (textureSize + 1)) - 1;
+        const int minCol = static_cast<int>((minY - minCellY) * (textureSize + 1));
+
+        if (minRow < 0)
+        {
+            --minCellX;
+            minRow += textureSize;
+        }
+
+        const int maxRow = minRow + static_cast<int>(textureSize * size);
+        const int maxCol = minCol + static_cast<int>(textureSize * size);
+        const int maxCellX = minCellX + maxRow / textureSize;
+        const int maxCellY = minCellY + maxCol / textureSize;
+
+        std::size_t baseDstCol = 0;
+        for (int cellY = minCellY; cellY <= maxCellY; ++cellY)
+        {
+            std::size_t baseDstRow = 0;
+
+            const auto [localBeginCol, localEndCol]
+                = getBlendmapLocalRange(cellY, minCellY, textureSize, minCol, maxCol);
+            const std::size_t colCount = localEndCol - localBeginCol;
+
+            for (int cellX = minCellX; cellX <= maxCellX; ++cellX)
+            {
+                const auto [localBeginRow, localEndRow]
+                    = getBlendmapLocalRange(cellX, minCellX, textureSize, minRow, maxRow);
+                const std::size_t rowCount = localEndRow - localBeginRow;
+
+                for (std::size_t col = 0; col < colCount; ++col)
+                    for (std::size_t row = 0; row < rowCount; ++row)
+                        f(CellSample{
+                            .mCellX = cellX,
+                            .mCellY = cellY,
+                            .mSrcRow = localBeginRow + row,
+                            .mSrcCol = localBeginCol + col,
+                            .mDstRow = baseDstRow + row,
+                            .mDstCol = baseDstCol + col,
+                        });
+
+                baseDstRow += rowCount;
+            }
+
+            baseDstCol += colCount;
         }
     }
 }
