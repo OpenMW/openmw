@@ -391,7 +391,10 @@ namespace MWWorld
         {
             std::string_view video = Fallback::Map::getString("Movies_New_Game");
             if (!video.empty())
+            {
+                MWBase::Environment::get().getSoundManager()->stopMusic();
                 MWBase::Environment::get().getWindowManager()->playVideo(video, true);
+            }
         }
 
         // enable collision

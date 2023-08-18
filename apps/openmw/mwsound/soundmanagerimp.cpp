@@ -14,6 +14,7 @@
 #include <components/vfs/pathutil.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -250,7 +251,7 @@ namespace MWSound
         if (filename.empty())
             return;
 
-        Log(Debug::Info) << "Playing " << filename;
+        Log(Debug::Info) << "Playing \"" << filename << "\"";
         mLastPlayedMusic = filename;
 
         DecoderPtr decoder = getDecoder();
@@ -260,7 +261,7 @@ namespace MWSound
         }
         catch (std::exception& e)
         {
-            Log(Debug::Error) << "Failed to load audio from " << filename << ": " << e.what();
+            Log(Debug::Error) << "Failed to load audio from \"" << filename << "\": " << e.what();
             return;
         }
 
@@ -274,7 +275,7 @@ namespace MWSound
         mOutput->streamSound(decoder, mMusic.get());
     }
 
-    void SoundManager::advanceMusic(const std::string& filename)
+    void SoundManager::advanceMusic(const std::string& filename, float fadeOut)
     {
         if (!isMusicPlaying())
         {
@@ -284,7 +285,7 @@ namespace MWSound
 
         mNextMusic = filename;
 
-        mMusic->setFadeout(1.f);
+        mMusic->setFadeout(fadeOut);
     }
 
     void SoundManager::startRandomTitle()
@@ -319,14 +320,28 @@ namespace MWSound
         tracklist.pop_back();
     }
 
-    void SoundManager::streamMusic(const std::string& filename)
-    {
-        advanceMusic("Music/" + filename);
-    }
-
     bool SoundManager::isMusicPlaying()
     {
         return mMusic && mOutput->isStreamPlaying(mMusic.get());
+    }
+
+    void SoundManager::streamMusic(const std::string& filename, MusicType type, float fade)
+    {
+        const auto mechanicsManager = MWBase::Environment::get().getMechanicsManager();
+
+        // Can not interrupt scripted music by built-in playlists
+        if (mechanicsManager->getMusicType() == MusicType::Scripted && type != MusicType::Scripted
+            && type != MusicType::Special)
+            return;
+
+        std::string normalizedName = VFS::Path::normalizeFilename(filename);
+
+        mechanicsManager->setMusicType(type);
+        advanceMusic(normalizedName, fade);
+        if (type == MWSound::MusicType::Battle)
+            mCurrentPlaylist = "Battle";
+        else if (type == MWSound::MusicType::Explore)
+            mCurrentPlaylist = "Explore";
     }
 
     void SoundManager::playPlaylist(const std::string& playlist)
@@ -337,7 +352,8 @@ namespace MWSound
         if (mMusicFiles.find(playlist) == mMusicFiles.end())
         {
             std::vector<std::string> filelist;
-            for (const auto& name : mVFS->getRecursiveDirectoryIterator("Music/" + playlist + '/'))
+            auto playlistPath = Misc::ResourceHelpers::correctMusicPath(playlist) + '/';
+            for (const auto& name : mVFS->getRecursiveDirectoryIterator(playlistPath))
                 filelist.push_back(name);
 
             mMusicFiles[playlist] = filelist;

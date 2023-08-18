@@ -63,10 +63,11 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                std::string sound{ runtime.getStringLiteral(runtime[0].mInteger) };
+                std::string music{ runtime.getStringLiteral(runtime[0].mInteger) };
                 runtime.pop();
 
-                MWBase::Environment::get().getSoundManager()->streamMusic(sound);
+                MWBase::Environment::get().getSoundManager()->streamMusic(
+                    Misc::ResourceHelpers::correctMusicPath(music));
             }
         };
 

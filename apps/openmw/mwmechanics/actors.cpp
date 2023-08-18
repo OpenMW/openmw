@@ -1285,7 +1285,7 @@ namespace MWMechanics
         }
     }
 
-    void Actors::updateCombatMusic()
+    bool Actors::playerHasHostiles() const
     {
         const MWWorld::Ptr player = getPlayer();
         const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
@@ -1315,19 +1315,7 @@ namespace MWMechanics
             }
         }
 
-        // check if we still have any player enemies to switch music
-        if (mCurrentMusic != MusicType::Explore && !hasHostiles
-            && !(player.getClass().getCreatureStats(player).isDead()
-                && MWBase::Environment::get().getSoundManager()->isMusicPlaying()))
-        {
-            MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
-            mCurrentMusic = MusicType::Explore;
-        }
-        else if (mCurrentMusic != MusicType::Battle && hasHostiles)
-        {
-            MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Battle"));
-            mCurrentMusic = MusicType::Battle;
-        }
+        return hasHostiles;
     }
 
     void Actors::predictAndAvoidCollisions(float duration) const
@@ -1735,8 +1723,6 @@ namespace MWMechanics
             killDeadActors();
             updateSneaking(playerCharacter, duration);
         }
-
-        updateCombatMusic();
     }
 
     void Actors::notifyDied(const MWWorld::Ptr& actor)
@@ -1806,7 +1792,8 @@ namespace MWMechanics
                     // player's death animation is over
                     MWBase::Environment::get().getStateManager()->askLoadRecent();
                     // Play Death Music if it was the player dying
-                    MWBase::Environment::get().getSoundManager()->streamMusic("Special/MW_Death.mp3");
+                    MWBase::Environment::get().getSoundManager()->streamMusic(
+                        "Music/Special/MW_Death.mp3", MWSound::MusicType::Special);
                 }
                 else
                 {

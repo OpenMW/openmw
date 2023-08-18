@@ -74,9 +74,6 @@ namespace MWMechanics
         void dropActors(const MWWorld::CellStore* cellStore, const MWWorld::Ptr& ignore);
         ///< Deregister all actors (except for \a ignore) in the given cell.
 
-        void updateCombatMusic();
-        ///< Update combat music state
-
         void update(float duration, bool paused);
         ///< Update actor stats and store desired velocity vectors in \a movement
 
@@ -159,19 +156,14 @@ namespace MWMechanics
         bool isReadyToBlock(const MWWorld::Ptr& ptr) const;
         bool isAttackingOrSpell(const MWWorld::Ptr& ptr) const;
 
+        bool playerHasHostiles() const;
+
         int getGreetingTimer(const MWWorld::Ptr& ptr) const;
         float getAngleToPlayer(const MWWorld::Ptr& ptr) const;
         GreetingState getGreetingState(const MWWorld::Ptr& ptr) const;
         bool isTurningToPlayer(const MWWorld::Ptr& ptr) const;
 
     private:
-        enum class MusicType
-        {
-            Title,
-            Explore,
-            Battle
-        };
-
         std::map<ESM::RefId, int> mDeathCount;
         std::list<Actor> mActors;
         std::map<const MWWorld::LiveCellRefBase*, std::list<Actor>::iterator> mIndex;
@@ -182,7 +174,6 @@ namespace MWMechanics
         float mTimerUpdateHello = 0;
         float mSneakTimer = 0; // Times update of sneak icon
         float mSneakSkillTimer = 0; // Times sneak skill progress from "avoid notice"
-        MusicType mCurrentMusic = MusicType::Title;
 
         void updateVisibility(const MWWorld::Ptr& ptr, CharacterController& ctrl) const;
 

@@ -127,7 +127,7 @@ namespace MWSound
         StreamPtr playVoice(DecoderPtr decoder, const osg::Vec3f& pos, bool playlocal);
 
         void streamMusicFull(const std::string& filename);
-        void advanceMusic(const std::string& filename);
+        void advanceMusic(const std::string& filename, float fadeOut = 1.f);
         void startRandomTitle();
 
         void cull3DSound(SoundBase* sound);
@@ -176,9 +176,12 @@ namespace MWSound
         void stopMusic() override;
         ///< Stops music if it's playing
 
-        void streamMusic(const std::string& filename) override;
+        void streamMusic(const std::string& filename, MWSound::MusicType type = MWSound::MusicType::Scripted,
+            float fade = 1.f) override;
         ///< Play a soundifle
-        /// \param filename name of a sound file in "Music/" in the data directory.
+        /// \param filename name of a sound file in the data directory.
+        /// \param type music type.
+        /// \param fade time in seconds to fade out current track before start this one.
 
         bool isMusicPlaying() override;
         ///< Returns true if music is playing

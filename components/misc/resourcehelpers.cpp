@@ -156,6 +156,11 @@ std::string Misc::ResourceHelpers::correctSoundPath(const std::string& resPath)
     return "sound\\" + resPath;
 }
 
+std::string Misc::ResourceHelpers::correctMusicPath(const std::string& resPath)
+{
+    return "music\\" + resPath;
+}
+
 std::string_view Misc::ResourceHelpers::meshPathForESM3(std::string_view resPath)
 {
     constexpr std::string_view prefix = "meshes";
