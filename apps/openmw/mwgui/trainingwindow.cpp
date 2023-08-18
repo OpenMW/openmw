@@ -64,20 +64,36 @@ namespace MWGui
         const MWWorld::Store<ESM::GameSetting>& gmst = store->get<ESM::GameSetting>();
         const MWWorld::Store<ESM::Skill>& skillStore = store->get<ESM::Skill>();
 
-        // NPC can train you in his best 3 skills
+        // NPC can train you in their best 3 skills
+        constexpr size_t maxSkills = 3;
         std::vector<std::pair<const ESM::Skill*, float>> skills;
+        skills.reserve(maxSkills);
 
-        MWMechanics::NpcStats const& actorStats(actor.getClass().getNpcStats(actor));
+        const auto sortByValue
+            = [](const std::pair<const ESM::Skill*, float>& lhs, const std::pair<const ESM::Skill*, float>& rhs) {
+                  return lhs.second > rhs.second;
+              };
+        // Maintain a sorted vector of max maxSkills elements, ordering skills by value and content file order
+        const MWMechanics::NpcStats& actorStats = actor.getClass().getNpcStats(actor);
         for (const ESM::Skill& skill : skillStore)
         {
             float value = getSkillForTraining(actorStats, skill.mId);
-
-            skills.emplace_back(&skill, value);
+            if (skills.size() < maxSkills)
+            {
+                skills.emplace_back(&skill, value);
+                std::stable_sort(skills.begin(), skills.end(), sortByValue);
+            }
+            else
+            {
+                auto& lowest = skills[maxSkills - 1];
+                if (lowest.second < value)
+                {
+                    lowest.first = &skill;
+                    lowest.second = value;
+                    std::stable_sort(skills.begin(), skills.end(), sortByValue);
+                }
+            }
         }
-
-        std::sort(skills.begin(), skills.end(), [](const auto& left, const auto& right) {
-            return std::tie(right.second, left.first->mId) < std::tie(left.second, right.first->mId);
-        });
 
         MyGUI::EnumeratorWidgetPtr widgets = mTrainingOptions->getEnumerator();
         MyGUI::Gui::getInstance().destroyWidgets(widgets);
@@ -86,7 +102,7 @@ namespace MWGui
 
         const int lineHeight = Settings::gui().mFontSize + 2;
 
-        for (int i = 0; i < 3; ++i)
+        for (size_t i = 0; i < skills.size(); ++i)
         {
             const ESM::Skill* skill = skills[i].first;
             int price = static_cast<int>(
