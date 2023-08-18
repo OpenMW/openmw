@@ -23,6 +23,7 @@
 
 #include "../mwrender/postprocessor.hpp"
 
+#include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/ptr.hpp"
 #include "../mwworld/scene.hpp"
@@ -75,7 +76,7 @@ namespace MWLua
         context.mIsGlobal = true;
         context.mLuaManager = this;
         context.mLua = &mLua;
-        context.mWorldView = &mWorldView;
+        context.mObjectLists = &mObjectLists;
         context.mLuaEvents = &mLuaEvents;
         context.mSerializer = mGlobalSerializer.get();
 
@@ -127,8 +128,6 @@ namespace MWLua
         if (mPlayer.isEmpty())
             return; // The game is not started yet.
 
-        float frameDuration = MWBase::Environment::get().getFrameDuration();
-
         MWWorld::Ptr newPlayerPtr = MWBase::Environment::get().getWorld()->getPlayerPtr();
         if (!(getId(mPlayer) == getId(newPlayerPtr)))
             throw std::logic_error("Player RefNum was changed unexpectedly");
@@ -138,7 +137,7 @@ namespace MWLua
             MWBase::Environment::get().getWorldModel()->registerPtr(mPlayer);
         }
 
-        mWorldView.update();
+        mObjectLists.update();
 
         std::erase_if(mActiveLocalScripts, [](const LocalScripts* l) {
             return l->getPtrOrEmpty().isEmpty() || l->getPtrOrEmpty().getRefData().isDeleted();
@@ -150,15 +149,12 @@ namespace MWLua
 
         mLuaEvents.finalizeEventBatch();
 
-        if (!mWorldView.isPaused())
-        { // Update time and process timers
-            double simulationTime = mWorldView.getSimulationTime() + frameDuration;
-            mWorldView.setSimulationTime(simulationTime);
-            double gameTime = mWorldView.getGameTime();
-
-            mGlobalScripts.processTimers(simulationTime, gameTime);
+        MWWorld::DateTimeManager& timeManager = *MWBase::Environment::get().getWorld()->getTimeManager();
+        if (!timeManager.isPaused())
+        {
+            mGlobalScripts.processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
             for (LocalScripts* scripts : mActiveLocalScripts)
-                scripts->processTimers(simulationTime, gameTime);
+                scripts->processTimers(timeManager.getSimulationTime(), timeManager.getGameTime());
         }
 
         // Run event handlers for events that were sent before `finalizeEventBatch`.
@@ -171,8 +167,9 @@ namespace MWLua
 
         // Run engine handlers
         mEngineEvents.callEngineHandlers();
-        if (!mWorldView.isPaused())
+        if (!timeManager.isPaused())
         {
+            float frameDuration = MWBase::Environment::get().getFrameDuration();
             for (LocalScripts* scripts : mActiveLocalScripts)
                 scripts->update(frameDuration);
             mGlobalScripts.update(frameDuration);
@@ -220,17 +217,19 @@ namespace MWLua
         // We apply input events in `synchronizedUpdate` rather than in `update` in order to reduce input latency.
         mProcessingInputEvents = true;
         PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
-        if (playerScripts && !MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu))
+        MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
+        if (playerScripts && !windowManager->containsMode(MWGui::GM_MainMenu))
         {
             for (const auto& event : mInputEvents)
                 playerScripts->processInputEvent(event);
         }
         mInputEvents.clear();
         if (playerScripts)
-            playerScripts->onFrame(mWorldView.isPaused() ? 0.0 : MWBase::Environment::get().getFrameDuration());
+            playerScripts->onFrame(MWBase::Environment::get().getWorld()->getTimeManager()->isPaused()
+                    ? 0.0
+                    : MWBase::Environment::get().getFrameDuration());
         mProcessingInputEvents = false;
 
-        MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
         for (const std::string& message : mUIMessages)
             windowManager->messageBox(message);
         mUIMessages.clear();
@@ -262,7 +261,7 @@ namespace MWLua
         mLuaEvents.clear();
         mEngineEvents.clear();
         mInputEvents.clear();
-        mWorldView.clear();
+        mObjectLists.clear();
         mGlobalScripts.removeAllScripts();
         mGlobalScriptsStarted = false;
         mNewGameStarted = false;
@@ -284,8 +283,8 @@ namespace MWLua
             return;
         if (!mPlayer.isEmpty())
             throw std::logic_error("Player is initialized twice");
-        mWorldView.objectAddedToScene(ptr);
-        mWorldView.setPlayer(ptr);
+        mObjectLists.objectAddedToScene(ptr);
+        mObjectLists.setPlayer(ptr);
         mPlayer = ptr;
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
         if (!localScripts)
@@ -314,7 +313,7 @@ namespace MWLua
 
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)
     {
-        mWorldView.objectAddedToScene(ptr); // assigns generated RefNum if it is not set yet.
+        mObjectLists.objectAddedToScene(ptr); // assigns generated RefNum if it is not set yet.
         mEngineEvents.addToQueue(EngineEvents::OnActive{ getId(ptr) });
 
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
@@ -334,7 +333,7 @@ namespace MWLua
 
     void LuaManager::objectRemovedFromScene(const MWWorld::Ptr& ptr)
     {
-        mWorldView.objectRemovedFromScene(ptr);
+        mObjectLists.objectRemovedFromScene(ptr);
         LocalScripts* localScripts = ptr.getRefData().getLuaScripts();
         if (localScripts)
         {
@@ -400,7 +399,8 @@ namespace MWLua
     {
         writer.startRecord(ESM::REC_LUAM);
 
-        mWorldView.save(writer);
+        writer.writeHNT<double>("LUAW", MWBase::Environment::get().getWorld()->getTimeManager()->getSimulationTime());
+        writer.writeFormId(MWBase::Environment::get().getWorldModel()->getLastGeneratedRefNum(), true);
         ESM::LuaScripts globalScripts;
         mGlobalScripts.save(globalScripts);
         globalScripts.save(writer);
@@ -414,7 +414,14 @@ namespace MWLua
         if (type != ESM::REC_LUAM)
             throw std::runtime_error("ESM::REC_LUAM is expected");
 
-        mWorldView.load(reader);
+        double simulationTime;
+        reader.getHNT(simulationTime, "LUAW");
+        MWBase::Environment::get().getWorld()->getTimeManager()->setSimulationTime(simulationTime);
+        ESM::FormId lastGenerated = reader.getFormId(true);
+        if (lastGenerated.hasContentFile())
+            throw std::runtime_error("Last generated RefNum is invalid");
+        MWBase::Environment::get().getWorldModel()->setLastGeneratedRefNum(lastGenerated);
+
         ESM::LuaScripts globalScripts;
         globalScripts.load(reader);
         mLuaEvents.load(mLua.sol(), reader, mContentFileMapping, mGlobalLoader.get());

@@ -33,6 +33,7 @@
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/globals.hpp"
 #include "../mwworld/scene.hpp"
@@ -227,7 +228,7 @@ void MWState::StateManager::saveGame(std::string_view description, const Slot* s
             profile.mPlayerClassId = classId;
 
         profile.mPlayerCellName = world.getCellName();
-        profile.mInGameTime = world.getEpochTimeStamp();
+        profile.mInGameTime = world.getTimeManager()->getEpochTimeStamp();
         profile.mTimePlayed = mTimePlayed;
         profile.mDescription = description;
 

@@ -20,6 +20,7 @@
 
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
+#include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/esmstore.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/player.hpp"
@@ -837,7 +838,7 @@ namespace MWMechanics
                 // Take a maximum remaining duration of Stunted Magicka effects (-1 is a constant one) in game hours.
                 if (remainingTime > 0)
                 {
-                    double timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+                    double timeScale = MWBase::Environment::get().getWorld()->getTimeManager()->getGameTimeScale();
                     if (timeScale == 0.0)
                         timeScale = 1;
 
@@ -1864,7 +1865,7 @@ namespace MWMechanics
     void Actors::rest(double hours, bool sleep) const
     {
         float duration = hours * 3600.f;
-        const float timeScale = MWBase::Environment::get().getWorld()->getTimeScaleFactor();
+        const float timeScale = MWBase::Environment::get().getWorld()->getTimeManager()->getGameTimeScale();
         if (timeScale != 0.f)
             duration /= timeScale;
 

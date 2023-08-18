@@ -13,7 +13,7 @@
 //
 // Subrecords:
 // LUAF - LuaScriptCfg::mFlags and ESM::RecNameInts list
-// LUAW - Start of MWLua::WorldView data
+// LUAW - Simulation time and last generated RefNum
 // LUAE - Start of MWLua::LocalEvent or MWLua::GlobalEvent (eventName)
 // LUAS - VFS path to a Lua script
 // LUAD - Serialized Lua variable

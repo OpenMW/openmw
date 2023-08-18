@@ -13,6 +13,7 @@
 #include "../mwbase/world.hpp"
 
 #include "../mwdialogue/keywordsearch.hpp"
+#include "../mwworld/datetimemanager.hpp"
 
 namespace MWGui
 {
@@ -253,8 +254,9 @@ namespace MWGui
 
                     std::ostringstream os;
 
-                    os << itr->mDayOfMonth << ' ' << MWBase::Environment::get().getWorld()->getMonthName(itr->mMonth)
-                       << " (" << dayStr << " " << (itr->mDay) << ')';
+                    os << itr->mDayOfMonth << ' '
+                       << MWBase::Environment::get().getWorld()->getTimeManager()->getMonthName(itr->mMonth) << " ("
+                       << dayStr << " " << (itr->mDay) << ')';
 
                     timestamp_buffer = os.str();
                 }

@@ -27,6 +27,7 @@
 
 #include <components/nifosg/particle.hpp>
 
+#include "../mwworld/datetimemanager.hpp"
 #include "../mwworld/weather.hpp"
 
 #include "../mwbase/environment.hpp"
@@ -559,7 +560,7 @@ namespace MWRender
         }
 
         // rotate the stars by 360 degrees every 4 days
-        mAtmosphereNightRoll += MWBase::Environment::get().getWorld()->getTimeScaleFactor() * duration
+        mAtmosphereNightRoll += MWBase::Environment::get().getWorld()->getTimeManager()->getGameTimeScale() * duration
             * osg::DegreesToRadians(360.f) / (3600 * 96.f);
         if (mAtmosphereNightNode->getNodeMask() != 0)
             mAtmosphereNightNode->setAttitude(osg::Quat(mAtmosphereNightRoll, osg::Vec3f(0, 0, 1)));

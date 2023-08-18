@@ -1,4 +1,4 @@
-#include "worldview.hpp"
+#include "objectlists.hpp"
 
 #include <components/esm3/esmreader.hpp>
 #include <components/esm3/esmwriter.hpp>
@@ -6,28 +6,27 @@
 
 #include <components/misc/resourcehelpers.hpp>
 
+#include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
 
 #include "../mwclass/container.hpp"
 
 #include "../mwworld/class.hpp"
-#include "../mwworld/timestamp.hpp"
 #include "../mwworld/worldmodel.hpp"
 
 namespace MWLua
 {
 
-    void WorldView::update()
+    void ObjectLists::update()
     {
         mActivatorsInScene.updateList();
         mActorsInScene.updateList();
         mContainersInScene.updateList();
         mDoorsInScene.updateList();
         mItemsInScene.updateList();
-        mPaused = MWBase::Environment::get().getWindowManager()->isGuiMode();
     }
 
-    void WorldView::clear()
+    void ObjectLists::clear()
     {
         mActivatorsInScene.clear();
         mActorsInScene.clear();
@@ -36,7 +35,7 @@ namespace MWLua
         mItemsInScene.clear();
     }
 
-    WorldView::ObjectGroup* WorldView::chooseGroup(const MWWorld::Ptr& ptr)
+    ObjectLists::ObjectGroup* ObjectLists::chooseGroup(const MWWorld::Ptr& ptr)
     {
         // It is important to check `isMarker` first.
         // For example "prisonmarker" has class "Door" despite that it is only an invisible marker.
@@ -56,7 +55,7 @@ namespace MWLua
         return nullptr;
     }
 
-    void WorldView::objectAddedToScene(const MWWorld::Ptr& ptr)
+    void ObjectLists::objectAddedToScene(const MWWorld::Ptr& ptr)
     {
         MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
         ObjectGroup* group = chooseGroup(ptr);
@@ -64,36 +63,14 @@ namespace MWLua
             addToGroup(*group, ptr);
     }
 
-    void WorldView::objectRemovedFromScene(const MWWorld::Ptr& ptr)
+    void ObjectLists::objectRemovedFromScene(const MWWorld::Ptr& ptr)
     {
         ObjectGroup* group = chooseGroup(ptr);
         if (group)
             removeFromGroup(*group, ptr);
     }
 
-    double WorldView::getGameTime() const
-    {
-        MWBase::World* world = MWBase::Environment::get().getWorld();
-        MWWorld::TimeStamp timeStamp = world->getTimeStamp();
-        return (static_cast<double>(timeStamp.getDay()) * 24 + timeStamp.getHour()) * 3600.0;
-    }
-
-    void WorldView::load(ESM::ESMReader& esm)
-    {
-        esm.getHNT(mSimulationTime, "LUAW");
-        ESM::FormId lastGenerated = esm.getFormId(true);
-        if (lastGenerated.hasContentFile())
-            throw std::runtime_error("Last generated RefNum is invalid");
-        MWBase::Environment::get().getWorldModel()->setLastGeneratedRefNum(lastGenerated);
-    }
-
-    void WorldView::save(ESM::ESMWriter& esm) const
-    {
-        esm.writeHNT("LUAW", mSimulationTime);
-        esm.writeFormId(MWBase::Environment::get().getWorldModel()->getLastGeneratedRefNum(), true);
-    }
-
-    void WorldView::ObjectGroup::updateList()
+    void ObjectLists::ObjectGroup::updateList()
     {
         if (mChanged)
         {
@@ -104,20 +81,20 @@ namespace MWLua
         }
     }
 
-    void WorldView::ObjectGroup::clear()
+    void ObjectLists::ObjectGroup::clear()
     {
         mChanged = false;
         mList->clear();
         mSet.clear();
     }
 
-    void WorldView::addToGroup(ObjectGroup& group, const MWWorld::Ptr& ptr)
+    void ObjectLists::addToGroup(ObjectGroup& group, const MWWorld::Ptr& ptr)
     {
         group.mSet.insert(getId(ptr));
         group.mChanged = true;
     }
 
-    void WorldView::removeFromGroup(ObjectGroup& group, const MWWorld::Ptr& ptr)
+    void ObjectLists::removeFromGroup(ObjectGroup& group, const MWWorld::Ptr& ptr)
     {
         group.mSet.erase(getId(ptr));
         group.mChanged = true;
