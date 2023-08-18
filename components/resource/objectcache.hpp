@@ -26,6 +26,7 @@
 
 #include <map>
 #include <mutex>
+#include <optional>
 #include <string>
 
 namespace osg
@@ -82,7 +83,8 @@ namespace Resource
                 {
                     if (oitr->second.second <= expiryTime)
                     {
-                        objectsToRemove.push_back(oitr->second.first);
+                        if (oitr->second.first != nullptr)
+                            objectsToRemove.push_back(oitr->second.first);
                         _objectCache.erase(oitr++);
                     }
                     else
@@ -125,6 +127,15 @@ namespace Resource
                 return itr->second.first;
             else
                 return nullptr;
+        }
+
+        std::optional<osg::ref_ptr<osg::Object>> getRefFromObjectCacheOrNone(const KeyType& key)
+        {
+            const std::lock_guard<std::mutex> lock(_objectCacheMutex);
+            const auto it = _objectCache.find(key);
+            if (it == _objectCache.end())
+                return std::nullopt;
+            return it->second.first;
         }
 
         /** Check if an object is in the cache, and if it is, update its usage time stamp. */
