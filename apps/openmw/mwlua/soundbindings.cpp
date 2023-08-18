@@ -12,7 +12,7 @@
 
 #include "luamanagerimp.hpp"
 
-namespace MWLua
+namespace
 {
     struct PlaySoundArgs
     {
@@ -55,7 +55,10 @@ namespace MWLua
             return MWSound::PlayMode::NoEnvNoScaling;
         return MWSound::PlayMode::NoEnv;
     }
+}
 
+namespace MWLua
+{
     sol::table initAmbientPackage(const Context& context)
     {
         sol::table api(context.mLua->sol(), sol::create);
