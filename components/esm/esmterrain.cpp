@@ -26,8 +26,8 @@ ESM::LandData::LandData(const ESM::Land& land, int loadFlags)
     mMaxHeight = data.mMaxHeight;
 }
 
-ESM::LandData::LandData(const ESM4::Land& land, int loadFlags)
-    : mLoadFlags(loadFlags)
+ESM::LandData::LandData(const ESM4::Land& land, int /*loadFlags*/)
+    : mLoadFlags(land.mDataTypes) // ESM4::Land is always fully loaded. TODO: implement lazy loading
     , mSize(Constants::ESM4CellSizeInUnits)
     , mLandSize(ESM4::Land::VERTS_PER_SIDE)
 {
