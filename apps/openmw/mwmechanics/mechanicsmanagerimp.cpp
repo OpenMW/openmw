@@ -423,12 +423,16 @@ namespace MWMechanics
 
         ESM::NPC player = *world->getPlayerPtr().get<ESM::NPC>()->mBase;
 
-        player.mRace = race;
-        player.mHead = head;
-        player.mHair = hair;
-        player.setIsMale(male);
+        if (player.mRace != race || player.mHead != head || player.mHair != hair || player.isMale() != male)
+        {
+            player.mRace = race;
+            player.mHead = head;
+            player.mHair = hair;
+            player.setIsMale(male);
 
-        world->getStore().insert(player);
+            world->getStore().insert(player);
+            world->renderPlayer();
+        }
 
         mRaceSelected = true;
         buildPlayer();
