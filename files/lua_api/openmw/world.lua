@@ -149,6 +149,7 @@
 -- Creates a custom record in the world database.
 -- Eventually meant to support all records, but the current
 -- set of supported types is limited to:
+--
 -- * @{openmw.types#PotionRecord},
 -- * @{openmw.types#ArmorRecord},
 -- * @{openmw.types#BookRecord},

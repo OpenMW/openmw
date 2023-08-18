@@ -18,6 +18,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwworld/action.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/datetimemanager.hpp"
@@ -314,6 +315,21 @@ namespace MWLua
                     objPtr.getClass().activate(objPtr, actorPtr)->execute(actorPtr);
                 },
                 "_runStandardActivationAction");
+        };
+        api["_runStandardUseAction"] = [context](const GObject& object, const GObject& actor) {
+            context.mLuaManager->addAction(
+                [object, actor] {
+                    const MWWorld::Ptr& actorPtr = actor.ptr();
+                    const MWWorld::Ptr& objectPtr = object.ptr();
+                    if (actorPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                        MWBase::Environment::get().getWindowManager()->useItem(objectPtr, true);
+                    else
+                    {
+                        std::unique_ptr<MWWorld::Action> action = objectPtr.getClass().use(objectPtr, true);
+                        action->execute(actorPtr, true);
+                    }
+                },
+                "_runStandardUseAction");
         };
 
         return LuaUtil::makeReadOnly(api);
