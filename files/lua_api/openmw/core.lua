@@ -739,4 +739,127 @@
 -- @field #number magnitudeBase
 -- @field #number magnitudeModifier
 
+---
+-- Play a 3D sound, attached to object
+-- @function [parent=#core] playSound3d
+-- @param #string soundId ID of Sound record to play
+-- @param #GameObject object Object to which we attach the sound
+-- @param #table options An optional table with additional optional arguments. Can contain:
+--
+--   * `timeOffset` - a floating point number >= 0, to some time (in second) from beginning of sound file (default: 0);
+--   * `volume` - a floating point number >= 0, to set a sound volume (default: 1);
+--   * `pitch` - a floating point number >= 0, to set a sound pitch (default: 1);
+--   * `loop` - a boolean, to set if sound should be repeated when it ends (default: false);
+-- @usage local params = {
+--    timeOffset=0.1
+--    volume=0.3,
+--    loop=false,
+--    pitch=1.0
+-- };
+-- core.sound.playSound3d("shock bolt", object, params)
+
+---
+-- Play a 3D sound file, attached to object
+-- @function [parent=#core] playSoundFile3d
+-- @param #string fileName Path to sound file in VFS
+-- @param #GameObject object Object to which we attach the sound
+-- @param #table options An optional table with additional optional arguments. Can contain:
+--
+--   * `timeOffset` - a floating point number >= 0, to some time (in second) from beginning of sound file (default: 0);
+--   * `volume` - a floating point number >= 0, to set a sound volume (default: 1);
+--   * `pitch` - a floating point number >= 0, to set a sound pitch (default: 1);
+--   * `loop` - a boolean, to set if sound should be repeated when it ends (default: false);
+-- @usage local params = {
+--    timeOffset=0.1
+--    volume=0.3,
+--    loop=false,
+--    pitch=1.0
+-- };
+-- core.sound.playSoundFile3d("Sound\\test.mp3", object, params)
+
+---
+-- Stop a 3D sound, attached to object
+-- @function [parent=#core] stopSound3d
+-- @param #string soundId ID of Sound record to stop
+-- @param #GameObject object Object on which we want to stop sound
+-- @usage core.sound.stopSound("shock bolt", object);
+
+---
+-- Stop a 3D sound file, attached to object
+-- @function [parent=#core] stopSoundFile3d
+-- @param #string fileName Path to sound file in VFS
+-- @param #GameObject object Object on which we want to stop sound
+-- @usage core.sound.stopSoundFile("Sound\\test.mp3", object);
+
+---
+-- Check if sound is playing on given object
+-- @function [parent=#core] isSoundPlaying
+-- @param #string soundId ID of Sound record to check
+-- @param #GameObject object Object on which we want to check sound
+-- @return #boolean
+-- @usage local isPlaying = core.sound.isSoundPlaying("shock bolt", object);
+
+---
+-- Check if sound file is playing on given object
+-- @function [parent=#core] isSoundFilePlaying
+-- @param #string fileName Path to sound file in VFS
+-- @param #GameObject object Object on which we want to check sound
+-- @return #boolean
+-- @usage local isPlaying = core.sound.isSoundFilePlaying("Sound\\test.mp3", object);
+
+---
+-- Play an animated voiceover. Has two overloads:
+--
+--   * With an "object" argument: play sound for given object, with speaking animation if possible equipment slots.
+--   * Without an "object" argument: play sound globally, without object
+-- @function [parent=#core] say
+-- @param #string fileName Path to sound file in VFS
+-- @param #GameObject object Object on which we want to play an animated voiceover (optional)
+-- @param #string text Subtitle text (optional)
+-- @usage -- play voiceover for object and print messagebox
+-- core.sound.say("Sound\\Vo\\Misc\\voice.mp3", object, "Subtitle text")
+-- @usage -- play voiceover globally and print messagebox
+-- core.sound.say("Sound\\Vo\\Misc\\voice.mp3", "Subtitle text")
+-- @usage -- play voiceover for object without messagebox
+-- core.sound.say("Sound\\Vo\\Misc\\voice.mp3", object)
+-- @usage -- play voiceover globally without messagebox
+-- core.sound.say("Sound\\Vo\\Misc\\voice.mp3")
+
+---
+-- Stop animated voiceover
+-- @function [parent=#core] stopSay
+-- @param #string fileName Path to sound file in VFS
+-- @param #GameObject object Object on which we want to stop an animated voiceover (optional)
+-- @usage -- stop voice for given object
+-- core.sound.stopSay(object);
+-- @usage -- stop global voice
+-- core.sound.stopSay();
+
+---
+-- Check if animated voiceover is playing
+-- @function [parent=#core] isSayActive
+-- @param #GameObject object Object on which we want to check an animated voiceover (optional)
+-- @return #boolean
+-- @usage -- check voice for given object
+-- local isActive = isSayActive(object);
+-- @usage -- check global voice
+-- local isActive = isSayActive();
+
+---
+-- @type Sound
+-- @field #string id Sound id
+-- @field #string fileName Normalized path to sound file in VFS
+-- @field #number volume Raw sound volume, from 0 to 255
+-- @field #number minRange Raw minimal range value, from 0 to 255
+-- @field #number maxRange Raw maximal range value, from 0 to 255
+
+--- List of all @{#Sound}s.
+-- @field [parent=#Sound] #list<#Sound> sounds
+-- @usage local sound = core.sound.sounds['Ashstorm']  -- get by id
+-- @usage local sound = core.sound.sounds[1]  -- get by index
+-- @usage -- Print all sound files paths
+-- for _, sound in pairs(core.sound.sounds) do
+--     print(sound.fileName)
+-- end
+
 return nil

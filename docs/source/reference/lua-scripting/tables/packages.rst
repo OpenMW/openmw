@@ -21,6 +21,8 @@
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.nearby <Package openmw.nearby>`                | by local scripts   | | Read-only access to the nearest area of the game world.     |
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.ambient <Package openmw.ambient>`              | by player scripts  | | Controls background sounds for given player.                |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.input <Package openmw.input>`                  | by player scripts  | | User input.                                                 |
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.ui <Package openmw.ui>`                        | by player scripts  | | Controls :ref:`user interface <User interface reference>`.  |

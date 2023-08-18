@@ -35,6 +35,9 @@ namespace Misc
         // Adds "meshes\\".
         std::string correctMeshPath(const std::string& resPath, const VFS::Manager* vfs);
 
+        // Adds "sound\\".
+        std::string correctSoundPath(const std::string& resPath);
+
         // Removes "meshes\\".
         std::string_view meshPathForESM3(std::string_view resPath);
 

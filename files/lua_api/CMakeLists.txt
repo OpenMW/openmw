@@ -9,6 +9,7 @@ set(LUA_API_FILES
     math.doclua
     string.doclua
     table.doclua
+    openmw/ambient.lua
     openmw/async.lua
     openmw/core.lua
     openmw/nearby.lua

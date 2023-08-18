@@ -52,6 +52,7 @@ namespace MWSound
         NoScaling = 1 << 4, /* Don't scale audio with simulation time */
         NoEnvNoScaling = NoEnv | NoScaling,
         LoopNoEnv = Loop | NoEnv,
+        LoopNoEnvNoScaling = Loop | NoEnv | NoScaling,
         LoopRemoveAtDistance = Loop | RemoveAtDistance
     };
 
@@ -117,11 +118,11 @@ namespace MWBase
 
         virtual void say(const MWWorld::ConstPtr& reference, const std::string& filename) = 0;
         ///< Make an actor say some text.
-        /// \param filename name of a sound file in "Sound/" in the data directory.
+        /// \param filename name of a sound file in the VFS
 
         virtual void say(const std::string& filename) = 0;
         ///< Say some text, without an actor ref
-        /// \param filename name of a sound file in "Sound/" in the data directory.
+        /// \param filename name of a sound file in the VFS
 
         virtual bool sayActive(const MWWorld::ConstPtr& reference = MWWorld::ConstPtr()) const = 0;
         ///< Is actor not speaking?
@@ -155,7 +156,20 @@ namespace MWBase
         ///< Play a sound, independently of 3D-position
         ///< @param offset Number of seconds into the sound to start playback.
 
+        virtual Sound* playSound(std::string_view fileName, float volume, float pitch, Type type = Type::Sfx,
+            PlayMode mode = PlayMode::Normal, float offset = 0)
+            = 0;
+        ///< Play a sound, independently of 3D-position
+        ///< @param offset Number of seconds into the sound to start playback.
+
         virtual Sound* playSound3D(const MWWorld::ConstPtr& reference, const ESM::RefId& soundId, float volume,
+            float pitch, Type type = Type::Sfx, PlayMode mode = PlayMode::Normal, float offset = 0)
+            = 0;
+        ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless
+        ///< Play_NoTrack is specified.
+        ///< @param offset Number of seconds into the sound to start playback.
+
+        virtual Sound* playSound3D(const MWWorld::ConstPtr& reference, std::string_view fileName, float volume,
             float pitch, Type type = Type::Sfx, PlayMode mode = PlayMode::Normal, float offset = 0)
             = 0;
         ///< Play a 3D sound attached to an MWWorld::Ptr. Will be updated automatically with the Ptr's position, unless
@@ -172,7 +186,10 @@ namespace MWBase
         ///< Stop the given sound from playing
 
         virtual void stopSound3D(const MWWorld::ConstPtr& reference, const ESM::RefId& soundId) = 0;
-        ///< Stop the given object from playing the given sound,
+        ///< Stop the given object from playing the given sound.
+
+        virtual void stopSound3D(const MWWorld::ConstPtr& reference, std::string_view fileName) = 0;
+        ///< Stop the given object from playing the given sound.
 
         virtual void stopSound3D(const MWWorld::ConstPtr& reference) = 0;
         ///< Stop the given object from playing all sounds.
@@ -187,6 +204,10 @@ namespace MWBase
         ///< @param duration Time until volume reaches 0.
 
         virtual bool getSoundPlaying(const MWWorld::ConstPtr& reference, const ESM::RefId& soundId) const = 0;
+        ///< Is the given sound currently playing on the given object?
+        ///  If you want to check if sound played with playSound is playing, use empty Ptr
+
+        virtual bool getSoundPlaying(const MWWorld::ConstPtr& reference, std::string_view fileName) const = 0;
         ///< Is the given sound currently playing on the given object?
         ///  If you want to check if sound played with playSound is playing, use empty Ptr
 

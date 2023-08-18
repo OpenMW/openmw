@@ -11,6 +11,7 @@
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
 #include <components/vfs/manager.hpp>
+#include <components/vfs/pathutil.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -36,6 +37,7 @@ namespace MWSound
         constexpr float sMinUpdateInterval = 1.0f / 30.0f;
         constexpr float sSfxFadeInDuration = 1.0f;
         constexpr float sSfxFadeOutDuration = 1.0f;
+        constexpr float sSoundCullDistance = 2000.f;
 
         WaterSoundUpdaterSettings makeWaterSoundUpdaterSettings()
         {
@@ -357,7 +359,7 @@ namespace MWSound
         if (!mOutput->isInitialized())
             return;
 
-        DecoderPtr decoder = loadVoice("Sound/" + filename);
+        DecoderPtr decoder = loadVoice(filename);
         if (!decoder)
             return;
 
@@ -389,7 +391,7 @@ namespace MWSound
         if (!mOutput->isInitialized())
             return;
 
-        DecoderPtr decoder = loadVoice("Sound/" + filename);
+        DecoderPtr decoder = loadVoice(filename);
         if (!decoder)
             return;
 
@@ -486,14 +488,22 @@ namespace MWSound
         return mOutput->getStreamDelay(stream);
     }
 
-    Sound* SoundManager::playSound(
-        const ESM::RefId& soundId, float volume, float pitch, Type type, PlayMode mode, float offset)
+    bool SoundManager::remove3DSoundAtDistance(PlayMode mode, const MWWorld::ConstPtr& ptr) const
     {
         if (!mOutput->isInitialized())
-            return nullptr;
+            return true;
 
-        Sound_Buffer* sfx = mSoundBuffers.load(soundId);
-        if (!sfx)
+        const osg::Vec3f objpos(ptr.getRefData().getPosition().asVec3());
+        const float squaredDist = (mListenerPos - objpos).length2();
+        if ((mode & PlayMode::RemoveAtDistance) && squaredDist > sSoundCullDistance * sSoundCullDistance)
+            return true;
+
+        return false;
+    }
+
+    Sound* SoundManager::playSound(Sound_Buffer* sfx, float volume, float pitch, Type type, PlayMode mode, float offset)
+    {
+        if (!mOutput->isInitialized())
             return nullptr;
 
         // Only one copy of given sound can be played at time, so stop previous copy
@@ -517,24 +527,44 @@ namespace MWSound
         return result;
     }
 
-    Sound* SoundManager::playSound3D(const MWWorld::ConstPtr& ptr, const ESM::RefId& soundId, float volume, float pitch,
+    Sound* SoundManager::playSound(
+        std::string_view fileName, float volume, float pitch, Type type, PlayMode mode, float offset)
+    {
+        if (!mOutput->isInitialized())
+            return nullptr;
+
+        std::string normalizedName = VFS::Path::normalizeFilename(fileName);
+        Sound_Buffer* sfx = mSoundBuffers.load(normalizedName);
+        if (!sfx)
+            return nullptr;
+
+        return playSound(sfx, volume, pitch, type, mode, offset);
+    }
+
+    Sound* SoundManager::playSound(
+        const ESM::RefId& soundId, float volume, float pitch, Type type, PlayMode mode, float offset)
+    {
+        if (!mOutput->isInitialized())
+            return nullptr;
+
+        Sound_Buffer* sfx = mSoundBuffers.load(soundId);
+        if (!sfx)
+            return nullptr;
+
+        return playSound(sfx, volume, pitch, type, mode, offset);
+    }
+
+    Sound* SoundManager::playSound3D(const MWWorld::ConstPtr& ptr, Sound_Buffer* sfx, float volume, float pitch,
         Type type, PlayMode mode, float offset)
     {
         if (!mOutput->isInitialized())
             return nullptr;
 
-        const osg::Vec3f objpos(ptr.getRefData().getPosition().asVec3());
-        const float squaredDist = (mListenerPos - objpos).length2();
-        if ((mode & PlayMode::RemoveAtDistance) && squaredDist > 2000 * 2000)
-            return nullptr;
-
-        // Look up the sound in the ESM data
-        Sound_Buffer* sfx = mSoundBuffers.load(soundId);
-        if (!sfx)
-            return nullptr;
-
         // Only one copy of given sound can be played at time on ptr, so stop previous copy
         stopSound(sfx, ptr);
+
+        const osg::Vec3f objpos(ptr.getRefData().getPosition().asVec3());
+        const float squaredDist = (mListenerPos - objpos).length2();
 
         bool played;
         SoundPtr sound = getSoundRef();
@@ -576,6 +606,35 @@ namespace MWSound
         it->second.mList.emplace_back(std::move(sound), sfx);
         mSoundBuffers.use(*sfx);
         return result;
+    }
+
+    Sound* SoundManager::playSound3D(const MWWorld::ConstPtr& ptr, const ESM::RefId& soundId, float volume, float pitch,
+        Type type, PlayMode mode, float offset)
+    {
+        if (remove3DSoundAtDistance(mode, ptr))
+            return nullptr;
+
+        // Look up the sound in the ESM data
+        Sound_Buffer* sfx = mSoundBuffers.load(soundId);
+        if (!sfx)
+            return nullptr;
+
+        return playSound3D(ptr, sfx, volume, pitch, type, mode, offset);
+    }
+
+    Sound* SoundManager::playSound3D(const MWWorld::ConstPtr& ptr, std::string_view fileName, float volume, float pitch,
+        Type type, PlayMode mode, float offset)
+    {
+        if (remove3DSoundAtDistance(mode, ptr))
+            return nullptr;
+
+        // Look up the sound
+        std::string normalizedName = VFS::Path::normalizeFilename(fileName);
+        Sound_Buffer* sfx = mSoundBuffers.load(normalizedName);
+        if (!sfx)
+            return nullptr;
+
+        return playSound3D(ptr, sfx, volume, pitch, type, mode, offset);
     }
 
     Sound* SoundManager::playSound3D(const osg::Vec3f& initialPos, const ESM::RefId& soundId, float volume, float pitch,
@@ -644,6 +703,13 @@ namespace MWSound
         stopSound(sfx, ptr);
     }
 
+    void SoundManager::stopSound3D(const MWWorld::ConstPtr& ptr, std::string_view fileName)
+    {
+        std::string normalizedName = VFS::Path::normalizeFilename(fileName);
+        auto soundId = ESM::RefId::stringRefId(normalizedName);
+        stopSound3D(ptr, soundId);
+    }
+
     void SoundManager::stopSound3D(const MWWorld::ConstPtr& ptr)
     {
         SoundMap::iterator snditer = mActiveSounds.find(ptr.mRef);
@@ -698,6 +764,13 @@ namespace MWSound
                     sndbuf.first->setFadeout(duration);
             }
         }
+    }
+
+    bool SoundManager::getSoundPlaying(const MWWorld::ConstPtr& ptr, std::string_view fileName) const
+    {
+        std::string normalizedName = VFS::Path::normalizeFilename(fileName);
+        auto soundId = ESM::RefId::stringRefId(normalizedName);
+        return getSoundPlaying(ptr, soundId);
     }
 
     bool SoundManager::getSoundPlaying(const MWWorld::ConstPtr& ptr, const ESM::RefId& soundId) const
@@ -849,8 +922,8 @@ namespace MWSound
 
     void SoundManager::cull3DSound(SoundBase* sound)
     {
-        // Hard-coded distance of 2000.0f is from vanilla Morrowind
-        const float maxDist = sound->getDistanceCull() ? 2000.0f : sound->getMaxDistance();
+        // Hard-coded distance is from an original engine
+        const float maxDist = sound->getDistanceCull() ? sSoundCullDistance : sound->getMaxDistance();
         const float squaredMaxDist = maxDist * maxDist;
 
         const osg::Vec3f pos = sound->getPosition();

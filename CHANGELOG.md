@@ -73,6 +73,7 @@
     Feature #5492: Let rain and snow collide with statics
     Feature #6447: Add LOD support to Object Paging
     Feature #6491: Add support for Qt6
+    Feature #6556: Lua API for sounds
     Feature #6726: Lua API for creating new objects
     Feature #6922: Improve launcher appearance
     Feature #6933: Support high-resolution cursor textures

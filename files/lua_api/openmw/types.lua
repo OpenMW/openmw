@@ -127,10 +127,10 @@
 ---
 -- Get equipment.
 -- Has two overloads:
--- 1) With a single argument: returns a table `slot` -> @{openmw.core#GameObject} of currently equipped items.
--- See @{#EQUIPMENT_SLOT}. Returns empty table if the actor doesn't have
--- equipment slots.
--- 2) With two arguments: returns an item equipped to the given slot.
+--
+--   * With a single argument: returns a table `slot` -> @{openmw.core#GameObject} of currently equipped items.
+-- See @{#EQUIPMENT_SLOT}. Returns empty table if the actor doesn't have equipment slots.
+--   * With two arguments: returns an item equipped to the given slot.
 -- @function [parent=#Actor] getEquipment
 -- @param openmw.core#GameObject actor
 -- @param #number slot Optional number of the equipment slot
