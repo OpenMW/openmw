@@ -24,13 +24,11 @@ namespace MWRender
             return static_cast<ESMTerrain::LandObject*>(obj.get());
         else
         {
-            const auto world = MWBase::Environment::get().getWorld();
-            if (!world)
-                return nullptr;
+            const MWBase::World& world = *MWBase::Environment::get().getWorld();
 
             if (ESM::isEsm4Ext(cellIndex.mWorldspace))
             {
-                const ESM4::Land* land = world->getStore().get<ESM4::Land>().search(cellIndex);
+                const ESM4::Land* land = world.getStore().get<ESM4::Land>().search(cellIndex);
                 if (!land)
                     return nullptr;
                 osg::ref_ptr<ESMTerrain::LandObject> landObj(new ESMTerrain::LandObject(*land, mLoadFlags));
@@ -39,7 +37,7 @@ namespace MWRender
             }
             else
             {
-                const ESM::Land* land = world->getStore().get<ESM::Land>().search(cellIndex.mX, cellIndex.mY);
+                const ESM::Land* land = world.getStore().get<ESM::Land>().search(cellIndex.mX, cellIndex.mY);
                 if (!land)
                     return nullptr;
                 osg::ref_ptr<ESMTerrain::LandObject> landObj(new ESMTerrain::LandObject(*land, mLoadFlags));
