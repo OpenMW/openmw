@@ -37,8 +37,8 @@ namespace ESMTerrain
     {
     public:
         LandObject() = default;
-        LandObject(const ESM::Land* land, int loadFlags);
-        LandObject(const ESM4::Land* land, int loadFlags);
+        LandObject(const ESM::Land& land, int loadFlags);
+        LandObject(const ESM4::Land& land, int loadFlags);
 
         META_Object(ESMTerrain, LandObject)
 

@@ -46,13 +46,13 @@ namespace ESMTerrain
         Map mMap;
     };
 
-    LandObject::LandObject(const ESM4::Land* land, int loadFlags)
-        : mData(*land, loadFlags)
+    LandObject::LandObject(const ESM4::Land& land, int loadFlags)
+        : mData(land, loadFlags)
     {
     }
 
-    LandObject::LandObject(const ESM::Land* land, int loadFlags)
-        : mData(*land, loadFlags)
+    LandObject::LandObject(const ESM::Land& land, int loadFlags)
+        : mData(land, loadFlags)
     {
     }
 

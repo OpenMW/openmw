@@ -33,7 +33,7 @@ namespace MWRender
                 const ESM4::Land* land = world->getStore().get<ESM4::Land>().search(cellIndex);
                 if (!land)
                     return nullptr;
-                osg::ref_ptr<ESMTerrain::LandObject> landObj(new ESMTerrain::LandObject(land, mLoadFlags));
+                osg::ref_ptr<ESMTerrain::LandObject> landObj(new ESMTerrain::LandObject(*land, mLoadFlags));
                 mCache->addEntryToObjectCache(cellIndex, landObj.get());
                 return landObj;
             }
@@ -42,7 +42,7 @@ namespace MWRender
                 const ESM::Land* land = world->getStore().get<ESM::Land>().search(cellIndex.mX, cellIndex.mY);
                 if (!land)
                     return nullptr;
-                osg::ref_ptr<ESMTerrain::LandObject> landObj(new ESMTerrain::LandObject(land, mLoadFlags));
+                osg::ref_ptr<ESMTerrain::LandObject> landObj(new ESMTerrain::LandObject(*land, mLoadFlags));
                 mCache->addEntryToObjectCache(cellIndex, landObj.get());
                 return landObj;
             }

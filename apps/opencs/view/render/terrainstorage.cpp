@@ -39,7 +39,7 @@ namespace CSVRender
 
         const ESM::Land& land = mData.getLand().getRecord(index).get();
         return new ESMTerrain::LandObject(
-            &land, ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX);
+            land, ESM::Land::DATA_VHGT | ESM::Land::DATA_VNML | ESM::Land::DATA_VCLR | ESM::Land::DATA_VTEX);
     }
 
     const ESM::LandTexture* TerrainStorage::getLandTexture(int index, short plugin)
