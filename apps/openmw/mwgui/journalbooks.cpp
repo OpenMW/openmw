@@ -25,7 +25,7 @@ namespace
     struct AddSpan : AddContent
     {
         AddSpan(MWGui::BookTypesetter::Ptr typesetter, MWGui::BookTypesetter::Style* body_style)
-            : AddContent(typesetter, body_style)
+            : AddContent(std::move(typesetter), body_style)
         {
         }
 
@@ -159,7 +159,7 @@ namespace MWGui
     typedef TypesetBook::Ptr book;
 
     JournalBooks::JournalBooks(JournalViewModel::Ptr model, ToUTF8::FromType encoding)
-        : mModel(model)
+        : mModel(std::move(model))
         , mEncoding(encoding)
         , mIndexPagesCount(0)
     {
