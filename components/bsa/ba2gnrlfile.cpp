@@ -202,23 +202,21 @@ namespace Bsa
 
     Files::IStreamPtr BA2GNRLFile::getFile(const FileRecord& fileRecord)
     {
-        Files::IStreamPtr streamPtr
-            = Files::openConstrainedFileStream(mFilepath, fileRecord.offset, fileRecord.packedSize);
-        std::istream* fileStream = streamPtr.get();
-        uint32_t uncompressedSize = fileRecord.size;
-        auto memoryStreamPtr = std::make_unique<MemoryInputStream>(uncompressedSize);
-        if (fileRecord.packedSize != 0)
+        const uint32_t inputSize = fileRecord.packedSize ? fileRecord.packedSize : fileRecord.size;
+        Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, fileRecord.offset, inputSize);
+        auto memoryStreamPtr = std::make_unique<MemoryInputStream>(fileRecord.size);
+        if (fileRecord.packedSize)
         {
             boost::iostreams::filtering_streambuf<boost::iostreams::input> inputStreamBuf;
             inputStreamBuf.push(boost::iostreams::zlib_decompressor());
-            inputStreamBuf.push(*fileStream);
+            inputStreamBuf.push(*streamPtr);
 
-            boost::iostreams::basic_array_sink<char> sr(memoryStreamPtr->getRawData(), uncompressedSize);
+            boost::iostreams::basic_array_sink<char> sr(memoryStreamPtr->getRawData(), fileRecord.size);
             boost::iostreams::copy(inputStreamBuf, sr);
         }
         else
         {
-            fileStream->read(memoryStreamPtr->getRawData(), fileRecord.size);
+            streamPtr->read(memoryStreamPtr->getRawData(), fileRecord.size);
         }
         return std::make_unique<Files::StreamWithBuffer<MemoryInputStream>>(std::move(memoryStreamPtr));
     }
