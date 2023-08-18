@@ -19,7 +19,11 @@ namespace ESM
         mTargetId = esm.getHNORefId("TARG");
         if (esm.peekNextSub("FRMR"))
             mTargetRef = esm.getFormId(true, "FRMR");
-        esm.applyContentFileMapping(mTargetRef);
+        if (!esm.applyContentFileMapping(mTargetRef))
+        {
+            mTargetId = ESM::RefId();
+            mTargetRef = ESM::FormId();
+        }
     }
 
     void GlobalScript::save(ESMWriter& esm) const
