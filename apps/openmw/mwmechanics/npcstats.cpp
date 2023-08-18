@@ -1,5 +1,6 @@
 #include "npcstats.hpp"
 
+#include <cassert>
 #include <iomanip>
 #include <sstream>
 
@@ -465,6 +466,7 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
     {
         // TODO extend format
         auto index = ESM::Skill::refIdToIndex(id);
+        assert(index >= 0);
         value.writeState(state.mSkills[static_cast<unsigned int>(index)]);
     }
 
@@ -523,6 +525,7 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
     {
         // TODO extend format
         ESM::RefId id = ESM::Skill::indexToRefId(i);
+        assert(!id.empty());
         mSkills[id].readState(state.mSkills[i]);
     }
 
