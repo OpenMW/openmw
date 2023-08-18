@@ -241,8 +241,10 @@
 -- Can be called only from a global script.
 -- @function [parent=#GameObject] moveInto
 -- @param self
--- @param #Inventory dest
+-- @param #any dest @{#Inventory} or @{#GameObject}
 -- @usage item:moveInto(types.Actor.inventory(actor))
+-- @usage item:moveInto(types.Container.content(container))
+-- @usage item:moveInto(container)
 
 ---
 -- Removes an object or reduces a stack of objects.
