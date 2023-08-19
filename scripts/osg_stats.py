@@ -9,6 +9,7 @@ import click
 import collections
 import matplotlib.pyplot
 import numpy
+import operator
 import os.path
 import re
 import statistics
@@ -62,11 +63,13 @@ import termtables
               help='Threshold for hist_over.')
 @click.option('--show_common_path_prefix', is_flag=True,
               help='Show common path prefix when applied to multiple files.')
+@click.option('--stats_sort_by', type=str, default=None, multiple=True,
+              help='Sort stats table by given fields (source, key, sum, min, max etc).')
 @click.argument('path', type=click.Path(), nargs=-1)
 def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plot, stats, precision,
          timeseries_sum, stats_sum, begin_frame, end_frame, path,
          commulative_timeseries, commulative_timeseries_sum, frame_number_name,
-         hist_threshold, threshold_name, threshold_value, show_common_path_prefix):
+         hist_threshold, threshold_name, threshold_value, show_common_path_prefix, stats_sort_by):
     sources = {v: list(read_data(v)) for v in path} if path else {'stdin': list(read_data(None))}
     if not show_common_path_prefix and len(sources) > 1:
         longest_common_prefix = os.path.commonprefix(list(sources.keys()))
@@ -98,7 +101,7 @@ def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plo
     if plot:
         draw_plots(sources=frames, plots=plot)
     if stats:
-        print_stats(sources=frames, keys=matching_keys(stats), stats_sum=stats_sum, precision=precision)
+        print_stats(sources=frames, keys=matching_keys(stats), stats_sum=stats_sum, precision=precision, sort_by=stats_sort_by)
     if hist_threshold:
         draw_hist_threshold(sources=frames, keys=matching_keys(hist_threshold), begin_frame=begin_frame,
                             threshold_name=threshold_name, threshold_value=threshold_value)
@@ -259,7 +262,7 @@ def draw_plots(sources, plots):
     fig.canvas.manager.set_window_title('plots')
 
 
-def print_stats(sources, keys, stats_sum, precision):
+def print_stats(sources, keys, stats_sum, precision, sort_by):
     stats = list()
     for name, frames in sources.items():
         for key in keys:
@@ -267,6 +270,8 @@ def print_stats(sources, keys, stats_sum, precision):
         if stats_sum:
             stats.append(make_stats(source=name, key='sum', values=sum_multiple(frames, keys), precision=precision))
     metrics = list(stats[0].keys())
+    if sort_by:
+        stats.sort(key=operator.itemgetter(*sort_by))
     termtables.print(
         [list(v.values()) for v in stats],
         header=metrics,
