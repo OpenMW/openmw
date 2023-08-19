@@ -9,10 +9,11 @@ import click
 import collections
 import matplotlib.pyplot
 import numpy
+import os.path
+import re
 import statistics
 import sys
 import termtables
-import re
 
 
 @click.command()
@@ -59,12 +60,17 @@ import re
               help='Frame duration metric name.')
 @click.option('--threshold_value', type=float, default=1.05/60,
               help='Threshold for hist_over.')
+@click.option('--show_common_path_prefix', is_flag=True,
+              help='Show common path prefix when applied to multiple files.')
 @click.argument('path', type=click.Path(), nargs=-1)
 def main(print_keys, regexp_match, timeseries, hist, hist_ratio, stdev_hist, plot, stats, precision,
          timeseries_sum, stats_sum, begin_frame, end_frame, path,
          commulative_timeseries, commulative_timeseries_sum, frame_number_name,
-         hist_threshold, threshold_name, threshold_value):
+         hist_threshold, threshold_name, threshold_value, show_common_path_prefix):
     sources = {v: list(read_data(v)) for v in path} if path else {'stdin': list(read_data(None))}
+    if not show_common_path_prefix and len(sources) > 1:
+        longest_common_prefix = os.path.commonprefix(list(sources.keys()))
+        sources = {k.removeprefix(longest_common_prefix): v for k, v in sources.items()}
     keys = collect_unique_keys(sources)
     frames, begin_frame, end_frame = collect_per_frame(
         sources=sources, keys=keys, begin_frame=begin_frame,
