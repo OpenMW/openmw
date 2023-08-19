@@ -6,8 +6,7 @@ namespace Nif
     void NiExtraData::read(NIFStream* nif)
     {
         Extra::read(nif);
-        if (recordSize)
-            nif->getChars(data, recordSize);
+        nif->readVector(data, recordSize);
     }
 
     void NiStringExtraData::read(NIFStream* nif)
@@ -47,17 +46,13 @@ namespace Nif
     {
         Extra::read(nif);
 
-        unsigned int num = nif->getUInt();
-        if (num)
-            nif->getUInts(data, num);
+        nif->readVector(data, nif->getUInt());
     }
 
     void NiBinaryExtraData::read(NIFStream* nif)
     {
         Extra::read(nif);
-        unsigned int size = nif->getUInt();
-        if (size)
-            nif->getChars(data, size);
+        nif->readVector(data, nif->getUInt());
     }
 
     void NiBooleanExtraData::read(NIFStream* nif)
@@ -82,9 +77,7 @@ namespace Nif
     void NiFloatsExtraData::read(NIFStream* nif)
     {
         Extra::read(nif);
-        unsigned int num = nif->getUInt();
-        if (num)
-            nif->getFloats(data, num);
+        nif->readVector(data, nif->getUInt());
     }
 
     void BSBound::read(NIFStream* nif)

@@ -26,287 +26,176 @@ namespace Nif
 
     class Reader;
 
-    template <class T>
-    struct is_arithmetic
-        : std::integral_constant<bool, std::is_arithmetic_v<T> || std::is_same<T, Misc::float16_t>::value>
-    {
-    };
-
     template <std::size_t numInstances, typename T>
-    inline void readLittleEndianBufferOfType(Files::IStreamPtr& pIStream, T* dest)
+    inline void readBufferOfType(Files::IStreamPtr& pIStream, T* dest)
     {
-        static_assert(is_arithmetic<T>(), "Buffer element type is not arithmetic");
+        static_assert(
+            std::is_arithmetic_v<T> || std::is_same_v<T, Misc::float16_t>, "Buffer element type is not arithmetic");
+        static_assert(!std::is_same_v<T, bool>, "Buffer element type is boolean");
         pIStream->read((char*)dest, numInstances * sizeof(T));
         if (pIStream->bad())
-            throw std::runtime_error("Failed to read little endian typed (" + std::string(typeid(T).name())
-                + ") buffer of " + std::to_string(numInstances) + " instances");
+            throw std::runtime_error("Failed to read typed (" + std::string(typeid(T).name()) + ") buffer of "
+                + std::to_string(numInstances) + " instances");
         if constexpr (Misc::IS_BIG_ENDIAN)
             for (std::size_t i = 0; i < numInstances; i++)
                 Misc::swapEndiannessInplace(dest[i]);
+    }
+
+    template <std::size_t numInstances, typename T>
+    inline void readBufferOfType(Files::IStreamPtr& pIStream, T (&dest)[numInstances])
+    {
+        readBufferOfType<numInstances>(pIStream, static_cast<T*>(dest));
     }
 
     template <typename T>
-    inline void readLittleEndianDynamicBufferOfType(Files::IStreamPtr& pIStream, T* dest, std::size_t numInstances)
+    inline void readDynamicBufferOfType(Files::IStreamPtr& pIStream, T* dest, std::size_t numInstances)
     {
-        static_assert(is_arithmetic<T>(), "Buffer element type is not arithmetic");
+        static_assert(
+            std::is_arithmetic_v<T> || std::is_same_v<T, Misc::float16_t>, "Buffer element type is not arithmetic");
+        static_assert(!std::is_same_v<T, bool>, "Buffer element type is boolean");
         pIStream->read((char*)dest, numInstances * sizeof(T));
         if (pIStream->bad())
-            throw std::runtime_error(
-                "Failed to read little endian dynamic buffer of " + std::to_string(numInstances) + " instances");
+            throw std::runtime_error("Failed to read typed (" + std::string(typeid(T).name()) + ") dynamic buffer of "
+                + std::to_string(numInstances) + " instances");
         if constexpr (Misc::IS_BIG_ENDIAN)
             for (std::size_t i = 0; i < numInstances; i++)
                 Misc::swapEndiannessInplace(dest[i]);
-    }
-    template <typename type>
-    type inline readLittleEndianType(Files::IStreamPtr& pIStream)
-    {
-        type val;
-        readLittleEndianBufferOfType<1, type>(pIStream, &val);
-        return val;
     }
 
     class NIFStream
     {
-        const Reader& file;
-
-        /// Input stream
-        Files::IStreamPtr inp;
+        const Reader& mReader;
+        Files::IStreamPtr mStream;
 
     public:
-        explicit NIFStream(const Reader& file, Files::IStreamPtr&& inp)
-            : file(file)
-            , inp(std::move(inp))
+        explicit NIFStream(const Reader& reader, Files::IStreamPtr&& stream)
+            : mReader(reader)
+            , mStream(std::move(stream))
         {
         }
 
-        const Reader& getFile() const { return file; }
-
-        void skip(size_t size) { inp->ignore(size); }
-
-        template <class T>
-        void read(T& data)
-        {
-            data = readLittleEndianType<T>(inp);
-        }
-
-        void read(osg::Vec3f& data) { readLittleEndianBufferOfType<3, float>(inp, data._v); }
-        void read(osg::Vec4f& data) { readLittleEndianBufferOfType<4, float>(inp, data._v); }
-
-        template <class T>
-        T get()
-        {
-            return readLittleEndianType<T>(inp);
-        }
-
-        template <class T>
-        void readVector(std::vector<T>& vec, size_t size)
-        {
-            vec.resize(size);
-            readLittleEndianDynamicBufferOfType<T>(inp, vec.data(), size);
-        }
-
-        template <class T, size_t size>
-        void readArray(std::array<T, size>& arr)
-        {
-            readLittleEndianDynamicBufferOfType<T>(inp, arr.data(), size);
-        }
-
-        // DEPRECATED: Use read() or get() whenever relevant
-        char getChar() { return readLittleEndianType<char>(inp); }
-
-        // DEPRECATED: Use read() or get() whenever relevant
-        short getShort() { return readLittleEndianType<short>(inp); }
-
-        // DEPRECATED: Use read() or get() whenever relevant
-        unsigned short getUShort() { return readLittleEndianType<unsigned short>(inp); }
-
-        // DEPRECATED: Use read() or get() whenever relevant
-        int getInt() { return readLittleEndianType<int>(inp); }
-
-        // DEPRECATED: Use read() or get() whenever relevant
-        unsigned int getUInt() { return readLittleEndianType<unsigned int>(inp); }
-
-        // DEPRECATED: Use read() or get() whenever relevant
-        float getFloat() { return readLittleEndianType<float>(inp); }
-
-        osg::Vec2f getVector2()
-        {
-            osg::Vec2f vec;
-            readLittleEndianBufferOfType<2, float>(inp, vec._v);
-            return vec;
-        }
-
-        // DEPRECATED: Use read() whenever relevant
-        osg::Vec3f getVector3()
-        {
-            osg::Vec3f vec;
-            readLittleEndianBufferOfType<3, float>(inp, vec._v);
-            return vec;
-        }
-
-        osg::Vec4f getVector4()
-        {
-            osg::Vec4f vec;
-            readLittleEndianBufferOfType<4, float>(inp, vec._v);
-            return vec;
-        }
-
-        Matrix3 getMatrix3()
-        {
-            Matrix3 mat;
-            readLittleEndianBufferOfType<9, float>(inp, (float*)&mat.mValues);
-            return mat;
-        }
-
-        osg::Quat getQuaternion();
-
-        Transformation getTrafo();
-
-        bool getBoolean();
-
-        std::string getString();
+        const Reader& getFile() const { return mReader; }
 
         unsigned int getVersion() const;
         unsigned int getUserVersion() const;
         unsigned int getBethVersion() const;
 
-        // Convert human-readable version numbers into a number that can be compared.
+        /// Convert human-readable version numbers into a number that can be compared.
         static constexpr uint32_t generateVersion(uint8_t major, uint8_t minor, uint8_t patch, uint8_t rev)
         {
             return (major << 24) + (minor << 16) + (patch << 8) + rev;
         }
 
-        /// Read in a string of the given length
-        std::string getSizedString(size_t length)
+        void skip(size_t size) { mStream->ignore(size); }
+
+        /// Read into a single instance of type
+        template <class T>
+        void read(T& data)
         {
-            std::string str(length, '\0');
-            inp->read(str.data(), length);
-            if (inp->bad())
-                throw std::runtime_error("Failed to read sized string of " + std::to_string(length) + " chars");
-            size_t end = str.find('\0');
-            if (end != std::string::npos)
-                str.erase(end);
-            return str;
-        }
-        /// Read in a string of the length specified in the file
-        std::string getSizedString()
-        {
-            size_t size = readLittleEndianType<uint32_t>(inp);
-            return getSizedString(size);
+            readBufferOfType<1>(mStream, &data);
         }
 
-        /// Specific to Bethesda headers, uses a byte for length
-        std::string getExportString()
+        /// Read multiple instances of type into an array
+        template <class T, size_t size>
+        void readArray(std::array<T, size>& arr)
         {
-            size_t size = static_cast<size_t>(readLittleEndianType<uint8_t>(inp));
-            return getSizedString(size);
+            readBufferOfType<size>(mStream, arr.data());
         }
 
-        /// This is special since the version string doesn't start with a number, and ends with "\n"
-        std::string getVersionString()
+        /// Read instances of type into a dynamic buffer
+        template <class T>
+        void read(T* dest, size_t size)
         {
-            std::string result;
-            std::getline(*inp, result);
-            if (inp->bad())
-                throw std::runtime_error("Failed to read version string");
-            return result;
+            readDynamicBufferOfType<T>(mStream, dest, size);
         }
+
+        /// Read multiple instances of type into a vector
+        template <class T>
+        void readVector(std::vector<T>& vec, size_t size)
+        {
+            if (size == 0)
+                return;
+            vec.resize(size);
+            read(vec.data(), size);
+        }
+
+        /// Extract an instance of type
+        template <class T>
+        T get()
+        {
+            T data;
+            read(data);
+            return data;
+        }
+
+        /// Read a string of the given length
+        std::string getSizedString(size_t length);
+
+        /// Read a string of the length specified in the file
+        std::string getSizedString() { return getSizedString(get<uint32_t>()); }
+
+        /// Read a list of strings without using the string table, e.g. the string table itself
+        void getSizedStrings(std::vector<std::string>& vec, size_t size);
+
+        /// Read a Bethesda header string that uses a byte for length
+        std::string getExportString() { return getSizedString(get<uint8_t>()); }
+
+        /// Read the version string which doesn't start with a number and ends with "\n"
+        std::string getVersionString();
 
         /// Read a sequence of null-terminated strings
-        std::string getStringPalette()
-        {
-            size_t size = readLittleEndianType<uint32_t>(inp);
-            std::string str(size, '\0');
-            inp->read(str.data(), size);
-            if (inp->bad())
-                throw std::runtime_error("Failed to read string palette of " + std::to_string(size) + " chars");
-            return str;
-        }
+        std::string getStringPalette();
 
-        // DEPRECATED: Use readVector()
-        void getChars(std::vector<char>& vec, size_t size)
-        {
-            vec.resize(size);
-            readLittleEndianDynamicBufferOfType<char>(inp, vec.data(), size);
-        }
-
-        // DEPRECATED: Use readVector()
-        void getUChars(std::vector<unsigned char>& vec, size_t size)
-        {
-            vec.resize(size);
-            readLittleEndianDynamicBufferOfType<unsigned char>(inp, vec.data(), size);
-        }
-
-        // DEPRECATED: Use readVector()
-        void getUShorts(std::vector<unsigned short>& vec, size_t size)
-        {
-            vec.resize(size);
-            readLittleEndianDynamicBufferOfType<unsigned short>(inp, vec.data(), size);
-        }
-
-        // DEPRECATED: Use readVector()
-        void getFloats(std::vector<float>& vec, size_t size)
-        {
-            vec.resize(size);
-            readLittleEndianDynamicBufferOfType<float>(inp, vec.data(), size);
-        }
-
-        // DEPRECATED: Use readVector()
-        void getInts(std::vector<int>& vec, size_t size)
-        {
-            vec.resize(size);
-            readLittleEndianDynamicBufferOfType<int>(inp, vec.data(), size);
-        }
-
-        // DEPRECATED: Use readVector()
-        void getUInts(std::vector<unsigned int>& vec, size_t size)
-        {
-            vec.resize(size);
-            readLittleEndianDynamicBufferOfType<unsigned int>(inp, vec.data(), size);
-        }
-
-        void getVector2s(std::vector<osg::Vec2f>& vec, size_t size)
-        {
-            vec.resize(size);
-            /* The packed storage of each Vec2f is 2 floats exactly */
-            readLittleEndianDynamicBufferOfType<float>(inp, (float*)vec.data(), size * 2);
-        }
-
-        void getVector3s(std::vector<osg::Vec3f>& vec, size_t size)
-        {
-            vec.resize(size);
-            /* The packed storage of each Vec3f is 3 floats exactly */
-            readLittleEndianDynamicBufferOfType<float>(inp, (float*)vec.data(), size * 3);
-        }
-
-        void getVector4s(std::vector<osg::Vec4f>& vec, size_t size)
-        {
-            vec.resize(size);
-            /* The packed storage of each Vec4f is 4 floats exactly */
-            readLittleEndianDynamicBufferOfType<float>(inp, (float*)vec.data(), size * 4);
-        }
-
-        void getQuaternions(std::vector<osg::Quat>& quat, size_t size)
-        {
-            quat.resize(size);
-            for (size_t i = 0; i < quat.size(); i++)
-                quat[i] = getQuaternion();
-        }
-
-        void getStrings(std::vector<std::string>& vec, size_t size)
-        {
-            vec.resize(size);
-            for (size_t i = 0; i < vec.size(); i++)
-                vec[i] = getString();
-        }
-        /// We need to use this when the string table isn't actually initialized.
-        void getSizedStrings(std::vector<std::string>& vec, size_t size)
-        {
-            vec.resize(size);
-            for (size_t i = 0; i < vec.size(); i++)
-                vec[i] = getSizedString();
-        }
+        /// DEPRECATED: Use read() or get()
+        char getChar() { return get<char>(); }
+        short getShort() { return get<short>(); }
+        unsigned short getUShort() { return get<unsigned short>(); }
+        int getInt() { return get<int>(); }
+        unsigned int getUInt() { return get<unsigned int>(); }
+        float getFloat() { return get<float>(); }
+        osg::Vec2f getVector2() { return get<osg::Vec2f>(); }
+        osg::Vec3f getVector3() { return get<osg::Vec3f>(); }
+        osg::Vec4f getVector4() { return get<osg::Vec4f>(); }
+        Matrix3 getMatrix3() { return get<Matrix3>(); }
+        osg::Quat getQuaternion() { return get<osg::Quat>(); }
+        Transformation getTrafo() { return get<Transformation>(); }
+        bool getBoolean() { return get<bool>(); }
+        std::string getString() { return get<std::string>(); }
     };
+
+    template <>
+    void NIFStream::read<osg::Vec2f>(osg::Vec2f& vec);
+    template <>
+    void NIFStream::read<osg::Vec3f>(osg::Vec3f& vec);
+    template <>
+    void NIFStream::read<osg::Vec4f>(osg::Vec4f& vec);
+    template <>
+    void NIFStream::read<Matrix3>(Matrix3& mat);
+    template <>
+    void NIFStream::read<osg::Quat>(osg::Quat& quat);
+    template <>
+    void NIFStream::read<Transformation>(Transformation& t);
+    template <>
+    void NIFStream::read<bool>(bool& data);
+    template <>
+    void NIFStream::read<std::string>(std::string& str);
+
+    template <>
+    void NIFStream::read<osg::Vec2f>(osg::Vec2f* dest, size_t size);
+    template <>
+    void NIFStream::read<osg::Vec3f>(osg::Vec3f* dest, size_t size);
+    template <>
+    void NIFStream::read<osg::Vec4f>(osg::Vec4f* dest, size_t size);
+    template <>
+    void NIFStream::read<Matrix3>(Matrix3* dest, size_t size);
+    template <>
+    void NIFStream::read<osg::Quat>(osg::Quat* dest, size_t size);
+    template <>
+    void NIFStream::read<Transformation>(Transformation* dest, size_t size);
+    template <>
+    void NIFStream::read<bool>(bool* dest, size_t size);
+    template <>
+    void NIFStream::read<std::string>(std::string* dest, size_t size);
 
 }
 

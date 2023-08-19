@@ -53,8 +53,7 @@ namespace Nif
             mOffset = nif->getVector4();
         if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
             nif->getChar(); // MOPP data build type
-        if (size)
-            nif->getChars(mData, size);
+        nif->readVector(mData, size);
     }
 
     void bhkEntityCInfo::read(NIFStream* nif)
@@ -99,18 +98,10 @@ namespace Nif
         mMaterialIndex = nif->getUInt();
         mReference = nif->getUShort();
         mTransformIndex = nif->getUShort();
-        size_t numVertices = nif->getUInt();
-        if (numVertices)
-            nif->getUShorts(mVertices, numVertices);
-        size_t numIndices = nif->getUInt();
-        if (numIndices)
-            nif->getUShorts(mIndices, numIndices);
-        size_t numStrips = nif->getUInt();
-        if (numStrips)
-            nif->getUShorts(mStrips, numStrips);
-        size_t numInfos = nif->getUInt();
-        if (numInfos)
-            nif->getUShorts(mWeldingInfos, numInfos);
+        nif->readVector(mVertices, nif->getUInt());
+        nif->readVector(mIndices, nif->getUInt());
+        nif->readVector(mStrips, nif->getUInt());
+        nif->readVector(mWeldingInfos, nif->getUInt());
     }
 
     void bhkRigidBodyCInfo::read(NIFStream* nif)
@@ -395,8 +386,7 @@ namespace Nif
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             mScale = nif->getVector4();
         readRecordList(nif, mData);
-        unsigned int numFilters = nif->getUInt();
-        nif->getUInts(mFilters, numFilters);
+        nif->readVector(mFilters, nif->getUInt());
     }
 
     void bhkNiTriStripsShape::post(Reader& nif)
@@ -438,7 +428,7 @@ namespace Nif
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS)
             compressed = nif->getBoolean();
         if (!compressed)
-            nif->getVector3s(mVertices, numVertices);
+            nif->readVector(mVertices, numVertices);
         else
             nif->skip(6 * numVertices); // Half-precision vectors are not currently supported
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS)
@@ -465,12 +455,8 @@ namespace Nif
         bhkConvexShape::read(nif);
         mVerticesProperty.read(nif);
         mNormalsProperty.read(nif);
-        unsigned int numVertices = nif->getUInt();
-        if (numVertices)
-            nif->getVector4s(mVertices, numVertices);
-        unsigned int numNormals = nif->getUInt();
-        if (numNormals)
-            nif->getVector4s(mNormals, numNormals);
+        nif->readVector(mVertices, nif->getUInt());
+        nif->readVector(mNormals, nif->getUInt());
     }
 
     void bhkConvexTransformShape::read(NIFStream* nif)
@@ -564,9 +550,7 @@ namespace Nif
         for (bhkQsTransform& transform : mChunkTransforms)
             transform.read(nif);
 
-        size_t numBigVertices = nif->getUInt();
-        if (numBigVertices)
-            nif->getVector4s(mBigVerts, numBigVertices);
+        nif->readVector(mBigVerts, nif->getUInt());
 
         size_t numBigTriangles = nif->getUInt();
         mBigTris.resize(numBigTriangles);

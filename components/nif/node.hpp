@@ -356,7 +356,7 @@ namespace Nif
     struct BSTriShape : Node
     {
         NiBoundingVolume::NiSphereBV mBoundingSphere;
-        std::vector<float> mBoundMinMax;
+        std::array<float, 6> mBoundMinMax;
 
         NiSkinInstancePtr mSkin;
         BSShaderPropertyPtr mShaderProperty;

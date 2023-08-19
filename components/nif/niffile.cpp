@@ -319,28 +319,26 @@ namespace Nif
         if (hasRecTypeListings)
         {
             unsigned short recTypeNum = nif.getUShort();
-            if (recTypeNum) // Record type list
-                nif.getSizedStrings(recTypes, recTypeNum);
-            if (recNum) // Record type mapping for each record
-                nif.getUShorts(recTypeIndices, recNum);
+            // Record type list
+            nif.getSizedStrings(recTypes, recTypeNum);
+            // Record type mapping for each record
+            nif.readVector(recTypeIndices, recNum);
             if (ver >= NIFStream::generateVersion(5, 0, 0, 6)) // Groups
             {
                 if (ver >= NIFStream::generateVersion(20, 1, 0, 1)) // String table
                 {
-                    if (ver >= NIFStream::generateVersion(20, 2, 0, 5) && recNum) // Record sizes
+                    if (ver >= NIFStream::generateVersion(20, 2, 0, 5)) // Record sizes
                     {
                         std::vector<unsigned int> recSizes; // Currently unused
-                        nif.getUInts(recSizes, recNum);
+                        nif.readVector(recSizes, recNum);
                     }
                     const std::size_t stringNum = nif.getUInt();
                     nif.getUInt(); // Max string length
-                    if (stringNum)
-                        nif.getSizedStrings(strings, stringNum);
+                    nif.getSizedStrings(strings, stringNum);
                 }
                 std::vector<unsigned int> groups; // Currently unused
                 unsigned int groupNum = nif.getUInt();
-                if (groupNum)
-                    nif.getUInts(groups, groupNum);
+                nif.readVector(groups, groupNum);
             }
         }
 
