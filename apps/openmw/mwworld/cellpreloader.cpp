@@ -7,6 +7,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/esm3/loadcell.hpp>
 #include <components/loadinglistener/reporter.hpp>
+#include <components/misc/constants.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/lower.hpp>
 #include <components/resource/bulletshapemanager.hpp>
@@ -394,7 +395,7 @@ namespace MWWorld
 
     void CellPreloader::abortTerrainPreloadExcept(const CellPreloader::PositionCellGrid* exceptPos)
     {
-        if (exceptPos && contains(mTerrainPreloadPositions, std::array{ *exceptPos }, ESM::Land::REAL_SIZE))
+        if (exceptPos && contains(mTerrainPreloadPositions, std::array{ *exceptPos }, Constants::CellSizeInUnits))
             return;
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
         {
@@ -437,7 +438,7 @@ namespace MWWorld
     bool CellPreloader::isTerrainLoaded(const CellPreloader::PositionCellGrid& position, double referenceTime) const
     {
         return mLoadedTerrainTimestamp + mResourceSystem->getSceneManager()->getExpiryDelay() > referenceTime
-            && contains(mLoadedTerrainPositions, std::array{ position }, ESM::Land::REAL_SIZE);
+            && contains(mLoadedTerrainPositions, std::array{ position }, Constants::CellSizeInUnits);
     }
 
     void CellPreloader::setTerrain(Terrain::World* terrain)

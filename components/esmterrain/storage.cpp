@@ -8,6 +8,7 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/esm/esmterrain.hpp>
+#include <components/esm3/loadland.hpp>
 #include <components/esm4/loadland.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/strings/algorithm.hpp>
@@ -46,29 +47,20 @@ namespace ESMTerrain
         Map mMap;
     };
 
-    LandObject::LandObject()
-        : mLand(nullptr)
+    LandObject::LandObject(const ESM4::Land& land, int loadFlags)
+        : mData(land, loadFlags)
     {
     }
 
-    LandObject::LandObject(const ESM4::Land* land, int loadFlags)
-        : mLand(nullptr)
-        , mData(*land, loadFlags)
+    LandObject::LandObject(const ESM::Land& land, int loadFlags)
+        : mData(land, loadFlags)
     {
     }
 
-    LandObject::LandObject(const ESM::Land* land, int loadFlags)
-        : mLand(land)
-        , mData(*land, loadFlags)
+    LandObject::LandObject(const LandObject& /*copy*/, const osg::CopyOp& /*copyOp*/)
     {
+        throw std::logic_error("LandObject copy constructor is not implemented");
     }
-
-    LandObject::LandObject(const LandObject& copy, const osg::CopyOp& copyop)
-        : mLand(nullptr)
-    {
-    }
-
-    LandObject::~LandObject() {}
 
     const float defaultHeight = ESM::Land::DEFAULT_HEIGHT;
 
@@ -232,20 +224,29 @@ namespace ESMTerrain
         const osg::Vec2f origin = center - osg::Vec2f(size, size) * 0.5f;
         const int startCellX = static_cast<int>(std::floor(origin.x()));
         const int startCellY = static_cast<int>(std::floor(origin.y()));
-        ESM::ExteriorCellLocation lastCellLocation(startCellX - 1, startCellY - 1, worldspace);
-        const LandObject* land = nullptr;
+        std::pair lastCell{ startCellX, startCellY };
+        const LandObject* land = getLand(ESM::ExteriorCellLocation(startCellX, startCellY, worldspace), cache);
         const ESM::LandData* heightData = nullptr;
         const ESM::LandData* normalData = nullptr;
         const ESM::LandData* colourData = nullptr;
         bool validHeightDataExists = false;
 
+        if (land != nullptr)
+        {
+            heightData = land->getData(ESM::Land::DATA_VHGT);
+            normalData = land->getData(ESM::Land::DATA_VNML);
+            colourData = land->getData(ESM::Land::DATA_VCLR);
+            validHeightDataExists = true;
+        }
+
         const auto handleSample = [&](std::size_t cellShiftX, std::size_t cellShiftY, std::size_t row, std::size_t col,
                                       std::size_t vertX, std::size_t vertY) {
             const int cellX = startCellX + cellShiftX;
             const int cellY = startCellY + cellShiftY;
+            const std::pair cell{ cellX, cellY };
             const ESM::ExteriorCellLocation cellLocation(cellX, cellY, worldspace);
 
-            if (lastCellLocation != cellLocation)
+            if (lastCell != cell)
             {
                 land = getLand(cellLocation, cache);
 
@@ -261,7 +262,7 @@ namespace ESMTerrain
                     validHeightDataExists = true;
                 }
 
-                lastCellLocation = cellLocation;
+                lastCell = cell;
             }
 
             float height = defaultHeight;

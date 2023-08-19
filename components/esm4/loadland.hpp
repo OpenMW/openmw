@@ -49,27 +49,27 @@ namespace ESM4
         };
 
         // number of vertices per side
-        static const int VERTS_PER_SIDE = 33;
+        static constexpr unsigned sVertsPerSide = 33;
 
         // cell terrain size in world coords
-        static const int REAL_SIZE = 4096;
+        static constexpr unsigned sRealSize = 4096;
 
         // total number of vertices
-        static const int LAND_NUM_VERTS = VERTS_PER_SIDE * VERTS_PER_SIDE;
+        static constexpr unsigned sLandNumVerts = sVertsPerSide * sVertsPerSide;
 
-        static const int HEIGHT_SCALE = 8;
+        static constexpr unsigned sHeightScale = 8;
 
         // number of textures per side of a land quadrant
         // (for TES4 - based on vanilla observations)
-        static const int QUAD_TEXTURE_PER_SIDE = 6;
+        static constexpr unsigned sQuadTexturePerSide = 6;
 
 #pragma pack(push, 1)
         struct VHGT
         {
             float heightOffset;
-            std::int8_t gradientData[VERTS_PER_SIDE * VERTS_PER_SIDE];
+            std::int8_t gradientData[sVertsPerSide * sVertsPerSide];
             std::uint16_t unknown1;
-            unsigned char unknown2;
+            std::uint8_t unknown2;
         };
 
         struct BTXT
@@ -117,19 +117,20 @@ namespace ESM4
         // FIXME: lazy loading not yet implemented
         int mDataTypes; // which data types are loaded
 
-        float mHeights[VERTS_PER_SIDE * VERTS_PER_SIDE]; // Float value of compressed Heightmap
-        float mMinHeight, mMaxHeight;
-        signed char mVertNorm[VERTS_PER_SIDE * VERTS_PER_SIDE * 3]; // from VNML subrecord
-        unsigned char mVertColr[VERTS_PER_SIDE * VERTS_PER_SIDE * 3]; // from VCLR subrecord
+        float mHeights[sVertsPerSide * sVertsPerSide]; // Float value of compressed Heightmap
+        std::int8_t mVertNorm[sVertsPerSide * sVertsPerSide * 3]; // from VNML subrecord
+        std::uint8_t mVertColr[sVertsPerSide * sVertsPerSide * 3]; // from VCLR subrecord
         VHGT mHeightMap;
         Texture mTextures[4]; // 0 = bottom left, 1 = bottom right, 2 = top left, 3 = top right
         std::vector<ESM::FormId> mIds; // land texture (LTEX) formids
         ESM::FormId mCell;
+
         void load(Reader& reader);
-        Land() = default;
+
         // void save(Writer& writer) const;
 
         // void blank();
+
         static constexpr ESM::RecNameInts sRecordId = ESM::REC_LAND4;
     };
 }

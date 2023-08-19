@@ -117,7 +117,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
                 if (currentAddQuad != -1)
                 {
                     // FIXME: sometimes there are no VTXT following an ATXT?  Just add a dummy one for now
-                    Log(Debug::Verbose) << "ESM4::Land VTXT empty layer " << (int)layer.texture.layerIndex;
+                    Log(Debug::Verbose) << "ESM4::Land VTXT empty layer " << layer.texture.layerIndex;
                     mTextures[currentAddQuad].layers.push_back(layer);
                 }
                 reader.get(layer.texture);
@@ -149,7 +149,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
                 if (currentAddQuad == -1)
                     throw std::runtime_error("VTXT without ATXT found");
 
-                int count = (int)reader.subRecordHeader().dataSize / sizeof(ESM4::Land::VTXT);
+                const std::uint16_t count = reader.subRecordHeader().dataSize / sizeof(ESM4::Land::VTXT);
                 if ((reader.subRecordHeader().dataSize % sizeof(ESM4::Land::VTXT)) != 0)
                     throw std::runtime_error("ESM4::LAND VTXT data size error");
 
@@ -179,7 +179,7 @@ void ESM4::Land::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_VTEX: // only in Oblivion?
             {
-                int count = (int)reader.subRecordHeader().dataSize / sizeof(ESM::FormId32);
+                const std::uint16_t count = reader.subRecordHeader().dataSize / sizeof(ESM::FormId32);
                 if ((reader.subRecordHeader().dataSize % sizeof(ESM::FormId32)) != 0)
                     throw std::runtime_error("ESM4::LAND VTEX data size error");
 
@@ -202,8 +202,8 @@ void ESM4::Land::load(ESM4::Reader& reader)
     if (currentAddQuad != -1)
     {
         // FIXME: not sure if it happens here as well
-        Log(Debug::Verbose) << "ESM4::Land VTXT empty layer " << (int)layer.texture.layerIndex << " quad "
-                            << (int)layer.texture.quadrant;
+        Log(Debug::Verbose) << "ESM4::Land VTXT empty layer " << layer.texture.layerIndex << " quad "
+                            << static_cast<unsigned>(layer.texture.quadrant);
         mTextures[currentAddQuad].layers.push_back(layer);
     }
 

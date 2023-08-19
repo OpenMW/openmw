@@ -37,11 +37,6 @@ namespace ESM
     class ESMWriter;
 }
 
-namespace ESM4
-{
-    struct Land;
-}
-
 namespace Loading
 {
     class Listener;
