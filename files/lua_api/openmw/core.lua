@@ -739,9 +739,12 @@
 -- @field #number magnitudeBase
 -- @field #number magnitudeModifier
 
+--- @{#Sound}: Sounds and Speech
+-- @field [parent=#core] #Sound sound
+
 ---
 -- Play a 3D sound, attached to object
--- @function [parent=#core] playSound3d
+-- @function [parent=#Sound] playSound3d
 -- @param #string soundId ID of Sound record to play
 -- @param #GameObject object Object to which we attach the sound
 -- @param #table options An optional table with additional optional arguments. Can contain:
@@ -760,7 +763,7 @@
 
 ---
 -- Play a 3D sound file, attached to object
--- @function [parent=#core] playSoundFile3d
+-- @function [parent=#Sound] playSoundFile3d
 -- @param #string fileName Path to sound file in VFS
 -- @param #GameObject object Object to which we attach the sound
 -- @param #table options An optional table with additional optional arguments. Can contain:
@@ -779,21 +782,21 @@
 
 ---
 -- Stop a 3D sound, attached to object
--- @function [parent=#core] stopSound3d
+-- @function [parent=#Sound] stopSound3d
 -- @param #string soundId ID of Sound record to stop
 -- @param #GameObject object Object on which we want to stop sound
 -- @usage core.sound.stopSound("shock bolt", object);
 
 ---
 -- Stop a 3D sound file, attached to object
--- @function [parent=#core] stopSoundFile3d
+-- @function [parent=#Sound] stopSoundFile3d
 -- @param #string fileName Path to sound file in VFS
 -- @param #GameObject object Object on which we want to stop sound
 -- @usage core.sound.stopSoundFile("Sound\\test.mp3", object);
 
 ---
 -- Check if sound is playing on given object
--- @function [parent=#core] isSoundPlaying
+-- @function [parent=#Sound] isSoundPlaying
 -- @param #string soundId ID of Sound record to check
 -- @param #GameObject object Object on which we want to check sound
 -- @return #boolean
@@ -801,7 +804,7 @@
 
 ---
 -- Check if sound file is playing on given object
--- @function [parent=#core] isSoundFilePlaying
+-- @function [parent=#Sound] isSoundFilePlaying
 -- @param #string fileName Path to sound file in VFS
 -- @param #GameObject object Object on which we want to check sound
 -- @return #boolean
@@ -812,7 +815,7 @@
 --
 --   * With an "object" argument: play sound for given object, with speaking animation if possible equipment slots.
 --   * Without an "object" argument: play sound globally, without object
--- @function [parent=#core] say
+-- @function [parent=#Sound] say
 -- @param #string fileName Path to sound file in VFS
 -- @param #GameObject object Object on which we want to play an animated voiceover (optional)
 -- @param #string text Subtitle text (optional)
@@ -827,7 +830,7 @@
 
 ---
 -- Stop animated voiceover
--- @function [parent=#core] stopSay
+-- @function [parent=#Sound] stopSay
 -- @param #string fileName Path to sound file in VFS
 -- @param #GameObject object Object on which we want to stop an animated voiceover (optional)
 -- @usage -- stop voice for given object
@@ -837,7 +840,7 @@
 
 ---
 -- Check if animated voiceover is playing
--- @function [parent=#core] isSayActive
+-- @function [parent=#Sound] isSayActive
 -- @param #GameObject object Object on which we want to check an animated voiceover (optional)
 -- @return #boolean
 -- @usage -- check voice for given object
@@ -846,15 +849,15 @@
 -- local isActive = isSayActive();
 
 ---
--- @type Sound
+-- @type SoundRecord
 -- @field #string id Sound id
 -- @field #string fileName Normalized path to sound file in VFS
 -- @field #number volume Raw sound volume, from 0 to 255
 -- @field #number minRange Raw minimal range value, from 0 to 255
 -- @field #number maxRange Raw maximal range value, from 0 to 255
 
---- List of all @{#Sound}s.
--- @field [parent=#Sound] #list<#Sound> sounds
+--- List of all @{#SoundRecord}s.
+-- @field [parent=#Sound] #list<#SoundRecord> sounds
 -- @usage local sound = core.sound.sounds['Ashstorm']  -- get by id
 -- @usage local sound = core.sound.sounds[1]  -- get by index
 -- @usage -- Print all sound files paths
