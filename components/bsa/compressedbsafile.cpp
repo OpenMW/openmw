@@ -50,76 +50,6 @@
 
 namespace Bsa
 {
-    // special marker for invalid records,
-    // equal to max uint32_t value
-    const uint32_t CompressedBSAFile::sInvalidOffset = std::numeric_limits<uint32_t>::max();
-
-    // bit marking compression on file size
-    const uint32_t CompressedBSAFile::sCompressedFlag = 1u << 30u;
-
-    CompressedBSAFile::FileRecord::FileRecord()
-        : size(0)
-        , offset(sInvalidOffset)
-    {
-    }
-
-    bool CompressedBSAFile::FileRecord::isValid() const
-    {
-        return offset != sInvalidOffset;
-    }
-
-    bool CompressedBSAFile::FileRecord::isCompressed(bool bsaCompressedByDefault) const
-    {
-        bool recordCompressionFlagEnabled = ((size & sCompressedFlag) == sCompressedFlag);
-
-        // record is compressed when:
-        //- bsaCompressedByDefault flag is set and 30th bit is NOT set, or
-        //- bsaCompressedByDefault flag is NOT set and 30th bit is set
-        // record is NOT compressed when:
-        //- bsaCompressedByDefault flag is NOT set and 30th bit is NOT set, or
-        //- bsaCompressedByDefault flag is set and 30th bit is set
-        return (bsaCompressedByDefault != recordCompressionFlagEnabled);
-    }
-
-    std::uint32_t CompressedBSAFile::FileRecord::getSizeWithoutCompressionFlag() const
-    {
-        return size & (~sCompressedFlag);
-    }
-
-    void CompressedBSAFile::getBZString(std::string& str, std::istream& filestream)
-    {
-        char size = 0;
-        filestream.read(&size, 1);
-
-        auto buf = std::vector<char>(size);
-        filestream.read(buf.data(), size);
-
-        if (buf[size - 1] != 0)
-        {
-            str.assign(buf.data(), size);
-            if (str.size() != ((size_t)size))
-            {
-                fail("getBZString string size mismatch");
-            }
-        }
-        else
-        {
-            str.assign(buf.data(), size - 1); // don't copy null terminator
-            if (str.size() != ((size_t)size - 1))
-            {
-                fail("getBZString string size mismatch (null terminator)");
-            }
-        }
-    }
-
-    CompressedBSAFile::CompressedBSAFile()
-        : mCompressedByDefault(false)
-        , mEmbeddedFileNames(false)
-    {
-    }
-
-    CompressedBSAFile::~CompressedBSAFile() = default;
-
     /// Read header information from the input source
     void CompressedBSAFile::readHeader()
     {
@@ -135,177 +65,138 @@ namespace Bsa
             input.seekg(0);
         }
 
-        if (fsize < 36) // header is 36 bytes
+        if (fsize < 36) // Header is 36 bytes
             fail("File too small to be a valid BSA archive");
 
-        // Get essential header numbers
-        // size_t dirsize, filenum;
-        std::uint32_t archiveFlags, folderCount, totalFileNameLength;
+        input.read(reinterpret_cast<char*>(&mHeader), sizeof(mHeader));
+
+        if (mHeader.mFormat != BSAVER_COMPRESSED) // BSA
+            fail("Unrecognized compressed BSA format");
+        if (mHeader.mVersion != Version_TES4 && mHeader.mVersion != Version_FO3 && mHeader.mVersion != Version_SSE)
+            fail("Unrecognized compressed BSA version");
+
+        if (mHeader.mVersion == Version_TES4)
+            mHeader.mFlags &= (~ArchiveFlag_EmbeddedNames);
+
+        input.seekg(mHeader.mFoldersOffset);
+        if (input.bad())
+            fail("Invalid compressed BSA folder record offset");
+
+        struct FlatFolderRecord
         {
-            // First 36 bytes
-            std::uint32_t header[9];
+            std::uint64_t mHash;
+            std::string mName;
+            std::uint32_t mCount;
+            std::int64_t mOffset;
+        };
 
-            input.read(reinterpret_cast<char*>(header), 36);
-
-            if (header[0] != 0x00415342) /*"BSA\x00"*/
-                fail("Unrecognized compressed BSA format");
-            mVersion = header[1];
-            if (mVersion != 0x67 /*TES4*/ && mVersion != 0x68 /*FO3, FNV, TES5*/ && mVersion != 0x69 /*SSE*/)
-                fail("Unrecognized compressed BSA version");
-
-            // header[2] is offset, should be 36 = 0x24 which is the size of the header
-
-            // Oblivion - Meshes.bsa
-            //
-            // 0111 1000 0111 = 0x0787
-            //  ^^^ ^     ^^^
-            //  ||| |     ||+-- has names for dirs  (mandatory?)
-            //  ||| |     |+--- has names for files (mandatory?)
-            //  ||| |     +---- files are compressed by default
-            //  ||| |
-            //  ||| +---------- unknown (TES5: retain strings during startup)
-            //  ||+------------ unknown (TES5: embedded file names)
-            //  |+------------- unknown
-            //  +-------------- unknown
-            //
-            archiveFlags = header[3];
-            folderCount = header[4];
-            // header[5] - fileCount
-            // totalFolderNameLength = header[6];
-            totalFileNameLength = header[7];
-            // header[8]; // fileFlags : an opportunity to optimize here
-
-            mCompressedByDefault = (archiveFlags & 0x4) != 0;
-            if (mVersion == 0x68 || mVersion == 0x69) /*FO3, FNV, TES5, SSE*/
-                mEmbeddedFileNames = (archiveFlags & 0x100) != 0;
-        }
-
-        // folder records
-        std::uint64_t hash;
-        FolderRecord fr;
-        for (std::uint32_t i = 0; i < folderCount; ++i)
+        std::vector<std::pair<FlatFolderRecord, std::vector<FileRecord>>> folders;
+        folders.resize(mHeader.mFolderCount);
+        for (auto& [folder, filelist] : folders)
         {
-            input.read(reinterpret_cast<char*>(&hash), 8);
-            input.read(reinterpret_cast<char*>(&fr.count), 4); // not sure purpose of count
-            if (mVersion == 0x69) // SSE
+            input.read(reinterpret_cast<char*>(&folder.mHash), 8);
+            input.read(reinterpret_cast<char*>(&folder.mCount), 4);
+            if (mHeader.mVersion == Version_SSE) // SSE
             {
-                std::uint32_t unknown;
+                std::uint32_t unknown = 0;
                 input.read(reinterpret_cast<char*>(&unknown), 4);
-                input.read(reinterpret_cast<char*>(&fr.offset), 8);
+                input.read(reinterpret_cast<char*>(&folder.mOffset), 8);
             }
             else
-                input.read(reinterpret_cast<char*>(&fr.offset), 4); // not sure purpose of offset
-
-            auto lb = mFolders.lower_bound(hash);
-            if (lb != mFolders.end() && !(mFolders.key_comp()(hash, lb->first)))
-                fail("Archive found duplicate folder name hash");
-            else
-                mFolders.insert(lb, std::pair<std::uint64_t, FolderRecord>(hash, fr));
+            {
+                input.read(reinterpret_cast<char*>(&folder.mOffset), 4);
+            }
         }
 
+        if (input.bad())
+            fail("Failed to read compressed BSA folder records: input error");
+
         // file record blocks
-        std::uint64_t fileHash;
-        FileRecord file;
+        if ((mHeader.mFlags & ArchiveFlag_FolderNames) == 0)
+            mHeader.mFolderCount = 1; // TODO: not tested - unit test necessary
 
-        std::string folder;
-        std::uint64_t folderHash;
-        if ((archiveFlags & 0x1) == 0)
-            folderCount = 1; // TODO: not tested - unit test necessary
-
-        mFiles.clear();
-        std::vector<std::string> fullPaths;
-
-        for (std::uint32_t i = 0; i < folderCount; ++i)
+        for (auto& [folder, filelist] : folders)
         {
-            if ((archiveFlags & 0x1) != 0)
-                getBZString(folder, input);
-
-            folderHash = generateHash(folder, {});
-
-            auto iter = mFolders.find(folderHash);
-            if (iter == mFolders.end())
-                fail("Archive folder name hash not found");
-
-            for (std::uint32_t j = 0; j < iter->second.count; ++j)
+            if ((mHeader.mFlags & ArchiveFlag_FolderNames) != 0)
             {
-                input.read(reinterpret_cast<char*>(&fileHash), 8);
-                input.read(reinterpret_cast<char*>(&file.size), 4);
-                input.read(reinterpret_cast<char*>(&file.offset), 4);
+                uint8_t size = 0;
+                input.read(reinterpret_cast<char*>(&size), 1);
+                if (size > 0)
+                {
+                    folder.mName.resize(size);
+                    input.getline(folder.mName.data(), size, '\0');
+                    if (input.gcount() != static_cast<std::streamsize>(size))
+                        fail("Folder name size mismatch: " + std::to_string(input.gcount()) + " bytes read, expected "
+                            + std::to_string(size));
+                    if (mHeader.mFolderNamesLength < size)
+                        fail("Failed to read folder names: " + std::to_string(mHeader.mFolderNamesLength) + " < "
+                            + std::to_string(size));
+                    folder.mName.resize(size - 1);
+                }
+                mHeader.mFolderNamesLength -= size;
+            }
 
-                auto lb = iter->second.files.lower_bound(fileHash);
-                if (lb != iter->second.files.end() && !(iter->second.files.key_comp()(fileHash, lb->first)))
-                    fail("Archive found duplicate file name hash");
+            filelist.resize(folder.mCount);
+            for (auto& file : filelist)
+            {
+                input.read(reinterpret_cast<char*>(&file.mHash), 8);
+                input.read(reinterpret_cast<char*>(&file.mSize), 4);
+                input.read(reinterpret_cast<char*>(&file.mOffset), 4);
+            }
+        }
+        if (mHeader.mFolderNamesLength != 0)
+            fail("Failed to read folder names: " + std::to_string(mHeader.mFolderNamesLength) + " bytes remaining");
 
-                iter->second.files.insert(lb, std::pair<std::uint64_t, FileRecord>(fileHash, file));
+        if (input.bad())
+            fail("Failed to read compressed BSA file records: input error");
 
+        if ((mHeader.mFlags & ArchiveFlag_FileNames) != 0)
+        {
+            for (auto& [folder, filelist] : folders)
+            {
+                for (auto& file : filelist)
+                {
+                    auto& name = file.mName;
+                    name.resize(256);
+                    input.getline(name.data(), 256, '\0');
+                    if (input.gcount() <= 1)
+                        fail("Failed to read a filename: filename is empty");
+                    if (mHeader.mFileNamesLength < input.gcount())
+                        fail("Failed to read file names: " + std::to_string(mHeader.mFileNamesLength) + " < "
+                            + std::to_string(input.gcount()));
+                    name.resize(input.gcount());
+                    if (name.back() != '\0')
+                        fail("Failed to read a filename: filename is too long");
+                    mHeader.mFileNamesLength -= input.gcount();
+                    file.mName.insert(file.mName.begin(), folder.mName.begin(), folder.mName.end());
+                    file.mName.insert(file.mName.begin() + folder.mName.size(), '\\');
+                }
+            }
+
+            if (input.bad())
+                fail("Failed to read compressed BSA filenames: input error");
+        }
+
+        if (mHeader.mFileNamesLength != 0)
+            fail("Failed to read file names: " + std::to_string(mHeader.mFileNamesLength) + " bytes remaining");
+
+        for (auto& [folder, filelist] : folders)
+        {
+            std::map<std::uint64_t, FileRecord> fileMap;
+            for (const auto& file : filelist)
+                fileMap[file.mHash] = std::move(file);
+            auto& folderMap = mFolders[folder.mHash];
+            folderMap = FolderRecord{ folder.mCount, folder.mOffset, std::move(fileMap) };
+            for (auto& [hash, fileRec] : folderMap.mFiles)
+            {
                 FileStruct fileStruct{};
-                fileStruct.fileSize = file.getSizeWithoutCompressionFlag();
-                fileStruct.offset = file.offset;
-                mFiles.push_back(fileStruct);
-
-                fullPaths.push_back(folder);
+                fileStruct.fileSize = fileRec.mSize & (~FileSizeFlag_Compression);
+                fileStruct.offset = fileRec.mOffset;
+                fileStruct.setNameInfos(0, &fileRec.mName);
+                mFiles.emplace_back(fileStruct);
             }
         }
 
-        // file record blocks
-        if ((archiveFlags & 0x2) != 0)
-        {
-            mStringBuf.resize(totalFileNameLength);
-            input.read(mStringBuf.data(), mStringBuf.size()); // TODO: maybe useful in building a lookup map?
-        }
-
-        size_t mStringBuffOffset = 0;
-        size_t totalStringsSize = 0;
-        for (std::uint32_t fileIndex = 0; fileIndex < mFiles.size(); ++fileIndex)
-        {
-
-            if (mStringBuffOffset >= totalFileNameLength)
-            {
-                fail("Corrupted names record in BSA file");
-            }
-
-            // The vector guarantees that its elements occupy contiguous memory
-            mFiles[fileIndex].setNameInfos(mStringBuffOffset, &mStringBuf);
-
-            fullPaths.at(fileIndex) += "\\" + std::string(mStringBuf.data() + mStringBuffOffset);
-
-            while (mStringBuffOffset < totalFileNameLength)
-            {
-                if (mStringBuf[mStringBuffOffset] != '\0')
-                {
-                    mStringBuffOffset++;
-                }
-                else
-                {
-                    mStringBuffOffset++;
-                    break;
-                }
-            }
-            // we want to keep one more 0 character at the end of each string
-            totalStringsSize += fullPaths.at(fileIndex).length() + 1u;
-        }
-        mStringBuf.resize(totalStringsSize);
-
-        mStringBuffOffset = 0;
-        for (std::uint32_t fileIndex = 0u; fileIndex < mFiles.size(); fileIndex++)
-        {
-            size_t stringLength = fullPaths.at(fileIndex).length();
-
-            std::copy(fullPaths.at(fileIndex).c_str(),
-                // plus 1 because we also want to copy 0 at the end of the string
-                fullPaths.at(fileIndex).c_str() + stringLength + 1u, mStringBuf.data() + mStringBuffOffset);
-
-            mFiles[fileIndex].setNameInfos(mStringBuffOffset, &mStringBuf);
-
-            mStringBuffOffset += stringLength + 1u;
-        }
-
-        if (mStringBuffOffset != mStringBuf.size())
-        {
-            fail("Could not resolve names of files in BSA file");
-        }
-
-        convertCompressedSizesToUncompressed();
         mIsLoaded = true;
     }
 
@@ -337,12 +228,12 @@ namespace Bsa
 
         auto it = mFolders.find(folderHash);
         if (it == mFolders.end())
-            return FileRecord(); // folder not found, return default which has offset of sInvalidOffset
+            return FileRecord();
 
         std::uint64_t fileHash = generateHash(stem, ext);
-        auto iter = it->second.files.find(fileHash);
-        if (iter == it->second.files.end())
-            return FileRecord(); // file not found, return default which has offset of sInvalidOffset
+        auto iter = it->second.mFiles.find(fileHash);
+        if (iter == it->second.mFiles.end())
+            return FileRecord();
 
         return iter->second;
     }
@@ -350,7 +241,7 @@ namespace Bsa
     Files::IStreamPtr CompressedBSAFile::getFile(const FileStruct* file)
     {
         FileRecord fileRec = getFileRecord(file->name());
-        if (!fileRec.isValid())
+        if (fileRec.mOffset == std::numeric_limits<uint32_t>::max())
         {
             fail("File not found: " + std::string(file->name()));
         }
@@ -366,7 +257,7 @@ namespace Bsa
     Files::IStreamPtr CompressedBSAFile::getFile(const char* file)
     {
         FileRecord fileRec = getFileRecord(file);
-        if (!fileRec.isValid())
+        if (fileRec.mOffset == std::numeric_limits<uint32_t>::max())
         {
             fail("File not found: " + std::string(file));
         }
@@ -375,46 +266,45 @@ namespace Bsa
 
     Files::IStreamPtr CompressedBSAFile::getFile(const FileRecord& fileRecord)
     {
-        size_t size = fileRecord.getSizeWithoutCompressionFlag();
-        size_t uncompressedSize = size;
-        bool compressed = fileRecord.isCompressed(mCompressedByDefault);
-        Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, fileRecord.offset, size);
-        std::istream* fileStream = streamPtr.get();
-        if (mEmbeddedFileNames)
+        size_t size = fileRecord.mSize & (~FileSizeFlag_Compression);
+        size_t resultSize = size;
+        Files::IStreamPtr streamPtr = Files::openConstrainedFileStream(mFilepath, fileRecord.mOffset, size);
+        bool compressed = (fileRecord.mSize != size) == ((mHeader.mFlags & ArchiveFlag_Compress) == 0);
+        if ((mHeader.mFlags & ArchiveFlag_EmbeddedNames) != 0)
         {
             // Skip over the embedded file name
-            char length = 0;
-            fileStream->read(&length, 1);
-            fileStream->ignore(length);
-            size -= length + sizeof(char);
+            uint8_t length = 0;
+            streamPtr->read(reinterpret_cast<char*>(&length), 1);
+            streamPtr->ignore(length);
+            size -= length + sizeof(uint8_t);
         }
         if (compressed)
         {
-            fileStream->read(reinterpret_cast<char*>(&uncompressedSize), sizeof(uint32_t));
+            streamPtr->read(reinterpret_cast<char*>(&resultSize), sizeof(uint32_t));
             size -= sizeof(uint32_t);
         }
-        auto memoryStreamPtr = std::make_unique<MemoryInputStream>(uncompressedSize);
+        auto memoryStreamPtr = std::make_unique<MemoryInputStream>(resultSize);
 
         if (compressed)
         {
-            if (mVersion != 0x69) // Non-SSE: zlib
+            if (mHeader.mVersion != Version_SSE)
             {
                 boost::iostreams::filtering_streambuf<boost::iostreams::input> inputStreamBuf;
                 inputStreamBuf.push(boost::iostreams::zlib_decompressor());
-                inputStreamBuf.push(*fileStream);
+                inputStreamBuf.push(*streamPtr);
 
-                boost::iostreams::basic_array_sink<char> sr(memoryStreamPtr->getRawData(), uncompressedSize);
+                boost::iostreams::basic_array_sink<char> sr(memoryStreamPtr->getRawData(), resultSize);
                 boost::iostreams::copy(inputStreamBuf, sr);
             }
-            else // SSE: lz4
+            else
             {
                 auto buffer = std::vector<char>(size);
-                fileStream->read(buffer.data(), size);
+                streamPtr->read(buffer.data(), size);
                 LZ4F_decompressionContext_t context = nullptr;
                 LZ4F_createDecompressionContext(&context, LZ4F_VERSION);
                 LZ4F_decompressOptions_t options = {};
                 LZ4F_errorCode_t errorCode = LZ4F_decompress(
-                    context, memoryStreamPtr->getRawData(), &uncompressedSize, buffer.data(), &size, &options);
+                    context, memoryStreamPtr->getRawData(), &resultSize, buffer.data(), &size, &options);
                 if (LZ4F_isError(errorCode))
                     fail("LZ4 decompression error (file " + Files::pathToUnicodeString(mFilepath)
                         + "): " + LZ4F_getErrorName(errorCode));
@@ -426,40 +316,10 @@ namespace Bsa
         }
         else
         {
-            fileStream->read(memoryStreamPtr->getRawData(), size);
+            streamPtr->read(memoryStreamPtr->getRawData(), size);
         }
 
         return std::make_unique<Files::StreamWithBuffer<MemoryInputStream>>(std::move(memoryStreamPtr));
-    }
-
-    // mFiles used by OpenMW expects uncompressed sizes
-    void CompressedBSAFile::convertCompressedSizesToUncompressed()
-    {
-        for (auto& mFile : mFiles)
-        {
-            const FileRecord& fileRecord = getFileRecord(mFile.name());
-            if (!fileRecord.isValid())
-            {
-                fail("Could not find file " + std::string(mFile.name()) + " in BSA");
-            }
-
-            if (!fileRecord.isCompressed(mCompressedByDefault))
-            {
-                // no need to fix fileSize in mFiles - uncompressed size already set
-                continue;
-            }
-
-            Files::IStreamPtr dataBegin = Files::openConstrainedFileStream(
-                mFilepath, fileRecord.offset, fileRecord.getSizeWithoutCompressionFlag());
-
-            if (mEmbeddedFileNames)
-            {
-                std::string embeddedFileName;
-                getBZString(embeddedFileName, *(dataBegin.get()));
-            }
-
-            dataBegin->read(reinterpret_cast<char*>(&(mFile.fileSize)), sizeof(mFile.fileSize));
-        }
     }
 
     std::uint64_t CompressedBSAFile::generateHash(const std::filesystem::path& stem, std::string extension)
