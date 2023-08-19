@@ -104,6 +104,7 @@ namespace MWSound
         Sound_Output* mOutput;
         std::deque<Sound_Buffer> mSoundBuffers;
         std::unordered_map<ESM::RefId, Sound_Buffer*> mBufferNameMap;
+        std::unordered_map<std::string, Sound_Buffer*> mBufferFileNameMap;
         std::size_t mBufferCacheMax;
         std::size_t mBufferCacheMin;
         std::size_t mBufferCacheSize = 0;
