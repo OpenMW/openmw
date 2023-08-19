@@ -355,18 +355,26 @@ namespace MWWorld
     template <class T, class Id>
     RecordId TypedDynamicStore<T, Id>::read(ESM::ESMReader& reader, bool overrideOnly)
     {
-        T record;
-        bool isDeleted = false;
         if constexpr (!ESM::isESM4Rec(T::sRecordId))
         {
+            T record;
+            bool isDeleted = false;
             record.load(reader, isDeleted);
-        }
-        insert(record, overrideOnly);
 
-        if constexpr (std::is_same_v<Id, ESM::RefId>)
-            return RecordId(record.mId, isDeleted);
+            insert(record, overrideOnly);
+
+            if constexpr (std::is_same_v<Id, ESM::RefId>)
+                return RecordId(record.mId, isDeleted);
+            else
+                return RecordId();
+        }
         else
-            return RecordId();
+        {
+            std::stringstream msg;
+            msg << "Can not load record of type ESM::REC_" << getRecNameString(T::sRecordId).toStringView()
+                << ": ESM::ESMReader can load only ESM3 records.";
+            throw std::runtime_error(msg.str());
+        }
     }
 
     // LandTexture
