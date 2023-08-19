@@ -417,7 +417,7 @@ namespace MWLua
                         destPtr = dest.as<GObject>().ptr();
                     else
                         destPtr = LuaUtil::cast<Inventory<GObject>>(dest).mObj.ptr();
-                    destPtr.getContainerStore(); // raises an error if there is no container store
+                    destPtr.getClass().getContainerStore(destPtr); // raises an error if there is no container store
 
                     std::optional<DelayedRemovalFn> delayedRemovalFn = removeFn(ptr, count);
                     context.mLuaManager->addAction([item = object, count, cont = GObject(destPtr), delayedRemovalFn] {
