@@ -151,7 +151,7 @@ namespace MWMechanics
             for (const ESM::Attribute& attribute : esmStore.get<ESM::Attribute>())
             {
                 const ESM::Race::MaleFemale& value
-                    = race->mData.mAttributeValues[ESM::Attribute::refIdToIndex(attribute.mId)];
+                    = race->mData.mAttributeValues[static_cast<size_t>(ESM::Attribute::refIdToIndex(attribute.mId))];
 
                 creatureStats.setAttribute(attribute.mId, male ? value.mMale : value.mFemale);
             }
