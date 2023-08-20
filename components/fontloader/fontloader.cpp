@@ -610,18 +610,26 @@ namespace Gui
 
     void FontLoader::overrideLineHeight(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version)
     {
+        // We should adjust line height for MyGUI widgets depending on font size
         MyGUI::xml::ElementEnumerator resourceNode = _node->getElementEnumerator();
         while (resourceNode.next("Resource"))
         {
             std::string type = resourceNode->findAttribute("type");
 
-            if (Misc::StringUtils::ciEqual(type, "ResourceSkin")
-                || Misc::StringUtils::ciEqual(type, "AutoSizedResourceSkin"))
+            if (Misc::StringUtils::ciEqual(type, "ResourceLayout"))
             {
-                // We should adjust line height for MyGUI widgets depending on font size
-                MyGUI::xml::ElementPtr heightNode = resourceNode->createChild("Property");
-                heightNode->addAttribute("key", "HeightLine");
-                heightNode->addAttribute("value", std::to_string(Settings::gui().mFontSize + 2));
+                MyGUI::xml::ElementEnumerator resourceRootNode = resourceNode->getElementEnumerator();
+                while (resourceRootNode.next("Widget"))
+                {
+                    if (resourceRootNode->findAttribute("name") != "Root")
+                        continue;
+
+                    MyGUI::xml::ElementPtr heightNode = resourceRootNode->createChild("UserString");
+                    heightNode->addAttribute("key", "HeightLine");
+                    heightNode->addAttribute("value", std::to_string(Settings::gui().mFontSize + 2));
+
+                    break;
+                }
             }
         }
 
