@@ -149,8 +149,8 @@ namespace MWGui
 
         void pushGuiMode(GuiMode mode, const MWWorld::Ptr& arg) override;
         void pushGuiMode(GuiMode mode) override;
-        void popGuiMode(bool noSound = false) override;
-        void removeGuiMode(GuiMode mode, bool noSound = false) override; ///< can be anywhere in the stack
+        void popGuiMode() override;
+        void removeGuiMode(GuiMode mode) override; ///< can be anywhere in the stack
 
         void goToJail(int days) override;
 
@@ -488,9 +488,6 @@ namespace MWGui
             void update(bool visible);
 
             std::vector<WindowBase*> mWindows;
-
-            ESM::RefId mCloseSound;
-            ESM::RefId mOpenSound;
         };
         // Defines the windows that should be shown in a particular GUI mode.
         std::map<GuiMode, GuiModeState> mGuiModeStates;

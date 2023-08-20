@@ -17,13 +17,13 @@ Examples:
 UI events
 ---------
 
-Every time UI mode is changed built-in scripts send to player the event ``UiModeChanged`` with arguments ``mode`` (same as ``I.UI.getMode()``)
+Every time UI mode is changed built-in scripts send to player the event ``UiModeChanged`` with arguments ``oldMode, ``newMode`` (same as ``I.UI.getMode()``)
 and ``arg`` (for example in the mode ``Book`` the argument is the book the player is reading).
 
 .. code-block:: Lua
 
     eventHandlers = {
         UiModeChanged = function(data)
-            print('UiModeChanged to', data.mode, '('..tostring(data.arg)..')')
+            print('UiModeChanged from', data.oldMode , 'to', data.newMode, '('..tostring(data.arg)..')')
         end
     }

@@ -107,6 +107,6 @@ namespace MWGui
         MWWorld::ActionTake take(mScroll);
         take.execute(MWMechanics::getPlayer());
 
-        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll, true);
+        MWBase::Environment::get().getWindowManager()->removeGuiMode(GM_Scroll);
     }
 }

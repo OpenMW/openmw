@@ -1,6 +1,7 @@
 local ui = require('openmw.ui')
 local util = require('openmw.util')
 local self = require('openmw.self')
+local ambient = require('openmw.ambient')
 
 local MODE = ui._getAllUiModes()
 local WINDOW = ui._getAllWindowIds()
@@ -91,6 +92,7 @@ local function removeMode(mode)
     end
 end
 
+local oldMode = nil
 local function onUiModeChanged(arg)
     local newStack = ui._getUiModeStack()
     for i = 1, math.max(#modeStack, #newStack) do
@@ -112,7 +114,27 @@ local function onUiModeChanged(arg)
             end
         end
     end
-    self:sendEvent('UiModeChanged', {mode = mode, arg = arg})
+    self:sendEvent('UiModeChanged', {oldMode = oldMode, newMode = mode, arg = arg})
+    oldMode = mode
+end
+
+local function onUiModeChangedEvent(data)
+    if data.oldMode == data.newMode then
+        return
+    end
+    -- Sounds are processed in the event handler rather than in engine handler
+    -- in order to allow them to be overridden in mods.
+    if data.newMode == MODE.Journal or data.newMode == MODE.Book then
+        ambient.playSound('book open', {scale = false})
+    elseif data.oldMode == MODE.Journal or data.oldMode == MODE.Book then
+        if not ambient.isSoundPlaying('item book up') then
+            ambient.playSound('book close', {scale = false})
+        end
+    elseif data.newMode == MODE.Scroll or data.oldMode == MODE.Scroll then
+        if not ambient.isSoundPlaying('item book up') then
+            ambient.playSound('scroll', {scale = false})
+        end
+    end
 end
 
 return {
@@ -191,5 +213,8 @@ return {
     },
     engineHandlers = {
         _onUiModeChanged = onUiModeChanged,
+    },
+    eventHandlers = {
+        UiModeChanged = onUiModeChangedEvent,
     },
 }

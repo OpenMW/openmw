@@ -119,9 +119,9 @@ namespace MWBase
 
         virtual void pushGuiMode(MWGui::GuiMode mode, const MWWorld::Ptr& arg) = 0;
         virtual void pushGuiMode(MWGui::GuiMode mode) = 0;
-        virtual void popGuiMode(bool noSound = false) = 0;
+        virtual void popGuiMode() = 0;
 
-        virtual void removeGuiMode(MWGui::GuiMode mode, bool noSound = false) = 0;
+        virtual void removeGuiMode(MWGui::GuiMode mode) = 0;
         ///< can be anywhere in the stack
 
         virtual void goToJail(int days) = 0;
