@@ -3,6 +3,8 @@
 #include "esmreader.hpp"
 #include "esmwriter.hpp"
 
+#include <cstdint>
+
 namespace ESM
 {
 
@@ -12,8 +14,9 @@ namespace ESM
 
         mLocals.load(esm);
 
-        mRunning = 0;
-        esm.getHNOT(mRunning, "RUN_");
+        int32_t running = 0;
+        esm.getHNOT(running, "RUN_");
+        mRunning = running != 0;
 
         mTargetRef = RefNum{};
         mTargetId = esm.getHNORefId("TARG");
@@ -33,7 +36,7 @@ namespace ESM
         mLocals.save(esm);
 
         if (mRunning)
-            esm.writeHNT("RUN_", mRunning);
+            esm.writeHNT("RUN_", int32_t{ 1 });
 
         if (!mTargetId.empty())
         {

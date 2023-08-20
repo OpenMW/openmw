@@ -28,7 +28,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("BKDT"):
-                    esm.getHTSized<20>(mData);
+                    esm.getHT(mData.mWeight, mData.mValue, mData.mIsScroll, mData.mSkillId, mData.mEnchant);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):

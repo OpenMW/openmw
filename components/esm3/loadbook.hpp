@@ -3,6 +3,8 @@
 
 #include "components/esm/defs.hpp"
 #include "components/esm/refid.hpp"
+
+#include <cstdint>
 #include <string>
 
 namespace ESM
@@ -24,12 +26,12 @@ namespace ESM
         struct BKDTstruct
         {
             float mWeight;
-            int mValue, mIsScroll, mSkillId, mEnchant;
+            int32_t mValue, mIsScroll, mSkillId, mEnchant;
         };
 
         BKDTstruct mData;
         std::string mName, mModel, mIcon, mText;
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId;
         RefId mScript, mEnchant;
 

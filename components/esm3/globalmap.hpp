@@ -1,6 +1,7 @@
 #ifndef OPENMW_COMPONENTS_ESM_GLOBALMAP_H
 #define OPENMW_COMPONENTS_ESM_GLOBALMAP_H
 
+#include <cstdint>
 #include <set>
 #include <vector>
 
@@ -21,7 +22,7 @@ namespace ESM
         // The minimum and maximum cell coordinates
         struct Bounds
         {
-            int mMinX, mMaxX, mMinY, mMaxY;
+            int32_t mMinX, mMaxX, mMinY, mMaxY;
         };
 
         Bounds mBounds;

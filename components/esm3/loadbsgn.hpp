@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_BSGN_H
 #define OPENMW_ESM_BSGN_H
 
+#include <cstdint>
 #include <string>
 
 #include "components/esm/defs.hpp"
@@ -20,7 +21,7 @@ namespace ESM
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
         static std::string_view getRecordType() { return "BirthSign"; }
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId;
         std::string mName, mDescription, mTexture;
 

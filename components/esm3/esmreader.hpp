@@ -362,7 +362,7 @@ namespace ESM
         void setEncoder(ToUTF8::Utf8Encoder* encoder) { mEncoder = encoder; }
 
         /// Get record flags of last record
-        unsigned int getRecordFlags() { return mRecordFlags; }
+        uint32_t getRecordFlags() { return mRecordFlags; }
 
         size_t getFileSize() const { return mFileSize; }
 
@@ -380,7 +380,7 @@ namespace ESM
 
         ESM_Context mCtx;
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
 
         // Special file signifier (see SpecialFile enum above)
 

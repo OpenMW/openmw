@@ -36,7 +36,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("ALDT"):
-                    esm.getHTSized<12>(mData);
+                    esm.getHT(mData.mWeight, mData.mValue, mData.mAutoCalc);
                     hasData = true;
                     break;
                 case fourCC("ENAM"):

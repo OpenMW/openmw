@@ -30,7 +30,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("CTDT"):
-                    esm.getHTSized<12>(mData);
+                    esm.getHT(mData.mType, mData.mWeight, mData.mValue, mData.mEnchant);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):

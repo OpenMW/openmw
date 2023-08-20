@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_ARMO_H
 #define OPENMW_ESM_ARMO_H
 
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -90,15 +91,15 @@ namespace ESM
 
         struct AODTstruct
         {
-            int mType;
+            int32_t mType;
             float mWeight;
-            int mValue, mHealth, mEnchant, mArmor;
+            int32_t mValue, mHealth, mEnchant, mArmor;
         };
 
         AODTstruct mData;
         PartReferenceList mParts;
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId, mScript, mEnchant;
         std::string mName, mModel, mIcon;
 

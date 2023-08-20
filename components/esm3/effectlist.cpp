@@ -18,7 +18,7 @@ namespace ESM
     void EffectList::add(ESMReader& esm)
     {
         ENAMstruct s;
-        esm.getHTSized<24>(s);
+        esm.getHT(s.mEffectID, s.mSkill, s.mAttribute, s.mRange, s.mArea, s.mDuration, s.mMagnMin, s.mMagnMax);
         mList.push_back(s);
     }
 

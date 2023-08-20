@@ -28,7 +28,7 @@ namespace ESM
                     mRace = esm.getRefId();
                     break;
                 case fourCC("BYDT"):
-                    esm.getHTSized<4>(mData);
+                    esm.getHT(mData.mPart, mData.mVampire, mData.mFlags, mData.mType);
                     hasData = true;
                     break;
                 case SREC_DELE:

@@ -2,6 +2,7 @@
 #define OPENMW_ESM_CLAS_H
 
 #include <array>
+#include <cstdint>
 #include <string>
 
 #include "components/esm/defs.hpp"
@@ -34,20 +35,20 @@ namespace ESM
 
         struct CLDTstruct
         {
-            std::array<int, 2> mAttribute; // Attributes that get class bonus
-            int mSpecialization; // 0 = Combat, 1 = Magic, 2 = Stealth
-            std::array<std::array<int, 2>, 5> mSkills; // Minor and major skills.
-            int mIsPlayable; // 0x0001 - Playable class
-            int mServices;
+            std::array<int32_t, 2> mAttribute; // Attributes that get class bonus
+            int32_t mSpecialization; // 0 = Combat, 1 = Magic, 2 = Stealth
+            std::array<std::array<int32_t, 2>, 5> mSkills; // Minor and major skills.
+            int32_t mIsPlayable; // 0x0001 - Playable class
+            int32_t mServices;
 
-            int& getSkill(int index, bool major);
+            int32_t& getSkill(int index, bool major);
             ///< Throws an exception for invalid values of \a index.
 
-            int getSkill(int index, bool major) const;
+            int32_t getSkill(int index, bool major) const;
             ///< Throws an exception for invalid values of \a index.
         }; // 60 bytes
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         std::string mName, mDescription;
         RefId mId;
         CLDTstruct mData;

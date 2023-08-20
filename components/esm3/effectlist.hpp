@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_EFFECTLIST_H
 #define OPENMW_ESM_EFFECTLIST_H
 
+#include <cstdint>
 #include <vector>
 
 namespace ESM
@@ -17,15 +18,15 @@ namespace ESM
     struct ENAMstruct
     {
         // Magical effect, hard-coded ID
-        short mEffectID;
+        int16_t mEffectID;
 
         // Which skills/attributes are affected (for restore/drain spells
         // etc.)
         signed char mSkill, mAttribute; // -1 if N/A
 
         // Other spell parameters
-        int mRange; // 0 - self, 1 - touch, 2 - target (RangeType enum)
-        int mArea, mDuration, mMagnMin, mMagnMax;
+        int32_t mRange; // 0 - self, 1 - touch, 2 - target (RangeType enum)
+        int32_t mArea, mDuration, mMagnMin, mMagnMax;
     };
 #pragma pack(pop)
 

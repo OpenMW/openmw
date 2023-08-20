@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_CLOT_H
 #define OPENMW_ESM_CLOT_H
 
+#include <cstdint>
 #include <string>
 
 #include "components/esm/defs.hpp"
@@ -40,16 +41,16 @@ namespace ESM
 
         struct CTDTstruct
         {
-            int mType;
+            int32_t mType;
             float mWeight;
-            unsigned short mValue;
-            unsigned short mEnchant;
+            uint16_t mValue;
+            uint16_t mEnchant;
         };
         CTDTstruct mData;
 
         PartReferenceList mParts;
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId, mEnchant, mScript;
         std::string mModel, mIcon, mName;
 
