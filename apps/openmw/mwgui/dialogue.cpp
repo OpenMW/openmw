@@ -446,7 +446,7 @@ namespace MWGui
 
     void DialogueWindow::setPtr(const MWWorld::Ptr& actor)
     {
-        if (!actor.getClass().isActor())
+        if (actor.isEmpty() || !actor.getClass().isActor())
         {
             Log(Debug::Warning) << "Warning: can not talk with non-actor object.";
             return;

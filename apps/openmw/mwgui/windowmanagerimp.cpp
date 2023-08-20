@@ -1278,8 +1278,17 @@ namespace MWGui
         }
         if (force)
             mContainerWindow->treatNextOpenAsLoot();
-        for (WindowBase* window : mGuiModeStates[mode].mWindows)
-            window->setPtr(arg);
+
+        try
+        {
+            for (WindowBase* window : mGuiModeStates[mode].mWindows)
+                window->setPtr(arg);
+        }
+        catch (...)
+        {
+            popGuiMode();
+            throw;
+        }
 
         mKeyboardNavigation->restoreFocus(mode);
 

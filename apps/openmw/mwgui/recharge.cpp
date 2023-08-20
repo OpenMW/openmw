@@ -56,6 +56,9 @@ namespace MWGui
 
     void Recharge::setPtr(const MWWorld::Ptr& item)
     {
+        if (item.isEmpty() || !item.getClass().isItem(item))
+            throw std::runtime_error("Invalid argument in Recharge::setPtr");
+
         mGemIcon->setItem(item);
         mGemIcon->setUserString("ToolTipType", "ItemPtr");
         mGemIcon->setUserData(MWWorld::Ptr(item));

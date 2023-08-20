@@ -42,6 +42,8 @@ namespace MWGui
 
     void ScrollWindow::setPtr(const MWWorld::Ptr& scroll)
     {
+        if (scroll.isEmpty() || scroll.getType() != ESM::REC_BOOK)
+            throw std::runtime_error("Invalid argument in ScrollWindow::setPtr");
         mScroll = scroll;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();

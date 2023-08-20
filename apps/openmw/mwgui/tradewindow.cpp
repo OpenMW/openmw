@@ -102,6 +102,8 @@ namespace MWGui
 
     void TradeWindow::setPtr(const MWWorld::Ptr& actor)
     {
+        if (actor.isEmpty() || !actor.getClass().isActor())
+            throw std::runtime_error("Invalid argument in TradeWindow::setPtr");
         mPtr = actor;
 
         mCurrentBalance = 0;

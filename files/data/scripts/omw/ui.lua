@@ -51,18 +51,29 @@ local function updateHidden(mode, options)
 end
 
 local function setMode(mode, options)
-    if mode then
+    local function impl()
         updateHidden(mode, options)
         ui._setUiModeStack({mode}, options and options.target)
+    end
+    if mode then
+        if not pcall(impl) then
+            error('Invalid mode: ' .. tostring(mode))
+        end
     else
         ui._setUiModeStack({})
     end
 end
 
 local function addMode(mode, options)
-    updateHidden(mode, options)
+    local function impl()
+        updateHidden(mode, options)
+        ui._setUiModeStack(modeStack, options and options.target)
+    end
     modeStack[#modeStack + 1] = mode
-    ui._setUiModeStack(modeStack, options and options.target)
+    if not pcall(impl) then
+        modeStack[#modeStack] = nil
+        error('Invalid mode: ' .. tostring(mode))
+    end
 end
 
 local function removeMode(mode)
@@ -180,8 +191,5 @@ return {
     },
     engineHandlers = {
         _onUiModeChanged = onUiModeChanged,
-    },
-    eventHandlers = {
-        UiModeChanged = function() end,
     },
 }

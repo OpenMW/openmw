@@ -121,6 +121,8 @@ namespace MWGui
 
     void CompanionWindow::setPtr(const MWWorld::Ptr& npc)
     {
+        if (npc.isEmpty() || npc.getType() != ESM::REC_NPC_)
+            throw std::runtime_error("Invalid argument in CompanionWindow::setPtr");
         mPtr = npc;
         updateEncumbranceBar();
         auto model = std::make_unique<CompanionItemModel>(npc);
