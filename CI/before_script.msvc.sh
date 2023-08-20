@@ -1044,7 +1044,7 @@ printf "zlib 1.2.11... "
 	fi
 	add_cmake_opts -DZLIB_ROOT="$(real_pwd)/zlib-1.2.11-msvc2017-win64"
 	for config in ${CONFIGURATIONS[@]}; do
-		if [ $CONFIGURATION == "Debug" ]; then
+		if [ $config == "Debug" ]; then
 			add_runtime_dlls $config "$(pwd)/zlib-1.2.11-msvc2017-win64/bin/zlibd.dll"
 		else
 			add_runtime_dlls $config "$(pwd)/zlib-1.2.11-msvc2017-win64/bin/zlib.dll"
