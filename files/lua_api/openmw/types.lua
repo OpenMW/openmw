@@ -688,6 +688,7 @@
 -- @field #string mwscript
 -- @field #number soulValue The soul value of the creature record
 -- @field #number type The @{#Creature.TYPE} of the creature
+-- @field #number baseGold The base barter gold of the creature
 
 
 --- @{#NPC} functions
@@ -727,6 +728,7 @@
 -- @field #string mwscript MWScript that is attached to this NPC
 -- @field #string hair Path to the hair body part model
 -- @field #string head Path to the head body part model
+-- @field #number baseGold The base barter gold of the NPC
 -- @field #bool isMale The gender setting of the NPC
 
 
