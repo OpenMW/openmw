@@ -61,6 +61,13 @@ namespace sol
 namespace MWLua
 {
 
+    static void checkGameInitialized(LuaUtil::LuaState* lua)
+    {
+        if (MWBase::Environment::get().getStateManager()->getState() == MWBase::StateManager::State_NoGame)
+            throw std::runtime_error(
+                "This function cannot be used until the game is fully initialized.\n" + lua->debugTraceback());
+    }
+
     static void addTimeBindings(sol::table& api, const Context& context, bool global)
     {
         MWWorld::DateTimeManager* timeManager = MWBase::Environment::get().getWorld()->getTimeManager();
@@ -243,7 +250,8 @@ namespace MWLua
         api["mwscript"] = initMWScriptBindings(context);
         api["activeActors"] = GObjectList{ objectLists->getActorsInScene() };
         api["players"] = GObjectList{ objectLists->getPlayers() };
-        api["createObject"] = [](std::string_view recordId, sol::optional<int> count) -> GObject {
+        api["createObject"] = [lua = context.mLua](std::string_view recordId, sol::optional<int> count) -> GObject {
+            checkGameInitialized(lua);
             MWWorld::ManualRef mref(*MWBase::Environment::get().getESMStore(), ESM::RefId::deserializeText(recordId));
             const MWWorld::Ptr& ptr = mref.getPtr();
             ptr.getRefData().disable();
@@ -260,25 +268,32 @@ namespace MWLua
 
         // Creates a new record in the world database.
         api["createRecord"] = sol::overload(
-            [](const ESM::Activator& activator) -> const ESM::Activator* {
+            [lua = context.mLua](const ESM::Activator& activator) -> const ESM::Activator* {
+                checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(activator);
             },
-            [](const ESM::Armor& armor) -> const ESM::Armor* {
+            [lua = context.mLua](const ESM::Armor& armor) -> const ESM::Armor* {
+                checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(armor);
             },
-            [](const ESM::Clothing& clothing) -> const ESM::Clothing* {
+            [lua = context.mLua](const ESM::Clothing& clothing) -> const ESM::Clothing* {
+                checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(clothing);
             },
-            [](const ESM::Book& book) -> const ESM::Book* {
+            [lua = context.mLua](const ESM::Book& book) -> const ESM::Book* {
+                checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(book);
             },
-            [](const ESM::Miscellaneous& misc) -> const ESM::Miscellaneous* {
+            [lua = context.mLua](const ESM::Miscellaneous& misc) -> const ESM::Miscellaneous* {
+                checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(misc);
             },
-            [](const ESM::Potion& potion) -> const ESM::Potion* {
+            [lua = context.mLua](const ESM::Potion& potion) -> const ESM::Potion* {
+                checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(potion);
             },
-            [](const ESM::Weapon& weapon) -> const ESM::Weapon* {
+            [lua = context.mLua](const ESM::Weapon& weapon) -> const ESM::Weapon* {
+                checkGameInitialized(lua);
                 return MWBase::Environment::get().getESMStore()->insert(weapon);
             });
 
