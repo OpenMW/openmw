@@ -119,9 +119,9 @@ namespace MWBase
 
         virtual void pushGuiMode(MWGui::GuiMode mode, const MWWorld::Ptr& arg) = 0;
         virtual void pushGuiMode(MWGui::GuiMode mode) = 0;
-        virtual void popGuiMode(bool noSound = false) = 0;
+        virtual void popGuiMode() = 0;
 
-        virtual void removeGuiMode(MWGui::GuiMode mode, bool noSound = false) = 0;
+        virtual void removeGuiMode(MWGui::GuiMode mode) = 0;
         ///< can be anywhere in the stack
 
         virtual void goToJail(int days) = 0;
@@ -378,6 +378,12 @@ namespace MWBase
 
         /// Same as viewer->getCamera()->getCullMask(), provided for consistency.
         virtual uint32_t getCullMask() = 0;
+
+        // Used in Lua bindings
+        virtual const std::vector<MWGui::GuiMode>& getGuiModeStack() const = 0;
+        virtual void setDisabledByLua(std::string_view windowId, bool disabled) = 0;
+        virtual std::vector<std::string_view> getAllWindowIds() const = 0;
+        virtual std::vector<std::string_view> getAllowedWindowIds(MWGui::GuiMode mode) const = 0;
     };
 }
 

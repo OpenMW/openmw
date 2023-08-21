@@ -580,7 +580,7 @@ namespace MWDialogue
 
     void DialogueManager::applyBarterDispositionChange(int delta)
     {
-        if (mActor.getClass().isNpc())
+        if (!mActor.isEmpty() && mActor.getClass().isNpc())
         {
             updateOriginalDisposition();
             mCurrentDisposition += delta;

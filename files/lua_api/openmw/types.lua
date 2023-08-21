@@ -752,6 +752,12 @@
 -- @return #number
 
 ---
+-- Whether the character generation for this player is finished.
+-- @function [parent=#Player] isCharGenFinished
+-- @param openmw.core#GameObject player
+-- @return #boolean
+
+---
 -- Returns a list containing quests @{#PlayerQuest} for the specified player, indexed by quest ID.
 -- @function [parent=#Player] quests
 -- @param openmw.core#GameObject player

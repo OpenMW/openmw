@@ -83,6 +83,8 @@ namespace MWGui
 
     void BookWindow::setPtr(const MWWorld::Ptr& book)
     {
+        if (book.isEmpty() || book.getType() != ESM::REC_BOOK)
+            throw std::runtime_error("Invalid argument in BookWindow::setPtr");
         mBook = book;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();

@@ -226,10 +226,6 @@ namespace
 
         void onOpen() override
         {
-            if (!MWBase::Environment::get().getWindowManager()->getJournalAllowed())
-            {
-                MWBase::Environment::get().getWindowManager()->popGuiMode();
-            }
             mModel->load();
 
             setBookMode();

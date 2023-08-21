@@ -88,6 +88,9 @@ namespace MWGui
 
     void SpellBuyingWindow::setPtr(const MWWorld::Ptr& actor, int startOffset)
     {
+        if (actor.isEmpty() || !actor.getClass().isActor())
+            throw std::runtime_error("Invalid argument in SpellBuyingWindow::setPtr");
+
         center();
         mPtr = actor;
         clearSpells();

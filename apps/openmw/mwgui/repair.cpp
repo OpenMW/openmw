@@ -56,6 +56,9 @@ namespace MWGui
 
     void Repair::setPtr(const MWWorld::Ptr& item)
     {
+        if (item.isEmpty() || !item.getClass().isItem(item))
+            throw std::runtime_error("Invalid argument in Repair::setPtr");
+
         MWBase::Environment::get().getWindowManager()->playSound(ESM::RefId::stringRefId("Item Repair Up"));
 
         mRepair.setTool(item);

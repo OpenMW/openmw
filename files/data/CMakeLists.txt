@@ -89,6 +89,7 @@ set(BUILTIN_DATA_FILES
     scripts/omw/mwui/textEdit.lua
     scripts/omw/mwui/space.lua
     scripts/omw/mwui/init.lua
+    scripts/omw/ui.lua
 
     shaders/adjustments.omwfx
     shaders/bloomlinear.omwfx

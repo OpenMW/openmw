@@ -53,6 +53,8 @@ namespace MWGui
 
     void TrainingWindow::setPtr(const MWWorld::Ptr& actor)
     {
+        if (actor.isEmpty() || !actor.getClass().isActor())
+            throw std::runtime_error("Invalid argument in TrainingWindow::setPtr");
         mPtr = actor;
 
         MWWorld::Ptr player = MWMechanics::getPlayer();

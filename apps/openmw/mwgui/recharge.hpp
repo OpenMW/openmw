@@ -26,6 +26,8 @@ namespace MWGui
 
         void setPtr(const MWWorld::Ptr& gem) override;
 
+        std::string_view getWindowIdForLua() const override { return "Recharge"; }
+
     protected:
         ItemChargeView* mBox;
 

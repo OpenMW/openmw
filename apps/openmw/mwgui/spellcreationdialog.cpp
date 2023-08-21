@@ -364,6 +364,9 @@ namespace MWGui
 
     void SpellCreationDialog::setPtr(const MWWorld::Ptr& actor)
     {
+        if (actor.isEmpty() || !actor.getClass().isActor())
+            throw std::runtime_error("Invalid argument in SpellCreationDialog::setPtr");
+
         mPtr = actor;
         mNameEdit->setCaption({});
 

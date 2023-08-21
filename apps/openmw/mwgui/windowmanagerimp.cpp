@@ -360,8 +360,6 @@ namespace MWGui
         bool questList = mResourceSystem->getVFS()->exists("textures/tx_menubook_options_over.dds");
         auto journal = JournalWindow::create(JournalViewModel::create(), questList, mEncoding);
         mGuiModeStates[GM_Journal] = GuiModeState(journal.get());
-        mGuiModeStates[GM_Journal].mCloseSound = ESM::RefId::stringRefId("book close");
-        mGuiModeStates[GM_Journal].mOpenSound = ESM::RefId::stringRefId("book open");
         mWindows.push_back(std::move(journal));
 
         mMessageBoxManager = std::make_unique<MessageBoxManager>(
@@ -398,15 +396,11 @@ namespace MWGui
         mScrollWindow = scrollWindow.get();
         mWindows.push_back(std::move(scrollWindow));
         mGuiModeStates[GM_Scroll] = GuiModeState(mScrollWindow);
-        mGuiModeStates[GM_Scroll].mOpenSound = ESM::RefId::stringRefId("scroll");
-        mGuiModeStates[GM_Scroll].mCloseSound = ESM::RefId::stringRefId("scroll");
 
         auto bookWindow = std::make_unique<BookWindow>();
         mBookWindow = bookWindow.get();
         mWindows.push_back(std::move(bookWindow));
         mGuiModeStates[GM_Book] = GuiModeState(mBookWindow);
-        mGuiModeStates[GM_Book].mOpenSound = ESM::RefId::stringRefId("book open");
-        mGuiModeStates[GM_Book].mCloseSound = ESM::RefId::stringRefId("book close");
 
         auto countDialog = std::make_unique<CountDialog>();
         mCountDialog = countDialog.get();
@@ -525,6 +519,13 @@ namespace MWGui
         mStatsWatcher->addListener(mHud);
         mStatsWatcher->addListener(mStatsWindow);
         mStatsWatcher->addListener(mCharGen.get());
+
+        for (auto& window : mWindows)
+        {
+            std::string_view id = window->getWindowIdForLua();
+            if (!id.empty())
+                mLuaIdToWindow.emplace(id, window.get());
+        }
     }
 
     void WindowManager::setNewGame(bool newgame)
@@ -1267,16 +1268,25 @@ namespace MWGui
             mGuiModes.push_back(mode);
 
             mGuiModeStates[mode].update(true);
-            playSound(mGuiModeStates[mode].mOpenSound);
         }
         if (force)
             mContainerWindow->treatNextOpenAsLoot();
-        for (WindowBase* window : mGuiModeStates[mode].mWindows)
-            window->setPtr(arg);
+
+        try
+        {
+            for (WindowBase* window : mGuiModeStates[mode].mWindows)
+                window->setPtr(arg);
+        }
+        catch (...)
+        {
+            popGuiMode();
+            throw;
+        }
 
         mKeyboardNavigation->restoreFocus(mode);
 
         updateVisible();
+        MWBase::Environment::get().getLuaManager()->uiModeChanged(arg);
     }
 
     void WindowManager::setCullMask(uint32_t mask)
@@ -1294,7 +1304,7 @@ namespace MWGui
         return mViewer->getCamera()->getCullMask();
     }
 
-    void WindowManager::popGuiMode(bool noSound)
+    void WindowManager::popGuiMode()
     {
         if (mDragAndDrop && mDragAndDrop->mIsOnDragAndDrop)
         {
@@ -1307,8 +1317,7 @@ namespace MWGui
             mKeyboardNavigation->saveFocus(mode);
             mGuiModes.pop_back();
             mGuiModeStates[mode].update(false);
-            if (!noSound)
-                playSound(mGuiModeStates[mode].mCloseSound);
+            MWBase::Environment::get().getLuaManager()->uiModeChanged(MWWorld::Ptr());
         }
 
         if (!mGuiModes.empty())
@@ -1325,11 +1334,11 @@ namespace MWGui
             mConsole->onOpen();
     }
 
-    void WindowManager::removeGuiMode(GuiMode mode, bool noSound)
+    void WindowManager::removeGuiMode(GuiMode mode)
     {
         if (!mGuiModes.empty() && mGuiModes.back() == mode)
         {
-            popGuiMode(noSound);
+            popGuiMode();
             return;
         }
 
@@ -1343,6 +1352,7 @@ namespace MWGui
         }
 
         updateVisible();
+        MWBase::Environment::get().getLuaManager()->uiModeChanged(MWWorld::Ptr());
     }
 
     void WindowManager::goToJail(int days)
@@ -1748,7 +1758,10 @@ namespace MWGui
         mPlayerBounty = -1;
 
         for (const auto& window : mWindows)
+        {
             window->clear();
+            window->setDisabledByLua(false);
+        }
 
         if (mLocalMapRender)
             mLocalMapRender->clear();
@@ -2333,5 +2346,46 @@ namespace MWGui
     void WindowManager::asyncPrepareSaveMap()
     {
         mMap->asyncPrepareSaveMap();
+    }
+
+    void WindowManager::setDisabledByLua(std::string_view windowId, bool disabled)
+    {
+        mLuaIdToWindow.at(windowId)->setDisabledByLua(disabled);
+        updateVisible();
+    }
+
+    std::vector<std::string_view> WindowManager::getAllWindowIds() const
+    {
+        std::vector<std::string_view> res;
+        for (const auto& [id, _] : mLuaIdToWindow)
+            res.push_back(id);
+        return res;
+    }
+
+    std::vector<std::string_view> WindowManager::getAllowedWindowIds(GuiMode mode) const
+    {
+        std::vector<std::string_view> res;
+        if (mode == GM_Inventory)
+        {
+            if (mAllowed & GW_Map)
+                res.push_back(mMap->getWindowIdForLua());
+            if (mAllowed & GW_Inventory)
+                res.push_back(mInventoryWindow->getWindowIdForLua());
+            if (mAllowed & GW_Magic)
+                res.push_back(mSpellWindow->getWindowIdForLua());
+            if (mAllowed & GW_Stats)
+                res.push_back(mStatsWindow->getWindowIdForLua());
+        }
+        else
+        {
+            auto it = mGuiModeStates.find(mode);
+            if (it != mGuiModeStates.end())
+            {
+                for (const auto* w : it->second.mWindows)
+                    if (!w->getWindowIdForLua().empty())
+                        res.push_back(w->getWindowIdForLua());
+            }
+        }
+        return res;
     }
 }

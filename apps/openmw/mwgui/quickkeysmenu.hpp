@@ -44,6 +44,8 @@ namespace MWGui
         void readRecord(ESM::ESMReader& reader, uint32_t type);
         void clear() override;
 
+        std::string_view getWindowIdForLua() const override { return "QuickKeys"; }
+
     private:
         struct keyData
         {

@@ -28,17 +28,14 @@ namespace MWInput
         bool checkAllowedToUseItems() const;
 
         void toggleMainMenu();
-        void toggleInventory();
         void toggleConsole();
         void screenshot();
-        void toggleJournal();
         void activate();
         void rest();
         void quickLoad();
         void quickSave();
 
         void quickKey(int index);
-        void showQuickKeysMenu();
 
         void resetIdleTime();
         float getIdleTime() const { return mTimeIdle; }

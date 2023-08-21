@@ -297,11 +297,7 @@ namespace LuaUtil
     {
         auto it = mEventHandlers.find(eventName);
         if (it == mEventHandlers.end())
-        {
-            Log(Debug::Warning) << mNamePrefix << " has received event '" << eventName
-                                << "', but there are no handlers for this event";
             return;
-        }
         sol::object data;
         try
         {

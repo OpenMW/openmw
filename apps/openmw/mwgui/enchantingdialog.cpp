@@ -139,6 +139,9 @@ namespace MWGui
 
     void EnchantingDialog::setPtr(const MWWorld::Ptr& ptr)
     {
+        if (ptr.isEmpty() || (ptr.getType() != ESM::REC_MISC && !ptr.getClass().isActor()))
+            throw std::runtime_error("Invalid argument in EnchantingDialog::setPtr");
+
         mName->setCaption({});
 
         if (ptr.getClass().isActor())

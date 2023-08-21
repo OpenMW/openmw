@@ -30,6 +30,8 @@ namespace MWGui
         void onFrame(float dt) override;
         void clear() override { resetReference(); }
 
+        std::string_view getWindowIdForLua() const override { return "Companion"; }
+
     private:
         ItemView* mItemView;
         SortFilterItemModel* mSortModel;

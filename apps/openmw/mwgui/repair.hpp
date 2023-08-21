@@ -23,6 +23,8 @@ namespace MWGui
 
         void setPtr(const MWWorld::Ptr& item) override;
 
+        std::string_view getWindowIdForLua() const override { return "Repair"; }
+
     protected:
         ItemChargeView* mRepairBox;
 

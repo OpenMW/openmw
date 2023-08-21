@@ -112,6 +112,9 @@ namespace MWGui
 
     void TravelWindow::setPtr(const MWWorld::Ptr& actor)
     {
+        if (actor.isEmpty() || !actor.getClass().isActor())
+            throw std::runtime_error("Invalid argument in TravelWindow::setPtr");
+
         center();
         mPtr = actor;
         clearDestinations();

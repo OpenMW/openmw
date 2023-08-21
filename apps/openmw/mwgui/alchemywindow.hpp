@@ -30,6 +30,8 @@ namespace MWGui
 
         void onResChange(int, int) override { center(); }
 
+        std::string_view getWindowIdForLua() const override { return "Alchemy"; }
+
     private:
         static const float sCountChangeInitialPause; // in seconds
         static const float sCountChangeInterval; // in seconds

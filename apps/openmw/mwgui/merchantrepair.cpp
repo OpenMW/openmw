@@ -32,6 +32,8 @@ namespace MWGui
 
     void MerchantRepair::setPtr(const MWWorld::Ptr& actor)
     {
+        if (actor.isEmpty() || !actor.getClass().isActor())
+            throw std::runtime_error("Invalid argument in MerchantRepair::setPtr");
         mActor = actor;
 
         while (mList->getChildCount())

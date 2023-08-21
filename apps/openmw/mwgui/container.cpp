@@ -124,6 +124,8 @@ namespace MWGui
 
     void ContainerWindow::setPtr(const MWWorld::Ptr& container)
     {
+        if (container.isEmpty() || (container.getType() != ESM::REC_CONT && !container.getClass().isActor()))
+            throw std::runtime_error("Invalid argument in ContainerWindow::setPtr");
         bool lootAnyway = mTreatNextOpenAsLoot;
         mTreatNextOpenAsLoot = false;
         mPtr = container;
@@ -191,6 +193,8 @@ namespace MWGui
 
     void ContainerWindow::onTakeAllButtonClicked(MyGUI::Widget* _sender)
     {
+        if (!mModel)
+            return;
         if (mDragAndDrop != nullptr && mDragAndDrop->mIsOnDragAndDrop)
             return;
 

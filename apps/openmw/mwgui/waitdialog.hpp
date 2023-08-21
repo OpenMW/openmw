@@ -43,6 +43,8 @@ namespace MWGui
 
         WindowBase* getProgressBar() { return &mProgressBar; }
 
+        std::string_view getWindowIdForLua() const override { return "WaitDialog"; }
+
     protected:
         MyGUI::TextBox* mDateTimeText;
         MyGUI::TextBox* mRestText;

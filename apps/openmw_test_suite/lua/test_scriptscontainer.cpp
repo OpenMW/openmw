@@ -204,8 +204,7 @@ CUSTOM, PLAYER: useInterface.lua
         {
             testing::internal::CaptureStdout();
             scripts.receiveEvent("SomeEvent", X1);
-            EXPECT_EQ(internal::GetCapturedStdout(),
-                "Test has received event 'SomeEvent', but there are no handlers for this event\n");
+            EXPECT_EQ(internal::GetCapturedStdout(), "");
         }
         {
             testing::internal::CaptureStdout();

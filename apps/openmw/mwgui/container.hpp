@@ -38,6 +38,8 @@ namespace MWGui
 
         void treatNextOpenAsLoot() { mTreatNextOpenAsLoot = true; }
 
+        std::string_view getWindowIdForLua() const override { return "Container"; }
+
     private:
         DragAndDrop* mDragAndDrop;
 

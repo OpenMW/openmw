@@ -5,6 +5,7 @@
 #include <apps/openmw/mwbase/world.hpp>
 #include <apps/openmw/mwmechanics/npcstats.hpp>
 #include <apps/openmw/mwworld/class.hpp>
+#include <apps/openmw/mwworld/globals.hpp>
 
 namespace MWLua
 {
@@ -125,6 +126,9 @@ namespace MWLua
         player["getCrimeLevel"] = [](const Object& o) -> int {
             const MWWorld::Class& cls = o.ptr().getClass();
             return cls.getNpcStats(o.ptr()).getBounty();
+        };
+        player["isCharGenFinished"] = [](const Object&) -> bool {
+            return MWBase::Environment::get().getWorld()->getGlobalFloat(MWWorld::Globals::sCharGenState) == -1;
         };
         addPlayerQuestBindings(player, context);
     }

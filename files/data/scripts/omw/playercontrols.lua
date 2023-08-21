@@ -47,6 +47,7 @@ local startAttack = false
 local autoMove = false
 local movementControlsOverridden = false
 local combatControlsOverridden = false
+local uiControlsOverridden = false
 
 local function processMovement()
     local controllerMovement = -input.getAxisValue(input.CONTROLLER_AXIS.MoveForwardBackward)
@@ -123,8 +124,48 @@ local function onFrame(dt)
     startAttack = false
 end
 
+local function checkNotWerewolf()
+    if Player.isWerewolf(self) then
+        ui.showMessage(core.getGMST('sWerewolfRefusal'))
+        return false
+    else
+        return true
+    end
+end
+
+local function isJournalAllowed()
+    -- During chargen journal is not allowed until magic window is allowed
+    return I.UI.getWindowsForMode(I.UI.MODE.Interface)[I.UI.WINDOW.Magic]
+end
+
 local function onInputAction(action)
-    if core.isWorldPaused() or not input.getControlSwitch(input.CONTROL_SWITCH.Controls) then
+    if not input.getControlSwitch(input.CONTROL_SWITCH.Controls) then
+        return
+    end
+
+    if not uiControlsOverridden then
+        if action == input.ACTION.Inventory then
+            if I.UI.getMode() == nil then
+                I.UI.setMode(I.UI.MODE.Interface)
+            elseif I.UI.getMode() == I.UI.MODE.Interface or I.UI.getMode() == I.UI.MODE.Container then
+                I.UI.removeMode(I.UI.getMode())
+            end
+        elseif action == input.ACTION.Journal then
+            if I.UI.getMode() == I.UI.MODE.Journal then
+                I.UI.removeMode(I.UI.MODE.Journal)
+            elseif isJournalAllowed() then
+                I.UI.addMode(I.UI.MODE.Journal)
+            end
+        elseif action == input.ACTION.QuickKeysMenu then
+            if I.UI.getMode() == I.UI.MODE.QuickKeysMenu then
+                I.UI.removeMode(I.UI.MODE.QuickKeysMenu)
+            elseif checkNotWerewolf() and Player.isCharGenFinished(self) then
+                I.UI.addMode(I.UI.MODE.QuickKeysMenu)
+            end
+        end
+    end
+
+    if core.isWorldPaused() then
         return
     end
 
@@ -144,9 +185,7 @@ local function onInputAction(action)
         if Actor.stance(self) == Actor.STANCE.Spell then
             Actor.setStance(self, Actor.STANCE.Nothing)
         elseif input.getControlSwitch(input.CONTROL_SWITCH.Magic) then
-            if Player.isWerewolf(self) then
-                ui.showMessage(core.getGMST('sWerewolfRefusal'))
-            else
+            if checkNotWerewolf() then
                 Actor.setStance(self, Actor.STANCE.Spell)
             end
         end
@@ -171,19 +210,24 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#Controls] #number version
-        version = 0,
+        version = 1,
 
         --- When set to true then the movement controls including jump and sneak are not processed and can be handled by another script.
-        -- If movement should be dissallowed completely, consider to use `input.setControlSwitch` instead.
+        -- If movement should be disallowed completely, consider to use `input.setControlSwitch` instead.
         -- @function [parent=#Controls] overrideMovementControls
         -- @param #boolean value
         overrideMovementControls = function(v) movementControlsOverridden = v end,
 
         --- When set to true then the controls "attack", "toggle spell", "toggle weapon" are not processed and can be handled by another script.
-        -- If combat should be dissallowed completely, consider to use `input.setControlSwitch` instead.
+        -- If combat should be disallowed completely, consider to use `input.setControlSwitch` instead.
         -- @function [parent=#Controls] overrideCombatControls
         -- @param #boolean value
         overrideCombatControls = function(v) combatControlsOverridden = v end,
+
+        --- When set to true then the controls "open inventory", "open journal" and so on are not processed and can be handled by another script.
+        -- @function [parent=#Controls] overrideUiControls
+        -- @param #boolean value
+        overrideUiControls = function(v) uiControlsOverridden = v end,
     }
 }
 
