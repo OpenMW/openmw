@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_ALCH_H
 #define OPENMW_ESM_ALCH_H
 
+#include <cstdint>
 #include <string>
 
 #include "components/esm/defs.hpp"
@@ -27,12 +28,12 @@ namespace ESM
         struct ALDTstruct
         {
             float mWeight;
-            int mValue;
-            int mAutoCalc;
+            int32_t mValue;
+            int32_t mAutoCalc;
         };
         ALDTstruct mData;
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId, mScript;
         std::string mName, mModel, mIcon;
         EffectList mEffects;

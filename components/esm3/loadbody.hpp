@@ -4,6 +4,7 @@
 #include "components/esm/defs.hpp"
 #include "components/esm/refid.hpp"
 
+#include <cstdint>
 #include <string>
 
 namespace ESM
@@ -62,7 +63,7 @@ namespace ESM
         };
 
         BYDTstruct mData;
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId, mRace;
         std::string mModel;
 

@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_APPA_H
 #define OPENMW_ESM_APPA_H
 
+#include <cstdint>
 #include <string>
 
 #include "components/esm/defs.hpp"
@@ -33,14 +34,14 @@ namespace ESM
 
         struct AADTstruct
         {
-            int mType;
+            int32_t mType;
             float mQuality;
             float mWeight;
-            int mValue;
+            int32_t mValue;
         };
 
         AADTstruct mData;
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId, mScript;
         std::string mName, mModel, mIcon;
 

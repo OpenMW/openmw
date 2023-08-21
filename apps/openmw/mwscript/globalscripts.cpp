@@ -232,7 +232,7 @@ namespace MWScript
 
             desc->mLocals.write(script.mLocals, id);
 
-            script.mRunning = desc->mRunning ? 1 : 0;
+            script.mRunning = desc->mRunning;
 
             writer.startRecord(ESM::REC_GSCR);
             script.save(writer);
@@ -276,7 +276,7 @@ namespace MWScript
                     return true;
             }
 
-            iter->second->mRunning = script.mRunning != 0;
+            iter->second->mRunning = script.mRunning;
             iter->second->mLocals.read(script.mLocals, script.mId);
 
             return true;

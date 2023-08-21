@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_ENCH_H
 #define OPENMW_ESM_ENCH_H
 
+#include <cstdint>
 #include <string>
 
 #include "components/esm/defs.hpp"
@@ -39,13 +40,13 @@ namespace ESM
 
         struct ENDTstruct
         {
-            int mType;
-            int mCost;
-            int mCharge;
-            int mFlags;
+            int32_t mType;
+            int32_t mCost;
+            int32_t mCharge;
+            int32_t mFlags;
         };
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId;
         ENDTstruct mData;
         EffectList mEffects;

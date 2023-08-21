@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_FOGSTATE_H
 #define OPENMW_ESM_FOGSTATE_H
 
+#include <cstdint>
 #include <vector>
 
 namespace ESM
@@ -10,7 +11,7 @@ namespace ESM
 
     struct FogTexture
     {
-        int mX, mY; // Only used for interior cells
+        int32_t mX, mY; // Only used for interior cells
         std::vector<char> mImageData;
     };
 

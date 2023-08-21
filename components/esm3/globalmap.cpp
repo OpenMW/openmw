@@ -8,7 +8,7 @@ namespace ESM
 
     void GlobalMap::load(ESMReader& esm)
     {
-        esm.getHNTSized<16>(mBounds, "BNDS");
+        esm.getHNT("BNDS", mBounds.mMinX, mBounds.mMaxX, mBounds.mMinY, mBounds.mMaxY);
 
         esm.getSubNameIs("DATA");
         esm.getSubHeader();

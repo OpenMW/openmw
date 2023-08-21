@@ -11,12 +11,12 @@ namespace ESM
     const std::string_view Class::sGmstSpecializationIds[3]
         = { "sSpecializationCombat", "sSpecializationMagic", "sSpecializationStealth" };
 
-    int& Class::CLDTstruct::getSkill(int index, bool major)
+    int32_t& Class::CLDTstruct::getSkill(int index, bool major)
     {
         return mSkills.at(index)[major ? 1 : 0];
     }
 
-    int Class::CLDTstruct::getSkill(int index, bool major) const
+    int32_t Class::CLDTstruct::getSkill(int index, bool major) const
     {
         return mSkills.at(index)[major ? 1 : 0];
     }
@@ -41,7 +41,8 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("CLDT"):
-                    esm.getHTSized<60>(mData);
+                    esm.getHT(
+                        mData.mAttribute, mData.mSpecialization, mData.mSkills, mData.mIsPlayable, mData.mServices);
                     if (mData.mIsPlayable > 1)
                         esm.fail("Unknown bool value");
                     hasData = true;

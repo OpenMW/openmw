@@ -59,7 +59,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("AODT"):
-                    esm.getHTSized<24>(mData);
+                    esm.getHT(mData.mType, mData.mWeight, mData.mValue, mData.mHealth, mData.mEnchant, mData.mArmor);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):

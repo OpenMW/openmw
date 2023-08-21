@@ -3,6 +3,8 @@
 
 #include "components/esm/defs.hpp"
 #include "components/esm/refid.hpp"
+
+#include <cstdint>
 #include <string>
 
 namespace ESM
@@ -18,7 +20,7 @@ namespace ESM
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
         static std::string_view getRecordType() { return "Activator"; }
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId, mScript;
         std::string mName, mModel;
 
