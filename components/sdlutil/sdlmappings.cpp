@@ -199,20 +199,10 @@ namespace SDLUtil
             keyMap[SDLK_INSERT] = MyGUI::KeyCode::Insert;
             keyMap[SDLK_DELETE] = MyGUI::KeyCode::Delete;
             keyMap[SDLK_APPLICATION] = MyGUI::KeyCode::AppMenu;
-
-// The function of the Ctrl and Meta keys are switched on macOS compared to other platforms.
-// For instance] = Cmd+C versus Ctrl+C to copy from the system clipboard
-#if defined(__APPLE__)
-            keyMap[SDLK_LGUI] = MyGUI::KeyCode::LeftControl;
-            keyMap[SDLK_RGUI] = MyGUI::KeyCode::RightControl;
-            keyMap[SDLK_LCTRL] = MyGUI::KeyCode::LeftWindows;
-            keyMap[SDLK_RCTRL] = MyGUI::KeyCode::RightWindows;
-#else
             keyMap[SDLK_LGUI] = MyGUI::KeyCode::LeftWindows;
             keyMap[SDLK_RGUI] = MyGUI::KeyCode::RightWindows;
             keyMap[SDLK_LCTRL] = MyGUI::KeyCode::LeftControl;
             keyMap[SDLK_RCTRL] = MyGUI::KeyCode::RightControl;
-#endif
             return keyMap;
         }
 
