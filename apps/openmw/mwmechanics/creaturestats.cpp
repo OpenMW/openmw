@@ -78,7 +78,7 @@ namespace MWMechanics
         return fFatigueBase - fFatigueMult * (1 - normalised);
     }
 
-    const AttributeValue& CreatureStats::getAttribute(ESM::Attribute::AttributeID id) const
+    const AttributeValue& CreatureStats::getAttribute(ESM::RefId id) const
     {
         return mAttributes.at(id);
     }
@@ -147,14 +147,14 @@ namespace MWMechanics
         return mMagicEffects;
     }
 
-    void CreatureStats::setAttribute(ESM::Attribute::AttributeID id, float base)
+    void CreatureStats::setAttribute(ESM::RefId id, float base)
     {
         AttributeValue current = getAttribute(id);
         current.setBase(base);
         setAttribute(id, current);
     }
 
-    void CreatureStats::setAttribute(ESM::Attribute::AttributeID id, const AttributeValue& value)
+    void CreatureStats::setAttribute(ESM::RefId id, const AttributeValue& value)
     {
         const AttributeValue& currentValue = mAttributes.at(id);
 
@@ -531,7 +531,7 @@ namespace MWMechanics
     void CreatureStats::writeState(ESM::CreatureStats& state) const
     {
         for (size_t i = 0; i < state.mAttributes.size(); ++i)
-            getAttribute(static_cast<ESM::Attribute::AttributeID>(i)).writeState(state.mAttributes[i]);
+            getAttribute(ESM::Attribute::indexToRefId(i)).writeState(state.mAttributes[i]);
 
         for (size_t i = 0; i < state.mDynamic.size(); ++i)
             mDynamic[i].writeState(state.mDynamic[i]);
@@ -588,7 +588,7 @@ namespace MWMechanics
         if (!state.mMissingACDT)
         {
             for (size_t i = 0; i < state.mAttributes.size(); ++i)
-                mAttributes[static_cast<ESM::Attribute::AttributeID>(i)].readState(state.mAttributes[i]);
+                mAttributes[ESM::Attribute::indexToRefId(i)].readState(state.mAttributes[i]);
 
             for (size_t i = 0; i < state.mDynamic.size(); ++i)
                 mDynamic[i].readState(state.mDynamic[i]);

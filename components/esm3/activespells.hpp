@@ -7,6 +7,7 @@
 #include "timestamp.hpp"
 
 #include <string>
+#include <variant>
 #include <vector>
 
 namespace ESM
@@ -32,11 +33,14 @@ namespace ESM
         float mMagnitude;
         float mMinMagnitude;
         float mMaxMagnitude;
-        int32_t mArg; // skill or attribute
+        std::variant<RefId, int> mArg; // skill, attribute, or summon
         float mDuration;
         float mTimeLeft;
         int32_t mEffectIndex;
         int32_t mFlags;
+
+        RefId getSkillOrAttribute() const;
+        int getActorId() const;
     };
 
     // format 0, saved games only

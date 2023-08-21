@@ -41,8 +41,6 @@ namespace MWGui
                 , mNoMagnitude(false)
                 , mKnown(true)
                 , mEffectID(-1)
-                , mSkill(-1)
-                , mAttribute(-1)
                 , mMagnMin(-1)
                 , mMagnMax(-1)
                 , mRange(-1)
@@ -60,8 +58,7 @@ namespace MWGui
             // value of -1 here means the effect is unknown to the player
             short mEffectID;
 
-            // value of -1 here means there is no skill/attribute
-            signed char mSkill, mAttribute;
+            ESM::RefId mSkill, mAttribute;
 
             // value of -1 here means the value is unavailable
             int mMagnMin, mMagnMax, mRange, mDuration;
@@ -138,10 +135,10 @@ namespace MWGui
 
             typedef MWMechanics::AttributeValue AttributeValue;
 
-            void setAttributeId(ESM::Attribute::AttributeID attributeId);
+            void setAttributeId(ESM::RefId attributeId);
             void setAttributeValue(const AttributeValue& value);
 
-            ESM::Attribute::AttributeID getAttributeId() const { return mId; }
+            ESM::RefId getAttributeId() const { return mId; }
             const AttributeValue& getAttributeValue() const { return mValue; }
 
             // Events
@@ -162,7 +159,7 @@ namespace MWGui
         private:
             void updateWidgets();
 
-            ESM::Attribute::AttributeID mId;
+            ESM::RefId mId;
             AttributeValue mValue;
             MyGUI::TextBox* mAttributeNameWidget;
             MyGUI::TextBox* mAttributeValueWidget;

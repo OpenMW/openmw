@@ -93,7 +93,8 @@ namespace
         int level = creatureStats.getLevel();
         for (const ESM::Attribute& attribute : attributes)
         {
-            const ESM::Race::MaleFemale& value = race->mData.mAttributeValues[attribute.mId];
+            const ESM::Race::MaleFemale& value
+                = race->mData.mAttributeValues[static_cast<size_t>(ESM::Attribute::refIdToIndex(attribute.mId))];
             creatureStats.setAttribute(attribute.mId, male ? value.mMale : value.mFemale);
         }
 
@@ -104,7 +105,7 @@ namespace
         {
             if (attribute >= 0 && attribute < ESM::Attribute::Length)
             {
-                auto id = static_cast<ESM::Attribute::AttributeID>(attribute);
+                auto id = ESM::Attribute::indexToRefId(attribute);
                 creatureStats.setAttribute(id, creatureStats.getAttribute(id).getBase() + 10);
             }
         }
@@ -113,10 +114,11 @@ namespace
         for (const ESM::Attribute& attribute : attributes)
         {
             float modifierSum = 0;
+            int attributeIndex = ESM::Attribute::refIdToIndex(attribute.mId);
 
             for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
             {
-                if (skill.mData.mAttribute != attribute.mId)
+                if (skill.mData.mAttribute != attributeIndex)
                     continue;
 
                 // is this a minor or major skill?
@@ -148,7 +150,8 @@ namespace
         else if (class_->mData.mSpecialization == ESM::Class::Stealth)
             multiplier += 1;
 
-        if (std::find(class_->mData.mAttribute.begin(), class_->mData.mAttribute.end(), ESM::Attribute::Endurance)
+        if (std::find(class_->mData.mAttribute.begin(), class_->mData.mAttribute.end(),
+                ESM::Attribute::refIdToIndex(ESM::Attribute::Endurance))
             != class_->mData.mAttribute.end())
             multiplier += 1;
 

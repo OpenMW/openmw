@@ -43,7 +43,7 @@ namespace MWGui
             if (value != mWatchedAttributes[attribute.mId] || mWatchedStatsEmpty)
             {
                 mWatchedAttributes[attribute.mId] = value;
-                setValue(attribute.mId, value);
+                setAttribute(attribute.mId, value);
             }
         }
 
@@ -150,10 +150,10 @@ namespace MWGui
         mListeners.erase(listener);
     }
 
-    void StatsWatcher::setValue(ESM::Attribute::AttributeID id, const MWMechanics::AttributeValue& value)
+    void StatsWatcher::setAttribute(ESM::RefId id, const MWMechanics::AttributeValue& value)
     {
         for (StatsListener* listener : mListeners)
-            listener->setValue(id, value);
+            listener->setAttribute(id, value);
     }
 
     void StatsWatcher::setValue(ESM::RefId id, const MWMechanics::SkillValue& value)

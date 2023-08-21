@@ -252,7 +252,7 @@ namespace MWMechanics
                 // Applied corprus effects are already in loaded stats modifiers
                 if (info.mId == ESM::MagicEffect::FortifyAttribute)
                 {
-                    auto id = static_cast<ESM::Attribute::AttributeID>(info.mArg);
+                    auto id = ESM::Attribute::indexToRefId(info.mArg);
                     AttributeValue attr = creatureStats->getAttribute(id);
                     attr.setModifier(attr.getModifier() - info.mMagnitude);
                     attr.damage(-info.mMagnitude);
@@ -260,7 +260,7 @@ namespace MWMechanics
                 }
                 else if (info.mId == ESM::MagicEffect::DrainAttribute)
                 {
-                    auto id = static_cast<ESM::Attribute::AttributeID>(info.mArg);
+                    auto id = ESM::Attribute::indexToRefId(info.mArg);
                     AttributeValue attr = creatureStats->getAttribute(id);
                     attr.setModifier(attr.getModifier() + info.mMagnitude);
                     attr.damage(info.mMagnitude);

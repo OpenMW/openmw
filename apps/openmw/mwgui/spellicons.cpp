@@ -36,7 +36,7 @@ namespace MWGui
                 if (!(effect.mFlags & ESM::ActiveEffect::Flag_Applied))
                     continue;
                 MagicEffectInfo newEffectSource;
-                newEffectSource.mKey = MWMechanics::EffectKey(effect.mEffectId, effect.mArg);
+                newEffectSource.mKey = MWMechanics::EffectKey(effect.mEffectId, effect.getSkillOrAttribute());
                 newEffectSource.mMagnitude = static_cast<int>(effect.mMagnitude);
                 newEffectSource.mPermanent = effect.mDuration == -1.f;
                 newEffectSource.mRemainingTime = effect.mTimeLeft;
@@ -82,8 +82,7 @@ namespace MWGui
 
                 if (effect->mData.mFlags & ESM::MagicEffect::TargetSkill)
                 {
-                    const ESM::Skill* skill
-                        = store->get<ESM::Skill>().find(ESM::Skill::indexToRefId(effectInfo.mKey.mArg));
+                    const ESM::Skill* skill = store->get<ESM::Skill>().find(effectInfo.mKey.mArg);
                     sourcesDescription += " (" + skill->mName + ')';
                 }
                 if (effect->mData.mFlags & ESM::MagicEffect::TargetAttribute)

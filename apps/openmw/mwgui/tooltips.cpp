@@ -225,8 +225,8 @@ namespace MWGui
                     {
                         Widgets::SpellEffectParams params;
                         params.mEffectID = spellEffect.mEffectID;
-                        params.mSkill = spellEffect.mSkill;
-                        params.mAttribute = spellEffect.mAttribute;
+                        params.mSkill = ESM::Skill::indexToRefId(spellEffect.mSkill);
+                        params.mAttribute = ESM::Attribute::indexToRefId(spellEffect.mAttribute);
                         params.mDuration = spellEffect.mDuration;
                         params.mMagnMin = spellEffect.mMagnMin;
                         params.mMagnMax = spellEffect.mMagnMax;
@@ -804,7 +804,8 @@ namespace MWGui
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
         const ESM::Skill* skill = store.get<ESM::Skill>().find(skillId);
-        const ESM::Attribute* attr = store.get<ESM::Attribute>().find(skill->mData.mAttribute);
+        const ESM::Attribute* attr
+            = store.get<ESM::Attribute>().find(ESM::Attribute::indexToRefId(skill->mData.mAttribute));
 
         widget->setUserString("ToolTipType", "Layout");
         widget->setUserString("ToolTipLayout", "SkillNoProgressToolTip");
@@ -815,7 +816,7 @@ namespace MWGui
         widget->setUserString("ImageTexture_SkillNoProgressImage", skill->mIcon);
     }
 
-    void ToolTips::createAttributeToolTip(MyGUI::Widget* widget, ESM::Attribute::AttributeID attributeId)
+    void ToolTips::createAttributeToolTip(MyGUI::Widget* widget, ESM::RefId attributeId)
     {
         const ESM::Attribute* attribute
             = MWBase::Environment::get().getESMStore()->get<ESM::Attribute>().search(attributeId);

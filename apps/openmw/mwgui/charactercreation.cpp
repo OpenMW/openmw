@@ -103,7 +103,7 @@ namespace MWGui
             mPlayerSkillValues.emplace(skill.mId, MWMechanics::SkillValue());
     }
 
-    void CharacterCreation::setValue(ESM::Attribute::AttributeID id, const MWMechanics::AttributeValue& value)
+    void CharacterCreation::setAttribute(ESM::RefId id, const MWMechanics::AttributeValue& value)
     {
         mPlayerAttributes[id] = value;
         if (mReviewDialog)
@@ -263,8 +263,7 @@ namespace MWGui
                     mReviewDialog->setFatigue(stats.getFatigue());
                     for (auto& attributePair : mPlayerAttributes)
                     {
-                        mReviewDialog->setAttribute(
-                            static_cast<ESM::Attribute::AttributeID>(attributePair.first), attributePair.second);
+                        mReviewDialog->setAttribute(attributePair.first, attributePair.second);
                     }
                     for (const auto& [skill, value] : mPlayerSkillValues)
                     {
@@ -462,9 +461,10 @@ namespace MWGui
             klass.mData.mIsPlayable = 0x1;
             klass.mRecordFlags = 0;
 
-            std::vector<int> attributes = mCreateClassDialog->getFavoriteAttributes();
-            assert(attributes.size() == klass.mData.mAttribute.size());
-            std::copy(attributes.begin(), attributes.end(), klass.mData.mAttribute.begin());
+            std::vector<ESM::RefId> attributes = mCreateClassDialog->getFavoriteAttributes();
+            assert(attributes.size() >= klass.mData.mAttribute.size());
+            for (size_t i = 0; i < klass.mData.mAttribute.size(); ++i)
+                klass.mData.mAttribute[i] = ESM::Attribute::refIdToIndex(attributes[i]);
 
             std::vector<ESM::RefId> majorSkills = mCreateClassDialog->getMajorSkills();
             std::vector<ESM::RefId> minorSkills = mCreateClassDialog->getMinorSkills();

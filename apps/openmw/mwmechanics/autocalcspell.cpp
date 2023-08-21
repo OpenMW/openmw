@@ -27,7 +27,7 @@ namespace MWMechanics
     };
 
     std::vector<ESM::RefId> autoCalcNpcSpells(const std::map<ESM::RefId, SkillValue>& actorSkills,
-        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes, const ESM::Race* race)
+        const std::map<ESM::RefId, AttributeValue>& actorAttributes, const ESM::Race* race)
     {
         const MWWorld::Store<ESM::GameSetting>& gmst
             = MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
@@ -136,7 +136,7 @@ namespace MWMechanics
     }
 
     std::vector<ESM::RefId> autoCalcPlayerSpells(const std::map<ESM::RefId, SkillValue>& actorSkills,
-        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes, const ESM::Race* race)
+        const std::map<ESM::RefId, AttributeValue>& actorAttributes, const ESM::Race* race)
     {
         const MWWorld::ESMStore& esmStore = *MWBase::Environment::get().getESMStore();
 
@@ -215,7 +215,7 @@ namespace MWMechanics
     }
 
     bool attrSkillCheck(const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills,
-        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes)
+        const std::map<ESM::RefId, AttributeValue>& actorAttributes)
     {
         for (const auto& spellEffect : spell->mEffects.mList)
         {
@@ -237,7 +237,8 @@ namespace MWMechanics
 
             if ((magicEffect->mData.mFlags & ESM::MagicEffect::TargetAttribute))
             {
-                auto found = actorAttributes.find(ESM::Attribute::AttributeID(spellEffect.mAttribute));
+                ESM::RefId attribute = ESM::Attribute::indexToRefId(spellEffect.mAttribute);
+                auto found = actorAttributes.find(attribute);
                 if (found == actorAttributes.end() || found->second.getBase() < iAutoSpellAttSkillMin)
                     return false;
             }
@@ -299,7 +300,7 @@ namespace MWMechanics
     }
 
     float calcAutoCastChance(const ESM::Spell* spell, const std::map<ESM::RefId, SkillValue>& actorSkills,
-        const std::map<ESM::Attribute::AttributeID, AttributeValue>& actorAttributes, ESM::RefId effectiveSchool)
+        const std::map<ESM::RefId, AttributeValue>& actorAttributes, ESM::RefId effectiveSchool)
     {
         if (spell->mData.mType != ESM::Spell::ST_Spell)
             return 100.f;

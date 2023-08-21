@@ -260,8 +260,8 @@ namespace MWGui
         mSpecializationName->setCaption(specName);
         ToolTips::createSpecializationToolTip(mSpecializationName, specName, specialization);
 
-        mFavoriteAttribute[0]->setAttributeId(static_cast<ESM::Attribute::AttributeID>(klass->mData.mAttribute[0]));
-        mFavoriteAttribute[1]->setAttributeId(static_cast<ESM::Attribute::AttributeID>(klass->mData.mAttribute[1]));
+        mFavoriteAttribute[0]->setAttributeId(ESM::Attribute::indexToRefId(klass->mData.mAttribute[0]));
+        mFavoriteAttribute[1]->setAttributeId(ESM::Attribute::indexToRefId(klass->mData.mAttribute[1]));
         ToolTips::createAttributeToolTip(mFavoriteAttribute[0], mFavoriteAttribute[0]->getAttributeId());
         ToolTips::createAttributeToolTip(mFavoriteAttribute[1], mFavoriteAttribute[1]->getAttributeId());
 
@@ -509,9 +509,9 @@ namespace MWGui
         return mSpecializationId;
     }
 
-    std::vector<int> CreateClassDialog::getFavoriteAttributes() const
+    std::vector<ESM::RefId> CreateClassDialog::getFavoriteAttributes() const
     {
-        std::vector<int> v;
+        std::vector<ESM::RefId> v;
         v.push_back(mFavoriteAttribute0->getAttributeId());
         v.push_back(mFavoriteAttribute1->getAttributeId());
         return v;
@@ -599,7 +599,7 @@ namespace MWGui
 
     void CreateClassDialog::onAttributeSelected()
     {
-        ESM::Attribute::AttributeID id = mAttribDialog->getAttributeId();
+        ESM::RefId id = mAttribDialog->getAttributeId();
         if (mAffectedAttribute == mFavoriteAttribute0)
         {
             if (mFavoriteAttribute1->getAttributeId() == id)

@@ -383,7 +383,7 @@ int MWDialogue::Filter::getSelectStructInteger(const SelectWrapper& select) cons
 
         case SelectWrapper::Function_PcAttribute:
         {
-            auto attribute = static_cast<ESM::Attribute::AttributeID>(select.getArgument());
+            ESM::RefId attribute = ESM::Attribute::indexToRefId(select.getArgument());
             return player.getClass().getCreatureStats(player).getAttribute(attribute).getModified();
         }
         case SelectWrapper::Function_PcSkill:
@@ -654,9 +654,9 @@ bool MWDialogue::Filter::hasFactionRankSkillRequirements(
 
     MWMechanics::CreatureStats& stats = actor.getClass().getCreatureStats(actor);
 
-    return stats.getAttribute(ESM::Attribute::AttributeID(faction.mData.mAttribute[0])).getBase()
+    return stats.getAttribute(ESM::Attribute::indexToRefId(faction.mData.mAttribute[0])).getBase()
         >= faction.mData.mRankData[rank].mAttribute1
-        && stats.getAttribute(ESM::Attribute::AttributeID(faction.mData.mAttribute[1])).getBase()
+        && stats.getAttribute(ESM::Attribute::indexToRefId(faction.mData.mAttribute[1])).getBase()
         >= faction.mData.mRankData[rank].mAttribute2;
 }
 

@@ -188,7 +188,7 @@ namespace MWGui
 
         bool exit() override;
 
-        ESM::Attribute::AttributeID getAttributeId() const { return mAttributeId; }
+        ESM::RefId getAttributeId() const { return mAttributeId; }
 
         // Events
         typedef MyGUI::delegates::MultiDelegate<> EventHandle_Void;
@@ -208,7 +208,7 @@ namespace MWGui
         void onCancelClicked(MyGUI::Widget* _sender);
 
     private:
-        ESM::Attribute::AttributeID mAttributeId;
+        ESM::RefId mAttributeId;
     };
 
     class SelectSkillDialog : public WindowModal
@@ -274,7 +274,7 @@ namespace MWGui
         std::string getName() const;
         std::string getDescription() const;
         ESM::Class::Specialization getSpecializationId() const;
-        std::vector<int> getFavoriteAttributes() const;
+        std::vector<ESM::RefId> getFavoriteAttributes() const;
         std::vector<ESM::RefId> getMajorSkills() const;
         std::vector<ESM::RefId> getMinorSkills() const;
 

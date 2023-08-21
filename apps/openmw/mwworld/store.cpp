@@ -1041,86 +1041,49 @@ namespace MWWorld
     // Attribute
     //=========================================================================
 
-    Store<ESM::Attribute>::Store()
-    {
-        mStatic.reserve(ESM::Attribute::Length);
-    }
-    const ESM::Attribute* Store<ESM::Attribute>::search(size_t index) const
-    {
-        if (index >= mStatic.size())
-        {
-            return nullptr;
-        }
-        return &mStatic[index];
-    }
-
-    const ESM::Attribute* Store<ESM::Attribute>::find(size_t index) const
-    {
-        const ESM::Attribute* ptr = search(index);
-        if (ptr == nullptr)
-        {
-            const std::string msg = "Attribute with index " + std::to_string(index) + " not found";
-            throw std::runtime_error(msg);
-        }
-        return ptr;
-    }
     void Store<ESM::Attribute>::setUp(const MWWorld::Store<ESM::GameSetting>& settings)
     {
-        // TODO remove after !3084 gets merged
-        mStatic.clear();
-        mStatic.push_back({ .mId = ESM::Attribute::Strength,
+        insertStatic({ .mId = ESM::Attribute::Strength,
             .mName = std::string{ getGMSTString(settings, "sAttributeStrength") },
             .mDescription = std::string{ getGMSTString(settings, "sStrDesc") },
             .mIcon = "icons\\k\\attribute_strength.dds",
             .mWerewolfValue = getGMSTFloat(settings, "fWerewolfStrength") });
-        mStatic.push_back({ .mId = ESM::Attribute::Intelligence,
+        insertStatic({ .mId = ESM::Attribute::Intelligence,
             .mName = std::string{ getGMSTString(settings, "sAttributeIntelligence") },
             .mDescription = std::string{ getGMSTString(settings, "sIntDesc") },
             .mIcon = "icons\\k\\attribute_int.dds",
             // Oh, Bethesda. It's "Intelligence".
             .mWerewolfValue = getGMSTFloat(settings, "fWerewolfIntellegence") });
-        mStatic.push_back({ .mId = ESM::Attribute::Willpower,
+        insertStatic({ .mId = ESM::Attribute::Willpower,
             .mName = std::string{ getGMSTString(settings, "sAttributeWillpower") },
             .mDescription = std::string{ getGMSTString(settings, "sWilDesc") },
             .mIcon = "icons\\k\\attribute_wilpower.dds",
             .mWerewolfValue = getGMSTFloat(settings, "fWerewolfWillpower") });
-        mStatic.push_back({ .mId = ESM::Attribute::Agility,
+        insertStatic({ .mId = ESM::Attribute::Agility,
             .mName = std::string{ getGMSTString(settings, "sAttributeAgility") },
             .mDescription = std::string{ getGMSTString(settings, "sAgiDesc") },
             .mIcon = "icons\\k\\attribute_agility.dds",
             .mWerewolfValue = getGMSTFloat(settings, "fWerewolfAgility") });
-        mStatic.push_back({ .mId = ESM::Attribute::Speed,
+        insertStatic({ .mId = ESM::Attribute::Speed,
             .mName = std::string{ getGMSTString(settings, "sAttributeSpeed") },
             .mDescription = std::string{ getGMSTString(settings, "sSpdDesc") },
             .mIcon = "icons\\k\\attribute_speed.dds",
             .mWerewolfValue = getGMSTFloat(settings, "fWerewolfSpeed") });
-        mStatic.push_back({ .mId = ESM::Attribute::Endurance,
+        insertStatic({ .mId = ESM::Attribute::Endurance,
             .mName = std::string{ getGMSTString(settings, "sAttributeEndurance") },
             .mDescription = std::string{ getGMSTString(settings, "sEndDesc") },
             .mIcon = "icons\\k\\attribute_endurance.dds",
             .mWerewolfValue = getGMSTFloat(settings, "fWerewolfEndurance") });
-        mStatic.push_back({ .mId = ESM::Attribute::Personality,
+        insertStatic({ .mId = ESM::Attribute::Personality,
             .mName = std::string{ getGMSTString(settings, "sAttributePersonality") },
             .mDescription = std::string{ getGMSTString(settings, "sPerDesc") },
             .mIcon = "icons\\k\\attribute_personality.dds",
             .mWerewolfValue = getGMSTFloat(settings, "fWerewolfPersonality") });
-        mStatic.push_back({ .mId = ESM::Attribute::Luck,
+        insertStatic({ .mId = ESM::Attribute::Luck,
             .mName = std::string{ getGMSTString(settings, "sAttributeLuck") },
             .mDescription = std::string{ getGMSTString(settings, "sLucDesc") },
             .mIcon = "icons\\k\\attribute_luck.dds",
             .mWerewolfValue = getGMSTFloat(settings, "fWerewolfLuck") });
-    }
-    size_t Store<ESM::Attribute>::getSize() const
-    {
-        return mStatic.size();
-    }
-    Store<ESM::Attribute>::iterator Store<ESM::Attribute>::begin() const
-    {
-        return mStatic.begin();
-    }
-    Store<ESM::Attribute>::iterator Store<ESM::Attribute>::end() const
-    {
-        return mStatic.end();
     }
 
     // Dialogue
@@ -1339,7 +1302,7 @@ namespace MWWorld
 template class MWWorld::TypedDynamicStore<ESM::Activator>;
 template class MWWorld::TypedDynamicStore<ESM::Apparatus>;
 template class MWWorld::TypedDynamicStore<ESM::Armor>;
-// template class MWWorld::Store<ESM::Attribute>;
+template class MWWorld::TypedDynamicStore<ESM::Attribute>;
 template class MWWorld::TypedDynamicStore<ESM::BirthSign>;
 template class MWWorld::TypedDynamicStore<ESM::BodyPart>;
 template class MWWorld::TypedDynamicStore<ESM::Book>;

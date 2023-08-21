@@ -9,6 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <components/esm/attr.hpp>
 #include <components/esm/refid.hpp>
 #include <components/esm/util.hpp>
 #include <components/esm3/loadcell.hpp>
@@ -29,7 +30,6 @@
 
 namespace ESM
 {
-    struct Attribute;
     struct LandTexture;
     struct MagicEffect;
     struct WeaponType;
@@ -492,25 +492,14 @@ namespace MWWorld
     };
 
     template <>
-    class Store<ESM::Attribute> : public IndexedStore<ESM::Attribute>
+    class Store<ESM::Attribute> : public TypedDynamicStore<ESM::Attribute>
     {
-        std::vector<ESM::Attribute> mStatic;
+        using TypedDynamicStore<ESM::Attribute>::setUp;
 
     public:
-        typedef std::vector<ESM::Attribute>::const_iterator iterator;
-
-        Store();
-
-        const ESM::Attribute* search(size_t index) const;
-
-        // calls `search` and throws an exception if not found
-        const ESM::Attribute* find(size_t index) const;
+        Store() = default;
 
         void setUp(const MWWorld::Store<ESM::GameSetting>& settings);
-
-        size_t getSize() const;
-        iterator begin() const;
-        iterator end() const;
     };
 
     template <>

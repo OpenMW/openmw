@@ -200,7 +200,7 @@ namespace MWGui
         mFatigue->setUserString("Caption_HealthDescription", "#{sFatDesc}\n" + valStr);
     }
 
-    void ReviewDialog::setAttribute(ESM::Attribute::AttributeID attributeId, const MWMechanics::AttributeValue& value)
+    void ReviewDialog::setAttribute(ESM::RefId attributeId, const MWMechanics::AttributeValue& value)
     {
         auto attr = mAttributeWidgets.find(attributeId);
         if (attr == mAttributeWidgets.end())
@@ -412,7 +412,7 @@ namespace MWGui
         if (!mRaceId.empty())
             race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(mRaceId);
 
-        std::map<ESM::Attribute::AttributeID, MWMechanics::AttributeValue> attributes;
+        std::map<ESM::RefId, MWMechanics::AttributeValue> attributes;
         for (const auto& [key, value] : mAttributeWidgets)
             attributes[key] = value->getAttributeValue();
 

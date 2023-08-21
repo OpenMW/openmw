@@ -456,6 +456,8 @@ namespace
         {
             refId = ESM::RefId::esm3ExteriorCell(0, 0);
         }
+        else if constexpr (std::is_same_v<RecordType, ESM::Attribute>)
+            refId = ESM::Attribute::Strength;
         else if constexpr (std::is_same_v<RecordType, ESM::Skill>)
             refId = ESM::Skill::Block;
         else
@@ -484,6 +486,12 @@ namespace
             ESM::ESMReader reader;
             ESM::Dialogue* dialogue = nullptr;
             MWWorld::ESMStore esmStore;
+
+            if constexpr (std::is_same_v<RecordType, ESM::Attribute>)
+            {
+                ASSERT_ANY_THROW(getEsmFile(record, false, formatVersion));
+                continue;
+            }
 
             reader.open(getEsmFile(record, false, formatVersion), "filename");
             ASSERT_NO_THROW(esmStore.load(reader, &dummyListener, dialogue));
@@ -575,7 +583,7 @@ namespace
 
     REGISTER_TYPED_TEST_SUITE_P(StoreSaveLoadTest, shouldNotChangeRefId);
 
-    static_assert(std::tuple_size_v<RecordTypesWithSave> == 39);
+    static_assert(std::tuple_size_v<RecordTypesWithSave> == 40);
 
     INSTANTIATE_TYPED_TEST_SUITE_P(
         RecordTypesTest, StoreSaveLoadTest, typename AsTestingTypes<RecordTypesWithSave>::Type);

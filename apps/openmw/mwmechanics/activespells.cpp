@@ -548,14 +548,13 @@ namespace MWMechanics
         purge([=](const ActiveSpellParams& params) { return params.mId == id; }, ptr);
     }
 
-    void ActiveSpells::purgeEffect(const MWWorld::Ptr& ptr, int effectId, int effectArg)
+    void ActiveSpells::purgeEffect(const MWWorld::Ptr& ptr, int effectId, ESM::RefId effectArg)
     {
         purge(
             [=](const ActiveSpellParams&, const ESM::ActiveEffect& effect) {
-                if (effectArg < 0)
+                if (effectArg.empty())
                     return effect.mEffectId == effectId;
-                else
-                    return effect.mEffectId == effectId && effect.mArg == effectArg;
+                return effect.mEffectId == effectId && effect.getSkillOrAttribute() == effectArg;
             },
             ptr);
     }

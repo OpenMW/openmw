@@ -246,7 +246,7 @@ void MWMechanics::NpcStats::increaseSkill(ESM::RefId id, const ESM::Class& class
         }
     }
 
-    mSkillIncreases[ESM::Attribute::AttributeID(skill->mData.mAttribute)] += increase;
+    mSkillIncreases[ESM::Attribute::indexToRefId(skill->mData.mAttribute)] += increase;
 
     mSpecIncreases[skill->mData.mSpecialization] += gmst.find("iLevelupSpecialization")->mValue.getInteger();
 
@@ -467,7 +467,7 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
         // TODO extend format
         auto index = ESM::Skill::refIdToIndex(id);
         assert(index >= 0);
-        value.writeState(state.mSkills[static_cast<unsigned int>(index)]);
+        value.writeState(state.mSkills[static_cast<size_t>(index)]);
     }
 
     state.mIsWerewolf = mIsWerewolf;
@@ -488,7 +488,7 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
 
     state.mSkillIncrease.fill(0);
     for (const auto& [key, value] : mSkillIncreases)
-        state.mSkillIncrease[key] = value;
+        state.mSkillIncrease[static_cast<size_t>(ESM::Attribute::refIdToIndex(key))] = value;
 
     for (size_t i = 0; i < state.mSpecIncreases.size(); ++i)
         state.mSpecIncreases[i] = mSpecIncreases[i];
@@ -538,7 +538,7 @@ void MWMechanics::NpcStats::readState(const ESM::NpcStats& state)
     mLevelProgress = state.mLevelProgress;
 
     for (size_t i = 0; i < state.mSkillIncrease.size(); ++i)
-        mSkillIncreases[static_cast<ESM::Attribute::AttributeID>(i)] = state.mSkillIncrease[i];
+        mSkillIncreases[ESM::Attribute::indexToRefId(i)] = state.mSkillIncrease[i];
 
     for (size_t i = 0; i < state.mSpecIncreases.size(); ++i)
         mSpecIncreases[i] = state.mSpecIncreases[i];

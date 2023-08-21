@@ -63,7 +63,7 @@ namespace MWWorld
         for (size_t i = 0; i < mSaveSkills.size(); ++i)
             mSaveSkills[i] = stats.getSkill(ESM::Skill::indexToRefId(i)).getModified();
         for (size_t i = 0; i < mSaveAttributes.size(); ++i)
-            mSaveAttributes[i] = stats.getAttribute(static_cast<ESM::Attribute::AttributeID>(i)).getModified();
+            mSaveAttributes[i] = stats.getAttribute(ESM::Attribute::indexToRefId(i)).getModified();
     }
 
     void Player::restoreStats()
@@ -82,7 +82,7 @@ namespace MWWorld
         }
         for (size_t i = 0; i < mSaveAttributes.size(); ++i)
         {
-            auto id = static_cast<ESM::Attribute::AttributeID>(i);
+            auto id = ESM::Attribute::indexToRefId(i);
             auto attribute = npcStats.getAttribute(id);
             attribute.restore(attribute.getDamage());
             attribute.setModifier(mSaveAttributes[i] - attribute.getBase());

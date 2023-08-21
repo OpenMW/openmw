@@ -171,11 +171,11 @@ namespace MWLua
     class AttributeStat
     {
         ObjectVariant mObject;
-        int mIndex;
+        ESM::RefId mId;
 
-        AttributeStat(ObjectVariant object, int index)
+        AttributeStat(ObjectVariant object, ESM::RefId id)
             : mObject(std::move(object))
-            , mIndex(index)
+            , mId(id)
         {
         }
 
@@ -183,10 +183,9 @@ namespace MWLua
         template <class G>
         sol::object get(const Context& context, std::string_view prop, G getter) const
         {
-            auto id = static_cast<ESM::Attribute::AttributeID>(mIndex);
             return getValue(
-                context, mObject, &AttributeStat::setValue, mIndex, prop, [id, getter](const MWWorld::Ptr& ptr) {
-                    return (ptr.getClass().getCreatureStats(ptr).getAttribute(id).*getter)();
+                context, mObject, &AttributeStat::setValue, mId, prop, [this, getter](const MWWorld::Ptr& ptr) {
+                    return (ptr.getClass().getCreatureStats(ptr).getAttribute(mId).*getter)();
                 });
         }
 
@@ -202,20 +201,20 @@ namespace MWLua
         {
             if (!object.ptr().getClass().isActor())
                 return {};
-            int index = std::get<int>(i);
-            return AttributeStat{ std::move(object), index };
+            ESM::RefId id = std::get<ESM::RefId>(i);
+            return AttributeStat{ std::move(object), id };
         }
 
         void cache(const Context& context, std::string_view prop, const sol::object& value) const
         {
             SelfObject* obj = mObject.asSelfObject();
             addStatUpdateAction(context.mLuaManager, *obj);
-            obj->mStatsCache[SelfObject::CachedStat{ &AttributeStat::setValue, mIndex, prop }] = value;
+            obj->mStatsCache[SelfObject::CachedStat{ &AttributeStat::setValue, mId, prop }] = value;
         }
 
         static void setValue(Index i, std::string_view prop, const MWWorld::Ptr& ptr, const sol::object& value)
         {
-            auto id = static_cast<ESM::Attribute::AttributeID>(std::get<int>(i));
+            ESM::RefId id = std::get<ESM::RefId>(i);
             auto& stats = ptr.getClass().getCreatureStats(ptr);
             auto stat = stats.getAttribute(id);
             float floatValue = LuaUtil::cast<float>(value);
@@ -370,9 +369,8 @@ namespace MWLua
         addProp(context, attributeStatT, "modifier", &MWMechanics::AttributeValue::getModifier);
         sol::table attributes(context.mLua->sol(), sol::create);
         stats["attributes"] = LuaUtil::makeReadOnly(attributes);
-        for (int id = ESM::Attribute::Strength; id < ESM::Attribute::Length; ++id)
-            attributes[Misc::StringUtils::lowerCase(ESM::Attribute::sAttributeNames[id])]
-                = addIndexedAccessor<AttributeStat>(id);
+        for (const ESM::Attribute& attribute : MWBase::Environment::get().getESMStore()->get<ESM::Attribute>())
+            attributes[ESM::RefId(attribute.mId).serializeText()] = addIndexedAccessor<AttributeStat>(attribute.mId);
     }
 
     void addNpcStatsBindings(sol::table& npc, const Context& context)
