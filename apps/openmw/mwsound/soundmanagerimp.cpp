@@ -534,6 +534,9 @@ namespace MWSound
             return nullptr;
 
         std::string normalizedName = VFS::Path::normalizeFilename(fileName);
+        if (!mVFS->exists(normalizedName))
+            return nullptr;
+
         Sound_Buffer* sfx = mSoundBuffers.load(normalizedName);
         if (!sfx)
             return nullptr;
@@ -630,6 +633,9 @@ namespace MWSound
 
         // Look up the sound
         std::string normalizedName = VFS::Path::normalizeFilename(fileName);
+        if (!mVFS->exists(normalizedName))
+            return nullptr;
+
         Sound_Buffer* sfx = mSoundBuffers.load(normalizedName);
         if (!sfx)
             return nullptr;
@@ -705,9 +711,15 @@ namespace MWSound
 
     void SoundManager::stopSound3D(const MWWorld::ConstPtr& ptr, std::string_view fileName)
     {
+        if (!mOutput->isInitialized())
+            return;
+
         std::string normalizedName = VFS::Path::normalizeFilename(fileName);
-        auto soundId = ESM::RefId::stringRefId(normalizedName);
-        stopSound3D(ptr, soundId);
+        Sound_Buffer* sfx = mSoundBuffers.lookup(normalizedName);
+        if (!sfx)
+            return;
+
+        stopSound(sfx, ptr);
     }
 
     void SoundManager::stopSound3D(const MWWorld::ConstPtr& ptr)
@@ -769,8 +781,21 @@ namespace MWSound
     bool SoundManager::getSoundPlaying(const MWWorld::ConstPtr& ptr, std::string_view fileName) const
     {
         std::string normalizedName = VFS::Path::normalizeFilename(fileName);
-        auto soundId = ESM::RefId::stringRefId(normalizedName);
-        return getSoundPlaying(ptr, soundId);
+
+        SoundMap::const_iterator snditer = mActiveSounds.find(ptr.mRef);
+        if (snditer != mActiveSounds.end())
+        {
+            Sound_Buffer* sfx = mSoundBuffers.lookup(normalizedName);
+            if (!sfx)
+                return false;
+
+            return std::find_if(snditer->second.mList.cbegin(), snditer->second.mList.cend(),
+                       [this, sfx](const SoundBufferRefPair& snd) -> bool {
+                           return snd.second == sfx && mOutput->isSoundPlaying(snd.first.get());
+                       })
+                != snditer->second.mList.cend();
+        }
+        return false;
     }
 
     bool SoundManager::getSoundPlaying(const MWWorld::ConstPtr& ptr, const ESM::RefId& soundId) const
@@ -779,6 +804,9 @@ namespace MWSound
         if (snditer != mActiveSounds.end())
         {
             Sound_Buffer* sfx = mSoundBuffers.lookup(soundId);
+            if (!sfx)
+                return false;
+
             return std::find_if(snditer->second.mList.cbegin(), snditer->second.mList.cend(),
                        [this, sfx](const SoundBufferRefPair& snd) -> bool {
                            return snd.second == sfx && mOutput->isSoundPlaying(snd.first.get());

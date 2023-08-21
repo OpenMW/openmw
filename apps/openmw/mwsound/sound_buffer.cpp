@@ -64,8 +64,14 @@ namespace MWSound
 
     Sound_Buffer* SoundBufferPool::lookup(std::string_view fileName) const
     {
-        auto soundId = ESM::RefId::stringRefId(fileName);
-        return lookup(soundId);
+        const auto it = mBufferFileNameMap.find(std::string(fileName));
+        if (it != mBufferFileNameMap.end())
+        {
+            Sound_Buffer* sfx = it->second;
+            if (sfx->getHandle() != nullptr)
+                return sfx;
+        }
+        return nullptr;
     }
 
     Sound_Buffer* SoundBufferPool::loadSfx(Sound_Buffer* sfx)
@@ -116,11 +122,9 @@ namespace MWSound
 
     Sound_Buffer* SoundBufferPool::load(std::string_view fileName)
     {
-        auto soundId = ESM::RefId::stringRefId(fileName);
-
         Sound_Buffer* sfx;
-        const auto it = mBufferNameMap.find(soundId);
-        if (it != mBufferNameMap.end())
+        const auto it = mBufferFileNameMap.find(std::string(fileName));
+        if (it != mBufferFileNameMap.end())
             sfx = it->second;
         else
         {
@@ -138,6 +142,9 @@ namespace MWSound
                 mOutput->unloadSound(sfx.mHandle);
             sfx.mHandle = nullptr;
         }
+
+        mBufferFileNameMap.clear();
+        mBufferNameMap.clear();
         mUnusedBuffers.clear();
     }
 
@@ -155,7 +162,7 @@ namespace MWSound
 
         Sound_Buffer& sfx = mSoundBuffers.emplace_back(fileName, volume, min, max);
 
-        mBufferNameMap.emplace(ESM::RefId::stringRefId(fileName), &sfx);
+        mBufferFileNameMap.emplace(fileName, &sfx);
         return &sfx;
     }
 
