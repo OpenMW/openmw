@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <map>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -48,10 +49,17 @@ namespace VFS
             const std::string& operator*() const { return mIt->first; }
             const std::string* operator->() const { return &mIt->first; }
             bool operator!=(const RecursiveDirectoryIterator& other) { return mIt != other.mIt; }
+            bool operator==(const RecursiveDirectoryIterator& other) const { return mIt == other.mIt; }
             RecursiveDirectoryIterator& operator++()
             {
                 ++mIt;
                 return *this;
+            }
+            RecursiveDirectoryIterator operator++(int)
+            {
+                RecursiveDirectoryIterator old = *this;
+                mIt++;
+                return old;
             }
 
         private:
@@ -61,6 +69,31 @@ namespace VFS
         using RecursiveDirectoryRange = IteratorPair<RecursiveDirectoryIterator>;
 
     public:
+        class StatefulIterator : RecursiveDirectoryRange
+        {
+        public:
+            StatefulIterator(RecursiveDirectoryIterator first, RecursiveDirectoryIterator last, const std::string& path)
+                : RecursiveDirectoryRange(first, last)
+                , mCurrent(first)
+                , mPath(path)
+            {
+            }
+
+            const std::string& getPath() const { return mPath; }
+
+            std::optional<std::string_view> next()
+            {
+                if (mCurrent == end())
+                    return std::nullopt;
+
+                return *mCurrent++;
+            }
+
+        private:
+            RecursiveDirectoryIterator mCurrent;
+            std::string mPath;
+        };
+
         // Empty the file index and unregister archives.
         void reset();
 
@@ -92,6 +125,13 @@ namespace VFS
         /// @note the path is normalized
         /// @note May be called from any thread once the index has been built.
         RecursiveDirectoryRange getRecursiveDirectoryIterator(std::string_view path) const;
+
+        /// Recursively iterate over the elements of the given path
+        /// In practice it return all files of the VFS starting with the given path
+        /// Stores iterator to current element.
+        /// @note the path is normalized
+        /// @note May be called from any thread once the index has been built.
+        StatefulIterator getStatefulIterator(std::string_view path) const;
 
         /// Retrieve the absolute path to the file
         /// @note Throws an exception if the file can not be found.

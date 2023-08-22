@@ -77,6 +77,7 @@
     Feature #6491: Add support for Qt6
     Feature #6556: Lua API for sounds
     Feature #6726: Lua API for creating new objects
+    Feature #6864: Lua file access API
     Feature #6922: Improve launcher appearance
     Feature #6933: Support high-resolution cursor textures
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData

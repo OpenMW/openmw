@@ -43,6 +43,7 @@
 #include "soundbindings.hpp"
 #include "types/types.hpp"
 #include "uibindings.hpp"
+#include "vfsbindings.hpp"
 
 namespace MWLua
 {
@@ -331,6 +332,7 @@ namespace MWLua
             { "openmw.core", initCorePackage(context) },
             { "openmw.types", initTypesPackage(context) },
             { "openmw.util", LuaUtil::initUtilPackage(lua) },
+            { "openmw.vfs", initVFSPackage(context) },
         };
     }
 

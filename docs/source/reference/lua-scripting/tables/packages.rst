@@ -15,6 +15,8 @@
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.async <Package openmw.async>`                  | everywhere         | | Timers and callbacks.                                       |
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
+|:ref:`openmw.vfs <Package openmw.vfs>`                      | everywhere         | | Read-only access to data directories via VFS.               |
++------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.world <Package openmw.world>`                  | by global scripts  | | Read-write access to the game world.                        |
 +------------------------------------------------------------+--------------------+---------------------------------------------------------------+
 |:ref:`openmw.self <Package openmw.self>`                    | by local scripts   | | Full access to the object the script is attached to.        |

@@ -89,4 +89,17 @@ namespace VFS
         ++normalized.back();
         return { it, mIndex.lower_bound(normalized) };
     }
+
+    Manager::StatefulIterator Manager::getStatefulIterator(std::string_view path) const
+    {
+        if (path.empty())
+            return { mIndex.begin(), mIndex.end(), std::string() };
+        std::string normalized = Path::normalizeFilename(path);
+        const auto it = mIndex.lower_bound(normalized);
+        if (it == mIndex.end() || !startsWith(it->first, normalized))
+            return { it, it, normalized };
+        std::string upperBound = normalized;
+        ++upperBound.back();
+        return { it, mIndex.lower_bound(upperBound), normalized };
+    }
 }
