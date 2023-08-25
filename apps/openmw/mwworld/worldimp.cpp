@@ -3062,17 +3062,7 @@ namespace MWWorld
             if (inv.getSelectedEnchantItem() != inv.end())
             {
                 const auto& itemPtr = *inv.getSelectedEnchantItem();
-                auto [slots, _] = itemPtr.getClass().getEquipmentSlots(itemPtr);
-                int slot = 0;
-                for (std::size_t i = 0; i < slots.size(); ++i)
-                {
-                    if (inv.getSlot(slots[i]) == inv.getSelectedEnchantItem())
-                    {
-                        slot = slots[i];
-                        break;
-                    }
-                }
-                cast.cast(itemPtr, slot);
+                cast.cast(itemPtr);
             }
         }
     }
