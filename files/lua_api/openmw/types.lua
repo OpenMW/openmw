@@ -1577,7 +1577,7 @@
 
 
 --- @{#CreatureLevelledList} functions
--- @field [parent=#types] #CreatureLevelledList CreatureLevelledList
+-- @field [parent=#types] #CreatureLevelledList LevelledCreature
 
 ---
 -- @type CreatureLevelledList
@@ -1605,8 +1605,8 @@
 ---
 -- Picks a random id from the levelled list.
 -- @function [parent=#CreatureLevelledListRecord] getRandomId
--- @param openmw.core#CreatureLevelledListRecord The list
--- @param #number The maximum level to select entries for
+-- @param openmw.core#CreatureLevelledListRecord listRecord The list
+-- @param #number MaxLvl The maximum level to select entries for
 -- @return #string An id
 
 ---
