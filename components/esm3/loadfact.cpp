@@ -57,7 +57,12 @@ namespace ESM
                     ESM::RefId faction = esm.getRefId();
                     int reaction;
                     esm.getHNT(reaction, "INTV");
-                    mReactions[faction] = reaction;
+                    // Prefer the lowest reaction in case a faction is listed multiple times
+                    auto it = mReactions.find(faction);
+                    if (it == mReactions.end())
+                        mReactions.emplace(faction, reaction);
+                    else if (it->second > reaction)
+                        it->second = reaction;
                     break;
                 }
                 case SREC_DELE:

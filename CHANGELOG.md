@@ -69,6 +69,7 @@
     Bug #7459: Icons get stacked on the cursor when picking up multiple items simultaneously
     Bug #7472: Crash when enchanting last projectiles
     Bug #7505: Distant terrain does not support sample size greater than cell size
+    Bug #7553: Faction reaction loading is incorrect
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6447: Add LOD support to Object Paging
