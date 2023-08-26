@@ -766,8 +766,6 @@
 -- @return #list<#PlayerQuest>
 -- @usage -- Get stage of a specific quest
 -- stage = types.Player.quests(player)["ms_fargothring"].stage
--- @usage -- Get names of all started quests
--- for x, quest in pairs(types.Player.quests(player)) do print (quest.name) end
 -- @usage -- Start a new quest, add it to the player's quest list but don't add any journal entries
 -- types.Player.quests(player)["ms_fargothring"].stage = 0
 
