@@ -498,7 +498,7 @@ namespace ESM
                 FormId formId{};
                 getTSized<8>(formId);
                 if (applyContentFileMapping(formId))
-                    return RefId::formIdRefId(formId);
+                    return RefId(formId);
                 else
                     return RefId(); // content file was removed from load order
             }

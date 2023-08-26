@@ -126,9 +126,9 @@ namespace MWLua
 
         api["getObjectByFormId"] = [](std::string_view formIdStr) -> LObject {
             ESM::RefId refId = ESM::RefId::deserializeText(formIdStr);
-            if (!refId.is<ESM::FormIdRefId>())
+            if (!refId.is<ESM::FormId>())
                 throw std::runtime_error("FormId expected, got " + std::string(formIdStr) + "; use core.getFormId");
-            return LObject(refId.getIf<ESM::FormIdRefId>()->getValue());
+            return LObject(*refId.getIf<ESM::FormId>());
         };
 
         api["activators"] = LObjectList{ objectLists->getActivatorsInScene() };

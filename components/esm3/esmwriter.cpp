@@ -43,10 +43,10 @@ namespace ESM
                 mWriter.write(v.getValue().data(), v.getValue().size());
             }
 
-            void operator()(FormIdRefId v) const
+            void operator()(FormId v) const
             {
                 mWriter.writeT(RefIdType::FormId);
-                mWriter.writeT(v.getValue());
+                mWriter.writeT(v);
             }
 
             void operator()(GeneratedRefId v) const

@@ -21,7 +21,7 @@ namespace ESM
         // Zero is used in ESM4 as a null reference
         constexpr bool isZeroOrUnset() const { return mIndex == 0 && (mContentFile == 0 || mContentFile == -1); }
 
-        std::string toString() const;
+        std::string toString(std::string_view prefix = "") const;
         FormId32 toUint32() const;
         static constexpr FormId fromUint32(FormId32 v) { return { v & 0xffffff, static_cast<int32_t>(v >> 24) }; }
     };

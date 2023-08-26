@@ -268,9 +268,9 @@ namespace MWLua
         };
         api["getObjectByFormId"] = [](std::string_view formIdStr) -> GObject {
             ESM::RefId refId = ESM::RefId::deserializeText(formIdStr);
-            if (!refId.is<ESM::FormIdRefId>())
+            if (!refId.is<ESM::FormId>())
                 throw std::runtime_error("FormId expected, got " + std::string(formIdStr) + "; use core.getFormId");
-            return GObject(refId.getIf<ESM::FormIdRefId>()->getValue());
+            return GObject(*refId.getIf<ESM::FormId>());
         };
 
         // Creates a new record in the world database.
