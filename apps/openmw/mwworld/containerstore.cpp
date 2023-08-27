@@ -350,7 +350,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
     const ESM::RefId& script = item.getClass().getScript(item);
     if (!script.empty())
     {
-        if (mActor == player)
+        const Ptr& contPtr = getPtr();
+        if (contPtr == player)
         {
             // Items in player's inventory have cell set to 0, so their scripts will never be removed
             item.mCell = nullptr;
@@ -359,10 +360,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
         {
             // Set mCell to the cell of the container/actor, so that the scripts are removed properly when
             // the cell of the container/actor goes inactive
-            if (!mPtr.isEmpty())
-                item.mCell = mPtr.getCell();
-            else if (!mActor.isEmpty())
-                item.mCell = mActor.getCell();
+            if (!contPtr.isEmpty())
+                item.mCell = contPtr.getCell();
         }
 
         item.mContainerStore = this;
@@ -371,12 +370,12 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::add(
 
         // Set OnPCAdd special variable, if it is declared
         // Make sure to do this *after* we have added the script to LocalScripts
-        if (mActor == player)
+        if (contPtr == player)
             item.getRefData().getLocals().setVarByInt(script, "onpcadd", 1);
     }
 
     // we should not fire event for InventoryStore yet - it has some custom logic
-    if (mListener && !(!mActor.isEmpty() && mActor.getClass().hasInventoryStore(mActor)))
+    if (mListener && typeid(*this) == typeid(ContainerStore))
         mListener->itemAdded(item, count);
 
     return it;
@@ -415,8 +414,8 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::addImp(const Ptr& ptr, 
     for (MWWorld::ContainerStoreIterator iter(begin(type)); iter != end(); ++iter)
     {
         // Don't stack with equipped items
-        if (!mActor.isEmpty() && mActor.getClass().hasInventoryStore(mActor))
-            if (mActor.getClass().getInventoryStore(mActor).isEquipped(*iter))
+        if (auto* inventoryStore = dynamic_cast<InventoryStore*>(this))
+            if (inventoryStore->isEquipped(*iter))
                 continue;
 
         if (stacks(*iter, ptr))
@@ -586,7 +585,7 @@ int MWWorld::ContainerStore::remove(const Ptr& item, int count, bool equipReplac
     flagAsModified();
 
     // we should not fire event for InventoryStore yet - it has some custom logic
-    if (mListener && !(!mActor.isEmpty() && mActor.getClass().hasInventoryStore(mActor)))
+    if (mListener && typeid(*this) == typeid(ContainerStore))
         mListener->itemRemoved(item, count - toRemove);
 
     // number of removed items
@@ -694,13 +693,14 @@ bool MWWorld::ContainerStore::isResolved() const
 
 void MWWorld::ContainerStore::resolve()
 {
-    if (!mResolved && !mPtr.isEmpty())
+    const Ptr& container = getPtr();
+    if (!mResolved && !container.isEmpty() && container.getType() == ESM::REC_CONT)
     {
         for (const auto&& ptr : *this)
             ptr.getRefData().setCount(0);
         Misc::Rng::Generator prng{ mSeed };
-        fill(mPtr.get<ESM::Container>()->mBase->mInventory, ESM::RefId(), prng);
-        addScripts(*this, mPtr.mCell);
+        fill(container.get<ESM::Container>()->mBase->mInventory, ESM::RefId(), prng);
+        addScripts(*this, container.mCell);
     }
     mModified = true;
 }
@@ -715,13 +715,14 @@ MWWorld::ResolutionHandle MWWorld::ContainerStore::resolveTemporarily()
         listener = std::make_shared<ResolutionListener>(*this);
         mResolutionListener = listener;
     }
-    if (!mResolved && !mPtr.isEmpty())
+    const Ptr& container = getPtr();
+    if (!mResolved && !container.isEmpty() && container.getType() == ESM::REC_CONT)
     {
         for (const auto&& ptr : *this)
             ptr.getRefData().setCount(0);
         Misc::Rng::Generator prng{ mSeed };
-        fill(mPtr.get<ESM::Container>()->mBase->mInventory, ESM::RefId(), prng);
-        addScripts(*this, mPtr.mCell);
+        fill(container.get<ESM::Container>()->mBase->mInventory, ESM::RefId(), prng);
+        addScripts(*this, container.mCell);
     }
     return { listener };
 }
@@ -731,12 +732,13 @@ void MWWorld::ContainerStore::unresolve()
     if (mModified)
         return;
 
-    if (mResolved && !mPtr.isEmpty())
+    const Ptr& container = getPtr();
+    if (mResolved && !container.isEmpty() && container.getType() == ESM::REC_CONT)
     {
         for (const auto&& ptr : *this)
             ptr.getRefData().setCount(0);
-        fillNonRandom(mPtr.get<ESM::Container>()->mBase->mInventory, ESM::RefId(), mSeed);
-        addScripts(*this, mPtr.mCell);
+        fillNonRandom(container.get<ESM::Container>()->mBase->mInventory, ESM::RefId(), mSeed);
+        addScripts(*this, container.mCell);
         mResolved = false;
     }
 }

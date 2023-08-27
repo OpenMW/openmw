@@ -159,6 +159,7 @@
 -- @field #string ownerFactionId Faction who owns the object (nil if missing). Global and self scripts can set the value.
 -- @field #number ownerFactionRank Rank required to be allowed to pick up the object. Global and self scripts can set the value.
 -- @field #Cell cell The cell where the object currently is. During loading a game and for objects in an inventory or a container `cell` is nil.
+-- @field #GameObject parentContainer Container or actor that contains (or has in inventory) this object. It is nil if the object is in a cell.
 -- @field #any type Type of the object (one of the tables from the package @{openmw.types#types}).
 -- @field #number count Count (>1 means a stack of objects).
 -- @field #string recordId Returns record ID of the object in lowercase.

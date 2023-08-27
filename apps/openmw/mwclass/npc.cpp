@@ -297,6 +297,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
+            MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
             bool recalculate = false;
             auto tempData = std::make_unique<NpcCustomData>();
             NpcCustomData* data = tempData.get();
@@ -397,9 +398,10 @@ namespace MWClass
             // inventory
             // setting ownership is used to make the NPC auto-equip his initial equipment only, and not bartered items
             auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-            getInventoryStore(ptr).fill(ref->mBase->mInventory, ptr.getCellRef().getRefId(), prng);
-
-            getInventoryStore(ptr).autoEquip();
+            MWWorld::InventoryStore& inventory = getInventoryStore(ptr);
+            inventory.setPtr(ptr);
+            inventory.fill(ref->mBase->mInventory, ptr.getCellRef().getRefId(), prng);
+            inventory.autoEquip();
         }
     }
 
@@ -956,18 +958,13 @@ namespace MWClass
 
     MWWorld::ContainerStore& Npc::getContainerStore(const MWWorld::Ptr& ptr) const
     {
-        ensureCustomData(ptr);
-        auto& store = ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
-        store.setActor(ptr);
-        return store;
+        return getInventoryStore(ptr);
     }
 
     MWWorld::InventoryStore& Npc::getInventoryStore(const MWWorld::Ptr& ptr) const
     {
         ensureCustomData(ptr);
-        auto& store = ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
-        store.setActor(ptr);
-        return store;
+        return ptr.getRefData().getCustomData()->asNpcCustomData().mInventoryStore;
     }
 
     ESM::RefId Npc::getScript(const MWWorld::ConstPtr& ptr) const
@@ -1362,8 +1359,13 @@ namespace MWClass
                 if (npcState.mCreatureStats.mMissingACDT)
                     ensureCustomData(ptr);
                 else
+                {
                     // Create a CustomData, but don't fill it from ESM records (not needed)
-                    ptr.getRefData().setCustomData(std::make_unique<NpcCustomData>());
+                    auto data = std::make_unique<NpcCustomData>();
+                    MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
+                    data->mInventoryStore.setPtr(ptr);
+                    ptr.getRefData().setCustomData(std::move(data));
+                }
             }
         }
         else

@@ -21,6 +21,7 @@
 #include "../mwworld/failedaction.hpp"
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/nullaction.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwgui/tooltips.hpp"
 #include "../mwgui/ustring.hpp"
@@ -68,10 +69,12 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
+            MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
             MWWorld::LiveCellRef<ESM::Container>* ref = ptr.get<ESM::Container>();
 
             // store
             ptr.getRefData().setCustomData(std::make_unique<ContainerCustomData>(*ref->mBase, ptr.getCell()));
+            getContainerStore(ptr).setPtr(ptr);
 
             MWBase::Environment::get().getWorld()->addContainerScripts(ptr, ptr.getCell());
         }
@@ -223,9 +226,7 @@ namespace MWClass
     MWWorld::ContainerStore& Container::getContainerStore(const MWWorld::Ptr& ptr) const
     {
         ensureCustomData(ptr);
-        auto& data = ptr.getRefData().getCustomData()->asContainerCustomData();
-        data.mStore.mPtr = ptr;
-        return data.mStore;
+        return ptr.getRefData().getCustomData()->asContainerCustomData().mStore;
     }
 
     ESM::RefId Container::getScript(const MWWorld::ConstPtr& ptr) const
@@ -312,6 +313,9 @@ namespace MWClass
 
         const ESM::ContainerState& containerState = state.asContainerState();
         ptr.getRefData().setCustomData(std::make_unique<ContainerCustomData>(containerState.mInventory));
+
+        MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
+        getContainerStore(ptr).setPtr(ptr);
     }
 
     void Container::writeAdditionalState(const MWWorld::ConstPtr& ptr, ESM::ObjectState& state) const
