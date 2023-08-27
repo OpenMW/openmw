@@ -108,7 +108,8 @@ namespace LuaUtf8
             return result;
         };
 
-        utf8["codes"] = [pos_byte = std::vector<int64_t>{ 1 }](const std::string_view& s) {
+        utf8["codes"] = [](const std::string_view& s) {
+            std::vector<int64_t> pos_byte{ 1 };
             return sol::as_function([s, pos_byte]() mutable -> sol::optional<std::pair<int64_t, int64_t>> {
                 if (pos_byte.back() <= static_cast<int64_t>(s.size()))
                 {
