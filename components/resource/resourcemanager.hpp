@@ -3,6 +3,8 @@
 
 #include <osg/ref_ptr>
 
+#include <components/settings/values.hpp>
+
 #include "objectcache.hpp"
 
 namespace VFS
@@ -39,10 +41,11 @@ namespace Resource
     public:
         typedef GenericObjectCache<KeyType> CacheType;
 
-        GenericResourceManager(const VFS::Manager* vfs)
+        explicit GenericResourceManager(
+            const VFS::Manager* vfs, double expiryDelay = Settings::cells().mCacheExpiryDelay)
             : mVFS(vfs)
             , mCache(new CacheType)
-            , mExpiryDelay(0.0)
+            , mExpiryDelay(expiryDelay)
         {
         }
 
@@ -77,8 +80,13 @@ namespace Resource
     class ResourceManager : public GenericResourceManager<std::string>
     {
     public:
-        ResourceManager(const VFS::Manager* vfs)
+        explicit ResourceManager(const VFS::Manager* vfs)
             : GenericResourceManager<std::string>(vfs)
+        {
+        }
+
+        explicit ResourceManager(const VFS::Manager* vfs, double expiryDelay)
+            : GenericResourceManager<std::string>(vfs, expiryDelay)
         {
         }
     };
