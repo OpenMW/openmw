@@ -4,11 +4,16 @@
 
 namespace
 {
-    static constexpr std::string_view UTF8PATT = "[%z\x01-\x7F\xC2-\xF4][\x80-\xBF]*"; // %z is deprecated in Lua5.2
-    static constexpr uint32_t MAXUTF = 0x7FFFFFFFu;
-    static constexpr uint32_t MAXUNICODE = 0x10FFFFu;
+    constexpr std::string_view UTF8PATT = "[%z\x01-\x7F\xC2-\xF4][\x80-\xBF]*"; // %z is deprecated in Lua5.2
+    constexpr uint32_t MAXUTF = 0x7FFFFFFFu;
+    constexpr uint32_t MAXUNICODE = 0x10FFFFu;
 
-    inline static double getInteger(const sol::stack_proxy arg, const size_t& n, const std::string_view& name)
+    inline bool isNilOrNone(const sol::stack_proxy arg)
+    {
+        return (arg.get_type() == sol::type::lua_nil || arg.get_type() == sol::type::none);
+    }
+
+    inline double getInteger(const sol::stack_proxy arg, const size_t& n, const std::string_view& name)
     {
         double integer;
         if (!arg.is<double>())
@@ -22,8 +27,18 @@ namespace
         return integer;
     }
 
+    inline void posrelat(int64_t& pos, const size_t& len)
+    {
+        if (pos >= 0)
+            /* no change */;
+        else if (0u - pos > static_cast<int64_t>(len))
+            pos = 0;
+        else
+            pos = len + pos + 1;
+    }
+
     // returns: first - character pos in bytes, second - character codepoint
-    static std::pair<int64_t, int64_t> poscodes(const std::string_view& s, std::vector<int64_t>& pos_byte)
+    std::pair<int64_t, int64_t> poscodes(const std::string_view& s, std::vector<int64_t>& pos_byte)
     {
         const int64_t pos = pos_byte.back() - 1;
         const unsigned char ch = static_cast<unsigned char>(s[pos]);
@@ -106,6 +121,100 @@ namespace LuaUtf8
                 return sol::nullopt;
             });
         };
+
+        utf8["len"] = [](const std::string_view& s,
+                          const sol::variadic_args args) -> std::variant<size_t, std::pair<sol::object, int64_t>> {
+            size_t len = s.size();
+            int64_t iv = isNilOrNone(args[0]) ? 1 : getInteger(args[0], 2, "len");
+            int64_t fv = isNilOrNone(args[1]) ? -1 : getInteger(args[1], 3, "len");
+
+            posrelat(iv, len);
+            posrelat(fv, len);
+
+            if (iv <= 0)
+                throw std::runtime_error("bad argument #2 to 'len' (initial position out of bounds)");
+            if (fv > static_cast<int64_t>(len))
+                throw std::runtime_error("bad argument #3 to 'len' (final position out of bounds)");
+
+            if (len == 0)
+                return len;
+
+            std::vector<int64_t> pos_byte = { iv };
+
+            while (pos_byte.back() <= fv)
+            {
+                if (poscodes(s, pos_byte).second == -1)
+                    return std::pair(sol::lua_nil, pos_byte.back());
+            }
+            return pos_byte.size() - 1;
+        };
+
+        utf8["codepoint"]
+            = [](const std::string_view& s, const sol::variadic_args args) -> sol::as_returns_t<std::vector<int64_t>> {
+            size_t len = s.size();
+            int64_t iv = isNilOrNone(args[0]) ? 1 : getInteger(args[0], 2, "codepoint");
+            int64_t fv = isNilOrNone(args[1]) ? iv : getInteger(args[1], 3, "codepoint");
+
+            posrelat(iv, len);
+            posrelat(fv, len);
+
+            if (iv <= 0)
+                throw std::runtime_error("bad argument #2 to 'codepoint' (initial position out of bounds)");
+            if (fv > static_cast<int64_t>(len))
+                throw std::runtime_error("bad argument #3 to 'codepoint' (final position out of bounds)");
+
+            if (iv > fv)
+                return sol::as_returns(std::vector<int64_t>{}); /* empty interval; return nothing */
+
+            std::vector<int64_t> pos_byte = { iv };
+            std::vector<int64_t> codepoints;
+
+            while (pos_byte.back() <= fv)
+            {
+                codepoints.push_back(poscodes(s, pos_byte).second);
+                if (codepoints.back() == -1)
+                    throw std::runtime_error("Invalid UTF-8 code at position " + std::to_string(pos_byte.size()));
+            }
+
+            return sol::as_returns(std::move(codepoints));
+        };
+
+        utf8["offset"]
+            = [](const std::string_view& s, const int64_t n, const sol::variadic_args args) -> sol::optional<int64_t> {
+            size_t len = s.size();
+            int64_t iv = isNilOrNone(args[0]) ? ((n >= 0) ? 1 : s.size() + 1) : getInteger(args[0], 3, "offset");
+            std::vector<int64_t> pos_byte = { 1 };
+
+            posrelat(iv, len);
+
+            if (iv > static_cast<int64_t>(len) + 1)
+                throw std::runtime_error("bad argument #3 to 'offset' (position out of bounds)");
+
+            while (pos_byte.back() <= static_cast<int64_t>(len))
+                poscodes(s, pos_byte);
+
+            for (auto it = pos_byte.begin(); it != pos_byte.end(); ++it)
+                if (*it == iv)
+                {
+                    if (n <= 0)
+                        if ((it + n) >= pos_byte.begin())
+                            return *(it + n);
+                    if (n > 0)
+                        if ((it + n - 1) < pos_byte.end())
+                            return *(it + n - 1);
+                    break;
+                }
+                else if (*it > iv) /* a continuation byte */
+                {
+                    if (n == 0)
+                        return *(it - 1); /* special case */
+                    else
+                        throw std::runtime_error("initial position is a continuation byte");
+                }
+
+            return sol::nullopt;
+        };
+
         return utf8;
     }
 }
