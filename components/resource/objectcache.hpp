@@ -83,8 +83,8 @@ namespace Resource
                 {
                     if (oitr->second.second <= expiryTime)
                     {
-                        if (oitr->second.first != nullptr)
-                            objectsToRemove.push_back(oitr->second.first);
+                        if (oitr->second.mValue != nullptr)
+                            objectsToRemove.push_back(std::move(oitr->second.first));
                         _objectCache.erase(oitr++);
                     }
                     else
