@@ -225,10 +225,6 @@ if(APPLE AND BUILD_OPENCS)
         MACOSX_PACKAGE_LOCATION Resources/resources)
     set_source_files_properties(${OPENCS_OPENMW_CFG} PROPERTIES
         MACOSX_PACKAGE_LOCATION Resources)
-
-    add_custom_command(TARGET openmw-cs
-        POST_BUILD
-        COMMAND cp "${OpenMW_BINARY_DIR}/resources/version" "${OPENCS_BUNDLE_RESOURCES_DIR}/resources")
 endif()
 
 target_link_libraries(openmw-cs-lib

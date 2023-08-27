@@ -1,6 +1,8 @@
 Built-in events
 ===============
 
+.. include:: version.rst
+
 Actor events
 ------------
 

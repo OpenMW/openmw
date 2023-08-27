@@ -1,6 +1,8 @@
 Overview of Lua scripting
 #########################
 
+.. include:: version.rst
+
 Language and sandboxing
 =======================
 

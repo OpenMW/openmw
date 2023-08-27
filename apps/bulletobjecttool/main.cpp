@@ -146,8 +146,7 @@ namespace
         config.filterOutNonExistingPaths(dataDirs);
 
         const auto resDir = variables["resources"].as<Files::MaybeQuotedPath>();
-        const auto v = Version::getOpenmwVersion(resDir);
-        Log(Debug::Info) << v.describe();
+        Log(Debug::Info) << Version::getOpenmwVersionDescription();
         dataDirs.insert(dataDirs.begin(), resDir / "vfs");
         const auto fileCollections = Files::Collections(dataDirs);
         const auto archives = variables["fallback-archive"].as<StringsVector>();

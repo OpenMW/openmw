@@ -774,7 +774,7 @@ void CSVDoc::View::tutorial()
 void CSVDoc::View::infoAbout()
 {
     // Get current OpenMW version
-    QString versionInfo = (Version::getOpenmwVersionDescription(mDocument->getResourceDir()) +
+    QString versionInfo = (Version::getOpenmwVersionDescription() +
 #if defined(__x86_64__) || defined(_M_X64)
         " (64-bit)")
                               .c_str();

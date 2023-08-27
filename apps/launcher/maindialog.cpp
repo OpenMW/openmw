@@ -174,14 +174,13 @@ Launcher::FirstRunDialogResult Launcher::MainDialog::showFirstRunDialog()
 void Launcher::MainDialog::setVersionLabel()
 {
     // Add version information to bottom of the window
-    Version::Version v = Version::getOpenmwVersion(mGameSettings.value("resources").toUtf8().constData());
-
-    QString revision(QString::fromUtf8(v.mCommitHash.c_str()));
-    QString tag(QString::fromUtf8(v.mTagHash.c_str()));
+    QString revision(QString::fromUtf8(Version::getCommitHash().data(), Version::getCommitHash().size()));
+    QString tag(QString::fromUtf8(Version::getTagHash().data(), Version::getTagHash().size()));
 
     versionLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-    if (!v.mVersion.empty() && (revision.isEmpty() || revision == tag))
-        versionLabel->setText(tr("OpenMW %1 release").arg(QString::fromUtf8(v.mVersion.c_str())));
+    if (!Version::getVersion().empty() && (revision.isEmpty() || revision == tag))
+        versionLabel->setText(
+            tr("OpenMW %1 release").arg(QString::fromUtf8(Version::getVersion().data(), Version::getVersion().size())));
     else
         versionLabel->setText(tr("OpenMW development (%1)").arg(revision.left(10)));
 

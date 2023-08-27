@@ -62,6 +62,13 @@ macro (add_component_dir dir)
             list (APPEND cppfiles "${f}")
         endforeach (f)
 
+        if (u MATCHES ".*[ch]pp")
+            list (APPEND files "${dir}/${u}")
+            list (APPEND COMPONENT_FILES "${dir}/${u}")
+        endif()
+        if (u MATCHES ".*cpp")
+            list (APPEND cppfiles "${dir}/${u}")
+        endif()
     endforeach (u)
 
     if (OPENMW_UNITY_BUILD)

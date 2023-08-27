@@ -1,6 +1,8 @@
 Built-in AI packages
 ====================
 
+.. include:: version.rst
+
 Starting an AI package
 ----------------------
 

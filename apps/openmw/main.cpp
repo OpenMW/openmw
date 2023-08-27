@@ -58,27 +58,14 @@ bool parseOptions(int argc, char** argv, OMW::Engine& engine, Files::Configurati
 
     if (variables.count("version"))
     {
-        cfgMgr.readConfiguration(variables, desc, true);
-
-        Version::Version v
-            = Version::getOpenmwVersion(variables["resources"]
-                                            .as<Files::MaybeQuotedPath>()
-                                            .u8string()); // This call to u8string is redundant, but required to build
-                                                          // on MSVC 14.26 due to implementation bugs.
-        getRawStdout() << v.describe() << std::endl;
+        getRawStdout() << Version::getOpenmwVersionDescription() << std::endl;
         return false;
     }
 
     cfgMgr.readConfiguration(variables, desc);
 
     setupLogging(cfgMgr.getLogPath(), "OpenMW");
-
-    Version::Version v
-        = Version::getOpenmwVersion(variables["resources"]
-                                        .as<Files::MaybeQuotedPath>()
-                                        .u8string()); // This call to u8string is redundant, but required to build on
-                                                      // MSVC 14.26 due to implementation bugs.
-    Log(Debug::Info) << v.describe();
+    Log(Debug::Info) << Version::getOpenmwVersionDescription();
 
     Settings::Manager::load(cfgMgr);
 

@@ -28,4 +28,4 @@ endif ()
 
 include(${MACROSFILE})
 
-configure_resource_file(${VERSION_IN_FILE} ${VERSION_FILE_PATH_BASE} ${VERSION_FILE_PATH_RELATIVE})
+configure_file(${VERSION_IN_FILE} ${VERSION_FILE})

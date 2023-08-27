@@ -6,21 +6,22 @@ if(APPLE)
 endif(APPLE)
 
 # Version file
-set (VERSION_IN_FILE "${OpenMW_SOURCE_DIR}/files/version.in")
-set (VERSION_FILE_PATH_BASE "${OpenMW_BINARY_DIR}")
-set (VERSION_FILE_PATH_RELATIVE resources/version)
+set (VERSION_IN_FILE "${OpenMW_SOURCE_DIR}/components/version/version.cpp.in")
+set (VERSION_FILE "${OpenMW_SOURCE_DIR}/components/version/version.cpp")
 if (GIT_CHECKOUT)
     get_generator_is_multi_config(multi_config)
-    add_custom_target (git-version
+    add_custom_command (
+       OUTPUT ${VERSION_FILE}
+       DEPENDS ${VERSION_IN_FILE}
        COMMAND ${CMAKE_COMMAND}
             -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
             -DPROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}
             -DVERSION_IN_FILE=${VERSION_IN_FILE}
-            -DVERSION_FILE_PATH_BASE=${VERSION_FILE_PATH_BASE}
-            -DVERSION_FILE_PATH_RELATIVE=${VERSION_FILE_PATH_RELATIVE}
+            -DVERSION_FILE=${VERSION_FILE}
             -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
             -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
             -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
+            -DOPENMW_LUA_API_REVISION=${OPENMW_LUA_API_REVISION}
             -DOPENMW_VERSION=${OPENMW_VERSION}
             -DMACROSFILE=${CMAKE_SOURCE_DIR}/cmake/OpenMWMacros.cmake
             "-DCMAKE_CONFIGURATION_TYPES=${CMAKE_CONFIGURATION_TYPES}"
@@ -28,7 +29,7 @@ if (GIT_CHECKOUT)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/GitVersion.cmake
             VERBATIM)
 else (GIT_CHECKOUT)
-    configure_resource_file(${VERSION_IN_FILE} ${VERSION_FILE_PATH_BASE} ${VERSION_FILE_PATH_RELATIVE})
+    configure_file(${VERSION_IN_FILE} ${VERSION_FILE})
 endif (GIT_CHECKOUT)
 
 # source files
@@ -311,6 +312,7 @@ add_component_dir (sdlutil
 
 add_component_dir (version
     version
+    version.cpp
     )
 
 add_component_dir (fallback
@@ -550,10 +552,6 @@ if (USE_QT)
         target_link_libraries(components_qt gcov)
     endif()
 endif()
-
-if (GIT_CHECKOUT)
-    add_dependencies (components git-version)
-endif (GIT_CHECKOUT)
 
 if (OSG_STATIC AND CMAKE_SYSTEM_NAME MATCHES "Linux")
     find_package(X11 REQUIRED COMPONENTS Xinerama Xrandr)

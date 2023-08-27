@@ -2,6 +2,8 @@
 Lua API reference
 #################
 
+.. include:: version.rst
+
 .. toctree::
     :hidden:
 
