@@ -23,11 +23,11 @@ namespace Resource
     {
     public:
         virtual ~BaseResourceManager() = default;
-        virtual void updateCache(double referenceTime) {}
-        virtual void clearCache() {}
-        virtual void setExpiryDelay(double expiryDelay) {}
-        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const {}
-        virtual void releaseGLObjects(osg::State* state) {}
+        virtual void updateCache(double referenceTime) = 0;
+        virtual void clearCache() = 0;
+        virtual void setExpiryDelay(double expiryDelay) = 0;
+        virtual void reportStats(unsigned int frameNumber, osg::Stats* stats) const = 0;
+        virtual void releaseGLObjects(osg::State* state) = 0;
     };
 
     /// @brief Base class for managers that require a virtual file system and object cache.
