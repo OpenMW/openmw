@@ -9,6 +9,8 @@
 #include <map>
 #include <string>
 
+#include "../testing_util.hpp"
+
 MATCHER(IsPrint, "")
 {
     return std::isprint(arg) != 0;
@@ -36,6 +38,12 @@ namespace ESM
         {
             const RefId refId = RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 });
             EXPECT_FALSE(refId.empty());
+        }
+
+        TEST(ESMRefIdTest, FormIdRefIdMustHaveContentFile)
+        {
+            EXPECT_TRUE(RefId(FormId()).empty());
+            EXPECT_ERROR(RefId(FormId{ .mIndex = 1, .mContentFile = -1 }), "RefId can't be a generated FormId");
         }
 
         TEST(ESMRefIdTest, defaultConstructedIsEqualToItself)
@@ -104,11 +112,10 @@ namespace ESM
             EXPECT_EQ(stringRefId, refId);
         }
 
-        TEST(ESMRefIdTest, equalityIsDefinedForFormRefIdAndRefId)
+        TEST(ESMRefIdTest, equalityIsDefinedForFormIdAndRefId)
         {
-            const FormIdRefId formIdRefId({ .mIndex = 42, .mContentFile = 0 });
-            const RefId refId = RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 });
-            EXPECT_EQ(formIdRefId, refId);
+            const FormId formId{ .mIndex = 42, .mContentFile = 0 };
+            EXPECT_EQ(formId, RefId(formId));
         }
 
         TEST(ESMRefIdTest, stringRefIdIsEqualToItself)
@@ -139,9 +146,9 @@ namespace ESM
 
         TEST(ESMRefIdTest, lessThanIsDefinedForFormRefIdAndRefId)
         {
-            const FormIdRefId formIdRefId({ .mIndex = 13, .mContentFile = 0 });
-            const RefId refId = RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 });
-            EXPECT_LT(formIdRefId, refId);
+            const FormId formId{ .mIndex = 13, .mContentFile = 0 };
+            const RefId refId = RefId(FormId{ .mIndex = 42, .mContentFile = 0 });
+            EXPECT_LT(formId, refId);
         }
 
         TEST(ESMRefIdTest, stringRefIdHasCaseInsensitiveHash)
@@ -189,11 +196,6 @@ namespace ESM
             const std::string_view stringView = "42";
             EXPECT_TRUE(stringView < formIdRefId);
             EXPECT_FALSE(formIdRefId < stringView);
-        }
-
-        TEST(ESMRefIdTest, formIdRefIdIndexShouldHaveOnly24SignificantBits)
-        {
-            EXPECT_THROW(FormIdRefId(FormId{ .mIndex = 1 << 25, .mContentFile = 0 }), std::invalid_argument);
         }
 
         TEST(ESMRefIdTest, canBeUsedAsMapKeyWithLookupByStringView)
@@ -256,8 +258,6 @@ namespace ESM
             { RefId::stringRefId("foo"), "foo" },
             { RefId::stringRefId(std::string({ 'a', 0, -1, '\n', '\t' })), { 'a', 0, -1, '\n', '\t' } },
             { RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 }), "0x2a" },
-            { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = std::numeric_limits<std::int32_t>::min() }),
-                "0xff80000000ffffff" },
             { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = std::numeric_limits<std::int32_t>::max() }),
                 "0x7fffffffffffff" },
             { RefId::generated(42), "0x2a" },
@@ -302,8 +302,6 @@ namespace ESM
             { RefId::stringRefId("\xff\x9b"), "\"\\xff\\x9b\"" },
             { RefId::stringRefId("\xd0\xd0"), "\"\\xd0\\xd0\"" },
             { RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 }), "FormId:0x2a" },
-            { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = std::numeric_limits<std::int32_t>::min() }),
-                "FormId:0xff80000000ffffff" },
             { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = std::numeric_limits<std::int32_t>::max() }),
                 "FormId:0x7fffffffffffff" },
             { RefId::generated(42), "Generated:0x2a" },
@@ -344,9 +342,6 @@ namespace ESM
             { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = 0x1abc }), "FormId:0x1abcffffff" },
             { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = std::numeric_limits<std::int32_t>::max() }),
                 "FormId:0x7fffffffffffff" },
-            { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = -1 }), "FormId:0xffffffffffffffff" },
-            { RefId::formIdRefId({ .mIndex = 0xffffff, .mContentFile = std::numeric_limits<std::int32_t>::min() }),
-                "FormId:0xff80000000ffffff" },
             { RefId::generated(0), "Generated:0x0" },
             { RefId::generated(1), "Generated:0x1" },
             { RefId::generated(0x1f), "Generated:0x1f" },
@@ -390,9 +385,9 @@ namespace ESM
         };
 
         template <>
-        struct GenerateRefId<FormIdRefId>
+        struct GenerateRefId<FormId>
         {
-            static RefId call() { return RefId::formIdRefId({ .mIndex = 42, .mContentFile = 0 }); }
+            static RefId call() { return FormId{ .mIndex = 42, .mContentFile = 0 }; }
         };
 
         template <>

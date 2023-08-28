@@ -120,7 +120,6 @@ add_component_dir (to_utf8
 
 add_component_dir(esm attr common defs esmcommon records util luascripts format refid esmbridge esmterrain
     formid
-    formidrefid
     stringrefid
     generatedrefid
     indexrefid

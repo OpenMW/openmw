@@ -22,6 +22,8 @@ namespace CSMWorld
 
             std::string operator()(ESM::StringRefId value) const { return value.getValue(); }
 
+            std::string operator()(ESM::FormId value) const { return value.toString("FormId:"); }
+
             std::string operator()(ESM::IndexRefId value) const
             {
                 switch (value.getRecordType())

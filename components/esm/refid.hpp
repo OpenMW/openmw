@@ -11,7 +11,7 @@
 #include <components/misc/notnullptr.hpp>
 
 #include "esm3exteriorcellrefid.hpp"
-#include "formidrefid.hpp"
+#include "formid.hpp"
 #include "generatedrefid.hpp"
 #include "indexrefid.hpp"
 #include "stringrefid.hpp"
@@ -24,11 +24,9 @@ namespace ESM
 
         constexpr bool operator<(EmptyRefId /*rhs*/) const { return false; }
 
-        std::string toString() const;
+        std::string toString() const { return ""; }
 
-        std::string toDebugString() const;
-
-        friend std::ostream& operator<<(std::ostream& stream, EmptyRefId value);
+        std::string toDebugString() const { return "Empty{}"; }
     };
 
     enum class RefIdType : std::uint8_t
@@ -48,8 +46,7 @@ namespace ESM
     class RefId
     {
     public:
-        using Value
-            = std::variant<EmptyRefId, ESM3ExteriorCellRefId, StringRefId, FormIdRefId, GeneratedRefId, IndexRefId>;
+        using Value = std::variant<EmptyRefId, ESM3ExteriorCellRefId, StringRefId, FormId, GeneratedRefId, IndexRefId>;
 
         // Constructs RefId from a serialized string containing byte by byte copy of RefId::mValue.
         static ESM::RefId deserialize(std::string_view value);
@@ -85,17 +82,14 @@ namespace ESM
         {
         }
 
-        constexpr RefId(FormIdRefId value)
-            : mValue(value)
-        {
-        }
-
         constexpr RefId(FormId value)
         {
             if (value.isZeroOrUnset())
                 mValue = EmptyRefId();
+            else if (value.hasContentFile())
+                mValue = value;
             else
-                mValue = FormIdRefId(value);
+                throw std::logic_error("RefId can't be a generated FormId");
         }
 
         constexpr RefId(GeneratedRefId value) noexcept
@@ -164,7 +158,7 @@ namespace ESM
 
         friend bool operator<(std::string_view lhs, RefId rhs);
 
-        friend std::ostream& operator<<(std::ostream& stream, RefId value);
+        friend std::ostream& operator<<(std::ostream& stream, RefId value) { return stream << value.toDebugString(); }
 
         template <class F, class... T>
         friend constexpr auto visit(F&& f, T&&... v)

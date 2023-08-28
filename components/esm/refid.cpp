@@ -116,27 +116,14 @@ namespace ESM
 
             std::string operator()(ESM::StringRefId v) const { return Misc::StringUtils::lowerCase(v.getValue()); }
 
+            std::string operator()(ESM::FormId v) const { return v.toString(formIdRefIdPrefix); }
+
             template <class T>
             std::string operator()(const T& v) const
             {
                 return v.toDebugString();
             }
         };
-    }
-
-    std::string EmptyRefId::toString() const
-    {
-        return std::string();
-    }
-
-    std::string EmptyRefId::toDebugString() const
-    {
-        return "Empty{}";
-    }
-
-    std::ostream& operator<<(std::ostream& stream, EmptyRefId value)
-    {
-        return stream << value.toDebugString();
     }
 
     bool RefId::operator==(std::string_view rhs) const
@@ -152,11 +139,6 @@ namespace ESM
     bool operator<(std::string_view lhs, RefId rhs)
     {
         return std::visit(IsGreaterThanString{ lhs }, rhs.mValue);
-    }
-
-    std::ostream& operator<<(std::ostream& stream, RefId value)
-    {
-        return std::visit([&](auto v) -> std::ostream& { return stream << v; }, value.mValue);
     }
 
     RefId RefId::stringRefId(std::string_view value)
@@ -178,7 +160,14 @@ namespace ESM
 
     std::string RefId::toDebugString() const
     {
-        return std::visit([](auto v) { return v.toDebugString(); }, mValue);
+        return std::visit(
+            [](auto v) {
+                if constexpr (std::is_same_v<decltype(v), FormId>)
+                    return v.toString(formIdRefIdPrefix);
+                else
+                    return v.toDebugString();
+            },
+            mValue);
     }
 
     bool RefId::startsWith(std::string_view prefix) const
