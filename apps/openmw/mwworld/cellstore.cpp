@@ -1021,6 +1021,8 @@ namespace MWWorld
         for (const auto& [base, store] : mMovedToAnotherCell)
         {
             ESM::RefNum refNum = base->mRef.getRefNum();
+            if (base->mData.isDeleted() && !refNum.hasContentFile())
+                continue; // filtered out in writeReferenceCollection
             ESM::RefId movedTo = store->getCell()->getId();
 
             writer.writeFormId(refNum, true, "MVRF");
