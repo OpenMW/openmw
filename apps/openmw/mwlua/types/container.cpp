@@ -28,15 +28,9 @@ namespace MWLua
 
     void addContainerBindings(sol::table container, const Context& context)
     {
-        container["content"] = sol::overload(
-            [](const LObject& o) {
-                containerPtr(o);
-                return Inventory<LObject>{ o };
-            },
-            [](const GObject& o) {
-                containerPtr(o);
-                return Inventory<GObject>{ o };
-            });
+        container["content"] = sol::overload([](const LObject& o) { return Inventory<LObject>{ o }; },
+            [](const GObject& o) { return Inventory<GObject>{ o }; });
+        container["inventory"] = container["content"];
         container["encumbrance"] = [](const Object& obj) -> float {
             const MWWorld::Ptr& ptr = containerPtr(obj);
             return ptr.getClass().getEncumbrance(ptr);
