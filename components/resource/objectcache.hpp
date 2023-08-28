@@ -195,11 +195,21 @@ namespace Resource
             return _objectCache.size();
         }
 
+        template <class K>
+        std::optional<std::pair<KeyType, osg::ref_ptr<osg::Object>>> lowerBound(K&& key)
+        {
+            const std::lock_guard<std::mutex> lock(_objectCacheMutex);
+            const auto it = _objectCache.lower_bound(std::forward<K>(key));
+            if (it == _objectCache.end())
+                return std::nullopt;
+            return std::pair(it->first, it->second.first);
+        }
+
     protected:
         virtual ~GenericObjectCache() {}
 
         typedef std::pair<osg::ref_ptr<osg::Object>, double> ObjectTimeStampPair;
-        typedef std::map<KeyType, ObjectTimeStampPair> ObjectCacheMap;
+        typedef std::map<KeyType, ObjectTimeStampPair, std::less<>> ObjectCacheMap;
 
         ObjectCacheMap _objectCache;
         mutable std::mutex _objectCacheMutex;
