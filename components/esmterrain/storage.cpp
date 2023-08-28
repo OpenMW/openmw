@@ -1,6 +1,7 @@
 #include "storage.hpp"
 
 #include <algorithm>
+#include <optional>
 #include <stdexcept>
 
 #include <osg/Image>
@@ -43,8 +44,45 @@ namespace ESMTerrain
     class LandCache
     {
     public:
-        typedef std::map<ESM::ExteriorCellLocation, osg::ref_ptr<const LandObject>> Map;
-        Map mMap;
+        explicit LandCache(int offsetX, int offsetY, std::size_t size)
+            : mOffsetX(offsetX)
+            , mOffsetY(offsetY)
+            , mSize(size)
+            , mValues(size * size)
+        {
+        }
+
+        std::optional<const LandObject*> find(int x, int y) const
+        {
+            const std::size_t index = getIndex(x, y);
+            if (const auto& value = mValues[index])
+                return value->get();
+            return std::nullopt;
+        }
+
+        void insert(int x, int y, osg::ref_ptr<const LandObject>&& value)
+        {
+            const std::size_t index = getIndex(x, y);
+            mValues[index] = std::move(value);
+        }
+
+    private:
+        int mOffsetX;
+        int mOffsetY;
+        std::size_t mSize;
+        std::vector<std::optional<osg::ref_ptr<const LandObject>>> mValues;
+
+        std::size_t getIndex(int x, int y) const
+        {
+            return normalizeCoordinate(x, mOffsetX) * mSize + normalizeCoordinate(y, mOffsetY);
+        }
+
+        std::size_t normalizeCoordinate(int value, int offset) const
+        {
+            assert(value >= offset);
+            assert(value < offset + static_cast<int>(mSize));
+            return static_cast<std::size_t>(value - offset);
+        }
     };
 
     LandObject::LandObject(const ESM4::Land& land, int loadFlags)
@@ -217,13 +255,12 @@ namespace ESMTerrain
         normals.resize(numVerts * numVerts);
         colours.resize(numVerts * numVerts);
 
-        LandCache cache;
-
         const bool alteration = useAlteration();
         const int landSizeInUnits = ESM::getCellSize(worldspace);
         const osg::Vec2f origin = center - osg::Vec2f(size, size) * 0.5f;
         const int startCellX = static_cast<int>(std::floor(origin.x()));
         const int startCellY = static_cast<int>(std::floor(origin.y()));
+        LandCache cache(startCellX - 1, startCellY - 1, static_cast<std::size_t>(std::ceil(size)) + 2);
         std::pair lastCell{ startCellX, startCellY };
         const LandObject* land = getLand(ESM::ExteriorCellLocation(startCellX, startCellY, worldspace), cache);
         const ESM::LandData* heightData = nullptr;
@@ -361,7 +398,7 @@ namespace ESMTerrain
         const std::size_t blendmapImageSize = blendmapSize * imageScaleFactor;
 
         std::vector<UniqueTextureId> textureIds(blendmapSize * blendmapSize);
-        LandCache cache;
+        LandCache cache(startCellX - 1, startCellY - 1, static_cast<std::size_t>(std::ceil(chunkSize)) + 2);
         std::pair lastCell{ startCellX, startCellY };
         const LandObject* land = getLand(ESM::ExteriorCellLocation(startCellX, startCellY, worldspace), cache);
 
@@ -514,14 +551,12 @@ namespace ESMTerrain
 
     const LandObject* Storage::getLand(ESM::ExteriorCellLocation cellLocation, LandCache& cache)
     {
-        LandCache::Map::iterator found = cache.mMap.find(cellLocation);
-        if (found != cache.mMap.end())
-            return found->second;
-        else
-        {
-            found = cache.mMap.insert(std::make_pair(cellLocation, getLand(cellLocation))).first;
-            return found->second;
-        }
+        if (const auto land = cache.find(cellLocation.mX, cellLocation.mY))
+            return *land;
+        osg::ref_ptr<const LandObject> land = getLand(cellLocation);
+        const LandObject* result = land.get();
+        cache.insert(cellLocation.mX, cellLocation.mY, std::move(land));
+        return result;
     }
 
     void Storage::adjustColor(int col, int row, const ESM::LandData* heightData, osg::Vec4ub& color) const {}
