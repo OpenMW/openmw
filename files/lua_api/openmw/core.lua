@@ -161,6 +161,7 @@
 -- @field #Cell cell The cell where the object currently is. During loading a game and for objects in an inventory or a container `cell` is nil.
 -- @field #any type Type of the object (one of the tables from the package @{openmw.types#types}).
 -- @field #number count Count (>1 means a stack of objects).
+-- @field #number baseCount Base Count (<1 means a restocking item).
 -- @field #string recordId Returns record ID of the object in lowercase.
 
 ---

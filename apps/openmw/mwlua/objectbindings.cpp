@@ -214,6 +214,8 @@ namespace MWLua
                     const ObjectT& o) mutable { return types[getLiveCellRefType(o.ptr().mRef)]; });
 
             objectT["count"] = sol::readonly_property([](const ObjectT& o) { return o.ptr().getRefData().getCount(); });
+            objectT["baseCount"]
+                = sol::readonly_property([](const ObjectT& o) { return o.ptr().getRefData().getCount(false); });
             objectT[sol::meta_function::equal_to] = [](const ObjectT& a, const ObjectT& b) { return a.id() == b.id(); };
             objectT[sol::meta_function::to_string] = &ObjectT::toString;
             objectT["sendEvent"] = [context](const ObjectT& dest, std::string eventName, const sol::object& eventData) {
