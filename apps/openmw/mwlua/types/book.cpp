@@ -31,7 +31,7 @@ namespace
             book = LuaUtil::cast<ESM::Book>(rec["template"]);
         else
         {
-        book.blank();
+            book.blank();
             book.mData.mSkillId = -1;
         }
         if (rec["name"] != sol::nil)
@@ -74,7 +74,6 @@ namespace
                     throw std::runtime_error("Incorrect skill: " + skill.toDebugString());
             }
         }
-        
 
         return book;
     }

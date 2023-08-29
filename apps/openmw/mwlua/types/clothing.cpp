@@ -26,7 +26,7 @@ namespace
             clothing = LuaUtil::cast<ESM::Clothing>(rec["template"]);
         else
             clothing.blank();
-            
+
         if (rec["name"] != sol::nil)
             clothing.mName = rec["name"];
         if (rec["model"] != sol::nil)
