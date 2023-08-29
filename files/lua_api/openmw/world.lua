@@ -153,6 +153,8 @@
 -- * @{openmw.types#ArmorRecord},
 -- * @{openmw.types#BookRecord},
 -- * @{openmw.types#MiscellaneousRecord},
+-- * @{openmw.types#ClothingRecord},
+-- * @{openmw.types#WeaponRecord},
 -- * @{openmw.types#ActivatorRecord}
 -- @function [parent=#world] createRecord
 -- @param #any record A record to be registered in the database. Must be one of the supported types.
