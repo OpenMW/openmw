@@ -24,15 +24,25 @@ namespace
     ESM::Miscellaneous tableToMisc(const sol::table& rec)
     {
         ESM::Miscellaneous misc;
-        misc.mName = rec["name"];
-        misc.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
-        misc.mIcon = rec["icon"];
-        std::string_view scriptId = rec["mwscript"].get<std::string_view>();
-        misc.mScript = ESM::RefId::deserializeText(scriptId);
-        misc.mData.mWeight = rec["weight"];
-        misc.mData.mValue = rec["value"];
-        misc.mData.mFlags = 0;
-        misc.mRecordFlags = 0;
+        if (rec["template"] != sol::nil)
+            misc = LuaUtil::cast<ESM::Miscellaneous>(rec["template"]);
+        else
+            misc.blank();
+        if (rec["name"] != sol::nil)
+            misc.mName = rec["name"];
+        if (rec["model"] != sol::nil)
+            misc.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
+        if (rec["icon"] != sol::nil)
+            misc.mIcon = rec["icon"];
+        if (rec["mwscript"] != sol::nil)
+        {
+            std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+            misc.mScript = ESM::RefId::deserializeText(scriptId);
+        }
+        if (rec["weight"] != sol::nil)
+            misc.mData.mWeight = rec["weight"];
+        if (rec["value"] != sol::nil)
+            misc.mData.mValue = rec["value"];
         return misc;
     }
 }

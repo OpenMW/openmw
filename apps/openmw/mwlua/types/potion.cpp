@@ -23,20 +23,33 @@ namespace
     ESM::Potion tableToPotion(const sol::table& rec)
     {
         ESM::Potion potion;
-        potion.mName = rec["name"];
-        potion.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
-        potion.mIcon = rec["icon"];
-        std::string_view scriptId = rec["mwscript"].get<std::string_view>();
-        potion.mScript = ESM::RefId::deserializeText(scriptId);
-        potion.mData.mWeight = rec["weight"];
-        potion.mData.mValue = rec["value"];
-        potion.mData.mAutoCalc = 0;
-        potion.mRecordFlags = 0;
-        sol::table effectsTable = rec["effects"];
-        size_t numEffects = effectsTable.size();
-        potion.mEffects.mList.resize(numEffects);
-        for (size_t i = 0; i < numEffects; ++i)
-            potion.mEffects.mList[i] = LuaUtil::cast<ESM::ENAMstruct>(effectsTable[i + 1]);
+        if (rec["template"] != sol::nil)
+            potion = LuaUtil::cast<ESM::Potion>(rec["template"]);
+        else
+            potion.blank();
+        if (rec["name"] != sol::nil)
+            potion.mName = rec["name"];
+        if (rec["model"] != sol::nil)
+            potion.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
+        if (rec["icon"] != sol::nil)
+            potion.mIcon = rec["icon"];
+        if (rec["mwscript"] != sol::nil)
+        {
+            std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+            potion.mScript = ESM::RefId::deserializeText(scriptId);
+        }
+        if (rec["weight"] != sol::nil)
+            potion.mData.mWeight = rec["weight"];
+        if (rec["value"] != sol::nil)
+            potion.mData.mValue = rec["value"];
+        if (rec["effects"] != sol::nil)
+        {
+            sol::table effectsTable = rec["effects"];
+            size_t numEffects = effectsTable.size();
+            potion.mEffects.mList.resize(numEffects);
+            for (size_t i = 0; i < numEffects; ++i)
+                potion.mEffects.mList[i] = LuaUtil::cast<ESM::ENAMstruct>(effectsTable[i + 1]);
+        }
         return potion;
     }
 }

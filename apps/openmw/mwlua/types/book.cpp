@@ -27,30 +27,55 @@ namespace
     ESM::Book tableToBook(const sol::table& rec)
     {
         ESM::Book book;
-        book.mName = rec["name"];
-        book.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
-        book.mIcon = rec["icon"];
-        book.mText = rec["text"];
-        std::string_view enchantId = rec["enchant"].get<std::string_view>();
-        book.mEnchant = ESM::RefId::deserializeText(enchantId);
-
-        book.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
-        std::string_view scriptId = rec["mwscript"].get<std::string_view>();
-        book.mScript = ESM::RefId::deserializeText(scriptId);
-        book.mData.mWeight = rec["weight"];
-        book.mData.mValue = rec["value"];
-        book.mData.mIsScroll = rec["isScroll"];
-        book.mRecordFlags = 0;
-
-        ESM::RefId skill = ESM::RefId::deserializeText(rec["skill"].get<std::string_view>());
-
-        book.mData.mSkillId = -1;
-        if (!skill.empty())
+        if (rec["template"] != sol::nil)
+            book = LuaUtil::cast<ESM::Book>(rec["template"]);
+        else
         {
-            book.mData.mSkillId = ESM::Skill::refIdToIndex(skill);
-            if (book.mData.mSkillId == -1)
-                throw std::runtime_error("Incorrect skill: " + skill.toDebugString());
+        book.blank();
+            book.mData.mSkillId = -1;
         }
+        if (rec["name"] != sol::nil)
+            book.mName = rec["name"];
+        if (rec["model"] != sol::nil)
+            book.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
+        if (rec["icon"] != sol::nil)
+            book.mIcon = rec["icon"];
+        if (rec["text"] != sol::nil)
+            book.mText = rec["text"];
+        if (rec["enchant"] != sol::nil)
+        {
+            std::string_view enchantId = rec["enchant"].get<std::string_view>();
+            book.mEnchant = ESM::RefId::deserializeText(enchantId);
+        }
+
+        if (rec["enchantCapacity"] != sol::nil)
+            book.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
+        if (rec["mwscript"] != sol::nil)
+        {
+            std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+            book.mScript = ESM::RefId::deserializeText(scriptId);
+        }
+        if (rec["weight"] != sol::nil)
+            book.mData.mWeight = rec["weight"];
+        if (rec["value"] != sol::nil)
+            book.mData.mValue = rec["value"];
+        if (rec["isScroll"] != sol::nil)
+            book.mData.mIsScroll = rec["isScroll"];
+
+        if (rec["skill"] != sol::nil)
+        {
+            ESM::RefId skill = ESM::RefId::deserializeText(rec["skill"].get<std::string_view>());
+
+            book.mData.mSkillId = -1;
+            if (!skill.empty())
+            {
+                book.mData.mSkillId = ESM::Skill::refIdToIndex(skill);
+                if (book.mData.mSkillId == -1)
+                    throw std::runtime_error("Incorrect skill: " + skill.toDebugString());
+            }
+        }
+        
+
         return book;
     }
 }
