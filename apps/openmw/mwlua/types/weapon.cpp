@@ -45,10 +45,21 @@ namespace
             std::string_view scriptId = rec["mwscript"].get<std::string_view>();
             weapon.mScript = ESM::RefId::deserializeText(scriptId);
         }
-        if (rec["isMagical"])
-            weapon.mData.mFlags |= ESM::Weapon::Magical;
-        if (rec["isSilver"])
-            weapon.mData.mFlags |= ESM::Weapon::Silver;
+        if (auto isMagical = rec["isMagical"]; isMagical != sol::nil)
+        {
+            if (isMagical)
+                weapon.mData.mFlags |= ESM::Weapon::Magical;
+            else
+                weapon.mData.mFlags &= ~ESM::Weapon::Magical;
+        }
+        if (auto isSilver = rec["isSilver"]; isSilver != sol::nil)
+        {
+            if (isSilver)
+                weapon.mData.mFlags |= ESM::Weapon::Silver;
+            else
+                weapon.mData.mFlags &= ~ESM::Weapon::Silver;
+        }
+
         if (rec["type"] != sol::nil)
         {
             int weaponType = rec["type"].get<int>();

@@ -846,11 +846,17 @@
 -- @field #number enchantCapacity
 
 ---
--- Creates a @{#ArmorRecord} without adding it to the world database.
+-- Creates a @{#ArmorRecord} without adding it to the world database, for the armor to appear correctly on the body, make sure to use a template as described below.
 -- Use @{openmw_world#(world).createRecord} to add the record to the world.
 -- @function [parent=#Armor] createRecordDraft
 -- @param #ArmorRecord armor A Lua table with the fields of a ArmorRecord, with an additional field `template` that accepts a @{#ArmorRecord} as a base.
 -- @return #ArmorRecord A strongly typed Armor record.
+-- @usage local armorTemplate = types.Armor.record('orcish_cuirass')
+-- local armorTable = {name = "Better Orcish Cuirass",template = armorTemplate,baseArmor = armorTemplate.baseArmor + 10} 
+--  --This is the new record we want to create, with a record provided as a template.
+-- local recordDraft = types.Armor.createRecordDraft(armorTable)--Need to convert the table into the record draft
+-- local newRecord = world.createRecord(recordDraft)--This creates the actual record
+-- world.createObject(newRecord):moveInto(playerActor)--Create an instance of this object, and move it into the player's inventory
 
 
 --- @{#Book} functions
@@ -926,7 +932,7 @@
 -- Creates a @{#BookRecord} without adding it to the world database.
 -- Use @{openmw_world#(world).createRecord} to add the record to the world.
 -- @function [parent=#Book] createRecordDraft
--- @param #BookRecord book A Lua table with the fields of a BookRecord, with an additional field `template` that accepts a @{#BookRecord} as a base.
+-- @param #BookRecord book A Lua table with the fields of a BookRecord, with an optional field `template` that accepts a @{#BookRecord} as a base.
 -- @return #BookRecord A strongly typed Book record.
 
 --- @{#Clothing} functions
@@ -967,11 +973,17 @@
 -- @return #ClothingRecord
 
 ---
--- Creates a @{#ClothingRecord} without adding it to the world database.
+-- Creates a @{#ClothingRecord} without adding it to the world database, for the clothing to appear correctly on the body, make sure to use a template as described below.
 -- Use @{openmw_world#(world).createRecord} to add the record to the world.
 -- @function [parent=#Clothing] createRecordDraft
 -- @param #ClothingRecord clothing A Lua table with the fields of a ClothingRecord, with an additional field `template` that accepts a @{#ClothingRecord} as a base.
 -- @return #ClothingRecord A strongly typed clothing record.
+-- @usage local clothingTemplate = types.Clothing.record('exquisite_robe_01')
+-- local clothingTable = {name = "Better Exquisite Robe",template = clothingTemplate,enchantCapacity = clothingTemplate.enchantCapacity + 10} 
+--  --This is the new record we want to create, with a record provided as a template.
+-- local recordDraft = types.Clothing.createRecordDraft(clothingTable)--Need to convert the table into the record draft
+-- local newRecord = world.createRecord(recordDraft)--This creates the actual record
+-- world.createObject(newRecord):moveInto(playerActor)--Create an instance of this object, and move it into the player's inventory
 
 ---
 -- @type ClothingRecord
@@ -1145,7 +1157,7 @@
 -- Creates a @{#MiscellaneousRecord} without adding it to the world database.
 -- Use @{openmw_world#(world).createRecord} to add the record to the world.
 -- @function [parent=#Miscellaneous] createRecordDraft
--- @param #MiscellaneousRecord miscellaneous A Lua table with the fields of a MiscellaneousRecord, with an additional field `template` that accepts a @{#MiscellaneousRecord} as a base.
+-- @param #MiscellaneousRecord miscellaneous A Lua table with the fields of a MiscellaneousRecord, with an optional field `template` that accepts a @{#MiscellaneousRecord} as a base.
 -- @return #MiscellaneousRecord A strongly typed Miscellaneous record.
 
 ---
@@ -1190,7 +1202,7 @@
 -- Creates a @{#PotionRecord} without adding it to the world database.
 -- Use @{openmw_world#(world).createRecord} to add the record to the world.
 -- @function [parent=#Potion] createRecordDraft
--- @param #PotionRecord potion A Lua table with the fields of a PotionRecord, with an additional field `template` that accepts a @{#PotionRecord} as a base.
+-- @param #PotionRecord potion A Lua table with the fields of a PotionRecord, with an optional field `template` that accepts a @{#PotionRecord} as a base.
 -- @return #PotionRecord A strongly typed Potion record.
 
 ---
@@ -1275,7 +1287,7 @@
 -- Creates a @{#WeaponRecord} without adding it to the world database.
 -- Use @{openmw_world#(world).createRecord} to add the record to the world.
 -- @function [parent=#Weapon] createRecordDraft
--- @param #WeaponRecord weapon A Lua table with the fields of a WeaponRecord, with an additional field `template` that accepts a @{#WeaponRecord} as a base.
+-- @param #WeaponRecord weapon A Lua table with the fields of a WeaponRecord, with an optional field `template` that accepts a @{#WeaponRecord} as a base.
 -- @return #WeaponRecord A strongly typed Weapon record.
 
 --- @{#Apparatus} functions
@@ -1450,7 +1462,7 @@
 -- Creates a @{#ActivatorRecord} without adding it to the world database.
 -- Use @{openmw_world#(world).createRecord} to add the record to the world.
 -- @function [parent=#Activator] createRecordDraft
--- @param #ActivatorRecord activator A Lua table with the fields of a ActivatorRecord, with an additional field `template` that accepts a @{#ActivatorRecord} as a base.
+-- @param #ActivatorRecord activator A Lua table with the fields of a ActivatorRecord, with an optional field `template` that accepts a @{#ActivatorRecord} as a base.
 -- @return #ActivatorRecord A strongly typed Activator record.
 
 
