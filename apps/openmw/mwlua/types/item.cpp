@@ -12,5 +12,7 @@ namespace MWLua
             = [](const Object& object) { return object.ptr().getCellRef().getEnchantmentCharge(); };
         item["setEnchantmentCharge"]
             = [](const GObject& object, float charge) { object.ptr().getCellRef().setEnchantmentCharge(charge); };
+        item["isRestocking"]
+            = [](const Object& object) -> bool { return object.ptr().getRefData().getCount(false) < 0; };
     }
 }

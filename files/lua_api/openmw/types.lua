@@ -633,6 +633,13 @@
 -- @return #number The charge remaining. -1 if the enchantment has never been used, implying the charge is full. Unenchanted items will always return a value of -1.
 
 ---
+-- Checks if the item restocks.
+-- Returns true if the object restocks, and false otherwise.
+-- @function [parent=#Item] isRestocking
+-- @param openmw.core#GameObject item
+-- @return #boolean
+
+---
 -- Set this item's enchantment charge.
 -- @function [parent=#Item] setEnchantmentCharge
 -- @param openmw.core#GameObject item
