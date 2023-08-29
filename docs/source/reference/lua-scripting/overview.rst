@@ -4,7 +4,7 @@ Overview of Lua scripting
 Language and sandboxing
 =======================
 
-OpenMW supports scripts written in Lua 5.1 with some extensions (see below) from Lua 5.2.
+OpenMW supports scripts written in Lua 5.1 with some extensions (see below) from Lua 5.2 and Lua 5.3.
 There are no plans to switch to any newer version of the language, because newer versions are not supported by LuaJIT.
 
 .. note::
@@ -37,6 +37,10 @@ Supported Lua 5.2 features:
 - String matching pattern ``%g``;
 - ``__pairs`` and ``__ipairs`` metamethods;
 - Function ``table.unpack`` (alias to Lua 5.1 ``unpack``).
+
+Supported Lua 5.3 features:
+
+- All functions in the `UTF-8 Library <https://www.lua.org/manual/5.3/manual.html#6.5>`__
 
 Loading libraries with ``require('library_name')`` is allowed, but limited. It works this way:
 
