@@ -70,6 +70,7 @@
     Bug #7472: Crash when enchanting last projectiles
     Bug #7505: Distant terrain does not support sample size greater than cell size
     Bug #7553: Faction reaction loading is incorrect
+    Bug #7557: Terrain::ChunkManager::createChunk is called twice for the same position, lod on initial loading
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6447: Add LOD support to Object Paging
