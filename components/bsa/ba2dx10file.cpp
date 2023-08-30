@@ -112,11 +112,16 @@ namespace Bsa
             if (header[0] == 0x00415342) /*"BSA\x00"*/
                 fail("Unrecognized compressed BSA format");
             mVersion = header[1];
-            if (mVersion != 0x01 /*F04*/)
+            if (mVersion != 0x01 /*FO4*/ && mVersion != 0x02 /*Starfield*/)
                 fail("Unrecognized compressed BSA version");
 
             type = header[2];
             fileCount = header[3];
+            if (mVersion == 0x02)
+            {
+                uint64_t dummy;
+                input.read(reinterpret_cast<char*>(&dummy), 8);
+            }
         }
 
         if (type == ESM::fourCC("DX10"))
