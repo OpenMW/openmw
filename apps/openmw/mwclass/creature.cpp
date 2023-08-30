@@ -39,6 +39,7 @@
 #include "../mwworld/inventorystore.hpp"
 #include "../mwworld/localscripts.hpp"
 #include "../mwworld/ptr.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 #include "../mwrender/objects.hpp"
 #include "../mwrender/renderinginterface.hpp"
@@ -117,6 +118,7 @@ namespace MWClass
     {
         if (!ptr.getRefData().getCustomData())
         {
+            MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
             auto tempData = std::make_unique<CreatureCustomData>();
             CreatureCustomData* data = tempData.get();
             MWMechanics::CreatureCustomDataResetter resetter{ ptr };
@@ -161,6 +163,7 @@ namespace MWClass
                 data->mContainerStore = std::make_unique<MWWorld::InventoryStore>();
             else
                 data->mContainerStore = std::make_unique<MWWorld::ContainerStore>();
+            data->mContainerStore->setPtr(ptr);
 
             data->mCreatureStats.setGoldPool(ref->mBase->mData.mGold);
 
@@ -505,10 +508,7 @@ namespace MWClass
     MWWorld::ContainerStore& Creature::getContainerStore(const MWWorld::Ptr& ptr) const
     {
         ensureCustomData(ptr);
-        auto& store = *ptr.getRefData().getCustomData()->asCreatureCustomData().mContainerStore;
-        if (hasInventoryStore(ptr))
-            static_cast<MWWorld::InventoryStore&>(store).setActor(ptr);
-        return store;
+        return *ptr.getRefData().getCustomData()->asCreatureCustomData().mContainerStore;
     }
 
     MWWorld::InventoryStore& Creature::getInventoryStore(const MWWorld::Ptr& ptr) const
@@ -806,6 +806,9 @@ namespace MWClass
                         data->mContainerStore = std::make_unique<MWWorld::InventoryStore>();
                     else
                         data->mContainerStore = std::make_unique<MWWorld::ContainerStore>();
+
+                    MWBase::Environment::get().getWorldModel()->registerPtr(ptr);
+                    data->mContainerStore->setPtr(ptr);
 
                     ptr.getRefData().setCustomData(std::move(data));
                 }

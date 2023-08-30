@@ -376,8 +376,6 @@ namespace MWWorld
         newPtr.getRefData().setCount(count);
         newPtr.getRefData().setLuaScripts(nullptr);
         MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
-        if (hasInventoryStore(newPtr))
-            getInventoryStore(newPtr).setActor(newPtr);
         return newPtr;
     }
 
@@ -386,8 +384,6 @@ namespace MWWorld
         Ptr newPtr = copyToCellImpl(ptr, cell);
         ptr.getRefData().setLuaScripts(nullptr);
         MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
-        if (hasInventoryStore(newPtr))
-            getInventoryStore(newPtr).setActor(newPtr);
         return newPtr;
     }
 

@@ -495,11 +495,7 @@ namespace MWWorld
         mMovedToAnotherCell.insert(std::make_pair(object.getBase(), cellToMoveTo));
 
         requestMergedRefsUpdate();
-        MWWorld::Ptr ptr(object.getBase(), cellToMoveTo);
-        const Class& cls = ptr.getClass();
-        if (cls.hasInventoryStore(ptr))
-            cls.getInventoryStore(ptr).setActor(ptr);
-        return ptr;
+        return MWWorld::Ptr(object.getBase(), cellToMoveTo);
     }
 
     struct MergeVisitor

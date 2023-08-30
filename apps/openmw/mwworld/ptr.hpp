@@ -153,8 +153,9 @@ namespace MWWorld
     class SafePtr
     {
     public:
-        using Id = ESM::RefNum;
+        using Id = ESM::FormId;
 
+        SafePtr() = default;
         explicit SafePtr(Id id)
             : mId(id)
         {
@@ -172,7 +173,7 @@ namespace MWWorld
         }
 
     private:
-        const Id mId;
+        Id mId;
 
         mutable Ptr mPtr;
         mutable size_t mLastUpdate = 0;

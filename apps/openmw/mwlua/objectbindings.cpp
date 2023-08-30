@@ -190,6 +190,13 @@ namespace MWLua
                 else
                     return sol::nullopt;
             });
+            objectT["parentContainer"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<ObjectT> {
+                const MWWorld::Ptr& ptr = o.ptr();
+                if (ptr.getContainerStore())
+                    return ObjectT(ptr.getContainerStore()->getPtr());
+                else
+                    return sol::nullopt;
+            });
             objectT["position"] = sol::readonly_property(
                 [](const ObjectT& o) -> osg::Vec3f { return o.ptr().getRefData().getPosition().asVec3(); });
             objectT["scale"]
