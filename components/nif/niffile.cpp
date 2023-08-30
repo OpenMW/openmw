@@ -49,180 +49,265 @@ namespace Nif
     static std::map<std::string, CreateRecord> makeFactory()
     {
         return {
+            // 4.0.0.2 refers to Bethesda variant of NetImmerse 4.0.0.2 file format
+            // Gamebryo refers to files newer than 4.0.0.2
+            // Bethesda refers to custom records Bethesda introduced post-4.0.0.2
+
+            // NODES
+
+            // NiNode-like nodes, 4.0.0.2
             { "NiNode", &construct<NiNode, RC_NiNode> },
-            { "NiSwitchNode", &construct<NiSwitchNode, RC_NiSwitchNode> },
-            { "NiLODNode", &construct<NiLODNode, RC_NiLODNode> },
-            { "NiFltAnimationNode", &construct<NiFltAnimationNode, RC_NiFltAnimationNode> },
             { "AvoidNode", &construct<NiNode, RC_AvoidNode> },
-            { "NiCollisionSwitch", &construct<NiNode, RC_NiCollisionSwitch> },
-            { "NiBSParticleNode", &construct<NiNode, RC_NiBSParticleNode> },
-            { "NiBSAnimationNode", &construct<NiNode, RC_NiBSAnimationNode> },
             { "NiBillboardNode", &construct<NiBillboardNode, RC_NiBillboardNode> },
-            { "NiTriShape", &construct<NiTriShape, RC_NiTriShape> },
-            { "NiTriStrips", &construct<NiTriStrips, RC_NiTriStrips> },
-            { "NiLines", &construct<NiLines, RC_NiLines> },
-            { "NiParticles", &construct<NiParticles, RC_NiParticles> },
-            { "NiRotatingParticles", &construct<NiParticles, RC_NiParticles> },
-            { "NiAutoNormalParticles", &construct<NiParticles, RC_NiParticles> },
-            { "NiCamera", &construct<NiCamera, RC_NiCamera> },
+            { "NiBSAnimationNode", &construct<NiNode, RC_NiBSAnimationNode> },
+            { "NiBSParticleNode", &construct<NiNode, RC_NiBSParticleNode> },
+            { "NiCollisionSwitch", &construct<NiNode, RC_NiCollisionSwitch> },
+            { "NiSortAdjustNode", &construct<NiSortAdjustNode, RC_NiSortAdjustNode> },
             { "RootCollisionNode", &construct<NiNode, RC_RootCollisionNode> },
-            { "NiTexturingProperty", &construct<NiTexturingProperty, RC_NiTexturingProperty> },
-            { "NiFogProperty", &construct<NiFogProperty, RC_NiFogProperty> },
-            { "NiMaterialProperty", &construct<NiMaterialProperty, RC_NiMaterialProperty> },
-            { "NiZBufferProperty", &construct<NiZBufferProperty, RC_NiZBufferProperty> },
-            { "NiAlphaProperty", &construct<NiAlphaProperty, RC_NiAlphaProperty> },
-            { "NiVertexColorProperty", &construct<NiVertexColorProperty, RC_NiVertexColorProperty> },
-            { "NiShadeProperty", &construct<NiShadeProperty, RC_NiShadeProperty> },
-            { "NiDitherProperty", &construct<NiDitherProperty, RC_NiDitherProperty> },
-            { "NiWireframeProperty", &construct<NiWireframeProperty, RC_NiWireframeProperty> },
-            { "NiSpecularProperty", &construct<NiSpecularProperty, RC_NiSpecularProperty> },
-            { "NiStencilProperty", &construct<NiStencilProperty, RC_NiStencilProperty> },
-            { "NiVisController", &construct<NiVisController, RC_NiVisController> },
-            { "NiGeomMorpherController", &construct<NiGeomMorpherController, RC_NiGeomMorpherController> },
-            { "NiKeyframeController", &construct<NiKeyframeController, RC_NiKeyframeController> },
-            { "NiAlphaController", &construct<NiAlphaController, RC_NiAlphaController> },
-            { "NiRollController", &construct<NiRollController, RC_NiRollController> },
-            { "NiUVController", &construct<NiUVController, RC_NiUVController> },
-            { "NiPathController", &construct<NiPathController, RC_NiPathController> },
-            { "NiMaterialColorController", &construct<NiMaterialColorController, RC_NiMaterialColorController> },
-            { "NiBSPArrayController", &construct<NiBSPArrayController, RC_NiBSPArrayController> },
-            { "NiParticleSystemController", &construct<NiParticleSystemController, RC_NiParticleSystemController> },
-            { "NiFlipController", &construct<NiFlipController, RC_NiFlipController> },
-            { "NiTextureTransformController",
-                &construct<NiTextureTransformController, RC_NiTextureTransformController> },
-            { "NiAmbientLight", &construct<NiLight, RC_NiLight> },
-            { "NiDirectionalLight", &construct<NiLight, RC_NiLight> },
-            { "NiPointLight", &construct<NiPointLight, RC_NiLight> },
-            { "NiSpotLight", &construct<NiSpotLight, RC_NiLight> },
-            { "NiTextureEffect", &construct<NiTextureEffect, RC_NiTextureEffect> },
-            { "NiExtraData", &construct<NiExtraData, RC_NiExtraData> },
-            { "NiVertWeightsExtraData", &construct<NiVertWeightsExtraData, RC_NiVertWeightsExtraData> },
-            { "NiTextKeyExtraData", &construct<NiTextKeyExtraData, RC_NiTextKeyExtraData> },
-            { "NiStringExtraData", &construct<NiStringExtraData, RC_NiStringExtraData> },
-            { "NiGravity", &construct<NiGravity, RC_NiGravity> },
-            { "NiPlanarCollider", &construct<NiPlanarCollider, RC_NiPlanarCollider> },
-            { "NiSphericalCollider", &construct<NiSphericalCollider, RC_NiSphericalCollider> },
-            { "NiParticleGrowFade", &construct<NiParticleGrowFade, RC_NiParticleGrowFade> },
-            { "NiParticleColorModifier", &construct<NiParticleColorModifier, RC_NiParticleColorModifier> },
-            { "NiParticleRotation", &construct<NiParticleRotation, RC_NiParticleRotation> },
-            { "NiFloatData", &construct<NiFloatData, RC_NiFloatData> },
-            { "NiTriShapeData", &construct<NiTriShapeData, RC_NiTriShapeData> },
-            { "NiTriStripsData", &construct<NiTriStripsData, RC_NiTriStripsData> },
-            { "NiLinesData", &construct<NiLinesData, RC_NiLinesData> },
-            { "NiVisData", &construct<NiVisData, RC_NiVisData> },
-            { "NiColorData", &construct<NiColorData, RC_NiColorData> },
-            { "NiPixelData", &construct<NiPixelData, RC_NiPixelData> },
-            { "NiMorphData", &construct<NiMorphData, RC_NiMorphData> },
-            { "NiKeyframeData", &construct<NiKeyframeData, RC_NiKeyframeData> },
-            { "NiSkinData", &construct<NiSkinData, RC_NiSkinData> },
-            { "NiUVData", &construct<NiUVData, RC_NiUVData> },
-            { "NiPosData", &construct<NiPosData, RC_NiPosData> },
-            { "NiParticlesData", &construct<NiParticlesData, RC_NiParticlesData> },
-            { "NiRotatingParticlesData", &construct<NiRotatingParticlesData, RC_NiParticlesData> },
-            { "NiAutoNormalParticlesData", &construct<NiParticlesData, RC_NiParticlesData> },
-            { "NiSequenceStreamHelper", &construct<NiSequenceStreamHelper, RC_NiSequenceStreamHelper> },
-            { "NiSourceTexture", &construct<NiSourceTexture, RC_NiSourceTexture> },
-            { "NiSkinInstance", &construct<NiSkinInstance, RC_NiSkinInstance> },
-            { "NiLookAtController", &construct<NiLookAtController, RC_NiLookAtController> },
-            { "NiPalette", &construct<NiPalette, RC_NiPalette> },
-            { "NiIntegerExtraData", &construct<NiIntegerExtraData, RC_NiIntegerExtraData> },
-            { "NiIntegersExtraData", &construct<NiIntegersExtraData, RC_NiIntegersExtraData> },
-            { "NiBinaryExtraData", &construct<NiBinaryExtraData, RC_NiBinaryExtraData> },
-            { "NiBooleanExtraData", &construct<NiBooleanExtraData, RC_NiBooleanExtraData> },
-            { "NiVectorExtraData", &construct<NiVectorExtraData, RC_NiVectorExtraData> },
-            { "NiColorExtraData", &construct<NiVectorExtraData, RC_NiColorExtraData> },
-            { "NiFloatExtraData", &construct<NiFloatExtraData, RC_NiFloatExtraData> },
-            { "NiFloatsExtraData", &construct<NiFloatsExtraData, RC_NiFloatsExtraData> },
-            { "NiStringPalette", &construct<NiStringPalette, RC_NiStringPalette> },
-            { "NiBoolData", &construct<NiBoolData, RC_NiBoolData> },
-            { "NiSkinPartition", &construct<NiSkinPartition, RC_NiSkinPartition> },
-            { "BSXFlags", &construct<NiIntegerExtraData, RC_BSXFlags> },
-            { "BSBound", &construct<BSBound, RC_BSBound> },
-            { "NiTransformData", &construct<NiKeyframeData, RC_NiKeyframeData> },
-            { "BSFadeNode", &construct<NiNode, RC_NiNode> },
-            { "BSLeafAnimNode", &construct<NiNode, RC_NiNode> },
-            { "BSTreeNode", &construct<BSTreeNode, RC_NiNode> },
-            { "BSValueNode", &construct<BSValueNode, RC_NiNode> },
-            { "BSOrderedNode", &construct<BSOrderedNode, RC_NiNode> },
-            { "BSMultiBoundNode", &construct<BSMultiBoundNode, RC_NiNode> },
-            { "BSRangeNode", &construct<BSRangeNode, RC_NiNode> },
+
+            // NiNode-like nodes, Bethesda
             { "BSBlastNode", &construct<BSRangeNode, RC_NiNode> },
             { "BSDamageStage", &construct<BSRangeNode, RC_NiNode> },
-            { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
+            { "BSFadeNode", &construct<NiNode, RC_NiNode> },
+            { "BSLeafAnimNode", &construct<NiNode, RC_NiNode> },
+            { "BSMultiBoundNode", &construct<BSMultiBoundNode, RC_NiNode> },
+            { "BSOrderedNode", &construct<BSOrderedNode, RC_NiNode> },
+            { "BSRangeNode", &construct<BSRangeNode, RC_NiNode> },
+            { "BSTreeNode", &construct<BSTreeNode, RC_NiNode> },
+            { "BSValueNode", &construct<BSValueNode, RC_NiNode> },
+
+            // Switch nodes, 4.0.0.2
+            { "NiSwitchNode", &construct<NiSwitchNode, RC_NiSwitchNode> },
+            { "NiFltAnimationNode", &construct<NiFltAnimationNode, RC_NiFltAnimationNode> },
+            { "NiLODNode", &construct<NiLODNode, RC_NiLODNode> },
+
+            // NiSequence nodes, 4.0.0.2
+            { "NiSequenceStreamHelper", &construct<NiSequenceStreamHelper, RC_NiSequenceStreamHelper> },
+
+            // NiSequence nodes, Gamebryo
+            { "NiSequence", &construct<NiSequence, RC_NiSequence> },
+            { "NiControllerSequence", &construct<NiControllerSequence, RC_NiControllerSequence> },
+
+            // Other nodes, 4.0.0.2
+            { "NiCamera", &construct<NiCamera, RC_NiCamera> },
+
+            // ACCUMULATORS
+
+            // 4.0.0.2
+            { "NiAlphaAccumulator", &construct<NiAlphaAccumulator, RC_NiAlphaAccumulator> },
+            { "NiClusterAccumulator", &construct<NiClusterAccumulator, RC_NiClusterAccumulator> },
+
+            // CONTROLLERS
+
+            // 4.0.0.2
+            { "NiAlphaController", &construct<NiAlphaController, RC_NiAlphaController> },
+            { "NiBSPArrayController", &construct<NiBSPArrayController, RC_NiBSPArrayController> },
+            { "NiFlipController", &construct<NiFlipController, RC_NiFlipController> },
+            { "NiGeomMorpherController", &construct<NiGeomMorpherController, RC_NiGeomMorpherController> },
+            { "NiKeyframeController", &construct<NiKeyframeController, RC_NiKeyframeController> },
+            { "NiLookAtController", &construct<NiLookAtController, RC_NiLookAtController> },
+            { "NiMaterialColorController", &construct<NiMaterialColorController, RC_NiMaterialColorController> },
+            { "NiParticleSystemController", &construct<NiParticleSystemController, RC_NiParticleSystemController> },
+            { "NiPathController", &construct<NiPathController, RC_NiPathController> },
+            { "NiRollController", &construct<NiRollController, RC_NiRollController> },
+            { "NiUVController", &construct<NiUVController, RC_NiUVController> },
+            { "NiVisController", &construct<NiVisController, RC_NiVisController> },
+
+            // Gamebryo
+            { "NiControllerManager", &construct<NiControllerManager, RC_NiControllerManager> },
+            { "NiTransformController", &construct<NiKeyframeController, RC_NiKeyframeController> },
+            { "NiTextureTransformController",
+                &construct<NiTextureTransformController, RC_NiTextureTransformController> },
+            { "NiMultiTargetTransformController",
+                &construct<NiMultiTargetTransformController, RC_NiMultiTargetTransformController> },
+
+            // Bethesda
             { "BSMaterialEmittanceMultController",
                 &construct<NiFloatInterpController, RC_BSMaterialEmittanceMultController> },
             { "BSRefractionFirePeriodController",
                 &construct<NiSingleInterpController, RC_BSRefractionFirePeriodController> },
             { "BSRefractionStrengthController",
                 &construct<NiFloatInterpController, RC_BSRefractionStrengthController> },
-            { "NiFloatInterpolator", &construct<NiFloatInterpolator, RC_NiFloatInterpolator> },
-            { "NiBoolInterpolator", &construct<NiBoolInterpolator, RC_NiBoolInterpolator> },
-            { "NiBoolTimelineInterpolator", &construct<NiBoolInterpolator, RC_NiBoolTimelineInterpolator> },
-            { "NiPoint3Interpolator", &construct<NiPoint3Interpolator, RC_NiPoint3Interpolator> },
-            { "NiTransformController", &construct<NiKeyframeController, RC_NiKeyframeController> },
-            { "NiMultiTargetTransformController",
-                &construct<NiMultiTargetTransformController, RC_NiMultiTargetTransformController> },
-            { "NiTransformInterpolator", &construct<NiTransformInterpolator, RC_NiTransformInterpolator> },
-            { "NiColorInterpolator", &construct<NiColorInterpolator, RC_NiColorInterpolator> },
-            { "BSShaderTextureSet", &construct<BSShaderTextureSet, RC_BSShaderTextureSet> },
-            { "BSLODTriShape", &construct<BSLODTriShape, RC_BSLODTriShape> },
-            { "BSShaderProperty", &construct<BSShaderProperty, RC_BSShaderProperty> },
-            { "BSShaderPPLightingProperty", &construct<BSShaderPPLightingProperty, RC_BSShaderPPLightingProperty> },
-            { "BSShaderNoLightingProperty", &construct<BSShaderNoLightingProperty, RC_BSShaderNoLightingProperty> },
-            { "BSFurnitureMarker", &construct<BSFurnitureMarker, RC_BSFurnitureMarker> },
-            { "BSFurnitureMarkerNode", &construct<BSFurnitureMarker, RC_BSFurnitureMarker> },
-            { "NiCollisionObject", &construct<NiCollisionObject, RC_NiCollisionObject> },
-            { "bhkCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
-            { "bhkSPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
-            { "bhkPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
-            { "BSDismemberSkinInstance", &construct<BSDismemberSkinInstance, RC_BSDismemberSkinInstance> },
-            { "NiControllerManager", &construct<NiControllerManager, RC_NiControllerManager> },
-            { "bhkMoppBvTreeShape", &construct<bhkMoppBvTreeShape, RC_bhkMoppBvTreeShape> },
-            { "bhkNiTriStripsShape", &construct<bhkNiTriStripsShape, RC_bhkNiTriStripsShape> },
-            { "bhkPackedNiTriStripsShape", &construct<bhkPackedNiTriStripsShape, RC_bhkPackedNiTriStripsShape> },
-            { "hkPackedNiTriStripsData", &construct<hkPackedNiTriStripsData, RC_hkPackedNiTriStripsData> },
-            { "bhkConvexVerticesShape", &construct<bhkConvexVerticesShape, RC_bhkConvexVerticesShape> },
-            { "bhkConvexTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },
-            { "bhkTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },
-            { "bhkSimpleShapePhantom", &construct<bhkSimpleShapePhantom, RC_bhkSimpleShapePhantom> },
-            { "bhkBoxShape", &construct<bhkBoxShape, RC_bhkBoxShape> },
-            { "bhkCapsuleShape", &construct<bhkCapsuleShape, RC_bhkCapsuleShape> },
-            { "bhkSphereShape", &construct<bhkSphereShape, RC_bhkSphereShape> },
-            { "bhkListShape", &construct<bhkListShape, RC_bhkListShape> },
-            { "bhkRigidBody", &construct<bhkRigidBody, RC_bhkRigidBody> },
-            { "bhkRigidBodyT", &construct<bhkRigidBody, RC_bhkRigidBodyT> },
-            { "bhkRagdollConstraint", &construct<bhkRagdollConstraint, RC_bhkRagdollConstraint> },
-            { "bhkHingeConstraint", &construct<bhkHingeConstraint, RC_bhkHingeConstraint> },
-            { "bhkLimitedHingeConstraint", &construct<bhkLimitedHingeConstraint, RC_bhkLimitedHingeConstraint> },
-            { "BSLightingShaderProperty", &construct<BSLightingShaderProperty, RC_BSLightingShaderProperty> },
-            { "BSEffectShaderProperty", &construct<BSEffectShaderProperty, RC_BSEffectShaderProperty> },
-            { "NiSortAdjustNode", &construct<NiSortAdjustNode, RC_NiSortAdjustNode> },
-            { "NiClusterAccumulator", &construct<NiClusterAccumulator, RC_NiClusterAccumulator> },
-            { "NiAlphaAccumulator", &construct<NiAlphaAccumulator, RC_NiAlphaAccumulator> },
-            { "NiSequence", &construct<NiSequence, RC_NiSequence> },
-            { "NiControllerSequence", &construct<NiControllerSequence, RC_NiControllerSequence> },
-            { "NiDefaultAVObjectPalette", &construct<NiDefaultAVObjectPalette, RC_NiDefaultAVObjectPalette> },
+            { "BSEffectShaderPropertyColorController",
+                &construct<BSEffectShaderPropertyColorController, RC_BSEffectShaderPropertyColorController> },
+            { "BSEffectShaderPropertyFloatController",
+                &construct<BSEffectShaderPropertyFloatController, RC_BSEffectShaderPropertyFloatController> },
+            { "BSLightingShaderPropertyColorController",
+                &construct<BSEffectShaderPropertyColorController, RC_BSLightingShaderPropertyColorController> },
+            { "BSLightingShaderPropertyFloatController",
+                &construct<BSEffectShaderPropertyFloatController, RC_BSLightingShaderPropertyFloatController> },
+            { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
+
+            // Interpolators, Gamebryo
             { "NiBlendBoolInterpolator", &construct<NiBlendBoolInterpolator, RC_NiBlendBoolInterpolator> },
             { "NiBlendFloatInterpolator", &construct<NiBlendFloatInterpolator, RC_NiBlendFloatInterpolator> },
             { "NiBlendPoint3Interpolator", &construct<NiBlendPoint3Interpolator, RC_NiBlendPoint3Interpolator> },
             { "NiBlendTransformInterpolator",
                 &construct<NiBlendTransformInterpolator, RC_NiBlendTransformInterpolator> },
-            { "bhkCompressedMeshShape", &construct<bhkCompressedMeshShape, RC_bhkCompressedMeshShape> },
-            { "bhkCompressedMeshShapeData", &construct<bhkCompressedMeshShapeData, RC_bhkCompressedMeshShapeData> },
+            { "NiBoolInterpolator", &construct<NiBoolInterpolator, RC_NiBoolInterpolator> },
+            { "NiBoolTimelineInterpolator", &construct<NiBoolInterpolator, RC_NiBoolTimelineInterpolator> },
+            { "NiColorInterpolator", &construct<NiColorInterpolator, RC_NiColorInterpolator> },
+            { "NiFloatInterpolator", &construct<NiFloatInterpolator, RC_NiFloatInterpolator> },
+            { "NiPoint3Interpolator", &construct<NiPoint3Interpolator, RC_NiPoint3Interpolator> },
+            { "NiTransformInterpolator", &construct<NiTransformInterpolator, RC_NiTransformInterpolator> },
+
+            // DATA
+
+            // 4.0.0.2
+            { "NiColorData", &construct<NiColorData, RC_NiColorData> },
+            { "NiFloatData", &construct<NiFloatData, RC_NiFloatData> },
+            { "NiKeyframeData", &construct<NiKeyframeData, RC_NiKeyframeData> },
+            { "NiMorphData", &construct<NiMorphData, RC_NiMorphData> },
+            { "NiPalette", &construct<NiPalette, RC_NiPalette> },
+            { "NiPixelData", &construct<NiPixelData, RC_NiPixelData> },
+            { "NiPosData", &construct<NiPosData, RC_NiPosData> },
+            { "NiSourceTexture", &construct<NiSourceTexture, RC_NiSourceTexture> },
+            { "NiUVData", &construct<NiUVData, RC_NiUVData> },
+            { "NiVisData", &construct<NiVisData, RC_NiVisData> },
+
+            // Gamebryo
+            { "NiBoolData", &construct<NiBoolData, RC_NiBoolData> },
+            { "NiDefaultAVObjectPalette", &construct<NiDefaultAVObjectPalette, RC_NiDefaultAVObjectPalette> },
+            { "NiTransformData", &construct<NiKeyframeData, RC_NiKeyframeData> },
+
+            // Bethesda
+            { "BSShaderTextureSet", &construct<BSShaderTextureSet, RC_BSShaderTextureSet> },
+
+            // DYNAMIC EFFECTS
+
+            // 4.0.0.2
+            { "NiAmbientLight", &construct<NiLight, RC_NiLight> },
+            { "NiDirectionalLight", &construct<NiLight, RC_NiLight> },
+            { "NiPointLight", &construct<NiPointLight, RC_NiLight> },
+            { "NiSpotLight", &construct<NiSpotLight, RC_NiLight> },
+            { "NiTextureEffect", &construct<NiTextureEffect, RC_NiTextureEffect> },
+
+            // EXTRA DATA
+
+            // 4.0.0.2
+            { "NiExtraData", &construct<NiExtraData, RC_NiExtraData> },
+            { "NiStringExtraData", &construct<NiStringExtraData, RC_NiStringExtraData> },
+            { "NiTextKeyExtraData", &construct<NiTextKeyExtraData, RC_NiTextKeyExtraData> },
+            { "NiVertWeightsExtraData", &construct<NiVertWeightsExtraData, RC_NiVertWeightsExtraData> },
+
+            // Gamebryo
+            { "NiBinaryExtraData", &construct<NiBinaryExtraData, RC_NiBinaryExtraData> },
+            { "NiBooleanExtraData", &construct<NiBooleanExtraData, RC_NiBooleanExtraData> },
+            { "NiColorExtraData", &construct<NiVectorExtraData, RC_NiColorExtraData> },
+            { "NiFloatExtraData", &construct<NiFloatExtraData, RC_NiFloatExtraData> },
+            { "NiFloatsExtraData", &construct<NiFloatsExtraData, RC_NiFloatsExtraData> },
+            { "NiIntegerExtraData", &construct<NiIntegerExtraData, RC_NiIntegerExtraData> },
+            { "NiIntegersExtraData", &construct<NiIntegersExtraData, RC_NiIntegersExtraData> },
+            { "NiVectorExtraData", &construct<NiVectorExtraData, RC_NiVectorExtraData> },
+            { "NiStringPalette", &construct<NiStringPalette, RC_NiStringPalette> },
+
+            // Bethesda bounds
+            { "BSBound", &construct<BSBound, RC_BSBound> },
             { "BSMultiBound", &construct<BSMultiBound, RC_BSMultiBound> },
             { "BSMultiBoundOBB", &construct<BSMultiBoundOBB, RC_BSMultiBoundOBB> },
             { "BSMultiBoundSphere", &construct<BSMultiBoundSphere, RC_BSMultiBoundSphere> },
+
+            // Bethesda markers
+            { "BSFurnitureMarker", &construct<BSFurnitureMarker, RC_BSFurnitureMarker> },
+            { "BSFurnitureMarkerNode", &construct<BSFurnitureMarker, RC_BSFurnitureMarker> },
             { "BSInvMarker", &construct<BSInvMarker, RC_BSInvMarker> },
-            { "BSTriShape", &construct<BSTriShape, RC_BSTriShape> },
-            { "BSEffectShaderPropertyFloatController",
-                &construct<BSEffectShaderPropertyFloatController, RC_BSEffectShaderPropertyFloatController> },
-            { "BSLightingShaderPropertyFloatController",
-                &construct<BSEffectShaderPropertyFloatController, RC_BSLightingShaderPropertyFloatController> },
-            { "BSEffectShaderPropertyColorController",
-                &construct<BSEffectShaderPropertyColorController, RC_BSEffectShaderPropertyColorController> },
-            { "BSLightingShaderPropertyColorController",
-                &construct<BSEffectShaderPropertyColorController, RC_BSLightingShaderPropertyColorController> },
+
+            // Other Bethesda records
             { "BSBehaviorGraphExtraData", &construct<BSBehaviorGraphExtraData, RC_BSBehaviorGraphExtraData> },
+            { "BSXFlags", &construct<NiIntegerExtraData, RC_BSXFlags> },
+
+            // GEOMETRY
+
+            // 4.0.0.2
+            { "NiAutoNormalParticles", &construct<NiParticles, RC_NiParticles> },
+            { "NiAutoNormalParticlesData", &construct<NiParticlesData, RC_NiParticlesData> },
+            { "NiLines", &construct<NiLines, RC_NiLines> },
+            { "NiLinesData", &construct<NiLinesData, RC_NiLinesData> },
+            { "NiParticles", &construct<NiParticles, RC_NiParticles> },
+            { "NiParticlesData", &construct<NiParticlesData, RC_NiParticlesData> },
+            { "NiRotatingParticles", &construct<NiParticles, RC_NiParticles> },
+            { "NiRotatingParticlesData", &construct<NiRotatingParticlesData, RC_NiParticlesData> },
+            { "NiSkinData", &construct<NiSkinData, RC_NiSkinData> },
+            { "NiSkinInstance", &construct<NiSkinInstance, RC_NiSkinInstance> },
+            { "NiSkinPartition", &construct<NiSkinPartition, RC_NiSkinPartition> },
+            { "NiTriShape", &construct<NiTriShape, RC_NiTriShape> },
+            { "NiTriShapeData", &construct<NiTriShapeData, RC_NiTriShapeData> },
+            { "NiTriStrips", &construct<NiTriStrips, RC_NiTriStrips> },
+            { "NiTriStripsData", &construct<NiTriStripsData, RC_NiTriStripsData> },
+
+            // Bethesda
+            { "BSDismemberSkinInstance", &construct<BSDismemberSkinInstance, RC_BSDismemberSkinInstance> },
+            { "BSTriShape", &construct<BSTriShape, RC_BSTriShape> },
+            { "BSLODTriShape", &construct<BSLODTriShape, RC_BSLODTriShape> },
+
+            // PARTICLES
+
+            // Modifiers, 4.0.0.2
+            { "NiGravity", &construct<NiGravity, RC_NiGravity> },
+            { "NiParticleColorModifier", &construct<NiParticleColorModifier, RC_NiParticleColorModifier> },
+            { "NiParticleGrowFade", &construct<NiParticleGrowFade, RC_NiParticleGrowFade> },
+            { "NiParticleRotation", &construct<NiParticleRotation, RC_NiParticleRotation> },
+
+            // Colliders, 4.0.0.2
+            { "NiPlanarCollider", &construct<NiPlanarCollider, RC_NiPlanarCollider> },
+            { "NiSphericalCollider", &construct<NiSphericalCollider, RC_NiSphericalCollider> },
+
+            // PHYSICS
+
+            // Collision objects, Gamebryo
+            { "NiCollisionObject", &construct<NiCollisionObject, RC_NiCollisionObject> },
+
+            // Collision objects, Bethesda
+            { "bhkCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
+            { "bhkPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
+            { "bhkSPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
+
+            // Constraint records, Bethesda
+            { "bhkHingeConstraint", &construct<bhkHingeConstraint, RC_bhkHingeConstraint> },
+            { "bhkLimitedHingeConstraint", &construct<bhkLimitedHingeConstraint, RC_bhkLimitedHingeConstraint> },
+            { "bhkRagdollConstraint", &construct<bhkRagdollConstraint, RC_bhkRagdollConstraint> },
+
+            // Physics body records, Bethesda
+            { "bhkRigidBody", &construct<bhkRigidBody, RC_bhkRigidBody> },
+            { "bhkRigidBodyT", &construct<bhkRigidBody, RC_bhkRigidBodyT> },
+
+            // Physics geometry records, Bethesda
+            { "bhkBoxShape", &construct<bhkBoxShape, RC_bhkBoxShape> },
+            { "bhkCapsuleShape", &construct<bhkCapsuleShape, RC_bhkCapsuleShape> },
+            { "bhkCompressedMeshShape", &construct<bhkCompressedMeshShape, RC_bhkCompressedMeshShape> },
+            { "bhkCompressedMeshShapeData", &construct<bhkCompressedMeshShapeData, RC_bhkCompressedMeshShapeData> },
+            { "bhkConvexTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },
+            { "bhkConvexVerticesShape", &construct<bhkConvexVerticesShape, RC_bhkConvexVerticesShape> },
+            { "bhkListShape", &construct<bhkListShape, RC_bhkListShape> },
+            { "bhkMoppBvTreeShape", &construct<bhkMoppBvTreeShape, RC_bhkMoppBvTreeShape> },
+            { "bhkNiTriStripsShape", &construct<bhkNiTriStripsShape, RC_bhkNiTriStripsShape> },
+            { "bhkPackedNiTriStripsShape", &construct<bhkPackedNiTriStripsShape, RC_bhkPackedNiTriStripsShape> },
+            { "hkPackedNiTriStripsData", &construct<hkPackedNiTriStripsData, RC_hkPackedNiTriStripsData> },
+            { "bhkSimpleShapePhantom", &construct<bhkSimpleShapePhantom, RC_bhkSimpleShapePhantom> },
+            { "bhkSphereShape", &construct<bhkSphereShape, RC_bhkSphereShape> },
+            { "bhkTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },
+
+            // PROPERTIES
+
+            // 4.0.0.2
+            { "NiAlphaProperty", &construct<NiAlphaProperty, RC_NiAlphaProperty> },
+            { "NiDitherProperty", &construct<NiDitherProperty, RC_NiDitherProperty> },
+            { "NiFogProperty", &construct<NiFogProperty, RC_NiFogProperty> },
+            { "NiMaterialProperty", &construct<NiMaterialProperty, RC_NiMaterialProperty> },
+            { "NiShadeProperty", &construct<NiShadeProperty, RC_NiShadeProperty> },
+            { "NiSpecularProperty", &construct<NiSpecularProperty, RC_NiSpecularProperty> },
+            { "NiStencilProperty", &construct<NiStencilProperty, RC_NiStencilProperty> },
+            { "NiTexturingProperty", &construct<NiTexturingProperty, RC_NiTexturingProperty> },
+            { "NiVertexColorProperty", &construct<NiVertexColorProperty, RC_NiVertexColorProperty> },
+            { "NiWireframeProperty", &construct<NiWireframeProperty, RC_NiWireframeProperty> },
+            { "NiZBufferProperty", &construct<NiZBufferProperty, RC_NiZBufferProperty> },
+
+            // Shader properties, Bethesda
+            { "BSShaderProperty", &construct<BSShaderProperty, RC_BSShaderProperty> },
+            { "BSShaderPPLightingProperty", &construct<BSShaderPPLightingProperty, RC_BSShaderPPLightingProperty> },
+            { "BSShaderNoLightingProperty", &construct<BSShaderNoLightingProperty, RC_BSShaderNoLightingProperty> },
+            { "BSLightingShaderProperty", &construct<BSLightingShaderProperty, RC_BSLightingShaderProperty> },
+            { "BSEffectShaderProperty", &construct<BSEffectShaderProperty, RC_BSEffectShaderProperty> },
         };
     }
 
