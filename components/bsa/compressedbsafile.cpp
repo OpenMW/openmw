@@ -144,8 +144,9 @@ namespace Bsa
                 input.read(reinterpret_cast<char*>(&file.mOffset), 4);
             }
         }
+
         if (mHeader.mFolderNamesLength != 0)
-            fail("Failed to read folder names: " + std::to_string(mHeader.mFolderNamesLength) + " bytes remaining");
+            input.ignore(mHeader.mFolderNamesLength);
 
         if (input.bad())
             fail("Failed to read compressed BSA file records: input error");
@@ -172,13 +173,13 @@ namespace Bsa
                     file.mName.insert(file.mName.begin() + folder.mName.size(), '\\');
                 }
             }
-
-            if (input.bad())
-                fail("Failed to read compressed BSA filenames: input error");
         }
 
         if (mHeader.mFileNamesLength != 0)
-            fail("Failed to read file names: " + std::to_string(mHeader.mFileNamesLength) + " bytes remaining");
+            input.ignore(mHeader.mFileNamesLength);
+
+        if (input.bad())
+            fail("Failed to read compressed BSA filenames: input error");
 
         for (auto& [folder, filelist] : folders)
         {
