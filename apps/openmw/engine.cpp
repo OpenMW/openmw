@@ -423,6 +423,9 @@ void OMW::Engine::addArchive(const std::string& archive)
 void OMW::Engine::setResourceDir(const std::filesystem::path& parResDir)
 {
     mResDir = parResDir;
+    if (!Version::checkResourcesVersion(mResDir))
+        Log(Debug::Error) << "Resources dir " << mResDir
+                          << " doesn't match OpenMW binary, the game may work incorrectly.";
 }
 
 // Set start cell name

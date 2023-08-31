@@ -1,6 +1,7 @@
 #ifndef VERSION_HPP
 #define VERSION_HPP
 
+#include <filesystem>
 #include <string>
 #include <string_view>
 
@@ -13,6 +14,8 @@ namespace Version
 
     // Prepares string that contains version and commit hash.
     std::string getOpenmwVersionDescription();
+
+    bool checkResourcesVersion(const std::filesystem::path& resourcePath);
 }
 
 #endif // VERSION_HPP

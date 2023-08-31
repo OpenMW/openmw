@@ -1,4 +1,7 @@
-#include "version.hpp"
+#include <components/version/version.hpp>
+
+#include <filesystem>
+#include <fstream>
 
 namespace Version
 {
@@ -33,4 +36,15 @@ namespace Version
         }
         return str;
     }
+
+    bool checkResourcesVersion(const std::filesystem::path& resourcePath)
+    {
+        std::ifstream stream(resourcePath / "version");
+        std::string version, commitHash, tagHash;
+        std::getline(stream, version);
+        std::getline(stream, commitHash);
+        std::getline(stream, tagHash);
+        return getVersion() == version && getCommitHash() == commitHash && getTagHash() == tagHash;
+    }
+
 }

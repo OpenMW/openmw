@@ -6,18 +6,22 @@ if(APPLE)
 endif(APPLE)
 
 # Version file
-set (VERSION_IN_FILE "${OpenMW_SOURCE_DIR}/components/version/version.cpp.in")
-set (VERSION_FILE "${OpenMW_SOURCE_DIR}/components/version/version.cpp")
+set (VERSION_RESOURCE_FILE_IN "${OpenMW_SOURCE_DIR}/files/version.in")
+set (VERSION_RESOURCE_FILE_RELATIVE "resources/version")
+set (VERSION_CPP_FILE "components/version/version.cpp")
+
 if (GIT_CHECKOUT)
     get_generator_is_multi_config(multi_config)
     add_custom_command (
-       OUTPUT ${VERSION_FILE}
-       DEPENDS ${VERSION_IN_FILE}
+       OUTPUT "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}"
+       DEPENDS "${OpenMW_SOURCE_DIR}/${VERSION_CPP_FILE}.in"
        COMMAND ${CMAKE_COMMAND}
             -DGIT_EXECUTABLE=${GIT_EXECUTABLE}
-            -DPROJECT_SOURCE_DIR=${PROJECT_SOURCE_DIR}
-            -DVERSION_IN_FILE=${VERSION_IN_FILE}
-            -DVERSION_FILE=${VERSION_FILE}
+            -DOpenMW_SOURCE_DIR=${OpenMW_SOURCE_DIR}
+            -DOpenMW_BINARY_DIR=${OpenMW_BINARY_DIR}
+            -DVERSION_RESOURCE_FILE_IN=${VERSION_RESOURCE_FILE_IN}
+            -DVERSION_RESOURCE_FILE_RELATIVE=${VERSION_RESOURCE_FILE_RELATIVE}
+            -DVERSION_CPP_FILE=${VERSION_CPP_FILE}
             -DOPENMW_VERSION_MAJOR=${OPENMW_VERSION_MAJOR}
             -DOPENMW_VERSION_MINOR=${OPENMW_VERSION_MINOR}
             -DOPENMW_VERSION_RELEASE=${OPENMW_VERSION_RELEASE}
@@ -29,8 +33,11 @@ if (GIT_CHECKOUT)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/GitVersion.cmake
             VERBATIM)
 else (GIT_CHECKOUT)
-    configure_file(${VERSION_IN_FILE} ${VERSION_FILE})
+    configure_resource_file(${VERSION_RESOURCE_FILE_IN} ${OpenMW_BINARY_DIR} ${VERSION_RESOURCE_FILE_RELATIVE})
+    configure_file("${OpenMW_SOURCE_DIR}/${VERSION_CPP_FILE}.in" "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
 endif (GIT_CHECKOUT)
+
+list (APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
 
 # source files
 
@@ -312,7 +319,6 @@ add_component_dir (sdlutil
 
 add_component_dir (version
     version
-    version.cpp
     )
 
 add_component_dir (fallback

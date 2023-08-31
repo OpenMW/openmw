@@ -68,7 +68,6 @@ apps/wizard/ui_intropage.h
 apps/wizard/ui_languageselectionpage.h
 apps/wizard/ui_methodselectionpage.h
 components/ui_contentselector.h
-components/version/version.cpp
 docs/mainpage.hpp
 docs/Doxyfile
 docs/DoxyfilePages
