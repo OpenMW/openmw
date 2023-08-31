@@ -7,50 +7,41 @@ namespace Nif
 
     void NiSourceTexture::read(NIFStream* nif)
     {
-        Named::read(nif);
+        NiTexture::read(nif);
 
-        external = nif->getChar() != 0;
-        bool internal = false;
-        if (external)
-            filename = nif->getString();
-        else
-        {
-            if (nif->getVersion() <= NIFStream::generateVersion(10, 0, 1, 3))
-                internal = nif->getChar();
-            if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-                filename = nif->getString(); // Original file path of the internal texture
-        }
-        if (nif->getVersion() <= NIFStream::generateVersion(10, 0, 1, 3))
-        {
-            if (!external && internal)
-                data.read(nif);
-        }
-        else
-        {
-            data.read(nif);
-        }
+        nif->read(mExternal);
+        if (mExternal || nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
+            nif->read(mFile);
 
-        pixel = nif->getUInt();
-        mipmap = nif->getUInt();
-        alpha = nif->getUInt();
+        bool hasData = nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 4);
+        if (!hasData && !mExternal)
+            nif->read(hasData);
 
-        // Renderer hints, typically of no use for us
-        /* bool mIsStatic = */ nif->getChar();
+        if (hasData)
+            mData.read(nif);
+
+        mPrefs.mPixelLayout = static_cast<PixelLayout>(nif->get<uint32_t>());
+        mPrefs.mUseMipMaps = static_cast<MipMapFormat>(nif->get<uint32_t>());
+        mPrefs.mAlphaFormat = static_cast<AlphaFormat>(nif->get<uint32_t>());
+
+        nif->read(mIsStatic);
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 103))
-            /* bool mDirectRendering = */ nif->getBoolean();
-        if (nif->getVersion() >= NIFStream::generateVersion(20, 2, 0, 4))
-            /* bool mPersistRenderData = */ nif->getBoolean();
+        {
+            nif->read(mDirectRendering);
+            if (nif->getVersion() >= NIFStream::generateVersion(20, 2, 0, 4))
+                nif->read(mPersistRenderData);
+        }
     }
 
     void NiSourceTexture::post(Reader& nif)
     {
-        Named::post(nif);
-        data.post(nif);
+        NiTexture::post(nif);
+        mData.post(nif);
     }
 
     void BSShaderTextureSet::read(NIFStream* nif)
     {
-        nif->getSizedStrings(textures, nif->getUInt());
+        nif->getSizedStrings(mTextures, nif->get<uint32_t>());
     }
 
 }

@@ -12,35 +12,48 @@ namespace Nif
 
     struct NiSourceTexture : public NiTexture
     {
-        // Is this an external (references a separate texture file) or
-        // internal (data is inside the nif itself) texture?
-        bool external;
+        enum class PixelLayout : uint32_t
+        {
+            Palette = 0,
+            HighColor = 1,
+            TrueColor = 2,
+            Compressed = 3,
+            BumpMap = 4,
+            Default = 5,
+        };
 
-        std::string filename; // In case of external textures
-        NiPixelDataPtr data; // In case of internal textures
+        enum class MipMapFormat : uint32_t
+        {
+            No = 0,
+            Yes = 1,
+            Default = 2,
+        };
 
-        /* Pixel layout
-            0 - Palettised
-            1 - High color 16
-            2 - True color 32
-            3 - Compressed
-            4 - Bumpmap
-            5 - Default */
-        unsigned int pixel;
+        enum class AlphaFormat : uint32_t
+        {
+            None = 0,
+            Binary = 1,
+            Smooth = 2,
+            Default = 3,
+        };
 
-        /* Mipmap format
-            0 - no
-            1 - yes
-            2 - default */
-        unsigned int mipmap;
+        struct FormatPrefs
+        {
+            PixelLayout mPixelLayout;
+            MipMapFormat mUseMipMaps;
+            AlphaFormat mAlphaFormat;
+        };
 
-        /* Alpha
-            0 - none
-            1 - binary
-            2 - smooth
-            3 - default (use material alpha, or multiply material with texture if present)
-        */
-        unsigned int alpha;
+        char mExternal; // References external file
+
+        std::string mFile;
+        NiPixelDataPtr mData;
+
+        FormatPrefs mPrefs;
+
+        char mIsStatic{ 1 };
+        bool mDirectRendering{ true };
+        bool mPersistRenderData{ false };
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -48,18 +61,18 @@ namespace Nif
 
     struct BSShaderTextureSet : public Record
     {
-        enum TextureType
+        enum class TextureType : uint32_t
         {
-            TextureType_Base = 0,
-            TextureType_Normal = 1,
-            TextureType_Glow = 2,
-            TextureType_Parallax = 3,
-            TextureType_Env = 4,
-            TextureType_EnvMask = 5,
-            TextureType_Subsurface = 6,
-            TextureType_BackLighting = 7
+            Base = 0,
+            Normal = 1,
+            Glow = 2,
+            Parallax = 3,
+            Environment = 4,
+            EnvironmentMask = 5,
+            Subsurface = 6,
+            BackLighting = 7,
         };
-        std::vector<std::string> textures;
+        std::vector<std::string> mTextures;
 
         void read(NIFStream* nif) override;
     };

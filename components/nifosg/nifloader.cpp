@@ -510,14 +510,14 @@ namespace NifOsg
                 return nullptr;
 
             osg::ref_ptr<osg::Image> image;
-            if (!st->external && !st->data.empty())
+            if (st->mExternal)
             {
-                image = handleInternalTexture(st->data.getPtr());
-            }
-            else
-            {
-                std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, imageManager->getVFS());
+                std::string filename = Misc::ResourceHelpers::correctTexturePath(st->mFile, imageManager->getVFS());
                 image = imageManager->getImage(filename);
+            }
+            else if (!st->mData.empty())
+            {
+                image = handleInternalTexture(st->mData.getPtr());
             }
             return image;
         }
@@ -2009,15 +2009,15 @@ namespace NifOsg
 
             const unsigned int uvSet = 0;
 
-            for (size_t i = 0; i < textureSet->textures.size(); ++i)
+            for (size_t i = 0; i < textureSet->mTextures.size(); ++i)
             {
-                if (textureSet->textures[i].empty())
+                if (textureSet->mTextures[i].empty())
                     continue;
-                switch (i)
+                switch (static_cast<Nif::BSShaderTextureSet::TextureType>(i))
                 {
-                    case Nif::BSShaderTextureSet::TextureType_Base:
-                    case Nif::BSShaderTextureSet::TextureType_Normal:
-                    case Nif::BSShaderTextureSet::TextureType_Glow:
+                    case Nif::BSShaderTextureSet::TextureType::Base:
+                    case Nif::BSShaderTextureSet::TextureType::Normal:
+                    case Nif::BSShaderTextureSet::TextureType::Glow:
                         break;
                     default:
                     {
@@ -2027,7 +2027,7 @@ namespace NifOsg
                     }
                 }
                 std::string filename
-                    = Misc::ResourceHelpers::correctTexturePath(textureSet->textures[i], imageManager->getVFS());
+                    = Misc::ResourceHelpers::correctTexturePath(textureSet->mTextures[i], imageManager->getVFS());
                 osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
                 osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
                 if (image)
@@ -2036,16 +2036,18 @@ namespace NifOsg
                 unsigned int texUnit = boundTextures.size();
                 stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
                 // BSShaderTextureSet presence means there's no need for FFP support for the affected node
-                switch (i)
+                switch (static_cast<Nif::BSShaderTextureSet::TextureType>(i))
                 {
-                    case Nif::BSShaderTextureSet::TextureType_Base:
+                    case Nif::BSShaderTextureSet::TextureType::Base:
                         texture2d->setName("diffuseMap");
                         break;
-                    case Nif::BSShaderTextureSet::TextureType_Normal:
+                    case Nif::BSShaderTextureSet::TextureType::Normal:
                         texture2d->setName("normalMap");
                         break;
-                    case Nif::BSShaderTextureSet::TextureType_Glow:
+                    case Nif::BSShaderTextureSet::TextureType::Glow:
                         texture2d->setName("emissiveMap");
+                        break;
+                    default:
                         break;
                 }
                 boundTextures.emplace_back(uvSet);
