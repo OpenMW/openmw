@@ -899,7 +899,7 @@ namespace NifOsg
                     if (!key->mInterpolator.empty() && key->mInterpolator->recType != Nif::RC_NiTransformInterpolator)
                     {
                         Log(Debug::Error) << "Unsupported interpolator type for NiKeyframeController " << key->recIndex
-                                          << " in " << mFilename;
+                                          << " in " << mFilename << ": " << key->mInterpolator->recName;
                         continue;
                     }
                     osg::ref_ptr<KeyframeController> callback = new KeyframeController(key);
@@ -926,7 +926,7 @@ namespace NifOsg
                         && visctrl->mInterpolator->recType != Nif::RC_NiBoolInterpolator)
                     {
                         Log(Debug::Error) << "Unsupported interpolator type for NiVisController " << visctrl->recIndex
-                                          << " in " << mFilename;
+                                          << " in " << mFilename << ": " << visctrl->mInterpolator->recName;
                         continue;
                     }
                     osg::ref_ptr<VisController> callback(new VisController(visctrl, Loader::getHiddenNodeMask()));
@@ -942,7 +942,7 @@ namespace NifOsg
                         && rollctrl->mInterpolator->recType != Nif::RC_NiFloatInterpolator)
                     {
                         Log(Debug::Error) << "Unsupported interpolator type for NiRollController " << rollctrl->recIndex
-                                          << " in " << mFilename;
+                                          << " in " << mFilename << ": " << rollctrl->mInterpolator->recName;
                         continue;
                     }
                     osg::ref_ptr<RollController> callback = new RollController(rollctrl);
@@ -977,8 +977,9 @@ namespace NifOsg
                     if (!alphactrl->mInterpolator.empty()
                         && alphactrl->mInterpolator->recType != Nif::RC_NiFloatInterpolator)
                     {
-                        Log(Debug::Error) << "Unsupported interpolator type for NiAlphaController "
-                                          << alphactrl->recIndex << " in " << mFilename;
+                        Log(Debug::Error)
+                            << "Unsupported interpolator type for NiAlphaController " << alphactrl->recIndex << " in "
+                            << mFilename << ": " << alphactrl->mInterpolator->recName;
                         continue;
                     }
                     osg::ref_ptr<AlphaController> osgctrl = new AlphaController(alphactrl, baseMaterial);
@@ -998,8 +999,9 @@ namespace NifOsg
                     if (!matctrl->mInterpolator.empty()
                         && matctrl->mInterpolator->recType != Nif::RC_NiPoint3Interpolator)
                     {
-                        Log(Debug::Error) << "Unsupported interpolator type for NiMaterialColorController "
-                                          << matctrl->recIndex << " in " << mFilename;
+                        Log(Debug::Error)
+                            << "Unsupported interpolator type for NiMaterialColorController " << matctrl->recIndex
+                            << " in " << mFilename << ": " << matctrl->mInterpolator->recName;
                         continue;
                     }
                     osg::ref_ptr<MaterialColorController> osgctrl = new MaterialColorController(matctrl, baseMaterial);
@@ -1025,7 +1027,7 @@ namespace NifOsg
                         && flipctrl->mInterpolator->recType != Nif::RC_NiFloatInterpolator)
                     {
                         Log(Debug::Error) << "Unsupported interpolator type for NiFlipController " << flipctrl->recIndex
-                                          << " in " << mFilename;
+                                          << " in " << mFilename << ": " << flipctrl->mInterpolator->recName;
                         continue;
                     }
                     std::vector<osg::ref_ptr<osg::Texture2D>> textures;
