@@ -1,7 +1,7 @@
 #include "effect.hpp"
 
-#include "controlled.hpp"
 #include "node.hpp"
+#include "texture.hpp"
 
 namespace Nif
 {

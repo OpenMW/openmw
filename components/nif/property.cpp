@@ -1,7 +1,7 @@
 #include "property.hpp"
 
-#include "controlled.hpp"
 #include "data.hpp"
+#include "texture.hpp"
 
 namespace Nif
 {

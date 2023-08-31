@@ -42,13 +42,14 @@
 #include <osg/TexEnvCombine>
 #include <osg/Texture2D>
 
-#include <components/nif/controlled.hpp>
 #include <components/nif/effect.hpp>
 #include <components/nif/exception.hpp>
 #include <components/nif/extra.hpp>
 #include <components/nif/niffile.hpp>
 #include <components/nif/node.hpp>
+#include <components/nif/particle.hpp>
 #include <components/nif/property.hpp>
+#include <components/nif/texture.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>

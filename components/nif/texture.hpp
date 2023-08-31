@@ -1,12 +1,16 @@
-#ifndef OPENMW_COMPONENTS_NIF_CONTROLLED_HPP
-#define OPENMW_COMPONENTS_NIF_CONTROLLED_HPP
+#ifndef OPENMW_COMPONENTS_NIF_TEXTURE_HPP
+#define OPENMW_COMPONENTS_NIF_TEXTURE_HPP
 
 #include "base.hpp"
 
 namespace Nif
 {
 
-    struct NiSourceTexture : public Named
+    struct NiTexture : public Named
+    {
+    };
+
+    struct NiSourceTexture : public NiTexture
     {
         // Is this an external (references a separate texture file) or
         // internal (data is inside the nif itself) texture?

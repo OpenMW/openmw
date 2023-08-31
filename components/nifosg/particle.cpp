@@ -9,7 +9,6 @@
 
 #include <components/debug/debuglog.hpp>
 #include <components/misc/rng.hpp>
-#include <components/nif/controlled.hpp>
 #include <components/nif/data.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>

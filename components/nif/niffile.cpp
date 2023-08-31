@@ -10,7 +10,6 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "controlled.hpp"
 #include "controller.hpp"
 #include "data.hpp"
 #include "effect.hpp"
@@ -20,6 +19,7 @@
 #include "particle.hpp"
 #include "physics.hpp"
 #include "property.hpp"
+#include "texture.hpp"
 
 namespace Nif
 {

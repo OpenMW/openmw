@@ -1,9 +1,9 @@
 #include "controller.hpp"
 
-#include "controlled.hpp"
 #include "data.hpp"
 #include "node.hpp"
 #include "particle.hpp"
+#include "texture.hpp"
 
 namespace Nif
 {
