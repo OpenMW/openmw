@@ -5,11 +5,11 @@ namespace Nif
     void Extra::read(NIFStream* nif)
     {
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
-            name = nif->getString();
+            nif->read(mName);
         else if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
         {
-            next.read(nif);
-            recordSize = nif->getUInt();
+            mNext.read(nif);
+            nif->read(mRecordSize);
         }
     }
 

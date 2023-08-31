@@ -175,16 +175,16 @@ namespace
 
     void extractTextKeys(const Nif::NiTextKeyExtraData* tk, SceneUtil::TextKeyMap& textkeys)
     {
-        for (size_t i = 0; i < tk->list.size(); i++)
+        for (const Nif::NiTextKeyExtraData::TextKey& key : tk->mList)
         {
             std::vector<std::string> results;
-            Misc::StringUtils::split(tk->list[i].text, results, "\r\n");
+            Misc::StringUtils::split(key.mText, results, "\r\n");
             for (std::string& result : results)
             {
                 Misc::StringUtils::trim(result);
                 Misc::StringUtils::lowerCaseInPlace(result);
                 if (!result.empty())
-                    textkeys.emplace(tk->list[i].time, std::move(result));
+                    textkeys.emplace(key.mTime, std::move(result));
             }
         }
     }
@@ -286,9 +286,9 @@ namespace NifOsg
 
             extractTextKeys(static_cast<const Nif::NiTextKeyExtraData*>(extra.getPtr()), target.mTextKeys);
 
-            extra = extra->next;
+            extra = extra->mNext;
             Nif::ControllerPtr ctrl = seq->controller;
-            for (; !extra.empty() && !ctrl.empty(); (extra = extra->next), (ctrl = ctrl->next))
+            for (; !extra.empty() && !ctrl.empty(); (extra = extra->mNext), (ctrl = ctrl->next))
             {
                 if (extra->recType != Nif::RC_NiStringExtraData || ctrl->recType != Nif::RC_NiKeyframeController)
                 {
@@ -316,8 +316,8 @@ namespace NifOsg
                 osg::ref_ptr<SceneUtil::KeyframeController> callback = new NifOsg::KeyframeController(key);
                 setupController(key, callback, /*animflags*/ 0);
 
-                if (!target.mKeyframeControllers.emplace(strdata->string, callback).second)
-                    Log(Debug::Verbose) << "Controller " << strdata->string << " present more than once in "
+                if (!target.mKeyframeControllers.emplace(strdata->mData, callback).second)
+                    Log(Debug::Verbose) << "Controller " << strdata->mData << " present more than once in "
                                         << nif.getFilename() << ", ignoring later version";
             }
         }
@@ -648,7 +648,7 @@ namespace NifOsg
 
             std::vector<Nif::ExtraPtr> extraCollection;
 
-            for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->next)
+            for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->mNext)
                 extraCollection.emplace_back(e);
 
             for (const auto& extraNode : nifNode->extralist)
@@ -670,25 +670,25 @@ namespace NifOsg
 
                     // String markers may contain important information
                     // affecting the entire subtree of this obj
-                    if (sd->string == "MRK" && !Loader::getShowMarkers())
+                    if (sd->mData == "MRK" && !Loader::getShowMarkers())
                     {
                         // Marker objects. These meshes are only visible in the editor.
                         args.mHasMarkers = true;
                     }
-                    else if (sd->string == "BONE")
+                    else if (sd->mData == "BONE")
                     {
                         node->getOrCreateUserDataContainer()->addDescription("CustomBone");
                     }
-                    else if (sd->string.rfind(extraDataIdentifer, 0) == 0)
+                    else if (sd->mData.rfind(extraDataIdentifer, 0) == 0)
                     {
                         node->setUserValue(
-                            Misc::OsgUserValues::sExtraData, sd->string.substr(extraDataIdentifer.length()));
+                            Misc::OsgUserValues::sExtraData, sd->mData.substr(extraDataIdentifer.length()));
                     }
                 }
                 else if (e->recType == Nif::RC_BSXFlags)
                 {
                     auto bsxFlags = static_cast<const Nif::NiIntegerExtraData*>(e.getPtr());
-                    if (bsxFlags->data & 32) // Editor marker flag
+                    if (bsxFlags->mData & 32) // Editor marker flag
                         args.mHasMarkers = true;
                 }
             }
