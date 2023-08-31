@@ -140,7 +140,7 @@ namespace MWWorld
         }
 
         /// @param readerList The readers to use for loading of the cell on-demand.
-        CellStore(MWWorld::Cell cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
+        CellStore(MWWorld::Cell&& cell, const MWWorld::ESMStore& store, ESM::ReadersCache& readers);
 
         CellStore(const CellStore&) = delete;
 

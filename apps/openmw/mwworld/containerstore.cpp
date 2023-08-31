@@ -159,9 +159,16 @@ MWWorld::ContainerStore::ContainerStore()
 
 MWWorld::ContainerStore::~ContainerStore()
 {
-    MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
-    for (MWWorld::ContainerStoreIterator iter(begin()); iter != end(); ++iter)
-        worldModel->deregisterPtr(*iter);
+    try
+    {
+        MWWorld::WorldModel* worldModel = MWBase::Environment::get().getWorldModel();
+        for (MWWorld::ContainerStoreIterator iter(begin()); iter != end(); ++iter)
+            worldModel->deregisterPtr(*iter);
+    }
+    catch (const std::exception& e)
+    {
+        Log(Debug::Error) << "Failed to deregister container store: " << e.what();
+    }
 }
 
 MWWorld::ConstContainerStoreIterator MWWorld::ContainerStore::cbegin(int mask) const

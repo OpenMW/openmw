@@ -1017,11 +1017,12 @@ namespace MWWorld
     void Store<ESM::GameSetting>::setUp()
     {
         auto addSetting = [&](const std::string& key, ESM::Variant value) {
+            auto id = ESM::RefId::stringRefId(key);
             ESM::GameSetting setting;
             setting.blank();
-            setting.mId = ESM::RefId::stringRefId(key);
+            setting.mId = id;
             setting.mValue = std::move(value);
-            auto [iter, inserted] = mStatic.insert_or_assign(setting.mId, std::move(setting));
+            auto [iter, inserted] = mStatic.insert_or_assign(id, std::move(setting));
             if (inserted)
                 mShared.push_back(&iter->second);
         };

@@ -2,6 +2,7 @@
 
 #include <MyGUI_TextIterator.h>
 
+#include <cassert>
 #include <memory>
 
 #include <components/misc/constants.hpp>
@@ -93,8 +94,10 @@ namespace
         int level = creatureStats.getLevel();
         for (const ESM::Attribute& attribute : attributes)
         {
-            const ESM::Race::MaleFemale& value
-                = race->mData.mAttributeValues[static_cast<size_t>(ESM::Attribute::refIdToIndex(attribute.mId))];
+            auto index = ESM::Attribute::refIdToIndex(attribute.mId);
+            assert(index >= 0);
+
+            const ESM::Race::MaleFemale& value = race->mData.mAttributeValues[static_cast<size_t>(index)];
             creatureStats.setAttribute(attribute.mId, male ? value.mMale : value.mFemale);
         }
 
