@@ -281,17 +281,10 @@ namespace NifOsg
 
     GravityAffector::GravityAffector(const Nif::NiGravity* gravity)
         : mForce(gravity->mForce)
-        , mType(static_cast<ForceType>(gravity->mType))
+        , mType(gravity->mType)
         , mPosition(gravity->mPosition)
         , mDirection(gravity->mDirection)
         , mDecay(gravity->mDecay)
-    {
-    }
-
-    GravityAffector::GravityAffector()
-        : mForce(0)
-        , mType(Type_Wind)
-        , mDecay(0.f)
     {
     }
 
@@ -311,8 +304,8 @@ namespace NifOsg
     {
         bool absolute = (program->getReferenceFrame() == osgParticle::ParticleProcessor::ABSOLUTE_RF);
 
-        if (mType == Type_Point
-            || mDecay != 0.f) // we don't need the position for Wind gravity, except if decay is being applied
+        // We don't need the position for Wind gravity, except if decay is being applied
+        if (mType == Nif::NiGravity::ForceType::Point || mDecay != 0.f)
             mCachedWorldPosition = absolute ? program->transformLocalToWorld(mPosition) : mPosition;
 
         mCachedWorldDirection = absolute ? program->rotateLocalToWorld(mDirection) : mDirection;
@@ -324,7 +317,7 @@ namespace NifOsg
         const float magic = 1.6f;
         switch (mType)
         {
-            case Type_Wind:
+            case Nif::NiGravity::ForceType::Wind:
             {
                 float decayFactor = 1.f;
                 if (mDecay != 0.f)
@@ -338,7 +331,7 @@ namespace NifOsg
 
                 break;
             }
-            case Type_Point:
+            case Nif::NiGravity::ForceType::Point:
             {
                 osg::Vec3f diff = mCachedWorldPosition - particle->getPosition();
 

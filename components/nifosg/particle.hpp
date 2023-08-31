@@ -10,15 +10,14 @@
 #include <osgParticle/Placer>
 #include <osgParticle/Shooter>
 
+#include <components/nif/controlled.hpp> // NiGravity::ForceType
+
 #include <components/sceneutil/nodecallback.hpp>
 
 #include "controller.hpp" // ValueInterpolator
 
 namespace Nif
 {
-    struct NiGravity;
-    struct NiPlanarCollider;
-    struct NiSphericalCollider;
     struct NiColorData;
 }
 
@@ -180,7 +179,7 @@ namespace NifOsg
     {
     public:
         GravityAffector(const Nif::NiGravity* gravity);
-        GravityAffector();
+        GravityAffector() = default;
         GravityAffector(const GravityAffector& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
 
         GravityAffector& operator=(const GravityAffector&) = delete;
@@ -191,16 +190,11 @@ namespace NifOsg
         void beginOperate(osgParticle::Program*) override;
 
     private:
-        float mForce;
-        enum ForceType
-        {
-            Type_Wind,
-            Type_Point
-        };
-        ForceType mType;
+        float mForce{ 0.f };
+        Nif::NiGravity::ForceType mType{ Nif::NiGravity::ForceType::Wind };
         osg::Vec3f mPosition;
         osg::Vec3f mDirection;
-        float mDecay;
+        float mDecay{ 0.f };
         osg::Vec3f mCachedWorldPosition;
         osg::Vec3f mCachedWorldDirection;
     };

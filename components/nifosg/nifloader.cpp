@@ -1067,12 +1067,12 @@ namespace NifOsg
             attachTo->addChild(program);
             program->setParticleSystem(partsys);
             program->setReferenceFrame(rf);
-            for (; !affectors.empty(); affectors = affectors->next)
+            for (; !affectors.empty(); affectors = affectors->mNext)
             {
                 if (affectors->recType == Nif::RC_NiParticleGrowFade)
                 {
                     const Nif::NiParticleGrowFade* gf = static_cast<const Nif::NiParticleGrowFade*>(affectors.getPtr());
-                    program->addOperator(new GrowFadeAffector(gf->growTime, gf->fadeTime));
+                    program->addOperator(new GrowFadeAffector(gf->mGrowTime, gf->mFadeTime));
                 }
                 else if (affectors->recType == Nif::RC_NiGravity)
                 {
@@ -1083,9 +1083,9 @@ namespace NifOsg
                 {
                     const Nif::NiParticleColorModifier* cl
                         = static_cast<const Nif::NiParticleColorModifier*>(affectors.getPtr());
-                    if (cl->data.empty())
+                    if (cl->mData.empty())
                         continue;
-                    const Nif::NiColorData* clrdata = cl->data.getPtr();
+                    const Nif::NiColorData* clrdata = cl->mData.getPtr();
                     program->addOperator(new ParticleColorAffector(clrdata));
                 }
                 else if (affectors->recType == Nif::RC_NiParticleRotation)
@@ -1095,7 +1095,7 @@ namespace NifOsg
                 else
                     Log(Debug::Info) << "Unhandled particle modifier " << affectors->recName << " in " << mFilename;
             }
-            for (; !colliders.empty(); colliders = colliders->next)
+            for (; !colliders.empty(); colliders = colliders->mNext)
             {
                 if (colliders->recType == Nif::RC_NiPlanarCollider)
                 {

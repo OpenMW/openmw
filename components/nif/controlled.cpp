@@ -55,56 +55,59 @@ namespace Nif
 
     void NiParticleModifier::read(NIFStream* nif)
     {
-        next.read(nif);
-        controller.read(nif);
+        mNext.read(nif);
+        if (nif->getVersion() >= NIFStream::generateVersion(3, 3, 0, 13))
+            mController.read(nif);
     }
 
     void NiParticleModifier::post(Reader& nif)
     {
-        next.post(nif);
-        controller.post(nif);
+        mNext.post(nif);
+        mController.post(nif);
     }
 
     void NiParticleGrowFade::read(NIFStream* nif)
     {
         NiParticleModifier::read(nif);
-        growTime = nif->getFloat();
-        fadeTime = nif->getFloat();
+        nif->read(mGrowTime);
+        nif->read(mFadeTime);
     }
 
     void NiParticleColorModifier::read(NIFStream* nif)
     {
         NiParticleModifier::read(nif);
-        data.read(nif);
+
+        mData.read(nif);
     }
 
     void NiParticleColorModifier::post(Reader& nif)
     {
         NiParticleModifier::post(nif);
-        data.post(nif);
+
+        mData.post(nif);
     }
 
     void NiGravity::read(NIFStream* nif)
     {
         NiParticleModifier::read(nif);
 
-        mDecay = nif->getFloat();
-        mForce = nif->getFloat();
-        mType = nif->getUInt();
-        mPosition = nif->getVector3();
-        mDirection = nif->getVector3();
+        if (nif->getVersion() >= NIFStream::generateVersion(3, 3, 0, 13))
+            nif->read(mDecay);
+        nif->read(mForce);
+        mType = static_cast<ForceType>(nif->get<uint32_t>());
+        nif->read(mPosition);
+        nif->read(mDirection);
     }
 
     void NiParticleCollider::read(NIFStream* nif)
     {
         NiParticleModifier::read(nif);
 
-        mBounceFactor = nif->getFloat();
+        nif->read(mBounceFactor);
         if (nif->getVersion() >= NIFStream::generateVersion(4, 2, 0, 2))
         {
-            // Unused in NifSkope. Need to figure out what these do.
-            /*bool mSpawnOnCollision = */ nif->getBoolean();
-            /*bool mDieOnCollision = */ nif->getBoolean();
+            nif->read(mSpawnOnCollision);
+            nif->read(mDieOnCollision);
         }
     }
 
@@ -112,29 +115,28 @@ namespace Nif
     {
         NiParticleCollider::read(nif);
 
-        mExtents = nif->getVector2();
-        mPosition = nif->getVector3();
-        mXVector = nif->getVector3();
-        mYVector = nif->getVector3();
-        mPlaneNormal = nif->getVector3();
-        mPlaneDistance = nif->getFloat();
-    }
-
-    void NiParticleRotation::read(NIFStream* nif)
-    {
-        NiParticleModifier::read(nif);
-
-        /* bool mRandomInitialAxis = */ nif->getChar();
-        /* osg::Vec3f mInitialAxis = */ nif->getVector3();
-        /* float mRotationSpeed = */ nif->getFloat();
+        nif->read(mExtents);
+        nif->read(mPosition);
+        nif->read(mXVector);
+        nif->read(mYVector);
+        nif->read(mPlaneNormal);
+        nif->read(mPlaneDistance);
     }
 
     void NiSphericalCollider::read(NIFStream* nif)
     {
         NiParticleCollider::read(nif);
 
-        mRadius = nif->getFloat();
-        mCenter = nif->getVector3();
+        nif->read(mRadius);
+        nif->read(mCenter);
     }
 
+    void NiParticleRotation::read(NIFStream* nif)
+    {
+        NiParticleModifier::read(nif);
+
+        nif->read(mRandomInitialAxis);
+        nif->read(mInitialAxis);
+        nif->read(mRotationSpeed);
+    }
 }

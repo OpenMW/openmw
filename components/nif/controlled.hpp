@@ -85,8 +85,8 @@ namespace Nif
 
     struct NiParticleModifier : public Record
     {
-        NiParticleModifierPtr next;
-        ControllerPtr controller;
+        NiParticleModifierPtr mNext;
+        ControllerPtr mController;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -94,15 +94,15 @@ namespace Nif
 
     struct NiParticleGrowFade : public NiParticleModifier
     {
-        float growTime;
-        float fadeTime;
+        float mGrowTime;
+        float mFadeTime;
 
         void read(NIFStream* nif) override;
     };
 
     struct NiParticleColorModifier : public NiParticleModifier
     {
-        NiColorDataPtr data;
+        NiColorDataPtr mData;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -110,12 +110,15 @@ namespace Nif
 
     struct NiGravity : public NiParticleModifier
     {
+        enum class ForceType : uint32_t
+        {
+            Wind = 0, // Fixed direction
+            Point = 1, // Fixed origin
+        };
+
+        float mDecay{ 0.f };
         float mForce;
-        /* 0 - Wind (fixed direction)
-         * 1 - Point (fixed origin)
-         */
-        int mType;
-        float mDecay;
+        ForceType mType;
         osg::Vec3f mPosition;
         osg::Vec3f mDirection;
 
@@ -125,6 +128,9 @@ namespace Nif
     struct NiParticleCollider : public NiParticleModifier
     {
         float mBounceFactor;
+        bool mSpawnOnCollision{ false };
+        bool mDieOnCollision{ false };
+
         void read(NIFStream* nif) override;
     };
 
@@ -150,6 +156,10 @@ namespace Nif
 
     struct NiParticleRotation : public NiParticleModifier
     {
+        uint8_t mRandomInitialAxis;
+        osg::Vec3f mInitialAxis;
+        float mRotationSpeed;
+
         void read(NIFStream* nif) override;
     };
 
