@@ -22,25 +22,45 @@ namespace
     ESM::Armor tableToArmor(const sol::table& rec)
     {
         ESM::Armor armor;
-        armor.mName = rec["name"];
-        armor.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
-        armor.mIcon = rec["icon"];
-        std::string_view enchantId = rec["enchant"].get<std::string_view>();
-        armor.mEnchant = ESM::RefId::deserializeText(enchantId);
-        std::string_view scriptId = rec["mwscript"].get<std::string_view>();
-        armor.mScript = ESM::RefId::deserializeText(scriptId);
-
-        armor.mData.mWeight = rec["weight"];
-        armor.mData.mValue = rec["value"];
-        int armorType = rec["type"].get<int>();
-        if (armorType >= 0 && armorType <= ESM::Armor::RBracer)
-            armor.mData.mType = armorType;
+        if (rec["template"] != sol::nil)
+            armor = LuaUtil::cast<ESM::Armor>(rec["template"]);
         else
-            throw std::runtime_error("Invalid Armor Type provided: " + std::to_string(armorType));
-        armor.mData.mHealth = rec["health"];
-        armor.mData.mArmor = rec["baseArmor"];
-        armor.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
-        armor.mRecordFlags = 0;
+            armor.blank();
+        if (rec["name"] != sol::nil)
+            armor.mName = rec["name"];
+        if (rec["model"] != sol::nil)
+            armor.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
+        if (rec["icon"] != sol::nil)
+            armor.mIcon = rec["icon"];
+        if (rec["enchant"] != sol::nil)
+        {
+            std::string_view enchantId = rec["enchant"].get<std::string_view>();
+            armor.mEnchant = ESM::RefId::deserializeText(enchantId);
+        }
+        if (rec["mwscript"] != sol::nil)
+        {
+            std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+            armor.mScript = ESM::RefId::deserializeText(scriptId);
+        }
+
+        if (rec["weight"] != sol::nil)
+            armor.mData.mWeight = rec["weight"];
+        if (rec["value"] != sol::nil)
+            armor.mData.mValue = rec["value"];
+        if (rec["type"] != sol::nil)
+        {
+            int armorType = rec["type"].get<int>();
+            if (armorType >= 0 && armorType <= ESM::Armor::RBracer)
+                armor.mData.mType = armorType;
+            else
+                throw std::runtime_error("Invalid Armor Type provided: " + std::to_string(armorType));
+        }
+        if (rec["health"] != sol::nil)
+            armor.mData.mHealth = rec["health"];
+        if (rec["baseArmor"] != sol::nil)
+            armor.mData.mArmor = rec["baseArmor"];
+        if (rec["enchantCapacity"] != sol::nil)
+            armor.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
 
         return armor;
     }

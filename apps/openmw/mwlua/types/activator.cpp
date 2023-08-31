@@ -22,11 +22,19 @@ namespace
     ESM::Activator tableToActivator(const sol::table& rec)
     {
         ESM::Activator activator;
-        activator.mName = rec["name"];
-        activator.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
-        std::string_view scriptId = rec["mwscript"].get<std::string_view>();
-        activator.mScript = ESM::RefId::deserializeText(scriptId);
-        activator.mRecordFlags = 0;
+        if (rec["template"] != sol::nil)
+            activator = LuaUtil::cast<ESM::Activator>(rec["template"]);
+        else
+            activator.blank();
+        if (rec["name"] != sol::nil)
+            activator.mName = rec["name"];
+        if (rec["model"] != sol::nil)
+            activator.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
+        if (rec["mwscript"] != sol::nil)
+        {
+            std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+            activator.mScript = ESM::RefId::deserializeText(scriptId);
+        }
         return activator;
     }
 }

@@ -24,37 +24,74 @@ namespace
     ESM::Weapon tableToWeapon(const sol::table& rec)
     {
         ESM::Weapon weapon;
-        weapon.mName = rec["name"];
-        weapon.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
-        weapon.mIcon = rec["icon"];
-        std::string_view enchantId = rec["enchant"].get<std::string_view>();
-        weapon.mEnchant = ESM::RefId::deserializeText(enchantId);
-        std::string_view scriptId = rec["mwscript"].get<std::string_view>();
-        weapon.mScript = ESM::RefId::deserializeText(scriptId);
-        weapon.mData.mFlags = 0;
-        weapon.mRecordFlags = 0;
-        if (rec["isMagical"])
-            weapon.mData.mFlags |= ESM::Weapon::Magical;
-        if (rec["isSilver"])
-            weapon.mData.mFlags |= ESM::Weapon::Silver;
-        int weaponType = rec["type"].get<int>();
-        if (weaponType >= 0 && weaponType <= ESM::Weapon::MarksmanThrown)
-            weapon.mData.mType = weaponType;
+        if (rec["template"] != sol::nil)
+            weapon = LuaUtil::cast<ESM::Weapon>(rec["template"]);
         else
-            throw std::runtime_error("Invalid Weapon Type provided: " + std::to_string(weaponType));
+            weapon.blank();
 
-        weapon.mData.mWeight = rec["weight"];
-        weapon.mData.mValue = rec["value"];
-        weapon.mData.mHealth = rec["health"];
-        weapon.mData.mSpeed = rec["speed"];
-        weapon.mData.mReach = rec["reach"];
-        weapon.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
-        weapon.mData.mChop[0] = rec["chopMinDamage"];
-        weapon.mData.mChop[1] = rec["chopMaxDamage"];
-        weapon.mData.mSlash[0] = rec["slashMinDamage"];
-        weapon.mData.mSlash[1] = rec["slashMaxDamage"];
-        weapon.mData.mThrust[0] = rec["thrustMinDamage"];
-        weapon.mData.mThrust[1] = rec["thrustMaxDamage"];
+        if (rec["name"] != sol::nil)
+            weapon.mName = rec["name"];
+        if (rec["model"] != sol::nil)
+            weapon.mModel = Misc::ResourceHelpers::meshPathForESM3(rec["model"].get<std::string_view>());
+        if (rec["icon"] != sol::nil)
+            weapon.mIcon = rec["icon"];
+        if (rec["enchant"] != sol::nil)
+        {
+            std::string_view enchantId = rec["enchant"].get<std::string_view>();
+            weapon.mEnchant = ESM::RefId::deserializeText(enchantId);
+        }
+        if (rec["mwscript"] != sol::nil)
+        {
+            std::string_view scriptId = rec["mwscript"].get<std::string_view>();
+            weapon.mScript = ESM::RefId::deserializeText(scriptId);
+        }
+        if (auto isMagical = rec["isMagical"]; isMagical != sol::nil)
+        {
+            if (isMagical)
+                weapon.mData.mFlags |= ESM::Weapon::Magical;
+            else
+                weapon.mData.mFlags &= ~ESM::Weapon::Magical;
+        }
+        if (auto isSilver = rec["isSilver"]; isSilver != sol::nil)
+        {
+            if (isSilver)
+                weapon.mData.mFlags |= ESM::Weapon::Silver;
+            else
+                weapon.mData.mFlags &= ~ESM::Weapon::Silver;
+        }
+
+        if (rec["type"] != sol::nil)
+        {
+            int weaponType = rec["type"].get<int>();
+            if (weaponType >= 0 && weaponType <= ESM::Weapon::MarksmanThrown)
+                weapon.mData.mType = weaponType;
+            else
+                throw std::runtime_error("Invalid Weapon Type provided: " + std::to_string(weaponType));
+        }
+        if (rec["weight"] != sol::nil)
+            weapon.mData.mWeight = rec["weight"];
+        if (rec["value"] != sol::nil)
+            weapon.mData.mValue = rec["value"];
+        if (rec["health"] != sol::nil)
+            weapon.mData.mHealth = rec["health"];
+        if (rec["speed"] != sol::nil)
+            weapon.mData.mSpeed = rec["speed"];
+        if (rec["reach"] != sol::nil)
+            weapon.mData.mReach = rec["reach"];
+        if (rec["enchantCapacity"] != sol::nil)
+            weapon.mData.mEnchant = std::round(rec["enchantCapacity"].get<float>() * 10);
+        if (rec["chopMinDamage"] != sol::nil)
+            weapon.mData.mChop[0] = rec["chopMinDamage"];
+        if (rec["chopMaxDamage"] != sol::nil)
+            weapon.mData.mChop[1] = rec["chopMaxDamage"];
+        if (rec["slashMinDamage"] != sol::nil)
+            weapon.mData.mSlash[0] = rec["slashMinDamage"];
+        if (rec["slashMaxDamage"] != sol::nil)
+            weapon.mData.mSlash[1] = rec["slashMaxDamage"];
+        if (rec["thrustMinDamage"] != sol::nil)
+            weapon.mData.mThrust[0] = rec["thrustMinDamage"];
+        if (rec["thrustMaxDamage"] != sol::nil)
+            weapon.mData.mThrust[1] = rec["thrustMaxDamage"];
 
         return weapon;
     }
