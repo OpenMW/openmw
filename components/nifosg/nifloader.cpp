@@ -537,38 +537,41 @@ namespace NifOsg
             }
 
             const Nif::NiTextureEffect* textureEffect = static_cast<const Nif::NiTextureEffect*>(nifNode);
-            if (textureEffect->textureType != Nif::NiTextureEffect::Environment_Map)
+            if (!textureEffect->mSwitchState)
+                return false;
+
+            if (textureEffect->mTextureType != Nif::NiTextureEffect::TextureType::EnvironmentMap)
             {
-                Log(Debug::Info) << "Unhandled NiTextureEffect type " << textureEffect->textureType << " in "
-                                 << mFilename;
+                Log(Debug::Info) << "Unhandled NiTextureEffect type "
+                                 << static_cast<uint32_t>(textureEffect->mTextureType) << " in " << mFilename;
                 return false;
             }
 
-            if (textureEffect->texture.empty())
+            if (textureEffect->mTexture.empty())
             {
                 Log(Debug::Info) << "NiTextureEffect missing source texture in " << mFilename;
                 return false;
             }
 
             osg::ref_ptr<osg::TexGen> texGen(new osg::TexGen);
-            switch (textureEffect->coordGenType)
+            switch (textureEffect->mCoordGenType)
             {
-                case Nif::NiTextureEffect::World_Parallel:
+                case Nif::NiTextureEffect::CoordGenType::WorldParallel:
                     texGen->setMode(osg::TexGen::OBJECT_LINEAR);
                     break;
-                case Nif::NiTextureEffect::World_Perspective:
+                case Nif::NiTextureEffect::CoordGenType::WorldPerspective:
                     texGen->setMode(osg::TexGen::EYE_LINEAR);
                     break;
-                case Nif::NiTextureEffect::Sphere_Map:
+                case Nif::NiTextureEffect::CoordGenType::SphereMap:
                     texGen->setMode(osg::TexGen::SPHERE_MAP);
                     break;
                 default:
-                    Log(Debug::Info) << "Unhandled NiTextureEffect coordGenType " << textureEffect->coordGenType
-                                     << " in " << mFilename;
+                    Log(Debug::Info) << "Unhandled NiTextureEffect CoordGenType "
+                                     << static_cast<uint32_t>(textureEffect->mCoordGenType) << " in " << mFilename;
                     return false;
             }
 
-            osg::ref_ptr<osg::Image> image(handleSourceTexture(textureEffect->texture.getPtr(), imageManager));
+            osg::ref_ptr<osg::Image> image(handleSourceTexture(textureEffect->mTexture.getPtr(), imageManager));
             osg::ref_ptr<osg::Texture2D> texture2d(new osg::Texture2D(image));
             if (image)
                 texture2d->setTextureSize(image->s(), image->t());
