@@ -17,6 +17,7 @@
 #include "exception.hpp"
 #include "extra.hpp"
 #include "node.hpp"
+#include "particle.hpp"
 #include "physics.hpp"
 #include "property.hpp"
 

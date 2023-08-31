@@ -103,7 +103,7 @@ add_component_dir (sceneutil
     )
 
 add_component_dir (nif
-    controlled effect niftypes record controller extra node record_ptr data niffile property nifkey base nifstream physics
+    base controlled controller data effect extra niffile nifkey nifstream niftypes node particle physics property record record_ptr
     )
 
 add_component_dir (nifosg

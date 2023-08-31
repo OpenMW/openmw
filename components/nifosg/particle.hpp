@@ -10,7 +10,7 @@
 #include <osgParticle/Placer>
 #include <osgParticle/Shooter>
 
-#include <components/nif/controlled.hpp> // NiGravity::ForceType
+#include <components/nif/particle.hpp> // NiGravity::ForceType
 
 #include <components/sceneutil/nodecallback.hpp>
 
