@@ -162,6 +162,11 @@
 -- @param openmw.core#Spell spell Spell (can be nil)
 
 ---
+-- Clears the actor's selected castable(spell or enchanted item)
+-- @function [parent=#Actor] clearSelectedCastable
+-- @param openmw.core#GameObject actor
+
+---
 -- Get currently selected enchanted item
 -- @function [parent=#Actor] getSelectedEnchantedItem
 -- @param openmw.core#GameObject actor

@@ -24,6 +24,7 @@
 #include "../mwmechanics/spellutil.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
+#include "../mwworld/inventorystore.hpp"
 #include "../mwworld/worldmodel.hpp"
 
 #include "localscripts.hpp"
@@ -615,17 +616,43 @@ namespace MWLua
             context.mLuaManager->addAction([obj = Object(ptr), spellId]() {
                 const MWWorld::Ptr& ptr = obj.ptr();
                 auto& stats = ptr.getClass().getCreatureStats(ptr);
+
+                if (spellId.empty())
+                {
+                    if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                        MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
+                    else
+                        stats.getSpells().setSelectedSpell(ESM::RefId());
+                    return;
+                }
                 if (!stats.getSpells().hasSpell(spellId))
                     throw std::runtime_error("Actor doesn't know spell " + spellId.toDebugString());
+
                 if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
                 {
-                    int chance = 0;
-                    if (!spellId.empty())
-                        chance = MWMechanics::getSpellSuccessChance(spellId, ptr);
+                    int chance = MWMechanics::getSpellSuccessChance(spellId, ptr);
                     MWBase::Environment::get().getWindowManager()->setSelectedSpell(spellId, chance);
                 }
                 else
-                    ptr.getClass().getCreatureStats(ptr).getSpells().setSelectedSpell(spellId);
+                    stats.getSpells().setSelectedSpell(spellId);
+            });
+        };
+
+        actor["clearSelectedCastable"] = [context](const SelfObject& o) {
+            if (!o.ptr().getClass().isActor())
+                throw std::runtime_error("Actor expected");
+            context.mLuaManager->addAction([obj = Object(o.ptr())]() {
+                const MWWorld::Ptr& ptr = obj.ptr();
+                auto& stats = ptr.getClass().getCreatureStats(ptr);
+                if (ptr.getClass().hasInventoryStore(ptr))
+                {
+                    MWWorld::InventoryStore& inventory = ptr.getClass().getInventoryStore(ptr);
+                    inventory.setSelectedEnchantItem(inventory.end());
+                }
+                if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+                    MWBase::Environment::get().getWindowManager()->unsetSelectedSpell();
+                else
+                    stats.getSpells().setSelectedSpell(ESM::RefId());
             });
         };
 
