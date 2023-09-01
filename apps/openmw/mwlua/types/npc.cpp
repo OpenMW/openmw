@@ -4,6 +4,7 @@
 #include <components/lua/luastate.hpp>
 
 #include <apps/openmw/mwbase/environment.hpp>
+#include <apps/openmw/mwbase/mechanicsmanager.hpp>
 #include <apps/openmw/mwbase/world.hpp>
 #include <apps/openmw/mwmechanics/npcstats.hpp>
 #include <apps/openmw/mwworld/class.hpp>
@@ -41,6 +42,8 @@ namespace MWLua
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mScript.serializeText(); });
         record["hair"]
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHair.serializeText(); });
+        record["baseDisposition"]
+            = sol::readonly_property([](const ESM::NPC& rec) -> int { return (int)rec.mNpdt.mDisposition; });
         record["head"]
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.serializeText(); });
         record["isMale"] = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.isMale(); });
@@ -53,6 +56,15 @@ namespace MWLua
                 return cls.getNpcStats(o.ptr()).isWerewolf();
             else
                 throw std::runtime_error("NPC or Player expected");
+        };
+
+        npc["getDisposition"] = [](const Object& o, const Object& player) -> int {
+            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+                throw std::runtime_error("The argument must be a player!");
+            const MWWorld::Class& cls = o.ptr().getClass();
+            if (!cls.isNpc())
+                throw std::runtime_error("NPC expected");
+            return MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(o.ptr());
         };
     }
 }
