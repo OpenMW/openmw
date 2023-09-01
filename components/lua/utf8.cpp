@@ -1,4 +1,5 @@
 #include <codecvt>
+#include <components/misc/strings/format.hpp>
 
 #include "utf8.hpp"
 
@@ -17,24 +18,20 @@ namespace
     {
         double integer;
         if (!arg.is<double>())
-            throw std::runtime_error(std::format("bad argument #{} to '{}' (number expected, got {})", n, name,
-                sol::type_name(arg.lua_state(), arg.get_type())));
+            throw std::runtime_error(Misc::StringUtils::format("bad argument #%i to '%s' (number expected, got %s)", n,
+                name, sol::type_name(arg.lua_state(), arg.get_type())));
 
         if (std::modf(arg, &integer) != 0)
             throw std::runtime_error(
-                std::format("bad argument #{} to '{}' (number has no integer representation)", n, name));
+                Misc::StringUtils::format("bad argument #{} to '{}' (number has no integer representation)", n, name));
 
         return integer;
     }
 
     inline void relativePosition(int64_t& pos, const size_t& len)
     {
-        if (pos >= 0)
-            return;
-        else if (0u - pos > static_cast<int64_t>(len))
-            pos = 0;
-        else
-            pos = len + pos + 1;
+        if (pos < 0)
+            pos = std::max<int64_t>(0, pos + len + 1);
     }
 
     // returns: first - character pos in bytes, second - character codepoint
@@ -101,7 +98,8 @@ namespace LuaUtf8
             {
                 int64_t codepoint = getInteger(args[i], (i + 1), "char");
                 if (codepoint < 0 || codepoint > MAXUTF)
-                    throw std::runtime_error(std::format("bad argument #{} to 'char' (value out of range)", (i + 1)));
+                    throw std::runtime_error(
+                        Misc::StringUtils::format("bad argument #{} to 'char' (value out of range)", (i + 1)));
 
                 result += converter.to_bytes(codepoint);
             }
