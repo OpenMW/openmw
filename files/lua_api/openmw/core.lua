@@ -7,7 +7,7 @@
 
 
 ---
--- The revision of OpenMW Lua API. It is an integer that is incremented every time the API is changed.
+-- The revision of OpenMW Lua API. It is an integer that is incremented every time the API is changed. See the actual value at the top of the page.
 -- @field [parent=#core] #number API_REVISION
 
 ---

@@ -1,6 +1,8 @@
 Built-in Setting Renderers
 ==========================
 
+.. include:: version.rst
+
 textLine
 --------
 

@@ -3,25 +3,19 @@
 
 #include <filesystem>
 #include <string>
+#include <string_view>
 
 namespace Version
 {
+    std::string_view getVersion();
+    std::string_view getCommitHash();
+    std::string_view getTagHash();
+    int getLuaApiRevision();
 
-    struct Version
-    {
-        std::string mVersion;
-        std::string mCommitHash;
-        std::string mTagHash;
+    // Prepares string that contains version and commit hash.
+    std::string getOpenmwVersionDescription();
 
-        std::string describe() const;
-    };
-
-    /// Read OpenMW version from the version file located in resourcePath.
-    Version getOpenmwVersion(const std::filesystem::path& resourcePath);
-
-    /// Helper function to getOpenmwVersion and describe() it
-    std::string getOpenmwVersionDescription(const std::filesystem::path& resourcePath);
-
+    bool checkResourcesVersion(const std::filesystem::path& resourcePath);
 }
 
 #endif // VERSION_HPP

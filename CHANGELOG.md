@@ -72,6 +72,7 @@
     Bug #7553: Faction reaction loading is incorrect
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
+    Feature #6149: Dehardcode Lua API_REVISION
     Feature #6447: Add LOD support to Object Paging
     Feature #6491: Add support for Qt6
     Feature #6556: Lua API for sounds

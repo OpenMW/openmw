@@ -1,6 +1,8 @@
 Engine handlers reference
 =========================
 
+.. include:: version.rst
+
 Engine handler is a function defined by a script, that can be called by the engine.
 
 

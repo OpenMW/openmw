@@ -15,6 +15,7 @@
 #include <components/lua/luastate.hpp>
 #include <components/lua/utilpackage.hpp>
 #include <components/misc/strings/lower.hpp>
+#include <components/version/version.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
@@ -128,7 +129,7 @@ namespace MWLua
     {
         auto* lua = context.mLua;
         sol::table api(lua->sol(), sol::create);
-        api["API_REVISION"] = 44;
+        api["API_REVISION"] = Version::getLuaApiRevision(); // specified in CMakeLists.txt
         api["quit"] = [lua]() {
             Log(Debug::Warning) << "Quit requested by a Lua script.\n" << lua->debugTraceback();
             MWBase::Environment::get().getStateManager()->requestQuit();
