@@ -7,14 +7,14 @@ namespace
 {
     constexpr std::string_view UTF8PATT = "[%z\x01-\x7F\xC2-\xF4][\x80-\xBF]*"; // %z is deprecated in Lua5.2
     constexpr uint32_t MAXUTF = 0x7FFFFFFFu;
-    //constexpr uint32_t MAXUNICODE = 0x10FFFFu;
+    // constexpr uint32_t MAXUNICODE = 0x10FFFFu;
 
     inline bool isNilOrNone(const sol::stack_proxy arg)
     {
         return (arg.get_type() == sol::type::lua_nil || arg.get_type() == sol::type::none);
     }
 
-    inline double getInteger(const sol::stack_proxy arg, const size_t n, const std::string_view name)
+    inline double getInteger(const sol::stack_proxy arg, const size_t n, std::string_view name)
     {
         double integer;
         if (!arg.is<double>())
@@ -35,7 +35,7 @@ namespace
     }
 
     // returns: first - character pos in bytes, second - character codepoint
-    std::pair<int64_t, int64_t> decodeNextUTF8Character(const std::string_view s, std::vector<int64_t>& pos_byte)
+    std::pair<int64_t, int64_t> decodeNextUTF8Character(std::string_view s, std::vector<int64_t>& pos_byte)
     {
         const int64_t pos = pos_byte.back() - 1;
         const unsigned char ch = static_cast<unsigned char>(s[pos]);
@@ -106,7 +106,7 @@ namespace LuaUtf8
             return result;
         };
 
-        utf8["codes"] = [](const std::string_view& s) {
+        utf8["codes"] = [](std::string_view s) {
             std::vector<int64_t> pos_byte{ 1 };
             return sol::as_function([s, pos_byte]() mutable -> sol::optional<std::pair<int64_t, int64_t>> {
                 if (pos_byte.back() <= static_cast<int64_t>(s.size()))
@@ -121,7 +121,7 @@ namespace LuaUtf8
             });
         };
 
-        utf8["len"] = [](const std::string_view& s,
+        utf8["len"] = [](std::string_view s,
                           const sol::variadic_args args) -> std::variant<size_t, std::pair<sol::object, int64_t>> {
             const size_t len = s.size();
             int64_t iv = isNilOrNone(args[0]) ? 1 : getInteger(args[0], 2, "len");
@@ -149,7 +149,7 @@ namespace LuaUtf8
         };
 
         utf8["codepoint"]
-            = [](const std::string_view& s, const sol::variadic_args args) -> sol::as_returns_t<std::vector<int64_t>> {
+            = [](std::string_view s, const sol::variadic_args args) -> sol::as_returns_t<std::vector<int64_t>> {
             size_t len = s.size();
             int64_t iv = isNilOrNone(args[0]) ? 1 : getInteger(args[0], 2, "codepoint");
             int64_t fv = isNilOrNone(args[1]) ? iv : getInteger(args[1], 3, "codepoint");
@@ -179,7 +179,7 @@ namespace LuaUtf8
         };
 
         utf8["offset"]
-            = [](const std::string_view& s, const int64_t n, const sol::variadic_args args) -> sol::optional<int64_t> {
+            = [](std::string_view s, const int64_t n, const sol::variadic_args args) -> sol::optional<int64_t> {
             size_t len = s.size();
             int64_t iv = isNilOrNone(args[0]) ? ((n >= 0) ? 1 : s.size() + 1) : getInteger(args[0], 3, "offset");
             std::vector<int64_t> pos_byte = { 1 };
