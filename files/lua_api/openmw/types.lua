@@ -715,6 +715,13 @@
 -- @return #boolean
 
 ---
+-- Returns the current disposition of the provided NPC. This is their derived disposition, after modifiers such as personality and faction relations are taken into account.
+-- @function [parent=#NPC] getDisposition
+-- @param openmw.core#GameObject object
+-- @param openmw.core#GameObject player The player that you want to check the disposition for.
+-- @return #number
+
+---
 -- Whether the NPC or player is in the werewolf form at the moment.
 -- @function [parent=#NPC] isWerewolf
 -- @param openmw.core#GameObject actor
@@ -736,6 +743,7 @@
 -- @field #string hair Path to the hair body part model
 -- @field #string head Path to the head body part model
 -- @field #number baseGold The base barter gold of the NPC
+-- @field #number baseDisposition NPC's starting disposition
 -- @field #bool isMale The gender setting of the NPC
 
 
