@@ -7,14 +7,14 @@ namespace
 {
     constexpr std::string_view UTF8PATT = "[%z\x01-\x7F\xC2-\xF4][\x80-\xBF]*"; // %z is deprecated in Lua5.2
     constexpr uint32_t MAXUTF = 0x7FFFFFFFu;
-    constexpr uint32_t MAXUNICODE = 0x10FFFFu;
+    //constexpr uint32_t MAXUNICODE = 0x10FFFFu;
 
     inline bool isNilOrNone(const sol::stack_proxy arg)
     {
         return (arg.get_type() == sol::type::lua_nil || arg.get_type() == sol::type::none);
     }
 
-    inline double getInteger(const sol::stack_proxy arg, const size_t& n, const std::string_view& name)
+    inline double getInteger(const sol::stack_proxy arg, const size_t n, const std::string_view name)
     {
         double integer;
         if (!arg.is<double>())
@@ -28,14 +28,14 @@ namespace
         return integer;
     }
 
-    inline void relativePosition(int64_t& pos, const size_t& len)
+    inline void relativePosition(int64_t& pos, const size_t len)
     {
         if (pos < 0)
             pos = std::max<int64_t>(0, pos + len + 1);
     }
 
     // returns: first - character pos in bytes, second - character codepoint
-    std::pair<int64_t, int64_t> decodeNextUTF8Character(const std::string_view& s, std::vector<int64_t>& pos_byte)
+    std::pair<int64_t, int64_t> decodeNextUTF8Character(const std::string_view s, std::vector<int64_t>& pos_byte)
     {
         const int64_t pos = pos_byte.back() - 1;
         const unsigned char ch = static_cast<unsigned char>(s[pos]);
@@ -123,7 +123,7 @@ namespace LuaUtf8
 
         utf8["len"] = [](const std::string_view& s,
                           const sol::variadic_args args) -> std::variant<size_t, std::pair<sol::object, int64_t>> {
-            size_t len = s.size();
+            const size_t len = s.size();
             int64_t iv = isNilOrNone(args[0]) ? 1 : getInteger(args[0], 2, "len");
             int64_t fv = isNilOrNone(args[1]) ? -1 : getInteger(args[1], 3, "len");
 
