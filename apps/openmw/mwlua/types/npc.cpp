@@ -3,6 +3,7 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
 
+#include "apps/openmw/mwworld/worldmodel.hpp"
 #include <apps/openmw/mwbase/environment.hpp>
 #include <apps/openmw/mwbase/mechanicsmanager.hpp>
 #include <apps/openmw/mwbase/world.hpp>
@@ -57,6 +58,54 @@ namespace MWLua
             else
                 throw std::runtime_error("NPC or Player expected");
         };
+        record["servicesOffered"] = sol::readonly_property([](const ESM::NPC& rec) {
+            std::vector<std::string> providedServices;
+
+            int mServices = rec.mAiData.mServices;
+            if (mServices & ESM::NPC::Spells)
+                providedServices.push_back("Spells");
+            if (mServices & ESM::NPC::Spellmaking)
+                providedServices.push_back("Spellmaking");
+            if (mServices & ESM::NPC::Enchanting)
+                providedServices.push_back("Enchanting");
+            if (mServices & ESM::NPC::Training)
+                providedServices.push_back("Training");
+            if (mServices & ESM::NPC::Repair)
+                providedServices.push_back("Repair");
+            if (mServices & ESM::NPC::AllItems)
+                providedServices.push_back("Barter");
+
+            if (mServices & ESM::NPC::Weapon)
+                providedServices.push_back("Weapon");
+            if (mServices & ESM::NPC::Armor)
+                providedServices.push_back("Armor");
+            if (mServices & ESM::NPC::Clothing)
+                providedServices.push_back("Clothing");
+            if (mServices & ESM::NPC::Books)
+                providedServices.push_back("Books");
+            if (mServices & ESM::NPC::Ingredients)
+                providedServices.push_back("Ingredients");
+            if (mServices & ESM::NPC::Picks)
+                providedServices.push_back("Picks");
+            if (mServices & ESM::NPC::Probes)
+                providedServices.push_back("Probes");
+            if (mServices & ESM::NPC::Lights)
+                providedServices.push_back("Lights");
+            if (mServices & ESM::NPC::Apparatus)
+                providedServices.push_back("Apparatus");
+            if (mServices & ESM::NPC::RepairItem)
+                providedServices.push_back("RepairItem");
+            if (mServices & ESM::NPC::Misc)
+                providedServices.push_back("Misc");
+            if (mServices & ESM::NPC::Potions)
+                providedServices.push_back("Potions");
+            if (mServices & ESM::NPC::MagicItems)
+                providedServices.push_back("MagicItems");
+            if (rec.getTransport().size() > 0)
+                providedServices.push_back("Travel");
+
+            return providedServices;
+        });
 
         npc["getDisposition"] = [](const Object& o, const Object& player) -> int {
             if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
