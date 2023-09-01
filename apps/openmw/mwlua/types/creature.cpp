@@ -49,7 +49,7 @@ namespace MWLua
         record["soulValue"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mSoul; });
         record["type"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mType; });
         record["baseGold"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mGold; });
-        record["servicesOffered"] = sol::readonly_property([](const ESM::Creature& rec) {
+        record["servicesOffered"] = sol::readonly_property([](const ESM::Creature& rec) -> std::vector<std::string> {
             std::vector<std::string> providedServices;
             std::map<int, std::string> serviceNames = { { ESM::NPC::Spells, "Spells" },
                 { ESM::NPC::Spellmaking, "Spellmaking" }, { ESM::NPC::Enchanting, "Enchanting" },
