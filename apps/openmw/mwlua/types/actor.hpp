@@ -17,16 +17,17 @@ namespace MWLua
     template <class T>
     void addActorServicesBindings(sol::usertype<T>& record, const Context& context)
     {
-        record["servicesOffered"] = sol::readonly_property([](const T& rec) -> std::map<std::string, bool> {
-             std::map<std::string, bool> providedServices;
-        const static std::map<int, std::string> serviceNames = { { ESM::NPC::Spells, "Spells" },
+        record["servicesOffered"] = sol::readonly_property([](const T& rec) -> std::map<std::string_view, bool> {
+            std::map<std::string_view, bool> providedServices;
+            constexpr std::array<std::pair<int, std::string_view>, 19> serviceNames = { { { ESM::NPC::Spells,
+                                                                                              "Spells" },
                 { ESM::NPC::Spellmaking, "Spellmaking" }, { ESM::NPC::Enchanting, "Enchanting" },
                 { ESM::NPC::Training, "Training" }, { ESM::NPC::Repair, "Repair" }, { ESM::NPC::AllItems, "Barter" },
                 { ESM::NPC::Weapon, "Weapon" }, { ESM::NPC::Armor, "Armor" }, { ESM::NPC::Clothing, "Clothing" },
                 { ESM::NPC::Books, "Books" }, { ESM::NPC::Ingredients, "Ingredients" }, { ESM::NPC::Picks, "Picks" },
                 { ESM::NPC::Probes, "Probes" }, { ESM::NPC::Lights, "Lights" }, { ESM::NPC::Apparatus, "Apparatus" },
                 { ESM::NPC::RepairItem, "RepairItem" }, { ESM::NPC::Misc, "Misc" }, { ESM::NPC::Potions, "Potions" },
-                { ESM::NPC::MagicItems, "MagicItems" } };
+                { ESM::NPC::MagicItems, "MagicItems" } } };
 
             int services = rec.mAiData.mServices;
             if constexpr (std::is_same_v<T, ESM::NPC>)
