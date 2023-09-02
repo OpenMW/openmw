@@ -50,6 +50,7 @@ namespace MWLua
         record["isMale"] = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.isMale(); });
         record["baseGold"] = sol::readonly_property([](const ESM::NPC& rec) -> int { return rec.mNpdt.mGold; });
         addActorServicesBindings<ESM::NPC>(record, context);
+        
         // This function is game-specific, in future we should replace it with something more universal.
         npc["isWerewolf"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
