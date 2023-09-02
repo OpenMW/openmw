@@ -1,5 +1,5 @@
 #include "types.hpp"
-
+#include "actor.hpp"
 #include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
 
@@ -49,31 +49,8 @@ namespace MWLua
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.serializeText(); });
         record["isMale"] = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.isMale(); });
         record["baseGold"] = sol::readonly_property([](const ESM::NPC& rec) -> int { return rec.mNpdt.mGold; });
-
-        record["servicesOffered"] = sol::readonly_property([](const ESM::NPC& rec) -> std::vector<std::string> {
-            std::vector<std::string> providedServices;
-            std::map<int, std::string> serviceNames = { { ESM::NPC::Spells, "Spells" },
-                { ESM::NPC::Spellmaking, "Spellmaking" }, { ESM::NPC::Enchanting, "Enchanting" },
-                { ESM::NPC::Training, "Training" }, { ESM::NPC::Repair, "Repair" }, { ESM::NPC::AllItems, "Barter" },
-                { ESM::NPC::Weapon, "Weapon" }, { ESM::NPC::Armor, "Armor" }, { ESM::NPC::Clothing, "Clothing" },
-                { ESM::NPC::Books, "Books" }, { ESM::NPC::Ingredients, "Ingredients" }, { ESM::NPC::Picks, "Picks" },
-                { ESM::NPC::Probes, "Probes" }, { ESM::NPC::Lights, "Lights" }, { ESM::NPC::Apparatus, "Apparatus" },
-                { ESM::NPC::RepairItem, "RepairItem" }, { ESM::NPC::Misc, "Misc" }, { ESM::NPC::Potions, "Potions" },
-                { ESM::NPC::MagicItems, "MagicItems" } };
-
-            int mServices = rec.mAiData.mServices;
-            for (const auto& entry : serviceNames)
-            {
-                if (mServices & entry.first)
-                {
-                    providedServices.push_back(entry.second);
-                }
-            }
-            if (!rec.getTransport().empty())
-                providedServices.push_back("Travel");
-            return providedServices;
-        });
-        // This function is game-specific, in future we should replace it with something more universal.
+        addActorServicesBindings<ESM::NPC>(record, context);
+            // This function is game-specific, in future we should replace it with something more universal.
         npc["isWerewolf"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
             if (cls.isNpc())
