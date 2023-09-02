@@ -17,9 +17,9 @@ namespace MWLua
     template <class T>
     void addActorServicesBindings(sol::usertype<T>& record, const Context& context)
     {
-        record["servicesOffered"] = sol::readonly_property([](const T& rec) -> std::vector<std::string> {
-            std::vector<std::string> providedServices;
-            std::map<int, std::string> serviceNames = { { ESM::NPC::Spells, "Spells" },
+        record["servicesOffered"] = sol::readonly_property([](const T& rec) -> std::map<std::string, bool> {
+             std::map<std::string, bool> providedServices;
+        const static std::map<int, std::string> serviceNames = { { ESM::NPC::Spells, "Spells" },
                 { ESM::NPC::Spellmaking, "Spellmaking" }, { ESM::NPC::Enchanting, "Enchanting" },
                 { ESM::NPC::Training, "Training" }, { ESM::NPC::Repair, "Repair" }, { ESM::NPC::AllItems, "Barter" },
                 { ESM::NPC::Weapon, "Weapon" }, { ESM::NPC::Armor, "Armor" }, { ESM::NPC::Clothing, "Clothing" },
@@ -41,12 +41,9 @@ namespace MWLua
             }
             for (const auto& [flag, name] : serviceNames)
             {
-                if (services & flag)
-                    providedServices.push_back(name);
+                providedServices[name] = (services & flag) != 0;
             }
-
-            if (!rec.getTransport().empty())
-                providedServices.push_back("Travel");
+            providedServices["Travel"] = !rec.getTransport().empty();
             return providedServices;
         });
     }
