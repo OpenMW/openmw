@@ -7,10 +7,6 @@
 
 
 ---
--- @type VFSIterator
--- @field #string path VFS prefix path
-
----
 -- @type FileHandle
 -- @field #string fileName VFS path to related file
 
@@ -135,14 +131,18 @@
 -- end
 
 ---
--- Get iterator to fetch file names with given path prefix from VFS
--- @function [parent=#vfs] getIterator
+-- Get iterator function to fetch file names with given path prefix from VFS
+-- @function [parent=#vfs] pathsWithPrefix
 -- @param #string path Path prefix
--- @return #VFSIterator Opened iterator
--- @usage local dir = vfs.getIterator("Music\\Explore");
--- for _, fileName in pairs(dir) do
+-- @return #function Function to get next file name
+-- @usage -- get all files with given prefix from VFS index
+-- for fileName in vfs.pathsWithPrefix("Music\\Explore") do
 --     print(fileName);
 -- end
+-- @usage -- get some first files
+-- local getNextFile = vfs.pathsWithPrefix("Music\\Explore");
+-- local firstFile = getNextFile();
+-- local secondFile = getNextFile();
 
 ---
 -- Detect a file handle type

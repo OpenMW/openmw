@@ -160,25 +160,6 @@ namespace MWLua
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 
-        sol::usertype<VFS::Manager::StatefulIterator> vfsIterator
-            = context.mLua->sol().new_usertype<VFS::Manager::StatefulIterator>("VFSIterator");
-        vfsIterator[sol::meta_function::to_string] = [](const VFS::Manager::StatefulIterator& vfsIterator) {
-            return "VFSIterator{'" + vfsIterator.getPath() + "'}";
-        };
-        vfsIterator["path"] = sol::readonly_property(
-            [](const VFS::Manager::StatefulIterator& vfsIterator) { return vfsIterator.getPath(); });
-
-        auto createIter = [](VFS::Manager::StatefulIterator& vfsIterator) {
-            return sol::as_function([vfsIterator, i = 1]() mutable {
-                if (auto v = vfsIterator.next())
-                    return std::tuple<sol::optional<int>, sol::optional<std::string_view>>(i++, *v);
-                else
-                    return std::tuple<sol::optional<int>, sol::optional<std::string_view>>(sol::nullopt, sol::nullopt);
-            });
-        };
-        vfsIterator["__pairs"] = createIter;
-        vfsIterator["__ipairs"] = createIter;
-
         sol::usertype<FileHandle> handle = context.mLua->sol().new_usertype<FileHandle>("FileHandle");
         handle["fileName"] = sol::readonly_property([](const FileHandle& self) { return self.mFileName; });
         handle[sol::meta_function::to_string] = [](const FileHandle& self) {
@@ -346,8 +327,19 @@ namespace MWLua
             [](const sol::object&) -> sol::object { return sol::nil; });
 
         api["fileExists"] = [vfs](std::string_view fileName) -> bool { return vfs->exists(fileName); };
-        api["getIterator"]
-            = [vfs](std::string_view path) -> VFS::Manager::StatefulIterator { return vfs->getStatefulIterator(path); };
+        api["pathsWithPrefix"] = [vfs](std::string_view prefix) {
+            auto iterator = vfs->getRecursiveDirectoryIterator(prefix);
+            return sol::as_function([iterator, current = iterator.begin()]() mutable -> sol::optional<std::string> {
+                if (current != iterator.end())
+                {
+                    const std::string& result = *current;
+                    ++current;
+                    return result;
+                }
+
+                return sol::nullopt;
+            });
+        };
 
         return LuaUtil::makeReadOnly(api);
     }
