@@ -7,5 +7,6 @@ paths=(
   scripts/omw/mwui/init.lua
   scripts/omw/settings/player.lua
   scripts/omw/ui.lua
+  scripts/omw/usehandlers.lua
 )
 printf '%s\n' "${paths[@]}"

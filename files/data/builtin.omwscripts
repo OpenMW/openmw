@@ -8,6 +8,7 @@ PLAYER: scripts/omw/settings/player.lua
 # Mechanics
 GLOBAL: scripts/omw/activationhandlers.lua
 GLOBAL: scripts/omw/cellhandlers.lua
+GLOBAL: scripts/omw/usehandlers.lua
 PLAYER: scripts/omw/mechanics/playercontroller.lua
 PLAYER: scripts/omw/playercontrols.lua
 PLAYER: scripts/omw/camera/camera.lua
