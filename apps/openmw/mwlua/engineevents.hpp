@@ -36,6 +36,11 @@ namespace MWLua
             ESM::RefNum mActor;
             ESM::RefNum mObject;
         };
+        struct OnUseItem
+        {
+            ESM::RefNum mActor;
+            ESM::RefNum mObject;
+        };
         struct OnConsume
         {
             ESM::RefNum mActor;
@@ -45,7 +50,7 @@ namespace MWLua
         {
             MWWorld::CellStore& mCell;
         };
-        using Event = std::variant<OnActive, OnInactive, OnConsume, OnActivate, OnNewExterior, OnTeleported>;
+        using Event = std::variant<OnActive, OnInactive, OnConsume, OnActivate, OnUseItem, OnNewExterior, OnTeleported>;
 
         void clear() { mQueue.clear(); }
         void addToQueue(Event e) { mQueue.push_back(std::move(e)); }

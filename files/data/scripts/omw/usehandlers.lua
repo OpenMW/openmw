@@ -1,28 +1,10 @@
-local async = require('openmw.async')
 local types = require('openmw.types')
 local world = require('openmw.world')
-
-local EnableObject = async:registerTimerCallback('EnableObject', function(obj) obj.enabled = true end)
-
-local function ESM4DoorActivation(door, actor)
-    -- TODO: Implement lockpicking minigame
-    -- TODO: Play door opening animation and sound
-    local Door4 = types.ESM4Door
-    if Door4.isTeleport(door) then
-        actor:teleport(Door4.destCell(door), Door4.destPosition(door), Door4.destRotation(door))
-    else
-        door.enabled = false
-        async:newSimulationTimer(5, EnableObject, door)
-    end
-    return false -- disable activation handling in C++ mwmechanics code
-end
 
 local handlersPerObject = {}
 local handlersPerType = {}
 
-handlersPerType[types.ESM4Door] = { ESM4DoorActivation }
-
-local function onActivate(obj, actor)
+local function useItem(obj, actor)
     local handlers = handlersPerObject[obj.id]
     if handlers then
         for i = #handlers, 1, -1 do
@@ -39,24 +21,41 @@ local function onActivate(obj, actor)
             end
         end
     end
-    types.Actor.activeEffects(actor):remove('invisibility')
-    world._runStandardActivationAction(obj, actor)
+    world._runStandardUseAction(obj, actor)
 end
 
 return {
-    interfaceName = 'Activation',
+    interfaceName = 'ItemUsage',
     ---
-    -- @module Activation
-    -- @usage require('openmw.interfaces').Activation
+    -- Allows to extend or override built-in item usage mechanics.
+    -- Note: at the moment it can override item usage in inventory
+    -- (dragging an item on the character's model), but
+    --
+    -- * can't intercept actions performed by mwscripts;
+    -- * can't intercept actions performed by the AI (i.e. drinking a potion in combat);
+    -- * can't intercept actions performed via quick keys menu.
+    -- @module ItemUsage
+    -- @usage local I = require('openmw.interfaces')
+    --
+    -- -- Override Use action (global script).
+    -- -- Forbid equipping armor with weight > 5
+    -- I.ItemUsage.addHandlerForType(types.Armor, function(armor, actor)
+    --     if types.Armor.record(armor).weight > 5 then
+    --         return false -- disable other handlers
+    --     end
+    -- end)
+    --
+    -- -- Call Use action (any script).
+    -- core.sendGlobalEvent('UseItem', {object = armor, actor = player})
     interface = {
         --- Interface version
-        -- @field [parent=#Activation] #number version
+        -- @field [parent=#ItemUsage] #number version
         version = 0,
 
-        --- Add new activation handler for a specific object.
+        --- Add new use action handler for a specific object.
         -- If `handler(object, actor)` returns false, other handlers for
         -- the same object (including type handlers) will be skipped.
-        -- @function [parent=#Activation] addHandlerForObject
+        -- @function [parent=#ItemUsage] addHandlerForObject
         -- @param openmw.core#GameObject obj The object.
         -- @param #function handler The handler.
         addHandlerForObject = function(obj, handler)
@@ -68,10 +67,10 @@ return {
             handlers[#handlers + 1] = handler
         end,
 
-        --- Add new activation handler for a type of objects.
+        --- Add new use action handler for a type of objects.
         -- If `handler(object, actor)` returns false, other handlers for
         -- the same object (including type handlers) will be skipped.
-        -- @function [parent=#Activation] addHandlerForType
+        -- @function [parent=#ItemUsage] addHandlerForType
         -- @param #any type A type from the `openmw.types` package.
         -- @param #function handler The handler.
         addHandlerForType = function(type, handler)
@@ -83,5 +82,16 @@ return {
             handlers[#handlers + 1] = handler
         end,
     },
-    engineHandlers = { onActivate = onActivate },
+    engineHandlers = { _onUseItem = useItem },
+    eventHandlers = {
+        UseItem = function(data)
+            if not data.object then
+                error('UseItem: missing argument "object"')
+            end
+            if not data.actor or not types.Actor.objectIsInstance(data.actor) then
+                error('UseItem: invalid argument "actor"')
+            end
+            useItem(data.object, data.actor)
+        end
+    }
 }

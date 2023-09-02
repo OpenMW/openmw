@@ -19,6 +19,7 @@
 #include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
@@ -600,7 +601,7 @@ namespace MWGui
                 }
             }
             else
-                useItem(ptr);
+                MWBase::Environment::get().getLuaManager()->useItem(ptr, MWMechanics::getPlayer());
 
             // If item is ingredient or potion don't stop drag and drop to simplify action of taking more than one 1
             // item

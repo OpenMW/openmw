@@ -51,6 +51,7 @@ namespace MWBase
         virtual void objectTeleported(const MWWorld::Ptr& ptr) = 0;
         virtual void itemConsumed(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) = 0;
         virtual void objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
+        virtual void useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
         virtual void exteriorCreated(MWWorld::CellStore& cell) = 0;
         virtual void questUpdated(const ESM::RefId& questId, int stage) = 0;
 

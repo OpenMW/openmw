@@ -19,8 +19,16 @@ namespace MWLua
         GlobalScripts(LuaUtil::LuaState* lua)
             : LuaUtil::ScriptsContainer(lua, "Global")
         {
-            registerEngineHandlers({ &mObjectActiveHandlers, &mActorActiveHandlers, &mItemActiveHandlers,
-                &mNewGameHandlers, &mPlayerAddedHandlers, &mOnActivateHandlers, &mOnNewExteriorHandlers });
+            registerEngineHandlers({
+                &mObjectActiveHandlers,
+                &mActorActiveHandlers,
+                &mItemActiveHandlers,
+                &mNewGameHandlers,
+                &mPlayerAddedHandlers,
+                &mOnActivateHandlers,
+                &mOnUseItemHandlers,
+                &mOnNewExteriorHandlers,
+            });
         }
 
         void newGameStarted() { callEngineHandlers(mNewGameHandlers); }
@@ -32,6 +40,7 @@ namespace MWLua
         {
             callEngineHandlers(mOnActivateHandlers, obj, actor);
         }
+        void onUseItem(const GObject& obj, const GObject& actor) { callEngineHandlers(mOnUseItemHandlers, obj, actor); }
         void onNewExterior(const GCell& cell) { callEngineHandlers(mOnNewExteriorHandlers, cell); }
 
     private:
@@ -41,6 +50,7 @@ namespace MWLua
         EngineHandlerList mNewGameHandlers{ "onNewGame" };
         EngineHandlerList mPlayerAddedHandlers{ "onPlayerAdded" };
         EngineHandlerList mOnActivateHandlers{ "onActivate" };
+        EngineHandlerList mOnUseItemHandlers{ "_onUseItem" };
         EngineHandlerList mOnNewExteriorHandlers{ "onNewExterior" };
     };
 
