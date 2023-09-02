@@ -48,4 +48,4 @@ namespace MWLua
         });
     }
 }
-#endif // MWLUA_TYPES_H
+#endif // MWLUA_ACTOR_H
