@@ -1,5 +1,5 @@
-#include "types.hpp"
 #include "actor.hpp"
+#include "types.hpp"
 
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loadnpc.hpp>
