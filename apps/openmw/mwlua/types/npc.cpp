@@ -1,9 +1,9 @@
 #include "types.hpp"
 #include "actor.hpp"
+
 #include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
 
-#include "apps/openmw/mwworld/worldmodel.hpp"
 #include <apps/openmw/mwbase/environment.hpp>
 #include <apps/openmw/mwbase/mechanicsmanager.hpp>
 #include <apps/openmw/mwbase/world.hpp>
@@ -50,7 +50,7 @@ namespace MWLua
         record["isMale"] = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.isMale(); });
         record["baseGold"] = sol::readonly_property([](const ESM::NPC& rec) -> int { return rec.mNpdt.mGold; });
         addActorServicesBindings<ESM::NPC>(record, context);
-            // This function is game-specific, in future we should replace it with something more universal.
+        // This function is game-specific, in future we should replace it with something more universal.
         npc["isWerewolf"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();
             if (cls.isNpc())
