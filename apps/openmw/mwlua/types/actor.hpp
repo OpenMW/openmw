@@ -20,8 +20,9 @@ namespace MWLua
     template <class T>
     void addActorServicesBindings(sol::usertype<T>& record, const Context& context)
     {
-        record["servicesOffered"] = sol::readonly_property([](const T& rec) -> std::map<std::string_view, bool> {
-            std::map<std::string_view, bool> providedServices;
+        record["servicesOffered"] = sol::readonly_property([context](const T& rec) -> sol::table {
+            sol::state_view& lua = context.mLua->sol();
+            sol::table providedServices(lua, sol::create);
             constexpr std::array<std::pair<int, std::string_view>, 19> serviceNames = { { { ESM::NPC::Spells,
                                                                                               "Spells" },
                 { ESM::NPC::Spellmaking, "Spellmaking" }, { ESM::NPC::Enchanting, "Enchanting" },
@@ -36,12 +37,8 @@ namespace MWLua
             if constexpr (std::is_same_v<T, ESM::NPC>)
             {
                 if (rec.mFlags & ESM::NPC::Autocalc)
-                    services = MWBase::Environment::get()
-                                   .getWorld()
-                                   ->getStore()
-                                   .get<ESM::Class>()
-                                   .find(rec.mClass)
-                                   ->mData.mServices;
+                    services
+                        = MWBase::Environment::get().getESMStore()->get<ESM::Class>().find(rec.mClass)->mData.mServices;
             }
             for (const auto& [flag, name] : serviceNames)
             {
