@@ -161,12 +161,8 @@ namespace Nif
 
     struct NiVisData : public Record
     {
-        struct VisData
-        {
-            float time;
-            bool isSet;
-        };
-        std::vector<VisData> mVis;
+        // TODO: investigate possible use of ByteKeyMap
+        std::shared_ptr<std::map<float, bool>> mKeys;
 
         void read(NIFStream* nif) override;
     };

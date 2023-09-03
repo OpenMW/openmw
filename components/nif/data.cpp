@@ -194,7 +194,12 @@ namespace Nif
     {
         NiParticlesData::read(nif);
 
-        if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0) && nif->getBoolean())
+        if (nif->getVersion() > NIFStream::generateVersion(4, 2, 2, 0))
+            return;
+
+        bool hasRotations;
+        nif->read(hasRotations);
+        if (hasRotations)
             nif->readVector(rotations, vertices.size());
     }
 
@@ -281,12 +286,16 @@ namespace Nif
 
     void NiVisData::read(NIFStream* nif)
     {
-        int count = nif->getInt();
-        mVis.resize(count);
-        for (size_t i = 0; i < mVis.size(); i++)
+        mKeys = std::make_shared<std::map<float, bool>>();
+        uint32_t numKeys;
+        nif->read(numKeys);
+        for (size_t i = 0; i < numKeys; i++)
         {
-            mVis[i].time = nif->getFloat();
-            mVis[i].isSet = (nif->getChar() != 0);
+            float time;
+            char value;
+            nif->read(time);
+            nif->read(value);
+            (*mKeys)[time] = (value != 0);
         }
     }
 
