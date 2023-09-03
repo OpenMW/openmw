@@ -1,26 +1,3 @@
-/*
-  OpenMW - The completely unofficial reimplementation of Morrowind
-  Copyright (C) 2008-2010  Nicolay Korslund
-  Email: < korslund@gmail.com >
-  WWW: https://openmw.org/
-
-  This file (extra.h) is part of the OpenMW package.
-
-  OpenMW is distributed as free software: you can redistribute it
-  and/or modify it under the terms of the GNU General Public License
-  version 3, as published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  version 3 along with this program. If not, see
-  https://www.gnu.org/licenses/ .
-
- */
-
 #ifndef OPENMW_COMPONENTS_NIF_EXTRA_HPP
 #define OPENMW_COMPONENTS_NIF_EXTRA_HPP
 
@@ -29,9 +6,46 @@
 namespace Nif
 {
 
+    template <typename T>
+    struct TypedExtra : public Extra
+    {
+        T mData;
+
+        void read(NIFStream* nif) override
+        {
+            Extra::read(nif);
+
+            nif->read(mData);
+        }
+    };
+
+    template <typename T>
+    struct TypedVectorExtra : public Extra
+    {
+        std::vector<T> mData;
+
+        void read(NIFStream* nif) override
+        {
+            Extra::read(nif);
+
+            nif->readVector(mData, nif->get<uint32_t>());
+        }
+    };
+
+    using NiBooleanExtraData = TypedExtra<bool>;
+    using NiFloatExtraData = TypedExtra<float>;
+    using NiIntegerExtraData = TypedExtra<uint32_t>;
+    using NiStringExtraData = TypedExtra<std::string>;
+    using NiVectorExtraData = TypedExtra<osg::Vec4f>;
+
+    using NiBinaryExtraData = TypedVectorExtra<uint8_t>;
+    using NiFloatsExtraData = TypedVectorExtra<float>;
+    using NiIntegersExtraData = TypedVectorExtra<uint32_t>;
+
+    // Distinct from NiBinaryExtraData, uses mRecordSize as its size
     struct NiExtraData : public Extra
     {
-        std::vector<char> data;
+        std::vector<uint8_t> mData;
 
         void read(NIFStream* nif) override;
     };
@@ -45,78 +59,17 @@ namespace Nif
     {
         struct TextKey
         {
-            float time;
-            std::string text;
+            float mTime;
+            std::string mText;
         };
-        std::vector<TextKey> list;
-
-        void read(NIFStream* nif) override;
-    };
-
-    struct NiStringExtraData : public Extra
-    {
-        /* Known meanings:
-           "MRK" - marker, only visible in the editor, not rendered in-game
-           "NCC" - no collision except with the camera
-           Anything else starting with "NC" - no collision
-        */
-        std::string string;
-
-        void read(NIFStream* nif) override;
-    };
-
-    struct NiIntegerExtraData : public Extra
-    {
-        unsigned int data;
-
-        void read(NIFStream* nif) override;
-    };
-
-    struct NiIntegersExtraData : public Extra
-    {
-        std::vector<unsigned int> data;
-
-        void read(NIFStream* nif) override;
-    };
-
-    struct NiBinaryExtraData : public Extra
-    {
-        std::vector<char> data;
-
-        void read(NIFStream* nif) override;
-    };
-
-    struct NiBooleanExtraData : public Extra
-    {
-        bool data;
-
-        void read(NIFStream* nif) override;
-    };
-
-    struct NiVectorExtraData : public Extra
-    {
-        osg::Vec4f data;
-
-        void read(NIFStream* nif) override;
-    };
-
-    struct NiFloatExtraData : public Extra
-    {
-        float data;
-
-        void read(NIFStream* nif) override;
-    };
-
-    struct NiFloatsExtraData : public Extra
-    {
-        std::vector<float> data;
+        std::vector<TextKey> mList;
 
         void read(NIFStream* nif) override;
     };
 
     struct BSBound : public Extra
     {
-        osg::Vec3f center, halfExtents;
+        osg::Vec3f mCenter, mExtents;
 
         void read(NIFStream* nif) override;
     };
@@ -149,7 +102,7 @@ namespace Nif
     struct BSInvMarker : public Extra
     {
         osg::Quat mRotation;
-        float mScale = 1.0f;
+        float mScale;
 
         void read(NIFStream* nif) override;
     };
@@ -162,5 +115,5 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-} // Namespace
+}
 #endif

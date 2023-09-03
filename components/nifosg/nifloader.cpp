@@ -42,13 +42,14 @@
 #include <osg/TexEnvCombine>
 #include <osg/Texture2D>
 
-#include <components/nif/controlled.hpp>
 #include <components/nif/effect.hpp>
 #include <components/nif/exception.hpp>
 #include <components/nif/extra.hpp>
 #include <components/nif/niffile.hpp>
 #include <components/nif/node.hpp>
+#include <components/nif/particle.hpp>
 #include <components/nif/property.hpp>
+#include <components/nif/texture.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
@@ -174,16 +175,16 @@ namespace
 
     void extractTextKeys(const Nif::NiTextKeyExtraData* tk, SceneUtil::TextKeyMap& textkeys)
     {
-        for (size_t i = 0; i < tk->list.size(); i++)
+        for (const Nif::NiTextKeyExtraData::TextKey& key : tk->mList)
         {
             std::vector<std::string> results;
-            Misc::StringUtils::split(tk->list[i].text, results, "\r\n");
+            Misc::StringUtils::split(key.mText, results, "\r\n");
             for (std::string& result : results)
             {
                 Misc::StringUtils::trim(result);
                 Misc::StringUtils::lowerCaseInPlace(result);
                 if (!result.empty())
-                    textkeys.emplace(tk->list[i].time, std::move(result));
+                    textkeys.emplace(key.mTime, std::move(result));
             }
         }
     }
@@ -285,9 +286,9 @@ namespace NifOsg
 
             extractTextKeys(static_cast<const Nif::NiTextKeyExtraData*>(extra.getPtr()), target.mTextKeys);
 
-            extra = extra->next;
+            extra = extra->mNext;
             Nif::ControllerPtr ctrl = seq->controller;
-            for (; !extra.empty() && !ctrl.empty(); (extra = extra->next), (ctrl = ctrl->next))
+            for (; !extra.empty() && !ctrl.empty(); (extra = extra->mNext), (ctrl = ctrl->next))
             {
                 if (extra->recType != Nif::RC_NiStringExtraData || ctrl->recType != Nif::RC_NiKeyframeController)
                 {
@@ -315,8 +316,8 @@ namespace NifOsg
                 osg::ref_ptr<SceneUtil::KeyframeController> callback = new NifOsg::KeyframeController(key);
                 setupController(key, callback, /*animflags*/ 0);
 
-                if (!target.mKeyframeControllers.emplace(strdata->string, callback).second)
-                    Log(Debug::Verbose) << "Controller " << strdata->string << " present more than once in "
+                if (!target.mKeyframeControllers.emplace(strdata->mData, callback).second)
+                    Log(Debug::Verbose) << "Controller " << strdata->mData << " present more than once in "
                                         << nif.getFilename() << ", ignoring later version";
             }
         }
@@ -509,14 +510,14 @@ namespace NifOsg
                 return nullptr;
 
             osg::ref_ptr<osg::Image> image;
-            if (!st->external && !st->data.empty())
+            if (st->mExternal)
             {
-                image = handleInternalTexture(st->data.getPtr());
-            }
-            else
-            {
-                std::string filename = Misc::ResourceHelpers::correctTexturePath(st->filename, imageManager->getVFS());
+                std::string filename = Misc::ResourceHelpers::correctTexturePath(st->mFile, imageManager->getVFS());
                 image = imageManager->getImage(filename);
+            }
+            else if (!st->mData.empty())
+            {
+                image = handleInternalTexture(st->mData.getPtr());
             }
             return image;
         }
@@ -536,38 +537,41 @@ namespace NifOsg
             }
 
             const Nif::NiTextureEffect* textureEffect = static_cast<const Nif::NiTextureEffect*>(nifNode);
-            if (textureEffect->textureType != Nif::NiTextureEffect::Environment_Map)
+            if (!textureEffect->mSwitchState)
+                return false;
+
+            if (textureEffect->mTextureType != Nif::NiTextureEffect::TextureType::EnvironmentMap)
             {
-                Log(Debug::Info) << "Unhandled NiTextureEffect type " << textureEffect->textureType << " in "
-                                 << mFilename;
+                Log(Debug::Info) << "Unhandled NiTextureEffect type "
+                                 << static_cast<uint32_t>(textureEffect->mTextureType) << " in " << mFilename;
                 return false;
             }
 
-            if (textureEffect->texture.empty())
+            if (textureEffect->mTexture.empty())
             {
                 Log(Debug::Info) << "NiTextureEffect missing source texture in " << mFilename;
                 return false;
             }
 
             osg::ref_ptr<osg::TexGen> texGen(new osg::TexGen);
-            switch (textureEffect->coordGenType)
+            switch (textureEffect->mCoordGenType)
             {
-                case Nif::NiTextureEffect::World_Parallel:
+                case Nif::NiTextureEffect::CoordGenType::WorldParallel:
                     texGen->setMode(osg::TexGen::OBJECT_LINEAR);
                     break;
-                case Nif::NiTextureEffect::World_Perspective:
+                case Nif::NiTextureEffect::CoordGenType::WorldPerspective:
                     texGen->setMode(osg::TexGen::EYE_LINEAR);
                     break;
-                case Nif::NiTextureEffect::Sphere_Map:
+                case Nif::NiTextureEffect::CoordGenType::SphereMap:
                     texGen->setMode(osg::TexGen::SPHERE_MAP);
                     break;
                 default:
-                    Log(Debug::Info) << "Unhandled NiTextureEffect coordGenType " << textureEffect->coordGenType
-                                     << " in " << mFilename;
+                    Log(Debug::Info) << "Unhandled NiTextureEffect CoordGenType "
+                                     << static_cast<uint32_t>(textureEffect->mCoordGenType) << " in " << mFilename;
                     return false;
             }
 
-            osg::ref_ptr<osg::Image> image(handleSourceTexture(textureEffect->texture.getPtr(), imageManager));
+            osg::ref_ptr<osg::Image> image(handleSourceTexture(textureEffect->mTexture.getPtr(), imageManager));
             osg::ref_ptr<osg::Texture2D> texture2d(new osg::Texture2D(image));
             if (image)
                 texture2d->setTextureSize(image->s(), image->t());
@@ -644,7 +648,7 @@ namespace NifOsg
 
             std::vector<Nif::ExtraPtr> extraCollection;
 
-            for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->next)
+            for (Nif::ExtraPtr e = nifNode->extra; !e.empty(); e = e->mNext)
                 extraCollection.emplace_back(e);
 
             for (const auto& extraNode : nifNode->extralist)
@@ -666,25 +670,25 @@ namespace NifOsg
 
                     // String markers may contain important information
                     // affecting the entire subtree of this obj
-                    if (sd->string == "MRK" && !Loader::getShowMarkers())
+                    if (sd->mData == "MRK" && !Loader::getShowMarkers())
                     {
                         // Marker objects. These meshes are only visible in the editor.
                         args.mHasMarkers = true;
                     }
-                    else if (sd->string == "BONE")
+                    else if (sd->mData == "BONE")
                     {
                         node->getOrCreateUserDataContainer()->addDescription("CustomBone");
                     }
-                    else if (sd->string.rfind(extraDataIdentifer, 0) == 0)
+                    else if (sd->mData.rfind(extraDataIdentifer, 0) == 0)
                     {
                         node->setUserValue(
-                            Misc::OsgUserValues::sExtraData, sd->string.substr(extraDataIdentifer.length()));
+                            Misc::OsgUserValues::sExtraData, sd->mData.substr(extraDataIdentifer.length()));
                     }
                 }
                 else if (e->recType == Nif::RC_BSXFlags)
                 {
                     auto bsxFlags = static_cast<const Nif::NiIntegerExtraData*>(e.getPtr());
-                    if (bsxFlags->data & 32) // Editor marker flag
+                    if (bsxFlags->mData & 32) // Editor marker flag
                         args.mHasMarkers = true;
                 }
             }
@@ -895,7 +899,7 @@ namespace NifOsg
                     if (!key->mInterpolator.empty() && key->mInterpolator->recType != Nif::RC_NiTransformInterpolator)
                     {
                         Log(Debug::Error) << "Unsupported interpolator type for NiKeyframeController " << key->recIndex
-                                          << " in " << mFilename;
+                                          << " in " << mFilename << ": " << key->mInterpolator->recName;
                         continue;
                     }
                     osg::ref_ptr<KeyframeController> callback = new KeyframeController(key);
@@ -922,7 +926,7 @@ namespace NifOsg
                         && visctrl->mInterpolator->recType != Nif::RC_NiBoolInterpolator)
                     {
                         Log(Debug::Error) << "Unsupported interpolator type for NiVisController " << visctrl->recIndex
-                                          << " in " << mFilename;
+                                          << " in " << mFilename << ": " << visctrl->mInterpolator->recName;
                         continue;
                     }
                     osg::ref_ptr<VisController> callback(new VisController(visctrl, Loader::getHiddenNodeMask()));
@@ -938,7 +942,7 @@ namespace NifOsg
                         && rollctrl->mInterpolator->recType != Nif::RC_NiFloatInterpolator)
                     {
                         Log(Debug::Error) << "Unsupported interpolator type for NiRollController " << rollctrl->recIndex
-                                          << " in " << mFilename;
+                                          << " in " << mFilename << ": " << rollctrl->mInterpolator->recName;
                         continue;
                     }
                     osg::ref_ptr<RollController> callback = new RollController(rollctrl);
@@ -973,8 +977,9 @@ namespace NifOsg
                     if (!alphactrl->mInterpolator.empty()
                         && alphactrl->mInterpolator->recType != Nif::RC_NiFloatInterpolator)
                     {
-                        Log(Debug::Error) << "Unsupported interpolator type for NiAlphaController "
-                                          << alphactrl->recIndex << " in " << mFilename;
+                        Log(Debug::Error)
+                            << "Unsupported interpolator type for NiAlphaController " << alphactrl->recIndex << " in "
+                            << mFilename << ": " << alphactrl->mInterpolator->recName;
                         continue;
                     }
                     osg::ref_ptr<AlphaController> osgctrl = new AlphaController(alphactrl, baseMaterial);
@@ -994,8 +999,9 @@ namespace NifOsg
                     if (!matctrl->mInterpolator.empty()
                         && matctrl->mInterpolator->recType != Nif::RC_NiPoint3Interpolator)
                     {
-                        Log(Debug::Error) << "Unsupported interpolator type for NiMaterialColorController "
-                                          << matctrl->recIndex << " in " << mFilename;
+                        Log(Debug::Error)
+                            << "Unsupported interpolator type for NiMaterialColorController " << matctrl->recIndex
+                            << " in " << mFilename << ": " << matctrl->mInterpolator->recName;
                         continue;
                     }
                     osg::ref_ptr<MaterialColorController> osgctrl = new MaterialColorController(matctrl, baseMaterial);
@@ -1021,7 +1027,7 @@ namespace NifOsg
                         && flipctrl->mInterpolator->recType != Nif::RC_NiFloatInterpolator)
                     {
                         Log(Debug::Error) << "Unsupported interpolator type for NiFlipController " << flipctrl->recIndex
-                                          << " in " << mFilename;
+                                          << " in " << mFilename << ": " << flipctrl->mInterpolator->recName;
                         continue;
                     }
                     std::vector<osg::ref_ptr<osg::Texture2D>> textures;
@@ -1067,12 +1073,12 @@ namespace NifOsg
             attachTo->addChild(program);
             program->setParticleSystem(partsys);
             program->setReferenceFrame(rf);
-            for (; !affectors.empty(); affectors = affectors->next)
+            for (; !affectors.empty(); affectors = affectors->mNext)
             {
                 if (affectors->recType == Nif::RC_NiParticleGrowFade)
                 {
                     const Nif::NiParticleGrowFade* gf = static_cast<const Nif::NiParticleGrowFade*>(affectors.getPtr());
-                    program->addOperator(new GrowFadeAffector(gf->growTime, gf->fadeTime));
+                    program->addOperator(new GrowFadeAffector(gf->mGrowTime, gf->mFadeTime));
                 }
                 else if (affectors->recType == Nif::RC_NiGravity)
                 {
@@ -1083,9 +1089,9 @@ namespace NifOsg
                 {
                     const Nif::NiParticleColorModifier* cl
                         = static_cast<const Nif::NiParticleColorModifier*>(affectors.getPtr());
-                    if (cl->data.empty())
+                    if (cl->mData.empty())
                         continue;
-                    const Nif::NiColorData* clrdata = cl->data.getPtr();
+                    const Nif::NiColorData* clrdata = cl->mData.getPtr();
                     program->addOperator(new ParticleColorAffector(clrdata));
                 }
                 else if (affectors->recType == Nif::RC_NiParticleRotation)
@@ -1095,7 +1101,7 @@ namespace NifOsg
                 else
                     Log(Debug::Info) << "Unhandled particle modifier " << affectors->recName << " in " << mFilename;
             }
-            for (; !colliders.empty(); colliders = colliders->next)
+            for (; !colliders.empty(); colliders = colliders->mNext)
             {
                 if (colliders->recType == Nif::RC_NiPlanarCollider)
                 {
@@ -2008,15 +2014,15 @@ namespace NifOsg
 
             const unsigned int uvSet = 0;
 
-            for (size_t i = 0; i < textureSet->textures.size(); ++i)
+            for (size_t i = 0; i < textureSet->mTextures.size(); ++i)
             {
-                if (textureSet->textures[i].empty())
+                if (textureSet->mTextures[i].empty())
                     continue;
-                switch (i)
+                switch (static_cast<Nif::BSShaderTextureSet::TextureType>(i))
                 {
-                    case Nif::BSShaderTextureSet::TextureType_Base:
-                    case Nif::BSShaderTextureSet::TextureType_Normal:
-                    case Nif::BSShaderTextureSet::TextureType_Glow:
+                    case Nif::BSShaderTextureSet::TextureType::Base:
+                    case Nif::BSShaderTextureSet::TextureType::Normal:
+                    case Nif::BSShaderTextureSet::TextureType::Glow:
                         break;
                     default:
                     {
@@ -2026,7 +2032,7 @@ namespace NifOsg
                     }
                 }
                 std::string filename
-                    = Misc::ResourceHelpers::correctTexturePath(textureSet->textures[i], imageManager->getVFS());
+                    = Misc::ResourceHelpers::correctTexturePath(textureSet->mTextures[i], imageManager->getVFS());
                 osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
                 osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
                 if (image)
@@ -2035,16 +2041,18 @@ namespace NifOsg
                 unsigned int texUnit = boundTextures.size();
                 stateset->setTextureAttributeAndModes(texUnit, texture2d, osg::StateAttribute::ON);
                 // BSShaderTextureSet presence means there's no need for FFP support for the affected node
-                switch (i)
+                switch (static_cast<Nif::BSShaderTextureSet::TextureType>(i))
                 {
-                    case Nif::BSShaderTextureSet::TextureType_Base:
+                    case Nif::BSShaderTextureSet::TextureType::Base:
                         texture2d->setName("diffuseMap");
                         break;
-                    case Nif::BSShaderTextureSet::TextureType_Normal:
+                    case Nif::BSShaderTextureSet::TextureType::Normal:
                         texture2d->setName("normalMap");
                         break;
-                    case Nif::BSShaderTextureSet::TextureType_Glow:
+                    case Nif::BSShaderTextureSet::TextureType::Glow:
                         texture2d->setName("emissiveMap");
+                        break;
+                    default:
                         break;
                 }
                 boundTextures.emplace_back(uvSet);

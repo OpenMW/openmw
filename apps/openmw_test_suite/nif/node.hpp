@@ -13,7 +13,7 @@ namespace Nif::Testing
 
     inline void init(Extra& value)
     {
-        value.next = ExtraPtr(nullptr);
+        value.mNext = ExtraPtr(nullptr);
     }
 
     inline void init(Named& value)

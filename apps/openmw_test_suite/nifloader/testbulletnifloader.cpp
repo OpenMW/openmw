@@ -996,7 +996,7 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_child_node_with_extra_data_string_equal_ncc_should_return_shape_with_cameraonly_collision)
     {
-        mNiStringExtraData.string = "NCC__";
+        mNiStringExtraData.mData = "NCC__";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.parents.push_back(&mNiNode);
@@ -1024,8 +1024,8 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_child_node_with_not_first_extra_data_string_equal_ncc_should_return_shape_with_cameraonly_collision)
     {
-        mNiStringExtraData.next = Nif::ExtraPtr(&mNiStringExtraData2);
-        mNiStringExtraData2.string = "NCC__";
+        mNiStringExtraData.mNext = Nif::ExtraPtr(&mNiStringExtraData2);
+        mNiStringExtraData2.mData = "NCC__";
         mNiStringExtraData2.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.parents.push_back(&mNiNode);
@@ -1052,7 +1052,7 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_child_node_with_extra_data_string_starting_with_nc_should_return_shape_with_nocollision)
     {
-        mNiStringExtraData.string = "NC___";
+        mNiStringExtraData.mData = "NC___";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.parents.push_back(&mNiNode);
@@ -1079,8 +1079,8 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_child_node_with_not_first_extra_data_string_starting_with_nc_should_return_shape_with_nocollision)
     {
-        mNiStringExtraData.next = Nif::ExtraPtr(&mNiStringExtraData2);
-        mNiStringExtraData2.string = "NC___";
+        mNiStringExtraData.mNext = Nif::ExtraPtr(&mNiStringExtraData2);
+        mNiStringExtraData2.mData = "NC___";
         mNiStringExtraData2.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.parents.push_back(&mNiNode);
@@ -1141,7 +1141,7 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_child_node_with_extra_data_string_mrk_should_return_shape_with_null_collision_shape)
     {
-        mNiStringExtraData.string = "MRK";
+        mNiStringExtraData.mData = "MRK";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.parents.push_back(&mNiNode);
@@ -1160,7 +1160,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, bsx_editor_marker_flag_disables_collision_for_markers)
     {
-        mNiIntegerExtraData.data = 32; // BSX flag "editor marker"
+        mNiIntegerExtraData.mData = 32; // BSX flag "editor marker"
         mNiIntegerExtraData.recType = Nif::RC_BSXFlags;
         mNiTriShape.extralist.push_back(Nif::ExtraPtr(&mNiIntegerExtraData));
         mNiTriShape.parents.push_back(&mNiNode);
@@ -1181,7 +1181,7 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_child_node_with_extra_data_string_mrk_and_other_collision_node_should_return_shape_with_triangle_mesh_shape_with_all_meshes)
     {
-        mNiStringExtraData.string = "MRK";
+        mNiStringExtraData.mData = "MRK";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.parents.push_back(&mNiNode2);
