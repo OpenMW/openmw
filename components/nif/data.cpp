@@ -1,9 +1,10 @@
 #include "data.hpp"
+
+#include <components/debug/debuglog.hpp>
+
 #include "exception.hpp"
 #include "nifkey.hpp"
 #include "node.hpp"
-
-#include <components/debug/debuglog.hpp>
 
 namespace Nif
 {
@@ -117,22 +118,20 @@ namespace Nif
     {
         NiTriBasedGeomData::read(nif);
 
-        // Number of triangle strips
-        int numStrips = nif->getUShort();
-
-        std::vector<unsigned short> lengths;
+        uint16_t numStrips;
+        nif->read(numStrips);
+        std::vector<uint16_t> lengths;
         nif->readVector(lengths, numStrips);
 
-        // "Has Strips" flag. Exceptionally useful.
         bool hasStrips = true;
         if (nif->getVersion() > NIFFile::NIFVersion::VER_OB_OLD)
-            hasStrips = nif->getBoolean();
+            nif->read(hasStrips);
         if (!hasStrips || !numStrips)
             return;
 
-        strips.resize(numStrips);
+        mStrips.resize(numStrips);
         for (int i = 0; i < numStrips; i++)
-            nif->readVector(strips[i], lengths[i]);
+            nif->readVector(mStrips[i], lengths[i]);
     }
 
     void NiLinesData::read(NIFStream* nif)

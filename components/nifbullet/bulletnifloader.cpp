@@ -54,7 +54,7 @@ namespace
     void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriStripsData& data)
     {
         prepareTriangleMesh(mesh, data);
-        for (const std::vector<unsigned short>& strip : data.strips)
+        for (const std::vector<unsigned short>& strip : data.mStrips)
         {
             if (strip.size() < 3)
                 continue;
@@ -99,7 +99,7 @@ namespace
                 return {};
 
             auto data = static_cast<const Nif::NiTriStripsData*>(geometry.data.getPtr());
-            if (data->strips.empty())
+            if (data->mStrips.empty())
                 return {};
 
             return function(static_cast<const Nif::NiTriStripsData&>(*data));

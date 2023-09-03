@@ -63,7 +63,7 @@ namespace Nif
     struct NiTriStripsData : public NiTriBasedGeomData
     {
         // Triangle strips, series of vertex indices.
-        std::vector<std::vector<unsigned short>> strips;
+        std::vector<std::vector<unsigned short>> mStrips;
 
         void read(NIFStream* nif) override;
     };

@@ -338,7 +338,7 @@ namespace
             mNiTriStripsData.vertices
                 = { osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0), osg::Vec3f(0, 1, 0) };
             mNiTriStripsData.mNumTriangles = 2;
-            mNiTriStripsData.strips = { { 0, 1, 2, 3 } };
+            mNiTriStripsData.mStrips = { { 0, 1, 2, 3 } };
             mNiTriStrips.data = Nif::NiGeometryDataPtr(&mNiTriStripsData);
         }
     };
@@ -1260,7 +1260,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, should_ignore_tri_strips_data_with_empty_strips)
     {
-        mNiTriStripsData.strips.clear();
+        mNiTriStripsData.mStrips.clear();
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiTriStrips);
@@ -1275,7 +1275,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_static_mesh_should_ignore_tri_strips_data_with_less_than_3_strips)
     {
-        mNiTriStripsData.strips.front() = { 0, 1 };
+        mNiTriStripsData.mStrips.front() = { 0, 1 };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiTriStrips);
@@ -1293,7 +1293,7 @@ namespace
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
         mNiNode.recType = Nif::RC_AvoidNode;
-        mNiTriStripsData.strips.front() = { 0, 1 };
+        mNiTriStripsData.mStrips.front() = { 0, 1 };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiTriStrips);
@@ -1308,7 +1308,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_animated_mesh_should_ignore_tri_strips_data_with_less_than_3_strips)
     {
-        mNiTriStripsData.strips.front() = { 0, 1 };
+        mNiTriStripsData.mStrips.front() = { 0, 1 };
         mNiTriStrips.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriStrips) }));
 
@@ -1325,7 +1325,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, should_not_add_static_mesh_with_no_triangles_to_compound_shape)
     {
-        mNiTriStripsData.strips.front() = { 0, 1 };
+        mNiTriStripsData.mStrips.front() = { 0, 1 };
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
 

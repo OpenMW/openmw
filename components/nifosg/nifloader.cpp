@@ -1442,7 +1442,7 @@ namespace NifOsg
                         return;
                     auto data = static_cast<const Nif::NiTriStripsData*>(niGeometryData);
                     bool hasGeometry = false;
-                    for (const std::vector<unsigned short>& strip : data->strips)
+                    for (const std::vector<unsigned short>& strip : data->mStrips)
                     {
                         if (strip.size() < 3)
                             continue;
