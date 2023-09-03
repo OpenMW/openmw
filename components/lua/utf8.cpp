@@ -28,6 +28,9 @@ namespace
         return integer;
     }
 
+    // If the input 'pos' is negative, it is treated as counting from the end of the string,
+    // where -1 represents the last character position, -2 represents the second-to-last position,
+    // and so on. If 'pos' is non-negative, it is used as-is.
     inline void relativePosition(int64_t& pos, const size_t len)
     {
         if (pos < 0)
@@ -181,7 +184,18 @@ namespace LuaUtf8
         utf8["offset"]
             = [](std::string_view s, const int64_t n, const sol::variadic_args args) -> sol::optional<int64_t> {
             size_t len = s.size();
-            int64_t iv = isNilOrNone(args[0]) ? ((n >= 0) ? 1 : s.size() + 1) : getInteger(args[0], 3, "offset");
+            int64_t iv;
+
+            if (isNilOrNone(args[0]))
+            {
+                if (n >= 0)
+                    iv = 1;
+                else
+                    iv = s.size() + 1;
+            }
+            else
+                iv = getInteger(args[0], 3, "offset");
+
             std::vector<int64_t> pos_byte = { 1 };
 
             relativePosition(iv, len);
@@ -193,14 +207,13 @@ namespace LuaUtf8
                 decodeNextUTF8Character(s, pos_byte);
 
             for (auto it = pos_byte.begin(); it != pos_byte.end(); ++it)
+            {
                 if (*it == iv)
                 {
-                    if (n <= 0)
-                        if ((it + n) >= pos_byte.begin())
-                            return *(it + n);
-                    if (n > 0)
-                        if ((it + n - 1) < pos_byte.end())
-                            return *(it + n - 1);
+                    if (n <= 0 && it + n >= pos_byte.begin())
+                        return *(it + n);
+                    if (n > 0 && it + n - 1 < pos_byte.end())
+                        return *(it + n - 1);
                     break;
                 }
                 else if (*it > iv) /* a continuation byte */
@@ -210,6 +223,7 @@ namespace LuaUtf8
                     else
                         throw std::runtime_error("initial position is a continuation byte");
                 }
+            }
 
             return sol::nullopt;
         };
