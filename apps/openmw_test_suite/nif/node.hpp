@@ -53,8 +53,8 @@ namespace Nif::Testing
 
     inline void init(NiSkinInstance& value)
     {
-        value.data = NiSkinDataPtr(nullptr);
-        value.root = NodePtr(nullptr);
+        value.mData = NiSkinDataPtr(nullptr);
+        value.mRoot = NodePtr(nullptr);
     }
 
     inline void init(Controller& value)

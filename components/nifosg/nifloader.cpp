@@ -1391,14 +1391,14 @@ namespace NifOsg
                 const Nif::NiSkinInstance* skin = niGeometry->skin.getPtr();
                 const Nif::NiSkinData* data = nullptr;
                 const Nif::NiSkinPartition* partitions = nullptr;
-                if (!skin->data.empty())
+                if (!skin->mData.empty())
                 {
-                    data = skin->data.getPtr();
+                    data = skin->mData.getPtr();
                     if (!data->partitions.empty())
                         partitions = data->partitions.getPtr();
                 }
-                if (!partitions && !skin->partitions.empty())
-                    partitions = skin->partitions.getPtr();
+                if (!partitions && !skin->mPartitions.empty())
+                    partitions = skin->mPartitions.getPtr();
 
                 hasPartitions = partitions != nullptr;
                 if (hasPartitions)
@@ -1549,9 +1549,9 @@ namespace NifOsg
             osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map(new SceneUtil::RigGeometry::InfluenceMap);
 
             const Nif::NiSkinInstance* skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin.getPtr();
-            const Nif::NiSkinData* data = skin->data.getPtr();
-            const Nif::NodeList& bones = skin->bones;
-            for (std::size_t i = 0, n = bones.size(); i < n; ++i)
+            const Nif::NiSkinData* data = skin->mData.getPtr();
+            const Nif::NodeList& bones = skin->mBones;
+            for (std::size_t i = 0; i < bones.size(); ++i)
             {
                 std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->name);
 

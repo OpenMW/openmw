@@ -172,10 +172,10 @@ namespace Nif
 
     struct NiSkinInstance : public Record
     {
-        NiSkinDataPtr data;
-        NiSkinPartitionPtr partitions;
-        NodePtr root;
-        NodeList bones;
+        NiSkinDataPtr mData;
+        NiSkinPartitionPtr mPartitions;
+        NodePtr mRoot;
+        NodeList mBones;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -183,6 +183,14 @@ namespace Nif
 
     struct BSDismemberSkinInstance : public NiSkinInstance
     {
+        struct BodyPart
+        {
+            uint16_t mFlags;
+            uint16_t mType;
+        };
+
+        std::vector<BodyPart> mParts;
+
         void read(NIFStream* nif) override;
     };
 
