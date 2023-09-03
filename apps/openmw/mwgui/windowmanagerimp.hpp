@@ -160,8 +160,8 @@ namespace MWGui
         bool isGuiMode() const override;
 
         bool isConsoleMode() const override;
-
         bool isPostProcessorHudVisible() const override;
+        bool isInteractiveMessageBoxActive() const override;
 
         void toggleVisible(GuiWindow wnd) override;
 

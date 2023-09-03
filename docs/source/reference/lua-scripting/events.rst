@@ -42,3 +42,22 @@ and ``arg`` (for example in the mode ``Book`` the argument is the book the playe
             print('UiModeChanged from', data.oldMode , 'to', data.newMode, '('..tostring(data.arg)..')')
         end
     }
+
+World events
+------------
+
+Global events that just call the corresponding function in `openmw.world`.
+
+.. code-block:: Lua
+
+    -- world.pause(tag)
+    core.sendGlobalEvent('Pause', tag)
+
+    -- world.unpause(tag)
+    core.sendGlobalEvent('Unpause', tag)
+
+    -- world.setGameTimeScale(scale)
+    core.sendGlobalEvent('SetGameTimeScale', scale)
+
+    -- world.setSimulationTimeScale(scale)
+    core.sendGlobalEvent('SetSimulationTimeScale', scale)

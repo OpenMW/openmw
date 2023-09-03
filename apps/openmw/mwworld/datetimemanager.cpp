@@ -263,6 +263,8 @@ namespace MWWorld
 
     void DateTimeManager::updateIsPaused()
     {
-        mPaused = !mPausedTags.empty() || MWBase::Environment::get().getWindowManager()->isGuiMode();
+        auto wm = MWBase::Environment::get().getWindowManager();
+        mPaused = !mPausedTags.empty() || wm->isConsoleMode() || wm->isPostProcessorHudVisible()
+            || wm->isInteractiveMessageBoxActive();
     }
 }

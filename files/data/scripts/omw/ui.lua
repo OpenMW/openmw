@@ -1,6 +1,7 @@
 local ui = require('openmw.ui')
 local util = require('openmw.util')
 local self = require('openmw.self')
+local core = require('openmw.core')
 local ambient = require('openmw.ambient')
 
 local MODE = ui._getAllUiModes()
@@ -9,6 +10,11 @@ local WINDOW = ui._getAllWindowIds()
 local replacedWindows = {}
 local hiddenWindows = {}
 local modeStack = {}
+
+local modePause = {}
+for _, mode in pairs(MODE) do
+    modePause[mode] = true
+end
 
 local function registerWindow(window, showFn, hideFn)
     if not WINDOW[window] then
@@ -114,6 +120,15 @@ local function onUiModeChanged(arg)
             end
         end
     end
+    local shouldPause = false
+    for _, m in pairs(modeStack) do
+        shouldPause = shouldPause or modePause[m]
+    end
+    if shouldPause then
+        core.sendGlobalEvent('Pause', 'ui')
+    else
+        core.sendGlobalEvent('Unpause', 'ui')
+    end
     self:sendEvent('UiModeChanged', {oldMode = oldMode, newMode = mode, arg = arg})
     oldMode = mode
 end
@@ -145,7 +160,7 @@ return {
     interface = {
         --- Interface version
         -- @field [parent=#UI] #number version
-        version = 0,
+        version = 1,
 
         --- All available UI modes.
         -- Use `view(I.UI.MODE)` in `luap` console mode to see the list.
@@ -203,6 +218,12 @@ return {
         -- @function [parent=#UI] removeMode
         -- @param #string mode Mode to drop
         removeMode = removeMode,
+
+        --- Set whether the mode should pause the game.
+        -- @function [parent=#UI] setPauseOnMode
+        -- @param #string mode Mode to configure
+        -- @param #boolean shouldPause
+        setPauseOnMode = function(mode, shouldPause) modePause[mode] = shouldPause end
 
         -- TODO
         -- registerHudElement = function(name, showFn, hideFn) end,
