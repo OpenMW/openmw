@@ -1680,71 +1680,76 @@ namespace NifOsg
 
         osg::ref_ptr<osg::Image> handleInternalTexture(const Nif::NiPixelData* pixelData)
         {
-            osg::ref_ptr<osg::Image> image(new osg::Image);
+            if (pixelData->mMipmaps.empty())
+                return nullptr;
 
-            // Pixel row alignment, defining it to be consistent with OSG DDS plugin
-            int packing = 1;
+            // Not fatal, but warn the user
+            if (pixelData->mNumFaces != 1)
+                Log(Debug::Info) << "Unsupported multifaceted internal texture in " << mFilename;
+
+            using Nif::NiPixelFormat;
+            NiPixelFormat niPixelFormat = pixelData->mPixelFormat;
             GLenum pixelformat = 0;
-            switch (pixelData->fmt)
+            // Pixel row alignment. Defining it to be consistent with OSG DDS plugin
+            int packing = 1;
+            switch (niPixelFormat.mFormat)
             {
-                case Nif::NiPixelData::NIPXFMT_RGB8:
+                case NiPixelFormat::Format::RGB:
                     pixelformat = GL_RGB;
                     break;
-                case Nif::NiPixelData::NIPXFMT_RGBA8:
+                case NiPixelFormat::Format::RGBA:
                     pixelformat = GL_RGBA;
                     break;
-                case Nif::NiPixelData::NIPXFMT_PAL8:
-                case Nif::NiPixelData::NIPXFMT_PALA8:
+                case NiPixelFormat::Format::Palette:
+                case NiPixelFormat::Format::PaletteAlpha:
                     pixelformat = GL_RED; // Each color is defined by a byte.
                     break;
-                case Nif::NiPixelData::NIPXFMT_BGR8:
+                case NiPixelFormat::Format::BGR:
                     pixelformat = GL_BGR;
                     break;
-                case Nif::NiPixelData::NIPXFMT_BGRA8:
+                case NiPixelFormat::Format::BGRA:
                     pixelformat = GL_BGRA;
                     break;
-                case Nif::NiPixelData::NIPXFMT_DXT1:
+                case NiPixelFormat::Format::DXT1:
                     pixelformat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
                     packing = 2;
                     break;
-                case Nif::NiPixelData::NIPXFMT_DXT3:
+                case NiPixelFormat::Format::DXT3:
                     pixelformat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
                     packing = 4;
                     break;
-                case Nif::NiPixelData::NIPXFMT_DXT5:
+                case NiPixelFormat::Format::DXT5:
                     pixelformat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
                     packing = 4;
                     break;
                 default:
-                    Log(Debug::Info) << "Unhandled internal pixel format " << pixelData->fmt << " in " << mFilename;
+                    Log(Debug::Info) << "Unhandled internal pixel format "
+                                     << static_cast<uint32_t>(niPixelFormat.mFormat) << " in " << mFilename;
                     return nullptr;
             }
-
-            if (pixelData->mipmaps.empty())
-                return nullptr;
 
             int width = 0;
             int height = 0;
 
-            std::vector<unsigned int> mipmapVector;
-            for (unsigned int i = 0; i < pixelData->mipmaps.size(); ++i)
+            std::vector<unsigned int> mipmapOffsets;
+            for (unsigned int i = 0; i < pixelData->mMipmaps.size(); ++i)
             {
-                const Nif::NiPixelData::Mipmap& mip = pixelData->mipmaps[i];
+                const Nif::NiPixelData::Mipmap& mip = pixelData->mMipmaps[i];
 
                 size_t mipSize = osg::Image::computeImageSizeInBytes(
-                    mip.width, mip.height, 1, pixelformat, GL_UNSIGNED_BYTE, packing);
-                if (mipSize + mip.dataOffset > pixelData->data.size())
+                    mip.mWidth, mip.mHeight, 1, pixelformat, GL_UNSIGNED_BYTE, packing);
+                if (mipSize + mip.mOffset > pixelData->mData.size())
                 {
                     Log(Debug::Info) << "Internal texture's mipmap data out of bounds, ignoring texture";
                     return nullptr;
                 }
 
                 if (i != 0)
-                    mipmapVector.push_back(mip.dataOffset);
+                    mipmapOffsets.push_back(mip.mOffset);
                 else
                 {
-                    width = mip.width;
-                    height = mip.height;
+                    width = mip.mWidth;
+                    height = mip.mHeight;
                 }
             }
 
@@ -1754,16 +1759,17 @@ namespace NifOsg
                 return nullptr;
             }
 
-            const std::vector<unsigned char>& pixels = pixelData->data;
-            switch (pixelData->fmt)
+            osg::ref_ptr<osg::Image> image(new osg::Image);
+            const std::vector<unsigned char>& pixels = pixelData->mData;
+            switch (niPixelFormat.mFormat)
             {
-                case Nif::NiPixelData::NIPXFMT_RGB8:
-                case Nif::NiPixelData::NIPXFMT_RGBA8:
-                case Nif::NiPixelData::NIPXFMT_BGR8:
-                case Nif::NiPixelData::NIPXFMT_BGRA8:
-                case Nif::NiPixelData::NIPXFMT_DXT1:
-                case Nif::NiPixelData::NIPXFMT_DXT3:
-                case Nif::NiPixelData::NIPXFMT_DXT5:
+                case NiPixelFormat::Format::RGB:
+                case NiPixelFormat::Format::RGBA:
+                case NiPixelFormat::Format::BGR:
+                case NiPixelFormat::Format::BGRA:
+                case NiPixelFormat::Format::DXT1:
+                case NiPixelFormat::Format::DXT3:
+                case NiPixelFormat::Format::DXT5:
                 {
                     unsigned char* data = new unsigned char[pixels.size()];
                     memcpy(data, pixels.data(), pixels.size());
@@ -1771,18 +1777,18 @@ namespace NifOsg
                         osg::Image::USE_NEW_DELETE, packing);
                     break;
                 }
-                case Nif::NiPixelData::NIPXFMT_PAL8:
-                case Nif::NiPixelData::NIPXFMT_PALA8:
+                case NiPixelFormat::Format::Palette:
+                case NiPixelFormat::Format::PaletteAlpha:
                 {
-                    if (pixelData->palette.empty() || pixelData->bpp != 8)
+                    if (pixelData->mPalette.empty() || niPixelFormat.mBitsPerPixel != 8)
                     {
                         Log(Debug::Info) << "Palettized texture in " << mFilename << " is invalid, ignoring";
                         return nullptr;
                     }
-                    pixelformat = pixelData->fmt == Nif::NiPixelData::NIPXFMT_PAL8 ? GL_RGB : GL_RGBA;
+                    pixelformat = niPixelFormat.mFormat == NiPixelFormat::Format::PaletteAlpha ? GL_RGBA : GL_RGB;
                     // We're going to convert the indices that pixel data contains
                     // into real colors using the palette.
-                    const auto& palette = pixelData->palette->mColors;
+                    const auto& palette = pixelData->mPalette->mColors;
                     const int numChannels = pixelformat == GL_RGBA ? 4 : 3;
                     unsigned char* data = new unsigned char[pixels.size() * numChannels];
                     unsigned char* pixel = data;
@@ -1791,7 +1797,7 @@ namespace NifOsg
                         memcpy(pixel, &palette[index], sizeof(unsigned char) * numChannels);
                         pixel += numChannels;
                     }
-                    for (unsigned int& offset : mipmapVector)
+                    for (unsigned int& offset : mipmapOffsets)
                         offset *= numChannels;
                     image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data,
                         osg::Image::USE_NEW_DELETE, packing);
@@ -1801,7 +1807,7 @@ namespace NifOsg
                     return nullptr;
             }
 
-            image->setMipmapLevels(mipmapVector);
+            image->setMipmapLevels(mipmapOffsets);
             image->flipVertical();
 
             return image;

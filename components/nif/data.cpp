@@ -224,58 +224,61 @@ namespace Nif
         mKeyList->read(nif);
     }
 
+    void NiPixelFormat::read(NIFStream* nif)
+    {
+        mFormat = static_cast<Format>(nif->get<uint32_t>());
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 4, 0, 1))
+        {
+            nif->readArray(mColorMasks);
+            nif->read(mBitsPerPixel);
+            nif->readArray(mCompareBits);
+            if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
+                nif->read(mPixelTiling);
+        }
+        else
+        {
+            mBitsPerPixel = nif->get<uint8_t>();
+            nif->read(mRendererHint);
+            nif->read(mExtraData);
+            nif->read(mFlags);
+            nif->read(mPixelTiling);
+            if (nif->getVersion() >= NIFStream::generateVersion(20, 3, 0, 4))
+                nif->read(mUseSrgb);
+            for (int i = 0; i < 4; i++)
+                mChannels[i].read(nif);
+        }
+    }
+
+    void NiPixelFormat::ChannelData::read(NIFStream* nif)
+    {
+        mType = static_cast<Type>(nif->get<uint32_t>());
+        mConvention = static_cast<Convention>(nif->get<uint32_t>());
+        nif->read(mBitsPerChannel);
+        nif->read(mSigned);
+    }
+
     void NiPixelData::read(NIFStream* nif)
     {
-        fmt = (Format)nif->getUInt();
-
-        if (nif->getVersion() < NIFStream::generateVersion(10, 4, 0, 2))
+        mPixelFormat.read(nif);
+        mPalette.read(nif);
+        mMipmaps.resize(nif->get<uint32_t>());
+        nif->read(mBytesPerPixel);
+        for (Mipmap& mip : mMipmaps)
         {
-            for (unsigned int i = 0; i < 4; ++i)
-                colorMask[i] = nif->getUInt();
-            bpp = nif->getUInt();
-            nif->skip(8); // "Old Fast Compare". Whatever that means.
-            if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-                pixelTiling = nif->getUInt();
+            nif->read(mip.mWidth);
+            nif->read(mip.mHeight);
+            nif->read(mip.mOffset);
         }
-        else // TODO: see if anything from here needs to be implemented
-        {
-            bpp = nif->getChar();
-            nif->skip(4); // Renderer hint
-            nif->skip(4); // Extra data
-            nif->skip(4); // Flags
-            pixelTiling = nif->getUInt();
-            if (nif->getVersion() >= NIFStream::generateVersion(20, 3, 0, 4))
-                sRGB = nif->getBoolean();
-            nif->skip(4 * 10); // Channel data
-        }
-
-        palette.read(nif);
-
-        numberOfMipmaps = nif->getUInt();
-
-        // Bytes per pixel, should be bpp / 8
-        /* int bytes = */ nif->getUInt();
-
-        for (unsigned int i = 0; i < numberOfMipmaps; i++)
-        {
-            // Image size and offset in the following data field
-            Mipmap m;
-            m.width = nif->getUInt();
-            m.height = nif->getUInt();
-            m.dataOffset = nif->getUInt();
-            mipmaps.push_back(m);
-        }
-
-        // Read the data
-        unsigned int numPixels = nif->getUInt();
-        bool hasFaces = nif->getVersion() >= NIFStream::generateVersion(10, 4, 0, 2);
-        unsigned int numFaces = hasFaces ? nif->getUInt() : 1;
-        nif->readVector(data, numPixels * numFaces);
+        uint32_t numPixels;
+        nif->read(numPixels);
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 4, 0, 2))
+            nif->read(mNumFaces);
+        nif->readVector(mData, numPixels * mNumFaces);
     }
 
     void NiPixelData::post(Reader& nif)
     {
-        palette.post(nif);
+        mPalette.post(nif);
     }
 
     void NiColorData::read(NIFStream* nif)

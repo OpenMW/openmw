@@ -116,37 +116,94 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct NiPixelFormat
+    {
+        enum class Format : uint32_t
+        {
+            RGB = 0,
+            RGBA = 1,
+            Palette = 2,
+            PaletteAlpha = 3,
+            BGR = 4,
+            BGRA = 5,
+            DXT1 = 6,
+            DXT3 = 7,
+            DXT5 = 8,
+        };
+
+        struct ChannelData
+        {
+            enum class Type : uint32_t
+            {
+                Red = 0,
+                Green = 1,
+                Blue = 2,
+                Alpha = 3,
+                Compressed = 4,
+                OffsetU = 5,
+                OffsetV = 6,
+                OffsetW = 7,
+                OffsetQ = 8,
+                Luma = 9,
+                Height = 10,
+                VectorX = 11,
+                VectorY = 12,
+                VectorZ = 13,
+                Padding = 14,
+                Intensity = 15,
+                Index = 16,
+                Depth = 17,
+                Stencil = 18,
+                Empty = 19,
+            };
+
+            enum class Convention : uint32_t
+            {
+                NormInt = 0,
+                Half = 1,
+                Float = 2,
+                Index = 3,
+                Compressed = 4,
+                Unknown = 5,
+                Int = 6,
+            };
+
+            Type mType;
+            Convention mConvention;
+            uint8_t mBitsPerChannel;
+            bool mSigned;
+
+            void read(NIFStream* nif);
+        };
+
+        Format mFormat{ Format::RGB };
+        std::array<uint32_t, 4> mColorMasks;
+        uint32_t mBitsPerPixel{ 0 };
+        uint32_t mPixelTiling{ 0 };
+        std::array<uint32_t, 2> mCompareBits;
+        uint32_t mRendererHint{ 0 };
+        uint32_t mExtraData{ 0 };
+        uint8_t mFlags{ 0 };
+        bool mUseSrgb{ false };
+        std::array<ChannelData, 4> mChannels;
+
+        void read(NIFStream* nif);
+    };
+
     struct NiPixelData : public Record
     {
-        enum Format
-        {
-            NIPXFMT_RGB8,
-            NIPXFMT_RGBA8,
-            NIPXFMT_PAL8,
-            NIPXFMT_PALA8,
-            NIPXFMT_BGR8,
-            NIPXFMT_BGRA8,
-            NIPXFMT_DXT1,
-            NIPXFMT_DXT3,
-            NIPXFMT_DXT5
-        };
-        Format fmt{ NIPXFMT_RGB8 };
-
-        unsigned int colorMask[4]{ 0 };
-        unsigned int bpp{ 0 }, pixelTiling{ 0 };
-        bool sRGB{ false };
-
-        NiPalettePtr palette;
-        unsigned int numberOfMipmaps{ 0 };
-
         struct Mipmap
         {
-            int width, height;
-            int dataOffset;
+            uint32_t mWidth, mHeight;
+            uint32_t mOffset;
         };
-        std::vector<Mipmap> mipmaps;
 
-        std::vector<unsigned char> data;
+        NiPixelFormat mPixelFormat;
+        NiPalettePtr mPalette;
+        uint32_t mBytesPerPixel;
+        std::vector<Mipmap> mMipmaps;
+        uint32_t mNumFaces{ 1 };
+        std::vector<uint8_t> mData;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
