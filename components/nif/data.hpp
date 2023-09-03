@@ -253,6 +253,8 @@ namespace Nif
             FloatKeyMapPtr mKeyFrames;
             std::vector<osg::Vec3f> mVertices;
         };
+
+        uint8_t mRelativeTargets;
         std::vector<MorphData> mMorphs;
 
         void read(NIFStream* nif) override;
@@ -291,14 +293,15 @@ namespace Nif
     struct NiPalette : public Record
     {
         // 32-bit RGBA colors that correspond to 8-bit indices
-        std::vector<unsigned int> colors;
+        std::vector<uint32_t> mColors;
 
         void read(NIFStream* nif) override;
     };
 
     struct NiStringPalette : public Record
     {
-        std::string palette;
+        std::string mPalette;
+
         void read(NIFStream* nif) override;
     };
 

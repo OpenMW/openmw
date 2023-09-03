@@ -1782,7 +1782,7 @@ namespace NifOsg
                     pixelformat = pixelData->fmt == Nif::NiPixelData::NIPXFMT_PAL8 ? GL_RGB : GL_RGBA;
                     // We're going to convert the indices that pixel data contains
                     // into real colors using the palette.
-                    const auto& palette = pixelData->palette->colors;
+                    const auto& palette = pixelData->palette->mColors;
                     const int numChannels = pixelformat == GL_RGBA ? 4 : 3;
                     unsigned char* data = new unsigned char[pixels.size() * numChannels];
                     unsigned char* pixel = data;

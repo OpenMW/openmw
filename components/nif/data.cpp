@@ -485,16 +485,17 @@ namespace Nif
 
     void NiMorphData::read(NIFStream* nif)
     {
-        int morphCount = nif->getInt();
-        int vertCount = nif->getInt();
-        nif->getChar(); // Relative targets, always 1
+        uint32_t numMorphs, numVerts;
+        nif->read(numMorphs);
+        nif->read(numVerts);
+        nif->read(mRelativeTargets);
 
-        mMorphs.resize(morphCount);
-        for (int i = 0; i < morphCount; i++)
+        mMorphs.resize(numMorphs);
+        for (MorphData& morph : mMorphs)
         {
-            mMorphs[i].mKeyFrames = std::make_shared<FloatKeyMap>();
-            mMorphs[i].mKeyFrames->read(nif, /*morph*/ true);
-            nif->readVector(mMorphs[i].mVertices, vertCount);
+            morph.mKeyFrames = std::make_shared<FloatKeyMap>();
+            morph.mKeyFrames->read(nif, /*morph*/ true);
+            nif->readVector(morph.mVertices, numVerts);
         }
     }
 
@@ -521,18 +522,28 @@ namespace Nif
 
     void NiPalette::read(NIFStream* nif)
     {
-        unsigned int alphaMask = !nif->getChar() ? 0xFF000000 : 0;
+        bool useAlpha = nif->get<uint8_t>() != 0;
+        uint32_t alphaMask = useAlpha ? 0 : 0xFF000000;
+
+        uint32_t numEntries;
+        nif->read(numEntries);
+
         // Fill the entire palette with black even if there isn't enough entries.
-        colors.resize(256);
-        unsigned int numEntries = nif->getUInt();
-        for (unsigned int i = 0; i < numEntries; i++)
-            colors[i] = nif->getUInt() | alphaMask;
+        mColors.resize(256);
+        if (numEntries > 256)
+            mColors.resize(numEntries);
+
+        for (uint32_t i = 0; i < numEntries; i++)
+        {
+            nif->read(mColors[i]);
+            mColors[i] |= alphaMask;
+        }
     }
 
     void NiStringPalette::read(NIFStream* nif)
     {
-        palette = nif->getStringPalette();
-        if (nif->getUInt() != palette.size())
+        mPalette = nif->getStringPalette();
+        if (nif->get<uint32_t>() != mPalette.size())
             Log(Debug::Warning) << "NIFFile Warning: Failed size check in NiStringPalette. File: "
                                 << nif->getFile().getFilename();
     }
@@ -555,15 +566,15 @@ namespace Nif
 
     void BSMultiBoundOBB::read(NIFStream* nif)
     {
-        mCenter = nif->getVector3();
-        mSize = nif->getVector3();
-        mRotation = nif->getMatrix3();
+        nif->read(mCenter);
+        nif->read(mSize);
+        nif->read(mRotation);
     }
 
     void BSMultiBoundSphere::read(NIFStream* nif)
     {
-        mCenter = nif->getVector3();
-        mRadius = nif->getFloat();
+        nif->read(mCenter);
+        nif->read(mRadius);
     }
 
 } // Namespace
