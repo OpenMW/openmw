@@ -5,6 +5,7 @@ local util = require('openmw.util')
 local self = require('openmw.self')
 local nearby = require('openmw.nearby')
 local async = require('openmw.async')
+local I = require('openmw.interfaces')
 
 local Actor = require('openmw.types').Actor
 
@@ -189,7 +190,7 @@ local function updateIdleTimer(dt)
 end
 
 local function onFrame(dt)
-    if core.isWorldPaused() then return end
+    if core.isWorldPaused() or I.UI.getMode() then return end
     updateIdleTimer(dt)
     local mode = camera.getMode()
     if (mode == MODE.FirstPerson or mode == MODE.ThirdPerson) and not camera.getQueuedMode() then
@@ -273,7 +274,7 @@ return {
         onUpdate = onUpdate,
         onFrame = onFrame,
         onInputAction = function(action)
-            if core.isWorldPaused() then return end
+            if core.isWorldPaused() or I.UI.getMode() then return end
             if action == input.ACTION.ZoomIn then
                 zoom(10)
             elseif action == input.ACTION.ZoomOut then

@@ -138,14 +138,12 @@ namespace MWRender
         if (mProcessViewChange)
             processViewChange();
 
-        if (paused)
-            return;
-
         // only show the crosshair in game mode
         MWBase::WindowManager* wm = MWBase::Environment::get().getWindowManager();
         wm->showCrosshair(!wm->isGuiMode() && mShowCrosshair);
 
-        updateFocalPointOffset(duration);
+        if (!paused)
+            updateFocalPointOffset(duration);
         updatePosition();
     }
 
