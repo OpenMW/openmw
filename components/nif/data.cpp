@@ -85,7 +85,7 @@ namespace Nif
     {
         NiGeometryData::read(nif);
 
-        mNumTriangles = nif->getUShort();
+        nif->read(mNumTriangles);
     }
 
     void NiTriShapeData::read(NIFStream* nif)
@@ -150,15 +150,15 @@ namespace Nif
         {
             if (flags[i] & 1)
             {
-                lines.emplace_back(i);
-                lines.emplace_back(i + 1);
+                mLines.emplace_back(i);
+                mLines.emplace_back(i + 1);
             }
         }
         // If there are just two vertices, they can be connected twice. Probably isn't critical.
         if (flags[num - 1] & 1)
         {
-            lines.emplace_back(num - 1);
-            lines.emplace_back(0);
+            mLines.emplace_back(num - 1);
+            mLines.emplace_back(0);
         }
     }
 
@@ -207,10 +207,10 @@ namespace Nif
 
     void NiUVData::read(NIFStream* nif)
     {
-        for (int i = 0; i < 4; i++)
+        for (FloatKeyMapPtr& keys : mKeyList)
         {
-            mKeyList[i] = std::make_shared<FloatKeyMap>();
-            mKeyList[i]->read(nif);
+            keys = std::make_shared<FloatKeyMap>();
+            keys->read(nif);
         }
     }
 

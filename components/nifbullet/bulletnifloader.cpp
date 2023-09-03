@@ -40,7 +40,7 @@ namespace
         for (const osg::Vec3f& vertex : vertices)
             mesh.findOrAddVertex(Misc::Convert::toBullet(vertex), false);
 
-        mesh.preallocateIndices(static_cast<int>(data.mNumTriangles * 3));
+        mesh.preallocateIndices(static_cast<int>(data.mNumTriangles) * 3);
     }
 
     void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriShapeData& data)

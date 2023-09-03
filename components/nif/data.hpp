@@ -47,7 +47,7 @@ namespace Nif
     // Abstract
     struct NiTriBasedGeomData : public NiGeometryData
     {
-        size_t mNumTriangles;
+        uint16_t mNumTriangles;
 
         void read(NIFStream* nif) override;
     };
@@ -71,7 +71,8 @@ namespace Nif
     struct NiLinesData : public NiGeometryData
     {
         // Lines, series of indices that correspond to connected vertices.
-        std::vector<unsigned short> lines;
+        // NB: assumes <=65536 number of vertices
+        std::vector<uint16_t> mLines;
 
         void read(NIFStream* nif) override;
     };
@@ -103,7 +104,7 @@ namespace Nif
 
     struct NiUVData : public Record
     {
-        FloatKeyMapPtr mKeyList[4];
+        std::array<FloatKeyMapPtr, 4> mKeyList;
 
         void read(NIFStream* nif) override;
     };

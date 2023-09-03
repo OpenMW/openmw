@@ -1458,7 +1458,7 @@ namespace NifOsg
                     if (niGeometryData->recType != Nif::RC_NiLinesData)
                         return;
                     auto data = static_cast<const Nif::NiLinesData*>(niGeometryData);
-                    const auto& line = data->lines;
+                    const auto& line = data->mLines;
                     if (line.empty())
                         return;
                     geometry->addPrimitiveSet(
