@@ -110,18 +110,19 @@ namespace LuaUtf8
         };
 
         utf8["codes"] = [](std::string_view s) {
-            std::vector<int64_t> pos_byte{ 1 };
-            return sol::as_function([s, pos_byte]() mutable -> sol::optional<std::pair<int64_t, int64_t>> {
-                if (pos_byte.back() <= static_cast<int64_t>(s.size()))
-                {
-                    const auto pair = decodeNextUTF8Character(s, pos_byte);
-                    if (pair.second == -1)
-                        throw std::runtime_error("Invalid UTF-8 code at position " + std::to_string(pos_byte.size()));
+            return sol::as_function(
+                [s, pos_byte = std::vector<int64_t>{ 1 }]() mutable -> sol::optional<std::pair<int64_t, int64_t>> {
+                    if (pos_byte.back() <= static_cast<int64_t>(s.size()))
+                    {
+                        const auto pair = decodeNextUTF8Character(s, pos_byte);
+                        if (pair.second == -1)
+                            throw std::runtime_error(
+                                "Invalid UTF-8 code at position " + std::to_string(pos_byte.size()));
 
-                    return pair;
-                }
-                return sol::nullopt;
-            });
+                        return pair;
+                    }
+                    return sol::nullopt;
+                });
         };
 
         utf8["len"] = [](std::string_view s,
