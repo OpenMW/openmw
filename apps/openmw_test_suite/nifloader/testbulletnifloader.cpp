@@ -323,19 +323,19 @@ namespace
             init(mController);
 
             mNiTriShapeData.recType = Nif::RC_NiTriShapeData;
-            mNiTriShapeData.vertices = { osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0) };
+            mNiTriShapeData.mVertices = { osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0) };
             mNiTriShapeData.mNumTriangles = 1;
             mNiTriShapeData.mTriangles = { 0, 1, 2 };
             mNiTriShape.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
 
             mNiTriShapeData2.recType = Nif::RC_NiTriShapeData;
-            mNiTriShapeData2.vertices = { osg::Vec3f(0, 0, 1), osg::Vec3f(1, 0, 1), osg::Vec3f(1, 1, 1) };
+            mNiTriShapeData2.mVertices = { osg::Vec3f(0, 0, 1), osg::Vec3f(1, 0, 1), osg::Vec3f(1, 1, 1) };
             mNiTriShapeData2.mNumTriangles = 1;
             mNiTriShapeData2.mTriangles = { 0, 1, 2 };
             mNiTriShape2.data = Nif::NiGeometryDataPtr(&mNiTriShapeData2);
 
             mNiTriStripsData.recType = Nif::RC_NiTriStripsData;
-            mNiTriStripsData.vertices
+            mNiTriStripsData.mVertices
                 = { osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0), osg::Vec3f(0, 1, 0) };
             mNiTriStripsData.mNumTriangles = 2;
             mNiTriStripsData.mStrips = { { 0, 1, 2, 3 } };

@@ -11,72 +11,79 @@ namespace Nif
     void NiGeometryData::read(NIFStream* nif)
     {
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 114))
-            nif->getInt(); // Group ID. (Almost?) always 0.
+            nif->read(mGroupId);
 
-        int verts = nif->getUShort();
+        // Note: has special meaning for NiPSysData
+        nif->read(mNumVertices);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            nif->skip(2); // Keep flags and compress flags
+        {
+            nif->read(mKeepFlags);
+            nif->read(mCompressFlags);
+        }
 
-        if (nif->getBoolean())
-            nif->readVector(vertices, verts);
+        bool hasVertices;
+        nif->read(hasVertices);
+        if (hasVertices)
+            nif->readVector(mVertices, mNumVertices);
 
-        unsigned int dataFlags = 0;
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
-            dataFlags = nif->getUShort();
+            nif->read(mDataFlags);
 
         if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS
             && nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
-            nif->getUInt(); // Material CRC
+            nif->read(mMaterialHash);
 
-        if (nif->getBoolean())
+        bool hasNormals;
+        nif->read(hasNormals);
+        if (hasNormals)
         {
-            nif->readVector(normals, verts);
-            if (dataFlags & 0x1000)
+            nif->readVector(mNormals, mNumVertices);
+            if (mDataFlags & DataFlag_HasTangents)
             {
-                nif->readVector(tangents, verts);
-                nif->readVector(bitangents, verts);
+                nif->readVector(mTangents, mNumVertices);
+                nif->readVector(mBitangents, mNumVertices);
             }
         }
 
-        center = nif->getVector3();
-        radius = nif->getFloat();
+        nif->read(mCenter);
+        nif->read(mRadius);
 
-        if (nif->getBoolean())
-            nif->readVector(colors, verts);
+        bool hasColors;
+        nif->read(hasColors);
+        if (hasColors)
+            nif->readVector(mColors, mNumVertices);
 
-        unsigned int numUVs = dataFlags;
         if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
-            numUVs = nif->getUShort();
+            nif->read(mDataFlags);
 
-        // In Morrowind this field only corresponds to the number of UV sets.
-        // In later games only the first 6 bits are used as a count and the rest are flags.
+        // In 4.0.0.2 the flags field corresponds to the number of UV sets.
+        // In later revisions the part that corresponds to the number is narrower.
+        uint16_t numUVs = mDataFlags;
         if (nif->getVersion() > NIFFile::NIFVersion::VER_MW)
         {
-            numUVs &= 0x3f;
+            numUVs &= DataFlag_NumUVsMask;
             if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > 0)
-                numUVs &= 0x1;
+                numUVs &= DataFlag_HasUV;
         }
 
         bool hasUVs = true;
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_MW)
-            hasUVs = nif->getBoolean();
+            nif->read(hasUVs);
         if (hasUVs)
         {
-            uvlist.resize(numUVs);
-            for (unsigned int i = 0; i < numUVs; i++)
+            mUVList.resize(numUVs);
+            for (std::vector<osg::Vec2f>& list : mUVList)
             {
-                nif->readVector(uvlist[i], verts);
+                nif->readVector(list, mNumVertices);
                 // flip the texture coordinates to convert them to the OpenGL convention of bottom-left image origin
-                for (unsigned int uv = 0; uv < uvlist[i].size(); ++uv)
-                {
-                    uvlist[i][uv] = osg::Vec2f(uvlist[i][uv].x(), 1.f - uvlist[i][uv].y());
-                }
+                for (osg::Vec2f& uv : list)
+                    uv.y() = 1.f - uv.y();
             }
         }
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
-            nif->getUShort(); // Consistency flags
+            nif->read(mConsistencyType);
 
         if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 4))
             nif->skip(4); // Additional data
@@ -130,14 +137,13 @@ namespace Nif
     {
         NiGeometryData::read(nif);
 
-        size_t num = vertices.size();
         std::vector<uint8_t> flags;
-        nif->readVector(flags, num);
+        nif->readVector(flags, mNumVertices);
         // Can't construct a line from a single vertex.
-        if (num < 2)
+        if (mNumVertices < 2)
             return;
         // Convert connectivity flags into usable geometry. The last element needs special handling.
-        for (size_t i = 0; i < num - 1; ++i)
+        for (uint16_t i = 0; i < mNumVertices - 1; ++i)
         {
             if (flags[i] & 1)
             {
@@ -146,9 +152,9 @@ namespace Nif
             }
         }
         // If there are just two vertices, they can be connected twice. Probably isn't critical.
-        if (flags[num - 1] & 1)
+        if (flags[mNumVertices - 1] & 1)
         {
-            mLines.emplace_back(num - 1);
+            mLines.emplace_back(mNumVertices - 1);
             mLines.emplace_back(0);
         }
     }
@@ -164,21 +170,21 @@ namespace Nif
         if (nif->getVersion() <= NIFStream::generateVersion(10, 0, 1, 0))
             std::fill(particleRadii.begin(), particleRadii.end(), nif->getFloat());
         else if (nif->getBoolean())
-            nif->readVector(particleRadii, vertices.size());
+            nif->readVector(particleRadii, mNumVertices);
         activeCount = nif->getUShort();
 
         // Particle sizes
         if (nif->getBoolean())
-            nif->readVector(sizes, vertices.size());
+            nif->readVector(sizes, mNumVertices);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0) && nif->getBoolean())
-            nif->readVector(rotations, vertices.size());
+            nif->readVector(rotations, mNumVertices);
         if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 4))
         {
             if (nif->getBoolean())
-                nif->readVector(rotationAngles, vertices.size());
+                nif->readVector(rotationAngles, mNumVertices);
             if (nif->getBoolean())
-                nif->readVector(rotationAxes, vertices.size());
+                nif->readVector(rotationAxes, mNumVertices);
         }
     }
 
@@ -192,7 +198,7 @@ namespace Nif
         bool hasRotations;
         nif->read(hasRotations);
         if (hasRotations)
-            nif->readVector(rotations, vertices.size());
+            nif->readVector(rotations, mNumVertices);
     }
 
     void NiPosData::read(NIFStream* nif)

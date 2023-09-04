@@ -35,7 +35,7 @@ namespace
     void prepareTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriBasedGeomData& data)
     {
         // FIXME: copying vertices/indices individually is unreasonable
-        const std::vector<osg::Vec3f>& vertices = data.vertices;
+        const std::vector<osg::Vec3f>& vertices = data.mVertices;
         mesh.preallocateVertices(static_cast<int>(vertices.size()));
         for (const osg::Vec3f& vertex : vertices)
             mesh.findOrAddVertex(Misc::Convert::toBullet(vertex), false);
@@ -381,7 +381,7 @@ namespace NifBullet
         if (args.mHasMarkers && Misc::StringUtils::ciStartsWith(niGeometry.name, "EditorMarker"))
             return;
 
-        if (niGeometry.data.empty() || niGeometry.data->vertices.empty())
+        if (niGeometry.data.empty() || niGeometry.data->mVertices.empty())
             return;
 
         if (!niGeometry.skin.empty())

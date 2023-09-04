@@ -1146,7 +1146,7 @@ namespace NifOsg
                 if (particle.lifespan <= 0)
                     continue;
 
-                if (particle.vertex >= particledata->vertices.size())
+                if (particle.vertex >= particledata->mVertices.size())
                     continue;
 
                 ParticleAgeSetter particletemplate(std::max(0.f, particle.lifetime));
@@ -1158,7 +1158,7 @@ namespace NifOsg
                 // which can not be done in this loader since we are not attached to the scene yet. Will be fixed up
                 // post-load in the SceneManager.
                 created->setVelocity(particle.velocity);
-                const osg::Vec3f& position = particledata->vertices[particle.vertex];
+                const osg::Vec3f& position = particledata->mVertices[particle.vertex];
                 created->setPosition(position);
 
                 created->setColorRange(osgParticle::rangev4(partctrl->color, partctrl->color));
@@ -1173,7 +1173,7 @@ namespace NifOsg
             }
 
             // radius may be used to force a larger bounding box
-            box.expandBy(osg::BoundingSphere(osg::Vec3(0, 0, 0), particledata->radius));
+            box.expandBy(osg::BoundingSphere(osg::Vec3(0, 0, 0), particledata->mRadius));
 
             partsys->setInitialBound(box);
         }
@@ -1346,9 +1346,9 @@ namespace NifOsg
         void handleNiGeometryData(osg::Geometry* geometry, const Nif::NiGeometryData* data,
             const std::vector<unsigned int>& boundTextures, const std::string& name)
         {
-            const auto& vertices = data->vertices;
-            const auto& normals = data->normals;
-            const auto& colors = data->colors;
+            const auto& vertices = data->mVertices;
+            const auto& normals = data->mNormals;
+            const auto& colors = data->mColors;
             if (!vertices.empty())
                 geometry->setVertexArray(new osg::Vec3Array(vertices.size(), vertices.data()));
             if (!normals.empty())
@@ -1357,7 +1357,7 @@ namespace NifOsg
             if (!colors.empty())
                 geometry->setColorArray(new osg::Vec4Array(colors.size(), colors.data()), osg::Array::BIND_PER_VERTEX);
 
-            const auto& uvlist = data->uvlist;
+            const auto& uvlist = data->mUVList;
             int textureStage = 0;
             for (std::vector<unsigned int>::const_iterator it = boundTextures.begin(); it != boundTextures.end();
                  ++it, ++textureStage)
@@ -1473,7 +1473,7 @@ namespace NifOsg
             //   above the actual renderable would be tedious.
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(nifNode, parent, drawableProps);
-            applyDrawableProperties(parentNode, drawableProps, composite, !niGeometryData->colors.empty(), animflags);
+            applyDrawableProperties(parentNode, drawableProps, composite, !niGeometryData->mColors.empty(), animflags);
         }
 
         void handleGeometry(const Nif::Node* nifNode, const Nif::Parent* parent, osg::Group* parentNode,

@@ -35,11 +35,27 @@ namespace Nif
     // Common ancestor for several data classes
     struct NiGeometryData : public Record
     {
-        std::vector<osg::Vec3f> vertices, normals, tangents, bitangents;
-        std::vector<osg::Vec4f> colors;
-        std::vector<std::vector<osg::Vec2f>> uvlist;
-        osg::Vec3f center;
-        float radius;
+        // Interpretation of Flags field differs depending on the version
+        enum DataFlags
+        {
+            DataFlag_HasUV = 0x0001,
+            DataFlag_NumUVsMask = 0x003F,
+            DataFlag_HasTangents = 0x1000,
+        };
+
+        int32_t mGroupId{ 0 };
+        uint16_t mNumVertices;
+        uint8_t mKeepFlags{ 0 };
+        uint8_t mCompressFlags{ 0 };
+        std::vector<osg::Vec3f> mVertices;
+        uint16_t mDataFlags{ 0 };
+        uint32_t mMaterialHash;
+        std::vector<osg::Vec3f> mNormals, mTangents, mBitangents;
+        osg::Vec3f mCenter;
+        float mRadius;
+        std::vector<osg::Vec4f> mColors;
+        std::vector<std::vector<osg::Vec2f>> mUVList;
+        uint16_t mConsistencyType;
 
         void read(NIFStream* nif) override;
     };
