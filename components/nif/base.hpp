@@ -13,12 +13,12 @@ namespace Nif
     // An extra data record. All the extra data connected to an object form a linked list.
     struct Extra : public Record
     {
-        std::string name;
-        ExtraPtr next; // Next extra data record in the list
-        unsigned int recordSize{ 0u };
+        std::string mName;
+        ExtraPtr mNext; // Next extra data record in the list
+        uint32_t mRecordSize{ 0u };
 
         void read(NIFStream* nif) override;
-        void post(Reader& nif) override { next.post(nif); }
+        void post(Reader& nif) override { mNext.post(nif); }
     };
 
     struct Controller : public Record

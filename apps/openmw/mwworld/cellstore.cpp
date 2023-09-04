@@ -556,7 +556,7 @@ namespace MWWorld
         return false;
     }
 
-    CellStore::CellStore(MWWorld::Cell cell, const MWWorld::ESMStore& esmStore, ESM::ReadersCache& readers)
+    CellStore::CellStore(MWWorld::Cell&& cell, const MWWorld::ESMStore& esmStore, ESM::ReadersCache& readers)
         : mStore(esmStore)
         , mReaders(readers)
         , mCellVariant(std::move(cell))

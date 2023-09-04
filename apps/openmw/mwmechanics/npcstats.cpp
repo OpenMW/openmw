@@ -488,7 +488,12 @@ void MWMechanics::NpcStats::writeState(ESM::NpcStats& state) const
 
     state.mSkillIncrease.fill(0);
     for (const auto& [key, value] : mSkillIncreases)
-        state.mSkillIncrease[static_cast<size_t>(ESM::Attribute::refIdToIndex(key))] = value;
+    {
+        // TODO extend format
+        auto index = ESM::Attribute::refIdToIndex(key);
+        assert(index >= 0);
+        state.mSkillIncrease[static_cast<size_t>(index)] = value;
+    }
 
     for (size_t i = 0; i < state.mSpecIncreases.size(); ++i)
         state.mSpecIncreases[i] = mSpecIncreases[i];

@@ -24,6 +24,7 @@ local env = {
     storage = require('openmw.storage'),
     core = require('openmw.core'),
     types = require('openmw.types'),
+    vfs = require('openmw.vfs'),
     async = require('openmw.async'),
     nearby = require('openmw.nearby'),
     self = require('openmw.self'),

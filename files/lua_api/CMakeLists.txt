@@ -12,14 +12,15 @@ set(LUA_API_FILES
     openmw/ambient.lua
     openmw/async.lua
     openmw/core.lua
+    openmw/debug.lua
     openmw/nearby.lua
+    openmw/postprocessing.lua
     openmw/self.lua
+    openmw/types.lua
     openmw/ui.lua
     openmw/util.lua
+    openmw/vfs.lua
     openmw/world.lua
-    openmw/types.lua
-    openmw/postprocessing.lua
-    openmw/debug.lua
 )
 
 foreach (f ${LUA_API_FILES})

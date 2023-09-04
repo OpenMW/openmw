@@ -42,7 +42,7 @@ list (APPEND COMPONENT_FILES "${OpenMW_BINARY_DIR}/${VERSION_CPP_FILE}")
 # source files
 
 add_component_dir (lua
-    luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage
+    luastate scriptscontainer asyncpackage utilpackage serialization configuration l10n storage utf8
     shapes/box
     )
 
@@ -111,7 +111,7 @@ add_component_dir (sceneutil
     )
 
 add_component_dir (nif
-    controlled effect niftypes record controller extra node record_ptr data niffile property nifkey base nifstream physics
+    base controller data effect extra niffile nifkey nifstream niftypes node particle physics property record record_ptr texture
     )
 
 add_component_dir (nifosg

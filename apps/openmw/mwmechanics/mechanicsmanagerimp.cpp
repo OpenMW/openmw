@@ -1,5 +1,7 @@
 #include "mechanicsmanagerimp.hpp"
 
+#include <cassert>
+
 #include <osg/Stats>
 
 #include <components/misc/rng.hpp>
@@ -150,9 +152,10 @@ namespace MWMechanics
 
             for (const ESM::Attribute& attribute : esmStore.get<ESM::Attribute>())
             {
-                const ESM::Race::MaleFemale& value
-                    = race->mData.mAttributeValues[static_cast<size_t>(ESM::Attribute::refIdToIndex(attribute.mId))];
+                auto index = ESM::Attribute::refIdToIndex(attribute.mId);
+                assert(index >= 0);
 
+                const ESM::Race::MaleFemale& value = race->mData.mAttributeValues[static_cast<size_t>(index)];
                 creatureStats.setAttribute(attribute.mId, male ? value.mMale : value.mFemale);
             }
 

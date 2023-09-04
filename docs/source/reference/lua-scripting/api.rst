@@ -17,6 +17,7 @@ Lua API reference
     openmw_core
     openmw_types
     openmw_async
+    openmw_vfs
     openmw_world
     openmw_self
     openmw_nearby

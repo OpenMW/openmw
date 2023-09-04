@@ -48,9 +48,9 @@ namespace MWMechanics
     std::string EffectKey::toString() const
     {
         const auto& store = MWBase::Environment::get().getESMStore();
-        const ESM::MagicEffect* magicEffect = store->get<ESM::MagicEffect>().search(mId);
+        const ESM::MagicEffect* magicEffect = store->get<ESM::MagicEffect>().find(mId);
         return getMagicEffectString(
-            *magicEffect, store->get<ESM::Attribute>().search(mArg), store->get<ESM::Skill>().search(mArg));
+            *magicEffect, store->get<ESM::Attribute>().find(mArg), store->get<ESM::Skill>().find(mArg));
     }
 
     bool operator<(const EffectKey& left, const EffectKey& right)

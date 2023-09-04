@@ -70,6 +70,7 @@
     Bug #7472: Crash when enchanting last projectiles
     Bug #7505: Distant terrain does not support sample size greater than cell size
     Bug #7553: Faction reaction loading is incorrect
+    Bug #7557: Terrain::ChunkManager::createChunk is called twice for the same position, lod on initial loading
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6149: Dehardcode Lua API_REVISION
@@ -77,6 +78,7 @@
     Feature #6491: Add support for Qt6
     Feature #6556: Lua API for sounds
     Feature #6726: Lua API for creating new objects
+    Feature #6864: Lua file access API
     Feature #6922: Improve launcher appearance
     Feature #6933: Support high-resolution cursor textures
     Feature #6945: Support S3TC-compressed and BGR/BGRA NiPixelData
