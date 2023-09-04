@@ -2,7 +2,6 @@
 #include "types.hpp"
 
 #include <components/esm3/loadcrea.hpp>
-#include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
