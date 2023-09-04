@@ -1430,7 +1430,7 @@ namespace NifOsg
                     if (niGeometryData->recType != Nif::RC_NiTriShapeData)
                         return;
                     auto data = static_cast<const Nif::NiTriShapeData*>(niGeometryData);
-                    const std::vector<unsigned short>& triangles = data->triangles;
+                    const std::vector<unsigned short>& triangles = data->mTriangles;
                     if (triangles.empty())
                         return;
                     geometry->addPrimitiveSet(

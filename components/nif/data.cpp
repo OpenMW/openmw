@@ -93,25 +93,17 @@ namespace Nif
     {
         NiTriBasedGeomData::read(nif);
 
-        // We have three times as many vertices as triangles, so this
-        // is always equal to mNumTriangles * 3.
-        int cnt = nif->getInt();
+        uint32_t numIndices;
+        nif->read(numIndices);
         bool hasTriangles = true;
         if (nif->getVersion() > NIFFile::NIFVersion::VER_OB_OLD)
-            hasTriangles = nif->getBoolean();
+            nif->read(hasTriangles);
         if (hasTriangles)
-            nif->readVector(triangles, cnt);
+            nif->readVector(mTriangles, numIndices);
 
-        // Read the match list, which lists the vertices that are equal to
-        // vertices. We don't actually need need this for anything, so
-        // just skip it.
-        unsigned short verts = nif->getUShort();
-        for (unsigned short i = 0; i < verts; i++)
-        {
-            // Number of vertices matching vertex 'i'
-            int num = nif->getUShort();
-            nif->skip(num * sizeof(short));
-        }
+        mMatchGroups.resize(nif->get<uint16_t>());
+        for (auto& group : mMatchGroups)
+            nif->readVector(group, nif->get<uint16_t>());
     }
 
     void NiTriStripsData::read(NIFStream* nif)

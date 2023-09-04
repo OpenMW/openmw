@@ -46,7 +46,7 @@ namespace
     void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriShapeData& data)
     {
         prepareTriangleMesh(mesh, data);
-        const std::vector<unsigned short>& triangles = data.triangles;
+        const std::vector<unsigned short>& triangles = data.mTriangles;
         for (std::size_t i = 0; i < triangles.size(); i += 3)
             mesh.addTriangleIndices(triangles[i + 0], triangles[i + 1], triangles[i + 2]);
     }
@@ -87,7 +87,7 @@ namespace
                 return {};
 
             auto data = static_cast<const Nif::NiTriShapeData*>(geometry.data.getPtr());
-            if (data->triangles.empty())
+            if (data->mTriangles.empty())
                 return {};
 
             return function(static_cast<const Nif::NiTriShapeData&>(*data));

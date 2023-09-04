@@ -55,7 +55,8 @@ namespace Nif
     struct NiTriShapeData : public NiTriBasedGeomData
     {
         // Triangles, three vertex indices per triangle
-        std::vector<unsigned short> triangles;
+        std::vector<unsigned short> mTriangles;
+        std::vector<std::vector<unsigned short>> mMatchGroups;
 
         void read(NIFStream* nif) override;
     };

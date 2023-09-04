@@ -325,13 +325,13 @@ namespace
             mNiTriShapeData.recType = Nif::RC_NiTriShapeData;
             mNiTriShapeData.vertices = { osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0) };
             mNiTriShapeData.mNumTriangles = 1;
-            mNiTriShapeData.triangles = { 0, 1, 2 };
+            mNiTriShapeData.mTriangles = { 0, 1, 2 };
             mNiTriShape.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
 
             mNiTriShapeData2.recType = Nif::RC_NiTriShapeData;
             mNiTriShapeData2.vertices = { osg::Vec3f(0, 0, 1), osg::Vec3f(1, 0, 1), osg::Vec3f(1, 1, 1) };
             mNiTriShapeData2.mNumTriangles = 1;
-            mNiTriShapeData2.triangles = { 0, 1, 2 };
+            mNiTriShapeData2.mTriangles = { 0, 1, 2 };
             mNiTriShape2.data = Nif::NiGeometryDataPtr(&mNiTriShapeData2);
 
             mNiTriStripsData.recType = Nif::RC_NiTriStripsData;
@@ -978,7 +978,7 @@ namespace
         for_tri_shape_child_node_with_empty_data_triangles_should_return_shape_with_null_collision_shape)
     {
         auto data = static_cast<Nif::NiTriShapeData*>(mNiTriShape.data.getPtr());
-        data->triangles.clear();
+        data->mTriangles.clear();
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
 
