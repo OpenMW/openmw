@@ -10,12 +10,12 @@ namespace Nif
         NiTexture::read(nif);
 
         nif->read(mExternal);
-        if (mExternal || nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            nif->read(mFile);
-
         bool hasData = nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 4);
         if (!hasData && !mExternal)
-            nif->read(hasData);
+            hasData = nif->get<uint8_t>() != 0;
+
+        if (mExternal || nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
+            nif->read(mFile);
 
         if (hasData)
             mData.read(nif);
