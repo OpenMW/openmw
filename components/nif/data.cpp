@@ -509,7 +509,7 @@ namespace Nif
         if (mRotations->mInterpolationType == InterpolationType_XYZ)
         {
             if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 0))
-                mAxisOrder = static_cast<AxisOrder>(nif->getInt());
+                mAxisOrder = static_cast<AxisOrder>(nif->get<uint32_t>());
             mXRotations = std::make_shared<FloatKeyMap>();
             mYRotations = std::make_shared<FloatKeyMap>();
             mZRotations = std::make_shared<FloatKeyMap>();

@@ -327,7 +327,7 @@ namespace Nif
         Vector3KeyMapPtr mTranslations;
         FloatKeyMapPtr mScales;
 
-        enum class AxisOrder
+        enum class AxisOrder : uint32_t
         {
             Order_XYZ = 0,
             Order_XZY = 1,
