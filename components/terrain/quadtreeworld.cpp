@@ -544,37 +544,16 @@ namespace Terrain
         vd->setViewPoint(viewPoint);
         vd->setActiveGrid(grid);
 
-        for (unsigned int pass = 0; pass < 3; ++pass)
+        DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, grid, cellWorldSize);
+        mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
+
+        reporter.addTotal(vd->getNumEntries());
+
+        for (unsigned int i = 0, n = vd->getNumEntries(); i < n && !abort; ++i)
         {
-            unsigned int startEntry = vd->getNumEntries();
-
-            float distanceModifier = 0.f;
-            if (pass == 1)
-                distanceModifier = 1024;
-            else if (pass == 2)
-                distanceModifier = -1024;
-            DefaultLodCallback lodCallback(mLodFactor, mMinSize, mViewDistance, grid, cellWorldSize, distanceModifier);
-            mRootNode->traverseNodes(vd, viewPoint, &lodCallback);
-
-            if (pass == 0)
-            {
-                std::size_t progressTotal = 0;
-                for (unsigned int i = 0, n = vd->getNumEntries(); i < n; ++i)
-                    progressTotal += vd->getEntry(i).mNode->getSize();
-
-                reporter.addTotal(progressTotal);
-            }
-
-            for (unsigned int i = startEntry; i < vd->getNumEntries() && !abort; ++i)
-            {
-                ViewDataEntry& entry = vd->getEntry(i);
-
-                loadRenderingNode(entry, vd, cellWorldSize, grid, true);
-                if (pass == 0)
-                    reporter.addProgress(entry.mNode->getSize());
-                vd->removeNodeFromIndex(entry.mNode);
-                entry.mNode = nullptr; // Clear node lest we break the neighbours search for the next pass
-            }
+            ViewDataEntry& entry = vd->getEntry(i);
+            loadRenderingNode(entry, vd, cellWorldSize, grid, true);
+            reporter.addProgress(1);
         }
     }
 

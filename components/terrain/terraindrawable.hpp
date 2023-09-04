@@ -60,7 +60,7 @@ namespace Terrain
         const osg::BoundingBox& getWaterBoundingBox() const { return mWaterBoundingBox; }
 
         void setCompositeMap(CompositeMap* map) { mCompositeMap = map; }
-        CompositeMap* getCompositeMap() { return mCompositeMap; }
+        CompositeMap* getCompositeMap() const { return mCompositeMap; }
         void setCompositeMapRenderer(CompositeMapRenderer* renderer) { mCompositeMapRenderer = renderer; }
 
     private:
