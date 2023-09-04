@@ -169,8 +169,8 @@ namespace ESM4
         , currCellGrid(FormId{ 0, 0 })
         , cellGridValid(false)
     {
-        subRecordHeader.typeId = 0;
-        subRecordHeader.dataSize = 0;
+        recordHeader = {};
+        subRecordHeader = {};
     }
 
     Reader::Reader(Files::IStreamPtr&& esmStream, const std::filesystem::path& filename, VFS::Manager const* vfs,
