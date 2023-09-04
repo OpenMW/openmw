@@ -96,13 +96,14 @@ namespace Nif
 
     struct NiParticlesData : public NiGeometryData
     {
-        int numParticles{ 0 };
+        uint16_t mNumParticles{ 0 };
+        uint16_t mActiveCount;
 
-        int activeCount{ 0 };
-
-        std::vector<float> particleRadii, sizes, rotationAngles;
-        std::vector<osg::Quat> rotations;
-        std::vector<osg::Vec3f> rotationAxes;
+        std::vector<float> mRadii;
+        std::vector<float> mSizes;
+        std::vector<osg::Quat> mRotations;
+        std::vector<float> mRotationAngles;
+        std::vector<osg::Vec3f> mRotationAxes;
 
         void read(NIFStream* nif) override;
     };
@@ -267,23 +268,18 @@ namespace Nif
 
     struct NiSkinData : public Record
     {
-        struct VertWeight
-        {
-            unsigned short vertex;
-            float weight;
-        };
+        using VertWeight = std::pair<unsigned short, float>;
 
         struct BoneInfo
         {
-            Transformation trafo;
-            osg::Vec3f boundSphereCenter;
-            float boundSphereRadius;
-            std::vector<VertWeight> weights;
+            Transformation mTransform;
+            osg::BoundingSpheref mBoundSphere;
+            std::vector<VertWeight> mWeights;
         };
 
-        Transformation trafo;
-        std::vector<BoneInfo> bones;
-        NiSkinPartitionPtr partitions;
+        Transformation mTransform;
+        std::vector<BoneInfo> mBones;
+        NiSkinPartitionPtr mPartitions;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;

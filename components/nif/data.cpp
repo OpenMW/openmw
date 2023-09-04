@@ -165,26 +165,33 @@ namespace Nif
 
         // Should always match the number of vertices
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_MW)
-            numParticles = nif->getUShort();
+            nif->read(mNumParticles);
 
-        if (nif->getVersion() <= NIFStream::generateVersion(10, 0, 1, 0))
-            std::fill(particleRadii.begin(), particleRadii.end(), nif->getFloat());
-        else if (nif->getBoolean())
-            nif->readVector(particleRadii, mNumVertices);
-        activeCount = nif->getUShort();
-
-        // Particle sizes
-        if (nif->getBoolean())
-            nif->readVector(sizes, mNumVertices);
-
-        if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0) && nif->getBoolean())
-            nif->readVector(rotations, mNumVertices);
-        if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 4))
+        bool numRadii = 1;
+        if (nif->getVersion() > NIFStream::generateVersion(10, 0, 1, 0))
         {
-            if (nif->getBoolean())
-                nif->readVector(rotationAngles, mNumVertices);
-            if (nif->getBoolean())
-                nif->readVector(rotationAxes, mNumVertices);
+            numRadii = mNumVertices;
+            if (!nif->get<bool>() || (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > 0))
+                numRadii = 0;
+        }
+        nif->readVector(mRadii, numRadii);
+
+        nif->read(mActiveCount);
+
+        if (nif->get<bool>())
+            nif->readVector(mSizes, mNumVertices);
+
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
+        {
+            if (nif->get<bool>())
+                nif->readVector(mRotations, mNumVertices);
+            if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 4))
+            {
+                if (nif->get<bool>())
+                    nif->readVector(mRotationAngles, mNumVertices);
+                if (nif->get<bool>())
+                    nif->readVector(mRotationAxes, mNumVertices);
+            }
         }
     }
 
@@ -198,7 +205,7 @@ namespace Nif
         bool hasRotations;
         nif->read(hasRotations);
         if (hasRotations)
-            nif->readVector(rotations, mNumVertices);
+            nif->readVector(mRotations, mNumVertices);
     }
 
     void NiPosData::read(NIFStream* nif)
@@ -319,7 +326,7 @@ namespace Nif
         if (mData.empty() || mRoot.empty())
             throw Nif::Exception("NiSkinInstance missing root or data", nif.getFilename());
 
-        if (mBones.size() != mData->bones.size())
+        if (mBones.size() != mData->mBones.size())
             throw Nif::Exception("Mismatch in NiSkinData bone count", nif.getFilename());
 
         for (auto& bone : mBones)
@@ -344,45 +351,48 @@ namespace Nif
 
     void NiSkinData::read(NIFStream* nif)
     {
-        trafo.rotation = nif->getMatrix3();
-        trafo.pos = nif->getVector3();
-        trafo.scale = nif->getFloat();
+        nif->read(mTransform.rotation);
+        nif->read(mTransform.pos);
+        nif->read(mTransform.scale);
 
-        int boneNum = nif->getInt();
-        if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW
-            && nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 0))
-            partitions.read(nif);
-
+        uint32_t numBones;
+        nif->read(numBones);
         bool hasVertexWeights = true;
-        if (nif->getVersion() > NIFStream::generateVersion(4, 2, 1, 0))
-            hasVertexWeights = nif->getBoolean();
-
-        bones.resize(boneNum);
-        for (BoneInfo& bi : bones)
+        if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW)
         {
-            bi.trafo.rotation = nif->getMatrix3();
-            bi.trafo.pos = nif->getVector3();
-            bi.trafo.scale = nif->getFloat();
-            bi.boundSphereCenter = nif->getVector3();
-            bi.boundSphereRadius = nif->getFloat();
+            if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 0))
+                mPartitions.read(nif);
 
-            size_t numVertices = nif->getUShort();
+            if (nif->getVersion() >= NIFStream::generateVersion(4, 2, 1, 0))
+                nif->read(hasVertexWeights);
+        }
+
+        mBones.resize(numBones);
+        for (BoneInfo& bi : mBones)
+        {
+            nif->read(bi.mTransform.rotation);
+            nif->read(bi.mTransform.pos);
+            nif->read(bi.mTransform.scale);
+            bi.mBoundSphere = osg::BoundingSpheref(nif->get<osg::Vec3f>(), nif->get<float>());
+
+            uint16_t numVertices;
+            nif->read(numVertices);
 
             if (!hasVertexWeights)
                 continue;
 
-            bi.weights.resize(numVertices);
-            for (size_t j = 0; j < bi.weights.size(); j++)
+            bi.mWeights.resize(numVertices);
+            for (auto& [vertex, weight] : bi.mWeights)
             {
-                bi.weights[j].vertex = nif->getUShort();
-                bi.weights[j].weight = nif->getFloat();
+                nif->read(vertex);
+                nif->read(weight);
             }
         }
     }
 
     void NiSkinData::post(Reader& nif)
     {
-        partitions.post(nif);
+        mPartitions.post(nif);
     }
 
     void NiSkinPartition::read(NIFStream* nif)

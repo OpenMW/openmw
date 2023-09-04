@@ -1133,14 +1133,14 @@ namespace NifOsg
             }
 
             auto particledata = static_cast<const Nif::NiParticlesData*>(particleNode->data.getPtr());
-            partsys->setQuota(particledata->numParticles);
+            partsys->setQuota(particledata->mNumParticles);
 
             osg::BoundingBox box;
 
             int i = 0;
             for (const auto& particle : partctrl->particles)
             {
-                if (i++ >= particledata->activeCount)
+                if (i++ >= particledata->mActiveCount)
                     break;
 
                 if (particle.lifespan <= 0)
@@ -1165,8 +1165,8 @@ namespace NifOsg
                 created->setAlphaRange(osgParticle::rangef(1.f, 1.f));
 
                 float size = partctrl->size;
-                if (particle.vertex < particledata->sizes.size())
-                    size *= particledata->sizes[particle.vertex];
+                if (particle.vertex < particledata->mSizes.size())
+                    size *= particledata->mSizes[particle.vertex];
 
                 created->setSizeRange(osgParticle::rangef(size, size));
                 box.expandBy(osg::BoundingSphere(position, size));
@@ -1394,8 +1394,8 @@ namespace NifOsg
                 if (!skin->mData.empty())
                 {
                     data = skin->mData.getPtr();
-                    if (!data->partitions.empty())
-                        partitions = data->partitions.getPtr();
+                    if (!data->mPartitions.empty())
+                        partitions = data->mPartitions.getPtr();
                 }
                 if (!partitions && !skin->mPartitions.empty())
                     partitions = skin->mPartitions.getPtr();
@@ -1556,14 +1556,9 @@ namespace NifOsg
                 std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->name);
 
                 SceneUtil::RigGeometry::BoneInfluence influence;
-                const std::vector<Nif::NiSkinData::VertWeight>& weights = data->bones[i].weights;
-                for (size_t j = 0; j < weights.size(); j++)
-                {
-                    influence.mWeights.emplace_back(weights[j].vertex, weights[j].weight);
-                }
-                influence.mInvBindMatrix = data->bones[i].trafo.toMatrix();
-                influence.mBoundSphere
-                    = osg::BoundingSpheref(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
+                influence.mWeights = data->mBones[i].mWeights;
+                influence.mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
+                influence.mBoundSphere = data->mBones[i].mBoundSphere;
 
                 map->mData.emplace_back(boneName, influence);
             }
