@@ -53,23 +53,20 @@ namespace MWWorld
 
         const ESM::Cell* createEsmCell(ESM::ExteriorCellLocation location, ESMStore& store)
         {
-            ESM::Cell record;
+            ESM::Cell record = {};
             record.mData.mFlags = ESM::Cell::HasWater;
             record.mData.mX = location.mX;
             record.mData.mY = location.mY;
-            record.mWater = 0;
-            record.mMapColor = 0;
             record.updateId();
             return store.insert(record);
         }
 
         const ESM4::Cell* createEsm4Cell(ESM::ExteriorCellLocation location, ESMStore& store)
         {
-            ESM4::Cell record;
+            ESM4::Cell record = {};
             record.mParent = location.mWorldspace;
             record.mX = location.mX;
             record.mY = location.mY;
-            record.mCellFlags = 0;
             return store.insert(record);
         }
 
