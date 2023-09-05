@@ -13,7 +13,7 @@ namespace Nif
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 114))
             nif->read(mGroupId);
 
-        // Note: has special meaning for NiPSysData
+        // Note: has special meaning for NiPSysData (unimplemented)
         nif->read(mNumVertices);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
@@ -22,21 +22,19 @@ namespace Nif
             nif->read(mCompressFlags);
         }
 
-        bool hasVertices;
-        nif->read(hasVertices);
-        if (hasVertices)
+        if (nif->get<bool>())
             nif->readVector(mVertices, mNumVertices);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
+        {
             nif->read(mDataFlags);
 
-        if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS
-            && nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
-            nif->read(mMaterialHash);
+            if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS
+                && nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
+                nif->read(mMaterialHash);
+        }
 
-        bool hasNormals;
-        nif->read(hasNormals);
-        if (hasNormals)
+        if (nif->get<bool>())
         {
             nif->readVector(mNormals, mNumVertices);
             if (mDataFlags & DataFlag_HasTangents)
@@ -48,9 +46,7 @@ namespace Nif
 
         nif->read(mBoundingSphere);
 
-        bool hasColors;
-        nif->read(hasColors);
-        if (hasColors)
+        if (nif->get<bool>())
             nif->readVector(mColors, mNumVertices);
 
         if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
@@ -65,27 +61,24 @@ namespace Nif
             if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > 0)
                 numUVs &= DataFlag_HasUV;
         }
+        else if (!nif->get<bool>())
+            numUVs = 0;
 
-        bool hasUVs = true;
-        if (nif->getVersion() <= NIFFile::NIFVersion::VER_MW)
-            nif->read(hasUVs);
-        if (hasUVs)
+        mUVList.resize(numUVs);
+        for (std::vector<osg::Vec2f>& list : mUVList)
         {
-            mUVList.resize(numUVs);
-            for (std::vector<osg::Vec2f>& list : mUVList)
-            {
-                nif->readVector(list, mNumVertices);
-                // flip the texture coordinates to convert them to the OpenGL convention of bottom-left image origin
-                for (osg::Vec2f& uv : list)
-                    uv.y() = 1.f - uv.y();
-            }
+            nif->readVector(list, mNumVertices);
+            // flip the texture coordinates to convert them to the OpenGL convention of bottom-left image origin
+            for (osg::Vec2f& uv : list)
+                uv.y() = 1.f - uv.y();
         }
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
+        {
             nif->read(mConsistencyType);
-
-        if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 4))
-            nif->skip(4); // Additional data
+            if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 4))
+                nif->skip(4); // Additional data
+        }
     }
 
     void NiTriBasedGeomData::read(NIFStream* nif)
@@ -165,31 +158,45 @@ namespace Nif
         // Should always match the number of vertices
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_MW)
             nif->read(mNumParticles);
+        else if (nif->getVersion() != NIFFile::NIFVersion::VER_BGS || nif->getBethVersion() == 0)
+            mNumParticles = mNumVertices;
 
         bool numRadii = 1;
         if (nif->getVersion() > NIFStream::generateVersion(10, 0, 1, 0))
-        {
-            numRadii = mNumVertices;
-            if (!nif->get<bool>() || (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > 0))
-                numRadii = 0;
-        }
+            numRadii = nif->get<bool>() ? mNumParticles : 0;
         nif->readVector(mRadii, numRadii);
-
         nif->read(mActiveCount);
-
         if (nif->get<bool>())
-            nif->readVector(mSizes, mNumVertices);
+            nif->readVector(mSizes, mNumParticles);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
         {
             if (nif->get<bool>())
-                nif->readVector(mRotations, mNumVertices);
+                nif->readVector(mRotations, mNumParticles);
             if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 4))
             {
                 if (nif->get<bool>())
-                    nif->readVector(mRotationAngles, mNumVertices);
+                    nif->readVector(mRotationAngles, mNumParticles);
                 if (nif->get<bool>())
-                    nif->readVector(mRotationAxes, mNumVertices);
+                    nif->readVector(mRotationAxes, mNumParticles);
+                if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > 0)
+                {
+                    nif->read(mHasTextureIndices);
+                    uint32_t numSubtextureOffsets;
+                    if (nif->getBethVersion() <= 34)
+                        numSubtextureOffsets = nif->get<uint8_t>();
+                    else
+                        nif->read(numSubtextureOffsets);
+                    nif->readVector(mSubtextureOffsets, numSubtextureOffsets);
+                    if (nif->getBethVersion() > 34)
+                    {
+                        nif->read(mAspectRatio);
+                        nif->read(mAspectFlags);
+                        nif->read(mAspectRatio2);
+                        nif->read(mAspectSpeed);
+                        nif->read(mAspectSpeed2);
+                    }
+                }
             }
         }
     }

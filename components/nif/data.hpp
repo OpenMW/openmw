@@ -104,6 +104,13 @@ namespace Nif
         std::vector<float> mRotationAngles;
         std::vector<osg::Vec3f> mRotationAxes;
 
+        bool mHasTextureIndices{ false };
+        std::vector<osg::Vec4f> mSubtextureOffsets;
+        float mAspectRatio{ 1.f };
+        uint16_t mAspectFlags{ 0 };
+        float mAspectRatio2;
+        float mAspectSpeed, mAspectSpeed2;
+
         void read(NIFStream* nif) override;
     };
 
