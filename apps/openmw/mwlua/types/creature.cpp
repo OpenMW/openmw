@@ -1,3 +1,4 @@
+#include "actor.hpp"
 #include "types.hpp"
 
 #include <components/esm3/loadcrea.hpp>
@@ -48,5 +49,6 @@ namespace MWLua
         record["soulValue"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mSoul; });
         record["type"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mType; });
         record["baseGold"] = sol::readonly_property([](const ESM::Creature& rec) -> int { return rec.mData.mGold; });
+        addActorServicesBindings<ESM::Creature>(record, context);
     }
 }

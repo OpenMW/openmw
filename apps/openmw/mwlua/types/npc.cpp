@@ -1,3 +1,4 @@
+#include "actor.hpp"
 #include "types.hpp"
 
 #include <components/esm3/loadnpc.hpp>
@@ -48,6 +49,7 @@ namespace MWLua
             = sol::readonly_property([](const ESM::NPC& rec) -> std::string { return rec.mHead.serializeText(); });
         record["isMale"] = sol::readonly_property([](const ESM::NPC& rec) -> bool { return rec.isMale(); });
         record["baseGold"] = sol::readonly_property([](const ESM::NPC& rec) -> int { return rec.mNpdt.mGold; });
+        addActorServicesBindings<ESM::NPC>(record, context);
 
         // This function is game-specific, in future we should replace it with something more universal.
         npc["isWerewolf"] = [](const Object& o) {
