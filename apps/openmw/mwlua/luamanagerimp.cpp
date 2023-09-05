@@ -68,6 +68,7 @@ namespace MWLua
         Log(Debug::Verbose) << "Lua scripts configuration (" << mConfiguration.size() << " scripts):";
         for (size_t i = 0; i < mConfiguration.size(); ++i)
             Log(Debug::Verbose) << "#" << i << " " << LuaUtil::scriptCfgToString(mConfiguration[i]);
+        mMenuScripts.setAutoStartConf(mConfiguration.getMenuConf());
         mGlobalScripts.setAutoStartConf(mConfiguration.getGlobalConf());
     }
 
@@ -89,20 +90,25 @@ namespace MWLua
             mLua.addCommonPackage(name, package);
         for (const auto& [name, package] : initGlobalPackages(context))
             mGlobalScripts.addPackage(name, package);
+        for (const auto& [name, package] : initMenuPackages(context))
+            mMenuScripts.addPackage(name, package);
 
         mLocalPackages = initLocalPackages(localContext);
+
         mPlayerPackages = initPlayerPackages(localContext);
         mPlayerPackages.insert(mLocalPackages.begin(), mLocalPackages.end());
 
         LuaUtil::LuaStorage::initLuaBindings(mLua.sol());
         mGlobalScripts.addPackage(
             "openmw.storage", LuaUtil::LuaStorage::initGlobalPackage(mLua.sol(), &mGlobalStorage));
+        mMenuScripts.addPackage("openmw.storage", LuaUtil::LuaStorage::initMenuPackage(mLua.sol(), &mPlayerStorage));
         mLocalPackages["openmw.storage"] = LuaUtil::LuaStorage::initLocalPackage(mLua.sol(), &mGlobalStorage);
         mPlayerPackages["openmw.storage"]
             = LuaUtil::LuaStorage::initPlayerPackage(mLua.sol(), &mGlobalStorage, &mPlayerStorage);
 
         initConfiguration();
         mInitialized = true;
+        mMenuScripts.addAutoStartedScripts();
     }
 
     void LuaManager::loadPermanentStorage(const std::filesystem::path& userConfigPath)
@@ -204,9 +210,6 @@ namespace MWLua
 
     void LuaManager::synchronizedUpdate()
     {
-        if (mPlayer.isEmpty())
-            return; // The game is not started yet.
-
         if (mNewGameStarted)
         {
             mNewGameStarted = false;
@@ -217,7 +220,8 @@ namespace MWLua
 
         // We apply input events in `synchronizedUpdate` rather than in `update` in order to reduce input latency.
         mProcessingInputEvents = true;
-        PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
+        PlayerScripts* playerScripts
+            = mPlayer.isEmpty() ? nullptr : dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
         if (playerScripts && !windowManager->containsMode(MWGui::GM_MainMenu))
         {
@@ -225,6 +229,7 @@ namespace MWLua
                 playerScripts->processInputEvent(event);
         }
         mInputEvents.clear();
+        mMenuScripts.update(0);
         if (playerScripts)
             playerScripts->onFrame(MWBase::Environment::get().getWorld()->getTimeManager()->isPaused()
                     ? 0.0
@@ -272,7 +277,6 @@ namespace MWLua
     {
         LuaUi::clearUserInterface();
         mUiResourceManager.clear();
-        MWBase::Environment::get().getWindowManager()->setConsoleMode("");
         MWBase::Environment::get().getWorld()->getPostProcessor()->disableDynamicShaders();
         mActiveLocalScripts.clear();
         mLuaEvents.clear();
@@ -320,6 +324,7 @@ namespace MWLua
         mGlobalScripts.addAutoStartedScripts();
         mGlobalScriptsStarted = true;
         mNewGameStarted = true;
+        mMenuScripts.stateChanged();
     }
 
     void LuaManager::gameLoaded()
@@ -327,6 +332,7 @@ namespace MWLua
         if (!mGlobalScriptsStarted)
             mGlobalScripts.addAutoStartedScripts();
         mGlobalScriptsStarted = true;
+        mMenuScripts.stateChanged();
     }
 
     void LuaManager::uiModeChanged(const MWWorld::Ptr& arg)
@@ -529,6 +535,9 @@ namespace MWLua
         }
         for (LocalScripts* scripts : mActiveLocalScripts)
             scripts->setActive(true);
+
+        mMenuScripts.removeAllScripts();
+        mMenuScripts.addAutoStartedScripts();
     }
 
     void LuaManager::handleConsoleCommand(
@@ -537,16 +546,16 @@ namespace MWLua
         PlayerScripts* playerScripts = nullptr;
         if (!mPlayer.isEmpty())
             playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
-        if (!playerScripts)
+        bool processed = mMenuScripts.consoleCommand(consoleMode, command);
+        if (playerScripts)
         {
-            MWBase::Environment::get().getWindowManager()->printToConsole(
-                "You must enter a game session to run Lua commands\n", MWBase::WindowManager::sConsoleColor_Error);
-            return;
+            sol::object selected = sol::nil;
+            if (!selectedPtr.isEmpty())
+                selected = sol::make_object(mLua.sol(), LObject(getId(selectedPtr)));
+            if (playerScripts->consoleCommand(consoleMode, command, selected))
+                processed = true;
         }
-        sol::object selected = sol::nil;
-        if (!selectedPtr.isEmpty())
-            selected = sol::make_object(mLua.sol(), LObject(getId(selectedPtr)));
-        if (!playerScripts->consoleCommand(consoleMode, command, selected))
+        if (!processed)
             MWBase::Environment::get().getWindowManager()->printToConsole(
                 "No Lua handlers for console\n", MWBase::WindowManager::sConsoleColor_Error);
     }
@@ -680,6 +689,7 @@ namespace MWLua
         for (size_t i = 0; i < mConfiguration.size(); ++i)
         {
             bool isGlobal = mConfiguration[i].mFlags & ESM::LuaScriptCfg::sGlobal;
+            bool isMenu = mConfiguration[i].mFlags & ESM::LuaScriptCfg::sMenu;
 
             out << std::left;
             out << " " << std::setw(nameW) << mConfiguration[i].mScriptPath;
@@ -692,6 +702,8 @@ namespace MWLua
 
             if (isGlobal)
                 out << std::setw(valueW * 2) << "NA (global script)";
+            else if (isMenu && (!selectedScripts || !selectedScripts->hasScript(i)))
+                out << std::setw(valueW * 2) << "NA (menu script)";
             else if (selectedPtr.isEmpty())
                 out << std::setw(valueW * 2) << "NA (not selected) ";
             else if (!selectedScripts || !selectedScripts->hasScript(i))

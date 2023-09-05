@@ -92,6 +92,12 @@ namespace MWLua
 
     sol::table initUserInterfacePackage(const Context& context)
     {
+        {
+            sol::state_view& lua = context.mLua->sol();
+            if (lua["openmw_ui"] != sol::nil)
+                return lua["openmw_ui"];
+        }
+
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
 
         auto element = context.mLua->sol().new_usertype<LuaUi::Element>("Element");
@@ -130,6 +136,7 @@ namespace MWLua
         api["setConsoleMode"] = [luaManager = context.mLuaManager, windowManager](std::string_view mode) {
             luaManager->addAction([mode = std::string(mode), windowManager] { windowManager->setConsoleMode(mode); });
         };
+        api["getConsoleMode"] = [windowManager]() -> std::string_view { return windowManager->getConsoleMode(); };
         api["setConsoleSelectedObject"] = [luaManager = context.mLuaManager, windowManager](const sol::object& obj) {
             if (obj == sol::nil)
                 luaManager->addAction([windowManager] { windowManager->setConsoleSelectedObject(MWWorld::Ptr()); });
@@ -302,6 +309,8 @@ namespace MWLua
         // TODO
         // api["_showMouseCursor"] = [](bool) {};
 
-        return LuaUtil::makeReadOnly(api);
+        sol::state_view& lua = context.mLua->sol();
+        lua["openmw_ui"] = LuaUtil::makeReadOnly(api);
+        return lua["openmw_ui"];
     }
 }

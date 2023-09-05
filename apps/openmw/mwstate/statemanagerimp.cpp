@@ -666,6 +666,18 @@ void MWState::StateManager::update(float duration)
             MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
         }
     }
+
+    if (mNewGameRequest)
+    {
+        newGame();
+        mNewGameRequest = false;
+    }
+
+    if (mLoadRequest)
+    {
+        loadGame(*mLoadRequest);
+        mLoadRequest = std::nullopt;
+    }
 }
 
 bool MWState::StateManager::verifyProfile(const ESM::SavedGame& profile) const

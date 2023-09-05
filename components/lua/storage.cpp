@@ -49,6 +49,14 @@ namespace LuaUtil
                                  return !valid;
                              }),
             mCallbacks.end());
+        mPermanentCallbacks.erase(std::remove_if(mPermanentCallbacks.begin(), mPermanentCallbacks.end(),
+                                      [&](const Callback& callback) {
+                                          bool valid = callback.isValid();
+                                          if (valid)
+                                              callback.tryCall(mSectionName, changedKey);
+                                          return !valid;
+                                      }),
+            mPermanentCallbacks.end());
         mStorage->mRunningCallbacks.erase(this);
     }
 
@@ -112,7 +120,8 @@ namespace LuaUtil
         };
         sview["asTable"] = [](const SectionView& section) { return section.mSection->asTable(); };
         sview["subscribe"] = [](const SectionView& section, const sol::table& callback) {
-            std::vector<Callback>& callbacks = section.mSection->mCallbacks;
+            std::vector<Callback>& callbacks
+                = section.mForMenuScripts ? section.mSection->mPermanentCallbacks : section.mSection->mCallbacks;
             if (!callbacks.empty() && callbacks.size() == callbacks.capacity())
             {
                 callbacks.erase(
@@ -166,6 +175,16 @@ namespace LuaUtil
         return LuaUtil::makeReadOnly(res);
     }
 
+    sol::table LuaStorage::initMenuPackage(lua_State* lua, LuaStorage* playerStorage)
+    {
+        sol::table res(lua, sol::create);
+        res["playerSection"] = [playerStorage](std::string_view section) {
+            return playerStorage->getMutableSection(section, /*forMenuScripts=*/true);
+        };
+        res["allPlayerSections"] = [playerStorage]() { return playerStorage->getAllSections(); };
+        return LuaUtil::makeReadOnly(res);
+    }
+
     void LuaStorage::clearTemporaryAndRemoveCallbacks()
     {
         auto it = mData.begin();
@@ -174,6 +193,7 @@ namespace LuaUtil
             it->second->mCallbacks.clear();
             if (!it->second->mPermanent)
             {
+                it->second->mPermanentCallbacks.clear();
                 it->second->mValues.clear();
                 it = mData.erase(it);
             }
@@ -231,10 +251,10 @@ namespace LuaUtil
         return newIt->second;
     }
 
-    sol::object LuaStorage::getSection(std::string_view sectionName, bool readOnly)
+    sol::object LuaStorage::getSection(std::string_view sectionName, bool readOnly, bool forMenuScripts)
     {
         const std::shared_ptr<Section>& section = getSection(sectionName);
-        return sol::make_object<SectionView>(mLua, SectionView{ section, readOnly });
+        return sol::make_object<SectionView>(mLua, SectionView{ section, readOnly, forMenuScripts });
     }
 
     sol::table LuaStorage::getAllSections(bool readOnly)

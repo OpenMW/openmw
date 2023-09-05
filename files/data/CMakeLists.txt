@@ -72,9 +72,10 @@ set(BUILTIN_DATA_FILES
     scripts/omw/camera/settings.lua
     scripts/omw/camera/move360.lua
     scripts/omw/camera/first_person_auto_switch.lua
-    scripts/omw/console/player.lua
     scripts/omw/console/global.lua
     scripts/omw/console/local.lua
+    scripts/omw/console/player.lua
+    scripts/omw/console/menu.lua
     scripts/omw/mechanics/playercontroller.lua
     scripts/omw/playercontrols.lua
     scripts/omw/settings/player.lua

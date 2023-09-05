@@ -191,7 +191,8 @@ namespace MWGui
         void setConsoleSelectedObject(const MWWorld::Ptr& object) override;
         MWWorld::Ptr getConsoleSelectedObject() const override;
         void printToConsole(const std::string& msg, std::string_view color) override;
-        void setConsoleMode(const std::string& mode) override;
+        void setConsoleMode(std::string_view mode) override;
+        const std::string& getConsoleMode() override;
 
         /// Set time left for the player to start drowning (update the drowning bar)
         /// @param time time left to start drowning

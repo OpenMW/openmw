@@ -17,6 +17,7 @@ namespace LuaUtil
         static sol::table initGlobalPackage(lua_State* lua, LuaStorage* globalStorage);
         static sol::table initLocalPackage(lua_State* lua, LuaStorage* globalStorage);
         static sol::table initPlayerPackage(lua_State* lua, LuaStorage* globalStorage, LuaStorage* playerStorage);
+        static sol::table initMenuPackage(lua_State* lua, LuaStorage* playerStorage);
 
         explicit LuaStorage(lua_State* lua)
             : mLua(lua)
@@ -27,8 +28,11 @@ namespace LuaUtil
         void load(const std::filesystem::path& path);
         void save(const std::filesystem::path& path) const;
 
-        sol::object getSection(std::string_view sectionName, bool readOnly);
-        sol::object getMutableSection(std::string_view sectionName) { return getSection(sectionName, false); }
+        sol::object getSection(std::string_view sectionName, bool readOnly, bool forMenuScripts = false);
+        sol::object getMutableSection(std::string_view sectionName, bool forMenuScripts = false)
+        {
+            return getSection(sectionName, false, forMenuScripts);
+        }
         sol::object getReadOnlySection(std::string_view sectionName) { return getSection(sectionName, true); }
         sol::table getAllSections(bool readOnly = false);
 
@@ -87,6 +91,7 @@ namespace LuaUtil
             std::string mSectionName;
             std::map<std::string, Value, std::less<>> mValues;
             std::vector<Callback> mCallbacks;
+            std::vector<Callback> mPermanentCallbacks;
             bool mPermanent = true;
             static Value sEmpty;
         };
@@ -94,6 +99,7 @@ namespace LuaUtil
         {
             std::shared_ptr<Section> mSection;
             bool mReadOnly;
+            bool mForMenuScripts = false;
         };
 
         const std::shared_ptr<Section>& getSection(std::string_view sectionName);

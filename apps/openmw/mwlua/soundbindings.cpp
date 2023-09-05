@@ -61,7 +61,11 @@ namespace MWLua
 {
     sol::table initAmbientPackage(const Context& context)
     {
-        sol::table api(context.mLua->sol(), sol::create);
+        sol::state_view& lua = context.mLua->sol();
+        if (lua["openmw_ambient"] != sol::nil)
+            return lua["openmw_ambient"];
+
+        sol::table api(lua, sol::create);
 
         api["playSound"] = [](std::string_view soundId, const sol::optional<sol::table>& options) {
             auto args = getPlaySoundArgs(options);
@@ -104,7 +108,8 @@ namespace MWLua
 
         api["stopMusic"] = []() { MWBase::Environment::get().getSoundManager()->stopMusic(); };
 
-        return LuaUtil::makeReadOnly(api);
+        lua["openmw_ambient"] = LuaUtil::makeReadOnly(api);
+        return lua["openmw_ambient"];
     }
 
     sol::table initCoreSoundBindings(const Context& context)

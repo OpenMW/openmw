@@ -20,8 +20,10 @@ namespace ESM
         static constexpr Flags sCustom = 1ull << 1; // local; can be attached/detached by a global script
         static constexpr Flags sPlayer = 1ull << 2; // auto attach to players
 
-        static constexpr Flags sMerge = 1ull
-            << 3; // merge with configuration for this script from previous content files.
+        // merge with configuration for this script from previous content files.
+        static constexpr Flags sMerge = 1ull << 3;
+
+        static constexpr Flags sMenu = 1ull << 4; // start as a menu script
 
         std::string mScriptPath; // VFS path to the script.
         std::string mInitializationData; // Serialized Lua table. It is a binary data. Can contain '\0'.

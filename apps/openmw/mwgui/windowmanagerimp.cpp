@@ -2173,9 +2173,14 @@ namespace MWGui
         mConsole->print(msg, color);
     }
 
-    void WindowManager::setConsoleMode(const std::string& mode)
+    void WindowManager::setConsoleMode(std::string_view mode)
     {
         mConsole->setConsoleMode(mode);
+    }
+
+    const std::string& WindowManager::getConsoleMode()
+    {
+        return mConsole->getConsoleMode();
     }
 
     void WindowManager::createCursors()

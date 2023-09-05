@@ -17,6 +17,7 @@
 #include "globalscripts.hpp"
 #include "localscripts.hpp"
 #include "luaevents.hpp"
+#include "menuscripts.hpp"
 #include "object.hpp"
 #include "objectlists.hpp"
 
@@ -164,6 +165,7 @@ namespace MWLua
         std::map<std::string, sol::object> mLocalPackages;
         std::map<std::string, sol::object> mPlayerPackages;
 
+        MenuScripts mMenuScripts{ &mLua };
         GlobalScripts mGlobalScripts{ &mLua };
         std::set<LocalScripts*> mActiveLocalScripts;
         ObjectLists mObjectLists;
