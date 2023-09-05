@@ -15,6 +15,7 @@
 #include <components/misc/endianness.hpp>
 #include <components/misc/float16.hpp>
 
+#include <osg/BoundingSphere>
 #include <osg/Quat>
 #include <osg/Vec3f>
 #include <osg/Vec4f>
@@ -174,6 +175,8 @@ namespace Nif
     template <>
     void NIFStream::read<osg::Quat>(osg::Quat& quat);
     template <>
+    void NIFStream::read<osg::BoundingSpheref>(osg::BoundingSpheref& sphere);
+    template <>
     void NIFStream::read<Transformation>(Transformation& t);
     template <>
     void NIFStream::read<bool>(bool& data);
@@ -190,6 +193,8 @@ namespace Nif
     void NIFStream::read<Matrix3>(Matrix3* dest, size_t size);
     template <>
     void NIFStream::read<osg::Quat>(osg::Quat* dest, size_t size);
+    template <>
+    void NIFStream::read<osg::BoundingSpheref>(osg::BoundingSpheref* dest, size_t size);
     template <>
     void NIFStream::read<Transformation>(Transformation* dest, size_t size);
     template <>

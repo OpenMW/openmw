@@ -46,8 +46,7 @@ namespace Nif
             }
         }
 
-        nif->read(mCenter);
-        nif->read(mRadius);
+        nif->read(mBoundingSphere);
 
         bool hasColors;
         nif->read(hasColors);
@@ -373,7 +372,7 @@ namespace Nif
             nif->read(bi.mTransform.rotation);
             nif->read(bi.mTransform.pos);
             nif->read(bi.mTransform.scale);
-            bi.mBoundSphere = osg::BoundingSpheref(nif->get<osg::Vec3f>(), nif->get<float>());
+            nif->read(bi.mBoundSphere);
 
             uint16_t numVertices;
             nif->read(numVertices);
@@ -574,8 +573,7 @@ namespace Nif
 
     void BSMultiBoundSphere::read(NIFStream* nif)
     {
-        nif->read(mCenter);
-        nif->read(mRadius);
+        nif->read(mSphere);
     }
 
 } // Namespace

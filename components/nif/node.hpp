@@ -26,13 +26,6 @@ namespace Nif
             HALFSPACE_BV = 5
         };
 
-        struct NiSphereBV
-        {
-            osg::Vec3f center;
-            float radius{ 0.f };
-            void read(NIFStream* nif);
-        };
-
         struct NiBoxBV
         {
             osg::Vec3f center;
@@ -59,7 +52,7 @@ namespace Nif
         };
 
         unsigned int type;
-        NiSphereBV sphere;
+        osg::BoundingSpheref sphere;
         NiBoxBV box;
         NiCapsuleBV capsule;
         NiLozengeBV lozenge;
@@ -355,7 +348,7 @@ namespace Nif
 
     struct BSTriShape : Node
     {
-        NiBoundingVolume::NiSphereBV mBoundingSphere;
+        osg::BoundingSpheref mBoundingSphere;
         std::array<float, 6> mBoundMinMax;
 
         NiSkinInstancePtr mSkin;

@@ -1173,7 +1173,7 @@ namespace NifOsg
             }
 
             // radius may be used to force a larger bounding box
-            box.expandBy(osg::BoundingSphere(osg::Vec3(0, 0, 0), particledata->mRadius));
+            box.expandBy(osg::BoundingSphere(osg::Vec3(0, 0, 0), particledata->mBoundingSphere.radius()));
 
             partsys->setInitialBound(box);
         }

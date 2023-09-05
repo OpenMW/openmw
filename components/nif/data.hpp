@@ -51,8 +51,7 @@ namespace Nif
         uint16_t mDataFlags{ 0 };
         uint32_t mMaterialHash;
         std::vector<osg::Vec3f> mNormals, mTangents, mBitangents;
-        osg::Vec3f mCenter;
-        float mRadius;
+        osg::BoundingSpheref mBoundingSphere;
         std::vector<osg::Vec4f> mColors;
         std::vector<std::vector<osg::Vec2f>> mUVList;
         uint16_t mConsistencyType;
@@ -402,8 +401,7 @@ namespace Nif
 
     struct BSMultiBoundSphere : public BSMultiBoundData
     {
-        osg::Vec3f mCenter;
-        float mRadius;
+        osg::BoundingSpheref mSphere;
 
         void read(NIFStream* nif) override;
     };
