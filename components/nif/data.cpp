@@ -94,12 +94,9 @@ namespace Nif
 
         uint32_t numIndices;
         nif->read(numIndices);
-        bool hasTriangles = true;
-        if (nif->getVersion() > NIFFile::NIFVersion::VER_OB_OLD)
-            nif->read(hasTriangles);
-        if (hasTriangles)
-            nif->readVector(mTriangles, numIndices);
-
+        if (nif->getVersion() > NIFFile::NIFVersion::VER_OB_OLD && !nif->get<bool>())
+            numIndices = 0;
+        nif->readVector(mTriangles, numIndices);
         mMatchGroups.resize(nif->get<uint16_t>());
         for (auto& group : mMatchGroups)
             nif->readVector(group, nif->get<uint16_t>());
@@ -113,13 +110,8 @@ namespace Nif
         nif->read(numStrips);
         std::vector<uint16_t> lengths;
         nif->readVector(lengths, numStrips);
-
-        bool hasStrips = true;
-        if (nif->getVersion() > NIFFile::NIFVersion::VER_OB_OLD)
-            nif->read(hasStrips);
-        if (!hasStrips || !numStrips)
-            return;
-
+        if (nif->getVersion() > NIFFile::NIFVersion::VER_OB_OLD && !nif->get<bool>())
+            numStrips = 0;
         mStrips.resize(numStrips);
         for (int i = 0; i < numStrips; i++)
             nif->readVector(mStrips[i], lengths[i]);
@@ -205,13 +197,8 @@ namespace Nif
     {
         NiParticlesData::read(nif);
 
-        if (nif->getVersion() > NIFStream::generateVersion(4, 2, 2, 0))
-            return;
-
-        bool hasRotations;
-        nif->read(hasRotations);
-        if (hasRotations)
-            nif->readVector(mRotations, mNumVertices);
+        if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0) && nif->get<bool>())
+            nif->readVector(mRotations, mNumParticles);
     }
 
     void NiPosData::read(NIFStream* nif)
@@ -429,26 +416,13 @@ namespace Nif
         nif->read(numStrips);
         nif->read(bonesPerVertex);
         nif->readVector(mBones, numBones);
-
-        bool hasVertexMap = true;
-        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            nif->read(hasVertexMap);
-        if (hasVertexMap)
+        if (nif->getVersion() < NIFStream::generateVersion(10, 1, 0, 0) || nif->get<bool>())
             nif->readVector(mVertexMap, numVertices);
-
-        bool hasVertexWeights = true;
-        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            nif->read(hasVertexWeights);
-        if (hasVertexWeights)
+        if (nif->getVersion() < NIFStream::generateVersion(10, 1, 0, 0) || nif->get<bool>())
             nif->readVector(mWeights, numVertices * bonesPerVertex);
-
         std::vector<unsigned short> stripLengths;
         nif->readVector(stripLengths, numStrips);
-
-        bool hasFaces = true;
-        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            nif->read(hasFaces);
-        if (hasFaces)
+        if (nif->getVersion() < NIFStream::generateVersion(10, 1, 0, 0) || nif->get<bool>())
         {
             if (numStrips)
             {
@@ -465,14 +439,15 @@ namespace Nif
         {
             nif->read(mLODLevel);
             nif->read(mGlobalVB);
+            if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
+            {
+                mVertexDesc.read(nif);
+                nif->readVector(mTrueTriangles, numTriangles * 3);
+            }
         }
 
-        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
-        {
-            mVertexDesc.read(nif);
-            nif->readVector(mTrueTriangles, numTriangles * 3);
-        }
-        else if (!mVertexMap.empty())
+        // Not technically a part of the loading process
+        if (mTrueTriangles.empty() && !mVertexMap.empty())
         {
             if (!mStrips.empty())
             {
