@@ -100,11 +100,7 @@ namespace fx
             mPointLightBuffer = std::move(buffer);
         }
 
-        static std::string getStructDefinition()
-        {
-            static std::string definition = UniformData::getDefinition("_omw_data");
-            return definition;
-        }
+        static const std::string& getStructDefinition() { return sDefinition; }
 
         void setDefaults(osg::StateSet* stateset) override;
 
@@ -274,6 +270,8 @@ namespace fx
 
         UniformData mData;
         bool mUseUBO;
+
+        static std::string sDefinition;
 
         std::shared_ptr<SceneUtil::PPLightBuffer> mPointLightBuffer;
     };
