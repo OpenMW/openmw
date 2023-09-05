@@ -397,8 +397,7 @@ namespace Nif
 
     void NiSkinPartition::read(NIFStream* nif)
     {
-        nif->read(mPartitionNum);
-        mPartitions.resize(mPartitionNum);
+        mPartitions.resize(nif->get<uint32_t>());
 
         if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
         {
@@ -417,89 +416,72 @@ namespace Nif
 
     void NiSkinPartition::Partition::read(NIFStream* nif)
     {
-        size_t numVertices = nif->getUShort();
-        size_t numTriangles = nif->getUShort();
-        size_t numBones = nif->getUShort();
-        size_t numStrips = nif->getUShort();
-        size_t bonesPerVertex = nif->getUShort();
-        nif->readVector(bones, numBones);
+        uint16_t numVertices, numTriangles, numBones, numStrips, bonesPerVertex;
+        nif->read(numVertices);
+        nif->read(numTriangles);
+        nif->read(numBones);
+        nif->read(numStrips);
+        nif->read(bonesPerVertex);
+        nif->readVector(mBones, numBones);
 
         bool hasVertexMap = true;
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            hasVertexMap = nif->getBoolean();
+            nif->read(hasVertexMap);
         if (hasVertexMap)
-            nif->readVector(vertexMap, numVertices);
+            nif->readVector(mVertexMap, numVertices);
 
         bool hasVertexWeights = true;
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            hasVertexWeights = nif->getBoolean();
+            nif->read(hasVertexWeights);
         if (hasVertexWeights)
-            nif->readVector(weights, numVertices * bonesPerVertex);
+            nif->readVector(mWeights, numVertices * bonesPerVertex);
 
         std::vector<unsigned short> stripLengths;
         nif->readVector(stripLengths, numStrips);
 
         bool hasFaces = true;
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            hasFaces = nif->getBoolean();
+            nif->read(hasFaces);
         if (hasFaces)
         {
             if (numStrips)
             {
-                strips.resize(numStrips);
+                mStrips.resize(numStrips);
                 for (size_t i = 0; i < numStrips; i++)
-                    nif->readVector(strips[i], stripLengths[i]);
+                    nif->readVector(mStrips[i], stripLengths[i]);
             }
             else
-                nif->readVector(triangles, numTriangles * 3);
+                nif->readVector(mTriangles, numTriangles * 3);
         }
-        bool hasBoneIndices = nif->getChar() != 0;
-        if (hasBoneIndices)
-            nif->readVector(boneIndices, numVertices * bonesPerVertex);
+        if (nif->get<uint8_t>() != 0)
+            nif->readVector(mBoneIndices, numVertices * bonesPerVertex);
         if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
         {
-            nif->getChar(); // LOD level
-            nif->getBoolean(); // Global VB
+            nif->read(mLODLevel);
+            nif->read(mGlobalVB);
         }
 
         if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
         {
             mVertexDesc.read(nif);
-            nif->readVector(trueTriangles, numTriangles * 3);
+            nif->readVector(mTrueTriangles, numTriangles * 3);
         }
-    }
-
-    std::vector<unsigned short> NiSkinPartition::Partition::getTrueTriangles() const
-    {
-        if (!trueTriangles.empty())
-            return trueTriangles;
-
-        std::vector<unsigned short> remappedTriangles;
-        if (vertexMap.empty() || triangles.empty())
-            return remappedTriangles;
-
-        remappedTriangles = triangles;
-
-        for (unsigned short& index : remappedTriangles)
-            index = vertexMap[index];
-        return remappedTriangles;
-    }
-
-    std::vector<std::vector<unsigned short>> NiSkinPartition::Partition::getTrueStrips() const
-    {
-        if (!trueTriangles.empty())
-            return {};
-
-        std::vector<std::vector<unsigned short>> remappedStrips;
-        if (vertexMap.empty() || strips.empty())
-            return remappedStrips;
-
-        remappedStrips = strips;
-        for (auto& strip : remappedStrips)
-            for (auto& index : strip)
-                index = vertexMap[index];
-
-        return remappedStrips;
+        else if (!mVertexMap.empty())
+        {
+            if (!mStrips.empty())
+            {
+                mTrueStrips = mStrips;
+                for (auto& strip : mTrueStrips)
+                    for (auto& index : strip)
+                        index = mVertexMap[index];
+            }
+            else if (!mTriangles.empty())
+            {
+                mTrueTriangles = mTriangles;
+                for (unsigned short& index : mTrueTriangles)
+                    index = mVertexMap[index];
+            }
+        }
     }
 
     void NiMorphData::read(NIFStream* nif)

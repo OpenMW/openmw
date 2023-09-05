@@ -289,20 +289,20 @@ namespace Nif
     {
         struct Partition
         {
-            std::vector<unsigned short> bones;
-            std::vector<unsigned short> vertexMap;
-            std::vector<float> weights;
-            std::vector<std::vector<unsigned short>> strips;
-            std::vector<unsigned short> triangles;
-            std::vector<unsigned short> trueTriangles;
-            std::vector<char> boneIndices;
+            std::vector<unsigned short> mBones;
+            std::vector<unsigned short> mVertexMap;
+            std::vector<float> mWeights;
+            std::vector<std::vector<unsigned short>> mStrips;
+            std::vector<unsigned short> mTriangles;
+            std::vector<char> mBoneIndices;
             BSVertexDesc mVertexDesc;
+            std::vector<unsigned short> mTrueTriangles;
+            std::vector<std::vector<unsigned short>> mTrueStrips;
+            uint8_t mLODLevel;
+            bool mGlobalVB;
 
             void read(NIFStream* nif);
-            std::vector<unsigned short> getTrueTriangles() const;
-            std::vector<std::vector<unsigned short>> getTrueStrips() const;
         };
-        unsigned int mPartitionNum;
         std::vector<Partition> mPartitions;
 
         unsigned int mDataSize;

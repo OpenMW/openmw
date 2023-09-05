@@ -1403,18 +1403,18 @@ namespace NifOsg
                 hasPartitions = partitions != nullptr;
                 if (hasPartitions)
                 {
-                    std::vector<unsigned short> trueTriangles;
                     for (const Nif::NiSkinPartition::Partition& partition : partitions->mPartitions)
                     {
-                        trueTriangles = partition.getTrueTriangles();
+                        const std::vector<unsigned short>& trueTriangles = partition.mTrueTriangles;
                         if (!trueTriangles.empty())
                         {
                             geometry->addPrimitiveSet(new osg::DrawElementsUShort(
                                 osg::PrimitiveSet::TRIANGLES, trueTriangles.size(), trueTriangles.data()));
                         }
-                        const std::vector<std::vector<unsigned short>> trueStrips = partition.getTrueStrips();
-                        for (const auto& strip : trueStrips)
+                        for (const auto& strip : partition.mTrueStrips)
                         {
+                            if (strip.size() < 3)
+                                continue;
                             geometry->addPrimitiveSet(new osg::DrawElementsUShort(
                                 osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(), strip.data()));
                         }
