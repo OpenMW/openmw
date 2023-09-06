@@ -416,13 +416,14 @@ namespace Nif
         nif->read(numStrips);
         nif->read(bonesPerVertex);
         nif->readVector(mBones, numBones);
-        if (nif->getVersion() < NIFStream::generateVersion(10, 1, 0, 0) || nif->get<bool>())
+        bool hasPresenceFlags = nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0);
+        if (!hasPresenceFlags || nif->get<bool>())
             nif->readVector(mVertexMap, numVertices);
-        if (nif->getVersion() < NIFStream::generateVersion(10, 1, 0, 0) || nif->get<bool>())
+        if (!hasPresenceFlags || nif->get<bool>())
             nif->readVector(mWeights, numVertices * bonesPerVertex);
         std::vector<unsigned short> stripLengths;
         nif->readVector(stripLengths, numStrips);
-        if (nif->getVersion() < NIFStream::generateVersion(10, 1, 0, 0) || nif->get<bool>())
+        if (!hasPresenceFlags || nif->get<bool>())
         {
             if (numStrips)
             {
@@ -509,12 +510,8 @@ namespace Nif
 
         uint32_t numEntries;
         nif->read(numEntries);
-
         // Fill the entire palette with black even if there isn't enough entries.
-        mColors.resize(256);
-        if (numEntries > 256)
-            mColors.resize(numEntries);
-
+        mColors.resize(numEntries > 256 ? numEntries : 256);
         for (uint32_t i = 0; i < numEntries; i++)
         {
             nif->read(mColors[i]);
