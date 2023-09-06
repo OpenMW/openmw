@@ -126,6 +126,8 @@ namespace Nif
         // Can't construct a line from a single vertex.
         if (mNumVertices < 2)
             return;
+        // There can't be more than 2 indices for each vertex
+        mLines.reserve(mNumVertices * 2);
         // Convert connectivity flags into usable geometry. The last element needs special handling.
         for (uint16_t i = 0; i < mNumVertices - 1; ++i)
         {
@@ -141,6 +143,7 @@ namespace Nif
             mLines.emplace_back(mNumVertices - 1);
             mLines.emplace_back(0);
         }
+        mLines.shrink_to_fit();
     }
 
     void NiParticlesData::read(NIFStream* nif)
