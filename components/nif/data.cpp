@@ -175,12 +175,12 @@ namespace Nif
                 {
                     nif->read(mHasTextureIndices);
                     uint32_t numSubtextureOffsets;
-                    if (nif->getBethVersion() <= 34)
+                    if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
                         numSubtextureOffsets = nif->get<uint8_t>();
                     else
                         nif->read(numSubtextureOffsets);
                     nif->readVector(mSubtextureOffsets, numSubtextureOffsets);
-                    if (nif->getBethVersion() > 34)
+                    if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
                     {
                         nif->read(mAspectRatio);
                         nif->read(mAspectFlags);
