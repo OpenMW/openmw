@@ -8,6 +8,7 @@
 #include <components/esm3/loadarmo.hpp>
 #include <components/esm3/loadbook.hpp>
 #include <components/esm3/loadclot.hpp>
+#include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadskil.hpp>
 #include <components/esm3/loadweap.hpp>
@@ -36,6 +37,7 @@
 #include "camerabindings.hpp"
 #include "cellbindings.hpp"
 #include "debugbindings.hpp"
+#include "factionbindings.hpp"
 #include "inputbindings.hpp"
 #include "magicbindings.hpp"
 #include "nearbybindings.hpp"
@@ -153,6 +155,10 @@ namespace MWLua
         addTimeBindings(api, context, false);
         api["magic"] = initCoreMagicBindings(context);
         api["stats"] = initCoreStatsBindings(context);
+
+        initCoreFactionBindings(context);
+        api["factions"] = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>();
+
         api["l10n"] = LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager());
         const MWWorld::Store<ESM::GameSetting>* gmstStore
             = &MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();

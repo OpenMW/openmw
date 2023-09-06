@@ -721,6 +721,117 @@
 -- @return #boolean
 
 ---
+-- Get all factions in which NPC has a membership.
+-- Note: this function does not take in account an expelling state.
+-- @function [parent=#NPC] getFactions
+-- @param openmw.core#GameObject actor NPC object
+-- @return #list<#string> factionIds List of faction IDs.
+-- @usage local NPC = require('openmw.types').NPC;
+-- for _, factionId in pairs(types.NPC.getFactions(actor)) do
+--     print(factionId);
+-- end
+
+---
+-- Get rank of given NPC in given faction.
+-- Throws an exception if there is no such faction.
+-- Note: this function does not take in account an expelling state.
+-- @function [parent=#NPC] getFactionRank
+-- @param openmw.core#GameObject actor NPC object
+-- @param #string faction Faction ID
+-- @return #number rank Rank index (from 1), 0 if NPC is not in faction.
+-- @usage local NPC = require('openmw.types').NPC;
+-- print(NPC.getFactionRank(player, "mages guild");
+
+---
+-- Set rank of given NPC in given faction.
+-- Throws an exception if there is no such faction.
+-- For NPCs faction should be an NPC's primary faction.
+-- Notes:
+--
+--   * "value" <= 0 does nothing for NPCs and make the player character to leave the faction (purge his rank and reputation in faction).
+--   * "value" > 0 set rank to given value if rank is valid (name is not empty), and to the highest valid rank otherwise.
+-- @function [parent=#NPC] setFactionRank
+-- @param openmw.core#GameObject actor NPC object
+-- @param #string faction Faction ID
+-- @param #number value Rank index (from 1).
+-- @usage local NPC = require('openmw.types').NPC;
+-- NPC.setFactionRank(player, "mages guild", 6);
+
+---
+-- Adjust rank of given NPC in given faction.
+-- For NPCs faction should be an NPC's primary faction.
+-- Throws an exception if there is no such faction.
+-- Notes:
+--
+--   * If rank should become <= 0 after modification, function does nothing for NPCs and makes the player character to leave the faction (purge his rank and reputation in faction).
+--   * If rank should become > 0 after modification, function set rank to given value if rank is valid (name is not empty), and to the highest valid rank otherwise.
+-- @function [parent=#NPC] modifyFactionRank
+-- @param openmw.core#GameObject actor NPC object
+-- @param #string faction Faction ID
+-- @param #number value Rank index (from 1) modifier. If rank reaches 0 for player character, he leaves the faction.
+-- @usage local NPC = require('openmw.types').NPC;
+-- NPC.modifyFactionRank(player, "mages guild", 1);
+
+---
+-- Get reputation of given actor in given faction.
+-- Throws an exception if there is no such faction.
+-- @function [parent=#NPC] getFactionReputation
+-- @param openmw.core#GameObject actor NPC object
+-- @param #string faction Faction ID
+-- @return #number reputation Reputation level, 0 if NPC is not in faction.
+-- @usage local NPC = require('openmw.types').NPC;
+-- print(NPC.getFactionReputation(player, "mages guild"));
+
+---
+-- Set reputation of given actor in given faction.
+-- Throws an exception if there is no such faction.
+-- @function [parent=#NPC] setFactionReputation
+-- @param openmw.core#GameObject actor NPC object
+-- @param #string faction Faction ID
+-- @param #number value Reputation value
+-- @usage local NPC = require('openmw.types').NPC;
+-- NPC.setFactionReputation(player, "mages guild", 100);
+
+---
+-- Adjust reputation of given actor in given faction.
+-- Throws an exception if there is no such faction.
+-- @function [parent=#NPC] modifyFactionReputation
+-- @param openmw.core#GameObject actor NPC object
+-- @param #string faction Faction ID
+-- @param #number value Reputation modifier value
+-- @usage local NPC = require('openmw.types').NPC;
+-- NPC.modifyFactionReputation(player, "mages guild", 5);
+
+---
+-- Expell NPC from given faction.
+-- Throws an exception if there is no such faction.
+-- Note: expelled NPC still keeps his rank and reputation in faction, he just get an additonal flag for given faction.
+-- @function [parent=#NPC] expell
+-- @param openmw.core#GameObject actor NPC object
+-- @param #string faction Faction ID
+-- @usage local NPC = require('openmw.types').NPC;
+-- NPC.expell(player, "mages guild");
+
+---
+-- Clear expelling of NPC from given faction.
+-- Throws an exception if there is no such faction.
+-- @function [parent=#NPC] clearExpelled
+-- @param openmw.core#GameObject actor NPC object
+-- @param #string faction Faction ID
+-- @usage local NPC = require('openmw.types').NPC;
+-- NPC.clearExpell(player, "mages guild");
+
+---
+-- Check if NPC is expelled from given faction.
+-- Throws an exception if there is no such faction.
+-- @function [parent=#NPC] isExpelled
+-- @param openmw.core#GameObject actor NPC object
+-- @param #string faction Faction ID
+-- @return #bool isExpelled True if NPC is expelled from the faction.
+-- @usage local NPC = require('openmw.types').NPC;
+-- local result = NPC.isExpelled(player, "mages guild");
+
+---
 -- Returns the current disposition of the provided NPC. This is their derived disposition, after modifiers such as personality and faction relations are taken into account.
 -- @function [parent=#NPC] getDisposition
 -- @param openmw.core#GameObject object

@@ -112,14 +112,17 @@ bool MWMechanics::NpcStats::getExpelled(const ESM::RefId& factionID) const
     return mExpelled.find(factionID) != mExpelled.end();
 }
 
-void MWMechanics::NpcStats::expell(const ESM::RefId& factionID)
+void MWMechanics::NpcStats::expell(const ESM::RefId& factionID, bool printMessage)
 {
     if (mExpelled.find(factionID) == mExpelled.end())
     {
+        mExpelled.insert(factionID);
+        if (!printMessage)
+            return;
+
         std::string message = "#{sExpelledMessage}";
         message += MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionID)->mName;
         MWBase::Environment::get().getWindowManager()->messageBox(message);
-        mExpelled.insert(factionID);
     }
 }
 

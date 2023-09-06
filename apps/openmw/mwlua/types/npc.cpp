@@ -1,6 +1,7 @@
 #include "actor.hpp"
 #include "types.hpp"
 
+#include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadnpc.hpp>
 #include <components/lua/luastate.hpp>
 
@@ -11,6 +12,7 @@
 #include <apps/openmw/mwworld/class.hpp>
 #include <apps/openmw/mwworld/esmstore.hpp>
 
+#include "../localscripts.hpp"
 #include "../stats.hpp"
 
 namespace sol
@@ -21,6 +23,32 @@ namespace sol
     };
 }
 
+namespace
+{
+    size_t getValidRanksCount(const ESM::Faction* faction)
+    {
+        if (!faction)
+            return 0;
+
+        for (size_t i = 0; i < faction->mRanks.size(); i++)
+        {
+            if (faction->mRanks[i].empty())
+                return i;
+        }
+
+        return faction->mRanks.size();
+    }
+
+    ESM::RefId parseFactionId(std::string_view faction)
+    {
+        ESM::RefId id = ESM::RefId::deserializeText(faction);
+        const MWWorld::ESMStore* store = MWBase::Environment::get().getESMStore();
+        if (!store->get<ESM::Faction>().search(id))
+            throw std::runtime_error("Faction '" + std::string(faction) + "' does not exist");
+        return id;
+    }
+}
+
 namespace MWLua
 {
     void addNpcBindings(sol::table npc, const Context& context)
@@ -29,7 +57,9 @@ namespace MWLua
 
         addRecordFunctionBinding<ESM::NPC>(npc, context);
 
-        sol::usertype<ESM::NPC> record = context.mLua->sol().new_usertype<ESM::NPC>("ESM3_NPC");
+        sol::state_view& lua = context.mLua->sol();
+
+        sol::usertype<ESM::NPC> record = lua.new_usertype<ESM::NPC>("ESM3_NPC");
         record[sol::meta_function::to_string]
             = [](const ESM::NPC& rec) { return "ESM3_NPC[" + rec.mId.toDebugString() + "]"; };
         record["id"]
@@ -67,6 +97,183 @@ namespace MWLua
             if (!cls.isNpc())
                 throw std::runtime_error("NPC expected");
             return MWBase::Environment::get().getMechanicsManager()->getDerivedDisposition(o.ptr());
+        };
+
+        npc["getFactionRank"] = [](const Object& actor, std::string_view faction) {
+            const MWWorld::Ptr ptr = actor.ptr();
+            ESM::RefId factionId = parseFactionId(faction);
+
+            const MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
+
+            int factionRank = npcStats.getFactionRank(factionId);
+            if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            {
+                if (npcStats.isInFaction(factionId))
+                    return factionRank + 1;
+                else
+                    return 0;
+            }
+            else
+            {
+                ESM::RefId primaryFactionId = ptr.getClass().getPrimaryFaction(ptr);
+                if (factionId == primaryFactionId && factionRank == -1)
+                    return ptr.getClass().getPrimaryFactionRank(ptr);
+                else if (primaryFactionId == factionId)
+                    return factionRank + 1;
+                else
+                    return 0;
+            }
+        };
+
+        npc["setFactionRank"] = [](Object& actor, std::string_view faction, int value) {
+            if (dynamic_cast<LObject*>(&actor) && !dynamic_cast<SelfObject*>(&actor))
+                throw std::runtime_error("Local scripts can modify only self");
+
+            const MWWorld::Ptr ptr = actor.ptr();
+            ESM::RefId factionId = parseFactionId(faction);
+
+            const ESM::Faction* factionPtr
+                = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().find(factionId);
+
+            auto ranksCount = static_cast<int>(getValidRanksCount(factionPtr));
+
+            if (ptr != MWBase::Environment::get().getWorld()->getPlayerPtr())
+            {
+                ESM::RefId primaryFactionId = ptr.getClass().getPrimaryFaction(ptr);
+                if (value <= 0 || factionId != primaryFactionId)
+                    return;
+            }
+
+            MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
+
+            if (!npcStats.isInFaction(factionId) && value > 0)
+                npcStats.joinFaction(factionId);
+
+            npcStats.setFactionRank(factionId, std::min(value - 1, ranksCount - 1));
+        };
+
+        npc["modifyFactionRank"] = [](Object& actor, std::string_view faction, int value) {
+            if (dynamic_cast<LObject*>(&actor) && !dynamic_cast<SelfObject*>(&actor))
+                throw std::runtime_error("Local scripts can modify only self");
+
+            if (value == 0)
+                return;
+
+            const MWWorld::Ptr ptr = actor.ptr();
+            ESM::RefId factionId = parseFactionId(faction);
+
+            const ESM::Faction* factionPtr
+                = MWBase::Environment::get().getESMStore()->get<ESM::Faction>().search(factionId);
+            if (!factionPtr)
+                return;
+
+            auto ranksCount = static_cast<int>(getValidRanksCount(factionPtr));
+
+            MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
+
+            if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            {
+                int currentRank = npcStats.getFactionRank(factionId);
+                if (currentRank >= 0)
+                {
+                    npcStats.setFactionRank(factionId, currentRank + value);
+                }
+                else if (value > 0)
+                {
+                    npcStats.joinFaction(factionId);
+                    npcStats.setFactionRank(factionId, std::min(value - 1, ranksCount - 1));
+                }
+
+                return;
+            }
+
+            ESM::RefId primaryFactionId = ptr.getClass().getPrimaryFaction(ptr);
+            if (factionId != primaryFactionId)
+                return;
+
+            // If we already changed rank for this NPC, modify current rank in the NPC stats.
+            // Otherwise take rank from base NPC record, adjust it and put it to NPC data.
+            int currentRank = npcStats.getFactionRank(factionId);
+            if (currentRank < 0)
+            {
+                int rank = ptr.getClass().getPrimaryFactionRank(ptr);
+                npcStats.joinFaction(factionId);
+                npcStats.setFactionRank(factionId, std::clamp(0, rank + value, ranksCount - 1));
+
+                return;
+            }
+            else
+                npcStats.setFactionRank(factionId, std::clamp(0, currentRank + value, ranksCount - 1));
+        };
+
+        npc["getFactionReputation"] = [](const Object& actor, std::string_view faction) {
+            const MWWorld::Ptr ptr = actor.ptr();
+            ESM::RefId factionId = parseFactionId(faction);
+
+            return ptr.getClass().getNpcStats(ptr).getFactionReputation(factionId);
+        };
+
+        npc["setFactionReputation"] = [](Object& actor, std::string_view faction, int value) {
+            if (dynamic_cast<LObject*>(&actor) && !dynamic_cast<SelfObject*>(&actor))
+                throw std::runtime_error("Local scripts can modify only self");
+
+            const MWWorld::Ptr ptr = actor.ptr();
+            ESM::RefId factionId = parseFactionId(faction);
+
+            ptr.getClass().getNpcStats(ptr).setFactionReputation(factionId, value);
+        };
+
+        npc["modifyFactionReputation"] = [](Object& actor, std::string_view faction, int value) {
+            if (dynamic_cast<LObject*>(&actor) && !dynamic_cast<SelfObject*>(&actor))
+                throw std::runtime_error("Local scripts can modify only self");
+
+            const MWWorld::Ptr ptr = actor.ptr();
+            ESM::RefId factionId = parseFactionId(faction);
+
+            MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
+            int existingReputation = npcStats.getFactionReputation(factionId);
+            npcStats.setFactionReputation(factionId, existingReputation + value);
+        };
+
+        npc["expell"] = [](Object& actor, std::string_view faction) {
+            if (dynamic_cast<LObject*>(&actor) && !dynamic_cast<SelfObject*>(&actor))
+                throw std::runtime_error("Local scripts can modify only self");
+
+            const MWWorld::Ptr ptr = actor.ptr();
+            ESM::RefId factionId = parseFactionId(faction);
+            ptr.getClass().getNpcStats(ptr).expell(factionId, false);
+        };
+        npc["clearExpelled"] = [](Object& actor, std::string_view faction) {
+            if (dynamic_cast<LObject*>(&actor) && !dynamic_cast<SelfObject*>(&actor))
+                throw std::runtime_error("Local scripts can modify only self");
+
+            const MWWorld::Ptr ptr = actor.ptr();
+            ESM::RefId factionId = parseFactionId(faction);
+            ptr.getClass().getNpcStats(ptr).clearExpelled(factionId);
+        };
+        npc["isExpelled"] = [](const Object& actor, std::string_view faction) {
+            const MWWorld::Ptr ptr = actor.ptr();
+            ESM::RefId factionId = parseFactionId(faction);
+            return ptr.getClass().getNpcStats(ptr).getExpelled(factionId);
+        };
+        npc["getFactions"] = [&lua](const Object& actor) {
+            const MWWorld::Ptr ptr = actor.ptr();
+            MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
+            sol::table res(lua, sol::create);
+            if (ptr == MWBase::Environment::get().getWorld()->getPlayerPtr())
+            {
+                for (const auto& [factionId, _] : npcStats.getFactionRanks())
+                    res.add(factionId.serializeText());
+                return res;
+            }
+
+            ESM::RefId primaryFactionId = ptr.getClass().getPrimaryFaction(ptr);
+            if (primaryFactionId.empty())
+                return res;
+
+            res.add(primaryFactionId.serializeText());
+
+            return res;
         };
     }
 }

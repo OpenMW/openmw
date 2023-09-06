@@ -11,6 +11,10 @@
 -- @field [parent=#core] #number API_REVISION
 
 ---
+-- A read-only list of all @{#FactionRecord}s in the world database.
+-- @field [parent=#core] #list<#FactionRecord> factions
+
+---
 -- Terminates the game and quits to the OS. Should be used only for testing purposes.
 -- @function [parent=#core] quit
 
@@ -868,7 +872,6 @@
 --     print(sound.fileName)
 -- end
 
-
 --- @{#Stats}: stats
 -- @field [parent=#core] #Stats stats
 
@@ -919,5 +922,24 @@
 -- @field #string castSound VFS path to the cast sound
 -- @field #string failureSound VFS path to the failure sound
 -- @field #string hitSound VFS path to the hit sound
+
+---
+-- Faction data record
+-- @type FactionRecord
+-- @field #string id Faction id
+-- @field #string name Faction name
+-- @field #list<#FactionRank> ranks A read-only list containing data for all ranks in the faction, in order.
+-- @field #map<#string, #number> reactions A read-only map containing reactions of other factions to this faction.
+-- @field #list<#string> attributes A read-only list containing IDs of attributes to advance ranks in the faction.
+-- @field #list<#string> skills A read-only list containing IDs of skills to advance ranks in the faction.
+
+---
+-- Faction rank data record
+-- @type FactionRank
+-- @field #string name Faction name Rank display name
+-- @field #list<#number> attributeValues Attributes values required to get this rank.
+-- @field #number primarySkillValue Primary skill value required to get this rank.
+-- @field #number favouredSkillValue Secondary skill value required to get this rank.
+-- @field #number factionReaction Reaction of faction members if player is in this faction.
 
 return nil
