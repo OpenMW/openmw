@@ -516,10 +516,18 @@ QVariant CSMWorld::CreatureRefIdAdapter::getData(const RefIdColumn* column, cons
     if (column == mColumns.mBloodType)
         return record.get().mBloodType;
 
-    std::map<const RefIdColumn*, unsigned int>::const_iterator iter = mColumns.mFlags.find(column);
+    {
+        std::map<const RefIdColumn*, unsigned int>::const_iterator iter = mColumns.mFlags.find(column);
 
-    if (iter != mColumns.mFlags.end())
-        return (record.get().mFlags & iter->second) != 0;
+        if (iter != mColumns.mFlags.end())
+            return (record.get().mFlags & iter->second) != 0;
+    }
+
+    {
+        std::map<const RefIdColumn*, unsigned int>::const_iterator iter = mColumns.mServices.find(column);
+        if (iter != mColumns.mServices.end() && iter->second == ESM::NPC::Training)
+            return QVariant();
+    }
 
     return ActorRefIdAdapter<ESM::Creature>::getData(column, data, index);
 }
