@@ -23,6 +23,9 @@ local handlersPerType = {}
 handlersPerType[types.ESM4Door] = { ESM4DoorActivation }
 
 local function onActivate(obj, actor)
+    if world.isWorldPaused() then
+        return
+    end
     local handlers = handlersPerObject[obj.id]
     if handlers then
         for i = #handlers, 1, -1 do

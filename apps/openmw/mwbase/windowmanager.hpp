@@ -134,8 +134,8 @@ namespace MWBase
         virtual bool isGuiMode() const = 0;
 
         virtual bool isConsoleMode() const = 0;
-
         virtual bool isPostProcessorHudVisible() const = 0;
+        virtual bool isInteractiveMessageBoxActive() const = 0;
 
         virtual void toggleVisible(MWGui::GuiWindow wnd) = 0;
 

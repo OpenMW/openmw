@@ -1539,8 +1539,7 @@ namespace MWGui
 
     bool WindowManager::isGuiMode() const
     {
-        return !mGuiModes.empty() || isConsoleMode() || (mPostProcessorHud && mPostProcessorHud->isVisible())
-            || (mMessageBoxManager && mMessageBoxManager->isInteractiveMessageBox());
+        return !mGuiModes.empty() || isConsoleMode() || isPostProcessorHudVisible() || isInteractiveMessageBoxActive();
     }
 
     bool WindowManager::isConsoleMode() const
@@ -1550,7 +1549,12 @@ namespace MWGui
 
     bool WindowManager::isPostProcessorHudVisible() const
     {
-        return mPostProcessorHud->isVisible();
+        return mPostProcessorHud && mPostProcessorHud->isVisible();
+    }
+
+    bool WindowManager::isInteractiveMessageBoxActive() const
+    {
+        return mMessageBoxManager && mMessageBoxManager->isInteractiveMessageBox();
     }
 
     MWGui::GuiMode WindowManager::getMode() const
