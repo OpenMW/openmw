@@ -153,6 +153,7 @@ namespace MWLua
         bool mInitialized = false;
         bool mGlobalScriptsStarted = false;
         bool mProcessingInputEvents = false;
+        bool mApplyingDelayedActions = false;
         bool mNewGameStarted = false;
         LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;

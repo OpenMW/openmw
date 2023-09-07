@@ -99,7 +99,7 @@ local function removeMode(mode)
 end
 
 local oldMode = nil
-local function onUiModeChanged(arg)
+local function onUiModeChanged(changedByLua, arg)
     local newStack = ui._getUiModeStack()
     for i = 1, math.max(#modeStack, #newStack) do
         modeStack[i] = newStack[i]
@@ -112,6 +112,9 @@ local function onUiModeChanged(arg)
     end
     local mode = newStack[#newStack]
     if mode then
+        if not changedByLua then
+            updateHidden(mode)
+        end
         for _, w in pairs(ui._getAllowedWindows(mode)) do
             local state = replacedWindows[w]
             if state and not hiddenWindows[w] then

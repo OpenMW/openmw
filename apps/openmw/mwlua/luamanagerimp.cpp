@@ -243,6 +243,7 @@ namespace MWLua
 
     void LuaManager::applyDelayedActions()
     {
+        mApplyingDelayedActions = true;
         for (DelayedAction& action : mActionQueue)
             action.apply();
         mActionQueue.clear();
@@ -250,6 +251,7 @@ namespace MWLua
         if (mTeleportPlayerAction)
             mTeleportPlayerAction->apply();
         mTeleportPlayerAction.reset();
+        mApplyingDelayedActions = false;
     }
 
     void LuaManager::clear()
@@ -318,7 +320,7 @@ namespace MWLua
             return;
         PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
         if (playerScripts)
-            playerScripts->uiModeChanged(arg);
+            playerScripts->uiModeChanged(arg, mApplyingDelayedActions);
     }
 
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)
@@ -558,6 +560,8 @@ namespace MWLua
 
     void LuaManager::addAction(std::function<void()> action, std::string_view name)
     {
+        if (mApplyingDelayedActions)
+            throw std::runtime_error("DelayedAction is not allowed to create another DelayedAction");
         mActionQueue.emplace_back(&mLua, std::move(action), name);
     }
 
