@@ -9,6 +9,7 @@ namespace MWLua
 
     void addActorStatsBindings(sol::table& actor, const Context& context);
     void addNpcStatsBindings(sol::table& npc, const Context& context);
+    sol::table initCoreStatsBindings(const Context& context);
 }
 
 #endif

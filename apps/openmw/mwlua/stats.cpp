@@ -8,6 +8,8 @@
 
 #include <components/esm3/loadclas.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/misc/resourcehelpers.hpp>
+#include <components/resource/resourcesystem.hpp>
 
 #include "context.hpp"
 #include "localscripts.hpp"
@@ -20,6 +22,7 @@
 #include "../mwworld/esmstore.hpp"
 
 #include "objectvariant.hpp"
+#include "types/types.hpp"
 
 namespace
 {
@@ -336,6 +339,18 @@ namespace sol
     struct is_automagical<MWLua::SkillStat> : std::false_type
     {
     };
+    template <>
+    struct is_automagical<ESM::Attribute> : std::false_type
+    {
+    };
+    template <>
+    struct is_automagical<ESM::Skill> : std::false_type
+    {
+    };
+    template <>
+    struct is_automagical<ESM::MagicSchool> : std::false_type
+    {
+    };
 }
 
 namespace MWLua
@@ -392,5 +407,70 @@ namespace MWLua
         npcStats["skills"] = LuaUtil::makeReadOnly(skills);
         for (const ESM::Skill& skill : MWBase::Environment::get().getESMStore()->get<ESM::Skill>())
             skills[ESM::RefId(skill.mId).serializeText()] = addIndexedAccessor<SkillStat>(skill.mId);
+    }
+
+    sol::table initCoreStatsBindings(const Context& context)
+    {
+        sol::state_view& lua = context.mLua->sol();
+        sol::table statsApi(lua, sol::create);
+        auto* vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+
+        sol::table attributes(lua, sol::create);
+        addRecordFunctionBinding<ESM::Attribute>(attributes, context);
+        statsApi["Attribute"] = LuaUtil::makeReadOnly(attributes);
+        statsApi["Attribute"][sol::metatable_key][sol::meta_function::to_string] = ESM::Attribute::getRecordType;
+
+        auto attributeT = context.mLua->sol().new_usertype<ESM::Attribute>("Attribute");
+        attributeT[sol::meta_function::to_string]
+            = [](const ESM::Attribute& rec) { return "ESM3_Attribute[" + rec.mId.toDebugString() + "]"; };
+        attributeT["id"] = sol::readonly_property(
+            [](const ESM::Attribute& rec) -> std::string { return ESM::RefId{ rec.mId }.serializeText(); });
+        attributeT["name"]
+            = sol::readonly_property([](const ESM::Attribute& rec) -> std::string_view { return rec.mName; });
+        attributeT["description"]
+            = sol::readonly_property([](const ESM::Attribute& rec) -> std::string_view { return rec.mDescription; });
+        attributeT["icon"] = sol::readonly_property([vfs](const ESM::Attribute& rec) -> std::string {
+            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+        });
+
+        sol::table skills(lua, sol::create);
+        addRecordFunctionBinding<ESM::Skill>(skills, context);
+        statsApi["Skill"] = LuaUtil::makeReadOnly(skills);
+        statsApi["Skill"][sol::metatable_key][sol::meta_function::to_string] = ESM::Skill::getRecordType;
+
+        auto skillT = context.mLua->sol().new_usertype<ESM::Skill>("Skill");
+        skillT[sol::meta_function::to_string]
+            = [](const ESM::Skill& rec) { return "ESM3_Skill[" + rec.mId.toDebugString() + "]"; };
+        skillT["id"] = sol::readonly_property(
+            [](const ESM::Skill& rec) -> std::string { return ESM::RefId{ rec.mId }.serializeText(); });
+        skillT["name"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view { return rec.mName; });
+        skillT["description"]
+            = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view { return rec.mDescription; });
+        skillT["icon"] = sol::readonly_property([vfs](const ESM::Skill& rec) -> std::string {
+            return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
+        });
+        skillT["school"] = sol::readonly_property([](const ESM::Skill& rec) -> const ESM::MagicSchool* {
+            if (!rec.mSchool)
+                return nullptr;
+            return &*rec.mSchool;
+        });
+
+        auto schoolT = context.mLua->sol().new_usertype<ESM::MagicSchool>("MagicSchool");
+        schoolT[sol::meta_function::to_string]
+            = [](const ESM::MagicSchool& rec) { return "ESM3_MagicSchool[" + rec.mName + "]"; };
+        schoolT["name"]
+            = sol::readonly_property([](const ESM::MagicSchool& rec) -> std::string_view { return rec.mName; });
+        schoolT["areaSound"] = sol::readonly_property(
+            [](const ESM::MagicSchool& rec) -> std::string { return rec.mAreaSound.serializeText(); });
+        schoolT["boltSound"] = sol::readonly_property(
+            [](const ESM::MagicSchool& rec) -> std::string { return rec.mBoltSound.serializeText(); });
+        schoolT["castSound"] = sol::readonly_property(
+            [](const ESM::MagicSchool& rec) -> std::string { return rec.mCastSound.serializeText(); });
+        schoolT["failureSound"] = sol::readonly_property(
+            [](const ESM::MagicSchool& rec) -> std::string { return rec.mFailureSound.serializeText(); });
+        schoolT["hitSound"] = sol::readonly_property(
+            [](const ESM::MagicSchool& rec) -> std::string { return rec.mHitSound.serializeText(); });
+
+        return LuaUtil::makeReadOnly(statsApi);
     }
 }

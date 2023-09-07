@@ -429,9 +429,10 @@
 -- @usage for _, item in ipairs(inventory:findAll('common_shirt_01')) do ... end
 
 
---- Possible @{#ATTRIBUTE} values
+--- Possible @{#ATTRIBUTE} values (DEPRECATED use @{#Attribute})
 -- @field [parent=#core] #ATTRIBUTE ATTRIBUTE
 
+--- DEPRECATED, use @{#Attribute}
 --- `core.ATTRIBUTE`
 -- @type ATTRIBUTE
 -- @field #string Strength "strength"
@@ -444,9 +445,10 @@
 -- @field #string Luck "luck"
 
 
---- Possible @{#SKILL} values
+--- Possible @{#SKILL} values (DEPRECATED use @{#Skill})
 -- @field [parent=#core] #SKILL SKILL
 
+--- DEPRECATED, use @{#Skill}
 --- `core.SKILL`
 -- @type SKILL
 -- @field #string Acrobatics "acrobatics"
@@ -865,5 +867,57 @@
 -- for _, sound in pairs(core.sound.sounds) do
 --     print(sound.fileName)
 -- end
+
+
+--- @{#Stats}: stats
+-- @field [parent=#core] #Stats stats
+
+
+--- @{#Attribute} functions
+-- @field [parent=#Stats] #Attribute Attribute
+
+--- `core.stats.Attribute`
+-- @type Attribute
+-- @field #list<#AttributeRecord> records A read-only list of all @{#AttributeRecord}s in the world database.
+
+---
+-- Returns a read-only @{#AttributeRecord}
+-- @function [parent=#Attribute] record
+-- @param #string recordId
+-- @return #AttributeRecord
+
+--- @{#Skill} functions
+-- @field [parent=#Stats] #Skill Skill
+
+--- `core.stats.Skill`
+-- @type Skill
+-- @field #list<#SkillRecord> records A read-only list of all @{#SkillRecord}s in the world database.
+
+---
+-- Returns a read-only @{#SkillRecord}
+-- @function [parent=#Skill] record
+-- @param #string recordId
+-- @return #SkillRecord
+
+-- @type AttributeRecord
+-- @field #string id Record id
+-- @field #string name Human-readable name
+-- @field #string description Human-readable description
+-- @field #string icon VFS path to the icon
+
+-- @type SkillRecord
+-- @field #string id Record id
+-- @field #string name Human-readable name
+-- @field #string description Human-readable description
+-- @field #string icon VFS path to the icon
+-- @field #MagicSchoolData school Optional magic school
+
+-- @type MagicSchoolData
+-- @field #string name Human-readable name
+-- @field #string areaSound VFS path to the area sound
+-- @field #string boltSound VFS path to the bolt sound
+-- @field #string castSound VFS path to the cast sound
+-- @field #string failureSound VFS path to the failure sound
+-- @field #string hitSound VFS path to the hit sound
 
 return nil

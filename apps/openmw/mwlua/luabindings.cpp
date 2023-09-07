@@ -42,6 +42,7 @@
 #include "objectbindings.hpp"
 #include "postprocessingbindings.hpp"
 #include "soundbindings.hpp"
+#include "stats.hpp"
 #include "types/types.hpp"
 #include "uibindings.hpp"
 #include "vfsbindings.hpp"
@@ -151,6 +152,7 @@ namespace MWLua
         };
         addTimeBindings(api, context, false);
         api["magic"] = initCoreMagicBindings(context);
+        api["stats"] = initCoreStatsBindings(context);
         api["l10n"] = LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager());
         const MWWorld::Store<ESM::GameSetting>* gmstStore
             = &MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
