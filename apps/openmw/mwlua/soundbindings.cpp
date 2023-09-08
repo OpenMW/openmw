@@ -169,9 +169,13 @@ namespace MWLua
             = [](const SoundStore& store) { return "ESM3_SoundStore{" + std::to_string(store.getSize()) + " sounds}"; };
         soundStoreT[sol::meta_function::length] = [](const SoundStore& store) { return store.getSize(); };
         soundStoreT[sol::meta_function::index] = sol::overload(
-            [](const SoundStore& store, size_t index) -> const ESM::Sound* { return store.at(index - 1); },
+            [](const SoundStore& store, size_t index) -> const ESM::Sound* {
+                if (index == 0 || index > store.getSize())
+                    return nullptr;
+                return store.at(index - 1);
+            },
             [](const SoundStore& store, std::string_view soundId) -> const ESM::Sound* {
-                return store.find(ESM::RefId::deserializeText(soundId));
+                return store.search(ESM::RefId::deserializeText(soundId));
             });
         soundStoreT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
         soundStoreT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();

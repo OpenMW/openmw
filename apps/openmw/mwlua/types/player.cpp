@@ -48,13 +48,13 @@ namespace MWLua
         };
         sol::usertype<Quests> quests = context.mLua->sol().new_usertype<Quests>("Quests");
         quests[sol::meta_function::to_string] = [](const Quests& quests) { return "Quests"; };
-        quests[sol::meta_function::index] = sol::overload([](const Quests& quests, std::string_view questId) -> Quest {
+        quests[sol::meta_function::index] = [](const Quests& quests, std::string_view questId) -> sol::optional<Quest> {
             ESM::RefId quest = ESM::RefId::deserializeText(questId);
-            const ESM::Dialogue* dial = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().find(quest);
-            if (dial->mType != ESM::Dialogue::Journal)
-                throw std::runtime_error("Not a quest:" + std::string(questId));
+            const ESM::Dialogue* dial = MWBase::Environment::get().getESMStore()->get<ESM::Dialogue>().search(quest);
+            if (dial == nullptr || dial->mType != ESM::Dialogue::Journal)
+                return sol::nullopt;
             return Quest{ .mQuestId = quest, .mMutable = quests.mMutable };
-        });
+        };
         quests[sol::meta_function::pairs] = [journal](const Quests& quests) {
             std::vector<ESM::RefId> ids;
             for (auto it = journal->questBegin(); it != journal->questEnd(); ++it)
