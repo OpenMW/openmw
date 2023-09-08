@@ -740,6 +740,9 @@ void OMW::Engine::prepareEngine()
     // Create the world
     mWorld = std::make_unique<MWWorld::World>(
         mResourceSystem.get(), mActivationDistanceOverride, mCellName, mCfgMgr.getUserDataPath());
+    mEnvironment.setWorld(*mWorld);
+    mEnvironment.setWorldModel(mWorld->getWorldModel());
+    mEnvironment.setESMStore(mWorld->getStore());
 
     Loading::Listener* listener = MWBase::Environment::get().getWindowManager()->getLoadingScreen();
     Loading::AsyncListener asyncListener(*listener);
@@ -763,12 +766,9 @@ void OMW::Engine::prepareEngine()
     listener->loadingOff();
 
     mWorld->init(mViewer, rootNode, mWorkQueue.get(), *mUnrefQueue);
+    mEnvironment.setWorldScene(mWorld->getWorldScene());
     mWorld->setupPlayer();
     mWorld->setRandomSeed(mRandomSeed);
-    mEnvironment.setWorld(*mWorld);
-    mEnvironment.setWorldModel(mWorld->getWorldModel());
-    mEnvironment.setWorldScene(mWorld->getWorldScene());
-    mEnvironment.setESMStore(mWorld->getStore());
 
     const MWWorld::Store<ESM::GameSetting>* gmst = &mWorld->getStore().get<ESM::GameSetting>();
     mL10nManager->setGmstLoader(

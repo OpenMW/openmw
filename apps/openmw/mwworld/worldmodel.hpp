@@ -79,7 +79,7 @@ namespace MWWorld
 
         void registerPtr(const Ptr& ptr) { mPtrRegistry.insert(ptr); }
 
-        void deregisterPtr(const Ptr& ptr) { mPtrRegistry.remove(ptr); }
+        void deregisterLiveCellRef(const LiveCellRefBase& ref) noexcept { mPtrRegistry.remove(ref); }
 
         template <typename Fn>
         void forEachLoadedCellStore(Fn&& fn)

@@ -13,6 +13,7 @@
 #include "class.hpp"
 #include "esmstore.hpp"
 #include "ptr.hpp"
+#include "worldmodel.hpp"
 
 MWWorld::LiveCellRefBase::LiveCellRefBase(unsigned int type, const ESM::CellRef& cref)
     : mClass(&Class::get(type))
@@ -33,6 +34,11 @@ MWWorld::LiveCellRefBase::LiveCellRefBase(unsigned int type, const ESM4::ActorCh
     , mRef(cref)
     , mData(cref)
 {
+}
+
+MWWorld::LiveCellRefBase::~LiveCellRefBase()
+{
+    MWBase::Environment::get().getWorldModel()->deregisterLiveCellRef(*this);
 }
 
 void MWWorld::LiveCellRefBase::loadImp(const ESM::ObjectState& state)

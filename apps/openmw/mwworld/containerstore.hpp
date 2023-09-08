@@ -175,7 +175,7 @@ namespace MWWorld
     public:
         ContainerStore();
 
-        virtual ~ContainerStore();
+        virtual ~ContainerStore() = default;
 
         virtual std::unique_ptr<ContainerStore> clone()
         {

@@ -1334,8 +1334,13 @@ namespace MWClass
     MWWorld::Ptr Npc::copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const
     {
         const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
-
-        return MWWorld::Ptr(cell.insert(ref), &cell);
+        MWWorld::Ptr newPtr(cell.insert(ref), &cell);
+        if (newPtr.getRefData().getCustomData())
+        {
+            MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
+            newPtr.getContainerStore()->setPtr(newPtr);
+        }
+        return newPtr;
     }
 
     float Npc::getSkill(const MWWorld::Ptr& ptr, ESM::RefId id) const

@@ -694,8 +694,13 @@ namespace MWClass
     MWWorld::Ptr Creature::copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const
     {
         const MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
-
-        return MWWorld::Ptr(cell.insert(ref), &cell);
+        MWWorld::Ptr newPtr(cell.insert(ref), &cell);
+        if (newPtr.getRefData().getCustomData())
+        {
+            MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
+            newPtr.getContainerStore()->setPtr(newPtr);
+        }
+        return newPtr;
     }
 
     bool Creature::isBipedal(const MWWorld::ConstPtr& ptr) const

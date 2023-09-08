@@ -136,8 +136,8 @@ namespace MWWorld
         uint32_t mRandomSeed{};
 
         // not implemented
-        World(const World&);
-        World& operator=(const World&);
+        World(const World&) = delete;
+        World& operator=(const World&) = delete;
 
         void updateWeather(float duration, bool paused = false);
 
