@@ -1,6 +1,6 @@
 #include "actorutil.hpp"
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 namespace SceneUtil
 {
@@ -9,24 +9,24 @@ namespace SceneUtil
         if (!firstPerson)
         {
             if (isWerewolf)
-                return Settings::Manager::getString("wolfskin", "Models");
+                return Settings::models().mWolfskin;
             else if (isBeast)
-                return Settings::Manager::getString("baseanimkna", "Models");
+                return Settings::models().mBaseanimkna;
             else if (isFemale)
-                return Settings::Manager::getString("baseanimfemale", "Models");
+                return Settings::models().mBaseanimfemale;
             else
-                return Settings::Manager::getString("baseanim", "Models");
+                return Settings::models().mBaseanim;
         }
         else
         {
             if (isWerewolf)
-                return Settings::Manager::getString("wolfskin1st", "Models");
+                return Settings::models().mWolfskin1st;
             else if (isBeast)
-                return Settings::Manager::getString("baseanimkna1st", "Models");
+                return Settings::models().mBaseanimkna1st;
             else if (isFemale)
-                return Settings::Manager::getString("baseanimfemale1st", "Models");
+                return Settings::models().mBaseanimfemale1st;
             else
-                return Settings::Manager::getString("xbaseanim1st", "Models");
+                return Settings::models().mXbaseanim1st;
         }
     }
 }

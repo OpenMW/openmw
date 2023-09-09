@@ -543,8 +543,8 @@ namespace MWRender
         MWBase::Environment::get().getWindowManager()->setCullMask(mask);
         NifOsg::Loader::setHiddenNodeMask(Mask_UpdateVisitor);
         NifOsg::Loader::setIntersectionDisabledNodeMask(Mask_Effect);
-        Nif::Reader::setLoadUnsupportedFiles(Settings::Manager::getBool("load unsupported nif files", "Models"));
-        Nif::Reader::setWriteNifDebugLog(Settings::Manager::getBool("write nif debug log", "Models"));
+        Nif::Reader::setLoadUnsupportedFiles(Settings::models().mLoadUnsupportedNifFiles);
+        Nif::Reader::setWriteNifDebugLog(Settings::models().mWriteNifDebugLog);
 
         mStateUpdater->setFogEnd(mViewDistance);
 
@@ -606,15 +606,15 @@ namespace MWRender
         mSky->listAssetsToPreload(workItem->mModels, workItem->mTextures);
         mWater->listAssetsToPreload(workItem->mTextures);
 
-        workItem->mModels.push_back(Settings::Manager::getString("xbaseanim", "Models"));
-        workItem->mModels.push_back(Settings::Manager::getString("xbaseanim1st", "Models"));
-        workItem->mModels.push_back(Settings::Manager::getString("xbaseanimfemale", "Models"));
-        workItem->mModels.push_back(Settings::Manager::getString("xargonianswimkna", "Models"));
+        workItem->mModels.push_back(Settings::models().mXbaseanim);
+        workItem->mModels.push_back(Settings::models().mXbaseanim1st);
+        workItem->mModels.push_back(Settings::models().mXbaseanimfemale);
+        workItem->mModels.push_back(Settings::models().mXargonianswimkna);
 
-        workItem->mKeyframes.push_back(Settings::Manager::getString("xbaseanimkf", "Models"));
-        workItem->mKeyframes.push_back(Settings::Manager::getString("xbaseanim1stkf", "Models"));
-        workItem->mKeyframes.push_back(Settings::Manager::getString("xbaseanimfemalekf", "Models"));
-        workItem->mKeyframes.push_back(Settings::Manager::getString("xargonianswimknakf", "Models"));
+        workItem->mKeyframes.push_back(Settings::models().mXbaseanimkf);
+        workItem->mKeyframes.push_back(Settings::models().mXbaseanim1stkf);
+        workItem->mKeyframes.push_back(Settings::models().mXbaseanimfemalekf);
+        workItem->mKeyframes.push_back(Settings::models().mXargonianswimknakf);
 
         workItem->mTextures.emplace_back("textures/_land_default.dds");
 

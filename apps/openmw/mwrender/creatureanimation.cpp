@@ -7,7 +7,7 @@
 #include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/visitor.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwmechanics/weapontype.hpp"
 
@@ -27,7 +27,7 @@ namespace MWRender
             setObjectRoot(model, false, false, true);
 
             if ((ref->mBase->mFlags & ESM::Creature::Bipedal))
-                addAnimSource(Settings::Manager::getString("xbaseanim", "Models"), model);
+                addAnimSource(Settings::models().mXbaseanim.get(), model);
 
             if (animated)
                 addAnimSource(model, model);
@@ -47,7 +47,7 @@ namespace MWRender
             setObjectRoot(model, true, false, true);
 
             if ((ref->mBase->mFlags & ESM::Creature::Bipedal))
-                addAnimSource(Settings::Manager::getString("xbaseanim", "Models"), model);
+                addAnimSource(Settings::models().mXbaseanim.get(), model);
 
             if (animated)
                 addAnimSource(model, model);
