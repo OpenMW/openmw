@@ -1,9 +1,10 @@
 #ifndef OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 #define OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 
+#include <vector>
+
 #include "niffile.hpp"
 #include "nifstream.hpp"
-#include <vector>
 
 namespace Nif
 {
@@ -39,7 +40,7 @@ namespace Nif
             assert(index == -2);
 
             // Store the index for later
-            index = nif->getInt();
+            index = nif->get<int32_t>();
             assert(index >= -1);
         }
 
@@ -90,12 +91,13 @@ namespace Nif
     template <class T>
     void readRecordList(NIFStream* nif, RecordListT<T>& list)
     {
-        const int length = nif->getInt();
+        const std::uint32_t length = nif->get<std::uint32_t>();
 
-        if (length < 0)
-            throw std::runtime_error("Negative NIF record list length: " + std::to_string(length));
+        // No reasonable list can hit this generous limit
+        if (length >= (1 << 24))
+            throw std::runtime_error("Record list too long: " + std::to_string(length));
 
-        list.resize(static_cast<std::size_t>(length));
+        list.resize(length);
 
         for (auto& value : list)
             value.read(nif);
