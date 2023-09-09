@@ -919,7 +919,7 @@
 -- @field #string speechcraft "speechcraft"
 -- @field #string unarmored "unarmored"
 
---- DEPRECATED, use @{openmw.core#SKILL}
+--- DEPRECATED, use @{openmw.core#Skill}
 -- @field [parent=#Book] #BookSKILL SKILL
 
 ---
