@@ -14,6 +14,7 @@
 #include <components/misc/convert.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/nodecallback.hpp>
+#include <components/settings/values.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/terrain/quadtreenode.hpp>
 
@@ -327,7 +328,7 @@ namespace MWRender
 
     Groundcover::Groundcover(
         Resource::SceneManager* sceneManager, float density, float viewDistance, const MWWorld::GroundcoverStore& store)
-        : GenericResourceManager<GroundcoverChunkId>(nullptr)
+        : GenericResourceManager<GroundcoverChunkId>(nullptr, Settings::cells().mCacheExpiryDelay)
         , mSceneManager(sceneManager)
         , mDensity(density)
         , mStateset(new osg::StateSet)

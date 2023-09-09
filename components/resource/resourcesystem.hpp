@@ -30,7 +30,7 @@ namespace Resource
     class ResourceSystem
     {
     public:
-        ResourceSystem(const VFS::Manager* vfs);
+        explicit ResourceSystem(const VFS::Manager* vfs, double expiryDelay);
         ~ResourceSystem();
 
         SceneManager* getSceneManager();

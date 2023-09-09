@@ -172,10 +172,11 @@ namespace
         const EsmLoader::EsmData esmData
             = EsmLoader::loadEsmData(query, contentFiles, fileCollections, readers, &encoder);
 
-        Resource::ImageManager imageManager(&vfs);
+        constexpr double expiryDelay = 0;
+        Resource::ImageManager imageManager(&vfs, expiryDelay);
         Resource::NifFileManager nifFileManager(&vfs);
-        Resource::SceneManager sceneManager(&vfs, &imageManager, &nifFileManager);
-        Resource::BulletShapeManager bulletShapeManager(&vfs, &sceneManager, &nifFileManager);
+        Resource::SceneManager sceneManager(&vfs, &imageManager, &nifFileManager, expiryDelay);
+        Resource::BulletShapeManager bulletShapeManager(&vfs, &sceneManager, &nifFileManager, expiryDelay);
 
         Resource::forEachBulletObject(
             readers, vfs, bulletShapeManager, esmData, [](const ESM::Cell& cell, const Resource::BulletObject& object) {

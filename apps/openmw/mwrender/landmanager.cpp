@@ -3,6 +3,7 @@
 #include <osg/Stats>
 
 #include <components/resource/objectcache.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/world.hpp"
@@ -12,7 +13,7 @@ namespace MWRender
 {
 
     LandManager::LandManager(int loadFlags)
-        : GenericResourceManager<ESM::ExteriorCellLocation>(nullptr)
+        : GenericResourceManager<ESM::ExteriorCellLocation>(nullptr, Settings::cells().mCacheExpiryDelay)
         , mLoadFlags(loadFlags)
     {
     }

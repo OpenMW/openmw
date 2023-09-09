@@ -48,7 +48,7 @@ namespace Resource
     class KeyframeManager : public ResourceManager
     {
     public:
-        KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager);
+        explicit KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay);
         ~KeyframeManager() = default;
 
         /// Retrieve a read-only keyframe resource by name (case-insensitive).

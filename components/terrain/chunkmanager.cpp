@@ -20,8 +20,8 @@ namespace Terrain
 {
 
     ChunkManager::ChunkManager(Storage* storage, Resource::SceneManager* sceneMgr, TextureManager* textureManager,
-        CompositeMapRenderer* renderer, ESM::RefId worldspace)
-        : GenericResourceManager<ChunkKey>(nullptr)
+        CompositeMapRenderer* renderer, ESM::RefId worldspace, double expiryDelay)
+        : GenericResourceManager<ChunkKey>(nullptr, expiryDelay)
         , QuadTreeWorld::ChunkManager(worldspace)
         , mStorage(storage)
         , mSceneManager(sceneMgr)

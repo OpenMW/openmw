@@ -89,8 +89,8 @@ namespace Resource
     class SceneManager : public ResourceManager
     {
     public:
-        SceneManager(
-            const VFS::Manager* vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager);
+        explicit SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager,
+            Resource::NifFileManager* nifFileManager, double expiryDelay);
         ~SceneManager();
 
         Shader::ShaderManager& getShaderManager();

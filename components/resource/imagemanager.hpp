@@ -23,7 +23,7 @@ namespace Resource
     class ImageManager : public ResourceManager
     {
     public:
-        ImageManager(const VFS::Manager* vfs);
+        explicit ImageManager(const VFS::Manager* vfs, double expiryDelay);
         ~ImageManager();
 
         /// Create or retrieve an Image

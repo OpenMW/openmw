@@ -33,7 +33,7 @@
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/riggeometryosgaextension.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "apps/openmw/mwbase/environment.hpp"
 #include "apps/openmw/mwbase/world.hpp"
@@ -454,7 +454,7 @@ namespace MWRender
     };
 
     ObjectPaging::ObjectPaging(Resource::SceneManager* sceneManager, ESM::RefId worldspace)
-        : GenericResourceManager<ChunkId>(nullptr)
+        : GenericResourceManager<ChunkId>(nullptr, Settings::cells().mCacheExpiryDelay)
         , Terrain::QuadTreeWorld::ChunkManager(worldspace)
         , mSceneManager(sceneManager)
         , mRefTrackerLocked(false)

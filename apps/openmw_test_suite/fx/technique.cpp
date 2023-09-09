@@ -99,7 +99,7 @@ namespace
                 { "shaders/missing_sampler_source.omwfx", &missing_sampler_source },
                 { "shaders/repeated_shared_block.omwfx", &repeated_shared_block },
             }))
-            , mImageManager(mVFS.get())
+            , mImageManager(mVFS.get(), 0)
         {
         }
 

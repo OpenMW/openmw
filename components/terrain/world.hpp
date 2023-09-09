@@ -49,8 +49,9 @@ namespace Terrain
         /// @param storage Storage instance to get terrain data from (heights, normals, colors, textures..)
         /// @param nodeMask mask for the terrain root
         /// @param preCompileMask mask for pre compiling textures
-        World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem, Storage* storage,
-            unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask, ESM::RefId worldspace);
+        explicit World(osg::Group* parent, osg::Group* compileRoot, Resource::ResourceSystem* resourceSystem,
+            Storage* storage, unsigned int nodeMask, unsigned int preCompileMask, unsigned int borderMask,
+            ESM::RefId worldspace, double expiryDelay);
         World(osg::Group* parent, Storage* storage, unsigned int nodeMask, ESM::RefId worldspace);
         virtual ~World();
 

@@ -142,12 +142,14 @@ CSMWorld::Data::Data(ToUTF8::FromType encoding, const Files::PathContainer& data
     , mReaderIndex(1)
     , mDataPaths(dataPaths)
     , mArchives(archives)
+    , mVFS(std::make_unique<VFS::Manager>())
 {
-    mVFS = std::make_unique<VFS::Manager>();
     VFS::registerArchives(mVFS.get(), Files::Collections(mDataPaths), mArchives, true);
 
     mResourcesManager.setVFS(mVFS.get());
-    mResourceSystem = std::make_unique<Resource::ResourceSystem>(mVFS.get());
+
+    constexpr double expiryDelay = 0;
+    mResourceSystem = std::make_unique<Resource::ResourceSystem>(mVFS.get(), expiryDelay);
 
     Shader::ShaderManager::DefineMap defines
         = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
