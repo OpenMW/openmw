@@ -30,13 +30,14 @@ namespace Nif
             BETHVER_SKY = 83, // Skyrim
             BETHVER_SSE = 100, // Skyrim SE
             BETHVER_FO4 = 130, // Fallout 4
-            BETHVER_F76 = 155 // Fallout 76
+            BETHVER_F76 = 155, // Fallout 76
+            BETHVER_STF = 172, // Starfield
         };
 
         /// File version, user version, Bethesda version
-        unsigned int mVersion = 0;
-        unsigned int mUserVersion = 0;
-        unsigned int mBethVersion = 0;
+        std::uint32_t mVersion = 0;
+        std::uint32_t mUserVersion = 0;
+        std::uint32_t mBethVersion = 0;
 
         /// File name, used for error messages and opening the file
         std::filesystem::path mPath;
@@ -76,13 +77,13 @@ namespace Nif
         const std::string& getHash() const { return mFile->mHash; }
 
         /// Get the version of the NIF format used
-        unsigned int getVersion() const { return mFile->mVersion; }
+        std::uint32_t getVersion() const { return mFile->mVersion; }
 
         /// Get the user version of the NIF format used
-        unsigned int getUserVersion() const { return mFile->mUserVersion; }
+        std::uint32_t getUserVersion() const { return mFile->mUserVersion; }
 
         /// Get the Bethesda version of the NIF format used
-        unsigned int getBethVersion() const { return mFile->mBethVersion; }
+        std::uint32_t getBethVersion() const { return mFile->mBethVersion; }
 
         bool getUseSkinning() const { return mFile->mUseSkinning; }
 
@@ -93,22 +94,22 @@ namespace Nif
     class Reader
     {
         /// File version, user version, Bethesda version
-        unsigned int& ver;
-        unsigned int& userVer;
-        unsigned int& bethVer;
+        std::uint32_t& mVersion;
+        std::uint32_t& mUserVersion;
+        std::uint32_t& mBethVersion;
 
         /// File name, used for error messages and opening the file
-        std::filesystem::path& filename;
-        std::string& hash;
+        std::filesystem::path& mFilename;
+        std::string& mHash;
 
         /// Record list
-        std::vector<std::unique_ptr<Record>>& records;
+        std::vector<std::unique_ptr<Record>>& mRecords;
 
         /// Root list.  This is a select portion of the pointers from records
-        std::vector<Record*>& roots;
+        std::vector<Record*>& mRoots;
 
         /// String table
-        std::vector<std::string> strings;
+        std::vector<std::string> mStrings;
 
         bool& mUseSkinning;
 
@@ -117,7 +118,7 @@ namespace Nif
 
         /// Get the file's version in a human readable form
         ///\returns A string containing a human readable NIF version number
-        std::string printVersion(unsigned int version);
+        std::string versionToString(std::uint32_t version);
 
     public:
         /// Open a NIF stream. The name is used for error messages.
@@ -127,26 +128,26 @@ namespace Nif
         void parse(Files::IStreamPtr&& stream);
 
         /// Get a given record
-        Record* getRecord(size_t index) const { return records.at(index).get(); }
+        Record* getRecord(size_t index) const { return mRecords.at(index).get(); }
 
         /// Get a given string from the file's string table
-        std::string getString(uint32_t index) const;
+        std::string getString(std::uint32_t index) const;
 
         /// Set whether there is skinning contained in this NIF file.
         /// @note This is just a hint for users of the NIF file and has no effect on the loading procedure.
         void setUseSkinning(bool skinning);
 
         /// Get the name of the file
-        std::filesystem::path getFilename() const { return filename; }
+        std::filesystem::path getFilename() const { return mFilename; }
 
         /// Get the version of the NIF format used
-        unsigned int getVersion() const { return ver; }
+        std::uint32_t getVersion() const { return mVersion; }
 
         /// Get the user version of the NIF format used
-        unsigned int getUserVersion() const { return userVer; }
+        std::uint32_t getUserVersion() const { return mUserVersion; }
 
         /// Get the Bethesda version of the NIF format used
-        unsigned int getBethVersion() const { return bethVer; }
+        std::uint32_t getBethVersion() const { return mBethVersion; }
 
         static void setLoadUnsupportedFiles(bool load);
 
