@@ -2693,7 +2693,11 @@ namespace MWWorld
             for (const MWWorld::LiveCellRef<ESM::Door>& destDoor : source.getReadOnlyDoors().mList)
             {
                 if (cellId == destDoor.mRef.getDestCell())
-                    return destDoor.mRef.getDoorDest();
+                {
+                    ESM::Position doorDest = destDoor.mRef.getDoorDest();
+                    doorDest.rot[0] = doorDest.rot[1] = doorDest.rot[2] = 0;
+                    return doorDest;
+                }
             }
             for (const MWWorld::LiveCellRef<ESM4::Door>& destDoor : source.getReadOnlyEsm4Doors().mList)
             {
