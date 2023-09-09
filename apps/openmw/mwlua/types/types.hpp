@@ -77,7 +77,7 @@ namespace MWLua
         const MWWorld::Store<T>& store = MWBase::Environment::get().getESMStore()->get<T>();
 
         table["record"] = sol::overload([](const Object& obj) -> const T* { return obj.ptr().get<T>()->mBase; },
-            [&store](std::string_view id) -> const T* { return store.find(ESM::RefId::deserializeText(id)); });
+            [&store](std::string_view id) -> const T* { return store.search(ESM::RefId::deserializeText(id)); });
 
         // Define a custom user type for the store.
         // Provide the interface of a read-only array.
@@ -89,6 +89,8 @@ namespace MWLua
         };
         storeT[sol::meta_function::length] = [](const StoreT& store) { return store.getSize(); };
         storeT[sol::meta_function::index] = [](const StoreT& store, size_t index) -> const T* {
+            if (index == 0 || index > store.getSize())
+                return nullptr;
             return store.at(index - 1); // Translate from Lua's 1-based indexing.
         };
         storeT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();

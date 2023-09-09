@@ -136,11 +136,11 @@ namespace MWLua
             listT[sol::meta_function::to_string]
                 = [](const ListT& list) { return "{" + std::to_string(list.mIds->size()) + " objects}"; };
             listT[sol::meta_function::length] = [](const ListT& list) { return list.mIds->size(); };
-            listT[sol::meta_function::index] = [](const ListT& list, size_t index) {
+            listT[sol::meta_function::index] = [](const ListT& list, size_t index) -> sol::optional<ObjectT> {
                 if (index > 0 && index <= list.mIds->size())
                     return ObjectT((*list.mIds)[index - 1]);
                 else
-                    throw std::runtime_error("Index out of range");
+                    return sol::nullopt;
             };
             listT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
             listT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();

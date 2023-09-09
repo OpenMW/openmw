@@ -243,9 +243,13 @@ namespace MWLua
             = [](const SpellStore& store) { return "ESM3_SpellStore{" + std::to_string(store.getSize()) + " spells}"; };
         spellStoreT[sol::meta_function::length] = [](const SpellStore& store) { return store.getSize(); };
         spellStoreT[sol::meta_function::index] = sol::overload(
-            [](const SpellStore& store, size_t index) -> const ESM::Spell* { return store.at(index - 1); },
+            [](const SpellStore& store, size_t index) -> const ESM::Spell* {
+                if (index == 0 || index > store.getSize())
+                    return nullptr;
+                return store.at(index - 1);
+            },
             [](const SpellStore& store, std::string_view spellId) -> const ESM::Spell* {
-                return store.find(ESM::RefId::deserializeText(spellId));
+                return store.search(ESM::RefId::deserializeText(spellId));
             });
         spellStoreT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
         spellStoreT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
@@ -262,9 +266,13 @@ namespace MWLua
         };
         enchantmentStoreT[sol::meta_function::length] = [](const EnchantmentStore& store) { return store.getSize(); };
         enchantmentStoreT[sol::meta_function::index] = sol::overload(
-            [](const EnchantmentStore& store, size_t index) -> const ESM::Enchantment* { return store.at(index - 1); },
+            [](const EnchantmentStore& store, size_t index) -> const ESM::Enchantment* {
+                if (index == 0 || index > store.getSize())
+                    return nullptr;
+                return store.at(index - 1);
+            },
             [](const EnchantmentStore& store, std::string_view enchantmentId) -> const ESM::Enchantment* {
-                return store.find(ESM::RefId::deserializeText(enchantmentId));
+                return store.search(ESM::RefId::deserializeText(enchantmentId));
             });
         enchantmentStoreT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
         enchantmentStoreT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
@@ -280,10 +288,10 @@ namespace MWLua
             return "ESM3_MagicEffectStore{" + std::to_string(store.getSize()) + " effects}";
         };
         magicEffectStoreT[sol::meta_function::index] = sol::overload(
-            [](const MagicEffectStore& store, int id) -> const ESM::MagicEffect* { return store.find(id); },
+            [](const MagicEffectStore& store, int id) -> const ESM::MagicEffect* { return store.search(id); },
             [](const MagicEffectStore& store, std::string_view id) -> const ESM::MagicEffect* {
                 int index = ESM::MagicEffect::indexNameToIndex(id);
-                return store.find(index);
+                return store.search(index);
             });
         auto magicEffectsIter = [magicEffectStore](sol::this_state lua, const sol::object& /*store*/,
                                     sol::optional<int> id) -> std::tuple<sol::object, sol::object> {
@@ -665,20 +673,20 @@ namespace MWLua
 
         // types.Actor.spells(o)[i]
         spellsT[sol::meta_function::index] = sol::overload(
-            [](const ActorSpells& spells, size_t index) -> sol::optional<const ESM::Spell*> {
+            [](const ActorSpells& spells, size_t index) -> const ESM::Spell* {
                 if (auto* store = spells.getStore())
-                    if (index <= store->count())
+                    if (index <= store->count() && index > 0)
                         return store->at(index - 1);
-                return sol::nullopt;
+                return nullptr;
             },
-            [spellStore](const ActorSpells& spells, std::string_view spellId) -> sol::optional<const ESM::Spell*> {
+            [spellStore](const ActorSpells& spells, std::string_view spellId) -> const ESM::Spell* {
                 if (auto* store = spells.getStore())
                 {
-                    const ESM::Spell* spell = spellStore->find(ESM::RefId::deserializeText(spellId));
-                    if (store->hasSpell(spell))
+                    const ESM::Spell* spell = spellStore->search(ESM::RefId::deserializeText(spellId));
+                    if (spell && store->hasSpell(spell))
                         return spell;
                 }
-                return sol::nullopt;
+                return nullptr;
             });
 
         // pairs(types.Actor.spells(o))
