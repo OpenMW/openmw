@@ -19,7 +19,7 @@ namespace Nif
                 break;
             case SPHERE_BV:
             {
-                sphere.read(nif);
+                nif->read(sphere);
                 break;
             }
             case BOX_BV:
@@ -336,7 +336,7 @@ namespace Nif
     void BSTriShape::read(NIFStream* nif)
     {
         Node::read(nif);
-        mBoundingSphere.read(nif);
+        nif->read(mBoundingSphere);
 
         if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_F76)
         {
@@ -410,12 +410,6 @@ namespace Nif
         mLandscapeDataOffset = (data & 0xF00000000) >> 0x20;
         mEyeDataOffset = (data & 0xF000000000) >> 0x24;
         mFlags = (data & 0xFFF00000000000) >> 0x2C;
-    }
-
-    void NiBoundingVolume::NiSphereBV::read(NIFStream* nif)
-    {
-        nif->read(center);
-        nif->read(radius);
     }
 
     void BSVertexData::read(NIFStream* nif, uint16_t flags)

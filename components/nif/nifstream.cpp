@@ -123,6 +123,13 @@ namespace Nif
     }
 
     template <>
+    void NIFStream::read<osg::BoundingSpheref>(osg::BoundingSpheref& sphere)
+    {
+        read(sphere.center());
+        read(sphere.radius());
+    }
+
+    template <>
     void NIFStream::read<Transformation>(Transformation& t)
     {
         read(t.pos);
@@ -174,6 +181,12 @@ namespace Nif
 
     template <>
     void NIFStream::read<osg::Quat>(osg::Quat* dest, size_t size)
+    {
+        readRange(*this, dest, size);
+    }
+
+    template <>
+    void NIFStream::read<osg::BoundingSpheref>(osg::BoundingSpheref* dest, size_t size)
     {
         readRange(*this, dest, size);
     }

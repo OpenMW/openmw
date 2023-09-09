@@ -35,18 +35,18 @@ namespace
     void prepareTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriBasedGeomData& data)
     {
         // FIXME: copying vertices/indices individually is unreasonable
-        const std::vector<osg::Vec3f>& vertices = data.vertices;
+        const std::vector<osg::Vec3f>& vertices = data.mVertices;
         mesh.preallocateVertices(static_cast<int>(vertices.size()));
         for (const osg::Vec3f& vertex : vertices)
             mesh.findOrAddVertex(Misc::Convert::toBullet(vertex), false);
 
-        mesh.preallocateIndices(static_cast<int>(data.mNumTriangles * 3));
+        mesh.preallocateIndices(static_cast<int>(data.mNumTriangles) * 3);
     }
 
     void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriShapeData& data)
     {
         prepareTriangleMesh(mesh, data);
-        const std::vector<unsigned short>& triangles = data.triangles;
+        const std::vector<unsigned short>& triangles = data.mTriangles;
         for (std::size_t i = 0; i < triangles.size(); i += 3)
             mesh.addTriangleIndices(triangles[i + 0], triangles[i + 1], triangles[i + 2]);
     }
@@ -54,7 +54,7 @@ namespace
     void fillTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriStripsData& data)
     {
         prepareTriangleMesh(mesh, data);
-        for (const std::vector<unsigned short>& strip : data.strips)
+        for (const std::vector<unsigned short>& strip : data.mStrips)
         {
             if (strip.size() < 3)
                 continue;
@@ -87,7 +87,7 @@ namespace
                 return {};
 
             auto data = static_cast<const Nif::NiTriShapeData*>(geometry.data.getPtr());
-            if (data->triangles.empty())
+            if (data->mTriangles.empty())
                 return {};
 
             return function(static_cast<const Nif::NiTriShapeData&>(*data));
@@ -99,7 +99,7 @@ namespace
                 return {};
 
             auto data = static_cast<const Nif::NiTriStripsData*>(geometry.data.getPtr());
-            if (data->strips.empty())
+            if (data->mStrips.empty())
                 return {};
 
             return function(static_cast<const Nif::NiTriStripsData&>(*data));
@@ -381,7 +381,7 @@ namespace NifBullet
         if (args.mHasMarkers && Misc::StringUtils::ciStartsWith(niGeometry.name, "EditorMarker"))
             return;
 
-        if (niGeometry.data.empty() || niGeometry.data->vertices.empty())
+        if (niGeometry.data.empty() || niGeometry.data->mVertices.empty())
             return;
 
         if (!niGeometry.skin.empty())

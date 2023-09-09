@@ -35,11 +35,26 @@ namespace Nif
     // Common ancestor for several data classes
     struct NiGeometryData : public Record
     {
-        std::vector<osg::Vec3f> vertices, normals, tangents, bitangents;
-        std::vector<osg::Vec4f> colors;
-        std::vector<std::vector<osg::Vec2f>> uvlist;
-        osg::Vec3f center;
-        float radius;
+        // Interpretation of Flags field differs depending on the version
+        enum DataFlags
+        {
+            DataFlag_HasUV = 0x0001,
+            DataFlag_NumUVsMask = 0x003F,
+            DataFlag_HasTangents = 0x1000,
+        };
+
+        int32_t mGroupId{ 0 };
+        uint16_t mNumVertices;
+        uint8_t mKeepFlags{ 0 };
+        uint8_t mCompressFlags{ 0 };
+        std::vector<osg::Vec3f> mVertices;
+        uint16_t mDataFlags{ 0 };
+        uint32_t mMaterialHash;
+        std::vector<osg::Vec3f> mNormals, mTangents, mBitangents;
+        osg::BoundingSpheref mBoundingSphere;
+        std::vector<osg::Vec4f> mColors;
+        std::vector<std::vector<osg::Vec2f>> mUVList;
+        uint16_t mConsistencyType;
 
         void read(NIFStream* nif) override;
     };
@@ -47,7 +62,7 @@ namespace Nif
     // Abstract
     struct NiTriBasedGeomData : public NiGeometryData
     {
-        size_t mNumTriangles;
+        uint16_t mNumTriangles;
 
         void read(NIFStream* nif) override;
     };
@@ -55,7 +70,8 @@ namespace Nif
     struct NiTriShapeData : public NiTriBasedGeomData
     {
         // Triangles, three vertex indices per triangle
-        std::vector<unsigned short> triangles;
+        std::vector<unsigned short> mTriangles;
+        std::vector<std::vector<unsigned short>> mMatchGroups;
 
         void read(NIFStream* nif) override;
     };
@@ -63,7 +79,7 @@ namespace Nif
     struct NiTriStripsData : public NiTriBasedGeomData
     {
         // Triangle strips, series of vertex indices.
-        std::vector<std::vector<unsigned short>> strips;
+        std::vector<std::vector<unsigned short>> mStrips;
 
         void read(NIFStream* nif) override;
     };
@@ -71,20 +87,29 @@ namespace Nif
     struct NiLinesData : public NiGeometryData
     {
         // Lines, series of indices that correspond to connected vertices.
-        std::vector<unsigned short> lines;
+        // NB: assumes <=65536 number of vertices
+        std::vector<uint16_t> mLines;
 
         void read(NIFStream* nif) override;
     };
 
     struct NiParticlesData : public NiGeometryData
     {
-        int numParticles{ 0 };
+        uint16_t mNumParticles{ 0 };
+        uint16_t mActiveCount;
 
-        int activeCount{ 0 };
+        std::vector<float> mRadii;
+        std::vector<float> mSizes;
+        std::vector<osg::Quat> mRotations;
+        std::vector<float> mRotationAngles;
+        std::vector<osg::Vec3f> mRotationAxes;
 
-        std::vector<float> particleRadii, sizes, rotationAngles;
-        std::vector<osg::Quat> rotations;
-        std::vector<osg::Vec3f> rotationAxes;
+        bool mHasTextureIndices{ false };
+        std::vector<osg::Vec4f> mSubtextureOffsets;
+        float mAspectRatio{ 1.f };
+        uint16_t mAspectFlags{ 0 };
+        float mAspectRatio2;
+        float mAspectSpeed, mAspectSpeed2;
 
         void read(NIFStream* nif) override;
     };
@@ -103,7 +128,7 @@ namespace Nif
 
     struct NiUVData : public Record
     {
-        FloatKeyMapPtr mKeyList[4];
+        std::array<FloatKeyMapPtr, 4> mKeyList;
 
         void read(NIFStream* nif) override;
     };
@@ -115,37 +140,94 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct NiPixelFormat
+    {
+        enum class Format : uint32_t
+        {
+            RGB = 0,
+            RGBA = 1,
+            Palette = 2,
+            PaletteAlpha = 3,
+            BGR = 4,
+            BGRA = 5,
+            DXT1 = 6,
+            DXT3 = 7,
+            DXT5 = 8,
+        };
+
+        struct ChannelData
+        {
+            enum class Type : uint32_t
+            {
+                Red = 0,
+                Green = 1,
+                Blue = 2,
+                Alpha = 3,
+                Compressed = 4,
+                OffsetU = 5,
+                OffsetV = 6,
+                OffsetW = 7,
+                OffsetQ = 8,
+                Luma = 9,
+                Height = 10,
+                VectorX = 11,
+                VectorY = 12,
+                VectorZ = 13,
+                Padding = 14,
+                Intensity = 15,
+                Index = 16,
+                Depth = 17,
+                Stencil = 18,
+                Empty = 19,
+            };
+
+            enum class Convention : uint32_t
+            {
+                NormInt = 0,
+                Half = 1,
+                Float = 2,
+                Index = 3,
+                Compressed = 4,
+                Unknown = 5,
+                Int = 6,
+            };
+
+            Type mType;
+            Convention mConvention;
+            uint8_t mBitsPerChannel;
+            bool mSigned;
+
+            void read(NIFStream* nif);
+        };
+
+        Format mFormat{ Format::RGB };
+        std::array<uint32_t, 4> mColorMasks;
+        uint32_t mBitsPerPixel{ 0 };
+        uint32_t mPixelTiling{ 0 };
+        std::array<uint32_t, 2> mCompareBits;
+        uint32_t mRendererHint{ 0 };
+        uint32_t mExtraData{ 0 };
+        uint8_t mFlags{ 0 };
+        bool mUseSrgb{ false };
+        std::array<ChannelData, 4> mChannels;
+
+        void read(NIFStream* nif);
+    };
+
     struct NiPixelData : public Record
     {
-        enum Format
-        {
-            NIPXFMT_RGB8,
-            NIPXFMT_RGBA8,
-            NIPXFMT_PAL8,
-            NIPXFMT_PALA8,
-            NIPXFMT_BGR8,
-            NIPXFMT_BGRA8,
-            NIPXFMT_DXT1,
-            NIPXFMT_DXT3,
-            NIPXFMT_DXT5
-        };
-        Format fmt{ NIPXFMT_RGB8 };
-
-        unsigned int colorMask[4]{ 0 };
-        unsigned int bpp{ 0 }, pixelTiling{ 0 };
-        bool sRGB{ false };
-
-        NiPalettePtr palette;
-        unsigned int numberOfMipmaps{ 0 };
-
         struct Mipmap
         {
-            int width, height;
-            int dataOffset;
+            uint32_t mWidth, mHeight;
+            uint32_t mOffset;
         };
-        std::vector<Mipmap> mipmaps;
 
-        std::vector<unsigned char> data;
+        NiPixelFormat mPixelFormat;
+        NiPalettePtr mPalette;
+        uint32_t mBytesPerPixel;
+        std::vector<Mipmap> mMipmaps;
+        uint32_t mNumFaces{ 1 };
+        std::vector<uint8_t> mData;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -160,22 +242,18 @@ namespace Nif
 
     struct NiVisData : public Record
     {
-        struct VisData
-        {
-            float time;
-            bool isSet;
-        };
-        std::vector<VisData> mVis;
+        // TODO: investigate possible use of ByteKeyMap
+        std::shared_ptr<std::map<float, bool>> mKeys;
 
         void read(NIFStream* nif) override;
     };
 
     struct NiSkinInstance : public Record
     {
-        NiSkinDataPtr data;
-        NiSkinPartitionPtr partitions;
-        NodePtr root;
-        NodeList bones;
+        NiSkinDataPtr mData;
+        NiSkinPartitionPtr mPartitions;
+        NodePtr mRoot;
+        NodeList mBones;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -183,28 +261,31 @@ namespace Nif
 
     struct BSDismemberSkinInstance : public NiSkinInstance
     {
+        struct BodyPart
+        {
+            uint16_t mFlags;
+            uint16_t mType;
+        };
+
+        std::vector<BodyPart> mParts;
+
         void read(NIFStream* nif) override;
     };
 
     struct NiSkinData : public Record
     {
-        struct VertWeight
-        {
-            unsigned short vertex;
-            float weight;
-        };
+        using VertWeight = std::pair<unsigned short, float>;
 
         struct BoneInfo
         {
-            Transformation trafo;
-            osg::Vec3f boundSphereCenter;
-            float boundSphereRadius;
-            std::vector<VertWeight> weights;
+            Transformation mTransform;
+            osg::BoundingSpheref mBoundSphere;
+            std::vector<VertWeight> mWeights;
         };
 
-        Transformation trafo;
-        std::vector<BoneInfo> bones;
-        NiSkinPartitionPtr partitions;
+        Transformation mTransform;
+        std::vector<BoneInfo> mBones;
+        NiSkinPartitionPtr mPartitions;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -214,20 +295,20 @@ namespace Nif
     {
         struct Partition
         {
-            std::vector<unsigned short> bones;
-            std::vector<unsigned short> vertexMap;
-            std::vector<float> weights;
-            std::vector<std::vector<unsigned short>> strips;
-            std::vector<unsigned short> triangles;
-            std::vector<unsigned short> trueTriangles;
-            std::vector<char> boneIndices;
+            std::vector<unsigned short> mBones;
+            std::vector<unsigned short> mVertexMap;
+            std::vector<float> mWeights;
+            std::vector<std::vector<unsigned short>> mStrips;
+            std::vector<unsigned short> mTriangles;
+            std::vector<char> mBoneIndices;
             BSVertexDesc mVertexDesc;
+            std::vector<unsigned short> mTrueTriangles;
+            std::vector<std::vector<unsigned short>> mTrueStrips;
+            uint8_t mLODLevel;
+            bool mGlobalVB;
 
             void read(NIFStream* nif);
-            std::vector<unsigned short> getTrueTriangles() const;
-            std::vector<std::vector<unsigned short>> getTrueStrips() const;
         };
-        unsigned int mPartitionNum;
         std::vector<Partition> mPartitions;
 
         unsigned int mDataSize;
@@ -245,6 +326,8 @@ namespace Nif
             FloatKeyMapPtr mKeyFrames;
             std::vector<osg::Vec3f> mVertices;
         };
+
+        uint8_t mRelativeTargets;
         std::vector<MorphData> mMorphs;
 
         void read(NIFStream* nif) override;
@@ -262,7 +345,7 @@ namespace Nif
         Vector3KeyMapPtr mTranslations;
         FloatKeyMapPtr mScales;
 
-        enum class AxisOrder
+        enum class AxisOrder : uint32_t
         {
             Order_XYZ = 0,
             Order_XZY = 1,
@@ -283,14 +366,15 @@ namespace Nif
     struct NiPalette : public Record
     {
         // 32-bit RGBA colors that correspond to 8-bit indices
-        std::vector<unsigned int> colors;
+        std::vector<uint32_t> mColors;
 
         void read(NIFStream* nif) override;
     };
 
     struct NiStringPalette : public Record
     {
-        std::string palette;
+        std::string mPalette;
+
         void read(NIFStream* nif) override;
     };
 
@@ -324,8 +408,7 @@ namespace Nif
 
     struct BSMultiBoundSphere : public BSMultiBoundData
     {
-        osg::Vec3f mCenter;
-        float mRadius;
+        osg::BoundingSpheref mSphere;
 
         void read(NIFStream* nif) override;
     };

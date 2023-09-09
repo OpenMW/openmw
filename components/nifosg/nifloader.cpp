@@ -1133,20 +1133,20 @@ namespace NifOsg
             }
 
             auto particledata = static_cast<const Nif::NiParticlesData*>(particleNode->data.getPtr());
-            partsys->setQuota(particledata->numParticles);
+            partsys->setQuota(particledata->mNumParticles);
 
             osg::BoundingBox box;
 
             int i = 0;
             for (const auto& particle : partctrl->particles)
             {
-                if (i++ >= particledata->activeCount)
+                if (i++ >= particledata->mActiveCount)
                     break;
 
                 if (particle.lifespan <= 0)
                     continue;
 
-                if (particle.vertex >= particledata->vertices.size())
+                if (particle.vertex >= particledata->mVertices.size())
                     continue;
 
                 ParticleAgeSetter particletemplate(std::max(0.f, particle.lifetime));
@@ -1158,22 +1158,22 @@ namespace NifOsg
                 // which can not be done in this loader since we are not attached to the scene yet. Will be fixed up
                 // post-load in the SceneManager.
                 created->setVelocity(particle.velocity);
-                const osg::Vec3f& position = particledata->vertices[particle.vertex];
+                const osg::Vec3f& position = particledata->mVertices[particle.vertex];
                 created->setPosition(position);
 
                 created->setColorRange(osgParticle::rangev4(partctrl->color, partctrl->color));
                 created->setAlphaRange(osgParticle::rangef(1.f, 1.f));
 
                 float size = partctrl->size;
-                if (particle.vertex < particledata->sizes.size())
-                    size *= particledata->sizes[particle.vertex];
+                if (particle.vertex < particledata->mSizes.size())
+                    size *= particledata->mSizes[particle.vertex];
 
                 created->setSizeRange(osgParticle::rangef(size, size));
                 box.expandBy(osg::BoundingSphere(position, size));
             }
 
             // radius may be used to force a larger bounding box
-            box.expandBy(osg::BoundingSphere(osg::Vec3(0, 0, 0), particledata->radius));
+            box.expandBy(osg::BoundingSphere(osg::Vec3(0, 0, 0), particledata->mBoundingSphere.radius()));
 
             partsys->setInitialBound(box);
         }
@@ -1346,9 +1346,9 @@ namespace NifOsg
         void handleNiGeometryData(osg::Geometry* geometry, const Nif::NiGeometryData* data,
             const std::vector<unsigned int>& boundTextures, const std::string& name)
         {
-            const auto& vertices = data->vertices;
-            const auto& normals = data->normals;
-            const auto& colors = data->colors;
+            const auto& vertices = data->mVertices;
+            const auto& normals = data->mNormals;
+            const auto& colors = data->mColors;
             if (!vertices.empty())
                 geometry->setVertexArray(new osg::Vec3Array(vertices.size(), vertices.data()));
             if (!normals.empty())
@@ -1357,7 +1357,7 @@ namespace NifOsg
             if (!colors.empty())
                 geometry->setColorArray(new osg::Vec4Array(colors.size(), colors.data()), osg::Array::BIND_PER_VERTEX);
 
-            const auto& uvlist = data->uvlist;
+            const auto& uvlist = data->mUVList;
             int textureStage = 0;
             for (std::vector<unsigned int>::const_iterator it = boundTextures.begin(); it != boundTextures.end();
                  ++it, ++textureStage)
@@ -1391,30 +1391,30 @@ namespace NifOsg
                 const Nif::NiSkinInstance* skin = niGeometry->skin.getPtr();
                 const Nif::NiSkinData* data = nullptr;
                 const Nif::NiSkinPartition* partitions = nullptr;
-                if (!skin->data.empty())
+                if (!skin->mData.empty())
                 {
-                    data = skin->data.getPtr();
-                    if (!data->partitions.empty())
-                        partitions = data->partitions.getPtr();
+                    data = skin->mData.getPtr();
+                    if (!data->mPartitions.empty())
+                        partitions = data->mPartitions.getPtr();
                 }
-                if (!partitions && !skin->partitions.empty())
-                    partitions = skin->partitions.getPtr();
+                if (!partitions && !skin->mPartitions.empty())
+                    partitions = skin->mPartitions.getPtr();
 
                 hasPartitions = partitions != nullptr;
                 if (hasPartitions)
                 {
-                    std::vector<unsigned short> trueTriangles;
                     for (const Nif::NiSkinPartition::Partition& partition : partitions->mPartitions)
                     {
-                        trueTriangles = partition.getTrueTriangles();
+                        const std::vector<unsigned short>& trueTriangles = partition.mTrueTriangles;
                         if (!trueTriangles.empty())
                         {
                             geometry->addPrimitiveSet(new osg::DrawElementsUShort(
                                 osg::PrimitiveSet::TRIANGLES, trueTriangles.size(), trueTriangles.data()));
                         }
-                        const std::vector<std::vector<unsigned short>> trueStrips = partition.getTrueStrips();
-                        for (const auto& strip : trueStrips)
+                        for (const auto& strip : partition.mTrueStrips)
                         {
+                            if (strip.size() < 3)
+                                continue;
                             geometry->addPrimitiveSet(new osg::DrawElementsUShort(
                                 osg::PrimitiveSet::TRIANGLE_STRIP, strip.size(), strip.data()));
                         }
@@ -1430,7 +1430,7 @@ namespace NifOsg
                     if (niGeometryData->recType != Nif::RC_NiTriShapeData)
                         return;
                     auto data = static_cast<const Nif::NiTriShapeData*>(niGeometryData);
-                    const std::vector<unsigned short>& triangles = data->triangles;
+                    const std::vector<unsigned short>& triangles = data->mTriangles;
                     if (triangles.empty())
                         return;
                     geometry->addPrimitiveSet(
@@ -1442,7 +1442,7 @@ namespace NifOsg
                         return;
                     auto data = static_cast<const Nif::NiTriStripsData*>(niGeometryData);
                     bool hasGeometry = false;
-                    for (const std::vector<unsigned short>& strip : data->strips)
+                    for (const std::vector<unsigned short>& strip : data->mStrips)
                     {
                         if (strip.size() < 3)
                             continue;
@@ -1458,7 +1458,7 @@ namespace NifOsg
                     if (niGeometryData->recType != Nif::RC_NiLinesData)
                         return;
                     auto data = static_cast<const Nif::NiLinesData*>(niGeometryData);
-                    const auto& line = data->lines;
+                    const auto& line = data->mLines;
                     if (line.empty())
                         return;
                     geometry->addPrimitiveSet(
@@ -1473,7 +1473,7 @@ namespace NifOsg
             //   above the actual renderable would be tedious.
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(nifNode, parent, drawableProps);
-            applyDrawableProperties(parentNode, drawableProps, composite, !niGeometryData->colors.empty(), animflags);
+            applyDrawableProperties(parentNode, drawableProps, composite, !niGeometryData->mColors.empty(), animflags);
         }
 
         void handleGeometry(const Nif::Node* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
@@ -1549,21 +1549,16 @@ namespace NifOsg
             osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map(new SceneUtil::RigGeometry::InfluenceMap);
 
             const Nif::NiSkinInstance* skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin.getPtr();
-            const Nif::NiSkinData* data = skin->data.getPtr();
-            const Nif::NodeList& bones = skin->bones;
-            for (std::size_t i = 0, n = bones.size(); i < n; ++i)
+            const Nif::NiSkinData* data = skin->mData.getPtr();
+            const Nif::NodeList& bones = skin->mBones;
+            for (std::size_t i = 0; i < bones.size(); ++i)
             {
                 std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->name);
 
                 SceneUtil::RigGeometry::BoneInfluence influence;
-                const std::vector<Nif::NiSkinData::VertWeight>& weights = data->bones[i].weights;
-                for (size_t j = 0; j < weights.size(); j++)
-                {
-                    influence.mWeights.emplace_back(weights[j].vertex, weights[j].weight);
-                }
-                influence.mInvBindMatrix = data->bones[i].trafo.toMatrix();
-                influence.mBoundSphere
-                    = osg::BoundingSpheref(data->bones[i].boundSphereCenter, data->bones[i].boundSphereRadius);
+                influence.mWeights = data->mBones[i].mWeights;
+                influence.mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
+                influence.mBoundSphere = data->mBones[i].mBoundSphere;
 
                 map->mData.emplace_back(boneName, influence);
             }
@@ -1680,71 +1675,76 @@ namespace NifOsg
 
         osg::ref_ptr<osg::Image> handleInternalTexture(const Nif::NiPixelData* pixelData)
         {
-            osg::ref_ptr<osg::Image> image(new osg::Image);
+            if (pixelData->mMipmaps.empty())
+                return nullptr;
 
-            // Pixel row alignment, defining it to be consistent with OSG DDS plugin
-            int packing = 1;
+            // Not fatal, but warn the user
+            if (pixelData->mNumFaces != 1)
+                Log(Debug::Info) << "Unsupported multifaceted internal texture in " << mFilename;
+
+            using Nif::NiPixelFormat;
+            NiPixelFormat niPixelFormat = pixelData->mPixelFormat;
             GLenum pixelformat = 0;
-            switch (pixelData->fmt)
+            // Pixel row alignment. Defining it to be consistent with OSG DDS plugin
+            int packing = 1;
+            switch (niPixelFormat.mFormat)
             {
-                case Nif::NiPixelData::NIPXFMT_RGB8:
+                case NiPixelFormat::Format::RGB:
                     pixelformat = GL_RGB;
                     break;
-                case Nif::NiPixelData::NIPXFMT_RGBA8:
+                case NiPixelFormat::Format::RGBA:
                     pixelformat = GL_RGBA;
                     break;
-                case Nif::NiPixelData::NIPXFMT_PAL8:
-                case Nif::NiPixelData::NIPXFMT_PALA8:
+                case NiPixelFormat::Format::Palette:
+                case NiPixelFormat::Format::PaletteAlpha:
                     pixelformat = GL_RED; // Each color is defined by a byte.
                     break;
-                case Nif::NiPixelData::NIPXFMT_BGR8:
+                case NiPixelFormat::Format::BGR:
                     pixelformat = GL_BGR;
                     break;
-                case Nif::NiPixelData::NIPXFMT_BGRA8:
+                case NiPixelFormat::Format::BGRA:
                     pixelformat = GL_BGRA;
                     break;
-                case Nif::NiPixelData::NIPXFMT_DXT1:
+                case NiPixelFormat::Format::DXT1:
                     pixelformat = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
                     packing = 2;
                     break;
-                case Nif::NiPixelData::NIPXFMT_DXT3:
+                case NiPixelFormat::Format::DXT3:
                     pixelformat = GL_COMPRESSED_RGBA_S3TC_DXT3_EXT;
                     packing = 4;
                     break;
-                case Nif::NiPixelData::NIPXFMT_DXT5:
+                case NiPixelFormat::Format::DXT5:
                     pixelformat = GL_COMPRESSED_RGBA_S3TC_DXT5_EXT;
                     packing = 4;
                     break;
                 default:
-                    Log(Debug::Info) << "Unhandled internal pixel format " << pixelData->fmt << " in " << mFilename;
+                    Log(Debug::Info) << "Unhandled internal pixel format "
+                                     << static_cast<uint32_t>(niPixelFormat.mFormat) << " in " << mFilename;
                     return nullptr;
             }
-
-            if (pixelData->mipmaps.empty())
-                return nullptr;
 
             int width = 0;
             int height = 0;
 
-            std::vector<unsigned int> mipmapVector;
-            for (unsigned int i = 0; i < pixelData->mipmaps.size(); ++i)
+            std::vector<unsigned int> mipmapOffsets;
+            for (unsigned int i = 0; i < pixelData->mMipmaps.size(); ++i)
             {
-                const Nif::NiPixelData::Mipmap& mip = pixelData->mipmaps[i];
+                const Nif::NiPixelData::Mipmap& mip = pixelData->mMipmaps[i];
 
                 size_t mipSize = osg::Image::computeImageSizeInBytes(
-                    mip.width, mip.height, 1, pixelformat, GL_UNSIGNED_BYTE, packing);
-                if (mipSize + mip.dataOffset > pixelData->data.size())
+                    mip.mWidth, mip.mHeight, 1, pixelformat, GL_UNSIGNED_BYTE, packing);
+                if (mipSize + mip.mOffset > pixelData->mData.size())
                 {
                     Log(Debug::Info) << "Internal texture's mipmap data out of bounds, ignoring texture";
                     return nullptr;
                 }
 
                 if (i != 0)
-                    mipmapVector.push_back(mip.dataOffset);
+                    mipmapOffsets.push_back(mip.mOffset);
                 else
                 {
-                    width = mip.width;
-                    height = mip.height;
+                    width = mip.mWidth;
+                    height = mip.mHeight;
                 }
             }
 
@@ -1754,16 +1754,17 @@ namespace NifOsg
                 return nullptr;
             }
 
-            const std::vector<unsigned char>& pixels = pixelData->data;
-            switch (pixelData->fmt)
+            osg::ref_ptr<osg::Image> image(new osg::Image);
+            const std::vector<unsigned char>& pixels = pixelData->mData;
+            switch (niPixelFormat.mFormat)
             {
-                case Nif::NiPixelData::NIPXFMT_RGB8:
-                case Nif::NiPixelData::NIPXFMT_RGBA8:
-                case Nif::NiPixelData::NIPXFMT_BGR8:
-                case Nif::NiPixelData::NIPXFMT_BGRA8:
-                case Nif::NiPixelData::NIPXFMT_DXT1:
-                case Nif::NiPixelData::NIPXFMT_DXT3:
-                case Nif::NiPixelData::NIPXFMT_DXT5:
+                case NiPixelFormat::Format::RGB:
+                case NiPixelFormat::Format::RGBA:
+                case NiPixelFormat::Format::BGR:
+                case NiPixelFormat::Format::BGRA:
+                case NiPixelFormat::Format::DXT1:
+                case NiPixelFormat::Format::DXT3:
+                case NiPixelFormat::Format::DXT5:
                 {
                     unsigned char* data = new unsigned char[pixels.size()];
                     memcpy(data, pixels.data(), pixels.size());
@@ -1771,18 +1772,18 @@ namespace NifOsg
                         osg::Image::USE_NEW_DELETE, packing);
                     break;
                 }
-                case Nif::NiPixelData::NIPXFMT_PAL8:
-                case Nif::NiPixelData::NIPXFMT_PALA8:
+                case NiPixelFormat::Format::Palette:
+                case NiPixelFormat::Format::PaletteAlpha:
                 {
-                    if (pixelData->palette.empty() || pixelData->bpp != 8)
+                    if (pixelData->mPalette.empty() || niPixelFormat.mBitsPerPixel != 8)
                     {
                         Log(Debug::Info) << "Palettized texture in " << mFilename << " is invalid, ignoring";
                         return nullptr;
                     }
-                    pixelformat = pixelData->fmt == Nif::NiPixelData::NIPXFMT_PAL8 ? GL_RGB : GL_RGBA;
+                    pixelformat = niPixelFormat.mFormat == NiPixelFormat::Format::PaletteAlpha ? GL_RGBA : GL_RGB;
                     // We're going to convert the indices that pixel data contains
                     // into real colors using the palette.
-                    const auto& palette = pixelData->palette->colors;
+                    const auto& palette = pixelData->mPalette->mColors;
                     const int numChannels = pixelformat == GL_RGBA ? 4 : 3;
                     unsigned char* data = new unsigned char[pixels.size() * numChannels];
                     unsigned char* pixel = data;
@@ -1791,7 +1792,7 @@ namespace NifOsg
                         memcpy(pixel, &palette[index], sizeof(unsigned char) * numChannels);
                         pixel += numChannels;
                     }
-                    for (unsigned int& offset : mipmapVector)
+                    for (unsigned int& offset : mipmapOffsets)
                         offset *= numChannels;
                     image->setImage(width, height, 1, pixelformat, pixelformat, GL_UNSIGNED_BYTE, data,
                         osg::Image::USE_NEW_DELETE, packing);
@@ -1801,7 +1802,7 @@ namespace NifOsg
                     return nullptr;
             }
 
-            image->setMipmapLevels(mipmapVector);
+            image->setMipmapLevels(mipmapOffsets);
             image->flipVertical();
 
             return image;

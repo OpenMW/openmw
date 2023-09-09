@@ -1,18 +1,17 @@
 #ifndef COMPONENTS_NIFOSG_CONTROLLER_H
 #define COMPONENTS_NIFOSG_CONTROLLER_H
 
-#include <components/nif/controller.hpp>
-#include <components/nif/data.hpp>
-#include <components/nif/nifkey.hpp>
-
-#include <components/sceneutil/keyframe.hpp>
-#include <components/sceneutil/nodecallback.hpp>
-#include <components/sceneutil/statesetupdater.hpp>
-
 #include <set>
 #include <type_traits>
 
 #include <osg/Texture2D>
+
+#include <components/nif/controller.hpp>
+#include <components/nif/data.hpp>
+#include <components/nif/nifkey.hpp>
+#include <components/sceneutil/keyframe.hpp>
+#include <components/sceneutil/nodecallback.hpp>
+#include <components/sceneutil/statesetupdater.hpp>
 
 namespace osg
 {
@@ -283,7 +282,7 @@ namespace NifOsg
     class VisController : public SceneUtil::NodeCallback<VisController>, public SceneUtil::Controller
     {
     private:
-        std::vector<Nif::NiVisData::VisData> mData;
+        std::shared_ptr<std::map<float, bool>> mData;
         ByteInterpolator mInterpolator;
         unsigned int mMask{ 0u };
 

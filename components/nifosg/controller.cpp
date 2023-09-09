@@ -319,7 +319,7 @@ namespace NifOsg
                     = ByteInterpolator(static_cast<const Nif::NiBoolInterpolator*>(ctrl->mInterpolator.getPtr()));
         }
         else if (!ctrl->mData.empty())
-            mData = ctrl->mData->mVis;
+            mData = ctrl->mData->mKeys;
     }
 
     VisController::VisController() {}
@@ -338,15 +338,13 @@ namespace NifOsg
         if (!mInterpolator.empty())
             return mInterpolator.interpKey(time);
 
-        if (mData.size() == 0)
+        if (mData->empty())
             return true;
 
-        for (size_t i = 1; i < mData.size(); i++)
-        {
-            if (mData[i].time > time)
-                return mData[i - 1].isSet;
-        }
-        return mData.back().isSet;
+        auto iter = mData->upper_bound(time);
+        if (iter != mData->begin())
+            --iter;
+        return iter->second;
     }
 
     void VisController::operator()(osg::Node* node, osg::NodeVisitor* nv)
