@@ -6,9 +6,9 @@
 
 namespace Nif::Testing
 {
-    inline void init(Transformation& value)
+    inline void init(NiTransform& value)
     {
-        value = Transformation::getIdentity();
+        value = NiTransform::getIdentity();
     }
 
     inline void init(Extra& value)

@@ -80,7 +80,10 @@ namespace Nif
         NiObjectNET::read(nif);
 
         flags = nif->getBethVersion() <= 26 ? nif->getUShort() : nif->getUInt();
-        trafo = nif->getTrafo();
+        nif->read(trafo.mTranslation);
+        nif->read(trafo.mRotation);
+        nif->read(trafo.mScale);
+
         if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
             velocity = nif->getVector3();
         if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
@@ -130,7 +133,7 @@ namespace Nif
         // We want to do this on world scene graph level rather than local scene graph level.
         if (0 == recIndex && !Misc::StringUtils::ciEqual(mName, "bip01"))
         {
-            trafo = Nif::Transformation::getIdentity();
+            trafo = Nif::NiTransform::getIdentity();
         }
     }
 

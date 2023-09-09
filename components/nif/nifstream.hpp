@@ -159,7 +159,6 @@ namespace Nif
         osg::Vec4f getVector4() { return get<osg::Vec4f>(); }
         Matrix3 getMatrix3() { return get<Matrix3>(); }
         osg::Quat getQuaternion() { return get<osg::Quat>(); }
-        Transformation getTrafo() { return get<Transformation>(); }
         bool getBoolean() { return get<bool>(); }
         std::string getString() { return get<std::string>(); }
     };
@@ -177,7 +176,7 @@ namespace Nif
     template <>
     void NIFStream::read<osg::BoundingSpheref>(osg::BoundingSpheref& sphere);
     template <>
-    void NIFStream::read<Transformation>(Transformation& t);
+    void NIFStream::read<NiTransform>(NiTransform& transform);
     template <>
     void NIFStream::read<bool>(bool& data);
     template <>
@@ -196,7 +195,7 @@ namespace Nif
     template <>
     void NIFStream::read<osg::BoundingSpheref>(osg::BoundingSpheref* dest, size_t size);
     template <>
-    void NIFStream::read<Transformation>(Transformation* dest, size_t size);
+    void NIFStream::read<NiTransform>(NiTransform* dest, size_t size);
     template <>
     void NIFStream::read<bool>(bool* dest, size_t size);
     template <>

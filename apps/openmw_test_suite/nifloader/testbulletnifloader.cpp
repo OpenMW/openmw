@@ -274,12 +274,12 @@ namespace
     using namespace Nif::Testing;
     using NifBullet::BulletNifLoader;
 
-    void copy(const btTransform& src, Nif::Transformation& dst)
+    void copy(const btTransform& src, Nif::NiTransform& dst)
     {
-        dst.pos = osg::Vec3f(src.getOrigin().x(), src.getOrigin().y(), src.getOrigin().z());
+        dst.mTranslation = osg::Vec3f(src.getOrigin().x(), src.getOrigin().y(), src.getOrigin().z());
         for (int row = 0; row < 3; ++row)
             for (int column = 0; column < 3; ++column)
-                dst.rotation.mValues[row][column] = src.getBasis().getRow(row)[column];
+                dst.mRotation.mValues[row][column] = src.getBasis().getRow(row)[column];
     }
 
     struct TestBulletNifLoader : Test
@@ -740,7 +740,7 @@ namespace
     TEST_F(TestBulletNifLoader, for_tri_shape_root_node_and_filename_starting_with_x_should_return_animated_shape)
     {
         copy(mTransform, mNiTriShape.trafo);
-        mNiTriShape.trafo.scale = 3;
+        mNiTriShape.trafo.mScale = 3;
 
         Nif::NIFFile file("xtest.nif");
         file.mRoots.push_back(&mNiTriShape);
@@ -764,10 +764,10 @@ namespace
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_and_filename_starting_with_x_should_return_animated_shape)
     {
         copy(mTransform, mNiTriShape.trafo);
-        mNiTriShape.trafo.scale = 3;
+        mNiTriShape.trafo.mScale = 3;
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
-        mNiNode.trafo.scale = 4;
+        mNiNode.trafo.mScale = 4;
 
         Nif::NIFFile file("xtest.nif");
         file.mRoots.push_back(&mNiNode);
@@ -792,11 +792,11 @@ namespace
         TestBulletNifLoader, for_two_tri_shape_children_nodes_and_filename_starting_with_x_should_return_animated_shape)
     {
         copy(mTransform, mNiTriShape.trafo);
-        mNiTriShape.trafo.scale = 3;
+        mNiTriShape.trafo.mScale = 3;
         mNiTriShape.parents.push_back(&mNiNode);
 
         copy(mTransform, mNiTriShape2.trafo);
-        mNiTriShape2.trafo.scale = 3;
+        mNiTriShape2.trafo.mScale = 3;
         mNiTriShape2.parents.push_back(&mNiNode);
 
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({
@@ -835,11 +835,11 @@ namespace
         mController.recType = Nif::RC_NiKeyframeController;
         mController.flags |= Nif::Controller::Flag_Active;
         copy(mTransform, mNiTriShape.trafo);
-        mNiTriShape.trafo.scale = 3;
+        mNiTriShape.trafo.mScale = 3;
         mNiTriShape.parents.push_back(&mNiNode);
         mNiTriShape.mController = Nif::ControllerPtr(&mController);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
-        mNiNode.trafo.scale = 4;
+        mNiNode.trafo.mScale = 4;
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -865,17 +865,17 @@ namespace
         mController.recType = Nif::RC_NiKeyframeController;
         mController.flags |= Nif::Controller::Flag_Active;
         copy(mTransform, mNiTriShape.trafo);
-        mNiTriShape.trafo.scale = 3;
+        mNiTriShape.trafo.mScale = 3;
         mNiTriShape.parents.push_back(&mNiNode);
         copy(mTransform, mNiTriShape2.trafo);
-        mNiTriShape2.trafo.scale = 3;
+        mNiTriShape2.trafo.mScale = 3;
         mNiTriShape2.parents.push_back(&mNiNode);
         mNiTriShape2.mController = Nif::ControllerPtr(&mController);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({
             Nif::NodePtr(&mNiTriShape),
             Nif::NodePtr(&mNiTriShape2),
         }));
-        mNiNode.trafo.scale = 4;
+        mNiNode.trafo.mScale = 4;
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -1352,12 +1352,12 @@ namespace
     TEST_F(TestBulletNifLoader, should_handle_node_with_multiple_parents)
     {
         copy(mTransform, mNiTriShape.trafo);
-        mNiTriShape.trafo.scale = 4;
+        mNiTriShape.trafo.mScale = 4;
         mNiTriShape.parents = { &mNiNode, &mNiNode2 };
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
-        mNiNode.trafo.scale = 2;
+        mNiNode.trafo.mScale = 2;
         mNiNode2.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
-        mNiNode2.trafo.scale = 3;
+        mNiNode2.trafo.mScale = 3;
 
         Nif::NIFFile file("xtest.nif");
         file.mRoots.push_back(&mNiNode);

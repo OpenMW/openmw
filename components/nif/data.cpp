@@ -347,9 +347,7 @@ namespace Nif
 
     void NiSkinData::read(NIFStream* nif)
     {
-        nif->read(mTransform.rotation);
-        nif->read(mTransform.pos);
-        nif->read(mTransform.scale);
+        nif->read(mTransform);
 
         uint32_t numBones;
         nif->read(numBones);
@@ -366,9 +364,7 @@ namespace Nif
         mBones.resize(numBones);
         for (BoneInfo& bi : mBones)
         {
-            nif->read(bi.mTransform.rotation);
-            nif->read(bi.mTransform.pos);
-            nif->read(bi.mTransform.scale);
+            nif->read(bi.mTransform);
             nif->read(bi.mBoundSphere);
 
             uint16_t numVertices;

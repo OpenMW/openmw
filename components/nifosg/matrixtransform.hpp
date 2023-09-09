@@ -12,7 +12,7 @@ namespace NifOsg
     {
     public:
         MatrixTransform() = default;
-        MatrixTransform(const Nif::Transformation& trafo);
+        MatrixTransform(const Nif::NiTransform& transform);
         MatrixTransform(const MatrixTransform& copy, const osg::CopyOp& copyop);
 
         META_Node(NifOsg, MatrixTransform)
