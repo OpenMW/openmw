@@ -23,7 +23,7 @@ namespace
 
         if (std::modf(arg, &integer) != 0)
             throw std::runtime_error(
-                Misc::StringUtils::format("bad argument #{} to '{}' (number has no integer representation)", n, name));
+                Misc::StringUtils::format("bad argument #%i to '%s' (number has no integer representation)", n, name));
 
         return integer;
     }
@@ -102,7 +102,7 @@ namespace LuaUtf8
                 int64_t codepoint = getInteger(args[i], (i + 1), "char");
                 if (codepoint < 0 || codepoint > MAXUTF)
                     throw std::runtime_error(
-                        Misc::StringUtils::format("bad argument #{} to 'char' (value out of range)", (i + 1)));
+                        "bad argument #" + std::to_string(i + 1) + " to 'char' (value out of range)");
 
                 result += converter.to_bytes(codepoint);
             }
