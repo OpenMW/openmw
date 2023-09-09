@@ -150,31 +150,31 @@ namespace Nif
     {
         NiGeometryData::read(nif);
 
-        // Should always match the number of vertices
+        // Should always match the number of vertices in theory, but doesn't:
+        // see mist.nif in Mistify mod (https://www.nexusmods.com/morrowind/mods/48112).
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_MW)
             nif->read(mNumParticles);
-        else if (nif->getVersion() != NIFFile::NIFVersion::VER_BGS || nif->getBethVersion() == 0)
-            mNumParticles = mNumVertices;
+        bool isBs202 = nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() != 0;
 
         bool numRadii = 1;
         if (nif->getVersion() > NIFStream::generateVersion(10, 0, 1, 0))
-            numRadii = nif->get<bool>() ? mNumParticles : 0;
+            numRadii = (nif->get<bool>() && !isBs202) ? mNumVertices : 0;
         nif->readVector(mRadii, numRadii);
         nif->read(mActiveCount);
-        if (nif->get<bool>())
-            nif->readVector(mSizes, mNumParticles);
+        if (nif->get<bool>() && !isBs202)
+            nif->readVector(mSizes, mNumVertices);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
         {
-            if (nif->get<bool>())
-                nif->readVector(mRotations, mNumParticles);
+            if (nif->get<bool>() && !isBs202)
+                nif->readVector(mRotations, mNumVertices);
             if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 4))
             {
-                if (nif->get<bool>())
-                    nif->readVector(mRotationAngles, mNumParticles);
-                if (nif->get<bool>())
-                    nif->readVector(mRotationAxes, mNumParticles);
-                if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() > 0)
+                if (nif->get<bool>() && !isBs202)
+                    nif->readVector(mRotationAngles, mNumVertices);
+                if (nif->get<bool>() && !isBs202)
+                    nif->readVector(mRotationAxes, mNumVertices);
+                if (isBs202)
                 {
                     nif->read(mHasTextureIndices);
                     uint32_t numSubtextureOffsets;
@@ -201,7 +201,7 @@ namespace Nif
         NiParticlesData::read(nif);
 
         if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0) && nif->get<bool>())
-            nif->readVector(mRotations, mNumParticles);
+            nif->readVector(mRotations, mNumVertices);
     }
 
     void NiPosData::read(NIFStream* nif)
