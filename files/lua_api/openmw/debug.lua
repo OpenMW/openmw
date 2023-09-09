@@ -45,6 +45,19 @@
 -- @return #boolean
 
 ---
+-- Toggles MWScripts
+-- @function [parent=#Debug] toggleMWScript
+
+---
+-- Is MWScripts enabled
+-- @function [parent=#Debug] isMWScriptEnabled
+-- @return #boolean
+
+---
+-- Reloads all Lua scripts
+-- @function [parent=#Debug] reloadLua
+
+---
 -- Navigation mesh rendering modes
 -- @type NAV_MESH_RENDER_MODE
 -- @field [parent=#NAV_MESH_RENDER_MODE] #number AreaType

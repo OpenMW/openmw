@@ -239,6 +239,13 @@ namespace MWLua
         mInGameConsoleMessages.clear();
 
         applyDelayedActions();
+
+        if (mReloadAllScriptsRequested)
+        {
+            // Reloading right after `applyDelayedActions` to guarantee that no delayed actions are currently queued.
+            reloadAllScriptsImpl();
+            mReloadAllScriptsRequested = false;
+        }
     }
 
     void LuaManager::applyDelayedActions()
@@ -477,7 +484,7 @@ namespace MWLua
         scripts->load(data);
     }
 
-    void LuaManager::reloadAllScripts()
+    void LuaManager::reloadAllScriptsImpl()
     {
         Log(Debug::Info) << "Reload Lua";
 
