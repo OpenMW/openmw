@@ -26,7 +26,7 @@ namespace MWGui
 
         void resetReference() override;
 
-        void setPtr(const MWWorld::Ptr& npc) override;
+        void setPtr(const MWWorld::Ptr& actor) override;
         void onFrame(float dt) override;
         void clear() override { resetReference(); }
 
