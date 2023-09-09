@@ -29,7 +29,7 @@
 namespace Nif
 {
 
-    struct Property : public Named
+    struct Property : public NiObjectNET
     {
     };
 

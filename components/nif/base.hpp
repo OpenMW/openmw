@@ -40,7 +40,7 @@ namespace Nif
         int flags;
         float frequency, phase;
         float timeStart, timeStop;
-        NamedPtr target;
+        NiObjectNETPtr target;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -49,18 +49,20 @@ namespace Nif
         ExtrapolationMode extrapolationMode() const { return static_cast<ExtrapolationMode>(flags & Mask); }
     };
 
-    /// Has name, extra-data and controller
-    struct Named : public Record
+    /// Abstract object that has a name, extra data and controllers
+    struct NiObjectNET : public Record
     {
-        std::string name;
-        ExtraPtr extra;
-        ExtraList extralist;
-        ControllerPtr controller;
+        std::string mName;
+        ExtraPtr mExtra;
+        ExtraList mExtraList;
+        ControllerPtr mController;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
-    };
-    using NiSequenceStreamHelper = Named;
 
-} // Namespace
+        // Collect extra records attached to the object
+        ExtraList getExtraList() const;
+    };
+
+}
 #endif

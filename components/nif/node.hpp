@@ -62,11 +62,15 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
+    struct NiSequenceStreamHelper : NiObjectNET
+    {
+    };
+
     /** A Node is an object that's part of the main NIF tree. It has
         parent node (unless it's the root), and transformation (location
         and rotation) relative to it's parent.
      */
-    struct Node : public Named
+    struct Node : public NiObjectNET
     {
         enum Flags
         {

@@ -837,7 +837,7 @@ namespace
         copy(mTransform, mNiTriShape.trafo);
         mNiTriShape.trafo.scale = 3;
         mNiTriShape.parents.push_back(&mNiNode);
-        mNiTriShape.controller = Nif::ControllerPtr(&mController);
+        mNiTriShape.mController = Nif::ControllerPtr(&mController);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
         mNiNode.trafo.scale = 4;
 
@@ -870,7 +870,7 @@ namespace
         copy(mTransform, mNiTriShape2.trafo);
         mNiTriShape2.trafo.scale = 3;
         mNiTriShape2.parents.push_back(&mNiNode);
-        mNiTriShape2.controller = Nif::ControllerPtr(&mController);
+        mNiTriShape2.mController = Nif::ControllerPtr(&mController);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({
             Nif::NodePtr(&mNiTriShape),
             Nif::NodePtr(&mNiTriShape2),
@@ -998,7 +998,7 @@ namespace
     {
         mNiStringExtraData.mData = "NCC__";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
-        mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
 
@@ -1027,7 +1027,7 @@ namespace
         mNiStringExtraData.mNext = Nif::ExtraPtr(&mNiStringExtraData2);
         mNiStringExtraData2.mData = "NCC__";
         mNiStringExtraData2.recType = Nif::RC_NiStringExtraData;
-        mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
 
@@ -1054,7 +1054,7 @@ namespace
     {
         mNiStringExtraData.mData = "NC___";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
-        mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
 
@@ -1082,7 +1082,7 @@ namespace
         mNiStringExtraData.mNext = Nif::ExtraPtr(&mNiStringExtraData2);
         mNiStringExtraData2.mData = "NC___";
         mNiStringExtraData2.recType = Nif::RC_NiStringExtraData;
-        mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
 
@@ -1143,7 +1143,7 @@ namespace
     {
         mNiStringExtraData.mData = "MRK";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
-        mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.parents.push_back(&mNiNode);
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
 
@@ -1162,9 +1162,9 @@ namespace
     {
         mNiIntegerExtraData.mData = 32; // BSX flag "editor marker"
         mNiIntegerExtraData.recType = Nif::RC_BSXFlags;
-        mNiTriShape.extralist.push_back(Nif::ExtraPtr(&mNiIntegerExtraData));
+        mNiTriShape.mExtraList.push_back(Nif::ExtraPtr(&mNiIntegerExtraData));
         mNiTriShape.parents.push_back(&mNiNode);
-        mNiTriShape.name = "EditorMarker";
+        mNiTriShape.mName = "EditorMarker";
         mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
 
         Nif::NIFFile file("test.nif");
@@ -1183,7 +1183,7 @@ namespace
     {
         mNiStringExtraData.mData = "MRK";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
-        mNiTriShape.extra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.parents.push_back(&mNiNode2);
         mNiNode2.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
         mNiNode2.recType = Nif::RC_RootCollisionNode;

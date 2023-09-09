@@ -77,7 +77,7 @@ namespace Nif
 
     void Node::read(NIFStream* nif)
     {
-        Named::read(nif);
+        NiObjectNET::read(nif);
 
         flags = nif->getBethVersion() <= 26 ? nif->getUShort() : nif->getUInt();
         trafo = nif->getTrafo();
@@ -101,7 +101,7 @@ namespace Nif
 
     void Node::post(Reader& nif)
     {
-        Named::post(nif);
+        NiObjectNET::post(nif);
         postRecordList(nif, props);
         collision.post(nif);
     }
@@ -128,7 +128,7 @@ namespace Nif
         // FIXME: if node 0 is *not* the only root node, this must not happen.
         // FIXME: doing this here is awful.
         // We want to do this on world scene graph level rather than local scene graph level.
-        if (0 == recIndex && !Misc::StringUtils::ciEqual(name, "bip01"))
+        if (0 == recIndex && !Misc::StringUtils::ciEqual(mName, "bip01"))
         {
             trafo = Nif::Transformation::getIdentity();
         }

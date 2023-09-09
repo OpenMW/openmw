@@ -16,16 +16,16 @@ namespace Nif::Testing
         value.mNext = ExtraPtr(nullptr);
     }
 
-    inline void init(Named& value)
+    inline void init(NiObjectNET& value)
     {
-        value.extra = ExtraPtr(nullptr);
-        value.extralist = ExtraList();
-        value.controller = ControllerPtr(nullptr);
+        value.mExtra = ExtraPtr(nullptr);
+        value.mExtraList = ExtraList();
+        value.mController = ControllerPtr(nullptr);
     }
 
     inline void init(Node& value)
     {
-        init(static_cast<Named&>(value));
+        init(static_cast<NiObjectNET&>(value));
         value.flags = 0;
         init(value.trafo);
         value.hasBounds = false;
@@ -65,7 +65,7 @@ namespace Nif::Testing
         value.phase = 0;
         value.timeStart = 0;
         value.timeStop = 0;
-        value.target = NamedPtr(nullptr);
+        value.target = NiObjectNETPtr(nullptr);
     }
 }
 

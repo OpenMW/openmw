@@ -6,7 +6,7 @@
 namespace Nif
 {
 
-    struct NiTexture : public Named
+    struct NiTexture : public NiObjectNET
     {
     };
 

@@ -188,7 +188,7 @@ osg::Group {
         Nif::BSShaderPPLightingProperty property;
         property.recType = Nif::RC_BSShaderPPLightingProperty;
         property.textureSet = nullptr;
-        property.controller = nullptr;
+        property.mController = nullptr;
         property.type = GetParam().mShaderType;
         node.props.push_back(Nif::RecordPtrT<Nif::Property>(&property));
         Nif::NIFFile file("test.nif");
@@ -216,7 +216,7 @@ osg::Group {
         Nif::BSLightingShaderProperty property;
         property.recType = Nif::RC_BSLightingShaderProperty;
         property.mTextureSet = nullptr;
-        property.controller = nullptr;
+        property.mController = nullptr;
         property.type = GetParam().mShaderType;
         node.props.push_back(Nif::RecordPtrT<Nif::Property>(&property));
         Nif::NIFFile file("test.nif");

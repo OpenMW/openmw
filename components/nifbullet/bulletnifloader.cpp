@@ -277,9 +277,23 @@ namespace NifBullet
         if (node.recType == Nif::RC_NiCollisionSwitch && !node.collisionActive())
             return;
 
-        if (!node.controller.empty() && node.controller->recType == Nif::RC_NiKeyframeController
-            && node.controller->isActive())
-            args.mAnimated = true;
+        for (Nif::ControllerPtr ctrl = node.mController; !ctrl.empty(); ctrl = ctrl->next)
+        {
+            if (args.mAnimated)
+                break;
+            if (!ctrl->isActive())
+                continue;
+            switch (ctrl->recType)
+            {
+                case Nif::RC_NiKeyframeController:
+                case Nif::RC_NiPathController:
+                case Nif::RC_NiRollController:
+                    args.mAnimated = true;
+                    break;
+                default:
+                    continue;
+            }
+        }
 
         if (node.recType == Nif::RC_RootCollisionNode)
         {
@@ -304,13 +318,7 @@ namespace NifBullet
             args.mAvoid = true;
 
         // Check for extra data
-        std::vector<Nif::ExtraPtr> extraCollection;
-        for (Nif::ExtraPtr e = node.extra; !e.empty(); e = e->mNext)
-            extraCollection.emplace_back(e);
-        for (const auto& extraNode : node.extralist)
-            if (!extraNode.empty())
-                extraCollection.emplace_back(extraNode);
-        for (const auto& e : extraCollection)
+        for (const auto& e : node.getExtraList())
         {
             if (e->recType == Nif::RC_NiStringExtraData)
             {
@@ -378,7 +386,7 @@ namespace NifBullet
     {
         // mHasMarkers is specifically BSXFlags editor marker flag.
         // If this changes, the check must be corrected.
-        if (args.mHasMarkers && Misc::StringUtils::ciStartsWith(niGeometry.name, "EditorMarker"))
+        if (args.mHasMarkers && Misc::StringUtils::ciStartsWith(niGeometry.mName, "EditorMarker"))
             return;
 
         if (niGeometry.data.empty() || niGeometry.data->mVertices.empty())
