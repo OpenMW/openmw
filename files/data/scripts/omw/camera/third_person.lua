@@ -15,7 +15,7 @@ local M = {
     baseDistance = 192,
     preferredDistance = 0,
     standingPreview = false,
-    noOffsetControl = 0,
+    noOffsetControl = {},
 }
 
 local viewOverShoulder, autoSwitchShoulder
@@ -142,7 +142,7 @@ function M.update(dt, smoothedSpeed)
         return
     end
 
-    if M.noOffsetControl == 0 then
+    if not next(M.noOffsetControl) then
         updateState()
     else
         state = nil
