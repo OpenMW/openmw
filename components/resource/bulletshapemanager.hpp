@@ -25,7 +25,8 @@ namespace Resource
     class BulletShapeManager : public ResourceManager
     {
     public:
-        BulletShapeManager(const VFS::Manager* vfs, SceneManager* sceneMgr, NifFileManager* nifFileManager);
+        BulletShapeManager(
+            const VFS::Manager* vfs, SceneManager* sceneMgr, NifFileManager* nifFileManager, double expiryDelay);
         ~BulletShapeManager();
 
         /// @note May return a null pointer if the object has no shape.

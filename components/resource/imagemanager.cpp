@@ -46,8 +46,8 @@ namespace
 namespace Resource
 {
 
-    ImageManager::ImageManager(const VFS::Manager* vfs)
-        : ResourceManager(vfs)
+    ImageManager::ImageManager(const VFS::Manager* vfs, double expiryDelay)
+        : ResourceManager(vfs, expiryDelay)
         , mWarningImage(createWarningImage())
         , mOptions(new osgDB::Options("dds_flip dds_dxt1_detect_rgba ignoreTga2Fields"))
         , mOptionsNoFlip(new osgDB::Options("dds_dxt1_detect_rgba ignoreTga2Fields"))

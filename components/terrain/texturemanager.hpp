@@ -21,7 +21,7 @@ namespace Terrain
     class TextureManager : public Resource::ResourceManager
     {
     public:
-        TextureManager(Resource::SceneManager* sceneMgr);
+        explicit TextureManager(Resource::SceneManager* sceneMgr, double expiryDelay);
 
         void updateTextureFiltering();
 

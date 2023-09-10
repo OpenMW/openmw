@@ -645,7 +645,7 @@ void OMW::Engine::prepareEngine()
 
     VFS::registerArchives(mVFS.get(), mFileCollections, mArchives, true);
 
-    mResourceSystem = std::make_unique<Resource::ResourceSystem>(mVFS.get());
+    mResourceSystem = std::make_unique<Resource::ResourceSystem>(mVFS.get(), Settings::cells().mCacheExpiryDelay);
     mResourceSystem->getSceneManager()->getShaderManager().setMaxTextureUnits(mGlMaxTextureImageUnits);
     mResourceSystem->getSceneManager()->setUnRefImageDataAfterApply(
         false); // keep to Off for now to allow better state sharing

@@ -98,8 +98,8 @@ namespace Resource
     };
 
     BulletShapeManager::BulletShapeManager(
-        const VFS::Manager* vfs, SceneManager* sceneMgr, NifFileManager* nifFileManager)
-        : ResourceManager(vfs)
+        const VFS::Manager* vfs, SceneManager* sceneMgr, NifFileManager* nifFileManager, double expiryDelay)
+        : ResourceManager(vfs, expiryDelay)
         , mInstanceCache(new MultiObjectCache)
         , mSceneManager(sceneMgr)
         , mNifFileManager(nifFileManager)

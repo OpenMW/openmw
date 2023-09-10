@@ -10,8 +10,8 @@
 namespace Terrain
 {
 
-    TextureManager::TextureManager(Resource::SceneManager* sceneMgr)
-        : ResourceManager(sceneMgr->getVFS())
+    TextureManager::TextureManager(Resource::SceneManager* sceneMgr, double expiryDelay)
+        : ResourceManager(sceneMgr->getVFS(), expiryDelay)
         , mSceneManager(sceneMgr)
     {
     }

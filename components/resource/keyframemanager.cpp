@@ -207,8 +207,8 @@ namespace Resource
 namespace Resource
 {
 
-    KeyframeManager::KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager)
-        : ResourceManager(vfs)
+    KeyframeManager::KeyframeManager(const VFS::Manager* vfs, SceneManager* sceneManager, double expiryDelay)
+        : ResourceManager(vfs, expiryDelay)
         , mSceneManager(sceneManager)
     {
     }

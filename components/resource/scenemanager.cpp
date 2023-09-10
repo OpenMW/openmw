@@ -352,9 +352,9 @@ namespace Resource
         std::vector<osg::ref_ptr<SceneUtil::RigGeometryHolder>> mRigGeometryHolders;
     };
 
-    SceneManager::SceneManager(
-        const VFS::Manager* vfs, Resource::ImageManager* imageManager, Resource::NifFileManager* nifFileManager)
-        : ResourceManager(vfs)
+    SceneManager::SceneManager(const VFS::Manager* vfs, Resource::ImageManager* imageManager,
+        Resource::NifFileManager* nifFileManager, double expiryDelay)
+        : ResourceManager(vfs, expiryDelay)
         , mShaderManager(new Shader::ShaderManager)
         , mForceShaders(false)
         , mClampLighting(true)
