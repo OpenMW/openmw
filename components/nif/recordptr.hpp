@@ -110,7 +110,7 @@ namespace Nif
             value.post(nif);
     }
 
-    struct Node;
+    struct NiAVObject;
     struct Extra;
     struct Property;
     struct NiUVData;
@@ -152,7 +152,7 @@ namespace Nif
     struct BSMultiBound;
     struct BSMultiBoundData;
 
-    using NodePtr = RecordPtrT<Node>;
+    using NiAVObjectPtr = RecordPtrT<NiAVObject>;
     using ExtraPtr = RecordPtrT<Extra>;
     using NiUVDataPtr = RecordPtrT<NiUVData>;
     using NiPosDataPtr = RecordPtrT<NiPosData>;
@@ -190,7 +190,7 @@ namespace Nif
     using BSMultiBoundPtr = RecordPtrT<BSMultiBound>;
     using BSMultiBoundDataPtr = RecordPtrT<BSMultiBoundData>;
 
-    using NodeList = RecordListT<Node>;
+    using NiAVObjectList = RecordListT<NiAVObject>;
     using PropertyList = RecordListT<Property>;
     using ExtraList = RecordListT<Extra>;
     using NiSourceTextureList = RecordListT<NiSourceTexture>;

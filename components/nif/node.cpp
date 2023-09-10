@@ -75,51 +75,47 @@ namespace Nif
         }
     }
 
-    void Node::read(NIFStream* nif)
+    void NiAVObject::read(NIFStream* nif)
     {
         NiObjectNET::read(nif);
 
-        flags = nif->getBethVersion() <= 26 ? nif->getUShort() : nif->getUInt();
-        nif->read(trafo.mTranslation);
-        nif->read(trafo.mRotation);
-        nif->read(trafo.mScale);
-
+        if (nif->getBethVersion() <= 26)
+            mFlags = nif->get<uint16_t>();
+        else
+            nif->read(mFlags);
+        nif->read(mTransform.mTranslation);
+        nif->read(mTransform.mRotation);
+        nif->read(mTransform.mScale);
         if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
-            velocity = nif->getVector3();
+            nif->read(mVelocity);
         if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
-            readRecordList(nif, props);
-
-        if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
-            hasBounds = nif->getBoolean();
-        if (hasBounds)
-            bounds.read(nif);
-        // Reference to the collision object in Gamebryo files.
+            readRecordList(nif, mProperties);
+        if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0) && nif->get<bool>())
+            mBounds.read(nif);
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
-            collision.read(nif);
-
-        parents.clear();
-
-        isBone = false;
+            mCollision.read(nif);
     }
 
-    void Node::post(Reader& nif)
+    void NiAVObject::post(Reader& nif)
     {
         NiObjectNET::post(nif);
-        postRecordList(nif, props);
-        collision.post(nif);
+
+        postRecordList(nif, mProperties);
+        mCollision.post(nif);
     }
 
-    void Node::setBone()
+    void NiAVObject::setBone()
     {
-        isBone = true;
+        mIsBone = true;
     }
 
     void NiNode::read(NIFStream* nif)
     {
-        Node::read(nif);
-        readRecordList(nif, children);
+        NiAVObject::read(nif);
+
+        readRecordList(nif, mChildren);
         if (nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO4)
-            readRecordList(nif, effects);
+            readRecordList(nif, mEffects);
 
         // FIXME: stopgap solution until we figure out what Oblivion does if it does anything
         if (nif->getVersion() > NIFFile::NIFVersion::VER_MW && nif->getVersion() < NIFFile::NIFVersion::VER_BGS)
@@ -131,23 +127,24 @@ namespace Nif
         // FIXME: if node 0 is *not* the only root node, this must not happen.
         // FIXME: doing this here is awful.
         // We want to do this on world scene graph level rather than local scene graph level.
-        if (0 == recIndex && !Misc::StringUtils::ciEqual(mName, "bip01"))
+        if (recIndex == 0 && !Misc::StringUtils::ciEqual(mName, "bip01"))
         {
-            trafo = Nif::NiTransform::getIdentity();
+            mTransform = Nif::NiTransform::getIdentity();
         }
     }
 
     void NiNode::post(Reader& nif)
     {
-        Node::post(nif);
-        postRecordList(nif, children);
-        postRecordList(nif, effects);
+        NiAVObject::post(nif);
 
-        for (auto& child : children)
+        postRecordList(nif, mChildren);
+        postRecordList(nif, mEffects);
+
+        for (auto& child : mChildren)
         {
             // Why would a unique list of children contain empty refs?
             if (!child.empty())
-                child->parents.push_back(this);
+                child->mParents.push_back(this);
         }
     }
 
@@ -171,7 +168,7 @@ namespace Nif
 
     void NiGeometry::read(NIFStream* nif)
     {
-        Node::read(nif);
+        NiAVObject::read(nif);
         data.read(nif);
         skin.read(nif);
         material.read(nif);
@@ -185,7 +182,7 @@ namespace Nif
 
     void NiGeometry::post(Reader& nif)
     {
-        Node::post(nif);
+        NiAVObject::post(nif);
         data.post(nif);
         skin.post(nif);
         shaderprop.post(nif);
@@ -224,7 +221,7 @@ namespace Nif
 
     void NiCamera::read(NIFStream* nif)
     {
-        Node::read(nif);
+        NiAVObject::read(nif);
 
         cam.read(nif);
 
@@ -290,7 +287,7 @@ namespace Nif
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             mMode = nif->getUShort() & 0x7;
         else
-            mMode = (flags >> 5) & 0x3;
+            mMode = (mFlags >> 5) & 0x3;
     }
 
     void NiDefaultAVObjectPalette::read(NIFStream* nif)
@@ -338,7 +335,7 @@ namespace Nif
 
     void BSTriShape::read(NIFStream* nif)
     {
-        Node::read(nif);
+        NiAVObject::read(nif);
         nif->read(mBoundingSphere);
 
         if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_F76)
@@ -392,7 +389,7 @@ namespace Nif
 
     void BSTriShape::post(Reader& nif)
     {
-        Node::post(nif);
+        NiAVObject::post(nif);
         mSkin.post(nif);
         mShaderProperty.post(nif);
         mAlphaProperty.post(nif);

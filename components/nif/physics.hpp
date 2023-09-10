@@ -374,7 +374,7 @@ namespace Nif
     struct NiCollisionObject : public Record
     {
         // The node that references this object
-        NodePtr mTarget;
+        NiAVObjectPtr mTarget;
 
         void read(NIFStream* nif) override { mTarget.read(nif); }
         void post(Reader& nif) override { mTarget.post(nif); }
@@ -541,7 +541,7 @@ namespace Nif
 
     struct bhkCompressedMeshShape : public bhkShape
     {
-        NodePtr mTarget;
+        NiAVObjectPtr mTarget;
         uint32_t mUserData;
         float mRadius;
         osg::Vec4f mScale;

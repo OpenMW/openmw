@@ -76,12 +76,12 @@ namespace
         void apply(osg::Drawable& node) override { traverse(node); }
     };
 
-    void getAllNiNodes(const Nif::Node* node, std::vector<int>& outIndices)
+    void getAllNiNodes(const Nif::NiAVObject* node, std::vector<int>& outIndices)
     {
         if (const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(node))
         {
             outIndices.push_back(ninode->recIndex);
-            for (const auto& child : ninode->children)
+            for (const auto& child : ninode->mChildren)
                 if (!child.empty())
                     getAllNiNodes(child.getPtr(), outIndices);
         }
@@ -103,11 +103,11 @@ namespace
     // Collect all properties affecting the given drawable that should be handled on drawable basis rather than on the
     // node hierarchy above it.
     void collectDrawableProperties(
-        const Nif::Node* nifNode, const Nif::Parent* parent, std::vector<const Nif::Property*>& out)
+        const Nif::NiAVObject* nifNode, const Nif::Parent* parent, std::vector<const Nif::Property*>& out)
     {
         if (parent != nullptr)
             collectDrawableProperties(&parent->mNiNode, parent->mParent, out);
-        for (const auto& property : nifNode->props)
+        for (const auto& property : nifNode->mProperties)
         {
             if (!property.empty())
             {
@@ -345,13 +345,13 @@ namespace NifOsg
         osg::ref_ptr<osg::Node> load(Nif::FileView nif, Resource::ImageManager* imageManager)
         {
             const size_t numRoots = nif.numRoots();
-            std::vector<const Nif::Node*> roots;
+            std::vector<const Nif::NiAVObject*> roots;
             for (size_t i = 0; i < numRoots; ++i)
             {
                 const Nif::Record* r = nif.getRoot(i);
                 if (!r)
                     continue;
-                const Nif::Node* nifNode = dynamic_cast<const Nif::Node*>(r);
+                const Nif::NiAVObject* nifNode = dynamic_cast<const Nif::NiAVObject*>(r);
                 if (nifNode)
                     roots.emplace_back(nifNode);
             }
@@ -362,7 +362,7 @@ namespace NifOsg
 
             osg::ref_ptr<osg::Group> created(new osg::Group);
             created->setDataVariance(osg::Object::STATIC);
-            for (const Nif::Node* root : roots)
+            for (const Nif::NiAVObject* root : roots)
             {
                 auto node = handleNode(root, nullptr, nullptr,
                     { .mNifVersion = nif.getVersion(),
@@ -397,13 +397,13 @@ namespace NifOsg
             return created;
         }
 
-        void applyNodeProperties(const Nif::Node* nifNode, osg::Node* applyTo,
+        void applyNodeProperties(const Nif::NiAVObject* nifNode, osg::Node* applyTo,
             SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager,
             std::vector<unsigned int>& boundTextures, int animflags)
         {
             bool hasStencilProperty = false;
 
-            for (const auto& property : nifNode->props)
+            for (const auto& property : nifNode->mProperties)
             {
                 if (property.empty())
                     continue;
@@ -420,13 +420,13 @@ namespace NifOsg
                 }
             }
 
-            for (const auto& property : nifNode->props)
+            for (const auto& property : nifNode->mProperties)
             {
                 if (!property.empty())
                 {
                     // Get the lowest numbered recIndex of the NiTexturingProperty root node.
                     // This is what is overridden when a spell effect "particle texture" is used.
-                    if (nifNode->parents.empty() && !mFoundFirstRootTexturingProperty
+                    if (nifNode->mParents.empty() && !mFoundFirstRootTexturingProperty
                         && property.getPtr()->recType == Nif::RC_NiTexturingProperty)
                     {
                         mFirstRootTextureIndex = property.getPtr()->recIndex;
@@ -482,23 +482,23 @@ namespace NifOsg
             return switchNode;
         }
 
-        static osg::ref_ptr<osg::Sequence> prepareSequenceNode(const Nif::Node* nifNode)
+        static osg::ref_ptr<osg::Sequence> prepareSequenceNode(const Nif::NiAVObject* nifNode)
         {
             const Nif::NiFltAnimationNode* niFltAnimationNode = static_cast<const Nif::NiFltAnimationNode*>(nifNode);
             osg::ref_ptr<osg::Sequence> sequenceNode(new osg::Sequence);
             sequenceNode->setName(niFltAnimationNode->mName);
-            if (!niFltAnimationNode->children.empty())
+            if (!niFltAnimationNode->mChildren.empty())
             {
                 if (niFltAnimationNode->swing())
                     sequenceNode->setDefaultTime(
-                        niFltAnimationNode->mDuration / (niFltAnimationNode->children.size() * 2));
+                        niFltAnimationNode->mDuration / (niFltAnimationNode->mChildren.size() * 2));
                 else
-                    sequenceNode->setDefaultTime(niFltAnimationNode->mDuration / niFltAnimationNode->children.size());
+                    sequenceNode->setDefaultTime(niFltAnimationNode->mDuration / niFltAnimationNode->mChildren.size());
             }
             return sequenceNode;
         }
 
-        static void activateSequenceNode(osg::Group* osgNode, const Nif::Node* nifNode)
+        static void activateSequenceNode(osg::Group* osgNode, const Nif::NiAVObject* nifNode)
         {
             const Nif::NiFltAnimationNode* niFltAnimationNode = static_cast<const Nif::NiFltAnimationNode*>(nifNode);
             osg::Sequence* sequenceNode = static_cast<osg::Sequence*>(osgNode);
@@ -535,7 +535,7 @@ namespace NifOsg
             texture->setWrap(osg::Texture::WRAP_T, wrapT ? osg::Texture::REPEAT : osg::Texture::CLAMP_TO_EDGE);
         }
 
-        bool handleEffect(const Nif::Node* nifNode, osg::StateSet* stateset, Resource::ImageManager* imageManager)
+        bool handleEffect(const Nif::NiAVObject* nifNode, osg::StateSet* stateset, Resource::ImageManager* imageManager)
         {
             if (nifNode->recType != Nif::RC_NiTextureEffect)
             {
@@ -596,7 +596,7 @@ namespace NifOsg
         }
 
         // Get a default dataVariance for this node to be used as a hint by optimization (post)routines
-        osg::ref_ptr<osg::Group> createNode(const Nif::Node* nifNode)
+        osg::ref_ptr<osg::Group> createNode(const Nif::NiAVObject* nifNode)
         {
             osg::ref_ptr<osg::Group> node;
             osg::Object::DataVariance dataVariance = osg::Object::UNSPECIFIED;
@@ -611,15 +611,15 @@ namespace NifOsg
                     // This takes advantage of the fact root nodes can't have additional controllers
                     // loaded from an external .kf file (original engine just throws "can't find node" errors if you
                     // try).
-                    if (nifNode->parents.empty() && nifNode->mController.empty() && nifNode->trafo.isIdentity())
+                    if (nifNode->mParents.empty() && nifNode->mController.empty() && nifNode->mTransform.isIdentity())
                         node = new osg::Group;
 
-                    dataVariance = nifNode->isBone ? osg::Object::DYNAMIC : osg::Object::STATIC;
+                    dataVariance = nifNode->mIsBone ? osg::Object::DYNAMIC : osg::Object::STATIC;
 
                     break;
             }
             if (!node)
-                node = new NifOsg::MatrixTransform(nifNode->trafo);
+                node = new NifOsg::MatrixTransform(nifNode->mTransform);
 
             node->setDataVariance(dataVariance);
 
@@ -627,7 +627,7 @@ namespace NifOsg
         }
 
         osg::ref_ptr<osg::Node> handleNode(
-            const Nif::Node* nifNode, const Nif::Parent* parent, osg::Group* parentNode, HandleNodeArgs args)
+            const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Group* parentNode, HandleNodeArgs args)
         {
             if (args.mRootNode && Misc::StringUtils::ciEqual(nifNode->mName, "Bounding Box"))
                 return nullptr;
@@ -692,7 +692,7 @@ namespace NifOsg
             }
 
             if (nifNode->recType == Nif::RC_NiBSAnimationNode || nifNode->recType == Nif::RC_NiBSParticleNode)
-                args.mAnimFlags = nifNode->flags;
+                args.mAnimFlags = nifNode->mFlags;
 
             if (nifNode->recType == Nif::RC_NiSortAdjustNode)
             {
@@ -829,7 +829,7 @@ namespace NifOsg
             const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(nifNode);
             if (ninode)
             {
-                const Nif::NodeList& children = ninode->children;
+                const Nif::NiAVObjectList& children = ninode->mChildren;
                 const Nif::Parent currentParent{ *ninode, parent };
                 for (const auto& child : children)
                     if (!child.empty())
@@ -838,7 +838,7 @@ namespace NifOsg
                 // Propagate effects to the the direct subgraph instead of the node itself
                 // This simulates their "affected node list" which Morrowind appears to replace with the subgraph (?)
                 // Note that the serialized affected node list is actually unused
-                for (const auto& effect : ninode->effects)
+                for (const auto& effect : ninode->mEffects)
                     if (!effect.empty())
                     {
                         osg::ref_ptr<osg::StateSet> effectStateSet = new osg::StateSet;
@@ -854,7 +854,7 @@ namespace NifOsg
             return node;
         }
 
-        void handleMeshControllers(const Nif::Node* nifNode, osg::Node* node,
+        void handleMeshControllers(const Nif::NiAVObject* nifNode, osg::Node* node,
             SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures,
             int animflags)
         {
@@ -883,7 +883,7 @@ namespace NifOsg
             }
         }
 
-        void handleNodeControllers(const Nif::Node* nifNode, osg::Node* node, int animflags, bool& isAnimated)
+        void handleNodeControllers(const Nif::NiAVObject* nifNode, osg::Node* node, int animflags, bool& isAnimated)
         {
             for (Nif::ControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->next)
             {
@@ -1121,7 +1121,7 @@ namespace NifOsg
         // Load the initial state of the particle system, i.e. the initial particles and their positions, velocity and
         // colors.
         void handleParticleInitialState(
-            const Nif::Node* nifNode, ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
+            const Nif::NiAVObject* nifNode, ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
         {
             auto particleNode = static_cast<const Nif::NiParticles*>(nifNode);
             if (particleNode->data.empty() || particleNode->data->recType != Nif::RC_NiParticlesData)
@@ -1247,7 +1247,7 @@ namespace NifOsg
             mEmitterQueue.clear();
         }
 
-        void handleParticleSystem(const Nif::Node* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
+        void handleParticleSystem(const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
             SceneUtil::CompositeStateSetUpdater* composite, int animflags)
         {
             osg::ref_ptr<ParticleSystem> partsys(new ParticleSystem);
@@ -1375,7 +1375,7 @@ namespace NifOsg
             }
         }
 
-        void handleNiGeometry(const Nif::Node* nifNode, const Nif::Parent* parent, osg::Geometry* geometry,
+        void handleNiGeometry(const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Geometry* geometry,
             osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite,
             const std::vector<unsigned int>& boundTextures, int animflags)
         {
@@ -1474,7 +1474,7 @@ namespace NifOsg
             applyDrawableProperties(parentNode, drawableProps, composite, !niGeometryData->mColors.empty(), animflags);
         }
 
-        void handleGeometry(const Nif::Node* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
+        void handleGeometry(const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
             SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures,
             int animflags)
         {
@@ -1530,7 +1530,7 @@ namespace NifOsg
             return morphGeom;
         }
 
-        void handleSkinnedGeometry(const Nif::Node* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
+        void handleSkinnedGeometry(const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
             SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures,
             int animflags)
         {
@@ -1548,7 +1548,7 @@ namespace NifOsg
 
             const Nif::NiSkinInstance* skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin.getPtr();
             const Nif::NiSkinData* data = skin->mData.getPtr();
-            const Nif::NodeList& bones = skin->mBones;
+            const Nif::NiAVObjectList& bones = skin->mBones;
             for (std::size_t i = 0; i < bones.size(); ++i)
             {
                 std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);

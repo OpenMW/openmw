@@ -8,7 +8,7 @@ namespace Nif
 
     void NiDynamicEffect::read(NIFStream* nif)
     {
-        Node::read(nif);
+        NiAVObject::read(nif);
 
         if (nif->getVersion() > NIFFile::VER_MW && nif->getVersion() < nif->generateVersion(10, 1, 0, 0))
             return;

@@ -285,8 +285,8 @@ namespace
     struct TestBulletNifLoader : Test
     {
         BulletNifLoader mLoader;
-        Nif::Node mNode;
-        Nif::Node mNode2;
+        Nif::NiAVObject mNode;
+        Nif::NiAVObject mNode2;
         Nif::NiNode mNiNode;
         Nif::NiNode mNiNode2;
         Nif::NiNode mNiNode3;
@@ -414,11 +414,10 @@ namespace
     TEST_F(
         TestBulletNifLoader, for_root_nif_node_with_bounding_box_should_return_shape_with_compound_shape_and_box_inside)
     {
-        mNode.hasBounds = true;
-        mNode.flags |= Nif::Node::Flag_BBoxCollision;
-        mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
+        mNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.mBounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNode.mBounds.box.center = osg::Vec3f(-1, -2, -3);
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNode);
@@ -439,13 +438,12 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_child_nif_node_with_bounding_box)
     {
-        mNode.hasBounds = true;
-        mNode.flags |= Nif::Node::Flag_BBoxCollision;
-        mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
-        mNode.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNode) }));
+        mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
+        mNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.mBounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNode.mBounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -467,18 +465,16 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_root_and_child_nif_node_with_bounding_box_but_root_without_flag_should_use_child_bounds)
     {
-        mNode.hasBounds = true;
-        mNode.flags |= Nif::Node::Flag_BBoxCollision;
-        mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
-        mNode.parents.push_back(&mNiNode);
+        mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
+        mNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.mBounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNode.mBounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.mParents.push_back(&mNiNode);
 
-        mNiNode.hasBounds = true;
-        mNiNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNiNode.bounds.box.extents = osg::Vec3f(4, 5, 6);
-        mNiNode.bounds.box.center = osg::Vec3f(-4, -5, -6);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNode) }));
+        mNiNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNiNode.mBounds.box.extents = osg::Vec3f(4, 5, 6);
+        mNiNode.mBounds.box.center = osg::Vec3f(-4, -5, -6);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -500,24 +496,21 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_root_and_two_children_where_both_with_bounds_but_only_first_with_flag_should_use_first_bounds)
     {
-        mNode.hasBounds = true;
-        mNode.flags |= Nif::Node::Flag_BBoxCollision;
-        mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
-        mNode.parents.push_back(&mNiNode);
+        mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
+        mNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.mBounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNode.mBounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.mParents.push_back(&mNiNode);
 
-        mNode2.hasBounds = true;
-        mNode2.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode2.bounds.box.extents = osg::Vec3f(4, 5, 6);
-        mNode2.bounds.box.center = osg::Vec3f(-4, -5, -6);
-        mNode2.parents.push_back(&mNiNode);
+        mNode2.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode2.mBounds.box.extents = osg::Vec3f(4, 5, 6);
+        mNode2.mBounds.box.center = osg::Vec3f(-4, -5, -6);
+        mNode2.mParents.push_back(&mNiNode);
 
-        mNiNode.hasBounds = true;
-        mNiNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNiNode.bounds.box.extents = osg::Vec3f(7, 8, 9);
-        mNiNode.bounds.box.center = osg::Vec3f(-7, -8, -9);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNode), Nif::NodePtr(&mNode2) }));
+        mNiNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNiNode.mBounds.box.extents = osg::Vec3f(7, 8, 9);
+        mNiNode.mBounds.box.center = osg::Vec3f(-7, -8, -9);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode), Nif::NiAVObjectPtr(&mNode2) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -539,24 +532,21 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_root_and_two_children_where_both_with_bounds_but_only_second_with_flag_should_use_second_bounds)
     {
-        mNode.hasBounds = true;
-        mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
-        mNode.parents.push_back(&mNiNode);
+        mNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.mBounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNode.mBounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.mParents.push_back(&mNiNode);
 
-        mNode2.hasBounds = true;
-        mNode2.flags |= Nif::Node::Flag_BBoxCollision;
-        mNode2.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode2.bounds.box.extents = osg::Vec3f(4, 5, 6);
-        mNode2.bounds.box.center = osg::Vec3f(-4, -5, -6);
-        mNode2.parents.push_back(&mNiNode);
+        mNode2.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
+        mNode2.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode2.mBounds.box.extents = osg::Vec3f(4, 5, 6);
+        mNode2.mBounds.box.center = osg::Vec3f(-4, -5, -6);
+        mNode2.mParents.push_back(&mNiNode);
 
-        mNiNode.hasBounds = true;
-        mNiNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNiNode.bounds.box.extents = osg::Vec3f(7, 8, 9);
-        mNiNode.bounds.box.center = osg::Vec3f(-7, -8, -9);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNode), Nif::NodePtr(&mNode2) }));
+        mNiNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNiNode.mBounds.box.extents = osg::Vec3f(7, 8, 9);
+        mNiNode.mBounds.box.center = osg::Vec3f(-7, -8, -9);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode), Nif::NiAVObjectPtr(&mNode2) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -578,10 +568,9 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_root_nif_node_with_bounds_but_without_flag_should_return_shape_with_bounds_but_with_null_collision_shape)
     {
-        mNode.hasBounds = true;
-        mNode.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode.bounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNode.bounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.mBounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNode.mBounds.box.center = osg::Vec3f(-1, -2, -3);
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNode);
@@ -619,10 +608,9 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_root_node_with_bounds_should_return_static_shape_with_bounds_but_with_null_collision_shape)
     {
-        mNiTriShape.hasBounds = true;
-        mNiTriShape.bounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNiTriShape.bounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNiTriShape.bounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNiTriShape.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNiTriShape.mBounds.box.extents = osg::Vec3f(1, 2, 3);
+        mNiTriShape.mBounds.box.center = osg::Vec3f(-1, -2, -3);
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiTriShape);
@@ -639,8 +627,8 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_should_return_static_shape)
     {
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -662,10 +650,10 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_nested_tri_shape_child_should_return_static_shape)
     {
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiNode2) }));
-        mNiNode2.parents.push_back(&mNiNode);
-        mNiNode2.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
-        mNiTriShape.parents.push_back(&mNiNode2);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiNode2) };
+        mNiNode2.mParents.push_back(&mNiNode);
+        mNiNode2.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
+        mNiTriShape.mParents.push_back(&mNiNode2);
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -687,10 +675,9 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_two_tri_shape_children_should_return_static_shape_with_all_meshes)
     {
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiTriShape2.parents.push_back(&mNiNode);
-        mNiNode.children
-            = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape), Nif::NodePtr(&mNiTriShape2) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiTriShape2.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape), Nif::NiAVObjectPtr(&mNiTriShape2) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -717,8 +704,8 @@ namespace
         for_tri_shape_child_node_and_filename_starting_with_x_and_not_empty_skin_should_return_static_shape)
     {
         mNiTriShape.skin = Nif::NiSkinInstancePtr(&mNiSkinInstance);
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("xtest.nif");
         file.mRoots.push_back(&mNiNode);
@@ -739,8 +726,8 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_tri_shape_root_node_and_filename_starting_with_x_should_return_animated_shape)
     {
-        copy(mTransform, mNiTriShape.trafo);
-        mNiTriShape.trafo.mScale = 3;
+        copy(mTransform, mNiTriShape.mTransform);
+        mNiTriShape.mTransform.mScale = 3;
 
         Nif::NIFFile file("xtest.nif");
         file.mRoots.push_back(&mNiTriShape);
@@ -763,11 +750,11 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_and_filename_starting_with_x_should_return_animated_shape)
     {
-        copy(mTransform, mNiTriShape.trafo);
-        mNiTriShape.trafo.mScale = 3;
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
-        mNiNode.trafo.mScale = 4;
+        copy(mTransform, mNiTriShape.mTransform);
+        mNiTriShape.mTransform.mScale = 3;
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
+        mNiNode.mTransform.mScale = 4;
 
         Nif::NIFFile file("xtest.nif");
         file.mRoots.push_back(&mNiNode);
@@ -791,18 +778,15 @@ namespace
     TEST_F(
         TestBulletNifLoader, for_two_tri_shape_children_nodes_and_filename_starting_with_x_should_return_animated_shape)
     {
-        copy(mTransform, mNiTriShape.trafo);
-        mNiTriShape.trafo.mScale = 3;
-        mNiTriShape.parents.push_back(&mNiNode);
+        copy(mTransform, mNiTriShape.mTransform);
+        mNiTriShape.mTransform.mScale = 3;
+        mNiTriShape.mParents.push_back(&mNiNode);
 
-        copy(mTransform, mNiTriShape2.trafo);
-        mNiTriShape2.trafo.mScale = 3;
-        mNiTriShape2.parents.push_back(&mNiNode);
+        copy(mTransform, mNiTriShape2.mTransform);
+        mNiTriShape2.mTransform.mScale = 3;
+        mNiTriShape2.mParents.push_back(&mNiNode);
 
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({
-            Nif::NodePtr(&mNiTriShape),
-            Nif::NodePtr(&mNiTriShape2),
-        }));
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape), Nif::NiAVObjectPtr(&mNiTriShape2) };
 
         Nif::NIFFile file("xtest.nif");
         file.mRoots.push_back(&mNiNode);
@@ -834,12 +818,12 @@ namespace
     {
         mController.recType = Nif::RC_NiKeyframeController;
         mController.flags |= Nif::Controller::Flag_Active;
-        copy(mTransform, mNiTriShape.trafo);
-        mNiTriShape.trafo.mScale = 3;
-        mNiTriShape.parents.push_back(&mNiNode);
+        copy(mTransform, mNiTriShape.mTransform);
+        mNiTriShape.mTransform.mScale = 3;
+        mNiTriShape.mParents.push_back(&mNiNode);
         mNiTriShape.mController = Nif::ControllerPtr(&mController);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
-        mNiNode.trafo.mScale = 4;
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
+        mNiNode.mTransform.mScale = 4;
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -864,18 +848,18 @@ namespace
     {
         mController.recType = Nif::RC_NiKeyframeController;
         mController.flags |= Nif::Controller::Flag_Active;
-        copy(mTransform, mNiTriShape.trafo);
-        mNiTriShape.trafo.mScale = 3;
-        mNiTriShape.parents.push_back(&mNiNode);
-        copy(mTransform, mNiTriShape2.trafo);
-        mNiTriShape2.trafo.mScale = 3;
-        mNiTriShape2.parents.push_back(&mNiNode);
+        copy(mTransform, mNiTriShape.mTransform);
+        mNiTriShape.mTransform.mScale = 3;
+        mNiTriShape.mParents.push_back(&mNiNode);
+        copy(mTransform, mNiTriShape2.mTransform);
+        mNiTriShape2.mTransform.mScale = 3;
+        mNiTriShape2.mParents.push_back(&mNiNode);
         mNiTriShape2.mController = Nif::ControllerPtr(&mController);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({
-            Nif::NodePtr(&mNiTriShape),
-            Nif::NodePtr(&mNiTriShape2),
-        }));
-        mNiNode.trafo.mScale = 4;
+        mNiNode.mChildren = Nif::NiAVObjectList{
+            Nif::NiAVObjectPtr(&mNiTriShape),
+            Nif::NiAVObjectPtr(&mNiTriShape2),
+        };
+        mNiNode.mTransform.mScale = 4;
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -905,8 +889,8 @@ namespace
 
     TEST_F(TestBulletNifLoader, should_add_static_mesh_to_existing_compound_mesh)
     {
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("xtest.nif");
         file.mRoots.push_back(&mNiNode);
@@ -936,8 +920,8 @@ namespace
     TEST_F(
         TestBulletNifLoader, for_root_avoid_node_and_tri_shape_child_node_should_return_shape_with_null_collision_shape)
     {
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
         mNiNode.recType = Nif::RC_AvoidNode;
 
         Nif::NIFFile file("test.nif");
@@ -960,8 +944,8 @@ namespace
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_with_empty_data_should_return_shape_with_null_collision_shape)
     {
         mNiTriShape.data = Nif::NiGeometryDataPtr(nullptr);
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -979,8 +963,8 @@ namespace
     {
         auto data = static_cast<Nif::NiTriShapeData*>(mNiTriShape.data.getPtr());
         data->mTriangles.clear();
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -999,8 +983,8 @@ namespace
         mNiStringExtraData.mData = "NCC__";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -1028,8 +1012,8 @@ namespace
         mNiStringExtraData2.mData = "NCC__";
         mNiStringExtraData2.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -1055,8 +1039,8 @@ namespace
         mNiStringExtraData.mData = "NC___";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -1083,8 +1067,8 @@ namespace
         mNiStringExtraData2.mData = "NC___";
         mNiStringExtraData2.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -1112,13 +1096,13 @@ namespace
         init(emptyCollisionNode);
 
         niTriShape.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
-        niTriShape.parents.push_back(&mNiNode);
+        niTriShape.mParents.push_back(&mNiNode);
 
         emptyCollisionNode.recType = Nif::RC_RootCollisionNode;
-        emptyCollisionNode.parents.push_back(&mNiNode);
+        emptyCollisionNode.mParents.push_back(&mNiNode);
 
-        mNiNode.children = Nif::NodeList(
-            std::vector<Nif::NodePtr>({ Nif::NodePtr(&niTriShape), Nif::NodePtr(&emptyCollisionNode) }));
+        mNiNode.mChildren
+            = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&niTriShape), Nif::NiAVObjectPtr(&emptyCollisionNode) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -1144,8 +1128,8 @@ namespace
         mNiStringExtraData.mData = "MRK";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -1163,9 +1147,9 @@ namespace
         mNiIntegerExtraData.mData = 32; // BSX flag "editor marker"
         mNiIntegerExtraData.recType = Nif::RC_BSXFlags;
         mNiTriShape.mExtraList.push_back(Nif::ExtraPtr(&mNiIntegerExtraData));
-        mNiTriShape.parents.push_back(&mNiNode);
+        mNiTriShape.mParents.push_back(&mNiNode);
         mNiTriShape.mName = "EditorMarker";
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -1184,11 +1168,11 @@ namespace
         mNiStringExtraData.mData = "MRK";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
         mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
-        mNiTriShape.parents.push_back(&mNiNode2);
-        mNiNode2.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode2);
+        mNiNode2.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
         mNiNode2.recType = Nif::RC_RootCollisionNode;
-        mNiNode2.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiNode2) }));
+        mNiNode2.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiNode2) };
         mNiNode.recType = Nif::RC_NiNode;
 
         Nif::NIFFile file("test.nif");
@@ -1290,8 +1274,8 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_avoid_collision_mesh_should_ignore_tri_strips_data_with_less_than_3_strips)
     {
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
         mNiNode.recType = Nif::RC_AvoidNode;
         mNiTriStripsData.mStrips.front() = { 0, 1 };
 
@@ -1309,8 +1293,8 @@ namespace
     TEST_F(TestBulletNifLoader, for_animated_mesh_should_ignore_tri_strips_data_with_less_than_3_strips)
     {
         mNiTriStripsData.mStrips.front() = { 0, 1 };
-        mNiTriStrips.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriStrips) }));
+        mNiTriStrips.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriStrips) };
 
         Nif::NIFFile file("xtest.nif");
         file.mRoots.push_back(&mNiNode);
@@ -1326,8 +1310,8 @@ namespace
     TEST_F(TestBulletNifLoader, should_not_add_static_mesh_with_no_triangles_to_compound_shape)
     {
         mNiTriStripsData.mStrips.front() = { 0, 1 };
-        mNiTriShape.parents.push_back(&mNiNode);
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("xtest.nif");
         file.mRoots.push_back(&mNiNode);
@@ -1351,13 +1335,13 @@ namespace
 
     TEST_F(TestBulletNifLoader, should_handle_node_with_multiple_parents)
     {
-        copy(mTransform, mNiTriShape.trafo);
-        mNiTriShape.trafo.mScale = 4;
-        mNiTriShape.parents = { &mNiNode, &mNiNode2 };
-        mNiNode.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
-        mNiNode.trafo.mScale = 2;
-        mNiNode2.children = Nif::NodeList(std::vector<Nif::NodePtr>({ Nif::NodePtr(&mNiTriShape) }));
-        mNiNode2.trafo.mScale = 3;
+        copy(mTransform, mNiTriShape.mTransform);
+        mNiTriShape.mTransform.mScale = 4;
+        mNiTriShape.mParents = { &mNiNode, &mNiNode2 };
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
+        mNiNode.mTransform.mScale = 2;
+        mNiNode2.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
+        mNiNode2.mTransform.mScale = 3;
 
         Nif::NIFFile file("xtest.nif");
         file.mRoots.push_back(&mNiNode);

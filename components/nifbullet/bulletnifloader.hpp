@@ -22,10 +22,8 @@ class btCollisionShape;
 
 namespace Nif
 {
-    struct Node;
-    struct Transformation;
-    struct NiTriShape;
-    struct NiTriStrips;
+    struct NiAVObject;
+    struct NiNode;
     struct NiGeometry;
     struct Parent;
 }
@@ -50,7 +48,7 @@ namespace NifBullet
         osg::ref_ptr<Resource::BulletShape> load(Nif::FileView file);
 
     private:
-        bool findBoundingBox(const Nif::Node& node, const std::string& filename);
+        bool findBoundingBox(const Nif::NiAVObject& node, const std::string& filename);
 
         struct HandleNodeArgs
         {
@@ -61,11 +59,10 @@ namespace NifBullet
             bool mAvoid{ false };
         };
 
-        void handleNode(const std::string& fileName, const Nif::Node& node, const Nif::Parent* parent,
+        void handleNode(const std::string& fileName, const Nif::NiAVObject& node, const Nif::Parent* parent,
             HandleNodeArgs args, Resource::VisualCollisionType& visualCollisionType);
 
-        bool hasRootCollisionNode(const Nif::Node& rootNode) const;
-        bool collisionShapeIsEmpty(const Nif::Node& rootNode) const;
+        const Nif::NiNode* findRootCollisionNode(const Nif::NiAVObject& rootNode) const;
 
         void handleNiTriShape(const Nif::NiGeometry& nifNode, const Nif::Parent* parent, HandleNodeArgs args);
 

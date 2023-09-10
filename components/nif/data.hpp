@@ -229,8 +229,8 @@ namespace Nif
     {
         NiSkinDataPtr mData;
         NiSkinPartitionPtr mPartitions;
-        NodePtr mRoot;
-        NodeList mBones;
+        NiAVObjectPtr mRoot;
+        NiAVObjectList mBones;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;

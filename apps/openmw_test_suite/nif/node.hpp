@@ -23,18 +23,16 @@ namespace Nif::Testing
         value.mController = ControllerPtr(nullptr);
     }
 
-    inline void init(Node& value)
+    inline void init(NiAVObject& value)
     {
         init(static_cast<NiObjectNET&>(value));
-        value.flags = 0;
-        init(value.trafo);
-        value.hasBounds = false;
-        value.isBone = false;
+        value.mFlags = 0;
+        init(value.mTransform);
     }
 
     inline void init(NiGeometry& value)
     {
-        init(static_cast<Node&>(value));
+        init(static_cast<NiAVObject&>(value));
         value.data = NiGeometryDataPtr(nullptr);
         value.skin = NiSkinInstancePtr(nullptr);
     }
@@ -54,7 +52,7 @@ namespace Nif::Testing
     inline void init(NiSkinInstance& value)
     {
         value.mData = NiSkinDataPtr(nullptr);
-        value.mRoot = NodePtr(nullptr);
+        value.mRoot = NiAVObjectPtr(nullptr);
     }
 
     inline void init(Controller& value)
