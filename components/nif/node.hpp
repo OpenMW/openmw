@@ -15,7 +15,7 @@ namespace Nif
 
     struct NiBoundingVolume
     {
-        enum Type
+        enum Type : uint32_t
         {
             BASE_BV = 0xFFFFFFFF,
             SPHERE_BV = 0,
@@ -51,7 +51,7 @@ namespace Nif
             osg::Vec3f origin;
         };
 
-        unsigned int type{ BASE_BV };
+        uint32_t type{ BASE_BV };
         osg::BoundingSpheref sphere;
         NiBoxBV box;
         NiCapsuleBV capsule;

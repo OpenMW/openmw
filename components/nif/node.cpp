@@ -12,7 +12,7 @@ namespace Nif
 {
     void NiBoundingVolume::read(NIFStream* nif)
     {
-        type = nif->getUInt();
+        nif->read(type);
         switch (type)
         {
             case BASE_BV:
