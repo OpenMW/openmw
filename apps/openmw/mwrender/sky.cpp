@@ -302,8 +302,7 @@ namespace MWRender
 
         bool forceShaders = mSceneManager->getForceShaders();
 
-        mAtmosphereDay
-            = mSceneManager->getInstance(Settings::Manager::getString("skyatmosphere", "Models"), mEarlyRenderBinRoot);
+        mAtmosphereDay = mSceneManager->getInstance(Settings::models().mSkyatmosphere, mEarlyRenderBinRoot);
         ModVertexAlphaVisitor modAtmosphere(ModVertexAlphaVisitor::Atmosphere);
         mAtmosphereDay->accept(modAtmosphere);
 
@@ -315,12 +314,10 @@ namespace MWRender
         mEarlyRenderBinRoot->addChild(mAtmosphereNightNode);
 
         osg::ref_ptr<osg::Node> atmosphereNight;
-        if (mSceneManager->getVFS()->exists(Settings::Manager::getString("skynight02", "Models")))
-            atmosphereNight = mSceneManager->getInstance(
-                Settings::Manager::getString("skynight02", "Models"), mAtmosphereNightNode);
+        if (mSceneManager->getVFS()->exists(Settings::models().mSkynight02.get()))
+            atmosphereNight = mSceneManager->getInstance(Settings::models().mSkynight02, mAtmosphereNightNode);
         else
-            atmosphereNight = mSceneManager->getInstance(
-                Settings::Manager::getString("skynight01", "Models"), mAtmosphereNightNode);
+            atmosphereNight = mSceneManager->getInstance(Settings::models().mSkynight01, mAtmosphereNightNode);
         atmosphereNight->getOrCreateStateSet()->setAttributeAndModes(
             createAlphaTrackingUnlitMaterial(), osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
@@ -340,8 +337,7 @@ namespace MWRender
         mEarlyRenderBinRoot->addChild(mCloudNode);
 
         mCloudMesh = new osg::PositionAttitudeTransform;
-        osg::ref_ptr<osg::Node> cloudMeshChild
-            = mSceneManager->getInstance(Settings::Manager::getString("skyclouds", "Models"), mCloudMesh);
+        osg::ref_ptr<osg::Node> cloudMeshChild = mSceneManager->getInstance(Settings::models().mSkyclouds, mCloudMesh);
         mCloudUpdater = new CloudUpdater(forceShaders);
         mCloudUpdater->setOpacity(1.f);
         cloudMeshChild->addUpdateCallback(mCloudUpdater);
@@ -349,7 +345,7 @@ namespace MWRender
 
         mNextCloudMesh = new osg::PositionAttitudeTransform;
         osg::ref_ptr<osg::Node> nextCloudMeshChild
-            = mSceneManager->getInstance(Settings::Manager::getString("skyclouds", "Models"), mNextCloudMesh);
+            = mSceneManager->getInstance(Settings::models().mSkyclouds, mNextCloudMesh);
         mNextCloudUpdater = new CloudUpdater(forceShaders);
         mNextCloudUpdater->setOpacity(0.f);
         nextCloudMeshChild->addUpdateCallback(mNextCloudUpdater);
@@ -911,16 +907,16 @@ namespace MWRender
 
     void SkyManager::listAssetsToPreload(std::vector<std::string>& models, std::vector<std::string>& textures)
     {
-        models.emplace_back(Settings::Manager::getString("skyatmosphere", "Models"));
-        if (mSceneManager->getVFS()->exists(Settings::Manager::getString("skynight02", "Models")))
-            models.emplace_back(Settings::Manager::getString("skynight02", "Models"));
-        models.emplace_back(Settings::Manager::getString("skynight01", "Models"));
-        models.emplace_back(Settings::Manager::getString("skyclouds", "Models"));
+        models.push_back(Settings::models().mSkyatmosphere);
+        if (mSceneManager->getVFS()->exists(Settings::models().mSkynight02.get()))
+            models.push_back(Settings::models().mSkynight02);
+        models.push_back(Settings::models().mSkynight01);
+        models.push_back(Settings::models().mSkyclouds);
 
-        models.emplace_back(Settings::Manager::getString("weatherashcloud", "Models"));
-        models.emplace_back(Settings::Manager::getString("weatherblightcloud", "Models"));
-        models.emplace_back(Settings::Manager::getString("weathersnow", "Models"));
-        models.emplace_back(Settings::Manager::getString("weatherblizzard", "Models"));
+        models.push_back(Settings::models().mWeatherashcloud);
+        models.push_back(Settings::models().mWeatherblightcloud);
+        models.push_back(Settings::models().mWeathersnow);
+        models.push_back(Settings::models().mWeatherblizzard);
 
         textures.emplace_back("textures/tx_mooncircle_full_s.dds");
         textures.emplace_back("textures/tx_mooncircle_full_m.dds");

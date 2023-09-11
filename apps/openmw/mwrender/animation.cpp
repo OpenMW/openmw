@@ -1394,7 +1394,7 @@ namespace MWRender
                 MWWorld::LiveCellRef<ESM::Creature>* ref = mPtr.get<ESM::Creature>();
                 if (ref->mBase->mFlags & ESM::Creature::Bipedal)
                 {
-                    defaultSkeleton = Settings::Manager::getString("xbaseanim", "Models");
+                    defaultSkeleton = Settings::models().mXbaseanim;
                     inject = true;
                 }
             }

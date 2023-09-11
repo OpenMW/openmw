@@ -424,10 +424,10 @@ namespace MWClass
     {
         const MWWorld::LiveCellRef<ESM::NPC>* ref = ptr.get<ESM::NPC>();
 
-        std::string model = Settings::Manager::getString("baseanim", "Models");
+        std::string model = Settings::models().mBaseanim;
         const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().find(ref->mBase->mRace);
         if (race->mData.mFlags & ESM::Race::Beast)
-            model = Settings::Manager::getString("baseanimkna", "Models");
+            model = Settings::models().mBaseanimkna;
 
         return model;
     }
@@ -437,12 +437,12 @@ namespace MWClass
         const MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
         const ESM::Race* race = MWBase::Environment::get().getESMStore()->get<ESM::Race>().search(npc->mBase->mRace);
         if (race && race->mData.mFlags & ESM::Race::Beast)
-            models.emplace_back(Settings::Manager::getString("baseanimkna", "Models"));
+            models.push_back(Settings::models().mBaseanimkna);
 
         // keep these always loaded just in case
-        models.emplace_back(Settings::Manager::getString("xargonianswimkna", "Models"));
-        models.emplace_back(Settings::Manager::getString("xbaseanimfemale", "Models"));
-        models.emplace_back(Settings::Manager::getString("xbaseanim", "Models"));
+        models.push_back(Settings::models().mXargonianswimkna);
+        models.push_back(Settings::models().mXbaseanimfemale);
+        models.push_back(Settings::models().mXbaseanim);
 
         const VFS::Manager* const vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 

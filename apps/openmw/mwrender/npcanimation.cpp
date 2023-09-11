@@ -515,7 +515,7 @@ namespace MWRender
 
         if (!is1stPerson)
         {
-            const std::string& base = Settings::Manager::getString("xbaseanim", "Models");
+            const std::string& base = Settings::models().mXbaseanim;
             if (smodel != base && !isWerewolf)
                 addAnimSource(base, smodel);
 
@@ -529,7 +529,7 @@ namespace MWRender
         }
         else
         {
-            const std::string& base = Settings::Manager::getString("xbaseanim1st", "Models");
+            const std::string& base = Settings::models().mXbaseanim1st;
             if (smodel != base && !isWerewolf)
                 addAnimSource(base, smodel);
 
