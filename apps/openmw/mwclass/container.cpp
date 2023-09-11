@@ -302,8 +302,13 @@ namespace MWClass
     MWWorld::Ptr Container::copyToCellImpl(const MWWorld::ConstPtr& ptr, MWWorld::CellStore& cell) const
     {
         const MWWorld::LiveCellRef<ESM::Container>* ref = ptr.get<ESM::Container>();
-
-        return MWWorld::Ptr(cell.insert(ref), &cell);
+        MWWorld::Ptr newPtr(cell.insert(ref), &cell);
+        if (newPtr.getRefData().getCustomData())
+        {
+            MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
+            newPtr.getContainerStore()->setPtr(newPtr);
+        }
+        return newPtr;
     }
 
     void Container::readAdditionalState(const MWWorld::Ptr& ptr, const ESM::ObjectState& state) const

@@ -43,10 +43,17 @@ namespace MWWorld
             ++mRevision;
         }
 
-        void remove(const Ptr& ptr)
+        void remove(const LiveCellRefBase& ref) noexcept
         {
-            mIndex.erase(ptr.getCellRef().getRefNum());
-            ++mRevision;
+            const ESM::RefNum& refNum = ref.mRef.getRefNum();
+            if (!refNum.isSet())
+                return;
+            auto it = mIndex.find(refNum);
+            if (it != mIndex.end() && it->second.getBase() == &ref)
+            {
+                mIndex.erase(it);
+                ++mRevision;
+            }
         }
 
     private:

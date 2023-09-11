@@ -475,9 +475,6 @@ namespace MWLua
         scripts->setSerializer(mLocalSerializer.get());
         scripts->setSavedDataDeserializer(mLocalLoader.get());
         scripts->load(data);
-
-        // LiveCellRef is usually copied after loading, so this Ptr will become invalid and should be deregistered.
-        MWBase::Environment::get().getWorldModel()->deregisterPtr(ptr);
     }
 
     void LuaManager::reloadAllScripts()

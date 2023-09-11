@@ -38,7 +38,7 @@ namespace MWWorld
         LiveCellRefBase(unsigned int type, const ESM4::Reference& cref);
         LiveCellRefBase(unsigned int type, const ESM4::ActorCharacter& cref);
         /* Need this for the class to be recognized as polymorphic */
-        virtual ~LiveCellRefBase() {}
+        virtual ~LiveCellRefBase();
 
         virtual void load(const ESM::ObjectState& state) = 0;
         ///< Load state into a LiveCellRef, that has already been initialised with base and class.

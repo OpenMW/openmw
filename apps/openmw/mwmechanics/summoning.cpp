@@ -90,16 +90,14 @@ namespace MWMechanics
             {
                 auto world = MWBase::Environment::get().getWorld();
                 MWWorld::ManualRef ref(world->getStore(), creatureID, 1);
+                MWWorld::Ptr placed = world->safePlaceObject(ref.getPtr(), summoner, summoner.getCell(), 0, 120.f);
 
-                MWMechanics::CreatureStats& summonedCreatureStats
-                    = ref.getPtr().getClass().getCreatureStats(ref.getPtr());
+                MWMechanics::CreatureStats& summonedCreatureStats = placed.getClass().getCreatureStats(placed);
 
                 // Make the summoned creature follow its master and help in fights
                 AiFollow package(summoner);
-                summonedCreatureStats.getAiSequence().stack(package, ref.getPtr());
+                summonedCreatureStats.getAiSequence().stack(package, placed);
                 creatureActorId = summonedCreatureStats.getActorId();
-
-                MWWorld::Ptr placed = world->safePlaceObject(ref.getPtr(), summoner, summoner.getCell(), 0, 120.f);
 
                 MWRender::Animation* anim = world->getAnimation(placed);
                 if (anim)
