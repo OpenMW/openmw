@@ -717,8 +717,8 @@ namespace MWMechanics
                 if (!godmode)
                 {
                     int index = effect.mEffectId - ESM::MagicEffect::DrainHealth;
-                    adjustDynamicStat(
-                        target, index, -effect.mMagnitude, Settings::game().mUncappedDamageFatigue && index == 2);
+                    // Unlike Absorb and Damage effects Drain effects can bring stats below zero
+                    adjustDynamicStat(target, index, -effect.mMagnitude, true);
                     if (index == 0)
                         receivedMagicDamage = affectedHealth = true;
                 }
