@@ -324,16 +324,16 @@ namespace MWLua
                 },
                 "_runStandardActivationAction");
         };
-        api["_runStandardUseAction"] = [context](const GObject& object, const GObject& actor) {
+        api["_runStandardUseAction"] = [context](const GObject& object, const GObject& actor, bool force) {
             context.mLuaManager->addAction(
-                [object, actor] {
+                [object, actor, force] {
                     const MWWorld::Ptr& actorPtr = actor.ptr();
                     const MWWorld::Ptr& objectPtr = object.ptr();
                     if (actorPtr == MWBase::Environment::get().getWorld()->getPlayerPtr())
-                        MWBase::Environment::get().getWindowManager()->useItem(objectPtr, true);
+                        MWBase::Environment::get().getWindowManager()->useItem(objectPtr, force);
                     else
                     {
-                        std::unique_ptr<MWWorld::Action> action = objectPtr.getClass().use(objectPtr, true);
+                        std::unique_ptr<MWWorld::Action> action = objectPtr.getClass().use(objectPtr, force);
                         action->execute(actorPtr, true);
                     }
                 },

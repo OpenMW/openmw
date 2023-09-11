@@ -601,7 +601,7 @@ namespace MWGui
                 }
             }
             else
-                MWBase::Environment::get().getLuaManager()->useItem(ptr, MWMechanics::getPlayer());
+                MWBase::Environment::get().getLuaManager()->useItem(ptr, MWMechanics::getPlayer(), false);
 
             // If item is ingredient or potion don't stop drag and drop to simplify action of taking more than one 1
             // item

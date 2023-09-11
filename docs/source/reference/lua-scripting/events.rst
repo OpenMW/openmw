@@ -20,14 +20,14 @@ Examples:
 
 **UseItem**
 
-Any script can send global event ``UseItem`` with arguments ``object`` and ``actor``.
+Any script can send global event ``UseItem`` with arguments ``object``, ``actor``, and optional boolean ``force``.
 The actor will use (e.g. equip or consume) the object. The object should be in the actor's inventory.
 
 Example:
 
 .. code-block:: Lua
 
-    core.sendGlobalEvent('UseItem', {object = potion, actor = player})
+    core.sendGlobalEvent('UseItem', {object = potion, actor = player, force = true})
 
 UI events
 ---------

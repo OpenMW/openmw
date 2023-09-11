@@ -40,6 +40,7 @@ namespace MWLua
         {
             ESM::RefNum mActor;
             ESM::RefNum mObject;
+            bool mForce;
         };
         struct OnConsume
         {
