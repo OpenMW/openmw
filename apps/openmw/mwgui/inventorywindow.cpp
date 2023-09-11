@@ -556,6 +556,20 @@ namespace MWGui
         std::unique_ptr<MWWorld::Action> action = ptr.getClass().use(ptr, force);
         action->execute(player);
 
+        // Handles partial equipping (final part)
+        if (mEquippedStackableCount.has_value())
+        {
+            // the count to unequip
+            int count = ptr.getRefData().getCount() - mDragAndDrop->mDraggedCount - mEquippedStackableCount.value();
+            if (count > 0)
+            {
+                MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
+                invStore.unequipItemQuantity(ptr, count);
+                updateItemView();
+                mEquippedStackableCount.reset();
+            }
+        }
+
         if (isVisible())
         {
             mItemView->update();
@@ -581,27 +595,21 @@ namespace MWGui
             }
 
             // Handles partial equipping
-            const std::pair<std::vector<int>, bool> slots = ptr.getClass().getEquipmentSlots(ptr);
+            mEquippedStackableCount.reset();
+            const auto slots = ptr.getClass().getEquipmentSlots(ptr);
             if (!slots.first.empty() && slots.second)
             {
-                int equippedStackableCount = 0;
                 MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
                 MWWorld::ConstContainerStoreIterator slotIt = invStore.getSlot(slots.first.front());
 
-                // Get the count before useItem()
+                // Save the currently equipped count before useItem()
                 if (slotIt != invStore.end() && slotIt->getCellRef().getRefId() == ptr.getCellRef().getRefId())
-                    equippedStackableCount = slotIt->getRefData().getCount();
-
-                useItem(ptr);
-                int unequipCount = ptr.getRefData().getCount() - mDragAndDrop->mDraggedCount - equippedStackableCount;
-                if (unequipCount > 0)
-                {
-                    invStore.unequipItemQuantity(ptr, unequipCount);
-                    updateItemView();
-                }
+                    mEquippedStackableCount = slotIt->getRefData().getCount();
+                else
+                    mEquippedStackableCount = 0;
             }
-            else
-                MWBase::Environment::get().getLuaManager()->useItem(ptr, MWMechanics::getPlayer(), false);
+
+            MWBase::Environment::get().getLuaManager()->useItem(ptr, MWMechanics::getPlayer(), false);
 
             // If item is ingredient or potion don't stop drag and drop to simplify action of taking more than one 1
             // item
