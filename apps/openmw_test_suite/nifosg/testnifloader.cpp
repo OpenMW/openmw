@@ -66,7 +66,7 @@ namespace
 
     TEST_F(NifOsgLoaderTest, shouldLoadFileWithDefaultNode)
     {
-        Nif::Node node;
+        Nif::NiAVObject node;
         init(node);
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&node);
@@ -183,14 +183,14 @@ osg::Group {
 
     TEST_P(NifOsgLoaderBSShaderPrefixTest, shouldAddShaderPrefix)
     {
-        Nif::Node node;
+        Nif::NiAVObject node;
         init(node);
         Nif::BSShaderPPLightingProperty property;
         property.recType = Nif::RC_BSShaderPPLightingProperty;
         property.textureSet = nullptr;
-        property.controller = nullptr;
+        property.mController = nullptr;
         property.type = GetParam().mShaderType;
-        node.props.push_back(Nif::RecordPtrT<Nif::Property>(&property));
+        node.mProperties.push_back(Nif::RecordPtrT<Nif::Property>(&property));
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&node);
         auto result = Loader::load(file, &mImageManager);
@@ -211,14 +211,14 @@ osg::Group {
 
     TEST_P(NifOsgLoaderBSLightingShaderPrefixTest, shouldAddShaderPrefix)
     {
-        Nif::Node node;
+        Nif::NiAVObject node;
         init(node);
         Nif::BSLightingShaderProperty property;
         property.recType = Nif::RC_BSLightingShaderProperty;
         property.mTextureSet = nullptr;
-        property.controller = nullptr;
+        property.mController = nullptr;
         property.type = GetParam().mShaderType;
-        node.props.push_back(Nif::RecordPtrT<Nif::Property>(&property));
+        node.mProperties.push_back(Nif::RecordPtrT<Nif::Property>(&property));
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&node);
         auto result = Loader::load(file, &mImageManager);

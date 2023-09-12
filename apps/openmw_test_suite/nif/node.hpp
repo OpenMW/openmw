@@ -6,9 +6,9 @@
 
 namespace Nif::Testing
 {
-    inline void init(Transformation& value)
+    inline void init(NiTransform& value)
     {
-        value = Transformation::getIdentity();
+        value = NiTransform::getIdentity();
     }
 
     inline void init(Extra& value)
@@ -16,25 +16,23 @@ namespace Nif::Testing
         value.mNext = ExtraPtr(nullptr);
     }
 
-    inline void init(Named& value)
+    inline void init(NiObjectNET& value)
     {
-        value.extra = ExtraPtr(nullptr);
-        value.extralist = ExtraList();
-        value.controller = ControllerPtr(nullptr);
+        value.mExtra = ExtraPtr(nullptr);
+        value.mExtraList = ExtraList();
+        value.mController = ControllerPtr(nullptr);
     }
 
-    inline void init(Node& value)
+    inline void init(NiAVObject& value)
     {
-        init(static_cast<Named&>(value));
-        value.flags = 0;
-        init(value.trafo);
-        value.hasBounds = false;
-        value.isBone = false;
+        init(static_cast<NiObjectNET&>(value));
+        value.mFlags = 0;
+        init(value.mTransform);
     }
 
     inline void init(NiGeometry& value)
     {
-        init(static_cast<Node&>(value));
+        init(static_cast<NiAVObject&>(value));
         value.data = NiGeometryDataPtr(nullptr);
         value.skin = NiSkinInstancePtr(nullptr);
     }
@@ -54,7 +52,7 @@ namespace Nif::Testing
     inline void init(NiSkinInstance& value)
     {
         value.mData = NiSkinDataPtr(nullptr);
-        value.mRoot = NodePtr(nullptr);
+        value.mRoot = NiAVObjectPtr(nullptr);
     }
 
     inline void init(Controller& value)
@@ -65,7 +63,7 @@ namespace Nif::Testing
         value.phase = 0;
         value.timeStart = 0;
         value.timeStop = 0;
-        value.target = NamedPtr(nullptr);
+        value.target = NiObjectNETPtr(nullptr);
     }
 }
 

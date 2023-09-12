@@ -15,7 +15,7 @@ namespace Nif
 
     struct NiBoundingVolume
     {
-        enum Type
+        enum Type : uint32_t
         {
             BASE_BV = 0xFFFFFFFF,
             SPHERE_BV = 0,
@@ -51,7 +51,7 @@ namespace Nif
             osg::Vec3f origin;
         };
 
-        unsigned int type;
+        uint32_t type{ BASE_BV };
         osg::BoundingSpheref sphere;
         NiBoxBV box;
         NiCapsuleBV capsule;
@@ -62,11 +62,13 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
-    /** A Node is an object that's part of the main NIF tree. It has
-        parent node (unless it's the root), and transformation (location
-        and rotation) relative to it's parent.
-     */
-    struct Node : public Named
+    struct NiSequenceStreamHelper : NiObjectNET
+    {
+    };
+
+    // NiAVObject is an object that is a part of the main NIF tree. It has
+    // a parent node (unless it's the root) and transformation relative to its parent.
+    struct NiAVObject : public NiObjectNET
     {
         enum Flags
         {
@@ -76,57 +78,48 @@ namespace Nif
             Flag_ActiveCollision = 0x0020
         };
 
-        // Node flags. Interpretation depends somewhat on the type of node.
-        unsigned int flags;
-
-        Transformation trafo;
-        osg::Vec3f velocity; // Unused? Might be a run-time game state
-        PropertyList props;
-
-        // Bounding box info
-        bool hasBounds{ false };
-        NiBoundingVolume bounds;
-
-        // Collision object info
-        NiCollisionObjectPtr collision;
+        // Node flags. Interpretation depends on the record type.
+        uint32_t mFlags;
+        NiTransform mTransform;
+        osg::Vec3f mVelocity;
+        PropertyList mProperties;
+        NiBoundingVolume mBounds;
+        NiCollisionObjectPtr mCollision;
+        // Parent nodes for the node. Only types derived from NiNode can be parents.
+        std::vector<NiNode*> mParents;
+        bool mIsBone{ false };
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
 
-        // Parent node, or nullptr for the root node. As far as I'm aware, only
-        // NiNodes (or types derived from NiNodes) can be parents.
-        std::vector<NiNode*> parents;
-
-        bool isBone{ false };
-
         void setBone();
-
-        bool isHidden() const { return flags & Flag_Hidden; }
-        bool hasMeshCollision() const { return flags & Flag_MeshCollision; }
-        bool hasBBoxCollision() const { return flags & Flag_BBoxCollision; }
-        bool collisionActive() const { return flags & Flag_ActiveCollision; }
+        bool isHidden() const { return mFlags & Flag_Hidden; }
+        bool hasMeshCollision() const { return mFlags & Flag_MeshCollision; }
+        bool hasBBoxCollision() const { return mFlags & Flag_BBoxCollision; }
+        bool collisionActive() const { return mFlags & Flag_ActiveCollision; }
     };
 
-    struct NiNode : Node
+    struct NiNode : NiAVObject
     {
-        NodeList children;
-        NodeList effects;
-
         enum BSAnimFlags
         {
             AnimFlag_AutoPlay = 0x0020
         };
+
         enum BSParticleFlags
         {
             ParticleFlag_AutoPlay = 0x0020,
             ParticleFlag_LocalSpace = 0x0080
         };
 
+        NiAVObjectList mChildren;
+        NiAVObjectList mEffects;
+
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
     };
 
-    struct NiGeometry : Node
+    struct NiGeometry : NiAVObject
     {
         /* Possible flags:
             0x40 - mesh has no vertex normals ?
@@ -172,7 +165,7 @@ namespace Nif
     {
     };
 
-    struct NiCamera : Node
+    struct NiCamera : NiAVObject
     {
         struct Camera
         {
@@ -230,7 +223,7 @@ namespace Nif
 
         void read(NIFStream* nif) override;
 
-        bool swing() const { return flags & Flag_Swing; }
+        bool swing() const { return mFlags & Flag_Swing; }
     };
 
     // Abstract
@@ -272,8 +265,8 @@ namespace Nif
 
     struct NiDefaultAVObjectPalette : Record
     {
-        NodePtr mScene;
-        std::unordered_map<std::string, NodePtr> mObjects;
+        NiAVObjectPtr mScene;
+        std::unordered_map<std::string, NiAVObjectPtr> mObjects;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -281,7 +274,7 @@ namespace Nif
 
     struct BSTreeNode : NiNode
     {
-        NodeList mBones1, mBones2;
+        NiAVObjectList mBones1, mBones2;
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
     };
@@ -346,7 +339,7 @@ namespace Nif
         void read(NIFStream* nif, uint16_t flags);
     };
 
-    struct BSTriShape : Node
+    struct BSTriShape : NiAVObject
     {
         osg::BoundingSpheref mBoundingSphere;
         std::array<float, 6> mBoundMinMax;
@@ -393,5 +386,6 @@ namespace Nif
 
         void read(NIFStream* nif) override;
     };
-} // Namespace
+
+}
 #endif

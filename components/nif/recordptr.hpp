@@ -1,9 +1,10 @@
 #ifndef OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 #define OPENMW_COMPONENTS_NIF_RECORDPTR_HPP
 
+#include <vector>
+
 #include "niffile.hpp"
 #include "nifstream.hpp"
-#include <vector>
 
 namespace Nif
 {
@@ -39,7 +40,7 @@ namespace Nif
             assert(index == -2);
 
             // Store the index for later
-            index = nif->getInt();
+            index = nif->get<int32_t>();
             assert(index >= -1);
         }
 
@@ -90,12 +91,13 @@ namespace Nif
     template <class T>
     void readRecordList(NIFStream* nif, RecordListT<T>& list)
     {
-        const int length = nif->getInt();
+        const std::uint32_t length = nif->get<std::uint32_t>();
 
-        if (length < 0)
-            throw std::runtime_error("Negative NIF record list length: " + std::to_string(length));
+        // No reasonable list can hit this generous limit
+        if (length >= (1 << 24))
+            throw std::runtime_error("Record list too long: " + std::to_string(length));
 
-        list.resize(static_cast<std::size_t>(length));
+        list.resize(length);
 
         for (auto& value : list)
             value.read(nif);
@@ -108,14 +110,14 @@ namespace Nif
             value.post(nif);
     }
 
-    struct Node;
+    struct NiAVObject;
     struct Extra;
     struct Property;
     struct NiUVData;
     struct NiPosData;
     struct NiVisData;
     struct Controller;
-    struct Named;
+    struct NiObjectNET;
     struct NiSkinData;
     struct NiFloatData;
     struct NiMorphData;
@@ -150,13 +152,13 @@ namespace Nif
     struct BSMultiBound;
     struct BSMultiBoundData;
 
-    using NodePtr = RecordPtrT<Node>;
+    using NiAVObjectPtr = RecordPtrT<NiAVObject>;
     using ExtraPtr = RecordPtrT<Extra>;
     using NiUVDataPtr = RecordPtrT<NiUVData>;
     using NiPosDataPtr = RecordPtrT<NiPosData>;
     using NiVisDataPtr = RecordPtrT<NiVisData>;
     using ControllerPtr = RecordPtrT<Controller>;
-    using NamedPtr = RecordPtrT<Named>;
+    using NiObjectNETPtr = RecordPtrT<NiObjectNET>;
     using NiSkinDataPtr = RecordPtrT<NiSkinData>;
     using NiMorphDataPtr = RecordPtrT<NiMorphData>;
     using NiPixelDataPtr = RecordPtrT<NiPixelData>;
@@ -188,7 +190,7 @@ namespace Nif
     using BSMultiBoundPtr = RecordPtrT<BSMultiBound>;
     using BSMultiBoundDataPtr = RecordPtrT<BSMultiBoundData>;
 
-    using NodeList = RecordListT<Node>;
+    using NiAVObjectList = RecordListT<NiAVObject>;
     using PropertyList = RecordListT<Property>;
     using ExtraList = RecordListT<Extra>;
     using NiSourceTextureList = RecordListT<NiSourceTexture>;

@@ -308,7 +308,7 @@ namespace Nif
     {
         NiInterpController::read(nif);
         size_t numTargets = nif->getUShort();
-        std::vector<NodePtr> targets;
+        std::vector<NiAVObjectPtr> targets;
         targets.resize(numTargets);
         for (size_t i = 0; i < targets.size(); i++)
             targets[i].read(nif);

@@ -30,7 +30,7 @@ namespace Nif
 {
 
     // Abstract
-    struct NiDynamicEffect : public Node
+    struct NiDynamicEffect : public NiAVObject
     {
         bool mSwitchState{ true };
         void read(NIFStream* nif) override;

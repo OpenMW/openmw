@@ -25,13 +25,13 @@ namespace Nif
 {
 
     Reader::Reader(NIFFile& file)
-        : ver(file.mVersion)
-        , userVer(file.mUserVersion)
-        , bethVer(file.mBethVersion)
-        , filename(file.mPath)
-        , hash(file.mHash)
-        , records(file.mRecords)
-        , roots(file.mRoots)
+        : mVersion(file.mVersion)
+        , mUserVersion(file.mUserVersion)
+        , mBethVersion(file.mBethVersion)
+        , mFilename(file.mPath)
+        , mHash(file.mHash)
+        , mRecords(file.mRecords)
+        , mRoots(file.mRoots)
         , mUseSkinning(file.mUseSkinning)
     {
     }
@@ -315,7 +315,7 @@ namespace Nif
     /// Make the factory map used for parsing the file
     static const std::map<std::string, CreateRecord> factories = makeFactory();
 
-    std::string Reader::printVersion(unsigned int version)
+    std::string Reader::versionToString(std::uint32_t version)
     {
         int major = (version >> 24) & 0xFF;
         int minor = (version >> 16) & 0xFF;
@@ -329,8 +329,8 @@ namespace Nif
 
     void Reader::parse(Files::IStreamPtr&& stream)
     {
-        const std::array<std::uint64_t, 2> fileHash = Files::getHash(filename, *stream);
-        hash.append(reinterpret_cast<const char*>(fileHash.data()), fileHash.size() * sizeof(std::uint64_t));
+        const std::array<std::uint64_t, 2> fileHash = Files::getHash(mFilename, *stream);
+        mHash.append(reinterpret_cast<const char*>(fileHash.data()), fileHash.size() * sizeof(std::uint64_t));
 
         NIFStream nif(*this, std::move(stream));
 
@@ -343,151 +343,172 @@ namespace Nif
         const bool supportedHeader = std::any_of(verStrings.begin(), verStrings.end(),
             [&](const std::string& verString) { return head.starts_with(verString); });
         if (!supportedHeader)
-            throw Nif::Exception("Invalid NIF header: " + head, filename);
+            throw Nif::Exception("Invalid NIF header: " + head, mFilename);
 
         // Get BCD version
-        ver = nif.getUInt();
+        nif.read(mVersion);
         // 4.0.0.0 is an older, practically identical version of the format.
         // It's not used by Morrowind assets but Morrowind supports it.
         static const std::array<uint32_t, 2> supportedVers = {
             NIFStream::generateVersion(4, 0, 0, 0),
             NIFFile::VER_MW,
         };
-        const bool supportedVersion = std::find(supportedVers.begin(), supportedVers.end(), ver) != supportedVers.end();
+        const bool supportedVersion
+            = std::find(supportedVers.begin(), supportedVers.end(), mVersion) != supportedVers.end();
         const bool writeDebugLog = sWriteNifDebugLog;
         if (!supportedVersion)
         {
             if (!sLoadUnsupportedFiles)
-                throw Nif::Exception("Unsupported NIF version: " + printVersion(ver), filename);
+                throw Nif::Exception("Unsupported NIF version: " + versionToString(mVersion), mFilename);
             if (writeDebugLog)
-                Log(Debug::Warning) << " NIFFile Warning: Unsupported NIF version: " << printVersion(ver)
-                                    << ". Proceed with caution! File: " << filename;
+                Log(Debug::Warning) << " NIFFile Warning: Unsupported NIF version: " << versionToString(mVersion)
+                                    << ". Proceed with caution! File: " << mFilename;
         }
 
-        // NIF data endianness
-        if (ver >= NIFStream::generateVersion(20, 0, 0, 4))
+        const bool hasEndianness = mVersion >= NIFStream::generateVersion(20, 0, 0, 4);
+        const bool hasUserVersion = mVersion >= NIFStream::generateVersion(10, 0, 1, 8);
+        const bool hasRecTypeListings = mVersion >= NIFStream::generateVersion(5, 0, 0, 1);
+        const bool hasRecTypeHashes = mVersion == NIFStream::generateVersion(20, 3, 1, 2);
+        const bool hasRecordSizes = mVersion >= NIFStream::generateVersion(20, 2, 0, 5);
+        const bool hasGroups = mVersion >= NIFStream::generateVersion(5, 0, 0, 6);
+        const bool hasStringTable = mVersion >= NIFStream::generateVersion(20, 1, 0, 1);
+        const bool hasRecordSeparators
+            = mVersion >= NIFStream::generateVersion(10, 0, 0, 0) && mVersion < NIFStream::generateVersion(10, 2, 0, 0);
+
+        // Record type list
+        std::vector<std::string> recTypes;
+        // Record type mapping for each record
+        std::vector<std::uint16_t> recTypeIndices;
+
         {
-            unsigned char endianness = nif.getChar();
+            std::uint8_t endianness = 1;
+            if (hasEndianness)
+                nif.read(endianness);
+
+            // TODO: find some big-endian files and investigate the difference
             if (endianness == 0)
-                throw Nif::Exception("Big endian NIF files are unsupported", filename);
+                throw Nif::Exception("Big endian NIF files are unsupported", mFilename);
         }
 
-        // User version
-        if (ver > NIFStream::generateVersion(10, 0, 1, 8))
-            userVer = nif.getUInt();
+        if (hasUserVersion)
+            nif.read(mUserVersion);
 
-        // Number of records
-        const std::size_t recNum = nif.getUInt();
-        records.resize(recNum);
+        mRecords.resize(nif.get<std::uint32_t>());
 
         // Bethesda stream header
-        // It contains Bethesda format version and (useless) export information
-        if (ver == NIFFile::VER_OB_OLD
-            || (userVer >= 3
-                && ((ver == NIFFile::VER_OB || ver == NIFFile::VER_BGS)
-                    || (ver >= NIFStream::generateVersion(10, 1, 0, 0) && ver <= NIFStream::generateVersion(20, 0, 0, 4)
-                        && userVer <= 11))))
         {
-            bethVer = nif.getUInt();
-            nif.getExportString(); // Author
-            if (bethVer > NIFFile::BETHVER_FO4)
-                nif.getUInt(); // Unknown
-            nif.getExportString(); // Process script
-            nif.getExportString(); // Export script
-            if (bethVer == NIFFile::BETHVER_FO4)
-                nif.getExportString(); // Max file path
-        }
-
-        std::vector<std::string> recTypes;
-        std::vector<unsigned short> recTypeIndices;
-
-        const bool hasRecTypeListings = ver >= NIFStream::generateVersion(5, 0, 0, 1);
-        if (hasRecTypeListings)
-        {
-            unsigned short recTypeNum = nif.getUShort();
-            // Record type list
-            nif.getSizedStrings(recTypes, recTypeNum);
-            // Record type mapping for each record
-            nif.readVector(recTypeIndices, recNum);
-            if (ver >= NIFStream::generateVersion(5, 0, 0, 6)) // Groups
+            bool hasBSStreamHeader = false;
+            if (mVersion == NIFFile::VER_OB_OLD)
+                hasBSStreamHeader = true;
+            else if (mUserVersion >= 3 && mVersion >= NIFStream::generateVersion(10, 1, 0, 0))
             {
-                if (ver >= NIFStream::generateVersion(20, 1, 0, 1)) // String table
-                {
-                    if (ver >= NIFStream::generateVersion(20, 2, 0, 5)) // Record sizes
-                    {
-                        std::vector<unsigned int> recSizes; // Currently unused
-                        nif.readVector(recSizes, recNum);
-                    }
-                    const std::size_t stringNum = nif.getUInt();
-                    nif.getUInt(); // Max string length
-                    nif.getSizedStrings(strings, stringNum);
-                }
-                std::vector<unsigned int> groups; // Currently unused
-                unsigned int groupNum = nif.getUInt();
-                nif.readVector(groups, groupNum);
+                if (mVersion <= NIFFile::VER_OB || mVersion == NIFFile::VER_BGS)
+                    hasBSStreamHeader = mUserVersion <= 11 || mVersion >= NIFFile::VER_OB;
+            }
+
+            if (hasBSStreamHeader)
+            {
+                nif.read(mBethVersion);
+                nif.getExportString(); // Author
+                if (mBethVersion >= 131)
+                    nif.get<std::uint32_t>(); // Unknown
+                else
+                    nif.getExportString(); // Process script
+                nif.getExportString(); // Export script
+                if (mBethVersion >= 103)
+                    nif.getExportString(); // Max file path
             }
         }
 
-        const bool hasRecordSeparators
-            = ver >= NIFStream::generateVersion(10, 0, 0, 0) && ver < NIFStream::generateVersion(10, 2, 0, 0);
-        for (std::size_t i = 0; i < recNum; i++)
+        if (hasRecTypeListings)
+        {
+            // TODO: 20.3.1.2 uses DJB hashes instead of strings
+            if (hasRecTypeHashes)
+                throw Nif::Exception("Hashed record types are unsupported", mFilename);
+            else
+            {
+                nif.getSizedStrings(recTypes, nif.get<std::uint16_t>());
+                nif.readVector(recTypeIndices, mRecords.size());
+            }
+        }
+
+        if (hasRecordSizes) // Record sizes
+        {
+            std::vector<std::uint32_t> recSizes; // Currently unused
+            nif.readVector(recSizes, mRecords.size());
+        }
+
+        if (hasStringTable)
+        {
+            std::uint32_t stringNum, maxStringLength;
+            nif.read(stringNum);
+            nif.read(maxStringLength);
+            nif.getSizedStrings(mStrings, stringNum);
+        }
+
+        if (hasGroups)
+        {
+            std::vector<std::uint32_t> groups; // Currently unused
+            nif.readVector(groups, nif.get<std::uint32_t>());
+        }
+
+        for (std::size_t i = 0; i < mRecords.size(); i++)
         {
             std::unique_ptr<Record> r;
 
-            std::string rec = hasRecTypeListings ? recTypes[recTypeIndices[i]] : nif.getString();
+            std::string rec = hasRecTypeListings ? recTypes[recTypeIndices[i]] : nif.get<std::string>();
             if (rec.empty())
             {
                 std::stringstream error;
                 error << "Record type is blank (index " << i << ")";
-                throw Nif::Exception(error.str(), filename);
+                throw Nif::Exception(error.str(), mFilename);
             }
 
             // Record separator. Some Havok records in Oblivion do not have it.
             if (hasRecordSeparators && !rec.starts_with("bhk"))
-                if (nif.getInt())
+                if (nif.get<int32_t>())
                     Log(Debug::Warning) << "NIFFile Warning: Record of type " << rec << ", index " << i
-                                        << " is preceded by a non-zero separator. File: " << filename;
+                                        << " is preceded by a non-zero separator. File: " << mFilename;
 
             const auto entry = factories.find(rec);
 
             if (entry == factories.end())
-                throw Nif::Exception("Unknown record type " + rec, filename);
+                throw Nif::Exception("Unknown record type " + rec, mFilename);
 
             r = entry->second();
 
             if (!supportedVersion && writeDebugLog)
                 Log(Debug::Verbose) << "NIF Debug: Reading record of type " << rec << ", index " << i << " ("
-                                    << filename << ")";
+                                    << mFilename << ")";
 
             assert(r != nullptr);
             assert(r->recType != RC_MISSING);
             r->recName = rec;
             r->recIndex = i;
             r->read(&nif);
-            records[i] = std::move(r);
+            mRecords[i] = std::move(r);
         }
 
-        const std::size_t rootNum = nif.getUInt();
-        roots.resize(rootNum);
-
         // Determine which records are roots
-        for (std::size_t i = 0; i < rootNum; i++)
+        mRoots.resize(nif.get<uint32_t>());
+        for (std::size_t i = 0; i < mRoots.size(); i++)
         {
-            int idx = nif.getInt();
-            if (idx >= 0 && static_cast<std::size_t>(idx) < records.size())
+            std::int32_t idx;
+            nif.read(idx);
+            if (idx >= 0 && static_cast<std::size_t>(idx) < mRecords.size())
             {
-                roots[i] = records[idx].get();
+                mRoots[i] = mRecords[idx].get();
             }
             else
             {
-                roots[i] = nullptr;
+                mRoots[i] = nullptr;
                 Log(Debug::Warning) << "NIFFile Warning: Root " << i + 1 << " does not point to a record: index " << idx
-                                    << ". File: " << filename;
+                                    << ". File: " << mFilename;
             }
         }
 
         // Once parsing is done, do post-processing.
-        for (const auto& record : records)
+        for (const auto& record : mRecords)
             record->post(*this);
     }
 
@@ -513,7 +534,7 @@ namespace Nif
     {
         if (index == std::numeric_limits<std::uint32_t>::max())
             return std::string();
-        return strings.at(index);
+        return mStrings.at(index);
     }
 
 }

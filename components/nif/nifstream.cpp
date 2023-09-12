@@ -130,11 +130,11 @@ namespace Nif
     }
 
     template <>
-    void NIFStream::read<Transformation>(Transformation& t)
+    void NIFStream::read<NiTransform>(NiTransform& transform)
     {
-        read(t.pos);
-        read(t.rotation);
-        read(t.scale);
+        read(transform.mRotation);
+        read(transform.mTranslation);
+        read(transform.mScale);
     }
 
     template <>
@@ -192,7 +192,7 @@ namespace Nif
     }
 
     template <>
-    void NIFStream::read<Transformation>(Transformation* dest, size_t size)
+    void NIFStream::read<NiTransform>(NiTransform* dest, size_t size)
     {
         readRange(*this, dest, size);
     }

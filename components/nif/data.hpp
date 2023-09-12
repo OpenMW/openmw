@@ -1,33 +1,10 @@
-/*
-  OpenMW - The completely unofficial reimplementation of Morrowind
-  Copyright (C) 2008-2010  Nicolay Korslund
-  Email: < korslund@gmail.com >
-  WWW: https://openmw.org/
-
-  This file (data.h) is part of the OpenMW package.
-
-  OpenMW is distributed as free software: you can redistribute it
-  and/or modify it under the terms of the GNU General Public License
-  version 3, as published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  version 3 along with this program. If not, see
-  https://www.gnu.org/licenses/ .
-
- */
-
 #ifndef OPENMW_COMPONENTS_NIF_DATA_HPP
 #define OPENMW_COMPONENTS_NIF_DATA_HPP
 
 #include "nifkey.hpp"
-#include "niftypes.hpp" // Transformation
+#include "niftypes.hpp" // NiTransform
+#include "node.hpp"
 #include "recordptr.hpp"
-#include <components/nif/node.hpp>
 
 namespace Nif
 {
@@ -252,8 +229,8 @@ namespace Nif
     {
         NiSkinDataPtr mData;
         NiSkinPartitionPtr mPartitions;
-        NodePtr mRoot;
-        NodeList mBones;
+        NiAVObjectPtr mRoot;
+        NiAVObjectList mBones;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -278,12 +255,12 @@ namespace Nif
 
         struct BoneInfo
         {
-            Transformation mTransform;
+            NiTransform mTransform;
             osg::BoundingSpheref mBoundSphere;
             std::vector<VertWeight> mWeights;
         };
 
-        Transformation mTransform;
+        NiTransform mTransform;
         std::vector<BoneInfo> mBones;
         NiSkinPartitionPtr mPartitions;
 
@@ -413,5 +390,5 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-} // Namespace
+}
 #endif

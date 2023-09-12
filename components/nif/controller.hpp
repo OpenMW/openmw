@@ -160,7 +160,7 @@ namespace Nif
 
         osg::Vec3f offsetRandom;
 
-        NodePtr emitter;
+        NiAVObjectPtr emitter;
 
         int numParticles;
         int activeCount;
@@ -211,7 +211,7 @@ namespace Nif
 
     struct NiLookAtController : public Controller
     {
-        NodePtr target;
+        NiAVObjectPtr target;
         unsigned short lookAtFlags{ 0 };
 
         void read(NIFStream* nif) override;
@@ -237,7 +237,7 @@ namespace Nif
 
     struct NiMultiTargetTransformController : public NiInterpController
     {
-        NodeList mExtraTargets;
+        NiAVObjectList mExtraTargets;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
