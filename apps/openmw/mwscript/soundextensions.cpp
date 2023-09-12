@@ -67,7 +67,7 @@ namespace MWScript
                 runtime.pop();
 
                 MWBase::Environment::get().getSoundManager()->streamMusic(
-                    Misc::ResourceHelpers::correctMusicPath(music));
+                    Misc::ResourceHelpers::correctMusicPath(music), MWSound::MusicType::Scripted);
             }
         };
 

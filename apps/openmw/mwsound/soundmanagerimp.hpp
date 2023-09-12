@@ -176,8 +176,7 @@ namespace MWSound
         void stopMusic() override;
         ///< Stops music if it's playing
 
-        void streamMusic(const std::string& filename, MWSound::MusicType type = MWSound::MusicType::Scripted,
-            float fade = 1.f) override;
+        void streamMusic(const std::string& filename, MWSound::MusicType type, float fade = 1.f) override;
         ///< Play a soundifle
         /// \param filename name of a sound file in the data directory.
         /// \param type music type.

@@ -14,7 +14,8 @@ namespace MWLua
     {
         sol::table api(context.mLua->sol(), sol::create);
         api["streamMusic"] = [](std::string_view fileName) {
-            MWBase::Environment::get().getSoundManager()->streamMusic(std::string(fileName));
+            MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
+            sndMgr->streamMusic(std::string(fileName), MWSound::MusicType::Scripted);
         };
 
         api["stopMusic"] = []() { MWBase::Environment::get().getSoundManager()->stopMusic(); };
