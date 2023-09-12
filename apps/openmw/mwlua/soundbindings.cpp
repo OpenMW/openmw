@@ -95,6 +95,13 @@ namespace MWLua
             return MWBase::Environment::get().getSoundManager()->getSoundPlaying(MWWorld::Ptr(), fileName);
         };
 
+        api["streamMusic"] = [](std::string_view fileName) {
+            MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
+            sndMgr->streamMusic(std::string(fileName), MWSound::MusicType::Scripted);
+        };
+
+        api["stopMusic"] = []() { MWBase::Environment::get().getSoundManager()->stopMusic(); };
+
         return LuaUtil::makeReadOnly(api);
     }
 

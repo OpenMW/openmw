@@ -13,7 +13,6 @@ set(LUA_API_FILES
     openmw/async.lua
     openmw/core.lua
     openmw/debug.lua
-    openmw/music.lua
     openmw/nearby.lua
     openmw/postprocessing.lua
     openmw/self.lua

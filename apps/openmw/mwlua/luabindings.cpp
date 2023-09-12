@@ -40,7 +40,6 @@
 #include "factionbindings.hpp"
 #include "inputbindings.hpp"
 #include "magicbindings.hpp"
-#include "musicbindings.hpp"
 #include "nearbybindings.hpp"
 #include "objectbindings.hpp"
 #include "postprocessingbindings.hpp"
@@ -393,7 +392,6 @@ namespace MWLua
             { "openmw.input", initInputPackage(context) },
             { "openmw.postprocessing", initPostprocessingPackage(context) },
             { "openmw.ui", initUserInterfacePackage(context) },
-            { "openmw.music", initMusicPackage(context) },
         };
     }
 

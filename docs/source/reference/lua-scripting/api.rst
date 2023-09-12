@@ -23,7 +23,6 @@ Lua API reference
     openmw_nearby
     openmw_input
     openmw_ambient
-    openmw_music
     openmw_ui
     openmw_camera
     openmw_postprocessing

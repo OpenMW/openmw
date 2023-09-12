@@ -77,7 +77,6 @@ local env = {
     nearby = require('openmw.nearby'),
     self = require('openmw.self'),
     input = require('openmw.input'),
-    music = require('openmw.music'),
     ui = require('openmw.ui'),
     camera = require('openmw.camera'),
     aux_util = require('openmw_aux.util'),
