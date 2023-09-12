@@ -392,7 +392,9 @@ namespace MWWorld
             std::string_view video = Fallback::Map::getString("Movies_New_Game");
             if (!video.empty())
             {
+                // Make sure that we do not continue to play a Title music after a new game video.
                 MWBase::Environment::get().getSoundManager()->stopMusic();
+                MWBase::Environment::get().getSoundManager()->playPlaylist(std::string("Explore"));
                 MWBase::Environment::get().getWindowManager()->playVideo(video, true);
             }
         }
