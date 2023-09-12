@@ -744,12 +744,8 @@
 
 ---
 -- Set rank of given NPC in given faction.
--- Throws an exception if there is no such faction.
--- For NPCs faction should be an NPC's primary faction.
--- Notes:
---
---   * "value" <= 0 does nothing for NPCs and make the player character to leave the faction (purge his rank and reputation in faction).
---   * "value" > 0 set rank to given value if rank is valid (name is not empty), and to the highest valid rank otherwise.
+-- Throws an exception if there is no such faction, target rank does not exist or actor is not a member of given faction.
+-- For NPCs faction also should be an NPC's primary faction.
 -- @function [parent=#NPC] setFactionRank
 -- @param openmw.core#GameObject actor NPC object
 -- @param #string faction Faction ID
@@ -759,18 +755,39 @@
 
 ---
 -- Adjust rank of given NPC in given faction.
--- For NPCs faction should be an NPC's primary faction.
--- Throws an exception if there is no such faction.
+-- Throws an exception if there is no such faction or actor is not a member of given faction.
+-- For NPCs faction also should be an NPC's primary faction.
 -- Notes:
 --
---   * If rank should become <= 0 after modification, function does nothing for NPCs and makes the player character to leave the faction (purge his rank and reputation in faction).
---   * If rank should become > 0 after modification, function set rank to given value if rank is valid (name is not empty), and to the highest valid rank otherwise.
+--   * If rank should become <= 0 after modification, function set rank to lowest available rank.
+--   * If rank should become > 0 after modification, but target rank does not exist, function set rank to the highest valid rank.
 -- @function [parent=#NPC] modifyFactionRank
 -- @param openmw.core#GameObject actor NPC object
 -- @param #string faction Faction ID
 -- @param #number value Rank index (from 1) modifier. If rank reaches 0 for player character, he leaves the faction.
 -- @usage local NPC = require('openmw.types').NPC;
 -- NPC.modifyFactionRank(player, "mages guild", 1);
+
+---
+-- Add given actor to given faction.
+-- Throws an exception if there is no such faction or target actor is not player.
+-- Function does nothing if valid target actor is already a member of target faction.
+-- @function [parent=#NPC] joinFaction
+-- @param openmw.core#GameObject actor NPC object
+-- @param #string faction Faction ID
+-- @usage local NPC = require('openmw.types').NPC;
+-- NPC.joinFaction(player, "mages guild");
+
+---
+-- Remove given actor from given faction.
+-- Function removes rank data and expelling state, but keeps a reputation in target faction.
+-- Throws an exception if there is no such faction or target actor is not player.
+-- Function does nothing if valid target actor is already not member of target faction.
+-- @function [parent=#NPC] leaveFaction
+-- @param openmw.core#GameObject actor NPC object
+-- @param #string faction Faction ID
+-- @usage local NPC = require('openmw.types').NPC;
+-- NPC.leaveFaction(player, "mages guild");
 
 ---
 -- Get reputation of given actor in given faction.
