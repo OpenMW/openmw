@@ -74,7 +74,7 @@ namespace MWMechanics
 
         const std::set<ESM::RefId>& getExpelled() const { return mExpelled; }
         bool getExpelled(const ESM::RefId& factionID) const;
-        void expell(const ESM::RefId& factionID);
+        void expell(const ESM::RefId& factionID, bool printMessage);
         void clearExpelled(const ESM::RefId& factionID);
 
         bool isInFaction(const ESM::RefId& faction) const;

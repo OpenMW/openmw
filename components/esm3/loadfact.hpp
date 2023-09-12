@@ -68,7 +68,7 @@ namespace ESM
         std::map<ESM::RefId, int> mReactions;
 
         // Name of faction ranks (may be empty for NPC factions)
-        std::string mRanks[10];
+        std::array<std::string, 10> mRanks;
 
         void load(ESMReader& esm, bool& isDeleted);
         void save(ESMWriter& esm, bool isDeleted = false) const;

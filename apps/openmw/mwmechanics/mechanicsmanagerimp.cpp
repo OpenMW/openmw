@@ -1364,7 +1364,7 @@ namespace MWMechanics
                 const std::map<ESM::RefId, int>& playerRanks = player.getClass().getNpcStats(player).getFactionRanks();
                 if (playerRanks.find(factionID) != playerRanks.end())
                 {
-                    player.getClass().getNpcStats(player).expell(factionID);
+                    player.getClass().getNpcStats(player).expell(factionID, true);
                 }
             }
             else if (!factionId.empty())
@@ -1372,7 +1372,7 @@ namespace MWMechanics
                 const std::map<ESM::RefId, int>& playerRanks = player.getClass().getNpcStats(player).getFactionRanks();
                 if (playerRanks.find(factionId) != playerRanks.end())
                 {
-                    player.getClass().getNpcStats(player).expell(factionId);
+                    player.getClass().getNpcStats(player).expell(factionId, true);
                 }
             }
 

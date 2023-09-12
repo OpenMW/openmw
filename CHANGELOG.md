@@ -95,6 +95,7 @@
     Feature #7194: Ori to show texture paths
     Feature #7214: Searching in the in-game console
     Feature #7284: Searching in the console with regex and toggleable case-sensitivity 
+    Feature #7468: Factions API for Lua
     Feature #7477: NegativeLight Magic Effect flag
     Feature #7499: OpenMW-CS: Generate record filters by drag & dropping cell content to the filters field
     Feature #7546: Start the game on Fredas

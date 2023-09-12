@@ -938,7 +938,7 @@ namespace MWScript
                 MWWorld::Ptr player = MWMechanics::getPlayer();
                 if (!factionID.empty())
                 {
-                    player.getClass().getNpcStats(player).expell(factionID);
+                    player.getClass().getNpcStats(player).expell(factionID, true);
                 }
             }
         };
