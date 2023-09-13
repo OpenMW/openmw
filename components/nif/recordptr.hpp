@@ -116,7 +116,7 @@ namespace Nif
     struct NiUVData;
     struct NiPosData;
     struct NiVisData;
-    struct Controller;
+    struct NiTimeController;
     struct NiObjectNET;
     struct NiSkinData;
     struct NiFloatData;
@@ -157,7 +157,7 @@ namespace Nif
     using NiUVDataPtr = RecordPtrT<NiUVData>;
     using NiPosDataPtr = RecordPtrT<NiPosData>;
     using NiVisDataPtr = RecordPtrT<NiVisData>;
-    using ControllerPtr = RecordPtrT<Controller>;
+    using NiTimeControllerPtr = RecordPtrT<NiTimeController>;
     using NiObjectNETPtr = RecordPtrT<NiObjectNET>;
     using NiSkinDataPtr = RecordPtrT<NiSkinData>;
     using NiMorphDataPtr = RecordPtrT<NiMorphData>;

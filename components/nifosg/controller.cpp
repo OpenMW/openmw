@@ -15,11 +15,11 @@
 namespace NifOsg
 {
 
-    ControllerFunction::ControllerFunction(const Nif::Controller* ctrl)
-        : mFrequency(ctrl->frequency)
-        , mPhase(ctrl->phase)
-        , mStartTime(ctrl->timeStart)
-        , mStopTime(ctrl->timeStop)
+    ControllerFunction::ControllerFunction(const Nif::NiTimeController* ctrl)
+        : mFrequency(ctrl->mFrequency)
+        , mPhase(ctrl->mPhase)
+        , mStartTime(ctrl->mTimeStart)
+        , mStopTime(ctrl->mTimeStop)
         , mExtrapolationMode(ctrl->extrapolationMode())
     {
     }
@@ -31,7 +31,7 @@ namespace NifOsg
             return time;
         switch (mExtrapolationMode)
         {
-            case Nif::Controller::ExtrapolationMode::Cycle:
+            case Nif::NiTimeController::ExtrapolationMode::Cycle:
             {
                 float delta = mStopTime - mStartTime;
                 if (delta <= 0)
@@ -40,7 +40,7 @@ namespace NifOsg
                 float remainder = (cycles - std::floor(cycles)) * delta;
                 return mStartTime + remainder;
             }
-            case Nif::Controller::ExtrapolationMode::Reverse:
+            case Nif::NiTimeController::ExtrapolationMode::Reverse:
             {
                 float delta = mStopTime - mStartTime;
                 if (delta <= 0)
@@ -55,7 +55,7 @@ namespace NifOsg
 
                 return mStopTime - remainder;
             }
-            case Nif::Controller::ExtrapolationMode::Constant:
+            case Nif::NiTimeController::ExtrapolationMode::Constant:
             default:
                 return std::clamp(time, mStartTime, mStopTime);
         }

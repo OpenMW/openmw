@@ -191,10 +191,10 @@ namespace NifOsg
         float mPhase;
         float mStartTime;
         float mStopTime;
-        Nif::Controller::ExtrapolationMode mExtrapolationMode;
+        Nif::NiTimeController::ExtrapolationMode mExtrapolationMode;
 
     public:
-        ControllerFunction(const Nif::Controller* ctrl);
+        ControllerFunction(const Nif::NiTimeController* ctrl);
 
         float calculate(float value) const override;
 

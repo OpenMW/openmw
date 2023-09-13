@@ -300,7 +300,7 @@ namespace
         Nif::NiStringExtraData mNiStringExtraData;
         Nif::NiStringExtraData mNiStringExtraData2;
         Nif::NiIntegerExtraData mNiIntegerExtraData;
-        Nif::Controller mController;
+        Nif::NiTimeController mController;
         btTransform mTransform{ btMatrix3x3(btQuaternion(btVector3(1, 0, 0), 0.5f)), btVector3(1, 2, 3) };
         btTransform mTransformScale2{ btMatrix3x3(btQuaternion(btVector3(1, 0, 0), 0.5f)), btVector3(2, 4, 6) };
         btTransform mTransformScale3{ btMatrix3x3(btQuaternion(btVector3(1, 0, 0), 0.5f)), btVector3(3, 6, 9) };
@@ -817,11 +817,11 @@ namespace
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_with_controller_should_return_animated_shape)
     {
         mController.recType = Nif::RC_NiKeyframeController;
-        mController.flags |= Nif::Controller::Flag_Active;
+        mController.mFlags |= Nif::NiTimeController::Flag_Active;
         copy(mTransform, mNiTriShape.mTransform);
         mNiTriShape.mTransform.mScale = 3;
         mNiTriShape.mParents.push_back(&mNiNode);
-        mNiTriShape.mController = Nif::ControllerPtr(&mController);
+        mNiTriShape.mController = Nif::NiTimeControllerPtr(&mController);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
         mNiNode.mTransform.mScale = 4;
 
@@ -847,14 +847,14 @@ namespace
     TEST_F(TestBulletNifLoader, for_two_tri_shape_children_nodes_where_one_with_controller_should_return_animated_shape)
     {
         mController.recType = Nif::RC_NiKeyframeController;
-        mController.flags |= Nif::Controller::Flag_Active;
+        mController.mFlags |= Nif::NiTimeController::Flag_Active;
         copy(mTransform, mNiTriShape.mTransform);
         mNiTriShape.mTransform.mScale = 3;
         mNiTriShape.mParents.push_back(&mNiNode);
         copy(mTransform, mNiTriShape2.mTransform);
         mNiTriShape2.mTransform.mScale = 3;
         mNiTriShape2.mParents.push_back(&mNiNode);
-        mNiTriShape2.mController = Nif::ControllerPtr(&mController);
+        mNiTriShape2.mController = Nif::NiTimeControllerPtr(&mController);
         mNiNode.mChildren = Nif::NiAVObjectList{
             Nif::NiAVObjectPtr(&mNiTriShape),
             Nif::NiAVObjectPtr(&mNiTriShape2),

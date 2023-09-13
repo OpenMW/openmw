@@ -21,7 +21,7 @@ namespace Nif
         void post(Reader& nif) override { mNext.post(nif); }
     };
 
-    struct Controller : public Record
+    struct NiTimeController : public Record
     {
         enum Flags
         {
@@ -36,17 +36,17 @@ namespace Nif
             Mask = 6
         };
 
-        ControllerPtr next;
-        int flags;
-        float frequency, phase;
-        float timeStart, timeStop;
+        NiTimeControllerPtr mNext;
+        uint16_t mFlags;
+        float mFrequency, mPhase;
+        float mTimeStart, mTimeStop;
         NiObjectNETPtr mTarget;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
 
-        bool isActive() const { return flags & Flag_Active; }
-        ExtrapolationMode extrapolationMode() const { return static_cast<ExtrapolationMode>(flags & Mask); }
+        bool isActive() const { return mFlags & Flag_Active; }
+        ExtrapolationMode extrapolationMode() const { return static_cast<ExtrapolationMode>(mFlags & Mask); }
     };
 
     /// Abstract object that has a name, extra data and controllers
@@ -55,7 +55,7 @@ namespace Nif
         std::string mName;
         ExtraPtr mExtra;
         ExtraList mExtraList;
-        ControllerPtr mController;
+        NiTimeControllerPtr mController;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;

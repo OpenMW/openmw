@@ -293,8 +293,8 @@ namespace NifOsg
             auto textKeyExtraData = static_cast<const Nif::NiTextKeyExtraData*>(extraList[0].getPtr());
             extractTextKeys(textKeyExtraData, target.mTextKeys);
 
-            Nif::ControllerPtr ctrl = seq->mController;
-            for (size_t i = 1; i < extraList.size() && !ctrl.empty(); i++, (ctrl = ctrl->next))
+            Nif::NiTimeControllerPtr ctrl = seq->mController;
+            for (size_t i = 1; i < extraList.size() && !ctrl.empty(); i++, (ctrl = ctrl->mNext))
             {
                 Nif::ExtraPtr extra = extraList[i];
                 if (extra->recType != Nif::RC_NiStringExtraData || ctrl->recType != Nif::RC_NiKeyframeController)
@@ -449,7 +449,7 @@ namespace NifOsg
                     animflags, hasStencilProperty);
         }
 
-        static void setupController(const Nif::Controller* ctrl, SceneUtil::Controller* toSetup, int animflags)
+        static void setupController(const Nif::NiTimeController* ctrl, SceneUtil::Controller* toSetup, int animflags)
         {
             bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
             if (autoPlay)
@@ -725,7 +725,7 @@ namespace NifOsg
             if (nifNode->isHidden())
             {
                 bool hasVisController = false;
-                for (Nif::ControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->next)
+                for (Nif::NiTimeControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->mNext)
                 {
                     hasVisController |= (ctrl->recType == Nif::RC_NiVisController);
                     if (hasVisController)
@@ -858,7 +858,7 @@ namespace NifOsg
             SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures,
             int animflags)
         {
-            for (Nif::ControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::NiTimeControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
                 if (!ctrl->isActive())
                     continue;
@@ -884,7 +884,7 @@ namespace NifOsg
 
         void handleNodeControllers(const Nif::NiAVObject* nifNode, osg::Node* node, int animflags, bool& isAnimated)
         {
-            for (Nif::ControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::NiTimeControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
                 if (!ctrl->isActive())
                     continue;
@@ -962,7 +962,7 @@ namespace NifOsg
         void handleMaterialControllers(const Nif::Property* materialProperty,
             SceneUtil::CompositeStateSetUpdater* composite, int animflags, const osg::Material* baseMaterial)
         {
-            for (Nif::ControllerPtr ctrl = materialProperty->mController; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::NiTimeControllerPtr ctrl = materialProperty->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
                 if (!ctrl->isActive())
                     continue;
@@ -1012,7 +1012,7 @@ namespace NifOsg
         void handleTextureControllers(const Nif::Property* texProperty, SceneUtil::CompositeStateSetUpdater* composite,
             Resource::ImageManager* imageManager, osg::StateSet* stateset, int animflags)
         {
-            for (Nif::ControllerPtr ctrl = texProperty->mController; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::NiTimeControllerPtr ctrl = texProperty->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
                 if (!ctrl->isActive())
                     continue;
@@ -1200,7 +1200,7 @@ namespace NifOsg
                 partctrl->horizontalAngle, partctrl->verticalDir, partctrl->verticalAngle, partctrl->lifetime,
                 partctrl->lifetimeRandom);
             emitter->setShooter(shooter);
-            emitter->setFlags(partctrl->flags);
+            emitter->setFlags(partctrl->mFlags);
 
             if (partctrl->recType == Nif::RC_NiBSPArrayController && partctrl->emitAtVertex())
             {
@@ -1252,7 +1252,7 @@ namespace NifOsg
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
 
             const Nif::NiParticleSystemController* partctrl = nullptr;
-            for (Nif::ControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::NiTimeControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
                 if (!ctrl->isActive())
                     continue;
@@ -1483,7 +1483,7 @@ namespace NifOsg
             if (geom->empty())
                 return;
             osg::ref_ptr<osg::Drawable> drawable;
-            for (Nif::ControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::NiTimeControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
                 if (!ctrl->isActive())
                     continue;

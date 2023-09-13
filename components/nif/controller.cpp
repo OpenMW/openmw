@@ -9,21 +9,21 @@
 namespace Nif
 {
 
-    void Controller::read(NIFStream* nif)
+    void NiTimeController::read(NIFStream* nif)
     {
-        next.read(nif);
-
-        flags = nif->getUShort();
-        frequency = nif->getFloat();
-        phase = nif->getFloat();
-        timeStart = nif->getFloat();
-        timeStop = nif->getFloat();
-        mTarget.read(nif);
+        mNext.read(nif);
+        nif->read(mFlags);
+        nif->read(mFrequency);
+        nif->read(mPhase);
+        nif->read(mTimeStart);
+        nif->read(mTimeStop);
+        if (nif->getVersion() >= NIFStream::generateVersion(3, 3, 0, 13))
+            mTarget.read(nif);
     }
 
-    void Controller::post(Reader& nif)
+    void NiTimeController::post(Reader& nif)
     {
-        next.post(nif);
+        mNext.post(nif);
         mTarget.post(nif);
     }
 
@@ -109,7 +109,7 @@ namespace Nif
 
         nif->read(mWeight);
         mTextKeys.read(nif);
-        mExtrapolationMode = static_cast<Controller::ExtrapolationMode>(nif->getUInt());
+        mExtrapolationMode = static_cast<NiTimeController::ExtrapolationMode>(nif->getUInt());
         mFrequency = nif->getFloat();
         if (nif->getVersion() <= NIFStream::generateVersion(10, 4, 0, 1))
             nif->read(mPhase);
@@ -142,7 +142,7 @@ namespace Nif
 
     void NiInterpController::read(NIFStream* nif)
     {
-        Controller::read(nif);
+        NiTimeController::read(nif);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 104)
             && nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 108))
@@ -166,7 +166,7 @@ namespace Nif
 
     void NiParticleSystemController::read(NIFStream* nif)
     {
-        Controller::read(nif);
+        NiTimeController::read(nif);
 
         velocity = nif->getFloat();
         velocityRandom = nif->getFloat();
@@ -220,7 +220,7 @@ namespace Nif
 
     void NiParticleSystemController::post(Reader& nif)
     {
-        Controller::post(nif);
+        NiTimeController::post(nif);
 
         emitter.post(nif);
         affectors.post(nif);
@@ -234,7 +234,7 @@ namespace Nif
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             mTargetColor = static_cast<TargetColor>(nif->get<uint16_t>() & 3);
         else
-            mTargetColor = static_cast<TargetColor>((flags >> 4) & 3);
+            mTargetColor = static_cast<TargetColor>((mFlags >> 4) & 3);
 
         if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 103))
             mData.read(nif);
@@ -249,7 +249,7 @@ namespace Nif
 
     void NiLookAtController::read(NIFStream* nif)
     {
-        Controller::read(nif);
+        NiTimeController::read(nif);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             nif->read(mLookAtFlags);
@@ -258,19 +258,19 @@ namespace Nif
 
     void NiLookAtController::post(Reader& nif)
     {
-        Controller::post(nif);
+        NiTimeController::post(nif);
 
         mLookAt.post(nif);
     }
 
     void NiPathController::read(NIFStream* nif)
     {
-        Controller::read(nif);
+        NiTimeController::read(nif);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             nif->read(mPathFlags);
         else
-            mPathFlags = (flags >> 16);
+            mPathFlags = (mFlags >> 16);
 
         nif->read(mBankDirection);
         nif->read(mMaxBankAngle);
@@ -282,7 +282,7 @@ namespace Nif
 
     void NiPathController::post(Reader& nif)
     {
-        Controller::post(nif);
+        NiTimeController::post(nif);
 
         mPathData.post(nif);
         mPercentData.post(nif);
@@ -290,7 +290,7 @@ namespace Nif
 
     void NiUVController::read(NIFStream* nif)
     {
-        Controller::read(nif);
+        NiTimeController::read(nif);
 
         nif->read(mUvSet);
         mData.read(nif);
@@ -298,7 +298,7 @@ namespace Nif
 
     void NiUVController::post(Reader& nif)
     {
-        Controller::post(nif);
+        NiTimeController::post(nif);
 
         mData.post(nif);
     }
@@ -427,7 +427,7 @@ namespace Nif
         mTexSlot = static_cast<NiTexturingProperty::TextureType>(nif->get<uint32_t>());
         if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 103))
         {
-            nif->read(timeStart);
+            nif->read(mTimeStart);
             nif->read(mDelta);
         }
         readRecordList(nif, mSources);
@@ -460,7 +460,7 @@ namespace Nif
 
     void bhkBlendController::read(NIFStream* nif)
     {
-        Controller::read(nif);
+        NiTimeController::read(nif);
 
         uint32_t numKeys;
         nif->read(numKeys);
@@ -486,7 +486,7 @@ namespace Nif
 
     void NiControllerManager::read(NIFStream* nif)
     {
-        Controller::read(nif);
+        NiTimeController::read(nif);
 
         nif->read(mCumulative);
         readRecordList(nif, mSequences);
@@ -495,7 +495,7 @@ namespace Nif
 
     void NiControllerManager::post(Reader& nif)
     {
-        Controller::post(nif);
+        NiTimeController::post(nif);
 
         postRecordList(nif, mSequences);
         mObjectPalette.post(nif);

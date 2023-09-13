@@ -12,7 +12,7 @@ namespace Nif
     {
         std::string mTargetName;
         NiInterpolatorPtr mInterpolator;
-        ControllerPtr mController;
+        NiTimeControllerPtr mController;
         NiBlendInterpolatorPtr mBlendInterpolator;
         uint16_t mBlendIndex;
         uint8_t mPriority;
@@ -49,7 +49,7 @@ namespace Nif
     struct NiControllerSequence : public NiSequence
     {
         float mWeight{ 1.f };
-        Controller::ExtrapolationMode mExtrapolationMode{ Controller::ExtrapolationMode::Constant };
+        NiTimeController::ExtrapolationMode mExtrapolationMode{ NiTimeController::ExtrapolationMode::Constant };
         float mFrequency{ 1.f };
         float mPhase{ 1.f };
         float mStartTime, mStopTime;
@@ -62,7 +62,7 @@ namespace Nif
     };
 
     // Base class for controllers that use NiInterpolators to animate objects.
-    struct NiInterpController : public Controller
+    struct NiInterpController : public NiTimeController
     {
         // Usually one of the flags.
         bool mManagerControlled{ false };
@@ -94,7 +94,7 @@ namespace Nif
     {
     };
 
-    struct NiParticleSystemController : public Controller
+    struct NiParticleSystemController : public NiTimeController
     {
         enum BSPArrayController
         {
@@ -151,7 +151,7 @@ namespace Nif
         void post(Reader& nif) override;
 
         bool noAutoAdjust() const { return emitFlags & EmitFlag_NoAutoAdjust; }
-        bool emitAtVertex() const { return flags & BSPArrayController_AtVertex; }
+        bool emitAtVertex() const { return mFlags & BSPArrayController_AtVertex; }
     };
     using NiBSPArrayController = NiParticleSystemController;
 
@@ -172,7 +172,7 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiPathController : public Controller
+    struct NiPathController : public NiTimeController
     {
         enum Flags
         {
@@ -197,7 +197,7 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiLookAtController : public Controller
+    struct NiLookAtController : public NiTimeController
     {
         enum Flags
         {
@@ -213,7 +213,7 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiUVController : public Controller
+    struct NiUVController : public NiTimeController
     {
         NiUVDataPtr mData;
         uint16_t mUvSet;
@@ -295,7 +295,7 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct bhkBlendController : public Controller
+    struct bhkBlendController : public NiTimeController
     {
         void read(NIFStream* nif) override;
     };
@@ -314,7 +314,7 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiControllerManager : public Controller
+    struct NiControllerManager : public NiTimeController
     {
         bool mCumulative;
         NiControllerSequenceList mSequences;
