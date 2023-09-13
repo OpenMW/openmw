@@ -156,8 +156,6 @@ namespace Nif
         osg::Vec2f getVector2() { return get<osg::Vec2f>(); }
         osg::Vec3f getVector3() { return get<osg::Vec3f>(); }
         osg::Vec4f getVector4() { return get<osg::Vec4f>(); }
-        bool getBoolean() { return get<bool>(); }
-        std::string getString() { return get<std::string>(); }
     };
 
     template <>

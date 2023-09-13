@@ -153,8 +153,8 @@ namespace Nif
         if (nif->getVersion() < NIFStream::generateVersion(10, 0, 1, 0))
             return;
         unsigned int num = 0;
-        if (nif->getVersion() <= NIFStream::generateVersion(20, 1, 0, 3))
-            num = nif->getBoolean(); // Has Shader
+        if (nif->getVersion() <= NIFStream::generateVersion(20, 1, 0, 3) && nif->get<bool>())
+            num = 1;
         else if (nif->getVersion() >= NIFStream::generateVersion(20, 2, 0, 5))
             num = nif->getUInt();
 
@@ -163,7 +163,7 @@ namespace Nif
         if (nif->getVersion() >= NIFStream::generateVersion(20, 2, 0, 5))
             active = nif->getUInt();
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS)
-            needsUpdate = nif->getBoolean();
+            nif->read(needsUpdate);
     }
 
     void NiGeometry::read(NIFStream* nif)
@@ -210,7 +210,7 @@ namespace Nif
         nearDist = nif->getFloat();
         farDist = nif->getFloat();
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            orthographic = nif->getBoolean();
+            nif->read(orthographic);
         vleft = nif->getFloat();
         vright = nif->getFloat();
         vtop = nif->getFloat();
