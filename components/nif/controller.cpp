@@ -305,17 +305,16 @@ namespace Nif
     void NiMultiTargetTransformController::read(NIFStream* nif)
     {
         NiInterpController::read(nif);
-        size_t numTargets = nif->getUShort();
-        std::vector<NiAVObjectPtr> targets;
-        targets.resize(numTargets);
-        for (size_t i = 0; i < targets.size(); i++)
-            targets[i].read(nif);
-        mExtraTargets = targets;
+
+        mExtraTargets.resize(nif->get<uint16_t>());
+        for (NiAVObjectPtr& extraTarget : mExtraTargets)
+            extraTarget.read(nif);
     }
 
     void NiMultiTargetTransformController::post(Reader& nif)
     {
         NiInterpController::post(nif);
+
         postRecordList(nif, mExtraTargets);
     }
 
