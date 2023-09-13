@@ -262,9 +262,9 @@ namespace NifOsg
     class UVController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
     public:
-        UVController();
+        UVController() = default;
         UVController(const UVController&, const osg::CopyOp&);
-        UVController(const Nif::NiUVData* data, const std::set<int>& textureUnits);
+        UVController(const Nif::NiUVData* data, const std::set<unsigned int>& textureUnits);
 
         META_Object(NifOsg, UVController)
 
@@ -276,7 +276,7 @@ namespace NifOsg
         FloatInterpolator mVTrans;
         FloatInterpolator mUScale;
         FloatInterpolator mVScale;
-        std::set<int> mTextureUnits;
+        std::set<unsigned int> mTextureUnits;
     };
 
     class VisController : public SceneUtil::NodeCallback<VisController>, public SceneUtil::Controller

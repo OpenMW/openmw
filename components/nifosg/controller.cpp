@@ -255,9 +255,7 @@ namespace NifOsg
         }
     }
 
-    UVController::UVController() {}
-
-    UVController::UVController(const Nif::NiUVData* data, const std::set<int>& textureUnits)
+    UVController::UVController(const Nif::NiUVData* data, const std::set<unsigned int>& textureUnits)
         : mUTrans(data->mKeyList[0], 0.f)
         , mVTrans(data->mKeyList[1], 0.f)
         , mUScale(data->mKeyList[2], 1.f)
@@ -281,8 +279,8 @@ namespace NifOsg
     void UVController::setDefaults(osg::StateSet* stateset)
     {
         osg::ref_ptr<osg::TexMat> texMat(new osg::TexMat);
-        for (std::set<int>::const_iterator it = mTextureUnits.begin(); it != mTextureUnits.end(); ++it)
-            stateset->setTextureAttributeAndModes(*it, texMat, osg::StateAttribute::ON);
+        for (unsigned int unit : mTextureUnits)
+            stateset->setTextureAttributeAndModes(unit, texMat, osg::StateAttribute::ON);
     }
 
     void UVController::apply(osg::StateSet* stateset, osg::NodeVisitor* nv)

@@ -213,8 +213,8 @@ namespace Nif
 
     struct NiUVController : public Controller
     {
-        NiUVDataPtr data;
-        unsigned int uvSet;
+        NiUVDataPtr mData;
+        uint16_t mUvSet;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;

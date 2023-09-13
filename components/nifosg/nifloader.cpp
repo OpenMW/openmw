@@ -865,18 +865,17 @@ namespace NifOsg
                 if (ctrl->recType == Nif::RC_NiUVController)
                 {
                     const Nif::NiUVController* niuvctrl = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
-                    if (niuvctrl->data.empty())
+                    if (niuvctrl->mData.empty())
                         continue;
-                    const unsigned int uvSet = niuvctrl->uvSet;
-                    std::set<int> texUnits;
-                    // UVController should work only for textures which use a given UV Set, usually 0.
+                    std::set<unsigned int> texUnits;
+                    // UVController should only work for textures which use the given UV Set.
                     for (unsigned int i = 0; i < boundTextures.size(); ++i)
                     {
-                        if (boundTextures[i] == uvSet)
+                        if (boundTextures[i] == niuvctrl->mUvSet)
                             texUnits.insert(i);
                     }
 
-                    osg::ref_ptr<UVController> uvctrl = new UVController(niuvctrl->data.getPtr(), texUnits);
+                    osg::ref_ptr<UVController> uvctrl = new UVController(niuvctrl->mData.getPtr(), texUnits);
                     setupController(niuvctrl, uvctrl, animflags);
                     composite->addController(uvctrl);
                 }

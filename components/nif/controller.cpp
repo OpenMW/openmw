@@ -287,15 +287,15 @@ namespace Nif
     {
         Controller::read(nif);
 
-        uvSet = nif->getUShort();
-        data.read(nif);
+        nif->read(mUvSet);
+        mData.read(nif);
     }
 
     void NiUVController::post(Reader& nif)
     {
         Controller::post(nif);
 
-        data.post(nif);
+        mData.post(nif);
     }
 
     void NiKeyframeController::read(NIFStream* nif)
