@@ -292,6 +292,7 @@ namespace Nif
     void NiKeyframeController::read(NIFStream* nif)
     {
         NiSingleInterpController::read(nif);
+
         if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 103))
             mData.read(nif);
     }
@@ -299,6 +300,7 @@ namespace Nif
     void NiKeyframeController::post(Reader& nif)
     {
         NiSingleInterpController::post(nif);
+
         mData.post(nif);
     }
 
@@ -503,24 +505,13 @@ namespace Nif
 
     void NiTransformInterpolator::read(NIFStream* nif)
     {
-        defaultPos = nif->getVector3();
-        nif->read(defaultRot);
-        defaultScale = nif->getFloat();
-        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
-        {
-            if (!nif->getBoolean())
-                defaultPos = osg::Vec3f();
-            if (!nif->getBoolean())
-                defaultRot = osg::Quat();
-            if (!nif->getBoolean())
-                defaultScale = 1.f;
-        }
-        data.read(nif);
+        nif->read(mDefaultTransform);
+        mData.read(nif);
     }
 
     void NiTransformInterpolator::post(Reader& nif)
     {
-        data.post(nif);
+        mData.post(nif);
     }
 
     void NiColorInterpolator::read(NIFStream* nif)

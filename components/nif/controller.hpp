@@ -344,10 +344,8 @@ namespace Nif
 
     struct NiTransformInterpolator : public NiInterpolator
     {
-        osg::Vec3f defaultPos;
-        osg::Quat defaultRot;
-        float defaultScale;
-        NiKeyframeDataPtr data;
+        NiQuatTransform mDefaultTransform;
+        NiKeyframeDataPtr mData;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;

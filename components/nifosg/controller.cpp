@@ -90,21 +90,23 @@ namespace NifOsg
             {
                 const Nif::NiTransformInterpolator* interp
                     = static_cast<const Nif::NiTransformInterpolator*>(keyctrl->mInterpolator.getPtr());
-                if (!interp->data.empty())
+                const Nif::NiQuatTransform& defaultTransform = interp->mDefaultTransform;
+                if (!interp->mData.empty())
                 {
-                    mRotations = QuaternionInterpolator(interp->data->mRotations, interp->defaultRot);
-                    mXRotations = FloatInterpolator(interp->data->mXRotations);
-                    mYRotations = FloatInterpolator(interp->data->mYRotations);
-                    mZRotations = FloatInterpolator(interp->data->mZRotations);
-                    mTranslations = Vec3Interpolator(interp->data->mTranslations, interp->defaultPos);
-                    mScales = FloatInterpolator(interp->data->mScales, interp->defaultScale);
-                    mAxisOrder = interp->data->mAxisOrder;
+                    mRotations = QuaternionInterpolator(interp->mData->mRotations, defaultTransform.mRotation);
+                    mXRotations = FloatInterpolator(interp->mData->mXRotations);
+                    mYRotations = FloatInterpolator(interp->mData->mYRotations);
+                    mZRotations = FloatInterpolator(interp->mData->mZRotations);
+                    mTranslations = Vec3Interpolator(interp->mData->mTranslations, defaultTransform.mTranslation);
+                    mScales = FloatInterpolator(interp->mData->mScales, defaultTransform.mScale);
+
+                    mAxisOrder = interp->mData->mAxisOrder;
                 }
                 else
                 {
-                    mRotations = QuaternionInterpolator(Nif::QuaternionKeyMapPtr(), interp->defaultRot);
-                    mTranslations = Vec3Interpolator(Nif::Vector3KeyMapPtr(), interp->defaultPos);
-                    mScales = FloatInterpolator(Nif::FloatKeyMapPtr(), interp->defaultScale);
+                    mRotations = QuaternionInterpolator(Nif::QuaternionKeyMapPtr(), defaultTransform.mRotation);
+                    mTranslations = Vec3Interpolator(Nif::Vector3KeyMapPtr(), defaultTransform.mTranslation);
+                    mScales = FloatInterpolator(Nif::FloatKeyMapPtr(), defaultTransform.mScale);
                 }
             }
         }
@@ -117,6 +119,7 @@ namespace NifOsg
             mZRotations = FloatInterpolator(keydata->mZRotations);
             mTranslations = Vec3Interpolator(keydata->mTranslations);
             mScales = FloatInterpolator(keydata->mScales, 1.f);
+
             mAxisOrder = keydata->mAxisOrder;
         }
     }
@@ -177,11 +180,12 @@ namespace NifOsg
             else
                 node->setRotation(node->mRotationScale);
 
+            if (!mTranslations.empty())
+                node->setTranslation(mTranslations.interpKey(time));
+
             if (!mScales.empty())
                 node->setScale(mScales.interpKey(time));
 
-            if (!mTranslations.empty())
-                node->setTranslation(mTranslations.interpKey(time));
         }
 
         traverse(node, nv);
