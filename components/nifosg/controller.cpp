@@ -598,9 +598,9 @@ namespace NifOsg
     }
 
     PathController::PathController(const Nif::NiPathController* ctrl)
-        : mPath(ctrl->posData->mKeyList, osg::Vec3f())
-        , mPercent(ctrl->floatData->mKeyList, 1.f)
-        , mFlags(ctrl->flags)
+        : mPath(ctrl->mPathData->mKeyList, osg::Vec3f())
+        , mPercent(ctrl->mPercentData->mKeyList, 1.f)
+        , mFlags(ctrl->mPathFlags)
     {
     }
 

@@ -267,20 +267,25 @@ namespace Nif
     {
         Controller::read(nif);
 
-        bankDir = nif->getInt();
-        maxBankAngle = nif->getFloat();
-        smoothing = nif->getFloat();
-        nif->read(followAxis);
-        posData.read(nif);
-        floatData.read(nif);
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
+            nif->read(mPathFlags);
+        else
+            mPathFlags = (flags >> 16);
+
+        nif->read(mBankDirection);
+        nif->read(mMaxBankAngle);
+        nif->read(mSmoothing);
+        nif->read(mFollowAxis);
+        mPathData.read(nif);
+        mPercentData.read(nif);
     }
 
     void NiPathController::post(Reader& nif)
     {
         Controller::post(nif);
 
-        posData.post(nif);
-        floatData.post(nif);
+        mPathData.post(nif);
+        mPercentData.post(nif);
     }
 
     void NiUVController::read(NIFStream* nif)

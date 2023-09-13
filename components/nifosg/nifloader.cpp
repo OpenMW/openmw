@@ -907,7 +907,7 @@ namespace NifOsg
                 else if (ctrl->recType == Nif::RC_NiPathController)
                 {
                     const Nif::NiPathController* path = static_cast<const Nif::NiPathController*>(ctrl.getPtr());
-                    if (path->posData.empty() || path->floatData.empty())
+                    if (path->mPathData.empty() || path->mPercentData.empty())
                         continue;
                     osg::ref_ptr<PathController> callback(new PathController(path));
                     setupController(path, callback, animflags);

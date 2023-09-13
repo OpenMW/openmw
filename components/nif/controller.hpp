@@ -174,22 +174,24 @@ namespace Nif
 
     struct NiPathController : public Controller
     {
-        NiPosDataPtr posData;
-        NiFloatDataPtr floatData;
-
         enum Flags
         {
-            Flag_OpenCurve = 0x020,
-            Flag_AllowFlip = 0x040,
-            Flag_Bank = 0x080,
-            Flag_ConstVelocity = 0x100,
-            Flag_Follow = 0x200,
-            Flag_FlipFollowAxis = 0x400
+            Flag_CVDataNeedsUpdate = 0x01,
+            Flag_OpenCurve = 0x02,
+            Flag_AllowFlip = 0x04,
+            Flag_Bank = 0x08,
+            Flag_ConstVelocity = 0x10,
+            Flag_Follow = 0x20,
+            Flag_FlipFollowAxis = 0x40,
         };
 
-        int bankDir;
-        float maxBankAngle, smoothing;
-        uint16_t followAxis;
+        uint16_t mPathFlags;
+        int32_t mBankDirection;
+        float mMaxBankAngle;
+        float mSmoothing;
+        uint16_t mFollowAxis;
+        NiPosDataPtr mPathData;
+        NiFloatDataPtr mPercentData;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
