@@ -7,12 +7,12 @@
 
 namespace ESM
 {
-    int& Faction::FADTstruct::getSkill(int index, bool)
+    int32_t& Faction::FADTstruct::getSkill(size_t index, bool)
     {
         return mSkills.at(index);
     }
 
-    int Faction::FADTstruct::getSkill(int index, bool) const
+    int32_t Faction::FADTstruct::getSkill(size_t index, bool) const
     {
         return mSkills.at(index);
     }
@@ -23,10 +23,10 @@ namespace ESM
         mRecordFlags = esm.getRecordFlags();
 
         mReactions.clear();
-        for (int i = 0; i < 10; ++i)
-            mRanks[i].clear();
+        for (auto& rank : mRanks)
+            rank.clear();
 
-        int rankCounter = 0;
+        size_t rankCounter = 0;
         bool hasName = false;
         bool hasData = false;
         while (esm.hasMoreSubs())
@@ -42,7 +42,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("RNAM"):
-                    if (rankCounter >= 10)
+                    if (rankCounter >= mRanks.size())
                         esm.fail("Rank out of range");
                     mRanks[rankCounter++] = esm.getHString();
                     break;
@@ -55,7 +55,7 @@ namespace ESM
                 case fourCC("ANAM"):
                 {
                     ESM::RefId faction = esm.getRefId();
-                    int reaction;
+                    int32_t reaction;
                     esm.getHNT(reaction, "INTV");
                     // Prefer the lowest reaction in case a faction is listed multiple times
                     auto it = mReactions.find(faction);
@@ -93,12 +93,12 @@ namespace ESM
 
         esm.writeHNOCString("FNAM", mName);
 
-        for (int i = 0; i < 10; i++)
+        for (const auto& rank : mRanks)
         {
-            if (mRanks[i].empty())
+            if (rank.empty())
                 break;
 
-            esm.writeHNString("RNAM", mRanks[i], 32);
+            esm.writeHNString("RNAM", rank, 32);
         }
 
         esm.writeHNT("FADT", mData, 240);

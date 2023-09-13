@@ -48,7 +48,8 @@ namespace ESM
                     mScript = esm.getRefId();
                     break;
                 case fourCC("NPDT"):
-                    esm.getHTSized<96>(mData);
+                    esm.getHT(mData.mType, mData.mLevel, mData.mAttributes, mData.mHealth, mData.mMana, mData.mFatigue,
+                        mData.mSoul, mData.mCombat, mData.mMagic, mData.mStealth, mData.mAttack, mData.mGold);
                     hasNpdt = true;
                     break;
                 case fourCC("FLAG"):
@@ -139,8 +140,7 @@ namespace ESM
         mRecordFlags = 0;
         mData.mType = 0;
         mData.mLevel = 0;
-        mData.mStrength = mData.mIntelligence = mData.mWillpower = mData.mAgility = mData.mSpeed = mData.mEndurance
-            = mData.mPersonality = mData.mLuck = 0;
+        mData.mAttributes.fill(0);
         mData.mHealth = mData.mMana = mData.mFatigue = 0;
         mData.mSoul = 0;
         mData.mCombat = mData.mMagic = mData.mStealth = 0;

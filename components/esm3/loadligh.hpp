@@ -41,16 +41,16 @@ namespace ESM
         struct LHDTstruct
         {
             float mWeight;
-            int mValue;
-            int mTime; // Duration
-            int mRadius;
-            unsigned int mColor; // 4-byte rgba value
-            int mFlags;
+            int32_t mValue;
+            int32_t mTime; // Duration
+            int32_t mRadius;
+            uint32_t mColor; // 4-byte rgba value
+            int32_t mFlags;
         }; // Size = 24 bytes
 
         LHDTstruct mData;
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         std::string mModel, mIcon, mName;
         ESM::RefId mId, mSound, mScript;
 

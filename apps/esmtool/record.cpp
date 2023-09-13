@@ -690,14 +690,8 @@ namespace EsmTool
         std::cout << "  Level: " << mData.mData.mLevel << std::endl;
 
         std::cout << "  Attributes:" << std::endl;
-        std::cout << "    Strength: " << mData.mData.mStrength << std::endl;
-        std::cout << "    Intelligence: " << mData.mData.mIntelligence << std::endl;
-        std::cout << "    Willpower: " << mData.mData.mWillpower << std::endl;
-        std::cout << "    Agility: " << mData.mData.mAgility << std::endl;
-        std::cout << "    Speed: " << mData.mData.mSpeed << std::endl;
-        std::cout << "    Endurance: " << mData.mData.mEndurance << std::endl;
-        std::cout << "    Personality: " << mData.mData.mPersonality << std::endl;
-        std::cout << "    Luck: " << mData.mData.mLuck << std::endl;
+        for (size_t i = 0; i < mData.mData.mAttributes.size(); ++i)
+            std::cout << "    " << ESM::Attribute::indexToRefId(i) << ": " << mData.mData.mAttributes[i] << std::endl;
 
         std::cout << "  Health: " << mData.mData.mHealth << std::endl;
         std::cout << "  Magicka: " << mData.mData.mMana << std::endl;

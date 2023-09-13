@@ -456,22 +456,12 @@ void CSMTools::ReferenceableCheckStage::creatureCheck(
     if (creature.mData.mLevel <= 0)
         messages.add(id, "Level is non-positive", "", CSMDoc::Message::Severity_Warning);
 
-    if (creature.mData.mStrength < 0)
-        messages.add(id, "Strength is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mIntelligence < 0)
-        messages.add(id, "Intelligence is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mWillpower < 0)
-        messages.add(id, "Willpower is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mAgility < 0)
-        messages.add(id, "Agility is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mSpeed < 0)
-        messages.add(id, "Speed is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mEndurance < 0)
-        messages.add(id, "Endurance is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mPersonality < 0)
-        messages.add(id, "Personality is negative", "", CSMDoc::Message::Severity_Warning);
-    if (creature.mData.mLuck < 0)
-        messages.add(id, "Luck is negative", "", CSMDoc::Message::Severity_Warning);
+    for (size_t i = 0; i < creature.mData.mAttributes.size(); ++i)
+    {
+        if (creature.mData.mAttributes[i] < 0)
+            messages.add(id, ESM::Attribute::indexToRefId(i).toDebugString() + " is negative", {},
+                CSMDoc::Message::Severity_Warning);
+    }
 
     if (creature.mData.mCombat < 0)
         messages.add(id, "Combat is negative", "", CSMDoc::Message::Severity_Warning);

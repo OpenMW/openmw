@@ -31,7 +31,7 @@ namespace ESM
                     mIcon = esm.getHString();
                     break;
                 case fourCC("LHDT"):
-                    esm.getHTSized<24>(mData);
+                    esm.getHT(mData.mWeight, mData.mValue, mData.mTime, mData.mRadius, mData.mColor, mData.mFlags);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):

@@ -23,7 +23,8 @@ namespace ESM
             switch (esm.retSubName().toInt())
             {
                 case fourCC("DATA"):
-                    esm.getHTSized<12>(mData);
+                    esm.getHT(mData.mUnknown1, mData.mDisposition, mData.mRank, mData.mGender, mData.mPCrank,
+                        mData.mUnknown2);
                     break;
                 case fourCC("ONAM"):
                     mActor = esm.getRefId();

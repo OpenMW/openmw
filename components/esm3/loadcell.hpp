@@ -96,8 +96,8 @@ namespace ESM
 
         struct DATAstruct
         {
-            int mFlags{ 0 };
-            int mX{ 0 }, mY{ 0 };
+            int32_t mFlags{ 0 };
+            int32_t mX{ 0 }, mY{ 0 };
         };
 
         struct AMBIstruct
@@ -132,11 +132,11 @@ namespace ESM
 
         float mWater; // Water level
         bool mWaterInt;
-        int mMapColor;
+        int32_t mMapColor;
         // Counter for RefNums. This is only used during content file editing and has no impact on gameplay.
         // It prevents overwriting previous refNums, even if they were deleted.
         // as that would collide with refs when a content file is upgraded.
-        int mRefNumCounter;
+        int32_t mRefNumCounter;
 
         // References "leased" from another cell (i.e. a different cell
         //  introduced this ref, and it has been moved here by a plugin)
