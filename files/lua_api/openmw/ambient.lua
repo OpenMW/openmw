@@ -83,4 +83,10 @@
 -- @function [parent=#ambient] stopMusic
 -- @usage ambient.stopMusic();
 
+---
+-- Check if music is playing
+-- @function [parent=#ambient] isMusicPlaying
+-- @return #boolean
+-- @usage local isPlaying = ambient.isMusicPlaying();
+
 return nil

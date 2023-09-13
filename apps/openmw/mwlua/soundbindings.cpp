@@ -100,6 +100,8 @@ namespace MWLua
             sndMgr->streamMusic(std::string(fileName), MWSound::MusicType::Scripted);
         };
 
+        api["isMusicPlaying"] = []() { return MWBase::Environment::get().getSoundManager()->isMusicPlaying(); };
+
         api["stopMusic"] = []() { MWBase::Environment::get().getSoundManager()->stopMusic(); };
 
         return LuaUtil::makeReadOnly(api);
