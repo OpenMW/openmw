@@ -175,6 +175,8 @@ namespace Nif
     template <>
     void NIFStream::read<NiTransform>(NiTransform& transform);
     template <>
+    void NIFStream::read<NiQuatTransform>(NiQuatTransform& transform);
+    template <>
     void NIFStream::read<bool>(bool& data);
     template <>
     void NIFStream::read<std::string>(std::string& str);
@@ -193,6 +195,8 @@ namespace Nif
     void NIFStream::read<osg::BoundingSpheref>(osg::BoundingSpheref* dest, size_t size);
     template <>
     void NIFStream::read<NiTransform>(NiTransform* dest, size_t size);
+    template <>
+    void NIFStream::read<NiQuatTransform>(NiQuatTransform* dest, size_t size);
     template <>
     void NIFStream::read<bool>(bool* dest, size_t size);
     template <>

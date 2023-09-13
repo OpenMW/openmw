@@ -540,71 +540,63 @@ namespace Nif
     void NiBlendInterpolator::read(NIFStream* nif)
     {
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 112))
-            mManagerControlled = nif->getChar() & 1;
-        size_t numInterps = 0;
-        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
         {
-            numInterps = nif->getUShort();
-            mArrayGrowBy = nif->getUShort();
-        }
-        else
-        {
-            numInterps = nif->getChar();
-            if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 112))
+            nif->read(mFlags);
+            mItems.resize(nif->get<uint8_t>());
+            nif->read(mWeightThreshold);
+            if (!(mFlags & Flag_ManagerControlled))
             {
-                mWeightThreshold = nif->getFloat();
-                if (!mManagerControlled)
-                {
-                    mInterpCount = nif->getChar();
-                    mSingleIndex = nif->getChar();
-                    mHighPriority = nif->getChar();
-                    mNextHighPriority = nif->getChar();
-                    mSingleTime = nif->getFloat();
-                    mHighWeightsSum = nif->getFloat();
-                    mNextHighWeightsSum = nif->getFloat();
-                    mHighEaseSpinner = nif->getFloat();
-                }
+                mInterpCount = nif->get<uint8_t>();
+                mSingleIndex = nif->get<uint8_t>();
+                mHighPriority = nif->get<int8_t>();
+                mNextHighPriority = nif->get<int8_t>();
+                nif->read(mSingleTime);
+                nif->read(mHighWeightsSum);
+                nif->read(mNextHighWeightsSum);
+                nif->read(mHighEaseSpinner);
+                for (Item& item : mItems)
+                    item.read(nif);
             }
+            return;
         }
 
-        if (!mManagerControlled)
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 110))
         {
-            mItems.resize(numInterps);
+            mItems.resize(nif->get<uint8_t>());
             for (Item& item : mItems)
                 item.read(nif);
+            if (nif->get<bool>())
+                mFlags |= Flag_ManagerControlled;
+            nif->read(mWeightThreshold);
+            if (nif->get<bool>())
+                mFlags |= Flag_OnlyUseHighestWeight;
+            mInterpCount = nif->get<uint8_t>();
+            mSingleIndex = nif->get<uint8_t>();
+            mSingleInterpolator.read(nif);
+            nif->read(mSingleTime);
+            mHighPriority = nif->get<int8_t>();
+            mNextHighPriority = nif->get<int8_t>();
+            return;
         }
 
-        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 111))
+        mItems.resize(nif->get<uint16_t>());
+        nif->read(mArrayGrowBy);
+        for (Item& item : mItems)
+            item.read(nif);
+        if (nif->get<bool>())
+            mFlags |= Flag_ManagerControlled;
+        nif->read(mWeightThreshold);
+        if (nif->get<bool>())
+            mFlags |= Flag_OnlyUseHighestWeight;
+        nif->read(mInterpCount);
+        nif->read(mSingleIndex);
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 108))
         {
-            mManagerControlled = nif->getBoolean();
-            mWeightThreshold = nif->getFloat();
-            mOnlyUseHighestWeight = nif->getBoolean();
-            if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
-            {
-                mInterpCount = nif->getUShort();
-                mSingleIndex = nif->getUShort();
-            }
-            else
-            {
-                mInterpCount = nif->getChar();
-                mSingleIndex = nif->getChar();
-            }
-            if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 108))
-            {
-                mSingleInterpolator.read(nif);
-                mSingleTime = nif->getFloat();
-            }
-            if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
-            {
-                mHighPriority = nif->getInt();
-                mNextHighPriority = nif->getInt();
-            }
-            else
-            {
-                mHighPriority = nif->getChar();
-                mNextHighPriority = nif->getChar();
-            }
+            mSingleInterpolator.read(nif);
+            nif->read(mSingleTime);
         }
+        nif->read(mHighPriority);
+        nif->read(mNextHighPriority);
     }
 
     void NiBlendInterpolator::post(Reader& nif)
@@ -617,13 +609,13 @@ namespace Nif
     void NiBlendInterpolator::Item::read(NIFStream* nif)
     {
         mInterpolator.read(nif);
-        mWeight = nif->getFloat();
-        mNormalizedWeight = nif->getFloat();
-        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
-            mPriority = nif->getInt();
+        nif->read(mWeight);
+        nif->read(mNormalizedWeight);
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 110))
+            mPriority = nif->get<int8_t>();
         else
-            mPriority = nif->getChar();
-        mEaseSpinner = nif->getFloat();
+            nif->read(mPriority);
+        nif->read(mEaseSpinner);
     }
 
     void NiBlendInterpolator::Item::post(Reader& nif)
@@ -631,38 +623,4 @@ namespace Nif
         mInterpolator.post(nif);
     }
 
-    void NiBlendBoolInterpolator::read(NIFStream* nif)
-    {
-        NiBlendInterpolator::read(nif);
-        mValue = nif->getChar() != 0;
-    }
-
-    void NiBlendFloatInterpolator::read(NIFStream* nif)
-    {
-        NiBlendInterpolator::read(nif);
-        mValue = nif->getFloat();
-    }
-
-    void NiBlendPoint3Interpolator::read(NIFStream* nif)
-    {
-        NiBlendInterpolator::read(nif);
-        mValue = nif->getVector3();
-    }
-
-    void NiBlendTransformInterpolator::read(NIFStream* nif)
-    {
-        NiBlendInterpolator::read(nif);
-        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
-        {
-            mPosValue = nif->getVector3();
-            nif->read(mRotValue);
-            mScaleValue = nif->getFloat();
-            if (!nif->getBoolean())
-                mPosValue = osg::Vec3f();
-            if (!nif->getBoolean())
-                mRotValue = osg::Quat();
-            if (!nif->getBoolean())
-                mScaleValue = 1.f;
-        }
-    }
 }

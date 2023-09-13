@@ -1,30 +1,8 @@
-/*
-  OpenMW - The completely unofficial reimplementation of Morrowind
-  Copyright (C) 2008-2010  Nicolay Korslund
-  Email: < korslund@gmail.com >
-  WWW: https://openmw.org/
-
-  This file (controller.h) is part of the OpenMW package.
-
-  OpenMW is distributed as free software: you can redistribute it
-  and/or modify it under the terms of the GNU General Public License
-  version 3, as published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  version 3 along with this program. If not, see
-  https://www.gnu.org/licenses/ .
-
- */
-
 #ifndef OPENMW_COMPONENTS_NIF_CONTROLLER_HPP
 #define OPENMW_COMPONENTS_NIF_CONTROLLER_HPP
 
 #include "base.hpp"
+#include "niftypes.hpp"
 #include "property.hpp"
 
 namespace Nif
@@ -378,24 +356,29 @@ namespace Nif
     // Abstract
     struct NiBlendInterpolator : public NiInterpolator
     {
+        enum Flags
+        {
+            Flag_ManagerControlled = 0x1,
+            Flag_OnlyUseHighestWeight = 0x2,
+        };
+
         struct Item
         {
             NiInterpolatorPtr mInterpolator;
             float mWeight, mNormalizedWeight;
-            int mPriority;
+            int32_t mPriority;
             float mEaseSpinner;
 
             void read(NIFStream* nif);
             void post(Reader& nif);
         };
 
-        bool mManagerControlled{ false };
-        bool mOnlyUseHighestWeight{ false };
-        unsigned short mArrayGrowBy{ 0 };
+        uint8_t mFlags{ 0 };
+        uint16_t mArrayGrowBy{ 0 };
         float mWeightThreshold;
-        unsigned short mInterpCount;
-        unsigned short mSingleIndex;
-        int mHighPriority, mNextHighPriority;
+        uint16_t mInterpCount;
+        uint16_t mSingleIndex;
+        int32_t mHighPriority, mNextHighPriority;
         float mSingleTime;
         float mHighWeightsSum, mNextHighWeightsSum;
         float mHighEaseSpinner;
@@ -406,31 +389,37 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiBlendBoolInterpolator : public NiBlendInterpolator
+    template <typename T>
+    struct TypedNiBlendInterpolator : public NiBlendInterpolator
     {
-        char mValue;
-        void read(NIFStream* nif) override;
+        T mValue;
+
+        void read(NIFStream* nif) override
+        {
+            NiBlendInterpolator::read(nif);
+
+            nif->read(mValue);
+        }
     };
 
-    struct NiBlendFloatInterpolator : public NiBlendInterpolator
+    template <>
+    struct TypedNiBlendInterpolator<NiQuatTransform> : public NiBlendInterpolator
     {
-        float mValue;
-        void read(NIFStream* nif) override;
+        NiQuatTransform mValue;
+
+        void read(NIFStream* nif) override
+        {
+            NiBlendInterpolator::read(nif);
+
+            if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
+                nif->read(mValue);
+        }
     };
 
-    struct NiBlendPoint3Interpolator : public NiBlendInterpolator
-    {
-        osg::Vec3f mValue;
-        void read(NIFStream* nif) override;
-    };
+    using NiBlendBoolInterpolator = TypedNiBlendInterpolator<uint8_t>;
+    using NiBlendFloatInterpolator = TypedNiBlendInterpolator<float>;
+    using NiBlendPoint3Interpolator = TypedNiBlendInterpolator<osg::Vec3f>;
+    using NiBlendTransformInterpolator = TypedNiBlendInterpolator<NiQuatTransform>;
 
-    struct NiBlendTransformInterpolator : public NiBlendInterpolator
-    {
-        osg::Vec3f mPosValue;
-        osg::Quat mRotValue;
-        float mScaleValue;
-        void read(NIFStream* nif) override;
-    };
-
-} // Namespace
+}
 #endif

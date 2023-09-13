@@ -138,6 +138,22 @@ namespace Nif
     }
 
     template <>
+    void NIFStream::read<NiQuatTransform>(NiQuatTransform& transform)
+    {
+        read(transform.mTranslation);
+        read(transform.mRotation);
+        read(transform.mScale);
+        if (getVersion() >= generateVersion(10, 1, 0, 110))
+            return;
+        if (!get<bool>())
+            transform.mTranslation = osg::Vec3f();
+        if (!get<bool>())
+            transform.mRotation = osg::Quat();
+        if (!get<bool>())
+            transform.mScale = 1.f;
+    }
+
+    template <>
     void NIFStream::read<bool>(bool& data)
     {
         if (getVersion() < generateVersion(4, 1, 0, 0))
@@ -193,6 +209,12 @@ namespace Nif
 
     template <>
     void NIFStream::read<NiTransform>(NiTransform* dest, size_t size)
+    {
+        readRange(*this, dest, size);
+    }
+
+    template <>
+    void NIFStream::read<NiQuatTransform>(NiQuatTransform* dest, size_t size)
     {
         readRange(*this, dest, size);
     }
