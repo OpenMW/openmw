@@ -14,14 +14,14 @@ namespace Nif
         NiInterpolatorPtr mInterpolator;
         ControllerPtr mController;
         NiBlendInterpolatorPtr mBlendInterpolator;
-        unsigned short mBlendIndex;
-        unsigned char mPriority;
+        uint16_t mBlendIndex;
+        uint8_t mPriority;
         NiStringPalettePtr mStringPalette;
-        size_t mNodeNameOffset;
-        size_t mPropertyTypeOffset;
-        size_t mControllerTypeOffset;
-        size_t mControllerIdOffset;
-        size_t mInterpolatorIdOffset;
+        uint32_t mNodeNameOffset;
+        uint32_t mPropertyTypeOffset;
+        uint32_t mControllerTypeOffset;
+        uint32_t mControllerIdOffset;
+        uint32_t mInterpolatorIdOffset;
         std::string mNodeName;
         std::string mPropertyType;
         std::string mControllerType;
@@ -38,7 +38,7 @@ namespace Nif
         std::string mName;
         std::string mAccumRootName;
         ExtraPtr mTextKeys;
-        unsigned int mArrayGrowBy;
+        uint32_t mArrayGrowBy;
         std::vector<ControlledBlock> mControlledBlocks;
 
         void read(NIFStream* nif) override;
@@ -197,8 +197,15 @@ namespace Nif
 
     struct NiLookAtController : public Controller
     {
-        NiAVObjectPtr target;
-        unsigned short lookAtFlags{ 0 };
+        enum Flags
+        {
+            Flag_Flip = 0x1,
+            Flag_LookYAxis = 0x2,
+            Flag_LookZAxis = 0x4,
+        };
+
+        uint16_t mLookAtFlags{ 0 };
+        NiAVObjectPtr mLookAt;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -267,7 +274,7 @@ namespace Nif
 
     struct NiFlipController : public NiFloatInterpController
     {
-        int mTexSlot; // NiTexturingProperty::TextureType
+        NiTexturingProperty::TextureType mTexSlot;
         float mDelta; // Time between two flips. delta = (start_time - stop_time) / num_sources
         NiSourceTextureList mSources;
 
@@ -278,8 +285,8 @@ namespace Nif
     struct NiTextureTransformController : public NiFloatInterpController
     {
         bool mShaderMap;
-        int mTexSlot; // NiTexturingProperty::TextureType
-        unsigned int mTransformMember;
+        NiTexturingProperty::TextureType mTexSlot;
+        uint32_t mTransformMember;
         NiFloatDataPtr mData;
 
         void read(NIFStream* nif) override;
@@ -293,14 +300,14 @@ namespace Nif
 
     struct BSEffectShaderPropertyFloatController : public NiFloatInterpController
     {
-        unsigned int mControlledVariable;
+        uint32_t mControlledVariable;
 
         void read(NIFStream* nif) override;
     };
 
     struct BSEffectShaderPropertyColorController : public NiPoint3InterpController
     {
-        unsigned int mControlledColor;
+        uint32_t mControlledColor;
 
         void read(NIFStream* nif) override;
     };
@@ -310,10 +317,12 @@ namespace Nif
         bool mCumulative;
         NiControllerSequenceList mSequences;
         NiDefaultAVObjectPalettePtr mObjectPalette;
+
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
     };
 
+    // Abstract
     struct NiInterpolator : public Record
     {
     };

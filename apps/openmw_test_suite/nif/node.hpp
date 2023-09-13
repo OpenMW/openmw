@@ -63,7 +63,7 @@ namespace Nif::Testing
         value.phase = 0;
         value.timeStart = 0;
         value.timeStop = 0;
-        value.target = NiObjectNETPtr(nullptr);
+        value.mTarget = NiObjectNETPtr(nullptr);
     }
 }
 

@@ -40,7 +40,7 @@ namespace Nif
         int flags;
         float frequency, phase;
         float timeStart, timeStop;
-        NiObjectNETPtr target;
+        NiObjectNETPtr mTarget;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
