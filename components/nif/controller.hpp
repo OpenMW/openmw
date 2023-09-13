@@ -157,8 +157,16 @@ namespace Nif
 
     struct NiMaterialColorController : public NiPoint3InterpController
     {
+        enum class TargetColor
+        {
+            Ambient = 0,
+            Diffuse = 1,
+            Specular = 2,
+            Emissive = 3,
+        };
+
         NiPosDataPtr mData;
-        unsigned int mTargetColor;
+        TargetColor mTargetColor;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;

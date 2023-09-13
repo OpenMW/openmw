@@ -224,15 +224,12 @@ namespace Nif
     void NiMaterialColorController::read(NIFStream* nif)
     {
         NiPoint3InterpController::read(nif);
-        // Two bits that correspond to the controlled material color.
-        // 00: Ambient
-        // 01: Diffuse
-        // 10: Specular
-        // 11: Emissive
+
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            mTargetColor = nif->getUShort() & 3;
+            mTargetColor = static_cast<TargetColor>(nif->get<uint16_t>() & 3);
         else
-            mTargetColor = (flags >> 4) & 3;
+            mTargetColor = static_cast<TargetColor>((flags >> 4) & 3);
+
         if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 103))
             mData.read(nif);
     }
@@ -240,6 +237,7 @@ namespace Nif
     void NiMaterialColorController::post(Reader& nif)
     {
         NiPoint3InterpController::post(nif);
+
         mData.post(nif);
     }
 

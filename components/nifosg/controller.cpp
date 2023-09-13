@@ -444,7 +444,7 @@ namespace NifOsg
 
     MaterialColorController::MaterialColorController(
         const Nif::NiMaterialColorController* ctrl, const osg::Material* baseMaterial)
-        : mTargetColor(static_cast<MaterialColorController::TargetColor>(ctrl->mTargetColor))
+        : mTargetColor(ctrl->mTargetColor)
         , mBaseMaterial(baseMaterial)
     {
         if (!ctrl->mInterpolator.empty())
@@ -477,30 +477,31 @@ namespace NifOsg
         {
             osg::Vec3f value = mData.interpKey(getInputValue(nv));
             osg::Material* mat = static_cast<osg::Material*>(stateset->getAttribute(osg::StateAttribute::MATERIAL));
+            using TargetColor = Nif::NiMaterialColorController::TargetColor;
             switch (mTargetColor)
             {
-                case Diffuse:
+                case TargetColor::Diffuse:
                 {
                     osg::Vec4f diffuse = mat->getDiffuse(osg::Material::FRONT_AND_BACK);
                     diffuse.set(value.x(), value.y(), value.z(), diffuse.a());
                     mat->setDiffuse(osg::Material::FRONT_AND_BACK, diffuse);
                     break;
                 }
-                case Specular:
+                case TargetColor::Specular:
                 {
                     osg::Vec4f specular = mat->getSpecular(osg::Material::FRONT_AND_BACK);
                     specular.set(value.x(), value.y(), value.z(), specular.a());
                     mat->setSpecular(osg::Material::FRONT_AND_BACK, specular);
                     break;
                 }
-                case Emissive:
+                case TargetColor::Emissive:
                 {
                     osg::Vec4f emissive = mat->getEmission(osg::Material::FRONT_AND_BACK);
                     emissive.set(value.x(), value.y(), value.z(), emissive.a());
                     mat->setEmission(osg::Material::FRONT_AND_BACK, emissive);
                     break;
                 }
-                case Ambient:
+                case TargetColor::Ambient:
                 default:
                 {
                     osg::Vec4f ambient = mat->getAmbient(osg::Material::FRONT_AND_BACK);

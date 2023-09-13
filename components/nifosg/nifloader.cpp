@@ -988,18 +988,17 @@ namespace NifOsg
                 {
                     const Nif::NiMaterialColorController* matctrl
                         = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
-                    if (matctrl->mData.empty() && matctrl->mInterpolator.empty())
+                    Nif::NiInterpolatorPtr interp = matctrl->mInterpolator;
+                    if (matctrl->mData.empty() && interp.empty())
                         continue;
-                    auto targetColor = static_cast<MaterialColorController::TargetColor>(matctrl->mTargetColor);
                     if (mVersion <= Nif::NIFFile::VER_MW
-                        && targetColor == MaterialColorController::TargetColor::Specular)
+                        && matctrl->mTargetColor == Nif::NiMaterialColorController::TargetColor::Specular)
                         continue;
-                    if (!matctrl->mInterpolator.empty()
-                        && matctrl->mInterpolator->recType != Nif::RC_NiPoint3Interpolator)
+                    if (!interp.empty() && interp->recType != Nif::RC_NiPoint3Interpolator)
                     {
                         Log(Debug::Error)
                             << "Unsupported interpolator type for NiMaterialColorController " << matctrl->recIndex
-                            << " in " << mFilename << ": " << matctrl->mInterpolator->recName;
+                            << " in " << mFilename << ": " << interp->recName;
                         continue;
                     }
                     osg::ref_ptr<MaterialColorController> osgctrl = new MaterialColorController(matctrl, baseMaterial);

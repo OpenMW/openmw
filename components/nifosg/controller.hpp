@@ -336,13 +336,6 @@ namespace NifOsg
     class MaterialColorController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
     public:
-        enum TargetColor
-        {
-            Ambient = 0,
-            Diffuse = 1,
-            Specular = 2,
-            Emissive = 3
-        };
         MaterialColorController(const Nif::NiMaterialColorController* ctrl, const osg::Material* baseMaterial);
         MaterialColorController();
         MaterialColorController(const MaterialColorController& copy, const osg::CopyOp& copyop);
@@ -355,7 +348,7 @@ namespace NifOsg
 
     private:
         Vec3Interpolator mData;
-        TargetColor mTargetColor = Ambient;
+        Nif::NiMaterialColorController::TargetColor mTargetColor;
         osg::ref_ptr<const osg::Material> mBaseMaterial;
     };
 
