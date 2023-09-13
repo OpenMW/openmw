@@ -149,7 +149,6 @@ namespace Nif
 
         /// DEPRECATED: Use read() or get()
         char getChar() { return get<char>(); }
-        short getShort() { return get<short>(); }
         unsigned short getUShort() { return get<unsigned short>(); }
         int getInt() { return get<int>(); }
         unsigned int getUInt() { return get<unsigned int>(); }
@@ -157,8 +156,6 @@ namespace Nif
         osg::Vec2f getVector2() { return get<osg::Vec2f>(); }
         osg::Vec3f getVector3() { return get<osg::Vec3f>(); }
         osg::Vec4f getVector4() { return get<osg::Vec4f>(); }
-        Matrix3 getMatrix3() { return get<Matrix3>(); }
-        osg::Quat getQuaternion() { return get<osg::Quat>(); }
         bool getBoolean() { return get<bool>(); }
         std::string getString() { return get<std::string>(); }
     };

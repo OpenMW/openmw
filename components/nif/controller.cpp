@@ -264,7 +264,7 @@ namespace Nif
         bankDir = nif->getInt();
         maxBankAngle = nif->getFloat();
         smoothing = nif->getFloat();
-        followAxis = nif->getShort();
+        nif->read(followAxis);
         posData.read(nif);
         floatData.read(nif);
     }
@@ -507,7 +507,7 @@ namespace Nif
     void NiTransformInterpolator::read(NIFStream* nif)
     {
         defaultPos = nif->getVector3();
-        defaultRot = nif->getQuaternion();
+        nif->read(defaultRot);
         defaultScale = nif->getFloat();
         if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
         {
@@ -655,7 +655,7 @@ namespace Nif
         if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 109))
         {
             mPosValue = nif->getVector3();
-            mRotValue = nif->getQuaternion();
+            nif->read(mRotValue);
             mScaleValue = nif->getFloat();
             if (!nif->getBoolean())
                 mPosValue = osg::Vec3f();

@@ -25,7 +25,7 @@ namespace Nif
             case BOX_BV:
             {
                 box.center = nif->getVector3();
-                box.axes = nif->getMatrix3();
+                nif->read(box.axes);
                 box.extents = nif->getVector3();
                 break;
             }

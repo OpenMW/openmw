@@ -203,7 +203,7 @@ namespace Nif
 
         int bankDir;
         float maxBankAngle, smoothing;
-        short followAxis;
+        uint16_t followAxis;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
