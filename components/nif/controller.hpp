@@ -318,46 +318,29 @@ namespace Nif
     {
     };
 
-    struct NiPoint3Interpolator : public NiInterpolator
+    template<class T, class DataPtr>
+    struct TypedNiInterpolator : public NiInterpolator
     {
-        osg::Vec3f defaultVal;
-        NiPosDataPtr data;
-        void read(NIFStream* nif) override;
-        void post(Reader& nif) override;
+        T mDefaultValue;
+        DataPtr mData;
+
+        void read(NIFStream* nif) override
+        {
+            nif->read(mDefaultValue);
+            mData.read(nif);
+        }
+
+        void post(Reader& nif) override
+        {
+            mData.post(nif);
+        }
     };
 
-    struct NiBoolInterpolator : public NiInterpolator
-    {
-        char defaultVal;
-        NiBoolDataPtr data;
-        void read(NIFStream* nif) override;
-        void post(Reader& nif) override;
-    };
-
-    struct NiFloatInterpolator : public NiInterpolator
-    {
-        float defaultVal;
-        NiFloatDataPtr data;
-        void read(NIFStream* nif) override;
-        void post(Reader& nif) override;
-    };
-
-    struct NiTransformInterpolator : public NiInterpolator
-    {
-        NiQuatTransform mDefaultTransform;
-        NiKeyframeDataPtr mData;
-
-        void read(NIFStream* nif) override;
-        void post(Reader& nif) override;
-    };
-
-    struct NiColorInterpolator : public NiInterpolator
-    {
-        osg::Vec4f defaultVal;
-        NiColorDataPtr data;
-        void read(NIFStream* nif) override;
-        void post(Reader& nif) override;
-    };
+    using NiPoint3Interpolator = TypedNiInterpolator<osg::Vec3f, NiPosDataPtr>;
+    using NiBoolInterpolator = TypedNiInterpolator<bool, NiBoolDataPtr>;
+    using NiFloatInterpolator = TypedNiInterpolator<float, NiFloatDataPtr>;
+    using NiTransformInterpolator = TypedNiInterpolator<NiQuatTransform, NiKeyframeDataPtr>;
+    using NiColorInterpolator = TypedNiInterpolator<osg::Vec4f, NiColorDataPtr>;
 
     // Abstract
     struct NiBlendInterpolator : public NiInterpolator

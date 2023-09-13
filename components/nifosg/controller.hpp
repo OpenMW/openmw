@@ -66,15 +66,15 @@ namespace NifOsg
             typename
             = std::enable_if_t<std::conjunction_v<std::disjunction<std::is_same<ValueT, float>,
                                                       std::is_same<ValueT, osg::Vec3f>, std::is_same<ValueT, bool>,
-                                                      std::is_same<ValueT, osg::Vec4f>, std::is_same<ValueT, char>>,
-                                   std::is_same<decltype(T::defaultVal), ValueT>>,
+                                                      std::is_same<ValueT, osg::Vec4f>>,
+                                   std::is_same<decltype(T::mDefaultValue), ValueT>>,
                 T>>
         ValueInterpolator(const T* interpolator)
-            : mDefaultVal(interpolator->defaultVal)
+            : mDefaultVal(interpolator->mDefaultValue)
         {
-            if (interpolator->data.empty())
+            if (interpolator->mData.empty())
                 return;
-            mKeys = interpolator->data->mKeyList;
+            mKeys = interpolator->mData->mKeyList;
             if (mKeys)
             {
                 mLastLowKey = mKeys->mKeys.end();
@@ -182,7 +182,7 @@ namespace NifOsg
     using FloatInterpolator = ValueInterpolator<Nif::FloatKeyMap>;
     using Vec3Interpolator = ValueInterpolator<Nif::Vector3KeyMap>;
     using Vec4Interpolator = ValueInterpolator<Nif::Vector4KeyMap>;
-    using ByteInterpolator = ValueInterpolator<Nif::ByteKeyMap>;
+    using BoolInterpolator = ValueInterpolator<Nif::BoolKeyMap>;
 
     class ControllerFunction : public SceneUtil::ControllerFunction
     {
@@ -283,7 +283,7 @@ namespace NifOsg
     {
     private:
         std::shared_ptr<std::map<float, bool>> mData;
-        ByteInterpolator mInterpolator;
+        BoolInterpolator mInterpolator;
         unsigned int mMask{ 0u };
 
         bool calculate(float time) const;

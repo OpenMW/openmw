@@ -90,7 +90,7 @@ namespace NifOsg
             {
                 const Nif::NiTransformInterpolator* interp
                     = static_cast<const Nif::NiTransformInterpolator*>(keyctrl->mInterpolator.getPtr());
-                const Nif::NiQuatTransform& defaultTransform = interp->mDefaultTransform;
+                const Nif::NiQuatTransform& defaultTransform = interp->mDefaultValue;
                 if (!interp->mData.empty())
                 {
                     mRotations = QuaternionInterpolator(interp->mData->mRotations, defaultTransform.mRotation);
@@ -318,9 +318,10 @@ namespace NifOsg
     {
         if (!ctrl->mInterpolator.empty())
         {
-            if (ctrl->mInterpolator->recType == Nif::RC_NiBoolInterpolator)
-                mInterpolator
-                    = ByteInterpolator(static_cast<const Nif::NiBoolInterpolator*>(ctrl->mInterpolator.getPtr()));
+            if (ctrl->mInterpolator->recType != Nif::RC_NiBoolInterpolator)
+                return;
+
+            mInterpolator = { static_cast<const Nif::NiBoolInterpolator*>(ctrl->mInterpolator.getPtr()) };
         }
         else if (!ctrl->mData.empty())
             mData = ctrl->mData->mKeys;

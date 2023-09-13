@@ -470,61 +470,6 @@ namespace Nif
         mObjectPalette.post(nif);
     }
 
-    void NiPoint3Interpolator::read(NIFStream* nif)
-    {
-        defaultVal = nif->getVector3();
-        data.read(nif);
-    }
-
-    void NiPoint3Interpolator::post(Reader& nif)
-    {
-        data.post(nif);
-    }
-
-    void NiBoolInterpolator::read(NIFStream* nif)
-    {
-        defaultVal = nif->getBoolean();
-        data.read(nif);
-    }
-
-    void NiBoolInterpolator::post(Reader& nif)
-    {
-        data.post(nif);
-    }
-
-    void NiFloatInterpolator::read(NIFStream* nif)
-    {
-        defaultVal = nif->getFloat();
-        data.read(nif);
-    }
-
-    void NiFloatInterpolator::post(Reader& nif)
-    {
-        data.post(nif);
-    }
-
-    void NiTransformInterpolator::read(NIFStream* nif)
-    {
-        nif->read(mDefaultTransform);
-        mData.read(nif);
-    }
-
-    void NiTransformInterpolator::post(Reader& nif)
-    {
-        mData.post(nif);
-    }
-
-    void NiColorInterpolator::read(NIFStream* nif)
-    {
-        defaultVal = nif->getVector4();
-        data.read(nif);
-    }
-
-    void NiColorInterpolator::post(Reader& nif)
-    {
-        data.post(nif);
-    }
-
     void NiBlendInterpolator::read(NIFStream* nif)
     {
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 112))
