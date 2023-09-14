@@ -23,6 +23,7 @@ namespace
             : ESM::RankData(data)
             , mRankName(rankName)
             , mFactionId(factionId)
+            , mRankIndex(rankIndex)
         {
         }
     };
