@@ -14,8 +14,8 @@ namespace Nif
 
     void NiBoundingVolume::read(NIFStream* nif)
     {
-        nif->read(type);
-        switch (type)
+        nif->read(mType);
+        switch (mType)
         {
             case BASE_BV:
                 break;
@@ -26,9 +26,9 @@ namespace Nif
             }
             case BOX_BV:
             {
-                nif->read(box.center);
-                nif->read(box.axes);
-                nif->read(box.extents);
+                nif->read(mBox.mCenter);
+                nif->read(mBox.mAxes);
+                nif->read(mBox.mExtents);
                 break;
             }
             case CAPSULE_BV:
@@ -69,7 +69,7 @@ namespace Nif
             default:
             {
                 throw Nif::Exception(
-                    "Unhandled NiBoundingVolume type: " + std::to_string(type), nif->getFile().getFilename());
+                    "Unhandled NiBoundingVolume type: " + std::to_string(mType), nif->getFile().getFilename());
             }
         }
     }

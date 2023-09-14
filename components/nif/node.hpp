@@ -28,9 +28,9 @@ namespace Nif
 
         struct NiBoxBV
         {
-            osg::Vec3f center;
-            Matrix3 axes;
-            osg::Vec3f extents;
+            osg::Vec3f mCenter;
+            Matrix3 mAxes;
+            osg::Vec3f mExtents;
         };
 
         struct NiCapsuleBV
@@ -51,9 +51,9 @@ namespace Nif
             osg::Vec3f mOrigin;
         };
 
-        uint32_t type{ BASE_BV };
+        uint32_t mType{ BASE_BV };
         osg::BoundingSpheref mSphere;
-        NiBoxBV box;
+        NiBoxBV mBox;
         NiCapsuleBV mCapsule;
         NiLozengeBV mLozenge;
         std::vector<NiBoundingVolume> mChildren;
