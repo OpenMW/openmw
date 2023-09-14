@@ -132,15 +132,6 @@ namespace MWSound
 
             Log(Debug::Info) << stream.str();
         }
-
-        // TODO: dehardcode this
-        std::vector<std::string> titleMusic;
-        std::string_view titlefile = "music/special/morrowind title.mp3";
-        if (mVFS->exists(titlefile))
-            titleMusic.emplace_back(titlefile);
-        else
-            Log(Debug::Warning) << "Title music not found";
-        mMusicFiles["Title"] = titleMusic;
     }
 
     SoundManager::~SoundManager()
@@ -1142,6 +1133,14 @@ namespace MWSound
     {
         if (!mOutput->isInitialized() || mPlaybackPaused)
             return;
+
+        MWBase::StateManager::State state = MWBase::Environment::get().getStateManager()->getState();
+        if (state == MWBase::StateManager::State_NoGame && !isMusicPlaying())
+        {
+            std::string titlefile = "music/special/morrowind title.mp3";
+            if (mVFS->exists(titlefile))
+                streamMusic(titlefile, MWSound::MusicType::Special);
+        }
 
         updateSounds(duration);
         if (MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_NoGame)
