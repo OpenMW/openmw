@@ -185,7 +185,6 @@ namespace NifOsg
 
             if (!mScales.empty())
                 node->setScale(mScales.interpKey(time));
-
         }
 
         traverse(node, nv);

@@ -63,11 +63,10 @@ namespace NifOsg
         ValueInterpolator() = default;
 
         template <class T,
-            typename
-            = std::enable_if_t<std::conjunction_v<std::disjunction<std::is_same<ValueT, float>,
-                                                      std::is_same<ValueT, osg::Vec3f>, std::is_same<ValueT, bool>,
-                                                      std::is_same<ValueT, osg::Vec4f>>,
-                                   std::is_same<decltype(T::mDefaultValue), ValueT>>,
+            typename = std::enable_if_t<
+                std::conjunction_v<std::disjunction<std::is_same<ValueT, float>, std::is_same<ValueT, osg::Vec3f>,
+                                       std::is_same<ValueT, bool>, std::is_same<ValueT, osg::Vec4f>>,
+                    std::is_same<decltype(T::mDefaultValue), ValueT>>,
                 T>>
         ValueInterpolator(const T* interpolator)
             : mDefaultVal(interpolator->mDefaultValue)

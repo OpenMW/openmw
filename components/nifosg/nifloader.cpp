@@ -995,9 +995,8 @@ namespace NifOsg
                         continue;
                     if (!interp.empty() && interp->recType != Nif::RC_NiPoint3Interpolator)
                     {
-                        Log(Debug::Error)
-                            << "Unsupported interpolator type for NiMaterialColorController " << matctrl->recIndex
-                            << " in " << mFilename << ": " << interp->recName;
+                        Log(Debug::Error) << "Unsupported interpolator type for NiMaterialColorController "
+                                          << matctrl->recIndex << " in " << mFilename << ": " << interp->recName;
                         continue;
                     }
                     osg::ref_ptr<MaterialColorController> osgctrl = new MaterialColorController(matctrl, baseMaterial);
@@ -1280,8 +1279,10 @@ namespace NifOsg
 
             handleParticleInitialState(nifNode, partsys, partctrl);
 
-            partsys->getDefaultParticleTemplate().setSizeRange(osgParticle::rangef(partctrl->mInitialSize, partctrl->mInitialSize));
-            partsys->getDefaultParticleTemplate().setColorRange(osgParticle::rangev4(partctrl->mInitialColor, partctrl->mInitialColor));
+            partsys->getDefaultParticleTemplate().setSizeRange(
+                osgParticle::rangef(partctrl->mInitialSize, partctrl->mInitialSize));
+            partsys->getDefaultParticleTemplate().setColorRange(
+                osgParticle::rangev4(partctrl->mInitialColor, partctrl->mInitialColor));
             partsys->getDefaultParticleTemplate().setAlphaRange(osgParticle::rangef(1.f, 1.f));
 
             if (!partctrl->mEmitter.empty())

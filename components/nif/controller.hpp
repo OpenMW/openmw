@@ -334,7 +334,7 @@ namespace Nif
     {
     };
 
-    template<class T, class DataPtr>
+    template <class T, class DataPtr>
     struct TypedNiInterpolator : public NiInterpolator
     {
         T mDefaultValue;
@@ -346,10 +346,7 @@ namespace Nif
             mData.read(nif);
         }
 
-        void post(Reader& nif) override
-        {
-            mData.post(nif);
-        }
+        void post(Reader& nif) override { mData.post(nif); }
     };
 
     using NiPoint3Interpolator = TypedNiInterpolator<osg::Vec3f, NiPosDataPtr>;
