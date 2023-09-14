@@ -84,11 +84,9 @@ namespace Nif
             nif->read(mAccumRootName);
             mTextKeys.read(nif);
         }
-        uint32_t numBlocks;
-        nif->read(numBlocks);
+        mControlledBlocks.resize(nif->get<uint32_t>());
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 106))
             nif->read(mArrayGrowBy);
-        mControlledBlocks.resize(numBlocks);
         for (ControlledBlock& block : mControlledBlocks)
             block.read(nif);
     }
@@ -109,8 +107,8 @@ namespace Nif
 
         nif->read(mWeight);
         mTextKeys.read(nif);
-        mExtrapolationMode = static_cast<NiTimeController::ExtrapolationMode>(nif->getUInt());
-        mFrequency = nif->getFloat();
+        mExtrapolationMode = static_cast<NiTimeController::ExtrapolationMode>(nif->get<uint32_t>());
+        nif->read(mFrequency);
         if (nif->getVersion() <= NIFStream::generateVersion(10, 4, 0, 1))
             nif->read(mPhase);
         nif->read(mStartTime);
