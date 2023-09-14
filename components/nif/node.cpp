@@ -167,14 +167,14 @@ namespace Nif
     {
         NiAVObject::read(nif);
 
-        data.read(nif);
-        skin.read(nif);
+        mData.read(nif);
+        mSkin.read(nif);
         mMaterial.read(nif);
         if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS
             && nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
         {
-            shaderprop.read(nif);
-            alphaprop.read(nif);
+            mShaderProperty.read(nif);
+            mAlphaProperty.read(nif);
         }
     }
 
@@ -182,12 +182,38 @@ namespace Nif
     {
         NiAVObject::post(nif);
 
-        data.post(nif);
-        skin.post(nif);
-        shaderprop.post(nif);
-        alphaprop.post(nif);
-        if (recType != RC_NiParticles && !skin.empty())
+        mData.post(nif);
+        mSkin.post(nif);
+        mShaderProperty.post(nif);
+        mAlphaProperty.post(nif);
+        if (recType != RC_NiParticles && !mSkin.empty())
             nif.setUseSkinning(true);
+
+        if (!mData.empty())
+        {
+            switch (recType)
+            {
+                case RC_NiTriShape:
+                case RC_BSLODTriShape:
+                    if (mData->recType != RC_NiTriShapeData)
+                        mData = NiGeometryDataPtr(nullptr);
+                    break;
+                case RC_NiTriStrips:
+                    if (mData->recType != RC_NiTriStripsData)
+                        mData = NiGeometryDataPtr(nullptr);
+                    break;
+                case RC_NiParticles:
+                    if (mData->recType != RC_NiParticlesData)
+                        mData = NiGeometryDataPtr(nullptr);
+                    break;
+                case RC_NiLines:
+                    if (mData->recType != RC_NiLinesData)
+                        mData = NiGeometryDataPtr(nullptr);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     void BSLODTriShape::read(NIFStream* nif)

@@ -119,7 +119,14 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiGeometry : NiAVObject
+    struct GeometryInterface
+    {
+        NiSkinInstancePtr mSkin;
+        BSShaderPropertyPtr mShaderProperty;
+        NiAlphaPropertyPtr mAlphaProperty;
+    };
+
+    struct NiGeometry : NiAVObject, GeometryInterface
     {
         /* Possible flags:
             0x40 - mesh has no vertex normals ?
@@ -138,17 +145,13 @@ namespace Nif
             void read(NIFStream* nif);
         };
 
-        NiGeometryDataPtr data;
-        NiSkinInstancePtr skin;
+        NiGeometryDataPtr mData;
         MaterialData mMaterial;
-        BSShaderPropertyPtr shaderprop;
-        NiAlphaPropertyPtr alphaprop;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
     };
 
-    // TODO: consider checking the data record type here
     struct NiTriShape : NiGeometry
     {
     };
@@ -337,13 +340,10 @@ namespace Nif
         void read(NIFStream* nif, uint16_t flags);
     };
 
-    struct BSTriShape : NiAVObject
+    struct BSTriShape : NiAVObject, GeometryInterface
     {
         osg::BoundingSpheref mBoundingSphere;
         std::array<float, 6> mBoundMinMax;
-        NiSkinInstancePtr mSkin;
-        BSShaderPropertyPtr mShaderProperty;
-        NiAlphaPropertyPtr mAlphaProperty;
         BSVertexDesc mVertDesc;
         uint32_t mDataSize;
         std::vector<BSVertexData> mVertData;

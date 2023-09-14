@@ -326,20 +326,20 @@ namespace
             mNiTriShapeData.mVertices = { osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0) };
             mNiTriShapeData.mNumTriangles = 1;
             mNiTriShapeData.mTriangles = { 0, 1, 2 };
-            mNiTriShape.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
+            mNiTriShape.mData = Nif::NiGeometryDataPtr(&mNiTriShapeData);
 
             mNiTriShapeData2.recType = Nif::RC_NiTriShapeData;
             mNiTriShapeData2.mVertices = { osg::Vec3f(0, 0, 1), osg::Vec3f(1, 0, 1), osg::Vec3f(1, 1, 1) };
             mNiTriShapeData2.mNumTriangles = 1;
             mNiTriShapeData2.mTriangles = { 0, 1, 2 };
-            mNiTriShape2.data = Nif::NiGeometryDataPtr(&mNiTriShapeData2);
+            mNiTriShape2.mData = Nif::NiGeometryDataPtr(&mNiTriShapeData2);
 
             mNiTriStripsData.recType = Nif::RC_NiTriStripsData;
             mNiTriStripsData.mVertices
                 = { osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0), osg::Vec3f(0, 1, 0) };
             mNiTriStripsData.mNumTriangles = 2;
             mNiTriStripsData.mStrips = { { 0, 1, 2, 3 } };
-            mNiTriStrips.data = Nif::NiGeometryDataPtr(&mNiTriStripsData);
+            mNiTriStrips.mData = Nif::NiGeometryDataPtr(&mNiTriStripsData);
         }
     };
 
@@ -703,7 +703,7 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_child_node_and_filename_starting_with_x_and_not_empty_skin_should_return_static_shape)
     {
-        mNiTriShape.skin = Nif::NiSkinInstancePtr(&mNiSkinInstance);
+        mNiTriShape.mSkin = Nif::NiSkinInstancePtr(&mNiSkinInstance);
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
@@ -943,7 +943,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_with_empty_data_should_return_shape_with_null_collision_shape)
     {
-        mNiTriShape.data = Nif::NiGeometryDataPtr(nullptr);
+        mNiTriShape.mData = Nif::NiGeometryDataPtr(nullptr);
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
@@ -961,7 +961,7 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_child_node_with_empty_data_triangles_should_return_shape_with_null_collision_shape)
     {
-        auto data = static_cast<Nif::NiTriShapeData*>(mNiTriShape.data.getPtr());
+        auto data = static_cast<Nif::NiTriShapeData*>(mNiTriShape.mData.getPtr());
         data->mTriangles.clear();
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
@@ -1095,7 +1095,7 @@ namespace
         init(niTriShape);
         init(emptyCollisionNode);
 
-        niTriShape.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
+        niTriShape.mData = Nif::NiGeometryDataPtr(&mNiTriShapeData);
         niTriShape.mParents.push_back(&mNiNode);
 
         emptyCollisionNode.recType = Nif::RC_RootCollisionNode;
@@ -1192,21 +1192,6 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, should_ignore_tri_shape_data_with_mismatching_data_rec_type)
-    {
-        mNiTriShape.data = Nif::NiGeometryDataPtr(&mNiTriStripsData);
-
-        Nif::NIFFile file("test.nif");
-        file.mRoots.push_back(&mNiTriShape);
-        file.mHash = mHash;
-
-        const auto result = mLoader.load(file);
-
-        const Resource::BulletShape expected;
-
-        EXPECT_EQ(*result, expected);
-    }
-
     TEST_F(TestBulletNifLoader, for_tri_strips_root_node_should_return_static_shape)
     {
         Nif::NIFFile file("test.nif");
@@ -1223,21 +1208,6 @@ namespace
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
-
-        EXPECT_EQ(*result, expected);
-    }
-
-    TEST_F(TestBulletNifLoader, should_ignore_tri_strips_data_with_mismatching_data_rec_type)
-    {
-        mNiTriStrips.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
-
-        Nif::NIFFile file("test.nif");
-        file.mRoots.push_back(&mNiTriStrips);
-        file.mHash = mHash;
-
-        const auto result = mLoader.load(file);
-
-        const Resource::BulletShape expected;
 
         EXPECT_EQ(*result, expected);
     }
