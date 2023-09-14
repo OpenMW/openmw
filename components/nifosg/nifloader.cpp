@@ -463,11 +463,11 @@ namespace NifOsg
             osg::ref_ptr<osg::LOD> lod(new osg::LOD);
             lod->setName(niLodNode->mName);
             lod->setCenterMode(osg::LOD::USER_DEFINED_CENTER);
-            lod->setCenter(niLodNode->lodCenter);
-            for (unsigned int i = 0; i < niLodNode->lodLevels.size(); ++i)
+            lod->setCenter(niLodNode->mLODCenter);
+            for (unsigned int i = 0; i < niLodNode->mLODLevels.size(); ++i)
             {
-                const Nif::NiLODNode::LODRange& range = niLodNode->lodLevels[i];
-                lod->setRange(i, range.minRange, range.maxRange);
+                const Nif::NiLODNode::LODRange& range = niLodNode->mLODLevels[i];
+                lod->setRange(i, range.mMinRange, range.mMaxRange);
             }
             lod->setRangeMode(osg::LOD::DISTANCE_FROM_EYE_POINT);
             return lod;
@@ -478,7 +478,7 @@ namespace NifOsg
             osg::ref_ptr<osg::Switch> switchNode(new osg::Switch);
             switchNode->setName(niSwitchNode->mName);
             switchNode->setNewChildDefaultValue(false);
-            switchNode->setSingleChildOn(niSwitchNode->initialIndex);
+            switchNode->setSingleChildOn(niSwitchNode->mInitialIndex);
             return switchNode;
         }
 

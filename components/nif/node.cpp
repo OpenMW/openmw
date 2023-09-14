@@ -234,8 +234,8 @@ namespace Nif
         NiNode::read(nif);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
-            nif->read(switchFlags);
-        nif->read(initialIndex);
+            nif->read(mSwitchFlags);
+        nif->read(mInitialIndex);
     }
 
     void NiLODNode::read(NIFStream* nif)
@@ -249,13 +249,13 @@ namespace Nif
         }
 
         if (nif->getVersion() >= NIFFile::NIFVersion::VER_MW)
-            nif->read(lodCenter);
+            nif->read(mLODCenter);
 
-        lodLevels.resize(nif->get<uint32_t>());
-        for (LODRange& level : lodLevels)
+        mLODLevels.resize(nif->get<uint32_t>());
+        for (LODRange& level : mLODLevels)
         {
-            nif->read(level.minRange);
-            nif->read(level.maxRange);
+            nif->read(level.mMinRange);
+            nif->read(level.mMaxRange);
         }
     }
 

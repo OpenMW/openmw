@@ -189,8 +189,8 @@ namespace Nif
     // A node used as the base to switch between child nodes, such as for LOD levels.
     struct NiSwitchNode : NiNode
     {
-        uint16_t switchFlags;
-        uint32_t initialIndex;
+        uint16_t mSwitchFlags;
+        uint32_t mInitialIndex;
 
         void read(NIFStream* nif) override;
     };
@@ -199,12 +199,12 @@ namespace Nif
     {
         struct LODRange
         {
-            float minRange;
-            float maxRange;
+            float mMinRange;
+            float mMaxRange;
         };
 
-        osg::Vec3f lodCenter;
-        std::vector<LODRange> lodLevels;
+        osg::Vec3f mLODCenter;
+        std::vector<LODRange> mLODLevels;
 
         void read(NIFStream* nif) override;
     };
