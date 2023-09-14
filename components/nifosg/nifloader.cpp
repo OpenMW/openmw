@@ -706,7 +706,7 @@ namespace NifOsg
                 else
                 {
                     if (mPushedSorter && !mPushedSorter->mSubSorter.empty()
-                        && mPushedSorter->mMode != Nif::NiSortAdjustNode::SortingMode_Inherit)
+                        && mPushedSorter->mMode != Nif::NiSortAdjustNode::SortingMode::Inherit)
                         mLastAppliedNoInheritSorter = mPushedSorter;
                     mPushedSorter = sortNode;
                 }
@@ -2627,8 +2627,8 @@ namespace NifOsg
             if (!mPushedSorter)
                 return;
 
-            auto assignBin = [&](int mode, int type) {
-                if (mode == Nif::NiSortAdjustNode::SortingMode_Off)
+            auto assignBin = [&](Nif::NiSortAdjustNode::SortingMode mode, int type) {
+                if (mode == Nif::NiSortAdjustNode::SortingMode::Off)
                 {
                     setBin_Traversal(stateset);
                     return;
@@ -2649,7 +2649,7 @@ namespace NifOsg
 
             switch (mPushedSorter->mMode)
             {
-                case Nif::NiSortAdjustNode::SortingMode_Inherit:
+                case Nif::NiSortAdjustNode::SortingMode::Inherit:
                 {
                     if (mLastAppliedNoInheritSorter)
                         assignBin(mLastAppliedNoInheritSorter->mMode, mLastAppliedNoInheritSorter->mSubSorter->recType);
@@ -2657,12 +2657,12 @@ namespace NifOsg
                         assignBin(mPushedSorter->mMode, Nif::RC_NiAlphaAccumulator);
                     break;
                 }
-                case Nif::NiSortAdjustNode::SortingMode_Off:
+                case Nif::NiSortAdjustNode::SortingMode::Off:
                 {
                     setBin_Traversal(stateset);
                     break;
                 }
-                case Nif::NiSortAdjustNode::SortingMode_Subsort:
+                case Nif::NiSortAdjustNode::SortingMode::Subsort:
                 {
                     assignBin(mPushedSorter->mMode, mPushedSorter->mSubSorter->recType);
                     break;

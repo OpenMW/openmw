@@ -35,29 +35,29 @@ namespace Nif
 
         struct NiCapsuleBV
         {
-            osg::Vec3f center, axis;
-            float extent{ 0.f }, radius{ 0.f };
+            osg::Vec3f mCenter, mAxis;
+            float mExtent{ 0.f }, mRadius{ 0.f };
         };
 
         struct NiLozengeBV
         {
-            float radius{ 0.f }, extent0{ 0.f }, extent1{ 0.f };
-            osg::Vec3f center, axis0, axis1;
+            float mRadius{ 0.f }, mExtent0{ 0.f }, mExtent1{ 0.f };
+            osg::Vec3f mCenter, mAxis0, mAxis1;
         };
 
         struct NiHalfSpaceBV
         {
-            osg::Plane plane;
-            osg::Vec3f origin;
+            osg::Plane mPlane;
+            osg::Vec3f mOrigin;
         };
 
         uint32_t type{ BASE_BV };
-        osg::BoundingSpheref sphere;
+        osg::BoundingSpheref mSphere;
         NiBoxBV box;
-        NiCapsuleBV capsule;
-        NiLozengeBV lozenge;
-        std::vector<NiBoundingVolume> children;
-        NiHalfSpaceBV halfSpace;
+        NiCapsuleBV mCapsule;
+        NiLozengeBV mLozenge;
+        std::vector<NiBoundingVolume> mChildren;
+        NiHalfSpaceBV mHalfSpace;
 
         void read(NIFStream* nif);
     };
@@ -68,7 +68,7 @@ namespace Nif
 
     // NiAVObject is an object that is a part of the main NIF tree. It has
     // a parent node (unless it's the root) and transformation relative to its parent.
-    struct NiAVObject : public NiObjectNET
+    struct NiAVObject : NiObjectNET
     {
         enum Flags
         {
@@ -130,16 +130,17 @@ namespace Nif
 
         struct MaterialData
         {
-            std::vector<std::string> names;
-            std::vector<int> extra;
-            unsigned int active{ 0 };
-            bool needsUpdate{ false };
+            std::vector<std::string> mNames;
+            std::vector<int> mExtra;
+            int32_t mActive{ -1 };
+            bool mNeedsUpdate{ false };
+
             void read(NIFStream* nif);
         };
 
         NiGeometryDataPtr data;
         NiSkinInstancePtr skin;
-        MaterialData material;
+        MaterialData mMaterial;
         BSShaderPropertyPtr shaderprop;
         NiAlphaPropertyPtr alphaprop;
 
@@ -147,79 +148,75 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    // TODO: consider checking the data record type here
     struct NiTriShape : NiGeometry
     {
     };
-    struct BSLODTriShape : NiTriShape
-    {
-        unsigned int lod0, lod1, lod2;
-        void read(NIFStream* nif) override;
-    };
+
     struct NiTriStrips : NiGeometry
     {
     };
+
     struct NiLines : NiGeometry
     {
     };
+
     struct NiParticles : NiGeometry
     {
     };
 
+    struct BSLODTriShape : NiTriShape
+    {
+        std::array<uint32_t, 3> mLOD;
+        void read(NIFStream* nif) override;
+    };
+
     struct NiCamera : NiAVObject
     {
-        struct Camera
-        {
-            unsigned short cameraFlags{ 0 };
-
-            // Camera frustrum
-            float left, right, top, bottom, nearDist, farDist;
-
-            // Viewport
-            float vleft, vright, vtop, vbottom;
-
-            // Level of detail modifier
-            float LOD;
-
-            // Orthographic projection usage flag
-            bool orthographic{ false };
-
-            void read(NIFStream* nif);
-        };
-        Camera cam;
+        uint16_t mCameraFlags{ 0 };
+        // Camera frustum
+        float mLeft, mRight, mTop, mBottom, mNearDist, mFarDist;
+        bool mOrthographic{ false };
+        // Viewport
+        float mVLeft, mVRight, mVTop, mVBottom;
+        float mLODAdjust;
+        NiAVObjectPtr mScene;
 
         void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
     // A node used as the base to switch between child nodes, such as for LOD levels.
-    struct NiSwitchNode : public NiNode
+    struct NiSwitchNode : NiNode
     {
-        unsigned int switchFlags{ 0 };
-        unsigned int initialIndex{ 0 };
+        uint16_t switchFlags;
+        uint32_t initialIndex;
 
         void read(NIFStream* nif) override;
     };
 
-    struct NiLODNode : public NiSwitchNode
+    struct NiLODNode : NiSwitchNode
     {
-        osg::Vec3f lodCenter;
-
         struct LODRange
         {
             float minRange;
             float maxRange;
         };
+
+        osg::Vec3f lodCenter;
         std::vector<LODRange> lodLevels;
 
         void read(NIFStream* nif) override;
     };
 
-    struct NiFltAnimationNode : public NiSwitchNode
+    struct NiFltAnimationNode : NiSwitchNode
     {
-        float mDuration;
         enum Flags
         {
             Flag_Swing = 0x40
         };
+
+        float mDuration;
 
         void read(NIFStream* nif) override;
 
@@ -236,20 +233,21 @@ namespace Nif
     struct NiClusterAccumulator : NiAccumulator
     {
     };
+
     struct NiAlphaAccumulator : NiClusterAccumulator
     {
     };
 
     struct NiSortAdjustNode : NiNode
     {
-        enum SortingMode
+        enum class SortingMode : uint32_t
         {
-            SortingMode_Inherit,
-            SortingMode_Off,
-            SortingMode_Subsort
+            Inherit,
+            Off,
+            Subsort,
         };
 
-        int mMode;
+        SortingMode mMode;
         NiAccumulatorPtr mSubSorter;
 
         void read(NIFStream* nif) override;
@@ -258,7 +256,7 @@ namespace Nif
 
     struct NiBillboardNode : NiNode
     {
-        int mMode{ 0 };
+        int mMode;
 
         void read(NIFStream* nif) override;
     };
@@ -275,6 +273,7 @@ namespace Nif
     struct BSTreeNode : NiNode
     {
         NiAVObjectList mBones1, mBones2;
+
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
     };
@@ -282,7 +281,7 @@ namespace Nif
     struct BSMultiBoundNode : NiNode
     {
         BSMultiBoundPtr mMultiBound;
-        unsigned int mType{ 0 };
+        uint32_t mType{ 0 };
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -290,17 +289,17 @@ namespace Nif
 
     struct BSVertexDesc
     {
-        unsigned char mVertexDataSize;
-        unsigned char mDynamicVertexSize;
-        unsigned char mUV1Offset;
-        unsigned char mUV2Offset;
-        unsigned char mNormalOffset;
-        unsigned char mTangentOffset;
-        unsigned char mColorOffset;
-        unsigned char mSkinningDataOffset;
-        unsigned char mLandscapeDataOffset;
-        unsigned char mEyeDataOffset;
-        unsigned short mFlags;
+        uint8_t mVertexDataSize;
+        uint8_t mDynamicVertexSize;
+        uint8_t mUV1Offset;
+        uint8_t mUV2Offset;
+        uint8_t mNormalOffset;
+        uint8_t mTangentOffset;
+        uint8_t mColorOffset;
+        uint8_t mSkinningDataOffset;
+        uint8_t mLandscapeDataOffset;
+        uint8_t mEyeDataOffset;
+        uint16_t mFlags;
 
         enum VertexAttribute
         {
@@ -324,9 +323,8 @@ namespace Nif
     {
         osg::Vec3f mVertex;
         float mBitangentX;
-        unsigned int mUnusedW;
+        uint32_t mUnusedW;
         std::array<Misc::float16_t, 2> mUV;
-
         std::array<char, 3> mNormal;
         char mBitangentY;
         std::array<char, 3> mTangent;
@@ -343,21 +341,17 @@ namespace Nif
     {
         osg::BoundingSpheref mBoundingSphere;
         std::array<float, 6> mBoundMinMax;
-
         NiSkinInstancePtr mSkin;
         BSShaderPropertyPtr mShaderProperty;
         NiAlphaPropertyPtr mAlphaProperty;
-
         BSVertexDesc mVertDesc;
-
-        unsigned int mDataSize;
-        unsigned int mParticleDataSize;
-
+        uint32_t mDataSize;
         std::vector<BSVertexData> mVertData;
         std::vector<unsigned short> mTriangles;
+        uint32_t mParticleDataSize;
+        std::vector<Misc::float16_t> mParticleVerts;
+        std::vector<Misc::float16_t> mParticleNormals;
         std::vector<unsigned short> mParticleTriangles;
-        std::vector<osg::Vec3f> mParticleVerts;
-        std::vector<osg::Vec3f> mParticleNormals;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -365,8 +359,14 @@ namespace Nif
 
     struct BSValueNode : NiNode
     {
-        unsigned int mValue;
-        char mValueFlags;
+        enum Flags
+        {
+            Flag_BillboardWorldZ = 0x1,
+            Flag_UsePlayerAdjust = 0x2,
+        };
+
+        uint32_t mValue;
+        uint8_t mValueFlags;
 
         void read(NIFStream* nif) override;
     };
@@ -374,7 +374,7 @@ namespace Nif
     struct BSOrderedNode : NiNode
     {
         osg::Vec4f mAlphaSortBound;
-        char mStaticBound;
+        bool mStaticBound;
 
         void read(NIFStream* nif) override;
     };
