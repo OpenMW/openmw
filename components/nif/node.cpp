@@ -12,7 +12,7 @@
 namespace Nif
 {
 
-    void NiBoundingVolume::read(NIFStream* nif)
+    void BoundingVolume::read(NIFStream* nif)
     {
         nif->read(mType);
         switch (mType)
@@ -55,7 +55,7 @@ namespace Nif
             case UNION_BV:
             {
                 mChildren.resize(nif->get<uint32_t>());
-                for (NiBoundingVolume& child : mChildren)
+                for (BoundingVolume& child : mChildren)
                     child.read(nif);
                 break;
             }
@@ -69,7 +69,7 @@ namespace Nif
             default:
             {
                 throw Nif::Exception(
-                    "Unhandled NiBoundingVolume type: " + std::to_string(mType), nif->getFile().getFilename());
+                    "Unhandled BoundingVolume type: " + std::to_string(mType), nif->getFile().getFilename());
             }
         }
     }
@@ -168,7 +168,8 @@ namespace Nif
         NiAVObject::read(nif);
 
         mData.read(nif);
-        mSkin.read(nif);
+        if (nif->getVersion() >= NIFStream::generateVersion(3, 3, 0, 13))
+            mSkin.read(nif);
         mMaterial.read(nif);
         if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS
             && nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
@@ -218,7 +219,7 @@ namespace Nif
 
     void BSLODTriShape::read(NIFStream* nif)
     {
-        NiTriShape::read(nif);
+        NiTriBasedGeom::read(nif);
 
         nif->readArray(mLOD);
     }
@@ -356,7 +357,7 @@ namespace Nif
 
         mMultiBound.read(nif);
         if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_SKY)
-            nif->read(mType);
+            mCullingType = static_cast<BSCPCullingType>(nif->get<uint32_t>());
     }
 
     void BSMultiBoundNode::post(Reader& nif)

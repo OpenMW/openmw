@@ -175,7 +175,7 @@ namespace NifBullet
             bool hasCollisionShape = false;
             if (colNode != nullptr)
             {
-                if (colNode->mBounds.mType == Nif::NiBoundingVolume::Type::BASE_BV && !colNode->mChildren.empty())
+                if (colNode->mBounds.mType == Nif::BoundingVolume::Type::BASE_BV && !colNode->mChildren.empty())
                     hasCollisionShape = true;
                 else
                     mShape->mVisualCollisionType = Resource::VisualCollisionType::Camera;
@@ -202,22 +202,22 @@ namespace NifBullet
         unsigned int type = node.mBounds.mType;
         switch (type)
         {
-            case Nif::NiBoundingVolume::Type::BASE_BV:
+            case Nif::BoundingVolume::Type::BASE_BV:
                 break;
-            case Nif::NiBoundingVolume::Type::BOX_BV:
+            case Nif::BoundingVolume::Type::BOX_BV:
                 mShape->mCollisionBox.mExtents = node.mBounds.mBox.mExtents;
                 mShape->mCollisionBox.mCenter = node.mBounds.mBox.mCenter;
                 break;
             default:
             {
                 std::stringstream warning;
-                warning << "Unsupported NiBoundingVolume type " << type << " in node " << node.recIndex;
+                warning << "Unsupported BoundingVolume type " << type << " in node " << node.recIndex;
                 warning << " in file " << filename;
                 warn(warning.str());
             }
         }
 
-        if (type != Nif::NiBoundingVolume::Type::BASE_BV && node.hasBBoxCollision())
+        if (type != Nif::BoundingVolume::Type::BASE_BV && node.hasBBoxCollision())
             return true;
 
         if (const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(&node))
@@ -329,7 +329,7 @@ namespace NifBullet
             // NOTE: a trishape with bounds, but no BBoxCollision flag should NOT go through handleNiTriShape!
             // It must be ignored completely.
             // (occurs in tr_ex_imp_wall_arch_04.nif)
-            if (node.mBounds.mType == Nif::NiBoundingVolume::Type::BASE_BV
+            if (node.mBounds.mType == Nif::BoundingVolume::Type::BASE_BV
                 && (node.recType == Nif::RC_NiTriShape || node.recType == Nif::RC_NiTriStrips
                     || node.recType == Nif::RC_BSLODTriShape))
             {

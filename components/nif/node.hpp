@@ -13,7 +13,7 @@ namespace Nif
 
     struct NiNode;
 
-    struct NiBoundingVolume
+    struct BoundingVolume
     {
         enum Type : uint32_t
         {
@@ -56,7 +56,7 @@ namespace Nif
         NiBoxBV mBox;
         NiCapsuleBV mCapsule;
         NiLozengeBV mLozenge;
-        std::vector<NiBoundingVolume> mChildren;
+        std::vector<BoundingVolume> mChildren;
         NiHalfSpaceBV mHalfSpace;
 
         void read(NIFStream* nif);
@@ -83,7 +83,7 @@ namespace Nif
         NiTransform mTransform;
         osg::Vec3f mVelocity;
         PropertyList mProperties;
-        NiBoundingVolume mBounds;
+        BoundingVolume mBounds;
         NiCollisionObjectPtr mCollision;
         // Parent nodes for the node. Only types derived from NiNode can be parents.
         std::vector<NiNode*> mParents;
@@ -152,15 +152,20 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiTriShape : NiGeometry
+    // Abstract triangle-based geometry
+    struct NiTriBasedGeom : NiGeometry
     {
     };
 
-    struct NiTriStrips : NiGeometry
+    struct NiTriShape : NiTriBasedGeom
     {
     };
 
-    struct NiLines : NiGeometry
+    struct NiTriStrips : NiTriBasedGeom
+    {
+    };
+
+    struct NiLines : NiTriBasedGeom
     {
     };
 
@@ -168,7 +173,7 @@ namespace Nif
     {
     };
 
-    struct BSLODTriShape : NiTriShape
+    struct BSLODTriShape : NiTriBasedGeom
     {
         std::array<uint32_t, 3> mLOD;
         void read(NIFStream* nif) override;
@@ -283,8 +288,17 @@ namespace Nif
 
     struct BSMultiBoundNode : NiNode
     {
+        enum class BSCPCullingType : uint32_t
+        {
+            Normal,
+            AllPass,
+            AllFail,
+            IgnoreMultiBounds,
+            ForceMultiBoundsNoUpdate,
+        };
+
         BSMultiBoundPtr mMultiBound;
-        uint32_t mType{ 0 };
+        BSCPCullingType mCullingType;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;

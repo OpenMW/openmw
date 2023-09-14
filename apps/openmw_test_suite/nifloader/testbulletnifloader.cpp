@@ -415,7 +415,7 @@ namespace
         TestBulletNifLoader, for_root_nif_node_with_bounding_box_should_return_shape_with_compound_shape_and_box_inside)
     {
         mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
-        mNode.mBounds.mType = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
 
@@ -439,7 +439,7 @@ namespace
     TEST_F(TestBulletNifLoader, for_child_nif_node_with_bounding_box)
     {
         mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
-        mNode.mBounds.mType = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
         mNode.mParents.push_back(&mNiNode);
@@ -466,12 +466,12 @@ namespace
         for_root_and_child_nif_node_with_bounding_box_but_root_without_flag_should_use_child_bounds)
     {
         mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
-        mNode.mBounds.mType = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
         mNode.mParents.push_back(&mNiNode);
 
-        mNiNode.mBounds.mType = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNiNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNiNode.mBounds.mBox.mExtents = osg::Vec3f(4, 5, 6);
         mNiNode.mBounds.mBox.mCenter = osg::Vec3f(-4, -5, -6);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode) };
@@ -497,17 +497,17 @@ namespace
         for_root_and_two_children_where_both_with_bounds_but_only_first_with_flag_should_use_first_bounds)
     {
         mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
-        mNode.mBounds.mType = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
         mNode.mParents.push_back(&mNiNode);
 
-        mNode2.mBounds.mType = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode2.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode2.mBounds.mBox.mExtents = osg::Vec3f(4, 5, 6);
         mNode2.mBounds.mBox.mCenter = osg::Vec3f(-4, -5, -6);
         mNode2.mParents.push_back(&mNiNode);
 
-        mNiNode.mBounds.mType = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNiNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNiNode.mBounds.mBox.mExtents = osg::Vec3f(7, 8, 9);
         mNiNode.mBounds.mBox.mCenter = osg::Vec3f(-7, -8, -9);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode), Nif::NiAVObjectPtr(&mNode2) };
@@ -532,18 +532,18 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_root_and_two_children_where_both_with_bounds_but_only_second_with_flag_should_use_second_bounds)
     {
-        mNode.mBounds.mType = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
         mNode.mParents.push_back(&mNiNode);
 
         mNode2.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
-        mNode2.mBounds.mType = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode2.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode2.mBounds.mBox.mExtents = osg::Vec3f(4, 5, 6);
         mNode2.mBounds.mBox.mCenter = osg::Vec3f(-4, -5, -6);
         mNode2.mParents.push_back(&mNiNode);
 
-        mNiNode.mBounds.mType = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNiNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNiNode.mBounds.mBox.mExtents = osg::Vec3f(7, 8, 9);
         mNiNode.mBounds.mBox.mCenter = osg::Vec3f(-7, -8, -9);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode), Nif::NiAVObjectPtr(&mNode2) };
@@ -568,7 +568,7 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_root_nif_node_with_bounds_but_without_flag_should_return_shape_with_bounds_but_with_null_collision_shape)
     {
-        mNode.mBounds.mType = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
 
@@ -608,7 +608,7 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_root_node_with_bounds_should_return_static_shape_with_bounds_but_with_null_collision_shape)
     {
-        mNiTriShape.mBounds.mType = Nif::NiBoundingVolume::Type::BOX_BV;
+        mNiTriShape.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNiTriShape.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNiTriShape.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
 
