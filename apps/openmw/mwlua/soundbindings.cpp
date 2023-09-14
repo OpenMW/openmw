@@ -112,6 +112,8 @@ namespace MWLua
         sol::state_view& lua = context.mLua->sol();
         sol::table api(lua, sol::create);
 
+        api["isEnabled"] = []() { return MWBase::Environment::get().getSoundManager()->isEnabled(); };
+
         api["playSound3d"]
             = [](std::string_view soundId, const Object& object, const sol::optional<sol::table>& options) {
                   auto args = getPlaySoundArgs(options);

@@ -109,6 +109,9 @@ namespace MWBase
 
         virtual void processChangedSettings(const std::set<std::pair<std::string, std::string>>& settings) = 0;
 
+        virtual bool isEnabled() const = 0;
+        ///< Returns true if sound system is enabled
+
         virtual void stopMusic() = 0;
         ///< Stops music if it's playing
 

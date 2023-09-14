@@ -173,6 +173,9 @@ namespace MWSound
 
         void processChangedSettings(const Settings::CategorySettingVector& settings) override;
 
+        bool isEnabled() const override { return mOutput->isInitialized(); }
+        ///< Returns true if sound system is enabled
+
         void stopMusic() override;
         ///< Stops music if it's playing
 
