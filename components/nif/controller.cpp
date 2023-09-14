@@ -272,7 +272,7 @@ namespace Nif
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
             nif->read(mPathFlags);
         else
-            mPathFlags = (mFlags >> 16);
+            mPathFlags = (mFlags >> 4);
 
         nif->read(mBankDirection);
         nif->read(mMaxBankAngle);
