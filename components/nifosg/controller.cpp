@@ -556,14 +556,8 @@ namespace NifOsg
     }
 
     ParticleSystemController::ParticleSystemController(const Nif::NiParticleSystemController* ctrl)
-        : mEmitStart(ctrl->startTime)
-        , mEmitStop(ctrl->stopTime)
-    {
-    }
-
-    ParticleSystemController::ParticleSystemController()
-        : mEmitStart(0.f)
-        , mEmitStop(0.f)
+        : mEmitStart(ctrl->mEmitStartTime)
+        , mEmitStop(ctrl->mEmitStopTime)
     {
     }
 

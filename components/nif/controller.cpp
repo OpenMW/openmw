@@ -162,67 +162,71 @@ namespace Nif
         mInterpolator.post(nif);
     }
 
+    void NiParticleInfo::read(NIFStream* nif)
+    {
+        nif->read(mVelocity);
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 4, 0, 1))
+            nif->read(mRotationAxis);
+        nif->read(mAge);
+        nif->read(mLifespan);
+        nif->read(mLastUpdate);
+        nif->read(mSpawnGeneration);
+        nif->read(mCode);
+    }
+
     void NiParticleSystemController::read(NIFStream* nif)
     {
         NiTimeController::read(nif);
 
-        velocity = nif->getFloat();
-        velocityRandom = nif->getFloat();
-        verticalDir = nif->getFloat();
-        verticalAngle = nif->getFloat();
-        horizontalDir = nif->getFloat();
-        horizontalAngle = nif->getFloat();
-        /*normal?*/ nif->getVector3();
-        color = nif->getVector4();
-        size = nif->getFloat();
-        startTime = nif->getFloat();
-        stopTime = nif->getFloat();
-        nif->getChar();
-        emitRate = nif->getFloat();
-        lifetime = nif->getFloat();
-        lifetimeRandom = nif->getFloat();
-
-        emitFlags = nif->getUShort();
-        offsetRandom = nif->getVector3();
-
-        emitter.read(nif);
-
-        /* Unknown Short, 0?
-         * Unknown Float, 1.0?
-         * Unknown Int, 1?
-         * Unknown Int, 0?
-         * Unknown Short, 0?
-         */
-        nif->skip(16);
-
-        numParticles = nif->getUShort();
-        activeCount = nif->getUShort();
-
-        particles.resize(numParticles);
-        for (size_t i = 0; i < particles.size(); i++)
+        if (nif->getVersion() >= NIFStream::generateVersion(3, 3, 0, 13))
+            nif->read(mSpeed);
+        nif->read(mSpeedVariation);
+        nif->read(mDeclination);
+        nif->read(mDeclinationVariation);
+        nif->read(mPlanarAngle);
+        nif->read(mPlanarAngleVariation);
+        nif->read(mInitialNormal);
+        nif->read(mInitialColor);
+        nif->read(mInitialSize);
+        nif->read(mEmitStartTime);
+        nif->read(mEmitStopTime);
+        if (nif->getVersion() >= NIFStream::generateVersion(3, 3, 0, 13))
         {
-            particles[i].velocity = nif->getVector3();
-            nif->getVector3(); /* unknown */
-            particles[i].lifetime = nif->getFloat();
-            particles[i].lifespan = nif->getFloat();
-            particles[i].timestamp = nif->getFloat();
-            nif->getUShort(); /* unknown */
-            particles[i].vertex = nif->getUShort();
+            mResetParticleSystem = nif->get<uint8_t>() != 0;
+            nif->read(mBirthRate);
         }
-
-        nif->getUInt(); /* -1? */
-        affectors.read(nif);
-        colliders.read(nif);
-        nif->getChar();
+        nif->read(mLifetime);
+        nif->read(mLifetimeVariation);
+        if (nif->getVersion() >= NIFStream::generateVersion(3, 3, 0, 13))
+            nif->read(mEmitFlags);
+        nif->read(mEmitterDimensions);
+        mEmitter.read(nif);
+        if (nif->getVersion() >= NIFStream::generateVersion(3, 3, 0, 13))
+        {
+            nif->read(mNumSpawnGenerations);
+            nif->read(mPercentageSpawned);
+            nif->read(mSpawnMultiplier);
+            nif->read(mSpawnSpeedChaos);
+            nif->read(mSpawnDirChaos);
+            mParticles.resize(nif->get<uint16_t>());
+            nif->read(mNumValid);
+            for (NiParticleInfo& particle : mParticles)
+                particle.read(nif);
+            nif->skip(4); // NiEmitterModifier link
+        }
+        mModifier.read(nif);
+        mCollider.read(nif);
+        if (nif->getVersion() >= NIFStream::generateVersion(3, 3, 0, 15))
+            nif->read(mStaticTargetBound);
     }
 
     void NiParticleSystemController::post(Reader& nif)
     {
         NiTimeController::post(nif);
 
-        emitter.post(nif);
-        affectors.post(nif);
-        colliders.post(nif);
+        mEmitter.post(nif);
+        mModifier.post(nif);
+        mCollider.post(nif);
     }
 
     void NiMaterialColorController::read(NIFStream* nif)

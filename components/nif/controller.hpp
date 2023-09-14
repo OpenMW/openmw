@@ -94,6 +94,19 @@ namespace Nif
     {
     };
 
+    struct NiParticleInfo
+    {
+        osg::Vec3f mVelocity;
+        osg::Vec3f mRotationAxis;
+        float mAge;
+        float mLifespan;
+        float mLastUpdate;
+        uint16_t mSpawnGeneration;
+        uint16_t mCode;
+
+        void read(NIFStream* nif);
+    };
+
     struct NiParticleSystemController : public NiTimeController
     {
         enum BSPArrayController
@@ -102,55 +115,47 @@ namespace Nif
             BSPArrayController_AtVertex = 0x10
         };
 
-        struct Particle
-        {
-            osg::Vec3f velocity;
-            float lifetime;
-            float lifespan;
-            float timestamp;
-            unsigned short vertex;
-        };
-
-        float velocity;
-        float velocityRandom;
-
-        float verticalDir; // 0=up, pi/2=horizontal, pi=down
-        float verticalAngle;
-        float horizontalDir;
-        float horizontalAngle;
-
-        osg::Vec4f color;
-        float size;
-        float startTime;
-        float stopTime;
-
-        float emitRate;
-        float lifetime;
-        float lifetimeRandom;
-
         enum EmitFlags
         {
             EmitFlag_NoAutoAdjust = 0x1 // If this flag is set, we use the emitRate value. Otherwise,
                                         // we calculate an emit rate so that the maximum number of particles
                                         // in the system (numParticles) is never exceeded.
         };
-        int emitFlags;
 
-        osg::Vec3f offsetRandom;
-
-        NiAVObjectPtr emitter;
-
-        int numParticles;
-        int activeCount;
-        std::vector<Particle> particles;
-
-        NiParticleModifierPtr affectors;
-        NiParticleModifierPtr colliders;
+        float mSpeed;
+        float mSpeedVariation;
+        float mDeclination;
+        float mDeclinationVariation;
+        float mPlanarAngle;
+        float mPlanarAngleVariation;
+        osg::Vec3f mInitialNormal;
+        osg::Vec4f mInitialColor;
+        float mInitialSize;
+        float mEmitStartTime;
+        float mEmitStopTime;
+        bool mResetParticleSystem{ false };
+        float mBirthRate;
+        float mLifetime;
+        float mLifetimeVariation;
+        uint16_t mEmitFlags{ 0 };
+        osg::Vec3f mEmitterDimensions;
+        NiAVObjectPtr mEmitter;
+        uint16_t mNumSpawnGenerations;
+        float mPercentageSpawned;
+        uint16_t mSpawnMultiplier;
+        float mSpawnSpeedChaos;
+        float mSpawnDirChaos;
+        uint16_t mNumParticles;
+        uint16_t mNumValid;
+        std::vector<NiParticleInfo> mParticles;
+        NiParticleModifierPtr mModifier;
+        NiParticleModifierPtr mCollider;
+        uint8_t mStaticTargetBound;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
 
-        bool noAutoAdjust() const { return emitFlags & EmitFlag_NoAutoAdjust; }
+        bool noAutoAdjust() const { return mEmitFlags & EmitFlag_NoAutoAdjust; }
         bool emitAtVertex() const { return mFlags & BSPArrayController_AtVertex; }
     };
     using NiBSPArrayController = NiParticleSystemController;

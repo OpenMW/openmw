@@ -379,7 +379,7 @@ namespace NifOsg
     {
     public:
         ParticleSystemController(const Nif::NiParticleSystemController* ctrl);
-        ParticleSystemController();
+        ParticleSystemController() = default;
         ParticleSystemController(const ParticleSystemController& copy, const osg::CopyOp& copyop);
 
         META_Object(NifOsg, ParticleSystemController)
@@ -387,8 +387,8 @@ namespace NifOsg
         void operator()(osgParticle::ParticleProcessor* node, osg::NodeVisitor* nv);
 
     private:
-        float mEmitStart;
-        float mEmitStop;
+        float mEmitStart{ 0.f };
+        float mEmitStop{ 0.f };
     };
 
     class PathController : public SceneUtil::NodeCallback<PathController, NifOsg::MatrixTransform*>,
