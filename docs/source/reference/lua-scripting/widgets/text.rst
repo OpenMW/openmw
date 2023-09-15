@@ -22,7 +22,7 @@ Properties
     - number (10)
     - The size of the text.
   * - textColor
-    - util.color (0, 0, 0, 1)
+    - util.color (``rgb(0, 0, 0)``)
     - The color of the text.
   * - multiline
     - boolean (false)
@@ -40,5 +40,5 @@ Properties
     - boolean (false)
     - Whether to render a shadow behind the text.
   * - textShadowColor
-    - util.color (0, 0, 0, 1)
+    - util.color (``rgb(0, 0, 0)``)
     - The color of the text shadow.
