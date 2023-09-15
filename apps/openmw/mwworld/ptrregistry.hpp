@@ -49,7 +49,7 @@ namespace MWWorld
             if (!refNum.isSet())
                 return;
             auto it = mIndex.find(refNum);
-            if (it != mIndex.end() && it->second.getBase() == &ref)
+            if (it != mIndex.end() && it->second.mRef == &ref)
             {
                 mIndex.erase(it);
                 ++mRevision;

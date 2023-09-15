@@ -30,7 +30,7 @@ namespace MWWorld
     {
     }
 
-    const ESM::RefNum& CellRef::getRefNum() const
+    const ESM::RefNum& CellRef::getRefNum() const noexcept
     {
         return std::visit(ESM::VisitOverload{
                               [&](const ESM4::Reference& ref) -> const ESM::RefNum& { return ref.mId; },
