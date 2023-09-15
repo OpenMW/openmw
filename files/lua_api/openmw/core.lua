@@ -827,7 +827,7 @@
 ---
 -- Play an animated voiceover. Has two overloads:
 --
---   * With an "object" argument: play sound for given object, with speaking animation if possible equipment slots.
+--   * With an "object" argument: play sound for given object, with speaking animation if possible
 --   * Without an "object" argument: play sound globally, without object
 -- @function [parent=#Sound] say
 -- @param #string fileName Path to sound file in VFS
