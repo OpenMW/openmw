@@ -9,7 +9,7 @@ namespace Nif
     struct NiParticleModifier : public Record
     {
         NiParticleModifierPtr mNext;
-        ControllerPtr mController;
+        NiTimeControllerPtr mController;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;

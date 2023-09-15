@@ -528,7 +528,7 @@ namespace Nif
 
     void NiBoolData::read(NIFStream* nif)
     {
-        mKeyList = std::make_shared<ByteKeyMap>();
+        mKeyList = std::make_shared<BoolKeyMap>();
         mKeyList->read(nif);
     }
 

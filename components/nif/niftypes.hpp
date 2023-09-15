@@ -25,6 +25,7 @@
 #define OPENMW_COMPONENTS_NIF_NIFTYPES_HPP
 
 #include <osg/Matrixf>
+#include <osg/Quat>
 #include <osg/Vec3f>
 
 // Common types used in NIF files
@@ -76,6 +77,31 @@ namespace Nif
         static const NiTransform& getIdentity()
         {
             static const NiTransform identity = { Matrix3(), osg::Vec3f(), 1.0f };
+            return identity;
+        }
+    };
+
+    struct NiQuatTransform
+    {
+        osg::Vec3f mTranslation;
+        osg::Quat mRotation;
+        float mScale;
+
+        osg::Matrixf toMatrix() const
+        {
+            osg::Matrixf transform(mRotation);
+            transform.setTrans(mTranslation);
+            for (int i = 0; i < 3; i++)
+                transform(i, i) *= mScale;
+
+            return transform;
+        }
+
+        bool isIdentity() const { return mTranslation == osg::Vec3f() && mRotation == osg::Quat() && mScale == 1.f; }
+
+        static const NiQuatTransform& getIdentity()
+        {
+            static const NiQuatTransform identity = { osg::Vec3f(), osg::Quat(), 1.f };
             return identity;
         }
     };

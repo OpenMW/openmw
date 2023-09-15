@@ -219,7 +219,7 @@ namespace Nif
 
     struct NiVisData : public Record
     {
-        // TODO: investigate possible use of ByteKeyMap
+        // TODO: investigate possible use of BoolKeyMap
         std::shared_ptr<std::map<float, bool>> mKeys;
 
         void read(NIFStream* nif) override;
@@ -357,7 +357,8 @@ namespace Nif
 
     struct NiBoolData : public Record
     {
-        ByteKeyMapPtr mKeyList;
+        BoolKeyMapPtr mKeyList;
+
         void read(NIFStream* nif) override;
     };
 

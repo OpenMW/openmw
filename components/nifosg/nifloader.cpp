@@ -293,8 +293,8 @@ namespace NifOsg
             auto textKeyExtraData = static_cast<const Nif::NiTextKeyExtraData*>(extraList[0].getPtr());
             extractTextKeys(textKeyExtraData, target.mTextKeys);
 
-            Nif::ControllerPtr ctrl = seq->mController;
-            for (size_t i = 1; i < extraList.size() && !ctrl.empty(); i++, (ctrl = ctrl->next))
+            Nif::NiTimeControllerPtr ctrl = seq->mController;
+            for (size_t i = 1; i < extraList.size() && !ctrl.empty(); i++, (ctrl = ctrl->mNext))
             {
                 Nif::ExtraPtr extra = extraList[i];
                 if (extra->recType != Nif::RC_NiStringExtraData || ctrl->recType != Nif::RC_NiKeyframeController)
@@ -449,7 +449,7 @@ namespace NifOsg
                     animflags, hasStencilProperty);
         }
 
-        static void setupController(const Nif::Controller* ctrl, SceneUtil::Controller* toSetup, int animflags)
+        static void setupController(const Nif::NiTimeController* ctrl, SceneUtil::Controller* toSetup, int animflags)
         {
             bool autoPlay = animflags & Nif::NiNode::AnimFlag_AutoPlay;
             if (autoPlay)
@@ -725,7 +725,7 @@ namespace NifOsg
             if (nifNode->isHidden())
             {
                 bool hasVisController = false;
-                for (Nif::ControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->next)
+                for (Nif::NiTimeControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->mNext)
                 {
                     hasVisController |= (ctrl->recType == Nif::RC_NiVisController);
                     if (hasVisController)
@@ -858,25 +858,24 @@ namespace NifOsg
             SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures,
             int animflags)
         {
-            for (Nif::ControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::NiTimeControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
                 if (!ctrl->isActive())
                     continue;
                 if (ctrl->recType == Nif::RC_NiUVController)
                 {
                     const Nif::NiUVController* niuvctrl = static_cast<const Nif::NiUVController*>(ctrl.getPtr());
-                    if (niuvctrl->data.empty())
+                    if (niuvctrl->mData.empty())
                         continue;
-                    const unsigned int uvSet = niuvctrl->uvSet;
-                    std::set<int> texUnits;
-                    // UVController should work only for textures which use a given UV Set, usually 0.
+                    std::set<unsigned int> texUnits;
+                    // UVController should only work for textures which use the given UV Set.
                     for (unsigned int i = 0; i < boundTextures.size(); ++i)
                     {
-                        if (boundTextures[i] == uvSet)
+                        if (boundTextures[i] == niuvctrl->mUvSet)
                             texUnits.insert(i);
                     }
 
-                    osg::ref_ptr<UVController> uvctrl = new UVController(niuvctrl->data.getPtr(), texUnits);
+                    osg::ref_ptr<UVController> uvctrl = new UVController(niuvctrl->mData.getPtr(), texUnits);
                     setupController(niuvctrl, uvctrl, animflags);
                     composite->addController(uvctrl);
                 }
@@ -885,7 +884,7 @@ namespace NifOsg
 
         void handleNodeControllers(const Nif::NiAVObject* nifNode, osg::Node* node, int animflags, bool& isAnimated)
         {
-            for (Nif::ControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::NiTimeControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
                 if (!ctrl->isActive())
                     continue;
@@ -908,7 +907,7 @@ namespace NifOsg
                 else if (ctrl->recType == Nif::RC_NiPathController)
                 {
                     const Nif::NiPathController* path = static_cast<const Nif::NiPathController*>(ctrl.getPtr());
-                    if (path->posData.empty() || path->floatData.empty())
+                    if (path->mPathData.empty() || path->mPercentData.empty())
                         continue;
                     osg::ref_ptr<PathController> callback(new PathController(path));
                     setupController(path, callback, animflags);
@@ -963,7 +962,7 @@ namespace NifOsg
         void handleMaterialControllers(const Nif::Property* materialProperty,
             SceneUtil::CompositeStateSetUpdater* composite, int animflags, const osg::Material* baseMaterial)
         {
-            for (Nif::ControllerPtr ctrl = materialProperty->mController; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::NiTimeControllerPtr ctrl = materialProperty->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
                 if (!ctrl->isActive())
                     continue;
@@ -988,18 +987,16 @@ namespace NifOsg
                 {
                     const Nif::NiMaterialColorController* matctrl
                         = static_cast<const Nif::NiMaterialColorController*>(ctrl.getPtr());
-                    if (matctrl->mData.empty() && matctrl->mInterpolator.empty())
+                    Nif::NiInterpolatorPtr interp = matctrl->mInterpolator;
+                    if (matctrl->mData.empty() && interp.empty())
                         continue;
-                    auto targetColor = static_cast<MaterialColorController::TargetColor>(matctrl->mTargetColor);
                     if (mVersion <= Nif::NIFFile::VER_MW
-                        && targetColor == MaterialColorController::TargetColor::Specular)
+                        && matctrl->mTargetColor == Nif::NiMaterialColorController::TargetColor::Specular)
                         continue;
-                    if (!matctrl->mInterpolator.empty()
-                        && matctrl->mInterpolator->recType != Nif::RC_NiPoint3Interpolator)
+                    if (!interp.empty() && interp->recType != Nif::RC_NiPoint3Interpolator)
                     {
-                        Log(Debug::Error)
-                            << "Unsupported interpolator type for NiMaterialColorController " << matctrl->recIndex
-                            << " in " << mFilename << ": " << matctrl->mInterpolator->recName;
+                        Log(Debug::Error) << "Unsupported interpolator type for NiMaterialColorController "
+                                          << matctrl->recIndex << " in " << mFilename << ": " << interp->recName;
                         continue;
                     }
                     osg::ref_ptr<MaterialColorController> osgctrl = new MaterialColorController(matctrl, baseMaterial);
@@ -1014,7 +1011,7 @@ namespace NifOsg
         void handleTextureControllers(const Nif::Property* texProperty, SceneUtil::CompositeStateSetUpdater* composite,
             Resource::ImageManager* imageManager, osg::StateSet* stateset, int animflags)
         {
-            for (Nif::ControllerPtr ctrl = texProperty->mController; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::NiTimeControllerPtr ctrl = texProperty->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
                 if (!ctrl->isActive())
                     continue;
@@ -1063,7 +1060,7 @@ namespace NifOsg
             }
         }
 
-        void handleParticlePrograms(Nif::NiParticleModifierPtr affectors, Nif::NiParticleModifierPtr colliders,
+        void handleParticlePrograms(Nif::NiParticleModifierPtr modifier, Nif::NiParticleModifierPtr collider,
             osg::Group* attachTo, osgParticle::ParticleSystem* partsys,
             osgParticle::ParticleProcessor::ReferenceFrame rf)
         {
@@ -1071,50 +1068,50 @@ namespace NifOsg
             attachTo->addChild(program);
             program->setParticleSystem(partsys);
             program->setReferenceFrame(rf);
-            for (; !affectors.empty(); affectors = affectors->mNext)
+            for (; !modifier.empty(); modifier = modifier->mNext)
             {
-                if (affectors->recType == Nif::RC_NiParticleGrowFade)
+                if (modifier->recType == Nif::RC_NiParticleGrowFade)
                 {
-                    const Nif::NiParticleGrowFade* gf = static_cast<const Nif::NiParticleGrowFade*>(affectors.getPtr());
+                    const Nif::NiParticleGrowFade* gf = static_cast<const Nif::NiParticleGrowFade*>(modifier.getPtr());
                     program->addOperator(new GrowFadeAffector(gf->mGrowTime, gf->mFadeTime));
                 }
-                else if (affectors->recType == Nif::RC_NiGravity)
+                else if (modifier->recType == Nif::RC_NiGravity)
                 {
-                    const Nif::NiGravity* gr = static_cast<const Nif::NiGravity*>(affectors.getPtr());
+                    const Nif::NiGravity* gr = static_cast<const Nif::NiGravity*>(modifier.getPtr());
                     program->addOperator(new GravityAffector(gr));
                 }
-                else if (affectors->recType == Nif::RC_NiParticleColorModifier)
+                else if (modifier->recType == Nif::RC_NiParticleColorModifier)
                 {
                     const Nif::NiParticleColorModifier* cl
-                        = static_cast<const Nif::NiParticleColorModifier*>(affectors.getPtr());
+                        = static_cast<const Nif::NiParticleColorModifier*>(modifier.getPtr());
                     if (cl->mData.empty())
                         continue;
                     const Nif::NiColorData* clrdata = cl->mData.getPtr();
                     program->addOperator(new ParticleColorAffector(clrdata));
                 }
-                else if (affectors->recType == Nif::RC_NiParticleRotation)
+                else if (modifier->recType == Nif::RC_NiParticleRotation)
                 {
                     // unused
                 }
                 else
-                    Log(Debug::Info) << "Unhandled particle modifier " << affectors->recName << " in " << mFilename;
+                    Log(Debug::Info) << "Unhandled particle modifier " << modifier->recName << " in " << mFilename;
             }
-            for (; !colliders.empty(); colliders = colliders->mNext)
+            for (; !collider.empty(); collider = collider->mNext)
             {
-                if (colliders->recType == Nif::RC_NiPlanarCollider)
+                if (collider->recType == Nif::RC_NiPlanarCollider)
                 {
                     const Nif::NiPlanarCollider* planarcollider
-                        = static_cast<const Nif::NiPlanarCollider*>(colliders.getPtr());
+                        = static_cast<const Nif::NiPlanarCollider*>(collider.getPtr());
                     program->addOperator(new PlanarCollider(planarcollider));
                 }
-                else if (colliders->recType == Nif::RC_NiSphericalCollider)
+                else if (collider->recType == Nif::RC_NiSphericalCollider)
                 {
                     const Nif::NiSphericalCollider* sphericalcollider
-                        = static_cast<const Nif::NiSphericalCollider*>(colliders.getPtr());
+                        = static_cast<const Nif::NiSphericalCollider*>(collider.getPtr());
                     program->addOperator(new SphericalCollider(sphericalcollider));
                 }
                 else
-                    Log(Debug::Info) << "Unhandled particle collider " << colliders->recName << " in " << mFilename;
+                    Log(Debug::Info) << "Unhandled particle collider " << collider->recName << " in " << mFilename;
             }
         }
 
@@ -1126,7 +1123,7 @@ namespace NifOsg
             auto particleNode = static_cast<const Nif::NiParticles*>(nifNode);
             if (particleNode->data.empty() || particleNode->data->recType != Nif::RC_NiParticlesData)
             {
-                partsys->setQuota(partctrl->numParticles);
+                partsys->setQuota(partctrl->mParticles.size());
                 return;
             }
 
@@ -1136,35 +1133,35 @@ namespace NifOsg
             osg::BoundingBox box;
 
             int i = 0;
-            for (const auto& particle : partctrl->particles)
+            for (const auto& particle : partctrl->mParticles)
             {
                 if (i++ >= particledata->mActiveCount)
                     break;
 
-                if (particle.lifespan <= 0)
+                if (particle.mLifespan <= 0)
                     continue;
 
-                if (particle.vertex >= particledata->mVertices.size())
+                if (particle.mCode >= particledata->mVertices.size())
                     continue;
 
-                ParticleAgeSetter particletemplate(std::max(0.f, particle.lifetime));
+                ParticleAgeSetter particletemplate(std::max(0.f, particle.mAge));
 
                 osgParticle::Particle* created = partsys->createParticle(&particletemplate);
-                created->setLifeTime(particle.lifespan);
+                created->setLifeTime(particle.mLifespan);
 
                 // Note this position and velocity is not correct for a particle system with absolute reference frame,
                 // which can not be done in this loader since we are not attached to the scene yet. Will be fixed up
                 // post-load in the SceneManager.
-                created->setVelocity(particle.velocity);
-                const osg::Vec3f& position = particledata->mVertices[particle.vertex];
+                created->setVelocity(particle.mVelocity);
+                const osg::Vec3f& position = particledata->mVertices[particle.mCode];
                 created->setPosition(position);
 
-                created->setColorRange(osgParticle::rangev4(partctrl->color, partctrl->color));
+                created->setColorRange(osgParticle::rangev4(partctrl->mInitialColor, partctrl->mInitialColor));
                 created->setAlphaRange(osgParticle::rangef(1.f, 1.f));
 
-                float size = partctrl->size;
-                if (particle.vertex < particledata->mSizes.size())
-                    size *= particledata->mSizes[particle.vertex];
+                float size = partctrl->mInitialSize;
+                if (particle.mCode < particledata->mSizes.size())
+                    size *= particledata->mSizes[particle.mCode];
 
                 created->setSizeRange(osgParticle::rangef(size, size));
                 box.expandBy(osg::BoundingSphere(position, size));
@@ -1181,39 +1178,39 @@ namespace NifOsg
             std::vector<int> targets;
             if (partctrl->recType == Nif::RC_NiBSPArrayController && !partctrl->emitAtVertex())
             {
-                getAllNiNodes(partctrl->emitter.getPtr(), targets);
+                getAllNiNodes(partctrl->mEmitter.getPtr(), targets);
             }
 
             osg::ref_ptr<Emitter> emitter = new Emitter(targets);
 
             osgParticle::ConstantRateCounter* counter = new osgParticle::ConstantRateCounter;
             if (partctrl->noAutoAdjust())
-                counter->setNumberOfParticlesPerSecondToCreate(partctrl->emitRate);
-            else if (partctrl->lifetime == 0 && partctrl->lifetimeRandom == 0)
+                counter->setNumberOfParticlesPerSecondToCreate(partctrl->mBirthRate);
+            else if (partctrl->mLifetime == 0 && partctrl->mLifetimeVariation == 0)
                 counter->setNumberOfParticlesPerSecondToCreate(0);
             else
                 counter->setNumberOfParticlesPerSecondToCreate(
-                    partctrl->numParticles / (partctrl->lifetime + partctrl->lifetimeRandom / 2));
+                    partctrl->mParticles.size() / (partctrl->mLifetime + partctrl->mLifetimeVariation / 2));
 
             emitter->setCounter(counter);
 
-            ParticleShooter* shooter = new ParticleShooter(partctrl->velocity - partctrl->velocityRandom * 0.5f,
-                partctrl->velocity + partctrl->velocityRandom * 0.5f, partctrl->horizontalDir,
-                partctrl->horizontalAngle, partctrl->verticalDir, partctrl->verticalAngle, partctrl->lifetime,
-                partctrl->lifetimeRandom);
+            ParticleShooter* shooter = new ParticleShooter(partctrl->mSpeed - partctrl->mSpeedVariation * 0.5f,
+                partctrl->mSpeed + partctrl->mSpeedVariation * 0.5f, partctrl->mPlanarAngle,
+                partctrl->mPlanarAngleVariation, partctrl->mDeclination, partctrl->mDeclinationVariation,
+                partctrl->mLifetime, partctrl->mLifetimeVariation);
             emitter->setShooter(shooter);
-            emitter->setFlags(partctrl->flags);
+            emitter->setFlags(partctrl->mFlags);
 
             if (partctrl->recType == Nif::RC_NiBSPArrayController && partctrl->emitAtVertex())
             {
-                emitter->setGeometryEmitterTarget(partctrl->emitter->recIndex);
+                emitter->setGeometryEmitterTarget(partctrl->mEmitter->recIndex);
             }
             else
             {
                 osgParticle::BoxPlacer* placer = new osgParticle::BoxPlacer;
-                placer->setXRange(-partctrl->offsetRandom.x() / 2.f, partctrl->offsetRandom.x() / 2.f);
-                placer->setYRange(-partctrl->offsetRandom.y() / 2.f, partctrl->offsetRandom.y() / 2.f);
-                placer->setZRange(-partctrl->offsetRandom.z() / 2.f, partctrl->offsetRandom.z() / 2.f);
+                placer->setXRange(-partctrl->mEmitterDimensions.x() / 2.f, partctrl->mEmitterDimensions.x() / 2.f);
+                placer->setYRange(-partctrl->mEmitterDimensions.y() / 2.f, partctrl->mEmitterDimensions.y() / 2.f);
+                placer->setZRange(-partctrl->mEmitterDimensions.z() / 2.f, partctrl->mEmitterDimensions.z() / 2.f);
                 emitter->setPlacer(placer);
             }
 
@@ -1254,7 +1251,7 @@ namespace NifOsg
             partsys->setSortMode(osgParticle::ParticleSystem::SORT_BACK_TO_FRONT);
 
             const Nif::NiParticleSystemController* partctrl = nullptr;
-            for (Nif::ControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::NiTimeControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
                 if (!ctrl->isActive())
                     continue;
@@ -1282,11 +1279,13 @@ namespace NifOsg
 
             handleParticleInitialState(nifNode, partsys, partctrl);
 
-            partsys->getDefaultParticleTemplate().setSizeRange(osgParticle::rangef(partctrl->size, partctrl->size));
-            partsys->getDefaultParticleTemplate().setColorRange(osgParticle::rangev4(partctrl->color, partctrl->color));
+            partsys->getDefaultParticleTemplate().setSizeRange(
+                osgParticle::rangef(partctrl->mInitialSize, partctrl->mInitialSize));
+            partsys->getDefaultParticleTemplate().setColorRange(
+                osgParticle::rangev4(partctrl->mInitialColor, partctrl->mInitialColor));
             partsys->getDefaultParticleTemplate().setAlphaRange(osgParticle::rangef(1.f, 1.f));
 
-            if (!partctrl->emitter.empty())
+            if (!partctrl->mEmitter.empty())
             {
                 osg::ref_ptr<Emitter> emitter = handleParticleEmitter(partctrl);
                 emitter->setParticleSystem(partsys);
@@ -1295,7 +1294,7 @@ namespace NifOsg
                 // The emitter node may not actually be handled yet, so let's delay attaching the emitter to a later
                 // moment. If the emitter node is placed later than the particle node, it'll have a single frame delay
                 // in particle processing. But that shouldn't be a game-breaking issue.
-                mEmitterQueue.emplace_back(partctrl->emitter->recIndex, emitter);
+                mEmitterQueue.emplace_back(partctrl->mEmitter->recIndex, emitter);
 
                 osg::ref_ptr<ParticleSystemController> callback(new ParticleSystemController(partctrl));
                 setupController(partctrl, callback, animflags);
@@ -1312,16 +1311,16 @@ namespace NifOsg
                 partsys->update(0.0, nv);
             }
 
-            // affectors should be attached *after* the emitter in the scene graph for correct update order
+            // modifiers should be attached *after* the emitter in the scene graph for correct update order
             // attach to same node as the ParticleSystem, we need osgParticle Operators to get the correct
             // localToWorldMatrix for transforming to particle space
-            handleParticlePrograms(partctrl->affectors, partctrl->colliders, parentNode, partsys.get(), rf);
+            handleParticlePrograms(partctrl->mModifier, partctrl->mCollider, parentNode, partsys.get(), rf);
 
             std::vector<const Nif::Property*> drawableProps;
             collectDrawableProperties(nifNode, parent, drawableProps);
             applyDrawableProperties(parentNode, drawableProps, composite, true, animflags);
 
-            // particle system updater (after the emitters and affectors in the scene graph)
+            // particle system updater (after the emitters and modifiers in the scene graph)
             // I think for correct culling needs to be *before* the ParticleSystem, though osg examples do it the other
             // way
             osg::ref_ptr<osgParticle::ParticleSystemUpdater> updater = new osgParticle::ParticleSystemUpdater;
@@ -1485,7 +1484,7 @@ namespace NifOsg
             if (geom->empty())
                 return;
             osg::ref_ptr<osg::Drawable> drawable;
-            for (Nif::ControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->next)
+            for (Nif::NiTimeControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
                 if (!ctrl->isActive())
                     continue;

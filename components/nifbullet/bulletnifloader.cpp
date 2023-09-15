@@ -255,7 +255,7 @@ namespace NifBullet
         if (node.recType == Nif::RC_NiCollisionSwitch && !node.collisionActive())
             return;
 
-        for (Nif::ControllerPtr ctrl = node.mController; !ctrl.empty(); ctrl = ctrl->next)
+        for (Nif::NiTimeControllerPtr ctrl = node.mController; !ctrl.empty(); ctrl = ctrl->mNext)
         {
             if (args.mAnimated)
                 break;

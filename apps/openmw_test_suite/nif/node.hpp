@@ -20,7 +20,7 @@ namespace Nif::Testing
     {
         value.mExtra = ExtraPtr(nullptr);
         value.mExtraList = ExtraList();
-        value.mController = ControllerPtr(nullptr);
+        value.mController = NiTimeControllerPtr(nullptr);
     }
 
     inline void init(NiAVObject& value)
@@ -55,15 +55,15 @@ namespace Nif::Testing
         value.mRoot = NiAVObjectPtr(nullptr);
     }
 
-    inline void init(Controller& value)
+    inline void init(NiTimeController& value)
     {
-        value.next = ControllerPtr(nullptr);
-        value.flags = 0;
-        value.frequency = 0;
-        value.phase = 0;
-        value.timeStart = 0;
-        value.timeStop = 0;
-        value.target = NiObjectNETPtr(nullptr);
+        value.mNext = NiTimeControllerPtr(nullptr);
+        value.mFlags = 0;
+        value.mFrequency = 0;
+        value.mPhase = 0;
+        value.mTimeStart = 0;
+        value.mTimeStop = 0;
+        value.mTarget = NiObjectNETPtr(nullptr);
     }
 }
 

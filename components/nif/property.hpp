@@ -79,7 +79,7 @@ namespace Nif
          * 5 - Bump map texture
          * 6 - Decal texture
          */
-        enum TextureType
+        enum TextureType : uint32_t
         {
             BaseTexture = 0,
             DarkTexture = 1,

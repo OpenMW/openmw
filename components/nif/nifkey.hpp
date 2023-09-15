@@ -152,13 +152,13 @@ namespace Nif
     using Vector3KeyMap = KeyMapT<osg::Vec3f, &NIFStream::get<osg::Vec3f>>;
     using Vector4KeyMap = KeyMapT<osg::Vec4f, &NIFStream::get<osg::Vec4f>>;
     using QuaternionKeyMap = KeyMapT<osg::Quat, &NIFStream::get<osg::Quat>>;
-    using ByteKeyMap = KeyMapT<char, &NIFStream::get<char>>;
+    using BoolKeyMap = KeyMapT<bool, &NIFStream::get<bool>>;
 
     using FloatKeyMapPtr = std::shared_ptr<FloatKeyMap>;
     using Vector3KeyMapPtr = std::shared_ptr<Vector3KeyMap>;
     using Vector4KeyMapPtr = std::shared_ptr<Vector4KeyMap>;
     using QuaternionKeyMapPtr = std::shared_ptr<QuaternionKeyMap>;
-    using ByteKeyMapPtr = std::shared_ptr<ByteKeyMap>;
+    using BoolKeyMapPtr = std::shared_ptr<BoolKeyMap>;
 
 } // Namespace
 #endif //#ifndef OPENMW_COMPONENTS_NIF_NIFKEY_HPP

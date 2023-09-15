@@ -63,18 +63,17 @@ namespace NifOsg
         ValueInterpolator() = default;
 
         template <class T,
-            typename
-            = std::enable_if_t<std::conjunction_v<std::disjunction<std::is_same<ValueT, float>,
-                                                      std::is_same<ValueT, osg::Vec3f>, std::is_same<ValueT, bool>,
-                                                      std::is_same<ValueT, osg::Vec4f>, std::is_same<ValueT, char>>,
-                                   std::is_same<decltype(T::defaultVal), ValueT>>,
+            typename = std::enable_if_t<
+                std::conjunction_v<std::disjunction<std::is_same<ValueT, float>, std::is_same<ValueT, osg::Vec3f>,
+                                       std::is_same<ValueT, bool>, std::is_same<ValueT, osg::Vec4f>>,
+                    std::is_same<decltype(T::mDefaultValue), ValueT>>,
                 T>>
         ValueInterpolator(const T* interpolator)
-            : mDefaultVal(interpolator->defaultVal)
+            : mDefaultVal(interpolator->mDefaultValue)
         {
-            if (interpolator->data.empty())
+            if (interpolator->mData.empty())
                 return;
-            mKeys = interpolator->data->mKeyList;
+            mKeys = interpolator->mData->mKeyList;
             if (mKeys)
             {
                 mLastLowKey = mKeys->mKeys.end();
@@ -182,7 +181,7 @@ namespace NifOsg
     using FloatInterpolator = ValueInterpolator<Nif::FloatKeyMap>;
     using Vec3Interpolator = ValueInterpolator<Nif::Vector3KeyMap>;
     using Vec4Interpolator = ValueInterpolator<Nif::Vector4KeyMap>;
-    using ByteInterpolator = ValueInterpolator<Nif::ByteKeyMap>;
+    using BoolInterpolator = ValueInterpolator<Nif::BoolKeyMap>;
 
     class ControllerFunction : public SceneUtil::ControllerFunction
     {
@@ -191,10 +190,10 @@ namespace NifOsg
         float mPhase;
         float mStartTime;
         float mStopTime;
-        Nif::Controller::ExtrapolationMode mExtrapolationMode;
+        Nif::NiTimeController::ExtrapolationMode mExtrapolationMode;
 
     public:
-        ControllerFunction(const Nif::Controller* ctrl);
+        ControllerFunction(const Nif::NiTimeController* ctrl);
 
         float calculate(float value) const override;
 
@@ -262,9 +261,9 @@ namespace NifOsg
     class UVController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
     public:
-        UVController();
+        UVController() = default;
         UVController(const UVController&, const osg::CopyOp&);
-        UVController(const Nif::NiUVData* data, const std::set<int>& textureUnits);
+        UVController(const Nif::NiUVData* data, const std::set<unsigned int>& textureUnits);
 
         META_Object(NifOsg, UVController)
 
@@ -276,14 +275,14 @@ namespace NifOsg
         FloatInterpolator mVTrans;
         FloatInterpolator mUScale;
         FloatInterpolator mVScale;
-        std::set<int> mTextureUnits;
+        std::set<unsigned int> mTextureUnits;
     };
 
     class VisController : public SceneUtil::NodeCallback<VisController>, public SceneUtil::Controller
     {
     private:
         std::shared_ptr<std::map<float, bool>> mData;
-        ByteInterpolator mInterpolator;
+        BoolInterpolator mInterpolator;
         unsigned int mMask{ 0u };
 
         bool calculate(float time) const;
@@ -336,13 +335,6 @@ namespace NifOsg
     class MaterialColorController : public SceneUtil::StateSetUpdater, public SceneUtil::Controller
     {
     public:
-        enum TargetColor
-        {
-            Ambient = 0,
-            Diffuse = 1,
-            Specular = 2,
-            Emissive = 3
-        };
         MaterialColorController(const Nif::NiMaterialColorController* ctrl, const osg::Material* baseMaterial);
         MaterialColorController();
         MaterialColorController(const MaterialColorController& copy, const osg::CopyOp& copyop);
@@ -355,7 +347,7 @@ namespace NifOsg
 
     private:
         Vec3Interpolator mData;
-        TargetColor mTargetColor = Ambient;
+        Nif::NiMaterialColorController::TargetColor mTargetColor;
         osg::ref_ptr<const osg::Material> mBaseMaterial;
     };
 
@@ -386,7 +378,7 @@ namespace NifOsg
     {
     public:
         ParticleSystemController(const Nif::NiParticleSystemController* ctrl);
-        ParticleSystemController();
+        ParticleSystemController() = default;
         ParticleSystemController(const ParticleSystemController& copy, const osg::CopyOp& copyop);
 
         META_Object(NifOsg, ParticleSystemController)
@@ -394,8 +386,8 @@ namespace NifOsg
         void operator()(osgParticle::ParticleProcessor* node, osg::NodeVisitor* nv);
 
     private:
-        float mEmitStart;
-        float mEmitStop;
+        float mEmitStart{ 0.f };
+        float mEmitStop{ 0.f };
     };
 
     class PathController : public SceneUtil::NodeCallback<PathController, NifOsg::MatrixTransform*>,

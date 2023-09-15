@@ -8,7 +8,7 @@ namespace Nif
 
     void NiTexturingProperty::Texture::read(NIFStream* nif)
     {
-        inUse = nif->getBoolean();
+        nif->read(inUse);
         if (!inUse)
             return;
 
@@ -36,7 +36,7 @@ namespace Nif
             nif->skip(2); // Unknown short
         else if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
         {
-            if (nif->getBoolean()) // Has texture transform
+            if (nif->get<bool>()) // Has texture transform
             {
                 nif->getVector2(); // UV translation
                 nif->getVector2(); // UV scale
