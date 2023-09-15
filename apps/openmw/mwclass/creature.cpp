@@ -127,14 +127,8 @@ namespace MWClass
             MWWorld::LiveCellRef<ESM::Creature>* ref = ptr.get<ESM::Creature>();
 
             // creature stats
-            data->mCreatureStats.setAttribute(ESM::Attribute::Strength, ref->mBase->mData.mStrength);
-            data->mCreatureStats.setAttribute(ESM::Attribute::Intelligence, ref->mBase->mData.mIntelligence);
-            data->mCreatureStats.setAttribute(ESM::Attribute::Willpower, ref->mBase->mData.mWillpower);
-            data->mCreatureStats.setAttribute(ESM::Attribute::Agility, ref->mBase->mData.mAgility);
-            data->mCreatureStats.setAttribute(ESM::Attribute::Speed, ref->mBase->mData.mSpeed);
-            data->mCreatureStats.setAttribute(ESM::Attribute::Endurance, ref->mBase->mData.mEndurance);
-            data->mCreatureStats.setAttribute(ESM::Attribute::Personality, ref->mBase->mData.mPersonality);
-            data->mCreatureStats.setAttribute(ESM::Attribute::Luck, ref->mBase->mData.mLuck);
+            for (size_t i = 0; i < ref->mBase->mData.mAttributes.size(); ++i)
+                data->mCreatureStats.setAttribute(ESM::Attribute::indexToRefId(i), ref->mBase->mData.mAttributes[i]);
             data->mCreatureStats.setHealth(static_cast<float>(ref->mBase->mData.mHealth));
             data->mCreatureStats.setMagicka(static_cast<float>(ref->mBase->mData.mMana));
             data->mCreatureStats.setFatigue(static_cast<float>(ref->mBase->mData.mFatigue));

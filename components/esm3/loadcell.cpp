@@ -93,7 +93,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("DATA"):
-                    esm.getHTSized<12>(mData);
+                    esm.getHT(mData.mFlags, mData.mX, mData.mY);
                     hasData = true;
                     break;
                 case SREC_DELE:
@@ -144,7 +144,7 @@ namespace ESM
                         mWater = waterLevel;
                     break;
                 case fourCC("AMBI"):
-                    esm.getHTSized<16>(mAmbi);
+                    esm.getHT(mAmbi.mAmbient, mAmbi.mSunlight, mAmbi.mFog, mAmbi.mFogDensity);
                     mHasAmbi = true;
                     break;
                 case fourCC("RGNN"):

@@ -1315,30 +1315,9 @@ QVariant CSMWorld::CreatureAttributesRefIdAdapter::getNestedData(
 
     if (subColIndex == 0)
         return subRowIndex;
-    else if (subColIndex == 1)
-        switch (subRowIndex)
-        {
-            case 0:
-                return creature.mData.mStrength;
-            case 1:
-                return creature.mData.mIntelligence;
-            case 2:
-                return creature.mData.mWillpower;
-            case 3:
-                return creature.mData.mAgility;
-            case 4:
-                return creature.mData.mSpeed;
-            case 5:
-                return creature.mData.mEndurance;
-            case 6:
-                return creature.mData.mPersonality;
-            case 7:
-                return creature.mData.mLuck;
-            default:
-                return QVariant(); // throw an exception here?
-        }
-    else
-        return QVariant(); // throw an exception here?
+    else if (subColIndex == 1 && subRowIndex > 0 && subRowIndex < ESM::Attribute::Length)
+        return creature.mData.mAttributes[subRowIndex];
+    return QVariant(); // throw an exception here?
 }
 
 void CSMWorld::CreatureAttributesRefIdAdapter::setNestedData(
@@ -1346,42 +1325,14 @@ void CSMWorld::CreatureAttributesRefIdAdapter::setNestedData(
 {
     Record<ESM::Creature>& record
         = static_cast<Record<ESM::Creature>&>(data.getRecord(RefIdData::LocalIndex(row, UniversalId::Type_Creature)));
-    ESM::Creature creature = record.get();
 
-    if (subColIndex == 1)
-        switch (subRowIndex)
-        {
-            case 0:
-                creature.mData.mStrength = value.toInt();
-                break;
-            case 1:
-                creature.mData.mIntelligence = value.toInt();
-                break;
-            case 2:
-                creature.mData.mWillpower = value.toInt();
-                break;
-            case 3:
-                creature.mData.mAgility = value.toInt();
-                break;
-            case 4:
-                creature.mData.mSpeed = value.toInt();
-                break;
-            case 5:
-                creature.mData.mEndurance = value.toInt();
-                break;
-            case 6:
-                creature.mData.mPersonality = value.toInt();
-                break;
-            case 7:
-                creature.mData.mLuck = value.toInt();
-                break;
-            default:
-                return; // throw an exception here?
-        }
-    else
-        return; // throw an exception here?
-
-    record.setModified(creature);
+    if (subColIndex == 1 && subRowIndex > 0 && subRowIndex < ESM::Attribute::Length)
+    {
+        ESM::Creature creature = record.get();
+        creature.mData.mAttributes[subRowIndex] = value.toInt();
+        record.setModified(creature);
+    }
+    // throw an exception here?
 }
 
 int CSMWorld::CreatureAttributesRefIdAdapter::getNestedColumnsCount(

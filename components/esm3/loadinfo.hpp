@@ -35,11 +35,11 @@ namespace ESM
 
         struct DATAstruct
         {
-            int mUnknown1 = 0;
+            int32_t mUnknown1 = 0;
             union
             {
-                int mDisposition = 0; // Used for dialogue responses
-                int mJournalIndex; // Used for journal entries
+                int32_t mDisposition = 0; // Used for dialogue responses
+                int32_t mJournalIndex; // Used for journal entries
             };
             signed char mRank = -1; // Rank of NPC
             signed char mGender = Gender::NA; // See Gender enum
