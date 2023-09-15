@@ -437,7 +437,7 @@ namespace MWRender
     class AddRefnumMarkerVisitor : public osg::NodeVisitor
     {
     public:
-        AddRefnumMarkerVisitor(const ESM::RefNum& refnum)
+        AddRefnumMarkerVisitor(ESM::RefNum refnum)
             : osg::NodeVisitor(TRAVERSE_ALL_CHILDREN)
             , mRefnum(refnum)
         {
@@ -896,7 +896,7 @@ namespace MWRender
     };
 
     bool ObjectPaging::enableObject(
-        int type, const ESM::RefNum& refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled)
+        int type, ESM::RefNum refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled)
     {
         if (!typeFilter(type, false))
             return false;
@@ -923,8 +923,7 @@ namespace MWRender
         return true;
     }
 
-    bool ObjectPaging::blacklistObject(
-        int type, const ESM::RefNum& refnum, const osg::Vec3f& pos, const osg::Vec2i& cell)
+    bool ObjectPaging::blacklistObject(int type, ESM::RefNum refnum, const osg::Vec3f& pos, const osg::Vec2i& cell)
     {
         if (!typeFilter(type, false))
             return false;

@@ -27,11 +27,11 @@ namespace MWWorld
         explicit CellRef(const ESM4::ActorCharacter& ref);
 
         // Note: Currently unused for items in containers
-        const ESM::RefNum& getRefNum() const noexcept;
+        ESM::RefNum getRefNum() const noexcept;
 
         // Returns RefNum.
         // If RefNum is not set, assigns a generated one and changes the "lastAssignedRefNum" counter.
-        const ESM::RefNum& getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum);
+        ESM::RefNum getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum);
 
         void setRefNum(ESM::RefNum refNum);
 

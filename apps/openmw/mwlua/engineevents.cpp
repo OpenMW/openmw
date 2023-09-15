@@ -87,7 +87,7 @@ namespace MWLua
         void operator()(const OnNewExterior& event) const { mGlobalScripts.onNewExterior(GCell{ &event.mCell }); }
 
     private:
-        MWWorld::Ptr getPtr(const ESM::RefNum& id) const
+        MWWorld::Ptr getPtr(ESM::RefNum id) const
         {
             MWWorld::Ptr res = mWorldModel->getPtr(id);
             if (res.isEmpty() && Settings::lua().mLuaDebug)
@@ -103,7 +103,7 @@ namespace MWLua
                 return ptr.getRefData().getLuaScripts();
         }
 
-        LocalScripts* getLocalScripts(const ESM::RefNum& id) const { return getLocalScripts(getPtr(id)); }
+        LocalScripts* getLocalScripts(ESM::RefNum id) const { return getLocalScripts(getPtr(id)); }
 
         GlobalScripts& mGlobalScripts;
         MWWorld::WorldModel* mWorldModel = MWBase::Environment::get().getWorldModel();

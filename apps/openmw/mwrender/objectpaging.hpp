@@ -41,11 +41,10 @@ namespace MWRender
         unsigned int getNodeMask() override;
 
         /// @return true if view needs rebuild
-        bool enableObject(
-            int type, const ESM::RefNum& refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled);
+        bool enableObject(int type, ESM::RefNum refnum, const osg::Vec3f& pos, const osg::Vec2i& cell, bool enabled);
 
         /// @return true if view needs rebuild
-        bool blacklistObject(int type, const ESM::RefNum& refnum, const osg::Vec3f& pos, const osg::Vec2i& cell);
+        bool blacklistObject(int type, ESM::RefNum refnum, const osg::Vec3f& pos, const osg::Vec2i& cell);
 
         void clear();
 

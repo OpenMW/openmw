@@ -660,10 +660,10 @@ namespace MWWorld
 
     class RefNumSearchVisitor
     {
-        const ESM::RefNum& mRefNum;
+        ESM::RefNum mRefNum;
 
     public:
-        RefNumSearchVisitor(const ESM::RefNum& refNum)
+        RefNumSearchVisitor(ESM::RefNum refNum)
             : mRefNum(refNum)
         {
         }
