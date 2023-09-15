@@ -22,7 +22,7 @@ namespace MWLua
         class CachedStat
         {
         public:
-            using Index = std::variant<int, ESM::RefId>;
+            using Index = std::variant<int, ESM::RefId, std::monostate>;
             using Setter = void (*)(const Index&, std::string_view, const MWWorld::Ptr&, const sol::object&);
 
             CachedStat(Setter setter, Index index, std::string_view prop)
