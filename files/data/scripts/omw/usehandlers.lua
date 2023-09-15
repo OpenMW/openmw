@@ -4,11 +4,12 @@ local world = require('openmw.world')
 local handlersPerObject = {}
 local handlersPerType = {}
 
-local function useItem(obj, actor)
+local function useItem(obj, actor, force)
+    local options = { force = force or false }
     local handlers = handlersPerObject[obj.id]
     if handlers then
         for i = #handlers, 1, -1 do
-            if handlers[i](obj, actor) == false then
+            if handlers[i](obj, actor, options) == false then
                 return -- skip other handlers
             end
         end
@@ -16,12 +17,12 @@ local function useItem(obj, actor)
     handlers = handlersPerType[obj.type]
     if handlers then
         for i = #handlers, 1, -1 do
-            if handlers[i](obj, actor) == false then
+            if handlers[i](obj, actor, options) == false then
                 return -- skip other handlers
             end
         end
     end
-    world._runStandardUseAction(obj, actor)
+    world._runStandardUseAction(obj, actor, force)
 end
 
 return {
@@ -53,7 +54,7 @@ return {
         version = 0,
 
         --- Add new use action handler for a specific object.
-        -- If `handler(object, actor)` returns false, other handlers for
+        -- If `handler(object, actor, options)` returns false, other handlers for
         -- the same object (including type handlers) will be skipped.
         -- @function [parent=#ItemUsage] addHandlerForObject
         -- @param openmw.core#GameObject obj The object.
@@ -68,7 +69,7 @@ return {
         end,
 
         --- Add new use action handler for a type of objects.
-        -- If `handler(object, actor)` returns false, other handlers for
+        -- If `handler(object, actor, options)` returns false, other handlers for
         -- the same object (including type handlers) will be skipped.
         -- @function [parent=#ItemUsage] addHandlerForType
         -- @param #any type A type from the `openmw.types` package.
@@ -91,7 +92,7 @@ return {
             if not data.actor or not types.Actor.objectIsInstance(data.actor) then
                 error('UseItem: invalid argument "actor"')
             end
-            useItem(data.object, data.actor)
+            useItem(data.object, data.actor, data.force)
         end
     }
 }

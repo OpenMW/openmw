@@ -40,7 +40,10 @@ namespace MWLua
         {
             callEngineHandlers(mOnActivateHandlers, obj, actor);
         }
-        void onUseItem(const GObject& obj, const GObject& actor) { callEngineHandlers(mOnUseItemHandlers, obj, actor); }
+        void onUseItem(const GObject& obj, const GObject& actor, bool force)
+        {
+            callEngineHandlers(mOnUseItemHandlers, obj, actor, force);
+        }
         void onNewExterior(const GCell& cell) { callEngineHandlers(mOnNewExteriorHandlers, cell); }
 
     private:

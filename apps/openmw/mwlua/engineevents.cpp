@@ -71,7 +71,7 @@ namespace MWLua
             MWWorld::Ptr actor = getPtr(event.mActor);
             if (actor.isEmpty() || obj.isEmpty())
                 return;
-            mGlobalScripts.onUseItem(GObject(obj), GObject(actor));
+            mGlobalScripts.onUseItem(GObject(obj), GObject(actor), event.mForce);
         }
 
         void operator()(const OnConsume& event) const

@@ -77,9 +77,9 @@ namespace MWLua
         {
             mEngineEvents.addToQueue(EngineEvents::OnActivate{ getId(actor), getId(object) });
         }
-        void useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) override
+        void useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force) override
         {
-            mEngineEvents.addToQueue(EngineEvents::OnUseItem{ getId(actor), getId(object) });
+            mEngineEvents.addToQueue(EngineEvents::OnUseItem{ getId(actor), getId(object), force });
         }
         void exteriorCreated(MWWorld::CellStore& cell) override
         {
