@@ -214,7 +214,8 @@ namespace MWGui
         center();
 
         // Play LevelUp Music
-        MWBase::Environment::get().getSoundManager()->streamMusic("Special/MW_Triumph.mp3");
+        MWBase::Environment::get().getSoundManager()->streamMusic(
+            "Music/Special/MW_Triumph.mp3", MWSound::MusicType::Special);
     }
 
     void LevelupDialog::onOkButtonClicked(MyGUI::Widget* sender)

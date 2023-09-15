@@ -95,6 +95,15 @@ namespace MWLua
             return MWBase::Environment::get().getSoundManager()->getSoundPlaying(MWWorld::Ptr(), fileName);
         };
 
+        api["streamMusic"] = [](std::string_view fileName) {
+            MWBase::SoundManager* sndMgr = MWBase::Environment::get().getSoundManager();
+            sndMgr->streamMusic(std::string(fileName), MWSound::MusicType::Scripted);
+        };
+
+        api["isMusicPlaying"] = []() { return MWBase::Environment::get().getSoundManager()->isMusicPlaying(); };
+
+        api["stopMusic"] = []() { MWBase::Environment::get().getSoundManager()->stopMusic(); };
+
         return LuaUtil::makeReadOnly(api);
     }
 
@@ -102,6 +111,8 @@ namespace MWLua
     {
         sol::state_view& lua = context.mLua->sol();
         sol::table api(lua, sol::create);
+
+        api["isEnabled"] = []() { return MWBase::Environment::get().getSoundManager()->isEnabled(); };
 
         api["playSound3d"]
             = [](std::string_view soundId, const Object& object, const sol::optional<sol::table>& options) {

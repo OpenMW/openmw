@@ -750,6 +750,13 @@
 -- @field [parent=#core] #Sound sound
 
 ---
+-- Checks if sound system is enabled (any functions to play sounds are no-ops when it is disabled).
+-- It can not be enabled or disabled during runtime.
+-- @function [parent=#Sound] isEnabled
+-- @return #boolean
+-- @usage local enabled = core.sound.isEnabled();
+
+---
 -- Play a 3D sound, attached to object
 -- @function [parent=#Sound] playSound3d
 -- @param #string soundId ID of Sound record to play

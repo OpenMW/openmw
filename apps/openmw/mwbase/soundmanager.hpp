@@ -29,6 +29,14 @@ namespace MWSound
         MaxCount
     };
 
+    enum class MusicType
+    {
+        Special,
+        Explore,
+        Battle,
+        Scripted
+    };
+
     class Sound;
     class Stream;
     struct Sound_Decoder;
@@ -101,12 +109,17 @@ namespace MWBase
 
         virtual void processChangedSettings(const std::set<std::pair<std::string, std::string>>& settings) = 0;
 
+        virtual bool isEnabled() const = 0;
+        ///< Returns true if sound system is enabled
+
         virtual void stopMusic() = 0;
         ///< Stops music if it's playing
 
-        virtual void streamMusic(const std::string& filename) = 0;
+        virtual void streamMusic(const std::string& filename, MWSound::MusicType type, float fade = 1.f) = 0;
         ///< Play a soundifle
-        /// \param filename name of a sound file in "Music/" in the data directory.
+        /// \param filename name of a sound file in the data directory.
+        /// \param type music type.
+        /// \param fade time in seconds to fade out current track before start this one.
 
         virtual bool isMusicPlaying() = 0;
         ///< Returns true if music is playing

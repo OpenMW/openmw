@@ -72,4 +72,21 @@
 -- @return #boolean
 -- @usage local isPlaying = ambient.isSoundFilePlaying("Sound\\test.mp3");
 
+---
+-- Play a sound file as a music track
+-- @function [parent=#ambient] streamMusic
+-- @param #string fileName Path to file in VFS
+-- @usage ambient.streamMusic("Music\\Test\\Test.mp3");
+
+---
+-- Stop to play current music
+-- @function [parent=#ambient] stopMusic
+-- @usage ambient.stopMusic();
+
+---
+-- Check if music is playing
+-- @function [parent=#ambient] isMusicPlaying
+-- @return #boolean
+-- @usage local isPlaying = ambient.isMusicPlaying();
+
 return nil
