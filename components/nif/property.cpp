@@ -6,50 +6,61 @@
 namespace Nif
 {
 
+    void NiTextureTransform::read(NIFStream* nif)
+    {
+        nif->read(mOffset);
+        nif->read(mScale);
+        nif->read(mRotation);
+        mTransformMethod = static_cast<Method>(nif->get<uint32_t>());
+        nif->read(mOrigin);
+    }
+
     void NiTexturingProperty::Texture::read(NIFStream* nif)
     {
-        nif->read(inUse);
-        if (!inUse)
+        nif->read(mEnabled);
+        if (!mEnabled)
             return;
 
-        texture.read(nif);
+        if (nif->getVersion() >= NIFStream::generateVersion(3, 3, 0, 13))
+            mSourceTexture.read(nif);
+
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
         {
-            clamp = nif->getInt();
-            nif->skip(4); // Filter mode. Ignoring because global filtering settings are more sensible
+            nif->read(mClamp);
+            nif->read(mFilter);
         }
         else
         {
-            clamp = nif->getUShort() & 0xF;
+            uint16_t flags;
+            nif->read(flags);
+            mClamp = flags & 0xF;
+            mFilter = (flags >> 4) & 0xF;
         }
-        // Max anisotropy. I assume we'll always only use the global anisotropy setting.
+
         if (nif->getVersion() >= NIFStream::generateVersion(20, 5, 0, 4))
-            nif->getUShort();
+            nif->read(mMaxAnisotropy);
 
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
-            uvSet = nif->getUInt();
+            nif->read(mUVSet);
 
-        // Two PS2-specific shorts.
-        if (nif->getVersion() < NIFStream::generateVersion(10, 4, 0, 2))
+        // PS2 filtering settings
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 4, 0, 1))
             nif->skip(4);
-        if (nif->getVersion() <= NIFStream::generateVersion(4, 1, 0, 18))
-            nif->skip(2); // Unknown short
-        else if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
+
+        if (nif->getVersion() <= NIFStream::generateVersion(4, 1, 0, 12))
+            nif->skip(2); // Unknown
+
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
         {
-            if (nif->get<bool>()) // Has texture transform
-            {
-                nif->getVector2(); // UV translation
-                nif->getVector2(); // UV scale
-                nif->getFloat(); // W axis rotation
-                nif->getUInt(); // Transform method
-                nif->getVector2(); // Texture rotation origin
-            }
+            nif->read(mHasTransform);
+            if (mHasTransform)
+                mTransform.read(nif);
         }
     }
 
     void NiTexturingProperty::Texture::post(Reader& nif)
     {
-        texture.post(nif);
+        mSourceTexture.post(nif);
     }
 
     void NiTexturingProperty::read(NIFStream* nif)
@@ -58,37 +69,33 @@ namespace Nif
 
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD
             || nif->getVersion() >= NIFStream::generateVersion(20, 1, 0, 2))
-            flags = nif->getUShort();
+            nif->read(mFlags);
         if (nif->getVersion() <= NIFStream::generateVersion(20, 1, 0, 1))
-            apply = nif->getUInt();
+            mApplyMode = static_cast<ApplyMode>(nif->get<uint32_t>());
 
-        unsigned int numTextures = nif->getUInt();
-
-        if (!numTextures)
-            return;
-
-        textures.resize(numTextures);
-        for (unsigned int i = 0; i < numTextures; i++)
+        mTextures.resize(nif->get<uint32_t>());
+        for (size_t i = 0; i < mTextures.size(); i++)
         {
-            textures[i].read(nif);
-            if (i == 5 && textures[5].inUse) // Bump map settings
+            mTextures[i].read(nif);
+
+            if (i == 5 && mTextures[5].mEnabled)
             {
-                envMapLumaBias = nif->getVector2();
-                bumpMapMatrix = nif->getVector4();
+                nif->read(mEnvMapLumaBias);
+                nif->read(mBumpMapMatrix);
             }
-            else if (i == 7 && textures[7].inUse && nif->getVersion() >= NIFStream::generateVersion(20, 2, 0, 5))
-                /*float parallaxOffset = */ nif->getFloat();
+            else if (i == 7 && mTextures[7].mEnabled && nif->getVersion() >= NIFStream::generateVersion(20, 2, 0, 5))
+                nif->read(mParallaxOffset);
         }
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
         {
-            unsigned int numShaderTextures = nif->getUInt();
-            shaderTextures.resize(numShaderTextures);
-            for (unsigned int i = 0; i < numShaderTextures; i++)
+            mShaderTextures.resize(nif->get<uint32_t>());
+            mShaderIds.resize(mShaderTextures.size());
+            for (size_t i = 0; i < mShaderTextures.size(); i++)
             {
-                shaderTextures[i].read(nif);
-                if (shaderTextures[i].inUse)
-                    nif->getUInt(); // Unique identifier
+                mShaderTextures[i].read(nif);
+                if (mShaderTextures[i].mEnabled)
+                    nif->read(mShaderIds[i]);
             }
         }
     }
@@ -97,10 +104,10 @@ namespace Nif
     {
         Property::post(nif);
 
-        for (size_t i = 0; i < textures.size(); i++)
-            textures[i].post(nif);
-        for (size_t i = 0; i < shaderTextures.size(); i++)
-            shaderTextures[i].post(nif);
+        for (Texture& tex : mTextures)
+            tex.post(nif);
+        for (Texture& tex : mShaderTextures)
+            tex.post(nif);
     }
 
     void BSSPParallaxParams::read(NIFStream* nif)

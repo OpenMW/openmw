@@ -10,53 +10,38 @@ namespace Nif
     {
     };
 
-    struct NiTexturingProperty : public Property
+    struct NiTextureTransform
     {
-        unsigned short flags{ 0u };
-
-        // A sub-texture
-        struct Texture
+        enum class Method : uint32_t
         {
-            /* Clamp mode
-            0 - clampS clampT
-            1 - clampS wrapT
-            2 - wrapS clampT
-            3 - wrapS wrapT
-            */
-
-            bool inUse;
-            NiSourceTexturePtr texture;
-
-            unsigned int clamp, uvSet;
-
-            void read(NIFStream* nif);
-            void post(Reader& nif);
-
-            bool wrapT() const { return clamp & 1; }
-            bool wrapS() const { return (clamp >> 1) & 1; }
+            // Back = inverse of mOrigin.
+            // FromMaya = inverse of the V axis with a positive translation along V of 1 unit.
+            MayaLegacy = 0, // mOrigin * mRotation * Back * mOffset * mScale
+            Max = 1, // mOrigin * mScale * mRotation * mOffset * Back
+            Maya = 2, // mOrigin * mRotation * Back * FromMaya * mOffset * mScale
         };
 
-        /* Apply mode:
-            0 - replace
-            1 - decal
-            2 - modulate
-            3 - hilight  // These two are for PS2 only?
-            4 - hilight2
-        */
-        unsigned int apply{ 0 };
+        osg::Vec2f mOffset;
+        osg::Vec2f mScale;
+        float mRotation;
+        Method mTransformMethod;
+        osg::Vec2f mOrigin;
 
-        /*
-         * The textures in this list are as follows:
-         *
-         * 0 - Base texture
-         * 1 - Dark texture
-         * 2 - Detail texture
-         * 3 - Gloss texture
-         * 4 - Glow texture
-         * 5 - Bump map texture
-         * 6 - Decal texture
-         */
-        enum TextureType : uint32_t
+        void read(NIFStream* nif);
+    };
+
+    struct NiTexturingProperty : public Property
+    {
+        enum class ApplyMode : uint32_t
+        {
+            Replace = 0,
+            Decal = 1,
+            Modulate = 2,
+            Hilight = 3, // PS2-specific?
+            Hilight2 = 4, // Used for Oblivion parallax
+        };
+
+        enum TextureType
         {
             BaseTexture = 0,
             DarkTexture = 1,
@@ -67,11 +52,35 @@ namespace Nif
             DecalTexture = 6,
         };
 
-        std::vector<Texture> textures;
-        std::vector<Texture> shaderTextures;
+        // A sub-texture
+        struct Texture
+        {
+            bool mEnabled;
+            NiSourceTexturePtr mSourceTexture;
+            uint32_t mClamp;
+            uint32_t mFilter;
+            uint16_t mMaxAnisotropy;
+            uint32_t mUVSet;
+            bool mHasTransform;
+            NiTextureTransform mTransform;
 
-        osg::Vec2f envMapLumaBias;
-        osg::Vec4f bumpMapMatrix;
+            void read(NIFStream* nif);
+            void post(Reader& nif);
+
+            bool wrapT() const { return mClamp & 1; }
+            bool wrapS() const { return mClamp & 2; }
+        };
+
+        uint16_t mFlags{ 0u };
+        ApplyMode mApplyMode{ ApplyMode::Modulate };
+
+        std::vector<Texture> mTextures;
+        std::vector<Texture> mShaderTextures;
+        std::vector<uint32_t> mShaderIds;
+
+        osg::Vec2f mEnvMapLumaBias;
+        osg::Vec4f mBumpMapMatrix;
+        float mParallaxOffset;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;

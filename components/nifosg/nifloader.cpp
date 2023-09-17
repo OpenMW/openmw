@@ -1827,9 +1827,9 @@ namespace NifOsg
 
             // If this loop is changed such that the base texture isn't guaranteed to end up in texture unit 0, the
             // shadow casting shader will need to be updated accordingly.
-            for (size_t i = 0; i < texprop->textures.size(); ++i)
+            for (size_t i = 0; i < texprop->mTextures.size(); ++i)
             {
-                if (texprop->textures[i].inUse
+                if (texprop->mTextures[i].mEnabled
                     || (i == Nif::NiTexturingProperty::BaseTexture && !texprop->mController.empty()))
                 {
                     switch (i)
@@ -1854,10 +1854,10 @@ namespace NifOsg
                     unsigned int uvSet = 0;
                     // create a new texture, will later attempt to share using the SharedStateManager
                     osg::ref_ptr<osg::Texture2D> texture2d;
-                    if (texprop->textures[i].inUse)
+                    if (texprop->mTextures[i].mEnabled)
                     {
-                        const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
-                        if (tex.texture.empty() && texprop->mController.empty())
+                        const Nif::NiTexturingProperty::Texture& tex = texprop->mTextures[i];
+                        if (tex.mSourceTexture.empty() && texprop->mController.empty())
                         {
                             if (i == 0)
                                 Log(Debug::Warning) << "Base texture is in use but empty on shape \"" << nodeName
@@ -1865,9 +1865,9 @@ namespace NifOsg
                             continue;
                         }
 
-                        if (!tex.texture.empty())
+                        if (!tex.mSourceTexture.empty())
                         {
-                            const Nif::NiSourceTexture* st = tex.texture.getPtr();
+                            const Nif::NiSourceTexture* st = tex.mSourceTexture.getPtr();
                             osg::ref_ptr<osg::Image> image = handleSourceTexture(st, imageManager);
                             texture2d = new osg::Texture2D(image);
                             if (image)
@@ -1878,7 +1878,7 @@ namespace NifOsg
 
                         handleTextureWrapping(texture2d, tex.wrapS(), tex.wrapT());
 
-                        uvSet = tex.uvSet;
+                        uvSet = tex.mUVSet;
                     }
                     else
                     {
@@ -1926,10 +1926,10 @@ namespace NifOsg
                         // Bump maps offset the environment map.
                         // Set this texture to Off by default since we can't render it with the fixed-function pipeline
                         stateset->setTextureMode(texUnit, GL_TEXTURE_2D, osg::StateAttribute::OFF);
-                        osg::Matrix2 bumpMapMatrix(texprop->bumpMapMatrix.x(), texprop->bumpMapMatrix.y(),
-                            texprop->bumpMapMatrix.z(), texprop->bumpMapMatrix.w());
+                        osg::Matrix2 bumpMapMatrix(texprop->mBumpMapMatrix.x(), texprop->mBumpMapMatrix.y(),
+                            texprop->mBumpMapMatrix.z(), texprop->mBumpMapMatrix.w());
                         stateset->addUniform(new osg::Uniform("bumpMapMatrix", bumpMapMatrix));
-                        stateset->addUniform(new osg::Uniform("envMapLumaBias", texprop->envMapLumaBias));
+                        stateset->addUniform(new osg::Uniform("envMapLumaBias", texprop->mEnvMapLumaBias));
                     }
                     else if (i == Nif::NiTexturingProperty::GlossTexture)
                     {
