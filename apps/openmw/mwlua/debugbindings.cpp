@@ -44,6 +44,11 @@ namespace MWLua
             return world->isActorCollisionEnabled(world->getPlayerPtr());
         };
 
+        api["toggleMWScript"] = []() { MWBase::Environment::get().getWorld()->toggleScripts(); };
+        api["isMWScriptEnabled"] = []() { return MWBase::Environment::get().getWorld()->getScriptsEnabled(); };
+
+        api["reloadLua"] = []() { MWBase::Environment::get().getLuaManager()->reloadAllScripts(); };
+
         api["NAV_MESH_RENDER_MODE"]
             = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWRender::NavMeshMode>({
                 { "AreaType", MWRender::NavMeshMode::AreaType },

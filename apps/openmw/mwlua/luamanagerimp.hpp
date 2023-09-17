@@ -116,8 +116,9 @@ namespace MWLua
         void loadLocalScripts(const MWWorld::Ptr& ptr, const ESM::LuaScripts& data) override;
         void setContentFileMapping(const std::map<int, int>& mapping) override { mContentFileMapping = mapping; }
 
-        // Drops script cache and reloads all scripts. Calls `onSave` and `onLoad` for every script.
-        void reloadAllScripts() override;
+        // At the end of the next `synchronizedUpdate` drops script cache and reloads all scripts.
+        // Calls `onSave` and `onLoad` for every script.
+        void reloadAllScripts() override { mReloadAllScriptsRequested = true; }
 
         void handleConsoleCommand(
             const std::string& consoleMode, const std::string& command, const MWWorld::Ptr& selectedPtr) override;
@@ -149,12 +150,14 @@ namespace MWLua
         void initConfiguration();
         LocalScripts* createLocalScripts(const MWWorld::Ptr& ptr,
             std::optional<LuaUtil::ScriptIdsWithInitializationData> autoStartConf = std::nullopt);
+        void reloadAllScriptsImpl();
 
         bool mInitialized = false;
         bool mGlobalScriptsStarted = false;
         bool mProcessingInputEvents = false;
         bool mApplyingDelayedActions = false;
         bool mNewGameStarted = false;
+        bool mReloadAllScriptsRequested = false;
         LuaUtil::ScriptsConfiguration mConfiguration;
         LuaUtil::LuaState mLua;
         LuaUi::ResourceManager mUiResourceManager;
