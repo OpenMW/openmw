@@ -2202,18 +2202,16 @@ namespace NifOsg
                 {
                     auto texprop = static_cast<const Nif::BSShaderPPLightingProperty*>(property);
                     bool shaderRequired = true;
-                    node->setUserValue("shaderPrefix", std::string(getBSShaderPrefix(texprop->type)));
+                    node->setUserValue("shaderPrefix", std::string(getBSShaderPrefix(texprop->mType)));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
-                    if (!texprop->textureSet.empty())
+                    if (!texprop->mTextureSet.empty())
                     {
-                        auto textureSet = texprop->textureSet.getPtr();
+                        auto textureSet = texprop->mTextureSet.getPtr();
                         handleTextureSet(
-                            textureSet, texprop->clamp, node->getName(), stateset, imageManager, boundTextures);
+                            textureSet, texprop->mClamp, node->getName(), stateset, imageManager, boundTextures);
                     }
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
-                    if (texprop->doubleSided())
-                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
                     break;
                 }
                 case Nif::RC_BSShaderNoLightingProperty:
@@ -2221,10 +2219,10 @@ namespace NifOsg
                     auto texprop = static_cast<const Nif::BSShaderNoLightingProperty*>(property);
                     bool shaderRequired = true;
                     bool useFalloff = false;
-                    node->setUserValue("shaderPrefix", std::string(getBSShaderPrefix(texprop->type)));
+                    node->setUserValue("shaderPrefix", std::string(getBSShaderPrefix(texprop->mType)));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
-                    if (!texprop->filename.empty())
+                    if (!texprop->mFilename.empty())
                     {
                         if (!boundTextures.empty())
                         {
@@ -2233,7 +2231,7 @@ namespace NifOsg
                             boundTextures.clear();
                         }
                         std::string filename
-                            = Misc::ResourceHelpers::correctTexturePath(texprop->filename, imageManager->getVFS());
+                            = Misc::ResourceHelpers::correctTexturePath(texprop->mFilename, imageManager->getVFS());
                         osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
                         osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
                         texture2d->setName("diffuseMap");
@@ -2247,20 +2245,18 @@ namespace NifOsg
                         if (mBethVersion >= 27)
                         {
                             useFalloff = true;
-                            stateset->addUniform(new osg::Uniform("falloffParams", texprop->falloffParams));
+                            stateset->addUniform(new osg::Uniform("falloffParams", texprop->mFalloffParams));
                         }
                     }
                     stateset->addUniform(new osg::Uniform("useFalloff", useFalloff));
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
-                    if (texprop->doubleSided())
-                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
                     break;
                 }
                 case Nif::RC_BSLightingShaderProperty:
                 {
                     auto texprop = static_cast<const Nif::BSLightingShaderProperty*>(property);
                     bool shaderRequired = true;
-                    node->setUserValue("shaderPrefix", std::string(getBSLightingShaderPrefix(texprop->type)));
+                    node->setUserValue("shaderPrefix", std::string(getBSLightingShaderPrefix(texprop->mType)));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
                     if (!texprop->mTextureSet.empty())

@@ -1,26 +1,3 @@
-/*
-  OpenMW - The completely unofficial reimplementation of Morrowind
-  Copyright (C) 2008-2010  Nicolay Korslund
-  Email: < korslund@gmail.com >
-  WWW: https://openmw.org/
-
-  This file (property.h) is part of the OpenMW package.
-
-  OpenMW is distributed as free software: you can redistribute it
-  and/or modify it under the terms of the GNU General Public License
-  version 3, as published by the Free Software Foundation.
-
-  This program is distributed in the hope that it will be useful, but
-  WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-  General Public License for more details.
-
-  You should have received a copy of the GNU General Public License
-  version 3 along with this program. If not, see
-  https://www.gnu.org/licenses/ .
-
- */
-
 #ifndef OPENMW_COMPONENTS_NIF_PROPERTY_HPP
 #define OPENMW_COMPONENTS_NIF_PROPERTY_HPP
 
@@ -109,19 +86,18 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    // These contain no other data than the 'flags' field
     struct NiShadeProperty : public Property
     {
-        unsigned short flags{ 0u };
+        uint16_t mFlags{ 0u };
         void read(NIFStream* nif) override
         {
             Property::read(nif);
             if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
-                flags = nif->getUShort();
+                nif->read(mFlags);
         }
     };
 
-    enum class BSShaderType : unsigned int
+    enum class BSShaderType : uint32_t
     {
         ShaderType_TallGrass = 0,
         ShaderType_Default = 1,
@@ -133,42 +109,55 @@ namespace Nif
         ShaderType_NoLighting = 33
     };
 
+    enum BSShaderFlags1
+    {
+        BSSFlag1_Specular = 0x00000001,
+        BSSFlag1_Decal = 0x04000000,
+    };
+
+    struct BSSPParallaxParams
+    {
+        float mMaxPasses;
+        float mScale;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSSPRefractionParams
+    {
+        float mStrength;
+        int32_t mPeriod;
+
+        void read(NIFStream* nif);
+    };
+
     struct BSShaderProperty : public NiShadeProperty
     {
-        unsigned int type{ 0u }, flags1{ 0u }, flags2{ 0u };
-        float envMapIntensity{ 0.f };
+        uint32_t mType{ 0u }, mShaderFlags1{ 0u }, mShaderFlags2{ 0u };
+        float mEnvMapScale{ 0.f };
+
         void read(NIFStream* nif) override;
 
-        bool specular() const { return flags1 & 1; }
-        bool doubleSided() const { return (flags2 >> 4) & 1; }
-        bool treeAnim() const { return (flags2 >> 29) & 1; }
-        bool decal() const { return (flags1 >> 26) & 1; }
+        // These flags are shared between BSShader and BSLightingShader
+        // Shader-specific flag methods must be handled on per-record basis
+        bool specular() const { return mShaderFlags1 & BSSFlag1_Specular; }
+        bool decal() const { return mShaderFlags1 & BSSFlag1_Decal; }
     };
 
     struct BSShaderLightingProperty : public BSShaderProperty
     {
-        unsigned int clamp{ 0u };
+        unsigned int mClamp{ 0u };
         void read(NIFStream* nif) override;
 
-        bool wrapT() const { return clamp & 1; }
-        bool wrapS() const { return (clamp >> 1) & 1; }
+        bool wrapT() const { return mClamp & 1; }
+        bool wrapS() const { return mClamp & 2; }
     };
 
     struct BSShaderPPLightingProperty : public BSShaderLightingProperty
     {
-        BSShaderTextureSetPtr textureSet;
-        struct RefractionSettings
-        {
-            float strength{ 0.f };
-            int period{ 0 };
-        };
-        struct ParallaxSettings
-        {
-            float passes{ 0.f };
-            float scale{ 0.f };
-        };
-        RefractionSettings refraction;
-        ParallaxSettings parallax;
+        BSShaderTextureSetPtr mTextureSet;
+        BSSPRefractionParams mRefraction;
+        BSSPParallaxParams mParallax;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -176,13 +165,13 @@ namespace Nif
 
     struct BSShaderNoLightingProperty : public BSShaderLightingProperty
     {
-        std::string filename;
-        osg::Vec4f falloffParams;
+        std::string mFilename;
+        osg::Vec4f mFalloffParams;
 
         void read(NIFStream* nif) override;
     };
 
-    enum class BSLightingShaderType : unsigned int
+    enum class BSLightingShaderType : uint32_t
     {
         ShaderType_Default = 0,
         ShaderType_EnvMap = 1,
@@ -207,43 +196,146 @@ namespace Nif
         ShaderType_Dismemberment = 20
     };
 
+    enum BSLightingShaderFlags1
+    {
+        BSLSFlag1_Falloff = 0x00000040,
+    };
+
+    enum BSLightingShaderFlags2
+    {
+        BSLSFlag2_DoubleSided = 0x00000010,
+        BSLSFlag2_TreeAnim = 0x20000000,
+    };
+
+    struct BSSPLuminanceParams
+    {
+        float mLumEmittance;
+        float mExposureOffset;
+        float mFinalExposureMin, mFinalExposureMax;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSSPWetnessParams
+    {
+        float mSpecScale;
+        float mSpecPower;
+        float mMinVar;
+        float mEnvMapScale;
+        float mFresnelPower;
+        float mMetalness;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSSPMLParallaxParams
+    {
+        float mInnerLayerThickness;
+        float mRefractionScale;
+        osg::Vec2f mInnerLayerTextureScale;
+        float mEnvMapScale;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSSPTranslucencyParams
+    {
+        osg::Vec3f mSubsurfaceColor;
+        float mTransmissiveScale;
+        float mTurbulence;
+        bool mThickObject;
+        bool mMixAlbedo;
+
+        void read(NIFStream* nif);
+    };
+
     struct BSLightingShaderProperty : public BSShaderProperty
     {
+        std::vector<uint32_t> mShaderFlags1Hashes, mShaderFlags2Hashes;
+        osg::Vec2f mUVOffset, mUVScale;
         BSShaderTextureSetPtr mTextureSet;
-        unsigned int mClamp{ 0u };
+        osg::Vec3f mEmissive;
+        float mEmissiveMult;
+        std::string mRootMaterial;
+        uint32_t mClamp;
         float mAlpha;
-        float mGlossiness;
-        osg::Vec3f mEmissive, mSpecular;
-        float mEmissiveMult, mSpecStrength;
+        float mRefractionStrength;
+        float mGlossiness{ 80.f };
+        float mSmoothness{ 1.f };
+        osg::Vec3f mSpecular;
+        float mSpecStrength;
+        std::array<float, 2> mLightingEffects;
+        float mSubsurfaceRolloff;
+        float mRimlightPower;
+        float mBacklightPower;
+        float mGrayscaleToPaletteScale{ 1.f };
+        float mFresnelPower{ 5.f };
+        BSSPWetnessParams mWetness;
+        bool mDoTranslucency{ false };
+        BSSPTranslucencyParams mTranslucency;
+        std::vector<std::vector<std::string>> mTextureArrays;
+        BSSPLuminanceParams mLuminance;
+
+        bool mUseSSR;
+        bool mWetnessUseSSR;
+
+        osg::Vec4f mSkinTintColor;
+        osg::Vec3f mHairTintColor;
+
+        BSSPParallaxParams mParallax;
+        BSSPMLParallaxParams mMultiLayerParallax;
+        osg::Vec4f mSparkle;
+
+        float mCubeMapScale;
+        osg::Vec3f mLeftEyeReflectionCenter;
+        osg::Vec3f mRightEyeReflectionCenter;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
+
+        bool doubleSided() const { return mShaderFlags2 & BSLSFlag2_DoubleSided; }
+        bool treeAnim() const { return mShaderFlags2 & BSLSFlag2_TreeAnim; }
     };
 
     struct BSEffectShaderProperty : public BSShaderProperty
     {
+        std::vector<uint32_t> mShaderFlags1Hashes, mShaderFlags2Hashes;
         osg::Vec2f mUVOffset, mUVScale;
         std::string mSourceTexture;
-        unsigned char mClamp;
-        unsigned char mLightingInfluence;
-        unsigned char mEnvMapMinLOD;
+        uint8_t mClamp;
+        uint8_t mLightingInfluence;
+        uint8_t mEnvMapMinLOD;
         osg::Vec4f mFalloffParams;
+        float mRefractionPower;
         osg::Vec4f mBaseColor;
         float mBaseColorScale;
         float mFalloffDepth;
         std::string mGreyscaleTexture;
+        std::string mEnvMapTexture;
+        std::string mNormalTexture;
+        std::string mEnvMaskTexture;
+        float mEnvMapScale;
+        std::string mReflectanceTexture;
+        std::string mLightingTexture;
+        osg::Vec3f mEmittanceColor;
+        std::string mEmitGradientTexture;
+        BSSPLuminanceParams mLuminance;
 
         void read(NIFStream* nif) override;
 
-        bool useFalloff() const { return (flags >> 6) & 1; }
+        bool useFalloff() const { return mShaderFlags1 & BSLSFlag1_Falloff; }
+        bool doubleSided() const { return mShaderFlags2 & BSLSFlag2_DoubleSided; }
+        bool treeAnim() const { return mShaderFlags2 & BSLSFlag2_TreeAnim; }
     };
 
     struct NiDitherProperty : public Property
     {
         unsigned short flags;
+
         void read(NIFStream* nif) override
         {
             Property::read(nif);
+
             flags = nif->getUShort();
         }
     };
@@ -252,9 +344,11 @@ namespace Nif
     {
         unsigned short flags;
         unsigned int testFunction;
+
         void read(NIFStream* nif) override
         {
             Property::read(nif);
+
             flags = nif->getUShort();
             testFunction = (flags >> 2) & 0x7;
             if (nif->getVersion() >= NIFStream::generateVersion(4, 1, 0, 12)
@@ -264,15 +358,17 @@ namespace Nif
 
         bool depthTest() const { return flags & 1; }
 
-        bool depthWrite() const { return (flags >> 1) & 1; }
+        bool depthWrite() const { return flags & 2; }
     };
 
     struct NiSpecularProperty : public Property
     {
         unsigned short flags;
+
         void read(NIFStream* nif) override
         {
             Property::read(nif);
+
             flags = nif->getUShort();
         }
 
@@ -282,9 +378,11 @@ namespace Nif
     struct NiWireframeProperty : public Property
     {
         unsigned short flags;
+
         void read(NIFStream* nif) override
         {
             Property::read(nif);
+
             flags = nif->getUShort();
         }
 
@@ -301,6 +399,7 @@ namespace Nif
         void read(NIFStream* nif) override
         {
             Property::read(nif);
+
             flags = nif->getUShort();
             data.read(nif);
         }
@@ -400,12 +499,19 @@ namespace Nif
 
     struct NiAlphaProperty : public StructPropT<S_AlphaProperty>
     {
-        bool useAlphaBlending() const { return flags & 1; }
+        enum Flags
+        {
+            Flag_Blending = 0x0001,
+            Flag_Testing = 0x0200,
+            Flag_NoSorter = 0x2000,
+        };
+
+        bool useAlphaBlending() const { return flags & Flag_Blending; }
+        bool useAlphaTesting() const { return flags & Flag_Testing; }
+        bool noSorter() const { return flags & Flag_NoSorter; }
+
         int sourceBlendMode() const { return (flags >> 1) & 0xF; }
         int destinationBlendMode() const { return (flags >> 5) & 0xF; }
-        bool noSorter() const { return (flags >> 13) & 1; }
-
-        bool useAlphaTesting() const { return (flags >> 9) & 1; }
         int alphaTestMode() const { return (flags >> 10) & 0x7; }
     };
 
@@ -460,5 +566,5 @@ namespace Nif
         }
     };
 
-} // Namespace
+}
 #endif

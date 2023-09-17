@@ -55,6 +55,7 @@ namespace Nif
     void NiTexturingProperty::read(NIFStream* nif)
     {
         Property::read(nif);
+
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD
             || nif->getVersion() >= NIFStream::generateVersion(20, 1, 0, 2))
             flags = nif->getUShort();
@@ -95,103 +96,247 @@ namespace Nif
     void NiTexturingProperty::post(Reader& nif)
     {
         Property::post(nif);
+
         for (size_t i = 0; i < textures.size(); i++)
             textures[i].post(nif);
         for (size_t i = 0; i < shaderTextures.size(); i++)
             shaderTextures[i].post(nif);
     }
 
+    void BSSPParallaxParams::read(NIFStream* nif)
+    {
+        nif->read(mMaxPasses);
+        nif->read(mScale);
+    }
+
+    void BSSPRefractionParams::read(NIFStream* nif)
+    {
+        nif->read(mStrength);
+        nif->read(mPeriod);
+    }
+
     void BSShaderProperty::read(NIFStream* nif)
     {
         NiShadeProperty::read(nif);
+
         if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
         {
-            type = nif->getUInt();
-            flags1 = nif->getUInt();
-            flags2 = nif->getUInt();
-            envMapIntensity = nif->getFloat();
+            nif->read(mType);
+            nif->read(mShaderFlags1);
+            nif->read(mShaderFlags2);
+            nif->read(mEnvMapScale);
         }
     }
 
     void BSShaderLightingProperty::read(NIFStream* nif)
     {
         BSShaderProperty::read(nif);
+
         if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
-            clamp = nif->getUInt();
+            nif->read(mClamp);
     }
 
     void BSShaderPPLightingProperty::read(NIFStream* nif)
     {
         BSShaderLightingProperty::read(nif);
-        textureSet.read(nif);
-        if (nif->getBethVersion() <= 14)
-            return;
-        refraction.strength = nif->getFloat();
-        refraction.period = nif->getInt();
-        if (nif->getBethVersion() <= 24)
-            return;
-        parallax.passes = nif->getFloat();
-        parallax.scale = nif->getFloat();
+
+        mTextureSet.read(nif);
+        if (nif->getBethVersion() >= 15)
+            mRefraction.read(nif);
+        if (nif->getBethVersion() >= 25)
+            mParallax.read(nif);
     }
 
     void BSShaderPPLightingProperty::post(Reader& nif)
     {
         BSShaderLightingProperty::post(nif);
-        textureSet.post(nif);
+
+        mTextureSet.post(nif);
     }
 
     void BSShaderNoLightingProperty::read(NIFStream* nif)
     {
         BSShaderLightingProperty::read(nif);
-        filename = nif->getSizedString();
+
+        mFilename = nif->getSizedString();
         if (nif->getBethVersion() >= 27)
-            falloffParams = nif->getVector4();
+            nif->read(mFalloffParams);
     }
+
+    void BSSPLuminanceParams::read(NIFStream* nif)
+    {
+        nif->read(mLumEmittance);
+        nif->read(mExposureOffset);
+        nif->read(mFinalExposureMin);
+        nif->read(mFinalExposureMax);
+    };
+
+    void BSSPWetnessParams::read(NIFStream* nif)
+    {
+        nif->read(mSpecScale);
+        nif->read(mSpecPower);
+        nif->read(mMinVar);
+        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_FO4)
+            nif->read(mEnvMapScale);
+        nif->read(mFresnelPower);
+        nif->read(mMetalness);
+        if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO4)
+            nif->skip(4); // Unknown
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+            nif->skip(4); // Unknown
+    };
+
+    void BSSPMLParallaxParams::read(NIFStream* nif)
+    {
+        nif->read(mInnerLayerThickness);
+        nif->read(mRefractionScale);
+        nif->read(mInnerLayerTextureScale);
+        nif->read(mEnvMapScale);
+    };
+
+    void BSSPTranslucencyParams::read(NIFStream* nif)
+    {
+        nif->read(mSubsurfaceColor);
+        nif->read(mTransmissiveScale);
+        nif->read(mTurbulence);
+        nif->read(mThickObject);
+        nif->read(mMixAlbedo);
+    };
 
     void BSLightingShaderProperty::read(NIFStream* nif)
     {
-        type = nif->getUInt();
+        if (nif->getBethVersion() <= 139)
+            nif->read(mType);
+
         BSShaderProperty::read(nif);
-        flags1 = nif->getUInt();
-        flags2 = nif->getUInt();
-        nif->skip(8); // UV offset
-        nif->skip(8); // UV scale
+
+        if (nif->getBethVersion() <= 130)
+        {
+            nif->read(mShaderFlags1);
+            nif->read(mShaderFlags2);
+        }
+        else if (nif->getBethVersion() >= 132)
+        {
+            uint32_t numShaderFlags1 = 0, numShaderFlags2 = 0;
+            nif->read(numShaderFlags1);
+            if (nif->getBethVersion() >= 152)
+                nif->read(numShaderFlags2);
+            nif->readVector(mShaderFlags1Hashes, numShaderFlags1);
+            nif->readVector(mShaderFlags2Hashes, numShaderFlags2);
+        }
+
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+            nif->read(mType);
+
+        nif->read(mUVOffset);
+        nif->read(mUVScale);
         mTextureSet.read(nif);
-        mEmissive = nif->getVector3();
-        mEmissiveMult = nif->getFloat();
-        mClamp = nif->getUInt();
-        mAlpha = nif->getFloat();
-        nif->getFloat(); // Refraction strength
-        mGlossiness = nif->getFloat();
-        mSpecular = nif->getVector3();
-        mSpecStrength = nif->getFloat();
-        nif->skip(8); // Lighting effects
-        switch (static_cast<BSLightingShaderType>(type))
+        nif->read(mEmissive);
+        nif->read(mEmissiveMult);
+
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_FO4)
+            nif->read(mRootMaterial);
+
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_STF)
+            nif->skip(4); // Unknown float
+
+        nif->read(mClamp);
+        nif->read(mAlpha);
+        nif->read(mRefractionStrength);
+
+        if (nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO4)
+            nif->read(mGlossiness);
+        else
+            nif->read(mSmoothness);
+
+        nif->read(mSpecular);
+        nif->read(mSpecStrength);
+
+        if (nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO4)
+            nif->readArray(mLightingEffects);
+        else if (nif->getBethVersion() <= 139)
+        {
+            nif->read(mSubsurfaceRolloff);
+            nif->read(mRimlightPower);
+            if (mRimlightPower == std::numeric_limits<float>::max())
+                nif->read(mBacklightPower);
+        }
+
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_FO4)
+        {
+            nif->read(mGrayscaleToPaletteScale);
+            nif->read(mFresnelPower);
+            mWetness.read(nif);
+        }
+
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_STF)
+            mLuminance.read(nif);
+
+        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_F76)
+        {
+            nif->read(mDoTranslucency);
+            if (mDoTranslucency)
+                mTranslucency.read(nif);
+            if (nif->get<uint8_t>() != 0)
+            {
+                mTextureArrays.resize(nif->get<uint32_t>());
+                for (std::vector<std::string>& textureArray : mTextureArrays)
+                    nif->getSizedStrings(textureArray, nif->get<uint32_t>());
+            }
+        }
+
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_STF)
+        {
+            nif->skip(4); // Unknown
+            nif->skip(4); // Unknown
+            nif->skip(2); // Unknown
+        }
+
+        // TODO: consider separating this switch for pre-FO76 and FO76+
+        switch (static_cast<BSLightingShaderType>(mType))
         {
             case BSLightingShaderType::ShaderType_EnvMap:
-                nif->skip(4); // Environment map scale
+                if (nif->getBethVersion() <= 139)
+                    nif->read(mEnvMapScale);
+                if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_FO4)
+                {
+                    nif->read(mUseSSR);
+                    nif->read(mWetnessUseSSR);
+                }
+                break;
+            case BSLightingShaderType::ShaderType_FaceTint:
+                // Skin tint shader in FO76+
+                if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+                    nif->read(mSkinTintColor);
                 break;
             case BSLightingShaderType::ShaderType_SkinTint:
+                if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+                    nif->read(mHairTintColor);
+                else if (nif->getBethVersion() <= 130)
+                    mSkinTintColor = { nif->get<osg::Vec3f>(), 1.f };
+                else if (nif->getBethVersion() <= 139)
+                    nif->read(mSkinTintColor);
+                // Hair tint shader in FO76+
+                else if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+                    nif->read(mHairTintColor);
+                break;
             case BSLightingShaderType::ShaderType_HairTint:
-                nif->skip(12); // Tint color
+                if (nif->getBethVersion() <= 139)
+                    nif->read(mHairTintColor);
                 break;
             case BSLightingShaderType::ShaderType_ParallaxOcc:
-                nif->skip(4); // Max passes
-                nif->skip(4); // Scale
+                mParallax.read(nif);
                 break;
             case BSLightingShaderType::ShaderType_MultiLayerParallax:
-                nif->skip(4); // Inner layer thickness
-                nif->skip(4); // Refraction scale
-                nif->skip(8); // Inner layer texture scale
-                nif->skip(4); // Environment map strength
+                mMultiLayerParallax.read(nif);
                 break;
             case BSLightingShaderType::ShaderType_SparkleSnow:
-                nif->skip(16); // Sparkle parameters
+                nif->read(mSparkle);
                 break;
             case BSLightingShaderType::ShaderType_EyeEnvmap:
-                nif->skip(4); // Cube map scale
-                nif->skip(12); // Left eye cube map offset
-                nif->skip(12); // Right eye cube map offset
+                nif->read(mCubeMapScale);
+                nif->read(mLeftEyeReflectionCenter);
+                nif->read(mRightEyeReflectionCenter);
                 break;
             default:
                 break;
@@ -201,31 +346,80 @@ namespace Nif
     void BSLightingShaderProperty::post(Reader& nif)
     {
         BSShaderProperty::post(nif);
+
         mTextureSet.post(nif);
     }
 
     void BSEffectShaderProperty::read(NIFStream* nif)
     {
         BSShaderProperty::read(nif);
-        flags1 = nif->getUInt();
-        flags2 = nif->getUInt();
-        mUVOffset = nif->getVector2();
-        mUVScale = nif->getVector2();
+
+        if (nif->getBethVersion() <= 130)
+        {
+            nif->read(mShaderFlags1);
+            nif->read(mShaderFlags2);
+        }
+        else if (nif->getBethVersion() >= 132)
+        {
+            uint32_t numShaderFlags1 = 0, numShaderFlags2 = 0;
+            nif->read(numShaderFlags1);
+            if (nif->getBethVersion() >= 152)
+                nif->read(numShaderFlags2);
+            nif->readVector(mShaderFlags1Hashes, numShaderFlags1);
+            nif->readVector(mShaderFlags2Hashes, numShaderFlags2);
+        }
+
+        nif->read(mUVOffset);
+        nif->read(mUVScale);
         mSourceTexture = nif->getSizedString();
-        unsigned int miscParams = nif->getUInt();
+
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_STF)
+            nif->skip(4); // Unknown
+
+        uint32_t miscParams = nif->get<uint32_t>();
         mClamp = miscParams & 0xFF;
         mLightingInfluence = (miscParams >> 8) & 0xFF;
         mEnvMapMinLOD = (miscParams >> 16) & 0xFF;
-        mFalloffParams = nif->getVector4();
-        mBaseColor = nif->getVector4();
-        mBaseColorScale = nif->getFloat();
-        mFalloffDepth = nif->getFloat();
+        nif->read(mFalloffParams);
+
+        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_F76)
+            nif->read(mRefractionPower);
+
+        nif->read(mBaseColor);
+        nif->read(mBaseColorScale);
+        nif->read(mFalloffDepth);
         mGreyscaleTexture = nif->getSizedString();
+
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_FO4)
+        {
+            mEnvMapTexture = nif->getSizedString();
+            mNormalTexture = nif->getSizedString();
+            mEnvMaskTexture = nif->getSizedString();
+            nif->read(mEnvMapScale);
+        }
+
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+        {
+            nif->read(mRefractionPower);
+            mReflectanceTexture = nif->getSizedString();
+            mLightingTexture = nif->getSizedString();
+            nif->read(mEmittanceColor);
+            mEmitGradientTexture = nif->getSizedString();
+            mLuminance.read(nif);
+        }
+
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_STF)
+        {
+            nif->skip(7); // Unknown bytes
+            nif->skip(6 * sizeof(float)); // Unknown floats
+            nif->skip(1); // Unknown byte
+        }
     }
 
     void NiFogProperty::read(NIFStream* nif)
     {
         Property::read(nif);
+
         mFlags = nif->getUShort();
         mFogDepth = nif->getFloat();
         mColour = nif->getVector3();
@@ -249,6 +443,7 @@ namespace Nif
     void NiVertexColorProperty::read(NIFStream* nif)
     {
         Property::read(nif);
+
         mFlags = nif->getUShort();
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
         {
