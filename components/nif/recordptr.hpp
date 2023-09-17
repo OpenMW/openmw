@@ -112,7 +112,7 @@ namespace Nif
 
     struct NiAVObject;
     struct Extra;
-    struct Property;
+    struct NiProperty;
     struct NiUVData;
     struct NiPosData;
     struct NiVisData;
@@ -191,7 +191,7 @@ namespace Nif
     using BSMultiBoundDataPtr = RecordPtrT<BSMultiBoundData>;
 
     using NiAVObjectList = RecordListT<NiAVObject>;
-    using PropertyList = RecordListT<Property>;
+    using NiPropertyList = RecordListT<NiProperty>;
     using ExtraList = RecordListT<Extra>;
     using NiSourceTextureList = RecordListT<NiSourceTexture>;
     using NiInterpolatorList = RecordListT<NiInterpolator>;

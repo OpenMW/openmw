@@ -6,7 +6,7 @@
 namespace Nif
 {
 
-    struct Property : NiObjectNET
+    struct NiProperty : NiObjectNET
     {
     };
 
@@ -30,7 +30,7 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
-    struct NiTexturingProperty : Property
+    struct NiTexturingProperty : NiProperty
     {
         enum class ApplyMode : uint32_t
         {
@@ -86,7 +86,7 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiShadeProperty : Property
+    struct NiShadeProperty : NiProperty
     {
         uint16_t mFlags{ 0u };
 
@@ -325,7 +325,7 @@ namespace Nif
         bool treeAnim() const { return mShaderFlags2 & BSLSFlag2_TreeAnim; }
     };
 
-    struct NiAlphaProperty : Property
+    struct NiAlphaProperty : NiProperty
     {
         enum Flags
         {
@@ -376,14 +376,14 @@ namespace Nif
         int alphaTestMode() const { return (mFlags >> 10) & 0x7; }
     };
 
-    struct NiDitherProperty : Property
+    struct NiDitherProperty : NiProperty
     {
         uint16_t mFlags;
 
         void read(NIFStream* nif) override;
     };
 
-    struct NiFogProperty : Property
+    struct NiFogProperty : NiProperty
     {
         uint16_t mFlags;
         float mFogDepth;
@@ -392,7 +392,7 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiMaterialProperty : Property
+    struct NiMaterialProperty : NiProperty
     {
         uint16_t mFlags{ 0u };
         osg::Vec3f mAmbient{ 1.f, 1.f, 1.f };
@@ -406,14 +406,14 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiSpecularProperty : Property
+    struct NiSpecularProperty : NiProperty
     {
         bool mEnable;
 
         void read(NIFStream* nif) override;
     };
 
-    struct NiStencilProperty : Property
+    struct NiStencilProperty : NiProperty
     {
         enum class TestFunc : uint32_t
         {
@@ -458,7 +458,7 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiVertexColorProperty : Property
+    struct NiVertexColorProperty : NiProperty
     {
         enum class VertexMode : uint32_t
         {
@@ -480,14 +480,14 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiWireframeProperty : Property
+    struct NiWireframeProperty : NiProperty
     {
         bool mEnable;
 
         void read(NIFStream* nif) override;
     };
 
-    struct NiZBufferProperty : Property
+    struct NiZBufferProperty : NiProperty
     {
         uint16_t mFlags;
         uint32_t mTestFunction;

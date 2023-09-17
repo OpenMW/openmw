@@ -82,7 +82,7 @@ namespace Nif
         uint32_t mFlags;
         NiTransform mTransform;
         osg::Vec3f mVelocity;
-        PropertyList mProperties;
+        NiPropertyList mProperties;
         BoundingVolume mBounds;
         NiCollisionObjectPtr mCollision;
         // Parent nodes for the node. Only types derived from NiNode can be parents.

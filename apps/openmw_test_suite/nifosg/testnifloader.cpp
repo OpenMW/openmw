@@ -190,7 +190,7 @@ osg::Group {
         property.mTextureSet = nullptr;
         property.mController = nullptr;
         property.mType = GetParam().mShaderType;
-        node.mProperties.push_back(Nif::RecordPtrT<Nif::Property>(&property));
+        node.mProperties.push_back(Nif::RecordPtrT<Nif::NiProperty>(&property));
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&node);
         auto result = Loader::load(file, &mImageManager);
@@ -218,7 +218,7 @@ osg::Group {
         property.mTextureSet = nullptr;
         property.mController = nullptr;
         property.mType = GetParam().mShaderType;
-        node.mProperties.push_back(Nif::RecordPtrT<Nif::Property>(&property));
+        node.mProperties.push_back(Nif::RecordPtrT<Nif::NiProperty>(&property));
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&node);
         auto result = Loader::load(file, &mImageManager);

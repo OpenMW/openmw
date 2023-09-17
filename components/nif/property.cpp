@@ -65,7 +65,7 @@ namespace Nif
 
     void NiTexturingProperty::read(NIFStream* nif)
     {
-        Property::read(nif);
+        NiProperty::read(nif);
 
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD
             || nif->getVersion() >= NIFStream::generateVersion(20, 1, 0, 2))
@@ -102,7 +102,7 @@ namespace Nif
 
     void NiTexturingProperty::post(Reader& nif)
     {
-        Property::post(nif);
+        NiProperty::post(nif);
 
         for (Texture& tex : mTextures)
             tex.post(nif);
@@ -425,7 +425,7 @@ namespace Nif
 
     void NiAlphaProperty::read(NIFStream* nif)
     {
-        Property::read(nif);
+        NiProperty::read(nif);
 
         nif->read(mFlags);
         nif->read(mThreshold);
@@ -433,14 +433,14 @@ namespace Nif
 
     void NiDitherProperty::read(NIFStream* nif)
     {
-        Property::read(nif);
+        NiProperty::read(nif);
 
         nif->read(mFlags);
     }
 
     void NiFogProperty::read(NIFStream* nif)
     {
-        Property::read(nif);
+        NiProperty::read(nif);
 
         nif->read(mFlags);
         nif->read(mFogDepth);
@@ -449,7 +449,7 @@ namespace Nif
 
     void NiMaterialProperty::read(NIFStream* nif)
     {
-        Property::read(nif);
+        NiProperty::read(nif);
 
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD)
             nif->read(mFlags);
@@ -468,7 +468,7 @@ namespace Nif
 
     void NiShadeProperty::read(NIFStream* nif)
     {
-        Property::read(nif);
+        NiProperty::read(nif);
 
         if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
             nif->read(mFlags);
@@ -476,14 +476,14 @@ namespace Nif
 
     void NiSpecularProperty::read(NIFStream* nif)
     {
-        Property::read(nif);
+        NiProperty::read(nif);
 
         mEnable = nif->get<uint16_t>() & 1;
     }
 
     void NiStencilProperty::read(NIFStream* nif)
     {
-        Property::read(nif);
+        NiProperty::read(nif);
 
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
         {
@@ -514,7 +514,7 @@ namespace Nif
 
     void NiVertexColorProperty::read(NIFStream* nif)
     {
-        Property::read(nif);
+        NiProperty::read(nif);
 
         nif->read(mFlags);
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
@@ -531,14 +531,14 @@ namespace Nif
 
     void NiWireframeProperty::read(NIFStream* nif)
     {
-        Property::read(nif);
+        NiProperty::read(nif);
 
         mEnable = nif->get<uint16_t>() & 1;
     }
 
     void NiZBufferProperty::read(NIFStream* nif)
     {
-        Property::read(nif);
+        NiProperty::read(nif);
 
         nif->read(mFlags);
         if (nif->getVersion() >= NIFStream::generateVersion(4, 1, 0, 12)

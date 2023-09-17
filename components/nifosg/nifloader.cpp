@@ -103,7 +103,7 @@ namespace
     // Collect all properties affecting the given drawable that should be handled on drawable basis rather than on the
     // node hierarchy above it.
     void collectDrawableProperties(
-        const Nif::NiAVObject* nifNode, const Nif::Parent* parent, std::vector<const Nif::Property*>& out)
+        const Nif::NiAVObject* nifNode, const Nif::Parent* parent, std::vector<const Nif::NiProperty*>& out)
     {
         if (parent != nullptr)
             collectDrawableProperties(&parent->mNiNode, parent->mParent, out);
@@ -959,7 +959,7 @@ namespace NifOsg
             }
         }
 
-        void handleMaterialControllers(const Nif::Property* materialProperty,
+        void handleMaterialControllers(const Nif::NiProperty* materialProperty,
             SceneUtil::CompositeStateSetUpdater* composite, int animflags, const osg::Material* baseMaterial)
         {
             for (Nif::NiTimeControllerPtr ctrl = materialProperty->mController; !ctrl.empty(); ctrl = ctrl->mNext)
@@ -1008,7 +1008,7 @@ namespace NifOsg
             }
         }
 
-        void handleTextureControllers(const Nif::Property* texProperty, SceneUtil::CompositeStateSetUpdater* composite,
+        void handleTextureControllers(const Nif::NiProperty* texProperty, SceneUtil::CompositeStateSetUpdater* composite,
             Resource::ImageManager* imageManager, osg::StateSet* stateset, int animflags)
         {
             for (Nif::NiTimeControllerPtr ctrl = texProperty->mController; !ctrl.empty(); ctrl = ctrl->mNext)
@@ -1316,7 +1316,7 @@ namespace NifOsg
             // localToWorldMatrix for transforming to particle space
             handleParticlePrograms(partctrl->mModifier, partctrl->mCollider, parentNode, partsys.get(), rf);
 
-            std::vector<const Nif::Property*> drawableProps;
+            std::vector<const Nif::NiProperty*> drawableProps;
             collectDrawableProperties(nifNode, parent, drawableProps);
             applyDrawableProperties(parentNode, drawableProps, composite, true, animflags);
 
@@ -1462,7 +1462,7 @@ namespace NifOsg
             // - if there are no vertex colors, we need to disable colorMode.
             // - there are 3 "overlapping" nif properties that all affect the osg::Material, handling them
             //   above the actual renderable would be tedious.
-            std::vector<const Nif::Property*> drawableProps;
+            std::vector<const Nif::NiProperty*> drawableProps;
             collectDrawableProperties(nifNode, parent, drawableProps);
             applyDrawableProperties(parentNode, drawableProps, composite, !niGeometryData->mColors.empty(), animflags);
         }
@@ -2107,7 +2107,7 @@ namespace NifOsg
             return "bs/default";
         }
 
-        void handleProperty(const Nif::Property* property, osg::Node* node,
+        void handleProperty(const Nif::NiProperty* property, osg::Node* node,
             SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager,
             std::vector<unsigned int>& boundTextures, int animflags, bool hasStencilProperty)
         {
@@ -2366,7 +2366,7 @@ namespace NifOsg
             return *found;
         }
 
-        void applyDrawableProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties,
+        void applyDrawableProperties(osg::Node* node, const std::vector<const Nif::NiProperty*>& properties,
             SceneUtil::CompositeStateSetUpdater* composite, bool hasVertexColors, int animflags)
         {
             // Specular lighting is enabled by default, but there's a quirk...
@@ -2391,7 +2391,7 @@ namespace NifOsg
             float emissiveMult = 1.f;
             float specStrength = 1.f;
 
-            for (const Nif::Property* property : properties)
+            for (const Nif::NiProperty* property : properties)
             {
                 switch (property->recType)
                 {
