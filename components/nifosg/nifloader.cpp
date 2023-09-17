@@ -1008,8 +1008,9 @@ namespace NifOsg
             }
         }
 
-        void handleTextureControllers(const Nif::NiProperty* texProperty, SceneUtil::CompositeStateSetUpdater* composite,
-            Resource::ImageManager* imageManager, osg::StateSet* stateset, int animflags)
+        void handleTextureControllers(const Nif::NiProperty* texProperty,
+            SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager,
+            osg::StateSet* stateset, int animflags)
         {
             for (Nif::NiTimeControllerPtr ctrl = texProperty->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
@@ -1638,7 +1639,8 @@ namespace NifOsg
                 case TestFunc::Always:
                     return osg::Stencil::ALWAYS;
                 default:
-                    Log(Debug::Info) << "Unexpected stencil function: " <<  static_cast<uint32_t>(func) << " in " << mFilename;
+                    Log(Debug::Info) << "Unexpected stencil function: " << static_cast<uint32_t>(func) << " in "
+                                     << mFilename;
                     return osg::Stencil::NEVER;
             }
         }
@@ -1661,7 +1663,8 @@ namespace NifOsg
                 case Action::Invert:
                     return osg::Stencil::INVERT;
                 default:
-                    Log(Debug::Info) << "Unexpected stencil operation: " << static_cast<uint32_t>(op) << " in " << mFilename;
+                    Log(Debug::Info) << "Unexpected stencil operation: " << static_cast<uint32_t>(op) << " in "
+                                     << mFilename;
                     return osg::Stencil::KEEP;
             }
         }
@@ -2144,8 +2147,8 @@ namespace NifOsg
                     {
                         mHasStencilProperty = true;
                         osg::ref_ptr<osg::Stencil> stencil = new osg::Stencil;
-                        stencil->setFunction(getStencilFunction(stencilprop->mTestFunction),
-                            stencilprop->mStencilRef, stencilprop->mStencilMask);
+                        stencil->setFunction(getStencilFunction(stencilprop->mTestFunction), stencilprop->mStencilRef,
+                            stencilprop->mStencilMask);
                         stencil->setStencilFailOperation(getStencilOperation(stencilprop->mFailAction));
                         stencil->setStencilPassAndDepthFailOperation(getStencilOperation(stencilprop->mZFailAction));
                         stencil->setStencilPassAndDepthPassOperation(getStencilOperation(stencilprop->mPassAction));
@@ -2407,8 +2410,7 @@ namespace NifOsg
                     {
                         const Nif::NiMaterialProperty* matprop = static_cast<const Nif::NiMaterialProperty*>(property);
 
-                        mat->setDiffuse(
-                            osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mDiffuse, matprop->mAlpha));
+                        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mDiffuse, matprop->mAlpha));
                         mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mAmbient, 1.f));
                         mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mEmissive, 1.f));
                         emissiveMult = matprop->mEmissiveMult;

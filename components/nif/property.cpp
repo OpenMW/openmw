@@ -176,7 +176,7 @@ namespace Nif
         nif->read(mExposureOffset);
         nif->read(mFinalExposureMin);
         nif->read(mFinalExposureMax);
-    };
+    }
 
     void BSSPWetnessParams::read(NIFStream* nif)
     {
@@ -191,7 +191,7 @@ namespace Nif
             nif->skip(4); // Unknown
         if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
             nif->skip(4); // Unknown
-    };
+    }
 
     void BSSPMLParallaxParams::read(NIFStream* nif)
     {
@@ -199,7 +199,7 @@ namespace Nif
         nif->read(mRefractionScale);
         nif->read(mInnerLayerTextureScale);
         nif->read(mEnvMapScale);
-    };
+    }
 
     void BSSPTranslucencyParams::read(NIFStream* nif)
     {
@@ -208,7 +208,7 @@ namespace Nif
         nif->read(mTurbulence);
         nif->read(mThickObject);
         nif->read(mMixAlbedo);
-    };
+    }
 
     void BSLightingShaderProperty::read(NIFStream* nif)
     {
@@ -502,7 +502,7 @@ namespace Nif
         {
             nif->read(mFlags);
             mEnabled = mFlags & 0x1;
-            mFailAction = static_cast<Action>((mFlags>> 1) & 0x7);
+            mFailAction = static_cast<Action>((mFlags >> 1) & 0x7);
             mZFailAction = static_cast<Action>((mFlags >> 4) & 0x7);
             mPassAction = static_cast<Action>((mFlags >> 7) & 0x7);
             mDrawMode = static_cast<DrawMode>((mFlags >> 10) & 0x3);
