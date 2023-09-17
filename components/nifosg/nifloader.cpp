@@ -128,10 +128,10 @@ namespace
         auto geometry = dynamic_cast<const Nif::NiGeometry*>(nifNode);
         if (geometry)
         {
-            if (!geometry->shaderprop.empty())
-                out.emplace_back(geometry->shaderprop.getPtr());
-            if (!geometry->alphaprop.empty())
-                out.emplace_back(geometry->alphaprop.getPtr());
+            if (!geometry->mShaderProperty.empty())
+                out.emplace_back(geometry->mShaderProperty.getPtr());
+            if (!geometry->mAlphaProperty.empty())
+                out.emplace_back(geometry->mAlphaProperty.getPtr());
         }
     }
 
@@ -444,8 +444,8 @@ namespace NifOsg
 
             auto geometry = dynamic_cast<const Nif::NiGeometry*>(nifNode);
             // NiGeometry's NiAlphaProperty doesn't get handled here because it's a drawable property
-            if (geometry && !geometry->shaderprop.empty())
-                handleProperty(geometry->shaderprop.getPtr(), applyTo, composite, imageManager, boundTextures,
+            if (geometry && !geometry->mShaderProperty.empty())
+                handleProperty(geometry->mShaderProperty.getPtr(), applyTo, composite, imageManager, boundTextures,
                     animflags, hasStencilProperty);
         }
 
@@ -463,11 +463,11 @@ namespace NifOsg
             osg::ref_ptr<osg::LOD> lod(new osg::LOD);
             lod->setName(niLodNode->mName);
             lod->setCenterMode(osg::LOD::USER_DEFINED_CENTER);
-            lod->setCenter(niLodNode->lodCenter);
-            for (unsigned int i = 0; i < niLodNode->lodLevels.size(); ++i)
+            lod->setCenter(niLodNode->mLODCenter);
+            for (unsigned int i = 0; i < niLodNode->mLODLevels.size(); ++i)
             {
-                const Nif::NiLODNode::LODRange& range = niLodNode->lodLevels[i];
-                lod->setRange(i, range.minRange, range.maxRange);
+                const Nif::NiLODNode::LODRange& range = niLodNode->mLODLevels[i];
+                lod->setRange(i, range.mMinRange, range.mMaxRange);
             }
             lod->setRangeMode(osg::LOD::DISTANCE_FROM_EYE_POINT);
             return lod;
@@ -478,7 +478,7 @@ namespace NifOsg
             osg::ref_ptr<osg::Switch> switchNode(new osg::Switch);
             switchNode->setName(niSwitchNode->mName);
             switchNode->setNewChildDefaultValue(false);
-            switchNode->setSingleChildOn(niSwitchNode->initialIndex);
+            switchNode->setSingleChildOn(niSwitchNode->mInitialIndex);
             return switchNode;
         }
 
@@ -706,7 +706,7 @@ namespace NifOsg
                 else
                 {
                     if (mPushedSorter && !mPushedSorter->mSubSorter.empty()
-                        && mPushedSorter->mMode != Nif::NiSortAdjustNode::SortingMode_Inherit)
+                        && mPushedSorter->mMode != Nif::NiSortAdjustNode::SortingMode::Inherit)
                         mLastAppliedNoInheritSorter = mPushedSorter;
                     mPushedSorter = sortNode;
                 }
@@ -761,7 +761,7 @@ namespace NifOsg
                     skip = args.mHasMarkers && Misc::StringUtils::ciStartsWith(nifNode->mName, "EditorMarker");
                 if (!skip)
                 {
-                    Nif::NiSkinInstancePtr skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin;
+                    Nif::NiSkinInstancePtr skin = static_cast<const Nif::NiGeometry*>(nifNode)->mSkin;
 
                     if (skin.empty())
                         handleGeometry(nifNode, parent, node, composite, args.mBoundTextures, args.mAnimFlags);
@@ -1121,13 +1121,13 @@ namespace NifOsg
             const Nif::NiAVObject* nifNode, ParticleSystem* partsys, const Nif::NiParticleSystemController* partctrl)
         {
             auto particleNode = static_cast<const Nif::NiParticles*>(nifNode);
-            if (particleNode->data.empty() || particleNode->data->recType != Nif::RC_NiParticlesData)
+            if (particleNode->mData.empty())
             {
                 partsys->setQuota(partctrl->mParticles.size());
                 return;
             }
 
-            auto particledata = static_cast<const Nif::NiParticlesData*>(particleNode->data.getPtr());
+            auto particledata = static_cast<const Nif::NiParticlesData*>(particleNode->mData.getPtr());
             partsys->setQuota(particledata->mNumParticles);
 
             osg::BoundingBox box;
@@ -1379,13 +1379,13 @@ namespace NifOsg
             const std::vector<unsigned int>& boundTextures, int animflags)
         {
             const Nif::NiGeometry* niGeometry = static_cast<const Nif::NiGeometry*>(nifNode);
-            if (niGeometry->data.empty())
+            if (niGeometry->mData.empty())
                 return;
 
             bool hasPartitions = false;
-            if (!niGeometry->skin.empty())
+            if (!niGeometry->mSkin.empty())
             {
-                const Nif::NiSkinInstance* skin = niGeometry->skin.getPtr();
+                const Nif::NiSkinInstance* skin = niGeometry->mSkin.getPtr();
                 const Nif::NiSkinData* data = nullptr;
                 const Nif::NiSkinPartition* partitions = nullptr;
                 if (!skin->mData.empty())
@@ -1419,13 +1419,11 @@ namespace NifOsg
                 }
             }
 
-            const Nif::NiGeometryData* niGeometryData = niGeometry->data.getPtr();
+            const Nif::NiGeometryData* niGeometryData = niGeometry->mData.getPtr();
             if (!hasPartitions)
             {
                 if (niGeometry->recType == Nif::RC_NiTriShape || nifNode->recType == Nif::RC_BSLODTriShape)
                 {
-                    if (niGeometryData->recType != Nif::RC_NiTriShapeData)
-                        return;
                     auto data = static_cast<const Nif::NiTriShapeData*>(niGeometryData);
                     const std::vector<unsigned short>& triangles = data->mTriangles;
                     if (triangles.empty())
@@ -1435,8 +1433,6 @@ namespace NifOsg
                 }
                 else if (niGeometry->recType == Nif::RC_NiTriStrips)
                 {
-                    if (niGeometryData->recType != Nif::RC_NiTriStripsData)
-                        return;
                     auto data = static_cast<const Nif::NiTriStripsData*>(niGeometryData);
                     bool hasGeometry = false;
                     for (const std::vector<unsigned short>& strip : data->mStrips)
@@ -1452,8 +1448,6 @@ namespace NifOsg
                 }
                 else if (niGeometry->recType == Nif::RC_NiLines)
                 {
-                    if (niGeometryData->recType != Nif::RC_NiLinesData)
-                        return;
                     auto data = static_cast<const Nif::NiLinesData*>(niGeometryData);
                     const auto& line = data->mLines;
                     if (line.empty())
@@ -1545,7 +1539,7 @@ namespace NifOsg
             // Assign bone weights
             osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map(new SceneUtil::RigGeometry::InfluenceMap);
 
-            const Nif::NiSkinInstance* skin = static_cast<const Nif::NiGeometry*>(nifNode)->skin.getPtr();
+            const Nif::NiSkinInstance* skin = static_cast<const Nif::NiGeometry*>(nifNode)->mSkin.getPtr();
             const Nif::NiSkinData* data = skin->mData.getPtr();
             const Nif::NiAVObjectList& bones = skin->mBones;
             for (std::size_t i = 0; i < bones.size(); ++i)
@@ -2627,8 +2621,8 @@ namespace NifOsg
             if (!mPushedSorter)
                 return;
 
-            auto assignBin = [&](int mode, int type) {
-                if (mode == Nif::NiSortAdjustNode::SortingMode_Off)
+            auto assignBin = [&](Nif::NiSortAdjustNode::SortingMode mode, int type) {
+                if (mode == Nif::NiSortAdjustNode::SortingMode::Off)
                 {
                     setBin_Traversal(stateset);
                     return;
@@ -2649,7 +2643,7 @@ namespace NifOsg
 
             switch (mPushedSorter->mMode)
             {
-                case Nif::NiSortAdjustNode::SortingMode_Inherit:
+                case Nif::NiSortAdjustNode::SortingMode::Inherit:
                 {
                     if (mLastAppliedNoInheritSorter)
                         assignBin(mLastAppliedNoInheritSorter->mMode, mLastAppliedNoInheritSorter->mSubSorter->recType);
@@ -2657,12 +2651,12 @@ namespace NifOsg
                         assignBin(mPushedSorter->mMode, Nif::RC_NiAlphaAccumulator);
                     break;
                 }
-                case Nif::NiSortAdjustNode::SortingMode_Off:
+                case Nif::NiSortAdjustNode::SortingMode::Off:
                 {
                     setBin_Traversal(stateset);
                     break;
                 }
-                case Nif::NiSortAdjustNode::SortingMode_Subsort:
+                case Nif::NiSortAdjustNode::SortingMode::Subsort:
                 {
                     assignBin(mPushedSorter->mMode, mPushedSorter->mSubSorter->recType);
                     break;

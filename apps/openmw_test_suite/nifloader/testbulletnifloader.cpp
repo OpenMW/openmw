@@ -326,20 +326,20 @@ namespace
             mNiTriShapeData.mVertices = { osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0) };
             mNiTriShapeData.mNumTriangles = 1;
             mNiTriShapeData.mTriangles = { 0, 1, 2 };
-            mNiTriShape.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
+            mNiTriShape.mData = Nif::NiGeometryDataPtr(&mNiTriShapeData);
 
             mNiTriShapeData2.recType = Nif::RC_NiTriShapeData;
             mNiTriShapeData2.mVertices = { osg::Vec3f(0, 0, 1), osg::Vec3f(1, 0, 1), osg::Vec3f(1, 1, 1) };
             mNiTriShapeData2.mNumTriangles = 1;
             mNiTriShapeData2.mTriangles = { 0, 1, 2 };
-            mNiTriShape2.data = Nif::NiGeometryDataPtr(&mNiTriShapeData2);
+            mNiTriShape2.mData = Nif::NiGeometryDataPtr(&mNiTriShapeData2);
 
             mNiTriStripsData.recType = Nif::RC_NiTriStripsData;
             mNiTriStripsData.mVertices
                 = { osg::Vec3f(0, 0, 0), osg::Vec3f(1, 0, 0), osg::Vec3f(1, 1, 0), osg::Vec3f(0, 1, 0) };
             mNiTriStripsData.mNumTriangles = 2;
             mNiTriStripsData.mStrips = { { 0, 1, 2, 3 } };
-            mNiTriStrips.data = Nif::NiGeometryDataPtr(&mNiTriStripsData);
+            mNiTriStrips.mData = Nif::NiGeometryDataPtr(&mNiTriStripsData);
         }
     };
 
@@ -415,9 +415,9 @@ namespace
         TestBulletNifLoader, for_root_nif_node_with_bounding_box_should_return_shape_with_compound_shape_and_box_inside)
     {
         mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
-        mNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode.mBounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNode.mBounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
+        mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
+        mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNode);
@@ -439,9 +439,9 @@ namespace
     TEST_F(TestBulletNifLoader, for_child_nif_node_with_bounding_box)
     {
         mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
-        mNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode.mBounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNode.mBounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
+        mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
+        mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
         mNode.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode) };
 
@@ -466,14 +466,14 @@ namespace
         for_root_and_child_nif_node_with_bounding_box_but_root_without_flag_should_use_child_bounds)
     {
         mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
-        mNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode.mBounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNode.mBounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
+        mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
+        mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
         mNode.mParents.push_back(&mNiNode);
 
-        mNiNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNiNode.mBounds.box.extents = osg::Vec3f(4, 5, 6);
-        mNiNode.mBounds.box.center = osg::Vec3f(-4, -5, -6);
+        mNiNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
+        mNiNode.mBounds.mBox.mExtents = osg::Vec3f(4, 5, 6);
+        mNiNode.mBounds.mBox.mCenter = osg::Vec3f(-4, -5, -6);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode) };
 
         Nif::NIFFile file("test.nif");
@@ -497,19 +497,19 @@ namespace
         for_root_and_two_children_where_both_with_bounds_but_only_first_with_flag_should_use_first_bounds)
     {
         mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
-        mNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode.mBounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNode.mBounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
+        mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
+        mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
         mNode.mParents.push_back(&mNiNode);
 
-        mNode2.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode2.mBounds.box.extents = osg::Vec3f(4, 5, 6);
-        mNode2.mBounds.box.center = osg::Vec3f(-4, -5, -6);
+        mNode2.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
+        mNode2.mBounds.mBox.mExtents = osg::Vec3f(4, 5, 6);
+        mNode2.mBounds.mBox.mCenter = osg::Vec3f(-4, -5, -6);
         mNode2.mParents.push_back(&mNiNode);
 
-        mNiNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNiNode.mBounds.box.extents = osg::Vec3f(7, 8, 9);
-        mNiNode.mBounds.box.center = osg::Vec3f(-7, -8, -9);
+        mNiNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
+        mNiNode.mBounds.mBox.mExtents = osg::Vec3f(7, 8, 9);
+        mNiNode.mBounds.mBox.mCenter = osg::Vec3f(-7, -8, -9);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode), Nif::NiAVObjectPtr(&mNode2) };
 
         Nif::NIFFile file("test.nif");
@@ -532,20 +532,20 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_root_and_two_children_where_both_with_bounds_but_only_second_with_flag_should_use_second_bounds)
     {
-        mNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode.mBounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNode.mBounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
+        mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
+        mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
         mNode.mParents.push_back(&mNiNode);
 
         mNode2.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
-        mNode2.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode2.mBounds.box.extents = osg::Vec3f(4, 5, 6);
-        mNode2.mBounds.box.center = osg::Vec3f(-4, -5, -6);
+        mNode2.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
+        mNode2.mBounds.mBox.mExtents = osg::Vec3f(4, 5, 6);
+        mNode2.mBounds.mBox.mCenter = osg::Vec3f(-4, -5, -6);
         mNode2.mParents.push_back(&mNiNode);
 
-        mNiNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNiNode.mBounds.box.extents = osg::Vec3f(7, 8, 9);
-        mNiNode.mBounds.box.center = osg::Vec3f(-7, -8, -9);
+        mNiNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
+        mNiNode.mBounds.mBox.mExtents = osg::Vec3f(7, 8, 9);
+        mNiNode.mBounds.mBox.mCenter = osg::Vec3f(-7, -8, -9);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNode), Nif::NiAVObjectPtr(&mNode2) };
 
         Nif::NIFFile file("test.nif");
@@ -568,9 +568,9 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_root_nif_node_with_bounds_but_without_flag_should_return_shape_with_bounds_but_with_null_collision_shape)
     {
-        mNode.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNode.mBounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNode.mBounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
+        mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
+        mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNode);
@@ -608,9 +608,9 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_root_node_with_bounds_should_return_static_shape_with_bounds_but_with_null_collision_shape)
     {
-        mNiTriShape.mBounds.type = Nif::NiBoundingVolume::Type::BOX_BV;
-        mNiTriShape.mBounds.box.extents = osg::Vec3f(1, 2, 3);
-        mNiTriShape.mBounds.box.center = osg::Vec3f(-1, -2, -3);
+        mNiTriShape.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
+        mNiTriShape.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
+        mNiTriShape.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiTriShape);
@@ -703,7 +703,7 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_child_node_and_filename_starting_with_x_and_not_empty_skin_should_return_static_shape)
     {
-        mNiTriShape.skin = Nif::NiSkinInstancePtr(&mNiSkinInstance);
+        mNiTriShape.mSkin = Nif::NiSkinInstancePtr(&mNiSkinInstance);
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
@@ -943,7 +943,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, for_tri_shape_child_node_with_empty_data_should_return_shape_with_null_collision_shape)
     {
-        mNiTriShape.data = Nif::NiGeometryDataPtr(nullptr);
+        mNiTriShape.mData = Nif::NiGeometryDataPtr(nullptr);
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
@@ -961,7 +961,7 @@ namespace
     TEST_F(TestBulletNifLoader,
         for_tri_shape_child_node_with_empty_data_triangles_should_return_shape_with_null_collision_shape)
     {
-        auto data = static_cast<Nif::NiTriShapeData*>(mNiTriShape.data.getPtr());
+        auto data = static_cast<Nif::NiTriShapeData*>(mNiTriShape.mData.getPtr());
         data->mTriangles.clear();
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
@@ -1095,7 +1095,7 @@ namespace
         init(niTriShape);
         init(emptyCollisionNode);
 
-        niTriShape.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
+        niTriShape.mData = Nif::NiGeometryDataPtr(&mNiTriShapeData);
         niTriShape.mParents.push_back(&mNiNode);
 
         emptyCollisionNode.recType = Nif::RC_RootCollisionNode;
@@ -1192,21 +1192,6 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, should_ignore_tri_shape_data_with_mismatching_data_rec_type)
-    {
-        mNiTriShape.data = Nif::NiGeometryDataPtr(&mNiTriStripsData);
-
-        Nif::NIFFile file("test.nif");
-        file.mRoots.push_back(&mNiTriShape);
-        file.mHash = mHash;
-
-        const auto result = mLoader.load(file);
-
-        const Resource::BulletShape expected;
-
-        EXPECT_EQ(*result, expected);
-    }
-
     TEST_F(TestBulletNifLoader, for_tri_strips_root_node_should_return_static_shape)
     {
         Nif::NIFFile file("test.nif");
@@ -1223,21 +1208,6 @@ namespace
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
-
-        EXPECT_EQ(*result, expected);
-    }
-
-    TEST_F(TestBulletNifLoader, should_ignore_tri_strips_data_with_mismatching_data_rec_type)
-    {
-        mNiTriStrips.data = Nif::NiGeometryDataPtr(&mNiTriShapeData);
-
-        Nif::NIFFile file("test.nif");
-        file.mRoots.push_back(&mNiTriStrips);
-        file.mHash = mHash;
-
-        const auto result = mLoader.load(file);
-
-        const Resource::BulletShape expected;
 
         EXPECT_EQ(*result, expected);
     }

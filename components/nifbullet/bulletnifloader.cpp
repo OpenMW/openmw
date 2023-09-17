@@ -79,14 +79,11 @@ namespace
 
     template <class Function>
     auto handleNiGeometry(const Nif::NiGeometry& geometry, Function&& function)
-        -> decltype(function(static_cast<const Nif::NiTriShapeData&>(geometry.data.get())))
+        -> decltype(function(static_cast<const Nif::NiTriShapeData&>(geometry.mData.get())))
     {
         if (geometry.recType == Nif::RC_NiTriShape || geometry.recType == Nif::RC_BSLODTriShape)
         {
-            if (geometry.data->recType != Nif::RC_NiTriShapeData)
-                return {};
-
-            auto data = static_cast<const Nif::NiTriShapeData*>(geometry.data.getPtr());
+            auto data = static_cast<const Nif::NiTriShapeData*>(geometry.mData.getPtr());
             if (data->mTriangles.empty())
                 return {};
 
@@ -95,10 +92,7 @@ namespace
 
         if (geometry.recType == Nif::RC_NiTriStrips)
         {
-            if (geometry.data->recType != Nif::RC_NiTriStripsData)
-                return {};
-
-            auto data = static_cast<const Nif::NiTriStripsData*>(geometry.data.getPtr());
+            auto data = static_cast<const Nif::NiTriStripsData*>(geometry.mData.getPtr());
             if (data->mStrips.empty())
                 return {};
 
@@ -181,7 +175,7 @@ namespace NifBullet
             bool hasCollisionShape = false;
             if (colNode != nullptr)
             {
-                if (colNode->mBounds.type == Nif::NiBoundingVolume::Type::BASE_BV && !colNode->mChildren.empty())
+                if (colNode->mBounds.mType == Nif::BoundingVolume::Type::BASE_BV && !colNode->mChildren.empty())
                     hasCollisionShape = true;
                 else
                     mShape->mVisualCollisionType = Resource::VisualCollisionType::Camera;
@@ -205,25 +199,25 @@ namespace NifBullet
     // Return: use bounding box for collision?
     bool BulletNifLoader::findBoundingBox(const Nif::NiAVObject& node, const std::string& filename)
     {
-        unsigned int type = node.mBounds.type;
+        unsigned int type = node.mBounds.mType;
         switch (type)
         {
-            case Nif::NiBoundingVolume::Type::BASE_BV:
+            case Nif::BoundingVolume::Type::BASE_BV:
                 break;
-            case Nif::NiBoundingVolume::Type::BOX_BV:
-                mShape->mCollisionBox.mExtents = node.mBounds.box.extents;
-                mShape->mCollisionBox.mCenter = node.mBounds.box.center;
+            case Nif::BoundingVolume::Type::BOX_BV:
+                mShape->mCollisionBox.mExtents = node.mBounds.mBox.mExtents;
+                mShape->mCollisionBox.mCenter = node.mBounds.mBox.mCenter;
                 break;
             default:
             {
                 std::stringstream warning;
-                warning << "Unsupported NiBoundingVolume type " << type << " in node " << node.recIndex;
+                warning << "Unsupported BoundingVolume type " << type << " in node " << node.recIndex;
                 warning << " in file " << filename;
                 warn(warning.str());
             }
         }
 
-        if (type != Nif::NiBoundingVolume::Type::BASE_BV && node.hasBBoxCollision())
+        if (type != Nif::BoundingVolume::Type::BASE_BV && node.hasBBoxCollision())
             return true;
 
         if (const Nif::NiNode* ninode = dynamic_cast<const Nif::NiNode*>(&node))
@@ -335,7 +329,7 @@ namespace NifBullet
             // NOTE: a trishape with bounds, but no BBoxCollision flag should NOT go through handleNiTriShape!
             // It must be ignored completely.
             // (occurs in tr_ex_imp_wall_arch_04.nif)
-            if (node.mBounds.type == Nif::NiBoundingVolume::Type::BASE_BV
+            if (node.mBounds.mType == Nif::BoundingVolume::Type::BASE_BV
                 && (node.recType == Nif::RC_NiTriShape || node.recType == Nif::RC_NiTriStrips
                     || node.recType == Nif::RC_BSLODTriShape))
             {
@@ -366,10 +360,10 @@ namespace NifBullet
         if (args.mHasMarkers && Misc::StringUtils::ciStartsWith(niGeometry.mName, "EditorMarker"))
             return;
 
-        if (niGeometry.data.empty() || niGeometry.data->mVertices.empty())
+        if (niGeometry.mData.empty() || niGeometry.mData->mVertices.empty())
             return;
 
-        if (!niGeometry.skin.empty())
+        if (!niGeometry.mSkin.empty())
             args.mAnimated = false;
         // TODO: handle NiSkinPartition
 
