@@ -26,27 +26,27 @@ namespace Nif
     {
         NiDynamicEffect::read(nif);
 
-        mDimmer = nif->getFloat();
-        mAmbient = nif->getVector3();
-        mDiffuse = nif->getVector3();
-        mSpecular = nif->getVector3();
+        nif->read(mDimmer);
+        nif->read(mAmbient);
+        nif->read(mDiffuse);
+        nif->read(mSpecular);
     }
 
     void NiPointLight::read(NIFStream* nif)
     {
         NiLight::read(nif);
 
-        mConstantAttenuation = nif->getFloat();
-        mLinearAttenuation = nif->getFloat();
-        mQuadraticAttenuation = nif->getFloat();
+        nif->read(mConstantAttenuation);
+        nif->read(mLinearAttenuation);
+        nif->read(mQuadraticAttenuation);
     }
 
     void NiSpotLight::read(NIFStream* nif)
     {
         NiPointLight::read(nif);
 
-        mCutoff = nif->getFloat();
-        mExponent = nif->getFloat();
+        nif->read(mCutoff);
+        nif->read(mExponent);
     }
 
     void NiTextureEffect::read(NIFStream* nif)
