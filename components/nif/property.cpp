@@ -423,39 +423,104 @@ namespace Nif
         }
     }
 
+    void NiAlphaProperty::read(NIFStream* nif)
+    {
+        Property::read(nif);
+
+        nif->read(mFlags);
+        nif->read(mThreshold);
+    }
+
+    void NiDitherProperty::read(NIFStream* nif)
+    {
+        Property::read(nif);
+
+        nif->read(mFlags);
+    }
+
     void NiFogProperty::read(NIFStream* nif)
     {
         Property::read(nif);
 
-        mFlags = nif->getUShort();
-        mFogDepth = nif->getFloat();
-        mColour = nif->getVector3();
+        nif->read(mFlags);
+        nif->read(mFogDepth);
+        nif->read(mColour);
     }
 
-    void S_MaterialProperty::read(NIFStream* nif)
+    void NiMaterialProperty::read(NIFStream* nif)
     {
+        Property::read(nif);
+
+        if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD)
+            nif->read(mFlags);
         if (nif->getBethVersion() < 26)
         {
-            ambient = nif->getVector3();
-            diffuse = nif->getVector3();
+            nif->read(mAmbient);
+            nif->read(mDiffuse);
         }
-        specular = nif->getVector3();
-        emissive = nif->getVector3();
-        glossiness = nif->getFloat();
-        alpha = nif->getFloat();
+        nif->read(mSpecular);
+        nif->read(mEmissive);
+        nif->read(mGlossiness);
+        nif->read(mAlpha);
         if (nif->getBethVersion() >= 22)
-            emissiveMult = nif->getFloat();
+            nif->read(mEmissiveMult);
+    }
+
+    void NiShadeProperty::read(NIFStream* nif)
+    {
+        Property::read(nif);
+
+        if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
+            nif->read(mFlags);
+    }
+
+    void NiSpecularProperty::read(NIFStream* nif)
+    {
+        Property::read(nif);
+
+        mEnable = nif->get<uint16_t>() & 1;
+    }
+
+    void NiStencilProperty::read(NIFStream* nif)
+    {
+        Property::read(nif);
+
+        if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
+        {
+            if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD)
+                nif->read(mFlags);
+            mEnabled = nif->get<uint8_t>() != 0;
+            mTestFunction = static_cast<TestFunc>(nif->get<uint32_t>());
+            nif->read(mStencilRef);
+            nif->read(mStencilMask);
+            mFailAction = static_cast<Action>(nif->get<uint32_t>());
+            mZFailAction = static_cast<Action>(nif->get<uint32_t>());
+            mPassAction = static_cast<Action>(nif->get<uint32_t>());
+            mDrawMode = static_cast<DrawMode>(nif->get<uint32_t>());
+        }
+        else
+        {
+            nif->read(mFlags);
+            mEnabled = mFlags & 0x1;
+            mFailAction = static_cast<Action>((mFlags>> 1) & 0x7);
+            mZFailAction = static_cast<Action>((mFlags >> 4) & 0x7);
+            mPassAction = static_cast<Action>((mFlags >> 7) & 0x7);
+            mDrawMode = static_cast<DrawMode>((mFlags >> 10) & 0x3);
+            mTestFunction = static_cast<TestFunc>((mFlags >> 12) & 0x7);
+            nif->read(mStencilRef);
+            nif->read(mStencilMask);
+        }
     }
 
     void NiVertexColorProperty::read(NIFStream* nif)
     {
         Property::read(nif);
 
-        mFlags = nif->getUShort();
+        nif->read(mFlags);
         if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
         {
-            mVertexMode = static_cast<VertexMode>(nif->getUInt());
-            mLightingMode = static_cast<LightMode>(nif->getUInt());
+            mVertexMode = static_cast<VertexMode>(nif->get<uint32_t>());
+            mLightingMode = static_cast<LightMode>(nif->get<uint32_t>());
         }
         else
         {
@@ -464,36 +529,23 @@ namespace Nif
         }
     }
 
-    void S_AlphaProperty::read(NIFStream* nif)
+    void NiWireframeProperty::read(NIFStream* nif)
     {
-        threshold = nif->getChar();
+        Property::read(nif);
+
+        mEnable = nif->get<uint16_t>() & 1;
     }
 
-    void S_StencilProperty::read(NIFStream* nif)
+    void NiZBufferProperty::read(NIFStream* nif)
     {
-        if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
-        {
-            enabled = nif->getChar();
-            compareFunc = nif->getInt();
-            stencilRef = nif->getUInt();
-            stencilMask = nif->getUInt();
-            failAction = nif->getInt();
-            zFailAction = nif->getInt();
-            zPassAction = nif->getInt();
-            drawMode = nif->getInt();
-        }
+        Property::read(nif);
+
+        nif->read(mFlags);
+        if (nif->getVersion() >= NIFStream::generateVersion(4, 1, 0, 12)
+            && nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
+            nif->read(mTestFunction);
         else
-        {
-            unsigned short flags = nif->getUShort();
-            enabled = flags & 0x1;
-            failAction = (flags >> 1) & 0x7;
-            zFailAction = (flags >> 4) & 0x7;
-            zPassAction = (flags >> 7) & 0x7;
-            drawMode = (flags >> 10) & 0x3;
-            compareFunc = (flags >> 12) & 0x7;
-            stencilRef = nif->getUInt();
-            stencilMask = nif->getUInt();
-        }
+            mTestFunction = (mFlags >> 2) & 0x7;
     }
 
 }

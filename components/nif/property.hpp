@@ -6,7 +6,7 @@
 namespace Nif
 {
 
-    struct Property : public NiObjectNET
+    struct Property : NiObjectNET
     {
     };
 
@@ -30,7 +30,7 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
-    struct NiTexturingProperty : public Property
+    struct NiTexturingProperty : Property
     {
         enum class ApplyMode : uint32_t
         {
@@ -86,24 +86,11 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiFogProperty : public Property
-    {
-        unsigned short mFlags;
-        float mFogDepth;
-        osg::Vec3f mColour;
-
-        void read(NIFStream* nif) override;
-    };
-
-    struct NiShadeProperty : public Property
+    struct NiShadeProperty : Property
     {
         uint16_t mFlags{ 0u };
-        void read(NIFStream* nif) override
-        {
-            Property::read(nif);
-            if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
-                nif->read(mFlags);
-        }
+
+        void read(NIFStream* nif) override;
     };
 
     enum class BSShaderType : uint32_t
@@ -140,7 +127,7 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
-    struct BSShaderProperty : public NiShadeProperty
+    struct BSShaderProperty : NiShadeProperty
     {
         uint32_t mType{ 0u }, mShaderFlags1{ 0u }, mShaderFlags2{ 0u };
         float mEnvMapScale{ 0.f };
@@ -153,16 +140,17 @@ namespace Nif
         bool decal() const { return mShaderFlags1 & BSSFlag1_Decal; }
     };
 
-    struct BSShaderLightingProperty : public BSShaderProperty
+    struct BSShaderLightingProperty : BSShaderProperty
     {
         unsigned int mClamp{ 0u };
+
         void read(NIFStream* nif) override;
 
         bool wrapT() const { return mClamp & 1; }
         bool wrapS() const { return mClamp & 2; }
     };
 
-    struct BSShaderPPLightingProperty : public BSShaderLightingProperty
+    struct BSShaderPPLightingProperty : BSShaderLightingProperty
     {
         BSShaderTextureSetPtr mTextureSet;
         BSSPRefractionParams mRefraction;
@@ -172,7 +160,7 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct BSShaderNoLightingProperty : public BSShaderLightingProperty
+    struct BSShaderNoLightingProperty : BSShaderLightingProperty
     {
         std::string mFilename;
         osg::Vec4f mFalloffParams;
@@ -258,7 +246,7 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
-    struct BSLightingShaderProperty : public BSShaderProperty
+    struct BSLightingShaderProperty : BSShaderProperty
     {
         std::vector<uint32_t> mShaderFlags1Hashes, mShaderFlags2Hashes;
         osg::Vec2f mUVOffset, mUVScale;
@@ -306,7 +294,7 @@ namespace Nif
         bool treeAnim() const { return mShaderFlags2 & BSLSFlag2_TreeAnim; }
     };
 
-    struct BSEffectShaderProperty : public BSShaderProperty
+    struct BSEffectShaderProperty : BSShaderProperty
     {
         std::vector<uint32_t> mShaderFlags1Hashes, mShaderFlags2Hashes;
         osg::Vec2f mUVOffset, mUVScale;
@@ -337,95 +325,24 @@ namespace Nif
         bool treeAnim() const { return mShaderFlags2 & BSLSFlag2_TreeAnim; }
     };
 
-    struct NiDitherProperty : public Property
+    struct NiAlphaProperty : Property
     {
-        unsigned short flags;
-
-        void read(NIFStream* nif) override
+        enum Flags
         {
-            Property::read(nif);
+            Flag_Blending = 0x0001,
+            Flag_Testing = 0x0200,
+            Flag_NoSorter = 0x2000,
+        };
 
-            flags = nif->getUShort();
-        }
-    };
+        uint16_t mFlags;
+        uint8_t mThreshold;
 
-    struct NiZBufferProperty : public Property
-    {
-        unsigned short flags;
-        unsigned int testFunction;
+        void read(NIFStream* nif) override;
 
-        void read(NIFStream* nif) override
-        {
-            Property::read(nif);
+        bool useAlphaBlending() const { return mFlags & Flag_Blending; }
+        bool useAlphaTesting() const { return mFlags & Flag_Testing; }
+        bool noSorter() const { return mFlags & Flag_NoSorter; }
 
-            flags = nif->getUShort();
-            testFunction = (flags >> 2) & 0x7;
-            if (nif->getVersion() >= NIFStream::generateVersion(4, 1, 0, 12)
-                && nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
-                testFunction = nif->getUInt();
-        }
-
-        bool depthTest() const { return flags & 1; }
-
-        bool depthWrite() const { return flags & 2; }
-    };
-
-    struct NiSpecularProperty : public Property
-    {
-        unsigned short flags;
-
-        void read(NIFStream* nif) override
-        {
-            Property::read(nif);
-
-            flags = nif->getUShort();
-        }
-
-        bool isEnabled() const { return flags & 1; }
-    };
-
-    struct NiWireframeProperty : public Property
-    {
-        unsigned short flags;
-
-        void read(NIFStream* nif) override
-        {
-            Property::read(nif);
-
-            flags = nif->getUShort();
-        }
-
-        bool isEnabled() const { return flags & 1; }
-    };
-
-    // The rest are all struct-based
-    template <typename T>
-    struct StructPropT : Property
-    {
-        T data;
-        unsigned short flags;
-
-        void read(NIFStream* nif) override
-        {
-            Property::read(nif);
-
-            flags = nif->getUShort();
-            data.read(nif);
-        }
-    };
-
-    struct S_MaterialProperty
-    {
-        // The vector components are R,G,B
-        osg::Vec3f ambient{ 1.f, 1.f, 1.f }, diffuse{ 1.f, 1.f, 1.f };
-        osg::Vec3f specular, emissive;
-        float glossiness{ 0.f }, alpha{ 0.f }, emissiveMult{ 1.f };
-
-        void read(NIFStream* nif);
-    };
-
-    struct S_AlphaProperty
-    {
         /*
             NiAlphaProperty blend modes (glBlendFunc):
             0000 GL_ONE
@@ -454,125 +371,131 @@ namespace Nif
             http://niftools.sourceforge.net/doc/nif/NiAlphaProperty.html
         */
 
-        // Tested against when certain flags are set (see above.)
-        unsigned char threshold;
-
-        void read(NIFStream* nif);
+        int sourceBlendMode() const { return (mFlags >> 1) & 0xF; }
+        int destinationBlendMode() const { return (mFlags >> 5) & 0xF; }
+        int alphaTestMode() const { return (mFlags >> 10) & 0x7; }
     };
 
-    /*
-        Docs taken from:
-        http://niftools.sourceforge.net/doc/nif/NiStencilProperty.html
-     */
-    struct S_StencilProperty
+    struct NiDitherProperty : Property
     {
-        // Is stencil test enabled?
-        unsigned char enabled;
+        uint16_t mFlags;
 
-        /*
-            0   TEST_NEVER
-            1   TEST_LESS
-            2   TEST_EQUAL
-            3   TEST_LESS_EQUAL
-            4   TEST_GREATER
-            5   TEST_NOT_EQUAL
-            6   TEST_GREATER_EQUAL
-            7   TEST_NEVER (though nifskope comment says TEST_ALWAYS, but ingame it is TEST_NEVER)
-         */
-        int compareFunc;
-        unsigned stencilRef;
-        unsigned stencilMask;
-        /*
-            Stencil test fail action, depth test fail action and depth test pass action:
-            0   ACTION_KEEP
-            1   ACTION_ZERO
-            2   ACTION_REPLACE
-            3   ACTION_INCREMENT
-            4   ACTION_DECREMENT
-            5   ACTION_INVERT
-         */
-        int failAction;
-        int zFailAction;
-        int zPassAction;
-        /*
-            Face draw mode:
-            0   DRAW_CCW_OR_BOTH
-            1   DRAW_CCW        [default]
-            2   DRAW_CW
-            3   DRAW_BOTH
-         */
-        int drawMode;
-
-        void read(NIFStream* nif);
+        void read(NIFStream* nif) override;
     };
 
-    struct NiAlphaProperty : public StructPropT<S_AlphaProperty>
+    struct NiFogProperty : Property
     {
-        enum Flags
+        uint16_t mFlags;
+        float mFogDepth;
+        osg::Vec3f mColour;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiMaterialProperty : Property
+    {
+        uint16_t mFlags{ 0u };
+        osg::Vec3f mAmbient{ 1.f, 1.f, 1.f };
+        osg::Vec3f mDiffuse{ 1.f, 1.f, 1.f };
+        osg::Vec3f mSpecular;
+        osg::Vec3f mEmissive;
+        float mGlossiness{ 0.f };
+        float mAlpha{ 0.f };
+        float mEmissiveMult{ 1.f };
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiSpecularProperty : Property
+    {
+        bool mEnable;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiStencilProperty : Property
+    {
+        enum class TestFunc : uint32_t
         {
-            Flag_Blending = 0x0001,
-            Flag_Testing = 0x0200,
-            Flag_NoSorter = 0x2000,
+            Never = 0,
+            Less = 1,
+            Equal = 2,
+            LessEqual = 3,
+            Greater = 4,
+            NotEqual = 5,
+            GreaterEqual = 6,
+            Always = 7,
         };
 
-        bool useAlphaBlending() const { return flags & Flag_Blending; }
-        bool useAlphaTesting() const { return flags & Flag_Testing; }
-        bool noSorter() const { return flags & Flag_NoSorter; }
+        enum class Action : uint32_t
+        {
+            Keep = 0,
+            Zero = 1,
+            Replace = 2,
+            Increment = 3,
+            Decrement = 4,
+            Invert = 5,
+        };
 
-        int sourceBlendMode() const { return (flags >> 1) & 0xF; }
-        int destinationBlendMode() const { return (flags >> 5) & 0xF; }
-        int alphaTestMode() const { return (flags >> 10) & 0x7; }
+        enum class DrawMode : uint32_t
+        {
+            Default = 0,
+            CounterClockwise = 1,
+            Clockwise = 2,
+            Both = 3,
+        };
+
+        uint16_t mFlags{ 0u };
+        bool mEnabled;
+        TestFunc mTestFunction;
+        uint32_t mStencilRef;
+        uint32_t mStencilMask;
+        Action mFailAction;
+        Action mZFailAction;
+        Action mPassAction;
+        DrawMode mDrawMode;
+
+        void read(NIFStream* nif) override;
     };
 
-    struct NiVertexColorProperty : public Property
+    struct NiVertexColorProperty : Property
     {
-        enum class VertexMode : unsigned int
+        enum class VertexMode : uint32_t
         {
             VertMode_SrcIgnore = 0,
             VertMode_SrcEmissive = 1,
             VertMode_SrcAmbDif = 2
         };
 
-        enum class LightMode : unsigned int
+        enum class LightMode : uint32_t
         {
             LightMode_Emissive = 0,
             LightMode_EmiAmbDif = 1
         };
 
-        unsigned short mFlags;
+        uint16_t mFlags;
         VertexMode mVertexMode;
         LightMode mLightingMode;
 
         void read(NIFStream* nif) override;
     };
 
-    struct NiStencilProperty : public Property
+    struct NiWireframeProperty : Property
     {
-        S_StencilProperty data;
-        unsigned short flags{ 0u };
+        bool mEnable;
 
-        void read(NIFStream* nif) override
-        {
-            Property::read(nif);
-            if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD)
-                flags = nif->getUShort();
-            data.read(nif);
-        }
+        void read(NIFStream* nif) override;
     };
 
-    struct NiMaterialProperty : public Property
+    struct NiZBufferProperty : Property
     {
-        S_MaterialProperty data;
-        unsigned short flags{ 0u };
+        uint16_t mFlags;
+        uint32_t mTestFunction;
 
-        void read(NIFStream* nif) override
-        {
-            Property::read(nif);
-            if (nif->getVersion() >= NIFStream::generateVersion(3, 0, 0, 0)
-                && nif->getVersion() <= NIFFile::NIFVersion::VER_OB_OLD)
-                flags = nif->getUShort();
-            data.read(nif);
-        }
+        void read(NIFStream* nif) override;
+
+        bool depthTest() const { return mFlags & 1; }
+        bool depthWrite() const { return mFlags & 2; }
     };
 
 }
