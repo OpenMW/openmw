@@ -113,16 +113,16 @@ namespace Nif
 
     struct BSSPParallaxParams
     {
-        float mMaxPasses;
-        float mScale;
+        float mMaxPasses{ 4.f };
+        float mScale{ 1.f };
 
         void read(NIFStream* nif);
     };
 
     struct BSSPRefractionParams
     {
-        float mStrength;
-        int32_t mPeriod;
+        float mStrength{ 0.f };
+        int32_t mPeriod{ 0 };
 
         void read(NIFStream* nif);
     };
@@ -131,6 +131,8 @@ namespace Nif
     {
         uint32_t mType{ 0u }, mShaderFlags1{ 0u }, mShaderFlags2{ 0u };
         float mEnvMapScale{ 0.f };
+        std::vector<uint32_t> mShaderFlags1Hashes, mShaderFlags2Hashes;
+        osg::Vec2f mUVOffset, mUVScale;
 
         void read(NIFStream* nif) override;
 
@@ -142,7 +144,7 @@ namespace Nif
 
     struct BSShaderLightingProperty : BSShaderProperty
     {
-        unsigned int mClamp{ 0u };
+        uint32_t mClamp{ 3 };
 
         void read(NIFStream* nif) override;
 
@@ -155,6 +157,7 @@ namespace Nif
         BSShaderTextureSetPtr mTextureSet;
         BSSPRefractionParams mRefraction;
         BSSPParallaxParams mParallax;
+        osg::Vec4f mEmissiveColor;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
@@ -249,8 +252,6 @@ namespace Nif
 
     struct BSLightingShaderProperty : BSShaderProperty
     {
-        std::vector<uint32_t> mShaderFlags1Hashes, mShaderFlags2Hashes;
-        osg::Vec2f mUVOffset, mUVScale;
         BSShaderTextureSetPtr mTextureSet;
         osg::Vec3f mEmissive;
         float mEmissiveMult;
@@ -277,7 +278,8 @@ namespace Nif
         bool mUseSSR;
         bool mWetnessUseSSR;
 
-        osg::Vec4f mSkinTintColor;
+        osg::Vec3f mSkinTintColor;
+        float mSkinTintAlpha{ 1.f };
         osg::Vec3f mHairTintColor;
 
         BSSPParallaxParams mParallax;
@@ -297,8 +299,6 @@ namespace Nif
 
     struct BSEffectShaderProperty : BSShaderProperty
     {
-        std::vector<uint32_t> mShaderFlags1Hashes, mShaderFlags2Hashes;
-        osg::Vec2f mUVOffset, mUVScale;
         std::string mSourceTexture;
         uint8_t mClamp;
         uint8_t mLightingInfluence;

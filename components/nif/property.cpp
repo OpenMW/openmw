@@ -124,22 +124,74 @@ namespace Nif
 
     void BSShaderProperty::read(NIFStream* nif)
     {
+        if (nif->getBethVersion() < NIFFile::BethVersion::BETHVER_F76 && recType == RC_BSLightingShaderProperty)
+            nif->read(mType);
+
         NiShadeProperty::read(nif);
 
-        if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
+        if (nif->getUserVersion() <= 11)
         {
             nif->read(mType);
             nif->read(mShaderFlags1);
             nif->read(mShaderFlags2);
             nif->read(mEnvMapScale);
+            return;
         }
+
+        if (!mName.empty() && nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+            return;
+
+        if (nif->getBethVersion() <= 131)
+        {
+            nif->read(mShaderFlags1);
+            nif->read(mShaderFlags2);
+        }
+        else
+        {
+            uint32_t numShaderFlags1 = 0, numShaderFlags2 = 0;
+            nif->read(numShaderFlags1);
+            if (nif->getBethVersion() >= 152)
+                nif->read(numShaderFlags2);
+            nif->readVector(mShaderFlags1Hashes, numShaderFlags1);
+            nif->readVector(mShaderFlags2Hashes, numShaderFlags2);
+            if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76 && recType == RC_BSLightingShaderProperty)
+            {
+                nif->read(mType);
+
+                // Remap FO76+ shader types to FO4 system so that we can actually use them
+                // TODO: NifTools spec doesn't do anything about the misplaced EyeEnvmap. Bug or feature?
+                switch (mType)
+                {
+                    case 3:
+                        mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_FaceTint);
+                        break;
+                    case 4:
+                        mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_SkinTint);
+                        break;
+                    case 5:
+                        mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_HairTint);
+                        break;
+                    case 12:
+                        mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_EyeEnvmap);
+                        break;
+                    case 17:
+                        mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_Terrain);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
+        nif->read(mUVOffset);
+        nif->read(mUVScale);
     }
 
     void BSShaderLightingProperty::read(NIFStream* nif)
     {
         BSShaderProperty::read(nif);
 
-        if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
+        if (nif->getUserVersion() <= 11)
             nif->read(mClamp);
     }
 
@@ -148,10 +200,15 @@ namespace Nif
         BSShaderLightingProperty::read(nif);
 
         mTextureSet.read(nif);
-        if (nif->getBethVersion() >= 15)
-            mRefraction.read(nif);
-        if (nif->getBethVersion() >= 25)
-            mParallax.read(nif);
+        if (nif->getUserVersion() == 11)
+        {
+            if (nif->getBethVersion() >= 15)
+                mRefraction.read(nif);
+            if (nif->getBethVersion() >= 25)
+                mParallax.read(nif);
+        }
+        else if (nif->getUserVersion() >= 12)
+            nif->read(mEmissiveColor);
     }
 
     void BSShaderPPLightingProperty::post(Reader& nif)
@@ -212,31 +269,11 @@ namespace Nif
 
     void BSLightingShaderProperty::read(NIFStream* nif)
     {
-        if (nif->getBethVersion() <= 139)
-            nif->read(mType);
-
         BSShaderProperty::read(nif);
 
-        if (nif->getBethVersion() <= 130)
-        {
-            nif->read(mShaderFlags1);
-            nif->read(mShaderFlags2);
-        }
-        else if (nif->getBethVersion() >= 132)
-        {
-            uint32_t numShaderFlags1 = 0, numShaderFlags2 = 0;
-            nif->read(numShaderFlags1);
-            if (nif->getBethVersion() >= 152)
-                nif->read(numShaderFlags2);
-            nif->readVector(mShaderFlags1Hashes, numShaderFlags1);
-            nif->readVector(mShaderFlags2Hashes, numShaderFlags2);
-        }
+        if (!mName.empty() && nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+            return;
 
-        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
-            nif->read(mType);
-
-        nif->read(mUVOffset);
-        nif->read(mUVScale);
         mTextureSet.read(nif);
         nif->read(mEmissive);
         nif->read(mEmissiveMult);
@@ -299,32 +336,6 @@ namespace Nif
             nif->skip(2); // Unknown
         }
 
-        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
-        {
-            // Remap FO76+ shader types to FO4 system so that we can actually use them
-            // TODO: NifTools spec doesn't do anything about the misplaced EyeEnvmap. Bug or feature?
-            switch (static_cast<BSLightingShaderType>(mType))
-            {
-                case BSLightingShaderType::ShaderType_Parallax:
-                    mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_FaceTint);
-                    break;
-                case BSLightingShaderType::ShaderType_FaceTint:
-                    mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_SkinTint);
-                    break;
-                case BSLightingShaderType::ShaderType_SkinTint:
-                    mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_HairTint);
-                    break;
-                case BSLightingShaderType::ShaderType_TreeAnim:
-                    mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_EyeEnvmap);
-                    break;
-                case BSLightingShaderType::ShaderType_Cloud:
-                    mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_Terrain);
-                    break;
-                default:
-                    break;
-            }
-        }
-
         switch (static_cast<BSLightingShaderType>(mType))
         {
             case BSLightingShaderType::ShaderType_EnvMap:
@@ -337,10 +348,9 @@ namespace Nif
                 }
                 break;
             case BSLightingShaderType::ShaderType_SkinTint:
-                if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO4)
-                    mSkinTintColor = { nif->get<osg::Vec3f>(), 1.f };
-                else
-                    nif->read(mSkinTintColor);
+                nif->read(mSkinTintColor);
+                if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO4)
+                    nif->read(mSkinTintAlpha);
                 break;
             case BSLightingShaderType::ShaderType_HairTint:
                 nif->read(mHairTintColor);
@@ -375,23 +385,9 @@ namespace Nif
     {
         BSShaderProperty::read(nif);
 
-        if (nif->getBethVersion() <= 130)
-        {
-            nif->read(mShaderFlags1);
-            nif->read(mShaderFlags2);
-        }
-        else if (nif->getBethVersion() >= 132)
-        {
-            uint32_t numShaderFlags1 = 0, numShaderFlags2 = 0;
-            nif->read(numShaderFlags1);
-            if (nif->getBethVersion() >= 152)
-                nif->read(numShaderFlags2);
-            nif->readVector(mShaderFlags1Hashes, numShaderFlags1);
-            nif->readVector(mShaderFlags2Hashes, numShaderFlags2);
-        }
+        if (!mName.empty() && nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+            return;
 
-        nif->read(mUVOffset);
-        nif->read(mUVScale);
         mSourceTexture = nif->getSizedString();
 
         if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_STF)
