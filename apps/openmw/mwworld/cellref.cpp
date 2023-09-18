@@ -30,17 +30,17 @@ namespace MWWorld
     {
     }
 
-    const ESM::RefNum& CellRef::getRefNum() const noexcept
+    ESM::RefNum CellRef::getRefNum() const noexcept
     {
         return std::visit(ESM::VisitOverload{
-                              [&](const ESM4::Reference& ref) -> const ESM::RefNum& { return ref.mId; },
-                              [&](const ESM4::ActorCharacter& ref) -> const ESM::RefNum& { return ref.mId; },
-                              [&](const ESM::CellRef& ref) -> const ESM::RefNum& { return ref.mRefNum; },
+                              [&](const ESM4::Reference& ref) -> ESM::RefNum { return ref.mId; },
+                              [&](const ESM4::ActorCharacter& ref) -> ESM::RefNum { return ref.mId; },
+                              [&](const ESM::CellRef& ref) -> ESM::RefNum { return ref.mRefNum; },
                           },
             mCellRef.mVariant);
     }
 
-    const ESM::RefNum& CellRef::getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum)
+    ESM::RefNum CellRef::getOrAssignRefNum(ESM::RefNum& lastAssignedRefNum)
     {
         ESM::RefNum& refNum = std::visit(ESM::VisitOverload{
                                              [&](ESM4::Reference& ref) -> ESM::RefNum& { return ref.mId; },

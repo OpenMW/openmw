@@ -111,7 +111,7 @@ namespace
         std::string model = getModel(ptr);
         const auto rotation = makeDirectNodeRotation(ptr);
 
-        const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
+        ESM::RefNum refnum = ptr.getCellRef().getRefNum();
         if (!refnum.hasContentFile() || !std::binary_search(pagedRefs.begin(), pagedRefs.end(), refnum))
             ptr.getClass().insertObjectRendering(ptr, model, rendering);
         else
@@ -259,7 +259,7 @@ namespace
         return false;
     }
 
-    bool removeFromSorted(const ESM::RefNum& refNum, std::vector<ESM::RefNum>& pagedRefs)
+    bool removeFromSorted(ESM::RefNum refNum, std::vector<ESM::RefNum>& pagedRefs)
     {
         const auto it = std::lower_bound(pagedRefs.begin(), pagedRefs.end(), refNum);
         if (it == pagedRefs.end() || *it != refNum)
@@ -274,7 +274,7 @@ namespace MWWorld
 
     void Scene::removeFromPagedRefs(const Ptr& ptr)
     {
-        const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
+        ESM::RefNum refnum = ptr.getCellRef().getRefNum();
         if (refnum.hasContentFile() && removeFromSorted(refnum, mPagedRefs))
         {
             if (!ptr.getRefData().getBaseNode())

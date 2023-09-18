@@ -45,7 +45,7 @@ namespace MWWorld
 
         void remove(const LiveCellRefBase& ref) noexcept
         {
-            const ESM::RefNum& refNum = ref.mRef.getRefNum();
+            ESM::RefNum refNum = ref.mRef.getRefNum();
             if (!refNum.isSet())
                 return;
             auto it = mIndex.find(refNum);

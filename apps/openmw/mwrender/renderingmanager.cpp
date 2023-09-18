@@ -1644,7 +1644,7 @@ namespace MWRender
     {
         if (!ptr.isInCell() || !ptr.getCell()->isExterior() || !mObjectPaging)
             return;
-        const ESM::RefNum& refnum = ptr.getCellRef().getRefNum();
+        ESM::RefNum refnum = ptr.getCellRef().getRefNum();
         if (!refnum.hasContentFile())
             return;
         if (mObjectPaging->blacklistObject(type, refnum, ptr.getCellRef().getPosition().asVec3(),

@@ -79,8 +79,7 @@ namespace Resource
 
             Log(Debug::Debug) << "Loaded " << cellRefs.size() << " cell refs";
 
-            const auto getKey
-                = [](const EsmLoader::Record<CellRef>& v) -> const ESM::RefNum& { return v.mValue.mRefNum; };
+            const auto getKey = [](const EsmLoader::Record<CellRef>& v) -> ESM::RefNum { return v.mValue.mRefNum; };
             std::vector<CellRef> result = prepareRecords(cellRefs, getKey);
 
             Log(Debug::Debug) << "Prepared " << result.size() << " unique cell refs";

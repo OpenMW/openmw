@@ -52,7 +52,7 @@ namespace MWLua
     }
 
     template <typename Event>
-    static void saveEvent(ESM::ESMWriter& esm, const ESM::RefNum& dest, const Event& event)
+    static void saveEvent(ESM::ESMWriter& esm, ESM::RefNum dest, const Event& event)
     {
         esm.writeHNString("LUAE", event.mEventName);
         esm.writeFormId(dest, true);

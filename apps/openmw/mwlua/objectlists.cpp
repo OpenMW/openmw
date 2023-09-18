@@ -75,7 +75,7 @@ namespace MWLua
         if (mChanged)
         {
             mList->clear();
-            for (const ObjectId& id : mSet)
+            for (ObjectId id : mSet)
                 mList->push_back(id);
             mChanged = false;
         }
