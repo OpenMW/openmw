@@ -16,6 +16,7 @@
 #include "../mwbase/environment.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/statemanager.hpp"
+#include "../mwbase/windowmanager.hpp"
 #include "../mwbase/world.hpp"
 
 #include "../mwworld/cellstore.hpp"
@@ -1135,7 +1136,10 @@ namespace MWSound
             return;
 
         MWBase::StateManager::State state = MWBase::Environment::get().getStateManager()->getState();
-        if (state == MWBase::StateManager::State_NoGame && !isMusicPlaying())
+        bool isMainMenu = MWBase::Environment::get().getWindowManager()->containsMode(MWGui::GM_MainMenu)
+            && state == MWBase::StateManager::State_NoGame;
+
+        if (isMainMenu && !isMusicPlaying())
         {
             std::string titlefile = "music/special/morrowind title.mp3";
             if (mVFS->exists(titlefile))
@@ -1143,7 +1147,7 @@ namespace MWSound
         }
 
         updateSounds(duration);
-        if (MWBase::Environment::get().getStateManager()->getState() != MWBase::StateManager::State_NoGame)
+        if (state != MWBase::StateManager::State_NoGame)
         {
             updateRegionSound(duration);
             updateWaterSound();
