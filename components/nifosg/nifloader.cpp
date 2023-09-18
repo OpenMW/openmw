@@ -2103,6 +2103,7 @@ namespace NifOsg
                 case Nif::BSLightingShaderType::ShaderType_LODNoise:
                 case Nif::BSLightingShaderType::ShaderType_MultitexLandLODBlend:
                 case Nif::BSLightingShaderType::ShaderType_Dismemberment:
+                case Nif::BSLightingShaderType::ShaderType_Terrain:
                     Log(Debug::Warning) << "Unhandled BSLightingShaderType " << type << " in " << mFilename;
                     return "bs/default";
             }

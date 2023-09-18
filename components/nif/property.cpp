@@ -299,7 +299,32 @@ namespace Nif
             nif->skip(2); // Unknown
         }
 
-        // TODO: consider separating this switch for pre-FO76 and FO76+
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+        {
+            // Remap FO76+ shader types to FO4 system so that we can actually use them
+            // TODO: NifTools spec doesn't do anything about the misplaced EyeEnvmap. Bug or feature?
+            switch (static_cast<BSLightingShaderType>(mType))
+            {
+                case BSLightingShaderType::ShaderType_Parallax:
+                    mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_FaceTint);
+                    break;
+                case BSLightingShaderType::ShaderType_FaceTint:
+                    mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_SkinTint);
+                    break;
+                case BSLightingShaderType::ShaderType_SkinTint:
+                    mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_HairTint);
+                    break;
+                case BSLightingShaderType::ShaderType_TreeAnim:
+                    mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_EyeEnvmap);
+                    break;
+                case BSLightingShaderType::ShaderType_Cloud:
+                    mType = static_cast<uint32_t>(BSLightingShaderType::ShaderType_Terrain);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         switch (static_cast<BSLightingShaderType>(mType))
         {
             case BSLightingShaderType::ShaderType_EnvMap:
@@ -311,25 +336,14 @@ namespace Nif
                     nif->read(mWetnessUseSSR);
                 }
                 break;
-            case BSLightingShaderType::ShaderType_FaceTint:
-                // Skin tint shader in FO76+
-                if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
-                    nif->read(mSkinTintColor);
-                break;
             case BSLightingShaderType::ShaderType_SkinTint:
-                if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
-                    nif->read(mHairTintColor);
-                else if (nif->getBethVersion() <= 130)
+                if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO4)
                     mSkinTintColor = { nif->get<osg::Vec3f>(), 1.f };
-                else if (nif->getBethVersion() <= 139)
+                else
                     nif->read(mSkinTintColor);
-                // Hair tint shader in FO76+
-                else if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
-                    nif->read(mHairTintColor);
                 break;
             case BSLightingShaderType::ShaderType_HairTint:
-                if (nif->getBethVersion() <= 139)
-                    nif->read(mHairTintColor);
+                nif->read(mHairTintColor);
                 break;
             case BSLightingShaderType::ShaderType_ParallaxOcc:
                 mParallax.read(nif);

@@ -190,7 +190,8 @@ namespace Nif
         ShaderType_Cloud = 17,
         ShaderType_LODNoise = 18,
         ShaderType_MultitexLandLODBlend = 19,
-        ShaderType_Dismemberment = 20
+        ShaderType_Dismemberment = 20,
+        ShaderType_Terrain = 21, // FO76+, technically 17
     };
 
     enum BSLightingShaderFlags1
