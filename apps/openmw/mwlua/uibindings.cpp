@@ -156,20 +156,16 @@ namespace MWLua
         uiLayer[sol::meta_function::to_string]
             = [](LuaUi::Layer& self) { return Misc::StringUtils::format("UiLayer(%s)", self.name()); };
 
-        sol::table layers = context.mLua->newTable();
-        layers[sol::meta_function::length] = []() { return LuaUi::Layer::count(); };
-        layers[sol::meta_function::index] = [](size_t index) {
-            index = fromLuaIndex(index);
-            return LuaUi::Layer(index);
-        };
-        layers["indexOf"] = [](std::string_view name) -> sol::optional<size_t> {
+        sol::table layersTable = context.mLua->newTable();
+        layersTable["indexOf"] = [](std::string_view name) -> sol::optional<size_t> {
             size_t index = LuaUi::Layer::indexOf(name);
             if (index == LuaUi::Layer::count())
                 return sol::nullopt;
             else
                 return toLuaIndex(index);
         };
-        layers["insertAfter"] = [context](std::string_view afterName, std::string_view name, const sol::object& opt) {
+        layersTable["insertAfter"] = [context](
+                                         std::string_view afterName, std::string_view name, const sol::object& opt) {
             LuaUi::Layer::Options options;
             options.mInteractive = LuaUtil::getValueOrDefault(LuaUtil::getFieldOrNil(opt, "interactive"), true);
             size_t index = LuaUi::Layer::indexOf(afterName);
@@ -178,7 +174,8 @@ namespace MWLua
             index++;
             context.mLuaManager->addAction([=]() { LuaUi::Layer::insert(index, name, options); }, "Insert UI layer");
         };
-        layers["insertBefore"] = [context](std::string_view beforename, std::string_view name, const sol::object& opt) {
+        layersTable["insertBefore"] = [context](
+                                          std::string_view beforename, std::string_view name, const sol::object& opt) {
             LuaUi::Layer::Options options;
             options.mInteractive = LuaUtil::getValueOrDefault(LuaUtil::getFieldOrNil(opt, "interactive"), true);
             size_t index = LuaUi::Layer::indexOf(beforename);
@@ -186,6 +183,16 @@ namespace MWLua
                 throw std::logic_error(std::string("Layer not found"));
             context.mLuaManager->addAction([=]() { LuaUi::Layer::insert(index, name, options); }, "Insert UI layer");
         };
+        sol::table layers = LuaUtil::makeReadOnly(layersTable);
+        sol::table layersMeta = layers[sol::metatable_key];
+        layersMeta[sol::meta_function::length] = []() { return LuaUi::Layer::count(); };
+        layersMeta[sol::meta_function::index] = sol::overload(
+            [](const sol::object& self, size_t index) {
+                index = fromLuaIndex(index);
+                return LuaUi::Layer(index);
+            },
+            [layersTable](
+                const sol::object& self, std::string_view key) { return layersTable.raw_get<sol::object>(key); });
         {
             auto pairs = [layers](const sol::object&) {
                 auto next = [](const sol::table& l, size_t i) -> sol::optional<std::tuple<size_t, LuaUi::Layer>> {
@@ -196,10 +203,10 @@ namespace MWLua
                 };
                 return std::make_tuple(next, layers, 0);
             };
-            layers[sol::meta_function::pairs] = pairs;
-            layers[sol::meta_function::ipairs] = pairs;
+            layersMeta[sol::meta_function::pairs] = pairs;
+            layersMeta[sol::meta_function::ipairs] = pairs;
         }
-        api["layers"] = LuaUtil::makeReadOnly(layers);
+        api["layers"] = layers;
 
         sol::table typeTable = context.mLua->newTable();
         for (const auto& it : LuaUi::widgetTypeToName())
