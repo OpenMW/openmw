@@ -36,6 +36,15 @@
 -- @return #boolean
 
 ---
+-- Toggles AI
+-- @function [parent=#Debug] toggleAI
+
+---
+-- Is AI enabled
+-- @function [parent=#Debug] isAIEnabled
+-- @return #boolean
+
+---
 -- Toggles collisions
 -- @function [parent=#Debug] toggleCollision
 

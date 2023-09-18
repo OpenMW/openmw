@@ -3,7 +3,9 @@
 #include "luamanagerimp.hpp"
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/world.hpp"
+
 #include "../mwrender/postprocessor.hpp"
 #include "../mwrender/renderingmanager.hpp"
 
@@ -37,6 +39,9 @@ namespace MWLua
 
         api["toggleGodMode"] = []() { MWBase::Environment::get().getWorld()->toggleGodMode(); };
         api["isGodMode"] = []() { return MWBase::Environment::get().getWorld()->getGodModeState(); };
+
+        api["toggleAI"] = []() { MWBase::Environment::get().getMechanicsManager()->toggleAI(); };
+        api["isAIEnabled"] = []() { return MWBase::Environment::get().getMechanicsManager()->isAIActive(); };
 
         api["toggleCollision"] = []() { MWBase::Environment::get().getWorld()->toggleCollisionMode(); };
         api["isCollisionEnabled"] = []() {
