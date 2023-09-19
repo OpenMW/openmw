@@ -66,11 +66,12 @@ namespace MWLua
 
     static void setEquipment(const MWWorld::Ptr& actor, const Equipment& equipment)
     {
+        bool isPlayer = actor == MWBase::Environment::get().getWorld()->getPlayerPtr();
         MWWorld::InventoryStore& store = actor.getClass().getInventoryStore(actor);
         std::array<bool, MWWorld::InventoryStore::Slots> usedSlots;
         std::fill(usedSlots.begin(), usedSlots.end(), false);
 
-        auto tryEquipToSlot = [&store, &usedSlots](int slot, const EquipmentItem& item) -> bool {
+        auto tryEquipToSlot = [&store, &usedSlots, isPlayer](int slot, const EquipmentItem& item) -> bool {
             auto [it, alreadyEquipped] = findInInventory(store, item, slot);
             if (alreadyEquipped)
                 return true;
@@ -93,7 +94,22 @@ namespace MWLua
                 slot = *firstAllowed;
             }
 
-            store.equip(slot, it);
+            bool skipEquip = false;
+
+            if (isPlayer)
+            {
+                const ESM::RefId& script = itemPtr.getClass().getScript(itemPtr);
+                if (!script.empty())
+                {
+                    MWScript::Locals& locals = itemPtr.getRefData().getLocals();
+                    locals.setVarByInt(script, "onpcequip", 1);
+                    skipEquip = locals.getIntVar(script, "pcskipequip") == 1;
+                }
+            }
+
+            if (!skipEquip)
+                store.equip(slot, it);
+
             return requestedSlotIsAllowed; // return true if equipped to requested slot and false if slot was changed
         };
 
