@@ -414,6 +414,23 @@ namespace Nif
         mAlphaProperty.post(nif);
     }
 
+    void BSDynamicTriShape::read(NIFStream* nif)
+    {
+        BSTriShape::read(nif);
+
+        nif->read(mDynamicDataSize);
+        // nifly style.
+        // Consider complaining if mDynamicDataSize * 16 != mVertData.size()?
+        nif->readVector(mDynamicData, mVertData.size());
+    }
+
+    void BSMeshLODTriShape::read(NIFStream* nif)
+    {
+        BSTriShape::read(nif);
+
+        nif->readArray(mLOD);
+    }
+
     void BSVertexDesc::read(NIFStream* nif)
     {
         uint64_t data;
@@ -448,21 +465,9 @@ namespace Nif
         if (hasVertex)
         {
             if (fullPrecision)
-            {
                 nif->read(mVertex);
-                if (hasTangent)
-                    nif->read(mBitangentX);
-                else
-                    nif->skip(4); // Unused
-            }
             else
-            {
                 nif->readArray(mHalfVertex);
-                if (hasTangent)
-                    nif->read(mHalfBitangentX);
-                else
-                    nif->skip(2); // Unused
-            }
         }
 
         if (hasUV)
@@ -471,12 +476,8 @@ namespace Nif
         if (hasNormal)
         {
             nif->readArray(mNormal);
-            nif->read(mBitangentY);
             if (hasTangent)
-            {
                 nif->readArray(mTangent);
-                nif->read(mBitangentZ);
-            }
         }
 
         if (hasVertexColor)

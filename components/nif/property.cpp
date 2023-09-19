@@ -349,7 +349,7 @@ namespace Nif
                 break;
             case BSLightingShaderType::ShaderType_SkinTint:
                 nif->read(mSkinTintColor);
-                if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO4)
+                if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_FO4)
                     nif->read(mSkinTintAlpha);
                 break;
             case BSLightingShaderType::ShaderType_HairTint:

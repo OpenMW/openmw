@@ -338,15 +338,11 @@ namespace Nif
 
     struct BSVertexData
     {
-        osg::Vec3f mVertex;
-        std::array<Misc::float16_t, 3> mHalfVertex;
-        float mBitangentX;
-        Misc::float16_t mHalfBitangentX;
+        osg::Vec4f mVertex; // Bitangent X is stored in the fourth component
+        std::array<Misc::float16_t, 4> mHalfVertex; // Ditto
         std::array<Misc::float16_t, 2> mUV;
-        std::array<char, 3> mNormal;
-        char mBitangentY;
-        std::array<char, 3> mTangent;
-        char mBitangentZ;
+        std::array<char, 4> mNormal; // Bitangent Y is stored in the fourth component
+        std::array<char, 4> mTangent; // Bitangent Z is stored in the fourth component
         std::array<char, 4> mVertColor;
         std::array<Misc::float16_t, 4> mBoneWeights;
         std::array<char, 4> mBoneIndices;
@@ -370,6 +366,21 @@ namespace Nif
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
+    };
+
+    struct BSDynamicTriShape : BSTriShape
+    {
+        uint32_t mDynamicDataSize;
+        std::vector<osg::Vec4f> mDynamicData;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSMeshLODTriShape : BSTriShape
+    {
+        std::array<uint32_t, 3> mLOD;
+
+        void read(NIFStream* nif) override;
     };
 
     struct BSValueNode : NiNode

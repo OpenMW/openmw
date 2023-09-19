@@ -249,7 +249,9 @@ namespace Nif
             // Bethesda
             { "BSDismemberSkinInstance", &construct<BSDismemberSkinInstance, RC_BSDismemberSkinInstance> },
             { "BSTriShape", &construct<BSTriShape, RC_BSTriShape> },
+            { "BSDynamicTriShape", &construct<BSDynamicTriShape, RC_BSDynamicTriShape> },
             { "BSLODTriShape", &construct<BSLODTriShape, RC_BSLODTriShape> },
+            { "BSMeshLODTriShape", &construct<BSMeshLODTriShape, RC_BSMeshLODTriShape> },
 
             // PARTICLES
 
