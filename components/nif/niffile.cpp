@@ -200,6 +200,7 @@ namespace Nif
             { "NiIntegerExtraData", &construct<NiIntegerExtraData, RC_NiIntegerExtraData> },
             { "NiIntegersExtraData", &construct<NiIntegersExtraData, RC_NiIntegersExtraData> },
             { "NiVectorExtraData", &construct<NiVectorExtraData, RC_NiVectorExtraData> },
+            { "NiStringsExtraData", &construct<NiStringsExtraData, RC_NiStringsExtraData> },
             { "NiStringPalette", &construct<NiStringPalette, RC_NiStringPalette> },
 
             // Bethesda bounds
@@ -214,7 +215,16 @@ namespace Nif
             { "BSInvMarker", &construct<BSInvMarker, RC_BSInvMarker> },
 
             // Other Bethesda records
+            { "BSExtraData", &construct<BSExtraData, RC_BSExtraData> },
             { "BSBehaviorGraphExtraData", &construct<BSBehaviorGraphExtraData, RC_BSBehaviorGraphExtraData> },
+            { "BSBoneLODExtraData", &construct<BSBoneLODExtraData, RC_BSBoneLODExtraData> },
+            { "BSClothExtraData", &construct <BSClothExtraData, RC_BSClothExtraData> },
+            { "BSDecalPlacementVectorExtraData",
+                &construct<BSDecalPlacementVectorExtraData, RC_BSDecalPlacementVectorExtraData> },
+            { "BSDistantObjectExtraData", &construct<BSDistantObjectExtraData, RC_BSDistantObjectExtraData> },
+            { "BSDistantObjectLargeRefExtraData",
+                &construct<BSDistantObjectLargeRefExtraData, RC_BSDistantObjectLargeRefExtraData> },
+            { "BSWArray", &construct<BSWArray, RC_BSWArray> },
             { "BSXFlags", &construct<NiIntegerExtraData, RC_BSXFlags> },
 
             // GEOMETRY

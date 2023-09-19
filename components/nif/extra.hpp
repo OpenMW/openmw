@@ -38,14 +38,27 @@ namespace Nif
     using NiStringExtraData = TypedExtra<std::string>;
     using NiVectorExtraData = TypedExtra<osg::Vec4f>;
 
+    using BSDistantObjectExtraData = TypedExtra<uint32_t>;
+    using BSDistantObjectLargeRefExtraData = TypedExtra<bool>;
+
     using NiBinaryExtraData = TypedVectorExtra<uint8_t>;
     using NiFloatsExtraData = TypedVectorExtra<float>;
     using NiIntegersExtraData = TypedVectorExtra<uint32_t>;
+
+    using BSWArray = TypedVectorExtra<int32_t>;
 
     // Distinct from NiBinaryExtraData, uses mRecordSize as its size
     struct NiExtraData : public Extra
     {
         std::vector<uint8_t> mData;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // != TypedVectorExtra<std::string>, doesn't use the string table
+    struct NiStringsExtraData : public Extra
+    {
+        std::vector<std::string> mData;
 
         void read(NIFStream* nif) override;
     };
@@ -111,6 +124,48 @@ namespace Nif
     {
         std::string mFile;
         bool mControlsBaseSkeleton;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSBoneLODExtraData : public Extra
+    {
+        struct BoneLOD
+        {
+            uint32_t mDistance;
+            std::string mBone;
+
+            void read(NIFStream* nif);
+        };
+
+        std::vector<BoneLOD> mData;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSDecalPlacementVectorExtraData : public NiFloatExtraData
+    {
+        struct Block
+        {
+            std::vector<osg::Vec3f> mPoints;
+            std::vector<osg::Vec3f> mNormals;
+
+            void read(NIFStream* nif);
+        };
+
+        std::vector<Block> mBlocks;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSExtraData : NiExtraData
+    {
+        void read(NIFStream* nif) override { }
+    };
+
+    struct BSClothExtraData : BSExtraData
+    {
+        std::vector<uint8_t> mData;
 
         void read(NIFStream* nif) override;
     };
