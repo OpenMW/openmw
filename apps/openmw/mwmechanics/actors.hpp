@@ -162,8 +162,6 @@ namespace MWMechanics
         bool isReadyToBlock(const MWWorld::Ptr& ptr) const;
         bool isAttackingOrSpell(const MWWorld::Ptr& ptr) const;
 
-        bool playerHasHostiles() const;
-
         int getGreetingTimer(const MWWorld::Ptr& ptr) const;
         float getAngleToPlayer(const MWWorld::Ptr& ptr) const;
         GreetingState getGreetingState(const MWWorld::Ptr& ptr) const;

@@ -249,7 +249,6 @@ namespace MWMechanics
         void setMusicType(MWSound::MusicType type) override { mMusicType = type; }
 
     private:
-        void updateMusicState();
         bool canCommitCrimeAgainst(const MWWorld::Ptr& victim, const MWWorld::Ptr& attacker);
         bool canReportCrime(
             const MWWorld::Ptr& actor, const MWWorld::Ptr& victim, std::set<MWWorld::Ptr>& playerFollowers);

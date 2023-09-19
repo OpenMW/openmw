@@ -1290,40 +1290,6 @@ namespace MWMechanics
         }
     }
 
-    bool Actors::playerHasHostiles() const
-    {
-        const MWWorld::Ptr player = getPlayer();
-        const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
-        bool hasHostiles = false; // need to know this to play Battle music
-        const bool aiActive = MWBase::Environment::get().getMechanicsManager()->isAIActive();
-
-        if (aiActive)
-        {
-            const int actorsProcessingRange = Settings::game().mActorsProcessingRange;
-            for (const Actor& actor : mActors)
-            {
-                if (actor.getPtr() == player)
-                    continue;
-
-                const bool inProcessingRange
-                    = (playerPos - actor.getPtr().getRefData().getPosition().asVec3()).length2()
-                    <= actorsProcessingRange * actorsProcessingRange;
-                if (inProcessingRange)
-                {
-                    MWMechanics::CreatureStats& stats = actor.getPtr().getClass().getCreatureStats(actor.getPtr());
-                    bool isDead = stats.isDead() && stats.isDeathAnimationFinished();
-                    if (!isDead && stats.getAiSequence().isInCombat())
-                    {
-                        hasHostiles = true;
-                        break;
-                    }
-                }
-            }
-        }
-
-        return hasHostiles;
-    }
-
     void Actors::predictAndAvoidCollisions(float duration) const
     {
         if (!MWBase::Environment::get().getMechanicsManager()->isAIActive())
@@ -1798,9 +1764,6 @@ namespace MWMechanics
                 {
                     // player's death animation is over
                     MWBase::Environment::get().getStateManager()->askLoadRecent();
-                    // Play Death Music if it was the player dying
-                    MWBase::Environment::get().getSoundManager()->streamMusic(
-                        MWSound::deathMusic, MWSound::MusicType::Special);
                 }
                 else
                 {

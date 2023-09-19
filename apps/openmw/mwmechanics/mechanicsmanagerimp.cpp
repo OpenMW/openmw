@@ -250,7 +250,7 @@ namespace MWMechanics
         , mClassSelected(false)
         , mRaceSelected(false)
         , mAI(true)
-        , mMusicType(MWSound::MusicType::Special)
+        , mMusicType(MWSound::MusicType::Normal)
     {
         // buildPlayer no longer here, needs to be done explicitly after all subsystems are up and running
     }
@@ -334,8 +334,6 @@ namespace MWMechanics
 
         mActors.update(duration, paused);
         mObjects.update(duration, paused);
-
-        updateMusicState();
     }
 
     void MechanicsManager::processChangedSettings(const Settings::CategorySettingVector& changed)
@@ -1663,31 +1661,6 @@ namespace MWMechanics
         float target = x - y;
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
         return (Misc::Rng::roll0to99(prng) >= target);
-    }
-
-    void MechanicsManager::updateMusicState()
-    {
-        bool musicPlaying = MWBase::Environment::get().getSoundManager()->isMusicPlaying();
-
-        // Can not interrupt scripted music by built-in playlists
-        if (mMusicType == MWSound::MusicType::Scripted && musicPlaying)
-            return;
-
-        const MWWorld::Ptr& player = MWMechanics::getPlayer();
-        bool hasHostiles = mActors.playerHasHostiles();
-
-        // check if we still have any player enemies to switch music
-        if (mMusicType != MWSound::MusicType::Explore && !hasHostiles
-            && !(player.getClass().getCreatureStats(player).isDead() && musicPlaying))
-        {
-            MWBase::Environment::get().getSoundManager()->playPlaylist(MWSound::explorePlaylist);
-            mMusicType = MWSound::MusicType::Explore;
-        }
-        else if (mMusicType != MWSound::MusicType::Battle && hasHostiles)
-        {
-            MWBase::Environment::get().getSoundManager()->playPlaylist(MWSound::battlePlaylist);
-            mMusicType = MWSound::MusicType::Battle;
-        }
     }
 
     void MechanicsManager::startCombat(

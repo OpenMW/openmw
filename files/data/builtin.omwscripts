@@ -31,3 +31,8 @@ MENU: scripts/omw/console/menu.lua
 PLAYER: scripts/omw/console/player.lua
 GLOBAL: scripts/omw/console/global.lua
 CUSTOM: scripts/omw/console/local.lua
+
+# Music system
+PLAYER: scripts/omw/music/music.lua
+MENU: scripts/omw/music/settings.lua
+NPC,CREATURE: scripts/omw/music/actor.lua
