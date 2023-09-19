@@ -146,16 +146,6 @@ namespace Nif
 
         /// Read a sequence of null-terminated strings
         std::string getStringPalette();
-
-        /// DEPRECATED: Use read() or get()
-        char getChar() { return get<char>(); }
-        unsigned short getUShort() { return get<unsigned short>(); }
-        int getInt() { return get<int>(); }
-        unsigned int getUInt() { return get<unsigned int>(); }
-        float getFloat() { return get<float>(); }
-        osg::Vec2f getVector2() { return get<osg::Vec2f>(); }
-        osg::Vec3f getVector3() { return get<osg::Vec3f>(); }
-        osg::Vec4f getVector4() { return get<osg::Vec4f>(); }
     };
 
     template <>

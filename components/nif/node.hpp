@@ -82,7 +82,7 @@ namespace Nif
         uint32_t mFlags;
         NiTransform mTransform;
         osg::Vec3f mVelocity;
-        PropertyList mProperties;
+        NiPropertyList mProperties;
         BoundingVolume mBounds;
         NiCollisionObjectPtr mCollision;
         // Parent nodes for the node. Only types derived from NiNode can be parents.
@@ -339,14 +339,15 @@ namespace Nif
     struct BSVertexData
     {
         osg::Vec3f mVertex;
+        std::array<Misc::float16_t, 3> mHalfVertex;
         float mBitangentX;
-        uint32_t mUnusedW;
+        Misc::float16_t mHalfBitangentX;
         std::array<Misc::float16_t, 2> mUV;
         std::array<char, 3> mNormal;
         char mBitangentY;
         std::array<char, 3> mTangent;
         char mBitangentZ;
-        std::array<char, 4> mVertColors;
+        std::array<char, 4> mVertColor;
         std::array<Misc::float16_t, 4> mBoneWeights;
         std::array<char, 4> mBoneIndices;
         float mEyeData;

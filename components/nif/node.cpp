@@ -433,60 +433,63 @@ namespace Nif
 
     void BSVertexData::read(NIFStream* nif, uint16_t flags)
     {
-        uint16_t vertexFlag = flags & BSVertexDesc::VertexAttribute::Vertex;
-        uint16_t tangentsFlag = flags & BSVertexDesc::VertexAttribute::Tangents;
-        uint16_t UVsFlag = flags & BSVertexDesc::VertexAttribute::UVs;
-        uint16_t normalsFlag = flags & BSVertexDesc::VertexAttribute::Normals;
+        bool fullPrecision = true;
+        if (nif->getBethVersion() != NIFFile::BethVersion::BETHVER_SSE)
+            fullPrecision = flags & BSVertexDesc::VertexAttribute::Full_Precision;
 
-        if (vertexFlag == BSVertexDesc::VertexAttribute::Vertex)
+        bool hasVertex = flags & BSVertexDesc::VertexAttribute::Vertex;
+        bool hasTangent = flags & BSVertexDesc::VertexAttribute::Tangents;
+        bool hasUV = flags & BSVertexDesc::VertexAttribute::UVs;
+        bool hasNormal = flags & BSVertexDesc::VertexAttribute::Normals;
+        bool hasVertexColor = flags & BSVertexDesc::VertexAttribute::Vertex_Colors;
+        bool hasSkinData = flags & BSVertexDesc::VertexAttribute::Skinned;
+        bool hasEyeData = flags & BSVertexDesc::VertexAttribute::Eye_Data;
+
+        if (hasVertex)
         {
-            nif->read(mVertex);
+            if (fullPrecision)
+            {
+                nif->read(mVertex);
+                if (hasTangent)
+                    nif->read(mBitangentX);
+                else
+                    nif->skip(4); // Unused
+            }
+            else
+            {
+                nif->readArray(mHalfVertex);
+                if (hasTangent)
+                    nif->read(mHalfBitangentX);
+                else
+                    nif->skip(2); // Unused
+            }
         }
 
-        if ((vertexFlag | tangentsFlag)
-            == (BSVertexDesc::VertexAttribute::Vertex | BSVertexDesc::VertexAttribute::Tangents))
-        {
-            nif->read(mBitangentX);
-        }
-
-        if ((vertexFlag | tangentsFlag) == BSVertexDesc::VertexAttribute::Vertex)
-        {
-            nif->read(mUnusedW);
-        }
-
-        if (UVsFlag == BSVertexDesc::VertexAttribute::UVs)
-        {
+        if (hasUV)
             nif->readArray(mUV);
-        }
 
-        if (normalsFlag)
+        if (hasNormal)
         {
             nif->readArray(mNormal);
             nif->read(mBitangentY);
+            if (hasTangent)
+            {
+                nif->readArray(mTangent);
+                nif->read(mBitangentZ);
+            }
         }
 
-        if ((normalsFlag | tangentsFlag)
-            == (BSVertexDesc::VertexAttribute::Normals | BSVertexDesc::VertexAttribute::Tangents))
-        {
-            nif->readArray(mTangent);
-            nif->read(mBitangentZ);
-        }
+        if (hasVertexColor)
+            nif->readArray(mVertColor);
 
-        if (flags & BSVertexDesc::VertexAttribute::Vertex_Colors)
-        {
-            nif->readArray(mVertColors);
-        }
-
-        if (flags & BSVertexDesc::VertexAttribute::Skinned)
+        if (hasSkinData)
         {
             nif->readArray(mBoneWeights);
             nif->readArray(mBoneIndices);
         }
 
-        if (flags & BSVertexDesc::VertexAttribute::Eye_Data)
-        {
+        if (hasEyeData)
             nif->read(mEyeData);
-        }
     }
 
     void BSValueNode::read(NIFStream* nif)

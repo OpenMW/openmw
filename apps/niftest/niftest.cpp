@@ -38,7 +38,7 @@ bool isNIF(const std::filesystem::path& filename)
 /// See if the file has the "bsa" extension.
 bool isBSA(const std::filesystem::path& filename)
 {
-    return hasExtension(filename, ".bsa");
+    return hasExtension(filename, ".bsa") || hasExtension(filename, ".ba2");
 }
 
 std::unique_ptr<VFS::Archive> makeBsaArchive(const std::filesystem::path& path)
@@ -216,7 +216,7 @@ int main(int argc, char** argv)
             else
             {
                 std::cerr << "ERROR:  \"" << Files::pathToUnicodeString(path)
-                          << "\" is not a nif file, bsa file, or directory!" << std::endl;
+                          << "\" is not a nif file, bsa/ba2 file, or directory!" << std::endl;
             }
         }
         catch (std::exception& e)

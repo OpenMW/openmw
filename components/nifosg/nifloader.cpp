@@ -103,7 +103,7 @@ namespace
     // Collect all properties affecting the given drawable that should be handled on drawable basis rather than on the
     // node hierarchy above it.
     void collectDrawableProperties(
-        const Nif::NiAVObject* nifNode, const Nif::Parent* parent, std::vector<const Nif::Property*>& out)
+        const Nif::NiAVObject* nifNode, const Nif::Parent* parent, std::vector<const Nif::NiProperty*>& out)
     {
         if (parent != nullptr)
             collectDrawableProperties(&parent->mNiNode, parent->mParent, out);
@@ -412,7 +412,7 @@ namespace NifOsg
                 {
                     const Nif::NiStencilProperty* stencilprop
                         = static_cast<const Nif::NiStencilProperty*>(property.getPtr());
-                    if (stencilprop->data.enabled != 0)
+                    if (stencilprop->mEnabled)
                     {
                         hasStencilProperty = true;
                         break;
@@ -959,7 +959,7 @@ namespace NifOsg
             }
         }
 
-        void handleMaterialControllers(const Nif::Property* materialProperty,
+        void handleMaterialControllers(const Nif::NiProperty* materialProperty,
             SceneUtil::CompositeStateSetUpdater* composite, int animflags, const osg::Material* baseMaterial)
         {
             for (Nif::NiTimeControllerPtr ctrl = materialProperty->mController; !ctrl.empty(); ctrl = ctrl->mNext)
@@ -1008,8 +1008,9 @@ namespace NifOsg
             }
         }
 
-        void handleTextureControllers(const Nif::Property* texProperty, SceneUtil::CompositeStateSetUpdater* composite,
-            Resource::ImageManager* imageManager, osg::StateSet* stateset, int animflags)
+        void handleTextureControllers(const Nif::NiProperty* texProperty,
+            SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager,
+            osg::StateSet* stateset, int animflags)
         {
             for (Nif::NiTimeControllerPtr ctrl = texProperty->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
@@ -1316,7 +1317,7 @@ namespace NifOsg
             // localToWorldMatrix for transforming to particle space
             handleParticlePrograms(partctrl->mModifier, partctrl->mCollider, parentNode, partsys.get(), rf);
 
-            std::vector<const Nif::Property*> drawableProps;
+            std::vector<const Nif::NiProperty*> drawableProps;
             collectDrawableProperties(nifNode, parent, drawableProps);
             applyDrawableProperties(parentNode, drawableProps, composite, true, animflags);
 
@@ -1462,7 +1463,7 @@ namespace NifOsg
             // - if there are no vertex colors, we need to disable colorMode.
             // - there are 3 "overlapping" nif properties that all affect the osg::Material, handling them
             //   above the actual renderable would be tedious.
-            std::vector<const Nif::Property*> drawableProps;
+            std::vector<const Nif::NiProperty*> drawableProps;
             collectDrawableProperties(nifNode, parent, drawableProps);
             applyDrawableProperties(parentNode, drawableProps, composite, !niGeometryData->mColors.empty(), animflags);
         }
@@ -1616,50 +1617,54 @@ namespace NifOsg
             }
         }
 
-        osg::Stencil::Function getStencilFunction(int func)
+        osg::Stencil::Function getStencilFunction(Nif::NiStencilProperty::TestFunc func)
         {
+            using TestFunc = Nif::NiStencilProperty::TestFunc;
             switch (func)
             {
-                case 0:
+                case TestFunc::Never:
                     return osg::Stencil::NEVER;
-                case 1:
+                case TestFunc::Less:
                     return osg::Stencil::LESS;
-                case 2:
+                case TestFunc::Equal:
                     return osg::Stencil::EQUAL;
-                case 3:
+                case TestFunc::LessEqual:
                     return osg::Stencil::LEQUAL;
-                case 4:
+                case TestFunc::Greater:
                     return osg::Stencil::GREATER;
-                case 5:
+                case TestFunc::NotEqual:
                     return osg::Stencil::NOTEQUAL;
-                case 6:
+                case TestFunc::GreaterEqual:
                     return osg::Stencil::GEQUAL;
-                case 7:
+                case TestFunc::Always:
                     return osg::Stencil::ALWAYS;
                 default:
-                    Log(Debug::Info) << "Unexpected stencil function: " << func << " in " << mFilename;
+                    Log(Debug::Info) << "Unexpected stencil function: " << static_cast<uint32_t>(func) << " in "
+                                     << mFilename;
                     return osg::Stencil::NEVER;
             }
         }
 
-        osg::Stencil::Operation getStencilOperation(int op)
+        osg::Stencil::Operation getStencilOperation(Nif::NiStencilProperty::Action op)
         {
+            using Action = Nif::NiStencilProperty::Action;
             switch (op)
             {
-                case 0:
+                case Action::Keep:
                     return osg::Stencil::KEEP;
-                case 1:
+                case Action::Zero:
                     return osg::Stencil::ZERO;
-                case 2:
+                case Action::Replace:
                     return osg::Stencil::REPLACE;
-                case 3:
+                case Action::Increment:
                     return osg::Stencil::INCR;
-                case 4:
+                case Action::Decrement:
                     return osg::Stencil::DECR;
-                case 5:
+                case Action::Invert:
                     return osg::Stencil::INVERT;
                 default:
-                    Log(Debug::Info) << "Unexpected stencil operation: " << op << " in " << mFilename;
+                    Log(Debug::Info) << "Unexpected stencil operation: " << static_cast<uint32_t>(op) << " in "
+                                     << mFilename;
                     return osg::Stencil::KEEP;
             }
         }
@@ -1827,9 +1832,9 @@ namespace NifOsg
 
             // If this loop is changed such that the base texture isn't guaranteed to end up in texture unit 0, the
             // shadow casting shader will need to be updated accordingly.
-            for (size_t i = 0; i < texprop->textures.size(); ++i)
+            for (size_t i = 0; i < texprop->mTextures.size(); ++i)
             {
-                if (texprop->textures[i].inUse
+                if (texprop->mTextures[i].mEnabled
                     || (i == Nif::NiTexturingProperty::BaseTexture && !texprop->mController.empty()))
                 {
                     switch (i)
@@ -1854,10 +1859,10 @@ namespace NifOsg
                     unsigned int uvSet = 0;
                     // create a new texture, will later attempt to share using the SharedStateManager
                     osg::ref_ptr<osg::Texture2D> texture2d;
-                    if (texprop->textures[i].inUse)
+                    if (texprop->mTextures[i].mEnabled)
                     {
-                        const Nif::NiTexturingProperty::Texture& tex = texprop->textures[i];
-                        if (tex.texture.empty() && texprop->mController.empty())
+                        const Nif::NiTexturingProperty::Texture& tex = texprop->mTextures[i];
+                        if (tex.mSourceTexture.empty() && texprop->mController.empty())
                         {
                             if (i == 0)
                                 Log(Debug::Warning) << "Base texture is in use but empty on shape \"" << nodeName
@@ -1865,9 +1870,9 @@ namespace NifOsg
                             continue;
                         }
 
-                        if (!tex.texture.empty())
+                        if (!tex.mSourceTexture.empty())
                         {
-                            const Nif::NiSourceTexture* st = tex.texture.getPtr();
+                            const Nif::NiSourceTexture* st = tex.mSourceTexture.getPtr();
                             osg::ref_ptr<osg::Image> image = handleSourceTexture(st, imageManager);
                             texture2d = new osg::Texture2D(image);
                             if (image)
@@ -1878,7 +1883,7 @@ namespace NifOsg
 
                         handleTextureWrapping(texture2d, tex.wrapS(), tex.wrapT());
 
-                        uvSet = tex.uvSet;
+                        uvSet = tex.mUVSet;
                     }
                     else
                     {
@@ -1926,10 +1931,10 @@ namespace NifOsg
                         // Bump maps offset the environment map.
                         // Set this texture to Off by default since we can't render it with the fixed-function pipeline
                         stateset->setTextureMode(texUnit, GL_TEXTURE_2D, osg::StateAttribute::OFF);
-                        osg::Matrix2 bumpMapMatrix(texprop->bumpMapMatrix.x(), texprop->bumpMapMatrix.y(),
-                            texprop->bumpMapMatrix.z(), texprop->bumpMapMatrix.w());
+                        osg::Matrix2 bumpMapMatrix(texprop->mBumpMapMatrix.x(), texprop->mBumpMapMatrix.y(),
+                            texprop->mBumpMapMatrix.z(), texprop->mBumpMapMatrix.w());
                         stateset->addUniform(new osg::Uniform("bumpMapMatrix", bumpMapMatrix));
-                        stateset->addUniform(new osg::Uniform("envMapLumaBias", texprop->envMapLumaBias));
+                        stateset->addUniform(new osg::Uniform("envMapLumaBias", texprop->mEnvMapLumaBias));
                     }
                     else if (i == Nif::NiTexturingProperty::GlossTexture)
                     {
@@ -2098,6 +2103,7 @@ namespace NifOsg
                 case Nif::BSLightingShaderType::ShaderType_LODNoise:
                 case Nif::BSLightingShaderType::ShaderType_MultitexLandLODBlend:
                 case Nif::BSLightingShaderType::ShaderType_Dismemberment:
+                case Nif::BSLightingShaderType::ShaderType_Terrain:
                     Log(Debug::Warning) << "Unhandled BSLightingShaderType " << type << " in " << mFilename;
                     return "bs/default";
             }
@@ -2105,7 +2111,7 @@ namespace NifOsg
             return "bs/default";
         }
 
-        void handleProperty(const Nif::Property* property, osg::Node* node,
+        void handleProperty(const Nif::NiProperty* property, osg::Node* node,
             SceneUtil::CompositeStateSetUpdater* composite, Resource::ImageManager* imageManager,
             std::vector<unsigned int>& boundTextures, int animflags, bool hasStencilProperty)
         {
@@ -2114,14 +2120,17 @@ namespace NifOsg
                 case Nif::RC_NiStencilProperty:
                 {
                     const Nif::NiStencilProperty* stencilprop = static_cast<const Nif::NiStencilProperty*>(property);
+
                     osg::ref_ptr<osg::FrontFace> frontFace = new osg::FrontFace;
-                    switch (stencilprop->data.drawMode)
+                    using DrawMode = Nif::NiStencilProperty::DrawMode;
+                    switch (stencilprop->mDrawMode)
                     {
-                        case 2:
+                        case DrawMode::Clockwise:
                             frontFace->setMode(osg::FrontFace::CLOCKWISE);
                             break;
-                        case 0:
-                        case 1:
+                        case DrawMode::Default:
+                        case DrawMode::CounterClockwise:
+                        case DrawMode::Both:
                         default:
                             frontFace->setMode(osg::FrontFace::COUNTER_CLOCKWISE);
                             break;
@@ -2130,20 +2139,20 @@ namespace NifOsg
 
                     osg::StateSet* stateset = node->getOrCreateStateSet();
                     stateset->setAttribute(frontFace, osg::StateAttribute::ON);
-                    stateset->setMode(GL_CULL_FACE,
-                        stencilprop->data.drawMode == 3 ? osg::StateAttribute::OFF : osg::StateAttribute::ON);
+                    if (stencilprop->mDrawMode == DrawMode::Both)
+                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
+                    else
+                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::ON);
 
-                    if (stencilprop->data.enabled != 0)
+                    if (stencilprop->mEnabled)
                     {
                         mHasStencilProperty = true;
                         osg::ref_ptr<osg::Stencil> stencil = new osg::Stencil;
-                        stencil->setFunction(getStencilFunction(stencilprop->data.compareFunc),
-                            stencilprop->data.stencilRef, stencilprop->data.stencilMask);
-                        stencil->setStencilFailOperation(getStencilOperation(stencilprop->data.failAction));
-                        stencil->setStencilPassAndDepthFailOperation(
-                            getStencilOperation(stencilprop->data.zFailAction));
-                        stencil->setStencilPassAndDepthPassOperation(
-                            getStencilOperation(stencilprop->data.zPassAction));
+                        stencil->setFunction(getStencilFunction(stencilprop->mTestFunction), stencilprop->mStencilRef,
+                            stencilprop->mStencilMask);
+                        stencil->setStencilFailOperation(getStencilOperation(stencilprop->mFailAction));
+                        stencil->setStencilPassAndDepthFailOperation(getStencilOperation(stencilprop->mZFailAction));
+                        stencil->setStencilPassAndDepthPassOperation(getStencilOperation(stencilprop->mPassAction));
                         stencil = shareAttribute(stencil);
 
                         stateset->setAttributeAndModes(stencil, osg::StateAttribute::ON);
@@ -2155,7 +2164,7 @@ namespace NifOsg
                     const Nif::NiWireframeProperty* wireprop = static_cast<const Nif::NiWireframeProperty*>(property);
                     osg::ref_ptr<osg::PolygonMode> mode = new osg::PolygonMode;
                     mode->setMode(osg::PolygonMode::FRONT_AND_BACK,
-                        wireprop->isEnabled() ? osg::PolygonMode::LINE : osg::PolygonMode::FILL);
+                        wireprop->mEnable ? osg::PolygonMode::LINE : osg::PolygonMode::FILL);
                     mode = shareAttribute(mode);
                     node->getOrCreateStateSet()->setAttributeAndModes(mode, osg::StateAttribute::ON);
                     break;
@@ -2202,18 +2211,16 @@ namespace NifOsg
                 {
                     auto texprop = static_cast<const Nif::BSShaderPPLightingProperty*>(property);
                     bool shaderRequired = true;
-                    node->setUserValue("shaderPrefix", std::string(getBSShaderPrefix(texprop->type)));
+                    node->setUserValue("shaderPrefix", std::string(getBSShaderPrefix(texprop->mType)));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
-                    if (!texprop->textureSet.empty())
+                    if (!texprop->mTextureSet.empty())
                     {
-                        auto textureSet = texprop->textureSet.getPtr();
+                        auto textureSet = texprop->mTextureSet.getPtr();
                         handleTextureSet(
-                            textureSet, texprop->clamp, node->getName(), stateset, imageManager, boundTextures);
+                            textureSet, texprop->mClamp, node->getName(), stateset, imageManager, boundTextures);
                     }
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
-                    if (texprop->doubleSided())
-                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
                     break;
                 }
                 case Nif::RC_BSShaderNoLightingProperty:
@@ -2221,10 +2228,10 @@ namespace NifOsg
                     auto texprop = static_cast<const Nif::BSShaderNoLightingProperty*>(property);
                     bool shaderRequired = true;
                     bool useFalloff = false;
-                    node->setUserValue("shaderPrefix", std::string(getBSShaderPrefix(texprop->type)));
+                    node->setUserValue("shaderPrefix", std::string(getBSShaderPrefix(texprop->mType)));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
-                    if (!texprop->filename.empty())
+                    if (!texprop->mFilename.empty())
                     {
                         if (!boundTextures.empty())
                         {
@@ -2233,7 +2240,7 @@ namespace NifOsg
                             boundTextures.clear();
                         }
                         std::string filename
-                            = Misc::ResourceHelpers::correctTexturePath(texprop->filename, imageManager->getVFS());
+                            = Misc::ResourceHelpers::correctTexturePath(texprop->mFilename, imageManager->getVFS());
                         osg::ref_ptr<osg::Image> image = imageManager->getImage(filename);
                         osg::ref_ptr<osg::Texture2D> texture2d = new osg::Texture2D(image);
                         texture2d->setName("diffuseMap");
@@ -2247,20 +2254,18 @@ namespace NifOsg
                         if (mBethVersion >= 27)
                         {
                             useFalloff = true;
-                            stateset->addUniform(new osg::Uniform("falloffParams", texprop->falloffParams));
+                            stateset->addUniform(new osg::Uniform("falloffParams", texprop->mFalloffParams));
                         }
                     }
                     stateset->addUniform(new osg::Uniform("useFalloff", useFalloff));
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
-                    if (texprop->doubleSided())
-                        stateset->setMode(GL_CULL_FACE, osg::StateAttribute::OFF);
                     break;
                 }
                 case Nif::RC_BSLightingShaderProperty:
                 {
                     auto texprop = static_cast<const Nif::BSLightingShaderProperty*>(property);
                     bool shaderRequired = true;
-                    node->setUserValue("shaderPrefix", std::string(getBSLightingShaderPrefix(texprop->type)));
+                    node->setUserValue("shaderPrefix", std::string(getBSLightingShaderPrefix(texprop->mType)));
                     node->setUserValue("shaderRequired", shaderRequired);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
                     if (!texprop->mTextureSet.empty())
@@ -2365,7 +2370,7 @@ namespace NifOsg
             return *found;
         }
 
-        void applyDrawableProperties(osg::Node* node, const std::vector<const Nif::Property*>& properties,
+        void applyDrawableProperties(osg::Node* node, const std::vector<const Nif::NiProperty*>& properties,
             SceneUtil::CompositeStateSetUpdater* composite, bool hasVertexColors, int animflags)
         {
             // Specular lighting is enabled by default, but there's a quirk...
@@ -2390,7 +2395,7 @@ namespace NifOsg
             float emissiveMult = 1.f;
             float specStrength = 1.f;
 
-            for (const Nif::Property* property : properties)
+            for (const Nif::NiProperty* property : properties)
             {
                 switch (property->recType)
                 {
@@ -2399,21 +2404,20 @@ namespace NifOsg
                         // Specular property can turn specular lighting off.
                         // FIXME: NiMaterialColorController doesn't care about this.
                         auto specprop = static_cast<const Nif::NiSpecularProperty*>(property);
-                        specEnabled = specprop->isEnabled();
+                        specEnabled = specprop->mEnable;
                         break;
                     }
                     case Nif::RC_NiMaterialProperty:
                     {
                         const Nif::NiMaterialProperty* matprop = static_cast<const Nif::NiMaterialProperty*>(property);
 
-                        mat->setDiffuse(
-                            osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.diffuse, matprop->data.alpha));
-                        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.ambient, 1.f));
-                        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.emissive, 1.f));
-                        emissiveMult = matprop->data.emissiveMult;
+                        mat->setDiffuse(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mDiffuse, matprop->mAlpha));
+                        mat->setAmbient(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mAmbient, 1.f));
+                        mat->setEmission(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mEmissive, 1.f));
+                        emissiveMult = matprop->mEmissiveMult;
 
-                        mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->data.specular, 1.f));
-                        mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->data.glossiness);
+                        mat->setSpecular(osg::Material::FRONT_AND_BACK, osg::Vec4f(matprop->mSpecular, 1.f));
+                        mat->setShininess(osg::Material::FRONT_AND_BACK, matprop->mGlossiness);
 
                         if (!matprop->mController.empty())
                         {
@@ -2428,29 +2432,31 @@ namespace NifOsg
                         const Nif::NiVertexColorProperty* vertprop
                             = static_cast<const Nif::NiVertexColorProperty*>(property);
 
+                        using VertexMode = Nif::NiVertexColorProperty::VertexMode;
                         switch (vertprop->mVertexMode)
                         {
-                            case Nif::NiVertexColorProperty::VertexMode::VertMode_SrcIgnore:
+                            case VertexMode::VertMode_SrcIgnore:
                             {
                                 mat->setColorMode(osg::Material::OFF);
                                 break;
                             }
-                            case Nif::NiVertexColorProperty::VertexMode::VertMode_SrcEmissive:
+                            case VertexMode::VertMode_SrcEmissive:
                             {
                                 mat->setColorMode(osg::Material::EMISSION);
                                 break;
                             }
-                            case Nif::NiVertexColorProperty::VertexMode::VertMode_SrcAmbDif:
+                            case VertexMode::VertMode_SrcAmbDif:
                             {
                                 lightmode = vertprop->mLightingMode;
+                                using LightMode = Nif::NiVertexColorProperty::LightMode;
                                 switch (lightmode)
                                 {
-                                    case Nif::NiVertexColorProperty::LightMode::LightMode_Emissive:
+                                    case LightMode::LightMode_Emissive:
                                     {
                                         mat->setColorMode(osg::Material::OFF);
                                         break;
                                     }
-                                    case Nif::NiVertexColorProperty::LightMode::LightMode_EmiAmbDif:
+                                    case LightMode::LightMode_EmiAmbDif:
                                     default:
                                     {
                                         mat->setColorMode(osg::Material::AMBIENT_AND_DIFFUSE);
@@ -2503,7 +2509,7 @@ namespace NifOsg
                         if (alphaprop->useAlphaTesting())
                         {
                             osg::ref_ptr<osg::AlphaFunc> alphaFunc(new osg::AlphaFunc(
-                                getTestMode(alphaprop->alphaTestMode()), alphaprop->data.threshold / 255.f));
+                                getTestMode(alphaprop->alphaTestMode()), alphaprop->mThreshold / 255.f));
                             alphaFunc = shareAttribute(alphaFunc);
                             node->getOrCreateStateSet()->setAttributeAndModes(alphaFunc, osg::StateAttribute::ON);
                         }
