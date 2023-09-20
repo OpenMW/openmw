@@ -319,6 +319,14 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSKeyframeController : NiKeyframeController
+    {
+        NiKeyframeDataPtr mData2;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct NiControllerManager : public NiTimeController
     {
         bool mCumulative;

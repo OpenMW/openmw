@@ -123,6 +123,8 @@ namespace Nif
                 &construct<NiMultiTargetTransformController, RC_NiMultiTargetTransformController> },
 
             // Bethesda
+            { "BSFrustumFOVController", &construct<NiFloatInterpController, RC_BSFrustumFOVController> },
+            { "BSKeyframeController", &construct<BSKeyframeController, RC_BSKeyframeController> },
             { "BSMaterialEmittanceMultController",
                 &construct<NiFloatInterpController, RC_BSMaterialEmittanceMultController> },
             { "BSRefractionFirePeriodController",

@@ -486,6 +486,20 @@ namespace Nif
         nif->read(mControlledColor);
     }
 
+    void BSKeyframeController::read(NIFStream* nif)
+    {
+        NiKeyframeController::read(nif);
+
+        mData2.read(nif);
+    }
+
+    void BSKeyframeController::post(Reader& nif)
+    {
+        NiKeyframeController::post(nif);
+
+        mData2.post(nif);
+    }
+
     void NiControllerManager::read(NIFStream* nif)
     {
         NiTimeController::read(nif);
