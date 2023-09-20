@@ -184,7 +184,7 @@ namespace MWLua
             return sol::nil;
         };
 
-        // TODO: deprecate this and provide access to the store instead
+        // deprecated, use core.stats.Skill
         sol::table skills(context.mLua->sol(), sol::create);
         api["SKILL"] = LuaUtil::makeStrictReadOnly(skills);
         for (int i = 0; i < ESM::Skill::Length; ++i)
@@ -197,7 +197,7 @@ namespace MWLua
             skills[key] = id;
         }
 
-        // TODO: deprecate this and provide access to the store instead
+        // deprecated, use core.stats.Attribute
         sol::table attributes(context.mLua->sol(), sol::create);
         api["ATTRIBUTE"] = LuaUtil::makeStrictReadOnly(attributes);
         for (int i = 0; i < ESM::Attribute::Length; ++i)

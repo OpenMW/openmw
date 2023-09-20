@@ -333,8 +333,8 @@
 
 ---
 -- @type ActiveSpellEffect
--- @field #string affectedSkill @{#SKILL} or nil
--- @field #string affectedAttribute @{#ATTRIBUTE} or nil
+-- @field #string affectedSkill Optional skill ID
+-- @field #string affectedAttribute Optional attribute ID
 -- @field #string id Magic effect id
 -- @field #string name Localized name of the effect
 -- @field #number magnitudeThisFrame The magnitude of the effect in the current frame. This will be a new random number between minMagnitude and maxMagnitude every frame. Or nil if the effect has no magnitude.
@@ -498,17 +498,17 @@
 -- @field #number Target Ranged spell
 
 
---- Possible @{#MagicSchool} values
+--- Possible @{#MagicSchool} values (DEPRECATED use @{#Skill})
 -- @field [parent=#Magic] #MagicSchool SCHOOL
 
 --- `core.magic.SCHOOL`
 -- @type MagicSchool
--- @field #number Alteration Alteration
--- @field #number Conjuration Conjuration
--- @field #number Destruction Destruction
--- @field #number Illusion Illusion
--- @field #number Mysticism Mysticism
--- @field #number Restoration Restoration
+-- @field #string Alteration alteration
+-- @field #string Conjuration conjuration
+-- @field #string Destruction destruction
+-- @field #string Illusion illusion
+-- @field #string Mysticism mysticism
+-- @field #string Restoration restoration
 
 
 --- Possible @{#MagicEffectId} values
@@ -720,7 +720,7 @@
 -- @field #string id Effect ID
 -- @field #string icon Effect Icon Path
 -- @field #string name Localized name of the effect
--- @field #number school @{#MagicSchool}
+-- @field #string school Skill ID
 -- @field #number baseCost
 -- @field openmw.util#Color color
 -- @field #boolean harmful
@@ -728,8 +728,8 @@
 ---
 -- @type MagicEffectWithParams
 -- @field #MagicEffect effect @{#MagicEffect}
--- @field #string affectedSkill @{#SKILL} or nil
--- @field #string affectedAttribute @{#ATTRIBUTE} or nil
+-- @field #string affectedSkill Optional skill ID
+-- @field #string affectedAttribute Optional attribute ID
 -- @field #number range
 -- @field #number area
 -- @field #number magnitudeMin
@@ -738,8 +738,8 @@
 
 ---
 -- @type ActiveEffect
--- @field #string affectedSkill @{#SKILL} or nil
--- @field #string affectedAttribute @{#ATTRIBUTE} or nil
+-- @field #string affectedSkill Optional skill ID
+-- @field #string affectedAttribute Optional attribute ID
 -- @field #string id Effect id string
 -- @field #string name Localized name of the effect
 -- @field #number magnitude
