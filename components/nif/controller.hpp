@@ -327,6 +327,15 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    struct BSLagBoneController : NiTimeController
+    {
+        float mLinearVelocity;
+        float mLinearRotation;
+        float mMaximumDistance;
+
+        void read(NIFStream* nif) override;
+    };
+
     struct NiControllerManager : public NiTimeController
     {
         bool mCumulative;

@@ -79,6 +79,7 @@ namespace Nif
         RC_BSFurnitureMarker,
         RC_BSInvMarker,
         RC_BSKeyframeController,
+        RC_BSLagBoneController,
         RC_BSLightingShaderProperty,
         RC_BSLightingShaderPropertyColorController,
         RC_BSLightingShaderPropertyFloatController,

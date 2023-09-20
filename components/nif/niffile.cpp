@@ -126,6 +126,7 @@ namespace Nif
             // Bethesda
             { "BSFrustumFOVController", &construct<NiFloatInterpController, RC_BSFrustumFOVController> },
             { "BSKeyframeController", &construct<BSKeyframeController, RC_BSKeyframeController> },
+            { "BSLagBoneController", &construct<BSLagBoneController, RC_BSLagBoneController> },
             { "BSMaterialEmittanceMultController",
                 &construct<NiFloatInterpController, RC_BSMaterialEmittanceMultController> },
             { "BSNiAlphaPropertyTestRefController",

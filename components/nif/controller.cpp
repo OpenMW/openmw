@@ -500,6 +500,15 @@ namespace Nif
         mData2.post(nif);
     }
 
+    void BSLagBoneController::read(NIFStream* nif)
+    {
+        NiTimeController::read(nif);
+
+        nif->read(mLinearVelocity);
+        nif->read(mLinearRotation);
+        nif->read(mMaximumDistance);
+    }
+
     void NiControllerManager::read(NIFStream* nif)
     {
         NiTimeController::read(nif);
