@@ -342,6 +342,22 @@ namespace Nif
         mBody.read(nif);
     }
 
+    void bhkNPCollisionObject::read(NIFStream* nif)
+    {
+        NiCollisionObject::read(nif);
+
+        nif->read(mFlags);
+        mData.read(nif);
+        nif->read(mBodyID);
+    }
+
+    void bhkNPCollisionObject::post(Reader& nif)
+    {
+        NiCollisionObject::post(nif);
+
+        mData.post(nif);
+    }
+
     void bhkBlendCollisionObject::read(NIFStream* nif)
     {
         bhkCollisionObject::read(nif);
@@ -351,6 +367,16 @@ namespace Nif
 
         if (nif->getBethVersion() <= 8)
             nif->skip(8); // Unknown
+    }
+
+    void bhkPhysicsSystem::read(NIFStream* nif)
+    {
+        nif->readVector(mData, nif->get<uint32_t>());
+    }
+
+    void bhkRagdollSystem::read(NIFStream* nif)
+    {
+        nif->readVector(mData, nif->get<uint32_t>());
     }
 
     void bhkWorldObject::read(NIFStream* nif)

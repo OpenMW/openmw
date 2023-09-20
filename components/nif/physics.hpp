@@ -370,6 +370,11 @@ namespace Nif
     {
     };
 
+    // Abstract physics system
+    struct bhkSystem : public Record
+    {
+    };
+
     // Generic collision object
     struct NiCollisionObject : public Record
     {
@@ -394,10 +399,34 @@ namespace Nif
         }
     };
 
+    struct bhkNPCollisionObject : NiCollisionObject
+    {
+        uint16_t mFlags;
+        bhkSystemPtr mData;
+        uint32_t mBodyID;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct bhkBlendCollisionObject : bhkCollisionObject
     {
         float mHeirGain;
         float mVelGain;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkPhysicsSystem : public bhkSystem
+    {
+        std::vector<uint8_t> mData;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkRagdollSystem : public bhkSystem
+    {
+        std::vector<uint8_t> mData;
 
         void read(NIFStream* nif) override;
     };

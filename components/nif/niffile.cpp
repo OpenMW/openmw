@@ -283,6 +283,7 @@ namespace Nif
             { "bhkCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
             { "bhkPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
             { "bhkSPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
+            { "bhkNPCollisionObject", &construct<bhkNPCollisionObject, RC_bhkCollisionObject> },
             { "bhkBlendCollisionObject", &construct<bhkBlendCollisionObject, RC_bhkBlendCollisionObject> },
 
             // Constraint records, Bethesda
@@ -312,6 +313,10 @@ namespace Nif
             { "bhkSimpleShapePhantom", &construct<bhkSimpleShapePhantom, RC_bhkSimpleShapePhantom> },
             { "bhkSphereShape", &construct<bhkSphereShape, RC_bhkSphereShape> },
             { "bhkTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },
+
+            // Physics system records, Bethesda
+            { "bhkPhysicsSystem", &construct<bhkPhysicsSystem, RC_bhkPhysicsSystem> },
+            { "bhkRagdollSystem", &construct<bhkRagdollSystem, RC_bhkRagdollSystem> },
 
             // PROPERTIES
 
