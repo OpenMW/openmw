@@ -375,6 +375,14 @@ namespace Nif
     {
     };
 
+    struct BSMultiBoundAABB : public BSMultiBoundData
+    {
+        osg::Vec3f mPosition;
+        osg::Vec3f mExtents;
+
+        void read(NIFStream* nif) override;
+    };
+
     struct BSMultiBoundOBB : public BSMultiBoundData
     {
         osg::Vec3f mCenter;

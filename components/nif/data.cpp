@@ -542,6 +542,12 @@ namespace Nif
         mData.post(nif);
     }
 
+    void BSMultiBoundAABB::read(NIFStream* nif)
+    {
+        nif->read(mPosition);
+        nif->read(mExtents);
+    }
+
     void BSMultiBoundOBB::read(NIFStream* nif)
     {
         nif->read(mCenter);

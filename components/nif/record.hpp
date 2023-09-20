@@ -78,6 +78,7 @@ namespace Nif
         RC_BSMaterialEmittanceMultController,
         RC_BSMeshLODTriShape,
         RC_BSMultiBound,
+        RC_BSMultiBoundAABB,
         RC_BSMultiBoundOBB,
         RC_BSMultiBoundSphere,
         RC_BSRefractionFirePeriodController,

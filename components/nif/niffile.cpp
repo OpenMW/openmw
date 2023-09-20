@@ -206,6 +206,7 @@ namespace Nif
             // Bethesda bounds
             { "BSBound", &construct<BSBound, RC_BSBound> },
             { "BSMultiBound", &construct<BSMultiBound, RC_BSMultiBound> },
+            { "BSMultiBoundAABB", &construct<BSMultiBoundAABB, RC_BSMultiBoundAABB> },
             { "BSMultiBoundOBB", &construct<BSMultiBoundOBB, RC_BSMultiBoundOBB> },
             { "BSMultiBoundSphere", &construct<BSMultiBoundSphere, RC_BSMultiBoundSphere> },
 
