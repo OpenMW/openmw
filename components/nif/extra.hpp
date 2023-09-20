@@ -160,7 +160,7 @@ namespace Nif
 
     struct BSExtraData : NiExtraData
     {
-        void read(NIFStream* nif) override { }
+        void read(NIFStream* nif) override {}
     };
 
     struct BSClothExtraData : BSExtraData

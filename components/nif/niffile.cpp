@@ -178,7 +178,8 @@ namespace Nif
             { "NiTransformData", &construct<NiKeyframeData, RC_NiKeyframeData> },
 
             // Bethesda
-            { "BSPackedAdditionalGeometryData", &construct<NiAdditionalGeometryData, RC_BSPackedAdditionalGeometryData> },
+            { "BSPackedAdditionalGeometryData",
+                &construct<NiAdditionalGeometryData, RC_BSPackedAdditionalGeometryData> },
             { "BSShaderTextureSet", &construct<BSShaderTextureSet, RC_BSShaderTextureSet> },
 
             // DYNAMIC EFFECTS
@@ -226,7 +227,7 @@ namespace Nif
             { "BSExtraData", &construct<BSExtraData, RC_BSExtraData> },
             { "BSBehaviorGraphExtraData", &construct<BSBehaviorGraphExtraData, RC_BSBehaviorGraphExtraData> },
             { "BSBoneLODExtraData", &construct<BSBoneLODExtraData, RC_BSBoneLODExtraData> },
-            { "BSClothExtraData", &construct <BSClothExtraData, RC_BSClothExtraData> },
+            { "BSClothExtraData", &construct<BSClothExtraData, RC_BSClothExtraData> },
             { "BSDecalPlacementVectorExtraData",
                 &construct<BSDecalPlacementVectorExtraData, RC_BSDecalPlacementVectorExtraData> },
             { "BSDistantObjectExtraData", &construct<BSDistantObjectExtraData, RC_BSDistantObjectExtraData> },
