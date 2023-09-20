@@ -116,6 +116,7 @@ namespace Nif
 
             // Gamebryo
             { "NiControllerManager", &construct<NiControllerManager, RC_NiControllerManager> },
+            { "NiLightDimmerController", &construct<NiFloatInterpController, RC_NiLightDimmerController> },
             { "NiTransformController", &construct<NiKeyframeController, RC_NiKeyframeController> },
             { "NiTextureTransformController",
                 &construct<NiTextureTransformController, RC_NiTextureTransformController> },

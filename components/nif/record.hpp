@@ -144,6 +144,7 @@ namespace Nif
         RC_NiKeyframeController,
         RC_NiKeyframeData,
         RC_NiLight,
+        RC_NiLightDimmerController,
         RC_NiLines,
         RC_NiLinesData,
         RC_NiLODNode,
