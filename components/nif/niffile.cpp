@@ -127,6 +127,8 @@ namespace Nif
             { "BSKeyframeController", &construct<BSKeyframeController, RC_BSKeyframeController> },
             { "BSMaterialEmittanceMultController",
                 &construct<NiFloatInterpController, RC_BSMaterialEmittanceMultController> },
+            { "BSNiAlphaPropertyTestRefController",
+                &construct<NiFloatInterpController, RC_BSNiAlphaPropertyTestRefController> },
             { "BSRefractionFirePeriodController",
                 &construct<NiSingleInterpController, RC_BSRefractionFirePeriodController> },
             { "BSRefractionStrengthController",

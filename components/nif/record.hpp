@@ -84,6 +84,7 @@ namespace Nif
         RC_BSMultiBoundAABB,
         RC_BSMultiBoundOBB,
         RC_BSMultiBoundSphere,
+        RC_BSNiAlphaPropertyTestRefController,
         RC_BSPackedAdditionalGeometryData,
         RC_BSRefractionFirePeriodController,
         RC_BSRefractionStrengthController,
