@@ -169,11 +169,13 @@ namespace Nif
             { "NiVisData", &construct<NiVisData, RC_NiVisData> },
 
             // Gamebryo
+            { "NiAdditionalGeometryData", &construct<NiAdditionalGeometryData, RC_NiAdditionalGeometryData> },
             { "NiBoolData", &construct<NiBoolData, RC_NiBoolData> },
             { "NiDefaultAVObjectPalette", &construct<NiDefaultAVObjectPalette, RC_NiDefaultAVObjectPalette> },
             { "NiTransformData", &construct<NiKeyframeData, RC_NiKeyframeData> },
 
             // Bethesda
+            { "BSPackedAdditionalGeometryData", &construct<NiAdditionalGeometryData, RC_BSPackedAdditionalGeometryData> },
             { "BSShaderTextureSet", &construct<BSShaderTextureSet, RC_BSShaderTextureSet> },
 
             // DYNAMIC EFFECTS

@@ -362,6 +362,41 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct NiAdditionalGeometryData : public Record
+    {
+        struct DataStream
+        {
+            uint32_t mType;
+            uint32_t mUnitSize;
+            uint32_t mTotalSize;
+            uint32_t mStride;
+            uint32_t mBlockIndex;
+            uint32_t mBlockOffset;
+            uint8_t mFlags;
+
+            void read(NIFStream* nif);
+        };
+
+        struct DataBlock
+        {
+            bool mValid;
+            uint32_t mBlockSize;
+            std::vector<uint32_t> mBlockOffsets;
+            std::vector<uint32_t> mDataSizes;
+            std::vector<char> mData;
+            uint32_t mShaderIndex;
+            uint32_t mTotalSize;
+
+            void read(NIFStream* nif, bool bsPacked);
+        };
+
+        uint16_t mNumVertices;
+        std::vector<DataStream> mBlockInfos;
+        std::vector<DataBlock> mBlocks;
+
+        void read(NIFStream* nif);
+    };
+
     struct BSMultiBound : public Record
     {
         BSMultiBoundDataPtr mData;
