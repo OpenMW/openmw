@@ -36,6 +36,7 @@ namespace Nif
     {
         RC_MISSING = 0,
         RC_AvoidNode,
+        RC_bhkBlendCollisionObject,
         RC_bhkBlendController,
         RC_bhkBoxShape,
         RC_bhkCapsuleShape,

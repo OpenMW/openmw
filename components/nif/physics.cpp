@@ -342,6 +342,17 @@ namespace Nif
         mBody.read(nif);
     }
 
+    void bhkBlendCollisionObject::read(NIFStream* nif)
+    {
+        bhkCollisionObject::read(nif);
+
+        nif->read(mHeirGain);
+        nif->read(mVelGain);
+
+        if (nif->getBethVersion() <= 8)
+            nif->skip(8); // Unknown
+    }
+
     void bhkWorldObject::read(NIFStream* nif)
     {
         mShape.read(nif);

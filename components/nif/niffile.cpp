@@ -281,6 +281,7 @@ namespace Nif
             { "bhkCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
             { "bhkPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
             { "bhkSPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
+            { "bhkBlendCollisionObject", &construct<bhkBlendCollisionObject, RC_bhkBlendCollisionObject> },
 
             // Constraint records, Bethesda
             { "bhkHingeConstraint", &construct<bhkHingeConstraint, RC_bhkHingeConstraint> },

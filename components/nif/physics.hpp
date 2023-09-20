@@ -394,6 +394,14 @@ namespace Nif
         }
     };
 
+    struct bhkBlendCollisionObject : bhkCollisionObject
+    {
+        float mHeirGain;
+        float mVelGain;
+
+        void read(NIFStream* nif) override;
+    };
+
     // Abstract Havok shape info record
     struct bhkWorldObject : public bhkSerializable
     {
