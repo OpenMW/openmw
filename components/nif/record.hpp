@@ -60,6 +60,7 @@ namespace Nif
         RC_BSBoneLODExtraData,
         RC_BSClothExtraData,
         RC_BSDecalPlacementVectorExtraData,
+        RC_BSDistantTreeShaderProperty,
         RC_BSDynamicTriShape,
         RC_BSDismemberSkinInstance,
         RC_BSDistantObjectExtraData,
@@ -88,6 +89,8 @@ namespace Nif
         RC_BSTriShape,
         RC_BSWArray,
         RC_BSXFlags,
+        RC_DistantLODShaderProperty,
+        RC_HairShaderProperty,
         RC_hkPackedNiTriStripsData,
         RC_NiAlphaAccumulator,
         RC_NiAlphaController,
@@ -187,6 +190,11 @@ namespace Nif
         RC_NiWireframeProperty,
         RC_NiZBufferProperty,
         RC_RootCollisionNode,
+        RC_SkyShaderProperty,
+        RC_TallGrassShaderProperty,
+        RC_TileShaderProperty,
+        RC_VolumetricFogShaderProperty,
+        RC_WaterShaderProperty,
     };
 
     /// Base class for all records

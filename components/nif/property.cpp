@@ -227,6 +227,28 @@ namespace Nif
             nif->read(mFalloffParams);
     }
 
+    void SkyShaderProperty::read(NIFStream* nif)
+    {
+        BSShaderLightingProperty::read(nif);
+
+        mFilename = nif->getSizedString();
+        mSkyObjectType = static_cast<ObjectType>(nif->get<uint32_t>());
+    }
+
+    void TallGrassShaderProperty::read(NIFStream* nif)
+    {
+        BSShaderProperty::read(nif);
+
+        mFilename = nif->getSizedString();
+    }
+
+    void TileShaderProperty::read(NIFStream* nif)
+    {
+        BSShaderLightingProperty::read(nif);
+
+        mFilename = nif->getSizedString();
+    }
+
     void BSSPLuminanceParams::read(NIFStream* nif)
     {
         nif->read(mLumEmittance);

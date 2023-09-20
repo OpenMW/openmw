@@ -319,8 +319,17 @@ namespace Nif
             { "BSShaderProperty", &construct<BSShaderProperty, RC_BSShaderProperty> },
             { "BSShaderPPLightingProperty", &construct<BSShaderPPLightingProperty, RC_BSShaderPPLightingProperty> },
             { "BSShaderNoLightingProperty", &construct<BSShaderNoLightingProperty, RC_BSShaderNoLightingProperty> },
+            { "BSDistantTreeShaderProperty", &construct<BSShaderProperty, RC_BSDistantTreeShaderProperty> },
             { "BSLightingShaderProperty", &construct<BSLightingShaderProperty, RC_BSLightingShaderProperty> },
             { "BSEffectShaderProperty", &construct<BSEffectShaderProperty, RC_BSEffectShaderProperty> },
+            { "DistantLODShaderProperty", &construct<BSShaderProperty, RC_DistantLODShaderProperty> },
+            { "HairShaderProperty", &construct<BSShaderProperty, RC_HairShaderProperty> },
+            { "Lighting30ShaderProperty", &construct<BSShaderPPLightingProperty, RC_BSShaderPPLightingProperty> },
+            { "SkyShaderProperty", &construct<SkyShaderProperty, RC_SkyShaderProperty> },
+            { "TallGrassShaderProperty", &construct<TallGrassShaderProperty, RC_TallGrassShaderProperty> },
+            { "TileShaderProperty", &construct<TileShaderProperty, RC_TileShaderProperty> },
+            { "VolumetricFogShaderProperty", &construct<BSShaderProperty, RC_VolumetricFogShaderProperty> },
+            { "WaterShaderProperty", &construct<BSShaderProperty, RC_WaterShaderProperty> },
         };
     }
 
