@@ -512,6 +512,17 @@ namespace Nif
         nif->read(mRadius2);
     }
 
+    void bhkCylinderShape::read(NIFStream* nif)
+    {
+        bhkConvexShape::read(nif);
+
+        nif->skip(8); // Unused
+        nif->read(mVertexA);
+        nif->read(mVertexB);
+        nif->read(mCylinderRadius);
+        nif->skip(12); // Unused
+    }
+
     void bhkListShape::read(NIFStream* nif)
     {
         readRecordList(nif, mSubshapes);

@@ -290,6 +290,7 @@ namespace Nif
             // Physics geometry records, Bethesda
             { "bhkBoxShape", &construct<bhkBoxShape, RC_bhkBoxShape> },
             { "bhkCapsuleShape", &construct<bhkCapsuleShape, RC_bhkCapsuleShape> },
+            { "bhkCylinderShape", &construct<bhkCylinderShape, RC_bhkCylinderShape> },
             { "bhkCompressedMeshShape", &construct<bhkCompressedMeshShape, RC_bhkCompressedMeshShape> },
             { "bhkCompressedMeshShapeData", &construct<bhkCompressedMeshShapeData, RC_bhkCompressedMeshShapeData> },
             { "bhkConvexTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },

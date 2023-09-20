@@ -39,6 +39,7 @@ namespace Nif
         RC_bhkBlendController,
         RC_bhkBoxShape,
         RC_bhkCapsuleShape,
+        RC_bhkCylinderShape,
         RC_bhkCollisionObject,
         RC_bhkCompressedMeshShape,
         RC_bhkCompressedMeshShapeData,

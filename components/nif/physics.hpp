@@ -524,6 +524,15 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    // A cylinder
+    struct bhkCylinderShape : public bhkConvexShape
+    {
+        osg::Vec4f mVertexA, mVertexB;
+        float mCylinderRadius;
+
+        void read(NIFStream* nif) override;
+    };
+
     // A sphere
     using bhkSphereShape = bhkConvexShape;
 
