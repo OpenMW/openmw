@@ -493,6 +493,30 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    // A list of convex shapes sharing the same properties
+    struct bhkConvexListShape : public bhkShape
+    {
+        bhkShapeList mSubShapes;
+        HavokMaterial mMaterial;
+        float mRadius;
+        bhkWorldObjCInfoProperty mChildShapeProperty;
+        bool mUseCachedAABB;
+        float mClosestPointMinDistance;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct bhkConvexSweepShape : bhkShape
+    {
+        bhkConvexShape mShape;
+        HavokMaterial mMaterial;
+        float mRadius;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     // A convex shape built from vertices
     struct bhkConvexVerticesShape : public bhkConvexShape
     {

@@ -298,6 +298,8 @@ namespace Nif
             { "bhkCylinderShape", &construct<bhkCylinderShape, RC_bhkCylinderShape> },
             { "bhkCompressedMeshShape", &construct<bhkCompressedMeshShape, RC_bhkCompressedMeshShape> },
             { "bhkCompressedMeshShapeData", &construct<bhkCompressedMeshShapeData, RC_bhkCompressedMeshShapeData> },
+            { "bhkConvexListShape", &construct<bhkConvexListShape, RC_bhkConvexListShape> },
+            { "bhkConvexSweepShape", &construct<bhkConvexSweepShape, RC_bhkConvexSweepShape> },
             { "bhkConvexTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },
             { "bhkConvexVerticesShape", &construct<bhkConvexVerticesShape, RC_bhkConvexVerticesShape> },
             { "bhkListShape", &construct<bhkListShape, RC_bhkListShape> },

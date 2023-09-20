@@ -477,6 +477,35 @@ namespace Nif
         nif->read(mRadius);
     }
 
+    void bhkConvexListShape::read(NIFStream* nif)
+    {
+        readRecordList(nif, mSubShapes);
+        mMaterial.read(nif);
+        nif->read(mRadius);
+        nif->skip(8); // Unknown
+        mChildShapeProperty.read(nif);
+        nif->read(mUseCachedAABB);
+        nif->read(mClosestPointMinDistance);
+    }
+
+    void bhkConvexListShape::post(Reader& nif)
+    {
+        postRecordList(nif, mSubShapes);
+    }
+
+    void bhkConvexSweepShape::read(NIFStream* nif)
+    {
+        mShape.read(nif);
+        mMaterial.read(nif);
+        nif->read(mRadius);
+        nif->skip(12); // Unknown
+    }
+
+    void bhkConvexSweepShape::post(Reader& nif)
+    {
+        mShape.post(nif);
+    }
+
     void bhkConvexVerticesShape::read(NIFStream* nif)
     {
         bhkConvexShape::read(nif);

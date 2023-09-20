@@ -44,6 +44,8 @@ namespace Nif
         RC_bhkCollisionObject,
         RC_bhkCompressedMeshShape,
         RC_bhkCompressedMeshShapeData,
+        RC_bhkConvexListShape,
+        RC_bhkConvexSweepShape,
         RC_bhkConvexTransformShape,
         RC_bhkConvexVerticesShape,
         RC_bhkHingeConstraint,
