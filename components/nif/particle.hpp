@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_NIF_PARTICLE_HPP
 
 #include "base.hpp"
+#include "controller.hpp"
 #include "data.hpp"
 
 namespace Nif
@@ -121,6 +122,47 @@ namespace Nif
         uint16_t mAddedParticlesBase;
 
         void read(NIFStream* nif) override;
+    };
+
+    // Abstract
+    struct NiPSysModifierCtlr : NiSingleInterpController
+    {
+        std::string mModifierName;
+
+        void read(NIFStream* nif) override;
+    };
+
+    template <class DataPtr>
+    struct TypedNiPSysModifierCtlr : NiPSysModifierCtlr
+    {
+        DataPtr mData;
+
+        void read(NIFStream* nif) override
+        {
+            NiPSysModifierCtlr::read(nif);
+
+            if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 103))
+                mData.read(nif);
+        }
+
+        void post(Reader& nif) override
+        {
+            NiPSysModifierCtlr::post(nif);
+
+            mData.post(nif);
+        }
+    };
+
+    using NiPSysModifierBoolCtlr = TypedNiPSysModifierCtlr<NiVisDataPtr>;
+    using NiPSysModifierFloatCtlr = TypedNiPSysModifierCtlr<NiFloatDataPtr>;
+
+    struct NiPSysEmitterCtlr : NiPSysModifierCtlr
+    {
+        NiPSysEmitterCtlrDataPtr mData;
+        NiInterpolatorPtr mVisInterpolator;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiPSysEmitterCtlrData : Record

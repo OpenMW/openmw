@@ -276,7 +276,33 @@ namespace Nif
             { "NiParticleGrowFade", &construct<NiParticleGrowFade, RC_NiParticleGrowFade> },
             { "NiParticleRotation", &construct<NiParticleRotation, RC_NiParticleRotation> },
 
-            // Modifier data, Gamebryo
+            // Modifier controllers, Gamebryo
+            { "NiPSysAirFieldAirFrictionCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysAirFieldAirFrictionCtlr> },
+            { "NiPSysAirFieldInheritVelocityCtlr",
+                &construct<NiPSysModifierFloatCtlr, RC_NiPSysAirFieldInheritVelocityCtlr> },
+            { "NiPSysAirFieldSpreadCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysAirFieldSpreadCtlr> },
+            { "NiPSysEmitterCtlr", &construct<NiPSysEmitterCtlr, RC_NiPSysEmitterCtlr> },
+            { "NiPSysEmitterDeclinationCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysEmitterDeclinationCtlr> },
+            { "NiPSysEmitterDeclinationVarCtlr",
+                &construct<NiPSysModifierFloatCtlr, RC_NiPSysEmitterDeclinationVarCtlr> },
+            { "NiPSysEmitterInitialRadiusCtlr",
+                &construct<NiPSysModifierFloatCtlr, RC_NiPSysEmitterInitialRadiusCtlr> },
+            { "NiPSysEmitterLifeSpanCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysEmitterLifeSpanCtlr> },
+            { "NiPSysEmitterPlanarAngleCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysEmitterPlanarAngleCtlr> },
+            { "NiPSysEmitterPlanarAngleVarCtlr",
+                &construct<NiPSysModifierFloatCtlr, RC_NiPSysEmitterPlanarAngleVarCtlr> },
+            { "NiPSysEmitterSpeedCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysEmitterSpeedCtlr> },
+            { "NiPSysFieldAttenuationCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysFieldAttenuationCtlr> },
+            { "NiPSysFieldMagnitudeCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysFieldMagnitudeCtlr> },
+            { "NiPSysFieldMaxDistanceCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysFieldMaxDistanceCtlr> },
+            { "NiPSysGravityStrengthCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysGravityStrengthCtlr> },
+            { "NiPSysInitialRotSpeedCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysInitialRotSpeedCtlr> },
+            { "NiPSysInitialRotSpeedVarCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysInitialRotSpeedVarCtlr> },
+            { "NiPSysInitialRotAngleCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysInitialRotAngleCtlr> },
+            { "NiPSysInitialRotAngleVarCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysInitialRotAngleVarCtlr> },
+            { "NiPSysModifierActiveCtlr", &construct<NiPSysModifierBoolCtlr, RC_NiPSysModifierActiveCtlr> },
+
+            // Modifier controller data, Gamebryo
             { "NiPSysEmitterCtlrData", &construct<NiPSysEmitterCtlrData, RC_NiPSysEmitterCtlrData> },
 
             // Colliders, 4.0.0.2

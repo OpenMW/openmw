@@ -175,6 +175,31 @@ namespace Nif
         }
     }
 
+    void NiPSysModifierCtlr::read(NIFStream* nif)
+    {
+        NiSingleInterpController::read(nif);
+
+        nif->read(mModifierName);
+    }
+
+    void NiPSysEmitterCtlr::read(NIFStream* nif)
+    {
+        NiPSysModifierCtlr::read(nif);
+
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 103))
+            mData.read(nif);
+        else
+            mVisInterpolator.read(nif);
+    }
+
+    void NiPSysEmitterCtlr::post(Reader& nif)
+    {
+        NiPSysModifierCtlr::post(nif);
+
+        mData.post(nif);
+        mVisInterpolator.post(nif);
+    }
+
     void NiPSysEmitterCtlrData::read(NIFStream* nif)
     {
         mFloatKeyList = std::make_shared<FloatKeyMap>();
