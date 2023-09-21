@@ -150,11 +150,8 @@ namespace MWClass
 
         std::string getModel(const MWWorld::ConstPtr& ptr) const override
         {
-            // TODO: Not clear where to get something renderable:
-            // ESM4::Npc::mModel is usually an empty string
-            // ESM4::Race::mModelMale is only a skeleton
-            // For now show error marker as a dummy model.
-            return "meshes/marker_error.nif";
+            // TODO: Implement actor rendering. This function will typically return the skeleton.
+            return {};
         }
     };
 }
