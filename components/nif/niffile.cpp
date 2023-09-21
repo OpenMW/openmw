@@ -539,10 +539,8 @@ namespace Nif
             }
 
             // Record separator. Some Havok records in Oblivion do not have it.
-            if (hasRecordSeparators && !rec.starts_with("bhk"))
-                if (nif.get<int32_t>())
-                    Log(Debug::Warning) << "NIFFile Warning: Record of type " << rec << ", index " << i
-                                        << " is preceded by a non-zero separator. File: " << mFilename;
+            if (hasRecordSeparators && !rec.starts_with("bhk") && nif.get<int32_t>())
+                throw Nif::Exception("Non-zero separator precedes " + rec + ", index " + std::to_string(i), mFilename);
 
             const auto entry = factories.find(rec);
 
