@@ -191,6 +191,7 @@ namespace Nif
         RC_NiPSysInitialRotAngleCtlr,
         RC_NiPSysInitialRotAngleVarCtlr,
         RC_NiPSysModifierActiveCtlr,
+        RC_NiPSysUpdateCtlr,
         RC_NiRollController,
         RC_NiSequence,
         RC_NiSequenceStreamHelper,

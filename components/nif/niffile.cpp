@@ -108,7 +108,6 @@ namespace Nif
             { "NiKeyframeController", &construct<NiKeyframeController, RC_NiKeyframeController> },
             { "NiLookAtController", &construct<NiLookAtController, RC_NiLookAtController> },
             { "NiMaterialColorController", &construct<NiMaterialColorController, RC_NiMaterialColorController> },
-            { "NiParticleSystemController", &construct<NiParticleSystemController, RC_NiParticleSystemController> },
             { "NiPathController", &construct<NiPathController, RC_NiPathController> },
             { "NiRollController", &construct<NiRollController, RC_NiRollController> },
             { "NiUVController", &construct<NiUVController, RC_NiUVController> },
@@ -308,6 +307,12 @@ namespace Nif
             // Colliders, 4.0.0.2
             { "NiPlanarCollider", &construct<NiPlanarCollider, RC_NiPlanarCollider> },
             { "NiSphericalCollider", &construct<NiSphericalCollider, RC_NiSphericalCollider> },
+
+            // Particle system controllers, 4.0.0.2
+            { "NiParticleSystemController", &construct<NiParticleSystemController, RC_NiParticleSystemController> },
+
+            // Particle system controllers, Gamebryo
+            { "NiPSysUpdateCtlr", &construct<NiTimeController, RC_NiPSysUpdateCtlr> },
 
             // PHYSICS
 
