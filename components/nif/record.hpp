@@ -169,6 +169,8 @@ namespace Nif
         RC_NiPlanarCollider,
         RC_NiPoint3Interpolator,
         RC_NiPosData,
+        RC_NiPSysEmitterCtlrData,
+        RC_NiPSysData,
         RC_NiRollController,
         RC_NiSequence,
         RC_NiSequenceStreamHelper,

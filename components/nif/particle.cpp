@@ -92,4 +92,97 @@ namespace Nif
         nif->read(mRotationSpeed);
     }
 
+    void NiParticlesData::read(NIFStream* nif)
+    {
+        NiGeometryData::read(nif);
+
+        // Should always match the number of vertices in theory, but doesn't:
+        // see mist.nif in Mistify mod (https://www.nexusmods.com/morrowind/mods/48112).
+        if (nif->getVersion() <= NIFFile::NIFVersion::VER_MW)
+            nif->read(mNumParticles);
+        bool isBs202 = nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() != 0;
+
+        bool numRadii = 1;
+        if (nif->getVersion() > NIFStream::generateVersion(10, 0, 1, 0))
+            numRadii = (nif->get<bool>() && !isBs202) ? mNumVertices : 0;
+        nif->readVector(mRadii, numRadii);
+        nif->read(mActiveCount);
+        if (nif->get<bool>() && !isBs202)
+            nif->readVector(mSizes, mNumVertices);
+
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
+        {
+            if (nif->get<bool>() && !isBs202)
+                nif->readVector(mRotations, mNumVertices);
+            if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 4))
+            {
+                if (nif->get<bool>() && !isBs202)
+                    nif->readVector(mRotationAngles, mNumVertices);
+                if (nif->get<bool>() && !isBs202)
+                    nif->readVector(mRotationAxes, mNumVertices);
+                if (isBs202)
+                {
+                    nif->read(mHasTextureIndices);
+                    uint32_t numSubtextureOffsets;
+                    if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
+                        numSubtextureOffsets = nif->get<uint8_t>();
+                    else
+                        nif->read(numSubtextureOffsets);
+                    nif->readVector(mSubtextureOffsets, numSubtextureOffsets);
+                    if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
+                    {
+                        nif->read(mAspectRatio);
+                        nif->read(mAspectFlags);
+                        nif->read(mAspectRatio2);
+                        nif->read(mAspectSpeed);
+                        nif->read(mAspectSpeed2);
+                    }
+                }
+            }
+        }
+    }
+
+    void NiRotatingParticlesData::read(NIFStream* nif)
+    {
+        NiParticlesData::read(nif);
+
+        if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0) && nif->get<bool>())
+            nif->readVector(mRotations, mNumVertices);
+    }
+
+    void NiPSysData::read(NIFStream* nif)
+    {
+        NiParticlesData::read(nif);
+
+        bool hasData = nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO3;
+        if (hasData)
+        {
+            mParticles.resize(mNumVertices);
+            for (NiParticleInfo& info : mParticles)
+                info.read(nif);
+        }
+
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+            nif->skip(12); // Unknown
+
+        if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 2) && nif->get<bool>() && hasData)
+            nif->readVector(mRotationSpeeds, mNumVertices);
+
+        if (nif->getVersion() != NIFStream::generateVersion(20, 2, 0, 7) || nif->getBethVersion() == 0)
+        {
+            nif->read(mNumAddedParticles);
+            nif->read(mAddedParticlesBase);
+        }
+    }
+
+    void NiPSysEmitterCtlrData::read(NIFStream* nif)
+    {
+        mFloatKeyList = std::make_shared<FloatKeyMap>();
+        mVisKeyList = std::make_shared<BoolKeyMap>();
+        uint32_t numVisKeys;
+        nif->read(numVisKeys);
+        for (size_t i = 0; i < numVisKeys; i++)
+            mVisKeyList->mKeys[nif->get<float>()].mValue = nif->get<uint8_t>() != 0;
+    }
+
 }

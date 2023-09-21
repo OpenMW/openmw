@@ -240,14 +240,8 @@ namespace Nif
             // GEOMETRY
 
             // 4.0.0.2
-            { "NiAutoNormalParticles", &construct<NiParticles, RC_NiParticles> },
-            { "NiAutoNormalParticlesData", &construct<NiParticlesData, RC_NiParticlesData> },
             { "NiLines", &construct<NiLines, RC_NiLines> },
             { "NiLinesData", &construct<NiLinesData, RC_NiLinesData> },
-            { "NiParticles", &construct<NiParticles, RC_NiParticles> },
-            { "NiParticlesData", &construct<NiParticlesData, RC_NiParticlesData> },
-            { "NiRotatingParticles", &construct<NiParticles, RC_NiParticles> },
-            { "NiRotatingParticlesData", &construct<NiRotatingParticlesData, RC_NiParticlesData> },
             { "NiSkinData", &construct<NiSkinData, RC_NiSkinData> },
             { "NiSkinInstance", &construct<NiSkinInstance, RC_NiSkinInstance> },
             { "NiSkinPartition", &construct<NiSkinPartition, RC_NiSkinPartition> },
@@ -265,11 +259,25 @@ namespace Nif
 
             // PARTICLES
 
+            // Geometry, 4.0.0.2
+            { "NiAutoNormalParticles", &construct<NiParticles, RC_NiParticles> },
+            { "NiAutoNormalParticlesData", &construct<NiParticlesData, RC_NiParticlesData> },
+            { "NiParticles", &construct<NiParticles, RC_NiParticles> },
+            { "NiParticlesData", &construct<NiParticlesData, RC_NiParticlesData> },
+            { "NiRotatingParticles", &construct<NiParticles, RC_NiParticles> },
+            { "NiRotatingParticlesData", &construct<NiRotatingParticlesData, RC_NiParticlesData> },
+
+            // Geometry, Gamebryo
+            { "NiPSysData", &construct<NiPSysData, RC_NiPSysData> },
+
             // Modifiers, 4.0.0.2
             { "NiGravity", &construct<NiGravity, RC_NiGravity> },
             { "NiParticleColorModifier", &construct<NiParticleColorModifier, RC_NiParticleColorModifier> },
             { "NiParticleGrowFade", &construct<NiParticleGrowFade, RC_NiParticleGrowFade> },
             { "NiParticleRotation", &construct<NiParticleRotation, RC_NiParticleRotation> },
+
+            // Modifier data, Gamebryo
+            { "NiPSysEmitterCtlrData", &construct<NiPSysEmitterCtlrData, RC_NiPSysEmitterCtlrData> },
 
             // Colliders, 4.0.0.2
             { "NiPlanarCollider", &construct<NiPlanarCollider, RC_NiPlanarCollider> },

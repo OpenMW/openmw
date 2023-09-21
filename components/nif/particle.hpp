@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_NIF_PARTICLE_HPP
 
 #include "base.hpp"
+#include "data.hpp"
 
 namespace Nif
 {
@@ -82,6 +83,50 @@ namespace Nif
         uint8_t mRandomInitialAxis;
         osg::Vec3f mInitialAxis;
         float mRotationSpeed;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiParticlesData : NiGeometryData
+    {
+        uint16_t mNumParticles{ 0 };
+        uint16_t mActiveCount;
+
+        std::vector<float> mRadii;
+        std::vector<float> mSizes;
+        std::vector<osg::Quat> mRotations;
+        std::vector<float> mRotationAngles;
+        std::vector<osg::Vec3f> mRotationAxes;
+
+        bool mHasTextureIndices{ false };
+        std::vector<osg::Vec4f> mSubtextureOffsets;
+        float mAspectRatio{ 1.f };
+        uint16_t mAspectFlags{ 0 };
+        float mAspectRatio2;
+        float mAspectSpeed, mAspectSpeed2;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiRotatingParticlesData : NiParticlesData
+    {
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiPSysData : NiParticlesData
+    {
+        std::vector<NiParticleInfo> mParticles;
+        std::vector<float> mRotationSpeeds;
+        uint16_t mNumAddedParticles;
+        uint16_t mAddedParticlesBase;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiPSysEmitterCtlrData : Record
+    {
+        FloatKeyMapPtr mFloatKeyList;
+        BoolKeyMapPtr mVisKeyList;
 
         void read(NIFStream* nif) override;
     };
