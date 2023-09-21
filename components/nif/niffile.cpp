@@ -393,6 +393,8 @@ namespace Nif
             { "BSDistantTreeShaderProperty", &construct<BSShaderProperty, RC_BSDistantTreeShaderProperty> },
             { "BSLightingShaderProperty", &construct<BSLightingShaderProperty, RC_BSLightingShaderProperty> },
             { "BSEffectShaderProperty", &construct<BSEffectShaderProperty, RC_BSEffectShaderProperty> },
+            { "BSSkyShaderProperty", &construct<BSSkyShaderProperty, RC_BSSkyShaderProperty> },
+            { "BSWaterShaderProperty", &construct<BSWaterShaderProperty, RC_BSWaterShaderProperty> },
             { "DistantLODShaderProperty", &construct<BSShaderProperty, RC_DistantLODShaderProperty> },
             { "HairShaderProperty", &construct<BSShaderProperty, RC_HairShaderProperty> },
             { "Lighting30ShaderProperty", &construct<BSShaderPPLightingProperty, RC_BSShaderPPLightingProperty> },

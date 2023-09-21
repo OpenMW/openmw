@@ -232,7 +232,7 @@ namespace Nif
         BSShaderLightingProperty::read(nif);
 
         mFilename = nif->getSizedString();
-        mSkyObjectType = static_cast<ObjectType>(nif->get<uint32_t>());
+        mSkyObjectType = static_cast<SkyObjectType>(nif->get<uint32_t>());
     }
 
     void TallGrassShaderProperty::read(NIFStream* nif)
@@ -453,6 +453,21 @@ namespace Nif
             nif->skip(6 * sizeof(float)); // Unknown floats
             nif->skip(1); // Unknown byte
         }
+    }
+
+    void BSSkyShaderProperty::read(NIFStream* nif)
+    {
+        BSShaderProperty::read(nif);
+
+        mFilename = nif->getSizedString();
+        mSkyObjectType = static_cast<SkyObjectType>(nif->get<uint32_t>());
+    }
+
+    void BSWaterShaderProperty::read(NIFStream* nif)
+    {
+        BSShaderProperty::read(nif);
+
+        nif->read(mFlags);
     }
 
     void NiAlphaProperty::read(NIFStream* nif)

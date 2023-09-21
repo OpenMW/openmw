@@ -171,20 +171,20 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    enum class SkyObjectType : uint32_t
+    {
+        SkyTexture = 0,
+        SkySunglare = 1,
+        Sky = 2,
+        SkyClouds = 3,
+        SkyStars = 5,
+        SkyMoonStarsMask = 7,
+    };
+
     struct SkyShaderProperty : BSShaderLightingProperty
     {
-        enum class ObjectType : uint32_t
-        {
-            SkyTexture = 0,
-            SkySunglare = 1,
-            Sky = 2,
-            SkyClouds = 3,
-            SkyStars = 5,
-            SkyMoonStarsMask = 7,
-        };
-
         std::string mFilename;
-        ObjectType mSkyObjectType;
+        SkyObjectType mSkyObjectType;
 
         void read(NIFStream* nif) override;
     };
@@ -356,6 +356,39 @@ namespace Nif
         bool useFalloff() const { return mShaderFlags1 & BSLSFlag1_Falloff; }
         bool doubleSided() const { return mShaderFlags2 & BSLSFlag2_DoubleSided; }
         bool treeAnim() const { return mShaderFlags2 & BSLSFlag2_TreeAnim; }
+    };
+
+    struct BSSkyShaderProperty : BSShaderProperty
+    {
+        std::string mFilename;
+        SkyObjectType mSkyObjectType;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSWaterShaderProperty : BSShaderProperty
+    {
+        enum Flags
+        {
+            Flag_Displacement = 0x0001,
+            Flag_LOD = 0x0002,
+            Flag_Depth = 0x0004,
+            Flag_ActorInWater = 0x0008,
+            Flag_ActorInWaterIsMoving = 0x0010,
+            Flag_Underwater = 0x0020,
+            Flag_Reflections = 0x0040,
+            Flag_Refractions = 0x0080,
+            Flag_VertexUV = 0x0100,
+            Flag_VertexAlphaDepth = 0x0200,
+            Flag_Procedural = 0x0400,
+            Flag_Fog = 0x0800,
+            Flag_UpdateConstants = 0x1000,
+            Flag_CubeMap = 0x2000,
+        };
+
+        uint32_t mFlags;
+
+        void read(NIFStream* nif) override;
     };
 
     struct NiAlphaProperty : NiProperty
