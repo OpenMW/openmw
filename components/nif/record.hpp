@@ -172,6 +172,7 @@ namespace Nif
         RC_NiParticleRotation,
         RC_NiParticles,
         RC_NiParticlesData,
+        RC_NiParticleSystem,
         RC_NiParticleSystemController,
         RC_NiPathController,
         RC_NiPathInterpolator,

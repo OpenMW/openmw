@@ -278,7 +278,12 @@ namespace Nif
             { "NiRotatingParticlesData", &construct<NiRotatingParticlesData, RC_NiParticlesData> },
 
             // Geometry, Gamebryo
+            { "NiParticleSystem", &construct<NiParticleSystem, RC_NiParticleSystem> },
+            { "NiMeshParticleSystem", &construct<NiParticleSystem, RC_NiParticleSystem> },
             { "NiPSysData", &construct<NiPSysData, RC_NiPSysData> },
+
+            // Geometry, Bethesda
+            { "BSStripParticleSystem", &construct<NiParticleSystem, RC_NiParticleSystem> },
 
             // Modifiers, 4.0.0.2
             { "NiGravity", &construct<NiGravity, RC_NiGravity> },

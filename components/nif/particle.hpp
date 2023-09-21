@@ -4,6 +4,7 @@
 #include "base.hpp"
 #include "controller.hpp"
 #include "data.hpp"
+#include "node.hpp"
 
 namespace Nif
 {
@@ -114,6 +115,19 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct NiParticleSystem : NiParticles
+    {
+        osg::BoundingSpheref mBoundingSphere;
+        std::array<float, 6> mBoundMinMax;
+        BSVertexDesc mVertDesc;
+        std::array<uint16_t, 4> mNearFar;
+        bool mWorldSpace{ true };
+        NiPSysModifierList mModifiers;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct NiPSysData : NiParticlesData
     {
         std::vector<NiParticleInfo> mParticles;
@@ -122,6 +136,35 @@ namespace Nif
         uint16_t mAddedParticlesBase;
 
         void read(NIFStream* nif) override;
+    };
+
+    // Abstract
+    struct NiPSysModifier : Record
+    {
+        enum class NiPSysModifierOrder : uint32_t
+        {
+            KillOldParticles = 0,
+            BSLOD = 1,
+            Emitter = 1000,
+            Spawn = 2000,
+            BSStripUpdateFO3 = 2500,
+            General = 3000,
+            Force = 4000,
+            Collider = 5000,
+            PosUpdate = 6000,
+            PostPosUpdate = 6500,
+            WorldshiftPartspawn = 6600,
+            BoundUpdate = 7000,
+            BSStripUpdateSK = 8000,
+        };
+
+        std::string mName;
+        NiPSysModifierOrder mOrder;
+        NiParticleSystemPtr mTarget;
+        bool mActive;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
     // Abstract

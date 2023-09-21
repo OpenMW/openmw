@@ -150,6 +150,46 @@ namespace Nif
             nif->readVector(mRotations, mNumVertices);
     }
 
+    void NiParticleSystem::read(NIFStream* nif)
+    {
+        // Weird loading to account for inheritance differences starting from SSE
+        if (nif->getBethVersion() < NIFFile::BethVersion::BETHVER_SSE)
+            NiParticles::read(nif);
+        else
+        {
+            NiAVObject::read(nif);
+
+            nif->read(mBoundingSphere);
+            if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+                nif->readArray(mBoundMinMax);
+
+            mSkin.read(nif);
+            mShaderProperty.read(nif);
+            mAlphaProperty.read(nif);
+            mVertDesc.read(nif);
+        }
+
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_SKY)
+        {
+            nif->readArray(mNearFar);
+            if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_SSE)
+                mData.read(nif);
+        }
+
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
+        {
+            nif->read(mWorldSpace);
+            readRecordList(nif, mModifiers);
+        }
+    }
+
+    void NiParticleSystem::post(Reader& nif)
+    {
+        NiParticles::post(nif);
+
+        postRecordList(nif, mModifiers);
+    }
+
     void NiPSysData::read(NIFStream* nif)
     {
         NiParticlesData::read(nif);
@@ -173,6 +213,19 @@ namespace Nif
             nif->read(mNumAddedParticles);
             nif->read(mAddedParticlesBase);
         }
+    }
+
+    void NiPSysModifier::read(NIFStream* nif)
+    {
+        nif->read(mName);
+        mOrder = static_cast<NiPSysModifierOrder>(nif->get<uint32_t>());
+        mTarget.read(nif);
+        nif->read(mActive);
+    }
+
+    void NiPSysModifier::post(Reader& nif)
+    {
+        mTarget.post(nif);
     }
 
     void NiPSysModifierCtlr::read(NIFStream* nif)

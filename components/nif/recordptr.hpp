@@ -129,7 +129,9 @@ namespace Nif
     struct NiSourceTexture;
     struct NiPalette;
     struct NiParticleModifier;
+    struct NiParticleSystem;
     struct NiPSysEmitterCtlrData;
+    struct NiPSysModifier;
     struct NiBoolData;
     struct NiSkinPartition;
     struct BSShaderTextureSet;
@@ -171,6 +173,7 @@ namespace Nif
     using NiSourceTexturePtr = RecordPtrT<NiSourceTexture>;
     using NiPalettePtr = RecordPtrT<NiPalette>;
     using NiParticleModifierPtr = RecordPtrT<NiParticleModifier>;
+    using NiParticleSystemPtr = RecordPtrT<NiParticleSystem>;
     using NiPSysEmitterCtlrDataPtr = RecordPtrT<NiPSysEmitterCtlrData>;
     using NiBoolDataPtr = RecordPtrT<NiBoolData>;
     using NiSkinPartitionPtr = RecordPtrT<NiSkinPartition>;
@@ -204,6 +207,7 @@ namespace Nif
     using bhkSerializableList = RecordListT<bhkSerializable>;
     using bhkEntityList = RecordListT<bhkEntity>;
     using NiControllerSequenceList = RecordListT<NiControllerSequence>;
+    using NiPSysModifierList = RecordListT<NiPSysModifier>;
 
 } // Namespace
 #endif
