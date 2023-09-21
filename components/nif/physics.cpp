@@ -342,6 +342,43 @@ namespace Nif
         mBody.read(nif);
     }
 
+    void bhkNPCollisionObject::read(NIFStream* nif)
+    {
+        NiCollisionObject::read(nif);
+
+        nif->read(mFlags);
+        mData.read(nif);
+        nif->read(mBodyID);
+    }
+
+    void bhkNPCollisionObject::post(Reader& nif)
+    {
+        NiCollisionObject::post(nif);
+
+        mData.post(nif);
+    }
+
+    void bhkBlendCollisionObject::read(NIFStream* nif)
+    {
+        bhkCollisionObject::read(nif);
+
+        nif->read(mHeirGain);
+        nif->read(mVelGain);
+
+        if (nif->getBethVersion() <= 8)
+            nif->skip(8); // Unknown
+    }
+
+    void bhkPhysicsSystem::read(NIFStream* nif)
+    {
+        nif->readVector(mData, nif->get<uint32_t>());
+    }
+
+    void bhkRagdollSystem::read(NIFStream* nif)
+    {
+        nif->readVector(mData, nif->get<uint32_t>());
+    }
+
     void bhkWorldObject::read(NIFStream* nif)
     {
         mShape.read(nif);
@@ -466,6 +503,35 @@ namespace Nif
         nif->read(mRadius);
     }
 
+    void bhkConvexListShape::read(NIFStream* nif)
+    {
+        readRecordList(nif, mSubShapes);
+        mMaterial.read(nif);
+        nif->read(mRadius);
+        nif->skip(8); // Unknown
+        mChildShapeProperty.read(nif);
+        nif->read(mUseCachedAABB);
+        nif->read(mClosestPointMinDistance);
+    }
+
+    void bhkConvexListShape::post(Reader& nif)
+    {
+        postRecordList(nif, mSubShapes);
+    }
+
+    void bhkConvexSweepShape::read(NIFStream* nif)
+    {
+        mShape.read(nif);
+        mMaterial.read(nif);
+        nif->read(mRadius);
+        nif->skip(12); // Unknown
+    }
+
+    void bhkConvexSweepShape::post(Reader& nif)
+    {
+        mShape.post(nif);
+    }
+
     void bhkConvexVerticesShape::read(NIFStream* nif)
     {
         bhkConvexShape::read(nif);
@@ -510,6 +576,17 @@ namespace Nif
         nif->read(mRadius1);
         nif->read(mPoint2);
         nif->read(mRadius2);
+    }
+
+    void bhkCylinderShape::read(NIFStream* nif)
+    {
+        bhkConvexShape::read(nif);
+
+        nif->skip(8); // Unused
+        nif->read(mVertexA);
+        nif->read(mVertexB);
+        nif->read(mCylinderRadius);
+        nif->skip(12); // Unused
     }
 
     void bhkListShape::read(NIFStream* nif)

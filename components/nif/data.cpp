@@ -532,6 +532,44 @@ namespace Nif
         mKeyList->read(nif);
     }
 
+    void NiAdditionalGeometryData::read(NIFStream* nif)
+    {
+        nif->read(mNumVertices);
+        mBlockInfos.resize(nif->get<uint32_t>());
+        for (DataStream& info : mBlockInfos)
+            info.read(nif);
+        mBlocks.resize(nif->get<uint32_t>());
+        for (DataBlock& block : mBlocks)
+            block.read(nif, recType == RC_BSPackedAdditionalGeometryData);
+    }
+
+    void NiAdditionalGeometryData::DataStream::read(NIFStream* nif)
+    {
+        nif->read(mType);
+        nif->read(mUnitSize);
+        nif->read(mTotalSize);
+        nif->read(mStride);
+        nif->read(mBlockIndex);
+        nif->read(mBlockOffset);
+        nif->read(mFlags);
+    }
+
+    void NiAdditionalGeometryData::DataBlock::read(NIFStream* nif, bool bsPacked)
+    {
+        nif->read(mValid);
+        if (!mValid)
+            return;
+        nif->read(mBlockSize);
+        nif->readVector(mBlockOffsets, nif->get<uint32_t>());
+        nif->readVector(mDataSizes, nif->get<uint32_t>());
+        nif->readVector(mData, mDataSizes.size() * mBlockSize);
+        if (bsPacked)
+        {
+            nif->read(mShaderIndex);
+            nif->read(mTotalSize);
+        }
+    }
+
     void BSMultiBound::read(NIFStream* nif)
     {
         mData.read(nif);
@@ -540,6 +578,12 @@ namespace Nif
     void BSMultiBound::post(Reader& nif)
     {
         mData.post(nif);
+    }
+
+    void BSMultiBoundAABB::read(NIFStream* nif)
+    {
+        nif->read(mPosition);
+        nif->read(mExtents);
     }
 
     void BSMultiBoundOBB::read(NIFStream* nif)

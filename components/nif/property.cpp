@@ -227,6 +227,28 @@ namespace Nif
             nif->read(mFalloffParams);
     }
 
+    void SkyShaderProperty::read(NIFStream* nif)
+    {
+        BSShaderLightingProperty::read(nif);
+
+        mFilename = nif->getSizedString();
+        mSkyObjectType = static_cast<ObjectType>(nif->get<uint32_t>());
+    }
+
+    void TallGrassShaderProperty::read(NIFStream* nif)
+    {
+        BSShaderProperty::read(nif);
+
+        mFilename = nif->getSizedString();
+    }
+
+    void TileShaderProperty::read(NIFStream* nif)
+    {
+        BSShaderLightingProperty::read(nif);
+
+        mFilename = nif->getSizedString();
+    }
+
     void BSSPLuminanceParams::read(NIFStream* nif)
     {
         nif->read(mLumEmittance);
@@ -349,7 +371,7 @@ namespace Nif
                 break;
             case BSLightingShaderType::ShaderType_SkinTint:
                 nif->read(mSkinTintColor);
-                if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO4)
+                if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_FO4)
                     nif->read(mSkinTintAlpha);
                 break;
             case BSLightingShaderType::ShaderType_HairTint:

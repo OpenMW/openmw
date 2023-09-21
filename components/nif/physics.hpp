@@ -370,6 +370,11 @@ namespace Nif
     {
     };
 
+    // Abstract physics system
+    struct bhkSystem : public Record
+    {
+    };
+
     // Generic collision object
     struct NiCollisionObject : public Record
     {
@@ -392,6 +397,38 @@ namespace Nif
             NiCollisionObject::post(nif);
             mBody.post(nif);
         }
+    };
+
+    struct bhkNPCollisionObject : NiCollisionObject
+    {
+        uint16_t mFlags;
+        bhkSystemPtr mData;
+        uint32_t mBodyID;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct bhkBlendCollisionObject : bhkCollisionObject
+    {
+        float mHeirGain;
+        float mVelGain;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkPhysicsSystem : public bhkSystem
+    {
+        std::vector<uint8_t> mData;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkRagdollSystem : public bhkSystem
+    {
+        std::vector<uint8_t> mData;
+
+        void read(NIFStream* nif) override;
     };
 
     // Abstract Havok shape info record
@@ -485,6 +522,30 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    // A list of convex shapes sharing the same properties
+    struct bhkConvexListShape : public bhkShape
+    {
+        bhkShapeList mSubShapes;
+        HavokMaterial mMaterial;
+        float mRadius;
+        bhkWorldObjCInfoProperty mChildShapeProperty;
+        bool mUseCachedAABB;
+        float mClosestPointMinDistance;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct bhkConvexSweepShape : bhkShape
+    {
+        bhkConvexShape mShape;
+        HavokMaterial mMaterial;
+        float mRadius;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     // A convex shape built from vertices
     struct bhkConvexVerticesShape : public bhkConvexShape
     {
@@ -520,6 +581,15 @@ namespace Nif
     {
         osg::Vec3f mPoint1, mPoint2;
         float mRadius1, mRadius2;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // A cylinder
+    struct bhkCylinderShape : public bhkConvexShape
+    {
+        osg::Vec4f mVertexA, mVertexB;
+        float mCylinderRadius;
 
         void read(NIFStream* nif) override;
     };

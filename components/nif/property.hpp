@@ -171,6 +171,38 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct SkyShaderProperty : BSShaderLightingProperty
+    {
+        enum class ObjectType : uint32_t
+        {
+            SkyTexture = 0,
+            SkySunglare = 1,
+            Sky = 2,
+            SkyClouds = 3,
+            SkyStars = 5,
+            SkyMoonStarsMask = 7,
+        };
+
+        std::string mFilename;
+        ObjectType mSkyObjectType;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct TallGrassShaderProperty : BSShaderProperty
+    {
+        std::string mFilename;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct TileShaderProperty : BSShaderLightingProperty
+    {
+        std::string mFilename;
+
+        void read(NIFStream* nif) override;
+    };
+
     enum class BSLightingShaderType : uint32_t
     {
         ShaderType_Default = 0,

@@ -10,6 +10,13 @@ namespace Nif
         nif->readVector(mData, mRecordSize);
     }
 
+    void NiStringsExtraData::read(NIFStream* nif)
+    {
+        Extra::read(nif);
+
+        nif->getSizedStrings(mData, nif->get<uint32_t>());
+    }
+
     void NiTextKeyExtraData::read(NIFStream* nif)
     {
         Extra::read(nif);
@@ -92,6 +99,41 @@ namespace Nif
 
         nif->read(mFile);
         nif->read(mControlsBaseSkeleton);
+    }
+
+    void BSBoneLODExtraData::read(NIFStream* nif)
+    {
+        Extra::read(nif);
+
+        mData.resize(nif->get<uint32_t>());
+        for (BoneLOD& lod : mData)
+            lod.read(nif);
+    }
+
+    void BSBoneLODExtraData::BoneLOD::read(NIFStream* nif)
+    {
+        nif->read(mDistance);
+        nif->read(mBone);
+    }
+
+    void BSDecalPlacementVectorExtraData::read(NIFStream* nif)
+    {
+        NiFloatExtraData::read(nif);
+
+        mBlocks.resize(nif->get<uint16_t>());
+        for (Block& block : mBlocks)
+            block.read(nif);
+    }
+
+    void BSDecalPlacementVectorExtraData::Block::read(NIFStream* nif)
+    {
+        nif->readVector(mPoints, nif->get<uint16_t>());
+        nif->readVector(mNormals, mPoints.size());
+    }
+
+    void BSClothExtraData::read(NIFStream* nif)
+    {
+        nif->readVector(mData, nif->get<uint32_t>());
     }
 
 }

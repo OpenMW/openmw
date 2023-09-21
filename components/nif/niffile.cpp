@@ -116,6 +116,7 @@ namespace Nif
 
             // Gamebryo
             { "NiControllerManager", &construct<NiControllerManager, RC_NiControllerManager> },
+            { "NiLightDimmerController", &construct<NiFloatInterpController, RC_NiLightDimmerController> },
             { "NiTransformController", &construct<NiKeyframeController, RC_NiKeyframeController> },
             { "NiTextureTransformController",
                 &construct<NiTextureTransformController, RC_NiTextureTransformController> },
@@ -123,8 +124,13 @@ namespace Nif
                 &construct<NiMultiTargetTransformController, RC_NiMultiTargetTransformController> },
 
             // Bethesda
+            { "BSFrustumFOVController", &construct<NiFloatInterpController, RC_BSFrustumFOVController> },
+            { "BSKeyframeController", &construct<BSKeyframeController, RC_BSKeyframeController> },
+            { "BSLagBoneController", &construct<BSLagBoneController, RC_BSLagBoneController> },
             { "BSMaterialEmittanceMultController",
                 &construct<NiFloatInterpController, RC_BSMaterialEmittanceMultController> },
+            { "BSNiAlphaPropertyTestRefController",
+                &construct<NiFloatInterpController, RC_BSNiAlphaPropertyTestRefController> },
             { "BSRefractionFirePeriodController",
                 &construct<NiSingleInterpController, RC_BSRefractionFirePeriodController> },
             { "BSRefractionStrengthController",
@@ -167,11 +173,14 @@ namespace Nif
             { "NiVisData", &construct<NiVisData, RC_NiVisData> },
 
             // Gamebryo
+            { "NiAdditionalGeometryData", &construct<NiAdditionalGeometryData, RC_NiAdditionalGeometryData> },
             { "NiBoolData", &construct<NiBoolData, RC_NiBoolData> },
             { "NiDefaultAVObjectPalette", &construct<NiDefaultAVObjectPalette, RC_NiDefaultAVObjectPalette> },
             { "NiTransformData", &construct<NiKeyframeData, RC_NiKeyframeData> },
 
             // Bethesda
+            { "BSPackedAdditionalGeometryData",
+                &construct<NiAdditionalGeometryData, RC_BSPackedAdditionalGeometryData> },
             { "BSShaderTextureSet", &construct<BSShaderTextureSet, RC_BSShaderTextureSet> },
 
             // DYNAMIC EFFECTS
@@ -200,11 +209,13 @@ namespace Nif
             { "NiIntegerExtraData", &construct<NiIntegerExtraData, RC_NiIntegerExtraData> },
             { "NiIntegersExtraData", &construct<NiIntegersExtraData, RC_NiIntegersExtraData> },
             { "NiVectorExtraData", &construct<NiVectorExtraData, RC_NiVectorExtraData> },
+            { "NiStringsExtraData", &construct<NiStringsExtraData, RC_NiStringsExtraData> },
             { "NiStringPalette", &construct<NiStringPalette, RC_NiStringPalette> },
 
             // Bethesda bounds
             { "BSBound", &construct<BSBound, RC_BSBound> },
             { "BSMultiBound", &construct<BSMultiBound, RC_BSMultiBound> },
+            { "BSMultiBoundAABB", &construct<BSMultiBoundAABB, RC_BSMultiBoundAABB> },
             { "BSMultiBoundOBB", &construct<BSMultiBoundOBB, RC_BSMultiBoundOBB> },
             { "BSMultiBoundSphere", &construct<BSMultiBoundSphere, RC_BSMultiBoundSphere> },
 
@@ -214,7 +225,16 @@ namespace Nif
             { "BSInvMarker", &construct<BSInvMarker, RC_BSInvMarker> },
 
             // Other Bethesda records
+            { "BSExtraData", &construct<BSExtraData, RC_BSExtraData> },
             { "BSBehaviorGraphExtraData", &construct<BSBehaviorGraphExtraData, RC_BSBehaviorGraphExtraData> },
+            { "BSBoneLODExtraData", &construct<BSBoneLODExtraData, RC_BSBoneLODExtraData> },
+            { "BSClothExtraData", &construct<BSClothExtraData, RC_BSClothExtraData> },
+            { "BSDecalPlacementVectorExtraData",
+                &construct<BSDecalPlacementVectorExtraData, RC_BSDecalPlacementVectorExtraData> },
+            { "BSDistantObjectExtraData", &construct<BSDistantObjectExtraData, RC_BSDistantObjectExtraData> },
+            { "BSDistantObjectLargeRefExtraData",
+                &construct<BSDistantObjectLargeRefExtraData, RC_BSDistantObjectLargeRefExtraData> },
+            { "BSWArray", &construct<BSWArray, RC_BSWArray> },
             { "BSXFlags", &construct<NiIntegerExtraData, RC_BSXFlags> },
 
             // GEOMETRY
@@ -239,7 +259,9 @@ namespace Nif
             // Bethesda
             { "BSDismemberSkinInstance", &construct<BSDismemberSkinInstance, RC_BSDismemberSkinInstance> },
             { "BSTriShape", &construct<BSTriShape, RC_BSTriShape> },
+            { "BSDynamicTriShape", &construct<BSDynamicTriShape, RC_BSDynamicTriShape> },
             { "BSLODTriShape", &construct<BSLODTriShape, RC_BSLODTriShape> },
+            { "BSMeshLODTriShape", &construct<BSMeshLODTriShape, RC_BSMeshLODTriShape> },
 
             // PARTICLES
 
@@ -262,6 +284,8 @@ namespace Nif
             { "bhkCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
             { "bhkPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
             { "bhkSPCollisionObject", &construct<bhkCollisionObject, RC_bhkCollisionObject> },
+            { "bhkNPCollisionObject", &construct<bhkNPCollisionObject, RC_bhkCollisionObject> },
+            { "bhkBlendCollisionObject", &construct<bhkBlendCollisionObject, RC_bhkBlendCollisionObject> },
 
             // Constraint records, Bethesda
             { "bhkHingeConstraint", &construct<bhkHingeConstraint, RC_bhkHingeConstraint> },
@@ -275,8 +299,11 @@ namespace Nif
             // Physics geometry records, Bethesda
             { "bhkBoxShape", &construct<bhkBoxShape, RC_bhkBoxShape> },
             { "bhkCapsuleShape", &construct<bhkCapsuleShape, RC_bhkCapsuleShape> },
+            { "bhkCylinderShape", &construct<bhkCylinderShape, RC_bhkCylinderShape> },
             { "bhkCompressedMeshShape", &construct<bhkCompressedMeshShape, RC_bhkCompressedMeshShape> },
             { "bhkCompressedMeshShapeData", &construct<bhkCompressedMeshShapeData, RC_bhkCompressedMeshShapeData> },
+            { "bhkConvexListShape", &construct<bhkConvexListShape, RC_bhkConvexListShape> },
+            { "bhkConvexSweepShape", &construct<bhkConvexSweepShape, RC_bhkConvexSweepShape> },
             { "bhkConvexTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },
             { "bhkConvexVerticesShape", &construct<bhkConvexVerticesShape, RC_bhkConvexVerticesShape> },
             { "bhkListShape", &construct<bhkListShape, RC_bhkListShape> },
@@ -287,6 +314,10 @@ namespace Nif
             { "bhkSimpleShapePhantom", &construct<bhkSimpleShapePhantom, RC_bhkSimpleShapePhantom> },
             { "bhkSphereShape", &construct<bhkSphereShape, RC_bhkSphereShape> },
             { "bhkTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },
+
+            // Physics system records, Bethesda
+            { "bhkPhysicsSystem", &construct<bhkPhysicsSystem, RC_bhkPhysicsSystem> },
+            { "bhkRagdollSystem", &construct<bhkRagdollSystem, RC_bhkRagdollSystem> },
 
             // PROPERTIES
 
@@ -307,8 +338,17 @@ namespace Nif
             { "BSShaderProperty", &construct<BSShaderProperty, RC_BSShaderProperty> },
             { "BSShaderPPLightingProperty", &construct<BSShaderPPLightingProperty, RC_BSShaderPPLightingProperty> },
             { "BSShaderNoLightingProperty", &construct<BSShaderNoLightingProperty, RC_BSShaderNoLightingProperty> },
+            { "BSDistantTreeShaderProperty", &construct<BSShaderProperty, RC_BSDistantTreeShaderProperty> },
             { "BSLightingShaderProperty", &construct<BSLightingShaderProperty, RC_BSLightingShaderProperty> },
             { "BSEffectShaderProperty", &construct<BSEffectShaderProperty, RC_BSEffectShaderProperty> },
+            { "DistantLODShaderProperty", &construct<BSShaderProperty, RC_DistantLODShaderProperty> },
+            { "HairShaderProperty", &construct<BSShaderProperty, RC_HairShaderProperty> },
+            { "Lighting30ShaderProperty", &construct<BSShaderPPLightingProperty, RC_BSShaderPPLightingProperty> },
+            { "SkyShaderProperty", &construct<SkyShaderProperty, RC_SkyShaderProperty> },
+            { "TallGrassShaderProperty", &construct<TallGrassShaderProperty, RC_TallGrassShaderProperty> },
+            { "TileShaderProperty", &construct<TileShaderProperty, RC_TileShaderProperty> },
+            { "VolumetricFogShaderProperty", &construct<BSShaderProperty, RC_VolumetricFogShaderProperty> },
+            { "WaterShaderProperty", &construct<BSShaderProperty, RC_WaterShaderProperty> },
         };
     }
 

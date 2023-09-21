@@ -136,6 +136,7 @@ namespace Nif
     struct BSShaderProperty;
     struct NiAlphaProperty;
     struct NiCollisionObject;
+    struct bhkSystem;
     struct bhkWorldObject;
     struct bhkShape;
     struct bhkSerializable;
@@ -176,6 +177,7 @@ namespace Nif
     using BSShaderPropertyPtr = RecordPtrT<BSShaderProperty>;
     using NiAlphaPropertyPtr = RecordPtrT<NiAlphaProperty>;
     using NiCollisionObjectPtr = RecordPtrT<NiCollisionObject>;
+    using bhkSystemPtr = RecordPtrT<bhkSystem>;
     using bhkWorldObjectPtr = RecordPtrT<bhkWorldObject>;
     using bhkShapePtr = RecordPtrT<bhkShape>;
     using bhkEntityPtr = RecordPtrT<bhkEntity>;
