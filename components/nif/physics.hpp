@@ -348,6 +348,21 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
+    struct bhkBallAndSocketConstraintCInfo
+    {
+        osg::Vec4f mPivotA, mPivotB;
+
+        void read(NIFStream* nif);
+    };
+
+    struct bhkStiffSpringConstraintCInfo
+    {
+        osg::Vec4f mPivotA, mPivotB;
+        float mLength;
+
+        void read(NIFStream* nif);
+    };
+
     /// Record types
 
     // Abstract Bethesda Havok object
@@ -680,6 +695,20 @@ namespace Nif
     struct bhkLimitedHingeConstraint : public bhkConstraint
     {
         bhkLimitedHingeConstraintCInfo mConstraint;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkBallAndSocketConstraint : bhkConstraint
+    {
+        bhkBallAndSocketConstraintCInfo mConstraint;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkStiffSpringConstraint : bhkConstraint
+    {
+        bhkStiffSpringConstraintCInfo mConstraint;
 
         void read(NIFStream* nif) override;
     };

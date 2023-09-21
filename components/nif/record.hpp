@@ -36,6 +36,7 @@ namespace Nif
     {
         RC_MISSING = 0,
         RC_AvoidNode,
+        RC_bhkBallAndSocketConstraint,
         RC_bhkBlendCollisionObject,
         RC_bhkBlendController,
         RC_bhkBoxShape,
@@ -61,6 +62,7 @@ namespace Nif
         RC_bhkRigidBodyT,
         RC_bhkSimpleShapePhantom,
         RC_bhkSphereShape,
+        RC_bhkStiffSpringConstraint,
         RC_BSBehaviorGraphExtraData,
         RC_BSBound,
         RC_BSBoneLODExtraData,

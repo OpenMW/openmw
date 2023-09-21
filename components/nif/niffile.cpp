@@ -338,9 +338,11 @@ namespace Nif
             { "bhkBlendCollisionObject", &construct<bhkBlendCollisionObject, RC_bhkBlendCollisionObject> },
 
             // Constraint records, Bethesda
+            { "bhkBallAndSocketConstraint", &construct<bhkBallAndSocketConstraint, RC_bhkBallAndSocketConstraint> },
             { "bhkHingeConstraint", &construct<bhkHingeConstraint, RC_bhkHingeConstraint> },
             { "bhkLimitedHingeConstraint", &construct<bhkLimitedHingeConstraint, RC_bhkLimitedHingeConstraint> },
             { "bhkRagdollConstraint", &construct<bhkRagdollConstraint, RC_bhkRagdollConstraint> },
+            { "bhkStiffSpringConstraint", &construct<bhkStiffSpringConstraint, RC_bhkStiffSpringConstraint> },
 
             // Physics body records, Bethesda
             { "bhkRigidBody", &construct<bhkRigidBody, RC_bhkRigidBody> },
