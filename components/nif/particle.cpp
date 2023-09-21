@@ -238,6 +238,35 @@ namespace Nif
         mTarget.post(nif);
     }
 
+    void NiPSysAgeDeathModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mSpawnOnDeath);
+        mSpawnModifier.read(nif);
+    }
+
+    void NiPSysAgeDeathModifier::post(Reader& nif)
+    {
+        NiPSysModifier::post(nif);
+
+        mSpawnModifier.post(nif);
+    }
+
+    void NiPSysSpawnModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mNumSpawnGenerations);
+        nif->read(mPercentageSpawned);
+        nif->read(mMinNumToSpawn);
+        nif->read(mMaxNumToSpawn);
+        nif->read(mSpawnSpeedVariation);
+        nif->read(mSpawnDirVariation);
+        nif->read(mLifespan);
+        nif->read(mLifespanVariation);
+    }
+
     void NiPSysModifierCtlr::read(NIFStream* nif)
     {
         NiSingleInterpController::read(nif);

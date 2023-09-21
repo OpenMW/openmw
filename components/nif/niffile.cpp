@@ -292,6 +292,10 @@ namespace Nif
             { "NiParticleGrowFade", &construct<NiParticleGrowFade, RC_NiParticleGrowFade> },
             { "NiParticleRotation", &construct<NiParticleRotation, RC_NiParticleRotation> },
 
+            // Modifiers, Gamebryo
+            { "NiPSysAgeDeathModifier", &construct<NiPSysAgeDeathModifier, RC_NiPSysAgeDeathModifier> },
+            { "NiPSysSpawnModifier", &construct<NiPSysSpawnModifier, RC_NiPSysSpawnModifier> },
+
             // Modifier controllers, Gamebryo
             { "NiPSysAirFieldAirFrictionCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysAirFieldAirFrictionCtlr> },
             { "NiPSysAirFieldInheritVelocityCtlr",

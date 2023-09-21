@@ -177,6 +177,29 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    struct NiPSysAgeDeathModifier : NiPSysModifier
+    {
+        bool mSpawnOnDeath;
+        NiPSysSpawnModifierPtr mSpawnModifier;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct NiPSysSpawnModifier : NiPSysModifier
+    {
+        uint16_t mNumSpawnGenerations;
+        float mPercentageSpawned;
+        uint16_t mMinNumToSpawn;
+        uint16_t mMaxNumToSpawn;
+        float mSpawnSpeedVariation;
+        float mSpawnDirVariation;
+        float mLifespan;
+        float mLifespanVariation;
+
+        void read(NIFStream* nif) override;
+    };
+
     // Abstract
     struct NiPSysModifierCtlr : NiSingleInterpController
     {
