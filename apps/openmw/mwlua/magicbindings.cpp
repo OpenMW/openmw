@@ -203,15 +203,6 @@ namespace MWLua
             { "Touch", ESM::RT_Touch },
             { "Target", ESM::RT_Target },
         }));
-        // deprecated, use core.stats.Skill
-        magicApi["SCHOOL"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, std::string>({
-            { "Alteration", ESM::RefId(ESM::Skill::Alteration).serializeText() },
-            { "Conjuration", ESM::RefId(ESM::Skill::Conjuration).serializeText() },
-            { "Destruction", ESM::RefId(ESM::Skill::Destruction).serializeText() },
-            { "Illusion", ESM::RefId(ESM::Skill::Illusion).serializeText() },
-            { "Mysticism", ESM::RefId(ESM::Skill::Mysticism).serializeText() },
-            { "Restoration", ESM::RefId(ESM::Skill::Restoration).serializeText() },
-        }));
         magicApi["SPELL_TYPE"]
             = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, ESM::Spell::SpellType>({
                 { "Spell", ESM::Spell::ST_Spell },
