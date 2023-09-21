@@ -215,6 +215,16 @@ namespace Nif
         }
     }
 
+    void BSStripPSysData::read(NIFStream* nif)
+    {
+        NiPSysData::read(nif);
+
+        nif->read(mMaxPointCount);
+        nif->read(mStartCapSize);
+        nif->read(mEndCapSize);
+        nif->read(mDoZPrepass);
+    }
+
     void NiPSysModifier::read(NIFStream* nif)
     {
         nif->read(mName);

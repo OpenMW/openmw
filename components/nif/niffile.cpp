@@ -283,7 +283,8 @@ namespace Nif
             { "NiPSysData", &construct<NiPSysData, RC_NiPSysData> },
 
             // Geometry, Bethesda
-            { "BSStripParticleSystem", &construct<NiParticleSystem, RC_NiParticleSystem> },
+            { "BSStripParticleSystem", &construct<NiParticleSystem, RC_BSStripParticleSystem> },
+            { "BSStripPSysData", &construct<BSStripPSysData, RC_BSStripPSysData> },
 
             // Modifiers, 4.0.0.2
             { "NiGravity", &construct<NiGravity, RC_NiGravity> },

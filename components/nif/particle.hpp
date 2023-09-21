@@ -138,6 +138,16 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSStripPSysData : NiPSysData
+    {
+        uint16_t mMaxPointCount;
+        float mStartCapSize;
+        float mEndCapSize;
+        bool mDoZPrepass;
+
+        void read(NIFStream* nif) override;
+    };
+
     // Abstract
     struct NiPSysModifier : Record
     {

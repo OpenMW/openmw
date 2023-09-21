@@ -14,7 +14,19 @@ namespace Nif
             nif->read(mGroupId);
 
         nif->read(mNumVertices);
-        bool hasData = recType != RC_NiPSysData || nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO3;
+
+        bool isPSysData = false;
+        switch (recType)
+        {
+            case RC_NiPSysData:
+            // case RC_NiMeshPSysData:
+            case RC_BSStripPSysData:
+                isPSysData = true;
+                break;
+            default:
+                break;
+        }
+        bool hasData = !isPSysData || nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO3;
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
         {
