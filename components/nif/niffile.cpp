@@ -69,6 +69,7 @@ namespace Nif
             // NiNode-like nodes, Bethesda
             { "BSBlastNode", &construct<BSRangeNode, RC_NiNode> },
             { "BSDamageStage", &construct<BSRangeNode, RC_NiNode> },
+            { "BSDebrisNode", &construct<BSRangeNode, RC_NiNode> },
             { "BSFadeNode", &construct<NiNode, RC_NiNode> },
             { "BSLeafAnimNode", &construct<NiNode, RC_NiNode> },
             { "BSMultiBoundNode", &construct<BSMultiBoundNode, RC_NiNode> },
