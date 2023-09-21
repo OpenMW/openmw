@@ -526,6 +526,63 @@ namespace Nif
         mObjectPalette.post(nif);
     }
 
+    void NiExtraDataController::read(NIFStream* nif)
+    {
+        NiSingleInterpController::read(nif);
+
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 2, 0, 0))
+            nif->read(mExtraDataName);
+    }
+
+    void NiFloatExtraDataController::read(NIFStream* nif)
+    {
+        NiExtraDataController::read(nif);
+
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 104))
+            return;
+
+        // Unknown
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 0))
+        {
+            uint8_t numExtraBytes;
+            nif->read(numExtraBytes);
+            nif->skip(7);
+            nif->skip(numExtraBytes);
+        }
+
+        mData.read(nif);
+    }
+
+    void NiFloatExtraDataController::post(Reader& nif)
+    {
+        NiExtraDataController::post(nif);
+
+        mData.post(nif);
+    }
+
+    void NiFloatsExtraDataController::read(NIFStream* nif)
+    {
+        NiExtraDataController::read(nif);
+
+        nif->read(mFloatsExtraDataIndex);
+        if (nif->getVersion() <= NIFStream::generateVersion(10, 1, 0, 103))
+            mData.read(nif);
+    }
+
+    void NiFloatsExtraDataController::post(Reader& nif)
+    {
+        NiExtraDataController::post(nif);
+
+        mData.post(nif);
+    }
+
+    void NiFloatsExtraDataPoint3Controller::read(NIFStream* nif)
+    {
+        NiExtraDataController::read(nif);
+
+        nif->read(mFloatsExtraDataIndex);
+    }
+
     void NiBlendInterpolator::read(NIFStream* nif)
     {
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 112))

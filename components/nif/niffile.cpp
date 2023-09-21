@@ -122,6 +122,13 @@ namespace Nif
             { "NiMultiTargetTransformController",
                 &construct<NiMultiTargetTransformController, RC_NiMultiTargetTransformController> },
 
+            // Extra data controllers, Gamebryo
+            { "NiColorExtraDataController", &construct<NiExtraDataController, RC_NiColorExtraDataController> },
+            { "NiFloatExtraDataController", &construct<NiFloatExtraDataController, RC_NiFloatExtraDataController> },
+            { "NiFloatsExtraDataController", &construct<NiFloatsExtraDataController, RC_NiFloatsExtraDataController> },
+            { "NiFloatsExtraDataPoint3Controller",
+                &construct<NiFloatsExtraDataPoint3Controller, RC_NiFloatsExtraDataPoint3Controller> },
+
             // Bethesda
             { "BSFrustumFOVController", &construct<NiFloatInterpController, RC_BSFrustumFOVController> },
             { "BSKeyframeController", &construct<BSKeyframeController, RC_BSKeyframeController> },

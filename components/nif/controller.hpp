@@ -347,6 +347,38 @@ namespace Nif
     };
 
     // Abstract
+    struct NiExtraDataController : NiSingleInterpController
+    {
+        std::string mExtraDataName;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiFloatExtraDataController : NiExtraDataController
+    {
+        NiFloatDataPtr mData;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct NiFloatsExtraDataController : NiExtraDataController
+    {
+        int32_t mFloatsExtraDataIndex;
+        NiFloatDataPtr mData;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct NiFloatsExtraDataPoint3Controller : NiExtraDataController
+    {
+        int32_t mFloatsExtraDataIndex;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // Abstract
     struct NiInterpolator : public Record
     {
     };
