@@ -404,6 +404,21 @@ namespace Nif
     using NiTransformInterpolator = TypedNiInterpolator<NiQuatTransform, NiKeyframeDataPtr>;
     using NiColorInterpolator = TypedNiInterpolator<osg::Vec4f, NiColorDataPtr>;
 
+    struct NiPathInterpolator : public NiInterpolator
+    {
+        // Uses the same flags as NiPathController
+        uint16_t mFlags;
+        int32_t mBankDirection;
+        float mMaxBankAngle;
+        float mSmoothing;
+        uint16_t mFollowAxis;
+        NiPosDataPtr mPathData;
+        NiFloatDataPtr mPercentData;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     // Abstract
     struct NiBlendInterpolator : public NiInterpolator
     {

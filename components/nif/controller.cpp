@@ -583,6 +583,23 @@ namespace Nif
         nif->read(mFloatsExtraDataIndex);
     }
 
+    void NiPathInterpolator::read(NIFStream* nif)
+    {
+        nif->read(mFlags);
+        nif->read(mBankDirection);
+        nif->read(mMaxBankAngle);
+        nif->read(mSmoothing);
+        nif->read(mFollowAxis);
+        mPathData.read(nif);
+        mPercentData.read(nif);
+    }
+
+    void NiPathInterpolator::post(Reader& nif)
+    {
+        mPathData.post(nif);
+        mPercentData.post(nif);
+    }
+
     void NiBlendInterpolator::read(NIFStream* nif)
     {
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 112))

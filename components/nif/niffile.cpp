@@ -108,6 +108,8 @@ namespace Nif
             { "NiGeomMorpherController", &construct<NiGeomMorpherController, RC_NiGeomMorpherController> },
             { "NiKeyframeController", &construct<NiKeyframeController, RC_NiKeyframeController> },
             { "NiLookAtController", &construct<NiLookAtController, RC_NiLookAtController> },
+            // FIXME: NiLightColorController should have its own struct
+            { "NiLightColorController", &construct<NiMaterialColorController, RC_NiLightColorController> },
             { "NiMaterialColorController", &construct<NiMaterialColorController, RC_NiMaterialColorController> },
             { "NiPathController", &construct<NiPathController, RC_NiPathController> },
             { "NiRollController", &construct<NiRollController, RC_NiRollController> },
@@ -162,6 +164,7 @@ namespace Nif
             { "NiBoolTimelineInterpolator", &construct<NiBoolInterpolator, RC_NiBoolTimelineInterpolator> },
             { "NiColorInterpolator", &construct<NiColorInterpolator, RC_NiColorInterpolator> },
             { "NiFloatInterpolator", &construct<NiFloatInterpolator, RC_NiFloatInterpolator> },
+            { "NiPathInterpolator", &construct<NiPathInterpolator, RC_NiPathInterpolator> },
             { "NiPoint3Interpolator", &construct<NiPoint3Interpolator, RC_NiPoint3Interpolator> },
             { "NiTransformInterpolator", &construct<NiTransformInterpolator, RC_NiTransformInterpolator> },
 
