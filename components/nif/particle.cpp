@@ -279,6 +279,20 @@ namespace Nif
         nif->read(mUpdateSkip);
     }
 
+    void NiPSysColorModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        mData.read(nif);
+    }
+
+    void NiPSysColorModifier::post(Reader& nif)
+    {
+        NiPSysModifier::post(nif);
+
+        mData.post(nif);
+    }
+
     void NiPSysDragModifier::read(NIFStream* nif)
     {
         NiPSysModifier::read(nif);
@@ -318,6 +332,19 @@ namespace Nif
         NiPSysModifier::post(nif);
 
         mGravityObject.post(nif);
+    }
+
+    void NiPSysGrowFadeModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mGrowTime);
+        nif->read(mGrowGeneration);
+        nif->read(mFadeTime);
+        nif->read(mFadeGeneration);
+        if (nif->getVersion() == NIFFile::NIFVersion::VER_BGS
+            && nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_FO3)
+            nif->read(mBaseScale);
     }
 
     void NiPSysRotationModifier::read(NIFStream* nif)

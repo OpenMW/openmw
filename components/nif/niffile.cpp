@@ -296,8 +296,10 @@ namespace Nif
             { "NiPSysAgeDeathModifier", &construct<NiPSysAgeDeathModifier, RC_NiPSysAgeDeathModifier> },
             { "NiPSysBombModifier", &construct<NiPSysBombModifier, RC_NiPSysBombModifier> },
             { "NiPSysBoundUpdateModifier", &construct<NiPSysBoundUpdateModifier, RC_NiPSysBoundUpdateModifier> },
+            { "NiPSysColorModifier", &construct<NiPSysColorModifier, RC_NiPSysColorModifier> },
             { "NiPSysDragModifier", &construct<NiPSysDragModifier, RC_NiPSysDragModifier> },
             { "NiPSysGravityModifier", &construct<NiPSysGravityModifier, RC_NiPSysGravityModifier> },
+            { "NiPSysGrowFadeModifier", &construct<NiPSysGrowFadeModifier, RC_NiPSysGrowFadeModifier> },
             { "NiPSysPositionModifier", &construct<NiPSysModifier, RC_NiPSysPositionModifier> },
             { "NiPSysRotationModifier", &construct<NiPSysRotationModifier, RC_NiPSysRotationModifier> },
             { "NiPSysSpawnModifier", &construct<NiPSysSpawnModifier, RC_NiPSysSpawnModifier> },
@@ -313,11 +315,14 @@ namespace Nif
             { "BSPSysSubTexModifier", &construct<BSPSysSubTexModifier, RC_BSPSysSubTexModifier> },
             { "BSWindModifier", &construct<BSWindModifier, RC_BSWindModifier> },
 
-            // Emitters
+            // Emitters, Gamebryo
             { "NiPSysBoxEmitter", &construct<NiPSysBoxEmitter, RC_NiPSysBoxEmitter> },
             { "NiPSysCylinderEmitter", &construct<NiPSysCylinderEmitter, RC_NiPSysCylinderEmitter> },
             { "NiPSysMeshEmitter", &construct<NiPSysMeshEmitter, RC_NiPSysMeshEmitter> },
             { "NiPSysSphereEmitter", &construct<NiPSysSphereEmitter, RC_NiPSysSphereEmitter> },
+
+            // Emitters, Bethesda
+            { "BSPSysArrayEmitter", &construct<NiPSysVolumeEmitter, RC_BSPSysArrayEmitter> },
 
             // Modifier controllers, Gamebryo
             { "NiPSysAirFieldAirFrictionCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysAirFieldAirFrictionCtlr> },

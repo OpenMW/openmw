@@ -206,6 +206,14 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct NiPSysColorModifier : NiPSysModifier
+    {
+        NiColorDataPtr mData;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct NiPSysDragModifier : public NiPSysModifier
     {
         NiAVObjectPtr mDragObject;
@@ -231,6 +239,17 @@ namespace Nif
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
+    };
+
+    struct NiPSysGrowFadeModifier : NiPSysModifier
+    {
+        float mGrowTime;
+        uint16_t mGrowGeneration;
+        float mFadeTime;
+        uint16_t mFadeGeneration;
+        float mBaseScale;
+
+        void read(NIFStream* nif) override;
     };
 
     struct NiPSysRotationModifier : public NiPSysModifier
