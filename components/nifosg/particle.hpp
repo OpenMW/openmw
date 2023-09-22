@@ -191,7 +191,7 @@ namespace NifOsg
 
     private:
         float mForce{ 0.f };
-        Nif::NiGravity::ForceType mType{ Nif::NiGravity::ForceType::Wind };
+        Nif::ForceType mType{ Nif::ForceType::Wind };
         osg::Vec3f mPosition;
         osg::Vec3f mDirection;
         float mDecay{ 0.f };

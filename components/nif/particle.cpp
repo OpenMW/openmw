@@ -260,6 +260,69 @@ namespace Nif
         nif->read(mUpdateSkip);
     }
 
+    void NiPSysDragModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        mDragObject.read(nif);
+        nif->read(mDragAxis);
+        nif->read(mPercentage);
+        nif->read(mRange);
+        nif->read(mRangeFalloff);
+    }
+
+    void NiPSysDragModifier::post(Reader& nif)
+    {
+        NiPSysModifier::post(nif);
+
+        mDragObject.post(nif);
+    }
+
+    void NiPSysGravityModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        mGravityObject.read(nif);
+        nif->read(mGravityAxis);
+        nif->read(mDecay);
+        nif->read(mStrength);
+        mForceType = static_cast<ForceType>(nif->get<uint32_t>());
+        nif->read(mTurbulence);
+        nif->read(mTurbulenceScale);
+
+        if (nif->getBethVersion() >= 17)
+            nif->read(mWorldAligned);
+    }
+
+    void NiPSysGravityModifier::post(Reader& nif)
+    {
+        NiPSysModifier::post(nif);
+
+        mGravityObject.post(nif);
+    }
+
+    void NiPSysRotationModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mRotationSpeed);
+
+        if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 2))
+        {
+            nif->read(mRotationSpeedVariation);
+
+            if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+                nif->skip(5); // Unknown
+
+            nif->read(mRotationAngle);
+            nif->read(mRotationAngleVariation);
+            nif->read(mRandomRotSpeedSign);
+        }
+
+        nif->read(mRandomAxis);
+        nif->read(mAxis);
+    }
+
     void NiPSysSpawnModifier::read(NIFStream* nif)
     {
         NiPSysModifier::read(nif);
@@ -371,6 +434,24 @@ namespace Nif
 
         nif->read(mRadius);
         nif->read(mHeight);
+    }
+
+    void NiPSysMeshEmitter::read(NIFStream* nif)
+    {
+        NiPSysEmitter::read(nif);
+
+        readRecordList(nif, mEmitterMeshes);
+
+        nif->read(mInitialVelocityType);
+        nif->read(mEmissionType);
+        nif->read(mEmissionAxis);
+    }
+
+    void NiPSysMeshEmitter::post(Reader& nif)
+    {
+        NiPSysEmitter::post(nif);
+
+        postRecordList(nif, mEmitterMeshes);
     }
 
     void NiPSysSphereEmitter::read(NIFStream* nif)

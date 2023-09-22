@@ -34,14 +34,14 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    enum class ForceType : uint32_t
+    {
+        Wind = 0, // Fixed direction
+        Point = 1, // Fixed origin
+    };
+
     struct NiGravity : public NiParticleModifier
     {
-        enum class ForceType : uint32_t
-        {
-            Wind = 0, // Fixed direction
-            Point = 1, // Fixed origin
-        };
-
         float mDecay{ 0.f };
         float mForce;
         ForceType mType;
@@ -193,6 +193,46 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct NiPSysDragModifier : public NiPSysModifier
+    {
+        NiAVObjectPtr mDragObject;
+        osg::Vec3f mDragAxis;
+        float mPercentage;
+        float mRange;
+        float mRangeFalloff;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct NiPSysGravityModifier : public NiPSysModifier
+    {
+        NiAVObjectPtr mGravityObject;
+        osg::Vec3f mGravityAxis;
+        float mDecay;
+        float mStrength;
+        ForceType mForceType;
+        float mTurbulence;
+        float mTurbulenceScale;
+        bool mWorldAligned;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct NiPSysRotationModifier : public NiPSysModifier
+    {
+        float mRotationSpeed;
+        float mRotationSpeedVariation;
+        float mRotationAngle;
+        float mRotationAngleVariation;
+        bool mRandomRotSpeedSign;
+        bool mRandomAxis;
+        osg::Vec3f mAxis;
+
+        void read(NIFStream* nif) override;
+    };
+
     struct NiPSysSpawnModifier : NiPSysModifier
     {
         uint16_t mNumSpawnGenerations;
@@ -209,7 +249,7 @@ namespace Nif
 
     struct BSPSysInheritVelocityModifier : public NiPSysModifier
     {
-        NiObjectNETPtr mInheritObject;
+        NiAVObjectPtr mInheritObject;
         float mInheritChance;
         float mVelocityMult;
         float mVelcoityVariation;
@@ -290,6 +330,17 @@ namespace Nif
         float mHeight;
 
         void read(NIFStream* nif) override;
+    };
+
+    struct NiPSysMeshEmitter : public NiPSysEmitter
+    {
+        NiAVObjectList mEmitterMeshes;
+        uint32_t mInitialVelocityType;
+        uint32_t mEmissionType;
+        osg::Vec3f mEmissionAxis;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiPSysSphereEmitter : public NiPSysVolumeEmitter
