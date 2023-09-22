@@ -9,7 +9,7 @@
 namespace Nif
 {
 
-    struct NiParticleModifier : public Record
+    struct NiParticleModifier : Record
     {
         NiParticleModifierPtr mNext;
         NiTimeControllerPtr mController;
@@ -18,7 +18,7 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiParticleGrowFade : public NiParticleModifier
+    struct NiParticleGrowFade : NiParticleModifier
     {
         float mGrowTime;
         float mFadeTime;
@@ -26,7 +26,7 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiParticleColorModifier : public NiParticleModifier
+    struct NiParticleColorModifier : NiParticleModifier
     {
         NiColorDataPtr mData;
 
@@ -40,7 +40,7 @@ namespace Nif
         Point = 1, // Fixed origin
     };
 
-    struct NiGravity : public NiParticleModifier
+    struct NiGravity : NiParticleModifier
     {
         float mDecay{ 0.f };
         float mForce;
@@ -51,7 +51,7 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiParticleCollider : public NiParticleModifier
+    struct NiParticleCollider : NiParticleModifier
     {
         float mBounceFactor;
         bool mSpawnOnCollision{ false };
@@ -61,7 +61,7 @@ namespace Nif
     };
 
     // NiPinaColada
-    struct NiPlanarCollider : public NiParticleCollider
+    struct NiPlanarCollider : NiParticleCollider
     {
         osg::Vec2f mExtents;
         osg::Vec3f mPosition;
@@ -72,7 +72,7 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiSphericalCollider : public NiParticleCollider
+    struct NiSphericalCollider : NiParticleCollider
     {
         float mRadius;
         osg::Vec3f mCenter;
@@ -80,7 +80,7 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiParticleRotation : public NiParticleModifier
+    struct NiParticleRotation : NiParticleModifier
     {
         uint8_t mRandomInitialAxis;
         osg::Vec3f mInitialAxis;
@@ -199,7 +199,7 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiPSysBoundUpdateModifier : public NiPSysModifier
+    struct NiPSysBoundUpdateModifier : NiPSysModifier
     {
         uint16_t mUpdateSkip;
 
@@ -214,7 +214,7 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiPSysDragModifier : public NiPSysModifier
+    struct NiPSysDragModifier : NiPSysModifier
     {
         NiAVObjectPtr mDragObject;
         osg::Vec3f mDragAxis;
@@ -226,7 +226,7 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiPSysGravityModifier : public NiPSysModifier
+    struct NiPSysGravityModifier : NiPSysModifier
     {
         NiAVObjectPtr mGravityObject;
         osg::Vec3f mGravityAxis;
@@ -252,7 +252,7 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiPSysRotationModifier : public NiPSysModifier
+    struct NiPSysRotationModifier : NiPSysModifier
     {
         float mRotationSpeed;
         float mRotationSpeedVariation;
@@ -279,7 +279,7 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct BSPSysInheritVelocityModifier : public NiPSysModifier
+    struct BSPSysInheritVelocityModifier : NiPSysModifier
     {
         NiAVObjectPtr mInheritObject;
         float mInheritChance;
@@ -310,7 +310,7 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct BSPSysScaleModifier : public NiPSysModifier
+    struct BSPSysScaleModifier : NiPSysModifier
     {
         std::vector<float> mScales;
 
@@ -337,7 +337,7 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct BSPSysSubTexModifier : public NiPSysModifier
+    struct BSPSysSubTexModifier : NiPSysModifier
     {
         float mStartFrame;
         float mStartFrameFudge;
@@ -358,7 +358,7 @@ namespace Nif
     };
 
     // Abstract
-    struct NiPSysEmitter : public NiPSysModifier
+    struct NiPSysEmitter : NiPSysModifier
     {
         float mSpeed;
         float mSpeedVariation;
@@ -376,7 +376,7 @@ namespace Nif
     };
 
     // Abstract
-    struct NiPSysVolumeEmitter : public NiPSysEmitter
+    struct NiPSysVolumeEmitter : NiPSysEmitter
     {
         NiAVObjectPtr mEmitterObject;
 
@@ -384,7 +384,7 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiPSysBoxEmitter : public NiPSysVolumeEmitter
+    struct NiPSysBoxEmitter : NiPSysVolumeEmitter
     {
         float mWidth;
         float mHeight;
@@ -393,7 +393,7 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiPSysCylinderEmitter : public NiPSysVolumeEmitter
+    struct NiPSysCylinderEmitter : NiPSysVolumeEmitter
     {
         float mRadius;
         float mHeight;
@@ -401,7 +401,7 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct NiPSysMeshEmitter : public NiPSysEmitter
+    struct NiPSysMeshEmitter : NiPSysEmitter
     {
         NiAVObjectList mEmitterMeshes;
         uint32_t mInitialVelocityType;
@@ -412,7 +412,7 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
-    struct NiPSysSphereEmitter : public NiPSysVolumeEmitter
+    struct NiPSysSphereEmitter : NiPSysVolumeEmitter
     {
         float mRadius;
 
