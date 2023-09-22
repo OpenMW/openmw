@@ -186,6 +186,19 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    struct NiPSysBombModifier : NiPSysModifier
+    {
+        NiAVObjectPtr mBombObject;
+        osg::Vec3f mBombAxis;
+        float mDecay;
+        float mDeltaV;
+        uint32_t mDecayType;
+        uint32_t mSymmetryType;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct NiPSysBoundUpdateModifier : public NiPSysModifier
     {
         uint16_t mUpdateSkip;
@@ -314,6 +327,13 @@ namespace Nif
         float mLoopStartFrameFudge;
         float mFrameCount;
         float mFrameCountFudge;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSWindModifier : NiPSysModifier
+    {
+        float mStrength;
 
         void read(NIFStream* nif) override;
     };

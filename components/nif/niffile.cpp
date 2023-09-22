@@ -294,6 +294,7 @@ namespace Nif
 
             // Modifiers, Gamebryo
             { "NiPSysAgeDeathModifier", &construct<NiPSysAgeDeathModifier, RC_NiPSysAgeDeathModifier> },
+            { "NiPSysBombModifier", &construct<NiPSysBombModifier, RC_NiPSysBombModifier> },
             { "NiPSysBoundUpdateModifier", &construct<NiPSysBoundUpdateModifier, RC_NiPSysBoundUpdateModifier> },
             { "NiPSysDragModifier", &construct<NiPSysDragModifier, RC_NiPSysDragModifier> },
             { "NiPSysGravityModifier", &construct<NiPSysGravityModifier, RC_NiPSysGravityModifier> },
@@ -310,6 +311,7 @@ namespace Nif
             { "BSPSysSimpleColorModifier", &construct<BSPSysSimpleColorModifier, RC_BSPSysSimpleColorModifier> },
             { "BSPSysStripUpdateModifier", &construct<BSPSysStripUpdateModifier, RC_BSPSysStripUpdateModifier> },
             { "BSPSysSubTexModifier", &construct<BSPSysSubTexModifier, RC_BSPSysSubTexModifier> },
+            { "BSWindModifier", &construct<BSWindModifier, RC_BSWindModifier> },
 
             // Emitters
             { "NiPSysBoxEmitter", &construct<NiPSysBoxEmitter, RC_NiPSysBoxEmitter> },

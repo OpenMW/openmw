@@ -253,6 +253,25 @@ namespace Nif
         mSpawnModifier.post(nif);
     }
 
+    void NiPSysBombModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        mBombObject.read(nif);
+        nif->read(mBombAxis);
+        nif->read(mDecay);
+        nif->read(mDeltaV);
+        nif->read(mDecayType);
+        nif->read(mSymmetryType);
+    }
+
+    void NiPSysBombModifier::post(Reader& nif)
+    {
+        NiPSysModifier::post(nif);
+
+        mBombObject.post(nif);
+    }
+
     void NiPSysBoundUpdateModifier::read(NIFStream* nif)
     {
         NiPSysModifier::read(nif);
@@ -420,6 +439,13 @@ namespace Nif
         nif->read(mLoopStartFrameFudge);
         nif->read(mFrameCount);
         nif->read(mFrameCountFudge);
+    }
+
+    void BSWindModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mStrength);
     }
 
     void NiPSysEmitter::read(NIFStream* nif)
