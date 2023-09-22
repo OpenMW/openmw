@@ -294,10 +294,16 @@ namespace Nif
 
             // Modifiers, Gamebryo
             { "NiPSysAgeDeathModifier", &construct<NiPSysAgeDeathModifier, RC_NiPSysAgeDeathModifier> },
+            { "NiPSysPositionModifier", &construct<NiPSysModifier, RC_NiPSysPositionModifier> },
             { "NiPSysSpawnModifier", &construct<NiPSysSpawnModifier, RC_NiPSysSpawnModifier> },
 
             // Modifiers, Bethesda
             { "BSPSysLODModifier", &construct<BSPSysLODModifier, RC_BSPSysLODModifier> },
+
+            // Emitters
+            { "NiPSysBoxEmitter", &construct<NiPSysBoxEmitter, RC_NiPSysBoxEmitter> },
+            { "NiPSysCylinderEmitter", &construct<NiPSysCylinderEmitter, RC_NiPSysCylinderEmitter> },
+            { "NiPSysSphereEmitter", &construct<NiPSysSphereEmitter, RC_NiPSysSphereEmitter> },
 
             // Modifier controllers, Gamebryo
             { "NiPSysAirFieldAirFrictionCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysAirFieldAirFrictionCtlr> },
@@ -336,6 +342,7 @@ namespace Nif
             { "NiParticleSystemController", &construct<NiParticleSystemController, RC_NiParticleSystemController> },
 
             // Particle system controllers, Gamebryo
+            { "NiPSysResetOnLoopCtlr", &construct<NiTimeController, RC_NiPSysResetOnLoopCtlr> },
             { "NiPSysUpdateCtlr", &construct<NiTimeController, RC_NiPSysUpdateCtlr> },
 
             // PHYSICS

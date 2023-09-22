@@ -277,6 +277,63 @@ namespace Nif
         nif->read(mEndSize);
     }
 
+    void NiPSysEmitter::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mSpeed);
+        nif->read(mSpeedVariation);
+        nif->read(mDeclination);
+        nif->read(mDeclinationVariation);
+        nif->read(mPlanarAngle);
+        nif->read(mPlanarAngleVariation);
+        nif->read(mInitialColor);
+        nif->read(mInitialRadius);
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 4, 0, 1))
+            nif->read(mRadiusVariation);
+        nif->read(mLifespan);
+        nif->read(mLifespanVariation);
+    }
+
+    void NiPSysVolumeEmitter::read(NIFStream* nif)
+    {
+        NiPSysEmitter::read(nif);
+
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
+            mEmitterObject.read(nif);
+    }
+
+    void NiPSysVolumeEmitter::post(Reader& nif)
+    {
+        NiPSysEmitter::post(nif);
+
+        mEmitterObject.post(nif);
+    }
+
+    void NiPSysBoxEmitter::read(NIFStream* nif)
+    {
+        NiPSysVolumeEmitter::read(nif);
+
+        nif->read(mWidth);
+        nif->read(mHeight);
+        nif->read(mDepth);
+    }
+
+    void NiPSysCylinderEmitter::read(NIFStream* nif)
+    {
+        NiPSysVolumeEmitter::read(nif);
+
+        nif->read(mRadius);
+        nif->read(mHeight);
+    }
+
+    void NiPSysSphereEmitter::read(NIFStream* nif)
+    {
+        NiPSysVolumeEmitter::read(nif);
+
+        nif->read(mRadius);
+    }
+
     void NiPSysModifierCtlr::read(NIFStream* nif)
     {
         NiSingleInterpController::read(nif);

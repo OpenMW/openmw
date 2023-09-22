@@ -211,6 +211,57 @@ namespace Nif
     };
 
     // Abstract
+    struct NiPSysEmitter : public NiPSysModifier
+    {
+        float mSpeed;
+        float mSpeedVariation;
+        float mDeclination;
+        float mDeclinationVariation;
+        float mPlanarAngle;
+        float mPlanarAngleVariation;
+        osg::Vec4f mInitialColor;
+        float mInitialRadius;
+        float mRadiusVariation;
+        float mLifespan;
+        float mLifespanVariation;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // Abstract
+    struct NiPSysVolumeEmitter : public NiPSysEmitter
+    {
+        NiAVObjectPtr mEmitterObject;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct NiPSysBoxEmitter : public NiPSysVolumeEmitter
+    {
+        float mWidth;
+        float mHeight;
+        float mDepth;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiPSysCylinderEmitter : public NiPSysVolumeEmitter
+    {
+        float mRadius;
+        float mHeight;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiPSysSphereEmitter : public NiPSysVolumeEmitter
+    {
+        float mRadius;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // Abstract
     struct NiPSysModifierCtlr : NiSingleInterpController
     {
         std::string mModifierName;
