@@ -294,11 +294,16 @@ namespace Nif
 
             // Modifiers, Gamebryo
             { "NiPSysAgeDeathModifier", &construct<NiPSysAgeDeathModifier, RC_NiPSysAgeDeathModifier> },
+            { "NiPSysBoundUpdateModifier", &construct<NiPSysBoundUpdateModifier, RC_NiPSysBoundUpdateModifier> },
             { "NiPSysPositionModifier", &construct<NiPSysModifier, RC_NiPSysPositionModifier> },
             { "NiPSysSpawnModifier", &construct<NiPSysSpawnModifier, RC_NiPSysSpawnModifier> },
 
             // Modifiers, Bethesda
+            { "BSPSysInheritVelocityModifier",
+                &construct<BSPSysInheritVelocityModifier, RC_BSPSysInheritVelocityModifier> },
             { "BSPSysLODModifier", &construct<BSPSysLODModifier, RC_BSPSysLODModifier> },
+            { "BSPSysScaleModifier", &construct<BSPSysScaleModifier, RC_BSPSysScaleModifier> },
+            { "BSPSysSimpleColorModifier", &construct<BSPSysSimpleColorModifier, RC_BSPSysSimpleColorModifier> },
 
             // Emitters
             { "NiPSysBoxEmitter", &construct<NiPSysBoxEmitter, RC_NiPSysBoxEmitter> },

@@ -186,6 +186,13 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    struct NiPSysBoundUpdateModifier : public NiPSysModifier
+    {
+        uint16_t mUpdateSkip;
+
+        void read(NIFStream* nif) override;
+    };
+
     struct NiPSysSpawnModifier : NiPSysModifier
     {
         uint16_t mNumSpawnGenerations;
@@ -200,12 +207,43 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSPSysInheritVelocityModifier : public NiPSysModifier
+    {
+        NiObjectNETPtr mInheritObject;
+        float mInheritChance;
+        float mVelocityMult;
+        float mVelcoityVariation;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct BSPSysLODModifier : NiPSysModifier
     {
         float mLODStartDistance;
         float mLODEndDistance;
         float mEndEmitScale;
         float mEndSize;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSPSysScaleModifier : public NiPSysModifier
+    {
+        std::vector<float> mScales;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSPSysSimpleColorModifier : NiPSysModifier
+    {
+        float mFadeInPercent;
+        float mFadeOutPercent;
+        float mColor1EndPercent;
+        float mColor1StartPercent;
+        float mColor2EndPercent;
+        float mColor2StartPercent;
+        std::vector<osg::Vec4f> mColors;
 
         void read(NIFStream* nif) override;
     };

@@ -253,6 +253,13 @@ namespace Nif
         mSpawnModifier.post(nif);
     }
 
+    void NiPSysBoundUpdateModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mUpdateSkip);
+    }
+
     void NiPSysSpawnModifier::read(NIFStream* nif)
     {
         NiPSysModifier::read(nif);
@@ -267,6 +274,23 @@ namespace Nif
         nif->read(mLifespanVariation);
     }
 
+    void BSPSysInheritVelocityModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        mInheritObject.read(nif);
+        nif->read(mInheritChance);
+        nif->read(mVelocityMult);
+        nif->read(mVelcoityVariation);
+    }
+
+    void BSPSysInheritVelocityModifier::post(Reader& nif)
+    {
+        NiPSysModifier::post(nif);
+
+        mInheritObject.post(nif);
+    }
+
     void BSPSysLODModifier::read(NIFStream* nif)
     {
         NiPSysModifier::read(nif);
@@ -275,6 +299,28 @@ namespace Nif
         nif->read(mLODEndDistance);
         nif->read(mEndEmitScale);
         nif->read(mEndSize);
+    }
+
+    void BSPSysScaleModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->readVector(mScales, nif->get<uint32_t>());
+    }
+
+    void BSPSysSimpleColorModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mFadeInPercent);
+        nif->read(mFadeOutPercent);
+        nif->read(mColor1EndPercent);
+        nif->read(mColor1StartPercent);
+        nif->read(mColor2EndPercent);
+        nif->read(mColor2StartPercent);
+        nif->readVector(mColors, 3);
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+            nif->skip(52); // Unknown
     }
 
     void NiPSysEmitter::read(NIFStream* nif)
