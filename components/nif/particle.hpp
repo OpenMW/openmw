@@ -200,6 +200,16 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSPSysLODModifier : NiPSysModifier
+    {
+        float mLODStartDistance;
+        float mLODEndDistance;
+        float mEndEmitScale;
+        float mEndSize;
+
+        void read(NIFStream* nif) override;
+    };
+
     // Abstract
     struct NiPSysModifierCtlr : NiSingleInterpController
     {

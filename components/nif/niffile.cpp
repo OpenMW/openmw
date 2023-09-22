@@ -296,6 +296,9 @@ namespace Nif
             { "NiPSysAgeDeathModifier", &construct<NiPSysAgeDeathModifier, RC_NiPSysAgeDeathModifier> },
             { "NiPSysSpawnModifier", &construct<NiPSysSpawnModifier, RC_NiPSysSpawnModifier> },
 
+            // Modifiers, Bethesda
+            { "BSPSysLODModifier", &construct<BSPSysLODModifier, RC_BSPSysLODModifier> },
+
             // Modifier controllers, Gamebryo
             { "NiPSysAirFieldAirFrictionCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysAirFieldAirFrictionCtlr> },
             { "NiPSysAirFieldInheritVelocityCtlr",

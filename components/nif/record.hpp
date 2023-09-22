@@ -94,6 +94,7 @@ namespace Nif
         RC_BSMultiBoundSphere,
         RC_BSNiAlphaPropertyTestRefController,
         RC_BSPackedAdditionalGeometryData,
+        RC_BSPSysLODModifier,
         RC_BSStripParticleSystem,
         RC_BSStripPSysData,
         RC_BSRefractionFirePeriodController,

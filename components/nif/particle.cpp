@@ -267,6 +267,16 @@ namespace Nif
         nif->read(mLifespanVariation);
     }
 
+    void BSPSysLODModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mLODStartDistance);
+        nif->read(mLODEndDistance);
+        nif->read(mEndEmitScale);
+        nif->read(mEndSize);
+    }
+
     void NiPSysModifierCtlr::read(NIFStream* nif)
     {
         NiSingleInterpController::read(nif);
