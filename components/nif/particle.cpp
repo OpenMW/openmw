@@ -102,7 +102,7 @@ namespace Nif
             nif->read(mNumParticles);
         bool isBs202 = nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() != 0;
 
-        bool numRadii = 1;
+        uint16_t numRadii = 1;
         if (nif->getVersion() > NIFStream::generateVersion(10, 0, 1, 0))
             numRadii = (nif->get<bool>() && !isBs202) ? mNumVertices : 0;
         nif->readVector(mRadii, numRadii);
