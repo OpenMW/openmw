@@ -305,8 +305,11 @@ namespace Nif
             { "BSPSysInheritVelocityModifier",
                 &construct<BSPSysInheritVelocityModifier, RC_BSPSysInheritVelocityModifier> },
             { "BSPSysLODModifier", &construct<BSPSysLODModifier, RC_BSPSysLODModifier> },
+            { "BSPSysRecycleBoundModifier", &construct<BSPSysRecycleBoundModifier, RC_BSPSysRecycleBoundModifier> },
             { "BSPSysScaleModifier", &construct<BSPSysScaleModifier, RC_BSPSysScaleModifier> },
             { "BSPSysSimpleColorModifier", &construct<BSPSysSimpleColorModifier, RC_BSPSysSimpleColorModifier> },
+            { "BSPSysStripUpdateModifier", &construct<BSPSysStripUpdateModifier, RC_BSPSysStripUpdateModifier> },
+            { "BSPSysSubTexModifier", &construct<BSPSysSubTexModifier, RC_BSPSysSubTexModifier> },
 
             // Emitters
             { "NiPSysBoxEmitter", &construct<NiPSysBoxEmitter, RC_NiPSysBoxEmitter> },
@@ -346,6 +349,11 @@ namespace Nif
             // Colliders, 4.0.0.2
             { "NiPlanarCollider", &construct<NiPlanarCollider, RC_NiPlanarCollider> },
             { "NiSphericalCollider", &construct<NiSphericalCollider, RC_NiSphericalCollider> },
+
+            // Colliders, Gamebryo
+            { "NiPSysColliderManager", &construct<NiPSysColliderManager, RC_NiPSysColliderManager> },
+            { "NiPSysPlanarCollider", &construct<NiPSysPlanarCollider, RC_NiPSysPlanarCollider> },
+            { "NiPSysSphericalCollider", &construct<NiPSysSphericalCollider, RC_NiPSysSphericalCollider> },
 
             // Particle system controllers, 4.0.0.2
             { "NiParticleSystemController", &construct<NiParticleSystemController, RC_NiParticleSystemController> },

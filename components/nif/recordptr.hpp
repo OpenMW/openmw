@@ -130,6 +130,8 @@ namespace Nif
     struct NiPalette;
     struct NiParticleModifier;
     struct NiParticleSystem;
+    struct NiPSysCollider;
+    struct NiPSysColliderManager;
     struct NiPSysEmitterCtlrData;
     struct NiPSysModifier;
     struct NiPSysSpawnModifier;
@@ -175,6 +177,8 @@ namespace Nif
     using NiPalettePtr = RecordPtrT<NiPalette>;
     using NiParticleModifierPtr = RecordPtrT<NiParticleModifier>;
     using NiParticleSystemPtr = RecordPtrT<NiParticleSystem>;
+    using NiPSysColliderPtr = RecordPtrT<NiPSysCollider>;
+    using NiPSysColliderManagerPtr = RecordPtrT<NiPSysColliderManager>;
     using NiPSysEmitterCtlrDataPtr = RecordPtrT<NiPSysEmitterCtlrData>;
     using NiPSysSpawnModifierPtr = RecordPtrT<NiPSysSpawnModifier>;
     using NiBoolDataPtr = RecordPtrT<NiBoolData>;

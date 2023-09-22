@@ -268,6 +268,16 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSPSysRecycleBoundModifier : NiPSysModifier
+    {
+        osg::Vec3f mBoundOffset;
+        osg::Vec3f mBoundExtents;
+        NiAVObjectPtr mBoundObject;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct BSPSysScaleModifier : public NiPSysModifier
     {
         std::vector<float> mScales;
@@ -284,6 +294,26 @@ namespace Nif
         float mColor2EndPercent;
         float mColor2StartPercent;
         std::vector<osg::Vec4f> mColors;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSPSysStripUpdateModifier : NiPSysModifier
+    {
+        float mUpdateDeltaTime;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSPSysSubTexModifier : public NiPSysModifier
+    {
+        float mStartFrame;
+        float mStartFrameFudge;
+        float mEndFrame;
+        float mLoopStartFrame;
+        float mLoopStartFrameFudge;
+        float mFrameCount;
+        float mFrameCountFudge;
 
         void read(NIFStream* nif) override;
     };
@@ -395,6 +425,45 @@ namespace Nif
     {
         FloatKeyMapPtr mFloatKeyList;
         BoolKeyMapPtr mVisKeyList;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiPSysCollider : Record
+    {
+        float mBounce;
+        bool mCollideSpawn;
+        bool mCollideDie;
+        NiPSysSpawnModifierPtr mSpawnModifier;
+        NiPSysColliderManagerPtr mParent;
+        NiPSysColliderPtr mNextCollider;
+        NiAVObjectPtr mColliderObject;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct NiPSysColliderManager : NiPSysModifier
+    {
+        NiPSysColliderPtr mCollider;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct NiPSysPlanarCollider : NiPSysCollider
+    {
+        float mWidth;
+        float mHeight;
+        osg::Vec3f mXAxis;
+        osg::Vec3f mYAxis;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiPSysSphericalCollider : NiPSysCollider
+    {
+        float mRadius;
 
         void read(NIFStream* nif) override;
     };

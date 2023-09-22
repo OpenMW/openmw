@@ -364,6 +364,22 @@ namespace Nif
         nif->read(mEndSize);
     }
 
+    void BSPSysRecycleBoundModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mBoundOffset);
+        nif->read(mBoundExtents);
+        mBoundObject.read(nif);
+    }
+
+    void BSPSysRecycleBoundModifier::post(Reader& nif)
+    {
+        NiPSysModifier::post(nif);
+
+        mBoundObject.post(nif);
+    }
+
     void BSPSysScaleModifier::read(NIFStream* nif)
     {
         NiPSysModifier::read(nif);
@@ -384,6 +400,26 @@ namespace Nif
         nif->readVector(mColors, 3);
         if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
             nif->skip(52); // Unknown
+    }
+
+    void BSPSysStripUpdateModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mUpdateDeltaTime);
+    }
+
+    void BSPSysSubTexModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mStartFrame);
+        nif->read(mStartFrameFudge);
+        nif->read(mEndFrame);
+        nif->read(mLoopStartFrame);
+        nif->read(mLoopStartFrameFudge);
+        nif->read(mFrameCount);
+        nif->read(mFrameCountFudge);
     }
 
     void NiPSysEmitter::read(NIFStream* nif)
@@ -494,6 +530,56 @@ namespace Nif
         nif->read(numVisKeys);
         for (size_t i = 0; i < numVisKeys; i++)
             mVisKeyList->mKeys[nif->get<float>()].mValue = nif->get<uint8_t>() != 0;
+    }
+
+    void NiPSysCollider::read(NIFStream* nif)
+    {
+        nif->read(mBounce);
+        nif->read(mCollideSpawn);
+        nif->read(mCollideDie);
+        mSpawnModifier.read(nif);
+        mParent.read(nif);
+        mNextCollider.read(nif);
+        mColliderObject.read(nif);
+    }
+
+    void NiPSysCollider::post(Reader& nif)
+    {
+        mSpawnModifier.post(nif);
+        mParent.post(nif);
+        mNextCollider.post(nif);
+        mColliderObject.post(nif);
+    }
+
+    void NiPSysColliderManager::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        mCollider.read(nif);
+    }
+
+    void NiPSysColliderManager::post(Reader& nif)
+    {
+        NiPSysModifier::post(nif);
+
+        mCollider.post(nif);
+    }
+
+    void NiPSysSphericalCollider::read(NIFStream* nif)
+    {
+        NiPSysCollider::read(nif);
+
+        nif->read(mRadius);
+    }
+
+    void NiPSysPlanarCollider::read(NIFStream* nif)
+    {
+        NiPSysCollider::read(nif);
+
+        nif->read(mWidth);
+        nif->read(mHeight);
+        nif->read(mXAxis);
+        nif->read(mYAxis);
     }
 
 }
