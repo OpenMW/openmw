@@ -363,6 +363,64 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
+    struct bhkPrismaticConstraintCInfo
+    {
+        struct Data
+        {
+            osg::Vec4f mSliding;
+            osg::Vec4f mRotation;
+            osg::Vec4f mPlane;
+            osg::Vec4f mPivot;
+        };
+
+        Data mDataA;
+        Data mDataB;
+        float mMinDistance, mMaxDistance;
+        float mFriction;
+        bhkConstraintMotorCInfo mMotor;
+
+        void read(NIFStream* nif);
+    };
+
+    enum class hkConstraintType : uint32_t
+    {
+        BallAndSocket = 0,
+        Hinge = 1,
+        LimitedHinge = 2,
+        Prismatic = 6,
+        Ragdoll = 7,
+        StiffSpring = 8,
+        Malleable = 13,
+    };
+
+    struct bhkWrappedConstraintDataBase
+    {
+        hkConstraintType mType;
+        bhkConstraintCInfo mInfo;
+        bhkBallAndSocketConstraintCInfo mBallAndSocketInfo;
+        bhkHingeConstraintCInfo mHingeInfo;
+        bhkLimitedHingeConstraintCInfo mLimitedHingeInfo;
+        bhkPrismaticConstraintCInfo mPrismaticInfo;
+        bhkRagdollConstraintCInfo mRagdollInfo;
+        bhkStiffSpringConstraintCInfo mStiffSpringInfo;
+    };
+
+    struct bhkMalleableConstraintCInfo : bhkWrappedConstraintDataBase
+    {
+        float mTau;
+        float mDamping;
+        float mStrength;
+
+        void read(NIFStream* nif);
+    };
+
+    struct bhkWrappedConstraintData : bhkWrappedConstraintDataBase
+    {
+        bhkMalleableConstraintCInfo mMalleableInfo;
+
+        void read(NIFStream* nif);
+    };
+
     /// Record types
 
     // Abstract Bethesda Havok object
@@ -709,6 +767,29 @@ namespace Nif
     struct bhkStiffSpringConstraint : bhkConstraint
     {
         bhkStiffSpringConstraintCInfo mConstraint;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkPrismaticConstraint : bhkConstraint
+    {
+        bhkPrismaticConstraintCInfo mConstraint;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkMalleableConstraint : bhkConstraint
+    {
+        bhkMalleableConstraintCInfo mConstraint;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkBreakableConstraint : bhkConstraint
+    {
+        bhkWrappedConstraintData mConstraint;
+        float mThreshold;
+        bool mRemoveWhenBroken;
 
         void read(NIFStream* nif) override;
     };

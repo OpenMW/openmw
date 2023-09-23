@@ -395,6 +395,9 @@ namespace Nif
             { "bhkLimitedHingeConstraint", &construct<bhkLimitedHingeConstraint, RC_bhkLimitedHingeConstraint> },
             { "bhkRagdollConstraint", &construct<bhkRagdollConstraint, RC_bhkRagdollConstraint> },
             { "bhkStiffSpringConstraint", &construct<bhkStiffSpringConstraint, RC_bhkStiffSpringConstraint> },
+            { "bhkPrismaticConstraint", &construct<bhkPrismaticConstraint, RC_bhkPrismaticConstraint> },
+            { "bhkMalleableConstraint", &construct<bhkMalleableConstraint, RC_bhkMalleableConstraint> },
+            { "bhkBreakableConstraint", &construct<bhkBreakableConstraint, RC_bhkBreakableConstraint> },
 
             // Physics body records, Bethesda
             { "bhkRigidBody", &construct<bhkRigidBody, RC_bhkRigidBody> },

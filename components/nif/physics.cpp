@@ -345,6 +345,109 @@ namespace Nif
         nif->read(mLength);
     }
 
+    void bhkPrismaticConstraintCInfo::read(NIFStream* nif)
+    {
+        if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
+        {
+            nif->read(mDataA.mPivot);
+            nif->read(mDataA.mRotation);
+            nif->read(mDataA.mPlane);
+            nif->read(mDataA.mSliding);
+            nif->read(mDataB.mSliding);
+            nif->read(mDataB.mPivot);
+            nif->read(mDataB.mRotation);
+            nif->read(mDataB.mPlane);
+        }
+        else
+        {
+            nif->read(mDataA.mSliding);
+            nif->read(mDataA.mRotation);
+            nif->read(mDataA.mPlane);
+            nif->read(mDataA.mPivot);
+            nif->read(mDataB.mSliding);
+            nif->read(mDataB.mRotation);
+            nif->read(mDataB.mPlane);
+            nif->read(mDataB.mPivot);
+        }
+        nif->read(mMinDistance);
+        nif->read(mMaxDistance);
+        nif->read(mFriction);
+        if (nif->getVersion() >= NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() >= 17)
+            mMotor.read(nif);
+    }
+
+    void bhkMalleableConstraintCInfo::read(NIFStream* nif)
+    {
+        mType = static_cast<hkConstraintType>(nif->get<uint32_t>());
+        mInfo.read(nif);
+        switch (mType)
+        {
+            case hkConstraintType::BallAndSocket:
+                mBallAndSocketInfo.read(nif);
+                break;
+            case hkConstraintType::Hinge:
+                mHingeInfo.read(nif);
+                break;
+            case hkConstraintType::LimitedHinge:
+                mLimitedHingeInfo.read(nif);
+                break;
+            case hkConstraintType::Prismatic:
+                mPrismaticInfo.read(nif);
+                break;
+            case hkConstraintType::Ragdoll:
+                mRagdollInfo.read(nif);
+                break;
+            case hkConstraintType::StiffSpring:
+                mStiffSpringInfo.read(nif);
+                break;
+            default:
+                throw Nif::Exception(
+                    "Unrecognized constraint type in bhkMalleableConstraint", nif->getFile().getFilename());
+        }
+        if (nif->getVersion() <= NIFFile::NIFVersion::VER_OB)
+        {
+            nif->read(mTau);
+            nif->read(mDamping);
+        }
+        else
+        {
+            nif->read(mStrength);
+        }
+    }
+
+    void bhkWrappedConstraintData::read(NIFStream* nif)
+    {
+        mType = static_cast<hkConstraintType>(nif->get<uint32_t>());
+        mInfo.read(nif);
+        switch (mType)
+        {
+            case hkConstraintType::BallAndSocket:
+                mBallAndSocketInfo.read(nif);
+                break;
+            case hkConstraintType::Hinge:
+                mHingeInfo.read(nif);
+                break;
+            case hkConstraintType::LimitedHinge:
+                mLimitedHingeInfo.read(nif);
+                break;
+            case hkConstraintType::Prismatic:
+                mPrismaticInfo.read(nif);
+                break;
+            case hkConstraintType::Ragdoll:
+                mRagdollInfo.read(nif);
+                break;
+            case hkConstraintType::StiffSpring:
+                mStiffSpringInfo.read(nif);
+                break;
+            case hkConstraintType::Malleable:
+                mMalleableInfo.read(nif);
+                break;
+            default:
+                throw Nif::Exception(
+                    "Unrecognized constraint type in bhkWrappedConstraintData", nif->getFile().getFilename());
+        }
+    }
+
     /// Record types
 
     void bhkCollisionObject::read(NIFStream* nif)
@@ -744,6 +847,29 @@ namespace Nif
         bhkConstraint::read(nif);
 
         mConstraint.read(nif);
+    }
+
+    void bhkPrismaticConstraint::read(NIFStream* nif)
+    {
+        bhkConstraint::read(nif);
+
+        mConstraint.read(nif);
+    }
+
+    void bhkMalleableConstraint::read(NIFStream* nif)
+    {
+        bhkConstraint::read(nif);
+
+        mConstraint.read(nif);
+    }
+
+    void bhkBreakableConstraint::read(NIFStream* nif)
+    {
+        bhkConstraint::read(nif);
+
+        mConstraint.read(nif);
+        nif->read(mThreshold);
+        nif->read(mRemoveWhenBroken);
     }
 
 } // Namespace
