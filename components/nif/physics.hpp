@@ -553,7 +553,7 @@ namespace Nif
 
     struct bhkConvexSweepShape : bhkShape
     {
-        bhkConvexShape mShape;
+        bhkConvexShapePtr mShape;
         HavokMaterial mMaterial;
         float mRadius;
 
