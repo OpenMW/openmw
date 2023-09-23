@@ -203,14 +203,6 @@ namespace MWLua
             { "Touch", ESM::RT_Touch },
             { "Target", ESM::RT_Target },
         }));
-        magicApi["SCHOOL"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, int>({
-            { "Alteration", 0 },
-            { "Conjuration", 1 },
-            { "Destruction", 2 },
-            { "Illusion", 3 },
-            { "Mysticism", 4 },
-            { "Restoration", 5 },
-        }));
         magicApi["SPELL_TYPE"]
             = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, ESM::Spell::SpellType>({
                 { "Spell", ESM::Spell::ST_Spell },
@@ -406,7 +398,7 @@ namespace MWLua
                 ->mValue.getString();
         });
         magicEffectT["school"] = sol::readonly_property(
-            [](const ESM::MagicEffect& rec) -> int { return ESM::MagicSchool::skillRefIdToIndex(rec.mData.mSchool); });
+            [](const ESM::MagicEffect& rec) -> std::string { return rec.mData.mSchool.serializeText(); });
         magicEffectT["baseCost"]
             = sol::readonly_property([](const ESM::MagicEffect& rec) -> float { return rec.mData.mBaseCost; });
         magicEffectT["color"] = sol::readonly_property([](const ESM::MagicEffect& rec) -> Misc::Color {

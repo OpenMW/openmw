@@ -333,8 +333,8 @@
 
 ---
 -- @type ActiveSpellEffect
--- @field #string affectedSkill @{#SKILL} or nil
--- @field #string affectedAttribute @{#ATTRIBUTE} or nil
+-- @field #string affectedSkill Optional skill ID
+-- @field #string affectedAttribute Optional attribute ID
 -- @field #string id Magic effect id
 -- @field #string name Localized name of the effect
 -- @field #number magnitudeThisFrame The magnitude of the effect in the current frame. This will be a new random number between minMagnitude and maxMagnitude every frame. Or nil if the effect has no magnitude.
@@ -433,57 +433,6 @@
 -- @usage for _, item in ipairs(inventory:findAll('common_shirt_01')) do ... end
 
 
---- Possible @{#ATTRIBUTE} values (DEPRECATED use @{#Attribute})
--- @field [parent=#core] #ATTRIBUTE ATTRIBUTE
-
---- DEPRECATED, use @{#Attribute}
---- `core.ATTRIBUTE`
--- @type ATTRIBUTE
--- @field #string Strength "strength"
--- @field #string Intelligence "intelligence"
--- @field #string Willpower "willpower"
--- @field #string Agility "agility"
--- @field #string Speed "speed"
--- @field #string Endurance "endurance"
--- @field #string Personality "personality"
--- @field #string Luck "luck"
-
-
---- Possible @{#SKILL} values (DEPRECATED use @{#Skill})
--- @field [parent=#core] #SKILL SKILL
-
---- DEPRECATED, use @{#Skill}
---- `core.SKILL`
--- @type SKILL
--- @field #string Acrobatics "acrobatics"
--- @field #string Alchemy "alchemy"
--- @field #string Alteration "alteration"
--- @field #string Armorer "armorer"
--- @field #string Athletics "athletics"
--- @field #string Axe "axe"
--- @field #string Block "block"
--- @field #string BluntWeapon "bluntweapon"
--- @field #string Conjuration "conjuration"
--- @field #string Destruction "destruction"
--- @field #string Enchant "enchant"
--- @field #string HandToHand "handtohand"
--- @field #string HeavyArmor "heavyarmor"
--- @field #string Illusion "illusion"
--- @field #string LightArmor "lightarmor"
--- @field #string LongBlade "longblade"
--- @field #string Marksman "marksman"
--- @field #string MediumArmor "mediumarmor"
--- @field #string Mercantile "mercantile"
--- @field #string Mysticism "mysticism"
--- @field #string Restoration "restoration"
--- @field #string Security "security"
--- @field #string ShortBlade "shortblade"
--- @field #string Sneak "sneak"
--- @field #string Spear "spear"
--- @field #string Speechcraft "speechcraft"
--- @field #string Unarmored "unarmored"
-
-
 --- @{#Magic}: spells and spell effects
 -- @field [parent=#core] #Magic magic
 
@@ -496,19 +445,6 @@
 -- @field #number Self Applied on self
 -- @field #number Touch On touch
 -- @field #number Target Ranged spell
-
-
---- Possible @{#MagicSchool} values
--- @field [parent=#Magic] #MagicSchool SCHOOL
-
---- `core.magic.SCHOOL`
--- @type MagicSchool
--- @field #number Alteration Alteration
--- @field #number Conjuration Conjuration
--- @field #number Destruction Destruction
--- @field #number Illusion Illusion
--- @field #number Mysticism Mysticism
--- @field #number Restoration Restoration
 
 
 --- Possible @{#MagicEffectId} values
@@ -720,7 +656,7 @@
 -- @field #string id Effect ID
 -- @field #string icon Effect Icon Path
 -- @field #string name Localized name of the effect
--- @field #number school @{#MagicSchool}
+-- @field #string school Skill ID
 -- @field #number baseCost
 -- @field openmw.util#Color color
 -- @field #boolean harmful
@@ -728,8 +664,8 @@
 ---
 -- @type MagicEffectWithParams
 -- @field #MagicEffect effect @{#MagicEffect}
--- @field #string affectedSkill @{#SKILL} or nil
--- @field #string affectedAttribute @{#ATTRIBUTE} or nil
+-- @field #string affectedSkill Optional skill ID
+-- @field #string affectedAttribute Optional attribute ID
 -- @field #number range
 -- @field #number area
 -- @field #number magnitudeMin
@@ -738,8 +674,8 @@
 
 ---
 -- @type ActiveEffect
--- @field #string affectedSkill @{#SKILL} or nil
--- @field #string affectedAttribute @{#ATTRIBUTE} or nil
+-- @field #string affectedSkill Optional skill ID
+-- @field #string affectedAttribute Optional attribute ID
 -- @field #string id Effect id string
 -- @field #string name Localized name of the effect
 -- @field #number magnitude
