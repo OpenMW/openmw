@@ -460,6 +460,50 @@ namespace Nif
         mData.post(nif);
     }
 
+    void NiBoneLODController::read(NIFStream* nif)
+    {
+        NiTimeController::read(nif);
+
+        nif->read(mLOD);
+        mNodeGroups.resize(nif->get<uint32_t>());
+        nif->read(mNumNodeGroups);
+        for (NiAVObjectList& group : mNodeGroups)
+            readRecordList(nif, group);
+
+        if (nif->getBethVersion() != 0 || nif->getVersion() < NIFStream::generateVersion(4, 2, 2, 0))
+            return;
+
+        mSkinnedShapeGroups.resize(nif->get<uint32_t>());
+        for (std::vector<SkinInfo>& group : mSkinnedShapeGroups)
+        {
+            group.resize(nif->get<uint32_t>());
+            for (SkinInfo& info : group)
+            {
+                info.mShape.read(nif);
+                info.mSkin.read(nif);
+            }
+        }
+        readRecordList(nif, mShapeGroups);
+    }
+
+    void NiBoneLODController::post(Reader& nif)
+    {
+        NiTimeController::post(nif);
+
+        for (NiAVObjectList& group : mNodeGroups)
+            postRecordList(nif, group);
+
+        for (std::vector<SkinInfo>& group : mSkinnedShapeGroups)
+        {
+            for (SkinInfo& info : group)
+            {
+                info.mShape.post(nif);
+                info.mSkin.post(nif);
+            }
+        }
+        postRecordList(nif, mShapeGroups);
+    }
+
     void bhkBlendController::read(NIFStream* nif)
     {
         NiTimeController::read(nif);

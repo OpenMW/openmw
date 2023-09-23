@@ -476,6 +476,15 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    struct BSPSysMultiTargetEmitterCtlr : NiPSysEmitterCtlr
+    {
+        uint16_t mMaxEmitters;
+        BSMasterParticleSystemPtr mMasterPSys;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct NiPSysEmitterCtlrData : Record
     {
         FloatKeyMapPtr mFloatKeyList;

@@ -118,6 +118,7 @@ namespace Nif
             { "NiVisController", &construct<NiVisController, RC_NiVisController> },
 
             // Gamebryo
+            { "NiBoneLODController", &construct<NiBoneLODController, RC_NiBoneLODController> },
             { "NiControllerManager", &construct<NiControllerManager, RC_NiControllerManager> },
             { "NiLightDimmerController", &construct<NiFloatInterpController, RC_NiLightDimmerController> },
             { "NiTransformController", &construct<NiKeyframeController, RC_NiKeyframeController> },
@@ -154,6 +155,7 @@ namespace Nif
             { "BSLightingShaderPropertyFloatController",
                 &construct<BSEffectShaderPropertyFloatController, RC_BSLightingShaderPropertyFloatController> },
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
+            { "NiBSBoneLODController", &construct<NiBoneLODController, RC_NiBoneLODController> },
 
             // Interpolators, Gamebryo
             { "NiBlendBoolInterpolator", &construct<NiBlendBoolInterpolator, RC_NiBlendBoolInterpolator> },
@@ -352,6 +354,9 @@ namespace Nif
             { "NiPSysInitialRotAngleCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysInitialRotAngleCtlr> },
             { "NiPSysInitialRotAngleVarCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysInitialRotAngleVarCtlr> },
             { "NiPSysModifierActiveCtlr", &construct<NiPSysModifierBoolCtlr, RC_NiPSysModifierActiveCtlr> },
+
+            // Modifier controllers, Bethesda
+            { "BSPSysMultiTargetEmitterCtlr", &construct<BSPSysMultiTargetEmitterCtlr, RC_BSPSysMultiTargetEmitterCtlr> },
 
             // Modifier controller data, Gamebryo
             { "NiPSysEmitterCtlrData", &construct<NiPSysEmitterCtlrData, RC_NiPSysEmitterCtlrData> },

@@ -597,6 +597,21 @@ namespace Nif
         mVisInterpolator.post(nif);
     }
 
+    void BSPSysMultiTargetEmitterCtlr::read(NIFStream* nif)
+    {
+        NiPSysEmitterCtlr::read(nif);
+
+        nif->read(mMaxEmitters);
+        mMasterPSys.read(nif);
+    }
+
+    void BSPSysMultiTargetEmitterCtlr::post(Reader& nif)
+    {
+        NiPSysEmitterCtlr::post(nif);
+
+        mMasterPSys.post(nif);
+    }
+
     void NiPSysEmitterCtlrData::read(NIFStream* nif)
     {
         mFloatKeyList = std::make_shared<FloatKeyMap>();

@@ -300,6 +300,24 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    struct NiBoneLODController : NiTimeController
+    {
+        struct SkinInfo
+        {
+            NiTriBasedGeomPtr mShape;
+            NiSkinInstancePtr mSkin;
+        };
+
+        uint32_t mLOD;
+        uint32_t mNumNodeGroups;
+        std::vector<NiAVObjectList> mNodeGroups;
+        std::vector<std::vector<SkinInfo>> mSkinnedShapeGroups;
+        NiTriBasedGeomList mShapeGroups;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct bhkBlendController : public NiTimeController
     {
         void read(NIFStream* nif) override;
