@@ -230,6 +230,26 @@ namespace Nif
         }
     }
 
+    void NiMeshPSysData::read(NIFStream* nif)
+    {
+        NiPSysData::read(nif);
+
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 2, 0, 0))
+        {
+            nif->read(mDefaultPoolSize);
+            nif->read(mFillPoolsOnLoad);
+            nif->readVector(mGenerations, nif->get<uint32_t>());
+        }
+        mParticleMeshes.read(nif);
+    }
+
+    void NiMeshPSysData::post(Reader& nif)
+    {
+        NiPSysData::post(nif);
+
+        mParticleMeshes.post(nif);
+    }
+
     void BSStripPSysData::read(NIFStream* nif)
     {
         NiPSysData::read(nif);
@@ -362,6 +382,20 @@ namespace Nif
             nif->read(mBaseScale);
     }
 
+    void NiPSysMeshUpdateModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        readRecordList(nif, mMeshes);
+    }
+
+    void NiPSysMeshUpdateModifier::post(Reader& nif)
+    {
+        NiPSysModifier::post(nif);
+
+        postRecordList(nif, mMeshes);
+    }
+
     void NiPSysRotationModifier::read(NIFStream* nif)
     {
         NiPSysModifier::read(nif);
@@ -403,6 +437,20 @@ namespace Nif
         NiPSysModifier::read(nif);
 
         nif->read(mDamping);
+    }
+
+    void BSPSysHavokUpdateModifier::read(NIFStream* nif)
+    {
+        NiPSysMeshUpdateModifier::read(nif);
+
+        mModifier.read(nif);
+    }
+
+    void BSPSysHavokUpdateModifier::post(Reader& nif)
+    {
+        NiPSysMeshUpdateModifier::post(nif);
+
+        mModifier.post(nif);
     }
 
     void BSPSysInheritVelocityModifier::read(NIFStream* nif)

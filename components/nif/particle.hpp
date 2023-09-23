@@ -147,6 +147,17 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct NiMeshPSysData : NiPSysData
+    {
+        uint32_t mDefaultPoolSize;
+        bool mFillPoolsOnLoad;
+        std::vector<uint32_t> mGenerations;
+        NiAVObjectPtr mParticleMeshes;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct BSStripPSysData : NiPSysData
     {
         uint16_t mMaxPointCount;
@@ -261,6 +272,14 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct NiPSysMeshUpdateModifier : NiPSysModifier
+    {
+        NiAVObjectList mMeshes;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct NiPSysRotationModifier : NiPSysModifier
     {
         float mRotationSpeed;
@@ -293,6 +312,14 @@ namespace Nif
         float mDamping;
 
         void read(NIFStream* nif) override;
+    };
+
+    struct BSPSysHavokUpdateModifier : NiPSysMeshUpdateModifier
+    {
+        NiPSysModifierPtr mModifier;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct BSPSysInheritVelocityModifier : NiPSysModifier

@@ -287,6 +287,7 @@ namespace Nif
             { "NiParticleSystem", &construct<NiParticleSystem, RC_NiParticleSystem> },
             { "NiMeshParticleSystem", &construct<NiParticleSystem, RC_NiParticleSystem> },
             { "NiPSysData", &construct<NiPSysData, RC_NiPSysData> },
+            { "NiMeshPSysData", &construct<NiMeshPSysData, RC_NiMeshPSysData> },
 
             // Geometry, Bethesda
             { "BSStripParticleSystem", &construct<NiParticleSystem, RC_BSStripParticleSystem> },
@@ -309,9 +310,11 @@ namespace Nif
             { "NiPSysPositionModifier", &construct<NiPSysModifier, RC_NiPSysPositionModifier> },
             { "NiPSysRotationModifier", &construct<NiPSysRotationModifier, RC_NiPSysRotationModifier> },
             { "NiPSysSpawnModifier", &construct<NiPSysSpawnModifier, RC_NiPSysSpawnModifier> },
+            { "NiPSysMeshUpdateModifier", &construct<NiPSysMeshUpdateModifier, RC_NiPSysMeshUpdateModifier> },
 
             // Modifiers, Bethesda
             { "BSParentVelocityModifier", &construct<BSParentVelocityModifier, RC_BSParentVelocityModifier> },
+            { "BSPSysHavokUpdateModifier", &construct<BSPSysHavokUpdateModifier, RC_BSPSysHavokUpdateModifier> },
             { "BSPSysInheritVelocityModifier",
                 &construct<BSPSysInheritVelocityModifier, RC_BSPSysInheritVelocityModifier> },
             { "BSPSysLODModifier", &construct<BSPSysLODModifier, RC_BSPSysLODModifier> },

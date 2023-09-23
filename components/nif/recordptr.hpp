@@ -185,6 +185,7 @@ namespace Nif
     using NiPSysColliderPtr = RecordPtrT<NiPSysCollider>;
     using NiPSysColliderManagerPtr = RecordPtrT<NiPSysColliderManager>;
     using NiPSysEmitterCtlrDataPtr = RecordPtrT<NiPSysEmitterCtlrData>;
+    using NiPSysModifierPtr = RecordPtrT<NiPSysModifier>;
     using NiPSysSpawnModifierPtr = RecordPtrT<NiPSysSpawnModifier>;
     using NiBoolDataPtr = RecordPtrT<NiBoolData>;
     using NiSkinPartitionPtr = RecordPtrT<NiSkinPartition>;

@@ -19,7 +19,7 @@ namespace Nif
         switch (recType)
         {
             case RC_NiPSysData:
-            // case RC_NiMeshPSysData:
+            case RC_NiMeshPSysData:
             case RC_BSStripPSysData:
                 isPSysData = true;
                 break;
