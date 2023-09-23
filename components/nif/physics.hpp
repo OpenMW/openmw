@@ -6,6 +6,7 @@
 #include "recordptr.hpp"
 
 #include <osg/Quat>
+#include <osg/Plane>
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 
@@ -676,8 +677,35 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    // Abstract shape that can collide with an array of spheres
+    struct bhkHeightfieldShape : bhkShape
+    {
+        HavokMaterial mHavokMaterial;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // A plane bounded by an AABB
+    struct bhkPlaneShape : bhkHeightfieldShape
+    {
+        osg::Plane mPlane;
+        osg::Vec4f mExtents;
+        osg::Vec4f mCenter;
+
+        void read(NIFStream* nif) override;
+    };
+
     // A sphere
     using bhkSphereShape = bhkConvexShape;
+
+    // Multiple spheres
+    struct bhkMultiSphereShape : bhkSphereRepShape
+    {
+        bhkWorldObjCInfoProperty mShapeProperty;
+        std::vector<osg::BoundingSpheref> mSpheres;
+
+        void read(NIFStream* nif) override;
+    };
 
     // A list of shapes
     struct bhkListShape : public bhkShapeCollection

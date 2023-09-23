@@ -716,6 +716,29 @@ namespace Nif
         nif->skip(12); // Unused
     }
 
+    void bhkHeightfieldShape::read(NIFStream* nif)
+    {
+        mHavokMaterial.read(nif);
+    }
+
+    void bhkPlaneShape::read(NIFStream* nif)
+    {
+        bhkHeightfieldShape::read(nif);
+
+        nif->skip(12); // Unused
+        mPlane = osg::Plane(nif->get<osg::Vec4f>());
+        nif->read(mExtents);
+        nif->read(mCenter);
+    }
+
+    void bhkMultiSphereShape::read(NIFStream* nif)
+    {
+        bhkSphereRepShape::read(nif);
+
+        mShapeProperty.read(nif);
+        nif->readVector(mSpheres, nif->get<uint32_t>());
+    }
+
     void bhkListShape::read(NIFStream* nif)
     {
         readRecordList(nif, mSubshapes);
