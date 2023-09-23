@@ -150,6 +150,21 @@ namespace Nif
             nif->readVector(mRotations, mNumVertices);
     }
 
+    void BSMasterParticleSystem::read(NIFStream* nif)
+    {
+        NiNode::read(nif);
+
+        nif->read(mMaxEmitters);
+        readRecordList(nif, mParticleSystems);
+    }
+
+    void BSMasterParticleSystem::post(Reader& nif)
+    {
+        NiNode::post(nif);
+
+        postRecordList(nif, mParticleSystems);
+    }
+
     void NiParticleSystem::read(NIFStream* nif)
     {
         // Weird loading to account for inheritance differences starting from SSE
@@ -381,6 +396,13 @@ namespace Nif
         nif->read(mSpawnDirVariation);
         nif->read(mLifespan);
         nif->read(mLifespanVariation);
+    }
+
+    void BSParentVelocityModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mDamping);
     }
 
     void BSPSysInheritVelocityModifier::read(NIFStream* nif)

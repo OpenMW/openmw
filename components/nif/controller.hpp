@@ -419,6 +419,21 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    struct NiLookAtInterpolator : NiInterpolator
+    {
+        // Uses the same flags as NiLookAtController
+        uint16_t mLookAtFlags{ 0 };
+        NiAVObjectPtr mLookAt;
+        std::string mLookAtName;
+        NiQuatTransform mTransform;
+        NiInterpolatorPtr mTranslation;
+        NiInterpolatorPtr mRoll;
+        NiInterpolatorPtr mScale;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     // Abstract
     struct NiBlendInterpolator : public NiInterpolator
     {

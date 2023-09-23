@@ -600,6 +600,26 @@ namespace Nif
         mPercentData.post(nif);
     }
 
+    void NiLookAtInterpolator::read(NIFStream* nif)
+    {
+        nif->read(mLookAtFlags);
+        mLookAt.read(nif);
+        nif->read(mLookAtName);
+        if (nif->getVersion() <= NIFStream::generateVersion(20, 4, 0, 12))
+            nif->read(mTransform);
+        mTranslation.read(nif);
+        mRoll.read(nif);
+        mScale.read(nif);
+    }
+
+    void NiLookAtInterpolator::post(Reader& nif)
+    {
+        mLookAt.post(nif);
+        mTranslation.post(nif);
+        mRoll.post(nif);
+        mScale.post(nif);
+    }
+
     void NiBlendInterpolator::read(NIFStream* nif)
     {
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 112))

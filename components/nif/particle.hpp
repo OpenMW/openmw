@@ -115,6 +115,15 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSMasterParticleSystem : NiNode
+    {
+        uint16_t mMaxEmitters;
+        NiAVObjectList mParticleSystems;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct NiParticleSystem : NiParticles
     {
         osg::BoundingSpheref mBoundingSphere;
@@ -275,6 +284,13 @@ namespace Nif
         float mSpawnDirVariation;
         float mLifespan;
         float mLifespanVariation;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSParentVelocityModifier : NiPSysModifier
+    {
+        float mDamping;
 
         void read(NIFStream* nif) override;
     };

@@ -72,6 +72,7 @@ namespace Nif
             { "BSDebrisNode", &construct<BSRangeNode, RC_NiNode> },
             { "BSFadeNode", &construct<NiNode, RC_NiNode> },
             { "BSLeafAnimNode", &construct<NiNode, RC_NiNode> },
+            { "BSMasterParticleSystem", &construct<BSMasterParticleSystem, RC_NiNode> },
             { "BSMultiBoundNode", &construct<BSMultiBoundNode, RC_NiNode> },
             { "BSOrderedNode", &construct<BSOrderedNode, RC_NiNode> },
             { "BSRangeNode", &construct<BSRangeNode, RC_NiNode> },
@@ -164,6 +165,7 @@ namespace Nif
             { "NiBoolTimelineInterpolator", &construct<NiBoolInterpolator, RC_NiBoolTimelineInterpolator> },
             { "NiColorInterpolator", &construct<NiColorInterpolator, RC_NiColorInterpolator> },
             { "NiFloatInterpolator", &construct<NiFloatInterpolator, RC_NiFloatInterpolator> },
+            { "NiLookAtInterpolator", &construct<NiLookAtInterpolator, RC_NiLookAtInterpolator> },
             { "NiPathInterpolator", &construct<NiPathInterpolator, RC_NiPathInterpolator> },
             { "NiPoint3Interpolator", &construct<NiPoint3Interpolator, RC_NiPoint3Interpolator> },
             { "NiTransformInterpolator", &construct<NiTransformInterpolator, RC_NiTransformInterpolator> },
@@ -305,6 +307,7 @@ namespace Nif
             { "NiPSysSpawnModifier", &construct<NiPSysSpawnModifier, RC_NiPSysSpawnModifier> },
 
             // Modifiers, Bethesda
+            { "BSParentVelocityModifier", &construct<BSParentVelocityModifier, RC_BSParentVelocityModifier> },
             { "BSPSysInheritVelocityModifier",
                 &construct<BSPSysInheritVelocityModifier, RC_BSPSysInheritVelocityModifier> },
             { "BSPSysLODModifier", &construct<BSPSysLODModifier, RC_BSPSysLODModifier> },
