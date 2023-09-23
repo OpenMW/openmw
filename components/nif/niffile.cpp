@@ -361,7 +361,8 @@ namespace Nif
             { "NiPSysModifierActiveCtlr", &construct<NiPSysModifierBoolCtlr, RC_NiPSysModifierActiveCtlr> },
 
             // Modifier controllers, Bethesda
-            { "BSPSysMultiTargetEmitterCtlr", &construct<BSPSysMultiTargetEmitterCtlr, RC_BSPSysMultiTargetEmitterCtlr> },
+            { "BSPSysMultiTargetEmitterCtlr",
+                &construct<BSPSysMultiTargetEmitterCtlr, RC_BSPSysMultiTargetEmitterCtlr> },
 
             // Modifier controller data, Gamebryo
             { "NiPSysEmitterCtlrData", &construct<NiPSysEmitterCtlrData, RC_NiPSysEmitterCtlrData> },
@@ -396,7 +397,8 @@ namespace Nif
 
             // Constraint records, Bethesda
             { "bhkBallAndSocketConstraint", &construct<bhkBallAndSocketConstraint, RC_bhkBallAndSocketConstraint> },
-            { "bhkBallSocketConstraintChain", &construct<bhkBallSocketConstraintChain, RC_bhkBallSocketConstraintChain> },
+            { "bhkBallSocketConstraintChain",
+                &construct<bhkBallSocketConstraintChain, RC_bhkBallSocketConstraintChain> },
             { "bhkHingeConstraint", &construct<bhkHingeConstraint, RC_bhkHingeConstraint> },
             { "bhkLimitedHingeConstraint", &construct<bhkLimitedHingeConstraint, RC_bhkLimitedHingeConstraint> },
             { "bhkRagdollConstraint", &construct<bhkRagdollConstraint, RC_bhkRagdollConstraint> },

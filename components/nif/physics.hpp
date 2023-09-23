@@ -5,8 +5,8 @@
 #include "record.hpp"
 #include "recordptr.hpp"
 
-#include <osg/Quat>
 #include <osg/Plane>
+#include <osg/Quat>
 #include <osg/Vec3f>
 #include <osg/Vec4f>
 
