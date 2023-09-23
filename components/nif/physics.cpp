@@ -332,6 +332,19 @@ namespace Nif
             mMotor.read(nif);
     }
 
+    void bhkBallAndSocketConstraintCInfo::read(NIFStream* nif)
+    {
+        nif->read(mPivotA);
+        nif->read(mPivotB);
+    }
+
+    void bhkStiffSpringConstraintCInfo::read(NIFStream* nif)
+    {
+        nif->read(mPivotA);
+        nif->read(mPivotB);
+        nif->read(mLength);
+    }
+
     /// Record types
 
     void bhkCollisionObject::read(NIFStream* nif)
@@ -713,6 +726,20 @@ namespace Nif
     }
 
     void bhkLimitedHingeConstraint::read(NIFStream* nif)
+    {
+        bhkConstraint::read(nif);
+
+        mConstraint.read(nif);
+    }
+
+    void bhkBallAndSocketConstraint::read(NIFStream* nif)
+    {
+        bhkConstraint::read(nif);
+
+        mConstraint.read(nif);
+    }
+
+    void bhkStiffSpringConstraint::read(NIFStream* nif)
     {
         bhkConstraint::read(nif);
 

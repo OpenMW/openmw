@@ -347,6 +347,38 @@ namespace Nif
     };
 
     // Abstract
+    struct NiExtraDataController : NiSingleInterpController
+    {
+        std::string mExtraDataName;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct NiFloatExtraDataController : NiExtraDataController
+    {
+        NiFloatDataPtr mData;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct NiFloatsExtraDataController : NiExtraDataController
+    {
+        int32_t mFloatsExtraDataIndex;
+        NiFloatDataPtr mData;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct NiFloatsExtraDataPoint3Controller : NiExtraDataController
+    {
+        int32_t mFloatsExtraDataIndex;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // Abstract
     struct NiInterpolator : public Record
     {
     };
@@ -371,6 +403,21 @@ namespace Nif
     using NiFloatInterpolator = TypedNiInterpolator<float, NiFloatDataPtr>;
     using NiTransformInterpolator = TypedNiInterpolator<NiQuatTransform, NiKeyframeDataPtr>;
     using NiColorInterpolator = TypedNiInterpolator<osg::Vec4f, NiColorDataPtr>;
+
+    struct NiPathInterpolator : public NiInterpolator
+    {
+        // Uses the same flags as NiPathController
+        uint16_t mFlags;
+        int32_t mBankDirection;
+        float mMaxBankAngle;
+        float mSmoothing;
+        uint16_t mFollowAxis;
+        NiPosDataPtr mPathData;
+        NiFloatDataPtr mPercentData;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
 
     // Abstract
     struct NiBlendInterpolator : public NiInterpolator

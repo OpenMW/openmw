@@ -13,8 +13,20 @@ namespace Nif
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 114))
             nif->read(mGroupId);
 
-        // Note: has special meaning for NiPSysData (unimplemented)
         nif->read(mNumVertices);
+
+        bool isPSysData = false;
+        switch (recType)
+        {
+            case RC_NiPSysData:
+            // case RC_NiMeshPSysData:
+            case RC_BSStripPSysData:
+                isPSysData = true;
+                break;
+            default:
+                break;
+        }
+        bool hasData = !isPSysData || nif->getBethVersion() < NIFFile::BethVersion::BETHVER_FO3;
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 1, 0, 0))
         {
@@ -22,7 +34,7 @@ namespace Nif
             nif->read(mCompressFlags);
         }
 
-        if (nif->get<bool>())
+        if (nif->get<bool>() && hasData)
             nif->readVector(mVertices, mNumVertices);
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
@@ -34,7 +46,7 @@ namespace Nif
                 nif->read(mMaterialHash);
         }
 
-        if (nif->get<bool>())
+        if (nif->get<bool>() && hasData)
         {
             nif->readVector(mNormals, mNumVertices);
             if (mDataFlags & DataFlag_HasTangents)
@@ -46,7 +58,7 @@ namespace Nif
 
         nif->read(mBoundingSphere);
 
-        if (nif->get<bool>())
+        if (nif->get<bool>() && hasData)
             nif->readVector(mColors, mNumVertices);
 
         if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0))
@@ -64,13 +76,16 @@ namespace Nif
         else if (!nif->get<bool>())
             numUVs = 0;
 
-        mUVList.resize(numUVs);
-        for (std::vector<osg::Vec2f>& list : mUVList)
+        if (hasData)
         {
-            nif->readVector(list, mNumVertices);
-            // flip the texture coordinates to convert them to the OpenGL convention of bottom-left image origin
-            for (osg::Vec2f& uv : list)
-                uv.y() = 1.f - uv.y();
+            mUVList.resize(numUVs);
+            for (std::vector<osg::Vec2f>& list : mUVList)
+            {
+                nif->readVector(list, mNumVertices);
+                // flip the texture coordinates to convert them to the OpenGL convention of bottom-left image origin
+                for (osg::Vec2f& uv : list)
+                    uv.y() = 1.f - uv.y();
+            }
         }
 
         if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
@@ -144,64 +159,6 @@ namespace Nif
             mLines.emplace_back(0);
         }
         mLines.shrink_to_fit();
-    }
-
-    void NiParticlesData::read(NIFStream* nif)
-    {
-        NiGeometryData::read(nif);
-
-        // Should always match the number of vertices in theory, but doesn't:
-        // see mist.nif in Mistify mod (https://www.nexusmods.com/morrowind/mods/48112).
-        if (nif->getVersion() <= NIFFile::NIFVersion::VER_MW)
-            nif->read(mNumParticles);
-        bool isBs202 = nif->getVersion() == NIFFile::NIFVersion::VER_BGS && nif->getBethVersion() != 0;
-
-        bool numRadii = 1;
-        if (nif->getVersion() > NIFStream::generateVersion(10, 0, 1, 0))
-            numRadii = (nif->get<bool>() && !isBs202) ? mNumVertices : 0;
-        nif->readVector(mRadii, numRadii);
-        nif->read(mActiveCount);
-        if (nif->get<bool>() && !isBs202)
-            nif->readVector(mSizes, mNumVertices);
-
-        if (nif->getVersion() >= NIFStream::generateVersion(10, 0, 1, 0))
-        {
-            if (nif->get<bool>() && !isBs202)
-                nif->readVector(mRotations, mNumVertices);
-            if (nif->getVersion() >= NIFStream::generateVersion(20, 0, 0, 4))
-            {
-                if (nif->get<bool>() && !isBs202)
-                    nif->readVector(mRotationAngles, mNumVertices);
-                if (nif->get<bool>() && !isBs202)
-                    nif->readVector(mRotationAxes, mNumVertices);
-                if (isBs202)
-                {
-                    nif->read(mHasTextureIndices);
-                    uint32_t numSubtextureOffsets;
-                    if (nif->getBethVersion() <= NIFFile::BethVersion::BETHVER_FO3)
-                        numSubtextureOffsets = nif->get<uint8_t>();
-                    else
-                        nif->read(numSubtextureOffsets);
-                    nif->readVector(mSubtextureOffsets, numSubtextureOffsets);
-                    if (nif->getBethVersion() > NIFFile::BethVersion::BETHVER_FO3)
-                    {
-                        nif->read(mAspectRatio);
-                        nif->read(mAspectFlags);
-                        nif->read(mAspectRatio2);
-                        nif->read(mAspectSpeed);
-                        nif->read(mAspectSpeed2);
-                    }
-                }
-            }
-        }
-    }
-
-    void NiRotatingParticlesData::read(NIFStream* nif)
-    {
-        NiParticlesData::read(nif);
-
-        if (nif->getVersion() <= NIFStream::generateVersion(4, 2, 2, 0) && nif->get<bool>())
-            nif->readVector(mRotations, mNumVertices);
     }
 
     void NiPosData::read(NIFStream* nif)

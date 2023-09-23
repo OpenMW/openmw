@@ -726,6 +726,11 @@ namespace Resource
         auto ext = Misc::getFileExtension(normalizedFilename);
         if (ext == "nif")
             return NifOsg::Loader::load(*nifFileManager->get(normalizedFilename), imageManager);
+        else if (ext == "spt")
+        {
+            Log(Debug::Warning) << "Ignoring SpeedTree data file " << normalizedFilename;
+            return new osg::Node();
+        }
         else
             return loadNonNif(normalizedFilename, *vfs->get(normalizedFilename), imageManager);
     }
