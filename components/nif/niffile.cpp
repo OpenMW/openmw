@@ -138,6 +138,8 @@ namespace Nif
             { "BSFrustumFOVController", &construct<NiFloatInterpController, RC_BSFrustumFOVController> },
             { "BSKeyframeController", &construct<BSKeyframeController, RC_BSKeyframeController> },
             { "BSLagBoneController", &construct<BSLagBoneController, RC_BSLagBoneController> },
+            { "BSProceduralLightningController",
+                &construct<BSProceduralLightningController, RC_BSProceduralLightningController> },
             { "BSMaterialEmittanceMultController",
                 &construct<NiFloatInterpController, RC_BSMaterialEmittanceMultController> },
             { "BSNiAlphaPropertyTestRefController",
@@ -391,6 +393,7 @@ namespace Nif
 
             // Constraint records, Bethesda
             { "bhkBallAndSocketConstraint", &construct<bhkBallAndSocketConstraint, RC_bhkBallAndSocketConstraint> },
+            { "bhkBallSocketConstraintChain", &construct<bhkBallSocketConstraintChain, RC_bhkBallSocketConstraintChain> },
             { "bhkHingeConstraint", &construct<bhkHingeConstraint, RC_bhkHingeConstraint> },
             { "bhkLimitedHingeConstraint", &construct<bhkLimitedHingeConstraint, RC_bhkLimitedHingeConstraint> },
             { "bhkRagdollConstraint", &construct<bhkRagdollConstraint, RC_bhkRagdollConstraint> },

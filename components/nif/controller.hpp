@@ -354,6 +354,34 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSProceduralLightningController : NiTimeController
+    {
+        NiInterpolatorPtr mGenerationInterp;
+        NiInterpolatorPtr mMutationInterp;
+        NiInterpolatorPtr mSubdivisionInterp;
+        NiInterpolatorPtr mNumBranchesInterp;
+        NiInterpolatorPtr mNumBranchesVarInterp;
+        NiInterpolatorPtr mLengthInterp;
+        NiInterpolatorPtr mLengthVarInterp;
+        NiInterpolatorPtr mWidthInterp;
+        NiInterpolatorPtr mArcOffsetInterp;
+        uint16_t mSubdivisions;
+        uint16_t mNumBranches;
+        uint16_t mNumBranchesVar;
+        float mLength;
+        float mLengthVar;
+        float mWidth;
+        float mChildWidthMult;
+        float mArcOffset;
+        bool mFadeMainBolt;
+        bool mFadeChildBolts;
+        bool mAnimateArcOffset;
+        BSShaderPropertyPtr mShaderProperty;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct NiControllerManager : public NiTimeController
     {
         bool mCumulative;

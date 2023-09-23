@@ -150,6 +150,7 @@ namespace Nif
     struct bhkSerializable;
     struct bhkEntity;
     struct bhkConvexShape;
+    struct bhkRigidBody;
     struct hkPackedNiTriStripsData;
     struct NiAccumulator;
     struct NiInterpolator;
@@ -198,6 +199,7 @@ namespace Nif
     using bhkShapePtr = RecordPtrT<bhkShape>;
     using bhkEntityPtr = RecordPtrT<bhkEntity>;
     using bhkConvexShapePtr = RecordPtrT<bhkConvexShape>;
+    using bhkRigidBodyPtr = RecordPtrT<bhkRigidBody>;
     using hkPackedNiTriStripsDataPtr = RecordPtrT<hkPackedNiTriStripsData>;
     using NiAccumulatorPtr = RecordPtrT<NiAccumulator>;
     using NiInterpolatorPtr = RecordPtrT<NiInterpolator>;
@@ -218,6 +220,7 @@ namespace Nif
     using bhkShapeList = RecordListT<bhkShape>;
     using bhkSerializableList = RecordListT<bhkSerializable>;
     using bhkEntityList = RecordListT<bhkEntity>;
+    using bhkRigidBodyList = RecordListT<bhkEntity>;
     using NiControllerSequenceList = RecordListT<NiControllerSequence>;
     using NiPSysModifierList = RecordListT<NiPSysModifier>;
     using NiTriBasedGeomList = RecordListT<NiTriBasedGeom>;

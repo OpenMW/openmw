@@ -553,6 +553,49 @@ namespace Nif
         nif->read(mMaximumDistance);
     }
 
+    void BSProceduralLightningController::read(NIFStream* nif)
+    {
+        NiTimeController::read(nif);
+
+        mGenerationInterp.read(nif);
+        mMutationInterp.read(nif);
+        mSubdivisionInterp.read(nif);
+        mNumBranchesInterp.read(nif);
+        mNumBranchesVarInterp.read(nif);
+        mLengthInterp.read(nif);
+        mLengthVarInterp.read(nif);
+        mWidthInterp.read(nif);
+        mArcOffsetInterp.read(nif);
+        nif->read(mSubdivisions);
+        nif->read(mNumBranches);
+        nif->read(mNumBranchesVar);
+        nif->read(mLength);
+        nif->read(mLengthVar);
+        nif->read(mWidth);
+        nif->read(mChildWidthMult);
+        nif->read(mArcOffset);
+        nif->read(mFadeMainBolt);
+        nif->read(mFadeChildBolts);
+        nif->read(mAnimateArcOffset);
+        mShaderProperty.read(nif);
+    }
+
+    void BSProceduralLightningController::post(Reader& nif)
+    {
+        NiTimeController::post(nif);
+
+        mGenerationInterp.post(nif);
+        mMutationInterp.post(nif);
+        mSubdivisionInterp.post(nif);
+        mNumBranchesInterp.post(nif);
+        mNumBranchesVarInterp.post(nif);
+        mLengthInterp.post(nif);
+        mLengthVarInterp.post(nif);
+        mWidthInterp.post(nif);
+        mArcOffsetInterp.post(nif);
+        mShaderProperty.post(nif);
+    }
+
     void NiControllerManager::read(NIFStream* nif)
     {
         NiTimeController::read(nif);

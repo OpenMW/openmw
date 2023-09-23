@@ -448,6 +448,17 @@ namespace Nif
         }
     }
 
+    void bhkConstraintChainCInfo::read(NIFStream* nif)
+    {
+        readRecordList(nif, mEntities);
+        mInfo.read(nif);
+    }
+
+    void bhkConstraintChainCInfo::post(Reader& nif)
+    {
+        postRecordList(nif, mEntities);
+    }
+
     /// Record types
 
     void bhkCollisionObject::read(NIFStream* nif)
@@ -840,6 +851,27 @@ namespace Nif
         bhkConstraint::read(nif);
 
         mConstraint.read(nif);
+    }
+
+    void bhkBallSocketConstraintChain::read(NIFStream* nif)
+    {
+        uint32_t numPivots = nif->get<uint32_t>();
+        if (numPivots % 2 != 0)
+            throw Nif::Exception(
+                "Invalid number of constraints in bhkBallSocketConstraintChain", nif->getFile().getFilename());
+        mConstraints.resize(numPivots / 2);
+        for (bhkBallAndSocketConstraintCInfo& info : mConstraints)
+            info.read(nif);
+        nif->read(mTau);
+        nif->read(mDamping);
+        nif->read(mConstraintForceMixing);
+        nif->read(mMaxErrorDistance);
+        mConstraintChainInfo.read(nif);
+    }
+
+    void bhkBallSocketConstraintChain::post(Reader& nif)
+    {
+        mConstraintChainInfo.post(nif);
     }
 
     void bhkStiffSpringConstraint::read(NIFStream* nif)

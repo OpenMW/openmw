@@ -421,6 +421,15 @@ namespace Nif
         void read(NIFStream* nif);
     };
 
+    struct bhkConstraintChainCInfo
+    {
+        bhkRigidBodyList mEntities;
+        bhkConstraintCInfo mInfo;
+
+        void read(NIFStream* nif);
+        void post(Reader& nif);
+    };
+
     /// Record types
 
     // Abstract Bethesda Havok object
@@ -762,6 +771,19 @@ namespace Nif
         bhkBallAndSocketConstraintCInfo mConstraint;
 
         void read(NIFStream* nif) override;
+    };
+
+    struct bhkBallSocketConstraintChain : bhkSerializable
+    {
+        std::vector<bhkBallAndSocketConstraintCInfo> mConstraints;
+        float mTau;
+        float mDamping;
+        float mConstraintForceMixing;
+        float mMaxErrorDistance;
+        bhkConstraintChainCInfo mConstraintChainInfo;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct bhkStiffSpringConstraint : bhkConstraint
