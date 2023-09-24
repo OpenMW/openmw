@@ -11,6 +11,7 @@
     Bug #4382: Sound output device does not change when it should
     Bug #4508: Can't stack enchantment buffs from different instances of the same self-cast generic magic apparel
     Bug #4610: Casting a Bound Weapon spell cancels the casting animation by equipping the weapon prematurely
+    Bug #4683: Disposition decrease when player commits crime is not implemented properly
     Bug #4742: Actors with wander never stop walking after Loopgroup Walkforward
     Bug #4743: PlayGroup doesn't play non-looping animations correctly 
     Bug #4754: Stack of ammunition cannot be equipped partially

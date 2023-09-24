@@ -37,6 +37,9 @@ namespace ESM
         mDisposition = 0;
         esm.getHNOT(mDisposition, "DISP");
 
+        mCrimeDispositionModifier = 0;
+        esm.getHNOT(mCrimeDispositionModifier, "DISM");
+
         const bool intFallback = esm.getFormatVersion() <= MaxIntFallbackFormatVersion;
         for (auto& skill : mSkills)
             skill.load(esm, intFallback);
@@ -94,6 +97,9 @@ namespace ESM
         if (mDisposition)
             esm.writeHNT("DISP", mDisposition);
 
+        if (mCrimeDispositionModifier)
+            esm.writeHNT("DISM", mCrimeDispositionModifier);
+
         for (const auto& skill : mSkills)
             skill.save(esm);
 
@@ -141,6 +147,7 @@ namespace ESM
     {
         mIsWerewolf = false;
         mDisposition = 0;
+        mCrimeDispositionModifier = 0;
         mBounty = 0;
         mReputation = 0;
         mWerewolfKills = 0;

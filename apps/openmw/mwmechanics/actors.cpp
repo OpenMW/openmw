@@ -1164,6 +1164,9 @@ namespace MWMechanics
                 creatureStats.setAlarmed(false);
                 creatureStats.setAiSetting(AiSetting::Fight, ptr.getClass().getBaseFightRating(ptr));
 
+                // Restore original disposition
+                npcStats.setCrimeDispositionModifier(0);
+
                 // Update witness crime id
                 npcStats.setCrimeId(-1);
             }

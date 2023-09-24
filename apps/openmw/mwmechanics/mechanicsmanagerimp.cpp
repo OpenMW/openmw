@@ -473,8 +473,8 @@ namespace MWMechanics
 
     int MechanicsManager::getDerivedDisposition(const MWWorld::Ptr& ptr, bool clamp)
     {
-        const MWMechanics::NpcStats& npcSkill = ptr.getClass().getNpcStats(ptr);
-        float x = static_cast<float>(npcSkill.getBaseDisposition());
+        const MWMechanics::NpcStats& npcStats = ptr.getClass().getNpcStats(ptr);
+        float x = static_cast<float>(npcStats.getBaseDisposition() + npcStats.getCrimeDispositionModifier());
 
         MWWorld::LiveCellRef<ESM::NPC>* npc = ptr.get<ESM::NPC>();
         MWWorld::Ptr playerPtr = getPlayer();
@@ -1287,62 +1287,134 @@ namespace MWMechanics
             if (!canReportCrime(actor, victim, playerFollowers))
                 continue;
 
-            if (reported && actor.getClass().isClass(actor, "guard"))
+            NpcStats& observerStats = actor.getClass().getNpcStats(actor);
+
+            int alarm = observerStats.getAiSetting(AiSetting::Alarm).getBase();
+            float alarmTerm = 0.01f * alarm;
+
+            bool isActorVictim = actor == victim;
+            float dispTerm = isActorVictim ? dispVictim : disp;
+
+            bool isActorGuard = actor.getClass().isClass(actor, "guard");
+
+            int currentDisposition = getDerivedDisposition(actor);
+
+            bool isPermanent = false;
+            bool applyOnlyIfHostile = false;
+            int dispositionModifier = 0;
+            // Murdering and trespassing seem to do not affect disposition
+            if (type == OT_Theft)
+            {
+                dispositionModifier = static_cast<int>(dispTerm * alarmTerm);
+            }
+            else if (type == OT_Pickpocket)
+            {
+                if (alarm >= 100 && isActorGuard)
+                    dispositionModifier = static_cast<int>(dispTerm);
+                else if (isActorVictim && isActorGuard)
+                {
+                    isPermanent = true;
+                    dispositionModifier = static_cast<int>(dispTerm * alarmTerm);
+                }
+                else if (isActorVictim)
+                {
+                    isPermanent = true;
+                    dispositionModifier = static_cast<int>(dispTerm);
+                }
+            }
+            else if (type == OT_Assault)
+            {
+                if (isActorVictim && !isActorGuard)
+                {
+                    isPermanent = true;
+                    dispositionModifier = static_cast<int>(dispTerm);
+                }
+                else if (alarm >= 100)
+                    dispositionModifier = static_cast<int>(dispTerm);
+                else if (isActorVictim && isActorGuard)
+                {
+                    isPermanent = true;
+                    dispositionModifier = static_cast<int>(dispTerm * alarmTerm);
+                }
+                else
+                {
+                    applyOnlyIfHostile = true;
+                    dispositionModifier = static_cast<int>(dispTerm * alarmTerm);
+                }
+            }
+
+            bool setCrimeId = false;
+            if (isPermanent && dispositionModifier != 0 && !applyOnlyIfHostile)
+            {
+                setCrimeId = true;
+                dispositionModifier = std::clamp(dispositionModifier, -currentDisposition, 100 - currentDisposition);
+                int baseDisposition = observerStats.getBaseDisposition();
+                observerStats.setBaseDisposition(baseDisposition + dispositionModifier);
+            }
+            else if (dispositionModifier != 0 && !applyOnlyIfHostile)
+            {
+                setCrimeId = true;
+                dispositionModifier = std::clamp(dispositionModifier, -currentDisposition, 100 - currentDisposition);
+                observerStats.modCrimeDispositionModifier(dispositionModifier);
+            }
+
+            if (isActorGuard && alarm >= 100)
             {
                 // Mark as Alarmed for dialogue
-                actor.getClass().getCreatureStats(actor).setAlarmed(true);
+                observerStats.setAlarmed(true);
 
-                // Set the crime ID, which we will use to calm down participants
-                // once the bounty has been paid.
-                actor.getClass().getNpcStats(actor).setCrimeId(id);
+                setCrimeId = true;
 
-                if (!actor.getClass().getCreatureStats(actor).getAiSequence().isInPursuit())
+                if (!observerStats.getAiSequence().isInPursuit())
                 {
-                    actor.getClass().getCreatureStats(actor).getAiSequence().stack(AiPursue(player), actor);
+                    observerStats.getAiSequence().stack(AiPursue(player), actor);
                 }
             }
             else
             {
-                float dispTerm = (actor == victim) ? dispVictim : disp;
-
-                float alarmTerm
-                    = 0.01f * actor.getClass().getCreatureStats(actor).getAiSetting(AiSetting::Alarm).getBase();
-                if (type == OT_Pickpocket && alarmTerm <= 0)
+                // If Alarm is 0, treat it like 100 to calculate a Fight modifier for a victim of pickpocketing.
+                // Observers which do not try to arrest player do not care about pickpocketing at all.
+                if (type == OT_Pickpocket && isActorVictim && alarmTerm == 0.0)
                     alarmTerm = 1.0;
+                else if (type == OT_Pickpocket && !isActorVictim)
+                    alarmTerm = 0.0;
 
-                if (actor != victim)
-                    dispTerm *= alarmTerm;
-
-                float fightTerm = static_cast<float>((actor == victim) ? fightVictim : fight);
+                float fightTerm = static_cast<float>(isActorVictim ? fightVictim : fight);
                 fightTerm += getFightDispositionBias(dispTerm);
                 fightTerm += getFightDistanceBias(actor, player);
                 fightTerm *= alarmTerm;
 
-                const int observerFightRating
-                    = actor.getClass().getCreatureStats(actor).getAiSetting(AiSetting::Fight).getBase();
+                const int observerFightRating = observerStats.getAiSetting(AiSetting::Fight).getBase();
                 if (observerFightRating + fightTerm > 100)
                     fightTerm = static_cast<float>(100 - observerFightRating);
                 fightTerm = std::max(0.f, fightTerm);
 
                 if (observerFightRating + fightTerm >= 100)
                 {
+                    if (dispositionModifier != 0 && applyOnlyIfHostile)
+                    {
+                        dispositionModifier
+                            = std::clamp(dispositionModifier, -currentDisposition, 100 - currentDisposition);
+                        observerStats.modCrimeDispositionModifier(dispositionModifier);
+                    }
+
                     startCombat(actor, player);
 
-                    NpcStats& observerStats = actor.getClass().getNpcStats(actor);
                     // Apply aggression value to the base Fight rating, so that the actor can continue fighting
                     // after a Calm spell wears off
                     observerStats.setAiSetting(AiSetting::Fight, observerFightRating + static_cast<int>(fightTerm));
 
-                    observerStats.setBaseDisposition(observerStats.getBaseDisposition() + static_cast<int>(dispTerm));
-
-                    // Set the crime ID, which we will use to calm down participants
-                    // once the bounty has been paid.
-                    observerStats.setCrimeId(id);
+                    setCrimeId = true;
 
                     // Mark as Alarmed for dialogue
                     observerStats.setAlarmed(true);
                 }
             }
+
+            // Set the crime ID, which we will use to calm down participants
+            // once the bounty has been paid and restore their disposition to player character.
+            if (setCrimeId)
+                observerStats.setCrimeId(id);
         }
 
         if (reported)
