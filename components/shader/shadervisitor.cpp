@@ -690,6 +690,13 @@ namespace Shader
             writableStateSet->setAttribute(new osg::ColorMaski(1, false, false, false, false));
         }
 
+        if (reqs.mSoftParticles)
+        {
+            const int unitSoftEffect
+                = mShaderManager.reserveGlobalTextureUnits(Shader::ShaderManager::Slot::OpaqueDepthTexture);
+            writableStateSet->addUniform(new osg::Uniform("opaqueDepthTex", unitSoftEffect));
+        }
+
         if (writableStateSet->getMode(GL_ALPHA_TEST) != osg::StateAttribute::INHERIT
             && !previousAddedState->hasMode(GL_ALPHA_TEST))
             removedState->setMode(GL_ALPHA_TEST, writableStateSet->getMode(GL_ALPHA_TEST));

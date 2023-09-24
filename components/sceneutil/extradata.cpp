@@ -15,18 +15,12 @@
 
 namespace SceneUtil
 {
-    void ProcessExtraDataVisitor::setupSoftEffect(osg::Node& node, float size, bool falloff)
+    void setupSoftEffect(osg::Node& node, float size, bool falloff)
     {
-        if (!mSceneMgr->getSoftParticles())
-            return;
-
-        const int unitSoftEffect
-            = mSceneMgr->getShaderManager().reserveGlobalTextureUnits(Shader::ShaderManager::Slot::OpaqueDepthTexture);
         static const osg::ref_ptr<SceneUtil::AutoDepth> depth = new SceneUtil::AutoDepth(osg::Depth::LESS, 0, 1, false);
 
         osg::StateSet* stateset = node.getOrCreateStateSet();
 
-        stateset->addUniform(new osg::Uniform("opaqueDepthTex", unitSoftEffect));
         stateset->addUniform(new osg::Uniform("particleSize", size));
         stateset->addUniform(new osg::Uniform("particleFade", falloff));
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
@@ -36,6 +30,9 @@ namespace SceneUtil
 
     void ProcessExtraDataVisitor::apply(osg::Node& node)
     {
+        if (!mSceneMgr->getSoftParticles())
+            return;
+
         std::string source;
 
         if (node.getUserValue(Misc::OsgUserValues::sExtraData, source) && !source.empty())
