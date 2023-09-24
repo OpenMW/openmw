@@ -52,6 +52,7 @@
 #include <components/esm4/loadcont.hpp>
 #include <components/esm4/loadcrea.hpp>
 #include <components/esm4/loaddoor.hpp>
+#include <components/esm4/loadflor.hpp>
 #include <components/esm4/loadfurn.hpp>
 #include <components/esm4/loadingr.hpp>
 #include <components/esm4/loadligh.hpp>
