@@ -30,6 +30,7 @@
 #include <components/esm4/loadclot.hpp>
 #include <components/esm4/loadcont.hpp>
 #include <components/esm4/loaddoor.hpp>
+#include <components/esm4/loadflor.hpp>
 #include <components/esm4/loadfurn.hpp>
 #include <components/esm4/loadingr.hpp>
 #include <components/esm4/loadligh.hpp>
@@ -219,6 +220,9 @@ namespace MWLua
                             break;
                         case ESM::REC_DOOR4:
                             cell.mStore->template forEachType<ESM4::Door>(visitor);
+                            break;
+                        case ESM::REC_FLOR4:
+                            cell.mStore->template forEachType<ESM4::Flora>(visitor);
                             break;
                         case ESM::REC_FURN4:
                             cell.mStore->template forEachType<ESM4::Furniture>(visitor);

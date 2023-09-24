@@ -70,6 +70,7 @@ namespace ESM4
     struct Container;
     struct Door;
     struct Furniture;
+    struct Flora;
     struct Ingredient;
     struct MiscItem;
     struct Terminal;
@@ -93,7 +94,7 @@ namespace MWWorld
 
         CellRefList<ESM4::Static>, CellRefList<ESM4::Light>, CellRefList<ESM4::Activator>, CellRefList<ESM4::Potion>,
         CellRefList<ESM4::Ammunition>, CellRefList<ESM4::Armor>, CellRefList<ESM4::Book>, CellRefList<ESM4::Clothing>,
-        CellRefList<ESM4::Container>, CellRefList<ESM4::Door>, CellRefList<ESM4::Ingredient>,
+        CellRefList<ESM4::Container>, CellRefList<ESM4::Door>, CellRefList<ESM4::Flora>, CellRefList<ESM4::Ingredient>,
         CellRefList<ESM4::Terminal>, CellRefList<ESM4::Tree>, CellRefList<ESM4::MiscItem>, CellRefList<ESM4::Weapon>,
         CellRefList<ESM4::Furniture>, CellRefList<ESM4::Creature>, CellRefList<ESM4::Npc>>;
 

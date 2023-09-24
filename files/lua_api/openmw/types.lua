@@ -1803,6 +1803,9 @@
 --- Functions for @{#ESM4Door} objects
 -- @field [parent=#types] #ESM4Door ESM4Door
 
+--- Functions for @{#ESM4Flora} objects
+-- @field [parent=#types] #ESM4Flora ESM4Flora
+
 --- Functions for @{#ESM4Terminal} objects
 -- @field [parent=#types] #ESM4Terminal ESM4Terminal
 

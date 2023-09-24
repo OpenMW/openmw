@@ -9,6 +9,7 @@
 #include <components/esm4/loadcont.hpp>
 #include <components/esm4/loadcrea.hpp>
 #include <components/esm4/loaddoor.hpp>
+#include <components/esm4/loadflor.hpp>
 #include <components/esm4/loadfurn.hpp>
 #include <components/esm4/loadingr.hpp>
 #include <components/esm4/loadligh.hpp>
@@ -78,6 +79,7 @@ namespace MWClass
         ESM4Named<ESM4::Clothing>::registerSelf();
         ESM4Named<ESM4::Container>::registerSelf();
         ESM4Named<ESM4::Door>::registerSelf();
+        ESM4Named<ESM4::Flora>::registerSelf();
         ESM4Named<ESM4::Furniture>::registerSelf();
         ESM4Named<ESM4::Ingredient>::registerSelf();
         ESM4Named<ESM4::MiscItem>::registerSelf();
