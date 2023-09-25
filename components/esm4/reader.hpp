@@ -247,6 +247,7 @@ namespace ESM4
         void setRecHeaderSize(const std::size_t size);
 
         inline unsigned int esmVersion() const { return mHeader.mData.version.ui; }
+        inline float esmVersionF() const { return mHeader.mData.version.f; }
         inline unsigned int numRecords() const { return mHeader.mData.records; }
 
         inline bool hasFormVersion() const { return mCtx.recHeaderSize == sizeof(RecordHeader); }

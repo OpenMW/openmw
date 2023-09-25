@@ -562,7 +562,7 @@ namespace EsmTool
             {
                 std::cout << "Author: " << reader.getAuthor() << '\n'
                           << "Description: " << reader.getDesc() << '\n'
-                          << "File format version: " << reader.esmVersion() << '\n';
+                          << "File format version: " << reader.esmVersionF() << '\n';
 
                 if (const std::vector<ESM::MasterData>& masterData = reader.getGameFiles(); !masterData.empty())
                 {
