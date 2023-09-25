@@ -769,7 +769,26 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct bhkSimpleShapePhantom : public bhkWorldObject
+    // Abstract non-physical object that receives collision events
+    struct bhkPhantom : bhkWorldObject
+    {
+    };
+
+    // A Phantom with an AABB
+    struct bhkAabbPhantom : bhkPhantom
+    {
+        osg::Vec4f mAabbMin, mAabbMax;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // Abstract Phantom with a collision shape
+    struct bhkShapePhantom : bhkPhantom
+    {
+    };
+
+    // A ShapePhantom with a transformation
+    struct bhkSimpleShapePhantom : bhkShapePhantom
     {
         osg::Matrixf mTransform;
 

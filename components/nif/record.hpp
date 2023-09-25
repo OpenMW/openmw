@@ -36,6 +36,7 @@ namespace Nif
     {
         RC_MISSING = 0,
         RC_AvoidNode,
+        RC_bhkAabbPhantom,
         RC_bhkBallAndSocketConstraint,
         RC_bhkBallSocketConstraintChain,
         RC_bhkBlendCollisionObject,

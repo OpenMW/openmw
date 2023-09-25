@@ -429,9 +429,12 @@ namespace Nif
             { "bhkPackedNiTriStripsShape", &construct<bhkPackedNiTriStripsShape, RC_bhkPackedNiTriStripsShape> },
             { "hkPackedNiTriStripsData", &construct<hkPackedNiTriStripsData, RC_hkPackedNiTriStripsData> },
             { "bhkPlaneShape", &construct<bhkPlaneShape, RC_bhkPlaneShape> },
-            { "bhkSimpleShapePhantom", &construct<bhkSimpleShapePhantom, RC_bhkSimpleShapePhantom> },
             { "bhkSphereShape", &construct<bhkSphereShape, RC_bhkSphereShape> },
             { "bhkTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },
+
+            // Phantom records, Bethesda
+            { "bhkAabbPhantom", &construct<bhkAabbPhantom, RC_bhkAabbPhantom> },
+            { "bhkSimpleShapePhantom", &construct<bhkSimpleShapePhantom, RC_bhkSimpleShapePhantom> },
 
             // Physics system records, Bethesda
             { "bhkPhysicsSystem", &construct<bhkPhysicsSystem, RC_bhkPhysicsSystem> },

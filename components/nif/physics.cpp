@@ -846,9 +846,18 @@ namespace Nif
             mBodyFlags = nif->get<uint16_t>();
     }
 
+    void bhkAabbPhantom::read(NIFStream* nif)
+    {
+        bhkPhantom::read(nif);
+
+        nif->skip(8); // Unused
+        nif->read(mAabbMin);
+        nif->read(mAabbMax);
+    }
+
     void bhkSimpleShapePhantom::read(NIFStream* nif)
     {
-        bhkWorldObject::read(nif);
+        bhkShapePhantom::read(nif);
 
         nif->skip(8); // Unused
         std::array<float, 16> mat;
