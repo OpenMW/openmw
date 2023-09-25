@@ -1,6 +1,7 @@
 #include "terrainstorage.hpp"
 
 #include <components/esm3/loadland.hpp>
+#include <components/esm4/loadwrld.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwworld/esmstore.hpp"
@@ -33,6 +34,10 @@ namespace MWRender
 
         if (ESM::isEsm4Ext(cellLocation.mWorldspace))
         {
+            const ESM4::World* worldspace = esmStore.get<ESM4::World>().find(cellLocation.mWorldspace);
+            if (!worldspace->mParent.isZeroOrUnset() && worldspace->mParentUseFlags & ESM4::World::UseFlag_Land)
+                cellLocation.mWorldspace = worldspace->mParent;
+
             return esmStore.get<ESM4::Land>().search(cellLocation) != nullptr;
         }
         else
@@ -64,6 +69,10 @@ namespace MWRender
 
         if (ESM::isEsm4Ext(worldspace))
         {
+            const ESM4::World* worldRec = esmStore.get<ESM4::World>().find(worldspace);
+            if (!worldRec->mParent.isZeroOrUnset() && worldRec->mParentUseFlags & ESM4::World::UseFlag_Land)
+                worldspace = worldRec->mParent;
+
             const auto& lands = esmStore.get<ESM4::Land>().getLands();
             for (const auto& [landPos, _] : lands)
             {
