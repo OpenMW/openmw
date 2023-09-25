@@ -460,6 +460,50 @@ namespace Nif
         mData.post(nif);
     }
 
+    void NiBoneLODController::read(NIFStream* nif)
+    {
+        NiTimeController::read(nif);
+
+        nif->read(mLOD);
+        mNodeGroups.resize(nif->get<uint32_t>());
+        nif->read(mNumNodeGroups);
+        for (NiAVObjectList& group : mNodeGroups)
+            readRecordList(nif, group);
+
+        if (nif->getBethVersion() != 0 || nif->getVersion() < NIFStream::generateVersion(4, 2, 2, 0))
+            return;
+
+        mSkinnedShapeGroups.resize(nif->get<uint32_t>());
+        for (std::vector<SkinInfo>& group : mSkinnedShapeGroups)
+        {
+            group.resize(nif->get<uint32_t>());
+            for (SkinInfo& info : group)
+            {
+                info.mShape.read(nif);
+                info.mSkin.read(nif);
+            }
+        }
+        readRecordList(nif, mShapeGroups);
+    }
+
+    void NiBoneLODController::post(Reader& nif)
+    {
+        NiTimeController::post(nif);
+
+        for (NiAVObjectList& group : mNodeGroups)
+            postRecordList(nif, group);
+
+        for (std::vector<SkinInfo>& group : mSkinnedShapeGroups)
+        {
+            for (SkinInfo& info : group)
+            {
+                info.mShape.post(nif);
+                info.mSkin.post(nif);
+            }
+        }
+        postRecordList(nif, mShapeGroups);
+    }
+
     void bhkBlendController::read(NIFStream* nif)
     {
         NiTimeController::read(nif);
@@ -507,6 +551,49 @@ namespace Nif
         nif->read(mLinearVelocity);
         nif->read(mLinearRotation);
         nif->read(mMaximumDistance);
+    }
+
+    void BSProceduralLightningController::read(NIFStream* nif)
+    {
+        NiTimeController::read(nif);
+
+        mGenerationInterp.read(nif);
+        mMutationInterp.read(nif);
+        mSubdivisionInterp.read(nif);
+        mNumBranchesInterp.read(nif);
+        mNumBranchesVarInterp.read(nif);
+        mLengthInterp.read(nif);
+        mLengthVarInterp.read(nif);
+        mWidthInterp.read(nif);
+        mArcOffsetInterp.read(nif);
+        nif->read(mSubdivisions);
+        nif->read(mNumBranches);
+        nif->read(mNumBranchesVar);
+        nif->read(mLength);
+        nif->read(mLengthVar);
+        nif->read(mWidth);
+        nif->read(mChildWidthMult);
+        nif->read(mArcOffset);
+        nif->read(mFadeMainBolt);
+        nif->read(mFadeChildBolts);
+        nif->read(mAnimateArcOffset);
+        mShaderProperty.read(nif);
+    }
+
+    void BSProceduralLightningController::post(Reader& nif)
+    {
+        NiTimeController::post(nif);
+
+        mGenerationInterp.post(nif);
+        mMutationInterp.post(nif);
+        mSubdivisionInterp.post(nif);
+        mNumBranchesInterp.post(nif);
+        mNumBranchesVarInterp.post(nif);
+        mLengthInterp.post(nif);
+        mLengthVarInterp.post(nif);
+        mWidthInterp.post(nif);
+        mArcOffsetInterp.post(nif);
+        mShaderProperty.post(nif);
     }
 
     void NiControllerManager::read(NIFStream* nif)
@@ -598,6 +685,26 @@ namespace Nif
     {
         mPathData.post(nif);
         mPercentData.post(nif);
+    }
+
+    void NiLookAtInterpolator::read(NIFStream* nif)
+    {
+        nif->read(mLookAtFlags);
+        mLookAt.read(nif);
+        nif->read(mLookAtName);
+        if (nif->getVersion() <= NIFStream::generateVersion(20, 4, 0, 12))
+            nif->read(mTransform);
+        mTranslation.read(nif);
+        mRoll.read(nif);
+        mScale.read(nif);
+    }
+
+    void NiLookAtInterpolator::post(Reader& nif)
+    {
+        mLookAt.post(nif);
+        mTranslation.post(nif);
+        mRoll.post(nif);
+        mScale.post(nif);
     }
 
     void NiBlendInterpolator::read(NIFStream* nif)

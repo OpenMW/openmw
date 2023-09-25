@@ -72,6 +72,7 @@ namespace Nif
             { "BSDebrisNode", &construct<BSRangeNode, RC_NiNode> },
             { "BSFadeNode", &construct<NiNode, RC_NiNode> },
             { "BSLeafAnimNode", &construct<NiNode, RC_NiNode> },
+            { "BSMasterParticleSystem", &construct<BSMasterParticleSystem, RC_NiNode> },
             { "BSMultiBoundNode", &construct<BSMultiBoundNode, RC_NiNode> },
             { "BSOrderedNode", &construct<BSOrderedNode, RC_NiNode> },
             { "BSRangeNode", &construct<BSRangeNode, RC_NiNode> },
@@ -117,6 +118,7 @@ namespace Nif
             { "NiVisController", &construct<NiVisController, RC_NiVisController> },
 
             // Gamebryo
+            { "NiBoneLODController", &construct<NiBoneLODController, RC_NiBoneLODController> },
             { "NiControllerManager", &construct<NiControllerManager, RC_NiControllerManager> },
             { "NiLightDimmerController", &construct<NiFloatInterpController, RC_NiLightDimmerController> },
             { "NiTransformController", &construct<NiKeyframeController, RC_NiKeyframeController> },
@@ -136,6 +138,8 @@ namespace Nif
             { "BSFrustumFOVController", &construct<NiFloatInterpController, RC_BSFrustumFOVController> },
             { "BSKeyframeController", &construct<BSKeyframeController, RC_BSKeyframeController> },
             { "BSLagBoneController", &construct<BSLagBoneController, RC_BSLagBoneController> },
+            { "BSProceduralLightningController",
+                &construct<BSProceduralLightningController, RC_BSProceduralLightningController> },
             { "BSMaterialEmittanceMultController",
                 &construct<NiFloatInterpController, RC_BSMaterialEmittanceMultController> },
             { "BSNiAlphaPropertyTestRefController",
@@ -153,6 +157,7 @@ namespace Nif
             { "BSLightingShaderPropertyFloatController",
                 &construct<BSEffectShaderPropertyFloatController, RC_BSLightingShaderPropertyFloatController> },
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
+            { "NiBSBoneLODController", &construct<NiBoneLODController, RC_NiBoneLODController> },
 
             // Interpolators, Gamebryo
             { "NiBlendBoolInterpolator", &construct<NiBlendBoolInterpolator, RC_NiBlendBoolInterpolator> },
@@ -164,6 +169,7 @@ namespace Nif
             { "NiBoolTimelineInterpolator", &construct<NiBoolInterpolator, RC_NiBoolTimelineInterpolator> },
             { "NiColorInterpolator", &construct<NiColorInterpolator, RC_NiColorInterpolator> },
             { "NiFloatInterpolator", &construct<NiFloatInterpolator, RC_NiFloatInterpolator> },
+            { "NiLookAtInterpolator", &construct<NiLookAtInterpolator, RC_NiLookAtInterpolator> },
             { "NiPathInterpolator", &construct<NiPathInterpolator, RC_NiPathInterpolator> },
             { "NiPoint3Interpolator", &construct<NiPoint3Interpolator, RC_NiPoint3Interpolator> },
             { "NiTransformInterpolator", &construct<NiTransformInterpolator, RC_NiTransformInterpolator> },
@@ -281,6 +287,7 @@ namespace Nif
             { "NiParticleSystem", &construct<NiParticleSystem, RC_NiParticleSystem> },
             { "NiMeshParticleSystem", &construct<NiParticleSystem, RC_NiParticleSystem> },
             { "NiPSysData", &construct<NiPSysData, RC_NiPSysData> },
+            { "NiMeshPSysData", &construct<NiMeshPSysData, RC_NiMeshPSysData> },
 
             // Geometry, Bethesda
             { "BSStripParticleSystem", &construct<NiParticleSystem, RC_BSStripParticleSystem> },
@@ -303,8 +310,11 @@ namespace Nif
             { "NiPSysPositionModifier", &construct<NiPSysModifier, RC_NiPSysPositionModifier> },
             { "NiPSysRotationModifier", &construct<NiPSysRotationModifier, RC_NiPSysRotationModifier> },
             { "NiPSysSpawnModifier", &construct<NiPSysSpawnModifier, RC_NiPSysSpawnModifier> },
+            { "NiPSysMeshUpdateModifier", &construct<NiPSysMeshUpdateModifier, RC_NiPSysMeshUpdateModifier> },
 
             // Modifiers, Bethesda
+            { "BSParentVelocityModifier", &construct<BSParentVelocityModifier, RC_BSParentVelocityModifier> },
+            { "BSPSysHavokUpdateModifier", &construct<BSPSysHavokUpdateModifier, RC_BSPSysHavokUpdateModifier> },
             { "BSPSysInheritVelocityModifier",
                 &construct<BSPSysInheritVelocityModifier, RC_BSPSysInheritVelocityModifier> },
             { "BSPSysLODModifier", &construct<BSPSysLODModifier, RC_BSPSysLODModifier> },
@@ -350,6 +360,10 @@ namespace Nif
             { "NiPSysInitialRotAngleVarCtlr", &construct<NiPSysModifierFloatCtlr, RC_NiPSysInitialRotAngleVarCtlr> },
             { "NiPSysModifierActiveCtlr", &construct<NiPSysModifierBoolCtlr, RC_NiPSysModifierActiveCtlr> },
 
+            // Modifier controllers, Bethesda
+            { "BSPSysMultiTargetEmitterCtlr",
+                &construct<BSPSysMultiTargetEmitterCtlr, RC_BSPSysMultiTargetEmitterCtlr> },
+
             // Modifier controller data, Gamebryo
             { "NiPSysEmitterCtlrData", &construct<NiPSysEmitterCtlrData, RC_NiPSysEmitterCtlrData> },
 
@@ -383,10 +397,15 @@ namespace Nif
 
             // Constraint records, Bethesda
             { "bhkBallAndSocketConstraint", &construct<bhkBallAndSocketConstraint, RC_bhkBallAndSocketConstraint> },
+            { "bhkBallSocketConstraintChain",
+                &construct<bhkBallSocketConstraintChain, RC_bhkBallSocketConstraintChain> },
             { "bhkHingeConstraint", &construct<bhkHingeConstraint, RC_bhkHingeConstraint> },
             { "bhkLimitedHingeConstraint", &construct<bhkLimitedHingeConstraint, RC_bhkLimitedHingeConstraint> },
             { "bhkRagdollConstraint", &construct<bhkRagdollConstraint, RC_bhkRagdollConstraint> },
             { "bhkStiffSpringConstraint", &construct<bhkStiffSpringConstraint, RC_bhkStiffSpringConstraint> },
+            { "bhkPrismaticConstraint", &construct<bhkPrismaticConstraint, RC_bhkPrismaticConstraint> },
+            { "bhkMalleableConstraint", &construct<bhkMalleableConstraint, RC_bhkMalleableConstraint> },
+            { "bhkBreakableConstraint", &construct<bhkBreakableConstraint, RC_bhkBreakableConstraint> },
 
             // Physics body records, Bethesda
             { "bhkRigidBody", &construct<bhkRigidBody, RC_bhkRigidBody> },
@@ -404,9 +423,11 @@ namespace Nif
             { "bhkConvexVerticesShape", &construct<bhkConvexVerticesShape, RC_bhkConvexVerticesShape> },
             { "bhkListShape", &construct<bhkListShape, RC_bhkListShape> },
             { "bhkMoppBvTreeShape", &construct<bhkMoppBvTreeShape, RC_bhkMoppBvTreeShape> },
+            { "bhkMultiSphereShape", &construct<bhkMultiSphereShape, RC_bhkMultiSphereShape> },
             { "bhkNiTriStripsShape", &construct<bhkNiTriStripsShape, RC_bhkNiTriStripsShape> },
             { "bhkPackedNiTriStripsShape", &construct<bhkPackedNiTriStripsShape, RC_bhkPackedNiTriStripsShape> },
             { "hkPackedNiTriStripsData", &construct<hkPackedNiTriStripsData, RC_hkPackedNiTriStripsData> },
+            { "bhkPlaneShape", &construct<bhkPlaneShape, RC_bhkPlaneShape> },
             { "bhkSimpleShapePhantom", &construct<bhkSimpleShapePhantom, RC_bhkSimpleShapePhantom> },
             { "bhkSphereShape", &construct<bhkSphereShape, RC_bhkSphereShape> },
             { "bhkTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },

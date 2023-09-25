@@ -150,6 +150,21 @@ namespace Nif
             nif->readVector(mRotations, mNumVertices);
     }
 
+    void BSMasterParticleSystem::read(NIFStream* nif)
+    {
+        NiNode::read(nif);
+
+        nif->read(mMaxEmitters);
+        readRecordList(nif, mParticleSystems);
+    }
+
+    void BSMasterParticleSystem::post(Reader& nif)
+    {
+        NiNode::post(nif);
+
+        postRecordList(nif, mParticleSystems);
+    }
+
     void NiParticleSystem::read(NIFStream* nif)
     {
         // Weird loading to account for inheritance differences starting from SSE
@@ -213,6 +228,26 @@ namespace Nif
             nif->read(mNumAddedParticles);
             nif->read(mAddedParticlesBase);
         }
+    }
+
+    void NiMeshPSysData::read(NIFStream* nif)
+    {
+        NiPSysData::read(nif);
+
+        if (nif->getVersion() >= NIFStream::generateVersion(10, 2, 0, 0))
+        {
+            nif->read(mDefaultPoolSize);
+            nif->read(mFillPoolsOnLoad);
+            nif->readVector(mGenerations, nif->get<uint32_t>());
+        }
+        mParticleMeshes.read(nif);
+    }
+
+    void NiMeshPSysData::post(Reader& nif)
+    {
+        NiPSysData::post(nif);
+
+        mParticleMeshes.post(nif);
     }
 
     void BSStripPSysData::read(NIFStream* nif)
@@ -347,6 +382,20 @@ namespace Nif
             nif->read(mBaseScale);
     }
 
+    void NiPSysMeshUpdateModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        readRecordList(nif, mMeshes);
+    }
+
+    void NiPSysMeshUpdateModifier::post(Reader& nif)
+    {
+        NiPSysModifier::post(nif);
+
+        postRecordList(nif, mMeshes);
+    }
+
     void NiPSysRotationModifier::read(NIFStream* nif)
     {
         NiPSysModifier::read(nif);
@@ -381,6 +430,27 @@ namespace Nif
         nif->read(mSpawnDirVariation);
         nif->read(mLifespan);
         nif->read(mLifespanVariation);
+    }
+
+    void BSParentVelocityModifier::read(NIFStream* nif)
+    {
+        NiPSysModifier::read(nif);
+
+        nif->read(mDamping);
+    }
+
+    void BSPSysHavokUpdateModifier::read(NIFStream* nif)
+    {
+        NiPSysMeshUpdateModifier::read(nif);
+
+        mModifier.read(nif);
+    }
+
+    void BSPSysHavokUpdateModifier::post(Reader& nif)
+    {
+        NiPSysMeshUpdateModifier::post(nif);
+
+        mModifier.post(nif);
     }
 
     void BSPSysInheritVelocityModifier::read(NIFStream* nif)
@@ -573,6 +643,21 @@ namespace Nif
 
         mData.post(nif);
         mVisInterpolator.post(nif);
+    }
+
+    void BSPSysMultiTargetEmitterCtlr::read(NIFStream* nif)
+    {
+        NiPSysEmitterCtlr::read(nif);
+
+        nif->read(mMaxEmitters);
+        mMasterPSys.read(nif);
+    }
+
+    void BSPSysMultiTargetEmitterCtlr::post(Reader& nif)
+    {
+        NiPSysEmitterCtlr::post(nif);
+
+        mMasterPSys.post(nif);
     }
 
     void NiPSysEmitterCtlrData::read(NIFStream* nif)

@@ -115,6 +115,15 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSMasterParticleSystem : NiNode
+    {
+        uint16_t mMaxEmitters;
+        NiAVObjectList mParticleSystems;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct NiParticleSystem : NiParticles
     {
         osg::BoundingSpheref mBoundingSphere;
@@ -136,6 +145,17 @@ namespace Nif
         uint16_t mAddedParticlesBase;
 
         void read(NIFStream* nif) override;
+    };
+
+    struct NiMeshPSysData : NiPSysData
+    {
+        uint32_t mDefaultPoolSize;
+        bool mFillPoolsOnLoad;
+        std::vector<uint32_t> mGenerations;
+        NiAVObjectPtr mParticleMeshes;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct BSStripPSysData : NiPSysData
@@ -252,6 +272,14 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct NiPSysMeshUpdateModifier : NiPSysModifier
+    {
+        NiAVObjectList mMeshes;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct NiPSysRotationModifier : NiPSysModifier
     {
         float mRotationSpeed;
@@ -277,6 +305,21 @@ namespace Nif
         float mLifespanVariation;
 
         void read(NIFStream* nif) override;
+    };
+
+    struct BSParentVelocityModifier : NiPSysModifier
+    {
+        float mDamping;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSPSysHavokUpdateModifier : NiPSysMeshUpdateModifier
+    {
+        NiPSysModifierPtr mModifier;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct BSPSysInheritVelocityModifier : NiPSysModifier
@@ -455,6 +498,15 @@ namespace Nif
     {
         NiPSysEmitterCtlrDataPtr mData;
         NiInterpolatorPtr mVisInterpolator;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct BSPSysMultiTargetEmitterCtlr : NiPSysEmitterCtlr
+    {
+        uint16_t mMaxEmitters;
+        BSMasterParticleSystemPtr mMasterPSys;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;

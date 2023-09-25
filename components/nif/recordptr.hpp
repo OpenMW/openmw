@@ -129,6 +129,7 @@ namespace Nif
     struct NiSourceTexture;
     struct NiPalette;
     struct NiParticleModifier;
+    struct BSMasterParticleSystem;
     struct NiParticleSystem;
     struct NiPSysCollider;
     struct NiPSysColliderManager;
@@ -138,6 +139,7 @@ namespace Nif
     struct NiBoolData;
     struct NiSkinPartition;
     struct BSShaderTextureSet;
+    struct NiTriBasedGeom;
     struct NiGeometryData;
     struct BSShaderProperty;
     struct NiAlphaProperty;
@@ -148,6 +150,7 @@ namespace Nif
     struct bhkSerializable;
     struct bhkEntity;
     struct bhkConvexShape;
+    struct bhkRigidBody;
     struct hkPackedNiTriStripsData;
     struct NiAccumulator;
     struct NiInterpolator;
@@ -177,14 +180,17 @@ namespace Nif
     using NiSourceTexturePtr = RecordPtrT<NiSourceTexture>;
     using NiPalettePtr = RecordPtrT<NiPalette>;
     using NiParticleModifierPtr = RecordPtrT<NiParticleModifier>;
+    using BSMasterParticleSystemPtr = RecordPtrT<BSMasterParticleSystem>;
     using NiParticleSystemPtr = RecordPtrT<NiParticleSystem>;
     using NiPSysColliderPtr = RecordPtrT<NiPSysCollider>;
     using NiPSysColliderManagerPtr = RecordPtrT<NiPSysColliderManager>;
     using NiPSysEmitterCtlrDataPtr = RecordPtrT<NiPSysEmitterCtlrData>;
+    using NiPSysModifierPtr = RecordPtrT<NiPSysModifier>;
     using NiPSysSpawnModifierPtr = RecordPtrT<NiPSysSpawnModifier>;
     using NiBoolDataPtr = RecordPtrT<NiBoolData>;
     using NiSkinPartitionPtr = RecordPtrT<NiSkinPartition>;
     using BSShaderTextureSetPtr = RecordPtrT<BSShaderTextureSet>;
+    using NiTriBasedGeomPtr = RecordPtrT<NiTriBasedGeom>;
     using NiGeometryDataPtr = RecordPtrT<NiGeometryData>;
     using BSShaderPropertyPtr = RecordPtrT<BSShaderProperty>;
     using NiAlphaPropertyPtr = RecordPtrT<NiAlphaProperty>;
@@ -194,6 +200,7 @@ namespace Nif
     using bhkShapePtr = RecordPtrT<bhkShape>;
     using bhkEntityPtr = RecordPtrT<bhkEntity>;
     using bhkConvexShapePtr = RecordPtrT<bhkConvexShape>;
+    using bhkRigidBodyPtr = RecordPtrT<bhkRigidBody>;
     using hkPackedNiTriStripsDataPtr = RecordPtrT<hkPackedNiTriStripsData>;
     using NiAccumulatorPtr = RecordPtrT<NiAccumulator>;
     using NiInterpolatorPtr = RecordPtrT<NiInterpolator>;
@@ -214,8 +221,10 @@ namespace Nif
     using bhkShapeList = RecordListT<bhkShape>;
     using bhkSerializableList = RecordListT<bhkSerializable>;
     using bhkEntityList = RecordListT<bhkEntity>;
+    using bhkRigidBodyList = RecordListT<bhkEntity>;
     using NiControllerSequenceList = RecordListT<NiControllerSequence>;
     using NiPSysModifierList = RecordListT<NiPSysModifier>;
+    using NiTriBasedGeomList = RecordListT<NiTriBasedGeom>;
 
 } // Namespace
 #endif

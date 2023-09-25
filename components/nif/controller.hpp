@@ -300,6 +300,24 @@ namespace Nif
         void post(Reader& nif) override;
     };
 
+    struct NiBoneLODController : NiTimeController
+    {
+        struct SkinInfo
+        {
+            NiTriBasedGeomPtr mShape;
+            NiSkinInstancePtr mSkin;
+        };
+
+        uint32_t mLOD;
+        uint32_t mNumNodeGroups;
+        std::vector<NiAVObjectList> mNodeGroups;
+        std::vector<std::vector<SkinInfo>> mSkinnedShapeGroups;
+        NiTriBasedGeomList mShapeGroups;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct bhkBlendController : public NiTimeController
     {
         void read(NIFStream* nif) override;
@@ -334,6 +352,34 @@ namespace Nif
         float mMaximumDistance;
 
         void read(NIFStream* nif) override;
+    };
+
+    struct BSProceduralLightningController : NiTimeController
+    {
+        NiInterpolatorPtr mGenerationInterp;
+        NiInterpolatorPtr mMutationInterp;
+        NiInterpolatorPtr mSubdivisionInterp;
+        NiInterpolatorPtr mNumBranchesInterp;
+        NiInterpolatorPtr mNumBranchesVarInterp;
+        NiInterpolatorPtr mLengthInterp;
+        NiInterpolatorPtr mLengthVarInterp;
+        NiInterpolatorPtr mWidthInterp;
+        NiInterpolatorPtr mArcOffsetInterp;
+        uint16_t mSubdivisions;
+        uint16_t mNumBranches;
+        uint16_t mNumBranchesVar;
+        float mLength;
+        float mLengthVar;
+        float mWidth;
+        float mChildWidthMult;
+        float mArcOffset;
+        bool mFadeMainBolt;
+        bool mFadeChildBolts;
+        bool mAnimateArcOffset;
+        BSShaderPropertyPtr mShaderProperty;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
     };
 
     struct NiControllerManager : public NiTimeController
@@ -414,6 +460,21 @@ namespace Nif
         uint16_t mFollowAxis;
         NiPosDataPtr mPathData;
         NiFloatDataPtr mPercentData;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct NiLookAtInterpolator : NiInterpolator
+    {
+        // Uses the same flags as NiLookAtController
+        uint16_t mLookAtFlags{ 0 };
+        NiAVObjectPtr mLookAt;
+        std::string mLookAtName;
+        NiQuatTransform mTransform;
+        NiInterpolatorPtr mTranslation;
+        NiInterpolatorPtr mRoll;
+        NiInterpolatorPtr mScale;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
