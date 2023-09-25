@@ -201,15 +201,6 @@ namespace ESM4
 
         // restart from the beginning (i.e. "TES4" record header)
         mStream->seekg(0, mStream->beg);
-#if 0
-    unsigned int esmVer = mHeader.mData.version.ui;
-    bool isTes4 = esmVer == ESM::VER_080 || esmVer == ESM::VER_100;
-    //bool isTes5 = esmVer == ESM::VER_094 || esmVer == ESM::VER_170;
-    //bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
-
-    // TES4 header size is 4 bytes smaller than TES5 header
-    mCtx.recHeaderSize = isTes4 ? sizeof(ESM4::RecordHeader) - 4 : sizeof(ESM4::RecordHeader);
-#endif
         getRecordHeader();
         if (mCtx.recordHeader.record.typeId == REC_TES4)
         {

@@ -213,7 +213,7 @@ void ESM4::NavMesh::load(ESM4::Reader& reader)
             {
                 // See FIXME in ESM4::Navigation::load.
                 // FO4 updates the format
-                if (esmVer == ESM::VER_100)
+                if (reader.hasFormVersion() && (esmVer == ESM::VER_095 || esmVer == ESM::VER_100))
                 {
                     reader.skipSubRecordData();
                     break;

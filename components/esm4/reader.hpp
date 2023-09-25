@@ -249,6 +249,9 @@ namespace ESM4
         inline unsigned int esmVersion() const { return mHeader.mData.version.ui; }
         inline unsigned int numRecords() const { return mHeader.mData.records; }
 
+        inline bool hasFormVersion() const { return mCtx.recHeaderSize == sizeof(RecordHeader); }
+        inline unsigned int formVersion() const { return mCtx.recordHeader.record.version; }
+
         void buildLStringIndex();
         void getLocalizedString(std::string& str);
 
