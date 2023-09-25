@@ -161,6 +161,20 @@ namespace Nif
     {
     };
 
+    struct BSSegmentedTriShape : NiTriShape
+    {
+        struct SegmentData
+        {
+            uint8_t mFlags;
+            uint32_t mStartIndex;
+            uint32_t mNumTriangles;
+        };
+
+        std::vector<SegmentData> mSegments;
+
+        void read(NIFStream* nif);
+    };
+
     struct NiTriStrips : NiTriBasedGeom
     {
     };

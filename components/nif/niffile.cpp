@@ -272,6 +272,7 @@ namespace Nif
             { "BSDynamicTriShape", &construct<BSDynamicTriShape, RC_BSDynamicTriShape> },
             { "BSLODTriShape", &construct<BSLODTriShape, RC_BSLODTriShape> },
             { "BSMeshLODTriShape", &construct<BSMeshLODTriShape, RC_BSMeshLODTriShape> },
+            { "BSSegmentedTriShape", &construct<BSSegmentedTriShape, RC_BSSegmentedTriShape> },
 
             // PARTICLES
 
