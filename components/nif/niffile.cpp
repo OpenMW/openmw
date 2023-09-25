@@ -423,6 +423,7 @@ namespace Nif
             { "bhkConvexVerticesShape", &construct<bhkConvexVerticesShape, RC_bhkConvexVerticesShape> },
             { "bhkListShape", &construct<bhkListShape, RC_bhkListShape> },
             { "bhkMoppBvTreeShape", &construct<bhkMoppBvTreeShape, RC_bhkMoppBvTreeShape> },
+            { "bhkMeshShape", &construct<bhkMeshShape, RC_bhkMeshShape> },
             { "bhkMultiSphereShape", &construct<bhkMultiSphereShape, RC_bhkMultiSphereShape> },
             { "bhkNiTriStripsShape", &construct<bhkNiTriStripsShape, RC_bhkNiTriStripsShape> },
             { "bhkPackedNiTriStripsShape", &construct<bhkPackedNiTriStripsShape, RC_bhkPackedNiTriStripsShape> },

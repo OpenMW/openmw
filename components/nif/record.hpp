@@ -55,6 +55,7 @@ namespace Nif
         RC_bhkLimitedHingeConstraint,
         RC_bhkListShape,
         RC_bhkMalleableConstraint,
+        RC_bhkMeshShape,
         RC_bhkMoppBvTreeShape,
         RC_bhkMultiSphereShape,
         RC_bhkNiTriStripsShape,

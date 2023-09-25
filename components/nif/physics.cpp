@@ -731,6 +731,24 @@ namespace Nif
         nif->read(mCenter);
     }
 
+    void bhkMeshShape::read(NIFStream* nif)
+    {
+        nif->skip(8); // Unknown
+        nif->read(mRadius);
+        nif->skip(8); // Unknown
+        nif->read(mScale);
+        mShapeProperties.resize(nif->get<uint32_t>());
+        for (bhkWorldObjCInfoProperty& property : mShapeProperties)
+            property.read(nif);
+        nif->skip(12); // Unknown
+        readRecordList(nif, mDataList);
+    }
+
+    void bhkMeshShape::post(Reader& nif)
+    {
+        postRecordList(nif, mDataList);
+    }
+
     void bhkMultiSphereShape::read(NIFStream* nif)
     {
         bhkSphereRepShape::read(nif);

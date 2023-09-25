@@ -695,6 +695,18 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    /// A shape based on triangle strips
+    struct bhkMeshShape : bhkShape
+    {
+        float mRadius;
+        osg::Vec4f mScale;
+        std::vector<bhkWorldObjCInfoProperty> mShapeProperties;
+        NiTriStripsDataList mDataList;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     // A sphere
     using bhkSphereShape = bhkConvexShape;
 
