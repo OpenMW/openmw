@@ -134,6 +134,7 @@
 ---
 -- Create a new instance of the given record.
 -- After creation the object is in the disabled state. Use :teleport to place to the world or :moveInto to put it into a container or an inventory.
+-- Note that dynamically created creatures, NPCs, and container inventories will not respawn.
 -- @function [parent=#world] createObject
 -- @param #string recordId Record ID in lowercase
 -- @param #number count (optional, 1 by default) The number of objects in stack

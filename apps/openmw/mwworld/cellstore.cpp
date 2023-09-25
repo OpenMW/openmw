@@ -1235,13 +1235,12 @@ namespace MWWorld
                 clearCorpse(ptr, mStore);
                 ptr.getClass().respawn(ptr);
             }
-            for (CellRefList<ESM::CreatureLevList>::List::iterator it(get<ESM::CreatureLevList>().mList.begin());
-                 it != get<ESM::CreatureLevList>().mList.end(); ++it)
-            {
-                Ptr ptr = getCurrentPtr(&*it);
+            forEachType<ESM::CreatureLevList>([](Ptr ptr) {
                 // no need to clearCorpse, handled as part of get<ESM::Creature>()
-                ptr.getClass().respawn(ptr);
-            }
+                if (!ptr.getRefData().isDeleted())
+                    ptr.getClass().respawn(ptr);
+                return false;
+            });
         }
     }
 

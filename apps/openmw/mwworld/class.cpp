@@ -372,7 +372,8 @@ namespace MWWorld
     MWWorld::Ptr Class::copyToCell(const ConstPtr& ptr, CellStore& cell, int count) const
     {
         Ptr newPtr = copyToCellImpl(ptr, cell);
-        newPtr.getCellRef().unsetRefNum(); // This RefNum is only valid within the original cell of the reference
+        if (ptr.getCell() != &MWBase::Environment::get().getWorldModel()->getDraftCell())
+            newPtr.getCellRef().unsetRefNum(); // This RefNum is only valid within the original cell of the reference
         newPtr.getRefData().setCount(count);
         newPtr.getRefData().setLuaScripts(nullptr);
         MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);

@@ -1338,7 +1338,7 @@ namespace MWClass
         if (newPtr.getRefData().getCustomData())
         {
             MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
-            newPtr.getContainerStore()->setPtr(newPtr);
+            newPtr.getClass().getContainerStore(newPtr).setPtr(newPtr);
         }
         return newPtr;
     }
