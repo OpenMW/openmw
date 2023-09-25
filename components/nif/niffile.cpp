@@ -440,6 +440,10 @@ namespace Nif
             { "bhkPhysicsSystem", &construct<bhkPhysicsSystem, RC_bhkPhysicsSystem> },
             { "bhkRagdollSystem", &construct<bhkRagdollSystem, RC_bhkRagdollSystem> },
 
+            // Action records
+            { "bhkLiquidAction", &construct<bhkLiquidAction, RC_bhkLiquidAction> },
+            { "bhkOrientHingedBodyAction", &construct<bhkOrientHingedBodyAction, RC_bhkOrientHingedBodyAction> },
+
             // PROPERTIES
 
             // 4.0.0.2

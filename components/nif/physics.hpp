@@ -875,5 +875,38 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    // Abstract action applied during the simulation
+    struct bhkAction : bhkSerializable
+    {
+    };
+
+    struct bhkUnaryAction : bhkAction
+    {
+        bhkRigidBodyPtr mEntity;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct bhkLiquidAction : bhkAction
+    {
+        float mInitialStickForce;
+        float mStickStrength;
+        float mNeighborDistance;
+        float mNeighborStrength;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkOrientHingedBodyAction : bhkUnaryAction
+    {
+        osg::Vec4f mHingeAxisLS;
+        osg::Vec4f mForwardLS;
+        float mStrength;
+        float mDamping;
+
+        void read(NIFStream* nif) override;
+    };
+
 } // Namespace
 #endif

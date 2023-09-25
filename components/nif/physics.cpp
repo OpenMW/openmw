@@ -954,4 +954,36 @@ namespace Nif
         nif->read(mRemoveWhenBroken);
     }
 
+    void bhkUnaryAction::read(NIFStream* nif)
+    {
+        mEntity.read(nif);
+        nif->skip(8); // Unused
+    }
+
+    void bhkUnaryAction::post(Reader& nif)
+    {
+        mEntity.post(nif);
+    }
+
+    void bhkLiquidAction::read(NIFStream* nif)
+    {
+        nif->skip(12); // Unused
+        nif->read(mInitialStickForce);
+        nif->read(mStickStrength);
+        nif->read(mNeighborDistance);
+        nif->read(mNeighborStrength);
+    }
+
+    void bhkOrientHingedBodyAction::read(NIFStream* nif)
+    {
+        bhkUnaryAction::read(nif);
+
+        nif->skip(8); // Unused
+        nif->read(mHingeAxisLS);
+        nif->read(mForwardLS);
+        nif->read(mStrength);
+        nif->read(mDamping);
+        nif->skip(8); // Unused
+    }
+
 } // Namespace
