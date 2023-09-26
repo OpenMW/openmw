@@ -16,6 +16,12 @@
 -- @return #table with `shapeType` and `halfExtents`
 
 ---
+-- Check if given actor is in the actors processing range.
+-- @function [parent=#Actor] isInActorsProcessingRange
+-- @param openmw.core#GameObject actor
+-- @return #boolean
+
+---
 -- Whether the object is an actor.
 -- @function [parent=#Actor] objectIsInstance
 -- @param openmw.core#GameObject object

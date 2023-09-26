@@ -4,9 +4,11 @@
 
 #include <components/detournavigator/agentbounds.hpp>
 #include <components/lua/luastate.hpp>
+#include <components/settings/values.hpp>
 
 #include "apps/openmw/mwbase/mechanicsmanager.hpp"
 #include "apps/openmw/mwbase/windowmanager.hpp"
+#include "apps/openmw/mwmechanics/actorutil.hpp"
 #include "apps/openmw/mwmechanics/creaturestats.hpp"
 #include "apps/openmw/mwmechanics/drawstate.hpp"
 #include "apps/openmw/mwworld/class.hpp"
@@ -373,6 +375,24 @@ namespace MWLua
             result["shapeType"] = agentBounds.mShapeType;
             result["halfExtents"] = agentBounds.mHalfExtents;
             return result;
+        };
+        actor["isInActorsProcessingRange"] = [](const Object& o) {
+            const MWWorld::Ptr player = MWMechanics::getPlayer();
+            const auto& target = o.ptr();
+            if (target == player)
+                return true;
+
+            if (!target.getClass().isActor())
+                throw std::runtime_error("Actor expected");
+
+            if (target.getCell()->getCell()->getWorldSpace() != player.getCell()->getCell()->getWorldSpace())
+                return false;
+
+            const int actorsProcessingRange = Settings::game().mActorsProcessingRange;
+            const osg::Vec3f playerPos = player.getRefData().getPosition().asVec3();
+
+            const float dist = (playerPos - target.getRefData().getPosition().asVec3()).length();
+            return dist <= actorsProcessingRange;
         };
 
         addActorStatsBindings(actor, context);
