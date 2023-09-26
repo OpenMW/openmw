@@ -196,6 +196,7 @@ namespace Nif
             {
                 case RC_NiTriShape:
                 case RC_BSLODTriShape:
+                case RC_BSSegmentedTriShape:
                     if (mData->recType != RC_NiTriShapeData)
                         mData = NiGeometryDataPtr(nullptr);
                     break;
@@ -214,6 +215,19 @@ namespace Nif
                 default:
                     break;
             }
+        }
+    }
+
+    void BSSegmentedTriShape::read(NIFStream* nif)
+    {
+        NiTriShape::read(nif);
+
+        mSegments.resize(nif->get<uint32_t>());
+        for (SegmentData& segment : mSegments)
+        {
+            nif->read(segment.mFlags);
+            nif->read(segment.mStartIndex);
+            nif->read(segment.mNumTriangles);
         }
     }
 

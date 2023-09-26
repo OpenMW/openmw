@@ -272,6 +272,7 @@ namespace Nif
             { "BSDynamicTriShape", &construct<BSDynamicTriShape, RC_BSDynamicTriShape> },
             { "BSLODTriShape", &construct<BSLODTriShape, RC_BSLODTriShape> },
             { "BSMeshLODTriShape", &construct<BSMeshLODTriShape, RC_BSMeshLODTriShape> },
+            { "BSSegmentedTriShape", &construct<BSSegmentedTriShape, RC_BSSegmentedTriShape> },
 
             // PARTICLES
 
@@ -423,18 +424,26 @@ namespace Nif
             { "bhkConvexVerticesShape", &construct<bhkConvexVerticesShape, RC_bhkConvexVerticesShape> },
             { "bhkListShape", &construct<bhkListShape, RC_bhkListShape> },
             { "bhkMoppBvTreeShape", &construct<bhkMoppBvTreeShape, RC_bhkMoppBvTreeShape> },
+            { "bhkMeshShape", &construct<bhkMeshShape, RC_bhkMeshShape> },
             { "bhkMultiSphereShape", &construct<bhkMultiSphereShape, RC_bhkMultiSphereShape> },
             { "bhkNiTriStripsShape", &construct<bhkNiTriStripsShape, RC_bhkNiTriStripsShape> },
             { "bhkPackedNiTriStripsShape", &construct<bhkPackedNiTriStripsShape, RC_bhkPackedNiTriStripsShape> },
             { "hkPackedNiTriStripsData", &construct<hkPackedNiTriStripsData, RC_hkPackedNiTriStripsData> },
             { "bhkPlaneShape", &construct<bhkPlaneShape, RC_bhkPlaneShape> },
-            { "bhkSimpleShapePhantom", &construct<bhkSimpleShapePhantom, RC_bhkSimpleShapePhantom> },
             { "bhkSphereShape", &construct<bhkSphereShape, RC_bhkSphereShape> },
             { "bhkTransformShape", &construct<bhkConvexTransformShape, RC_bhkConvexTransformShape> },
+
+            // Phantom records, Bethesda
+            { "bhkAabbPhantom", &construct<bhkAabbPhantom, RC_bhkAabbPhantom> },
+            { "bhkSimpleShapePhantom", &construct<bhkSimpleShapePhantom, RC_bhkSimpleShapePhantom> },
 
             // Physics system records, Bethesda
             { "bhkPhysicsSystem", &construct<bhkPhysicsSystem, RC_bhkPhysicsSystem> },
             { "bhkRagdollSystem", &construct<bhkRagdollSystem, RC_bhkRagdollSystem> },
+
+            // Action records
+            { "bhkLiquidAction", &construct<bhkLiquidAction, RC_bhkLiquidAction> },
+            { "bhkOrientHingedBodyAction", &construct<bhkOrientHingedBodyAction, RC_bhkOrientHingedBodyAction> },
 
             // PROPERTIES
 

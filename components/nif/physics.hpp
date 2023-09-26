@@ -695,6 +695,18 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    /// A shape based on triangle strips
+    struct bhkMeshShape : bhkShape
+    {
+        float mRadius;
+        osg::Vec4f mScale;
+        std::vector<bhkWorldObjCInfoProperty> mShapeProperties;
+        NiTriStripsDataList mDataList;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     // A sphere
     using bhkSphereShape = bhkConvexShape;
 
@@ -757,7 +769,26 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
-    struct bhkSimpleShapePhantom : public bhkWorldObject
+    // Abstract non-physical object that receives collision events
+    struct bhkPhantom : bhkWorldObject
+    {
+    };
+
+    // A Phantom with an AABB
+    struct bhkAabbPhantom : bhkPhantom
+    {
+        osg::Vec4f mAabbMin, mAabbMax;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // Abstract Phantom with a collision shape
+    struct bhkShapePhantom : bhkPhantom
+    {
+    };
+
+    // A ShapePhantom with a transformation
+    struct bhkSimpleShapePhantom : bhkShapePhantom
     {
         osg::Matrixf mTransform;
 
@@ -840,6 +871,39 @@ namespace Nif
         bhkWrappedConstraintData mConstraint;
         float mThreshold;
         bool mRemoveWhenBroken;
+
+        void read(NIFStream* nif) override;
+    };
+
+    // Abstract action applied during the simulation
+    struct bhkAction : bhkSerializable
+    {
+    };
+
+    struct bhkUnaryAction : bhkAction
+    {
+        bhkRigidBodyPtr mEntity;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
+    struct bhkLiquidAction : bhkAction
+    {
+        float mInitialStickForce;
+        float mStickStrength;
+        float mNeighborDistance;
+        float mNeighborStrength;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct bhkOrientHingedBodyAction : bhkUnaryAction
+    {
+        osg::Vec4f mHingeAxisLS;
+        osg::Vec4f mForwardLS;
+        float mStrength;
+        float mDamping;
 
         void read(NIFStream* nif) override;
     };
