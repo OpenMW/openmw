@@ -687,7 +687,9 @@ namespace Shader
         {
             if (reqs.mSoftParticles)
                 defineMap["disableNormals"] = "1";
-            writableStateSet->setAttribute(new osg::ColorMaski(1, false, false, false, false));
+            auto colorMask = new osg::ColorMaski(1, false, false, false, false);
+            writableStateSet->setAttribute(colorMask);
+            addedState->setAttribute(colorMask);
         }
 
         if (reqs.mSoftParticles)
@@ -695,6 +697,7 @@ namespace Shader
             const int unitSoftEffect
                 = mShaderManager.reserveGlobalTextureUnits(Shader::ShaderManager::Slot::OpaqueDepthTexture);
             writableStateSet->addUniform(new osg::Uniform("opaqueDepthTex", unitSoftEffect));
+            addedState->addUniform("opaqueDepthTex");
         }
 
         if (writableStateSet->getMode(GL_ALPHA_TEST) != osg::StateAttribute::INHERIT
