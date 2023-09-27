@@ -945,7 +945,7 @@ void OMW::Engine::go()
                               .count()
             * timeManager.getSimulationTimeScale();
 
-        mViewer->advance(timeManager.getSimulationTime());
+        mViewer->advance(timeManager.getRenderingSimulationTime());
 
         if (!frame(dt))
         {
@@ -954,7 +954,10 @@ void OMW::Engine::go()
         }
         timeManager.updateIsPaused();
         if (!timeManager.isPaused())
+        {
             timeManager.setSimulationTime(timeManager.getSimulationTime() + dt);
+            timeManager.setRenderingSimulationTime(timeManager.getRenderingSimulationTime() + dt);
+        }
 
         if (stats)
         {
