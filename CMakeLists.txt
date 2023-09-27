@@ -434,7 +434,7 @@ if(HAVE_MULTIVIEW)
     add_definitions(-DOSG_HAS_MULTIVIEW)
 endif(HAVE_MULTIVIEW)
 
-set(BOOST_COMPONENTS system program_options iostreams)
+set(BOOST_COMPONENTS iostreams program_options system)
 if(WIN32)
     set(BOOST_COMPONENTS ${BOOST_COMPONENTS} locale)
     if(MSVC)
@@ -449,12 +449,9 @@ IF(BOOST_STATIC)
 endif()
 
 set(Boost_NO_BOOST_CMAKE ON)
+set(Boost_NO_WARN_NEW_VERSIONS ON)  # ignore warnings about new releases of boost
 
-find_package(Boost 1.6.2 REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
-
-if(Boost_VERSION_STRING VERSION_GREATER_EQUAL 1.77.0)
-    find_package(Boost 1.77.0 REQUIRED COMPONENTS atomic)
-endif()
+find_package(Boost 1.77.0 REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
 
 if(OPENMW_USE_SYSTEM_MYGUI)
     find_package(MyGUI 3.4.2 REQUIRED)
