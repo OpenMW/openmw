@@ -20,7 +20,7 @@
 #include <components/esm3/loadnpc.hpp>
 #include <components/esm3/loadrace.hpp>
 #include <components/esm3/mappings.hpp>
-#include <components/sceneutil/actorutil.hpp>
+#include <components/settings/settings.hpp>
 
 #include "data.hpp"
 
@@ -129,11 +129,14 @@ namespace CSMWorld
         if (mCreature || !mSkeletonOverride.empty())
             return "meshes\\" + mSkeletonOverride;
 
-        bool firstPerson = false;
         bool beast = mRaceData ? mRaceData->isBeast() : false;
-        bool werewolf = false;
 
-        return SceneUtil::getActorSkeleton(firstPerson, mFemale, beast, werewolf);
+        if (beast)
+            return Settings::Manager::getString("baseanimkna", "Models");
+        else if (mFemale)
+            return Settings::Manager::getString("baseanimfemale", "Models");
+        else
+            return Settings::Manager::getString("baseanim", "Models");
     }
 
     ESM::RefId ActorAdapter::ActorData::getPart(ESM::PartReferenceType index) const

@@ -34,7 +34,6 @@
 
 #include <components/vfs/manager.hpp>
 
-#include <components/sceneutil/actorutil.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/sceneutil/lightutil.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
@@ -54,6 +53,7 @@
 
 #include "../mwmechanics/character.hpp" // FIXME: for MWMechanics::Priority
 
+#include "actorutil.hpp"
 #include "rotatecontroller.hpp"
 #include "util.hpp"
 #include "vismask.hpp"
@@ -1411,12 +1411,13 @@ namespace MWRender
                     const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
                     const ESM::Race* race = store.get<ESM::Race>().find(ref->mBase->mRace);
 
-                    bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
-                    bool isFemale = !ref->mBase->isMale();
+                    const bool firstPerson = false;
+                    const bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
+                    const bool isFemale = !ref->mBase->isMale();
+                    const bool werewolf = false;
 
-                    defaultSkeleton = SceneUtil::getActorSkeleton(false, isFemale, isBeast, false);
-                    defaultSkeleton
-                        = Misc::ResourceHelpers::correctActorModelPath(defaultSkeleton, mResourceSystem->getVFS());
+                    defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(
+                        getActorSkeleton(firstPerson, isFemale, isBeast, werewolf), mResourceSystem->getVFS());
                 }
             }
         }

@@ -1,9 +1,9 @@
-#ifndef OPENMW_COMPONENTS_SCENEUTIL_ACTORUTIL_HPP
-#define OPENMW_COMPONENTS_SCENEUTIL_ACTORUTIL_HPP
+#ifndef OPENMW_APPS_OPENMW_MWRENDER_ACTORUTIL_H
+#define OPENMW_APPS_OPENMW_MWRENDER_ACTORUTIL_H
 
 #include <string>
 
-namespace SceneUtil
+namespace MWRender
 {
     const std::string& getActorSkeleton(bool firstPerson, bool female, bool beast, bool werewolf);
 }
