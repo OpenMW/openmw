@@ -656,7 +656,7 @@
 -- @field #string id Effect ID
 -- @field #string icon Effect Icon Path
 -- @field #string name Localized name of the effect
--- @field #string school Skill ID
+-- @field #string school Skill ID that is this effect's school
 -- @field #number baseCost
 -- @field openmw.util#Color color
 -- @field #boolean harmful
@@ -845,12 +845,14 @@
 -- @param #string recordId
 -- @return #SkillRecord
 
+---
 -- @type AttributeRecord
 -- @field #string id Record id
 -- @field #string name Human-readable name
 -- @field #string description Human-readable description
 -- @field #string icon VFS path to the icon
 
+---
 -- @type SkillRecord
 -- @field #string id Record id
 -- @field #string name Human-readable name
