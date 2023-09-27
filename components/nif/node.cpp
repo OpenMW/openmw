@@ -393,6 +393,8 @@ namespace Nif
         mShaderProperty.read(nif);
         mAlphaProperty.read(nif);
         mVertDesc.read(nif);
+        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
+            mVertDesc.mFlags |= BSVertexDesc::VertexAttribute::Full_Precision;
 
         if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_FO4)
             mTriangles.resize(nif->get<uint32_t>() * 3);
@@ -464,10 +466,7 @@ namespace Nif
 
     void BSVertexData::read(NIFStream* nif, uint16_t flags)
     {
-        bool fullPrecision = true;
-        if (nif->getBethVersion() != NIFFile::BethVersion::BETHVER_SSE)
-            fullPrecision = flags & BSVertexDesc::VertexAttribute::Full_Precision;
-
+        bool fullPrecision = flags & BSVertexDesc::VertexAttribute::Full_Precision;
         bool hasVertex = flags & BSVertexDesc::VertexAttribute::Vertex;
         bool hasTangent = flags & BSVertexDesc::VertexAttribute::Tangents;
         bool hasUV = flags & BSVertexDesc::VertexAttribute::UVs;

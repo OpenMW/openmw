@@ -775,6 +775,8 @@ namespace NifOsg
                 {
                     if (isNiGeometry)
                         handleNiGeometry(nifNode, parent, node, composite, args.mBoundTextures, args.mAnimFlags);
+                    else // isBSGeometry
+                        handleBSGeometry(nifNode, parent, node, composite, args.mBoundTextures, args.mAnimFlags);
 
                     if (!nifNode->mController.empty())
                         handleMeshControllers(nifNode, node, composite, args.mBoundTextures, args.mAnimFlags);
@@ -1552,6 +1554,100 @@ namespace NifOsg
 
             drawable->setName(nifNode->mName);
             parentNode->addChild(drawable);
+        }
+
+        void handleBSGeometry(const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
+            SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures,
+            int animflags)
+        {
+            assert(isTypeBSGeometry(nifNode->recType));
+
+            auto bsTriShape = static_cast<const Nif::BSTriShape*>(nifNode);
+            const std::vector<unsigned short>& triangles = bsTriShape->mTriangles;
+            if (triangles.empty())
+                return;
+
+            osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
+            geometry->addPrimitiveSet(new osg::DrawElementsUShort(
+                osg::PrimitiveSet::TRIANGLES, triangles.size(), triangles.data()));
+
+            auto normbyteToFloat = [](uint8_t value) { return value / 255.f * 2.f - 1.f; };
+            auto halfToFloat = [](uint16_t value)
+            {
+                uint32_t bits = static_cast<uint32_t>(value & 0x8000) << 16;
+
+                const uint32_t exp16 = (value & 0x7c00) >> 10;
+                uint32_t frac16 = value & 0x3ff;
+                if (exp16)
+                    bits |= (exp16 + 0x70) << 23;
+                else if (frac16)
+                {
+                    uint8_t offset = 0;
+                    do
+                    {
+                        ++offset;
+                        frac16 <<= 1;
+                    }
+                    while ((frac16 & 0x400) != 0x400);
+                    frac16 &= 0x3ff;
+                    bits |= (0x71 - offset) << 23;
+                }
+                bits |= frac16 << 13;
+
+                float result;
+                std::memcpy(&result, &bits, sizeof(float));
+                return result;
+            };
+
+            const bool fullPrecision = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Full_Precision;
+            const bool hasVertices = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Vertex;
+            const bool hasNormals = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Normals;
+            const bool hasColors = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Vertex_Colors;
+            const bool hasUV = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::UVs;
+
+            std::vector<osg::Vec3f> vertices;
+            std::vector<osg::Vec3f> normals;
+            std::vector<osg::Vec4ub> colors;
+            std::vector<osg::Vec2f> uvlist;
+            for (auto& elem : bsTriShape->mVertData)
+            {
+                if (hasVertices)
+                {
+                    if (fullPrecision)
+                        vertices.emplace_back(elem.mVertex.x(), elem.mVertex.y(), elem.mVertex.z());
+                    else
+                        vertices.emplace_back(halfToFloat(elem.mHalfVertex[0]), halfToFloat(elem.mHalfVertex[1]), halfToFloat(elem.mHalfVertex[2]));
+                }
+                if (hasNormals)
+                    normals.emplace_back(normbyteToFloat(elem.mNormal[0]), normbyteToFloat(elem.mNormal[1]), normbyteToFloat(elem.mNormal[2]));
+                if (hasColors)
+                    colors.emplace_back(elem.mVertColor[0], elem.mVertColor[1], elem.mVertColor[2], elem.mVertColor[3]);
+                if (hasUV)
+                    uvlist.emplace_back(halfToFloat(elem.mUV[0]), 1.0 - halfToFloat(elem.mUV[1]));
+            }
+
+            if (!vertices.empty())
+                geometry->setVertexArray(new osg::Vec3Array(vertices.size(), vertices.data()));
+            if (!normals.empty())
+                geometry->setNormalArray(
+                    new osg::Vec3Array(normals.size(), normals.data()), osg::Array::BIND_PER_VERTEX);
+            if (!colors.empty())
+                geometry->setColorArray(
+                    new osg::Vec4ubArray(colors.size(), colors.data()), osg::Array::BIND_PER_VERTEX);
+            if (!uvlist.empty())
+                geometry->setTexCoordArray(0, new osg::Vec2Array(uvlist.size(), uvlist.data()),
+                    osg::Array::BIND_PER_VERTEX);
+
+            std::vector<const Nif::NiProperty*> drawableProps;
+            collectDrawableProperties(nifNode, parent, drawableProps);
+            if (!bsTriShape->mShaderProperty.empty())
+                drawableProps.emplace_back(bsTriShape->mShaderProperty.getPtr());
+            if (!bsTriShape->mAlphaProperty.empty())
+                drawableProps.emplace_back(bsTriShape->mAlphaProperty.getPtr());
+            applyDrawableProperties(parentNode, drawableProps, composite, !colors.empty(), animflags);
+
+            geometry->setName(nifNode->mName);
+            parentNode->addChild(geometry);
         }
 
         osg::BlendFunc::BlendFuncMode getBlendMode(int mode)
