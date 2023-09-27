@@ -393,8 +393,6 @@ namespace Nif
         mShaderProperty.read(nif);
         mAlphaProperty.read(nif);
         mVertDesc.read(nif);
-        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
-            mVertDesc.mFlags |= BSVertexDesc::VertexAttribute::Full_Precision;
 
         if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_FO4)
             mTriangles.resize(nif->get<uint32_t>() * 3);
@@ -462,6 +460,8 @@ namespace Nif
         mLandscapeDataOffset = (data & 0xF00000000) >> 0x20;
         mEyeDataOffset = (data & 0xF000000000) >> 0x24;
         mFlags = (data & 0xFFF00000000000) >> 0x2C;
+        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
+            mFlags |= BSVertexDesc::VertexAttribute::Full_Precision;
     }
 
     void BSVertexData::read(NIFStream* nif, uint16_t flags)
