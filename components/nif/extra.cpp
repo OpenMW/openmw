@@ -136,4 +136,30 @@ namespace Nif
         nif->readVector(mData, nif->get<uint32_t>());
     }
 
+    void BSConnectPoint::Point::read(NIFStream* nif)
+    {
+        mParent = nif->getSizedString();
+        mName = nif->getSizedString();
+        nif->read(mTransform.mRotation);
+        nif->read(mTransform.mTranslation);
+        nif->read(mTransform.mScale);
+    }
+
+    void BSConnectPoint::Parents::read(NIFStream* nif)
+    {
+        NiExtraData::read(nif);
+
+        mPoints.resize(nif->get<uint32_t>());
+        for (Point& point : mPoints)
+            point.read(nif);
+    }
+
+    void BSConnectPoint::Children::read(NIFStream* nif)
+    {
+        NiExtraData::read(nif);
+
+        nif->read(mSkinned);
+        nif->getSizedStrings(mPointNames, nif->get<uint32_t>());
+    }
+
 }
