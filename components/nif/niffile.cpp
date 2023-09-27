@@ -158,6 +158,7 @@ namespace Nif
                 &construct<BSEffectShaderPropertyFloatController, RC_BSLightingShaderPropertyFloatController> },
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
             { "NiBSBoneLODController", &construct<NiBoneLODController, RC_NiBoneLODController> },
+            { "NiLightRadiusController", &construct<NiFloatInterpController, RC_NiLightRadiusController> },
 
             // Interpolators, Gamebryo
             { "NiBlendBoolInterpolator", &construct<NiBlendBoolInterpolator, RC_NiBlendBoolInterpolator> },

@@ -186,6 +186,7 @@ namespace Nif
         RC_NiLight,
         RC_NiLightColorController,
         RC_NiLightDimmerController,
+        RC_NiLightRadiusController,
         RC_NiLines,
         RC_NiLinesData,
         RC_NiLODNode,
