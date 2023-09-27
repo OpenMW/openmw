@@ -205,8 +205,7 @@ namespace MWClass
             newPtr = MWWorld::Ptr(cell.insert(ref), &cell);
             newPtr.getRefData().setCount(count);
         }
-        if (ptr.getCell() != &MWBase::Environment::get().getWorldModel()->getDraftCell())
-            newPtr.getCellRef().unsetRefNum();
+        newPtr.getCellRef().unsetRefNum();
         newPtr.getRefData().setLuaScripts(nullptr);
         MWBase::Environment::get().getWorldModel()->registerPtr(newPtr);
         return newPtr;

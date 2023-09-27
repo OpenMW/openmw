@@ -11,6 +11,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/localscripts.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/scene.hpp"
 #include "../mwworld/worldmodel.hpp"
@@ -112,17 +113,22 @@ namespace MWLua
             const MWWorld::Class& cls = ptr.getClass();
             if (cls.isActor())
             {
-                auto& stats = ptr.getClass().getCreatureStats(ptr);
+                auto& stats = cls.getCreatureStats(ptr);
                 stats.land(false);
                 stats.setTeleported(true);
             }
+            const MWWorld::CellStore* srcCell = ptr.getCell();
             MWWorld::Ptr newPtr;
-            if (ptr.getCell() == &wm->getDraftCell())
+            if (srcCell == &wm->getDraftCell())
             {
-                newPtr = world->placeObject(ptr, destCell, toPos(pos, rot));
+                newPtr = cls.moveToCell(ptr, *destCell, toPos(pos, rot));
                 ptr.getCellRef().unsetRefNum();
                 ptr.getRefData().setLuaScripts(nullptr);
                 ptr.getRefData().setCount(0);
+                ESM::RefId script = cls.getScript(newPtr);
+                if (!script.empty())
+                    world->getLocalScripts().add(script, newPtr);
+                world->addContainerScripts(newPtr, newPtr.getCell());
             }
             else
             {
