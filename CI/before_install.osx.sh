@@ -34,7 +34,7 @@ qmake --version
 if [[ "${MACOS_AMD64}" ]]; then
     curl -fSL -R -J https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/openmw-deps-20221113.zip -o ~/openmw-deps.zip
 else
-    curl -fSL -R -J https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/openmw-deps-20230722_arm64.zip -o ~/openmw-deps.zip
+    curl -fSL -R -J https://gitlab.com/OpenMW/openmw-deps/-/raw/main/macos/openmw-deps-20230920_arm64.zip -o ~/openmw-deps.zip
 fi
 
 unzip -o ~/openmw-deps.zip -d /tmp > /dev/null
