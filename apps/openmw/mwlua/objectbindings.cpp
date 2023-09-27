@@ -133,7 +133,7 @@ namespace MWLua
             else
             {
                 newPtr = world->moveObject(ptr, destCell, pos);
-                if (MWBase::Environment::get().getWorldScene()->isCellActive(*srcCell))
+                if (srcCell == destCell)
                 {
                     ESM::RefId script = cls.getScript(newPtr);
                     if (!script.empty())
