@@ -302,6 +302,33 @@ namespace Nif
         }
     }
 
+    void BSSkinInstance::read(NIFStream* nif)
+    {
+        mRoot.read(nif);
+        mData.read(nif);
+        readRecordList(nif, mBones);
+        nif->readVector(mScales, nif->get<uint32_t>());
+    }
+
+    void BSSkinInstance::post(Reader& nif)
+    {
+        mRoot.post(nif);
+        mData.post(nif);
+        postRecordList(nif, mBones);
+        if (mData.empty() || mRoot.empty())
+            throw Nif::Exception("BSSkin::Instance missing root or data", nif.getFilename());
+
+        if (mBones.size() != mData->mBones.size())
+            throw Nif::Exception("Mismatch in BSSkin::BoneData bone count", nif.getFilename());
+
+        for (auto& bone : mBones)
+        {
+            if (bone.empty())
+                throw Nif::Exception("Oops: Missing bone! Don't know how to handle this.", nif.getFilename());
+            bone->setBone();
+        }
+    }
+
     void NiSkinData::read(NIFStream* nif)
     {
         nif->read(mTransform);
@@ -342,6 +369,16 @@ namespace Nif
     void NiSkinData::post(Reader& nif)
     {
         mPartitions.post(nif);
+    }
+
+    void BSSkinBoneData::read(NIFStream* nif)
+    {
+        mBones.resize(nif->get<uint32_t>());
+        for (BoneInfo& bone : mBones)
+        {
+            nif->read(bone.mBoundSphere);
+            nif->read(bone.mTransform);
+        }
     }
 
     void NiSkinPartition::read(NIFStream* nif)

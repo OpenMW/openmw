@@ -223,6 +223,17 @@ namespace Nif
         void read(NIFStream* nif) override;
     };
 
+    struct BSSkinInstance : Record
+    {
+        NiAVObjectPtr mRoot;
+        BSSkinBoneDataPtr mData;
+        NiAVObjectList mBones;
+        std::vector<osg::Vec3f> mScales;
+
+        void read(NIFStream* nif) override;
+        void post(Reader& nif) override;
+    };
+
     struct NiSkinData : public Record
     {
         using VertWeight = std::pair<unsigned short, float>;
@@ -240,6 +251,19 @@ namespace Nif
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
+    };
+
+    struct BSSkinBoneData : Record
+    {
+        struct BoneInfo
+        {
+            osg::BoundingSpheref mBoundSphere;
+            NiTransform mTransform;
+        };
+
+        std::vector<BoneInfo> mBones;
+
+        void read(NIFStream* nif) override;
     };
 
     struct NiSkinPartition : public Record

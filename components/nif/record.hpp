@@ -125,6 +125,8 @@ namespace Nif
         RC_BSShaderPPLightingProperty,
         RC_BSShaderProperty,
         RC_BSShaderTextureSet,
+        RC_BSSkinBoneData,
+        RC_BSSkinInstance,
         RC_BSSkyShaderProperty,
         RC_BSTriShape,
         RC_BSWArray,
