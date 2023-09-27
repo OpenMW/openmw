@@ -138,7 +138,6 @@ namespace Nif
             void read(NIFStream* nif);
         };
 
-
         NiGeometryDataPtr mData;
         NiSkinInstancePtr mSkin;
         MaterialData mMaterial;

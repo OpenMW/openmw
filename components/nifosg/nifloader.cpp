@@ -456,7 +456,7 @@ namespace NifOsg
 
             if (!shaderprop.empty())
                 handleProperty(shaderprop.getPtr(), applyTo, composite, imageManager, boundTextures, animflags,
-                                   hasStencilProperty);
+                    hasStencilProperty);
         }
 
         static void setupController(const Nif::NiTimeController* ctrl, SceneUtil::Controller* toSetup, int animflags)
@@ -1533,8 +1533,9 @@ namespace NifOsg
                         continue;
 
                     const std::vector<Nif::NiMorphData::MorphData>& morphs = nimorphctrl->mData.getPtr()->mMorphs;
-                    if (morphs.empty() || morphs[0].mVertices.size()
-                        != static_cast<const osg::Vec3Array*>(geom->getVertexArray())->size())
+                    if (morphs.empty()
+                        || morphs[0].mVertices.size()
+                            != static_cast<const osg::Vec3Array*>(geom->getVertexArray())->size())
                         continue;
 
                     osg::ref_ptr<SceneUtil::MorphGeometry> morphGeom = new SceneUtil::MorphGeometry;
@@ -1568,12 +1569,11 @@ namespace NifOsg
                 return;
 
             osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
-            geometry->addPrimitiveSet(new osg::DrawElementsUShort(
-                osg::PrimitiveSet::TRIANGLES, triangles.size(), triangles.data()));
+            geometry->addPrimitiveSet(
+                new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, triangles.size(), triangles.data()));
 
             auto normbyteToFloat = [](uint8_t value) { return value / 255.f * 2.f - 1.f; };
-            auto halfToFloat = [](uint16_t value)
-            {
+            auto halfToFloat = [](uint16_t value) {
                 uint32_t bits = static_cast<uint32_t>(value & 0x8000) << 16;
 
                 const uint32_t exp16 = (value & 0x7c00) >> 10;
@@ -1587,8 +1587,7 @@ namespace NifOsg
                     {
                         ++offset;
                         frac16 <<= 1;
-                    }
-                    while ((frac16 & 0x400) != 0x400);
+                    } while ((frac16 & 0x400) != 0x400);
                     frac16 &= 0x3ff;
                     bits |= (0x71 - offset) << 23;
                 }
@@ -1599,7 +1598,7 @@ namespace NifOsg
                 return result;
             };
 
-            const bool fullPrecision = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Full_Precision;
+            const bool fullPrec = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Full_Precision;
             const bool hasVertices = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Vertex;
             const bool hasNormals = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Normals;
             const bool hasColors = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Vertex_Colors;
@@ -1613,13 +1612,15 @@ namespace NifOsg
             {
                 if (hasVertices)
                 {
-                    if (fullPrecision)
+                    if (fullPrec)
                         vertices.emplace_back(elem.mVertex.x(), elem.mVertex.y(), elem.mVertex.z());
                     else
-                        vertices.emplace_back(halfToFloat(elem.mHalfVertex[0]), halfToFloat(elem.mHalfVertex[1]), halfToFloat(elem.mHalfVertex[2]));
+                        vertices.emplace_back(halfToFloat(elem.mHalfVertex[0]), halfToFloat(elem.mHalfVertex[1]),
+                            halfToFloat(elem.mHalfVertex[2]));
                 }
                 if (hasNormals)
-                    normals.emplace_back(normbyteToFloat(elem.mNormal[0]), normbyteToFloat(elem.mNormal[1]), normbyteToFloat(elem.mNormal[2]));
+                    normals.emplace_back(normbyteToFloat(elem.mNormal[0]), normbyteToFloat(elem.mNormal[1]),
+                        normbyteToFloat(elem.mNormal[2]));
                 if (hasColors)
                     colors.emplace_back(elem.mVertColor[0], elem.mVertColor[1], elem.mVertColor[2], elem.mVertColor[3]);
                 if (hasUV)
@@ -1635,8 +1636,8 @@ namespace NifOsg
                 geometry->setColorArray(
                     new osg::Vec4ubArray(colors.size(), colors.data()), osg::Array::BIND_PER_VERTEX);
             if (!uvlist.empty())
-                geometry->setTexCoordArray(0, new osg::Vec2Array(uvlist.size(), uvlist.data()),
-                    osg::Array::BIND_PER_VERTEX);
+                geometry->setTexCoordArray(
+                    0, new osg::Vec2Array(uvlist.size(), uvlist.data()), osg::Array::BIND_PER_VERTEX);
 
             std::vector<const Nif::NiProperty*> drawableProps;
             collectDrawableProperties(nifNode, parent, drawableProps);
