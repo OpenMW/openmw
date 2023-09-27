@@ -60,7 +60,7 @@ namespace
         if (rec["value"] != sol::nil)
             book.mData.mValue = rec["value"];
         if (rec["isScroll"] != sol::nil)
-            book.mData.mIsScroll = rec["isScroll"];
+            book.mData.mIsScroll = rec["isScroll"] ? 1 : 0;
 
         if (rec["skill"] != sol::nil)
         {
