@@ -1239,7 +1239,7 @@ namespace MWWorld
                 // no need to clearCorpse, handled as part of get<ESM::Creature>()
                 if (!ptr.getRefData().isDeleted())
                     ptr.getClass().respawn(ptr);
-                return false;
+                return true;
             });
         }
     }

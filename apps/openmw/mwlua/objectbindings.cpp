@@ -133,6 +133,12 @@ namespace MWLua
             else
             {
                 newPtr = world->moveObject(ptr, destCell, pos);
+                if (MWBase::Environment::get().getWorldScene()->isCellActive(*srcCell))
+                {
+                    ESM::RefId script = cls.getScript(newPtr);
+                    if (!script.empty())
+                        world->getLocalScripts().add(script, newPtr);
+                }
                 world->rotateObject(newPtr, rot, MWBase::RotationFlag_none);
             }
             if (placeOnGround)
