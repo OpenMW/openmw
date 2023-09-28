@@ -375,6 +375,11 @@ namespace MWLua
             return result;
         };
 
+        actor["getEncumbrance"] = [](const Object& actor) -> float {
+            const MWWorld::Ptr ptr = actor.ptr();
+            return ptr.getClass().getEncumbrance(ptr);
+        };
+
         addActorStatsBindings(actor, context);
         addActorMagicBindings(actor, context);
     }

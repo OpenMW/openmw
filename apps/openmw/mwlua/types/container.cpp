@@ -31,14 +31,16 @@ namespace MWLua
         container["content"] = sol::overload([](const LObject& o) { return Inventory<LObject>{ o }; },
             [](const GObject& o) { return Inventory<GObject>{ o }; });
         container["inventory"] = container["content"];
-        container["encumbrance"] = [](const Object& obj) -> float {
+        container["getEncumbrance"] = [](const Object& obj) -> float {
             const MWWorld::Ptr& ptr = containerPtr(obj);
             return ptr.getClass().getEncumbrance(ptr);
         };
-        container["capacity"] = [](const Object& obj) -> float {
+        container["encumbrance"] = container["getEncumbrance"]; // for compatibility; should be removed later
+        container["getCapacity"] = [](const Object& obj) -> float {
             const MWWorld::Ptr& ptr = containerPtr(obj);
             return ptr.getClass().getCapacity(ptr);
         };
+        container["capacity"] = container["getCapacity"]; // for compatibility; should be removed later
 
         auto vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
 

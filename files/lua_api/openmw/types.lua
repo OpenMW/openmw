@@ -10,6 +10,12 @@
 -- @type Actor
 
 ---
+-- Get the total weight of everything the actor is carrying, plus modifications from magic effects.
+-- @function [parent=#Actor] getEncumbrance
+-- @param openmw.core#GameObject actor
+-- @return #number
+
+---
 -- Agent bounds to be used for pathfinding functions.
 -- @function [parent=#Actor] getPathfindingAgentBounds
 -- @param openmw.core#GameObject actor
@@ -856,6 +862,12 @@
 -- @return #number
 
 ---
+-- Get the total weight that the actor can carry.
+-- @function [parent=#NPC] getCapacity
+-- @param openmw.core#GameObject actor
+-- @return #number
+
+---
 -- Whether the NPC or player is in the werewolf form at the moment.
 -- @function [parent=#NPC] isWerewolf
 -- @param openmw.core#GameObject actor
@@ -1639,13 +1651,13 @@
 
 ---
 -- Returns the total weight of everything in a container
--- @function [parent=#Container] encumbrance
+-- @function [parent=#Container] getEncumbrance
 -- @param openmw.core#GameObject object
 -- @return #number
 
 ---
 -- Returns the capacity of a container
--- @function [parent=#Container] capacity
+-- @function [parent=#Container] getCapacity
 -- @param openmw.core#GameObject object
 -- @return #number
 
