@@ -18,7 +18,6 @@
 #include <components/esm3/loadrace.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/actorutil.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/keyframe.hpp>
 #include <components/sceneutil/lightcommon.hpp>
@@ -40,6 +39,7 @@
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
 
+#include "actorutil.hpp"
 #include "postprocessor.hpp"
 #include "renderbin.hpp"
 #include "rotatecontroller.hpp"
@@ -500,8 +500,8 @@ namespace MWRender
         bool is1stPerson = mViewMode == VM_FirstPerson;
         bool isBeast = (race->mData.mFlags & ESM::Race::Beast) != 0;
 
-        std::string defaultSkeleton = SceneUtil::getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf);
-        defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(defaultSkeleton, mResourceSystem->getVFS());
+        const std::string defaultSkeleton = Misc::ResourceHelpers::correctActorModelPath(
+            getActorSkeleton(is1stPerson, isFemale, isBeast, isWerewolf), mResourceSystem->getVFS());
 
         std::string smodel = defaultSkeleton;
         if (!is1stPerson && !isWerewolf && !mNpc->mModel.empty())

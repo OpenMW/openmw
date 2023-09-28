@@ -2,7 +2,7 @@
 
 #include <components/settings/values.hpp>
 
-namespace SceneUtil
+namespace MWRender
 {
     const std::string& getActorSkeleton(bool firstPerson, bool isFemale, bool isBeast, bool isWerewolf)
     {
