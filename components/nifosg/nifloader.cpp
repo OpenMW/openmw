@@ -1572,6 +1572,8 @@ namespace NifOsg
             geometry->addPrimitiveSet(
                 new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, triangles.size(), triangles.data()));
 
+            osg::ref_ptr<osg::Drawable> drawable = geometry;
+
             auto normbyteToFloat = [](uint8_t value) { return value / 255.f * 2.f - 1.f; };
             auto halfToFloat = [](uint16_t value) {
                 uint32_t bits = static_cast<uint32_t>(value & 0x8000) << 16;
@@ -1639,6 +1641,39 @@ namespace NifOsg
                 geometry->setTexCoordArray(
                     0, new osg::Vec2Array(uvlist.size(), uvlist.data()), osg::Array::BIND_PER_VERTEX);
 
+            if (!bsTriShape->mSkin.empty() && bsTriShape->mSkin->recType == Nif::RC_BSSkinInstance
+                && bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Skinned)
+            {
+                osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
+                rig->setSourceGeometry(geometry);
+
+                osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map(new SceneUtil::RigGeometry::InfluenceMap);
+
+                auto skin = static_cast<const Nif::BSSkinInstance*>(bsTriShape->mSkin.getPtr());
+                const Nif::BSSkinBoneData* data = skin->mData.getPtr();
+                const Nif::NiAVObjectList& bones = skin->mBones;
+                std::vector<std::vector<Nif::NiSkinData::VertWeight>> vertWeights(data->mBones.size());
+                for (size_t i = 0; i < vertices.size(); i++)
+                    for (int j = 0; j < 4; j++)
+                        vertWeights[bsTriShape->mVertData[i].mBoneIndices[j]].emplace_back(
+                            i, halfToFloat(bsTriShape->mVertData[i].mBoneWeights[j]));
+
+                for (std::size_t i = 0; i < bones.size(); ++i)
+                {
+                    std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
+
+                    SceneUtil::RigGeometry::BoneInfluence influence;
+                    influence.mWeights = vertWeights[i];
+                    influence.mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
+                    influence.mBoundSphere = data->mBones[i].mBoundSphere;
+
+                    map->mData.emplace_back(boneName, influence);
+                }
+                rig->setInfluenceMap(map);
+
+                drawable = rig;
+            }
+
             std::vector<const Nif::NiProperty*> drawableProps;
             collectDrawableProperties(nifNode, parent, drawableProps);
             if (!bsTriShape->mShaderProperty.empty())
@@ -1647,8 +1682,8 @@ namespace NifOsg
                 drawableProps.emplace_back(bsTriShape->mAlphaProperty.getPtr());
             applyDrawableProperties(parentNode, drawableProps, composite, !colors.empty(), animflags);
 
-            geometry->setName(nifNode->mName);
-            parentNode->addChild(geometry);
+            drawable->setName(nifNode->mName);
+            parentNode->addChild(drawable);
         }
 
         osg::BlendFunc::BlendFuncMode getBlendMode(int mode)

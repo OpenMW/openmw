@@ -426,6 +426,8 @@ namespace Nif
         mSkin.post(nif);
         mShaderProperty.post(nif);
         mAlphaProperty.post(nif);
+        if (!mSkin.empty())
+            nif.setUseSkinning(true);
     }
 
     void BSDynamicTriShape::read(NIFStream* nif)
