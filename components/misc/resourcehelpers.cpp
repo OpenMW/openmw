@@ -56,13 +56,26 @@ std::string Misc::ResourceHelpers::correctResourcePath(
 
     std::string correctedPath = Misc::StringUtils::lowerCase(resPath);
 
-    // Apparently, leading separators are allowed
-    while (correctedPath.size() && (correctedPath[0] == '/' || correctedPath[0] == '\\'))
+    // Flatten slashes
+    std::replace(correctedPath.begin(), correctedPath.end(), '/', '\\');
+    auto bothSeparators = [](char a, char b) { return a == '\\' && b == '\\'; };
+    correctedPath.erase(std::unique(correctedPath.begin(), correctedPath.end(), bothSeparators), correctedPath.end());
+
+    // Remove leading separator
+    if (!correctedPath.empty() && correctedPath[0] == '\\')
         correctedPath.erase(0, 1);
 
+    // Handle top level directory
     if (!correctedPath.starts_with(topLevelDirectory) || correctedPath.size() <= topLevelDirectory.size()
-        || (correctedPath[topLevelDirectory.size()] != '/' && correctedPath[topLevelDirectory.size()] != '\\'))
-        correctedPath = std::string{ topLevelDirectory } + '\\' + correctedPath;
+        || correctedPath[topLevelDirectory.size()] != '\\')
+    {
+        std::string topLevelPrefix = std::string{ topLevelDirectory } + '\\';
+        size_t topLevelPos = correctedPath.find('\\' + topLevelPrefix);
+        if (topLevelPos == std::string::npos)
+            correctedPath = topLevelPrefix + correctedPath;
+        else
+            correctedPath.erase(0, topLevelPos + 1);
+    }
 
     std::string origExt = correctedPath;
 
