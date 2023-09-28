@@ -11,6 +11,7 @@
 #include "../mwworld/cellstore.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/containerstore.hpp"
+#include "../mwworld/localscripts.hpp"
 #include "../mwworld/player.hpp"
 #include "../mwworld/scene.hpp"
 #include "../mwworld/worldmodel.hpp"
@@ -77,20 +78,25 @@ namespace MWLua
             return &wm->getExterior(ESM::positionToExteriorCellLocation(pos.x(), pos.y(), worldspace));
         }
 
-        void teleportPlayer(
-            MWWorld::CellStore* destCell, const osg::Vec3f& pos, const osg::Vec3f& rot, bool placeOnGround)
+        ESM::Position toPos(const osg::Vec3f& pos, const osg::Vec3f& rot)
         {
-            MWBase::World* world = MWBase::Environment::get().getWorld();
             ESM::Position esmPos;
             static_assert(sizeof(esmPos) == sizeof(osg::Vec3f) * 2);
             std::memcpy(esmPos.pos, &pos, sizeof(osg::Vec3f));
             std::memcpy(esmPos.rot, &rot, sizeof(osg::Vec3f));
+            return esmPos;
+        }
+
+        void teleportPlayer(
+            MWWorld::CellStore* destCell, const osg::Vec3f& pos, const osg::Vec3f& rot, bool placeOnGround)
+        {
+            MWBase::World* world = MWBase::Environment::get().getWorld();
             MWWorld::Ptr ptr = world->getPlayerPtr();
             auto& stats = ptr.getClass().getCreatureStats(ptr);
             stats.land(true);
             stats.setTeleported(true);
             world->getPlayer().setTeleported(true);
-            world->changeToCell(destCell->getCell()->getId(), esmPos, false);
+            world->changeToCell(destCell->getCell()->getId(), toPos(pos, rot), false);
             MWWorld::Ptr newPtr = world->getPlayerPtr();
             world->moveObject(newPtr, pos);
             world->rotateObject(newPtr, rot);
@@ -103,15 +109,38 @@ namespace MWLua
             const osg::Vec3f& rot, bool placeOnGround)
         {
             MWBase::World* world = MWBase::Environment::get().getWorld();
+            MWWorld::WorldModel* wm = MWBase::Environment::get().getWorldModel();
             const MWWorld::Class& cls = ptr.getClass();
             if (cls.isActor())
             {
-                auto& stats = ptr.getClass().getCreatureStats(ptr);
+                auto& stats = cls.getCreatureStats(ptr);
                 stats.land(false);
                 stats.setTeleported(true);
             }
-            MWWorld::Ptr newPtr = world->moveObject(ptr, destCell, pos);
-            world->rotateObject(newPtr, rot, MWBase::RotationFlag_none);
+            const MWWorld::CellStore* srcCell = ptr.getCell();
+            MWWorld::Ptr newPtr;
+            if (srcCell == &wm->getDraftCell())
+            {
+                newPtr = cls.moveToCell(ptr, *destCell, toPos(pos, rot));
+                ptr.getCellRef().unsetRefNum();
+                ptr.getRefData().setLuaScripts(nullptr);
+                ptr.getRefData().setCount(0);
+                ESM::RefId script = cls.getScript(newPtr);
+                if (!script.empty())
+                    world->getLocalScripts().add(script, newPtr);
+                world->addContainerScripts(newPtr, newPtr.getCell());
+            }
+            else
+            {
+                newPtr = world->moveObject(ptr, destCell, pos);
+                if (srcCell == destCell)
+                {
+                    ESM::RefId script = cls.getScript(newPtr);
+                    if (!script.empty())
+                        world->getLocalScripts().add(script, newPtr);
+                }
+                world->rotateObject(newPtr, rot, MWBase::RotationFlag_none);
+            }
             if (placeOnGround)
                 world->adjustPosition(newPtr, true);
             if (cls.isDoor())

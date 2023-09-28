@@ -12,6 +12,7 @@
 #include <components/esm3/loadcrea.hpp>
 #include <components/esm3/loaddoor.hpp>
 #include <components/esm3/loadingr.hpp>
+#include <components/esm3/loadlevlist.hpp>
 #include <components/esm3/loadligh.hpp>
 #include <components/esm3/loadlock.hpp>
 #include <components/esm3/loadmisc.hpp>
@@ -198,6 +199,9 @@ namespace MWLua
                             break;
                         case ESM::REC_STAT:
                             cell.mStore->template forEachType<ESM::Static>(visitor);
+                            break;
+                        case ESM::REC_LEVC:
+                            cell.mStore->template forEachType<ESM::CreatureLevList>(visitor);
                             break;
 
                         case ESM::REC_ACTI4:

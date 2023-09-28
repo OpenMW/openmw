@@ -263,7 +263,7 @@ namespace MWWorld
         /// unintended behaviour. \attention This function also lists deleted (count 0) objects! \return Iteration
         /// completed?
         template <class T, class Visitor>
-        bool forEachType(Visitor& visitor)
+        bool forEachType(Visitor&& visitor)
         {
             if (mState != State_Loaded)
                 return false;

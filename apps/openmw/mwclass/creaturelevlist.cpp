@@ -148,7 +148,7 @@ namespace MWClass
             manualRef.getPtr().getCellRef().setPosition(ptr.getCellRef().getPosition());
             manualRef.getPtr().getCellRef().setScale(ptr.getCellRef().getScale());
             MWWorld::Ptr placed = MWBase::Environment::get().getWorld()->placeObject(
-                manualRef.getPtr(), ptr.getCell(), ptr.getCellRef().getPosition());
+                manualRef.getPtr(), ptr.getCell(), ptr.getRefData().getPosition());
             customData.mSpawnActorId = placed.getClass().getCreatureStats(placed).getActorId();
             customData.mSpawn = false;
         }
