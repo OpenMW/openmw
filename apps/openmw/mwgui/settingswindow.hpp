@@ -14,6 +14,8 @@ namespace MWGui
 
         void onOpen() override;
 
+        void onFrame(float duration) override;
+
         void updateControlsBox();
 
         void updateLightSettings();
