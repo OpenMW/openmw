@@ -230,6 +230,16 @@ namespace MWGui
         }
     }
 
+    void SettingsWindow::onFrame(float duration)
+    {
+        if (mScriptView->getVisible())
+        {
+            const auto scriptsSize = mScriptAdapter->getSize();
+            if (mScriptView->getCanvasSize() != scriptsSize)
+                mScriptView->setCanvasSize(scriptsSize);
+        }
+    }
+
     void SettingsWindow::updateSliderLabel(MyGUI::ScrollBar* scroller, const std::string& value)
     {
         std::string labelWidgetName = scroller->getUserString("SettingLabelWidget");
@@ -1005,7 +1015,6 @@ namespace MWGui
         mScriptDisabled->setVisible(disabled);
 
         LuaUi::attachPageAt(mCurrentPage, mScriptAdapter);
-        mScriptView->setCanvasSize(mScriptAdapter->getSize());
     }
 
     void SettingsWindow::onScriptFilterChange(MyGUI::EditBox*)
@@ -1022,7 +1031,6 @@ namespace MWGui
             mCurrentPage = *mScriptList->getItemDataAt<size_t>(index);
             LuaUi::attachPageAt(mCurrentPage, mScriptAdapter);
         }
-        mScriptView->setCanvasSize(mScriptAdapter->getSize());
     }
 
     void SettingsWindow::onRebindAction(MyGUI::Widget* _sender)
