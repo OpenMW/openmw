@@ -38,7 +38,7 @@ void ESM4::Race::load(ESM4::Reader& reader)
     mFlags = reader.hdr().record.flags;
 
     std::uint32_t esmVer = reader.esmVersion();
-    bool isTES4 = esmVer == ESM::VER_080 || esmVer == ESM::VER_100;
+    bool isTES4 = (esmVer == ESM::VER_080 || esmVer == ESM::VER_100) && !reader.hasFormVersion();
     bool isFONV = esmVer == ESM::VER_132 || esmVer == ESM::VER_133 || esmVer == ESM::VER_134;
     bool isFO3 = false;
 

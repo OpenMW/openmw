@@ -249,9 +249,8 @@ void ESM4::Navigation::load(ESM4::Reader& reader)
             }
             case ESM4::SUB_NVPP:
             {
-                // FIXME: this is both the version for FO4 and for some TES4 files
-                // How to distinguish?
-                if (esmVer == ESM::VER_100)
+                // FIXME: FO4 updates the format
+                if (reader.hasFormVersion() && (esmVer == ESM::VER_095 || esmVer == ESM::VER_100))
                 {
                     reader.skipSubRecordData();
                     break;

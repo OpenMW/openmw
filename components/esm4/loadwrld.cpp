@@ -185,6 +185,10 @@ void ESM4::World::load(ESM4::Reader& reader)
                 mWaterLevel = 0.f;
             }
         }
+
+        // TES4 doesn't define PNAM. Exact parent worldspace behavior needs research
+        if (!reader.hasFormVersion())
+            mParentUseFlags = 0xFFFF;
     }
 }
 
