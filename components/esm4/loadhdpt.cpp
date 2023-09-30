@@ -88,6 +88,8 @@ void ESM4::HeadPart::load(ESM4::Reader& reader)
                 reader.getFormId(mBaseTexture);
                 break;
             case ESM4::SUB_PNAM:
+                reader.get(mType);
+                break;
             case ESM4::SUB_MODT: // Model data
             case ESM4::SUB_MODC:
             case ESM4::SUB_MODS:
