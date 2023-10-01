@@ -16,8 +16,8 @@
 
 #include "components/debug/debuglog.hpp"
 #include "components/misc/convert.hpp"
-#include "components/settings/settings.hpp"
 #include <components/misc/barrier.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/creaturestats.hpp"
@@ -314,7 +314,7 @@ namespace MWPhysics
 
         LockingPolicy detectLockingPolicy()
         {
-            if (Settings::Manager::getInt("async num threads", "Physics") < 1)
+            if (Settings::physics().mAsyncNumThreads < 1)
                 return LockingPolicy::NoLocks;
             if (getMaxBulletSupportedThreads() > 1)
                 return LockingPolicy::AllowSharedLocks;
@@ -331,8 +331,8 @@ namespace MWPhysics
                 case LockingPolicy::ExclusiveLocksOnly:
                     return 1;
                 case LockingPolicy::AllowSharedLocks:
-                    return std::clamp<unsigned>(
-                        Settings::Manager::getInt("async num threads", "Physics"), 0, getMaxBulletSupportedThreads());
+                    return static_cast<unsigned>(std::clamp<int>(
+                        Settings::physics().mAsyncNumThreads, 0, static_cast<int>(getMaxBulletSupportedThreads())));
             }
 
             throw std::runtime_error("Unsupported LockingPolicy: "
@@ -407,7 +407,7 @@ namespace MWPhysics
         , mNumThreads(getNumThreads(mLockingPolicy))
         , mNumJobs(0)
         , mRemainingSteps(0)
-        , mLOSCacheExpiry(Settings::Manager::getInt("lineofsight keep inactive cache", "Physics"))
+        , mLOSCacheExpiry(Settings::physics().mLineofsightKeepInactiveCache)
         , mAdvanceSimulation(false)
         , mNextJob(0)
         , mNextLOS(0)

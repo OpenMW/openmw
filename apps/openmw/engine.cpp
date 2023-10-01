@@ -105,7 +105,7 @@ namespace
         });
         // the forEachUserStatsValue loop is "run" at compile time, hence the settings manager is not available.
         // Unconditionnally add the async physics stats, and then remove it at runtime if necessary
-        if (Settings::Manager::getInt("async num threads", "Physics") == 0)
+        if (Settings::physics().mAsyncNumThreads == 0)
             profiler.removeUserStatsLine(" -Async");
     }
 
