@@ -481,4 +481,14 @@ namespace Settings
 
         throw std::runtime_error("Invalid gyroscope axis: " + std::string(value));
     }
+
+    NavMeshRenderMode parseNavMeshRenderMode(std::string_view value)
+    {
+        if (value == "area type")
+            return NavMeshRenderMode::AreaType;
+        if (value == "update frequency")
+            return NavMeshRenderMode::UpdateFrequency;
+
+        throw std::invalid_argument("Invalid navigation mesh rendering mode: " + std::string(value));
+    }
 }

@@ -9,7 +9,6 @@
 
 #include <osgUtil/IncrementalCompileOperation>
 
-#include "navmeshmode.hpp"
 #include "objects.hpp"
 #include "renderinginterface.hpp"
 #include "rendermode.hpp"
@@ -275,7 +274,7 @@ namespace MWRender
 
         void setScreenRes(int width, int height);
 
-        void setNavMeshMode(NavMeshMode value);
+        void setNavMeshMode(Settings::NavMeshRenderMode value);
 
     private:
         void updateTextureFiltering();

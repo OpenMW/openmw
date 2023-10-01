@@ -3,6 +3,7 @@
 
 #include "components/settings/sanitizerimpl.hpp"
 #include "components/settings/settingvalue.hpp"
+#include <components/settings/navmeshrendermode.hpp>
 
 #include <osg/Math>
 #include <osg/Vec2f>
@@ -52,8 +53,7 @@ namespace Settings
         SettingValue<std::string> mRecastMeshPathPrefix{ mIndex, "Navigator", "recast mesh path prefix" };
         SettingValue<std::string> mNavMeshPathPrefix{ mIndex, "Navigator", "nav mesh path prefix" };
         SettingValue<bool> mEnableNavMeshRender{ mIndex, "Navigator", "enable nav mesh render" };
-        SettingValue<std::string> mNavMeshRenderMode{ mIndex, "Navigator", "nav mesh render mode",
-            makeEnumSanitizerString({ "area type", "update frequency" }) };
+        SettingValue<NavMeshRenderMode> mNavMeshRenderMode{ mIndex, "Navigator", "nav mesh render mode" };
         SettingValue<bool> mEnableAgentsPathsRender{ mIndex, "Navigator", "enable agents paths render" };
         SettingValue<bool> mEnableRecastMeshRender{ mIndex, "Navigator", "enable recast mesh render" };
         SettingValue<int> mMaxTilesNumber{ mIndex, "Navigator", "max tiles number", makeMaxSanitizerInt(0) };

@@ -3,6 +3,7 @@
 
 #include "categories.hpp"
 #include "gyroscopeaxis.hpp"
+#include "navmeshrendermode.hpp"
 
 #include "components/detournavigator/collisionshapetype.hpp"
 
@@ -205,6 +206,14 @@ namespace Settings
     inline GyroscopeAxis Manager::getImpl<GyroscopeAxis>(std::string_view setting, std::string_view category)
     {
         return parseGyroscopeAxis(getString(setting, category));
+    }
+
+    NavMeshRenderMode parseNavMeshRenderMode(std::string_view value);
+
+    template <>
+    inline NavMeshRenderMode Manager::getImpl<NavMeshRenderMode>(std::string_view setting, std::string_view category)
+    {
+        return parseNavMeshRenderMode(getString(setting, category));
     }
 }
 

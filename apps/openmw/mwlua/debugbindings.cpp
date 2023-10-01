@@ -55,12 +55,12 @@ namespace MWLua
         api["reloadLua"] = []() { MWBase::Environment::get().getLuaManager()->reloadAllScripts(); };
 
         api["NAV_MESH_RENDER_MODE"]
-            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, MWRender::NavMeshMode>({
-                { "AreaType", MWRender::NavMeshMode::AreaType },
-                { "UpdateFrequency", MWRender::NavMeshMode::UpdateFrequency },
+            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, Settings::NavMeshRenderMode>({
+                { "AreaType", Settings::NavMeshRenderMode::AreaType },
+                { "UpdateFrequency", Settings::NavMeshRenderMode::UpdateFrequency },
             }));
 
-        api["setNavMeshRenderMode"] = [context](MWRender::NavMeshMode value) {
+        api["setNavMeshRenderMode"] = [context](Settings::NavMeshRenderMode value) {
             context.mLuaManager->addAction(
                 [value] { MWBase::Environment::get().getWorld()->getRenderingManager()->setNavMeshMode(value); });
         };

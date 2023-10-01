@@ -427,7 +427,7 @@ namespace MWRender
 
         mNavMesh = std::make_unique<NavMesh>(mRootNode, mWorkQueue,
             Settings::Manager::getBool("enable nav mesh render", "Navigator"),
-            parseNavMeshMode(Settings::Manager::getString("nav mesh render mode", "Navigator")));
+            Settings::navigator().mNavMeshRenderMode);
         mActorsPaths = std::make_unique<ActorsPaths>(
             mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator"));
         mRecastMesh = std::make_unique<RecastMesh>(
@@ -1666,7 +1666,7 @@ namespace MWRender
             mObjectPaging->getPagedRefnums(activeGrid, out);
     }
 
-    void RenderingManager::setNavMeshMode(NavMeshMode value)
+    void RenderingManager::setNavMeshMode(Settings::NavMeshRenderMode value)
     {
         mNavMesh->setMode(value);
     }
