@@ -21,7 +21,6 @@
 
 #include "../mwbase/dialoguemanager.hpp"
 #include "../mwbase/environment.hpp"
-#include "../mwbase/luamanager.hpp"
 #include "../mwbase/mechanicsmanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -1121,17 +1120,6 @@ namespace MWClass
         // According to UESP, inventory weight is ignored in werewolf form. Does that include
         // feather and burden effects?
         return getNpcStats(ptr).isWerewolf() ? 0.0f : Actor::getEncumbrance(ptr);
-    }
-
-    bool Npc::consume(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) const
-    {
-        MWBase::Environment::get().getWorld()->breakInvisibility(actor);
-        MWMechanics::CastSpell cast(actor, actor);
-        const ESM::RefId& recordId = consumable.getCellRef().getRefId();
-        MWBase::Environment::get().getWorldModel()->registerPtr(consumable);
-        MWBase::Environment::get().getLuaManager()->itemConsumed(consumable, actor);
-        actor.getClass().getContainerStore(actor).remove(consumable, 1);
-        return cast.cast(recordId);
     }
 
     void Npc::skillUsageSucceeded(const MWWorld::Ptr& ptr, ESM::RefId skill, int usageType, float extraFactor) const

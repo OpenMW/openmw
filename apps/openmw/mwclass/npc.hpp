@@ -114,8 +114,6 @@ namespace MWClass
         float getArmorRating(const MWWorld::Ptr& ptr) const override;
         ///< @return combined armor rating of this actor
 
-        bool consume(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) const override;
-
         void adjustScale(const MWWorld::ConstPtr& ptr, osg::Vec3f& scale, bool rendering) const override;
         /// @param rendering Indicates if the scale to adjust is for the rendering mesh, or for the collision mesh
 
