@@ -18,7 +18,7 @@
 #include <components/sceneutil/color.hpp>
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/nodecallback.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/shader/shadermanager.hpp>
 #include <components/stereo/multiview.hpp>
 #include <components/stereo/stereomanager.hpp>
@@ -121,7 +121,7 @@ namespace MWRender
         , mTriggerShaderReload(false)
         , mReload(false)
         , mEnabled(false)
-        , mUsePostProcessing(false)
+        , mUsePostProcessing(Settings::postProcessing().mEnabled)
         , mSoftParticles(false)
         , mDisableDepthPasses(false)
         , mLastFrameNumber(0)
@@ -136,7 +136,6 @@ namespace MWRender
         , mPrevPassLights(false)
     {
         mSoftParticles = Settings::Manager::getBool("soft particles", "Shaders");
-        mUsePostProcessing = Settings::Manager::getBool("enabled", "Post Processing");
 
         osg::GraphicsContext* gc = viewer->getCamera()->getGraphicsContext();
         osg::GLExtensions* ext = gc->getState()->get<osg::GLExtensions>();
@@ -237,7 +236,7 @@ namespace MWRender
     {
         mReload = true;
         mEnabled = true;
-        bool postPass = Settings::Manager::getBool("transparent postpass", "Post Processing");
+        const bool postPass = Settings::postProcessing().mTransparentPostpass;
         mUsePostProcessing = usePostProcessing;
 
         mDisableDepthPasses = !mSoftParticles && !postPass;
@@ -839,9 +838,7 @@ namespace MWRender
 
         mTechniques.clear();
 
-        std::vector<std::string> techniqueStrings = Settings::Manager::getStringArray("chain", "Post Processing");
-
-        for (auto& techniqueName : techniqueStrings)
+        for (const std::string& techniqueName : Settings::postProcessing().mChain.get())
         {
             if (techniqueName.empty())
                 continue;
@@ -863,7 +860,7 @@ namespace MWRender
             chain.push_back(technique->getName());
         }
 
-        Settings::Manager::setStringArray("chain", "Post Processing", chain);
+        Settings::postProcessing().mChain.set(chain);
     }
 
     void PostProcessor::toggleMode()

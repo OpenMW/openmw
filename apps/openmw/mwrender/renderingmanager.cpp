@@ -1441,7 +1441,7 @@ namespace MWRender
             }
             else if (it->first == "Post Processing" && it->second == "enabled")
             {
-                if (Settings::Manager::getBool("enabled", "Post Processing"))
+                if (Settings::postProcessing().mEnabled)
                     mPostProcessor->enable();
                 else
                 {

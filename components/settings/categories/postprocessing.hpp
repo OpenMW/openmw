@@ -19,7 +19,7 @@ namespace Settings
         using WithIndex::WithIndex;
 
         SettingValue<bool> mEnabled{ mIndex, "Post Processing", "enabled" };
-        SettingValue<std::string> mChain{ mIndex, "Post Processing", "chain" };
+        SettingValue<std::vector<std::string>> mChain{ mIndex, "Post Processing", "chain" };
         SettingValue<float> mAutoExposureSpeed{ mIndex, "Post Processing", "auto exposure speed",
             makeMaxStrictSanitizerFloat(0.0001f) };
         SettingValue<bool> mTransparentPostpass{ mIndex, "Post Processing", "transparent postpass" };
