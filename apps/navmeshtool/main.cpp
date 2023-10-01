@@ -199,7 +199,7 @@ namespace NavMeshTool
                 Settings::game().mActorCollisionShapeType,
                 Settings::game().mDefaultActorPathfindHalfExtents,
             };
-            const std::uint64_t maxDbFileSize = Settings::Manager::getUInt64("max navmeshdb file size", "Navigator");
+            const std::uint64_t maxDbFileSize = Settings::navigator().mMaxNavmeshdbFileSize;
             const auto dbPath = Files::pathToUnicodeString(config.getUserDataPath() / "navmesh.db");
 
             Log(Debug::Info) << "Using navmeshdb at " << dbPath;

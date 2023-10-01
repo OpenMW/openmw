@@ -425,13 +425,10 @@ namespace MWRender
         // It is unnecessary to stop/start the viewer as no frames are being rendered yet.
         mResourceSystem->getSceneManager()->getShaderManager().setGlobalDefines(globalDefines);
 
-        mNavMesh = std::make_unique<NavMesh>(mRootNode, mWorkQueue,
-            Settings::Manager::getBool("enable nav mesh render", "Navigator"),
+        mNavMesh = std::make_unique<NavMesh>(mRootNode, mWorkQueue, Settings::navigator().mEnableNavMeshRender,
             Settings::navigator().mNavMeshRenderMode);
-        mActorsPaths = std::make_unique<ActorsPaths>(
-            mRootNode, Settings::Manager::getBool("enable agents paths render", "Navigator"));
-        mRecastMesh = std::make_unique<RecastMesh>(
-            mRootNode, Settings::Manager::getBool("enable recast mesh render", "Navigator"));
+        mActorsPaths = std::make_unique<ActorsPaths>(mRootNode, Settings::navigator().mEnableAgentsPathsRender);
+        mRecastMesh = std::make_unique<RecastMesh>(mRootNode, Settings::navigator().mEnableRecastMeshRender);
         mPathgrid = std::make_unique<Pathgrid>(mRootNode);
 
         mObjects = std::make_unique<Objects>(mResourceSystem, sceneRoot, unrefQueue);
