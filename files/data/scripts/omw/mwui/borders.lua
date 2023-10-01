@@ -22,49 +22,52 @@ local cornerParts = {
     bottom_right = v2(1, 1),
 }
 
-local borderSidePattern = 'textures/menu_thin_border_%s.dds'
-local borderCornerPattern = 'textures/menu_thin_border_%s_corner.dds'
+local borderSidePattern = 'textures/menu_%s_border_%s.dds'
+local borderCornerPattern = 'textures/menu_%s_border_%s_corner.dds'
 
 local borderResources = {}
-do
+local borderPieces = {}
+for _, thickness in ipairs{'thin', 'thick'} do
+    borderResources[thickness] = {}
     for k in pairs(sideParts) do
-        borderResources[k] = ui.texture{ path = borderSidePattern:format(k) }
+        borderResources[thickness][k] = ui.texture{ path = borderSidePattern:format(thickness, k) }
     end
     for k in pairs(cornerParts) do
-        borderResources[k] = ui.texture{ path = borderCornerPattern:format(k) }
+        borderResources[thickness][k] = ui.texture{ path = borderCornerPattern:format(thickness, k) }
+    end
+
+    borderPieces[thickness] = {}
+    for k in pairs(sideParts) do
+        local horizontal = k == 'top' or k == 'bottom'
+        borderPieces[thickness][k] = {
+            type = ui.TYPE.Image,
+            props = {
+                resource = borderResources[thickness][k],
+                tileH = horizontal,
+                tileV = not horizontal,
+            },
+        }
+    end
+    for k in pairs(cornerParts) do
+        borderPieces[thickness][k] = {
+            type = ui.TYPE.Image,
+            props = {
+                resource = borderResources[thickness][k],
+            },
+        }
     end
 end
 
-local borderPieces = {}
-for k in pairs(sideParts) do
-    local horizontal = k == 'top' or k == 'bottom'
-    borderPieces[k] = {
-        type = ui.TYPE.Image,
-        props = {
-            resource = borderResources[k],
-            tileH = horizontal,
-            tileV = not horizontal,
-        },
-    }
-end
-for k in pairs(cornerParts) do
-    borderPieces[k] = {
-        type = ui.TYPE.Image,
-        props = {
-            resource = borderResources[k],
-        },
-    }
-end
 
 
-
-local function borderTemplates(borderSize)
+local function borderTemplates(thickness)
+    local borderSize = (thickness == 'thin') and constants.border or constants.thickBorder
     local borderV = v2(1, 1) * borderSize
     local result = {}
     result.horizontalLine = {
         type = ui.TYPE.Image,
         props = {
-            resource = borderResources.top,
+            resource = borderResources[thickness].top,
             tileH = true,
             tileV = false,
             size = v2(0, borderSize),
@@ -75,7 +78,7 @@ local function borderTemplates(borderSize)
     result.verticalLine = {
         type = ui.TYPE.Image,
         props = {
-            resource = borderResources.left,
+            resource = borderResources[thickness].left,
             tileH = false,
             tileV = true,
             size = v2(borderSize, 0),
@@ -90,7 +93,7 @@ local function borderTemplates(borderSize)
         local horizontal = k == 'top' or k == 'bottom'
         local direction = horizontal and v2(1, 0) or v2(0, 1)
         result.borders.content:add {
-            template = borderPieces[k],
+            template = borderPieces[thickness][k],
             props = {
                 position = (direction - v) * borderSize,
                 relativePosition = v,
@@ -101,7 +104,7 @@ local function borderTemplates(borderSize)
     end
     for k, v in pairs(cornerParts) do
         result.borders.content:add {
-            template = borderPieces[k],
+            template = borderPieces[thickness][k],
             props = {
                 position = -v * borderSize,
                 relativePosition = v,
@@ -126,7 +129,7 @@ local function borderTemplates(borderSize)
         local horizontal = k == 'top' or k == 'bottom'
         local direction = horizontal and v2(1, 0) or v2(0, 1)
         result.box.content:add {
-            template = borderPieces[k],
+            template = borderPieces[thickness][k],
             props = {
                 position = (direction + v) * borderSize,
                 relativePosition = v,
@@ -137,7 +140,7 @@ local function borderTemplates(borderSize)
     end
     for k, v in pairs(cornerParts) do
         result.box.content:add {
-            template = borderPieces[k],
+            template = borderPieces[thickness][k],
             props = {
                 position = v * borderSize,
                 relativePosition = v,
@@ -190,8 +193,8 @@ local function borderTemplates(borderSize)
     return result
 end
 
-local thinBorders = borderTemplates(constants.border)
-local thickBorders = borderTemplates(constants.thickBorder)
+local thinBorders = borderTemplates('thin')
+local thickBorders = borderTemplates('thick')
 
 return function(templates)
     for k, t in pairs(thinBorders) do
