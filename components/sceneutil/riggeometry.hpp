@@ -36,6 +36,7 @@ namespace SceneUtil
         // static parts of the model.
         void compileGLObjects(osg::RenderInfo& renderInfo) const override {}
 
+        // TODO: Make InfluenceMap more similar to InfluenceData
         struct BoneInfluence
         {
             osg::Matrixf mInvBindMatrix;
@@ -84,35 +85,29 @@ namespace SceneUtil
 
         osg::ref_ptr<osg::Geometry> mSourceGeometry;
         osg::ref_ptr<const osg::Vec4Array> mSourceTangents;
-        Skeleton* mSkeleton;
+        Skeleton* mSkeleton{ nullptr };
 
         osg::ref_ptr<osg::RefMatrix> mGeomToSkelMatrix;
 
-        osg::ref_ptr<InfluenceMap> mInfluenceMap;
-
-        typedef std::pair<std::string, osg::Matrixf> BoneBindMatrixPair;
-
-        typedef std::pair<BoneBindMatrixPair, float> BoneWeight;
-
-        typedef std::vector<unsigned short> VertexList;
-
-        typedef std::map<std::vector<BoneWeight>, VertexList> Bone2VertexMap;
-
-        struct Bone2VertexVector : public osg::Referenced
+        struct BoneInfo
         {
-            std::vector<std::pair<std::vector<BoneWeight>, VertexList>> mData;
+            std::string mName;
+            osg::BoundingSpheref mBoundSphere;
+            osg::Matrixf mInvBindMatrix;
         };
-        osg::ref_ptr<Bone2VertexVector> mBone2VertexVector;
 
-        struct BoneSphereVector : public osg::Referenced
+        using BoneWeight = std::pair<size_t, float>;
+        using VertexList = std::vector<unsigned short>;
+        struct InfluenceData : public osg::Referenced
         {
-            std::vector<std::pair<std::string, osg::BoundingSpheref>> mData;
+            std::vector<BoneInfo> mBones;
+            std::vector<std::pair<std::vector<BoneWeight>, VertexList>> mInfluences;
         };
-        osg::ref_ptr<BoneSphereVector> mBoneSphereVector;
-        std::vector<Bone*> mBoneNodesVector;
+        osg::ref_ptr<InfluenceData> mData;
+        std::vector<Bone*> mNodes;
 
-        unsigned int mLastFrameNumber;
-        bool mBoundsFirstFrame;
+        unsigned int mLastFrameNumber{ 0 };
+        bool mBoundsFirstFrame{ true };
 
         bool initFromParentSkeleton(osg::NodeVisitor* nv);
 
