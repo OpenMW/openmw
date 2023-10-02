@@ -1574,7 +1574,11 @@ namespace NifOsg
 
             osg::ref_ptr<osg::Drawable> drawable = geometry;
 
+            // Some input geometry may not be used as is so it needs to be converted.
+            // Normals, tangents and bitangents use a special normal map-like format not equivalent to snorm8 or unorm8
             auto normbyteToFloat = [](uint8_t value) { return value / 255.f * 2.f - 1.f; };
+            // Vertices and UV sets may be half-precision.
+            // OSG doesn't have a way to pass half-precision data at the moment.
             auto halfToFloat = [](uint16_t value) {
                 uint32_t bits = static_cast<uint32_t>(value & 0x8000) << 16;
 
@@ -1641,6 +1645,8 @@ namespace NifOsg
                 geometry->setTexCoordArray(
                     0, new osg::Vec2Array(uvlist.size(), uvlist.data()), osg::Array::BIND_PER_VERTEX);
 
+            // This is the skinning data Fallout 4 provides
+            // TODO: support Skyrim SE skinning data
             if (!bsTriShape->mSkin.empty() && bsTriShape->mSkin->recType == Nif::RC_BSSkinInstance
                 && bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Skinned)
             {
