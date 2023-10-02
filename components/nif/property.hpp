@@ -232,6 +232,7 @@ namespace Nif
     enum BSLightingShaderFlags1
     {
         BSLSFlag1_Falloff = 0x00000040,
+        BSLSFlag1_SoftEffect = 0x40000000,
     };
 
     enum BSLightingShaderFlags2
@@ -354,6 +355,7 @@ namespace Nif
         void read(NIFStream* nif) override;
 
         bool useFalloff() const { return mShaderFlags1 & BSLSFlag1_Falloff; }
+        bool softEffect() const { return mShaderFlags1 & BSLSFlag1_SoftEffect; }
         bool doubleSided() const { return mShaderFlags2 & BSLSFlag2_DoubleSided; }
         bool treeAnim() const { return mShaderFlags2 & BSLSFlag2_TreeAnim; }
     };

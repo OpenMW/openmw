@@ -15,6 +15,7 @@ varying vec2 diffuseMapUV;
 #endif
 
 varying vec3 passNormal;
+varying vec3 passViewPos;
 varying float euclideanDepth;
 varying float linearDepth;
 varying float passFalloff;
@@ -41,6 +42,7 @@ void main(void)
 #endif
 
     passColor = gl_Color;
+    passViewPos = viewPos.xyz;
     passNormal = gl_Normal.xyz;
 
     if (useFalloff)

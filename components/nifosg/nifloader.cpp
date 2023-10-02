@@ -51,6 +51,7 @@
 #include <components/nif/property.hpp>
 #include <components/nif/texture.hpp>
 #include <components/sceneutil/depth.hpp>
+#include <components/sceneutil/extradata.hpp>
 #include <components/sceneutil/morphgeometry.hpp>
 #include <components/sceneutil/riggeometry.hpp>
 #include <components/sceneutil/skeleton.hpp>
@@ -2561,6 +2562,8 @@ namespace NifOsg
                             polygonOffset->setFactor(SceneUtil::AutoDepth::isReversed() ? 0.65f : -0.65f);
                             stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
                         }
+                        if (shaderprop->softEffect())
+                            SceneUtil::setupSoftEffect(*node, shaderprop->mFalloffDepth, true);
                         break;
                     }
                     default:
