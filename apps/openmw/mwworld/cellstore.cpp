@@ -406,10 +406,31 @@ namespace MWWorld
     static void loadImpl(const R& ref, const MWWorld::ESMStore& esmStore, auto& list)
     {
         const MWWorld::Store<X>& store = esmStore.get<X>();
-        if (const X* ptr = store.search(ref.mBaseObj))
-            list.emplace_back(ref, ptr);
-        else
+        const X* ptr = store.search(ref.mBaseObj);
+        if (!ptr)
+        {
             Log(Debug::Warning) << "Warning: could not resolve cell reference " << ref.mId << " (dropping reference)";
+            return;
+        }
+        LiveCellRef<X> liveCellRef(ref, ptr);
+        if (!ref.mEsp.parent.isZeroOrUnset())
+        {
+            // Disable objects that are linked to an initially disabled parent.
+            // Actually when we will start working on Oblivion/Skyrim scripting we will need to:
+            //  - use the current state of the parent instead of initial state of the parent
+            //  - every time when the parent is enabled/disabled we should also enable/disable
+            //        all objects that are linked to it.
+            // But for now we assume that the parent remains in its initial state.
+            const ESM4::Reference* parentRef = esmStore.get<ESM4::Reference>().searchStatic(ref.mEsp.parent);
+            if (parentRef)
+            {
+                bool parentDisabled = parentRef->mFlags & ESM4::Rec_Disabled;
+                bool inversed = ref.mEsp.flags & ESM4::EnableParent::Flag_Inversed;
+                if (parentDisabled != inversed)
+                    liveCellRef.mData.disable();
+            }
+        }
+        list.push_back(liveCellRef);
     }
 
     template <typename X>
