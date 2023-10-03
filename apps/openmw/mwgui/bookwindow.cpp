@@ -4,6 +4,7 @@
 #include <MyGUI_TextBox.h>
 
 #include <components/esm3/loadbook.hpp>
+#include <components/esm4/loadbook.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
@@ -83,7 +84,7 @@ namespace MWGui
 
     void BookWindow::setPtr(const MWWorld::Ptr& book)
     {
-        if (book.isEmpty() || book.getType() != ESM::REC_BOOK)
+        if (book.isEmpty() || (book.getType() != ESM::REC_BOOK && book.getType() != ESM::REC_BOOK4))
             throw std::runtime_error("Invalid argument in BookWindow::setPtr");
         mBook = book;
 
@@ -93,11 +94,16 @@ namespace MWGui
         clearPages();
         mCurrentPage = 0;
 
-        MWWorld::LiveCellRef<ESM::Book>* ref = mBook.get<ESM::Book>();
+        const std::string* text;
+        if (book.getType() == ESM::REC_BOOK)
+            text = &book.get<ESM::Book>()->mBase->mText;
+        else
+            text = &book.get<ESM4::Book>()->mBase->mText;
+        bool shrinkTextAtLastTag = book.getType() == ESM::REC_BOOK;
 
         Formatting::BookFormatter formatter;
-        mPages = formatter.markupToWidget(mLeftPage, ref->mBase->mText);
-        formatter.markupToWidget(mRightPage, ref->mBase->mText);
+        mPages = formatter.markupToWidget(mLeftPage, *text, shrinkTextAtLastTag);
+        formatter.markupToWidget(mRightPage, *text, shrinkTextAtLastTag);
 
         updatePages();
 

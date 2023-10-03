@@ -459,7 +459,8 @@ Using the interface:
 
 The order in which the scripts are started is important. So if one mod should override an interface provided by another mod, make sure that load order (i.e. the sequence of `lua-scripts=...` in `openmw.cfg`) is correct.
 
-**Interfaces of built-in scripts**
+Interfaces of built-in scripts
+------------------------------
 
 .. include:: tables/interfaces.rst
 
