@@ -12,10 +12,11 @@ namespace MWRender
             const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem);
 
     private:
-        void insertMesh(std::string_view model);
+        void insertPart(std::string_view model);
 
-        void insertTes4NpcBodyPartsAndEquipment();
-        void insertTes5NpcBodyPartsAndEquipment();
+        void updateParts();
+        void updatePartsTES4();
+        void updatePartsTES5();
     };
 }
 

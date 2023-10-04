@@ -8,13 +8,13 @@
 #include <components/esm4/loadnpc.hpp>
 #include <components/esm4/loadrace.hpp>
 
-#include "../mwworld/customdata.hpp"
-#include "../mwworld/esmstore.hpp"
-
+#include <components/misc/resourcehelpers.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/resource/scenemanager.hpp>
 
 #include "../mwclass/esm4npc.hpp"
+#include "../mwworld/customdata.hpp"
+#include "../mwworld/esmstore.hpp"
 
 namespace MWRender
 {
@@ -23,18 +23,28 @@ namespace MWRender
         : Animation(ptr, std::move(parentNode), resourceSystem)
     {
         getOrCreateObjectRoot();
-        const ESM4::Npc* traits = MWClass::ESM4Npc::getTraitsRecord(mPtr);
-        if (traits->mIsTES4)
-            insertTes4NpcBodyPartsAndEquipment();
-        else
-            insertTes5NpcBodyPartsAndEquipment();
+        updateParts();
     }
 
-    void ESM4NpcAnimation::insertMesh(std::string_view model)
+    void ESM4NpcAnimation::updateParts()
     {
-        std::string path = "meshes\\";
-        path.append(model);
-        mResourceSystem->getSceneManager()->getInstance(path, mObjectRoot.get());
+        mObjectRoot->removeChildren(0, mObjectRoot->getNumChildren());
+        const ESM4::Npc* traits = MWClass::ESM4Npc::getTraitsRecord(mPtr);
+        // There is no flag "mIsTES5", so we can not distinguish from other cases.
+        // But calling wrong `updateParts*` function shouldn't crash the game and will
+        // only lead to the NPC not being rendered.
+        if (traits->mIsTES4)
+            updatePartsTES4();
+        else
+            updatePartsTES5();
+    }
+
+    void ESM4NpcAnimation::insertPart(std::string_view model)
+    {
+        if (model.empty())
+            return;
+        mResourceSystem->getSceneManager()->getInstance(
+            Misc::ResourceHelpers::correctMeshPath(model, mResourceSystem->getVFS()), mObjectRoot.get());
     }
 
     template <class Record>
@@ -48,7 +58,7 @@ namespace MWRender
             return rec->mModel;
     }
 
-    void ESM4NpcAnimation::insertTes4NpcBodyPartsAndEquipment()
+    void ESM4NpcAnimation::updatePartsTES4()
     {
         const ESM4::Npc* traits = MWClass::ESM4Npc::getTraitsRecord(mPtr);
         const ESM4::Race* race = MWClass::ESM4Npc::getRace(mPtr);
@@ -57,25 +67,23 @@ namespace MWRender
         // TODO: Body and head parts are placed incorrectly, need to attach to bones
 
         for (const ESM4::Race::BodyPart& bodyPart : (isFemale ? race->mBodyPartsFemale : race->mBodyPartsMale))
-            if (!bodyPart.mesh.empty())
-                insertMesh(bodyPart.mesh);
+            insertPart(bodyPart.mesh);
         for (const ESM4::Race::BodyPart& bodyPart : (isFemale ? race->mHeadPartsFemale : race->mHeadParts))
-            if (!bodyPart.mesh.empty())
-                insertMesh(bodyPart.mesh);
+            insertPart(bodyPart.mesh);
         if (!traits->mHair.isZeroOrUnset())
         {
             const MWWorld::ESMStore* store = MWBase::Environment::get().getESMStore();
             if (const ESM4::Hair* hair = store->get<ESM4::Hair>().search(traits->mHair))
-                insertMesh(hair->mModel);
+                insertPart(hair->mModel);
         }
 
         for (const ESM4::Armor* armor : MWClass::ESM4Npc::getEquippedArmor(mPtr))
-            insertMesh(chooseTes4EquipmentModel(armor, isFemale));
+            insertPart(chooseTes4EquipmentModel(armor, isFemale));
         for (const ESM4::Clothing* clothing : MWClass::ESM4Npc::getEquippedClothing(mPtr))
-            insertMesh(chooseTes4EquipmentModel(clothing, isFemale));
+            insertPart(chooseTes4EquipmentModel(clothing, isFemale));
     }
 
-    void ESM4NpcAnimation::insertTes5NpcBodyPartsAndEquipment()
+    void ESM4NpcAnimation::updatePartsTES5()
     {
         const MWWorld::ESMStore* store = MWBase::Environment::get().getESMStore();
 
@@ -95,10 +103,8 @@ namespace MWRender
                     Log(Debug::Error) << "Head part not found: " << ESM::RefId(partId);
                     continue;
                 }
-                if (usedHeadPartTypes.contains(part->mType))
-                    continue;
-                usedHeadPartTypes.insert(part->mType);
-                insertMesh(part->mModel);
+                if (usedHeadPartTypes.emplace(part->mType).second)
+                    insertPart(part->mModel);
             }
         };
 
@@ -126,7 +132,8 @@ namespace MWRender
             findArmorAddons(armor);
         if (!traits->mWornArmor.isZeroOrUnset())
             findArmorAddons(store->get<ESM4::Armor>().find(traits->mWornArmor));
-        findArmorAddons(store->get<ESM4::Armor>().find(race->mSkin));
+        if (!race->mSkin.isZeroOrUnset())
+            findArmorAddons(store->get<ESM4::Armor>().find(race->mSkin));
 
         if (isFemale)
             std::sort(armorAddons.begin(), armorAddons.end(),
@@ -139,12 +146,14 @@ namespace MWRender
         for (const ESM4::ArmorAddon* arma : armorAddons)
         {
             const uint32_t covers = arma->mBodyTemplate.bodyPart;
+            // if body is already covered, skip to avoid clipping
             if (covers & usedParts & ESM4::Armor::TES5_Body)
-                continue; // if body is already covered, skip to avoid clipping
+                continue;
+            // if covers at least something that wasn't covered before - add model
             if (covers & ~usedParts)
-            { // if covers at least something that wasn't covered before - add model
+            {
                 usedParts |= covers;
-                insertMesh(isFemale ? arma->mModelFemale : arma->mModelMale);
+                insertPart(isFemale ? arma->mModelFemale : arma->mModelMale);
             }
         }
 

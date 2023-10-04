@@ -32,6 +32,9 @@ namespace MWClass
 
     static const ESM4::Npc* chooseTemplate(const std::vector<const ESM4::Npc*>& recs, uint16_t flag)
     {
+        // If the record is neither TES4 nor TES5 (though maybe FO4 is compatible with tes5.templateFlags), then
+        // the function can return nullptr that will lead to "ESM4 NPC traits not found" exception and the NPC
+        // will not be added to the scene. But in any way it shouldn't cause a crash.
         for (const auto* rec : recs)
             if (rec->mIsTES4 || !(rec->mBaseConfig.tes5.templateFlags & flag))
                 return rec;
@@ -68,9 +71,9 @@ namespace MWClass
         data->mBaseData = chooseTemplate(npcRecs, ESM4::Npc::TES5_UseBaseData);
 
         if (!data->mTraits)
-            throw std::runtime_error("ESM4 Npc traits not found");
+            throw std::runtime_error("ESM4 NPC traits not found");
         if (!data->mBaseData)
-            throw std::runtime_error("ESM4 Npc base data not found");
+            throw std::runtime_error("ESM4 NPC base data not found");
 
         data->mRace = store->get<ESM4::Race>().find(data->mTraits->mRace);
         if (data->mTraits->mIsTES4)
