@@ -3,6 +3,7 @@
 #include <components/esm3/loadmgef.hpp>
 
 #include "../mwbase/environment.hpp"
+#include "../mwbase/luamanager.hpp"
 #include "../mwbase/soundmanager.hpp"
 #include "../mwbase/world.hpp"
 
@@ -14,6 +15,7 @@
 #include "../mwphysics/physicssystem.hpp"
 
 #include "../mwworld/inventorystore.hpp"
+#include "../mwworld/worldmodel.hpp"
 
 namespace MWClass
 {
@@ -89,5 +91,16 @@ namespace MWClass
         if (movementSettings.mIsStrafing)
             moveSpeed *= 0.75f;
         return moveSpeed;
+    }
+
+    bool Actor::consume(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) const
+    {
+        MWBase::Environment::get().getWorld()->breakInvisibility(actor);
+        MWMechanics::CastSpell cast(actor, actor);
+        const ESM::RefId& recordId = consumable.getCellRef().getRefId();
+        MWBase::Environment::get().getWorldModel()->registerPtr(consumable);
+        MWBase::Environment::get().getLuaManager()->itemConsumed(consumable, actor);
+        actor.getClass().getContainerStore(actor).remove(consumable, 1);
+        return cast.cast(recordId);
     }
 }

@@ -62,6 +62,8 @@ namespace MWClass
         /// Return current movement speed.
         float getCurrentSpeed(const MWWorld::Ptr& ptr) const override;
 
+        bool consume(const MWWorld::Ptr& consumable, const MWWorld::Ptr& actor) const override;
+
         // not implemented
         Actor(const Actor&) = delete;
         Actor& operator=(const Actor&) = delete;

@@ -74,6 +74,7 @@
     Bug #7557: Terrain::ChunkManager::createChunk is called twice for the same position, lod on initial loading
     Bug #7573: Drain Fatigue can't bring fatigue below zero by default
     Bug #7603: Scripts menu size is not updated properly
+    Bug #7604: Goblins Grunt becomes idle once injured
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6149: Dehardcode Lua API_REVISION
