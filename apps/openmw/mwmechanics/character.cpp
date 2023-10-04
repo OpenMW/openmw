@@ -1166,9 +1166,14 @@ namespace MWMechanics
 
     void CharacterController::updateIdleStormState(bool inwater) const
     {
-        if (!mAnimation->hasAnimation("idlestorm") || mUpperBodyState != UpperBodyState::None || inwater)
+        if (!mAnimation->hasAnimation("idlestorm"))
+            return;
+
+        bool animPlaying = mAnimation->isPlaying("idlestorm");
+        if (mUpperBodyState != UpperBodyState::None || inwater)
         {
-            mAnimation->disable("idlestorm");
+            if (animPlaying)
+                mAnimation->disable("idlestorm");
             return;
         }
 
@@ -1181,7 +1186,7 @@ namespace MWMechanics
             characterDirection.normalize();
             if (stormDirection * characterDirection < -0.5f)
             {
-                if (!mAnimation->isPlaying("idlestorm"))
+                if (!animPlaying)
                 {
                     int mask = MWRender::Animation::BlendMask_Torso | MWRender::Animation::BlendMask_RightArm;
                     mAnimation->play("idlestorm", Priority_Storm, mask, true, 1.0f, "start", "stop", 0.0f, ~0ul);
@@ -1194,7 +1199,7 @@ namespace MWMechanics
             }
         }
 
-        if (mAnimation->isPlaying("idlestorm"))
+        if (animPlaying)
         {
             mAnimation->setLoopingEnabled("idlestorm", false);
         }
