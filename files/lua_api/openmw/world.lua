@@ -109,12 +109,12 @@
 ---
 -- Pause the game starting from the next frame.
 -- @function [parent=#world] pause
--- @param #string tag (optional) The game will be paused until `unpause` is called with the same tag.
+-- @param #string tag (optional, empty string by default) The game will be paused until `unpause` is called with the same tag.
 
 ---
 -- Remove given tag from the list of pause tags. Resume the game starting from the next frame if the list became empty.
 -- @function [parent=#world] unpause
--- @param #string tag (optional) Needed to undo `pause` called with this tag.
+-- @param #string tag (optional, empty string by default) Needed to undo `pause` called with this tag.
 
 ---
 -- The tags that are currently pausing the game.

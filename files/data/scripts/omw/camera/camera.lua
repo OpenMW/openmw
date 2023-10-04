@@ -249,11 +249,11 @@ return {
         isModeControlEnabled = function() return not next(noModeControl) end,
         --- Disable with (optional) tag until the corresponding enable function is called with the same tag.
         -- @function [parent=#Camera] disableModeControl
-        -- @param #string tag (optional) Will be disabled until the enabling function is called with the same tag
+        -- @param #string tag (optional, empty string by default) Will be disabled until the enabling function is called with the same tag
         disableModeControl = function(tag) noModeControl[tag or ''] = true end,
         --- Undo disableModeControl
         -- @function [parent=#Camera] enableModeControl
-        -- @param #string tag (optional)
+        -- @param #string tag (optional, empty string by default)
         enableModeControl = function(tag) noModeControl[tag or ''] = nil end,
 
         --- Whether the built-in standing preview logic is enabled.
@@ -262,11 +262,11 @@ return {
         isStandingPreviewEnabled = function() return previewIfStandStill and not next(noStandingPreview) end,
         --- Disable with (optional) tag until the corresponding enable function is called with the same tag.
         -- @function [parent=#Camera] disableStandingPreview
-        -- @param #string tag (optional) Will be disabled until the enabling function is called with the same tag
+        -- @param #string tag (optional, empty string by default) Will be disabled until the enabling function is called with the same tag
         disableStandingPreview = function(tag) noStandingPreview[tag or ''] = true end,
         --- Undo disableStandingPreview
         -- @function [parent=#Camera] enableStandingPreview
-        -- @param #string tag (optional)
+        -- @param #string tag (optional, empty string by default)
         enableStandingPreview = function(tag) noStandingPreview[tag or ''] = nil end,
 
         --- Whether head bobbing is enabled.
@@ -275,11 +275,11 @@ return {
         isHeadBobbingEnabled = function() return head_bobbing.enabled and not next(noHeadBobbing) end,
         --- Disable with (optional) tag until the corresponding enable function is called with the same tag.
         -- @function [parent=#Camera] disableHeadBobbing
-        -- @param #string tag (optional) Will be disabled until the enabling function is called with the same tag
+        -- @param #string tag (optional, empty string by default) Will be disabled until the enabling function is called with the same tag
         disableHeadBobbing = function(tag) noHeadBobbing[tag or ''] = true end,
         --- Undo disableHeadBobbing
         -- @function [parent=#Camera] enableHeadBobbing
-        -- @param #string tag (optional)
+        -- @param #string tag (optional, empty string by default)
         enableHeadBobbing = function(tag) noHeadBobbing[tag or ''] = nil end,
 
         --- Whether the built-in zooming is enabled.
@@ -288,11 +288,11 @@ return {
         isZoomEnabled = function() return not next(noZoom) end,
         --- Disable with (optional) tag until the corresponding enable function is called with the same tag.
         -- @function [parent=#Camera] disableZoom
-        -- @param #string tag (optional) Will be disabled until the enabling function is called with the same tag
+        -- @param #string tag (optional, empty string by default) Will be disabled until the enabling function is called with the same tag
         disableZoom = function(tag) noZoom[tag or ''] = true end,
         --- Undo disableZoom
         -- @function [parent=#Camera] enableZoom
-        -- @param #string tag (optional)
+        -- @param #string tag (optional, empty string by default)
         enableZoom = function(tag) noZoom[tag or ''] = nil end,
 
         --- Whether the the third person offset can be changed by the built-in camera script.
@@ -301,11 +301,11 @@ return {
         isThirdPersonOffsetControlEnabled = function() return not next(third_person.noOffsetControl) end,
         --- Disable with (optional) tag until the corresponding enable function is called with the same tag.
         -- @function [parent=#Camera] disableThirdPersonOffsetControl
-        -- @param #string tag (optional) Will be disabled until the enabling function is called with the same tag
+        -- @param #string tag (optional, empty string by default) Will be disabled until the enabling function is called with the same tag
         disableThirdPersonOffsetControl = function(tag) third_person.noOffsetControl[tag or ''] = true end,
         --- Undo disableThirdPersonOffsetControl
         -- @function [parent=#Camera] enableThirdPersonOffsetControl
-        -- @param #string tag (optional)
+        -- @param #string tag (optional, empty string by default)
         enableThirdPersonOffsetControl = function(tag) third_person.noOffsetControl[tag or ''] = nil end,
     },
     engineHandlers = {
