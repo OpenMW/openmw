@@ -22,13 +22,16 @@ namespace MWRender
         const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
         : Animation(ptr, std::move(parentNode), resourceSystem)
     {
-        getOrCreateObjectRoot();
+        std::string smodel
+            = Misc::ResourceHelpers::correctMeshPath(mPtr.getClass().getModel(mPtr), mResourceSystem->getVFS());
+        setObjectRoot(smodel, true, true, false);
         updateParts();
     }
 
     void ESM4NpcAnimation::updateParts()
     {
-        mObjectRoot->removeChildren(0, mObjectRoot->getNumChildren());
+        if (!mObjectRoot.get())
+            return;
         const ESM4::Npc* traits = MWClass::ESM4Npc::getTraitsRecord(mPtr);
         // There is no flag "mIsTES5", so we can not distinguish from other cases.
         // But calling wrong `updateParts*` function shouldn't crash the game and will
