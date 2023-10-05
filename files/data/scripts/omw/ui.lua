@@ -240,5 +240,7 @@ return {
     },
     eventHandlers = {
         UiModeChanged = onUiModeChangedEvent,
+        AddUiMode = function(options) addMode(options.mode, options) end,
+        SetUiMode = function(options) setMode(options.mode, options) end,
     },
 }

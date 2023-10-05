@@ -32,6 +32,8 @@ Example:
 UI events
 ---------
 
+**UiModeChanged**
+
 Every time UI mode is changed built-in scripts send to player the event ``UiModeChanged`` with arguments ``oldMode, ``newMode`` (same as ``I.UI.getMode()``)
 and ``arg`` (for example in the mode ``Book`` the argument is the book the player is reading).
 
@@ -42,6 +44,22 @@ and ``arg`` (for example in the mode ``Book`` the argument is the book the playe
             print('UiModeChanged from', data.oldMode , 'to', data.newMode, '('..tostring(data.arg)..')')
         end
     }
+
+**AddUiMode**
+
+Equivalent to ``I.UI.addMode``, but can be sent from another object or global script.
+
+.. code-block:: Lua
+
+    player:sendEvent('AddUiMode', {mode = 'Book', target = book})
+
+**SetUiMode**
+
+Equivalent to ``I.UI.setMode``, but can be sent from another object or global script.
+
+.. code-block:: Lua
+
+    player:sendEvent('SetUiMode', {mode = 'Book', target = book})
 
 World events
 ------------

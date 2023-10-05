@@ -46,10 +46,11 @@ namespace MWGui
                 Event_PTag,
                 Event_ImgTag,
                 Event_DivTag,
-                Event_FontTag
+                Event_FontTag,
+                Event_PageBreak,
             };
 
-            BookTextParser(const std::string& text);
+            BookTextParser(const std::string& text, bool shrinkTextAtLastTag);
 
             Events next();
 
@@ -120,9 +121,9 @@ namespace MWGui
         class BookFormatter
         {
         public:
-            Paginator::Pages markupToWidget(
-                MyGUI::Widget* parent, const std::string& markup, const int pageWidth, const int pageHeight);
-            Paginator::Pages markupToWidget(MyGUI::Widget* parent, const std::string& markup);
+            Paginator::Pages markupToWidget(MyGUI::Widget* parent, const std::string& markup, const int pageWidth,
+                const int pageHeight, bool shrinkTextAtLastTag);
+            Paginator::Pages markupToWidget(MyGUI::Widget* parent, const std::string& markup, bool shrinkTextAtLastTag);
 
         private:
             void resetFontProperties();

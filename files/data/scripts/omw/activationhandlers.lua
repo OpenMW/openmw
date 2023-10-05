@@ -17,9 +17,16 @@ local function ESM4DoorActivation(door, actor)
     return false -- disable activation handling in C++ mwmechanics code
 end
 
+local function ESM4BookActivation(book, actor)
+    if actor.type == types.Player then
+        actor:sendEvent('AddUiMode', { mode = 'Book', target = book })
+    end
+end
+
 local handlersPerObject = {}
 local handlersPerType = {}
 
+handlersPerType[types.ESM4Book] = { ESM4BookActivation }
 handlersPerType[types.ESM4Door] = { ESM4DoorActivation }
 
 local function onActivate(obj, actor)
