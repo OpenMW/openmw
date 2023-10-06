@@ -135,6 +135,15 @@ namespace MWScript
                     return;
                 }
 
+                bool greetWerewolves = false;
+                const ESM::RefId& script = ptr.getClass().getScript(ptr);
+                if (!script.empty())
+                    greetWerewolves = ptr.getRefData().getLocals().hasVar(script, "allowwerewolfforcegreeting");
+
+                const MWWorld::Ptr& player = MWBase::Environment::get().getWorld()->getPlayerPtr();
+                if (player.getClass().getNpcStats(player).isWerewolf() && !greetWerewolves)
+                    return;
+
                 MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_Dialogue, ptr);
             }
         };
