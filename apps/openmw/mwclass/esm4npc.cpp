@@ -8,6 +8,8 @@
 #include <components/esm4/loadotft.hpp>
 #include <components/esm4/loadrace.hpp>
 
+#include <components/misc/resourcehelpers.hpp>
+
 #include "../mwworld/customdata.hpp"
 #include "../mwworld/esmstore.hpp"
 
@@ -146,12 +148,13 @@ namespace MWClass
         if (!ptr.getRefData().getCustomData())
             return "";
         const ESM4NpcCustomData& data = ptr.getRefData().getCustomData()->asESM4NpcCustomData();
+        const VFS::Manager* vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
         if (data.mTraits->mIsTES4)
-            return "meshes\\" + data.mTraits->mModel;
+            return Misc::ResourceHelpers::correctMeshPath(data.mTraits->mModel, vfs);
         if (data.mIsFemale)
-            return "meshes\\" + data.mRace->mModelFemale;
+            return Misc::ResourceHelpers::correctMeshPath(data.mRace->mModelFemale, vfs);
         else
-            return "meshes\\" + data.mRace->mModelMale;
+            return Misc::ResourceHelpers::correctMeshPath(data.mRace->mModelMale, vfs);
     }
 
     std::string_view ESM4Npc::getName(const MWWorld::ConstPtr& ptr) const

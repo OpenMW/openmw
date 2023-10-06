@@ -22,9 +22,7 @@ namespace MWRender
         const MWWorld::Ptr& ptr, osg::ref_ptr<osg::Group> parentNode, Resource::ResourceSystem* resourceSystem)
         : Animation(ptr, std::move(parentNode), resourceSystem)
     {
-        std::string smodel
-            = Misc::ResourceHelpers::correctMeshPath(mPtr.getClass().getModel(mPtr), mResourceSystem->getVFS());
-        setObjectRoot(smodel, true, true, false);
+        setObjectRoot(mPtr.getClass().getModel(mPtr), true, true, false);
         updateParts();
     }
 
@@ -71,7 +69,7 @@ namespace MWRender
 
         for (const ESM4::Race::BodyPart& bodyPart : (isFemale ? race->mBodyPartsFemale : race->mBodyPartsMale))
             insertPart(bodyPart.mesh);
-        for (const ESM4::Race::BodyPart& bodyPart : (isFemale ? race->mHeadPartsFemale : race->mHeadParts))
+        for (const ESM4::Race::BodyPart& bodyPart : race->mHeadParts)
             insertPart(bodyPart.mesh);
         if (!traits->mHair.isZeroOrUnset())
         {
