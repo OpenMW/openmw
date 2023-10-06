@@ -1133,9 +1133,9 @@ namespace EsmTool
     {
         std::cout << "  Cell: " << mData.mCell << std::endl;
         std::cout << "  Coordinates: (" << mData.mData.mX << "," << mData.mData.mY << ")" << std::endl;
-        std::cout << "  Unknown S1: " << mData.mData.mS1 << std::endl;
-        if (static_cast<size_t>(mData.mData.mS2) != mData.mPoints.size())
-            std::cout << "  Reported Point Count: " << mData.mData.mS2 << std::endl;
+        std::cout << "  Granularity: " << mData.mData.mGranularity << std::endl;
+        if (mData.mData.mPoints != mData.mPoints.size())
+            std::cout << "  Reported Point Count: " << mData.mData.mPoints << std::endl;
         std::cout << "  Point Count: " << mData.mPoints.size() << std::endl;
         std::cout << "  Edge Count: " << mData.mEdges.size() << std::endl;
 
@@ -1154,7 +1154,7 @@ namespace EsmTool
         for (const ESM::Pathgrid::Edge& edge : mData.mEdges)
         {
             std::cout << "  Edge[" << i << "]: " << edge.mV0 << " -> " << edge.mV1 << std::endl;
-            if (edge.mV0 >= static_cast<size_t>(mData.mData.mS2) || edge.mV1 >= static_cast<size_t>(mData.mData.mS2))
+            if (edge.mV0 >= mData.mData.mPoints || edge.mV1 >= mData.mData.mPoints)
                 std::cout << "  BAD POINT IN EDGE!" << std::endl;
             i++;
         }
