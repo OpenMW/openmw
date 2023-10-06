@@ -34,11 +34,10 @@ namespace MWClass
 
     static const ESM4::Npc* chooseTemplate(const std::vector<const ESM4::Npc*>& recs, uint16_t flag)
     {
-        // If the record is neither TES4 nor TES5 (though maybe FO4 is compatible with tes5.templateFlags), then
-        // the function can return nullptr that will lead to "ESM4 NPC traits not found" exception and the NPC
-        // will not be added to the scene. But in any way it shouldn't cause a crash.
+        // In case of FO3 the function may return nullptr that will lead to "ESM4 NPC traits not found"
+        // exception and the NPC will not be added to the scene. But in any way it shouldn't cause a crash.
         for (const auto* rec : recs)
-            if (rec->mIsTES4 || !(rec->mBaseConfig.tes5.templateFlags & flag))
+            if (rec->mIsTES4 || rec->mIsFONV || !(rec->mBaseConfig.tes5.templateFlags & flag))
                 return rec;
         return nullptr;
     }
@@ -59,9 +58,16 @@ namespace MWClass
         const ESM4NpcCustomData& asESM4NpcCustomData() const override { return *this; }
     };
 
-    ESM4NpcCustomData& ESM4Npc::getCustomData(const MWWorld::Ptr& ptr)
+    ESM4NpcCustomData& ESM4Npc::getCustomData(const MWWorld::ConstPtr& ptr)
     {
-        if (auto* data = ptr.getRefData().getCustomData())
+        // Note: the argument is ConstPtr because this function is used in `getModel` and `getName`
+        // which are virtual and work with ConstPtr. `getModel` and `getName` use custom data
+        // because they require a lot of work including levelled records resolving and it would be
+        // stupid to not to cache the results. Maybe we should stop using ConstPtr at all
+        // to avoid such workarounds.
+        MWWorld::RefData& refData = const_cast<MWWorld::RefData&>(ptr.getRefData());
+
+        if (auto* data = refData.getCustomData())
             return data->asESM4NpcCustomData();
 
         auto data = std::make_unique<ESM4NpcCustomData>();
@@ -114,7 +120,7 @@ namespace MWClass
         }
 
         ESM4NpcCustomData& res = *data;
-        ptr.getRefData().setCustomData(std::move(data));
+        refData.setCustomData(std::move(data));
         return res;
     }
 
@@ -145,23 +151,18 @@ namespace MWClass
 
     std::string ESM4Npc::getModel(const MWWorld::ConstPtr& ptr) const
     {
-        if (!ptr.getRefData().getCustomData())
-            return "";
-        const ESM4NpcCustomData& data = ptr.getRefData().getCustomData()->asESM4NpcCustomData();
-        const VFS::Manager* vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+        const ESM4NpcCustomData& data = getCustomData(ptr);
+        std::string_view model;
         if (data.mTraits->mIsTES4)
-            return Misc::ResourceHelpers::correctMeshPath(data.mTraits->mModel, vfs);
-        if (data.mIsFemale)
-            return Misc::ResourceHelpers::correctMeshPath(data.mRace->mModelFemale, vfs);
+            model = data.mTraits->mModel;
         else
-            return Misc::ResourceHelpers::correctMeshPath(data.mRace->mModelMale, vfs);
+            model = data.mIsFemale ? data.mRace->mModelFemale : data.mRace->mModelMale;
+        const VFS::Manager* vfs = MWBase::Environment::get().getResourceSystem()->getVFS();
+        return Misc::ResourceHelpers::correctMeshPath(model, vfs);
     }
 
     std::string_view ESM4Npc::getName(const MWWorld::ConstPtr& ptr) const
     {
-        if (!ptr.getRefData().getCustomData())
-            return "";
-        const ESM4NpcCustomData& data = ptr.getRefData().getCustomData()->asESM4NpcCustomData();
-        return data.mBaseData->mFullName;
+        return getCustomData(ptr).mBaseData->mFullName;
     }
 }

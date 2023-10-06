@@ -64,7 +64,7 @@ namespace MWClass
         static const std::vector<const ESM4::Clothing*>& getEquippedClothing(const MWWorld::Ptr& ptr);
 
     private:
-        static ESM4NpcCustomData& getCustomData(const MWWorld::Ptr& ptr);
+        static ESM4NpcCustomData& getCustomData(const MWWorld::ConstPtr& ptr);
     };
 }
 
