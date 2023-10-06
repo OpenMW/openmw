@@ -69,6 +69,7 @@
     Bug #7284: "Your weapon has no effect." message doesn't always show when the player character attempts to attack
     Bug #7298: Water ripples from projectiles sometimes are not spawned
     Bug #7307: Alchemy "Magic Effect" search string does not match on tool tip for effects related to attributes
+    Bug #7309: Sunlight scattering is visible in inappropriate situations
     Bug #7322: Shadows don't cover groundcover depending on the view angle and perspective with compute scene bounds = primitives
     Bug #7413: Generated wilderness cells don't spawn fish
     Bug #7415: Unbreakable lock discrepancies
