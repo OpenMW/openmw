@@ -60,6 +60,14 @@ namespace ESM4
             Type_FacialHair = 4,
             Type_Scar = 5,
             Type_Eyebrows = 6,
+            // FO4+
+            Type_Meatcaps = 7,
+            Type_Teeth = 8,
+            Type_HeadRear = 9,
+            // Starfield
+            // 10 and 11 are unknown
+            Type_LeftEye = 12,
+            Type_Eyelashes = 13,
         };
 
         ESM::FormId mAdditionalPart;
