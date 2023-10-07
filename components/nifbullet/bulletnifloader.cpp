@@ -32,6 +32,32 @@ namespace
         return letterPos < path.size() && (path[letterPos] == 'x' || path[letterPos] == 'X');
     }
 
+    bool isTypeNiGeometry(int type)
+    {
+        switch (type)
+        {
+            case Nif::RC_NiTriShape:
+            case Nif::RC_NiTriStrips:
+            case Nif::RC_BSLODTriShape:
+            case Nif::RC_BSSegmentedTriShape:
+                return true;
+        }
+        return false;
+    }
+
+    bool isTypeTriShape(int type)
+    {
+        switch (type)
+        {
+            case Nif::RC_NiTriShape:
+            case Nif::RC_BSLODTriShape:
+            case Nif::RC_BSSegmentedTriShape:
+                return true;
+        }
+
+        return false;
+    }
+
     void prepareTriangleMesh(btTriangleMesh& mesh, const Nif::NiTriBasedGeomData& data)
     {
         // FIXME: copying vertices/indices individually is unreasonable
@@ -81,7 +107,7 @@ namespace
     auto handleNiGeometry(const Nif::NiGeometry& geometry, Function&& function)
         -> decltype(function(static_cast<const Nif::NiTriShapeData&>(geometry.mData.get())))
     {
-        if (geometry.recType == Nif::RC_NiTriShape || geometry.recType == Nif::RC_BSLODTriShape)
+        if (isTypeTriShape(geometry.recType))
         {
             auto data = static_cast<const Nif::NiTriShapeData*>(geometry.mData.getPtr());
             if (data->mTriangles.empty())
@@ -329,12 +355,8 @@ namespace NifBullet
             // NOTE: a trishape with bounds, but no BBoxCollision flag should NOT go through handleNiTriShape!
             // It must be ignored completely.
             // (occurs in tr_ex_imp_wall_arch_04.nif)
-            if (node.mBounds.mType == Nif::BoundingVolume::Type::BASE_BV
-                && (node.recType == Nif::RC_NiTriShape || node.recType == Nif::RC_NiTriStrips
-                    || node.recType == Nif::RC_BSLODTriShape))
-            {
+            if (node.mBounds.mType == Nif::BoundingVolume::Type::BASE_BV && isTypeNiGeometry(node.recType))
                 handleNiTriShape(static_cast<const Nif::NiGeometry&>(node), parent, args);
-            }
         }
 
         // For NiNodes, loop through children

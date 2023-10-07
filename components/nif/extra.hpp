@@ -45,6 +45,8 @@ namespace Nif
     using NiFloatsExtraData = TypedVectorExtra<float>;
     using NiIntegersExtraData = TypedVectorExtra<uint32_t>;
 
+    using BSEyeCenterExtraData = TypedVectorExtra<float>;
+    using BSPositionData = TypedVectorExtra<Misc::float16_t>;
     using BSWArray = TypedVectorExtra<int32_t>;
 
     // Distinct from NiBinaryExtraData, uses mRecordSize as its size
@@ -168,6 +170,33 @@ namespace Nif
         std::vector<uint8_t> mData;
 
         void read(NIFStream* nif) override;
+    };
+
+    struct BSConnectPoint
+    {
+        struct Point
+        {
+            std::string mParent;
+            std::string mName;
+            NiQuatTransform mTransform;
+
+            void read(NIFStream* nif);
+        };
+
+        struct Parents : NiExtraData
+        {
+            std::vector<Point> mPoints;
+
+            void read(NIFStream* nif) override;
+        };
+
+        struct Children : NiExtraData
+        {
+            bool mSkinned;
+            std::vector<std::string> mPointNames;
+
+            void read(NIFStream* nif) override;
+        };
     };
 
 }

@@ -426,6 +426,8 @@ namespace Nif
         mSkin.post(nif);
         mShaderProperty.post(nif);
         mAlphaProperty.post(nif);
+        if (!mSkin.empty())
+            nif.setUseSkinning(true);
     }
 
     void BSDynamicTriShape::read(NIFStream* nif)
@@ -460,14 +462,13 @@ namespace Nif
         mLandscapeDataOffset = (data & 0xF00000000) >> 0x20;
         mEyeDataOffset = (data & 0xF000000000) >> 0x24;
         mFlags = (data & 0xFFF00000000000) >> 0x2C;
+        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
+            mFlags |= BSVertexDesc::VertexAttribute::Full_Precision;
     }
 
     void BSVertexData::read(NIFStream* nif, uint16_t flags)
     {
-        bool fullPrecision = true;
-        if (nif->getBethVersion() != NIFFile::BethVersion::BETHVER_SSE)
-            fullPrecision = flags & BSVertexDesc::VertexAttribute::Full_Precision;
-
+        bool fullPrecision = flags & BSVertexDesc::VertexAttribute::Full_Precision;
         bool hasVertex = flags & BSVertexDesc::VertexAttribute::Vertex;
         bool hasTangent = flags & BSVertexDesc::VertexAttribute::Tangents;
         bool hasUV = flags & BSVertexDesc::VertexAttribute::UVs;

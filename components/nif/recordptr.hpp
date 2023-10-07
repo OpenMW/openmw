@@ -162,6 +162,7 @@ namespace Nif
     struct bhkCompressedMeshShapeData;
     struct BSMultiBound;
     struct BSMultiBoundData;
+    struct BSSkinBoneData;
 
     using NiAVObjectPtr = RecordPtrT<NiAVObject>;
     using ExtraPtr = RecordPtrT<Extra>;
@@ -211,6 +212,7 @@ namespace Nif
     using bhkCompressedMeshShapeDataPtr = RecordPtrT<bhkCompressedMeshShapeData>;
     using BSMultiBoundPtr = RecordPtrT<BSMultiBound>;
     using BSMultiBoundDataPtr = RecordPtrT<BSMultiBoundData>;
+    using BSSkinBoneDataPtr = RecordPtrT<BSSkinBoneData>;
 
     using NiAVObjectList = RecordListT<NiAVObject>;
     using NiPropertyList = RecordListT<NiProperty>;

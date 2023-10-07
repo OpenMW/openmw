@@ -88,7 +88,7 @@ namespace
         }
     }
 
-    bool isTypeGeometry(int type)
+    bool isTypeNiGeometry(int type)
     {
         switch (type)
         {
@@ -96,6 +96,19 @@ namespace
             case Nif::RC_NiTriStrips:
             case Nif::RC_NiLines:
             case Nif::RC_BSLODTriShape:
+            case Nif::RC_BSSegmentedTriShape:
+                return true;
+        }
+        return false;
+    }
+
+    bool isTypeBSGeometry(int type)
+    {
+        switch (type)
+        {
+            case Nif::RC_BSTriShape:
+            case Nif::RC_BSDynamicTriShape:
+            case Nif::RC_BSMeshLODTriShape:
                 return true;
         }
         return false;
@@ -124,15 +137,6 @@ namespace
                         break;
                 }
             }
-        }
-
-        auto geometry = dynamic_cast<const Nif::NiGeometry*>(nifNode);
-        if (geometry)
-        {
-            if (!geometry->mShaderProperty.empty())
-                out.emplace_back(geometry->mShaderProperty.getPtr());
-            if (!geometry->mAlphaProperty.empty())
-                out.emplace_back(geometry->mAlphaProperty.getPtr());
         }
     }
 
@@ -443,11 +447,16 @@ namespace NifOsg
                 }
             }
 
-            auto geometry = dynamic_cast<const Nif::NiGeometry*>(nifNode);
-            // NiGeometry's NiAlphaProperty doesn't get handled here because it's a drawable property
-            if (geometry && !geometry->mShaderProperty.empty())
-                handleProperty(geometry->mShaderProperty.getPtr(), applyTo, composite, imageManager, boundTextures,
-                    animflags, hasStencilProperty);
+            // NiAlphaProperty is handled as a drawable property
+            Nif::BSShaderPropertyPtr shaderprop = nullptr;
+            if (isTypeNiGeometry(nifNode->recType))
+                shaderprop = static_cast<const Nif::NiGeometry*>(nifNode)->mShaderProperty;
+            else if (isTypeBSGeometry(nifNode->recType))
+                shaderprop = static_cast<const Nif::BSTriShape*>(nifNode)->mShaderProperty;
+
+            if (!shaderprop.empty())
+                handleProperty(shaderprop.getPtr(), applyTo, composite, imageManager, boundTextures, animflags,
+                    hasStencilProperty);
         }
 
         static void setupController(const Nif::NiTimeController* ctrl, SceneUtil::Controller* toSetup, int animflags)
@@ -747,7 +756,9 @@ namespace NifOsg
 
             applyNodeProperties(nifNode, node, composite, args.mImageManager, args.mBoundTextures, args.mAnimFlags);
 
-            const bool isGeometry = isTypeGeometry(nifNode->recType);
+            const bool isNiGeometry = isTypeNiGeometry(nifNode->recType);
+            const bool isBSGeometry = isTypeBSGeometry(nifNode->recType);
+            const bool isGeometry = isNiGeometry || isBSGeometry;
 
             if (isGeometry && !args.mSkipMeshes)
             {
@@ -762,12 +773,10 @@ namespace NifOsg
                     skip = args.mHasMarkers && Misc::StringUtils::ciStartsWith(nifNode->mName, "EditorMarker");
                 if (!skip)
                 {
-                    Nif::NiSkinInstancePtr skin = static_cast<const Nif::NiGeometry*>(nifNode)->mSkin;
-
-                    if (skin.empty())
-                        handleGeometry(nifNode, parent, node, composite, args.mBoundTextures, args.mAnimFlags);
-                    else
-                        handleSkinnedGeometry(nifNode, parent, node, composite, args.mBoundTextures, args.mAnimFlags);
+                    if (isNiGeometry)
+                        handleNiGeometry(nifNode, parent, node, composite, args.mBoundTextures, args.mAnimFlags);
+                    else // isBSGeometry
+                        handleBSGeometry(nifNode, parent, node, composite, args.mBoundTextures, args.mAnimFlags);
 
                     if (!nifNode->mController.empty())
                         handleMeshControllers(nifNode, node, composite, args.mBoundTextures, args.mAnimFlags);
@@ -1342,41 +1351,7 @@ namespace NifOsg
             }
         }
 
-        void handleNiGeometryData(osg::Geometry* geometry, const Nif::NiGeometryData* data,
-            const std::vector<unsigned int>& boundTextures, const std::string& name)
-        {
-            const auto& vertices = data->mVertices;
-            const auto& normals = data->mNormals;
-            const auto& colors = data->mColors;
-            if (!vertices.empty())
-                geometry->setVertexArray(new osg::Vec3Array(vertices.size(), vertices.data()));
-            if (!normals.empty())
-                geometry->setNormalArray(
-                    new osg::Vec3Array(normals.size(), normals.data()), osg::Array::BIND_PER_VERTEX);
-            if (!colors.empty())
-                geometry->setColorArray(new osg::Vec4Array(colors.size(), colors.data()), osg::Array::BIND_PER_VERTEX);
-
-            const auto& uvlist = data->mUVList;
-            int textureStage = 0;
-            for (std::vector<unsigned int>::const_iterator it = boundTextures.begin(); it != boundTextures.end();
-                 ++it, ++textureStage)
-            {
-                unsigned int uvSet = *it;
-                if (uvSet >= uvlist.size())
-                {
-                    Log(Debug::Verbose) << "Out of bounds UV set " << uvSet << " on shape \"" << name << "\" in "
-                                        << mFilename;
-                    if (uvlist.empty())
-                        continue;
-                    uvSet = 0;
-                }
-
-                geometry->setTexCoordArray(textureStage, new osg::Vec2Array(uvlist[uvSet].size(), uvlist[uvSet].data()),
-                    osg::Array::BIND_PER_VERTEX);
-            }
-        }
-
-        void handleNiGeometry(const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Geometry* geometry,
+        void handleNiGeometryData(const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Geometry* geometry,
             osg::Node* parentNode, SceneUtil::CompositeStateSetUpdater* composite,
             const std::vector<unsigned int>& boundTextures, int animflags)
         {
@@ -1458,7 +1433,36 @@ namespace NifOsg
                         new osg::DrawElementsUShort(osg::PrimitiveSet::LINES, line.size(), line.data()));
                 }
             }
-            handleNiGeometryData(geometry, niGeometryData, boundTextures, nifNode->mName);
+
+            const auto& vertices = niGeometryData->mVertices;
+            const auto& normals = niGeometryData->mNormals;
+            const auto& colors = niGeometryData->mColors;
+            if (!vertices.empty())
+                geometry->setVertexArray(new osg::Vec3Array(vertices.size(), vertices.data()));
+            if (!normals.empty())
+                geometry->setNormalArray(
+                    new osg::Vec3Array(normals.size(), normals.data()), osg::Array::BIND_PER_VERTEX);
+            if (!colors.empty())
+                geometry->setColorArray(new osg::Vec4Array(colors.size(), colors.data()), osg::Array::BIND_PER_VERTEX);
+
+            const auto& uvlist = niGeometryData->mUVList;
+            int textureStage = 0;
+            for (std::vector<unsigned int>::const_iterator it = boundTextures.begin(); it != boundTextures.end();
+                 ++it, ++textureStage)
+            {
+                unsigned int uvSet = *it;
+                if (uvSet >= uvlist.size())
+                {
+                    Log(Debug::Verbose) << "Out of bounds UV set " << uvSet << " on shape \"" << nifNode->mName
+                                        << "\" in " << mFilename;
+                    if (uvlist.empty())
+                        continue;
+                    uvSet = 0;
+                }
+
+                geometry->setTexCoordArray(textureStage, new osg::Vec2Array(uvlist[uvSet].size(), uvlist[uvSet].data()),
+                    osg::Array::BIND_PER_VERTEX);
+            }
 
             // osg::Material properties are handled here for two reasons:
             // - if there are no vertex colors, we need to disable colorMode.
@@ -1466,98 +1470,226 @@ namespace NifOsg
             //   above the actual renderable would be tedious.
             std::vector<const Nif::NiProperty*> drawableProps;
             collectDrawableProperties(nifNode, parent, drawableProps);
+            if (!niGeometry->mShaderProperty.empty())
+                drawableProps.emplace_back(niGeometry->mShaderProperty.getPtr());
+            if (!niGeometry->mAlphaProperty.empty())
+                drawableProps.emplace_back(niGeometry->mAlphaProperty.getPtr());
             applyDrawableProperties(parentNode, drawableProps, composite, !niGeometryData->mColors.empty(), animflags);
         }
 
-        void handleGeometry(const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
+        void handleNiGeometry(const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
             SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures,
             int animflags)
         {
-            assert(isTypeGeometry(nifNode->recType));
+            assert(isTypeNiGeometry(nifNode->recType));
+
             osg::ref_ptr<osg::Geometry> geom(new osg::Geometry);
-            handleNiGeometry(nifNode, parent, geom, parentNode, composite, boundTextures, animflags);
+            handleNiGeometryData(nifNode, parent, geom, parentNode, composite, boundTextures, animflags);
             // If the record had no valid geometry data in it, early-out
             if (geom->empty())
                 return;
-            osg::ref_ptr<osg::Drawable> drawable;
+
+            osg::ref_ptr<osg::Drawable> drawable = geom;
+
+            auto niGeometry = static_cast<const Nif::NiGeometry*>(nifNode);
+            if (!niGeometry->mSkin.empty())
+            {
+                osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
+                rig->setSourceGeometry(geom);
+
+                // Assign bone weights
+                osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map(new SceneUtil::RigGeometry::InfluenceMap);
+
+                const Nif::NiSkinInstance* skin = niGeometry->mSkin.getPtr();
+                const Nif::NiSkinData* data = skin->mData.getPtr();
+                const Nif::NiAVObjectList& bones = skin->mBones;
+                for (std::size_t i = 0; i < bones.size(); ++i)
+                {
+                    std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
+
+                    SceneUtil::RigGeometry::BoneInfluence influence;
+                    influence.mWeights = data->mBones[i].mWeights;
+                    influence.mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
+                    influence.mBoundSphere = data->mBones[i].mBoundSphere;
+
+                    map->mData.emplace_back(boneName, influence);
+                }
+                rig->setInfluenceMap(map);
+
+                drawable = rig;
+            }
+
             for (Nif::NiTimeControllerPtr ctrl = nifNode->mController; !ctrl.empty(); ctrl = ctrl->mNext)
             {
                 if (!ctrl->isActive())
                     continue;
                 if (ctrl->recType == Nif::RC_NiGeomMorpherController)
                 {
-                    const Nif::NiGeomMorpherController* nimorphctrl
-                        = static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr());
+                    if (!niGeometry->mSkin.empty())
+                        continue;
+
+                    auto nimorphctrl = static_cast<const Nif::NiGeomMorpherController*>(ctrl.getPtr());
                     if (nimorphctrl->mData.empty())
                         continue;
-                    drawable = handleMorphGeometry(nimorphctrl, geom, parentNode, composite, boundTextures, animflags);
+
+                    const std::vector<Nif::NiMorphData::MorphData>& morphs = nimorphctrl->mData.getPtr()->mMorphs;
+                    if (morphs.empty()
+                        || morphs[0].mVertices.size()
+                            != static_cast<const osg::Vec3Array*>(geom->getVertexArray())->size())
+                        continue;
+
+                    osg::ref_ptr<SceneUtil::MorphGeometry> morphGeom = new SceneUtil::MorphGeometry;
+                    morphGeom->setSourceGeometry(geom);
+                    for (unsigned int i = 0; i < morphs.size(); ++i)
+                        morphGeom->addMorphTarget(
+                            new osg::Vec3Array(morphs[i].mVertices.size(), morphs[i].mVertices.data()), 0.f);
 
                     osg::ref_ptr<GeomMorpherController> morphctrl = new GeomMorpherController(nimorphctrl);
                     setupController(ctrl.getPtr(), morphctrl, animflags);
-                    drawable->setUpdateCallback(morphctrl);
+                    morphGeom->setUpdateCallback(morphctrl);
+
+                    drawable = morphGeom;
                     break;
                 }
             }
-            if (!drawable.get())
-                drawable = geom;
+
             drawable->setName(nifNode->mName);
             parentNode->addChild(drawable);
         }
 
-        osg::ref_ptr<osg::Drawable> handleMorphGeometry(const Nif::NiGeomMorpherController* morpher,
-            osg::ref_ptr<osg::Geometry> sourceGeometry, osg::Node* parentNode,
+        void handleBSGeometry(const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
             SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures,
             int animflags)
         {
-            osg::ref_ptr<SceneUtil::MorphGeometry> morphGeom = new SceneUtil::MorphGeometry;
-            morphGeom->setSourceGeometry(sourceGeometry);
+            assert(isTypeBSGeometry(nifNode->recType));
 
-            const std::vector<Nif::NiMorphData::MorphData>& morphs = morpher->mData.getPtr()->mMorphs;
-            if (morphs.empty())
-                return morphGeom;
-            if (morphs[0].mVertices.size()
-                != static_cast<const osg::Vec3Array*>(sourceGeometry->getVertexArray())->size())
-                return morphGeom;
-            for (unsigned int i = 0; i < morphs.size(); ++i)
-                morphGeom->addMorphTarget(
-                    new osg::Vec3Array(morphs[i].mVertices.size(), morphs[i].mVertices.data()), 0.f);
-
-            return morphGeom;
-        }
-
-        void handleSkinnedGeometry(const Nif::NiAVObject* nifNode, const Nif::Parent* parent, osg::Group* parentNode,
-            SceneUtil::CompositeStateSetUpdater* composite, const std::vector<unsigned int>& boundTextures,
-            int animflags)
-        {
-            assert(isTypeGeometry(nifNode->recType));
-            osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
-            handleNiGeometry(nifNode, parent, geometry, parentNode, composite, boundTextures, animflags);
-            if (geometry->empty())
+            auto bsTriShape = static_cast<const Nif::BSTriShape*>(nifNode);
+            const std::vector<unsigned short>& triangles = bsTriShape->mTriangles;
+            if (triangles.empty())
                 return;
-            osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
-            rig->setSourceGeometry(geometry);
-            rig->setName(nifNode->mName);
 
-            // Assign bone weights
-            osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map(new SceneUtil::RigGeometry::InfluenceMap);
+            osg::ref_ptr<osg::Geometry> geometry(new osg::Geometry);
+            geometry->addPrimitiveSet(
+                new osg::DrawElementsUShort(osg::PrimitiveSet::TRIANGLES, triangles.size(), triangles.data()));
 
-            const Nif::NiSkinInstance* skin = static_cast<const Nif::NiGeometry*>(nifNode)->mSkin.getPtr();
-            const Nif::NiSkinData* data = skin->mData.getPtr();
-            const Nif::NiAVObjectList& bones = skin->mBones;
-            for (std::size_t i = 0; i < bones.size(); ++i)
+            osg::ref_ptr<osg::Drawable> drawable = geometry;
+
+            // Some input geometry may not be used as is so it needs to be converted.
+            // Normals, tangents and bitangents use a special normal map-like format not equivalent to snorm8 or unorm8
+            auto normbyteToFloat = [](uint8_t value) { return value / 255.f * 2.f - 1.f; };
+            // Vertices and UV sets may be half-precision.
+            // OSG doesn't have a way to pass half-precision data at the moment.
+            auto halfToFloat = [](uint16_t value) {
+                uint32_t bits = static_cast<uint32_t>(value & 0x8000) << 16;
+
+                const uint32_t exp16 = (value & 0x7c00) >> 10;
+                uint32_t frac16 = value & 0x3ff;
+                if (exp16)
+                    bits |= (exp16 + 0x70) << 23;
+                else if (frac16)
+                {
+                    uint8_t offset = 0;
+                    do
+                    {
+                        ++offset;
+                        frac16 <<= 1;
+                    } while ((frac16 & 0x400) != 0x400);
+                    frac16 &= 0x3ff;
+                    bits |= (0x71 - offset) << 23;
+                }
+                bits |= frac16 << 13;
+
+                float result;
+                std::memcpy(&result, &bits, sizeof(float));
+                return result;
+            };
+
+            const bool fullPrec = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Full_Precision;
+            const bool hasVertices = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Vertex;
+            const bool hasNormals = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Normals;
+            const bool hasColors = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Vertex_Colors;
+            const bool hasUV = bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::UVs;
+
+            std::vector<osg::Vec3f> vertices;
+            std::vector<osg::Vec3f> normals;
+            std::vector<osg::Vec4ub> colors;
+            std::vector<osg::Vec2f> uvlist;
+            for (auto& elem : bsTriShape->mVertData)
             {
-                std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
-
-                SceneUtil::RigGeometry::BoneInfluence influence;
-                influence.mWeights = data->mBones[i].mWeights;
-                influence.mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
-                influence.mBoundSphere = data->mBones[i].mBoundSphere;
-
-                map->mData.emplace_back(boneName, influence);
+                if (hasVertices)
+                {
+                    if (fullPrec)
+                        vertices.emplace_back(elem.mVertex.x(), elem.mVertex.y(), elem.mVertex.z());
+                    else
+                        vertices.emplace_back(halfToFloat(elem.mHalfVertex[0]), halfToFloat(elem.mHalfVertex[1]),
+                            halfToFloat(elem.mHalfVertex[2]));
+                }
+                if (hasNormals)
+                    normals.emplace_back(normbyteToFloat(elem.mNormal[0]), normbyteToFloat(elem.mNormal[1]),
+                        normbyteToFloat(elem.mNormal[2]));
+                if (hasColors)
+                    colors.emplace_back(elem.mVertColor[0], elem.mVertColor[1], elem.mVertColor[2], elem.mVertColor[3]);
+                if (hasUV)
+                    uvlist.emplace_back(halfToFloat(elem.mUV[0]), 1.0 - halfToFloat(elem.mUV[1]));
             }
-            rig->setInfluenceMap(map);
 
-            parentNode->addChild(rig);
+            if (!vertices.empty())
+                geometry->setVertexArray(new osg::Vec3Array(vertices.size(), vertices.data()));
+            if (!normals.empty())
+                geometry->setNormalArray(
+                    new osg::Vec3Array(normals.size(), normals.data()), osg::Array::BIND_PER_VERTEX);
+            if (!colors.empty())
+                geometry->setColorArray(
+                    new osg::Vec4ubArray(colors.size(), colors.data()), osg::Array::BIND_PER_VERTEX);
+            if (!uvlist.empty())
+                geometry->setTexCoordArray(
+                    0, new osg::Vec2Array(uvlist.size(), uvlist.data()), osg::Array::BIND_PER_VERTEX);
+
+            // This is the skinning data Fallout 4 provides
+            // TODO: support Skyrim SE skinning data
+            if (!bsTriShape->mSkin.empty() && bsTriShape->mSkin->recType == Nif::RC_BSSkinInstance
+                && bsTriShape->mVertDesc.mFlags & Nif::BSVertexDesc::VertexAttribute::Skinned)
+            {
+                osg::ref_ptr<SceneUtil::RigGeometry> rig(new SceneUtil::RigGeometry);
+                rig->setSourceGeometry(geometry);
+
+                osg::ref_ptr<SceneUtil::RigGeometry::InfluenceMap> map(new SceneUtil::RigGeometry::InfluenceMap);
+
+                auto skin = static_cast<const Nif::BSSkinInstance*>(bsTriShape->mSkin.getPtr());
+                const Nif::BSSkinBoneData* data = skin->mData.getPtr();
+                const Nif::NiAVObjectList& bones = skin->mBones;
+                std::vector<std::vector<Nif::NiSkinData::VertWeight>> vertWeights(data->mBones.size());
+                for (size_t i = 0; i < vertices.size(); i++)
+                    for (int j = 0; j < 4; j++)
+                        vertWeights[bsTriShape->mVertData[i].mBoneIndices[j]].emplace_back(
+                            i, halfToFloat(bsTriShape->mVertData[i].mBoneWeights[j]));
+
+                for (std::size_t i = 0; i < bones.size(); ++i)
+                {
+                    std::string boneName = Misc::StringUtils::lowerCase(bones[i].getPtr()->mName);
+
+                    SceneUtil::RigGeometry::BoneInfluence influence;
+                    influence.mWeights = vertWeights[i];
+                    influence.mInvBindMatrix = data->mBones[i].mTransform.toMatrix();
+                    influence.mBoundSphere = data->mBones[i].mBoundSphere;
+
+                    map->mData.emplace_back(boneName, influence);
+                }
+                rig->setInfluenceMap(map);
+
+                drawable = rig;
+            }
+
+            std::vector<const Nif::NiProperty*> drawableProps;
+            collectDrawableProperties(nifNode, parent, drawableProps);
+            if (!bsTriShape->mShaderProperty.empty())
+                drawableProps.emplace_back(bsTriShape->mShaderProperty.getPtr());
+            if (!bsTriShape->mAlphaProperty.empty())
+                drawableProps.emplace_back(bsTriShape->mAlphaProperty.getPtr());
+            applyDrawableProperties(parentNode, drawableProps, composite, !colors.empty(), animflags);
+
+            drawable->setName(nifNode->mName);
+            parentNode->addChild(drawable);
         }
 
         osg::BlendFunc::BlendFuncMode getBlendMode(int mode)

@@ -158,6 +158,7 @@ namespace Nif
                 &construct<BSEffectShaderPropertyFloatController, RC_BSLightingShaderPropertyFloatController> },
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
             { "NiBSBoneLODController", &construct<NiBoneLODController, RC_NiBoneLODController> },
+            { "NiLightRadiusController", &construct<NiFloatInterpController, RC_NiLightRadiusController> },
 
             // Interpolators, Gamebryo
             { "NiBlendBoolInterpolator", &construct<NiBlendBoolInterpolator, RC_NiBlendBoolInterpolator> },
@@ -245,11 +246,15 @@ namespace Nif
             { "BSBehaviorGraphExtraData", &construct<BSBehaviorGraphExtraData, RC_BSBehaviorGraphExtraData> },
             { "BSBoneLODExtraData", &construct<BSBoneLODExtraData, RC_BSBoneLODExtraData> },
             { "BSClothExtraData", &construct<BSClothExtraData, RC_BSClothExtraData> },
+            { "BSConnectPoint::Children", &construct<BSConnectPoint::Children, RC_BSConnectPointChildren> },
+            { "BSConnectPoint::Parents", &construct<BSConnectPoint::Parents, RC_BSConnectPointParents> },
             { "BSDecalPlacementVectorExtraData",
                 &construct<BSDecalPlacementVectorExtraData, RC_BSDecalPlacementVectorExtraData> },
             { "BSDistantObjectExtraData", &construct<BSDistantObjectExtraData, RC_BSDistantObjectExtraData> },
             { "BSDistantObjectLargeRefExtraData",
                 &construct<BSDistantObjectLargeRefExtraData, RC_BSDistantObjectLargeRefExtraData> },
+            { "BSEyeCenterExtraData", &construct<BSEyeCenterExtraData, RC_BSEyeCenterExtraData> },
+            { "BSPositionData", &construct<BSPositionData, RC_BSPositionData> },
             { "BSWArray", &construct<BSWArray, RC_BSWArray> },
             { "BSXFlags", &construct<NiIntegerExtraData, RC_BSXFlags> },
 
@@ -268,6 +273,8 @@ namespace Nif
 
             // Bethesda
             { "BSDismemberSkinInstance", &construct<BSDismemberSkinInstance, RC_BSDismemberSkinInstance> },
+            { "BSSkin::Instance", &construct<BSSkinInstance, RC_BSSkinInstance> },
+            { "BSSkin::BoneData", &construct<BSSkinBoneData, RC_BSSkinBoneData> },
             { "BSTriShape", &construct<BSTriShape, RC_BSTriShape> },
             { "BSDynamicTriShape", &construct<BSDynamicTriShape, RC_BSDynamicTriShape> },
             { "BSLODTriShape", &construct<BSLODTriShape, RC_BSLODTriShape> },
