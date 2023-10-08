@@ -17,7 +17,7 @@
 
 #include <components/misc/strings/lower.hpp>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <components/files/conversion.hpp>
 #include <components/files/memorystream.hpp>
@@ -168,7 +168,7 @@ namespace MWGui
 
         mCurrentCharacter = mgr->getCurrentCharacter();
 
-        const std::string& directory = Settings::Manager::getString("character", "Saves");
+        const std::string& directory = Settings::saves().mCharacter;
 
         size_t selectedIndex = MyGUI::ITEM_NONE;
 
@@ -427,7 +427,7 @@ namespace MWGui
                     mCurrentSlot->mProfile.mInGameTime.mMonth)
              << " " << hour << " " << (pm ? "#{Calendar:pm}" : "#{Calendar:am}");
 
-        if (Settings::Manager::getBool("timeplayed", "Saves"))
+        if (Settings::saves().mTimeplayed)
         {
             text << "\n"
                  << "#{OMWEngine:TimePlayed}: " << formatTimeplayed(mCurrentSlot->mProfile.mTimePlayed);

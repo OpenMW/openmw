@@ -186,7 +186,7 @@ namespace MWGui
 
     void WaitDialog::startWaiting(int hoursToWait)
     {
-        if (Settings::Manager::getBool("autosave", "Saves")) // autosaves when enabled
+        if (Settings::saves().mAutosave) // autosaves when enabled
             MWBase::Environment::get().getStateManager()->quickSave("Autosave");
 
         MWBase::World* world = MWBase::Environment::get().getWorld();
