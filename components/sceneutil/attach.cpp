@@ -10,6 +10,8 @@
 #include <osg/PositionAttitudeTransform>
 
 #include <components/resource/scenemanager.hpp>
+#include <components/sceneutil/riggeometry.hpp>
+#include <components/sceneutil/riggeometryosgaextension.hpp>
 #include <components/sceneutil/skeleton.hpp>
 
 #include "visitor.hpp"
@@ -37,6 +39,12 @@ namespace SceneUtil
                 return;
 
             const osg::Node* node = &drawable;
+            bool isRig = dynamic_cast<const SceneUtil::RigGeometry*>(node) != nullptr;
+            if (!isRig)
+                isRig = dynamic_cast<const SceneUtil::RigGeometryHolder*>(node) != nullptr;
+            if (!isRig)
+                return;
+
             for (auto it = getNodePath().rbegin() + 1; it != getNodePath().rend(); ++it)
             {
                 const osg::Node* parent = *it;
