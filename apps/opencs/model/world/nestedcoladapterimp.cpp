@@ -41,7 +41,7 @@ namespace CSMWorld
         point.mUnknown = 0;
 
         points.insert(points.begin() + position, point);
-        pathgrid.mData.mS2 = pathgrid.mPoints.size();
+        pathgrid.mData.mPoints = pathgrid.mPoints.size();
 
         record.setModified(pathgrid);
     }
@@ -58,7 +58,7 @@ namespace CSMWorld
         // Do not remove dangling edges, does not work with current undo mechanism
         // Do not automatically adjust indices, what would be done with dangling edges?
         points.erase(points.begin() + rowToRemove);
-        pathgrid.mData.mS2 = pathgrid.mPoints.size();
+        pathgrid.mData.mPoints = pathgrid.mPoints.size();
 
         record.setModified(pathgrid);
     }
@@ -67,7 +67,7 @@ namespace CSMWorld
     {
         Pathgrid pathgrid = record.get();
         pathgrid.mPoints = static_cast<const NestedTableWrapper<ESM::Pathgrid::PointList>&>(nestedTable).mNestedTable;
-        pathgrid.mData.mS2 = pathgrid.mPoints.size();
+        pathgrid.mData.mPoints = pathgrid.mPoints.size();
 
         record.setModified(pathgrid);
     }

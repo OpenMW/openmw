@@ -27,13 +27,11 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("SPDT"):
-                    esm.getHTSized<12>(mData);
+                    esm.getHT(mData.mType, mData.mCost, mData.mFlags);
                     hasData = true;
                     break;
                 case fourCC("ENAM"):
-                    ENAMstruct s;
-                    esm.getHTSized<24>(s);
-                    mEffects.mList.push_back(s);
+                    mEffects.add(esm);
                     break;
                 case SREC_DELE:
                     esm.skipHSub();

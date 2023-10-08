@@ -25,7 +25,7 @@ namespace ESM
                     mSound = esm.getHString();
                     break;
                 case fourCC("DATA"):
-                    esm.getHTSized<3>(mData);
+                    esm.getHT(mData.mVolume, mData.mMinRange, mData.mMaxRange);
                     hasData = true;
                     break;
                 case SREC_DELE:
