@@ -821,6 +821,9 @@ namespace MWMechanics
         mCurrentIdle = idleGroup;
         mAnimation->play(mCurrentIdle, priority, MWRender::Animation::BlendMask_All, false, 1.0f, "start", "stop",
             startPoint, numLoops, true);
+
+        // May still be false after recent turn or jump animations
+        mMovementAnimationControlled = true;
     }
 
     void CharacterController::refreshCurrentAnims(
