@@ -35,11 +35,14 @@
 
 #include <components/fallback/fallback.hpp>
 
+#include <components/settings/values.hpp>
+
 #include "../mwworld/cellstore.hpp"
 
 #include "renderbin.hpp"
 #include "ripples.hpp"
 #include "ripplesimulation.hpp"
+#include "util.hpp"
 #include "vismask.hpp"
 
 namespace MWRender
@@ -234,7 +237,7 @@ namespace MWRender
     {
     public:
         Refraction(uint32_t rttSize)
-            : RTTNode(rttSize, rttSize, 0, false, 1, StereoAwareness::Aware)
+            : RTTNode(rttSize, rttSize, 0, false, 1, StereoAwareness::Aware, shouldAddMSAAIntermediateTarget())
             , mNodeMask(Refraction::sDefaultCullMask)
         {
             setDepthBufferInternalFormat(GL_DEPTH24_STENCIL8);
@@ -315,7 +318,7 @@ namespace MWRender
     {
     public:
         Reflection(uint32_t rttSize, bool isInterior)
-            : RTTNode(rttSize, rttSize, 0, false, 0, StereoAwareness::Aware)
+            : RTTNode(rttSize, rttSize, 0, false, 0, StereoAwareness::Aware, shouldAddMSAAIntermediateTarget())
         {
             setInterior(isInterior);
             setDepthBufferInternalFormat(GL_DEPTH24_STENCIL8);

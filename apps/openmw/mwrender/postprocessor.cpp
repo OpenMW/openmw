@@ -122,7 +122,6 @@ namespace MWRender
         , mReload(false)
         , mEnabled(false)
         , mUsePostProcessing(Settings::postProcessing().mEnabled)
-        , mSoftParticles(false)
         , mDisableDepthPasses(false)
         , mLastFrameNumber(0)
         , mLastSimulationTime(0.f)
@@ -135,8 +134,6 @@ namespace MWRender
         , mPassLights(false)
         , mPrevPassLights(false)
     {
-        mSoftParticles = Settings::Manager::getBool("soft particles", "Shaders");
-
         osg::GraphicsContext* gc = viewer->getCamera()->getGraphicsContext();
         osg::GLExtensions* ext = gc->getState()->get<osg::GLExtensions>();
 
@@ -155,7 +152,7 @@ namespace MWRender
         else
             Log(Debug::Error) << "'glDisablei' unsupported, pass normals will not be available to shaders.";
 
-        if (mSoftParticles)
+        if (Settings::shaders().mSoftParticles)
         {
             for (int i = 0; i < 2; ++i)
             {
@@ -172,7 +169,8 @@ namespace MWRender
         mUBO = ext->isUniformBufferObjectSupported && mGLSLVersion >= 330;
         mStateUpdater = new fx::StateUpdater(mUBO);
 
-        if (!Stereo::getStereo() && !SceneUtil::AutoDepth::isReversed() && !mSoftParticles && !mUsePostProcessing)
+        if (!Stereo::getStereo() && !SceneUtil::AutoDepth::isReversed() && !Settings::shaders().mSoftParticles
+            && !mUsePostProcessing)
             return;
 
         enable(mUsePostProcessing);
@@ -239,7 +237,7 @@ namespace MWRender
         const bool postPass = Settings::postProcessing().mTransparentPostpass;
         mUsePostProcessing = usePostProcessing;
 
-        mDisableDepthPasses = !mSoftParticles && !postPass;
+        mDisableDepthPasses = !Settings::shaders().mSoftParticles && !postPass;
 
 #ifdef ANDROID
         mDisableDepthPasses = true;
@@ -276,10 +274,10 @@ namespace MWRender
 
     void PostProcessor::disable()
     {
-        if (!mSoftParticles)
+        if (!Settings::shaders().mSoftParticles)
             osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(nullptr);
 
-        if (!SceneUtil::AutoDepth::isReversed() && !mSoftParticles)
+        if (!SceneUtil::AutoDepth::isReversed() && !Settings::shaders().mSoftParticles)
         {
             removeChild(mHUDCamera);
             setCullCallback(nullptr);

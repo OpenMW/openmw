@@ -24,7 +24,7 @@
 #include <components/sceneutil/nodecallback.hpp>
 #include <components/sceneutil/rtt.hpp>
 #include <components/sceneutil/shadow.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/stereo/multiview.hpp>
 
 #include "../mwworld/class.hpp"
@@ -34,6 +34,7 @@
 #include "../mwmechanics/weapontype.hpp"
 
 #include "npcanimation.hpp"
+#include "util.hpp"
 #include "vismask.hpp"
 
 namespace MWRender
@@ -154,7 +155,7 @@ namespace MWRender
     public:
         CharacterPreviewRTTNode(uint32_t sizeX, uint32_t sizeY)
             : RTTNode(sizeX, sizeY, Settings::Manager::getInt("antialiasing", "Video"), false, 0,
-                StereoAwareness::Unaware_MultiViewShaders)
+                StereoAwareness::Unaware_MultiViewShaders, shouldAddMSAAIntermediateTarget())
             , mAspectRatio(static_cast<float>(sizeX) / static_cast<float>(sizeY))
         {
             if (SceneUtil::AutoDepth::isReversed())
@@ -226,9 +227,13 @@ namespace MWRender
         mRTTNode = new CharacterPreviewRTTNode(sizeX, sizeY);
         mRTTNode->setNodeMask(Mask_RenderToTexture);
 
-        bool ffp = mResourceSystem->getSceneManager()->getLightingMethod() == SceneUtil::LightingMethod::FFP;
-
-        osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(ffp);
+        osg::ref_ptr<SceneUtil::LightManager> lightManager = new SceneUtil::LightManager(SceneUtil::LightSettings{
+            .mLightingMethod = mResourceSystem->getSceneManager()->getLightingMethod(),
+            .mMaxLights = Settings::shaders().mMaxLights,
+            .mMaximumLightDistance = Settings::shaders().mMaximumLightDistance,
+            .mLightFadeStart = Settings::shaders().mLightFadeStart,
+            .mLightBoundsMultiplier = Settings::shaders().mLightBoundsMultiplier,
+        });
         lightManager->setStartLight(1);
         osg::ref_ptr<osg::StateSet> stateset = lightManager->getOrCreateStateSet();
         stateset->setDefine("FORCE_OPAQUE", "1", osg::StateAttribute::ON);

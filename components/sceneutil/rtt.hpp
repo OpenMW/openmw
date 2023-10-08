@@ -49,7 +49,7 @@ namespace SceneUtil
         };
 
         RTTNode(uint32_t textureWidth, uint32_t textureHeight, uint32_t samples, bool generateMipmaps,
-            int renderOrderNum, StereoAwareness stereoAwareness);
+            int renderOrderNum, StereoAwareness stereoAwareness, bool addMSAAIntermediateTarget);
         ~RTTNode();
 
         osg::Texture* getColorTexture(osgUtil::CullVisitor* cv);
@@ -110,6 +110,7 @@ namespace SceneUtil
         GLint mDepthBufferInternalFormat;
         int mRenderOrderNum;
         StereoAwareness mStereoAwareness;
+        bool mAddMSAAIntermediateTarget;
     };
 }
 #endif

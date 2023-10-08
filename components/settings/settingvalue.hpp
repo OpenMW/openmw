@@ -40,6 +40,7 @@ namespace Settings
         MyGuiColour,
         GyroscopeAxis,
         NavMeshRenderMode,
+        LightingMethod,
     };
 
     template <class T>
@@ -147,6 +148,12 @@ namespace Settings
         return SettingValueType::NavMeshRenderMode;
     }
 
+    template <>
+    inline constexpr SettingValueType getSettingValueType<SceneUtil::LightingMethod>()
+    {
+        return SettingValueType::LightingMethod;
+    }
+
     inline constexpr std::string_view getSettingValueTypeName(SettingValueType type)
     {
         switch (type)
@@ -185,6 +192,8 @@ namespace Settings
                 return "gyroscope axis";
             case SettingValueType::NavMeshRenderMode:
                 return "navmesh render mode";
+            case SettingValueType::LightingMethod:
+                return "lighting method";
         }
         return "unsupported";
     }

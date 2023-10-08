@@ -175,8 +175,6 @@ namespace MWRender
 
         bool isEnabled() const { return mUsePostProcessing && mEnabled; }
 
-        bool softParticlesEnabled() const { return mSoftParticles; }
-
         bool getHDR() const { return mHDR; }
 
         void disable();
@@ -247,7 +245,6 @@ namespace MWRender
         bool mReload;
         bool mEnabled;
         bool mUsePostProcessing;
-        bool mSoftParticles;
         bool mDisableDepthPasses;
 
         size_t mLastFrameNumber;

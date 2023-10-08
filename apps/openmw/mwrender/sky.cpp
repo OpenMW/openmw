@@ -35,6 +35,7 @@
 
 #include "renderbin.hpp"
 #include "skyutil.hpp"
+#include "util.hpp"
 #include "vismask.hpp"
 
 namespace
@@ -205,7 +206,8 @@ namespace
     {
     public:
         SkyRTT(osg::Vec2f size, osg::Group* earlyRenderBinRoot)
-            : RTTNode(static_cast<int>(size.x()), static_cast<int>(size.y()), 0, false, 1, StereoAwareness::Aware)
+            : RTTNode(static_cast<int>(size.x()), static_cast<int>(size.y()), 0, false, 1, StereoAwareness::Aware,
+                MWRender::shouldAddMSAAIntermediateTarget())
             , mEarlyRenderBinRoot(earlyRenderBinRoot)
         {
             setDepthBufferInternalFormat(GL_DEPTH24_STENCIL8);
@@ -292,7 +294,7 @@ namespace MWRender
         mRootNode->addChild(mEarlyRenderBinRoot);
         mUnderwaterSwitch = new UnderwaterSwitchCallback(skyroot);
 
-        mPrecipitationOcclusion = Settings::Manager::getBool("weather particle occlusion", "Shaders");
+        mPrecipitationOcclusion = Settings::shaders().mWeatherParticleOcclusion;
         mPrecipitationOccluder = std::make_unique<PrecipitationOccluder>(skyroot, parentNode, rootNode, camera);
     }
 

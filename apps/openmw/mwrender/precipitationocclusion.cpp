@@ -8,6 +8,7 @@
 #include <components/sceneutil/depth.hpp>
 #include <components/sceneutil/positionattitudetransform.hpp>
 #include <components/sceneutil/util.hpp>
+#include <components/settings/values.hpp>
 #include <components/shader/shadermanager.hpp>
 
 #include "../mwbase/environment.hpp"
@@ -112,7 +113,7 @@ namespace MWRender
         mCamera->attach(osg::Camera::DEPTH_BUFFER, mDepthTexture);
         mCamera->addChild(mSceneNode);
         mCamera->setSmallFeatureCullingPixelSize(
-            Settings::Manager::getFloat("weather particle occlusion small feature culling pixel size", "Shaders"));
+            Settings::shaders().mWeatherParticleOcclusionSmallFeatureCullingPixelSize);
 
         SceneUtil::setCameraClearDepth(mCamera);
     }

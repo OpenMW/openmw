@@ -147,7 +147,7 @@ namespace
         constexpr int min = 8;
         constexpr int max = 32;
         constexpr int increment = 8;
-        int maxLights = Settings::Manager::getInt("max lights", "Shaders");
+        const int maxLights = Settings::shaders().mMaxLights;
         // show increments of 8 in dropdown
         if (maxLights >= min && maxLights <= max && !(maxLights % increment))
             box->setIndexSelected((maxLights / increment) - 1);
@@ -559,7 +559,8 @@ namespace MWGui
         MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
             "#{OMWEngine:ChangeRequiresRestart}", { "#{Interface:OK}" }, true);
 
-        Settings::Manager::setString("lighting method", "Shaders", *_sender->getItemDataAt<std::string>(pos));
+        Settings::shaders().mLightingMethod.set(
+            Settings::parseLightingMethod(*_sender->getItemDataAt<std::string>(pos)));
         apply();
     }
 
@@ -630,9 +631,7 @@ namespace MWGui
 
     void SettingsWindow::onMaxLightsChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
-        int count = 8 * (pos + 1);
-
-        Settings::Manager::setInt("max lights", "Shaders", count);
+        Settings::shaders().mMaxLights.set(8 * (pos + 1));
         apply();
         configureWidgets(mMainWidget, false);
     }
@@ -653,8 +652,7 @@ namespace MWGui
         Settings::shaders().mMaxLights.reset();
         Settings::shaders().mLightingMethod.reset();
 
-        const SceneUtil::LightingMethod lightingMethod
-            = SceneUtil::LightManager::getLightingMethodFromString(Settings::shaders().mLightingMethod);
+        const SceneUtil::LightingMethod lightingMethod = Settings::shaders().mLightingMethod;
         const std::size_t lightIndex = mLightingMethodButton->findItemIndexWith(lightingMethodToStr(lightingMethod));
         mLightingMethodButton->setIndexSelected(lightIndex);
         updateMaxLightsComboBox(mMaxLights);

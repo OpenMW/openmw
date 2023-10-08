@@ -2,6 +2,8 @@
 
 #include "sdlinit.hpp"
 
+#include <components/settings/values.hpp>
+
 #include <QMessageBox>
 #include <QScreen>
 
@@ -144,10 +146,18 @@ bool Launcher::GraphicsPage::loadSettings()
 
     // Lighting
     int lightingMethod = 1;
-    if (Settings::Manager::getString("lighting method", "Shaders") == "legacy")
-        lightingMethod = 0;
-    else if (Settings::Manager::getString("lighting method", "Shaders") == "shaders")
-        lightingMethod = 2;
+    switch (Settings::shaders().mLightingMethod)
+    {
+        case SceneUtil::LightingMethod::FFP:
+            lightingMethod = 0;
+            break;
+        case SceneUtil::LightingMethod::PerObjectUniform:
+            lightingMethod = 1;
+            break;
+        case SceneUtil::LightingMethod::SingleUBO:
+            lightingMethod = 2;
+            break;
+    }
     lightingMethodComboBox->setCurrentIndex(lightingMethod);
 
     // Shadows
@@ -246,10 +256,12 @@ void Launcher::GraphicsPage::saveSettings()
     }
 
     // Lighting
-    static std::array<std::string, 3> lightingMethodMap = { "legacy", "shaders compatibility", "shaders" };
-    const std::string& cLightingMethod = lightingMethodMap[lightingMethodComboBox->currentIndex()];
-    if (cLightingMethod != Settings::Manager::getString("lighting method", "Shaders"))
-        Settings::Manager::setString("lighting method", "Shaders", cLightingMethod);
+    static constexpr std::array<SceneUtil::LightingMethod, 3> lightingMethodMap = {
+        SceneUtil::LightingMethod::FFP,
+        SceneUtil::LightingMethod::PerObjectUniform,
+        SceneUtil::LightingMethod::SingleUBO,
+    };
+    Settings::shaders().mLightingMethod.set(lightingMethodMap[lightingMethodComboBox->currentIndex()]);
 
     // Shadows
     int cShadowDist = shadowDistanceCheckBox->checkState() != Qt::Unchecked ? shadowDistanceSpinBox->value() : 0;
