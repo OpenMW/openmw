@@ -951,6 +951,39 @@
 -- @param #number stage Quest stage
 -- @param openmw.core#GameObject actor (optional) The actor who is the source of the journal entry, it may be used in journal entries with variables such as `%name(The speaker's name)` or `%race(The speaker's race)`.
 
+---
+-- Get state of a control switch. I.e. is the player able to move/fight/jump/etc.
+-- @function [parent=#Player] getControlSwitch
+-- @param openmw.core#GameObject player
+-- @param #ControlSwitch key Control type (see @{openmw.types#CONTROL_SWITCH})
+-- @return #boolean
+
+---
+-- Set state of a control switch. I.e. forbid or allow the player to move/fight/jump/etc.
+-- Can be used only in global or player scripts.
+-- @function [parent=#Player] setControlSwitch
+-- @param openmw.core#GameObject player
+-- @param #ControlSwitch key Control type (see @{openmw.types#CONTROL_SWITCH})
+-- @param #boolean value
+
+---
+-- String id of a @{#CONTROL_SWITCH}
+-- @type ControlSwitch
+
+---
+-- @type CONTROL_SWITCH
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch Controls Ability to move
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch Fighting Ability to attack
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch Jumping Ability to jump
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch Looking Ability to change view direction
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch Magic Ability to use magic
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch ViewMode Ability to toggle 1st/3rd person view
+-- @field [parent=#CONTROL_SWITCH] #ControlSwitch VanityMode Vanity view if player doesn't touch controls for a long time
+
+---
+-- Values that can be used with getControlSwitch/setControlSwitch.
+-- @field [parent=#Player] #CONTROL_SWITCH CONTROL_SWITCH
+
 
 --------------------------------------------------------------------------------
 -- @{#Armor} functions

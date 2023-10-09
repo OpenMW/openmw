@@ -6,6 +6,7 @@ local util = require('openmw.util')
 local I = require('openmw.interfaces')
 
 local Actor = require('openmw.types').Actor
+local Player = require('openmw.types').Player
 
 local MODE = camera.MODE
 
@@ -60,8 +61,8 @@ end
 
 function M.onInputAction(action)
     if not active or core.isWorldPaused() or
-       not input.getControlSwitch(input.CONTROL_SWITCH.ViewMode) or
-       not input.getControlSwitch(input.CONTROL_SWITCH.Controls) or
+       not Player.getControlSwitch(self, Player.CONTROL_SWITCH.ViewMode) or
+       not Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls) or
        input.isActionPressed(input.ACTION.TogglePOV) or
        not I.Camera.isModeControlEnabled() then
         return

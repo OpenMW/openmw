@@ -1,6 +1,7 @@
 #include "types.hpp"
 
 #include "../luamanagerimp.hpp"
+#include <apps/openmw/mwbase/inputmanager.hpp>
 #include <apps/openmw/mwbase/journal.hpp>
 #include <apps/openmw/mwbase/world.hpp>
 #include <apps/openmw/mwmechanics/npcstats.hpp>
@@ -118,6 +119,31 @@ namespace MWLua
                     MWBase::Environment::get().getJournal()->addEntry(q.mQuestId, stage, actorPtr);
                 },
                 "addJournalEntryAction");
+        };
+
+        player["CONTROL_SWITCH"]
+            = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, std::string_view>({
+                { "Controls", "playercontrols" },
+                { "Fighting", "playerfighting" },
+                { "Jumping", "playerjumping" },
+                { "Looking", "playerlooking" },
+                { "Magic", "playermagic" },
+                { "ViewMode", "playerviewswitch" },
+                { "VanityMode", "vanitymode" },
+            }));
+
+        MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
+        player["getControlSwitch"] = [input](const Object& player, std::string_view key) {
+            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+                throw std::runtime_error("The argument must be a player.");
+            return input->getControlSwitch(key);
+        };
+        player["setControlSwitch"] = [input](const Object& player, std::string_view key, bool v) {
+            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+                throw std::runtime_error("The argument must be a player.");
+            if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
+                throw std::runtime_error("Only player and global scripts can toggle control switches.");
+            input->toggleControlSwitch(key, v);
         };
     }
 

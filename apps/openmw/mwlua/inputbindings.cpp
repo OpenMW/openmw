@@ -77,6 +77,7 @@ namespace MWLua
                 return input->getActionValue(axis - SDL_CONTROLLER_AXIS_MAX) * 2 - 1;
         };
 
+        // input.CONTROL_SWITCH is deprecated, remove after releasing 0.49
         api["getControlSwitch"] = [input](std::string_view key) { return input->getControlSwitch(key); };
         api["setControlSwitch"] = [input](std::string_view key, bool v) { input->toggleControlSwitch(key, v); };
 
@@ -134,6 +135,7 @@ namespace MWLua
             { "ZoomOut", MWInput::A_ZoomOut },
         }));
 
+        // input.CONTROL_SWITCH is deprecated, remove after releasing 0.49
         api["CONTROL_SWITCH"]
             = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string_view, std::string_view>({
                 { "Controls", "playercontrols" },
