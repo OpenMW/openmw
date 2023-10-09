@@ -1,7 +1,7 @@
 #include "luminancecalculator.hpp"
 
 #include <components/misc/mathutil.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/shader/shadermanager.hpp>
 
 #include "pingpongcanvas.hpp"
@@ -10,11 +10,8 @@ namespace MWRender
 {
     LuminanceCalculator::LuminanceCalculator(Shader::ShaderManager& shaderManager)
     {
-        const float hdrExposureTime
-            = std::max(Settings::Manager::getFloat("auto exposure speed", "Post Processing"), 0.0001f);
-
         Shader::ShaderManager::DefineMap defines = {
-            { "hdrExposureTime", std::to_string(hdrExposureTime) },
+            { "hdrExposureTime", std::to_string(Settings::postProcessing().mAutoExposureSpeed) },
         };
 
         auto vertex = shaderManager.getShader("fullscreen_tri.vert", {});
