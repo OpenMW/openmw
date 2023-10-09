@@ -76,6 +76,7 @@
     Bug #7573: Drain Fatigue can't bring fatigue below zero by default
     Bug #7603: Scripts menu size is not updated properly
     Bug #7604: Goblins Grunt becomes idle once injured
+    Bug #7609: ForceGreeting should not open dialogue for werewolves
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6149: Dehardcode Lua API_REVISION
