@@ -46,7 +46,7 @@ namespace MWRender
         const osg::ref_ptr<osg::StateSet> mDebugDrawStateSet;
         const DetourNavigator::Settings mSettings;
         std::map<DetourNavigator::TilePosition, Tile> mTiles;
-        NavMeshMode mMode;
+        Settings::NavMeshRenderMode mMode;
         std::atomic_bool mAborted{ false };
         std::mutex mMutex;
         bool mStarted = false;
@@ -57,7 +57,7 @@ namespace MWRender
             std::weak_ptr<DetourNavigator::GuardedNavMeshCacheItem> navMesh,
             const osg::ref_ptr<osg::StateSet>& groupStateSet, const osg::ref_ptr<osg::StateSet>& debugDrawStateSet,
             const DetourNavigator::Settings& settings, const std::map<DetourNavigator::TilePosition, Tile>& tiles,
-            NavMeshMode mode)
+            Settings::NavMeshRenderMode mode)
             : mId(id)
             , mVersion(version)
             , mNavMesh(std::move(navMesh))
@@ -110,13 +110,13 @@ namespace MWRender
 
             const unsigned char flags = SceneUtil::NavMeshTileDrawFlagsOffMeshConnections
                 | SceneUtil::NavMeshTileDrawFlagsClosedList
-                | (mMode == NavMeshMode::UpdateFrequency ? SceneUtil::NavMeshTileDrawFlagsHeat : 0);
+                | (mMode == Settings::NavMeshRenderMode::UpdateFrequency ? SceneUtil::NavMeshTileDrawFlagsHeat : 0);
 
             for (const auto& [position, version] : existingTiles)
             {
                 const auto it = mTiles.find(position);
                 if (it != mTiles.end() && it->second.mGroup != nullptr && it->second.mVersion == version
-                    && mMode != NavMeshMode::UpdateFrequency)
+                    && mMode != Settings::NavMeshRenderMode::UpdateFrequency)
                     continue;
 
                 osg::ref_ptr<osg::Group> group;
@@ -163,7 +163,7 @@ namespace MWRender
     };
 
     NavMesh::NavMesh(const osg::ref_ptr<osg::Group>& root, const osg::ref_ptr<SceneUtil::WorkQueue>& workQueue,
-        bool enabled, NavMeshMode mode)
+        bool enabled, Settings::NavMeshRenderMode mode)
         : mRootNode(root)
         , mWorkQueue(workQueue)
         , mGroupStateSet(SceneUtil::makeNavMeshTileStateSet())
@@ -310,7 +310,7 @@ namespace MWRender
         mEnabled = false;
     }
 
-    void NavMesh::setMode(NavMeshMode value)
+    void NavMesh::setMode(Settings::NavMeshRenderMode value)
     {
         if (mMode == value)
             return;

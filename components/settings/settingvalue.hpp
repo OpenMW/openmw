@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_SETTINGS_SETTINGVALUE_H
 
 #include "gyroscopeaxis.hpp"
+#include "navmeshrendermode.hpp"
 #include "sanitizer.hpp"
 #include "settings.hpp"
 
@@ -38,6 +39,7 @@ namespace Settings
         StringArray,
         MyGuiColour,
         GyroscopeAxis,
+        NavMeshRenderMode,
     };
 
     template <class T>
@@ -139,6 +141,12 @@ namespace Settings
         return SettingValueType::GyroscopeAxis;
     }
 
+    template <>
+    inline constexpr SettingValueType getSettingValueType<NavMeshRenderMode>()
+    {
+        return SettingValueType::NavMeshRenderMode;
+    }
+
     inline constexpr std::string_view getSettingValueTypeName(SettingValueType type)
     {
         switch (type)
@@ -175,6 +183,8 @@ namespace Settings
                 return "colour";
             case SettingValueType::GyroscopeAxis:
                 return "gyroscope axis";
+            case SettingValueType::NavMeshRenderMode:
+                return "navmesh render mode";
         }
         return "unsupported";
     }

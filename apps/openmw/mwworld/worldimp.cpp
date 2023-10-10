@@ -294,7 +294,7 @@ namespace MWWorld
     {
         mPhysics = std::make_unique<MWPhysics::PhysicsSystem>(mResourceSystem, rootNode);
 
-        if (Settings::Manager::getBool("enable", "Navigator"))
+        if (Settings::navigator().mEnable)
         {
             auto navigatorSettings = DetourNavigator::makeSettingsFromSettingsManager();
             navigatorSettings.mRecast.mSwimHeightScale = mSwimHeightScale;
