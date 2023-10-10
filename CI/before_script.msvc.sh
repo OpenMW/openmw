@@ -14,16 +14,6 @@ MISSINGTOOLS=0
 command -v 7z >/dev/null 2>&1 || { echo "Error: 7z (7zip) is not on the path."; MISSINGTOOLS=1; }
 command -v cmake >/dev/null 2>&1 || { echo "Error: cmake (CMake) is not on the path."; MISSINGTOOLS=1; }
 
-MISSINGPYTHON=0
-if ! command -v python >/dev/null 2>&1; then
-	echo "Warning: Python is not on the path, automatic Qt installation impossible."
-	MISSINGPYTHON=1
-elif ! python --version >/dev/null 2>&1; then
-	echo "Warning: Python is (probably) fake stub Python that comes bundled with newer versions of Windows, automatic Qt installation impossible."
-	echo "If you think you have Python installed, try changing the order of your PATH environment variable in Advanced System Settings."
-	MISSINGPYTHON=1
-fi
-
 if [ $MISSINGTOOLS -ne 0 ]; then
 	wrappedExit 1
 fi
@@ -889,30 +879,12 @@ printf "Qt ${QT_VER}... "
 	if [ -d "Qt/${QT_VER}" ]; then
 		printf "Exists. "
 	elif [ -z $SKIP_EXTRACT ]; then
-		if [ $MISSINGPYTHON -ne 0 ]; then
-			echo "Can't be automatically installed without Python."
-			wrappedExit 1
-		fi
-
 		pushd "$DEPS" > /dev/null
-		if ! [ -d 'aqt-venv' ]; then
-			echo "  Creating Virtualenv for aqt..."
-			run_cmd python -m venv aqt-venv
-		fi
-		if [ -d 'aqt-venv/bin' ]; then
-			VENV_BIN_DIR='bin'
-		elif [ -d 'aqt-venv/Scripts' ]; then
-			VENV_BIN_DIR='Scripts'
-		else
-			echo "Error: Failed to create virtualenv in expected location."
-			wrappedExit 1
-		fi
-
-		# check version
-		aqt-venv/${VENV_BIN_DIR}/pip list | grep 'aqtinstall\s*1.1.3' || [ $? -ne 0 ]
-		if [ $? -eq 0 ]; then
-			echo "  Installing aqt wheel into virtualenv..."
-			run_cmd "aqt-venv/${VENV_BIN_DIR}/pip" install aqtinstall==1.1.3
+		AQT_VERSION="v3.1.7"
+		if ! [ -f "aqt_x64-${AQT_VERSION}.exe" ]; then
+			download "aqt ${AQT_VERSION}"\
+				"https://github.com/miurahr/aqtinstall/releases/download/${AQT_VERSION}/aqt_x64.exe" \
+				"aqt_x64-${AQT_VERSION}.exe"
 		fi
 		popd > /dev/null
 
@@ -921,7 +893,7 @@ printf "Qt ${QT_VER}... "
 		mkdir Qt
 		cd Qt
 
-		run_cmd "${DEPS}/aqt-venv/${VENV_BIN_DIR}/aqt" install ${QT_VER} windows desktop "win${BITS}_msvc${QT_MSVC_YEAR}${SUFFIX}"
+		run_cmd "${DEPS}/aqt_x64-${AQT_VERSION}.exe" install-qt windows desktop ${QT_VER} "win${BITS}_msvc${QT_MSVC_YEAR}${SUFFIX}"
 
 		printf "  Cleaning up extraneous data... "
 		rm -rf Qt/{aqtinstall.log,Tools}
