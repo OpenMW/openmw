@@ -147,7 +147,7 @@ namespace MWMechanics
         std::string mCurrentMovement;
         float mMovementAnimSpeed{ 0.f };
         bool mAdjustMovementAnimSpeed{ false };
-        bool mMovementAnimationControlled{ true };
+        bool mMovementAnimationHasMovement{ false };
 
         CharacterState mDeathState{ CharState_None };
         std::string mCurrentDeath;
@@ -272,6 +272,7 @@ namespace MWMechanics
         bool playGroup(std::string_view groupname, int mode, int count, bool persist = false);
         void skipAnim();
         bool isAnimPlaying(std::string_view groupName) const;
+        bool isMovementAnimationControlled() const;
 
         enum KillResult
         {

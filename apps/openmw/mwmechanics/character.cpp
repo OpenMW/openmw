@@ -353,6 +353,7 @@ namespace MWMechanics
     {
         clearStateAnimation(mCurrentMovement);
         mMovementState = CharState_None;
+        mMovementAnimationHasMovement = false;
     }
 
     void CharacterController::resetCurrentIdleState()
@@ -705,7 +706,7 @@ namespace MWMechanics
         if (!mCurrentMovement.empty() && movementAnimName == mCurrentMovement)
             mAnimation->getInfo(mCurrentMovement, &startpoint);
 
-        mMovementAnimationControlled = true;
+        mMovementAnimationHasMovement = true;
 
         clearStateAnimation(mCurrentMovement);
         mCurrentMovement = movementAnimName;
@@ -743,7 +744,7 @@ namespace MWMechanics
                 bool sneaking = mMovementState == CharState_SneakForward || mMovementState == CharState_SneakBack
                     || mMovementState == CharState_SneakLeft || mMovementState == CharState_SneakRight;
                 mMovementAnimSpeed = (sneaking ? 33.5452f : (isRunning() ? 222.857f : 154.064f));
-                mMovementAnimationControlled = false;
+                mMovementAnimationHasMovement = false;
             }
         }
 
@@ -821,9 +822,6 @@ namespace MWMechanics
         mCurrentIdle = idleGroup;
         mAnimation->play(mCurrentIdle, priority, MWRender::Animation::BlendMask_All, false, 1.0f, "start", "stop",
             startPoint, numLoops, true);
-
-        // May still be false after recent turn or jump animations
-        mMovementAnimationControlled = true;
     }
 
     void CharacterController::refreshCurrentAnims(
@@ -855,7 +853,6 @@ namespace MWMechanics
         resetCurrentHitState();
         resetCurrentIdleState();
         resetCurrentJumpState();
-        mMovementAnimationControlled = true;
 
         mAnimation->play(mCurrentDeath, Priority_Death, MWRender::Animation::BlendMask_All, false, 1.0f, "start",
             "stop", startpoint, 0);
@@ -2312,9 +2309,6 @@ namespace MWMechanics
                 updateIdleStormState(inwater);
             }
 
-            if (mInJump)
-                mMovementAnimationControlled = false;
-
             if (isTurning())
             {
                 // Adjust animation speed from 1.0 to 1.5 multiplier
@@ -2350,7 +2344,7 @@ namespace MWMechanics
                     }
                 }
 
-                if (!mMovementAnimationControlled)
+                if (!isMovementAnimationControlled())
                     world->queueMovement(mPtr, vec);
             }
 
@@ -2419,7 +2413,7 @@ namespace MWMechanics
         }
 
         // Update movement
-        if (mMovementAnimationControlled && mPtr.getClass().isActor())
+        if (isMovementAnimationControlled() && mPtr.getClass().isActor())
             world->queueMovement(mPtr, moved);
 
         mSkipAnim = false;
@@ -2578,6 +2572,17 @@ namespace MWMechanics
         if (mAnimation == nullptr)
             return false;
         return mAnimation->isPlaying(groupName);
+    }
+
+    bool CharacterController::isMovementAnimationControlled() const
+    {
+        bool movementAnimationControlled = true;
+        movementAnimationControlled = mIdleState != CharState_None;
+        if (mMovementState != CharState_None)
+            movementAnimationControlled = mMovementAnimationHasMovement;
+        if (mInJump)
+            movementAnimationControlled = false;
+        return movementAnimationControlled;
     }
 
     void CharacterController::clearAnimQueue(bool clearPersistAnims)
