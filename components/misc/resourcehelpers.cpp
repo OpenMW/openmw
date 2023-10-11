@@ -159,9 +159,11 @@ std::string Misc::ResourceHelpers::correctActorModelPath(const std::string& resP
     return mdlname;
 }
 
-std::string Misc::ResourceHelpers::correctMeshPath(const std::string& resPath, const VFS::Manager* vfs)
+std::string Misc::ResourceHelpers::correctMeshPath(std::string_view resPath, const VFS::Manager* vfs)
 {
-    return "meshes\\" + resPath;
+    std::string res = "meshes\\";
+    res.append(resPath);
+    return res;
 }
 
 std::string Misc::ResourceHelpers::correctSoundPath(const std::string& resPath)

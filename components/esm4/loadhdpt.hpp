@@ -49,6 +49,26 @@ namespace ESM4
         std::string mModel;
 
         std::uint8_t mData;
+        std::uint32_t mType;
+
+        enum Type : std::uint32_t
+        {
+            Type_Misc = 0,
+            Type_Face = 1,
+            Type_Eyes = 2,
+            Type_Hair = 3,
+            Type_FacialHair = 4,
+            Type_Scar = 5,
+            Type_Eyebrows = 6,
+            // FO4+
+            Type_Meatcaps = 7,
+            Type_Teeth = 8,
+            Type_HeadRear = 9,
+            // Starfield
+            // 10 and 11 are unknown
+            Type_LeftEye = 12,
+            Type_Eyelashes = 13,
+        };
 
         ESM::FormId mAdditionalPart;
 

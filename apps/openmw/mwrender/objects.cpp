@@ -13,6 +13,7 @@
 
 #include "animation.hpp"
 #include "creatureanimation.hpp"
+#include "esm4npcanimation.hpp"
 #include "npcanimation.hpp"
 #include "vismask.hpp"
 
@@ -116,13 +117,22 @@ namespace MWRender
         insertBegin(ptr);
         ptr.getRefData().getBaseNode()->setNodeMask(Mask_Actor);
 
-        osg::ref_ptr<NpcAnimation> anim(
-            new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
-
-        if (mObjects.emplace(ptr.mRef, anim).second)
+        if (ptr.getType() == ESM::REC_NPC_4)
         {
-            ptr.getClass().getInventoryStore(ptr).setInvListener(anim.get());
-            ptr.getClass().getInventoryStore(ptr).setContListener(anim.get());
+            osg::ref_ptr<ESM4NpcAnimation> anim(
+                new ESM4NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
+            mObjects.emplace(ptr.mRef, anim);
+        }
+        else
+        {
+            osg::ref_ptr<NpcAnimation> anim(
+                new NpcAnimation(ptr, osg::ref_ptr<osg::Group>(ptr.getRefData().getBaseNode()), mResourceSystem));
+
+            if (mObjects.emplace(ptr.mRef, anim).second)
+            {
+                ptr.getClass().getInventoryStore(ptr).setInvListener(anim.get());
+                ptr.getClass().getInventoryStore(ptr).setContListener(anim.get());
+            }
         }
     }
 

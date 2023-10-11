@@ -95,6 +95,22 @@ void ESM4::ArmorAddon::load(ESM4::Reader& reader)
 
                 break;
             case ESM4::SUB_DNAM:
+                if (subHdr.dataSize == 12)
+                {
+                    std::uint16_t unknownInt16;
+                    std::uint8_t unknownInt8;
+                    reader.get(mMalePriority);
+                    reader.get(mFemalePriority);
+                    reader.get(mWeightSliderMale);
+                    reader.get(mWeightSliderFemale);
+                    reader.get(unknownInt16);
+                    reader.get(mDetectionSoundValue);
+                    reader.get(unknownInt8);
+                    reader.get(mWeaponAdjust);
+                }
+                else
+                    reader.skipSubRecordData();
+                break;
             case ESM4::SUB_MO2T: // FIXME: should group with MOD2
             case ESM4::SUB_MO2S: // FIXME: should group with MOD2
             case ESM4::SUB_MO2C: // FIXME: should group with MOD2

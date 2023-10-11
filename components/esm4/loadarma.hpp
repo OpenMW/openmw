@@ -59,6 +59,16 @@ namespace ESM4
 
         BodyTemplate mBodyTemplate; // TES5
 
+        std::uint8_t mMalePriority = 0;
+        std::uint8_t mFemalePriority = 0;
+
+        // Flag 0x2 in mWeightSlider means that there are 2 world models for different weights: _0.nif and _1.nif
+        std::uint8_t mWeightSliderMale = 0;
+        std::uint8_t mWeightSliderFemale = 0;
+
+        std::uint8_t mDetectionSoundValue = 0;
+        float mWeaponAdjust = 0;
+
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
 
