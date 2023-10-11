@@ -40,8 +40,35 @@ namespace
 {
     void contentSubdirs(const QString& path, QStringList& dirs)
     {
-        QStringList fileFilter{ "*.esm", "*.esp", "*.omwaddon", "*.bsa", "*.ba2", "*.omwscripts" };
-        QStringList dirFilter{ "bookart", "icons", "meshes", "music", "sound", "textures" };
+        static const QStringList fileFilter{
+            "*.esm",
+            "*.esp",
+            "*.bsa",
+            "*.ba2",
+            "*.omwgame",
+            "*.omwaddon",
+            "*.omwscripts",
+        };
+
+        static const QStringList dirFilter{
+            "animations",
+            "bookart",
+            "fonts",
+            "icons",
+            "interface",
+            "l10n",
+            "meshes",
+            "music",
+            "mygui",
+            "scripts",
+            "shaders",
+            "sound",
+            "splash",
+            "strings",
+            "textures",
+            "trees",
+            "video",
+        };
 
         QDir currentDir(path);
         if (!currentDir.entryInfoList(fileFilter, QDir::Files).empty()
@@ -587,18 +614,6 @@ void Launcher::DataFilesPage::updateCloneProfileOkButton(const QString& text)
     mCloneProfileDialog->setOkButtonEnabled(!text.isEmpty() && ui.profilesComboBox->findText(text) == -1);
 }
 
-QString Launcher::DataFilesPage::selectDirectory()
-{
-    QFileDialog fileDialog(this);
-    fileDialog.setFileMode(QFileDialog::Directory);
-    fileDialog.setOptions(QFileDialog::Option::ShowDirsOnly | QFileDialog::Option::ReadOnly);
-
-    if (fileDialog.exec() == QDialog::Rejected)
-        return {};
-
-    return QDir(fileDialog.selectedFiles()[0]).canonicalPath();
-}
-
 void Launcher::DataFilesPage::addSubdirectories(bool append)
 {
     int selectedRow = append ? ui.directoryListWidget->count() : ui.directoryListWidget->currentRow();
@@ -606,22 +621,30 @@ void Launcher::DataFilesPage::addSubdirectories(bool append)
     if (selectedRow == -1)
         return;
 
-    const auto rootDir = selectDirectory();
-    if (rootDir.isEmpty())
+    QString rootPath = QFileDialog::getExistingDirectory(
+        this, tr("Select Directory"), QDir::homePath(), QFileDialog::ShowDirsOnly | QFileDialog::Option::ReadOnly);
+
+    if (rootPath.isEmpty())
         return;
 
-    QStringList subdirs;
-    contentSubdirs(rootDir, subdirs);
+    const QDir rootDir(rootPath);
+    rootPath = rootDir.canonicalPath();
 
-    if (subdirs.empty())
+    QStringList subdirs;
+    contentSubdirs(rootPath, subdirs);
+
+    // Always offer to append the root directory just in case
+    if (subdirs.isEmpty() || subdirs[0] != rootPath)
+        subdirs.prepend(rootPath);
+    else if (subdirs.size() == 1)
     {
-        // we didn't find anything that looks like a content directory, add directory selected by user
-        if (ui.directoryListWidget->findItems(rootDir, Qt::MatchFixedString).isEmpty())
-        {
-            ui.directoryListWidget->addItem(rootDir);
-            mNewDataDirs.push_back(rootDir);
-            refreshDataFilesView();
-        }
+        // We didn't find anything else that looks like a content directory
+        // Automatically add the directory selected by user
+        if (!ui.directoryListWidget->findItems(rootPath, Qt::MatchFixedString).isEmpty())
+            return;
+        ui.directoryListWidget->addItem(rootPath);
+        mNewDataDirs.push_back(rootPath);
+        refreshDataFilesView();
         return;
     }
 
