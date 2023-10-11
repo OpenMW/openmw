@@ -14,7 +14,7 @@
 #include <components/loadinglistener/loadinglistener.hpp>
 
 #include <components/files/conversion.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <osg/Image>
 
@@ -314,8 +314,7 @@ void MWState::StateManager::saveGame(std::string_view description, const Slot* s
         if (filestream.fail())
             throw std::runtime_error("Write operation failed (file stream)");
 
-        Settings::Manager::setString(
-            "character", "Saves", Files::pathToUnicodeString(slot->mPath.parent_path().filename()));
+        Settings::saves().mCharacter.set(Files::pathToUnicodeString(slot->mPath.parent_path().filename()));
 
         const auto finish = std::chrono::steady_clock::now();
 
@@ -354,12 +353,8 @@ void MWState::StateManager::quickSave(std::string name)
         return;
     }
 
-    int maxSaves = Settings::Manager::getInt("max quicksaves", "Saves");
-    if (maxSaves < 1)
-        maxSaves = 1;
-
     Character* currentCharacter = getCurrentCharacter(); // Get current character
-    QuickSaveManager saveFinder = QuickSaveManager(name, maxSaves);
+    QuickSaveManager saveFinder(name, Settings::saves().mMaxQuicksaves);
 
     if (currentCharacter)
     {
@@ -542,8 +537,7 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
         mState = State_Running;
 
         if (character)
-            Settings::Manager::setString(
-                "character", "Saves", Files::pathToUnicodeString(character->getPath().filename()));
+            Settings::saves().mCharacter.set(Files::pathToUnicodeString(character->getPath().filename()));
 
         MWBase::Environment::get().getWindowManager()->setNewGame(false);
         MWBase::Environment::get().getWorld()->saveLoaded();
