@@ -41,6 +41,7 @@ namespace Settings
         GyroscopeAxis,
         NavMeshRenderMode,
         LightingMethod,
+        HrtfMode,
     };
 
     template <class T>
@@ -154,6 +155,12 @@ namespace Settings
         return SettingValueType::LightingMethod;
     }
 
+    template <>
+    inline constexpr SettingValueType getSettingValueType<HrtfMode>()
+    {
+        return SettingValueType::HrtfMode;
+    }
+
     inline constexpr std::string_view getSettingValueTypeName(SettingValueType type)
     {
         switch (type)
@@ -194,6 +201,8 @@ namespace Settings
                 return "navmesh render mode";
             case SettingValueType::LightingMethod:
                 return "lighting method";
+            case SettingValueType::HrtfMode:
+                return "hrtf mode";
         }
         return "unsupported";
     }

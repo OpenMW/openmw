@@ -3,6 +3,7 @@
 
 #include "categories.hpp"
 #include "gyroscopeaxis.hpp"
+#include "hrtfmode.hpp"
 #include "navmeshrendermode.hpp"
 
 #include <components/detournavigator/collisionshapetype.hpp>
@@ -112,6 +113,7 @@ namespace Settings
         static void set(std::string_view setting, std::string_view category, const std::vector<std::string>& value);
         static void set(std::string_view setting, std::string_view category, const MyGUI::Colour& value);
         static void set(std::string_view setting, std::string_view category, SceneUtil::LightingMethod value);
+        static void set(std::string_view setting, std::string_view category, HrtfMode value);
 
     private:
         static std::set<std::pair<std::string_view, std::string_view>> sInitialized;
@@ -225,6 +227,17 @@ namespace Settings
         std::string_view setting, std::string_view category)
     {
         return parseLightingMethod(getString(setting, category));
+    }
+
+    template <>
+    inline HrtfMode Manager::getImpl<HrtfMode>(std::string_view setting, std::string_view category)
+    {
+        const int value = getInt(setting, category);
+        if (value < 0)
+            return HrtfMode::Auto;
+        if (value > 0)
+            return HrtfMode::Enable;
+        return HrtfMode::Disable;
     }
 }
 

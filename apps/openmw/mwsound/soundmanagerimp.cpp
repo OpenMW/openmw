@@ -10,6 +10,7 @@
 #include <components/debug/debuglog.hpp>
 #include <components/misc/resourcehelpers.hpp>
 #include <components/misc/rng.hpp>
+#include <components/settings/values.hpp>
 #include <components/vfs/manager.hpp>
 #include <components/vfs/pathutil.hpp>
 
@@ -73,6 +74,33 @@ namespace MWSound
 
             return 1.0;
         }
+
+        // Gets the combined volume settings for the given sound type
+        float volumeFromType(Type type)
+        {
+            float volume = Settings::sound().mMasterVolume;
+
+            switch (type)
+            {
+                case Type::Sfx:
+                    volume *= Settings::sound().mSfxVolume;
+                    break;
+                case Type::Voice:
+                    volume *= Settings::sound().mVoiceVolume;
+                    break;
+                case Type::Foot:
+                    volume *= Settings::sound().mFootstepsVolume;
+                    break;
+                case Type::Music:
+                    volume *= Settings::sound().mMusicVolume;
+                    break;
+                case Type::Movie:
+                case Type::Mask:
+                    break;
+            }
+
+            return volume;
+        }
     }
 
     // For combining PlayMode and Type flags
@@ -103,12 +131,7 @@ namespace MWSound
             return;
         }
 
-        const std::string& hrtfname = Settings::Manager::getString("hrtf", "Sound");
-        int hrtfstate = Settings::Manager::getInt("hrtf enable", "Sound");
-        HrtfMode hrtfmode = hrtfstate < 0 ? HrtfMode::Auto : hrtfstate > 0 ? HrtfMode::Enable : HrtfMode::Disable;
-
-        const std::string& devname = Settings::Manager::getString("device", "Sound");
-        if (!mOutput->init(devname, hrtfname, hrtfmode))
+        if (!mOutput->init(Settings::sound().mDevice, Settings::sound().mHrtf, Settings::sound().mHrtfEnable))
         {
             Log(Debug::Error) << "Failed to initialize audio output, sound disabled";
             return;
@@ -217,12 +240,6 @@ namespace MWSound
         if (!played)
             return nullptr;
         return sound;
-    }
-
-    // Gets the combined volume settings for the given sound type
-    float SoundManager::volumeFromType(Type type) const
-    {
-        return mVolumeSettings.getVolumeFromType(type);
     }
 
     void SoundManager::stopMusic()
@@ -1156,8 +1173,6 @@ namespace MWSound
 
     void SoundManager::processChangedSettings(const Settings::CategorySettingVector& settings)
     {
-        mVolumeSettings.update();
-
         if (!mOutput->isInitialized())
             return;
         mOutput->startUpdate();

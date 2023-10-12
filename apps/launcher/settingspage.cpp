@@ -55,6 +55,20 @@ namespace
     {
         value.set(spinBox.value());
     }
+
+    int toIndex(Settings::HrtfMode value)
+    {
+        switch (value)
+        {
+            case Settings::HrtfMode::Auto:
+                return 0;
+            case Settings::HrtfMode::Disable:
+                return 1;
+            case Settings::HrtfMode::Enable:
+                return 2;
+        }
+        return 0;
+    }
 }
 
 Launcher::SettingsPage::SettingsPage(Config::GameSettings& gameSettings, QWidget* parent)
@@ -210,11 +224,7 @@ bool Launcher::SettingsPage::loadSettings()
                 audioDeviceSelectorComboBox->setCurrentIndex(audioDeviceIndex);
             }
         }
-        const int hrtfEnabledIndex = Settings::sound().mHrtfEnable;
-        if (hrtfEnabledIndex >= -1 && hrtfEnabledIndex <= 1)
-        {
-            enableHRTFComboBox->setCurrentIndex(hrtfEnabledIndex + 1);
-        }
+        enableHRTFComboBox->setCurrentIndex(toIndex(Settings::sound().mHrtfEnable));
         const std::string& selectedHRTFProfile = Settings::sound().mHrtf;
         if (selectedHRTFProfile.empty() == false)
         {
@@ -356,7 +366,12 @@ void Launcher::SettingsPage::saveSettings()
         else
             Settings::sound().mDevice.set({});
 
-        Settings::sound().mHrtfEnable.set(enableHRTFComboBox->currentIndex() - 1);
+        static constexpr std::array<Settings::HrtfMode, 3> hrtfModes{
+            Settings::HrtfMode::Auto,
+            Settings::HrtfMode::Disable,
+            Settings::HrtfMode::Enable,
+        };
+        Settings::sound().mHrtfEnable.set(hrtfModes[enableHRTFComboBox->currentIndex()]);
 
         if (hrtfProfileSelectorComboBox->currentIndex() != 0)
             Settings::sound().mHrtf.set(hrtfProfileSelectorComboBox->currentText().toStdString());
