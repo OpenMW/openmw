@@ -71,10 +71,11 @@ namespace MWLua
             if (prop == "condition")
             {
                 MWWorld::Ptr o = mObject.ptr();
-                if (o.getClass().isLight(o))
+                if (o.mRef->getType() == ESM::REC_LIGH)
                     return sol::make_object(context.mLua->sol(), o.getClass().getRemainingUsageTime(o));
                 else if (o.getClass().hasItemHealth(o))
-                    return sol::make_object(context.mLua->sol(), o.getClass().getItemHealth(o));
+                    return sol::make_object(
+                        context.mLua->sol(), o.getClass().getItemHealth(o) + o.getCellRef().getChargeIntRemainder());
             }
 
             return sol::lua_nil;
@@ -84,14 +85,26 @@ namespace MWLua
         {
             if (prop == "condition")
             {
-                double cond = value.as<double>();
-                if (ptr.getClass().isLight(ptr))
+                float cond = LuaUtil::cast<float>(value);
+                if (ptr.mRef->getType() == ESM::REC_LIGH)
                     ptr.getClass().setRemainingUsageTime(ptr, cond);
                 else if (ptr.getClass().hasItemHealth(ptr))
-                    ptr.getCellRef().setCharge(std::max(0, static_cast<int>(cond)));
-                else /*ignore or error?*/
+                {
+                    const float lastChargeRemainder = ptr.getCellRef().getChargeIntRemainder();
+                    // if the value set is less than 0, chargeInt and chargeIntRemainder is set to 0
+                    ptr.getCellRef().setChargeIntRemainder(std::max(0.f, std::modf(cond, &cond)));
+                    ptr.getCellRef().setCharge(std::max(0.f, cond));
+                    // resolve the remaining charge remainder to be subtracted
+                    if (lastChargeRemainder < 0)
+                        ptr.getCellRef().applyChargeRemainderToBeSubtracted(lastChargeRemainder);
+                }
+                else
                     invalidPropErr(prop, ptr);
+                return;
             }
+
+            /*ignore or error?*/
+            invalidPropErr(prop, ptr);
         }
     };
 }
