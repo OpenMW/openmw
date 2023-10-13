@@ -916,6 +916,11 @@ namespace fx
                 return mode;
         }
 
+        if (asLiteral() == "clamp")
+            error(
+                "unsupported wrap mode 'clamp'; 'clamp_to_edge' was likely intended, look for an updated shader or "
+                "contact author");
+
         error(Misc::StringUtils::format("unrecognized wrap mode '%s'", std::string{ asLiteral() }));
     }
 
