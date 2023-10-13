@@ -227,10 +227,15 @@ void MWState::StateManager::saveGame(std::string_view description, const Slot* s
         else
             profile.mPlayerClassId = classId;
 
+        const MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
+
         profile.mPlayerCellName = world.getCellName();
         profile.mInGameTime = world.getTimeManager()->getEpochTimeStamp();
         profile.mTimePlayed = mTimePlayed;
         profile.mDescription = description;
+        profile.mCurrentDay = world.getTimeManager()->getTimeStamp().getDay();
+        profile.mCurrentHealth = stats.getHealth().getCurrent();
+        profile.mMaximumHealth = stats.getHealth().getModified();
 
         Log(Debug::Info) << "Making a screenshot for saved game '" << description << "'";
         writeScreenshot(profile.mScreenshot);

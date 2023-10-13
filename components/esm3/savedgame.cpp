@@ -28,6 +28,10 @@ namespace ESM
         esm.getSubHeader();
         mScreenshot.resize(esm.getSubSize());
         esm.getExact(mScreenshot.data(), mScreenshot.size());
+
+        esm.getHNOT(mCurrentDay, "CDAY");
+        esm.getHNOT(mCurrentHealth, "CHLT");
+        esm.getHNOT(mMaximumHealth, "MHLT");
     }
 
     void SavedGame::save(ESMWriter& esm) const
@@ -51,6 +55,10 @@ namespace ESM
         esm.startSubRecord("SCRN");
         esm.write(mScreenshot.data(), mScreenshot.size());
         esm.endRecord("SCRN");
+
+        esm.writeHNT("CDAY", mCurrentDay);
+        esm.writeHNT("CHLT", mCurrentHealth);
+        esm.writeHNT("MHLT", mMaximumHealth);
     }
 
 }

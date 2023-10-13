@@ -34,6 +34,10 @@ namespace ESM
         std::string mDescription;
         std::vector<char> mScreenshot; // raw jpg-encoded data
 
+        int mCurrentDay = 0;
+        float mCurrentHealth = 0;
+        float mMaximumHealth = 0;
+
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;
     };
