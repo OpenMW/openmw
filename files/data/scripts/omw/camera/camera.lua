@@ -8,6 +8,7 @@ local async = require('openmw.async')
 local I = require('openmw.interfaces')
 
 local Actor = require('openmw.types').Actor
+local Player = require('openmw.types').Player
 
 local settings = require('scripts.omw.camera.settings').thirdPerson
 local head_bobbing = require('scripts.omw.camera.head_bobbing')
@@ -62,7 +63,7 @@ local previewTimer = 0
 
 local function updatePOV(dt)
     local switchLimit = 0.25
-    if input.isActionPressed(input.ACTION.TogglePOV) and input.getControlSwitch(input.CONTROL_SWITCH.ViewMode) then
+    if input.isActionPressed(input.ACTION.TogglePOV) and Player.getControlSwitch(self, Player.CONTROL_SWITCH.ViewMode) then
         previewTimer = previewTimer + dt
         if primaryMode == MODE.ThirdPerson or previewTimer >= switchLimit then
             third_person.standingPreview = false
@@ -91,7 +92,7 @@ local idleTimer = 0
 local vanityDelay = core.getGMST('fVanityDelay')
 
 local function updateVanity(dt)
-    local vanityAllowed = input.getControlSwitch(input.CONTROL_SWITCH.VanityMode)
+    local vanityAllowed = Player.getControlSwitch(self, Player.CONTROL_SWITCH.VanityMode)
     if vanityAllowed and idleTimer > vanityDelay and camera.getMode() ~= MODE.Vanity then
         camera.setMode(MODE.Vanity)
     end
@@ -115,8 +116,8 @@ local minDistance = 30
 local maxDistance = 800
 
 local function zoom(delta)
-    if not input.getControlSwitch(input.CONTROL_SWITCH.ViewMode) or
-       not input.getControlSwitch(input.CONTROL_SWITCH.Controls) or
+    if not Player.getControlSwitch(self, Player.CONTROL_SWITCH.ViewMode) or
+       not Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls) or
        camera.getMode() == MODE.Static or next(noZoom) then
         return
     end

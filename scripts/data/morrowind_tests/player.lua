@@ -6,12 +6,12 @@ local util = require('openmw.util')
 local types = require('openmw.types')
 local nearby = require('openmw.nearby')
 
-input.setControlSwitch(input.CONTROL_SWITCH.Fighting, false)
-input.setControlSwitch(input.CONTROL_SWITCH.Jumping, false)
-input.setControlSwitch(input.CONTROL_SWITCH.Looking, false)
-input.setControlSwitch(input.CONTROL_SWITCH.Magic, false)
-input.setControlSwitch(input.CONTROL_SWITCH.VanityMode, false)
-input.setControlSwitch(input.CONTROL_SWITCH.ViewMode, false)
+types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Fighting, false)
+types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Jumping, false)
+types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Looking, false)
+types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.Magic, false)
+types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.VanityMode, false)
+types.Player.setControlSwitch(self, types.Player.CONTROL_SWITCH.ViewMode, false)
 
 testing.registerLocalTest('Player should be able to walk up stairs in Ebonheart docks (#4247)',
     function()

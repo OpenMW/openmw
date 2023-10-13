@@ -72,22 +72,22 @@
 -- @return #number Value in range [-1, 1].
 
 ---
--- Get state of a control switch. I.e. is player able to move/fight/jump/etc.
+-- Returns a human readable name for the given key code
+-- @function [parent=#input] getKeyName
+-- @param #KeyCode code A key code (see @{openmw.input#KEY})
+-- @return #string
+
+---
+-- [Deprecated, moved to types.Player] Get state of a control switch. I.e. is player able to move/fight/jump/etc.
 -- @function [parent=#input] getControlSwitch
 -- @param #ControlSwitch key Control type (see @{openmw.input#CONTROL_SWITCH})
 -- @return #boolean
 
 ---
--- Set state of a control switch. I.e. forbid or allow player to move/fight/jump/etc.
+-- [Deprecated, moved to types.Player] Set state of a control switch. I.e. forbid or allow player to move/fight/jump/etc.
 -- @function [parent=#input] setControlSwitch
 -- @param #ControlSwitch key Control type (see @{openmw.input#CONTROL_SWITCH})
 -- @param #boolean value
-
----
--- Returns a human readable name for the given key code
--- @function [parent=#input] getKeyName
--- @param #KeyCode code A key code (see @{openmw.input#KEY})
--- @return #string
 
 ---
 -- String id of a @{#CONTROL_SWITCH}
@@ -104,7 +104,7 @@
 -- @field [parent=#CONTROL_SWITCH] #ControlSwitch VanityMode Vanity view if player doesn't touch controls for a long time
 
 ---
--- Values that can be used with getControlSwitch/setControlSwitch.
+-- [Deprecated, moved to types.Player] Values that can be used with getControlSwitch/setControlSwitch.
 -- @field [parent=#input] #CONTROL_SWITCH CONTROL_SWITCH
 
 ---

@@ -87,7 +87,7 @@ local function processMovement()
     elseif autoMove then
         self.controls.movement = 1
     end
-    self.controls.jump = attemptJump and input.getControlSwitch(input.CONTROL_SWITCH.Jumping)
+    self.controls.jump = attemptJump and Player.getControlSwitch(self, Player.CONTROL_SWITCH.Jumping)
     if not settings:get('toggleSneak') then
         self.controls.sneak = input.isActionPressed(input.ACTION.Sneak)
     end
@@ -107,7 +107,7 @@ local function processAttacking()
 end
 
 local function onFrame(dt)
-    local controlsAllowed = input.getControlSwitch(input.CONTROL_SWITCH.Controls)
+    local controlsAllowed = Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls)
                             and not core.isWorldPaused() and not I.UI.getMode()
     if not movementControlsOverridden then
         if controlsAllowed then
@@ -140,7 +140,7 @@ local function isJournalAllowed()
 end
 
 local function onInputAction(action)
-    if not input.getControlSwitch(input.CONTROL_SWITCH.Controls) then
+    if not Player.getControlSwitch(self, Player.CONTROL_SWITCH.Controls) then
         return
     end
 
@@ -185,7 +185,7 @@ local function onInputAction(action)
     elseif action == input.ACTION.ToggleSpell and not combatControlsOverridden then
         if Actor.stance(self) == Actor.STANCE.Spell then
             Actor.setStance(self, Actor.STANCE.Nothing)
-        elseif input.getControlSwitch(input.CONTROL_SWITCH.Magic) then
+        elseif Player.getControlSwitch(self, Player.CONTROL_SWITCH.Magic) then
             if checkNotWerewolf() then
                 Actor.setStance(self, Actor.STANCE.Spell)
             end
@@ -193,7 +193,7 @@ local function onInputAction(action)
     elseif action == input.ACTION.ToggleWeapon and not combatControlsOverridden then
         if Actor.stance(self) == Actor.STANCE.Weapon then
             Actor.setStance(self, Actor.STANCE.Nothing)
-        elseif input.getControlSwitch(input.CONTROL_SWITCH.Fighting) then
+        elseif Player.getControlSwitch(self, Player.CONTROL_SWITCH.Fighting) then
             Actor.setStance(self, Actor.STANCE.Weapon)
         end
     end
@@ -214,13 +214,13 @@ return {
         version = 1,
 
         --- When set to true then the movement controls including jump and sneak are not processed and can be handled by another script.
-        -- If movement should be disallowed completely, consider to use `input.setControlSwitch` instead.
+        -- If movement should be disallowed completely, consider to use `types.Player.setControlSwitch` instead.
         -- @function [parent=#Controls] overrideMovementControls
         -- @param #boolean value
         overrideMovementControls = function(v) movementControlsOverridden = v end,
 
         --- When set to true then the controls "attack", "toggle spell", "toggle weapon" are not processed and can be handled by another script.
-        -- If combat should be disallowed completely, consider to use `input.setControlSwitch` instead.
+        -- If combat should be disallowed completely, consider to use `types.Player.setControlSwitch` instead.
         -- @function [parent=#Controls] overrideCombatControls
         -- @param #boolean value
         overrideCombatControls = function(v) combatControlsOverridden = v end,
