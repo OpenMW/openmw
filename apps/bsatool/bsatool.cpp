@@ -320,6 +320,10 @@ int main(int argc, char** argv)
 
         // Open file
 
+        // TODO: add a version argument for this mode after compressed BSA writing is a thing
+        if (info.mode == "create")
+            return call<Bsa::BSAFile>(info);
+
         Bsa::BsaVersion bsaVersion = Bsa::BSAFile::detectVersion(info.filename);
 
         switch (bsaVersion)
