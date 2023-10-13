@@ -247,8 +247,7 @@ namespace MWRender
         void setDefaults(osg::Camera* camera) override
         {
             camera->setReferenceFrame(osg::Camera::RELATIVE_RF);
-            camera->setSmallFeatureCullingPixelSize(
-                Settings::Manager::getInt("small feature culling pixel size", "Water"));
+            camera->setSmallFeatureCullingPixelSize(Settings::water().mSmallFeatureCullingPixelSize);
             camera->setName("RefractionCamera");
             camera->addCullCallback(new InheritViewPointCallback);
             camera->setComputeNearFarMode(osg::CullSettings::DO_NOT_COMPUTE_NEAR_FAR);
@@ -265,7 +264,7 @@ namespace MWRender
             camera->addChild(mClipCullNode);
             camera->setNodeMask(Mask_RenderToTexture);
 
-            if (Settings::Manager::getFloat("refraction scale", "Water") != 1) // TODO: to be removed with issue #5709
+            if (Settings::water().mRefractionScale != 1) // TODO: to be removed with issue #5709
                 SceneUtil::ShadowManager::disableShadowsForStateSet(camera->getOrCreateStateSet());
         }
 
@@ -285,8 +284,7 @@ namespace MWRender
 
         void setWaterLevel(float waterLevel)
         {
-            const float refractionScale
-                = std::clamp(Settings::Manager::getFloat("refraction scale", "Water"), 0.f, 1.f);
+            const float refractionScale = Settings::water().mRefractionScale;
 
             mViewMatrix = osg::Matrix::scale(1, 1, refractionScale)
                 * osg::Matrix::translate(0, 0, (1.0 - refractionScale) * waterLevel);
@@ -328,8 +326,7 @@ namespace MWRender
         void setDefaults(osg::Camera* camera) override
         {
             camera->setReferenceFrame(osg::Camera::RELATIVE_RF);
-            camera->setSmallFeatureCullingPixelSize(
-                Settings::Manager::getInt("small feature culling pixel size", "Water"));
+            camera->setSmallFeatureCullingPixelSize(Settings::water().mSmallFeatureCullingPixelSize);
             camera->setName("ReflectionCamera");
             camera->addCullCallback(new InheritViewPointCallback);
 
@@ -384,7 +381,7 @@ namespace MWRender
     private:
         unsigned int calcNodeMask()
         {
-            int reflectionDetail = Settings::Manager::getInt("reflection detail", "Water");
+            int reflectionDetail = Settings::water().mReflectionDetail;
             reflectionDetail = std::clamp(reflectionDetail, mInterior ? 2 : 0, 5);
             unsigned int extraMask = 0;
             if (reflectionDetail >= 1)
@@ -525,9 +522,9 @@ namespace MWRender
         mWaterGeom->setStateSet(nullptr);
         mWaterGeom->setUpdateCallback(nullptr);
 
-        if (Settings::Manager::getBool("shader", "Water"))
+        if (Settings::water().mShader)
         {
-            unsigned int rttSize = Settings::Manager::getInt("rtt size", "Water");
+            const unsigned int rttSize = Settings::water().mRttSize;
 
             mReflection = new Reflection(rttSize, mInterior);
             mReflection->setWaterLevel(mTop);
@@ -536,7 +533,7 @@ namespace MWRender
                 mReflection->addCullCallback(mCullCallback);
             mParent->addChild(mReflection);
 
-            if (Settings::Manager::getBool("refraction", "Water"))
+            if (Settings::water().mRefraction)
             {
                 mRefraction = new Refraction(rttSize);
                 mRefraction->setWaterLevel(mTop);
@@ -693,7 +690,7 @@ namespace MWRender
         // use a define map to conditionally compile the shader
         std::map<std::string, std::string> defineMap;
         defineMap["refraction_enabled"] = std::string(mRefraction ? "1" : "0");
-        const auto rippleDetail = std::clamp(Settings::Manager::getInt("rain ripple detail", "Water"), 0, 2);
+        const int rippleDetail = Settings::water().mRainRippleDetail;
         defineMap["rain_ripple_detail"] = std::to_string(rippleDetail);
         defineMap["ripple_map_world_scale"] = std::to_string(RipplesSurface::mWorldScaleFactor);
         defineMap["ripple_map_size"] = std::to_string(RipplesSurface::mRTTSize) + ".0";

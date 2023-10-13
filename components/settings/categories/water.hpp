@@ -21,9 +21,8 @@ namespace Settings
         SettingValue<bool> mShader{ mIndex, "Water", "shader" };
         SettingValue<int> mRttSize{ mIndex, "Water", "rtt size", makeMaxSanitizerInt(1) };
         SettingValue<bool> mRefraction{ mIndex, "Water", "refraction" };
-        SettingValue<int> mReflectionDetail{ mIndex, "Water", "reflection detail",
-            makeEnumSanitizerInt({ 0, 1, 2, 3, 4, 5 }) };
-        SettingValue<int> mRainRippleDetail{ mIndex, "Water", "rain ripple detail", makeEnumSanitizerInt({ 0, 1, 2 }) };
+        SettingValue<int> mReflectionDetail{ mIndex, "Water", "reflection detail", makeClampSanitizerInt(0, 5) };
+        SettingValue<int> mRainRippleDetail{ mIndex, "Water", "rain ripple detail", makeClampSanitizerInt(0, 2) };
         SettingValue<float> mSmallFeatureCullingPixelSize{ mIndex, "Water", "small feature culling pixel size",
             makeMaxStrictSanitizerFloat(0) };
         SettingValue<float> mRefractionScale{ mIndex, "Water", "refraction scale", makeClampSanitizerFloat(0, 1) };
