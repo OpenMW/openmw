@@ -87,10 +87,10 @@ namespace CSVRender
 
         mView->getCamera()->setGraphicsContext(window);
 
-        SceneUtil::LightManager* lightMgr = new SceneUtil::LightManager;
+        osg::ref_ptr<SceneUtil::LightManager> lightMgr = new SceneUtil::LightManager;
         lightMgr->setStartLight(1);
         lightMgr->setLightingMask(Mask_Lighting);
-        mRootNode = lightMgr;
+        mRootNode = std::move(lightMgr);
 
         mView->getCamera()->setViewport(new osg::Viewport(0, 0, width(), height()));
 

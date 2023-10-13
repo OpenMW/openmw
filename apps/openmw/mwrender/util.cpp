@@ -7,6 +7,7 @@
 #include <components/resource/imagemanager.hpp>
 #include <components/resource/resourcesystem.hpp>
 #include <components/sceneutil/visitor.hpp>
+#include <components/settings/values.hpp>
 
 namespace MWRender
 {
@@ -65,6 +66,11 @@ namespace MWRender
         stateset->setTextureAttribute(0, tex, osg::StateAttribute::OVERRIDE);
 
         node->setStateSet(stateset);
+    }
+
+    bool shouldAddMSAAIntermediateTarget()
+    {
+        return Settings::shaders().mAntialiasAlphaTest && Settings::Manager::getInt("antialiasing", "Video") > 1;
     }
 
 }

@@ -82,6 +82,7 @@
 #include "screenshotmanager.hpp"
 #include "sky.hpp"
 #include "terrainstorage.hpp"
+#include "util.hpp"
 #include "vismask.hpp"
 #include "water.hpp"
 
@@ -312,7 +313,6 @@ namespace MWRender
         , mResourceSystem(resourceSystem)
         , mWorkQueue(workQueue)
         , mNavigator(navigator)
-        , mMinimumAmbientLuminance(0.f)
         , mNightEyeFactor(0.f)
         // TODO: Near clip should not need to be bounded like this, but too small values break OSG shadow calculations
         // CPU-side. See issue: #6072
@@ -325,46 +325,40 @@ namespace MWRender
         , mGroundCoverStore(groundcoverStore)
     {
         bool reverseZ = SceneUtil::AutoDepth::isReversed();
-        auto lightingMethod = SceneUtil::LightManager::getLightingMethodFromString(
-            Settings::Manager::getString("lighting method", "Shaders"));
+        const SceneUtil::LightingMethod lightingMethod = Settings::shaders().mLightingMethod;
 
         resourceSystem->getSceneManager()->setParticleSystemMask(MWRender::Mask_ParticleSystem);
         // Shadows and radial fog have problems with fixed-function mode.
         bool forceShaders = Settings::fog().mRadialFog || Settings::fog().mExponentialFog
-            || Settings::Manager::getBool("soft particles", "Shaders")
-            || Settings::Manager::getBool("force shaders", "Shaders")
+            || Settings::shaders().mSoftParticles || Settings::shaders().mForceShaders
             || Settings::Manager::getBool("enable shadows", "Shadows")
             || lightingMethod != SceneUtil::LightingMethod::FFP || reverseZ || mSkyBlending || Stereo::getMultiview();
         resourceSystem->getSceneManager()->setForceShaders(forceShaders);
 
         // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
-        resourceSystem->getSceneManager()->setClampLighting(Settings::Manager::getBool("clamp lighting", "Shaders"));
-        resourceSystem->getSceneManager()->setAutoUseNormalMaps(
-            Settings::Manager::getBool("auto use object normal maps", "Shaders"));
-        resourceSystem->getSceneManager()->setNormalMapPattern(
-            Settings::Manager::getString("normal map pattern", "Shaders"));
-        resourceSystem->getSceneManager()->setNormalHeightMapPattern(
-            Settings::Manager::getString("normal height map pattern", "Shaders"));
-        resourceSystem->getSceneManager()->setAutoUseSpecularMaps(
-            Settings::Manager::getBool("auto use object specular maps", "Shaders"));
-        resourceSystem->getSceneManager()->setSpecularMapPattern(
-            Settings::Manager::getString("specular map pattern", "Shaders"));
+        resourceSystem->getSceneManager()->setClampLighting(Settings::shaders().mClampLighting);
+        resourceSystem->getSceneManager()->setAutoUseNormalMaps(Settings::shaders().mAutoUseObjectNormalMaps);
+        resourceSystem->getSceneManager()->setNormalMapPattern(Settings::shaders().mNormalMapPattern);
+        resourceSystem->getSceneManager()->setNormalHeightMapPattern(Settings::shaders().mNormalHeightMapPattern);
+        resourceSystem->getSceneManager()->setAutoUseSpecularMaps(Settings::shaders().mAutoUseObjectSpecularMaps);
+        resourceSystem->getSceneManager()->setSpecularMapPattern(Settings::shaders().mSpecularMapPattern);
         resourceSystem->getSceneManager()->setApplyLightingToEnvMaps(
-            Settings::Manager::getBool("apply lighting to environment maps", "Shaders"));
-        resourceSystem->getSceneManager()->setConvertAlphaTestToAlphaToCoverage(
-            Settings::Manager::getBool("antialias alpha test", "Shaders")
-            && Settings::Manager::getInt("antialiasing", "Video") > 1);
+            Settings::shaders().mApplyLightingToEnvironmentMaps);
+        resourceSystem->getSceneManager()->setConvertAlphaTestToAlphaToCoverage(shouldAddMSAAIntermediateTarget());
         resourceSystem->getSceneManager()->setAdjustCoverageForAlphaTest(
-            Settings::Manager::getBool("adjust coverage for alpha test", "Shaders"));
+            Settings::shaders().mAdjustCoverageForAlphaTest);
 
         // Let LightManager choose which backend to use based on our hint. For methods besides legacy lighting, this
         // depends on support for various OpenGL extensions.
-        osg::ref_ptr<SceneUtil::LightManager> sceneRoot
-            = new SceneUtil::LightManager(lightingMethod == SceneUtil::LightingMethod::FFP);
+        osg::ref_ptr<SceneUtil::LightManager> sceneRoot = new SceneUtil::LightManager(SceneUtil::LightSettings{
+            .mLightingMethod = lightingMethod,
+            .mMaxLights = Settings::shaders().mMaxLights,
+            .mMaximumLightDistance = Settings::shaders().mMaximumLightDistance,
+            .mLightFadeStart = Settings::shaders().mLightFadeStart,
+            .mLightBoundsMultiplier = Settings::shaders().mLightBoundsMultiplier,
+        });
         resourceSystem->getSceneManager()->setLightingMethod(sceneRoot->getLightingMethod());
         resourceSystem->getSceneManager()->setSupportedLightingMethods(sceneRoot->getSupportedLightingMethods());
-        mMinimumAmbientLuminance
-            = std::clamp(Settings::Manager::getFloat("minimum interior brightness", "Shaders"), 0.f, 1.f);
 
         sceneRoot->setLightingMask(Mask_Lighting);
         mSceneRoot = sceneRoot;
@@ -396,10 +390,9 @@ namespace MWRender
         for (auto itr = shadowDefines.begin(); itr != shadowDefines.end(); itr++)
             globalDefines[itr->first] = itr->second;
 
-        globalDefines["forcePPL"] = Settings::Manager::getBool("force per pixel lighting", "Shaders") ? "1" : "0";
-        globalDefines["clamp"] = Settings::Manager::getBool("clamp lighting", "Shaders") ? "1" : "0";
-        globalDefines["preLightEnv"]
-            = Settings::Manager::getBool("apply lighting to environment maps", "Shaders") ? "1" : "0";
+        globalDefines["forcePPL"] = Settings::shaders().mForcePerPixelLighting ? "1" : "0";
+        globalDefines["clamp"] = Settings::shaders().mClampLighting ? "1" : "0";
+        globalDefines["preLightEnv"] = Settings::shaders().mApplyLightingToEnvironmentMaps ? "1" : "0";
         const bool exponentialFog = Settings::fog().mExponentialFog;
         globalDefines["radialFog"] = (exponentialFog || Settings::fog().mRadialFog) ? "1" : "0";
         globalDefines["exponentialFog"] = exponentialFog ? "1" : "0";
@@ -445,11 +438,11 @@ namespace MWRender
 
         mEffectManager = std::make_unique<EffectManager>(sceneRoot, mResourceSystem);
 
-        const std::string& normalMapPattern = Settings::Manager::getString("normal map pattern", "Shaders");
-        const std::string& heightMapPattern = Settings::Manager::getString("normal height map pattern", "Shaders");
-        const std::string& specularMapPattern = Settings::Manager::getString("terrain specular map pattern", "Shaders");
-        const bool useTerrainNormalMaps = Settings::Manager::getBool("auto use terrain normal maps", "Shaders");
-        const bool useTerrainSpecularMaps = Settings::Manager::getBool("auto use terrain specular maps", "Shaders");
+        const std::string& normalMapPattern = Settings::shaders().mNormalMapPattern;
+        const std::string& heightMapPattern = Settings::shaders().mNormalHeightMapPattern;
+        const std::string& specularMapPattern = Settings::shaders().mTerrainSpecularMapPattern;
+        const bool useTerrainNormalMaps = Settings::shaders().mAutoUseTerrainNormalMaps;
+        const bool useTerrainSpecularMaps = Settings::shaders().mAutoUseTerrainSpecularMaps;
 
         mTerrainStorage = std::make_unique<TerrainStorage>(mResourceSystem, normalMapPattern, heightMapPattern,
             useTerrainNormalMaps, specularMapPattern, useTerrainSpecularMaps);
@@ -472,8 +465,9 @@ namespace MWRender
         resourceSystem->getSceneManager()->setOpaqueDepthTex(
             mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 0),
             mPostProcessor->getTexture(PostProcessor::Tex_OpaqueDepth, 1));
-        resourceSystem->getSceneManager()->setSoftParticles(mPostProcessor->softParticlesEnabled());
+        resourceSystem->getSceneManager()->setSoftParticles(Settings::shaders().mSoftParticles);
         resourceSystem->getSceneManager()->setSupportsNormalsRT(mPostProcessor->getSupportsNormalsRT());
+        resourceSystem->getSceneManager()->setWeatherParticleOcclusion(Settings::shaders().mWeatherParticleOcclusion);
 
         // water goes after terrain for correct waterculling order
         mWater = std::make_unique<Water>(
@@ -680,15 +674,16 @@ namespace MWRender
 
             // we already work in linear RGB so no conversions are needed for the luminosity function
             float relativeLuminance = pR * ambient.r() + pG * ambient.g() + pB * ambient.b();
-            if (relativeLuminance < mMinimumAmbientLuminance)
+            const float minimumAmbientLuminance = Settings::shaders().mMinimumInteriorBrightness;
+            if (relativeLuminance < minimumAmbientLuminance)
             {
                 // brighten ambient so it reaches the minimum threshold but no more, we want to mess with content data
                 // as least we can
                 if (ambient.r() == 0.f && ambient.g() == 0.f && ambient.b() == 0.f)
                     ambient = osg::Vec4(
-                        mMinimumAmbientLuminance, mMinimumAmbientLuminance, mMinimumAmbientLuminance, ambient.a());
+                        minimumAmbientLuminance, minimumAmbientLuminance, minimumAmbientLuminance, ambient.a());
                 else
-                    ambient *= mMinimumAmbientLuminance / relativeLuminance;
+                    ambient *= minimumAmbientLuminance / relativeLuminance;
             }
         }
 
@@ -1408,8 +1403,6 @@ namespace MWRender
             }
             else if (it->first == "Shaders" && it->second == "minimum interior brightness")
             {
-                mMinimumAmbientLuminance
-                    = std::clamp(Settings::Manager::getFloat("minimum interior brightness", "Shaders"), 0.f, 1.f);
                 if (MWMechanics::getPlayer().isInCell())
                     configureAmbient(*MWMechanics::getPlayer().getCell()->getCell());
             }
@@ -1418,13 +1411,15 @@ namespace MWRender
                     || it->second == "light fade start" || it->second == "max lights"))
             {
                 auto* lightManager = getLightRoot();
-                lightManager->processChangedSettings(changed);
+
+                lightManager->processChangedSettings(Settings::shaders().mLightBoundsMultiplier,
+                    Settings::shaders().mMaximumLightDistance, Settings::shaders().mLightFadeStart);
 
                 if (it->second == "max lights" && !lightManager->usingFFP())
                 {
                     mViewer->stopThreading();
 
-                    lightManager->updateMaxLights();
+                    lightManager->updateMaxLights(Settings::shaders().mMaxLights);
 
                     auto defines = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
                     for (const auto& [name, key] : lightManager->getLightDefines())

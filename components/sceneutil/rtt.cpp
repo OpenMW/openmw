@@ -20,7 +20,7 @@ namespace SceneUtil
     };
 
     RTTNode::RTTNode(uint32_t textureWidth, uint32_t textureHeight, uint32_t samples, bool generateMipmaps,
-        int renderOrderNum, StereoAwareness stereoAwareness)
+        int renderOrderNum, StereoAwareness stereoAwareness, bool addMSAAIntermediateTarget)
         : mTextureWidth(textureWidth)
         , mTextureHeight(textureHeight)
         , mSamples(samples)
@@ -29,6 +29,7 @@ namespace SceneUtil
         , mDepthBufferInternalFormat(SceneUtil::AutoDepth::depthInternalFormat())
         , mRenderOrderNum(renderOrderNum)
         , mStereoAwareness(stereoAwareness)
+        , mAddMSAAIntermediateTarget(addMSAAIntermediateTarget)
     {
         addCullCallback(new CullCallback);
         setCullingActive(false);
@@ -206,7 +207,8 @@ namespace SceneUtil
                     camera->attach(osg::Camera::COLOR_BUFFER, vdd->mColorTexture, 0,
                         Stereo::osgFaceControlledByMultiviewShader(), mGenerateMipmaps, mSamples);
                     SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(camera, osg::Camera::COLOR_BUFFER,
-                        vdd->mColorTexture, 0, Stereo::osgFaceControlledByMultiviewShader(), mGenerateMipmaps);
+                        vdd->mColorTexture, 0, Stereo::osgFaceControlledByMultiviewShader(), mGenerateMipmaps,
+                        mAddMSAAIntermediateTarget);
                 }
 
                 if (camera->getBufferAttachmentMap().count(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER) == 0)
@@ -234,8 +236,8 @@ namespace SceneUtil
                 {
                     vdd->mColorTexture = createTexture(mColorBufferInternalFormat);
                     camera->attach(osg::Camera::COLOR_BUFFER, vdd->mColorTexture, 0, 0, mGenerateMipmaps, mSamples);
-                    SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(
-                        camera, osg::Camera::COLOR_BUFFER, vdd->mColorTexture, 0, 0, mGenerateMipmaps);
+                    SceneUtil::attachAlphaToCoverageFriendlyFramebufferToCamera(camera, osg::Camera::COLOR_BUFFER,
+                        vdd->mColorTexture, 0, 0, mGenerateMipmaps, mAddMSAAIntermediateTarget);
                 }
 
                 if (camera->getBufferAttachmentMap().count(osg::Camera::PACKED_DEPTH_STENCIL_BUFFER) == 0)

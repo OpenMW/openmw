@@ -5,7 +5,8 @@
 #include "gyroscopeaxis.hpp"
 #include "navmeshrendermode.hpp"
 
-#include "components/detournavigator/collisionshapetype.hpp"
+#include <components/detournavigator/collisionshapetype.hpp>
+#include <components/sceneutil/lightingmethod.hpp>
 
 #include <filesystem>
 #include <set>
@@ -110,6 +111,7 @@ namespace Settings
         static void set(std::string_view setting, std::string_view category, DetourNavigator::CollisionShapeType value);
         static void set(std::string_view setting, std::string_view category, const std::vector<std::string>& value);
         static void set(std::string_view setting, std::string_view category, const MyGUI::Colour& value);
+        static void set(std::string_view setting, std::string_view category, SceneUtil::LightingMethod value);
 
     private:
         static std::set<std::pair<std::string_view, std::string_view>> sInitialized;
@@ -214,6 +216,15 @@ namespace Settings
     inline NavMeshRenderMode Manager::getImpl<NavMeshRenderMode>(std::string_view setting, std::string_view category)
     {
         return parseNavMeshRenderMode(getString(setting, category));
+    }
+
+    SceneUtil::LightingMethod parseLightingMethod(std::string_view value);
+
+    template <>
+    inline SceneUtil::LightingMethod Manager::getImpl<SceneUtil::LightingMethod>(
+        std::string_view setting, std::string_view category)
+    {
+        return parseLightingMethod(getString(setting, category));
     }
 }
 

@@ -30,6 +30,7 @@
 
 #include "../mwworld/cellstore.hpp"
 
+#include "util.hpp"
 #include "vismask.hpp"
 
 namespace
@@ -679,7 +680,7 @@ namespace MWRender
 
     LocalMapRenderToTexture::LocalMapRenderToTexture(osg::Node* sceneRoot, int res, int mapWorldSize, float x, float y,
         const osg::Vec3d& upVector, float zmin, float zmax)
-        : RTTNode(res, res, 0, false, 0, StereoAwareness::Unaware_MultiViewShaders)
+        : RTTNode(res, res, 0, false, 0, StereoAwareness::Unaware_MultiViewShaders, shouldAddMSAAIntermediateTarget())
         , mSceneRoot(sceneRoot)
         , mActive(true)
     {

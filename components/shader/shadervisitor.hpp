@@ -51,6 +51,8 @@ namespace Shader
 
         void setSupportsNormalsRT(bool supports) { mSupportsNormalsRT = supports; }
 
+        void setWeatherParticleOcclusion(bool value) { mWeatherParticleOcclusion = value; }
+
         void apply(osg::Node& node) override;
 
         void apply(osg::Drawable& drawable) override;
@@ -78,6 +80,7 @@ namespace Shader
         bool mAdjustCoverageForAlphaTest;
 
         bool mSupportsNormalsRT;
+        bool mWeatherParticleOcclusion = false;
 
         ShaderManager& mShaderManager;
         Resource::ImageManager& mImageManager;

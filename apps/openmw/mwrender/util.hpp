@@ -3,6 +3,7 @@
 
 #include <osg/NodeCallback>
 #include <osg/ref_ptr>
+
 #include <string>
 
 namespace osg
@@ -35,6 +36,8 @@ namespace MWRender
             // no traverse()
         }
     };
+
+    bool shouldAddMSAAIntermediateTarget();
 }
 
 #endif

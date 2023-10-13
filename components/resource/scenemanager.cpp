@@ -1118,10 +1118,10 @@ namespace Resource
         stats->setAttribute(frameNumber, "Node", mCache->getCacheSize());
     }
 
-    Shader::ShaderVisitor* SceneManager::createShaderVisitor(const std::string& shaderPrefix)
+    osg::ref_ptr<Shader::ShaderVisitor> SceneManager::createShaderVisitor(const std::string& shaderPrefix)
     {
-        Shader::ShaderVisitor* shaderVisitor
-            = new Shader::ShaderVisitor(*mShaderManager.get(), *mImageManager, shaderPrefix);
+        osg::ref_ptr<Shader::ShaderVisitor> shaderVisitor(
+            new Shader::ShaderVisitor(*mShaderManager.get(), *mImageManager, shaderPrefix));
         shaderVisitor->setForceShaders(mForceShaders);
         shaderVisitor->setAutoUseNormalMaps(mAutoUseNormalMaps);
         shaderVisitor->setNormalMapPattern(mNormalMapPattern);
@@ -1132,6 +1132,7 @@ namespace Resource
         shaderVisitor->setConvertAlphaTestToAlphaToCoverage(mConvertAlphaTestToAlphaToCoverage);
         shaderVisitor->setAdjustCoverageForAlphaTest(mAdjustCoverageForAlphaTest);
         shaderVisitor->setSupportsNormalsRT(mSupportsNormalsRT);
+        shaderVisitor->setWeatherParticleOcclusion(mWeatherParticleOcclusion);
         return shaderVisitor;
     }
 }

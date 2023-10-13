@@ -239,13 +239,12 @@ namespace SceneUtil
         return glowUpdater;
     }
 
-    bool attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::Camera::BufferComponent buffer,
-        osg::Texture* texture, unsigned int level, unsigned int face, bool mipMapGeneration)
+    void attachAlphaToCoverageFriendlyFramebufferToCamera(osg::Camera* camera, osg::Camera::BufferComponent buffer,
+        osg::Texture* texture, unsigned int level, unsigned int face, bool mipMapGeneration,
+        bool addMSAAIntermediateTarget)
     {
         unsigned int samples = 0;
         unsigned int colourSamples = 0;
-        bool addMSAAIntermediateTarget = Settings::Manager::getBool("antialias alpha test", "Shaders")
-            && Settings::Manager::getInt("antialiasing", "Video") > 1;
         if (addMSAAIntermediateTarget)
         {
             // Alpha-to-coverage requires a multisampled framebuffer.
@@ -255,7 +254,6 @@ namespace SceneUtil
             colourSamples = 1;
         }
         camera->attach(buffer, texture, level, face, mipMapGeneration, samples, colourSamples);
-        return addMSAAIntermediateTarget;
     }
 
     OperationSequence::OperationSequence(bool keep)

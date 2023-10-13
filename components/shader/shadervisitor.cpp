@@ -680,8 +680,7 @@ namespace Shader
 
         bool particleOcclusion = false;
         node.getUserValue("particleOcclusion", particleOcclusion);
-        defineMap["particleOcclusion"]
-            = particleOcclusion && Settings::Manager::getBool("weather particle occlusion", "Shaders") ? "1" : "0";
+        defineMap["particleOcclusion"] = particleOcclusion && mWeatherParticleOcclusion ? "1" : "0";
 
         if (reqs.mAlphaBlend && mSupportsNormalsRT)
         {

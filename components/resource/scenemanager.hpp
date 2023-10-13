@@ -227,8 +227,10 @@ namespace Resource
         void setSoftParticles(bool enabled) { mSoftParticles = enabled; }
         bool getSoftParticles() const { return mSoftParticles; }
 
+        void setWeatherParticleOcclusion(bool value) { mWeatherParticleOcclusion = value; }
+
     private:
-        Shader::ShaderVisitor* createShaderVisitor(const std::string& shaderPrefix = "objects");
+        osg::ref_ptr<Shader::ShaderVisitor> createShaderVisitor(const std::string& shaderPrefix = "objects");
         osg::ref_ptr<osg::Node> loadErrorMarker();
         osg::ref_ptr<osg::Node> cloneErrorMarker();
 
@@ -248,6 +250,7 @@ namespace Resource
         bool mSupportsNormalsRT;
         std::array<osg::ref_ptr<osg::Texture>, 2> mOpaqueDepthTex;
         bool mSoftParticles = false;
+        bool mWeatherParticleOcclusion = false;
 
         osg::ref_ptr<Resource::SharedStateManager> mSharedStateManager;
         mutable std::mutex mSharedStateMutex;
