@@ -55,7 +55,7 @@ namespace ESM
                     hasIndex = true;
                     break;
                 case fourCC("SKDT"):
-                    esm.getHTSized<24>(mData);
+                    esm.getHT(mData.mAttribute, mData.mSpecialization, mData.mUseValue);
                     hasData = true;
                     break;
                 case fourCC("DESC"):

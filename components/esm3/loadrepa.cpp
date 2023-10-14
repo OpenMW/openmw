@@ -28,7 +28,7 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("RIDT"):
-                    esm.getHTSized<16>(mData);
+                    esm.getHT(mData.mWeight, mData.mValue, mData.mUses, mData.mQuality);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):

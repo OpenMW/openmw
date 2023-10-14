@@ -29,7 +29,7 @@ namespace ESM
         {
             /// Data from script-precompling in the editor.
             /// \warning Do not use them. OpenCS currently does not precompile scripts.
-            int mNumShorts, mNumLongs, mNumFloats, mScriptDataSize, mStringTableSize;
+            uint32_t mNumShorts, mNumLongs, mNumFloats, mScriptDataSize, mStringTableSize;
         };
         struct SCHD
         {
@@ -37,7 +37,7 @@ namespace ESM
             Script::SCHDstruct mData;
         };
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId;
 
         SCHDstruct mData;
