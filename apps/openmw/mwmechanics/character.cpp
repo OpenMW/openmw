@@ -2576,8 +2576,7 @@ namespace MWMechanics
 
     bool CharacterController::isMovementAnimationControlled() const
     {
-        bool movementAnimationControlled = true;
-        movementAnimationControlled = mIdleState != CharState_None;
+        bool movementAnimationControlled = mIdleState != CharState_None;
         if (mMovementState != CharState_None)
             movementAnimationControlled = mMovementAnimationHasMovement;
         if (mInJump)
