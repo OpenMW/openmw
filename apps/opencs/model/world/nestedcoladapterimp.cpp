@@ -1076,7 +1076,7 @@ namespace CSMWorld
         }
         else if (subColIndex == 1)
         {
-            if (subRowIndex >= 0 && subRowIndex < region.mData.mProbabilities.size())
+            if (subRowIndex >= 0 && static_cast<size_t>(subRowIndex) < region.mData.mProbabilities.size())
                 return region.mData.mProbabilities[subRowIndex];
         }
 
