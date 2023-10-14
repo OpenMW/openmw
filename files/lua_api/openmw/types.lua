@@ -227,7 +227,6 @@
 
 ---
 -- Completely removes the active effect from the actor.
--- This removes both the effects incurred by active spells and effect added by console, mwscript, or luascript.
 -- @function [parent=#ActorActiveEffects] remove
 -- @param self
 -- @param #string effectId effect ID
