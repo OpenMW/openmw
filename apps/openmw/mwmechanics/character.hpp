@@ -216,6 +216,7 @@ namespace MWMechanics
         static bool isRandomAttackAnimation(std::string_view group);
 
         bool isPersistentAnimPlaying() const;
+        bool isMovementAnimationControlled() const;
 
         void updateAnimQueue();
 
@@ -272,7 +273,6 @@ namespace MWMechanics
         bool playGroup(std::string_view groupname, int mode, int count, bool persist = false);
         void skipAnim();
         bool isAnimPlaying(std::string_view groupName) const;
-        bool isMovementAnimationControlled() const;
 
         enum KillResult
         {
