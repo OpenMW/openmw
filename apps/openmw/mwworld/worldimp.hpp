@@ -329,7 +329,7 @@ namespace MWWorld
 
         void setMoonColour(bool red) override;
 
-        void modRegion(const ESM::RefId& regionid, const std::vector<char>& chances) override;
+        void modRegion(const ESM::RefId& regionid, const std::vector<uint8_t>& chances) override;
 
         void changeToInteriorCell(const std::string_view cellName, const ESM::Position& position, bool adjustPlayerPos,
             bool changeEvent = true) override;

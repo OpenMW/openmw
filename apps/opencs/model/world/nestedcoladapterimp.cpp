@@ -1076,31 +1076,8 @@ namespace CSMWorld
         }
         else if (subColIndex == 1)
         {
-            switch (subRowIndex)
-            {
-                case 0:
-                    return region.mData.mClear;
-                case 1:
-                    return region.mData.mCloudy;
-                case 2:
-                    return region.mData.mFoggy;
-                case 3:
-                    return region.mData.mOvercast;
-                case 4:
-                    return region.mData.mRain;
-                case 5:
-                    return region.mData.mThunder;
-                case 6:
-                    return region.mData.mAsh;
-                case 7:
-                    return region.mData.mBlight;
-                case 8:
-                    return region.mData.mSnow;
-                case 9:
-                    return region.mData.mBlizzard;
-                default:
-                    break;
-            }
+            if (subRowIndex >= 0 && subRowIndex < region.mData.mProbabilities.size())
+                return region.mData.mProbabilities[subRowIndex];
         }
 
         throw std::runtime_error("index out of range");
@@ -1110,45 +1087,11 @@ namespace CSMWorld
         Record<ESM::Region>& record, const QVariant& value, int subRowIndex, int subColIndex) const
     {
         ESM::Region region = record.get();
-        unsigned char chance = static_cast<unsigned char>(value.toInt());
+        uint8_t chance = static_cast<uint8_t>(value.toInt());
 
         if (subColIndex == 1)
         {
-            switch (subRowIndex)
-            {
-                case 0:
-                    region.mData.mClear = chance;
-                    break;
-                case 1:
-                    region.mData.mCloudy = chance;
-                    break;
-                case 2:
-                    region.mData.mFoggy = chance;
-                    break;
-                case 3:
-                    region.mData.mOvercast = chance;
-                    break;
-                case 4:
-                    region.mData.mRain = chance;
-                    break;
-                case 5:
-                    region.mData.mThunder = chance;
-                    break;
-                case 6:
-                    region.mData.mAsh = chance;
-                    break;
-                case 7:
-                    region.mData.mBlight = chance;
-                    break;
-                case 8:
-                    region.mData.mSnow = chance;
-                    break;
-                case 9:
-                    region.mData.mBlizzard = chance;
-                    break;
-                default:
-                    throw std::runtime_error("index out of range");
-            }
+            region.mData.mProbabilities.at(subRowIndex) = chance;
 
             record.setModified(region);
         }

@@ -1,6 +1,7 @@
 #ifndef OPENMW_ESM_REGN_H
 #define OPENMW_ESM_REGN_H
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -24,26 +25,24 @@ namespace ESM
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
         static std::string_view getRecordType() { return "Region"; }
 
-#pragma pack(push)
-#pragma pack(1)
         struct WEATstruct
         {
             // These are probabilities that add up to 100
-            unsigned char mClear, mCloudy, mFoggy, mOvercast, mRain, mThunder, mAsh, mBlight, mSnow, mBlizzard;
+            // Clear, Cloudy, Foggy, Overcast, Rain, Thunder, Ash, Blight, Snow, Blizzard
+            std::array<uint8_t, 10> mProbabilities;
         }; // 10 bytes
-#pragma pack(pop)
 
         // Reference to a sound that is played randomly in this region
         struct SoundRef
         {
             ESM::RefId mSound;
-            unsigned char mChance;
+            uint8_t mChance;
         };
 
         WEATstruct mData;
-        int mMapColor; // RGBA
+        int32_t mMapColor; // RGBA
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         // sleepList refers to a leveled list of creatures you can meet if
         // you sleep outside in this region.
         RefId mId, mSleepList;

@@ -27,15 +27,14 @@ namespace ESM
                 {
                     esm.getSubHeader();
                     // Cold weather not included before 1.3
-                    if (esm.getSubSize() == sizeof(mData))
+                    if (esm.getSubSize() == mData.mProbabilities.size())
                     {
-                        esm.getTSized<10>(mData);
+                        esm.getT(mData.mProbabilities);
                     }
-                    else if (esm.getSubSize() == sizeof(mData) - 2)
+                    else if (esm.getSubSize() == mData.mProbabilities.size() - 2)
                     {
-                        mData.mSnow = 0;
-                        mData.mBlizzard = 0;
-                        esm.getExact(&mData, sizeof(mData) - 2);
+                        mData.mProbabilities.fill(0);
+                        esm.getExact(&mData.mProbabilities, esm.getSubSize());
                     }
                     else
                     {
@@ -85,9 +84,9 @@ namespace ESM
         esm.writeHNOCString("FNAM", mName);
 
         if (esm.getVersion() == VER_12)
-            esm.writeHNT("WEAT", mData, sizeof(mData) - 2);
+            esm.writeHNT("WEAT", mData.mProbabilities, mData.mProbabilities.size() - 2);
         else
-            esm.writeHNT("WEAT", mData);
+            esm.writeHNT("WEAT", mData.mProbabilities);
 
         esm.writeHNOCRefId("BNAM", mSleepList);
 
@@ -104,8 +103,7 @@ namespace ESM
     void Region::blank()
     {
         mRecordFlags = 0;
-        mData.mClear = mData.mCloudy = mData.mFoggy = mData.mOvercast = mData.mRain = mData.mThunder = mData.mAsh
-            = mData.mBlight = mData.mSnow = mData.mBlizzard = 0;
+        mData.mProbabilities.fill(0);
 
         mMapColor = 0;
 

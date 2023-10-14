@@ -1201,16 +1201,10 @@ namespace EsmTool
         std::cout << "  Name: " << mData.mName << std::endl;
 
         std::cout << "  Weather:" << std::endl;
-        std::cout << "    Clear: " << (int)mData.mData.mClear << std::endl;
-        std::cout << "    Cloudy: " << (int)mData.mData.mCloudy << std::endl;
-        std::cout << "    Foggy: " << (int)mData.mData.mFoggy << std::endl;
-        std::cout << "    Overcast: " << (int)mData.mData.mOvercast << std::endl;
-        std::cout << "    Rain: " << (int)mData.mData.mOvercast << std::endl;
-        std::cout << "    Thunder: " << (int)mData.mData.mThunder << std::endl;
-        std::cout << "    Ash: " << (int)mData.mData.mAsh << std::endl;
-        std::cout << "    Blight: " << (int)mData.mData.mBlight << std::endl;
-        std::cout << "    Snow: " << (int)mData.mData.mSnow << std::endl;
-        std::cout << "    Blizzard: " << (int)mData.mData.mBlizzard << std::endl;
+        std::array<std::string_view, 10> weathers
+            = { "Clear", "Cloudy", "Fog", "Overcast", "Rain", "Thunder", "Ash", "Blight", "Snow", "Blizzard" };
+        for (size_t i = 0; i < weathers.size(); ++i)
+            std::cout << "    " << weathers[i] << ": " << mData.mData.mProbabilities[i] << std::endl;
         std::cout << "  Map Color: " << mData.mMapColor << std::endl;
         if (!mData.mSleepList.empty())
             std::cout << "  Sleep List: " << mData.mSleepList << std::endl;
