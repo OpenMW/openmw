@@ -41,6 +41,7 @@
 #include <components/esm3/loadmisc.hpp>
 #include <components/esm3/loadprob.hpp>
 #include <components/esm3/loadrepa.hpp>
+#include <components/esm3/loadscpt.hpp>
 #include <components/esm3/loadstat.hpp>
 #include <components/esm3/loadweap.hpp>
 
@@ -184,6 +185,14 @@ namespace MWScript
                 MWWorld::Ptr target = R()(runtime, false);
                 ESM::RefId name = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
+
+                if (!MWBase::Environment::get().getESMStore()->get<ESM::Script>().search(name))
+                {
+                    runtime.getContext().report(
+                        "Failed to start global script '" + name.getRefIdString() + "': script record not found");
+                    return;
+                }
+
                 MWBase::Environment::get().getScriptManager()->getGlobalScripts().addScript(name, target);
             }
         };
@@ -206,6 +215,14 @@ namespace MWScript
             {
                 const ESM::RefId& name = ESM::RefId::stringRefId(runtime.getStringLiteral(runtime[0].mInteger));
                 runtime.pop();
+
+                if (!MWBase::Environment::get().getESMStore()->get<ESM::Script>().search(name))
+                {
+                    runtime.getContext().report(
+                        "Failed to stop global script '" + name.getRefIdString() + "': script record not found");
+                    return;
+                }
+
                 MWBase::Environment::get().getScriptManager()->getGlobalScripts().removeScript(name);
             }
         };

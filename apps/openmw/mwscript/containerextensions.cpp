@@ -31,6 +31,7 @@
 #include "../mwmechanics/actorutil.hpp"
 #include "../mwmechanics/levelledlist.hpp"
 
+#include "interpretercontext.hpp"
 #include "ref.hpp"
 
 namespace
@@ -93,6 +94,12 @@ namespace MWScript
 
                 Interpreter::Type_Integer count = runtime[0].mInteger;
                 runtime.pop();
+
+                if (!MWBase::Environment::get().getESMStore()->find(item))
+                {
+                    runtime.getContext().report("Failed to add item '" + item.getRefIdString() + "': unknown ID");
+                    return;
+                }
 
                 if (count < 0)
                     count = static_cast<uint16_t>(count);
@@ -209,6 +216,12 @@ namespace MWScript
 
                 Interpreter::Type_Integer count = runtime[0].mInteger;
                 runtime.pop();
+
+                if (!MWBase::Environment::get().getESMStore()->find(item))
+                {
+                    runtime.getContext().report("Failed to remove item '" + item.getRefIdString() + "': unknown ID");
+                    return;
+                }
 
                 if (count < 0)
                     count = static_cast<uint16_t>(count);
