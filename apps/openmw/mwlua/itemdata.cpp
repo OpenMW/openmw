@@ -90,13 +90,9 @@ namespace MWLua
                     ptr.getClass().setRemainingUsageTime(ptr, cond);
                 else if (ptr.getClass().hasItemHealth(ptr))
                 {
-                    const float lastChargeRemainder = ptr.getCellRef().getChargeIntRemainder();
                     // if the value set is less than 0, chargeInt and chargeIntRemainder is set to 0
                     ptr.getCellRef().setChargeIntRemainder(std::max(0.f, std::modf(cond, &cond)));
                     ptr.getCellRef().setCharge(std::max(0.f, cond));
-                    // resolve the remaining charge remainder to be subtracted
-                    if (lastChargeRemainder < 0)
-                        ptr.getCellRef().applyChargeRemainderToBeSubtracted(lastChargeRemainder);
                 }
                 else
                     invalidPropErr(prop, ptr);
