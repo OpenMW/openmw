@@ -412,6 +412,10 @@ namespace MWGui
 
         text << Misc::fileTimeToString(mCurrentSlot->mTimeStamp, "%Y.%m.%d %T") << "\n";
 
+        if (mCurrentSlot->mProfile.mMaximumHealth > 0)
+            text << std::fixed << std::setprecision(0) << "#{sHealth} " << mCurrentSlot->mProfile.mCurrentHealth << "/"
+                 << mCurrentSlot->mProfile.mMaximumHealth << "\n";
+
         text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
         text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCellName << "}\n";
 
@@ -421,6 +425,9 @@ namespace MWGui
             hour -= 12;
         if (hour == 0)
             hour = 12;
+
+        if (mCurrentSlot->mProfile.mCurrentDay > 0)
+            text << "#{Calendar:day} " << mCurrentSlot->mProfile.mCurrentDay << "\n";
 
         text << mCurrentSlot->mProfile.mInGameTime.mDay << " "
              << MWBase::Environment::get().getWorld()->getTimeManager()->getMonthName(
