@@ -103,6 +103,22 @@ namespace Settings
 
             throw std::invalid_argument("Invalid LightingMethod value: " + std::to_string(static_cast<int>(value)));
         }
+
+        int toInt(HrtfMode value)
+        {
+            switch (value)
+            {
+                case HrtfMode::Auto:
+                    return -1;
+                case HrtfMode::Disable:
+                    return 0;
+                case HrtfMode::Enable:
+                    return 1;
+            }
+
+            Log(Debug::Warning) << "Invalid HRTF mode value: " << static_cast<int>(value) << ", fallback to auto (-1)";
+            return -1;
+        }
     }
 
     CategorySettingValueMap Manager::mDefaultSettings = CategorySettingValueMap();
@@ -478,6 +494,11 @@ namespace Settings
     void Manager::set(std::string_view setting, std::string_view category, SceneUtil::LightingMethod value)
     {
         setString(setting, category, toString(value));
+    }
+
+    void Manager::set(std::string_view setting, std::string_view category, HrtfMode value)
+    {
+        setInt(setting, category, toInt(value));
     }
 
     void Manager::recordInit(std::string_view setting, std::string_view category)

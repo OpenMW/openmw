@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include <components/settings/hrtfmode.hpp>
+
 #include "../mwbase/soundmanager.hpp"
 
 namespace MWSound
@@ -19,18 +21,13 @@ namespace MWSound
     // An opaque handle for the implementation's sound instances.
     typedef void* Sound_Instance;
 
-    enum class HrtfMode
-    {
-        Disable,
-        Enable,
-        Auto
-    };
-
     enum Environment
     {
         Env_Normal,
         Env_Underwater
     };
+
+    using HrtfMode = Settings::HrtfMode;
 
     class Sound_Output
     {
