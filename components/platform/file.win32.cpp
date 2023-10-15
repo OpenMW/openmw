@@ -2,7 +2,7 @@
 
 #include <boost/locale.hpp>
 #include <cassert>
-#include <components/windows.hpp>
+#include <components/misc/windows.hpp>
 #include <stdexcept>
 #include <string>
 

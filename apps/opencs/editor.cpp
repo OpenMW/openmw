@@ -21,7 +21,7 @@
 #include <apps/opencs/view/tools/merge.hpp>
 
 #ifdef _WIN32
-#include <components/windows.hpp>
+#include <components/misc/windows.hpp>
 #endif
 
 #include <components/debug/debugging.hpp>
