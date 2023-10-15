@@ -843,9 +843,6 @@ namespace MWLua
 
             auto& activeSpells = ptr.getClass().getCreatureStats(ptr).getActiveSpells();
             activeSpells.purgeEffect(ptr, key.mId, key.mArg);
-
-            // Now remove any leftover effects that have been added by script/console.
-            effects.getStore()->remove(key);
         };
 
         // types.Actor.activeEffects(o):set(value, id, ?arg)
