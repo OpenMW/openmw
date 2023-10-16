@@ -1,7 +1,7 @@
 #ifndef WINDOWS_CRASHMONITOR_HPP
 #define WINDOWS_CRASHMONITOR_HPP
 
-#include <components/windows.hpp>
+#include <components/misc/windows.hpp>
 
 #include <atomic>
 #include <unordered_map>

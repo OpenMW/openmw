@@ -77,6 +77,9 @@ add_component_dir (settings
     categories/video
     categories/water
     categories/windows
+    gyroscopeaxis
+    hrtfmode
+    navmeshrendermode
     parser
     sanitizer
     sanitizerimpl
@@ -90,8 +93,16 @@ add_component_dir (bsa
     bsa_file compressedbsafile ba2gnrlfile ba2dx10file ba2file memorystream
     )
 
+add_component_dir (bullethelpers
+    collisionobject
+    heightfield
+    operators
+    processtrianglecallback
+    transformboundingbox
+    )
+
 add_component_dir (vfs
-    manager archive bsaarchive filesystemarchive registerarchives
+    manager archive bsaarchive filesystemarchive pathutil registerarchives
     )
 
 add_component_dir (resource
@@ -107,11 +118,12 @@ add_component_dir (sceneutil
     clone attach visitor util statesetupdater controller skeleton riggeometry morphgeometry lightcontroller
     lightmanager lightutil positionattitudetransform workqueue pathgridutil waterutil writescene serialize optimizer
     detourdebugdraw navmesh agentpath shadow mwshadowtechnique recastmesh shadowsbin osgacontroller rtt
-    screencapture depth color riggeometryosgaextension extradata unrefqueue lightcommon lightingmethod
+    screencapture depth color riggeometryosgaextension extradata unrefqueue lightcommon lightingmethod clearcolor
+    cullsafeboundsvisitor keyframe nodecallback textkeymap
     )
 
 add_component_dir (nif
-    base controller data effect extra niffile nifkey nifstream niftypes node particle physics property record record_ptr texture
+    base controller data effect extra niffile nifkey nifstream niftypes node parent particle physics property record recordptr texture
     )
 
 add_component_dir (nifosg
@@ -123,11 +135,13 @@ add_component_dir (nifbullet
     )
 
 add_component_dir (to_utf8
+    tables_gen
     to_utf8
     )
 
 add_component_dir(esm attr common defs esmcommon records util luascripts format refid esmbridge esmterrain
     formid
+    fourcc
     stringrefid
     generatedrefid
     indexrefid
@@ -135,7 +149,7 @@ add_component_dir(esm attr common defs esmcommon records util luascripts format 
     esm3exteriorcellrefid
     )
 
-add_component_dir(fx pass technique lexer widgets stateupdater)
+add_component_dir(fx pass technique lexer lexer_types parse_constants widgets stateupdater)
 
 add_component_dir(std140 ubo)
 
@@ -149,10 +163,11 @@ add_component_dir (esm3
     inventorystate containerstate npcstate creaturestate dialoguestate statstate npcstats creaturestats
     weatherstate quickkeys fogstate spellstate activespells creaturelevliststate doorstate projectilestate debugprofile
     aisequence magiceffects custommarkerstate stolenitems transport animationstate controlsstate mappings readerscache
-    infoorder timestamp
+    infoorder timestamp formatversion landrecorddata
     )
 
 add_component_dir (esmterrain
+    gridsampling
     storage
     )
 
@@ -255,8 +270,13 @@ add_component_dir (esm4
 )
 
 add_component_dir (misc
-    constants utf8stream resourcehelpers rng messageformatparser weakcache thread
-    compression osguservalues color tuplemeta tuplehelpers
+    barrier budgetmeasurement color compression constants convert coordinateconverter endianness float16 frameratelimiter
+    guarded math mathutil messageformatparser notnullptr objectpool osguservalues progressreporter resourcehelpers rng
+    strongtypedef thread timeconvert timer tuplehelpers tuplemeta utf8stream weakcache windows
+    )
+
+add_component_dir (misc/strings
+    algorithm conversion format lower
     )
 
 add_component_dir (stereo
@@ -264,7 +284,7 @@ add_component_dir (stereo
     )
 
 add_component_dir (debug
-    debugging debuglog gldebug debugdraw
+    debugging debuglog gldebug debugdraw writeflags
     )
 
 IF(NOT WIN32 AND NOT APPLE)
@@ -274,6 +294,7 @@ ENDIF()
 add_component_dir (files
     linuxpath androidpath windowspath macospath fixedpath multidircollection collections configurationmanager
     constrainedfilestream memorystream hash configfileparser openfile constrainedfilestreambuf conversion
+    istreamptr streamwithbuffer
     )
 
 add_component_dir (compiler
@@ -285,7 +306,7 @@ add_component_dir (compiler
 
 add_component_dir (interpreter
     context controlopcodes genericopcodes installopcodes interpreter localopcodes mathopcodes
-    miscopcodes opcodes runtime types defines
+    miscopcodes opcodes program runtime types defines
     )
 
 add_component_dir (translation
@@ -414,13 +435,22 @@ add_component_dir(loadinglistener
     reporter
     )
 
+add_component_dir(serialization
+    binaryreader
+    binarywriter
+    osgyaml
+    sizeaccumulator
+    )
+
 add_component_dir(sqlite3
     db
+    request
     statement
     transaction
 )
 
 add_component_dir(esmloader
+    lessbyid
     load
     esmdata
 )

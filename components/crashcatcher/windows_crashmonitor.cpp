@@ -1,7 +1,7 @@
 #include "windows_crashmonitor.hpp"
 
 #include <Psapi.h>
-#include <components/windows.hpp>
+#include <components/misc/windows.hpp>
 
 #include <DbgHelp.h>
 

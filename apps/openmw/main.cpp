@@ -14,7 +14,7 @@
 #include <boost/program_options/variables_map.hpp>
 
 #if defined(_WIN32)
-#include <components/windows.hpp>
+#include <components/misc/windows.hpp>
 // makes __argc and __argv available on windows
 #include <cstdlib>
 

@@ -1,7 +1,7 @@
 #ifndef WINDOWS_CRASHSHM_HPP
 #define WINDOWS_CRASHSHM_HPP
 
-#include <components/windows.hpp>
+#include <components/misc/windows.hpp>
 
 namespace Crash
 {
