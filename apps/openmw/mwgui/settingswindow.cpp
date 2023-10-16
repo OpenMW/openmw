@@ -380,7 +380,7 @@ namespace MWGui
         const std::string& tmip = Settings::general().mTextureMipmap;
         mTextureFilteringButton->setCaptionWithReplacing(textureMipmappingToStr(tmip));
 
-        int waterTextureSize = Settings::Manager::getInt("rtt size", "Water");
+        int waterTextureSize = Settings::water().mRttSize;
         if (waterTextureSize >= 512)
             mWaterTextureSize->setIndexSelected(0);
         if (waterTextureSize >= 1024)
@@ -388,10 +388,10 @@ namespace MWGui
         if (waterTextureSize >= 2048)
             mWaterTextureSize->setIndexSelected(2);
 
-        int waterReflectionDetail = std::clamp(Settings::Manager::getInt("reflection detail", "Water"), 0, 5);
+        const int waterReflectionDetail = Settings::water().mReflectionDetail;
         mWaterReflectionDetail->setIndexSelected(waterReflectionDetail);
 
-        int waterRainRippleDetail = std::clamp(Settings::Manager::getInt("rain ripple detail", "Water"), 0, 2);
+        const int waterRainRippleDetail = Settings::water().mRainRippleDetail;
         mWaterRainRippleDetail->setIndexSelected(waterRainRippleDetail);
 
         updateMaxLightsComboBox(mMaxLights);
@@ -531,21 +531,19 @@ namespace MWGui
             size = 1024;
         else if (pos == 2)
             size = 2048;
-        Settings::Manager::setInt("rtt size", "Water", size);
+        Settings::water().mRttSize.set(size);
         apply();
     }
 
     void SettingsWindow::onWaterReflectionDetailChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
-        unsigned int level = static_cast<unsigned int>(std::min<size_t>(pos, 5));
-        Settings::Manager::setInt("reflection detail", "Water", level);
+        Settings::water().mReflectionDetail.set(static_cast<int>(pos));
         apply();
     }
 
     void SettingsWindow::onWaterRainRippleDetailChanged(MyGUI::ComboBox* _sender, size_t pos)
     {
-        unsigned int level = static_cast<unsigned int>(std::min<size_t>(pos, 2));
-        Settings::Manager::setInt("rain ripple detail", "Water", level);
+        Settings::water().mRainRippleDetail.set(static_cast<int>(pos));
         apply();
     }
 
