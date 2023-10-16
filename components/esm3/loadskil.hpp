@@ -24,7 +24,7 @@ namespace ESM
         ESM::RefId mFailureSound;
         ESM::RefId mHitSound;
         std::string mName;
-        int mAutoCalcMax;
+        int32_t mAutoCalcMax;
 
         static constexpr int Length = 6;
 
@@ -44,13 +44,13 @@ namespace ESM
         /// Return a string descriptor for this record type. Currently used for debugging / error logs only.
         static std::string_view getRecordType() { return "Skill"; }
 
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         SkillId mId;
 
         struct SKDTstruct
         {
-            int mAttribute; // see defs.hpp
-            int mSpecialization; // 0 - Combat, 1 - Magic, 2 - Stealth
+            int32_t mAttribute; // see defs.hpp
+            int32_t mSpecialization; // 0 - Combat, 1 - Magic, 2 - Stealth
             float mUseValue[4]; // How much skill improves through use. Meaning
                                 // of each field depends on what skill this
                                 // is. We should document this better later.

@@ -22,14 +22,14 @@ namespace ESM
         struct Data
         {
             float mWeight;
-            int mValue;
+            int32_t mValue;
 
-            int mUses;
+            int32_t mUses;
             float mQuality;
         }; // Size = 16
 
         Data mData;
-        unsigned int mRecordFlags;
+        uint32_t mRecordFlags;
         RefId mId, mScript;
         std::string mName, mModel, mIcon;
 

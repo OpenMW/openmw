@@ -12,12 +12,12 @@ namespace ESM
 {
     void Script::loadSCVR(ESMReader& esm)
     {
-        int s = mData.mStringTableSize;
+        uint32_t s = mData.mStringTableSize;
 
         std::vector<char> tmp(s);
         // not using getHExact, vanilla doesn't seem to mind unused bytes at the end
         esm.getSubHeader();
-        int left = esm.getSubSize();
+        uint32_t left = esm.getSubSize();
         if (left < s)
             esm.fail("SCVR string list is smaller than specified");
         esm.getExact(tmp.data(), s);
@@ -99,7 +99,11 @@ namespace ESM
                 {
                     esm.getSubHeader();
                     mId = esm.getMaybeFixedRefIdSize(32);
-                    esm.getTSized<20>(mData);
+                    esm.getT(mData.mNumShorts);
+                    esm.getT(mData.mNumLongs);
+                    esm.getT(mData.mNumFloats);
+                    esm.getT(mData.mScriptDataSize);
+                    esm.getT(mData.mStringTableSize);
 
                     hasHeader = true;
                     break;
@@ -114,7 +118,7 @@ namespace ESM
                     esm.getSubHeader();
                     uint32_t subSize = esm.getSubSize();
 
-                    if (subSize != static_cast<uint32_t>(mData.mScriptDataSize))
+                    if (subSize != mData.mScriptDataSize)
                     {
                         std::stringstream ss;
                         ss << "Script data size defined in SCHD subrecord does not match size of SCDT subrecord";

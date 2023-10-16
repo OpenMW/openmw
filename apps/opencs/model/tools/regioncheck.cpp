@@ -47,9 +47,7 @@ void CSMTools::RegionCheckStage::perform(int stage, CSMDoc::Messages& messages)
     /// \todo test that the ID in mSleeplist exists
 
     // test that chances add up to 100
-    int chances = region.mData.mClear + region.mData.mCloudy + region.mData.mFoggy + region.mData.mOvercast
-        + region.mData.mRain + region.mData.mThunder + region.mData.mAsh + region.mData.mBlight + region.mData.mSnow
-        + region.mData.mBlizzard;
+    auto chances = std::accumulate(region.mData.mProbabilities.begin(), region.mData.mProbabilities.end(), 0u);
     if (chances != 100)
         messages.add(id, "Weather chances do not add up to 100", "", CSMDoc::Message::Severity_Error);
 

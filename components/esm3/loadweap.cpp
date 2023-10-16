@@ -29,7 +29,8 @@ namespace ESM
                     mName = esm.getHString();
                     break;
                 case fourCC("WPDT"):
-                    esm.getHTSized<32>(mData);
+                    esm.getHT(mData.mWeight, mData.mValue, mData.mType, mData.mHealth, mData.mSpeed, mData.mReach,
+                        mData.mEnchant, mData.mChop, mData.mSlash, mData.mThrust, mData.mFlags);
                     hasData = true;
                     break;
                 case fourCC("SCRI"):

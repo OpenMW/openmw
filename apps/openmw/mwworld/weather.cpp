@@ -285,19 +285,8 @@ namespace MWWorld
 
     RegionWeather::RegionWeather(const ESM::Region& region)
         : mWeather(invalidWeatherID)
-        , mChances()
+        , mChances(region.mData.mProbabilities.begin(), region.mData.mProbabilities.end())
     {
-        mChances.reserve(10);
-        mChances.push_back(region.mData.mClear);
-        mChances.push_back(region.mData.mCloudy);
-        mChances.push_back(region.mData.mFoggy);
-        mChances.push_back(region.mData.mOvercast);
-        mChances.push_back(region.mData.mRain);
-        mChances.push_back(region.mData.mThunder);
-        mChances.push_back(region.mData.mAsh);
-        mChances.push_back(region.mData.mBlight);
-        mChances.push_back(region.mData.mSnow);
-        mChances.push_back(region.mData.mBlizzard);
     }
 
     RegionWeather::RegionWeather(const ESM::RegionWeatherState& state)
@@ -313,19 +302,9 @@ namespace MWWorld
         return state;
     }
 
-    void RegionWeather::setChances(const std::vector<char>& chances)
+    void RegionWeather::setChances(const std::vector<uint8_t>& chances)
     {
-        if (mChances.size() < chances.size())
-        {
-            mChances.reserve(chances.size());
-        }
-
-        int i = 0;
-        for (char chance : chances)
-        {
-            mChances[i] = chance;
-            i++;
-        }
+        mChances = chances;
 
         // Regional weather no longer supports the current type, select a new weather pattern.
         if ((static_cast<size_t>(mWeather) >= mChances.size()) || (mChances[mWeather] == 0))
@@ -357,15 +336,14 @@ namespace MWWorld
         // If chances A and B has values 30 and 70 then by generating 100 numbers 1..100, 30% will be lesser or equal 30
         // and 70% will be greater than 30 (in theory).
         auto& prng = MWBase::Environment::get().getWorld()->getPrng();
-        int chance = Misc::Rng::rollDice(100, prng) + 1; // 1..100
-        int sum = 0;
-        int i = 0;
-        for (; static_cast<size_t>(i) < mChances.size(); ++i)
+        unsigned int chance = static_cast<unsigned int>(Misc::Rng::rollDice(100, prng) + 1); // 1..100
+        unsigned int sum = 0;
+        for (size_t i = 0; i < mChances.size(); ++i)
         {
             sum += mChances[i];
             if (chance <= sum)
             {
-                mWeather = i;
+                mWeather = static_cast<int>(i);
                 return;
             }
         }
@@ -649,7 +627,7 @@ namespace MWWorld
         }
     }
 
-    void WeatherManager::modRegion(const ESM::RefId& regionID, const std::vector<char>& chances)
+    void WeatherManager::modRegion(const ESM::RefId& regionID, const std::vector<uint8_t>& chances)
     {
         // Sets the region's probability for various weather patterns. Note that this appears to be saved permanently.
         // In Morrowind, this seems to have the following behavior when applied to the current region:
