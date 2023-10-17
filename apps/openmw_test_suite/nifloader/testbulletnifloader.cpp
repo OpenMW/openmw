@@ -1144,7 +1144,7 @@ namespace
 
     TEST_F(TestBulletNifLoader, bsx_editor_marker_flag_disables_collision_for_markers)
     {
-        mNiIntegerExtraData.mData = 32; // BSX flag "editor marker"
+        mNiIntegerExtraData.mData = 34; // BSXFlags "has collision" | "editor marker"
         mNiIntegerExtraData.recType = Nif::RC_BSXFlags;
         mNiTriShape.mExtraList.push_back(Nif::ExtraPtr(&mNiIntegerExtraData));
         mNiTriShape.mParents.push_back(&mNiNode);
@@ -1154,6 +1154,7 @@ namespace
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
         file.mHash = mHash;
+        file.mVersion = Nif::NIFStream::generateVersion(10, 0, 1, 0);
 
         const auto result = mLoader.load(file);
 

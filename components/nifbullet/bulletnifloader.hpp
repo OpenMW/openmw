@@ -48,7 +48,7 @@ namespace NifBullet
         osg::ref_ptr<Resource::BulletShape> load(Nif::FileView file);
 
     private:
-        bool findBoundingBox(const Nif::NiAVObject& node, const std::string& filename);
+        bool findBoundingBox(const Nif::NiAVObject& node);
 
         struct HandleNodeArgs
         {
@@ -59,11 +59,8 @@ namespace NifBullet
             bool mAvoid{ false };
         };
 
-        void handleNode(const std::string& fileName, const Nif::NiAVObject& node, const Nif::Parent* parent,
-            HandleNodeArgs args, Resource::VisualCollisionType& visualCollisionType);
-
-        const Nif::NiNode* findRootCollisionNode(const Nif::NiAVObject& rootNode) const;
-
+        void handleRoot(Nif::FileView nif, const Nif::NiAVObject& node, HandleNodeArgs args);
+        void handleNode(const Nif::NiAVObject& node, const Nif::Parent* parent, HandleNodeArgs args);
         void handleNiTriShape(const Nif::NiGeometry& nifNode, const Nif::Parent* parent, HandleNodeArgs args);
 
         std::unique_ptr<btCompoundShape, Resource::DeleteCollisionShape> mCompoundShape;
