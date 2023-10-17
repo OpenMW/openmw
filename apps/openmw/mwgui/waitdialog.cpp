@@ -8,7 +8,7 @@
 
 #include <components/esm3/loadregn.hpp>
 #include <components/misc/strings/format.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/widgets/box.hpp>
 
 #include "../mwbase/environment.hpp"
