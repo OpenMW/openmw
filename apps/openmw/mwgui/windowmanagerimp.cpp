@@ -498,6 +498,7 @@ namespace MWGui
         auto debugWindow = std::make_unique<DebugWindow>();
         mDebugWindow = debugWindow.get();
         mWindows.push_back(std::move(debugWindow));
+        trackWindow(mDebugWindow, makeDebugWindowSettingValues());
 
         auto postProcessorHud = std::make_unique<PostProcessorHud>();
         mPostProcessorHud = postProcessorHud.get();
