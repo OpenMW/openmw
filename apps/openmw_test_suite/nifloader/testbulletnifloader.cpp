@@ -411,10 +411,9 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(
-        TestBulletNifLoader, for_root_nif_node_with_bounding_box_should_return_shape_with_compound_shape_and_box_inside)
+    TEST_F(TestBulletNifLoader, for_root_bounding_box_should_return_shape_with_compound_shape_and_box_inside)
     {
-        mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
+        mNode.mName = "Bounding Box";
         mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
@@ -436,9 +435,9 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, for_child_nif_node_with_bounding_box)
+    TEST_F(TestBulletNifLoader, for_child_bounding_box_should_return_shape_with_compound_shape_with_box_inside)
     {
-        mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
+        mNode.mName = "Bounding Box";
         mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
@@ -462,10 +461,9 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader,
-        for_root_and_child_nif_node_with_bounding_box_but_root_without_flag_should_use_child_bounds)
+    TEST_F(TestBulletNifLoader, for_root_with_bounds_and_child_bounding_box_but_should_use_bounding_box)
     {
-        mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
+        mNode.mName = "Bounding Box";
         mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
@@ -493,10 +491,10 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader,
-        for_root_and_two_children_where_both_with_bounds_but_only_first_with_flag_should_use_first_bounds)
+    TEST_F(
+        TestBulletNifLoader, for_root_and_two_children_where_both_with_bounds_but_one_is_bounding_box_use_bounding_box)
     {
-        mNode.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
+        mNode.mName = "Bounding Box";
         mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
@@ -530,14 +528,14 @@ namespace
     }
 
     TEST_F(TestBulletNifLoader,
-        for_root_and_two_children_where_both_with_bounds_but_only_second_with_flag_should_use_second_bounds)
+        for_root_and_two_children_where_both_with_bounds_but_second_is_bounding_box_use_bounding_box)
     {
         mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
         mNode.mBounds.mBox.mCenter = osg::Vec3f(-1, -2, -3);
         mNode.mParents.push_back(&mNiNode);
 
-        mNode2.mFlags |= Nif::NiAVObject::Flag_BBoxCollision;
+        mNode2.mName = "Bounding Box";
         mNode2.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode2.mBounds.mBox.mExtents = osg::Vec3f(4, 5, 6);
         mNode2.mBounds.mBox.mCenter = osg::Vec3f(-4, -5, -6);
@@ -565,8 +563,7 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader,
-        for_root_nif_node_with_bounds_but_without_flag_should_return_shape_with_bounds_but_with_null_collision_shape)
+    TEST_F(TestBulletNifLoader, for_root_nif_node_with_bounds_should_return_shape_with_null_collision_shape)
     {
         mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNode.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
@@ -579,8 +576,6 @@ namespace
         const auto result = mLoader.load(file);
 
         Resource::BulletShape expected;
-        expected.mCollisionBox.mExtents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBox.mCenter = osg::Vec3f(-1, -2, -3);
 
         EXPECT_EQ(*result, expected);
     }
@@ -605,8 +600,7 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader,
-        for_tri_shape_root_node_with_bounds_should_return_static_shape_with_bounds_but_with_null_collision_shape)
+    TEST_F(TestBulletNifLoader, for_tri_shape_root_node_with_bounds_should_return_static_shape)
     {
         mNiTriShape.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
         mNiTriShape.mBounds.mBox.mExtents = osg::Vec3f(1, 2, 3);
@@ -618,9 +612,14 @@ namespace
 
         const auto result = mLoader.load(file);
 
+        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
+        triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
         Resource::BulletShape expected;
-        expected.mCollisionBox.mExtents = osg::Vec3f(1, 2, 3);
-        expected.mCollisionBox.mCenter = osg::Vec3f(-1, -2, -3);
+        expected.mCollisionShape.reset(compound.release());
 
         EXPECT_EQ(*result, expected);
     }
