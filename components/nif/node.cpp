@@ -218,17 +218,20 @@ namespace Nif
         }
     }
 
+    void BSSegmentedTriShape::SegmentData::read(NIFStream* nif)
+    {
+        nif->read(mFlags);
+        nif->read(mStartIndex);
+        nif->read(mNumTriangles);
+    }
+
     void BSSegmentedTriShape::read(NIFStream* nif)
     {
         NiTriShape::read(nif);
 
         mSegments.resize(nif->get<uint32_t>());
         for (SegmentData& segment : mSegments)
-        {
-            nif->read(segment.mFlags);
-            nif->read(segment.mStartIndex);
-            nif->read(segment.mNumTriangles);
-        }
+            segment.read(nif);
     }
 
     void BSLODTriShape::read(NIFStream* nif)
@@ -445,6 +448,68 @@ namespace Nif
         BSTriShape::read(nif);
 
         nif->readArray(mLOD);
+    }
+
+    void BSSubIndexTriShape::SubSegment::read(NIFStream* nif)
+    {
+        nif->read(mStartIndex);
+        nif->read(mNumPrimitives);
+        nif->read(mArrayIndex);
+        nif->skip(4); // Unknown
+    }
+
+    void BSSubIndexTriShape::Segment::read(NIFStream* nif)
+    {
+        nif->read(mStartIndex);
+        nif->read(mNumPrimitives);
+        nif->read(mParentArrayIndex);
+        mSubSegments.resize(nif->get<uint32_t>());
+        for (SubSegment& subsegment : mSubSegments)
+            subsegment.read(nif);
+    }
+
+    void BSSubIndexTriShape::SubSegmentDataRecord::read(NIFStream* nif)
+    {
+        nif->read(mUserSlotID);
+        nif->read(mMaterial);
+        nif->readVector(mExtraData, nif->get<uint32_t>());
+    }
+
+    void BSSubIndexTriShape::SubSegmentData::read(NIFStream* nif)
+    {
+        uint32_t numArrayIndices;
+        nif->read(numArrayIndices);
+        mDataRecords.resize(nif->get<uint32_t>());
+        nif->readVector(mArrayIndices, numArrayIndices);
+        for (SubSegmentDataRecord& dataRecord : mDataRecords)
+            dataRecord.read(nif);
+        mSSFFile = nif->getSizedString(nif->get<uint16_t>());
+    }
+
+    void BSSubIndexTriShape::Segmentation::read(NIFStream* nif)
+    {
+        nif->read(mNumPrimitives);
+        mSegments.resize(nif->get<uint32_t>());
+        nif->read(mNumTotalSegments);
+        for (Segment& segment : mSegments)
+            segment.read(nif);
+
+        if (mSegments.size() < mNumTotalSegments)
+            mSubSegmentData.read(nif);
+    }
+
+    void BSSubIndexTriShape::read(NIFStream* nif)
+    {
+        BSTriShape::read(nif);
+
+        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_SSE)
+        {
+            mSegments.resize(nif->get<uint32_t>());
+            for (BSSegmentedTriShape::SegmentData& segment : mSegments)
+                segment.read(nif);
+        }
+        else if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_FO4 && mDataSize > 0)
+            mSegmentation.read(nif);
     }
 
     void BSVertexDesc::read(NIFStream* nif)

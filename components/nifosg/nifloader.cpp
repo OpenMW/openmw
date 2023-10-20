@@ -109,6 +109,7 @@ namespace
             case Nif::RC_BSTriShape:
             case Nif::RC_BSDynamicTriShape:
             case Nif::RC_BSMeshLODTriShape:
+            case Nif::RC_BSSubIndexTriShape:
                 return true;
         }
         return false;
