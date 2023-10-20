@@ -98,6 +98,7 @@ namespace Nif
         RC_BSLightingShaderProperty,
         RC_BSLightingShaderPropertyColorController,
         RC_BSLightingShaderPropertyFloatController,
+        RC_BSLightingShaderPropertyUShortController,
         RC_BSLODTriShape,
         RC_BSMaterialEmittanceMultController,
         RC_BSMeshLODTriShape,

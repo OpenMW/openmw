@@ -156,6 +156,8 @@ namespace Nif
                 &construct<BSEffectShaderPropertyColorController, RC_BSLightingShaderPropertyColorController> },
             { "BSLightingShaderPropertyFloatController",
                 &construct<BSEffectShaderPropertyFloatController, RC_BSLightingShaderPropertyFloatController> },
+            { "BSLightingShaderPropertyUShortController",
+                &construct<BSEffectShaderPropertyFloatController, RC_BSLightingShaderPropertyUShortController> },
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
             { "NiBSBoneLODController", &construct<NiBoneLODController, RC_NiBoneLODController> },
             { "NiLightRadiusController", &construct<NiFloatInterpController, RC_NiLightRadiusController> },
