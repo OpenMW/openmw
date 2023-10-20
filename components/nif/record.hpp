@@ -108,6 +108,7 @@ namespace Nif
         RC_BSMultiBoundSphere,
         RC_BSNiAlphaPropertyTestRefController,
         RC_BSPackedAdditionalGeometryData,
+        RC_BSPackedCombinedSharedGeomDataExtra,
         RC_BSParentVelocityModifier,
         RC_BSPositionData,
         RC_BSProceduralLightningController,

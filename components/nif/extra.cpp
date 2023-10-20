@@ -162,4 +162,50 @@ namespace Nif
         nif->getSizedStrings(mPointNames, nif->get<uint32_t>());
     }
 
+    void BSPackedGeomDataCombined::read(NIFStream* nif)
+    {
+        nif->read(mGrayscaleToPaletteScale);
+        nif->read(mTransform);
+        nif->read(mBoundingSphere);
+    }
+
+    void BSPackedGeomObject::read(NIFStream* nif)
+    {
+        nif->read(mFileHash);
+        nif->read(mDataOffset);
+    }
+
+    void BSPackedSharedGeomData::read(NIFStream* nif)
+    {
+        nif->read(mNumVertices);
+        nif->read(mLODLevels);
+        nif->read(mLOD0TriCount);
+        nif->read(mLOD0TriOffset);
+        nif->read(mLOD1TriCount);
+        nif->read(mLOD1TriOffset);
+        nif->read(mLOD2TriCount);
+        nif->read(mLOD2TriOffset);
+        mCombined.resize(nif->get<uint32_t>());
+        for (BSPackedGeomDataCombined& data : mCombined)
+            data.read(nif);
+        mVertexDesc.read(nif);
+    }
+
+    void BSPackedCombinedSharedGeomDataExtra::read(NIFStream* nif)
+    {
+        NiExtraData::read(nif);
+
+        mVertexDesc.read(nif);
+        nif->read(mNumVertices);
+        nif->read(mNumTriangles);
+        nif->read(mFlags1);
+        nif->read(mFlags2);
+        mObjects.resize(nif->get<uint32_t>());
+        for (BSPackedGeomObject& object : mObjects)
+            object.read(nif);
+        mObjectData.resize(mObjects.size());
+        for (BSPackedSharedGeomData& objectData : mObjectData)
+            objectData.read(nif);
+    }
+
 }

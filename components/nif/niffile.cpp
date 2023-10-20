@@ -256,6 +256,8 @@ namespace Nif
             { "BSDistantObjectLargeRefExtraData",
                 &construct<BSDistantObjectLargeRefExtraData, RC_BSDistantObjectLargeRefExtraData> },
             { "BSEyeCenterExtraData", &construct<BSEyeCenterExtraData, RC_BSEyeCenterExtraData> },
+            { "BSPackedCombinedSharedGeomDataExtra",
+                &construct<BSPackedCombinedSharedGeomDataExtra, RC_BSPackedCombinedSharedGeomDataExtra> },
             { "BSPositionData", &construct<BSPositionData, RC_BSPositionData> },
             { "BSWArray", &construct<BSWArray, RC_BSWArray> },
             { "BSXFlags", &construct<NiIntegerExtraData, RC_BSXFlags> },
