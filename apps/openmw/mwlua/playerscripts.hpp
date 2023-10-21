@@ -66,9 +66,9 @@ namespace MWLua
         }
 
         // `arg` is either forwarded from MWGui::pushGuiMode or empty
-        void uiModeChanged(const MWWorld::Ptr& arg, bool byLuaAction)
+        void uiModeChanged(ObjectId arg, bool byLuaAction)
         {
-            if (arg.isEmpty())
+            if (arg.isZeroOrUnset())
                 callEngineHandlers(mUiModeChanged, byLuaAction);
             else
                 callEngineHandlers(mUiModeChanged, byLuaAction, LObject(arg));
