@@ -272,7 +272,9 @@ namespace MWMechanics
                 }
                 else
                 {
-                    float rating = MWMechanics::getBestActionRating(actor, target);
+                    float rating = 0.f;
+                    if (MWMechanics::canFight(actor, target))
+                        rating = MWMechanics::getBestActionRating(actor, target);
 
                     const ESM::Position& targetPos = target.getRefData().getPosition();
 
