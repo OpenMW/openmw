@@ -559,6 +559,10 @@ namespace MWMechanics
                 modifyAiSetting(
                     target, effect, ESM::MagicEffect::RallyCreature, AiSetting::Flee, -effect.mMagnitude, invalid);
                 break;
+            case ESM::MagicEffect::Charm:
+                if (!target.getClass().isNpc())
+                    invalid = true;
+                break;
             case ESM::MagicEffect::Sound:
                 if (target == getPlayer())
                 {
