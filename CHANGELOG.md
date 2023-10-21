@@ -78,6 +78,7 @@
     Bug #7604: Goblins Grunt becomes idle once injured
     Bug #7609: ForceGreeting should not open dialogue for werewolves
     Bug #7630: Charm can be cast on creatures
+    Bug #7631: Cannot trade with/talk to Creeper or Mudcrab Merchant when they're fleeing
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6149: Dehardcode Lua API_REVISION
