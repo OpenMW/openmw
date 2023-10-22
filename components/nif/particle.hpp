@@ -40,6 +40,20 @@ namespace Nif
         Point = 1, // Fixed origin
     };
 
+    enum class DecayType : uint32_t
+    {
+        None = 0, // f(Distance) = 1.0
+        Linear = 1, // f(Distance) = (Range - Distance) / Range
+        Exponential = 2, // f(Distance) = exp(-Distance / Range)
+    };
+
+    enum class SymmetryType : uint32_t
+    {
+        Spherical = 0,
+        Cylindrical = 1, // Perpendicular to direction axis
+        Planar = 2, // Parallel to direction axis
+    };
+
     struct NiGravity : NiParticleModifier
     {
         float mDecay{ 0.f };
@@ -49,6 +63,20 @@ namespace Nif
         osg::Vec3f mDirection;
 
         void read(NIFStream* nif) override;
+    };
+
+    struct NiParticleBomb : NiParticleModifier
+    {
+        float mRange;
+        float mDuration;
+        float mStrength;
+        float mStartTime;
+        DecayType mDecayType;
+        SymmetryType mSymmetryType;
+        osg::Vec3f mPosition;
+        osg::Vec3f mDirection;
+
+        void read(NIFStream* nif);
     };
 
     struct NiParticleCollider : NiParticleModifier
@@ -210,10 +238,10 @@ namespace Nif
     {
         NiAVObjectPtr mBombObject;
         osg::Vec3f mBombAxis;
-        float mDecay;
-        float mDeltaV;
-        uint32_t mDecayType;
-        uint32_t mSymmetryType;
+        float mRange;
+        float mStrength;
+        DecayType mDecayType;
+        SymmetryType mSymmetryType;
 
         void read(NIFStream* nif) override;
         void post(Reader& nif) override;
