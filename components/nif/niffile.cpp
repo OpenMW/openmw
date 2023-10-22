@@ -156,6 +156,8 @@ namespace Nif
                 &construct<BSEffectShaderPropertyColorController, RC_BSLightingShaderPropertyColorController> },
             { "BSLightingShaderPropertyFloatController",
                 &construct<BSEffectShaderPropertyFloatController, RC_BSLightingShaderPropertyFloatController> },
+            { "BSLightingShaderPropertyUShortController",
+                &construct<BSEffectShaderPropertyFloatController, RC_BSLightingShaderPropertyUShortController> },
             { "bhkBlendController", &construct<bhkBlendController, RC_bhkBlendController> },
             { "NiBSBoneLODController", &construct<NiBoneLODController, RC_NiBoneLODController> },
             { "NiLightRadiusController", &construct<NiFloatInterpController, RC_NiLightRadiusController> },
@@ -254,6 +256,8 @@ namespace Nif
             { "BSDistantObjectLargeRefExtraData",
                 &construct<BSDistantObjectLargeRefExtraData, RC_BSDistantObjectLargeRefExtraData> },
             { "BSEyeCenterExtraData", &construct<BSEyeCenterExtraData, RC_BSEyeCenterExtraData> },
+            { "BSPackedCombinedSharedGeomDataExtra",
+                &construct<BSPackedCombinedSharedGeomDataExtra, RC_BSPackedCombinedSharedGeomDataExtra> },
             { "BSPositionData", &construct<BSPositionData, RC_BSPositionData> },
             { "BSWArray", &construct<BSWArray, RC_BSWArray> },
             { "BSXFlags", &construct<NiIntegerExtraData, RC_BSXFlags> },
@@ -280,6 +284,7 @@ namespace Nif
             { "BSLODTriShape", &construct<BSLODTriShape, RC_BSLODTriShape> },
             { "BSMeshLODTriShape", &construct<BSMeshLODTriShape, RC_BSMeshLODTriShape> },
             { "BSSegmentedTriShape", &construct<BSSegmentedTriShape, RC_BSSegmentedTriShape> },
+            { "BSSubIndexTriShape", &construct<BSSubIndexTriShape, RC_BSSubIndexTriShape> },
 
             // PARTICLES
 

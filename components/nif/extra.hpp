@@ -2,6 +2,7 @@
 #define OPENMW_COMPONENTS_NIF_EXTRA_HPP
 
 #include "base.hpp"
+#include "node.hpp"
 
 namespace Nif
 {
@@ -197,6 +198,52 @@ namespace Nif
 
             void read(NIFStream* nif) override;
         };
+    };
+
+    struct BSPackedGeomDataCombined
+    {
+        float mGrayscaleToPaletteScale;
+        NiTransform mTransform;
+        osg::BoundingSpheref mBoundingSphere;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSPackedGeomObject
+    {
+        uint32_t mFileHash;
+        uint32_t mDataOffset;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSPackedSharedGeomData
+    {
+        uint32_t mNumVertices;
+        uint32_t mLODLevels;
+        uint32_t mLOD0TriCount;
+        uint32_t mLOD0TriOffset;
+        uint32_t mLOD1TriCount;
+        uint32_t mLOD1TriOffset;
+        uint32_t mLOD2TriCount;
+        uint32_t mLOD2TriOffset;
+        std::vector<BSPackedGeomDataCombined> mCombined;
+        BSVertexDesc mVertexDesc;
+
+        void read(NIFStream* nif);
+    };
+
+    struct BSPackedCombinedSharedGeomDataExtra : NiExtraData
+    {
+        BSVertexDesc mVertexDesc;
+        uint32_t mNumVertices;
+        uint32_t mNumTriangles;
+        uint32_t mFlags1;
+        uint32_t mFlags2;
+        std::vector<BSPackedGeomObject> mObjects;
+        std::vector<BSPackedSharedGeomData> mObjectData;
+
+        void read(NIFStream* nif) override;
     };
 
 }

@@ -164,6 +164,8 @@ namespace Nif
             uint8_t mFlags;
             uint32_t mStartIndex;
             uint32_t mNumTriangles;
+
+            void read(NIFStream* nif);
         };
 
         std::vector<SegmentData> mSegments;
@@ -392,6 +394,61 @@ namespace Nif
     struct BSMeshLODTriShape : BSTriShape
     {
         std::array<uint32_t, 3> mLOD;
+
+        void read(NIFStream* nif) override;
+    };
+
+    struct BSSubIndexTriShape : BSTriShape
+    {
+        struct SubSegment
+        {
+            uint32_t mStartIndex;
+            uint32_t mNumPrimitives;
+            uint32_t mArrayIndex;
+
+            void read(NIFStream* nif);
+        };
+
+        struct Segment
+        {
+            uint32_t mStartIndex;
+            uint32_t mNumPrimitives;
+            uint32_t mParentArrayIndex;
+            std::vector<SubSegment> mSubSegments;
+
+            void read(NIFStream* nif);
+        };
+
+        struct SubSegmentDataRecord
+        {
+            uint32_t mUserSlotID;
+            uint32_t mMaterial;
+            std::vector<float> mExtraData;
+
+            void read(NIFStream* nif);
+        };
+
+        struct SubSegmentData
+        {
+            std::vector<uint32_t> mArrayIndices;
+            std::vector<SubSegmentDataRecord> mDataRecords;
+            std::string mSSFFile;
+
+            void read(NIFStream* nif);
+        };
+
+        struct Segmentation
+        {
+            uint32_t mNumPrimitives;
+            uint32_t mNumTotalSegments;
+            std::vector<Segment> mSegments;
+            SubSegmentData mSubSegmentData;
+
+            void read(NIFStream* nif);
+        };
+
+        std::vector<BSSegmentedTriShape::SegmentData> mSegments; // SSE
+        Segmentation mSegmentation; // FO4
 
         void read(NIFStream* nif) override;
     };
