@@ -287,6 +287,7 @@ add_component_dir (debug
     debugging debuglog gldebug debugdraw writeflags
     )
 
+add_definitions(-DMYGUI_DONT_USE_OBSOLETE=ON)
 IF(NOT WIN32 AND NOT APPLE)
     add_definitions(-DGLOBAL_DATA_PATH="${GLOBAL_DATA_PATH}")
     add_definitions(-DGLOBAL_CONFIG_PATH="${GLOBAL_CONFIG_PATH}")

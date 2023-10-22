@@ -183,6 +183,8 @@ if (MSVC)
     )
 endif()
 
+add_definitions(-DMYGUI_DONT_USE_OBSOLETE=ON)
+
 if (ANDROID)
     target_link_libraries(openmw EGL android log z)
 endif (ANDROID)
