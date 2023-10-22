@@ -99,6 +99,25 @@ namespace MWGui
         };
     }
 
+    WindowSettingValues makeDebugWindowSettingValues()
+    {
+        return WindowSettingValues{
+            .mRegular = WindowRectSettingValues {
+                .mX = Settings::windows().mDebugX,
+                .mY = Settings::windows().mDebugY,
+                .mW = Settings::windows().mDebugW,
+                .mH = Settings::windows().mDebugH,
+            },
+            .mMaximized = WindowRectSettingValues {
+                .mX = Settings::windows().mDebugMaximizedX,
+                .mY = Settings::windows().mDebugMaximizedY,
+                .mW = Settings::windows().mDebugMaximizedW,
+                .mH = Settings::windows().mDebugMaximizedH,
+            },
+            .mIsMaximized = Settings::windows().mDebugMaximized,
+        };
+    }
+
     WindowSettingValues makeDialogueWindowSettingValues()
     {
         return WindowSettingValues{
