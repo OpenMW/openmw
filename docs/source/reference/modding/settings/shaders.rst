@@ -23,9 +23,7 @@ force per pixel lighting
 
 Force the use of per pixel lighting. By default, only bump mapped objects use per-pixel lighting.
 Has no effect if the 'force shaders' option is false.
-Enabling per-pixel lighting results in visual differences to the original MW engine.
-It is not recommended to enable this option when using vanilla Morrowind files,
-because certain lights in Morrowind rely on vertex lighting to look as intended.
+Enabling per-pixel lighting results in visual differences to the original MW engine as certain lights in Morrowind rely on vertex lighting to look as intended.
 Note that groundcover shaders ignore this setting.
 
 clamp lighting
