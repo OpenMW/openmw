@@ -147,7 +147,7 @@ namespace MWMechanics
         std::string mCurrentMovement;
         float mMovementAnimSpeed{ 0.f };
         bool mAdjustMovementAnimSpeed{ false };
-        bool mMovementAnimationControlled{ true };
+        bool mMovementAnimationHasMovement{ false };
 
         CharacterState mDeathState{ CharState_None };
         std::string mCurrentDeath;
@@ -216,6 +216,7 @@ namespace MWMechanics
         static bool isRandomAttackAnimation(std::string_view group);
 
         bool isPersistentAnimPlaying() const;
+        bool isMovementAnimationControlled() const;
 
         void updateAnimQueue();
 
