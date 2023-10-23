@@ -19,7 +19,6 @@
 void setupShadowCoords(vec4 viewPos, vec3 viewNormal)
 {
 #if SHADOWS
-    // This matrix has the opposite handedness to the others used here, so multiplication must have the vector to the left. Alternatively it could be transposed after construction, but that's extra work for the GPU just to make the code look a tiny bit cleaner.
     vec4 shadowOffset;
     @foreach shadow_texture_unit_index @shadow_texture_unit_list
 #if @perspectiveShadowMaps
