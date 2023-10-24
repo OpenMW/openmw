@@ -7,6 +7,7 @@
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadarmo.hpp>
 #include <components/esm3/loadbook.hpp>
+#include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadclot.hpp>
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadmisc.hpp>
@@ -36,6 +37,7 @@
 
 #include "camerabindings.hpp"
 #include "cellbindings.hpp"
+#include "classbindings.hpp"
 #include "debugbindings.hpp"
 #include "factionbindings.hpp"
 #include "inputbindings.hpp"
@@ -158,6 +160,9 @@ namespace MWLua
 
         initCoreFactionBindings(context);
         api["factions"] = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>();
+
+        initCoreClassBindings(context);
+        api["class"] = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>();
 
         api["l10n"] = LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager());
         const MWWorld::Store<ESM::GameSetting>* gmstStore
