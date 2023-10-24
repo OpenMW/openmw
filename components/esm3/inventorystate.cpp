@@ -9,7 +9,7 @@ namespace ESM
 {
     namespace
     {
-        constexpr uint32_t sInvalidSlot = -1;
+        constexpr uint32_t sInvalidSlot = static_cast<uint32_t>(-1);
     }
 
     void InventoryState::load(ESMReader& esm)
@@ -18,7 +18,7 @@ namespace ESM
         uint32_t index = 0;
         while (esm.isNextSub("IOBJ"))
         {
-            esm.skip(4);
+            esm.skipHT<int32_t>();
 
             ObjectState state;
 
