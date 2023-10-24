@@ -162,7 +162,7 @@ namespace MWLua
         api["factions"] = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>();
 
         initCoreClassBindings(context);
-        api["class"] = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>();
+        api["classes"] = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Class>();
 
         api["l10n"] = LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager());
         const MWWorld::Store<ESM::GameSetting>* gmstStore

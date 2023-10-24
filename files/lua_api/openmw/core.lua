@@ -16,7 +16,7 @@
 
 ---
 -- A read-only list of all @{#ClassRecord}s in the world database.
--- @field [parent=#core] #list<#ClassRecord> class
+-- @field [parent=#core] #list<#ClassRecord> classes
 
 ---
 -- Terminates the game and quits to the OS. Should be used only for testing purposes.
