@@ -46,32 +46,32 @@ void MWWorld::InventoryStore::initSlots(TSlots& slots_)
 }
 
 void MWWorld::InventoryStore::storeEquipmentState(
-    const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const
+    const MWWorld::LiveCellRefBase& ref, size_t index, ESM::InventoryState& inventory) const
 {
-    for (int i = 0; i < static_cast<int>(mSlots.size()); ++i)
+    for (int32_t i = 0; i < MWWorld::InventoryStore::Slots; ++i)
+    {
         if (mSlots[i].getType() != -1 && mSlots[i]->getBase() == &ref)
-        {
-            inventory.mEquipmentSlots[index] = i;
-        }
+            inventory.mEquipmentSlots[static_cast<uint32_t>(index)] = i;
+    }
 
     if (mSelectedEnchantItem.getType() != -1 && mSelectedEnchantItem->getBase() == &ref)
         inventory.mSelectedEnchantItem = index;
 }
 
 void MWWorld::InventoryStore::readEquipmentState(
-    const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory)
+    const MWWorld::ContainerStoreIterator& iter, size_t index, const ESM::InventoryState& inventory)
 {
     if (index == inventory.mSelectedEnchantItem)
         mSelectedEnchantItem = iter;
 
-    std::map<int, int>::const_iterator found = inventory.mEquipmentSlots.find(index);
+    auto found = inventory.mEquipmentSlots.find(index);
     if (found != inventory.mEquipmentSlots.end())
     {
         if (found->second < 0 || found->second >= MWWorld::InventoryStore::Slots)
             throw std::runtime_error("Invalid slot index in inventory state");
 
         // make sure the item can actually be equipped in this slot
-        int slot = found->second;
+        int32_t slot = found->second;
         std::pair<std::vector<int>, bool> allowedSlots = iter->getClass().getEquipmentSlots(*iter);
         if (!allowedSlots.first.size())
             return;

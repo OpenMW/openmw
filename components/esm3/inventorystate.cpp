@@ -7,22 +7,25 @@
 
 namespace ESM
 {
+    namespace
+    {
+        constexpr uint32_t sInvalidSlot = -1;
+    }
 
     void InventoryState::load(ESMReader& esm)
     {
         // obsolete
-        int index = 0;
+        uint32_t index = 0;
         while (esm.isNextSub("IOBJ"))
         {
-            int unused; // no longer used
-            esm.getHT(unused);
+            esm.skip(4);
 
             ObjectState state;
 
             // obsolete
             if (esm.isNextSub("SLOT"))
             {
-                int slot;
+                int32_t slot;
                 esm.getHT(slot);
                 mEquipmentSlots[index] = slot;
             }
@@ -38,9 +41,9 @@ namespace ESM
             ++index;
         }
 
-        int itemsCount = 0;
+        uint32_t itemsCount = 0;
         esm.getHNOT(itemsCount, "ICNT");
-        for (int i = 0; i < itemsCount; i++)
+        for (; itemsCount > 0; --itemsCount)
         {
             ObjectState state;
 
@@ -62,7 +65,7 @@ namespace ESM
         {
             // Get its name
             ESM::RefId id = esm.getRefId();
-            int count;
+            int32_t count;
             std::string parentGroup;
             // Then get its count
             esm.getHNT(count, "COUN");
@@ -91,9 +94,9 @@ namespace ESM
         while (esm.isNextSub("EQUI"))
         {
             esm.getSubHeader();
-            int equipIndex;
+            int32_t equipIndex;
             esm.getT(equipIndex);
-            int slot;
+            int32_t slot;
             esm.getT(slot);
             mEquipmentSlots[equipIndex] = slot;
         }
@@ -101,20 +104,24 @@ namespace ESM
         if (esm.isNextSub("EQIP"))
         {
             esm.getSubHeader();
-            int slotsCount = 0;
+            uint32_t slotsCount = 0;
             esm.getT(slotsCount);
-            for (int i = 0; i < slotsCount; i++)
+            for (; slotsCount > 0; --slotsCount)
             {
-                int equipIndex;
+                int32_t equipIndex;
                 esm.getT(equipIndex);
-                int slot;
+                int32_t slot;
                 esm.getT(slot);
                 mEquipmentSlots[equipIndex] = slot;
             }
         }
 
-        mSelectedEnchantItem = -1;
-        esm.getHNOT(mSelectedEnchantItem, "SELE");
+        uint32_t selectedEnchantItem = sInvalidSlot;
+        esm.getHNOT(selectedEnchantItem, "SELE");
+        if (selectedEnchantItem == sInvalidSlot)
+            mSelectedEnchantItem.reset();
+        else
+            mSelectedEnchantItem = selectedEnchantItem;
 
         // Old saves had restocking levelled items in a special map
         // This turns items from that map into negative quantities
@@ -132,7 +139,7 @@ namespace ESM
 
     void InventoryState::save(ESMWriter& esm) const
     {
-        int itemsCount = static_cast<int>(mItems.size());
+        uint32_t itemsCount = static_cast<uint32_t>(mItems.size());
         if (itemsCount > 0)
         {
             esm.writeHNT("ICNT", itemsCount);
@@ -149,34 +156,32 @@ namespace ESM
             esm.writeHNString("LGRP", it->first.second);
         }
 
-        for (TEffectMagnitudes::const_iterator it = mPermanentMagicEffectMagnitudes.begin();
-             it != mPermanentMagicEffectMagnitudes.end(); ++it)
+        for (const auto& [id, params] : mPermanentMagicEffectMagnitudes)
         {
-            esm.writeHNRefId("MAGI", it->first);
+            esm.writeHNRefId("MAGI", id);
 
-            const std::vector<std::pair<float, float>>& params = it->second;
-            for (std::vector<std::pair<float, float>>::const_iterator pIt = params.begin(); pIt != params.end(); ++pIt)
+            for (const auto& [rand, mult] : params)
             {
-                esm.writeHNT("RAND", pIt->first);
-                esm.writeHNT("MULT", pIt->second);
+                esm.writeHNT("RAND", rand);
+                esm.writeHNT("MULT", mult);
             }
         }
 
-        int slotsCount = static_cast<int>(mEquipmentSlots.size());
+        uint32_t slotsCount = static_cast<uint32_t>(mEquipmentSlots.size());
         if (slotsCount > 0)
         {
             esm.startSubRecord("EQIP");
             esm.writeT(slotsCount);
-            for (std::map<int, int>::const_iterator it = mEquipmentSlots.begin(); it != mEquipmentSlots.end(); ++it)
+            for (const auto& [index, slot] : mEquipmentSlots)
             {
-                esm.writeT(it->first);
-                esm.writeT(it->second);
+                esm.writeT(index);
+                esm.writeT(slot);
             }
             esm.endRecord("EQIP");
         }
 
-        if (mSelectedEnchantItem != -1)
-            esm.writeHNT("SELE", mSelectedEnchantItem);
+        if (mSelectedEnchantItem)
+            esm.writeHNT("SELE", *mSelectedEnchantItem);
     }
 
 }

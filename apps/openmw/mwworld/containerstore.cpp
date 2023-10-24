@@ -111,12 +111,12 @@ MWWorld::ContainerStoreIterator MWWorld::ContainerStore::getState(
 }
 
 void MWWorld::ContainerStore::storeEquipmentState(
-    const MWWorld::LiveCellRefBase& ref, int index, ESM::InventoryState& inventory) const
+    const MWWorld::LiveCellRefBase& ref, size_t index, ESM::InventoryState& inventory) const
 {
 }
 
 void MWWorld::ContainerStore::readEquipmentState(
-    const MWWorld::ContainerStoreIterator& iter, int index, const ESM::InventoryState& inventory)
+    const MWWorld::ContainerStoreIterator& iter, size_t index, const ESM::InventoryState& inventory)
 {
 }
 
@@ -128,7 +128,7 @@ void MWWorld::ContainerStore::storeState(const LiveCellRef<T>& ref, ESM::ObjectS
 
 template <typename T>
 void MWWorld::ContainerStore::storeStates(
-    const CellRefList<T>& collection, ESM::InventoryState& inventory, int& index, bool equipable) const
+    const CellRefList<T>& collection, ESM::InventoryState& inventory, size_t& index, bool equipable) const
 {
     for (const LiveCellRef<T>& liveCellRef : collection.mList)
     {
@@ -926,7 +926,7 @@ void MWWorld::ContainerStore::writeState(ESM::InventoryState& state) const
 {
     state.mItems.clear();
 
-    int index = 0;
+    size_t index = 0;
     storeStates(potions, state, index);
     storeStates(appas, state, index);
     storeStates(armors, state, index, true);
@@ -947,12 +947,12 @@ void MWWorld::ContainerStore::readState(const ESM::InventoryState& inventory)
     mModified = true;
     mResolved = true;
 
-    int index = 0;
+    size_t index = 0;
     for (const ESM::ObjectState& state : inventory.mItems)
     {
         int type = MWBase::Environment::get().getESMStore()->find(state.mRef.mRefID);
 
-        int thisIndex = index++;
+        size_t thisIndex = index++;
 
         switch (type)
         {
