@@ -919,12 +919,25 @@
 -- @function [parent=#Player] getCrimeLevel
 -- @param openmw.core#GameObject player
 -- @return #number
-
+ 
 ---
 -- Whether the character generation for this player is finished.
 -- @function [parent=#Player] isCharGenFinished
 -- @param openmw.core#GameObject player
 -- @return #boolean
+
+---
+-- Whether teleportation for this player is enabled.
+-- @function [parent=#Player] isTeleportingEnabled
+-- @param openmw.core#GameObject player
+-- @param #boolean player
+-- @return #boolean
+
+---
+-- Enables or disables teleportation for this player.
+-- @function [parent=#Player] setTeleportingEnabled
+-- @param openmw.core#GameObject player
+-- @param #boolean state True to enable teleporting, false to disable.
 
 ---
 -- Returns a list containing quests @{#PlayerQuest} for the specified player, indexed by quest ID.
