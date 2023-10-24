@@ -206,6 +206,7 @@ namespace Nif
         RC_NiMultiTargetTransformController,
         RC_NiNode,
         RC_NiPalette,
+        RC_NiParticleBomb,
         RC_NiParticleColorModifier,
         RC_NiParticleGrowFade,
         RC_NiParticleRotation,

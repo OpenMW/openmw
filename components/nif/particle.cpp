@@ -51,6 +51,20 @@ namespace Nif
         nif->read(mDirection);
     }
 
+    void NiParticleBomb::read(NIFStream* nif)
+    {
+        NiParticleModifier::read(nif);
+
+        nif->read(mRange);
+        nif->read(mDuration);
+        nif->read(mStrength);
+        nif->read(mStartTime);
+        mDecayType = static_cast<DecayType>(nif->get<uint32_t>());
+        mSymmetryType = static_cast<SymmetryType>(nif->get<uint32_t>());
+        nif->read(mPosition);
+        nif->read(mDirection);
+    }
+
     void NiParticleCollider::read(NIFStream* nif)
     {
         NiParticleModifier::read(nif);
@@ -294,10 +308,10 @@ namespace Nif
 
         mBombObject.read(nif);
         nif->read(mBombAxis);
-        nif->read(mDecay);
-        nif->read(mDeltaV);
-        nif->read(mDecayType);
-        nif->read(mSymmetryType);
+        nif->read(mRange);
+        nif->read(mStrength);
+        mDecayType = static_cast<DecayType>(nif->get<uint32_t>());
+        mSymmetryType = static_cast<SymmetryType>(nif->get<uint32_t>());
     }
 
     void NiPSysBombModifier::post(Reader& nif)
