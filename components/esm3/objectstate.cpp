@@ -49,7 +49,7 @@ namespace ESM
         esm.getHNOT(mFlags, "FLAG");
 
         // obsolete
-        int unused;
+        int32_t unused;
         esm.getHNOT(unused, "LTIM");
 
         mAnimationState.load(esm);
@@ -179,6 +179,6 @@ namespace ESM
         throw std::logic_error(error.str());
     }
 
-    ObjectState::~ObjectState() {}
+    ObjectState::~ObjectState() = default;
 
 }

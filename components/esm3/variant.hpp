@@ -25,7 +25,7 @@ namespace ESM
     class Variant
     {
         VarType mType;
-        std::variant<std::monostate, int, float, std::string> mData;
+        std::variant<std::monostate, int32_t, float, std::string> mData;
 
     public:
         enum Format
@@ -54,7 +54,7 @@ namespace ESM
         {
         }
 
-        explicit Variant(int value)
+        explicit Variant(int32_t value)
             : mType(VT_Long)
             , mData(value)
         {
@@ -71,7 +71,7 @@ namespace ESM
         const std::string& getString() const;
         ///< Will throw an exception, if value can not be represented as a string.
 
-        int getInteger() const;
+        int32_t getInteger() const;
         ///< Will throw an exception, if value can not be represented as an integer (implicit
         /// casting of float values is permitted).
 
@@ -93,7 +93,7 @@ namespace ESM
         void setString(std::string&& value);
         ///< Will throw an exception, if type is not compatible with string.
 
-        void setInteger(int value);
+        void setInteger(int32_t value);
         ///< Will throw an exception, if type is not compatible with integer.
 
         void setFloat(float value);

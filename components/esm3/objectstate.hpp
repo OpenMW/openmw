@@ -32,9 +32,9 @@ namespace ESM
         Locals mLocals;
         LuaScripts mLuaScripts;
         unsigned char mEnabled;
-        int mCount;
+        int32_t mCount;
         Position mPosition;
-        unsigned int mFlags;
+        uint32_t mFlags;
 
         // Is there any class-specific state following the ObjectState
         bool mHasCustomState;

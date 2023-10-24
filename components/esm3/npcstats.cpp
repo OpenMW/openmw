@@ -21,7 +21,7 @@ namespace ESM
 
             Faction faction;
 
-            int expelled = 0;
+            int32_t expelled = 0;
             esm.getHNOT(expelled, "FAEX");
 
             if (expelled)
@@ -75,7 +75,7 @@ namespace ESM
         esm.getHNOT(hasWerewolfAttributes, "HWAT");
         if (hasWerewolfAttributes)
         {
-            StatState<int> dummy;
+            StatState<int32_t> dummy;
             for (int i = 0; i < ESM::Attribute::Length; ++i)
                 dummy.load(esm, intFallback);
             mWerewolfDeprecatedData = true;
@@ -130,21 +130,21 @@ namespace ESM
 
     void NpcStats::save(ESMWriter& esm) const
     {
-        for (auto iter(mFactions.begin()); iter != mFactions.end(); ++iter)
+        for (const auto& [id, faction] : mFactions)
         {
-            esm.writeHNRefId("FACT", iter->first);
+            esm.writeHNRefId("FACT", id);
 
-            if (iter->second.mExpelled)
+            if (faction.mExpelled)
             {
-                int expelled = 1;
+                int32_t expelled = 1;
                 esm.writeHNT("FAEX", expelled);
             }
 
-            if (iter->second.mRank >= 0)
-                esm.writeHNT("FARA", iter->second.mRank);
+            if (faction.mRank >= 0)
+                esm.writeHNT("FARA", faction.mRank);
 
-            if (iter->second.mReputation)
-                esm.writeHNT("FARE", iter->second.mReputation);
+            if (faction.mReputation)
+                esm.writeHNT("FARE", faction.mReputation);
         }
 
         if (mDisposition)
@@ -169,7 +169,7 @@ namespace ESM
             esm.writeHNT("LPRO", mLevelProgress);
 
         bool saveSkillIncreases = false;
-        for (int increase : mSkillIncrease)
+        for (int32_t increase : mSkillIncrease)
         {
             if (increase != 0)
             {
@@ -183,8 +183,8 @@ namespace ESM
         if (mSpecIncreases[0] != 0 || mSpecIncreases[1] != 0 || mSpecIncreases[2] != 0)
             esm.writeHNT("SPEC", mSpecIncreases);
 
-        for (auto iter(mUsedIds.begin()); iter != mUsedIds.end(); ++iter)
-            esm.writeHNRefId("USED", *iter);
+        for (const RefId& id : mUsedIds)
+            esm.writeHNRefId("USED", id);
 
         if (mTimeToStartDrowning)
             esm.writeHNT("DRTI", mTimeToStartDrowning);

@@ -196,7 +196,7 @@ namespace ESM
             int count = 0;
             while (esm.isNextSub("AIPK"))
             {
-                int type;
+                int32_t type;
                 esm.getHT(type);
 
                 mPackages.emplace_back();

@@ -23,7 +23,7 @@ namespace ESM
         Vector3 mPosition;
         Quaternion mOrientation;
 
-        int mActorId;
+        int32_t mActorId;
 
         void load(ESMReader& esm);
         void save(ESMWriter& esm) const;
