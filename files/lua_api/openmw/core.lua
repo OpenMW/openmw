@@ -881,6 +881,7 @@
 -- @field #list<#string> majorSkills A read-only list containing the major skills of the class.
 -- @field #list<#string> minorSkills A read-only list containing the minor skills of the class.
 -- @field #string description Class description
+-- @field #boolean isPlayable True if the player can play as this class
 -- @field #string specialization Class specialization. Either combat, magic, or stealth.
 
 
