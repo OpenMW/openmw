@@ -30,6 +30,12 @@
 -- @return #MWScript, #nil
 
 ---
+-- Returns mutable global variables. In multiplayer, these may be specific to the provided player.
+-- @function [parent=#MWScriptFunctions] getGlobalVariables
+-- @param openmw.core#GameObject player (optional) Will be used in multiplayer mode to get the globals if there is a separate instance for each player. Currently has no effect.
+-- @return #list<#number>
+
+---
 -- Returns global mwscript with given recordId. Returns `nil` if the script doesn't exist or is not started.
 -- Currently there can be only one instance of each mwscript, but in multiplayer it will be possible to have a separate instance per player.
 -- @function [parent=#MWScriptFunctions] getGlobalScript

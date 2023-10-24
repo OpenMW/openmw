@@ -173,6 +173,8 @@ namespace LuaUi
         void focusLoss(MyGUI::Widget*, MyGUI::Widget*);
 
         std::optional<std::function<void(WidgetExtension*, MyGUI::IntCoord)>> mOnCoordChange;
+
+        void updateVisible();
     };
 
     class LuaWidget : public MyGUI::Widget, public WidgetExtension

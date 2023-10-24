@@ -167,7 +167,7 @@ namespace SceneUtil
                 "SceneUtil::DisableLight", "SceneUtil::MWShadowTechnique", "SceneUtil::TextKeyMapHolder",
                 "Shader::AddedState", "Shader::RemovedAlphaFunc", "NifOsg::FlipController",
                 "NifOsg::KeyframeController", "NifOsg::Emitter", "NifOsg::ParticleColorAffector",
-                "NifOsg::ParticleSystem", "NifOsg::GravityAffector", "NifOsg::GrowFadeAffector",
+                "NifOsg::ParticleSystem", "NifOsg::GravityAffector", "NifOsg::ParticleBomb", "NifOsg::GrowFadeAffector",
                 "NifOsg::InverseWorldMatrix", "NifOsg::StaticBoundingBoxCallback", "NifOsg::GeomMorpherController",
                 "NifOsg::UpdateMorphGeometry", "NifOsg::UVController", "NifOsg::VisController", "osgMyGUI::Drawable",
                 "osg::DrawCallback", "osg::UniformBufferObject", "osgOQ::ClearQueriesCallback",

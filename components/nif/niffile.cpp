@@ -308,6 +308,7 @@ namespace Nif
 
             // Modifiers, 4.0.0.2
             { "NiGravity", &construct<NiGravity, RC_NiGravity> },
+            { "NiParticleBomb", &construct<NiParticleBomb, RC_NiParticleBomb> },
             { "NiParticleColorModifier", &construct<NiParticleColorModifier, RC_NiParticleColorModifier> },
             { "NiParticleGrowFade", &construct<NiParticleGrowFade, RC_NiParticleGrowFade> },
             { "NiParticleRotation", &construct<NiParticleRotation, RC_NiParticleRotation> },

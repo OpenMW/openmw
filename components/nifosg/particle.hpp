@@ -199,6 +199,31 @@ namespace NifOsg
         osg::Vec3f mCachedWorldDirection;
     };
 
+    class ParticleBomb : public osgParticle::Operator
+    {
+    public:
+        ParticleBomb(const Nif::NiParticleBomb* bomb);
+        ParticleBomb() = default;
+        ParticleBomb(const ParticleBomb& copy, const osg::CopyOp& copyop = osg::CopyOp::SHALLOW_COPY);
+
+        ParticleBomb& operator=(const ParticleBomb&) = delete;
+
+        META_Object(NifOsg, ParticleBomb)
+
+        void operate(osgParticle::Particle* particle, double dt) override;
+        void beginOperate(osgParticle::Program*) override;
+
+    private:
+        float mRange{ 0.f };
+        float mStrength{ 0.f };
+        Nif::DecayType mDecayType{ Nif::DecayType::None };
+        Nif::SymmetryType mSymmetryType{ Nif::SymmetryType::Spherical };
+        osg::Vec3f mPosition;
+        osg::Vec3f mDirection;
+        osg::Vec3f mCachedWorldPosition;
+        osg::Vec3f mCachedWorldDirection;
+    };
+
     // NodeVisitor to find a Group node with the given record index, stored in the node's user data container.
     // Alternatively, returns the node's parent Group if that node is not a Group (i.e. a leaf node).
     class FindGroupByRecIndex : public osg::NodeVisitor

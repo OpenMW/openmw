@@ -1092,6 +1092,18 @@ namespace NifOsg
                     const Nif::NiGravity* gr = static_cast<const Nif::NiGravity*>(modifier.getPtr());
                     program->addOperator(new GravityAffector(gr));
                 }
+                else if (modifier->recType == Nif::RC_NiParticleBomb)
+                {
+                    auto bomb = static_cast<const Nif::NiParticleBomb*>(modifier.getPtr());
+                    osg::ref_ptr<osgParticle::ModularProgram> bombProgram(new osgParticle::ModularProgram);
+                    attachTo->addChild(bombProgram);
+                    bombProgram->setParticleSystem(partsys);
+                    bombProgram->setReferenceFrame(rf);
+                    bombProgram->setStartTime(bomb->mStartTime);
+                    bombProgram->setLifeTime(bomb->mDuration);
+                    bombProgram->setEndless(false);
+                    bombProgram->addOperator(new ParticleBomb(bomb));
+                }
                 else if (modifier->recType == Nif::RC_NiParticleColorModifier)
                 {
                     const Nif::NiParticleColorModifier* cl
