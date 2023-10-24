@@ -32,9 +32,9 @@ namespace MWLua
     void initCoreClassBindings(const Context& context)
     {
         sol::state_view& lua = context.mLua->sol();
-        sol::usertype<classStore> classStoreT = lua.new_usertype<classStore>("ESM3_classStore");
+        sol::usertype<classStore> classStoreT = lua.new_usertype<classStore>("ESM3_ClassStore");
         classStoreT[sol::meta_function::to_string] = [](const classStore& store) {
-            return "ESM3_classStore{" + std::to_string(store.getSize()) + " classes}";
+            return "ESM3_ClassStore{" + std::to_string(store.getSize()) + " classes}";
         };
         classStoreT[sol::meta_function::length] = [](const classStore& store) { return store.getSize(); };
         classStoreT[sol::meta_function::index] = sol::overload(
