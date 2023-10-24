@@ -83,6 +83,7 @@
     Bug #7611: Beast races' idle animations slide after turning or jumping in place
     Bug #7630: Charm can be cast on creatures
     Bug #7631: Cannot trade with/talk to Creeper or Mudcrab Merchant when they're fleeing
+    Bug #7639: NPCs don't use hand-to-hand if their other melee skills were damaged during combat
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6149: Dehardcode Lua API_REVISION
