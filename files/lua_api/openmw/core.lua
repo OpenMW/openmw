@@ -167,6 +167,7 @@
 -- @field #any type Type of the object (one of the tables from the package @{openmw.types#types}).
 -- @field #number count Count (>1 means a stack of objects).
 -- @field #string recordId Returns record ID of the object in lowercase.
+-- @field #string globalVariable Global Variable associated with this object(read only).
 
 ---
 -- Does the object still exist and is available.
