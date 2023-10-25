@@ -83,6 +83,8 @@
     Bug #7611: Beast races' idle animations slide after turning or jumping in place
     Bug #7630: Charm can be cast on creatures
     Bug #7631: Cannot trade with/talk to Creeper or Mudcrab Merchant when they're fleeing
+    Bug #7636: Animations bug out when switching between 1st and 3rd person, while playing a scripted animation
+    Bug #7637: Actors can sometimes move while playing scripted animations
     Bug #7639: NPCs don't use hand-to-hand if their other melee skills were damaged during combat
     Bug #7647: NPC walk cycle bugs after greeting player
     Feature #3537: Shader-based water ripples
