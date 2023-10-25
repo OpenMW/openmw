@@ -226,12 +226,21 @@ return {
         -- @function [parent=#UI] setPauseOnMode
         -- @param #string mode Mode to configure
         -- @param #boolean shouldPause
-        setPauseOnMode = function(mode, shouldPause) modePause[mode] = shouldPause end
+        setPauseOnMode = function(mode, shouldPause) modePause[mode] = shouldPause end,
+
+        --- Set whether the UI should be visible.
+        -- @function [parent=#UI] setHudVisibility
+        -- @param #boolean showHud
+        setHudVisibility = function(showHud) ui._setHudVisibility(showHud) end,
+
+        ---
+        -- Returns if the player HUD is visible or not
+        -- @function [parent=#UI] isHudVisible
+        -- @return #bool
+        isHudVisible = function() return ui._isHudVisible() end,
 
         -- TODO
         -- registerHudElement = function(name, showFn, hideFn) end,
-        -- showHud = function(bool) end,
-        -- isHudVisible = function() end,
         -- showHudElement = function(name, bool) end,
         -- hudElements,  -- map from element name to its visibility
     },

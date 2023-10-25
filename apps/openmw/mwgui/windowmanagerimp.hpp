@@ -247,7 +247,8 @@ namespace MWGui
         void showCrosshair(bool show) override;
 
         /// Turn visibility of HUD on or off
-        bool toggleHud() override;
+        bool setHudVisibility(bool show) override;
+        bool isHudVisible() const override { return mHudEnabled; }
 
         void disallowMouse() override;
         void allowMouse() override;
