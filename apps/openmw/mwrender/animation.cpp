@@ -1145,8 +1145,7 @@ namespace MWRender
         bool hasScriptedAnims = false;
         for (AnimStateMap::iterator stateiter = mStates.begin(); stateiter != mStates.end(); stateiter++)
         {
-            if (stateiter->second.mPriority.contains(int(MWMechanics::Priority_Scripted))
-                && stateiter->second.mPlaying)
+            if (stateiter->second.mPriority.contains(int(MWMechanics::Priority_Scripted)) && stateiter->second.mPlaying)
             {
                 hasScriptedAnims = true;
                 break;
