@@ -1020,6 +1020,14 @@ namespace MWRender
         return false;
     }
 
+    bool Animation::isPlayingScripted(std::string_view groupname) const
+    {
+        AnimStateMap::const_iterator state(mStates.find(groupname));
+        if (state != mStates.end())
+            return state->second.mPlaying && state->second.mPriority.contains(MWMechanics::Priority::Priority_Scripted);
+        return false;
+    }
+
     bool Animation::getInfo(std::string_view groupname, float* complete, float* speedmult) const
     {
         AnimStateMap::const_iterator iter = mStates.find(groupname);
@@ -1145,7 +1153,7 @@ namespace MWRender
         bool hasScriptedAnims = false;
         for (AnimStateMap::iterator stateiter = mStates.begin(); stateiter != mStates.end(); stateiter++)
         {
-            if (stateiter->second.mPriority.contains(int(MWMechanics::Priority_Persistent))
+            if (stateiter->second.mPriority.contains(int(MWMechanics::Priority_Scripted))
                 && stateiter->second.mPlaying)
             {
                 hasScriptedAnims = true;
@@ -1158,7 +1166,7 @@ namespace MWRender
         while (stateiter != mStates.end())
         {
             AnimState& state = stateiter->second;
-            if (hasScriptedAnims && !state.mPriority.contains(int(MWMechanics::Priority_Persistent)))
+            if (hasScriptedAnims && !state.mPriority.contains(int(MWMechanics::Priority_Scripted)))
             {
                 ++stateiter;
                 continue;

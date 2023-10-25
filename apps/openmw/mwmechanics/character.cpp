@@ -538,7 +538,7 @@ namespace MWMechanics
             if (mAnimation->isPlaying("containerclose"))
                 return false;
 
-            mAnimation->play("containeropen", Priority_Persistent, MWRender::Animation::BlendMask_All, false, 1.0f,
+            mAnimation->play("containeropen", Priority_Scripted, MWRender::Animation::BlendMask_All, false, 1.0f,
                 "start", "stop", 0.f, 0);
             if (mAnimation->isPlaying("containeropen"))
                 return false;
@@ -559,7 +559,7 @@ namespace MWMechanics
             if (animPlaying)
                 startPoint = 1.f - complete;
 
-            mAnimation->play("containerclose", Priority_Persistent, MWRender::Animation::BlendMask_All, false, 1.0f,
+            mAnimation->play("containerclose", Priority_Scripted, MWRender::Animation::BlendMask_All, false, 1.0f,
                 "start", "stop", startPoint, 0);
         }
     }
@@ -828,7 +828,7 @@ namespace MWMechanics
         CharacterState idle, CharacterState movement, JumpingState jump, bool force)
     {
         // If the current animation is persistent, do not touch it
-        if (isPersistentAnimPlaying())
+        if (isScriptedAnimPlaying())
             return;
 
         refreshHitRecoilAnims();
@@ -882,7 +882,7 @@ namespace MWMechanics
             mDeathState = chooseRandomDeathState();
 
         // Do not interrupt scripted animation by death
-        if (isPersistentAnimPlaying())
+        if (isScriptedAnimPlaying())
             return;
 
         playDeath(startpoint, mDeathState);
@@ -1482,7 +1482,7 @@ namespace MWMechanics
         }
 
         // Combat for actors with persistent animations obviously will be buggy
-        if (isPersistentAnimPlaying())
+        if (isScriptedAnimPlaying())
             return forcestateupdate;
 
         float complete = 0.f;
@@ -1855,10 +1855,18 @@ namespace MWMechanics
         if (mAnimQueue.empty())
             return;
 
-        if (mAnimation->isPlaying(mAnimQueue.front().mGroup) == false)
+        bool isFrontAnimPlaying = false;
+        if (mAnimQueue.front().mScripted)
+            isFrontAnimPlaying = mAnimation->isPlayingScripted(mAnimQueue.front().mGroup);
+        else
+            isFrontAnimPlaying = mAnimation->isPlaying(mAnimQueue.front().mGroup);
+
+
+        if (!isFrontAnimPlaying)
         {
             if (mAnimQueue.size() > 1)
             {
+                // Curren animation finished, move to the next in queue
                 mAnimation->disable(mAnimQueue.front().mGroup);
                 mAnimQueue.pop_front();
 
@@ -1866,14 +1874,13 @@ namespace MWMechanics
                 mAnimation->play(mAnimQueue.front().mGroup, Priority_Default, MWRender::Animation::BlendMask_All, false,
                     1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
             }
-            else if (mAnimQueue.front().mLoopCount > 1 && mAnimQueue.front().mPersist)
+            else if (mAnimQueue.front().mLoopCount > 1 && mAnimQueue.front().mScripted)
             {
-                // The last animation stopped playing when it shouldn't have.
-                // This is caused by a rebuild of the animation object, so we should restart the animation here
-                // Subtract 1 from mLoopCount to consider the current loop done.
+                // A scripted animation stopped playing before time.
+                // This happens when the animation object is rebuilt, so we should restart the animation here.
                 bool loopfallback = mAnimQueue.front().mGroup.starts_with("idle");
-                mAnimation->play(mAnimQueue.front().mGroup, Priority_Persistent, MWRender::Animation::BlendMask_All,
-                    false, 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount - 1, loopfallback);
+                mAnimation->play(mAnimQueue.front().mGroup, Priority_Scripted, MWRender::Animation::BlendMask_All,
+                    false, 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
             }
             else
             {
@@ -2393,7 +2400,7 @@ namespace MWMechanics
             }
         }
 
-        bool isPersist = isPersistentAnimPlaying();
+        bool isPersist = isScriptedAnimPlaying();
         osg::Vec3f moved = mAnimation->runAnimation(mSkipAnim && !isPersist ? 0.f : duration);
         if (duration > 0.0f)
             moved /= duration;
@@ -2450,7 +2457,7 @@ namespace MWMechanics
         state.mScriptedAnims.clear();
         for (AnimationQueue::const_iterator iter = mAnimQueue.begin(); iter != mAnimQueue.end(); ++iter)
         {
-            if (!iter->mPersist)
+            if (!iter->mScripted)
                 continue;
 
             ESM::AnimationState::ScriptedAnimation anim;
@@ -2486,7 +2493,7 @@ namespace MWMechanics
                 AnimationQueueEntry entry;
                 entry.mGroup = iter->mGroup;
                 entry.mLoopCount = iter->mLoopCount;
-                entry.mPersist = true;
+                entry.mScripted = true;
 
                 mAnimQueue.push_back(entry);
             }
@@ -2505,18 +2512,18 @@ namespace MWMechanics
             mIdleState = CharState_SpecialIdle;
 
             bool loopfallback = mAnimQueue.front().mGroup.starts_with("idle");
-            mAnimation->play(anim.mGroup, Priority_Persistent, MWRender::Animation::BlendMask_All, false, 1.0f, "start",
+            mAnimation->play(anim.mGroup, Priority_Scripted, MWRender::Animation::BlendMask_All, false, 1.0f, "start",
                 "stop", complete, anim.mLoopCount, loopfallback);
         }
     }
 
-    bool CharacterController::playGroup(std::string_view groupname, int mode, int count, bool persist)
+    bool CharacterController::playGroup(std::string_view groupname, int mode, int count, bool scripted)
     {
         if (!mAnimation || !mAnimation->hasAnimation(groupname))
             return false;
 
         // We should not interrupt persistent animations by non-persistent ones
-        if (isPersistentAnimPlaying() && !persist)
+        if (isScriptedAnimPlaying() && !scripted)
             return true;
 
         // If this animation is a looped animation (has a "loop start" key) that is already playing
@@ -2545,17 +2552,17 @@ namespace MWMechanics
         AnimationQueueEntry entry;
         entry.mGroup = groupname;
         entry.mLoopCount = count - 1;
-        entry.mPersist = persist;
+        entry.mScripted = scripted;
 
         if (mode != 0 || mAnimQueue.empty() || !isAnimPlaying(mAnimQueue.front().mGroup))
         {
-            clearAnimQueue(persist);
+            clearAnimQueue(scripted);
 
             clearStateAnimation(mCurrentIdle);
 
             mIdleState = CharState_SpecialIdle;
             bool loopfallback = entry.mGroup.starts_with("idle");
-            mAnimation->play(groupname, persist && groupname != "idle" ? Priority_Persistent : Priority_Default,
+            mAnimation->play(groupname, scripted && groupname != "idle" ? Priority_Scripted : Priority_Default,
                 MWRender::Animation::BlendMask_All, false, 1.0f, ((mode == 2) ? "loop start" : "start"), "stop", 0.0f,
                 count - 1, loopfallback);
         }
@@ -2566,7 +2573,7 @@ namespace MWMechanics
 
         // "PlayGroup idle" is a special case, used to remove to stop scripted animations playing
         if (groupname == "idle")
-            entry.mPersist = false;
+            entry.mScripted = false;
 
         mAnimQueue.push_back(entry);
 
@@ -2578,12 +2585,12 @@ namespace MWMechanics
         mSkipAnim = true;
     }
 
-    bool CharacterController::isPersistentAnimPlaying() const
+    bool CharacterController::isScriptedAnimPlaying() const
     {
         if (!mAnimQueue.empty())
         {
             const AnimationQueueEntry& first = mAnimQueue.front();
-            return first.mPersist && isAnimPlaying(first.mGroup);
+            return first.mScripted && isAnimPlaying(first.mGroup);
         }
 
         return false;
@@ -2609,7 +2616,7 @@ namespace MWMechanics
     void CharacterController::clearAnimQueue(bool clearPersistAnims)
     {
         // Do not interrupt scripted animations, if we want to keep them
-        if ((!isPersistentAnimPlaying() || clearPersistAnims) && !mAnimQueue.empty())
+        if ((!isScriptedAnimPlaying() || clearPersistAnims) && !mAnimQueue.empty())
             mAnimation->disable(mAnimQueue.front().mGroup);
 
         if (clearPersistAnims)
@@ -2620,7 +2627,7 @@ namespace MWMechanics
 
         for (AnimationQueue::iterator it = mAnimQueue.begin(); it != mAnimQueue.end();)
         {
-            if (!it->mPersist)
+            if (!it->mScripted)
                 it = mAnimQueue.erase(it);
             else
                 ++it;

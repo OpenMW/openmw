@@ -40,7 +40,7 @@ namespace MWMechanics
         Priority_Torch,
         Priority_Storm,
         Priority_Death,
-        Priority_Persistent,
+        Priority_Scripted,
 
         Num_Priorities
     };
@@ -135,7 +135,7 @@ namespace MWMechanics
         {
             std::string mGroup;
             size_t mLoopCount;
-            bool mPersist;
+            bool mScripted;
         };
         typedef std::deque<AnimationQueueEntry> AnimationQueue;
         AnimationQueue mAnimQueue;
@@ -215,7 +215,7 @@ namespace MWMechanics
         std::string chooseRandomAttackAnimation() const;
         static bool isRandomAttackAnimation(std::string_view group);
 
-        bool isPersistentAnimPlaying() const;
+        bool isScriptedAnimPlaying() const;
         bool isMovementAnimationControlled() const;
 
         void updateAnimQueue();
@@ -270,7 +270,7 @@ namespace MWMechanics
         void persistAnimationState() const;
         void unpersistAnimationState();
 
-        bool playGroup(std::string_view groupname, int mode, int count, bool persist = false);
+        bool playGroup(std::string_view groupname, int mode, int count, bool scripted = false);
         void skipAnim();
         bool isAnimPlaying(std::string_view groupName) const;
 
