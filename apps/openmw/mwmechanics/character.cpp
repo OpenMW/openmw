@@ -827,7 +827,7 @@ namespace MWMechanics
     void CharacterController::refreshCurrentAnims(
         CharacterState idle, CharacterState movement, JumpingState jump, bool force)
     {
-        // If the current animation is persistent, do not touch it
+        // If the current animation is scripted, do not touch it
         if (isScriptedAnimPlaying())
             return;
 
@@ -1481,7 +1481,7 @@ namespace MWMechanics
                 sndMgr->stopSound3D(mPtr, wolfRun);
         }
 
-        // Combat for actors with persistent animations obviously will be buggy
+        // Combat for actors with scripted animations obviously will be buggy
         if (isScriptedAnimPlaying())
             return forcestateupdate;
 
@@ -2399,8 +2399,7 @@ namespace MWMechanics
             }
         }
 
-        bool isPersist = isScriptedAnimPlaying();
-        osg::Vec3f moved = mAnimation->runAnimation(mSkipAnim && !isPersist ? 0.f : duration);
+        osg::Vec3f moved = mAnimation->runAnimation(mSkipAnim && !isScriptedAnimPlaying() ? 0.f : duration);
         if (duration > 0.0f)
             moved /= duration;
         else
@@ -2521,7 +2520,7 @@ namespace MWMechanics
         if (!mAnimation || !mAnimation->hasAnimation(groupname))
             return false;
 
-        // We should not interrupt persistent animations by non-scripted ones
+        // We should not interrupt scripted animations with non-scripted ones
         if (isScriptedAnimPlaying() && !scripted)
             return true;
 
@@ -2612,13 +2611,13 @@ namespace MWMechanics
         return movementAnimationControlled;
     }
 
-    void CharacterController::clearAnimQueue(bool clearPersistAnims)
+    void CharacterController::clearAnimQueue(bool clearScriptedAnims)
     {
         // Do not interrupt scripted animations, if we want to keep them
-        if ((!isScriptedAnimPlaying() || clearPersistAnims) && !mAnimQueue.empty())
+        if ((!isScriptedAnimPlaying() || clearScriptedAnims) && !mAnimQueue.empty())
             mAnimation->disable(mAnimQueue.front().mGroup);
 
-        if (clearPersistAnims)
+        if (clearScriptedAnims)
         {
             mAnimQueue.clear();
             return;

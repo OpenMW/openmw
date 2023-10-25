@@ -207,7 +207,7 @@ namespace MWMechanics
         void refreshMovementAnims(CharacterState movement, bool force = false);
         void refreshIdleAnims(CharacterState idle, bool force = false);
 
-        void clearAnimQueue(bool clearPersistAnims = false);
+        void clearAnimQueue(bool clearScriptedAnims = false);
 
         bool updateWeaponState();
         void updateIdleStormState(bool inwater) const;
