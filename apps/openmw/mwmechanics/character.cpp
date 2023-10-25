@@ -1852,17 +1852,39 @@ namespace MWMechanics
 
     void CharacterController::updateAnimQueue()
     {
-        if (mAnimQueue.size() > 1)
-        {
+        if (mAnimQueue.empty())
+            return;
+
             if (mAnimation->isPlaying(mAnimQueue.front().mGroup) == false)
+            {
+            if (mAnimQueue.size() > 1)
             {
                 mAnimation->disable(mAnimQueue.front().mGroup);
                 mAnimQueue.pop_front();
 
                 bool loopfallback = mAnimQueue.front().mGroup.starts_with("idle");
-                mAnimation->play(mAnimQueue.front().mGroup, Priority_Default, MWRender::Animation::BlendMask_All, false,
-                    1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
+                mAnimation->play(mAnimQueue.front().mGroup, Priority_Default, MWRender::Animation::BlendMask_All,
+                    false, 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
             }
+            else if (mAnimQueue.front().mLoopCount > 1 && mAnimQueue.front().mPersist)
+            {
+                // The last animation stopped playing when it shouldn't have.
+                // This is caused by a rebuild of the animation object, so we should restart the animation here
+                // Subtract 1 from mLoopCount to consider the current loop done.
+                bool loopfallback = mAnimQueue.front().mGroup.starts_with("idle");
+                mAnimation->play(mAnimQueue.front().mGroup, Priority_Persistent, MWRender::Animation::BlendMask_All,
+                    false, 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount - 1, loopfallback);
+            }
+            else
+            {
+                // Animation is done, remove it from the queue.
+                mAnimation->disable(mAnimQueue.front().mGroup);
+                mAnimQueue.pop_front();
+            }
+            }
+        else
+        {
+            mAnimQueue.front().mLoopCount = mAnimation->getCurrentLoopCount(mAnimQueue.front().mGroup);
         }
 
         if (!mAnimQueue.empty())
