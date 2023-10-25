@@ -1874,7 +1874,7 @@ namespace MWMechanics
                 mAnimation->play(mAnimQueue.front().mGroup, Priority_Default, MWRender::Animation::BlendMask_All, false,
                     1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
             }
-            else if (mAnimQueue.front().mLoopCount > 1 && mAnimQueue.front().mScripted)
+            else if (mAnimQueue.front().mLoopCount > 0 && mAnimQueue.front().mScripted)
             {
                 // A scripted animation stopped playing before time.
                 // This happens when the animation object is rebuilt, so we should restart the animation here.
