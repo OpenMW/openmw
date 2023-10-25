@@ -1605,9 +1605,9 @@ namespace MWGui
         mQuickKeysMenu->activateQuickKey(index);
     }
 
-    bool WindowManager::toggleHud()
+    bool WindowManager::setHudVisibility(bool show)
     {
-        mHudEnabled = !mHudEnabled;
+        mHudEnabled = show;
         updateVisible();
         mMessageBoxManager->setVisible(mHudEnabled);
         return mHudEnabled;

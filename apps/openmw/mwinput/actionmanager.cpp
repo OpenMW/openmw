@@ -118,7 +118,7 @@ namespace MWInput
                 quickKey(10);
                 break;
             case A_ToggleHUD:
-                windowManager->toggleHud();
+                windowManager->setHudVisibility(!windowManager->isHudVisible());
                 break;
             case A_ToggleDebug:
                 windowManager->toggleDebugWindow();
