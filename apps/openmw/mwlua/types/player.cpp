@@ -148,8 +148,7 @@ namespace MWLua
                 throw std::runtime_error("The argument must be a player.");
             if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
                 throw std::runtime_error("Only player and global scripts can toggle teleportation.");
-            context.mLuaManager->addAction([state] { MWBase::Environment::get().getWorld()->enableTeleporting(state); },
-                "toggleTeleportingAction");
+            MWBase::Environment::get().getWorld()->enableTeleporting(state);
         };
         player["setControlSwitch"] = [input](const Object& player, std::string_view key, bool v) {
             if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
