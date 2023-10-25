@@ -1861,7 +1861,6 @@ namespace MWMechanics
         else
             isFrontAnimPlaying = mAnimation->isPlaying(mAnimQueue.front().mGroup);
 
-
         if (!isFrontAnimPlaying)
         {
             if (mAnimQueue.size() > 1)
@@ -2373,7 +2372,7 @@ namespace MWMechanics
                     }
                 }
 
-                if (!isMovementAnimationControlled() && mAnimQueue.empty())
+                if (!isMovementAnimationControlled() && !isScriptedAnimPlaying())
                     world->queueMovement(mPtr, vec);
             }
 
@@ -2442,7 +2441,7 @@ namespace MWMechanics
         }
 
         // Update movement
-        if (isMovementAnimationControlled() && mPtr.getClass().isActor() && mAnimQueue.empty())
+        if (isMovementAnimationControlled() && mPtr.getClass().isActor() && !isScriptedAnimPlaying())
             world->queueMovement(mPtr, moved);
 
         mSkipAnim = false;
@@ -2522,7 +2521,7 @@ namespace MWMechanics
         if (!mAnimation || !mAnimation->hasAnimation(groupname))
             return false;
 
-        // We should not interrupt persistent animations by non-persistent ones
+        // We should not interrupt persistent animations by non-scripted ones
         if (isScriptedAnimPlaying() && !scripted)
             return true;
 
