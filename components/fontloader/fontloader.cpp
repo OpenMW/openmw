@@ -58,7 +58,7 @@ namespace
                 MyGUI::xml::ElementPtr sizeProperty = getProperty(layersIterator.current(), "Size");
                 if (sizeProperty != nullptr)
                 {
-                    std::string sizeValue = sizeProperty->findAttribute("value");
+                    auto sizeValue = sizeProperty->findAttribute("value");
                     if (!sizeValue.empty())
                         return MyGUI::IntSize::parse(sizeValue);
                 }
@@ -608,13 +608,13 @@ namespace Gui
         MyGUI::ResourceManager::getInstance().addResource(bookFont);
     }
 
-    void FontLoader::overrideLineHeight(MyGUI::xml::ElementPtr _node, const std::string& _file, MyGUI::Version _version)
+    void FontLoader::overrideLineHeight(MyGUI::xml::ElementPtr _node, std::string_view _file, MyGUI::Version _version)
     {
         // We should adjust line height for MyGUI widgets depending on font size
         MyGUI::xml::ElementEnumerator resourceNode = _node->getElementEnumerator();
         while (resourceNode.next("Resource"))
         {
-            std::string type = resourceNode->findAttribute("type");
+            auto type = resourceNode->findAttribute("type");
 
             if (Misc::StringUtils::ciEqual(type, "ResourceLayout"))
             {

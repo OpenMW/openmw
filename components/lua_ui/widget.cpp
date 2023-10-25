@@ -73,11 +73,7 @@ namespace LuaUi
         w->eventMouseButtonPressed.clear();
         w->eventMouseButtonReleased.clear();
         w->eventMouseMove.clear();
-#if MYGUI_VERSION <= MYGUI_DEFINE_VERSION(3, 4, 2)
-        w->eventMouseDrag.m_event.clear();
-#else
         w->eventMouseDrag.clear();
-#endif
 
         w->eventMouseSetFocus.clear();
         w->eventMouseLostFocus.clear();

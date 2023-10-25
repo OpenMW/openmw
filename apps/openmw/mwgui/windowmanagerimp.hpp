@@ -561,7 +561,7 @@ namespace MWGui
          */
         void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
 
-        void onCursorChange(const std::string& name);
+        void onCursorChange(std::string_view name);
         void onKeyFocusChanged(MyGUI::Widget* widget);
 
         // Key pressed while playing a video
@@ -569,8 +569,8 @@ namespace MWGui
 
         void sizeVideo(int screenWidth, int screenHeight);
 
-        void onClipboardChanged(const std::string& _type, const std::string& _data);
-        void onClipboardRequested(const std::string& _type, std::string& _data);
+        void onClipboardChanged(std::string_view _type, std::string_view _data);
+        void onClipboardRequested(std::string_view _type, std::string& _data);
 
         void createTextures();
         void createCursors();

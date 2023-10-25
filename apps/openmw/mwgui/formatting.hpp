@@ -161,7 +161,7 @@ namespace MWGui
         private:
             int currentFontHeight() const;
             TextStyle mTextStyle;
-            Gui::EditBox* mEditBox;
+            MyGUI::EditBox* mEditBox;
         };
 
         class ImageElement : public GraphicElement
