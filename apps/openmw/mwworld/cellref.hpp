@@ -130,7 +130,7 @@ namespace MWWorld
         }
         void setCharge(int charge);
         void setChargeFloat(float charge);
-        void applyChargeRemainderToBeSubtracted(float chargeRemainder); // Stores remainders and applies if > 1
+        void applyChargeRemainderToBeSubtracted(float chargeRemainder); // Stores remainders and applies if <= -1
 
         // Stores fractional part of mChargeInt
         void setChargeIntRemainder(float chargeRemainder);

@@ -658,6 +658,15 @@
 -- @param openmw.core#GameObject object
 -- @return #boolean
 
+---
+-- Set of properties that differentiates one item from another of the same record type.
+-- @function [parent=#Item] itemData
+-- @param openmw.core#GameObject item
+-- @return #ItemData
+
+---
+-- @type ItemData
+-- @field #number condition The item's current condition. Time remaining for lights. Uses left for lockpicks and probes. Current health for weapons and armor.
 
 --------------------------------------------------------------------------------
 -- @{#Creature} functions

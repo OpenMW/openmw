@@ -17,7 +17,7 @@ namespace
 
     void invalidPropErr(std::string_view prop, const MWWorld::Ptr& ptr)
     {
-        throw std::runtime_error(std::string(prop) + " does not exist for item "
+        throw std::runtime_error("'" + std::string(prop) + "'" + " property does not exist for item "
             + std::string(ptr.getClass().getName(ptr)) + "(" + std::string(ptr.getTypeDescription()) + ")");
     }
 }
@@ -96,11 +96,7 @@ namespace MWLua
                 }
                 else
                     invalidPropErr(prop, ptr);
-                return;
             }
-
-            /*ignore or error?*/
-            invalidPropErr(prop, ptr);
         }
     };
 }
