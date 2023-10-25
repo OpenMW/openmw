@@ -1855,16 +1855,16 @@ namespace MWMechanics
         if (mAnimQueue.empty())
             return;
 
-            if (mAnimation->isPlaying(mAnimQueue.front().mGroup) == false)
-            {
+        if (mAnimation->isPlaying(mAnimQueue.front().mGroup) == false)
+        {
             if (mAnimQueue.size() > 1)
             {
                 mAnimation->disable(mAnimQueue.front().mGroup);
                 mAnimQueue.pop_front();
 
                 bool loopfallback = mAnimQueue.front().mGroup.starts_with("idle");
-                mAnimation->play(mAnimQueue.front().mGroup, Priority_Default, MWRender::Animation::BlendMask_All,
-                    false, 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
+                mAnimation->play(mAnimQueue.front().mGroup, Priority_Default, MWRender::Animation::BlendMask_All, false,
+                    1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
             }
             else if (mAnimQueue.front().mLoopCount > 1 && mAnimQueue.front().mPersist)
             {
@@ -1881,7 +1881,7 @@ namespace MWMechanics
                 mAnimation->disable(mAnimQueue.front().mGroup);
                 mAnimQueue.pop_front();
             }
-            }
+        }
         else
         {
             mAnimQueue.front().mLoopCount = mAnimation->getCurrentLoopCount(mAnimQueue.front().mGroup);
