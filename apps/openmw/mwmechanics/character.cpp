@@ -1855,13 +1855,7 @@ namespace MWMechanics
         if (mAnimQueue.empty())
             return;
 
-        bool isFrontAnimPlaying = false;
-        if (mAnimQueue.front().mScripted)
-            isFrontAnimPlaying = mAnimation->isPlayingScripted(mAnimQueue.front().mGroup);
-        else
-            isFrontAnimPlaying = mAnimation->isPlaying(mAnimQueue.front().mGroup);
-
-        if (!isFrontAnimPlaying)
+        if (!mAnimation->isPlaying(mAnimQueue.front().mGroup))
         {
             if (mAnimQueue.size() > 1)
             {
