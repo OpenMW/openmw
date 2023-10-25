@@ -2366,7 +2366,7 @@ namespace MWMechanics
                     }
                 }
 
-                if (!isMovementAnimationControlled())
+                if (!isMovementAnimationControlled() && mAnimQueue.empty())
                     world->queueMovement(mPtr, vec);
             }
 
@@ -2435,7 +2435,7 @@ namespace MWMechanics
         }
 
         // Update movement
-        if (isMovementAnimationControlled() && mPtr.getClass().isActor())
+        if (isMovementAnimationControlled() && mPtr.getClass().isActor() && mAnimQueue.empty())
             world->queueMovement(mPtr, moved);
 
         mSkipAnim = false;
