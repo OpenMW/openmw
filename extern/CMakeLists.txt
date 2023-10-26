@@ -68,6 +68,7 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
     set(MYGUI_BUILD_DEMOS OFF CACHE BOOL "")
     set(MYGUI_BUILD_PLUGINS OFF CACHE BOOL "")
     set(MYGUI_BUILD_TOOLS OFF CACHE BOOL "")
+    set(MYGUI_DONT_USE_OBSOLETE ON CACHE BOOL "")
 
     if(MYGUI_STATIC)
         set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
@@ -77,8 +78,8 @@ if(NOT OPENMW_USE_SYSTEM_MYGUI)
 
     include(FetchContent)
     FetchContent_Declare(mygui
-        URL https://github.com/MyGUI/mygui/archive/refs/tags/MyGUI3.4.2.zip
-        URL_HASH SHA512=d15de716102237ca55b952c2ab52f84b91766332a0357a50b17c20cf2f168666ddaab52d088d7bb8f713ad0fc27e19d74e6ae2673f310a8f60a3b5754f0a0ba7
+        URL https://github.com/MyGUI/mygui/archive/refs/tags/MyGUI3.4.3.zip
+        URL_HASH SHA512=c804ef665e786076582367f171082cd2181fdbd214300ddcca4a4245c5a0f45e62e72778ee2d96ec46b393e22477dd729f9bb3006e6eecbf536674e34a057721
         SOURCE_DIR fetched/mygui
     )
     FetchContent_MakeAvailableExcludeFromAll(mygui)

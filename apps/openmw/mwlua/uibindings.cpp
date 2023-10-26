@@ -111,6 +111,10 @@ namespace MWLua
         };
 
         sol::table api = context.mLua->newTable();
+        api["_setHudVisibility"] = [luaManager = context.mLuaManager](bool state) {
+            luaManager->addAction([state] { MWBase::Environment::get().getWindowManager()->setHudVisibility(state); });
+        };
+        api["_isHudVisible"] = []() -> bool { return MWBase::Environment::get().getWindowManager()->isHudVisible(); };
         api["showMessage"]
             = [luaManager = context.mLuaManager](std::string_view message) { luaManager->addUIMessage(message); };
         api["CONSOLE_COLOR"] = LuaUtil::makeStrictReadOnly(context.mLua->tableFromPairs<std::string, Misc::Color>({
@@ -296,7 +300,6 @@ namespace MWLua
               };
 
         // TODO
-        // api["_showHUD"] = [](bool) {};
         // api["_showMouseCursor"] = [](bool) {};
 
         return LuaUtil::makeReadOnly(api);

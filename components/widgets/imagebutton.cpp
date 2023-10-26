@@ -34,7 +34,7 @@ namespace Gui
         updateImage();
     }
 
-    void ImageButton::setPropertyOverride(const std::string& _key, const std::string& _value)
+    void ImageButton::setPropertyOverride(std::string_view _key, std::string_view _value)
     {
         if (_key == "ImageHighlighted")
             mImageHighlighted = _value;
@@ -56,6 +56,7 @@ namespace Gui
         else
             ImageBox::setPropertyOverride(_key, _value);
     }
+
     void ImageButton::onMouseSetFocus(Widget* _old)
     {
         mMouseFocus = true;

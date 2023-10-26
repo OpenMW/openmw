@@ -211,6 +211,13 @@ namespace MWLua
             objectT["isValid"] = [](const ObjectT& o) { return !o.ptrOrEmpty().isEmpty(); };
             objectT["recordId"] = sol::readonly_property(
                 [](const ObjectT& o) -> std::string { return o.ptr().getCellRef().getRefId().serializeText(); });
+            objectT["globalVariable"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<std::string> {
+                std::string globalVariable = o.ptr().getCellRef().getGlobalVariable();
+                if (globalVariable.empty())
+                    return sol::nullopt;
+                else
+                    return ESM::RefId::stringRefId(globalVariable).serializeText();
+            });
             objectT["cell"] = sol::readonly_property([](const ObjectT& o) -> sol::optional<Cell<ObjectT>> {
                 const MWWorld::Ptr& ptr = o.ptr();
                 MWWorld::WorldModel* wm = MWBase::Environment::get().getWorldModel();

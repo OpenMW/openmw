@@ -247,7 +247,8 @@ namespace MWGui
         void showCrosshair(bool show) override;
 
         /// Turn visibility of HUD on or off
-        bool toggleHud() override;
+        bool setHudVisibility(bool show) override;
+        bool isHudVisible() const override { return mHudEnabled; }
 
         void disallowMouse() override;
         void allowMouse() override;
@@ -560,7 +561,7 @@ namespace MWGui
          */
         void onRetrieveTag(const MyGUI::UString& _tag, MyGUI::UString& _result);
 
-        void onCursorChange(const std::string& name);
+        void onCursorChange(std::string_view name);
         void onKeyFocusChanged(MyGUI::Widget* widget);
 
         // Key pressed while playing a video
@@ -568,8 +569,8 @@ namespace MWGui
 
         void sizeVideo(int screenWidth, int screenHeight);
 
-        void onClipboardChanged(const std::string& _type, const std::string& _data);
-        void onClipboardRequested(const std::string& _type, std::string& _data);
+        void onClipboardChanged(std::string_view _type, std::string_view _data);
+        void onClipboardRequested(std::string_view _type, std::string& _data);
 
         void createTextures();
         void createCursors();

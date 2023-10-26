@@ -531,6 +531,7 @@ macOS13_Xcode14_arm64:
   - choco install ccache -y
   - choco install vswhere -y
   - choco install ninja -y
+  - choco install python -y
   - choco install awscli -y
   - refreshenv
   - |
@@ -590,7 +591,7 @@ macOS13_Xcode14_arm64:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: ninja-v7
+    key: ninja-v8
     paths:
     - ccache
     - deps
@@ -652,6 +653,7 @@ macOS13_Xcode14_arm64:
   - choco install 7zip -y
   - choco install ccache -y
   - choco install vswhere -y
+  - choco install python -y
   - choco install awscli -y
   - refreshenv
   - |
@@ -710,7 +712,7 @@ macOS13_Xcode14_arm64:
     - Get-Volume
     - Copy-Item C:\ProgramData\chocolatey\logs\chocolatey.log
   cache:
-    key: msbuild-v7
+    key: msbuild-v8
     paths:
     - ccache
     - deps

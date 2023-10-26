@@ -454,7 +454,7 @@ set(Boost_NO_WARN_NEW_VERSIONS ON)  # ignore warnings about new releases of boos
 find_package(Boost 1.6.2 REQUIRED COMPONENTS ${BOOST_COMPONENTS} OPTIONAL_COMPONENTS ${BOOST_OPTIONAL_COMPONENTS})
 
 if(OPENMW_USE_SYSTEM_MYGUI)
-    find_package(MyGUI 3.4.2 REQUIRED)
+    find_package(MyGUI 3.4.3 REQUIRED)
 endif()
 find_package(SDL2 2.0.9 REQUIRED)
 find_package(OpenAL REQUIRED)

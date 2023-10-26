@@ -77,6 +77,7 @@
     Bug #7603: Scripts menu size is not updated properly
     Bug #7604: Goblins Grunt becomes idle once injured
     Bug #7609: ForceGreeting should not open dialogue for werewolves
+    Bug #7611: Beast races' idle animations slide after turning or jumping in place
     Bug #7630: Charm can be cast on creatures
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
@@ -108,6 +109,7 @@
     Feature #7546: Start the game on Fredas
     Feature #7568: Uninterruptable scripted music
     Feature #7618: Show the player character's health in the save details
+    Feature #7634: Support NiParticleBomb
     Task #5896: Do not use deprecated MyGUI properties
     Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector

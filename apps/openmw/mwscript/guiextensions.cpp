@@ -192,7 +192,8 @@ namespace MWScript
         public:
             void execute(Interpreter::Runtime& runtime) override
             {
-                bool state = MWBase::Environment::get().getWindowManager()->toggleHud();
+                bool state = MWBase::Environment::get().getWindowManager()->setHudVisibility(
+                    !MWBase::Environment::get().getWindowManager()->isHudVisible());
                 runtime.getContext().report(state ? "GUI -> On" : "GUI -> Off");
 
                 if (!state)

@@ -238,7 +238,7 @@ namespace MWGui
             mLines.emplace_back(separator, (MyGUI::Widget*)nullptr, NoSpellIndex);
         }
 
-        MyGUI::TextBox* groupWidget = mScrollView->createWidget<Gui::TextBox>("SandBrightText",
+        MyGUI::TextBox* groupWidget = mScrollView->createWidget<MyGUI::TextBox>("SandBrightText",
             MyGUI::IntCoord(0, 0, mScrollView->getWidth(), 24), MyGUI::Align::Left | MyGUI::Align::Top);
         groupWidget->setCaptionWithReplacing(label);
         groupWidget->setTextAlign(MyGUI::Align::Left);
@@ -246,7 +246,7 @@ namespace MWGui
 
         if (!label2.empty())
         {
-            MyGUI::TextBox* groupWidget2 = mScrollView->createWidget<Gui::TextBox>("SandBrightText",
+            MyGUI::TextBox* groupWidget2 = mScrollView->createWidget<MyGUI::TextBox>("SandBrightText",
                 MyGUI::IntCoord(0, 0, mScrollView->getWidth(), 24), MyGUI::Align::Left | MyGUI::Align::Top);
             groupWidget2->setCaptionWithReplacing(label2);
             groupWidget2->setTextAlign(MyGUI::Align::Right);

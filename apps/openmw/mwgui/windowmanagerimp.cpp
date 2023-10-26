@@ -1228,7 +1228,7 @@ namespace MWGui
         MWBase::Environment::get().getStateManager()->requestQuit();
     }
 
-    void WindowManager::onCursorChange(const std::string& name)
+    void WindowManager::onCursorChange(std::string_view name)
     {
         mCursorManager->cursorChanged(name);
     }
@@ -1605,9 +1605,9 @@ namespace MWGui
         mQuickKeysMenu->activateQuickKey(index);
     }
 
-    bool WindowManager::toggleHud()
+    bool WindowManager::setHudVisibility(bool show)
     {
-        mHudEnabled = !mHudEnabled;
+        mHudEnabled = show;
         updateVisible();
         mMessageBoxManager->setVisible(mHudEnabled);
         return mHudEnabled;
@@ -2072,13 +2072,13 @@ namespace MWGui
             mWerewolfFader->notifyAlphaChanged(set ? 1.0f : 0.0f);
     }
 
-    void WindowManager::onClipboardChanged(const std::string& _type, const std::string& _data)
+    void WindowManager::onClipboardChanged(std::string_view _type, std::string_view _data)
     {
         if (_type == "Text")
             SDL_SetClipboardText(MyGUI::TextIterator::getOnlyText(MyGUI::UString(_data)).asUTF8().c_str());
     }
 
-    void WindowManager::onClipboardRequested(const std::string& _type, std::string& _data)
+    void WindowManager::onClipboardRequested(std::string_view _type, std::string& _data)
     {
         if (_type != "Text")
             return;
@@ -2187,7 +2187,7 @@ namespace MWGui
             ResourceImageSetPointerFix* imgSetPointer = resource->castType<ResourceImageSetPointerFix>(false);
             if (!imgSetPointer)
                 continue;
-            std::string tex_name = imgSetPointer->getImageSet()->getIndexInfo(0, 0).texture;
+            auto tex_name = imgSetPointer->getImageSet()->getIndexInfo(0, 0).texture;
 
             osg::ref_ptr<osg::Image> image = mResourceSystem->getImageManager()->getImage(tex_name);
 
