@@ -143,7 +143,7 @@ namespace MWLua
                 throw std::runtime_error("The argument must be a player.");
             return MWBase::Environment::get().getWorld()->isTeleportingEnabled();
         };
-        player["setTeleportingEnabled"] = [context](const Object& player, bool state) {
+        player["setTeleportingEnabled"] = [](const Object& player, bool state) {
             if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
                 throw std::runtime_error("The argument must be a player.");
             if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
