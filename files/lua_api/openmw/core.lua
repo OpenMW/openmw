@@ -12,14 +12,18 @@
 
 ---
 -- A read-only list of all @{#FactionRecord}s in the world database.
--- @field [parent=#core] #list<#FactionRecord> factions
+-- @field [parent=#Character] #list<#FactionRecord> factions
 
 --- @{#Character}: Class and Character Data
 -- @field [parent=#core] #Character character
 
+
+--- @{#Classes}: Class Data
+-- @field [parent=#Character] #Classes classes
+
 ---
 -- A read-only list of all @{#ClassRecord}s in the world database.
--- @field [parent=#Character] #list<#ClassRecord> classes
+-- @field [parent=#Classes] #list<#ClassRecord> records
 
 ---
 -- Terminates the game and quits to the OS. Should be used only for testing purposes.

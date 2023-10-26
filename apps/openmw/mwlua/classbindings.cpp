@@ -1,5 +1,6 @@
 #include "classbindings.hpp"
-
+#include "stats.hpp"
+#include "types/types.hpp"
 #include <components/esm3/loadclas.hpp>
 #include <components/lua/luastate.hpp>
 
@@ -27,27 +28,12 @@ namespace sol
 
 namespace MWLua
 {
-    using classStore = MWWorld::Store<ESM::Class>;
 
-    void initCoreClassBindings(const Context& context)
+    sol::table initCoreClassBindings(const Context& context)
     {
         sol::state_view& lua = context.mLua->sol();
-        sol::usertype<classStore> classStoreT = lua.new_usertype<classStore>("ESM3_ClassStore");
-        classStoreT[sol::meta_function::to_string] = [](const classStore& store) {
-            return "ESM3_ClassStore{" + std::to_string(store.getSize()) + " classes}";
-        };
-        classStoreT[sol::meta_function::length] = [](const classStore& store) { return store.getSize(); };
-        classStoreT[sol::meta_function::index] = sol::overload(
-            [](const classStore& store, size_t index) -> const ESM::Class* {
-                if (index == 0 || index > store.getSize())
-                    return nullptr;
-                return store.at(index - 1);
-            },
-            [](const classStore& store, std::string_view classId) -> const ESM::Class* {
-                return store.search(ESM::RefId::deserializeText(classId));
-            });
-        classStoreT[sol::meta_function::pairs] = lua["ipairsForArray"].template get<sol::function>();
-        classStoreT[sol::meta_function::ipairs] = lua["ipairsForArray"].template get<sol::function>();
+        sol::table classes(context.mLua->sol(), sol::create);
+        addRecordFunctionBinding<ESM::Class>(classes, context);
         // class record
         auto classT = lua.new_usertype<ESM::Class>("ESM3_Class");
         classT[sol::meta_function::to_string]
@@ -92,15 +78,10 @@ namespace MWLua
 
             return res;
         });
-        classT["specialization"] = sol::readonly_property([](const ESM::Class& rec) -> std::string_view {
-            if (rec.mData.mSpecialization == ESM::Class::Stealth)
-                return "stealth";
-            else if (rec.mData.mSpecialization == ESM::Class::Magic)
-                return "magic";
-            else
-                return "combat";
-        });
+        classT["specialization"] = sol::readonly_property(
+            [](const ESM::Class& rec) -> std::string_view { return getSpecialization(rec.mData.mSpecialization); });
         classT["isPlayable"]
             = sol::readonly_property([](const ESM::Class& rec) -> bool { return rec.mData.mIsPlayable; });
+        return classes;
     }
 }
