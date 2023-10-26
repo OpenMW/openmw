@@ -59,6 +59,7 @@
     Bug #7134: Saves with an invalid last generated RefNum can be loaded
     Bug #7163: Myar Aranath: Wheat breaks the GUI
     Bug #7172: Current music playlist continues playing indefinitely if next playlist is empty
+    Bug #7204: Missing actor scripts freeze the game
     Bug #7229: Error marker loading failure is not handled
     Bug #7243: Supporting loading external files from VFS from esm files
     Bug #7284: "Your weapon has no effect." message doesn't always show when the player character attempts to attack
