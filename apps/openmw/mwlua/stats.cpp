@@ -60,16 +60,16 @@ namespace
 
 namespace MWLua
 {
-    std::string_view getSpecialization(const int var)
+    std::string_view getSpecialization(const int32_t val)
     {
-        if (var == ESM::Class::Stealth)
+        if (val == ESM::Class::Stealth)
             return "stealth";
-        else if (var == ESM::Class::Magic)
+        else if (val == ESM::Class::Magic)
             return "magic";
         else
             return "combat";
     }
-    
+
     static void addStatUpdateAction(MWLua::LuaManager* manager, const SelfObject& obj)
     {
         if (!obj.mStatsCache.empty())
