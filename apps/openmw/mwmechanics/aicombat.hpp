@@ -70,7 +70,7 @@ namespace MWMechanics
 
         void startFleeing();
         void stopFleeing();
-        bool isFleeing();
+        bool isFleeing() const;
     };
 
     /// \brief Causes the actor to fight another actor

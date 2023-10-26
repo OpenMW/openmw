@@ -117,6 +117,9 @@ namespace MWMechanics
         /// Is there any pursuit package.
         bool isInPursuit() const;
 
+        /// Is the actor fleeing?
+        bool isFleeing() const;
+
         /// Removes all packages using the specified id.
         void removePackagesById(AiPackageTypeId id);
 

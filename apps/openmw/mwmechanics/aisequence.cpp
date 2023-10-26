@@ -135,6 +135,15 @@ namespace MWMechanics
         return mNumPursuitPackages > 0;
     }
 
+    bool AiSequence::isFleeing() const
+    {
+        if (!isInCombat())
+            return false;
+
+        const AiCombatStorage* storage = mAiState.getPtr<AiCombatStorage>();
+        return storage && storage->isFleeing();
+    }
+
     bool AiSequence::isEngagedWithActor() const
     {
         if (!isInCombat())
