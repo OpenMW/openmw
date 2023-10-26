@@ -131,7 +131,6 @@ namespace Launcher
         void reloadCells(QStringList selectedFiles);
         void refreshDataFilesView();
         void updateNavMeshProgress(int minDataSize);
-        QString selectDirectory();
 
         /**
          * Returns the file paths of all selected content files
