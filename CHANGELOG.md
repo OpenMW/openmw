@@ -33,6 +33,7 @@
     Bug #6807: Ultimate Galleon is not working properly
     Bug #6893: Lua: Inconsistent behavior with actors affected by Disable and SetDelete commands
     Bug #6894: Added item combines with equipped stack instead of creating a new unequipped stack
+    Bug #6932: Creatures flee from my followers and we have to chase after them
     Bug #6939: OpenMW-CS: ID columns are too short
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
     Bug #6964: Nerasa Dralor Won't Follow
