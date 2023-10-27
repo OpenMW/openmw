@@ -47,6 +47,7 @@ namespace MWLua
         constexpr std::string_view ESM4Ingredient = "ESM4Ingredient";
         constexpr std::string_view ESM4Light = "ESM4Light";
         constexpr std::string_view ESM4MiscItem = "ESM4Miscellaneous";
+        constexpr std::string_view ESM4MovableStatic = "ESM4MovableStatic";
         constexpr std::string_view ESM4Potion = "ESM4Potion";
         constexpr std::string_view ESM4Static = "ESM4Static";
         constexpr std::string_view ESM4Terminal = "ESM4Terminal";
@@ -91,6 +92,7 @@ namespace MWLua
             { ESM::REC_INGR4, ObjectTypeName::ESM4Ingredient },
             { ESM::REC_LIGH4, ObjectTypeName::ESM4Light },
             { ESM::REC_MISC4, ObjectTypeName::ESM4MiscItem },
+            { ESM::REC_MSTT4, ObjectTypeName::ESM4MovableStatic },
             { ESM::REC_ALCH4, ObjectTypeName::ESM4Potion },
             { ESM::REC_STAT4, ObjectTypeName::ESM4Static },
             { ESM::REC_TERM4, ObjectTypeName::ESM4Terminal },
@@ -230,6 +232,7 @@ namespace MWLua
         addType(ObjectTypeName::ESM4Ingredient, { ESM::REC_INGR4 });
         addType(ObjectTypeName::ESM4Light, { ESM::REC_LIGH4 });
         addType(ObjectTypeName::ESM4MiscItem, { ESM::REC_MISC4 });
+        addType(ObjectTypeName::ESM4MovableStatic, { ESM::REC_MSTT4 });
         addType(ObjectTypeName::ESM4Potion, { ESM::REC_ALCH4 });
         addType(ObjectTypeName::ESM4Static, { ESM::REC_STAT4 });
         addESM4TerminalBindings(addType(ObjectTypeName::ESM4Terminal, { ESM::REC_TERM4 }), context);

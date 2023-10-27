@@ -301,6 +301,7 @@ namespace MWWorld
             case ESM::REC_LVLC4:
             case ESM::REC_LVLN4:
             case ESM::REC_MISC4:
+            case ESM::REC_MSTT4:
             case ESM::REC_NPC_4:
             case ESM::REC_STAT4:
             case ESM::REC_TERM4:

@@ -1881,6 +1881,9 @@
 --- Functions for @{#ESM4Miscellaneous} objects
 -- @field [parent=#types] #ESM4Miscellaneous ESM4Miscellaneous
 
+--- Functions for @{#ESM4MovableStatic} objects
+-- @field [parent=#types] #ESM4MovableStatic ESM4MovableStatic
+
 --- Functions for @{#ESM4Potion} objects
 -- @field [parent=#types] #ESM4Potion ESM4Potion
 
