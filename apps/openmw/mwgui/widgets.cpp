@@ -355,11 +355,9 @@ namespace MWGui::Widgets
 
         const MWWorld::ESMStore& store = *MWBase::Environment::get().getESMStore();
 
-        const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().search(mEffectParams.mEffectID);
+        const ESM::MagicEffect* magicEffect = store.get<ESM::MagicEffect>().find(mEffectParams.mEffectID);
         const ESM::Attribute* attribute = store.get<ESM::Attribute>().search(mEffectParams.mAttribute);
         const ESM::Skill* skill = store.get<ESM::Skill>().search(mEffectParams.mSkill);
-
-        assert(magicEffect);
 
         auto windowManager = MWBase::Environment::get().getWindowManager();
 
