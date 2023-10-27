@@ -229,7 +229,7 @@ namespace MWMechanics
             }
 
             if (mPathFinder.isPathConstructed())
-                storage.setState(AiWanderStorage::Wander_Walking);
+                storage.setState(AiWanderStorage::Wander_Walking, !mUsePathgrid);
         }
 
         if (!cStats.getMovementFlag(CreatureStats::Flag_ForceJump)
@@ -499,7 +499,7 @@ namespace MWMechanics
         if (!checkIdle(actor, storage.mIdleAnimation) && (greetingState == Greet_Done || greetingState == Greet_None))
         {
             if (mPathFinder.isPathConstructed())
-                storage.setState(AiWanderStorage::Wander_Walking);
+                storage.setState(AiWanderStorage::Wander_Walking, !mUsePathgrid);
             else
                 storage.setState(AiWanderStorage::Wander_ChooseAction);
         }
