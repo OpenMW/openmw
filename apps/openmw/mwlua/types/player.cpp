@@ -138,6 +138,18 @@ namespace MWLua
                 throw std::runtime_error("The argument must be a player.");
             return input->getControlSwitch(key);
         };
+        player["isTeleportingEnabled"] = [](const Object& player) -> bool {
+            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+                throw std::runtime_error("The argument must be a player.");
+            return MWBase::Environment::get().getWorld()->isTeleportingEnabled();
+        };
+        player["setTeleportingEnabled"] = [](const Object& player, bool state) {
+            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+                throw std::runtime_error("The argument must be a player.");
+            if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
+                throw std::runtime_error("Only player and global scripts can toggle teleportation.");
+            MWBase::Environment::get().getWorld()->enableTeleporting(state);
+        };
         player["setControlSwitch"] = [input](const Object& player, std::string_view key, bool v) {
             if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
                 throw std::runtime_error("The argument must be a player.");
