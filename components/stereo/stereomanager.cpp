@@ -114,13 +114,15 @@ namespace Stereo
         return *sInstance;
     }
 
-    Manager::Manager(osgViewer::Viewer* viewer, bool enableStereo)
+    Manager::Manager(osgViewer::Viewer* viewer, bool enableStereo, double near, double far)
         : mViewer(viewer)
         , mMainCamera(mViewer->getCamera())
         , mUpdateCallback(new StereoUpdateCallback(this))
         , mMasterProjectionMatrix(osg::Matrixd::identity())
         , mEyeResolutionOverriden(false)
         , mEyeResolutionOverride(0, 0)
+        , mNear(near)
+        , mFar(far)
         , mFrustumManager(nullptr)
         , mUpdateViewCallback(nullptr)
     {
@@ -289,20 +291,17 @@ namespace Stereo
 
     void Manager::update()
     {
-        const double near_ = Settings::camera().mNearClip;
-        const double far_ = Settings::camera().mViewingDistance;
-
         if (mUpdateViewCallback)
         {
             mUpdateViewCallback->updateView(mView[0], mView[1]);
             mViewOffsetMatrix[0] = mView[0].viewMatrix(true);
             mViewOffsetMatrix[1] = mView[1].viewMatrix(true);
-            mProjectionMatrix[0] = mView[0].perspectiveMatrix(near_, far_, false);
-            mProjectionMatrix[1] = mView[1].perspectiveMatrix(near_, far_, false);
+            mProjectionMatrix[0] = mView[0].perspectiveMatrix(mNear, mFar, false);
+            mProjectionMatrix[1] = mView[1].perspectiveMatrix(mNear, mFar, false);
             if (SceneUtil::AutoDepth::isReversed())
             {
-                mProjectionMatrixReverseZ[0] = mView[0].perspectiveMatrix(near_, far_, true);
-                mProjectionMatrixReverseZ[1] = mView[1].perspectiveMatrix(near_, far_, true);
+                mProjectionMatrixReverseZ[0] = mView[0].perspectiveMatrix(mNear, mFar, true);
+                mProjectionMatrixReverseZ[1] = mView[1].perspectiveMatrix(mNear, mFar, true);
             }
 
             View masterView;
@@ -310,7 +309,7 @@ namespace Stereo
             masterView.fov.angleUp = std::max(mView[0].fov.angleUp, mView[1].fov.angleUp);
             masterView.fov.angleLeft = std::min(mView[0].fov.angleLeft, mView[1].fov.angleLeft);
             masterView.fov.angleRight = std::max(mView[0].fov.angleRight, mView[1].fov.angleRight);
-            auto projectionMatrix = masterView.perspectiveMatrix(near_, far_, false);
+            auto projectionMatrix = masterView.perspectiveMatrix(mNear, mFar, false);
             mMainCamera->setProjectionMatrix(projectionMatrix);
         }
         else

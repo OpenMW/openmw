@@ -313,6 +313,8 @@ bool OMW::Engine::frame(float frametime)
         mLuaManager->reportStats(frameNumber, *stats);
     }
 
+    mStereoManager->updateSettings(Settings::camera().mNearClip, Settings::camera().mViewingDistance);
+
     mViewer->eventTraversal();
     mViewer->updateTraversal();
 
@@ -634,7 +636,8 @@ void OMW::Engine::prepareEngine()
 
     bool stereoEnabled
         = Settings::Manager::getBool("stereo enabled", "Stereo") || osg::DisplaySettings::instance().get()->getStereo();
-    mStereoManager = std::make_unique<Stereo::Manager>(mViewer, stereoEnabled);
+    mStereoManager = std::make_unique<Stereo::Manager>(
+        mViewer, stereoEnabled, Settings::camera().mNearClip, Settings::camera().mViewingDistance);
 
     osg::ref_ptr<osg::Group> rootNode(new osg::Group);
     mViewer->setSceneData(rootNode);

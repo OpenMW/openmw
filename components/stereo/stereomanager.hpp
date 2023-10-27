@@ -76,11 +76,19 @@ namespace Stereo
         //! @Param viewer the osg viewer whose stereo should be managed.
         //! @Param enableStereo whether or not stereo should be enabled.
         //! @Param enableMultiview whether or not to make use of the GL_OVR_Multiview extension, if supported.
-        Manager(osgViewer::Viewer* viewer, bool enableStereo);
+        //! @Param near defines distance to near camera clipping plane from view point.
+        //! @Param far defines distance to far camera clipping plane from view point.
+        explicit Manager(osgViewer::Viewer* viewer, bool enableStereo, double near, double far);
         ~Manager();
 
         //! Called during update traversal
         void update();
+
+        void updateSettings(double near, double far)
+        {
+            mNear = near;
+            mFar = far;
+        }
 
         //! Initializes all details of stereo if applicable. If the constructor was called with enableMultiview=true,
         //! and the GL_OVR_Multiview extension is supported, Stereo::getMultiview() will return true after this call.
@@ -138,6 +146,8 @@ namespace Stereo
         std::shared_ptr<MultiviewFramebuffer> mMultiviewFramebuffer;
         bool mEyeResolutionOverriden;
         osg::Vec2i mEyeResolutionOverride;
+        double mNear;
+        double mFar;
 
         std::array<View, 2> mView;
         std::array<osg::Matrixd, 2> mViewOffsetMatrix;
