@@ -92,7 +92,7 @@ namespace Stereo
 
         //! Initializes all details of stereo if applicable. If the constructor was called with enableMultiview=true,
         //! and the GL_OVR_Multiview extension is supported, Stereo::getMultiview() will return true after this call.
-        void initializeStereo(osg::GraphicsContext* gc, bool enableMultiview);
+        void initializeStereo(osg::GraphicsContext* gc, bool enableMultiview, bool sharedShadowMaps);
 
         //! Callback that updates stereo configuration during the update pass
         void setUpdateViewCallback(std::shared_ptr<UpdateViewCallback> cb);
@@ -163,13 +163,34 @@ namespace Stereo
         osg::ref_ptr<Identifier> mIdentifierRight = new Identifier();
     };
 
+    struct CustomView
+    {
+        Stereo::View mLeft;
+        Stereo::View mRight;
+    };
+
+    struct Settings
+    {
+        bool mMultiview;
+        bool mAllowDisplayListsForMultiview;
+        bool mSharedShadowMaps;
+        std::optional<CustomView> mCustomView;
+        std::optional<osg::Vec2i> mEyeResolution;
+    };
+
     //! Performs stereo-specific initialization operations.
     class InitializeStereoOperation final : public osg::GraphicsOperation
     {
     public:
-        InitializeStereoOperation();
+        explicit InitializeStereoOperation(const Settings& settings);
 
         void operator()(osg::GraphicsContext* graphicsContext) override;
+
+    private:
+        bool mMultiview;
+        bool mSharedShadowMaps;
+        std::optional<CustomView> mCustomView;
+        std::optional<osg::Vec2i> mEyeResolution;
     };
 }
 
