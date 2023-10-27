@@ -94,8 +94,8 @@ namespace MWLua
         api["getViewTransform"] = [camera]() { return LuaUtil::TransformM{ camera->getViewMatrix() }; };
 
         api["viewportToWorldVector"] = [camera, renderingManager](osg::Vec2f pos) -> osg::Vec3f {
-            double width = Settings::Manager::getInt("resolution x", "Video");
-            double height = Settings::Manager::getInt("resolution y", "Video");
+            const double width = Settings::video().mResolutionX;
+            const double height = Settings::video().mResolutionY;
             double aspect = (height == 0.0) ? 1.0 : width / height;
             double fovTan = std::tan(osg::DegreesToRadians(renderingManager->getFieldOfView()) / 2);
             osg::Matrixf invertedViewMatrix;
@@ -106,8 +106,8 @@ namespace MWLua
         };
 
         api["worldToViewportVector"] = [camera](osg::Vec3f pos) {
-            double width = Settings::Manager::getInt("resolution x", "Video");
-            double height = Settings::Manager::getInt("resolution y", "Video");
+            const double width = Settings::video().mResolutionX;
+            const double height = Settings::video().mResolutionY;
 
             osg::Matrix windowMatrix
                 = osg::Matrix::translate(1.0, 1.0, 1.0) * osg::Matrix::scale(0.5 * width, 0.5 * height, 0.5);

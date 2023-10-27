@@ -273,7 +273,7 @@ namespace Stereo
     void Manager::updateStereoFramebuffer()
     {
         // VR-TODO: in VR, still need to have this framebuffer attached before the postprocessor is created
-        // auto samples = Settings::Manager::getInt("antialiasing", "Video");
+        // auto samples = /*do not use Settings here*/;
         // auto eyeRes = eyeResolution();
 
         // if (mMultiviewFramebuffer)

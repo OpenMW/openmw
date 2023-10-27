@@ -1,7 +1,7 @@
 #include "sdlinputwrapper.hpp"
 
 #include <components/debug/debuglog.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include <osgViewer/Viewer>
 
@@ -187,8 +187,10 @@ namespace SDLUtil
                     {
                         case SDL_DISPLAYEVENT_ORIENTATION:
                             if (mSensorListener
-                                && evt.display.display == (unsigned int)Settings::Manager::getInt("screen", "Video"))
+                                && evt.display.display == static_cast<Uint32>(Settings::video().mScreen))
+                            {
                                 mSensorListener->displayOrientationChanged();
+                            }
                             break;
                         default:
                             break;

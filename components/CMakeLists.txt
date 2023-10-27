@@ -87,6 +87,8 @@ add_component_dir (settings
     settingvalue
     shadermanager
     values
+    screenshotsettings
+    windowmode
     )
 
 add_component_dir (bsa
@@ -336,7 +338,15 @@ add_component_dir (fontloader
     )
 
 add_component_dir (sdlutil
-    gl4es_init sdlgraphicswindow imagetosurface sdlinputwrapper sdlvideowrapper events sdlcursormanager sdlmappings
+    events
+    gl4es_init
+    imagetosurface
+    sdlcursormanager
+    sdlgraphicswindow
+    sdlinputwrapper
+    sdlmappings
+    sdlvideowrapper
+    vsyncmode
     )
 
 add_component_dir (version

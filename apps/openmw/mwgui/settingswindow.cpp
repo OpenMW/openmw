@@ -354,7 +354,7 @@ namespace MWGui
             += MyGUI::newDelegate(this, &SettingsWindow::onResetDefaultBindings);
 
         // fill resolution list
-        int screen = Settings::Manager::getInt("screen", "Video");
+        const int screen = Settings::video().mScreen;
         int numDisplayModes = SDL_GetNumDisplayModes(screen);
         std::vector<std::pair<int, int>> resolutions;
         for (int i = 0; i < numDisplayModes; i++)
@@ -396,8 +396,7 @@ namespace MWGui
 
         updateMaxLightsComboBox(mMaxLights);
 
-        Settings::WindowMode windowMode
-            = static_cast<Settings::WindowMode>(Settings::Manager::getInt("window mode", "Video"));
+        const Settings::WindowMode windowMode = Settings::video().mWindowMode;
         mWindowBorderButton->setEnabled(
             windowMode != Settings::WindowMode::Fullscreen && windowMode != Settings::WindowMode::WindowedFullscreen);
 
@@ -491,8 +490,8 @@ namespace MWGui
         int resX, resY;
         parseResolution(resX, resY, resStr);
 
-        Settings::Manager::setInt("resolution x", "Video", resX);
-        Settings::Manager::setInt("resolution y", "Video", resY);
+        Settings::video().mResolutionX.set(resX);
+        Settings::video().mResolutionY.set(resY);
 
         apply();
     }
@@ -506,8 +505,8 @@ namespace MWGui
     {
         mResolutionList->setIndexSelected(MyGUI::ITEM_NONE);
 
-        int currentX = Settings::Manager::getInt("resolution x", "Video");
-        int currentY = Settings::Manager::getInt("resolution y", "Video");
+        const int currentX = Settings::video().mResolutionX;
+        const int currentY = Settings::video().mResolutionY;
 
         for (size_t i = 0; i < mResolutionList->getItemCount(); ++i)
         {
@@ -591,23 +590,22 @@ namespace MWGui
             "#{OMWEngine:ChangeRequiresRestart}", { "#{Interface:OK}" }, true);
     }
 
-    void SettingsWindow::onVSyncModeChanged(MyGUI::ComboBox* _sender, size_t pos)
+    void SettingsWindow::onVSyncModeChanged(MyGUI::ComboBox* sender, size_t pos)
     {
         if (pos == MyGUI::ITEM_NONE)
             return;
 
-        int index = static_cast<int>(_sender->getIndexSelected());
-        Settings::Manager::setInt("vsync mode", "Video", index);
+        Settings::video().mVsyncMode.set(static_cast<SDLUtil::VSyncMode>(sender->getIndexSelected()));
         apply();
     }
 
-    void SettingsWindow::onWindowModeChanged(MyGUI::ComboBox* _sender, size_t pos)
+    void SettingsWindow::onWindowModeChanged(MyGUI::ComboBox* sender, size_t pos)
     {
         if (pos == MyGUI::ITEM_NONE)
             return;
 
-        int index = static_cast<int>(_sender->getIndexSelected());
-        if (index == static_cast<size_t>(Settings::WindowMode::WindowedFullscreen))
+        const Settings::WindowMode windowMode = static_cast<Settings::WindowMode>(sender->getIndexSelected());
+        if (windowMode == Settings::WindowMode::WindowedFullscreen)
         {
             mResolutionList->setEnabled(false);
             mWindowModeHint->setVisible(true);
@@ -618,12 +616,12 @@ namespace MWGui
             mWindowModeHint->setVisible(false);
         }
 
-        if (index == static_cast<size_t>(Settings::WindowMode::Windowed))
+        if (windowMode == Settings::WindowMode::Windowed)
             mWindowBorderButton->setEnabled(true);
         else
             mWindowBorderButton->setEnabled(false);
 
-        Settings::Manager::setInt("window mode", "Video", index);
+        Settings::video().mWindowMode.set(windowMode);
         apply();
     }
 
@@ -849,14 +847,12 @@ namespace MWGui
 
     void SettingsWindow::updateWindowModeSettings()
     {
-        size_t index = static_cast<size_t>(Settings::Manager::getInt("window mode", "Video"));
+        const Settings::WindowMode windowMode = Settings::video().mWindowMode;
+        const std::size_t windowModeIndex = static_cast<std::size_t>(windowMode);
 
-        if (index > static_cast<size_t>(Settings::WindowMode::Windowed))
-            index = MyGUI::ITEM_NONE;
+        mWindowModeList->setIndexSelected(windowModeIndex);
 
-        mWindowModeList->setIndexSelected(index);
-
-        if (index != static_cast<size_t>(Settings::WindowMode::Windowed) && index != MyGUI::ITEM_NONE)
+        if (windowMode != Settings::WindowMode::Windowed && windowModeIndex != MyGUI::ITEM_NONE)
         {
             // check if this resolution is supported in fullscreen
             if (mResolutionList->getIndexSelected() != MyGUI::ITEM_NONE)
@@ -864,8 +860,8 @@ namespace MWGui
                 const std::string& resStr = mResolutionList->getItemNameAt(mResolutionList->getIndexSelected());
                 int resX, resY;
                 parseResolution(resX, resY, resStr);
-                Settings::Manager::setInt("resolution x", "Video", resX);
-                Settings::Manager::setInt("resolution y", "Video", resY);
+                Settings::video().mResolutionX.set(resX);
+                Settings::video().mResolutionY.set(resY);
             }
 
             bool supported = false;
@@ -882,8 +878,7 @@ namespace MWGui
                     fallbackY = resY;
                 }
 
-                if (resX == Settings::Manager::getInt("resolution x", "Video")
-                    && resY == Settings::Manager::getInt("resolution y", "Video"))
+                if (resX == Settings::video().mResolutionX && resY == Settings::video().mResolutionY)
                     supported = true;
             }
 
@@ -891,26 +886,21 @@ namespace MWGui
             {
                 if (fallbackX != 0 && fallbackY != 0)
                 {
-                    Settings::Manager::setInt("resolution x", "Video", fallbackX);
-                    Settings::Manager::setInt("resolution y", "Video", fallbackY);
+                    Settings::video().mResolutionX.set(fallbackX);
+                    Settings::video().mResolutionY.set(fallbackY);
                 }
             }
 
             mWindowBorderButton->setEnabled(false);
         }
 
-        if (index == static_cast<size_t>(Settings::WindowMode::WindowedFullscreen))
+        if (windowMode == Settings::WindowMode::WindowedFullscreen)
             mResolutionList->setEnabled(false);
     }
 
     void SettingsWindow::updateVSyncModeSettings()
     {
-        int index = static_cast<size_t>(Settings::Manager::getInt("vsync mode", "Video"));
-
-        if (index < 0 || index > 2)
-            index = 0;
-
-        mVSyncModeList->setIndexSelected(index);
+        mVSyncModeList->setIndexSelected(static_cast<size_t>(Settings::video().mVsyncMode));
     }
 
     void SettingsWindow::layoutControlsBox()

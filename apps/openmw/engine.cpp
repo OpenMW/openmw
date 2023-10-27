@@ -452,14 +452,13 @@ void OMW::Engine::setSkipMenu(bool skipMenu, bool newGame)
 
 void OMW::Engine::createWindow()
 {
-    int screen = Settings::Manager::getInt("screen", "Video");
-    int width = Settings::Manager::getInt("resolution x", "Video");
-    int height = Settings::Manager::getInt("resolution y", "Video");
-    Settings::WindowMode windowMode
-        = static_cast<Settings::WindowMode>(Settings::Manager::getInt("window mode", "Video"));
-    bool windowBorder = Settings::Manager::getBool("window border", "Video");
-    int vsync = Settings::Manager::getInt("vsync mode", "Video");
-    unsigned int antialiasing = std::max(0, Settings::Manager::getInt("antialiasing", "Video"));
+    const int screen = Settings::video().mScreen;
+    const int width = Settings::video().mResolutionX;
+    const int height = Settings::video().mResolutionY;
+    const Settings::WindowMode windowMode = Settings::video().mWindowMode;
+    const bool windowBorder = Settings::video().mWindowBorder;
+    const SDLUtil::VSyncMode vsync = Settings::video().mVsyncMode;
+    unsigned antialiasing = static_cast<unsigned>(Settings::video().mAntialiasing);
 
     int pos_x = SDL_WINDOWPOS_CENTERED_DISPLAY(screen), pos_y = SDL_WINDOWPOS_CENTERED_DISPLAY(screen);
 
@@ -482,8 +481,7 @@ void OMW::Engine::createWindow()
     if (!windowBorder)
         flags |= SDL_WINDOW_BORDERLESS;
 
-    SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS,
-        Settings::Manager::getBool("minimize on focus loss", "Video") ? "1" : "0");
+    SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, Settings::video().mMinimizeOnFocusLoss ? "1" : "0");
 
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8));
     checkSDLError(SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8));
@@ -513,7 +511,7 @@ void OMW::Engine::createWindow()
                     Log(Debug::Warning) << "Warning: " << antialiasing << "x antialiasing not supported, trying "
                                         << antialiasing / 2;
                     antialiasing /= 2;
-                    Settings::Manager::setInt("antialiasing", "Video", antialiasing);
+                    Settings::video().mAntialiasing.set(antialiasing);
                     checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
                     continue;
                 }
@@ -560,7 +558,7 @@ void OMW::Engine::createWindow()
             SDL_DestroyWindow(mWindow);
             mWindow = nullptr;
             antialiasing /= 2;
-            Settings::Manager::setInt("antialiasing", "Video", antialiasing);
+            Settings::video().mAntialiasing.set(antialiasing);
             checkSDLError(SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, antialiasing));
             continue;
         }
@@ -866,7 +864,7 @@ void OMW::Engine::go()
     // Do not try to outsmart the OS thread scheduler (see bug #4785).
     mViewer->setUseConfigureAffinity(false);
 
-    mEnvironment.setFrameRateLimit(Settings::Manager::getFloat("framerate limit", "Video"));
+    mEnvironment.setFrameRateLimit(Settings::video().mFramerateLimit);
 
     prepareEngine();
 
