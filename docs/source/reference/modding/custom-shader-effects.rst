@@ -31,13 +31,15 @@ This setting can either be activated in the OpenMW launcher or changed in `setti
 
 Variables.
 
-+---------+--------------------------------------------------------------------------------------------------------+---------+---------+
-| Name    | Description                                                                                            | Type    | Default |
-+---------+--------------------------------------------------------------------------------------------------------+---------+---------+
-| size    | Scaling ratio. Larger values will make a softer fade effect. Larger geometry requires higher values.   | integer | 45      |
-+---------+--------------------------------------------------------------------------------------------------------+---------+---------+
-| falloff | Fades away geometry as camera gets closer. Geometry full fades when parallel to camera.                | boolean | false   |
-+---------+--------------------------------------------------------------------------------------------------------+---------+---------+
++--------------+--------------------------------------------------------------------------------------------------------+---------+---------+
+| Name         | Description                                                                                            | Type    | Default |
++--------------+--------------------------------------------------------------------------------------------------------+---------+---------+
+| size         | Scaling ratio. Larger values will make a softer fade effect. Larger geometry requires higher values.   | integer | 45      |
++--------------+--------------------------------------------------------------------------------------------------------+---------+---------+
+| falloff      | Fades away geometry as camera gets closer. Geometry full fades when parallel to camera.                | boolean | false   |
++--------------+--------------------------------------------------------------------------------------------------------+---------+---------+
+| falloffDepth | The units at which geometry starts to fade.                                                            | float   | 300     |
++--------------+--------------------------------------------------------------------------------------------------------+---------+---------+
 
 Example usage.
 
@@ -48,6 +50,7 @@ Example usage.
             "soft_effect" : {
                 "size": 250,
                 "falloff" : false,
+                "falloffDepth": 5,
             }
         }
     }
