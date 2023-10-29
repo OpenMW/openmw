@@ -2708,7 +2708,8 @@ namespace NifOsg
                             stateset->setAttributeAndModes(polygonOffset, osg::StateAttribute::ON);
                         }
                         if (shaderprop->softEffect())
-                            SceneUtil::setupSoftEffect(*node, shaderprop->mFalloffDepth, true);
+                            SceneUtil::setupSoftEffect(
+                                *node, shaderprop->mFalloffDepth, true, shaderprop->mFalloffDepth);
                         break;
                     }
                     default:

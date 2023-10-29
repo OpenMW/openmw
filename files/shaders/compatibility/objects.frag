@@ -98,6 +98,7 @@ varying vec3 passNormal;
 uniform sampler2D opaqueDepthTex;
 uniform float particleSize;
 uniform bool particleFade;
+uniform float softFalloffDepth;
 #endif
 
 #if @particleOcclusion
@@ -256,7 +257,8 @@ vec3 viewNormal = normalize(gl_NormalMatrix * normal);
         far,
         texture2D(opaqueDepthTex, screenCoords).x,
         particleSize,
-        particleFade
+        particleFade,
+        softFalloffDepth
     );
 #endif
 
