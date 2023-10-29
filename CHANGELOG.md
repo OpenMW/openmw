@@ -9,6 +9,7 @@
     Bug #4207: RestoreHealth/Fatigue spells have a huge priority even if a success chance is near 0
     Bug #4382: Sound output device does not change when it should
     Bug #4610: Casting a Bound Weapon spell cancels the casting animation by equipping the weapon prematurely
+    Bug #4742: Actors with wander never stop walking after Loopgroup Walkforward
     Bug #4754: Stack of ammunition cannot be equipped partially
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
