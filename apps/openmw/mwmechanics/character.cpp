@@ -1869,9 +1869,10 @@ namespace MWMechanics
             {
                 // Move on to the remaining items of the queue
                 bool loopfallback = mAnimQueue.front().mGroup.starts_with("idle");
-                mAnimation->play(mAnimQueue.front().mGroup, mAnimQueue.front().mScripted ? Priority_Scripted : Priority_Default,
-                    MWRender::Animation::BlendMask_All,
-                    false, 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
+                mAnimation->play(mAnimQueue.front().mGroup,
+                    mAnimQueue.front().mScripted ? Priority_Scripted : Priority_Default,
+                    MWRender::Animation::BlendMask_All, false, 1.0f, "start", "stop", 0.0f,
+                    mAnimQueue.front().mLoopCount, loopfallback);
             }
         }
         else
