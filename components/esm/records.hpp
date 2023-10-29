@@ -62,10 +62,12 @@
 #include <components/esm4/loadingr.hpp>
 #include <components/esm4/loadland.hpp>
 #include <components/esm4/loadligh.hpp>
+#include <components/esm4/loadltex.hpp>
 #include <components/esm4/loadlvlc.hpp>
 #include <components/esm4/loadlvli.hpp>
 #include <components/esm4/loadlvln.hpp>
 #include <components/esm4/loadmisc.hpp>
+#include <components/esm4/loadmstt.hpp>
 #include <components/esm4/loadnpc.hpp>
 #include <components/esm4/loadotft.hpp>
 #include <components/esm4/loadrace.hpp>
