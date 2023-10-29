@@ -8,6 +8,7 @@
 #include <osg/ref_ptr>
 
 #include <map>
+#include <span>
 
 namespace osg
 {
@@ -77,7 +78,7 @@ namespace MWWorld
 
         void setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue);
 
-        void setTerrainPreloadPositions(const std::vector<PositionCellGrid>& positions);
+        void setTerrainPreloadPositions(std::span<const PositionCellGrid> positions);
 
         void syncTerrainLoad(Loading::Listener& listener);
         void abortTerrainPreloadExcept(const PositionCellGrid* exceptPos);

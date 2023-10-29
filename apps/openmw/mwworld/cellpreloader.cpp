@@ -165,12 +165,12 @@ namespace MWWorld
     class TerrainPreloadItem : public SceneUtil::WorkItem
     {
     public:
-        TerrainPreloadItem(const std::vector<osg::ref_ptr<Terrain::View>>& views, Terrain::World* world,
-            const std::vector<PositionCellGrid>& preloadPositions)
+        explicit TerrainPreloadItem(const std::vector<osg::ref_ptr<Terrain::View>>& views, Terrain::World* world,
+            std::span<const PositionCellGrid> preloadPositions)
             : mAbort(false)
             , mTerrainViews(views)
             , mWorld(world)
-            , mPreloadPositions(preloadPositions)
+            , mPreloadPositions(preloadPositions.begin(), preloadPositions.end())
         {
         }
 
@@ -380,10 +380,10 @@ namespace MWWorld
             mTerrainPreloadItem->abort();
             mTerrainPreloadItem->waitTillDone();
         }
-        setTerrainPreloadPositions(std::vector<PositionCellGrid>());
+        setTerrainPreloadPositions({});
     }
 
-    void CellPreloader::setTerrainPreloadPositions(const std::vector<PositionCellGrid>& positions)
+    void CellPreloader::setTerrainPreloadPositions(std::span<const PositionCellGrid> positions)
     {
         if (positions.empty())
         {
@@ -404,7 +404,7 @@ namespace MWWorld
                     mTerrainViews.emplace_back(mTerrain->createView());
             }
 
-            mTerrainPreloadPositions = positions;
+            mTerrainPreloadPositions.assign(positions.begin(), positions.end());
             if (!positions.empty())
             {
                 mTerrainPreloadItem = new TerrainPreloadItem(mTerrainViews, mTerrain, positions);

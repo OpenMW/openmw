@@ -1232,10 +1232,9 @@ namespace MWWorld
     void Scene::preloadTerrain(const osg::Vec3f& pos, ESM::RefId worldspace, bool sync)
     {
         ESM::ExteriorCellLocation cellPos = ESM::positionToExteriorCellLocation(pos.x(), pos.y(), worldspace);
-        std::vector<PositionCellGrid> vec;
-        vec.emplace_back(pos, gridCenterToBounds({ cellPos.mX, cellPos.mY }));
-        mPreloader->abortTerrainPreloadExcept(vec.data());
-        mPreloader->setTerrainPreloadPositions(vec);
+        const PositionCellGrid position{ pos, gridCenterToBounds({ cellPos.mX, cellPos.mY }) };
+        mPreloader->abortTerrainPreloadExcept(&position);
+        mPreloader->setTerrainPreloadPositions(std::span(&position, 1));
         if (!sync)
             return;
 
@@ -1249,7 +1248,7 @@ namespace MWWorld
 
     void Scene::reloadTerrain()
     {
-        mPreloader->setTerrainPreloadPositions(std::vector<PositionCellGrid>());
+        mPreloader->setTerrainPreloadPositions({});
     }
 
     struct ListFastTravelDestinationsVisitor
