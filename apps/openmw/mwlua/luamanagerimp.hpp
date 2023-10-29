@@ -204,6 +204,7 @@ namespace MWLua
         std::optional<DelayedAction> mTeleportPlayerAction;
         std::vector<std::string> mUIMessages;
         std::vector<std::pair<std::string, Misc::Color>> mInGameConsoleMessages;
+        std::optional<ObjectId> mDelayedUiModeChangedArg;
 
         LuaUtil::LuaStorage mGlobalStorage{ mLua.sol() };
         LuaUtil::LuaStorage mPlayerStorage{ mLua.sol() };
