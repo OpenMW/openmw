@@ -29,15 +29,15 @@
 namespace
 {
     template <class Contained>
-    bool contains(const std::vector<MWWorld::CellPreloader::PositionCellGrid>& container, const Contained& contained,
-        float tolerance)
+    bool contains(const std::vector<MWWorld::PositionCellGrid>& container, const Contained& contained, float tolerance)
     {
         for (const auto& pos : contained)
         {
             bool found = false;
             for (const auto& pos2 : container)
             {
-                if ((pos.first - pos2.first).length2() < tolerance * tolerance && pos.second == pos2.second)
+                if ((pos.mPosition - pos2.mPosition).length2() < tolerance * tolerance
+                    && pos.mCellBounds == pos2.mCellBounds)
                 {
                     found = true;
                     break;
@@ -52,7 +52,6 @@ namespace
 
 namespace MWWorld
 {
-
     struct ListModelsVisitor
     {
         bool operator()(const MWWorld::ConstPtr& ptr)
@@ -170,7 +169,7 @@ namespace MWWorld
     {
     public:
         TerrainPreloadItem(const std::vector<osg::ref_ptr<Terrain::View>>& views, Terrain::World* world,
-            const std::vector<CellPreloader::PositionCellGrid>& preloadPositions)
+            const std::vector<PositionCellGrid>& preloadPositions)
             : mAbort(false)
             , mTerrainViews(views)
             , mWorld(world)
@@ -183,8 +182,8 @@ namespace MWWorld
             for (unsigned int i = 0; i < mTerrainViews.size() && i < mPreloadPositions.size() && !mAbort; ++i)
             {
                 mTerrainViews[i]->reset();
-                mWorld->preload(mTerrainViews[i], mPreloadPositions[i].first, mPreloadPositions[i].second, mAbort,
-                    mLoadingReporter);
+                mWorld->preload(mTerrainViews[i], mPreloadPositions[i].mPosition, mPreloadPositions[i].mCellBounds,
+                    mAbort, mLoadingReporter);
             }
             mLoadingReporter.complete();
         }
@@ -197,7 +196,7 @@ namespace MWWorld
         std::atomic<bool> mAbort;
         std::vector<osg::ref_ptr<Terrain::View>> mTerrainViews;
         Terrain::World* mWorld;
-        std::vector<CellPreloader::PositionCellGrid> mPreloadPositions;
+        std::vector<PositionCellGrid> mPreloadPositions;
         Loading::Reporter mLoadingReporter;
     };
 
@@ -375,7 +374,7 @@ namespace MWWorld
             mTerrainPreloadItem->wait(listener);
     }
 
-    void CellPreloader::abortTerrainPreloadExcept(const CellPreloader::PositionCellGrid* exceptPos)
+    void CellPreloader::abortTerrainPreloadExcept(const PositionCellGrid* exceptPos)
     {
         if (exceptPos && contains(mTerrainPreloadPositions, std::array{ *exceptPos }, Constants::CellSizeInUnits))
             return;
@@ -384,10 +383,10 @@ namespace MWWorld
             mTerrainPreloadItem->abort();
             mTerrainPreloadItem->waitTillDone();
         }
-        setTerrainPreloadPositions(std::vector<CellPreloader::PositionCellGrid>());
+        setTerrainPreloadPositions(std::vector<PositionCellGrid>());
     }
 
-    void CellPreloader::setTerrainPreloadPositions(const std::vector<CellPreloader::PositionCellGrid>& positions)
+    void CellPreloader::setTerrainPreloadPositions(const std::vector<PositionCellGrid>& positions)
     {
         if (positions.empty())
         {
@@ -417,7 +416,7 @@ namespace MWWorld
         }
     }
 
-    bool CellPreloader::isTerrainLoaded(const CellPreloader::PositionCellGrid& position, double referenceTime) const
+    bool CellPreloader::isTerrainLoaded(const PositionCellGrid& position, double referenceTime) const
     {
         return mLoadedTerrainTimestamp + mResourceSystem->getSceneManager()->getExpiryDelay() > referenceTime
             && contains(mLoadedTerrainPositions, std::array{ position }, Constants::CellSizeInUnits);

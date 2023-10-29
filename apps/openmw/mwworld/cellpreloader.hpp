@@ -1,12 +1,10 @@
 #ifndef OPENMW_MWWORLD_CELLPRELOADER_H
 #define OPENMW_MWWORLD_CELLPRELOADER_H
 
+#include "positioncellgrid.hpp"
+
 #include <components/sceneutil/workqueue.hpp>
 
-#include <map>
-
-#include <osg/Vec3f>
-#include <osg/Vec4i>
 #include <osg/ref_ptr>
 
 #include <map>
@@ -79,12 +77,11 @@ namespace MWWorld
 
         void setWorkQueue(osg::ref_ptr<SceneUtil::WorkQueue> workQueue);
 
-        typedef std::pair<osg::Vec3f, osg::Vec4i> PositionCellGrid;
         void setTerrainPreloadPositions(const std::vector<PositionCellGrid>& positions);
 
         void syncTerrainLoad(Loading::Listener& listener);
         void abortTerrainPreloadExcept(const PositionCellGrid* exceptPos);
-        bool isTerrainLoaded(const CellPreloader::PositionCellGrid& position, double referenceTime) const;
+        bool isTerrainLoaded(const PositionCellGrid& position, double referenceTime) const;
         void setTerrain(Terrain::World* terrain);
 
         void reportStats(unsigned int frameNumber, osg::Stats& stats) const;

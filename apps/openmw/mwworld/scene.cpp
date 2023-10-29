@@ -603,7 +603,7 @@ namespace MWWorld
         mPreloader->setTerrain(mRendering.getTerrain());
         if (mRendering.pagingUnlockCache())
             mPreloader->abortTerrainPreloadExcept(nullptr);
-        if (!mPreloader->isTerrainLoaded(std::make_pair(pos, newGrid), mRendering.getReferenceTime()))
+        if (!mPreloader->isTerrainLoaded(PositionCellGrid{ pos, newGrid }, mRendering.getReferenceTime()))
             preloadTerrain(pos, playerCellIndex.mWorldspace, true);
         mPagedRefs.clear();
         mRendering.getPagedRefnums(newGrid, mPagedRefs);
@@ -1093,8 +1093,8 @@ namespace MWWorld
         osg::Vec3f predictedPos = playerPos + moved / dt * mPredictionTime;
 
         if (mCurrentCell->isExterior())
-            exteriorPositions.emplace_back(
-                predictedPos, gridCenterToBounds(getNewGridCenter(predictedPos, &mCurrentGridCenter)));
+            exteriorPositions.push_back(PositionCellGrid{
+                predictedPos, gridCenterToBounds(getNewGridCenter(predictedPos, &mCurrentGridCenter)) });
 
         mLastPlayerPos = playerPos;
 
@@ -1305,7 +1305,7 @@ namespace MWWorld
                 const ESM::ExteriorCellLocation cellIndex
                     = ESM::positionToExteriorCellLocation(pos.x(), pos.y(), extWorldspace);
                 preloadCellWithSurroundings(mWorld.getWorldModel().getExterior(cellIndex));
-                exteriorPositions.emplace_back(pos, gridCenterToBounds(getNewGridCenter(pos)));
+                exteriorPositions.push_back(PositionCellGrid{ pos, gridCenterToBounds(getNewGridCenter(pos)) });
             }
         }
     }
