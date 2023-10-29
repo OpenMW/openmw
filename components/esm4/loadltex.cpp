@@ -76,6 +76,9 @@ void ESM4::LandTexture::load(ESM4::Reader& reader)
             case ESM4::SUB_MNAM:
                 reader.getFormId(mMaterial);
                 break; // TES5, FO4
+            case ESM4::SUB_INAM:
+                reader.get(mMaterialFlags);
+                break; // SSE
             default:
                 throw std::runtime_error("ESM4::LTEX::load - Unknown subrecord " + ESM::printName(subHdr.typeId));
         }
