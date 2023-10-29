@@ -1,8 +1,9 @@
 #include "cellpreloader.hpp"
 
-#include <array>
+#include <algorithm>
 #include <atomic>
 #include <limits>
+#include <span>
 
 #include <osg/Stats>
 
@@ -26,32 +27,28 @@
 #include "cellstore.hpp"
 #include "class.hpp"
 
-namespace
-{
-    template <class Contained>
-    bool contains(const std::vector<MWWorld::PositionCellGrid>& container, const Contained& contained, float tolerance)
-    {
-        for (const auto& pos : contained)
-        {
-            bool found = false;
-            for (const auto& pos2 : container)
-            {
-                if ((pos.mPosition - pos2.mPosition).length2() < tolerance * tolerance
-                    && pos.mCellBounds == pos2.mCellBounds)
-                {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found)
-                return false;
-        }
-        return true;
-    }
-}
-
 namespace MWWorld
 {
+    namespace
+    {
+        bool contains(std::span<const PositionCellGrid> positions, const PositionCellGrid& contained, float tolerance)
+        {
+            const float squaredTolerance = tolerance * tolerance;
+            const auto predicate = [&](const PositionCellGrid& v) {
+                return (contained.mPosition - v.mPosition).length2() < squaredTolerance
+                    && contained.mCellBounds == v.mCellBounds;
+            };
+            return std::ranges::any_of(positions, predicate);
+        }
+
+        bool contains(
+            std::span<const PositionCellGrid> container, std::span<const PositionCellGrid> contained, float tolerance)
+        {
+            const auto predicate = [&](const PositionCellGrid& v) { return contains(container, v, tolerance); };
+            return std::ranges::all_of(contained, predicate);
+        }
+    }
+
     struct ListModelsVisitor
     {
         bool operator()(const MWWorld::ConstPtr& ptr)
@@ -376,7 +373,7 @@ namespace MWWorld
 
     void CellPreloader::abortTerrainPreloadExcept(const PositionCellGrid* exceptPos)
     {
-        if (exceptPos && contains(mTerrainPreloadPositions, std::array{ *exceptPos }, Constants::CellSizeInUnits))
+        if (exceptPos != nullptr && contains(mTerrainPreloadPositions, *exceptPos, Constants::CellSizeInUnits))
             return;
         if (mTerrainPreloadItem && !mTerrainPreloadItem->isDone())
         {
@@ -419,7 +416,7 @@ namespace MWWorld
     bool CellPreloader::isTerrainLoaded(const PositionCellGrid& position, double referenceTime) const
     {
         return mLoadedTerrainTimestamp + mResourceSystem->getSceneManager()->getExpiryDelay() > referenceTime
-            && contains(mLoadedTerrainPositions, std::array{ position }, Constants::CellSizeInUnits);
+            && contains(mLoadedTerrainPositions, position, Constants::CellSizeInUnits);
     }
 
     void CellPreloader::setTerrain(Terrain::World* terrain)
