@@ -117,6 +117,7 @@
     Feature #7618: Show the player character's health in the save details
     Feature #7625: Add some missing console error outputs
     Feature #7634: Support NiParticleBomb
+    Feature #7652: Sort inactive post processing shaders list properly
     Task #5896: Do not use deprecated MyGUI properties
     Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector
