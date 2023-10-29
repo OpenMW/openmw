@@ -1857,29 +1857,21 @@ namespace MWMechanics
 
         if (!mAnimation->isPlaying(mAnimQueue.front().mGroup))
         {
-            if (mAnimQueue.size() > 1)
+            // Remove the finished animation, unless it's a scripted animation that was interrupted by e.g. a rebuild of
+            // the animation object.
+            if (mAnimQueue.size() > 1 || !mAnimQueue.front().mScripted || mAnimQueue.front().mLoopCount == 0)
             {
-                // Curren animation finished, move to the next in queue
                 mAnimation->disable(mAnimQueue.front().mGroup);
                 mAnimQueue.pop_front();
+            }
 
-                bool loopfallback = mAnimQueue.front().mGroup.starts_with("idle");
-                mAnimation->play(mAnimQueue.front().mGroup, Priority_Default, MWRender::Animation::BlendMask_All, false,
-                    1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
-            }
-            else if (mAnimQueue.front().mLoopCount > 0 && mAnimQueue.front().mScripted)
+            if (!mAnimQueue.empty())
             {
-                // A scripted animation stopped playing before time.
-                // This happens when the animation object is rebuilt, so we should restart the animation here.
+                // Move on to the remaining items of the queue
                 bool loopfallback = mAnimQueue.front().mGroup.starts_with("idle");
-                mAnimation->play(mAnimQueue.front().mGroup, Priority_Scripted, MWRender::Animation::BlendMask_All,
+                mAnimation->play(mAnimQueue.front().mGroup, mAnimQueue.front().mScripted ? Priority_Scripted : Priority_Default,
+                    MWRender::Animation::BlendMask_All,
                     false, 1.0f, "start", "stop", 0.0f, mAnimQueue.front().mLoopCount, loopfallback);
-            }
-            else
-            {
-                // Animation is done, remove it from the queue.
-                mAnimation->disable(mAnimQueue.front().mGroup);
-                mAnimQueue.pop_front();
             }
         }
         else
