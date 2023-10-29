@@ -258,7 +258,7 @@ namespace MWGui
         , mKeyboardMode(true)
         , mCurrentPage(-1)
     {
-        bool terrain = Settings::Manager::getBool("distant terrain", "Terrain");
+        const bool terrain = Settings::terrain().mDistantTerrain;
         const std::string_view widgetName = terrain ? "RenderingDistanceSlider" : "LargeRenderingDistanceSlider";
         MyGUI::Widget* unusedSlider;
         getWidget(unusedSlider, widgetName);

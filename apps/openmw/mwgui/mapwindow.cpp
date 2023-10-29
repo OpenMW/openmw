@@ -89,7 +89,7 @@ namespace
     {
         if (!Settings::map().mAllowZooming)
             return Constants::CellGridRadius;
-        if (!Settings::Manager::getBool("distant terrain", "Terrain"))
+        if (!Settings::terrain().mDistantTerrain)
             return Constants::CellGridRadius;
         const int viewingDistanceInCells = Settings::camera().mViewingDistance / Constants::CellSizeInUnits;
         return std::clamp(

@@ -457,14 +457,14 @@ namespace MWRender
         : GenericResourceManager<ChunkId>(nullptr, Settings::cells().mCacheExpiryDelay)
         , Terrain::QuadTreeWorld::ChunkManager(worldspace)
         , mSceneManager(sceneManager)
+        , mActiveGrid(Settings::terrain().mObjectPagingActiveGrid)
+        , mDebugBatches(Settings::terrain().mDebugChunks)
+        , mMergeFactor(Settings::terrain().mObjectPagingMergeFactor)
+        , mMinSize(Settings::terrain().mObjectPagingMinSize)
+        , mMinSizeMergeFactor(Settings::terrain().mObjectPagingMinSizeMergeFactor)
+        , mMinSizeCostMultiplier(Settings::terrain().mObjectPagingMinSizeCostMultiplier)
         , mRefTrackerLocked(false)
     {
-        mActiveGrid = Settings::Manager::getBool("object paging active grid", "Terrain");
-        mDebugBatches = Settings::Manager::getBool("debug chunks", "Terrain");
-        mMergeFactor = Settings::Manager::getFloat("object paging merge factor", "Terrain");
-        mMinSize = Settings::Manager::getFloat("object paging min size", "Terrain");
-        mMinSizeMergeFactor = Settings::Manager::getFloat("object paging min size merge factor", "Terrain");
-        mMinSizeCostMultiplier = Settings::Manager::getFloat("object paging min size cost multiplier", "Terrain");
     }
 
     std::map<ESM::RefNum, ESM::CellRef> ObjectPaging::collectESM3References(
