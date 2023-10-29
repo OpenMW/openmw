@@ -702,7 +702,7 @@ namespace MWRender
     {
         // need to wrap this in a StateUpdater?
         mSunLight->setDiffuse(diffuse);
-        mSunLight->setSpecular(specular);
+        mSunLight->setSpecular(osg::Vec4f(specular.x(), specular.y(), specular.z(), specular.w() * sunVis));
 
         mPostProcessor->getStateUpdater()->setSunColor(diffuse);
         mPostProcessor->getStateUpdater()->setSunVis(sunVis);
