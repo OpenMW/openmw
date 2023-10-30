@@ -85,6 +85,7 @@
     Bug #7631: Cannot trade with/talk to Creeper or Mudcrab Merchant when they're fleeing
     Bug #7639: NPCs don't use hand-to-hand if their other melee skills were damaged during combat
     Bug #7647: NPC walk cycle bugs after greeting player
+    Bug #7660: Some inconsistencies regarding Invisibility breaking
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6149: Dehardcode Lua API_REVISION

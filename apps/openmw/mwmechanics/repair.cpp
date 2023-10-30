@@ -22,6 +22,8 @@ namespace MWMechanics
         MWWorld::Ptr player = getPlayer();
         MWWorld::LiveCellRef<ESM::Repair>* ref = mTool.get<ESM::Repair>();
 
+        MWBase::Environment::get().getWorld()->breakInvisibility(player);
+
         // unstack tool if required
         player.getClass().getContainerStore(player).unstack(mTool);
 
