@@ -20,6 +20,7 @@
 #include <components/fx/technique.hpp>
 #include <components/fx/widgets.hpp>
 
+#include <components/misc/strings/algorithm.hpp>
 #include <components/misc/utf8stream.hpp>
 
 #include <components/widgets/box.hpp>
@@ -421,7 +422,12 @@ namespace MWGui
 
         auto* processor = MWBase::Environment::get().getWorld()->getPostProcessor();
 
+        std::vector<std::string> techniques;
         for (const auto& [name, _] : processor->getTechniqueMap())
+            techniques.push_back(name);
+        std::sort(techniques.begin(), techniques.end(), Misc::StringUtils::ciLess);
+
+        for (const std::string& name : techniques)
         {
             auto technique = processor->loadTechnique(name);
 
