@@ -328,46 +328,37 @@ namespace MWRender
         {
             osg::State* state = renderInfo.getState();
 
-            PostProcessor* postProcessor = dynamic_cast<PostProcessor*>(renderInfo.getCurrentCamera()->getUserData());
+            PostProcessor* postProcessor = static_cast<PostProcessor*>(renderInfo.getCurrentCamera()->getUserData());
 
             state->applyAttribute(mDepth);
 
             unsigned int frameId = state->getFrameStamp()->getFrameNumber() % 2;
 
-            if (postProcessor && postProcessor->getFbo(PostProcessor::FBO_FirstPerson, frameId))
+            postProcessor->getFbo(PostProcessor::FBO_FirstPerson, frameId)->apply(*state);
+            if (mPassNormals)
             {
-                postProcessor->getFbo(PostProcessor::FBO_FirstPerson, frameId)->apply(*state);
-                if (mPassNormals)
-                {
-                    state->get<osg::GLExtensions>()->glColorMaski(1, true, true, true, true);
-                    state->haveAppliedAttribute(osg::StateAttribute::COLORMASK);
-                }
-                glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-                // color accumulation pass
-                bin->drawImplementation(renderInfo, previous);
-
-                auto primaryFBO = postProcessor->getPrimaryFbo(frameId);
-
-                if (postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId))
-                    postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId)->apply(*state);
-                else
-                    primaryFBO->apply(*state);
-
-                // depth accumulation pass
-                osg::ref_ptr<osg::StateSet> restore = bin->getStateSet();
-                bin->setStateSet(mStateSet);
-                bin->drawImplementation(renderInfo, previous);
-                bin->setStateSet(restore);
-
-                if (postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId))
-                    primaryFBO->apply(*state);
+                state->get<osg::GLExtensions>()->glColorMaski(1, true, true, true, true);
+                state->haveAppliedAttribute(osg::StateAttribute::COLORMASK);
             }
+            glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+            // color accumulation pass
+            bin->drawImplementation(renderInfo, previous);
+
+            auto primaryFBO = postProcessor->getPrimaryFbo(frameId);
+
+            if (postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId))
+                postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId)->apply(*state);
             else
-            {
-                // fallback to standard depth clear when we are not rendering our main scene via an intermediate FBO
-                glClear(GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-                bin->drawImplementation(renderInfo, previous);
-            }
+                primaryFBO->apply(*state);
+
+            // depth accumulation pass
+            osg::ref_ptr<osg::StateSet> restore = bin->getStateSet();
+            bin->setStateSet(mStateSet);
+            bin->drawImplementation(renderInfo, previous);
+            bin->setStateSet(restore);
+
+            if (postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId))
+                primaryFBO->apply(*state);
 
             state->checkGLErrors("after DepthClearCallback::drawImplementation");
         }
