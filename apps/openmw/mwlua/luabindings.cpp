@@ -76,13 +76,11 @@ namespace MWLua
     std::map<std::string, sol::object> initMenuPackages(const Context& context)
     {
         return {
-            { "openmw.core", initCorePackageForMenuScripts(context) }, //
-            { "openmw.ambient", initAmbientPackage(context) }, //
-            { "openmw.ui", initUserInterfacePackage(context) }, //
+            { "openmw.core", initCorePackageForMenuScripts(context) },
+            { "openmw.ambient", initAmbientPackage(context) },
+            { "openmw.ui", initUserInterfacePackage(context) },
             { "openmw.menu", initMenuPackage(context) },
-            // TODO: Maybe add:
-            // { "openmw.input", initInputPackage(context) },
-            // { "openmw.postprocessing", initPostprocessingPackage(context) },
+            { "openmw.input", initInputPackage(context) },
         };
     }
 }

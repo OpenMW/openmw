@@ -50,6 +50,7 @@ local env = {
     ambient = require('openmw.ambient'),
     async = require('openmw.async'),
     ui = require('openmw.ui'),
+    input = require('openmw.input'),
     aux_util = require('openmw_aux.util'),
     view = require('openmw_aux.util').deepToString,
     print = printToConsole,
