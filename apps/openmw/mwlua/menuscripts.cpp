@@ -1,5 +1,7 @@
 #include "menuscripts.hpp"
 
+#include <components/misc/strings/lower.hpp>
+
 #include "../mwbase/environment.hpp"
 #include "../mwbase/statemanager.hpp"
 #include "../mwstate/character.hpp"
@@ -85,7 +87,7 @@ namespace MWLua
                 slotInfo["playerLevel"] = slot.mProfile.mPlayerLevel;
                 sol::table contentFiles(lua, sol::create);
                 for (size_t i = 0; i < slot.mProfile.mContentFiles.size(); ++i)
-                    contentFiles[i + 1] = slot.mProfile.mContentFiles[i];
+                    contentFiles[i + 1] = Misc::StringUtils::lowerCase(slot.mProfile.mContentFiles[i]);
                 slotInfo["contentFiles"] = contentFiles;
                 saves[slot.mPath.filename().string()] = slotInfo;
             }
