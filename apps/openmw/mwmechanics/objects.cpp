@@ -99,12 +99,12 @@ namespace MWMechanics
     }
 
     bool Objects::playAnimationGroup(
-        const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool persist)
+        const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted)
     {
         const auto iter = mIndex.find(ptr.mRef);
         if (iter != mIndex.end())
         {
-            return iter->second->playGroup(groupName, mode, number, persist);
+            return iter->second->playGroup(groupName, mode, number, scripted);
         }
         else
         {

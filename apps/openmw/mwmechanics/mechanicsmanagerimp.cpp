@@ -760,12 +760,12 @@ namespace MWMechanics
     }
 
     bool MechanicsManager::playAnimationGroup(
-        const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool persist)
+        const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted)
     {
         if (ptr.getClass().isActor())
-            return mActors.playAnimationGroup(ptr, groupName, mode, number, persist);
+            return mActors.playAnimationGroup(ptr, groupName, mode, number, scripted);
         else
-            return mObjects.playAnimationGroup(ptr, groupName, mode, number, persist);
+            return mObjects.playAnimationGroup(ptr, groupName, mode, number, scripted);
     }
     void MechanicsManager::skipAnimation(const MWWorld::Ptr& ptr)
     {

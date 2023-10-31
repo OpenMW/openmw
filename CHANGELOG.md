@@ -10,6 +10,7 @@
     Bug #4382: Sound output device does not change when it should
     Bug #4508: Can't stack enchantment buffs from different instances of the same self-cast generic magic apparel
     Bug #4610: Casting a Bound Weapon spell cancels the casting animation by equipping the weapon prematurely
+    Bug #4742: Actors with wander never stop walking after Loopgroup Walkforward
     Bug #4754: Stack of ammunition cannot be equipped partially
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
@@ -84,6 +85,8 @@
     Bug #7611: Beast races' idle animations slide after turning or jumping in place
     Bug #7630: Charm can be cast on creatures
     Bug #7631: Cannot trade with/talk to Creeper or Mudcrab Merchant when they're fleeing
+    Bug #7636: Animations bug out when switching between 1st and 3rd person, while playing a scripted animation
+    Bug #7637: Actors can sometimes move while playing scripted animations
     Bug #7639: NPCs don't use hand-to-hand if their other melee skills were damaged during combat
     Bug #7642: Items in repair and recharge menus aren't sorted alphabetically
     Bug #7647: NPC walk cycle bugs after greeting player
