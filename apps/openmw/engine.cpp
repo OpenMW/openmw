@@ -313,6 +313,8 @@ bool OMW::Engine::frame(float frametime)
         mLuaManager->reportStats(frameNumber, *stats);
     }
 
+    mStereoManager->updateSettings(Settings::camera().mNearClip, Settings::camera().mViewingDistance);
+
     mViewer->eventTraversal();
     mViewer->updateTraversal();
 
@@ -593,7 +595,63 @@ void OMW::Engine::createWindow()
     realizeOperations->add(mSelectColorFormatOperation);
 
     if (Stereo::getStereo())
-        realizeOperations->add(new Stereo::InitializeStereoOperation());
+    {
+        Stereo::Settings settings;
+
+        settings.mMultiview = Settings::stereo().mMultiview;
+        settings.mAllowDisplayListsForMultiview = Settings::stereo().mAllowDisplayListsForMultiview;
+        settings.mSharedShadowMaps = Settings::stereo().mSharedShadowMaps;
+
+        if (Settings::stereo().mUseCustomView)
+        {
+            const osg::Vec3 leftEyeOffset(Settings::stereoView().mLeftEyeOffsetX,
+                Settings::stereoView().mLeftEyeOffsetY, Settings::stereoView().mLeftEyeOffsetZ);
+
+            const osg::Quat leftEyeOrientation(Settings::stereoView().mLeftEyeOrientationX,
+                Settings::stereoView().mLeftEyeOrientationY, Settings::stereoView().mLeftEyeOrientationZ,
+                Settings::stereoView().mLeftEyeOrientationW);
+
+            const osg::Vec3 rightEyeOffset(Settings::stereoView().mRightEyeOffsetX,
+                Settings::stereoView().mRightEyeOffsetY, Settings::stereoView().mRightEyeOffsetZ);
+
+            const osg::Quat rightEyeOrientation(Settings::stereoView().mRightEyeOrientationX,
+                Settings::stereoView().mRightEyeOrientationY, Settings::stereoView().mRightEyeOrientationZ,
+                Settings::stereoView().mRightEyeOrientationW);
+
+            settings.mCustomView = Stereo::CustomView{
+                .mLeft = Stereo::View{
+                    .pose = Stereo::Pose{
+                        .position = leftEyeOffset,
+                        .orientation = leftEyeOrientation,
+                    },
+                    .fov = Stereo::FieldOfView{
+                        .angleLeft = Settings::stereoView().mLeftEyeFovLeft,
+                        .angleRight = Settings::stereoView().mLeftEyeFovRight,
+                        .angleUp = Settings::stereoView().mLeftEyeFovUp,
+                        .angleDown = Settings::stereoView().mLeftEyeFovDown,
+                    },
+                },
+                .mRight = Stereo::View{
+                    .pose = Stereo::Pose{
+                        .position = rightEyeOffset,
+                        .orientation = rightEyeOrientation,
+                    },
+                    .fov = Stereo::FieldOfView{
+                        .angleLeft = Settings::stereoView().mRightEyeFovLeft,
+                        .angleRight = Settings::stereoView().mRightEyeFovRight,
+                        .angleUp = Settings::stereoView().mRightEyeFovUp,
+                        .angleDown = Settings::stereoView().mRightEyeFovDown,
+                    },
+                },
+            };
+        }
+
+        if (Settings::stereo().mUseCustomEyeResolution)
+            settings.mEyeResolution
+                = osg::Vec2i(Settings::stereoView().mEyeResolutionX, Settings::stereoView().mEyeResolutionY);
+
+        realizeOperations->add(new Stereo::InitializeStereoOperation(settings));
+    }
 
     mViewer->realize();
     mGlMaxTextureImageUnits = identifyOp->getMaxTextureImageUnits();
@@ -632,9 +690,9 @@ void OMW::Engine::prepareEngine()
     mStateManager = std::make_unique<MWState::StateManager>(mCfgMgr.getUserDataPath() / "saves", mContentFiles);
     mEnvironment.setStateManager(*mStateManager);
 
-    bool stereoEnabled
-        = Settings::Manager::getBool("stereo enabled", "Stereo") || osg::DisplaySettings::instance().get()->getStereo();
-    mStereoManager = std::make_unique<Stereo::Manager>(mViewer, stereoEnabled);
+    const bool stereoEnabled = Settings::stereo().mStereoEnabled || osg::DisplaySettings::instance().get()->getStereo();
+    mStereoManager = std::make_unique<Stereo::Manager>(
+        mViewer, stereoEnabled, Settings::camera().mNearClip, Settings::camera().mViewingDistance);
 
     osg::ref_ptr<osg::Group> rootNode(new osg::Group);
     mViewer->setSceneData(rootNode);
