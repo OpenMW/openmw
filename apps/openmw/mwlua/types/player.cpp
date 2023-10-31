@@ -35,14 +35,18 @@ namespace sol
 
 namespace MWLua
 {
+    static void verifyPlayer(const Object& player)
+    {
+        if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
+            throw std::runtime_error("The argument must be a player!");
+    }
 
     void addPlayerQuestBindings(sol::table& player, const Context& context)
     {
         MWBase::Journal* const journal = MWBase::Environment::get().getJournal();
 
         player["quests"] = [](const Object& player) {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player!");
+            verifyPlayer(player);
             bool allowChanges = dynamic_cast<const GObject*>(&player) != nullptr
                 || dynamic_cast<const SelfObject*>(&player) != nullptr;
             return Quests{ .mMutable = allowChanges };
@@ -134,28 +138,28 @@ namespace MWLua
 
         MWBase::InputManager* input = MWBase::Environment::get().getInputManager();
         player["getControlSwitch"] = [input](const Object& player, std::string_view key) {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player.");
+            verifyPlayer(player);
             return input->getControlSwitch(key);
         };
+        player["setControlSwitch"] = [input](const Object& player, std::string_view key, bool v) {
+            verifyPlayer(player);
+            if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
+                throw std::runtime_error("Only player and global scripts can toggle control switches.");
+            input->toggleControlSwitch(key, v);
+        };
         player["isTeleportingEnabled"] = [](const Object& player) -> bool {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player.");
+            verifyPlayer(player);
             return MWBase::Environment::get().getWorld()->isTeleportingEnabled();
         };
         player["setTeleportingEnabled"] = [](const Object& player, bool state) {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player.");
+            verifyPlayer(player);
             if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
                 throw std::runtime_error("Only player and global scripts can toggle teleportation.");
             MWBase::Environment::get().getWorld()->enableTeleporting(state);
         };
-        player["setControlSwitch"] = [input](const Object& player, std::string_view key, bool v) {
-            if (player.ptr() != MWBase::Environment::get().getWorld()->getPlayerPtr())
-                throw std::runtime_error("The argument must be a player.");
-            if (dynamic_cast<const LObject*>(&player) && !dynamic_cast<const SelfObject*>(&player))
-                throw std::runtime_error("Only player and global scripts can toggle control switches.");
-            input->toggleControlSwitch(key, v);
+        player["sendMenuEvent"] = [context](const Object& player, std::string eventName, const sol::object& eventData) {
+            verifyPlayer(player);
+            context.mLuaEvents->addMenuEvent({ std::move(eventName), LuaUtil::serialize(eventData) });
         };
     }
 

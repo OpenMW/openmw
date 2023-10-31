@@ -229,6 +229,7 @@ namespace MWLua
                 playerScripts->processInputEvent(event);
         }
         mInputEvents.clear();
+        mLuaEvents.callMenuEventHandlers();
         mMenuScripts.update(0);
         if (playerScripts)
             playerScripts->onFrame(MWBase::Environment::get().getWorld()->getTimeManager()->isPaused()
