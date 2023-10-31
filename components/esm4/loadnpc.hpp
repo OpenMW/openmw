@@ -78,6 +78,7 @@ namespace ESM4
             FO3_NoRotateHead = 0x40000000
         };
 
+        // In FO4 flags seem to be the same.
         enum ACBS_TES5
         {
             TES5_Female = 0x00000001,
@@ -101,27 +102,32 @@ namespace ESM4
             TES5_Invulnerable = 0x80000000
         };
 
+        // All FO3+ games.
         enum Template_Flags
         {
-            TES5_UseTraits = 0x0001, // Destructible Object; Traits tab, including race, gender, height, weight,
-                                     // voice type, death item; Sounds tab; Animation tab; Character Gen tabs
-            TES5_UseStats = 0x0002, // Stats tab, including level, autocalc, skills, health/magicka/stamina,
-                                    // speed, bleedout, class
-            TES5_UseFactions = 0x0004, // both factions and assigned crime faction
-            TES5_UseSpellList = 0x0008, // both spells and perks
-            TES5_UseAIData = 0x0010, // AI Data tab, including aggression/confidence/morality, combat style and
-                                     // gift filter
-            TES5_UseAIPackage = 0x0020, // only the basic Packages listed on the AI Packages tab;
-                                        // rest of tab controlled by Def Pack List
-            TES5_UseBaseData = 0x0080, // including name and short name, and flags for Essential, Protected,
-                                       // Respawn, Summonable, Simple Actor, and Doesn't affect stealth meter
-            TES5_UseInventory = 0x0100, // Inventory tab, including all outfits and geared-up item
-                                        // -- but not death item
-            TES5_UseScript = 0x0200,
-            TES5_UseDefined = 0x0400, // Def Pack List (the dropdown-selected package lists on the AI Packages tab)
-            TES5_UseAtkData = 0x0800, // Attack Data tab, including override from behavior graph race,
-                                      // events, and data)
-            TES5_UseKeywords = 0x1000
+            Template_UseTraits = 0x0001, // Destructible Object; Traits tab, including race, gender, height, weight,
+                                         // voice type, death item; Sounds tab; Animation tab; Character Gen tabs
+            Template_UseStats = 0x0002, // Stats tab, including level, autocalc, skills, health/magicka/stamina,
+                                        // speed, bleedout, class
+            Template_UseFactions = 0x0004, // both factions and assigned crime faction
+            Template_UseSpellList = 0x0008, // both spells and perks
+            Template_UseAIData = 0x0010, // AI Data tab, including aggression/confidence/morality, combat style and
+                                         // gift filter
+            Template_UseAIPackage = 0x0020, // only the basic Packages listed on the AI Packages tab;
+                                            // rest of tab controlled by Def Pack List
+            Template_UseModel = 0x0040, // FO3, FONV; probably not used in TES5+
+            Template_UseBaseData = 0x0080, // including name and short name, and flags for Essential, Protected,
+                                           // Respawn, Summonable, Simple Actor, and Doesn't affect stealth meter
+            Template_UseInventory = 0x0100, // Inventory tab, including all outfits and geared-up item,
+                                            // but not death item
+            Template_UseScript = 0x0200,
+
+            // The following flags were added in TES5+:
+
+            Template_UseDefined = 0x0400, // Def Pack List (the dropdown-selected package lists on the AI Packages tab)
+            Template_UseAtkData = 0x0800, // Attack Data tab, including override from behavior graph race,
+                                          // events, and data)
+            Template_UseKeywords = 0x1000
         };
 
 #pragma pack(push, 1)
@@ -172,6 +178,7 @@ namespace ESM4
 
         bool mIsTES4;
         bool mIsFONV;
+        bool mIsFO4 = false;
 
         std::string mEditorId;
         std::string mFullName;
