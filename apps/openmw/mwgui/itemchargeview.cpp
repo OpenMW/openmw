@@ -128,6 +128,11 @@ namespace MWGui
 
         mLines.swap(lines);
 
+        std::stable_sort(mLines.begin(), mLines.end(),
+            [](const MWGui::ItemChargeView::Line& a, const MWGui::ItemChargeView::Line& b) {
+                return Misc::StringUtils::ciLess(a.mText->getCaption().asUTF8(), b.mText->getCaption().asUTF8());
+            });
+
         layoutWidgets();
     }
 
