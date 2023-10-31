@@ -49,14 +49,14 @@ namespace LuaUtil
                                  return !valid;
                              }),
             mCallbacks.end());
-        mPermanentCallbacks.erase(std::remove_if(mPermanentCallbacks.begin(), mPermanentCallbacks.end(),
-                                      [&](const Callback& callback) {
-                                          bool valid = callback.isValid();
-                                          if (valid)
-                                              callback.tryCall(mSectionName, changedKey);
-                                          return !valid;
-                                      }),
-            mPermanentCallbacks.end());
+        mMenuScriptsCallbacks.erase(std::remove_if(mMenuScriptsCallbacks.begin(), mMenuScriptsCallbacks.end(),
+                                        [&](const Callback& callback) {
+                                            bool valid = callback.isValid();
+                                            if (valid)
+                                                callback.tryCall(mSectionName, changedKey);
+                                            return !valid;
+                                        }),
+            mMenuScriptsCallbacks.end());
         mStorage->mRunningCallbacks.erase(this);
     }
 
@@ -121,7 +121,7 @@ namespace LuaUtil
         sview["asTable"] = [](const SectionView& section) { return section.mSection->asTable(); };
         sview["subscribe"] = [](const SectionView& section, const sol::table& callback) {
             std::vector<Callback>& callbacks
-                = section.mForMenuScripts ? section.mSection->mPermanentCallbacks : section.mSection->mCallbacks;
+                = section.mForMenuScripts ? section.mSection->mMenuScriptsCallbacks : section.mSection->mCallbacks;
             if (!callbacks.empty() && callbacks.size() == callbacks.capacity())
             {
                 callbacks.erase(
@@ -191,9 +191,11 @@ namespace LuaUtil
         while (it != mData.end())
         {
             it->second->mCallbacks.clear();
+            // Note that we don't clear menu callbacks for permanent sections
+            // because starting/loading a game doesn't reset menu scripts.
             if (!it->second->mPermanent)
             {
-                it->second->mPermanentCallbacks.clear();
+                it->second->mMenuScriptsCallbacks.clear();
                 it->second->mValues.clear();
                 it = mData.erase(it);
             }

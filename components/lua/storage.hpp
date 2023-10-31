@@ -91,7 +91,8 @@ namespace LuaUtil
             std::string mSectionName;
             std::map<std::string, Value, std::less<>> mValues;
             std::vector<Callback> mCallbacks;
-            std::vector<Callback> mPermanentCallbacks;
+            std::vector<Callback> mMenuScriptsCallbacks; // menu callbacks are in a separate vector because we don't
+                                                         // remove them in clear()
             bool mPermanent = true;
             static Value sEmpty;
         };
