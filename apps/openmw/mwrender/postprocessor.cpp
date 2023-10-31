@@ -112,7 +112,7 @@ namespace MWRender
         : osg::Group()
         , mEnableLiveReload(false)
         , mRootNode(rootNode)
-        , mSamples(Settings::Manager::getInt("antialiasing", "Video"))
+        , mSamples(Settings::video().mAntialiasing)
         , mDirty(false)
         , mDirtyFrameId(0)
         , mRendering(rendering)

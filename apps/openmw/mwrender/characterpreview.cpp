@@ -154,7 +154,7 @@ namespace MWRender
 
     public:
         CharacterPreviewRTTNode(uint32_t sizeX, uint32_t sizeY)
-            : RTTNode(sizeX, sizeY, Settings::Manager::getInt("antialiasing", "Video"), false, 0,
+            : RTTNode(sizeX, sizeY, Settings::video().mAntialiasing, false, 0,
                 StereoAwareness::Unaware_MultiViewShaders, shouldAddMSAAIntermediateTarget())
             , mAspectRatio(static_cast<float>(sizeX) / static_cast<float>(sizeY))
         {

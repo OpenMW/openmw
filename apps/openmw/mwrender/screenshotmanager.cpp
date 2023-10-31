@@ -8,6 +8,7 @@
 #include <osg/Texture2D>
 #include <osg/TextureCubeMap>
 
+#include <components/loadinglistener/loadinglistener.hpp>
 #include <components/misc/strings/algorithm.hpp>
 #include <components/misc/strings/conversion.hpp>
 #include <components/resource/resourcesystem.hpp>
@@ -20,7 +21,6 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
-#include "../mwgui/loadingscreen.hpp"
 
 #include "postprocessor.hpp"
 #include "util.hpp"
@@ -29,7 +29,7 @@
 
 namespace MWRender
 {
-    enum Screenshot360Type
+    enum class Screenshot360Type
     {
         Spherical,
         Cylindrical,
@@ -161,59 +161,46 @@ namespace MWRender
 
     bool ScreenshotManager::screenshot360(osg::Image* image)
     {
-        int screenshotW = mViewer->getCamera()->getViewport()->width();
-        int screenshotH = mViewer->getCamera()->getViewport()->height();
-        Screenshot360Type screenshotMapping = Spherical;
+        const Settings::ScreenshotSettings& settings = Settings::video().mScreenshotType;
 
-        const std::string& settingStr = Settings::Manager::getString("screenshot type", "Video");
-        std::vector<std::string_view> settingArgs;
-        Misc::StringUtils::split(settingStr, settingArgs);
+        Screenshot360Type screenshotMapping = Screenshot360Type::Spherical;
 
-        if (settingArgs.size() > 0)
+        switch (settings.mType)
         {
-            std::string_view typeStrings[4] = { "spherical", "cylindrical", "planet", "cubemap" };
-            bool found = false;
-
-            for (int i = 0; i < 4; ++i)
-            {
-                if (settingArgs[0] == typeStrings[i])
-                {
-                    screenshotMapping = static_cast<Screenshot360Type>(i);
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found)
-            {
-                Log(Debug::Warning) << "Wrong screenshot type: " << settingArgs[0] << ".";
+            case Settings::ScreenshotType::Regular:
+                Log(Debug::Warning) << "Wrong screenshot 360 type: regular.";
                 return false;
-            }
+            case Settings::ScreenshotType::Cylindrical:
+                screenshotMapping = Screenshot360Type::Cylindrical;
+                break;
+            case Settings::ScreenshotType::Spherical:
+                screenshotMapping = Screenshot360Type::Spherical;
+                break;
+            case Settings::ScreenshotType::Planet:
+                screenshotMapping = Screenshot360Type::Planet;
+                break;
+            case Settings::ScreenshotType::Cubemap:
+                screenshotMapping = Screenshot360Type::RawCubemap;
+                break;
         }
+
+        int screenshotW = mViewer->getCamera()->getViewport()->width();
+
+        if (settings.mWidth.has_value())
+            screenshotW = *settings.mWidth;
+
+        int screenshotH = mViewer->getCamera()->getViewport()->height();
+
+        if (settings.mHeight.has_value())
+            screenshotH = *settings.mHeight;
 
         // planet mapping needs higher resolution
-        int cubeSize = screenshotMapping == Planet ? screenshotW : screenshotW / 2;
-
-        if (settingArgs.size() > 1)
-        {
-            screenshotW = std::min(10000, Misc::StringUtils::toNumeric<int>(settingArgs[1], 0));
-        }
-
-        if (settingArgs.size() > 2)
-        {
-            screenshotH = std::min(10000, Misc::StringUtils::toNumeric<int>(settingArgs[2], 0));
-        }
-
-        if (settingArgs.size() > 3)
-        {
-            cubeSize = std::min(5000, Misc::StringUtils::toNumeric<int>(settingArgs[3], 0));
-        }
-
-        bool rawCubemap = screenshotMapping == RawCubemap;
+        const int cubeSize = screenshotMapping == Screenshot360Type::Planet ? screenshotW : screenshotW / 2;
+        const bool rawCubemap = screenshotMapping == Screenshot360Type::RawCubemap;
 
         if (rawCubemap)
             screenshotW = cubeSize * 6; // the image will consist of 6 cube sides in a row
-        else if (screenshotMapping == Planet)
+        else if (screenshotMapping == Screenshot360Type::Planet)
             screenshotH = screenshotW; // use square resolution for planet mapping
 
         std::vector<osg::ref_ptr<osg::Image>> images;
@@ -276,7 +263,7 @@ namespace MWRender
         stateset->setAttributeAndModes(shaderMgr.getProgram("360"), osg::StateAttribute::ON);
 
         stateset->addUniform(new osg::Uniform("cubeMap", 0));
-        stateset->addUniform(new osg::Uniform("mapping", screenshotMapping));
+        stateset->addUniform(new osg::Uniform("mapping", static_cast<int>(screenshotMapping)));
         stateset->setTextureAttributeAndModes(0, cubeTexture, osg::StateAttribute::ON);
 
         screenshotCamera->addChild(quad);

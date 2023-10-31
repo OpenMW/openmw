@@ -1230,8 +1230,8 @@ namespace MWRender
         if (mViewDistance < mNearClip)
             throw std::runtime_error("Viewing distance is less than near clip");
 
-        double width = Settings::Manager::getInt("resolution x", "Video");
-        double height = Settings::Manager::getInt("resolution y", "Video");
+        const double width = Settings::video().mResolutionX;
+        const double height = Settings::video().mResolutionY;
 
         double aspect = (height == 0.0) ? 1.0 : width / height;
         float fov = mFieldOfView;

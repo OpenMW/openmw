@@ -3,7 +3,7 @@
 
 #include "ui_graphicspage.h"
 
-#include <components/settings/settings.hpp>
+#include <components/settings/windowmode.hpp>
 
 namespace Files
 {
@@ -40,6 +40,7 @@ namespace Launcher
         static QRect getMaximumResolution();
 
         bool setupSDL();
+        void handleWindowModeChange(Settings::WindowMode state);
     };
 }
 #endif
