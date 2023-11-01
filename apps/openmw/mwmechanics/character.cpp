@@ -2450,7 +2450,6 @@ namespace MWMechanics
             }
 
             // Update movement
- && !isScriptedAnimPlaying()
             world->queueMovement(mPtr, moved);
         }
 
