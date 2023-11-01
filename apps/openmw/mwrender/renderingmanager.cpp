@@ -1256,7 +1256,7 @@ namespace MWRender
             mSharedUniformStateUpdater->setScreenRes(res.x(), res.y());
             Stereo::Manager::instance().setMasterProjectionMatrix(mPerViewUniformStateUpdater->getProjectionMatrix());
         }
-        else if (!mPostProcessor->isEnabled())
+        else
         {
             mSharedUniformStateUpdater->setScreenRes(width, height);
         }

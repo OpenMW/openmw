@@ -21,6 +21,7 @@
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/windowmanager.hpp"
+#include "../mwbase/world.hpp"
 
 #include "postprocessor.hpp"
 #include "util.hpp"
@@ -102,24 +103,6 @@ namespace MWRender
             int width = screenW - leftPadding * 2;
             int height = screenH - topPadding * 2;
 
-            // Ensure we are reading from the resolved framebuffer and not the multisampled render buffer. Also ensure
-            // that the readbuffer is set correctly with rendeirng to FBO. glReadPixel() cannot read from multisampled
-            // targets
-            PostProcessor* postProcessor = dynamic_cast<PostProcessor*>(renderInfo.getCurrentCamera()->getUserData());
-            osg::GLExtensions* ext = osg::GLExtensions::Get(renderInfo.getContextID(), false);
-
-            if (ext)
-            {
-                size_t frameId = renderInfo.getState()->getFrameStamp()->getFrameNumber() % 2;
-                osg::FrameBufferObject* fbo = nullptr;
-
-                if (postProcessor && postProcessor->getFbo(PostProcessor::FBO_Primary, frameId))
-                    fbo = postProcessor->getFbo(PostProcessor::FBO_Primary, frameId);
-
-                if (fbo)
-                    fbo->apply(*renderInfo.getState(), osg::FrameBufferObject::READ_FRAMEBUFFER);
-            }
-
             mImage->readPixels(leftPadding, topPadding, width, height, GL_RGB, GL_UNSIGNED_BYTE);
             mImage->scaleImage(mWidth, mHeight, 1);
         }
@@ -145,7 +128,7 @@ namespace MWRender
 
     void ScreenshotManager::screenshot(osg::Image* image, int w, int h)
     {
-        osg::Camera* camera = mViewer->getCamera();
+        osg::Camera* camera = MWBase::Environment::get().getWorld()->getPostProcessor()->getHUDCamera();
         osg::ref_ptr<osg::Drawable> tempDrw = new osg::Drawable;
         tempDrw->setDrawCallback(new ReadImageFromFramebufferCallback(image, w, h));
         tempDrw->setCullingActive(false);

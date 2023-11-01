@@ -110,30 +110,45 @@ namespace MWRender
     PostProcessor::PostProcessor(
         RenderingManager& rendering, osgViewer::Viewer* viewer, osg::Group* rootNode, const VFS::Manager* vfs)
         : osg::Group()
-        , mEnableLiveReload(false)
         , mRootNode(rootNode)
-        , mSamples(Settings::video().mAntialiasing)
-        , mDirty(false)
-        , mDirtyFrameId(0)
+        , mHUDCamera(new osg::Camera)
         , mRendering(rendering)
         , mViewer(viewer)
         , mVFS(vfs)
-        , mTriggerShaderReload(false)
-        , mReload(false)
-        , mEnabled(false)
         , mUsePostProcessing(Settings::postProcessing().mEnabled)
-        , mDisableDepthPasses(false)
-        , mLastFrameNumber(0)
-        , mLastSimulationTime(0.f)
-        , mExteriorFlag(false)
-        , mUnderwater(false)
-        , mHDR(false)
-        , mNormals(false)
-        , mPrevNormals(false)
-        , mNormalsSupported(false)
-        , mPassLights(false)
-        , mPrevPassLights(false)
+        , mSamples(Settings::video().mAntialiasing)
+        , mPingPongCull(new PingPongCull(this))
+        , mCanvases({ new PingPongCanvas(mRendering.getResourceSystem()->getSceneManager()->getShaderManager()),
+              new PingPongCanvas(mRendering.getResourceSystem()->getSceneManager()->getShaderManager()) })
     {
+        mHUDCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
+        mHUDCamera->setRenderOrder(osg::Camera::POST_RENDER);
+        mHUDCamera->setClearColor(osg::Vec4(0.45, 0.45, 0.14, 1.0));
+        mHUDCamera->setClearMask(0);
+        mHUDCamera->setProjectionMatrix(osg::Matrix::ortho2D(0, 1, 0, 1));
+        mHUDCamera->setAllowEventFocus(false);
+        mHUDCamera->setViewport(0, 0, mWidth, mHeight);
+        mHUDCamera->setNodeMask(Mask_RenderToTexture);
+        mHUDCamera->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
+        mHUDCamera->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+        mHUDCamera->addChild(mCanvases[0]);
+        mHUDCamera->addChild(mCanvases[1]);
+        mHUDCamera->setCullCallback(new HUDCullCallback);
+        mViewer->getCamera()->addCullCallback(mPingPongCull);
+
+        if (Settings::shaders().mSoftParticles || Settings::postProcessing().mTransparentPostpass)
+        {
+            mTransparentDepthPostPass
+                = new TransparentDepthBinCallback(mRendering.getResourceSystem()->getSceneManager()->getShaderManager(),
+                    Settings::postProcessing().mTransparentPostpass);
+            osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(mTransparentDepthPostPass);
+        }
+
+        createObjectsForFrame(0);
+        createObjectsForFrame(1);
+
+        populateTechniqueFiles();
+
         osg::GraphicsContext* gc = viewer->getCamera()->getGraphicsContext();
         osg::GLExtensions* ext = gc->getState()->get<osg::GLExtensions>();
 
@@ -169,11 +184,18 @@ namespace MWRender
         mUBO = ext->isUniformBufferObjectSupported && mGLSLVersion >= 330;
         mStateUpdater = new fx::StateUpdater(mUBO);
 
-        if (!Stereo::getStereo() && !SceneUtil::AutoDepth::isReversed() && !Settings::shaders().mSoftParticles
-            && !mUsePostProcessing)
-            return;
+        addChild(mHUDCamera);
+        addChild(mRootNode);
 
-        enable(mUsePostProcessing);
+        mViewer->setSceneData(this);
+        mViewer->getCamera()->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
+        mViewer->getCamera()->getGraphicsContext()->setResizedCallback(new ResizedCallback(this));
+        mViewer->getCamera()->setUserData(this);
+
+        setCullCallback(mStateUpdater);
+
+        if (mUsePostProcessing)
+            enable();
     }
 
     PostProcessor::~PostProcessor()
@@ -202,15 +224,12 @@ namespace MWRender
 
         size_t frameId = frame() % 2;
 
-        createTexturesAndCamera(frameId);
         createObjectsForFrame(frameId);
 
         mRendering.updateProjectionMatrix();
         mRendering.setScreenRes(width, height);
 
         dirtyTechniques();
-
-        mPingPongCanvas->dirty(frameId);
 
         mDirty = true;
         mDirtyFrameId = !frameId;
@@ -230,77 +249,20 @@ namespace MWRender
         }
     }
 
-    void PostProcessor::enable(bool usePostProcessing)
+    void PostProcessor::enable()
     {
         mReload = true;
-        mEnabled = true;
-        const bool postPass = Settings::postProcessing().mTransparentPostpass;
-        mUsePostProcessing = usePostProcessing;
-
-        mDisableDepthPasses = !Settings::shaders().mSoftParticles && !postPass;
-
-#ifdef ANDROID
-        mDisableDepthPasses = true;
-#endif
-
-        if (!mDisableDepthPasses)
-        {
-            mTransparentDepthPostPass = new TransparentDepthBinCallback(
-                mRendering.getResourceSystem()->getSceneManager()->getShaderManager(), postPass);
-            osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(mTransparentDepthPostPass);
-        }
-
-        if (mUsePostProcessing && mTechniqueFileMap.empty())
-        {
-            populateTechniqueFiles();
-        }
-
-        createTexturesAndCamera(frame() % 2);
-
-        removeChild(mHUDCamera);
-        removeChild(mRootNode);
-
-        addChild(mHUDCamera);
-        addChild(mRootNode);
-
-        mViewer->setSceneData(this);
-        mViewer->getCamera()->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER_OBJECT);
-        mViewer->getCamera()->getGraphicsContext()->setResizedCallback(new ResizedCallback(this));
-        mViewer->getCamera()->setUserData(this);
-
-        setCullCallback(mStateUpdater);
-        mHUDCamera->setCullCallback(new HUDCullCallback);
+        mUsePostProcessing = true;
     }
 
     void PostProcessor::disable()
     {
-        if (!Settings::shaders().mSoftParticles)
-            osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(nullptr);
-
-        if (!SceneUtil::AutoDepth::isReversed() && !Settings::shaders().mSoftParticles)
-        {
-            removeChild(mHUDCamera);
-            setCullCallback(nullptr);
-
-            mViewer->getCamera()->setRenderTargetImplementation(osg::Camera::FRAME_BUFFER);
-            mViewer->getCamera()->getGraphicsContext()->setResizedCallback(nullptr);
-            mViewer->getCamera()->setUserData(nullptr);
-
-            mEnabled = false;
-        }
-
         mUsePostProcessing = false;
         mRendering.getSkyManager()->setSunglare(true);
     }
 
     void PostProcessor::traverse(osg::NodeVisitor& nv)
     {
-        if (!mEnabled)
-        {
-            osg::Group::traverse(nv);
-            return;
-        }
-
         size_t frameId = nv.getTraversalNumber() % 2;
 
         if (nv.getVisitorType() == osg::NodeVisitor::CULL_VISITOR)
@@ -313,26 +275,23 @@ namespace MWRender
 
     void PostProcessor::cull(size_t frameId, osgUtil::CullVisitor* cv)
     {
-        const auto& fbo = getFbo(FBO_Intercept, frameId);
-        if (fbo)
+        if (const auto& fbo = getFbo(FBO_Intercept, frameId))
         {
             osgUtil::RenderStage* rs = cv->getRenderStage();
             if (rs && rs->getMultisampleResolveFramebufferObject())
                 rs->setMultisampleResolveFramebufferObject(fbo);
         }
 
-        mPingPongCanvas->setPostProcessing(frameId, mUsePostProcessing);
-        mPingPongCanvas->setNormalsTexture(frameId, mNormals ? getTexture(Tex_Normal, frameId) : nullptr);
-        mPingPongCanvas->setMask(frameId, mUnderwater, mExteriorFlag);
-        mPingPongCanvas->setHDR(frameId, getHDR());
+        mCanvases[frameId]->setPostProcessing(mUsePostProcessing);
+        mCanvases[frameId]->setTextureNormals(mNormals ? getTexture(Tex_Normal, frameId) : nullptr);
+        mCanvases[frameId]->setMask(mUnderwater, mExteriorFlag);
+        mCanvases[frameId]->setCalculateAvgLum(mHDR);
 
-        mPingPongCanvas->setSceneTexture(frameId, getTexture(Tex_Scene, frameId));
-        if (mDisableDepthPasses)
-            mPingPongCanvas->setDepthTexture(frameId, getTexture(Tex_Depth, frameId));
+        mCanvases[frameId]->setTextureScene(getTexture(Tex_Scene, frameId));
+        if (mTransparentDepthPostPass)
+            mCanvases[frameId]->setTextureDepth(getTexture(Tex_OpaqueDepth, frameId));
         else
-            mPingPongCanvas->setDepthTexture(frameId, getTexture(Tex_OpaqueDepth, frameId));
-
-        mPingPongCanvas->setLDRSceneTexture(frameId, getTexture(Tex_Scene_LDR, frameId));
+            mCanvases[frameId]->setTextureDepth(getTexture(Tex_Depth, frameId));
 
         if (mTransparentDepthPostPass)
         {
@@ -355,7 +314,7 @@ namespace MWRender
             mStateUpdater->setDeltaSimulationTime(static_cast<float>(stamp->getSimulationTime() - mLastSimulationTime));
             mLastSimulationTime = stamp->getSimulationTime();
 
-            for (const auto& dispatchNode : mPingPongCanvas->getCurrentFrameData(frame))
+            for (const auto& dispatchNode : mCanvases[frameId]->getPasses())
             {
                 for (auto& uniform : dispatchNode.mHandle->getUniformMap())
                 {
@@ -421,13 +380,15 @@ namespace MWRender
 
         reloadIfRequired();
 
+        mCanvases[frameId]->setNodeMask(~0u);
+        mCanvases[!frameId]->setNodeMask(0);
+
         if (mDirty && mDirtyFrameId == frameId)
         {
-            createTexturesAndCamera(frameId);
             createObjectsForFrame(frameId);
-            mDirty = false;
 
-            mPingPongCanvas->setCurrentFrameData(frameId, fx::DispatchArray(mTemplateData));
+            mDirty = false;
+            mCanvases[frameId]->setPasses(fx::DispatchArray(mTemplateData));
         }
 
         if ((mNormalsSupported && mNormals != mPrevNormals) || (mPassLights != mPrevPassLights))
@@ -448,7 +409,6 @@ namespace MWRender
 
             mViewer->startThreading();
 
-            createTexturesAndCamera(frameId);
             createObjectsForFrame(frameId);
 
             mDirty = true;
@@ -458,19 +418,55 @@ namespace MWRender
 
     void PostProcessor::createObjectsForFrame(size_t frameId)
     {
-        auto& fbos = mFbos[frameId];
         auto& textures = mTextures[frameId];
-        auto width = renderWidth();
-        auto height = renderHeight();
 
-        for (auto& tex : textures)
+        int width = renderWidth();
+        int height = renderHeight();
+
+        for (osg::ref_ptr<osg::Texture>& texture : textures)
         {
-            if (!tex)
-                continue;
-
-            Stereo::setMultiviewCompatibleTextureSize(tex, width, height);
-            tex->dirtyTextureObject();
+            if (!texture)
+            {
+                if (Stereo::getMultiview())
+                    texture = new osg::Texture2DArray;
+                else
+                    texture = new osg::Texture2D;
+            }
+            Stereo::setMultiviewCompatibleTextureSize(texture, width, height);
+            texture->setSourceFormat(GL_RGBA);
+            texture->setSourceType(GL_UNSIGNED_BYTE);
+            texture->setInternalFormat(GL_RGBA);
+            texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture::LINEAR);
+            texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture::LINEAR);
+            texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
+            texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+            texture->setResizeNonPowerOfTwoHint(false);
+            Stereo::setMultiviewCompatibleTextureSize(texture, width, height);
+            texture->dirtyTextureObject();
         }
+
+        textures[Tex_Normal]->setSourceFormat(GL_RGB);
+        textures[Tex_Normal]->setInternalFormat(GL_RGB);
+
+        auto setupDepth = [](osg::Texture* tex) {
+            tex->setSourceFormat(GL_DEPTH_STENCIL_EXT);
+            tex->setSourceType(SceneUtil::AutoDepth::depthSourceType());
+            tex->setInternalFormat(SceneUtil::AutoDepth::depthInternalFormat());
+        };
+
+        setupDepth(textures[Tex_Depth]);
+
+        if (!mTransparentDepthPostPass)
+        {
+            textures[Tex_OpaqueDepth] = nullptr;
+        }
+        else
+        {
+            setupDepth(textures[Tex_OpaqueDepth]);
+            textures[Tex_OpaqueDepth]->setName("opaqueTexMap");
+        }
+
+        auto& fbos = mFbos[frameId];
 
         fbos[FBO_Primary] = new osg::FrameBufferObject;
         fbos[FBO_Primary]->setAttachment(
@@ -534,13 +530,12 @@ namespace MWRender
                 osg::FrameBufferAttachment(new osg::RenderBuffer(textures[Tex_OpaqueDepth]->getTextureWidth(),
                     textures[Tex_OpaqueDepth]->getTextureHeight(), textures[Tex_Scene]->getInternalFormat())));
 #endif
+
+        mCanvases[frameId]->dirty();
     }
 
     void PostProcessor::dirtyTechniques()
     {
-        if (!isEnabled())
-            return;
-
         size_t frameId = frame() % 2;
 
         mDirty = true;
@@ -667,7 +662,7 @@ namespace MWRender
             mTemplateData.emplace_back(std::move(node));
         }
 
-        mPingPongCanvas->setCurrentFrameData(frameId, fx::DispatchArray(mTemplateData));
+        mCanvases[frameId]->setPasses(fx::DispatchArray(mTemplateData));
 
         if (auto hud = MWBase::Environment::get().getWindowManager()->getPostProcessorHud())
             hud->updateTechniques();
@@ -678,12 +673,6 @@ namespace MWRender
     PostProcessor::Status PostProcessor::enableTechnique(
         std::shared_ptr<fx::Technique> technique, std::optional<int> location)
     {
-        if (!isEnabled())
-        {
-            Log(Debug::Warning) << "PostProcessing disabled, cannot load technique '" << technique->getName() << "'";
-            return Status_Error;
-        }
-
         if (!technique || technique->getLocked() || (location.has_value() && location.value() < 0))
             return Status_Error;
 
@@ -721,86 +710,8 @@ namespace MWRender
         return technique->isValid();
     }
 
-    void PostProcessor::createTexturesAndCamera(size_t frameId)
-    {
-        auto& textures = mTextures[frameId];
-
-        auto width = renderWidth();
-        auto height = renderHeight();
-
-        for (auto& texture : textures)
-        {
-            if (!texture)
-            {
-                if (Stereo::getMultiview())
-                    texture = new osg::Texture2DArray;
-                else
-                    texture = new osg::Texture2D;
-            }
-            Stereo::setMultiviewCompatibleTextureSize(texture, width, height);
-            texture->setSourceFormat(GL_RGBA);
-            texture->setSourceType(GL_UNSIGNED_BYTE);
-            texture->setInternalFormat(GL_RGBA);
-            texture->setFilter(osg::Texture2D::MIN_FILTER, osg::Texture::LINEAR);
-            texture->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture::LINEAR);
-            texture->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
-            texture->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
-            texture->setResizeNonPowerOfTwoHint(false);
-        }
-
-        textures[Tex_Normal]->setSourceFormat(GL_RGB);
-        textures[Tex_Normal]->setInternalFormat(GL_RGB);
-
-        auto setupDepth = [](osg::Texture* tex) {
-            tex->setSourceFormat(GL_DEPTH_STENCIL_EXT);
-            tex->setSourceType(SceneUtil::AutoDepth::depthSourceType());
-            tex->setInternalFormat(SceneUtil::AutoDepth::depthInternalFormat());
-        };
-
-        setupDepth(textures[Tex_Depth]);
-
-        if (mDisableDepthPasses)
-        {
-            textures[Tex_OpaqueDepth] = nullptr;
-        }
-        else
-        {
-            setupDepth(textures[Tex_OpaqueDepth]);
-            textures[Tex_OpaqueDepth]->setName("opaqueTexMap");
-        }
-
-        if (mHUDCamera)
-            return;
-
-        mHUDCamera = new osg::Camera;
-        mHUDCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
-        mHUDCamera->setRenderOrder(osg::Camera::POST_RENDER);
-        mHUDCamera->setClearColor(osg::Vec4(0.45, 0.45, 0.14, 1.0));
-        mHUDCamera->setClearMask(0);
-        mHUDCamera->setProjectionMatrix(osg::Matrix::ortho2D(0, 1, 0, 1));
-        mHUDCamera->setAllowEventFocus(false);
-        mHUDCamera->setViewport(0, 0, mWidth, mHeight);
-
-        mViewer->getCamera()->removeCullCallback(mPingPongCull);
-        mPingPongCull = new PingPongCull(this);
-        mViewer->getCamera()->addCullCallback(mPingPongCull);
-
-        mPingPongCanvas = new PingPongCanvas(mRendering.getResourceSystem()->getSceneManager()->getShaderManager());
-        mHUDCamera->addChild(mPingPongCanvas);
-        mHUDCamera->setNodeMask(Mask_RenderToTexture);
-
-        mHUDCamera->getOrCreateStateSet()->setMode(GL_LIGHTING, osg::StateAttribute::OFF);
-        mHUDCamera->getOrCreateStateSet()->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
-    }
-
     std::shared_ptr<fx::Technique> PostProcessor::loadTechnique(const std::string& name, bool loadNextFrame)
     {
-        if (!isEnabled())
-        {
-            Log(Debug::Warning) << "PostProcessing disabled, cannot load technique '" << name << "'";
-            return nullptr;
-        }
-
         for (const auto& technique : mTemplates)
             if (Misc::StringUtils::ciEqual(technique->getName(), name))
                 return technique;
@@ -831,9 +742,6 @@ namespace MWRender
 
     void PostProcessor::loadChain()
     {
-        if (!isEnabled())
-            return;
-
         mTechniques.clear();
 
         for (const std::string& techniqueName : Settings::postProcessing().mChain.get())
