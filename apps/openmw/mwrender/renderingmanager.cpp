@@ -331,8 +331,8 @@ namespace MWRender
         // Shadows and radial fog have problems with fixed-function mode.
         bool forceShaders = Settings::fog().mRadialFog || Settings::fog().mExponentialFog
             || Settings::shaders().mSoftParticles || Settings::shaders().mForceShaders
-            || Settings::Manager::getBool("enable shadows", "Shadows")
-            || lightingMethod != SceneUtil::LightingMethod::FFP || reverseZ || mSkyBlending || Stereo::getMultiview();
+            || Settings::shadows().mEnableShadows || lightingMethod != SceneUtil::LightingMethod::FFP || reverseZ
+            || mSkyBlending || Stereo::getMultiview();
         resourceSystem->getSceneManager()->setForceShaders(forceShaders);
 
         // FIXME: calling dummy method because terrain needs to know whether lighting is clamped
@@ -367,22 +367,22 @@ namespace MWRender
         sceneRoot->setName("Scene Root");
 
         int shadowCastingTraversalMask = Mask_Scene;
-        if (Settings::Manager::getBool("actor shadows", "Shadows"))
+        if (Settings::shadows().mActorShadows)
             shadowCastingTraversalMask |= Mask_Actor;
-        if (Settings::Manager::getBool("player shadows", "Shadows"))
+        if (Settings::shadows().mPlayerShadows)
             shadowCastingTraversalMask |= Mask_Player;
 
         int indoorShadowCastingTraversalMask = shadowCastingTraversalMask;
-        if (Settings::Manager::getBool("object shadows", "Shadows"))
+        if (Settings::shadows().mObjectShadows)
             shadowCastingTraversalMask |= (Mask_Object | Mask_Static);
-        if (Settings::Manager::getBool("terrain shadows", "Shadows"))
+        if (Settings::shadows().mTerrainShadows)
             shadowCastingTraversalMask |= Mask_Terrain;
 
         mShadowManager = std::make_unique<SceneUtil::ShadowManager>(sceneRoot, mRootNode, shadowCastingTraversalMask,
-            indoorShadowCastingTraversalMask, Mask_Terrain | Mask_Object | Mask_Static,
+            indoorShadowCastingTraversalMask, Mask_Terrain | Mask_Object | Mask_Static, Settings::shadows(),
             mResourceSystem->getSceneManager()->getShaderManager());
 
-        Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines();
+        Shader::ShaderManager::DefineMap shadowDefines = mShadowManager->getShadowDefines(Settings::shadows());
         Shader::ShaderManager::DefineMap lightDefines = sceneRoot->getLightDefines();
         Shader::ShaderManager::DefineMap globalDefines
             = mResourceSystem->getSceneManager()->getShaderManager().getGlobalDefines();
@@ -770,7 +770,7 @@ namespace MWRender
         if (enabled)
             mShadowManager->enableOutdoorMode();
         else
-            mShadowManager->enableIndoorMode();
+            mShadowManager->enableIndoorMode(Settings::shadows());
         mPostProcessor->getStateUpdater()->setIsInterior(!enabled);
     }
 

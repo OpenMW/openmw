@@ -158,32 +158,32 @@ bool Launcher::GraphicsPage::loadSettings()
     lightingMethodComboBox->setCurrentIndex(lightingMethod);
 
     // Shadows
-    if (Settings::Manager::getBool("actor shadows", "Shadows"))
+    if (Settings::shadows().mActorShadows)
         actorShadowsCheckBox->setCheckState(Qt::Checked);
-    if (Settings::Manager::getBool("player shadows", "Shadows"))
+    if (Settings::shadows().mPlayerShadows)
         playerShadowsCheckBox->setCheckState(Qt::Checked);
-    if (Settings::Manager::getBool("terrain shadows", "Shadows"))
+    if (Settings::shadows().mTerrainShadows)
         terrainShadowsCheckBox->setCheckState(Qt::Checked);
-    if (Settings::Manager::getBool("object shadows", "Shadows"))
+    if (Settings::shadows().mObjectShadows)
         objectShadowsCheckBox->setCheckState(Qt::Checked);
-    if (Settings::Manager::getBool("enable indoor shadows", "Shadows"))
+    if (Settings::shadows().mEnableIndoorShadows)
         indoorShadowsCheckBox->setCheckState(Qt::Checked);
 
-    shadowComputeSceneBoundsComboBox->setCurrentIndex(shadowComputeSceneBoundsComboBox->findText(
-        QString(tr(Settings::Manager::getString("compute scene bounds", "Shadows").c_str()))));
+    shadowComputeSceneBoundsComboBox->setCurrentIndex(
+        shadowComputeSceneBoundsComboBox->findText(QString(tr(Settings::shadows().mComputeSceneBounds.get().c_str()))));
 
-    int shadowDistLimit = Settings::Manager::getInt("maximum shadow map distance", "Shadows");
+    const int shadowDistLimit = Settings::shadows().mMaximumShadowMapDistance;
     if (shadowDistLimit > 0)
     {
         shadowDistanceCheckBox->setCheckState(Qt::Checked);
         shadowDistanceSpinBox->setValue(shadowDistLimit);
     }
 
-    float shadowFadeStart = Settings::Manager::getFloat("shadow fade start", "Shadows");
+    const float shadowFadeStart = Settings::shadows().mShadowFadeStart;
     if (shadowFadeStart != 0)
         fadeStartSpinBox->setValue(shadowFadeStart);
 
-    int shadowRes = Settings::Manager::getInt("shadow map resolution", "Shadows");
+    const int shadowRes = Settings::shadows().mShadowMapResolution;
     int shadowResIndex = shadowResolutionComboBox->findText(QString::number(shadowRes));
     if (shadowResIndex != -1)
         shadowResolutionComboBox->setCurrentIndex(shadowResIndex);
@@ -240,55 +240,36 @@ void Launcher::GraphicsPage::saveSettings()
     Settings::shaders().mLightingMethod.set(lightingMethodMap[lightingMethodComboBox->currentIndex()]);
 
     // Shadows
-    int cShadowDist = shadowDistanceCheckBox->checkState() != Qt::Unchecked ? shadowDistanceSpinBox->value() : 0;
-    if (Settings::Manager::getInt("maximum shadow map distance", "Shadows") != cShadowDist)
-        Settings::Manager::setInt("maximum shadow map distance", "Shadows", cShadowDist);
-    float cFadeStart = fadeStartSpinBox->value();
-    if (cShadowDist > 0 && Settings::Manager::getFloat("shadow fade start", "Shadows") != cFadeStart)
-        Settings::Manager::setFloat("shadow fade start", "Shadows", cFadeStart);
+    const int cShadowDist = shadowDistanceCheckBox->checkState() != Qt::Unchecked ? shadowDistanceSpinBox->value() : 0;
+    Settings::shadows().mMaximumShadowMapDistance.set(cShadowDist);
+    const float cFadeStart = fadeStartSpinBox->value();
+    if (cShadowDist > 0)
+        Settings::shadows().mShadowFadeStart.set(cFadeStart);
 
-    bool cActorShadows = actorShadowsCheckBox->checkState();
-    bool cObjectShadows = objectShadowsCheckBox->checkState();
-    bool cTerrainShadows = terrainShadowsCheckBox->checkState();
-    bool cPlayerShadows = playerShadowsCheckBox->checkState();
+    const bool cActorShadows = actorShadowsCheckBox->checkState() != Qt::Unchecked;
+    const bool cObjectShadows = objectShadowsCheckBox->checkState() != Qt::Unchecked;
+    const bool cTerrainShadows = terrainShadowsCheckBox->checkState() != Qt::Unchecked;
+    const bool cPlayerShadows = playerShadowsCheckBox->checkState() != Qt::Unchecked;
     if (cActorShadows || cObjectShadows || cTerrainShadows || cPlayerShadows)
     {
-        if (!Settings::Manager::getBool("enable shadows", "Shadows"))
-            Settings::Manager::setBool("enable shadows", "Shadows", true);
-        if (Settings::Manager::getBool("actor shadows", "Shadows") != cActorShadows)
-            Settings::Manager::setBool("actor shadows", "Shadows", cActorShadows);
-        if (Settings::Manager::getBool("player shadows", "Shadows") != cPlayerShadows)
-            Settings::Manager::setBool("player shadows", "Shadows", cPlayerShadows);
-        if (Settings::Manager::getBool("object shadows", "Shadows") != cObjectShadows)
-            Settings::Manager::setBool("object shadows", "Shadows", cObjectShadows);
-        if (Settings::Manager::getBool("terrain shadows", "Shadows") != cTerrainShadows)
-            Settings::Manager::setBool("terrain shadows", "Shadows", cTerrainShadows);
+        Settings::shadows().mEnableShadows.set(true);
+        Settings::shadows().mActorShadows.set(cActorShadows);
+        Settings::shadows().mPlayerShadows.set(cPlayerShadows);
+        Settings::shadows().mObjectShadows.set(cObjectShadows);
+        Settings::shadows().mTerrainShadows.set(cTerrainShadows);
     }
     else
     {
-        if (Settings::Manager::getBool("enable shadows", "Shadows"))
-            Settings::Manager::setBool("enable shadows", "Shadows", false);
-        if (Settings::Manager::getBool("actor shadows", "Shadows"))
-            Settings::Manager::setBool("actor shadows", "Shadows", false);
-        if (Settings::Manager::getBool("player shadows", "Shadows"))
-            Settings::Manager::setBool("player shadows", "Shadows", false);
-        if (Settings::Manager::getBool("object shadows", "Shadows"))
-            Settings::Manager::setBool("object shadows", "Shadows", false);
-        if (Settings::Manager::getBool("terrain shadows", "Shadows"))
-            Settings::Manager::setBool("terrain shadows", "Shadows", false);
+        Settings::shadows().mEnableShadows.set(false);
+        Settings::shadows().mActorShadows.set(false);
+        Settings::shadows().mPlayerShadows.set(false);
+        Settings::shadows().mObjectShadows.set(false);
+        Settings::shadows().mTerrainShadows.set(false);
     }
 
-    bool cIndoorShadows = indoorShadowsCheckBox->checkState();
-    if (Settings::Manager::getBool("enable indoor shadows", "Shadows") != cIndoorShadows)
-        Settings::Manager::setBool("enable indoor shadows", "Shadows", cIndoorShadows);
-
-    int cShadowRes = shadowResolutionComboBox->currentText().toInt();
-    if (cShadowRes != Settings::Manager::getInt("shadow map resolution", "Shadows"))
-        Settings::Manager::setInt("shadow map resolution", "Shadows", cShadowRes);
-
-    auto cComputeSceneBounds = shadowComputeSceneBoundsComboBox->currentText().toStdString();
-    if (cComputeSceneBounds != Settings::Manager::getString("compute scene bounds", "Shadows"))
-        Settings::Manager::setString("compute scene bounds", "Shadows", cComputeSceneBounds);
+    Settings::shadows().mEnableIndoorShadows.set(indoorShadowsCheckBox->checkState() != Qt::Unchecked);
+    Settings::shadows().mShadowMapResolution.set(shadowResolutionComboBox->currentText().toInt());
+    Settings::shadows().mComputeSceneBounds.set(shadowComputeSceneBoundsComboBox->currentText().toStdString());
 }
 
 QStringList Launcher::GraphicsPage::getAvailableResolutions(int screen)
