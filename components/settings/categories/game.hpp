@@ -74,6 +74,7 @@ namespace Settings
             "unarmed creature attacks damage armor" };
         SettingValue<DetourNavigator::CollisionShapeType> mActorCollisionShapeType{ mIndex, "Game",
             "actor collision shape type" };
+        SettingValue<bool> mPlayerMovementIgnoresAnimation{ mIndex, "Game", "player movement ignores animation" };
     };
 }
 

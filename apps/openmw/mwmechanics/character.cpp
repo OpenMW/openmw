@@ -2387,48 +2387,72 @@ namespace MWMechanics
         }
 
         osg::Vec3f moved = mAnimation->runAnimation(mSkipAnim && !isScriptedAnimPlaying() ? 0.f : duration);
-        if (duration > 0.0f)
-            moved /= duration;
-        else
-            moved = osg::Vec3f(0.f, 0.f, 0.f);
 
-        moved.x() *= scale;
-        moved.y() *= scale;
-
-        // Ensure we're moving in generally the right direction...
-        if (speed > 0.f && moved != osg::Vec3f())
+        if (mPtr.getClass().isActor() && isMovementAnimationControlled() && !isScriptedAnimPlaying())
         {
-            float l = moved.length();
-            if (std::abs(movement.x() - moved.x()) > std::abs(moved.x()) / 2
-                || std::abs(movement.y() - moved.y()) > std::abs(moved.y()) / 2
-                || std::abs(movement.z() - moved.z()) > std::abs(moved.z()) / 2)
-            {
-                moved = movement;
-                // For some creatures getSpeed doesn't work, so we adjust speed to the animation.
-                // TODO: Fix Creature::getSpeed.
-                float newLength = moved.length();
-                if (newLength > 0 && !cls.isNpc())
-                    moved *= (l / newLength);
-            }
-        }
+            if (duration > 0.0f)
+                moved /= duration;
+            else
+                moved = osg::Vec3f(0.f, 0.f, 0.f);
 
-        if (mFloatToSurface && cls.isActor())
-        {
-            if (cls.getCreatureStats(mPtr).isDead()
-                || (!godmode
-                    && cls.getCreatureStats(mPtr)
-                            .getMagicEffects()
-                            .getOrDefault(ESM::MagicEffect::Paralyze)
-                            .getModifier()
-                        > 0))
-            {
-                moved.z() = 1.0;
-            }
-        }
+            moved.x() *= scale;
+            moved.y() *= scale;
 
-        // Update movement
-        if (isMovementAnimationControlled() && mPtr.getClass().isActor() && !isScriptedAnimPlaying())
+            if (speed > 0.f && moved != osg::Vec3f())
+            {
+                // Ensure we're moving in generally the right direction
+                // This is necessary when the "turn to movement direction" feature is off, as animations
+                // will not be rotated to match diagonal movement. In this case we have to slide the
+                // character diagonally.
+
+                // First decide the general direction expected from the current animation
+                float animMovementAngle = 0;
+                if (!Settings::game().mTurnToMovementDirection || isFirstPersonPlayer)
+                {
+                    if (cls.getMovementSettings(mPtr).mIsStrafing)
+                        animMovementAngle = movement.x() > 0 ? -osg::PI_2f : osg::PI_2f;
+                    else
+                        animMovementAngle = movement.y() >= 0 ? 0 : -osg::PIf;
+                }
+                else
+                {
+                    animMovementAngle = mAnimation->getLegsYawRadians();
+                    if (movement.y() < 0)
+                        animMovementAngle -= osg::PIf;
+                }
+
+                const float epsilon = 0.001f;
+                float targetMovementAngle = std::atan2(-movement.x(), movement.y());
+                float diff = targetMovementAngle - animMovementAngle;
+                if (std::fabsf(diff) > epsilon)
+                {
+                    moved = osg::Quat(diff, osg::Vec3f(0, 0, 1)) * moved;
+                }
+
+                if (isPlayer && Settings::game().mPlayerMovementIgnoresAnimation)
+                {
+                    moved = movement;
+                }
+            }
+
+            if (mFloatToSurface)
+            {
+                if (cls.getCreatureStats(mPtr).isDead()
+                    || (!godmode
+                        && cls.getCreatureStats(mPtr)
+                                .getMagicEffects()
+                                .getOrDefault(ESM::MagicEffect::Paralyze)
+                                .getModifier()
+                            > 0))
+                {
+                    moved.z() = 1.0;
+                }
+            }
+
+            // Update movement
+ && !isScriptedAnimPlaying()
             world->queueMovement(mPtr, moved);
+        }
 
         mSkipAnim = false;
 
