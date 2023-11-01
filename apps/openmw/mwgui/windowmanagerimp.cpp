@@ -294,8 +294,7 @@ namespace MWGui
             += MyGUI::newDelegate(this, &WindowManager::onClipboardRequested);
 
         mVideoWrapper = std::make_unique<SDLUtil::VideoWrapper>(window, viewer);
-        mVideoWrapper->setGammaContrast(
-            Settings::Manager::getFloat("gamma", "Video"), Settings::Manager::getFloat("contrast", "Video"));
+        mVideoWrapper->setGammaContrast(Settings::video().mGamma, Settings::video().mContrast);
 
         if (useShaders)
             mGuiPlatform->getRenderManagerPtr()->enableShaders(mResourceSystem->getSceneManager()->getShaderManager());
@@ -1157,25 +1156,22 @@ namespace MWGui
                 changeRes = true;
 
             else if (setting.first == "Video" && setting.second == "vsync mode")
-                mVideoWrapper->setSyncToVBlank(Settings::Manager::getInt("vsync mode", "Video"));
+                mVideoWrapper->setSyncToVBlank(Settings::video().mVsyncMode);
             else if (setting.first == "Video" && (setting.second == "gamma" || setting.second == "contrast"))
-                mVideoWrapper->setGammaContrast(
-                    Settings::Manager::getFloat("gamma", "Video"), Settings::Manager::getFloat("contrast", "Video"));
+                mVideoWrapper->setGammaContrast(Settings::video().mGamma, Settings::video().mContrast);
         }
 
         if (changeRes)
         {
-            mVideoWrapper->setVideoMode(Settings::Manager::getInt("resolution x", "Video"),
-                Settings::Manager::getInt("resolution y", "Video"),
-                static_cast<Settings::WindowMode>(Settings::Manager::getInt("window mode", "Video")),
-                Settings::Manager::getBool("window border", "Video"));
+            mVideoWrapper->setVideoMode(Settings::video().mResolutionX, Settings::video().mResolutionY,
+                Settings::video().mWindowMode, Settings::video().mWindowBorder);
         }
     }
 
     void WindowManager::windowResized(int x, int y)
     {
-        Settings::Manager::setInt("resolution x", "Video", x);
-        Settings::Manager::setInt("resolution y", "Video", y);
+        Settings::video().mResolutionX.set(x);
+        Settings::video().mResolutionY.set(y);
 
         // We only want to process changes to window-size related settings.
         Settings::CategorySettingVector filter = { { "Video", "resolution x" }, { "Video", "resolution y" } };

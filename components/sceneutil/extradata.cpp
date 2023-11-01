@@ -15,7 +15,7 @@
 
 namespace SceneUtil
 {
-    void setupSoftEffect(osg::Node& node, float size, bool falloff)
+    void setupSoftEffect(osg::Node& node, float size, bool falloff, float falloffDepth)
     {
         static const osg::ref_ptr<SceneUtil::AutoDepth> depth = new SceneUtil::AutoDepth(osg::Depth::LESS, 0, 1, false);
 
@@ -23,6 +23,7 @@ namespace SceneUtil
 
         stateset->addUniform(new osg::Uniform("particleSize", size));
         stateset->addUniform(new osg::Uniform("particleFade", falloff));
+        stateset->addUniform(new osg::Uniform("softFalloffDepth", falloffDepth));
         stateset->setAttributeAndModes(depth, osg::StateAttribute::ON | osg::StateAttribute::OVERRIDE);
 
         node.setUserValue(Misc::OsgUserValues::sXSoftEffect, true);
@@ -34,6 +35,8 @@ namespace SceneUtil
             return;
 
         std::string source;
+
+        constexpr float defaultFalloffDepth = 300.f; // arbitrary value that simply looks good with common cases
 
         if (node.getUserValue(Misc::OsgUserValues::sExtraData, source) && !source.empty())
         {
@@ -47,8 +50,9 @@ namespace SceneUtil
                 {
                     auto size = it.second["size"].as<float>(45.f);
                     auto falloff = it.second["falloff"].as<bool>(false);
+                    auto falloffDepth = it.second["falloffDepth"].as<float>(defaultFalloffDepth);
 
-                    setupSoftEffect(node, size, falloff);
+                    setupSoftEffect(node, size, falloff, falloffDepth);
                 }
             }
 
@@ -56,7 +60,8 @@ namespace SceneUtil
         }
         else if (osgParticle::ParticleSystem* partsys = dynamic_cast<osgParticle::ParticleSystem*>(&node))
         {
-            setupSoftEffect(node, partsys->getDefaultParticleTemplate().getSizeRange().maximum, false);
+            setupSoftEffect(
+                node, partsys->getDefaultParticleTemplate().getSizeRange().maximum, false, defaultFalloffDepth);
         }
 
         traverse(node);

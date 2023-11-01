@@ -135,6 +135,15 @@ namespace MWMechanics
         return mNumPursuitPackages > 0;
     }
 
+    bool AiSequence::isFleeing() const
+    {
+        if (!isInCombat())
+            return false;
+
+        const AiCombatStorage* storage = mAiState.getPtr<AiCombatStorage>();
+        return storage && storage->isFleeing();
+    }
+
     bool AiSequence::isEngagedWithActor() const
     {
         if (!isInCombat())
@@ -272,7 +281,9 @@ namespace MWMechanics
                 }
                 else
                 {
-                    float rating = MWMechanics::getBestActionRating(actor, target);
+                    float rating = 0.f;
+                    if (MWMechanics::canFight(actor, target))
+                        rating = MWMechanics::getBestActionRating(actor, target);
 
                     const ESM::Position& targetPos = target.getRefData().getPosition();
 

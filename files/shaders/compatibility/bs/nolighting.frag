@@ -38,6 +38,7 @@ uniform float alphaRef;
 uniform sampler2D opaqueDepthTex;
 uniform float particleSize;
 uniform bool particleFade;
+uniform float softFalloffDepth;
 #endif
 
 void main()
@@ -71,7 +72,8 @@ void main()
         far,
         texture2D(opaqueDepthTex, screenCoords).x,
         particleSize,
-        particleFade
+        particleFade,
+        softFalloffDepth
     );
 #endif
 

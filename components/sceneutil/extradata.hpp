@@ -15,7 +15,7 @@ namespace osg
 
 namespace SceneUtil
 {
-    void setupSoftEffect(osg::Node& node, float size, bool falloff);
+    void setupSoftEffect(osg::Node& node, float size, bool falloff, float falloffDepth);
 
     class ProcessExtraDataVisitor : public osg::NodeVisitor
     {

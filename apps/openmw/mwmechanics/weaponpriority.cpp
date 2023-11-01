@@ -118,13 +118,17 @@ namespace MWMechanics
         }
 
         int value = 50.f;
-        if (actor.getClass().isNpc())
-        {
-            ESM::RefId skill = item.getClass().getEquipmentSkill(item);
-            if (!skill.empty())
-                value = actor.getClass().getSkill(actor, skill);
-        }
-        else
+        ESM::RefId skill = item.getClass().getEquipmentSkill(item);
+        if (!skill.empty())
+            value = actor.getClass().getSkill(actor, skill);
+        // Prefer hand-to-hand if our skill is 0 (presumably due to magic)
+        if (value <= 0.f)
+            return 0.f;
+        // Note that a creature with a dagger and 0 Stealth will forgo the weapon despite using Combat for hit chance.
+        // The same creature will use a sword provided its Combat stat isn't 0. We're using the "skill" value here to
+        // decide whether to use the weapon at all, but adjusting the final rating based on actual hit chance - i.e. the
+        // Combat stat.
+        if (!actor.getClass().isNpc())
         {
             MWWorld::LiveCellRef<ESM::Creature>* ref = actor.get<ESM::Creature>();
             value = ref->mBase->mData.mCombat;

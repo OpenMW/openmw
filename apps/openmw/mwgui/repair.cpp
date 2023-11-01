@@ -49,7 +49,7 @@ namespace MWGui
             = new SortFilterItemModel(std::make_unique<InventoryItemModel>(MWMechanics::getPlayer()));
         model->setFilter(SortFilterItemModel::Filter_OnlyRepairable);
         mRepairBox->setModel(model);
-
+        mRepairBox->update();
         // Reset scrollbars
         mRepairBox->resetScrollbars();
     }

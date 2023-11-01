@@ -8,7 +8,9 @@
     Bug #4204: Dead slaughterfish doesn't float to water surface after loading saved game
     Bug #4207: RestoreHealth/Fatigue spells have a huge priority even if a success chance is near 0
     Bug #4382: Sound output device does not change when it should
+    Bug #4508: Can't stack enchantment buffs from different instances of the same self-cast generic magic apparel
     Bug #4610: Casting a Bound Weapon spell cancels the casting animation by equipping the weapon prematurely
+    Bug #4742: Actors with wander never stop walking after Loopgroup Walkforward
     Bug #4754: Stack of ammunition cannot be equipped partially
     Bug #4816: GetWeaponDrawn returns 1 before weapon is attached
     Bug #5057: Weapon swing sound plays at same pitch whether it hits or misses
@@ -33,6 +35,7 @@
     Bug #6807: Ultimate Galleon is not working properly
     Bug #6893: Lua: Inconsistent behavior with actors affected by Disable and SetDelete commands
     Bug #6894: Added item combines with equipped stack instead of creating a new unequipped stack
+    Bug #6932: Creatures flee from my followers and we have to chase after them
     Bug #6939: OpenMW-CS: ID columns are too short
     Bug #6949: Sun Damage effect doesn't work in quasi exteriors
     Bug #6964: Nerasa Dralor Won't Follow
@@ -58,6 +61,7 @@
     Bug #7134: Saves with an invalid last generated RefNum can be loaded
     Bug #7163: Myar Aranath: Wheat breaks the GUI
     Bug #7172: Current music playlist continues playing indefinitely if next playlist is empty
+    Bug #7204: Missing actor scripts freeze the game
     Bug #7229: Error marker loading failure is not handled
     Bug #7243: Supporting loading external files from VFS from esm files
     Bug #7284: "Your weapon has no effect." message doesn't always show when the player character attempts to attack
@@ -70,6 +74,7 @@
     Bug #7450: Evading obstacles does not work for actors missing certain animations
     Bug #7459: Icons get stacked on the cursor when picking up multiple items simultaneously
     Bug #7472: Crash when enchanting last projectiles
+    Bug #7502: Data directories dialog (0.48.0) forces adding subdirectory instead of intended directory
     Bug #7505: Distant terrain does not support sample size greater than cell size
     Bug #7553: Faction reaction loading is incorrect
     Bug #7557: Terrain::ChunkManager::createChunk is called twice for the same position, lod on initial loading
@@ -79,6 +84,12 @@
     Bug #7609: ForceGreeting should not open dialogue for werewolves
     Bug #7611: Beast races' idle animations slide after turning or jumping in place
     Bug #7630: Charm can be cast on creatures
+    Bug #7631: Cannot trade with/talk to Creeper or Mudcrab Merchant when they're fleeing
+    Bug #7636: Animations bug out when switching between 1st and 3rd person, while playing a scripted animation
+    Bug #7637: Actors can sometimes move while playing scripted animations
+    Bug #7639: NPCs don't use hand-to-hand if their other melee skills were damaged during combat
+    Bug #7642: Items in repair and recharge menus aren't sorted alphabetically
+    Bug #7647: NPC walk cycle bugs after greeting player
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6149: Dehardcode Lua API_REVISION
@@ -109,7 +120,9 @@
     Feature #7546: Start the game on Fredas
     Feature #7568: Uninterruptable scripted music
     Feature #7618: Show the player character's health in the save details
+    Feature #7625: Add some missing console error outputs
     Feature #7634: Support NiParticleBomb
+    Feature #7652: Sort inactive post processing shaders list properly
     Task #5896: Do not use deprecated MyGUI properties
     Task #7113: Move from std::atoi to std::from_char
     Task #7117: Replace boost::scoped_array with std::vector

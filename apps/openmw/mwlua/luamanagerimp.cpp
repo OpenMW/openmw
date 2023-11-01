@@ -246,6 +246,13 @@ namespace MWLua
             reloadAllScriptsImpl();
             mReloadAllScriptsRequested = false;
         }
+
+        if (mDelayedUiModeChangedArg)
+        {
+            if (playerScripts)
+                playerScripts->uiModeChanged(*mDelayedUiModeChangedArg, true);
+            mDelayedUiModeChangedArg = std::nullopt;
+        }
     }
 
     void LuaManager::applyDelayedActions()
@@ -275,6 +282,7 @@ namespace MWLua
         mGlobalScripts.removeAllScripts();
         mGlobalScriptsStarted = false;
         mNewGameStarted = false;
+        mDelayedUiModeChangedArg = std::nullopt;
         if (!mPlayer.isEmpty())
         {
             mPlayer.getCellRef().unsetRefNum();
@@ -325,9 +333,15 @@ namespace MWLua
     {
         if (mPlayer.isEmpty())
             return;
+        ObjectId argId = arg.isEmpty() ? ObjectId() : getId(arg);
+        if (mApplyingDelayedActions)
+        {
+            mDelayedUiModeChangedArg = argId;
+            return;
+        }
         PlayerScripts* playerScripts = dynamic_cast<PlayerScripts*>(mPlayer.getRefData().getLuaScripts());
         if (playerScripts)
-            playerScripts->uiModeChanged(arg, mApplyingDelayedActions);
+            playerScripts->uiModeChanged(argId, false);
     }
 
     void LuaManager::objectAddedToScene(const MWWorld::Ptr& ptr)

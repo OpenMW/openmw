@@ -464,18 +464,20 @@ namespace MWClass
         }
 
         const MWMechanics::CreatureStats& stats = getCreatureStats(ptr);
+        const MWMechanics::AiSequence& aiSequence = stats.getAiSequence();
 
+        const bool isInCombat = aiSequence.isInCombat();
         if (stats.isDead())
         {
             // by default user can loot friendly actors during death animation
-            if (Settings::game().mCanLootDuringDeathAnimation && !stats.getAiSequence().isInCombat())
+            if (Settings::game().mCanLootDuringDeathAnimation && !isInCombat)
                 return std::make_unique<MWWorld::ActionOpen>(ptr);
 
             // otherwise wait until death animation
             if (stats.isDeathAnimationFinished())
                 return std::make_unique<MWWorld::ActionOpen>(ptr);
         }
-        else if (!stats.getAiSequence().isInCombat() && !stats.getKnockedDown())
+        else if ((!isInCombat || aiSequence.isFleeing()) && !stats.getKnockedDown())
             return std::make_unique<MWWorld::ActionTalk>(ptr);
 
         // Tribunal and some mod companions oddly enough must use open action as fallback
@@ -570,7 +572,8 @@ namespace MWClass
         if (customData.mCreatureStats.isDead() && customData.mCreatureStats.isDeathAnimationFinished())
             return true;
 
-        return !customData.mCreatureStats.getAiSequence().isInCombat();
+        const MWMechanics::AiSequence& aiSeq = customData.mCreatureStats.getAiSequence();
+        return !aiSeq.isInCombat() || aiSeq.isFleeing();
     }
 
     MWGui::ToolTipInfo Creature::getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const

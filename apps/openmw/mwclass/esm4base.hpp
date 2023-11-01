@@ -138,17 +138,17 @@ namespace MWClass
         {
         }
 
-        bool hasToolTip(const MWWorld::ConstPtr& ptr) const override { return true; }
-
-        MWGui::ToolTipInfo getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const override
-        {
-            return ESM4Impl::getToolTipInfo(ptr.get<Record>()->mBase->mFullName, count);
-        }
-
         std::string_view getName(const MWWorld::ConstPtr& ptr) const override
         {
             return ptr.get<Record>()->mBase->mFullName;
         }
+
+        MWGui::ToolTipInfo getToolTipInfo(const MWWorld::ConstPtr& ptr, int count) const override
+        {
+            return ESM4Impl::getToolTipInfo(getName(ptr), count);
+        }
+
+        bool hasToolTip(const MWWorld::ConstPtr& ptr) const override { return !getName(ptr).empty(); }
     };
 }
 

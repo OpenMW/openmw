@@ -96,32 +96,29 @@ bool Launcher::GraphicsPage::loadSettings()
 
     // Visuals
 
-    int vsync = Settings::Manager::getInt("vsync mode", "Video");
-    if (vsync < 0 || vsync > 2)
-        vsync = 0;
+    const int vsync = Settings::video().mVsyncMode;
 
     vSyncComboBox->setCurrentIndex(vsync);
 
-    size_t windowMode = static_cast<size_t>(Settings::Manager::getInt("window mode", "Video"));
-    if (windowMode > static_cast<size_t>(Settings::WindowMode::Windowed))
-        windowMode = 0;
-    windowModeComboBox->setCurrentIndex(windowMode);
-    slotFullScreenChanged(windowMode);
+    const Settings::WindowMode windowMode = Settings::video().mWindowMode;
 
-    if (Settings::Manager::getBool("window border", "Video"))
+    windowModeComboBox->setCurrentIndex(static_cast<int>(windowMode));
+    handleWindowModeChange(windowMode);
+
+    if (Settings::video().mWindowBorder)
         windowBorderCheckBox->setCheckState(Qt::Checked);
 
     // aaValue is the actual value (0, 1, 2, 4, 8, 16)
-    int aaValue = Settings::Manager::getInt("antialiasing", "Video");
+    const int aaValue = Settings::video().mAntialiasing;
     // aaIndex is the index into the allowed values in the pull down.
-    int aaIndex = antiAliasingComboBox->findText(QString::number(aaValue));
+    const int aaIndex = antiAliasingComboBox->findText(QString::number(aaValue));
     if (aaIndex != -1)
         antiAliasingComboBox->setCurrentIndex(aaIndex);
 
-    int width = Settings::Manager::getInt("resolution x", "Video");
-    int height = Settings::Manager::getInt("resolution y", "Video");
+    const int width = Settings::video().mResolutionX;
+    const int height = Settings::video().mResolutionY;
     QString resolution = QString::number(width) + QString(" x ") + QString::number(height);
-    screenComboBox->setCurrentIndex(Settings::Manager::getInt("screen", "Video"));
+    screenComboBox->setCurrentIndex(Settings::video().mScreen);
 
     int resIndex = resolutionComboBox->findText(resolution, Qt::MatchStartsWith);
 
@@ -137,7 +134,7 @@ bool Launcher::GraphicsPage::loadSettings()
         customHeightSpinBox->setValue(height);
     }
 
-    float fpsLimit = Settings::Manager::getFloat("framerate limit", "Video");
+    const float fpsLimit = Settings::video().mFramerateLimit;
     if (fpsLimit != 0)
     {
         framerateLimitCheckBox->setCheckState(Qt::Checked);
@@ -198,23 +195,10 @@ void Launcher::GraphicsPage::saveSettings()
 {
     // Visuals
 
-    // Ensure we only set the new settings if they changed. This is to avoid cluttering the
-    // user settings file (which by definition should only contain settings the user has touched)
-    int cVSync = vSyncComboBox->currentIndex();
-    if (cVSync != Settings::Manager::getInt("vsync mode", "Video"))
-        Settings::Manager::setInt("vsync mode", "Video", cVSync);
-
-    int cWindowMode = windowModeComboBox->currentIndex();
-    if (cWindowMode != Settings::Manager::getInt("window mode", "Video"))
-        Settings::Manager::setInt("window mode", "Video", cWindowMode);
-
-    bool cWindowBorder = windowBorderCheckBox->checkState();
-    if (cWindowBorder != Settings::Manager::getBool("window border", "Video"))
-        Settings::Manager::setBool("window border", "Video", cWindowBorder);
-
-    int cAAValue = antiAliasingComboBox->currentText().toInt();
-    if (cAAValue != Settings::Manager::getInt("antialiasing", "Video"))
-        Settings::Manager::setInt("antialiasing", "Video", cAAValue);
+    Settings::video().mVsyncMode.set(static_cast<SDLUtil::VSyncMode>(vSyncComboBox->currentIndex()));
+    Settings::video().mWindowMode.set(static_cast<Settings::WindowMode>(windowModeComboBox->currentIndex()));
+    Settings::video().mWindowBorder.set(windowBorderCheckBox->checkState() == Qt::Checked);
+    Settings::video().mAntialiasing.set(antiAliasingComboBox->currentText().toInt());
 
     int cWidth = 0;
     int cHeight = 0;
@@ -234,25 +218,17 @@ void Launcher::GraphicsPage::saveSettings()
         cHeight = customHeightSpinBox->value();
     }
 
-    if (cWidth != Settings::Manager::getInt("resolution x", "Video"))
-        Settings::Manager::setInt("resolution x", "Video", cWidth);
-
-    if (cHeight != Settings::Manager::getInt("resolution y", "Video"))
-        Settings::Manager::setInt("resolution y", "Video", cHeight);
-
-    int cScreen = screenComboBox->currentIndex();
-    if (cScreen != Settings::Manager::getInt("screen", "Video"))
-        Settings::Manager::setInt("screen", "Video", cScreen);
+    Settings::video().mResolutionX.set(cWidth);
+    Settings::video().mResolutionY.set(cHeight);
+    Settings::video().mScreen.set(screenComboBox->currentIndex());
 
     if (framerateLimitCheckBox->checkState() != Qt::Unchecked)
     {
-        float cFpsLimit = framerateLimitSpinBox->value();
-        if (cFpsLimit != Settings::Manager::getFloat("framerate limit", "Video"))
-            Settings::Manager::setFloat("framerate limit", "Video", cFpsLimit);
+        Settings::video().mFramerateLimit.set(framerateLimitSpinBox->value());
     }
-    else if (Settings::Manager::getFloat("framerate limit", "Video") != 0)
+    else if (Settings::video().mFramerateLimit != 0)
     {
-        Settings::Manager::setFloat("framerate limit", "Video", 0);
+        Settings::video().mFramerateLimit.set(0);
     }
 
     // Lighting
@@ -392,8 +368,12 @@ void Launcher::GraphicsPage::screenChanged(int screen)
 
 void Launcher::GraphicsPage::slotFullScreenChanged(int mode)
 {
-    if (mode == static_cast<int>(Settings::WindowMode::Fullscreen)
-        || mode == static_cast<int>(Settings::WindowMode::WindowedFullscreen))
+    handleWindowModeChange(static_cast<Settings::WindowMode>(mode));
+}
+
+void Launcher::GraphicsPage::handleWindowModeChange(Settings::WindowMode mode)
+{
+    if (mode == Settings::WindowMode::Fullscreen || mode == Settings::WindowMode::WindowedFullscreen)
     {
         standardRadioButton->toggle();
         customRadioButton->setEnabled(false);

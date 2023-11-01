@@ -4,7 +4,7 @@
 
 #include <SDL_keyboard.h>
 
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 
 #include "../mwbase/environment.hpp"
 #include "../mwbase/inputmanager.hpp"
@@ -170,10 +170,9 @@ namespace MWInput
 
     void ActionManager::screenshot()
     {
-        const std::string& settingStr = Settings::Manager::getString("screenshot type", "Video");
-        bool regularScreenshot = settingStr.empty() || settingStr == "regular";
+        const Settings::ScreenshotSettings& settings = Settings::video().mScreenshotType;
 
-        if (regularScreenshot)
+        if (settings.mType == Settings::ScreenshotType::Regular)
         {
             mScreenCaptureHandler->setFramesToCapture(1);
             mScreenCaptureHandler->captureNextFrame(*mViewer);

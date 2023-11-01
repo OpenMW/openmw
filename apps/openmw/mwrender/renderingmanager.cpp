@@ -1230,8 +1230,8 @@ namespace MWRender
         if (mViewDistance < mNearClip)
             throw std::runtime_error("Viewing distance is less than near clip");
 
-        double width = Settings::Manager::getInt("resolution x", "Video");
-        double height = Settings::Manager::getInt("resolution y", "Video");
+        const double width = Settings::video().mResolutionX;
+        const double height = Settings::video().mResolutionY;
 
         double aspect = (height == 0.0) ? 1.0 : width / height;
         float fov = mFieldOfView;
@@ -1316,23 +1316,21 @@ namespace MWRender
             return existingChunkMgr->second;
         RenderingManager::WorldspaceChunkMgr newChunkMgr;
 
-        const float lodFactor = Settings::Manager::getFloat("lod factor", "Terrain");
+        const float lodFactor = Settings::terrain().mLodFactor;
         const bool groundcover = Settings::groundcover().mEnabled;
-        bool distantTerrain = Settings::Manager::getBool("distant terrain", "Terrain");
+        const bool distantTerrain = Settings::terrain().mDistantTerrain;
         if (distantTerrain || groundcover)
         {
-            const int compMapResolution = Settings::Manager::getInt("composite map resolution", "Terrain");
-            int compMapPower = Settings::Manager::getInt("composite map level", "Terrain");
-            compMapPower = std::max(-3, compMapPower);
-            float compMapLevel = pow(2, compMapPower);
-            const int vertexLodMod = Settings::Manager::getInt("vertex lod mod", "Terrain");
-            float maxCompGeometrySize = Settings::Manager::getFloat("max composite geometry size", "Terrain");
-            maxCompGeometrySize = std::max(maxCompGeometrySize, 1.f);
-            bool debugChunks = Settings::Manager::getBool("debug chunks", "Terrain");
+            const int compMapResolution = Settings::terrain().mCompositeMapResolution;
+            const int compMapPower = Settings::terrain().mCompositeMapLevel;
+            const float compMapLevel = std::pow(2, compMapPower);
+            const int vertexLodMod = Settings::terrain().mVertexLodMod;
+            const float maxCompGeometrySize = Settings::terrain().mMaxCompositeGeometrySize;
+            const bool debugChunks = Settings::terrain().mDebugChunks;
             auto quadTreeWorld = std::make_unique<Terrain::QuadTreeWorld>(mSceneRoot, mRootNode, mResourceSystem,
                 mTerrainStorage.get(), Mask_Terrain, Mask_PreCompile, Mask_Debug, compMapResolution, compMapLevel,
                 lodFactor, vertexLodMod, maxCompGeometrySize, debugChunks, worldspace);
-            if (Settings::Manager::getBool("object paging", "Terrain"))
+            if (Settings::terrain().mObjectPaging)
             {
                 newChunkMgr.mObjectPaging
                     = std::make_unique<ObjectPaging>(mResourceSystem->getSceneManager(), worldspace);

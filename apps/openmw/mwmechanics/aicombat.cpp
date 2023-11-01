@@ -708,7 +708,7 @@ namespace MWMechanics
         mFleeDest = ESM::Pathgrid::Point(0, 0, 0);
     }
 
-    bool AiCombatStorage::isFleeing()
+    bool AiCombatStorage::isFleeing() const
     {
         return mFleeState != FleeState_None;
     }

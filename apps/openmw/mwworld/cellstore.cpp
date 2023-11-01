@@ -57,6 +57,7 @@
 #include <components/esm4/loadingr.hpp>
 #include <components/esm4/loadligh.hpp>
 #include <components/esm4/loadmisc.hpp>
+#include <components/esm4/loadmstt.hpp>
 #include <components/esm4/loadnpc.hpp>
 #include <components/esm4/loadrefr.hpp>
 #include <components/esm4/loadstat.hpp>
@@ -160,31 +161,32 @@ namespace
     template <typename T>
     void writeReferenceCollection(ESM::ESMWriter& writer, const MWWorld::CellRefList<T>& collection)
     {
-        if (!collection.mList.empty())
+        // references
+        for (const MWWorld::LiveCellRef<T>& liveCellRef : collection.mList)
         {
-            // references
-            for (typename MWWorld::CellRefList<T>::List::const_iterator iter(collection.mList.begin());
-                 iter != collection.mList.end(); ++iter)
+            if (ESM::isESM4Rec(T::sRecordId))
             {
-                if (!iter->mData.hasChanged() && !iter->mRef.hasChanged() && iter->mRef.hasContentFile())
-                {
-                    // Reference that came from a content file and has not been changed -> ignore
-                    continue;
-                }
-                if (iter->mData.getCount() == 0 && !iter->mRef.hasContentFile())
-                {
-                    // Deleted reference that did not come from a content file -> ignore
-                    continue;
-                }
-                using StateType = typename RecordToState<T>::StateType;
-                StateType state;
-                iter->save(state);
-
-                // recordId currently unused
-                writer.writeHNT("OBJE", collection.mList.front().mBase->sRecordId);
-
-                state.save(writer);
+                // TODO: Implement loading/saving of REFR4 and ACHR4 with ESM3 reader/writer.
+                continue;
             }
+            if (!liveCellRef.mData.hasChanged() && !liveCellRef.mRef.hasChanged() && liveCellRef.mRef.hasContentFile())
+            {
+                // Reference that came from a content file and has not been changed -> ignore
+                continue;
+            }
+            if (liveCellRef.mData.getCount() == 0 && !liveCellRef.mRef.hasContentFile())
+            {
+                // Deleted reference that did not come from a content file -> ignore
+                continue;
+            }
+            using StateType = typename RecordToState<T>::StateType;
+            StateType state;
+            liveCellRef.save(state);
+
+            // recordId currently unused
+            writer.writeHNT("OBJE", collection.mList.front().mBase->sRecordId);
+
+            state.save(writer);
         }
     }
 

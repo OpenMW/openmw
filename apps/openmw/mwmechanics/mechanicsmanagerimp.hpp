@@ -142,7 +142,7 @@ namespace MWMechanics
         /// Attempt to play an animation group
         /// @return Success or error
         bool playAnimationGroup(
-            const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool persist = false) override;
+            const MWWorld::Ptr& ptr, std::string_view groupName, int mode, int number, bool scripted = false) override;
         void skipAnimation(const MWWorld::Ptr& ptr) override;
         bool checkAnimationPlaying(const MWWorld::Ptr& ptr, const std::string& groupName) override;
         void persistAnimationStates() override;

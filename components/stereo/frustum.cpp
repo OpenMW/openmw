@@ -85,7 +85,7 @@ namespace Stereo
         }
     }
 
-    StereoFrustumManager::StereoFrustumManager(osg::Camera* camera)
+    StereoFrustumManager::StereoFrustumManager(bool sharedShadowMaps, osg::Camera* camera)
         : mCamera(camera)
         , mShadowTechnique(nullptr)
         , mShadowFrustumCallback(nullptr)
@@ -95,7 +95,7 @@ namespace Stereo
             mMultiviewFrustumCallback = std::make_unique<MultiviewFrustumCallback>(this, camera);
         }
 
-        if (Settings::Manager::getBool("shared shadow maps", "Stereo"))
+        if (sharedShadowMaps)
         {
             mShadowFrustumCallback = new ShadowFrustumCallback(this);
             auto* renderer = static_cast<osgViewer::Renderer*>(mCamera->getRenderer());

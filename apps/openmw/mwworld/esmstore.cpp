@@ -84,7 +84,8 @@ namespace
     }
 
     std::vector<ESM::NPC> getNPCsToReplace(const MWWorld::Store<ESM::Faction>& factions,
-        const MWWorld::Store<ESM::Class>& classes, const std::unordered_map<ESM::RefId, ESM::NPC>& npcs)
+        const MWWorld::Store<ESM::Class>& classes, const MWWorld::Store<ESM::Script>& scripts,
+        const std::unordered_map<ESM::RefId, ESM::NPC>& npcs)
     {
         // Cache first class from store - we will use it if current class is not found
         const ESM::RefId& defaultCls = getDefaultClass(classes);
@@ -122,6 +123,14 @@ namespace
                 changed = true;
             }
 
+            if (!npc.mScript.empty() && !scripts.search(npc.mScript))
+            {
+                Log(Debug::Verbose) << "NPC " << npc.mId << " (" << npc.mName << ") has nonexistent script "
+                                    << npc.mScript << ", ignoring it.";
+                npc.mScript = ESM::RefId();
+                changed = true;
+            }
+
             if (changed)
                 npcsToReplace.push_back(npc);
         }
@@ -138,9 +147,9 @@ namespace
         {
             if (!item.mScript.empty() && !scripts.search(item.mScript))
             {
+                Log(Debug::Verbose) << MapT::mapped_type::getRecordType() << ' ' << id << " (" << item.mName
+                                    << ") has nonexistent script " << item.mScript << ", ignoring it.";
                 item.mScript = ESM::RefId();
-                Log(Debug::Verbose) << "Item " << id << " (" << item.mName << ") has nonexistent script "
-                                    << item.mScript << ", ignoring it.";
             }
         }
     }
@@ -292,6 +301,7 @@ namespace MWWorld
             case ESM::REC_LVLC4:
             case ESM::REC_LVLN4:
             case ESM::REC_MISC4:
+            case ESM::REC_MSTT4:
             case ESM::REC_NPC_4:
             case ESM::REC_STAT4:
             case ESM::REC_TERM4:
@@ -517,14 +527,16 @@ namespace MWWorld
     void ESMStore::validate()
     {
         auto& npcs = getWritable<ESM::NPC>();
-        std::vector<ESM::NPC> npcsToReplace
-            = getNPCsToReplace(getWritable<ESM::Faction>(), getWritable<ESM::Class>(), npcs.mStatic);
+        std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(
+            getWritable<ESM::Faction>(), getWritable<ESM::Class>(), getWritable<ESM::Script>(), npcs.mStatic);
 
         for (const ESM::NPC& npc : npcsToReplace)
         {
             npcs.eraseStatic(npc.mId);
             npcs.insertStatic(npc);
         }
+
+        removeMissingScripts(getWritable<ESM::Script>(), getWritable<ESM::Creature>().mStatic);
 
         // Validate spell effects for invalid arguments
         std::vector<ESM::Spell> spellsToReplace;
@@ -605,8 +617,8 @@ namespace MWWorld
         auto& npcs = getWritable<ESM::NPC>();
         auto& scripts = getWritable<ESM::Script>();
 
-        std::vector<ESM::NPC> npcsToReplace
-            = getNPCsToReplace(getWritable<ESM::Faction>(), getWritable<ESM::Class>(), npcs.mDynamic);
+        std::vector<ESM::NPC> npcsToReplace = getNPCsToReplace(
+            getWritable<ESM::Faction>(), getWritable<ESM::Class>(), getWritable<ESM::Script>(), npcs.mDynamic);
 
         for (const ESM::NPC& npc : npcsToReplace)
             npcs.insert(npc);
@@ -614,6 +626,7 @@ namespace MWWorld
         removeMissingScripts(scripts, getWritable<ESM::Armor>().mDynamic);
         removeMissingScripts(scripts, getWritable<ESM::Book>().mDynamic);
         removeMissingScripts(scripts, getWritable<ESM::Clothing>().mDynamic);
+        removeMissingScripts(scripts, getWritable<ESM::Creature>().mDynamic);
         removeMissingScripts(scripts, getWritable<ESM::Weapon>().mDynamic);
 
         removeMissingObjects(getWritable<ESM::CreatureLevList>());

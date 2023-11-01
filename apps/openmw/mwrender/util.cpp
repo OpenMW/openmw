@@ -70,7 +70,7 @@ namespace MWRender
 
     bool shouldAddMSAAIntermediateTarget()
     {
-        return Settings::shaders().mAntialiasAlphaTest && Settings::Manager::getInt("antialiasing", "Video") > 1;
+        return Settings::shaders().mAntialiasAlphaTest && Settings::video().mAntialiasing > 1;
     }
 
 }
