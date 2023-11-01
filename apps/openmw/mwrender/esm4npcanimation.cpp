@@ -124,6 +124,8 @@ namespace MWRender
         auto findArmorAddons = [&](const ESM4::Armor* armor) {
             for (ESM::FormId armaId : armor->mAddOns)
             {
+                if (armaId.isZeroOrUnset())
+                    continue;
                 const ESM4::ArmorAddon* arma = store->get<ESM4::ArmorAddon>().search(armaId);
                 if (!arma)
                 {
