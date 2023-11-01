@@ -318,7 +318,7 @@ Exactly one ``technique`` block is required for every shader file. In this we de
 +------------------+--------------------+---------------------------------------------------+
 | author           | string             | Shader authors that shows in HUD                  |
 +------------------+--------------------+---------------------------------------------------+
-| glsl_Version     | integer            | GLSL version                                      |
+| glsl_version     | integer            | GLSL version                                      |
 +------------------+--------------------+---------------------------------------------------+
 | glsl_profile     | string             | GLSL profile, like ``compatibility``              |
 +------------------+--------------------+---------------------------------------------------+
@@ -625,7 +625,6 @@ together passes, setting up metadata, and setting up various flags.
         passes = desaturate;
         version = "1.0";
         author = "Fargoth";
-        passes = desaturate;
     }
 
 
