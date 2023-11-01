@@ -82,6 +82,6 @@ namespace MWLua
             [](const ESM::Class& rec) -> std::string_view { return getSpecialization(rec.mData.mSpecialization); });
         classT["isPlayable"]
             = sol::readonly_property([](const ESM::Class& rec) -> bool { return rec.mData.mIsPlayable; });
-        return classes;
+        return LuaUtil::makeReadOnly(classes);
     }
 }

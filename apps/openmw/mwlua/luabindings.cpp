@@ -163,7 +163,7 @@ namespace MWLua
         character["factions"] = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>();
 
         character["classes"] = initCoreClassBindings(context);
-        api["character"] = LuaUtil::makeReadOnly(character);;
+        api["character"] = LuaUtil::makeReadOnly(character);
         api["l10n"] = LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager());
         const MWWorld::Store<ESM::GameSetting>* gmstStore
             = &MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();
