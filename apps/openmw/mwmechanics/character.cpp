@@ -2424,7 +2424,7 @@ namespace MWMechanics
                 const float epsilon = 0.001f;
                 float targetMovementAngle = std::atan2(-movement.x(), movement.y());
                 float diff = targetMovementAngle - animMovementAngle;
-                if (std::fabsf(diff) > epsilon)
+                if (std::abs(diff) > epsilon)
                 {
                     moved = osg::Quat(diff, osg::Vec3f(0, 0, 1)) * moved;
                 }
