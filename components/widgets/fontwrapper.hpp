@@ -5,10 +5,11 @@
 
 #include "components/settings/values.hpp"
 
-#include <algorithm>
+#include <string>
 
 namespace Gui
 {
+    /// Wrapper to tell UI element to use font size from settings.cfg
     template <class T>
     class FontWrapper : public T
     {
