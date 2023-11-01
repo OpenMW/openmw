@@ -145,6 +145,8 @@ namespace Settings
 
     void Manager::clear()
     {
+        sInitialized.clear();
+        StaticValues::clear();
         mDefaultSettings.clear();
         mUserSettings.clear();
         mChangedSettings.clear();
