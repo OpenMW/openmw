@@ -1,9 +1,9 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_SOUND_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_SOUND_H
 
-#include "components/settings/hrtfmode.hpp"
-#include "components/settings/sanitizerimpl.hpp"
-#include "components/settings/settingvalue.hpp"
+#include <components/settings/hrtfmode.hpp>
+#include <components/settings/sanitizerimpl.hpp>
+#include <components/settings/settingvalue.hpp>
 
 #include <string>
 
