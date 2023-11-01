@@ -26,6 +26,12 @@
 -- @field [parent=#Classes] #list<#ClassRecord> records
 
 ---
+-- Returns a read-only @{#ClassRecord}
+-- @function [parent=#Classes] record
+-- @param #string recordId
+-- @return #ClassRecord
+
+---
 -- Terminates the game and quits to the OS. Should be used only for testing purposes.
 -- @function [parent=#core] quit
 
