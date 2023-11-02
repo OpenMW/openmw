@@ -18,9 +18,12 @@ namespace Gui
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::HBox>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::Spacer>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::VBox>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::EditBox>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::TextBox>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedTextBox>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedEditBox>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::AutoSizedButton>("Widget");
+        MyGUI::FactoryManager::getInstance().registerFactory<Gui::Button>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::ImageButton>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::NumericEditBox>("Widget");
         MyGUI::FactoryManager::getInstance().registerFactory<Gui::SharedStateButton>("Widget");

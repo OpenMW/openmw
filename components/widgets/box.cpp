@@ -48,7 +48,7 @@ namespace Gui
         }
         else
         {
-            TextBox::setPropertyOverride(_key, _value);
+            Gui::TextBox::setPropertyOverride(_key, _value);
         }
     }
 
@@ -115,7 +115,7 @@ namespace Gui
         }
         else
         {
-            EditBox::setPropertyOverride(_key, _value);
+            Gui::EditBox::setPropertyOverride(_key, _value);
         }
     }
 
@@ -144,7 +144,7 @@ namespace Gui
         }
         else
         {
-            Button::setPropertyOverride(_key, _value);
+            Gui::Button::setPropertyOverride(_key, _value);
         }
     }
 
