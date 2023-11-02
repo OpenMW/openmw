@@ -30,6 +30,7 @@ namespace MWLua
         sol::state_view& lua = context.mLua->sol();
         sol::table classes(context.mLua->sol(), sol::create);
         addRecordFunctionBinding<ESM::Class>(classes, context);
+
         // class record
         auto classT = lua.new_usertype<ESM::Class>("ESM3_Class");
         classT[sol::meta_function::to_string]
@@ -38,6 +39,7 @@ namespace MWLua
         classT["name"] = sol::readonly_property([](const ESM::Class& rec) -> std::string_view { return rec.mName; });
         classT["description"]
             = sol::readonly_property([](const ESM::Class& rec) -> std::string_view { return rec.mDescription; });
+
         classT["majorSkills"] = sol::readonly_property([lua](const ESM::Class& rec) -> sol::table {
             sol::table res(lua, sol::create);
             auto skills = rec.mData.mSkills;
@@ -68,6 +70,7 @@ namespace MWLua
             }
             return res;
         });
+
         classT["specialization"] = sol::readonly_property(
             [](const ESM::Class& rec) -> std::string_view { return getSpecialization(rec.mData.mSpecialization); });
         classT["isPlayable"]
