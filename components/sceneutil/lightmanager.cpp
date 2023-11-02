@@ -536,6 +536,7 @@ namespace SceneUtil
                 configurePosition(lightMat, light->getPosition() * mViewMatrix);
                 configureAmbient(lightMat, light->getAmbient());
                 configureDiffuse(lightMat, light->getDiffuse());
+                configureSpecular(lightMat, light->getSpecular());
                 configureAttenuation(lightMat, light->getConstantAttenuation(), light->getLinearAttenuation(),
                     light->getQuadraticAttenuation(), lightList[i]->mLightSource->getRadius());
 
@@ -1214,6 +1215,7 @@ namespace SceneUtil
         auto& buf = getUBOManager()->getLightBuffer(frameNum);
         buf->setDiffuse(index, light->getDiffuse());
         buf->setAmbient(index, light->getAmbient());
+        buf->setSpecular(index, light->getSpecular());
         buf->setAttenuationRadius(index,
             osg::Vec4(light->getConstantAttenuation(), light->getLinearAttenuation(), light->getQuadraticAttenuation(),
                 lightSource->getRadius()));
