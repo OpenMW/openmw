@@ -1,18 +1,14 @@
-#include "classbindings.hpp"
-#include "stats.hpp"
-#include "types/types.hpp"
 #include <components/esm3/loadclas.hpp>
 #include <components/lua/luastate.hpp>
+
+#include "classbindings.hpp"
+#include "luamanagerimp.hpp"
+#include "stats.hpp"
+#include "types/types.hpp"
 
 #include "../mwbase/environment.hpp"
 #include "../mwworld/class.hpp"
 #include "../mwworld/esmstore.hpp"
-
-#include "luamanagerimp.hpp"
-
-namespace
-{
-}
 
 namespace sol
 {
@@ -45,37 +41,31 @@ namespace MWLua
         classT["majorSkills"] = sol::readonly_property([lua](const ESM::Class& rec) -> sol::table {
             sol::table res(lua, sol::create);
             auto skills = rec.mData.mSkills;
-
             for (size_t i = 0; i < skills.size(); ++i)
             {
                 ESM::RefId skillId = ESM::Skill::indexToRefId(skills[i][1]);
                 res[i + 1] = skillId.serializeText();
             }
-
             return res;
         });
         classT["attributes"] = sol::readonly_property([lua](const ESM::Class& rec) -> sol::table {
             sol::table res(lua, sol::create);
             auto attribute = rec.mData.mAttribute;
-
             for (size_t i = 0; i < attribute.size(); ++i)
             {
                 ESM::RefId attributeId = ESM::Attribute::indexToRefId(attribute[i]);
                 res[i + 1] = attributeId.serializeText();
             }
-
             return res;
         });
         classT["minorSkills"] = sol::readonly_property([lua](const ESM::Class& rec) -> sol::table {
             sol::table res(lua, sol::create);
             auto skills = rec.mData.mSkills;
-
             for (size_t i = 0; i < skills.size(); ++i)
             {
                 ESM::RefId skillId = ESM::Skill::indexToRefId(skills[i][0]);
                 res[i + 1] = skillId.serializeText();
             }
-
             return res;
         });
         classT["specialization"] = sol::readonly_property(
