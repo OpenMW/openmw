@@ -475,7 +475,7 @@ namespace MWGui::Formatting
         : GraphicElement(parent, pag, blockStyle)
         , mTextStyle(textStyle)
     {
-        MyGUI::EditBox* box = parent->createWidget<MyGUI::EditBox>("NormalText",
+        Gui::EditBox* box = parent->createWidget<Gui::EditBox>("NormalText",
             MyGUI::IntCoord(0, pag.getCurrentTop(), pag.getPageWidth(), 0), MyGUI::Align::Left | MyGUI::Align::Top,
             parent->getName() + MyGUI::utility::toString(parent->getChildCount()));
         box->setEditStatic(true);
