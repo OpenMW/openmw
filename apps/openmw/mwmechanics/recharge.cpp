@@ -44,6 +44,8 @@ namespace MWMechanics
         MWWorld::Ptr player = MWMechanics::getPlayer();
         MWMechanics::CreatureStats& stats = player.getClass().getCreatureStats(player);
 
+        MWBase::Environment::get().getWorld()->breakInvisibility(player);
+
         float luckTerm = 0.1f * stats.getAttribute(ESM::Attribute::Luck).getModified();
         if (luckTerm < 1 || luckTerm > 10)
             luckTerm = 1;

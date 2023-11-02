@@ -510,6 +510,8 @@ MWMechanics::Alchemy::Result MWMechanics::Alchemy::create(const std::string& nam
     if (readyStatus != Result_Success)
         return readyStatus;
 
+    MWBase::Environment::get().getWorld()->breakInvisibility(mAlchemist);
+
     Result result = Result_RandomFailure;
     int brewedCount = 0;
     for (int i = 0; i < count; ++i)
