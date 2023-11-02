@@ -60,7 +60,7 @@ namespace
 
 namespace MWLua
 {
-    std::string_view getSpecialization(const int32_t val)
+    std::string_view getSpecialization(int32_t val)
     {
         if (val == ESM::Class::Stealth)
             return "stealth";
