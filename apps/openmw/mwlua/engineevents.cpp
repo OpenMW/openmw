@@ -86,6 +86,16 @@ namespace MWLua
 
         void operator()(const OnNewExterior& event) const { mGlobalScripts.onNewExterior(GCell{ &event.mCell }); }
 
+        void operator()(const OnDeath& event) const
+        {
+            MWWorld::Ptr actor = getPtr(event.mActor);
+            if (!actor.isEmpty())
+            {
+                if (auto* scripts = getLocalScripts(actor))
+                    scripts->onDeath();
+            }
+        }
+
     private:
         MWWorld::Ptr getPtr(ESM::RefNum id) const
         {

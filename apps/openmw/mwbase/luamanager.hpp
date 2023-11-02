@@ -53,6 +53,7 @@ namespace MWBase
         virtual void objectActivated(const MWWorld::Ptr& object, const MWWorld::Ptr& actor) = 0;
         virtual void useItem(const MWWorld::Ptr& object, const MWWorld::Ptr& actor, bool force) = 0;
         virtual void exteriorCreated(MWWorld::CellStore& cell) = 0;
+        virtual void actorDied(const MWWorld::Ptr& actor) = 0;
         virtual void questUpdated(const ESM::RefId& questId, int stage) = 0;
 
         // `arg` is either forwarded from MWGui::pushGuiMode or empty

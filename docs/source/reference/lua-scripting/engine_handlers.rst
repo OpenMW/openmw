@@ -79,6 +79,8 @@ Engine handler is a function defined by a script, that can be called by the engi
     - | Called on an actor when they consume an item (e.g. a potion).
       | Similarly to onActivated, the item has already been removed
       | from the actor's inventory, and the count was set to zero.
+  * - onDeath()
+    - Called when the actor dies. Note that actors that start out dead are ignored.
 
 **Only for local scripts attached to a player**
 

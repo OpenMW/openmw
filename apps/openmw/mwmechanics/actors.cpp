@@ -1730,6 +1730,8 @@ namespace MWMechanics
         actor.getClass().getCreatureStats(actor).notifyDied();
 
         ++mDeathCount[actor.getCellRef().getRefId()];
+
+        MWBase::Environment::get().getLuaManager()->actorDied(actor);
     }
 
     void Actors::resurrect(const MWWorld::Ptr& ptr) const
