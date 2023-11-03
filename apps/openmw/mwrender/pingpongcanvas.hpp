@@ -30,6 +30,8 @@ namespace MWRender
 
         void dirty() { mDirty = true; }
 
+        void resizeRenderTargets() { mDirtyAttachments = true; }
+
         const fx::DispatchArray& getPasses() { return mPasses; }
 
         void setPasses(fx::DispatchArray&& passes);
@@ -65,6 +67,7 @@ namespace MWRender
         osg::ref_ptr<osg::Texture> mTextureNormals;
 
         mutable bool mDirty = false;
+        mutable bool mDirtyAttachments = false;
         mutable osg::ref_ptr<osg::Viewport> mRenderViewport;
         mutable osg::ref_ptr<osg::FrameBufferObject> mMultiviewResolveFramebuffer;
         mutable osg::ref_ptr<osg::FrameBufferObject> mDestinationFBO;
