@@ -411,7 +411,7 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, for_root_bounding_box_should_return_shape_with_compound_shape_and_box_inside)
+    TEST_F(TestBulletNifLoader, for_root_bounding_box_should_return_shape_with_bounding_box_data)
     {
         mNode.mName = "Bounding Box";
         mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
@@ -427,15 +427,11 @@ namespace
         Resource::BulletShape expected;
         expected.mCollisionBox.mExtents = osg::Vec3f(1, 2, 3);
         expected.mCollisionBox.mCenter = osg::Vec3f(-1, -2, -3);
-        std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(1, 2, 3)));
-        std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-1, -2, -3)), box.release());
-        expected.mCollisionShape.reset(shape.release());
 
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, for_child_bounding_box_should_return_shape_with_compound_shape_with_box_inside)
+    TEST_F(TestBulletNifLoader, for_child_bounding_box_should_return_shape_with_bounding_box_data)
     {
         mNode.mName = "Bounding Box";
         mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
@@ -453,15 +449,11 @@ namespace
         Resource::BulletShape expected;
         expected.mCollisionBox.mExtents = osg::Vec3f(1, 2, 3);
         expected.mCollisionBox.mCenter = osg::Vec3f(-1, -2, -3);
-        std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(1, 2, 3)));
-        std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-1, -2, -3)), box.release());
-        expected.mCollisionShape.reset(shape.release());
 
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader, for_root_with_bounds_and_child_bounding_box_but_should_use_bounding_box)
+    TEST_F(TestBulletNifLoader, for_root_with_bounds_and_child_bounding_box_should_use_bounding_box)
     {
         mNode.mName = "Bounding Box";
         mNode.mBounds.mType = Nif::BoundingVolume::Type::BOX_BV;
@@ -483,10 +475,6 @@ namespace
         Resource::BulletShape expected;
         expected.mCollisionBox.mExtents = osg::Vec3f(1, 2, 3);
         expected.mCollisionBox.mCenter = osg::Vec3f(-1, -2, -3);
-        std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(1, 2, 3)));
-        std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-1, -2, -3)), box.release());
-        expected.mCollisionShape.reset(shape.release());
 
         EXPECT_EQ(*result, expected);
     }
@@ -519,10 +507,6 @@ namespace
         Resource::BulletShape expected;
         expected.mCollisionBox.mExtents = osg::Vec3f(1, 2, 3);
         expected.mCollisionBox.mCenter = osg::Vec3f(-1, -2, -3);
-        std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(1, 2, 3)));
-        std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-1, -2, -3)), box.release());
-        expected.mCollisionShape.reset(shape.release());
 
         EXPECT_EQ(*result, expected);
     }
@@ -555,10 +539,6 @@ namespace
         Resource::BulletShape expected;
         expected.mCollisionBox.mExtents = osg::Vec3f(4, 5, 6);
         expected.mCollisionBox.mCenter = osg::Vec3f(-4, -5, -6);
-        std::unique_ptr<btBoxShape> box(new btBoxShape(btVector3(4, 5, 6)));
-        std::unique_ptr<btCompoundShape> shape(new btCompoundShape);
-        shape->addChildShape(btTransform(btMatrix3x3::getIdentity(), btVector3(-4, -5, -6)), box.release());
-        expected.mCollisionShape.reset(shape.release());
 
         EXPECT_EQ(*result, expected);
     }
