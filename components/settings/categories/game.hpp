@@ -1,9 +1,9 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_GAME_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_GAME_H
 
-#include "components/detournavigator/collisionshapetype.hpp"
-#include "components/settings/sanitizerimpl.hpp"
-#include "components/settings/settingvalue.hpp"
+#include <components/detournavigator/collisionshapetype.hpp>
+#include <components/settings/sanitizerimpl.hpp>
+#include <components/settings/settingvalue.hpp>
 
 #include <osg/Math>
 #include <osg/Vec2f>

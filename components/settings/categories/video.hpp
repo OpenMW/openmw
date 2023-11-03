@@ -1,12 +1,11 @@
 #ifndef OPENMW_COMPONENTS_SETTINGS_CATEGORIES_VIDEO_H
 #define OPENMW_COMPONENTS_SETTINGS_CATEGORIES_VIDEO_H
 
+#include <components/sdlutil/vsyncmode.hpp>
 #include <components/settings/sanitizerimpl.hpp>
 #include <components/settings/screenshotsettings.hpp>
 #include <components/settings/settingvalue.hpp>
 #include <components/settings/windowmode.hpp>
-
-#include <components/sdlutil/vsyncmode.hpp>
 
 #include <osg/Math>
 #include <osg/Vec2f>
