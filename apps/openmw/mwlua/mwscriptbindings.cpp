@@ -140,7 +140,7 @@ namespace MWLua
             = sol::overload([](const GlobalStore& store, std::string_view globalId, float val) {
                   auto g = store.search(ESM::RefId::deserializeText(globalId));
                   if (g == nullptr)
-                      return;
+                      throw std::runtime_error("No variable \"" + std::string(globalId) + "\" in GlobalStore");
                   char varType = MWBase::Environment::get().getWorld()->getGlobalVariableType(globalId);
                   if (varType == 's' || varType == 'l')
                   {
