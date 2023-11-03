@@ -116,9 +116,11 @@ void ESM4::Npc::load(ESM4::Reader& reader)
             {
                 switch (subHdr.dataSize)
                 {
+                    case 20: // FO4
+                        mIsFO4 = true;
+                        [[fallthrough]];
                     case 16: // TES4
                     case 24: // FO3/FNV, TES5
-                    case 20: // FO4
                         reader.get(&mBaseConfig, subHdr.dataSize);
                         break;
                     default:
