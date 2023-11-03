@@ -63,6 +63,17 @@ namespace ESM4
 
         // ----------------------
 
+        // ------ SSE -----------
+
+        enum MaterialFlags
+        {
+            Flag_IsSnow = 0x1,
+        };
+
+        std::uint32_t mMaterialFlags;
+
+        // ----------------------
+
         void load(ESM4::Reader& reader);
         // void save(ESM4::Writer& writer) const;
 
