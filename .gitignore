@@ -28,6 +28,7 @@ Doxygen
 .idea
 cmake-build-*
 files/windows/*.aps
+.cache/clangd
 ## qt-creator
 CMakeLists.txt.user*
 .vs
