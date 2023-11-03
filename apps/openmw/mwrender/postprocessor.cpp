@@ -211,25 +211,14 @@ namespace MWRender
         if (Stereo::getStereo())
             Stereo::Manager::instance().screenResolutionChanged();
 
-        auto width = renderWidth();
-        auto height = renderHeight();
-        for (auto& technique : mTechniques)
-        {
-            for (auto& [name, rt] : technique->getRenderTargetsMap())
-            {
-                const auto [w, h] = rt.mSize.get(width, height);
-                rt.mTarget->setTextureSize(w, h);
-            }
-        }
-
         size_t frameId = frame() % 2;
 
         createObjectsForFrame(frameId);
 
         mRendering.updateProjectionMatrix();
-        mRendering.setScreenRes(width, height);
+        mRendering.setScreenRes(renderWidth(), renderHeight());
 
-        dirtyTechniques();
+        dirtyTechniques(true);
 
         mDirty = true;
         mDirtyFrameId = !frameId;
@@ -534,7 +523,7 @@ namespace MWRender
         mCanvases[frameId]->dirty();
     }
 
-    void PostProcessor::dirtyTechniques()
+    void PostProcessor::dirtyTechniques(bool dirtyAttachments)
     {
         size_t frameId = frame() % 2;
 
@@ -613,8 +602,6 @@ namespace MWRender
                         uniform->mName.c_str(), *type, uniform->getNumElements()));
             }
 
-            std::unordered_map<osg::Texture2D*, osg::Texture2D*> renderTargetCache;
-
             for (const auto& pass : technique->getPasses())
             {
                 int subTexUnit = texUnit;
@@ -626,32 +613,27 @@ namespace MWRender
 
                 if (!pass->getTarget().empty())
                 {
-                    const auto& rt = technique->getRenderTargetsMap()[pass->getTarget()];
-
-                    const auto [w, h] = rt.mSize.get(renderWidth(), renderHeight());
-
-                    subPass.mRenderTexture = new osg::Texture2D(*rt.mTarget);
-                    renderTargetCache[rt.mTarget] = subPass.mRenderTexture;
-                    subPass.mRenderTexture->setTextureSize(w, h);
-                    subPass.mRenderTexture->setName(std::string(pass->getTarget()));
-
-                    if (rt.mMipMap)
-                        subPass.mRenderTexture->setNumMipmapLevels(osg::Image::computeNumberOfMipmapLevels(w, h));
+                    const auto& renderTarget = technique->getRenderTargetsMap()[pass->getTarget()];
+                    subPass.mSize = renderTarget.mSize;
+                    subPass.mRenderTexture = renderTarget.mTarget;
+                    subPass.mMipMap = renderTarget.mMipMap;
+                    subPass.mStateSet->setAttributeAndModes(new osg::Viewport(
+                        0, 0, subPass.mRenderTexture->getTextureWidth(), subPass.mRenderTexture->getTextureHeight()));
 
                     subPass.mRenderTarget = new osg::FrameBufferObject;
                     subPass.mRenderTarget->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
                         osg::FrameBufferAttachment(subPass.mRenderTexture));
+
+                    const auto [w, h] = renderTarget.mSize.get(renderWidth(), renderHeight());
                     subPass.mStateSet->setAttributeAndModes(new osg::Viewport(0, 0, w, h));
                 }
 
-                for (const auto& whitelist : pass->getRenderTargets())
+                for (const auto& name : pass->getRenderTargets())
                 {
-                    auto it = technique->getRenderTargetsMap().find(whitelist);
-                    if (it != technique->getRenderTargetsMap().end() && renderTargetCache[it->second.mTarget])
-                    {
-                        subPass.mStateSet->setTextureAttribute(subTexUnit, renderTargetCache[it->second.mTarget]);
-                        subPass.mStateSet->addUniform(new osg::Uniform(std::string(it->first).c_str(), subTexUnit++));
-                    }
+                    subPass.mStateSet->setTextureAttribute(subTexUnit, technique->getRenderTargetsMap()[name].mTarget);
+                    subPass.mStateSet->addUniform(new osg::Uniform(name.c_str(), subTexUnit));
+
+                    subTexUnit++;
                 }
 
                 node.mPasses.emplace_back(std::move(subPass));
@@ -668,6 +650,9 @@ namespace MWRender
             hud->updateTechniques();
 
         mRendering.getSkyManager()->setSunglare(sunglare);
+
+        if (dirtyAttachments)
+            mCanvases[frameId]->resizeRenderTargets();
     }
 
     PostProcessor::Status PostProcessor::enableTechnique(
@@ -774,7 +759,7 @@ namespace MWRender
         for (auto& technique : mTemplates)
             technique->compile();
 
-        dirtyTechniques();
+        dirtyTechniques(true);
     }
 
     void PostProcessor::disableDynamicShaders()

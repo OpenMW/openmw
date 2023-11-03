@@ -529,48 +529,134 @@ is not wanted and you want a custom render target.
 | mipmaps          | boolean             | Whether mipmaps should be generated every frame                             |
 +------------------+---------------------+-----------------------------------------------------------------------------+
 
-To use the render target a pass must be assigned to it, along with any optional clear or blend modes.
+To use the render target a pass must be assigned to it, along with any optional blend modes.
+As a restriction, only three render targets can be bound per pass with ``rt1``, ``rt2``, ``rt3``, respectively.
 
-In the code snippet below a rendertarget is used to draw the red channel of a scene at half resolution, then a quarter. As a restriction,
-only three render targets can be bound per pass with ``rt1``, ``rt2``, ``rt3``, respectively.
+Blending modes can be useful at times. Below is a simple shader which, when activated, will slowly turn the screen pure red.
+Notice how we only ever write the value `.01` to the `RT_Red` buffer. Since we're using appropriate blending modes the
+color buffer will accumulate.
 
 .. code-block:: none
 
-    render_target RT_Downsample {
-        width_ratio = 0.5;
-        height_ratio = 0.5;
-        internal_format = r16f;
+    render_target RT_Red {
+        width = 4;
+        height = 4;
+        source_format = rgb;
+        internal_format = rgb16f;
         source_type = float;
-        source_format = red;
     }
 
-    render_target RT_Downsample4 {
-        width_ratio = 0.25;
-        height_ratio = 0.25;
-    }
-
-    fragment downsample2x(target=RT_Downsample) {
-
+    fragment red(target=RT_Red,blend=(add, src_color, one), rt1=RT_Red) {
         omw_In vec2 omw_TexCoord;
 
         void main()
         {
-            omw_FragColor.r = omw_GetLastShader(omw_TexCoord).r;
+            omw_FragColor.rgb = vec3(0.01,0,0);
         }
     }
 
-    fragment downsample4x(target=RT_Downsample4, rt1=RT_Downsample) {
-
+    fragment view(rt1=RT_Red) {
         omw_In vec2 omw_TexCoord;
 
         void main()
         {
-            omw_FragColor = omw_Texture2D(RT_Downsample, omw_TexCoord);
+            omw_FragColor = omw_Texture2D(RT_Red, omw_TexCoord);
         }
     }
 
-Now, when the `downsample2x` pass runs it will write to the target buffer instead of the default
-one assigned by the engine.
+    technique {
+        author = "OpenMW";
+        passes = red, view;
+    }
+
+
+These custom render targets are persistent and ownership is given to the shader which defines them.
+This gives potential to implement temporal effects by storing previous frame data in these buffers.
+Below is an example which calculates a naive average scene luminance and transitions between values smoothly.
+
+.. code-block:: none
+
+    render_target RT_Lum {
+        width = 256;
+        height = 256;
+        mipmaps = true;
+        source_format = rgb;
+        internal_format = rgb16f;
+        source_type = float;
+        min_filter = linear_mipmap_linear;
+        mag_filter = linear;
+    }
+
+    render_target RT_LumAvg {
+        source_type = float;
+        source_format = rgb;
+        internal_format = rgb16f;
+        min_filter = nearest;
+        mag_filter = nearest;
+    }
+
+    render_target RT_LumAvgLastFrame {
+        source_type = float;
+        source_format = rgb;
+        internal_format = rgb16f;
+        min_filter = nearest;
+        mag_filter = nearest;
+    }
+
+    fragment calculateLum(target=RT_Lum) {
+        omw_In vec2 omw_TexCoord;
+
+        void main()
+        {
+            vec3 orgi = pow(omw_GetLastShader(omw_TexCoord), vec4(2.2)).rgb;
+            omw_FragColor.rgb = orgi;
+        }
+    }
+
+    fragment fetchLumAvg(target=RT_LumAvg, rt1=RT_Lum, rt2=RT_LumAvgLastFrame) {
+        omw_In vec2 omw_TexCoord;
+
+        void main()
+        {
+            vec3 avgLumaCurrFrame = textureLod(RT_Lum, vec2(0.5, 0.5), 6).rgb;
+            vec3 avgLumaLastFrame = omw_Texture2D(RT_LumAvgLastFrame, vec2(0.5, 0.5)).rgb;
+
+            const float speed = 0.9;
+
+            vec3 avgLuma = avgLumaLastFrame + (avgLumaCurrFrame - avgLumaLastFrame) * (1.0 - exp(-omw.deltaSimulationTime * speed));
+
+            omw_FragColor.rgb = avgLuma;
+        }
+    }
+
+    fragment adaptation(rt1=RT_LumAvg) {
+        omw_In vec2 omw_TexCoord;
+
+        void main()
+        {
+            vec3 avgLuma = omw_Texture2D(RT_LumAvg, vec2(0.5, 0.5)).rgb;
+
+            if (omw_TexCoord.y < 0.2)
+                omw_FragColor = vec4(avgLuma, 1.0);
+            else
+                omw_FragColor = omw_GetLastShader(omw_TexCoord);
+        }
+    }
+
+    fragment store(target=RT_LumAvgLastFrame, rt1=RT_LumAvg) {
+        void main()
+        {
+            vec3 avgLuma = omw_Texture2D(RT_LumAvg, vec2(0.5, 0.5)).rgb;
+            omw_FragColor.rgb = avgLuma;
+        }
+    }
+
+    technique {
+        author = "OpenMW";
+        passes = calculateLum, fetchLumAvg, store, adaptation;
+        glsl_version = 330;
+    }
+
 
 Simple Example
 ##############

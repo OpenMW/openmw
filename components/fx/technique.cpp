@@ -279,6 +279,7 @@ namespace fx
         rt.mTarget->setSourceType(GL_UNSIGNED_BYTE);
         rt.mTarget->setWrap(osg::Texture::WRAP_S, osg::Texture::CLAMP_TO_EDGE);
         rt.mTarget->setWrap(osg::Texture::WRAP_T, osg::Texture::CLAMP_TO_EDGE);
+        rt.mTarget->setName(std::string(mBlockName));
 
         while (!isNext<Lexer::Close_bracket>() && !isNext<Lexer::Eof>())
         {

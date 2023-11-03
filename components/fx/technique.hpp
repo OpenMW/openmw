@@ -54,10 +54,14 @@ namespace fx
             osg::ref_ptr<osg::FrameBufferObject> mRenderTarget;
             osg::ref_ptr<osg::Texture2D> mRenderTexture;
             bool mResolve = false;
+            Types::SizeProxy mSize;
+            bool mMipMap;
 
             SubPass(const SubPass& other, const osg::CopyOp& copyOp = osg::CopyOp::SHALLOW_COPY)
                 : mStateSet(new osg::StateSet(*other.mStateSet, copyOp))
                 , mResolve(other.mResolve)
+                , mSize(other.mSize)
+                , mMipMap(other.mMipMap)
             {
                 if (other.mRenderTarget)
                     mRenderTarget = new osg::FrameBufferObject(*other.mRenderTarget, copyOp);

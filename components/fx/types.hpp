@@ -29,6 +29,16 @@ namespace fx
             std::optional<int> mWidth;
             std::optional<int> mHeight;
 
+            SizeProxy() = default;
+
+            SizeProxy(const SizeProxy& other)
+                : mWidthRatio(other.mWidthRatio)
+                , mHeightRatio(other.mHeightRatio)
+                , mWidth(other.mWidth)
+                , mHeight(other.mHeight)
+            {
+            }
+
             std::tuple<int, int> get(int width, int height) const
             {
                 int scaledWidth = width;
