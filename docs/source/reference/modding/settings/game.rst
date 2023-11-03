@@ -517,3 +517,13 @@ will not be useful with another.
 * 0: Axis-aligned bounding box
 * 1: Rotating box
 * 2: Cylinder
+
+player movement ignores animation
+--------------------------
+
+:Type:		boolean
+:Range:		True/False
+:Default:	False
+
+In third person, the camera will sway along with the movement animations of the player. 
+Enabling this option disables this swaying by having the player character move independently of its animation.
