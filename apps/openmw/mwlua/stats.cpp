@@ -60,16 +60,6 @@ namespace
 
 namespace MWLua
 {
-    std::string_view getSpecialization(int32_t val)
-    {
-        if (val == ESM::Class::Stealth)
-            return "stealth";
-        else if (val == ESM::Class::Magic)
-            return "magic";
-        else
-            return "combat";
-    }
-
     static void addStatUpdateAction(MWLua::LuaManager* manager, const SelfObject& obj)
     {
         if (!obj.mStatsCache.empty())
@@ -456,8 +446,9 @@ namespace MWLua
         skillT["name"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view { return rec.mName; });
         skillT["description"]
             = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view { return rec.mDescription; });
-        skillT["specialization"] = sol::readonly_property(
-            [](const ESM::Skill& rec) -> std::string_view { return getSpecialization(rec.mData.mSpecialization); });
+        skillT["specialization"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view {
+            return ESM::Class::indexToLuaId[rec.mData.mSpecialization];
+        });
         skillT["icon"] = sol::readonly_property([vfs](const ESM::Skill& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
         });
