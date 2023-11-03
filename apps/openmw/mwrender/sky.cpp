@@ -220,7 +220,7 @@ namespace
             camera->setNodeMask(MWRender::Mask_RenderToTexture);
             camera->setCullMask(MWRender::Mask_Sky);
             camera->addChild(mEarlyRenderBinRoot);
-            SceneUtil::ShadowManager::disableShadowsForStateSet(camera->getOrCreateStateSet());
+            SceneUtil::ShadowManager::disableShadowsForStateSet(Settings::shadows(), *camera->getOrCreateStateSet());
         }
 
     private:
@@ -271,7 +271,7 @@ namespace MWRender
         if (!mSceneManager->getForceShaders())
             skyroot->getOrCreateStateSet()->setAttributeAndModes(new osg::Program(),
                 osg::StateAttribute::OVERRIDE | osg::StateAttribute::PROTECTED | osg::StateAttribute::ON);
-        SceneUtil::ShadowManager::disableShadowsForStateSet(skyroot->getOrCreateStateSet());
+        SceneUtil::ShadowManager::disableShadowsForStateSet(Settings::shadows(), *skyroot->getOrCreateStateSet());
         parentNode->addChild(skyroot);
 
         mEarlyRenderBinRoot = new osg::Group;
