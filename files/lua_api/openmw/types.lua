@@ -930,7 +930,6 @@
 -- Whether teleportation for this player is enabled.
 -- @function [parent=#Player] isTeleportingEnabled
 -- @param openmw.core#GameObject player
--- @param #boolean player
 -- @return #boolean
 
 ---
