@@ -199,10 +199,21 @@ local function onInputAction(action)
     end
 end
 
+local function onSave()
+    return {sneaking = self.controls.sneak}
+end
+
+local function onLoad(data)
+    if not data then return end
+    self.controls.sneak = data.sneaking or false
+end
+
 return {
     engineHandlers = {
         onFrame = onFrame,
         onInputAction = onInputAction,
+        onSave = onSave,
+        onLoad = onLoad,
     },
     interfaceName = 'Controls',
     ---
