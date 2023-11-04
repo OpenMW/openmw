@@ -2913,7 +2913,7 @@ namespace MWMechanics
             MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, *soundId, volume, pitch);
     }
 
-    float CharacterController::getAnimationMovementDirection()
+    float CharacterController::getAnimationMovementDirection() const
     {
         switch (mMovementState)
         {

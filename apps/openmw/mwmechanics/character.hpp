@@ -319,7 +319,7 @@ namespace MWMechanics
 
         void playSwishSound() const;
 
-        float getAnimationMovementDirection();
+        float getAnimationMovementDirection() const;
 
         MWWorld::MovementDirectionFlags getSupportedMovementDirections() const;
     };
