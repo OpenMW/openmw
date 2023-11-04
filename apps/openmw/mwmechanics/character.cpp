@@ -2386,26 +2386,26 @@ namespace MWMechanics
             }
         }
 
-        osg::Vec3f moved = mAnimation->runAnimation(mSkipAnim && !isScriptedAnimPlaying() ? 0.f : duration);
+        osg::Vec3f movementFromAnimation = mAnimation->runAnimation(mSkipAnim && !isScriptedAnimPlaying() ? 0.f : duration);
 
         if (mPtr.getClass().isActor() && isMovementAnimationControlled() && !isScriptedAnimPlaying())
         {
             if (duration > 0.0f)
-                moved /= duration;
+                movementFromAnimation /= duration;
             else
-                moved = osg::Vec3f(0.f, 0.f, 0.f);
+                movementFromAnimation = osg::Vec3f(0.f, 0.f, 0.f);
 
-            moved.x() *= scale;
-            moved.y() *= scale;
+            movementFromAnimation.x() *= scale;
+            movementFromAnimation.y() *= scale;
 
-            if (speed > 0.f && moved != osg::Vec3f())
+            if (speed > 0.f && movementFromAnimation != osg::Vec3f())
             {
-                // Ensure we're moving in generally the right direction
-                // This is necessary when the "turn to movement direction" feature is off, as animations
-                // will not be rotated to match diagonal movement. In this case we have to slide the
-                // character diagonally.
-
-                // First decide the general direction expected from the current animation
+                // Ensure we're moving in the right general direction. In vanilla, all horizontal movement is taken from animations,
+                // even when moving diagonally (which doesn't have a corresponding animation). So to acheive diagonal movement,
+                // we have to rotate the movement taken from the animation  to the intended direction.
+                // 
+                // Note that while a complete movement animation cycle will have a well defined direction, no individual frame will, and 
+                // therefore we have to determine the direction separately from the value of the movementFromAnimation variable.
                 float animMovementAngle = 0;
                 if (!Settings::game().mTurnToMovementDirection || isFirstPersonPlayer)
                 {
@@ -2426,12 +2426,12 @@ namespace MWMechanics
                 float diff = targetMovementAngle - animMovementAngle;
                 if (std::abs(diff) > epsilon)
                 {
-                    moved = osg::Quat(diff, osg::Vec3f(0, 0, 1)) * moved;
+                    movementFromAnimation = osg::Quat(diff, osg::Vec3f(0, 0, 1)) * movementFromAnimation;
                 }
 
-                if (isPlayer && Settings::game().mPlayerMovementIgnoresAnimation)
+                if (!(isPlayer && Settings::game().mPlayerMovementIgnoresAnimation))
                 {
-                    moved = movement;
+                    movement = movementFromAnimation;
                 }
             }
 
@@ -2445,12 +2445,12 @@ namespace MWMechanics
                                 .getModifier()
                             > 0))
                 {
-                    moved.z() = 1.0;
+                    movement.z() = 1.0;
                 }
             }
 
             // Update movement
-            world->queueMovement(mPtr, moved);
+            world->queueMovement(mPtr, movement);
         }
 
         mSkipAnim = false;
