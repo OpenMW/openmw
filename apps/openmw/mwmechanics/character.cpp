@@ -2407,13 +2407,8 @@ namespace MWMechanics
                 // Note that while a complete movement animation cycle will have a well defined direction, no individual frame will, and 
                 // therefore we have to determine the direction separately from the value of the movementFromAnimation variable.
                 float animMovementAngle = 0;
-                if (!Settings::game().mTurnToMovementDirection || isFirstPersonPlayer)
-                {
-                    if (cls.getMovementSettings(mPtr).mIsStrafing)
-                        animMovementAngle = movement.x() > 0 ? -osg::PI_2f : osg::PI_2f;
-                    else
-                        animMovementAngle = movement.y() >= 0 ? 0 : -osg::PIf;
-                }
+                if (cls.getMovementSettings(mPtr).mIsStrafing)
+                    animMovementAngle = movement.x() > 0 ? -osg::PI_2f : osg::PI_2f;
                 else
                 {
                     animMovementAngle = mAnimation->getLegsYawRadians();
