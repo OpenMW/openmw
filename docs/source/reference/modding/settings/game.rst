@@ -519,7 +519,7 @@ will not be useful with another.
 * 2: Cylinder
 
 player movement ignores animation
---------------------------
+---------------------------------
 
 :Type:		boolean
 :Range:		True/False
@@ -527,3 +527,5 @@ player movement ignores animation
 
 In third person, the camera will sway along with the movement animations of the player. 
 Enabling this option disables this swaying by having the player character move independently of its animation.
+
+This setting can be controlled in the Settings tab of the launcher, under Visuals.

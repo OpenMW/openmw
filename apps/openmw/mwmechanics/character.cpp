@@ -2941,8 +2941,9 @@ namespace MWMechanics
             case CharState_SwimRunBack:
             case CharState_WalkBack:
                 return mAnimation->getLegsYawRadians() - osg::PIf;
+            default:
+                return 0.0f;
         }
-        return 0.0f;
     }
 
     void CharacterController::updateHeadTracking(float duration)
