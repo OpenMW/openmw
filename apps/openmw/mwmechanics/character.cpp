@@ -2398,36 +2398,19 @@ namespace MWMechanics
             movementFromAnimation.x() *= scale;
             movementFromAnimation.y() *= scale;
 
-            if (speed > 0.f && movementFromAnimation != osg::Vec3f())
+            if (speed > 0.f && movementFromAnimation != osg::Vec3f()
+                && !(isPlayer && Settings::game().mPlayerMovementIgnoresAnimation))
             {
                 // Ensure we're moving in the right general direction. In vanilla, all horizontal movement is taken from animations,
                 // even when moving diagonally (which doesn't have a corresponding animation). So to acheive diagonal movement,
                 // we have to rotate the movement taken from the animation  to the intended direction.
                 // 
                 // Note that while a complete movement animation cycle will have a well defined direction, no individual frame will, and 
-                // therefore we have to determine the direction separately from the value of the movementFromAnimation variable.
-                float animMovementAngle = 0;
-                if (cls.getMovementSettings(mPtr).mIsStrafing)
-                    animMovementAngle = movement.x() > 0 ? -osg::PI_2f : osg::PI_2f;
-                else
-                {
-                    animMovementAngle = mAnimation->getLegsYawRadians();
-                    if (movement.y() < 0)
-                        animMovementAngle -= osg::PIf;
-                }
-
-                const float epsilon = 0.001f;
+                // therefore we have to determine the direction based on the currently playing cycle instead.
+                float animMovementAngle = getAnimationMovementDirection();
                 float targetMovementAngle = std::atan2(-movement.x(), movement.y());
                 float diff = targetMovementAngle - animMovementAngle;
-                if (std::abs(diff) > epsilon)
-                {
-                    movementFromAnimation = osg::Quat(diff, osg::Vec3f(0, 0, 1)) * movementFromAnimation;
-                }
-
-                if (!(isPlayer && Settings::game().mPlayerMovementIgnoresAnimation))
-                {
-                    movement = movementFromAnimation;
-                }
+                movement = osg::Quat(diff, osg::Vec3f(0, 0, 1)) * movementFromAnimation;
             }
 
             if (mFloatToSurface)
@@ -2925,6 +2908,39 @@ namespace MWMechanics
 
         if (!soundId->empty())
             MWBase::Environment::get().getSoundManager()->playSound3D(mPtr, *soundId, volume, pitch);
+    }
+
+    float CharacterController::getAnimationMovementDirection()
+    {
+        switch (mMovementState)
+        {
+            case CharState_RunLeft:
+            case CharState_SneakLeft:
+            case CharState_SwimWalkLeft:
+            case CharState_SwimRunLeft:
+            case CharState_WalkLeft:
+                return osg::PI_2f;
+            case CharState_RunRight:
+            case CharState_SneakRight:
+            case CharState_SwimWalkRight:
+            case CharState_SwimRunRight:
+            case CharState_WalkRight:
+                return -osg::PI_2f;
+            case CharState_RunForward:
+            case CharState_SneakForward:
+            case CharState_SwimRunForward:
+            case CharState_SwimWalkForward:
+            case CharState_WalkForward:
+                return mAnimation->getLegsYawRadians();
+            case CharState_RunBack:
+            case CharState_SneakBack:
+            case CharState_SwimWalkBack:
+            case CharState_SwimRunBack:
+            case CharState_WalkBack:
+                return mAnimation->getLegsYawRadians() - osg::PIf;
+
+        }
+        return 0.0f;
     }
 
     void CharacterController::updateHeadTracking(float duration)
