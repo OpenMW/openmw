@@ -2386,7 +2386,8 @@ namespace MWMechanics
             }
         }
 
-        osg::Vec3f movementFromAnimation = mAnimation->runAnimation(mSkipAnim && !isScriptedAnimPlaying() ? 0.f : duration);
+        osg::Vec3f movementFromAnimation
+            = mAnimation->runAnimation(mSkipAnim && !isScriptedAnimPlaying() ? 0.f : duration);
 
         if (mPtr.getClass().isActor() && isMovementAnimationControlled() && !isScriptedAnimPlaying())
         {
@@ -2401,12 +2402,14 @@ namespace MWMechanics
             if (speed > 0.f && movementFromAnimation != osg::Vec3f()
                 && !(isPlayer && Settings::game().mPlayerMovementIgnoresAnimation))
             {
-                // Ensure we're moving in the right general direction. In vanilla, all horizontal movement is taken from animations,
-                // even when moving diagonally (which doesn't have a corresponding animation). So to acheive diagonal movement,
-                // we have to rotate the movement taken from the animation  to the intended direction.
-                // 
-                // Note that while a complete movement animation cycle will have a well defined direction, no individual frame will, and 
-                // therefore we have to determine the direction based on the currently playing cycle instead.
+                // Ensure we're moving in the right general direction. In vanilla, all horizontal movement is taken from
+                // animations, even when moving diagonally (which doesn't have a corresponding animation). So to acheive
+                // diagonal movement, we have to rotate the movement taken from the animation  to the intended
+                // direction.
+                //
+                // Note that while a complete movement animation cycle will have a well defined direction, no individual
+                // frame will, and therefore we have to determine the direction based on the currently playing cycle
+                // instead.
                 float animMovementAngle = getAnimationMovementDirection();
                 float targetMovementAngle = std::atan2(-movement.x(), movement.y());
                 float diff = targetMovementAngle - animMovementAngle;
@@ -2938,7 +2941,6 @@ namespace MWMechanics
             case CharState_SwimRunBack:
             case CharState_WalkBack:
                 return mAnimation->getLegsYawRadians() - osg::PIf;
-
         }
         return 0.0f;
     }
