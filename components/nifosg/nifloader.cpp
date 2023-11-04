@@ -2363,6 +2363,7 @@ namespace NifOsg
                     osg::StateSet* stateset = node->getOrCreateStateSet();
                     handleTextureProperty(
                         texprop, node->getName(), stateset, composite, imageManager, boundTextures, animflags);
+                    node->setUserValue("applyMode", static_cast<int>(texprop->mApplyMode));
                     break;
                 }
                 case Nif::RC_BSShaderPPLightingProperty:

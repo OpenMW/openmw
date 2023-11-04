@@ -113,10 +113,6 @@ void main()
     applyOcclusionDiscard(orthoDepthMapCoord, texture2D(orthoDepthMap, orthoDepthMapCoord.xy * 0.5 + 0.5).r);
 #endif
 
-#if @diffuseMap
-    vec2 adjustedDiffuseUV = diffuseMapUV;
-#endif
-
     vec3 normal = normalize(passNormal);
     vec3 viewVec = normalize(passViewPos.xyz);
 
@@ -131,11 +127,24 @@ void main()
     normal = normalize(tbnTranspose * (normalTex.xyz * 2.0 - 1.0));
 #endif
 
-#if @parallax
+#if !@diffuseMap
+    gl_FragData[0] = vec4(1.0);
+#else
+    vec2 adjustedDiffuseUV = diffuseMapUV;
+
+#if @normalMap && (@parallax || @diffuseParallax)
     vec3 cameraPos = (gl_ModelViewMatrixInverse * vec4(0,0,0,1)).xyz;
     vec3 objectPos = (gl_ModelViewMatrixInverse * vec4(passViewPos, 1)).xyz;
     vec3 eyeDir = normalize(cameraPos - objectPos);
-    vec2 offset = getParallaxOffset(eyeDir, tbnTranspose, normalTex.a, (passTangent.w > 0.0) ? -1.f : 1.f);
+#if @parallax
+    float height = normalTex.a;
+    float flipY = (passTangent.w > 0.0) ? -1.f : 1.f;
+#else
+    float height = texture2D(diffuseMap, diffuseMapUV).a;
+    // FIXME: shouldn't be necessary, but in this path false-positives are common
+    float flipY = -1.f;
+#endif
+    vec2 offset = getParallaxOffset(eyeDir, tbnTranspose, height, flipY);
     adjustedDiffuseUV += offset; // only offset diffuse for now, other textures are more likely to be using a completely different UV set
 
     // TODO: check not working as the same UV buffer is being bound to different targets
@@ -149,14 +158,16 @@ void main()
 
 #endif
 
-vec3 viewNormal = normalize(gl_NormalMatrix * normal);
-
-#if @diffuseMap
-    gl_FragData[0] = texture2D(diffuseMap, adjustedDiffuseUV);
-    gl_FragData[0].a *= coveragePreservingAlphaScale(diffuseMap, adjustedDiffuseUV);
+    vec4 diffuseTex = texture2D(diffuseMap, adjustedDiffuseUV);
+    gl_FragData[0].xyz = diffuseTex.xyz;
+#if !@diffuseParallax
+    gl_FragData[0].a = diffuseTex.a * coveragePreservingAlphaScale(diffuseMap, adjustedDiffuseUV);
 #else
-    gl_FragData[0] = vec4(1.0);
+    gl_FragData[0].a = 1.0;
 #endif
+#endif
+
+    vec3 viewNormal = normalize(gl_NormalMatrix * normal);
 
     vec4 diffuseColor = getDiffuseColor();
     gl_FragData[0].a *= diffuseColor.a;
