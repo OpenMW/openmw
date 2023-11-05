@@ -660,8 +660,8 @@ namespace MWWorld
 
     std::string_view World::getCellName(const MWWorld::Cell& cell) const
     {
-        if (!cell.isExterior() || !cell.getNameId().empty())
-            return cell.getNameId();
+        if (!cell.isExterior() || !cell.getDisplayName().empty())
+            return cell.getDisplayName();
 
         return ESM::visit(ESM::VisitOverload{
                               [&](const ESM::Cell& cellIn) -> std::string_view { return getCellName(&cellIn); },
