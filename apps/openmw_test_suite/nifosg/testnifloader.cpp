@@ -156,6 +156,16 @@ osg::Group {
       StateSet TRUE {
         osg::StateSet {
           UniqueID 9
+          ModeList 1 {
+            GL_DEPTH_TEST ON
+          }
+          AttributeList 1 {
+            osg::Depth {
+              UniqueID 10
+              WriteMask FALSE
+            }
+            Value OFF
+          }
         }
       }
     }
