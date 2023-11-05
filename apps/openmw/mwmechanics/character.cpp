@@ -2399,8 +2399,7 @@ namespace MWMechanics
             movementFromAnimation.x() *= scale;
             movementFromAnimation.y() *= scale;
 
-            if (speed > 0.f && movementFromAnimation != osg::Vec3f()
-                && !(isPlayer && Settings::game().mPlayerMovementIgnoresAnimation))
+            if (speed > 0.f && movementFromAnimation != osg::Vec3f())
             {
                 // Ensure we're moving in the right general direction. In vanilla, all horizontal movement is taken from
                 // animations, even when moving diagonally (which doesn't have a corresponding animation). So to acheive
@@ -2413,8 +2412,11 @@ namespace MWMechanics
                 float animMovementAngle = getAnimationMovementDirection();
                 float targetMovementAngle = std::atan2(-movement.x(), movement.y());
                 float diff = targetMovementAngle - animMovementAngle;
-                movement = osg::Quat(diff, osg::Vec3f(0, 0, 1)) * movementFromAnimation;
+                movementFromAnimation = osg::Quat(diff, osg::Vec3f(0, 0, 1)) * movementFromAnimation;
             }
+
+            if (!(isPlayer && Settings::game().mPlayerMovementIgnoresAnimation))
+                movement = movementFromAnimation;
 
             if (mFloatToSurface)
             {
