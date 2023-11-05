@@ -789,8 +789,7 @@ namespace MWWorld
         mRendering.configureFog(
             mResult.mFogDepth, underwaterFog, mResult.mDLFogFactor, mResult.mDLFogOffset / 100.0f, mResult.mFogColor);
         mRendering.setAmbientColour(mResult.mAmbientColor);
-        mRendering.setSunColour(
-            mResult.mSunColor, mResult.mSunColor * mResult.mGlareView * glareFade, mResult.mGlareView * glareFade);
+        mRendering.setSunColour(mResult.mSunColor, mResult.mSunColor, mResult.mGlareView * glareFade);
 
         mRendering.getSkyManager()->setWeather(mResult);
 
