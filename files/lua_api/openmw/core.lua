@@ -862,6 +862,7 @@
 -- @field #string description Human-readable description
 -- @field #string icon VFS path to the icon
 -- @field #MagicSchoolData school Optional magic school
+-- @field #string attribute The id of the skill's governing attribute
 
 -- @type MagicSchoolData
 -- @field #string name Human-readable name
