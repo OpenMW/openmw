@@ -189,19 +189,30 @@ The following functions can be accessed in any fragment or vertex shader.
 +--------------------------------------------------+-------------------------------------------------------------------------------+
 | ``vec4 omw_GetLastPass(vec2 uv)``                | Returns RGBA color output of the last pass                                    |
 +--------------------------------------------------+-------------------------------------------------------------------------------+
-| ``vec3 omw_GetNormals(vec2 uv)``                 | Returns normalized worldspace normals [-1, 1]                                 |
-|                                                  |                                                                               |
-|                                                  | The values in sampler are in [0, 1] but are transformed to [-1, 1]            |
-+--------------------------------------------------+-----------------------+-------------------------------------------------------+
+| ``vec3 omw_GetNormals(vec2 uv)``                 | Returns normalized view-space normals [-1, 1]                                 |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``vec3 omw_GetNormalsWorldSpace(vec2 uv)``       | Returns normalized world-space normals [-1, 1]                                |
++--------------------------------------------------+-------------------------------------------------------------------------------+
 | ``vec3 omw_GetWorldPosFromUV(vec2 uv)``          | Returns world position for given uv coordinate.                               |
-+--------------------------------------------------+-----------------------+-------------------------------------------------------+
++--------------------------------------------------+-------------------------------------------------------------------------------+
 | ``float omw_GetLinearDepth(vec2 uv)``            | Returns the depth in game units for given uv coordinate.                      |
-+--------------------------------------------------+-----------------------+-------------------------------------------------------+
++--------------------------------------------------+-------------------------------------------------------------------------------+
 | ``float omw_EstimateFogCoverageFromUV(vec2 uv)`` | Returns a fog coverage in the range from 0.0 (no fog) and 1.0 (full fog)      |
 |                                                  |                                                                               |
 |                                                  | Calculates an estimated fog coverage for given uv coordinate.                 |
-+--------------------------------------------------+-----------------------+-------------------------------------------------------+
-
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``int omw_GetPointLightCount()``                 | Returns the number of point lights available to sample from in the scene.     |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``vec3 omw_GetPointLightWorldPos(int index)``    | Returns the world space position of a point light.                            |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``vec3 omw_GetPointLightDiffuse(int index)``     | Returns the diffuse color of the point light.                                 |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``int omw_GetPointLightAttenuation(int index)``  | Returns the attenuation values of the point light.                            |
+|                                                  |                                                                               |
+|                                                  | The XYZ channels hold the constant, linear, and quadratic components.         |
++--------------------------------------------------+-------------------------------------------------------------------------------+
+| ``float omw_GetPointLightRadius(int index)``     | Returns the radius of the point light, in game units.                         |
++--------------------------------------------------+-------------------------------------------------------------------------------+
 
 Special Attributes
 ##################
