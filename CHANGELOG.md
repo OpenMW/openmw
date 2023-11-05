@@ -90,6 +90,7 @@
     Bug #7639: NPCs don't use hand-to-hand if their other melee skills were damaged during combat
     Bug #7642: Items in repair and recharge menus aren't sorted alphabetically
     Bug #7647: NPC walk cycle bugs after greeting player
+    Bug #7654: Tooltips for enchantments with invalid effects cause crashes
     Bug #7660: Some inconsistencies regarding Invisibility breaking
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics

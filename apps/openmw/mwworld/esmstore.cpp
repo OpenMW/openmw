@@ -138,6 +138,59 @@ namespace
         return npcsToReplace;
     }
 
+    template <class RecordType>
+    std::vector<RecordType> getSpellsToReplace(
+        const MWWorld::Store<RecordType>& spells, const MWWorld::Store<ESM::MagicEffect>& magicEffects)
+    {
+        std::vector<RecordType> spellsToReplace;
+
+        for (RecordType spell : spells)
+        {
+            if (spell.mEffects.mList.empty())
+                continue;
+
+            bool changed = false;
+            auto iter = spell.mEffects.mList.begin();
+            while (iter != spell.mEffects.mList.end())
+            {
+                const ESM::MagicEffect* mgef = magicEffects.search(iter->mEffectID);
+                if (!mgef)
+                {
+                    Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
+                                        << ": dropping invalid effect (index " << iter->mEffectID << ")";
+                    iter = spell.mEffects.mList.erase(iter);
+                    changed = true;
+                    continue;
+                }
+
+                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute) && iter->mAttribute != -1)
+                {
+                    iter->mAttribute = -1;
+                    Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
+                                        << ": dropping unexpected attribute argument of "
+                                        << ESM::MagicEffect::indexToGmstString(iter->mEffectID) << " effect";
+                    changed = true;
+                }
+
+                if (!(mgef->mData.mFlags & ESM::MagicEffect::TargetSkill) && iter->mSkill != -1)
+                {
+                    iter->mSkill = -1;
+                    Log(Debug::Verbose) << RecordType::getRecordType() << " " << spell.mId
+                                        << ": dropping unexpected skill argument of "
+                                        << ESM::MagicEffect::indexToGmstString(iter->mEffectID) << " effect";
+                    changed = true;
+                }
+
+                ++iter;
+            }
+
+            if (changed)
+                spellsToReplace.emplace_back(spell);
+        }
+
+        return spellsToReplace;
+    }
+
     // Custom enchanted items can reference scripts that no longer exist, this doesn't necessarily mean the base item no
     // longer exists however. So instead of removing the item altogether, we're only removing the script.
     template <class MapT>
@@ -538,70 +591,23 @@ namespace MWWorld
 
         removeMissingScripts(getWritable<ESM::Script>(), getWritable<ESM::Creature>().mStatic);
 
-        // Validate spell effects for invalid arguments
-        std::vector<ESM::Spell> spellsToReplace;
+        // Validate spell effects and enchantments for invalid arguments
         auto& spells = getWritable<ESM::Spell>();
-        for (ESM::Spell spell : spells)
-        {
-            if (spell.mEffects.mList.empty())
-                continue;
+        auto& enchantments = getWritable<ESM::Enchantment>();
+        auto& magicEffects = getWritable<ESM::MagicEffect>();
 
-            bool changed = false;
-            auto iter = spell.mEffects.mList.begin();
-            while (iter != spell.mEffects.mList.end())
-            {
-                const ESM::MagicEffect* mgef = getWritable<ESM::MagicEffect>().search(iter->mEffectID);
-                if (!mgef)
-                {
-                    Log(Debug::Verbose) << "Spell '" << spell.mId << "' has an invalid effect (index "
-                                        << iter->mEffectID << ") present. Dropping the effect.";
-                    iter = spell.mEffects.mList.erase(iter);
-                    changed = true;
-                    continue;
-                }
-
-                if (mgef->mData.mFlags & ESM::MagicEffect::TargetSkill)
-                {
-                    if (iter->mAttribute != -1)
-                    {
-                        iter->mAttribute = -1;
-                        Log(Debug::Verbose)
-                            << ESM::MagicEffect::indexToGmstString(iter->mEffectID) << " effect of spell '" << spell.mId
-                            << "' has an attribute argument present. Dropping the argument.";
-                        changed = true;
-                    }
-                }
-                else if (mgef->mData.mFlags & ESM::MagicEffect::TargetAttribute)
-                {
-                    if (iter->mSkill != -1)
-                    {
-                        iter->mSkill = -1;
-                        Log(Debug::Verbose)
-                            << ESM::MagicEffect::indexToGmstString(iter->mEffectID) << " effect of spell '" << spell.mId
-                            << "' has a skill argument present. Dropping the argument.";
-                        changed = true;
-                    }
-                }
-                else if (iter->mSkill != -1 || iter->mAttribute != -1)
-                {
-                    iter->mSkill = -1;
-                    iter->mAttribute = -1;
-                    Log(Debug::Verbose) << ESM::MagicEffect::indexToGmstString(iter->mEffectID) << " effect of spell '"
-                                        << spell.mId << "' has argument(s) present. Dropping the argument(s).";
-                    changed = true;
-                }
-
-                ++iter;
-            }
-
-            if (changed)
-                spellsToReplace.emplace_back(spell);
-        }
-
+        std::vector<ESM::Spell> spellsToReplace = getSpellsToReplace(spells, magicEffects);
         for (const ESM::Spell& spell : spellsToReplace)
         {
             spells.eraseStatic(spell.mId);
             spells.insertStatic(spell);
+        }
+
+        std::vector<ESM::Enchantment> enchantmentsToReplace = getSpellsToReplace(enchantments, magicEffects);
+        for (const ESM::Enchantment& enchantment : enchantmentsToReplace)
+        {
+            enchantments.eraseStatic(enchantment.mId);
+            enchantments.insertStatic(enchantment);
         }
     }
 
