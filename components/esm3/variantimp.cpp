@@ -46,7 +46,7 @@ namespace ESM
         esm.writeHNString("STRV", in);
     }
 
-    void readESMVariantValue(ESMReader& esm, Variant::Format format, VarType type, int& out)
+    void readESMVariantValue(ESMReader& esm, Variant::Format format, VarType type, int32_t& out)
     {
         if (type != VT_Short && type != VT_Long && type != VT_Int)
             throw std::logic_error("not an integer type");
@@ -60,9 +60,9 @@ namespace ESM
                 if (std::isnan(value))
                     out = 0;
                 else
-                    out = static_cast<short>(value);
+                    out = static_cast<int16_t>(value);
             else if (type == VT_Long)
-                out = static_cast<int>(value);
+                out = static_cast<int32_t>(value);
             else
                 esm.fail("unsupported global variable integer type");
         }
@@ -82,7 +82,7 @@ namespace ESM
         {
             if (type == VT_Short)
             {
-                short value;
+                int16_t value;
                 esm.getHT(value);
                 out = value;
             }
@@ -95,7 +95,7 @@ namespace ESM
         }
     }
 
-    void writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType type, int in)
+    void writeESMVariantValue(ESMWriter& esm, Variant::Format format, VarType type, int32_t in)
     {
         if (type != VT_Short && type != VT_Long && type != VT_Int)
             throw std::logic_error("not an integer type");
@@ -126,7 +126,7 @@ namespace ESM
         else if (format == Variant::Format_Local)
         {
             if (type == VT_Short)
-                esm.writeHNT("STTV", static_cast<short>(in));
+                esm.writeHNT("STTV", static_cast<int16_t>(in));
             else if (type == VT_Int)
                 esm.writeHNT("INTV", in);
             else

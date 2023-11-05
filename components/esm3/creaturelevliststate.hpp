@@ -9,7 +9,7 @@ namespace ESM
 
     struct CreatureLevListState final : public ObjectState
     {
-        int mSpawnActorId;
+        int32_t mSpawnActorId;
         bool mSpawn;
 
         void load(ESMReader& esm) override;

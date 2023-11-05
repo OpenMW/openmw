@@ -36,7 +36,7 @@ namespace ESM
 
         esm.getSubNameIs("MEDT");
         esm.getSubHeader();
-        int school;
+        int32_t school;
         esm.getT(school);
         mData.mSchool = MagicSchool::indexToSkillRefId(school);
         esm.getT(mData.mBaseCost);

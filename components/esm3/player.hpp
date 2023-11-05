@@ -27,8 +27,8 @@ namespace ESM
         RefId mMarkedCell;
         ESM::RefId mBirthsign;
 
-        int mCurrentCrimeId;
-        int mPaidCrimeId;
+        int32_t mCurrentCrimeId;
+        int32_t mPaidCrimeId;
 
         float mSaveAttributes[Attribute::Length];
         float mSaveSkills[Skill::Length];

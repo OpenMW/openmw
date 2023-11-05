@@ -20,8 +20,8 @@ namespace ESM
     {
         while (esm.isNextSub("EFID"))
         {
-            int id;
-            std::pair<int, float> params;
+            int32_t id;
+            std::pair<int32_t, float> params;
             esm.getHT(id);
             esm.getHNT(params.first, "BASE");
             if (esm.getFormatVersion() <= MaxClearModifiersFormatVersion)
