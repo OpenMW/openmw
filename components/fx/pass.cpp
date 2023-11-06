@@ -190,6 +190,11 @@ mat4 omw_InvProjectionMatrix()
 #endif
     }
 
+    vec3 omw_GetNormalsWorldSpace(vec2 uv)
+    {
+        return (vec4(omw_GetNormals(uv), 0.0) * omw.viewMatrix).rgb;
+    }
+
     vec3 omw_GetWorldPosFromUV(vec2 uv)
     {
         float depth = omw_GetDepth(uv);
