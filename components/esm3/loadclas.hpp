@@ -30,9 +30,9 @@ namespace ESM
             Magic = 1,
             Stealth = 2
         };
-        
+
         static const std::string_view sGmstSpecializationIds[3];
-        static const std::array<std::string_view, 3> indexToLuaId;
+        static const std::array<std::string_view, 3> specilizationIndexToLuaId;
 
         struct CLDTstruct
         {
