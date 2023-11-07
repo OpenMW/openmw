@@ -7,7 +7,6 @@
 #include <components/esm3/loadalch.hpp>
 #include <components/esm3/loadarmo.hpp>
 #include <components/esm3/loadbook.hpp>
-#include <components/esm3/loadclas.hpp>
 #include <components/esm3/loadclot.hpp>
 #include <components/esm3/loadfact.hpp>
 #include <components/esm3/loadmisc.hpp>
