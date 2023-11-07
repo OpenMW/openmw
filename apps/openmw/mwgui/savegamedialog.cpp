@@ -413,8 +413,8 @@ namespace MWGui
         text << Misc::fileTimeToString(mCurrentSlot->mTimeStamp, "%Y.%m.%d %T") << "\n";
 
         if (mCurrentSlot->mProfile.mMaximumHealth > 0)
-            text << std::fixed << std::setprecision(0) << "#{sHealth} " << mCurrentSlot->mProfile.mCurrentHealth << "/"
-                 << mCurrentSlot->mProfile.mMaximumHealth << "\n";
+            text << "#{sHealth} " << static_cast<int>(mCurrentSlot->mProfile.mCurrentHealth) << "/"
+                 << static_cast<int>(mCurrentSlot->mProfile.mMaximumHealth) << "\n";
 
         text << "#{sLevel} " << mCurrentSlot->mProfile.mPlayerLevel << "\n";
         text << "#{sCell=" << mCurrentSlot->mProfile.mPlayerCellName << "}\n";
