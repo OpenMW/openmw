@@ -14,7 +14,7 @@
    <item>
     <widget class="QTabWidget" name="AdvancedTabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="GameMechanics">
       <attribute name="title">
@@ -293,8 +293,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>680</width>
-            <height>882</height>
+            <width>671</width>
+            <height>774</height>
            </rect>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout">
@@ -376,6 +376,16 @@
                  </widget>
                 </item>
                </layout>
+              </item>
+              <item row="2" column="1">
+               <widget class="QCheckBox" name="playerMovementIgnoresAnimationCheckBox">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In third person, the camera will sway along with the movement animations of the player. Enabling this option disables this swaying by having the player character move independently of its animation. This was the default behavior of OpenMW 0.48 and earlier.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Player movement ignores animation</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </widget>
