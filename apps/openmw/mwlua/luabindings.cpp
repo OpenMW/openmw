@@ -37,7 +37,6 @@
 
 #include "camerabindings.hpp"
 #include "cellbindings.hpp"
-#include "classbindings.hpp"
 #include "debugbindings.hpp"
 #include "factionbindings.hpp"
 #include "inputbindings.hpp"
@@ -158,12 +157,9 @@ namespace MWLua
         api["magic"] = initCoreMagicBindings(context);
         api["stats"] = initCoreStatsBindings(context);
 
-        sol::table character(lua->sol(), sol::create);
         initCoreFactionBindings(context);
-        character["factions"] = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>();
+        api["factions"] = &MWBase::Environment::get().getWorld()->getStore().get<ESM::Faction>();
 
-        character["classes"] = initCoreClassBindings(context);
-        api["character"] = LuaUtil::makeReadOnly(character);
         api["l10n"] = LuaUtil::initL10nLoader(lua->sol(), MWBase::Environment::get().getL10nManager());
         const MWWorld::Store<ESM::GameSetting>* gmstStore
             = &MWBase::Environment::get().getESMStore()->get<ESM::GameSetting>();

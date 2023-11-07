@@ -12,6 +12,7 @@
 #include <apps/openmw/mwworld/class.hpp>
 #include <apps/openmw/mwworld/esmstore.hpp>
 
+#include "../classbindings.hpp"
 #include "../localscripts.hpp"
 #include "../stats.hpp"
 
@@ -81,6 +82,9 @@ namespace MWLua
         record["baseGold"] = sol::readonly_property([](const ESM::NPC& rec) -> int { return rec.mNpdt.mGold; });
         addActorServicesBindings<ESM::NPC>(record, context);
 
+        sol::table character(lua, sol::create);
+        character["classes"] = initCoreClassBindings(context);
+        npc["character"] = LuaUtil::makeReadOnly(character);
         // This function is game-specific, in future we should replace it with something more universal.
         npc["isWerewolf"] = [](const Object& o) {
             const MWWorld::Class& cls = o.ptr().getClass();

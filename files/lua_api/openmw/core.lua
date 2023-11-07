@@ -12,24 +12,7 @@
 
 ---
 -- A read-only list of all @{#FactionRecord}s in the world database.
--- @field [parent=#Character] #list<#FactionRecord> factions
-
---- @{#Character}: Class and Character Data
--- @field [parent=#core] #Character character
-
-
---- @{#Classes}: Class Data
--- @field [parent=#Character] #Classes classes
-
----
--- A read-only list of all @{#ClassRecord}s in the world database.
--- @field [parent=#Classes] #list<#ClassRecord> records
-
----
--- Returns a read-only @{#ClassRecord}
--- @function [parent=#Classes] record
--- @param #string recordId
--- @return #ClassRecord
+-- @field [parent=#core] #list<#FactionRecord> factions
 
 ---
 -- Terminates the game and quits to the OS. Should be used only for testing purposes.
@@ -888,19 +871,6 @@
 -- @field #string castSound VFS path to the cast sound
 -- @field #string failureSound VFS path to the failure sound
 -- @field #string hitSound VFS path to the hit sound
-
----
--- Class data record
--- @type ClassRecord
--- @field #string id Class id
--- @field #string name Class name
--- @field #list<#string> attributes A read-only list containing the specialized attributes of the class.
--- @field #list<#string> majorSkills A read-only list containing the major skills of the class.
--- @field #list<#string> minorSkills A read-only list containing the minor skills of the class.
--- @field #string description Class description
--- @field #boolean isPlayable True if the player can play as this class
--- @field #string specialization Class specialization. Either combat, magic, or stealth.
-
 
 ---
 -- Faction data record
