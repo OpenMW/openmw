@@ -10,7 +10,7 @@ namespace ESM
 {
     const std::string_view Class::sGmstSpecializationIds[3]
         = { "sSpecializationCombat", "sSpecializationMagic", "sSpecializationStealth" };
-    const std::string_view Class::indexToLuaId[3] = { "combat", "magic", "stealth" };
+    const std::array<std::string_view, 3> Class::indexToLuaId = { "combat", "magic", "stealth" };
 
     int32_t& Class::CLDTstruct::getSkill(int index, bool major)
     {

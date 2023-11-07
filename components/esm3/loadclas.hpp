@@ -31,7 +31,7 @@ namespace ESM
             Stealth = 2
         };
         static const std::string_view sGmstSpecializationIds[3];
-        static const std::string_view indexToLuaId[3];
+        static const std::array<std::string_view, 3> indexToLuaId;
 
         struct CLDTstruct
         {

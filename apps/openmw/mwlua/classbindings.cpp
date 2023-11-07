@@ -72,7 +72,7 @@ namespace MWLua
         });
 
         classT["specialization"] = sol::readonly_property([](const ESM::Class& rec) -> std::string_view {
-            return ESM::Class::indexToLuaId[rec.mData.mSpecialization];
+            return ESM::Class::indexToLuaId.at(rec.mData.mSpecialization + 10);
         });
         classT["isPlayable"]
             = sol::readonly_property([](const ESM::Class& rec) -> bool { return rec.mData.mIsPlayable; });

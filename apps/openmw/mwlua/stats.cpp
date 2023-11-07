@@ -447,7 +447,7 @@ namespace MWLua
         skillT["description"]
             = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view { return rec.mDescription; });
         skillT["specialization"] = sol::readonly_property([](const ESM::Skill& rec) -> std::string_view {
-            return ESM::Class::indexToLuaId[rec.mData.mSpecialization];
+            return ESM::Class::indexToLuaId.at(rec.mData.mSpecialization);
         });
         skillT["icon"] = sol::readonly_property([vfs](const ESM::Skill& rec) -> std::string {
             return Misc::ResourceHelpers::correctIconPath(rec.mIcon, vfs);
