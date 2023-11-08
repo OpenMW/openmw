@@ -45,7 +45,9 @@ namespace Nif
     {
         NiPointLight::read(nif);
 
-        nif->read(mCutoff);
+        nif->read(mOuterSpotAngle);
+        if (nif->getVersion() >= NIFStream::generateVersion(20, 2, 0, 5))
+            nif->read(mInnerSpotAngle);
         nif->read(mExponent);
     }
 

@@ -148,12 +148,6 @@ namespace Nif
         }
         else
         {
-            uint32_t numShaderFlags1 = 0, numShaderFlags2 = 0;
-            nif->read(numShaderFlags1);
-            if (nif->getBethVersion() >= 152)
-                nif->read(numShaderFlags2);
-            nif->readVector(mShaderFlags1Hashes, numShaderFlags1);
-            nif->readVector(mShaderFlags2Hashes, numShaderFlags2);
             if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76 && recType == RC_BSLightingShaderProperty)
             {
                 nif->read(mType);
@@ -181,6 +175,13 @@ namespace Nif
                         break;
                 }
             }
+
+            uint32_t numShaderFlags1 = 0, numShaderFlags2 = 0;
+            nif->read(numShaderFlags1);
+            if (nif->getBethVersion() >= 152)
+                nif->read(numShaderFlags2);
+            nif->readVector(mShaderFlags1Hashes, numShaderFlags1);
+            nif->readVector(mShaderFlags2Hashes, numShaderFlags2);
         }
 
         nif->read(mUVOffset);
@@ -324,7 +325,7 @@ namespace Nif
         {
             nif->read(mSubsurfaceRolloff);
             nif->read(mRimlightPower);
-            if (mRimlightPower == std::numeric_limits<float>::max())
+            if (nif->getBethVersion() == 130 && mRimlightPower == std::numeric_limits<float>::max())
                 nif->read(mBacklightPower);
         }
 
@@ -335,27 +336,27 @@ namespace Nif
             mWetness.read(nif);
         }
 
-        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_STF)
+        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
+        {
             mLuminance.read(nif);
-
-        if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_F76)
-        {
-            nif->read(mDoTranslucency);
-            if (mDoTranslucency)
-                mTranslucency.read(nif);
-            if (nif->get<uint8_t>() != 0)
+            if (nif->getBethVersion() == NIFFile::BethVersion::BETHVER_F76)
             {
-                mTextureArrays.resize(nif->get<uint32_t>());
-                for (std::vector<std::string>& textureArray : mTextureArrays)
-                    nif->getSizedStrings(textureArray, nif->get<uint32_t>());
+                nif->read(mDoTranslucency);
+                if (mDoTranslucency)
+                    mTranslucency.read(nif);
+                if (nif->get<uint8_t>() != 0)
+                {
+                    mTextureArrays.resize(nif->get<uint32_t>());
+                    for (std::vector<std::string>& textureArray : mTextureArrays)
+                        nif->getSizedStrings(textureArray, nif->get<uint32_t>());
+                }
             }
-        }
-
-        if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_STF)
-        {
-            nif->skip(4); // Unknown
-            nif->skip(4); // Unknown
-            nif->skip(2); // Unknown
+            if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_STF)
+            {
+                nif->skip(4); // Unknown
+                nif->skip(4); // Unknown
+                nif->skip(2); // Unknown
+            }
         }
 
         switch (static_cast<BSLightingShaderType>(mType))
@@ -439,7 +440,6 @@ namespace Nif
 
         if (nif->getBethVersion() >= NIFFile::BethVersion::BETHVER_F76)
         {
-            nif->read(mRefractionPower);
             mReflectanceTexture = nif->getSizedString();
             mLightingTexture = nif->getSizedString();
             nif->read(mEmittanceColor);
