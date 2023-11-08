@@ -6,7 +6,6 @@
 #include <variant>
 #include <vector>
 
-#include <BulletCollision/CollisionShapes/btBoxShape.h>
 #include <BulletCollision/CollisionShapes/btTriangleMesh.h>
 
 #include <components/debug/debuglog.hpp>
@@ -171,23 +170,8 @@ namespace NifBullet
         }
 
         for (const Nif::NiAVObject* node : roots)
-        {
-            // Try to find a valid bounding box first. If one's found for any root node, use that.
             if (findBoundingBox(*node))
-            {
-                const btVector3 extents = Misc::Convert::toBullet(mShape->mCollisionBox.mExtents);
-                const btVector3 center = Misc::Convert::toBullet(mShape->mCollisionBox.mCenter);
-                auto compound = std::make_unique<btCompoundShape>();
-                auto boxShape = std::make_unique<btBoxShape>(extents);
-                btTransform transform = btTransform::getIdentity();
-                transform.setOrigin(center);
-                compound->addChildShape(transform, boxShape.get());
-                std::ignore = boxShape.release();
-
-                mShape->mCollisionShape.reset(compound.release());
-                return mShape;
-            }
-        }
+                break;
 
         HandleNodeArgs args;
 
@@ -196,8 +180,6 @@ namespace NifBullet
         // TODO: investigate whether this should and could be optimized.
         args.mAnimated = pathFileNameStartsWithX(mShape->mFileName);
 
-        // If there's no bounding box, we'll have to generate a Bullet collision shape
-        // from the collision data present in every root node.
         for (const Nif::NiAVObject* node : roots)
             handleRoot(nif, *node, args);
 
@@ -210,8 +192,7 @@ namespace NifBullet
         return mShape;
     }
 
-    // Find a boundingBox in the node hierarchy.
-    // Return: use bounding box for collision?
+    // Find a bounding box in the node hierarchy to use for actor collision
     bool BulletNifLoader::findBoundingBox(const Nif::NiAVObject& node)
     {
         if (Misc::StringUtils::ciEqual(node.mName, "Bounding Box"))
