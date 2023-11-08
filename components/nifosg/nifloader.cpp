@@ -1964,11 +1964,17 @@ namespace NifOsg
             return texEnv;
         }
 
-        void handleDepthFlags(osg::StateSet* stateset, bool depthTest, bool depthWrite,
-            osg::Depth::Function depthFunction = osg::Depth::LESS)
+        void handleDepthFlags(osg::StateSet* stateset, bool depthTest, bool depthWrite)
         {
-            stateset->setMode(GL_DEPTH_TEST, depthTest ? osg::StateAttribute::ON : osg::StateAttribute::OFF);
-            osg::ref_ptr<osg::Depth> depth = new osg::Depth(depthFunction, 0.0, 1.0, depthWrite);
+            if (!depthWrite && !depthTest)
+            {
+                stateset->setMode(GL_DEPTH_TEST, osg::StateAttribute::OFF);
+                return;
+            }
+            osg::ref_ptr<osg::Depth> depth = new osg::Depth;
+            depth->setWriteMask(depthWrite);
+            if (!depthTest)
+                depth->setFunction(osg::Depth::ALWAYS);
             depth = shareAttribute(depth);
             stateset->setAttributeAndModes(depth, osg::StateAttribute::ON);
         }
@@ -2328,10 +2334,8 @@ namespace NifOsg
                 {
                     const Nif::NiZBufferProperty* zprop = static_cast<const Nif::NiZBufferProperty*>(property);
                     osg::StateSet* stateset = node->getOrCreateStateSet();
-                    // Morrowind ignores depth test function, unless a NiStencilProperty is present, in which case it
-                    // uses a fixed depth function of GL_ALWAYS.
-                    osg::Depth::Function depthFunction = hasStencilProperty ? osg::Depth::ALWAYS : osg::Depth::LESS;
-                    handleDepthFlags(stateset, zprop->depthTest(), zprop->depthWrite(), depthFunction);
+                    // The test function from this property seems to be ignored.
+                    handleDepthFlags(stateset, zprop->depthTest(), zprop->depthWrite());
                     break;
                 }
                 // OSG groups the material properties that NIFs have separate, so we have to parse them all again when
@@ -2370,7 +2374,6 @@ namespace NifOsg
                             textureSet, texprop->mClamp, node->getName(), stateset, imageManager, boundTextures);
                     }
                     handleTextureControllers(texprop, composite, imageManager, stateset, animflags);
-                    handleDepthFlags(stateset, texprop->depthTest(), texprop->depthWrite());
                     break;
                 }
                 case Nif::RC_BSShaderNoLightingProperty:

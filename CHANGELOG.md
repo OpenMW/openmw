@@ -70,6 +70,7 @@
     Bug #7298: Water ripples from projectiles sometimes are not spawned
     Bug #7307: Alchemy "Magic Effect" search string does not match on tool tip for effects related to attributes
     Bug #7322: Shadows don't cover groundcover depending on the view angle and perspective with compute scene bounds = primitives
+    Bug #7380: NiZBufferProperty issue
     Bug #7413: Generated wilderness cells don't spawn fish
     Bug #7415: Unbreakable lock discrepancies
     Bug #7428: AutoCalc flag is not used to calculate enchantment costs
