@@ -10,9 +10,11 @@
 
 namespace MWRender
 {
-    PingPongCanvas::PingPongCanvas(Shader::ShaderManager& shaderManager)
+    PingPongCanvas::PingPongCanvas(
+        Shader::ShaderManager& shaderManager, const std::shared_ptr<LuminanceCalculator>& luminanceCalculator)
         : mFallbackStateSet(new osg::StateSet)
         , mMultiviewResolveStateSet(new osg::StateSet)
+        , mLuminanceCalculator(luminanceCalculator)
     {
         setUseDisplayList(false);
         setUseVertexBufferObjects(true);
@@ -26,8 +28,7 @@ namespace MWRender
 
         addPrimitiveSet(new osg::DrawArrays(osg::PrimitiveSet::TRIANGLES, 0, 3));
 
-        mLuminanceCalculator = LuminanceCalculator(shaderManager);
-        mLuminanceCalculator.disable();
+        mLuminanceCalculator->disable();
 
         Shader::ShaderManager::DefineMap defines;
         Stereo::shaderStereoDefines(defines);
@@ -142,7 +143,7 @@ namespace MWRender
                         .getTexture());
             }
 
-            mLuminanceCalculator.dirty(mTextureScene->getTextureWidth(), mTextureScene->getTextureHeight());
+            mLuminanceCalculator->dirty(mTextureScene->getTextureWidth(), mTextureScene->getTextureHeight());
 
             if (Stereo::getStereo())
                 mRenderViewport
@@ -158,11 +159,11 @@ namespace MWRender
                 { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT2_EXT },
                 { GL_COLOR_ATTACHMENT0_EXT, GL_COLOR_ATTACHMENT1_EXT } } };
 
-        (mAvgLum) ? mLuminanceCalculator.enable() : mLuminanceCalculator.disable();
+        (mAvgLum) ? mLuminanceCalculator->enable() : mLuminanceCalculator->disable();
 
         // A histogram based approach is superior way to calculate scene luminance. Using mipmaps is more broadly
         // supported, so that's what we use for now.
-        mLuminanceCalculator.draw(*this, renderInfo, state, ext, frameId);
+        mLuminanceCalculator->draw(*this, renderInfo, state, ext, frameId);
 
         auto buffer = buffers[0];
 
@@ -202,8 +203,8 @@ namespace MWRender
             node.mRootStateSet->setTextureAttribute(PostProcessor::Unit_Depth, mTextureDepth);
 
             if (mAvgLum)
-                node.mRootStateSet->setTextureAttribute(
-                    PostProcessor::TextureUnits::Unit_EyeAdaptation, mLuminanceCalculator.getLuminanceTexture(frameId));
+                node.mRootStateSet->setTextureAttribute(PostProcessor::TextureUnits::Unit_EyeAdaptation,
+                    mLuminanceCalculator->getLuminanceTexture(frameId));
 
             if (mTextureNormals)
                 node.mRootStateSet->setTextureAttribute(PostProcessor::TextureUnits::Unit_Normals, mTextureNormals);
@@ -258,8 +259,6 @@ namespace MWRender
                         texture->setTextureSize(w, h);
                         texture->setNumMipmapLevels(pass.mRenderTexture->getNumMipmapLevels());
                         texture->dirtyTextureObject();
-
-                        mDirtyAttachments = false;
                     }
 
                     pass.mRenderTarget->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
@@ -336,5 +335,8 @@ namespace MWRender
         {
             bindDestinationFbo();
         }
+
+        if (mDirtyAttachments)
+            mDirtyAttachments = false;
     }
 }

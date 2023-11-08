@@ -22,7 +22,8 @@ namespace MWRender
     class PingPongCanvas : public osg::Geometry
     {
     public:
-        PingPongCanvas(Shader::ShaderManager& shaderManager);
+        PingPongCanvas(
+            Shader::ShaderManager& shaderManager, const std::shared_ptr<LuminanceCalculator>& luminanceCalculator);
 
         void drawGeometry(osg::RenderInfo& renderInfo) const;
 
@@ -72,7 +73,7 @@ namespace MWRender
         mutable osg::ref_ptr<osg::FrameBufferObject> mMultiviewResolveFramebuffer;
         mutable osg::ref_ptr<osg::FrameBufferObject> mDestinationFBO;
         mutable std::array<osg::ref_ptr<osg::FrameBufferObject>, 3> mFbos;
-        mutable LuminanceCalculator mLuminanceCalculator;
+        mutable std::shared_ptr<LuminanceCalculator> mLuminanceCalculator;
     };
 }
 
