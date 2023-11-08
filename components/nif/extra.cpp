@@ -136,6 +136,11 @@ namespace Nif
         nif->readVector(mData, nif->get<uint32_t>());
     }
 
+    void BSCollisionQueryProxyExtraData::read(NIFStream* nif)
+    {
+        nif->readVector(mData, nif->get<uint32_t>());
+    }
+
     void BSConnectPoint::Point::read(NIFStream* nif)
     {
         mParent = nif->getSizedString();
