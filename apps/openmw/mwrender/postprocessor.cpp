@@ -118,9 +118,14 @@ namespace MWRender
         , mUsePostProcessing(Settings::postProcessing().mEnabled)
         , mSamples(Settings::video().mAntialiasing)
         , mPingPongCull(new PingPongCull(this))
-        , mCanvases({ new PingPongCanvas(mRendering.getResourceSystem()->getSceneManager()->getShaderManager()),
-              new PingPongCanvas(mRendering.getResourceSystem()->getSceneManager()->getShaderManager()) })
     {
+        auto& shaderManager = mRendering.getResourceSystem()->getSceneManager()->getShaderManager();
+
+        std::shared_ptr<LuminanceCalculator> luminanceCalculator = std::make_shared<LuminanceCalculator>(shaderManager);
+
+        for (auto& canvas : mCanvases)
+            canvas = new PingPongCanvas(shaderManager, luminanceCalculator);
+
         mHUDCamera->setReferenceFrame(osg::Camera::ABSOLUTE_RF);
         mHUDCamera->setRenderOrder(osg::Camera::POST_RENDER);
         mHUDCamera->setClearColor(osg::Vec4(0.45, 0.45, 0.14, 1.0));
@@ -139,8 +144,7 @@ namespace MWRender
         if (Settings::shaders().mSoftParticles || Settings::postProcessing().mTransparentPostpass)
         {
             mTransparentDepthPostPass
-                = new TransparentDepthBinCallback(mRendering.getResourceSystem()->getSceneManager()->getShaderManager(),
-                    Settings::postProcessing().mTransparentPostpass);
+                = new TransparentDepthBinCallback(shaderManager, Settings::postProcessing().mTransparentPostpass);
             osgUtil::RenderBin::getRenderBinPrototype("DepthSortedBin")->setDrawCallback(mTransparentDepthPostPass);
         }
 
@@ -617,8 +621,6 @@ namespace MWRender
                     subPass.mSize = renderTarget.mSize;
                     subPass.mRenderTexture = renderTarget.mTarget;
                     subPass.mMipMap = renderTarget.mMipMap;
-                    subPass.mStateSet->setAttributeAndModes(new osg::Viewport(
-                        0, 0, subPass.mRenderTexture->getTextureWidth(), subPass.mRenderTexture->getTextureHeight()));
 
                     subPass.mRenderTarget = new osg::FrameBufferObject;
                     subPass.mRenderTarget->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
