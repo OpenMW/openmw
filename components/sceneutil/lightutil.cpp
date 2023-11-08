@@ -124,7 +124,7 @@ namespace SceneUtil
         }
         light->setDiffuse(diffuse);
         light->setAmbient(ambient);
-        light->setSpecular(osg::Vec4f(0, 0, 0, 0));
+        light->setSpecular(diffuse); // ESM format doesn't provide specular
 
         lightSource->setLight(light);
 

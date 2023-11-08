@@ -95,7 +95,7 @@ void main()
 #endif
 
     if (matSpec != vec3(0.0))
-        gl_FragData[0].xyz += getSpecular(viewNormal, normalize(passViewPos.xyz), shininess, matSpec) * shadowing;
+        gl_FragData[0].xyz += matSpec * getSpecular(viewNormal, passViewPos, shininess, shadowing);
 
     gl_FragData[0] = applyFogAtDist(gl_FragData[0], euclideanDepth, linearDepth, far);
 
