@@ -20,11 +20,6 @@ namespace MWRender
 
         mResolveProgram = shaderManager.getProgram(vertex, std::move(resolveFragment));
         mLuminanceProgram = shaderManager.getProgram(vertex, std::move(luminanceFragment));
-    }
-
-    void LuminanceCalculator::compile()
-    {
-        int mipmapLevels = osg::Image::computeNumberOfMipmapLevels(mWidth, mHeight);
 
         for (auto& buffer : mBuffers)
         {
@@ -38,7 +33,6 @@ namespace MWRender
                 osg::Texture2D::MIN_FILTER, osg::Texture2D::LINEAR_MIPMAP_NEAREST);
             buffer.mipmappedSceneLuminanceTex->setFilter(osg::Texture2D::MAG_FILTER, osg::Texture2D::LINEAR);
             buffer.mipmappedSceneLuminanceTex->setTextureSize(mWidth, mHeight);
-            buffer.mipmappedSceneLuminanceTex->setNumMipmapLevels(mipmapLevels);
 
             buffer.luminanceTex = new osg::Texture2D;
             buffer.luminanceTex->setInternalFormat(GL_R16F);
@@ -62,14 +56,6 @@ namespace MWRender
             buffer.luminanceProxyFbo->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
                 osg::FrameBufferAttachment(buffer.luminanceProxyTex));
 
-            buffer.resolveSceneLumFbo = new osg::FrameBufferObject;
-            buffer.resolveSceneLumFbo->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
-                osg::FrameBufferAttachment(buffer.mipmappedSceneLuminanceTex, mipmapLevels - 1));
-
-            buffer.sceneLumFbo = new osg::FrameBufferObject;
-            buffer.sceneLumFbo->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
-                osg::FrameBufferAttachment(buffer.mipmappedSceneLuminanceTex));
-
             buffer.sceneLumSS = new osg::StateSet;
             buffer.sceneLumSS->setAttributeAndModes(mLuminanceProgram);
             buffer.sceneLumSS->addUniform(new osg::Uniform("sceneTex", 0));
@@ -84,6 +70,26 @@ namespace MWRender
 
         mBuffers[0].resolveSS->setTextureAttributeAndModes(1, mBuffers[1].luminanceTex);
         mBuffers[1].resolveSS->setTextureAttributeAndModes(1, mBuffers[0].luminanceTex);
+    }
+
+    void LuminanceCalculator::compile()
+    {
+        int mipmapLevels = osg::Image::computeNumberOfMipmapLevels(mWidth, mHeight);
+
+        for (auto& buffer : mBuffers)
+        {
+            buffer.mipmappedSceneLuminanceTex->setTextureSize(mWidth, mHeight);
+            buffer.mipmappedSceneLuminanceTex->setNumMipmapLevels(mipmapLevels);
+            buffer.mipmappedSceneLuminanceTex->dirtyTextureObject();
+
+            buffer.resolveSceneLumFbo = new osg::FrameBufferObject;
+            buffer.resolveSceneLumFbo->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
+                osg::FrameBufferAttachment(buffer.mipmappedSceneLuminanceTex, mipmapLevels - 1));
+
+            buffer.sceneLumFbo = new osg::FrameBufferObject;
+            buffer.sceneLumFbo->setAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0,
+                osg::FrameBufferAttachment(buffer.mipmappedSceneLuminanceTex));
+        }
 
         mCompiled = true;
     }
@@ -114,13 +120,14 @@ namespace MWRender
         buffer.luminanceProxyFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
         ext->glBlitFramebuffer(0, 0, 1, 1, 0, 0, 1, 1, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
-        if (dirty)
+        if (mIsBlank)
         {
             // Use current frame data for previous frame to warm up calculations and prevent popin
             mBuffers[(frameId + 1) % 2].resolveFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
             ext->glBlitFramebuffer(0, 0, 1, 1, 0, 0, 1, 1, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
             buffer.luminanceProxyFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+            mIsBlank = false;
         }
 
         buffer.resolveFbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
