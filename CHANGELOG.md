@@ -95,6 +95,7 @@
     Bug #7647: NPC walk cycle bugs after greeting player
     Bug #7654: Tooltips for enchantments with invalid effects cause crashes
     Bug #7660: Some inconsistencies regarding Invisibility breaking
+    Bug #7675: Successful lock spell doesn't produce a sound
     Feature #3537: Shader-based water ripples
     Feature #5492: Let rain and snow collide with statics
     Feature #6149: Dehardcode Lua API_REVISION
