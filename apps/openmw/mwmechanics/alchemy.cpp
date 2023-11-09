@@ -461,6 +461,24 @@ void MWMechanics::Alchemy::removeIngredient(int index)
     }
 }
 
+void MWMechanics::Alchemy::addApparatus(const MWWorld::Ptr& apparatus)
+{
+    int32_t slot = apparatus.get<ESM::Apparatus>()->mBase->mData.mType;
+
+    mTools[slot] = apparatus;
+
+    updateEffects();
+}
+
+void MWMechanics::Alchemy::removeApparatus(int index)
+{
+    if (index >= 0 && index < static_cast<int>(mTools.size()))
+    {
+        mTools[index] = MWWorld::Ptr();
+        updateEffects();
+    }
+}
+
 MWMechanics::Alchemy::TEffectsIterator MWMechanics::Alchemy::beginEffects() const
 {
     return mEffects.begin();

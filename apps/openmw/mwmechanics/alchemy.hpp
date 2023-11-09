@@ -119,8 +119,14 @@ namespace MWMechanics
         /// \return Slot index or -1, if adding failed because of no free slot or the ingredient type being
         /// listed already.
 
+        void addApparatus(const MWWorld::Ptr& apparatus);
+        ///< Add apparatus into the appropriate slot.
+
         void removeIngredient(int index);
         ///< Remove ingredient from slot (calling this function on an empty slot is a no-op).
+
+        void removeApparatus(int index);
+        ///< Remove apparatus from slot.
 
         std::string suggestPotionName();
         ///< Suggest a name for the potion, based on the current effects
