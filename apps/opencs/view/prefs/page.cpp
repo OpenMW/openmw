@@ -37,8 +37,4 @@ void CSVPrefs::Page::addSetting(CSMPrefs::Setting* setting)
     {
         mGrid->addWidget(widgets.second, next, 0, 1, 2);
     }
-    else
-    {
-        mGrid->addWidget(new QWidget(this), next, 0);
-    }
 }

@@ -75,8 +75,6 @@ namespace CSMPrefs
 
         ModifierSetting& declareModifier(const std::string& key, const QString& label, int modifier_);
 
-        void declareSeparator();
-
         void declareSubcategory(const QString& label);
 
         void setDefault(const std::string& key, const std::string& default_);

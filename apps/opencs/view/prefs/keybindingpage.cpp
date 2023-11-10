@@ -80,27 +80,16 @@ namespace CSVPrefs
             int next = mPageLayout->rowCount();
             mPageLayout->addWidget(widgets.second, next, 0, 1, 2);
         }
-        else
+        else if (!setting->getLabel().isEmpty())
         {
-            if (setting->getLabel().isEmpty())
-            {
-                // Insert empty space
-                assert(mPageLayout);
+            // Create new page
+            QWidget* pageWidget = new QWidget();
+            mPageLayout = new QGridLayout(pageWidget);
+            mPageLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
 
-                int next = mPageLayout->rowCount();
-                mPageLayout->addWidget(new QWidget(), next, 0);
-            }
-            else
-            {
-                // Create new page
-                QWidget* pageWidget = new QWidget();
-                mPageLayout = new QGridLayout(pageWidget);
-                mPageLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+            mStackedLayout->addWidget(pageWidget);
 
-                mStackedLayout->addWidget(pageWidget);
-
-                mPageSelector->addItem(setting->getLabel());
-            }
+            mPageSelector->addItem(setting->getLabel());
         }
     }
 
