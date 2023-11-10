@@ -86,7 +86,7 @@ declare -rA GROUPED_DEPS=(
     libswresample3
     libswscale5
     libtinyxml2.6.2v5
-    libyaml-cpp0.7
+    libyaml-cpp0.8
     python3-pip
     xvfb
   "
