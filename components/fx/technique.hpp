@@ -175,6 +175,9 @@ namespace fx
         void setLocked(bool locked) { mLocked = locked; }
         bool getLocked() const { return mLocked; }
 
+        void setInternal(bool internal) { mInternal = internal; }
+        bool getInternal() const { return mInternal; }
+
     private:
         [[noreturn]] void error(const std::string& msg);
 
@@ -295,6 +298,7 @@ namespace fx
 
         bool mDynamic = false;
         bool mLocked = false;
+        bool mInternal = false;
     };
 
     template <>

@@ -108,6 +108,8 @@ namespace Nif
     enum BSShaderFlags1
     {
         BSSFlag1_Specular = 0x00000001,
+        BSSFlag1_Refraction = 0x00008000,
+        BSSFlag1_FireRefraction = 0x00010000,
         BSSFlag1_Decal = 0x04000000,
         BSSFlag1_DepthTest = 0x80000000,
     };
@@ -148,6 +150,8 @@ namespace Nif
         bool decal() const { return mShaderFlags1 & BSSFlag1_Decal; }
         bool depthTest() const { return mShaderFlags1 & BSSFlag1_DepthTest; }
         bool depthWrite() const { return mShaderFlags2 & BSSFlag2_DepthWrite; }
+        bool refraction() const { return mShaderFlags1 & BSSFlag1_Refraction; }
+        bool fireRefraction() const { return mShaderFlags1 & BSSFlag1_FireRefraction; }
     };
 
     struct BSShaderLightingProperty : BSShaderProperty

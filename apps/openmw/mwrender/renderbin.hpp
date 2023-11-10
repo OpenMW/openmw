@@ -13,7 +13,8 @@ namespace MWRender
         RenderBin_DepthSorted = 10, // osg::StateSet::TRANSPARENT_BIN
         RenderBin_OcclusionQuery = 11,
         RenderBin_FirstPerson = 12,
-        RenderBin_SunGlare = 13
+        RenderBin_SunGlare = 13,
+        RenderBin_Distortion = 14,
     };
 
 }

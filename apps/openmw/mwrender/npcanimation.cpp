@@ -345,11 +345,9 @@ namespace MWRender
             bin->drawImplementation(renderInfo, previous);
 
             auto primaryFBO = postProcessor->getPrimaryFbo(frameId);
+            primaryFBO->apply(*state);
 
-            if (postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId))
-                postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId)->apply(*state);
-            else
-                primaryFBO->apply(*state);
+            postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId)->apply(*state);
 
             // depth accumulation pass
             osg::ref_ptr<osg::StateSet> restore = bin->getStateSet();
@@ -357,8 +355,7 @@ namespace MWRender
             bin->drawImplementation(renderInfo, previous);
             bin->setStateSet(restore);
 
-            if (postProcessor->getFbo(PostProcessor::FBO_OpaqueDepth, frameId))
-                primaryFBO->apply(*state);
+            primaryFBO->apply(*state);
 
             state->checkGLErrors("after DepthClearCallback::drawImplementation");
         }
