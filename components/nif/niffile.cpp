@@ -248,6 +248,8 @@ namespace Nif
             { "BSBehaviorGraphExtraData", &construct<BSBehaviorGraphExtraData, RC_BSBehaviorGraphExtraData> },
             { "BSBoneLODExtraData", &construct<BSBoneLODExtraData, RC_BSBoneLODExtraData> },
             { "BSClothExtraData", &construct<BSClothExtraData, RC_BSClothExtraData> },
+            { "BSCollisionQueryProxyExtraData",
+                &construct<BSCollisionQueryProxyExtraData, RC_BSCollisionQueryProxyExtraData> },
             { "BSConnectPoint::Children", &construct<BSConnectPoint::Children, RC_BSConnectPointChildren> },
             { "BSConnectPoint::Parents", &construct<BSConnectPoint::Parents, RC_BSConnectPointParents> },
             { "BSDecalPlacementVectorExtraData",

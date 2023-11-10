@@ -295,15 +295,15 @@ namespace Nif
     {
         BSShaderTextureSetPtr mTextureSet;
         osg::Vec3f mEmissive;
-        float mEmissiveMult;
+        float mEmissiveMult{ 1.f };
         std::string mRootMaterial;
-        uint32_t mClamp;
-        float mAlpha;
+        uint32_t mClamp{ 3 };
+        float mAlpha{ 1.f };
         float mRefractionStrength;
         float mGlossiness{ 80.f };
         float mSmoothness{ 1.f };
         osg::Vec3f mSpecular;
-        float mSpecStrength;
+        float mSpecStrength{ 1.f };
         std::array<float, 2> mLightingEffects;
         float mSubsurfaceRolloff;
         float mRimlightPower;
