@@ -125,3 +125,4 @@ add-apt-repository -y ppa:openmw/openmw
 add-apt-repository -y ppa:openmw/openmw-daily
 add-apt-repository -y ppa:openmw/staging
 apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends "${deps[@]}" >/dev/null
+apt list --installed
