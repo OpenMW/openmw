@@ -116,7 +116,7 @@ opencs_units (view/prefs
 
 opencs_units (model/prefs
     state setting intsetting doublesetting boolsetting enumsetting coloursetting shortcut
-    shortcuteventhandler shortcutmanager shortcutsetting modifiersetting stringsetting
+    shortcuteventhandler shortcutmanager shortcutsetting modifiersetting stringsetting subcategory
     )
 
 opencs_units (model/prefs

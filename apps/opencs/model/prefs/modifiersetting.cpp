@@ -26,7 +26,7 @@ namespace CSMPrefs
     {
     }
 
-    std::pair<QWidget*, QWidget*> ModifierSetting::makeWidgets(QWidget* parent)
+    SettingWidgets ModifierSetting::makeWidgets(QWidget* parent)
     {
         int modifier = 0;
         State::get().getShortcutManager().getModifier(getKey(), modifier);
@@ -46,7 +46,7 @@ namespace CSMPrefs
 
         connect(widget, &QPushButton::toggled, this, &ModifierSetting::buttonToggled);
 
-        return std::make_pair(label, widget);
+        return SettingWidgets{ .mLabel = label, .mInput = widget, .mLayout = nullptr };
     }
 
     void ModifierSetting::updateWidget()

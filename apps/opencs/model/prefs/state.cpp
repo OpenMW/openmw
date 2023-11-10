@@ -13,6 +13,7 @@
 #include <apps/opencs/model/prefs/enumsetting.hpp>
 #include <apps/opencs/model/prefs/setting.hpp>
 #include <apps/opencs/model/prefs/shortcutmanager.hpp>
+#include <apps/opencs/model/prefs/subcategory.hpp>
 
 #include <components/settings/categories.hpp>
 #include <components/settings/settings.hpp>
@@ -609,9 +610,7 @@ void CSMPrefs::State::declareSubcategory(const QString& label)
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
 
-    CSMPrefs::Setting* setting = new CSMPrefs::Setting(&mCurrentCategory->second, &mMutex, "", label);
-
-    mCurrentCategory->second.addSetting(setting);
+    mCurrentCategory->second.addSetting(new CSMPrefs::Subcategory(&mCurrentCategory->second, &mMutex, label));
 }
 
 void CSMPrefs::State::setDefault(const std::string& key, const std::string& default_)

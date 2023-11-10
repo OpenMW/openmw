@@ -56,7 +56,7 @@ CSMPrefs::DoubleSetting& CSMPrefs::DoubleSetting::setTooltip(const std::string& 
     return *this;
 }
 
-std::pair<QWidget*, QWidget*> CSMPrefs::DoubleSetting::makeWidgets(QWidget* parent)
+CSMPrefs::SettingWidgets CSMPrefs::DoubleSetting::makeWidgets(QWidget* parent)
 {
     QLabel* label = new QLabel(getLabel(), parent);
 
@@ -74,7 +74,7 @@ std::pair<QWidget*, QWidget*> CSMPrefs::DoubleSetting::makeWidgets(QWidget* pare
 
     connect(mWidget, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &DoubleSetting::valueChanged);
 
-    return std::make_pair(label, mWidget);
+    return SettingWidgets{ .mLabel = label, .mInput = mWidget, .mLayout = nullptr };
 }
 
 void CSMPrefs::DoubleSetting::updateWidget()

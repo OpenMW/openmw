@@ -27,7 +27,7 @@ CSMPrefs::ColourSetting& CSMPrefs::ColourSetting::setTooltip(const std::string& 
     return *this;
 }
 
-std::pair<QWidget*, QWidget*> CSMPrefs::ColourSetting::makeWidgets(QWidget* parent)
+CSMPrefs::SettingWidgets CSMPrefs::ColourSetting::makeWidgets(QWidget* parent)
 {
     QLabel* label = new QLabel(getLabel(), parent);
 
@@ -42,7 +42,7 @@ std::pair<QWidget*, QWidget*> CSMPrefs::ColourSetting::makeWidgets(QWidget* pare
 
     connect(mWidget, &CSVWidget::ColorEditor::pickingFinished, this, &ColourSetting::valueChanged);
 
-    return std::make_pair(label, mWidget);
+    return SettingWidgets{ .mLabel = label, .mInput = mWidget, .mLayout = nullptr };
 }
 
 void CSMPrefs::ColourSetting::updateWidget()

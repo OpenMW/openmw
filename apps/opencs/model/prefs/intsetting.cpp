@@ -49,7 +49,7 @@ CSMPrefs::IntSetting& CSMPrefs::IntSetting::setTooltip(const std::string& toolti
     return *this;
 }
 
-std::pair<QWidget*, QWidget*> CSMPrefs::IntSetting::makeWidgets(QWidget* parent)
+CSMPrefs::SettingWidgets CSMPrefs::IntSetting::makeWidgets(QWidget* parent)
 {
     QLabel* label = new QLabel(getLabel(), parent);
 
@@ -66,7 +66,7 @@ std::pair<QWidget*, QWidget*> CSMPrefs::IntSetting::makeWidgets(QWidget* parent)
 
     connect(mWidget, qOverload<int>(&QSpinBox::valueChanged), this, &IntSetting::valueChanged);
 
-    return std::make_pair(label, mWidget);
+    return SettingWidgets{ .mLabel = label, .mInput = mWidget, .mLayout = nullptr };
 }
 
 void CSMPrefs::IntSetting::updateWidget()

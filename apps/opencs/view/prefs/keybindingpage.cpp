@@ -7,6 +7,7 @@
 
 #include <QComboBox>
 #include <QGridLayout>
+#include <QLabel>
 #include <QPushButton>
 #include <QStackedLayout>
 #include <QVBoxLayout>
@@ -61,31 +62,31 @@ namespace CSVPrefs
 
     void KeyBindingPage::addSetting(CSMPrefs::Setting* setting)
     {
-        std::pair<QWidget*, QWidget*> widgets = setting->makeWidgets(this);
+        const CSMPrefs::SettingWidgets widgets = setting->makeWidgets(this);
 
-        if (widgets.first)
+        if (widgets.mLabel != nullptr && widgets.mInput != nullptr)
         {
             // Label, Option widgets
             assert(mPageLayout);
 
             int next = mPageLayout->rowCount();
-            mPageLayout->addWidget(widgets.first, next, 0);
-            mPageLayout->addWidget(widgets.second, next, 1);
+            mPageLayout->addWidget(widgets.mLabel, next, 0);
+            mPageLayout->addWidget(widgets.mInput, next, 1);
         }
-        else if (widgets.second)
+        else if (widgets.mInput != nullptr)
         {
             // Wide single widget
             assert(mPageLayout);
 
             int next = mPageLayout->rowCount();
-            mPageLayout->addWidget(widgets.second, next, 0, 1, 2);
+            mPageLayout->addWidget(widgets.mInput, next, 0, 1, 2);
         }
-        else if (!setting->getLabel().isEmpty())
+        else if (widgets.mLayout != nullptr)
         {
             // Create new page
             QWidget* pageWidget = new QWidget();
-            mPageLayout = new QGridLayout(pageWidget);
-            mPageLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+            mPageLayout = widgets.mLayout;
+            mPageLayout->setParent(pageWidget);
 
             mStackedLayout->addWidget(pageWidget);
 

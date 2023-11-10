@@ -30,7 +30,7 @@ namespace CSMPrefs
         }
     }
 
-    std::pair<QWidget*, QWidget*> ShortcutSetting::makeWidgets(QWidget* parent)
+    SettingWidgets ShortcutSetting::makeWidgets(QWidget* parent)
     {
         QKeySequence sequence;
         State::get().getShortcutManager().getSequence(getKey(), sequence);
@@ -50,7 +50,7 @@ namespace CSMPrefs
 
         connect(widget, &QPushButton::toggled, this, &ShortcutSetting::buttonToggled);
 
-        return std::make_pair(label, widget);
+        return SettingWidgets{ .mLabel = label, .mInput = widget, .mLayout = nullptr };
     }
 
     void ShortcutSetting::updateWidget()

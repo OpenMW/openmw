@@ -23,13 +23,6 @@ CSMPrefs::Setting::Setting(Category* parent, QMutex* mutex, const std::string& k
 {
 }
 
-std::pair<QWidget*, QWidget*> CSMPrefs::Setting::makeWidgets(QWidget* parent)
-{
-    return std::pair<QWidget*, QWidget*>(0, 0);
-}
-
-void CSMPrefs::Setting::updateWidget() {}
-
 const CSMPrefs::Category* CSMPrefs::Setting::getParent() const
 {
     return mParent;

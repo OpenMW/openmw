@@ -76,7 +76,7 @@ CSMPrefs::EnumSetting& CSMPrefs::EnumSetting::addValue(const std::string& value,
     return *this;
 }
 
-std::pair<QWidget*, QWidget*> CSMPrefs::EnumSetting::makeWidgets(QWidget* parent)
+CSMPrefs::SettingWidgets CSMPrefs::EnumSetting::makeWidgets(QWidget* parent)
 {
     QLabel* label = new QLabel(getLabel(), parent);
 
@@ -105,7 +105,7 @@ std::pair<QWidget*, QWidget*> CSMPrefs::EnumSetting::makeWidgets(QWidget* parent
 
     connect(mWidget, qOverload<int>(&QComboBox::currentIndexChanged), this, &EnumSetting::valueChanged);
 
-    return std::make_pair(label, mWidget);
+    return SettingWidgets{ .mLabel = label, .mInput = mWidget, .mLayout = nullptr };
 }
 
 void CSMPrefs::EnumSetting::updateWidget()
