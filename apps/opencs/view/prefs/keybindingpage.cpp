@@ -82,7 +82,7 @@ namespace CSVPrefs
         }
         else
         {
-            if (setting->getLabel().empty())
+            if (setting->getLabel().isEmpty())
             {
                 // Insert empty space
                 assert(mPageLayout);
@@ -99,7 +99,7 @@ namespace CSVPrefs
 
                 mStackedLayout->addWidget(pageWidget);
 
-                mPageSelector->addItem(QString::fromUtf8(setting->getLabel().c_str()));
+                mPageSelector->addItem(setting->getLabel());
             }
         }
     }

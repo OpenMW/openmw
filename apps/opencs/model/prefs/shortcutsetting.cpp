@@ -18,7 +18,7 @@
 
 namespace CSMPrefs
 {
-    ShortcutSetting::ShortcutSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label)
+    ShortcutSetting::ShortcutSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label)
         : Setting(parent, mutex, key, label)
         , mButton(nullptr)
         , mEditorActive(false)
@@ -37,7 +37,7 @@ namespace CSMPrefs
 
         QString text = QString::fromUtf8(State::get().getShortcutManager().convertToString(sequence).c_str());
 
-        QLabel* label = new QLabel(QString::fromUtf8(getLabel().c_str()), parent);
+        QLabel* label = new QLabel(getLabel(), parent);
         QPushButton* widget = new QPushButton(text, parent);
 
         widget->setCheckable(true);

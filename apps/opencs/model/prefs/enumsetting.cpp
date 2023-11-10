@@ -45,7 +45,7 @@ CSMPrefs::EnumValues& CSMPrefs::EnumValues::add(const std::string& value, const 
 }
 
 CSMPrefs::EnumSetting::EnumSetting(
-    Category* parent, QMutex* mutex, const std::string& key, const std::string& label, const EnumValue& default_)
+    Category* parent, QMutex* mutex, const std::string& key, const QString& label, const EnumValue& default_)
     : Setting(parent, mutex, key, label)
     , mDefault(default_)
     , mWidget(nullptr)
@@ -78,7 +78,7 @@ CSMPrefs::EnumSetting& CSMPrefs::EnumSetting::addValue(const std::string& value,
 
 std::pair<QWidget*, QWidget*> CSMPrefs::EnumSetting::makeWidgets(QWidget* parent)
 {
-    QLabel* label = new QLabel(QString::fromUtf8(getLabel().c_str()), parent);
+    QLabel* label = new QLabel(getLabel(), parent);
 
     mWidget = new QComboBox(parent);
 

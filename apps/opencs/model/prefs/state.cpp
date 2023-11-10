@@ -463,7 +463,7 @@ void CSMPrefs::State::declareCategory(const std::string& key)
     }
 }
 
-CSMPrefs::IntSetting& CSMPrefs::State::declareInt(const std::string& key, const std::string& label, int default_)
+CSMPrefs::IntSetting& CSMPrefs::State::declareInt(const std::string& key, const QString& label, int default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -479,8 +479,7 @@ CSMPrefs::IntSetting& CSMPrefs::State::declareInt(const std::string& key, const 
     return *setting;
 }
 
-CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble(
-    const std::string& key, const std::string& label, double default_)
+CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble(const std::string& key, const QString& label, double default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -499,7 +498,7 @@ CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble(
     return *setting;
 }
 
-CSMPrefs::BoolSetting& CSMPrefs::State::declareBool(const std::string& key, const std::string& label, bool default_)
+CSMPrefs::BoolSetting& CSMPrefs::State::declareBool(const std::string& key, const QString& label, bool default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -516,8 +515,7 @@ CSMPrefs::BoolSetting& CSMPrefs::State::declareBool(const std::string& key, cons
     return *setting;
 }
 
-CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum(
-    const std::string& key, const std::string& label, EnumValue default_)
+CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum(const std::string& key, const QString& label, EnumValue default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -534,8 +532,7 @@ CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum(
     return *setting;
 }
 
-CSMPrefs::ColourSetting& CSMPrefs::State::declareColour(
-    const std::string& key, const std::string& label, QColor default_)
+CSMPrefs::ColourSetting& CSMPrefs::State::declareColour(const std::string& key, const QString& label, QColor default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -554,7 +551,7 @@ CSMPrefs::ColourSetting& CSMPrefs::State::declareColour(
 }
 
 CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut(
-    const std::string& key, const std::string& label, const QKeySequence& default_)
+    const std::string& key, const QString& label, const QKeySequence& default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -576,7 +573,7 @@ CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut(
 }
 
 CSMPrefs::StringSetting& CSMPrefs::State::declareString(
-    const std::string& key, const std::string& label, std::string default_)
+    const std::string& key, const QString& label, std::string default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -593,8 +590,7 @@ CSMPrefs::StringSetting& CSMPrefs::State::declareString(
     return *setting;
 }
 
-CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(
-    const std::string& key, const std::string& label, int default_)
+CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(const std::string& key, const QString& label, int default_)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
@@ -625,7 +621,7 @@ void CSMPrefs::State::declareSeparator()
     mCurrentCategory->second.addSetting(setting);
 }
 
-void CSMPrefs::State::declareSubcategory(const std::string& label)
+void CSMPrefs::State::declareSubcategory(const QString& label)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");

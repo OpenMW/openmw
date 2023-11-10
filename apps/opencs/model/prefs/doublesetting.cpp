@@ -15,7 +15,7 @@
 #include "state.hpp"
 
 CSMPrefs::DoubleSetting::DoubleSetting(
-    Category* parent, QMutex* mutex, const std::string& key, const std::string& label, double default_)
+    Category* parent, QMutex* mutex, const std::string& key, const QString& label, double default_)
     : Setting(parent, mutex, key, label)
     , mPrecision(2)
     , mMin(0)
@@ -58,7 +58,7 @@ CSMPrefs::DoubleSetting& CSMPrefs::DoubleSetting::setTooltip(const std::string& 
 
 std::pair<QWidget*, QWidget*> CSMPrefs::DoubleSetting::makeWidgets(QWidget* parent)
 {
-    QLabel* label = new QLabel(QString::fromUtf8(getLabel().c_str()), parent);
+    QLabel* label = new QLabel(getLabel(), parent);
 
     mWidget = new QDoubleSpinBox(parent);
     mWidget->setDecimals(mPrecision);

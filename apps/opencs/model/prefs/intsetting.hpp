@@ -23,7 +23,7 @@ namespace CSMPrefs
         QSpinBox* mWidget;
 
     public:
-        IntSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label, int default_);
+        IntSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label, int default_);
 
         // defaults to [0, std::numeric_limits<int>::max()]
         IntSetting& setRange(int min, int max);

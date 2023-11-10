@@ -44,8 +44,8 @@ namespace CSMPrefs
         QComboBox* mWidget;
 
     public:
-        EnumSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label,
-            const EnumValue& default_);
+        EnumSetting(
+            Category* parent, QMutex* mutex, const std::string& key, const QString& label, const EnumValue& default_);
 
         EnumSetting& setTooltip(const std::string& tooltip);
 

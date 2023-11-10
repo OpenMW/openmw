@@ -15,7 +15,7 @@
 #include "state.hpp"
 
 CSMPrefs::IntSetting::IntSetting(
-    Category* parent, QMutex* mutex, const std::string& key, const std::string& label, int default_)
+    Category* parent, QMutex* mutex, const std::string& key, const QString& label, int default_)
     : Setting(parent, mutex, key, label)
     , mMin(0)
     , mMax(std::numeric_limits<int>::max())
@@ -51,7 +51,7 @@ CSMPrefs::IntSetting& CSMPrefs::IntSetting::setTooltip(const std::string& toolti
 
 std::pair<QWidget*, QWidget*> CSMPrefs::IntSetting::makeWidgets(QWidget* parent)
 {
-    QLabel* label = new QLabel(QString::fromUtf8(getLabel().c_str()), parent);
+    QLabel* label = new QLabel(getLabel(), parent);
 
     mWidget = new QSpinBox(parent);
     mWidget->setRange(mMin, mMax);

@@ -23,8 +23,8 @@ namespace CSMPrefs
         QLineEdit* mWidget;
 
     public:
-        StringSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label,
-            std::string_view default_);
+        StringSetting(
+            Category* parent, QMutex* mutex, const std::string& key, const QString& label, std::string_view default_);
 
         StringSetting& setTooltip(const std::string& tooltip);
 

@@ -22,7 +22,7 @@ namespace CSMPrefs
         Q_OBJECT
 
     public:
-        ShortcutSetting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label);
+        ShortcutSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label);
 
         std::pair<QWidget*, QWidget*> makeWidgets(QWidget* parent) override;
 

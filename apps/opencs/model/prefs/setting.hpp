@@ -21,13 +21,13 @@ namespace CSMPrefs
         Category* mParent;
         QMutex* mMutex;
         std::string mKey;
-        std::string mLabel;
+        QString mLabel;
 
     protected:
         QMutex* getMutex();
 
     public:
-        Setting(Category* parent, QMutex* mutex, const std::string& key, const std::string& label);
+        Setting(Category* parent, QMutex* mutex, const std::string& key, const QString& label);
 
         ~Setting() override = default;
 
@@ -46,7 +46,7 @@ namespace CSMPrefs
 
         const std::string& getKey() const;
 
-        const std::string& getLabel() const;
+        const QString& getLabel() const { return mLabel; }
 
         int toInt() const;
 
