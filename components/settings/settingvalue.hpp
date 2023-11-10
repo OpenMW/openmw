@@ -335,6 +335,15 @@ namespace Settings
         {
         }
 
+        explicit SettingValue(Index& index, std::string_view category, std::string_view name, T&& defaultValue,
+            std::unique_ptr<const Sanitizer<T>>&& sanitizer = nullptr)
+            : BaseSettingValue(getSettingValueType<T>(), category, name, index)
+            , mSanitizer(std::move(sanitizer))
+            , mDefaultValue(defaultValue)
+            , mValue(defaultValue)
+        {
+        }
+
         SettingValue(SettingValue&& other)
             : BaseSettingValue(std::move(other))
             , mSanitizer(std::move(other.mSanitizer))

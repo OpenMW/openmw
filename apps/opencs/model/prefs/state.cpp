@@ -25,6 +25,7 @@
 #include "modifiersetting.hpp"
 #include "shortcutsetting.hpp"
 #include "stringsetting.hpp"
+#include "values.hpp"
 
 CSMPrefs::State* CSMPrefs::State::sThis = nullptr;
 
@@ -628,13 +629,18 @@ CSMPrefs::State::State(const Files::ConfigurationManager& configurationManager)
     , mDefaultConfigFile("defaults-cs.bin")
     , mConfigurationManager(configurationManager)
     , mCurrentCategory(mCategories.end())
+    , mIndex(std::make_unique<Settings::Index>())
 {
     if (sThis)
         throw std::logic_error("An instance of CSMPRefs::State already exists");
 
     sThis = this;
 
+    Values values(*mIndex);
+
     declare();
+
+    mValues = std::make_unique<Values>(std::move(values));
 }
 
 CSMPrefs::State::~State()

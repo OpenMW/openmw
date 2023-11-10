@@ -17,6 +17,11 @@
 
 class QColor;
 
+namespace Settings
+{
+    class Index;
+}
+
 namespace CSMPrefs
 {
     class IntSetting;
@@ -27,6 +32,7 @@ namespace CSMPrefs
     class ModifierSetting;
     class Setting;
     class StringSetting;
+    struct Values;
 
     /// \brief User settings state
     ///
@@ -50,6 +56,8 @@ namespace CSMPrefs
         Collection mCategories;
         Iterator mCurrentCategory;
         QMutex mMutex;
+        std::unique_ptr<Settings::Index> mIndex;
+        std::unique_ptr<Values> mValues;
 
         void declare();
 
