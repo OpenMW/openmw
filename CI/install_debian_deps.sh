@@ -86,7 +86,7 @@ declare -rA GROUPED_DEPS=(
     libswresample3
     libswscale5
     libtinyxml2.6.2v5
-    libyaml-cpp0.7
+    libyaml-cpp0.8
     python3-pip
     xvfb
   "
@@ -125,3 +125,4 @@ add-apt-repository -y ppa:openmw/openmw
 add-apt-repository -y ppa:openmw/openmw-daily
 add-apt-repository -y ppa:openmw/staging
 apt-get -qq -o dir::cache::archives="$APT_CACHE_DIR" install -y --no-install-recommends "${deps[@]}" >/dev/null
+apt list --installed
