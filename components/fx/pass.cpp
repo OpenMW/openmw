@@ -12,7 +12,6 @@
 #include <osg/StateSet>
 
 #include <components/resource/scenemanager.hpp>
-#include <components/sceneutil/clearcolor.hpp>
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/settings/values.hpp>
 #include <components/stereo/multiview.hpp>
@@ -326,9 +325,6 @@ float omw_EstimateFogCoverageFromUV(vec2 uv)
 
         if (mBlendEq)
             stateSet->setAttributeAndModes(new osg::BlendEquation(mBlendEq.value()));
-
-        if (mClearColor)
-            stateSet->setAttributeAndModes(new SceneUtil::ClearColor(mClearColor.value(), GL_COLOR_BUFFER_BIT));
     }
 
     void Pass::dirty()

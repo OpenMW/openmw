@@ -541,6 +541,8 @@ namespace MWRender
         mNormals = false;
         mPassLights = false;
 
+        std::vector<fx::Types::RenderTarget> attachmentsToDirty;
+
         for (const auto& technique : mTechniques)
         {
             if (!technique->isValid())
@@ -617,7 +619,7 @@ namespace MWRender
 
                 if (!pass->getTarget().empty())
                 {
-                    const auto& renderTarget = technique->getRenderTargetsMap()[pass->getTarget()];
+                    auto& renderTarget = technique->getRenderTargetsMap()[pass->getTarget()];
                     subPass.mSize = renderTarget.mSize;
                     subPass.mRenderTexture = renderTarget.mTarget;
                     subPass.mMipMap = renderTarget.mMipMap;
@@ -628,13 +630,27 @@ namespace MWRender
 
                     const auto [w, h] = renderTarget.mSize.get(renderWidth(), renderHeight());
                     subPass.mStateSet->setAttributeAndModes(new osg::Viewport(0, 0, w, h));
+
+                    if (std::find_if(attachmentsToDirty.cbegin(), attachmentsToDirty.cend(),
+                            [renderTarget](const auto& rt) { return renderTarget.mTarget == rt.mTarget; })
+                        == attachmentsToDirty.cend())
+                    {
+                        attachmentsToDirty.push_back(fx::Types::RenderTarget(renderTarget));
+                    }
                 }
 
                 for (const auto& name : pass->getRenderTargets())
                 {
-                    subPass.mStateSet->setTextureAttribute(subTexUnit, technique->getRenderTargetsMap()[name].mTarget);
+                    auto& renderTarget = technique->getRenderTargetsMap()[name];
+                    subPass.mStateSet->setTextureAttribute(subTexUnit, renderTarget.mTarget);
                     subPass.mStateSet->addUniform(new osg::Uniform(name.c_str(), subTexUnit));
 
+                    if (std::find_if(attachmentsToDirty.cbegin(), attachmentsToDirty.cend(),
+                            [renderTarget](const auto& rt) { return renderTarget.mTarget == rt.mTarget; })
+                        == attachmentsToDirty.cend())
+                    {
+                        attachmentsToDirty.push_back(fx::Types::RenderTarget(renderTarget));
+                    }
                     subTexUnit++;
                 }
 
@@ -654,7 +670,7 @@ namespace MWRender
         mRendering.getSkyManager()->setSunglare(sunglare);
 
         if (dirtyAttachments)
-            mCanvases[frameId]->resizeRenderTargets();
+            mCanvases[frameId]->setDirtyAttachments(attachmentsToDirty);
     }
 
     PostProcessor::Status PostProcessor::enableTechnique(
@@ -668,7 +684,7 @@ namespace MWRender
         int pos = std::min<int>(location.value_or(mTechniques.size()), mTechniques.size());
 
         mTechniques.insert(mTechniques.begin() + pos, technique);
-        dirtyTechniques();
+        dirtyTechniques(Settings::ShaderManager::get().getMode() == Settings::ShaderManager::Mode::Debug);
 
         return Status_Toggled;
     }
