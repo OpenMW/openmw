@@ -151,17 +151,26 @@ return function(registerRenderer)
             if not argument.l10n then
                 error('"select" renderer requires a "l10n" argument')
             end
+            if not pcall(function()
+                    local _ = ipairs(argument.items)
+                    assert(#argument.items > 0)
+                end)
+            then
+                error('"select" renderer requires an "items" array as an argument')
+            end
             local l10n = core.l10n(argument.l10n)
             local index = nil
-            local itemCount = 0
+            local itemCount = #argument.items
             for i, item in ipairs(argument.items) do
-                itemCount = itemCount + 1
                 if item == value then
                     index = i
                 end
             end
-            if not index then return {} end
-            local label = l10n(value)
+            local label = l10n(tostring(value))
+            local labelColor = nil
+            if index == nil then
+                labelColor = util.color.rgb(1, 0, 0)
+            end
             local body = {
                 type = ui.TYPE.Flex,
                 props = {
@@ -177,6 +186,10 @@ return function(registerRenderer)
                         },
                         events = {
                             mouseClick = async:callback(function()
+                                if not index then
+                                    set(argument.items[#argument.items])
+                                    return
+                                end
                                 index = (index - 2) % itemCount + 1
                                 set(argument.items[index])
                             end),
@@ -187,6 +200,7 @@ return function(registerRenderer)
                         template = I.MWUI.templates.textNormal,
                         props = {
                             text = label,
+                            textColor = labelColor,
                         },
                         external = {
                             grow = 1,
@@ -201,6 +215,10 @@ return function(registerRenderer)
                         },
                         events = {
                             mouseClick = async:callback(function()
+                                if not index then
+                                    set(argument.items[1])
+                                    return
+                                end
                                 index = (index) % itemCount + 1
                                 set(argument.items[index])
                             end),
@@ -246,7 +264,9 @@ return function(registerRenderer)
                     focusLoss = async:callback(function()
                         if not lastInput then return end
                         if not pcall(function() set(util.color.hex(lastInput)) end)
-                        then set(value) end
+                        then
+                            set(value)
+                        end
                     end),
                 },
             }
