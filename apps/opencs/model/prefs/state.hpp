@@ -51,11 +51,6 @@ namespace CSMPrefs
         Iterator mCurrentCategory;
         QMutex mMutex;
 
-        // not implemented
-        State(const State&);
-        State& operator=(const State&);
-
-    private:
         void declare();
 
         void declareCategory(const std::string& key);
@@ -82,7 +77,11 @@ namespace CSMPrefs
     public:
         State(const Files::ConfigurationManager& configurationManager);
 
+        State(const State&) = delete;
+
         ~State();
+
+        State& operator=(const State&) = delete;
 
         void save();
 
