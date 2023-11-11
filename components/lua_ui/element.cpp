@@ -79,6 +79,14 @@ namespace LuaUi
             destroyWidget(ext);
         }
 
+        void updateRootCoord(LuaUi::WidgetExtension* ext)
+        {
+            LuaUi::WidgetExtension* root = ext;
+            while (root->getParent())
+                root = root->getParent();
+            root->updateCoord();
+        }
+
         WidgetExtension* createWidget(const sol::table& layout, uint64_t depth);
         void updateWidget(WidgetExtension* ext, const sol::table& layout, uint64_t depth);
 
@@ -246,6 +254,7 @@ namespace LuaUi
             mRoot = createWidget(layout(), 0);
             mLayer = setLayer(mRoot, layout());
             updateAttachment();
+            updateRootCoord(mRoot);
         }
     }
 
@@ -264,6 +273,7 @@ namespace LuaUi
             }
             mLayer = setLayer(mRoot, layout());
             updateAttachment();
+            updateRootCoord(mRoot);
         }
         mUpdate = false;
     }

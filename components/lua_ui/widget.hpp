@@ -34,6 +34,7 @@ namespace LuaUi
         WidgetExtension* slot() const { return mSlot; }
 
         bool isRoot() const { return mElementRoot; }
+        WidgetExtension* getParent() const { return mParent; }
 
         void reset();
 
