@@ -22,7 +22,7 @@ namespace LuaUi
             : mTable(std::move(table))
         {
             if (!isValidContent(mTable))
-                throw std::domain_error("Expected a Content table");
+                throw std::domain_error("Invalid UI Content");
         }
 
         size_t size() const { return mTable.size(); }
