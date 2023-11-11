@@ -12,18 +12,18 @@ namespace CSMPrefs
 {
     class Category;
 
-    class IntSetting : public Setting
+    class IntSetting final : public TypedSetting<int>
     {
         Q_OBJECT
 
         int mMin;
         int mMax;
         std::string mTooltip;
-        int mDefault;
         QSpinBox* mWidget;
 
     public:
-        IntSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label, int default_);
+        explicit IntSetting(
+            Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index);
 
         // defaults to [0, std::numeric_limits<int>::max()]
         IntSetting& setRange(int min, int max);

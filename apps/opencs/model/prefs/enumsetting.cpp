@@ -45,9 +45,8 @@ CSMPrefs::EnumValues& CSMPrefs::EnumValues::add(const std::string& value, const 
 }
 
 CSMPrefs::EnumSetting::EnumSetting(
-    Category* parent, QMutex* mutex, const std::string& key, const QString& label, const EnumValue& default_)
-    : Setting(parent, mutex, key, label)
-    , mDefault(default_)
+    Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index)
+    : TypedSetting(parent, mutex, key, label, index)
     , mWidget(nullptr)
 {
 }
@@ -83,16 +82,18 @@ CSMPrefs::SettingWidgets CSMPrefs::EnumSetting::makeWidgets(QWidget* parent)
     mWidget = new QComboBox(parent);
 
     size_t index = 0;
+    const std::string value = getValue();
 
     for (size_t i = 0; i < mValues.mValues.size(); ++i)
     {
-        if (mDefault.mValue == mValues.mValues[i].mValue)
+        if (value == mValues.mValues[i].mValue)
             index = i;
 
         mWidget->addItem(QString::fromUtf8(mValues.mValues[i].mValue.c_str()));
 
         if (!mValues.mValues[i].mTooltip.empty())
-            mWidget->setItemData(i, QString::fromUtf8(mValues.mValues[i].mTooltip.c_str()), Qt::ToolTipRole);
+            mWidget->setItemData(
+                static_cast<int>(i), QString::fromUtf8(mValues.mValues[i].mTooltip.c_str()), Qt::ToolTipRole);
     }
 
     mWidget->setCurrentIndex(static_cast<int>(index));
@@ -111,20 +112,11 @@ CSMPrefs::SettingWidgets CSMPrefs::EnumSetting::makeWidgets(QWidget* parent)
 void CSMPrefs::EnumSetting::updateWidget()
 {
     if (mWidget)
-    {
-        int index
-            = mWidget->findText(QString::fromStdString(Settings::Manager::getString(getKey(), getParent()->getKey())));
-
-        mWidget->setCurrentIndex(index);
-    }
+        mWidget->setCurrentIndex(mWidget->findText(QString::fromStdString(getValue())));
 }
 
 void CSMPrefs::EnumSetting::valueChanged(int value)
 {
-    {
-        QMutexLocker lock(getMutex());
-        Settings::Manager::setString(getKey(), getParent()->getKey(), mValues.mValues.at(value).mValue);
-    }
-
+    setValue(mValues.mValues.at(value).mValue);
     getParent()->getState()->update(*this);
 }

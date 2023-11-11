@@ -5,6 +5,7 @@
 
 #include "setting.hpp"
 #include "state.hpp"
+#include "subcategory.hpp"
 
 CSMPrefs::Category::Category(State* parent, const std::string& key)
     : mParent(parent)
@@ -27,6 +28,11 @@ void CSMPrefs::Category::addSetting(Setting* setting)
     if (!mIndex.emplace(setting->getKey(), setting).second)
         throw std::logic_error("Category " + mKey + " already has setting: " + setting->getKey());
 
+    mSettings.push_back(setting);
+}
+
+void CSMPrefs::Category::addSubcategory(Subcategory* setting)
+{
     mSettings.push_back(setting);
 }
 

@@ -17,12 +17,14 @@ class QWidget;
 namespace CSMPrefs
 {
     class Category;
-    class ShortcutSetting : public Setting
+
+    class ShortcutSetting final : public TypedSetting<std::string>
     {
         Q_OBJECT
 
     public:
-        ShortcutSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label);
+        explicit ShortcutSetting(
+            Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index);
 
         SettingWidgets makeWidgets(QWidget* parent) override;
 

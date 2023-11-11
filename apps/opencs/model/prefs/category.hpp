@@ -10,6 +10,7 @@ namespace CSMPrefs
 {
     class State;
     class Setting;
+    class Subcategory;
 
     class Category
     {
@@ -31,6 +32,8 @@ namespace CSMPrefs
         State* getState() const;
 
         void addSetting(Setting* setting);
+
+        void addSubcategory(Subcategory* setting);
 
         Iterator begin();
 

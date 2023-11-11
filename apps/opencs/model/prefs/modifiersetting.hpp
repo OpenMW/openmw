@@ -15,12 +15,14 @@ class QPushButton;
 namespace CSMPrefs
 {
     class Category;
-    class ModifierSetting : public Setting
+
+    class ModifierSetting final : public TypedSetting<std::string>
     {
         Q_OBJECT
 
     public:
-        ModifierSetting(Category* parent, QMutex* mutex, const std::string& key, const QString& label);
+        explicit ModifierSetting(
+            Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index);
 
         SettingWidgets makeWidgets(QWidget* parent) override;
 
