@@ -53,6 +53,8 @@ namespace LuaUi
         {
             if (!ext->isRoot())
                 destroyWidget(ext);
+            else
+                ext->widget()->detachFromWidget();
         }
 
         void detachElements(LuaUi::WidgetExtension* ext)
@@ -235,7 +237,6 @@ namespace LuaUi
 
     Element::Element(sol::table layout)
         : mRoot(nullptr)
-        , mAttachedTo(nullptr)
         , mLayout(std::move(layout))
         , mLayer()
         , mUpdate(false)
@@ -257,7 +258,6 @@ namespace LuaUi
         {
             mRoot = createWidget(layout(), 0);
             mLayer = setLayer(mRoot, layout());
-            updateAttachment();
             updateRootCoord(mRoot);
         }
     }
@@ -281,7 +281,6 @@ namespace LuaUi
                 updateWidget(mRoot, layout(), 0);
             }
             mLayer = setLayer(mRoot, layout());
-            updateAttachment();
             updateRootCoord(mRoot);
         }
         mUpdate = false;
@@ -296,35 +295,5 @@ namespace LuaUi
             mLayout = sol::make_object(mLayout.lua_state(), sol::nil);
         }
         sAllElements.erase(this);
-    }
-
-    void Element::attachToWidget(WidgetExtension* w)
-    {
-        if (mAttachedTo)
-            throw std::logic_error("A UI element can't be attached to two widgets at once");
-        mAttachedTo = w;
-        updateAttachment();
-    }
-
-    void Element::detachFromWidget()
-    {
-        if (mRoot)
-            mRoot->widget()->detachFromWidget();
-        if (mAttachedTo)
-            mAttachedTo->setChildren({});
-        mAttachedTo = nullptr;
-    }
-
-    void Element::updateAttachment()
-    {
-        if (!mRoot)
-            return;
-        if (mAttachedTo)
-        {
-            if (!mLayer.empty())
-                Log(Debug::Warning) << "Ignoring element's layer " << mLayer << " because it's attached to a widget";
-            mAttachedTo->setChildren({ mRoot });
-            mAttachedTo->updateCoord();
-        }
     }
 }

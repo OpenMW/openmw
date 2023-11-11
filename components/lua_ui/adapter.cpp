@@ -44,14 +44,20 @@ namespace LuaUi
 
     void LuaAdapter::attachElement()
     {
-        if (mElement.get())
-            mElement->attachToWidget(mContainer);
+        if (!mElement.get())
+            return;
+        if (!mElement->mRoot)
+            throw std::logic_error("Attempting to use a destroyed UI Element");
+        mContainer->setChildren({ mElement->mRoot });
+        mElement->mRoot->updateCoord();
+        mContainer->updateCoord();
     }
 
     void LuaAdapter::detachElement()
     {
-        if (mElement.get())
-            mElement->detachFromWidget();
+        mContainer->setChildren({});
+        if (mElement && mElement->mRoot)
+            mElement->mRoot->widget()->detachFromWidget();
         mElement = nullptr;
     }
 }

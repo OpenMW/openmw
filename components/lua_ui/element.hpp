@@ -17,7 +17,6 @@ namespace LuaUi
         }
 
         WidgetExtension* mRoot;
-        WidgetExtension* mAttachedTo;
         sol::object mLayout;
         std::string mLayer;
         bool mUpdate;
@@ -31,14 +30,10 @@ namespace LuaUi
 
         friend void clearUserInterface();
 
-        void attachToWidget(WidgetExtension* w);
-        void detachFromWidget();
-
     private:
         Element(sol::table layout);
         sol::table layout() { return LuaUtil::cast<sol::table>(mLayout); }
         static std::map<Element*, std::shared_ptr<Element>> sAllElements;
-        void updateAttachment();
     };
 }
 
