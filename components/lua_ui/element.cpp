@@ -113,6 +113,8 @@ namespace LuaUi
                     std::shared_ptr<Element> element = child.as<std::shared_ptr<Element>>();
                     if (ext != element->mRoot)
                         destroyChild(ext);
+                    if (!element->mRoot)
+                        throw std::logic_error("Using a destroyed element as a layout child");
                     result[i] = element->mRoot;
                     element->mRoot->updateCoord();
                 }
@@ -139,6 +141,8 @@ namespace LuaUi
                 if (child.is<Element>())
                 {
                     std::shared_ptr<Element> element = child.as<std::shared_ptr<Element>>();
+                    if (!element->mRoot)
+                        throw std::logic_error("Using a destroyed element as a layout child");
                     result[i] = element->mRoot;
                     element->mRoot->updateCoord();
                 }
