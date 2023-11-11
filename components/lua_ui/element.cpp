@@ -88,6 +88,23 @@ namespace LuaUi
                 root = root->getParent();
             root->updateCoord();
         }
+        WidgetExtension* pluckElementRoot(const sol::object& child)
+        {
+            std::shared_ptr<Element> element = child.as<std::shared_ptr<Element>>();
+            WidgetExtension* root = element->mRoot;
+            if (!root)
+                throw std::logic_error("Using a destroyed element as a layout child");
+            WidgetExtension* parent = root->getParent();
+            if (parent)
+            {
+                auto children = parent->children();
+                std::remove(children.begin(), children.end(), root);
+                parent->setChildren(children);
+                root->widget()->detachFromWidget();
+            }
+            root->updateCoord();
+            return root;
+        }
 
         WidgetExtension* createWidget(const sol::table& layout, uint64_t depth);
         void updateWidget(WidgetExtension* ext, const sol::table& layout, uint64_t depth);
@@ -112,13 +129,10 @@ namespace LuaUi
                 sol::object child = content.at(i);
                 if (child.is<Element>())
                 {
-                    std::shared_ptr<Element> element = child.as<std::shared_ptr<Element>>();
-                    if (ext != element->mRoot)
+                    WidgetExtension* root = pluckElementRoot(child);
+                    if (ext != root)
                         destroyChild(ext);
-                    if (!element->mRoot)
-                        throw std::logic_error("Using a destroyed element as a layout child");
-                    result[i] = element->mRoot;
-                    element->mRoot->updateCoord();
+                    result[i] = root;
                 }
                 else
                 {
@@ -141,15 +155,8 @@ namespace LuaUi
             {
                 sol::object child = content.at(i);
                 if (child.is<Element>())
-                {
-                    std::shared_ptr<Element> element = child.as<std::shared_ptr<Element>>();
-                    if (!element->mRoot)
-                        throw std::logic_error("Using a destroyed element as a layout child");
-                    result[i] = element->mRoot;
-                    element->mRoot->updateCoord();
-                }
+                    result[i] = pluckElementRoot(child);
                 else
-                {
                     result[i] = createWidget(child.as<sol::table>(), depth);
                 }
             }
@@ -275,6 +282,7 @@ namespace LuaUi
                 mRoot = createWidget(layout(), 0);
                 *it = mRoot;
                 parent->setChildren(children);
+                mRoot->updateCoord();
             }
             else
             {
