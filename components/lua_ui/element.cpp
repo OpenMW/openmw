@@ -43,13 +43,13 @@ namespace LuaUi
             return type;
         }
 
-        void destroyWidget(LuaUi::WidgetExtension* ext)
+        void destroyWidget(WidgetExtension* ext)
         {
             ext->deinitialize();
             MyGUI::Gui::getInstancePtr()->destroyWidget(ext->widget());
         }
 
-        void destroyChild(LuaUi::WidgetExtension* ext)
+        void destroyChild(WidgetExtension* ext)
         {
             if (!ext->isRoot())
                 destroyWidget(ext);
@@ -57,7 +57,7 @@ namespace LuaUi
                 ext->widget()->detachFromWidget();
         }
 
-        void detachElements(LuaUi::WidgetExtension* ext)
+        void detachElements(WidgetExtension* ext)
         {
             for (auto* child : ext->children())
             {
@@ -75,19 +75,20 @@ namespace LuaUi
             }
         }
 
-        void destroyRoot(LuaUi::WidgetExtension* ext)
+        void destroyRoot(WidgetExtension* ext)
         {
             detachElements(ext);
             destroyWidget(ext);
         }
 
-        void updateRootCoord(LuaUi::WidgetExtension* ext)
+        void updateRootCoord(WidgetExtension* ext)
         {
-            LuaUi::WidgetExtension* root = ext;
+            WidgetExtension* root = ext;
             while (root->getParent())
                 root = root->getParent();
             root->updateCoord();
         }
+
         WidgetExtension* pluckElementRoot(const sol::object& child)
         {
             std::shared_ptr<Element> element = child.as<std::shared_ptr<Element>>();
@@ -158,7 +159,6 @@ namespace LuaUi
                     result[i] = pluckElementRoot(child);
                 else
                     result[i] = createWidget(child.as<sol::table>(), depth);
-                }
             }
             return result;
         }
@@ -172,7 +172,7 @@ namespace LuaUi
             ext->setTemplateChildren(updateContent(ext->templateChildren(), content, depth));
         }
 
-        void setEventCallbacks(LuaUi::WidgetExtension* ext, const sol::object& eventsObj)
+        void setEventCallbacks(WidgetExtension* ext, const sol::object& eventsObj)
         {
             ext->clearCallbacks();
             if (eventsObj == sol::nil)
