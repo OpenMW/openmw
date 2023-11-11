@@ -95,6 +95,13 @@ namespace MWLua
         MWBase::WindowManager* windowManager = MWBase::Environment::get().getWindowManager();
 
         auto element = context.mLua->sol().new_usertype<LuaUi::Element>("Element");
+        element[sol::meta_function::to_string] = [](const LuaUi::Element& element) {
+            std::stringstream res;
+            res << "UiElement";
+            if (element.mLayer != "")
+                res << "[" << element.mLayer << "]";
+            return res.str();
+        };
         element["layout"] = sol::property([](LuaUi::Element& element) { return element.mLayout; },
             [](LuaUi::Element& element, const sol::table& layout) { element.mLayout = layout; });
         element["update"] = [luaManager = context.mLuaManager](const std::shared_ptr<LuaUi::Element>& element) {
