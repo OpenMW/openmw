@@ -269,7 +269,12 @@ namespace LuaUi
             if (mRoot->widget()->getTypeName() != widgetType(layout()))
             {
                 destroyRoot(mRoot);
+                WidgetExtension* parent = mRoot->getParent();
+                auto children = parent->children();
+                auto it = std::find(children.begin(), children.end(), mRoot);
                 mRoot = createWidget(layout(), 0);
+                *it = mRoot;
+                parent->setChildren(children);
             }
             else
             {
