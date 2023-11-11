@@ -18,7 +18,7 @@ namespace LuaUi
     {
         mContainer = MyGUI::Gui::getInstancePtr()->createWidget<LuaContainer>(
             "", MyGUI::IntCoord(), MyGUI::Align::Default, "", "");
-        mContainer->initialize(luaState, mContainer);
+        mContainer->initialize(luaState, mContainer, false);
         mContainer->onCoordChange([this](WidgetExtension* ext, MyGUI::IntCoord coord) { setSize(coord.size()); });
         mContainer->widget()->attachToWidget(this);
     }

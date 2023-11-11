@@ -26,12 +26,14 @@ namespace LuaUi
         virtual ~WidgetExtension() = default;
 
         // must be called after creating the underlying MyGUI::Widget
-        void initialize(lua_State* lua, MyGUI::Widget* self);
+        void initialize(lua_State* lua, MyGUI::Widget* self, bool isRoot);
         // must be called after before destroying the underlying MyGUI::Widget
         virtual void deinitialize();
 
         MyGUI::Widget* widget() const { return mWidget; }
         WidgetExtension* slot() const { return mSlot; }
+
+        bool isRoot() const { return mElementRoot; }
 
         void reset();
 
@@ -152,6 +154,7 @@ namespace LuaUi
         sol::object mExternal;
         WidgetExtension* mParent;
         bool mTemplateChild;
+        bool mElementRoot;
 
         void attach(WidgetExtension* ext);
         void attachTemplate(WidgetExtension* ext);

@@ -18,13 +18,15 @@ namespace LuaUi
         , mExternal(sol::nil)
         , mParent(nullptr)
         , mTemplateChild(false)
+        , mElementRoot(false)
     {
     }
 
-    void WidgetExtension::initialize(lua_State* lua, MyGUI::Widget* self)
+    void WidgetExtension::initialize(lua_State* lua, MyGUI::Widget* self, bool isRoot)
     {
         mLua = lua;
         mWidget = self;
+        mElementRoot = isRoot;
         initialize();
         updateTemplate();
     }
