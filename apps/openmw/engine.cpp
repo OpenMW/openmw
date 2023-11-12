@@ -318,9 +318,14 @@ bool OMW::Engine::frame(float frametime)
     mViewer->eventTraversal();
     mViewer->updateTraversal();
 
+    // update GUI by world data
     {
         ScopedProfile<UserStatsType::WindowManager> profile(frameStart, frameNumber, *timer, *stats);
-        mWorld->updateWindowManager();
+
+        if (mStateManager->getState() != MWBase::StateManager::State_NoGame)
+        {
+            mWorld->updateWindowManager();
+        }
     }
 
     mLuaWorker->allowUpdate(); // if there is a separate Lua thread, it starts the update now
