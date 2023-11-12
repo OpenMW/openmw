@@ -28,10 +28,8 @@ namespace Settings
         SettingValue<bool> mSubtitles{ mIndex, "GUI", "subtitles" };
         SettingValue<bool> mHitFader{ mIndex, "GUI", "hit fader" };
         SettingValue<bool> mWerewolfOverlay{ mIndex, "GUI", "werewolf overlay" };
-        SettingValue<float> mColorBackgroundOwned{ mIndex, "GUI", "color background owned",
-            makeClampSanitizerFloat(0, 1) };
-        SettingValue<float> mColorCrosshairOwned{ mIndex, "GUI", "color crosshair owned",
-            makeClampSanitizerFloat(0, 1) };
+        SettingValue<MyGUI::Colour> mColorBackgroundOwned{ mIndex, "GUI", "color background owned" };
+        SettingValue<MyGUI::Colour> mColorCrosshairOwned{ mIndex, "GUI", "color crosshair owned" };
         SettingValue<bool> mKeyboardNavigation{ mIndex, "GUI", "keyboard navigation" };
         SettingValue<bool> mColorTopicEnable{ mIndex, "GUI", "color topic enable" };
         SettingValue<MyGUI::Colour> mColorTopicSpecific{ mIndex, "GUI", "color topic specific" };
