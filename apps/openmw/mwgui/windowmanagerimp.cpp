@@ -1115,7 +1115,7 @@ namespace MWGui
         else
         {
             std::vector<std::string> split;
-            Misc::StringUtils::split(std::string{ tag }, split, ":");
+            Misc::StringUtils::split(tag, split, ":");
 
             l10n::Manager& l10nManager = *MWBase::Environment::get().getL10nManager();
 
