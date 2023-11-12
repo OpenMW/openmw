@@ -566,8 +566,8 @@ namespace MWGui
                 MWWorld::InventoryStore& invStore = mPtr.getClass().getInventoryStore(mPtr);
                 invStore.unequipItemQuantity(ptr, count);
                 updateItemView();
-                mEquippedStackableCount.reset();
             }
+            mEquippedStackableCount.reset();
         }
 
         if (isVisible())
