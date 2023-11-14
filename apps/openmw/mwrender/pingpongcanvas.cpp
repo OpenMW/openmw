@@ -196,6 +196,39 @@ namespace MWRender
             }
         };
 
+        // When textures are created (or resized) we need to either dirty them and/or clear them.
+        // Otherwise, there will be undefined behavior when reading from a texture that has yet to be written to in a
+        // later pass.
+        for (const auto& attachment : mDirtyAttachments)
+        {
+            const auto [w, h]
+                = attachment.mSize.get(mTextureScene->getTextureWidth(), mTextureScene->getTextureHeight());
+
+            attachment.mTarget->setTextureSize(w, h);
+            if (attachment.mMipMap)
+                attachment.mTarget->setNumMipmapLevels(osg::Image::computeNumberOfMipmapLevels(w, h));
+            attachment.mTarget->dirtyTextureObject();
+
+            osg::ref_ptr<osg::FrameBufferObject> fbo = new osg::FrameBufferObject;
+
+            fbo->setAttachment(
+                osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0, osg::FrameBufferAttachment(attachment.mTarget));
+            fbo->apply(state, osg::FrameBufferObject::DRAW_FRAMEBUFFER);
+
+            glViewport(0, 0, attachment.mTarget->getTextureWidth(), attachment.mTarget->getTextureHeight());
+            state.haveAppliedAttribute(osg::StateAttribute::VIEWPORT);
+            glClearColor(attachment.mClearColor.r(), attachment.mClearColor.g(), attachment.mClearColor.b(),
+                attachment.mClearColor.a());
+            glClear(GL_COLOR_BUFFER_BIT);
+
+            if (attachment.mTarget->getNumMipmapLevels() > 0)
+            {
+                state.setActiveTextureUnit(0);
+                state.applyTextureAttribute(0, attachment.mTarget);
+                ext->glGenerateMipmap(GL_TEXTURE_2D);
+            }
+        }
+
         for (const size_t& index : filtered)
         {
             const auto& node = mPasses[index];
@@ -239,15 +272,10 @@ namespace MWRender
 
                 if (pass.mRenderTarget)
                 {
-                    if (mDirtyAttachments)
+                    if (mDirtyAttachments.size() > 0)
                     {
                         const auto [w, h]
                             = pass.mSize.get(mTextureScene->getTextureWidth(), mTextureScene->getTextureHeight());
-
-                        pass.mRenderTexture->setTextureSize(w, h);
-                        if (pass.mMipMap)
-                            pass.mRenderTexture->setNumMipmapLevels(osg::Image::computeNumberOfMipmapLevels(w, h));
-                        pass.mRenderTexture->dirtyTextureObject();
 
                         // Custom render targets must be shared between frame ids, so it's impossible to double buffer
                         // without expensive copies. That means the only thread-safe place to resize is in the draw
@@ -265,7 +293,6 @@ namespace MWRender
 
                     if (pass.mRenderTexture->getNumMipmapLevels() > 0)
                     {
-
                         state.setActiveTextureUnit(0);
                         state.applyTextureAttribute(0,
                             pass.mRenderTarget->getAttachment(osg::FrameBufferObject::BufferComponent::COLOR_BUFFER0)
@@ -336,7 +363,6 @@ namespace MWRender
             bindDestinationFbo();
         }
 
-        if (mDirtyAttachments)
-            mDirtyAttachments = false;
+        mDirtyAttachments.clear();
     }
 }

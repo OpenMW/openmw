@@ -63,6 +63,17 @@ namespace fx
             osg::ref_ptr<osg::Texture2D> mTarget = new osg::Texture2D;
             SizeProxy mSize;
             bool mMipMap = false;
+            osg::Vec4f mClearColor = osg::Vec4f(0.0, 0.0, 0.0, 1.0);
+
+            RenderTarget() = default;
+
+            RenderTarget(const RenderTarget& other)
+                : mTarget(other.mTarget)
+                , mSize(other.mSize)
+                , mMipMap(other.mMipMap)
+                , mClearColor(other.mClearColor)
+            {
+            }
         };
 
         template <class T>

@@ -539,6 +539,8 @@ is not wanted and you want a custom render target.
 +------------------+---------------------+-----------------------------------------------------------------------------+
 | mipmaps          | boolean             | Whether mipmaps should be generated every frame                             |
 +------------------+---------------------+-----------------------------------------------------------------------------+
+| clear_color      | vec4                | The color the texture will be cleared to when it's first created            |
++------------------+---------------------+-----------------------------------------------------------------------------+
 
 To use the render target a pass must be assigned to it, along with any optional blend modes.
 As a restriction, only three render targets can be bound per pass with ``rt1``, ``rt2``, ``rt3``, respectively.
@@ -555,6 +557,7 @@ color buffer will accumulate.
         source_format = rgb;
         internal_format = rgb16f;
         source_type = float;
+        clear_color = vec4(1,0,0,1);
     }
 
     fragment red(target=RT_Red,blend=(add, src_color, one), rt1=RT_Red) {
