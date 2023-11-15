@@ -957,12 +957,12 @@ namespace
     }
 
     TEST_F(TestBulletNifLoader,
-        for_tri_shape_child_node_with_extra_data_string_equal_ncc_should_return_shape_with_cameraonly_collision)
+        for_root_node_with_extra_data_string_equal_ncc_should_return_shape_with_cameraonly_collision)
     {
         mNiStringExtraData.mData = "NCC__";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
-        mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("test.nif");
@@ -985,13 +985,13 @@ namespace
     }
 
     TEST_F(TestBulletNifLoader,
-        for_tri_shape_child_node_with_not_first_extra_data_string_equal_ncc_should_return_shape_with_cameraonly_collision)
+        for_root_node_with_not_first_extra_data_string_equal_ncc_should_return_shape_with_cameraonly_collision)
     {
         mNiStringExtraData.mNext = Nif::ExtraPtr(&mNiStringExtraData2);
         mNiStringExtraData2.mData = "NCC__";
         mNiStringExtraData2.recType = Nif::RC_NiStringExtraData;
-        mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("test.nif");
@@ -1012,8 +1012,62 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
+    TEST_F(
+        TestBulletNifLoader, for_root_node_with_extra_data_string_starting_with_nc_should_return_shape_with_nocollision)
+    {
+        mNiStringExtraData.mData = "NC___";
+        mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
+
+        Nif::NIFFile file("test.nif");
+        file.mRoots.push_back(&mNiNode);
+        file.mHash = mHash;
+
+        const auto result = mLoader.load(file);
+
+        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
+        triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
+        Resource::BulletShape expected;
+        expected.mCollisionShape.reset(compound.release());
+        expected.mVisualCollisionType = Resource::VisualCollisionType::Default;
+
+        EXPECT_EQ(*result, expected);
+    }
+
     TEST_F(TestBulletNifLoader,
-        for_tri_shape_child_node_with_extra_data_string_starting_with_nc_should_return_shape_with_nocollision)
+        for_root_node_with_not_first_extra_data_string_starting_with_nc_should_return_shape_with_nocollision)
+    {
+        mNiStringExtraData.mNext = Nif::ExtraPtr(&mNiStringExtraData2);
+        mNiStringExtraData2.mData = "NC___";
+        mNiStringExtraData2.recType = Nif::RC_NiStringExtraData;
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiNode.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
+
+        Nif::NIFFile file("test.nif");
+        file.mRoots.push_back(&mNiNode);
+        file.mHash = mHash;
+
+        const auto result = mLoader.load(file);
+
+        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
+        triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
+        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
+        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
+
+        Resource::BulletShape expected;
+        expected.mCollisionShape.reset(compound.release());
+        expected.mVisualCollisionType = Resource::VisualCollisionType::Default;
+
+        EXPECT_EQ(*result, expected);
+    }
+
+    TEST_F(TestBulletNifLoader, for_tri_shape_child_node_with_extra_data_string_should_ignore_extra_data)
     {
         mNiStringExtraData.mData = "NC___";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
@@ -1034,35 +1088,6 @@ namespace
 
         Resource::BulletShape expected;
         expected.mCollisionShape.reset(compound.release());
-        expected.mVisualCollisionType = Resource::VisualCollisionType::Default;
-
-        EXPECT_EQ(*result, expected);
-    }
-
-    TEST_F(TestBulletNifLoader,
-        for_tri_shape_child_node_with_not_first_extra_data_string_starting_with_nc_should_return_shape_with_nocollision)
-    {
-        mNiStringExtraData.mNext = Nif::ExtraPtr(&mNiStringExtraData2);
-        mNiStringExtraData2.mData = "NC___";
-        mNiStringExtraData2.recType = Nif::RC_NiStringExtraData;
-        mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
-        mNiTriShape.mParents.push_back(&mNiNode);
-        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
-
-        Nif::NIFFile file("test.nif");
-        file.mRoots.push_back(&mNiNode);
-        file.mHash = mHash;
-
-        const auto result = mLoader.load(file);
-
-        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
-        triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
-        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
-
-        Resource::BulletShape expected;
-        expected.mCollisionShape.reset(compound.release());
-        expected.mVisualCollisionType = Resource::VisualCollisionType::Default;
 
         EXPECT_EQ(*result, expected);
     }
@@ -1101,33 +1126,13 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader,
-        for_tri_shape_child_node_with_extra_data_string_mrk_should_return_shape_with_null_collision_shape)
-    {
-        mNiStringExtraData.mData = "MRK";
-        mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
-        mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
-        mNiTriShape.mParents.push_back(&mNiNode);
-        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
-
-        Nif::NIFFile file("test.nif");
-        file.mRoots.push_back(&mNiNode);
-        file.mHash = mHash;
-
-        const auto result = mLoader.load(file);
-
-        Resource::BulletShape expected;
-
-        EXPECT_EQ(*result, expected);
-    }
-
     TEST_F(TestBulletNifLoader, bsx_editor_marker_flag_disables_collision_for_markers)
     {
-        mNiIntegerExtraData.mData = 34; // BSXFlags "has collision" | "editor marker"
-        mNiIntegerExtraData.recType = Nif::RC_BSXFlags;
-        mNiTriShape.mExtraList.push_back(Nif::ExtraPtr(&mNiIntegerExtraData));
         mNiTriShape.mParents.push_back(&mNiNode);
         mNiTriShape.mName = "EditorMarker";
+        mNiIntegerExtraData.mData = 34; // BSXFlags "has collision" | "editor marker"
+        mNiIntegerExtraData.recType = Nif::RC_BSXFlags;
+        mNiNode.mExtraList.push_back(Nif::ExtraPtr(&mNiIntegerExtraData));
         mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("test.nif");
@@ -1142,18 +1147,14 @@ namespace
         EXPECT_EQ(*result, expected);
     }
 
-    TEST_F(TestBulletNifLoader,
-        for_tri_shape_child_node_with_extra_data_string_mrk_and_other_collision_node_should_return_shape_with_triangle_mesh_shape_with_all_meshes)
+    TEST_F(TestBulletNifLoader, mrk_editor_marker_flag_disables_collision_for_markers)
     {
+        mNiTriShape.mParents.push_back(&mNiNode);
+        mNiTriShape.mName = "Tri EditorMarker";
         mNiStringExtraData.mData = "MRK";
         mNiStringExtraData.recType = Nif::RC_NiStringExtraData;
-        mNiTriShape.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
-        mNiTriShape.mParents.push_back(&mNiNode2);
-        mNiNode2.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
-        mNiNode2.recType = Nif::RC_RootCollisionNode;
-        mNiNode2.mParents.push_back(&mNiNode);
-        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiNode2) };
-        mNiNode.recType = Nif::RC_NiNode;
+        mNiNode.mExtra = Nif::ExtraPtr(&mNiStringExtraData);
+        mNiNode.mChildren = Nif::NiAVObjectList{ Nif::NiAVObjectPtr(&mNiTriShape) };
 
         Nif::NIFFile file("test.nif");
         file.mRoots.push_back(&mNiNode);
@@ -1161,13 +1162,7 @@ namespace
 
         const auto result = mLoader.load(file);
 
-        std::unique_ptr<btTriangleMesh> triangles(new btTriangleMesh(false));
-        triangles->addTriangle(btVector3(0, 0, 0), btVector3(1, 0, 0), btVector3(1, 1, 0));
-        std::unique_ptr<btCompoundShape> compound(new btCompoundShape);
-        compound->addChildShape(btTransform::getIdentity(), new Resource::TriangleMeshShape(triangles.release(), true));
-
         Resource::BulletShape expected;
-        expected.mCollisionShape.reset(compound.release());
 
         EXPECT_EQ(*result, expected);
     }
