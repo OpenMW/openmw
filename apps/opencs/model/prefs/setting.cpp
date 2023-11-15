@@ -16,7 +16,7 @@ QMutex* CSMPrefs::Setting::getMutex()
 }
 
 CSMPrefs::Setting::Setting(
-    Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index)
+    Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index)
     : QObject(parent->getState())
     , mParent(parent)
     , mMutex(mutex)

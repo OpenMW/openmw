@@ -91,7 +91,7 @@ namespace CSMPrefs
             return false;
     }
 
-    void ShortcutManager::setModifier(const std::string& name, int modifier)
+    void ShortcutManager::setModifier(std::string_view name, int modifier)
     {
         // Add to map/modify
         ModifierMap::iterator item = mModifiers.find(name);
