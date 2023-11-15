@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace CSMPrefs
@@ -20,6 +21,7 @@ namespace CSMPrefs
         State* mParent;
         std::string mKey;
         Container mSettings;
+        std::unordered_map<std::string, Setting*> mIndex;
 
     public:
         Category(State* parent, const std::string& key);
