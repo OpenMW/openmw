@@ -67,7 +67,7 @@ namespace CSMPrefs
 
         DoubleSetting& declareDouble(const std::string& key, const QString& label, double default_);
 
-        BoolSetting& declareBool(const std::string& key, const QString& label, bool default_);
+        BoolSetting& declareBool(Settings::SettingValue<bool>& value, const QString& label);
 
         EnumSetting& declareEnum(const std::string& key, const QString& label, EnumValue default_);
 

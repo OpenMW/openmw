@@ -11,7 +11,7 @@
 #include "state.hpp"
 
 CSMPrefs::BoolSetting::BoolSetting(
-    Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index)
+    Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index)
     : TypedSetting(parent, mutex, key, label, index)
     , mWidget(nullptr)
 {

@@ -38,11 +38,11 @@ void CSMPrefs::State::declare()
     declareInt(mValues->mWindows.mDefaultHeight, "Default window height")
         .setTooltip("Newly opened top-level windows will open with this height.")
         .setMin(80);
-    declareBool("show-statusbar", "Show Status Bar", true)
+    declareBool(mValues->mWindows.mShowStatusbar, "Show Status Bar")
         .setTooltip(
             "If a newly open top level window is showing status bars or not. "
             " Note that this does not affect existing windows.");
-    declareBool("reuse", "Reuse Subviews", true)
+    declareBool(mValues->mWindows.mReuse, "Reuse Subviews")
         .setTooltip(
             "When a new subview is requested and a matching subview already "
             " exist, do not open a new subview and use the existing one instead.");
@@ -51,7 +51,7 @@ void CSMPrefs::State::declare()
             "If the maximum number is reached and a new subview is opened "
             "it will be placed into a new top-level window.")
         .setRange(1, 256);
-    declareBool("hide-subview", "Hide single subview", false)
+    declareBool(mValues->mWindows.mHideSubview, "Hide single subview")
         .setTooltip(
             "When a view contains only a single subview, hide the subview title "
             "bar and if this subview is closed also close the view (unless it is the last "
@@ -67,7 +67,7 @@ void CSMPrefs::State::declare()
         .addValue("Grow Only", "The view window grows as subviews are added. No scrollbars.")
         .addValue("Grow then Scroll", "The view window grows. The scrollbar appears once it cannot grow any further.");
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    declareBool("grow-limit", "Grow Limit Screen", false)
+    declareBool(mValues->mWindows.mGrowLimit, "Grow Limit Screen")
         .setTooltip(
             "When \"Grow then Scroll\" option is selected, the window size grows to"
             " the width of the virtual desktop. \nIf this option is selected the the window growth"
@@ -103,20 +103,21 @@ void CSMPrefs::State::declare()
         .addValue(jumpAndSelect)
         .addValue("Jump Only", "Scroll new record into view")
         .addValue("No Jump", "No special action");
-    declareBool("extended-config", "Manually specify affected record types for an extended delete/revert", false)
+    declareBool(
+        mValues->mIdTables.mExtendedConfig, "Manually specify affected record types for an extended delete/revert")
         .setTooltip(
             "Delete and revert commands have an extended form that also affects "
             "associated records.\n\n"
             "If this option is enabled, types of affected records are selected "
             "manually before a command execution.\nOtherwise, all associated "
             "records are deleted/reverted immediately.");
-    declareBool("subview-new-window", "Open Record in new window", false)
+    declareBool(mValues->mIdTables.mSubviewNewWindow, "Open Record in new window")
         .setTooltip(
             "When editing a record, open the view in a new window,"
             " rather than docked in the main view.");
 
     declareCategory("ID Dialogues");
-    declareBool("toolbar", "Show toolbar", true);
+    declareBool(mValues->mIdDialogues.mToolbar, "Show toolbar");
 
     declareCategory("Reports");
     EnumValue actionNone("None");
@@ -131,22 +132,23 @@ void CSMPrefs::State::declare()
     declareEnum("double-s", "Shift Double Click", actionRemove).addValues(reportValues);
     declareEnum("double-c", "Control Double Click", actionEditAndRemove).addValues(reportValues);
     declareEnum("double-sc", "Shift Control Double Click", actionNone).addValues(reportValues);
-    declareBool("ignore-base-records", "Ignore base records in verifier", false);
+    declareBool(mValues->mReports.mIgnoreBaseRecords, "Ignore base records in verifier");
 
     declareCategory("Search & Replace");
     declareInt(mValues->mSearchAndReplace.mCharBefore, "Characters before search string")
         .setTooltip("Maximum number of character to display in search result before the searched text");
     declareInt(mValues->mSearchAndReplace.mCharAfter, "Characters after search string")
         .setTooltip("Maximum number of character to display in search result after the searched text");
-    declareBool("auto-delete", "Delete row from result table after a successful replace", true);
+    declareBool(mValues->mSearchAndReplace.mAutoDelete, "Delete row from result table after a successful replace");
 
     declareCategory("Scripts");
-    declareBool("show-linenum", "Show Line Numbers", true)
+    declareBool(mValues->mScripts.mShowLinenum, "Show Line Numbers")
         .setTooltip(
             "Show line numbers to the left of the script editor window."
             "The current row and column numbers of the text cursor are shown at the bottom.");
-    declareBool("wrap-lines", "Wrap Lines", false).setTooltip("Wrap lines longer than width of script editor.");
-    declareBool("mono-font", "Use monospace font", true);
+    declareBool(mValues->mScripts.mWrapLines, "Wrap Lines")
+        .setTooltip("Wrap lines longer than width of script editor.");
+    declareBool(mValues->mScripts.mMonoFont, "Use monospace font");
     declareInt(mValues->mScripts.mTabWidth, "Tab Width")
         .setTooltip("Number of characters for tab width")
         .setRange(1, 10);
@@ -155,12 +157,12 @@ void CSMPrefs::State::declare()
         .addValue("Ignore", "Do not report warning")
         .addValue(warningsNormal)
         .addValue("Strict", "Promote warning to an error");
-    declareBool("toolbar", "Show toolbar", true);
+    declareBool(mValues->mScripts.mToolbar, "Show toolbar");
     declareInt(mValues->mScripts.mCompileDelay, "Delay between updating of source errors")
         .setTooltip("Delay in milliseconds")
         .setRange(0, 10000);
     declareInt(mValues->mScripts.mErrorHeight, "Initial height of the error panel").setRange(100, 10000);
-    declareBool("highlight-occurrences", "Highlight other occurrences of selected names", true);
+    declareBool(mValues->mScripts.mHighlightOccurrences, "Highlight other occurrences of selected names");
     declareColour("colour-highlight", "Colour of highlighted occurrences", QColor("lightcyan"));
     declareColour("colour-int", "Highlight Colour: Integer Literals", QColor("darkmagenta"));
     declareColour("colour-float", "Highlight Colour: Float Literals", QColor("magenta"));
@@ -171,7 +173,7 @@ void CSMPrefs::State::declare()
     declareColour("colour-id", "Highlight Colour: IDs", QColor("blue"));
 
     declareCategory("General Input");
-    declareBool("cycle", "Cyclic next/previous", false)
+    declareBool(mValues->mGeneralInput.mCycle, "Cyclic next/previous")
         .setTooltip(
             "When using next/previous functions at the last/first item of a "
             "list go to the first/last item");
@@ -182,19 +184,19 @@ void CSMPrefs::State::declare()
     declareDouble("s-navi-sensitivity", "Secondary Camera Movement Sensitivity", 50.0).setRange(-1000.0, 1000.0);
 
     declareDouble("p-navi-free-sensitivity", "Free Camera Sensitivity", 1 / 650.).setPrecision(5).setRange(0.0, 1.0);
-    declareBool("p-navi-free-invert", "Invert Free Camera Mouse Input", false);
+    declareBool(mValues->mSceneInput.mPNaviFreeInvert, "Invert Free Camera Mouse Input");
     declareDouble("navi-free-lin-speed", "Free Camera Linear Speed", 1000.0).setRange(1.0, 10000.0);
     declareDouble("navi-free-rot-speed", "Free Camera Rotational Speed", 3.14 / 2).setRange(0.001, 6.28);
     declareDouble("navi-free-speed-mult", "Free Camera Speed Multiplier (from Modifier)", 8).setRange(0.001, 1000.0);
 
     declareDouble("p-navi-orbit-sensitivity", "Orbit Camera Sensitivity", 1 / 650.).setPrecision(5).setRange(0.0, 1.0);
-    declareBool("p-navi-orbit-invert", "Invert Orbit Camera Mouse Input", false);
+    declareBool(mValues->mSceneInput.mPNaviOrbitInvert, "Invert Orbit Camera Mouse Input");
     declareDouble("navi-orbit-rot-speed", "Orbital Camera Rotational Speed", 3.14 / 4).setRange(0.001, 6.28);
     declareDouble("navi-orbit-speed-mult", "Orbital Camera Speed Multiplier (from Modifier)", 4)
         .setRange(0.001, 1000.0);
-    declareBool("navi-orbit-const-roll", "Keep camera roll constant for orbital camera", true);
+    declareBool(mValues->mSceneInput.mNaviOrbitConstRoll, "Keep camera roll constant for orbital camera");
 
-    declareBool("context-select", "Context Sensitive Selection", false);
+    declareBool(mValues->mSceneInput.mContextSelect, "Context Sensitive Selection");
     declareDouble("drag-factor", "Mouse sensitivity during drag operations", 1.0).setRange(0.001, 100.0);
     declareDouble("drag-wheel-factor", "Mouse wheel sensitivity during drag operations", 1.0).setRange(0.001, 100.0);
     declareDouble("drag-shift-factor", "Shift-acceleration factor during drag operations", 4.0)
@@ -207,12 +209,12 @@ void CSMPrefs::State::declare()
         .setTooltip("Framerate limit in 3D preview windows. Zero value means \"unlimited\".")
         .setRange(0, 10000);
     declareInt(mValues->mRendering.mCameraFov, "Camera FOV").setRange(10, 170);
-    declareBool("camera-ortho", "Orthographic projection for camera", false);
+    declareBool(mValues->mRendering.mCameraOrtho, "Orthographic projection for camera");
     declareInt(mValues->mRendering.mCameraOrthoSize, "Orthographic projection size parameter")
         .setTooltip("Size of the orthographic frustum, greater value will allow the camera to see more of the world.")
         .setRange(10, 10000);
     declareDouble("object-marker-alpha", "Object Marker Transparency", 0.5).setPrecision(2).setRange(0, 1);
-    declareBool("scene-use-gradient", "Use Gradient Background", true);
+    declareBool(mValues->mRendering.mSceneUseGradient, "Use Gradient Background");
     declareColour("scene-day-background-colour", "Day Background Colour", QColor(110, 120, 128, 255));
     declareColour("scene-day-gradient-colour", "Day Gradient  Colour", QColor(47, 51, 51, 255))
         .setTooltip(
@@ -228,11 +230,11 @@ void CSMPrefs::State::declare()
         .setTooltip(
             "Sets the gradient color to use in conjunction with the night background color. Ignored if "
             "the gradient option is disabled.");
-    declareBool("scene-day-night-switch-nodes", "Use Day/Night Switch Nodes", true);
+    declareBool(mValues->mRendering.mSceneDayNightSwitchNodes, "Use Day/Night Switch Nodes");
 
     declareCategory("Tooltips");
-    declareBool("scene", "Show Tooltips in 3D scenes", true);
-    declareBool("scene-hide-basic", "Hide basic  3D scenes tooltips", false);
+    declareBool(mValues->mTooltips.mScene, "Show Tooltips in 3D scenes");
+    declareBool(mValues->mTooltips.mSceneHideBasic, "Hide basic  3D scenes tooltips");
     declareInt(mValues->mTooltips.mSceneDelay, "Tooltip delay in milliseconds").setMin(1);
 
     EnumValue createAndInsert("Create cell and insert");
@@ -282,7 +284,7 @@ void CSMPrefs::State::declare()
     declareInt(mValues->mSceneEditing.mShapebrushMaximumsize, "Maximum height edit brush size")
         .setTooltip("Setting for the slider range of brush size in terrain height editing.")
         .setMin(1);
-    declareBool("landedit-post-smoothpainting", "Smooth land after painting height", false)
+    declareBool(mValues->mSceneEditing.mLandeditPostSmoothpainting, "Smooth land after painting height")
         .setTooltip("Raise and lower tools will leave bumpy finish without this option");
     declareDouble("landedit-post-smoothstrength", "Smoothing strength (post-edit)", 0.25)
         .setTooltip(
@@ -290,7 +292,7 @@ void CSMPrefs::State::declare()
             "Negative values may be used to roughen instead of smooth.")
         .setMin(-1)
         .setMax(1);
-    declareBool("open-list-view", "Open displays list view", false)
+    declareBool(mValues->mSceneEditing.mOpenListView, "Open displays list view")
         .setTooltip(
             "When opening a reference from the scene view, it will open the"
             " instance list view instead of the individual instance record view.");
@@ -487,12 +489,13 @@ CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble(const std::string& key, 
     return *setting;
 }
 
-CSMPrefs::BoolSetting& CSMPrefs::State::declareBool(const std::string& key, const QString& label, bool default_)
+CSMPrefs::BoolSetting& CSMPrefs::State::declareBool(Settings::SettingValue<bool>& value, const QString& label)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
 
-    CSMPrefs::BoolSetting* setting = new CSMPrefs::BoolSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
+    CSMPrefs::BoolSetting* setting
+        = new CSMPrefs::BoolSetting(&mCurrentCategory->second, &mMutex, value.mName, label, *mIndex);
 
     mCurrentCategory->second.addSetting(setting);
 
