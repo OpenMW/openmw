@@ -23,7 +23,7 @@ namespace CSMPrefs
 
     public:
         explicit IntSetting(
-            Category* parent, QMutex* mutex, const std::string& key, const QString& label, Settings::Index& index);
+            Category* parent, QMutex* mutex, std::string_view key, const QString& label, Settings::Index& index);
 
         // defaults to [0, std::numeric_limits<int>::max()]
         IntSetting& setRange(int min, int max);
