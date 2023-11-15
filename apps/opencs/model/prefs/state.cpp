@@ -463,8 +463,6 @@ CSMPrefs::IntSetting& CSMPrefs::State::declareInt(const std::string& key, const 
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
 
-    setDefault(key, std::to_string(default_));
-
     CSMPrefs::IntSetting* setting = new CSMPrefs::IntSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
 
     mCurrentCategory->second.addSetting(setting);
@@ -476,10 +474,6 @@ CSMPrefs::DoubleSetting& CSMPrefs::State::declareDouble(const std::string& key, 
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
-
-    std::ostringstream stream;
-    stream << default_;
-    setDefault(key, stream.str());
 
     CSMPrefs::DoubleSetting* setting
         = new CSMPrefs::DoubleSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
@@ -494,8 +488,6 @@ CSMPrefs::BoolSetting& CSMPrefs::State::declareBool(const std::string& key, cons
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
 
-    setDefault(key, default_ ? "true" : "false");
-
     CSMPrefs::BoolSetting* setting = new CSMPrefs::BoolSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
 
     mCurrentCategory->second.addSetting(setting);
@@ -508,8 +500,6 @@ CSMPrefs::EnumSetting& CSMPrefs::State::declareEnum(const std::string& key, cons
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
 
-    setDefault(key, default_.mValue);
-
     CSMPrefs::EnumSetting* setting = new CSMPrefs::EnumSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
 
     mCurrentCategory->second.addSetting(setting);
@@ -521,8 +511,6 @@ CSMPrefs::ColourSetting& CSMPrefs::State::declareColour(const std::string& key, 
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
-
-    setDefault(key, default_.name().toUtf8().data());
 
     CSMPrefs::ColourSetting* setting
         = new CSMPrefs::ColourSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
@@ -537,9 +525,6 @@ CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut(
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
-
-    std::string seqStr = getShortcutManager().convertToString(default_);
-    setDefault(key, seqStr);
 
     // Setup with actual data
     QKeySequence sequence;
@@ -560,8 +545,6 @@ CSMPrefs::StringSetting& CSMPrefs::State::declareString(
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
 
-    setDefault(key, default_);
-
     CSMPrefs::StringSetting* setting
         = new CSMPrefs::StringSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
 
@@ -574,9 +557,6 @@ CSMPrefs::ModifierSetting& CSMPrefs::State::declareModifier(const std::string& k
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
-
-    std::string modStr = getShortcutManager().convertToString(default_);
-    setDefault(key, modStr);
 
     // Setup with actual data
     int modifier;
@@ -600,33 +580,20 @@ void CSMPrefs::State::declareSubcategory(const QString& label)
         new CSMPrefs::Subcategory(&mCurrentCategory->second, &mMutex, label, *mIndex));
 }
 
-void CSMPrefs::State::setDefault(const std::string& key, const std::string& default_)
-{
-    Settings::CategorySetting fullKey(mCurrentCategory->second.getKey(), key);
-
-    Settings::CategorySettingValueMap::iterator iter = Settings::Manager::mDefaultSettings.find(fullKey);
-
-    if (iter == Settings::Manager::mDefaultSettings.end())
-        Settings::Manager::mDefaultSettings.insert(std::make_pair(fullKey, default_));
-}
-
 CSMPrefs::State::State(const Files::ConfigurationManager& configurationManager)
     : mConfigFile("openmw-cs.cfg")
     , mDefaultConfigFile("defaults-cs.bin")
     , mConfigurationManager(configurationManager)
     , mCurrentCategory(mCategories.end())
     , mIndex(std::make_unique<Settings::Index>())
+    , mValues(std::make_unique<Values>(*mIndex))
 {
     if (sThis)
         throw std::logic_error("An instance of CSMPRefs::State already exists");
 
     sThis = this;
 
-    Values values(*mIndex);
-
     declare();
-
-    mValues = std::make_unique<Values>(std::move(values));
 }
 
 CSMPrefs::State::~State()

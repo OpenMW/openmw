@@ -339,8 +339,8 @@ namespace Settings
             std::unique_ptr<const Sanitizer<T>>&& sanitizer = nullptr)
             : BaseSettingValue(getSettingValueType<T>(), category, name, index)
             , mSanitizer(std::move(sanitizer))
-            , mDefaultValue(defaultValue)
-            , mValue(defaultValue)
+            , mDefaultValue(sanitize(defaultValue))
+            , mValue(sanitize(Settings::Manager::getOrDefault<T>(mName, mCategory, mDefaultValue)))
         {
         }
 

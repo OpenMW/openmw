@@ -80,8 +80,6 @@ namespace CSMPrefs
 
         void declareSubcategory(const QString& label);
 
-        void setDefault(const std::string& key, const std::string& default_);
-
     public:
         State(const Files::ConfigurationManager& configurationManager);
 
