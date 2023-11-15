@@ -75,7 +75,7 @@ namespace CSMPrefs
 
         ShortcutSetting& declareShortcut(const std::string& key, const QString& label, const QKeySequence& default_);
 
-        StringSetting& declareString(const std::string& key, const QString& label, const std::string& default_);
+        StringSetting& declareString(Settings::SettingValue<std::string>& value, const QString& label);
 
         ModifierSetting& declareModifier(Settings::SettingValue<std::string>& value, const QString& label);
 

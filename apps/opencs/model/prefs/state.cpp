@@ -440,13 +440,12 @@ void CSMPrefs::State::declare()
     declareShortcut("script-editor-uncomment", "Uncomment Selection", QKeySequence());
 
     declareCategory("Models");
-    declareString("baseanim", "base animations", "meshes/base_anim.nif")
-        .setTooltip("3rd person base model with textkeys-data");
-    declareString("baseanimkna", "base animations, kna", "meshes/base_animkna.nif")
+    declareString(mValues->mModels.mBaseanim, "base animations").setTooltip("3rd person base model with textkeys-data");
+    declareString(mValues->mModels.mBaseanimkna, "base animations, kna")
         .setTooltip("3rd person beast race base model with textkeys-data");
-    declareString("baseanimfemale", "base animations, female", "meshes/base_anim_female.nif")
+    declareString(mValues->mModels.mBaseanimfemale, "base animations, female")
         .setTooltip("3rd person female base model with textkeys-data");
-    declareString("wolfskin", "base animations, wolf", "meshes/wolf/skin.nif").setTooltip("3rd person werewolf skin");
+    declareString(mValues->mModels.mWolfskin, "base animations, wolf").setTooltip("3rd person werewolf skin");
 }
 
 void CSMPrefs::State::declareCategory(const std::string& key)
@@ -547,13 +546,13 @@ CSMPrefs::ShortcutSetting& CSMPrefs::State::declareShortcut(
 }
 
 CSMPrefs::StringSetting& CSMPrefs::State::declareString(
-    const std::string& key, const QString& label, const std::string& default_)
+    Settings::SettingValue<std::string>& value, const QString& label)
 {
     if (mCurrentCategory == mCategories.end())
         throw std::logic_error("no category for setting");
 
     CSMPrefs::StringSetting* setting
-        = new CSMPrefs::StringSetting(&mCurrentCategory->second, &mMutex, key, label, *mIndex);
+        = new CSMPrefs::StringSetting(&mCurrentCategory->second, &mMutex, value.mName, label, *mIndex);
 
     mCurrentCategory->second.addSetting(setting);
 
