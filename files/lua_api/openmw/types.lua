@@ -878,12 +878,8 @@
 -- @param openmw.core#GameObject actor
 -- @return #number
 
---- @{#Character}: Class and Character Data
--- @field [parent=#NPC] #Character character
-
-
 --- @{#Classes}: Class Data
--- @field [parent=#Character] #Classes classes
+-- @field [parent=#NPC] #Classes classes
 
 ---
 -- A read-only list of all @{#ClassRecord}s in the world database.
