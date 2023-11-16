@@ -1737,13 +1737,14 @@ namespace MWWorld
     void World::updateSoundListener()
     {
         osg::Vec3f cameraPosition = mRendering->getCamera()->getPosition();
-        const ESM::Position& refpos = getPlayerPtr().getRefData().getPosition();
+        const auto& player = getPlayerPtr();
+        const ESM::Position& refpos = player.getRefData().getPosition();
         osg::Vec3f listenerPos;
 
         if (isFirstPerson())
             listenerPos = cameraPosition;
         else
-            listenerPos = refpos.asVec3() + osg::Vec3f(0, 0, 1.85f * mPhysics->getHalfExtents(getPlayerPtr()).z());
+            listenerPos = refpos.asVec3() + osg::Vec3f(0, 0, 1.85f * mPhysics->getHalfExtents(player).z());
 
         osg::Quat listenerOrient = osg::Quat(refpos.rot[1], osg::Vec3f(0, -1, 0))
             * osg::Quat(refpos.rot[0], osg::Vec3f(-1, 0, 0)) * osg::Quat(refpos.rot[2], osg::Vec3f(0, 0, -1));
@@ -1751,7 +1752,7 @@ namespace MWWorld
         osg::Vec3f forward = listenerOrient * osg::Vec3f(0, 1, 0);
         osg::Vec3f up = listenerOrient * osg::Vec3f(0, 0, 1);
 
-        bool underwater = isUnderwater(getPlayerPtr().getCell(), cameraPosition);
+        bool underwater = isUnderwater(player.getCell(), cameraPosition);
 
         MWBase::Environment::get().getSoundManager()->setListenerPosDir(listenerPos, forward, up, underwater);
     }
