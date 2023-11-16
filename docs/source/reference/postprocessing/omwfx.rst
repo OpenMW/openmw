@@ -126,45 +126,49 @@ Builtin Uniforms
 Builtin Macros
 ##############
 
-+-----------------------+----------------+----------------------------------------------------------------------+
-| Macro                 | Definition     | Description                                                          |
-+=======================+================+======================================================================+
-|``OMW_REVERSE_Z``      | ``0`` or ``1`` | Whether a reversed depth buffer is in use.                           |
-|                       |                |                                                                      |
-|                       |                | ``0``  Depth sampler will be in range [1, 0]                         |
-|                       |                |                                                                      |
-|                       |                | ``1``  Depth sampler will be in range [0, 1]                         |
-+-----------------------+----------------+----------------------------------------------------------------------+
-|``OMW_RADIAL_FOG``     | ``0`` or ``1`` | Whether radial fog is in use.                                        |
-|                       |                |                                                                      |
-|                       |                | ``0``  Fog is linear                                                 |
-|                       |                |                                                                      |
-|                       |                | ``1``  Fog is radial                                                 |
-+-----------------------+----------------+----------------------------------------------------------------------+
-|``OMW_EXPONENTIAL_FOG``| ``0`` or ``1`` | Whether exponential fog is in use.                                   |
-|                       |                |                                                                      |
-|                       |                | ``0``  Fog is linear                                                 |
-|                       |                |                                                                      |
-|                       |                | ``1``  Fog is exponential                                            |
-+-----------------------+----------------+----------------------------------------------------------------------+
-| ``OMW_HDR``           | ``0`` or ``1`` | Whether average scene luminance is computed every frame.             |
-|                       |                |                                                                      |
-|                       |                | ``0``  Average scene luminance is not computed                       |
-|                       |                |                                                                      |
-|                       |                | ``1``  Average scene luminance is computed                           |
-+-----------------------+----------------+----------------------------------------------------------------------+
-|  ``OMW_NORMALS``      | ``0`` or ``1`` | Whether normals are available as a sampler in the technique.         |
-|                       |                |                                                                      |
-|                       |                | ``0``  Normals are not available                                     |
-|                       |                |                                                                      |
-|                       |                | ``1``  Normals are available.                                        |
-+-----------------------+----------------+----------------------------------------------------------------------+
-| ``OMW_MULTIVIEW``     | ``0`` or ``1`` | Whether multiview rendering is in use.                               |
-|                       |                |                                                                      |
-|                       |                | ``0``  Multiview not in use                                          |
-|                       |                |                                                                      |
-|                       |                | ``1``  Multiview in use.                                             |
-+-----------------------+----------------+----------------------------------------------------------------------+
++-----------------------+-----------------+----------------------------------------------------------------------+
+| Macro                 | Definition      | Description                                                          |
++=======================+=================+======================================================================+
+|``OMW_REVERSE_Z``      | ``0`` or ``1``  | Whether a reversed depth buffer is in use.                           |
+|                       |                 |                                                                      |
+|                       |                 | ``0``  Depth sampler will be in range [1, 0]                         |
+|                       |                 |                                                                      |
+|                       |                 | ``1``  Depth sampler will be in range [0, 1]                         |
++-----------------------+-----------------+----------------------------------------------------------------------+
+|``OMW_RADIAL_FOG``     | ``0`` or ``1``  | Whether radial fog is in use.                                        |
+|                       |                 |                                                                      |
+|                       |                 | ``0``  Fog is linear                                                 |
+|                       |                 |                                                                      |
+|                       |                 | ``1``  Fog is radial                                                 |
++-----------------------+-----------------+----------------------------------------------------------------------+
+|``OMW_EXPONENTIAL_FOG``| ``0`` or ``1``  | Whether exponential fog is in use.                                   |
+|                       |                 |                                                                      |
+|                       |                 | ``0``  Fog is linear                                                 |
+|                       |                 |                                                                      |
+|                       |                 | ``1``  Fog is exponential                                            |
++-----------------------+-----------------+----------------------------------------------------------------------+
+| ``OMW_HDR``           | ``0`` or ``1``  | Whether average scene luminance is computed every frame.             |
+|                       |                 |                                                                      |
+|                       |                 | ``0``  Average scene luminance is not computed                       |
+|                       |                 |                                                                      |
+|                       |                 | ``1``  Average scene luminance is computed                           |
++-----------------------+-----------------+----------------------------------------------------------------------+
+|  ``OMW_NORMALS``      | ``0`` or ``1``  | Whether normals are available as a sampler in the technique.         |
+|                       |                 |                                                                      |
+|                       |                 | ``0``  Normals are not available                                     |
+|                       |                 |                                                                      |
+|                       |                 | ``1``  Normals are available.                                        |
++-----------------------+-----------------+----------------------------------------------------------------------+
+| ``OMW_MULTIVIEW``     | ``0`` or ``1``  | Whether multiview rendering is in use.                               |
+|                       |                 |                                                                      |
+|                       |                 | ``0``  Multiview not in use                                          |
+|                       |                 |                                                                      |
+|                       |                 | ``1``  Multiview in use.                                             |
++-----------------------+-----------------+----------------------------------------------------------------------+
+| ``OMW_API_VERSION``   | |ppApiRevision| | The revision of OpenMW postprocessing API.                           |
+|                       |                 | It is an integer that is incremented every time the API is changed.  |
+|                       |                 | This was added in 0.49, so it will be undefined in 0.48.             |
++-----------------------+-----------------+----------------------------------------------------------------------+
 
 
 Builtin Functions
