@@ -25,6 +25,11 @@ namespace Version
         return @OPENMW_LUA_API_REVISION@;
     }
 
+    int getPostprocessingApiRevision()
+    {
+        return @OPENMW_POSTPROCESSING_API_REVISION@;
+    }
+
     std::string getOpenmwVersionDescription()
     {
         std::string str = "OpenMW version ";
