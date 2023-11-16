@@ -11,6 +11,7 @@ namespace Version
     std::string_view getCommitHash();
     std::string_view getTagHash();
     int getLuaApiRevision();
+    int getPostprocessingApiRevision();
 
     // Prepares string that contains version and commit hash.
     std::string getOpenmwVersionDescription();

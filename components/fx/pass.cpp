@@ -15,6 +15,7 @@
 #include <components/sceneutil/lightmanager.hpp>
 #include <components/settings/values.hpp>
 #include <components/stereo/multiview.hpp>
+#include <components/version/version.hpp>
 
 #include "stateupdater.hpp"
 #include "technique.hpp"
@@ -67,6 +68,7 @@ namespace fx
 
 @uboStruct
 
+#define OMW_API_VERSION @apiVersion
 #define OMW_REVERSE_Z @reverseZ
 #define OMW_RADIAL_FOG @radialFog
 #define OMW_EXPONENTIAL_FOG @exponentialFog
@@ -259,6 +261,7 @@ float omw_EstimateFogCoverageFromUV(vec2 uv)
 
         const std::vector<std::pair<std::string, std::string>> defines
             = { { "@pointLightCount", std::to_string(SceneUtil::PPLightBuffer::sMaxPPLightsArraySize) },
+                  { "@apiVersion", std::to_string(Version::getPostprocessingApiRevision()) },
                   { "@version", std::to_string(technique.getGLSLVersion()) },
                   { "@multiview", Stereo::getMultiview() ? "1" : "0" },
                   { "@builtinSampler", Stereo::getMultiview() ? "sampler2DArray" : "sampler2D" },
