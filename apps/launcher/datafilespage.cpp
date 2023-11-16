@@ -26,7 +26,7 @@
 #include <components/files/qtconversion.hpp>
 #include <components/misc/strings/conversion.hpp>
 #include <components/navmeshtool/protocol.hpp>
-#include <components/settings/settings.hpp>
+#include <components/settings/values.hpp>
 #include <components/vfs/bsaarchive.hpp>
 
 #include "utils/profilescombobox.hpp"
@@ -123,7 +123,7 @@ namespace Launcher
 
         int getMaxNavMeshDbFileSizeMiB()
         {
-            return Settings::Manager::getUInt64("max navmeshdb file size", "Navigator") / (1024 * 1024);
+            return Settings::navigator().mMaxNavmeshdbFileSize / (1024 * 1024);
         }
 
         std::optional<QString> findFirstPath(const QStringList& directories, const QString& fileName)
@@ -359,9 +359,8 @@ void Launcher::DataFilesPage::populateFileViews(const QString& contentModelName)
 
 void Launcher::DataFilesPage::saveSettings(const QString& profile)
 {
-    if (const int value = ui.navMeshMaxSizeSpinBox->value(); value != getMaxNavMeshDbFileSizeMiB())
-        Settings::Manager::setUInt64(
-            "max navmeshdb file size", "Navigator", static_cast<std::uint64_t>(std::max(0, value)) * 1024 * 1024);
+    Settings::navigator().mMaxNavmeshdbFileSize.set(
+        static_cast<std::uint64_t>(std::max(0, ui.navMeshMaxSizeSpinBox->value())) * 1024 * 1024);
 
     QString profileName = profile;
 

@@ -1100,7 +1100,7 @@ namespace MWGui
             std::string_view settingSection = tag.substr(0, comma_pos);
             std::string_view settingTag = tag.substr(comma_pos + 1, tag.length());
 
-            _result = Settings::Manager::getString(settingTag, settingSection);
+            _result = Settings::get<MyGUI::Colour>(settingSection, settingTag).get().print();
         }
         else if (tag.starts_with(tokenToFind))
         {
@@ -1115,7 +1115,7 @@ namespace MWGui
         else
         {
             std::vector<std::string> split;
-            Misc::StringUtils::split(std::string{ tag }, split, ":");
+            Misc::StringUtils::split(tag, split, ":");
 
             l10n::Manager& l10nManager = *MWBase::Environment::get().getL10nManager();
 
