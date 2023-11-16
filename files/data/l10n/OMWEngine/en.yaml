@@ -34,10 +34,22 @@ DeleteGame: "Delete Game"
 DeleteGameConfirmation: "Are you sure you want to delete this saved game?"
 EmptySaveNameError: "Game can not be saved without a name!"
 LoadGameConfirmation: "Do you want to load a saved game and lose the current one?"
-MissingContentFilesConfirmation: |
+MissingContentFilesConfirmation: |-
     The currently selected content files do not match the ones used by this save game.
     Errors may occur during load or game play.
     Do you wish to continue?
+MissingContentFilesList: |-
+  {files, plural,
+    one{\n\nFound missing file: }
+    few{\n\nFound {files} missing files:\n}
+    other{\n\nFound {files} missing files:\n}
+  }
+MissingContentFilesListCopy: |-
+  {files, plural,
+    one{\n\nPress Copy to place its name to the clipboard.}
+    few{\n\nPress Copy to place their names to the clipboard.}
+    other{\n\nPress Copy to place their names to the clipboard.}
+  }
 OverwriteGameConfirmation: "Are you sure you want to overwrite this saved game?"
 SelectCharacter: "Select Character..."
 TimePlayed: "Time played"

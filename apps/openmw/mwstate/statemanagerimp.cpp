@@ -2,6 +2,8 @@
 
 #include <filesystem>
 
+#include <SDL_clipboard.h>
+
 #include <components/debug/debuglog.hpp>
 
 #include <components/esm3/esmreader.hpp>
@@ -440,7 +442,9 @@ void MWState::StateManager::loadGame(const Character* character, const std::file
                 {
                     ESM::SavedGame profile;
                     profile.load(reader);
-                    if (!verifyProfile(profile))
+                    const auto& selectedContentFiles = MWBase::Environment::get().getWorld()->getContentFiles();
+                    auto missingFiles = profile.getMissingContentFiles(selectedContentFiles);
+                    if (!missingFiles.empty() && !confirmLoading(missingFiles))
                     {
                         cleanup(true);
                         MWBase::Environment::get().getWindowManager()->pushGuiMode(MWGui::GM_MainMenu);
@@ -668,30 +672,64 @@ void MWState::StateManager::update(float duration)
     }
 }
 
-bool MWState::StateManager::verifyProfile(const ESM::SavedGame& profile) const
+bool MWState::StateManager::confirmLoading(const std::vector<std::string_view>& missingFiles) const
 {
-    const std::vector<std::string>& selectedContentFiles = MWBase::Environment::get().getWorld()->getContentFiles();
-    bool notFound = false;
-    for (const std::string& contentFile : profile.mContentFiles)
+    std::ostringstream stream;
+    for (auto& contentFile : missingFiles)
     {
-        if (std::find(selectedContentFiles.begin(), selectedContentFiles.end(), contentFile)
-            == selectedContentFiles.end())
+        Log(Debug::Warning) << "Warning: Saved game dependency " << contentFile << " is missing.";
+        stream << contentFile << "\n";
+    }
+
+    auto fullList = stream.str();
+    if (!fullList.empty())
+        fullList.pop_back();
+
+    constexpr size_t missingPluginsDisplayLimit = 12;
+
+    std::vector<std::string> buttons;
+    buttons.emplace_back("#{Interface:Yes}");
+    buttons.emplace_back("#{Interface:Copy}");
+    buttons.emplace_back("#{Interface:No}");
+    std::string message = "#{OMWEngine:MissingContentFilesConfirmation}";
+
+    auto l10n = MWBase::Environment::get().getL10nManager()->getContext("OMWEngine");
+    message += l10n->formatMessage("MissingContentFilesList", { "files" }, { static_cast<int>(missingFiles.size()) });
+    auto cappedSize = std::min(missingFiles.size(), missingPluginsDisplayLimit);
+    if (cappedSize == missingFiles.size())
+    {
+        message += fullList;
+    }
+    else
+    {
+        for (size_t i = 0; i < cappedSize - 1; ++i)
         {
-            Log(Debug::Warning) << "Warning: Saved game dependency " << contentFile << " is missing.";
-            notFound = true;
+            message += missingFiles[i];
+            message += "\n";
         }
+
+        message += "...";
     }
-    if (notFound)
+
+    message
+        += l10n->formatMessage("MissingContentFilesListCopy", { "files" }, { static_cast<int>(missingFiles.size()) });
+
+    while (true)
     {
-        std::vector<std::string> buttons;
-        buttons.emplace_back("#{Interface:Yes}");
-        buttons.emplace_back("#{Interface:No}");
-        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(
-            "#{OMWEngine:MissingContentFilesConfirmation}", buttons, true);
+        MWBase::Environment::get().getWindowManager()->interactiveMessageBox(message, buttons, true);
         int selectedButton = MWBase::Environment::get().getWindowManager()->readPressedButton();
-        if (selectedButton == 1 || selectedButton == -1)
-            return false;
+        if (selectedButton == 0)
+            break;
+
+        if (selectedButton == 1)
+        {
+            SDL_SetClipboardText(fullList.c_str());
+            continue;
+        }
+
+        return false;
     }
+
     return true;
 }
 

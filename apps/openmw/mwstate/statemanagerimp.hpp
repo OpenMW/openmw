@@ -21,7 +21,7 @@ namespace MWState
     private:
         void cleanup(bool force = false);
 
-        bool verifyProfile(const ESM::SavedGame& profile) const;
+        bool confirmLoading(const std::vector<std::string_view>& missingFiles) const;
 
         void writeScreenshot(std::vector<char>& imageData) const;
 
