@@ -45,7 +45,7 @@ namespace MWLua
                 providedServices[name] = (services & flag) != 0;
             }
             providedServices["Travel"] = !rec.getTransport().empty();
-            return providedServices;
+            return LuaUtil::makeReadOnly(providedServices);
         });
     }
 }
