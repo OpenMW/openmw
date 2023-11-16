@@ -650,17 +650,28 @@ namespace MWGui
         updateEnemyHealthBar();
     }
 
-    void HUD::resetEnemy()
+    void HUD::clear()
     {
         mEnemyActorId = -1;
         mEnemyHealthTimer = -1;
-    }
 
-    void HUD::clear()
-    {
-        unsetSelectedSpell();
-        unsetSelectedWeapon();
-        resetEnemy();
+        mWeaponSpellTimer = 0.f;
+        mWeaponName = std::string();
+        mSpellName = std::string();
+        mWeaponSpellBox->setVisible(false);
+
+        mWeapStatus->setProgressRange(100);
+        mWeapStatus->setProgressPosition(0);
+        mSpellStatus->setProgressRange(100);
+        mSpellStatus->setProgressPosition(0);
+
+        mWeapImage->setItem(MWWorld::Ptr());
+        mWeapImage->setIcon(std::string());
+        mSpellImage->setItem(MWWorld::Ptr());
+        mSpellImage->setIcon(std::string());
+
+        mWeapBox->clearUserStrings();
+        mSpellBox->clearUserStrings();
     }
 
     void HUD::customMarkerCreated(MyGUI::Widget* marker)
